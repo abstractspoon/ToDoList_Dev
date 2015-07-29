@@ -3,13 +3,13 @@
 
 #pragma once
 
-#include <Unknwn.h>
+/////////////////////////////////////////////////////////////////////////////////
 
 // ITaskList.h: interface and implementation of the ITaskList class.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#define ITASKLISTBASE ITaskList13 // latest interface
+#define ITASKLISTBASE ITaskList14 // latest interface
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +26,7 @@ static const GUID IID_TASKLIST10 = { 0xe925ad5f, 0x0958, 0x45b0, { 0x96, 0x15, 0
 static const GUID IID_TASKLIST11 = { 0xaadd0c6d, 0x5fd8, 0x4995, { 0xa1, 0x3c, 0xce, 0x4c, 0x9f, 0x2b, 0xc0, 0x7b } };
 static const GUID IID_TASKLIST12 = { 0x6c65c122, 0x6406, 0x4d53, { 0x97, 0x3a, 0x4c, 0x7b, 0x00, 0x49, 0xff, 0x1e } };
 static const GUID IID_TASKLIST13 = { 0x5951fde6, 0x508a, 0x4a9d, { 0xa5, 0x5d, 0xd1, 0x6e, 0xb0, 0x26, 0xae, 0xf7 } };
+static const GUID IID_TASKLIST14 = { 0x0e95dc97, 0x41f7, 0x4d9c, { 0xb4, 0x25, 0xf5, 0xd4, 0xc2, 0xb1, 0xba, 0x4c } };
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -81,31 +82,31 @@ public:
 	virtual bool IsCheckedOut() const = 0; // deprecated. Will always return false
 	virtual bool IsSourceControlled() const = 0;
 	
-	virtual LPCTSTR GetProjectName() const = 0;
-	virtual LPCTSTR GetCheckOutTo() const = 0;
+	virtual LPCWSTR GetProjectName() const = 0;
+	virtual LPCWSTR GetCheckOutTo() const = 0;
 	
 	virtual unsigned long GetFileFormat() const = 0;
 	virtual unsigned long GetFileVersion() const = 0;
 	
-	virtual bool SetProjectName(LPCTSTR szName) = 0;
+	virtual bool SetProjectName(LPCWSTR szName) = 0;
 	virtual bool SetFileVersion(unsigned long nVersion) = 0;
 
 	// task level methods
-	virtual HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent = NULL) = 0;
+	virtual HTASKITEM NewTask(LPCWSTR szTitle, HTASKITEM hParent = NULL) = 0;
 
 	virtual HTASKITEM GetFirstTask(HTASKITEM hParent = NULL) const = 0;
 	virtual HTASKITEM GetNextTask(HTASKITEM hTask) const = 0;
 
 	// get methods
-	virtual LPCTSTR GetTaskTitle(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskComments(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskAllocatedTo(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskAllocatedBy(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskCategory(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskStatus(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskFileReferencePath(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskWebColor(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskPriorityWebColor(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskTitle(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskComments(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskAllocatedTo(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskAllocatedBy(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskCategory(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskStatus(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskFileReferencePath(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskWebColor(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskPriorityWebColor(HTASKITEM hTask) const = 0;
 
 	virtual unsigned long GetTaskID(HTASKITEM hTask) const = 0;
 	virtual unsigned long GetTaskColor(HTASKITEM hTask) const = 0;
@@ -122,27 +123,27 @@ public:
 	virtual time_t GetTaskDueDate(HTASKITEM hTask) const = 0;
 	virtual time_t GetTaskStartDate(HTASKITEM hTask) const = 0;
 
-	virtual LPCTSTR GetTaskDoneDateString(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskDueDateString(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskStartDateString(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskDoneDateString(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskDueDateString(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskStartDateString(HTASKITEM hTask) const = 0;
 
 	virtual bool IsTaskDone(HTASKITEM hTask) const = 0;
 	virtual bool IsTaskDue(HTASKITEM hTask) const = 0;
 
 	virtual unsigned long GetTaskPosition(HTASKITEM hTask) const = 0;
 
-	virtual bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const = 0;
-	virtual LPCTSTR GetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const = 0;
+	virtual bool TaskHasAttribute(HTASKITEM hTask, LPCWSTR szAttrib) const = 0;
+	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, LPCWSTR szAttrib) const = 0;
 	virtual HTASKITEM GetTaskParent(HTASKITEM hTask) const = 0;
 		
 	// set methods
-	virtual bool SetTaskTitle(HTASKITEM hTask, LPCTSTR szTitle) = 0;
-	virtual bool SetTaskComments(HTASKITEM hTask, LPCTSTR szComments) = 0;
-	virtual bool SetTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo) = 0;
-	virtual bool SetTaskAllocatedBy(HTASKITEM hTask, LPCTSTR szAllocBy) = 0;
-	virtual bool SetTaskCategory(HTASKITEM hTask, LPCTSTR szCategory) = 0;
-	virtual bool SetTaskStatus(HTASKITEM hTask, LPCTSTR szStatus) = 0;
-	virtual bool SetTaskFileReferencePath(HTASKITEM hTask, LPCTSTR szFileRefpath) = 0;
+	virtual bool SetTaskTitle(HTASKITEM hTask, LPCWSTR szTitle) = 0;
+	virtual bool SetTaskComments(HTASKITEM hTask, LPCWSTR szComments) = 0;
+	virtual bool SetTaskAllocatedTo(HTASKITEM hTask, LPCWSTR szAllocTo) = 0;
+	virtual bool SetTaskAllocatedBy(HTASKITEM hTask, LPCWSTR szAllocBy) = 0;
+	virtual bool SetTaskCategory(HTASKITEM hTask, LPCWSTR szCategory) = 0;
+	virtual bool SetTaskStatus(HTASKITEM hTask, LPCWSTR szStatus) = 0;
+	virtual bool SetTaskFileReferencePath(HTASKITEM hTask, LPCWSTR szFileRefpath) = 0;
 
 	virtual bool SetTaskColor(HTASKITEM hTask, unsigned long nColor) = 0;
 
@@ -169,11 +170,11 @@ class ITaskList2 : public ITaskList
 {
 	// new methods
 public:
-	virtual LPCTSTR GetTaskCreatedBy(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskCreatedBy(HTASKITEM hTask) const = 0;
 	virtual time_t GetTaskCreationDate(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskCreationDateString(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskCreationDateString(HTASKITEM hTask) const = 0;
 	
-	virtual bool SetTaskCreatedBy(HTASKITEM hTask, LPCTSTR szCreatedBy) = 0;
+	virtual bool SetTaskCreatedBy(HTASKITEM hTask, LPCWSTR szCreatedBy) = 0;
 	virtual bool SetTaskCreationDate(HTASKITEM hTask, time_t tCreationDate) = 0;
 };
 
@@ -182,38 +183,38 @@ class ITaskList3 : public ITaskList2
 	// new methods
 public:
 	virtual time_t GetTaskDueDate(HTASKITEM hTask, BOOL bCalc) const = 0;
-	virtual LPCTSTR GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual LPCWSTR GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
 	virtual COLORREF GetTaskTextColor(HTASKITEM hTask) const = 0;
 	virtual int GetTaskRisk(HTASKITEM hTask, BOOL bHighest) const = 0;
-	virtual LPCTSTR GetTaskExternalID(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskExternalID(HTASKITEM hTask) const = 0;
 	
 	virtual bool SetTaskRisk(HTASKITEM hTask, int nRisk) = 0;
-	virtual bool SetTaskExternalID(HTASKITEM hTask, LPCTSTR szID) = 0;
+	virtual bool SetTaskExternalID(HTASKITEM hTask, LPCWSTR szID) = 0;
 };
 
 class ITaskList4 : public ITaskList3
 {
 	// new methods
 public:
-	virtual LPCTSTR GetAttribute(LPCTSTR szAttrib) const = 0;
+	virtual LPCWSTR GetAttribute(LPCWSTR szAttrib) const = 0;
 
-	virtual LPCTSTR GetHtmlCharSet() const = 0;
-	virtual LPCTSTR GetReportTitle() const = 0;
-	virtual LPCTSTR GetReportDate() const = 0;
+	virtual LPCWSTR GetHtmlCharSet() const = 0;
+	virtual LPCWSTR GetReportTitle() const = 0;
+	virtual LPCWSTR GetReportDate() const = 0;
 	virtual double GetTaskCost(HTASKITEM hTask, BOOL bCalc) const = 0;
 	virtual int GetTaskCategoryCount(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskCategory(HTASKITEM hTask, int nIndex) const = 0;
-	virtual LPCTSTR GetTaskDependency(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskCategory(HTASKITEM hTask, int nIndex) const = 0;
+	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask) const = 0;
 
 	virtual bool SetTaskCost(HTASKITEM hTask, double dCost) = 0;
-	virtual bool SetTaskDependency(HTASKITEM hTask, LPCTSTR szDepends) = 0;
+	virtual bool SetTaskDependency(HTASKITEM hTask, LPCWSTR szDepends) = 0;
 };
 
 class ITaskList5 : public ITaskList4
 {
 	// new methods
 public:
-	virtual bool AddTaskCategory(HTASKITEM hTask, LPCTSTR szCategory) = 0;
+	virtual bool AddTaskCategory(HTASKITEM hTask, LPCWSTR szCategory) = 0;
 };
 
 class ITaskList6 : public ITaskList5
@@ -225,8 +226,8 @@ public:
 	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
 									DWORD& dwSpecific2, BOOL& bRecalcFromDue, int& nReuse) const = 0;
 
-	virtual bool SetTaskVersion(HTASKITEM hTask, LPCTSTR szVersion) = 0;
-	virtual LPCTSTR GetTaskVersion(HTASKITEM hTask) const = 0;
+	virtual bool SetTaskVersion(HTASKITEM hTask, LPCWSTR szVersion) = 0;
+	virtual LPCWSTR GetTaskVersion(HTASKITEM hTask) const = 0;
 };
 
 class ITaskList7 : public ITaskList6
@@ -234,26 +235,26 @@ class ITaskList7 : public ITaskList6
 	// new methods
 public:
 	virtual int GetTaskDependencyCount(HTASKITEM hTask) const = 0;
-	virtual bool AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends) = 0;
+	virtual bool AddTaskDependency(HTASKITEM hTask, LPCWSTR szDepends) = 0;
 	virtual bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID) = 0;
-	virtual LPCTSTR GetTaskDependency(HTASKITEM hTask, int nIndex) const = 0;
+	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex) const = 0;
 
 	virtual int GetTaskAllocatedToCount(HTASKITEM hTask) const = 0;
-	virtual bool AddTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo) = 0;
-	virtual LPCTSTR GetTaskAllocatedTo(HTASKITEM hTask, int nIndex) const = 0;
+	virtual bool AddTaskAllocatedTo(HTASKITEM hTask, LPCWSTR szAllocTo) = 0;
+	virtual LPCWSTR GetTaskAllocatedTo(HTASKITEM hTask, int nIndex) const = 0;
 };
 
 class ITaskList8 : public ITaskList7
 {
 	// new methods
 public:
-	virtual HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, unsigned long dwID) = 0;
+	virtual HTASKITEM NewTask(LPCWSTR szTitle, HTASKITEM hParent, unsigned long dwID) = 0;
 	virtual unsigned long GetTaskParentID(HTASKITEM hTask) const = 0;
 	virtual HTASKITEM FindTask(unsigned long dwTaskID) const = 0;
 	virtual int GetTaskCount() const = 0;
 	virtual void Reset() = 0;
 
- 	virtual bool SetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib, LPCTSTR szValue) = 0;
+ 	virtual bool SetTaskAttribute(HTASKITEM hTask, LPCWSTR szAttrib, LPCWSTR szValue) = 0;
 };
 
 class ITaskList9 : public ITaskList8
@@ -261,11 +262,11 @@ class ITaskList9 : public ITaskList8
 	// new methods
 public:
 	virtual int GetTaskTagCount(HTASKITEM hTask) const = 0;
-	virtual LPCTSTR GetTaskTag(HTASKITEM hTask, int nIndex) const = 0;
-	virtual bool AddTaskTag(HTASKITEM hTask, LPCTSTR szTag) = 0;
+	virtual LPCWSTR GetTaskTag(HTASKITEM hTask, int nIndex) const = 0;
+	virtual bool AddTaskTag(HTASKITEM hTask, LPCWSTR szTag) = 0;
 
-	virtual LPCTSTR GetTaskPositionString(HTASKITEM hTask) const = 0;
-	virtual bool SetTaskPosition(HTASKITEM hTask, LPCTSTR szPos) = 0;
+	virtual LPCWSTR GetTaskPositionString(HTASKITEM hTask) const = 0;
+	virtual bool SetTaskPosition(HTASKITEM hTask, LPCWSTR szPos) = 0;
 };
 
 class ITaskList10 : public ITaskList9
@@ -273,25 +274,25 @@ class ITaskList10 : public ITaskList9
 	// new methods
 public:
 	// tasklist meta data
-	virtual LPCTSTR GetMetaData(LPCTSTR szKey) const = 0;
-	virtual bool SetMetaData(LPCTSTR szKey, LPCTSTR szMetaData) = 0;
-	virtual bool ClearMetaData(LPCTSTR szKey) = 0;
+	virtual LPCWSTR GetMetaData(LPCWSTR szKey) const = 0;
+	virtual bool SetMetaData(LPCWSTR szKey, LPCWSTR szMetaData) = 0;
+	virtual bool ClearMetaData(LPCWSTR szKey) = 0;
 
 	// task meta data
-	virtual LPCTSTR GetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey) const = 0;
-	virtual bool SetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey, LPCTSTR szMetaData) = 0;
-	virtual bool ClearTaskMetaData(HTASKITEM hTask, LPCTSTR szKey) = 0;
+	virtual LPCWSTR GetTaskMetaData(HTASKITEM hTask, LPCWSTR szKey) const = 0;
+	virtual bool SetTaskMetaData(HTASKITEM hTask, LPCWSTR szKey, LPCWSTR szMetaData) = 0;
+	virtual bool ClearTaskMetaData(HTASKITEM hTask, LPCWSTR szKey) = 0;
 
 	// user-defined data definitions
 	virtual int GetCustomAttributeCount() const = 0;
-	virtual LPCTSTR GetCustomAttributeLabel(int nIndex) const = 0;
-	virtual LPCTSTR GetCustomAttributeID(int nIndex) const = 0;
-	virtual LPCTSTR GetCustomAttributeValue(int nIndex, LPCTSTR szItem) const = 0;
+	virtual LPCWSTR GetCustomAttributeLabel(int nIndex) const = 0;
+	virtual LPCWSTR GetCustomAttributeID(int nIndex) const = 0;
+	virtual LPCWSTR GetCustomAttributeValue(int nIndex, LPCWSTR szItem) const = 0;
 
 	// user-defined data
-	virtual LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID) const = 0;
-	virtual bool SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTSTR szData) = 0;
-	virtual bool ClearTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID) = 0;
+	virtual LPCWSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCWSTR szID) const = 0;
+	virtual bool SetTaskCustomAttributeData(HTASKITEM hTask, LPCWSTR szID, LPCWSTR szData) = 0;
+	virtual bool ClearTaskCustomAttributeData(HTASKITEM hTask, LPCWSTR szID) = 0;
 };
 
 class ITaskList11 : public ITaskList10
@@ -299,10 +300,10 @@ class ITaskList11 : public ITaskList10
 	// new methods
 public:
 	virtual time_t GetTaskStartDate(HTASKITEM hTask, BOOL bCalc) const = 0;
-	virtual LPCTSTR GetTaskStartDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual LPCWSTR GetTaskStartDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
 
-	virtual bool SetTaskIcon(HTASKITEM hTask, LPCTSTR szIcon) = 0;
-	virtual LPCTSTR GetTaskIcon(HTASKITEM hTask) const = 0;
+	virtual bool SetTaskIcon(HTASKITEM hTask, LPCWSTR szIcon) = 0;
+	virtual LPCWSTR GetTaskIcon(HTASKITEM hTask) const = 0;
 };
 
 class ITaskList12 : public ITaskList11
@@ -338,7 +339,18 @@ public:
 									DWORD& dwSpecific2, BOOL& bRecalcFromDue, 
 									int& nReuse, int& nNumOccur) const = 0;
 
-	virtual LPCTSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const = 0;
+	virtual bool AddCustomAttribute(LPCWSTR szID, LPCWSTR szLabel) = 0;
+};
+
+class ITaskList14 : public ITaskList13
+{
+	// new methods
+public:
+	virtual int GetTaskFileReferenceCount(HTASKITEM hTask) const = 0;
+	virtual bool AddTaskFileReference(HTASKITEM hTask, LPCWSTR szFileRef) = 0;
+	virtual LPCWSTR GetTaskFileReference(HTASKITEM hTask, int nIndex) const = 0;
+	virtual bool IsTaskGoodAsDone(HTASKITEM hTask) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

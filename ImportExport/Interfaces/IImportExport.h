@@ -11,6 +11,8 @@
 
 #include <Windows.h>
 
+/////////////////////////////////////////////////////////////////////////////////
+
 // function to be exported from dll to create instance of interface
 #ifdef _EXPORTING // declare this in project settings for dll _only_
 #	define DLL_DECLSPEC __declspec(dllexport)
@@ -44,8 +46,8 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 
 #pragma warning(disable:4505)
 
-// helper method
-static IImportTasklist* CreateImportInterface(LPCTSTR szDllPath)
+// helper methods
+static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 {
     IImportTasklist* pInterface = NULL;
     HMODULE hDll = LoadLibrary(szDllPath);
@@ -75,7 +77,7 @@ static IImportTasklist* CreateImportInterface(LPCTSTR szDllPath)
     return pInterface;
 }
 
-static IExportTasklist* CreateExportInterface(LPCTSTR szDllPath)
+static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 {
     IExportTasklist* pInterface = NULL;
     HMODULE hDll = LoadLibrary(szDllPath);
@@ -105,7 +107,7 @@ static IExportTasklist* CreateExportInterface(LPCTSTR szDllPath)
     return pInterface;
 }
 
-static BOOL IsImportExportDll(LPCTSTR szDllPath)
+static BOOL IsImportExportDll(LPCWSTR szDllPath)
 {
     HMODULE hDll = LoadLibrary(szDllPath);
 	
@@ -135,11 +137,11 @@ public:
 	virtual void SetLocalizer(ITransText* pTT) = 0;
 
 	// caller must copy result only
-	virtual LPCTSTR GetMenuText() const = 0;
-	virtual LPCTSTR GetFileFilter() const = 0;
-	virtual LPCTSTR GetFileExtension() const = 0;
+	virtual LPCWSTR GetMenuText() const = 0;
+	virtual LPCWSTR GetFileFilter() const = 0;
+	virtual LPCWSTR GetFileExtension() const = 0;
 
-	virtual bool Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey) = 0;
+	virtual bool Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -152,12 +154,12 @@ public:
 	virtual void SetLocalizer(ITransText* pTT) = 0;
 
 	// caller must copy result only
-	virtual LPCTSTR GetMenuText() const = 0;
-	virtual LPCTSTR GetFileFilter() const = 0;
-	virtual LPCTSTR GetFileExtension() const = 0;
+	virtual LPCWSTR GetMenuText() const = 0;
+	virtual LPCWSTR GetFileFilter() const = 0;
+	virtual LPCWSTR GetFileExtension() const = 0;
 
-	virtual bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey) = 0;
-	virtual bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey) = 0;
+	virtual bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
