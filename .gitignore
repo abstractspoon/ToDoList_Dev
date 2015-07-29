@@ -53,3 +53,5 @@ ImportExport/Exporter/Exporter.sdf
 *.res
 *.exp
 *.sdf
+*.manifest
+ImportExport/ExporterHost/Debug/ExporterHost_manifest.rc
