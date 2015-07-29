@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\shared\IImportExport.h"
+#include "..\Interfaces\IImportExport.h"
 
 // This class is exported from ExporterBridge.dll
 class CExporterBridge : public IExportTasklist

@@ -2,11 +2,11 @@
 //
 
 #include "stdafx.h"
-#include "..\shared\IPreferences.h"
-#include "..\shared\ITasklist.h"
-#include "..\shared\ITransText.h"
-
 #include "pluginhelpers.h"
+
+#include "..\Interfaces\ITasklist.h"
+#include "..\Interfaces\ITransText.h"
+#include "..\Interfaces\IPreferences.h"
 
 using namespace PluginHelpers;
 using namespace System;

@@ -7,9 +7,9 @@
 #include "stdafx.h"
 #include "ExporterBridge.h"
 
-#include "..\shared\ITasklist.h"
-#include "..\shared\ITransText.h"
-#include "..\shared\IPreferences.h"
+#include "..\Interfaces\ITasklist.h"
+#include "..\Interfaces\ITransText.h"
+#include "..\Interfaces\IPreferences.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

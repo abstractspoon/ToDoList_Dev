@@ -17,7 +17,7 @@ public:
 	virtual UINT GetProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nDefault = 0) const = 0;
 	virtual BOOL WriteProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nValue) = 0;
 
-	virtual LPCWSTR GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault = _T("")) const = 0;
+	virtual LPCWSTR GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault = L"") const = 0;
 	virtual BOOL WriteProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszValue) = 0;
 
 	virtual double GetProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dDefault = 0.0) const = 0;

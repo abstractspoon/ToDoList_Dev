@@ -2,7 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "..\shared\iimportexport.h"
+
+#include "..\Interfaces\iimportexport.h"
 
 
 int _tmain(int argc, _TCHAR* argv[])
