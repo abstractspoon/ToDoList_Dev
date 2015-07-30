@@ -83,6 +83,12 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskDependencyCount, UInt32);
       DEF_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32);
 
+      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference, String^);
+
       DEF_GETTASKVALFUNC(GetTaskPercentDone, Byte);
 
       double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
@@ -92,6 +98,7 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskDoneDate, Int64);
       DEF_GETTASKVALFUNC(GetTaskDueDate, Int64);
       DEF_GETTASKVALFUNC(GetTaskStartDate, Int64);
+      DEF_GETTASKVALFUNC(GetTaskCreationDate, Int64);
 
       DEF_GETTASKVALFUNC(GetTaskDoneDateString, String^);
       DEF_GETTASKVALFUNC(GetTaskDueDateString, String^);
@@ -108,12 +115,6 @@ namespace PluginHelpers
 
    private:
       CTaskList();
-
-      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference, String^);
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

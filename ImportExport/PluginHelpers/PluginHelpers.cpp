@@ -192,6 +192,8 @@ IMPL_GETTASKVALFUNC(GetTaskPriorityColor, UInt32,  0)
 IMPL_GETTASKVALFUNC(GetTaskPosition,      UInt32,  0)
 IMPL_GETTASKVALFUNC(GetTaskLastModified,  Int64,   0)
 IMPL_GETTASKVALFUNC(GetTaskDoneDate,      Int64,   0)
+IMPL_GETTASKVALFUNC(GetTaskCreationDate,  Int64,   0)
+
 IMPL_GETTASKVALFUNC(IsTaskDone,           Boolean, false)
 IMPL_GETTASKVALFUNC(IsTaskDue,            Boolean, false)
 
