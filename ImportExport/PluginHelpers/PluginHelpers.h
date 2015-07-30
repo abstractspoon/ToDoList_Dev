@@ -54,10 +54,11 @@ namespace PluginHelpers
    public ref class CTaskList
    {
    public:
-      CTaskList(ITaskList14* pTaskList);
-      CTaskList(const ITaskList14* pTaskList);
+      CTaskList(ITaskList14* pTaskList);        // GET & SET
+      CTaskList(const ITaskList14* pTaskList);  // GET ONLY
       
-      IntPtr NewTask(String^ sTitle, IntPtr hParent);
+      // GET ----------------------------------------------------
+
       IntPtr GetFirstTask(IntPtr hParent);
       
       DEF_GETTASKVALFUNC(GetNextTask, IntPtr);
@@ -70,12 +71,17 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskWebColor, String^);
       DEF_GETTASKVALFUNC(GetTaskPriorityWebColor, String^);
       DEF_GETTASKVALFUNC(GetTaskVersion, String^);
+      DEF_GETTASKVALFUNC(GetTaskExternalID, String^);
+      DEF_GETTASKVALFUNC(GetTaskCreatedBy, String^);
+      DEF_GETTASKVALFUNC(GetTaskPositionString, String^);
 
       DEF_GETTASKVALFUNC(GetTaskID, UInt32);
       DEF_GETTASKVALFUNC(GetTaskColor, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskTextColor, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPriorityColor, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPosition, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPriority, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskRisk, UInt32);
 
       DEF_GETTASKVALFUNC(GetTaskCategoryCount, UInt32);
       DEF_GETTASKVALFUNC(GetTaskAllocatedToCount, UInt32);
@@ -91,9 +97,6 @@ namespace PluginHelpers
 
       DEF_GETTASKVALFUNC(GetTaskPercentDone, Byte);
 
-      double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
-      double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
-
       DEF_GETTASKVALFUNC(GetTaskLastModified, Int64);
       DEF_GETTASKVALFUNC(GetTaskDoneDate, Int64);
       DEF_GETTASKVALFUNC(GetTaskDueDate, Int64);
@@ -103,12 +106,22 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskDoneDateString, String^);
       DEF_GETTASKVALFUNC(GetTaskDueDateString, String^);
       DEF_GETTASKVALFUNC(GetTaskStartDateString, String^);
+      DEF_GETTASKVALFUNC(GetTaskCreationDateString, String^);
 
       DEF_GETTASKVALFUNC(IsTaskDone, Boolean);
       DEF_GETTASKVALFUNC(IsTaskDue, Boolean);
+      DEF_GETTASKVALFUNC(IsTaskGoodAsDone, Boolean);
       
-      // TODO
+      double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
+      double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
+      double GetTaskCost(IntPtr hTask);
+
+      Boolean GetTaskRecurrence(IntPtr hTask);
+
+      // SET -----------------------------------------------------
       
+      IntPtr NewTask(String^ sTitle, IntPtr hParent);
+
    private:
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;
