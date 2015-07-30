@@ -162,9 +162,13 @@ IMPL_GETTASKSTRFUNC(GetTaskFileReferencePath)
 IMPL_GETTASKSTRFUNC(GetTaskWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskPriorityWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskDoneDateString)
+IMPL_GETTASKSTRFUNC(GetTaskVersion)
 
 IMPL_GETTASKSTRFUNC_IDX(GetTaskAllocatedTo)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskCategory)
+IMPL_GETTASKSTRFUNC_IDX(GetTaskTag)
+IMPL_GETTASKSTRFUNC_IDX(GetTaskDependency)
+
 IMPL_GETTASKSTRFUNC_ARG(GetTaskDueDateString,   FALSE)
 IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, FALSE)
 
@@ -182,7 +186,7 @@ IMPL_GETTASKVALFUNC(IsTaskDue,            Boolean, false)
 IMPL_GETTASKVALFUNC_ARG(GetTaskDueDate,      Int64,   0, FALSE)
 IMPL_GETTASKVALFUNC_ARG(GetTaskStartDate,    Int64,   0, FALSE)
 IMPL_GETTASKVALFUNC_ARG(GetTaskPriority,     UInt32,  0, FALSE)
-IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    0, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    0, FALSE)
 
 // custom types
 double CTaskList::GetTaskTimeEstimate(HTASKITEM hTask, Char% cUnits)

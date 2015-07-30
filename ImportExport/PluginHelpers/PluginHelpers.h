@@ -70,8 +70,12 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskFileReferencePath, String^);
       DEF_GETTASKVALFUNC(GetTaskWebColor, String^);
       DEF_GETTASKVALFUNC(GetTaskPriorityWebColor, String^);
+      DEF_GETTASKVALFUNC(GetTaskVersion, String^);
+
       DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
       DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
    
       DEF_GETTASKVALFUNC(GetTaskID, UInt32);
       DEF_GETTASKVALFUNC(GetTaskColor, UInt32);
