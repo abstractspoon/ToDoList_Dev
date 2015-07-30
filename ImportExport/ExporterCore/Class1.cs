@@ -22,6 +22,9 @@ namespace ExporterCore
 
             String sTitle = srcTasks.GetTaskTitle(hTask);
 
+//             Array categories = new Array;
+//             UInt32 numCat = srcTasks.GetTaskCategories(hTask, categories);
+
             //MessageBox.Show("ExporterCore"); 
             return true;
         }

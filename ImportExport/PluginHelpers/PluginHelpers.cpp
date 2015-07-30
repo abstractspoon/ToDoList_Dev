@@ -120,14 +120,20 @@ bool CPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double d
    t CTaskList::fn(IntPtr hTask) { \
    return t(GETTASKVAL_ARG(fn, TASK(hTask), arg, errret)); }
 
+// #define IMPL_GETTASKSTRARRFUNC(fn) \
+//    String^ CTaskList::fn(IntPtr hTask, int nIndex) { \
+//    return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), nIndex, NULL)); }
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTaskList::CTaskList(ITaskList13* pTaskList) : m_pTaskList(pTaskList), m_pConstTaskList(NULL) 
+CTaskList::CTaskList(ITaskList14* pTaskList) : m_pTaskList(pTaskList), m_pConstTaskList(NULL) 
 {
    int breakpoint = 0;
 } 
 
-CTaskList::CTaskList(const ITaskList13* pTaskList) : m_pTaskList(NULL), m_pConstTaskList(pTaskList) 
+CTaskList::CTaskList(const ITaskList14* pTaskList) : m_pTaskList(NULL), m_pConstTaskList(pTaskList) 
 {
    int breakpoint = 0;
 } 
@@ -158,7 +164,6 @@ IMPL_GETTASKSTRFUNC(GetTaskTitle)
 IMPL_GETTASKSTRFUNC(GetTaskComments)
 IMPL_GETTASKSTRFUNC(GetTaskAllocatedBy)
 IMPL_GETTASKSTRFUNC(GetTaskStatus)
-IMPL_GETTASKSTRFUNC(GetTaskFileReferencePath)
 IMPL_GETTASKSTRFUNC(GetTaskWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskPriorityWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskDoneDateString)
@@ -168,6 +173,13 @@ IMPL_GETTASKSTRFUNC_IDX(GetTaskAllocatedTo)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskCategory)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskTag)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskDependency)
+IMPL_GETTASKSTRFUNC_IDX(GetTaskFileReference)
+
+IMPL_GETTASKVALFUNC(GetTaskAllocatedToCount, UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskCategoryCount, UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskTagCount, UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskDependencyCount, UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32, 0)
 
 IMPL_GETTASKSTRFUNC_ARG(GetTaskDueDateString,   FALSE)
 IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, FALSE)
@@ -188,30 +200,29 @@ IMPL_GETTASKVALFUNC_ARG(GetTaskStartDate,    Int64,   0, FALSE)
 IMPL_GETTASKVALFUNC_ARG(GetTaskPriority,     UInt32,  0, FALSE)
 IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    0, FALSE)
 
-// custom types
-double CTaskList::GetTaskTimeEstimate(HTASKITEM hTask, Char% cUnits)
+double CTaskList::GetTaskTimeEstimate(IntPtr hTask, Char% cUnits)
 {
    TCHAR nUnits = 0;
    double dTime = 0.0;
 
    if (m_pConstTaskList)
-      dTime = m_pConstTaskList->GetTaskTimeEstimate(hTask, nUnits, FALSE);
+      dTime = m_pConstTaskList->GetTaskTimeEstimate(TASK(hTask), nUnits, FALSE);
    else 
-      dTime = m_pTaskList->GetTaskTimeEstimate(hTask, nUnits, FALSE);
+      dTime = m_pTaskList->GetTaskTimeEstimate(TASK(hTask), nUnits, FALSE);
 
    cUnits = nUnits;
    return dTime;
 }
 
-double CTaskList::GetTaskTimeSpent(HTASKITEM hTask, Char% cUnits)
+double CTaskList::GetTaskTimeSpent(IntPtr hTask, Char% cUnits)
 {
    TCHAR nUnits = 0;
    double dTime = 0.0;
 
    if (m_pConstTaskList)
-      dTime = m_pConstTaskList->GetTaskTimeSpent(hTask, nUnits, FALSE);
+      dTime = m_pConstTaskList->GetTaskTimeSpent(TASK(hTask), nUnits, FALSE);
    else 
-      dTime = m_pTaskList->GetTaskTimeSpent(hTask, nUnits, FALSE);
+      dTime = m_pTaskList->GetTaskTimeSpent(TASK(hTask), nUnits, FALSE);
 
    cUnits = nUnits;
    return dTime;

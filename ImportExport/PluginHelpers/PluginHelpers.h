@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 class IPreferences;
-class ITaskList13;
+class ITaskList14;
 class ITransText;
 
 typedef void* HTASKITEM;
@@ -54,8 +54,8 @@ namespace PluginHelpers
    public ref class CTaskList
    {
    public:
-      CTaskList(ITaskList13* pTaskList);
-      CTaskList(const ITaskList13* pTaskList);
+      CTaskList(ITaskList14* pTaskList);
+      CTaskList(const ITaskList14* pTaskList);
       
       IntPtr NewTask(String^ sTitle, IntPtr hParent);
       IntPtr GetFirstTask(IntPtr hParent);
@@ -67,26 +67,26 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(GetTaskComments, String^);
       DEF_GETTASKVALFUNC(GetTaskAllocatedBy, String^);
       DEF_GETTASKVALFUNC(GetTaskStatus, String^);
-      DEF_GETTASKVALFUNC(GetTaskFileReferencePath, String^);
       DEF_GETTASKVALFUNC(GetTaskWebColor, String^);
       DEF_GETTASKVALFUNC(GetTaskPriorityWebColor, String^);
       DEF_GETTASKVALFUNC(GetTaskVersion, String^);
 
-      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
-   
       DEF_GETTASKVALFUNC(GetTaskID, UInt32);
       DEF_GETTASKVALFUNC(GetTaskColor, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPriorityColor, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPosition, UInt32);
       DEF_GETTASKVALFUNC(GetTaskPriority, UInt32);
 
+      DEF_GETTASKVALFUNC(GetTaskCategoryCount, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskAllocatedToCount, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskTagCount, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskDependencyCount, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32);
+
       DEF_GETTASKVALFUNC(GetTaskPercentDone, Byte);
 
-      double GetTaskTimeEstimate(HTASKITEM hTask, Char% cUnits);
-      double GetTaskTimeSpent(HTASKITEM hTask, Char% cUnits);
+      double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
+      double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
 
       DEF_GETTASKVALFUNC(GetTaskLastModified, Int64);
       DEF_GETTASKVALFUNC(GetTaskDoneDate, Int64);
@@ -103,11 +103,17 @@ namespace PluginHelpers
       // TODO
       
    private:
-      ITaskList13* m_pTaskList;
-      const ITaskList13* m_pConstTaskList;
+      ITaskList14* m_pTaskList;
+      const ITaskList14* m_pConstTaskList;
 
    private:
       CTaskList();
+
+      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference, String^);
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

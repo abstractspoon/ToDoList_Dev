@@ -65,7 +65,7 @@ bool CExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePa
    // call into out sibling C# module to do the actual work
    msclr::auto_gcroot<Class1^> expCore = gcnew Class1();
    msclr::auto_gcroot<CPreferences^> prefs = gcnew CPreferences(pPrefs);
-   msclr::auto_gcroot<CTaskList^> srcTasks = gcnew CTaskList(GetITLInterface<ITaskList13>(pSrcTaskFile, IID_TASKLIST13));
+   msclr::auto_gcroot<CTaskList^> srcTasks = gcnew CTaskList(GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14));
       
    // do the export
    return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
