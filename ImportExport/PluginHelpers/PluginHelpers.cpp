@@ -166,8 +166,13 @@ IMPL_GETTASKSTRFUNC(GetTaskAllocatedBy)
 IMPL_GETTASKSTRFUNC(GetTaskStatus)
 IMPL_GETTASKSTRFUNC(GetTaskWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskPriorityWebColor)
-IMPL_GETTASKSTRFUNC(GetTaskDoneDateString)
 IMPL_GETTASKSTRFUNC(GetTaskVersion)
+IMPL_GETTASKSTRFUNC(GetTaskExternalID)
+IMPL_GETTASKSTRFUNC(GetTaskCreatedBy)
+
+IMPL_GETTASKSTRFUNC(GetTaskPositionString)
+IMPL_GETTASKSTRFUNC(GetTaskDoneDateString)
+IMPL_GETTASKSTRFUNC(GetTaskCreationDateString)
 
 IMPL_GETTASKSTRFUNC_IDX(GetTaskAllocatedTo)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskCategory)
@@ -175,11 +180,11 @@ IMPL_GETTASKSTRFUNC_IDX(GetTaskTag)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskDependency)
 IMPL_GETTASKSTRFUNC_IDX(GetTaskFileReference)
 
-IMPL_GETTASKVALFUNC(GetTaskAllocatedToCount, UInt32, 0)
-IMPL_GETTASKVALFUNC(GetTaskCategoryCount, UInt32, 0)
-IMPL_GETTASKVALFUNC(GetTaskTagCount, UInt32, 0)
-IMPL_GETTASKVALFUNC(GetTaskDependencyCount, UInt32, 0)
-IMPL_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskAllocatedToCount,	UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskCategoryCount,		UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskTagCount,			UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskDependencyCount,		UInt32, 0)
+IMPL_GETTASKVALFUNC(GetTaskFileReferenceCount,	UInt32, 0)
 
 IMPL_GETTASKSTRFUNC_ARG(GetTaskDueDateString,   FALSE)
 IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, FALSE)
@@ -188,19 +193,24 @@ IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, FALSE)
 IMPL_GETTASKVALFUNC(GetTaskParent,        IntPtr,  NULL)
 IMPL_GETTASKVALFUNC(GetTaskID,            UInt32,  0)
 IMPL_GETTASKVALFUNC(GetTaskColor,         UInt32,  0)
+IMPL_GETTASKVALFUNC(GetTaskTextColor,     UInt32,  0)
 IMPL_GETTASKVALFUNC(GetTaskPriorityColor, UInt32,  0)
 IMPL_GETTASKVALFUNC(GetTaskPosition,      UInt32,  0)
+
 IMPL_GETTASKVALFUNC(GetTaskLastModified,  Int64,   0)
 IMPL_GETTASKVALFUNC(GetTaskDoneDate,      Int64,   0)
 IMPL_GETTASKVALFUNC(GetTaskCreationDate,  Int64,   0)
 
 IMPL_GETTASKVALFUNC(IsTaskDone,           Boolean, false)
 IMPL_GETTASKVALFUNC(IsTaskDue,            Boolean, false)
+IMPL_GETTASKVALFUNC(IsTaskGoodAsDone,     Boolean, false)
 
-IMPL_GETTASKVALFUNC_ARG(GetTaskDueDate,      Int64,   0, FALSE)
-IMPL_GETTASKVALFUNC_ARG(GetTaskStartDate,    Int64,   0, FALSE)
-IMPL_GETTASKVALFUNC_ARG(GetTaskPriority,     UInt32,  0, FALSE)
-IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    0, FALSE)
+IMPL_GETTASKVALFUNC_ARG(GetTaskDueDate,      Int64,   FALSE, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskStartDate,    Int64,   FALSE, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskPriority,     UInt32,  FALSE, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    FALSE, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskRisk,	     UInt32,  FALSE, 0)
+IMPL_GETTASKVALFUNC_ARG(GetTaskCost,	     double,  FALSE, 0.0)
 
 double CTaskList::GetTaskTimeEstimate(IntPtr hTask, Char% cUnits)
 {
@@ -228,6 +238,12 @@ double CTaskList::GetTaskTimeSpent(IntPtr hTask, Char% cUnits)
 
    cUnits = nUnits;
    return dTime;
+}
+
+Boolean CTaskList::GetTaskRecurrence(IntPtr hTask)
+{
+	// TODO
+	return false;
 }
 
 // TODO
