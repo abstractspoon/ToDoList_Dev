@@ -48,9 +48,6 @@ namespace PluginHelpers
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define DEF_GETTASKVALFUNC(fn, t) t fn(IntPtr hTask)
-#define DEF_GETTASKVALFUNC_IDX(fn, t) t fn(IntPtr hTask, int nIndex)
-
    public ref class CTaskList
    {
    public:
@@ -63,10 +60,12 @@ namespace PluginHelpers
       String^ GetReportDate();
 
       UInt32 GetTaskCount();
-
       IntPtr FindTask(UInt32 dwTaskID);
-      IntPtr GetFirstTask(IntPtr hParent);
       
+#define DEF_GETTASKVALFUNC(fn, t)      t fn(IntPtr hTask)
+#define DEF_GETTASKVALFUNC_IDX(fn, t)  t fn(IntPtr hTask, int nIndex)
+
+      DEF_GETTASKVALFUNC(GetFirstTask,              IntPtr);
       DEF_GETTASKVALFUNC(GetNextTask,               IntPtr);
       DEF_GETTASKVALFUNC(GetTaskParent,             IntPtr);
 
@@ -129,11 +128,45 @@ namespace PluginHelpers
       
       IntPtr NewTask(String^ sTitle, IntPtr hParent);
 
-   private:
+#define DEF_SETTASKVALFUNC(fn, t)      Boolean fn(IntPtr hTask, t value)
+
+      DEF_SETTASKVALFUNC(SetTaskTitle,              String^);
+      DEF_SETTASKVALFUNC(SetTaskComments,           String^);
+      DEF_SETTASKVALFUNC(SetTaskAllocatedBy,        String^);
+      DEF_SETTASKVALFUNC(SetTaskStatus,             String^);
+      DEF_SETTASKVALFUNC(SetTaskVersion,            String^);
+      DEF_SETTASKVALFUNC(SetTaskExternalID,         String^);
+      DEF_SETTASKVALFUNC(SetTaskCreatedBy,          String^);
+      DEF_SETTASKVALFUNC(SetTaskPosition,           String^);
+      DEF_SETTASKVALFUNC(SetTaskIcon,               String^);
+
+      DEF_SETTASKVALFUNC(AddTaskAllocatedTo,        String^);
+      DEF_SETTASKVALFUNC(AddTaskCategory,           String^);
+      DEF_SETTASKVALFUNC(AddTaskTag,                String^);
+      DEF_SETTASKVALFUNC(AddTaskDependency,         String^);
+      DEF_SETTASKVALFUNC(AddTaskFileReference,      String^);
+
+      DEF_SETTASKVALFUNC(SetTaskColor,              UInt32);
+      DEF_SETTASKVALFUNC(SetTaskPriority,           UInt32);
+      DEF_SETTASKVALFUNC(SetTaskRisk,               UInt32);
+
+      DEF_SETTASKVALFUNC(SetTaskPercentDone,        Byte);
+      DEF_SETTASKVALFUNC(SetTaskCost,               double);
+
+      DEF_SETTASKVALFUNC(SetTaskLastModified,       Int64);
+      DEF_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
+      DEF_SETTASKVALFUNC(SetTaskDueDate,            Int64);
+      DEF_SETTASKVALFUNC(SetTaskStartDate,          Int64);
+      DEF_SETTASKVALFUNC(SetTaskCreationDate,       Int64);
+
+      Boolean SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits);
+      Boolean SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits);
+
+   private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;
 
-   private:
+   private: // -------------------------------------------------------
       CTaskList();
    };
 

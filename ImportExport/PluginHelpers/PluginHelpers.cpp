@@ -89,20 +89,17 @@ bool CPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double d
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define TASK(t) ((HTASKITEM)t.ToPointer())
+
 #define GETTASKVAL(fn, htask, errret) \
    (m_pConstTaskList ? m_pConstTaskList->fn(htask) : (m_pTaskList ? m_pTaskList->fn(htask) : errret))
 
 #define GETTASKVAL_ARG(fn, htask, arg, errret) \
    (m_pConstTaskList ? m_pConstTaskList->fn(htask, arg) : (m_pTaskList ? m_pTaskList->fn(htask, arg) : errret))
 
-#define SETTASKVAL(fn, htask, val) \
-   (m_pTaskList ? m_pTaskList->fn(htask, val) : false)
-
-#define TASK(t) ((HTASKITEM)t.ToPointer())
-
 #define IMPL_GETTASKSTRFUNC(fn) \
    String^ CTaskList::fn(IntPtr hTask) { \
-      return gcnew String(GETTASKVAL(fn, TASK(hTask), NULL)); }
+   return gcnew String(GETTASKVAL(fn, TASK(hTask), NULL)); }
 
 #define IMPL_GETTASKSTRFUNC_IDX(fn) \
    String^ CTaskList::fn(IntPtr hTask, int nIndex) { \
@@ -120,6 +117,17 @@ bool CPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double d
    t CTaskList::fn(IntPtr hTask) { \
    return t(GETTASKVAL_ARG(fn, TASK(hTask), arg, errret)); }
 
+#define SETTASKVAL(fn, htask, val) \
+   (m_pTaskList ? m_pTaskList->fn(htask, val) : false)
+
+#define IMPL_SETTASKSTRFUNC(fn) \
+   Boolean CTaskList::fn(IntPtr hTask, String^ value) { \
+   return SETTASKVAL(fn, TASK(hTask), MS(value)); }
+
+#define IMPL_SETTASKVALFUNC(fn, t) \
+   Boolean CTaskList::fn(IntPtr hTask, t value) { \
+   return SETTASKVAL(fn, TASK(hTask), value); }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTaskList::CTaskList(ITaskList14* pTaskList) : m_pTaskList(pTaskList), m_pConstTaskList(NULL) 
@@ -136,14 +144,6 @@ CTaskList::CTaskList(const ITaskList14* pTaskList) : m_pTaskList(NULL), m_pConst
 CTaskList::CTaskList() : m_pTaskList(NULL), m_pConstTaskList(NULL)
 {
 
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// SETTERS
-
-IntPtr CTaskList::NewTask(String^ sTitle, IntPtr hParent)
-{
-   return IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), TASK(hParent), 0) : NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,6 @@ IntPtr CTaskList::GetNextTask(IntPtr hTask)
    return IntPtr(GETTASKVAL(GetNextTask, TASK(hTask), NULL));
 }
 
-// string functions
 IMPL_GETTASKSTRFUNC(GetTaskTitle)
 IMPL_GETTASKSTRFUNC(GetTaskComments)
 IMPL_GETTASKSTRFUNC(GetTaskAllocatedBy)
@@ -245,7 +244,7 @@ IMPL_GETTASKVALFUNC_ARG(GetTaskCost,	     double,  FALSE, 0.0)
 
 double CTaskList::GetTaskTimeEstimate(IntPtr hTask, Char% cUnits)
 {
-   TCHAR nUnits = 0;
+   WCHAR nUnits = 0;
    double dTime = 0.0;
 
    if (m_pConstTaskList)
@@ -259,7 +258,7 @@ double CTaskList::GetTaskTimeEstimate(IntPtr hTask, Char% cUnits)
 
 double CTaskList::GetTaskTimeSpent(IntPtr hTask, Char% cUnits)
 {
-   TCHAR nUnits = 0;
+   WCHAR nUnits = 0;
    double dTime = 0.0;
 
    if (m_pConstTaskList)
@@ -278,6 +277,53 @@ Boolean CTaskList::GetTaskRecurrence(IntPtr hTask)
 }
 
 // TODO
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+
+IntPtr CTaskList::NewTask(String^ sTitle, IntPtr hParent)
+{
+   return IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), TASK(hParent), 0) : NULL);
+}
+
+IMPL_SETTASKSTRFUNC(SetTaskTitle);
+IMPL_SETTASKSTRFUNC(SetTaskComments);
+IMPL_SETTASKSTRFUNC(SetTaskAllocatedBy);
+IMPL_SETTASKSTRFUNC(SetTaskStatus);
+IMPL_SETTASKSTRFUNC(SetTaskVersion);
+IMPL_SETTASKSTRFUNC(SetTaskExternalID);
+IMPL_SETTASKSTRFUNC(SetTaskCreatedBy);
+IMPL_SETTASKSTRFUNC(SetTaskPosition);
+IMPL_SETTASKSTRFUNC(SetTaskIcon);
+
+IMPL_SETTASKSTRFUNC(AddTaskAllocatedTo);
+IMPL_SETTASKSTRFUNC(AddTaskCategory);
+IMPL_SETTASKSTRFUNC(AddTaskTag);
+IMPL_SETTASKSTRFUNC(AddTaskDependency);
+IMPL_SETTASKSTRFUNC(AddTaskFileReference);
+
+IMPL_SETTASKVALFUNC(SetTaskColor,              UInt32);
+IMPL_SETTASKVALFUNC(SetTaskPriority,           UInt32);
+IMPL_SETTASKVALFUNC(SetTaskRisk,               UInt32);
+
+IMPL_SETTASKVALFUNC(SetTaskPercentDone,        Byte);
+IMPL_SETTASKVALFUNC(SetTaskCost,               double);
+
+IMPL_SETTASKVALFUNC(SetTaskLastModified,       Int64);
+IMPL_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
+IMPL_SETTASKVALFUNC(SetTaskDueDate,            Int64);
+IMPL_SETTASKVALFUNC(SetTaskStartDate,          Int64);
+IMPL_SETTASKVALFUNC(SetTaskCreationDate,       Int64);
+
+Boolean CTaskList::SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits)
+{
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(TASK(hTask), dTime, cUnits) : false);
+}
+
+Boolean CTaskList::SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits)
+{
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(TASK(hTask), dTime, cUnits) : false);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
