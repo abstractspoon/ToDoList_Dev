@@ -57,68 +57,75 @@ namespace PluginHelpers
       CTaskList(ITaskList14* pTaskList);        // GET & SET
       CTaskList(const ITaskList14* pTaskList);  // GET ONLY
       
-      // GET ----------------------------------------------------
+      // GETTERS ----------------------------------------------------
 
+      String^ GetReportTitle();
+      String^ GetReportDate();
+
+      UInt32 GetTaskCount();
+
+      IntPtr FindTask(UInt32 dwTaskID);
       IntPtr GetFirstTask(IntPtr hParent);
       
-      DEF_GETTASKVALFUNC(GetNextTask, IntPtr);
-      DEF_GETTASKVALFUNC(GetTaskParent, IntPtr);
+      DEF_GETTASKVALFUNC(GetNextTask,               IntPtr);
+      DEF_GETTASKVALFUNC(GetTaskParent,             IntPtr);
 
-      DEF_GETTASKVALFUNC(GetTaskTitle, String^);
-      DEF_GETTASKVALFUNC(GetTaskComments, String^);
-      DEF_GETTASKVALFUNC(GetTaskAllocatedBy, String^);
-      DEF_GETTASKVALFUNC(GetTaskStatus, String^);
-      DEF_GETTASKVALFUNC(GetTaskWebColor, String^);
-      DEF_GETTASKVALFUNC(GetTaskPriorityWebColor, String^);
-      DEF_GETTASKVALFUNC(GetTaskVersion, String^);
-      DEF_GETTASKVALFUNC(GetTaskExternalID, String^);
-      DEF_GETTASKVALFUNC(GetTaskCreatedBy, String^);
-      DEF_GETTASKVALFUNC(GetTaskPositionString, String^);
+      DEF_GETTASKVALFUNC(GetTaskTitle,              String^);
+      DEF_GETTASKVALFUNC(GetTaskComments,           String^);
+      DEF_GETTASKVALFUNC(GetTaskAllocatedBy,        String^);
+      DEF_GETTASKVALFUNC(GetTaskStatus,             String^);
+      DEF_GETTASKVALFUNC(GetTaskWebColor,           String^);
+      DEF_GETTASKVALFUNC(GetTaskPriorityWebColor,   String^);
+      DEF_GETTASKVALFUNC(GetTaskVersion,            String^);
+      DEF_GETTASKVALFUNC(GetTaskExternalID,         String^);
+      DEF_GETTASKVALFUNC(GetTaskCreatedBy,          String^);
+      DEF_GETTASKVALFUNC(GetTaskPositionString,     String^);
+      DEF_GETTASKVALFUNC(GetTaskIcon,               String^);
 
-      DEF_GETTASKVALFUNC(GetTaskID, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskColor, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskTextColor, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPriorityColor, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPosition, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPriority, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskRisk, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskID,                 UInt32);
+      DEF_GETTASKVALFUNC(GetTaskColor,              UInt32);
+      DEF_GETTASKVALFUNC(GetTaskTextColor,          UInt32);
+      DEF_GETTASKVALFUNC(GetTaskPriorityColor,      UInt32);
+      DEF_GETTASKVALFUNC(GetTaskPosition,           UInt32);
+      DEF_GETTASKVALFUNC(GetTaskPriority,           UInt32);
+      DEF_GETTASKVALFUNC(GetTaskRisk,               UInt32);
 
-      DEF_GETTASKVALFUNC(GetTaskCategoryCount, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskAllocatedToCount, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskTagCount, UInt32);
-      DEF_GETTASKVALFUNC(GetTaskDependencyCount, UInt32);
+      DEF_GETTASKVALFUNC(GetTaskCategoryCount,      UInt32);
+      DEF_GETTASKVALFUNC(GetTaskAllocatedToCount,   UInt32);
+      DEF_GETTASKVALFUNC(GetTaskTagCount,           UInt32);
+      DEF_GETTASKVALFUNC(GetTaskDependencyCount,    UInt32);
       DEF_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32);
 
-      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskCategory, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskTag, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskDependency, String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference, String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo,    String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskCategory,       String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskTag,            String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskDependency,     String^);
+      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference,  String^);
 
-      DEF_GETTASKVALFUNC(GetTaskPercentDone, Byte);
+      DEF_GETTASKVALFUNC(GetTaskPercentDone,        Byte);
+      DEF_GETTASKVALFUNC(GetTaskCost,               double);
 
-      DEF_GETTASKVALFUNC(GetTaskLastModified, Int64);
-      DEF_GETTASKVALFUNC(GetTaskDoneDate, Int64);
-      DEF_GETTASKVALFUNC(GetTaskDueDate, Int64);
-      DEF_GETTASKVALFUNC(GetTaskStartDate, Int64);
-      DEF_GETTASKVALFUNC(GetTaskCreationDate, Int64);
+      DEF_GETTASKVALFUNC(GetTaskLastModified,       Int64);
+      DEF_GETTASKVALFUNC(GetTaskDoneDate,           Int64);
+      DEF_GETTASKVALFUNC(GetTaskDueDate,            Int64);
+      DEF_GETTASKVALFUNC(GetTaskStartDate,          Int64);
+      DEF_GETTASKVALFUNC(GetTaskCreationDate,       Int64);
 
-      DEF_GETTASKVALFUNC(GetTaskDoneDateString, String^);
-      DEF_GETTASKVALFUNC(GetTaskDueDateString, String^);
-      DEF_GETTASKVALFUNC(GetTaskStartDateString, String^);
+      DEF_GETTASKVALFUNC(GetTaskDoneDateString,     String^);
+      DEF_GETTASKVALFUNC(GetTaskDueDateString,      String^);
+      DEF_GETTASKVALFUNC(GetTaskStartDateString,    String^);
       DEF_GETTASKVALFUNC(GetTaskCreationDateString, String^);
 
-      DEF_GETTASKVALFUNC(IsTaskDone, Boolean);
-      DEF_GETTASKVALFUNC(IsTaskDue, Boolean);
-      DEF_GETTASKVALFUNC(IsTaskGoodAsDone, Boolean);
+      DEF_GETTASKVALFUNC(IsTaskDone,                Boolean);
+      DEF_GETTASKVALFUNC(IsTaskDue,                 Boolean);
+      DEF_GETTASKVALFUNC(IsTaskGoodAsDone,          Boolean);
       
       double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
       double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
-      double GetTaskCost(IntPtr hTask);
 
-      Boolean GetTaskRecurrence(IntPtr hTask);
+      Boolean GetTaskRecurrence(IntPtr hTask); // TODO
 
-      // SET -----------------------------------------------------
+      // SETTERS -----------------------------------------------------
       
       IntPtr NewTask(String^ sTitle, IntPtr hParent);
 

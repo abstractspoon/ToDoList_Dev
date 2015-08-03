@@ -120,12 +120,6 @@ bool CPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double d
    t CTaskList::fn(IntPtr hTask) { \
    return t(GETTASKVAL_ARG(fn, TASK(hTask), arg, errret)); }
 
-// #define IMPL_GETTASKSTRARRFUNC(fn) \
-//    String^ CTaskList::fn(IntPtr hTask, int nIndex) { \
-//    return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), nIndex, NULL)); }
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTaskList::CTaskList(ITaskList14* pTaskList) : m_pTaskList(pTaskList), m_pConstTaskList(NULL) 
@@ -144,9 +138,45 @@ CTaskList::CTaskList() : m_pTaskList(NULL), m_pConstTaskList(NULL)
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// SETTERS
+
 IntPtr CTaskList::NewTask(String^ sTitle, IntPtr hParent)
 {
    return IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), TASK(hParent), 0) : NULL);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// GETTERS
+
+String^ CTaskList::GetReportTitle()
+{
+   LPCWSTR szTitle = (m_pConstTaskList ? m_pConstTaskList->GetReportTitle() : 
+                     (m_pTaskList ? m_pTaskList->GetReportTitle() : L""));
+    
+   return gcnew String(szTitle);
+}
+
+String^ CTaskList::GetReportDate()
+{
+   LPCWSTR szDate = (m_pConstTaskList ? m_pConstTaskList->GetReportDate() : 
+                    (m_pTaskList ? m_pTaskList->GetReportDate() : L""));
+
+   return gcnew String(szDate);
+}
+
+UInt32 CTaskList::GetTaskCount()
+{
+   return (m_pConstTaskList ? m_pConstTaskList->GetTaskCount() : 
+          (m_pTaskList ? m_pTaskList->GetTaskCount() : 0));
+}
+
+IntPtr CTaskList::FindTask(UInt32 dwTaskID)
+{
+   HTASKITEM hTask = (m_pConstTaskList ? m_pConstTaskList->FindTask(dwTaskID) : 
+                     (m_pTaskList ? m_pTaskList->FindTask(dwTaskID) : NULL));
+
+   return IntPtr(hTask);
 }
 
 IntPtr CTaskList::GetFirstTask(IntPtr hParent)
@@ -169,6 +199,7 @@ IMPL_GETTASKSTRFUNC(GetTaskPriorityWebColor)
 IMPL_GETTASKSTRFUNC(GetTaskVersion)
 IMPL_GETTASKSTRFUNC(GetTaskExternalID)
 IMPL_GETTASKSTRFUNC(GetTaskCreatedBy)
+IMPL_GETTASKSTRFUNC(GetTaskIcon)
 
 IMPL_GETTASKSTRFUNC(GetTaskPositionString)
 IMPL_GETTASKSTRFUNC(GetTaskDoneDateString)
