@@ -38,14 +38,6 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define GETPREF(fn, defval) \
-   (m_pPrefs ? m_pPrefs->fn(MS(sSection), MS(sEntry), defval) : defval)
-
-#define SETPREF(fn, val) \
-   (m_pPrefs ? (m_pPrefs->fn(MS(sSection), MS(sEntry), val) != FALSE) : false)
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 CPreferences::CPreferences(IPreferences* pPrefs) : m_pPrefs(pPrefs) 
 {
    int breakpoint = 0;
@@ -56,6 +48,16 @@ CPreferences::CPreferences() : m_pPrefs(NULL)
 {
 
 }
+
+// ---------------------------------------------------------
+
+#define GETPREF(fn, defval) \
+   (m_pPrefs ? m_pPrefs->fn(MS(sSection), MS(sEntry), defval) : defval)
+
+#define SETPREF(fn, val) \
+   (m_pPrefs ? (m_pPrefs->fn(MS(sSection), MS(sEntry), val) != FALSE) : false)
+
+// ---------------------------------------------------------
 
 int CPreferences::GetProfileInt(String^ sSection, String^ sEntry, int nDefault)
 {
@@ -88,48 +90,7 @@ bool CPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double d
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define TASK(t) ((HTASKITEM)t.ToPointer())
-
-#define GETTASKVAL(fn, htask, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(htask) : (m_pTaskList ? m_pTaskList->fn(htask) : errret))
-
-#define GETTASKVAL_ARG(fn, htask, arg, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(htask, arg) : (m_pTaskList ? m_pTaskList->fn(htask, arg) : errret))
-
-#define IMPL_GETTASKSTRFUNC(fn) \
-   String^ CTaskList::fn(IntPtr hTask) { \
-   return gcnew String(GETTASKVAL(fn, TASK(hTask), NULL)); }
-
-#define IMPL_GETTASKSTRFUNC_IDX(fn) \
-   String^ CTaskList::fn(IntPtr hTask, int nIndex) { \
-   return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), nIndex, NULL)); }
-
-#define IMPL_GETTASKSTRFUNC_ARG(fn, arg) \
-   String^ CTaskList::fn(IntPtr hTask) { \
-   return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), arg, NULL)); }
-
-#define IMPL_GETTASKVALFUNC(fn, t, errret) \
-   t CTaskList::fn(IntPtr hTask) { \
-   return t(GETTASKVAL(fn, TASK(hTask), errret)); }
-
-#define IMPL_GETTASKVALFUNC_ARG(fn, t, arg, errret) \
-   t CTaskList::fn(IntPtr hTask) { \
-   return t(GETTASKVAL_ARG(fn, TASK(hTask), arg, errret)); }
-
-#define SETTASKVAL(fn, htask, val) \
-   (m_pTaskList ? m_pTaskList->fn(htask, val) : false)
-
-#define IMPL_SETTASKSTRFUNC(fn) \
-   Boolean CTaskList::fn(IntPtr hTask, String^ value) { \
-   return SETTASKVAL(fn, TASK(hTask), MS(value)); }
-
-#define IMPL_SETTASKVALFUNC(fn, t) \
-   Boolean CTaskList::fn(IntPtr hTask, t value) { \
-   return SETTASKVAL(fn, TASK(hTask), value); }
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
+// CTaskList 
 CTaskList::CTaskList(ITaskList14* pTaskList) : m_pTaskList(pTaskList), m_pConstTaskList(NULL) 
 {
    int breakpoint = 0;
@@ -145,6 +106,10 @@ CTaskList::CTaskList() : m_pTaskList(NULL), m_pConstTaskList(NULL)
 {
 
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define TASK(t) ((HTASKITEM)t.ToPointer())
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // GETTERS
@@ -188,6 +153,36 @@ IntPtr CTaskList::GetNextTask(IntPtr hTask)
 {
    return IntPtr(GETTASKVAL(GetNextTask, TASK(hTask), NULL));
 }
+
+// ---------------------------------------------------------
+
+#define GETTASKVAL(fn, htask, errret) \
+   (m_pConstTaskList ? m_pConstTaskList->fn(htask) : (m_pTaskList ? m_pTaskList->fn(htask) : errret))
+
+#define GETTASKVAL_ARG(fn, htask, arg, errret) \
+   (m_pConstTaskList ? m_pConstTaskList->fn(htask, arg) : (m_pTaskList ? m_pTaskList->fn(htask, arg) : errret))
+
+#define IMPL_GETTASKSTRFUNC(fn) \
+   String^ CTaskList::fn(IntPtr hTask) { \
+   return gcnew String(GETTASKVAL(fn, TASK(hTask), NULL)); }
+
+#define IMPL_GETTASKSTRFUNC_IDX(fn) \
+   String^ CTaskList::fn(IntPtr hTask, int nIndex) { \
+   return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), nIndex, NULL)); }
+
+#define IMPL_GETTASKSTRFUNC_ARG(fn, arg) \
+   String^ CTaskList::fn(IntPtr hTask) { \
+   return gcnew String(GETTASKVAL_ARG(fn, TASK(hTask), arg, NULL)); }
+
+#define IMPL_GETTASKVALFUNC(fn, t, errret) \
+   t CTaskList::fn(IntPtr hTask) { \
+   return t(GETTASKVAL(fn, TASK(hTask), errret)); }
+
+#define IMPL_GETTASKVALFUNC_ARG(fn, t, arg, errret) \
+   t CTaskList::fn(IntPtr hTask) { \
+   return t(GETTASKVAL_ARG(fn, TASK(hTask), arg, errret)); }
+
+// ---------------------------------------------------------
 
 IMPL_GETTASKSTRFUNC(GetTaskTitle)
 IMPL_GETTASKSTRFUNC(GetTaskComments)
@@ -242,6 +237,8 @@ IMPL_GETTASKVALFUNC_ARG(GetTaskPercentDone,  Byte,    FALSE, 0)
 IMPL_GETTASKVALFUNC_ARG(GetTaskRisk,	     UInt32,  FALSE, 0)
 IMPL_GETTASKVALFUNC_ARG(GetTaskCost,	     double,  FALSE, 0.0)
 
+// ---------------------------------------------------------
+
 double CTaskList::GetTaskTimeEstimate(IntPtr hTask, Char% cUnits)
 {
    WCHAR nUnits = 0;
@@ -286,6 +283,21 @@ IntPtr CTaskList::NewTask(String^ sTitle, IntPtr hParent)
    return IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), TASK(hParent), 0) : NULL);
 }
 
+// ---------------------------------------------------------
+
+#define SETTASKVAL(fn, htask, val) \
+   (m_pTaskList ? m_pTaskList->fn(htask, val) : false)
+
+#define IMPL_SETTASKSTRFUNC(fn) \
+   Boolean CTaskList::fn(IntPtr hTask, String^ value) { \
+   return SETTASKVAL(fn, TASK(hTask), MS(value)); }
+
+#define IMPL_SETTASKVALFUNC(fn, t) \
+   Boolean CTaskList::fn(IntPtr hTask, t value) { \
+   return SETTASKVAL(fn, TASK(hTask), value); }
+
+// ---------------------------------------------------------
+
 IMPL_SETTASKSTRFUNC(SetTaskTitle);
 IMPL_SETTASKSTRFUNC(SetTaskComments);
 IMPL_SETTASKSTRFUNC(SetTaskAllocatedBy);
@@ -314,6 +326,8 @@ IMPL_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
 IMPL_SETTASKVALFUNC(SetTaskDueDate,            Int64);
 IMPL_SETTASKVALFUNC(SetTaskStartDate,          Int64);
 IMPL_SETTASKVALFUNC(SetTaskCreationDate,       Int64);
+
+// ---------------------------------------------------------
 
 Boolean CTaskList::SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits)
 {
