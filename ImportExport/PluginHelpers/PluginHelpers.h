@@ -59,6 +59,11 @@ namespace PluginHelpers
       String^ GetReportTitle();
       String^ GetReportDate();
 
+      UInt32 GetCustomAttributeCount();
+      String^ GetCustomAttributeLabel(int nIndex);
+      String^ GetCustomAttributeID(int nIndex);
+      String^ GetCustomAttributeValue(int nIndex, String^ sItem);
+
       UInt32 GetTaskCount();
       IntPtr FindTask(UInt32 dwTaskID);
       
@@ -118,11 +123,16 @@ namespace PluginHelpers
       DEF_GETTASKVALFUNC(IsTaskDone,                Boolean);
       DEF_GETTASKVALFUNC(IsTaskDue,                 Boolean);
       DEF_GETTASKVALFUNC(IsTaskGoodAsDone,          Boolean);
+      DEF_GETTASKVALFUNC(IsTaskFlagged,             Boolean);
       
       double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
       double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
 
       Boolean GetTaskRecurrence(IntPtr hTask); // TODO
+      Boolean TaskHasAttribute(IntPtr hTask, String^ sAttrib);
+
+      String^ GetTaskAttribute(IntPtr hTask, String^ sAttrib);
+      String^ GetTaskCustomAttributeData(IntPtr hTask, String^ sID);
 
       // SETTERS -----------------------------------------------------
       
@@ -152,6 +162,7 @@ namespace PluginHelpers
 
       DEF_SETTASKVALFUNC(SetTaskPercentDone,        Byte);
       DEF_SETTASKVALFUNC(SetTaskCost,               double);
+      DEF_SETTASKVALFUNC(SetTaskFlag,               Boolean);
 
       DEF_SETTASKVALFUNC(SetTaskLastModified,       Int64);
       DEF_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
@@ -161,6 +172,8 @@ namespace PluginHelpers
 
       Boolean SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits);
       Boolean SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits);
+      Boolean SetTaskCustomAttributeData(IntPtr hTask, String^ sID, String^ sValue);
+      Boolean ClearTaskCustomAttributeData(IntPtr hTask, String^ sID);
 
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;

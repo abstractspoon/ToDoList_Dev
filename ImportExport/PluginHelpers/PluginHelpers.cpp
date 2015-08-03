@@ -114,44 +114,53 @@ CTaskList::CTaskList() : m_pTaskList(NULL), m_pConstTaskList(NULL)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // GETTERS
 
+#define GETVAL(fn, errret) \
+   (m_pConstTaskList ? m_pConstTaskList->fn() : (m_pTaskList ? m_pTaskList->fn() : errret))
+
+#define GETVAL_ARG(fn, arg, errret) \
+   (m_pConstTaskList ? m_pConstTaskList->fn(arg) : (m_pTaskList ? m_pTaskList->fn(arg) : errret))
+
 String^ CTaskList::GetReportTitle()
 {
-   LPCWSTR szTitle = (m_pConstTaskList ? m_pConstTaskList->GetReportTitle() : 
-                     (m_pTaskList ? m_pTaskList->GetReportTitle() : L""));
-    
-   return gcnew String(szTitle);
+   return gcnew String(GETVAL(GetReportTitle, L""));
 }
 
 String^ CTaskList::GetReportDate()
 {
-   LPCWSTR szDate = (m_pConstTaskList ? m_pConstTaskList->GetReportDate() : 
-                    (m_pTaskList ? m_pTaskList->GetReportDate() : L""));
+   return gcnew String(GETVAL(GetReportDate, L""));
+}
 
-   return gcnew String(szDate);
+UInt32 CTaskList::GetCustomAttributeCount()
+{
+   return GETVAL(GetCustomAttributeCount, 0);
+}
+
+String^ CTaskList::GetCustomAttributeLabel(int nIndex)
+{
+   return gcnew String(GETVAL_ARG(GetCustomAttributeLabel, nIndex, L""));
+}
+
+String^ CTaskList::GetCustomAttributeID(int nIndex)
+{
+   return gcnew String(GETVAL_ARG(GetCustomAttributeID, nIndex, L""));
+}
+
+String^ CTaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
+{
+    LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : 
+                      (m_pTaskList ? m_pTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : L""));
+   
+    return gcnew String(szValue);
 }
 
 UInt32 CTaskList::GetTaskCount()
 {
-   return (m_pConstTaskList ? m_pConstTaskList->GetTaskCount() : 
-          (m_pTaskList ? m_pTaskList->GetTaskCount() : 0));
+   return GETVAL(GetTaskCount, 0);
 }
 
 IntPtr CTaskList::FindTask(UInt32 dwTaskID)
 {
-   HTASKITEM hTask = (m_pConstTaskList ? m_pConstTaskList->FindTask(dwTaskID) : 
-                     (m_pTaskList ? m_pTaskList->FindTask(dwTaskID) : NULL));
-
-   return IntPtr(hTask);
-}
-
-IntPtr CTaskList::GetFirstTask(IntPtr hParent)
-{
-   return IntPtr(GETTASKVAL(GetFirstTask, TASK(hParent), NULL));
-}
-
-IntPtr CTaskList::GetNextTask(IntPtr hTask)
-{
-   return IntPtr(GETTASKVAL(GetNextTask, TASK(hTask), NULL));
+   return IntPtr(GETVAL_ARG(FindTask, dwTaskID, NULL));
 }
 
 // ---------------------------------------------------------
@@ -184,6 +193,16 @@ IntPtr CTaskList::GetNextTask(IntPtr hTask)
 
 // ---------------------------------------------------------
 
+IntPtr CTaskList::GetFirstTask(IntPtr hParent)
+{
+   return IntPtr(GETTASKVAL(GetFirstTask, TASK(hParent), NULL));
+}
+
+IntPtr CTaskList::GetNextTask(IntPtr hTask)
+{
+   return IntPtr(GETTASKVAL(GetNextTask, TASK(hTask), NULL));
+}
+
 IMPL_GETTASKSTRFUNC(GetTaskTitle)
 IMPL_GETTASKSTRFUNC(GetTaskComments)
 IMPL_GETTASKSTRFUNC(GetTaskAllocatedBy)
@@ -211,8 +230,8 @@ IMPL_GETTASKVALFUNC(GetTaskTagCount,			UInt32, 0)
 IMPL_GETTASKVALFUNC(GetTaskDependencyCount,		UInt32, 0)
 IMPL_GETTASKVALFUNC(GetTaskFileReferenceCount,	UInt32, 0)
 
-IMPL_GETTASKSTRFUNC_ARG(GetTaskDueDateString,   FALSE)
-IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, FALSE)
+IMPL_GETTASKSTRFUNC_ARG(GetTaskDueDateString,   false)
+IMPL_GETTASKSTRFUNC_ARG(GetTaskStartDateString, false)
 
 // other types
 IMPL_GETTASKVALFUNC(GetTaskParent,        IntPtr,  NULL)
@@ -229,6 +248,7 @@ IMPL_GETTASKVALFUNC(GetTaskCreationDate,  Int64,   0)
 IMPL_GETTASKVALFUNC(IsTaskDone,           Boolean, false)
 IMPL_GETTASKVALFUNC(IsTaskDue,            Boolean, false)
 IMPL_GETTASKVALFUNC(IsTaskGoodAsDone,     Boolean, false)
+IMPL_GETTASKVALFUNC(IsTaskFlagged,        Boolean, false)
 
 IMPL_GETTASKVALFUNC_ARG(GetTaskDueDate,      Int64,   FALSE, 0)
 IMPL_GETTASKVALFUNC_ARG(GetTaskStartDate,    Int64,   FALSE, 0)
@@ -271,6 +291,28 @@ Boolean CTaskList::GetTaskRecurrence(IntPtr hTask)
 {
 	// TODO
 	return false;
+}
+
+Boolean CTaskList::TaskHasAttribute(IntPtr hTask, String^ sAttrib)
+{
+   return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(TASK(hTask), MS(sAttrib)) : 
+          (m_pTaskList ? m_pTaskList->TaskHasAttribute(TASK(hTask), MS(sAttrib)) : false));
+}
+
+String^ CTaskList::GetTaskAttribute(IntPtr hTask, String^ sAttrib)
+{
+   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(TASK(hTask), MS(sAttrib)) : 
+                     (m_pTaskList ? m_pTaskList->GetTaskAttribute(TASK(hTask), MS(sAttrib)) : L""));
+
+   return gcnew String(szValue);
+}
+
+String^ CTaskList::GetTaskCustomAttributeData(IntPtr hTask, String^ sID)
+{
+   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(TASK(hTask), MS(sID)) : 
+                     (m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(TASK(hTask), MS(sID)) : L""));
+
+   return gcnew String(szValue);
 }
 
 // TODO
@@ -320,6 +362,7 @@ IMPL_SETTASKVALFUNC(SetTaskRisk,               UInt32);
 
 IMPL_SETTASKVALFUNC(SetTaskPercentDone,        Byte);
 IMPL_SETTASKVALFUNC(SetTaskCost,               double);
+IMPL_SETTASKVALFUNC(SetTaskFlag,               Boolean);
 
 IMPL_SETTASKVALFUNC(SetTaskLastModified,       Int64);
 IMPL_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
@@ -337,6 +380,16 @@ Boolean CTaskList::SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits)
 Boolean CTaskList::SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits)
 {
    return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(TASK(hTask), dTime, cUnits) : false);
+}
+
+Boolean CTaskList::SetTaskCustomAttributeData(IntPtr hTask, String^ sID, String^ sValue)
+{
+   return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(TASK(hTask), MS(sID), MS(sValue)) : false);
+}
+
+Boolean CTaskList::ClearTaskCustomAttributeData(IntPtr hTask, String^ sID)
+{
+   return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(TASK(hTask), MS(sID)) : false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
