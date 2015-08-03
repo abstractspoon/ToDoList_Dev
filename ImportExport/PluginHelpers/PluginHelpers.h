@@ -58,8 +58,9 @@ namespace PluginHelpers
 
       String^ GetReportTitle();
       String^ GetReportDate();
-
-      UInt32 GetCustomAttributeCount();
+      String^ GetMetaData(String^ sKey);
+      
+      UInt32  GetCustomAttributeCount();
       String^ GetCustomAttributeLabel(int nIndex);
       String^ GetCustomAttributeID(int nIndex);
       String^ GetCustomAttributeValue(int nIndex, String^ sItem);
@@ -67,63 +68,60 @@ namespace PluginHelpers
       UInt32 GetTaskCount();
       IntPtr FindTask(UInt32 dwTaskID);
       
-#define DEF_GETTASKVALFUNC(fn, t)      t fn(IntPtr hTask)
-#define DEF_GETTASKVALFUNC_IDX(fn, t)  t fn(IntPtr hTask, int nIndex)
+      IntPtr GetFirstTask(IntPtr hTask);
+      IntPtr GetNextTask(IntPtr hTask);
+      IntPtr GetTaskParent(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetFirstTask,              IntPtr);
-      DEF_GETTASKVALFUNC(GetNextTask,               IntPtr);
-      DEF_GETTASKVALFUNC(GetTaskParent,             IntPtr);
+      String^ GetTaskTitle(IntPtr hTask);
+      String^ GetTaskComments(IntPtr hTask);
+      String^ GetTaskAllocatedBy(IntPtr hTask);
+      String^ GetTaskStatus(IntPtr hTask);
+      String^ GetTaskWebColor(IntPtr hTask);
+      String^ GetTaskPriorityWebColor(IntPtr hTask);
+      String^ GetTaskVersion(IntPtr hTask);
+      String^ GetTaskExternalID(IntPtr hTask);
+      String^ GetTaskCreatedBy(IntPtr hTask);
+      String^ GetTaskPositionString(IntPtr hTask);
+      String^ GetTaskIcon(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskTitle,              String^);
-      DEF_GETTASKVALFUNC(GetTaskComments,           String^);
-      DEF_GETTASKVALFUNC(GetTaskAllocatedBy,        String^);
-      DEF_GETTASKVALFUNC(GetTaskStatus,             String^);
-      DEF_GETTASKVALFUNC(GetTaskWebColor,           String^);
-      DEF_GETTASKVALFUNC(GetTaskPriorityWebColor,   String^);
-      DEF_GETTASKVALFUNC(GetTaskVersion,            String^);
-      DEF_GETTASKVALFUNC(GetTaskExternalID,         String^);
-      DEF_GETTASKVALFUNC(GetTaskCreatedBy,          String^);
-      DEF_GETTASKVALFUNC(GetTaskPositionString,     String^);
-      DEF_GETTASKVALFUNC(GetTaskIcon,               String^);
+      UInt32 GetTaskID(IntPtr hTask);
+      UInt32 GetTaskColor(IntPtr hTask);
+      UInt32 GetTaskTextColor(IntPtr hTask);
+      UInt32 GetTaskPriorityColor(IntPtr hTask);
+      UInt32 GetTaskPosition(IntPtr hTask);
+      UInt32 GetTaskPriority(IntPtr hTask);
+      UInt32 GetTaskRisk(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskID,                 UInt32);
-      DEF_GETTASKVALFUNC(GetTaskColor,              UInt32);
-      DEF_GETTASKVALFUNC(GetTaskTextColor,          UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPriorityColor,      UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPosition,           UInt32);
-      DEF_GETTASKVALFUNC(GetTaskPriority,           UInt32);
-      DEF_GETTASKVALFUNC(GetTaskRisk,               UInt32);
+      UInt32 GetTaskCategoryCount(IntPtr hTask);
+      UInt32 GetTaskAllocatedToCount(IntPtr hTask);
+      UInt32 GetTaskTagCount(IntPtr hTask);
+      UInt32 GetTaskDependencyCount(IntPtr hTask);
+      UInt32 GetTaskFileReferenceCount(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskCategoryCount,      UInt32);
-      DEF_GETTASKVALFUNC(GetTaskAllocatedToCount,   UInt32);
-      DEF_GETTASKVALFUNC(GetTaskTagCount,           UInt32);
-      DEF_GETTASKVALFUNC(GetTaskDependencyCount,    UInt32);
-      DEF_GETTASKVALFUNC(GetTaskFileReferenceCount, UInt32);
+      String^ GetTaskAllocatedTo(IntPtr hTask, int nIndex);
+      String^ GetTaskCategory(IntPtr hTask, int nIndex);
+      String^ GetTaskTag(IntPtr hTask, int nIndex);
+      String^ GetTaskDependency(IntPtr hTask, int nIndex);
+      String^ GetTaskFileReference(IntPtr hTask, int nIndex);
 
-      DEF_GETTASKVALFUNC_IDX(GetTaskAllocatedTo,    String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskCategory,       String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskTag,            String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskDependency,     String^);
-      DEF_GETTASKVALFUNC_IDX(GetTaskFileReference,  String^);
+      Byte GetTaskPercentDone(IntPtr hTask);
+      double GetTaskCost(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskPercentDone,        Byte);
-      DEF_GETTASKVALFUNC(GetTaskCost,               double);
+      Int64 GetTaskLastModified(IntPtr hTask);
+      Int64 GetTaskDoneDate(IntPtr hTask);
+      Int64 GetTaskDueDate(IntPtr hTask);
+      Int64 GetTaskStartDate(IntPtr hTask);
+      Int64 GetTaskCreationDate(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskLastModified,       Int64);
-      DEF_GETTASKVALFUNC(GetTaskDoneDate,           Int64);
-      DEF_GETTASKVALFUNC(GetTaskDueDate,            Int64);
-      DEF_GETTASKVALFUNC(GetTaskStartDate,          Int64);
-      DEF_GETTASKVALFUNC(GetTaskCreationDate,       Int64);
+      String^ GetTaskDoneDateString(IntPtr hTask);
+      String^ GetTaskDueDateString(IntPtr hTask);
+      String^ GetTaskStartDateString(IntPtr hTask);
+      String^ GetTaskCreationDateString(IntPtr hTask);
 
-      DEF_GETTASKVALFUNC(GetTaskDoneDateString,     String^);
-      DEF_GETTASKVALFUNC(GetTaskDueDateString,      String^);
-      DEF_GETTASKVALFUNC(GetTaskStartDateString,    String^);
-      DEF_GETTASKVALFUNC(GetTaskCreationDateString, String^);
-
-      DEF_GETTASKVALFUNC(IsTaskDone,                Boolean);
-      DEF_GETTASKVALFUNC(IsTaskDue,                 Boolean);
-      DEF_GETTASKVALFUNC(IsTaskGoodAsDone,          Boolean);
-      DEF_GETTASKVALFUNC(IsTaskFlagged,             Boolean);
+      Boolean IsTaskDone(IntPtr hTask);
+      Boolean IsTaskDue(IntPtr hTask);
+      Boolean IsTaskGoodAsDone(IntPtr hTask);
+      Boolean IsTaskFlagged(IntPtr hTask);
       
       double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
       double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
@@ -133,47 +131,52 @@ namespace PluginHelpers
 
       String^ GetTaskAttribute(IntPtr hTask, String^ sAttrib);
       String^ GetTaskCustomAttributeData(IntPtr hTask, String^ sID);
+      String^ GetTaskMetaData(IntPtr hTask, String^ sKey);
 
       // SETTERS -----------------------------------------------------
       
+      Boolean AddCustomAttribute(String^ sID, String^ sLabel);
+      Boolean SetMetaData(String^ sKey, String^ sValue);
+      Boolean ClearMetaData(String^ sKey);
+
       IntPtr NewTask(String^ sTitle, IntPtr hParent);
 
-#define DEF_SETTASKVALFUNC(fn, t)      Boolean fn(IntPtr hTask, t value)
+      Boolean SetTaskTitle(IntPtr hTask, String^ sTitle);
+      Boolean SetTaskComments(IntPtr hTask, String^ sComments);
+      Boolean SetTaskAllocatedBy(IntPtr hTask, String^ sAllocBy);
+      Boolean SetTaskStatus(IntPtr hTask, String^ sStatus);
+      Boolean SetTaskVersion(IntPtr hTask, String^ sVersion);
+      Boolean SetTaskExternalID(IntPtr hTask, String^ sExternalID);
+      Boolean SetTaskCreatedBy(IntPtr hTask, String^ sCreatedBy);
+      Boolean SetTaskPosition(IntPtr hTask, String^ sPosition);
+      Boolean SetTaskIcon(IntPtr hTask, String^ sIcon);
 
-      DEF_SETTASKVALFUNC(SetTaskTitle,              String^);
-      DEF_SETTASKVALFUNC(SetTaskComments,           String^);
-      DEF_SETTASKVALFUNC(SetTaskAllocatedBy,        String^);
-      DEF_SETTASKVALFUNC(SetTaskStatus,             String^);
-      DEF_SETTASKVALFUNC(SetTaskVersion,            String^);
-      DEF_SETTASKVALFUNC(SetTaskExternalID,         String^);
-      DEF_SETTASKVALFUNC(SetTaskCreatedBy,          String^);
-      DEF_SETTASKVALFUNC(SetTaskPosition,           String^);
-      DEF_SETTASKVALFUNC(SetTaskIcon,               String^);
+      Boolean AddTaskAllocatedTo(IntPtr hTask, String^ sAllocTo);
+      Boolean AddTaskCategory(IntPtr hTask, String^ sCategory);
+      Boolean AddTaskTag(IntPtr hTask, String^ sTag);
+      Boolean AddTaskDependency(IntPtr hTask, String^ sDependency);
+      Boolean AddTaskFileReference(IntPtr hTask, String^ sFileLink);
 
-      DEF_SETTASKVALFUNC(AddTaskAllocatedTo,        String^);
-      DEF_SETTASKVALFUNC(AddTaskCategory,           String^);
-      DEF_SETTASKVALFUNC(AddTaskTag,                String^);
-      DEF_SETTASKVALFUNC(AddTaskDependency,         String^);
-      DEF_SETTASKVALFUNC(AddTaskFileReference,      String^);
+      Boolean SetTaskColor(IntPtr hTask, UINT32 color );
+      Boolean SetTaskPriority(IntPtr hTask, Byte nPriority);
+      Boolean SetTaskRisk(IntPtr hTask, Byte Risk);
 
-      DEF_SETTASKVALFUNC(SetTaskColor,              UInt32);
-      DEF_SETTASKVALFUNC(SetTaskPriority,           UInt32);
-      DEF_SETTASKVALFUNC(SetTaskRisk,               UInt32);
+      Boolean SetTaskPercentDone(IntPtr hTask, Byte nPercent);
+      Boolean SetTaskCost(IntPtr hTask, double dCost);
+      Boolean SetTaskFlag(IntPtr hTask, Boolean bFlag);
 
-      DEF_SETTASKVALFUNC(SetTaskPercentDone,        Byte);
-      DEF_SETTASKVALFUNC(SetTaskCost,               double);
-      DEF_SETTASKVALFUNC(SetTaskFlag,               Boolean);
-
-      DEF_SETTASKVALFUNC(SetTaskLastModified,       Int64);
-      DEF_SETTASKVALFUNC(SetTaskDoneDate,           Int64);
-      DEF_SETTASKVALFUNC(SetTaskDueDate,            Int64);
-      DEF_SETTASKVALFUNC(SetTaskStartDate,          Int64);
-      DEF_SETTASKVALFUNC(SetTaskCreationDate,       Int64);
+      Boolean SetTaskLastModified(IntPtr hTask, Int64 dtLastMod);
+      Boolean SetTaskDoneDate(IntPtr hTask, Int64 dtCompletion);
+      Boolean SetTaskDueDate(IntPtr hTask, Int64 dtDue);
+      Boolean SetTaskStartDate(IntPtr hTask, Int64 dtStart);
+      Boolean SetTaskCreationDate(IntPtr hTask, Int64 dtCreation);
 
       Boolean SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits);
       Boolean SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits);
       Boolean SetTaskCustomAttributeData(IntPtr hTask, String^ sID, String^ sValue);
       Boolean ClearTaskCustomAttributeData(IntPtr hTask, String^ sID);
+      Boolean SetTaskMetaData(IntPtr hTask, String^ sKey, String^ sValue);
+      Boolean ClearTaskMetaData(IntPtr hTask, String^ sKey);
 
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
