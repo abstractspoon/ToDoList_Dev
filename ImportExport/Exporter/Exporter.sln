@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExporterCore", "..\ExporterCore\ExporterCore.csproj", "{92FEFDB8-3F95-4404-A620-8003B51C5A53}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExporterBridge", "..\Export
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 		{92FEFDB8-3F95-4404-A620-8003B51C5A53} = {92FEFDB8-3F95-4404-A620-8003B51C5A53}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExporterHost", "..\ExporterHost\ExporterHost.vcxproj", "{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginHelpers", "..\PluginHelpers\PluginHelpers.vcxproj", "{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}"
 EndProject
@@ -46,16 +44,6 @@ Global
 		{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}.Release|Win32.ActiveCfg = Release|Win32
 		{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}.Release|Win32.Build.0 = Release|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Debug|Win32.Build.0 = Debug|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Release|Any CPU.ActiveCfg = Release|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Release|Win32.ActiveCfg = Release|Win32
-		{567BC953-C549-40EC-A7F8-7A70B1F8F8FF}.Release|Win32.Build.0 = Release|Win32
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
