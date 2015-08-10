@@ -3,6 +3,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
     <StartAction>Program</StartAction>
-    <StartProgram>D:\ToDoList_Plugins\ImportExport\Exporter\Debug\ToDoList.exe</StartProgram>
+    <StartProgram>$(SolutionDir)debug\ToDoList.exe</StartProgram>
   </PropertyGroup>
 </Project>
