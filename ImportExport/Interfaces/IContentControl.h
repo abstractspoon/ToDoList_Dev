@@ -22,7 +22,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT WM_ICC_WANTSPELLCHECK = ::RegisterWindowMessage(_T("WM_ICC_WANTSPELLCHECK"));
+const UINT WM_ICC_WANTSPELLCHECK = ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static IContent* CreateContentInterface(LPCWSTR szDllPath, int* pVer = 0)
 {
     IContent* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -109,8 +109,8 @@ public:
 	
 	// returns the length of the html or zero if not supported
 	virtual int ConvertToHtml(const unsigned char* pContent, int nLength,
-							  LPCWSTR szCharSet, LPTSTR& szHtml, LPCWSTR szImageDir) = 0;
-	virtual void FreeHtmlBuffer(LPTSTR& szHtml) = 0;
+							  LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir) = 0;
+	virtual void FreeHtmlBuffer(LPWSTR& szHtml) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ public:
 	virtual LPCWSTR GetTypeID() const = 0;
 
 	// text content if supported. return false if not supported
-	virtual int GetTextContent(LPTSTR szContent, int nLength = -1) const = 0;
+	virtual int GetTextContent(LPWSTR szContent, int nLength = -1) const = 0;
 	virtual bool SetTextContent(LPCWSTR szContent, BOOL bResetSelection) = 0;
 
 	virtual void SetReadOnly(bool bReadOnly) = 0;

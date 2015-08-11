@@ -49,7 +49,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static IFileHandler* CreateFileHandlerInterface(LPCWSTR szDllPath)
 {
     IFileHandler* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -73,7 +73,7 @@ static IFileHandler* CreateFileHandlerInterface(LPCWSTR szDllPath)
 
 static BOOL IsFileHandlerDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {

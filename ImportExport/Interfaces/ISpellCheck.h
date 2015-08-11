@@ -51,7 +51,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static ISpellChecker* CreateSpellCheckerInterface(LPCWSTR szDllPath, LPCWSTR szAffPath, LPCWSTR szDicPath)
 {
     ISpellChecker* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -77,7 +77,7 @@ static ISpellChecker* CreateSpellCheckerInterface(LPCWSTR szDllPath, LPCWSTR szA
 
 static BOOL IsSpellCheckDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -99,10 +99,10 @@ public:
 	
     // 
     virtual bool CheckSpelling(LPCWSTR szWord) = 0;
-    virtual bool CheckSpelling(LPCWSTR szWord, LPTSTR*& pSuggestions, int& nNumSuggestions) = 0;
+    virtual bool CheckSpelling(LPCWSTR szWord, LPWSTR*& pSuggestions, int& nNumSuggestions) = 0;
 	
     // frees a previously returned buffer and sets the ptr to NULL
-    virtual void FreeSuggestions(LPTSTR*& pSuggestions, int nNumSuggestions) = 0;
+    virtual void FreeSuggestions(LPWSTR*& pSuggestions, int nNumSuggestions) = 0;
 	
 };
 

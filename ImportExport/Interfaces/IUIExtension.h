@@ -50,7 +50,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static IUIExtension* CreateUIExtensionInterface(LPCWSTR szDllPath)
 {
     IUIExtension* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -79,7 +79,7 @@ static IUIExtension* CreateUIExtensionInterface(LPCWSTR szDllPath)
 
 static BOOL IsUIExtemsionDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -164,7 +164,8 @@ struct IUITASKMOD
 
 //////////////////////////////////////////////////////////////////////
 
-// wParam = 0, lParam == Task ID
+// if   wParam == 0,		lParam = Task ID
+// else wParam = LPDWORD,	lParam = ID count
 const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessage(_T("WM_IUI_SELECTTASK")); 
 
 // wParam = Number of Mods, lParam == IUITASKMOD[0]

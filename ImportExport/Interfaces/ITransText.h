@@ -52,7 +52,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static ITransText* CreateTransTextInterface(LPCWSTR szDllPath, LPCWSTR szTransFile, ITT_TRANSLATEOPTION nOption)
 {
     ITransText* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -78,7 +78,7 @@ static ITransText* CreateTransTextInterface(LPCWSTR szDllPath, LPCWSTR szTransFi
 
 static BOOL IsTransTextDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -106,8 +106,8 @@ public:
 
 	virtual BOOL CleanupDictionary(LPCWSTR szMasterDictPath) = 0;
 
-	virtual BOOL TranslateText(LPCWSTR szText, LPTSTR& szTranslated) = 0;
-	virtual BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPTSTR& szTranslated) = 0;
+	virtual BOOL TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
+	virtual BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;
 	virtual BOOL TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive = TRUE) = 0;
 
 	virtual void UpdateMenu(HWND hWnd) = 0;
@@ -117,7 +117,7 @@ public:
 	virtual void EnableTranslation(UINT nMenuID, BOOL bEnable = TRUE) = 0;
 
 	virtual void IgnoreString(LPCWSTR szText) = 0;
-	virtual void FreeTextBuffer(LPTSTR& szTranslated) = 0;
+	virtual void FreeTextBuffer(LPWSTR& szTranslated) = 0;
 };
 
 

@@ -47,7 +47,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static IEncryption* CreateEncryptionInterface(LPCWSTR szDllPath)
 {
     IEncryption* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -68,7 +68,7 @@ static IEncryption* CreateEncryptionInterface(LPCWSTR szDllPath)
 
 static BOOL IsEncryptionDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {

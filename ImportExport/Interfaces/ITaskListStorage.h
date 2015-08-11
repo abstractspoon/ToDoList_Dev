@@ -47,7 +47,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static ITasklistStorage* CreateTasklistStorageInterface(LPCWSTR szDllPath)
 {
     ITasklistStorage* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -76,7 +76,7 @@ static ITasklistStorage* CreateTasklistStorageInterface(LPCWSTR szDllPath)
 
 static BOOL IsTasklistStorageDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -96,10 +96,10 @@ const int ITS_PASSWORD_LEN = 32;
 
 struct ITS_TASKLISTINFO
 {
-	TCHAR szTasklistID[ITS_TASKLISTID_LEN+1];
-	TCHAR szLocalFileName[_MAX_PATH+1];
-	TCHAR szDisplayName[_MAX_PATH+1];
-	TCHAR szPassword[ITS_PASSWORD_LEN+1];
+	WCHAR szTasklistID[ITS_TASKLISTID_LEN+1];
+	WCHAR szLocalFileName[_MAX_PATH+1];
+	WCHAR szDisplayName[_MAX_PATH+1];
+	WCHAR szPassword[ITS_PASSWORD_LEN+1];
 };
 
 //////////////////////////////////////////////////////////////////////

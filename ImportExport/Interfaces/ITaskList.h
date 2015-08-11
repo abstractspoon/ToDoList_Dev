@@ -115,8 +115,8 @@ public:
 	virtual int GetTaskPriority(HTASKITEM hTask, BOOL bHighest) const = 0;
 	virtual unsigned char GetTaskPercentDone(HTASKITEM hTask, BOOL bCalc) const = 0;
 
-	virtual double GetTaskTimeEstimate(HTASKITEM hTask, WCHAR& cUnits, BOOL bCalc) const = 0;
-	virtual double GetTaskTimeSpent(HTASKITEM hTask, WCHAR& cUnits, BOOL bCalc) const = 0;
+	virtual double GetTaskTimeEstimate(HTASKITEM hTask, TCHAR& cUnits, BOOL bCalc) const = 0;
+	virtual double GetTaskTimeSpent(HTASKITEM hTask, TCHAR& cUnits, BOOL bCalc) const = 0;
 
 	virtual time_t GetTaskLastModified(HTASKITEM hTask) const = 0;
 	virtual time_t GetTaskDoneDate(HTASKITEM hTask) const = 0;
@@ -150,8 +150,8 @@ public:
 	virtual bool SetTaskPriority(HTASKITEM hTask, int nPriority) = 0;
 	virtual bool SetTaskPercentDone(HTASKITEM hTask, unsigned char nPercent) = 0;
 
-	virtual bool SetTaskTimeEstimate(HTASKITEM hTask, double dTimeEst, WCHAR cUnits) = 0;
-	virtual bool SetTaskTimeSpent(HTASKITEM hTask, double dTimeSpent, WCHAR cUnits) = 0;
+	virtual bool SetTaskTimeEstimate(HTASKITEM hTask, double dTimeEst, TCHAR cUnits) = 0;
+	virtual bool SetTaskTimeSpent(HTASKITEM hTask, double dTimeSpent, TCHAR cUnits) = 0;
 
 	virtual bool SetTaskLastModified(HTASKITEM hTask, time_t tLastMod) = 0;
 	virtual bool SetTaskDoneDate(HTASKITEM hTask, time_t tDoneDate) = 0;

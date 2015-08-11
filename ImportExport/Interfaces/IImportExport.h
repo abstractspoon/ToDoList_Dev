@@ -50,7 +50,7 @@ extern "C" DLL_DECLSPEC int GetInterfaceVersion();
 static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 {
     IImportTasklist* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -80,7 +80,7 @@ static IImportTasklist* CreateImportInterface(LPCWSTR szDllPath)
 static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 {
     IExportTasklist* pInterface = NULL;
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
@@ -109,7 +109,7 @@ static IExportTasklist* CreateExportInterface(LPCWSTR szDllPath)
 
 static BOOL IsImportExportDll(LPCWSTR szDllPath)
 {
-    HMODULE hDll = LoadLibrary(szDllPath);
+    HMODULE hDll = LoadLibraryW(szDllPath);
 	
     if (hDll)
     {
