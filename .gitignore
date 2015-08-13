@@ -30,14 +30,11 @@ Release\*.*
 *.out
 *.app
 *.metagen
-Exporter/Debug/ExporterBridge.exp
+*.exp
 *.ilk
-Exporter/Debug/ExporterBridge.pdb
 *.pdb
 *.ini
-Exporter/Exporter.sdf
 *.suo
-Exporter/ipch/exporterhost-e66b3a48/exporterhost-23f8c1e3.ipch
 *.ipch
 *.tlog
 *.log
@@ -49,9 +46,5 @@ Exporter/ipch/exporterhost-e66b3a48/exporterhost-23f8c1e3.ipch
 *.idb
 *.sdf
 *.opensdf
-ImportExport/Exporter/Exporter.sdf
 *.res
-*.exp
-*.sdf
 *.manifest
-ImportExport/ExporterHost/Debug/ExporterHost_manifest.rc
