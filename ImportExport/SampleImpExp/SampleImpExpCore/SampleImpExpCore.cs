@@ -5,9 +5,9 @@ using System.Text;
 using System.Windows.Forms;
 using PluginHelpers;
 
-namespace ExporterCore
+namespace SampleImpExp
 {
-    public class Class1
+    public class SampleImpExpCore
     {
 //        public bool Export(string sTaskFilePath, string sDestFilePath, bool bSilent, Dictionary<string, string> prefs)
         public bool Export(CTaskList srcTasks, string sDestFilePath, bool bSilent, CPreferences prefs, string sKey)
@@ -25,7 +25,6 @@ namespace ExporterCore
 //             Array categories = new Array;
 //             UInt32 numCat = srcTasks.GetTaskCategories(hTask, categories);
 
-            //MessageBox.Show("ExporterCore"); 
             return true;
         }
     }
