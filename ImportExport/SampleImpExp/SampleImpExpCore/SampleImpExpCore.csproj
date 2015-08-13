@@ -37,9 +37,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PluginHelpers">
-      <HintPath>..\Sample\Debug\PluginHelpers.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
@@ -48,6 +45,11 @@
   <ItemGroup>
     <Compile Include="SampleImpExpCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+	<Reference Include="PluginHelpers">
+      <HintPath>..\Debug\PluginHelpers.dll</HintPath>
+    </Reference>  
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
