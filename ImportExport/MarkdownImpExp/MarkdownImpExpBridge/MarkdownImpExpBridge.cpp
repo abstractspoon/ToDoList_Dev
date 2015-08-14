@@ -62,10 +62,19 @@ LPCTSTR CMarkdownImpExpBridge::GetFileExtension() const
 
 bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
+   const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
+
+   if (pTasks14 == nullptr)
+   {
+      MessageBox(NULL, L"You need a minimum ToDoList version of 7.0 to use this plugin", L"Version Not Supported", MB_OK);
+      return false;
+   }
+   UInt32 taskCount = pTasks14->GetTaskCount();
+
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<MarkdownImpExpCore^> expCore = gcnew MarkdownImpExpCore();
 	msclr::auto_gcroot<CPreferences^> prefs = gcnew CPreferences(pPrefs);
-	msclr::auto_gcroot<CTaskList^> srcTasks = gcnew CTaskList(GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14));
+	msclr::auto_gcroot<CTaskList^> srcTasks = gcnew CTaskList(pTasks14);
 	
 	// do the export
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
