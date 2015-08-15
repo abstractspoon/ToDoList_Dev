@@ -43,24 +43,24 @@ void CMarkdownImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
 	// TODO
 }
 
-LPCTSTR CMarkdownImpExpBridge::GetMenuText() const
+LPCWSTR CMarkdownImpExpBridge::GetMenuText() const
 {
 	return L"Markdown";
 }
 
-LPCTSTR CMarkdownImpExpBridge::GetFileFilter() const
+LPCWSTR CMarkdownImpExpBridge::GetFileFilter() const
 {
 	return L"md";
 }
 
-LPCTSTR CMarkdownImpExpBridge::GetFileExtension() const
+LPCWSTR CMarkdownImpExpBridge::GetFileExtension() const
 {
 	return L"md";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<MarkdownImpExpCore^> expCore = gcnew MarkdownImpExpCore();
@@ -71,7 +71,7 @@ bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDest
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
 }
 
-bool CMarkdownImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CMarkdownImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return false;

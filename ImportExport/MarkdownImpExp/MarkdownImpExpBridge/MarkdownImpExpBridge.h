@@ -17,12 +17,12 @@ public:
 
    void SetLocalizer(ITransText* pTT);
 
-   LPCTSTR GetMenuText() const;
-   LPCTSTR GetFileFilter() const;
-   LPCTSTR GetFileExtension() const;
+   LPCWSTR GetMenuText() const;
+   LPCWSTR GetFileFilter() const;
+   LPCWSTR GetFileExtension() const;
 
-   bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-   bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+   bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey);
+   bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

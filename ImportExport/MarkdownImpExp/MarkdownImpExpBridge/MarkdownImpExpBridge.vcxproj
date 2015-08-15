@@ -82,8 +82,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MarkdownImpExpBridge.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MarkdownImpExpBridge.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="markdown.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
