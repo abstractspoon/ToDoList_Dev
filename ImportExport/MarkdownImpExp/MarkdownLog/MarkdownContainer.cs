@@ -6,7 +6,7 @@ namespace MarkdownLog
 {
     public class MarkdownContainer : MarkdownElement
     {
-        private readonly List<IMarkdownElement> _elements = new List<IMarkdownElement>();
+        protected readonly List<IMarkdownElement> _elements = new List<IMarkdownElement>();
 
         public void Append(IMarkdownElement element)
         {

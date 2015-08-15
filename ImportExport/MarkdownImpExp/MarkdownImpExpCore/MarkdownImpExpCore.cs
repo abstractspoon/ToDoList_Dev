@@ -15,47 +15,92 @@ namespace MarkdownImpExp
         {
             UInt32 taskCount = srcTasks.GetTaskCount();
 
-            MarkdownContainer mdTasks = new MarkdownContainer();
+            BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
 
             IntPtr hTask = srcTasks.GetFirstTask(IntPtr.Zero);
 
             while (hTask != IntPtr.Zero)
             {
-                ExportTask(srcTasks, hTask, mdTasks);
+                ExportTask(srcTasks, hTask, mdTasks, true);
 
                 hTask = srcTasks.GetNextTask(hTask);
             }
 
             Debug.Write(mdTasks.ToMarkdown());
+            System.IO.File.WriteAllText(sDestFilePath, mdTasks.ToMarkdown());
 
             return true;
         }
 
-        public bool ExportTask(CTaskList srcTasks, IntPtr hTask, MarkdownContainer mdParent)
+        protected bool ExportTask(CTaskList srcTasks, IntPtr hTask, BulletedMarkdownContainer mdParent, bool root)
         {
-            // each task is a container, containing itself 
-            // and a bulleted list of subtasks
-            MarkdownContainer mdTask = new MarkdownContainer();
-
             // add ourselves
-            String sTitle = srcTasks.GetTaskTitle(hTask);
-            mdTask.Append(new Paragraph(sTitle));
+            
+            mdParent.Append(new RawMarkdown(FormatTaskAttributes(srcTasks, hTask, root)));
 
-            // then our subtasks as a bulleted list
-            BulletedList subtasks = new BulletedList();
+            // then our subtasks in a container
+            BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
 
             IntPtr hSubTask = srcTasks.GetFirstTask(hTask);
 
-            while (hSubTask != IntPtr.Zero)
+            if (hSubTask != IntPtr.Zero)
             {
-                ExportTask(srcTasks, hSubTask, mdTask);
+                while (hSubTask != IntPtr.Zero)
+                {
+                    ExportTask(srcTasks, hSubTask, mdSubtasks, false);
 
-                hSubTask = srcTasks.GetNextTask(hSubTask);
+                    hSubTask = srcTasks.GetNextTask(hSubTask);
+                }
+
+                mdParent.Append(mdSubtasks);
             }
 
-            mdParent.Append(mdTask);
-
             return true;
+        }
+
+        protected string FormatTaskAttributes(CTaskList srcTasks, IntPtr hTask, bool root)
+        {
+            StringBuilder task = new StringBuilder();
+
+            task.Append("**`" + srcTasks.GetTaskTitle(hTask) + "`**");
+            task.Append("  ").AppendLine().Append("Priority: " + srcTasks.GetTaskPriority(hTask));
+            task.Append("  ").AppendLine().Append("Allocated to: " + srcTasks.GetTaskAllocatedTo(hTask, 0));
+
+            return task.AppendLine().ToString();
+        }
+    }
+
+    public class BulletedMarkdownContainer : MarkdownContainer
+    {
+        public override string ToMarkdown()
+        {
+            return ToMarkdown(-1);
+        }
+
+        protected string ToMarkdown(int indent)
+        {
+            indent++;
+            StringBuilder mdRaw = new StringBuilder();
+
+            foreach (var element in _elements)
+            {
+                if (element is BulletedMarkdownContainer)
+                {
+                    string md = (element as BulletedMarkdownContainer).ToMarkdown(indent);
+
+                    mdRaw.Append(md);
+                }
+                else
+                {
+                    string md = ("* " + element.ToMarkdown()).Indent(indent * 4);
+
+                    mdRaw.Append(md);
+                    mdRaw.AppendLine();
+                }
+            }
+            indent--;
+
+            return mdRaw.ToString();
         }
     }
 }
