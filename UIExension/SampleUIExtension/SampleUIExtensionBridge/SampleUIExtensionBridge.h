@@ -31,6 +31,8 @@ public:
 	CSampleUIExtensionBridgeWindow();
 
    void Release(); // releases the interface
+   BOOL Create(UINT nCtrlID, DWORD nStyle, 
+      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    HICON GetIcon() const;
    LPCWSTR GetMenuText() const; // caller must copy result only
@@ -56,6 +58,9 @@ public:
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, BOOL bAppOnly = FALSE);
+   
+protected:
+   HWND m_hwndEdit;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

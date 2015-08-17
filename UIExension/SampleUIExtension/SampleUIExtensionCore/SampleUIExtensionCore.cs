@@ -7,7 +7,7 @@ using PluginHelpers;
 
 namespace SampleUIExtension
 {
-    public class SampleUIExtensionCore
+    public class SampleUIExtensionCore : System.Windows.Forms.Form
     {
         // TODO
     }

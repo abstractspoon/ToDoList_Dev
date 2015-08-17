@@ -34,11 +34,8 @@ const LPCWSTR SAMPLE_NAME = L"Sample";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is the constructor of a class that has been exported.
-// see ExporterBridge.h for the class definition
 CSampleUIExtensionBridge::CSampleUIExtensionBridge()
 {
-	return;
 }
 
 void CSampleUIExtensionBridge::Release()
@@ -71,12 +68,20 @@ LPCWSTR CSampleUIExtensionBridge::GetTypeID() const
 IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
     DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   return NULL;
+   CSampleUIExtensionBridgeWindow* pExtWnd = new CSampleUIExtensionBridgeWindow;
+
+   if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
+   {
+      pExtWnd->Release();
+      pExtWnd = NULL;
+   }
+
+   return pExtWnd;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
+CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow() : m_hwndEdit(NULL)
 {
 
 }
@@ -84,6 +89,22 @@ CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
 void CSampleUIExtensionBridgeWindow::Release()
 {
    delete this;
+}
+
+BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
+            long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+{
+   if ((m_hwndEdit == NULL) || !::IsWindow(m_hwndEdit))
+   {
+      nStyle |= (WS_BORDER | ES_MULTILINE | WS_VSCROLL);
+
+      m_hwndEdit = ::CreateWindow(L"Edit", L"", nStyle, nLeft, nTop, nWidth, nHeight, hwndParent, NULL, NULL, NULL);
+
+      if (m_hwndEdit)
+         ::SetWindowText(m_hwndEdit, L"This is the sample plugin.\r\n\r\nIt has no functionality!");
+   }
+
+   return (m_hwndEdit != NULL);
 }
 
 HICON CSampleUIExtensionBridgeWindow::GetIcon() const
@@ -118,7 +139,7 @@ void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UP
 
 bool CSampleUIExtensionBridgeWindow::WantUpdate(int nAttribute) const
 {
-   return true;
+   return true; // everything
 }
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -128,6 +149,12 @@ bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
+//    switch (pMsg->message)
+//    {
+//    default:
+//      break;
+//    }
+
    return false;
 }
 
@@ -163,7 +190,7 @@ void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
 {
-   return NULL;
+   return m_hwndEdit;
 }
 
 void CSampleUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
