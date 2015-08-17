@@ -28,39 +28,39 @@ using namespace PluginHelpers;
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CSampleBridge::CSampleBridge()
+CSampleImpExpBridge::CSampleImpExpBridge()
 {
 	return;
 }
 
-void CSampleBridge::Release()
+void CSampleImpExpBridge::Release()
 {
 	delete this;
 }
 
-void CSampleBridge::SetLocalizer(ITransText* /*pTT*/)
+void CSampleImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
 {
 	// TODO
 }
 
-LPCTSTR CSampleBridge::GetMenuText() const
+LPCTSTR CSampleImpExpBridge::GetMenuText() const
 {
 	return L"Sample";
 }
 
-LPCTSTR CSampleBridge::GetFileFilter() const
+LPCTSTR CSampleImpExpBridge::GetFileFilter() const
 {
 	return L"smp";
 }
 
-LPCTSTR CSampleBridge::GetFileExtension() const
+LPCTSTR CSampleImpExpBridge::GetFileExtension() const
 {
 	return L"smp";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CSampleBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<SampleImpExpCore^> expCore = gcnew SampleImpExpCore();
@@ -71,7 +71,7 @@ bool CSampleBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
 }
 
-bool CSampleBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CSampleImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// TODO
 	return false;

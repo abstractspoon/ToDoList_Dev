@@ -8,10 +8,10 @@
 #include "..\..\..\Interfaces\IImportExport.h"
 
 // This class is exported from ExporterBridge.dll
-class CSampleBridge : public IExportTasklist
+class CSampleImpExpBridge : public IExportTasklist
 {
 public:
-	CSampleBridge();
+	CSampleImpExpBridge();
 
    void Release(); // releases the interface
 
@@ -32,7 +32,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 {
-   return new CSampleBridge();
+   return new CSampleImpExpBridge();
 }
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
