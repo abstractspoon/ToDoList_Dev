@@ -63,8 +63,6 @@ LPCWSTR CSampleUIExtensionBridge::GetTypeID() const
    return SAMPLE_GUID;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
     DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
@@ -81,7 +79,7 @@ IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow() : m_hwndEdit(NULL)
+CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
 {
 
 }
@@ -94,17 +92,26 @@ void CSampleUIExtensionBridgeWindow::Release()
 BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
             long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   if ((m_hwndEdit == NULL) || !::IsWindow(m_hwndEdit))
+   m_source = gcnew System::Windows::Interop::HwndSource(
+      CS_VREDRAW | CS_HREDRAW,
+      nStyle | WS_BORDER,
+      0,
+      nLeft,
+      nTop,
+      nWidth,
+      nHeight,
+      "",
+      System::IntPtr(hwndParent));
+
+   if (m_source->Handle != IntPtr::Zero)
    {
-      nStyle |= (WS_BORDER | ES_MULTILINE | WS_VSCROLL);
+      m_wnd = gcnew SampleUIExtension::SampleUIExtensionCore();
+      m_source->RootVisual = m_wnd;
 
-      m_hwndEdit = ::CreateWindow(L"Edit", L"", nStyle, nLeft, nTop, nWidth, nHeight, hwndParent, NULL, NULL, NULL);
-
-      if (m_hwndEdit)
-         ::SetWindowText(m_hwndEdit, L"This is the sample plugin.\r\n\r\nIt has no functionality!");
+      return true;
    }
 
-   return (m_hwndEdit != NULL);
+   return false;
 }
 
 HICON CSampleUIExtensionBridgeWindow::GetIcon() const
@@ -190,7 +197,7 @@ void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
 {
-   return m_hwndEdit;
+   return static_cast<HWND>(m_source->Handle.ToPointer());
 }
 
 void CSampleUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
@@ -203,13 +210,3 @@ void CSampleUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs,
 
 }
 
-// bool CSampleUIExtensionBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
-// {
-// 	// call into out sibling C# module to do the actual work
-// 	msclr::auto_gcroot<SampleUIExtensionCore^> expCore = gcnew SampleUIExtensionCore();
-// 	msclr::auto_gcroot<CPreferences^> prefs = gcnew CPreferences(pPrefs);
-// 	msclr::auto_gcroot<CTaskList^> srcTasks = gcnew CTaskList(GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14));
-// 	
-// 	// do the export
-// 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
-// }

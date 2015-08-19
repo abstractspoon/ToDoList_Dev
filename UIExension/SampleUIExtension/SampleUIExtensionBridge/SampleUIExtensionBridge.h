@@ -7,6 +7,9 @@
 
 #include "..\..\..\Interfaces\IUIExtension.h"
 
+#include <vcclr.h>
+using namespace SampleUIExtension;
+
 // This class is exported from SampleUIExtensionBridge.dll
 class CSampleUIExtensionBridge : public IUIExtension
 {
@@ -60,7 +63,8 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, BOOL bAppOnly = FALSE);
    
 protected:
-   HWND m_hwndEdit;
+   gcroot<SampleUIExtensionCore^> m_wnd;
+   gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
