@@ -10,6 +10,7 @@
 #include "..\..\..\Interfaces\ITasklist.h"
 #include "..\..\..\Interfaces\ITransText.h"
 #include "..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +95,7 @@ BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 {
    m_source = gcnew System::Windows::Interop::HwndSource(
       CS_VREDRAW | CS_HREDRAW,
-      nStyle | WS_BORDER,
+      nStyle,
       0,
       nLeft,
       nTop,
@@ -187,7 +188,14 @@ IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
 
 void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
+   System::Windows::Media::Color^ bkColor = gcnew System::Windows::Media::Color();
 
+   bkColor->R = GetRValue(pTheme->crAppBackLight);
+   bkColor->G = GetGValue(pTheme->crAppBackLight);
+   bkColor->B = GetBValue(pTheme->crAppBackLight);
+   bkColor->A = 255;
+   
+   m_wnd->SetBackgroundColor(*bkColor);
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
