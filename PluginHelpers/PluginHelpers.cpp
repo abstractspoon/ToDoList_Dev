@@ -169,7 +169,7 @@ UInt32 TDLTaskList::GetTaskCount()
 
 TDLTask^ TDLTaskList::FindTask(UInt32 dwTaskID)
 {
-   IntPtr hTask = IntPtr(GETVAL_ARG(FindTask, dwTaskID, NULL));
+   HTASKITEM hTask = GETVAL_ARG(FindTask, dwTaskID, NULL);
 
    return gcnew TDLTask((m_pConstTaskList ? m_pConstTaskList : m_pTaskList), hTask);
 }
@@ -177,47 +177,47 @@ TDLTask^ TDLTaskList::FindTask(UInt32 dwTaskID)
 TDLTask^ TDLTaskList::GetFirstTask()
 {
    if (m_pConstTaskList)
-      return gcnew TDLTask(m_pConstTaskList, IntPtr(m_pConstTaskList->GetFirstTask(nullptr)));
+      return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetFirstTask(nullptr));
 
    // else
-   return gcnew TDLTask(m_pTaskList, IntPtr(m_pTaskList->GetFirstTask(nullptr)));
+   return gcnew TDLTask(m_pTaskList, m_pTaskList->GetFirstTask(nullptr));
 }
 
 // ---------------------------------------------------------
 
 #define GETTASKVAL(fn, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(*this) : (m_pTaskList ? m_pTaskList->fn(*this) : errret))
+   (m_pConstTaskList ? m_pConstTaskList->fn(m_hTask) : (m_pTaskList ? m_pTaskList->fn(m_hTask) : errret))
 
 #define GETTASKDATE(fn, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(*this, date) : (m_pTaskList ? m_pTaskList->fn(*this, date) : errret))
+   (m_pConstTaskList ? m_pConstTaskList->fn(m_hTask, date) : (m_pTaskList ? m_pTaskList->fn(m_hTask, date) : errret))
 
 #define GETTASKSTR(fn) \
    gcnew String(GETTASKVAL(fn, L""))
 
 #define GETTASKVAL_ARG(fn, arg, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(*this, arg) : (m_pTaskList ? m_pTaskList->fn(*this, arg) : errret))
+   (m_pConstTaskList ? m_pConstTaskList->fn(m_hTask, arg) : (m_pTaskList ? m_pTaskList->fn(m_hTask, arg) : errret))
 
 #define GETTASKSTR_ARG(fn, arg) \
    gcnew String(GETTASKVAL_ARG(fn, arg, L""))
 
 #define GETTASKDATE_ARG(fn, arg, errret) \
-   (m_pConstTaskList ? m_pConstTaskList->fn(*this, arg, date) : (m_pTaskList ? m_pTaskList->fn(*this, arg, date) : errret))
+   (m_pConstTaskList ? m_pConstTaskList->fn(m_hTask, arg, date) : (m_pTaskList ? m_pTaskList->fn(m_hTask, arg, date) : errret))
 
 // ---------------------------------------------------------
 
 TDLTask::TDLTask()
-   : m_pTaskList(nullptr), m_pConstTaskList(nullptr), m_hTask(IntPtr::Zero)
+   : m_pTaskList(nullptr), m_pConstTaskList(nullptr), m_hTask(nullptr)
 {
 
 }
 
-TDLTask::TDLTask(ITaskList14* pTaskList, IntPtr hTask) 
+TDLTask::TDLTask(ITaskList14* pTaskList, HTASKITEM hTask) 
    : m_pTaskList(pTaskList), m_pConstTaskList(nullptr), m_hTask(hTask)
 {
 
 }
 
-TDLTask::TDLTask(const ITaskList14* pTaskList, IntPtr hTask)
+TDLTask::TDLTask(const ITaskList14* pTaskList, HTASKITEM hTask)
    : m_pTaskList(nullptr), m_pConstTaskList(pTaskList), m_hTask(hTask)
 {
 
@@ -239,39 +239,34 @@ TDLTask::TDLTask(TDLTask^ task)
 
 bool TDLTask::IsValid()
 {
-   return ((m_pConstTaskList || m_pTaskList) && (m_hTask != IntPtr::Zero));
-}
-
-TDLTask::operator HTASKITEM()
-{
-   return (HTASKITEM)m_hTask.ToPointer();
+   return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
 }
 
 TDLTask^ TDLTask::GetFirstSubtask()
 {
    if (m_pConstTaskList)
-      return gcnew TDLTask(m_pConstTaskList, IntPtr(m_pConstTaskList->GetFirstTask(*this)));
+      return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetFirstTask(m_hTask));
    
    // else
-   return gcnew TDLTask(m_pTaskList, IntPtr(m_pTaskList->GetFirstTask(*this)));
+   return gcnew TDLTask(m_pTaskList, m_pTaskList->GetFirstTask(m_hTask));
 }
 
 TDLTask^ TDLTask::GetNextTask()
 {
    if (m_pConstTaskList)
-      return gcnew TDLTask(m_pConstTaskList, IntPtr(m_pConstTaskList->GetNextTask(*this)));
+      return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetNextTask(m_hTask));
 
    // else
-   return gcnew TDLTask(m_pTaskList, IntPtr(m_pTaskList->GetNextTask(*this)));
+   return gcnew TDLTask(m_pTaskList, m_pTaskList->GetNextTask(m_hTask));
 }
 
 TDLTask^ TDLTask::GetParentTask()
 {
    if (m_pConstTaskList)
-      return gcnew TDLTask(m_pConstTaskList, IntPtr(m_pConstTaskList->GetTaskParent(*this)));
+      return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetTaskParent(m_hTask));
 
    // else
-   return gcnew TDLTask(m_pTaskList, IntPtr(m_pTaskList->GetTaskParent(*this)));
+   return gcnew TDLTask(m_pTaskList, m_pTaskList->GetTaskParent(m_hTask));
 }
 
 String^ TDLTask::GetTitle()
@@ -510,8 +505,8 @@ double TDLTask::GetTimeEstimate(Char% cUnits)
 {
    WCHAR nUnits = 0;
 
-   double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(*this, nUnits, FALSE) :
-                  (m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(*this, nUnits, FALSE) : 0.0));
+   double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) :
+                  (m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) : 0.0));
 
    cUnits = nUnits;
    return dTime;
@@ -521,8 +516,8 @@ double TDLTask::GetTimeSpent(Char% cUnits)
 {
    WCHAR nUnits = 0;
 
-   double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(*this, nUnits, FALSE) :
-                  (m_pTaskList ? m_pTaskList->GetTaskTimeSpent(*this, nUnits, FALSE) : 0.0));
+   double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) :
+                  (m_pTaskList ? m_pTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) : 0.0));
 
    cUnits = nUnits;
    return dTime;
@@ -536,30 +531,30 @@ Boolean TDLTask::GetRecurrence()
 
 Boolean TDLTask::HasAttribute(String^ sAttrib)
 {
-   return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(*this, MS(sAttrib)) : 
-          (m_pTaskList ? m_pTaskList->TaskHasAttribute(*this, MS(sAttrib)) : false));
+   return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : 
+          (m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : false));
 }
 
 String^ TDLTask::GetAttribute(String^ sAttrib)
 {
-   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(*this, MS(sAttrib)) : 
-                     (m_pTaskList ? m_pTaskList->GetTaskAttribute(*this, MS(sAttrib)) : L""));
+   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : 
+                     (m_pTaskList ? m_pTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : L""));
 
    return gcnew String(szValue);
 }
 
 String^ TDLTask::GetCustomAttributeData(String^ sID)
 {
-   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(*this, MS(sID)) : 
-                     (m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(*this, MS(sID)) : L""));
+   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : 
+                     (m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : L""));
 
    return gcnew String(szValue);
 }
 
 String^ TDLTask::GetMetaData(String^ sKey)
 {
-   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskMetaData(*this, MS(sKey)) : 
-                     (m_pTaskList ? m_pTaskList->GetTaskMetaData(*this, MS(sKey)) : L""));
+   LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : 
+                     (m_pTaskList ? m_pTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : L""));
 
    return gcnew String(szValue);
 }
@@ -571,7 +566,7 @@ String^ TDLTask::GetMetaData(String^ sKey)
 
 TDLTask^ TDLTaskList::NewTask(String^ sTitle)
 {
-   IntPtr hTask = IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
+   HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
 
    return gcnew TDLTask(m_pTaskList, hTask);
 }
@@ -594,16 +589,16 @@ Boolean TDLTaskList::ClearMetaData(String^ sKey)
 // ---------------------------------------------------------
 
 #define SETTASKVAL(fn, val) \
-   (m_pTaskList ? m_pTaskList->fn(*this, val) : false)
+   (m_pTaskList ? m_pTaskList->fn(m_hTask, val) : false)
 
 #define SETTASKSTR(fn, str) \
-   (m_pTaskList ? m_pTaskList->fn(*this, MS(str)) : false)
+   (m_pTaskList ? m_pTaskList->fn(m_hTask, MS(str)) : false)
 
 // ---------------------------------------------------------
 
 TDLTask^ TDLTask::NewSubtask(String^ sTitle)
 {
-   IntPtr hTask = IntPtr(m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
+   HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
 
    return gcnew TDLTask(m_pTaskList, hTask);
 }
@@ -735,32 +730,32 @@ Boolean TDLTask::SetCreationDate(Int64 dtCreation)
 
 Boolean TDLTask::SetTimeEstimate(double dTime, Char cUnits)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(*this, dTime, cUnits) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, cUnits) : false);
 }
 
 Boolean TDLTask::SetTimeSpent(double dTime, Char cUnits)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(*this, dTime, cUnits) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, cUnits) : false);
 }
 
 Boolean TDLTask::SetCustomAttributeData(String^ sID, String^ sValue)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(*this, MS(sID), MS(sValue)) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(m_hTask, MS(sID), MS(sValue)) : false);
 }
 
 Boolean TDLTask::ClearCustomAttributeData(String^ sID)
 {
-   return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(*this, MS(sID)) : false);
+   return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(m_hTask, MS(sID)) : false);
 }
 
 Boolean TDLTask::SetMetaData(String^ sKey, String^ sValue)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskMetaData(*this, MS(sKey), MS(sValue)) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskMetaData(m_hTask, MS(sKey), MS(sValue)) : false);
 }
 
 Boolean TDLTask::ClearMetaData(String^ sKey)
 {
-   return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(*this, MS(sKey)) : false);
+   return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

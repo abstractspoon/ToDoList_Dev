@@ -51,8 +51,8 @@ namespace PluginHelpers
    public ref class TDLTask
    {
    public:
-      TDLTask(ITaskList14* pTaskList, IntPtr hTask);        // GET & SET
-      TDLTask(const ITaskList14* pTaskList, IntPtr hTask);  // GET ONLY
+      TDLTask(ITaskList14* pTaskList, HTASKITEM hTask);        // GET & SET
+      TDLTask(const ITaskList14* pTaskList, HTASKITEM hTask);  // GET ONLY
       TDLTask(const TDLTask^ task);
       TDLTask(TDLTask^ task);
 
@@ -167,11 +167,10 @@ namespace PluginHelpers
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;
-      IntPtr m_hTask;
+      HTASKITEM m_hTask;
 
    private: // -------------------------------------------------------
       TDLTask();
-      operator HTASKITEM();
    };
 
    public ref class TDLTaskList
