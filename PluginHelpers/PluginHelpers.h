@@ -25,10 +25,10 @@ namespace PluginHelpers
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-   public ref class CPreferences
+   public ref class TDLPreferences
    {
    public:
-      CPreferences(IPreferences* pPrefs);
+      TDLPreferences(IPreferences* pPrefs);
       
       int GetProfileInt(String^ sSection, String^ sEntry, int nDefault);
       bool WriteProfileInt(String^ sSection, String^ sEntry, int nValue);
@@ -43,19 +43,142 @@ namespace PluginHelpers
       IPreferences* m_pPrefs;
 
    private:
-      CPreferences();
+      TDLPreferences();
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-   public ref class CTaskList
+   public ref class TDLTask
    {
    public:
-      CTaskList(ITaskList14* pTaskList);        // GET & SET
-      CTaskList(const ITaskList14* pTaskList);  // GET ONLY
-      
-      // GETTERS ----------------------------------------------------
+      TDLTask(ITaskList14* pTaskList, IntPtr hTask);        // GET & SET
+      TDLTask(const ITaskList14* pTaskList, IntPtr hTask);  // GET ONLY
+      TDLTask(const TDLTask^ task);
+      TDLTask(TDLTask^ task);
 
+      TDLTask^ GetFirstSubtask();
+      TDLTask^ GetNextTask();
+      TDLTask^ GetParentTask();
+
+      String^ GetTitle();
+      String^ GetComments();
+      String^ GetAllocatedBy();
+      String^ GetStatus();
+      String^ GetWebColor();
+      String^ GetPriorityWebColor();
+      String^ GetVersion();
+      String^ GetExternalID();
+      String^ GetCreatedBy();
+      String^ GetPositionString();
+      String^ GetIcon();
+
+      UInt32 GetID();
+      UInt32 GetColor();
+      UInt32 GetTextColor();
+      UInt32 GetPriorityColor();
+      UInt32 GetPosition();
+      UInt32 GetPriority();
+      UInt32 GetRisk();
+
+      UInt32 GetCategoryCount();
+      UInt32 GetAllocatedToCount();
+      UInt32 GetTagCount();
+      UInt32 GetDependencyCount();
+      UInt32 GetFileReferenceCount();
+
+      String^ GetAllocatedTo(int nIndex);
+      String^ GetCategory(int nIndex);
+      String^ GetTag(int nIndex);
+      String^ GetDependency(int nIndex);
+      String^ GetFileReference(int nIndex);
+
+      Byte GetPercentDone();
+      double GetCost();
+
+      Int64 GetLastModified();
+      Int64 GetDoneDate();
+      Int64 GetDueDate();
+      Int64 GetStartDate();
+      Int64 GetCreationDate();
+
+      String^ GetDoneDateString();
+      String^ GetDueDateString();
+      String^ GetStartDateString();
+      String^ GetCreationDateString();
+
+      Boolean IsDone();
+      Boolean IsDue();
+      Boolean IsGoodAsDone();
+      Boolean IsFlagged();
+      
+      double GetTimeEstimate(Char% cUnits);
+      double GetTimeSpent(Char% cUnits);
+
+      Boolean GetRecurrence(); // TODO
+      Boolean HasAttribute(String^ sAttrib);
+
+      String^ GetAttribute(String^ sAttrib);
+      String^ GetCustomAttributeData(String^ sID);
+      String^ GetMetaData(String^ sKey);
+
+      // SETTERS -----------------------------------------------------
+      
+      TDLTask^ NewSubtask(String^ sTitle);
+
+      Boolean SetTitle(String^ sTitle);
+      Boolean SetComments(String^ sComments);
+      Boolean SetAllocatedBy(String^ sAllocBy);
+      Boolean SetStatus(String^ sStatus);
+      Boolean SetVersion(String^ sVersion);
+      Boolean SetExternalID(String^ sExternalID);
+      Boolean SetCreatedBy(String^ sCreatedBy);
+      Boolean SetPosition(String^ sPosition);
+      Boolean SetIcon(String^ sIcon);
+
+      Boolean AddAllocatedTo(String^ sAllocTo);
+      Boolean AddCategory(String^ sCategory);
+      Boolean AddTag(String^ sTag);
+      Boolean AddDependency(String^ sDependency);
+      Boolean AddFileReference(String^ sFileLink);
+
+      Boolean SetColor(UINT32 color );
+      Boolean SetPriority(Byte nPriority);
+      Boolean SetRisk(Byte Risk);
+
+      Boolean SetPercentDone(Byte nPercent);
+      Boolean SetCost(double dCost);
+      Boolean SetFlag(Boolean bFlag);
+
+      Boolean SetLastModified(Int64 dtLastMod);
+      Boolean SetDoneDate(Int64 dtCompletion);
+      Boolean SetDueDate(Int64 dtDue);
+      Boolean SetStartDate(Int64 dtStart);
+      Boolean SetCreationDate(Int64 dtCreation);
+
+      Boolean SetTimeEstimate(double dTime, Char cUnits);
+      Boolean SetTimeSpent(double dTime, Char cUnits);
+      Boolean SetCustomAttributeData(String^ sID, String^ sValue);
+      Boolean ClearCustomAttributeData(String^ sID);
+      Boolean SetMetaData(String^ sKey, String^ sValue);
+      Boolean ClearMetaData(String^ sKey);
+
+
+   private: // -------------------------------------------------------
+      ITaskList14* m_pTaskList;
+      const ITaskList14* m_pConstTaskList;
+      IntPtr m_hTask;
+
+   private: // -------------------------------------------------------
+      TDLTask();
+      operator HTASKITEM();
+   };
+
+   public ref class TDLTaskList
+   {
+   public:
+      TDLTaskList(ITaskList14* pTaskList);        // GET & SET
+      TDLTaskList(const ITaskList14* pTaskList);  // GET ONLY
+      
       String^ GetReportTitle();
       String^ GetReportDate();
       String^ GetMetaData(String^ sKey);
@@ -66,132 +189,29 @@ namespace PluginHelpers
       String^ GetCustomAttributeValue(int nIndex, String^ sItem);
 
       UInt32 GetTaskCount();
-      IntPtr FindTask(UInt32 dwTaskID);
-      
-      IntPtr GetFirstTask(IntPtr hTask);
-      IntPtr GetNextTask(IntPtr hTask);
-      IntPtr GetTaskParent(IntPtr hTask);
+      TDLTask^ FindTask(UInt32 dwTaskID);
 
-      String^ GetTaskTitle(IntPtr hTask);
-      String^ GetTaskComments(IntPtr hTask);
-      String^ GetTaskAllocatedBy(IntPtr hTask);
-      String^ GetTaskStatus(IntPtr hTask);
-      String^ GetTaskWebColor(IntPtr hTask);
-      String^ GetTaskPriorityWebColor(IntPtr hTask);
-      String^ GetTaskVersion(IntPtr hTask);
-      String^ GetTaskExternalID(IntPtr hTask);
-      String^ GetTaskCreatedBy(IntPtr hTask);
-      String^ GetTaskPositionString(IntPtr hTask);
-      String^ GetTaskIcon(IntPtr hTask);
-
-      UInt32 GetTaskID(IntPtr hTask);
-      UInt32 GetTaskColor(IntPtr hTask);
-      UInt32 GetTaskTextColor(IntPtr hTask);
-      UInt32 GetTaskPriorityColor(IntPtr hTask);
-      UInt32 GetTaskPosition(IntPtr hTask);
-      UInt32 GetTaskPriority(IntPtr hTask);
-      UInt32 GetTaskRisk(IntPtr hTask);
-
-      UInt32 GetTaskCategoryCount(IntPtr hTask);
-      UInt32 GetTaskAllocatedToCount(IntPtr hTask);
-      UInt32 GetTaskTagCount(IntPtr hTask);
-      UInt32 GetTaskDependencyCount(IntPtr hTask);
-      UInt32 GetTaskFileReferenceCount(IntPtr hTask);
-
-      String^ GetTaskAllocatedTo(IntPtr hTask, int nIndex);
-      String^ GetTaskCategory(IntPtr hTask, int nIndex);
-      String^ GetTaskTag(IntPtr hTask, int nIndex);
-      String^ GetTaskDependency(IntPtr hTask, int nIndex);
-      String^ GetTaskFileReference(IntPtr hTask, int nIndex);
-
-      Byte GetTaskPercentDone(IntPtr hTask);
-      double GetTaskCost(IntPtr hTask);
-
-      Int64 GetTaskLastModified(IntPtr hTask);
-      Int64 GetTaskDoneDate(IntPtr hTask);
-      Int64 GetTaskDueDate(IntPtr hTask);
-      Int64 GetTaskStartDate(IntPtr hTask);
-      Int64 GetTaskCreationDate(IntPtr hTask);
-
-      String^ GetTaskDoneDateString(IntPtr hTask);
-      String^ GetTaskDueDateString(IntPtr hTask);
-      String^ GetTaskStartDateString(IntPtr hTask);
-      String^ GetTaskCreationDateString(IntPtr hTask);
-
-      Boolean IsTaskDone(IntPtr hTask);
-      Boolean IsTaskDue(IntPtr hTask);
-      Boolean IsTaskGoodAsDone(IntPtr hTask);
-      Boolean IsTaskFlagged(IntPtr hTask);
-      
-      double GetTaskTimeEstimate(IntPtr hTask, Char% cUnits);
-      double GetTaskTimeSpent(IntPtr hTask, Char% cUnits);
-
-      Boolean GetTaskRecurrence(IntPtr hTask); // TODO
-      Boolean TaskHasAttribute(IntPtr hTask, String^ sAttrib);
-
-      String^ GetTaskAttribute(IntPtr hTask, String^ sAttrib);
-      String^ GetTaskCustomAttributeData(IntPtr hTask, String^ sID);
-      String^ GetTaskMetaData(IntPtr hTask, String^ sKey);
-
-      // SETTERS -----------------------------------------------------
+      TDLTask^ GetFirstTask();
+      TDLTask^ NewTask(String^ sTitle);
       
       Boolean AddCustomAttribute(String^ sID, String^ sLabel);
       Boolean SetMetaData(String^ sKey, String^ sValue);
       Boolean ClearMetaData(String^ sKey);
-
-      IntPtr NewTask(String^ sTitle, IntPtr hParent);
-
-      Boolean SetTaskTitle(IntPtr hTask, String^ sTitle);
-      Boolean SetTaskComments(IntPtr hTask, String^ sComments);
-      Boolean SetTaskAllocatedBy(IntPtr hTask, String^ sAllocBy);
-      Boolean SetTaskStatus(IntPtr hTask, String^ sStatus);
-      Boolean SetTaskVersion(IntPtr hTask, String^ sVersion);
-      Boolean SetTaskExternalID(IntPtr hTask, String^ sExternalID);
-      Boolean SetTaskCreatedBy(IntPtr hTask, String^ sCreatedBy);
-      Boolean SetTaskPosition(IntPtr hTask, String^ sPosition);
-      Boolean SetTaskIcon(IntPtr hTask, String^ sIcon);
-
-      Boolean AddTaskAllocatedTo(IntPtr hTask, String^ sAllocTo);
-      Boolean AddTaskCategory(IntPtr hTask, String^ sCategory);
-      Boolean AddTaskTag(IntPtr hTask, String^ sTag);
-      Boolean AddTaskDependency(IntPtr hTask, String^ sDependency);
-      Boolean AddTaskFileReference(IntPtr hTask, String^ sFileLink);
-
-      Boolean SetTaskColor(IntPtr hTask, UINT32 color );
-      Boolean SetTaskPriority(IntPtr hTask, Byte nPriority);
-      Boolean SetTaskRisk(IntPtr hTask, Byte Risk);
-
-      Boolean SetTaskPercentDone(IntPtr hTask, Byte nPercent);
-      Boolean SetTaskCost(IntPtr hTask, double dCost);
-      Boolean SetTaskFlag(IntPtr hTask, Boolean bFlag);
-
-      Boolean SetTaskLastModified(IntPtr hTask, Int64 dtLastMod);
-      Boolean SetTaskDoneDate(IntPtr hTask, Int64 dtCompletion);
-      Boolean SetTaskDueDate(IntPtr hTask, Int64 dtDue);
-      Boolean SetTaskStartDate(IntPtr hTask, Int64 dtStart);
-      Boolean SetTaskCreationDate(IntPtr hTask, Int64 dtCreation);
-
-      Boolean SetTaskTimeEstimate(IntPtr hTask, double dTime, Char cUnits);
-      Boolean SetTaskTimeSpent(IntPtr hTask, double dTime, Char cUnits);
-      Boolean SetTaskCustomAttributeData(IntPtr hTask, String^ sID, String^ sValue);
-      Boolean ClearTaskCustomAttributeData(IntPtr hTask, String^ sID);
-      Boolean SetTaskMetaData(IntPtr hTask, String^ sKey, String^ sValue);
-      Boolean ClearTaskMetaData(IntPtr hTask, String^ sKey);
 
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;
 
    private: // -------------------------------------------------------
-      CTaskList();
+      TDLTaskList();
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-   public ref class CTransText
+   public ref class TDLTranslate
    {
    public:
-      CTransText(ITransText* pTaskList);
+      TDLTranslate(ITransText* pTaskList);
       
       // TODO
       
@@ -199,7 +219,7 @@ namespace PluginHelpers
       ITransText* m_pTransText;
 
    private:
-      CTransText();
+      TDLTranslate();
    };
 
 
