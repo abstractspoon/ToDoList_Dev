@@ -54,7 +54,6 @@ namespace PluginHelpers
       TDLTask(ITaskList14* pTaskList, HTASKITEM hTask);        // GET & SET
       TDLTask(const ITaskList14* pTaskList, HTASKITEM hTask);  // GET ONLY
       TDLTask(const TDLTask^ task);
-      TDLTask(TDLTask^ task);
 
       bool IsValid();
 

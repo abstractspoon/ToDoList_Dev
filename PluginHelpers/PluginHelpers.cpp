@@ -230,13 +230,6 @@ TDLTask::TDLTask(const TDLTask^ task)
    m_hTask = task->m_hTask;
 }
 
-TDLTask::TDLTask(TDLTask^ task)
-{
-   m_pTaskList = task->m_pTaskList;
-   m_pConstTaskList = task->m_pConstTaskList;
-   m_hTask = task->m_hTask;
-}
-
 bool TDLTask::IsValid()
 {
    return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
