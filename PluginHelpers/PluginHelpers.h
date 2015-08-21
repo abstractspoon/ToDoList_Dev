@@ -142,7 +142,7 @@ namespace PluginHelpers
       Boolean AddDependency(String^ sDependency);
       Boolean AddFileReference(String^ sFileLink);
 
-      Boolean SetColor(UINT32 color );
+      Boolean SetColor(UInt32 color);
       Boolean SetPriority(Byte nPriority);
       Boolean SetRisk(Byte Risk);
 
