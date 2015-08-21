@@ -20,7 +20,7 @@ namespace SampleImpExp
 
             TDLTask task = srcTasks.GetFirstTask();
 
-            String sTitle = task.GetTitle(hTask);
+            String sTitle = task.GetTitle();
 
 //             Array categories = new Array;
 //             UInt32 numCat = srcTasks.GetTaskCategories(hTask, categories);

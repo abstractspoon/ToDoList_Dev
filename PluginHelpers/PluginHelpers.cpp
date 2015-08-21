@@ -237,6 +237,11 @@ TDLTask::TDLTask(TDLTask^ task)
    m_hTask = task->m_hTask;
 }
 
+bool TDLTask::IsValid()
+{
+   return ((m_pConstTaskList || m_pTaskList) && (m_hTask != IntPtr::Zero));
+}
+
 TDLTask::operator HTASKITEM()
 {
    return (HTASKITEM)m_hTask.ToPointer();

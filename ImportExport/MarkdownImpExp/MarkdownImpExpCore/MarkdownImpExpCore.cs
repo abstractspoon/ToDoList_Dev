@@ -11,19 +11,19 @@ namespace MarkdownImpExp
 {
     public class MarkdownImpExpCore
     {
-        public bool Export(CTaskList srcTasks, string sDestFilePath, bool bSilent, CPreferences prefs, string sKey)
+        public bool Export(TDLTaskList srcTasks, string sDestFilePath, bool bSilent, TDLPreferences prefs, string sKey)
         {
             UInt32 taskCount = srcTasks.GetTaskCount();
 
             BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
 
-            IntPtr hTask = srcTasks.GetFirstTask(IntPtr.Zero);
+            TDLTask task = srcTasks.GetFirstTask();
 
-            while (hTask != IntPtr.Zero)
+            while (task.IsValid())
             {
-                ExportTask(srcTasks, hTask, mdTasks, true);
+                ExportTask(task, mdTasks, true);
 
-                hTask = srcTasks.GetNextTask(hTask);
+                task = task.GetNextTask();
             }
 
             Debug.Write(mdTasks.ToMarkdown());
@@ -32,24 +32,24 @@ namespace MarkdownImpExp
             return true;
         }
 
-        protected bool ExportTask(CTaskList srcTasks, IntPtr hTask, BulletedMarkdownContainer mdParent, bool root)
+        protected bool ExportTask(TDLTask task, BulletedMarkdownContainer mdParent, bool root)
         {
             // add ourselves
             
-            mdParent.Append(new RawMarkdown(FormatTaskAttributes(srcTasks, hTask, root)));
+            mdParent.Append(new RawMarkdown(FormatTaskAttributes(task, root)));
 
             // then our subtasks in a container
             BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
 
-            IntPtr hSubTask = srcTasks.GetFirstTask(hTask);
+            TDLTask subtask = task.GetFirstSubtask();
 
-            if (hSubTask != IntPtr.Zero)
+            if (subtask.IsValid())
             {
-                while (hSubTask != IntPtr.Zero)
+                while (subtask.IsValid())
                 {
-                    ExportTask(srcTasks, hSubTask, mdSubtasks, false);
+                    ExportTask(subtask, mdSubtasks, false);
 
-                    hSubTask = srcTasks.GetNextTask(hSubTask);
+                    subtask = subtask.GetNextTask();
                 }
 
                 mdParent.Append(mdSubtasks);
@@ -58,15 +58,15 @@ namespace MarkdownImpExp
             return true;
         }
 
-        protected string FormatTaskAttributes(CTaskList srcTasks, IntPtr hTask, bool root)
+        protected string FormatTaskAttributes(TDLTask task, bool root)
         {
-            StringBuilder task = new StringBuilder();
+            StringBuilder taskAttrib = new StringBuilder();
 
-            task.Append("**`" + srcTasks.GetTaskTitle(hTask) + "`**");
-            task.Append("  ").AppendLine().Append("Priority: " + srcTasks.GetTaskPriority(hTask));
-            task.Append("  ").AppendLine().Append("Allocated to: " + srcTasks.GetTaskAllocatedTo(hTask, 0));
+            taskAttrib.Append("**`" + task.GetTitle() + "`**");
+            taskAttrib.Append("  ").AppendLine().Append("Priority: " + task.GetPriority());
+            taskAttrib.Append("  ").AppendLine().Append("Allocated to: " + task.GetAllocatedTo(0));
 
-            return task.AppendLine().ToString();
+            return taskAttrib.AppendLine().ToString();
         }
     }
 

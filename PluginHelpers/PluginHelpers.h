@@ -56,6 +56,8 @@ namespace PluginHelpers
       TDLTask(const TDLTask^ task);
       TDLTask(TDLTask^ task);
 
+      bool IsValid();
+
       TDLTask^ GetFirstSubtask();
       TDLTask^ GetNextTask();
       TDLTask^ GetParentTask();
@@ -161,8 +163,7 @@ namespace PluginHelpers
       Boolean ClearCustomAttributeData(String^ sID);
       Boolean SetMetaData(String^ sKey, String^ sValue);
       Boolean ClearMetaData(String^ sKey);
-
-
+      
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;
