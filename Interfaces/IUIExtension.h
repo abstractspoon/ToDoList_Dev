@@ -145,6 +145,45 @@ enum IUI_HITTEST
 	IUI_TASK,
 };
 
+enum IUI_ATTRIBUTEEDIT
+{
+	// NEVER CHANGE THE ORDER OF THIS LIST
+	IUI_TASKNAME = 0,
+	IUI_DONEDATE,
+	IUI_DUEDATE,
+	IUI_STARTDATE,
+	IUI_PRIORITY,
+	IUI_COLOR,
+	IUI_ALLOCTO,
+	IUI_ALLOCBY,
+	IUI_STATUS,
+	IUI_CATEGORY,
+	IUI_PERCENT,
+	IUI_TIMEEST,
+	IUI_TIMESPENT,
+	IUI_FILEREF,
+	IUI_COMMENTS,
+	IUI_FLAG,
+	IUI_CREATIONDATE,
+	IUI_CREATEDBY,
+	IUI_RISK,			
+	IUI_EXTERNALID,	
+	IUI_COST,			
+	IUI_DEPENDENCY,	
+	IUI_RECURRENCE,	
+	IUI_VERSION,		
+	IUI_POSITION,
+	IUI_ID,
+	IUI_LASTMOD,
+	IUI_ICON,
+	IUI_TAGS,
+	IUI_CUSTOMATTRIB,
+	
+	// new values here
+
+	IUI_ALLATTRIB = 0xffff
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct IUITASKMOD
@@ -166,16 +205,16 @@ struct IUITASKMOD
 
 // if   wParam == 0,		lParam = Task ID
 // else wParam = LPDWORD,	lParam = ID count
-const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessage(_T("WM_IUI_SELECTTASK")); 
+const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK"); 
 
 // wParam = Number of Mods, lParam == IUITASKMOD[0]
-const UINT WM_IUI_MODIFYSELECTEDTASK	= ::RegisterWindowMessage(_T("WM_IUI_MODIFYSELECTEDTASK")); 
+const UINT WM_IUI_MODIFYSELECTEDTASK	= ::RegisterWindowMessageW(L"WM_IUI_MODIFYSELECTEDTASK"); 
 
 // wParam = lParam == 0
-const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessage(_T("WM_IUI_EDITSELECTEDTASKTITLE")); 
+const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
 
 // wParam = 0, lParam == Column ID
-const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessage(_T("WM_IUI_SORTCOLUMNCHANGE")); 
+const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,8 +228,8 @@ public:
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
 	virtual bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
-	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, int nEditAttribute = -1) = 0;
-	virtual bool WantUpdate(int nAttribute) const = 0;
+	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute) = 0;
+	virtual bool WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) const = 0;
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
@@ -205,7 +244,7 @@ public:
 	virtual HWND GetHwnd() const = 0;
 
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
-	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, BOOL bAppOnly = FALSE) = 0;
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE) = 0;
 
 	virtual void Release() = 0;
 };

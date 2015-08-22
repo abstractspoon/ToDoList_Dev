@@ -25,7 +25,7 @@ using namespace SampleUIExtension;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
-using namespace PluginHelpers;
+using namespace TDLPluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,75 +132,85 @@ LPCWSTR CSampleUIExtensionBridgeWindow::GetTypeID() const
 
 bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
 {
-   return false;
+   return m_wnd->SelectTask(dwTaskID);
 }
 
 bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
 {
-   return false;
+	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
+
+    return m_wnd->SelectTasks(taskIDs, nTaskCount);
 }
 
-void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, int nEditAttribute)
+void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute)
 {
+	TDLTaskList^ tasks = gcnew TDLTaskList(pTasks);
 
+	m_wnd->UpdateTasks(tasks, TDLUIExtension::Map(nUpdate),TDLUIExtension::Map(nEditAttribute));
 }
 
-bool CSampleUIExtensionBridgeWindow::WantUpdate(int nAttribute) const
+bool CSampleUIExtensionBridgeWindow::WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) const
 {
-   return true; // everything
+	return m_wnd->WantUpdate(TDLUIExtension::Map(nAttribute));
 }
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
-   return false;
+   return m_wnd->PrepareNewTask(gcnew TDLTaskList(pTask));
 }
 
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-//    switch (pMsg->message)
-//    {
-//    default:
-//      break;
-//    }
-
-   return false;
+	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
+								 pMsg->message, 
+								 pMsg->wParam, 
+								 pMsg->lParam, 
+								 pMsg->time, 
+								 System::Windows::Point(pMsg->pt.x, pMsg->pt.y));
 }
 
 void CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-
+	m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
 }
 
 bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 {
-   return true;
+	return m_wnd->CanDoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
 }
 
 bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
-   return false;
+	System::Windows::Rect^ rect = gcnew System::Windows::Rect(0, 0, 0, 0);
+
+	if (m_wnd->GetLabelEditRect(*rect))
+	{
+		pEdit->left = static_cast<LONG>(rect->Left);
+		pEdit->top = static_cast<LONG>(rect->Top);
+		pEdit->right = static_cast<LONG>(rect->Right);
+		pEdit->bottom = static_cast<LONG>(rect->Bottom);
+
+		return true;
+	}
+
+	return false;
 }
 
 IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
 {
-   return IUI_NOWHERE;
+	System::Windows::Point^ pt = gcnew System::Windows::Point(ptScreen.x, ptScreen.y);
+
+	return TDLUIExtension::Map(m_wnd->HitTest(*pt));
 }
 
 void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-   System::Windows::Media::Color^ bkColor = gcnew System::Windows::Media::Color();
-
-   bkColor->R = GetRValue(pTheme->crAppBackLight);
-   bkColor->G = GetGValue(pTheme->crAppBackLight);
-   bkColor->B = GetBValue(pTheme->crAppBackLight);
-   bkColor->A = 255;
-   
-   m_wnd->SetBackgroundColor(*bkColor);
+   m_wnd->SetTheme(gcnew TDLTheme(pTheme));
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 {
-
+	m_wnd->SetReadOnly(bReadOnly);
 }
 
 HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
@@ -210,11 +220,11 @@ HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
 
 void CSampleUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-
+	m_wnd->SavePreferences(gcnew TDLPluginHelpers::TDLPreferences(pPrefs), gcnew String(szKey));
 }
 
-void CSampleUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, BOOL bAppOnly)
+void CSampleUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-
+	m_wnd->LoadPreferences(gcnew TDLPluginHelpers::TDLPreferences(pPrefs), gcnew String(szKey), bAppOnly);
 }
 

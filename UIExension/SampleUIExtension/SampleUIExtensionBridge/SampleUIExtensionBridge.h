@@ -18,14 +18,13 @@ public:
 
    void Release(); // releases the interface
 
-   void SetLocalizer(ITransText* pTT);
-
    LPCTSTR GetMenuText() const;
    HICON GetIcon() const;
    LPCWSTR GetTypeID() const; // caller must copy result only
 
    IUIExtensionWindow* CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+   void SetLocalizer(ITransText* pTT);
 };
 
 class CSampleUIExtensionBridgeWindow : public IUIExtensionWindow
@@ -44,8 +43,8 @@ public:
    bool SelectTask(DWORD dwTaskID);
    bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
 
-   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, int nEditAttribute = -1);
-   bool WantUpdate(int nAttribute) const;
+   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute);
+   bool WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
@@ -60,7 +59,7 @@ public:
    HWND GetHwnd() const;
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
-   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, BOOL bAppOnly = FALSE);
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
    
 protected:
    gcroot<SampleUIExtensionCore^> m_wnd;

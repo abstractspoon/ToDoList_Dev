@@ -65,7 +65,7 @@ bool CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFi
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<SampleImpExpCore^> expCore = gcnew SampleImpExpCore();
 	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
-	msclr::auto_gcroot<TDLTaskList^> srcTasks = gcnew TDLTaskList(GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14));
+	msclr::auto_gcroot<TDLTaskList^> srcTasks = gcnew TDLTaskList(pSrcTaskFile);
 	
 	// do the export
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));

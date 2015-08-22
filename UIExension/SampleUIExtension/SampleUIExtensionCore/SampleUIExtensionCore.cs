@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace SampleUIExtension
@@ -17,10 +19,78 @@ namespace SampleUIExtension
             InitializeComponent();
         }
 
-        public void SetBackgroundColor(System.Windows.Media.Color bkColor)
+        public void SetTheme(TDLPluginHelpers.TDLTheme theme)
         {
+            System.Windows.Media.Color bkColor = theme.GetAppColor(TDLPluginHelpers.TDLTheme.AppColor.AppBackDark);
+
             this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
         }
+
+        // IUIExtension -------------------------------------------------------------------------
+
+        public bool SelectTask(UInt32 dwTaskID)
+        {
+            return false;
+        }
+
+	    public bool SelectTasks(UInt32[] pdwTaskIDs, int nTaskCount)
+        {
+            return false;
+        }
+
+	    public void UpdateTasks(TDLPluginHelpers.TDLTaskList tasks, 
+                                TDLPluginHelpers.TDLUIExtension.UpdateType type, 
+                                TDLPluginHelpers.TDLUIExtension.TaskAttribute attrib)
+        {
+        }
+
+        public bool WantUpdate(TDLPluginHelpers.TDLUIExtension.TaskAttribute attrib)
+	    {
+			return true; // all updates
+	    }
+	   
+        public bool PrepareNewTask(TDLPluginHelpers.TDLTaskList task)
+	    {
+		    return false;
+    	}
+
+	    public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, System.Windows.Point pt)
+	    {
+		    return false;
+	    }
+	   
+		public void DoAppCommand(TDLPluginHelpers.TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		{
+		}
+
+	    public bool CanDoAppCommand(TDLPluginHelpers.TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+	    {
+		    return false;
+	    }
+
+	    public bool GetLabelEditRect(System.Windows.Rect pEdit)
+	    {
+			return false;
+	    }
+
+        public TDLPluginHelpers.TDLUIExtension.HitTest HitTest(System.Windows.Point ptScreen)
+	    {
+            return TDLPluginHelpers.TDLUIExtension.HitTest.Nowhere;
+	    }
+
+        public void SetReadOnly(bool bReadOnly)
+	    {
+	    }
+
+	    public void SavePreferences(TDLPluginHelpers.TDLPreferences prefs, String key)
+	    {
+	    }
+
+	    public void LoadPreferences(TDLPluginHelpers.TDLPreferences prefs, String key, bool appOnly)
+	    {
+	    }
+        
+        // PRIVATE ------------------------------------------------------------------------------
 
         private void InitializeComponent()
         {
@@ -32,47 +102,50 @@ namespace SampleUIExtension
 
         private void CreateListView()
         {
-            listView = new System.Windows.Controls.ListView();
-            gridView = new System.Windows.Controls.GridView();
+            m_ListView = new System.Windows.Controls.ListView();
+            m_GridView = new System.Windows.Controls.GridView();
 
-            AttribCol = new System.Windows.Controls.GridViewColumn();
-            AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
-            AttribCol.Header = "Attribute Changed";
-            AttribCol.Width = 200;
-            gridView.Columns.Add(AttribCol);
+            m_AttribCol = new System.Windows.Controls.GridViewColumn();
+            m_AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
+            m_AttribCol.Header = "Attribute Changed";
+            m_AttribCol.Width = 200;
+            m_GridView.Columns.Add(m_AttribCol);
 
-            ValueCol = new System.Windows.Controls.GridViewColumn();
-            ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
-            ValueCol.Header = "New Value";
-            ValueCol.Width = 200;
-            gridView.Columns.Add(ValueCol);
+            m_ValueCol = new System.Windows.Controls.GridViewColumn();
+            m_ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
+            m_ValueCol.Header = "New Value";
+            m_ValueCol.Width = 200;
+            m_GridView.Columns.Add(m_ValueCol);
 
-            TasksCol = new System.Windows.Controls.GridViewColumn();
-            TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
-            TasksCol.Header = "Tasks Changed";
-            TasksCol.Width = 200;
-            gridView.Columns.Add(TasksCol);
+            m_TasksCol = new System.Windows.Controls.GridViewColumn();
+            m_TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
+            m_TasksCol.Header = "Tasks Changed";
+            m_TasksCol.Width = 200;
+            m_GridView.Columns.Add(m_TasksCol);
 
-            listView.View = gridView;
+            m_ListView.View = m_GridView;
 
-            this.Children.Add(listView);
+            this.Children.Add(m_ListView);
         }
 
         private void PopulateListView()
         {
-            System.Collections.Generic.List<SampleListItem> items = new System.Collections.Generic.List<SampleListItem>();
+            m_Items = new System.Collections.Generic.List<SampleListItem>();
+            m_ListView.ItemsSource = m_Items;
 
-            listView.ItemsSource = items;
-
-            items.Add(new SampleListItem() { Attrib = "Item1Col1", Value = "Item1Col2", Tasks = "Item1Col3" });
-            items.Add(new SampleListItem() { Attrib = "Item2Col1", Value = "Item2Col2", Tasks = "Item2Col3" });
-            items.Add(new SampleListItem() { Attrib = "Item3Col1", Value = "Item3Col2", Tasks = "Item3Col3" });
+            m_Items.Add(new SampleListItem() { Attrib = "Item1Col1", Value = "Item1Col2", Tasks = "Item1Col3" });
+            m_Items.Add(new SampleListItem() { Attrib = "Item2Col1", Value = "Item2Col2", Tasks = "Item2Col3" });
+            m_Items.Add(new SampleListItem() { Attrib = "Item3Col1", Value = "Item3Col2", Tasks = "Item3Col3" });
         }
 
-        private System.Windows.Controls.ListView listView;
-        private System.Windows.Controls.GridView gridView;
-        private System.Windows.Controls.GridViewColumn AttribCol;
-        private System.Windows.Controls.GridViewColumn ValueCol;
-        private System.Windows.Controls.GridViewColumn TasksCol;
+
+
+        // --------------------------------------------------------------------------------------
+        private System.Collections.Generic.List<SampleListItem> m_Items;
+        private System.Windows.Controls.ListView m_ListView;
+        private System.Windows.Controls.GridView m_GridView;
+        private System.Windows.Controls.GridViewColumn m_AttribCol;
+        private System.Windows.Controls.GridViewColumn m_ValueCol;
+        private System.Windows.Controls.GridViewColumn m_TasksCol;
     }
 }
