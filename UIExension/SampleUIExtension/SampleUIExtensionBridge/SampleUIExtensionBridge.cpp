@@ -144,9 +144,9 @@ bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCou
 
 void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute)
 {
-	TDLTaskList^ tasks = gcnew TDLTaskList(pTasks);
+	msclr::auto_gcroot<TDLTaskList^> tasks = gcnew TDLTaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks, TDLUIExtension::Map(nUpdate),TDLUIExtension::Map(nEditAttribute));
+	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(nEditAttribute));
 }
 
 bool CSampleUIExtensionBridgeWindow::WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) const
@@ -156,17 +156,21 @@ bool CSampleUIExtensionBridgeWindow::WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) co
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
-   return m_wnd->PrepareNewTask(gcnew TDLTaskList(pTask));
+	msclr::auto_gcroot<TDLTaskList^> task = gcnew TDLTaskList(pTask);
+
+	return m_wnd->PrepareNewTask(task.get());
 }
 
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
+	msclr::auto_gcroot<System::Windows::Point^> pt = gcnew System::Windows::Point(pMsg->pt.x, pMsg->pt.y);
+
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
 								 pMsg->message, 
 								 pMsg->wParam, 
 								 pMsg->lParam, 
 								 pMsg->time, 
-								 System::Windows::Point(pMsg->pt.x, pMsg->pt.y));
+								 *pt.get());
 }
 
 void CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
@@ -181,9 +185,9 @@ bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD 
 
 bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
-	System::Windows::Rect^ rect = gcnew System::Windows::Rect(0, 0, 0, 0);
+	msclr::auto_gcroot<System::Windows::Rect^> rect = gcnew System::Windows::Rect(0, 0, 0, 0);
 
-	if (m_wnd->GetLabelEditRect(*rect))
+	if (m_wnd->GetLabelEditRect(*rect.get()))
 	{
 		pEdit->left = static_cast<LONG>(rect->Left);
 		pEdit->top = static_cast<LONG>(rect->Top);
@@ -198,14 +202,16 @@ bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 
 IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
 {
-	System::Windows::Point^ pt = gcnew System::Windows::Point(ptScreen.x, ptScreen.y);
+	msclr::auto_gcroot<System::Windows::Point^> pt = gcnew System::Windows::Point(ptScreen.x, ptScreen.y);
 
-	return TDLUIExtension::Map(m_wnd->HitTest(*pt));
+	return TDLUIExtension::Map(m_wnd->HitTest(*pt.get()));
 }
 
 void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-   m_wnd->SetTheme(gcnew TDLTheme(pTheme));
+	msclr::auto_gcroot<TDLTheme^> theme = gcnew TDLTheme(pTheme);
+
+    m_wnd->SetTheme(theme.get());
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
@@ -220,11 +226,17 @@ HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
 
 void CSampleUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	m_wnd->SavePreferences(gcnew TDLPluginHelpers::TDLPreferences(pPrefs), gcnew String(szKey));
+	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+
+	m_wnd->SavePreferences(prefs.get(), key.get());
 }
 
 void CSampleUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	m_wnd->LoadPreferences(gcnew TDLPluginHelpers::TDLPreferences(pPrefs), gcnew String(szKey), bAppOnly);
+	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
+
+	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }
 

@@ -22,7 +22,7 @@ using namespace MarkdownImpExp;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
-using namespace PluginHelpers;
+using namespace TDLPluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDest
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<MarkdownImpExpCore^> expCore = gcnew MarkdownImpExpCore();
 	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
-	msclr::auto_gcroot<TDLTaskList^> srcTasks = gcnew TDLTaskList(pTasks14);
+	msclr::auto_gcroot<TDLTaskList^> srcTasks = gcnew TDLTaskList(pSrcTaskFile);
 	
 	// do the export
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));

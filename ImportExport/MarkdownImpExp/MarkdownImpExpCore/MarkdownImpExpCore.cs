@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Windows.Forms;
-using PluginHelpers;
+using TDLPluginHelpers;
 using MarkdownLog;
 
 namespace MarkdownImpExp
