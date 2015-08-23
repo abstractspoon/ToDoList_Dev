@@ -155,14 +155,14 @@ TDLUIExtension::AppCommand TDLUIExtension::Map(IUI_APPCOMMAND cmd)
 	return TDLUIExtension::AppCommand::Unknown;
 }
 
-IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitTest test)
+IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitResult test)
 {
 	switch (test)
 	{
-	case TDLUIExtension::HitTest::Nowhere:		return IUI_NOWHERE;
-	case TDLUIExtension::HitTest::Tasklist:		return IUI_TASKLIST;
-	case TDLUIExtension::HitTest::ColumnHeader:	return IUI_COLUMNHEADER;
-	case TDLUIExtension::HitTest::Task:			return IUI_TASK;
+	case TDLUIExtension::HitResult::Nowhere:		return IUI_NOWHERE;
+	case TDLUIExtension::HitResult::Tasklist:		return IUI_TASKLIST;
+	case TDLUIExtension::HitResult::ColumnHeader:	return IUI_COLUMNHEADER;
+	case TDLUIExtension::HitResult::Task:			return IUI_TASK;
 	}
 
 	return IUI_NOWHERE;

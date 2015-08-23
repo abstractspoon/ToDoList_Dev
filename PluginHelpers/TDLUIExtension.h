@@ -86,11 +86,10 @@ namespace TDLPluginHelpers
 		   ToggleSort,		// dwExtra is column ID
 		   SetFocus,
 		   ResizeAttributeColumns,
-		   //  
 
 	   };
 
-	   enum class HitTest
+	   enum class HitResult
 	   {
 		   Nowhere,
 		   Tasklist,
@@ -138,32 +137,33 @@ namespace TDLPluginHelpers
 		   All = 0xffff
 	   };
 
-/*
+	   static TaskAttribute Map(IUI_ATTRIBUTEEDIT attrib);
+	   static UpdateType Map(IUI_UPDATETYPE type);
+	   static AppCommand Map(IUI_APPCOMMAND cmd);
+	   static IUI_HITTEST Map(HitResult test);
+   };
+
+   public interface class ITDLUIExtension
+   {
 	   bool SelectTask(UInt32 dwTaskID);
-	   bool SelectTasks(UInt32 pdwTaskIDs[], int nTaskCount);
+	   bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs, int nTaskCount);
 
-	   void UpdateTasks(TDLTaskList^ tasks, UpdateType nUpdate, TaskAttribute nEditAttribute);
-	   bool WantUpdate(int nAttribute);
-	   bool PrepareNewTask(TDLTaskList^% task);
+	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, TDLUIExtension::TaskAttribute nEditAttribute);
+	   bool WantUpdate(TDLUIExtension::TaskAttribute nAttribute);
+	   bool PrepareNewTask(TDLTaskList^ task);
 
-	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, POINT pt);
-	   void DoAppCommand(AppCommand nCmd, DWORD dwExtra);
-	   bool CanDoAppCommand(AppCommand nCmd, DWORD dwExtra);
+	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
+	   void DoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
+	   bool CanDoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
 
-	   bool GetLabelEditRect(RECT% pEdit); // screen coordinates
-	   HitTest HitTest(POINT ptScreen);
+	   bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
+	   TDLUIExtension::HitResult HitTest(Int32 xPos, Int32 yPos);
 
-	   void SetUITheme(TDLTheme theme);
+	   void SetUITheme(TDLTheme^ theme);
 	   void SetReadOnly(bool bReadOnly);
 
 	   void SavePreferences(TDLPreferences^ prefs, String^ key);
 	   void LoadPreferences(TDLPreferences^ prefs, String^ key, bool appOnly);
-*/
-
-	   static TaskAttribute Map(IUI_ATTRIBUTEEDIT attrib);
-	   static UpdateType Map(IUI_UPDATETYPE type);
-	   static AppCommand Map(IUI_APPCOMMAND cmd);
-	   static IUI_HITTEST Map(HitTest test);
 
    };
 

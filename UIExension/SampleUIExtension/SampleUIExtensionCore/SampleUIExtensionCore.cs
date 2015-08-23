@@ -14,14 +14,14 @@ namespace SampleUIExtension
         public String Tasks { get; set; }
     }
 
-    public class SampleUIExtensionCore : System.Windows.Controls.Grid
+    public class SampleUIExtensionCore : System.Windows.Controls.Grid, ITDLUIExtension
     {
         public SampleUIExtensionCore()
         {
             InitializeComponent();
         }
 
-        public void SetTheme(TDLTheme theme)
+        public void SetUITheme(TDLTheme theme)
         {
             System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
 
@@ -252,7 +252,7 @@ namespace SampleUIExtension
 		    return false;
     	}
 
-	    public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, System.Windows.Point pt)
+        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 	    {
 		    return false;
 	    }
@@ -266,14 +266,14 @@ namespace SampleUIExtension
 		    return false;
 	    }
 
-	    public bool GetLabelEditRect(System.Windows.Rect pEdit)
+	    public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 	    {
 			return false;
 	    }
 
-        public TDLUIExtension.HitTest HitTest(System.Windows.Point ptScreen)
+        public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 	    {
-            return TDLUIExtension.HitTest.Nowhere;
+            return TDLUIExtension.HitResult.Nowhere;
 	    }
 
         public void SetReadOnly(bool bReadOnly)

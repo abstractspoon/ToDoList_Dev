@@ -163,14 +163,13 @@ bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
-	msclr::auto_gcroot<System::Windows::Point^> pt = gcnew System::Windows::Point(pMsg->pt.x, pMsg->pt.y);
-
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
 								 pMsg->message, 
 								 pMsg->wParam, 
 								 pMsg->lParam, 
 								 pMsg->time, 
-								 *pt.get());
+								 pMsg->pt.x,
+								 pMsg->pt.y);
 }
 
 void CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
@@ -185,33 +184,19 @@ bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD 
 
 bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
-	msclr::auto_gcroot<System::Windows::Rect^> rect = gcnew System::Windows::Rect(0, 0, 0, 0);
-
-	if (m_wnd->GetLabelEditRect(*rect.get()))
-	{
-		pEdit->left = static_cast<LONG>(rect->Left);
-		pEdit->top = static_cast<LONG>(rect->Top);
-		pEdit->right = static_cast<LONG>(rect->Right);
-		pEdit->bottom = static_cast<LONG>(rect->Bottom);
-
-		return true;
-	}
-
-	return false;
+	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
 IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
 {
-	msclr::auto_gcroot<System::Windows::Point^> pt = gcnew System::Windows::Point(ptScreen.x, ptScreen.y);
-
-	return TDLUIExtension::Map(m_wnd->HitTest(*pt.get()));
+	return TDLUIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
 }
 
 void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<TDLTheme^> theme = gcnew TDLTheme(pTheme);
 
-    m_wnd->SetTheme(theme.get());
+    m_wnd->SetUITheme(theme.get());
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
