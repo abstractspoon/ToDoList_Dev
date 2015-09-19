@@ -21,14 +21,7 @@ namespace SampleUIExtension
             InitializeComponent();
         }
 
-        public void SetUITheme(TDLTheme theme)
-        {
-            System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
-
-            this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
-        }
-
-        // IUIExtension -------------------------------------------------------------------------
+        // ITDLUIExtension ------------------------------------------------------------------
 
         public bool SelectTask(UInt32 dwTaskID)
         {
@@ -43,7 +36,7 @@ namespace SampleUIExtension
             return true;
         }
 
-	    public bool SelectTasks(UInt32[] pdwTaskIDs, int nTaskCount)
+	    public bool SelectTasks(UInt32[] pdwTaskIDs)
         {
             return false;
         }
@@ -275,6 +268,13 @@ namespace SampleUIExtension
 	    {
             return TDLUIExtension.HitResult.Nowhere;
 	    }
+
+        public void SetUITheme(TDLTheme theme)
+        {
+            System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
+
+            this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+        }
 
         public void SetReadOnly(bool bReadOnly)
 	    {

@@ -146,7 +146,7 @@ namespace TDLPluginHelpers
    public interface class ITDLUIExtension
    {
 	   bool SelectTask(UInt32 dwTaskID);
-	   bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs, int nTaskCount);
+	   bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs);
 
 	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, TDLUIExtension::TaskAttribute nEditAttribute);
 	   bool WantUpdate(TDLUIExtension::TaskAttribute nAttribute);

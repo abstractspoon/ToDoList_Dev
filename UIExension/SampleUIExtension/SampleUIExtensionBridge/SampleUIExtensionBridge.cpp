@@ -139,7 +139,10 @@ bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCou
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 
-    return m_wnd->SelectTasks(taskIDs, nTaskCount);
+	for (int i = 0; i < nTaskCount; i++)
+		taskIDs[i] = pdwTaskIDs[i];
+
+    return m_wnd->SelectTasks(taskIDs);
 }
 
 void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute)
