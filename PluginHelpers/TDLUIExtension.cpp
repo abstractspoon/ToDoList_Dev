@@ -74,7 +74,7 @@ Windows::Media::Color TDLTheme::GetToolbarTransparencyColor()
 Windows::Media::Color TDLTheme::GetColor(UInt32 rgbColor)
 {
 	System::Windows::Media::Color^ color = gcnew System::Windows::Media::Color();
-	color->FromArgb(255, GetRValue(rgbColor), GetGValue(rgbColor), GetBValue(rgbColor));
+	color->FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
 
 	return *color;
 }

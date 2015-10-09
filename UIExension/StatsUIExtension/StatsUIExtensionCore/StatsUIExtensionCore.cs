@@ -1,10 +1,7 @@
 ﻿
+// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 using System;
-using System.Windows.Forms.DataVisualization.Charting;
-
 using TDLPluginHelpers;
-
-// PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace StatsUIExtension
 {
@@ -27,15 +24,7 @@ namespace StatsUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-            SampleListItem item = new SampleListItem();
-
-            item.Value = dwTaskID.ToString();
-            item.Type = "Selection";
-
-            m_Items.Add(item);
-            m_ListView.Items.Refresh();
-
-            return true;
+            return false;
         }
 
 	    public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -233,8 +222,8 @@ namespace StatsUIExtension
             }
 
 
-            m_Items.Add(item);
-            m_ListView.Items.Refresh();
+//             m_Items.Add(item);
+//             m_ListView.Items.Refresh();
         }
 
         public bool WantUpdate(TDLUIExtension.TaskAttribute attrib)
@@ -276,6 +265,8 @@ namespace StatsUIExtension
             System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
 
             this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+            //m_Chart.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -296,57 +287,31 @@ namespace StatsUIExtension
         {
             this.Background = System.Windows.Media.Brushes.White;
 
-            CreateListView();
-            PopulateListView();
+            CreateChart();
+            PopulateChart();
         }
 
-        private void CreateListView()
+        private void CreateChart()
         {
-            m_ListView = new System.Windows.Controls.ListView();
-            m_GridView = new System.Windows.Controls.GridView();
+            // Create a Chart
+            m_Chart = new System.Windows.Controls.DataVisualization.Charting.Chart();
+            m_Chart.Title = "New Stats";
+            m_Chart.Background = System.Windows.Media.Brushes.White;
+            m_Chart.BorderBrush = null;
 
-            m_TypeCol = new System.Windows.Controls.GridViewColumn();
-            m_TypeCol.DisplayMemberBinding = new System.Windows.Data.Binding("Type");
-            m_TypeCol.Header = "Change Type";
-            m_TypeCol.Width = 200;
-            m_GridView.Columns.Add(m_TypeCol);
-
-            m_AttribCol = new System.Windows.Controls.GridViewColumn();
-            m_AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
-            m_AttribCol.Header = "Attribute Changed";
-            m_AttribCol.Width = 200;
-            m_GridView.Columns.Add(m_AttribCol);
-
-            m_ValueCol = new System.Windows.Controls.GridViewColumn();
-            m_ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
-            m_ValueCol.Header = "New Value";
-            m_ValueCol.Width = 200;
-            m_GridView.Columns.Add(m_ValueCol);
-
-            m_TasksCol = new System.Windows.Controls.GridViewColumn();
-            m_TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
-            m_TasksCol.Header = "Tasks Changed";
-            m_TasksCol.Width = 200;
-            m_GridView.Columns.Add(m_TasksCol);
-
-            m_ListView.View = m_GridView;
-
-            this.Children.Add(m_ListView);
+            this.Children.Add(m_Chart);
         }
 
-        private void PopulateListView()
+        private void PopulateChart()
         {
-            m_Items = new System.Collections.Generic.List<SampleListItem>();
-            m_ListView.ItemsSource = m_Items;
+//             m_Items = new System.Collections.Generic.List<SampleListItem>();
+//             m_ListView.ItemsSource = m_Items;
+//             m_Chart.DataContext = m_Items;
         }
 
         // --------------------------------------------------------------------------------------
-        private System.Collections.Generic.List<SampleListItem> m_Items;
-        private System.Windows.Controls.ListView m_ListView;
-        private System.Windows.Controls.GridView m_GridView;
-        private System.Windows.Controls.GridViewColumn m_TypeCol;
-        private System.Windows.Controls.GridViewColumn m_AttribCol;
-        private System.Windows.Controls.GridViewColumn m_ValueCol;
-        private System.Windows.Controls.GridViewColumn m_TasksCol;
+        private System.Windows.Controls.DataVisualization.Charting.Chart m_Chart;
+        //private System.Windows.Controls.DataVisualization.Charting.ChartArea m_ChartArea;
+
     }
 }
