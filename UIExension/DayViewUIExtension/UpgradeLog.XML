@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="DayViewUIExtension">
+</Property><Property Name="Solution File" Value="D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\DayViewUIExtension.sln">
+</Property><Property Name="Date" Value="Friday, 16 October 2015">
+</Property><Property Name="Time" Value="22:54:12 PM">
+</Property></Properties><Event ErrorLevel="0" Project="DayView" Source="DayView\DayView.csproj" Description="Project file successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\DayView.csproj">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\AbstractRenderer.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\AbstractRenderer.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\Appointment.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\Appointment.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\AppointmentEventArgs.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\AppointmentEventArgs.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\DataBoundAppointment.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\DataBoundAppointment.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\DayView.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\DayView.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\DrawTool.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\DrawTool.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\ITool.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\ITool.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\NewAppointmentEvent.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\NewAppointmentEvent.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\Office12Renderer.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\Office12Renderer.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\Office11Renderer.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\Office11Renderer.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\Properties\AssemblyInfo.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\Properties\AssemblyInfo.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\ResolveAppointmentsEvent.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\ResolveAppointmentsEvent.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\Selection.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\Selection.cs">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\SelectionTool.cs" Description="File successfully backed up as D:\_code\ToDoList_Plugins\UIExension\DayViewUIExtension\Backup\SelectionTool.cs">
+</Event><Event ErrorLevel="1" Project="DayView" Source="DayView\DayView.csproj" Description="Your project is targeting .NET Framework 2.0 or 3.0. If your project uses assemblies requiring a newer .NET Framework, your project will fail to build. You can change the .NET Framework version by clicking Properties on the project menu and then selecting a new version in the '.NET Framework' dropdown box. (In Visual Basic, this is located on the Compile tab by clicking the 'Advanced Compiler Options...' button.)">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\DayView.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="DayView" Source="DayView\DayView.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="DayView" Source="DayView\DayView.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

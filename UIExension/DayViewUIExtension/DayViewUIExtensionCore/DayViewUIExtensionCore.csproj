@@ -69,9 +69,15 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DayView\DayView.csproj">
+      <Project>{D17A4D6A-4CAA-4470-8A19-F42463C021FD}</Project>
+      <Name>DayView</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) "$(SolutionDir)debug\DayViewUIExtensionCore.dll"</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath) "$(SolutionDir)debug\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
