@@ -14,7 +14,7 @@ namespace DayViewUIExtension
         public String Tasks { get; set; }
     }
 
-    public class DayViewUIExtensionCore : System.Windows.Controls.Grid, ITDLUIExtension
+    public class DayViewUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
     {
         public DayViewUIExtensionCore()
         {
@@ -31,7 +31,7 @@ namespace DayViewUIExtension
             item.Type = "Selection";
 
             m_Items.Add(item);
-            m_ListView.Items.Refresh();
+            //m_ListView.Items.Refresh();
 
             return true;
         }
@@ -232,7 +232,7 @@ namespace DayViewUIExtension
 
 
             m_Items.Add(item);
-            m_ListView.Items.Refresh();
+            //m_ListView.Items.Refresh();
         }
 
         public bool WantUpdate(TDLUIExtension.TaskAttribute attrib)
@@ -271,9 +271,9 @@ namespace DayViewUIExtension
 
         public void SetUITheme(TDLTheme theme)
         {
-            System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
+            System.Windows.Media.Color temp = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
 
-            this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+            this.BackColor = System.Drawing.Color.FromArgb(temp.R, temp.G, temp.B);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -292,7 +292,7 @@ namespace DayViewUIExtension
 
         private void InitializeComponent()
         {
-            this.Background = System.Windows.Media.Brushes.White;
+            this.BackColor = System.Drawing.Color.White;
 
             CreateListView();
             PopulateListView();
@@ -300,51 +300,50 @@ namespace DayViewUIExtension
 
         private void CreateListView()
         {
-            m_ListView = new System.Windows.Controls.ListView();
-            m_GridView = new System.Windows.Controls.GridView();
+            m_ListView = new System.Windows.Forms.ListView();
+            m_ListView.View = System.Windows.Forms.View.Details;
 
-            m_TypeCol = new System.Windows.Controls.GridViewColumn();
-            m_TypeCol.DisplayMemberBinding = new System.Windows.Data.Binding("Type");
-            m_TypeCol.Header = "Change Type";
+            m_TypeCol = new System.Windows.Forms.ColumnHeader();
+            //m_TypeCol.DisplayMemberBinding = new System.Windows.Data.Binding("Type");
+            m_TypeCol.Name = "Change Type";
             m_TypeCol.Width = 200;
-            m_GridView.Columns.Add(m_TypeCol);
+            m_ListView.Columns.Add(m_TypeCol);
 
-            m_AttribCol = new System.Windows.Controls.GridViewColumn();
-            m_AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
-            m_AttribCol.Header = "Attribute Changed";
+            m_AttribCol = new System.Windows.Forms.ColumnHeader();
+            //m_AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
+            m_AttribCol.Name = "Attribute Changed";
             m_AttribCol.Width = 200;
-            m_GridView.Columns.Add(m_AttribCol);
+            m_ListView.Columns.Add(m_AttribCol);
 
-            m_ValueCol = new System.Windows.Controls.GridViewColumn();
-            m_ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
-            m_ValueCol.Header = "New Value";
+            m_ValueCol = new System.Windows.Forms.ColumnHeader();
+            //m_ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
+            m_ValueCol.Name = "New Value";
             m_ValueCol.Width = 200;
-            m_GridView.Columns.Add(m_ValueCol);
+            m_ListView.Columns.Add(m_ValueCol);
 
-            m_TasksCol = new System.Windows.Controls.GridViewColumn();
-            m_TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
-            m_TasksCol.Header = "Tasks Changed";
+            m_TasksCol = new System.Windows.Forms.ColumnHeader();
+            //m_TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
+            m_TasksCol.Name = "Tasks Changed";
             m_TasksCol.Width = 200;
-            m_GridView.Columns.Add(m_TasksCol);
+            m_ListView.Columns.Add(m_TasksCol);
 
-            m_ListView.View = m_GridView;
+            m_ListView.Update();
 
-            this.Children.Add(m_ListView);
+            this.Controls.Add(m_ListView);
         }
 
         private void PopulateListView()
         {
-            m_Items = new System.Collections.Generic.List<SampleListItem>();
-            m_ListView.ItemsSource = m_Items;
+//             m_Items = new System.Collections.Generic.List<SampleListItem>();
+//             m_ListView.ItemsSource = m_Items;
         }
 
         // --------------------------------------------------------------------------------------
         private System.Collections.Generic.List<SampleListItem> m_Items;
-        private System.Windows.Controls.ListView m_ListView;
-        private System.Windows.Controls.GridView m_GridView;
-        private System.Windows.Controls.GridViewColumn m_TypeCol;
-        private System.Windows.Controls.GridViewColumn m_AttribCol;
-        private System.Windows.Controls.GridViewColumn m_ValueCol;
-        private System.Windows.Controls.GridViewColumn m_TasksCol;
+        private System.Windows.Forms.ListView m_ListView;
+        private System.Windows.Forms.ColumnHeader m_TypeCol;
+        private System.Windows.Forms.ColumnHeader m_AttribCol;
+        private System.Windows.Forms.ColumnHeader m_ValueCol;
+        private System.Windows.Forms.ColumnHeader m_TasksCol;
     }
 }

@@ -93,25 +93,19 @@ void CDayViewUIExtensionBridgeWindow::Release()
 BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
             long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   m_source = gcnew System::Windows::Interop::HwndSource(
-      CS_VREDRAW | CS_HREDRAW,
-      nStyle,
-      0,
-      nLeft,
-      nTop,
-      nWidth,
-      nHeight,
-      "",
-      System::IntPtr(hwndParent));
+   m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore();
 
-   if (m_source->Handle != IntPtr::Zero)
+   HWND hWnd = GetHwnd();
+
+   if (hWnd)
    {
-      m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore();
-      m_source->RootVisual = m_wnd;
+      ::SetParent(hWnd, hwndParent);
+      ::SetWindowLong(hWnd, GWL_ID, nCtrlID);
+      ::MoveWindow(hWnd, nLeft, nTop, nWidth, nHeight, FALSE);
 
       return true;
    }
-
+        
    return false;
 }
 
@@ -209,7 +203,8 @@ void CDayViewUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CDayViewUIExtensionBridgeWindow::GetHwnd() const
 {
-   return static_cast<HWND>(m_source->Handle.ToPointer());
+//   return static_cast<HWND>(m_source->Handle.ToPointer());
+   return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
 void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

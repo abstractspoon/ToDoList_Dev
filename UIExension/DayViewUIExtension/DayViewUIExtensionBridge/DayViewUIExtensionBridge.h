@@ -63,7 +63,7 @@ public:
    
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;
-   gcroot<System::Windows::Interop::HwndSource^> m_source;
+   //gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
