@@ -109,21 +109,16 @@ CMDContentBridgeControl::CMDContentBridgeControl()
 BOOL CMDContentBridgeControl::Create(UINT nCtrlID, DWORD nStyle, 
                                      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   m_source = gcnew System::Windows::Interop::HwndSource(
-      CS_VREDRAW | CS_HREDRAW,
-      nStyle,
-      0,
-      nLeft,
-      nTop,
-      nWidth,
-      nHeight,
-      "",
-      System::IntPtr(hwndParent));
+   m_wnd = gcnew MDContentControl::MDContentControlCore();
 
-   if (m_source->Handle != IntPtr::Zero)
+   HWND hWnd = GetHwnd();
+
+   if (hWnd)
    {
-      m_wnd = gcnew MDContentControl::MDContentControlCore();
-      m_source->RootVisual = m_wnd;
+      ::SetParent(hWnd, hwndParent);
+      ::SetWindowLong(hWnd, GWL_ID, nCtrlID);
+      ::SetWindowLong(hWnd, GWL_STYLE, nStyle);
+      ::MoveWindow(hWnd, nLeft, nTop, nWidth, nHeight, FALSE);
 
       return true;
    }
@@ -164,7 +159,8 @@ void CMDContentBridgeControl::SetReadOnly(bool bReadOnly)
 
 HWND CMDContentBridgeControl::GetHwnd() const
 {
-   return NULL;
+   //return NULL;
+   return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
 void CMDContentBridgeControl::Release()

@@ -72,7 +72,7 @@ public:
 
 protected:
    gcroot<MDContentControlCore^> m_wnd;
-   gcroot<System::Windows::Interop::HwndSource^> m_source;
+   //gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
