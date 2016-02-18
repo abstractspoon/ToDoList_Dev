@@ -9,6 +9,8 @@
 
 #include "..\..\..\Interfaces\ITransText.h"
 #include "..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\Interfaces\UITheme.h"
+#include "..\..\..\Interfaces\ISpellcheck.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -82,6 +84,19 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
    return pCtrl;
 }
 
+// returns the length of the html or zero if not supported
+int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
+                  LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
+{
+   szHtml = nullptr;
+   return 0;
+}
+
+void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
+{
+   delete [] szHtml;
+   szHtml = nullptr;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -96,14 +96,9 @@
     <Reference Include="MDContentControlCore">
       <HintPath>..\Debug\MDContentControlCore.dll</HintPath>
     </Reference>
-    <Reference Include="PluginHelpers">
-      <HintPath>..\..\..\ImportExport\SampleImpExp\Debug\PluginHelpers.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="System.Windows.Controls.DataVisualization.Toolkit">
-      <HintPath>..\..\..\UIExension\StatsUIExtension\Debug\system.windows.controls.datavisualization.toolkit.dll</HintPath>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
