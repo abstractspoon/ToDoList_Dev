@@ -21,15 +21,6 @@
  * History: Milan ported the Markdown processor to C#. He granted license to me so I can open source it
  * and let the community contribute to and improve MarkdownSharp.
  * 
- * Adapted for use with the MarkdownLog project and FluentTestFramework in May 2014
- * by Stuart Wheelwright:
- * 
- *   - I removed options that weren't available in Portable Class Libraries (Regex.Compiled and
- *     System.Configuration)
- *   - I changed the namespace to match the rest of the project to reduce the need for namespace
- *     qualification or an extra using directive
- *   - Changed the class name to avoid confusion. The previous name "Markdown" could be confused
- *     with a chunk of Markdown text
  */
 
 #region Copyright and license
@@ -94,11 +85,13 @@ software, even if advised of the possibility of such damage.
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MarkdownLog
+namespace MarkdownSharp
 {
+
     public class MarkdownOptions
     {
         /// <summary>
@@ -138,20 +131,66 @@ namespace MarkdownLog
     /// Markdown allows you to write using an easy-to-read, easy-to-write plain text format, 
     /// then convert it to structurally valid XHTML (or HTML).
     /// </summary>
-    public class MarkdownToHtmlConverter
+    public class Markdown
     {
         private const string _version = "1.13";
 
         #region Constructors and Options
 
-        public MarkdownToHtmlConverter()
+        /// <summary>
+        /// Create a new Markdown instance using default options
+        /// </summary>
+        public Markdown() : this(false)
         {
+        }
+
+        /// <summary>
+        /// Create a new Markdown instance and optionally load options from a configuration
+        /// file. There they should be stored in the appSettings section, available options are:
+        /// 
+        ///     Markdown.StrictBoldItalic (true/false)
+        ///     Markdown.EmptyElementSuffix (">" or " />" without the quotes)
+        ///     Markdown.LinkEmails (true/false)
+        ///     Markdown.AutoNewLines (true/false)
+        ///     Markdown.AutoHyperlink (true/false)
+        ///     Markdown.EncodeProblemUrlCharacters (true/false) 
+        ///     
+        /// </summary>
+        public Markdown(bool loadOptionsFromConfigFile)
+        {
+            if (!loadOptionsFromConfigFile) return;
+
+            var settings = ConfigurationManager.AppSettings;
+            foreach (string key in settings.Keys)
+            {
+                switch (key)
+                {
+                    case "Markdown.AutoHyperlink":
+                        _autoHyperlink = Convert.ToBoolean(settings[key]);
+                        break;
+                    case "Markdown.AutoNewlines":
+                        _autoNewlines = Convert.ToBoolean(settings[key]);
+                        break;
+                    case "Markdown.EmptyElementSuffix":
+                        _emptyElementSuffix = settings[key];
+                        break;
+                    case "Markdown.EncodeProblemUrlCharacters":
+                        _encodeProblemUrlCharacters = Convert.ToBoolean(settings[key]);
+                        break;
+                    case "Markdown.LinkEmails":
+                        _linkEmails = Convert.ToBoolean(settings[key]);
+                        break;
+                    case "Markdown.StrictBoldItalic":
+                        _strictBoldItalic = Convert.ToBoolean(settings[key]);
+                        break;
+                }
+            }
         }
 
         /// <summary>
         /// Create a new Markdown instance and set the options from the MarkdownOptions object.
         /// </summary>
-        public MarkdownToHtmlConverter(MarkdownOptions options)
+        public Markdown(MarkdownOptions options)
         {
             _autoHyperlink = options.AutoHyperlink;
             _autoNewlines = options.AutoNewlines;
@@ -258,7 +297,7 @@ namespace MarkdownLog
 
         private static readonly Dictionary<string, string> _escapeTable;
         private static readonly Dictionary<string, string> _invertedEscapeTable;
-        private static readonly Dictionary<string, string> _backslashEscapeTable;
+        private static readonly Dictionary<string, string> _backslashEscapeTable;        
 
         private readonly Dictionary<string, string> _urls = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _titles = new Dictionary<string, string>();
@@ -269,7 +308,7 @@ namespace MarkdownLog
         /// <summary>
         /// In the static constuctor we'll initialize what stays the same across all transforms.
         /// </summary>
-        static MarkdownToHtmlConverter()
+        static Markdown()
         {
             // Table of hash values for escaped characters:
             _escapeTable = new Dictionary<string, string>();
@@ -289,7 +328,7 @@ namespace MarkdownLog
                 backslashPattern += Regex.Escape(@"\" + key) + "|";
             }
 
-            _backslashEscapes = new Regex(backslashPattern.Substring(0, backslashPattern.Length - 1));
+            _backslashEscapes = new Regex(backslashPattern.Substring(0, backslashPattern.Length - 1), RegexOptions.Compiled);
         }
 
         /// <summary>
@@ -318,7 +357,7 @@ namespace MarkdownLog
             Setup();
 
             text = Normalize(text);
-
+           
             text = HashHTMLBlocks(text);
             text = StripLinkDefinitions(text);
             text = RunBlockGamut(text);
@@ -377,9 +416,9 @@ namespace MarkdownLog
             return text;
         }
 
-        private static Regex _newlinesLeadingTrailing = new Regex(@"^\n+|\n+\z");
-        private static Regex _newlinesMultiple = new Regex(@"\n{2,}");
-        private static Regex _leadingWhitespace = new Regex(@"^[ ]*");
+        private static Regex _newlinesLeadingTrailing = new Regex(@"^\n+|\n+\z", RegexOptions.Compiled);
+        private static Regex _newlinesMultiple = new Regex(@"\n{2,}", RegexOptions.Compiled);
+        private static Regex _leadingWhitespace = new Regex(@"^[ ]*", RegexOptions.Compiled);
 
         /// <summary>
         /// splits on two or more newlines, to form "paragraphs";    
@@ -389,7 +428,7 @@ namespace MarkdownLog
         {
             // split on two or more newlines
             string[] grafs = _newlinesMultiple.Split(_newlinesLeadingTrailing.Replace(text, ""));
-
+            
             for (int i = 0; i < grafs.Length; i++)
             {
                 if (grafs[i].StartsWith("\x1A"))
@@ -489,7 +528,7 @@ namespace MarkdownLog
                             ["")]
                             [ ]*
                         )?                      # title is optional
-                        (?:\n+|\Z)", _tabWidth - 1), RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+                        (?:\n+|\Z)", _tabWidth - 1), RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Strips link definitions from text, stores the URLs and titles in hash references.
@@ -688,7 +727,7 @@ namespace MarkdownLog
             RepeatString(@" 
             (<[A-Za-z\/!$](?:[^<>]|", _nestDepth) + RepeatString(@")*>)", _nestDepth) +
                                        " # match <tag> and </tag>",
-            RegexOptions.Multiline | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace );
+            RegexOptions.Multiline | RegexOptions.Singleline | RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// returns an array of HTML tokens comprising the input string. Each token is 
@@ -735,7 +774,7 @@ namespace MarkdownLog
                 \[
                     (.*?)                   # id = $3
                 \]
-            )", GetNestedBracketsPattern()), RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace );
+            )", GetNestedBracketsPattern()), RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         private static Regex _anchorInline = new Regex(string.Format(@"
                 (                           # wrap whole match in $1
@@ -754,14 +793,14 @@ namespace MarkdownLog
                         )?                  # title is optional
                     \)
                 )", GetNestedBracketsPattern(), GetNestedParensPattern()),
-                  RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace );
+                  RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         private static Regex _anchorRefShortcut = new Regex(@"
             (                               # wrap whole match in $1
               \[
                  ([^\[\]]+)                 # link text = $2; can't contain [ or ]
               \]
-            )", RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace );
+            )", RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown link shortcuts into HTML anchor tags
@@ -803,7 +842,7 @@ namespace MarkdownLog
                 string url = _urls[linkID];
 
                 url = EncodeProblemUrlChars(url);
-                url = EscapeBoldItalic(url);
+                url = EscapeBoldItalic(url);                
                 result = "<a href=\"" + url + "\"";
 
                 if (_titles.ContainsKey(linkID))
@@ -834,7 +873,7 @@ namespace MarkdownLog
                 string url = _urls[linkID];
 
                 url = EncodeProblemUrlChars(url);
-                url = EscapeBoldItalic(url);
+                url = EscapeBoldItalic(url);                
                 result = "<a href=\"" + url + "\"";
 
                 if (_titles.ContainsKey(linkID))
@@ -891,7 +930,7 @@ namespace MarkdownLog
                         (.*?)       # id = $3
                     \]
 
-                    )", RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+                    )", RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
 
         private static Regex _imagesInline = new Regex(String.Format(@"
               (                     # wrap whole match in $1
@@ -911,7 +950,7 @@ namespace MarkdownLog
                     )?              # title is optional
                 \)
               )", GetNestedParensPattern()),
-                  RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+                  RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown image shortcuts into HTML img tags. 
@@ -949,7 +988,7 @@ namespace MarkdownLog
             {
                 string url = _urls[linkID];
                 url = EncodeProblemUrlChars(url);
-                url = EscapeBoldItalic(url);
+                url = EscapeBoldItalic(url);                
                 result = string.Format("<img src=\"{0}\" alt=\"{1}\"", url, altText);
 
                 if (_titles.ContainsKey(linkID))
@@ -980,7 +1019,7 @@ namespace MarkdownLog
 
             alt = alt.Replace("\"", "&quot;");
             title = title.Replace("\"", "&quot;");
-
+            
             if (url.StartsWith("<") && url.EndsWith(">"))
                 url = url.Substring(1, url.Length - 2);    // Remove <>'s surrounding URL, if present
             url = EncodeProblemUrlChars(url);
@@ -1006,7 +1045,7 @@ namespace MarkdownLog
                 (=+|-+)     # $1 = string of ='s or -'s
                 [ ]*
                 \n+",
-            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         private static Regex _headerAtx = new Regex(@"
                 ^(\#{1,6})  # $1 = string of #'s
@@ -1015,7 +1054,7 @@ namespace MarkdownLog
                 [ ]*
                 \#*         # optional closing #'s (not counted)
                 \n+",
-            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown headers into HTML header tags
@@ -1064,7 +1103,7 @@ namespace MarkdownLog
                 ){2,}         # Group repeated at least twice
                 [ ]*          # Trailing spaces
                 $             # End of line.
-            ", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+            ", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown horizontal rules into HTML hr tags
@@ -1101,10 +1140,10 @@ namespace MarkdownLog
             )", string.Format("(?:{0}|{1})", _markerUL, _markerOL), _tabWidth - 1);
 
         private static Regex _listNested = new Regex(@"^" + _wholeList,
-            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         private static Regex _listTopLevel = new Regex(@"(?:(?<=\n\n)|\A\n?)" + _wholeList,
-            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown lists into HTML ul and ol and li tags
@@ -1211,7 +1250,7 @@ namespace MarkdownLog
                     )+
                     )
                     ((?=^[ ]{{0,{0}}}\S)|\Z) # Lookahead for non-space at line-start, or end of doc",
-                    _tabWidth), RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace );
+                    _tabWidth), RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         /// <summary>
         /// /// Turn Markdown 4-space indented code into HTML pre code blocks
@@ -1238,7 +1277,7 @@ namespace MarkdownLog
                     (.+?)     # $2 = The code block
                     (?<!`)
                     \1
-                    (?!`)", RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+                    (?!`)", RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown `code spans` into HTML code tags
@@ -1282,14 +1321,14 @@ namespace MarkdownLog
 
 
         private static Regex _bold = new Regex(@"(\*\*|__) (?=\S) (.+?[*_]*) (?<=\S) \1",
-            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
         private static Regex _strictBold = new Regex(@"([\W_]|^) (\*\*|__) (?=\S) ([^\r]*?\S[\*_]*) \2 ([\W_]|$)",
-            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
 
         private static Regex _italic = new Regex(@"(\*|_) (?=\S) (.+?) (?<=\S) \1",
-            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
         private static Regex _strictItalic = new Regex(@"([\W_]|^) (\*|_) (?=\S) ([^\r\*_]*?\S) \2 ([\W_]|$)",
-            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline );
+            RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown *italics* and **bold** into HTML strong and em tags
@@ -1331,7 +1370,7 @@ namespace MarkdownLog
                 (.+\n)*                 # subsequent consecutive lines
                 \n*                     # blanks
                 )+
-            )", RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline );
+            )", RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn Markdown > quoted blocks into HTML blockquote blocks
@@ -1363,7 +1402,7 @@ namespace MarkdownLog
         }
 
         private static Regex _autolinkBare = new Regex(@"(^|\s)(https?|ftp)(://[-A-Z0-9+&@#/%?=~_|\[\]\(\)!:,\.;]*[-A-Z0-9+&@#/%=~_|\[\]])($|\W)",
-            RegexOptions.IgnoreCase );
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>
         /// Turn angle-delimited URLs into HTML anchor tags
@@ -1440,7 +1479,7 @@ namespace MarkdownLog
         }
 
 
-        private static Regex _outDent = new Regex(@"^[ ]{1," + _tabWidth + @"}", RegexOptions.Multiline);
+        private static Regex _outDent = new Regex(@"^[ ]{1," + _tabWidth + @"}", RegexOptions.Multiline | RegexOptions.Compiled);
 
         /// <summary>
         /// Remove one level of line-leading spaces
@@ -1477,7 +1516,7 @@ namespace MarkdownLog
             return sb.ToString();
         }
 
-        private static Regex _codeEncoder = new Regex(@"&|<|>|\\|\*|_|\{|\}|\[|\]");
+        private static Regex _codeEncoder = new Regex(@"&|<|>|\\|\*|_|\{|\}|\[|\]", RegexOptions.Compiled);
 
         /// <summary>
         /// Encode/escape certain Markdown characters inside code blocks and spans where they are literals
@@ -1506,8 +1545,8 @@ namespace MarkdownLog
         }
 
 
-        private static Regex _amps = new Regex(@"&(?!(#[0-9]+)|(#[xX][a-fA-F0-9])|([a-zA-Z][a-zA-Z0-9]*);)", RegexOptions.ExplicitCapture );
-        private static Regex _angles = new Regex(@"<(?![A-Za-z/?\$!])", RegexOptions.ExplicitCapture );
+        private static Regex _amps = new Regex(@"&(?!(#[0-9]+)|(#[xX][a-fA-F0-9])|([a-zA-Z][a-zA-Z0-9]*);)", RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+        private static Regex _angles = new Regex(@"<(?![A-Za-z/?\$!])", RegexOptions.ExplicitCapture | RegexOptions.Compiled);
 
         /// <summary>
         /// Encode any ampersands (that aren't part of an HTML entity) and left or right angle brackets
@@ -1519,7 +1558,7 @@ namespace MarkdownLog
             return s;
         }
 
-        private static Regex _backslashEscapes;
+        private static Regex _backslashEscapes; 
 
         /// <summary>
         /// Encodes any escaped characters such as \`, \*, \[ etc
@@ -1532,8 +1571,8 @@ namespace MarkdownLog
         {
             return _backslashEscapeTable[match.Value];
         }
-
-        private static Regex _unescapes = new Regex("\x1A\\d+\x1A");
+       
+        private static Regex _unescapes = new Regex("\x1A\\d+\x1A", RegexOptions.Compiled);
 
         /// <summary>
         /// swap back in all the special characters we've hidden
@@ -1581,7 +1620,7 @@ namespace MarkdownLog
                 if (encode)
                     sb.Append("%" + String.Format("{0:x}", (byte)c));
                 else
-                    sb.Append(c);
+                    sb.Append(c);                
             }
 
             return sb.ToString();
@@ -1626,7 +1665,7 @@ namespace MarkdownLog
         /// removes any blank lines (only spaces) in the text
         /// </summary>
         private string Normalize(string text)
-        {
+        {            
             var output = new StringBuilder(text.Length);
             var line = new StringBuilder();
             bool valid = false;
