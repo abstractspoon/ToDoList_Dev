@@ -40,7 +40,7 @@ namespace MarkdownEditor
             string outputHtml = markdown.Transform(inputTextBox.Text);
 
             outputWebBrowser.DocumentText = Style + outputHtml;
-            outputRichTextBox.Text = outputHtml;
+            //outputRichTextBox.Text = outputHtml;
         }
 
         private void alternateHorizontalVerticalLayoutToolStripMenuItem_Click(object sender, EventArgs e)

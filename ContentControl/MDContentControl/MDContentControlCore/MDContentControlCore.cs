@@ -64,7 +64,5 @@ namespace MDContentControl
             this.ResumeLayout(false);
             this.PerformLayout();
         }
-
     }
-
 }
