@@ -20,6 +20,16 @@
             base.Dispose(disposing);
         }
 
+        protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+        {
+            // Do Nothing
+        }
+
+        protected override void OnPaintBackground(System.Windows.Forms.PaintEventArgs e)
+        {
+            // Do Nothing
+        }
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -89,7 +99,7 @@
             this.outputTabControl.Location = new System.Drawing.Point(0, 6);
             this.outputTabControl.Name = "outputTabControl";
             this.outputTabControl.SelectedIndex = 0;
-            this.outputTabControl.Size = new System.Drawing.Size(606, 286);
+            this.outputTabControl.Size = new System.Drawing.Size(605, 290);
             this.outputTabControl.TabIndex = 0;
             // 
             // htmlOutputTabPage
@@ -158,7 +168,6 @@
             this.rawOutputTabPage.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -170,6 +179,7 @@
         private System.Windows.Forms.TabPage htmlOutputTabPage;
         private System.Windows.Forms.TabPage rawOutputTabPage;
         private System.Windows.Forms.TextBox inputTextBox;
+
     }
 }
 

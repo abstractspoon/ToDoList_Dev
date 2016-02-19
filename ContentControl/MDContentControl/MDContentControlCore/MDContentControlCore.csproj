@@ -60,11 +60,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarkdownSharpEditorForm.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="MarkdownSharpEditorForm.Designer.cs" />
     <Compile Include="MDContentControlCore.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
