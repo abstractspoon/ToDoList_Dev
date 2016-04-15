@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{92FEFDB8-3F95-4404-A620-8003B51C5A53}</ProjectGuid>
+    <ProjectGuid>{0426FC20-91CD-4459-9E4D-88493A25BEE2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SampleImpExp</RootNamespace>

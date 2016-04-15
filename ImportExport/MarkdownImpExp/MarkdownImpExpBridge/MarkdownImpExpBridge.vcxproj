@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}</ProjectGuid>
+    <ProjectGuid>{4BD0C76E-2582-470F-9468-FDC94389159F}</ProjectGuid>
     <RootNamespace>MarkdownImpExpBridge</RootNamespace>
     <ProjectName>MarkdownImpExpBridge</ProjectName>
   </PropertyGroup>

@@ -5,7 +5,7 @@
 #include "pluginhelpers.h"
 #include "TDLTasklist.h"
 
-#include "..\Interfaces\ITasklist.h"
+#include "..\..\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -434,25 +434,25 @@ Boolean TDLTask::IsFlagged()
 
 // ---------------------------------------------------------
 
-double TDLTask::GetTimeEstimate(Char% cUnits)
+double TDLTask::GetTimeEstimate(TimeUnits% cUnits)
 {
-   WCHAR nUnits = 0;
+   TDC_UNITS nUnits = TDCU_NULL;
 
    double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) :
                   (m_pTaskList ? m_pTaskList->GetTaskTimeEstimate(m_hTask, nUnits, FALSE) : 0.0));
 
-   cUnits = nUnits;
+   cUnits = Map(nUnits);
    return dTime;
 }
 
-double TDLTask::GetTimeSpent(Char% cUnits)
+double TDLTask::GetTimeSpent(TimeUnits% cUnits)
 {
-   WCHAR nUnits = 0;
+   TDC_UNITS nUnits = TDCU_NULL;
 
    double dTime = (m_pConstTaskList ? m_pConstTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) :
                   (m_pTaskList ? m_pTaskList->GetTaskTimeSpent(m_hTask, nUnits, FALSE) : 0.0));
 
-   cUnits = nUnits;
+   cUnits = Map(nUnits);
    return dTime;
 }
 
@@ -504,9 +504,9 @@ TDLTask^ TDLTaskList::NewTask(String^ sTitle)
    return gcnew TDLTask(m_pTaskList, hTask);
 }
 
-Boolean TDLTaskList::AddCustomAttribute(String^ sID, String^ sLabel)
+Boolean TDLTaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
 {
-   return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel)) : false);
+   return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn)) : false);
 }
 
 Boolean TDLTaskList::SetMetaData(String^ sKey, String^ sValue)
@@ -661,14 +661,14 @@ Boolean TDLTask::SetCreationDate(Int64 dtCreation)
    return SETTASKVAL(SetTaskCreationDate, dtCreation);
 }
 
-Boolean TDLTask::SetTimeEstimate(double dTime, Char cUnits)
+Boolean TDLTask::SetTimeEstimate(double dTime, TimeUnits cUnits)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, cUnits) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, Map(cUnits)) : false);
 }
 
-Boolean TDLTask::SetTimeSpent(double dTime, Char cUnits)
+Boolean TDLTask::SetTimeSpent(double dTime, TimeUnits cUnits)
 {
-   return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, cUnits) : false);
+   return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, Map(cUnits)) : false);
 }
 
 Boolean TDLTask::SetCustomAttributeData(String^ sID, String^ sValue)
@@ -689,6 +689,40 @@ Boolean TDLTask::SetMetaData(String^ sKey, String^ sValue)
 Boolean TDLTask::ClearMetaData(String^ sKey)
 {
    return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
+}
+
+TDLTask::TimeUnits TDLTask::Map(TDC_UNITS units)
+{
+	switch (units)
+	{
+	case TDCU_MINS:		return TimeUnits::Minutes;
+	case TDCU_HOURS:	return TimeUnits::Hours;
+	case TDCU_DAYS:		return TimeUnits::Days;
+	case TDCU_WEEKDAYS:	return TimeUnits::Weekdays;
+	case TDCU_WEEKS:	return TimeUnits::Weeks;
+	case TDCU_MONTHS:	return TimeUnits::Months;
+	case TDCU_YEARS:	return TimeUnits::Years;
+	}
+
+	// default
+	return TimeUnits::Unknown;
+}
+
+TDC_UNITS TDLTask::Map(TimeUnits units)
+{
+	switch (units)
+	{
+	case TimeUnits::Minutes:	return TDCU_MINS;
+	case TimeUnits::Hours:		return TDCU_HOURS;
+	case TimeUnits::Days:		return TDCU_DAYS;
+	case TimeUnits::Weekdays:	return TDCU_WEEKDAYS;
+	case TimeUnits::Weeks:		return TDCU_WEEKS;
+	case TimeUnits::Months:		return TDCU_MONTHS;
+	case TimeUnits::Years:		return TDCU_YEARS;
+	}
+
+	// default
+	return TDCU_NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,8 +5,8 @@
 #include "pluginhelpers.h"
 #include "TDLUIExtension.h"
 
-#include "..\Interfaces\UITheme.h"
-#include "..\Interfaces\IUIExtension.h"
+#include "..\..\Interfaces\UITheme.h"
+#include "..\..\Interfaces\IUIExtension.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

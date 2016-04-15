@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}</ProjectGuid>
+    <ProjectGuid>{1F5D0DCB-897F-42B7-8A6C-70DD5602570E}</ProjectGuid>
     <RootNamespace>StatsUIExtensionBridge</RootNamespace>
     <ProjectName>StatsUIExtensionBridge</ProjectName>
   </PropertyGroup>

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{92FEFDB8-3F95-4404-A620-8003B51C5A53}</ProjectGuid>
+    <ProjectGuid>{FA1F07F6-7653-4FB8-8BEC-91C5B381C0DD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MarkdownImpExp</RootNamespace>

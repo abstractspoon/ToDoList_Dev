@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}</ProjectGuid>
+    <ProjectGuid>{A0B7AFF0-BAD0-499F-8111-D16B8E596286}</ProjectGuid>
     <RootNamespace>SampleImpExpBridge</RootNamespace>
     <ProjectName>SampleImpExpBridge</ProjectName>
   </PropertyGroup>

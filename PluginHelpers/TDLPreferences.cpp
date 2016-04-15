@@ -5,7 +5,7 @@
 #include "pluginhelpers.h"
 #include "TDLPreferences.h"
 
-#include "..\Interfaces\IPreferences.h"
+#include "..\..\Interfaces\IPreferences.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

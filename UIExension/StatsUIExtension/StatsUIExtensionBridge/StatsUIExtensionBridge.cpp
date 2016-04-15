@@ -8,10 +8,10 @@
 #include "resource.h"
 #include "StatsUIExtensionBridge.h"
 
-#include "..\..\..\Interfaces\ITasklist.h"
-#include "..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\Interfaces\IPreferences.h"
-#include "..\..\..\Interfaces\UITheme.h"
+#include "..\..\..\..\Interfaces\ITasklist.h"
+#include "..\..\..\..\Interfaces\ITransText.h"
+#include "..\..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\..\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -7,9 +7,9 @@
 #include "stdafx.h"
 #include "SampleImpExpBridge.h"
 
-#include "..\..\..\Interfaces\ITasklist.h"
-#include "..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\..\Interfaces\ITasklist.h"
+#include "..\..\..\..\Interfaces\ITransText.h"
+#include "..\..\..\..\Interfaces\IPreferences.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

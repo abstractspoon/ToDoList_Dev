@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}</ProjectGuid>
+    <ProjectGuid>{E687CC37-AA5B-4E28-91B9-A0E72B0E9B7D}</ProjectGuid>
     <RootNamespace>SampleUIExtensionBridge</RootNamespace>
     <ProjectName>SampleUIExtensionBridge</ProjectName>
   </PropertyGroup>

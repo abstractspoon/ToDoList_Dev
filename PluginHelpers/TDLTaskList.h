@@ -6,6 +6,7 @@ class IPreferences;
 class ITaskList;
 class ITaskList14;
 class ITransText;
+enum TDC_UNITS;
 
 struct UITHEME;
 
@@ -25,9 +26,22 @@ using namespace System;
 
 namespace TDLPluginHelpers
 {
-
    public ref class TDLTask
    {
+   public:
+	   enum class TimeUnits
+	   {
+		   Unknown = -1,
+
+		   Minutes,
+		   Hours,
+		   Days,
+		   Weekdays,
+		   Weeks,
+		   Months,
+		   Years,
+	   };
+
    public:
       TDLTask(ITaskList* pTaskList, HTASKITEM hTask);        // GET & SET
       TDLTask(const ITaskList* pTaskList, HTASKITEM hTask);  // GET ONLY
@@ -90,8 +104,8 @@ namespace TDLPluginHelpers
       Boolean IsGoodAsDone();
       Boolean IsFlagged();
       
-      double GetTimeEstimate(Char% cUnits);
-      double GetTimeSpent(Char% cUnits);
+      double GetTimeEstimate(TimeUnits% cUnits);
+      double GetTimeSpent(TimeUnits% cUnits);
 
       Boolean GetRecurrence(); // TODO
       Boolean HasAttribute(String^ sAttrib);
@@ -134,8 +148,8 @@ namespace TDLPluginHelpers
       Boolean SetStartDate(Int64 dtStart);
       Boolean SetCreationDate(Int64 dtCreation);
 
-      Boolean SetTimeEstimate(double dTime, Char cUnits);
-      Boolean SetTimeSpent(double dTime, Char cUnits);
+      Boolean SetTimeEstimate(double dTime, TimeUnits cUnits);
+      Boolean SetTimeSpent(double dTime, TimeUnits cUnits);
       Boolean SetCustomAttributeData(String^ sID, String^ sValue);
       Boolean ClearCustomAttributeData(String^ sID);
       Boolean SetMetaData(String^ sKey, String^ sValue);
@@ -148,6 +162,9 @@ namespace TDLPluginHelpers
 
    private: // -------------------------------------------------------
       TDLTask();
+
+	  static TimeUnits Map(TDC_UNITS units);
+	  static TDC_UNITS Map(TimeUnits units);
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +192,7 @@ namespace TDLPluginHelpers
       TDLTask^ GetFirstTask();
       TDLTask^ NewTask(String^ sTitle);
       
-      Boolean AddCustomAttribute(String^ sID, String^ sLabel);
+      Boolean AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
       Boolean SetMetaData(String^ sKey, String^ sValue);
       Boolean ClearMetaData(String^ sKey);
 
