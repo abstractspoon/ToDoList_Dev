@@ -57,7 +57,7 @@ namespace DayViewUIExtension
 
         private void PopulateDayView()
         {
-            // TODO
+            m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
         }
 
         // ITDLUIExtension ------------------------------------------------------------------
