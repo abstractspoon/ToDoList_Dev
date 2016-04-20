@@ -16,6 +16,7 @@ public:
    void Release(); // releases the interface
 
    void SetLocalizer(ITransText* pTT);
+   HICON GetIcon(void) const;
 
    LPCTSTR GetMenuText() const;
    LPCTSTR GetFileFilter() const;

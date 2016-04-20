@@ -13,10 +13,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\Debug\SampleImpExpCore.dll>
+#using <..\..\..\Debug\SampleImpExpCore.dll>
 #include <msclr\auto_gcroot.h>
 
-#using <..\Debug\PluginHelpers.dll> as_friend
+#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 using namespace SampleImpExp;
 using namespace System;
@@ -41,6 +41,12 @@ void CSampleImpExpBridge::Release()
 void CSampleImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
 {
 	// TODO
+}
+
+HICON CSampleImpExpBridge::GetIcon(void) const
+{
+	// TODO
+	return NULL;
 }
 
 LPCTSTR CSampleImpExpBridge::GetMenuText() const

@@ -88,12 +88,14 @@
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="SampleUIExtensionCore">
-      <HintPath>..\Debug\SampleUIExtensionCore.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SampleUIExtensionCore\SampleUIExtensionCore.csproj">
+      <Project>{828b1da8-d72c-446b-b601-5117985691ad}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

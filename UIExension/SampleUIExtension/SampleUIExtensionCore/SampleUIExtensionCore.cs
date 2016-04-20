@@ -111,7 +111,7 @@ namespace SampleUIExtension
                     {
                         item.Attrib = "Time Estimate";
 
-                        Char units = 'H';
+                        TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
                         item.Value = (task.GetTimeEstimate(ref units).ToString() + units);
                     }
                     break;
@@ -120,7 +120,7 @@ namespace SampleUIExtension
                     {
                         item.Attrib = "Time Spent";
 
-                        Char units = 'H';
+                        TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
                         item.Value = (task.GetTimeSpent(ref units).ToString() + units);
                     }
                     break;
@@ -250,8 +250,9 @@ namespace SampleUIExtension
 		    return false;
 	    }
 	   
-		public void DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+            return false;
 		}
 
 	    public bool CanDoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)

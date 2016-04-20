@@ -7,17 +7,17 @@
 #include "stdafx.h"
 #include "MDContentControlBridge.h"
 
-#include "..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\Interfaces\IPreferences.h"
-#include "..\..\..\Interfaces\UITheme.h"
-#include "..\..\..\Interfaces\ISpellcheck.h"
+#include "..\..\..\..\Interfaces\ITransText.h"
+#include "..\..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\..\Interfaces\UITheme.h"
+#include "..\..\..\..\Interfaces\ISpellcheck.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\Debug\MDContentControlCore.dll>
+#using <..\..\..\Debug\MDContentControlCore.dll>
 #include <msclr\auto_gcroot.h>
 
-#using <..\Debug\PluginHelpers.dll> as_friend
+#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 using namespace MDContentControl;
 using namespace System;
@@ -82,6 +82,17 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
    }
 
    return pCtrl;
+}
+
+void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+{
+   // TODO
+
+}
+
+void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey/*, bool bAppOnly*/)
+{
+   // TODO
 }
 
 // returns the length of the html or zero if not supported

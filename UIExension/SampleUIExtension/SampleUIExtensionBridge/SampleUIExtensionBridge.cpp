@@ -14,10 +14,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\Debug\SampleUIExtensionCore.dll>
+#using <..\..\..\Debug\SampleUIExtensionCore.dll>
 #include <msclr\auto_gcroot.h>
 
-#using <..\Debug\PluginHelpers.dll> as_friend
+#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +76,16 @@ IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
    }
 
    return pExtWnd;
+}
+
+void CSampleUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+{
+	// TODO
+}
+
+void CSampleUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+{
+	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,9 +185,9 @@ bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 								 pMsg->pt.y);
 }
 
-void CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-	m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
+	return m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
 }
 
 bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const

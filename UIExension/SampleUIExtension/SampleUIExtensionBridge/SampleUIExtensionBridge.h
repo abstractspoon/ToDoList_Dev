@@ -25,6 +25,10 @@ public:
    IUIExtensionWindow* CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
    void SetLocalizer(ITransText* pTT);
+
+   void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
+
 };
 
 class CSampleUIExtensionBridgeWindow : public IUIExtensionWindow
@@ -48,7 +52,7 @@ public:
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
-   void DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
+   bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates

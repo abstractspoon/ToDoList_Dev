@@ -89,9 +89,6 @@
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="StatsUIExtensionCore">
-      <HintPath>..\Debug\StatsUIExtensionCore.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
@@ -101,6 +98,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StatsUIExtensionBridge.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StatsUIExtensionCore\StatsUIExtensionCore.csproj">
+      <Project>{b3b64e1b-64f1-4835-838d-b5044244174e}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

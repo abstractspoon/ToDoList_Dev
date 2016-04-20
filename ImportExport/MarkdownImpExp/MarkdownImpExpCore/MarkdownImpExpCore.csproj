@@ -38,7 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MarkdownLog">
-      <HintPath>..\Debug\MarkdownLog.dll</HintPath>
+      <HintPath>..\MarkdownLog\bin\Debug\MarkdownLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -51,8 +51,14 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
-      <HintPath>..\Debug\PluginHelpers.dll</HintPath>
+      <HintPath>..\..\..\Debug\PluginHelpers.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ContentControl\MDContentControl\MarkdownSharp\MarkdownSharp.csproj">
+      <Project>{37619116-CCE8-465A-8B1F-081CA53364BB}</Project>
+      <Name>MarkdownSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

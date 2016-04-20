@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\Interfaces\IContentControl.h"
+#include "..\..\..\..\Interfaces\IContentControl.h"
 
 #include <vcclr.h>
 using namespace MDContentControl;
@@ -20,19 +20,22 @@ public:
    LPCWSTR GetTypeDescription() const;
 
    void SetLocalizer(ITransText* pTT);
+   void Release();
 
    IContentControl* CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
-   void Release();
 
    // returns the length of the html or zero if not supported
    int ConvertToHtml(const unsigned char* pContent, int nLength,
       LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir);
    void FreeHtmlBuffer(LPWSTR& szHtml);
 
-// protected:
-//    HICON m_hIcon;
+   void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey/*, bool bAppOnly*/);
+
+protected:
+   HICON m_hIcon;
 
 protected:
    ~CMDContentBridge();

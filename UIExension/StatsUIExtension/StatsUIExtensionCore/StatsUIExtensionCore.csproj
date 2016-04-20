@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
-      <HintPath>..\Debug\PluginHelpers.dll</HintPath>
+      <HintPath>..\..\..\Debug\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\Interfaces\IUIExtension.h"
+#include "..\..\..\..\Interfaces\IUIExtension.h"
 
 #include <vcclr.h>
 using namespace DayViewUIExtension;
@@ -25,6 +25,10 @@ public:
    IUIExtensionWindow* CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
    void SetLocalizer(ITransText* pTT);
+
+   void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
+
 };
 
 class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
@@ -48,7 +52,7 @@ public:
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
-   void DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
+   bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
@@ -59,7 +63,7 @@ public:
    HWND GetHwnd() const;
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
-   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
    
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;

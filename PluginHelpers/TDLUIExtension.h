@@ -153,7 +153,7 @@ namespace TDLPluginHelpers
 	   bool PrepareNewTask(TDLTaskList^ task);
 
 	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
-	   void DoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
+	   bool DoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
 	   bool CanDoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
 
 	   bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates

@@ -13,10 +13,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\Debug\MarkdownImpExpCore.dll>
+#using <..\..\..\Debug\MarkdownImpExpCore.dll>
 #include <msclr\auto_gcroot.h>
 
-#using <..\Debug\PluginHelpers.dll> as_friend
+#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 using namespace MarkdownImpExp;
 using namespace System;
@@ -41,6 +41,12 @@ void CMarkdownImpExpBridge::Release()
 void CMarkdownImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
 {
 	// TODO
+}
+
+HICON CMarkdownImpExpBridge::GetIcon(void) const
+{
+	// TODO
+	return NULL;
 }
 
 LPCWSTR CMarkdownImpExpBridge::GetMenuText() const

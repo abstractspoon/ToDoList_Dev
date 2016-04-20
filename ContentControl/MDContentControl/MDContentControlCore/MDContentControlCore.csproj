@@ -38,7 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MarkdownSharp">
-      <HintPath>..\Debug\MarkdownSharp.dll</HintPath>
+      <HintPath>..\MarkdownSharp\bin\Debug\MarkdownSharp.dll</HintPath>
     </Reference>
     <Reference Include="MDContentControlCore, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
@@ -70,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
-      <HintPath>..\Debug\PluginHelpers.dll</HintPath>
+      <HintPath>..\..\..\Debug\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

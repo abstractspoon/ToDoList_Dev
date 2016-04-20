@@ -7,17 +7,17 @@
 #include "stdafx.h"
 #include "DayViewUIExtensionBridge.h"
 
-#include "..\..\..\Interfaces\ITasklist.h"
-#include "..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\Interfaces\IPreferences.h"
-#include "..\..\..\Interfaces\UITheme.h"
+#include "..\..\..\..\Interfaces\ITasklist.h"
+#include "..\..\..\..\Interfaces\ITransText.h"
+#include "..\..\..\..\Interfaces\IPreferences.h"
+#include "..\..\..\..\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\Debug\DayViewUIExtensionCore.dll>
+#using <..\..\..\Debug\DayViewUIExtensionCore.dll>
 #include <msclr\auto_gcroot.h>
 
-#using <..\Debug\PluginHelpers.dll> as_friend
+#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +76,16 @@ IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
    }
 
    return pExtWnd;
+}
+
+void CDayViewUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+{
+	// TODO
+}
+
+void CDayViewUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+{
+	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,9 +179,9 @@ bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 								 pMsg->pt.y);
 }
 
-void CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-	m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
+	return m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
 }
 
 bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const

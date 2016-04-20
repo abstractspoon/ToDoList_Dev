@@ -166,8 +166,9 @@ namespace DayViewUIExtension
 		    return false;
 	    }
 	   
-		public void DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+		    return false;
 		}
 
 	    public bool CanDoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
