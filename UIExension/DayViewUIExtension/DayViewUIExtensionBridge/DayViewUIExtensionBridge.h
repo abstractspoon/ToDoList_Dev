@@ -47,8 +47,9 @@ public:
    bool SelectTask(DWORD dwTaskID);
    bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
 
-   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute);
-   bool WantUpdate(IUI_ATTRIBUTEEDIT nAttribute) const;
+   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTE nEditAttribute);
+   bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
+   bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);

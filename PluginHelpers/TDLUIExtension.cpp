@@ -81,7 +81,7 @@ Windows::Media::Color TDLTheme::GetColor(UInt32 rgbColor)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTEEDIT attrib)
+TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTE attrib)
 {
 	switch (attrib)
 	{

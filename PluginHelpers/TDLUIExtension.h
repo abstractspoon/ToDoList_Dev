@@ -137,7 +137,7 @@ namespace TDLPluginHelpers
 		   All = 0xffff
 	   };
 
-	   static TaskAttribute Map(IUI_ATTRIBUTEEDIT attrib);
+	   static TaskAttribute Map(IUI_ATTRIBUTE attrib);
 	   static UpdateType Map(IUI_UPDATETYPE type);
 	   static AppCommand Map(IUI_APPCOMMAND cmd);
 	   static IUI_HITTEST Map(HitResult test);
@@ -149,7 +149,8 @@ namespace TDLPluginHelpers
 	   bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs);
 
 	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, TDLUIExtension::TaskAttribute nEditAttribute);
-	   bool WantUpdate(TDLUIExtension::TaskAttribute nAttribute);
+	   bool WantEditUpdate(TDLUIExtension::TaskAttribute nAttribute);
+	   bool WantSortUpdate(TDLUIExtension::TaskAttribute nAttribute);
 	   bool PrepareNewTask(TDLTaskList^ task);
 
 	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);

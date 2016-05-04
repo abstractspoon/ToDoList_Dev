@@ -228,10 +228,15 @@ namespace StatsUIExtension
 //             m_ListView.Items.Refresh();
         }
 
-        public bool WantUpdate(TDLUIExtension.TaskAttribute attrib)
+        public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
 	    {
 			return true; // all updates
 	    }
+
+        public bool WantSortUpdate(TDLUIExtension.TaskAttribute attrib)
+        {
+            return false;
+        }
 	   
         public bool PrepareNewTask(TDLTaskList task)
 	    {
@@ -296,21 +301,21 @@ namespace StatsUIExtension
 
         private void CreateChart()
         {
-            // Create a Chart
-            m_Chart = new System.Windows.Controls.DataVisualization.Charting.Chart();
-            m_Chart.Title = "New Stats";
-            m_Chart.Background = System.Windows.Media.Brushes.White;
-            m_Chart.BorderBrush = null;
-
-            m_XAxis = new System.Windows.Controls.DataVisualization.Charting.DateTimeAxis();
-            m_XAxis.Orientation = System.Windows.Controls.DataVisualization.Charting.AxisOrientation.X;
-
-            m_YAxis = new System.Windows.Controls.DataVisualization.Charting.CategoryAxis();
-            m_YAxis.Orientation = System.Windows.Controls.DataVisualization.Charting.AxisOrientation.Y;
-
-            m_Chart.Axes.Add(m_XAxis);
-
-            this.Children.Add(m_Chart);
+//             // Create a Chart
+//             m_Chart = new System.Windows.Controls.DataVisualization.Charting.Chart();
+//             m_Chart.Title = "New Stats";
+//             m_Chart.Background = System.Windows.Media.Brushes.White;
+//             m_Chart.BorderBrush = null;
+// 
+//             m_XAxis = new System.Windows.Controls.DataVisualization.Charting.DateTimeAxis();
+//             m_XAxis.Orientation = System.Windows.Controls.DataVisualization.Charting.AxisOrientation.X;
+// 
+//             m_YAxis = new System.Windows.Controls.DataVisualization.Charting.CategoryAxis();
+//             m_YAxis.Orientation = System.Windows.Controls.DataVisualization.Charting.AxisOrientation.Y;
+// 
+//             m_Chart.Axes.Add(m_XAxis);
+// 
+//             this.Children.Add(m_Chart);
         }
 
         private void PopulateChart()
@@ -321,9 +326,9 @@ namespace StatsUIExtension
         }
 
         // --------------------------------------------------------------------------------------
-        private System.Windows.Controls.DataVisualization.Charting.Chart m_Chart;
-        private System.Windows.Controls.DataVisualization.Charting.DateTimeAxis m_XAxis;
-        private System.Windows.Controls.DataVisualization.Charting.CategoryAxis m_YAxis;
+//         private System.Windows.Controls.DataVisualization.Charting.Chart m_Chart;
+//         private System.Windows.Controls.DataVisualization.Charting.DateTimeAxis m_XAxis;
+//         private System.Windows.Controls.DataVisualization.Charting.CategoryAxis m_YAxis;
         //private System.Windows.Controls.DataVisualization.Charting.ChartArea m_ChartArea;
 
     }

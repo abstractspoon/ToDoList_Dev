@@ -141,7 +141,7 @@ namespace DayViewUIExtension
             return new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Local).AddMilliseconds(tDate);
         }
 
-        public bool WantUpdate(TDLUIExtension.TaskAttribute attrib)
+        public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
 	    {
             switch (attrib)
             {
@@ -153,6 +153,11 @@ namespace DayViewUIExtension
             }
 
             // all else
+            return false;
+        }
+	   
+        public bool WantSortUpdate(TDLUIExtension.TaskAttribute attrib)
+	    {
             return false;
         }
 	   

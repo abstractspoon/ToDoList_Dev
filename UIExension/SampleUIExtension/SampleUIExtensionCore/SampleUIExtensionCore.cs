@@ -235,10 +235,15 @@ namespace SampleUIExtension
             m_ListView.Items.Refresh();
         }
 
-        public bool WantUpdate(TDLUIExtension.TaskAttribute attrib)
+        public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
 	    {
 			return true; // all updates
 	    }
+
+        public bool WantSortUpdate(TDLUIExtension.TaskAttribute attrib)
+        {
+			return true; // all updates
+        }
 	   
         public bool PrepareNewTask(TDLTaskList task)
 	    {
