@@ -16,23 +16,6 @@ namespace Calendar
             title = t;
         }
 
-        public override bool Equals(object obj)
-        {
-            Appointment appt = obj as Appointment;
-
-            if (appt == null)
-                return false;
-
-            // else
-            return ((title == appt.title) &&
-                    (layer == appt.layer) &&
-                    (group == appt.group) &&
-                    (startDate == appt.startDate) &&
-                    (endDate == appt.endDate) &&
-                //                    (id == appt.) &&
-                    (allDayEvent == appt.allDayEvent));
-        }
-
         private int layer;
 
         public int Layer
@@ -61,6 +44,7 @@ namespace Calendar
             {
                 startDate = value;
                 OnStartDateChanged();
+
             }
         }
         protected virtual void OnStartDateChanged()
