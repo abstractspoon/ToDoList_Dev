@@ -54,7 +54,7 @@ namespace Calendar
                 m_DayView.Capture = false;
                 m_SelectionStarted = false;
 
-                m_DayView.RaiseSelectionChanged(EventArgs.Empty);
+                m_DayView.RaiseSelectionChanged(new AppointmentEventArgs());
 
                 if (Complete != null)
                     Complete(this, EventArgs.Empty);

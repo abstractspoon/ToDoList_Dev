@@ -49,37 +49,37 @@ namespace Calendar
                 {
                     switch (e.Button)
                     {
-                    case System.Windows.Forms.MouseButtons.Left:
+                        case System.Windows.Forms.MouseButtons.Left:
 
-                        // Get time at mouse position
-                        DateTime m_Date = dayView.GetTimeAt(e.X, e.Y);
+                            // Get time at mouse position
+                            DateTime m_Date = dayView.GetTimeAt(e.X, e.Y);
 
-                        switch (mode)
-                        {
-                            case Mode.Move:
+                            switch (mode)
+                            {
+                                case Mode.Move:
 
                                     // This works for regular (i.e. non full-day or multi-day appointments)
 
                                     if (!selection.AllDayEvent && viewrect.Contains(e.Location))
                                     {
-                                // add delta value
-                                m_Date = m_Date.Add(delta);
+                                        // add delta value
+                                        m_Date = m_Date.Add(delta);
 
-                                if (length == TimeSpan.Zero)
-                                {
-                                    startDate = selection.StartDate;
-                                    length = selection.EndDate - startDate;
-                                }
-                                else
-                                {
-                                    DateTime m_EndDate = m_Date.Add(length);
+                                        if (length == TimeSpan.Zero)
+                                        {
+                                            startDate = selection.StartDate;
+                                            length = selection.EndDate - startDate;
+                                        }
+                                        else
+                                        {
+                                            DateTime m_EndDate = m_Date.Add(length);
 
                                             if (m_EndDate.Day == m_Date.Day)
                                             {
                                                 selection.StartDate = m_Date;
                                                 selection.EndDate = m_EndDate;
                                                 dayView.Invalidate();
-                                                dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                                dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                             }
                                         }
                                     }
@@ -98,7 +98,7 @@ namespace Calendar
                                                     selection.StartDate = selection.StartDate.AddDays(m_DateDiff);
                                                     selection.EndDate = selection.EndDate.AddDays(m_DateDiff);
                                                     dayView.Invalidate();
-                                                    dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                                    dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                                 }
                                             }
                                         }
@@ -114,7 +114,7 @@ namespace Calendar
                                         {
                                             selection.EndDate = m_Date;
                                             dayView.Invalidate();
-                                            dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                            dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                         }
                                     }
 
@@ -128,7 +128,7 @@ namespace Calendar
                                         {
                                             selection.StartDate = m_Date;
                                             dayView.Invalidate();
-                                            dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                            dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                         }
                                     }
                                     break;
@@ -138,7 +138,7 @@ namespace Calendar
                                     {
                                         selection.StartDate = m_Date.Date;
                                         dayView.Invalidate();
-                                        dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                        dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                     }
                                     break;
 
@@ -147,7 +147,7 @@ namespace Calendar
                                     {
                                         selection.EndDate = m_Date.Date.AddDays(1);
                                         dayView.Invalidate();
-                                        dayView.RaiseAppointmentMove(new AppointmentEventArgs(selection));
+                                        dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
                                     }
                                     break;
                             }
@@ -241,7 +241,7 @@ namespace Calendar
                     Complete(this, EventArgs.Empty);
             }
 
-            dayView.RaiseSelectionChanged(EventArgs.Empty);
+			dayView.RaiseSelectionChanged(new AppointmentEventArgs(dayView.SelectedAppointment));
 
             mode = Mode.Move;
 
@@ -276,7 +276,7 @@ namespace Calendar
 
         public event EventHandler Complete;
 
-        enum Mode
+        public enum Mode
         {
             ResizeTop,
             ResizeBottom,

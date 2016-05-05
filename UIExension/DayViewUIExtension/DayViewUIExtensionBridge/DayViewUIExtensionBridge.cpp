@@ -3,6 +3,7 @@
 
 #include <unknwn.h>
 #include <tchar.h>
+#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h"
 #include "DayViewUIExtensionBridge.h"
@@ -14,10 +15,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\..\..\Debug\DayViewUIExtensionCore.dll>
-#include <msclr\auto_gcroot.h>
-
-#using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#ifdef _DEBUG
+#	using <..\..\..\Debug\DayViewUIExtensionCore.dll>
+#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#else
+#	using <..\..\..\Release\DayViewUIExtensionCore.dll>
+#	using <..\..\..\Release\PluginHelpers.dll> as_friend
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +34,8 @@ using namespace TDLPluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
-const LPCWSTR SAMPLE_GUID = L"00000000-0000-0000-0000-000000000000";
+
+const LPCWSTR SAMPLE_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 const LPCWSTR SAMPLE_NAME = L"Day View";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +108,7 @@ void CDayViewUIExtensionBridgeWindow::Release()
 BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
             long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore();
+   m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent));
 
    HWND hWnd = GetHwnd();
 
@@ -218,7 +223,6 @@ void CDayViewUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CDayViewUIExtensionBridgeWindow::GetHwnd() const
 {
-//   return static_cast<HWND>(m_source->Handle.ToPointer());
    return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 

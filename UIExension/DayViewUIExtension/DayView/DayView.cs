@@ -504,7 +504,7 @@ namespace Calendar
         {
             if (selectedAppointment != null)
             {
-                System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(EnterEditMode));
+                //System.Threading.ThreadPool.QueueUserWorkItem(new System.Threading.WaitCallback(EnterEditMode));
             }
         }
 
@@ -682,7 +682,7 @@ namespace Calendar
             }
         }
 
-        internal void RaiseSelectionChanged(EventArgs e)
+		internal void RaiseSelectionChanged(AppointmentEventArgs e)
         {
             if (SelectionChanged != null)
                 SelectionChanged(this, e);
@@ -1423,10 +1423,10 @@ namespace Calendar
 
         #region Events
 
-        public event EventHandler SelectionChanged;
+		public event AppointmentEventHandler SelectionChanged;
         public event ResolveAppointmentsEventHandler ResolveAppointments;
         public event NewAppointmentEventHandler NewAppointment;
-        public event EventHandler<AppointmentEventArgs> AppointmentMove;
+        public event AppointmentEventHandler AppointmentMove;
 
         #endregion
     }

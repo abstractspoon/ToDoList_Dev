@@ -432,6 +432,11 @@ Boolean TDLTask::IsFlagged()
    return GETTASKVAL(IsTaskFlagged, false);
 }
 
+Boolean TDLTask::IsParent()
+{
+	return GETTASKVAL(IsTaskParent, false);
+}
+
 // ---------------------------------------------------------
 
 double TDLTask::GetTimeEstimate(TimeUnits% cUnits)

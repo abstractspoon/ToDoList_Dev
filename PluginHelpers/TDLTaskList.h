@@ -103,6 +103,7 @@ namespace TDLPluginHelpers
       Boolean IsDue();
       Boolean IsGoodAsDone();
       Boolean IsFlagged();
+	  Boolean IsParent();
       
       double GetTimeEstimate(TimeUnits% cUnits);
       double GetTimeSpent(TimeUnits% cUnits);

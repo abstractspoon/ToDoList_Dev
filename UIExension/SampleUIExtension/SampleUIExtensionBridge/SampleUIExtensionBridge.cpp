@@ -3,6 +3,7 @@
 
 #include <unknwn.h>
 #include <tchar.h>
+#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h"
 #include "SampleUIExtensionBridge.h"
@@ -14,10 +15,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\..\..\Debug\SampleUIExtensionCore.dll>
-#include <msclr\auto_gcroot.h>
-
-#using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#ifdef _DEBUG
+#	using <..\..\..\Debug\SampleUIExtensionCore.dll>
+#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#else
+#	using <..\..\..\Release\SampleUIExtensionCore.dll>
+#	using <..\..\..\Release\PluginHelpers.dll> as_friend
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

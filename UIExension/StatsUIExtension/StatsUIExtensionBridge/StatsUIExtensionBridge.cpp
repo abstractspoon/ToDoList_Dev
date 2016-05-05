@@ -3,6 +3,7 @@
 
 #include <unknwn.h>
 #include <tchar.h>
+#include <msclr\auto_gcroot.h>
 
 #include "stdafx.h"
 #include "resource.h"
@@ -15,10 +16,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\..\..\Debug\StatsUIExtensionCore.dll>
-#include <msclr\auto_gcroot.h>
-
-#using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#ifdef _DEBUG
+#	using <..\..\..\Debug\StatsUIExtensionCore.dll>
+#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#else
+#	using <..\..\..\Release\StatsUIExtensionCore.dll>
+#	using <..\..\..\Release\PluginHelpers.dll> as_friend
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +35,7 @@ using namespace TDLPluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
-const LPCWSTR SAMPLE_GUID = L"00000000-0000-0000-0000-000000000000";
+const LPCWSTR SAMPLE_GUID = L"32D5254E-849F-464C-9F43-8A67475EA24C";
 const LPCWSTR SAMPLE_NAME = L"Tasklist Statistics";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

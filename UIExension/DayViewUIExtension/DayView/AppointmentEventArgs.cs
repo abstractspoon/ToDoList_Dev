@@ -8,7 +8,11 @@ namespace Calendar
 {
     public class AppointmentEventArgs : EventArgs
     {
-        public AppointmentEventArgs( Appointment appointment )
+        public AppointmentEventArgs()
+        {
+            m_Appointment = null;
+        }
+        public AppointmentEventArgs(Appointment appointment)
         {
             m_Appointment = appointment;
         }
@@ -21,4 +25,21 @@ namespace Calendar
         }
 
     }
+
+    public class MoveAppointmentEventArgs : AppointmentEventArgs
+    {
+        public MoveAppointmentEventArgs(Appointment appointment, SelectionTool.Mode mode) : base(appointment)
+        {
+            m_Mode = mode;
+        }
+
+        private SelectionTool.Mode m_Mode;
+    
+        public SelectionTool.Mode Mode
+        { 
+            get { return m_Mode; }
+        }
+    }
+
+    public delegate void AppointmentEventHandler(object sender, AppointmentEventArgs args);
 }

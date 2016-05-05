@@ -131,6 +131,7 @@ namespace TDLPluginHelpers
 		   Icon,
 		   Tag,
 		   CustomAttribute,
+		   MoveTask,
 
 		   // new values here ONLY
 
@@ -141,6 +142,8 @@ namespace TDLPluginHelpers
 	   static UpdateType Map(IUI_UPDATETYPE type);
 	   static AppCommand Map(IUI_APPCOMMAND cmd);
 	   static IUI_HITTEST Map(HitResult test);
+	   static IUI_ATTRIBUTE Map(TaskAttribute attrib);
+
    };
 
    public interface class ITDLUIExtension
@@ -165,7 +168,27 @@ namespace TDLPluginHelpers
 
 	   void SavePreferences(TDLPreferences^ prefs, String^ key);
 	   void LoadPreferences(TDLPreferences^ prefs, String^ key, bool appOnly);
+   };
 
+   public ref class TDLNotify
+   {
+   public:
+	   TDLNotify(IntPtr hwnd);
+
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime value);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value);
+
+	   bool NotifySelChange(UInt32 taskID);
+	   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
+
+   private:
+	   HWND m_hwnd;
+
+   private:
+	   bool DoNotify(const IUITASKMOD* pMod, int numMod);
    };
 
 }

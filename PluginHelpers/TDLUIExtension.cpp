@@ -116,10 +116,53 @@ TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTE attrib)
 	case IUI_TAGS:			return TDLUIExtension::TaskAttribute::Tag;
 	case IUI_CUSTOMATTRIB:	return TDLUIExtension::TaskAttribute::CustomAttribute;
 	case IUI_ALLATTRIB:		return TDLUIExtension::TaskAttribute::All;
+	case IUI_MOVETASK:		return TDLUIExtension::TaskAttribute::MoveTask;
 	//  case IUI_
 	}
 
 	return TDLUIExtension::TaskAttribute::Unknown;
+}
+
+IUI_ATTRIBUTE TDLUIExtension::Map(TDLUIExtension::TaskAttribute attrib)
+{
+	switch (attrib)
+	{
+	case TDLUIExtension::TaskAttribute::Title:				return IUI_TASKNAME;	
+	case TDLUIExtension::TaskAttribute::DoneDate:			return IUI_DONEDATE;	
+	case TDLUIExtension::TaskAttribute::DueDate:			return IUI_DUEDATE;		
+	case TDLUIExtension::TaskAttribute::StartDate:			return IUI_STARTDATE;	
+	case TDLUIExtension::TaskAttribute::Priority:			return IUI_PRIORITY;	
+	case TDLUIExtension::TaskAttribute::Color:				return IUI_COLOR;		
+	case TDLUIExtension::TaskAttribute::AllocBy:			return IUI_ALLOCTO;		
+	case TDLUIExtension::TaskAttribute::AllocTo:			return IUI_ALLOCBY;		
+	case TDLUIExtension::TaskAttribute::Status:				return IUI_STATUS;		
+	case TDLUIExtension::TaskAttribute::Category:			return IUI_CATEGORY;	
+	case TDLUIExtension::TaskAttribute::Percent:			return IUI_PERCENT;		
+	case TDLUIExtension::TaskAttribute::TimeEstimate:		return IUI_TIMEEST;		
+	case TDLUIExtension::TaskAttribute::TimeSpent:			return IUI_TIMESPENT;	
+	case TDLUIExtension::TaskAttribute::FileReference:		return IUI_FILEREF;		
+	case TDLUIExtension::TaskAttribute::Comments:			return IUI_COMMENTS;	
+	case TDLUIExtension::TaskAttribute::Flag:				return IUI_FLAG;		
+	case TDLUIExtension::TaskAttribute::CreationDate:		return IUI_CREATIONDATE;
+	case TDLUIExtension::TaskAttribute::CreatedBy:			return IUI_CREATEDBY;	
+	case TDLUIExtension::TaskAttribute::Risk:				return IUI_RISK;		
+	case TDLUIExtension::TaskAttribute::ExternalId:			return IUI_EXTERNALID;	
+	case TDLUIExtension::TaskAttribute::Cost:				return IUI_COST;		
+	case TDLUIExtension::TaskAttribute::Dependency:			return IUI_DEPENDENCY;	
+	case TDLUIExtension::TaskAttribute::Recurrence:			return IUI_RECURRENCE;	
+	case TDLUIExtension::TaskAttribute::Version:			return IUI_VERSION;		
+	case TDLUIExtension::TaskAttribute::Position:			return IUI_POSITION;	
+	case TDLUIExtension::TaskAttribute::Id:					return IUI_ID;			
+	case TDLUIExtension::TaskAttribute::LastModified:		return IUI_LASTMOD;		
+	case TDLUIExtension::TaskAttribute::Icon:				return IUI_ICON;		
+	case TDLUIExtension::TaskAttribute::Tag:				return IUI_TAGS;		
+	case TDLUIExtension::TaskAttribute::CustomAttribute:	return IUI_CUSTOMATTRIB;
+	case TDLUIExtension::TaskAttribute::All:				return IUI_ALLATTRIB;	
+	case TDLUIExtension::TaskAttribute::MoveTask:			return IUI_MOVETASK;	
+		//  case IUI_
+	}
+
+	return IUI_NONE;
 }
 
 TDLUIExtension::UpdateType TDLUIExtension::Map(IUI_UPDATETYPE type)
@@ -166,6 +209,82 @@ IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitResult test)
 	}
 
 	return IUI_NOWHERE;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+TDLNotify::TDLNotify(IntPtr hwnd)
+{
+	m_hwnd = static_cast<HWND>(hwnd.ToPointer());
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	mod.tValue = (date - DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+	
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	mod.dValue = value;
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	// TODO
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	mod.nValue = value;
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	mod.bValue = (value ? TRUE : FALSE);
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
+{
+	if (!IsWindow(m_hwnd))
+		return false;
+
+	::SendMessage(m_hwnd, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
+	return true;
+}
+
+bool TDLNotify::NotifySelChange(UInt32 taskID)
+{
+	if (!IsWindow(m_hwnd))
+		return false;
+
+	::SendMessage(m_hwnd, WM_IUI_SELECTTASK, 0, taskID);
+	return true;
+}
+
+bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
+{
+	if (!IsWindow(m_hwnd) || !pdwTaskIDs->Length)
+		return false;
+
+	pin_ptr<UInt32> p = &pdwTaskIDs[0];
+	::SendMessage(m_hwnd, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
+
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

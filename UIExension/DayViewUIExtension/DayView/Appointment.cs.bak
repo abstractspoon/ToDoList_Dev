@@ -16,40 +16,6 @@ namespace Calendar
             title = t;
         }
 
-        private UInt32 id;
-
-        public UInt32 Id
-        {
-            get { return id; }
-            set { id = value; }
-        }
-
-        public override bool Equals(object obj)
-        {
-            Appointment appt = obj as Appointment;
-
-            if (appt == null)
-                return false;
-
-            if (base.Equals(appt))
-                return true;
-
-            // Check ID for efficiency
-            if ((id != 0) && (appt.id != 0))
-                return (id == appt.id);
-
-            // else value comparison
-            return ((title == appt.title) &&
-                    (layer == appt.layer) &&
-                    (group == appt.group) &&
-                    (startDate == appt.startDate) &&
-                    (endDate == appt.endDate) &&
-                    (locked == appt.locked) &&
-                    (color == appt.color) &&
-                    (textColor == appt.textColor) &&
-                    (allDayEvent == appt.allDayEvent));
-        }
-
         private int layer;
 
         public int Layer
@@ -78,6 +44,7 @@ namespace Calendar
             {
                 startDate = value;
                 OnStartDateChanged();
+
             }
         }
         protected virtual void OnStartDateChanged()
@@ -174,7 +141,8 @@ namespace Calendar
                 drawBorder = value;
             }
         }
-       
+
+        public UInt32 Id { get; set; }
 
         private Color borderColor = Color.Blue;
 
