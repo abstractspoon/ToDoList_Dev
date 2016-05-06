@@ -155,6 +155,9 @@ namespace TDLPluginHelpers
       Boolean ClearCustomAttributeData(String^ sID);
       Boolean SetMetaData(String^ sKey, String^ sValue);
       Boolean ClearMetaData(String^ sKey);
+
+	  static TimeUnits Map(TDC_UNITS units);
+	  static TDC_UNITS Map(TimeUnits units);
       
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
@@ -163,9 +166,6 @@ namespace TDLPluginHelpers
 
    private: // -------------------------------------------------------
       TDLTask();
-
-	  static TimeUnits Map(TDC_UNITS units);
-	  static TDC_UNITS Map(TimeUnits units);
    };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -180,6 +180,7 @@ namespace TDLPluginHelpers
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value);
+	   bool NotifyMod(String^ sCustAttribID, String^ value);
 
 	   bool NotifySelChange(UInt32 taskID);
 	   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);

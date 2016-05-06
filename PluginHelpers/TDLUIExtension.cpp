@@ -7,6 +7,7 @@
 
 #include "..\..\Interfaces\UITheme.h"
 #include "..\..\Interfaces\IUIExtension.h"
+#include "..\..\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -237,7 +238,9 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value
 bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
-	// TODO
+
+	mod.dValue = time;
+	mod.nTimeUnits = TDLTask::Map(units);
 
 	return DoNotify(&mod, 1);
 }
@@ -254,6 +257,16 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.bValue = (value ? TRUE : FALSE);
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
+{
+	IUITASKMOD mod = { IUI_CUSTOMATTRIB, 0 };
+
+	mod.szValue = MS(value);
+	mod.szCustomAttribID = MS(sCustAttribID);
 
 	return DoNotify(&mod, 1);
 }
