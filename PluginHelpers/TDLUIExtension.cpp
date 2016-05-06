@@ -80,6 +80,11 @@ Windows::Media::Color TDLTheme::GetColor(UInt32 rgbColor)
 	return *color;
 }
 
+Drawing::Color TDLTheme::Map(Windows::Media::Color color)
+{
+	return Drawing::Color::FromArgb(color.R, color.G, color.B);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTE attrib)

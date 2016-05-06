@@ -16,7 +16,6 @@ struct UITHEME;
 
 namespace TDLPluginHelpers
 {
-
    public ref class TDLTheme
    {
    public:
@@ -45,9 +44,11 @@ namespace TDLPluginHelpers
 		  StatusBarText,
 	  };
 	  Windows::Media::Color GetAppColor(AppColor color);
+	  static Drawing::Color Map(Windows::Media::Color color);
 
 	  String^ GetToolBarImagePath();
 	  Windows::Media::Color GetToolbarTransparencyColor();
+
       
    private:
       UITHEME* m_pTheme;

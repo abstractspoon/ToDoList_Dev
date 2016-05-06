@@ -42,7 +42,7 @@ namespace DayViewUIExtension
 			this.m_dayView.Location = new System.Drawing.Point(0, 0);
 			this.m_dayView.MinHalfHourApp = false;
 			this.m_dayView.Name = "m_dayView";
-			this.m_dayView.Renderer = new Calendar.Office12Renderer();
+			this.m_dayView.Renderer = m_renderer;
 			this.m_dayView.SelectionEnd = new System.DateTime(((long)(0)));
 			this.m_dayView.SelectionStart = new System.DateTime(((long)(0)));
 			this.m_dayView.Size = new System.Drawing.Size(798, 328);
@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 			this.m_dayView.WorkingMinuteEnd = 0;
 			this.m_dayView.WorkingMinuteStart = 0;
 
-            // I want the hour height to always be 20
+            // I want the hour height to always be 20 for now
             int hourHeight = 20;
             this.m_dayView.SlotsPerHour = 4;
             this.m_dayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
@@ -211,9 +211,10 @@ namespace DayViewUIExtension
 
 		public void SetUITheme(TDLTheme theme)
 		{
-			System.Windows.Media.Color temp = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
+            m_renderer.Theme = theme;
+            m_dayView.Invalidate(true);
 
-			this.BackColor = System.Drawing.Color.FromArgb(temp.R, temp.G, temp.B);
+            this.BackColor = TDLTheme.Map(theme.GetAppColor(TDLTheme.AppColor.AppBackDark));
 		}
 
 		public void SetReadOnly(bool bReadOnly)
@@ -234,6 +235,7 @@ namespace DayViewUIExtension
 		{
 			this.BackColor = System.Drawing.Color.White;
 			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
+            this.m_renderer = new TDLRenderer();
 
 			CreateDayView();
 		}
@@ -317,5 +319,6 @@ namespace DayViewUIExtension
 		// --------------------------------------------------------------------------------------
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 		private Calendar.DayView m_dayView;
+        private TDLRenderer m_renderer;
 	}
 }
