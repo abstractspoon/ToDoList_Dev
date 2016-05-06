@@ -49,13 +49,13 @@ namespace Calendar
             SetStyle(ControlStyles.Selectable, true);
 
             scrollbar = new VScrollBar();
-            scrollbar.SmallChange = halfHourHeight;
-            scrollbar.LargeChange = halfHourHeight * slotsPerHour;
+            scrollbar.SmallChange = slotHeight;
+            scrollbar.LargeChange = slotHeight * slotsPerHour;
             scrollbar.Dock = DockStyle.Right;
             scrollbar.Visible = allowScroll;
             scrollbar.Scroll += new ScrollEventHandler(scrollbar_Scroll);
             AdjustScrollbar();
-            scrollbar.Value = (startHour * slotsPerHour * halfHourHeight);
+            scrollbar.Value = (startHour * slotsPerHour * slotHeight);
 
             this.Controls.Add(scrollbar);
 
@@ -95,18 +95,18 @@ namespace Calendar
             set { appHeightMode = value; }
         }
 
-        private int halfHourHeight = 18;
+        private int slotHeight = 18;
 
         [System.ComponentModel.DefaultValue(18)]
-        public int HalfHourHeight
+        public int SlotHeight
         {
             get
             {
-                return halfHourHeight;
+                return slotHeight;
             }
             set
             {
-                halfHourHeight = value;
+                slotHeight = value;
                 OnHalfHourHeightChanged();
             }
         }
@@ -274,13 +274,13 @@ namespace Calendar
 
         protected virtual void OnStartHourChanged()
         {
-            if ((startHour * slotsPerHour * halfHourHeight) > scrollbar.Maximum) //maximum is lower on larger forms
+            if ((startHour * slotsPerHour * slotHeight) > scrollbar.Maximum) //maximum is lower on larger forms
             {
                 scrollbar.Value = scrollbar.Maximum;
             }
             else
             {
-                scrollbar.Value = (startHour * slotsPerHour * halfHourHeight);
+                scrollbar.Value = (startHour * slotsPerHour * slotHeight);
             }
 
             Invalidate();
@@ -525,7 +525,7 @@ namespace Calendar
 
         private void AdjustScrollbar()
         {
-            scrollbar.Maximum = (slotsPerHour * halfHourHeight * 25) - this.Height + this.HeaderHeight;
+            scrollbar.Maximum = (slotsPerHour * slotHeight * 25) - this.Height + this.HeaderHeight;
             scrollbar.Minimum = 0;
         }
 
@@ -864,7 +864,7 @@ namespace Calendar
         {
             int dayWidth = (this.Width - (scrollbar.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
 
-            int hour = (y - this.HeaderHeight + scrollbar.Value) / halfHourHeight;
+            int hour = (y - this.HeaderHeight + scrollbar.Value) / slotHeight;
             x -= hourLabelWidth;
 
             DateTime date = startDate;
@@ -960,7 +960,7 @@ namespace Calendar
             {
                 Rectangle hourRectangle = rect;
 
-                hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * halfHourHeight) - scrollbar.Value;
+                hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - scrollbar.Value;
                 hourRectangle.X += hourLabelIndent;
                 hourRectangle.Width = hourLabelWidth;
 
@@ -968,8 +968,9 @@ namespace Calendar
 
                 for (int slot = 0; slot < slotsPerHour; slot++)
                 {
-                    renderer.DrawMinuteLine(e.Graphics, hourRectangle);
-                    hourRectangle.Y += halfHourHeight;
+                    bool hour = ((slot % slotsPerHour) == 0);
+                    renderer.DrawMinuteLine(e.Graphics, hourRectangle, hour);
+                    hourRectangle.Y += slotHeight;
                 }
             }
 
@@ -1003,8 +1004,8 @@ namespace Calendar
             int startY;
             int endY;
 
-            startY = (start.Hour * halfHourHeight * slotsPerHour) + ((start.Minute * halfHourHeight) / /*30*/(60 / slotsPerHour));
-            endY = (end.Hour * halfHourHeight * slotsPerHour) + ((end.Minute * halfHourHeight) / /*30*/(60 / slotsPerHour));
+            startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
+            endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
 
             rect.Y = startY - scrollbar.Value + this.HeaderHeight;
 
@@ -1039,7 +1040,7 @@ namespace Calendar
 
             for (int hour = 0; hour < 24 * slotsPerHour; hour++)
             {
-                int y = rect.Top + (hour * halfHourHeight) - scrollbar.Value;
+                int y = rect.Top + (hour * slotHeight) - scrollbar.Value;
 
                 Color color1 = renderer.HourSeperatorColor;
                 Color color2 = renderer.HalfHourSeperatorColor;

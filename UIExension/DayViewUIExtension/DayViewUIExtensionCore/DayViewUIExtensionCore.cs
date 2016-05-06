@@ -39,7 +39,6 @@ namespace DayViewUIExtension
 			this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_dayView.DrawAllAppBorder = false;
 			this.m_dayView.Font = new System.Drawing.Font("Tahoma", 8F);
-			this.m_dayView.HalfHourHeight = 5;
 			this.m_dayView.Location = new System.Drawing.Point(0, 0);
 			this.m_dayView.MinHalfHourApp = false;
 			this.m_dayView.Name = "m_dayView";
@@ -54,6 +53,11 @@ namespace DayViewUIExtension
 			this.m_dayView.WorkingHourStart = 9;
 			this.m_dayView.WorkingMinuteEnd = 0;
 			this.m_dayView.WorkingMinuteStart = 0;
+
+            // I want the hour height to always be 20
+            int hourHeight = 20;
+            this.m_dayView.SlotsPerHour = 4;
+            this.m_dayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
 
 			this.m_dayView.StartDate = DateTime.Now;
 			this.m_dayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);

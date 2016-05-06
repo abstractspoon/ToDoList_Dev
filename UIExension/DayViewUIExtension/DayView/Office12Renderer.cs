@@ -44,7 +44,7 @@ namespace Calendar
         {
             get
             {
-                return System.Drawing.Color.FromArgb(165, 191, 225);
+                return System.Drawing.Color.FromArgb(213, 215, 241);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Calendar
         {
             get
             {
-                return System.Drawing.Color.FromArgb(213, 215, 241);
+                return System.Drawing.Color.FromArgb(165, 191, 225);
             }
         }
 
@@ -117,7 +117,7 @@ namespace Calendar
             }
         }
 
-        public override void DrawMinuteLine(Graphics g, Rectangle rect)
+        public override void DrawMinuteLine(Graphics g, Rectangle rect, bool hour)
         {
             if (g == null)
                 throw new ArgumentNullException("g");

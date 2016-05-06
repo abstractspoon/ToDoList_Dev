@@ -41,7 +41,7 @@ namespace Calendar
             g.DrawString("00", MinuteFont, SystemBrushes.ControlText, rect);
         }
 
-        public override void DrawMinuteLine(Graphics g, Rectangle rect)
+        public override void DrawMinuteLine(Graphics g, Rectangle rect, bool hour)
         {
             if (g == null)
                 throw new ArgumentNullException("g");

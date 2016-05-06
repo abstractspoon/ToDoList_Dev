@@ -124,7 +124,7 @@ namespace Calendar
 
         public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
 
-        public abstract void DrawMinuteLine(Graphics g, Rectangle rect);
+        public abstract void DrawMinuteLine(Graphics g, Rectangle rect, bool hour);
 
         public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date);
 
@@ -152,7 +152,7 @@ namespace Calendar
             using (Brush m_Brush = new SolidBrush(Color.White))
                 g.FillRectangle(m_Brush, rect.Left, rect.Top - 1, gripWidth, rect.Height);
 
-            using (Pen m_Pen = new Pen(Color.Black))
+            using (Pen m_Pen = new Pen(Color.DarkGray))
                 g.DrawRectangle(m_Pen, rect.Left, rect.Top - 1, gripWidth, rect.Height);
         }
 
