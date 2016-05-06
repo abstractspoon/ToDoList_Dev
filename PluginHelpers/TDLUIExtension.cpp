@@ -221,7 +221,7 @@ TDLNotify::TDLNotify(IntPtr hwnd)
 bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
-	mod.tValue = (date - DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+	mod.tValue = static_cast<__int64>((date - DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
 	
 	return DoNotify(&mod, 1);
 }
