@@ -43,19 +43,22 @@ namespace TDLPluginHelpers
 		  StatusBarLight,
 		  StatusBarText,
 	  };
-	  Windows::Media::Color GetAppColor(AppColor color);
-	  static Drawing::Color Map(Windows::Media::Color color);
+	  Windows::Media::Color GetAppColorAsMedia(AppColor color);
+	  Drawing::Color GetAppColorAsDrawing(AppColor color);
 
 	  String^ GetToolBarImagePath();
-	  Windows::Media::Color GetToolbarTransparencyColor();
-
-      
+	  Windows::Media::Color GetToolbarTransparencyColorAsMedia();
+	  Drawing::Color GetToolbarTransparencyColorAsDrawing();
+     
    private:
       UITHEME* m_pTheme;
 
    private:
       TDLTheme();
-	  Windows::Media::Color GetColor(UInt32 rgbColor);
+
+	  UInt32 GetColor(AppColor color);
+	  Windows::Media::Color GetMediaColor(UInt32 rgbColor);
+	  Drawing::Color GetDrawingColor(UInt32 rgbColor);
    };
    
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,20 +177,33 @@ namespace TDLPluginHelpers
    public ref class TDLNotify
    {
    public:
-	   TDLNotify(IntPtr hwnd);
+	   TDLNotify(IntPtr hwndParent);
+	   TDLNotify(IntPtr hwndParent, IntPtr hwndFrom);
 
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime value);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value);
 	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value);
+	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues);
 	   bool NotifyMod(String^ sCustAttribID, String^ value);
 
 	   bool NotifySelChange(UInt32 taskID);
 	   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
 
+	   enum class MouseClick
+	   {
+			Left,
+			Middle,
+			Right
+	   };
+
+	   bool NotifyMouseClick(MouseClick button, int X, int Y);
+
    private:
-	   HWND m_hwnd;
+	   HWND m_hwndParent;
+	   HWND m_hwndFrom;
 
    private:
 	   bool DoNotify(const IUITASKMOD* pMod, int numMod);

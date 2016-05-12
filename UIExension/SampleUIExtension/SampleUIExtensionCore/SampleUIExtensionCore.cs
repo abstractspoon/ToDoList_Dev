@@ -277,7 +277,7 @@ namespace SampleUIExtension
 
         public void SetUITheme(TDLTheme theme)
         {
-            System.Windows.Media.Color bkColor = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
+            System.Windows.Media.Color bkColor = theme.GetAppColorAsMedia(TDLTheme.AppColor.AppBackDark);
 
             this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
         }

@@ -75,7 +75,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return Color.FromArgb(213, 228, 242);
+                return m_theme.GetAppColorAsDrawing(TDLPluginHelpers.TDLTheme.AppColor.AppBackLight);
             }
         }
 
@@ -91,7 +91,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return Color.FromArgb(101, 147, 207);
+                return m_theme.GetAppColorAsDrawing(TDLPluginHelpers.TDLTheme.AppColor.AppText);
             }
         }
 
@@ -117,11 +117,13 @@ namespace DayViewUIExtension
                 else
                     ampmtime = "00";
 
-                g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont, brush, rect);
+				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+				g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont, brush, rect);
 
                 rect.X += 27;
                 g.DrawString(ampmtime, MinuteFont, brush, rect);
-            }
+				g.TextRenderingHint = TextRenderingHint.SystemDefault;
+			}
         }
 
         public override void DrawMinuteLine(Graphics g, Rectangle rect, bool hour)
@@ -232,7 +234,6 @@ namespace DayViewUIExtension
 
         public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
-
             using (SolidBrush backBrush = new SolidBrush(Color.FromArgb(0xe6, 0xed, 0xf7)))
                 g.FillRectangle(backBrush, rect);
         }

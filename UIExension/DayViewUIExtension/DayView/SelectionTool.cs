@@ -79,7 +79,7 @@ namespace Calendar
                                                 selection.StartDate = m_Date;
                                                 selection.EndDate = m_EndDate;
                                                 dayView.Invalidate();
-                                                dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+                                                dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                             }
                                         }
                                     }
@@ -98,7 +98,7 @@ namespace Calendar
                                                     selection.StartDate = selection.StartDate.AddDays(m_DateDiff);
                                                     selection.EndDate = selection.EndDate.AddDays(m_DateDiff);
                                                     dayView.Invalidate();
-                                                    dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+													dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                                 }
                                             }
                                         }
@@ -114,7 +114,7 @@ namespace Calendar
                                         {
                                             selection.EndDate = m_Date;
                                             dayView.Invalidate();
-                                            dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+											dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                         }
                                     }
 
@@ -128,7 +128,7 @@ namespace Calendar
                                         {
                                             selection.StartDate = m_Date;
                                             dayView.Invalidate();
-                                            dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+											dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                         }
                                     }
                                     break;
@@ -138,7 +138,7 @@ namespace Calendar
                                     {
                                         selection.StartDate = m_Date.Date;
                                         dayView.Invalidate();
-                                        dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+										dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                     }
                                     break;
 
@@ -147,7 +147,7 @@ namespace Calendar
                                     {
                                         selection.EndDate = m_Date.Date.AddDays(1);
                                         dayView.Invalidate();
-                                        dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode));
+										dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
                                     }
                                     break;
                             }
@@ -242,6 +242,7 @@ namespace Calendar
             }
 
 			dayView.RaiseSelectionChanged(new AppointmentEventArgs(dayView.SelectedAppointment));
+			dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(dayView.SelectedAppointment, mode, true));
 
             mode = Mode.Move;
 

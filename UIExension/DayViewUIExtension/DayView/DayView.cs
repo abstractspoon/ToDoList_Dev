@@ -49,8 +49,6 @@ namespace Calendar
             SetStyle(ControlStyles.Selectable, true);
 
             scrollbar = new VScrollBar();
-            scrollbar.SmallChange = slotHeight;
-            scrollbar.LargeChange = slotHeight * slotsPerHour;
             scrollbar.Dock = DockStyle.Right;
             scrollbar.Visible = allowScroll;
             scrollbar.Scroll += new ScrollEventHandler(scrollbar_Scroll);
@@ -107,11 +105,11 @@ namespace Calendar
             set
             {
                 slotHeight = value;
-                OnHalfHourHeightChanged();
+                OnSlotHeightChanged();
             }
         }
 
-        private void OnHalfHourHeightChanged()
+        private void OnSlotHeightChanged()
         {
             AdjustScrollbar();
             Invalidate();
@@ -525,7 +523,9 @@ namespace Calendar
 
         private void AdjustScrollbar()
         {
-            scrollbar.Maximum = (slotsPerHour * slotHeight * 25) - this.Height + this.HeaderHeight;
+			scrollbar.SmallChange = slotHeight;
+			scrollbar.LargeChange = (slotHeight * slotsPerHour);
+			scrollbar.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight;
             scrollbar.Minimum = 0;
         }
 
@@ -911,6 +911,7 @@ namespace Calendar
                 e.Graphics.FillRectangle(backBrush, this.ClientRectangle);
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+			e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
             // Calculate visible rectangle
             Rectangle rectangle = new Rectangle(0, 0, this.Width - scrollbar.Width, this.Height);

@@ -88,11 +88,11 @@ namespace TDLPluginHelpers
       Byte GetPercentDone();
       double GetCost();
 
-      Int64 GetLastModified();
-      Int64 GetDoneDate();
-      Int64 GetDueDate();
-      Int64 GetStartDate();
-      Int64 GetCreationDate();
+      DateTime GetLastModified();
+      DateTime GetDoneDate();
+      DateTime GetDueDate();
+      DateTime GetStartDate();
+      DateTime GetCreationDate();
 
       String^ GetDoneDateString();
       String^ GetDueDateString();
@@ -143,11 +143,11 @@ namespace TDLPluginHelpers
       Boolean SetCost(double dCost);
       Boolean SetFlag(Boolean bFlag);
 
-      Boolean SetLastModified(Int64 dtLastMod);
-      Boolean SetDoneDate(Int64 dtCompletion);
-      Boolean SetDueDate(Int64 dtDue);
-      Boolean SetStartDate(Int64 dtStart);
-      Boolean SetCreationDate(Int64 dtCreation);
+      Boolean SetLastModified(DateTime^ dtLastMod);
+      Boolean SetDoneDate(DateTime^ dtCompletion);
+      Boolean SetDueDate(DateTime^ dtDue);
+      Boolean SetStartDate(DateTime^ dtStart);
+      Boolean SetCreationDate(DateTime^ dtCreation);
 
       Boolean SetTimeEstimate(double dTime, TimeUnits cUnits);
       Boolean SetTimeSpent(double dTime, TimeUnits cUnits);
@@ -158,7 +158,9 @@ namespace TDLPluginHelpers
 
 	  static TimeUnits Map(TDC_UNITS units);
 	  static TDC_UNITS Map(TimeUnits units);
-      
+	  static DateTime Map(Int64 tDate);
+	  static Int64 Map(DateTime^ date);
+
    private: // -------------------------------------------------------
       ITaskList14* m_pTaskList;
       const ITaskList14* m_pConstTaskList;

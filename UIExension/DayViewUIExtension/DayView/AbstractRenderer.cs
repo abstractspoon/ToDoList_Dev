@@ -100,7 +100,7 @@ namespace Calendar
             {
                 if (hourFont == null)
                 {
-                    hourFont = new Font(BaseFont.FontFamily, 12, FontStyle.Regular);
+                    hourFont = new Font(BaseFont.FontFamily.Name, 12, FontStyle.Regular);
                 }
 
                 return hourFont;
@@ -115,7 +115,7 @@ namespace Calendar
             {
                 if (minuteFont == null)
                 {
-                    minuteFont = new Font(BaseFont.FontFamily, 8, FontStyle.Regular);
+                    minuteFont = new Font(BaseFont.FontFamily.Name, 8, FontStyle.Regular);
                 }
 
                 return minuteFont;

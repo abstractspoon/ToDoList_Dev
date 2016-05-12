@@ -352,44 +352,44 @@ double TDLTask::GetCost()
    return GETTASKVAL_ARG(GetTaskCost, FALSE, 0);
 }
 
-Int64 TDLTask::GetLastModified()
+DateTime TDLTask::GetLastModified()
 {
    __int64 date = 0;
    GETTASKDATE(GetTaskLastModified64, 0);
 
-   return date;
+   return Map(date);
 }
 
-Int64 TDLTask::GetDoneDate()
+DateTime TDLTask::GetDoneDate()
 {
    __int64 date = 0;
    GETTASKDATE(GetTaskDoneDate64, 0);
 
-   return date;
+   return Map(date);
 }
 
-Int64 TDLTask::GetDueDate()
+DateTime TDLTask::GetDueDate()
 {
    __int64 date = 0;
    GETTASKDATE_ARG(GetTaskDueDate64, FALSE, 0);
 
-   return date;
+   return Map(date);
 }
 
-Int64 TDLTask::GetStartDate()
+DateTime TDLTask::GetStartDate()
 {
    __int64 date = 0;
    GETTASKDATE_ARG(GetTaskStartDate64, FALSE, 0);
 
-   return date;
+   return Map(date);
 }
 
-Int64 TDLTask::GetCreationDate()
+DateTime TDLTask::GetCreationDate()
 {
    __int64 date = 0;
    GETTASKDATE(GetTaskCreationDate64, 0);
 
-   return date;
+   return Map(date);
 }
 
 String^ TDLTask::GetDoneDateString()
@@ -641,29 +641,29 @@ Boolean TDLTask::SetFlag(Boolean bFlag)
    return SETTASKVAL(SetTaskFlag, bFlag);
 }
 
-Boolean TDLTask::SetLastModified(Int64 dtLastMod)
+Boolean TDLTask::SetLastModified(DateTime^ dtLastMod)
 {
-   return SETTASKVAL(SetTaskLastModified, dtLastMod);
+   return SETTASKVAL(SetTaskLastModified, Map(dtLastMod));
 }
 
-Boolean TDLTask::SetDoneDate(Int64 dtCompletion)
+Boolean TDLTask::SetDoneDate(DateTime^ dtCompletion)
 {
-   return SETTASKVAL(SetTaskDoneDate, dtCompletion);
+   return SETTASKVAL(SetTaskDoneDate, Map(dtCompletion));
 }
 
-Boolean TDLTask::SetDueDate(Int64 dtDue)
+Boolean TDLTask::SetDueDate(DateTime^ dtDue)
 {
-   return SETTASKVAL(SetTaskDueDate, dtDue);
+   return SETTASKVAL(SetTaskDueDate, Map(dtDue));
 }
 
-Boolean TDLTask::SetStartDate(Int64 dtStart)
+Boolean TDLTask::SetStartDate(DateTime^ dtStart)
 {
-   return SETTASKVAL(SetTaskStartDate, dtStart);
+   return SETTASKVAL(SetTaskStartDate, Map(dtStart));
 }
 
-Boolean TDLTask::SetCreationDate(Int64 dtCreation)
+Boolean TDLTask::SetCreationDate(DateTime^ dtCreation)
 {
-   return SETTASKVAL(SetTaskCreationDate, dtCreation);
+   return SETTASKVAL(SetTaskCreationDate, Map(dtCreation));
 }
 
 Boolean TDLTask::SetTimeEstimate(double dTime, TimeUnits cUnits)
@@ -728,6 +728,21 @@ TDC_UNITS TDLTask::Map(TimeUnits units)
 
 	// default
 	return TDCU_NULL;
+}
+
+DateTime TDLTask::Map(Int64 tDate)
+{
+	DateTime^ date = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
+
+	return date->AddSeconds(tDate).ToLocalTime();
+}
+
+Int64 TDLTask::Map(DateTime^ date)
+{
+	DateTime utc = date->ToUniversalTime();
+	DateTime^ epoch = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
+
+	return (utc - *epoch).TotalSeconds;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

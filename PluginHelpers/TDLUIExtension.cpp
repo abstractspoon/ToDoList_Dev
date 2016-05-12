@@ -42,24 +42,14 @@ TDLTheme::RenderStyle TDLTheme::GetRenderStyle()
 	return TDLTheme::RenderStyle::Gradient;
 }
 
-Windows::Media::Color TDLTheme::GetAppColor(AppColor color)
+Windows::Media::Color TDLTheme::GetAppColorAsMedia(AppColor color)
 {
-	switch (color)
-	{
-	case TDLTheme::AppColor::AppBackDark:		return GetColor(m_pTheme->crAppBackDark);
-	case TDLTheme::AppColor::AppBackLight:		return GetColor(m_pTheme->crAppBackLight);
-	case TDLTheme::AppColor::AppLinesDark:		return GetColor(m_pTheme->crAppLinesDark);
-	case TDLTheme::AppColor::AppLinesLight:		return GetColor(m_pTheme->crAppLinesLight);
-	case TDLTheme::AppColor::AppText:			return GetColor(m_pTheme->crAppText);
-	case TDLTheme::AppColor::MenuBack:			return GetColor(m_pTheme->crMenuBack);
-	case TDLTheme::AppColor::ToolbarDark:		return GetColor(m_pTheme->crToolbarDark);
-	case TDLTheme::AppColor::ToolbarLight:		return GetColor(m_pTheme->crToolbarLight);
-	case TDLTheme::AppColor::StatusBarDark:		return GetColor(m_pTheme->crStatusBarDark);
-	case TDLTheme::AppColor::StatusBarLight:	return GetColor(m_pTheme->crStatusBarLight);
-	case TDLTheme::AppColor::StatusBarText:		return GetColor(m_pTheme->crStatusBarText);
-	}
+	return GetMediaColor(GetColor(color));
+}
 
-	return System::Windows::Media::Colors::Black;
+System::Drawing::Color TDLTheme::GetAppColorAsDrawing(AppColor color)
+{
+	return GetDrawingColor(GetColor(color));
 }
 
 String^ TDLTheme::GetToolBarImagePath()
@@ -67,12 +57,37 @@ String^ TDLTheme::GetToolBarImagePath()
 	return gcnew String(m_pTheme->szToolbarImage);
 }
 
-Windows::Media::Color TDLTheme::GetToolbarTransparencyColor()
+Windows::Media::Color TDLTheme::GetToolbarTransparencyColorAsMedia()
 {
-	return GetColor(m_pTheme->crToolbarTransparency);
+	return GetMediaColor(m_pTheme->crToolbarTransparency);
 }
 
-Windows::Media::Color TDLTheme::GetColor(UInt32 rgbColor)
+Drawing::Color TDLTheme::GetToolbarTransparencyColorAsDrawing()
+{
+	return GetDrawingColor(m_pTheme->crToolbarTransparency);
+}
+
+UInt32 TDLTheme::GetColor(AppColor color)
+{
+	switch (color)
+	{
+	case TDLTheme::AppColor::AppBackDark:		return m_pTheme->crAppBackDark;
+	case TDLTheme::AppColor::AppBackLight:		return m_pTheme->crAppBackLight;
+	case TDLTheme::AppColor::AppLinesDark:		return m_pTheme->crAppLinesDark;
+	case TDLTheme::AppColor::AppLinesLight:		return m_pTheme->crAppLinesLight;
+	case TDLTheme::AppColor::AppText:			return m_pTheme->crAppText;
+	case TDLTheme::AppColor::MenuBack:			return m_pTheme->crMenuBack;
+	case TDLTheme::AppColor::ToolbarDark:		return m_pTheme->crToolbarDark;
+	case TDLTheme::AppColor::ToolbarLight:		return m_pTheme->crToolbarLight;
+	case TDLTheme::AppColor::StatusBarDark:		return m_pTheme->crStatusBarDark;
+	case TDLTheme::AppColor::StatusBarLight:	return m_pTheme->crStatusBarLight;
+	case TDLTheme::AppColor::StatusBarText:		return m_pTheme->crStatusBarText;
+	}
+
+	return 0; // black
+}
+
+Windows::Media::Color TDLTheme::GetMediaColor(UInt32 rgbColor)
 {
 	System::Windows::Media::Color^ color = 
       System::Windows::Media::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
@@ -80,9 +95,12 @@ Windows::Media::Color TDLTheme::GetColor(UInt32 rgbColor)
 	return *color;
 }
 
-Drawing::Color TDLTheme::Map(Windows::Media::Color color)
+System::Drawing::Color TDLTheme::GetDrawingColor(UInt32 rgbColor)
 {
-	return Drawing::Color::FromArgb(color.R, color.G, color.B);
+	System::Drawing::Color^ color = 
+		System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+
+	return *color;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,15 +237,21 @@ IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLNotify::TDLNotify(IntPtr hwnd)
+TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
-	m_hwnd = static_cast<HWND>(hwnd.ToPointer());
+	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
+}
+
+TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
+{
+	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
+	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
 bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
-	mod.tValue = static_cast<__int64>((date - DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+	mod.tValue = static_cast<__int64>(TDLTask::Map(date));
 	
 	return DoNotify(&mod, 1);
 }
@@ -276,33 +300,61 @@ bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
 	return DoNotify(&mod, 1);
 }
 
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	mod.szValue = MS(value);
+
+	return DoNotify(&mod, 1);
+}
+
+bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
+{
+	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
+	//mod.szValue = MS(value);
+
+	return DoNotify(&mod, 1);
+}
+
 bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 {
-	if (!IsWindow(m_hwnd))
+	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwnd, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
+	::SendMessage(m_hwndParent, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
 	return true;
 }
 
 bool TDLNotify::NotifySelChange(UInt32 taskID)
 {
-	if (!IsWindow(m_hwnd))
+	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwnd, WM_IUI_SELECTTASK, 0, taskID);
+	::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, 0, taskID);
 	return true;
 }
 
 bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 {
-	if (!IsWindow(m_hwnd) || !pdwTaskIDs->Length)
+	if (!IsWindow(m_hwndParent) || !pdwTaskIDs->Length)
 		return false;
 
 	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	::SendMessage(m_hwnd, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
+	::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
 
 	return true;
+}
+
+bool TDLNotify::NotifyMouseClick(MouseClick button, int X, int Y)
+{
+	if (!IsWindow(m_hwndParent) || !IsWindow(m_hwndFrom))
+		return false;
+
+	if (button == MouseClick::Right)
+		::SendMessage(m_hwndParent, WM_CONTEXTMENU, (WPARAM)m_hwndFrom, MAKELPARAM(X, Y));
+
+	return true;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
