@@ -351,7 +351,12 @@ bool TDLNotify::NotifyMouseClick(MouseClick button, int X, int Y)
 		return false;
 
 	if (button == MouseClick::Right)
-		::SendMessage(m_hwndParent, WM_CONTEXTMENU, (WPARAM)m_hwndFrom, MAKELPARAM(X, Y));
+	{
+		POINT pt = { X, Y };
+		::ClientToScreen(m_hwndFrom, &pt);
+
+		::SendMessage(m_hwndParent, WM_CONTEXTMENU, (WPARAM)m_hwndFrom, MAKELPARAM(pt.x, pt.y));
+	}
 
 	return true;
 

@@ -104,8 +104,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) "$(SolutionDir)debug\
-</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
+mkdir "$(SolutionDir)..\ToDoList"
+mkdir "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

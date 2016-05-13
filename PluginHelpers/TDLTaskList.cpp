@@ -734,7 +734,7 @@ DateTime TDLTask::Map(Int64 tDate)
 {
 	DateTime^ date = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
 
-	return date->AddSeconds(tDate).ToLocalTime();
+	return date->AddSeconds(static_cast<double>(tDate)).ToLocalTime();
 }
 
 Int64 TDLTask::Map(DateTime^ date)
@@ -742,7 +742,7 @@ Int64 TDLTask::Map(DateTime^ date)
 	DateTime utc = date->ToUniversalTime();
 	DateTime^ epoch = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
 
-	return (utc - *epoch).TotalSeconds;
+	return static_cast<Int64>((utc - *epoch).TotalSeconds);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

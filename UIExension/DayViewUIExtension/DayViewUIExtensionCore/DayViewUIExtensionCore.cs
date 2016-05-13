@@ -208,6 +208,12 @@ namespace DayViewUIExtension
 
 		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
+            System.Drawing.Point pt = m_dayView.PointToClient(new System.Drawing.Point(xPos, yPos));
+
+            if (m_dayView.GetTrueRectangle().Contains(pt))
+                return TDLUIExtension.HitResult.Tasklist;
+
+            // else
 			return TDLUIExtension.HitResult.Nowhere;
 		}
 
