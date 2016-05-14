@@ -3,15 +3,45 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Globalization;
 
 namespace Calendar
 {
+    public static class FirstDayOfWeekUtility
+    {
+        /// <summary>
+        /// Returns the first day of the week that the specified
+        /// date is in using the current culture. 
+        /// </summary>
+        public static DateTime GetFirstDayOfWeek(DateTime dayInWeek)
+        {
+            CultureInfo defaultCultureInfo = CultureInfo.CurrentCulture;
+            return GetFirstDayOfWeek(dayInWeek, defaultCultureInfo);
+        }
+
+        /// <summary>
+        /// Returns the first day of the week that the specified date 
+        /// is in. 
+        /// </summary>
+        public static DateTime GetFirstDayOfWeek(DateTime dayInWeek, CultureInfo cultureInfo)
+        {
+            DayOfWeek firstDay = cultureInfo.DateTimeFormat.FirstDayOfWeek;
+            DateTime firstDayInWeek = dayInWeek.Date;
+            while (firstDayInWeek.DayOfWeek != firstDay)
+                firstDayInWeek = firstDayInWeek.AddDays(-1);
+
+            return firstDayInWeek;
+        }
+    }
+
     public class DayView : Control
     {
         #region Variables
 
         private TextBox editbox;
-        private VScrollBar scrollbar;
+        private VScrollBar vscroll;
+        private HScrollBar hscroll;
+        private ToolTip tooltip;
         private DrawTool drawTool;
         private SelectionTool selectionTool;
         private int allDayEventsHeaderHeight = 20;
@@ -48,14 +78,27 @@ namespace Calendar
             SetStyle(ControlStyles.ResizeRedraw, true);
             SetStyle(ControlStyles.Selectable, true);
 
-            scrollbar = new VScrollBar();
-            scrollbar.Dock = DockStyle.Right;
-            scrollbar.Visible = allowScroll;
-            scrollbar.Scroll += new ScrollEventHandler(scrollbar_Scroll);
+            vscroll = new VScrollBar();
+            vscroll.Dock = DockStyle.Right;
+            vscroll.Visible = allowScroll;
+            vscroll.Scroll += new ScrollEventHandler(OnVScroll);
             AdjustScrollbar();
-            scrollbar.Value = (startHour * slotsPerHour * slotHeight);
+            vscroll.Value = (startHour * slotsPerHour * slotHeight);
 
-            this.Controls.Add(scrollbar);
+            this.Controls.Add(vscroll);
+
+            hscroll = new HScrollBar();
+            //vscroll.Dock = DockStyle.Right;
+            hscroll.Visible = true;
+            hscroll.Location = new System.Drawing.Point(0, 0);
+            hscroll.Width = hourLabelWidth;
+            hscroll.Height = dayHeadersHeight;
+            hscroll.Scroll += new ScrollEventHandler(OnHScroll);
+            hscroll.Minimum = -1000; // ~-20 years
+            hscroll.Maximum = 1000;  // ~20 years
+            hscroll.Value = 0;
+
+            this.Controls.Add(hscroll);
 
             editbox = new TextBox();
             editbox.Multiline = true;
@@ -66,6 +109,9 @@ namespace Calendar
             editbox.Margin = Padding.Empty;
 
             this.Controls.Add(editbox);
+
+            tooltip = new ToolTip();
+            tooltip.SetToolTip(hscroll, "Change Week");
 
             drawTool = new DrawTool();
             drawTool.DayView = this;
@@ -238,7 +284,8 @@ namespace Calendar
             }
             set
             {
-                startDate = value;
+                // Move start date to start of week
+                startDate = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
                 OnStartDateChanged();
             }
         }
@@ -272,13 +319,13 @@ namespace Calendar
 
         protected virtual void OnStartHourChanged()
         {
-            if ((startHour * slotsPerHour * slotHeight) > scrollbar.Maximum) //maximum is lower on larger forms
+            if ((startHour * slotsPerHour * slotHeight) > vscroll.Maximum) //maximum is lower on larger forms
             {
-                scrollbar.Value = scrollbar.Maximum;
+                vscroll.Value = vscroll.Maximum;
             }
             else
             {
-                scrollbar.Value = (startHour * slotsPerHour * slotHeight);
+                vscroll.Value = (startHour * slotsPerHour * slotHeight);
             }
 
             Invalidate();
@@ -439,7 +486,7 @@ namespace Calendar
 
         private void OnAllowScrollChanged()
         {
-            this.scrollbar.Visible = this.AllowScroll;
+            this.vscroll.Visible = this.AllowScroll;
         }
 
         private bool allowInplaceEditing = true;
@@ -506,13 +553,27 @@ namespace Calendar
             }
         }
 
-        void scrollbar_Scroll(object sender, ScrollEventArgs e)
+        void OnVScroll(object sender, ScrollEventArgs e)
         {
             Invalidate();
 
             if (editbox.Visible)
                 //scroll text box too
                 editbox.Top += e.OldValue - e.NewValue;
+        }
+
+        void OnHScroll(object sender, ScrollEventArgs e)
+        {
+            if (e.NewValue > e.OldValue)
+            {
+                StartDate = StartDate.AddDays(7);
+            }
+            else if (e.NewValue < e.OldValue)
+            {
+                StartDate = StartDate.AddDays(-7);
+            }
+
+            Invalidate();
         }
 
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
@@ -523,10 +584,10 @@ namespace Calendar
 
         private void AdjustScrollbar()
         {
-			scrollbar.SmallChange = slotHeight;
-			scrollbar.LargeChange = (slotHeight * slotsPerHour);
-			scrollbar.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight;
-            scrollbar.Minimum = 0;
+			vscroll.SmallChange = slotHeight;
+			vscroll.LargeChange = (slotHeight * slotsPerHour);
+			vscroll.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight;
+            vscroll.Minimum = 0;
         }
 
         protected override void OnPaintBackground(PaintEventArgs pevent)
@@ -772,21 +833,21 @@ namespace Calendar
 
                 if (down)
                 {//mouse wheel scroll down
-                    newScrollValue = this.scrollbar.Value + this.scrollbar.SmallChange;
+                    newScrollValue = this.vscroll.Value + this.vscroll.SmallChange;
 
-                    if (newScrollValue < this.scrollbar.Maximum)
-                        this.scrollbar.Value = newScrollValue;
+                    if (newScrollValue < this.vscroll.Maximum)
+                        this.vscroll.Value = newScrollValue;
                     else
-                        this.scrollbar.Value = this.scrollbar.Maximum;
+                        this.vscroll.Value = this.vscroll.Maximum;
                 }
                 else
                 {//mouse wheel scroll up
-                    newScrollValue = this.scrollbar.Value - this.scrollbar.SmallChange;
+                    newScrollValue = this.vscroll.Value - this.vscroll.SmallChange;
 
-                    if (newScrollValue > this.scrollbar.Minimum)
-                        this.scrollbar.Value = newScrollValue;
+                    if (newScrollValue > this.vscroll.Minimum)
+                        this.vscroll.Value = newScrollValue;
                     else
-                        this.scrollbar.Value = this.scrollbar.Minimum;
+                        this.vscroll.Value = this.vscroll.Minimum;
                 }
 
                 this.Invalidate();
@@ -799,7 +860,7 @@ namespace Calendar
 
             truerect = this.ClientRectangle;
             truerect.X += hourLabelWidth + hourLabelIndent;
-            truerect.Width -= scrollbar.Width + hourLabelWidth + hourLabelIndent;
+            truerect.Width -= vscroll.Width + hourLabelWidth + hourLabelIndent;
             truerect.Y += this.HeaderHeight;
             truerect.Height -= this.HeaderHeight;
 
@@ -812,7 +873,7 @@ namespace Calendar
             fulldayrect = this.ClientRectangle;
             fulldayrect.Height = this.HeaderHeight - dayHeadersHeight;
             fulldayrect.Y += dayHeadersHeight;
-            fulldayrect.Width -= (hourLabelWidth + hourLabelIndent + this.scrollbar.Width);
+            fulldayrect.Width -= (hourLabelWidth + hourLabelIndent + this.vscroll.Width);
             fulldayrect.X += hourLabelWidth + hourLabelIndent;
 
             return fulldayrect;
@@ -862,9 +923,9 @@ namespace Calendar
 
         public DateTime GetTimeAt(int x, int y)
         {
-            int dayWidth = (this.Width - (scrollbar.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
+            int dayWidth = (this.Width - (vscroll.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
 
-            int hour = (y - this.HeaderHeight + scrollbar.Value) / slotHeight;
+            int hour = (y - this.HeaderHeight + vscroll.Value) / slotHeight;
             x -= hourLabelWidth;
 
             DateTime date = startDate;
@@ -914,7 +975,7 @@ namespace Calendar
 			e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
             // Calculate visible rectangle
-            Rectangle rectangle = new Rectangle(0, 0, this.Width - scrollbar.Width, this.Height);
+            Rectangle rectangle = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
 
             Rectangle daysRectangle = rectangle;
             daysRectangle.X += hourLabelWidth + hourLabelIndent;
@@ -946,11 +1007,10 @@ namespace Calendar
             if (this.AllowScroll == false)
             {
                 scrollrect.X = headerRectangle.Width + hourLabelWidth + hourLabelIndent;
-                scrollrect.Width = scrollbar.Width;
+                scrollrect.Width = vscroll.Width;
                 using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
                     e.Graphics.FillRectangle(backBrush, scrollrect);
             }
-
         }
 
         private void DrawHourLabels(PaintEventArgs e, Rectangle rect)
@@ -961,7 +1021,7 @@ namespace Calendar
             {
                 Rectangle hourRectangle = rect;
 
-                hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - scrollbar.Value;
+                hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - vscroll.Value;
                 hourRectangle.X += hourLabelIndent;
                 hourRectangle.Width = hourLabelWidth;
 
@@ -976,6 +1036,10 @@ namespace Calendar
             }
 
             e.Graphics.ResetClip();
+
+            // draw a line at the top for closure
+            using (Pen m_Pen = new Pen(Color.DarkGray))
+                e.Graphics.DrawLine(m_Pen, rect.Left, rect.Y, rect.Width, rect.Y);
         }
 
         private void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
@@ -1008,7 +1072,7 @@ namespace Calendar
             startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
             endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
 
-            rect.Y = startY - scrollbar.Value + this.HeaderHeight;
+            rect.Y = startY - vscroll.Value + this.HeaderHeight;
 
             rect.Height = System.Math.Max(1, endY - startY);
 
@@ -1041,7 +1105,7 @@ namespace Calendar
 
             for (int hour = 0; hour < 24 * slotsPerHour; hour++)
             {
-                int y = rect.Top + (hour * slotHeight) - scrollbar.Value;
+                int y = rect.Top + (hour * slotHeight) - vscroll.Value;
 
                 Color color1 = renderer.HourSeperatorColor;
                 Color color2 = renderer.HalfHourSeperatorColor;

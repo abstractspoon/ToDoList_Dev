@@ -27,9 +27,12 @@ namespace DayViewUIExtension
 			this.m_dayView.AllowInplaceEditing = true;
 			this.m_dayView.AllowNew = true;
 			this.m_dayView.AmPmDisplay = true;
-			this.m_dayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+            this.m_dayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+                                     System.Windows.Forms.AnchorStyles.Left |
+                                     System.Windows.Forms.AnchorStyles.Right);
+            this.m_dayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			this.m_dayView.DaysToShow = 7;
-			this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
+			//this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_dayView.DrawAllAppBorder = false;
 			this.m_dayView.Font = new System.Drawing.Font("Tahoma", 8);
 			this.m_dayView.Location = new System.Drawing.Point(0, 0);
@@ -244,10 +247,34 @@ namespace DayViewUIExtension
 			this.BackColor = System.Drawing.Color.White;
 			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
             this.m_renderer = new TDLRenderer();
-			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
 			CreateDayView();
 		}
+
+        protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+        {
+            System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            Border.Y = 20;
+            Border.Height -= 20;
+
+            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
+        }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+
+            System.Drawing.Rectangle DayView = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+
+            DayView.Y = 20;
+            DayView.Height -= 20;
+            DayView.Inflate(-1, -1);
+
+            m_dayView.Location = DayView.Location;
+            m_dayView.Size = DayView.Size;
+
+            Invalidate();
+        }
 
 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
 		{
