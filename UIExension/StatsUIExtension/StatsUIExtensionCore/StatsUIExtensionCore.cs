@@ -35,197 +35,215 @@ namespace StatsUIExtension
         }
 
 	    public void UpdateTasks(TDLTaskList tasks, 
-                                TDLUIExtension.UpdateType type, 
-                                TDLUIExtension.TaskAttribute attrib)
+                                TDLUIExtension.UpdateType type,
+                                System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
         {
+/*
             TDLTask task = tasks.GetFirstTask();
             SampleListItem item = new SampleListItem();
 
-            item.Tasks = task.GetID().ToString();
-                    
-            switch (attrib)
+            System.Text.StringBuilder attrib = new System.Text.StringBuilder();
+            System.Text.StringBuilder value = new System.Text.StringBuilder();
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
             {
-                case TDLUIExtension.TaskAttribute.Title:            
-                    item.Attrib = "Title";
-                    item.Value = task.GetTitle();
-                    break;
-
-                case TDLUIExtension.TaskAttribute.DoneDate:         
-                    item.Attrib = "Done Date";
-                    item.Value = task.GetDoneDateString();
-                    break;
-
-                case TDLUIExtension.TaskAttribute.DueDate:          
-                    item.Attrib = "Due Date";
-                    item.Value = task.GetDueDateString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.StartDate:        
-                    item.Attrib = "Start Date";
-                    item.Value = task.GetStartDateString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Priority:         
-                    item.Attrib = "Priority";
-                    item.Value = task.GetPriority().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Color:            
-                    item.Attrib = "Color";
-                    item.Value = task.GetColor().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.AllocTo:          
-                    item.Attrib = "Alloc To";
-                    item.Value = task.GetAllocatedTo(0);
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.AllocBy:          
-                    item.Attrib = "Alloc By";
-                    item.Value = task.GetAllocatedBy();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Status:           
-                    item.Attrib = "Status";
-                    item.Value = task.GetStatus();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Category:         
-                    item.Attrib = "Category";
-                    item.Value = task.GetCategory(0);
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Percent:          
-                    item.Attrib = "Percent";
-                    item.Value = task.GetPercentDone().ToString();
-                    break;
-
-                case TDLUIExtension.TaskAttribute.TimeEstimate:
-                    {
-                        item.Attrib = "Time Estimate";
-
-                        TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
-                        item.Value = (task.GetTimeEstimate(ref units).ToString() + units);
-                    }
-                    break;
-
-                case TDLUIExtension.TaskAttribute.TimeSpent:
-                    {
-                        item.Attrib = "Time Spent";
-
-                        TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
-                        item.Value = (task.GetTimeSpent(ref units).ToString() + units);
-                    }
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.FileReference:    
-                    item.Attrib = "File Reference";
-                    item.Value = task.GetFileReference(0);
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Comments:         
-                    item.Attrib = "Comments";
-                    item.Value = task.GetComments();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Flag:             
-                    item.Attrib = "Flag";
-                    item.Value = task.IsFlagged().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.CreationDate:     
-                    item.Attrib = "Creation Date";
-                    item.Value = task.GetCreationDateString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.CreatedBy:        
-                    item.Attrib = "Created By";
-                    item.Value = task.GetCreatedBy();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Risk:             
-                    item.Attrib = "Risk";
-                    item.Value = task.GetRisk().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.ExternalId:       
-                    item.Attrib = "External ID";
-                    item.Value = task.GetExternalID();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Cost:             
-                    item.Attrib = "Cost";
-                    item.Value = task.GetCost().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Dependency:       
-                    item.Attrib = "Dependency";
-                    item.Value = task.GetDependency(0);
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Recurrence:       
-                    item.Attrib = "Recurrence";
-                    //item.Value = task.GetRecurrence();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Version:          
-                    item.Attrib = "Version";
-                    item.Value = task.GetVersion();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Position:         
-                    item.Attrib = "Position";
-                    item.Value = task.GetPositionString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Id:               
-                    item.Attrib = "ID";
-                    item.Value = task.GetID().ToString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.LastModified:     
-                    item.Attrib = "Last Modified";
-                    //item.Value = task.GetLastModifiedString();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Icon:             
-                    item.Attrib = "Icon";
-                    item.Value = task.GetIcon();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Tag:              
-                    item.Attrib = "Tag";
-                    item.Value = task.GetTag(0);
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.CustomAttribute:  
-                    item.Attrib = "Custom Attribute";
-                    //item.Value = task.GetCustomAttributeData();
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.All:              
-                    item.Attrib = "All";
-                    item.Value = "...";
-                    break;
-                
-                case TDLUIExtension.TaskAttribute.Unknown:          
-                    item.Attrib = "Unknown";            
-                    break;
+                attrib.Append("Title");
+                value.Append(task.GetTitle());
             }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+            {
+                attrib.Append("Done Date");
+                value.Append(task.GetDoneDateString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+            {
+                attrib.Append("Due Date");
+                value.Append(task.GetDueDateString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+            {
+                attrib.Append("Start Date");
+                value.Append(task.GetStartDateString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Priority))
+            {
+                attrib.Append("Priority");
+                value.Append(task.GetPriority().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Color))
+            {
+                attrib.Append("Color");
+                value.Append(task.GetColor().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+            {
+                attrib.Append("Alloc To");
+                value.Append(task.GetAllocatedTo(0));
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocBy))
+            {
+                attrib.Append("Alloc By");
+                value.Append(task.GetAllocatedBy());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Status))
+            {
+                attrib.Append("Status");
+                value.Append(task.GetStatus());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Category))
+            {
+                attrib.Append("Category");
+                value.Append(task.GetCategory(0));
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Percent))
+            {
+                attrib.Append("Percent");
+                value.Append(task.GetPercentDone().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.TimeEstimate))
+            {
+                attrib.Append("Time Estimate");
+
+                TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
+                value.Append(task.GetTimeEstimate(ref units).ToString() + units);
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.TimeSpent))
+            {
+                attrib.Append("Time Spent");
+
+                TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
+                value.Append(task.GetTimeSpent(ref units).ToString() + units);
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.FileReference))
+            {
+                attrib.Append("File Reference");
+                value.Append(task.GetFileReference(0));
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Comments))
+            {
+                attrib.Append("Comments");
+                value.Append(task.GetComments());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Flag))
+            {
+                attrib.Append("Flag");
+                value.Append(task.IsFlagged().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.CreationDate))
+            {
+                attrib.Append("Creation Date");
+                value.Append(task.GetCreationDateString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.CreatedBy))
+            {
+                attrib.Append("Created By");
+                value.Append(task.GetCreatedBy());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Risk))
+            {
+                attrib.Append("Risk");
+                value.Append(task.GetRisk().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.ExternalId))
+            {
+                attrib.Append("External ID");
+                value.Append(task.GetExternalID());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Cost))
+            {
+                attrib.Append("Cost");
+                value.Append(task.GetCost().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Dependency))
+            {
+                attrib.Append("Dependency");
+                value.Append(task.GetDependency(0));
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Recurrence))
+            {
+                attrib.Append("Recurrence");
+                //value.Append(task.GetRecurrence());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Version))
+            {
+                attrib.Append("Version");
+                value.Append(task.GetVersion());
+            }
+
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Position))
+            {
+                attrib.Append("Position");
+                value.Append(task.GetPositionString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Id))
+            {
+                attrib.Append("ID");
+                value.Append(task.GetID().ToString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.LastModified))
+            {
+                attrib.Append("Last Modified");
+                //value.Append(task.GetLastModifiedString());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Icon))
+            {
+                attrib.Append("Icon");
+                value.Append(task.GetIcon());
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.Tag))
+            {
+                attrib.Append("Tag");
+                value.Append(task.GetTag(0));
+            }
+
+            if (attribs.Contains(TDLUIExtension.TaskAttribute.CustomAttribute))
+            {
+                attrib.Append("Custom Attribute");
+                //value.Append(task.GetCustomAttributeData());
+            }
+
+            item.Attrib = attrib.ToString();
+            item.Value = value.ToString();
+            item.Tasks = task.GetID().ToString();
 
             switch (type)
             {
-                case TDLUIExtension.UpdateType.Edit:    item.Type = "Edit";             break;
-                case TDLUIExtension.UpdateType.Add:     item.Type = "Add Task";         break;
-                case TDLUIExtension.UpdateType.Delete:  item.Type = "Move Task(s)";     break;
-                case TDLUIExtension.UpdateType.Move:    item.Type = "Delete Task(s)";   break;
-                case TDLUIExtension.UpdateType.All:     item.Type = "All";              break;
-                case TDLUIExtension.UpdateType.Unknown: item.Type = "Unknown";          break;
+                case TDLUIExtension.UpdateType.Edit: item.Type = "Edit"; break;
+                case TDLUIExtension.UpdateType.New: item.Type = "Add Task"; break;
+                case TDLUIExtension.UpdateType.Delete: item.Type = "Move Task(s)"; break;
+                case TDLUIExtension.UpdateType.Move: item.Type = "Delete Task(s)"; break;
+                case TDLUIExtension.UpdateType.All: item.Type = "All"; break;
+                case TDLUIExtension.UpdateType.Unknown: item.Type = "Unknown"; break;
             }
-
-
-//             m_Items.Add(item);
-//             m_ListView.Items.Refresh();
+*/
         }
 
         public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)

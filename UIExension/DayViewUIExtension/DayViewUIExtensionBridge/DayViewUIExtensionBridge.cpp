@@ -154,11 +154,11 @@ bool CDayViewUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCo
     return m_wnd->SelectTasks(taskIDs);
 }
 
-void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTE nEditAttribute)
+void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	msclr::auto_gcroot<TDLTaskList^> tasks = gcnew TDLTaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(nEditAttribute));
+	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(pAttributes, nNumAttributes));
 }
 
 bool CDayViewUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const

@@ -71,7 +71,7 @@ namespace TDLPluginHelpers
 		   Unknown = -1,
 
 		   Edit,
-		   Add,
+		   New,
 		   Delete,
 		   Move,
 
@@ -135,7 +135,7 @@ namespace TDLPluginHelpers
 		   Icon,
 		   Tag,
 		   CustomAttribute,
-		   MoveTask,
+		   OffsetTask,
 
 		   // new values here ONLY
 
@@ -143,6 +143,7 @@ namespace TDLPluginHelpers
 	   };
 
 	   static TaskAttribute Map(IUI_ATTRIBUTE attrib);
+	   static Collections::Generic::HashSet<TaskAttribute>^ Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib);
 	   static UpdateType Map(IUI_UPDATETYPE type);
 	   static AppCommand Map(IUI_APPCOMMAND cmd);
 	   static IUI_HITTEST Map(HitResult test);
@@ -155,7 +156,7 @@ namespace TDLPluginHelpers
 	   bool SelectTask(UInt32 dwTaskID);
 	   bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs);
 
-	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, TDLUIExtension::TaskAttribute nEditAttribute);
+	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, Collections::Generic::HashSet<TDLUIExtension::TaskAttribute>^ attribs);
 	   bool WantEditUpdate(TDLUIExtension::TaskAttribute nAttribute);
 	   bool WantSortUpdate(TDLUIExtension::TaskAttribute nAttribute);
 	   bool PrepareNewTask(TDLTaskList^ task);

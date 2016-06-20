@@ -80,11 +80,11 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TDLTaskList tasks, 
 								TDLUIExtension.UpdateType type, 
-								TDLUIExtension.TaskAttribute attrib)
+								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
 			switch (type)
 			{
-				case TDLUIExtension.UpdateType.Add:
+				case TDLUIExtension.UpdateType.New:
 				case TDLUIExtension.UpdateType.Delete:
 				case TDLUIExtension.UpdateType.Move:
 				case TDLUIExtension.UpdateType.All:
@@ -99,7 +99,7 @@ namespace DayViewUIExtension
 
 			TDLTask task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attrib))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
 
 			m_dayView.Invalidate();
@@ -107,7 +107,7 @@ namespace DayViewUIExtension
 
 		private bool ProcessTaskUpdate(TDLTask task, 
 									   TDLUIExtension.UpdateType type,
-									   TDLUIExtension.TaskAttribute attrib)
+                                       System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
 			if (!task.IsValid())
 				return false;
@@ -116,28 +116,20 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-				switch (attrib)
-				{
-					case TDLUIExtension.TaskAttribute.Title:
-						item.Title = task.GetTitle();
-						break;
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+					item.Title = task.GetTitle();
 
-					case TDLUIExtension.TaskAttribute.DoneDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
 						item.EndDate = item.OrgEndDate = task.GetDoneDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.DueDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
 						item.EndDate = item.OrgEndDate = task.GetDueDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.StartDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
 						item.StartDate = item.OrgStartDate = task.GetStartDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.AllocTo:
-						item.AllocTo = task.GetAllocatedTo(0);
-						break;
-				}
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+						item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 			}
 			else
 			{
@@ -146,7 +138,7 @@ namespace DayViewUIExtension
 				item.Title = task.GetTitle();
 				item.EndDate = item.OrgEndDate = task.GetDueDate();
 				item.StartDate = item.OrgStartDate = task.GetStartDate();
-				item.AllocTo = task.GetAllocatedTo(0);
+				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 				item.Id = task.GetID();
 				item.IsParent = task.IsParent();
 			}
@@ -157,7 +149,7 @@ namespace DayViewUIExtension
 			// Process children
 			TDLTask subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attrib))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -336,7 +328,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.MoveTask, args.Appointment.StartDate);
+						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
 					}
 					break;
 

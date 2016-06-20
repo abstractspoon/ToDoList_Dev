@@ -15,6 +15,7 @@ typedef void* HTASKITEM;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,17 +74,11 @@ namespace TDLPluginHelpers
       UInt32 GetPriority();
       UInt32 GetRisk();
 
-      UInt32 GetCategoryCount();
-      UInt32 GetAllocatedToCount();
-      UInt32 GetTagCount();
-      UInt32 GetDependencyCount();
-      UInt32 GetFileReferenceCount();
-
-      String^ GetAllocatedTo(int nIndex);
-      String^ GetCategory(int nIndex);
-      String^ GetTag(int nIndex);
-      String^ GetDependency(int nIndex);
-      String^ GetFileReference(int nIndex);
+	  List<String^>^ GetAllocatedTo();
+	  List<String^>^ GetCategory();
+	  List<String^>^ GetTag();
+	  List<String^>^ GetDependency();
+	  List<String^>^ GetFileReference();
 
       Byte GetPercentDone();
       double GetCost();
@@ -188,6 +183,9 @@ namespace TDLPluginHelpers
       String^ GetCustomAttributeLabel(int nIndex);
       String^ GetCustomAttributeID(int nIndex);
       String^ GetCustomAttributeValue(int nIndex, String^ sItem);
+	  UInt32  GetCustomAttributeType(int nIndex);
+	  String^ GetCustomAttributeListData(int nIndex);
+	  Boolean IsCustomAttributeEnabled(int nIndex);
 
       UInt32 GetTaskCount();
       TDLTask^ FindTask(UInt32 dwTaskID);
