@@ -193,8 +193,7 @@ TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTE attrib)
 	case IUI_ICON:			return TDLUIExtension::TaskAttribute::Icon;
 	case IUI_TAGS:			return TDLUIExtension::TaskAttribute::Tag;
 	case IUI_CUSTOMATTRIB:	return TDLUIExtension::TaskAttribute::CustomAttribute;
-	case IUI_ALLATTRIB:		return TDLUIExtension::TaskAttribute::All;
-	case IUI_MOVETASK:		return TDLUIExtension::TaskAttribute::MoveTask;
+	case IUI_OFFSETTASK:	return TDLUIExtension::TaskAttribute::OffsetTask;
 	//  case IUI_
 	}
 
@@ -235,12 +234,21 @@ IUI_ATTRIBUTE TDLUIExtension::Map(TDLUIExtension::TaskAttribute attrib)
 	case TDLUIExtension::TaskAttribute::Icon:				return IUI_ICON;		
 	case TDLUIExtension::TaskAttribute::Tag:				return IUI_TAGS;		
 	case TDLUIExtension::TaskAttribute::CustomAttribute:	return IUI_CUSTOMATTRIB;
-	case TDLUIExtension::TaskAttribute::All:				return IUI_ALLATTRIB;	
-	case TDLUIExtension::TaskAttribute::MoveTask:			return IUI_MOVETASK;	
+	case TDLUIExtension::TaskAttribute::OffsetTask:			return IUI_OFFSETTASK;	
 		//  case IUI_
 	}
 
 	return IUI_NONE;
+}
+
+Collections::Generic::HashSet<TDLUIExtension::TaskAttribute>^ TDLUIExtension::Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib)
+{
+	Collections::Generic::HashSet<TaskAttribute>^ attribs = gcnew(Collections::Generic::HashSet<TaskAttribute>);
+
+	for (int attrib = 0; attrib < numAttrib; attrib++)
+		attribs->Add(Map(pAttrib[attrib]));
+
+	return attribs;
 }
 
 TDLUIExtension::UpdateType TDLUIExtension::Map(IUI_UPDATETYPE type)
@@ -248,7 +256,7 @@ TDLUIExtension::UpdateType TDLUIExtension::Map(IUI_UPDATETYPE type)
 	switch (type)
 	{
 	case IUI_EDIT:		return TDLUIExtension::UpdateType::Edit;
-	case IUI_ADD:		return TDLUIExtension::UpdateType::Add;
+	case IUI_NEW:		return TDLUIExtension::UpdateType::New;
 	case IUI_DELETE:	return TDLUIExtension::UpdateType::Delete;
 	case IUI_MOVE:		return TDLUIExtension::UpdateType::Move;
 	case IUI_ALL:		return TDLUIExtension::UpdateType::All;
@@ -397,23 +405,6 @@ bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 	::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
 
 	return true;
-}
-
-bool TDLNotify::NotifyMouseClick(MouseClick button, int X, int Y)
-{
-	if (!IsWindow(m_hwndParent) || !IsWindow(m_hwndFrom))
-		return false;
-
-	if (button == MouseClick::Right)
-	{
-		POINT pt = { X, Y };
-		::ClientToScreen(m_hwndFrom, &pt);
-
-		::SendMessage(m_hwndParent, WM_CONTEXTMENU, (WPARAM)m_hwndFrom, MAKELPARAM(pt.x, pt.y));
-	}
-
-	return true;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

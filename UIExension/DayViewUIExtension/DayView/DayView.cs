@@ -629,70 +629,91 @@ namespace Calendar
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            // Capture focus
-            this.Focus();
-
-            if (CurrentlyEditing)
+            if (e.Button == MouseButtons.Left)
             {
-                FinishEditing(false);
-            }
+                // Capture focus
+                this.Focus();
 
-            if (selectedAppointmentIsNew)
-            {
-                RaiseNewAppointment();
-            }
-
-            ITool newTool = null;
-
-            Appointment appointment = GetAppointmentAt(e.X, e.Y);
-
-            if (e.Y < HeaderHeight && e.Y > dayHeadersHeight && appointment == null)
-            {
-                if (selectedAppointment != null)
+                if (CurrentlyEditing)
                 {
-                    selectedAppointment = null;
+                    FinishEditing(false);
+                }
+
+                if (selectedAppointmentIsNew)
+                {
+                    RaiseNewAppointment();
+                }
+
+                ITool newTool = null;
+
+                Appointment appointment = GetAppointmentAt(e.X, e.Y);
+
+                if (e.Y < HeaderHeight && e.Y > dayHeadersHeight && appointment == null)
+                {
+                    if (selectedAppointment != null)
+                    {
+                        selectedAppointment = null;
+                        Invalidate();
+                    }
+
+                    newTool = drawTool;
+                    selection = SelectionType.None;
+
+                    base.OnMouseDown(e);
+                    return;
+                }
+
+                if (appointment == null)
+                {
+                    if (selectedAppointment != null)
+                    {
+                        selectedAppointment = null;
+                        Invalidate();
+                    }
+
+                    newTool = drawTool;
+                    selection = SelectionType.DateRange;
+                }
+                else
+                {
+                    newTool = selectionTool;
+                    selectedAppointment = appointment;
+                    selection = SelectionType.Appointment;
+
                     Invalidate();
                 }
 
-                newTool = drawTool;
-                selection = SelectionType.None;
-
-                base.OnMouseDown(e);
-                return;
-            }
-
-            if (appointment == null)
-            {
-                if (selectedAppointment != null)
+                if (activeTool != null)
                 {
-                    selectedAppointment = null;
-                    Invalidate();
+                    activeTool.MouseDown(e);
                 }
 
-                newTool = drawTool;
-                selection = SelectionType.DateRange;
+                if ((activeTool != newTool) && (newTool != null))
+                {
+                    newTool.Reset();
+                    newTool.MouseDown(e);
+                }
+
+                activeTool = newTool;
             }
-            else
+            else if (e.Button == MouseButtons.Right)
             {
-                newTool = selectionTool;
-                selectedAppointment = appointment;
-                selection = SelectionType.Appointment;
+                // If we right-click outside the area of selection,
+                // select whatever is under the cursor
+                if (GetAppointmentAt(e.X, e.Y) == null)
+                {
+                    DateTime click = GetTimeAt(e.X, e.Y);
 
-                Invalidate();
+                    if ((click < SelectionStart) || (click > SelectionEnd))
+                    {
+                        SelectionStart = click;
+                        SelectionEnd = click.AddMinutes(60 / SlotsPerHour);
+
+                        Invalidate(true);
+                        Update();
+                    }
+                }
             }
-
-            if (activeTool != null)
-            {
-                activeTool.MouseDown(e);
-            }
-
-            if ((activeTool != newTool) && (newTool != null))
-            {
-                newTool.Reset();
-                newTool.MouseDown(e);
-            }
-
-            activeTool = newTool;
 
             base.OnMouseDown(e);
         }

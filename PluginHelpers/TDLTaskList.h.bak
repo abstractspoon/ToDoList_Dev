@@ -72,16 +72,30 @@ namespace TDLPluginHelpers
       UInt32 GetPriority();
       UInt32 GetRisk();
 
+<<<<<<< HEAD
       System::Drawing::Color GetTextDrawingColor();
       System::Windows::Media::Color GetTextMediaColor();
       System::Drawing::Color GetPriorityDrawingColor();
       System::Windows::Media::Color GetPriorityMediaColor();
 
+      UInt32 GetCategoryCount();
+      UInt32 GetAllocatedToCount();
+      UInt32 GetTagCount();
+      UInt32 GetDependencyCount();
+      UInt32 GetFileReferenceCount();
+
+      String^ GetAllocatedTo(int nIndex);
+      String^ GetCategory(int nIndex);
+      String^ GetTag(int nIndex);
+      String^ GetDependency(int nIndex);
+      String^ GetFileReference(int nIndex);
+=======
 	  List<String^>^ GetAllocatedTo();
 	  List<String^>^ GetCategory();
 	  List<String^>^ GetTag();
 	  List<String^>^ GetDependency();
 	  List<String^>^ GetFileReference();
+>>>>>>> origin/master
 
       Byte GetPercentDone();
       double GetCost();

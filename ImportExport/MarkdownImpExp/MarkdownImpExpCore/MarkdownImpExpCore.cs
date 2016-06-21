@@ -64,7 +64,7 @@ namespace MarkdownImpExp
 
             taskAttrib.Append("**`" + task.GetTitle() + "`**");
             taskAttrib.Append("  ").AppendLine().Append("Priority: " + task.GetPriority());
-            taskAttrib.Append("  ").AppendLine().Append("Allocated to: " + task.GetAllocatedTo(0));
+            taskAttrib.Append("  ").AppendLine().Append("Allocated to: " + String.Join(", ", task.GetAllocatedTo()));
 
             return taskAttrib.AppendLine().ToString();
         }

@@ -168,11 +168,11 @@ bool CStatsUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCoun
     return m_wnd->SelectTasks(taskIDs);
 }
 
-void CStatsUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTE nEditAttribute)
+void CStatsUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	msclr::auto_gcroot<TDLTaskList^> tasks = gcnew TDLTaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(nEditAttribute));
+	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(pAttributes, nNumAttributes));
 }
 
 bool CStatsUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
@@ -189,7 +189,7 @@ bool CStatsUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TDLTaskList^> task = gcnew TDLTaskList(pTask);
 
-	return m_wnd->PrepareNewTask(task.get());
+	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
 bool CStatsUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)

@@ -84,6 +84,8 @@ String^ TDLTaskList::GetCustomAttributeLabel(int nIndex)
 String^ TDLTaskList::GetCustomAttributeID(int nIndex)
 {
 	return GETSTR_ARG(GetCustomAttributeID, nIndex);
+<<<<<<< HEAD
+=======
 }
 
 UInt32  TDLTaskList::GetCustomAttributeType(int nIndex)
@@ -99,6 +101,7 @@ String^ TDLTaskList::GetCustomAttributeListData(int nIndex)
 Boolean TDLTaskList::IsCustomAttributeEnabled(int nIndex)
 {
 	return GETVAL_ARG(IsCustomAttributeEnabled, nIndex, false);
+>>>>>>> origin/master
 }
 
 String^ TDLTaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
@@ -281,6 +284,7 @@ UInt32 TDLTask::GetID()
 UInt32 TDLTask::GetColor()
 {
 	return GETTASKVAL(GetTaskColor, 0);
+<<<<<<< HEAD
 }
 
 System::Drawing::Color TDLTask::GetTextDrawingColor()
@@ -291,16 +295,26 @@ System::Drawing::Color TDLTask::GetTextDrawingColor()
 System::Windows::Media::Color TDLTask::GetTextMediaColor()
 {
 	return TDLColor::GetMediaColor(GETTASKVAL(GetTaskTextColor, 0));
+=======
+>>>>>>> origin/master
 }
 
 System::Drawing::Color TDLTask::GetPriorityDrawingColor()
 {
+<<<<<<< HEAD
 	return TDLColor::GetDrawingColor(GETTASKVAL(GetTaskPriorityColor, 0));
+=======
+	return GETTASKVAL(GetTaskTextColor, 0);
+>>>>>>> origin/master
 }
 
 System::Windows::Media::Color TDLTask::GetPriorityMediaColor()
 {
+<<<<<<< HEAD
 	return TDLColor::GetMediaColor(GETTASKVAL(GetTaskPriorityColor, 0));
+=======
+	return GETTASKVAL(GetTaskPriorityColor, 0);
+>>>>>>> origin/master
 }
 
 UInt32 TDLTask::GetPosition()
@@ -320,6 +334,19 @@ UInt32 TDLTask::GetRisk()
 
 List<String^>^ TDLTask::GetAllocatedTo()
 {
+<<<<<<< HEAD
+	return GETTASKVAL(GetTaskCategoryCount, 0);
+}
+
+UInt32 TDLTask::GetAllocatedToCount()
+{
+	return GETTASKVAL(GetTaskAllocatedToCount, 0);
+}
+
+UInt32 TDLTask::GetTagCount()
+{
+	return GETTASKVAL(GetTaskTagCount, 0);
+=======
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskAllocatedToCount, 0);
 
@@ -327,10 +354,24 @@ List<String^>^ TDLTask::GetAllocatedTo()
 		items->Add(GETTASKSTR_ARG(GetTaskAllocatedTo, nIndex));
 
 	return items;
+>>>>>>> origin/master
 }
 
 List<String^>^ TDLTask::GetCategory()
 {
+<<<<<<< HEAD
+	return GETTASKVAL(GetTaskDependencyCount, 0);
+}
+
+UInt32 TDLTask::GetFileReferenceCount()
+{
+	return GETTASKVAL(GetTaskFileReferenceCount, 0);
+}
+
+String^ TDLTask::GetAllocatedTo(int nIndex)
+{
+	return GETTASKSTR_ARG(GetTaskAllocatedTo, nIndex);
+=======
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskCategoryCount, 0);
 
@@ -338,10 +379,19 @@ List<String^>^ TDLTask::GetCategory()
 		items->Add(GETTASKSTR_ARG(GetTaskCategory, nIndex));
 
 	return items;
+>>>>>>> origin/master
 }
 
 List<String^>^ TDLTask::GetTag()
 {
+<<<<<<< HEAD
+	return GETTASKSTR_ARG(GetTaskCategory, nIndex);
+}
+
+String^ TDLTask::GetTag(int nIndex)
+{
+	return GETTASKSTR_ARG(GetTaskTag, nIndex);
+=======
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskTagCount, 0);
 
@@ -349,10 +399,14 @@ List<String^>^ TDLTask::GetTag()
 		items->Add(GETTASKSTR_ARG(GetTaskTag, nIndex));
 
 	return items;
+>>>>>>> origin/master
 }
 
 List<String^>^ TDLTask::GetDependency()
 {
+<<<<<<< HEAD
+	return GETTASKSTR_ARG(GetTaskDependency, nIndex);
+=======
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskDependencyCount, 0);
 
@@ -360,10 +414,14 @@ List<String^>^ TDLTask::GetDependency()
 		items->Add(GETTASKSTR_ARG(GetTaskDependency, nIndex));
 
 	return items;
+>>>>>>> origin/master
 }
 
 List<String^>^ TDLTask::GetFileReference()
 {
+<<<<<<< HEAD
+	return GETTASKSTR_ARG(GetTaskFileReference, nIndex);
+=======
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileReferenceCount, 0);
 
@@ -371,6 +429,7 @@ List<String^>^ TDLTask::GetFileReference()
 		items->Add(GETTASKSTR_ARG(GetTaskFileReference, nIndex));
 
 	return items;
+>>>>>>> origin/master
 }
 
 Byte TDLTask::GetPercentDone()

@@ -47,7 +47,7 @@ public:
    bool SelectTask(DWORD dwTaskID);
    bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
 
-   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTE nEditAttribute);
+   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
    bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
    bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
    bool PrepareNewTask(ITaskList* pTask) const;

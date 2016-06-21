@@ -6,60 +6,68 @@ using TDLPluginHelpers;
 
 namespace DayViewUIExtension
 {
-	public class CalendarItem
-	{
-		public String Title { get; set; }
-		public String AllocTo { get; set; }
-		public System.DateTime Start { get; set; }
-		public System.DateTime End { get; set; }
-		public UInt32 TaskId { get; set; }
-		public System.Boolean IsParent { get; set; }
-	}
-
 	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
 	{
-		public DayViewUIExtensionCore()
+		private Boolean m_taskColorIsBkgnd = false;
+		private IntPtr m_hwndParent;
+
+		public DayViewUIExtensionCore(IntPtr hwndParent)
 		{
+			m_hwndParent = hwndParent;
 			InitializeComponent();
 		}
 
 		private void CreateDayView()
 		{
 			Calendar.DrawTool drawTool = new Calendar.DrawTool();
-			this.m_dayView = new Calendar.DayView();
 
-			drawTool.DayView = this.m_dayView;
-			this.m_dayView.ActiveTool = drawTool;
-			this.m_dayView.AllowInplaceEditing = true;
-			this.m_dayView.AmPmDisplay = false;
-			this.m_dayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.m_dayView.DaysToShow = 7;
-			this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.m_dayView.DrawAllAppBorder = false;
-			this.m_dayView.Font = new System.Drawing.Font("Tahoma", 8F);
-			this.m_dayView.HalfHourHeight = 15;
-			this.m_dayView.Location = new System.Drawing.Point(0, 0);
-			this.m_dayView.MinHalfHourApp = false;
-			this.m_dayView.Name = "m_dayView";
-			this.m_dayView.SelectionEnd = new System.DateTime(((long)(0)));
-			this.m_dayView.SelectionStart = new System.DateTime(((long)(0)));
-			this.m_dayView.Size = new System.Drawing.Size(798, 328);
-			this.m_dayView.StartDate = DateTime.Now;
-			this.m_dayView.TabIndex = 0;
-			this.m_dayView.Text = "m_dayView";
-			this.m_dayView.WorkingHourEnd = 19;
-			this.m_dayView.WorkingHourStart = 9;
-			this.m_dayView.WorkingMinuteEnd = 0;
-			this.m_dayView.WorkingMinuteStart = 0;
+			this.m_DayView = new Calendar.DayView();
+			drawTool.DayView = this.m_DayView;
 
-			this.m_dayView.StartDate = DateTime.Now;
-			this.m_dayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
-			this.m_dayView.SelectionChanged += new EventHandler(this.OnDayViewSelectionChanged);
-			this.m_dayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
+			this.m_DayView.ActiveTool = drawTool;
+			this.m_DayView.AllowInplaceEditing = true;
+			this.m_DayView.AllowNew = true;
+			this.m_DayView.AmPmDisplay = true;
+            this.m_DayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+                                     System.Windows.Forms.AnchorStyles.Left |
+                                     System.Windows.Forms.AnchorStyles.Right);
+            this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			this.m_DayView.DaysToShow = 7;
+			//this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_DayView.DrawAllAppBorder = false;
+			this.m_DayView.Font = new System.Drawing.Font("Tahoma", 8);
+			this.m_DayView.Location = new System.Drawing.Point(0, 0);
+			this.m_DayView.MinHalfHourApp = false;
+			this.m_DayView.Name = "m_dayView";
+			this.m_DayView.Renderer = m_renderer;
+			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
+			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
+			this.m_DayView.Size = new System.Drawing.Size(798, 328);
+			this.m_DayView.StartDate = DateTime.Now;
+			this.m_DayView.TabIndex = 0;
+			this.m_DayView.Text = "m_dayView";
+			this.m_DayView.WorkingHourEnd = 19;
+			this.m_DayView.WorkingHourStart = 9;
+			this.m_DayView.WorkingMinuteEnd = 0;
+			this.m_DayView.WorkingMinuteStart = 0;
 
-			this.m_dayView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnDayViewMouseMove);
+            // I want the hour height to always be 20 for now
+            int hourHeight = 20;
+<<<<<<< HEAD
+            //this.m_dayView.SlotsPerHour = 4;
+            this.m_dayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
+=======
+            this.m_DayView.SlotsPerHour = 4;
+            this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
+>>>>>>> origin/master
 
-			this.Controls.Add(m_dayView);
+			this.m_DayView.StartDate = DateTime.Now;
+			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
+			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
+			this.m_DayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
+			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
+
+			this.Controls.Add(m_DayView);
 
 		}
 
@@ -67,7 +75,23 @@ namespace DayViewUIExtension
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-			return true;
+			CalendarItem item;
+
+			if (m_Items.TryGetValue(dwTaskID, out item))
+			{
+				DateTime startDate, endDate;
+				m_dayView.GetDateRange(out startDate, out endDate);
+
+				if (IsItemWithinRange(item, startDate, endDate))
+				{
+					m_dayView.SelectedAppointment = item;
+					Invalidate();
+					return true;
+				}
+			}
+
+			// all else 
+			return false;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -77,17 +101,34 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TDLTaskList tasks, 
 								TDLUIExtension.UpdateType type, 
-								TDLUIExtension.TaskAttribute attrib)
+								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
+			switch (type)
+			{
+				case TDLUIExtension.UpdateType.New:
+				case TDLUIExtension.UpdateType.Delete:
+				case TDLUIExtension.UpdateType.Move:
+				case TDLUIExtension.UpdateType.All:
+					// Rebuild
+					m_Items.Clear();
+					break;
+					
+				case TDLUIExtension.UpdateType.Edit:
+					// In-place update
+					break;
+			}
+
 			TDLTask task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attrib))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
+
+			m_DayView.Invalidate();
 		}
 
 		private bool ProcessTaskUpdate(TDLTask task, 
 									   TDLUIExtension.UpdateType type,
-									   TDLUIExtension.TaskAttribute attrib)
+                                       System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
 			if (!task.IsValid())
 				return false;
@@ -96,51 +137,45 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-				switch (attrib)
-				{
-					case TDLUIExtension.TaskAttribute.Title:
-						item.Title = task.GetTitle();
-						break;
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+					item.Title = task.GetTitle();
 
-					case TDLUIExtension.TaskAttribute.DoneDate:
-						item.End = ToDateTime(task.GetDoneDate());
-						break;
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+						item.EndDate = item.OrgEndDate = task.GetDoneDate();
 
-					case TDLUIExtension.TaskAttribute.DueDate:
-						item.End = ToDateTime(task.GetDueDate());
-						break;
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+						item.EndDate = item.OrgEndDate = task.GetDueDate();
 
-					case TDLUIExtension.TaskAttribute.StartDate:
-						item.Start = ToDateTime(task.GetStartDate());
-						break;
-				}
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+						item.StartDate = item.OrgStartDate = task.GetStartDate();
+
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+						item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 			}
 			else
 			{
 				item = new CalendarItem();
 
 				item.Title = task.GetTitle();
-				item.End = ToDateTime(task.GetDueDate());
-				item.Start = ToDateTime(task.GetStartDate());
-				item.TaskId = task.GetID();
-				item.IsParent = task.GetFirstSubtask().IsValid();
+				item.EndDate = item.OrgEndDate = task.GetDueDate();
+				item.StartDate = item.OrgStartDate = task.GetStartDate();
+				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+				item.Id = task.GetID();
+				item.IsParent = task.IsParent();
+				item.TaskTextColor = task.GetTextDrawingColor();
+				item.DrawBorder = true;
 			}
 
-            if (item.End > item.Start)
-			    m_Items[task.GetID()] = item;
+			if (item.EndDate > item.StartDate)
+				m_Items[task.GetID()] = item;
 
 			// Process children
 			TDLTask subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attrib))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
 				subtask = subtask.GetNextTask();
 
 			return true;
-		}
-
-		private System.DateTime ToDateTime(Int64 tDate)
-		{
-			return new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc).AddSeconds(tDate).ToLocalTime();
 		}
 
 		public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
@@ -151,6 +186,7 @@ namespace DayViewUIExtension
 				case TDLUIExtension.TaskAttribute.DoneDate:
 				case TDLUIExtension.TaskAttribute.DueDate:
 				case TDLUIExtension.TaskAttribute.StartDate:
+				case TDLUIExtension.TaskAttribute.AllocTo:
 					return true;
 			}
 
@@ -163,9 +199,20 @@ namespace DayViewUIExtension
 			return false;
 		}
 	   
-		public bool PrepareNewTask(TDLTaskList task)
+		public bool PrepareNewTask(ref TDLTask task)
 		{
-			return false;
+<<<<<<< HEAD
+			return true;
+=======
+            // Set the start/due dates to match the current selection
+            if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
+            {
+                task.SetStartDate(m_DayView.SelectionStart);
+                task.SetDueDate(m_DayView.SelectionEnd);
+            }
+
+            return true;
+>>>>>>> origin/master
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -190,14 +237,21 @@ namespace DayViewUIExtension
 
 		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
+            System.Drawing.Point pt = m_DayView.PointToClient(new System.Drawing.Point(xPos, yPos));
+
+            if (m_DayView.GetTrueRectangle().Contains(pt))
+                return TDLUIExtension.HitResult.Tasklist;
+
+            // else
 			return TDLUIExtension.HitResult.Nowhere;
 		}
 
 		public void SetUITheme(TDLTheme theme)
 		{
-			System.Windows.Media.Color temp = theme.GetAppColor(TDLTheme.AppColor.AppBackDark);
+            m_renderer.Theme = theme;
+            m_DayView.Invalidate(true);
 
-			this.BackColor = System.Drawing.Color.FromArgb(temp.R, temp.G, temp.B);
+            this.BackColor = theme.GetAppColorAsDrawing(TDLTheme.AppColor.AppBackDark);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
@@ -210,6 +264,16 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
 		{
+			if (appOnly)
+			{
+				bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+
+				if (taskColorIsBkgnd != m_taskColorIsBkgnd)
+				{
+					m_taskColorIsBkgnd = taskColorIsBkgnd;
+					Invalidate();
+				}
+			}
 		}
 		
 		// PRIVATE ------------------------------------------------------------------------------
@@ -217,10 +281,36 @@ namespace DayViewUIExtension
 		private void InitializeComponent()
 		{
 			this.BackColor = System.Drawing.Color.White;
-            this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
+			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
+            this.m_renderer = new TDLRenderer();
 
 			CreateDayView();
 		}
+
+        protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+        {
+            System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            Border.Y = 20;
+            Border.Height -= 20;
+
+            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
+        }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+
+            System.Drawing.Rectangle DayView = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+
+            DayView.Y = 20;
+            DayView.Height -= 20;
+            DayView.Inflate(-1, -1);
+
+            m_DayView.Location = DayView.Location;
+            m_DayView.Size = DayView.Size;
+
+            Invalidate();
+        }
 
 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
 		{
@@ -234,50 +324,117 @@ namespace DayViewUIExtension
 //             m_Appointments.Add(m_Appointment);
 		}
 
-		private void OnDayViewMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-//             label2.Text = dayView1.GetTimeAt(e.X, e.Y).ToString();
+			TDLNotify notify = new TDLNotify(m_hwndParent);
+
+			switch (this.m_DayView.Selection)
+			{
+				case Calendar.SelectionType.DateRange:
+					break;
+
+				case Calendar.SelectionType.Appointment:
+					if (args.Appointment != null)
+						notify.NotifySelChange(args.Appointment.Id);
+					break;
+			}
 		}
 
-		private void OnDayViewSelectionChanged(object sender, EventArgs e)
+		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-            if (this.m_dayView.Selection == Calendar.SelectionType.DateRange)
-            {
-                int a = 5;
-                //label3.Text = this.m_dayView.SelectionStart.ToString() + ":" + this.m_dayView.SelectionEnd.ToString();
-            }
-            else if (this.m_dayView.Selection == Calendar.SelectionType.Appointment)
-            {
-                int a = 5;
-                //label3.Text = this.m_dayView.SelectedAppointment.StartDate.ToString() + ":" + this.m_dayView.SelectedAppointment.EndDate.ToString();
-            }
+			Calendar.MoveAppointmentEventArgs move = args as Calendar.MoveAppointmentEventArgs;
+
+			// Ignore moves whilst they are occurring
+			if ((move == null) || !move.Finished)
+				return;
+
+			CalendarItem item = args.Appointment as CalendarItem;
+
+			if (item == null)
+				return;
+
+			TDLNotify notify = new TDLNotify(m_hwndParent);
+
+			switch (move.Mode)
+			{
+				case Calendar.SelectionTool.Mode.Move:
+					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
+					{
+						item.OrgStartDate = item.StartDate;
+						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
+					}
+					break;
+
+				case Calendar.SelectionTool.Mode.ResizeTop:
+					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
+					{
+						item.OrgStartDate = item.StartDate;
+						notify.NotifyMod(TDLUIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
+					}
+					break;
+
+				case Calendar.SelectionTool.Mode.ResizeBottom:
+					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
+					{
+						item.OrgEndDate = item.EndDate;
+						notify.NotifyMod(TDLUIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
+					}
+					break;
+			}
 		}
 
 		private void OnDayViewResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
-			System.Collections.Generic.List<Calendar.Appointment> appts = 
-                new System.Collections.Generic.List<Calendar.Appointment>();
+			System.Collections.Generic.List<Calendar.Appointment> appts =
+				new System.Collections.Generic.List<Calendar.Appointment>();
 
-            foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
-            {
-                if ((item.Value.Start >= args.StartDate) && (item.Value.End <= args.EndDate))
-                {
-                    Calendar.Appointment appt = new Calendar.Appointment();
+			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
+			{
+				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
+				{
+					// Recalculate colours
+					if (m_taskColorIsBkgnd)
+					{
+						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
+						item.Value.BorderColor = TDLColor.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
+						item.Value.BarColor = item.Value.TaskTextColor;
+						item.Value.FillColor = item.Value.TaskTextColor;
+					}
+					else
+					{
+						item.Value.TextColor = item.Value.TaskTextColor;
+						item.Value.BorderColor = item.Value.TaskTextColor;
+						item.Value.FillColor = TDLColor.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
+						item.Value.BarColor = item.Value.TaskTextColor;
+					}
 
-                    appt.Title = item.Value.Title;
-                    appt.StartDate = item.Value.Start;
-                    appt.EndDate = item.Value.End;
-                    appt.Id = item.Value.TaskId;
+					appts.Add(item.Value);
+				}
+			}
 
-                    appts.Add(appt);
-                }
-            }
+			args.Appointments = appts;
+		}
 
-            args.Appointments = appts;
+		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+		{
+			return ((item.StartDate >= startDate) && (item.EndDate <= endDate));
 		}
 
 		// --------------------------------------------------------------------------------------
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-		private Calendar.DayView m_dayView;
+		private Calendar.DayView m_DayView;
+        private TDLRenderer m_renderer;
 	}
+
+	public class CalendarItem : Calendar.Appointment
+	{
+		public DateTime OrgStartDate { get; set; }
+		public DateTime OrgEndDate { get; set; }
+
+		public System.Drawing.Color TaskTextColor { get; set; }
+
+		public String AllocTo { get; set; }
+		public Boolean IsParent { get; set; }
+	}
+
 }

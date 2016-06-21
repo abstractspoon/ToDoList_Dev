@@ -21,49 +21,48 @@ namespace DayViewUIExtension
 		{
 			Calendar.DrawTool drawTool = new Calendar.DrawTool();
 
-			this.m_dayView = new Calendar.DayView();
-			drawTool.DayView = this.m_dayView;
+			this.m_DayView = new Calendar.DayView();
+			drawTool.DayView = this.m_DayView;
 
-			this.m_dayView.ActiveTool = drawTool;
-			this.m_dayView.AllowInplaceEditing = true;
-			this.m_dayView.AllowNew = true;
-			this.m_dayView.AmPmDisplay = true;
-            this.m_dayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+			this.m_DayView.ActiveTool = drawTool;
+			this.m_DayView.AllowInplaceEditing = true;
+			this.m_DayView.AllowNew = true;
+			this.m_DayView.AmPmDisplay = true;
+            this.m_DayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
                                      System.Windows.Forms.AnchorStyles.Left |
                                      System.Windows.Forms.AnchorStyles.Right);
-            this.m_dayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.m_dayView.DaysToShow = 7;
+            this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			this.m_DayView.DaysToShow = 7;
 			//this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.m_dayView.DrawAllAppBorder = false;
-			this.m_dayView.Font = new System.Drawing.Font("Tahoma", 8);
-			this.m_dayView.Location = new System.Drawing.Point(0, 0);
-			this.m_dayView.MinHalfHourApp = false;
-			this.m_dayView.Name = "m_dayView";
-			this.m_dayView.Renderer = m_renderer;
-			this.m_dayView.SelectionEnd = new System.DateTime(((long)(0)));
-			this.m_dayView.SelectionStart = new System.DateTime(((long)(0)));
-			this.m_dayView.Size = new System.Drawing.Size(798, 328);
-			this.m_dayView.StartDate = DateTime.Now;
-			this.m_dayView.TabIndex = 0;
-			this.m_dayView.Text = "m_dayView";
-			this.m_dayView.WorkingHourEnd = 19;
-			this.m_dayView.WorkingHourStart = 9;
-			this.m_dayView.WorkingMinuteEnd = 0;
-			this.m_dayView.WorkingMinuteStart = 0;
+			this.m_DayView.DrawAllAppBorder = false;
+			this.m_DayView.Font = new System.Drawing.Font("Tahoma", 8);
+			this.m_DayView.Location = new System.Drawing.Point(0, 0);
+			this.m_DayView.MinHalfHourApp = false;
+			this.m_DayView.Name = "m_dayView";
+			this.m_DayView.Renderer = m_renderer;
+			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
+			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
+			this.m_DayView.Size = new System.Drawing.Size(798, 328);
+			this.m_DayView.StartDate = DateTime.Now;
+			this.m_DayView.TabIndex = 0;
+			this.m_DayView.Text = "m_dayView";
+			this.m_DayView.WorkingHourEnd = 19;
+			this.m_DayView.WorkingHourStart = 9;
+			this.m_DayView.WorkingMinuteEnd = 0;
+			this.m_DayView.WorkingMinuteStart = 0;
 
             // I want the hour height to always be 20 for now
             int hourHeight = 20;
-            //this.m_dayView.SlotsPerHour = 4;
-            this.m_dayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
+            //this.m_DayView.SlotsPerHour = 4;
+            this.m_DayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
 
-			this.m_dayView.StartDate = DateTime.Now;
-			this.m_dayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
-			this.m_dayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
-			this.m_dayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
-			this.m_dayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
-			this.m_dayView.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnDayViewMouseClick);
+			this.m_DayView.StartDate = DateTime.Now;
+			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
+			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
+			this.m_DayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
+			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
 
-			this.Controls.Add(m_dayView);
+			this.Controls.Add(m_DayView);
 
 		}
 
@@ -97,11 +96,11 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TDLTaskList tasks, 
 								TDLUIExtension.UpdateType type, 
-								TDLUIExtension.TaskAttribute attrib)
+								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
 			switch (type)
 			{
-				case TDLUIExtension.UpdateType.Add:
+				case TDLUIExtension.UpdateType.New:
 				case TDLUIExtension.UpdateType.Delete:
 				case TDLUIExtension.UpdateType.Move:
 				case TDLUIExtension.UpdateType.All:
@@ -116,15 +115,15 @@ namespace DayViewUIExtension
 
 			TDLTask task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attrib))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
 
-			m_dayView.Invalidate();
+			m_DayView.Invalidate();
 		}
 
 		private bool ProcessTaskUpdate(TDLTask task, 
 									   TDLUIExtension.UpdateType type,
-									   TDLUIExtension.TaskAttribute attrib)
+                                       System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
 			if (!task.IsValid())
 				return false;
@@ -133,28 +132,20 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-				switch (attrib)
-				{
-					case TDLUIExtension.TaskAttribute.Title:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
 						item.Title = task.GetTitle();
-						break;
 
-					case TDLUIExtension.TaskAttribute.DoneDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
 						item.EndDate = item.OrgEndDate = task.GetDoneDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.DueDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
 						item.EndDate = item.OrgEndDate = task.GetDueDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.StartDate:
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
 						item.StartDate = item.OrgStartDate = task.GetStartDate();
-						break;
 
-					case TDLUIExtension.TaskAttribute.AllocTo:
-						item.AllocTo = task.GetAllocatedTo(0);
-						break;
-				}
+				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+						item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 			}
 			else
 			{
@@ -163,7 +154,7 @@ namespace DayViewUIExtension
 				item.Title = task.GetTitle();
 				item.EndDate = item.OrgEndDate = task.GetDueDate();
 				item.StartDate = item.OrgStartDate = task.GetStartDate();
-				item.AllocTo = task.GetAllocatedTo(0);
+				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 				item.Id = task.GetID();
 				item.IsParent = task.IsParent();
 				item.TaskTextColor = task.GetTextDrawingColor();
@@ -176,7 +167,7 @@ namespace DayViewUIExtension
 			// Process children
 			TDLTask subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attrib))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -203,8 +194,15 @@ namespace DayViewUIExtension
 			return false;
 		}
 	   
-		public bool PrepareNewTask(TDLTaskList task)
+		public bool PrepareNewTask(ref TDLTask task)
 		{
+            // Set the start/due dates to match the current selection
+            if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
+		{
+                task.SetStartDate(m_DayView.SelectionStart);
+                task.SetDueDate(m_DayView.SelectionEnd);
+            }
+
 			return true;
 		}
 
@@ -230,9 +228,9 @@ namespace DayViewUIExtension
 
 		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
-            System.Drawing.Point pt = m_dayView.PointToClient(new System.Drawing.Point(xPos, yPos));
+            System.Drawing.Point pt = m_DayView.PointToClient(new System.Drawing.Point(xPos, yPos));
 
-            if (m_dayView.GetTrueRectangle().Contains(pt))
+            if (m_DayView.GetTrueRectangle().Contains(pt))
                 return TDLUIExtension.HitResult.Tasklist;
 
             // else
@@ -242,7 +240,7 @@ namespace DayViewUIExtension
 		public void SetUITheme(TDLTheme theme)
 		{
             m_renderer.Theme = theme;
-            m_dayView.Invalidate(true);
+            m_DayView.Invalidate(true);
 
             this.BackColor = theme.GetAppColorAsDrawing(TDLTheme.AppColor.AppBackDark);
 		}
@@ -299,8 +297,8 @@ namespace DayViewUIExtension
             DayView.Height -= 20;
             DayView.Inflate(-1, -1);
 
-            m_dayView.Location = DayView.Location;
-            m_dayView.Size = DayView.Size;
+            m_DayView.Location = DayView.Location;
+            m_DayView.Size = DayView.Size;
 
             Invalidate();
         }
@@ -317,22 +315,11 @@ namespace DayViewUIExtension
 //             m_Appointments.Add(m_Appointment);
 		}
 
-		private void OnDayViewMouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			// Forward right-click to parent
-			if (e.Button == System.Windows.Forms.MouseButtons.Right)
-			{
-				TDLNotify notify = new TDLNotify(m_hwndParent, Handle);
-
-				notify.NotifyMouseClick(TDLNotify.MouseClick.Right, e.X, e.Y);
-			}
-		}
-
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
 			TDLNotify notify = new TDLNotify(m_hwndParent);
 
-			switch (this.m_dayView.Selection)
+			switch (this.m_DayView.Selection)
 			{
 				case Calendar.SelectionType.DateRange:
 					break;
@@ -365,7 +352,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.MoveTask, args.Appointment.StartDate);
+						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
 					}
 					break;
 
@@ -426,7 +413,7 @@ namespace DayViewUIExtension
 
 		// --------------------------------------------------------------------------------------
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-		private Calendar.DayView m_dayView;
+		private Calendar.DayView m_DayView;
         private TDLRenderer m_renderer;
 	}
 
