@@ -67,11 +67,14 @@ namespace TDLPluginHelpers
 
       UInt32 GetID();
       UInt32 GetColor();
-      UInt32 GetTextColor();
-      UInt32 GetPriorityColor();
       UInt32 GetPosition();
       UInt32 GetPriority();
       UInt32 GetRisk();
+
+      System::Drawing::Color GetTextDrawingColor();
+      System::Windows::Media::Color GetTextMediaColor();
+      System::Drawing::Color GetPriorityDrawingColor();
+      System::Windows::Media::Color GetPriorityMediaColor();
 
       UInt32 GetCategoryCount();
       UInt32 GetAllocatedToCount();

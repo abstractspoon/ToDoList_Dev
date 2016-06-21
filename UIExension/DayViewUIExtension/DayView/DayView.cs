@@ -337,6 +337,32 @@ namespace Calendar
         public Appointment SelectedAppointment
         {
             get { return selectedAppointment; }
+			set
+			{
+				if (value == null)
+				{
+					selectedAppointment = value;
+				}
+				else // Validate against visible items
+				{
+					if (ResolveAppointments == null)
+						return;
+
+					ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.StartDate.AddDays(daysToShow));
+					ResolveAppointments(this, args);
+
+					foreach (Appointment appt in args.Appointments)
+					{
+						if (appt == value)
+						{
+							selectedAppointment = appt;
+							break;
+						}
+					}
+				}
+
+				Invalidate();
+			}
         }
 
         private DateTime selectionStart;
@@ -584,11 +610,17 @@ namespace Calendar
 
         private void AdjustScrollbar()
         {
-			vscroll.SmallChange = slotHeight;
-			vscroll.LargeChange = (slotHeight * slotsPerHour);
-			vscroll.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight;
+ 			vscroll.SmallChange = (slotHeight * slotsPerHour);
+ 			vscroll.LargeChange = (slotHeight * slotsPerHour * 4);
+ 			vscroll.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight + vscroll.LargeChange;
             vscroll.Minimum = 0;
         }
+
+		public void GetDateRange(out DateTime start, out DateTime end)
+		{
+			start = this.StartDate;
+			end = this.StartDate.AddDays(daysToShow);
+		}
 
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
@@ -832,16 +864,19 @@ namespace Calendar
                 int newScrollValue;
 
                 if (down)
-                {//mouse wheel scroll down
+                {
+					// mouse wheel scroll down
+					int maxLimit = (this.vscroll.Maximum - this.vscroll.LargeChange - this.HeaderHeight);
                     newScrollValue = this.vscroll.Value + this.vscroll.SmallChange;
 
-                    if (newScrollValue < this.vscroll.Maximum)
+					if (newScrollValue < maxLimit)
                         this.vscroll.Value = newScrollValue;
                     else
-                        this.vscroll.Value = this.vscroll.Maximum;
+						this.vscroll.Value = maxLimit;
                 }
                 else
-                {//mouse wheel scroll up
+                {
+					// mouse wheel scroll up
                     newScrollValue = this.vscroll.Value - this.vscroll.SmallChange;
 
                     if (newScrollValue > this.vscroll.Minimum)

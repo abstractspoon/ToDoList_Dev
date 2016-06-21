@@ -104,13 +104,13 @@ namespace Calendar
                     if ((appointment.Locked) && isSelected)
                     {
                         // Draw back
-                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Wave, Color.LightGray, appointment.Color))
+                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Wave, Color.LightGray, appointment.BarColor))
                             g.FillRectangle(m_Brush, rect);
                     }
                     else
                     {
                         // Draw back
-                        using (SolidBrush m_Brush = new SolidBrush(appointment.Color))
+                        using (SolidBrush m_Brush = new SolidBrush(appointment.BarColor))
                             g.FillRectangle(m_Brush, rect);
                     }
 

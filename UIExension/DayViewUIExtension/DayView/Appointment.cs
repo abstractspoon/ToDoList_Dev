@@ -11,7 +11,7 @@ namespace Calendar
     {
         public Appointment(string t = "New Appointment")
         {
-            color = Color.White;
+            barColor = Color.White;
             borderColor = Color.Blue;
             title = t;
         }
@@ -45,7 +45,7 @@ namespace Calendar
                     (startDate == appt.startDate) &&
                     (endDate == appt.endDate) &&
                     (locked == appt.locked) &&
-                    (color == appt.color) &&
+                    (barColor == appt.barColor) &&
                     (textColor == appt.textColor) &&
                     (allDayEvent == appt.allDayEvent));
         }
@@ -122,20 +122,35 @@ namespace Calendar
         {
         }
 
-        private Color color = Color.White;
+        private Color barColor = Color.White;
 
-        public Color Color
+        public Color BarColor
         {
             get
             {
-                return color;
+                return barColor;
             }
             set
             {
-                color = value;
+                barColor = value;
                 OnColorChanged();
             }
         }
+
+		private Color fillColor = Color.White;
+
+		public Color FillColor
+		{
+			get
+			{
+				return fillColor;
+			}
+			set
+			{
+				fillColor = value;
+				OnColorChanged();
+			}
+		}
 
         protected virtual void OnColorChanged()
         {

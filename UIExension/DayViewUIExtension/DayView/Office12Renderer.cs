@@ -258,13 +258,13 @@ namespace Calendar
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = StringAlignment.Near;
 
-                    Color start = InterpolateColors(appointment.Color, Color.White, 0.4f);
-                    Color end = InterpolateColors(appointment.Color, Color.FromArgb(191, 210, 234), 0.7f);
+                    Color start = InterpolateColors(appointment.BarColor, Color.White, 0.4f);
+                    Color end = InterpolateColors(appointment.BarColor, Color.FromArgb(191, 210, 234), 0.7f);
                     // if appointment is locked, draw different background pattern
                     if ((appointment.Locked))
                     {
                         // Draw back
-                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appointment.Color))
+                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appointment.BarColor))
                             g.FillRectangle(m_Brush, rect);
 
                         // little transparent
@@ -306,7 +306,7 @@ namespace Calendar
 
                         gripRect.Width += 1;
 
-                        start = InterpolateColors(appointment.BorderColor, appointment.Color, 0.2f);
+                        start = InterpolateColors(appointment.BorderColor, appointment.BarColor, 0.2f);
                         end = InterpolateColors(appointment.BorderColor, Color.White, 0.6f);
 
                         using (LinearGradientBrush aGB = new LinearGradientBrush(rect, start, end, LinearGradientMode.Vertical))

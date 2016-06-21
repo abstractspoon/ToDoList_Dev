@@ -57,7 +57,7 @@ namespace Calendar
         {
             base.OnColorChanged();
 
-            row["Color"] = this.Color.ToArgb();
+            row["Color"] = this.BarColor.ToArgb();
         }
 
         protected override void OnBorderColorChanged()

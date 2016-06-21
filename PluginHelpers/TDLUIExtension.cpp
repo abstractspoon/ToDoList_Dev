@@ -15,6 +15,76 @@ using namespace TDLPluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+Windows::Media::Color TDLColor::LighterMedia(Windows::Media::Color^ color, float amount)
+{
+	float red = (float)color->R;
+	float green = (float)color->G;
+	float blue = (float)color->B;
+
+	red = ((255 - red) * amount) + red;
+	green = ((255 - green) * amount) + green;
+	blue = ((255 - blue) * amount) + blue;
+
+	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+}
+
+Windows::Media::Color TDLColor::DarkerMedia(Windows::Media::Color^ color, float amount)
+{
+	float red = (float)color->R;
+	float green = (float)color->G;
+	float blue = (float)color->B;
+
+	red *= amount;
+	green *= amount;
+	blue *= amount;
+
+	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+}
+
+Drawing::Color TDLColor::LighterDrawing(Drawing::Color^ color, float amount)
+{
+	float red = (float)color->R;
+	float green = (float)color->G;
+	float blue = (float)color->B;
+
+	red = ((255 - red) * amount) + red;
+	green = ((255 - green) * amount) + green;
+	blue = ((255 - blue) * amount) + blue;
+
+	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+}
+
+Drawing::Color TDLColor::DarkerDrawing(Drawing::Color^ color, float amount)
+{
+	float red = (float)color->R;
+	float green = (float)color->G;
+	float blue = (float)color->B;
+
+	red *= amount;
+	green *= amount;
+	blue *= amount;
+
+	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+}
+
+Windows::Media::Color TDLColor::GetMediaColor(UInt32 rgbColor)
+{
+	System::Windows::Media::Color^ color = 
+      System::Windows::Media::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+
+	return *color;
+}
+
+System::Drawing::Color TDLColor::GetDrawingColor(UInt32 rgbColor)
+{
+	System::Drawing::Color^ color = 
+		System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+
+	return *color;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 TDLTheme::TDLTheme() : m_pTheme(nullptr)
 {
 	m_pTheme = new UITHEME;
@@ -44,12 +114,12 @@ TDLTheme::RenderStyle TDLTheme::GetRenderStyle()
 
 Windows::Media::Color TDLTheme::GetAppColorAsMedia(AppColor color)
 {
-	return GetMediaColor(GetColor(color));
+	return TDLColor::GetMediaColor(GetColor(color));
 }
 
 System::Drawing::Color TDLTheme::GetAppColorAsDrawing(AppColor color)
 {
-	return GetDrawingColor(GetColor(color));
+	return TDLColor::GetDrawingColor(GetColor(color));
 }
 
 String^ TDLTheme::GetToolBarImagePath()
@@ -59,12 +129,12 @@ String^ TDLTheme::GetToolBarImagePath()
 
 Windows::Media::Color TDLTheme::GetToolbarTransparencyColorAsMedia()
 {
-	return GetMediaColor(m_pTheme->crToolbarTransparency);
+	return TDLColor::GetMediaColor(m_pTheme->crToolbarTransparency);
 }
 
 Drawing::Color TDLTheme::GetToolbarTransparencyColorAsDrawing()
 {
-	return GetDrawingColor(m_pTheme->crToolbarTransparency);
+	return TDLColor::GetDrawingColor(m_pTheme->crToolbarTransparency);
 }
 
 UInt32 TDLTheme::GetColor(AppColor color)
@@ -85,22 +155,6 @@ UInt32 TDLTheme::GetColor(AppColor color)
 	}
 
 	return 0; // black
-}
-
-Windows::Media::Color TDLTheme::GetMediaColor(UInt32 rgbColor)
-{
-	System::Windows::Media::Color^ color = 
-      System::Windows::Media::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
-
-	return *color;
-}
-
-System::Drawing::Color TDLTheme::GetDrawingColor(UInt32 rgbColor)
-{
-	System::Drawing::Color^ color = 
-		System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
-
-	return *color;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

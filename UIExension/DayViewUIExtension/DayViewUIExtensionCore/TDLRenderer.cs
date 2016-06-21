@@ -4,11 +4,32 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using System.Windows.Forms.VisualStyles;
+
+using TDLPluginHelpers;
 
 namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
+		private VisualStyleRenderer m_explorerSelection;
+
+		private VisualStyleRenderer ExplorerSelection
+		{
+			get 
+			{
+				if (m_explorerSelection == null)
+				{
+					const int LVP_LISTITEM = 1;
+					const int LISS_MORESELECTED = 6;
+
+					m_explorerSelection = new VisualStyleRenderer("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+				}
+
+				return m_explorerSelection;
+			}
+		}
+
         private TDLPluginHelpers.TDLTheme m_theme;
 
         public TDLPluginHelpers.TDLTheme Theme
@@ -263,96 +284,74 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
+				rect.X += 7;
+				rect.Width -= 7;
 
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = StringAlignment.Near;
 
-                    Color start = InterpolateColors(appointment.Color, Color.White, 0.4f);
-                    Color end = InterpolateColors(appointment.Color, Color.FromArgb(191, 210, 234), 0.7f);
-                    // if appointment is locked, draw different background pattern
-                    if ((appointment.Locked))
-                    {
-                        // Draw back
-                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appointment.Color))
-                            g.FillRectangle(m_Brush, rect);
-
-                        // little transparent
-                        start = Color.FromArgb(230, start);
-                        end = Color.FromArgb(180, end);
-
-                        GraphicsPath path = new GraphicsPath();
-                        path.AddRectangle(rect);
-
-                    }
-
                     // Draw the background of the appointment
+					if (isSelected)
+					{
+						g.FillRectangle(System.Drawing.Brushes.White, rect);
+						ExplorerSelection.DrawBackground(g, rect);
+						ExplorerSelection.DrawBackground(g, rect);
+					}
+					else
+					{
+						using (SolidBrush brush = new SolidBrush(appointment.FillColor))
+							g.FillRectangle(brush, rect);
+					}
 
-                    using (LinearGradientBrush aGB = new LinearGradientBrush(rect, start, end, LinearGradientMode.Vertical))
-                        g.FillRectangle(aGB, rect);
+                    // Draw gripper bar
+					gripRect = rect;
+					gripRect.Inflate(-2, -2);
+					gripRect.Width = 5;
 
-                    // If the appointment is selected, only need to draw the selection frame
+					using (SolidBrush brush = new SolidBrush(appointment.BarColor))
+						g.FillRectangle(brush, gripRect);
 
-                    if (isSelected)
-                    {
-                        Rectangle m_BorderRectangle = rect;
+					// Draw gripper border
+					using (Pen m_Pen = new Pen(TDLColor.DarkerDrawing(appointment.BarColor, 0.5f), 1))
+						g.DrawRectangle(m_Pen, gripRect);
+					
+					//  Draw appointment border if needed
+					if (!isSelected && appointment.DrawBorder)
+					{
+						using (Pen m_Pen = new Pen(appointment.BorderColor, 1))
+							g.DrawRectangle(m_Pen, rect);
+					}
 
-                        using (Pen m_Pen = new Pen(appointment.BorderColor, 3))
-                            g.DrawRectangle(m_Pen, rect);
+					// Draw shadow lines
+					int xLeft = rect.X + 6;
+					int xRight = rect.Right + 1;
+					int yTop = rect.Y + 1;
+					int yButton = rect.Bottom + 1;
 
-                        m_BorderRectangle.Inflate(2, 2);
+					for (int i = 0; i < 5; i++)
+					{
+						using (Pen shadow_Pen = new Pen(Color.FromArgb(70 - 12 * i, Color.Black)))
+						{
+							g.DrawLine(shadow_Pen, xLeft + i, yButton + i, xRight + i - 1, yButton + i); //horizontal lines
+							g.DrawLine(shadow_Pen, xRight + i, yTop + i, xRight + i, yButton + i); //vertical
+						}
+					}
 
-                        using (Pen m_Pen = new Pen(SystemColors.WindowFrame, 1))
-                            g.DrawRectangle(m_Pen, m_BorderRectangle);
+					// draw appointment text
 
-                        m_BorderRectangle.Inflate(-4, -4);
-
-                        using (Pen m_Pen = new Pen(SystemColors.WindowFrame, 1))
-                            g.DrawRectangle(m_Pen, m_BorderRectangle);
-                    }
-                    else
-                    {
-                        // Draw gripper
-
-                        gripRect.Width += 1;
-
-                        start = InterpolateColors(appointment.BorderColor, appointment.Color, 0.2f);
-                        end = InterpolateColors(appointment.BorderColor, Color.White, 0.6f);
-
-                        using (LinearGradientBrush aGB = new LinearGradientBrush(rect, start, end, LinearGradientMode.Vertical))
-                            g.FillRectangle(aGB, gripRect);
-
-                        //  Draw border if needed
-                        if (appointment.DrawBorder)
-                            using (Pen m_Pen = new Pen(SystemColors.WindowFrame, 1))
-                                g.DrawRectangle(m_Pen, rect);
-
-                        // Draw shadow lines
-                        int xLeft = rect.X + 6;
-                        int xRight = rect.Right + 1;
-                        int yTop = rect.Y + 1;
-                        int yButton = rect.Bottom + 1;
-
-                        for (int i = 0; i < 5; i++)
-                        {
-                            using (Pen shadow_Pen = new Pen(Color.FromArgb(70 - 12 * i, Color.Black)))
-                            {
-                                g.DrawLine(shadow_Pen, xLeft + i, yButton + i, xRight + i - 1, yButton + i); //horisontal lines
-                                g.DrawLine(shadow_Pen, xRight + i, yTop + i, xRight + i, yButton + i); //vertical
-                            }
-                        }
-
-                    }
-
-                    // draw appointment text
-
-                    rect.X += gripRect.Width;
+                    rect.X = gripRect.Right + 2;
                     // width of shadow is 6.
                     rect.Width -= 6;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                    g.DrawString(appointment.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
+
+					Color textColor = (isSelected ? TDLColor.DarkerDrawing(appointment.TextColor, 0.5f) : appointment.TextColor);
+
+					using (SolidBrush brush = new SolidBrush(textColor))
+						g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+
                     g.TextRenderingHint = TextRenderingHint.SystemDefault;
                 }
             }

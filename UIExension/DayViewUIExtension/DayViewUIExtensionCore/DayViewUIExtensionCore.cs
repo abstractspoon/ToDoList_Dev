@@ -8,6 +8,7 @@ namespace DayViewUIExtension
 {
 	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
 	{
+		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
 
 		public DayViewUIExtensionCore(IntPtr hwndParent)
@@ -52,7 +53,7 @@ namespace DayViewUIExtension
 
             // I want the hour height to always be 20 for now
             int hourHeight = 20;
-            this.m_dayView.SlotsPerHour = 4;
+            //this.m_dayView.SlotsPerHour = 4;
             this.m_dayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
 
 			this.m_dayView.StartDate = DateTime.Now;
@@ -70,7 +71,23 @@ namespace DayViewUIExtension
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-			return true;
+			CalendarItem item;
+
+			if (m_Items.TryGetValue(dwTaskID, out item))
+			{
+				DateTime startDate, endDate;
+				m_dayView.GetDateRange(out startDate, out endDate);
+
+				if (IsItemWithinRange(item, startDate, endDate))
+				{
+					m_dayView.SelectedAppointment = item;
+					Invalidate();
+					return true;
+				}
+			}
+
+			// all else 
+			return false;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -149,6 +166,8 @@ namespace DayViewUIExtension
 				item.AllocTo = task.GetAllocatedTo(0);
 				item.Id = task.GetID();
 				item.IsParent = task.IsParent();
+				item.TaskTextColor = task.GetTextDrawingColor();
+				item.DrawBorder = true;
 			}
 
 			if (item.EndDate > item.StartDate)
@@ -186,7 +205,7 @@ namespace DayViewUIExtension
 	   
 		public bool PrepareNewTask(TDLTaskList task)
 		{
-			return false;
+			return true;
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -238,6 +257,16 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
 		{
+			if (appOnly)
+			{
+				bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+
+				if (taskColorIsBkgnd != m_taskColorIsBkgnd)
+				{
+					m_taskColorIsBkgnd = taskColorIsBkgnd;
+					Invalidate();
+				}
+			}
 		}
 		
 		// PRIVATE ------------------------------------------------------------------------------
@@ -365,13 +394,34 @@ namespace DayViewUIExtension
 
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
 			{
-				if ((item.Value.StartDate >= args.StartDate) && (item.Value.EndDate <= args.EndDate))
+				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
 				{
+					// Recalculate colours
+					if (m_taskColorIsBkgnd)
+					{
+						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
+						item.Value.BorderColor = TDLColor.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
+						item.Value.BarColor = item.Value.TaskTextColor;
+						item.Value.FillColor = item.Value.TaskTextColor;
+					}
+					else
+					{
+						item.Value.TextColor = item.Value.TaskTextColor;
+						item.Value.BorderColor = item.Value.TaskTextColor;
+						item.Value.FillColor = TDLColor.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
+						item.Value.BarColor = item.Value.TaskTextColor;
+					}
+
 					appts.Add(item.Value);
 				}
 			}
 
 			args.Appointments = appts;
+		}
+
+		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+		{
+			return ((item.StartDate >= startDate) && (item.EndDate <= endDate));
 		}
 
 		// --------------------------------------------------------------------------------------
@@ -380,13 +430,15 @@ namespace DayViewUIExtension
         private TDLRenderer m_renderer;
 	}
 
-public class CalendarItem : Calendar.Appointment
-{
-	public DateTime OrgStartDate { get; set; }
-	public DateTime OrgEndDate { get; set; }
+	public class CalendarItem : Calendar.Appointment
+	{
+		public DateTime OrgStartDate { get; set; }
+		public DateTime OrgEndDate { get; set; }
 
-	public String AllocTo { get; set; }
-	public System.Boolean IsParent { get; set; }
-}
+		public System.Drawing.Color TaskTextColor { get; set; }
+
+		public String AllocTo { get; set; }
+		public Boolean IsParent { get; set; }
+	}
 
 }
