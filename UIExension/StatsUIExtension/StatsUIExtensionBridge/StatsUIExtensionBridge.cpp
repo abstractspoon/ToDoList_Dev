@@ -189,7 +189,7 @@ bool CStatsUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TDLTaskList^> task = gcnew TDLTaskList(pTask);
 
-	return m_wnd->PrepareNewTask(task.get());
+	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
 bool CStatsUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)

@@ -256,7 +256,7 @@ namespace StatsUIExtension
             return false;
         }
 	   
-        public bool PrepareNewTask(TDLTaskList task)
+        public bool PrepareNewTask(ref TDLTask task)
 	    {
 		    return false;
     	}

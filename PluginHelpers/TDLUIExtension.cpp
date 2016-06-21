@@ -353,22 +353,5 @@ bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 	return true;
 }
 
-bool TDLNotify::NotifyMouseClick(MouseClick button, int X, int Y)
-{
-	if (!IsWindow(m_hwndParent) || !IsWindow(m_hwndFrom))
-		return false;
-
-	if (button == MouseClick::Right)
-	{
-		POINT pt = { X, Y };
-		::ClientToScreen(m_hwndFrom, &pt);
-
-		::SendMessage(m_hwndParent, WM_CONTEXTMENU, (WPARAM)m_hwndFrom, MAKELPARAM(pt.x, pt.y));
-	}
-
-	return true;
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

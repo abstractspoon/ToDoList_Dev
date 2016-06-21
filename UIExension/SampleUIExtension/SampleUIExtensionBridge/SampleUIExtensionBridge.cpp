@@ -180,7 +180,7 @@ bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TDLTaskList^> task = gcnew TDLTaskList(pTask);
 
-	return m_wnd->PrepareNewTask(task.get());
+	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)

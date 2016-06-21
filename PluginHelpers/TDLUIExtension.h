@@ -159,7 +159,7 @@ namespace TDLPluginHelpers
 	   void UpdateTasks(TDLTaskList^ tasks, TDLUIExtension::UpdateType nUpdate, Collections::Generic::HashSet<TDLUIExtension::TaskAttribute>^ attribs);
 	   bool WantEditUpdate(TDLUIExtension::TaskAttribute nAttribute);
 	   bool WantSortUpdate(TDLUIExtension::TaskAttribute nAttribute);
-	   bool PrepareNewTask(TDLTaskList^ task);
+	   bool PrepareNewTask(TDLTask^% task);
 
 	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
 	   bool DoAppCommand(TDLUIExtension::AppCommand nCmd, DWORD dwExtra);
@@ -192,15 +192,6 @@ namespace TDLPluginHelpers
 
 	   bool NotifySelChange(UInt32 taskID);
 	   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
-
-	   enum class MouseClick
-	   {
-			Left,
-			Middle,
-			Right
-	   };
-
-	   bool NotifyMouseClick(MouseClick button, int X, int Y);
 
    private:
 	   HWND m_hwndParent;
