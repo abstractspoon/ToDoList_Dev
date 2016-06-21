@@ -51,3 +51,4 @@ Release\*.*
 *.csv
 *.xml
 *.zip
+*.tdl
