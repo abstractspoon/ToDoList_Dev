@@ -54,7 +54,7 @@ namespace DayViewUIExtension
             // I want the hour height to always be 20 for now
             int hourHeight = 20;
             //this.m_DayView.SlotsPerHour = 4;
-            this.m_DayView.SlotHeight = (hourHeight / this.m_dayView.SlotsPerHour);
+            this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
 
 			this.m_DayView.StartDate = DateTime.Now;
 			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
@@ -75,11 +75,11 @@ namespace DayViewUIExtension
 			if (m_Items.TryGetValue(dwTaskID, out item))
 			{
 				DateTime startDate, endDate;
-				m_dayView.GetDateRange(out startDate, out endDate);
+				m_DayView.GetDateRange(out startDate, out endDate);
 
 				if (IsItemWithinRange(item, startDate, endDate))
 				{
-					m_dayView.SelectedAppointment = item;
+					m_DayView.SelectedAppointment = item;
 					Invalidate();
 					return true;
 				}

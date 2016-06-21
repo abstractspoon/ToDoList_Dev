@@ -16,6 +16,19 @@ struct UITHEME;
 
 namespace TDLPluginHelpers
 {
+	public ref class TDLColor
+	{
+	public:
+		static Windows::Media::Color LighterMedia(Windows::Media::Color^ color, float amount);
+		static Windows::Media::Color DarkerMedia(Windows::Media::Color^ color, float amount);
+
+		static Drawing::Color LighterDrawing(Drawing::Color^ color, float amount);
+		static Drawing::Color DarkerDrawing(Drawing::Color^ color, float amount);
+
+		static Windows::Media::Color GetMediaColor(UInt32 rgbColor);
+		static Drawing::Color GetDrawingColor(UInt32 rgbColor);
+	};
+
    public ref class TDLTheme
    {
    public:
@@ -57,8 +70,6 @@ namespace TDLPluginHelpers
       TDLTheme();
 
 	  UInt32 GetColor(AppColor color);
-	  Windows::Media::Color GetMediaColor(UInt32 rgbColor);
-	  Drawing::Color GetDrawingColor(UInt32 rgbColor);
    };
    
 ////////////////////////////////////////////////////////////////////////////////////////////////
