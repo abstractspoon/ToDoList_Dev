@@ -288,7 +288,7 @@ namespace StatsUIExtension
 
         public void SetUITheme(TDLTheme theme)
         {
-            System.Windows.Media.Color bkColor = theme.GetAppColorAsMedia(TDLTheme.AppColor.AppBackDark);
+            System.Windows.Media.Color bkColor = theme.GetAppMediaColor(TDLTheme.AppColor.AppBackDark);
 
             this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
             //m_Chart.Background = new System.Windows.Media.SolidColorBrush(bkColor);

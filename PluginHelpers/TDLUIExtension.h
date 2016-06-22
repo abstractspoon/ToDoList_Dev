@@ -56,12 +56,12 @@ namespace TDLPluginHelpers
 		  StatusBarLight,
 		  StatusBarText,
 	  };
-	  Windows::Media::Color GetAppColorAsMedia(AppColor color);
-	  Drawing::Color GetAppColorAsDrawing(AppColor color);
+	  Windows::Media::Color GetAppMediaColor(AppColor color);
+	  Drawing::Color GetAppDrawingColor(AppColor color);
 
 	  String^ GetToolBarImagePath();
-	  Windows::Media::Color GetToolbarTransparencyColorAsMedia();
-	  Drawing::Color GetToolbarTransparencyColorAsDrawing();
+	  Windows::Media::Color GetToolbarTransparencyMediaColor();
+	  Drawing::Color GetToolbarTransparencyDrawingColor();
      
    private:
       UITHEME* m_pTheme;

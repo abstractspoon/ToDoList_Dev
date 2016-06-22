@@ -112,12 +112,12 @@ TDLTheme::RenderStyle TDLTheme::GetRenderStyle()
 	return TDLTheme::RenderStyle::Gradient;
 }
 
-Windows::Media::Color TDLTheme::GetAppColorAsMedia(AppColor color)
+Windows::Media::Color TDLTheme::GetAppMediaColor(AppColor color)
 {
 	return TDLColor::GetMediaColor(GetColor(color));
 }
 
-System::Drawing::Color TDLTheme::GetAppColorAsDrawing(AppColor color)
+System::Drawing::Color TDLTheme::GetAppDrawingColor(AppColor color)
 {
 	return TDLColor::GetDrawingColor(GetColor(color));
 }
@@ -127,12 +127,12 @@ String^ TDLTheme::GetToolBarImagePath()
 	return gcnew String(m_pTheme->szToolbarImage);
 }
 
-Windows::Media::Color TDLTheme::GetToolbarTransparencyColorAsMedia()
+Windows::Media::Color TDLTheme::GetToolbarTransparencyMediaColor()
 {
 	return TDLColor::GetMediaColor(m_pTheme->crToolbarTransparency);
 }
 
-Drawing::Color TDLTheme::GetToolbarTransparencyColorAsDrawing()
+Drawing::Color TDLTheme::GetToolbarTransparencyDrawingColor()
 {
 	return TDLColor::GetDrawingColor(m_pTheme->crToolbarTransparency);
 }

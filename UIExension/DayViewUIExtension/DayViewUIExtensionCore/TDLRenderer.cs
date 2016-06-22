@@ -96,7 +96,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppColorAsDrawing(TDLPluginHelpers.TDLTheme.AppColor.AppBackLight);
+                return m_theme.GetAppDrawingColor(TDLPluginHelpers.TDLTheme.AppColor.AppBackLight);
             }
         }
 
@@ -112,7 +112,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppColorAsDrawing(TDLPluginHelpers.TDLTheme.AppColor.AppText);
+                return m_theme.GetAppDrawingColor(TDLPluginHelpers.TDLTheme.AppColor.AppText);
             }
         }
 

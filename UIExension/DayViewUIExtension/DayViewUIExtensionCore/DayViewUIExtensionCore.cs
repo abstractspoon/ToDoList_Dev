@@ -100,7 +100,6 @@ namespace DayViewUIExtension
 		{
 			switch (type)
 			{
-				case TDLUIExtension.UpdateType.New:
 				case TDLUIExtension.UpdateType.Delete:
 				case TDLUIExtension.UpdateType.Move:
 				case TDLUIExtension.UpdateType.All:
@@ -108,6 +107,7 @@ namespace DayViewUIExtension
 					m_Items.Clear();
 					break;
 					
+				case TDLUIExtension.UpdateType.New:
 				case TDLUIExtension.UpdateType.Edit:
 					// In-place update
 					break;
@@ -118,6 +118,9 @@ namespace DayViewUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
 
+
+            // Clear selection
+            m_DayView.SelectionStart = m_DayView.SelectionEnd;
 			m_DayView.Invalidate();
 		}
 
@@ -132,20 +135,22 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
-						item.Title = task.GetTitle();
+                if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+                    item.Title = task.GetTitle();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
-						item.EndDate = item.OrgEndDate = task.GetDoneDate();
+                if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+                    item.EndDate = item.OrgEndDate = task.GetDoneDate();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
-						item.EndDate = item.OrgEndDate = task.GetDueDate();
+                if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+                    item.EndDate = item.OrgEndDate = task.GetDueDate();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
-						item.StartDate = item.OrgStartDate = task.GetStartDate();
+                if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+                    item.StartDate = item.OrgStartDate = task.GetStartDate();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
-						item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+                if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+                    item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+
+                item.TaskTextColor = task.GetTextDrawingColor();
 			}
 			else
 			{
@@ -242,7 +247,7 @@ namespace DayViewUIExtension
             m_renderer.Theme = theme;
             m_DayView.Invalidate(true);
 
-            this.BackColor = theme.GetAppColorAsDrawing(TDLTheme.AppColor.AppBackDark);
+            this.BackColor = theme.GetAppDrawingColor(TDLTheme.AppColor.AppBackDark);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
