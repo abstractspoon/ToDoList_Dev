@@ -361,7 +361,7 @@ namespace Calendar
 					}
 				}
 
-				Invalidate();
+				Refresh();
 			}
         }
 
@@ -1212,6 +1212,22 @@ namespace Calendar
 
         internal Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
         internal Dictionary<Appointment, AppointmentView> longappointmentViews = new Dictionary<Appointment, AppointmentView>();
+
+        public bool GetAppointmentRect(Appointment appointment, ref Rectangle rect)
+        {
+            if (appointment == null)
+                return false;
+
+            AppointmentView view;
+
+            if (appointmentViews.TryGetValue(appointment, out view))
+            {
+                rect = view.Rectangle;
+                return true;
+            }
+
+            return false;
+        }
 
         private void DrawAppointments(PaintEventArgs e, Rectangle rect, DateTime time, string group)
         {

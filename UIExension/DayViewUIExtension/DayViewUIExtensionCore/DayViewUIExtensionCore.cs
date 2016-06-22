@@ -80,7 +80,6 @@ namespace DayViewUIExtension
 				if (IsItemWithinRange(item, startDate, endDate))
 				{
 					m_DayView.SelectedAppointment = item;
-					Invalidate();
 					return true;
 				}
 			}
@@ -228,7 +227,22 @@ namespace DayViewUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			return false;
+            System.Drawing.Rectangle rect = new System.Drawing.Rectangle();
+
+            if (m_DayView.GetAppointmentRect(m_DayView.SelectedAppointment, ref rect))
+            {
+                rect = m_DayView.RectangleToScreen(rect);
+
+                left = rect.Left;
+                top = rect.Top;
+                right = rect.Right;
+                bottom = rect.Bottom;
+
+                return true;
+            }
+
+            // else
+            return false;
 		}
 
 		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
