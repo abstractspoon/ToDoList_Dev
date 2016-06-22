@@ -700,7 +700,10 @@ namespace Calendar
             {
                 // If we right-click outside the area of selection,
                 // select whatever is under the cursor
-                if (GetAppointmentAt(e.X, e.Y) == null)
+                Appointment appointment = GetAppointmentAt(e.X, e.Y);
+                bool redraw = false;
+
+                if (appointment == null)
                 {
                     DateTime click = GetTimeAt(e.X, e.Y);
 
@@ -708,11 +711,18 @@ namespace Calendar
                     {
                         SelectionStart = click;
                         SelectionEnd = click.AddMinutes(60 / SlotsPerHour);
-
-                        Invalidate(true);
-                        Update();
+                        redraw = true;
                     }
                 }
+
+                if (appointment != selectedAppointment)
+                {
+                    selectedAppointment = appointment;
+                    redraw = true;
+                }
+
+                if (redraw)
+                    Refresh();
             }
 
             base.OnMouseDown(e);
