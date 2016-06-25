@@ -12,23 +12,45 @@ namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
-		private VisualStyleRenderer m_explorerSelection;
+		private VisualStyleRenderer m_ExplorerSelection;
+        private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
 
 		private VisualStyleRenderer ExplorerSelection
 		{
 			get 
 			{
-				if (m_explorerSelection == null)
+				if (m_ExplorerSelection == null)
 				{
 					const int LVP_LISTITEM = 1;
 					const int LISS_MORESELECTED = 6;
 
-					m_explorerSelection = new VisualStyleRenderer("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+					m_ExplorerSelection = new VisualStyleRenderer("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
 				}
 
-				return m_explorerSelection;
+				return m_ExplorerSelection;
 			}
 		}
+
+        private VisualStyleRenderer HeaderNormal
+        {
+            get
+            {
+                if (m_HeaderNormal == null)
+                    m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
+
+                return m_HeaderNormal;
+            }
+        }
+        private VisualStyleRenderer HeaderHot
+        {
+            get
+            {
+                if (m_HeaderHot == null)
+                    m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
+
+                return m_HeaderHot;
+            }
+        }
 
         private TDLPluginHelpers.TDLTheme m_theme;
 
@@ -58,6 +80,11 @@ namespace DayViewUIExtension
 
                 return baseFont;
             }
+        }
+
+        public int GetFontHeight()
+        {
+            return BaseFont.Height;
         }
 
         public override Color HourColor
@@ -164,6 +191,20 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
+            System.Drawing.Rectangle rHeader = rect;
+            rHeader.Height += 2;
+
+            if (date.Date.Equals(DateTime.Now.Date))
+            {
+                rHeader.Width += 1;
+                HeaderHot.DrawBackground(g, rHeader);
+            }
+            else
+            {
+                rHeader.X += 1;
+                HeaderNormal.DrawBackground(g, rHeader);
+            }
+
             using (StringFormat format = new StringFormat())
             {
                 format.Alignment = StringAlignment.Center;
@@ -175,63 +216,6 @@ namespace DayViewUIExtension
                     formatdd.Alignment = StringAlignment.Near;
                     formatdd.FormatFlags = StringFormatFlags.NoWrap;
                     formatdd.LineAlignment = StringAlignment.Center;
-
-                    using (SolidBrush brush = new SolidBrush(this.BackColor))
-                        g.FillRectangle(brush, rect);
-
-                    using (Pen aPen = new Pen(Color.FromArgb(205, 219, 238)))
-                        g.DrawLine(aPen, rect.Left, rect.Top + (int)rect.Height / 2, rect.Right, rect.Top + (int)rect.Height / 2);
-
-                    using (Pen aPen = new Pen(Color.FromArgb(141, 174, 217)))
-                        g.DrawRectangle(aPen, rect);
-
-                    rect.X += 1;
-                    rect.Width -= 1;
-                    using (Pen aPen = new Pen(Color.FromArgb(141, 174, 217)))
-                        g.DrawRectangle(aPen, rect);
-
-                    Rectangle topPart = new Rectangle(rect.Left + 1, rect.Top + 1, rect.Width - 2, (int)(rect.Height / 2) - 1);
-                    Rectangle lowPart = new Rectangle(rect.Left + 1, rect.Top + (int)(rect.Height / 2) + 1, rect.Width - 1, (int)(rect.Height / 2) - 1);
-
-                    using (LinearGradientBrush aGB = new LinearGradientBrush(topPart, Color.FromArgb(228, 236, 246), Color.FromArgb(214, 226, 241), LinearGradientMode.Vertical))
-                        g.FillRectangle(aGB, topPart);
-
-                    using (LinearGradientBrush aGB = new LinearGradientBrush(lowPart, Color.FromArgb(194, 212, 235), Color.FromArgb(208, 222, 239), LinearGradientMode.Vertical))
-                        g.FillRectangle(aGB, lowPart);
-
-                    if (date.Date.Equals(DateTime.Now.Date))
-                    {
-                        topPart.Inflate((int)(-topPart.Width / 4 + 1), 1); //top left orange area
-                        topPart.Offset(rect.Left - topPart.Left + 1, 1);
-                        topPart.Inflate(1, 0);
-                        using (LinearGradientBrush aGB = new LinearGradientBrush(topPart, Color.FromArgb(247, 207, 114), Color.FromArgb(251, 230, 148), LinearGradientMode.Horizontal))
-                        {
-                            topPart.Inflate(-1, 0);
-                            g.FillRectangle(aGB, topPart);
-                        }
-
-                        topPart.Offset(rect.Right - topPart.Right, 0);        //top right orange
-                        topPart.Inflate(1, 0);
-                        using (LinearGradientBrush aGB = new LinearGradientBrush(topPart, Color.FromArgb(251, 230, 148), Color.FromArgb(247, 207, 114), LinearGradientMode.Horizontal))
-                        {
-                            topPart.Inflate(-1, 0);
-                            g.FillRectangle(aGB, topPart);
-                        }
-
-                        using (Pen aPen = new Pen(Color.FromArgb(128, 240, 154, 30))) //center line
-                            g.DrawLine(aPen, rect.Left, topPart.Bottom - 1, rect.Right, topPart.Bottom - 1);
-
-                        topPart.Inflate(0, -1);
-                        topPart.Offset(0, topPart.Height + 1); //lower right
-                        using (LinearGradientBrush aGB = new LinearGradientBrush(topPart, Color.FromArgb(240, 157, 33), Color.FromArgb(250, 226, 142), LinearGradientMode.BackwardDiagonal))
-                            g.FillRectangle(aGB, topPart);
-
-                        topPart.Offset(rect.Left - topPart.Left + 1, 0); //lower left
-                        using (LinearGradientBrush aGB = new LinearGradientBrush(topPart, Color.FromArgb(240, 157, 33), Color.FromArgb(250, 226, 142), LinearGradientMode.ForwardDiagonal))
-                            g.FillRectangle(aGB, topPart);
-                        using (Pen aPen = new Pen(Color.FromArgb(238, 147, 17)))
-                            g.DrawRectangle(aPen, rect);
-                    }
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
@@ -284,8 +268,7 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
-				rect.X += 7;
-				rect.Width -= 7;
+				rect.Width--;
 
                 using (StringFormat format = new StringFormat())
                 {
@@ -309,6 +292,7 @@ namespace DayViewUIExtension
 					gripRect = rect;
 					gripRect.Inflate(-2, -2);
 					gripRect.Width = 5;
+                    gripRect.Height--;
 
 					using (SolidBrush brush = new SolidBrush(appointment.BarColor))
 						g.FillRectangle(brush, gripRect);
@@ -320,30 +304,13 @@ namespace DayViewUIExtension
 					//  Draw appointment border if needed
 					if (!isSelected && appointment.DrawBorder)
 					{
-						using (Pen m_Pen = new Pen(appointment.BorderColor, 1))
-							g.DrawRectangle(m_Pen, rect);
-					}
-
-					// Draw shadow lines
-					int xLeft = rect.X + 6;
-					int xRight = rect.Right + 1;
-					int yTop = rect.Y + 1;
-					int yButton = rect.Bottom + 1;
-
-					for (int i = 0; i < 5; i++)
-					{
-						using (Pen shadow_Pen = new Pen(Color.FromArgb(70 - 12 * i, Color.Black)))
-						{
-							g.DrawLine(shadow_Pen, xLeft + i, yButton + i, xRight + i - 1, yButton + i); //horizontal lines
-							g.DrawLine(shadow_Pen, xRight + i, yTop + i, xRight + i, yButton + i); //vertical
-						}
+						using (Pen pen = new Pen(appointment.BorderColor, 1))
+                            g.DrawRectangle(pen, rect.Left, rect.Top, rect.Width - 1, rect.Height - 1);
 					}
 
 					// draw appointment text
-
-                    rect.X = gripRect.Right + 2;
-                    // width of shadow is 6.
-                    rect.Width -= 6;
+                    rect.X = gripRect.Right/* + 2*/;
+                    rect.Y++;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 

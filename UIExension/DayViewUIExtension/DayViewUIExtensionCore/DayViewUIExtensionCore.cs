@@ -236,7 +236,7 @@ namespace DayViewUIExtension
                 left = rect.Left;
                 top = rect.Top;
                 right = rect.Right;
-                bottom = rect.Bottom;
+                bottom = (rect.Top + m_renderer.GetFontHeight() + 4); // 4 = border
 
                 return true;
             }

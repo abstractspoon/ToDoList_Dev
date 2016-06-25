@@ -91,7 +91,7 @@ namespace Calendar
             //vscroll.Dock = DockStyle.Right;
             hscroll.Visible = true;
             hscroll.Location = new System.Drawing.Point(0, 0);
-            hscroll.Width = hourLabelWidth;
+            hscroll.Width = hourLabelWidth/* + 2*/;
             hscroll.Height = dayHeadersHeight;
             hscroll.Scroll += new ScrollEventHandler(OnHScroll);
             hscroll.Minimum = -1000; // ~-20 years
@@ -1118,8 +1118,12 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
+                // Take up any leftover from rounding on day 0
                 if (day == 0)
-                    dayHeaderRectangle.Width += (rect.Width % daysToShow) - 1;
+                {
+                    int day0Width = (rect.Width - ((daysToShow - 1) * dayWidth));
+                    dayHeaderRectangle.Width = day0Width;
+                }
 
                 renderer.DrawDayHeader(e.Graphics, dayHeaderRectangle, headerDate);
 
@@ -1197,6 +1201,9 @@ namespace Calendar
                         groups.Add(app.Group);
 
                 Rectangle rect2 = rect;
+                rect2.X += (appointmentGripWidth + 2);
+                rect2.Width -= (appointmentGripWidth + 2);
+
                 rect2.Width = rect2.Width / groups.Count;
 
                 groups.Sort();
@@ -1239,7 +1246,7 @@ namespace Calendar
 
             if (appointments != null)
             {
-                HalfHourLayout[] layout = GetMaxParalelAppointments(appointments, this.slotsPerHour);
+                HalfHourLayout[] layout = GetMaxParallelAppointments(appointments, this.slotsPerHour);
 
                 List<Appointment> drawnItems = new List<Appointment>();
 
@@ -1280,7 +1287,7 @@ namespace Calendar
                                 if ((lastX + (appointmentWidth * 2)) > (rect.X + rect.Width))
                                     lastX = 0;
 
-                                appRect.Width = appointmentWidth - 5;
+                                appRect.Width = appointmentWidth/* - 5*/;
 
                                 if (lastX > 0)
                                     appRect.X = lastX + appointmentWidth;
@@ -1371,7 +1378,7 @@ namespace Calendar
             }
         }
 
-        private static HalfHourLayout[] GetMaxParalelAppointments(List<Appointment> appointments, int slotsPerHour)
+        private static HalfHourLayout[] GetMaxParallelAppointments(List<Appointment> appointments, int slotsPerHour)
         {
             HalfHourLayout[] appLayouts = new HalfHourLayout[24 * 20];
 
@@ -1506,7 +1513,7 @@ namespace Calendar
                     if (appointment.EndDate.Day != appointment.StartDate.Day && appointment.EndDate.TimeOfDay < appointment.StartDate.TimeOfDay)
                         spanDays += 1;
 
-                    appointmenRect.Width = dayWidth * spanDays - 5;
+                    appointmenRect.Width = dayWidth * spanDays/* - 5*/;
                     appointmenRect.Height = horizontalAppointmentHeight;
                     appointmenRect.X += (appointment.StartDate.Subtract(startDate).Days) * dayWidth; // changed by Gimlei
                     appointmenRect.Y = y + appointment.Layer * (horizontalAppointmentHeight + 5) + 5; // changed by Gimlei
