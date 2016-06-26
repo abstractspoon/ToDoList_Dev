@@ -85,7 +85,8 @@ namespace DayViewUIExtension
 			}
 
 			// all else 
-			return false;
+			m_DayView.SelectedAppointment = null;
+			return true;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -202,7 +203,7 @@ namespace DayViewUIExtension
 		{
             // Set the start/due dates to match the current selection
             if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
-		{
+			{
                 task.SetStartDate(m_DayView.SelectionStart);
                 task.SetDueDate(m_DayView.SelectionEnd);
             }

@@ -645,18 +645,10 @@ namespace Calendar
                 }
 
                 ITool newTool = null;
-
                 Appointment appointment = GetAppointmentAt(e.X, e.Y);
-
 
                 if (appointment == null)
                 {
-//                     if (selectedAppointment != null)
-//                     {
-//                         selectedAppointment = null;
-//                         Invalidate();
-//                     }
-
 					if (e.Y < HeaderHeight && e.Y > dayHeadersHeight)
 					{
 						newTool = drawTool;
@@ -705,7 +697,7 @@ namespace Calendar
                     if ((click < SelectionStart) || (click > SelectionEnd))
                     {
                         SelectionStart = click;
-                        SelectionEnd = click.AddMinutes(60 / SlotsPerHour);
+                        SelectionEnd = click.AddMinutes(60);
                         redraw = true;
                     }
                 }
