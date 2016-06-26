@@ -648,30 +648,25 @@ namespace Calendar
 
                 Appointment appointment = GetAppointmentAt(e.X, e.Y);
 
-                if (e.Y < HeaderHeight && e.Y > dayHeadersHeight && appointment == null)
-                {
-                    if (selectedAppointment != null)
-                    {
-                        selectedAppointment = null;
-                        Invalidate();
-                    }
-
-                    newTool = drawTool;
-                    selection = SelectionType.None;
-
-                    base.OnMouseDown(e);
-                    return;
-                }
 
                 if (appointment == null)
                 {
-                    if (selectedAppointment != null)
-                    {
-                        selectedAppointment = null;
-                        Invalidate();
-                    }
+//                     if (selectedAppointment != null)
+//                     {
+//                         selectedAppointment = null;
+//                         Invalidate();
+//                     }
 
-                    newTool = drawTool;
+					if (e.Y < HeaderHeight && e.Y > dayHeadersHeight)
+					{
+						newTool = drawTool;
+						selection = SelectionType.None;
+
+						base.OnMouseDown(e);
+						return;
+					}
+
+					newTool = drawTool;
                     selection = SelectionType.DateRange;
                 }
                 else
@@ -714,8 +709,7 @@ namespace Calendar
                         redraw = true;
                     }
                 }
-
-                if (appointment != selectedAppointment)
+				else if (appointment != selectedAppointment)
                 {
                     selectedAppointment = appointment;
                     redraw = true;
