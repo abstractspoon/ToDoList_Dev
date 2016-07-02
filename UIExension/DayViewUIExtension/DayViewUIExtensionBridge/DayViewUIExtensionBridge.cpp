@@ -7,6 +7,7 @@
 
 #include "stdafx.h"
 #include "DayViewUIExtensionBridge.h"
+#include "resource.h"
 
 #include "..\..\..\..\Interfaces\ITasklist.h"
 #include "..\..\..\..\Interfaces\ITransText.h"
@@ -40,8 +41,11 @@ const LPCWSTR SAMPLE_NAME = L"Day View";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CDayViewUIExtensionBridge::CDayViewUIExtensionBridge()
+CDayViewUIExtensionBridge::CDayViewUIExtensionBridge() : m_hIcon(NULL)
 {
+	HMODULE hMod = LoadLibrary(L"DayViewUIExtensionBridge.dll"); // us
+
+	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
 }
 
 void CDayViewUIExtensionBridge::Release()
@@ -61,26 +65,26 @@ LPCTSTR CDayViewUIExtensionBridge::GetMenuText() const
 
 HICON CDayViewUIExtensionBridge::GetIcon() const
 {
-   return NULL;
+	return m_hIcon;
 }
 
 LPCWSTR CDayViewUIExtensionBridge::GetTypeID() const
 {
-   return SAMPLE_GUID;
+	return SAMPLE_GUID;
 }
 
 IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
-    DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   CDayViewUIExtensionBridgeWindow* pExtWnd = new CDayViewUIExtensionBridgeWindow;
+	CDayViewUIExtensionBridgeWindow* pExtWnd = new CDayViewUIExtensionBridgeWindow;
 
-   if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
-   {
-      pExtWnd->Release();
-      pExtWnd = NULL;
-   }
+	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
+	{
+		pExtWnd->Release();
+		pExtWnd = NULL;
+	}
 
-   return pExtWnd;
+	return pExtWnd;
 }
 
 void CDayViewUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
@@ -102,31 +106,31 @@ CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow()
 
 void CDayViewUIExtensionBridgeWindow::Release()
 {
-   delete this;
+	delete this;
 }
 
 BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
-            long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent));
+	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent));
 
-   HWND hWnd = GetHwnd();
+	HWND hWnd = GetHwnd();
 
-   if (hWnd)
-   {
-      ::SetParent(hWnd, hwndParent);
-      ::SetWindowLong(hWnd, GWL_ID, nCtrlID);
-      ::MoveWindow(hWnd, nLeft, nTop, nWidth, nHeight, FALSE);
+	if (hWnd)
+	{
+		::SetParent(hWnd, hwndParent);
+		::SetWindowLong(hWnd, GWL_ID, nCtrlID);
+		::MoveWindow(hWnd, nLeft, nTop, nWidth, nHeight, FALSE);
 
-      return true;
-   }
-        
-   return false;
+		return true;
+	}
+
+	return false;
 }
 
 HICON CDayViewUIExtensionBridgeWindow::GetIcon() const
 {
-   return NULL;
+	return NULL;
 }
 
 LPCWSTR CDayViewUIExtensionBridgeWindow::GetMenuText() const
@@ -136,12 +140,12 @@ LPCWSTR CDayViewUIExtensionBridgeWindow::GetMenuText() const
 
 LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
 {
-   return SAMPLE_GUID;
+	return SAMPLE_GUID;
 }
 
 bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
 {
-   return m_wnd->SelectTask(dwTaskID);
+	return m_wnd->SelectTask(dwTaskID);
 }
 
 bool CDayViewUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
@@ -151,7 +155,7 @@ bool CDayViewUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCo
 	for (int i = 0; i < nTaskCount; i++)
 		taskIDs[i] = pdwTaskIDs[i];
 
-    return m_wnd->SelectTasks(taskIDs);
+	return m_wnd->SelectTasks(taskIDs);
 }
 
 void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
@@ -181,12 +185,12 @@ bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-								 pMsg->message, 
-								 pMsg->wParam, 
-								 pMsg->lParam, 
-								 pMsg->time, 
-								 pMsg->pt.x,
-								 pMsg->pt.y);
+		pMsg->message, 
+		pMsg->wParam, 
+		pMsg->lParam, 
+		pMsg->time, 
+		pMsg->pt.x,
+		pMsg->pt.y);
 }
 
 bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
@@ -213,7 +217,7 @@ void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<TDLTheme^> theme = gcnew TDLTheme(pTheme);
 
-    m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme.get());
 }
 
 void CDayViewUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
@@ -223,7 +227,7 @@ void CDayViewUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CDayViewUIExtensionBridgeWindow::GetHwnd() const
 {
-   return static_cast<HWND>(m_wnd->Handle.ToPointer());
+	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
 void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

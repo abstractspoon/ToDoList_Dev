@@ -29,6 +29,8 @@ public:
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
 
+protected:
+	HICON m_hIcon;
 };
 
 class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
