@@ -105,9 +105,6 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <ResourceCompile Include="MDContentControlBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="markdown.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="MDContentControlCore">
       <HintPath>..\Debug\MDContentControlCore.dll</HintPath>
     </Reference>
@@ -116,6 +113,9 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\markdown.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

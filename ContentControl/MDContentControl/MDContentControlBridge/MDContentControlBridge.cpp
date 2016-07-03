@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 #include "MDContentControlBridge.h"
+#include "resource.h"
 
 #include "..\..\..\..\Interfaces\ITransText.h"
 #include "..\..\..\..\Interfaces\IPreferences.h"
@@ -33,16 +34,16 @@ const LPCWSTR SAMPLE_NAME = L"Markdown";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMDContentBridge::CMDContentBridge()// : m_hIcon(NULL)
+CMDContentBridge::CMDContentBridge() : m_hIcon(NULL)
 {
-//    HMODULE hMod = LoadLibrary(L"MDContentBridge.dll"); // us
-// 
-//    m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_STATS));
+   HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
+
+   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MARKDOWN));
 }
 
 CMDContentBridge::~CMDContentBridge()
 {
-//    ::DestroyIcon(m_hIcon);
+   ::DestroyIcon(m_hIcon);
 }
 
 void CMDContentBridge::Release()
@@ -60,10 +61,10 @@ LPCTSTR CMDContentBridge::GetTypeDescription() const
    return SAMPLE_NAME;
 }
 
-// HICON CMDContentBridge::GetIcon() const
-// {
-//    return m_hIcon;
-// }
+HICON CMDContentBridge::GetTypeIcon() const
+{
+   return m_hIcon;
+}
 
 LPCWSTR CMDContentBridge::GetTypeID() const
 {

@@ -18,6 +18,7 @@ public:
 
    LPCWSTR GetTypeID() const;
    LPCWSTR GetTypeDescription() const;
+   HICON GetTypeIcon() const;
 
    void SetLocalizer(ITransText* pTT);
    void Release();
