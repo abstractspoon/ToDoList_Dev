@@ -24,24 +24,24 @@ namespace MDContentControl
 
         public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(inputTextBox.Text);
+            return System.Text.Encoding.Unicode.GetBytes(InputText);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            inputTextBox.Text = System.Text.Encoding.Unicode.GetString(content);
+            InputText = System.Text.Encoding.Unicode.GetString(content);
             return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return inputTextBox.Text;
+            return InputText;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            inputTextBox.Text = content;
+            InputText = content;
             return true;
         }
 

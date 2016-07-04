@@ -33,10 +33,21 @@ namespace MarkdownEditor
             markdown.StrictBoldItalic = true;            
         }
 
+        public string InputText
+        {
+            get { return inputTextBox.Text; }
+            set { inputTextBox.Text = value; }
+        }
+
         private void inputTextBox_TextChanged(object sender, EventArgs e)
         {
             Debug.Assert(markdown != null);
 
+            UpdateOutput();
+        }
+
+        private void UpdateOutput()
+        {
             string outputHtml = markdown.Transform(inputTextBox.Text);
 
             outputWebBrowser.DocumentText = Style + outputHtml;
