@@ -692,23 +692,37 @@ namespace Calendar
 
                 if (appointment == null)
                 {
+                    if (selectedAppointment != null)
+                        redraw = true;
+
+                    selectedAppointment = null;
+                    selection = SelectionType.Appointment;
+                    RaiseSelectionChanged(new AppointmentEventArgs(null));
+
                     DateTime click = GetTimeAt(e.X, e.Y);
+                    selection = SelectionType.DateRange;
 
                     if ((click < SelectionStart) || (click > SelectionEnd))
                     {
                         SelectionStart = click;
                         SelectionEnd = click.AddMinutes(60);
+
                         redraw = true;
                     }
                 }
 				else if (appointment != selectedAppointment)
                 {
                     selectedAppointment = appointment;
+                    selection = SelectionType.Appointment;
+
+                    RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
                     redraw = true;
                 }
 
                 if (redraw)
+                {
                     Refresh();
+                }
             }
 
             base.OnMouseDown(e);

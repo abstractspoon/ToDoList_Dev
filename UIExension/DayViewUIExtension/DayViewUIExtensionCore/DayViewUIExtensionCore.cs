@@ -249,9 +249,16 @@ namespace DayViewUIExtension
 		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
             System.Drawing.Point pt = m_DayView.PointToClient(new System.Drawing.Point(xPos, yPos));
+            Calendar.Appointment appointment = m_DayView.GetAppointmentAt(pt.X, pt.Y);
 
-            if (m_DayView.GetTrueRectangle().Contains(pt))
+            if (appointment != null)
+            {
+                return TDLUIExtension.HitResult.Task;
+            }
+            else if (m_DayView.GetTrueRectangle().Contains(pt))
+            {
                 return TDLUIExtension.HitResult.Tasklist;
+            }
 
             // else
 			return TDLUIExtension.HitResult.Nowhere;
@@ -347,6 +354,8 @@ namespace DayViewUIExtension
 				case Calendar.SelectionType.Appointment:
 					if (args.Appointment != null)
 						notify.NotifySelChange(args.Appointment.Id);
+                    else
+                        notify.NotifySelChange(0);
 					break;
 			}
 		}
