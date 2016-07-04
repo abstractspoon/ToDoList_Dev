@@ -15,6 +15,7 @@ namespace TDLPluginHelpers
 {
 	public ref class TDLContentControl
 	{
+	public:
 		ref class TDLNotify
 		{
 		public:

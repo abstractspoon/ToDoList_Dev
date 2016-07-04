@@ -73,7 +73,7 @@ LPCWSTR CMDContentBridge::GetTypeID() const
 IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CMDContentBridgeControl* pCtrl = new CMDContentBridgeControl;
+	CMDContentBridgeControl* pCtrl = new CMDContentBridgeControl();
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -120,7 +120,7 @@ CMDContentBridgeControl::CMDContentBridgeControl()
 BOOL CMDContentBridgeControl::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew MDContentControl::MDContentControlCore();
+	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent));
 
 	HWND hWnd = GetHwnd();
 

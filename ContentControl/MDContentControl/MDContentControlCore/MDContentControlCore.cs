@@ -9,9 +9,15 @@ namespace MDContentControl
 {
     public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, ITDLContentControl
     {
-        public MDContentControlCore()
+        private IntPtr m_hwndParent;
+
+        public MDContentControlCore(IntPtr hwndParent)
         {
+            m_hwndParent = hwndParent;
+
             InitializeComponent();
+
+            inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
@@ -139,5 +145,13 @@ namespace MDContentControl
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private void OnInputTextChanged(object sender, EventArgs e)
+        {
+            TDLContentControl.TDLNotify notify = new TDLContentControl.TDLNotify(m_hwndParent);
+
+            notify.NotifyMod();
+        }
+
     }
 }
