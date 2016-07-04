@@ -201,7 +201,7 @@ HWND CMDContentBridgeControl::GetHwnd() const
 
 void CMDContentBridgeControl::Release()
 {
-
+	delete this;
 }
 
 bool CMDContentBridgeControl::ProcessMessage(MSG* pMsg)

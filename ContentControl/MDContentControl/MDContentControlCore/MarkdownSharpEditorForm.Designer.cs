@@ -130,6 +130,7 @@
             this.outputWebBrowser.Name = "outputWebBrowser";
             this.outputWebBrowser.Size = new System.Drawing.Size(600, 250);
             this.outputWebBrowser.TabIndex = 1;
+            this.outputWebBrowser.ScrollBarsEnabled = true;
 
             this.browserLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top/* | System.Windows.Forms.AnchorStyles.Bottom*/)
                         | System.Windows.Forms.AnchorStyles.Left)
