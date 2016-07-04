@@ -1,13 +1,79 @@
 ﻿
-// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 using System;
 using TDLPluginHelpers;
 using System.Runtime.InteropServices;
 
+// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
+
 namespace MDContentControl
 {
-    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm //, ITDLContentControl
+    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, ITDLContentControl
     {
+        public MDContentControlCore()
+        {
+            InitializeComponent();
+        }
+
+        // ITDLContentControl ------------------------------------------------------------------
+
+        public int GetContent(ref Byte[] content)
+        {
+            return 0;
+        }
+
+        public bool SetContent(Byte[] content, bool bResetSelection)
+        {
+            return false;
+        }
+
+        // text content if supported. return false if not supported
+        public String GetTextContent()
+        {
+            return "";
+        }
+
+        public bool SetTextContent(String content, bool bResetSelection)
+        {
+            return false;
+        }
+
+        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+        {
+            return false;
+        }
+
+        public bool Undo()
+        {
+            return false;
+        }
+
+        public bool Redo()
+        {
+            return false;
+        }
+
+        public void SetUITheme(TDLTheme theme)
+        {
+
+        }
+
+        public void SetReadOnly(bool bReadOnly)
+        {
+
+        }
+
+        public void SavePreferences(TDLPreferences prefs, String key)
+        {
+
+        }
+
+        public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
+        {
+
+        }
+
+        // --------------------------------------------------------------------
+
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 

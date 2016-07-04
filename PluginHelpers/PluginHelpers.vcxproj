@@ -97,6 +97,7 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TDLContentControl.h" />
     <ClInclude Include="TDLPreferences.h" />
     <ClInclude Include="TDLTaskList.h" />
     <ClInclude Include="TDLTranslate.h" />
@@ -116,6 +117,7 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TDLContentControl.cpp" />
     <ClCompile Include="TDLPreferences.cpp" />
     <ClCompile Include="TDLTaskList.cpp" />
     <ClCompile Include="TDLTranslate.cpp" />
