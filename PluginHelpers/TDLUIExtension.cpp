@@ -155,18 +155,18 @@ IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
+TDLUIExtension::TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 }
 
-TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
+TDLUIExtension::TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.tValue = static_cast<__int64>(TDLTask::Map(date));
@@ -174,7 +174,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime dat
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.dValue = value;
@@ -182,7 +182,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 
@@ -192,7 +192,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time,
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.nValue = value;
@@ -200,7 +200,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.bValue = (value ? TRUE : FALSE);
@@ -208,7 +208,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
+bool TDLUIExtension::TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
 {
 	IUITASKMOD mod = { IUI_CUSTOMATTRIB, 0 };
 
@@ -218,7 +218,7 @@ bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.szValue = MS(value);
@@ -226,7 +226,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ valu
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	//mod.szValue = MS(value);
@@ -234,7 +234,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<S
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
+bool TDLUIExtension::TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -243,7 +243,7 @@ bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 	return true;
 }
 
-bool TDLNotify::NotifySelChange(UInt32 taskID)
+bool TDLUIExtension::TDLNotify::NotifySelChange(UInt32 taskID)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -252,7 +252,7 @@ bool TDLNotify::NotifySelChange(UInt32 taskID)
 	return true;
 }
 
-bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
+bool TDLUIExtension::TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 {
 	if (!IsWindow(m_hwndParent) || !pdwTaskIDs->Length)
 		return false;

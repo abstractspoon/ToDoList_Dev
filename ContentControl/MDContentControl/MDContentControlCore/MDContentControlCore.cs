@@ -16,59 +16,68 @@ namespace MDContentControl
 
         // ITDLContentControl ------------------------------------------------------------------
 
-        public int GetContent(ref Byte[] content)
+        public Byte[] GetContent()
         {
-            return 0;
+            return System.Text.Encoding.Unicode.GetBytes(inputTextBox.Text);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            return false;
+            inputTextBox.Text = System.Text.Encoding.Unicode.GetString(content);
+            return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return "";
+            return inputTextBox.Text;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            return false;
+            inputTextBox.Text = content;
+            return true;
         }
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
+            // TODO
             return false;
         }
 
         public bool Undo()
         {
+            // TODO
             return false;
         }
 
         public bool Redo()
         {
+            // TODO
             return false;
         }
 
         public void SetUITheme(TDLTheme theme)
         {
+            // TODO
 
         }
 
         public void SetReadOnly(bool bReadOnly)
         {
+            // TODO
 
         }
 
         public void SavePreferences(TDLPreferences prefs, String key)
         {
+            // TODO
 
         }
 
         public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
         {
+            // TODO
 
         }
 

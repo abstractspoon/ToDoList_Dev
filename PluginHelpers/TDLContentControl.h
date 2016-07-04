@@ -13,29 +13,45 @@ struct UITHEME;
 
 namespace TDLPluginHelpers
 {
-   public interface class ITDLContentControl
-   {
-	   // custom/binary data format
-	   int GetContent(cli::array<Byte>^% content);
-	   bool SetContent(cli::array<Byte>^ content, bool bResetSelection);
+	public ref class TDLContentControl
+	{
+		ref class TDLNotify
+		{
+		public:
+			TDLNotify(IntPtr hwndParent);
+			TDLNotify(IntPtr hwndParent, IntPtr hwndFrom);
 
-	   // text content if supported. return false if not supported
-	   String^ GetTextContent();
-	   bool SetTextContent(String^ content, bool bResetSelection);
+			bool NotifyMod();
 
-	   bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
+		private:
+			HWND m_hwndParent;
+			HWND m_hwndFrom;
+		};
+	};
 
-	   bool Undo();
-	   bool Redo();
+	public interface class ITDLContentControl
+	{
+		// custom/binary data format
+		cli::array<Byte>^ GetContent();
+		bool SetContent(cli::array<Byte>^ content, bool bResetSelection);
 
-	   void SetUITheme(TDLTheme^ theme);
-	   void SetReadOnly(bool bReadOnly);
+		// text content if supported. return false if not supported
+		String^ GetTextContent();
+		bool SetTextContent(String^ content, bool bResetSelection);
 
-	   void SavePreferences(TDLPreferences^ prefs, String^ key);
-	   void LoadPreferences(TDLPreferences^ prefs, String^ key, bool appOnly);
+		bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
 
-	   //virtual ISpellCheck* GetSpellCheckInterface() = 0;
-   };
+		bool Undo();
+		bool Redo();
+
+		void SetUITheme(TDLTheme^ theme);
+		void SetReadOnly(bool bReadOnly);
+
+		void SavePreferences(TDLPreferences^ prefs, String^ key);
+		void LoadPreferences(TDLPreferences^ prefs, String^ key, bool appOnly);
+
+		//virtual ISpellCheck* GetSpellCheckInterface() = 0;
+	};
 
 }
 

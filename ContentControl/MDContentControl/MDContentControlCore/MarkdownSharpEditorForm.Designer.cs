@@ -208,7 +208,7 @@
 //         private System.Windows.Forms.TabControl outputTabControl;
 //         private System.Windows.Forms.TabPage htmlOutputTabPage;
 //         private System.Windows.Forms.TabPage rawOutputTabPage;
-        private System.Windows.Forms.TextBox inputTextBox;
+        protected System.Windows.Forms.TextBox inputTextBox;
 
     }
 }

@@ -36,8 +36,8 @@ using namespace TDLPluginHelpers;
 
 // REPLACE THIS WITH NEW GUID!
 
-const LPCWSTR SAMPLE_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
-const LPCWSTR SAMPLE_NAME = L"Day View";
+const LPCWSTR DAYVIEW_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR DAYVIEW_NAME = L"Day View";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ void CDayViewUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
 
 LPCTSTR CDayViewUIExtensionBridge::GetMenuText() const
 {
-	return SAMPLE_NAME;
+	return DAYVIEW_NAME;
 }
 
 HICON CDayViewUIExtensionBridge::GetIcon() const
@@ -70,7 +70,7 @@ HICON CDayViewUIExtensionBridge::GetIcon() const
 
 LPCWSTR CDayViewUIExtensionBridge::GetTypeID() const
 {
-	return SAMPLE_GUID;
+	return DAYVIEW_GUID;
 }
 
 IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
@@ -135,12 +135,12 @@ HICON CDayViewUIExtensionBridgeWindow::GetIcon() const
 
 LPCWSTR CDayViewUIExtensionBridgeWindow::GetMenuText() const
 {
-	return SAMPLE_NAME;
+	return DAYVIEW_NAME;
 }
 
 LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
 {
-	return SAMPLE_GUID;
+	return DAYVIEW_GUID;
 }
 
 bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)

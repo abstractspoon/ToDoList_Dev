@@ -101,6 +101,32 @@ namespace TDLPluginHelpers
 	   static IUI_HITTEST Map(HitResult test);
 	   static IUI_ATTRIBUTE Map(TaskAttribute attrib);
 
+	   ref class TDLNotify
+	   {
+	   public:
+		   TDLNotify(IntPtr hwndParent);
+		   TDLNotify(IntPtr hwndParent, IntPtr hwndFrom);
+
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime value);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value);
+		   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues);
+		   bool NotifyMod(String^ sCustAttribID, String^ value);
+
+		   bool NotifySelChange(UInt32 taskID);
+		   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
+
+	   private:
+		   HWND m_hwndParent;
+		   HWND m_hwndFrom;
+
+	   private:
+		   bool DoNotify(const IUITASKMOD* pMod, int numMod);
+	   };
+
    };
 
    public interface class ITDLUIExtension
@@ -125,32 +151,6 @@ namespace TDLPluginHelpers
 
 	   void SavePreferences(TDLPreferences^ prefs, String^ key);
 	   void LoadPreferences(TDLPreferences^ prefs, String^ key, bool appOnly);
-   };
-
-   public ref class TDLNotify
-   {
-   public:
-	   TDLNotify(IntPtr hwndParent);
-	   TDLNotify(IntPtr hwndParent, IntPtr hwndFrom);
-
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime value);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value);
-	   bool NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues);
-	   bool NotifyMod(String^ sCustAttribID, String^ value);
-
-	   bool NotifySelChange(UInt32 taskID);
-	   bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
-
-   private:
-	   HWND m_hwndParent;
-	   HWND m_hwndFrom;
-
-   private:
-	   bool DoNotify(const IUITASKMOD* pMod, int numMod);
    };
 
 }

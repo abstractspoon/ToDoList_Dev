@@ -344,7 +344,7 @@ namespace DayViewUIExtension
 
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-			TDLNotify notify = new TDLNotify(m_hwndParent);
+            TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
 
 			switch (this.m_DayView.Selection)
 			{
@@ -373,7 +373,7 @@ namespace DayViewUIExtension
 			if (item == null)
 				return;
 
-			TDLNotify notify = new TDLNotify(m_hwndParent);
+            TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
 
 			switch (move.Mode)
 			{

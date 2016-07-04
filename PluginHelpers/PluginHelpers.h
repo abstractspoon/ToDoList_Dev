@@ -15,7 +15,7 @@ namespace TDLPluginHelpers
 {
 	// converts System::String to LPCWSTR, and frees memory on exit
 	// DO NOT USE TO RETURN STRINGS
-	class TDLMarshalledString
+	public ref class TDLMarshalledString
 	{
 	public:
 		TDLMarshalledString(String^ str);
