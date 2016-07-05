@@ -43,7 +43,7 @@
 //             this.outputTabControl = new System.Windows.Forms.TabControl();
 //             this.htmlOutputTabPage = new System.Windows.Forms.TabPage();
             this.outputWebBrowser = new System.Windows.Forms.WebBrowser();
-            this.browserWithLabel = new System.Windows.Forms.Panel();
+//            this.browserWithLabel = new System.Windows.Forms.Panel();
             this.browserLabel = new System.Windows.Forms.Label();
 
 //             this.rawOutputTabPage = new System.Windows.Forms.TabPage();
@@ -71,12 +71,13 @@
             // mainSplitContainer.Panel2
             // 
 //            this.mainSplitContainer.Panel2.Controls.Add(this.outputTabControl);
-            this.mainSplitContainer.Panel2.Controls.Add(this.browserWithLabel);
+//            this.mainSplitContainer.Panel2.Controls.Add(this.browserWithLabel);
+            this.mainSplitContainer.Panel2.Controls.Add(this.browserLabel);
+            this.mainSplitContainer.Panel2.Controls.Add(this.outputWebBrowser);
             this.mainSplitContainer.Size = new System.Drawing.Size(600, 600);
             this.mainSplitContainer.SplitterDistance = 300;
             this.mainSplitContainer.TabIndex = 2;
             this.mainSplitContainer.BackColor = System.Drawing.SystemColors.Control;
-            //             this.mainSplitContainer.SplitterWidth = 20;
             // 
             // inputTextBox
             // 
@@ -93,7 +94,6 @@
             this.inputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.inputTextBox.Size = new System.Drawing.Size(600, 300);
             this.inputTextBox.TabIndex = 0;
-//             this.inputTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.inputTextBox.TextChanged += new System.EventHandler(this.inputTextBox_TextChanged);
             // 
             // outputTabControl
@@ -128,8 +128,7 @@
             this.outputWebBrowser.Location = new System.Drawing.Point(0, 20);
             this.outputWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.outputWebBrowser.Name = "outputWebBrowser";
-            this.outputWebBrowser.Size = new System.Drawing.Size(600, 250);
-            this.outputWebBrowser.TabIndex = 1;
+            this.outputWebBrowser.Size = new System.Drawing.Size(600, (300 - 20 - this.mainSplitContainer.SplitterWidth));
 
             this.browserLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top/* | System.Windows.Forms.AnchorStyles.Bottom*/)
                         | System.Windows.Forms.AnchorStyles.Left)
@@ -140,15 +139,16 @@
             this.browserLabel.Size = new System.Drawing.Size(600, 20);
             this.browserLabel.BackColor = System.Drawing.SystemColors.Control;
 
-            this.browserWithLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.browserWithLabel.MinimumSize = new System.Drawing.Size(20, 20);
-            //this.browserWithLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.browserWithLabel.Controls.Add(this.browserLabel);
-            this.browserWithLabel.Controls.Add(this.outputWebBrowser);
-            this.browserWithLabel.Location = new System.Drawing.Point(0, 0);
-            this.browserWithLabel.Size = new System.Drawing.Size(600, (300 - this.mainSplitContainer.SplitterWidth));
+//             this.browserWithLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((/*System.Windows.Forms.AnchorStyles.Top | */System.Windows.Forms.AnchorStyles.Bottom)
+//                         | System.Windows.Forms.AnchorStyles.Left)
+//                         | System.Windows.Forms.AnchorStyles.Right)));
+//             this.browserWithLabel.MinimumSize = new System.Drawing.Size(20, 20);
+//             //this.browserWithLabel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+//             this.browserWithLabel.Controls.Add(this.browserLabel);
+//             this.browserWithLabel.Controls.Add(this.outputWebBrowser);
+//             this.browserWithLabel.Location = new System.Drawing.Point(0, 0);
+//             this.browserWithLabel.Size = new System.Drawing.Size(600, (300 - this.mainSplitContainer.SplitterWidth));
+//             this.browserWithLabel.TabIndex = 1;
             // 
             // rawOutputTabPage
             // 
@@ -184,11 +184,15 @@
             this.Controls.Add(this.mainSplitContainer);
             this.Name = "MarkdownSharpEditorForm";
             this.Text = "Markdown Editor";
+//            this.browserWithLabel.ResumeLayout(false);
+//            this.browserWithLabel.PerformLayout();
             this.mainSplitContainer.Panel1.ResumeLayout(false);
-            this.mainSplitContainer.Panel1.PerformLayout();
+//            this.mainSplitContainer.Panel1.PerformLayout();
             this.mainSplitContainer.Panel2.ResumeLayout(false);
+//            this.mainSplitContainer.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainSplitContainer)).EndInit();
             this.mainSplitContainer.ResumeLayout(false);
+//            this.mainSplitContainer.PerformLayout();
 //             this.mainSplitContainer.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
 //             this.outputTabControl.ResumeLayout(false);
@@ -203,12 +207,12 @@
         private System.Windows.Forms.SplitContainer mainSplitContainer;
 //         private System.Windows.Forms.RichTextBox outputRichTextBox;
         private System.Windows.Forms.WebBrowser outputWebBrowser;
-        private System.Windows.Forms.Panel browserWithLabel;
+//        private System.Windows.Forms.Panel browserWithLabel;
         private System.Windows.Forms.Label browserLabel;
 //         private System.Windows.Forms.TabControl outputTabControl;
 //         private System.Windows.Forms.TabPage htmlOutputTabPage;
 //         private System.Windows.Forms.TabPage rawOutputTabPage;
-        private System.Windows.Forms.TextBox inputTextBox;
+        protected System.Windows.Forms.TextBox inputTextBox;
 
     }
 }

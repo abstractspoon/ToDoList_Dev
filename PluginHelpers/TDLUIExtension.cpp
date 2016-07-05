@@ -15,150 +15,6 @@ using namespace TDLPluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-Windows::Media::Color TDLColor::LighterMedia(Windows::Media::Color^ color, float amount)
-{
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
-
-	red = ((255 - red) * amount) + red;
-	green = ((255 - green) * amount) + green;
-	blue = ((255 - blue) * amount) + blue;
-
-	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
-}
-
-Windows::Media::Color TDLColor::DarkerMedia(Windows::Media::Color^ color, float amount)
-{
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
-
-	red *= amount;
-	green *= amount;
-	blue *= amount;
-
-	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
-}
-
-Drawing::Color TDLColor::LighterDrawing(Drawing::Color^ color, float amount)
-{
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
-
-	red = ((255 - red) * amount) + red;
-	green = ((255 - green) * amount) + green;
-	blue = ((255 - blue) * amount) + blue;
-
-	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
-}
-
-Drawing::Color TDLColor::DarkerDrawing(Drawing::Color^ color, float amount)
-{
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
-
-	red *= amount;
-	green *= amount;
-	blue *= amount;
-
-	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
-}
-
-Windows::Media::Color TDLColor::GetMediaColor(UInt32 rgbColor)
-{
-	System::Windows::Media::Color^ color = 
-      System::Windows::Media::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
-
-	return *color;
-}
-
-System::Drawing::Color TDLColor::GetDrawingColor(UInt32 rgbColor)
-{
-	System::Drawing::Color^ color = 
-		System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
-
-	return *color;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-TDLTheme::TDLTheme() : m_pTheme(nullptr)
-{
-	m_pTheme = new UITHEME;
-	ZeroMemory(m_pTheme, sizeof(UITHEME));
-}
-
-TDLTheme::TDLTheme(const UITHEME* pTheme)
-{
-	m_pTheme = new UITHEME;
-	ZeroMemory(m_pTheme, sizeof(UITHEME));
-
-	if (pTheme)
-		*m_pTheme = *pTheme;
-}
-
-TDLTheme::RenderStyle TDLTheme::GetRenderStyle()
-{
-	switch (m_pTheme->nRenderStyle)
-	{
-	case UIRS_GRADIENT:				return TDLTheme::RenderStyle::Gradient;
-	case UIRS_GLASS:				return TDLTheme::RenderStyle::Glass;
-	case UIRS_GLASSWITHGRADIENT:	return TDLTheme::RenderStyle::GlassWithGradient;
-	}
-
-	return TDLTheme::RenderStyle::Gradient;
-}
-
-Windows::Media::Color TDLTheme::GetAppMediaColor(AppColor color)
-{
-	return TDLColor::GetMediaColor(GetColor(color));
-}
-
-System::Drawing::Color TDLTheme::GetAppDrawingColor(AppColor color)
-{
-	return TDLColor::GetDrawingColor(GetColor(color));
-}
-
-String^ TDLTheme::GetToolBarImagePath()
-{
-	return gcnew String(m_pTheme->szToolbarImage);
-}
-
-Windows::Media::Color TDLTheme::GetToolbarTransparencyMediaColor()
-{
-	return TDLColor::GetMediaColor(m_pTheme->crToolbarTransparency);
-}
-
-Drawing::Color TDLTheme::GetToolbarTransparencyDrawingColor()
-{
-	return TDLColor::GetDrawingColor(m_pTheme->crToolbarTransparency);
-}
-
-UInt32 TDLTheme::GetColor(AppColor color)
-{
-	switch (color)
-	{
-	case TDLTheme::AppColor::AppBackDark:		return m_pTheme->crAppBackDark;
-	case TDLTheme::AppColor::AppBackLight:		return m_pTheme->crAppBackLight;
-	case TDLTheme::AppColor::AppLinesDark:		return m_pTheme->crAppLinesDark;
-	case TDLTheme::AppColor::AppLinesLight:		return m_pTheme->crAppLinesLight;
-	case TDLTheme::AppColor::AppText:			return m_pTheme->crAppText;
-	case TDLTheme::AppColor::MenuBack:			return m_pTheme->crMenuBack;
-	case TDLTheme::AppColor::ToolbarDark:		return m_pTheme->crToolbarDark;
-	case TDLTheme::AppColor::ToolbarLight:		return m_pTheme->crToolbarLight;
-	case TDLTheme::AppColor::StatusBarDark:		return m_pTheme->crStatusBarDark;
-	case TDLTheme::AppColor::StatusBarLight:	return m_pTheme->crStatusBarLight;
-	case TDLTheme::AppColor::StatusBarText:		return m_pTheme->crStatusBarText;
-	}
-
-	return 0; // black
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 TDLUIExtension::TaskAttribute TDLUIExtension::Map(IUI_ATTRIBUTE attrib)
 {
 	switch (attrib)
@@ -299,18 +155,18 @@ IUI_HITTEST TDLUIExtension::Map(TDLUIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
+TDLUIExtension::TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 }
 
-TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
+TDLUIExtension::TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime date)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.tValue = static_cast<__int64>(TDLTask::Map(date));
@@ -318,7 +174,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, DateTime dat
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.dValue = value;
@@ -326,7 +182,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double value
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time, TDLTask::TimeUnits units)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 
@@ -336,7 +192,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, double time,
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.nValue = value;
@@ -344,7 +200,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, int value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.bValue = (value ? TRUE : FALSE);
@@ -352,7 +208,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, bool value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
+bool TDLUIExtension::TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
 {
 	IUITASKMOD mod = { IUI_CUSTOMATTRIB, 0 };
 
@@ -362,7 +218,7 @@ bool TDLNotify::NotifyMod(String^ sCustAttribID, String^ value)
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ value)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	mod.szValue = MS(value);
@@ -370,7 +226,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, String^ valu
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
+bool TDLUIExtension::TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
 {
 	IUITASKMOD mod = { TDLUIExtension::Map(nAttribute), 0 };
 	//mod.szValue = MS(value);
@@ -378,7 +234,7 @@ bool TDLNotify::NotifyMod(TDLUIExtension::TaskAttribute nAttribute, cli::array<S
 	return DoNotify(&mod, 1);
 }
 
-bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
+bool TDLUIExtension::TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -387,7 +243,7 @@ bool TDLNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 	return true;
 }
 
-bool TDLNotify::NotifySelChange(UInt32 taskID)
+bool TDLUIExtension::TDLNotify::NotifySelChange(UInt32 taskID)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -396,7 +252,7 @@ bool TDLNotify::NotifySelChange(UInt32 taskID)
 	return true;
 }
 
-bool TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
+bool TDLUIExtension::TDLNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 {
 	if (!IsWindow(m_hwndParent) || !pdwTaskIDs->Length)
 		return false;

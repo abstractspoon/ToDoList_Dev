@@ -51,12 +51,12 @@ public:
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    int GetContent(unsigned char* pContent) const;
-   bool SetContent(const unsigned char* pContent, int nLength, BOOL bResetSelection);
+   bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
    LPCWSTR GetTypeID() const;
 
    // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
-   bool SetTextContent(LPCWSTR szContent, BOOL bResetSelection);
+   bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
 
    void SetReadOnly(bool bReadOnly);
    HWND GetHwnd() const;
