@@ -39,6 +39,11 @@ namespace MarkdownEditor
             set { inputTextBox.Text = value; }
         }
 
+        public string OutputText
+        {
+            get { return ""; }
+        }
+
         private void inputTextBox_TextChanged(object sender, EventArgs e)
         {
             Debug.Assert(markdown != null);

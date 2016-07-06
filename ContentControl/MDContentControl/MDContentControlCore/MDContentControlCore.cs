@@ -18,6 +18,7 @@ namespace MDContentControl
             InitializeComponent();
 
             inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
+            inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
@@ -36,7 +37,7 @@ namespace MDContentControl
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return InputText;
+            return OutputText;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
@@ -118,7 +119,7 @@ namespace MDContentControl
 
             this.RemoveClientEdge();
         }
-
+        
         protected void RemoveClientEdge()
         {
             // remove client edge
@@ -150,7 +151,14 @@ namespace MDContentControl
         {
             TDLContentControl.TDLNotify notify = new TDLContentControl.TDLNotify(m_hwndParent);
 
-            notify.NotifyMod();
+            notify.NotifyChange();
+        }
+
+        private void OnInputTextLostFocus(object sender, EventArgs e)
+        {
+            TDLContentControl.TDLNotify notify = new TDLContentControl.TDLNotify(m_hwndParent);
+
+            notify.NotifyKillFocus();
         }
 
     }

@@ -25,11 +25,20 @@ TDLContentControl::TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool TDLContentControl::TDLNotify::NotifyMod()
+bool TDLContentControl::TDLNotify::NotifyChange()
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_ICC_COMMENTSCHANGE, 0, 0);
+	::SendMessage(m_hwndParent, WM_ICC_COMMENTSCHANGE, 0, (LPARAM)m_hwndFrom);
+	return true;
+}
+
+bool TDLContentControl::TDLNotify::NotifyKillFocus()
+{
+	if (!IsWindow(m_hwndParent))
+		return false;
+
+	::SendMessage(m_hwndParent, WM_ICC_COMMENTSKILLFOCUS, 0, (LPARAM)m_hwndFrom);
 	return true;
 }

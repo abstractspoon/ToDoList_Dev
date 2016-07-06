@@ -15,13 +15,15 @@ namespace TDLPluginHelpers
 {
 	public ref class TDLContentControl
 	{
+	public:
 		ref class TDLNotify
 		{
 		public:
 			TDLNotify(IntPtr hwndParent);
 			TDLNotify(IntPtr hwndParent, IntPtr hwndFrom);
 
-			bool NotifyMod();
+			bool NotifyChange();
+			bool NotifyKillFocus();
 
 		private:
 			HWND m_hwndParent;
