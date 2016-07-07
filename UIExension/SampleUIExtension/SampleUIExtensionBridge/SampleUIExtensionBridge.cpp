@@ -60,26 +60,26 @@ LPCTSTR CSampleUIExtensionBridge::GetMenuText() const
 
 HICON CSampleUIExtensionBridge::GetIcon() const
 {
-   return NULL;
+	return NULL;
 }
 
 LPCWSTR CSampleUIExtensionBridge::GetTypeID() const
 {
-   return SAMPLE_GUID;
+	return SAMPLE_GUID;
 }
 
 IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
-    DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   CSampleUIExtensionBridgeWindow* pExtWnd = new CSampleUIExtensionBridgeWindow;
+	CSampleUIExtensionBridgeWindow* pExtWnd = new CSampleUIExtensionBridgeWindow;
 
-   if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
-   {
-      pExtWnd->Release();
-      pExtWnd = NULL;
-   }
+	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
+	{
+		pExtWnd->Release();
+		pExtWnd = NULL;
+	}
 
-   return pExtWnd;
+	return pExtWnd;
 }
 
 void CSampleUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
@@ -101,37 +101,38 @@ CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
 
 void CSampleUIExtensionBridgeWindow::Release()
 {
-   delete this;
+	::DestroyWindow(GetHwnd());
+	delete this;
 }
 
 BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
-            long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-   m_source = gcnew System::Windows::Interop::HwndSource(
-      CS_VREDRAW | CS_HREDRAW,
-      nStyle,
-      0,
-      nLeft,
-      nTop,
-      nWidth,
-      nHeight,
-      "",
-      System::IntPtr(hwndParent));
+	m_source = gcnew System::Windows::Interop::HwndSource(
+		CS_VREDRAW | CS_HREDRAW,
+		nStyle,
+		0,
+		nLeft,
+		nTop,
+		nWidth,
+		nHeight,
+		"",
+		System::IntPtr(hwndParent));
 
-   if (m_source->Handle != IntPtr::Zero)
-   {
-      m_wnd = gcnew SampleUIExtension::SampleUIExtensionCore();
-      m_source->RootVisual = m_wnd;
+	if (m_source->Handle != IntPtr::Zero)
+	{
+		m_wnd = gcnew SampleUIExtension::SampleUIExtensionCore();
+		m_source->RootVisual = m_wnd;
 
-      return true;
-   }
+		return true;
+	}
 
-   return false;
+	return false;
 }
 
 HICON CSampleUIExtensionBridgeWindow::GetIcon() const
 {
-   return NULL;
+	return NULL;
 }
 
 LPCWSTR CSampleUIExtensionBridgeWindow::GetMenuText() const
@@ -141,12 +142,12 @@ LPCWSTR CSampleUIExtensionBridgeWindow::GetMenuText() const
 
 LPCWSTR CSampleUIExtensionBridgeWindow::GetTypeID() const
 {
-   return SAMPLE_GUID;
+	return SAMPLE_GUID;
 }
 
 bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
 {
-   return m_wnd->SelectTask(dwTaskID);
+	return m_wnd->SelectTask(dwTaskID);
 }
 
 bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
@@ -156,13 +157,13 @@ bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCou
 	for (int i = 0; i < nTaskCount; i++)
 		taskIDs[i] = pdwTaskIDs[i];
 
-    return m_wnd->SelectTasks(taskIDs);
+	return m_wnd->SelectTasks(taskIDs);
 }
 
 void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	msclr::auto_gcroot<TDLTaskList^> tasks = gcnew TDLTaskList(pTasks);
-	
+
 	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(pAttributes, nNumAttributes));
 }
 
@@ -186,12 +187,12 @@ bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
-								 pMsg->message, 
-								 pMsg->wParam, 
-								 pMsg->lParam, 
-								 pMsg->time, 
-								 pMsg->pt.x,
-								 pMsg->pt.y);
+										pMsg->message, 
+										pMsg->wParam, 
+										pMsg->lParam, 
+										pMsg->time, 
+										pMsg->pt.x,
+										pMsg->pt.y);
 }
 
 bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
@@ -218,7 +219,7 @@ void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<TDLTheme^> theme = gcnew TDLTheme(pTheme);
 
-    m_wnd->SetUITheme(theme.get());
+	m_wnd->SetUITheme(theme.get());
 }
 
 void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
@@ -228,7 +229,7 @@ void CSampleUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CSampleUIExtensionBridgeWindow::GetHwnd() const
 {
-   return static_cast<HWND>(m_source->Handle.ToPointer());
+	return static_cast<HWND>(m_source->Handle.ToPointer());
 }
 
 void CSampleUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

@@ -117,18 +117,32 @@ namespace MDContentControl
         {
             base.OnResize(e);
 
-            this.RemoveClientEdge();
+            this.RemoveClientEdge(Handle);
         }
-        
-        protected void RemoveClientEdge()
+
+        protected void RemoveClientEdge(IntPtr hWnd)
         {
             // remove client edge
-            int nExStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
+            int nExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 
             if ((nExStyle & WS_EX_CLIENTEDGE) == WS_EX_CLIENTEDGE)
             {
-                SetWindowLong(this.Handle, GWL_EXSTYLE, (nExStyle & ~WS_EX_CLIENTEDGE));
-                SetWindowPos(this.Handle, IntPtr.Zero, 0, 0, 0, 0,
+                SetWindowLong(hWnd, GWL_EXSTYLE, (nExStyle & ~WS_EX_CLIENTEDGE));
+                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0,
+                                        SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                                        SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+            }
+        }
+
+        protected void AddClientEdge(IntPtr hWnd)
+        {
+            // remove client edge
+            int nExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+
+            if ((nExStyle & WS_EX_CLIENTEDGE) == 0)
+            {
+                SetWindowLong(hWnd, GWL_EXSTYLE, (nExStyle | WS_EX_CLIENTEDGE));
+                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0,
                                         SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
                                         SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
             }

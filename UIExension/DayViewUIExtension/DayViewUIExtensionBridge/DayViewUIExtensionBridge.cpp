@@ -106,6 +106,7 @@ CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow()
 
 void CDayViewUIExtensionBridgeWindow::Release()
 {
+	::DestroyWindow(GetHwnd());
 	delete this;
 }
 

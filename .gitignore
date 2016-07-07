@@ -53,3 +53,5 @@ Release\*.*
 *.zip
 *.tdl
 *.force
+*.aps
+*.bak

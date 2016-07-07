@@ -110,7 +110,8 @@ CStatsUIExtensionBridgeWindow::CStatsUIExtensionBridgeWindow()
 
 void CStatsUIExtensionBridgeWindow::Release()
 {
-   delete this;
+	::DestroyWindow(GetHwnd());
+	delete this;
 }
 
 BOOL CStatsUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 

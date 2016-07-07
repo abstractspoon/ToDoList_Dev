@@ -45,7 +45,7 @@
 //             this.outputTabControl = new System.Windows.Forms.TabControl();
 //             this.htmlOutputTabPage = new System.Windows.Forms.TabPage();
 //             this.rawOutputTabPage = new System.Windows.Forms.TabPage();
-            this.outputRichTextBox = new System.Windows.Forms.RichTextBox();
+//            this.outputRichTextBox = new System.Windows.Forms.RichTextBox();
 
 			((System.ComponentModel.ISupportInitialize)(this.mainSplitContainer)).BeginInit();
 			this.mainSplitContainer.Panel1.SuspendLayout();
@@ -164,8 +164,8 @@
 //             this.outputRichTextBox.ReadOnly = true;
 //             this.outputRichTextBox.Size = new System.Drawing.Size(598, 260);
 //             this.outputRichTextBox.TabIndex = 0;
-            this.outputRichTextBox.Text = "";
-            this.outputRichTextBox.Visible = false;
+//            this.outputRichTextBox.Text = "";
+//            this.outputRichTextBox.Visible = false;
 			// 
 			// MarkdownSharpEditorForm
 			// 
@@ -194,7 +194,7 @@
 		private System.Windows.Forms.Label browserLabel;
 		protected System.Windows.Forms.TextBox inputTextBox;
 
-        private System.Windows.Forms.RichTextBox outputRichTextBox;
+//        private System.Windows.Forms.RichTextBox outputRichTextBox;
 //        private System.Windows.Forms.TabControl outputTabControl;
 //        private System.Windows.Forms.TabPage htmlOutputTabPage;
 //        private System.Windows.Forms.TabPage rawOutputTabPage;

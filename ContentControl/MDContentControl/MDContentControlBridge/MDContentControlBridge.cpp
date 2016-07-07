@@ -201,6 +201,7 @@ HWND CMDContentBridgeControl::GetHwnd() const
 
 void CMDContentBridgeControl::Release()
 {
+	::DestroyWindow(GetHwnd());
 	delete this;
 }
 
