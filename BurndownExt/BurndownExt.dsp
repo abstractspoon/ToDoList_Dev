@@ -58,7 +58,7 @@ LINK32=link.exe
 # SUBTRACT LINK32 /incremental:no
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\statisticsext.dll ..\todolist\unicode_debug /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\Burndownext.dll ..\todolist\unicode_debug /y
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "BurndownExt - Win32 Unicode Release"
@@ -90,7 +90,7 @@ LINK32=link.exe
 # ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\BurndownExt.dll ..\todolist\unicode_release /y
 # End Special Build Tool
 
 !ENDIF 
@@ -130,15 +130,15 @@ SOURCE=.\StdAfx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\Resource.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\BurndownExt.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\BurndownWnd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
@@ -150,11 +150,11 @@ SOURCE=.\StdAfx.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\res\icon1.ico
+SOURCE=.\res\BurndownExt.rc2
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\BurndownExt.rc2
+SOURCE=.\res\icon1.ico
 # End Source File
 # End Group
 # Begin Source File
