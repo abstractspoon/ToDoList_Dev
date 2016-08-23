@@ -8,10 +8,13 @@
 *.sln.docstates
 *.orig
 
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
 # Build results
+Unicode_Debug/
+Unicode_Release/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
