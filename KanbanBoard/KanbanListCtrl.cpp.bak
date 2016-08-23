@@ -1,0 +1,409 @@
+// KanbanListCtrl.cpp : implementation file
+//
+
+#include "stdafx.h"
+#include "resource.h"
+#include "KanbanListCtrl.h"
+
+#include "..\shared\graphicsMisc.h"
+#include "..\shared\enstring.h"
+#include "..\shared\misc.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef LVS_EX_DOUBLEBUFFER
+#	define LVS_EX_DOUBLEBUFFER (0x00010000)
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+CKanbanListCtrlArray::~CKanbanListCtrlArray()
+{
+	RemoveAll();
+}
+
+void CKanbanListCtrlArray::RemoveAll()
+{
+	int nList = GetSize();
+	
+	while (nList--)
+		delete GetAt(nList);
+	
+	CArray<CKanbanListCtrl*, CKanbanListCtrl*&>::RemoveAll();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CKanbanListCtrl
+
+CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN& columnDef,
+								 CFontCache& fonts, DWORD dwDisplay)
+	:
+	m_data(data),
+	m_columnDef(columnDef),
+	m_dwDisplay(dwDisplay),
+	m_fonts(fonts),
+	m_bStrikeThruDoneTasks(FALSE),
+	m_crDoneTasks(CLR_NONE)
+{
+}
+
+CKanbanListCtrl::~CKanbanListCtrl()
+{
+}
+
+
+BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
+	//{{AFX_MSG_MAP(CKanbanListCtrl)
+	ON_WM_CREATE()
+	//}}AFX_MSG_MAP
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnListCustomDraw)
+	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
+END_MESSAGE_MAP()
+
+/////////////////////////////////////////////////////////////////////////////
+// CKanbanListCtrl message handlers
+
+BOOL CKanbanListCtrl::Create(UINT nID, CWnd* pParentWnd, HIMAGELIST hilHeight)
+{
+	UINT nFlags = (WS_CHILD | WS_VISIBLE | WS_BORDER | LVS_REPORT | WS_TABSTOP);
+	nFlags |= (/*LVS_SINGLESEL | */LVS_SHOWSELALWAYS);
+
+	return CListCtrl::Create(nFlags, CRect(0, 0, 0, 0), pParentWnd, nID);
+}
+
+int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+{
+	if (CListCtrl::OnCreate(lpCreateStruct) == -1)
+		return -1;
+	
+	ListView_SetBkColor(*this, GraphicsMisc::Lighter(m_columnDef.crBackground, 0.8));
+ 
+	// the only column
+	InsertColumn(0, _T(""), LVCFMT_RIGHT, 100);
+	
+	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+
+	VERIFY(m_header.SubclassWindow(ListView_GetHeader(*this)));
+	m_header.EnableTracking(FALSE);
+	m_header.ModifyStyle(HDS_FULLDRAG | HDS_DRAGDROP, 0, 0);
+
+	RefreshColumnTitle();
+	
+	return 0;
+}
+
+int CKanbanListCtrl::AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect)
+{
+	int nNewItem = InsertItem(GetItemCount(), szTitle, -1);
+	ASSERT(nNewItem != -1);
+
+	if (nNewItem != -1)
+	{
+		SetItemData(nNewItem, dwTaskID);
+		
+		// select item and make visible
+		if (bSelect)
+		{
+			SetItemState(nNewItem, LVIS_SELECTED, LVIS_SELECTED);
+			EnsureVisible(nNewItem, FALSE);
+		}
+
+		RefreshColumnTitle();
+	}
+
+	return nNewItem;
+}
+
+void CKanbanListCtrl::SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru)
+{
+	m_crDoneTasks = color;
+	m_bStrikeThruDoneTasks = bStrikeThru;
+
+	Invalidate(FALSE);
+}
+
+CString CKanbanListCtrl::GetAttributeID() const 
+{ 
+	return m_columnDef.sAttribID; 
+}
+
+int CKanbanListCtrl::GetAttributeValues(CStringArray& aValues) const 
+{ 
+	aValues.Copy(m_columnDef.aAttribValues); 
+	return aValues.GetSize();
+}
+
+CString CKanbanListCtrl::GetAttributeValue() const
+{
+	return Misc::FormatArray(m_columnDef.aAttribValues);
+}
+
+BOOL CKanbanListCtrl::HasMultipleValues() const
+{
+	return (m_columnDef.aAttribValues.GetSize() > 1);
+}
+
+BOOL CKanbanListCtrl::HasAnyValues() const
+{
+	return (m_columnDef.aAttribValues.GetSize() > 0);
+}
+
+void CKanbanListCtrl::SetDisplay(DWORD dwDisplay)
+{
+	if (dwDisplay != m_dwDisplay)
+	{
+		m_dwDisplay = dwDisplay;
+		Invalidate();
+	}
+}
+
+void CKanbanListCtrl::RefreshColumnTitle()
+{
+	CEnString sTitle(m_columnDef.sTitle);
+
+	if (sTitle.IsEmpty())
+		sTitle.LoadString(IDS_BACKLOG);
+
+	CString sFormat;
+	sFormat.Format(CEnString(IDS_COLUMNTITLE_FMT), sTitle, GetItemCount());
+
+	m_header.SetItemText(0, sFormat);
+}
+
+void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+	*pResult = CDRF_DODEFAULT;
+	
+	switch (pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+		
+	case CDDS_ITEMPREPAINT:
+		{
+			const KANBANITEM* pKI = GetKanbanItem(pLVCD->nmcd.lItemlParam);
+			ASSERT(pKI);
+			
+			if (pKI)
+			{
+				int nItem = (int)pLVCD->nmcd.dwItemSpec;
+				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+		
+				// draw backgound
+				CRect rItem(pLVCD->nmcd.rc);
+				rItem.DeflateRect(1, 1);
+				
+				BOOL bSelected = (GetItemState(nItem, LVIS_SELECTED) == LVIS_SELECTED);
+				BOOL bFocused = (bSelected && (::GetFocus() == pNMHDR->hwndFrom));
+				
+				if (bFocused)
+				{
+					GraphicsMisc::DrawExplorerItemBkgnd(pDC, pNMHDR->hwndFrom, GMIS_SELECTED, rItem);
+				}
+				else if (bSelected)
+				{
+					GraphicsMisc::DrawExplorerItemBkgnd(pDC, pNMHDR->hwndFrom, GMIS_SELECTEDNOTFOCUSED, rItem);
+				}
+				else
+				{
+					if ((pKI->crText != CLR_NONE) && (pKI->crText != 0))
+						GraphicsMisc::DrawRect(pDC, rItem, GraphicsMisc::Lighter(pKI->crText, 0.9), pKI->crText);
+					else
+						GraphicsMisc::DrawRect(pDC, rItem, GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOWTEXT));
+				}
+				
+				// draw text
+				pDC->SetBkMode(TRANSPARENT);
+				
+				// first line is the task title
+				CRect rLine(rItem);
+				rLine.DeflateRect(4, 2);
+								
+				if (pKI->crText != CLR_NONE)
+					pDC->SetTextColor(pKI->crText);
+				else
+					pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+
+				pDC->DrawText(pKI->sTitle, rLine, DT_LEFT | DT_END_ELLIPSIS);
+				
+				// second line is parent path
+				if (!pKI->sPath.IsEmpty())
+				{
+					rLine.top = rItem.CenterPoint().y;
+					
+					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+					pDC->DrawText(pKI->sPath, rLine, DT_LEFT | DT_END_ELLIPSIS);
+				}
+			}
+			
+			*pResult |= CDRF_SKIPDEFAULT;
+		}
+	}
+}
+
+void CKanbanListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
+	*pResult = CDRF_DODEFAULT;
+
+	HWND hwndHdr = pNMCD->hdr.hwndFrom;
+	ASSERT(hwndHdr == m_header);
+	
+	switch (pNMCD->dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		// Handle RTL text column headers
+		if (GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING)
+			*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+		
+	case CDDS_ITEMPREPAINT:
+		ASSERT(GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING);
+		*pResult = CDRF_NOTIFYPOSTPAINT;
+		break;
+		
+	case CDDS_ITEMPOSTPAINT:
+		{
+			HDITEM hdi = { 0 };
+			hdi.mask = HDI_FORMAT;
+			
+			m_header.GetItem(0, &hdi);
+
+			ASSERT(GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING);
+
+			CRect rItem(pNMCD->rc);
+			rItem.DeflateRect(3, 0);
+
+			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+			
+			UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(hwndHdr));
+			
+			pDC->SetBkMode(TRANSPARENT);
+			pDC->DrawText(m_columnDef.sTitle, rItem, nFlags);
+			
+			*pResult = CDRF_SKIPDEFAULT;
+		}
+		break;
+	}
+}
+
+int CKanbanListCtrl::GetSelectedTasks(CDWordArray& aItemIDs) const
+{
+	aItemIDs.RemoveAll();
+	POSITION pos = GetFirstSelectedItemPosition();
+	
+	while (pos)
+		aItemIDs.Add(GetItemData(GetNextSelectedItem(pos)));
+
+	return aItemIDs.GetSize();
+}
+
+void CKanbanListCtrl::ScrollToSelection()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+
+	if (pos)
+		EnsureVisible(GetNextSelectedItem(pos), FALSE);
+}
+
+BOOL CKanbanListCtrl::SelectItem(int nItem, BOOL bFocus)
+{
+	UINT nMask = (LVIS_SELECTED | (bFocus ? LVIS_FOCUSED : 0));
+
+	if (nItem == -1)
+		return SetItemState(-1, 0, nMask); // deselect all
+	
+	// else
+	return SetItemState(nItem, nMask, nMask);
+}
+
+BOOL CKanbanListCtrl::SelectTask(DWORD dwTaskID)
+{
+	int nItem = FindTask(dwTaskID);
+
+	if (nItem != -1)
+	{
+		SelectItem(nItem, TRUE);
+		return TRUE;
+	}
+
+	// not found
+	return FALSE;
+}
+
+BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	// make sure we have all the items first
+	CArray<int, int> aItems;
+
+	int nID = aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		int nItem = FindTask(aTaskIDs[nID]);
+
+		if (nItem == -1)
+			return FALSE;
+
+		aItems.Add(nItem);
+	}
+
+	// deselect all and reselect
+	SelectItem(-1);
+
+	if (aItems.GetSize())
+	{
+		nID = aItems.GetSize();
+
+		// set the first item to be focused
+		while (nID--)
+			SelectItem(aItems[nID], (nID == 0));
+	}
+	
+	return TRUE;
+}
+
+const KANBANITEM* CKanbanListCtrl::GetKanbanItem(DWORD dwTaskID) const
+{
+	ASSERT(dwTaskID);
+	
+	KANBANITEM* pKI = NULL;
+	
+	if (dwTaskID && m_data.Lookup(dwTaskID, pKI))
+	{
+		ASSERT(pKI);
+	}
+	
+	return pKI;
+}
+
+int CKanbanListCtrl::FindTask(DWORD dwTaskID) const
+{
+	LVFINDINFO lvfi = { 0 };
+	
+	lvfi.flags = LVFI_PARAM;
+	lvfi.lParam = dwTaskID;
+	
+	return CListCtrl::FindItem(&lvfi);
+}
+
+int CKanbanListCtrl::FindTask(const CPoint& ptScreen) const
+{
+	LVFINDINFO lvfi = { 0 };
+	
+	lvfi.flags = LVFI_NEARESTXY;
+	lvfi.pt = ptScreen;
+
+	ScreenToClient(&lvfi.pt);
+	
+	return CListCtrl::FindItem(&lvfi);
+}

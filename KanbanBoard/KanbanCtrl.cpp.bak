@@ -1,0 +1,1270 @@
+// KanbanTreeList.cpp: implementation of the CKanbanTreeList class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "resource.h"
+#include "KanbanCtrl.h"
+#include "KanbanColors.h"
+#include "Kanbanlistctrl.h"
+
+#include "..\todolist\tdcenum.h"
+#include "..\todolist\tdlschemadef.h"
+
+#include "..\shared\DialogHelper.h"
+//#include "..\shared\DateHelper.h"
+#include "..\shared\holdredraw.h"
+#include "..\shared\graphicsMisc.h"
+#include "..\shared\autoflag.h"
+#include "..\shared\misc.h"
+#include "..\shared\enstring.h"
+#include "..\shared\localizer.h"
+#include "..\shared\themed.h"
+
+#include "..\Interfaces\iuiextension.h"
+
+#include <float.h> // for DBL_MAX
+#include <math.h>  // for fabs()
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
+#ifndef GET_WHEEL_DELTA_WPARAM
+#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
+#endif 
+
+#ifndef CDRF_SKIPPOSTPAINT
+#	define CDRF_SKIPPOSTPAINT	(0x00000100)
+#endif
+
+const UINT IDC_LISTCTRL = 101;
+
+//////////////////////////////////////////////////////////////////////
+
+#define GET_KI_RET(id, ki, ret)	\
+{								\
+	if (id == 0) return ret;	\
+	ki = GetKanbanItem(id);		\
+	ASSERT(ki);					\
+	if (ki == NULL) return ret;	\
+}
+
+#define GET_KI(id, ki)		\
+{							\
+	if (id == 0) return;	\
+	ki = GetKanbanItem(id);	\
+	ASSERT(ki);				\
+	if (ki == NULL)	return;	\
+}
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CKanbanCtrl::CKanbanCtrl() 
+	:
+	m_bSortAscending(-1), 
+	m_dwOptions(0),
+	m_bDragging(FALSE),
+	m_bReadOnly(FALSE),
+	m_nNextColor(0),
+	m_pDragFromList(NULL),
+	m_pSelectedList(NULL)
+{
+
+}
+
+CKanbanCtrl::~CKanbanCtrl()
+{
+}
+
+BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
+//{{AFX_MSG_MAP(CKanbanCtrl)
+//}}AFX_MSG_MAP
+ON_WM_SIZE()
+ON_WM_ERASEBKGND()
+ON_WM_CREATE()
+ON_WM_MOUSEMOVE()
+ON_WM_LBUTTONUP()
+ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
+ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
+ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
+ON_NOTIFY(NM_CLICK, IDC_LISTCTRL, OnListClick)
+ON_WM_SETFOCUS()
+END_MESSAGE_MAP()
+
+//////////////////////////////////////////////////////////////////////
+
+BOOL CKanbanCtrl::Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID)
+{
+	return CWnd::Create(NULL, NULL, dwStyle, rect, pParentWnd, nID);
+}
+
+int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CWnd::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
+	m_ilHeight.Create(1, 32, ILC_COLOR32, 1, 0);
+
+	return 0;
+}
+
+int CKanbanCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	const CKanbanListCtrl* pList = GetSelListCtrl();
+
+	if (pList)
+		return pList->GetSelectedTasks(aTaskIDs);
+
+	// else
+	aTaskIDs.RemoveAll();
+	return 0;
+}
+
+CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl()
+{
+	ASSERT((m_pSelectedList == NULL) || (Misc::FindT(m_aListCtrls, m_pSelectedList) != -1));
+
+	if (m_pSelectedList)
+	{
+		return m_pSelectedList;
+	}
+	else if (m_aListCtrls.GetSize())
+	{
+		return m_aListCtrls[0];
+	}
+
+	// else
+	return NULL;
+}
+
+const CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl() const
+{
+	return const_cast<CKanbanCtrl*>(this)->GetSelListCtrl();
+}
+
+BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	if (aTaskIDs.GetSize() == 0)
+	{
+		ClearOtherListSelections(NULL);
+		return FALSE;
+	}
+
+	// find the list containing the first item and then
+	// check that all the other items belong to the same list
+	int nItem = -1;
+	CKanbanListCtrl* pList = LocateTask(aTaskIDs[0], nItem);
+
+	if (pList && (nItem != -1))
+	{
+		if (!pList->SelectTasks(aTaskIDs))
+			pList = NULL;
+	}
+	
+	ClearOtherListSelections(pList);
+
+	if (pList)
+	{
+		m_pSelectedList = pList;
+		pList->SetFocus();
+		TRACE(_T("CKanbanCtrl::SetFocus(SelectTasks: %s)\n"), pList->GetAttributeValue());
+	}
+	
+	return (pList != NULL);
+}
+
+BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
+{
+	int nItem = -1;
+	CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem);
+
+	if (pList && (nItem != -1))
+	{
+		CDWordArray aItemIDs;
+		aItemIDs.Add(dwTaskID);
+
+		m_pSelectedList = pList;
+		pList->SelectTasks(aItemIDs);
+		pList->SetFocus();
+		TRACE(_T("CKanbanCtrl::SetFocus(SelectTask: %s)\n"), pList->GetAttributeValue());
+
+		ScrollToSelectedTask();
+	}
+	
+	ClearOtherListSelections(pList);
+
+	return (pList != NULL);
+}
+
+void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute)
+{
+	ASSERT(GetSafeHwnd());
+
+	// always cancel any ongoing operation
+	CancelOperation();
+
+	const ITaskList12* pTasks12 = GetITLInterface<ITaskList12>(pTasks, IID_TASKLIST12);
+	BOOL bResort = FALSE;
+	
+	switch (nUpdate)
+	{
+	case IUI_ALL:
+		{
+ 			CDWordArray aSelIDs;
+			GetSelectedTaskIDs(aSelIDs);
+
+ 			RebuildData(pTasks12);
+ 			RebuildListCtrls();
+
+			SelectTasks(aSelIDs);
+
+			if (aSelIDs.GetSize())
+ 				ScrollToSelectedTask();
+		}
+		break;
+		
+	case IUI_EDIT:
+		{
+ 			// update the task(s)
+ 			if (UpdateData(pTasks12, pTasks12->GetFirstTask(), nUpdate, nEditAttribute, TRUE))
+ 			{
+				RebuildListCtrls();
+ 			}
+		}
+		break;
+		
+	case IUI_DELETE:
+		{
+ 			RemoveDeletedTasks(pTasks12);
+		}
+		break;
+		
+	case IUI_ADD:
+	case IUI_MOVE:
+		ASSERT(0);
+		break;
+		
+	default:
+		ASSERT(0);
+	}
+}
+
+CString CKanbanCtrl::GetTaskAllocTo(const ITaskList12* pTasks, HTASKITEM hTask)
+{
+	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
+	
+	if (nAllocTo == 0)
+	{
+		return _T("");
+	}
+	else if (nAllocTo == 1)
+	{
+		return pTasks->GetTaskAllocatedTo(hTask, 0);
+	}
+	
+	// nAllocTo > 1 
+	CStringArray aAllocTo;
+	
+	while (nAllocTo--)
+		aAllocTo.InsertAt(0, pTasks->GetTaskAllocatedTo(hTask, nAllocTo));
+	
+	return Misc::FormatArray(aAllocTo);
+}
+
+BOOL CKanbanCtrl::WantAttributeUpdate(IUI_ATTRIBUTEEDIT nEditAttrib)
+{
+	switch (nEditAttrib)
+	{
+	case IUI_TASKNAME:
+	case IUI_STATUS:
+	case IUI_COLOR:
+	case IUI_CUSTOMATTRIB:
+	case IUI_ALLOCTO:
+		//  case IUI_CATEGORY:
+		//  case IUI_DONEDATE:
+		// 	case IUI_DUEDATE:
+		// 	case IUI_STARTDATE:
+		// 	case IUI_ALLOCTO:
+		// 	case IUI_TAGS:
+		// 	case IUI_PERCENT:
+		// 	case IUI_TIMEEST:
+		// 	case IUI_TIMESPENT:
+		return TRUE;
+	}
+	
+	// all else 
+	return (nEditAttrib == IUI_ALL);
+}
+
+BOOL CKanbanCtrl::WantAttributeUpdate(int nEditAttrib, int nAttribMask)
+{
+	return ((nEditAttrib == IUI_ALL) || (nEditAttrib == nAttribMask));
+}
+
+BOOL CKanbanCtrl::RebuildData(const ITaskList12* pTasks)
+{
+	m_data.RemoveAll();
+
+	return AddTaskToData(pTasks, pTasks->GetFirstTask());
+}
+
+BOOL CKanbanCtrl::AddTaskToData(const ITaskList12* pTasks, HTASKITEM hTask)
+{
+	if (!hTask)
+		return FALSE;
+
+	KANBANITEM* pKI = m_data.NewItem(pTasks->GetTaskID(hTask), 
+									pTasks->GetTaskTitle(hTask));
+	ASSERT(pKI);
+	
+	if (!pKI)
+		return FALSE;
+
+	pKI->crText = pTasks->GetTaskTextColor(hTask);
+	pKI->sPath = pTasks->GetTaskAttribute(hTask, TDL_TASKPATH);
+	pKI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
+
+	// tracked attribute
+	pKI->SetAttributeValue(_T("STATUS"), pTasks->GetTaskStatus(hTask));
+	// TODO
+
+	// custom attributes
+	int nCust = pTasks->GetCustomAttributeCount();
+
+	while (nCust--)
+	{
+		CString sCustID = pTasks->GetCustomAttributeID(nCust);
+		pKI->SetAttributeValue(sCustID, pTasks->GetTaskCustomAttributeData(hTask, sCustID));
+	}
+
+	// first child
+	AddTaskToData(pTasks, pTasks->GetFirstTask(hTask));
+
+	// first sibling
+	AddTaskToData(pTasks, pTasks->GetNextTask(hTask));
+
+	return TRUE;
+}
+
+BOOL CKanbanCtrl::UpdateData(const ITaskList12* pTasks, HTASKITEM hTask, 
+							IUI_UPDATETYPE nUpdate, IUI_ATTRIBUTEEDIT nEditAttribute, BOOL bAndSiblings)
+{
+	if (hTask == NULL)
+		return FALSE;
+
+	ASSERT(nUpdate == IUI_EDIT);
+
+	// handle task if not NULL (== root)
+	BOOL bChange = FALSE, bRedraw = FALSE;
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+
+	if (dwTaskID)
+	{
+		KANBANITEM* pKI = NULL;
+		GET_KI_RET(dwTaskID, pKI, FALSE);
+
+		// can't use a switch here because we also need to check for TDCA_ALL
+		if (WantAttributeUpdate(nEditAttribute, IUI_TASKNAME))
+		{
+			CString sNewTitle = pTasks->GetTaskTitle(hTask);
+
+			if (pKI->sTitle != sNewTitle)
+			{
+				pKI->sTitle = sNewTitle;
+				bRedraw = TRUE;
+			}
+		}
+		
+		if (WantAttributeUpdate(nEditAttribute, IUI_ALLOCTO))
+		{
+			CString sNewAllocTo = GetTaskAllocTo(pTasks, hTask);
+			
+			if (pKI->sAllocTo != sNewAllocTo)
+			{
+				pKI->sAllocTo = sNewAllocTo;
+				bRedraw = TRUE;
+			}
+		}
+		
+		if (WantAttributeUpdate(nEditAttribute, IUI_STATUS))
+		{
+			CString sNewStatus = pTasks->GetTaskStatus(hTask);
+
+			if (pKI->GetAttributeValue(_T("STATUS")).CompareNoCase(sNewStatus) != 0)
+			{
+				// remove from it's current list
+				int nCurItem = -1;
+				CKanbanListCtrl* pCurList = LocateTask(dwTaskID, nCurItem);
+
+				if (pCurList && (nCurItem != -1))
+				{
+					pCurList->DeleteItem(nCurItem);
+					bChange = (pCurList->GetItemCount() == 0);
+				}
+
+				// add at the head of it's new list
+				CKanbanListCtrl* pNewList = GetListCtrl(sNewStatus);
+				
+				if (pNewList)
+				{
+					int nNewItem = pNewList->InsertItem(0, pKI->sTitle, -1);
+					pNewList->SetItemData(nNewItem, dwTaskID);
+				}
+				else
+				{
+					bChange = TRUE; // needs new list ctrl
+				}
+
+				// update status
+				pKI->SetAttributeValue(_T("STATUS"), sNewStatus);
+			}
+		}
+			
+		// always update colour because it can change for
+		// so many reasons
+		COLORREF crTextColor = pTasks->GetTaskTextColor(hTask);
+
+		if (crTextColor != pKI->crText)
+		{
+			pKI->crText = crTextColor;
+			bRedraw = TRUE;
+		}
+		
+		if (!bChange && bRedraw)
+		{
+			CString sAttribValue = pKI->GetAttributeValue(m_sTrackAttribID);
+			CKanbanListCtrl* pList = GetListCtrl(sAttribValue);
+			
+			if (pList)
+				pList->Invalidate();
+		}
+	}
+		
+	// children
+	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), nUpdate, nEditAttribute, TRUE))
+		bChange = TRUE;
+
+	// handle siblings WITHOUT RECURSION
+	if (bAndSiblings)
+	{
+		HTASKITEM hSibling = pTasks->GetNextTask(hTask);
+		
+		while (hSibling)
+		{
+			// FALSE == not siblings
+			if (UpdateData(pTasks, hSibling, nUpdate, nEditAttribute, FALSE))
+				bChange = TRUE;
+			
+			hSibling = pTasks->GetNextTask(hSibling);
+		}
+	}
+	
+	return bChange;
+}
+
+
+void CKanbanCtrl::SetDisplay(DWORD dwDisplay)
+{
+	int nList = m_aListCtrls.GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+
+		pList->SetDisplay(dwDisplay);
+	}
+}
+
+void CKanbanCtrl::RebuildListCtrls()
+{
+	CKanbanItemArrayMap mapKIArray;
+	CStringArray aAttribVals;
+
+	int nNumVals = m_data.BuildTempItemArrays(m_sTrackAttribID, mapKIArray, aAttribVals);
+
+	if (m_aColumnDefs.GetSize() == 0) // dynamic columns
+	{
+		// remove any lists whose values are no longer used
+		CKanbanListCtrl* pList = NULL;
+		CString sStatus;
+		
+		int nList = m_aListCtrls.GetSize();
+		
+		while (nList--)
+		{
+			CKanbanListCtrl* pList = m_aListCtrls[nList];
+			ASSERT(pList && !pList->HasMultipleValues());
+
+			if (Misc::Find(aAttribVals, pList->GetAttributeValue(), FALSE, FALSE) == -1)
+			{
+				if (pList == m_pSelectedList)
+					m_pSelectedList = NULL;
+
+				pList->DestroyWindow();
+				delete pList;
+				
+				m_aListCtrls.RemoveAt(nList);
+			}
+		}
+
+		// And any new status lists not yet existing
+		int nVal = nNumVals;
+
+		while (nVal--)
+		{
+			const CString& sValue = aAttribVals[nVal];
+			CKanbanListCtrl* pList = GetListCtrl(sValue);
+
+			if (pList == NULL)
+			{
+				KANBANCOLUMN colDef;
+
+				colDef.sAttribID = m_sTrackAttribID;
+				colDef.sTitle = sValue;
+				colDef.aAttribValues.Add(sValue);
+				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
+
+				pList = NewListCtrl(colDef);
+
+				if (!pList)
+				{
+					ASSERT(pList);
+					return;
+				}
+			}
+		}
+		ASSERT(m_aListCtrls.GetSize() == aAttribVals.GetSize());
+
+		// sort
+		if (m_aListCtrls.GetSize())
+		{
+			// sort
+			qsort(m_aListCtrls.GetData(), m_aListCtrls.GetSize(), sizeof(CKanbanListCtrl**), ListSortProc);
+
+			if (!m_pSelectedList)
+				m_pSelectedList = m_aListCtrls[0];
+		}
+	}
+	
+	// rebuild the list data for each list (which can be empty)
+	int nList = m_aListCtrls.GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+		
+		RebuildListContents(pList, mapKIArray);
+	}
+
+	Resize();
+}
+
+
+BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTEEDIT nAttrib, const CString& sCustomAttribID, 
+								 const CKanbanColumnArray& aColumnDefs)
+{
+	// validate input and check for changes
+	BOOL bChange = (nAttrib != m_nTrackAttribute);
+
+	switch (nAttrib)
+	{
+	case IUI_STATUS:
+		break;
+		
+	case IUI_CUSTOMATTRIB:
+		if (sCustomAttribID.IsEmpty())
+			return FALSE;
+
+		if (!bChange)
+			bChange = (sCustomAttribID != m_sTrackAttribID);
+		break;
+
+	default:
+		return FALSE;
+	}
+
+	if (!bChange && Misc::MatchAllT(m_aColumnDefs, aColumnDefs, TRUE))
+		return TRUE;
+
+	// update state
+	switch (nAttrib)
+	{
+	case IUI_STATUS:
+		m_sTrackAttribID = _T("STATUS");
+		break;
+		
+	case IUI_CUSTOMATTRIB:
+		m_sTrackAttribID = sCustomAttribID;
+		break;
+	}
+	m_nTrackAttribute = nAttrib;
+
+	// delete all lists and start over
+	m_aListCtrls.RemoveAll();
+	m_pSelectedList = NULL;
+
+	int nNumDefs = aColumnDefs.GetSize();
+	
+	if (!nNumDefs) // switch to dynamic columns
+	{
+		m_aColumnDefs.RemoveAll();
+
+		RebuildListCtrls();
+		return TRUE;
+	}
+
+	CKanbanItemArrayMap mapKIArray;
+	CStringArray aAttribVals;
+
+	m_data.BuildTempItemArrays(m_sTrackAttribID, mapKIArray, aAttribVals);
+
+	// rebuild fixed columns
+	m_aColumnDefs.Copy(aColumnDefs);
+
+	for (int nDef = 0; nDef < nNumDefs; nDef++)
+	{
+		CKanbanListCtrl* pList = NewListCtrl(m_aColumnDefs[nDef]);
+
+		if (!pList)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		// build list data (which can be empty)
+		RebuildListContents(pList, mapKIArray);
+	}
+	ASSERT(m_aListCtrls.GetSize() == m_aColumnDefs.GetSize());
+
+	Resize();
+
+	return TRUE;
+}
+
+CKanbanListCtrl* CKanbanCtrl::NewListCtrl(const KANBANCOLUMN& colDef)
+{
+	CKanbanListCtrl* pList = new CKanbanListCtrl(m_data, colDef, m_fonts);
+	ASSERT(pList);
+	
+	if (pList->Create(IDC_LISTCTRL, this, m_ilHeight))
+	{
+		pList->SetImageList(&m_ilHeight, LVSIL_SMALL);
+
+		m_aListCtrls.Add(pList);
+	}
+	else
+	{
+		delete pList;
+		pList = NULL;
+	}
+
+	return pList;
+}
+
+int CKanbanCtrl::ListSortProc(const void* pV1, const void* pV2)
+{
+	typedef CKanbanListCtrl* LPCKanbanListCtrl;
+	
+	const CKanbanListCtrl* pKI1 = *(static_cast<const LPCKanbanListCtrl*>(pV1));
+	const CKanbanListCtrl* pKI2 = *(static_cast<const LPCKanbanListCtrl*>(pV2));
+
+	// backlog always comes first
+	if (!pKI1->HasAnyValues())
+		return -1;
+
+	if (pKI2->HasAnyValues())
+		return 1;
+	
+	// don't care for now
+	return 0;
+}
+
+BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemArrayMap& mapKIArray)
+{
+	ASSERT(pList && pList->GetSafeHwnd());
+
+	if (!pList || !pList->GetSafeHwnd())
+		return FALSE;
+
+	pList->SetRedraw(FALSE);
+	pList->DeleteAllItems();
+
+	CStringArray aValues;
+	int nNumVals = pList->GetAttributeValues(aValues);
+
+	if (nNumVals)
+	{
+		for (int nVal = 0; nVal < nNumVals; nVal++)
+		{
+			CKanbanItemArray* pKIArr = NULL;
+			CString sValue(aValues[nVal]);
+			
+			if (mapKIArray.Lookup(sValue, pKIArr))
+			{
+				ASSERT(pKIArr->GetSize());
+
+				for (int nKI = 0; nKI < pKIArr->GetSize(); nKI++)
+				{
+					const KANBANITEM* pKI = pKIArr->GetAt(nKI);
+					ASSERT(pKI);
+					
+					int nItem = pList->AddTask(pKI->sTitle, pKI->dwTaskID, FALSE);
+					ASSERT(nItem != -1);
+				}
+			}
+		}
+	}
+	
+	pList->SetRedraw(TRUE);
+
+	return TRUE;
+}
+
+void CKanbanCtrl::RemoveDeletedTasks(const ITaskList12* pTasks)
+{
+	POSITION pos = m_data.GetStartPosition();
+	DWORD dwTaskID = 0;
+	KANBANITEM* pKI = NULL;
+
+	while (pos)
+	{
+		m_data.GetNextAssoc(pos, dwTaskID, pKI);
+
+		HTASKITEM hTask = pTasks->FindTask(dwTaskID);
+
+		if (hTask == NULL)
+			m_data.RemoveKey(dwTaskID);
+	}
+}
+
+KANBANITEM* CKanbanCtrl::GetKanbanItem(DWORD dwTaskID) const
+{
+	ASSERT(dwTaskID);
+
+	KANBANITEM* pKI = NULL;
+
+	if (dwTaskID && m_data.Lookup(dwTaskID, pKI))
+	{
+		ASSERT(pKI);
+ 	}
+ 
+ 	return pKI;
+}
+
+BOOL CKanbanCtrl::HasKanbanItem(DWORD dwTaskID) const
+{
+	ASSERT(dwTaskID);
+
+	KANBANITEM* pKI = NULL;
+
+	return (dwTaskID && m_data.Lookup(dwTaskID, pKI));
+}
+
+CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID) const
+{
+	int nUnused = -1;
+	return LocateTask(dwTaskID, nUnused);
+}
+
+CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, int& nItem) const
+{
+	int nList = m_aListCtrls.GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+
+		nItem = pList->FindTask(dwTaskID);
+
+		if (nItem != -1)
+			return pList;
+	}
+
+	// else
+	nItem = -1;
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanCtrl::GetListCtrl(const CString& sAttribValue) const
+{
+	int nList = m_aListCtrls.GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+		
+		if (pList && (pList->GetAttributeValue() == sAttribValue))
+			return pList;
+	}
+
+	// not found
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanCtrl::GetListCtrl(HWND hwnd) const
+{
+	ASSERT(hwnd);
+
+	int nList = m_aListCtrls.GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+
+		if (pList && (pList->GetSafeHwnd() == hwnd))
+			return pList;
+	}
+
+	// not found
+	return NULL;
+}
+
+void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
+{
+	if (dwOption)
+	{
+		DWORD dwPrev = m_dwOptions;
+
+		if (bSet)
+			m_dwOptions |= dwOption;
+		else
+			m_dwOptions &= ~dwOption;
+
+		// specific handling
+		if (m_dwOptions != dwPrev)
+		{
+			// TODO
+		}
+	}
+}
+
+void CKanbanCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CWnd::OnSize(nType, cx, cy);
+
+	Resize(CRect(0, 0, cx, cy));
+}
+
+BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
+{
+	return TRUE;
+}
+
+void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
+{
+	CWnd::OnSetFocus(pOldWnd);
+
+	CKanbanListCtrl* pList = GetSelListCtrl();
+
+	if (pList)
+	{
+		m_pSelectedList = pList;
+		pList->SetFocus();
+		TRACE(_T("CKanbanCtrl::SetFocus(OnSetFocus: %s)\n"), pList->GetAttributeValue());
+
+		CDWordArray aSelIDs;
+		pList->GetSelectedTasks(aSelIDs);
+		int breakpoint = 0;
+	}
+}
+
+void CKanbanCtrl::Resize(const CRect& rect)
+{
+	int nNumLists = m_aListCtrls.GetSize();
+
+	if (nNumLists)
+	{
+		int nListWidth = ((rect.Width() / nNumLists) + 1);
+		CRect rList(0, rect.top, nListWidth, rect.bottom);
+
+		// last column is stretchy
+		if (nNumLists ==  1)
+			rList.right = rect.right;
+
+		CKanbanListCtrl* pList = NULL;
+		CString sStatus;
+
+		for (int nList = 0; nList < nNumLists; nList++)
+		{
+			CKanbanListCtrl* pList = m_aListCtrls[nList];
+			ASSERT(pList && pList->GetSafeHwnd());
+
+			pList->MoveWindow(rList);
+			pList->SetColumnWidth(0, (rList.Width() - 1 - GetSystemMetrics(SM_CXVSCROLL)));
+			
+			rList.OffsetRect(nListWidth - 1, 0); // so borders overlap
+
+			// last column is stretchy
+			if (nList == (nNumLists - 1))
+				rList.right = rect.right;
+		}
+	}
+}
+
+void CKanbanCtrl::Resize()
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	Resize(rClient);
+}
+
+BOOL CKanbanCtrl::GetLabelEditRect(LPRECT pEdit)
+{
+	// TODO
+	
+	return FALSE;
+}
+
+void CKanbanCtrl::SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru)
+{
+	int nList = m_aListCtrls.GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		ASSERT(pList);
+		
+		pList->SetDoneTaskAttributes(color, bStrikeThru);
+	}
+}
+
+int CALLBACK CKanbanCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	// TODO
+	return 0;
+}
+
+int CKanbanCtrl::Compare(const CString& sText1, const CString& sText2)
+{
+	BOOL bEmpty1 = sText1.IsEmpty();
+	BOOL bEmpty2 = sText2.IsEmpty();
+		
+	if (bEmpty1 != bEmpty2)
+		return (bEmpty1 ? 1 : -1);
+	
+	return Misc::NaturalCompare(sText1, sText2);
+}
+
+void CKanbanCtrl::ScrollToSelectedTask()
+{
+	CKanbanListCtrl* pList = GetSelListCtrl();
+
+	if (pList)
+		pList->ScrollToSelection();
+}
+
+bool CKanbanCtrl::PrepareNewTask(ITaskList* /*pTask*/) const
+{
+// 	HTASKITEM hNewTask = pTask->GetFirstTask();
+// 	ASSERT(hNewTask);
+
+	return true;
+}
+
+DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
+{
+	const CKanbanListCtrl* pList = HitTestListCtrl(ptScreen);
+
+	if (pList)
+	{
+		int nItem = pList->FindTask(ptScreen);
+
+		if (nItem != -1)
+			return pList->GetItemData(nItem);
+	}
+
+	// else
+	return 0;
+}
+
+CKanbanListCtrl* CKanbanCtrl::HitTestListCtrl(const CPoint& ptScreen) const
+{
+	HWND hwnd = ::WindowFromPoint(ptScreen);
+
+	return (hwnd ? GetListCtrl(hwnd) : NULL);
+}
+
+BOOL CKanbanCtrl::IsDragging() const
+{
+	ASSERT((m_pDragFromList && (m_aDragItems.GetSize() > 0)) ||
+			(!m_pDragFromList && (m_aDragItems.GetSize() == 0)));
+
+	return (m_pDragFromList && (m_aDragItems.GetSize() > 0));
+}
+
+void CKanbanCtrl::NotifyParentAttibuteChange(LPCTSTR szStatus)
+{
+	ASSERT(!m_bReadOnly);
+//	ASSERT(GetSelectedTaskID());
+
+	GetParent()->SendMessage(WM_KBC_STATUSCHANGE, 0, (LPARAM)szStatus);
+}
+
+void CKanbanCtrl::NotifyParentSelectionChange()
+{
+	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE, 0, 0);
+}
+
+// external version
+BOOL CKanbanCtrl::CancelOperation()
+{
+	if (IsDragging())
+	{
+		ReleaseCapture();
+
+		m_aDragItems.RemoveAll();
+		m_pDragFromList = NULL;
+
+		return TRUE;
+	}
+	
+	// else 
+	return FALSE;
+}
+
+
+int CKanbanCtrl::GetColumnOrder(CStringArray& aOrder) const
+{
+	// TODO
+	return 0;
+}
+
+BOOL CKanbanCtrl::SetColumnOrder(const CStringArray& aTreeOrder)
+{
+	// TODO
+	return FALSE;
+}
+
+/*
+void CKanbanCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
+{
+	m_treeHeader.GetItemWidths(aTreeWidths);
+	m_listHeader.GetItemWidths(aListWidths);
+
+	// trim the list columns to what's currently visible
+	// remember to include hidden dummy first column
+	int nNumMonths = (GetRequiredColumnCount() + 1);
+	int nItem = aListWidths.GetSize();
+
+	while (nItem-- > nNumMonths)
+		aListWidths.RemoveAt(nItem);
+}
+
+void CKanbanCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
+{
+	m_treeHeader.SetItemWidths(aTreeWidths);
+
+	// save list column widths for when we've initialised our columns
+	// remember to include hidden dummy first column
+	if (aListWidths.GetSize() == (GetRequiredColumnCount() + 1))
+		m_listHeader.SetItemWidths(aListWidths);
+	else
+		m_aPrevColWidths.Copy(aListWidths);
+}
+*/
+
+void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	m_pSelectedList = GetListCtrl(pNMHDR->hwndFrom);
+	//TRACE(_T("CKanbanCtrl::OnSetFocusToList(%s)\n"), m_pSelectedList->GetAttributeValue());
+
+	ClearOtherListSelections(m_pSelectedList);
+
+	if ((m_pSelectedList->GetSelectedCount() == 0) && m_pSelectedList->GetItemCount())
+		m_pSelectedList->SelectItem(0, TRUE);
+
+	NotifyParentSelectionChange();
+}
+
+void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// only interested in selection changes
+	NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
+
+	if ((pNMLV->uChanged & LVIF_STATE) && ((pNMLV->uNewState & LVIS_SELECTED) || (pNMLV->uOldState & LVIS_SELECTED)))
+		NotifyParentSelectionChange();
+}
+
+void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
+{
+	int nList = m_aListCtrls.GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+
+		if (pList != pIgnore)
+		{
+			//pList->SetItemState(-1, 0, (LVIS_FOCUSED | LVIS_SELECTED));
+		}
+		else
+		{
+			CDWordArray aSelIDs;
+			GetSelectedTaskIDs(aSelIDs);
+			int breakpoint = 0;
+		}
+	}
+}
+
+void CKanbanCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	ASSERT(m_pSelectedList);
+
+	if ((m_pSelectedList->GetSelectedCount() == 0) && m_pSelectedList->GetItemCount())
+		m_pSelectedList->SelectItem(0);
+
+	NotifyParentSelectionChange();
+
+	*pResult = 0;
+}
+
+void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	if (!m_bReadOnly)
+	{
+		ASSERT(!IsDragging());
+		ASSERT(pNMHDR->idFrom == IDC_LISTCTRL);
+		
+		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
+		ASSERT(pNMLV->iItem != -1);
+		
+		CKanbanListCtrl* pList = (CKanbanListCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
+		POSITION pos = pList->GetFirstSelectedItemPosition();
+		
+		while (pos)
+			m_aDragItems.Add(pList->GetNextSelectedItem(pos));
+		
+		if (m_aDragItems.GetSize())
+		{
+			m_pDragFromList = pList;
+			SetCapture();
+		}
+	}
+	
+	*pResult = 0;
+}
+
+void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	if (IsDragging())
+	{
+		ASSERT(!m_bReadOnly);
+
+		// get the list under the mouse
+		ClientToScreen(&point);
+		CKanbanListCtrl* pDestList = HitTestListCtrl(point);
+
+		if (pDestList && (pDestList != m_pDragFromList))
+		{
+			// move the items
+			CString sAttribValue;
+			
+			if (GetListCtrlAttributeValue(pDestList, point, sAttribValue))
+			{
+				int nDrag = m_aDragItems.GetSize();
+				
+				while (nDrag--)
+				{
+					int nDragItem = m_aDragItems[nDrag];
+					DWORD dwDragID = m_pDragFromList->GetItemData(nDragItem);
+					ASSERT(dwDragID);
+					
+					KANBANITEM* pKI = GetKanbanItem(dwDragID);
+					ASSERT(pKI);
+					
+					if (pKI)
+					{
+						// remove from src list
+						m_pDragFromList->DeleteItem(nDragItem);
+						m_pDragFromList->RefreshColumnTitle();
+						
+						pKI->SetAttributeValue(m_sTrackAttribID, sAttribValue);
+						
+						pDestList->AddTask(pKI->sTitle, dwDragID, TRUE);
+						pDestList->SetFocus();
+						//TRACE(_T("CKanbanCtrl::SetFocus(OnLButtonUp: %s)\n"), sAttribValue);
+						
+						NotifyParentAttibuteChange(sAttribValue);
+					}
+				}
+			}
+		}
+
+		// reset always
+		m_aDragItems.RemoveAll();
+		m_pDragFromList = NULL;
+
+		ReleaseCapture();
+	}
+
+	CWnd::OnLButtonUp(nFlags, point);
+}
+
+BOOL CKanbanCtrl::GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue)
+{
+	CStringArray aListValues;
+	int nNumValues = pDestList->GetAttributeValues(aListValues);
+
+	switch (nNumValues)
+	{
+	case 0: // Backlog
+		sValue.Empty();
+		return TRUE;
+		
+	case 1:
+		sValue = aListValues[0];
+		return TRUE;
+	}
+
+	// List has multiple values -> show popup menu
+	CMenu menu;
+	VERIFY (menu.CreatePopupMenu());
+
+	for (int nVal = 0; nVal < nNumValues; nVal++)
+	{
+		menu.AppendMenu(MF_STRING, (nVal + 1), aListValues[nVal]);
+	}
+
+	UINT nValID = menu.TrackPopupMenu((TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD), 
+										ptScreen.x, ptScreen.y, pDestList);
+
+	if (nValID > 0)
+	{
+		sValue = aListValues[nValID - 1];
+		return TRUE;
+	}
+
+	// user cancelled
+	return FALSE;
+}
+
+void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (IsDragging())
+	{
+		ASSERT(!m_bReadOnly);
+		
+		// get the list under the mouse
+		ClientToScreen(&point);
+		const CKanbanListCtrl* pDestList = HitTestListCtrl(point);
+
+		BOOL bValidDest = (pDestList && (pDestList != m_pDragFromList));
+		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? GMOC_MOVE : GMOC_NO));
+	}
+
+	CWnd::OnMouseMove(nFlags, point);
+}

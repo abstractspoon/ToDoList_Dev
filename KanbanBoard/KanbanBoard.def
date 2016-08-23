@@ -1,0 +1,7 @@
+; KanbanBoard.def : Declares the module parameters for the DLL.
+
+LIBRARY      "KanbanBoard"
+DESCRIPTION  'KanbanBoard Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
