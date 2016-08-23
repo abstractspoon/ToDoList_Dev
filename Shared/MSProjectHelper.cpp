@@ -1,0 +1,43 @@
+// MSProjectHelper.cpp: implementation of the CMSProjectHelper class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "MSProjectHelper.h"
+
+#include "..\3rdParty\msproject.h"
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CMSProjectHelper::CMSProjectHelper()
+{
+
+}
+
+CMSProjectHelper::~CMSProjectHelper()
+{
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
