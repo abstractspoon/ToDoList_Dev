@@ -1,0 +1,570 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,2
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "RTFContentCtrl DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 2\0"
+            VALUE "InternalName", "RTFContentCtrl\0"
+            VALUE "LegalCopyright", "Copyright © AbstractSpoon 2005 & Johan Rosengren © 2005\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "RTFContentCtrl.DLL\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "RTFContentCtrl Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_RTFCOMMENTS         ICON    DISCARDABLE     "res\\icon1.ico"
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\RTFContentCtrl.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+TOOLBAR_CONTROL TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_EDIT_FONT
+    SEPARATOR
+    BUTTON      ID_EDIT_BOLD
+    BUTTON      ID_EDIT_ITALIC
+    BUTTON      ID_EDIT_UNDERLINE
+    BUTTON      ID_EDIT_STRIKETHRU
+    SEPARATOR
+    BUTTON      ID_EDIT_GROWFONT
+    BUTTON      ID_EDIT_SHRINKFONT
+    SEPARATOR
+    BUTTON      ID_EDIT_LEFTALIGN
+    BUTTON      ID_EDIT_CENTERALIGN
+    BUTTON      ID_EDIT_RIGHTALIGN
+    BUTTON      ID_EDIT_JUSTIFY
+    SEPARATOR
+    BUTTON      ID_EDIT_BULLET
+    BUTTON      ID_EDIT_NUMBER
+    SEPARATOR
+    BUTTON      ID_EDIT_OUTDENT
+    BUTTON      ID_EDIT_INDENT
+    SEPARATOR
+    BUTTON      ID_EDIT_INSERTTABLE
+    SEPARATOR
+    BUTTON      ID_EDIT_TEXTCOLOR
+    BUTTON      ID_EDIT_BACKCOLOR
+    SEPARATOR
+    BUTTON      ID_EDIT_WORDWRAP
+    BUTTON      ID_EDIT_INLINESPELLCHECK
+    SEPARATOR
+    BUTTON      ID_PREFERENCES
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+TOOLBAR_CONTROL         BITMAP  DISCARDABLE     "toolbar.bmp"
+IDB_TOOLBAR             BITMAP  DISCARDABLE     "toolbar2.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "edit"
+    BEGIN
+        MENUITEM "&Bold",                       ID_EDIT_BOLD
+        MENUITEM "&Italic",                     ID_EDIT_ITALIC
+        MENUITEM "&Underline",                  ID_EDIT_UNDERLINE
+        MENUITEM "Stri&kethrough",              ID_EDIT_STRIKETHRU
+        MENUITEM SEPARATOR
+        POPUP "&Font"
+        BEGIN
+            MENUITEM "Increase",                    ID_EDIT_GROWFONT
+            MENUITEM "Decrease",                    ID_EDIT_SHRINKFONT
+            MENUITEM SEPARATOR
+            MENUITEM "Subscript",                   ID_EDIT_SUBSCRIPT
+            MENUITEM "Superscript",                 ID_EDIT_SUPERSCRIPT
+        END
+        MENUITEM SEPARATOR
+        POPUP "&Paragraph"
+        BEGIN
+            MENUITEM "&Left",                       ID_EDIT_LEFTALIGN
+            MENUITEM "&Centre",                     ID_EDIT_CENTERALIGN
+            MENUITEM "&Right",                      ID_EDIT_RIGHTALIGN
+            MENUITEM "&Justify",                    ID_EDIT_JUSTIFY
+            MENUITEM SEPARATOR
+            MENUITEM "I&ncrease Indent",            ID_EDIT_INDENT
+            MENUITEM "D&ecrease Indent",            ID_EDIT_OUTDENT
+        END
+        MENUITEM SEPARATOR
+        POPUP "I&nsert"
+        BEGIN
+            MENUITEM "&Table...",                   ID_EDIT_INSERTTABLE
+            MENUITEM "&Horizontal Line",            ID_EDIT_HORZRULE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t",                        ID_EDIT_CUT
+        MENUITEM "&Copy",                       ID_EDIT_COPY
+        MENUITEM "&Paste",                      ID_EDIT_PASTE
+        MENUITEM "Delete",                      ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        POPUP "C&opy (More)"
+        BEGIN
+            MENUITEM "Copy as HTML",                ID_EDIT_COPYASHTML
+            MENUITEM "Copy For&matting",            ID_EDIT_COPYFORMATTING
+        END
+        POPUP "Paste (More)"
+        BEGIN
+            MENUITEM "Paste Simple (No formatting)", ID_EDIT_PASTESIMPLE
+            MENUITEM "Past&e Tasks as Links",       ID_EDIT_PASTEASREF
+            MENUITEM "Past&e Formatting",           ID_EDIT_PASTEFORMATTING
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Select &All",                 ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "&Find...",                    ID_EDIT_FIND
+        MENUITEM "&Replace...",                 ID_EDIT_FINDREPLACE
+        MENUITEM SEPARATOR
+        MENUITEM "&Open Link",                  ID_EDIT_OPENURL
+        MENUITEM "&Copy Link",                  ID_EDIT_COPYURL
+        MENUITEM "Insert &File Link...",        ID_EDIT_FILEBROWSE
+        MENUITEM SEPARATOR
+        MENUITEM "C&heck Spelling",             ID_EDIT_SPELLCHECK
+        MENUITEM SEPARATOR
+        MENUITEM "Show &Formatting Toolbar",    ID_EDIT_SHOWTOOLBAR
+        MENUITEM "Show &Ruler",                 ID_EDIT_SHOWRULER
+        MENUITEM SEPARATOR
+        MENUITEM "Word &Wrap",                  ID_EDIT_WORDWRAP
+        MENUITEM "I&nline Spell Checking",      ID_EDIT_INLINESPELLCHECK
+        MENUITEM SEPARATOR
+        MENUITEM "&Preferences...",             ID_PREFERENCES
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_EDITWEBLINK_DIALOG DIALOG DISCARDABLE  0, 0, 239, 49
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit Web Link"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,128,28,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,182,28,50,14
+    LTEXT           "URL",IDC_STATIC,7,9,16,8
+    EDITTEXT        IDC_WEBLINK,27,7,205,14,ES_AUTOHSCROLL
+END
+
+IDD_LINKTOFILE_DIALOG DIALOG DISCARDABLE  0, 0, 256, 151
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create Link to File"
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "Options",IDC_STATIC,7,7,242,116
+    CONTROL         "&Make this my automatic choice",IDC_MAKEDEFAULT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,105,234,10
+    DEFPUSHBUTTON   "OK",IDOK,143,130,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,199,130,50,14
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,15,97,227,1
+    CONTROL         "&Link to the file using 'file://...'",IDC_FILEURL,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,14,21,226,10
+    CONTROL         "&Embed a copy of the file which can be viewed by double-clicking the icon",
+                    IDC_FILECOPY,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,14,36,226,20
+    CONTROL         "E&mbed a link to the file which allows the original file to be edited and automatically updated",
+                    IDC_FILELINK,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,14,56,226,18
+    CONTROL         "&Display the image file directly\n(currently supports bmp, ico, gif, jpg, png)",
+                    IDC_FILEIMAGE,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,14,76,226,18
+END
+
+IDD_INSERTTABLE_DIALOG DIALOG DISCARDABLE  0, 0, 197, 102
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Insert Table"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,86,81,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,140,81,50,14
+    LTEXT           "&Row count:",IDC_STATIC,15,21,45,10
+    LTEXT           "&Column count:",IDC_STATIC,15,39,46,10
+    COMBOBOX        IDC_NUMROWS,79,18,51,30,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_NUMCOLS,79,36,51,30,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "C&olumn width:",IDC_STATIC,15,56,48,8
+    COMBOBOX        IDC_COLWIDTH,79,53,51,30,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "tab-stops",IDC_STATIC,136,56,47,8
+    GROUPBOX        "Size",IDC_STATIC,7,7,183,67
+END
+
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 360, 116
+STYLE WS_CHILD
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "&Use Microsoft Word to convert content to HTML for printing",
+                    IDC_USEMSWORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,
+                    346,10
+    LTEXT           "File Linking",IDC_LINKTOFILE_GROUP,7,25,346,8
+    CONTROL         "&Always prompt me to choose",IDC_PROMPTFORFILELINK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,38,346,10
+    CONTROL         "&Link to the file using 'file://...'",IDC_FILEURL,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,54,346,10
+    CONTROL         "&Embed a copy of the file which can be viewed by double-clicking the icon",
+                    IDC_FILECOPY,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,7,69,346,10
+    CONTROL         "E&mbed a link to the file which allows the original file to be edited and automatically updated",
+                    IDC_FILELINK,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,7,84,346,10
+    CONTROL         "&Display the image file directly (currently supports bmp, ico, gif, jpg, png)",
+                    IDC_FILEIMAGE,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
+                    BS_MULTILINE,7,99,346,10
+END
+
+IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 374, 189
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Rich Text Preferences"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,261,168,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,317,168,50,14
+    CONTROL         "",IDC_PPHOST,"Static",SS_BLACKFRAME,7,7,360,154
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_EDITWEBLINK_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 42
+    END
+
+    IDD_LINKTOFILE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 249
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_INSERTTABLE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 190
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+
+    IDD_PREFERENCES_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 353
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 109
+    END
+
+    IDD_PREFERENCES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 367
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 182
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_INSERTTABLE_DIALOG DLGINIT
+BEGIN
+    IDC_NUMROWS, 0x403, 2, 0
+0x0031, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0032, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0033, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0034, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0035, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0036, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0037, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0038, 
+    IDC_NUMROWS, 0x403, 2, 0
+0x0039, 
+    IDC_NUMROWS, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0031, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0032, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0033, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0034, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0035, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0036, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0037, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0038, 
+    IDC_NUMCOLS, 0x403, 2, 0
+0x0039, 
+    IDC_NUMCOLS, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0031, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0032, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0033, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0034, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0035, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0036, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0037, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0038, 
+    IDC_COLWIDTH, 0x403, 2, 0
+0x0039, 
+    IDC_COLWIDTH, 0x403, 3, 0
+0x3031, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    STRING_COLOR            "abc"
+    STRING_DEFAULT          "Automatic"
+    STRING_CUSTOM           "More Colours..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_BROWSE_TITLE        "Select File"
+    IDS_COMMENTSGOTOERRMSG  "The selected file could not be opened.\n\nPlease check that the file exists and that there is an application \nregistered for opening the selected file type."
+    IDS_FILELINK_PREFS_TITLE "File Link Preferences"
+    IDS_FIND_TITLE          "Find In Comments"
+    IDS_REPLACE_TITLE       "Replace In Comments"
+    IDS_PASTE_ERROR         "There was a problem accessing the dragged or copied files.\n\nPlease re-copy the files and then perform the operation again."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_FONT            "\nFont Dialog"
+    ID_EDIT_BOLD            "\nBold"
+    ID_EDIT_ITALIC          "\nItalic"
+    ID_EDIT_UNDERLINE       "\nUnderline"
+    ID_EDIT_LEFTALIGN       "\nLeft Align"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CENTERALIGN     "\nCentre Align"
+    ID_EDIT_RIGHTALIGN      "\nRight Align"
+    ID_EDIT_INDENT          "\nIncrease Indent"
+    ID_EDIT_OUTDENT         "\nDecrease Indent"
+    ID_EDIT_BULLET          "\nBullet List"
+    ID_EDIT_STRIKETHRU      "\nStrikethrough"
+    ID_EDIT_WORDWRAP        "\nWordwrap"
+    ID_EDIT_NUMBER          "\nNumbered List"
+    ID_EDIT_TEXTCOLOR       "\nText Colour"
+    ID_PREFERENCES          "\nRich Text Preferences"
+    ID_EDIT_INSERTTABLE     "\nInsert Table"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_BACKCOLOR       "\nBackground Colour"
+    ID_EDIT_JUSTIFY         "\nJustify"
+    ID_EDIT_SHRINKFONT      "\nDecrease Font Size"
+    ID_EDIT_GROWFONT        "\nIncrease Font Size"
+    ID_EDIT_PREFS           "\nRich Text Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_INLINESPELLCHECK "\nInline Spell-checking"
+END
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\RTFContentCtrl.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

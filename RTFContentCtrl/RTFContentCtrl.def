@@ -1,0 +1,7 @@
+; RTFContentCtrl.def : Declares the module parameters for the DLL.
+
+LIBRARY      "RTFContentCtrl"
+DESCRIPTION  'RTFContentCtrl Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
