@@ -1,0 +1,18 @@
+# jrm21 - This directory creates the symbol names used by the rtf reader.
+# I think it is basically iso-8859-15 - Western Europe charset.
+
+#all:
+all:	rtf.h stdcharnames.h
+
+#clean:
+clean:
+	rm -f rtf.h stdcharnames.h
+
+rtf.h:  rtf.h.dist standard-names
+	@AWK@ -f stdnames.awk standard-names|cat rtf.h.dist - > $@
+
+stdcharnames.h:: rtf.h.dist standard-names
+	sed -e '/^$$/d' -e '/^#/d' -e 's/.*/ "&",/' \
+                standard-names > $@
+
+

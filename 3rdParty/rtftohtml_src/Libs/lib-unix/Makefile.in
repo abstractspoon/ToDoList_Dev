@@ -1,0 +1,16 @@
+CC	= @CC@
+# CFLAGS should be overridden in environment from top-level makefile for LIBDIR
+CFLAGS	= @CFLAGS@
+RANLIB	= @RANLIB@
+
+INCLUDES=../h/rtf-unix.h
+
+lib-unix.a:	fileops.o
+	ar r lib-unix.a fileops.o
+	$(RANLIB) lib-unix.a 
+
+fileops.o:	fileops.c $(INCLUDES)
+	$(CC) $(CFLAGS) -c -I../h -I../OTHER $*.c
+
+clean:
+	rm -f lib-unix.a *.o

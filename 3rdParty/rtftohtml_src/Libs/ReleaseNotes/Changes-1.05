@@ -1,0 +1,132 @@
+Changes for RTF distribution release 1.05
+-----------------------------------------
+
+-----------------------------
+the RTF reader:
+
+unsigned chars are no longer used in the reader since the RTF specification
+implies a 7-bit character set.  I was not sure about that before so used
+unsigned characters to be safe.  The "get character" function still checks
+input characters, and panics if an 8-bit character is seen.
+
+Fixed bug in _RTFToken() where, if a control word was delimited by a space,
+the space was left at the end of rtfTextBuf.
+
+Color values in color table entries are -1 if the values were not specified
+for the entry.  That means the default color should be used.  In earlier
+versions, color 0 was assumed to be the default, but since any entry can
+be left unspecified, including the entry for color 0, the default color
+is left to the writer to decide.
+
+Instead of ignoring \r and \<10>, and treating \n like \par, \r and \n
+are ignored, and \<10> and \<13> are treated like \par.
+
+The font table destination reader now recognizes old style font tables,
+where entries in the table are not surrounded by braces.
+
+Fixed the stylesheet reader to recognize \sbasedon and \snext explicitly
+and use them to set the corresponding fields of RTFStyle structs accordingly,
+which it didn't do previously.  Worse, none of the elements of the style were
+attached except the last.  This means that style expansion was completely
+broken in 1.04.  (Real brain-o-matic programming.  Duh.  Blush.)
+
+It also turns out that automatic style expansion (i.e., with no writer
+intervention required) is the wrong thing to do (due to the circumstances
+under which tabstops are overridden), so it's now up to the writer to
+call RTFExpandStyle() explicitly.  There is little loss in this since
+style expansion was broken anyway.
+
+RTFGetFont(), RTFGetColor() and RTFGetStyle() didn't work unless you
+passed an argument of -1 or 0.  Fixed.
+
+RTFInit() can be called multiple times for translators that wish to
+translate multiple files.  Formerly the internal state that was built
+up would not have been disposed of.
+
+The reader now recognizes roughly 300 control symbols, or about twice as
+many as before.  Some of the #define'd constant names have changed:
+
+rtfBrace -> rtfGroup
+rtfLBrace -> rtfBeginGroup
+rtfRBrace -> rtfEndGroup
+
+[rtfDestination, rtfRtf] -> [rtfVersion, -1]
+	Version number is parameter
+
+[rtfMacintosh, -1] -> [rtfCharSet, rtfMacChar]
+
+rtfFontStyle -> rtfFontFamily
+	Minor number symbols have different names, also.
+	rtfFType field of RTFColor structure changed correspondingly.
+
+rtfColorNum -> rtfForeColor
+
+rtfCurFNotePage ->rtfCurFNote
+
+rtfEndNotes -> rtfFNoteEndSect
+
+rtfLineRestart1 -> rtfLineRestart
+	This was a typo
+
+rtfAutoPageX -> rtfPageNumLeft
+rtfAutoPageY -> rtfPageNumTop
+
+rtfColumnWid -> rtfColumnSpace
+
+rtfComment -> rtfIComment
+
+rtfNewline was deleted
+rtfPageContinuous was deleted (use rtfPageCont)
+
+rtfCurPict (for \chpict) may be bogus.  I'm not sure if \chpict is
+a legitimate control symbol or not.
+
+
+The functional interface also has many name changes and additions.
+
+RTFReadHook() -> RTFSetReadHook()
+Added RTFGetReadHook().
+
+RTFClassCallback() -> RTFSetClassCallback()
+Added RTFGetClassCallback().
+
+RTFDestinationCallback() -> RTFSetDestinationCallback()
+Added RTFGetDestinationCallback().
+
+Added RTFSkipGroup().
+Added RTFExpandStyle().
+Added RTFCheckCM(), RTFCheckCMM(), RTFCheckMM().
+Added RTFFree().
+
+Deleted RTFStyleExpansion().
+
+-----------------------------
+rtf2null:
+
+rtf2null echoes unknown symbols so that it can be used as a quick way of
+finding symbols that the reader doesn't recognize.
+
+-----------------------------
+rtf2text:
+
+More characters in >= 128 range handled.  Can switch between character
+sets, although only Macintosh character set is handled.
+
+-----------------------------
+rtf2troff:
+
+Some fprintf's in FlushParState() had no stream argument, causing core dumps.
+Fixed.
+
+Underlining works better now (doesn't destroy multiple-character characters
+like \(de, writes smaller output).
+
+Stikeout works.
+
+A bit of top/bottom margin support and header/footer support added.
+
+More characters in >= 128 range handled.  Can switch between character
+sets, although only Macintosh character set is handled.
+
+However, the whole thing is more complicated and probably has many new
+bugs.

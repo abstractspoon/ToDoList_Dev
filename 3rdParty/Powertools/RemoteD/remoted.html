@@ -1,0 +1,322 @@
+<html>
+<head>
+
+<style type="text/css">
+<!--
+body { font-size: 100%; font-family: Times New Roman,serif; }
+td   { font-family: Times New Roman,serif; }
+h1   { font-family: Arial,Helvetica,sans-serif; color: darkblue; }
+h2   { font-size: 125%; font-family: Arial,Helvetica,sans-serif; font-weight: normal;
+       color: darkblue; margin-top: 0pt; margin-bottom: 0pt; }
+h3   { font-size: 100%; font-family: Arial,Helvetica,sans-serif; font-weight: bold;
+       margin-top: 0pt; margin-bottom: 0pt;}
+h4   { font-size: 100%; font-family: Arial,Helvetica,sans-serif; font-weight: normal;
+       color: black; margin-top: 0pt; margin-bottom: 0pt; }
+h5   { font-size: 80%; font-family: Arial,Helvetica,sans-serif; font-weight: normal;
+       color: black; margin-top: 0pt; margin-bottom: 0pt; }
+hr   { color: black; height: 1 }
+-->
+</style>
+<title>RemoteD</title>
+</head>
+
+<body BGCOLOR="#eeeeee" text="#000000">
+
+<center>
+<h1>RemoteD</h1>
+</center>
+
+<center>
+<table width="95%" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td bgcolor="#333333">
+      <table width="100%" border="0" cellspacing="0" cellpadding="3">
+        <tr>
+          <td bgcolor="#c8cbb5" valign="top" colspan="2">
+            <h3>Description</h3>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="95%">
+            RemoteD is lightweight utility that lets you to interact with two or more
+            networked computers with a single mouse and keyboard.  It works like a
+            software switchbox, enabling you to switch the mouse and keyboard input
+            to another computer by simply moving the mouse pointer off the screen.
+            
+            <p>
+            Scenarios:
+            <ul>
+              <li>Use it to switch between development and test computers.</li>
+              <li>Use it to control multiple computers in a lab environment.</li>
+              <li>Use it to control a laptop from the comfort of your main computer.</li>
+            </ul>
+            <p>
+
+            <p>
+            <em>RemoteD is </em>not<em> a utility that allows remote viewing of a
+            desktop, such as Terminal Server, XP's Remote Desktop Sharing, or VNC.</em>
+            </p>
+          </td>
+        </tr>
+      </table>  
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<table width="95%" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td bgcolor="#333333">
+      <table width="100%" border="0" cellspacing="0" cellpadding="3">
+        <tr>
+          <td bgcolor="#c8cbb5" valign="top" colspan="2">
+            <h3>Installation and Usage</h3>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="95%">
+            <p>
+            <h3>Installation:</h3>
+            <ul>
+              <li>Copy <tt>rdclient.exe</tt> to your main computer.  You can put it anywhere.</li>
+              <li>Copy <tt>rdserver.exe</tt> to your peripheral computer(s).  You can put it anywhere.</li>
+            </ul>
+            </p>
+            <p>
+            Now run RDServer on the peripheral machine.  You will be prompted with a
+            configuration dialog, most fields are optional:
+            </p>
+            
+            <blockquote>
+            <p><b>Password</b></p>
+            
+            <p>
+            The password is used as the key to encrypt data sent over the network.  Do not use
+            any of your regular passwords.
+            </p>
+            
+            <p><b>Save Password</b></p>
+            
+            <p>
+            Check this option to save the password so that you do not have to enter it
+            every time you launch the program.  <em>Note: The saved password obscured, but
+            as with all applications there is no way to prevent a determined person with
+            access to the machine from viewing it.</em>
+            </p>
+            
+            <p><b>Require NTLM Authentication</b></p>
+            
+            <p>
+            Check this option to force clients to authenticate using their NT
+            credentials.  The authentication process is separate from the
+            encryption Password.  NTLM Authentication is optional but
+            recommended when it can be used.  Both machines must be a member of
+            the same domain and support NTLM Authentication (i.e. NT, Win2k, and XP).
+            </p>
+            
+            <p><b>ACL</b></p>
+            
+            <p>
+            ACL stands for Access Control List.  It is an optional semicolon
+            separated list of DNS names for clients that are allowed to connect
+            to the RemoteD server.  If this field is filled in any computer not on
+            the list will be prevented from connecting.  <em>Note: See the rdserver.log
+            file to identify the exact DNS name of the client.</em>
+            </p>
+
+            <p><b>rdserver.log</b></p>
+
+            <p>
+            RDServer keeps an activity/security log in
+            <tt>rdserver.log</tt>, which is written to the current working
+            directory (usually the same directory that rdserver.exe is in).
+            </p>
+                  
+            </blockquote>
+
+            <p>
+            After configuring RDServer run RDClient on your main computer.
+            Using the tray icon choose "RemoteD Client Options".  In this dialog
+            you must enter the same password that you entered in RDServer.  Use
+            Add, Modify, and Remove to configure the set of peripheral computers and
+            the side of the screen they are chained on.  <b>The NTLM Authentication
+            option must match with the peripheral machine's configuration</b>.
+            </p>
+
+            <p>
+            After both computers are configured you can connect and
+            disconnect by selecting the computer name in the RDClient tray
+            icon's popup menu.  When you select a server there may be a few
+            second delay while the connection is negotiated.
+            </p>
+          </td>
+        </tr>
+      </table>  
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<table width="95%" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td bgcolor="#333333">
+      <table width="100%" border="0" cellspacing="0" cellpadding="3">
+        <tr>
+          <td bgcolor="#c8cbb5" valign="top" colspan="2">
+            <h3>Known Issues</h3>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="95%">
+            <ul>
+              <li><h4>Cannot connect to server</h4>
+                <p>
+                Troubleshooting steps:
+                <ul>
+                  <li>
+                    Verify that NTLM Authentication option for the peripheral
+                    computer you are trying to connect to is correct.
+                  </li>
+
+                  <li>
+                    If the computers are running Win9X/ME, or they are not on
+                    the same domain, you will need to disable the NLTM
+                    Authentication option.
+                  </li>
+
+                  <li>
+                    If you are using firewall software, including XP's Internet
+                    Connection Firewall, you will need to configure it to allow
+                    activity on port 1692.
+                  </li>
+                  
+                  <li>
+                    If you have set the Access Control List on RDServer use the
+                    rdserver.log file to verify that the DNS name is correct.
+                    If it still doesn't work try temporarily clearing the ACL
+                    textbox.
+                  </li>
+
+                  <li>If the machine was recently reconnected to the network
+                    the DNS lookup to get the IP address may fail.  You can wait a
+                    few minutes or try to connect using the IP address.
+                  </li>
+                </ul>
+                </p>
+              </li>
+            </ul>
+
+             <ul>
+              <li><h4>Another application window steals focus</h4>
+                <p>
+                This is the most common problem, and it's usually just an
+                occasional annoyance.  When an application or system-modal
+                dialog on the main computer forces itself to get focus the mouse
+                will jump back to the main computer.  The workaround is to move
+                the mouse pointer back to the main computer, dismiss the
+                dialog if there was one, and move the mouse pointer back to the
+                other computer.
+                </p>
+
+                <p>
+                Another manifestation of this problem is that when you
+                type the system will beep.
+                </p>
+              </li>
+            </ul>
+
+            <ul>
+              <li><h4>Stuck on remote desktop</h4>
+                <p>
+                In extremely rare circumstances you may find that you're stuck on the peripheral
+                computer and you cannot move the mouse back.  If this happens to hit
+                the 'Windows' key to move back to the main computer.  If that fails
+                you may need to use Ctrl-Alt-Delete and kill the <tt>rdclient.exe</tt>
+                process.
+                </p>
+              </li>
+            </ul>
+            
+            <p>
+            <em>Note: When the mouse is on the peripheral computer you will see a 1-pixel
+            dot that is used to identify the mouse on the main machine.</em>
+            </p>
+          </td>
+         </tr>
+      </table>  
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<table width="95%" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td bgcolor="#333333">
+      <table width="100%" border="0" cellspacing="0" cellpadding="3">
+        <tr>
+          <td bgcolor="#c8cbb5" valign="top" colspan="2">
+            <h3>Future Features</h3>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="95%">
+            <p>
+            Intercept keyboard and mouse using hooks instead of a top-most window.
+            </p>
+            
+            <p>
+            Support for Alt-Tab, Windows key, and other keyboard combinations
+            that do not work.
+            </p>
+            
+            <p>
+            Multimon support.
+            </p>
+          </td>
+        </tr>
+      </table>  
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<table width="95%" border="0" cellspacing="0" cellpadding="1">
+  <tr>
+    <td bgcolor="#333333">
+      <table width="100%" border="0" cellspacing="0" cellpadding="3">
+        <tr>
+          <td bgcolor="#c8cbb5" valign="top" colspan="2">
+            <h3>RemoteD License Agreement</h3>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="95%">
+            <p>
+            <b>RemoteD is Copyright (C) 2001-2002 by Tony Schreiner.</b></p>
+            
+            <p>
+            This software is provided free of charge for both commercial and non-commercial
+            use.  You may install, use, and copy this software as long as this copyright
+            notice remains intact.  You may not reverse engineer or modify this software.
+            </p>
+            
+            <p>
+            This software is provided AS IS.  No warranties expressed or implied.  By using
+            this software you are acknowledging that the use of this software is at your own
+            risk.
+            </p>
+          </td>
+        </tr>
+      </table>  
+    </td>
+  </tr>
+</table>
+
+
+</body>
+</html>
+

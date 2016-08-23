@@ -1,0 +1,137 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0F203536-FF4F-4783-992D-1DE210C3C485}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Itenso.Sys</RootNamespace>
+    <AssemblyName>Itenso.Sys</AssemblyName>
+    <AssemblyOriginatorKeyFile>..\keys\ItensoRtfConverter.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unicode_Release|AnyCPU' ">
+    <OutputPath>bin\Unicode_Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unicode_Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Unicode_Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.9.0, Culture=neutral, PublicKeyToken=b32731d11ce58905">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ext\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit-console-runner, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ext\nunit-console-runner.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.2.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ext\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Application\ApplicationArguments.cs" />
+    <Compile Include="Application\ApplicationInfo.cs" />
+    <Compile Include="Application\Argument.cs" />
+    <Compile Include="Application\ArgumentCollection.cs" />
+    <Compile Include="Application\ArgumentType.cs" />
+    <Compile Include="Application\HelpModeArgument.cs" />
+    <Compile Include="Application\IArgument.cs" />
+    <Compile Include="Application\NamedValueArgument.cs" />
+    <Compile Include="Application\ToggleArgument.cs" />
+    <Compile Include="Application\ValueArgument.cs" />
+    <Compile Include="ArgumentCheck.cs" />
+    <Compile Include="Collection\CollectionTool.cs" />
+    <Compile Include="Collection\IStringCollection.cs" />
+    <Compile Include="Collection\StringCollection.cs" />
+    <Compile Include="CompareTool.cs" />
+    <Compile Include="HashTool.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\ILoggerEvent.cs" />
+    <Compile Include="Logging\ILoggerListener.cs" />
+    <Compile Include="Logging\ILoggerMonitor.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\LoggerBase.cs" />
+    <Compile Include="Logging\LoggerContextDisposable.cs" />
+    <Compile Include="Logging\LoggerEvent.cs" />
+    <Compile Include="Logging\LoggerFactory.cs" />
+    <Compile Include="Logging\LoggerFactoryBuilder.cs" />
+    <Compile Include="Logging\LoggerFactoryLog4net.cs" />
+    <Compile Include="Logging\LoggerFactoryNone.cs" />
+    <Compile Include="Logging\LoggerFactoryTrace.cs" />
+    <Compile Include="Logging\LoggerImplBase.cs" />
+    <Compile Include="Logging\LoggerLevel.cs" />
+    <Compile Include="Logging\LoggerLog4net.cs" />
+    <Compile Include="Logging\LoggerMonitorAppender.cs" />
+    <Compile Include="Logging\LoggerMonitorLog4net.cs" />
+    <Compile Include="Logging\LoggerMonitorNone.cs" />
+    <Compile Include="Logging\LoggerNone.cs" />
+    <Compile Include="Logging\LoggerTrace.cs" />
+    <Compile Include="Logging\StringBuilderLogger.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\VersionInfo.cs" />
+    <Compile Include="Strings.cs" />
+    <Compile Include="StringsBase.cs" />
+    <Compile Include="StringTool.cs" />
+    <Compile Include="Test\ConsoleRunner.cs" />
+    <Compile Include="Test\TestUnitBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings.resx">
+      <DependentUpon>Strings.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath)  $(SolutionDir)\..\..\ToDoList\$(ConfigurationName)\ /y</PostBuildEvent>
+  </PropertyGroup>
+</Project>

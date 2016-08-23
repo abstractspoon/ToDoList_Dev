@@ -1,0 +1,9 @@
+Changes for RTF distribution release 1.07a2
+-------------------------------------------
+
+Minor Imakefile changes.
+
+Minor change to rtf2troff in CharAttr().
+
+Changed form of distribution from sh archive to tar archive due
+to unpacking problems for certain files.

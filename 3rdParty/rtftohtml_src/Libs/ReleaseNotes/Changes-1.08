@@ -1,0 +1,27 @@
+Changes for RTF distribution release 1.08
+-----------------------------------------
+
+Now configured with WRPRC2 imake configuration files.
+
+The char->hex and hex->char functions are now public since some of the
+writers need them.  (The functions are RTFCharToHex(), RTFHexToChar())
+
+Fixed some errant calls to RTFSetToken() to pass rtfNoParam rather than -1
+when no parameter value was intended.  Also fixed description of RTFSetToken()
+in rtf.ms.
+
+rtf2troff:
+
+Incorporated Dave Davey's mods to handle characters in symbol font.
+See trf-symbol.c.  Also several entries for the maps in trf-charmap.c
+Added -h/+h options to control whether header/footer macros and traps are
+generated, with the default being off.  This is based on the presumption
+that the output is likely to be run through some troff with some macro
+package anyway, and that package will supply space at the top/bottom of
+the page.
+
+Made groff the default troff version.
+
+rtf2text:
+
+Incorporated Mike Sendall's entries for the maps.

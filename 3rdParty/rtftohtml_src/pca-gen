@@ -1,0 +1,244 @@
+# RTF PC-A character set (\pca) general map
+
+# Field 1 is the standard character name which the character value in
+# field 2 maps onto.  (It doesn't mean "to produce the character in field 1,
+# use the value in field 2.)
+
+# The character value may be given either as a single character (which will be
+# converted to the ASCII value of the character), or in numeric format, either
+# in decimal or 0xyy as hex yy.  Single or double quotes may be used to quote
+# characters.
+
+# characters in ASCII range (32-127)
+
+formula		0x06
+nobrkhyphen	0x1e
+opthyphen	0x1f
+
+space		" "
+exclam		!
+quotedbl	'"'
+numbersign	#
+dollar		$
+percent		%
+ampersand	&
+quoteright	"'"
+parenleft	(
+parenright	)
+asterisk	*
+plus		+
+comma		,
+hyphen		-
+period		.
+slash		/
+zero		0
+one		1
+two		2
+three		3
+four		4
+five		5
+six		6
+seven		7
+eight		8
+nine		9
+colon		:
+semicolon	;
+less		<
+equal		=
+greater		>
+question	?
+at		@
+A		A
+B		B
+C		C
+D		D
+E		E
+F		F
+G		G
+H		H
+I		I
+J		J
+K		K
+L		L
+M		M
+N		N
+O		O
+P		P
+Q		Q
+R		R
+S		S
+T		T
+U		U
+V		V
+W		W
+X		X
+Y		Y
+Z		Z
+bracketleft	[
+backslash	\
+bracketright	]
+asciicircum	^
+underscore	_
+quoteleft	"`"
+a		a
+b		b
+c		c
+d		d
+e		e
+f		f
+g		g
+h		h
+i		i
+j		j
+k		k
+l		l
+m		m
+n		n
+o		o
+p		p
+q		q
+r		r
+s		s
+t		t
+u		u
+v		v
+w		w
+x		x
+y		y
+z		z
+braceleft	{
+bar		|
+braceright	}
+asciitilde	~
+
+# non-ASCII characters (128-255)
+
+
+Ccedilla	0x80
+udieresis	0x81
+eacute		0x82
+acircumflex	0x83
+adieresis	0x84
+agrave		0x85
+aring		0x86
+ccedilla	0x87
+ecircumflex	0x88
+edieresis	0x89
+egrave		0x8a
+idieresis	0x8b
+icircumflex	0x8c
+igrave		0x8d
+Adieresis	0x8e
+Aring		0x8f
+Eacute		0x90
+ae		0x91
+AE		0x92
+ocircumflex	0x93
+odieresis	0x94
+ograve		0x95
+ucircumflex	0x96
+ugrave		0x97
+ydieresis	0x98
+Odieresis	0x99
+Udieresis	0x9a
+oslash		0x9b
+sterling	0x9c
+Oslash		0x9d
+# ???		0x9e
+florin		0x9f
+aacute		0xa0
+iacute		0xa1
+oacute		0xa2
+uacute		0xa3
+ntilde		0xa4
+Ntilde		0xa5
+ordfeminine	0xa6
+ordmasculine	0xa7
+questiondown	0xa8
+registered	0xa9
+logicalnot	0xaa
+# ???		0xab
+# ???		0xac
+exclamdown	0xad
+guillemotleft	0xae
+guillemotright	0xaf
+# ???		0xb0
+# ???		0xb1
+# ???		0xb2
+# ???		0xb3
+# ???		0xb4
+# ???		0xb5
+# ???		0xb6
+Agrave		0xb7
+copyright	0xb8
+# ???		0xb9
+# ???		0xba
+# ???		0xbb
+# ???		0xbc
+cent		0xbd
+yen		0xbe
+# ???		0xbf
+# ???		0xc0
+# ???		0xc1
+# ???		0xc2
+# ???		0xc3
+# ???		0xc4
+# ???		0xc5
+atilde		0xc6
+Atilde		0xc7
+# ???		0xc8
+# ???		0xc9
+# ???		0xca
+# ???		0xcb
+# ???		0xcc
+# ???		0xcd
+# ???		0xce
+# ???		0xcf
+partialdiff	0xd0
+# ???		0xd1
+# ???		0xd2
+# ???		0xd3
+# ???		0xd4
+# ???		0xd5
+# ???		0xd6
+# ???		0xd7
+# ???		0xd8
+# ???		0xd9
+# ???		0xda
+# ???		0xdb
+# ???		0xdc
+# ???		0xdd
+# ???		0xde
+# ???		0xdf
+# ???		0xe0
+germandbls	0xe1
+# ???		0xe2
+# ???		0xe3
+otilde		0xe4
+Otilde		0xe5
+mu		0xe6
+# ???		0xe7
+# ???		0xe8
+# ???		0xe9
+# ???		0xea
+# ???		0xeb
+# ???		0xec
+# ???		0xed
+# ???		0xee
+acute		0xef
+endash		0xf0
+plusminus	0xf1
+equal		0xf2
+# ???		0xf3
+paragraph	0xf4
+section		0xf5
+divide		0xf6
+# ???		0xf7
+degree		0xf8
+dieresis	0xf9
+bullet		0xfa
+# ???		0xfb
+# ???		0xfc
+# ???		0xfd
+# ???		0xfe
+nobrkspace	0xff

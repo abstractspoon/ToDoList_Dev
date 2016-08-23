@@ -1,0 +1,15 @@
+standard-names is a list of all the standard character names recognized by
+this distribution.  For every name xxx, a macro for rtfSC_xxx is created
+as a macro defining the standard code number for the name.  In order that
+the macro values correspond exactly to the ordering of the names in
+standard-names, standard-names is processed here to produce the #define's
+automatically that are added to rtf.h.
+
+stdcharnames.h is used in $(LIBSRC)/charset.c as the contents of a array
+containing a string for each standard name.  This too must correspond
+exactly to the ordering in standard-names, because the rtfSC_xxx values
+are assumed to be the same as the position of the names in the array.
+Thus stdcharnames.h is also produced from standard-names.
+
+This means that to add new standard names, you edit standard-names and run
+make again in this directory to recreate rtf.h and stdcharnames.h.

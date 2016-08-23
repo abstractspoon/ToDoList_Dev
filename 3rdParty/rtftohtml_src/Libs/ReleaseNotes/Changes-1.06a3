@@ -1,0 +1,24 @@
+Changes for RTF distribution release 1.06a3
+-------------------------------------------
+
+-----------------------------
+the RTF reader:
+
+Discard nulls now, not just \r and \n.
+
+The "Normal" style may be specified with no style number.
+
+Previously, checked for "Normal"; now check only first 6 characters,
+since the name for the normal style in some documents has stuff
+following, e.g., "Normal,Times 10 point".  Some German readers apparently
+use "Standard" for "Normal", so check that, too.
+
+Added recognition for special character controls \bullet, \emdash, \endash,
+\lquote, \rquote, \ldblquote, \rdblquote (and added sporadic support in
+various writers).
+
+Style reader ignores {\*\keyword ... } group inside of style definitions.
+It's not clear to me yet what I should do with these things, if anything.
+
+Added recognition for more keywords.
+

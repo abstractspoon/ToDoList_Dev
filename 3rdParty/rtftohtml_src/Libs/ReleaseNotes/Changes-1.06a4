@@ -1,0 +1,5 @@
+Changes for RTF distribution release 1.06a4
+-------------------------------------------
+
+Patched reader.c to fix stupid bug.
+

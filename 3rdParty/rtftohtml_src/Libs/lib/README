@@ -1,0 +1,3 @@
+Check charset maps with rtfchkmap, but you can usually ignore "duplicate"
+warnings, since each charset contains instances where multiple input
+characters map onto the same standard name.

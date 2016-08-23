@@ -1,0 +1,74 @@
+Changes for RTF distribution release 1.06
+-----------------------------------------
+
+Up through distribution 1.05, development was based on example RTF files
+generated only with Word for Macintosh 4.0 and 4.0C.  I've since had access
+to Word for Windows 1.1, which generates RTF differing somewhat from
+WfM RTF.  Experience with these differences led to some changes which make
+the reader (and thus the translators) more robust.  For instance, you should
+not get style expansion loop error messages.
+
+Some support for NeXT-generated RTF documents was added.  I don't have
+access to a NeXT, so this is all guesswork.
+
+-----------------------------
+the RTF reader:
+
+There is a new routine RTFSetToken() for synthesizing fake tokens.
+RTFToken() was renamed to RTFGetToken() for symmetry.
+
+Added a couple of symbols (brdrbar/rtfBorderBar and brdrbtw/rtfBorderBetween).
+
+Changed the strings "picwGoal" and "pichGoal" to "picwgoal" and
+"pichgoal", because the RTF spec has little g's in those.  THEN I
+saw a file in which pic[wh]Goal were really used.  Sigh.  So now
+the reader accepts both.  Maybe it should just be made case insensitive
+on control words...
+
+rtfCellMoveX -> rtfCellPos
+
+Stylesheet reader modified to correctly handle missing \sbasedon and \snext
+in stylesheet entries.  rtfBasedOnNone (=222) is available as the symbolic
+constant explicitly indicating "this style is based on no other".
+
+There are default readers for the \info and \pict groups now (they
+just skip the group).
+
+Symbols added for NeXT support:
+
+\gray
+
+
+-----------------------------
+rtfwc:
+
+Understands how to deal with multiple file arguments.
+(rtfdiag should do so, too, but doesn't yet.)
+
+
+-----------------------------
+rtf2troff:
+
+Headers and footers seem to work even worse than they did before.
+
+Yikes. I had never put in stuff to catch paper width or height changes.
+Fixed.
+
+Added some table support.  Output is generated that must be run through
+tbl.
+
+Output text lines are now broken to reasonable length if possible.
+This prevents paragraphs from coming out as one lonnnnnnnnnnnnng line
+of text and makes the output more readable/editable.
+
+Underlining is now enabled by default instead of disabled.  The output is
+still voluminous, but at least now is editable since lines are broken.
+
+The +u/-u and +s/-s options turn on/off underlining/strikethrough.
+
+Added support for handling different versions of troff that have different
+special character conventions, and for generating special character sequences
+used by macro packages (-me, -mm, -ms).  Unfortunately, this is the only
+part of the output that is specialized for particular macro packages so far.
+
+Correctly processes input containing "\" characters.

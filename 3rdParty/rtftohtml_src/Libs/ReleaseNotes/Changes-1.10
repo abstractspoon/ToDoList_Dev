@@ -1,0 +1,151 @@
+Changes for RTF distribution release 1.10
+-----------------------------------------
+
+Most of the differences between this release and release 1.09 relate to
+two major changes.
+
+- The translators included in the distribution use an architecture that
+makes the writer end of the translators less system-dependent.  This doesn't
+change the behavior of the translators much for the UNIX versions, but the
+Macintosh versions now have a real Macintosh interface (support for drag 'n'
+drop, menus, translation progress window, etc.).
+
+- Word 6.0 introduced about a zillion new RTF control words (documented
+in RTF specification version 1.2).  Some of these made the release 1.09
+reader blow up, particularly during font table and stylesheet parsing.
+The new controls are now known to the reader.
+
+The new symbols are marked as follows in rtf.h:
+
+	/* new in 1.10 */
+
+You can use these markings to see where an RTF translator might need to
+be upgraded.
+
+
+The font table reader now deals more intelligently with Word 6.0 \fonttbl
+structures.  That is, it tries not to panic immediately when it sees \fcharset
+or that a font name doesn't occur at the end of a font entry.  It parses all
+the W6.0 font tables that I've seen.  That means it doesn't choke, not
+necessarily that it collects all the information in the table.  For instance,
+the alternate font name is simply skipped if it's present.
+
+RTFFont structure now has character set, pitch, code page, type and alternate
+font name members.  The reader doesn't use any of these.  Writer code might,
+but beware that the values may not make sense yet.  I'm uncertain what good
+default values are for some of these.  Also, you must check whether or not
+the alternate font name is nil.  The reader currently skips the name, but
+even for the day when it doesn't, there's no guarantee an alternate name will
+be present.  So don't use the pointer blindly, assuming it points somewhere
+sensible.
+
+RTFStyle structure now has members identifying style type (paragraph,
+character, section) and whether or not the style's additive.
+
+8-bit characters are no longer converted to \'xx form and flagged with a
+warning message, because the RTF specification now allows them.
+
+The internal function Error() is now available publicly as RTFPanic().
+Another function RTFMsg() allows for diagnostic output but doesn't cause
+process termination.  Both functions take printf()-style arguments.
+
+
+Changes that introduce incompatibilities with release 1.09
+----------------------------------------------------------
+
+-	Some symbols were renamed or reclassified.  These are marked as
+	follows in rtf.h:
+
+	/* renamed in 1.10 */
+	/* reclassified in 1.10 */
+
+	If you've written a translator that uses a symbol that has been
+	renamed, you'll get an "undefined symbol" error when you recompile
+	with the new distribution. Consult the list below to see what you
+	need to change.  If your translator uses symbols that have been
+	reclassified, you should modify it according to the new
+	classification. If you interpret these symbols in a switch
+	statement, you'll likely get "duplicate case" errors unless you
+	move the code that interprets them to the proper switch statement.
+
+-	\cs (character style) is now classified in the rtfCharAttr class
+	rather than in the rtfParAttr class.  \ds (section style) is now
+	classified in the rtfSectAttr class rather than in the rtfParAttr
+	class.
+
+-	Renamed rtfPageNumLeft to rtfPageNumRight -- I misread the spec for
+	the symbol \pgnx; it says the parameter represents the twips from
+	the *right* margin, not the left margin.
+
+-	Renamed rtfTextDistX to rtfDistFromTextAll.
+
+-	Renamed rtfDUnderline to rtfDotUnderline, and rtfWUnderline to
+	rtfWordUnderline, which makes more sense.  I guess I wasn't sure
+	what \uld and \ulw meant before, or something.
+
+-	Reclassified rtfAnnotation (\annotation) and rtfAnnotID (\atnid) as
+	destinations in rtf.h, rather than as special characters.  (The
+	reader was returning rtfDestination correctly as the token major
+	number, but the minor number wasn't correct.)
+
+-	Reclassified rtfNextFile (\nextfile) and rtfTemplate (\template) as
+	destinations, rather than as document attributes.
+
+-	Removed rtfCurAnnot, which apparently was not being used.
+
+-	rtfIndexBold (\bxe) and rtfIndexItalic (\ixe) were reclassified as
+	index attributes, rather than as destinations.
+
+
+Other Changes
+-------------
+
+rtf2troff:
+Several data structures are now allocated dynamically rather than statically,
+to reduce the data segment size when built on a Macintosh.  This allows it
+to be built with Far Data turned off.
+
+- rtfPathSep is no more.  Anything that needs to know a path separator
+should be in an OS-specific file.
+
+- Absorbed all reader library files into reader.c.
+
+- rtfTextBuf in reader.c is now a char pointer rather than an array,
+and it's NULL until RTFInit() has been called the first time.  This is
+because it's dynamically allocated.  (Also true for internal buffer
+pushedTextBuf.)
+
+- RTFGetLibPrefix() no longer exists, because one of the OS-specifics is
+expected to be a function that can open a library file.  The function is
+set by RTFSetOpenLibFileProc(), and it's called by RTFOpenLibFile().
+
+- Created "lib-mac" folder for code used by Macintosh drivers.
+
+- Created "lib-unix" folder for code used by UNIX drivers.
+
+- lib/macintosh.c is no longer used.  Similar-function code is in the
+lib-mac directory.
+
+- New functions RTF{Get,Set}{Input,Output}Name().  Wrappers can use the
+Set functions to set the input and output names.  Writers can use the
+Get functions to find out the names if they need them.  It's up to the
+wrapper and the writer to coordinate whether the names are necessary or
+not.  For most translators, the writer code doesn't need to know the
+names.
+
+- Added new global variables rtfLineNum (a long) and rtfLinePos (an int)
+that hold the current input line and position within the line.  RTFPanic()
+prints those values when it generates an error message.  They might also
+be useful from within writer code.
+
+- RTF specification 1.2 clarifies that 222 is the "no style" number and 0
+is the "normal style" number.  The reader now follows this convention.
+Formerly I was under the impression that 222 was "normal" and that references
+to style 0 were synonymous with that.  (See Changes-1.07).  The value
+of rtfNormalStyleNum is now 0 rather than 222 and rtfNoStyleNum is a new
+constant with value 222.
+
+- Created "man" directory for manual pages.  Wrote rtf2troff.man.
+
+- Wrote rtf2groff script, which just calls rtf2troff and adds -t groff
+to the arguments.

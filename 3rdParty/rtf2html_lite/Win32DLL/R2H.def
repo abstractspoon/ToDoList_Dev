@@ -1,0 +1,11 @@
+; R2H.def : Declares the module parameters for the DLL.
+
+LIBRARY      "R2H"
+DESCRIPTION  'R2H Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
+    Convert
+    ConvertBuffer
+	r2hErrorMessage
+		

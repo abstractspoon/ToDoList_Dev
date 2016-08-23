@@ -1,0 +1,26 @@
+CC	= @CC@
+CFLAGS	= @CFLAGS@
+RANLIB	= @RANLIB@
+
+INCLUDES=../h/rtf.h ../h/stdcharnames.h ../OTHER/tokenscan.h
+
+all:	librtf.a rtf-ctrl
+
+librtf.a:	reader.o
+	ar r librtf.a reader.o
+	$(RANLIB) librtf.a 
+
+reader.o:	reader.c $(INCLUDES)
+	$(CC) $(CFLAGS) -c -I../h -I../OTHER $*.c
+
+mkrtf-ctrl:	mkrtf-ctrl.c $(INCLUDES)
+	 $(CC) $(CFLAGS) -I../h -I../OTHER mkrtf-ctrl.c -o mkrtf-ctrl
+
+rtf-ctrl:	mkrtf-ctrl $(INCLUDES) 
+	./mkrtf-ctrl
+
+rtf-ctl.o:	reader.c $(INCLUDES)
+	$(CC) $(CFLAGS) -c -I../h -I../OTHER $*.c
+
+clean:
+	rm -f librtf.a *.o
