@@ -158,7 +158,7 @@ copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
-copy unicode_debug\statisticsext.dll ..\todolist\unicode_debug /y
+copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
