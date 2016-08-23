@@ -1,0 +1,22 @@
+<TODOLIST>
+	<UITHEME STYLE = "GLASS">
+
+		<COLOR NAME = "APPBACKDARK"		R = "60" G = "85" B = "120"/>
+		<COLOR NAME = "APPBACKLIGHT"		R = "60" G = "85" B = "120"/>
+		<COLOR NAME = "APPLINESDARK"		R = "60" G = "85" B = "120"/>
+		<COLOR NAME = "APPLINESLIGHT"		R = "188" G = "199" B = "216"/>
+		<COLOR NAME = "APPTEXT"			R = "188" G = "199" B = "216"/>
+		<COLOR NAME = "MENUBACK"		R = "177" G = "188" B = "207"/>
+		<COLOR NAME = "TOOLBARDARK"		R = "255" G = "230" B = "165"/>
+		<COLOR NAME = "TOOLBARLIGHT"		R = "255" G = "245" B = "225"/>
+		<COLOR NAME = "STATUSBARDARK"		R = "255" G = "230" B = "165"/>
+		<COLOR NAME = "STATUSBARLIGHT"	R = "255" G = "245" B = "225"/>
+		<COLOR NAME = "STATUSBARTEXT"		R = "0" G = "0" B = "0"/>
+<!--
+		<COLOR NAME = "" R = "" G = "" B = ""/>
+		<COLOR NAME = "" R = "" G = "" B = ""/>
+		<COLOR NAME = "" R = "" G = "" B = ""/>
+-->
+	</UITHEME>
+</TODOLIST>
+

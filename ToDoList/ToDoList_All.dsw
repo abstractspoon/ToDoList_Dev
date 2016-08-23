@@ -1,0 +1,541 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "3rdParty"=..\3rdParty\3rdParty.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/3rdParty", WQDAAAAA
+    ..\3rdparty
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "CalendarExt"=..\CalendarExt\CalendarExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/CalendarExt", DVFAAAAA
+    ..\calendarext
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "EncryptDecrypt"=..\EncryptDecrypt\EncryptDecrypt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/EncryptDecrypt", RAEAAAAA
+    ..\encryptdecrypt
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "FMindImportExport"=..\FMindImportExport\FMindImportExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/FMindImportExport", PTEAAAAA
+    ..\fmindimportexport
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "FtpStorage"=..\FtpStorage\FtpStorage.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/FtpStorage", PFGAAAAA
+    ..\ftpstorage
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "GPExport"=..\GPExport\GPExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/GPExport", IFEAAAAA
+    ..\gpexport
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "GanttChartExt"=..\GanttChartExt\GanttChartExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/GanttChartExt", RHGAAAAA
+    ..\ganttchartext
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "KanbanBoard"=..\KanbanBoard\KanbanBoard.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/KanbanBoard", DDHAAAAA
+    ..\kanbanboard
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MLOImport"=..\MLOImport\MLOImport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/MLOImport", APEAAAAA
+    ..\mloimport
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MySpellCheck"=..\MySpellCheck\MySpellCheck.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/MySpellCheck", ZXDAAAAA
+    ..\myspellcheck
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "OdbcStorage"=..\OdbcStorage\OdbcStorage.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/OdbcStorage", VOGAAAAA
+    ..\odbcstorage
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "OutlookImpExp"=..\OutlookImpExp\OutlookImpExp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/OutlookImpExp", ECFAAAAA
+    ..\outlookimpexp
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "PlainTextImport"=..\PlainTextImport\PlainTextImport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/PlainTextImport", GOEAAAAA
+    ..\plaintextimport
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "RTFContentCtrl"=..\RTFContentCtrl\RTFContentCtrl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/RTFContentCtrl", HIEAAAAA
+    ..\rtfcontentctrl
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Shared"=..\Shared\Shared.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/Shared", HACAAAAA
+    ..\shared
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "StatisticsExt"=..\StatisticsExt\StatisticsExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/StatisticsExt", LQGAAAAA
+    ..\statisticsext
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLTest"=..\TDLTest\TDLTest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/TDLTest", TXGAAAAA
+    ..\tdltest
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLUninstall"=..\TDLUninstall\TDLUninstall.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/TDLUninstall", KVGAAAAA
+    ..\tdluninstall
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLUpdate"=..\TDLUpdate\TDLUpdate.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/TDLUpdate", RUGAAAAA
+    ..\tdlupdate
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoList"=.\ToDoList.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ToDoList", OBDAAAAA
+    .
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name EncryptDecrypt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name GPExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name MySpellCheck
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name iCalImportExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name RTFContentCtrl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name PlainTextImport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name MLOImport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name FMindImportExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name OutlookImpExp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name CalendarExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TransText
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name FtpStorage
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name GanttChartExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name StatisticsExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLUpdate
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLUninstall
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name OdbcStorage
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLTest
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name KanbanBoard
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TransText"=..\TransText\TransText.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/TransText", QAGAAAAA
+    ..\transtext
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "iCalImportExport"=..\iCalImportExport\iCalImportExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/iCalImportExport", WFEAAAAA
+    ..\icalimportexport
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ToDoList", OBDAAAAA
+    .
+    end source code control
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

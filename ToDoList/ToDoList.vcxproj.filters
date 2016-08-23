@@ -1,0 +1,981 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="FilteredToDoCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiTaskFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesExportPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesFile2Page.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesFilePage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesGenPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesMultiUserPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesShortcutsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesTaskCalcPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesTaskDefPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesTaskPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesToolPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesUIPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesUITasklistColorsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesUITasklistPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesUIVisibilityPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TabbedToDoCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskClipboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListCsvExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListCsvImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListDropTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListExporterBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListHtmlExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListTdlExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListTdlImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListTxtExporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskSelectionDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskTimeLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCAnonymizeTasklist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCCustomAttributeHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCEnumContainers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCImageList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCMergeToDoList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCSearchParamHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCStartupOptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCToolsCmdlineParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCToolsHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCUIExtensionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCWebUpdateScript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLAboutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLAddLoggedTimeDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLAnalyseLoggedTimeDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLAttribListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLCmdlineOptionsDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLColumnAttribVisibilityListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLColumnListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLColumnSelectionDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tdcreminder.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLContentMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLCsvAttributeSetupListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLCsvImportExportDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLCustomAttribFeatureComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLCustomAttributeDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLExportDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFilterBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFilterComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFilterDateComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFilterDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFilterOptionComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tdlfindresultslistctrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tdlfindtaskattributecombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFindTaskExpressionListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLFindTasksDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tdliconcombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tdlimportexportcombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportExportMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportOutlookObjectsDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLKeyboardShortcutDisplayDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLLanguageComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLLanguageDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLMultiSortDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLOffsetDatesDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLOleMessageFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLPasteFromClipboardDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLPrefMigrationDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLPrintDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLPriorityComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLQuickFindComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLRecurringTaskEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLReminderPeriodComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLReuseRecurringTaskDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLRiskComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLSendTasksDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLSetReminderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLShowReminderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTaskCtrlBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTaskIconDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTaskListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTasklistImportDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTasklistStorageMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTaskTreeCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTaskViewListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTimeTrackerDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLToolsUserInputDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLTransformDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLViewTabControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLWebUpdatePromptDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLWelcomeWizard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="todocommentsctrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrlData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrlFind.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrlMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrlReminders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoCtrlUndo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoitem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ToDoListWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TdcRecurrence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportOutlookObjectSetupListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLContentTypeCombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Interfaces\IContentControl.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\ITaskListStorage.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\IEncryption.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\IFileStorage.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\IImportExport.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\IPreferences.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\ISpellCheck.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\ITaskList.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\ITransText.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interfaces\IUIExtension.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="FilteredToDoCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesUITasklistPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiTaskFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesExportPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesFile2Page.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesFilePage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesGenPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesMultiUserPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesShortcutsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesTaskCalcPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesTaskDefPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesTaskPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesToolPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesUIPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesUITasklistColorsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesUIVisibilityPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLColumnSelectionDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TabbedToDoCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskClipboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListCsvExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListCsvImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListDropTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListExporterBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListHtmlExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\TaskListStorageMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListTdlExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListTdlImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListTxtExporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskSelectionDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskTimeLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCAnonymizeTasklist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCCustomAttributeHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcenum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCEnumContainers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCImageList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcmapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCMergeTasklist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcmsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcreminder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCSearchParamHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCStartupOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcstatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcstruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdcswitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCToolsCmdlineParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCToolsHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCUIExtensionHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCWebUpdateScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLAboutDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLAddLoggedTimeDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLAnalyseLoggedTimeDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLAttribListBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCmdlineOptionsDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLColumnAttribVisibilityListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLColumnListBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLContentMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLViewTabControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCsvAttributeSetupListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCsvImportExportDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCustomAttribFeatureComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCustomAttributeDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLExportDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFilterBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFilterComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFilterDateComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFilterDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFilterOptionComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdlfindresultslistctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdlfindtaskattributecombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFindTaskExpressionListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLFindTasksDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdliconcombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdlimportexportcombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportExportMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportOutlookObjectsDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLKeyboardShortcutDisplayDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLLanguageComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLLanguageDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLMultiSortDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLOffsetDatesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLOleMessageFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLPasteFromClipboardDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLPrefMigrationDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLPrintDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLPriorityComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLQuickFindComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLRecurringTaskEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLReminderPeriodComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLReuseRecurringTaskDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLRiskComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdlschemadef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLSendTasksDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLSetReminderDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLShowReminderDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskCtrlBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskIconDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTasklistImportDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTasklistStorageMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskTreeCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskViewListBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTimeTrackerDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLToolsUserInputDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTransformDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLWebUpdatePromptDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLWelcomeWizard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tdstringres.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="todocommentsctrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlFind.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlReminders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlUndo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoListWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportOutlookObjectSetupListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TdcRecurrence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLContentTypeCombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\abstractspoon.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\fileedit_browse.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_extra_metro.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_extra_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_toolbar_metro.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\clock.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\column_header.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\custattrib_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\custattrib_toolbar_metro.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\custattrib_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\custom_attrib_icons.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\depend_link.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\DropBox.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\English.gif">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\fileedit_go.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\find_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\find_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\find_toolbar_metro.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\find_dialog_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\GoogleDrive.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\help_button.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Unicode_Release\Itenso.Rtf.Converter.Html.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="Unicode_Release\Itenso.Rtf.Interpreter.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="Unicode_Debug\Itenso.Solutions.Community.Rtf2Html.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="Unicode_Release\Itenso.Sys.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="Unicode_Release\Itenso.Rtf.Parser.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="Unicode_Release\Itenso.Solutions.Community.Rtf2Html.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="Unicode_Debug\Itenso.Sys.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="res\list_view_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\null.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\prefs_dlg_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\shield.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\SkyDrive.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\social_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\social_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\src_control_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\style_para.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\style_table.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\style_wrap.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\task_icons_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\task_tree_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Unicode_Debug\Rtf2HtmlBridge.dll">
+      <Filter>Release</Filter>
+    </None>
+    <None Include="Unicode_Release\Rtf2HtmlBridge.dll">
+      <Filter>Debug</Filter>
+    </None>
+    <None Include="res\timetrack_btns.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\tray_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\tray_tracking_std.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\update_filter.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\wiz_header.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="RES\XPcheckboxes.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\YourLanguage.GIF">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ToDoList.rc2">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{d46db6cd-b0f6-4476-9942-76fbf3c60b8b}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{51300bfa-f563-4095-ac1c-460160b0f858}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{a65eff4e-0845-4ec5-80ce-7109a3a56e5f}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{e698842a-dea5-46e6-952c-fbfa4cb21911}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{2b469877-c242-4c54-86fc-f2a28fa0296b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release">
+      <UniqueIdentifier>{bf20db5e-eefa-4fa8-a842-f7912492d85a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ToDoList.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="RES\todolist.exe.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
+  </ItemGroup>
+</Project>

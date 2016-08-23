@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="TASK">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="COMMENTS" type="xs:string" minOccurs="0" msdata:Ordinal="0" />
+        <xs:element name="CUSTOMCOMMENTS" type="xs:string" minOccurs="0" msdata:Ordinal="2" />
+        <xs:element name="RECURRENCE" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="RECURFREQ" type="xs:string" />
+            <xs:attribute name="RECURSPECIFIC1" type="xs:string" />
+            <xs:attribute name="RECURSPECIFIC2" type="xs:string" />
+            <xs:attribute name="RECURREUSE" type="xs:string" />
+            <xs:attribute name="RECURFROM" type="xs:string" />
+            <xs:attribute name="RECURNUM" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="PERSON" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="CATEGORY" nillable="true" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:simpleContent msdata:ColumnName="CATEGORY_Text" msdata:Ordinal="0">
+              <xs:extension base="xs:string">
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="METADATA" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="selected" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="TAG" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="DEPENDS" nillable="true" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:simpleContent msdata:ColumnName="DEPENDS_Text" msdata:Ordinal="0">
+              <xs:extension base="xs:string">
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CUSTOMATTRIB" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="ID" type="xs:string" />
+            <xs:attribute name="VALUE" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="TASK" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+      <xs:attribute name="TITLE" type="xs:string" />
+      <xs:attribute name="ID" type="xs:string" />
+      <xs:attribute name="REFID" type="xs:string" />
+      <xs:attribute name="COMMENTSTYPE" type="xs:string" />
+      <xs:attribute name="STATUS" type="xs:string" />
+      <xs:attribute name="CREATEDBY" type="xs:string" />
+      <xs:attribute name="PRIORITY" type="xs:string" />
+      <xs:attribute name="RISK" type="xs:string" />
+      <xs:attribute name="PERCENTDONE" type="xs:string" />
+      <xs:attribute name="STARTDATE" type="xs:string" />
+      <xs:attribute name="STARTDATESTRING" type="xs:string" />
+      <xs:attribute name="CREATIONDATE" type="xs:string" />
+      <xs:attribute name="CREATIONDATESTRING" type="xs:string" />
+      <xs:attribute name="LASTMOD" type="xs:string" />
+      <xs:attribute name="LASTMODSTRING" type="xs:string" />
+      <xs:attribute name="PRIORITYCOLOR" type="xs:string" />
+      <xs:attribute name="PRIORITYWEBCOLOR" type="xs:string" />
+      <xs:attribute name="ICONINDEX" type="xs:string" />
+      <xs:attribute name="FLAG" type="xs:string" />
+      <xs:attribute name="TIMESPENT" type="xs:string" />
+      <xs:attribute name="TIMESPENTUNITS" type="xs:string" />
+      <xs:attribute name="DUEDATE" type="xs:string" />
+      <xs:attribute name="DUEDATESTRING" type="xs:string" />
+      <xs:attribute name="COLOR" type="xs:string" />
+      <xs:attribute name="WEBCOLOR" type="xs:string" />
+      <xs:attribute name="CALCTIMESPENT" type="xs:string" />
+      <xs:attribute name="CALCTIMESPENTUNITS" type="xs:string" />
+      <xs:attribute name="TEXTCOLOR" type="xs:string" />
+      <xs:attribute name="TEXTWEBCOLOR" type="xs:string" />
+      <xs:attribute name="ALLOCATEDBY" type="xs:string" />
+      <xs:attribute name="FILEREFPATH" type="xs:string" />
+      <xs:attribute name="EXTERNALID" type="xs:string" />
+      <xs:attribute name="HIGHESTPRIORITY" type="xs:string" />
+      <xs:attribute name="HIGHESTRISK" type="xs:string" />
+      <xs:attribute name="SUBTASKDONE" type="xs:string" />
+      <xs:attribute name="VERSION" type="xs:string" />
+      <xs:attribute name="COST" type="xs:string" />
+      <xs:attribute name="TIMEESTIMATE" type="xs:string" />
+      <xs:attribute name="TIMEESTUNITS" type="xs:string" />
+      <xs:attribute name="CALCCOST" type="xs:string" />
+      <xs:attribute name="CALCTIMEESTIMATE" type="xs:string" />
+      <xs:attribute name="CALCTIMEESTUNITS" type="xs:string" />
+      <xs:attribute name="DONEDATE" type="xs:string" />
+      <xs:attribute name="DONEDATESTRING" type="xs:string" />
+      <xs:attribute name="CALCPERCENTDONE" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PERSON" nillable="true">
+    <xs:complexType>
+      <xs:simpleContent msdata:ColumnName="PERSON_Text" msdata:Ordinal="0">
+        <xs:extension base="xs:string">
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="TAG" nillable="true">
+    <xs:complexType>
+      <xs:simpleContent msdata:ColumnName="TAG_Text" msdata:Ordinal="0">
+        <xs:extension base="xs:string">
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="TODOLIST">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="STATUS" type="xs:string" minOccurs="0" msdata:Ordinal="1" />
+        <xs:element name="VERSION" type="xs:string" minOccurs="0" msdata:Ordinal="2" />
+        <xs:element name="CUSTOMATTRIBDEF" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:attribute name="ID" type="xs:string" />
+            <xs:attribute name="LABEL" type="xs:string" />
+            <xs:attribute name="COLTITLE" type="xs:string" />
+            <xs:attribute name="TYPE" type="xs:string" />
+            <xs:attribute name="COLALIGN" type="xs:string" />
+            <xs:attribute name="FEATURES" type="xs:string" />
+            <xs:attribute name="ENABLED" type="xs:string" />
+            <xs:attribute name="LISTDATA" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element ref="TASK" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element ref="TAG" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element ref="PERSON" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="ALLOCATEDBY" nillable="true" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:simpleContent msdata:ColumnName="ALLOCATEDBY_Text" msdata:Ordinal="0">
+              <xs:extension base="xs:string">
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="PROJECTNAME" type="xs:string" />
+      <xs:attribute name="FILEFORMAT" type="xs:string" />
+      <xs:attribute name="EARLIESTDUEDATE" type="xs:string" />
+      <xs:attribute name="LASTMOD" type="xs:string" />
+      <xs:attribute name="LASTMODSTRING" type="xs:string" />
+      <xs:attribute name="NEXTUNIQUEID" type="xs:string" />
+      <xs:attribute name="FILENAME" type="xs:string" />
+      <xs:attribute name="FILEVERSION" type="xs:string" />
+      <xs:attribute name="APPVER" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="TASK" />
+        <xs:element ref="PERSON" />
+        <xs:element ref="TAG" />
+        <xs:element ref="TODOLIST" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

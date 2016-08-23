@@ -1,0 +1,19 @@
+<TODOLIST>
+<UITHEME STYLE = "GRADIENT">
+
+<COLOR NAME = "APPBACKDARK" R = "126" G = "165" B = "224"/>
+<COLOR NAME = "APPBACKLIGHT" R = "202" G = "224" B = "252"/>
+<COLOR NAME = "APPLINES" R = "0" G = "45" B = "150"/>
+<COLOR NAME = "MENUBACK" R = "158" G = "190" B = "245"/>
+<COLOR NAME = "TOOLBARDARK" R = "126" G = "165" B = "224"/>
+<COLOR NAME = "TOOLBARLIGHT" R = "202" G = "224" B = "252"/>
+<COLOR NAME = "STATUSBARDARK" R = "126" G = "165" B = "224"/>
+<COLOR NAME = "STATUSBARLIGHT" R = "202" G = "224" B = "252"/>
+<!--
+<COLOR NAME = "" R = "" G = "" B = ""/>
+<COLOR NAME = "" R = "" G = "" B = ""/>
+<COLOR NAME = "" R = "" G = "" B = ""/>
+-->
+</UITHEME>
+</TODOLIST>
+

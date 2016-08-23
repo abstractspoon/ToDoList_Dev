@@ -1,0 +1,18 @@
+Welcome to ToDoList by AbstractSpoon
+------------------------------------
+
+ToDoList is delivered in a zip file to provide maximum control and flexibility 
+over where the software is installed.
+
+To install ToDoList, carry out the following steps:
+
+1. Decide where you want to locate the software.
+
+   This can be in 'Program Files (x86)', on a thumb drive, on another hard drive, 
+   on a network, or even in the cloud using DropBox, GoogleDrive or OneDrive.
+   
+2. Create a 'ToDoList' folder in that location.
+
+3. Unzip the download into that new 'ToDoList' folder.
+
+4. Double-click 'ToDoList.exe' to start working.

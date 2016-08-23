@@ -1,0 +1,7 @@
+vssver.scc
+CopyResToBuildFolders.bat
+CopyResToBuildFolders_Exclude.txt
+Translations\backup
+.gitattributes
+.gitignore
+README.md

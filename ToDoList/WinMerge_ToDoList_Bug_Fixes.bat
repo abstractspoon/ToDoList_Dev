@@ -1,0 +1,22 @@
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\CalendarExt 	D:\_Code\CalendarExt
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\GanttChartExt 	D:\_Code\GanttChartExt
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\3rdParty 		D:\_Code\3rdParty
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\EncryptDecrypt 	D:\_Code\EncryptDecrypt
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\FMindImportExport 	D:\_Code\FMindImportExport
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\GPExport 		D:\_Code\GPExport
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\iCalImportExport 	D:\_Code\iCalImportExport
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\MLOImport 		D:\_Code\MLOImport
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\FtpStorage 		D:\_Code\FtpStorage
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\ODBCStorage 	D:\_Code\ODBCStorage
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\StatisticsExt 	D:\_Code\StatisticsExt
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\OutlookImpExp 	D:\_Code\OutlookImpExp
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\MySpellCheck 	D:\_Code\MySpellCheck
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\PlainTextImport 	D:\_Code\PlainTextImport
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\RTFContentCtrl 	D:\_Code\RTFContentCtrl
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\Interfaces		D:\_Code\Interfaces
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\Shared 		D:\_Code\Shared
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\TDLUninstall	D:\_Code\TDLUninstall
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\TDLUpdate 		D:\_Code\TDLUpdate
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\ToDoList 		D:\_Code\ToDoList
+D:\Tools\WinMerge\WinMergeU.exe D:\ToDoList_Source_Versions\ToDoList_src.%1\TransText 		D:\_Code\TransText
+
