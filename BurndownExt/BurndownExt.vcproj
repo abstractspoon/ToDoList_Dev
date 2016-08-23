@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="StatisticsExt"
+	Name="BurndownExt"
 	ProjectGUID="{ED936E84-7149-4C07-94A8-53F1A1DBD400}"
-	SccProjectName="&quot;$/StatisticsExt&quot;, LQGAAAAA"
+	SccProjectName="&quot;$/BurndownExt&quot;, LQGAAAAA"
 	SccLocalPath="."
 	SccProvider="MSSCCI:Microsoft Visual SourceSafe"
 	Keyword="MFCProj"
@@ -45,7 +45,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Unicode_Release/StatisticsExt.tlb"
+				TypeLibraryName=".\Unicode_Release/BurndownExt.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -58,7 +58,7 @@
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Unicode_Release/StatisticsExt.pch"
+				PrecompiledHeaderFile=".\Unicode_Release/BurndownExt.pch"
 				AssemblerListingLocation=".\Unicode_Release/"
 				ObjectFile=".\Unicode_Release/"
 				ProgramDataBaseFileName=".\Unicode_Release/"
@@ -81,13 +81,13 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="msimg32.lib"
-				OutputFile=".\Unicode_Release/StatisticsExt.dll"
+				OutputFile=".\Unicode_Release/BurndownExt.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				ModuleDefinitionFile=".\StatisticsExt.def"
-				ProgramDatabaseFile=".\Unicode_Release/StatisticsExt.pdb"
+				ModuleDefinitionFile=".\BurndownExt.def"
+				ProgramDatabaseFile=".\Unicode_Release/BurndownExt.pdb"
 				SubSystem="2"
-				ImportLibrary=".\Unicode_Release/StatisticsExt.lib"
+				ImportLibrary=".\Unicode_Release/BurndownExt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -102,7 +102,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Unicode_Release/StatisticsExt.bsc"
+				OutputFile=".\Unicode_Release/BurndownExt.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -146,7 +146,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Unicode_Debug/StatisticsExt.tlb"
+				TypeLibraryName=".\Unicode_Debug/BurndownExt.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -158,7 +158,7 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Unicode_Debug/StatisticsExt.pch"
+				PrecompiledHeaderFile=".\Unicode_Debug/BurndownExt.pch"
 				AssemblerListingLocation=".\Unicode_Debug/"
 				ObjectFile=".\Unicode_Debug/"
 				ProgramDataBaseFileName=".\Unicode_Debug/"
@@ -181,14 +181,14 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="true"
 				AdditionalDependencies="msimg32.lib"
-				OutputFile=".\Unicode_Debug/StatisticsExt.dll"
+				OutputFile=".\Unicode_Debug/BurndownExt.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				ModuleDefinitionFile=".\StatisticsExt.def"
+				ModuleDefinitionFile=".\BurndownExt.def"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Unicode_Debug/StatisticsExt.pdb"
+				ProgramDatabaseFile=".\Unicode_Debug/BurndownExt.pdb"
 				SubSystem="2"
-				ImportLibrary=".\Unicode_Debug/StatisticsExt.lib"
+				ImportLibrary=".\Unicode_Debug/BurndownExt.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -203,7 +203,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Unicode_Debug/StatisticsExt.bsc"
+				OutputFile=".\Unicode_Debug/BurndownExt.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -588,7 +588,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="StatisticsExt.cpp"
+				RelativePath="BurndownExt.cpp"
 				>
 				<FileConfiguration
 					Name="Unicode Release|Win32"
@@ -608,11 +608,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="StatisticsExt.def"
+				RelativePath="BurndownExt.def"
 				>
 			</File>
 			<File
-				RelativePath="StatisticsExt.rc"
+				RelativePath="BurndownExt.rc"
 				>
 				<FileConfiguration
 					Name="Unicode Release|Win32"
@@ -632,7 +632,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="StatisticsWnd.cpp"
+				RelativePath="BurndownWnd.cpp"
 				>
 				<FileConfiguration
 					Name="Unicode Release|Win32"
@@ -771,11 +771,11 @@
 				>
 			</File>
 			<File
-				RelativePath="StatisticsExt.h"
+				RelativePath="BurndownExt.h"
 				>
 			</File>
 			<File
-				RelativePath="StatisticsWnd.h"
+				RelativePath="BurndownWnd.h"
 				>
 			</File>
 			<File
@@ -792,7 +792,7 @@
 				>
 			</File>
 			<File
-				RelativePath="res\StatisticsExt.rc2"
+				RelativePath="res\BurndownExt.rc2"
 				>
 			</File>
 		</Filter>

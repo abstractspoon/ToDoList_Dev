@@ -1,10 +1,10 @@
-// StatisticsExt.cpp : Defines the initialization routines for the DLL.
+// BurndownExt.cpp : Defines the initialization routines for the DLL.
 //
 
 #include "stdafx.h"
 #include "resource.h"
-#include "StatisticsExt.h"
-#include "StatisticsWnd.h"
+#include "BurndownExt.h"
+#include "BurndownWnd.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
@@ -18,10 +18,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// CStatisticsExtApp Class
+// CBurndownExtApp Class
 //////////////////////////////////////////////////////////////////////
 
-static CStatisticsExtApp theApp;
+static CBurndownExtApp theApp;
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
@@ -41,27 +41,27 @@ DLL_DECLSPEC int GetInterfaceVersion()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CStatisticsExtApp::CStatisticsExtApp() : m_hIcon(NULL)
+CBurndownExtApp::CBurndownExtApp() : m_hIcon(NULL)
 {
 }
 
-CStatisticsExtApp::~CStatisticsExtApp()
+CBurndownExtApp::~CBurndownExtApp()
 {
 
 }
 
-void CStatisticsExtApp::Release()
+void CBurndownExtApp::Release()
 {
 	// don't delete because we are static
 }
 
-IUIExtensionWindow* CStatisticsExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
+IUIExtensionWindow* CBurndownExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
 													long nLeft, long nTop, long nWidth, long nHeight, 
 													HWND hwndParent)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	CStatisticsWnd* pWindow = new CStatisticsWnd;
+	CBurndownWnd* pWindow = new CBurndownWnd;
 
 	if (pWindow)
 	{
@@ -77,14 +77,14 @@ IUIExtensionWindow* CStatisticsExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyl
 	return NULL;
 }
 
-void CStatisticsExtApp::SetLocalizer(ITransText* pTT)
+void CBurndownExtApp::SetLocalizer(ITransText* pTT)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	CLocalizer::Initialize(pTT);
 }
 
-BOOL CStatisticsExtApp::InitInstance()
+BOOL CBurndownExtApp::InitInstance()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -93,14 +93,14 @@ BOOL CStatisticsExtApp::InitInstance()
 	return CWinApp::InitInstance();
 }
 
-void CStatisticsExtApp::SavePreferences(IPreferences* /*pPrefs*/, LPCWSTR /*szKey*/) const
+void CBurndownExtApp::SavePreferences(IPreferences* /*pPrefs*/, LPCWSTR /*szKey*/) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// TODO
 }
 
-void CStatisticsExtApp::LoadPreferences(const IPreferences* /*pPrefs*/, LPCWSTR /*szKey*/)
+void CBurndownExtApp::LoadPreferences(const IPreferences* /*pPrefs*/, LPCWSTR /*szKey*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

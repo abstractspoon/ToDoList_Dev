@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StatisticsExt.cpp">
+    <ClCompile Include="BurndownExt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StatisticsWnd.cpp">
+    <ClCompile Include="BurndownWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp">
@@ -26,18 +26,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="StatisticsExt.def">
+    <None Include="BurndownExt.def">
       <Filter>Source Files</Filter>
     </None>
     <None Include="res\icon1.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\StatisticsExt.rc2">
+    <None Include="res\BurndownExt.rc2">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="StatisticsExt.rc">
+    <ResourceCompile Include="BurndownExt.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -45,10 +45,10 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StatisticsExt.h">
+    <ClInclude Include="BurndownExt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StatisticsWnd.h">
+    <ClInclude Include="BurndownWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">

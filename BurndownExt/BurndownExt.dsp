@@ -1,35 +1,35 @@
-# Microsoft Developer Studio Project File - Name="StatisticsExt" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="BurndownExt" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=StatisticsExt - Win32 Unicode Debug
+CFG=BurndownExt - Win32 Unicode Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "StatisticsExt.mak".
+!MESSAGE NMAKE /f "BurndownExt.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "StatisticsExt.mak" CFG="StatisticsExt - Win32 Unicode Debug"
+!MESSAGE NMAKE /f "BurndownExt.mak" CFG="BurndownExt - Win32 Unicode Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "StatisticsExt - Win32 Unicode Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "StatisticsExt - Win32 Unicode Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "BurndownExt - Win32 Unicode Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "BurndownExt - Win32 Unicode Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/StatisticsExt", LQGAAAAA"
+# PROP Scc_ProjName ""$/BurndownExt", LQGAAAAA"
 # PROP Scc_LocalPath "."
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "StatisticsExt - Win32 Unicode Debug"
+!IF  "$(CFG)" == "BurndownExt - Win32 Unicode Debug"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 1
@@ -61,7 +61,7 @@ SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\statisticsext.dll ..\todolist\unicode_debug /y
 # End Special Build Tool
 
-!ELSEIF  "$(CFG)" == "StatisticsExt - Win32 Unicode Release"
+!ELSEIF  "$(CFG)" == "BurndownExt - Win32 Unicode Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
@@ -97,26 +97,26 @@ PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_
 
 # Begin Target
 
-# Name "StatisticsExt - Win32 Unicode Debug"
-# Name "StatisticsExt - Win32 Unicode Release"
+# Name "BurndownExt - Win32 Unicode Debug"
+# Name "BurndownExt - Win32 Unicode Release"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\StatisticsExt.cpp
+SOURCE=.\BurndownExt.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsExt.def
+SOURCE=.\BurndownExt.def
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsExt.rc
+SOURCE=.\BurndownExt.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsWnd.cpp
+SOURCE=.\BurndownWnd.cpp
 # End Source File
 # Begin Source File
 
@@ -134,11 +134,11 @@ SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsExt.h
+SOURCE=.\BurndownExt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsWnd.h
+SOURCE=.\BurndownWnd.h
 # End Source File
 # Begin Source File
 
@@ -154,16 +154,16 @@ SOURCE=.\res\icon1.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\StatisticsExt.rc2
+SOURCE=.\res\BurndownExt.rc2
 # End Source File
 # End Group
 # Begin Source File
 
-SOURCE=.\StatisticsExt.vcxproj
+SOURCE=.\BurndownExt.vcxproj
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatisticsExt.vcxproj.filters
+SOURCE=.\BurndownExt.vcxproj.filters
 # End Source File
 # End Target
 # End Project

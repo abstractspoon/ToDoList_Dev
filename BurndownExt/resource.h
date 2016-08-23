@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by StatisticsExt.rc
+// Used by BurndownExt.rc
 //
 #define IDR_BURNDOWN                    1000
 #define IDR_STATISTICS                  1000

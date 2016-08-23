@@ -60,7 +60,7 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Unicode_Release/StatisticsExt.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Unicode_Release/BurndownExt.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -73,7 +73,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Unicode_Release/StatisticsExt.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Unicode_Release/BurndownExt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Unicode_Release/</AssemblerListingLocation>
       <ObjectFileName>.\Unicode_Release/</ObjectFileName>
       <ProgramDataBaseFileName>.\Unicode_Release/</ProgramDataBaseFileName>
@@ -86,20 +86,20 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>.\Unicode_Release/StatisticsExt.dll</OutputFile>
+      <OutputFile>.\Unicode_Release/BurndownExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\StatisticsExt.def</ModuleDefinitionFile>
-      <ProgramDatabaseFile>.\Unicode_Release/StatisticsExt.pdb</ProgramDatabaseFile>
+      <ModuleDefinitionFile>.\BurndownExt.def</ModuleDefinitionFile>
+      <ProgramDatabaseFile>.\Unicode_Release/BurndownExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>.\Unicode_Release/StatisticsExt.lib</ImportLibrary>
+      <ImportLibrary>.\Unicode_Release/BurndownExt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Release/StatisticsExt.bsc</OutputFile>
+      <OutputFile>.\Unicode_Release/BurndownExt.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
@@ -114,7 +114,7 @@ copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Unicode_Debug/StatisticsExt.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Unicode_Debug/BurndownExt.tlb</TypeLibraryName>
       <HeaderFileName>
       </HeaderFileName>
     </Midl>
@@ -126,7 +126,7 @@ copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Unicode_Debug/StatisticsExt.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Unicode_Debug/BurndownExt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Unicode_Debug/</AssemblerListingLocation>
       <ObjectFileName>.\Unicode_Debug/</ObjectFileName>
       <ProgramDataBaseFileName>.\Unicode_Debug/</ProgramDataBaseFileName>
@@ -139,21 +139,21 @@ copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <OutputFile>.\Unicode_Debug/StatisticsExt.dll</OutputFile>
+      <OutputFile>.\Unicode_Debug/BurndownExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\StatisticsExt.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\BurndownExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Unicode_Debug/StatisticsExt.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>.\Unicode_Debug/BurndownExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>.\Unicode_Debug/StatisticsExt.lib</ImportLibrary>
+      <ImportLibrary>.\Unicode_Debug/BurndownExt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Debug/StatisticsExt.bsc</OutputFile>
+      <OutputFile>.\Unicode_Debug/BurndownExt.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
@@ -163,11 +163,11 @@ copy unicode_debug\statisticsext.dll ..\todolist\unicode_debug /y
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="StatisticsExt.cpp">
+    <ClCompile Include="BurndownExt.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="StatisticsWnd.cpp">
+    <ClCompile Include="BurndownWnd.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -179,20 +179,20 @@ copy unicode_debug\statisticsext.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="StatisticsExt.def" />
+    <None Include="BurndownExt.def" />
     <None Include="res\icon1.ico" />
-    <None Include="res\StatisticsExt.rc2" />
+    <None Include="res\BurndownExt.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="StatisticsExt.rc">
+    <ResourceCompile Include="BurndownExt.rc">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="StatisticsExt.h" />
-    <ClInclude Include="StatisticsWnd.h" />
+    <ClInclude Include="BurndownExt.h" />
+    <ClInclude Include="BurndownWnd.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>

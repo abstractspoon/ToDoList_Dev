@@ -45,13 +45,13 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "StatisticsExt DLL\0"
+            VALUE "FileDescription", "BurndownExt DLL\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "StatisticsExt\0"
+            VALUE "InternalName", "BurndownExt\0"
             VALUE "LegalCopyright", "Copyright (C) 2013\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "StatisticsExt.DLL\0"
-            VALUE "ProductName", "StatisticsExt Dynamic Link Library\0"
+            VALUE "OriginalFilename", "BurndownExt.DLL\0"
+            VALUE "ProductName", "BurndownExt Dynamic Link Library\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -114,7 +114,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\StatisticsExt.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""res\\BurndownExt.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#endif\r\n"
     "\0"
@@ -201,7 +201,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "res\StatisticsExt.rc2"  // non-Microsoft Visual C++ edited resources
+#include "res\BurndownExt.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #endif
 

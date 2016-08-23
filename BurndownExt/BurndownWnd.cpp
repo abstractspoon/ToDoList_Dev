@@ -1,10 +1,10 @@
-// StatisticsWnd.cpp : implementation file
+// BurndownWnd.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "resource.h"
-#include "StatisticsExt.h"
-#include "StatisticsWnd.h"
+#include "BurndownExt.h"
+#include "BurndownWnd.h"
 
 #include "..\shared\mapex.h"
 #include "..\shared\misc.h"
@@ -99,38 +99,38 @@ void STATSITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTi
 static CMapStatsItems* PSORTDATA = NULL;
 
 /////////////////////////////////////////////////////////////////////////////
-// CStatisticsWnd dialog
+// CBurndownWnd dialog
 
 
-CStatisticsWnd::CStatisticsWnd(CWnd* pParent /*=NULL*/)
+CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nDisplay(0),
 	m_nScale(1),
 	m_hIcon(NULL)
 {
-	//{{AFX_DATA_INIT(CStatisticsWnd)
+	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_STATISTICS);
 }
 
-CStatisticsWnd::~CStatisticsWnd()
+CBurndownWnd::~CBurndownWnd()
 {
 
 }
 
-void CStatisticsWnd::DoDataExchange(CDataExchange* pDX)
+void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CStatisticsWnd)
+	//{{AFX_DATA_MAP(CBurndownWnd)
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
 	DDX_CBIndex(pDX, IDC_DISPLAY, m_nDisplay);
 	//}}AFX_DATA_MAP
 }
 
 
-BEGIN_MESSAGE_MAP(CStatisticsWnd, CDialog)
-	//{{AFX_MSG_MAP(CStatisticsWnd)
+BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
+	//{{AFX_MSG_MAP(CBurndownWnd)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
@@ -138,9 +138,9 @@ BEGIN_MESSAGE_MAP(CStatisticsWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CStatisticsWnd message handlers
+// CBurndownWnd message handlers
 
-BOOL CStatisticsWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
+BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -157,7 +157,7 @@ BOOL CStatisticsWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWn
 	return FALSE;
 }
 
-void CStatisticsWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const 
+void CBurndownWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const 
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -165,7 +165,7 @@ void CStatisticsWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/
 
 }
 
-void CStatisticsWnd::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/, bool /*bAppOnly*/) 
+void CBurndownWnd::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/, bool /*bAppOnly*/) 
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -180,7 +180,7 @@ void CStatisticsWnd::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*s
 // 	}
 }
 
-void CStatisticsWnd::SetUITheme(const UITHEME* pTheme)
+void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -193,7 +193,7 @@ void CStatisticsWnd::SetUITheme(const UITHEME* pTheme)
 	}
 }
 
-bool CStatisticsWnd::ProcessMessage(MSG* /*pMsg*/) 
+bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/) 
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -206,28 +206,28 @@ bool CStatisticsWnd::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
-bool CStatisticsWnd::GetLabelEditRect(LPRECT /*pEdit*/)
+bool CBurndownWnd::GetLabelEditRect(LPRECT /*pEdit*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return false;
 }
 
-bool CStatisticsWnd::PrepareNewTask(ITaskList* /*pTask*/) const 
+bool CBurndownWnd::PrepareNewTask(ITaskList* /*pTask*/) const 
 { 
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return false; 
 }
 
-IUI_HITTEST CStatisticsWnd::HitTest(const POINT& /*ptScreen*/) const
+IUI_HITTEST CBurndownWnd::HitTest(const POINT& /*ptScreen*/) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return IUI_NOWHERE;
 }
 
-bool CStatisticsWnd::SelectTask(DWORD /*dwTaskID*/)
+bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -236,7 +236,7 @@ bool CStatisticsWnd::SelectTask(DWORD /*dwTaskID*/)
 	return true;
 }
 
-bool CStatisticsWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CBurndownWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -245,7 +245,7 @@ bool CStatisticsWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return true;
 }
 
-bool CStatisticsWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CBurndownWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 	switch (nAttribute)
 	{
@@ -259,7 +259,7 @@ bool CStatisticsWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 	return false;
 }
 
-bool CStatisticsWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
+bool CBurndownWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
 {
 // 	switch (nAttribute)
 // 	{
@@ -272,7 +272,7 @@ bool CStatisticsWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
 	return false;
 }
 
-void CStatisticsWnd::BuildData(const ITaskList14* pTasks)
+void CBurndownWnd::BuildData(const ITaskList14* pTasks)
 {
 	// reset data structures
 	m_data.RemoveAll();
@@ -303,7 +303,7 @@ void CStatisticsWnd::BuildData(const ITaskList14* pTasks)
 	}
 }
 
-void CStatisticsWnd::BuildData(const ITaskList14* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CBurndownWnd::BuildData(const ITaskList14* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -353,7 +353,7 @@ void CStatisticsWnd::BuildData(const ITaskList14* pTasks, HTASKITEM hTask, BOOL 
 	}
 }
 
-void CStatisticsWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
+void CBurndownWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -398,7 +398,7 @@ void CStatisticsWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	}
 }
 
-void CStatisticsWnd::UpdateDataExtents()
+void CBurndownWnd::UpdateDataExtents()
 {
 	if (m_data.GetCount())
 	{
@@ -424,7 +424,7 @@ void CStatisticsWnd::UpdateDataExtents()
 	}
 }
 
-void CStatisticsWnd::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CBurndownWnd::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	// handle task if not NULL (== root)
 	if (hTask == NULL)
@@ -481,7 +481,7 @@ void CStatisticsWnd::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_
 	}
 }
 
-COleDateTime CStatisticsWnd::GetTaskStartDate(const ITaskList14* pTasks, HTASKITEM hTask)
+COleDateTime CBurndownWnd::GetTaskStartDate(const ITaskList14* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
 	COleDateTime dtStart;
@@ -495,7 +495,7 @@ COleDateTime CStatisticsWnd::GetTaskStartDate(const ITaskList14* pTasks, HTASKIT
 	return dtStart;
 }
 
-COleDateTime CStatisticsWnd::GetTaskDoneDate(const ITaskList14* pTasks, HTASKITEM hTask)
+COleDateTime CBurndownWnd::GetTaskDoneDate(const ITaskList14* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
 	COleDateTime dtDone;
@@ -506,12 +506,12 @@ COleDateTime CStatisticsWnd::GetTaskDoneDate(const ITaskList14* pTasks, HTASKITE
 	return dtDone;
 }
 
-COleDateTime CStatisticsWnd::GetTaskDate(time64_t tDate)
+COleDateTime CBurndownWnd::GetTaskDate(time64_t tDate)
 {
 	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
 }
 
-BOOL CStatisticsWnd::RemoveDeletedTasks(const ITaskList14* pTasks)
+BOOL CBurndownWnd::RemoveDeletedTasks(const ITaskList14* pTasks)
 {
 	// iterating sorted data is quickest
 	int nOrgCount = m_aDateOrdered.GetSize();
@@ -531,7 +531,7 @@ BOOL CStatisticsWnd::RemoveDeletedTasks(const ITaskList14* pTasks)
 	return (m_aDateOrdered.GetSize() != nOrgCount);
 }
 
-void CStatisticsWnd::Release()
+void CBurndownWnd::Release()
 {
 	if (GetSafeHwnd())
 		DestroyWindow();
@@ -539,7 +539,7 @@ void CStatisticsWnd::Release()
 	delete this;
 }
 
-bool CStatisticsWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) 
+bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) 
 { 
 	switch (nCmd)
 	{
@@ -562,7 +562,7 @@ bool CStatisticsWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/)
 	return false;
 }
 
-bool CStatisticsWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const 
+bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const 
 { 
 	switch (nCmd)
 	{
@@ -586,7 +586,7 @@ bool CStatisticsWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) con
 }
 
 
-BOOL CStatisticsWnd::OnEraseBkgnd(CDC* pDC) 
+BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -602,7 +602,7 @@ BOOL CStatisticsWnd::OnEraseBkgnd(CDC* pDC)
 	return CDialog::OnEraseBkgnd(pDC);
 }
 
-HBRUSH CStatisticsWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+HBRUSH CBurndownWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	
@@ -616,7 +616,7 @@ HBRUSH CStatisticsWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-BOOL CStatisticsWnd::OnInitDialog() 
+BOOL CBurndownWnd::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 
@@ -645,7 +645,7 @@ BOOL CStatisticsWnd::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CStatisticsWnd::OnSize(UINT nType, int cx, int cy) 
+void CBurndownWnd::OnSize(UINT nType, int cx, int cy) 
 {
 	CDialog::OnSize(nType, cx, cy);
 	
@@ -672,7 +672,7 @@ void CStatisticsWnd::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-void CStatisticsWnd::SortData()
+void CBurndownWnd::SortData()
 {
 	if (!IsDataSorted())
 	{
@@ -684,7 +684,7 @@ void CStatisticsWnd::SortData()
 	}
 }
 
-int CStatisticsWnd::CompareStatItems(const void* pV1, const void* pV2)
+int CBurndownWnd::CompareStatItems(const void* pV1, const void* pV2)
 {
 	ASSERT(PSORTDATA);
 
@@ -720,7 +720,7 @@ int CStatisticsWnd::CompareStatItems(const void* pV1, const void* pV2)
 	return 0;
 }
 
-BOOL CStatisticsWnd::IsDataSorted() const
+BOOL CBurndownWnd::IsDataSorted() const
 {
 	int nNumItems = m_aDateOrdered.GetSize();
 	COleDateTime dtLast;
@@ -751,7 +751,7 @@ BOOL CStatisticsWnd::IsDataSorted() const
 	return TRUE;
 }
 
-int CStatisticsWnd::CalculateRequiredScale() const
+int CBurndownWnd::CalculateRequiredScale() const
 {
 	// calculate new x scale
 	int nDataWidth = m_graph.GetDataArea().cx;
@@ -771,7 +771,7 @@ int CStatisticsWnd::CalculateRequiredScale() const
 	return SCALE_YEAR;
 }
 
-void CStatisticsWnd::RebuildXScale()
+void CBurndownWnd::RebuildXScale()
 {
 	m_graph.ClearXScaleLabels();
 
@@ -832,7 +832,7 @@ void CStatisticsWnd::RebuildXScale()
 	//m_graph.Invalidate();
 }
 
-COleDateTime CStatisticsWnd::GetGraphStartDate() const
+COleDateTime CBurndownWnd::GetGraphStartDate() const
 {
 	COleDateTime dtStart(m_dtEarliestDone);
 
@@ -881,7 +881,7 @@ COleDateTime CStatisticsWnd::GetGraphStartDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-COleDateTime CStatisticsWnd::GetGraphEndDate() const
+COleDateTime CBurndownWnd::GetGraphEndDate() const
 {
 	COleDateTime dtEnd = max(m_dtLatestDone, COleDateTime::GetCurrentTime()) + COleDateTimeSpan(1.0);
 
@@ -932,7 +932,7 @@ COleDateTime CStatisticsWnd::GetGraphEndDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-void CStatisticsWnd::BuildGraph()
+void CBurndownWnd::BuildGraph()
 {
 	m_graph.ClearData(0);
 
@@ -955,7 +955,7 @@ void CStatisticsWnd::BuildGraph()
 	m_graph.CalcDatas();
 }
 
-int CStatisticsWnd::GetDataDuration() const
+int CBurndownWnd::GetDataDuration() const
 {
 	double dStart = m_dtEarliestDone;
 	ASSERT(dStart > 0.0);
@@ -966,7 +966,7 @@ int CStatisticsWnd::GetDataDuration() const
 	return ((int)dEnd - (int)dStart);
 }
 
-int CStatisticsWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
+int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
 {
 	// work thru items until we hit the first task whose 
 	// start date > date, counting how many are not complete as we go
@@ -989,7 +989,7 @@ int CStatisticsWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
 	return nNumNotDone;
 }
 
-BOOL CStatisticsWnd::GetStatsItem(DWORD dwTaskID, STATSITEM& si) const
+BOOL CBurndownWnd::GetStatsItem(DWORD dwTaskID, STATSITEM& si) const
 {
 	return m_data.Lookup(dwTaskID, si);
 }

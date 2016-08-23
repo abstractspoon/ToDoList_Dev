@@ -1,10 +1,10 @@
-#if !defined(AFX_StatisticsWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)
-#define AFX_StatisticsWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_
+#if !defined(AFX_BurndownWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)
+#define AFX_BurndownWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// StatisticsWnd.h : header file
+// BurndownWnd.h : header file
 //
 
 #include <afxtempl.h>
@@ -39,14 +39,14 @@ protected:
 typedef CMap<DWORD, DWORD, STATSITEM, STATSITEM&> CMapStatsItems;
 
 /////////////////////////////////////////////////////////////////////////////
-// CStatisticsWnd dialog
+// CBurndownWnd dialog
 
-class CStatisticsWnd : public CDialog, public IUIExtensionWindow
+class CBurndownWnd : public CDialog, public IUIExtensionWindow
 {
 // Construction
 public:
-	CStatisticsWnd(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CStatisticsWnd();
+	CBurndownWnd(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CBurndownWnd();
 
 	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
@@ -82,7 +82,7 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CStatisticsWnd)
+	//{{AFX_DATA(CBurndownWnd)
 	enum { IDD = IDD_STATISTICS_DLG };
 	CStatic	m_stFrame;
 	int		m_nDisplay;
@@ -100,7 +100,7 @@ protected:
 protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CStatisticsWnd)
+	//{{AFX_VIRTUAL(CBurndownWnd)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
@@ -112,7 +112,7 @@ protected:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(CStatisticsWnd)
+	//{{AFX_MSG(CBurndownWnd)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -146,4 +146,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_StatisticsWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)
+#endif // !defined(AFX_BurndownWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)
