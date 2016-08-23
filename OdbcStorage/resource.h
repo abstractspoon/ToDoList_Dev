@@ -1,0 +1,126 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Developer Studio generated include file.
+// Used by OdbcStorage.rc
+//
+#define IDD_DATABASESELECTION_DIALOG    2003
+#define IDC_DATABASE_LIST               2003
+#define IDC_NEW_DATABASE                2004
+#define IDC_TASKLISTS                   2006
+#define IDC_ALLOCTOLIST                 2007
+#define IDC_DELETE_DATABASE             2008
+#define IDC_TASKS_TABLENAME             2009
+#define IDC_TASKS_PARENTKEYFIELD        2010
+#define IDC_TASKS_KEYFIELD              2011
+#define IDC_TASKS_TASKLISTKEYFIELD      2012
+#define IDC_TASKLISTS_TABLENAME         2013
+#define IDC_TASKLISTS_KEYFIELD          2014
+#define IDC_TASKLISTS_NAMEFIELD         2015
+#define IDC_ALLOCTO_TABLENAME           2016
+#define IDC_ALLOCTO_KEYFIELD            2017
+#define IDC_ALLOCTO_NAMEFIELD           2018
+#define IDC_ATTRIBUTESETUP              2019
+#define IDC_TASKS_TASKLISTKEYFIELD2     2019
+#define IDS_TASKATTRIB_COL              9001
+#define IDS_TASKFIELD_COL               9002
+#define IDS_ATTRIBTABLE_COL             9003
+#define IDS_ATTRIBFIELD_COL             9004
+#define IDS_ATTRIBKEYFIELD_COL          9004
+#define IDS_LINKTABLE_COL               9005
+#define IDS_LINKTASKFIELD_COL           9006
+#define IDS_LINKATTRIBFIELD_COL         9007
+#define IDC_TASKSTABLE                  9008
+#define IDS_ATTRIBCONTENTFIELD_COL      9008
+#define IDR_ODBCSTORAGE                 9009
+#define IDS_LINKTASKLISTFIELD_COL       9009
+#define IDC_TASKATTRIBUTESETUP          9010
+#define IDD_SETUP_DIALOG                9011
+#define IDD_DATABASESETUP_DIALOG_ORG    9011
+#define IDC_VALIDATE                    9012
+#define IDD_DATABASESETUP_DIALOG        9012
+#define IDS_TA_DONE                     9013
+#define IDS_TA_PRIORITY                 9014
+#define IDS_TA_ALLOCTO                  9015
+#define IDS_TA_ALLOCBY                  9016
+#define IDS_TA_DONEDATE                 9017
+#define IDS_TA_DUEDATE                  9018
+#define IDC_TABLESETUP                  9018
+#define IDS_TA_STARTDATE                9019
+#define IDS_TA_TIMEEST                  9020
+#define IDS_TA_TIMESPENT                9021
+#define IDS_TA_CATEGORY                 9022
+#define IDS_TA_STATUS                   9023
+#define IDS_TA_CREATEDATE               9024
+#define IDS_TA_CREATEDBY                9025
+#define IDS_TA_ID                       9026
+#define IDS_TA_POS                      9027
+#define IDS_TA_PERCENT                  9028
+#define IDS_TA_FILEREF                  9029
+#define IDS_TA_FLAG                     9030
+#define IDS_TA_TRACKTIME                9031
+#define IDS_TA_MODIFYDATE               9032
+#define IDS_TA_RISK                     9033
+#define IDS_TA_EXTERNALID               9034
+#define IDS_TA_COST                     9035
+#define IDS_TA_DEPENDS                  9036
+#define IDS_TA_TITLE                    9037
+#define IDS_TA_RECURRENCE               9038
+#define IDS_TA_VERSION                  9039
+#define IDS_TA_TAGS                     9040
+#define IDS_TA_RECENTEDIT               9041
+#define IDS_TA_NAME                     9042
+#define IDS_TA_ICON                     9043
+#define IDS_TA_COLOR                    9044
+#define IDS_TA_COMMENTS                 9045
+#define IDS_TA_PARENTID                 9046
+#define IDS_DATABASE_COL                9047
+#define IDS_DBSETUP_COL                 9048
+#define IDS_DBSETUP_DLGTITLE            9049
+#define IDS_ERR_TASKTABLE               9050
+#define IDS_ERR_TABLENAME               9050
+#define IDS_ERR_ALLOCTTOKEYFIELD        9051
+#define IDS_ERR_TABLEKEYFIELD           9051
+#define IDS_ERR_ALLOCTTONAMEFIELD       9052
+#define IDS_ERR_TABLENAMEFIELD          9052
+#define IDS_ERR_ATTRIBFIELD             9053
+#define IDS_ERR_ATTRIBKEYFIELD          9053
+#define IDS_ERR_LINKTASKFIELD           9054
+#define IDS_ERR_LINKATTRIBFIELD         9055
+#define IDS_ERR_VALIDATION              9056
+#define IDS_TABLE_COL                   9057
+#define IDS_TABLENAME_COL               9058
+#define IDS_KEYFIELD_COL                9059
+#define IDS_CONTENTFIELD_COL            9060
+#define IDS_TASKSTABLE                  9061
+#define IDS_TASKLISTSTABLE              9062
+#define IDS_ALLOCTOTABLE                9063
+#define IDS_NOT_APPLICABLE              9064
+#define IDS_ERR_TASKKEYFIELD            9065
+#define IDS_ERR_TASKLISTSKEYFIELD       9066
+#define IDS_ERR_ATTRIBNAMEFIELD         9066
+#define IDS_ERR_TASKLISTSNAMEFIELD      9067
+#define IDS_ERR_SELECTEDDATABASE        9067
+#define IDS_CONFIRM_DELETE_DB           9068
+#define IDS_ERR_ONEORMOREATTRIB         9069
+#define IDS_ERR_LINKTASKLISTFIELD       9070
+#define IDS_ERR_TASKTABLETASKLISTFIELD  9071
+#define IDS_ERR_NEEDTASKLISTID          9072
+#define IDS_ERR_FAILEDTOCONNECT         9073
+#define IDS_ERR_NOMATCHINGDATA          9074
+#define IDS_ERR_NOMATCHINGDATA_TASKLIST 9075
+#define IDS_ERR_NOMATCHINGDATA_PERSON   9076
+#define IDS_ERR_NOMATCHINGDATA_TASKLISTANDPERSON 9077
+#define IDS_ERR_TASKTABLEPARENTFIELD    9078
+#define IDS_TDLFILEOPENFILTER           9079
+#define IDS_ERR_DATABASE_EXISTS         9080
+#define IDS_ERR_NOCHANGEDDATA           9081
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        2004
+#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_CONTROL_VALUE         2010
+#define _APS_NEXT_SYMED_VALUE           2000
+#endif
+#endif
