@@ -8,10 +8,10 @@
 #include "MDContentControlBridge.h"
 #include "resource.h"
 
-#include "..\..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\..\Interfaces\IPreferences.h"
-#include "..\..\..\..\Interfaces\UITheme.h"
-#include "..\..\..\..\Interfaces\ISpellcheck.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\ISpellcheck.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

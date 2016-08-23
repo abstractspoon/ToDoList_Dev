@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\..\..\Interfaces\IUIExtension.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\IUIExtension.h"
 
 #include <vcclr.h>
 using namespace DayViewUIExtension;

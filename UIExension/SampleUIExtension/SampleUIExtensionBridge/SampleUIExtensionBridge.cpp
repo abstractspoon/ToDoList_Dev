@@ -8,10 +8,10 @@
 #include "stdafx.h"
 #include "SampleUIExtensionBridge.h"
 
-#include "..\..\..\..\Interfaces\ITasklist.h"
-#include "..\..\..\..\Interfaces\ITransText.h"
-#include "..\..\..\..\Interfaces\IPreferences.h"
-#include "..\..\..\..\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\ITasklist.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Core\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

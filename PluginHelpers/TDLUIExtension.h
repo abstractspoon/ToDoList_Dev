@@ -6,7 +6,7 @@
 #include "TDLTaskList.h"
 #include "TDLPreferences.h"
 
-#include "..\..\Interfaces\IUIExtension.h"
+#include "..\..\ToDoList_Core\Interfaces\IUIExtension.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

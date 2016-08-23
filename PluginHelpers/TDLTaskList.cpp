@@ -6,7 +6,7 @@
 #include "TDLTasklist.h"
 #include "TDLUIExtension.h"
 
-#include "..\..\Interfaces\ITasklist.h"
+#include "..\..\ToDoList_Core\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

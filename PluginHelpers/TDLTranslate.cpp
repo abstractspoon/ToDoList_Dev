@@ -5,7 +5,7 @@
 #include "pluginhelpers.h"
 #include "TDLTranslate.h"
 
-#include "..\..\Interfaces\ITransText.h"
+#include "..\..\ToDoList_Core\Interfaces\ITransText.h"
 
 using namespace TDLPluginHelpers;
 
