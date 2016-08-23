@@ -9,12 +9,30 @@ Package=<5>
 {{{
     begin source code control
     "$/3rdParty", WQDAAAAA
-    ..\3rdparty
+    ..\..\3rdparty
     end source code control
 }}}
 
 Package=<4>
 {{{
+}}}
+
+###############################################################################
+
+Project: "BurndownExt"=..\BurndownExt\BurndownExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -25,7 +43,7 @@ Package=<5>
 {{{
     begin source code control
     "$/CalendarExt", DVFAAAAA
-    ..\calendarext
+    ..\..\calendarext
     end source code control
 }}}
 
@@ -47,7 +65,7 @@ Package=<5>
 {{{
     begin source code control
     "$/EncryptDecrypt", RAEAAAAA
-    ..\encryptdecrypt
+    ..\..\encryptdecrypt
     end source code control
 }}}
 
@@ -66,7 +84,7 @@ Package=<5>
 {{{
     begin source code control
     "$/FMindImportExport", PTEAAAAA
-    ..\fmindimportexport
+    ..\..\fmindimportexport
     end source code control
 }}}
 
@@ -88,7 +106,7 @@ Package=<5>
 {{{
     begin source code control
     "$/FtpStorage", PFGAAAAA
-    ..\ftpstorage
+    ..\..\ftpstorage
     end source code control
 }}}
 
@@ -110,7 +128,7 @@ Package=<5>
 {{{
     begin source code control
     "$/GPExport", IFEAAAAA
-    ..\gpexport
+    ..\..\gpexport
     end source code control
 }}}
 
@@ -132,7 +150,7 @@ Package=<5>
 {{{
     begin source code control
     "$/GanttChartExt", RHGAAAAA
-    ..\ganttchartext
+    ..\..\ganttchartext
     end source code control
 }}}
 
@@ -154,7 +172,7 @@ Package=<5>
 {{{
     begin source code control
     "$/KanbanBoard", DDHAAAAA
-    ..\kanbanboard
+    ..\..\kanbanboard
     end source code control
 }}}
 
@@ -173,7 +191,7 @@ Package=<5>
 {{{
     begin source code control
     "$/MLOImport", APEAAAAA
-    ..\mloimport
+    ..\..\mloimport
     end source code control
 }}}
 
@@ -195,7 +213,7 @@ Package=<5>
 {{{
     begin source code control
     "$/MySpellCheck", ZXDAAAAA
-    ..\myspellcheck
+    ..\..\myspellcheck
     end source code control
 }}}
 
@@ -211,7 +229,7 @@ Package=<5>
 {{{
     begin source code control
     "$/OdbcStorage", VOGAAAAA
-    ..\odbcstorage
+    ..\..\odbcstorage
     end source code control
 }}}
 
@@ -233,7 +251,7 @@ Package=<5>
 {{{
     begin source code control
     "$/OutlookImpExp", ECFAAAAA
-    ..\outlookimpexp
+    ..\..\outlookimpexp
     end source code control
 }}}
 
@@ -255,7 +273,7 @@ Package=<5>
 {{{
     begin source code control
     "$/PlainTextImport", GOEAAAAA
-    ..\plaintextimport
+    ..\..\plaintextimport
     end source code control
 }}}
 
@@ -277,7 +295,7 @@ Package=<5>
 {{{
     begin source code control
     "$/RTFContentCtrl", HIEAAAAA
-    ..\rtfcontentctrl
+    ..\..\rtfcontentctrl
     end source code control
 }}}
 
@@ -299,34 +317,12 @@ Package=<5>
 {{{
     begin source code control
     "$/Shared", HACAAAAA
-    ..\shared
+    ..\..\shared
     end source code control
 }}}
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name 3rdParty
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "StatisticsExt"=..\StatisticsExt\StatisticsExt.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-    begin source code control
-    "$/StatisticsExt", LQGAAAAA
-    ..\statisticsext
-    end source code control
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name Shared
-    End Project Dependency
     Begin Project Dependency
     Project_Dep_Name 3rdParty
     End Project Dependency
@@ -340,7 +336,7 @@ Package=<5>
 {{{
     begin source code control
     "$/TDLTest", TXGAAAAA
-    ..\tdltest
+    ..\..\tdltest
     end source code control
 }}}
 
@@ -362,7 +358,7 @@ Package=<5>
 {{{
     begin source code control
     "$/TDLUninstall", KVGAAAAA
-    ..\tdluninstall
+    ..\..\tdluninstall
     end source code control
 }}}
 
@@ -384,7 +380,7 @@ Package=<5>
 {{{
     begin source code control
     "$/TDLUpdate", RUGAAAAA
-    ..\tdlupdate
+    ..\..\tdlupdate
     end source code control
 }}}
 
@@ -406,7 +402,7 @@ Package=<5>
 {{{
     begin source code control
     "$/ToDoList", OBDAAAAA
-    .
+    ..\..\todolist
     end source code control
 }}}
 
@@ -475,6 +471,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name KanbanBoard
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name BurndownExt
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -485,7 +484,7 @@ Package=<5>
 {{{
     begin source code control
     "$/TransText", QAGAAAAA
-    ..\transtext
+    ..\..\transtext
     end source code control
 }}}
 
@@ -507,7 +506,7 @@ Package=<5>
 {{{
     begin source code control
     "$/iCalImportExport", WFEAAAAA
-    ..\icalimportexport
+    ..\..\icalimportexport
     end source code control
 }}}
 
@@ -529,7 +528,7 @@ Package=<5>
 {{{
     begin source code control
     "$/ToDoList", OBDAAAAA
-    .
+    ..\..\todolist
     end source code control
 }}}
 
