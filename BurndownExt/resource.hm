@@ -1,0 +1,4 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by StatisticsExt.rc
+//
+#define HIDC_DISPLAY                    0xc26803f7    // IDD_STATISTICS_DLG
