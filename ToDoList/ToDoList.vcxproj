@@ -748,6 +748,7 @@ copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\null.ico" />
     <None Include="res\prefs_dlg_std.ico" />
     <None Include="res\shield.ico" />
+    <None Include="res\simpletext.ico" />
     <None Include="res\SkyDrive.ico" />
     <None Include="res\social_toolbar.bmp" />
     <None Include="res\social_toolbar_std.bmp" />
@@ -757,7 +758,9 @@ copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\style_wrap.ico" />
     <None Include="res\task_icons_std.bmp" />
     <None Include="res\task_tree_std.ico" />
+    <None Include="res\timetrac.bmp" />
     <None Include="res\timetrack_btns.bmp" />
+    <None Include="res\timetrack_toolbar_std.bmp" />
     <None Include="res\ToDoList.rc2" />
     <None Include="res\tray_std.ico" />
     <None Include="res\tray_tracking_std.ico" />

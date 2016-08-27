@@ -134,16 +134,14 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, const CString& sFolde
 		// use ISO date and 24 hour time so that backups can be sorted 
 		// by name in date order
 		CString sDate = COleDateTime::GetCurrentTime().Format(_T("%Y-%m-%d_%H-%M-%S"));
-		sFExt = "." + sDate + sFExt;
+		sFExt = ('.' + sDate + sFExt);
 	}
 
 	// and app version
 	if (dwFlags & FBS_APPVERSION)
 	{
-		CString sVersion = FileMisc::GetAppVersion();
-		sVersion.Replace(_T("."), _T("_"));
-
-		sFExt = "." + sVersion + sFExt;
+		CString sVersion = FileMisc::GetAppVersion('_');
+		sFExt = ('.' + sVersion + sFExt);
 	}
 
 	// add extension before existing file extension
@@ -1571,40 +1569,30 @@ int FileMisc::GetModuleDriveType(HMODULE hMod)
 	return CDriveInfo::GetPathType(GetModuleFilePath(hMod));
 }
 
-CString FileMisc::GetModuleVersion(LPCTSTR szModulePath)
+CString FileMisc::GetModuleVersion(LPCTSTR szModulePath, TCHAR cSep)
 {
-	CFileVersionInfo fvi;
-
-	if (fvi.Create(szModulePath))
-		return fvi.GetFileVersion();
-
-	// else
-	return EMPTYSTRING;
-}
-
-CString FileMisc::GetModuleVersion(HMODULE hMod)
-{
-	return GetModuleVersion(GetModuleFilePath(hMod));
-}
-
-BOOL FileMisc::GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts)
-{
+	CString sModuleVer;
 	CFileVersionInfo fvi;
 
 	if (fvi.Create(szModulePath))
 	{
-		aVersionParts.RemoveAll();
+		sModuleVer = fvi.GetFileVersion();
 
-		aVersionParts.Add(fvi.GetFileVersion(3));
-		aVersionParts.Add(fvi.GetFileVersion(2));
-		aVersionParts.Add(fvi.GetFileVersion(1));
-		aVersionParts.Add(fvi.GetFileVersion(0));
-
-		return TRUE;
+		if (!sModuleVer.Replace(',', cSep))
+			sModuleVer.Replace('.', cSep);
 	}
 
-	// else
-	return FALSE;
+	return sModuleVer;
+}
+
+CString FileMisc::GetModuleVersion(HMODULE hMod, TCHAR cSep)
+{
+	return GetModuleVersion(GetModuleFilePath(hMod), cSep);
+}
+
+BOOL FileMisc::GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts)
+{
+	return (SplitVersionNumber(GetModuleVersion(szModulePath), aVersionParts) > 0);
 }
 
 BOOL FileMisc::GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts)
@@ -1783,9 +1771,9 @@ void FileMisc::LogAppModuleState(FB_MODULE_SORT nSort)
 	}
 }
 
-CString FileMisc::GetAppVersion()
+CString FileMisc::GetAppVersion(TCHAR cSep)
 {
-	return GetModuleVersion();
+	return GetModuleVersion((HMODULE)NULL, cSep);
 }
 
 BOOL FileMisc::GetAppVersion(CDWordArray& aVersionParts)
@@ -1795,17 +1783,16 @@ BOOL FileMisc::GetAppVersion(CDWordArray& aVersionParts)
 
 int FileMisc::SplitVersionNumber(LPCTSTR szVersion, CDWordArray& aVersionParts)
 {
-	CStringArray aParts;
-	
 	// replace commas with periods to simplify things
 	CString sVersion(szVersion);
-	sVersion.Replace(_T(","), _T("."));
+	sVersion.Replace(',', '.');
+
+	CStringArray aParts;
 
 	if (!Misc::Split(szVersion, aParts, '.', FALSE))
 		return 0;
 
 	aVersionParts.RemoveAll();
-
 	int nPart = aParts.GetSize();
 
 	while (nPart--)

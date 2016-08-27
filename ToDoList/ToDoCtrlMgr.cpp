@@ -1208,10 +1208,7 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 			nNumFiles = 0;
 
 			// get current app version once only
-			CDWordArray aAppVer;
-
-			FileMisc::GetAppVersion(aAppVer);
-			CString sAppVer = Misc::FormatArray(aAppVer, '_');
+			CString sAppVer = FileMisc::GetAppVersion('_');
 			ASSERT(sFName.Find(sAppVer) != -1);
 
 			// find the first previous version having backups

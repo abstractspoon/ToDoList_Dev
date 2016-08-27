@@ -944,6 +944,15 @@
     <None Include="res\ToDoList.rc2">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="res\simpletext.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\timetrac.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\timetrack_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

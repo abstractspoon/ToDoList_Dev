@@ -84,18 +84,18 @@ BOOL CTDCWebUpdateScript::CheckForUpdates(BOOL bPreRelease)
 	}
 	
 	// check against current app version
-	CString sThisExeVer(FileMisc::GetModuleVersion());
+	CString sAppVer(FileMisc::GetAppVersion());
 
 	// NOTE: only allow updates to pre-releases 
 	// if the app already is one of these versions
 	if (bPreRelease)
 	{
-		if (IsPreRelease(sScriptExeVer) && !IsPreRelease(sThisExeVer))
+		if (IsPreRelease(sScriptExeVer) && !IsPreRelease(sAppVer))
 			return FALSE;
 	}
 	
 	// else simple compare
-	return (FileMisc::CompareVersions(sThisExeVer, sScriptExeVer, 4) < 0);
+	return (FileMisc::CompareVersions(sAppVer, sScriptExeVer, 4) < 0);
 }
 
 BOOL CTDCWebUpdateScript::LoadScript(const CString& sScriptUrl)

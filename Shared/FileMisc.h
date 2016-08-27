@@ -199,8 +199,8 @@ namespace FileMisc
 	CString GetModuleFilePath(HMODULE hMod = NULL);
 	CString GetModuleFolder(HMODULE hMod = NULL);
 	int GetModuleDriveType(HMODULE hMod = NULL);
-	CString GetModuleVersion(HMODULE hMod = NULL);
-	CString GetModuleVersion(LPCTSTR szModulePath);
+	CString GetModuleVersion(HMODULE hMod = NULL, TCHAR cSep = '.');
+	CString GetModuleVersion(LPCTSTR szModulePath, TCHAR cSep = '.');
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
 	
@@ -212,7 +212,7 @@ namespace FileMisc
 	int GetAppModuleFilePaths(CStringArray& aFileNames, FB_MODULE_SORT nSort = FBM_UNSORTED);
 	int GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted = TRUE);
 	
-	CString GetAppVersion();
+	CString GetAppVersion(TCHAR cSep = '.');
 	BOOL GetAppVersion(CDWordArray& aVersionParts);
 	BOOL SplitVersionNumber(LPCTSTR szVersion, CDWordArray& aVersionParts);
 	int CompareVersions(LPCTSTR szVersion1, LPCTSTR szVersion2, int nNumItems = 0);
