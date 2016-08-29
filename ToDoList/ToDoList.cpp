@@ -822,7 +822,6 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 		
 		UpgradePreferences(prefs);
-		prefs.Save();
 
 		// check for web updates
 		if (prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE))
@@ -929,14 +928,17 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 {
 	CString sExisting(bExisting ? _T("existing ") : _T(""));
-
+	
 	if (bIni)
 	{
 		FileMisc::LogText(_T("Using %sini file for preferences: %s"), sExisting, szPrefs);
 		
 		free((void*)m_pszProfileName);
 		m_pszProfileName = _tcsdup(szPrefs);
-		
+
+		free((void*)m_pszRegistryKey);
+		m_pszRegistryKey = NULL;
+				
 		CPreferences::Initialise(szPrefs, TRUE);
 	}
 	else
@@ -944,6 +946,9 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		FileMisc::LogText(_T("Using %sregistry settings for preferences"), sExisting);
 		
 		SetRegistryKey(REGKEY);
+
+		free((void*)m_pszProfileName);
+		m_pszProfileName = NULL;
 		
 		CPreferences::Initialise(APPREGKEY, FALSE);
 	}
@@ -1052,7 +1057,7 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 	UNREFERENCED_PARAMETER(prefs);
 
 	// we don't handle the registry because it's too hard (for now)
-	if (m_pszRegistryKey)
+	if (!CPreferences::UsesIni())
 		return;
 	
 	// remove preferences for all files _not_ in the MRU list
@@ -1117,6 +1122,8 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 			}
 		}
 	}
+
+	prefs.Save();
 */
 }
 
@@ -1198,17 +1205,14 @@ void CToDoListApp::OnImportPrefs()
 				{
 					if (AfxMessageBox(CEnString(IDS_POSTIMPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 					{
-						// renames existing prefs file
+						SetPreferences(FALSE, APPREGKEY, FALSE);
+
+						// reset prefs
+						m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
+
+						// rename existing prefs file
 						CString sNewName = (sIniPath + _T(".bak"));
-						
-						if (FileMisc::MoveFile(sIniPath, sNewName, TRUE, TRUE))
-						{
-							// and initialize the registry 
-							SetRegistryKey(REGKEY);
-							
-							// reset prefs
-							m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
-						}
+						VERIFY (FileMisc::MoveFile(sIniPath, sNewName, TRUE, TRUE));
 					}
 				}
 				else // reset prefs
@@ -1270,11 +1274,7 @@ void CToDoListApp::OnExportPrefs()
 				{
 					if (AfxMessageBox(CEnString(IDS_POSTEXPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 					{
-						free((void*)m_pszRegistryKey);
-						m_pszRegistryKey = NULL;
-						
-						free((void*)m_pszProfileName);
-						m_pszProfileName = _tcsdup(sIniPath);
+						SetPreferences(TRUE, sIniPath, FALSE);
 						
 						// reset prefs
 						m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
