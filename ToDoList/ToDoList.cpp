@@ -981,6 +981,7 @@ BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime,
 				return FALSE; // quit app
 
 			// else
+			CLocalizer::Release();
 			m_sLanguageFile = dialog.GetLanguageFile();
 		}
 	}
