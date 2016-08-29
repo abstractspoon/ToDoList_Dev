@@ -4150,8 +4150,8 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 
 	ValidateMonthDisplay(nNewDisplay, nNewMonthWidth);
 
-	if (nNewDisplay == m_nMonthDisplay)
-		return FALSE;
+	if ((nNewDisplay == m_nMonthDisplay) && (nNewMonthWidth == m_nMonthWidth))
+		return TRUE;
 
 	// validate month width
 	if (nNewMonthWidth < 10/* || nNewMonthWidth > 1000*/)
