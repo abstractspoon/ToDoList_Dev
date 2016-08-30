@@ -376,24 +376,24 @@ void CKanbanPreferencesPage::OnSelchangeCustomAttribute()
 
 void CKanbanPreferencesPage::OnMoveFixedColDown() 
 {
-	VERIFY(MoveSelectedColumnRow(FALSE));
+	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(FALSE));
 }
 
 void CKanbanPreferencesPage::OnUpdateFixedMoveColDown(CCmdUI* pCmdUI) 
 {
 	int nRow = m_lcFixedColumnDefs.GetCurSel();
 
-	pCmdUI->Enable(CanMoveSelectedColumnRow(FALSE));
+	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
 }
 
 void CKanbanPreferencesPage::OnMoveFixedColUp() 
 {
-	VERIFY(MoveSelectedColumnRow(TRUE));
+	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(TRUE));
 }
 
 void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(CanMoveSelectedColumnRow(TRUE));
+	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
 }
 
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
@@ -442,46 +442,6 @@ void CKanbanPreferencesPage::OnPopulateFixedColumns()
 void CKanbanPreferencesPage::OnUpdatePopulateColumns(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(TRUE);
-}
-
-BOOL CKanbanPreferencesPage::CanMoveSelectedColumnRow(BOOL bUp) const
-{
-	int nRow = m_lcFixedColumnDefs.GetCurSel();
-	int nNumRows = (m_lcFixedColumnDefs.GetItemCount() - 1);
-	
-	if ((nRow < 0) || (nRow >= nNumRows))
-		return FALSE;
-	
-	if (bUp)
-		nRow--;
-	else
-		nRow++;
-
-	return ((nRow >= 0) && (nRow < nNumRows));
-}
-
-BOOL CKanbanPreferencesPage::MoveSelectedColumnRow(BOOL bUp)
-{
-	if (!CanMoveSelectedColumnRow(bUp))
-		return FALSE;
-
-	int nRow = m_lcFixedColumnDefs.GetCurSel();
-
-	CString sTitle = m_lcFixedColumnDefs.GetItemText(nRow, 0);
-	CString sValue = m_lcFixedColumnDefs.GetItemText(nRow, 1);
-	CString sMaxTasks = m_lcFixedColumnDefs.GetItemText(nRow, 2);
-		
-	m_lcFixedColumnDefs.DeleteItem(nRow);
-		
-	int nNewRow = (nRow + (bUp ? -1 : 1));
-
-	nRow = m_lcFixedColumnDefs.InsertItem(nNewRow, sTitle);
-	m_lcFixedColumnDefs.SetItemText(nRow, 1, sValue);
-	m_lcFixedColumnDefs.SetItemText(nRow, 2, sMaxTasks);
-		
-	m_lcFixedColumnDefs.SetCurSel(nRow);
-
-	return TRUE;
 }
 
 void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

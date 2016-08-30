@@ -233,3 +233,45 @@ void CKanbanFixedColumnListCtrl::PostDrawContent(CDC* pDC, int nRow, int nCol, c
 		}
 	}
 }
+
+BOOL CKanbanFixedColumnListCtrl::CanMoveSelectedColumnRow(BOOL bUp) const
+{
+	int nRow = GetCurSel();
+	int nNumRows = (GetItemCount() - 1);
+
+	if ((nRow < 0) || (nRow >= nNumRows))
+		return FALSE;
+
+	if (bUp)
+		nRow--;
+	else
+		nRow++;
+
+	return ((nRow >= 0) && (nRow < nNumRows));
+}
+
+BOOL CKanbanFixedColumnListCtrl::MoveSelectedColumnRow(BOOL bUp)
+{
+	if (!CanMoveSelectedColumnRow(bUp))
+		return FALSE;
+
+	int nRow = GetCurSel();
+
+	CString sTitle = GetItemText(nRow, 0);
+	CString sValue = GetItemText(nRow, 1);
+	CString sMaxTasks = GetItemText(nRow, 2);
+	COLORREF crBack = (COLORREF)GetItemData(nRow);
+
+	DeleteItem(nRow);
+
+	int nNewRow = (nRow + (bUp ? -1 : 1));
+
+	nRow = InsertItem(nNewRow, sTitle);
+	SetItemText(nRow, 1, sValue);
+	SetItemText(nRow, 2, sMaxTasks);
+	SetItemData(nRow, crBack);
+
+	SetCurSel(nRow);
+
+	return TRUE;
+}

@@ -25,6 +25,9 @@ public:
 	int GetColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
 	void SetAttributeValues(const CStringArray& aValues);
 
+	BOOL MoveSelectedColumnRow(BOOL bUp);
+	BOOL CanMoveSelectedColumnRow(BOOL bUp) const;
+
 protected:
 	CCheckComboBox m_cbValues;
 

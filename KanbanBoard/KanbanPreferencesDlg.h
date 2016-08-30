@@ -103,8 +103,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL MoveSelectedColumnRow(BOOL bUp);
-	BOOL CanMoveSelectedColumnRow(BOOL bUp) const;
 	void EnableDisableControls();
 	void UpdateAttributeValueCombo();
 	CString GetFixedAttributeID() const;
