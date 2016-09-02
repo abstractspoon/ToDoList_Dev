@@ -496,16 +496,23 @@ int Misc::GetTotalLength(const CStringArray& array)
 
 BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
 {
+	TCHAR szDelim[] = { cDelim, 0 };
+
+	return Split(sText, sRest, szDelim, bTrim);
+}
+
+BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim)
+{
 	if (sText.IsEmpty())
 		return FALSE;
-
-	int nDelim = sText.Find(cDelim);
+	
+	int nDelim = sText.Find(szDelim);
 
 	if (nDelim == -1)
 		return FALSE;
 
 	// else
-	sRest = sText.Mid(nDelim + 1);
+	sRest = sText.Mid(nDelim + lstrlen(szDelim));
 	sText = sText.Left(nDelim);
 
 	if (bTrim)
@@ -515,6 +522,8 @@ BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
 	}
 
 	return TRUE;
+
+
 }
 
 CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)

@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 struct LOGFORMATTYPE
 {
 	UINT nIDText;
-	TDCTTL_FORMAT nFormat;
+	TDCTTL_FORMAT nFormat; 
 	LPCTSTR szExt;
 };
 

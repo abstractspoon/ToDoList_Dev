@@ -178,7 +178,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
-	return FALSE;
+	return TRUE;
 }
 
 void CPreferencesDlg::SynchronizeTree()
@@ -197,6 +197,14 @@ BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg)
 	// special handling for hotkeys
 	if (CWinClasses::IsClass(pMsg->hwnd, WC_HOTKEY))
 		return FALSE;
+
+	// F1 handling
+	if ((pMsg->message == WM_KEYDOWN) && 
+		(pMsg->wParam == VK_F1) &&
+		CDialogHelper::IsChildOrSame(::GetParent(*this), pMsg->hwnd))
+	{
+		OnHelp();
+	}
 	
 	return CPreferencesDlgBase::PreTranslateMessage(pMsg);
 }
@@ -208,6 +216,8 @@ void CPreferencesDlg::OnHelp()
 
 	if (pPage)
 		AfxGetApp()->WinHelp(pPage->GetHelpID());
+	else
+		AfxGetApp()->WinHelp(IDD_PREFERENCES);
 }
 
 void CPreferencesDlg::AddPage(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection)

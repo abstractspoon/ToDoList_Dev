@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
 	//{{AFX_MSG_MAP(CWelcomeWizard)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_WIZFINISH, OnWizFinish)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,6 +88,12 @@ void CTDLWelcomeWizard::OnWizFinish()
 	m_page3.UpdateData();
 
 	EndDialog(ID_WIZFINISH);
+}
+
+BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
