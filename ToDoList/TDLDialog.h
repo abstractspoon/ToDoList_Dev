@@ -15,7 +15,7 @@
 class CTDLDialog : public CDialog
 {
 // Construction
-public:
+protected:
 	CTDLDialog(UINT nIDTemplate, CWnd* pParent = NULL);   // standard constructor
 
 protected:
@@ -32,6 +32,7 @@ protected:
 	//{{AFX_MSG(CTDLDialog)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 };
 

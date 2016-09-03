@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	//{{AFX_MSG_MAP(CTDLDialog)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -58,4 +59,10 @@ void CTDLDialog::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 	
 	m_btnHelp.UpdatePosition();
+}
+
+BOOL CTDLDialog::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
+	return TRUE;
 }

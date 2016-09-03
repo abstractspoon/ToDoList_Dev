@@ -9685,8 +9685,9 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	{
 		// format outlook link
 		OutlookAPI::_MailItem item(pData->pOutlookSelection->Item(COleVariant((short)1)));
-		
-		aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(item, OAFMT_NICE));
+
+		DWORD dwFlags = (Misc::ModKeysArePressed(MKS_SHIFT) ? 0 : OAFMT_NICE);
+		aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(item, dwFlags));
 	}
 	else if (nNumFiles)
 	{ 

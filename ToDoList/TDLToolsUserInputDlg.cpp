@@ -168,6 +168,7 @@ BEGIN_MESSAGE_MAP(CTDLToolsUserInputDlg, CRuntimeDlg)
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -339,4 +340,10 @@ void CTDLToolsUserInputDlg::SetInitialPos(LPCRECT pRect, DWORD dwStyle)
 	// Save off original window and client rects
 	GetWindowRect(m_rWindowOrg);
 	GetClientRect(m_rClientOrg);
+}
+
+BOOL CTDLToolsUserInputDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
+	return TRUE;
 }

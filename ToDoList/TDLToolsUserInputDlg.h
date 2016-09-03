@@ -64,6 +64,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
 protected:

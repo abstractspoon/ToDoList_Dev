@@ -96,8 +96,7 @@ public:
  
 	static BOOL Initialise(LPCTSTR szPrefsPath, BOOL bIni);
 	static BOOL IsInitialised();
-
-	BOOL UsesIni() const { return s_bIni; }
+	static BOOL UsesIni() { return s_bIni; }
 
 	// directly from CWinApp
 	UINT GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault = 0) const;

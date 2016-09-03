@@ -20,6 +20,7 @@ public:
 
 	BOOL Create(UINT nID, CWnd* pParent, const CRect& rPos = CRect(0, 0, 0, 0));
 	void UpdatePosition();
+	UINT GetHelpID() const { return m_nHelpID; }
 
 	static BOOL SetIcon(HICON hIcon);
 	static BOOL SetTooltip(LPCTSTR szTooltip);

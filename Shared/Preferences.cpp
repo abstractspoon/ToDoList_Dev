@@ -153,6 +153,9 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 		return FALSE;
 	}
 
+	if (s_bIni && !s_sPrefsPath.IsEmpty())
+		Save();
+
 	s_sPrefsPath = szPrefsPath;
 	s_bIni = bIni;
 
@@ -166,6 +169,12 @@ BOOL CPreferences::IsInitialised()
 
 BOOL CPreferences::Save()
 {
+	if (!s_bIni)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	if (!s_bDirty)
 		return TRUE; // nothing to do
 
@@ -180,6 +189,7 @@ BOOL CPreferences::Save()
 BOOL CPreferences::SaveInternal()
 {
 	ASSERT(s_bLocked);
+	ASSERT(s_bIni);
 
 	if (!s_bLocked)
 		return FALSE;
