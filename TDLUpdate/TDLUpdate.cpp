@@ -234,6 +234,7 @@ void CTDLUpdateApp::CleanupAppFolder(const CString& sAppFolder)
 	FileMisc::DeleteFile(sFolder + _T("ToDoListLOC.dll"), TRUE);
 	FileMisc::DeleteFile(sFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
 	FileMisc::DeleteFile(sFolder + _T("ChronicleWrap.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("StatisticsExt.dll"), TRUE);
 
 	// gif translation 'flags' replaced with pngs
 	FileMisc::DeleteFolderContents(sFolder + _T("Resources\\Translations"), 

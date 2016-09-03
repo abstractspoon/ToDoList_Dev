@@ -104,7 +104,7 @@
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_release
-copy unicode_release\statisticsExt.dll ..\todolist\unicode_release /y
+copy unicode_release\burndownExt.dll ..\todolist\unicode_release /y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
