@@ -3343,11 +3343,10 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				{
 					const NMITEMACTIVATE* pNMIA = (NMITEMACTIVATE*)lp;
 
-					// only handle if item is valid
-					if (pNMIA->iItem != -1)
+					if (pNMIA->iItem != -1)// valid items only
 					{
-						TDC_COLUMN nColID = GetColumnID(pNMIA->iSubItem);
 						DWORD dwTaskID = GetColumnItemTaskID(pNMIA->iItem); // task ID
+						TDC_COLUMN nColID = GetColumnID(pNMIA->iSubItem);
 						
 						if (ItemColumnSupportsClickHandling(pNMIA->iItem, nColID))
 						{
@@ -3705,28 +3704,49 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 	int nHit = -1;
 	TDC_COLUMN nColID = TDCC_NONE;
 
-	// if the user clicked on a column that allows direct input
-	// AND multi items are selected and the item clicked is 
-	// already selected then we generate a NM_CLICK and eat the 
-	// message to prevent a selection change
 	if (lc == m_lcColumns)
 	{
 		DWORD dwTaskID = 0;
 		nHit = HitTestColumnsItem(pt, TRUE, nColID, &dwTaskID);
 
-		BOOL bMultiSelection = (m_lcColumns.GetSelectedCount() > 1);
-		BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nHit);
-
-		if (bMultiSelection && bTaskSelected && ItemColumnSupportsClickHandling(nHit, nColID))
+		if (nColID != TDCC_NONE)
 		{
-			// special case
-			if (nColID == TDCC_FILEREF)
-				HandleFileLinkColumnClick(nHit, dwTaskID, pt);
-			else
-				NotifyParentOfColumnEditClick(nColID, dwTaskID);
+			if (Misc::ModKeysArePressed(MKS_ALT))
+			{
+				NMITEMACTIVATE nmia = { 0 };
 
-			TRACE(_T("Ate Listview LButtonDown\n"));
-			return TRUE; // eat it
+				nmia.hdr.hwndFrom = GetSafeHwnd();
+				nmia.hdr.code = NM_CLICK;
+				nmia.hdr.idFrom = CWnd::GetDlgCtrlID();
+
+				nmia.iItem = nHit;
+				nmia.iSubItem = nColID;
+
+				CWnd::GetParent()->SendMessage(WM_NOTIFY, nmia.hdr.idFrom, (LPARAM)&nmia);
+				return TRUE; // eat it
+			}
+			else
+			{
+				// if the user clicked on a column that allows direct input
+				// AND multi items are selected and the item clicked is 
+				// already selected then we generate a NM_CLICK and eat the 
+				// message to prevent a selection change
+				BOOL bMultiSelection = (m_lcColumns.GetSelectedCount() > 1);
+				BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nHit);
+
+				if (bMultiSelection && bTaskSelected && 
+					ItemColumnSupportsClickHandling(nHit, nColID))
+				{
+					// special case
+					if (nColID == TDCC_FILEREF)
+						HandleFileLinkColumnClick(nHit, dwTaskID, pt);
+					else
+						NotifyParentOfColumnEditClick(nColID, dwTaskID);
+
+					TRACE(_T("Ate Listview LButtonDown\n"));
+					return TRUE; // eat it
+				}
+			}
 		}
 	}
 	else
