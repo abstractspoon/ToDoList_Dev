@@ -178,19 +178,29 @@ BOOL TDCRECURRENCE::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& d
 			if ((int)dwSpecific1 <= 0)
 				return FALSE;
 			
-			// if no weekdays have been set we just add the specified number of weeks
 			if (!dwSpecific2)
 			{
+				// if no days have been set we just add 
+				// the specified number of weeks
 				CDateHelper::OffsetDate(dtNext, (int)dwSpecific1, DHU_WEEKS);
 			}
-			else // go looking for the next specified weekday
+			else
 			{
-				// first add any weeks greater than one
-				CDateHelper::OffsetDate(dtNext, (int)(dwSpecific1 - 1), DHU_WEEKS);
-				
-				// then look for the next weekday *after* this one
-				dtNext.m_dt += 1.0; 
-				CDateHelper::ValidateDay(dtNext, dwSpecific2);
+				// Look for the next valid day but before the end of the week
+				COleDateTime dtTry = CDateHelper::GetNextAvailableDay(dtNext, dwSpecific2); 
+
+				if ((dtTry <= CDateHelper::GetEndOfWeek(dtNext)) || (dwSpecific1 == 1))
+				{
+					dtNext = dtTry;
+				}
+				else
+				{
+					// Add any weeks greater than one, then increment the day
+					CDateHelper::OffsetDate(dtNext, (int)(dwSpecific1 - 1), DHU_WEEKS);
+					dtNext.m_dt += 1.0; 
+					
+					CDateHelper::ValidateDay(dtNext, dwSpecific2);
+				}
 			}
 		}
 		break;

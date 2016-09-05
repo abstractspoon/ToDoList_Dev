@@ -697,7 +697,7 @@ DWORD CDateHelper::GetWeekdays()
 	return (DHW_EVERYDAY & ~s_dwWeekend);
 }
 
-COleDateTime CDateHelper::GetNextDay(const COleDateTime& date, DWORD dwAvailDays)
+COleDateTime CDateHelper::GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays)
 {
 	COleDateTime dtNext(date);
 	dtNext.m_dt += 1.0; // at least
