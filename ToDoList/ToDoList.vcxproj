@@ -841,7 +841,7 @@ copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\release /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\StatisticsExt\StatisticsExt.vcxproj">
+    <ProjectReference Include="..\BurndownExt\BurndownExt.vcxproj">
       <Project>{da896cdc-157d-472e-8f61-87e174e6b80c}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

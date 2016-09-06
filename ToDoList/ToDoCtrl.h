@@ -804,11 +804,11 @@ protected:
 	BOOL MoveSelection(TDC_MOVETASK nDirection);
 
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
-	void PrepareTaskIDsForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID) const;
+	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID) const;
 	void BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD& dwNextID, 
 								CMapID2ID& mapID, TDC_RESETIDS nResetID, BOOL bAndSiblings) const;
-	void PrepareTaskIDsForPaste(CTaskFile& tasks, HTASKITEM hTask, const CMapID2ID& mapID, BOOL bAndSiblings) const;
-	BOOL PrepareTaskIDsForPaste(CString& sLink, const CMapID2ID& mapID) const;
+	void PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, const CMapID2ID& mapID, BOOL bAndSiblings) const;
+	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
 	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
 	void RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask) const;
 
