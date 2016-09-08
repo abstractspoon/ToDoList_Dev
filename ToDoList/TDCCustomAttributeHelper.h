@@ -30,7 +30,9 @@ public:
 	static CString GetAttributeTypeID(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
+	static BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
+	static BOOL IsCustomColumnEnabled(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static BOOL IsCustomControl(UINT nCtrlID);
 
 	static BOOL GetAttributeDef(TDC_COLUMN nColID, 

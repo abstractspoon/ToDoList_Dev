@@ -650,7 +650,7 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 	}
 	else if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
 	{
-		return TRUE;
+		return CTDCCustomAttributeHelper::IsCustomColumnEnabled(nColID, m_aCustomAttribDefs);
 	}
 
 	return m_mapVisibleCols.HasColumn(nColID);
