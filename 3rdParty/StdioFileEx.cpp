@@ -124,7 +124,7 @@ BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nForma
 	switch (nFormat)
 	{
 	case SFEF_AUTODETECT:
-		m_nFormat = ReadFormat();
+		m_nFormat = ReadFormat(nAnsiCodePage);
 		m_nFileCodePage = GetFileCodePage(m_nFormat, nAnsiCodePage);
 		break;
 
@@ -167,7 +167,7 @@ int CStdioFileEx::GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage)
 	return -1;
 }
 
-SFE_FORMAT CStdioFileEx::ReadFormat()
+SFE_FORMAT CStdioFileEx::ReadFormat(int nAnsiCodePage)
 {
 	SFE_FORMAT nFormat = SFEF_UNKNOWN;
 
@@ -187,9 +187,13 @@ SFE_FORMAT CStdioFileEx::ReadFormat()
 		{
 			nFormat = SFEF_UTF8;
 		}
+		else if (nAnsiCodePage == CP_ACP)
+		{
+			nFormat = SFEF_UTF8WITHOUTBOM;
+		}
 		else
 		{
-			nFormat = SFEF_UTF8WITHOUTBOM; // handles Ansi too
+			nFormat = SFEF_ANSI;
 		}
 	}
 
