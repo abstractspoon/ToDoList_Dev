@@ -1253,14 +1253,14 @@ BOOL FileMisc::AppendLineToFile(LPCTSTR szPathname, const CString& sLine, SFE_FO
 	return FALSE;
 }
 
-int FileMisc::LoadFile(LPCTSTR szPathname, CStringArray& aLines, int nLineCount)
+int FileMisc::LoadFile(LPCTSTR szPathname, CStringArray& aLines, int nLineCount, UINT nAnsiCodePage)
 {
 	int nLinesRead = 0;
 	aLines.RemoveAll();
 
 	CStdioFileEx file;
 
-	if (file.Open(szPathname, CFile::modeRead | CFile::shareDenyWrite))
+	if (file.Open(szPathname, (CFile::modeRead | CFile::shareDenyWrite), SFEF_AUTODETECT, nAnsiCodePage))
 	{
 		if (file.GetLength())
 		{
@@ -1294,14 +1294,6 @@ BOOL FileMisc::SaveFile(LPCTSTR szPathname, const CString& sText, SFE_FORMAT nFo
 
 	if (file.Open(szPathname, CFile::modeCreate | CFile::modeWrite, nFormat, nAnsiCodePage))
 	{
-// 		if (nSaveAs == SFE_MULTIBYTE)
-// 			file.SetCodePage(nMultibyteCodePage);
-// 
-// #ifndef _UNICODE
-// 		else if (nSaveAs == SFE_ASCOMPILED)
-// 			file.SetCodePage(nMultibyteCodePage);
-// #endif
-
 		file.WriteString(sText);
 		return TRUE;
 	}
@@ -1322,12 +1314,12 @@ BOOL FileMisc::SaveFile(LPCTSTR szPathname, LPCSTR szText)
 	return FALSE;
 }
 
-BOOL FileMisc::LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite)
+BOOL FileMisc::LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite, UINT nAnsiCodePage)
 {
 	CStdioFileEx file;
-	UINT nFlags = CFile::modeRead | (bDenyWrite ? CFile::shareDenyWrite : CFile::shareDenyNone);
+	UINT nFlags = (CFile::modeRead | (bDenyWrite ? CFile::shareDenyWrite : CFile::shareDenyNone));
 
-	if (file.Open(szPathname, nFlags))
+	if (file.Open(szPathname, nFlags, SFEF_AUTODETECT, nAnsiCodePage))
 	{
 		return (file.ReadFile(sText) != FALSE);
 	}

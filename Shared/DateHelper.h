@@ -132,7 +132,7 @@ public:
 
 	static void SetWeekendDays(DWORD dwDays = DHW_SATURDAY | DHW_SUNDAY);
 	static DWORD GetWeekdays();
-	static COleDateTime GetNextDay(const COleDateTime& date, DWORD dwAvailDays);
+	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 
 	static BOOL IsWeekend(int nDOW);

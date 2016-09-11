@@ -184,8 +184,8 @@ namespace FileMisc
 	BOOL IsTempFilePath(LPCTSTR szFilename);
 
 	BOOL CanReadFile(LPCTSTR szPathname, BOOL bDenyWrite = FALSE);
-	BOOL LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE);
-	int LoadFile(LPCTSTR szPathname, CStringArray& aLines, int nLineCount = -1);
+	BOOL LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE, UINT nAnsiCodePage = CP_ACP);
+	int LoadFile(LPCTSTR szPathname, CStringArray& aLines, int nLineCount = -1, UINT nAnsiCodePage = CP_ACP);
 
 	BOOL SaveFile(LPCTSTR szPathname, const CString& sText, SFE_FORMAT nFormat, UINT nAnsiCodePage = CP_ACP);
 	BOOL SaveFile(LPCTSTR szPathname, LPCSTR szText); // save as multibyte

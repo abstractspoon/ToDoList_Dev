@@ -13,7 +13,7 @@
 #include "..\shared\filemisc.h"
 //#include "..\shared\localizer.h"
 
-#include "..\todolist\tdlschemadef.h"
+//#include "..\todolist\tdlschemadef.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -97,16 +97,16 @@ bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFi
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		const ITaskList10* pITL8 = GetITLInterface<ITaskList10>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST8);
+		const ITaskList10* pITL10 = GetITLInterface<ITaskList10>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST8);
 		
-		if (pITL8)
+		if (pITL10)
 		{
 			CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
 
-			CString sProjectName = pITL8->GetProjectName();
+			CString sProjectName = pITL10->GetProjectName();
 
-			if (sProjectName.IsEmpty())
-				sProjectName = FileMisc::GetFileNameFromPath(pITL8->GetAttribute(TDL_FILENAME), FALSE);
+// 			if (sProjectName.IsEmpty())
+// 				sProjectName = FileMisc::GetFileNameFromPath(pITL8->GetAttribute(TDL_FILENAME), FALSE);
 
 			firstItem->AddItem(_T("TEXT"), sProjectName);	
 
@@ -119,7 +119,7 @@ bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFi
 			attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
 
 			// export first task
-			ExportTask(pITL8, pITL8->GetFirstTask(), firstItem, 0, TRUE);
+			ExportTask(pITL10, pITL10->GetFirstTask(), firstItem, 0, TRUE);
 		}
 	}
 

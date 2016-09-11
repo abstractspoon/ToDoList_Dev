@@ -660,9 +660,25 @@ BOOL CTDCCustomAttributeHelper::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 	return (nAttribID >= TDCA_CUSTOMATTRIB_FIRST && nAttribID <= TDCA_CUSTOMATTRIB_LAST);
 }
 
+BOOL CTDCCustomAttributeHelper::IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID, 
+														const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+
+	return (GetAttributeDef(nAttribID, aAttribDefs, attribDef) && attribDef.bEnabled);
+}
+
 BOOL CTDCCustomAttributeHelper::IsCustomColumn(TDC_COLUMN nColID)
 {
 	return (nColID >= TDCC_CUSTOMCOLUMN_FIRST && nColID <= TDCC_CUSTOMCOLUMN_LAST);
+}
+
+BOOL CTDCCustomAttributeHelper::IsCustomColumnEnabled(TDC_COLUMN nColID, 
+													  const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+
+	return (GetAttributeDef(nColID, aAttribDefs, attribDef) && attribDef.bEnabled);
 }
 
 BOOL CTDCCustomAttributeHelper::IsCustomControl(UINT nCtrlID)

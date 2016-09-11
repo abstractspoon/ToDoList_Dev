@@ -4774,7 +4774,8 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 			break;
 
 		case TDCA_POSITION:
-			bMatch = TaskMatches(pTDS->GetPosition(), sp, resTask);
+			// Position is 1-based in the UI, but 0-based 'here' 
+			bMatch = TaskMatches((pTDS->GetPosition() + 1), sp, resTask);
 
 			if (bMatch)
 			{

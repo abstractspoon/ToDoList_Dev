@@ -105,7 +105,7 @@ protected:
 	BOOL	ReadMultiByteLine(OUT CString& sOutputLine);
 	UINT	WriteUnicodeLine(IN LPCWSTR sInputLine);
 	UINT	WriteMultiByteLine(IN LPCWSTR sInputLine);
-	SFE_FORMAT ReadFormat();
+	SFE_FORMAT ReadFormat(int nAnsiCodePage);
 	
 	static int GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage);
 	static void ProcessOpenFlags(UINT& nOpenFlags, SFE_FORMAT nFormat);
