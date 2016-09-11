@@ -5552,7 +5552,8 @@ void CToDoListWnd::OnUpdateEditPasteAfter(CCmdUI* pCmdUI)
 	if (nSelCount == 0)
 		pCmdUI->SetText(CEnString(IDS_PASTETOPLEVELTASK));
 	
-	pCmdUI->Enable(tdc.CanPasteTasks(((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK), FALSE));	
+	pCmdUI->Enable(tdc.CanPasteTasks(((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK), FALSE) || 
+					Misc::ClipboardHasText());	
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 

@@ -99,9 +99,16 @@ TDL_WEBUPDATE_CHECK CTDLWebUpdatePromptDlg::CheckForUpdates()
 #ifdef _DEBUG
 void CTDLWebUpdatePromptDlg::ShowDialog()
 {
+	CTDCWebUpdateScript script;
+	script.CheckForUpdates();
+
+	CString sNewExeVer, sNewDisplayVer;
 	CStringArray aUpdates;
 
-	CTDLWebUpdatePromptDlg(_T("0.0.997.0"), aUpdates).DoModal();
+	VERIFY(script.GetScriptDetails(sNewExeVer, sNewDisplayVer, aUpdates));
+	ASSERT(!sNewDisplayVer.IsEmpty());
+
+	CTDLWebUpdatePromptDlg(sNewDisplayVer, aUpdates).DoModal();
 }
 #endif
 
