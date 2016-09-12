@@ -178,11 +178,14 @@ BOOL CTDLAboutDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	// Forward toolbar commands to app window
 	switch (LOWORD(wParam))
 	{
+	case ID_HELP_WIKI:
+		AfxGetApp()->WinHelp(IDD_ABOUT_DIALOG);
+		return TRUE;
+		
 	case ID_HELP_FACEBOOK:
 	case ID_HELP_TWITTER:
 	case ID_HELP_GOOGLEPLUS:
 	case ID_HELP_GOOGLEGROUP:
-	case ID_HELP_WIKI:
 	case ID_HELP_LINKEDIN:
 		return AfxGetMainWnd()->SendMessage(WM_COMMAND, wParam, lParam);
 	}

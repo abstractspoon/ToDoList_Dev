@@ -52,7 +52,7 @@ LPCTSTR APPREGKEY			= _T("Software\\AbstractSpoon\\ToDoList");
 LPCTSTR UNINSTALLREGKEY		= _T("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\AbstractSpoon_ToDoList");
 LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
 
-LPCTSTR WIKI_URL			= _T("https://github.com/abstractspoon/ToDoList_Wiki/wiki"); 
+LPCTSTR WIKI_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id="); 
 LPCTSTR GOOGLEGROUP_URL		= _T("http://bit.ly/AbstrToDoListGG"); 
 LPCTSTR LINKEDIN_URL		= _T("http://bit.ly/AbstrToDoListLinkedIn"); 
 LPCTSTR LICENSE_URL			= _T("https://github.com/abstractspoon/ToDoList_Wiki/wiki/Free-Open-Source-Software"); 
@@ -654,7 +654,7 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 	switch (nHelpID)
 	{
 	CASE(0) // App itself
-//	CASE(IDD_ABOUT_DIALOG)               
+	CASE(IDD_ABOUT_DIALOG)               
 	CASE(IDD_ADDCUSTOMATTRIB_DIALOG)      
 	CASE(IDD_ADDLOGGEDTIME_DIALOG)        
 	CASE(IDD_ANALYSELOGGEDTIME_DIALOG)   
@@ -719,15 +719,9 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 	{
 		// Load the Help.ini file to find the URL for this topic
 		CIni ini(GetResourcePath(_T("Misc"), _T("Help.ini")));
-		CString sUrl = ini.GetString(_T("Help Urls"), sHelpID);
+		sHelpUrl += ini.GetString(_T("Help Urls"), sHelpID);
 
-		if (!sUrl.IsEmpty())
-		{
-			sHelpUrl += '/';
-			sHelpUrl += sUrl;
-		}
-
-		TRACE(_T("CToDoListApp::DoHelp(%s = %s)\n"), sHelpID, sUrl);
+		TRACE(_T("CToDoListApp::DoHelp(%s = %s)\n"), sHelpID, sHelpUrl);
 	}
 	else
 	{
@@ -736,11 +730,13 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 
 #ifdef _DEBUG
 	CString sHelpMsg;
-	sHelpMsg.Format(_T("CToDoListApp::DoHelp(%s = %s)\n"), sHelpID, sHelpUrl);
-	AfxMessageBox(sHelpMsg);
-#else
-	FileMisc::Run(*m_pMainWnd, sHelpUrl, NULL, SW_SHOWNORMAL);
+	sHelpMsg.Format(_T("CToDoListApp::DoHelp(%s = %s)\n\nDo you want to go here?"), sHelpID, sHelpUrl);
+
+	if (AfxMessageBox(sHelpMsg, MB_YESNO) != IDYES)
+		return;
 #endif
+
+	FileMisc::Run(*m_pMainWnd, sHelpUrl, NULL, SW_SHOWNORMAL);
 }
 
 BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
