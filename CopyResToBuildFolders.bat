@@ -1,8 +1,8 @@
 REM - Copy Resources to own build folders
 
-xcopy ..\ToDoList_Resources\*.* .\Unicode_Debug\Resources\   /E /EXCLUDE:.\CopyResToBuildFolders_Exclude.txt /Y /D
+xcopy ..\ToDoList_Resources\*.* .\ToDoList\Unicode_Debug\Resources\   /E /EXCLUDE:.\CopyResToBuildFolders_Exclude.txt /Y /D
 
-xcopy ..\ToDoList_Resources\*.* .\Unicode_Release\Resources\ /E /EXCLUDE:.\CopyResToBuildFolders_Exclude.txt /Y /D
+xcopy ..\ToDoList_Resources\*.* .\ToDoList\Unicode_Release\Resources\ /E /EXCLUDE:.\CopyResToBuildFolders_Exclude.txt /Y /D
 
 REM - Copy Resources to latest release
 
