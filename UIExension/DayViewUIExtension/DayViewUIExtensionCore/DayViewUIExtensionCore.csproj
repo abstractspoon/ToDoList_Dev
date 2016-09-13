@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
+      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

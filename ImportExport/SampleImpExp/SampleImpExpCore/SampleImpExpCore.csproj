@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
+      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

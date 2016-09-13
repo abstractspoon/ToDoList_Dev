@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MarkdownLog">
+      <HintPath>..\MarkdownLog\bin\$(Configuration)\MarkdownLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -50,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PluginHelpers">
+      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
