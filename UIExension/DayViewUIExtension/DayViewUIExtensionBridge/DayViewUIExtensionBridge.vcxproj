@@ -105,7 +105,7 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="DayViewUIExtensionCore">
-      <HintPath>..\Debug\DayViewUIExtensionCore.dll</HintPath>
+      <HintPath>..\$(Configuration)\DayViewUIExtensionCore.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />

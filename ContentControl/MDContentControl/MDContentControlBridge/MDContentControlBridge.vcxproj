@@ -106,7 +106,7 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MDContentControlCore">
-      <HintPath>..\Debug\MDContentControlCore.dll</HintPath>
+      <HintPath>..\$(Configuration)\MDContentControlCore.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

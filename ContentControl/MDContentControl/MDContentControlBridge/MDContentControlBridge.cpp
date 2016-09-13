@@ -15,10 +15,15 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\..\..\Debug\MDContentControlCore.dll>
-#include <msclr\auto_gcroot.h>
+#ifdef _DEBUG
+#	using <..\..\..\Debug\MDContentControlCore.dll>
+#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#else
+#	using <..\..\..\Release\MDContentControlCore.dll>
+#	using <..\..\..\Release\PluginHelpers.dll> as_friend
+#endif
 
-#using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#include <msclr\auto_gcroot.h>
 
 using namespace MDContentControl;
 using namespace System;

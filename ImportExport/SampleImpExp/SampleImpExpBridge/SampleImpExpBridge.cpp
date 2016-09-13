@@ -13,10 +13,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#using <..\..\..\Debug\SampleImpExpCore.dll>
+#ifdef _DEBUG
+#	using <..\..\..\Debug\SampleImpExpCore.dll>
+#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
+#else
+#	using <..\..\..\Release\SampleImpExpCore.dll>
+#	using <..\..\..\Release\PluginHelpers.dll> as_friend
+#endif
 #include <msclr\auto_gcroot.h>
-
-#using <..\..\..\Debug\PluginHelpers.dll> as_friend
 
 using namespace SampleImpExp;
 using namespace System;
