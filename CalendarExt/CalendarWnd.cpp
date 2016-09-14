@@ -401,7 +401,7 @@ bool CCalendarWnd::SelectTask(DWORD dwTaskID)
 	return bSet;
 }
 
-bool CCalendarWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CCalendarWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

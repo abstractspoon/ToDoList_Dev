@@ -4531,28 +4531,76 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 		return;
 	}
 
-	// save current states
-	TDCSELECTIONCACHE cache;
-	CacheTreeSelection(cache);
-
 	IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 	ASSERT(pExt);
 
 	if (pExt)
 	{
-		if (!pExt->SelectTasks(cache.aSelTaskIDs.GetData(), cache.aSelTaskIDs.GetSize()))
+		// Get tree selection
+		TDCSELECTIONCACHE cache;
+
+		// If nothing is selected, work backwards until we find something
+		BOOL bNeedUpdate = FALSE;
+
+		while (!CacheTreeSelection(cache))
 		{
-			if (cache.dwFocusedTaskID && pExt->SelectTask(cache.dwFocusedTaskID))
+			if (!m_taskTree.SelectTasksInHistory(FALSE))
+				break;
+
+			bNeedUpdate = TRUE; // selection has changed
+		}
+
+		if (!cache.IsEmpty())
+		{
+			// If nothing can be selected, work backwards as before
+			while (!SelectExtensionTasks(pExt, cache.aSelTaskIDs, cache.dwFocusedTaskID))
 			{
-				CToDoCtrl::SelectTask(cache.dwFocusedTaskID);
-			}
-			else
-			{
-				m_taskTree.DeselectAll();
-				UpdateControls();
+				cache.Clear();
+
+				if (!m_taskTree.SelectTasksInHistory(FALSE))
+					break;
+
+				CacheTreeSelection(cache);
+				bNeedUpdate = TRUE; // selection has changed
 			}
 		}
+		
+		// fallback
+		if (cache.IsEmpty())
+		{
+			pExt->SelectTask(0);
+
+			m_taskTree.DeselectAll();
+			UpdateControls();
+		}
+		else if (bNeedUpdate)
+		{
+			UpdateControls();
+		}
 	}
+}
+
+BOOL CTabbedToDoCtrl::SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
+{
+	ASSERT(pExtWnd);
+
+	if (pExtWnd == NULL)
+		return FALSE;
+
+	if ((aTaskIDs.GetSize() == 0) || (dwFocusedTaskID == 0))
+		return FALSE;
+
+	if (pExtWnd->SelectTasks(aTaskIDs.GetData(), aTaskIDs.GetSize()))
+		return TRUE;
+
+	// Try single task
+	if (dwFocusedTaskID && pExtWnd->SelectTask(dwFocusedTaskID))
+	{
+		UpdateControls();
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void CTabbedToDoCtrl::SelectTasksInHistory(BOOL bForward)

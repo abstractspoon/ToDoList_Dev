@@ -236,7 +236,7 @@ bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/)
 	return true;
 }
 
-bool CBurndownWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

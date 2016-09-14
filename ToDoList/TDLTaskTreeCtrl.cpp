@@ -1979,7 +1979,7 @@ int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 		}
 	}
 
-	return cache.aSelTaskIDs.GetSize();
+	return !cache.IsEmpty();
 }
 
 BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)

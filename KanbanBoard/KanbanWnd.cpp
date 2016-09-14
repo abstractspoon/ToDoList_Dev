@@ -381,7 +381,7 @@ bool CKanbanWnd::SelectTask(DWORD dwTaskID)
 	return (m_ctrlKanban.SelectTask(dwTaskID) != FALSE);
 }
 
-bool CKanbanWnd::SelectTasks(LPDWORD pdwTaskIDs, int nTaskCount)
+bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 

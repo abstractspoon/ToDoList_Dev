@@ -58,7 +58,7 @@ public:
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	bool SelectTask(DWORD dwTaskID);
-	bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
+	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
 	bool ProcessMessage(MSG* pMsg);
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);

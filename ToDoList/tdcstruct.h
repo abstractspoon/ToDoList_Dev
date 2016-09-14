@@ -378,6 +378,18 @@ struct TDCSELECTIONCACHE
 		dwFocusedTaskID = dwFirstVisibleTaskID = 0;
 	}
 
+	BOOL IsEmpty() const
+	{
+		if (aSelTaskIDs.GetSize())
+		{
+			ASSERT(dwFocusedTaskID);
+			return FALSE;
+		}
+
+		// else
+		return TRUE;
+	}
+
 	CDWordArray aSelTaskIDs;
 	DWORD dwFocusedTaskID;
 	CDWordArray aBreadcrumbs;

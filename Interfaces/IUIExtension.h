@@ -258,7 +258,7 @@ public:
 	virtual LPCWSTR GetTypeID() const = 0; // caller must copy result only
 
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
-	virtual bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount) = 0;
+	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
 	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
 	virtual bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const = 0;

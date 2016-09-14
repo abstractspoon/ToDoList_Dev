@@ -419,7 +419,7 @@ bool CGanttChartWnd::SelectTask(DWORD dwTaskID)
 	return (m_ctrlGantt.SelectTask(dwTaskID) != FALSE);
 }
 
-bool CGanttChartWnd::SelectTasks(DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CGanttChartWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
