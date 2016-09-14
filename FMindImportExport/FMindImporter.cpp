@@ -118,7 +118,7 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITaskList10* pDestTaskF
 	// simple attribs
 	pDestTaskFile->SetTaskStatus(hTask, GetAttribValueS(pFMTask, FM_CUSTOMSTATUS));
 	pDestTaskFile->SetTaskAllocatedBy(hTask, GetAttribValueS(pFMTask, FM_CUSTOMALLOCBY));
-	pDestTaskFile->SetTaskFileReferencePath(hTask, GetAttribValueS(pFMTask, FM_CUSTOMFILEREF));
+	pDestTaskFile->SetTaskFileLinkPath(hTask, GetAttribValueS(pFMTask, FM_CUSTOMFILEREF));
 	pDestTaskFile->SetTaskColor(hTask, GetAttribValueI(pFMTask, FM_CUSTOMCOLOR));
 	pDestTaskFile->SetTaskPriority(hTask, GetAttribValueI(pFMTask, FM_CUSTOMPRIORITY));
 	pDestTaskFile->SetTaskPercentDone(hTask, (unsigned char)GetAttribValueI(pFMTask, FM_CUSTOMPERCENT));

@@ -180,8 +180,15 @@ HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObj
 		*ppvObject = reinterpret_cast<ITaskList14*>(this);
 		AddRef();
 	}
+	else if (IsEqualIID(riid, IID_TASKLIST15))
+	{
+		*ppvObject = reinterpret_cast<ITaskList15*>(this);
+		AddRef();
+	}
 	else
+	{
 		ASSERT(0);
+	}
 	
 	return (*ppvObject ? S_OK : E_NOTIMPL);
 }
@@ -554,7 +561,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 	pTasksDest->SetTaskAllocatedBy(hTaskDest, pTasksSrc->GetTaskAllocatedBy(hTaskSrc));
 	pTasksDest->SetTaskCategory(hTaskDest, pTasksSrc->GetTaskCategory(hTaskSrc));
 	pTasksDest->SetTaskStatus(hTaskDest, pTasksSrc->GetTaskStatus(hTaskSrc));
-	pTasksDest->SetTaskFileReferencePath(hTaskDest, pTasksSrc->GetTaskFileReferencePath(hTaskSrc));
+	pTasksDest->SetTaskFileLinkPath(hTaskDest, pTasksSrc->GetTaskFileLinkPath(hTaskSrc));
 	pTasksDest->SetTaskColor(hTaskDest, pTasksSrc->GetTaskColor(hTaskSrc));
 	pTasksDest->SetTaskPriority(hTaskDest, pTasksSrc->GetTaskPriority(hTaskSrc, FALSE));
 	pTasksDest->SetTaskPercentDone(hTaskDest, pTasksSrc->GetTaskPercentDone(hTaskSrc, FALSE));
@@ -738,10 +745,20 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL14Src && pTL14Dest))
 			break;
 
-		int nNumFile = pTL14Src->GetTaskFileReferenceCount(hTaskSrc);
+		int nNumFile = pTL14Src->GetTaskFileLinkCount(hTaskSrc);
 		
 		for (int nFile = 0; nFile < nNumFile; nFile++)
-			pTL14Dest->AddTaskFileReference(hTaskDest, pTL14Src->GetTaskFileReference(hTaskSrc, nFile));
+			pTL14Dest->AddTaskFileLink(hTaskDest, pTL14Src->GetTaskFileLink(hTaskSrc, nFile));
+		// ---------------------------------------------------------------------------
+		const ITaskList15* pTL15Src = GetITLInterface<ITaskList15>(pTasksSrc, IID_TASKLIST15);
+		ITaskList15* pTL15Dest = GetITLInterface<ITaskList15>(pTasksDest, IID_TASKLIST15);
+		
+		if (!(pTL15Src && pTL15Dest))
+			break;
+
+		// Note: we don't deliberately don't expose SetTaskReferenceID to clients
+		CString sRefID = Misc::Format(pTL15Src->GetTaskReferenceID(hTaskSrc));
+		pTL15Dest->SetTaskAttribute(hTaskDest, TDL_TASKREFID, sRefID);
 		// ---------------------------------------------------------------------------
 	} 
 	while (0);
@@ -1575,7 +1592,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM* pTDI)
 			SetTaskDependencies(hTask, pTDI->aDependencies);
 			
 		if (pTDI->aFileRefs.GetSize())
-			SetTaskFileReferences(hTask, pTDI->aFileRefs);
+			SetTaskFileLinks(hTask, pTDI->aFileRefs);
 		
 		if (pTDI->dCost != 0)
 			SetTaskCost(hTask, pTDI->dCost);
@@ -1663,7 +1680,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM* pTDI) const
 		GetTaskAllocatedTo(hTask, pTDI->aAllocTo);
 		GetTaskRecurrence(hTask, pTDI->trRecurrence);
 		GetTaskDependencies(hTask, pTDI->aDependencies);
-		GetTaskFileReferences(hTask, pTDI->aFileRefs);
+		GetTaskFileLinks(hTask, pTDI->aFileRefs);
 		GetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
 
 		// meta data
@@ -1813,7 +1830,7 @@ BOOL CTaskFile::SetTaskTags(HTASKITEM hTask, const CStringArray& aTags)
 	return SetTaskArray(hTask, TDL_TASKTAG, aTags);
 }
 
-BOOL CTaskFile::SetTaskFileReferences(HTASKITEM hTask, const CStringArray& aFiles)
+BOOL CTaskFile::SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles)
 {
 	return SetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles);
 }
@@ -1926,7 +1943,7 @@ bool CTaskFile::AddTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo)
 	return AddTaskArrayItem(hTask, TDL_TASKALLOCTO, szAllocTo);
 }
 
-bool CTaskFile::AddTaskFileReference(HTASKITEM hTask, LPCTSTR szFileRef)
+bool CTaskFile::AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef)
 {
 	return AddTaskArrayItem(hTask, TDL_TASKFILEREFPATH, szFileRef);
 }
@@ -1951,7 +1968,7 @@ int CTaskFile::GetTaskTags(HTASKITEM hTask, CStringArray& aTags) const
 	return GetTaskArray(hTask, TDL_TASKTAG, aTags);
 }
 
-int CTaskFile::GetTaskFileReferences(HTASKITEM hTask, CStringArray& aFiles) const
+int CTaskFile::GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const
 {
 	return GetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles);
 }
@@ -2209,12 +2226,12 @@ LPCTSTR CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, int nIndex) const
 	return GetTaskArrayItem(hTask, TDL_TASKALLOCTO, nIndex);
 }
 
-int CTaskFile::GetTaskFileReferenceCount(HTASKITEM hTask) const
+int CTaskFile::GetTaskFileLinkCount(HTASKITEM hTask) const
 {
 	return GetTaskArraySize(hTask, TDL_TASKFILEREFPATH);
 }
 
-LPCTSTR CTaskFile::GetTaskFileReference(HTASKITEM hTask, int nIndex) const
+LPCTSTR CTaskFile::GetTaskFileLink(HTASKITEM hTask, int nIndex) const
 {
 	return GetTaskArrayItem(hTask, TDL_TASKFILEREFPATH, nIndex);
 }
@@ -2247,7 +2264,7 @@ LPCTSTR CTaskFile::GetTaskStatus(HTASKITEM hTask) const
 	return GetTaskString(hTask, TDL_TASKSTATUS);
 }
 
-LPCTSTR CTaskFile::GetTaskFileReferencePath(HTASKITEM hTask) const
+LPCTSTR CTaskFile::GetTaskFileLinkPath(HTASKITEM hTask) const
 {
 	return GetTaskString(hTask, TDL_TASKFILEREFPATH);
 }
@@ -2946,7 +2963,7 @@ bool CTaskFile::SetTaskFlag(HTASKITEM hTask, bool bFlag)
 	return SetTaskUChar(hTask, TDL_TASKFLAG, (unsigned char)(bFlag ? 1 : 0));
 }
 
-bool CTaskFile::SetTaskFileReferencePath(HTASKITEM hTask, LPCTSTR szFileRefpath)
+bool CTaskFile::SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath)
 {
 	return SetTaskString(hTask, TDL_TASKFILEREFPATH, szFileRefpath);
 }
@@ -2982,6 +2999,11 @@ BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL b
 DWORD CTaskFile::GetTaskReferenceID(HTASKITEM hTask) const
 {
 	return GetTaskULong(hTask, TDL_TASKREFID);
+}
+
+bool CTaskFile::IsTaskReference(HTASKITEM hTask) const
+{
+	return (GetTaskReferenceID(hTask) > 0);
 }
 
 BOOL CTaskFile::HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide)

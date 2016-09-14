@@ -1110,20 +1110,25 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) cons
 int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const
 {
 	aTaskIDs.RemoveAll();
-	aTaskIDs.SetSize(m_lcTasks.GetSelectedCount());
-	
-	int nCount = 0;
-	POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
-	
-	while (pos)
+	dwFocusedTaskID = 0;
+
+	if (m_lcTasks.GetSelectedCount())
 	{
-		int nItem = m_lcTasks.GetNextSelectedItem(pos);
-		
-		aTaskIDs[nCount] = m_lcTasks.GetItemData(nItem);
-		nCount++;
-	}
+		aTaskIDs.SetSize(m_lcTasks.GetSelectedCount());
 	
-	dwFocusedTaskID = GetFocusedListTaskID();
+		int nCount = 0;
+		POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
+	
+		while (pos)
+		{
+			int nItem = m_lcTasks.GetNextSelectedItem(pos);
+		
+			aTaskIDs[nCount] = m_lcTasks.GetItemData(nItem);
+			nCount++;
+		}
+	
+		dwFocusedTaskID = GetFocusedListTaskID();
+	}
 	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(aTaskIDs, dwFocusedTaskID));
 	
 	return aTaskIDs.GetSize();
@@ -1189,32 +1194,34 @@ void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFoc
 	}
 }
 
-void CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
+int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID) == 0)
-		return;
-	
-	cache.dwFirstVisibleTaskID = GetTaskID(m_lcTasks.GetTopIndex());
-	
-	// breadcrumbs
-	cache.aBreadcrumbs.RemoveAll();
-	
-	if (bIncBreadcrumbs)
+	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID) > 0)
 	{
-		// cache the preceding and following 10 tasks
-		int nFocus = GetFocusedListItem(), nItem;
-		int nMin = 0, nMax = m_lcTasks.GetItemCount() - 1;
+		cache.dwFirstVisibleTaskID = GetTaskID(m_lcTasks.GetTopIndex());
+	
+		// breadcrumbs
+		cache.aBreadcrumbs.RemoveAll();
+	
+		if (bIncBreadcrumbs)
+		{
+			// cache the preceding and following 10 tasks
+			int nFocus = GetFocusedListItem(), nItem;
+			int nMin = 0, nMax = m_lcTasks.GetItemCount() - 1;
 		
-		nMin = max(nMin, nFocus - 11);
-		nMax = min(nMax, nFocus + 11);
+			nMin = max(nMin, nFocus - 11);
+			nMax = min(nMax, nFocus + 11);
 		
-		// following tasks first
-		for (nItem = (nFocus + 1); nItem <= nMax; nItem++)
-			cache.aBreadcrumbs.InsertAt(0, m_lcTasks.GetItemData(nItem));
+			// following tasks first
+			for (nItem = (nFocus + 1); nItem <= nMax; nItem++)
+				cache.aBreadcrumbs.InsertAt(0, m_lcTasks.GetItemData(nItem));
 		
-		for (nItem = (nFocus - 1); nItem >= nMin; nItem--)
-			cache.aBreadcrumbs.InsertAt(0, m_lcTasks.GetItemData(nItem));
-	}
+			for (nItem = (nFocus - 1); nItem >= nMin; nItem--)
+				cache.aBreadcrumbs.InsertAt(0, m_lcTasks.GetItemData(nItem));
+		}
+	}	
+
+	return cache.aSelTaskIDs.GetSize();
 }
 
 void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)

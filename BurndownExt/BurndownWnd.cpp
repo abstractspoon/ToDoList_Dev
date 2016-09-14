@@ -272,7 +272,7 @@ bool CBurndownWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
 	return false;
 }
 
-void CBurndownWnd::BuildData(const ITaskList14* pTasks)
+void CBurndownWnd::BuildData(const ITaskList15* pTasks)
 {
 	// reset data structures
 	m_data.RemoveAll();
@@ -303,9 +303,13 @@ void CBurndownWnd::BuildData(const ITaskList14* pTasks)
 	}
 }
 
-void CBurndownWnd::BuildData(const ITaskList14* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CBurndownWnd::BuildData(const ITaskList15* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
+		return;
+
+	// Not interested in references
+	if (pTasks->IsTaskReference(hTask))
 		return;
 
 	// only interested in leaf tasks
@@ -362,7 +366,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 
 	CHoldRedraw hr(m_graph);
 		
-	const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pTasks, IID_TASKLIST14);
+	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
 	
 	switch (nUpdate)
 	{
@@ -424,12 +428,16 @@ void CBurndownWnd::UpdateDataExtents()
 	}
 }
 
-void CBurndownWnd::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CBurndownWnd::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	// handle task if not NULL (== root)
 	if (hTask == NULL)
 		return;
 
+	// Not interested in references
+	if (pTasks->IsTaskReference(hTask))
+		return;
+	
 	ASSERT(nUpdate == IUI_EDIT);
 
 	// only interested in leaf tasks
@@ -481,7 +489,7 @@ void CBurndownWnd::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UP
 	}
 }
 
-COleDateTime CBurndownWnd::GetTaskStartDate(const ITaskList14* pTasks, HTASKITEM hTask)
+COleDateTime CBurndownWnd::GetTaskStartDate(const ITaskList15* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
 	COleDateTime dtStart;
@@ -495,7 +503,7 @@ COleDateTime CBurndownWnd::GetTaskStartDate(const ITaskList14* pTasks, HTASKITEM
 	return dtStart;
 }
 
-COleDateTime CBurndownWnd::GetTaskDoneDate(const ITaskList14* pTasks, HTASKITEM hTask)
+COleDateTime CBurndownWnd::GetTaskDoneDate(const ITaskList15* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
 	COleDateTime dtDone;
@@ -511,7 +519,7 @@ COleDateTime CBurndownWnd::GetTaskDate(time64_t tDate)
 	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
 }
 
-BOOL CBurndownWnd::RemoveDeletedTasks(const ITaskList14* pTasks)
+BOOL CBurndownWnd::RemoveDeletedTasks(const ITaskList15* pTasks)
 {
 	// iterating sorted data is quickest
 	int nOrgCount = m_aDateOrdered.GetSize();

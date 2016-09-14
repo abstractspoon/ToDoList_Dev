@@ -195,7 +195,7 @@ BOOL ODBCTASK::Save(ITaskList12* pTasks, HTASKITEM hTask, const COdbcMapKeyToID&
 		pTasks->SetTaskExternalID(hTask, sExternalID);
 
 	if (HasAttribute(OT_FILEREF))
-		pTasks->SetTaskFileReferencePath(hTask, sFileRef);
+		pTasks->SetTaskFileLinkPath(hTask, sFileRef);
 
 	if (HasAttribute(OT_FLAG))
 		pTasks->SetTaskFlag(hTask, (bFlag != FALSE));
@@ -273,7 +273,7 @@ BOOL ODBCTASK::Load(const ITaskList12* pTasks, HTASKITEM hTask, COdbcMapIDToKey&
 	SetAttrib(sComments,	pTasks->GetTaskComments(hTask),				OT_COMMENTS);
 	SetAttrib(sCreatedBy,	pTasks->GetTaskCreatedBy(hTask),			OT_CREATEDBY);
 	SetAttrib(sExternalID,	pTasks->GetTaskExternalID(hTask),			OT_EXTERNALID);
-	SetAttrib(sFileRef,		pTasks->GetTaskFileReferencePath(hTask),	OT_FILEREF);
+	SetAttrib(sFileRef,		pTasks->GetTaskFileLinkPath(hTask),	OT_FILEREF);
 	SetAttrib(sIcon,		pTasks->GetTaskIcon(hTask),					OT_ICON);
 	SetAttrib(sStatus,		pTasks->GetTaskStatus(hTask),				OT_STATUS);
 	SetAttrib(sVersion,		pTasks->GetTaskVersion(hTask),				OT_VERSION);

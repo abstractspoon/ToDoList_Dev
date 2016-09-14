@@ -236,7 +236,7 @@ void CiCalExporter::ExportTask(const ITaskList12* pTasks, HTASKITEM hTask,
 		WriteString(fileOut, _T("PERCENT:%lu"), pTasks->GetTaskPercentDone(hTask, FALSE));
 
 		// encode file link into ORGANIZER if it is an email address
-		CString sUrl(pTasks->GetTaskFileReferencePath(hTask));
+		CString sUrl(pTasks->GetTaskFileLinkPath(hTask));
 		sUrl.MakeLower();
 
 		if (sUrl.Find(_T("mailto:")) != 0)

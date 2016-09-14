@@ -7199,7 +7199,7 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, const CM
 	
 	// file references
 	CStringArray aFileRefs;
-	int nFile = tasks.GetTaskFileReferences(hTask, aFileRefs);
+	int nFile = tasks.GetTaskFileLinks(hTask, aFileRefs);
 
 	bChanged = FALSE;
 
@@ -7216,7 +7216,7 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, const CM
 
 	// update taskfile if any file link was changed
 	if (bChanged)
-		tasks.SetTaskFileReferences(hTask, aFileRefs);
+		tasks.SetTaskFileLinks(hTask, aFileRefs);
 
 	// children
 	PrepareTasksForPaste(tasks, tasks.GetFirstTask(hTask), mapID, TRUE);
@@ -8927,9 +8927,9 @@ BOOL CToDoCtrl::AddItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, cons
 	return AddTreeItemToTaskFile(hti, tasks, hParent, filter, bWantSubtasks, dwParentID);
 }
 
-void CToDoCtrl::CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
+int CToDoCtrl::CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	m_taskTree.CacheSelection(cache, bIncBreadcrumbs);
+	return m_taskTree.CacheSelection(cache, bIncBreadcrumbs);
 }
 
 BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
@@ -9111,7 +9111,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			file.SetTaskTags(hTask, pTDI->aTags);
 		
 		if (pTDI->aFileRefs.GetSize() && filter.WantAttribute(TDCA_FILEREF))
-			file.SetTaskFileReferences(hTask, pTDI->aFileRefs);
+			file.SetTaskFileLinks(hTask, pTDI->aFileRefs);
 		
 		if (!pTDI->sCreatedBy.IsEmpty() && filter.WantAttribute(TDCA_CREATEDBY))
 			file.SetTaskCreatedBy(hTask, pTDI->sCreatedBy);

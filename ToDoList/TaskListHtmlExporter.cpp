@@ -376,11 +376,11 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		{
 			// do it over creating a link for each file ref
 			CString sFileRefs;
-			int nNumFileRefs = pTasks->GetTaskFileReferenceCount(hTask);
+			int nNumFileRefs = pTasks->GetTaskFileLinkCount(hTask);
 
 			for (int nFile = 0; nFile < nNumFileRefs; nFile++) 
 			{ 
-				CString sFilePath = pTasks->GetTaskFileReference(hTask, nFile), sFileName;
+				CString sFilePath = pTasks->GetTaskFileLink(hTask, nFile), sFileName;
 
 				if (PathIsURL(sFilePath))
 				{

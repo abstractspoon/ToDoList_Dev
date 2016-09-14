@@ -505,7 +505,7 @@ int COutlookImportDlg::SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
 	{
 		CString sFileLink, sEntryID(item.GetEntryID());
 		sFileLink.Format(_T("outlook:%s"), sEntryID);
-		m_pDestTaskFile->SetTaskFileReferencePath(hTask, sFileLink);
+		m_pDestTaskFile->SetTaskFileLinkPath(hTask, sFileLink);
 		
 		// and save entry ID as meta-data so we
 		// maintain the association for synchronization

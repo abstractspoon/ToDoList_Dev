@@ -434,7 +434,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITaskList14* pTasks, HTASKITEM hTa
 		break;
 		
 	case TDCA_FILEREF: 
-		SETTASKATTRIBARRAY(AddTaskFileReference);
+		SETTASKATTRIBARRAY(AddTaskFileLink);
 		break;
 		
 	case TDCA_DEPENDENCY: 

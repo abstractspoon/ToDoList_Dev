@@ -3331,9 +3331,9 @@ LRESULT CTabbedToDoCtrl::OnEditCancel(WPARAM wParam, LPARAM lParam)
 	return CToDoCtrl::OnEditCancel(wParam, lParam);
 }
 
-void CTabbedToDoCtrl::CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
+int CTabbedToDoCtrl::CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	m_taskList.CacheSelection(cache, bIncBreadcrumbs);
+	return m_taskList.CacheSelection(cache, bIncBreadcrumbs);
 }
 
 void CTabbedToDoCtrl::RestoreListSelection(const TDCSELECTIONCACHE& cache)
@@ -4542,9 +4542,7 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 	{
 		if (!pExt->SelectTasks(cache.aSelTaskIDs.GetData(), cache.aSelTaskIDs.GetSize()))
 		{
-			ASSERT(cache.dwFocusedTaskID);
-			
-			if (pExt->SelectTask(cache.dwFocusedTaskID))
+			if (cache.dwFocusedTaskID && pExt->SelectTask(cache.dwFocusedTaskID))
 			{
 				CToDoCtrl::SelectTask(cache.dwFocusedTaskID);
 			}

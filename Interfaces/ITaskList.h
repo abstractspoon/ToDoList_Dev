@@ -7,7 +7,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-#define ITASKLISTBASE ITaskList14 // latest interface
+#define ITASKLISTBASE ITaskList15 // latest interface
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +25,7 @@ static const GUID IID_TASKLIST11 = { 0xaadd0c6d, 0x5fd8, 0x4995, { 0xa1, 0x3c, 0
 static const GUID IID_TASKLIST12 = { 0x6c65c122, 0x6406, 0x4d53, { 0x97, 0x3a, 0x4c, 0x7b, 0x00, 0x49, 0xff, 0x1e } };
 static const GUID IID_TASKLIST13 = { 0x5951fde6, 0x508a, 0x4a9d, { 0xa5, 0x5d, 0xd1, 0x6e, 0xb0, 0x26, 0xae, 0xf7 } };
 static const GUID IID_TASKLIST14 = { 0x0e95dc97, 0x41f7, 0x4d9c, { 0xb4, 0x25, 0xf5, 0xd4, 0xc2, 0xb1, 0xba, 0x4c } };
+static const GUID IID_TASKLIST15 = { 0x2a8fd5f0, 0x63ae, 0x485f, { 0xbc, 0x5e, 0xa2, 0xa2, 0xc2, 0xc2, 0x51, 0x5e } };
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -116,7 +117,7 @@ public:
 	virtual LPCWSTR GetTaskAllocatedBy(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskCategory(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskStatus(HTASKITEM hTask) const = 0;
-	virtual LPCWSTR GetTaskFileReferencePath(HTASKITEM hTask) const = 0;
+	virtual LPCWSTR GetTaskFileLinkPath(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskWebColor(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskPriorityWebColor(HTASKITEM hTask) const = 0;
 
@@ -155,7 +156,7 @@ public:
 	virtual bool SetTaskAllocatedBy(HTASKITEM hTask, LPCWSTR szAllocBy) = 0;
 	virtual bool SetTaskCategory(HTASKITEM hTask, LPCWSTR szCategory) = 0;
 	virtual bool SetTaskStatus(HTASKITEM hTask, LPCWSTR szStatus) = 0;
-	virtual bool SetTaskFileReferencePath(HTASKITEM hTask, LPCWSTR szFileRefpath) = 0;
+	virtual bool SetTaskFileLinkPath(HTASKITEM hTask, LPCWSTR szFileRefpath) = 0;
 
 	virtual bool SetTaskColor(HTASKITEM hTask, unsigned long nColor) = 0;
 
@@ -359,11 +360,17 @@ class ITaskList14 : public ITaskList13
 {
 	// new methods
 public:
-	virtual int GetTaskFileReferenceCount(HTASKITEM hTask) const = 0;
-	virtual bool AddTaskFileReference(HTASKITEM hTask, LPCWSTR szFileRef) = 0;
-	virtual LPCWSTR GetTaskFileReference(HTASKITEM hTask, int nIndex) const = 0;
+	virtual int GetTaskFileLinkCount(HTASKITEM hTask) const = 0;
+	virtual bool AddTaskFileLink(HTASKITEM hTask, LPCWSTR szFileRef) = 0;
+	virtual LPCWSTR GetTaskFileLink(HTASKITEM hTask, int nIndex) const = 0;
 	virtual bool IsTaskGoodAsDone(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskCustomDateString(HTASKITEM hTask, LPCWSTR szID) const = 0;
+};
+
+class ITaskList15 : public ITaskList14
+{
+	// new methods
+public:
 	virtual bool IsTaskParent(HTASKITEM hTask) const = 0;
 
 	virtual int GetAttributeCount(LPCWSTR szAttrib) const = 0;
@@ -373,6 +380,9 @@ public:
 	virtual LPCWSTR GetCustomAttributeListData(int nIndex) const = 0;
 	virtual bool IsCustomAttributeEnabled(int nIndex) const = 0;
 	
+	virtual DWORD GetTaskReferenceID(HTASKITEM hTask) const = 0;
+	virtual bool IsTaskReference(HTASKITEM hTask) const = 0;
+
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

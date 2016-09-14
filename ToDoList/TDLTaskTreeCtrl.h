@@ -76,7 +76,7 @@ public:
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
-	void CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
+	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue = FALSE);
 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);

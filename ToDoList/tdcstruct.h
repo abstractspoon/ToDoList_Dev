@@ -370,6 +370,14 @@ struct TDCSELECTIONCACHE
 			    (!bAndFocus || (dwFocusedTaskID == cache.dwFocusedTaskID)));
 	}
 
+	void Clear()
+	{
+		aSelTaskIDs.RemoveAll();
+		aBreadcrumbs.RemoveAll();
+
+		dwFocusedTaskID = dwFirstVisibleTaskID = 0;
+	}
+
 	CDWordArray aSelTaskIDs;
 	DWORD dwFocusedTaskID;
 	CDWordArray aBreadcrumbs;

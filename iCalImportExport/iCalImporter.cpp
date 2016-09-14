@@ -365,7 +365,7 @@ bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITaskList12* pTas
 		
 		// rest of attributes
 		pTasks->SetTaskStatus(hTask, pEvent->sStatus);
-		pTasks->SetTaskFileReferencePath(hTask, pEvent->sUrl);
+		pTasks->SetTaskFileLinkPath(hTask, pEvent->sUrl);
 		pTasks->SetTaskAllocatedBy(hTask, pEvent->sOrganizer);
 		pTasks->SetTaskAllocatedTo(hTask, pEvent->sAttendee);
 		pTasks->SetTaskExternalID(hTask, pEvent->sUID);

@@ -247,7 +247,7 @@ bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	// dependencies done afterwards
 
 	// file/weblink
-	CString sFileRef = pSrcTaskFile->GetTaskFileReferencePath(hTask);
+	CString sFileRef = pSrcTaskFile->GetTaskFileLinkPath(hTask);
 	sFileRef.TrimLeft();
 
 	if (!sFileRef.IsEmpty())

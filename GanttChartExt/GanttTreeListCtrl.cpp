@@ -433,7 +433,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 	// always cancel any ongoing operation
 	CancelOperation();
 
-	const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pTasks, IID_TASKLIST14);
+	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
 	BOOL bResort = FALSE;
 	
 	switch (nUpdate)
@@ -553,7 +553,7 @@ void CGanttTreeListCtrl::PreFixVScrollSyncBug()
 	}
 }
 
-CString CGanttTreeListCtrl::GetTaskAllocTo(const ITaskList14* pTasks, HTASKITEM hTask)
+CString CGanttTreeListCtrl::GetTaskAllocTo(const ITaskList15* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -631,7 +631,7 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	return IUI_NONE;
 }
 
-BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, 
+BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, 
 									IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, 
 									BOOL bAndSiblings)
 {
@@ -788,7 +788,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask,
 	return bChange;
 }
 
-void CGanttTreeListCtrl::BuildTaskMap(const ITaskList14* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -813,7 +813,7 @@ void CGanttTreeListCtrl::BuildTaskMap(const ITaskList14* pTasks, HTASKITEM hTask
 	}
 }
 
-void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList14* pTasks, const CSet<DWORD>& mapIDs)
+void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList15* pTasks, const CSet<DWORD>& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
@@ -879,7 +879,7 @@ GANTTDISPLAY* CGanttTreeListCtrl::GetGanttDisplay(DWORD dwTaskID)
 	return pGD;
 }
 
-void CGanttTreeListCtrl::RebuildTree(const ITaskList14* pTasks)
+void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
 {
 	CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(m_hwndTree);
 
@@ -947,7 +947,7 @@ COleDateTime CGanttTreeListCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
 	return date;
 }
 
-void CGanttTreeListCtrl::BuildTreeItem(const ITaskList14* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTask, 
 									   CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -957,7 +957,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITaskList14* pTasks, HTASKITEM hTas
 	GANTTITEM* pGI = new GANTTITEM;
 	time64_t tDate = 0;
 	
-	pGI->dwRefID = _ttoi(pTasks->GetTaskAttribute(hTask, TDL_TASKREFID));
+	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 
 	if (pGI->dwRefID == 0) // 'true' task
 	{

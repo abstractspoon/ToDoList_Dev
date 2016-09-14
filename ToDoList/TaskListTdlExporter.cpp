@@ -115,7 +115,7 @@ void CTaskListTdlExporter::CreateReverseFileLinks(CTaskFile& tasks, HTASKITEM hT
 	ASSERT (dwOrgID > 0);
 
 	sFileLink.Format(_T("tdl://%s?%lu"), sFileName, dwOrgID);
-	tasks.AddTaskFileReference(hTask, sFileLink);
+	tasks.AddTaskFileLink(hTask, sFileLink);
 
 	// first child
 	CreateReverseFileLinks(tasks, tasks.GetFirstTask(hTask), mapIDs, sFileName, TRUE);

@@ -159,7 +159,7 @@ copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y</Command>
     <PostBuildEvent>
       <Command>mkdir ..\..\ToDoList_Plugins
 mkdir ..\..\ToDoList_Plugins\release
-copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\release /y
+copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

@@ -67,7 +67,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
 	BOOL SelectTasks(const CDWordArray& aTasks, BOOL bTrue = FALSE);
-	void CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
+	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	void RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
 	BOOL EnsureSelectionVisible();

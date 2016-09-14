@@ -513,7 +513,7 @@ CString CTaskListExporterBase::FormatDependencyList(const ITASKLISTBASE* pTasks,
 
 CString CTaskListExporterBase::FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const
 {
-	FORMATATTRIBLIST(GetTaskFileReferenceCount, GetTaskFileReference, TDCA_FILEREF);
+	FORMATATTRIBLIST(GetTaskFileLinkCount, GetTaskFileLink, TDCA_FILEREF);
 }
 
 CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask) const

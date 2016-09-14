@@ -240,7 +240,7 @@ protected:
 	BOOL IsItemSelected(int nItem) const;
 	BOOL HasSingleSelectionChanged(DWORD dwSelID) const;
 	DWORD GetSingleSelectedTaskID() const;
-	void CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
+	int CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	void RestoreListSelection(const TDCSELECTIONCACHE& cache);
 
 	int GetListColumnAlignment(int nDTAlign); 

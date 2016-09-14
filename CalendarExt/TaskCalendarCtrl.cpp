@@ -207,7 +207,7 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 
 void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
-	const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pTasks, IID_TASKLIST14);
+	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
 	BOOL bChange = FALSE;
 
 	switch (nUpdate)
@@ -243,7 +243,7 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpd
 		Invalidate(FALSE);
 }
 
-void CTaskCalendarCtrl::BuildTaskMap(const ITaskList14* pTasks, HTASKITEM hTask, 
+void CTaskCalendarCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, 
 							   CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -268,7 +268,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITaskList14* pTasks, HTASKITEM hTask,
 	}
 }
 
-BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList14* pTasks)
+BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList15* pTasks)
 {
 	CSet<DWORD> mapIDs;
 	BuildTaskMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
@@ -302,7 +302,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList14* pTasks)
 	return bChange;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
+BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
 									const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -310,8 +310,8 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, I
 
 	ASSERT(nUpdate == IUI_EDIT);
 
-	// handle task if not a reference
-	if (_ttoi(pTasks->GetTaskAttribute(hTask, _T("REFID"))) > 0)
+	// Not interested in references
+	if (pTasks->IsTaskReference(hTask))
 		return FALSE;
 
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
@@ -377,35 +377,35 @@ BOOL CTaskCalendarCtrl::IsSpecialDate(const COleDateTime& date) const
 	return m_mapSpecial.Lookup(CDateHelper::GetDateOnly(date).m_dt, bDummy);
 }
 
-void CTaskCalendarCtrl::BuildData(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CTaskCalendarCtrl::BuildData(const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
 
-	// handle task unless it's a reference
-	if (_ttoi(pTasks->GetTaskAttribute(hTask, _T("REFID"))) == 0)
+	// Not interested in references
+	if (pTasks->IsTaskReference(hTask))
+		return;
+
+	// We are only interested in leaf (non-parent) tasks
+	if (!pTasks->IsTaskParent(hTask))
 	{
-		// We are only interested in non-parent tasks
-		if (!pTasks->IsTaskParent(hTask)) // leaf-task
-		{
-			// sanity check
-			DWORD dwTaskID = pTasks->GetTaskID(hTask);
-			ASSERT(!HasTask(dwTaskID));
-			
-			TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
-			m_mapData[dwTaskID] = pTCI;
-			
-			// process item for special dates
-			if (pTCI->IsStartDateSet())
-				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyStartDate())] = TRUE;
-			
-			if (pTCI->IsEndDateSet())
-				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyEndDate())] = TRUE;
-		}
-		else // process children
-		{
-			BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
-		}
+		// sanity check
+		DWORD dwTaskID = pTasks->GetTaskID(hTask);
+		ASSERT(!HasTask(dwTaskID));
+
+		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
+		m_mapData[dwTaskID] = pTCI;
+
+		// process item for special dates
+		if (pTCI->IsStartDateSet())
+			m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyStartDate())] = TRUE;
+
+		if (pTCI->IsEndDateSet())
+			m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyEndDate())] = TRUE;
+	}
+	else // process children
+	{
+		BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
 	}
 
 	// handle siblings WITHOUT RECURSION

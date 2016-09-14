@@ -1959,25 +1959,27 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 	return FALSE;
 }
 
-void CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
+int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE) == 0)
-		return;
-
-	cache.dwFirstVisibleTaskID = GetTaskID(m_tcTasks.GetFirstVisibleItem());
- 
-	// we prefer the 'down' breadcrumbs because this way the 
-	// focused item appears to stay still, just like when we delete items
-	// but in case the item in question is last, we also get the 'up' breadcrumbs
-	cache.aBreadcrumbs.RemoveAll();
-
-	if (bIncBreadcrumbs)
+	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE) > 0)
 	{
-		HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
+		cache.dwFirstVisibleTaskID = GetTaskID(m_tcTasks.GetFirstVisibleItem());
+ 
+		// we prefer the 'down' breadcrumbs because this way the 
+		// focused item appears to stay still, just like when we delete items
+		// but in case the item in question is last, we also get the 'up' breadcrumbs
+		cache.aBreadcrumbs.RemoveAll();
+
+		if (bIncBreadcrumbs)
+		{
+			HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
 		
-		m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY);
-		m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY | TCFBC_APPEND | TCFBC_UP);
+			m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY);
+			m_find.GetTaskBreadcrumbs(htiFocus, cache.aBreadcrumbs, TCFBC_VISIBLEONLY | TCFBC_APPEND | TCFBC_UP);
+		}
 	}
+
+	return cache.aSelTaskIDs.GetSize();
 }
 
 BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
@@ -2042,25 +2044,25 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) cons
 
 int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
 {
-	if (!GetSelectedCount())
-		return 0;
+	aTaskIDs.RemoveAll();
+	dwFocusedTaskID = 0;
+
+	if (GetSelectedCount())
+	{
+		// get selected tasks with/out duplicate subtasks
+		CHTIList selection;
+		TSH().CopySelection(selection, bRemoveChildDupes);
+
+		TDCGETTASKS filter(TDCGT_ALL, 0);
+		POSITION pos = selection.GetHeadPosition();
 	
-	// get selected tasks with/out duplicate subtasks
-	CHTIList selection;
-	TSH().CopySelection(selection, bRemoveChildDupes);
+		while (pos)
+			aTaskIDs.Add(GetTaskID(selection.GetNext(pos)));
 
-	TDCGETTASKS filter(TDCGT_ALL, 0);
-	POSITION pos = selection.GetHeadPosition();
-	
-	while (pos)
-		aTaskIDs.Add(GetTaskID(selection.GetNext(pos)));
-
-	// focused item
-	HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
-	dwFocusedTaskID = GetTaskID(htiFocus);
-
-//	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(aTaskIDs, dwFocusedTaskID));
-//	ASSERT ((GetSelectedCount() > 1) || (dwFocusedTaskID == aTaskIDs[0])); // sanity check
+		// focused item
+		HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
+		dwFocusedTaskID = GetTaskID(htiFocus);
+	}
 	
 	return (aTaskIDs.GetSize());
 }

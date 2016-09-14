@@ -385,15 +385,17 @@ bool CKanbanWnd::SelectTasks(LPDWORD pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ASSERT(pdwTaskIDs);
-	ASSERT(nTaskCount);
-	
 	CAutoFlag af(m_bInSelectTask, TRUE);
 	CDWordArray aTaskIDs;
 
-	for (int nID = 0; nID < nTaskCount; nID++)
-		aTaskIDs.Add(pdwTaskIDs[nID]);
-		
+	if (nTaskCount)
+	{
+		ASSERT(pdwTaskIDs);
+	
+		for (int nID = 0; nID < nTaskCount; nID++)
+			aTaskIDs.Add(pdwTaskIDs[nID]);
+	}
+
 	return (m_ctrlKanban.SelectTasks(aTaskIDs) != FALSE);
 }
 

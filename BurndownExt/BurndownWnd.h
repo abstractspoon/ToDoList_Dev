@@ -120,11 +120,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	void UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void UpdateDataExtents();
-	BOOL RemoveDeletedTasks(const ITaskList14* pTasks);
-	void BuildData(const ITaskList14* pTasks);
-	void BuildData(const ITaskList14* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
+	BOOL RemoveDeletedTasks(const ITaskList15* pTasks);
+	void BuildData(const ITaskList15* pTasks);
+	void BuildData(const ITaskList15* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void SortData();
 	BOOL IsDataSorted() const;
 	void BuildGraph();
@@ -135,8 +135,8 @@ protected:
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
 	int CalculateRequiredScale() const;
-	COleDateTime GetTaskStartDate(const ITaskList14* pTasks, HTASKITEM hTask);
-	COleDateTime GetTaskDoneDate(const ITaskList14* pTasks, HTASKITEM hTask);
+	COleDateTime GetTaskStartDate(const ITaskList15* pTasks, HTASKITEM hTask);
+	COleDateTime GetTaskDoneDate(const ITaskList15* pTasks, HTASKITEM hTask);
 
 	static int CompareStatItems(const void* pV1, const void* pV2);
 	static COleDateTime GetTaskDate(time64_t tDate);

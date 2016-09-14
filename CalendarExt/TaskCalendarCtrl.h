@@ -144,14 +144,14 @@ protected:
 	void NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
 
-	BOOL UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL RemoveDeletedTasks(const ITaskList14* pTasks);
-	void BuildData(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL RemoveDeletedTasks(const ITaskList15* pTasks);
+	void BuildData(const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
 
 	// helpers
 	static int CompareTCItems(const void* pV1, const void* pV2);
-	static void BuildTaskMap(const ITaskList14* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static void BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 
 };
 

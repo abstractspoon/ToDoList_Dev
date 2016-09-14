@@ -148,7 +148,7 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFi
 			sFileRef.Replace(_T("%20"), _T(""));
 		}
 
-		pDestTaskFile->SetTaskFileReferencePath(hTask, sFileRef);
+		pDestTaskFile->SetTaskFileLinkPath(hTask, sFileRef);
 	}
 
 	// comments

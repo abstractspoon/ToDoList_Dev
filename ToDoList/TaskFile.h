@@ -137,7 +137,6 @@ public:
 
 	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID, BOOL bVisible = TRUE);
 	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible = TRUE);
-	DWORD GetTaskReferenceID(HTASKITEM hTask) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM* pTDI);
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM* pTDI) const;
@@ -170,8 +169,8 @@ public:
 	BOOL SetTaskTags(HTASKITEM hTask, const CStringArray& aTags);
 	int  GetTaskTags(HTASKITEM hTask, CStringArray& aTags) const;
 
-	BOOL SetTaskFileReferences(HTASKITEM hTask, const CStringArray& aFiles);
-	int  GetTaskFileReferences(HTASKITEM hTask, CStringArray& aFiles) const;
+	BOOL SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles);
+	int  GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const;
 	
 	BOOL SetTaskMetaData(HTASKITEM hTask, const CMapStringToString& mapMetaData);
 	int GetTaskMetaData(HTASKITEM hTask, CMapStringToString& mapMetaData) const;
@@ -193,12 +192,7 @@ public:
 	bool SetTaskIsParent(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
-	// ITaskList14 implementation 
-	int GetTaskFileReferenceCount(HTASKITEM hTask) const;
-	bool AddTaskFileReference(HTASKITEM hTask, LPCTSTR szFileRef);
-	LPCTSTR GetTaskFileReference(HTASKITEM hTask, int nIndex) const;
-	bool IsTaskGoodAsDone(HTASKITEM hTask) const;
-	LPCTSTR GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const;
+	// ITaskList15 implementation 
 	bool IsTaskParent(HTASKITEM hTask) const;
 
 	int GetAttributeCount(LPCTSTR szAttrib) const;
@@ -207,6 +201,17 @@ public:
 	unsigned long GetCustomAttributeType(int nIndex) const;
 	LPCTSTR GetCustomAttributeListData(int nIndex) const;
 	bool IsCustomAttributeEnabled(int nIndex) const;
+
+	DWORD GetTaskReferenceID(HTASKITEM hTask) const;
+	bool IsTaskReference(HTASKITEM hTask) const;
+
+	//////////////////////////////////////////////////////////////
+	// ITaskList14 implementation 
+	int GetTaskFileLinkCount(HTASKITEM hTask) const;
+	bool AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef);
+	LPCTSTR GetTaskFileLink(HTASKITEM hTask, int nIndex) const;
+	bool IsTaskGoodAsDone(HTASKITEM hTask) const;
+	LPCTSTR GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList13 implementation 
@@ -368,7 +373,7 @@ public:
 	LPCTSTR GetTaskAllocatedBy(HTASKITEM hTask) const;
 	LPCTSTR GetTaskCategory(HTASKITEM hTask) const;
 	LPCTSTR GetTaskStatus(HTASKITEM hTask) const;
-	LPCTSTR GetTaskFileReferencePath(HTASKITEM hTask) const;
+	LPCTSTR GetTaskFileLinkPath(HTASKITEM hTask) const;
 	LPCTSTR GetTaskWebColor(HTASKITEM hTask) const;
 	LPCTSTR GetTaskPriorityWebColor(HTASKITEM hTask) const;
 
@@ -406,7 +411,7 @@ public:
 	bool SetTaskAllocatedBy(HTASKITEM hTask, LPCTSTR szAllocBy);
 	bool SetTaskCategory(HTASKITEM hTask, LPCTSTR szCategory);
 	bool SetTaskStatus(HTASKITEM hTask, LPCTSTR szStatus);
-	bool SetTaskFileReferencePath(HTASKITEM hTask, LPCTSTR szFileRefpath);
+	bool SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath);
 
 	bool SetTaskColor(HTASKITEM hTask, unsigned long nColor);
 	bool SetTaskWebColor(HTASKITEM hTask, unsigned long nColor);
