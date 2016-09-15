@@ -279,6 +279,9 @@ void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 	if (!header.sXmlHeader.IsEmpty())
 		VERIFY(SetXmlHeader(header.sXmlHeader));
 
+	if (!header.sXslHeader.IsEmpty())
+		VERIFY(SetXslHeader(header.sXslHeader));
+
 	// add other taskfile related stuff
 	if (!header.sProjectName.IsEmpty())
 		VERIFY(SetProjectName(header.sProjectName));
@@ -306,7 +309,8 @@ void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 
 void CTaskFile::GetHeader(TASKFILE_HEADER& header) const
 {
-	header.sXmlHeader = m_sHeader;
+	header.sXmlHeader = m_sXmlHeader;
+	header.sXslHeader = GetXslHeader();
 	header.sProjectName = GetProjectName();
 	header.sFileName = GetItemValue(TDL_FILENAME);
 	header.sCheckedOutTo = GetCheckOutTo();

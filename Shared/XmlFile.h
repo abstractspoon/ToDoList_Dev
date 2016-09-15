@@ -258,7 +258,9 @@ public:
 	const HANDLE GetFileHandle() const;
 
 	CString GetXmlHeader() const;
+	CString GetXslHeader() const;
 	BOOL SetXmlHeader(const CString& sHeader);
+	BOOL SetXslHeader(const CString& sHeader);
 
 	void Trace() const;
 
@@ -269,7 +271,7 @@ public:
 	
 protected:
 	CXmlItem m_xiRoot;
-	CString m_sHeader;
+	CString m_sXmlHeader, m_sXslHeader;
 	IXmlParse* m_pCallback;
 
 	mutable CXmlDocumentWrapper m_xmlDoc, m_xslDoc;

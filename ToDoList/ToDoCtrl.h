@@ -451,7 +451,7 @@ protected:
 	HICON m_hIconClock, m_hIconLink;
 
 	CWordArray m_aStyles;
-	CString m_sXmlHeader;
+	CString m_sXmlHeader, m_sXslHeader;
 	CTaskListDropTarget m_dtTree, m_dtFileRef;
 	CString m_sLastSavePath;
 	CString m_sAltPrefsKey;

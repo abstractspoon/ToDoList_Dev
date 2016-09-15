@@ -90,8 +90,10 @@ public:
 	BOOL Save(LPCTSTR path = _T(""), BOOL bPreserveWhiteSpace = TRUE);
 	void Reset();
 
-	CString GetHeader(BOOL bAsXml = FALSE) const;
-	BOOL SetHeader(LPCTSTR szHeader);
+	CString GetXmlHeader(BOOL bAsXml = FALSE) const;
+	CString GetXslHeader(BOOL bAsXml = FALSE) const;
+	BOOL SetXmlHeader(LPCTSTR szHeader);
+	BOOL SetXslHeader(LPCTSTR szHeader);
 
 	static BOOL IsVersion3orGreater();
 
@@ -103,6 +105,8 @@ public:
 	MSXML2::IXMLDOMNodePtr AsNode();
 
 protected:
+	long FindHeaderItem(LPCTSTR szName) const;
+	CString GetHeader(LPCTSTR szName, BOOL bAsXml = FALSE) const;
 
 private:
 	MSXML2::IXMLDOMDocumentPtr m_xmldoc;

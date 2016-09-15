@@ -2159,6 +2159,7 @@ struct TASKFILE_HEADER
 	TASKFILE_HEADER() : bArchive(-1), bUnicode(-1), dwNextID(0), nFileFormat(-1), nFileVersion(-1) {}
 
 	CString sXmlHeader;
+	CString sXslHeader;
 	CString sProjectName;
 	CString sFileName;
 	CString sCheckedOutTo;

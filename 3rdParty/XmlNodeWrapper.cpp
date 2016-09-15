@@ -284,7 +284,7 @@ CXmlDocumentWrapper::CXmlDocumentWrapper(LPCTSTR szHeader, LPCTSTR szRootItem)
 
 	   // set header afterwards so it not overwritten
 		if (szHeader && *szHeader)
-			SetHeader(szHeader);
+			SetXmlHeader(szHeader);
 	}
 	catch (...)
 	{
@@ -332,55 +332,105 @@ BOOL CXmlDocumentWrapper::IsValid() const
 	return TRUE;
 }
 
-CString CXmlDocumentWrapper::GetHeader(BOOL bAsXml) const
+CString CXmlDocumentWrapper::GetXmlHeader(BOOL bAsXml) const
+{
+	return GetHeader(NULL, bAsXml);
+}
+
+CString CXmlDocumentWrapper::GetXslHeader(BOOL bAsXml) const
+{
+	return GetHeader(_T("stylesheet"), bAsXml);
+}
+
+CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 {
 	CString sHeader;
 	
 	if (IsValid())
 	{
-		CXmlNodeWrapper nodeHdr(m_xmldoc->childNodes->item[0]);
-		
-		if (nodeHdr.IsValid())
+		BOOL bRootItem = (!szName || !szName[0]);
+		long nItem = FindHeaderItem(szName);
+
+		if (nItem != -1)
 		{
-			if (nodeHdr.GetXML().Find(_T("?xml")) == 1) // <?xml
+			CXmlNodeWrapper nodeHdr(m_xmldoc->childNodes->item[nItem]);
+		
+			if (nodeHdr.IsValid())
 			{
-				int nAttribs = nodeHdr.NumAttributes();
-				
-				for (int nAttrib = 0; nAttrib < nAttribs; nAttrib++)
-				{
-					CString sAttrib;
-					sAttrib.Format(_T("%s=\"%s\" "), nodeHdr.GetAttribName(nAttrib), nodeHdr.GetAttribVal(nAttrib));
-					sHeader += sAttrib;
-				}
+				sHeader = nodeHdr.GetXML();
+				sHeader.TrimLeft();
+				sHeader.TrimRight();
+
+				// remove the xml start/end
+				sHeader = sHeader.Mid(6, (sHeader.GetLength() - 8));
 			}
-		}
 		
-		if (sHeader.IsEmpty())
-		{
-			sHeader = DEFAULT_HEADER;
+			// Fallback for root header item
+			if (sHeader.IsEmpty() && bRootItem)
+			{
+				sHeader = DEFAULT_HEADER;
 			
-			// get active code page
-			CString sCodePage;
+				// get active code page
+				CString sCodePage;
 			
-			GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTANSICODEPAGE, sCodePage.GetBuffer(7), 6);
-			sCodePage.ReleaseBuffer();
+				GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTANSICODEPAGE, sCodePage.GetBuffer(7), 6);
+				sCodePage.ReleaseBuffer();
 			
-			// and replace in header
-			if (_ttoi(sCodePage) > 0)
-				sHeader.Replace(_T("1252"), sCodePage);
-		}
+				// and replace in header
+				if (_ttoi(sCodePage) > 0)
+					sHeader.Replace(_T("1252"), sCodePage);
+			}
 		
-		if (bAsXml)
-		{
-			sHeader = _T("<?xml ") + sHeader;
-			sHeader += _T("?>");
+			if (bAsXml && !sHeader.IsEmpty())
+			{
+				if (bRootItem)
+					sHeader = _T("<?xml ") + sHeader;
+				else
+					sHeader = _T("<?xml-") + sHeader;
+
+				sHeader += _T("?>");
+			}
+
 		}
 	}
 	
 	return sHeader;
 }
 
-BOOL CXmlDocumentWrapper::SetHeader(LPCTSTR szHeader)
+long CXmlDocumentWrapper::FindHeaderItem(LPCTSTR szName) const
+{
+	if (IsValid())
+	{
+		long nNumNodes = m_xmldoc->childNodes->Getlength();
+
+		for (long nNode = 0; nNode < nNumNodes; nNode++)
+		{
+			CXmlNodeWrapper node(m_xmldoc->childNodes->item[nNode]);
+			
+			if (node.IsValid())
+			{
+				CString sNodeXml(node.GetXML());
+				CString sHeaderItem(_T("?xml"));
+
+				if (szName && *szName)
+				{
+					sHeaderItem += '-';
+					sHeaderItem += szName;
+				}
+				
+				if (sNodeXml.Find(sHeaderItem) == 1)
+				{
+					return nNode;
+				}
+			}
+		}
+	}
+
+	// all else
+	return -1;
+}
+
+BOOL CXmlDocumentWrapper::SetXmlHeader(LPCTSTR szHeader)
 {
 	ASSERT(IsValid());
 	ASSERT(szHeader && *szHeader);
@@ -412,6 +462,52 @@ BOOL CXmlDocumentWrapper::SetHeader(LPCTSTR szHeader)
 	}
 
 	return m_bHeaderSet;
+}
+
+BOOL CXmlDocumentWrapper::SetXslHeader(LPCTSTR szHeader)
+{
+	ASSERT(IsValid());
+
+	if (IsValid())
+	{
+		if (!szHeader || !szHeader[0])
+		{
+			// delete the xsl header
+			long nItem = FindHeaderItem(_T("stylesheet"));
+
+			if (nItem != -1)
+			{
+				// TODO
+			}
+		}
+		else
+		{
+			_bstr_t name(CXmlNodeWrapper::ConvertStringToBSTR(_T("xml-stylesheet")), FALSE);
+			_bstr_t bstr(CXmlNodeWrapper::ConvertStringToBSTR(szHeader), FALSE);
+		
+			MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(name, bstr);
+		
+			// always insert header right at the start but after root header
+			long nItem = (FindHeaderItem(NULL) + 1);
+			MSXML2::IXMLDOMNodePtr pNode = m_xmldoc->childNodes->item[nItem];
+		
+			if (pNode)
+			{
+				CString sXml = (LPCTSTR)pNode->Getxml();
+				_variant_t varFirst(pNode.GetInterfacePtr());
+			
+				m_xmldoc->insertBefore(pHdr, varFirst);
+			}
+			else
+			{
+				m_xmldoc->appendChild(pHdr);
+			}
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 MSXML2::IXMLDOMDocument* CXmlDocumentWrapper::Detach()
@@ -492,7 +588,7 @@ BOOL CXmlDocumentWrapper::Save(LPCTSTR path, BOOL bPreserveWhiteSpace)
 		if (!m_bHeaderSet)
 		{
 			ASSERT(0);
-			SetHeader(DEFAULT_HEADER);
+			SetXmlHeader(DEFAULT_HEADER);
 		}
 		
 		return (VARIANT_TRUE == m_xmldoc->save(bPath));
@@ -538,7 +634,7 @@ CString CXmlDocumentWrapper::GetXML(BOOL bPreserveWhiteSpace) const
 		sXml = (LPCTSTR)m_xmldoc->Getxml();
 		
 		// Getxml doesn't return entire header so we need to fix it up here
-		CString sHeader = GetHeader(TRUE);
+		CString sHeader = GetXmlHeader(TRUE);
 		int nStart = sXml.Find(_T("?xml"));
 		
 		if (nStart > 0)
@@ -742,7 +838,6 @@ int CXmlNodeListWrapper::Count()
 		return m_xmlnodelist->Getlength();
 	else
 		return 0;
-	
 }
 
 BOOL CXmlNodeListWrapper::IsValid()

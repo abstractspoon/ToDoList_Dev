@@ -6234,7 +6234,8 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& file)
 		SaveAttributeVisibility(prefs);
 	}	
 	
-	// Update XML header if not already unicode
+	// Update XML headers if not already unicode
+	m_sXslHeader = file.GetXslHeader();
 	m_sXmlHeader = file.GetXmlHeader();
 
 	if (!XMLHeaderIsUnicode(m_sXmlHeader))
@@ -6550,7 +6551,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 
 		if (!XMLHeaderIsUnicode(tfh.sXmlHeader))
 			tfh.sXmlHeader = m_sXmlHeader;
-		
+
 		// increment file version if not 3rd party source controlled
 		if (!HasStyle(TDCS_USES3RDPARTYSOURCECONTROL))
 		{
@@ -6565,6 +6566,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 		tfh.sProjectName.Format(_T("%s (%s)"), m_sProjectName, CEnString(IDS_TDC_ARCHIVEPROJECT));
 		tfh.nFileVersion = 1;
 		tfh.sXmlHeader = m_sXmlHeader;
+		tfh.sXslHeader = m_sXslHeader;
 	}
 	
 	file.Merge(tasks, TRUE, TRUE);
@@ -8585,6 +8587,7 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 	ASSERT(XMLHeaderIsUnicode(m_sXmlHeader));
 
 	tasks.SetXmlHeader(m_sXmlHeader);
+	tasks.SetXslHeader(m_sXslHeader);
 	tasks.SetProjectName(m_sProjectName);
 	tasks.SetArchive(m_bArchive);
 	tasks.SetFileFormat(FILEFORMAT_CURRENT);

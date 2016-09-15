@@ -1150,7 +1150,7 @@ BOOL CXmlFile::ParseRootItem(CXmlDocumentWrapper* pDoc, const CString& sRootItem
 	}
 	
 	// save off the header string
-	m_sHeader = pDoc->GetHeader();
+	m_sXmlHeader = pDoc->GetXmlHeader();
 	
 	// parse rest of file
 	ParseItem(m_xiRoot, &node);
@@ -1272,7 +1272,8 @@ BOOL CXmlFile::BuildDOM() const
 
 	// clear existing document
 	m_xmlDoc.Reset();
-	m_xmlDoc.SetHeader(GetXmlHeader());
+	m_xmlDoc.SetXmlHeader(GetXmlHeader());
+	m_xmlDoc.SetXslHeader(GetXslHeader());
 	
 	// build new one
 	CXmlNodeWrapper node(m_xmlDoc.AsNode());
@@ -1561,7 +1562,7 @@ const HANDLE CXmlFile::GetFileHandle() const
 
 CString CXmlFile::GetXmlHeader() const 
 { 
-	return m_sHeader.IsEmpty() ? m_xmlDoc.GetHeader() : m_sHeader; 
+	return m_sXmlHeader.IsEmpty() ? m_xmlDoc.GetXmlHeader() : m_sXmlHeader; 
 }
 
 BOOL CXmlFile::SetXmlHeader(const CString& sHeader) 
@@ -1569,10 +1570,23 @@ BOOL CXmlFile::SetXmlHeader(const CString& sHeader)
 	if (sHeader.IsEmpty())
 		return FALSE;
 
-	m_sHeader = sHeader; 
-	m_sHeader.MakeLower(); 
+	m_sXmlHeader = sHeader; 
+	m_sXmlHeader.MakeLower(); 
 
-	return m_xmlDoc.SetHeader(m_sHeader);
+	return m_xmlDoc.SetXmlHeader(m_sXmlHeader);
+}
+
+CString CXmlFile::GetXslHeader() const 
+{ 
+	return m_sXslHeader.IsEmpty() ? m_xmlDoc.GetXslHeader() : m_sXslHeader; 
+}
+
+BOOL CXmlFile::SetXslHeader(const CString& sHeader) 
+{ 
+	m_sXslHeader = sHeader; 
+	m_sXslHeader.MakeLower(); 
+
+	return m_xmlDoc.SetXslHeader(m_sXslHeader);
 }
 
 void CXmlFile::SortItems(const CString& sItemName, const CString& sKeyName, BOOL bAscending)
