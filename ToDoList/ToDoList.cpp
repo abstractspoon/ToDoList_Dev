@@ -1176,52 +1176,56 @@ void CToDoListApp::OnImportPrefs()
 	sIniPath.MakeLower();
 	sIniPath.Replace(_T("exe"), _T("ini"));
 	
-	CPreferences prefs;
-	CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE, 
-							_T("ini"), 
-							sIniPath, 
-							EOFN_DEFAULTOPEN, 
-							CEnString(IDS_INIFILEFILTER));
-	
-	if (dialog.DoModal(prefs) == IDOK)
+	// scope the prefs object so that no outstanding references
+	// are held if we need to re-initialise it
 	{
-		CRegKey2 reg;
+		CPreferences prefs;
+
+		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE, 
+			_T("ini"), 
+			sIniPath, 
+			EOFN_DEFAULTOPEN, 
+			CEnString(IDS_INIFILEFILTER));
 		
-		if (reg.Open(HKEY_CURRENT_USER, APPREGKEY, FALSE) == ERROR_SUCCESS)
+		if (dialog.DoModal(prefs) != IDOK)
+			return;
+
+		// else
+		sIniPath = dialog.GetPathName();
+	}
+
+	CRegKey2 reg;
+		
+	if ((reg.Open(HKEY_CURRENT_USER, APPREGKEY, FALSE) == ERROR_SUCCESS) &&
+		 reg.ImportFromIni(sIniPath)) // => import ini to registry
+	{
+		// use them now?
+		// only ask if we're not already using the registry
+		BOOL bUsingIni = (m_pszRegistryKey == NULL);
+		
+		if (bUsingIni)
 		{
-			sIniPath = dialog.GetPathName();
-			
-			if (reg.ImportFromIni(sIniPath)) // => import ini to registry
+			if (AfxMessageBox(CEnString(IDS_POSTIMPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 			{
-				// use them now?
-				// only ask if we're not already using the registry
-				BOOL bUsingIni = (m_pszRegistryKey == NULL);
-
-				if (bUsingIni)
-				{
-					if (AfxMessageBox(CEnString(IDS_POSTIMPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
-					{
-						SetPreferences(FALSE, APPREGKEY, FALSE);
-
-						// reset prefs
-						m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
-
-						// rename existing prefs file
-						CString sNewName = (sIniPath + _T(".bak"));
-						VERIFY (FileMisc::MoveFile(sIniPath, sNewName, TRUE, TRUE));
-					}
-				}
-				else // reset prefs
-				{
-					m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
-				}
-			}
-			else // notify user
-			{
-				CEnString sMessage(CEnString(IDS_INVALIDPREFFILE), dialog.GetFileName());
-				AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+				SetPreferences(FALSE, APPREGKEY, FALSE);
+				
+				// reset prefs
+				m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
+				
+				// rename existing prefs file
+				CString sNewName = (sIniPath + _T(".bak"));
+				VERIFY (FileMisc::MoveFile(sIniPath, sNewName, TRUE, TRUE));
 			}
 		}
+		else // reset prefs
+		{
+			m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
+		}
+	}
+	else // notify user
+	{
+		CEnString sMessage(CEnString(IDS_INVALIDPREFFILE), sIniPath);
+		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
 	}
 }
 
@@ -1245,36 +1249,42 @@ void CToDoListApp::OnExportPrefs()
 		sIniPath.MakeLower();
 		sIniPath.Replace(_T("exe"), _T("ini"));
 		
-		CPreferences prefs;
-		CFileSaveDialog dialog(IDS_IMPORTPREFS_TITLE, 
-								_T("ini"), 
-								sIniPath, 
-								EOFN_DEFAULTSAVE, 
-								CEnString(IDS_INIFILEFILTER));
-		
-		if (dialog.DoModal(prefs) == IDOK)
+		// scope the prefs object so that no outstanding references
+		// are held if we need to re-initialise it
 		{
-			BOOL bUsingReg = (m_pszRegistryKey != NULL);
-			sIniPath = dialog.GetPathName();
+			CPreferences prefs;
+			CFileSaveDialog dialog(IDS_IMPORTPREFS_TITLE, 
+									_T("ini"), 
+									sIniPath, 
+									EOFN_DEFAULTSAVE, 
+									CEnString(IDS_INIFILEFILTER));
+			
+			if (dialog.DoModal(prefs) != IDOK)
+				return;
 
-			if (bUsingReg && reg.ExportToIni(sIniPath, TRUE))
+			// else
+			sIniPath = dialog.GetPathName();
+		}
+
+		BOOL bUsingReg = (m_pszRegistryKey != NULL);
+
+		if (bUsingReg && reg.ExportToIni(sIniPath, TRUE))
+		{
+			// use them now? 
+			CString sAppFolder, sIniFolder;
+			
+			FileMisc::SplitPath(sAppPath, NULL, &sAppFolder);
+			FileMisc::SplitPath(sIniPath, NULL, &sIniFolder);
+			
+			// only if they're in the same folder as the exe
+			if (sIniFolder.CompareNoCase(sAppFolder) == 0)
 			{
-				// use them now? 
-				CString sAppFolder, sIniFolder;
-				
-				FileMisc::SplitPath(sAppPath, NULL, &sAppFolder);
-				FileMisc::SplitPath(sIniPath, NULL, &sIniFolder);
-				
-				// only if they're in the same folder as the exe
-				if (sIniFolder.CompareNoCase(sAppFolder) == 0)
+				if (AfxMessageBox(CEnString(IDS_POSTEXPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 				{
-					if (AfxMessageBox(CEnString(IDS_POSTEXPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
-					{
-						SetPreferences(TRUE, sIniPath, FALSE);
-						
-						// reset prefs
-						m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
-					}
+					SetPreferences(TRUE, sIniPath, FALSE);
+					
+					// reset prefs
+					m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
 				}
 			}
 		}
