@@ -102,6 +102,7 @@ void CTDLAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLAboutDlg, CDialog)
 	//{{AFX_MSG_MAP(CTDLAboutDlg)
 	//}}AFX_MSG_MAP
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -171,6 +172,13 @@ BOOL CTDLAboutDlg::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+BOOL CTDLAboutDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(IDD_ABOUT_DIALOG);
+	return TRUE;
 }
 
 BOOL CTDLAboutDlg::OnCommand(WPARAM wParam, LPARAM lParam)

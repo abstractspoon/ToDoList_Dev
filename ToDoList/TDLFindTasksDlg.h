@@ -129,6 +129,7 @@ protected:
 	afx_msg void OnEditchangeSearchlist();
 	afx_msg void OnFind();
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnItemActivated(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangingResults(NMHDR* pNMHDR, LRESULT* pResult);

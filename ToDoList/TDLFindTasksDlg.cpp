@@ -115,6 +115,7 @@ BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_SIZE()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1572,4 +1573,10 @@ void CTDLFindTasksDlg::OnSelchangeInclude()
 void CTDLFindTasksDlg::OnFindHelp() 
 {
 	AfxGetApp()->WinHelp(IDD_FINDTASKS_DIALOG);
+}
+
+BOOL CTDLFindTasksDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	OnFindHelp();
+	return TRUE;
 }

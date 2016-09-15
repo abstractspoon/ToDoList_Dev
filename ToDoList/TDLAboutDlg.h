@@ -47,10 +47,11 @@ protected:
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLAboutDlg)
 	//}}AFX_MSG
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+
 	DECLARE_MESSAGE_MAP()
 };
 
