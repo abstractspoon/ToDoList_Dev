@@ -3039,14 +3039,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// due, start, creation
-		int nItemRes = m_data.SetTaskDate(dwTaskID, nDate, date);
-
-		// post-processing
-		if (nItemRes == SET_CHANGE)
+		if (m_data.SetTaskDate(dwTaskID, nDate, date) == SET_CHANGE)
 		{
-			if (nDate == TDCD_DUEDATE)
-				m_eRecurrence.SetDefaultDate(date);
-
 			nRes = SET_CHANGE;
 			dwModTaskID = dwTaskID;
 		}
@@ -3054,6 +3048,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	
 	if (nRes == SET_CHANGE)
 	{
+		BOOL bUpdateTimeEst = FALSE;
+
 		switch (nDate)
 		{
 		case TDCD_CREATE:	
@@ -3076,6 +3072,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 
 		case TDCD_START:
 		case TDCD_STARTTIME:
+			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
+
 			SetModified(TRUE, TDCA_STARTDATE, dwModTaskID); 
 			break;
 			
@@ -3088,10 +3086,13 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 
 				SetCtrlDate(m_dtcDue, 0.0, dtStart);
 			}
+			m_eRecurrence.SetDefaultDate(date);
 			// fall thru
 
 		case TDCD_DUE:
 		case TDCD_DUETIME:
+			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
+			
 			SetModified(TRUE, TDCA_DUEDATE, dwModTaskID); 
 			break;
 				
@@ -3107,7 +3108,18 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 
 		// only update controls if the date was changed implicitly
 		if (!bDateEdited)
+		{
 			UpdateControls(FALSE); // don't update comments
+		}
+		else if (bUpdateTimeEst && (GetSelectedCount() == 1))
+		{
+			TDC_UNITS nUnits;
+			double dTimeEst = GetSelectedTaskTimeEstimate(nUnits);
+
+			ASSERT(nUnits == TDC::MapTHUnitsToUnits(m_eTimeEstimate.GetUnits()));
+			
+			UpdateDataEx(this, IDC_TIMEEST, dTimeEst, FALSE, DECIMALS);
+		}
 	}
 	
 	return (nRes != SET_FAILED);
