@@ -1088,8 +1088,8 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 	VERIFY (GetAttributeDef(nAttribID, aAttribDefs, attribDef));
 
-	// treat lists as strings
-	if (attribDef.IsList())
+	// treat lists as strings, except for icon lists
+	if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
 		return FT_STRING;
 
 	// else
@@ -1102,7 +1102,7 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	case TDCCA_DOUBLE:		return FT_DOUBLE;
 	case TDCCA_DATE:		return (bRelativeDate ? FT_DATE_REL : FT_DATE);
 	case TDCCA_BOOL:		return FT_BOOL;
-	case TDCCA_ICON:		return FT_STRING;
+	case TDCCA_ICON:		return FT_ICON;
 	}
 
 	return FT_NONE;

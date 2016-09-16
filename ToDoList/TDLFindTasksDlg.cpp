@@ -503,6 +503,10 @@ void CTDLFindTasksDlg::SetAttributeListData(const TDCAUTOLISTDATA& tldActive, co
 		m_lcFindSetup.SetAttributeListData(tldActive);
 }
 
+void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons)
+{
+	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
+}
 
 void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPCTSTR szPath, const CFilteredToDoCtrl* pTDC)
 {

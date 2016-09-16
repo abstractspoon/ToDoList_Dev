@@ -218,19 +218,25 @@ void CKanbanFixedColumnListCtrl::OnValueEditOK()
 	SetCellText(GetCurSel(), KFCL_VALUECOL, Misc::FormatArray(aValues));
 }
 
-void CKanbanFixedColumnListCtrl::PostDrawContent(CDC* pDC, int nRow, int nCol, const CRect& rContent)
+void CKanbanFixedColumnListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 
+												const CRect& rText, const CString& sText, 
+												COLORREF crText, UINT nDrawTextFlags)
 {
-	if (nCol == KFCL_COLORCOL)
+	if ((nCol == KFCL_COLORCOL) && !IsPrompt(nRow))
 	{
 		COLORREF color = GetItemData(nRow);
 
 		if (color != CLR_NONE)
 		{
-			CRect rColor(rContent);
-			rColor.DeflateRect(4, 3);
+			CRect rColor(rText);
+			rColor.DeflateRect(1, 3, 4, 3);
 
 			GraphicsMisc::DrawRect(pDC, rColor, color, GraphicsMisc::Darker(color, 0.4));
 		}
+	}
+	else
+	{
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 	}
 }
 

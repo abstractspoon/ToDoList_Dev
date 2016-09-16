@@ -60,6 +60,7 @@ public:
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveTasklistAttribDefs,
 							const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll);
+	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
 	void SetUITheme(const CUIThemeFile& theme);
 	BOOL IsDocked() const { return m_dockMgr.IsDocked(); }

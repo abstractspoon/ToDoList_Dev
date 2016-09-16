@@ -635,7 +635,7 @@ protected:
 
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void AddFindResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC);
-	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl = NULL);
+	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	
 	void PrepareToolbar(int nOption);
 	void SetToolbarOption(int nOption);

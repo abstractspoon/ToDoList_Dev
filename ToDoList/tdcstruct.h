@@ -951,6 +951,7 @@ struct SEARCHPARAM
 
 			case FT_STRING:
 			case FT_DATE_REL:
+			case FT_ICON:
 				return (sValue == rule.sValue);
 			}
 		}
@@ -1147,6 +1148,9 @@ struct SEARCHPARAM
 		case TDCA_PATH: 
 			return FT_STRING;
 
+		case TDCA_ICON: 
+			return FT_ICON;
+
 		case TDCA_PRIORITY:
 		case TDCA_COLOR:
 		case TDCA_PERCENT:
@@ -1198,7 +1202,7 @@ struct SEARCHPARAM
 
 		case FOP_INCLUDES:
 		case FOP_NOT_INCLUDES:
-			return (nType == FT_STRING);
+			return ((nType == FT_STRING) || (nType == FT_ICON));
 
 		case FOP_ON_OR_BEFORE:
 		case FOP_BEFORE:
@@ -1251,6 +1255,11 @@ struct SEARCHPARAM
 		return (TypeIs(FT_STRING) && !sValue.IsEmpty());
 	}
 
+	BOOL HasIcon() const
+	{
+		return (TypeIs(FT_ICON) && !sValue.IsEmpty());
+	}
+
 	void SetAnd(BOOL and = TRUE)
 	{
 		bAnd = and;
@@ -1267,6 +1276,7 @@ struct SEARCHPARAM
 		{
 		case FT_STRING:
 		case FT_DATE_REL:
+		case FT_ICON:
 			sValue = val;
 			break;
 			

@@ -457,7 +457,6 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect rHeader, rFocus;
 	BOOL bRes;
 	int nWidth;
-	int nFormat;
 	CSize sizeText;
 	BOOL bIsPrompt;
 	CSize sizeState, sizeImage;
@@ -573,7 +572,6 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			// save width and format because GetItem overwrites
 			// if first column deduct width of image if exists
 			nWidth = (nCol == 0) ? lvc.cx - nImageWidth : lvc.cx;
-			nFormat = (lvc.fmt & LVCFMT_JUSTIFYMASK);
 
 			// get next item
 			bRes = GetColumn(nCol + 1, &lvc);
@@ -680,38 +678,31 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 			
 			// draw text
-			if (!sText.IsEmpty())
+			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | 
+				GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+			switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
 			{
-				UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | 
-								GraphicsMisc::GetRTLDrawTextFlags(*this));
-				
-				switch (nFormat)
-				{
-				case LVCFMT_CENTER: 
-					nFlags |= DT_CENTER;	
-					break;
-					
-				case LVCFMT_RIGHT:	
-					nFlags |= DT_RIGHT;		
-					rText.right -= 4;
-					break;
-					
-				case LVCFMT_LEFT:	
-					nFlags |= DT_LEFT;		
-					rText.left += 4;
-					break;
-				}
-			
-				pDC->SetTextColor(crText);
-				pDC->DrawText(sText, rText, nFlags);
+			case LVCFMT_CENTER: 
+				nFlags |= DT_CENTER;	
+				break;
+
+			case LVCFMT_RIGHT:	
+				nFlags |= DT_RIGHT;		
+				rText.right -= 4;
+				break;
+
+			case LVCFMT_LEFT:	
+				nFlags |= DT_LEFT;		
+				rText.left += 4;
+				break;
 			}
+
+			DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
 		
 			if (bHasBtn)
 				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty());
 
-			if (!IsPrompt(nItem)) // checks whole row
-				PostDrawContent(pDC, nItem, nCol, rBack);
-			
 			// next column
 			nCol++;
 		}
@@ -721,6 +712,17 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		// then draw focus rect
 		if (bWantCellFocus)
 			pDC->DrawFocusRect(rFocus);
+	}
+}
+
+void CInputListCtrl::DrawCellText(CDC* pDC, int /*nRow*/, int /*nCol*/, 
+									const CRect& rText, const CString& sText, 
+									COLORREF crText, UINT nDrawTextFlags)
+{
+	if (!sText.IsEmpty())
+	{
+		pDC->SetTextColor(crText);
+		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
 	}
 }
 
@@ -1387,7 +1389,6 @@ CPopupEditCtrl* CInputListCtrl::GetEditControl()
 
 	if (!m_editBox.m_hWnd)
 		m_editBox.Create(this, IDC_EDITBOX, (WS_CHILD | WS_BORDER));
-//		m_editBox.Create(this, IDC_EDITBOX, WS_POPUP);
 
 	return &m_editBox;
 }

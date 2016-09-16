@@ -145,7 +145,7 @@ protected:
 	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText); 
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
-	virtual void PostDrawContent(CDC* /*pDC*/, int /*nRow*/, int /*nCol*/, const CRect& /*rContent*/) {}
+	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	void HideControl(CWnd& ctrl);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol);

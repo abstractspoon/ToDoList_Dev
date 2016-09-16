@@ -3485,7 +3485,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	// custom attributes on the find dialog?
 	if (m_findDlg.GetSafeHwnd() && nAttrib == TDCA_CUSTOMATTRIBDEFS)
 	{
-		UpdateFindDialogCustomAttributes(&GetToDoCtrl());
+		UpdateFindDialogActiveTasklist(&GetToDoCtrl());
 	}
 
 	return 0L;
@@ -4276,7 +4276,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 			pTDC->ExpandTasks(TDCEC_ALL);
 		
 		// update find dialog with this ToDoCtrl's custom attributes
-		UpdateFindDialogCustomAttributes(pTDC);
+		UpdateFindDialogActiveTasklist(pTDC);
 
 		// Update time tracking widget
 		if (bWasDelayed)
@@ -4292,7 +4292,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 	return nOpen;
 }
 
-void CToDoListWnd::UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pTDC)
+void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
 {
 	if (pTDC == NULL && GetTDCCount() == 0)
 		return; // nothing to do
@@ -4322,6 +4322,7 @@ void CToDoListWnd::UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pTD
 
 	// do the update
 	m_findDlg.SetCustomAttributes(aTDCAttribDefs, aAllAttribDefs);
+	m_findDlg.SetActiveTasklist(pTDC->GetFilePath(), Prefs().GetShowDefaultTaskIcons());
 }
 
 LRESULT CToDoListWnd::OnDoInitialDueTaskNotify(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -7448,7 +7449,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		tdcShow.UpdateWindow();
 
 		// update find dialog with this ToDoCtrl's custom attributes
-		UpdateFindDialogCustomAttributes(&tdcShow);
+		UpdateFindDialogActiveTasklist(&tdcShow);
 		RefreshFindTasksListData();
 
 		// leave focus setting till last else the 'old' tasklist flashes
@@ -8203,9 +8204,6 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 {
 	ASSERT (!(bClosingWindows && bRestart));
 	
-	// Hide Time tracker because it's topmost and may obscure save dialogs
-	m_dlgTimeTracker.ShowWindow(SW_HIDE);
-
     // save all first to ensure new tasklists get reloaded on startup
 	DWORD dwSaveFlags = TDLS_INCLUDEUNSAVED | TDLS_CLOSINGTASKLISTS | TDLS_FLUSH;
 
@@ -8228,13 +8226,16 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	BOOL bWasVisible = IsWindowVisible();
 	BOOL bWasMinimized = IsIconic();
 	BOOL bWasMaximized = IsZoomed();
+
+	if (m_dlgTimeTracker.IsAlwaysOnTop())
+		m_dlgTimeTracker.ShowWindow(SW_HIDE);
 	
 	if (bWasVisible)
 	{
+		if (m_findDlg.GetSafeHwnd())
+			m_findDlg.ShowWindow(SW_HIDE);
+
 		ShowWindow(SW_HIDE);
-		
-		if (m_dlgTimeTracker.IsAlwaysOnTop())
-			m_dlgTimeTracker.ShowWindow(SW_HIDE);
 	}
 	
 	// remove tasklists
@@ -9699,7 +9700,7 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 {
 	if (!m_findDlg.GetSafeHwnd())
 	{
-		UpdateFindDialogCustomAttributes();
+		UpdateFindDialogActiveTasklist();
 
 		VERIFY(m_findDlg.Initialize(this));
 

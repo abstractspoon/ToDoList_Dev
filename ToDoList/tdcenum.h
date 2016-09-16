@@ -578,6 +578,7 @@ enum FIND_ATTRIBTYPE
 	FT_BOOL,
 	FT_TIME,
 	FT_DATE_REL, // relative date
+	FT_ICON,
 };
 
 enum TDC_OFFSET

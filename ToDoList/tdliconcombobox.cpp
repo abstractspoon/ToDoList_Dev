@@ -100,7 +100,8 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 int CTDLIconComboBox::SelectImage(const CString& sImage)
 {
 	CString sPartial = TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(sImage, _T(""));
-	return SelectString(-1, sPartial);
+
+	return CComboBox::SelectString(-1, sPartial);
 }
 
 CString CTDLIconComboBox::GetSelectedImage() const

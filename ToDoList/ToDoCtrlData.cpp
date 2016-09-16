@@ -4764,6 +4764,10 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 		case TDCA_VERSION:
 			bMatch = TaskMatches(pTDI->sVersion, sp, resTask, TRUE);
 			break;
+			
+		case TDCA_ICON:
+			bMatch = TaskMatches(pTDI->sIcon, sp, resTask, FALSE);
+			break;
 
 		case TDCA_FILEREF:
 			bMatch = TaskMatches(pTDI->aFileRefs, sp, resTask);
