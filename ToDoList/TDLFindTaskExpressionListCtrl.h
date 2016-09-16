@@ -12,6 +12,8 @@
 #include "tdlfindtaskattributecombobox.h"
 #include "tdlprioritycombobox.h"
 #include "tdlriskcombobox.h"
+#include "tdcimagelist.h"
+#include "tdlIconComboBox.h"
 
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\timeedit.h"
@@ -37,6 +39,7 @@ public:
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld);
+	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
@@ -58,9 +61,12 @@ protected:
 	CCheckComboBox					m_cbListValues;
 	CTDLPriorityComboBox			m_cbPriority;
 	CTDLRiskComboBox				m_cbRisk;
+	CTDLIconComboBox				m_cbCustomIcons;
+
 	CSearchParamArray				m_aSearchParams;
 	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
+	CTDCImageList					m_ilIcons;
 
 // Operations
 public:
@@ -96,6 +102,7 @@ protected:
 	afx_msg void OnPriorityEditOK();
 	afx_msg void OnRiskEditCancel();
 	afx_msg void OnRiskEditOK();
+	afx_msg void OnCustomIconEditChange();
 	afx_msg void OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
@@ -112,6 +119,7 @@ protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void OnCancelEdit();
 	virtual void InitState();
+	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	void PrepareEdit(int nRow, int nCol);
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);
