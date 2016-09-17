@@ -561,7 +561,7 @@ BOOL CTDLFindTasksDlg::GetSearchAllTasklists()
 	return m_bAllTasklists;
 }
 
-int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter)
+int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter) const
 {
 	if (GetSearchParams(szName, filter.params))
 	{
@@ -614,7 +614,7 @@ int CTDLFindTasksDlg::GetSearchParams(SEARCHPARAMS& params)
 	return params.aRules.GetSize();
 }
 
-int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params)
+int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) const
 {
 	BOOL bWantDone, bWantParents, bWantFilteredOut;
 

@@ -37,8 +37,7 @@ public:
 	BOOL GetSearchAllTasklists();
 	int GetSearchParams(SEARCHPARAMS& params);
 	int GetSearchParams(FTDCCUSTOMFILTER& filter);
-	int GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params);
-	int GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter);
+	int GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter) const;
 
 	CString GetActiveSearch() const { return m_sActiveSearch; }
 	int GetSavedSearches(CStringArray& aNames);
@@ -182,6 +181,7 @@ protected:
 	BOOL SaveSearch(LPCTSTR szName);
 	int LoadSearches();
 	int SaveSearches();
+	int GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) const;
 
 	BOOL LoadRule(const CPreferences& prefs, const CString& sRule, 
 					TDC_ATTRIBUTE& attrib, FIND_ATTRIBTYPE& nFindType, FIND_OPERATOR& op, 
