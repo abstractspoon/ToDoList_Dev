@@ -839,8 +839,7 @@ protected:
 
 	void AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 
-	int CreateTasksFromOutlookObjects(TLDT_DATA* pData);
-	BOOL CreateTaskFromOutlookObject(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_MailItem* pItem, BOOL bWantConfidential, CTaskFile& tasks);
+	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void SetDefaultComboNames(CAutoComboBox& combo, const CStringArray& aNewNames, 

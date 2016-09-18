@@ -33,7 +33,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLImportOutlookObjectsDlg)
-	enum { IDD = IDD_OUTLOOKMSGIMPORT_DIALOG };
 	BOOL	m_bHideUnmapped;
 	BOOL	m_bHideConfidential;
 	//}}AFX_DATA

@@ -108,7 +108,7 @@ const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	aTags.Copy(tdi.aTags);
 	aAllocTo.Copy(tdi.aAllocTo);
 	aDependencies.Copy(tdi.aDependencies);
-	aFileRefs.Copy(tdi.aFileRefs);
+	aFileLinks.Copy(tdi.aFileLinks);
 
 	// meta data
 	Misc::Copy(tdi.mapMetaData, mapMetaData);
@@ -313,8 +313,8 @@ CString TODOITEM::GetTag(int nTag) const
 
 CString TODOITEM::GetFileRef(int nFile) const
 {
-	if (nFile < aFileRefs.GetSize())
-		return aFileRefs[nFile];
+	if (nFile < aFileLinks.GetSize())
+		return aFileLinks[nFile];
 	
 	// else
 	return EMPTY_STR;

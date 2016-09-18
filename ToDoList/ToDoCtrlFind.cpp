@@ -282,7 +282,7 @@ int CToDoCtrlFind::GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, 
 	if (hti && !pTDI)
 		pTDI = GetTask(hti, FALSE); // FALSE -> Want references
 
-	int nLargest = (pTDI ? pTDI->aFileRefs.GetSize() : 0);
+	int nLargest = (pTDI ? pTDI->aFileLinks.GetSize() : 0);
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{

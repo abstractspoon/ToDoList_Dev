@@ -1595,8 +1595,8 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM* pTDI)
 		if (pTDI->aDependencies.GetSize())
 			SetTaskDependencies(hTask, pTDI->aDependencies);
 			
-		if (pTDI->aFileRefs.GetSize())
-			SetTaskFileLinks(hTask, pTDI->aFileRefs);
+		if (pTDI->aFileLinks.GetSize())
+			SetTaskFileLinks(hTask, pTDI->aFileLinks);
 		
 		if (pTDI->dCost != 0)
 			SetTaskCost(hTask, pTDI->dCost);
@@ -1684,7 +1684,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM* pTDI) const
 		GetTaskAllocatedTo(hTask, pTDI->aAllocTo);
 		GetTaskRecurrence(hTask, pTDI->trRecurrence);
 		GetTaskDependencies(hTask, pTDI->aDependencies);
-		GetTaskFileLinks(hTask, pTDI->aFileRefs);
+		GetTaskFileLinks(hTask, pTDI->aFileLinks);
 		GetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
 
 		// meta data

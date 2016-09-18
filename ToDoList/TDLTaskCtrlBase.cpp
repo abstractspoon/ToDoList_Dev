@@ -2439,14 +2439,14 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_FILEREF:
-			if (pTDI->aFileRefs.GetSize())
+			if (pTDI->aFileLinks.GetSize())
 			{
-				int nNumFiles = pTDI->aFileRefs.GetSize();
+				int nNumFiles = pTDI->aFileLinks.GetSize();
 
 				// TDCS_SHOWNONFILEREFSASTEXT only works for one file
 				if ((nNumFiles == 1) && HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
 				{
-					CString sFileRef = pTDI->aFileRefs[0];
+					CString sFileRef = pTDI->aFileLinks[0];
 					int nImage = m_ilFileRef.GetFileImageIndex(sFileRef, TRUE);
 					
 					if (nImage == -1)
@@ -2465,7 +2465,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 						break; // out of bounds
 
 					// first check for a tdl://
-					CString sFileRef = pTDI->aFileRefs[nFile];
+					CString sFileRef = pTDI->aFileLinks[nFile];
 
 					if (sFileRef.Find(TDL_PROTOCOL) != -1)
 					{
@@ -3645,7 +3645,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 	if (pTDI == NULL)
 		return;
 	
-	int nNumFiles = pTDI->aFileRefs.GetSize();
+	int nNumFiles = pTDI->aFileLinks.GetSize();
 	
 	switch (nNumFiles)
 	{
@@ -3653,7 +3653,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 		break;
 		
 	case 1:
-		ShowFileLink(pTDI->aFileRefs[0]);
+		ShowFileLink(pTDI->aFileLinks[0]);
 		break;
 		
 	default: // > 1 file links
@@ -3676,7 +3676,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 				
 				if (rIcon.PtInRect(pt))
 				{
-					ShowFileLink(pTDI->aFileRefs[nFile]);
+					ShowFileLink(pTDI->aFileLinks[nFile]);
 					break;
 				}
 			}
@@ -5769,9 +5769,9 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 			}
 		}
 		
-		if (IsColumnShowing(TDCC_FILEREF) && pTDI->aFileRefs.GetSize())
+		if (IsColumnShowing(TDCC_FILEREF) && pTDI->aFileLinks.GetSize())
 		{
-			sItem.Format(_T("\n%s %s"), CEnString(IDS_TDCTIP_FILEREF), pTDI->aFileRefs[0]);
+			sItem.Format(_T("\n%s %s"), CEnString(IDS_TDCTIP_FILEREF), pTDI->aFileLinks[0]);
 			sTip += sItem;
 		}
 		

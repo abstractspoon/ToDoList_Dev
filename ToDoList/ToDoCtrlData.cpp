@@ -928,7 +928,7 @@ BOOL CToDoCtrlData::TaskHasFileRef(DWORD dwTaskID) const
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 	
-	return (pTDI->aFileRefs.GetSize() > 0);
+	return (pTDI->aFileLinks.GetSize() > 0);
 }
 
 BOOL CToDoCtrlData::CanTaskRecur(DWORD dwTaskID) const
@@ -1023,7 +1023,7 @@ int CToDoCtrlData::GetTaskFileRefs(DWORD dwTaskID, CStringArray& aFiles) const
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	aFiles.Copy(pTDI->aFileRefs);
+	aFiles.Copy(pTDI->aFileLinks);
 	return aFiles.GetSize();
 }
 
@@ -1032,7 +1032,7 @@ int CToDoCtrlData::GetTaskFileRefCount(DWORD dwTaskID) const
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	return pTDI->aFileRefs.GetSize();
+	return pTDI->aFileLinks.GetSize();
 }
 
 DWORD CToDoCtrlData::GetTaskParentID(DWORD dwTaskID) const
@@ -1260,7 +1260,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 									COPYATTRIB(customComments); 
 									COPYATTRIB(sCommentsTypeID); break;
 			
-			case TDCA_FILEREF:		COPYATTRIBARR(aFileRefs); break;
+			case TDCA_FILEREF:		COPYATTRIBARR(aFileLinks); break;
 			case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
 			case TDCA_CATEGORY:		COPYATTRIBARR(aCategories); break;
 			case TDCA_TAGS:			COPYATTRIBARR(aTags); break;
@@ -1568,8 +1568,8 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 			break;
 			
 		case TDCA_FILEREF:
-			if (bIncludeBlank || pTDI->aFileRefs.GetSize())
-				pTDIChild->aFileRefs.Copy(pTDI->aFileRefs);
+			if (bIncludeBlank || pTDI->aFileLinks.GetSize())
+				pTDIChild->aFileLinks.Copy(pTDI->aFileLinks);
 			break;
 			
 		case TDCA_VERSION:
@@ -2344,7 +2344,7 @@ TDC_SET CToDoCtrlData::SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFile
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
-	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_FILEREF, pTDI->aFileRefs, aFileRefs, bAppend, TRUE);
+	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_FILEREF, pTDI->aFileLinks, aFileRefs, bAppend, TRUE);
 }
 
 BOOL CToDoCtrlData::BeginNewUndoAction(TDCUNDOACTIONTYPE nType)
@@ -4243,7 +4243,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			break;
 			
 		case TDCC_FILEREF:
-			nCompare = Compare(pTDI1->aFileRefs.GetSize(), pTDI2->aFileRefs.GetSize());
+			nCompare = Compare(pTDI1->aFileLinks.GetSize(), pTDI2->aFileLinks.GetSize());
 			break;
 			
 		case TDCC_PERCENT:
@@ -4770,7 +4770,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 			break;
 
 		case TDCA_FILEREF:
-			bMatch = TaskMatches(pTDI->aFileRefs, sp, resTask);
+			bMatch = TaskMatches(pTDI->aFileLinks, sp, resTask);
 			break;
 
 		case TDCA_DEPENDENCY:
@@ -4797,7 +4797,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 						TaskMatches(pTDI->sStatus, sp, resTask, TRUE) ||
 						TaskMatches(pTDI->sVersion, sp, resTask, TRUE) ||
 						TaskMatches(pTDI->sExternalID, sp, resTask, TRUE) ||
-						TaskMatches(pTDI->aFileRefs, sp, resTask) ||
+						TaskMatches(pTDI->aFileLinks, sp, resTask) ||
 						TaskMatches(pTDI->sCreatedBy, sp, resTask, TRUE));
 			break;
 

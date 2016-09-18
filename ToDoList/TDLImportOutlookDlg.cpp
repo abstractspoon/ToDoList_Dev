@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TasklistOutlookImporter.h"
 #include "TDLImportOutlookDlg.h"
+#include "TDCOutlookImportHelper.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"

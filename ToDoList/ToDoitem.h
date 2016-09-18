@@ -99,7 +99,7 @@ public:
 	CStringArray aCategories;
 	CStringArray aDependencies;
 	CStringArray aTags;
-	CStringArray aFileRefs;
+	CStringArray aFileLinks;
 	
 	COleDateTime dateStart;
 	COleDateTime dateDue;
