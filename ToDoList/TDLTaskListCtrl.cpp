@@ -68,7 +68,7 @@ enum LCH_CHECK
 
 enum
 {
-	IDC_TASKLIST = 101,		
+	IDC_TITLES = 101,		
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ BOOL CTDLTaskListCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 							WS_CLIPSIBLINGS),
 							rect, 
 							pParentWnd, 
-							IDC_TASKLIST))
+							IDC_TITLES))
 	{
 		ListView_SetExtendedListViewStyleEx(m_lcTasks, (LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP), (LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP));
 		ListView_SetCallbackMask(m_lcTasks, LVIS_STATEIMAGEMASK);

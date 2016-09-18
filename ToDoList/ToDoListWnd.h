@@ -13,7 +13,7 @@
 #include "preferencesdlg.h"
 #include "tdlfindtasksDlg.h"
 #include "todoctrlmgr.h"
-#include "TDLImportExportMgr.h"
+#include "TDCImportExportMgr.h"
 #include "TDLContentMgr.h"
 #include "TDLfilterbar.h"
 #include "TDLSendTasksDlg.h"
@@ -116,7 +116,7 @@ protected:
 	int m_nNumDueTaskThreads;
 
 	CShortcutManager m_mgrShortcuts;
-	CTDLImportExportMgr m_mgrImportExport;
+	CTDCImportExportMgr m_mgrImportExport;
 	CTDLTasklistStorageMgr m_mgrStorage;
 	CToDoCtrlMgr m_mgrToDoCtrls;
 	CTDLContentMgr m_mgrContent;
@@ -713,7 +713,7 @@ protected:
 
 	void TranslateUIElements();
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
-
+	
 	static int MessageBox(UINT nIDText, UINT nIDCaption = 0, UINT nType = MB_OK, LPCTSTR szData = NULL);
 	static int MessageBox(const CString& sText, UINT nIDCaption = 0, UINT nType = MB_OK);
 	static int MessageBox(const CString& sText, const CString& sCaption, UINT nType = MB_OK);

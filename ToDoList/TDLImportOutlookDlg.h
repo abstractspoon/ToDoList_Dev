@@ -41,7 +41,6 @@ public:
 
 // Dialog Data
 	//{{AFX_DATA(COutlookImportDlg)
-	enum { IDD = IDD_IMPORT_DIALOG };
 	BOOL	m_bRemoveOutlookTasks;
 	CString	m_sCurFolder;
 	BOOL	m_bHideUnflaggedEmails;

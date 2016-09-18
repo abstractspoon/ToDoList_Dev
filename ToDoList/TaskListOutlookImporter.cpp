@@ -3,9 +3,10 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "OutlookImpExp.h"
-#include "OutlookImporter.h"
-#include "OutlookImportDlg.h"
+#include "resource.h"
+
+#include "TasklistOutlookImporter.h"
+#include "TDLImportOutlookDlg.h"
 
 #include "..\shared\Localizer.h"
 
@@ -19,25 +20,23 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-COutlookImporter::COutlookImporter() : m_hIcon(NULL)
+CTaskListOutlookImporter::CTaskListOutlookImporter() : m_hIcon(NULL)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_OUTLOOK);
 }
 
-COutlookImporter::~COutlookImporter()
+CTaskListOutlookImporter::~CTaskListOutlookImporter()
 {
 	::DestroyIcon(m_hIcon);
 }
 
-void COutlookImporter::SetLocalizer(ITransText* pTT)
+void CTaskListOutlookImporter::SetLocalizer(ITransText* pTT)
 {
 	CLocalizer::Initialize(pTT);
 }
 
-IIMPORT_RESULT COutlookImporter::Import(LPCTSTR /*szSrcFilePath*/, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORT_RESULT CTaskListOutlookImporter::Import(LPCTSTR /*szSrcFilePath*/, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 	if (bSilent)
 		return IIR_OTHER;
 	

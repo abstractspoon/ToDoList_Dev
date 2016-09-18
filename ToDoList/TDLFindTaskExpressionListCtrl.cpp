@@ -1410,10 +1410,12 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 			for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 			{
 				int nIconIdx = m_ilIcons.GetImageIndex(aIcons[nIcon]);
-				ASSERT(nIconIdx != -1);
-
-				m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
-				rIcon.left += 18;
+				
+				if (nIconIdx != -1)
+				{
+					m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
+					rIcon.left += 18;
+				}
 			}
 		}
 	}

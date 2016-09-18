@@ -14,13 +14,13 @@
 #include "..\SHARED\ImportExportMgr.h"
 
 enum { EXPTOHTML, EXPTOTXT, EXPTOCSV, EXPTOTDL };
-enum { IMPFROMCSV, IMPFROMTDL };
+enum { IMPFROMCSV, IMPFROMTDL, IMPFROMOUTLOOK };
 
-class CTDLImportExportMgr : public CImportExportMgr  
+class CTDCImportExportMgr : public CImportExportMgr  
 {
 public:
-	CTDLImportExportMgr();
-	virtual ~CTDLImportExportMgr();
+	CTDCImportExportMgr();
+	virtual ~CTDCImportExportMgr();
 
 	BOOL ExportTaskListToHtml(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
 	BOOL ExportTaskListsToHtml(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent = FALSE) const;
@@ -44,6 +44,7 @@ public:
 
 	BOOL ImportTaskListFromCsv(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
 	BOOL ImportTaskListFromTdl(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
+	BOOL ImportTaskListFromOutlook(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent = FALSE) const;
 
 	// override base class so we can set default task attributes
 	IIMPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent = FALSE) const; 

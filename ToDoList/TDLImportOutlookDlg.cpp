@@ -2,8 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "OutlookImpExp.h"
-#include "OutlookImportDlg.h"
+#include "resource.h"
+#include "TasklistOutlookImporter.h"
+#include "TDLImportOutlookDlg.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
@@ -156,7 +157,7 @@ public:
 // COutlookImportDlg dialog
 
 COutlookImportDlg::COutlookImportDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(COutlookImportDlg::IDD, pParent), m_pDestTaskFile(NULL), m_pOutlook(NULL)
+: CDialog(IDD_IMPORT_OUTLOOK_DIALOG, pParent), m_pDestTaskFile(NULL), m_pOutlook(NULL)
 {
 	//{{AFX_DATA_INIT(COutlookImportDlg)
 	m_sCurFolder = _T("");
@@ -239,7 +240,7 @@ BOOL COutlookImportDlg::OnInitDialog()
 	}
 	else
 	{
-		AfxMessageBox(CEnString(IDS_UNABLETOCONNECT), MB_OK | MB_ICONERROR);
+		AfxMessageBox(CEnString(IDS_OUTLOOK_UNABLETOCONNECT), MB_OK | MB_ICONERROR);
 		EndDialog(IDCANCEL);
 	}
 	
@@ -624,11 +625,11 @@ void COutlookImportDlg::OnChoosefolder()
 	{
 		delete m_pFolder;
 		m_pFolder = new MAPIFolder(pDisp);
-
-		OnRefresh();
 		
 		m_sCurFolder = m_pFolder->GetName();
 		UpdateData(FALSE);
+		
+		OnRefresh();
 	}
 }
 
@@ -691,7 +692,7 @@ void COutlookImportDlg::OnHideUnflaggedEmails()
 
 void COutlookImportDlg::OnRefresh() 
 {
-	m_wndPrompt.SetPrompt(m_tcTasks, IDS_BUILDINGLIST, TVM_GETCOUNT);
+	m_wndPrompt.SetPrompt(m_tcTasks, IDS_OUTLOOK_BUILDINGLIST, TVM_GETCOUNT);
 
 	// re-add items
 	CWaitCursor wait;
@@ -700,5 +701,5 @@ void COutlookImportDlg::OnRefresh()
 	CHoldRedraw hr(m_tcTasks);
 	AddFolderItemsToTree(m_pFolder);
 
-	m_wndPrompt.SetPrompt(m_tcTasks, IDS_FOLDERNOITEMS, TVM_GETCOUNT);
+	m_wndPrompt.SetPrompt(m_tcTasks, IDS_OUTLOOK_FOLDERNOITEMS, TVM_GETCOUNT);
 }

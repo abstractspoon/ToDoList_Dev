@@ -211,6 +211,10 @@ SOURCE=.\TaskListHtmlExporter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TaskListOutlookImporter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TaskListTdlExporter.cpp
 # End Source File
 # Begin Source File
@@ -251,7 +255,15 @@ SOURCE=.\TDCImageList.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCImportExportMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCMergeToDoList.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCOutlookImportHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -399,7 +411,7 @@ SOURCE=.\tdlimportexportcombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportExportMgr.cpp
+SOURCE=.\TDLImportOutlookDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -691,6 +703,10 @@ SOURCE=.\TaskListHtmlExporter.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TaskListOutlookImporter.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\Shared\TaskListStorageMgr.h
 # End Source File
 # Begin Source File
@@ -739,6 +755,10 @@ SOURCE=.\TDCImageList.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCImportExportMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\tdcmapping.h
 # End Source File
 # Begin Source File
@@ -748,6 +768,10 @@ SOURCE=.\TDCMergeTasklist.h
 # Begin Source File
 
 SOURCE=.\tdcmsg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCOutlookImportHelper.h
 # End Source File
 # Begin Source File
 
@@ -907,7 +931,7 @@ SOURCE=.\tdlimportexportcombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportExportMgr.h
+SOURCE=.\TDLImportOutlookDlg.h
 # End Source File
 # Begin Source File
 
@@ -1123,11 +1147,19 @@ SOURCE=.\res\app_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\appointment.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\clock.ico
 # End Source File
 # Begin Source File
 
 SOURCE=.\res\column_header.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\contact.ico
 # End Source File
 # Begin Source File
 
@@ -1179,7 +1211,19 @@ SOURCE=.\res\find_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\flaggedmail.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\folder.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\help_button.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\journal.ico
 # End Source File
 # Begin Source File
 
@@ -1187,7 +1231,19 @@ SOURCE=.\res\list_view_std.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\mail.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\note.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\null.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\outlook_16.ico
 # End Source File
 # Begin Source File
 
@@ -1224,6 +1280,10 @@ SOURCE=.\res\style_table.ico
 # Begin Source File
 
 SOURCE=.\res\style_wrap.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\task.ico
 # End Source File
 # Begin Source File
 

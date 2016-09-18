@@ -11,13 +11,21 @@
 
 #include "..\Interfaces\IImportExport.h"
 
+//////////////////////////////////////////////////////////////////////
+
 class ITransText;
 
-class COutlookImporter : public IImportTasklist  
+//////////////////////////////////////////////////////////////////////
+
+const LPCTSTR OUTLOOK_METADATAKEY = _T("MSO_956F3091_A2DD_4E1D_B5F7_F58BAD300F0F");
+
+//////////////////////////////////////////////////////////////////////
+
+class CTaskListOutlookImporter : public IImportTasklist  
 {
 public:
-	COutlookImporter();
-	virtual ~COutlookImporter();
+	CTaskListOutlookImporter();
+	virtual ~CTaskListOutlookImporter();
 
 	void Release() { delete this; }
 	void SetLocalizer(ITransText* pTT);

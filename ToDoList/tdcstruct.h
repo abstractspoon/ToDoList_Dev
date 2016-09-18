@@ -29,7 +29,7 @@ typedef CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&> CTDCStylesMap;
 
 class CToDoCtrl;
 class CFilteredToDoCtrl;
-class CTDLImportExportMgr;
+class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,7 +206,7 @@ struct TDCDUETASKNOTIFY
 	CTaskFile tasks;
 	BOOL bHtml;
 	HWND hWndNotify;
-	CTDLImportExportMgr* pImpExpMgr;
+	CTDCImportExportMgr* pImpExpMgr;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
