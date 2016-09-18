@@ -7,6 +7,8 @@
 #include "ToDoCtrl.h"
 #include "TDLContentMgr.h"
 #include "tdcmsg.h"
+#include "preferencesdlg.h"
+#include "TDCToDoCtrlPreferenceHelper.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\ContentMgr.h"
@@ -86,22 +88,32 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 
 	if (m_tdc.Create(rToDoCtrl, this, IDC_TODOCTRL+1))
 	{
-		m_tdc.SetMaximizeState(TDCMS_MAXTASKLIST);
-		m_tdc.SetStyle(TDCS_RIGHTSIDECOLUMNS);
-		m_tdc.SetReadonly(TRUE);
-		m_tdc.ExpandTasks(TDCEC_ALL);
-		m_tdc.SelectAll();
-		m_tdc.SetFocusToTasks();
-		m_tdc.MoveWindow(rToDoCtrl);
-		m_tdc.SetUITheme(CUIThemeFile());
-		m_tdc.ShowAllColumns();
-		m_tdc.ResizeAttributeColumnsToFit();
-		m_tdc.SetGridlineColor(RGB(200, 200, 200));
+		CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CPreferencesDlg(), m_tdc);
 
 		m_nLoadRes = m_tdc.Load(m_sFilePath);
 
 		if (m_nLoadRes != TDCF_SUCCESS)
+		{
 			EndDialog(IDOK);
+		}
+		else
+		{
+			m_tdc.SetMaximizeState(TDCMS_MAXTASKLIST);
+			m_tdc.SetReadonly(TRUE);
+			m_tdc.SetFocusToTasks();
+			m_tdc.MoveWindow(rToDoCtrl);
+			m_tdc.SetUITheme(CUIThemeFile());
+			m_tdc.ShowAllColumns();
+			m_tdc.ResizeAttributeColumnsToFit();
+			m_tdc.SetGridlineColor(RGB(200, 200, 200));
+			m_tdc.ExpandTasks(TDCEC_ALL);
+			m_tdc.ShowWindow(SW_SHOW);
+
+			// Select All
+			PostMessage(WM_COMMAND, MAKEWPARAM(IDC_SELECTALL, BN_CLICKED), (LPARAM)::GetDlgItem(*this, IDC_SELECTALL));
+
+		}
+
 	}
 	
 	return FALSE;  // return TRUE unless you set the focus to a control

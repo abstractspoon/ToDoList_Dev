@@ -35,6 +35,7 @@
 #include "tasktimelog.h"
 #include "TDLAboutDlg.h"
 #include "TDCWebUpdateScript.h"
+#include "TDCToDoCtrlPreferenceHelper.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -3089,7 +3090,7 @@ LRESULT CToDoListWnd::OnToDoListRefreshPrefs(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE);
 	
 	// then update active tasklist
-	UpdateToDoCtrlPreferences();
+	UpdateActiveToDoCtrlPreferences();
 
 	return 0;
 }
@@ -4744,7 +4745,7 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 			m_findDlg.RefreshUserPreferences();
 		
 		// active tasklist userPrefs
-		UpdateToDoCtrlPreferences();
+		UpdateActiveToDoCtrlPreferences();
 		UpdateTimeTrackerPreferences();
 
 		// then refresh filter bar for any new default cats, statuses, etc
@@ -7847,7 +7848,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	m_tabCtrl.UpdateWindow();
 	
 	if (!m_bClosing)
-		UpdateToDoCtrlPreferences();
+		UpdateActiveToDoCtrlPreferences();
 	
 	const CPreferencesDlg& userPrefs = Prefs();
 
@@ -7918,7 +7919,7 @@ void CToDoListWnd::UpdateAeroFeatures()
 		GraphicsMisc::ForceIconicRepresentation(*this, !bEnable);
 }
 
-void CToDoListWnd::UpdateToDoCtrlPreferences()
+void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
 {
 	// check if this has already been done since the last userPrefs change
 	int nSel = GetSelToDoCtrl();
@@ -7940,166 +7941,11 @@ void CToDoListWnd::UpdateToDoCtrlPreferences()
 void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 {
 	const CPreferencesDlg& userPrefs = Prefs();
-
 	CFilteredToDoCtrl& tdc = *pTDC;
-	tdc.NotifyBeginPreferencesUpdate();
-	
-	CTDCStylesMap styles;
-	styles.InitHashTable(TDCS_LAST);
-	
-	styles[TDCS_ALLOWCOMMENTSSTACKING] = userPrefs.GetStackEditFieldsAndComments();
-	styles[TDCS_ALLOWPARENTTIMETRACKING] = userPrefs.GetAllowParentTimeTracking();
-	styles[TDCS_ALLOWTREEITEMCHECKBOX] = userPrefs.GetAllowCheckboxAgainstTreeItem();
-	styles[TDCS_ALWAYSHIDELISTPARENTS] = userPrefs.GetAlwaysHideListParents();
-	styles[TDCS_AUTOADJUSTDEPENDENCYDATES] = userPrefs.GetAutoAdjustDependentsDates();
-	styles[TDCS_AUTOCALCPERCENTDONE] = userPrefs.GetAutoCalcPercentDone();
-	styles[TDCS_SYNCTIMEESTIMATESANDDATES] = userPrefs.GetSyncTimeEstimatesAndDates();
-	styles[TDCS_AUTOREPOSCTRLS] = userPrefs.GetAutoReposCtrls();
-	styles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = userPrefs.GetAveragePercentSubCompletion();
-	styles[TDCS_CALCREMAININGTIMEBYDUEDATE] = (userPrefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISDUEDATE);
-	styles[TDCS_CALCREMAININGTIMEBYPERCENT] = (userPrefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISPERCENTAGE);
-	styles[TDCS_CALCREMAININGTIMEBYSPENT] = (userPrefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISSPENT);
-	styles[TDCS_CHECKOUTONLOAD] = userPrefs.GetAutoCheckOut();
-	styles[TDCS_COLORTEXTBYATTRIBUTE] = (userPrefs.GetTextColorOption() == COLOROPT_ATTRIB);
-	styles[TDCS_COLORTEXTBYNONE] = (userPrefs.GetTextColorOption() == COLOROPT_NONE);
-	styles[TDCS_COLORTEXTBYPRIORITY] = (userPrefs.GetTextColorOption() == COLOROPT_PRIORITY);
-	styles[TDCS_COLUMNHEADERSORTING] = userPrefs.GetEnableColumnHeaderSorting();
-	styles[TDCS_COMMENTSUSETREEFONT] = userPrefs.GetCommentsUseTreeFont();
-	styles[TDCS_CONFIRMDELETE] = userPrefs.GetConfirmDelete();
-	styles[TDCS_DISPLAYHMSTIMEFORMAT] = userPrefs.GetUseHMSTimeFormat();
-	styles[TDCS_DISPLAYLOGCONFIRM] = userPrefs.GetDisplayLogConfirm();
-	styles[TDCS_DONEHAVELOWESTPRIORITY] = userPrefs.GetDoneTasksHaveLowestPriority();
-	styles[TDCS_DONEHAVELOWESTRISK] = userPrefs.GetDoneTasksHaveLowestRisk();
-	styles[TDCS_DUEHAVEHIGHESTPRIORITY] = userPrefs.GetDueTasksHaveHighestPriority();
-	styles[TDCS_FOCUSTREEONENTER] = userPrefs.GetFocusTreeOnEnter();
-	styles[TDCS_HIDEPANESPLITBAR] = userPrefs.GetHidePaneSplitBar();
-	styles[TDCS_HIDEPERCENTFORDONETASKS] = userPrefs.GetHidePercentForDoneTasks();
-	styles[TDCS_HIDEPRIORITYNUMBER] = userPrefs.GetHidePriorityNumber();
-	styles[TDCS_HIDESTARTDUEFORDONETASKS] = userPrefs.GetHideStartDueForDoneTasks();
-	styles[TDCS_HIDEZEROPERCENTDONE] = userPrefs.GetHideZeroPercentDone();
-	styles[TDCS_HIDEZEROTIMECOST] = userPrefs.GetHideZeroTimeCost();
-	styles[TDCS_INCLUDEDONEINAVERAGECALC] = userPrefs.GetIncludeDoneInAverageCalc();
-	styles[TDCS_INCLUDEDONEINPRIORITYCALC] = userPrefs.GetIncludeDoneInPriorityRiskCalc();
-	styles[TDCS_INCLUDEDONEINRISKCALC] = userPrefs.GetIncludeDoneInPriorityRiskCalc();
-	styles[TDCS_INCLUDEUSERINCHECKOUT] = userPrefs.GetIncludeUserNameInCheckout();
-	styles[TDCS_LOGTASKTIMESEPARATELY] = userPrefs.GetLogTaskTimeSeparately();
-	styles[TDCS_LOGTIMETRACKING] = userPrefs.GetLogTimeTracking();
-	styles[TDCS_NODUEDATEISDUETODAYORSTART] = userPrefs.GetNoDueDateIsDueTodayOrStart();
-	styles[TDCS_PAUSETIMETRACKINGONSCRNSAVER] = !userPrefs.GetTrackOnScreenSaver();
-	styles[TDCS_REFILTERONMODIFY] = userPrefs.GetReFilterOnModify();
-	styles[TDCS_RESORTONMODIFY] = userPrefs.GetReSortOnModify();
-	styles[TDCS_RESTOREFILTERS] = userPrefs.GetRestoreTasklistFilters();
-	styles[TDCS_RIGHTSIDECOLUMNS] = userPrefs.GetShowColumnsOnRight();
-	styles[TDCS_ROUNDTIMEFRACTIONS] = userPrefs.GetRoundTimeFractions();
-	styles[TDCS_SHAREDCOMMENTSHEIGHT] = userPrefs.GetSharedCommentsHeight();
-	styles[TDCS_SHOWCOMMENTSALWAYS] = userPrefs.GetShowCommentsAlways();
-	styles[TDCS_SHOWCOMMENTSINLIST] = userPrefs.GetShowComments();
-	styles[TDCS_SHOWDATESINISO] = userPrefs.GetDisplayDatesInISO();
-	styles[TDCS_SHOWDEFAULTTASKICONS] = userPrefs.GetShowDefaultTaskIcons();
-	styles[TDCS_SHOWFIRSTCOMMENTLINEINLIST] = userPrefs.GetDisplayFirstCommentLine();
-	styles[TDCS_SHOWINFOTIPS] = userPrefs.GetShowInfoTips();
-	styles[TDCS_SHOWNONFILEREFSASTEXT] = userPrefs.GetShowNonFilesAsText();
-	styles[TDCS_SHOWPARENTSASFOLDERS] = userPrefs.GetShowParentsAsFolders();
-	styles[TDCS_SHOWPATHINHEADER] = userPrefs.GetShowPathInHeader();
-	styles[TDCS_SHOWPERCENTASPROGRESSBAR] = userPrefs.GetShowPercentAsProgressbar();
-	styles[TDCS_SHOWPROJECTNAME] = m_bShowProjectName;
-	styles[TDCS_SHOWTREELISTBAR] = m_bShowTreeListBar;
-	styles[TDCS_SHOWWEEKDAYINDATES] = userPrefs.GetShowWeekdayInDates();
-	styles[TDCS_SORTDONETASKSATBOTTOM] = userPrefs.GetSortDoneTasksAtBottom();
-	styles[TDCS_SORTVISIBLETASKSONLY] = FALSE;//userPrefs.GetSortVisibleOnly();
-	styles[TDCS_STRIKETHOUGHDONETASKS] = userPrefs.GetStrikethroughDone();
-	styles[TDCS_TASKCOLORISBACKGROUND] = userPrefs.GetColorTaskBackground();
-	styles[TDCS_TRACKSELECTEDTASKONLY] = !userPrefs.GetTrackNonSelectedTasks();
-	styles[TDCS_TREATSUBCOMPLETEDASDONE] = userPrefs.GetTreatSubCompletedAsDone();
-	styles[TDCS_USEEARLIESTDUEDATE] = (userPrefs.GetDueDateCalculation() == PTCP_EARLIESTDUEDATE);
-	styles[TDCS_USEEARLIESTSTARTDATE] = (userPrefs.GetStartDateCalculation() == PTCP_EARLIESTSTARTDATE);
-	styles[TDCS_USEHIGHESTPRIORITY] = userPrefs.GetUseHighestPriority();
-	styles[TDCS_USEHIGHESTRISK] = userPrefs.GetUseHighestRisk();
-	styles[TDCS_USELATESTDUEDATE] = (userPrefs.GetDueDateCalculation() == PTCP_LATESTDUEDATE);
-	styles[TDCS_USELATESTSTARTDATE] = (userPrefs.GetStartDateCalculation() == PTCP_LATESTSTARTDATE);
-	styles[TDCS_USEPERCENTDONEINTIMEEST] = userPrefs.GetUsePercentDoneInTimeEst();
-	styles[TDCS_USES3RDPARTYSOURCECONTROL] = userPrefs.GetUsing3rdPartySourceControl();
-	styles[TDCS_WARNADDDELETEARCHIVE] = userPrefs.GetWarnAddDeleteArchive();
-	styles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = userPrefs.GetWeightPercentCompletionByNumSubtasks();
-	styles[TDCS_SHOWREMINDERSASDATEANDTIME] = userPrefs.GetShowRemindersAsDateAndTime();
-	styles[TDCS_SYNCCOMPLETIONTOSTATUS] = userPrefs.GetSyncCompletionToStatus();
-	
-	// set the styles in one hit
-	tdc.SetStyles(styles);
 
-	// layout
-	tdc.SetLayoutPositions((TDC_UILOCATION)userPrefs.GetControlsPos(), 
-							(TDC_UILOCATION)userPrefs.GetCommentsPos(), 
-							TRUE);
-	
-	// info tips
-	tdc.SetMaxInfotipCommentsLength(userPrefs.GetMaxInfoTipCommentsLength());
-	
-	// update default task preferences
-	tdc.SetDefaultTaskAttributes(m_tdiDefault);
-
-	// default string lists
-	TDCAUTOLISTDATA tld;
-	userPrefs.GetDefaultListItems(tld);
-	
-	tdc.SetDefaultAutoListData(tld);
-
-	// set list content readonly
-	tdc.SetAutoListContentReadOnly(TDCA_CATEGORY,	userPrefs.GetDefaultListIsReadonly(TDCA_CATEGORY));
-	tdc.SetAutoListContentReadOnly(TDCA_ALLOCTO,	userPrefs.GetDefaultListIsReadonly(TDCA_ALLOCTO));
-	tdc.SetAutoListContentReadOnly(TDCA_ALLOCBY,	userPrefs.GetDefaultListIsReadonly(TDCA_ALLOCBY));
-	tdc.SetAutoListContentReadOnly(TDCA_STATUS,		userPrefs.GetDefaultListIsReadonly(TDCA_STATUS));
-	tdc.SetAutoListContentReadOnly(TDCA_VERSION,	userPrefs.GetDefaultListIsReadonly(TDCA_VERSION));
-	tdc.SetAutoListContentReadOnly(TDCA_TAGS,		userPrefs.GetDefaultListIsReadonly(TDCA_TAGS));
-		
-	// fonts
-	if (!m_fontTree.GetSafeHandle() || !m_fontComments.GetSafeHandle())
-	{
-		CString sFaceName;
-		int nFontSize;
-		
-		if (!m_fontTree.GetSafeHandle() && userPrefs.GetTreeFont(sFaceName, nFontSize))
-			m_fontTree.Attach(GraphicsMisc::CreateFont(sFaceName, nFontSize));
-		
-		if (!m_fontComments.GetSafeHandle() && userPrefs.GetCommentsFont(sFaceName, nFontSize))
-			m_fontComments.Attach(GraphicsMisc::CreateFont(sFaceName, nFontSize));
-	}
-	
-	tdc.SetTreeFont(m_fontTree);
-	tdc.SetCommentsFont(m_fontComments);
-	
-	// colours
-	tdc.SetGridlineColor(userPrefs.GetGridlineColor());
-	tdc.SetCompletedTaskColor(userPrefs.GetDoneTaskColor());
-	tdc.SetAlternateLineColor(userPrefs.GetAlternateLineColor());
-	tdc.SetFlaggedTaskColor(userPrefs.GetFlaggedTaskColor());
-	tdc.SetReferenceTaskColor(userPrefs.GetReferenceTaskColor());
-	tdc.SetPriorityColors(m_aPriorityColors);
-
-	COLORREF color, crToday;
-	userPrefs.GetStartedTaskColors(color, crToday);
-	tdc.SetStartedTaskColors(color, crToday);
-
-	userPrefs.GetDueTaskColors(color, crToday);
-	tdc.SetDueTaskColors(color, crToday);
-	
-	CTDCColorMap colors;
-	TDC_ATTRIBUTE nAttrib = userPrefs.GetAttributeColors(colors);
-	
-	tdc.SetAttributeColors(nAttrib, colors);
-
-	// misc
-	tdc.SetSubtaskDragDropPos(userPrefs.GetNewSubtaskPos() == PUIP_TOP);
-	tdc.SetPercentDoneIncrement(userPrefs.GetPercentDoneIncrement());
-
-	CString sStatus;
-	userPrefs.GetCompletionStatus(sStatus);
-	tdc.SetCompletionStatus(sStatus);
-	
-	tdc.Flush(); // clear any outstanding issues
-
-	// we're done
-	tdc.NotifyEndPreferencesUpdate();
+	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(userPrefs, m_tdiDefault, 
+												m_bShowProjectName, m_bShowTreeListBar, 
+												m_fontTree, m_fontComments, tdc);
 }
 
 void CToDoListWnd::OnSaveall() 

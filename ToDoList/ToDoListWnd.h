@@ -672,7 +672,7 @@ protected:
 	void UpdateTimeTrackerPreferences();
 
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
-	void UpdateToDoCtrlPreferences();
+	void UpdateActiveToDoCtrlPreferences();
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();
 

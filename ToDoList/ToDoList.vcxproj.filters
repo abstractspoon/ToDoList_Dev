@@ -352,6 +352,9 @@
     <ClCompile Include="TDLContentTypeCombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCToDoCtrlPreferenceHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -763,6 +766,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLContentTypeCombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCToDoCtrlPreferenceHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
