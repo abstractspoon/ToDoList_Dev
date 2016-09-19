@@ -18,13 +18,12 @@ namespace OutlookAPI
 {
 	class _Application;
 	class MAPIFolder;
-	class _TaskItem;
+	class _Item;
 }
 
 class ITaskList10;
 class ITaskList;
 class IPreferences;
-class _Item;
 
 typedef void* HTASKITEM;
 
@@ -80,9 +79,7 @@ protected:
 	static time_t ConvertDate(DATE date);
 
 	void AddFolderItemsToTree(OutlookAPI::MAPIFolder* pFolder, HTREEITEM htiParent = NULL);
-	void SetTaskAttributes(HTASKITEM hTask, LPDISPATCH pItem);
-	int SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH pItem);
-	BOOL DeleteItemFromFolder(LPDISPATCH pTask, OutlookAPI::MAPIFolder* pFolder);
+	BOOL DeleteItemFromFolder(OutlookAPI::_Item& obj, OutlookAPI::MAPIFolder* pFolder);
 	void AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hTaskParent, OutlookAPI::MAPIFolder* pFolder);
 	void SetChildItemsChecked(HTREEITEM hti, BOOL bChecked);
 	BOOL BuildItemImageList();

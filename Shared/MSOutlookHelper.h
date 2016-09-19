@@ -31,7 +31,7 @@ namespace OutlookAPI
 {
 	class _Application;
 	class Selection;
-	class _MailItem;
+	class _Item;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -56,23 +56,26 @@ public:
 	static BOOL IsOutlookUrl(LPCTSTR szURL);
 
 	// caller deletes before COutlookHelper object goes out of scope
-	OutlookAPI::_MailItem* GetFirstFileObject(const CStringArray& aFiles);
-	OutlookAPI::_MailItem* GetFileObject(LPCTSTR szFilePath);
+	OutlookAPI::_Item* GetFirstFileObject(const CStringArray& aFiles);
+	OutlookAPI::_Item* GetFileObject(LPCTSTR szFilePath);
 	OutlookAPI::Selection* GetSelection();
 	int GetSelectionCount();
-	OutlookAPI::_MailItem* GetFirstSelectedObject();
+	OutlookAPI::_Item* GetFirstSelectedObject();
 
-	static OutlookAPI::_MailItem* GetFirstObject(OutlookAPI::Selection* pSelection);
-	static int GetItemData(OutlookAPI::_MailItem& obj, CMSOutlookItemDataMap& mapData, BOOL bIncludeConfidential = TRUE);
-	static CString GetItemData(OutlookAPI::_MailItem& obj, OUTLOOK_FIELDTYPE nField);
-	static CString GetItemID(OutlookAPI::_MailItem& obj);
-	static CString GetItemClass(OutlookAPI::_MailItem& obj);
+	static OutlookAPI::_Item* GetFirstObject(OutlookAPI::Selection* pSelection);
+	static int GetItemData(OutlookAPI::_Item& obj, CMSOutlookItemDataMap& mapData, BOOL bIncludeConfidential = TRUE);
+	static CString GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE nField);
+	static CString GetItemID(OutlookAPI::_Item& obj);
+	static CString GetItemClass(OutlookAPI::_Item& obj);
 	static BOOL IsConfidential(OUTLOOK_FIELDTYPE nField);
-	static CString FormatItemAsUrl(OutlookAPI::_MailItem& obj, DWORD dwFlags = (OAFMT_NICE | OAFMT_REPLACESPACES)); 
+	static CString FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags = (OAFMT_NICE | OAFMT_REPLACESPACES)); 
 
 	static BOOL HasDenyConfidential() { return s_bDenyConfidential; }
 	static void ResetDenyConfidential() { s_bDenyConfidential = FALSE; }
 
+	static CString GetFullPath(OutlookAPI::_Item& obj);
+	static BOOL PathsMatch(OutlookAPI::_Item& obj1, OutlookAPI::_Item& obj2);
+	
 	static const CLIPFORMAT CF_OUTLOOK;
 	static const DATE NULL_DATE;
 

@@ -18,6 +18,7 @@
 #include "..\Interfaces\ITaskList.h"
 
 #include "..\3rdparty\msoutl.h"
+#include "..\3rdparty\msoutlookitem.h"
 
 #include <afxtempl.h>
 
@@ -33,8 +34,6 @@ using namespace OutlookAPI;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR PATHDELIM = _T(" \\ ");
-
 const int OOC_FLAGGEDMAIL = -1;
 
 static int ICONS[][2] = 
@@ -49,111 +48,6 @@ static int ICONS[][2] =
 	{ OOC_APPOINTMENT,	IDI_APPOINTMENT }
 };
 int NUM_ICONS = (sizeof(ICONS) / (2 * sizeof(UINT)));
-
-/////////////////////////////////////////////////////////////////////////////
-
-class _Item : public COleDispatchDriver
-{
-public:
-	_Item(LPDISPATCH pItem) : COleDispatchDriver(pItem, FALSE) {}
-
-	long GetClass()
-	{
-		long result;
-		InvokeHelper(0xf00a, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
-		return result;
-	}
-
-	CString GetSubject()
-	{
-		CString result;
-		InvokeHelper(0x37, DISPATCH_PROPERTYGET, VT_BSTR, (void*)&result, NULL);
-		return result;
-	}
-
-	LPDISPATCH GetParent()
-	{
-		LPDISPATCH result;
-		InvokeHelper(0xf001, DISPATCH_PROPERTYGET, VT_DISPATCH, (void*)&result, NULL);
-		return result;
-	}
-
-	CString GetBody()
-	{
-		CString result;
-		InvokeHelper(0x9100, DISPATCH_PROPERTYGET, VT_BSTR, (void*)&result, NULL);
-		return result;
-	}
-
-	CString GetCategories()
-	{
-		CString result;
-		InvokeHelper(0x9001, DISPATCH_PROPERTYGET, VT_BSTR, (void*)&result, NULL);
-		return result;
-	}
-	
-	long GetImportance()
-	{
-		long result;
-		InvokeHelper(0x17, DISPATCH_PROPERTYGET, VT_I4, (void*)&result, NULL);
-		return result;
-	}
-	
-	CString GetEntryID()
-	{
-		CString result;
-		InvokeHelper(0xf01e, DISPATCH_PROPERTYGET, VT_BSTR, (void*)&result, NULL);
-		return result;
-	}
-	
-	DATE GetCreationTime()
-	{
-		DATE result;
-		InvokeHelper(0x3007, DISPATCH_PROPERTYGET, VT_DATE, (void*)&result, NULL);
-		return result;
-	}
-	
-	DATE GetLastModificationTime()
-	{
-		DATE result;
-		InvokeHelper(0x3008, DISPATCH_PROPERTYGET, VT_DATE, (void*)&result, NULL);
-		return result;
-	}
-
-	CString GetFullPath()
-	{
-		CString sPath(GetSubject()), sFolder;
-		LPDISPATCH lpd = GetParent();
-		
-		do
-		{
-			try
-			{
-				MAPIFolder folder(lpd);
-				sFolder = folder.GetName(); // will throw when we hit the highest level
-				sPath = sFolder + PATHDELIM + sPath;
-				
-				lpd = folder.GetParent(); 
-			}
-			catch (...)
-			{
-				break;
-			}
-		}
-		while (true);
-		
-		return sPath;
-	}
-
-	static BOOL PathsMatch(LPDISPATCH lpd1, LPDISPATCH lpd2)
-	{
-		CString sPath1 = _Item(lpd1).GetFullPath();
-		CString sPath2 = _Item(lpd2).GetFullPath();
-		
-		return (sPath1 == sPath2);
-	}
-
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
@@ -428,11 +322,11 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 		{
 			// Get the field mapping once only for the first item
 			LPDISPATCH lpd = (LPDISPATCH)m_tcTasks.GetItemData(hti);
-			_MailItem mail(lpd);
+			_Item obj(lpd);
 
-			if (aMapping.IsEmpty())
+			if (aMapping.GetSize() == 0)
 			{
-				CTDLImportOutlookObjectsDlg dialog(mail);
+				CTDLImportOutlookObjectsDlg dialog(obj);
 
 				if (dialog.DoModal() != IDOK)
 				{
@@ -450,11 +344,11 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 
 			if (bLeafTask)
 			{
-				if (CTDCOutlookImportHelper::ImportTask(aMapping, &mail, bWantConfidential, m_pDestTaskFile, bLeafTask))
+				if (CTDCOutlookImportHelper::ImportTask(aMapping, &obj, bWantConfidential, m_pDestTaskFile, bLeafTask))
 				{
 					// delete the item as we go if required
 					if (m_bRemoveOutlookTasks)
-						DeleteItemFromFolder(lpd, pFolder);
+						DeleteItemFromFolder(_Item(lpd), pFolder);
 
 				}
 			}
@@ -470,7 +364,7 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 	}
 }
 
-BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pFolder)
+BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(_Item& obj, MAPIFolder* pFolder)
 {
 	// look through this folders tasks first
 	_Items items(pFolder->GetItems());
@@ -480,7 +374,7 @@ BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pF
 	{
 		LPDISPATCH lpd = items.Item(COleVariant((short)nItem));
 
-		if (_Item::PathsMatch(pItem, lpd))
+		if (CMSOutlookHelper::PathsMatch(obj, _Item(lpd)))
 		{
 			items.Remove(nItem);
 			return TRUE;
@@ -495,116 +389,11 @@ BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pF
 	{
 		MAPIFolder folder(folders.Item(COleVariant((short)nItem)));
 
-		if (DeleteItemFromFolder(pItem, &folder))
+		if (DeleteItemFromFolder(obj, &folder))
 			return TRUE;
 	}
 
 	return FALSE;
-}
-
-int CTDLImportOutlookDlg::SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
-{
-	_Item item(lpd);
-
-	// set it's attributes
-	m_pDestTaskFile->SetTaskComments(hTask, item.GetBody());
-	
-	// can have multiple categories
-	CStringArray aCats;
-	Misc::Split(item.GetCategories(), aCats);
-	
-	for (int nCat = 0; nCat < aCats.GetSize(); nCat++)
-		m_pDestTaskFile->AddTaskCategory(hTask, aCats[nCat]);
-	
-	m_pDestTaskFile->SetTaskCreationDate(hTask, ConvertDate(item.GetCreationTime()));
-	m_pDestTaskFile->SetTaskLastModified(hTask, ConvertDate(item.GetLastModificationTime()));
-	m_pDestTaskFile->SetTaskPriority(hTask, (unsigned char)(item.GetImportance() * 5));
-	
-	// save outlook ID unless removing from Outlook
-	if (!m_bRemoveOutlookTasks)
-	{
-		CString sFileLink, sEntryID(item.GetEntryID());
-		sFileLink.Format(_T("outlook:%s"), sEntryID);
-		m_pDestTaskFile->SetTaskFileLinkPath(hTask, sFileLink);
-		
-		// and save entry ID as meta-data so we
-		// maintain the association for synchronization
-		m_pDestTaskFile->SetTaskMetaData(hTask, OUTLOOK_METADATAKEY, sEntryID);
-	}
-
-	return item.GetClass();
-}
-
-void CTDLImportOutlookDlg::SetTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
-{
-	lpd->AddRef(); // to keep it alive
-
-	// common attributes
-	int nClass = SetCommonTaskAttributes(hTask, lpd);
-
-	// class specific attributes
-	switch (nClass)
-	{
-	case OOC_MAIL:		
-		{
-			_MailItem mail(lpd);
-			
-			// TODO
-		}
-		break;
-		
-	case OOC_NOTE:		
-		{
-			_NoteItem note(lpd);
-			
-			// TODO
-		}
-		break;
-		
-	case OOC_TASK:		
-		{
-			_TaskItem task(lpd);
-
-			if (task.GetComplete())
-				m_pDestTaskFile->SetTaskDoneDate(hTask, ConvertDate(task.GetDateCompleted()));
-			
-			m_pDestTaskFile->SetTaskDueDate(hTask, ConvertDate(task.GetDueDate()));
-			m_pDestTaskFile->SetTaskStartDate(hTask, ConvertDate(task.GetStartDate()));
-			m_pDestTaskFile->SetTaskAllocatedBy(hTask, task.GetDelegator());
-			m_pDestTaskFile->SetTaskAllocatedTo(hTask, task.GetOwner());
-		}
-		break;
-
-	case OOC_JOURNAL:	
-		{
-			_JournalItem journal(lpd);
-			
-			// TODO
-		}
-		break;
-		
-	case OOC_CONTACT:	
-		{
-			_ContactItem contact(lpd);
-			
-			// TODO
-		}
-		break;
-		
-	case OOC_APPOINTMENT:
-		{
-			_AppointmentItem appointment(lpd);
-			
-			// TODO
-		}
-		break;
-		
-
-	case OOC_FOLDER:	
-	default:
-		ASSERT(0);
-		break;
-	}
 }
 
 void CTDLImportOutlookDlg::OnDestroy() 

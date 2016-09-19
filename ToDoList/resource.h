@@ -1856,7 +1856,7 @@
 #define IDS_OA_EXPIRYTIME               58249
 #define IDS_OA_FLAGREQUEST              58250
 #define IDS_OA_IMPORTANCE               58251
-#define IDS_OA_LASTMODIFICATIONTIME     58252
+#define IDS_OA_LASTMODTIME     58252
 #define IDS_RESTARTTOCHANGERTLINPUT     58253
 #define IDS_OA_MILEAGE                  58254
 #define IDS_OA_PERMISSION               58255

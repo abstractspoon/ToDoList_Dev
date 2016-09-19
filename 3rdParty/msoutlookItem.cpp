@@ -12,9 +12,6 @@ static char THIS_FILE[] = __FILE__;
 using namespace OutlookAPI;
 
 
-
-
-
 LPDISPATCH _Item::GetApplication()
 {
 	LPDISPATCH result;

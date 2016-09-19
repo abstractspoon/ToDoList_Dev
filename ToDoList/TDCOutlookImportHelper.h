@@ -18,7 +18,7 @@ class TODOITEM;
 
 namespace OutlookAPI
 {
-	class _MailItem;
+	class _Item;
 }
 
 struct TLDT_DATA;
@@ -28,11 +28,11 @@ struct TLDT_DATA;
 class CTDCOutlookImportHelper  
 {
 public:
-	static BOOL ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_MailItem* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib = TRUE);
+	static BOOL ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib = TRUE);
 	static int ImportTasks(const TLDT_DATA* pData, UINT nIDMappingError, ITaskList* pTasks);
 
 protected:
-	static BOOL ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_MailItem* pItem, BOOL bWantConfidential, TODOITEM& tdi);
+	static BOOL ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi);
 	static BOOL SetTaskAttributes(ITaskList* pTasks, HTASKITEM hTask, const TODOITEM& tdi);
 };
 

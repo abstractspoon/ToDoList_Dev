@@ -16,6 +16,7 @@
 #include "enstring.h"
 
 #include "..\3rdParty\msoutl.h"
+#include "..\3rdParty\msoutlookitem.h"
 
 #include <afxole.h>
 
@@ -552,7 +553,7 @@ HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lp
 			// 1-based indexing
 			for (short nSel = 1; nSel <= nNumSel; nSel++)
 			{
-				OutlookAPI::_MailItem item(pSelection->Item(COleVariant(nSel)));
+				OutlookAPI::_Item item(pSelection->Item(COleVariant(nSel)));
 
 				// format 'nicely' unless shift is pressed
 				DWORD dwFlags = OAFMT_BRACED;

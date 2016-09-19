@@ -165,6 +165,10 @@ SOURCE=.\msoutl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\msoutlookItem.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\msword.cpp
 # End Source File
 # Begin Source File
@@ -334,6 +338,10 @@ SOURCE=.\MemUtil.h
 # Begin Source File
 
 SOURCE=.\msoutl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\msoutlookItem.h
 # End Source File
 # Begin Source File
 

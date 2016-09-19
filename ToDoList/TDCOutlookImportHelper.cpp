@@ -17,6 +17,7 @@
 #include "..\shared\MSOutlookHelper.h"
 
 #include "..\3rdparty\msoutl.h"
+#include "..\3rdparty\msoutlookitem.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -36,7 +37,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	// first thing to do is to get the first outlook object so we 
 	// can prime the dialog
 	CMSOutlookHelper outlook;
-	OutlookAPI::_MailItem* pItem = NULL;
+	OutlookAPI::_Item* pItem = NULL;
 	
 	if (pData->pOutlookSelection)
 		pItem = outlook.GetFirstObject(pData->pOutlookSelection);
@@ -80,7 +81,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 		// 1-based indexing
 		for (short nSel = 1; nSel <= pData->pOutlookSelection->GetCount(); nSel++)
 		{
-			OutlookAPI::_MailItem item(pData->pOutlookSelection->Item(COleVariant(nSel)));
+			OutlookAPI::_Item item(pData->pOutlookSelection->Item(COleVariant(nSel)));
 			
 			if (CTDCOutlookImportHelper::ImportTask(aMapping, &item, bWantConfidential, pTasks))
 				nTaskCount++;
@@ -93,7 +94,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 		// 0-based indexing
 		for (int nFile = 0; nFile < pData->GetFileCount(); nFile++)
 		{
-			OutlookAPI::_MailItem* pItem = outlook.GetFileObject(pData->GetFile(nFile));
+			OutlookAPI::_Item* pItem = outlook.GetFileObject(pData->GetFile(nFile));
 			
 			if (pItem)
 			{
@@ -111,7 +112,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	return nTaskCount;
 }
 
-BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_MailItem* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib)
+BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib)
 {
 	TODOITEM tdi;
 
@@ -131,7 +132,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, O
 	return FALSE;
 }
 
-BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_MailItem* pItem, BOOL bWantConfidential, TODOITEM& tdi)
+BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi)
 {
 	ASSERT(pItem);
 

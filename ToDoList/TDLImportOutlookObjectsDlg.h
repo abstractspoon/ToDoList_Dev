@@ -23,7 +23,7 @@ class CTDLImportOutlookObjectsDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLImportOutlookObjectsDlg(OutlookAPI::_MailItem& refItem, CWnd* pParent = NULL);   // standard constructor
+	CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantConfidentialAttributes() const { return !m_bHideConfidential; }
 	int GetColumnMapping(CTDCCsvColumnMapping& aMapping);
@@ -39,7 +39,7 @@ protected:
 	CTDLImportOutlookObjectSetupListCtrl m_lcFieldMapping;
 	CMSOutlookItemDataMap m_mapRefData;
 	CString m_sClass;
-	OutlookAPI::_MailItem& m_refItem;
+	OutlookAPI::_Item& m_refItem;
 
 	// the master mapping always contains all fields
 	// with their last mapped attributes, whilst the mapping

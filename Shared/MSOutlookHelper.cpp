@@ -11,6 +11,7 @@
 #include "regkey.h"
 
 #include "..\3rdparty\msoutl.h"
+#include "..\3rdparty\msoutlookitem.h"
 
 #include <afxole.h>
 
@@ -78,6 +79,7 @@ const DATE CMSOutlookHelper::NULL_DATE = 949998.0;
 struct OUTLOOKDATAITEM
 {
 	OUTLOOK_FIELDTYPE nField;
+	int nObjectType;
 	BOOL bConfidential;
 };	
 
@@ -85,37 +87,59 @@ struct OUTLOOKDATAITEM
 
 OUTLOOKDATAITEM OUTLOOKDATA[] = 
 {
-	{ OA_BCC, TRUE },
-	{ OA_BILLINGINFORMATION, FALSE },
-	{ OA_BODY, TRUE },
-	{ OA_CATEGORIES, FALSE },
-	{ OA_CC, TRUE },
-	{ OA_COMPANIES, FALSE },
-	{ OA_CONVERSATIONTOPIC, FALSE },
-	{ OA_CREATIONTIME, FALSE },
-	{ OA_ENTRYID, FALSE },
-	{ OA_EXPIRYTIME, FALSE },
-	{ OA_FLAGREQUEST, FALSE },
-	{ OA_IMPORTANCE, FALSE },
-	{ OA_LASTMODIFICATIONTIME, FALSE },
-	{ OA_MESSAGECLASS, FALSE },
-	{ OA_MILEAGE, FALSE },
-	{ OA_PERMISSION, FALSE },
-	{ OA_RECEIVEDBYNAME, TRUE },
-	{ OA_RECEIVEDTIME, FALSE },
-	{ OA_REMINDERTIME, FALSE },
-	{ OA_REPLYRECIPIENTNAMES, TRUE },
-	{ OA_SENDEREMAILADDRESS, TRUE },
-	{ OA_SENDERNAME, TRUE },
-	{ OA_SENSITIVITY, FALSE },
-	{ OA_SENTON, FALSE },
-	{ OA_SENTONBEHALFOFNAME, TRUE },
-	{ OA_SUBJECT, FALSE },
-	{ OA_TASKCOMPLETEDDATE, FALSE },
-	{ OA_TASKDUEDATE, FALSE },
-	{ OA_TASKSTARTDATE, FALSE },
-//	{ OA_TASKSUBJECT, FALSE },
-	{ OA_TO, TRUE },
+	// Common
+	{ OA_BILLINGINFORMATION,	OOC_ITEM, FALSE },
+	{ OA_CATEGORIES,			OOC_ITEM, FALSE },
+	{ OA_COMPANIES,				OOC_ITEM, FALSE },
+	{ OA_CONVERSATIONTOPIC,		OOC_ITEM, FALSE },
+	{ OA_CREATIONTIME,			OOC_ITEM, FALSE },
+	{ OA_ENTRYID,				OOC_ITEM, FALSE },
+	{ OA_EXPIRYTIME,			OOC_ITEM, FALSE },
+	{ OA_FLAGREQUEST,			OOC_ITEM, FALSE },
+	{ OA_IMPORTANCE,			OOC_ITEM, FALSE },
+	{ OA_LASTMODIFICATIONTIME,	OOC_ITEM, FALSE },
+	{ OA_MESSAGECLASS,			OOC_ITEM, FALSE },
+	{ OA_MILEAGE,				OOC_ITEM, FALSE },
+	{ OA_PERMISSION,			OOC_ITEM, FALSE },
+	{ OA_SENSITIVITY,			OOC_ITEM, FALSE },
+	{ OA_TITLE,					OOC_ITEM, FALSE },
+
+	// Mail specific
+	{ OA_BCC,					OOC_MAIL, TRUE },
+	{ OA_BODY,					OOC_MAIL, TRUE },
+	{ OA_CC,					OOC_MAIL, TRUE },
+	{ OA_RECEIVEDBYNAME,		OOC_MAIL, TRUE },
+	{ OA_RECEIVEDTIME,			OOC_MAIL, FALSE },
+	{ OA_REPLYRECIPIENTNAMES,	OOC_MAIL, TRUE },
+	{ OA_SENDEREMAILADDRESS,	OOC_MAIL, TRUE },
+	{ OA_SENDERNAME,			OOC_MAIL, TRUE },
+	{ OA_SENTON,				OOC_MAIL, FALSE },
+	{ OA_SENTONBEHALFOFNAME,	OOC_MAIL, TRUE },
+	{ OA_TASKCOMPLETEDDATE,		OOC_MAIL, FALSE },
+	{ OA_TASKDUEDATE,			OOC_MAIL, FALSE },
+	{ OA_TASKSTARTDATE,			OOC_MAIL, FALSE },
+	{ OA_TO,					OOC_MAIL, TRUE },
+	{ OA_REMINDERTIME,			OOC_MAIL, FALSE },
+
+	// Task specific
+	{ OA_ACTUALWORK,			OOC_TASK, FALSE },
+	{ OA_COMPLETE,				OOC_TASK, FALSE },
+	{ OA_DATECOMPLETED,			OOC_TASK, FALSE },
+	{ OA_DELEGATOR,				OOC_TASK, FALSE },
+	{ OA_DUEDATE,				OOC_TASK, FALSE },
+	{ OA_DURATION,				OOC_TASK, FALSE },
+	{ OA_END,					OOC_TASK, FALSE },
+	{ OA_ISRECURRING,			OOC_TASK, FALSE },
+	{ OA_OWNER,					OOC_TASK, FALSE },
+	{ OA_PERCENTCOMPLETE,		OOC_TASK, FALSE },
+	{ OA_SCHEDULEPLUSPRIORITY,	OOC_TASK, FALSE },
+	{ OA_START,					OOC_TASK, FALSE },
+	{ OA_STARTDATE,				OOC_TASK, FALSE },
+	{ OA_STATUS,				OOC_TASK, FALSE },
+	{ OA_TEAMTASK,				OOC_TASK, FALSE },
+	{ OA_TOTALWORK,				OOC_TASK, FALSE },
+
+
 };
 const int NUMOUTLOOKDATA = sizeof(OUTLOOKDATA) / sizeof(OUTLOOKDATAITEM);
 
@@ -271,7 +295,7 @@ BOOL COutlookHelper::QueryInstallUrlHandler(UINT nIDQuery, UINT nMBOptions, int 
 }
 */
 
-CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_MailItem& obj, DWORD dwFlags)
+CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 {
 	CString sPath(GetItemID(obj)); // default
 
@@ -283,7 +307,7 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_MailItem& obj, DWORD dwFl
 		if (lpParent)
 		{
 			CString sFolder = MAPIFolder(lpParent).GetFolderPath();
-			CString sSubject = GetItemData(obj, OA_SUBJECT);
+			CString sSubject = GetItemData(obj, OA_TITLE);
 
 			// very odd bug if subject starts with two chars 
 			// and then a colon -> Outlook fails to open the link
@@ -312,7 +336,7 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_MailItem& obj, DWORD dwFl
 	return sUrl;
 }
 
-CString CMSOutlookHelper::GetItemData(OutlookAPI::_MailItem& obj, OUTLOOK_FIELDTYPE nField)
+CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE nField)
 {
 	if (IsConfidential(nField) && s_bDenyConfidential)
 		return _T("");
@@ -321,11 +345,9 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_MailItem& obj, OUTLOOK_FIELDT
 
 	switch (nField)
 	{
-		case OA_BCC:					return obj.GetBcc();
+		// Common
 		case OA_BILLINGINFORMATION:		return obj.GetBillingInformation();
-		case OA_BODY:					return obj.GetBody();
 		case OA_CATEGORIES:				return obj.GetCategories();
-		case OA_CC:						return obj.GetCc();
 		case OA_COMPANIES:				return obj.GetCompanies();
 		case OA_CONVERSATIONTOPIC:		return obj.GetConversationTopic();
 		case OA_CREATIONTIME:			return MapDate(obj.GetCreationTime());
@@ -337,39 +359,62 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_MailItem& obj, OUTLOOK_FIELDT
 		case OA_MESSAGECLASS:			return obj.GetMessageClass();
 		case OA_MILEAGE:				return obj.GetMileage();
 		case OA_PERMISSION:				return Misc::Format(obj.GetPermission());
+		case OA_TITLE:					return obj.GetSubject();
+		case OA_REMINDERTIME:			return MapDate(obj.GetReminderTime());
+
+		// Mail specific
+		case OA_BCC:					return obj.GetBcc();
+		case OA_BODY:					return obj.GetBody();
+		case OA_CC:						return obj.GetCc();
 		case OA_RECEIVEDBYNAME:			return obj.GetReceivedByName();
 		case OA_RECEIVEDTIME:			return MapDate(obj.GetReceivedTime());
-		case OA_REMINDERTIME:			return MapDate(obj.GetReminderTime());
 		case OA_REPLYRECIPIENTNAMES:	return obj.GetReplyRecipientNames();
 		case OA_SENDEREMAILADDRESS:		return obj.GetSenderEmailAddress();
 		case OA_SENDERNAME:				return obj.GetSenderName();
 		case OA_SENSITIVITY:			return Misc::Format(obj.GetSensitivity());
 		case OA_SENTONBEHALFOFNAME:		return obj.GetSentOnBehalfOfName();
 		case OA_SENTON:					return MapDate(obj.GetSentOn());
-		case OA_SUBJECT:				return obj.GetSubject();
 		case OA_TASKCOMPLETEDDATE:		return MapDate(obj.GetTaskCompletedDate());
 		case OA_TASKDUEDATE:			return MapDate(obj.GetTaskDueDate());
 		case OA_TASKSTARTDATE:			return MapDate(obj.GetTaskStartDate());
-//		case OA_TASKSUBJECT:			return obj.GetTaskSubject();
 		case OA_TO:						return obj.GetTo();
+
+		// task specific
+		case OA_ACTUALWORK:				return Misc::Format(obj.GetActualWork());
+		case OA_COMPLETE:				return obj.GetComplete();
+		case OA_DATECOMPLETED:			return MapDate(obj.GetDateCompleted());
+		case OA_DELEGATOR:				return obj.GetDelegator();
+		case OA_DUEDATE:				return MapDate(obj.GetDueDate());
+		case OA_DURATION:				return Misc::Format(obj.GetDuration());
+		case OA_END:					return MapDate(obj.GetEnd());
+		case OA_ISRECURRING:			return obj.GetIsRecurring();
+		case OA_OWNER:					return obj.GetOwner();
+		case OA_PERCENTCOMPLETE:		return Misc::Format(obj.GetPercentComplete());
+		case OA_SCHEDULEPLUSPRIORITY:	return obj.GetSchedulePlusPriority();
+		case OA_START:					return MapDate(obj.GetStart());
+		case OA_STARTDATE:				return MapDate(obj.GetStartDate());
+		case OA_STATUS:					return Misc::Format(obj.GetStatus());
+		case OA_TEAMTASK:				return obj.GetTeamTask();
+		case OA_TOTALWORK:				return Misc::Format(obj.GetTotalWork());
+
 	}
 
 	ASSERT(0);
 	return _T("");
 }
 
-CString CMSOutlookHelper::GetItemID(OutlookAPI::_MailItem& obj)
+CString CMSOutlookHelper::GetItemID(OutlookAPI::_Item& obj)
 {
 	return GetItemData(obj, OA_ENTRYID);
 }
 
-CString CMSOutlookHelper::GetItemClass(OutlookAPI::_MailItem& obj)
+CString CMSOutlookHelper::GetItemClass(OutlookAPI::_Item& obj)
 {
 	return GetItemData(obj, OA_MESSAGECLASS);
 }
 
 // static
-int CMSOutlookHelper::GetItemData(OutlookAPI::_MailItem& obj, CMSOutlookItemDataMap& mapData, BOOL bIncludeConfidential)
+int CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, CMSOutlookItemDataMap& mapData, BOOL bIncludeConfidential)
 {
 	mapData.RemoveAll();
 
@@ -381,21 +426,28 @@ int CMSOutlookHelper::GetItemData(OutlookAPI::_MailItem& obj, CMSOutlookItemData
 
 	if (obj.m_lpDispatch != NULL)
 	{
-		for (int nField = OA_FIRST; nField < OA_LAST; nField++)
+		int nObjType = obj.GetClass();
+
+		for (int nData = 0; nData < NUMOUTLOOKDATA; nData++)
 		{
-			try
+			const OUTLOOKDATAITEM& item = OUTLOOKDATA[nData];
+
+			if ((item.nObjectType == OOC_TASK) || (item.nObjectType == nObjType))
 			{
-				mapData[(OUTLOOK_FIELDTYPE)nField] = GetItemData(obj, (OUTLOOK_FIELDTYPE)nField);
-			}
-			catch (COleException* e)
-			{
-				e->Delete();
-				s_bDenyConfidential = TRUE;
-			}
-			catch (...)
-			{
-				ASSERT(0);
-				s_bDenyConfidential = TRUE;
+				try
+				{
+					mapData[item.nField] = GetItemData(obj, item.nField);
+				}
+				catch (COleException* e)
+				{
+					e->Delete();
+					s_bDenyConfidential = TRUE;
+				}
+				catch (...)
+				{
+					ASSERT(0);
+					s_bDenyConfidential = TRUE;
+				}
 			}
 		}
 	}
@@ -455,11 +507,11 @@ BOOL CMSOutlookHelper::IsOutlookUrl(LPCTSTR szURL)
 	return (CString(szURL).Find(_T("outlook:")) == 0);
 }
 
-OutlookAPI::_MailItem* CMSOutlookHelper::GetFirstFileObject(const CStringArray& aFiles)
+OutlookAPI::_Item* CMSOutlookHelper::GetFirstFileObject(const CStringArray& aFiles)
 {
 	for (int nFile = 0; nFile < aFiles.GetSize(); nFile++)
 	{
-		OutlookAPI::_MailItem* pItem = GetFileObject(aFiles[nFile]);
+		OutlookAPI::_Item* pItem = GetFileObject(aFiles[nFile]);
 		
 		if (pItem)
 			return pItem;
@@ -468,13 +520,13 @@ OutlookAPI::_MailItem* CMSOutlookHelper::GetFirstFileObject(const CStringArray& 
 	return NULL; // no outlook object found
 }
 
-_MailItem* CMSOutlookHelper::GetFileObject(LPCTSTR szFilePath)
+_Item* CMSOutlookHelper::GetFileObject(LPCTSTR szFilePath)
 {
 	if (!IsOutlookObject(szFilePath) || s_pOutlook == NULL)
 		return NULL;
 
 	_NameSpace nmspc(s_pOutlook->GetNamespace(_T("MAPI")));
-	_MailItem* pItem = new _MailItem(nmspc.OpenSharedItem(szFilePath));
+	_Item* pItem = new _Item(nmspc.OpenSharedItem(szFilePath));
 
 	return pItem;
 }
@@ -501,10 +553,10 @@ int CMSOutlookHelper::GetSelectionCount()
 	return selection.GetCount();
 }
 
-_MailItem* CMSOutlookHelper::GetFirstSelectedObject()
+_Item* CMSOutlookHelper::GetFirstSelectedObject()
 {
 	Selection* pSelection = GetSelection();
-	_MailItem* pItem = GetFirstObject(pSelection);
+	_Item* pItem = GetFirstObject(pSelection);
 
 	// cleanup
 	delete pSelection;
@@ -512,12 +564,12 @@ _MailItem* CMSOutlookHelper::GetFirstSelectedObject()
 	return pItem;
 }
 
-OutlookAPI::_MailItem* CMSOutlookHelper::GetFirstObject(OutlookAPI::Selection* pSelection)
+OutlookAPI::_Item* CMSOutlookHelper::GetFirstObject(OutlookAPI::Selection* pSelection)
 {
 	if (pSelection == NULL)
 		return NULL;
 
-	_MailItem* pItem = (pSelection->GetCount() ? new _MailItem(pSelection->Item(COleVariant((short)1))) : NULL);
+	_Item* pItem = (pSelection->GetCount() ? new _Item(pSelection->Item(COleVariant((short)1))) : NULL);
 	
 	return pItem;
 }
@@ -525,9 +577,6 @@ OutlookAPI::_MailItem* CMSOutlookHelper::GetFirstObject(OutlookAPI::Selection* p
 // static
 BOOL CMSOutlookHelper::IsConfidential(OUTLOOK_FIELDTYPE nField)
 {
-	// sanity check
-	ASSERT(NUMOUTLOOKDATA == OA_LAST);
-
 	for (int i = 0; i < NUMOUTLOOKDATA; i++)
 	{
 		if (OUTLOOKDATA[i].nField == nField)
@@ -536,4 +585,39 @@ BOOL CMSOutlookHelper::IsConfidential(OUTLOOK_FIELDTYPE nField)
 
 	// fallback
 	return TRUE;
+}
+
+CString CMSOutlookHelper::GetFullPath(OutlookAPI::_Item& obj)
+{
+	CString sPath(obj.GetSubject()), sFolder;
+	LPDISPATCH lpd = obj.GetParent();
+
+	const LPCTSTR PATHDELIM = _T(" \\ ");
+
+	do
+	{
+		try
+		{
+			MAPIFolder folder(lpd);
+			sFolder = folder.GetName(); // will throw when we hit the highest level
+			sPath = sFolder + PATHDELIM + sPath;
+			
+			lpd = folder.GetParent(); 
+		}
+		catch (...)
+		{
+			break;
+		}
+	}
+	while (true);
+	
+	return sPath;
+}
+
+BOOL CMSOutlookHelper::PathsMatch(OutlookAPI::_Item& obj1, OutlookAPI::_Item& obj2)
+{
+	CString sPath1 = GetFullPath(obj1);
+	CString sPath2 = GetFullPath(obj2);
+	
+	return (sPath1 == sPath2);
 }

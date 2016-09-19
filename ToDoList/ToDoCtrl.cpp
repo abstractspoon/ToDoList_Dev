@@ -55,6 +55,7 @@
 #include "..\interfaces\IContentControl.h"
 
 #include "..\3rdparty\msoutl.h"
+#include "..\3rdparty\msoutlookitem.h"
 #include "..\3rdparty\shellicons.h"
 
 #include <Windowsx.h>
@@ -9700,10 +9701,10 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	if (bSingleOutlookObj)
 	{
 		// format outlook link
-		OutlookAPI::_MailItem item(pData->pOutlookSelection->Item(COleVariant((short)1)));
+		OutlookAPI::_Item obj(pData->pOutlookSelection->Item(COleVariant((short)1)));
 
 		DWORD dwFlags = (Misc::ModKeysArePressed(MKS_SHIFT) ? 0 : OAFMT_NICE);
-		aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(item, dwFlags));
+		aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(obj, dwFlags));
 	}
 	else if (nNumFiles)
 	{ 
