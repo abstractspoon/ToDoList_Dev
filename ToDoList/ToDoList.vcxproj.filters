@@ -214,9 +214,6 @@
     <ClCompile Include="tdlimportexportcombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLImportExportMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDLImportOutlookObjectsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -353,6 +350,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TDCToDoCtrlPreferenceHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCImportExportMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCOutlookImportHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskListOutlookImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImportOutlookDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -627,9 +636,6 @@
     <ClInclude Include="tdlimportexportcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLImportExportMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TDLImportOutlookObjectsDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -769,6 +775,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCToDoCtrlPreferenceHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCImportExportMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCOutlookImportHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskListOutlookImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImportOutlookDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

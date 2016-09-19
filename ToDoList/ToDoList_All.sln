@@ -19,8 +19,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MySpellCheck", "..\MySpellC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OdbcStorage", "..\OdbcStorage\OdbcStorage.vcxproj", "{A7C43C06-49E9-4F5F-AA84-4E3DC3EB6CA5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OutlookImpExp", "..\OutlookImpExp\OutlookImpExp.vcxproj", "{5D5D7310-32E1-4A78-95F1-0FED9F898523}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlainTextImport", "..\PlainTextImport\PlainTextImport.vcxproj", "{1AC5867E-0688-4C2E-8F23-E488F6594948}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTFContentCtrl", "..\RTFContentCtrl\RTFContentCtrl.vcxproj", "{6690E3DF-E9BF-4CDD-8019-5A331A566011}"
@@ -91,10 +89,6 @@ Global
 		{A7C43C06-49E9-4F5F-AA84-4E3DC3EB6CA5}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{A7C43C06-49E9-4F5F-AA84-4E3DC3EB6CA5}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{A7C43C06-49E9-4F5F-AA84-4E3DC3EB6CA5}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{5D5D7310-32E1-4A78-95F1-0FED9F898523}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{5D5D7310-32E1-4A78-95F1-0FED9F898523}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{5D5D7310-32E1-4A78-95F1-0FED9F898523}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{5D5D7310-32E1-4A78-95F1-0FED9F898523}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 		{1AC5867E-0688-4C2E-8F23-E488F6594948}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
 		{1AC5867E-0688-4C2E-8F23-E488F6594948}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{1AC5867E-0688-4C2E-8F23-E488F6594948}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32

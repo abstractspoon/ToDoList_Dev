@@ -31,11 +31,11 @@ typedef void* HTASKITEM;
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
 
-class COutlookImportDlg : public CDialog
+class CImportOutlookDlg : public CDialog
 {
 // Construction
 public:
-	COutlookImportDlg(CWnd* pParent = NULL);   // standard constructor
+	CImportOutlookDlg(CWnd* pParent = NULL);   // standard constructor
 
 	IIMPORT_RESULT ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey);
 
