@@ -56,22 +56,32 @@ OutlookAPI::_Application* CMSOutlookHelper::s_pOutlook = NULL;
 int CMSOutlookHelper::s_nRefCount = 0;
 BOOL CMSOutlookHelper::s_bDenyConfidential = FALSE;
 
+//////////////////////////////////////////////////////////////////////
+
 #define CFSTR_RENPRIVATEMESSAGES  _T("RenPrivateMessages") 
 #define CFSTR_RENPRIVATESRCFOLDER _T("RenPrivateSourceFolder")
+
+//////////////////////////////////////////////////////////////////////
 
 static const CLIPFORMAT CF_RENPRIVATEMESSAGES = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_RENPRIVATEMESSAGES);
 static const CLIPFORMAT CF_RENPRIVATESRCFOLDER = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_RENPRIVATESRCFOLDER);	
 static const CLIPFORMAT CF_FILECONTENTS = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_FILECONTENTS);
 static const CLIPFORMAT CF_FILEDESCRIPTOR = (CLIPFORMAT)::RegisterClipboardFormat(CFSTR_FILEDESCRIPTORW);
 
+//////////////////////////////////////////////////////////////////////
+
 const CLIPFORMAT CMSOutlookHelper::CF_OUTLOOK = CF_RENPRIVATEMESSAGES;
 const DATE CMSOutlookHelper::NULL_DATE = 949998.0;
+
+//////////////////////////////////////////////////////////////////////
 
 struct OUTLOOKDATAITEM
 {
 	OUTLOOK_FIELDTYPE nField;
 	BOOL bConfidential;
 };	
+
+//////////////////////////////////////////////////////////////////////
 
 OUTLOOKDATAITEM OUTLOOKDATA[] = 
 {
@@ -107,8 +117,9 @@ OUTLOOKDATAITEM OUTLOOKDATA[] =
 //	{ OA_TASKSUBJECT, FALSE },
 	{ OA_TO, TRUE },
 };
-
 const int NUMOUTLOOKDATA = sizeof(OUTLOOKDATA) / sizeof(OUTLOOKDATAITEM);
+
+//////////////////////////////////////////////////////////////////////
 
 CMSOutlookHelper::CMSOutlookHelper()
 {

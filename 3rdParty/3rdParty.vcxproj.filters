@@ -115,6 +115,9 @@
     <ClCompile Include="XPTabCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="msoutlookItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base64Coder.h">
@@ -271,6 +274,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Zlib\ZIP.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="msoutlookItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

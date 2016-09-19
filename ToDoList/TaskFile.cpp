@@ -2001,7 +2001,7 @@ HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent)
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID)
 {
-	ASSERT(FindTask(dwID) == 0);
+	ASSERT((dwID == 0) || (FindTask(dwID) == 0));
 
 	CXmlItem* pXIParent = hParent ? TaskFromHandle(hParent) : Root();
 

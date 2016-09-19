@@ -40,7 +40,7 @@ IIMPORT_RESULT CTaskListOutlookImporter::Import(LPCTSTR /*szSrcFilePath*/, ITask
 	if (bSilent)
 		return IIR_OTHER;
 	
-	CImportOutlookDlg dlg;
+	CTDLImportOutlookDlg dlg;
 
 	return dlg.ImportTasks(pDestTaskFile, pPrefs, szKey);
 }

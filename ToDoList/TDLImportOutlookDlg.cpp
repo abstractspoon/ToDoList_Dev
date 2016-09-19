@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TasklistOutlookImporter.h"
 #include "TDLImportOutlookDlg.h"
+#include "TDLImportOutlookObjectsDlg.h"
 #include "TDCOutlookImportHelper.h"
 
 #include "..\shared\misc.h"
@@ -157,7 +158,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
 
-CImportOutlookDlg::CImportOutlookDlg(CWnd* pParent /*=NULL*/)
+CTDLImportOutlookDlg::CTDLImportOutlookDlg(CWnd* pParent /*=NULL*/)
 : CDialog(IDD_IMPORT_OUTLOOK_DIALOG, pParent), m_pDestTaskFile(NULL), m_pOutlook(NULL)
 {
 	//{{AFX_DATA_INIT(COutlookImportDlg)
@@ -165,7 +166,7 @@ CImportOutlookDlg::CImportOutlookDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 }
 
-void CImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COutlookImportDlg)
@@ -177,7 +178,7 @@ void CImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CImportOutlookDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLImportOutlookDlg, CDialog)
 	//{{AFX_MSG_MAP(COutlookImportDlg)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_CHOOSEFOLDER, OnChoosefolder)
@@ -190,7 +191,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg message handlers
 
-IIMPORT_RESULT CImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_pDestTaskFile = GetITLInterface<ITaskList10>(pDestTaskFile, IID_TASKLIST10);
 
@@ -216,7 +217,7 @@ IIMPORT_RESULT CImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPrefere
 	return IIR_SUCCESS;
 }
 
-BOOL CImportOutlookDlg::OnInitDialog() 
+BOOL CTDLImportOutlookDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 	CLocalizer::EnableTranslation(m_tcTasks, FALSE);
@@ -249,7 +250,7 @@ BOOL CImportOutlookDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-BOOL CImportOutlookDlg::BuildItemImageList()
+BOOL CTDLImportOutlookDlg::BuildItemImageList()
 {
 	if (m_ilItemTypes.GetSafeHandle())
 		return TRUE;
@@ -275,7 +276,7 @@ BOOL CImportOutlookDlg::BuildItemImageList()
 	return TRUE;
 }
 
-int CImportOutlookDlg::GetItemImage(int nClass) const
+int CTDLImportOutlookDlg::GetItemImage(int nClass) const
 {
 	int nImage = -1; // not supported
 
@@ -284,7 +285,7 @@ int CImportOutlookDlg::GetItemImage(int nClass) const
 	return nImage;
 }
 
-void CImportOutlookDlg::AddFolderItemsToTree(MAPIFolder* pFolder, HTREEITEM htiParent)
+void CTDLImportOutlookDlg::AddFolderItemsToTree(MAPIFolder* pFolder, HTREEITEM htiParent)
 {
 	_Items items(pFolder->GetItems());
 	items.m_lpDispatch->AddRef(); // to keep it alive
@@ -398,7 +399,7 @@ void CImportOutlookDlg::AddFolderItemsToTree(MAPIFolder* pFolder, HTREEITEM htiP
 	}
 }
 
-void CImportOutlookDlg::OnOK()
+void CTDLImportOutlookDlg::OnOK()
 {
 	CDialog::OnOK();
 
@@ -411,48 +412,65 @@ void CImportOutlookDlg::OnOK()
 	AddTreeItemsToTasks(NULL, NULL, &mapi);
 }
 
-void CImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hTaskParent, MAPIFolder* pFolder)
+void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hTaskParent, MAPIFolder* pFolder)
 {
 	ASSERT ((htiParent && hTaskParent) || (!htiParent && !hTaskParent));
 
 	// iterate the tree items adding checked items
+	CTDCCsvColumnMapping aMapping;
+	BOOL bWantConfidential = FALSE;
+
 	HTREEITEM hti = m_tcTasks.GetChildItem(htiParent);
 
 	while (hti)
 	{
 		if (m_tcTasks.GetCheck(hti))
 		{
-			// create a new task
-			CString sTitle = m_tcTasks.GetItemText(hti);
-
-			HTASKITEM hTask = m_pDestTaskFile->NewTask(sTitle, hTaskParent, 0);
-			ASSERT(hTask);
-
-			// get the Outlook item that this item points to
+			// Get the field mapping once only for the first item
 			LPDISPATCH lpd = (LPDISPATCH)m_tcTasks.GetItemData(hti);
-				
-			// add attributes for leaf tasks
-			if (!m_tcTasks.ItemHasChildren(hti))
+			_MailItem mail(lpd);
+
+			if (aMapping.IsEmpty())
 			{
-				SetTaskAttributes(hTask, lpd);
+				CTDLImportOutlookObjectsDlg dialog(mail);
+
+				if (dialog.DoModal() != IDOK)
+				{
+					EndDialog(IDCANCEL);
+					return;
+				}
+
+				// else
+				dialog.GetColumnMapping(aMapping);
+				bWantConfidential = dialog.GetWantConfidentialAttributes();
+			}
 				
-				// delete the item as we go if required
-				if (m_bRemoveOutlookTasks)
-					DeleteItemFromFolder(lpd, pFolder);
-			}
-			else // process RECURSIVELY
+			// create a new task
+			BOOL bLeafTask = !m_tcTasks.ItemHasChildren(hti);
+
+			if (bLeafTask)
 			{
-				AddTreeItemsToTasks(hti, hTask, pFolder);
+				if (CTDCOutlookImportHelper::ImportTask(aMapping, &mail, bWantConfidential, m_pDestTaskFile, bLeafTask))
+				{
+					// delete the item as we go if required
+					if (m_bRemoveOutlookTasks)
+						DeleteItemFromFolder(lpd, pFolder);
+
+				}
 			}
-			
-			lpd->Release();
+			else // folder -> new parent
+			{
+				HTASKITEM hNewParent = m_pDestTaskFile->NewTask(m_tcTasks.GetItemText(hti), hTaskParent, 0);
+
+				AddTreeItemsToTasks(hti, hNewParent, pFolder);
+			}
 		}
 
 		hti = m_tcTasks.GetNextItem(hti, TVGN_NEXT);
 	}
 }
 
-BOOL CImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pFolder)
+BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pFolder)
 {
 	// look through this folders tasks first
 	_Items items(pFolder->GetItems());
@@ -484,7 +502,7 @@ BOOL CImportOutlookDlg::DeleteItemFromFolder(LPDISPATCH pItem, MAPIFolder* pFold
 	return FALSE;
 }
 
-int CImportOutlookDlg::SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
+int CTDLImportOutlookDlg::SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
 {
 	_Item item(lpd);
 
@@ -517,7 +535,7 @@ int CImportOutlookDlg::SetCommonTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
 	return item.GetClass();
 }
 
-void CImportOutlookDlg::SetTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
+void CTDLImportOutlookDlg::SetTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
 {
 	lpd->AddRef(); // to keep it alive
 
@@ -589,7 +607,7 @@ void CImportOutlookDlg::SetTaskAttributes(HTASKITEM hTask, LPDISPATCH lpd)
 	}
 }
 
-void CImportOutlookDlg::OnDestroy() 
+void CTDLImportOutlookDlg::OnDestroy() 
 {
 	CDialog::OnDestroy();
 	
@@ -601,7 +619,7 @@ void CImportOutlookDlg::OnDestroy()
 	m_pFolder = NULL;
 }
 
-time_t CImportOutlookDlg::ConvertDate(DATE date)
+time_t CTDLImportOutlookDlg::ConvertDate(DATE date)
 {
 	if (date <= 0.0)
 		return 0;
@@ -615,7 +633,7 @@ time_t CImportOutlookDlg::ConvertDate(DATE date)
 	return mktime(&t);
 }
 
-void CImportOutlookDlg::OnChoosefolder() 
+void CTDLImportOutlookDlg::OnChoosefolder() 
 {
 	_NameSpace nmspc(m_pOutlook->GetNamespace(_T("MAPI")));
 	nmspc.m_lpDispatch->AddRef(); // to keep it alive
@@ -634,7 +652,7 @@ void CImportOutlookDlg::OnChoosefolder()
 	}
 }
 
-void CImportOutlookDlg::OnClickTasklist(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLImportOutlookDlg::OnClickTasklist(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
 	CPoint ptClick(GetMessagePos());
 	m_tcTasks.ScreenToClient(&ptClick);
@@ -668,7 +686,7 @@ void CImportOutlookDlg::OnClickTasklist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CImportOutlookDlg::SetChildItemsChecked(HTREEITEM hti, BOOL bChecked)
+void CTDLImportOutlookDlg::SetChildItemsChecked(HTREEITEM hti, BOOL bChecked)
 {
 	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
 
@@ -684,14 +702,14 @@ void CImportOutlookDlg::SetChildItemsChecked(HTREEITEM hti, BOOL bChecked)
 	}
 }
 
-void CImportOutlookDlg::OnHideUnflaggedEmails() 
+void CTDLImportOutlookDlg::OnHideUnflaggedEmails() 
 {
 	UpdateData();
 
 	OnRefresh();
 }
 
-void CImportOutlookDlg::OnRefresh() 
+void CTDLImportOutlookDlg::OnRefresh() 
 {
 	m_wndPrompt.SetPrompt(m_tcTasks, IDS_OUTLOOK_BUILDINGLIST, TVM_GETCOUNT);
 
