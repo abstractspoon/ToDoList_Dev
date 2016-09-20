@@ -3,7 +3,7 @@
 
 #pragma once
 
-class CToDoCtrl;
+class CFilteredToDoCtrl;
 class CPreferencesDlg;
 
 class CTDCToDoCtrlPreferenceHelper
@@ -11,12 +11,13 @@ class CTDCToDoCtrlPreferenceHelper
 public:
 	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
 								BOOL bShowProjectName, BOOL bShowTreeListBar,
-								CFont& fontTree, CFont& fontComments, CToDoCtrl& tdc);
-	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, CToDoCtrl& tdc,
+								CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc);
+	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, CFilteredToDoCtrl& tdc,
 								BOOL bShowProjectName = FALSE, BOOL bShowTreeListBar = FALSE);
 
 protected:
-	static void UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, BOOL bShowTreeListBar, CToDoCtrl& tdc);
+	static void UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, 
+									BOOL bShowTreeListBar, CFilteredToDoCtrl& tdc);
 
 };
 

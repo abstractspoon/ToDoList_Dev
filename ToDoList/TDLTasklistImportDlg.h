@@ -7,7 +7,7 @@
 // TDLTasklistImportDlg.h : header file
 //
 
-#include "ToDoCtrl.h"
+#include "FilteredToDoCtrl.h"
 #include "TaskFile.h"
 
 #include "..\shared\fileedit.h"
@@ -16,7 +16,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTDLTasklistImportCtrl : public CToDoCtrl
+class CTDLTasklistImportCtrl : public CFilteredToDoCtrl
 {
 public:
 	CTDLTasklistImportCtrl();

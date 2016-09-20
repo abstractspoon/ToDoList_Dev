@@ -1,11 +1,11 @@
 #include "stdafx.h"
 
 #include "tdcstruct.h"
-#include "todoctrl.h"
+#include "filteredtodoctrl.h"
 #include "preferencesdlg.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
 
-void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, CToDoCtrl& tdc, 
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, CFilteredToDoCtrl& tdc, 
 													BOOL bShowProjectName, BOOL bShowTreeListBar)
 {
 	// simplified version
@@ -19,7 +19,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
 													BOOL bShowProjectName, BOOL bShowTreeListBar,
-													CFont& fontTree, CFont& fontComments, CToDoCtrl& tdc)
+													CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc)
 {
 	tdc.NotifyBeginPreferencesUpdate();
 
@@ -48,7 +48,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 	tdc.NotifyEndPreferencesUpdate();
 }
 
-void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, BOOL bShowTreeListBar, CToDoCtrl& tdc)
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, BOOL bShowTreeListBar, CFilteredToDoCtrl& tdc)
 {
 	// Assumes CtoDoCtrl::NotifyBeginPreferencesUpdate has already been called
 	CTDCStylesMap styles;

@@ -12,6 +12,7 @@
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\ContentMgr.h"
+#include "..\shared\uiextensionmgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,11 +22,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+static CUIExtensionMgr s_extm;
 static CTDLContentMgr s_cm;
 static CONTENTFORMAT s_cf = _T("PLAIN_TEXT");
 static TDCCOLEDITFILTERVISIBILITY s_vis;
 
-CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CToDoCtrl(s_cm, s_cf, s_vis)
+CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CFilteredToDoCtrl(s_extm, s_cm, s_cf, s_vis)
 {
 }
 
