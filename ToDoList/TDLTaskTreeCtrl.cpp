@@ -1338,6 +1338,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			
 		case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
 			{
+				BOOL bHadFocus = HasFocus();
+
 				// allow parent to handle any focus changes
 				// before we change our selection
 				m_tcTasks.SetFocus();
@@ -1408,7 +1410,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						// if we didn't previously have the focus then we save
 						// off the clicked item so the button up handler will
 						// not initiate a label edit
-						if (bSelChange || !HasFocus())
+						if (bSelChange || !bHadFocus)
 							m_htiLastHandledLBtnDown = htiHit;
 					}
 					else

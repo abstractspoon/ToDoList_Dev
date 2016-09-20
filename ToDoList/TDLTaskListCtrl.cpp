@@ -557,6 +557,8 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	case WM_LBUTTONDOWN:
 		if (hRealWnd == m_lcTasks)
 		{
+			BOOL bHadFocus = HasFocus();
+
 			// let parent handle any focus changes first
 			m_lcTasks.SetFocus();
 
@@ -584,6 +586,12 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					if (bSelChange)
 					{
 						NotifyParentSelChange(SC_BYMOUSE);
+						return 0L;
+					}
+					else if (!bHadFocus)
+					{
+						// Or if the item was already selected but not focused, 
+						// to be consistent with CTDLTaskTreeCtrl
 						return 0L;
 					}
 				}
