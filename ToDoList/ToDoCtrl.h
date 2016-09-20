@@ -80,9 +80,6 @@ public:
 	TDC_FILE Load(const CString& sFilePath);
 	TDC_FILE Load(const CString& sFilePath, CTaskFile& tasks/*out*/);
 
-// 	BOOL IsUnicode() const { return m_bIsUnicode; }
-// 	void SetUnicode(BOOL bUnicode);
-	
 	BOOL DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue);
 	BOOL IsDelayLoaded() const { return m_bDelayLoaded; }
 
@@ -117,6 +114,7 @@ public:
 	void SetProjectName(const CString& sProjectName);
 	CString GetFriendlyProjectName(int nUntitledIndex = -1) const;
 	void SetFilePath(const CString& sPath) { m_sLastSavePath = sPath; }
+	CString GetStylesheetPath() const;
 
 	const CTDCCustomAttribDefinitionArray& GetCustomAttributeDefs() const { return m_aCustomAttribDefs; }
 	int GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) const;

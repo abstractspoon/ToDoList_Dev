@@ -54,6 +54,7 @@ protected:
 	int m_nHtmlFontSize;
 	CEnEdit m_eCharset;
 	CMaskEdit m_eTextIndent;
+	HICON m_hResetCharSet;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

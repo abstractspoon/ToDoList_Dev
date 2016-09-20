@@ -977,6 +977,36 @@
     <None Include="res\timetrack_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\appointment.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\contact.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\flaggedmail.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\folder.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\journal.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\mail.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\note.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\outlook_16.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\task.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\reset.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

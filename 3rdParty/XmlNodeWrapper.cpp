@@ -361,7 +361,7 @@ CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 
 				// remove the xml start/end 
 				sHeader.Trim(_T("<>? "));
-				sHeader = sHeader.Mid(4); // 'xml
+				sHeader = sHeader.Mid(4); // 'xml'
 
 				// remove name
 				if (!bRootItem)

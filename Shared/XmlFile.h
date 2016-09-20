@@ -161,6 +161,8 @@ protected:
 	static CString ToString(double dValue);
 };
 
+/////////////////////////////////////////////////////////////////////////////////////
+
 class IXmlParse
 {
 public:
@@ -168,12 +170,16 @@ public:
 	virtual BOOL Continue(LPCTSTR szItem, LPCTSTR szValue) const = 0;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////
+
 enum XF_OPEN 
 {
 	XF_READ,
 	XF_WRITE,
 	XF_READWRITE,
 };
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 enum // load errors. if >0 then == GetLastFileError
 {
@@ -184,9 +190,7 @@ enum // load errors. if >0 then == GetLastFileError
     XFL_LAST        = -99
 };
 
-struct XMLHEADER
-{
-};
+/////////////////////////////////////////////////////////////////////////////////////
 
 class CXmlFile : protected CStdioFileEx 
 {
@@ -259,7 +263,6 @@ public:
 
 	CString GetXmlHeader() const;
 	CString GetXslHeader() const;
-	CString GetXslStylesheet() const;
 	BOOL SetXmlHeader(const CString& sHeader);
 	BOOL SetXslHeader(const CString& sHeader);
 

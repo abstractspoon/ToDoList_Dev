@@ -724,6 +724,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
   </ItemGroup>
   <ItemGroup>
     <None Include="res\abstractspoon.ico" />
+    <None Include="res\appointment.ico" />
     <None Include="res\app_extra_metro.bmp" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
@@ -733,6 +734,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\bitmap1.bmp" />
     <None Include="res\clock.ico" />
     <None Include="res\column_header.bmp" />
+    <None Include="res\contact.ico" />
     <None Include="res\custattrib_toolbar.bmp" />
     <None Include="res\custattrib_toolbar_metro.bmp" />
     <None Include="res\custattrib_toolbar_std.bmp" />
@@ -746,12 +748,19 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\find_toolbar.bmp" />
     <None Include="res\find_toolbar_metro.bmp" />
     <None Include="res\find_toolbar_std.bmp" />
+    <None Include="res\flaggedmail.ico" />
+    <None Include="res\folder.ico" />
     <None Include="res\GoogleDrive.ico" />
     <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
+    <None Include="res\journal.ico" />
     <None Include="res\list_view_std.ico" />
+    <None Include="res\mail.ico" />
+    <None Include="res\note.ico" />
     <None Include="res\null.ico" />
+    <None Include="res\outlook_16.ico" />
     <None Include="res\prefs_dlg_std.ico" />
+    <None Include="res\reset.ico" />
     <None Include="res\shield.ico" />
     <None Include="res\simpletext.ico" />
     <None Include="res\SkyDrive.ico" />
@@ -761,6 +770,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\style_para.ico" />
     <None Include="res\style_table.ico" />
     <None Include="res\style_wrap.ico" />
+    <None Include="res\task.ico" />
     <None Include="res\task_icons_std.bmp" />
     <None Include="res\task_tree_std.ico" />
     <None Include="res\timetrac.bmp" />

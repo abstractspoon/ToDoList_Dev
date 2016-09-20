@@ -7497,6 +7497,36 @@ CString CToDoCtrl::GetFriendlyProjectName(int nUntitledIndex) const
 	return sProjectName;
 }
 
+CString CToDoCtrl::GetStylesheetPath() const
+{
+	if (!m_sXslHeader.IsEmpty())
+	{
+		CStringArray aLinks, aText;
+
+		if (WebMisc::ExtractHtmlLinks(m_sXslHeader, aLinks, aText))
+		{
+			// look for .xsl
+			int nLink = aLinks.GetSize();
+
+			while (nLink--)
+			{
+				CString sFile(aLinks[nLink]);
+
+				if (FileMisc::GetExtension(Misc::ToUpper(sFile)) == _T(".XSL"))
+				{
+					if (!m_sLastSavePath.IsEmpty())
+						FileMisc::MakeFullPath(sFile, FileMisc::GetFolderFromFilePath(m_sLastSavePath));
+
+					return sFile;
+				}
+			}
+		}
+	}
+
+	// not found
+	return _T("");
+}
+
 void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
 	Flush(FALSE);

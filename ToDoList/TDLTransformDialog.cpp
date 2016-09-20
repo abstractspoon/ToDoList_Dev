@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 // CTDLTransformDialog dialog
 
 
-CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, CWnd* pParent /*=NULL*/)
+CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent /*=NULL*/)
 	: CTDLDialog(IDD_TRANSFORM_DIALOG, pParent), m_taskSel(_T("Transform"), nView),
 		m_sTitle(szTitle), m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 
@@ -29,19 +29,12 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, CWnd* 
 	// see what we had last time
 	CPreferences prefs;
 
-	// init the stylesheet folder to point to the resource folder
-	CString sFolder = FileMisc::GetAppResourceFolder() + _T("\\Stylesheets");
-	
-	m_eStylesheet.SetCurrentFolder(sFolder);
-	m_eStylesheet.SetBrowseTitle(CEnString(IDS_SELECTSTYLESHEET_TITLE));	
-	
-	m_sStylesheet = prefs.GetProfileString(_T("Transform"), _T("Stylesheet"));
-	m_sStylesheet = FileMisc::GetRelativePath(m_sStylesheet, sFolder, FALSE);
-
 	m_bDate = prefs.GetProfileInt(_T("Transform"), _T("WantDate"), TRUE);
 
 	// share same title history as print dialog
 	m_cbTitle.Load(prefs, _T("Print"));
+
+	InitStylesheet(szStylesheet);
 }
 
 
@@ -124,4 +117,21 @@ HBRUSH CTDLTransformDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	}
 
 	return hbr;
+}
+
+void CTDLTransformDialog::InitStylesheet(LPCTSTR szStylesheet)
+{
+	// init the stylesheet folder to point to the resource folder
+	CString sFolder = FileMisc::GetAppResourceFolder() + _T("\\Stylesheets");
+
+	m_eStylesheet.SetCurrentFolder(sFolder);
+	m_eStylesheet.SetBrowseTitle(CEnString(IDS_SELECTSTYLESHEET_TITLE));	
+
+	m_sStylesheet = szStylesheet;
+
+	if (m_sStylesheet.IsEmpty())
+		m_sStylesheet = CPreferences().GetProfileString(_T("Transform"), _T("Stylesheet"));
+
+	m_sStylesheet = FileMisc::GetRelativePath(m_sStylesheet, sFolder, FALSE);
+
 }

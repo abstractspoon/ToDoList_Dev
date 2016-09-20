@@ -5065,7 +5065,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
-			CTDLTransformDialog dialog(_T(""), tdc.GetView());
+			CTDLTransformDialog dialog(_T(""), tdc.GetView(), _T(""));
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
 			// add title and date 
@@ -6057,7 +6057,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetView());
+	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetView(), tdc.GetStylesheetPath());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -9413,7 +9413,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// pass the project name as the title field
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
-	CTDLTransformDialog dialog(sTitle, tdc.GetView());
+	CTDLTransformDialog dialog(sTitle, tdc.GetView(), tdc.GetStylesheetPath());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -9499,6 +9499,16 @@ CString CToDoListWnd::GetIntermediateTaskListPath(LPCTSTR szRefPath)
 	CString sRefName = FileMisc::RemoveExtension(FileMisc::GetFileNameFromPath(szRefPath));
 	
 	return FileMisc::GetTempFilePath(sRefName, _T("intermediate.txt")); 
+}
+
+BOOL CToDoListWnd::GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet)
+{
+	CString sTDCStylesheet = tdc.GetStylesheetPath();
+
+	if (FileMisc::FileExists(sTDCStylesheet))
+		sDlgStylesheet = sTDCStylesheet;
+
+	return !sDlgStylesheet.IsEmpty();
 }
 
 void CToDoListWnd::OnNexttopleveltask() 

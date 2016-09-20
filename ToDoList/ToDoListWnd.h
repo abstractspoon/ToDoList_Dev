@@ -710,6 +710,7 @@ protected:
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static UINT DueTaskNotifyThreadProc(LPVOID pParam);
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
+	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 
 	void TranslateUIElements();
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);

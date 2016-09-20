@@ -22,7 +22,7 @@ class CTDLTransformDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView = FTCV_TASKTREE, CWnd* pParent = NULL);   // standard constructor
+	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantDate() { return m_bDate; }
 	CString GetStylesheet() const;
@@ -59,6 +59,9 @@ protected:
 	//}}AFX_MSG
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void InitStylesheet(LPCTSTR szStylesheet);
 };
 
 //{{AFX_INSERT_LOCATION}}

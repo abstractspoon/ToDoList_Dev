@@ -27,7 +27,7 @@ class CTDLPrintDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview = FALSE, FTC_VIEW nView = FTCV_TASKTREE, CWnd* pParent = NULL);   // standard constructor
+	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantDate() { return m_bDate; }
 	CString GetStylesheet() const;
@@ -68,7 +68,11 @@ protected:
 	afx_msg void OnChangeStylesheet();
 	//}}AFX_MSG
     afx_msg void OnUsestylesheet();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void InitStylesheet(LPCTSTR szStylesheet);
 };
 
 //{{AFX_INSERT_LOCATION}}

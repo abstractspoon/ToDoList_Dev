@@ -106,24 +106,28 @@ int WebMisc::ExtractNextHtmlLink(const CString& sHtml, int nFrom, CString& sLink
 	// get text
 	nStart = sHtml.Find(TEXT_START, nEnd + 1);
 
-	if (nStart == -1)
-		return -1;
+	if (nStart != -1)
+	{
+		nStart += TEXT_START.GetLength();
+		nEnd = sHtml.Find(TEXT_END, nStart);
 
-	nStart += TEXT_START.GetLength();
-	nEnd = sHtml.Find(TEXT_END, nStart);
+		if (nEnd == -1)
+			return -1;
 
-	if (nEnd == -1)
-		return -1;
+		sText = sHtml.Mid(nStart, (nEnd - nStart));
 
-	sText = sHtml.Mid(nStart, (nEnd - nStart));
+		// cleanup
+		Misc::Trim(sText, _T("\" "));
 
-	// cleanup
-	Misc::Trim(sText, _T("\" "));
+		// translate HTML representations
+		CXmlCharMap::ConvertFromRep(sText);
 
-	// translate HTML representations
-	CXmlCharMap::ConvertFromRep(sText);
+		return (nEnd + TEXT_END.GetLength());
+	}
 
-	return (nEnd + TEXT_END.GetLength());
+	// else just link
+	sText.Empty();
+	return (nEnd + 1);
 }
 
 int WebMisc::ExtractHtmlLinks(const CString& sHtml, CStringArray& aLinks, CStringArray& aLinkText)

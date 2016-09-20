@@ -128,6 +128,7 @@
 #define IDR_TIMETRACKER_TOOLBAR         298
 #define IDB_TIMETRACK_TOOLBAR_STD       300
 #define IDI_SIMPLETEXT                  302
+#define IDI_RESET                       303
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -1856,7 +1857,7 @@
 #define IDS_OA_EXPIRYTIME               58249
 #define IDS_OA_FLAGREQUEST              58250
 #define IDS_OA_IMPORTANCE               58251
-#define IDS_OA_LASTMODTIME     58252
+#define IDS_OA_LASTMODTIME              58252
 #define IDS_RESTARTTOCHANGERTLINPUT     58253
 #define IDS_OA_MILEAGE                  58254
 #define IDS_OA_PERMISSION               58255
@@ -2064,7 +2065,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        303
+#define _APS_NEXT_RESOURCE_VALUE        304
 #define _APS_NEXT_COMMAND_VALUE         34557
 #define _APS_NEXT_CONTROL_VALUE         1489
 #define _APS_NEXT_SYMED_VALUE           108

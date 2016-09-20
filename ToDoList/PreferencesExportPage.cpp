@@ -23,9 +23,12 @@ const UINT RESETBTN = 0xc4;
 
 IMPLEMENT_DYNCREATE(CPreferencesExportPage, CPreferencesPageBase)
 
-CPreferencesExportPage::CPreferencesExportPage() : 
-		CPreferencesPageBase(CPreferencesExportPage::IDD), 
-			m_eTextIndent(_T("0123456789")), m_eLineSpaces(_T("0123456789"))
+CPreferencesExportPage::CPreferencesExportPage() 
+	: 
+	CPreferencesPageBase(CPreferencesExportPage::IDD), 
+	m_eTextIndent(_T("0123456789")), 
+	m_eLineSpaces(_T("0123456789")),
+	m_hResetCharSet(NULL)
 {
 //	m_psp.dwFlags &= ~PSP_HASHELP;
 
@@ -35,13 +38,15 @@ CPreferencesExportPage::CPreferencesExportPage() :
 	//}}AFX_DATA_INIT
 
 	// add a 'reset' button to the charset field
-	m_eCharset.InsertButton(0, ID_RESETCHARSET, RESETBTN, 
-								CEnString(IDS_PEP_RESETCHARSET), 
-								DEF_BTNWIDTH + 4, _T("Wingdings"));
+	m_hResetCharSet = AfxGetApp()->LoadIconW(IDI_RESET); 
+
+	m_eCharset.InsertButton(0, ID_RESETCHARSET, m_hResetCharSet, 
+								CEnString(IDS_PEP_RESETCHARSET));
 }
 
 CPreferencesExportPage::~CPreferencesExportPage()
 {
+	::DestroyIcon(m_hResetCharSet);
 }
 
 void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
