@@ -358,11 +358,17 @@ CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 			if (nodeHdr.IsValid())
 			{
 				sHeader = nodeHdr.GetXML();
+
+				// remove the xml start/end 
+				sHeader.Trim(_T("<>? "));
+				sHeader = sHeader.Mid(4); // 'xml
+
+				// remove name
+				if (!bRootItem)
+					sHeader = sHeader.Mid(lstrlen(szName));
+
 				sHeader.TrimLeft();
 				sHeader.TrimRight();
-
-				// remove the xml start/end
-				sHeader = sHeader.Mid(6, (sHeader.GetLength() - 8));
 			}
 		
 			// Fallback for root header item

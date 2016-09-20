@@ -259,6 +259,7 @@ public:
 
 	CString GetXmlHeader() const;
 	CString GetXslHeader() const;
+	CString GetXslStylesheet() const;
 	BOOL SetXmlHeader(const CString& sHeader);
 	BOOL SetXslHeader(const CString& sHeader);
 

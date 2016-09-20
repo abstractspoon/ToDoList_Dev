@@ -7,6 +7,7 @@
 #include "XmlFile.h"
 #include "misc.h"
 #include "filemisc.h"
+#include "webmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1579,6 +1580,36 @@ BOOL CXmlFile::SetXmlHeader(const CString& sHeader)
 CString CXmlFile::GetXslHeader() const 
 { 
 	return m_sXslHeader.IsEmpty() ? m_xmlDoc.GetXslHeader() : m_sXslHeader; 
+}
+
+CString CXmlFile::GetXslStylesheet() const
+{
+	if (!m_sXslHeader.IsEmpty())
+	{
+		CStringArray aLinks, aText;
+
+		if (WebMisc::ExtractHtmlLinks(m_sXslHeader, aLinks, aText))
+		{
+			// look for .xsl
+			int nLink = aLinks.GetSize();
+
+			while (nLink--)
+			{
+				CString sLink(aLinks[nLink]), sFile;
+
+				if (Misc::Split(sLink, sFile, '='))
+				{
+					Misc::MakeUnquoted(sFile);
+
+					if (FileMisc::GetExtension(Misc::ToUpper(sFile)) == _T(".XSL"))
+						return sFile;
+				}
+			}
+		}
+	}
+
+	// not found
+	return EMPTY_STR;
 }
 
 BOOL CXmlFile::SetXslHeader(const CString& sHeader) 
