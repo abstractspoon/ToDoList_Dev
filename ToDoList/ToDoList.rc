@@ -4699,7 +4699,7 @@ BEGIN
     IDS_OA_EXPIRYTIME       "Expiry Time"
     IDS_OA_FLAGREQUEST      "Flag Request"
     IDS_OA_IMPORTANCE       "Importance"
-    IDS_OA_LASTMODIFICATIONTIME "Last Modification Time"
+    IDS_OA_LASTMODTIME      "Last Modification Time"
     IDS_RESTARTTOCHANGERTLINPUT 
                             "Language Change|Support for RTL user input will be changed next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_OA_MILEAGE          "Mileage"

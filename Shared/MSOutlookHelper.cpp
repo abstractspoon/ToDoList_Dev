@@ -381,20 +381,20 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE 
 
 		// task specific
 		case OA_ACTUALWORK:				return Misc::Format(obj.GetActualWork());
-		case OA_COMPLETE:				return obj.GetComplete();
+		case OA_COMPLETE:				return Misc::Format(obj.GetComplete());
 		case OA_DATECOMPLETED:			return MapDate(obj.GetDateCompleted());
 		case OA_DELEGATOR:				return obj.GetDelegator();
 		case OA_DUEDATE:				return MapDate(obj.GetDueDate());
 		case OA_DURATION:				return Misc::Format(obj.GetDuration());
 		case OA_END:					return MapDate(obj.GetEnd());
-		case OA_ISRECURRING:			return obj.GetIsRecurring();
+		case OA_ISRECURRING:			return Misc::Format(obj.GetIsRecurring());
 		case OA_OWNER:					return obj.GetOwner();
 		case OA_PERCENTCOMPLETE:		return Misc::Format(obj.GetPercentComplete());
 		case OA_SCHEDULEPLUSPRIORITY:	return obj.GetSchedulePlusPriority();
 		case OA_START:					return MapDate(obj.GetStart());
 		case OA_STARTDATE:				return MapDate(obj.GetStartDate());
 		case OA_STATUS:					return Misc::Format(obj.GetStatus());
-		case OA_TEAMTASK:				return obj.GetTeamTask();
+		case OA_TEAMTASK:				return Misc::Format(obj.GetTeamTask());
 		case OA_TOTALWORK:				return Misc::Format(obj.GetTotalWork());
 
 	}
