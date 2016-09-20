@@ -358,10 +358,10 @@
     <ClCompile Include="TDCOutlookImportHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TaskListOutlookImporter.cpp">
+    <ClCompile Include="TDLImportOutlookDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLImportOutlookDlg.cpp">
+    <ClCompile Include="TaskListOutlookImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -783,10 +783,10 @@
     <ClInclude Include="TDCOutlookImportHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TaskListOutlookImporter.h">
+    <ClInclude Include="TDLImportOutlookDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLImportOutlookDlg.h">
+    <ClInclude Include="TaskListOutlookImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
