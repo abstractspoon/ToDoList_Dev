@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TDLCsvAttributeSetupListCtrl.h"
+#include "TDLImpExpAttributeMappingListCtrl.h"
 #include "tdcstatic.h"
 
 #ifdef _DEBUG
@@ -19,91 +19,19 @@ enum { ATTRIB_ID = 5000 };
 const int COL_WIDTH = 200;
 
 /////////////////////////////////////////////////////////////////////////////
-
-CSVCOLUMNMAPPING::CSVCOLUMNMAPPING() : nTDCAttrib(TDCA_NONE) 
-{
-
-}
-	
-CSVCOLUMNMAPPING::CSVCOLUMNMAPPING(const CString& sName, TDC_ATTRIBUTE tdcAttrib, DWORD dwData) 
-{ 
-	sColumnName = sName; 
-	nTDCAttrib = tdcAttrib;
-	dwItemData = dwData;
-}
-
-CSVCOLUMNMAPPING::CSVCOLUMNMAPPING(UINT nNameID, TDC_ATTRIBUTE tdcAttrib, DWORD dwData) 
-{ 
-	sColumnName.LoadString(nNameID); 
-	nTDCAttrib = tdcAttrib;
-	dwItemData = dwData;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-int CTDCCsvColumnMapping::Find(const CString& sCol) const
-{
-	int nMap = GetSize();
-	
-	while (nMap--)
-	{
-		if (GetData()[nMap].sColumnName.CompareNoCase(sCol) == 0)
-			return nMap;
-	}
-	
-	// not found
-	return -1;
-}
-
-int CTDCCsvColumnMapping::Find(TDC_ATTRIBUTE nAttrib) const
-{
-	int nMap = GetSize();
-	
-	while (nMap--)
-	{
-		if (GetData()[nMap].nTDCAttrib == nAttrib)
-			return nMap;
-	}
-	
-	// not found
-	return -1;
-}
-
-int CTDCCsvColumnMapping::FindMappedAttribute(TDC_ATTRIBUTE nAttrib) const
-{
-	int nMap = GetSize();
-	
-	while (nMap--)
-	{
-		const CSVCOLUMNMAPPING& col = GetData()[nMap];
-
-		if ((col.nTDCAttrib == nAttrib) && !col.sColumnName.IsEmpty())
-			return nMap;
-	}
-	
-	// not found or mapped
-	return -1;
-}
-
-BOOL CTDCCsvColumnMapping::IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const
-{
-	return (FindMappedAttribute(nAttrib) != -1);
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl
 
-CTDLCsvAttributeSetupListCtrl::CTDLCsvAttributeSetupListCtrl(BOOL bImporting, BOOL bOneToOneMapping)
+CTDLImportExportAttributeMappingListCtrl::CTDLImportExportAttributeMappingListCtrl(BOOL bImporting, BOOL bOneToOneMapping)
  : m_bImporting(bImporting), m_bOneToOneMapping(bOneToOneMapping)
 {
 }
 
-CTDLCsvAttributeSetupListCtrl::~CTDLCsvAttributeSetupListCtrl()
+CTDLImportExportAttributeMappingListCtrl::~CTDLImportExportAttributeMappingListCtrl()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLCsvAttributeSetupListCtrl, CInputListCtrl)
+BEGIN_MESSAGE_MAP(CTDLImportExportAttributeMappingListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLCsvAttributeSetupListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
@@ -116,7 +44,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl message handlers
 
-void CTDLCsvAttributeSetupListCtrl::SetColumnMapping(const CTDCCsvColumnMapping& aMapping)
+void CTDLImportExportAttributeMappingListCtrl::SetColumnMapping(const CTDCAttributeMapping& aMapping)
 {
 	m_aMapping.Copy(aMapping);
 
@@ -124,13 +52,13 @@ void CTDLCsvAttributeSetupListCtrl::SetColumnMapping(const CTDCCsvColumnMapping&
 		BuildListCtrl();
 }
 
-int CTDLCsvAttributeSetupListCtrl::GetColumnMapping(CTDCCsvColumnMapping& aMapping) const
+int CTDLImportExportAttributeMappingListCtrl::GetColumnMapping(CTDCAttributeMapping& aMapping) const
 {
 	aMapping.Copy(m_aMapping);
 	return aMapping.GetSize();
 }
 
-void CTDLCsvAttributeSetupListCtrl::PreSubclassWindow() 
+void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow() 
 {
 	// create child controls 
 	// we need combo to be created first
@@ -188,7 +116,7 @@ void CTDLCsvAttributeSetupListCtrl::PreSubclassWindow()
 	BuildListCtrl();
 }
 
-void CTDLCsvAttributeSetupListCtrl::InitState()
+void CTDLImportExportAttributeMappingListCtrl::InitState()
 {
 	CInputListCtrl::InitState();
 	
@@ -196,7 +124,7 @@ void CTDLCsvAttributeSetupListCtrl::InitState()
 	ShowGrid(TRUE, TRUE);
 }
 
-void CTDLCsvAttributeSetupListCtrl::BuildListCtrl()
+void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 {
 	DeleteAllItems();
 
@@ -204,7 +132,7 @@ void CTDLCsvAttributeSetupListCtrl::BuildListCtrl()
 	{
 		for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
 		{
-			CSVCOLUMNMAPPING& col = m_aMapping[nRow];
+			TDCATTRIBUTEMAPPING& col = m_aMapping[nRow];
 
 			if (!col.sColumnName.IsEmpty())
 			{
@@ -218,7 +146,7 @@ void CTDLCsvAttributeSetupListCtrl::BuildListCtrl()
 	{
 		for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
 		{
-			CSVCOLUMNMAPPING& col = m_aMapping[nRow];
+			TDCATTRIBUTEMAPPING& col = m_aMapping[nRow];
 			
 			if (!col.sColumnName.IsEmpty())
 			{
@@ -239,7 +167,7 @@ void CTDLCsvAttributeSetupListCtrl::BuildListCtrl()
 }
 
 // static helper
-CString CTDLCsvAttributeSetupListCtrl::GetAttributeName(TDC_ATTRIBUTE nAtt)
+CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE nAtt)
 {
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
@@ -252,7 +180,7 @@ CString CTDLCsvAttributeSetupListCtrl::GetAttributeName(TDC_ATTRIBUTE nAtt)
 	return _T("");
 }
 
-int CTDLCsvAttributeSetupListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const
+int CTDLImportExportAttributeMappingListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const
 {
 	for (int nRow = 0; nRow < GetItemCount(); nRow++)
 	{
@@ -266,7 +194,7 @@ int CTDLCsvAttributeSetupListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) c
 	return -1;
 }
 
-int CTDLCsvAttributeSetupListCtrl::FindRow(const CString& sName, int nIgnoreRow) const
+int CTDLImportExportAttributeMappingListCtrl::FindRow(const CString& sName, int nIgnoreRow) const
 {
 	for (int nRow = 0; nRow < GetItemCount(); nRow++)
 	{
@@ -288,7 +216,7 @@ int CTDLCsvAttributeSetupListCtrl::FindRow(const CString& sName, int nIgnoreRow)
 	return -1;
 }
 
-void CTDLCsvAttributeSetupListCtrl::EditCell(int nItem, int nCol)
+void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol)
 {
 	if ((m_bImporting && nCol == IMPORT_COLUMNID) ||
 		(!m_bImporting && nCol == EXPORT_COLUMNID))
@@ -300,18 +228,18 @@ void CTDLCsvAttributeSetupListCtrl::EditCell(int nItem, int nCol)
 		CInputListCtrl::EditCell(nItem, nCol);
 }
 
-BOOL CTDLCsvAttributeSetupListCtrl::IsEditing() const 
+BOOL CTDLImportExportAttributeMappingListCtrl::IsEditing() const 
 {
 	return CInputListCtrl::IsEditing() ||
 			m_cbAttributes.IsWindowVisible();
 }
 
-BOOL CTDLCsvAttributeSetupListCtrl::CanEditSelectedCell() const 
+BOOL CTDLImportExportAttributeMappingListCtrl::CanEditSelectedCell() const 
 {
 	return CInputListCtrl::CanEditSelectedCell();
 }
 
-void CTDLCsvAttributeSetupListCtrl::PrepareEdit(int nRow, int nCol)
+void CTDLImportExportAttributeMappingListCtrl::PrepareEdit(int nRow, int nCol)
 {
 	if (m_bImporting && nCol == IMPORT_COLUMNID)
 	{
@@ -327,7 +255,7 @@ void CTDLCsvAttributeSetupListCtrl::PrepareEdit(int nRow, int nCol)
 	}		
 }
 
-BOOL CTDLCsvAttributeSetupListCtrl::CanDeleteSelectedCell() const
+BOOL CTDLImportExportAttributeMappingListCtrl::CanDeleteSelectedCell() const
 {
 	int nRow, nCol;
 	GetCurSel(nRow, nCol);
@@ -336,7 +264,7 @@ BOOL CTDLCsvAttributeSetupListCtrl::CanDeleteSelectedCell() const
 			(!m_bImporting && nCol == EXPORT_COLUMNNAME));
 }
 
-BOOL CTDLCsvAttributeSetupListCtrl::DeleteSelectedCell()
+BOOL CTDLImportExportAttributeMappingListCtrl::DeleteSelectedCell()
 {
 	int nRow, nCol;
 	GetCurSel(nRow, nCol);
@@ -359,12 +287,12 @@ BOOL CTDLCsvAttributeSetupListCtrl::DeleteSelectedCell()
 	return FALSE;
 }
 
-void CTDLCsvAttributeSetupListCtrl::OnAttribEditCancel()
+void CTDLImportExportAttributeMappingListCtrl::OnAttribEditCancel()
 {
 	HideControl(m_cbAttributes);
 }
 
-void CTDLCsvAttributeSetupListCtrl::OnAttribEditOK()
+void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 {
 	ASSERT (m_bImporting);
 
@@ -421,17 +349,17 @@ void CTDLCsvAttributeSetupListCtrl::OnAttribEditOK()
 	}
 }
 
-void CTDLCsvAttributeSetupListCtrl::TraceMapping() const
+void CTDLImportExportAttributeMappingListCtrl::TraceMapping() const
 {
 	for (int nAtt = 0; nAtt < m_aMapping.GetSize(); nAtt++)
 	{
-		const CSVCOLUMNMAPPING& col = m_aMapping[nAtt];
+		const TDCATTRIBUTEMAPPING& col = m_aMapping[nAtt];
 
 		TRACE (_T("'%s' maps to '%d'\n"), col.sColumnName, col.nTDCAttrib);
 	}
 }
 
-void CTDLCsvAttributeSetupListCtrl::OnNameEditOK(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTDLImportExportAttributeMappingListCtrl::OnNameEditOK(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	ASSERT (!m_bImporting);
 

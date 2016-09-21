@@ -4,16 +4,14 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLCsvColumnSetupListCtrl.h : header file
-//
 
 #include "tdcenum.h"
-#include "TDLCsvAttributeSetupListCtrl.h"
+#include "TDLImpExpAttributeMappingListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportOutlookObjectSetupListCtrl window
 
-class CTDLImportOutlookObjectSetupListCtrl : public CTDLCsvAttributeSetupListCtrl
+class CTDLImportOutlookObjectSetupListCtrl : public CTDLImportExportAttributeMappingListCtrl
 {
 // Construction
 public:

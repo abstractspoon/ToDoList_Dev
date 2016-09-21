@@ -21,7 +21,7 @@ enum { ATTRIB_ID = 5000 };
 // CTDLImportOutlookObjectSetupListCtrl
 
 CTDLImportOutlookObjectSetupListCtrl::CTDLImportOutlookObjectSetupListCtrl()
- : CTDLCsvAttributeSetupListCtrl(TRUE)
+ : CTDLImportExportAttributeMappingListCtrl(TRUE)
 {
 }
 
@@ -30,7 +30,7 @@ CTDLImportOutlookObjectSetupListCtrl::~CTDLImportOutlookObjectSetupListCtrl()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectSetupListCtrl, CTDLCsvAttributeSetupListCtrl)
+BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectSetupListCtrl, CTDLImportExportAttributeMappingListCtrl)
 	//{{AFX_MSG_MAP(CTDLImportOutlookObjectSetupListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
@@ -55,6 +55,6 @@ void CTDLImportOutlookObjectSetupListCtrl::OnAttribEditOK()
 
 	CAutoFlag af(m_bOneToOneMapping, bOneToOne);
 
-	CTDLCsvAttributeSetupListCtrl::OnAttribEditOK();
+	CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK();
 }
 

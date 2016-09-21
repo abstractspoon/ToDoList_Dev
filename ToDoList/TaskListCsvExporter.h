@@ -34,7 +34,7 @@ public:
 
 protected:
 	CString DELIM, INDENT;
-	CTDCCsvColumnMapping m_aColumnMapping;
+	CTDCAttributeMapping m_aColumnMapping;
 	BOOL m_bExportingForExcel;
 
 protected:

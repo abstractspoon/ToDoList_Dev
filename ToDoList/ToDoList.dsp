@@ -343,7 +343,7 @@ SOURCE=.\TDLContentTypeCombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCsvAttributeSetupListCtrl.cpp
+SOURCE=.\TDLImpExpAttributeMappingListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -867,7 +867,7 @@ SOURCE=.\TDLContentTypeCombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCsvAttributeSetupListCtrl.h
+SOURCE=.\TDLImpExpAttributeMappingListCtrl.h
 # End Source File
 # Begin Source File
 

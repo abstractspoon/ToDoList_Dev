@@ -1,57 +1,32 @@
-#if !defined(AFX_TDLCSVCOLUMNSETUPLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_)
-#define AFX_TDLCSVCOLUMNSETUPLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_
+#if !defined(AFX_TDLIMPEXPATTRIBUTEMAPPINGLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_)
+#define AFX_TDLIMPEXPATTRIBUTEMAPPINGLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLCsvColumnSetupListCtrl.h : header file
+// TDLImpExpAttributeMappingListCtrl.h : header file
 //
 
-#include "tdcenum.h"
+#include "tdcstruct.h"
 
 #include "..\shared\InputListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
-
-struct CSVCOLUMNMAPPING
-{
-	CSVCOLUMNMAPPING();
-	CSVCOLUMNMAPPING(const CString& sName, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0); 
-	CSVCOLUMNMAPPING(UINT nNameID, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0); 
-
-	TDC_ATTRIBUTE nTDCAttrib;
-	CEnString sColumnName;
-	DWORD dwItemData;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CTDCCsvColumnMapping : public CArray<CSVCOLUMNMAPPING, CSVCOLUMNMAPPING&>
-{
-public:
-	int Find(const CString& sCol) const;
-	int Find(TDC_ATTRIBUTE nAttrib) const;
-
-	int FindMappedAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const;
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl window
 
-class CTDLCsvAttributeSetupListCtrl : public CInputListCtrl
+class CTDLImportExportAttributeMappingListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLCsvAttributeSetupListCtrl(BOOL bImporting, BOOL bOneToOneMapping = TRUE);
+	CTDLImportExportAttributeMappingListCtrl(BOOL bImporting, BOOL bOneToOneMapping = TRUE);
 
-	void SetColumnMapping(const CTDCCsvColumnMapping& aMapping);
-	int GetColumnMapping(CTDCCsvColumnMapping& aMapping) const;
+	void SetColumnMapping(const CTDCAttributeMapping& aMapping);
+	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
 
 // attributes
 protected:
 	CComboBox m_cbAttributes;
-	CTDCCsvColumnMapping m_aMapping;
+	CTDCAttributeMapping m_aMapping;
 	BOOL m_bImporting, m_bOneToOneMapping;
 
 // Overrides
@@ -63,7 +38,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CTDLCsvAttributeSetupListCtrl();
+	virtual ~CTDLImportExportAttributeMappingListCtrl();
 
 	// Generated message map functions
 protected:
@@ -100,4 +75,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TDLCSVCOLUMNSETUPLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_)
+#endif // !defined(AFX_TDLIMPEXPATTRIBUTEMAPPINGLISTCTRL_H__E379E120_FF91_417F_ADBB_0DD6A98089AA__INCLUDED_)

@@ -311,7 +311,7 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 	ASSERT ((htiParent && hTaskParent) || (!htiParent && !hTaskParent));
 
 	// iterate the tree items adding checked items
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	BOOL bWantConfidential = FALSE;
 
 	HTREEITEM hti = m_tcTasks.GetChildItem(htiParent);

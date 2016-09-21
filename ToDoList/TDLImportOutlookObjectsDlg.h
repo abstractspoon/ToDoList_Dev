@@ -9,6 +9,7 @@
 
 #include "TDLImportOutlookObjectSetupListCtrl.h"
 #include "TDLDialog.h"
+#include "tdcstruct.h"
 
 #include "..\shared\MSOutlookHelper.h"
 #include "..\shared\enstring.h"
@@ -26,7 +27,7 @@ public:
 	CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantConfidentialAttributes() const { return !m_bHideConfidential; }
-	int GetColumnMapping(CTDCCsvColumnMapping& aMapping);
+	int GetColumnMapping(CTDCAttributeMapping& aMapping);
 
 	static CString GetOutlookFieldName(OUTLOOK_FIELDTYPE nFieldType);
 
@@ -45,7 +46,7 @@ protected:
 	// with their last mapped attributes, whilst the mapping
 	// passed to m_lcFieldMapping just contains the visible
 	// items
-	CTDCCsvColumnMapping m_aMasterMapping;
+	CTDCAttributeMapping m_aMasterMapping;
 
 	static CEnString CONFIDENTIAL;
 
@@ -72,11 +73,11 @@ protected:
 	void UpdateMasterMapping();
 
 	CString FormatFieldAndData(const OUTLOOK_FIELD& oaField) const;
-	void RemoveUnwantedAttributes(CTDCCsvColumnMapping& aMapping) const;
+	void RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const;
 
 	// some mapping helpers
-	static int FindField(const CTDCCsvColumnMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
-	static TDC_ATTRIBUTE GetFieldMapping(const CTDCCsvColumnMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
+	static int FindField(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
+	static TDC_ATTRIBUTE GetFieldMapping(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
 };
 
 //{{AFX_INSERT_LOCATION}}

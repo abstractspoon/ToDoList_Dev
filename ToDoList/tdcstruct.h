@@ -2720,6 +2720,84 @@ protected:
 	}
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+struct TDCATTRIBUTEMAPPING
+{
+	TDCATTRIBUTEMAPPING() : nTDCAttrib(TDCA_NONE) {}
+	TDCATTRIBUTEMAPPING(const CString& sName, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0) 
+	{ 
+		sColumnName = sName; 
+		nTDCAttrib = tdcAttrib;
+		dwItemData = dwData;
+	}
+
+	TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0) 
+	{ 
+		sColumnName.LoadString(nNameID); 
+		nTDCAttrib = tdcAttrib;
+		dwItemData = dwData;
+	}
+
+	TDC_ATTRIBUTE nTDCAttrib;
+	CEnString sColumnName;
+	DWORD dwItemData;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCAttributeMapping : public CArray<TDCATTRIBUTEMAPPING, TDCATTRIBUTEMAPPING&>
+{
+public:
+	int Find(const CString& sCol) const
+	{
+		int nMap = GetSize();
+
+		while (nMap--)
+		{
+			if (GetData()[nMap].sColumnName.CompareNoCase(sCol) == 0)
+				return nMap;
+		}
+
+		// not found
+		return -1;
+	}
+
+	int Find(TDC_ATTRIBUTE nAttrib) const
+	{
+		int nMap = GetSize();
+
+		while (nMap--)
+		{
+			if (GetData()[nMap].nTDCAttrib == nAttrib)
+				return nMap;
+		}
+
+		// not found
+		return -1;
+	}
+
+	int FindMappedAttribute(TDC_ATTRIBUTE nAttrib) const
+	{
+		int nMap = GetSize();
+
+		while (nMap--)
+		{
+			const TDCATTRIBUTEMAPPING& col = GetData()[nMap];
+
+			if ((col.nTDCAttrib == nAttrib) && !col.sColumnName.IsEmpty())
+				return nMap;
+		}
+
+		// not found or mapped
+		return -1;
+	}
+
+	BOOL CTDCAttributeMapping::IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const
+	{
+		return (FindMappedAttribute(nAttrib) != -1);
+	}
+};
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // AFX_TDCSTRUCT_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

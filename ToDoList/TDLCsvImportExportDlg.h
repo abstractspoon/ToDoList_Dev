@@ -7,7 +7,7 @@
 // TDLCsvImportExportDlg.h : header file
 //
 
-#include "TDLCsvAttributeSetupListCtrl.h"
+#include "TDLImpExpAttributeMappingListCtrl.h"
 #include "TDLDialog.h"
 #include "tdcenumcontainers.h"
 
@@ -35,7 +35,7 @@ public:
 							LPCTSTR szKey, 
 							CWnd* pParent = NULL);
 
-	int GetColumnMapping(CTDCCsvColumnMapping& aMapping) const;
+	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
 	CString GetDelimiter() const;
 	BOOL IsExportingForExcel() const;
 
@@ -47,9 +47,9 @@ protected:
 	BOOL	m_bAlwaysExportTaskIDs;
 	//}}AFX_DATA
 	CFileEdit	m_eFilePath;
-	CTDLCsvAttributeSetupListCtrl m_lcColumnSetup;
+	CTDLImportExportAttributeMappingListCtrl m_lcColumnSetup;
 	BOOL m_bImporting;
-	CTDCCsvColumnMapping m_aMasterColumnMapping;
+	CTDCAttributeMapping m_aMasterColumnMapping;
 	CTDCAttributeArray m_aExportAttributes;
 
 	IPreferences* m_pPrefs;
@@ -75,8 +75,8 @@ protected:
 	virtual void OnOK();
 
 protected:
-	int BuildImportColumnMapping(CTDCCsvColumnMapping& aImportMapping) const;
-	int BuildExportColumnMapping(CTDCCsvColumnMapping& aExportMapping) const;
+	int BuildImportColumnMapping(CTDCAttributeMapping& aImportMapping) const;
+	int BuildExportColumnMapping(CTDCAttributeMapping& aExportMapping) const;
 
 	void BuildDefaultMasterColumnMapping();
 	void UpdateMasterColumnMappingFromList();

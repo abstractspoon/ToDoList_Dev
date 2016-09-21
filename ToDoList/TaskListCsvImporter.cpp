@@ -230,7 +230,7 @@ BOOL CTaskListCsvImporter::String2Date(const CString& sDate, time64_t& t64, BOOL
 	return (CDateHelper::DecodeDate(sDate, t64, bAndTime));
 }
 
-BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const CSVCOLUMNMAPPING& col, CString& sCustID, CString& sCustLabel)
+BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sCustID, CString& sCustLabel)
 {
 	if (((col.nTDCAttrib == TDCA_CUSTOMATTRIB_FIRST) || (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST)) && !col.sColumnName.IsEmpty())
 	{
@@ -269,7 +269,7 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList14* pTasks) co
 	
 	while (nAttrib--)
 	{
-		const CSVCOLUMNMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
 		CString sCustID, sCustLabel;
 
 		if (GetCustomAttribIDAndLabel(col, sCustID, sCustLabel))
@@ -288,7 +288,7 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList14* pTasks, HTASKI
 	
 	while (nAttrib--)
 	{
-		const CSVCOLUMNMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
 		CString sCustID, sDummy;
 		
 		if (GetCustomAttribIDAndLabel(col, sCustID, sDummy))

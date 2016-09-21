@@ -49,7 +49,7 @@ class CDlgUnits;
 class CSpellCheckDlg;
 class CPreferences;
 class CMSOutlookItemDataMap;
-class CTDCCsvColumnMapping;
+class CTDCAttributeMapping;
 
 struct CTRLITEM;
 struct TDCCOLUMN;

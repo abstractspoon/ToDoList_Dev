@@ -8,7 +8,6 @@
 #include "todoitem.h"
 #include "taskfile.h"
 #include "TDCOutlookImportHelper.h"
-#include "TDLCsvAttributeSetupListCtrl.h"
 #include "TDLImportOutlookObjectsDlg.h"
 #include "TaskListDropTarget.h"
 
@@ -50,7 +49,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	
 	// display the mapping dialog and create the tasks
 	CTDLImportOutlookObjectsDlg dialog(*pItem);
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	
 	while (true)
 	{
@@ -112,7 +111,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	return nTaskCount;
 }
 
-BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib)
+BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib)
 {
 	TODOITEM tdi;
 
@@ -132,7 +131,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, O
 	return FALSE;
 }
 
-BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi)
+BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi)
 {
 	ASSERT(pItem);
 
@@ -143,7 +142,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCCsvColumnMapping& aMapping, O
 
 	for (int nAttrib = 0; nAttrib < aMapping.GetSize(); nAttrib++)
 	{
-		const CSVCOLUMNMAPPING& attrib = aMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& attrib = aMapping[nAttrib];
 
 		OUTLOOK_FIELDTYPE oaType = (OUTLOOK_FIELDTYPE)attrib.dwItemData;
 		CString sData;

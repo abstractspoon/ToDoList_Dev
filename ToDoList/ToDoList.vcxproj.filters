@@ -160,9 +160,6 @@
     <ClCompile Include="TDLContentMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLCsvAttributeSetupListCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TDLCsvImportExportDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -362,6 +359,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TaskListOutlookImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLImpExpAttributeMappingListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -582,9 +582,6 @@
     <ClInclude Include="TDLViewTabControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLCsvAttributeSetupListCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TDLCsvImportExportDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -787,6 +784,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TaskListOutlookImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLImpExpAttributeMappingListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -139,7 +139,7 @@ BOOL CTDLImportOutlookObjectsDlg::OnInitDialog()
 	
 	// take a copy of the master mapping and remove any unwanted fields before
 	// passing to list control
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	aMapping.Copy(m_aMasterMapping);
 
 	RemoveUnwantedAttributes(aMapping);
@@ -193,7 +193,7 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 			{
 				CString sFieldAndData = FormatFieldAndData(oaField);
 				
-				m_aMasterMapping.Add(CSVCOLUMNMAPPING(sFieldAndData, oaField.nTDCAttrib, oaField.nFieldType)); 
+				m_aMasterMapping.Add(TDCATTRIBUTEMAPPING(sFieldAndData, oaField.nTDCAttrib, oaField.nFieldType)); 
 			}
 			
 		}
@@ -218,7 +218,7 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 	}
 }
 
-void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCCsvColumnMapping& aMapping) const
+void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const
 {
 	if (m_bHideUnmapped || m_bHideConfidential)
 	{
@@ -226,7 +226,7 @@ void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCCsvColumnMapping&
 
 		while (nField--)
 		{
-			const CSVCOLUMNMAPPING& col = aMapping[nField];
+			const TDCATTRIBUTEMAPPING& col = aMapping[nField];
 
 			if (m_bHideUnmapped && col.nTDCAttrib == TDCA_NONE)
 			{
@@ -262,12 +262,12 @@ void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
 
 void CTDLImportOutlookObjectsDlg::UpdateMasterMapping()
 {
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	m_lcFieldMapping.GetColumnMapping(aMapping);
 
 	for (int nField = 0; nField < aMapping.GetSize(); nField++)
 	{
-		const CSVCOLUMNMAPPING& col = aMapping[nField];
+		const TDCATTRIBUTEMAPPING& col = aMapping[nField];
 
 		// find this field in the master mapping
 		int nMaster = FindField(m_aMasterMapping, (OUTLOOK_FIELDTYPE)col.dwItemData);
@@ -292,7 +292,7 @@ CString CTDLImportOutlookObjectsDlg::GetOutlookFieldName(OUTLOOK_FIELDTYPE nFiel
 	return _T("");
 }
 
-int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCCsvColumnMapping& aMapping) 
+int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) 
 { 
 	// get the latest changes from the list control
 	UpdateMasterMapping();
@@ -341,14 +341,14 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 			const OUTLOOK_FIELD& oaField = FIELDS[nField];
 			CEnString sFieldAndData = FormatFieldAndData(oaField);
 
-			CSVCOLUMNMAPPING& col = m_aMasterMapping[nField];
+			TDCATTRIBUTEMAPPING& col = m_aMasterMapping[nField];
 			col.sColumnName = sFieldAndData; 
 			//col.nTDCAttrib = oaField.nTDCAttrib;
 		}
 	}
 
 	// then update the list ctrl
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	aMapping.Copy(m_aMasterMapping);
 
 	RemoveUnwantedAttributes(aMapping);
@@ -356,7 +356,7 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 	m_lcFieldMapping.SetColumnMapping(aMapping);
 }
 
-int CTDLImportOutlookObjectsDlg::FindField(const CTDCCsvColumnMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
+int CTDLImportOutlookObjectsDlg::FindField(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
 {
 	int nField = aMapping.GetSize();
 
@@ -370,7 +370,7 @@ int CTDLImportOutlookObjectsDlg::FindField(const CTDCCsvColumnMapping& aMapping,
 	return -1;
 }
 
-TDC_ATTRIBUTE CTDLImportOutlookObjectsDlg::GetFieldMapping(const CTDCCsvColumnMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
+TDC_ATTRIBUTE CTDLImportOutlookObjectsDlg::GetFieldMapping(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
 {
 	int nField = FindField(aMapping, nFieldType);
 

@@ -34,7 +34,7 @@ public:
 protected:
 	CString DELIM;
 
-	CTDCCsvColumnMapping m_aColumnMapping;
+	CTDCAttributeMapping m_aColumnMapping;
 
 protected:
 	BOOL ImportTask(ITaskList14* pTasks, const CString& sLine) const;
@@ -53,7 +53,7 @@ protected:
 	void AddCustomAttributeDefinitions(ITaskList14* pTasks) const;
 
 	static TDC_UNITS GetTimeUnits(const CStringArray& aValues, int nCol);
-	static BOOL GetCustomAttribIDAndLabel(const CSVCOLUMNMAPPING& col, CString& sID, CString& sLabel);
+	static BOOL GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sID, CString& sLabel);
 
 };
 

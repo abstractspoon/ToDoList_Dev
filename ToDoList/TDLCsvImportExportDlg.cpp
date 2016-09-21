@@ -54,7 +54,7 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 	LoadMasterColumnMapping();
 
 	// user mapping
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 
 	if (pExportAttributes)
 	{
@@ -110,7 +110,7 @@ BOOL CTDLCsvImportExportDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-int CTDLCsvImportExportDlg::GetColumnMapping(CTDCCsvColumnMapping& aMapping) const 
+int CTDLCsvImportExportDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) const 
 { 
 	return m_lcColumnSetup.GetColumnMapping(aMapping);
 }
@@ -142,7 +142,7 @@ void CTDLCsvImportExportDlg::OnChangeCsvdelimiter()
 
 	if (!m_sDelim.IsEmpty() && m_bImporting && m_sDelim != sOldDelim)
 	{
-		CTDCCsvColumnMapping aMapping;
+		CTDCAttributeMapping aMapping;
 		
 		if (BuildImportColumnMapping(aMapping))
 			m_lcColumnSetup.SetColumnMapping(aMapping);
@@ -158,11 +158,11 @@ void CTDLCsvImportExportDlg::BuildDefaultMasterColumnMapping()
 		TDC_ATTRIBUTE attrib = ATTRIBUTES[nCol].attrib;
 		CEnString sName(ATTRIBUTES[nCol].nAttribResID);
 
-		m_aMasterColumnMapping.Add(CSVCOLUMNMAPPING(sName, attrib));
+		m_aMasterColumnMapping.Add(TDCATTRIBUTEMAPPING(sName, attrib));
 	}
 }
 
-int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCCsvColumnMapping& aImportMapping) const
+int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCAttributeMapping& aImportMapping) const
 {
 	ASSERT (m_bImporting);
 	ASSERT(!m_sFilePath.IsEmpty());
@@ -197,7 +197,7 @@ int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCCsvColumnMapping& aImpo
 		// try to map text column names to column IDs
 		// Note: Must include _all_ columns else the column
 		// indices will be out of sync with the data rows
-		aImportMapping.Add(CSVCOLUMNMAPPING(sName, GetMasterColumnAttribute(sName)));
+		aImportMapping.Add(TDCATTRIBUTEMAPPING(sName, GetMasterColumnAttribute(sName)));
 	}
 
 	return aImportMapping.GetSize();
@@ -209,7 +209,7 @@ BOOL CTDLCsvImportExportDlg::IsExportingForExcel() const
 			!m_pPrefs->GetProfileInt(_T("Preferences"), _T("ExportCsvToUTF8"), FALSE));
 }
 
-int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCCsvColumnMapping& aExportMapping) const
+int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCAttributeMapping& aExportMapping) const
 {
 	ASSERT (!m_bImporting);
 
@@ -220,7 +220,7 @@ int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCCsvColumnMapping& aExpo
 		ASSERT(attrib != TDCA_NONE);
 
 		// try to map text column names to column IDs
-		aExportMapping.Add(CSVCOLUMNMAPPING(GetMasterColumnName(attrib), attrib));
+		aExportMapping.Add(TDCATTRIBUTEMAPPING(GetMasterColumnName(attrib), attrib));
 	}
 
 	return aExportMapping.GetSize();
@@ -276,7 +276,7 @@ int CTDLCsvImportExportDlg::LoadMasterColumnMapping()
 void CTDLCsvImportExportDlg::UpdateMasterColumnMappingFromList()
 {
 	// get mapping from list ctrl and update names in master mapping
-	CTDCCsvColumnMapping aListMapping;
+	CTDCAttributeMapping aListMapping;
 	int nListRows = m_lcColumnSetup.GetColumnMapping(aListMapping);
 
 	for (int nRow = 0; nRow < nListRows; nRow++)
@@ -387,7 +387,7 @@ void CTDLCsvImportExportDlg::OnExportTaskids()
 
 	UpdateData();
 
-	CTDCCsvColumnMapping aMapping;
+	CTDCAttributeMapping aMapping;
 	m_lcColumnSetup.GetColumnMapping(aMapping);
 
 	if (!m_bAlwaysExportTaskIDs)
@@ -436,10 +436,10 @@ void CTDLCsvImportExportDlg::OnExportTaskids()
 
 		// Add TaskID and/or ParentTaskID if not present
 		if (nTaskID == -1)
-			aMapping.Add(CSVCOLUMNMAPPING(GetMasterColumnName(TDCA_ID), TDCA_ID)); 
+			aMapping.Add(TDCATTRIBUTEMAPPING(GetMasterColumnName(TDCA_ID), TDCA_ID)); 
 
 		if (nParentTaskID == -1)
-			aMapping.Add(CSVCOLUMNMAPPING(GetMasterColumnName(TDCA_PARENTID), TDCA_PARENTID));
+			aMapping.Add(TDCATTRIBUTEMAPPING(GetMasterColumnName(TDCA_PARENTID), TDCA_PARENTID));
 	}
 	
 	m_lcColumnSetup.SetColumnMapping(aMapping);
