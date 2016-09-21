@@ -553,7 +553,7 @@ protected:
 	void RestorePosition();
 	void RestoreVisibility();
 	
-	BOOL Export2Html(const CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szStylesheet = NULL) const;
+	BOOL Export2Html(const CTaskFile& tasks, const CString& sFilePath, const CString& sStylesheet) const;
 	BOOL GetAutoExportExtension(CString& sExt) const;
 
 	TDC_FILE DelayOpenTaskList(LPCTSTR szFilePath); // 0 = failed, 1 = success, -1 = cancelled

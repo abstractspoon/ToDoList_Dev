@@ -1806,6 +1806,10 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nIndex, LPCTSTR szFilePath, BOOL bAuto)
 			// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 			// only 'Visible Columns' we need to grab the tasks again.
 			BOOL bFiltered = (userPrefs.GetExportFilteredOnly() && tdc.HasAnyFilter());
+			BOOL bHtmlComments = userPrefs.GetExportToHTML();
+
+			CString sStylesheet(userPrefs.GetSaveExportStylesheet());
+			BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 
 			if (bFiltered || userPrefs.GetExportToHTML() || !userPrefs.GetExportAllAttributes())
 			{
@@ -1820,9 +1824,6 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nIndex, LPCTSTR szFilePath, BOOL bAuto)
 					// add comments always
 					filter.mapAttribs.AddAttribute(TDCA_COMMENTS);
 				}
-
-				BOOL bHtmlComments = userPrefs.GetExportToHTML();
-				BOOL bTransform = FileMisc::FileExists(userPrefs.GetSaveExportStylesheet());
 
 				// set the html image folder to be the output path with
 				// an different extension
@@ -1843,7 +1844,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nIndex, LPCTSTR szFilePath, BOOL bAuto)
 			// want HTML 
 			if (userPrefs.GetExportToHTML())
 			{
-				Export2Html(tasks, sFilePath, userPrefs.GetSaveExportStylesheet());
+				Export2Html(tasks, sFilePath, sStylesheet);
 			}
 			else if (userPrefs.GetOtherExporter() != -1)
 			{
@@ -3570,17 +3571,17 @@ void CToDoListWnd::UpdateTooltip()
     m_trayIcon.SetTip(sTooltip);
 }
 
-BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szStylesheet) const
+BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath, const CString& sStylesheet) const
 {
 	CWaitCursor cursor;
 	
-	if (FileMisc::FileExists(szStylesheet))
+	if (FileMisc::FileExists(sStylesheet))
 	{
-		return tasks.TransformToFile(szStylesheet, szFilePath, Prefs().GetHtmlCharSet());
+		return tasks.TransformToFile(sStylesheet, sFilePath, Prefs().GetHtmlCharSet());
 	}
 	
 	// else default export
-	return m_mgrImportExport.ExportTaskListToHtml(&tasks, szFilePath);
+	return m_mgrImportExport.ExportTaskListToHtml(&tasks, sFilePath);
 }
 
 void CToDoListWnd::OnSaveas() 
@@ -4370,9 +4371,10 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 	// preferences
 	BOOL bParentTitleCommentsOnly = userPrefs.GetExportParentTitleCommentsOnly();
 	BOOL bDueTaskTitlesOnly = userPrefs.GetDueTaskTitlesOnly();
-	CString sStylesheet = userPrefs.GetDueTaskStylesheet();
-	BOOL bTransform = FileMisc::FileExists(sStylesheet);
 	BOOL bHtmlNotify = userPrefs.GetDisplayDueTasksInHtml();
+
+	CString sStylesheet(userPrefs.GetDueTaskStylesheet());
+	BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 	
 	DWORD dwFlags = TDCGTF_FILENAME;
 	
@@ -6057,7 +6059,8 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetView(), tdc.GetStylesheetPath());
+	CString sStylesheet(tdc.GetStylesheetPath());
+	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetView(), sStylesheet);
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -6067,11 +6070,8 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	// always use the same file
 	CString sTempFile = FileMisc::GetTempFilePath(_T("ToDoList.print"), _T("html"));
 	
-	// stylesheets don't seem to like the way we do html comments
-	CString sStylesheet = dialog.GetStylesheet();
-	BOOL bTransform = FileMisc::FileExists(sStylesheet);
-
 	sTitle = dialog.GetTitle();
+	BOOL bTransform = dialog.GetStylesheet(sStylesheet);
 	
 	// export
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
@@ -9506,9 +9506,13 @@ BOOL CToDoListWnd::GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlg
 	CString sTDCStylesheet = tdc.GetStylesheetPath();
 
 	if (FileMisc::FileExists(sTDCStylesheet))
+	{
 		sDlgStylesheet = sTDCStylesheet;
+		return TRUE;
+	}
 
-	return !sDlgStylesheet.IsEmpty();
+	// else
+	return FileMisc::FileExists(sDlgStylesheet);
 }
 
 void CToDoListWnd::OnNexttopleveltask() 

@@ -30,7 +30,7 @@ public:
 	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantDate() { return m_bDate; }
-	CString GetStylesheet() const;
+	BOOL GetStylesheet(CString& sStylesheet) const;
 	CString GetTitle() const { return m_sTitle; }
 	TDLPD_STYLE GetExportStyle() const { return m_nExportStyle; }
 

@@ -117,9 +117,6 @@ BOOL CTDLPrintDialog::OnInitDialog()
 
     VERIFY(m_taskSel.Create(IDC_FRAME, this));
 
-	BOOL bEnable = !m_bUseStylesheet || FileMisc::FileExists(GetStylesheet());
-	GetDlgItem(IDOK)->EnableWindow(bEnable);
-
 	if (m_bPreview)
 		SetWindowText(CEnString(IDS_PRINTDLG_PREVIEW_TITLE));
 	else
@@ -145,15 +142,16 @@ void CTDLPrintDialog::OnUsestylesheet()
 	GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
 
-	BOOL bEnable = !m_bUseStylesheet || FileMisc::FileExists(GetStylesheet());
-	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	OnChangeStylesheet();
 }
 
 void CTDLPrintDialog::OnChangeStylesheet() 
 {
 	UpdateData();
 
-	BOOL bEnable = !m_bUseStylesheet || FileMisc::FileExists(GetStylesheet());
+	CString sUnused;
+	BOOL bEnable = (!m_bUseStylesheet || GetStylesheet(sUnused));
+
 	GetDlgItem(IDOK)->EnableWindow(bEnable);
 
 	// Helpful text for why OK button is disabled
@@ -163,13 +161,14 @@ void CTDLPrintDialog::OnChangeStylesheet()
 	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
 }
 
-CString CTDLPrintDialog::GetStylesheet() const 
+BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const 
 { 
 	if (m_bUseStylesheet)
-		return FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
+		sStylesheet = FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
+	else
+		sStylesheet.Empty();
 	
-	// else
-	return _T(""); 
+	return FileMisc::FileExists(sStylesheet); 
 }
 
 HBRUSH CTDLPrintDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
