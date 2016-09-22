@@ -63,5 +63,8 @@
     <None Include="res\iCalImportExport.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\icalendar_16.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

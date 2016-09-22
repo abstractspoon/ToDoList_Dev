@@ -96,12 +96,13 @@ const UINT NUM_FIELDS = sizeof(FIELDS) / sizeof(OUTLOOK_FIELD);
 
 CEnString CTDLImportOutlookObjectsDlg::CONFIDENTIAL;
 
-CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, CWnd* pParent /*=NULL*/)
+CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_OUTLOOKMSGIMPORT_DIALOG, pParent), 
 	m_refItem(refItem), 
 	m_bHideUnmapped(FALSE), 
-	m_bHideConfidential(TRUE)
+	m_bHideConfidential(TRUE),
+	m_sAltTitle(szAltTitle)
 {
 	BuildMasterMapping();
 }
@@ -130,6 +131,9 @@ END_MESSAGE_MAP()
 BOOL CTDLImportOutlookObjectsDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
+
+	if (!m_sAltTitle.IsEmpty())
+		SetWindowText(m_sAltTitle);
 
 	// modify first column header
 	m_lcFieldMapping.SetColumnText(0, CEnString(IDS_OUTLOOK_FIELDNAME));

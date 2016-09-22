@@ -2060,6 +2060,7 @@
 #define IDS_ONLINEHELP                  58440
 #define IDS_MULTIINSTANCENOFILEPATH     58441
 #define IDS_RESTARTTOUPDATESETTINGS     58442
+#define IDS_OUTLOOK_IMPORTDLG           58443
 
 // Next default values for new objects
 // 

@@ -1102,7 +1102,7 @@ END
 
 IDD_TDLIMPORTEXPORT_DIALOG DIALOGEX 0, 0, 299, 289
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Import Tasks"
+CAPTION "Import Tasks From Tasklist"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,189,268,50,14
@@ -1132,7 +1132,7 @@ END
 
 IDD_OUTLOOKMSGIMPORT_DIALOG DIALOG 0, 0, 321, 224
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create Tasks from Outlook"
+CAPTION "Create Tasks From Outlook"
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "List1",IDC_FIELDMAPPING,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,307,152
@@ -1399,7 +1399,7 @@ END
 
 IDD_IMPORT_OUTLOOK_DIALOG DIALOG 0, 0, 301, 221
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Import Tasks from Outlook"
+CAPTION "Import Tasks From Outlook"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Current folder:",IDC_STATIC,7,9,73,8
@@ -3693,8 +3693,8 @@ END
 STRINGTABLE
 BEGIN
     IDS_TDLBC_PROJECTNAME   "Project Name"
-    IDS_CSV_EXPORTDLG       "Exporting Csv File"
-    IDS_CSV_IMPORTDLG       "Importing Csv File"
+    IDS_CSV_EXPORTDLG       "Export Tasks To CSV"
+    IDS_CSV_IMPORTDLG       "Import Tasks From CSV"
     IDS_SB_FOCUS_TIP        "Currently focused field"
     IDS_SB_SELTIMEEST_TIP   "Aggregate time estimate for the selected tasks"
     IDS_SB_SELTIMESPENT_TIP "Aggregate time spent on the selected tasks"
@@ -4259,6 +4259,7 @@ BEGIN
                             "Unable to process Startup Options|When more than one instance of ToDoList is running you must specify a filepath as well."
     IDS_RESTARTTOUPDATESETTINGS 
                             "Regional Settings Change|The user interface will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
+    IDS_OUTLOOK_IMPORTDLG   "Import Tasks From Outlook"
 END
 
 STRINGTABLE

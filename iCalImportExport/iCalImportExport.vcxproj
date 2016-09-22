@@ -200,6 +200,7 @@ copy unicode_release\icalimportexport.dll ..\todolist\unicode_release /y
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\icalendar_16.ico" />
     <None Include="res\iCalImportExport.rc2" />
   </ItemGroup>
   <ItemGroup>

@@ -326,7 +326,7 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 
 			if (aMapping.GetSize() == 0)
 			{
-				CTDLImportOutlookObjectsDlg dialog(obj);
+				CTDLImportOutlookObjectsDlg dialog(obj, CEnString(IDS_OUTLOOK_IMPORTDLG));
 
 				if (dialog.DoModal() != IDOK)
 				{
