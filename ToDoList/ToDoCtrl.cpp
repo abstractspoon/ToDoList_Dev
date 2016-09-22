@@ -55,7 +55,6 @@
 #include "..\interfaces\IContentControl.h"
 
 #include "..\3rdparty\msoutl.h"
-#include "..\3rdparty\msoutlookitem.h"
 #include "..\3rdparty\shellicons.h"
 
 #include <Windowsx.h>

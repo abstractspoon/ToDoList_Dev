@@ -11,7 +11,6 @@
 #include "regkey.h"
 
 #include "..\3rdparty\msoutl.h"
-#include "..\3rdparty\msoutlookitem.h"
 
 #include <afxole.h>
 
@@ -338,7 +337,7 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 
 CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE nField)
 {
-	if (IsConfidential(nField) && s_bDenyConfidential)
+	if (s_bDenyConfidential && IsConfidential(nField))
 		return _T("");
 
 	CString sData;
@@ -346,57 +345,68 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE 
 	switch (nField)
 	{
 		// Common
+		case OA_BODY:					return obj.GetBody();
 		case OA_BILLINGINFORMATION:		return obj.GetBillingInformation();
 		case OA_CATEGORIES:				return obj.GetCategories();
 		case OA_COMPANIES:				return obj.GetCompanies();
 		case OA_CONVERSATIONTOPIC:		return obj.GetConversationTopic();
 		case OA_CREATIONTIME:			return MapDate(obj.GetCreationTime());
 		case OA_ENTRYID:				return obj.GetEntryID();
-		case OA_EXPIRYTIME:				return MapDate(obj.GetExpiryTime());
-		case OA_FLAGREQUEST:			return obj.GetFlagRequest();
 		case OA_IMPORTANCE:				return Misc::Format(obj.GetImportance());
 		case OA_LASTMODIFICATIONTIME:	return MapDate(obj.GetLastModificationTime());
 		case OA_MESSAGECLASS:			return obj.GetMessageClass();
 		case OA_MILEAGE:				return obj.GetMileage();
-		case OA_PERMISSION:				return Misc::Format(obj.GetPermission());
+		case OA_SENSITIVITY:			return Misc::Format(obj.GetSensitivity());
 		case OA_TITLE:					return obj.GetSubject();
-		case OA_REMINDERTIME:			return MapDate(obj.GetReminderTime());
 
 		// Mail specific
-		case OA_BCC:					return obj.GetBcc();
-		case OA_BODY:					return obj.GetBody();
-		case OA_CC:						return obj.GetCc();
-		case OA_RECEIVEDBYNAME:			return obj.GetReceivedByName();
-		case OA_RECEIVEDTIME:			return MapDate(obj.GetReceivedTime());
-		case OA_REPLYRECIPIENTNAMES:	return obj.GetReplyRecipientNames();
-		case OA_SENDEREMAILADDRESS:		return obj.GetSenderEmailAddress();
-		case OA_SENDERNAME:				return obj.GetSenderName();
-		case OA_SENSITIVITY:			return Misc::Format(obj.GetSensitivity());
-		case OA_SENTONBEHALFOFNAME:		return obj.GetSentOnBehalfOfName();
-		case OA_SENTON:					return MapDate(obj.GetSentOn());
-		case OA_TASKCOMPLETEDDATE:		return MapDate(obj.GetTaskCompletedDate());
-		case OA_TASKDUEDATE:			return MapDate(obj.GetTaskDueDate());
-		case OA_TASKSTARTDATE:			return MapDate(obj.GetTaskStartDate());
-		case OA_TO:						return obj.GetTo();
+		case OA_BCC:					return _MailItem(obj).GetBcc();
+		case OA_CC:						return _MailItem(obj).GetCc();
+		case OA_EXPIRYTIME:				return MapDate(_MailItem(obj).GetExpiryTime());
+		case OA_FLAGREQUEST:			return _MailItem(obj).GetFlagRequest();
+		case OA_PERMISSION:				return Misc::Format(_MailItem(obj).GetPermission());
+		case OA_REMINDERTIME:			return MapDate(_MailItem(obj).GetReminderTime());
+		case OA_RECEIVEDBYNAME:			return _MailItem(obj).GetReceivedByName();
+		case OA_RECEIVEDTIME:			return MapDate(_MailItem(obj).GetReceivedTime());
+		case OA_REPLYRECIPIENTNAMES:	return _MailItem(obj).GetReplyRecipientNames();
+		case OA_SENDEREMAILADDRESS:		return _MailItem(obj).GetSenderEmailAddress();
+		case OA_SENDERNAME:				return _MailItem(obj).GetSenderName();
+		case OA_SENTONBEHALFOFNAME:		return _MailItem(obj).GetSentOnBehalfOfName();
+		case OA_SENTON:					return MapDate(_MailItem(obj).GetSentOn());
+		case OA_TASKCOMPLETEDDATE:		return MapDate(_MailItem(obj).GetTaskCompletedDate());
+		case OA_TASKDUEDATE:			return MapDate(_MailItem(obj).GetTaskDueDate());
+		case OA_TASKSTARTDATE:			return MapDate(_MailItem(obj).GetTaskStartDate());
+		case OA_TO:						return _MailItem(obj).GetTo();
 
 		// task specific
-		case OA_ACTUALWORK:				return Misc::Format(obj.GetActualWork());
-		case OA_COMPLETE:				return Misc::Format(obj.GetComplete());
-		case OA_DATECOMPLETED:			return MapDate(obj.GetDateCompleted());
-		case OA_DELEGATOR:				return obj.GetDelegator();
-		case OA_DUEDATE:				return MapDate(obj.GetDueDate());
-		case OA_DURATION:				return Misc::Format(obj.GetDuration());
-		case OA_END:					return MapDate(obj.GetEnd());
-		case OA_ISRECURRING:			return Misc::Format(obj.GetIsRecurring());
-		case OA_OWNER:					return obj.GetOwner();
-		case OA_PERCENTCOMPLETE:		return Misc::Format(obj.GetPercentComplete());
-		case OA_SCHEDULEPLUSPRIORITY:	return obj.GetSchedulePlusPriority();
-		case OA_START:					return MapDate(obj.GetStart());
-		case OA_STARTDATE:				return MapDate(obj.GetStartDate());
-		case OA_STATUS:					return Misc::Format(obj.GetStatus());
-		case OA_TEAMTASK:				return Misc::Format(obj.GetTeamTask());
-		case OA_TOTALWORK:				return Misc::Format(obj.GetTotalWork());
+		case OA_ACTUALWORK:				return Misc::Format(_TaskItem(obj).GetActualWork());
+		case OA_COMPLETE:				return Misc::Format(_TaskItem(obj).GetComplete());
+		case OA_DATECOMPLETED:			return MapDate(_TaskItem(obj).GetDateCompleted());
+		case OA_DELEGATOR:				return _TaskItem(obj).GetDelegator();
+		case OA_DUEDATE:				return MapDate(_TaskItem(obj).GetDueDate());
+		case OA_ISRECURRING:			return Misc::Format(_TaskItem(obj).GetIsRecurring());
+		case OA_OWNER:					return _TaskItem(obj).GetOwner();
+		case OA_PERCENTCOMPLETE:		return Misc::Format(_TaskItem(obj).GetPercentComplete());
+		case OA_SCHEDULEPLUSPRIORITY:	return _TaskItem(obj).GetSchedulePlusPriority();
+		case OA_STARTDATE:				return MapDate(_TaskItem(obj).GetStartDate());
+		case OA_STATUS:					return Misc::Format(_TaskItem(obj).GetStatus());
+		case OA_TEAMTASK:				return Misc::Format(_TaskItem(obj).GetTeamTask());
+		case OA_TOTALWORK:				return Misc::Format(_TaskItem(obj).GetTotalWork());
 
+		// Appointment specific
+		case OA_DURATION:				return Misc::Format(_AppointmentItem(obj).GetDuration());
+		case OA_END:					return MapDate(_AppointmentItem(obj).GetEnd());
+		case OA_START:					return MapDate(_AppointmentItem(obj).GetStart());
+			// TODO
+
+		// Journal specific
+			// TODO
+
+		// Note specific
+			// TODO
+
+		// Contact Specific
+			// TODO
 	}
 
 	ASSERT(0);

@@ -16,7 +16,6 @@
 #include "enstring.h"
 
 #include "..\3rdParty\msoutl.h"
-#include "..\3rdParty\msoutlookitem.h"
 
 #include <afxole.h>
 

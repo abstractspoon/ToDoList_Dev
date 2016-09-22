@@ -18,7 +18,6 @@
 #include "..\Interfaces\ITaskList.h"
 
 #include "..\3rdparty\msoutl.h"
-#include "..\3rdparty\msoutlookitem.h"
 
 #include <afxtempl.h>
 

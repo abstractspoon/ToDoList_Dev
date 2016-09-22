@@ -16,7 +16,6 @@
 #include "..\shared\MSOutlookHelper.h"
 
 #include "..\3rdparty\msoutl.h"
-#include "..\3rdparty\msoutlookitem.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
