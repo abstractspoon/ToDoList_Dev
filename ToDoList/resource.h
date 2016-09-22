@@ -2061,6 +2061,16 @@
 #define IDS_MULTIINSTANCENOFILEPATH     58441
 #define IDS_RESTARTTOUPDATESETTINGS     58442
 #define IDS_OUTLOOK_IMPORTDLG           58443
+#define IDS_OA_ACTUALWORK               58444
+#define IDS_OA_DATECOMPLETED            58445
+#define IDS_OA_DELEGATOR                58446
+#define IDS_OA_DUEDATE                  58447
+#define IDS_OA_OWNER                    58448
+#define IDS_OA_PERCENTCOMPLETE          58449
+#define IDS_OA_SCHEDULEPLUSPRIORITY     58450
+#define IDS_OA_STARTDATE                58451
+#define IDS_OA_STATUS                   58452
+#define IDS_OA_TOTALWORK                58453
 
 // Next default values for new objects
 // 

@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int MAPPING_VER = 0;
+const int MAPPING_VER = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -70,22 +70,17 @@ static OUTLOOK_FIELD FIELDS[] =
 	OUTLOOK_FIELD(OA_TASKSTARTDATE,			OOC_MAIL,	IDS_OA_TASKSTARTDATE,		TDCA_STARTDATE),
 	OUTLOOK_FIELD(OA_TO,					OOC_MAIL,	IDS_OA_TO,					TDCA_ALLOCTO),
 
-// 	OUTLOOK_FIELD(OA_ACTUALWORK,			OOC_TASK,	IDS_OA_ACTUALWORK,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_COMPLETE,				OOC_TASK,	IDS_OA_COMPLETE,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_DATECOMPLETED,			OOC_TASK,	IDS_OA_DATECOMPLETED,		TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_DELEGATOR,				OOC_TASK,	IDS_OA_DELEGATOR,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_DUEDATE,				OOC_TASK,	IDS_OA_DUEDATE,				TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_DURATION,				OOC_TASK,	IDS_OA_DURATION,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_END,					OOC_TASK,	IDS_OA_END,					TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_ISRECURRING,			OOC_TASK,	IDS_OA_ISRECURRING,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_OWNER,					OOC_TASK,	IDS_OA_OWNER,				TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_PERCENTCOMPLETE,		OOC_TASK,	IDS_OA_PERCENTCOMPLETE,		TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_SCHEDULEPLUSPRIORITY,	OOC_TASK,	IDS_OA_SCHEDULEPLUSPRIORITY, TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_START,					OOC_TASK,	IDS_OA_START,				TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_STARTDATE,				OOC_TASK,	IDS_OA_STARTDATE,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_STATUS,				OOC_TASK,	IDS_OA_STATUS,				TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_TEAMTASK,				OOC_TASK,	IDS_OA_TEAMTASK,			TDCA_ALLOCTO),
-// 	OUTLOOK_FIELD(OA_TOTALWORK,				OOC_TASK,	IDS_OA_TOTALWORK,			TDCA_ALLOCTO),
+ 	OUTLOOK_FIELD(OA_ACTUALWORK,			OOC_TASK,	IDS_OA_ACTUALWORK,			TDCA_TIMESPENT),
+ 	OUTLOOK_FIELD(OA_DATECOMPLETED,			OOC_TASK,	IDS_OA_DATECOMPLETED,		TDCA_DONEDATE),
+ 	OUTLOOK_FIELD(OA_DELEGATOR,				OOC_TASK,	IDS_OA_DELEGATOR,			TDCA_ALLOCTO),
+ 	OUTLOOK_FIELD(OA_DUEDATE,				OOC_TASK,	IDS_OA_DUEDATE,				TDCA_DUEDATE),
+// 	OUTLOOK_FIELD(OA_ISRECURRING,			OOC_TASK,	IDS_OA_ISRECURRING,			TDCA_RECURRENCE),
+ 	OUTLOOK_FIELD(OA_OWNER,					OOC_TASK,	IDS_OA_OWNER,				TDCA_CREATEDBY),
+ 	OUTLOOK_FIELD(OA_PERCENTCOMPLETE,		OOC_TASK,	IDS_OA_PERCENTCOMPLETE,		TDCA_PERCENT),
+ 	OUTLOOK_FIELD(OA_SCHEDULEPLUSPRIORITY,	OOC_TASK,	IDS_OA_SCHEDULEPLUSPRIORITY, TDCA_PRIORITY),
+ 	OUTLOOK_FIELD(OA_STARTDATE,				OOC_TASK,	IDS_OA_STARTDATE,			TDCA_STARTDATE),
+ 	OUTLOOK_FIELD(OA_STATUS,				OOC_TASK,	IDS_OA_STATUS,				TDCA_STATUS),
+ 	OUTLOOK_FIELD(OA_TOTALWORK,				OOC_TASK,	IDS_OA_TOTALWORK,			TDCA_TIMEEST),
 
 };
 
@@ -199,7 +194,6 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 				
 				m_aMasterMapping.Add(TDCATTRIBUTEMAPPING(sFieldAndData, oaField.nTDCAttrib, oaField.nFieldType)); 
 			}
-			
 		}
 	}
 
@@ -254,7 +248,9 @@ void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
 	prefs.WriteProfileInt(sSection, _T("HideConfidential"), m_bHideConfidential);
 	prefs.WriteProfileInt(sSection, _T("MappingVer"), MAPPING_VER);
 
-	for (int nField = 0; nField < NUM_FIELDS; nField++)
+	int nField = m_aMasterMapping.GetSize();
+
+	while (nField--)
 	{
 		CString sKey = Misc::MakeKey(_T("Field%d"), nField);
 		prefs.WriteProfileInt(sSection, sKey, m_aMasterMapping[nField].dwItemData);
@@ -340,14 +336,18 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 		CMSOutlookHelper::ResetDenyConfidential();
 		CMSOutlookHelper::GetItemData(m_refItem, m_mapRefData, TRUE);
 
-		for (int nField = 0; nField < NUM_FIELDS; nField++)
+		int nField = NUM_FIELDS;
+
+		while (nField--)
 		{
 			const OUTLOOK_FIELD& oaField = FIELDS[nField];
-			CEnString sFieldAndData = FormatFieldAndData(oaField);
+			int nMaster = FindField(m_aMasterMapping, oaField.nFieldType);
 
-			TDCATTRIBUTEMAPPING& col = m_aMasterMapping[nField];
-			col.sColumnName = sFieldAndData; 
-			//col.nTDCAttrib = oaField.nTDCAttrib;
+			if (nMaster != -1)
+			{
+				CEnString sFieldAndData = FormatFieldAndData(oaField);
+				m_aMasterMapping[nMaster].sColumnName = sFieldAndData; 
+			}
 		}
 	}
 

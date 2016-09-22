@@ -2797,6 +2797,20 @@ public:
 	{
 		return (FindMappedAttribute(nAttrib) != -1);
 	}
+
+#ifdef _DEBUG
+	void Trace() const
+	{
+		for (int nMap = 0; nMap < GetSize(); nMap++)
+		{
+			const TDCATTRIBUTEMAPPING& col = GetData()[nMap];
+
+			TRACE(_T("CTDCAttributeMapping::Trace(%s, %d, %d)\n"), col.sColumnName, col.nTDCAttrib, col.dwItemData);
+		}
+	}
+#else
+	void Trace() const {}
+#endif
 };
 /////////////////////////////////////////////////////////////////////////////
 

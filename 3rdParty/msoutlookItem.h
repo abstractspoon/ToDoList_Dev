@@ -434,6 +434,12 @@ public:
 	void SetStartTimeZone(LPDISPATCH newValue);
 	LPDISPATCH GetEndTimeZone();
 	void SetEndTimeZone(LPDISPATCH newValue);
+	DATE GetEnd();
+	void SetEnd(DATE newValue);
+	DATE GetStart();
+	void SetStart(DATE newValue);
+	long GetDuration();
+	void SetDuration(long nNewValue);
 
 	// _JournalItem
 	BOOL GetDocPosted();
@@ -463,12 +469,6 @@ public:
 	void Close(long SaveMode);
 
 	// _TaskItem
-	DATE GetEnd();
-	void SetEnd(DATE newValue);
-	DATE GetStart();
-	void SetStart(DATE newValue);
-	long GetDuration();
-	void SetDuration(long nNewValue);
 	void ClearRecurrencePattern();
 	long GetActualWork();
 	void SetActualWork(long nNewValue);

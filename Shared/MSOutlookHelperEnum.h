@@ -11,7 +11,7 @@
 
 enum OUTLOOK_FIELDTYPE
 {
-	// Common
+	// Common ----------------------------
 	OA_BILLINGINFORMATION = 0,
 	OA_CATEGORIES,
 	OA_COMPANIES,
@@ -28,7 +28,7 @@ enum OUTLOOK_FIELDTYPE
 	OA_SENSITIVITY,
 	OA_TITLE,
 
-	// Mail specific
+	// Mail specific ---------------------
 	OA_BCC = 100,
 	OA_BODY,
 	OA_CC,
@@ -44,25 +44,26 @@ enum OUTLOOK_FIELDTYPE
 	OA_TASKDUEDATE,
 	OA_TASKSTARTDATE,
 	OA_TO,
-
-
-	// Task specific
+	
+	// Task specific ---------------------
 	OA_ACTUALWORK = 200,
 	OA_COMPLETE,
 	OA_DATECOMPLETED,
 	OA_DELEGATOR,
 	OA_DUEDATE,
-	OA_DURATION,
-	OA_END,
-	OA_ISRECURRING,
 	OA_OWNER,
 	OA_PERCENTCOMPLETE,
 	OA_SCHEDULEPLUSPRIORITY,
-	OA_START,
 	OA_STARTDATE,
 	OA_STATUS,
 	OA_TEAMTASK,
 	OA_TOTALWORK,
+	OA_ISRECURRING,
+
+	// Appointment specific --------------
+	OA_END = 300,
+	OA_START,
+	OA_DURATION,
 };
 
 

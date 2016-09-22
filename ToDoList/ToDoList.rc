@@ -4260,6 +4260,10 @@ BEGIN
     IDS_RESTARTTOUPDATESETTINGS 
                             "Regional Settings Change|The user interface will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_OUTLOOK_IMPORTDLG   "Import Tasks From Outlook"
+    IDS_OA_ACTUALWORK       "Actual Work"
+    IDS_OA_DATECOMPLETED    "Completion Date"
+    IDS_OA_DELEGATOR        "Delegator"
+    IDS_OA_DUEDATE          "Due Date"
 END
 
 STRINGTABLE
@@ -4271,6 +4275,16 @@ END
 STRINGTABLE
 BEGIN
     IDS_OUTLOOK_BUILDINGLIST "Building item list..."
+END
+
+STRINGTABLE
+BEGIN
+    IDS_OA_OWNER            "Owner"
+    IDS_OA_PERCENTCOMPLETE  "% Completion"
+    IDS_OA_SCHEDULEPLUSPRIORITY "Schedule and Priority"
+    IDS_OA_STARTDATE        "Start Date"
+    IDS_OA_STATUS           "Status"
+    IDS_OA_TOTALWORK        "Total Work"
 END
 
 #endif    // English (Australia) resources

@@ -128,32 +128,20 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 {
 	DeleteAllItems();
 
-	if (m_bImporting)
+	for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
 	{
-		for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
-		{
-			TDCATTRIBUTEMAPPING& col = m_aMapping[nRow];
+		const TDCATTRIBUTEMAPPING& col = m_aMapping.GetData()[nRow];
 
-			if (!col.sColumnName.IsEmpty())
-			{
-				int nItem = InsertItem(GetItemCount(), col.sColumnName);
-				SetItemText(nItem, IMPORT_COLUMNID, GetAttributeName(col.nTDCAttrib));
-				SetItemData(nItem, col.nTDCAttrib);
-			}
-		}
-	}
-	else // export
-	{
-		for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
+		if (!col.sColumnName.IsEmpty())
 		{
-			TDCATTRIBUTEMAPPING& col = m_aMapping[nRow];
-			
-			if (!col.sColumnName.IsEmpty())
-			{
-				int nItem = InsertItem(GetItemCount(), GetAttributeName(col.nTDCAttrib));
-				SetItemText(nItem, EXPORT_COLUMNNAME, col.sColumnName);
-				SetItemData(nItem, col.nTDCAttrib);
-			}
+			CString sAttribName(GetAttributeName(col.nTDCAttrib));
+			CString sFrom(m_bImporting ? col.sColumnName : sAttribName);
+			CString sTo(m_bImporting ? sAttribName : col.sColumnName);
+
+			int nItem = InsertItem(GetItemCount(), sFrom);
+
+			SetItemText(nItem, IMPORT_COLUMNID, sTo);
+			SetItemData(nItem, col.nTDCAttrib);
 		}
 	}
 
