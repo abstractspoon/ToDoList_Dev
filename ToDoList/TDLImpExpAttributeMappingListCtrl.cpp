@@ -24,6 +24,7 @@ const int COL_WIDTH = 200;
 CTDLImportExportAttributeMappingListCtrl::CTDLImportExportAttributeMappingListCtrl(BOOL bImporting, BOOL bOneToOneMapping)
  : m_bImporting(bImporting), m_bOneToOneMapping(bOneToOneMapping)
 {
+	SetFirstColumnStretchy(TRUE);
 }
 
 CTDLImportExportAttributeMappingListCtrl::~CTDLImportExportAttributeMappingListCtrl()
@@ -112,6 +113,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		SetColumnType(EXPORT_COLUMNNAME, ILCT_TEXT);
 	}
 	SetView(LVS_REPORT);
+	ResizeStretchyColumns();
 
 	BuildListCtrl();
 }
@@ -149,6 +151,7 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 	m_cbAttributes.GetWindowRect(rCombo);
 	
 	SetMinItemHeight(rCombo.Height());
+	ResizeStretchyColumns();
 
 	if (GetItemCount())
 		SetCurSel(0);

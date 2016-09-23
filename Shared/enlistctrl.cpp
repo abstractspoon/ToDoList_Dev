@@ -120,7 +120,6 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_KEYUP()
-	ON_WM_KILLFOCUS()
 	ON_WM_SIZE()
 	ON_WM_MEASUREITEM_REFLECT()
 	ON_WM_LBUTTONDBLCLK()
@@ -128,8 +127,8 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
+	ON_WM_WINDOWPOSCHANGED()
 	//}}AFX_MSG_MAP
-	ON_WM_GETDLGCODE()
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 END_MESSAGE_MAP()
@@ -141,8 +140,9 @@ void CEnListCtrl::OnPaint()
 {
 	// if no items or in report mode draw to back buffer then blt
 	if (GetItemCount() && GetView() != LVS_REPORT)
+	{
 		Default();
-
+	}
 	else
 	{
 		CPaintDC cleanup(this);
@@ -211,100 +211,6 @@ void CEnListCtrl::OnPaint()
 	// Do not call CListView::OnPaint() for painting messages
 }
 
-/*
-BOOL CEnListCtrl::ESetRegistrySection(CString sSection)
-{
-	return ERegistry::ESetRegistrySection(sSection);
-}
-
-BOOL CEnListCtrl::ERegStoreState(CRegKey& regKey)
-{
-	int nNumCols, nCol;
-	CString sColKey;
-	CRect rItem;
-	DWORD dwTopLeft;
-
-	if (!ERegistry::ERegStoreState(regKey))
-		return FALSE;
-
-	// save current column widths
-	nNumCols = GetColumnCount();
-
-	for (nCol = 0; nCol < nNumCols; nCol++)
-	{
-		sColKey.Format("ColumnWidth%d", nCol);
-		EGetRegKey().Write(sColKey, (DWORD)GetColumnWidth(nCol));
-	}
-
-	// save view
-	EGetRegKey().Write("View", (DWORD)GetView());
-
-	// save scrolled pos
-	if (GetItemRect(0, rItem, LVIR_BOUNDS))
-	{
-		if ((rItem.top % rItem.Height()) != 0)
-			rItem.top -= rItem.Height();
-	}
-	
-	dwTopLeft = MAKELONG(rItem.left, rItem.top - 10);
-	EGetRegKey().Write("TopLeft", dwTopLeft);
-
-	// sort state
-	EGetRegKey().Write("SortColumn", (DWORD)GetSortColumn());
-	EGetRegKey().Write("SortAscending", (DWORD)GetSortAscending());
-
-	return TRUE;
-}
-
-BOOL CEnListCtrl::ERegRestoreState(CRegKey& regKey)
-{
-	int nNumCols, nCol, nWidth, nView = LVS_REPORT, nSortColumn = 0;
-	BOOL bSortAscending = TRUE;
-	CString sColKey;
-	CPoint ptTopLeft;
-	DWORD dwTopLeft;
-
-	if (!ERegistry::ERegRestoreState(regKey))
-		return FALSE;
-
-	SetRedraw(FALSE);
-
-	// restore column widths
-	nNumCols = GetColumnCount();
-
-	for (nCol = 0; nCol < nNumCols; nCol++)
-	{
-		nWidth = 0;
-		sColKey.Format("ColumnWidth%d", nCol);
-		EGetRegKey().Read(sColKey, (DWORD&)nWidth);
-
-		if (nWidth > 0)
-			SetColumnWidth(nCol, nWidth);
-	}
-
-	// restore view
-	EGetRegKey().Read("View", (DWORD&)nView);
-	SetView(nView);
-
-	// sort state
-	EGetRegKey().Read("SortColumn", (DWORD&)nSortColumn);
-	EGetRegKey().Read("SortAscending", (DWORD&)bSortAscending);
-	SetSortColumn(nSortColumn, FALSE);
-	SetSortAscending(bSortAscending);
-	Sort();
-
-	// restore scrolled pos
-	EGetRegKey().Read("TopLeft", dwTopLeft);
-	ptTopLeft = CPoint(dwTopLeft);
-	Scroll(CSize(0, max(0, -ptTopLeft.y)));
-
-	SetRedraw(TRUE);
-	Invalidate();
-
-	return TRUE;
-}
-
-*/
 void CEnListCtrl::DeleteAllColumnData()
 {
 	int nCol;
@@ -449,8 +355,6 @@ void CEnListCtrl::SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect, BOOL b
 
 void CEnListCtrl::SetItemFocus(int nIndex, BOOL bFocused)
 {
-//	ASSERT (nIndex >= 0 && nIndex < GetItemCount());
-	
 	if (!(nIndex >= 0 && nIndex < GetItemCount()))
 		return;
 	
@@ -548,13 +452,13 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int nIndent = 0;
 
 	// get and prepare device context
-	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);//GetDC(); 
+	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
 	pDC->SetROP2(R2_COPYPEN);
 
 	// init helper variables
 	int nItem = lpDrawItemStruct->itemID;
-	GetItemRect(nItem, rItem, LVIR_BOUNDS);//lpDrawItemStruct->rcItem;
+	GetItemRect(nItem, rItem, LVIR_BOUNDS);
 	GetClientRect(&rClient);
 
 	// some problems with drophiliting items during drag and drop
@@ -731,10 +635,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		pDC->SetTextColor(crOldText);
 		pDC->SetBkColor(crOldBack);
-//		pDC->SelectObject(pOldPen);
 	}
-
-//	ReleaseDC(pDC);
 }
 
 COLORREF CEnListCtrl::GetItemTextColor(int /*nItem*/, int nSubItem, 
@@ -1069,35 +970,28 @@ void CEnListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		NotifySelChange();
 }
 
-UINT CEnListCtrl::OnGetDlgCode()
-{
-	return CListCtrl::OnGetDlgCode();//DLGC_WANTCHARS;
-}
-
-void CEnListCtrl::OnKillFocus(CWnd* pNewWnd)
-{
-	CListCtrl::OnKillFocus(pNewWnd);
-}
-
 void CEnListCtrl::SetLastColumnStretchy(BOOL bStretchy)
 {
-//	ASSERT (m_nCurView == LVS_REPORT);
-
 	m_bLastColStretchy = bStretchy;
 	m_bFirstColStretchy = FALSE;
 
 	// invoke a resize to update last column
-	if (m_bLastColStretchy && m_nCurView == LVS_REPORT && GetSafeHwnd())
+	if (m_bLastColStretchy && (m_nCurView == LVS_REPORT) && GetSafeHwnd())
 	{
 		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
 		PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
 	}
 }
 
+void CEnListCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
+{
+	CListCtrl::OnWindowPosChanged(lpwndpos);
+
+	ResizeStretchyColumns();
+}
+
 void CEnListCtrl::SetFirstColumnStretchy(BOOL bStretchy)
 {
-//	ASSERT (m_nCurView == LVS_REPORT);
-
 	m_bFirstColStretchy = bStretchy;
 	m_bLastColStretchy = FALSE;
 
@@ -1116,22 +1010,27 @@ void CEnListCtrl::OnTimer(UINT nIDEvent)
 
 void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	static BOOL bInOnSize = FALSE;
+	CListCtrl::OnSize(nType, cx, cy);
 
-	if (bInOnSize)
+	ResizeStretchyColumns();
+}
+
+void CEnListCtrl::ResizeStretchyColumns()
+{
+	static BOOL bResizingCols = FALSE;
+
+	if (bResizingCols)
 		return;
 
-	bInOnSize = TRUE;
+	bResizingCols = TRUE;
 
-	CRect rClient, rPrev;
+	// get header state
+	CRect rClient;
+	GetClientRect(rClient);
+
 	HD_LAYOUT hdLayout = { 0 };
 	WINDOWPOS wpos = { 0 };
 
-	GetClientRect(rPrev);
-
-	CListCtrl::OnSize(nType, cx, cy);
-
-	// get header state
 	if (m_header.GetSafeHwnd())
 	{
 		GetClientRect(rClient);
@@ -1144,23 +1043,11 @@ void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 	if (m_nCurView == LVS_REPORT)
 	{
 		int nCol, nNumCols, /*nColStart = 0,*/ nColEnd = 0;
-		GetClientRect(rClient);
 
 		// get the start of the last column
 		if (m_bLastColStretchy)
 		{
-/*
-			nNumCols = GetColumnCount();
-
-			for (nCol = 0; nCol < nNumCols - 1; nCol++)
-				nColStart += GetColumnWidth(nCol);
-		
-			// if its reasonably less than the client area adjust else do nothing
-			if (nColStart < rClient.Width() - 20 || nNumCols == 1)
-				SetColumnWidth(nNumCols - 1, rClient.Width() - nColStart - 2);
-*/
 			SetColumnWidth(GetColumnCount() - 1, LVSCW_AUTOSIZE_USEHEADER);
-			
 			ShowScrollBar(SB_HORZ, FALSE);
 		}
 		// get the end of the first column
@@ -1172,11 +1059,11 @@ void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 				nColEnd += GetColumnWidth(nCol);
 
 			nColEnd = rClient.Width() - nColEnd;
-		
+
 			// if its reasonably less than the client area adjust else do nothing
 			if (nColEnd < rClient.Width() - 20 || nNumCols == 1)
 				SetColumnWidth(0, nColEnd - 2);
-			
+
 			ShowScrollBar(SB_HORZ, FALSE);
 		}
 
@@ -1185,12 +1072,12 @@ void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 	}
 	else // hide header ctrl
 		wpos.flags |= SWP_HIDEWINDOW;
-	
+
 	// ensure the header ctrl is correctly positioned
 	if (m_header.GetSafeHwnd())
 	{
 		::SetWindowPos(GetHeader()->GetSafeHwnd(), wpos.hwndInsertAfter, wpos.x, wpos.y,
-		wpos.cx, wpos.cy, wpos.flags);
+			wpos.cx, wpos.cy, wpos.flags);
 	}
 
 	// windows does not send wm_paint messages if the window size decreased
@@ -1198,7 +1085,7 @@ void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 	if (!GetItemCount())
 		Invalidate(FALSE);
 
-	bInOnSize = FALSE;
+	bResizingCols = FALSE;
 }
 
 int CEnListCtrl::FindItemFromData(DWORD dwItemData) const
@@ -1296,9 +1183,10 @@ void CEnListCtrl::ForceResize()
 {
 	if (GetSafeHwnd())
 	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-		SetWindowPos(NULL, 0, 0, rWindow.Width()-1, rWindow.Height(), SWP_NOMOVE | SWP_NOZORDER);
+// 		CRect rWindow;
+// 		GetWindowRect(rWindow);
+// 		SetWindowPos(NULL, 0, 0, rWindow.Width()-1, rWindow.Height(), SWP_NOMOVE | SWP_NOZORDER);
+		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 	}
 }
 

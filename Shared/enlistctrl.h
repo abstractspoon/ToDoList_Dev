@@ -154,7 +154,6 @@ protected:
 	//{{AFX_MSG(CEnListCtrl)
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
@@ -162,8 +161,8 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 	//}}AFX_MSG
-	afx_msg UINT OnGetDlgCode();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lParam);
 	DECLARE_MESSAGE_MAP()
@@ -193,6 +192,7 @@ protected:
 	void BuildSortMap(int nCol);
 	CString GetSortText(DWORD dwItemData) const;
 	void ForceResize();
+	void ResizeStretchyColumns();
 
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 //	static BOOL IsSelectionThemed(BOOL bClassic) { return IsSelectionThemed(s_dwSelectionTheming, bClassic); }
