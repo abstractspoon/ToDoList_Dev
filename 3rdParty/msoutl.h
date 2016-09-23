@@ -74,7 +74,6 @@ namespace OutlookAPI
 		_ContactItem() {}		// Calls COleDispatchDriver default constructor
 		_ContactItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_ContactItem(const _ContactItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_ContactItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
@@ -356,7 +355,6 @@ namespace OutlookAPI
 		_TaskItem() {}		// Calls _Item default constructor
 		_TaskItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_TaskItem(const _TaskItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_TaskItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
@@ -449,7 +447,6 @@ namespace OutlookAPI
 		_AppointmentItem() {}		// Calls _Item default constructor
 		_AppointmentItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_AppointmentItem(const _AppointmentItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_AppointmentItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
@@ -540,7 +537,6 @@ namespace OutlookAPI
 		_JournalItem() {}		// Calls _Item default constructor
 		_JournalItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_JournalItem(const _JournalItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_JournalItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
@@ -591,7 +587,6 @@ namespace OutlookAPI
 		_NoteItem() {}		// Calls _Item default constructor
 		_NoteItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_NoteItem(const _NoteItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_NoteItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
@@ -626,7 +621,6 @@ namespace OutlookAPI
 		_MailItem() {}		// Calls _Item default constructor
 		_MailItem(LPDISPATCH pDispatch) : _Item(pDispatch) {}
 		_MailItem(const _MailItem& dispatchSrc) : _Item(dispatchSrc) {}
-		_MailItem(const _Item& dispatchSrc) : _Item(dispatchSrc) {}
 
 		// Attributes
 	public:
