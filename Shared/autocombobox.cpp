@@ -84,6 +84,7 @@ CAutoComboBox::~CAutoComboBox()
 {
 }
 
+IMPLEMENT_DYNAMIC(CAutoComboBox, COwnerdrawComboBoxBase)
 
 BEGIN_MESSAGE_MAP(CAutoComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CAutoComboBox)

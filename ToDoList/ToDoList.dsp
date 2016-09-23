@@ -343,10 +343,6 @@ SOURCE=.\TDLContentTypeCombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImpExpAttributeMappingListCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLCsvImportExportDlg.cpp
 # End Source File
 # Begin Source File
@@ -404,6 +400,10 @@ SOURCE=.\TDLFindTasksDlg.cpp
 # Begin Source File
 
 SOURCE=.\tdliconcombobox.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLImpExpAttributeMappingListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -867,10 +867,6 @@ SOURCE=.\TDLContentTypeCombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImpExpAttributeMappingListCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLCsvImportExportDlg.h
 # End Source File
 # Begin Source File
@@ -928,6 +924,10 @@ SOURCE=.\TDLFindTasksDlg.h
 # Begin Source File
 
 SOURCE=.\tdliconcombobox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLImpExpAttributeMappingListCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1256,6 +1256,10 @@ SOURCE=.\res\outlook_16.ico
 # Begin Source File
 
 SOURCE=.\res\prefs_dlg_std.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\reset.ico
 # End Source File
 # Begin Source File
 

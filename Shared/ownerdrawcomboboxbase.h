@@ -12,6 +12,8 @@
 
 class COwnerdrawComboBoxBase : public CComboBox
 {
+	DECLARE_DYNAMIC(COwnerdrawComboBoxBase)
+
 // Construction
 public:
 	COwnerdrawComboBoxBase(int nMinDLUHeight = 9);

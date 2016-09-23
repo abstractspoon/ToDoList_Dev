@@ -35,7 +35,9 @@ void AFXAPI DDX_AutoCBString(CDataExchange* pDX, int nIDC, CString& value);
 
 class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclassWnd, private CSubclasser
 {
-	// Construction
+	DECLARE_DYNAMIC(CAutoComboBox)
+
+		// Construction
 public:
 	CAutoComboBox(DWORD dwFlags = 0);
 	virtual ~CAutoComboBox();

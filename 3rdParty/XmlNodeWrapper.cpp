@@ -360,7 +360,8 @@ CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 				sHeader = nodeHdr.GetXML();
 
 				// remove the xml start/end 
-				sHeader.Trim(_T("<>? "));
+				sHeader.TrimLeft(_T("<? "));
+				sHeader.TrimRight(_T(">? "));
 				sHeader = sHeader.Mid(4); // 'xml'
 
 				// remove name
