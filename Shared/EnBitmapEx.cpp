@@ -155,3 +155,46 @@ BOOL CEnBitmapEx::GrayScale(CBitmap& bitmap, COLORREF crMask)
 	// else
 	return FALSE;
 }
+
+HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
+{
+	CEnBitmapEx hbmDisabled;
+	const COLORREF crMask = RGB(255, 0, 255);
+	
+	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
+	hbmDisabled.GrayImage(crMask);
+	hbmDisabled.LightenImage(0.3, crMask);
+	
+	return hbmDisabled.ExtractIcon(crMask, 16, 16);
+}
+
+BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& ilDest)
+{
+	if (!ilSrc.GetSafeHandle() || !ilSrc.GetImageCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	ilDest.DeleteImageList();
+	CImageList* pILSrc = (CImageList*)&ilSrc;
+
+	if (ilDest.Create(pILSrc))
+	{
+		int nImage = ilDest.GetImageCount();
+
+		while (nImage--)
+		{
+			HICON hIcon = pILSrc->ExtractIcon(nImage);
+			HICON hDis = CreateDisabledIcon(hIcon);
+
+			ilDest.Replace(nImage, hDis);
+
+			::DestroyIcon(hIcon);
+			::DestroyIcon(hDis);
+		}
+	}
+
+	// else
+	return FALSE;
+}

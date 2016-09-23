@@ -134,7 +134,8 @@ protected:
 		
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void EditCell(int nItem, int nCol);
-	virtual BOOL IsEditing() const { return m_editBox.GetSafeHwnd() && m_editBox.IsWindowVisible(); }
+	virtual BOOL IsEditing() const;
+	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData2; }

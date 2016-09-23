@@ -148,7 +148,6 @@ protected:
 						const CRect& rect, BOOL bSymbol = FALSE);
 	static void DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
 						const CRect& rect, BOOL bEnabled = TRUE, BOOL bSymbol = FALSE);
-	static HICON CreateDisabledIcon(HICON hIcon);
 };
 
 /////////////////////////////////////////////////////////////////////////////

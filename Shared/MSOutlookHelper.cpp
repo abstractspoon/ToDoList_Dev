@@ -90,7 +90,7 @@ OUTLOOKDATAITEM OUTLOOKDATA[] =
 	{ OA_BILLINGINFORMATION,	OOC_ITEM, FALSE },
 	{ OA_CATEGORIES,			OOC_ITEM, FALSE },
 	{ OA_COMPANIES,				OOC_ITEM, FALSE },
-	{ OA_CONVERSATIONTOPIC,		OOC_ITEM, FALSE },
+	//{ OA_CONVERSATIONTOPIC,		OOC_ITEM, FALSE },
 	{ OA_CREATIONTIME,			OOC_ITEM, FALSE },
 	{ OA_ENTRYID,				OOC_ITEM, FALSE },
 	{ OA_EXPIRYTIME,			OOC_ITEM, FALSE },
@@ -349,7 +349,7 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE 
 		case OA_BILLINGINFORMATION:		return obj.GetBillingInformation();
 		case OA_CATEGORIES:				return obj.GetCategories();
 		case OA_COMPANIES:				return obj.GetCompanies();
-		case OA_CONVERSATIONTOPIC:		return obj.GetConversationTopic();
+		//case OA_CONVERSATIONTOPIC:		return obj.GetConversationTopic();
 		case OA_CREATIONTIME:			return MapDate(obj.GetCreationTime());
 		case OA_ENTRYID:				return obj.GetEntryID();
 		case OA_IMPORTANCE:				return Misc::Format(obj.GetImportance());
@@ -442,7 +442,7 @@ int CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, CMSOutlookItemDataMap&
 		{
 			const OUTLOOKDATAITEM& item = OUTLOOKDATA[nData];
 
-			if ((item.nObjectType == OOC_TASK) || (item.nObjectType == nObjType))
+			if ((item.nObjectType == OOC_ITEM) || (item.nObjectType == nObjType))
 			{
 				try
 				{

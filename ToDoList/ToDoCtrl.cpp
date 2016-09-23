@@ -11250,7 +11250,8 @@ LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 {
-	SelectItem((HTREEITEM)lp);
+	if (lp)
+		SelectItem((HTREEITEM)lp);
 
     return 0L;
 }

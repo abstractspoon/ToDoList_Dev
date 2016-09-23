@@ -304,6 +304,24 @@ COLORREF CTDLColumnAttribVisibilityListCtrl::GetItemBackColor(int nItem, int nCo
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
+BOOL CTDLColumnAttribVisibilityListCtrl::IsButtonEnabled(int nRow, int nCol) const 
+{ 
+	if (!CInputListCtrl::IsButtonEnabled(nRow, nCol))
+		return FALSE;
+
+	switch (nCol)
+	{
+	case COL_EDITVIS:
+		return (m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+		
+	case COL_FILTERVIS:
+		return (m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+	}
+
+	// all else
+	return TRUE; 
+}
+
 BOOL CTDLColumnAttribVisibilityListCtrl::IsTimeCellEnabled(int nItem, int nCol) const
 {
 	// time cells are disabled if the corresponding date cells are unticked

@@ -175,7 +175,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip)
 	eb.nWidth = 20; // 2 px padding
 	eb.iImage = m_ilBtns.Add(hIcon);
 
-	HICON hDisabled = CreateDisabledIcon(hIcon);
+	HICON hDisabled = CEnBitmapEx::CreateDisabledIcon(hIcon);
 	VERIFY(m_ilDisabledBtns.Add(hDisabled) == eb.iImage);
 	::DestroyIcon(hDisabled);
 
@@ -197,18 +197,6 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip)
 	}
 	
 	return TRUE;
-}
-
-HICON CEnEdit::CreateDisabledIcon(HICON hIcon)
-{
-	CEnBitmapEx hbmDisabled;
-	const COLORREF crMask = RGB(255, 0, 255);
-	
-	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
-	hbmDisabled.GrayImage(crMask);
-	hbmDisabled.LightenImage(0.3, crMask);
-
-	return hbmDisabled.ExtractIcon(crMask, 16, 16);
 }
 
 void CEnEdit::SetBorders(int nTop, int nBottom)
