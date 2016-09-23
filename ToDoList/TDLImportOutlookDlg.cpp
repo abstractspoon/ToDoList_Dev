@@ -13,6 +13,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\themed.h"
 
 #include "..\Interfaces\IPreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -138,6 +139,8 @@ BOOL CTDLImportOutlookDlg::OnInitDialog()
 		AfxMessageBox(CEnString(IDS_OUTLOOK_UNABLETOCONNECT), MB_OK | MB_ICONERROR);
 		EndDialog(IDCANCEL);
 	}
+
+	CThemed::SetWindowTheme(&m_tcTasks, _T("Explorer"));
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -205,7 +208,7 @@ void CTDLImportOutlookDlg::AddFolderItemsToTree(MAPIFolder* pFolder, HTREEITEM h
 
 			case OOC_MAIL:		
 				{
-					_MailItem mail(lpd);
+					_MailItem mail(item);
 					BOOL bFlagged = (mail.GetIsMarkedAsTask() && (mail.GetTaskCompletedDate() == CMSOutlookHelper::NULL_DATE));
 			
 					if (!m_bHideUnflaggedEmails || bFlagged)

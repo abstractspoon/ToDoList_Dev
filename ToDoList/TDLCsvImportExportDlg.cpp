@@ -103,6 +103,8 @@ BOOL CTDLCsvImportExportDlg::OnInitDialog()
 	GetDlgItem(IDC_EXPORTTASKIDS)->EnableWindow(!m_bImporting);
 	GetDlgItem(IDC_EXPORTTASKIDS)->ShowWindow(m_bImporting ? SW_HIDE : SW_SHOW);
 
+	m_lcColumnSetup.SetFirstColumnStretchy(TRUE);
+
 	if (!m_bImporting)
 		OnExportTaskids();
 	
@@ -205,8 +207,9 @@ int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCAttributeMapping& aImpo
 
 BOOL CTDLCsvImportExportDlg::IsExportingForExcel() const
 {
-	return (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE) &&
-			!m_pPrefs->GetProfileInt(_T("Preferences"), _T("ExportCsvToUTF8"), FALSE));
+	return (!m_bImporting &&
+			!m_pPrefs->GetProfileInt(_T("Preferences"), _T("ExportCsvToUTF8"), FALSE) && 
+			CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE));
 }
 
 int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCAttributeMapping& aExportMapping) const
