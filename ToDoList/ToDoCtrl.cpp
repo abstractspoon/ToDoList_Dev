@@ -4065,11 +4065,14 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 			
-			// update due date?
+			// update start/due date?
 			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 			{
 				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
 				SetCtrlDate(m_dtcDue, dtDue, dtDue);
+
+				COleDateTime dtStart = GetSelectedTaskDate(TDCD_START);
+				SetCtrlDate(m_dtcStart, dtStart, dtStart);
 			}
 		}
 		
@@ -4080,7 +4083,10 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 			SetModified(TRUE, TDCA_PERCENT, dwModTaskID);
 
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			SetModified(TRUE, TDCA_STARTDATE, dwModTaskID);
 			SetModified(TRUE, TDCA_DUEDATE, dwModTaskID);
+		}
 	}
 	
 	return (nRes != SET_FAILED);
@@ -11250,7 +11256,8 @@ LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 {
-	SelectItem((HTREEITEM)lp);
+	if (lp)
+		SelectItem((HTREEITEM)lp);
 
     return 0L;
 }

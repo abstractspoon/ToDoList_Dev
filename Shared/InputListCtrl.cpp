@@ -741,23 +741,29 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
 
+	DWORD dwDisabled = (IsButtonEnabled(nRow, nCol) ? 0 : DFCS_INACTIVE);
+
 	switch (nType)
 	{
 		case ILCT_DROPLIST:
 			rButton.bottom--;
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			break;
 					
 		case ILCT_DATE:
 			{
 				CRect rDate(rButton);
 				rDate.DeflateRect(0, 1, 1, 2);
-				CThemed::DrawFrameControl(this, pDC, rDate, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
+				CThemed::DrawFrameControl(this, pDC, rDate, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			}
 			break;
 					
 		case ILCT_BROWSE:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, DFCS_BUTTONPUSH);
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled));
+
+			if (dwDisabled)
+				pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+
 			pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
 			break;
 			
@@ -770,7 +776,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 				else 
 					pWnd = this;
 
-				UINT nStyle = (DFCS_BUTTONCHECK | (bHasText ? DFCS_CHECKED : 0));
+				UINT nStyle = (DFCS_BUTTONCHECK | (bHasText ? DFCS_CHECKED : 0) | dwDisabled);
 
 				CThemed::DrawFrameControl(pWnd, pDC, rButton, DFC_BUTTON, nStyle);
 			}
@@ -857,13 +863,6 @@ BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 	return FALSE;
 }
 
-/*
-void CInputListCtrl::OnDeleteSelectedCell()
-{
-	DeleteSelectedCell();
-}
-
-*/
 BOOL CInputListCtrl::DeleteSelectedCell()
 {
 	if (GetCurSel() != - 1)
@@ -898,36 +897,29 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 			SetItemText(GetCurSel(), m_nCurCol, _T(""));
 		}
 
-		// redraw
-/*
-		SetCurSel(-1);
-		Invalidate();
-
-		// notify parent
-		m_nmhdr.hwndFrom = m_hWnd;
-		m_nmhdr.idFrom = GetDlgCtrlID();
-		m_nmhdr.code = LVN_DELETE;
-		GetParent()->SendMessage(WM_NOTIFY, (WPARAM)GetDlgCtrlID(), (LPARAM)&m_nmhdr);
-*/
-
 		return TRUE;
 	}
 	// else do nothing
 	return FALSE;
 }
 
+BOOL CInputListCtrl::IsEditing() const 
+{ 
+	return m_editBox.GetSafeHwnd() && m_editBox.IsWindowVisible(); 
+}
+
+BOOL CInputListCtrl::IsButtonEnabled(int nRow, int nCol) const
+{
+	// NOT if readonly or disabled
+	return (!IsReadOnly() && IsWindowEnabled());
+}
+
 BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	// if readonly or disabled then no
-	if (IsReadOnly() || !IsWindowEnabled())
-		return FALSE;
 
 	if (nRow == -1 || nCol == -1)
 		return FALSE;
 
-	int nNumRows = GetItemCount();
-	int nNumCols = GetColumnCount();
-	
 	// don't edit it:
 	//
 	// if editing is disabled in the current column
@@ -935,6 +927,9 @@ BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 		return FALSE;
 	
 	// or if its the last row and not the first column when autoadding rows
+	int nNumRows = GetItemCount();
+	int nNumCols = GetColumnCount();
+	
 	if (m_bAutoAddRows && (nRow == nNumRows - 1) && nCol != 0)
 		return FALSE;
 	

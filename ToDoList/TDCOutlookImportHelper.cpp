@@ -324,16 +324,20 @@ BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTasks, HTASKITEM hTa
 	// ------------------------------------------------------------
 	time64_t time;
 
-	if (CDateHelper::IsDateSet(tdi.dateStart) && CDateHelper::GetTimeT64(tdi.dateStart, time))
+	if (CDateHelper::GetTimeT64(tdi.dateStart, time))
 		pTasks15->SetTaskStartDate64(hTask, time);
 
-	if (CDateHelper::IsDateSet(tdi.dateDue) && CDateHelper::GetTimeT64(tdi.dateDue, time))
+	if (CDateHelper::GetTimeT64(tdi.dateDue, time))
 		pTasks15->SetTaskStartDate64(hTask, time);
 	
-	if (CDateHelper::IsDateSet(tdi.dateDone) && CDateHelper::GetTimeT64(tdi.dateDone, time))
+	if (CDateHelper::GetTimeT64(tdi.dateDone, time))
 		pTasks15->SetTaskStartDate64(hTask, time);
 	
-	// No created or Last Modified dates
+	if (CDateHelper::GetTimeT64(tdi.dateCreated, time))
+		pTasks15->SetTaskCreationDate64(hTask, time);
+	
+	if (CDateHelper::GetTimeT64(tdi.dateLastMod, time))
+		pTasks15->SetTaskLastModified64(hTask, time);
 	
 	// ------------------------------------------------------------
 	pTasks15->SetTaskPriority(hTask, tdi.nPriority);

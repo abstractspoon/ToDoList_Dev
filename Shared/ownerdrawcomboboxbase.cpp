@@ -29,6 +29,7 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 {
 }
 
+IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	//{{AFX_MSG_MAP(COwnerdrawComboBoxBase)

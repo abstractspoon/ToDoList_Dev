@@ -7,7 +7,7 @@
 
 // CTDLQuickFindComboBox
 
-IMPLEMENT_DYNAMIC(CTDLQuickFindComboBox, CComboBox)
+IMPLEMENT_DYNAMIC(CTDLQuickFindComboBox, CAutoComboBox)
 
 CTDLQuickFindComboBox::CTDLQuickFindComboBox(DWORD dwFlags) : CAutoComboBox(dwFlags)
 {
@@ -18,7 +18,7 @@ CTDLQuickFindComboBox::~CTDLQuickFindComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLQuickFindComboBox, CComboBox)
+BEGIN_MESSAGE_MAP(CTDLQuickFindComboBox, CAutoComboBox)
 END_MESSAGE_MAP()
 
 
