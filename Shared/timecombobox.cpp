@@ -161,54 +161,14 @@ double CTimeComboBox::Get24HourTime() const
 	}
 
 	// else use window text
-	double dTime = 0;
 	CString sTime;
 	GetWindowText(sTime);
 
-	if (sTime.IsEmpty())
-	{
-		if (m_dwStyle & TCB_NOTIME)
-			return 0; // midnight
-		else
-			return -1; // error
-	}
+	if (Misc::Trim(sTime).IsEmpty() && !(m_dwStyle & TCB_NOTIME))
+		return -1; // error
 
-	// look for a separator
-	CString sSep = Misc::GetTimeSeparator();
-	int nColon = sTime.Find(sSep);
-
-	if (nColon != -1) // extract hours and minutes
-	{
-		dTime = (_ttof(sTime.Left(nColon)) + (_ttof(sTime.Mid(nColon + sSep.GetLength())) / 60));
-	}
-	// test for military time
-	else if (Misc::IsNumber(sTime) && sTime.GetLength() >= 3)
-	{
-		// if only 3 digits have been typed, add a zero
-		if (sTime.GetLength() == 3)
-			sTime += '0';
-
-		dTime = _ttof(sTime.Left(2)) + _ttof(sTime.Mid(2)) / 60;
-	}
-	else // simple number
-	{
-		dTime = _ttof(sTime);
-	}
-
-	// look for PM signifier
-	CString sPM = Misc::GetPM();
-
-	if (!sPM.IsEmpty() && dTime < 12)
-	{
-		Misc::MakeUpper(sTime);
-		Misc::MakeUpper(sPM);
-		
-		if (sTime.Find(sPM) != -1)
-			dTime += 12;
-	}
-
-	// truncate to 0-24
-	return min(max(dTime, 0.0), 24.0);
+	// else
+	return CTimeHelper::DecodeClockTime(sTime);
 }
 
 BOOL CTimeComboBox::Set24HourTime(double dTime)
