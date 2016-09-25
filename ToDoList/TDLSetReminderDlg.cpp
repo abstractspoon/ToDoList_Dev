@@ -224,7 +224,7 @@ LRESULT CTDLSetReminderDlg::OnPlaySound(WPARAM wParam, LPARAM lParam)
 		UpdateData();
 
 		if (!m_sSoundFile.IsEmpty())
-			PlaySound(m_sSoundFile, NULL, SND_FILENAME);
+			PlaySound(m_sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
 
 		return TRUE;
 	}
