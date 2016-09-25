@@ -522,8 +522,6 @@ BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim)
 	}
 
 	return TRUE;
-
-
 }
 
 CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
@@ -540,6 +538,48 @@ CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
 	}
 
 	return sText;
+}
+
+BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
+{
+	CString sTemp(sText);
+	sTemp.TrimLeft();
+
+	int nPos = sTemp.Find(szPrefix);
+
+	if (nPos == 0)
+	{
+		sText = sTemp.Mid(lstrlen(szPrefix));
+
+		if (bTrim)
+			sText.TrimLeft();
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim)
+{
+	CString sTemp(sText);
+	sTemp.TrimRight();
+
+	int nPos = sTemp.Find(szSuffix);
+
+	if (nPos == (sTemp.GetLength() - lstrlen(szSuffix)))
+	{
+		sText = sTemp.Left(nPos);
+
+		if (bTrim)
+			sText.TrimRight();
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 BOOL Misc::RemoveAt(CString& sText, int nPos)

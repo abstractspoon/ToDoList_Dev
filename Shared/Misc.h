@@ -328,6 +328,8 @@ namespace Misc
 	TCHAR TrimLast(CString& sText);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	BOOL RemoveAt(CString& sText, int nPos);
+	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
+	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
 
 	double Round(double dValue);
 	float Round(float fValue);

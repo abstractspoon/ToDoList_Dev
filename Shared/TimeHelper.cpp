@@ -358,6 +358,69 @@ CString CTimeHelper::FormatClockTime(int nHour, int nMin, int nSec, BOOL bIncSec
 	return sTime;
 }
 
+double CTimeHelper::DecodeClockTime(LPCTSTR szTime)
+{
+	CString sTime(szTime);
+	Misc::Trim(sTime);
+
+	if (sTime.IsEmpty())
+	{
+		return 0; // midnight
+	}
+
+	// else
+	double dTime = 0;
+
+	// Look for AM/PM
+	BOOL bPM = RemovePM(sTime);
+	BOOL bAM = (!bPM && RemoveAM(sTime));
+
+	// look for a minute separator
+	CStringArray aBits;
+
+	if (Misc::Split(sTime, aBits, Misc::GetTimeSeparator()))
+	{
+		switch (aBits.GetSize())
+		{
+		case 3: dTime += (_ttof(aBits[2]) / 3600);	// seconds
+		case 2: dTime += (_ttof(aBits[1]) / 60);	// minutes
+		case 1: dTime += (_ttof(aBits[0]));			// minutes
+		}
+	}
+	// test for military time
+	else if (Misc::IsNumber(sTime) && sTime.GetLength() >= 3)
+	{
+		// if only 3 digits have been typed, add a zero
+		if (sTime.GetLength() == 3)
+			sTime += '0';
+
+		dTime = _ttof(sTime.Left(2)) + _ttof(sTime.Mid(2)) / 60;
+	}
+	else // simple number
+	{
+		dTime = _ttof(sTime);
+	}
+
+	// Modify for PM signifier
+	if (bPM && dTime < 12)
+		dTime += 12;
+
+	// truncate to 0-24
+	return min(max(dTime, 0.0), 24.0);
+}
+
+BOOL CTimeHelper::RemovePM(CString& sTime)
+{
+	CString sPM(Misc::GetPM());
+	return (Misc::RemovePrefix(sTime, sPM) || Misc::RemoveSuffix(sTime, sPM));
+}
+
+BOOL CTimeHelper::RemoveAM(CString& sTime)
+{
+	CString sAM(Misc::GetAM());
+	return (Misc::RemovePrefix(sTime, sAM) || Misc::RemoveSuffix(sTime, sAM));
+}
+
 CString CTimeHelper::FormatTime(double dTime, int nDecPlaces) const
 {
 	return FormatTime(dTime, THU_NULL, nDecPlaces);

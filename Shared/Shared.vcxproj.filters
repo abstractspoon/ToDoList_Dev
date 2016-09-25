@@ -286,9 +286,6 @@
     <ClCompile Include="RichEditHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Misc.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="RichEditNcBorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -452,6 +449,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MonthCalCtrlEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

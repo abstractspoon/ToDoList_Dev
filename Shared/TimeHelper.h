@@ -69,6 +69,7 @@ public:
 
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
+	static double DecodeClockTime(LPCTSTR szTime); // returns 0-24
 	
 protected:
 	double m_dHours2Workdays, m_dWorkdays2Weeks;
@@ -90,6 +91,8 @@ protected:
 								double dLeftOverMultiplier, BOOL bDecPlaces);
 	static BOOL IsWeekdays(TH_UNITS nUnits);
 	static BOOL IsValidUnit(int nUnits);
+	static BOOL RemovePM(CString& sTime);
+	static BOOL RemoveAM(CString& sTime);
 };
 
 #endif // !defined(AFX_TIMEHELPER_H__BA0C1E67_FAAA_4E65_8EF3_01B011ACFBBC__INCLUDED_)
