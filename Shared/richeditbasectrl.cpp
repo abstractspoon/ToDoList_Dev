@@ -1114,11 +1114,7 @@ DWORD CRichEditBaseCtrl::StreamInCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG
 	STREAMINCOOKIE* pCookie = (STREAMINCOOKIE*)dwCookie;
 	int nBytes = min(cb, pCookie->GetLength());
 	
-#if _MSC_VER >= 1400
-	strncpy_s((char*)pbBuff, cb, pCookie->CopyFrom(), nBytes);
-#else
-	strncpy((char*)pbBuff, pCookie->CopyFrom(), nBytes);
-#endif
+	memcpy(pbBuff, pCookie->CopyFrom(), nBytes);
 	
 	*pcb = nBytes;
 	pCookie->nStreamPos += nBytes;
