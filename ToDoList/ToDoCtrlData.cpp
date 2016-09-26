@@ -4798,6 +4798,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 						TaskMatches(pTDI->sVersion, sp, resTask, TRUE) ||
 						TaskMatches(pTDI->sExternalID, sp, resTask, TRUE) ||
 						TaskMatches(pTDI->aFileLinks, sp, resTask) ||
+						TaskMatches(pTDI->aTags, sp, resTask) ||
 						TaskMatches(pTDI->sCreatedBy, sp, resTask, TRUE));
 			break;
 
