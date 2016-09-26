@@ -1417,10 +1417,11 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 					rIcon.left += 18;
 				}
 			}
+
+			return;
 		}
 	}
-	else
-	{
-		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
-	}
+
+	// all else
+	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
