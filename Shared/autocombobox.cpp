@@ -131,6 +131,9 @@ BOOL CAutoComboBox::OnCloseUp()
 
 BOOL CAutoComboBox::OnDropDown()
 {
+// 	if (ScIsHooked())
+// 		FixupListBoxPosition();
+
 	return FALSE; // pass to parent
 }
 
@@ -553,6 +556,16 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 			return 1L; // prevent combo closing
 		}
 		break;
+
+	case WM_WINDOWPOSCHANGED:
+		if (lp)
+		{
+			WINDOWPOS* pWPos = (WINDOWPOS*)lp;
+			
+			if (FixupListBoxPosition(*pWPos))
+				return 0;
+		}
+		break;
 	}
 	
 	return CSubclasser::ScWindowProc(GetListbox(), msg, wp, lp);
@@ -794,3 +807,38 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 	return FALSE;
 }
 
+BOOL CAutoComboBox::FixupListBoxPosition(const WINDOWPOS& wpos)
+{
+	// If the right edge of the droplist is off the edge
+	// of the screen such that the close button is hidden
+	// reposition the listbox aligned to the right of the
+	// combobox
+	if (AllowDelete())
+	{
+		if (!ScIsHooked())
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		CRect rListBox(wpos.x, wpos.y, (wpos.x + wpos.cx), (wpos.y + wpos.cy));
+		CRect rComboBox;
+		GetWindowRect(rComboBox);
+
+		if (rListBox.right > rComboBox.right)
+		{
+			CRect rDesktop;
+			GraphicsMisc::GetTotalAvailableScreenSpace(rDesktop);
+
+			if (rListBox.right > rDesktop.right)
+			{
+				rListBox.OffsetRect((rComboBox.right - rListBox.right), 0);
+				ScGetCWnd()->MoveWindow(rListBox, TRUE);
+				return TRUE;
+			}
+		}
+	}
+
+	// not modified
+	return FALSE;
+}

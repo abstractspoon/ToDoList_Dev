@@ -157,6 +157,8 @@ protected:
 	virtual CString GetSelectedItem() const;
 	virtual BOOL DeleteLBItem(int nItem);
 
+	BOOL FixupListBoxPosition(const WINDOWPOS& wpos);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

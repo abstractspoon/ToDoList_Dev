@@ -185,7 +185,7 @@ namespace GraphicsMisc
 
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen);
 	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen);
-	BOOL GetAvailableScreenSpace(CRect& rScreen);
+	void GetTotalAvailableScreenSpace(CRect& rScreen);
 
 	void DrawGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);
 	void DrawGlass(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);

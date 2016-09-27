@@ -2651,7 +2651,7 @@ void CToDoListWnd::RestorePosition()
 	
 	if (rect.Width() > 0 && rect.Height() > 0)
 	{
-		// ensure this intersects with the desktop by a decent amount
+		// ensure this intersects with the closest screen by a decent amount
 		int BORDER = 200;
 		rect.DeflateRect(BORDER, BORDER);
 
@@ -2691,7 +2691,7 @@ void CToDoListWnd::RestorePosition()
 
 		// make sure it fits the screen
 		CRect rScreen;
-		GraphicsMisc::GetAvailableScreenSpace(rScreen);
+		GraphicsMisc::GetAvailableScreenSpace(rScreen, rScreen);
 
 		if (rect.Height() > rScreen.Height())
 			rect.bottom = rScreen.Height();
