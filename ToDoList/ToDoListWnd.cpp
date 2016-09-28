@@ -10897,19 +10897,7 @@ void CToDoListWnd::OnUpdateShowTimelogfile(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnAddtimetologfile() 
 {
-	// Temporarily hide the time tracker if it is visible 
-	// and pinned on top
-	BOOL bHideTracker = (Prefs().GetDisplayLogConfirm() && 
-		m_dlgTimeTracker.IsWindowVisible() && 
-		m_dlgTimeTracker.IsAlwaysOnTop());
-
-	if (bHideTracker)
-		m_dlgTimeTracker.ShowWindow(SW_HIDE);
-	
 	GetToDoCtrl().DoAddTimeToLogFile();
-	
-	if (bHideTracker)
-		m_dlgTimeTracker.ShowWindow(SW_SHOW);
 }
 
 void CToDoListWnd::OnUpdateAddtimetologfile(CCmdUI* pCmdUI) 
