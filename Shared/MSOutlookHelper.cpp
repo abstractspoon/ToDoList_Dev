@@ -314,6 +314,7 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 			{
 				// Other 'dangerous' characters can be replaced by 
 				// their HEX equivalent
+				const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
 				CString sReplace;
 
 				for (int nChar = 0; nChar < sSearch.GetLength(); nChar++)
