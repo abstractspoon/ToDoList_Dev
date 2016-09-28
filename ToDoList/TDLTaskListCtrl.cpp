@@ -743,23 +743,13 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 			case VK_LEFT:
 			case VK_RIGHT:
+				// Windows only invalidates the item labels but
+				// we need the whole row because we render the 
+				// comments after the task text
 				if (hRealWnd == m_lcTasks)
-				{
-					// see WM_MOUSEWHEEL comment below
 					m_lcTasks.Invalidate(FALSE);
-				}
 				break;
 			}
-		}
-		break;
-
-	case WM_MOUSEWHEEL:
-		// if horizontal scrolling with right-side tree we have to redraw 
-		// the full client width because Window's own optimised
-		// scrolling creates artifacts otherwise.
-		if (!HasVScrollBar() && HasHScrollBar(hRealWnd) && !HasStyle(TDCS_RIGHTSIDECOLUMNS))
-		{
-			m_lcTasks.Invalidate(FALSE);
 		}
 		break;
 

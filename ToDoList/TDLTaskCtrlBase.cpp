@@ -3472,7 +3472,15 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// Windows only invalidates the item labels but
 			// we need the whole row because we render the 
 			// comments after the task text
-			::InvalidateRect(Tasks(), NULL, FALSE);
+			::InvalidateRect(hRealWnd, NULL, FALSE);
+			break;
+
+		case WM_MOUSEWHEEL:
+			// Windows only invalidates the item labels but
+			// we need the whole row because we render the 
+			// comments after the task text
+			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+				::InvalidateRect(hRealWnd, NULL, FALSE);
 			break;
 		}
 	}

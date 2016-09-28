@@ -1499,43 +1499,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 			}
 			break;
-
-		case WM_MOUSEWHEEL:
-			// only restrain horizontal pos if vertically scrolling
-			// and there is actually something to do
-			if (HasVScrollBar())
-			{
-				SCROLLINFO si = { 0 };
-
-				if (m_tcTasks.GetScrollInfo(SB_VERT, &si))
-				{
-					int nDelta = (short)HIWORD(wp);
-					
-					if (((nDelta > 0) && (si.nPos > 0)) ||
-						((nDelta < 0) && (si.nPos < (si.nMax + 1 - (int)si.nPage))))
-					{
-						CHoldHScroll hhs(m_tcTasks);
-						CDisableTreeTips dtt(m_tcTasks, FALSE);
-					
-						return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
-					}
-				}
-			}
-			else if (HasHScrollBar(hRealWnd) && !HasStyle(TDCS_RIGHTSIDECOLUMNS))
-			{
-				// see comment below
-				m_tcTasks.Invalidate(FALSE);
-			}
-			break;
-
-		case WM_HSCROLL:
-			// if scrolling with right-side tree we have to redraw 
-			// the full client width because Windows' own optimised
-			// scrolling creates artifacts otherwise.
-			if (!HasStyle(TDCS_RIGHTSIDECOLUMNS))
-				m_tcTasks.Invalidate(FALSE);
-			break;
-			
 		} // -----------------------------------------------------------------------------------------------
 		
 		if (bSelChange)
