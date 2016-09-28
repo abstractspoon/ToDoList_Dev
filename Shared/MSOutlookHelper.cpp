@@ -308,14 +308,24 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 			CString sFolder = MAPIFolder(lpParent).GetFolderPath();
 			CString sSubject = GetItemData(obj, OA_TITLE);
 
-			// very odd bug if subject starts with two chars 
-			// and then a colon -> Outlook fails to open the link
-			// so we handle this specific issue by falling back on the itemID
-			if ((sSubject.GetLength() <= 2) || (sSubject[2] != ':'))
+			// Outlook will not accept certain characters in the 
+			// URL even if they are encoded so we check these first
+			if (sSubject.FindOneOf(_T("%!/")) == -1)
 			{
+				// Other 'dangerous' characters can be replaced by 
+				// their HEX equivalent
+				CString sReplace;
+
+				for (int nChar = 0; nChar < sSearch.GetLength(); nChar++)
+				{
+					TCHAR cSearch[2] = { sSearch[nChar], 0 };
+
+					sReplace.Format(_T("%%%02X"), sSearch[nChar]);
+					sSubject.Replace(cSearch, sReplace);
+				}
+
 				sPath.Format(_T("%s\\~%s"), sFolder, sSubject);
 			}
-			// else use itemID from above
 		}
 	}
 
