@@ -182,10 +182,9 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		break;
 		
 	case TDLWUR_SUCCESS:
-		CleanupAppFolder(sAppFolder);
+		// all good
 		break;
 		
-		// prompt to display update log
 	case TDLWUR_ERR_APPFOLDER:
 	case TDLWUR_ERR_CREATEPROGRESSDLG:
 	case TDLWUR_ERR_DELETEBACKUPFOLDER:
@@ -203,6 +202,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	case TDLWUR_ERR_TEMPUPDATERFOLDER:
 	case TDLWUR_ERR_UNZIP:
 	case TDLWUR_ERR_UPDATERFOLDER:
+		// prompt to display update log
 		if (IDYES == AfxMessageBox(CEnString(IDS_WEBUPDATE_FAILURE), MB_YESNO | MB_ICONINFORMATION))
 		{
 			FileMisc::Run(NULL, sUpdateLog);
@@ -213,41 +213,4 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		ASSERT(0);
 		break;
 	}
-}
-
-void CTDLUpdateApp::CleanupAppFolder(const CString& sAppFolder)
-{
-	CString sFolder = FileMisc::TerminatePath(sAppFolder);
-
-	// remove old web updater
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.exe"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.exe"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.log"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.log"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.LIC"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("install.bmp"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("install.ico"), TRUE);
-
-	// remove old components
-	FileMisc::DeleteFile(sFolder + _T("GoogleDocsStorage.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ToodleDoStorage.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ToDoListLOC.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("ChronicleWrap.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("StatisticsExt.dll"), TRUE);
-
-	// gif translation 'flags' replaced with pngs
-	FileMisc::DeleteFolderContents(sFolder + _T("Resources\\Translations"), 
-									FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY,
-									_T("*.gif"));
-
-/*
-	// remove old RTF to HTML converter
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Converter.Html.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Interpreter.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Parser.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Solutions.Community.Rtf2Html.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Itenso.Sys.dll"), TRUE);
-	FileMisc::DeleteFile(sFolder + _T("Rtf2HtmlBridge.dll"), TRUE);
-*/
 }

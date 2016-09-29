@@ -120,6 +120,10 @@ BOOL CToDoListApp::InitInstance()
 	// Set this before any 
 	CWinHelpButton::SetIcon(LoadIcon(IDI_HELPBUTTON));
 
+	// Remove any old components before they might get loaded
+	CleanupAppFolder();
+
+	// Process commandline switches
 	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
 	ParseCommandLine(cmdInfo);
 
@@ -1885,4 +1889,42 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 	}
 
 	return sResource;
+}
+
+void CToDoListApp::CleanupAppFolder()
+{
+	CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppFolder());
+
+	// remove old web updater
+	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.exe"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.exe"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.log"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc2.log"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("WebUpdateSvc.LIC"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("install.bmp"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("install.ico"), TRUE);
+
+	// remove old components
+	FileMisc::DeleteFile(sFolder + _T("GoogleDocsStorage.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("ToodleDoStorage.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("ToDoListLOC.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("RTFContentCtrlLOC.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("ChronicleWrap.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("StatisticsExt.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("OutlookImpExp.dll"), TRUE);
+
+	// gif translation 'flags' replaced with pngs
+	FileMisc::DeleteFolderContents(sFolder + _T("Resources\\Translations"), 
+									FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY,
+									_T("*.gif"));
+
+/*
+	// remove old RTF to HTML converter
+	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Converter.Html.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Interpreter.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Parser.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("Itenso.Solutions.Community.Rtf2Html.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("Itenso.Sys.dll"), TRUE);
+	FileMisc::DeleteFile(sFolder + _T("Rtf2HtmlBridge.dll"), TRUE);
+*/
 }

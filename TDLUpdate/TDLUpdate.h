@@ -32,7 +32,6 @@ protected:
 	//}}AFX_VIRTUAL
 
 	static void DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bPreRelease, const CPoint& ptPos);
-	static void CleanupAppFolder(const CString& sAppFolder);
 
 // Implementation
 
