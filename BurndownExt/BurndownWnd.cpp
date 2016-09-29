@@ -256,6 +256,8 @@ bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 
 bool CBurndownWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 {
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	switch (nAttribute)
 	{
 	case IUI_DONEDATE:
@@ -270,6 +272,8 @@ bool CBurndownWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 
 bool CBurndownWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
 {
+// 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+// 	
 // 	switch (nAttribute)
 // 	{
 // 	case IUI_DONEDATE:
@@ -550,6 +554,8 @@ BOOL CBurndownWnd::RemoveDeletedTasks(const ITaskList15* pTasks)
 
 void CBurndownWnd::Release()
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	if (GetSafeHwnd())
 		DestroyWindow();
 	
@@ -558,6 +564,8 @@ void CBurndownWnd::Release()
 
 bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) 
 { 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
@@ -581,6 +589,8 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/)
 
 bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const 
 { 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:

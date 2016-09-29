@@ -160,6 +160,14 @@ SOURCE=.\res\BurndownExt.rc2
 
 SOURCE=.\res\icon1.ico
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\toolbar.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\toolbar_std.bmp
+# End Source File
 # End Group
 # Begin Source File
 
