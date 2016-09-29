@@ -85,16 +85,28 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_WM_SHOWWINDOW()
 	ON_CBN_SELCHANGE(IDC_OPTIONS, OnSelchangeOptions)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_HELP, OnHelp)
+	ON_WM_HELPINFO()
 	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
-	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanWnd message handlers
+
+void CKanbanWnd::OnHelp()
+{
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
+}
+
+BOOL CKanbanWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnHelp();
+	return TRUE;
+}
 
 BOOL CKanbanWnd::OnInitDialog() 
 {
@@ -738,11 +750,6 @@ LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	//	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((GTLC_COLUMN)lp));
 	
 	return 0L;
-}
-
-void CKanbanWnd::OnHelp()
-{
-	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
 }
 
 void CKanbanWnd::OnKanbanPreferences() 

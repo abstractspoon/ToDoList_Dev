@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
+	ON_WM_HELPINFO()
 	ON_COMMAND(ID_CAL_GOTOTODAY, OnGototoday)
 	ON_COMMAND(ID_CAL_PREFS, OnPreferences)
 	ON_CBN_SELCHANGE(IDC_NUMWEEKS, OnSelChangeNumWeeks)
@@ -87,6 +88,12 @@ END_MESSAGE_MAP()
 void CCalendarWnd::OnHelp()
 {
 	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
+}
+
+BOOL CCalendarWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnHelp();
+	return TRUE;
 }
 
 void CCalendarWnd::SetReadOnly(bool bReadOnly)

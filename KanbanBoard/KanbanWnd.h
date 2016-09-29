@@ -99,11 +99,12 @@ protected:
 	afx_msg void OnSelchangeAttribute();
 	afx_msg void OnSelchangeOptions();
 	//}}AFX_MSG
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKanbanPreferences();
-	afx_msg void OnHelp();
 	afx_msg void OnUpdateKanbanPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

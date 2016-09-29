@@ -71,6 +71,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnCommentsMenuCmd(UINT nCmdID);
 	afx_msg void OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI);
 	afx_msg BOOL OnChangeText();

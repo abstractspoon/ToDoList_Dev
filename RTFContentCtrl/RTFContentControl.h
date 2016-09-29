@@ -134,6 +134,7 @@ protected:
 	afx_msg LRESULT OnCustomUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFailedUrl(WPARAM wp, LPARAM lp);
 	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
 	DECLARE_MESSAGE_MAP()
 

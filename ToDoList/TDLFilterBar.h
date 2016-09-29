@@ -112,6 +112,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeFilter();
 	afx_msg void OnCloseUpOptions();
 	afx_msg void OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult);

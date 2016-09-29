@@ -182,6 +182,7 @@ protected:
 	afx_msg void OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);

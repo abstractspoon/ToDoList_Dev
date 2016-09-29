@@ -117,6 +117,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);

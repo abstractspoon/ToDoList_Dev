@@ -98,8 +98,13 @@ const COLORREF WHITE = RGB(240, 240, 240);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT DAYINSECS		= 24 * 60 * 60;
-const int  COMBODROPHEIGHT	= 200;
+const UINT  DAYINSECS		= 24 * 60 * 60;
+const int   COMBODROPHEIGHT	= 200;
+
+/////////////////////////////////////////////////////////////////////////////
+
+const DWORD IDD_TODOCTRL_DIALOG = (DWORD)(LPCTSTR)_T("IDD_TODOCTRL_DIALOG");
+const DWORD IDC_TREEVIEW_CTRL   = (DWORD)(LPCTSTR)_T("IDC_TREEVIEW_CTRL");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -403,6 +408,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_WM_SHOWWINDOW()
 	ON_WM_TIMER()
 	ON_WM_SETTINGCHANGE()
+	ON_WM_HELPINFO()
 
 	ON_NOTIFY(NM_CLICK, IDC_TASKTREELIST, OnTreeClick)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_TASKTREELIST, OnTreeSelChange)
@@ -6834,6 +6840,22 @@ LRESULT CToDoCtrl::OnCommentsDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 	AfxGetApp()->WinHelp(lParam);
 
 	return 0L;
+}
+
+BOOL CToDoCtrl::OnHelpInfo(HELPINFO* lpHelpInfo)
+{
+	if (lpHelpInfo->iContextType == HELPINFO_WINDOW)
+	{
+		if (CDialogHelper::IsChildOrSame(m_taskTree, (HWND)lpHelpInfo->hItemHandle))
+		{
+			AfxGetApp()->WinHelp(IDC_TREEVIEW_CTRL);
+		}
+		else // default
+		{
+			AfxGetApp()->WinHelp(IDD_TODOCTRL_DIALOG);
+		}
+	}
+	return TRUE;
 }
 
 void CToDoCtrl::OnChangeProjectName()

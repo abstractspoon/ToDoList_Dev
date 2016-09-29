@@ -136,6 +136,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -144,6 +145,12 @@ END_MESSAGE_MAP()
 void CBurndownWnd::OnHelp()
 {
 	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
+}
+
+BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnHelp();
+	return TRUE;
 }
 
 BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)

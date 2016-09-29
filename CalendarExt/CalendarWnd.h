@@ -109,6 +109,7 @@ protected:
 	afx_msg void OnMiniCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnMiniCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	
 	afx_msg LRESULT OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifySelectionChange(WPARAM wp, LPARAM lp);

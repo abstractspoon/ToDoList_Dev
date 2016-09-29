@@ -276,10 +276,17 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 	ON_WM_CTLCOLOR()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CFilterBar message handlers
+
+BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	AfxGetApp()->WinHelp(IDD_FILTER_BAR);
+	return TRUE;
+}
 
 BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
 {

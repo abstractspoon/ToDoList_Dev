@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_WM_CREATE()
 	//}}AFX_MSG_
 	ON_COMMAND(ID_HELP, OnHelp)
+	ON_WM_HELPINFO()
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 	ON_COMMAND(ID_EDIT_COPYFORMATTING, OnEditCopyFormatting)
 	ON_COMMAND(ID_EDIT_COPYASHTML, OnEditCopyAsHtml)
@@ -150,6 +151,12 @@ END_MESSAGE_MAP()
 void CRTFContentControl::OnHelp()
 {
 	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)GetTypeID());
+}
+
+BOOL CRTFContentControl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnHelp();
+	return TRUE;
 }
 
 void CRTFContentControl::OnChangeText() 

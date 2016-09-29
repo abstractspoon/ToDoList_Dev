@@ -28,7 +28,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 const UINT WM_SETWORDWRAP = (WM_USER+1);
+const DWORD IDC_SIMPLETEXT_COMMENTS = (DWORD)(LPCTSTR)_T("IDC_SIMPLETEXT_COMMENTS");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +92,7 @@ BEGIN_MESSAGE_MAP(CToDoCommentsCtrl, CUrlRichEditCtrl)
 	ON_WM_DESTROY()
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
+	ON_WM_HELPINFO()
 	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
@@ -99,6 +103,12 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCommentsCtrl message handlers
+
+BOOL CToDoCommentsCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	GetParent()->SendMessage(WM_ICC_DOHELP, 0, IDC_SIMPLETEXT_COMMENTS);
+	return TRUE;
+}
 
 BOOL CToDoCommentsCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
