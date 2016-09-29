@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -737,6 +738,11 @@ LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	//	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((GTLC_COLUMN)lp));
 	
 	return 0L;
+}
+
+void CKanbanWnd::OnHelp()
+{
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
 }
 
 void CKanbanWnd::OnKanbanPreferences() 

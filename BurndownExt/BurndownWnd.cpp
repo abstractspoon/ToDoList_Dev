@@ -135,10 +135,16 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd message handlers
+
+void CBurndownWnd::OnHelp()
+{
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
+}
 
 BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
 {
@@ -190,6 +196,9 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 	{
 		m_theme = *pTheme;
 		m_brBack.CreateSolidBrush(pTheme->crAppBackLight);
+		
+		// intentionally set background colours to be same as ours
+		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 	}
 }
 
@@ -627,6 +636,19 @@ HBRUSH CBurndownWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 BOOL CBurndownWnd::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
+
+	// create toolbar
+	if (m_toolbar.CreateEx(this))
+	{
+		const COLORREF MAGENTA = RGB(255, 0, 255);
+		
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		
+		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
+		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
+		m_toolbar.RefreshButtonStates(TRUE);
+	}
 
 	CRect rFrame;
 	m_stFrame.GetWindowRect(rFrame);

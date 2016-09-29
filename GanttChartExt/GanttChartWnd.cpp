@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_COMMAND(ID_GANTT_DELETEDEPENDS, OnGanttDeleteDepends)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_DELETEDEPENDS, OnUpdateGanttDeleteDepends)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_SETFOCUS()
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_GANTTTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
@@ -99,6 +100,11 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd message handlers
+
+void CGanttChartWnd::OnHelp()
+{
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)GetTypeID());
+}
 
 void CGanttChartWnd::SetReadOnly(bool bReadOnly)
 {

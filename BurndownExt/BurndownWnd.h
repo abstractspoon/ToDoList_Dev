@@ -11,6 +11,8 @@
 
 #include "..\Shared\mapex.h"
 #include "..\Shared\uitheme.h"
+#include "..\Shared\entoolbar.h"
+#include "..\Shared\toolbarhelper.h"
 
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -92,6 +94,8 @@ protected:
 	UITHEME m_theme;
 	CHMXChart m_graph;
 	int m_nScale;
+	CEnToolBar m_toolbar;
+	CToolbarHelper m_tbHelper;
 
 	CMapStatsItems m_data;
 	CDWordArray m_aDateOrdered;
@@ -117,6 +121,7 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
+	afx_msg void OnHelp();
 	DECLARE_MESSAGE_MAP()
 
 protected:

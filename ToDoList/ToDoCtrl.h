@@ -577,6 +577,7 @@ protected:
 	afx_msg LRESULT OnTreeDragOver(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);

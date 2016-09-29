@@ -175,6 +175,8 @@ BEGIN
     BUTTON      ID_EDIT_INLINESPELLCHECK
     SEPARATOR
     BUTTON      ID_PREFERENCES
+    SEPARATOR
+    BUTTON      ID_HELP
 END
 
 
@@ -261,6 +263,7 @@ BEGIN
         MENUITEM "I&nline Spell Checking",      ID_EDIT_INLINESPELLCHECK
         MENUITEM SEPARATOR
         MENUITEM "&Preferences...",             ID_PREFERENCES
+        MENUITEM "Online Help",                 ID_HELP
     END
 END
 
@@ -539,6 +542,11 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INLINESPELLCHECK "\nInline Spell-checking"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
 END
 
 #endif    // English (Australia) resources

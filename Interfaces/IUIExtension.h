@@ -248,6 +248,9 @@ const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDIT
 // wParam = 0, lParam == Column ID
 const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
 
+// wParam = 0, lParam == identifying string (LPCTSTR)
+const UINT WM_IUI_DOHELP				= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
+
 //////////////////////////////////////////////////////////////////////
 
 class IUIExtensionWindow

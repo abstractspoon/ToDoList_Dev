@@ -75,7 +75,7 @@ EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,377,13,210,13,SS_CENTERIMAGE | 
+                    IDC_SELECTEDTASKDATES,365,13,222,13,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
@@ -93,9 +93,9 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
     LTEXT           "Selected Task Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    377,3,210,8
+                    366,3,210,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,247,12,122,17
+                    WS_VISIBLE,247,12,109,17
 END
 
 
@@ -311,6 +311,8 @@ BEGIN
     BUTTON      ID_GANTT_NEWDEPENDS
     BUTTON      ID_GANTT_EDITDEPENDS
     BUTTON      ID_GANTT_DELETEDEPENDS
+    SEPARATOR
+    BUTTON      ID_HELP
 END
 
 
@@ -379,6 +381,11 @@ BEGIN
     IDS_DISPLAYDAYSSHORT    "Days, narrow"
     IDS_DISPLAYDAYSMID      "Days, mid"
     IDS_DISPLAYDAYSLONG     "Days, wide"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
 END
 
 #endif    // English (Australia) resources

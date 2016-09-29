@@ -155,7 +155,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 358
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -273,6 +273,8 @@ IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
 IDR_TOOLBAR TOOLBAR DISCARDABLE  16, 15
 BEGIN
     BUTTON      ID_PREFS
+    SEPARATOR
+    BUTTON      ID_HELP
 END
 
 IDR_COLUMN_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
@@ -324,6 +326,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_HELP                 "\nOnline Help"
     IDS_DISPLAY_PRIORITY    "Priority"
     IDS_DISPLAY_ALLOCTO     "Allocated To"
     IDS_DISPLAY_ALLOCBY     "Allocated By"

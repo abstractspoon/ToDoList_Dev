@@ -121,7 +121,7 @@ STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,226,13,303,13,SS_CENTERIMAGE | 
+                    IDC_SELECTEDTASKDATES,244,13,285,13,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Dis&play",IDC_STATIC,0,2,79,8
     COMBOBOX        IDC_NUMWEEKS,0,13,79,200,CBS_DROPDOWNLIST | WS_TABSTOP
@@ -129,9 +129,9 @@ BEGIN
     COMBOBOX        IDC_SNAPMODES,87,13,79,161,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_STATIC,87,2,79,8
-    LTEXT           "Selected Task Date Range",IDC_STATIC,226,2,210,8
+    LTEXT           "Selected Task Date Range",IDC_STATIC,244,2,210,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,172,12,48,17
+                    WS_VISIBLE,172,12,62,17
 END
 
 IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 373, 222
@@ -296,6 +296,8 @@ BEGIN
     BUTTON      ID_CAL_GOTOTODAY
     SEPARATOR
     BUTTON      ID_CAL_PREFS
+    SEPARATOR
+    BUTTON      ID_HELP
 END
 
 
@@ -316,6 +318,11 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_CAL_GOTOTODAY        "\nScroll To Today"
     ID_CAL_PREFS            "\nCalendar Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
 END
 
 #endif    // English (Australia) resources

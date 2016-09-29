@@ -103,6 +103,7 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKanbanPreferences();
+	afx_msg void OnHelp();
 	afx_msg void OnUpdateKanbanPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

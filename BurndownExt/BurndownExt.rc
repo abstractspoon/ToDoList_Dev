@@ -137,6 +137,8 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "",IDC_GRAPH,"Static",SS_WHITERECT,15,46,252,206
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,31,314,250
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,87,12,122,17
 END
 
 
@@ -167,6 +169,25 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_TOOLBAR_STD         BITMAP  DISCARDABLE     "res\\toolbar_std.bmp"
+IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_HELP
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

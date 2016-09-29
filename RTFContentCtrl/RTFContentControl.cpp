@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_CREATE()
 	//}}AFX_MSG_
+	ON_COMMAND(ID_HELP, OnHelp)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 	ON_COMMAND(ID_EDIT_COPYFORMATTING, OnEditCopyFormatting)
 	ON_COMMAND(ID_EDIT_COPYASHTML, OnEditCopyAsHtml)
@@ -145,6 +146,11 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
+
+void CRTFContentControl::OnHelp()
+{
+	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)GetTypeID());
+}
 
 void CRTFContentControl::OnChangeText() 
 {
@@ -457,6 +463,7 @@ void CRTFContentControl::InitMenuIconManager()
 	aCmdIDs.Add(ID_EDIT_WORDWRAP);
 	aCmdIDs.Add(ID_EDIT_INLINESPELLCHECK);
 	aCmdIDs.Add(ID_PREFERENCES);
+	aCmdIDs.Add(ID_HELP);
 		
 	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TOOLBAR, RGB(255, 0, 255));
 }

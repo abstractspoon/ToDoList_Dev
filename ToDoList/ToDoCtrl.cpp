@@ -410,6 +410,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_COMMENTSCHANGE, OnCommentsChange)
 	ON_REGISTERED_MESSAGE(WM_ICC_COMMENTSKILLFOCUS, OnCommentsKillFocus)
 	ON_REGISTERED_MESSAGE(WM_ICC_WANTSPELLCHECK, OnCommentsWantSpellCheck)
+	ON_REGISTERED_MESSAGE(WM_ICC_DOHELP, OnCommentsDoHelp)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -6824,6 +6825,13 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 LRESULT CToDoCtrl::OnCommentsKillFocus(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	HandleUnsavedComments();
+
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnCommentsDoHelp(WPARAM /*wParam*/, LPARAM lParam)
+{
+	AfxGetApp()->WinHelp(lParam);
 
 	return 0L;
 }
