@@ -1172,9 +1172,8 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 void CToDoListApp::OnImportPrefs() 
 {
 	// default location is always app folder
-	CString sIniPath = FileMisc::GetAppFilePath();
-	sIniPath.MakeLower();
-	sIniPath.Replace(_T("exe"), _T("ini"));
+	CString sIniPath(FileMisc::GetAppFilePath());
+	FileMisc::ReplaceExtension(sIniPath, _T("ini"));
 	
 	// scope the prefs object so that no outstanding references
 	// are held if we need to re-initialise it

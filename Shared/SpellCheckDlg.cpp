@@ -153,8 +153,7 @@ BOOL CSpellCheckDlg::InitDictionary(const CString& sDict)
 	CString sDictPath = FileMisc::GetFullPath(sDict, FileMisc::GetAppFolder());
 	
 	CString sAffixPath(sDictPath);
-	sAffixPath.MakeLower();
-	sAffixPath.Replace(_T(".dic"), _T(".aff"));
+	FileMisc::ReplaceExtension(sAffixPath, _T(".aff"));
 
 	ISpellChecker* pTemp = CreateSpellCheckerInterface(m_sEnginePath, sAffixPath, sDictPath);
 
