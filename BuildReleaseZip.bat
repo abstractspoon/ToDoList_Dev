@@ -18,11 +18,10 @@ REM Zip C++ Binaries
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TDLUninstall.exe
 
 REM Handle dlls explicitly to maintain control over .NET plugins
-%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\OutlookImpExp.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PlainTextImport.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\RTFContentCtrl.dll
-%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\StatisticsExt.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\BurndownExt.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TransText.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\CalendarExt.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\EncryptDecrypt.dll
