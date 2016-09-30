@@ -31,7 +31,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_SETWORDWRAP = (WM_USER+1);
-const DWORD IDC_SIMPLETEXT_COMMENTS = (DWORD)(LPCTSTR)_T("IDC_SIMPLETEXT_COMMENTS");
+const DWORD SIMPLETEXT_COMMENTS = (DWORD)(LPCTSTR)_T("SIMPLETEXT_COMMENTS");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -106,7 +106,7 @@ END_MESSAGE_MAP()
 
 BOOL CToDoCommentsCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
-	GetParent()->SendMessage(WM_ICC_DOHELP, 0, IDC_SIMPLETEXT_COMMENTS);
+	GetParent()->SendMessage(WM_ICC_DOHELP, 0, SIMPLETEXT_COMMENTS);
 	return TRUE;
 }
 

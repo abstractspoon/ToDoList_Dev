@@ -113,25 +113,28 @@ protected:
 	LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);
-
 	void OnNotifySplitterChange(int nSplitPos);
-	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
-	int RecalcColumnWidth(int nCol, CDC* pDC) const;
-	DWORD GetColumnItemTaskID(int nItem) const { return GetTaskID(nItem); }
-	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate);
-	void DeselectAll();
-	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
 
-protected:
-	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
+	// pure virtual overrides
+	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
+	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
 	BOOL BuildColumns();
 	void Release();
-	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
+	DWORD GetColumnItemTaskID(int nItem) const { return GetTaskID(nItem); }
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
-	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
+	HWND Tasks() const { return m_lcTasks; }
+	int RecalcColumnWidth(int nCol, CDC* pDC) const;
+	GM_ITEMSTATE GetColumnItemState(int nItem) const;
+	void DeselectAll();
+	DWORD GetHelpID() const;
+
+protected:
+	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
+	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate);
+	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
+	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra) const;
 	inline HWND TasksHeader() const { return m_hdrTasks; }
-	inline HWND Tasks() const { return m_lcTasks; }
 	int GetTopIndex() const;
 	BOOL SetTopIndex(int nIndex);
 	BOOL NeedDrawTaskSelection() { return (HasFocus() && (GetFocus() != &m_lcTasks)); }
@@ -142,7 +145,6 @@ protected:
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
 	GM_ITEMSTATE GetListItemState(int nItem) const;
-	GM_ITEMSTATE GetColumnItemState(int nItem) const;
 
 #ifdef _DEBUG
 	LPCTSTR GetDebugName() const { return _T("ListView"); }

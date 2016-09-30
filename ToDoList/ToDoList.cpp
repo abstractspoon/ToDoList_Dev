@@ -725,15 +725,13 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 		}
 	}
 
-	CString sHelpUrl(WIKI_URL);
+	CString sHelpPage;
 
 	if (!sHelpID.IsEmpty())
 	{
 		// Load the Help.ini file to find the URL for this topic
 		CIni ini(GetResourcePath(_T("Misc"), _T("Help.ini")));
-		sHelpUrl += ini.GetString(_T("Help Urls"), sHelpID);
-
-		TRACE(_T("CToDoListApp::DoHelp(%s = %s)\n"), sHelpID, sHelpUrl);
+		sHelpPage = ini.GetString(_T("Help Urls"), sHelpID);
 	}
 	else
 	{
@@ -742,13 +740,13 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 
 #ifdef _DEBUG
 	CString sHelpMsg;
-	sHelpMsg.Format(_T("CToDoListApp::DoHelp(%s = %s)\n\nDo you want to go here?"), sHelpID, sHelpUrl);
+	sHelpMsg.Format(_T("DoHelp(%s = %s)   Do you want to go here?"), sHelpID, sHelpPage);
 
 	if (AfxMessageBox(sHelpMsg, MB_YESNO) != IDYES)
 		return;
 #endif
 
-	FileMisc::Run(*m_pMainWnd, sHelpUrl, NULL, SW_SHOWNORMAL);
+	FileMisc::Run(*m_pMainWnd, (WIKI_URL + sHelpPage), NULL, SW_SHOWNORMAL);
 }
 
 BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)

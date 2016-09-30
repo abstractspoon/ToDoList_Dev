@@ -148,6 +148,8 @@ ON_WM_CREATE()
 ON_MESSAGE(WM_SETREDRAW, OnSetRedraw)
 ON_WM_SETCURSOR()
 ON_WM_TIMER()
+ON_WM_HELPINFO()
+
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
@@ -5813,3 +5815,11 @@ BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 	// all else
 	return CWnd::PreTranslateMessage(pMsg);
 }
+
+BOOL CTDLTaskCtrlBase::OnHelpInfo(HELPINFO* lpHelpInfo)
+{
+	AfxGetApp()->WinHelp(GetHelpID());
+	return TRUE;
+}
+
+

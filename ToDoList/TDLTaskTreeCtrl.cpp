@@ -93,6 +93,12 @@ END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
 
+DWORD CTDLTaskTreeCtrl::GetHelpID() const
+{
+	static LPCTSTR IDC_TREEVIEW_CTRL = _T("IDC_TREEVIEW_CTRL");
+	return (DWORD)IDC_TREEVIEW_CTRL;
+}
+
 BOOL CTDLTaskTreeCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible)
 {
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));

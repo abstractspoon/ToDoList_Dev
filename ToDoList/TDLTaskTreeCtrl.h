@@ -193,6 +193,7 @@ protected:
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList(HTREEITEM hti = NULL);
+	DWORD GetHelpID() const;
 
 	inline HWND Tasks() const { return m_tcTasks; }
 	inline HWND TasksHeader() const { return m_hdrTasks; }

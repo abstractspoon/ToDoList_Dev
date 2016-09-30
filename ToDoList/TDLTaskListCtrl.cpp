@@ -45,6 +45,8 @@ const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edi
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
+
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef CDRF_SKIPPOSTPAINT
@@ -103,6 +105,12 @@ ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
+
+DWORD CTDLTaskListCtrl::GetHelpID() const
+{
+	static LPCTSTR IDC_LISTVIEW_CTRL = _T("IDC_LISTVIEW_CTRL");
+	return (DWORD)IDC_LISTVIEW_CTRL;
+}
 
 BOOL CTDLTaskListCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible)
 {

@@ -315,6 +315,7 @@ protected:
 	afx_msg LRESULT OnSetRedraw(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 		
 	DECLARE_MESSAGE_MAP()
 
@@ -354,6 +355,7 @@ protected:
 	virtual int RecalcColumnWidth(int nCol, CDC* pDC) const = 0;
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
+	virtual DWORD GetHelpID() const = 0;
 
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 

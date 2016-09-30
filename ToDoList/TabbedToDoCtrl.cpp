@@ -49,8 +49,6 @@ static char THIS_FILE[]=__FILE__;
 const UINT SORTWIDTH      = 10;
 const UINT DEFTEXTFLAGS   = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 
-const DWORD IDC_LISTVIEW_CTRL = (DWORD)(LPCTSTR)_T("IDC_LISTVIEW_CTRL");
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -125,7 +123,6 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_WM_DRAWITEM()
 	ON_WM_ERASEBKGND()
 	ON_WM_CONTEXTMENU()
-	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1214,21 +1211,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM /*wParam*/, LPARAM lPara
 	}
 
 	return 0L;
-}
-
-BOOL CTabbedToDoCtrl::OnHelpInfo(HELPINFO* lpHelpInfo)
-{
-	if (lpHelpInfo->iContextType == HELPINFO_WINDOW)
-	{
-		if (CDialogHelper::IsChildOrSame(m_taskList, (HWND)lpHelpInfo->hItemHandle))
-		{
-			AfxGetApp()->WinHelp(IDC_LISTVIEW_CTRL);
-			return TRUE;
-		}
-	}
-
-	// else
-	return CToDoCtrl::OnHelpInfo(lpHelpInfo);
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtDoHelp(WPARAM /*wParam*/, LPARAM lParam)

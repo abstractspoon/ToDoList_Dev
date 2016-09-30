@@ -104,7 +104,6 @@ const int   COMBODROPHEIGHT	= 200;
 /////////////////////////////////////////////////////////////////////////////
 
 const DWORD IDD_TODOCTRL_DIALOG = (DWORD)(LPCTSTR)_T("IDD_TODOCTRL_DIALOG");
-const DWORD IDC_TREEVIEW_CTRL   = (DWORD)(LPCTSTR)_T("IDC_TREEVIEW_CTRL");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -6842,19 +6841,9 @@ LRESULT CToDoCtrl::OnCommentsDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 	return 0L;
 }
 
-BOOL CToDoCtrl::OnHelpInfo(HELPINFO* lpHelpInfo)
+BOOL CToDoCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
-	if (lpHelpInfo->iContextType == HELPINFO_WINDOW)
-	{
-		if (CDialogHelper::IsChildOrSame(m_taskTree, (HWND)lpHelpInfo->hItemHandle))
-		{
-			AfxGetApp()->WinHelp(IDC_TREEVIEW_CTRL);
-		}
-		else // default
-		{
-			AfxGetApp()->WinHelp(IDD_TODOCTRL_DIALOG);
-		}
-	}
+	AfxGetApp()->WinHelp(IDD_TODOCTRL_DIALOG);
 	return TRUE;
 }
 
