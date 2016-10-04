@@ -783,6 +783,9 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					
 					if (GetItemTitleRect(nItem, TDCTR_LABEL, rLabel, &dc, pTDI->sTitle))
 					{
+						// Add a bit ie. 'near enough is good enough'
+						rLabel.right += 10;
+
 						CPoint pt(GetMessagePos());
 						m_lcTasks.ScreenToClient(&pt);
 						
