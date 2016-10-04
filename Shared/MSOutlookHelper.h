@@ -86,6 +86,8 @@ protected:
 
 protected:
 	static CString MapDate(DATE date);
+	static BOOL EscapeText(CString& sText);
+	static BOOL CanEscapeText(const CString& sText);
 
 };
 

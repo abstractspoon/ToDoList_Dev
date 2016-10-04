@@ -308,25 +308,8 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 			CString sFolder = MAPIFolder(lpParent).GetFolderPath();
 			CString sSubject = GetItemData(obj, OA_TITLE);
 
-			// Outlook will not accept certain characters in the 
-			// URL even if they are encoded so we check these first
-			if (sSubject.FindOneOf(_T("%!/")) == -1)
-			{
-				// Other 'dangerous' characters can be replaced by 
-				// their HEX equivalent
-				const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
-				CString sReplace;
-
-				for (int nChar = 0; nChar < sSearch.GetLength(); nChar++)
-				{
-					TCHAR cSearch[2] = { sSearch[nChar], 0 };
-
-					sReplace.Format(_T("%%%02X"), sSearch[nChar]);
-					sSubject.Replace(cSearch, sReplace);
-				}
-
+			if (EscapeText(sSubject))
 				sPath.Format(_T("%s\\~%s"), sFolder, sSubject);
-			}
 		}
 	}
 
@@ -344,6 +327,34 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 	sUrl.Replace('\\', '/');
 
 	return sUrl;
+}
+
+BOOL CMSOutlookHelper::EscapeText(CString& sText)
+{
+	if (!CanEscapeText(sText))
+		return FALSE;
+
+	// Other 'dangerous' characters can be replaced by 
+	// their HEX equivalent
+	const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
+	CString sReplace;
+
+	for (int nChar = 0; nChar < sSearch.GetLength(); nChar++)
+	{
+		TCHAR cSearch[2] = { sSearch[nChar], 0 };
+
+		sReplace.Format(_T("%%%02X"), sSearch[nChar]);
+		sText.Replace(cSearch, sReplace);
+	}
+
+	return TRUE;
+}
+
+BOOL CMSOutlookHelper::CanEscapeText(const CString& sText)
+{
+	// Outlook will not accept the following characters in the 
+	// URL even if they are encoded
+	return (sText.FindOneOf(_T("%!/")) == -1);
 }
 
 CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE nField)
