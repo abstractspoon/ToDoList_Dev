@@ -197,6 +197,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
   <ItemGroup>
     <None Include="GanttChartExt.def" />
     <None Include="res\GanttChartExt.rc2" />
+    <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\toolbar.bmp" />
     <None Include="res\toolbar_std.bmp" />

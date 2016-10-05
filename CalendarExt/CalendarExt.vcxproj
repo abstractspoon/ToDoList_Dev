@@ -220,10 +220,13 @@ copy unicode_release\CalendarExt.dll ..\todolist\unicode_release /y
   </ItemGroup>
   <ItemGroup>
     <None Include="res\CalendarExt.rc2" />
+    <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\minical_arrow_L.bmp" />
     <None Include="res\minical_arrow_R.bmp" />
+    <None Include="res\toolbar.bmp" />
     <None Include="res\toolbar1.bmp" />
+    <None Include="RES\toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">

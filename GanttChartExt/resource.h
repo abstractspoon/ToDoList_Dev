@@ -4,6 +4,7 @@
 //
 #define IDD_GANTTTREE_DIALOG            103
 #define IDB_TOOLBAR_STD                 245
+#define IDI_HELP_BUTTON                 293
 #define IDR_GANTTCHART                  1000
 #define IDC_TREEHEADER                  1004
 #define IDC_GANTTLIST                   1005

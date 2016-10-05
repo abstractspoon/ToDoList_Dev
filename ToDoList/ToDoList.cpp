@@ -117,7 +117,7 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::InitInstance()
 {
-	// Set this before any 
+	// Set this before anything else
 	CWinHelpButton::SetIcon(LoadIcon(IDI_HELPBUTTON));
 
 	// Remove any old components before they might get loaded

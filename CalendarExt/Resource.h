@@ -3,6 +3,7 @@
 // Used by CalendarExt.rc
 //
 #define IDB_TOOLBAR_STD                 245
+#define IDI_HELP_BUTTON                 293
 #define IDR_CALENDAR                    1000
 #define IDC_STATUSBAR                   1001
 #define IDS_SNAP_NEARESTHOUR            1004
