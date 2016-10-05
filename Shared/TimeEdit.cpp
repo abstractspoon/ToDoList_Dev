@@ -93,7 +93,7 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 	{
 		TIMEUNIT& tu = TIMEUNITS[nUnit];
 
-		if (tu.szLabel[0] == 0) // empty string
+		if (Misc::IsEmpty(tu.szLabel))
 		{
 			//fabio_2005
 #if _MSC_VER >= 1400
@@ -162,7 +162,7 @@ void CTimeEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CTimeEdit::SetDefaultButtonTip(LPCTSTR szUnits)
 {
-	if (szUnits && *szUnits)
+	if (!Misc::IsEmpty(szUnits))
 		s_sUnitsBtnTip = szUnits;
 }
 
@@ -376,9 +376,8 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevU
 
 		if (tu.nUnits == nUnits)
 		{
-			if (szLongUnits && *szLongUnits)
+			if (!Misc::IsEmpty(szLongUnits))
 			{
-				//fabio_2005
 #if _MSC_VER >= 1300
 				_tcsncpy_s(tu.szLabel, LABELLEN, szLongUnits, LABELLEN - 1);
 #else
@@ -388,7 +387,7 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevU
 				tu.szLabel[LABELLEN - 1] = 0;
 			}
 
-			if (szAbbrevUnits && *szAbbrevUnits)
+			if (!Misc::IsEmpty(szAbbrevUnits))
 				tu.cAbbrLabel = szAbbrevUnits[0];
 		}
 	}

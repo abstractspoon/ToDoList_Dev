@@ -1206,10 +1206,11 @@ bool CTaskFile::AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColu
 
 CXmlItem* CTaskFile::AddCustomAttributeDef(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, BOOL bList)
 {
-	ASSERT(szID && *szID && szLabel && *szLabel);
-
-	if (!(szID && *szID && szLabel && *szLabel))
+	if (Misc::IsEmpty(szID) || Misc::IsEmpty(szLabel))
+	{
+		ASSERT(0);
 		return NULL;
+	}
 
 	// check for existing item with same ID
 	if (HasCustomAttribute(szID))
@@ -1224,7 +1225,7 @@ CXmlItem* CTaskFile::AddCustomAttributeDef(LPCTSTR szID, LPCTSTR szLabel, LPCTST
 	pXINewAttribDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (bList ? TDCCA_AUTOLIST : TDCCA_STRING));
 
 	// optionals
-	if (szColumn && *szColumn)
+	if (!Misc::IsEmpty(szColumn))
 		pXINewAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLTITLE, szColumn);
 
 	return pXINewAttribDef;
@@ -1285,10 +1286,11 @@ LPCTSTR CTaskFile::GetCustomAttributeValue(int nIndex, LPCTSTR szItem) const
 
 LPCTSTR CTaskFile::GetMetaData(LPCTSTR szKey) const
 {
-	ASSERT (szKey && *szKey);
-
-	if (!(szKey && *szKey))
+	if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return _T("");
+	}
 
 	// else
 	return GetItemValue(TDL_METADATA, szKey);
@@ -1373,15 +1375,20 @@ bool CTaskFile::SetProjectName(LPCTSTR szName)
 
 bool CTaskFile::SetMetaData(LPCTSTR szKey, LPCTSTR szMetaData)
 {
-	ASSERT (szKey && *szKey && szMetaData && *szMetaData);
-
-	if (!(szKey && *szKey && szMetaData))
+	if (Misc::IsEmpty(szMetaData))
+	{
+		return ClearMetaData(szKey);
+	}
+	else if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return false;
+	}
 
+	// else
 	CXmlItem* pXItem = GetAddItem(TDL_METADATA);
 	ASSERT(pXItem);
 
-	// else
 	return (NULL != pXItem->SetItemValue(szKey, szMetaData));
 }
 
@@ -1397,10 +1404,11 @@ BOOL CTaskFile::SetCheckedOutTo(const CString& sCheckedOutTo)
 
 bool CTaskFile::ClearMetaData(LPCTSTR szKey)
 {
-	ASSERT (szKey && *szKey);
-
-	if (!(szKey && *szKey))
+	if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return false;
+	}
 
 	return (FALSE != DeleteItem(TDL_METADATA, szKey));
 }
@@ -1422,7 +1430,7 @@ CString CTaskFile::GetCharSet() const
 
 BOOL CTaskFile::SetCharSet(LPCTSTR szCharSet)
 {
-	if (szCharSet && *szCharSet)
+	if (!Misc::IsEmpty(szCharSet))
 		return (NULL != SetItemValue(TDL_CHARSET, szCharSet));
 
 	// else
@@ -1432,7 +1440,7 @@ BOOL CTaskFile::SetCharSet(LPCTSTR szCharSet)
 
 BOOL CTaskFile::SetFileName(LPCTSTR szFilename)
 {
-	if (szFilename && *szFilename)
+	if (!Misc::IsEmpty(szFilename))
 		return (NULL != SetItemValue(TDL_FILENAME, szFilename));
 
 	// else
@@ -2125,20 +2133,22 @@ LPCTSTR CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey) const
 {
-	ASSERT (szKey && *szKey);
-
-	if (!(szKey && *szKey))
+	if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return _T("");
+	}
 
 	return GetTaskAttribute(hTask, TDL_TASKMETADATA, szKey);
 }
 
 const CXmlItem* CTaskFile::GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const
 {
-	ASSERT (szID && *szID);
-
-	if (!(szID && *szID))
+	if (Misc::IsEmpty(szID))
+	{
+		ASSERT(0);
 		return NULL;
+	}
 
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULL);
@@ -2836,30 +2846,42 @@ bool CTaskFile::SetTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo)
 
 bool CTaskFile::SetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey, LPCTSTR szMetaData)
 {
-	ASSERT(szKey && *szKey && szMetaData);
-
-	if (!(szKey && *szKey && szMetaData))
+	if (Misc::IsEmpty(szMetaData))
+	{
+		return ClearTaskMetaData(hTask, szKey);
+	}
+	else if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return false;
+	}
 
+	// else
 	return SetTaskAttribute(hTask, TDL_TASKMETADATA, szKey, szMetaData);
 }
 
 bool CTaskFile::ClearTaskMetaData(HTASKITEM hTask, LPCTSTR szKey)
 {
-	ASSERT(szKey && *szKey);
-
-	if (!(szKey && *szKey))
+	if (Misc::IsEmpty(szKey))
+	{
+		ASSERT(0);
 		return false;
+	}
 
 	return DeleteTaskAttribute(hTask, TDL_TASKMETADATA, szKey);
 }
 
 bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTSTR szData)
 {
-	ASSERT(szID && *szID && szData);
-
-	if (!(szID && *szID && szData))
+	if (Misc::IsEmpty(szData))
+	{
+		return ClearTaskCustomAttributeData(hTask, szID);
+	}
+	else if (Misc::IsEmpty(szID))
+	{
+		ASSERT(0);
 		return false;
+	}
 
 	// first check that custom attribute exists
 	CXmlItem* pXICustDef = GetCustomAttributeDef(szID);
@@ -2889,28 +2911,25 @@ bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTST
 	// If the type is 'LIST' append the data to the definition
 	// and if the data contains multiple values then change the
 	// list definition to 'MULTI-LIST'
-	if (*szData)
+	TDCCUSTOMATTRIBUTEDEFINITION temp;
+	temp.SetListType(pXICustDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE));
+
+	if (temp.IsList())
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION temp;
-		temp.SetListType(pXICustDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE));
-		
-		if (temp.IsList())
+		temp.DecodeListData(pXICustDef->GetItemValue(TDL_CUSTOMATTRIBLISTDATA));
+
+		CStringArray aData;
+		VERIFY(Misc::Split(szData, aData, '\n'));
+
+		if (aData.GetSize() > 1)
 		{
-			temp.DecodeListData(pXICustDef->GetItemValue(TDL_CUSTOMATTRIBLISTDATA));
-			
-			CStringArray aData;
-			VERIFY(Misc::Split(szData, aData, '\n'));
+			temp.SetListType(TDCCA_AUTOMULTILIST);
+			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)temp.GetAttributeType());
+		}
 
-			if (aData.GetSize() > 1)
-			{
-				temp.SetListType(TDCCA_AUTOMULTILIST);
-				pXICustDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)temp.GetAttributeType());
-			}
-
-			if (Misc::AddUniqueItems(aData, temp.aDefaultListData))
-			{
-				pXICustDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, temp.EncodeListData());
-			}
+		if (Misc::AddUniqueItems(aData, temp.aDefaultListData))
+		{
+			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, temp.EncodeListData());
 		}
 	}
 
@@ -2919,10 +2938,11 @@ bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTST
 
 bool CTaskFile::ClearTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID)
 {
-	ASSERT(szID && *szID);
-
-	if (!(szID && *szID))
+	if (Misc::IsEmpty(szID))
+	{
+		ASSERT(0);
 		return false;
+	}
 
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
