@@ -7,6 +7,7 @@
 #include "KanbanCtrl.h"
 #include "KanbanColors.h"
 #include "Kanbanlistctrl.h"
+#include "KanbanMsg.h"
 
 #include "..\todolist\tdcenum.h"
 #include "..\todolist\tdlschemadef.h"

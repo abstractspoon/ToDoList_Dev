@@ -17,6 +17,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\checklistboxex.h"
+#include "..\Shared\winhelpbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\iuiextension.h"
@@ -136,6 +137,7 @@ protected:
 	CKanbanPreferencesPage m_page;
 	CScrollingPropertyPageHost m_ppHost;
 	HICON m_hIcon;
+	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -147,6 +149,8 @@ protected:
 	//{{AFX_MSG(CKanbanPreferencesDlg)
 	//}}AFX_MSG
 	afx_msg void OnDestroy();
+	afx_msg void OnClickHelpButton();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
 };

@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "KanbanPreferencesDlg.h"
 #include "Kanbanenum.h"
+#include "KanbanMsg.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
@@ -535,9 +536,13 @@ BOOL CKanbanPreferencesPage::SetDisplayAttributes(const CKanbanAttributeArray& a
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesDlg dialog
 
+const UINT IDC_HELPBUTTON = 1001;
+
 CKanbanPreferencesDlg::CKanbanPreferencesDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_PREFERENCES_DIALOG, pParent),
-	m_hIcon(NULL)
+	: 
+	CDialog(IDD_PREFERENCES_DIALOG, pParent),
+	m_hIcon(NULL),
+	m_btnHelp(1, FALSE)
 {
 	//{{AFX_DATA_INIT(CKanbanPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -549,6 +554,8 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CDialog)
 	//{{AFX_MSG_MAP(CKanbanPreferencesDlg)
 	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
+	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_HELPBUTTON, OnClickHelpButton)
 END_MESSAGE_MAP()
 
 int CKanbanPreferencesDlg::DoModal(const CStringArray& aCustomAttribIDs, 
@@ -579,6 +586,8 @@ BOOL CKanbanPreferencesDlg::OnInitDialog()
 	// Replace icon
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_KANBAN);
 	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
+
+	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -598,3 +607,16 @@ void CKanbanPreferencesDlg::OnDestroy()
 	::DestroyIcon(m_hIcon);
 }
 
+void CKanbanPreferencesDlg::OnClickHelpButton()
+{
+	ASSERT(m_pParentWnd);
+
+	if (m_pParentWnd)
+		m_pParentWnd->SendMessage(WM_KBC_PREFSHELP);
+}
+
+BOOL CKanbanPreferencesDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnClickHelpButton();
+	return TRUE;
+}

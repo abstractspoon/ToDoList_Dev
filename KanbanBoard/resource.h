@@ -2,10 +2,11 @@
 // Microsoft Developer Studio generated include file.
 // Used by KanbanBoard.rc
 //
-#define IDD_KanbanTREE_DIALOG           103
+#define IDD_KANBANTREE_DIALOG           103
 #define IDB_TOOLBAR_STD                 245
 #define IDR_COLUMN_TOOLBAR              251
 #define IDB_COLUMN_TOOLBAR_STD          259
+#define IDI_HELP_BUTTON                 293
 #define IDR_KANBAN                      1000
 #define IDC_TREEHEADER                  1004
 #define IDC_KanbanLIST                  1005
@@ -19,8 +20,8 @@
 #define IDC_SETWEEKENDCOLOR             1072
 #define IDC_SETTODAYCOLOR               1073
 #define IDC_SETPARENTCOLOR              1074
-#define IDS_Kanban_DAYS                 2001
-#define IDS_Kanban_WEEKS                2002
+#define IDS_KANBAN_DAYS                 2001
+#define IDS_KANBAN_WEEKS                2002
 #define IDS_SNAP_FREE                   2003
 #define IDS_SNAP_NEARESTDAY             2004
 #define IDS_SNAP_NEARESTHALFDAY         2005
@@ -74,15 +75,15 @@
 #define IDC_COLORBARBYPRIORITY          16044
 #define IDC_OPTIONS_LABEL               16044
 #define IDC_DISPLAYATTRIBUTES           16045
-#define ID_Kanban_GOTOTODAY             32774
+#define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
 #define ID_PREFS                        32775
-#define ID_Kanban_NEWDEPENDS            32776
+#define ID_KANBAN_NEWDEPENDS            32776
 #define IDS_BACKLOG                     32776
 #define IDS_PICKINGFROMTASK             32777
 #define IDS_PICKINGTOTASKADD            32778
-#define ID_Kanban_EDITDEPENDS           32779
-#define ID_Kanban_DELETEDEPENDS         32780
+#define ID_KANBAN_EDITDEPENDS           32779
+#define ID_KANBAN_DELETEDEPENDS         32780
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
 #define ID_HIDE_EMPTY_COLS              32782

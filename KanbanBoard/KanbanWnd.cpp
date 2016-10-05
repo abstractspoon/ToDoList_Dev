@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "KanbanBoard.h"
 #include "KanbanWnd.h"
+#include "KanbanMsg.h"
 
 #include "..\todolist\tdcenum.h"
 #include "..\todolist\tdcmsg.h"
@@ -36,12 +37,13 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_KanbanTREE_DIALOG, pParent), 
+	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
-	m_ctrlKanban(m_fonts)
+	m_ctrlKanban(m_fonts),
+	m_dlgPrefs(this)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_KANBAN);
 	m_cbOptions.SetMinDLUHeight(10);
@@ -91,6 +93,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
+	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 END_MESSAGE_MAP()
 
@@ -106,6 +109,15 @@ BOOL CKanbanWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+LRESULT CKanbanWnd::OnKanbanPrefsHelp(WPARAM wp, LPARAM lp)
+{
+	CString sHelpID(GetTypeID());
+	sHelpID += _T("_PREFS");
+
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)(LPCTSTR)sHelpID);
+	return 0L;
 }
 
 BOOL CKanbanWnd::OnInitDialog() 
