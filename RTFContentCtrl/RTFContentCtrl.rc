@@ -332,9 +332,8 @@ IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 360, 116
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "&Use Microsoft Word to convert content to HTML for printing",
-                    IDC_USEMSWORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,
-                    346,10
+    CONTROL         "&Use Microsoft Word for content format conversions",IDC_USEMSWORD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,346,10
     LTEXT           "File Linking",IDC_LINKTOFILE_GROUP,7,25,346,8
     CONTROL         "&Always prompt me to choose",IDC_PROMPTFORFILELINK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,38,346,10

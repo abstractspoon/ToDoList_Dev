@@ -548,6 +548,9 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 			
 			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
 			{
+				// This is the best place for synchronisation
+				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+
 				CString sRTF;
 				
 				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
