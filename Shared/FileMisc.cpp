@@ -412,7 +412,7 @@ int FileMisc::DeleteFolderContents(LPCTSTR szFolder, DWORD dwFlags, LPCTSTR szFi
 	BOOL bWantSubFolders = Misc::HasFlag(dwFlags, FMDF_SUBFOLDERS);
 	BOOL bWantMsgLoop	 = Misc::HasFlag(dwFlags, FMDF_PROCESSMSGLOOP);
 	BOOL bHiddenReadOnly = Misc::HasFlag(dwFlags, FMDF_HIDDENREADONLY);
-	BOOL bDeleteAll		 = (!szFileMask || !(*szFileMask) || _tcsstr(szFileMask, ALLFILESMASK));
+	BOOL bDeleteAll		 = (Misc::IsEmpty(szFileMask) || _tcsstr(szFileMask, ALLFILESMASK));
 
 	// if a file mask has been specified with subfolders 
 	// we need to do multiple passes on each folder, 
@@ -636,7 +636,7 @@ BOOL FileMisc::IsPath(LPCTSTR szPath)
 BOOL FileMisc::PathExists(LPCTSTR szPath)
 {
 	// special case
-	if (!szPath || !*szPath) // cwd
+	if (Misc::IsEmpty(szPath)) // cwd
 		return TRUE;
 
 	return (::GetFileAttributes(szPath) != 0xffffffff);
@@ -645,7 +645,7 @@ BOOL FileMisc::PathExists(LPCTSTR szPath)
 BOOL FileMisc::FolderExists(LPCTSTR szFolder)
 {
 	// special case
-	if (!szFolder || !*szFolder) // cwd
+	if (Misc::IsEmpty(szFolder)) // cwd
 		return TRUE;
 
 	if (lstrlen(szFolder) > _MAX_PATH)
@@ -1170,7 +1170,7 @@ void FileMisc::LogTimeElapsed(DWORD& dwTickStart, LPCTSTR szFormat, ...)
 
 	CString sMessage, sReason(_T("Action"));
 
-	if (szFormat && *szFormat)
+	if (!Misc::IsEmpty(szFormat))
 	{
 		// from CString::Format
 		ASSERT(AfxIsValidString(szFormat));
@@ -1201,7 +1201,7 @@ void FileMisc::LogText(LPCTSTR szText, ...)
 
 	CString sLogLine;
 
-	if (szText && *szText)
+	if (!Misc::IsEmpty(szText))
 	{
 		// from CString::Format
 		ASSERT(AfxIsValidString(szText));
@@ -1601,7 +1601,7 @@ CString FileMisc::GetAppFolder(LPCTSTR szSubFolder)
 {
 	CString sFolder = GetModuleFolder();
 
-	if (szSubFolder && *szSubFolder)
+	if (!Misc::IsEmpty(szSubFolder))
 		MakePath(sFolder, NULL, sFolder, szSubFolder, NULL);
 
 	return TerminatePath(sFolder, FALSE);

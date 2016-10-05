@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "iconbutton.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,7 +67,7 @@ void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 
 void CIconButton::SetTooltip(LPCTSTR szTooltip)
 {
-	if (szTooltip && *szTooltip)
+	if (!Misc::IsEmpty(szTooltip))
 	{
 		if (!m_tooltip.GetSafeHwnd())
 			VERIFY(m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP)));

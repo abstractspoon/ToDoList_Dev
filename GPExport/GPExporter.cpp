@@ -264,7 +264,7 @@ bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	// comments
 	LPCTSTR szComments = pSrcTaskFile->GetTaskComments(hTask);
 
-	if (szComments && *szComments)
+	if (!Misc::IsEmpty(szComments))
 		pXIDestItem->AddItem(_T("notes"), szComments, XIT_CDATA);
 
 	// resource allocation

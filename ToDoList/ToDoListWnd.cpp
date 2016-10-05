@@ -727,7 +727,7 @@ int CToDoListWnd::GetVersion()
 
 int CToDoListWnd::MessageBox(UINT nIDText, UINT nIDCaption, UINT nType, LPCTSTR szData)
 {
-	if (szData && *szData)
+	if (!Misc::IsEmpty(szData))
 		return MessageBox(CEnString(nIDText, szData), nIDCaption, nType);
 	else
 		return MessageBox(CEnString(nIDText), nIDCaption, nType);
@@ -4214,7 +4214,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 			// handle bad path
 			if (sFilePath.IsEmpty())
 			{
-				if (szFilePath && *szFilePath)
+				if (!Misc::IsEmpty(szFilePath))
 					return TDCF_NOTEXIST;
 				else
 					sFilePath = pTDC->GetFilePath(); // ie. reload
@@ -8427,9 +8427,8 @@ LRESULT CToDoListWnd::OnPreferencesClearMRU(WPARAM /*wp*/, LPARAM /*lp*/)
 LRESULT CToDoListWnd::OnPreferencesCleanupDictionary(WPARAM /*wp*/, LPARAM lp)
 {
 	LPCTSTR szLangFile = (LPCTSTR)lp;
-	ASSERT(szLangFile && *szLangFile);
 
-	if (szLangFile && *szLangFile)
+	if (!Misc::IsEmpty(szLangFile))
 	{
 		DOPROGRESS(IDS_CLEANINGDICTPROGRESS);
 
@@ -8439,6 +8438,7 @@ LRESULT CToDoListWnd::OnPreferencesCleanupDictionary(WPARAM /*wp*/, LPARAM lp)
 		return CLocalizer::CleanupDictionary(sMasterDict);
 	}
 	
+	ASSERT(0);
 	return 0;
 }
 
@@ -9280,7 +9280,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		tasks.SetHtmlImageFolder(szHtmlImageDir);
 
 		// And delete all existing images in that folder
-		if (szHtmlImageDir && *szHtmlImageDir)
+		if (!Misc::IsEmpty(szHtmlImageDir))
 			FileMisc::DeleteFolderContents(szHtmlImageDir, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 
 		if (bTransform)
@@ -9329,7 +9329,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	
 	// delete the HTML image folder if it is empty
 	// this will fail if it is not empty.
-	if (bHtmlComments && szHtmlImageDir && *szHtmlImageDir)
+	if (bHtmlComments && !Misc::IsEmpty(szHtmlImageDir))
 		RemoveDirectory(szHtmlImageDir);
 	
 	return tasks.GetTaskCount();

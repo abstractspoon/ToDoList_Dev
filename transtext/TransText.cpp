@@ -8,6 +8,7 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\enmenu.h"
+#include "..\shared\misc.h"
 
 #include "..\Interfaces\ITransText.h"
 
@@ -183,7 +184,7 @@ public:
 
 DLL_DECLSPEC ITransText* CreateTransTextInterface(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
 {
-	if ((nOption == ITTTO_TRANSLATEONLY) && (!szDictPath || !(*szDictPath)))
+	if ((nOption == ITTTO_TRANSLATEONLY) && Misc::IsEmpty(szDictPath))
 		return NULL;
 
 	static CTransText tt;

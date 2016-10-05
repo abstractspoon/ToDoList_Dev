@@ -192,7 +192,7 @@ void CTDLLanguageComboBox::OnDestroy()
 
 CString CTDLLanguageComboBox::GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt, BOOL bRelative) // static
 {
-	ASSERT(szLanguage && *szLanguage);
+	ASSERT(!Misc::IsEmpty(szLanguage));
 
 	CString sLanguageFile(GetDefaultLanguage());
 

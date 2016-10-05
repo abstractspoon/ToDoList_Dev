@@ -542,6 +542,9 @@ CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
 
 BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 {
+	if (IsEmpty(szPrefix))
+		return FALSE;
+
 	CString sTemp(sText);
 	sTemp.TrimLeft();
 
@@ -563,6 +566,9 @@ BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 
 BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim)
 {
+	if (IsEmpty(szSuffix))
+		return FALSE;
+
 	CString sTemp(sText);
 	sTemp.TrimRight();
 
@@ -605,14 +611,50 @@ BOOL Misc::RemoveAt(CString& sText, int nPos)
 
 TCHAR Misc::First(const CString& sText)
 {
-	ASSERT(!sText.IsEmpty());
-	return (TCHAR)(sText.IsEmpty() ? 0 : sText[0]);
+	if (sText.IsEmpty())
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	// else
+	return sText[0];
 }
 
 TCHAR Misc::Last(const CString& sText)
 {
-	ASSERT(!sText.IsEmpty());
-	return (TCHAR)(sText.IsEmpty() ? 0 : sText[sText.GetLength() - 1]);
+	if (sText.IsEmpty())
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	// else
+	return sText[sText.GetLength() - 1];
+}
+
+TCHAR Misc::First(LPCTSTR szText)
+{
+	if (IsEmpty(szText))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	// else
+	return szText[0];
+}
+
+TCHAR Misc::Last(LPCTSTR szText)
+{
+	if (IsEmpty(szText))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	// else
+	return szText[lstrlen(szText) - 1];
 }
 
 TCHAR Misc::TrimFirst(CString& sText)
@@ -843,7 +885,7 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 		const CString& sArrItem = GetItem(array, nItem);
 
 		// special case: empty item
-		if (szItem[0] == 0)
+		if (IsEmpty(szItem))
 		{
 			if (sArrItem.IsEmpty())
 				return nItem;
@@ -1870,7 +1912,7 @@ CString Misc::MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey)
 	CString sKey;
 	sKey.Format(sFormat, nKeyVal);
 
-	if (szParentKey && *szParentKey)
+	if (!IsEmpty(szParentKey))
 	{
 		CString sTemp;
 		sTemp.Format(_T("%s\\%s"), szParentKey, sKey);

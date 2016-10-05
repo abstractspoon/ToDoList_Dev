@@ -9,6 +9,7 @@
 #include "..\shared\xmlfileex.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -125,7 +126,7 @@ bool CMLOExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	// comments
 	LPCTSTR szComments = pSrcTaskFile->GetTaskComments(hTask);
 	
-	if (szComments && *szComments)
+	if (!Misc::IsEmpty(szComments))
 		pXIDestItem->AddItem(_T("Note"), szComments);
 	
 	// copy across first child

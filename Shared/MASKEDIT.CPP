@@ -140,7 +140,7 @@ LRESULT CMaskEdit::OnPaste(WPARAM /*wp*/, LPARAM /*lp*/)
 
 BOOL CMaskEdit::IsValid(LPCTSTR szText) const
 {
-	if (!m_sMask.IsEmpty() && szText && *szText)
+	if (!m_sMask.IsEmpty() && !Misc::IsEmpty(szText))
 	{
 		// abandon change at the first invalid char
 		TCHAR cChar = *szText;

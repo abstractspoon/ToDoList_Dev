@@ -225,7 +225,7 @@ private:
 		else
 			sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
 
-		if (szTrail && *szTrail)
+		if (!Misc::IsEmpty(szTrail))
 		{
 			CString sTrail;
 			sTrail.Format(_T(" (%s)\n"), szTrail);

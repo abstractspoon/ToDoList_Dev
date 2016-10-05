@@ -5,6 +5,7 @@
 #include "passworddialog.h"
 #include "stringres.h"
 #include "enstring.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -146,7 +147,7 @@ BOOL CPasswordDialog::VerifyPassword(LPCTSTR szPassword, LPCTSTR szExplanation, 
 				return TRUE;
 
 			// else
-			if (szErrorMsg && *szErrorMsg)
+			if (!Misc::IsEmpty(szErrorMsg))
 				szExplanation = szErrorMsg;
 		}
 		else

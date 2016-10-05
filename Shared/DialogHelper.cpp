@@ -1401,7 +1401,7 @@ void CDialogHelper::ModifyChildCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DW
 	while (pChild)
 	{
 		// check class
-		if (!szClass || !(*szClass) || CWinClasses::IsClass(*pChild, szClass))
+		if (Misc::IsEmpty(szClass) || CWinClasses::IsClass(*pChild, szClass))
 		{
 			// mod the style
 			if (bExStyle)
@@ -1755,7 +1755,7 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 	CEnString sCaption(szCaption), sText(szText);
 
 	// instruction overrides caption
-	if (szInstruction && *szInstruction)
+	if (!Misc::IsEmpty(szInstruction))
 	{
 		sCaption = szInstruction;
 	}

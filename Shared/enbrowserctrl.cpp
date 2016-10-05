@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "enbrowserctrl.h"
 #include "regkey.h"
+#include "misc.h"
 
 //fabio_2005
 #if _MSC_VER >= 1300
@@ -104,7 +105,7 @@ void CEnBrowserCtrl::Print(LPCTSTR szFile, BOOL bPrintBkgnd)
 {
 	InitPrintBkgnd(bPrintBkgnd);
 
-	if (!szFile || !*szFile)
+	if (Misc::IsEmpty(szFile))
 	{
 		SafeExecWB(OLECMDID_PRINT, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
 	}
@@ -122,7 +123,7 @@ void CEnBrowserCtrl::PrintPreview(LPCTSTR szFile, BOOL bPrintBkgnd)
 {
 	InitPrintBkgnd(bPrintBkgnd);
 	
-	if (!szFile || !*szFile)
+	if (Misc::IsEmpty(szFile))
 	{
 		SafeExecWB(OLECMDID_PRINTPREVIEW, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
 	}

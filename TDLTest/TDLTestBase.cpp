@@ -284,10 +284,11 @@ CTDLTestBase::~CTDLTestBase()
 
 BOOL CTDLTestBase::BeginTest(LPCTSTR szTest) 
 {
-	ASSERT(szTest && *szTest);
-
-	if (!(szTest && *szTest))
+	if (Misc::IsEmpty(szTest))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	ASSERT(m_sCurrentTest.IsEmpty());
 

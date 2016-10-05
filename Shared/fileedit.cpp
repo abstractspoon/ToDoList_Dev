@@ -35,19 +35,19 @@ HICON CFileEdit::s_hGoImage = NULL;
 // static members
 void CFileEdit::SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo)
 {
-	if (szBrowse && *szBrowse)
+	if (!Misc::IsEmpty(szBrowse))
 		s_sBrowseBtnTip = szBrowse;
 
-	if (szGo && *szGo)
+	if (!Misc::IsEmpty(szGo))
 		s_sGoBtnTip = szGo;
 }
 
 void CFileEdit::SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders)
 {
-	if (szBrowseFiles && *szBrowseFiles)
+	if (!Misc::IsEmpty(szBrowseFiles))
 		s_sBrowseFilesTitle = szBrowseFiles;
 
-	if (szBrowseFolders && *szBrowseFolders)
+	if (!Misc::IsEmpty(szBrowseFolders))
 		s_sBrowseFoldersTitle = szBrowseFolders;
 }
 

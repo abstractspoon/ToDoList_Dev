@@ -238,7 +238,7 @@ BOOL CUrlRichEditCtrl::FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, 
 
 BOOL CUrlRichEditCtrl::IsBaseDelim(LPCTSTR szText)
 {
-	if (!szText || !*szText)
+	if (Misc::IsEmpty(szText))
 		return TRUE; // end of string
 
 	static LPCTSTR BASEDELIMS[] = 
@@ -802,7 +802,7 @@ BOOL CUrlRichEditCtrl::PasteSimpleText()
 
 BOOL CUrlRichEditCtrl::AppendSourceUrls(LPCTSTR szUrls)
 {
-	if (!szUrls || !szUrls[0])
+	if (Misc::IsEmpty(szUrls))
 		return FALSE;
 
 	CStringArray aLinks, aUnused;

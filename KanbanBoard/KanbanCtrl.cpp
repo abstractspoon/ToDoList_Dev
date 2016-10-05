@@ -963,7 +963,7 @@ BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& map
 	if (HasOption(KBCF_SHOWEMPTYCOLUMNS) && (m_nTrackAttribute != IUI_CUSTOMATTRIB))
 		return TRUE;
 
-	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && (!szValue || !(*szValue)))
+	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && Misc::IsEmpty(szValue))
 		return TRUE;
 
 	// else

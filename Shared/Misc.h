@@ -324,12 +324,16 @@ namespace Misc
 
 	TCHAR First(const CString& sText);
 	TCHAR Last(const CString& sText);
+	TCHAR First(LPCTSTR szText);
+	TCHAR Last(LPCTSTR szText);
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
+	inline BOOL IsEmpty(LPCTSTR szText) { return (!szText || !szText[0]); }
+	inline BOOL IsEmpty(LPCSTR szText) { return (!szText || !szText[0]); }
 
 	double Round(double dValue);
 	float Round(float fValue);

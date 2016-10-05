@@ -147,7 +147,7 @@ CPreferences::~CPreferences()
 
 BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 {
-	if ((szPrefsPath == NULL) || (szPrefsPath[0] == 0))
+	if (Misc::IsEmpty(szPrefsPath))
 	{
 		ASSERT(0);
 		return FALSE;

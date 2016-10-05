@@ -340,7 +340,7 @@ void CTDLCsvImportExportDlg::SetMasterColumnAttribute(LPCTSTR szColumn, TDC_ATTR
 void CTDLCsvImportExportDlg::SetMasterColumnName(TDC_ATTRIBUTE attrib, LPCTSTR szColumn)
 {
 	// prevent setting the master mapping to an empty name
-	if (szColumn && *szColumn)
+	if (!Misc::IsEmpty(szColumn))
 	{
 		// check if the column name is already in use
 		int nNameCol = FindMasterColumn(szColumn);

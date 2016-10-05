@@ -112,7 +112,7 @@ void CContentCtrl::SetUITheme(const CUIThemeFile& theme)
 
 void CContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	if (m_pContentCtrl && szKey && *szKey)
+	if (m_pContentCtrl && !Misc::IsEmpty(szKey))
 	{
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), szKey, GetTypeID());
@@ -123,7 +123,7 @@ void CContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 void CContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (m_pContentCtrl && szKey && *szKey)
+	if (m_pContentCtrl && !Misc::IsEmpty(szKey))
 	{
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), szKey, GetTypeID());

@@ -7,6 +7,7 @@
 #include "driveinfo.h"
 #include "filemisc.h"
 #include "webmisc.h"
+#include "misc.h"
 
 #include <shlwapi.h>
 
@@ -80,7 +81,7 @@ BOOL CSysImageList::Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle)
 
 int CSysImageList::GetImageIndex(LPCTSTR szFile)
 {
-	if (!m_hImageList && !Initialize() || !szFile || !(*szFile))
+	if (!m_hImageList && !Initialize() || Misc::IsEmpty(szFile))
 		return -1;
 	
 	SHFILEINFO sfi = { 0 };
@@ -102,7 +103,7 @@ int CSysImageList::GetImageIndex(LPCTSTR szFile)
 
 int CSysImageList::GetFileImageIndex(LPCTSTR szFilePath, BOOL bFailUnKnown)
 {
-	if (!m_hImageList && !Initialize() || !szFilePath || !(*szFilePath))
+	if (!m_hImageList && !Initialize() || Misc::IsEmpty(szFilePath))
 		return -1;
 	
 	// check index cache unless bFailUnknown is TRUE because the cache

@@ -323,8 +323,11 @@ void CRtfHtmlConverter::CleanupTemporaryImages()
 BOOL CRtfHtmlConverter::ConvertRtfToHtml(LPCSTR szRTF, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szImageDir)
 {
 	// sanity check
-	if (!szRTF || !szRTF[0])
+	if (Misc::IsEmpty(szRTF))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	CString sImageDir(szImageDir), sUniqueDir;
 	BOOL bTempImageDir = sImageDir.IsEmpty();

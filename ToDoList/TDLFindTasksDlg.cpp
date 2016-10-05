@@ -1181,7 +1181,7 @@ BOOL CTDLFindTasksDlg::LoadSearch(LPCTSTR szName, CSearchParamArray& params, BOO
 {
 	params.RemoveAll();
 
-	if (!szName || !(*szName))
+	if (Misc::IsEmpty(szName))
 		return FALSE;
 
 	CPreferences prefs;

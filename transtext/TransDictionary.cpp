@@ -591,7 +591,7 @@ BOOL DICTITEM::Translate(CString& sText)
 
 BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID)
 {
-	if (szClassID && *szClassID)
+	if (!Misc::IsEmpty(szClassID))
 		return Translate(sText, szClassID);
 	 
 	// else

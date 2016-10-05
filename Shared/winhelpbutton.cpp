@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "winhelpbutton.h"
 #include "dlgunits.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -119,7 +120,7 @@ BOOL CWinHelpButton::SetIcon(HICON hIcon)
 
 BOOL CWinHelpButton::SetTooltip(LPCTSTR szTooltip)
 {
-	if (!szTooltip || !(*szTooltip))
+	if (Misc::IsEmpty(szTooltip))
 	{
 		ASSERT(0);
 		return FALSE;

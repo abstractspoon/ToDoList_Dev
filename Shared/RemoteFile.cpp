@@ -1343,7 +1343,7 @@ void CRemoteFile::SplitPath(LPCTSTR szFullRemotePath, CString& sServer, CString&
 
 CString CRemoteFile::FormatRemotePath(LPCTSTR szFile) const
 {
-	ASSERT(szFile && szFile[0]);
+	ASSERT(!Misc::IsEmpty(szFile));
 
 	CString sRemotePath(m_sServer);
 

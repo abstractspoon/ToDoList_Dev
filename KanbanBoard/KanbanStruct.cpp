@@ -127,9 +127,14 @@ KANBANITEM::~KANBANITEM()
 
 void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 {
-	ASSERT(szAttrib && szAttrib[0]);
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
 
-	if (!szValue || !szValue[0])
+	// else
+	if (Misc::IsEmpty(szValue))
 		mapAttribValues.RemoveKey(szAttrib);
 	else
 		mapAttribValues[szAttrib] = szValue;
@@ -137,6 +142,12 @@ void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 
 void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, int nValue)
 {
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
 	// Less than zero == empty
 	if (nValue >= 0)
 		SetAttributeValue(szAttrib, Misc::Format(nValue));
@@ -146,10 +157,10 @@ void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, int nValue)
 
 CString KANBANITEM::GetAttributeValue(LPCTSTR szAttrib) const
 {
-	ASSERT(szAttrib && szAttrib[0]);
-	
 	CString sValue;
-	mapAttribValues.Lookup(szAttrib, sValue);
+
+	if (!Misc::IsEmpty(szAttrib))
+		mapAttribValues.Lookup(szAttrib, sValue);
 		
 	return sValue;
 }
@@ -392,7 +403,7 @@ KANBANITEM* CKanbanItemMap::NewItem(DWORD dwTaskID, const CString& sTitle)
 
 int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const
 {
-	ASSERT(szAttribID && szAttribID[0]);
+	ASSERT(!Misc::IsEmpty(szAttribID));
 
 	map.RemoveAll();
 

@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "UIExtensionWnd.h"
+#include "misc.h"
 
 #include "..\Interfaces\IUIExtension.h"
 
@@ -82,13 +83,13 @@ void CUIExtensionWnd::SetUITheme(const UITHEME* pTheme)
 
 void CUIExtensionWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	if (m_pExtensionWnd && szKey && *szKey)
+	if (m_pExtensionWnd && !Misc::IsEmpty(szKey))
 		m_pExtensionWnd->SavePreferences(pPrefs, szKey);
 }
 
 void CUIExtensionWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (m_pExtensionWnd && szKey && *szKey)
+	if (m_pExtensionWnd && !Misc::IsEmpty(szKey))
 		m_pExtensionWnd->LoadPreferences(pPrefs, szKey, false);
 }
 

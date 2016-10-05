@@ -1880,7 +1880,7 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 {
 	CString sResource(_T("Resources"));
 
-	if (szSubFolder && *szSubFolder)
+	if (!Misc::IsEmpty(szSubFolder))
 	{
 		sResource += '\\';
 		sResource += szSubFolder;
@@ -1888,7 +1888,7 @@ CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
 
 	sResource = FileMisc::GetAppResourceFolder(sResource);
 
-	if (szFile && *szFile)
+	if (!Misc::IsEmpty(szFile))
 	{
 		sResource += '\\';
 		sResource += szFile;

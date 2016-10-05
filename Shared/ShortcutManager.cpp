@@ -421,7 +421,7 @@ int CShortcutManager::BuildMapping(CMenu* pMenu, LPCTSTR szParentName,
 
 		pMenu->GetMenuString(nItem, sMenuText, MF_BYPOSITION);
 
-		if (szParentName && *szParentName)
+		if (!Misc::IsEmpty(szParentName))
 			sItemText.Format(_T("%s > %s"), szParentName, sMenuText);
 		else
 			sItemText = sMenuText;

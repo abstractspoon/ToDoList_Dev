@@ -36,7 +36,7 @@ END_MESSAGE_MAP()
 
 void CHistoryComboBox::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	ASSERT(pPrefs && szKey && *szKey);
+	ASSERT(pPrefs && !Misc::IsEmpty(szKey));
 
 	int nItem = pPrefs->GetProfileInt(szKey, _T("HistoryCount"));
 
@@ -55,7 +55,7 @@ void CHistoryComboBox::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 
 void CHistoryComboBox::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	ASSERT(pPrefs && szKey && *szKey);
+	ASSERT(pPrefs && !Misc::IsEmpty(szKey));
 	ASSERT(GetSafeHwnd());
 	
 	CStringArray aHistory;

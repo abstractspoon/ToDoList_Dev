@@ -295,7 +295,7 @@ BOOL WebMisc::IsProtocolRegistered(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTST
 	CRegKey2 reg;
 
 	// optional test
-	if (szAppName && *szAppName)
+	if (!Misc::IsEmpty(szAppName))
 	{
 		if (reg.Open(HKEY_CLASSES_ROOT, szProtocol, TRUE) != ERROR_SUCCESS)
 			return FALSE;
@@ -324,7 +324,7 @@ BOOL WebMisc::IsProtocolRegistered(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTST
 		return FALSE;
 
 	// optional test
-	if (szCommand && *szCommand)
+	if (!Misc::IsEmpty(szCommand))
 		return (sTemp.CompareNoCase(szCommand) == 0);
 
 	// else

@@ -6,6 +6,7 @@
 #include "WinClasses.h"
 #include "wclassdefines.h"
 #include "folderdialog.h"
+#include "misc.h"
 
 #include <afxpriv.h>
 
@@ -56,8 +57,11 @@ CString CWinClasses::GetClass(HWND hWnd)
 
 BOOL CWinClasses::IsClass(LPCTSTR szClass, LPCTSTR szWndClass) 
 { 
-	if (!szClass || !szClass[0] || !szWndClass || ! szWndClass[0])
+	if (Misc::IsEmpty(szClass) || Misc::IsEmpty(szWndClass))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	return (_tcsicmp(szClass, szWndClass) == 0); 
 }

@@ -468,7 +468,7 @@ void CTimeHelper::SetUnits(TH_UNITS nUnits, LPCTSTR szUnits)
 		return ;
 	}
 
-	if (szUnits && *szUnits)
+	if (!Misc::IsEmpty(szUnits))
 		SetUnits(nUnits, szUnits[0]);
 }
 
@@ -721,9 +721,13 @@ BOOL CTimeHelper::SetWorkdaysInWeek(double dDays)
 
 TH_UNITS CTimeHelper::DecodeUnits(LPCTSTR szUnits)
 {
-	ASSERT(szUnits);
+	if (Misc::IsEmpty(szUnits))
+	{
+		ASSERT(0);
+		return THU_NULL;
+	}
 
-	return (szUnits ? DecodeUnits(szUnits[0]) : THU_NULL);
+	return DecodeUnits(szUnits[0]);
 }
 
 TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits)

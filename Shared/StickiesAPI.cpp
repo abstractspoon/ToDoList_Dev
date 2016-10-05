@@ -31,7 +31,7 @@ CStickiesAPI::~CStickiesAPI()
 
 BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickiesPath)
 {
-	if (szStickiesPath && *szStickiesPath)
+	if (!Misc::IsEmpty(szStickiesPath))
 		m_sStickiesPath = szStickiesPath;
 
 	// verify owner callback
@@ -153,16 +153,16 @@ CString CStickiesAPI::FormatCommandString(LPCTSTR szCommand, LPCTSTR szStickyID,
 {
 	CString sCommand(_T("api "));
 	
-	ASSERT(szCommand && *szCommand);
+	ASSERT(!Misc::IsEmpty(szCommand));
 	sCommand += szCommand;
 
-	if (szStickyID && *szStickyID)
+	if (!Misc::IsEmpty(szStickyID))
 	{
 		sCommand += ' ';
 		sCommand += szStickyID;
 	}
 
-	if (szExtra && *szExtra)
+	if (!Misc::IsEmpty(szExtra))
 	{
 		sCommand += ' ';
 		sCommand += szExtra;

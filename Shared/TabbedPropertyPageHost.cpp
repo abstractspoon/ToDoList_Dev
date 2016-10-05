@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TabbedPropertyPageHost.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -117,10 +118,11 @@ BOOL CTabbedPropertyPageHost::ConstructTabControl()
 
 BOOL CTabbedPropertyPageHost::AddPage(CPropertyPage* pPage, LPCTSTR szTitle, DWORD dwItemData)
 {
-	ASSERT(szTitle && *szTitle);
-
-	if (!szTitle || !(*szTitle))
+	if (Misc::IsEmpty(szTitle))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	if (GetSafeHwnd() && !ConstructTabControl())
 		return FALSE;

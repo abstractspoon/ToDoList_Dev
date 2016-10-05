@@ -27,7 +27,7 @@ CString CTDLRecurringTaskEdit::s_sOptionsBtnTip;
 
 void CTDLRecurringTaskEdit::SetDefaultButtonTip(LPCTSTR szOption)
 {
-	if (szOption && *szOption)
+	if (!Misc::IsEmpty(szOption))
 		s_sOptionsBtnTip = szOption;
 }
 

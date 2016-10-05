@@ -248,7 +248,7 @@ void COrderedTreeCtrl::SetGutterColumnHeaderTitle(UINT nColID, UINT nSymbol, LPC
 
 void COrderedTreeCtrl::SetGutterColumnHeaderTip(UINT nColID, LPCTSTR szTip)
 {
-	if (szTip && *szTip)
+	if (!Misc::IsEmpty(szTip))
 	{
 		m_mapTooltips[nColID] = szTip;
 	

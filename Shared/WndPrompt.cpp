@@ -7,6 +7,7 @@
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "enstring.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -34,7 +35,7 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT
 	ASSERT (!IsHooked());
 	ASSERT (nCheckMsg);
 
-	if (!IsHooked() && hWnd && szPrompt && *szPrompt && nCheckMsg)
+	if (!IsHooked() && hWnd && !Misc::IsEmpty(szPrompt) && nCheckMsg)
 	{
 		if (HookWindow(hWnd))
 		{
@@ -56,10 +57,7 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT
 
 void CWndPrompt::SetPrompt(LPCTSTR szPrompt, BOOL bCentred)
 {
-	ASSERT (IsHooked());
-	ASSERT (szPrompt && *szPrompt);
-
-	if (IsHooked() && szPrompt && *szPrompt)
+	if (IsHooked() && !Misc::IsEmpty(szPrompt))
 	{
 		m_sPrompt = szPrompt;
 
@@ -68,6 +66,10 @@ void CWndPrompt::SetPrompt(LPCTSTR szPrompt, BOOL bCentred)
 
 		if (WantPrompt())
 			Invalidate();
+	}
+	else
+	{
+		ASSERT(0);
 	}
 }
 
@@ -137,7 +139,7 @@ void CWndPrompt::DrawPrompt(HDC hdc)
 
 void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred, LPCTSTR szClass)
 {
-	ASSERT (szPrompt && *szPrompt);
+	ASSERT (!Misc::IsEmpty(szPrompt));
 	
 	// set up DC
 	HDC hdcOrg = hdc;
@@ -231,7 +233,7 @@ BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt,
 		if (pWnd->IsValid())
 		{
 			// empty prompt => remove
-			if (!szPrompt || !*szPrompt)
+			if (Misc::IsEmpty(szPrompt))
 			{
 				pWnd->HookWindow(NULL);
 				delete pWnd;

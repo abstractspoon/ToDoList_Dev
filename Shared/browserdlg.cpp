@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "browserdlg.h"
+#include "misc.h"
 
 #include "..\3rdParty\stdiofileex.h"
 
@@ -50,7 +51,7 @@ END_MESSAGE_MAP()
 
 int CBrowserDlg::DoModal(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 {
-	if (!szUrlPath || !*szUrlPath)
+	if (Misc::IsEmpty(szUrlPath))
 		return IDCANCEL;
 
 	m_sUrl = szUrlPath;
@@ -61,7 +62,7 @@ int CBrowserDlg::DoModal(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 
 BOOL CBrowserDlg::Create(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 {
-	if (!szUrlPath || !*szUrlPath)
+	if (Misc::IsEmpty(szUrlPath))
 		return IDCANCEL;
 
 	m_sUrl = szUrlPath;
@@ -72,7 +73,7 @@ BOOL CBrowserDlg::Create(LPCTSTR szCaption, LPCTSTR szUrlPath, CWnd* pParentWnd)
 
 BOOL CBrowserDlg::Navigate(LPCTSTR szUrlPath, LPCTSTR szCaption)
 {
-	if (szCaption && *szCaption)
+	if (!Misc::IsEmpty(szCaption))
 		SetWindowText(szCaption);
 
 	if (m_bBrowser)
