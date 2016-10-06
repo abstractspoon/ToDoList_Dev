@@ -281,7 +281,7 @@ protected:
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
-	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
+	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
 	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	DWORD HitTestTask(const CPoint& point, BOOL bScreen, int& nItem) const;
 	int FindListItem(DWORD dwTaskID, const CHTIMap& mapItems) const;

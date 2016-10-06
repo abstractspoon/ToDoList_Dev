@@ -2012,7 +2012,7 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 
 		// calc new 'To' point to see if anything has actually changed
 		GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit);
+		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit, TRUE);
 		CPoint ptTo;
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
@@ -2141,7 +2141,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				CPoint ptCursor(GetMessagePos());
 				GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 
-				DWORD dwTaskID = ListHitTestTask(ptCursor, TRUE, nHit);
+				DWORD dwTaskID = ListHitTestTask(ptCursor, TRUE, nHit, TRUE);
 				ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
 
 				if (nHit != GTLCHT_NOWHERE)
@@ -2237,7 +2237,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				else if (IsPickingDependencyToTask())
 				{
 					GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-					DWORD dwToTaskID = ListHitTestTask(lp, FALSE, nHit);
+					DWORD dwToTaskID = ListHitTestTask(lp, FALSE, nHit, TRUE);
 
 					if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 					{
@@ -2302,7 +2302,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 		case WM_RBUTTONDOWN:
 			{
 				GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-				DWORD dwTaskID = ListHitTestTask(lp, FALSE, nHit);
+				DWORD dwTaskID = ListHitTestTask(lp, FALSE, nHit, FALSE);
 
 				ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
 
@@ -4973,7 +4973,7 @@ DWORD CGanttTreeListCtrl::HitTestTask(const CPoint& ptScreen) const
 {
 	// try list first
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE, nHit);
+	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE, nHit, FALSE);
 
 	// then tree
 	if (!dwTaskID)
@@ -5066,7 +5066,7 @@ int CGanttTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& 
 	return -1;
 }
 
-DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const
+DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
 {
 	nHit = GTLCHT_NOWHERE;
 
@@ -5085,7 +5085,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	GET_GI_RET(dwTaskID, pGI, 0);
 	
 	// No dragging on auto-calculated parent tasks
-	if (HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
+	if (bDragging && HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
 		return 0;
 
 	COleDateTime dtStart, dtDue;
@@ -5174,7 +5174,7 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 	
-	DWORD dwTaskID = ListHitTestTask(ptCursor, FALSE, nHit);
+	DWORD dwTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
 	ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
 
 	if (nHit == GTLCHT_NOWHERE)
