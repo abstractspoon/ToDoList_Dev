@@ -13,8 +13,8 @@
 #include "tdcreminder.h"
 #include "TDLReminderPeriodComboBox.h"
 
-
 #include "..\Shared\DateTimeCtrlEx.h"
+#include "..\Shared\timecombobox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -52,8 +52,9 @@ public:
 	DWORD m_dwNextReminderID;
 	BOOL m_bChangingReminders;
 
-	CTDLReminderPeriodComboBox m_cbSnooze;
-	CDateTimeCtrlEx m_dtcSnoozeTime;
+	CTDLReminderPeriodComboBox m_cbSnoozeFor;
+	CDateTimeCtrlEx m_dtcSnoozeDate;
+	CTimeComboBox m_cbSnoozeTime;
 	COleDateTime	m_dtSnoozeUntil;
 	CListCtrl	m_lcReminders;
 

@@ -737,6 +737,8 @@
 #define IDC_TASKS_LABEL                 1485
 #define IDC_TASKLISTS_LABEL             1486
 #define IDC_SYNCCOMPLETIONTOSTATUS      1487
+#define IDC_SNOOZEUNTILDATE             1489
+#define IDC_SNOOZEUNTILTIME             1490
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2078,7 +2080,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        304
 #define _APS_NEXT_COMMAND_VALUE         34557
-#define _APS_NEXT_CONTROL_VALUE         1489
+#define _APS_NEXT_CONTROL_VALUE         1491
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

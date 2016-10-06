@@ -13,6 +13,7 @@
 #include "..\Shared\localizer.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\autoflag.h"
+#include "..\Shared\dlgunits.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4201)
@@ -65,18 +66,30 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLShowReminderDlg)
 	DDX_Control(pDX, IDC_REMINDERS, m_lcReminders);
-	DDX_DateTimeCtrl(pDX, IDC_SNOOZEUNTIL, m_dtSnoozeUntil);
 	DDX_Radio(pDX, IDC_SNOOZEOPTIONFOR, m_bSnoozeUntil);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_SNOOZEFOR, m_cbSnooze);
-	DDX_Control(pDX, IDC_SNOOZEUNTIL, m_dtcSnoozeTime);
+	DDX_Control(pDX, IDC_SNOOZEFOR, m_cbSnoozeFor);
+	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
+	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
 
-	ASSERT(m_cbSnooze.GetCount());
+	ASSERT(m_cbSnoozeFor.GetCount());
 
 	if (pDX->m_bSaveAndValidate)
-		m_nSnoozeMins = m_cbSnooze.GetSelectedPeriod();
+	{
+		m_nSnoozeMins = m_cbSnoozeFor.GetSelectedPeriod();
+
+		COleDateTime date;
+		m_dtcSnoozeDate.GetTime(date);
+
+		m_dtSnoozeUntil = (CDateHelper::GetDateOnly(date).m_dt + m_cbSnoozeTime.GetOleTime());
+	}
 	else
-		m_cbSnooze.SetSelectedPeriod(m_nSnoozeMins);
+	{
+		m_cbSnoozeFor.SetSelectedPeriod(m_nSnoozeMins);
+
+		m_dtcSnoozeDate.SetTime(CDateHelper::GetDateOnly(m_dtSnoozeUntil));
+		m_cbSnoozeTime.Set24HourTime(CDateHelper::GetTimeOnly(m_dtSnoozeUntil) * 24);
+	}
 }
 
 
@@ -113,8 +126,9 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	m_dtcSnoozeTime.ShowSeconds(FALSE);
-	
+	CDlgUnits dlu(this);
+	m_cbSnoozeTime.SetItemHeight(-1, dlu.ToPixelsY(10));
+
 	// create list columns
 	m_lcReminders.InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, 250);
 	m_lcReminders.InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, 100);
@@ -388,7 +402,8 @@ void CTDLShowReminderDlg::EnableControls()
 	UpdateData();
 	
 	GetDlgItem(IDC_SNOOZEFOR)->EnableWindow(!m_bSnoozeUntil);
-	GetDlgItem(IDC_SNOOZEUNTIL)->EnableWindow(m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILDATE)->EnableWindow(m_bSnoozeUntil);
+	GetDlgItem(IDC_SNOOZEUNTILTIME)->EnableWindow(m_bSnoozeUntil);
 
 	int nNumSel = m_lcReminders.GetSelectedCount();
 
@@ -404,7 +419,7 @@ void CTDLShowReminderDlg::UpdateControls()
 	if (GetSelectedReminder(rem) != -1)
 	{
 		UINT nSnooze = ((rem.nLastSnoozeMins > 0) ? rem.nLastSnoozeMins : 5);
-		m_cbSnooze.SetSelectedPeriod(nSnooze);
+		m_cbSnoozeFor.SetSelectedPeriod(nSnooze);
 		
 		m_dtSnoozeUntil = (COleDateTime::GetCurrentTime().m_dt + (nSnooze / ONE_DAY_IN_MINS));
 		m_bSnoozeUntil = (rem.nLastSnoozeMins == 0);
