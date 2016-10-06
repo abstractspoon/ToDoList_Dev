@@ -10,6 +10,7 @@
 #include "..\shared\colorbutton.h"
 #include "..\shared\groupline.h"
 #include "..\shared\scrollingpropertypagehost.h"
+#include "..\Shared\winhelpbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -93,7 +94,7 @@ class CGanttPreferencesDlg : public CDialog
 {
 // Construction
 public:
-	CGanttPreferencesDlg(CWnd* pParent = NULL);   // standard constructor
+	CGanttPreferencesDlg(CWnd* pParent);   // standard constructor
 
 	BOOL GetDisplayAllocTo() const { return m_page.GetDisplayAllocTo(); }
 	BOOL GetAutoScrollSelection() const { return m_page.GetAutoScrollSelection(); }
@@ -114,6 +115,7 @@ protected:
 	CGanttPreferencesPage m_page;
 	CScrollingPropertyPageHost m_ppHost;
 	HICON m_hIcon;
+	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -125,6 +127,9 @@ protected:
 	//{{AFX_MSG(CGanttPreferencesDlg)
 	//}}AFX_MSG
 	afx_msg void OnDestroy();
+	afx_msg void OnClickHelpButton();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+
 	DECLARE_MESSAGE_MAP()
 };
 

@@ -27,20 +27,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_GTLC_DATECHANGE = ::RegisterWindowMessage(_T("WM_GTLC_DATECHANGE"));
-
-// WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_GTLC_DRAGCHANGE = ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
-
-// WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYZOOM = ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYZOOM"));
-
-// WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYSORT = ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYSORT"));
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CGanttDependencyEditor
 {
 public:

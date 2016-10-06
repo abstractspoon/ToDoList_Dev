@@ -115,6 +115,7 @@ protected:
 	afx_msg LRESULT OnBigCalendarNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifyDragChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifyVisibleWeekChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnBigCalendarPrefsHelp(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 //protected member functions

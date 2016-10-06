@@ -6,6 +6,7 @@
 #include "GanttChartExt.h"
 #include "GanttChartWnd.h"
 #include "GanttStatic.h"
+#include "GanttMsg.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
@@ -45,7 +46,10 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
 	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
-	m_bInSelectTask(FALSE)
+	m_bInSelectTask(FALSE),
+#pragma warning(disable:4355)
+	m_dlgPrefs(this)
+#pragma warning(default:4355)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_GANTTCHART);
 }
@@ -96,6 +100,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
 	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
+	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnGanttPrefsHelp)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -111,6 +116,15 @@ BOOL CGanttChartWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+LRESULT CGanttChartWnd::OnGanttPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	CString sHelpID(GetTypeID());
+	sHelpID += _T("_PREFS");
+	
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)(LPCTSTR)sHelpID);
+	return 0L;
 }
 
 void CGanttChartWnd::SetReadOnly(bool bReadOnly)

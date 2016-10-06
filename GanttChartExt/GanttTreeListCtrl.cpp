@@ -5,8 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "GanttTreeListCtrl.h"
-
-#include "..\todolist\tdlschemadef.h"
+#include "GanttMsg.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\DateHelper.h"

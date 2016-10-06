@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "TaskCalendarCtrl.h"
+#include "CalMsg.h"
 
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\themed.h"

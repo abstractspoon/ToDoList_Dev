@@ -49,17 +49,6 @@ enum TCC_SNAPMODE
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_CALENDAR_DATECHANGE = ::RegisterWindowMessage(_T("WM_CALENDAR_DATECHANGE"));
-
-// WPARAM = 0, LPARAM = Task ID
-const UINT WM_CALENDAR_SELCHANGE = ::RegisterWindowMessage(_T("WM_CALENDAR_SELCHANGE"));
-
-// WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_CALENDAR_DRAGCHANGE = ::RegisterWindowMessage(_T("WM_CALENDAR_DRAGCHANGE"));
-
-/////////////////////////////////////////////////////////////////////////////
-
 const double	ONE_HOUR		= (1.0 / 24.0);
 const int		DEF_TASK_HEIGHT = 18;
 const int		MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);

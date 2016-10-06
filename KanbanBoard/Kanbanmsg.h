@@ -12,16 +12,16 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = , LPARAM = LPCTSTR
-const UINT WM_KBC_VALUECHANGE = ::RegisterWindowMessage(_T("WM_KBC_STATUSCHANGE"));
+const UINT WM_KBC_VALUECHANGE		= ::RegisterWindowMessage(_T("WM_KBC_STATUSCHANGE"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_KBC_SELECTIONCHANGE = ::RegisterWindowMessage(_T("WM_KBC_SELECTIONCHANGE"));
+const UINT WM_KBC_SELECTIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_SELECTIONCHANGE"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_KBC_NOTIFYSORT = ::RegisterWindowMessage(_T("WM_KBC_NOTIFYSORT"));
+const UINT WM_KBC_NOTIFYSORT		= ::RegisterWindowMessage(_T("WM_KBC_NOTIFYSORT"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_KBC_PREFSHELP = ::RegisterWindowMessage(_T("WM_KBC_PREFSHELP"));
+const UINT WM_KBC_PREFSHELP			= ::RegisterWindowMessage(_T("WM_KBC_PREFSHELP"));
 
 /////////////////////////////////////////////////////////////////////////////
 

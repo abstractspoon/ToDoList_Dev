@@ -86,6 +86,9 @@ BOOL CGanttChartExtApp::InitInstance()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
+	// Set this before anything else
+	CWinHelpButton::SetIcon(LoadIcon(IDI_HELP_BUTTON));
+	
 	m_hIcon = LoadIcon(IDR_GANTTCHART);
 
 	return CWinApp::InitInstance();

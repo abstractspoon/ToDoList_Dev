@@ -43,7 +43,9 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_bInSelectTask(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
 	m_ctrlKanban(m_fonts),
+#pragma warning(disable:4355)
 	m_dlgPrefs(this)
+#pragma warning(default:4355)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_KANBAN);
 	m_cbOptions.SetMinDLUHeight(10);
@@ -111,7 +113,7 @@ BOOL CKanbanWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-LRESULT CKanbanWnd::OnKanbanPrefsHelp(WPARAM wp, LPARAM lp)
+LRESULT CKanbanWnd::OnKanbanPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	CString sHelpID(GetTypeID());
 	sHelpID += _T("_PREFS");

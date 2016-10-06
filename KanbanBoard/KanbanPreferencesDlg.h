@@ -117,7 +117,7 @@ class CKanbanPreferencesDlg : public CDialog
 {
 // Construction
 public:
-	CKanbanPreferencesDlg(CWnd* pParent = NULL);   // standard constructor
+	CKanbanPreferencesDlg(CWnd* pParent);   // standard constructor
 
 	BOOL HasFixedColumns() const { return m_page.HasFixedColumns(); }
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const { return m_page.GetFixedColumnDefinitions(aColumnDefs); }

@@ -9,6 +9,7 @@
 
 #include "..\shared\groupline.h"
 #include "..\shared\scrollingpropertypagehost.h"
+#include "..\Shared\winhelpbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -88,7 +89,7 @@ class CCalendarPreferencesDlg : public CDialog
 {
 // Construction
 public:
-	CCalendarPreferencesDlg(CWnd* pParent = NULL);   // standard constructor
+	CCalendarPreferencesDlg(CWnd* pParent);   // standard constructor
 
 	BOOL GetShowMiniCalendar() const { return m_page.GetShowMiniCalendar(); }
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
@@ -114,6 +115,7 @@ protected:
 	CCalendarPreferencesPage m_page;
 	CScrollingPropertyPageHost m_ppHost;
 	HICON m_hIcon;
+	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
@@ -125,6 +127,9 @@ protected:
 	//{{AFX_MSG(CCalendarPreferencesDlg)
 	//}}AFX_MSG
 	afx_msg void OnDestroy();
+	afx_msg void OnClickHelpButton();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+
 	DECLARE_MESSAGE_MAP()
 };
 

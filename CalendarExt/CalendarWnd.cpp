@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "CalendarExt.h"
 #include "CalendarWnd.h"
+#include "CalMsg.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\DateHelper.h"
@@ -42,7 +43,10 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 CCalendarWnd::CCalendarWnd()
 	:	
 	m_hIcon(AfxGetApp()->LoadIcon(IDR_CALENDAR)),
-	m_bReadOnly(FALSE)
+	m_bReadOnly(FALSE),
+#pragma warning(disable:4355)
+	m_dlgPrefs(this)
+#pragma warning(default:4355)
 {
 }
 
@@ -80,6 +84,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_SELCHANGE, OnBigCalendarNotifySelectionChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_DRAGCHANGE, OnBigCalendarNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_VISIBLEWEEKCHANGE, OnBigCalendarNotifyVisibleWeekChange)
+	ON_REGISTERED_MESSAGE(WM_CALENDAR_PREFSHELP, OnBigCalendarPrefsHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -94,6 +99,15 @@ BOOL CCalendarWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+LRESULT CCalendarWnd::OnBigCalendarPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	CString sHelpID(GetTypeID());
+	sHelpID += _T("_PREFS");
+	
+	GetParent()->SendMessage(WM_IUI_DOHELP, 0, (LPARAM)(LPCTSTR)sHelpID);
+	return 0L;
 }
 
 void CCalendarWnd::SetReadOnly(bool bReadOnly)

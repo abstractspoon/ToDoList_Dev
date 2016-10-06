@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "CalendarPreferencesDlg.h"
+#include "CalMsg.h"
 
 #include "..\Shared\DialogHelper.h"
 
@@ -214,9 +215,13 @@ BOOL CCalendarPreferencesPage::GetCalcMissingDueAsLatestStartAndToday() const
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesDlg dialog
 
+const UINT IDC_HELPBUTTON = 1001;
+
 CCalendarPreferencesDlg::CCalendarPreferencesDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_PREFERENCES_DIALOG, pParent),
-		m_hIcon(NULL)
+	: 
+	CDialog(IDD_PREFERENCES_DIALOG, pParent),
+	m_hIcon(NULL),
+	m_btnHelp(1, FALSE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -227,6 +232,9 @@ CCalendarPreferencesDlg::CCalendarPreferencesDlg(CWnd* pParent /*=NULL*/)
 BEGIN_MESSAGE_MAP(CCalendarPreferencesDlg, CDialog)
 	//{{AFX_MSG_MAP(CCalendarPreferencesDlg)
 	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
+	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_HELPBUTTON, OnClickHelpButton)
 END_MESSAGE_MAP()
 
 BOOL CCalendarPreferencesDlg::OnInitDialog() 
@@ -247,6 +255,8 @@ BOOL CCalendarPreferencesDlg::OnInitDialog()
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_CALENDAR);
 	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
 	
+	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -263,4 +273,18 @@ void CCalendarPreferencesDlg::OnDestroy()
 	CDialog::OnDestroy();
 	
 	::DestroyIcon(m_hIcon);
+}
+
+void CCalendarPreferencesDlg::OnClickHelpButton()
+{
+	ASSERT(m_pParentWnd);
+	
+	if (m_pParentWnd)
+		m_pParentWnd->SendMessage(WM_CALENDAR_PREFSHELP);
+}
+
+BOOL CCalendarPreferencesDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnClickHelpButton();
+	return TRUE;
 }
