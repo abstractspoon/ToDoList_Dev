@@ -8947,7 +8947,8 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 	}
 
 	// extra processing to identify the originally selected tasks
-	// in case the user want's to paste as references
+	// in case the user wants to paste as references.
+	// Note: References are excluded of bResolveReferences is true
 	pos = TSH().GetFirstItemPos();
 
 	while (pos)
@@ -8955,10 +8956,13 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 		DWORD dwSelID = TSH().GetNextItemData(pos);
 		ASSERT(dwSelID);
 
-		HTASKITEM hSelTask = tasks.FindTask(dwSelID);
-		ASSERT(hSelTask);
+		if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))
+		{
+			HTASKITEM hSelTask = tasks.FindTask(dwSelID);
+			ASSERT(hSelTask);
 
-		tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
+			tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
+		}
 	}
 
 	return (tasks.GetTaskCount());
