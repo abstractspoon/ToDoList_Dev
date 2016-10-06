@@ -2407,6 +2407,10 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 					dwScrollID = HitTestTask(::GetMessagePos());
 				}
 
+				// For reasons I don't understand, the resource context is
+				// wrong when handling the mousewheel
+				AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 				// do the zoom
 				ZoomIn(zDelta > 0);
 
