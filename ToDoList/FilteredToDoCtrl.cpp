@@ -307,21 +307,21 @@ LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView)
 
 BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 {
+	// NOTE: we are overriding this function else
+	// filtered out subtasks will not get copied
+
+	// NOTE: We DON'T override GetSelectedTasks because
+	// most often that only wants visible tasks
+
 	if (!GetSelectedCount())
 		return FALSE;
 	
 	ClearCopiedItem();
 	
-	// NOTE: we are overriding this function else
-	// filtered out tasks will not get copied
-
-	// NOTE: We DON'T override GetSelectedTasks because
-	// most often that only wants visible tasks
-
-	// ISO date strings
-	// must be done first before any tasks are added
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_FILENAME);
 	CTaskFile tasks;
-	tasks.EnableISODates(HasStyle(TDCS_SHOWDATESINISO));
+
+	PrepareTaskfileForTasks(tasks, filter);
 	
 	// get selected tasks ordered, removing duplicate subtasks
 	CHTIList selection;
@@ -355,7 +355,7 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 	}
 	
 	// extra processing to identify the originally selected tasks
-	// in case the user want's to paste as references
+	// in case the user wants to paste as references
 	pos = TSH().GetFirstItemPos();
 	
 	while (pos)
@@ -368,16 +368,6 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 		
 		tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
 	}
-	
-	// filename
-	tasks.SetFileName(m_sLastSavePath);
-	
-	// meta data
-	tasks.SetMetaData(m_mapMetaData);
-	
-	// custom data definitions
-	if (m_aCustomAttribDefs.GetSize())
-		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
 	
 	// and their titles (including child dupes)
 	CStringArray aTitles;
