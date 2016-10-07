@@ -7553,7 +7553,7 @@ CString CToDoCtrl::GetStylesheetPath() const
 
 void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	Flush(FALSE);
+	Flush();
 
 	CRuntimeDlg::OnContextMenu(pWnd, point);
 }
@@ -8546,7 +8546,7 @@ BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 
 void CToDoCtrl::SelectItem(HTREEITEM hti) 
 { 
-	HandleUnsavedComments();
+	Flush();
 
 	if (m_taskTree.GetSafeHwnd()) 
 	{
