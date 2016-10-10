@@ -405,9 +405,22 @@ BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_COMMAND(ID_TIMETRACKER_ONTOP, OnToggleTopMost)
+	ON_COMMAND(ID_TIMETRACK_HELP, OnHelp)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////
+
+void CTDLTimeTrackerDlg::OnHelp()
+{
+	AfxGetApp()->WinHelp(IDD_TIMETRACK_DIALOG);
+}
+
+BOOL CTDLTimeTrackerDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+{
+	OnHelp();
+	return TRUE;
+}
 
 BOOL CTDLTimeTrackerDlg::Create(DWORD dwOptions)
 {

@@ -171,6 +171,8 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnToggleTopMost();
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	
 protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
