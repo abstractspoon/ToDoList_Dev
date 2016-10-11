@@ -4166,7 +4166,7 @@ BEGIN
     IDS_TDC_FIELD_TASKLIST  "&Body"
     IDS_TDC_FIELD_PRIORITY  "Priorit&y"
     IDS_TDC_FIELD_PERCENT   "% C&omplete"
-    IDS_TDC_FIELD_TIMEEST   "T&ime Est."
+    IDS_TDC_FIELD_TIMEEST   "T&ime Estimate"
     IDS_TDC_FIELD_TIMESPENT "T&ime Spent"
     IDS_TDC_FIELD_STARTDATE "St&art Date"
     IDS_TDC_FIELD_DUEDATE   "D&ue Date"
