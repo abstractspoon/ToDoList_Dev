@@ -165,7 +165,7 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 			{
 				CEnBitmap bmp;
 				
-				if (bmp.CopyImage(hIcon, crBack))
+				if (bmp.CopyImage(hIcon, crBack, cx, cy))
 					hbm = (HBITMAP)bmp.Detach();
 		
 				// cleanup
