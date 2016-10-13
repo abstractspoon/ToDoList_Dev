@@ -191,20 +191,46 @@ BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const
 	return TRUE;
 }
 
-void CToDoCtrlReminders::RemoveDeletedTaskReminders(const CFilteredToDoCtrl* pTDC)
+BOOL CToDoCtrlReminders::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
 {
-	int nRem = m_aReminders.GetSize();
+	return RemoveTasks(TCR_REMOVEDELETED, pTDC);
+}
+
+BOOL CToDoCtrlReminders::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
+{
+	return RemoveTasks(TCR_REMOVEDONE, pTDC);
+}
+
+BOOL CToDoCtrlReminders::RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC)
+{
+	int nNumRem = m_aReminders.GetSize(), nRem(nNumRem);
 
 	while (nRem--)
 	{
 		TDCREMINDER rem = m_aReminders[nRem];
 
-		if (pTDC == NULL || pTDC == rem.pTDC)
+		if ((pTDC == NULL) || (pTDC == rem.pTDC))
 		{
-			if (!rem.pTDC->HasTask(rem.dwTaskID))
+			BOOL bRemove = (Misc::HasFlag(dwToRemove, TCR_REMOVEDELETED) && 
+							!rem.pTDC->HasTask(rem.dwTaskID));
+
+			if (!bRemove)
+			{
+				bRemove = (Misc::HasFlag(dwToRemove, TCR_REMOVEDONE) && 
+							rem.pTDC->IsTaskDone(rem.dwTaskID));
+
+				// if (!bRemove)
+				// {
+				//    ...
+				// }
+			}
+
+			if (bRemove)
 				RemoveReminder(nRem);
 		}
 	}
+
+	return (m_aReminders.GetSize() != nNumRem);
 }
 
 int CToDoCtrlReminders::FindReminder(const TDCREMINDER& rem, BOOL bIncludeDisabled) const

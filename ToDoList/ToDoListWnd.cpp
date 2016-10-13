@@ -3434,6 +3434,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		return 0L;
 	}
 
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)lp;
 
 	switch (nAttrib)
@@ -3449,30 +3450,29 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		
 	case TDCA_DONEDATE:
 		OnTimerDueItems(nTDC);
-		UpdateTimeTrackerTasks(GetToDoCtrl(nTDC), FALSE);
+		UpdateTimeTrackerTasks(tdc, FALSE);
+
+		m_dlgTimeTracker.RemoveCompletedTasks(&tdc);
+
+		if (m_reminders.RemoveCompletedTasks(&tdc))
+			tdc.RedrawReminders();
 		break;
 
 	case TDCA_DELETE:
-		{
-			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+		m_dlgTimeTracker.RemoveDeletedTasks(&tdc);
 
-			m_reminders.RemoveDeletedTaskReminders(&tdc);
-			m_dlgTimeTracker.RemoveDeletedTasks(&tdc);
-		}
+		if (m_reminders.RemoveDeletedTasks(&tdc))
+			tdc.RedrawReminders();
 		break;
 
 	case TDCA_TIMEEST:
 	case TDCA_TIMESPENT:
-		{
-			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-
-			m_dlgTimeTracker.UpdateTaskTime(&tdc);
-		}
+		m_dlgTimeTracker.UpdateTaskTime(&tdc);
 		break;
 
 	case TDCA_TASKNAME:
 	case TDCA_NEWTASK:
-		UpdateTimeTrackerTasks(GetToDoCtrl(nTDC), FALSE);
+		UpdateTimeTrackerTasks(tdc, FALSE);
 		break;
 	}
 
@@ -3485,9 +3485,9 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 	// do we need to update the current todoctrl's
 	// custom attributes on the find dialog?
-	if (m_findDlg.GetSafeHwnd() && nAttrib == TDCA_CUSTOMATTRIBDEFS)
+	if (m_findDlg.GetSafeHwnd() && (nAttrib == TDCA_CUSTOMATTRIBDEFS))
 	{
-		UpdateFindDialogActiveTasklist(&GetToDoCtrl());
+		UpdateFindDialogActiveTasklist(&tdc);
 	}
 
 	return 0L;

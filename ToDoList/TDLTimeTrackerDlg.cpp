@@ -173,23 +173,33 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
 	return UpdateTasks(tasks, NULL, _T(""), mapTasks);
 }
 
-BOOL TRACKTASKLIST::RemoveDeletedtasks()
+BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 {
-	BOOL bRemoved = FALSE;
-	int nTask = pTasks->GetSize();
+	int nNumTask = pTasks->GetSize(), nTask = nNumTask;
 
 	while (nTask--)
 	{
 		const TRACKITEM& ti = pTasks->GetData()[nTask];
 
-		if (!pTDC->HasTask(ti.dwTaskID))
+		BOOL bRemove = (Misc::HasFlag(dwToRemove, TTL_REMOVEDELETED) && 
+						!pTDC->HasTask(ti.dwTaskID));
+
+		if (!bRemove)
 		{
-			pTasks->RemoveAt(nTask);
-			bRemoved = TRUE;
+			bRemove = (Misc::HasFlag(dwToRemove, TTL_REMOVEDONE) && 
+						pTDC->IsTaskDone(ti.dwTaskID));
+
+			// if (!bRemove)
+			// {
+			//    ...
+			// }
 		}
+
+		if (bRemove)
+			pTasks->RemoveAt(nTask);
 	}
 
-	return bRemoved;
+	return (pTasks->GetSize() != nNumTask);
 }
 
 void TRACKTASKLIST::BuildTaskMap(CMap<DWORD, DWORD, int, int>& mapTasks) const
@@ -684,6 +694,16 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CFilteredToDoCtrl* pTDC)
 
 void CTDLTimeTrackerDlg::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
 {
+	RemoveTasks(pTDC, TTL_REMOVEDELETED);
+}
+
+void CTDLTimeTrackerDlg::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
+{
+	RemoveTasks(pTDC, TTL_REMOVEDONE);
+}
+
+void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove)
+{
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
 	if (!pTTL)
@@ -691,10 +711,10 @@ void CTDLTimeTrackerDlg::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
 		ASSERT(0);
 		return;
 	}
-	
-	if (pTTL->RemoveDeletedtasks() && IsSelectedTasklist(pTDC))
+
+	if (pTTL->RemoveTasks(dwToRemove) && IsSelectedTasklist(pTDC))
 		RebuildTaskCombo();
-	
+
 	UpdateButtonState();
 	UpdateTaskTime(pTDC);
 }

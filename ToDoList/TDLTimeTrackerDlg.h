@@ -44,6 +44,12 @@ typedef CArray<TRACKITEM, TRACKITEM&> CTrackItemArray;
 
 /////////////////////////////////////////////////////////////////////////
 
+enum 
+{
+	TTL_REMOVEDELETED	= 0x01,
+	TTL_REMOVEDONE		= 0x02,
+};
+
 struct TRACKTASKLIST
 {
 	TRACKTASKLIST();
@@ -51,7 +57,7 @@ struct TRACKTASKLIST
 
 	int SetTasks(const CTaskFile& tasks);
 	BOOL UpdateTasks(const CTaskFile& tasks);
-	BOOL RemoveDeletedtasks();
+	BOOL RemoveTasks(DWORD dwToRemove);
 
 	BOOL IsTracking(DWORD dwTaskID = 0) const;
 
@@ -109,6 +115,7 @@ public:
 	void RemoveAllTasklists();
 	BOOL UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
 	void RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC);
+	void RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC);
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
 	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC);
 	void UpdateTasklistName(const CFilteredToDoCtrl* pTDC);
@@ -178,6 +185,7 @@ protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
 	int GetTasklistCBIndex(const CFilteredToDoCtrl* pTDC) const;
 	BOOL HasTasklist(const CFilteredToDoCtrl* pTDC) const;
+	void RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove);
 	
 	BOOL Create(BOOL bVisible);
 	BOOL Recreate();
@@ -198,4 +206,5 @@ protected:
 	int CalcAvailableRows(int nHeight) const;
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
+
 };

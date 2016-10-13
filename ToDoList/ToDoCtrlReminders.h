@@ -40,7 +40,8 @@ public:
 	int FindReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC, BOOL bIncludeDisabled = TRUE) const;
 	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl& tdc);
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
-	void RemoveDeletedTaskReminders(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 
 	static CString FormatWhenString(const TDCREMINDER& rem);
@@ -83,6 +84,14 @@ protected:
 	BOOL ShowReminder(const TDCREMINDER& rem);
 	BOOL RemoveReminder(int nRem, BOOL bNotify = FALSE);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
+
+	enum 
+	{
+		TCR_REMOVEDELETED	= 0x01,
+		TCR_REMOVEDONE		= 0x02,
+	};
+
+	BOOL RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC = NULL);
 
 };
 
