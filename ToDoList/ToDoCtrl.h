@@ -838,6 +838,8 @@ protected:
 	HTREEITEM InsertTreeItem(const TODOITEM* pTDI, DWORD dwID, HTREEITEM htiParent, HTREEITEM htiAfter);
 
 	void AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
+	void InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, HTREEITEM hti,
+									const COleDateTime& dtNext, BOOL bDueDate);
 
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 

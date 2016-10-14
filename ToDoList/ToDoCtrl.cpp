@@ -3541,20 +3541,8 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 				bSomeRecurred = TRUE;
 
 				VERIFY (m_data.GetTaskNextOccurrence(dwTaskID, dtNext, bDueDate));
-				
-				// clear the completion date on the task and all its subtasks
-				SetTaskDone(hti, 0.0, TRUE, TRUE);
 
-				// we need to move both the due date and the start date forward
-				AdjustNewRecurringTasksDates(dwTaskID, dwTaskID, dtNext, bDueDate);
-				
-				// reset certain attributes BUT NOT COMMENTS
-				m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMESPENT, TRUE); 
-				m_data.ClearTaskAttribute(dwTaskID, TDCA_STATUS, TRUE);
-				m_data.ClearTaskAttribute(dwTaskID, TDCA_PERCENT, TRUE);
-	
-				// reset number of occurrences
-				m_data.ResetRecurringSubtaskOcurrences(dwTaskID);
+				InitialiseNewRecurringTask(dwTaskID, dwTaskID, hti, dtNext, bDueDate);
 
 				// notify parent
 				GetParent()->SendMessage(WM_TDCN_RECREATERECURRINGTASK, dwTaskID, dwTaskID);
@@ -3691,30 +3679,10 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 
 		HTREEITEM htiParent = m_taskTree.GetParentItem(hti);
 		HTREEITEM htiNew = AddTaskToTreeItem(task, task.GetFirstTask(), htiParent, hti, TDCR_YES);
-		ASSERT(htiNew);
-		ASSERT(GetTaskID(htiNew) == dwNewTaskID);
 
-		// reset new task(s) state to 'undone' including all children
-		SetTaskDone(htiNew, 0.0, TRUE, TRUE);
+		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, htiNew, dtNext, bDueDate);
 
-		// we need to move both the due date and the start date forward
-		// same as we did when reusing the task
-		AdjustNewRecurringTasksDates(dwTaskID, dwNewTaskID, dtNext, bDueDate);
-	
-		// the task ID has effectively changed so fixup those
-		// tasks that previously had a dependency
-		m_data.FixupTaskLocalDependentsIDs(dwNewTaskID, dwTaskID);
-	
-		// reset certain attributes
-		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_TIMESPENT, TRUE); 
-		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_COMMENTS, TRUE);
-		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_STATUS, TRUE);
-		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_PERCENT, TRUE);
-
-		// reset number of occurrences
-		m_data.ResetRecurringSubtaskOcurrences(dwNewTaskID);
-
-		// save off taskIDs for the end
+		// Save off taskIDs for the end
 		aTaskIDs.Add(dwTaskID);
 		aNewTaskIDs.Add(dwNewTaskID);
 	}
@@ -3736,6 +3704,40 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 	m_aRecreateTaskIDs.RemoveAll();
 
 	return 0L;
+}
+
+void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, 
+											HTREEITEM htiNew, const COleDateTime& dtNext, BOOL bDueDate)
+{
+	ASSERT(htiNew);
+	ASSERT(GetTaskID(htiNew) == dwNewTaskID);
+
+	// reset new task(s) state to 'undone' including all children
+	SetTaskDone(htiNew, 0.0, TRUE, TRUE);
+
+	// we need to move both the due date and the start date forward
+	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);
+
+	// Clear certain attributes
+	m_data.ClearTaskAttribute(dwNewTaskID, TDCA_TIMESPENT, TRUE); 
+	m_data.ClearTaskAttribute(dwNewTaskID, TDCA_PERCENT, TRUE);
+
+	// Set some defaults
+	m_data.SetTaskStatus(dwNewTaskID, m_tdiDefault.sStatus);
+
+	// Reset number of occurrences
+	m_data.ResetRecurringSubtaskOcurrences(dwNewTaskID);
+
+	// Special handling for recreated tasks
+	if (dwNewTaskID != dwPrevTaskID)
+	{
+		// the task ID has effectively changed so fix up those
+		// tasks that previously had a dependency
+		m_data.FixupTaskLocalDependentsIDs(dwNewTaskID, dwPrevTaskID);
+
+		// Clear the comments
+		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_COMMENTS, TRUE);
+	}
 }
 
 int CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date, 
