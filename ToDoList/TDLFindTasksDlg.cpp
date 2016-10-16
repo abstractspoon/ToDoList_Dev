@@ -961,7 +961,7 @@ void CTDLFindTasksDlg::OnUpdateDockleft(CCmdUI* pCmdUI)
 
 void CTDLFindTasksDlg::OnUndock() 
 {
-	m_dockMgr.Dock(DMP_UNDOCKED);
+	m_dockMgr.UnDock();
 
 	ResizeDlg();
 	Invalidate(TRUE);

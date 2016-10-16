@@ -84,12 +84,13 @@ BOOL CDockManager::IsValidDock(DM_POS nPos)
 BOOL CDockManager::Dock(DM_POS nPos)
 {
 	// sanity check
-	if (!IsValidDock(nPos))
+	// Note: Use Undock() for undocking
+	if (!IsValidDock(nPos) || (nPos == DMP_UNDOCKED))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-
+	
 	// check if no change
 	if (m_nDockPos == nPos)
 		return TRUE;
@@ -118,7 +119,7 @@ BOOL CDockManager::Dock(DM_POS nPos)
 			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 		}
 	}
-	else
+	else // left or right
 	{
 		int nWidth = GetDockedWidth(IsMaximized());
 		
