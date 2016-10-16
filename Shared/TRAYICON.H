@@ -56,6 +56,8 @@ private:
 	int m_nCurIcon;
 	BOOL m_bTemporaryIcon;
 
+	CSubclassWnd m_scParent;
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CTrayIcon)

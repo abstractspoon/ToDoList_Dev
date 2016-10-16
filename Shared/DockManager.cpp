@@ -54,7 +54,7 @@ BOOL CDockManager::Initialize(CWnd* pMainWnd, CWnd* pDockWnd,
 		return FALSE;
 	}
 
-	if (!HookWindow(*pMainWnd) || !ScHookWindow(*pDockWnd))
+	if (!HookWindow(*pMainWnd) || !m_scDockWnd.HookWindow(*pDockWnd, this))
 		return FALSE;
 
 	m_nLastDockPos = nLastPos;
@@ -91,14 +91,14 @@ BOOL CDockManager::Dock(DM_POS nPos)
 	}
 
 	// check if no change
-	if (/*IsDocked() &&*/ (m_nDockPos == nPos))
+	if (m_nDockPos == nPos)
 		return TRUE;
 
 	BOOL bDocked = IsDocked();
 	m_nDockPos = nPos;
 
 	CRect rDock;
-	ScGetCWnd()->GetWindowRect(rDock);
+	m_scDockWnd.GetWindowRect(rDock);
 
 	// save window pos if not currently docked
 	if (!bDocked)
@@ -115,7 +115,7 @@ BOOL CDockManager::Dock(DM_POS nPos)
 
 			CAutoFlag af(m_bResizeUpdate, FALSE);
 			CAutoFlag af2(m_bSizeUpdate, FALSE);
-			MoveWindow(ScGetCWnd(), rDock);
+			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 		}
 	}
 	else
@@ -128,7 +128,7 @@ BOOL CDockManager::Dock(DM_POS nPos)
 
 			CAutoFlag af(m_bResizeUpdate, FALSE);
 			CAutoFlag af2(m_bSizeUpdate, FALSE);
-			MoveWindow(ScGetCWnd(), rDock);
+			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 		}
 	}
 
@@ -155,7 +155,7 @@ BOOL CDockManager::UnDock()
 	m_nDockPos = DMP_UNDOCKED;
 
 	// restore window pos
-	ScGetCWnd()->MoveWindow(m_rUndocked);
+	MoveWindow(m_scDockWnd.GetCWnd(), m_rUndocked);
 
 	// also restore main window pos if maximized
 	if (IsMaximized())
@@ -269,13 +269,13 @@ void CDockManager::OnMaximize()
 {
 	ASSERT (IsMaximized());
 
-	BOOL bDockVisible = ::IsWindowVisible(ScGetHwnd());
+	BOOL bDockVisible = m_scDockWnd.IsWindowVisible();
 	CRect rMain = GetWorkArea();
 	
 	if (bDockVisible && IsDocked())
 	{
 		CRect rDock;
-		::GetWindowRect(ScGetHwnd(), rDock);
+		m_scDockWnd.GetWindowRect(rDock);
 		
 		switch (m_nDockPos)
 		{
@@ -316,7 +316,7 @@ void CDockManager::OnRestore()
 {
 	ASSERT (!IsMaximized());
 
-	BOOL bDockVisible = ::IsWindowVisible(ScGetHwnd());
+	BOOL bDockVisible = m_scDockWnd.IsWindowVisible();
 
 	if (bDockVisible && IsDocked())
 	{
@@ -354,7 +354,7 @@ void CDockManager::OnRestore()
 			return;
 		}
 
-		MoveWindow(ScGetCWnd(), rDock);
+		MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 	}
 }
 
@@ -365,7 +365,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_MOVE:
 		if (IsDocked())
 		{
-			LRESULT lr = ScDefault(hRealWnd);
+			LRESULT lr = ScDefault(m_scDockWnd);
 
 			if (m_bResizeUpdate)
 				UpdateMainWindowPos();
@@ -377,16 +377,16 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_SIZE:
 		if (IsDocked())
 		{
-			LRESULT lr = ScDefault(hRealWnd);
+			LRESULT lr = ScDefault(m_scDockWnd);
 
 			if (m_bResizeUpdate)
 				UpdateMainWindowPos();
 
 			// save dock width
-			if (m_bSizeUpdate && ::IsWindowVisible(ScGetHwnd()))
+			if (m_bSizeUpdate && m_scDockWnd.IsWindowVisible())
 			{
 				CRect rDock;
-				::GetWindowRect(ScGetHwnd(), rDock);
+				m_scDockWnd.GetWindowRect(rDock);
 
 				if (IsMaximized())
 				{
@@ -430,7 +430,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				if (IsMaximized())
 				{
 					CAutoFlag af(m_bResizeUpdate, FALSE);
-					LRESULT lr = ScDefault(hRealWnd);
+					LRESULT lr = ScDefault(m_scDockWnd);
 
 					OnMaximize();
 
@@ -446,7 +446,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 		if (IsDocked() && wp == HTCAPTION)
 		{
 			// activate the window first
-			ScSendMessage(WM_ACTIVATE, WA_CLICKACTIVE, NULL);
+			m_scDockWnd.SendMessage(WM_ACTIVATE, WA_CLICKACTIVE, NULL);
 			return 0;
 		}
 		break;
@@ -457,7 +457,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 		if (IsDocked() && wp == HTCAPTION && IsMaximized())
 		{
 			// activate the window first
-			ScSendMessage(WM_ACTIVATE, WA_CLICKACTIVE, NULL);
+			m_scDockWnd.SendMessage(WM_ACTIVATE, WA_CLICKACTIVE, NULL);
 			return 0;
 		}
 		break;
@@ -479,7 +479,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_NCHITTEST:
 		if (IsDocked())
 		{
-			UINT nHitTest = ScDefault(hRealWnd);
+			UINT nHitTest = ScDefault(m_scDockWnd);
 
 			// if the main window is _not_ unmaximized then don't let the 
 			// docked window be resized on it's docked edge
@@ -554,7 +554,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_GETMINMAXINFO:
 		if (IsDocked())
 		{
-			LRESULT lr = ScDefault(hRealWnd);
+			LRESULT lr = ScDefault(m_scDockWnd);
 
 			// save off our last min size
 			LPMINMAXINFO pMMI = (LPMINMAXINFO)lp;
@@ -577,7 +577,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 			if (bVisible && bWantHide) // special case
 			{
 				CAutoFlag af(m_bResizeUpdate, FALSE);
-				LRESULT lr = ScDefault(hRealWnd);
+				LRESULT lr = ScDefault(m_scDockWnd);
 
 				CRect rMain = GetWorkArea();
 				MoveWindow(GetCWnd(), rMain);
@@ -587,7 +587,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 			}
 			else
 			{
-				LRESULT lr = ScDefault(hRealWnd);
+				LRESULT lr = ScDefault(m_scDockWnd);
 				OnMaximize();
 				
 				return lr;
@@ -596,7 +596,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 		break;
 	}
 
-	return ScDefault(hRealWnd);
+	return ScDefault(m_scDockWnd);
 }
 
 void CDockManager::OnMinMaxInfo(LPMINMAXINFO pMMI, BOOL /*bMain*/)
@@ -640,7 +640,7 @@ void CDockManager::FitDockWindowToWorkArea()
 {
 	// make sure the dock window is fully visible
 	CRect rDock, rMain, rWorkArea = GetWorkArea();
-	::GetWindowRect(ScGetHwnd(), rDock);
+	m_scDockWnd.GetWindowRect(rDock);
 	GetWindowRect(rMain);
 
 	CRect rIntersect;
@@ -657,7 +657,7 @@ void CDockManager::FitDockWindowToWorkArea()
 			rDock.left = max(rDock.left, rWorkArea.left);
 			rDock.right = max(rDock.left + m_sizeDockMin.cx, rDock.right);
 
-			ScGetCWnd()->MoveWindow(rDock);
+			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 
 			// check we've not pushed the main window over
 			if (rDock.right > rMain.left)
@@ -675,7 +675,7 @@ void CDockManager::FitDockWindowToWorkArea()
 			rDock.right = min(rDock.right, rWorkArea.right);
 			rDock.left = min(rDock.right - m_sizeDockMin.cx, rDock.left);
 
-			ScGetCWnd()->MoveWindow(rDock);
+			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 
 			// check we've not pushed the main window over
 			if (rDock.left < rMain.right)
@@ -693,7 +693,7 @@ void CDockManager::FitDockWindowToWorkArea()
 			rDock.bottom = min(rDock.bottom, rWorkArea.bottom);
 			rDock.top = min(rDock.bottom - m_sizeDockMin.cy, rDock.top);
 
-			ScGetCWnd()->MoveWindow(rDock);
+			MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 
 			// check we've not pushed the main window over
 			if (rDock.top < rMain.bottom)
@@ -709,7 +709,7 @@ void CDockManager::FitDockWindowToWorkArea()
 
 		case DMP_UNDOCKED:
 			// just centre the window on the desktop
-			ScGetCWnd()->CenterWindow();
+			m_scDockWnd.GetCWnd()->CenterWindow();
 			break;
 	}
 }
@@ -724,7 +724,7 @@ void CDockManager::UpdateDockWindowPos()
 	CRect rMain, rDock;
 
 	GetWindowRect(rMain);
-	::GetWindowRect(ScGetHwnd(), rDock);
+	m_scDockWnd.GetWindowRect(rDock);
 
 	if (IsMaximized())
 	{
@@ -789,7 +789,7 @@ void CDockManager::UpdateDockWindowPos()
 		}
 	}
 
-	MoveWindow(ScGetCWnd(), rDock);
+	MoveWindow(m_scDockWnd.GetCWnd(), rDock);
 }
 
 void CDockManager::UpdateMainWindowPos()
@@ -802,7 +802,7 @@ void CDockManager::UpdateMainWindowPos()
 	CRect rMain, rDock;
 
 	GetWindowRect(rMain);
-	::GetWindowRect(ScGetHwnd(), rDock);
+	m_scDockWnd.GetWindowRect(rDock);
 
 	// if the main window is maximized then shrink/enlarge
 	// the window
@@ -882,7 +882,7 @@ CRect CDockManager::GetUnDockedRect() const
 
 	// else
 	CRect rect;
-	::GetWindowRect(ScGetHwnd(), rect);
+	m_scDockWnd.GetWindowRect(rect);
 
 	return rect;
 }
@@ -904,7 +904,7 @@ CSize CDockManager::GetMinMaximizedSize()
 {
    CSize sizeMin = GetWorkArea().Size();
    
-   if (IsDocked() && ::IsWindowVisible(ScGetHwnd()))
+   if (IsDocked() && m_scDockWnd.IsWindowVisible())
    {
       switch (m_nDockPos)
       {

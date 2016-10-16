@@ -153,11 +153,13 @@ LRESULT CSubclassWnd::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 	{
 		if (m_pNext->m_pSubclasser)
 			return m_pNext->m_pSubclasser->ScWindowProc(m_hWndHooked, msg, wp, lp);
-		else
-			return m_pNext->WindowProc(m_hWndHooked, msg, wp, lp);
+		
+		// else
+		return m_pNext->WindowProc(m_hWndHooked, msg, wp, lp);
 	}
-	else	
-		return ::CallWindowProc(m_pOldWndProc, m_hWndHooked, msg, wp, lp);
+	
+	// else	
+	return ::CallWindowProc(m_pOldWndProc, m_hWndHooked, msg, wp, lp);
 }
 
 //////////////////
@@ -226,12 +228,6 @@ LRESULT CALLBACK CSubclassWnd::HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARA
 
 	if (msg == WM_NCDESTROY) 
 	{
-#ifdef _DEBUG
-		TCHAR szClass[30];
-		GetClassName(hwnd, szClass, 30);
-//		TRACE ("CSubclassWnd::HookWndProc(%s, WM_NCDESTROY)\n", szClass);
-#endif
-
 		// Window is being destroyed: unhook all hooks (for this window)
 		// and pass msg to orginal window proc
 		WNDPROC wndproc = pSubclassWnd->m_pOldWndProc;
@@ -242,22 +238,12 @@ LRESULT CALLBACK CSubclassWnd::HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARA
 		if (s_pCallback)
 			s_pCallback->PostNcDestroy(hwnd);
 	} 
-	else 
+	else // pass to msg hook
 	{
 		if (pSubclassWnd->m_pSubclasser)
-		{
-			// pass to msg hook
 			lr = pSubclassWnd->m_pSubclasser->ScWindowProc(pSubclassWnd->GetHwnd(), msg, wp, lp);
-		}
 		else
-		{
-			if (msg == WM_DESTROY)
-			{
-				//CWnd* pWnd = CWnd::FromHandle(hwnd);
-			}
-			// pass to msg hook
 			lr = pSubclassWnd->WindowProc(pSubclassWnd->GetHwnd(), msg, wp, lp);
-		}
 	}
 
 	theSafeMap[(void*)pSubclassWnd] = NULL;
@@ -289,7 +275,6 @@ CMapPtrToPtr& CSubclassWnd::GetValidMap()
 	// By creating theMap here, C++ doesn't instantiate it until/unless
 	// it's ever used! This is a good trick to use in C++, to
 	// instantiate/initialize a static object the first time it's used.
-	//
 	static CMapPtrToPtr theMap;
 	return theMap;
 }
@@ -351,31 +336,6 @@ void CSubclassWnd::ClientToScreen(LPPOINT pPoint) const
 	::ClientToScreen(m_hWndHooked, pPoint);
 }
 
-LRESULT CSubclasser::ScDefault(HWND hRealWnd) 
-{ 
-	if (hRealWnd == m_subclass.GetHwnd()) 
-		return m_subclass.Default(); 
-	
-	// Get hook object for this window. Get from hook map
-	CSubclassWnd* pSubclassWnd = theHookMap.Lookup(hRealWnd);
-	ASSERT(pSubclassWnd);
-
-	BOOL bRestoreSC = FALSE;
-
-	if (pSubclassWnd->m_pNext && pSubclassWnd->m_pNext->m_pSubclasser == this)
-	{
-		pSubclassWnd->m_pNext->m_pSubclasser = NULL;
-		bRestoreSC = TRUE;
-	}
-
-	LRESULT lr = pSubclassWnd->Default();
-
-	if (bRestoreSC)
-		pSubclassWnd->m_pNext->m_pSubclasser = this;
-	
-	return lr;
-} 
-
 ////////////////////////////////////////////////////////////////
 // CSubclassWndMap implementation
 
@@ -434,10 +394,7 @@ void CSubclassWndMap::Add(HWND hwnd, CSubclassWnd* pSubclassWnd)
 void CSubclassWndMap::Remove(CSubclassWnd* pUnHook)
 {
 	HWND hwnd = pUnHook->m_hWndHooked;
-	//ASSERT(hwnd && ::IsWindow(hwnd));
-
 	CSubclassWnd* pHook = Lookup(hwnd);
-//	ASSERT(pHook);
 
 	if (!pHook)
 		return;
@@ -500,8 +457,6 @@ CSubclassWnd* CSubclassWndMap::Lookup(HWND hwnd)
 
 	if (!CMapPtrToPtr::Lookup(hwnd, (void*&)pFound))
 		return NULL;
-
-//	ASSERT_KINDOF(CSubclassWnd, pFound);
 
 	return pFound;
 }

@@ -228,7 +228,7 @@ BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
     SetCapture();
 
 	// Hook the parent wnd
-	return ScHookWindow(pParentWnd->GetSafeHwnd());
+	return m_scParent.HookWindow(*pParentWnd, this);
 }
 
 BEGIN_MESSAGE_MAP(CColourPopup, CWnd)
@@ -259,7 +259,7 @@ BOOL CColourPopup::PreTranslateMessage(MSG* pMsg)
     return CWnd::PreTranslateMessage(pMsg);
 }
 
-LRESULT CColourPopup::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM /*lp*/)
+LRESULT CColourPopup::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
 	{
@@ -420,7 +420,7 @@ LRESULT CColourPopup::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM /*
 		break;
 	}
 
-	return CSubclasser::ScDefault(hRealWnd);
+	return CSubclasser::ScDefault(m_scParent);
 }
 
 // auto-deletion

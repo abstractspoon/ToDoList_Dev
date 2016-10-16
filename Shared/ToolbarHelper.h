@@ -45,6 +45,8 @@ public:
 
 protected:
 	CToolBar* m_pToolbar;
+	CSubclassWnd m_scToolbar;
+
 	const CShortcutManager* m_pShortcutMgr;
 
 	struct THButton
@@ -62,7 +64,6 @@ protected:
 	CToolTipCtrl m_tt;
 
 protected:
-	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	CString GetTip(UINT nID, LPPOINT pPoint) const;
 	BOOL DisplayDropMenu(UINT nCmdID, BOOL bPressBtn = FALSE);
 	BOOL IsCmdEnabled(UINT nCmdID) const;
@@ -70,6 +71,7 @@ protected:
 	void RefreshTooltipRects();
 	void InitTooltips();
 
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 };
 

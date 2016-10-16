@@ -36,7 +36,9 @@ END_MESSAGE_MAP()
 void CSizeGrip::OnPaint() 
 {
 	if (!m_bm.GetSafeHandle())
+	{
 		Default();
+	}
 	else
 	{
 		CPaintDC dc(this); // device context for painting
@@ -70,7 +72,7 @@ BOOL CSizeGrip::Initialize(UINT nCtrlID, CWnd* pParent, UINT nBitmapID)
 	if (!Create(WS_CHILD | WS_VISIBLE | SBS_SIZEBOX | SBS_SIZEBOXBOTTOMRIGHTALIGN, rCtrl, pParent, nCtrlID))
 		return FALSE;
 
-	if (!ScHookWindow(*pParent))
+	if (!m_scParent.HookWindow(*pParent, this))
 	{
 		DestroyWindow();
 		return FALSE;
@@ -104,7 +106,7 @@ LRESULT CSizeGrip::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	}
 
-	return CSubclasser::ScWindowProc(hRealWnd, msg, wp, lp);
+	return CSubclasser::ScDefault(m_scParent);
 }
 
 BOOL CSizeGrip::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 

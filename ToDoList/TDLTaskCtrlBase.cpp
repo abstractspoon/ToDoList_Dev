@@ -5816,7 +5816,7 @@ BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 	return CWnd::PreTranslateMessage(pMsg);
 }
 
-BOOL CTDLTaskCtrlBase::OnHelpInfo(HELPINFO* lpHelpInfo)
+BOOL CTDLTaskCtrlBase::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	AfxGetApp()->WinHelp(GetHelpID());
 	return TRUE;

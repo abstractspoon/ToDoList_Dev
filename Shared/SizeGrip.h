@@ -24,6 +24,7 @@ public:
 // Attributes
 protected:
 	CEnBitmap m_bm;
+	CSubclassWnd m_scParent;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

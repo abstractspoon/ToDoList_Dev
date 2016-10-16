@@ -161,7 +161,7 @@ BOOL CAutoComboBox::OnSelEndCancel()
 BOOL CAutoComboBox::OnSelChange()
 {
 	// make sure the edit control is up to date
-	if (IsHooked())
+	if (m_scEdit.IsValid())
 	{
 		int nSel = GetCurSel();
 
@@ -508,15 +508,15 @@ int CAutoComboBox::GetItems(CStringArray& aItems) const
     return aItems.GetSize();
 }
 
-// messages destined for the edit control
-LRESULT CAutoComboBox::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM lp)
-{
-	return OnEditboxMessage(msg, wp, lp);
-}
-
 // this handles messages destined for the dropped listbox
-LRESULT CAutoComboBox::ScWindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM lp)
+LRESULT CAutoComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	if (m_scEdit.GetHwnd() == hRealWnd)
+		return OnEditboxMessage(msg, wp, lp);
+
+	// else
+	ASSERT(m_scList.GetHwnd() == hRealWnd);
+
 	return OnListboxMessage(msg, wp, lp);
 }
 
@@ -568,7 +568,7 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	}
 	
-	return CSubclasser::ScWindowProc(GetListbox(), msg, wp, lp);
+	return CSubclasser::ScDefault(m_scList);
 }
 
 LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
@@ -579,7 +579,7 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		// <Ctrl> + <Delete>
 		if (AllowDelete() && (wp == VK_DELETE) && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
 		{
-			if (DeleteLBItem(ScSendMessage(LB_GETCURSEL)))
+			if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
 			{
 				// eat message else it'll go to the edit window
 				return 0L;
@@ -623,7 +623,7 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	}
 
-	return CSubclassWnd::WindowProc(GetEdit(), msg, wp, lp);
+	return CSubclasser::ScDefault(m_scEdit);
 }
 
 int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
@@ -672,10 +672,10 @@ void CAutoComboBox::HandleReturnKey()
 {
 	m_bEditChange = FALSE;
 
-	if (IsHooked())
+	if (m_scEdit.IsValid())
 	{
 		CString sEdit;
-		GetCWnd()->GetWindowText(sEdit);
+		m_scEdit.GetCWnd()->GetWindowText(sEdit);
 		
 		int nAdd = AddUniqueItem(sEdit);
 		
@@ -733,18 +733,18 @@ HBRUSH CAutoComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 	
 	// hook list box before base class subclasses it
-	if (nCtlColor == CTLCOLOR_LISTBOX && !ScIsHooked())
+	if ((nCtlColor == CTLCOLOR_LISTBOX) && !m_scList.IsValid())
 	{
-		ScHookWindow(pWnd->GetSafeHwnd());
+		m_scList.HookWindow(*pWnd, this);
 	}
 	// and hook edit box
-	else if (nCtlColor == CTLCOLOR_EDIT && !IsHooked())
+	else if ((nCtlColor == CTLCOLOR_EDIT) && !m_scEdit.IsValid())
 	{
-		HookWindow(pWnd->GetSafeHwnd());
+		m_scEdit.HookWindow(*pWnd, this);
 
 		// mask
 		if (m_eMask.IsMasked())
-			m_eMask.SubclassWindow(pWnd->GetSafeHwnd());
+			m_eMask.SubclassWindow(*pWnd);
 	}
 	
 	return hbr;
@@ -778,7 +778,7 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 			SetWindowText(_T("")); // clear edit
 			m_bEditChange = TRUE;
 		}
-		ScSendMessage(LB_SETCURSEL, nCurSel);
+		m_scList.SendMessage(LB_SETCURSEL, nCurSel);
 		
 		// notify parent that we've been fiddling
 		ParentACNotify(WM_ACBN_ITEMDELETED, nItem, sItem);
@@ -789,10 +789,10 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 			if (GetCount())
 			{
 				CRect rList;
-				ScGetCWnd()->GetWindowRect(rList);
+				m_scList.GetWindowRect(rList);
 				rList.bottom -= GetItemHeight(0);
 				
-				ScGetCWnd()->MoveWindow(rList, TRUE);
+				m_scList.GetCWnd()->MoveWindow(rList, TRUE);
 			}
 			else
 			{
@@ -815,7 +815,7 @@ BOOL CAutoComboBox::FixupListBoxPosition(const WINDOWPOS& wpos)
 	// combobox
 	if (AllowDelete())
 	{
-		if (!ScIsHooked())
+		if (!m_scList.IsValid())
 		{
 			ASSERT(0);
 			return FALSE;
@@ -833,7 +833,7 @@ BOOL CAutoComboBox::FixupListBoxPosition(const WINDOWPOS& wpos)
 			if (rListBox.right > rDesktop.right)
 			{
 				rListBox.OffsetRect((rComboBox.right - rListBox.right), 0);
-				ScGetCWnd()->MoveWindow(rListBox, TRUE);
+				m_scList.GetCWnd()->MoveWindow(rListBox, TRUE);
 				return TRUE;
 			}
 		}

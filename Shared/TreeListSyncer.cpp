@@ -10,7 +10,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-//#define WM_CHECK_WS_VSCROLL (WM_USER+1)
 #define WM_RESYNC           (WM_USER+2)
 #define WM_RESIZE           (WM_USER+3)
 
@@ -1888,11 +1887,11 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 {
 	if (hRealWnd != Left() && hRealWnd != Right())
 	{
-		return CSubclasser::ScDefault(hRealWnd);
+		return ScDefault(hRealWnd);
 	}
 	else if (!IsResyncEnabled() && (msg != WM_NCCALCSIZE))
 	{
-		return CSubclasser::ScDefault(hRealWnd);
+		return ScDefault(hRealWnd);
 	}
 
 	LRESULT lr = 0;
@@ -1924,7 +1923,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ASSERT(hRealWnd == PrimaryWnd());
 			
 			// we only need to handle this if the new item is visible
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			HTREEITEM hti = (HTREEITEM)lr;
@@ -1968,7 +1967,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				// temporary disable of resyncing required
 				m_bResyncEnabled = FALSE; 
 
-				lr = CSubclasser::ScDefault(hRealWnd);
+				lr = ScDefault(hRealWnd);
 				bDoneDefault = TRUE;
 				
 				::SendMessage(OtherWnd(hRealWnd), LVM_DELETEALLITEMS, 0, 0);
@@ -2008,7 +2007,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		{
 			ASSERT(IsList(hRealWnd));
 			
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 
 			int nItem = (int)lr;
@@ -2066,7 +2065,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		if (hRealWnd == PrimaryWnd())
 		{
 			// do default handling
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 
 			// forward on to list
@@ -2098,7 +2097,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case TVM_ENSUREVISIBLE:
 		// one view has been scrolled => resync other
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
@@ -2111,7 +2110,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_MOUSEWHEEL:
 		if (IsRight(hRealWnd)) // right view has received mousewheel => resync left
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
@@ -2159,7 +2158,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_SIZE: 
 		{
 			// hide VScrollbar after default behaviour
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (IsLeft(hRealWnd) && HasVScrollBar(hRealWnd))
@@ -2168,23 +2167,6 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			}
 		}
 		break;
-		
-/*
-	case WM_CHECK_WS_VSCROLL:
-		if (IsLeft(hRealWnd) && ShowVScrollBar(hRealWnd, FALSE))
-		{
-			if (IsList(hRealWnd))
-			{
-				// resize Header bar
-				ResyncListHeader(hRealWnd);
-			}
-			else
-			{
-				ForceNcCalcSize(hRealWnd);
-			}
-		}
-		break;
-*/
 		
 	case WM_RESYNC:
 		{
@@ -2234,7 +2216,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_LBUTTONDOWN:
 		if (IsList(hRealWnd) && IsTree(OtherWnd(hRealWnd)))
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
@@ -2243,7 +2225,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		
 	case WM_TIMER:
 		{
- 			lr = CSubclasser::ScDefault(hRealWnd);
+ 			lr = ScDefault(hRealWnd);
  			bDoneDefault = TRUE;
 
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
@@ -2257,7 +2239,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		case VK_DOWN:
 		case VK_PRIOR:
 		case VK_NEXT:
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 				
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
@@ -2292,9 +2274,14 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	}
 
 	if (!bDoneDefault)
-		lr = CSubclasser::ScDefault(hRealWnd);
+		lr = ScDefault(hRealWnd);
 	
 	return lr;
+}
+
+LRESULT CTreeListSyncer::ScDefault(HWND hwnd)
+{
+	return CSubclasser::ScDefault(IsLeft(hwnd) ? m_scLeft : m_scRight);
 }
 
 BOOL CTreeListSyncer::ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam)
@@ -2368,13 +2355,6 @@ BOOL CTreeListSyncer::ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WP
 	
 	return TRUE;
 }
-
-/*
-void CTreeListSyncer::PostCheckVScrollBar() const
-{
-	::PostMessage(Left(), WM_CHECK_WS_VSCROLL, 0, 0);
-}
-*/
 
 BOOL CTreeListSyncer::ShowVScrollBar(HWND hwnd, BOOL bShow, BOOL bRefreshSize)
 {

@@ -33,7 +33,7 @@ enum
 // replacement DDX routine
 void AFXAPI DDX_AutoCBString(CDataExchange* pDX, int nIDC, CString& value);
 
-class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclassWnd, private CSubclasser
+class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclasser
 {
 	DECLARE_DYNAMIC(CAutoComboBox)
 
@@ -95,6 +95,9 @@ protected:
 	CMaskEdit m_eMask;
 	CFont m_fontClose;
 
+	CSubclassWnd m_scEdit;
+	CSubclassWnd m_scList;
+
 	mutable BOOL m_bDrawing;
 
 	// Overrides
@@ -103,11 +106,7 @@ protected:
 	//}}AFX_VIRTUAL
 	
 private:
-	// for listbox
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
-	
-	// for editbox
-	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	// for deletion
 	int m_nDeleteItem;
@@ -147,8 +146,8 @@ protected:
 	BOOL AddToStart() const { return Misc::HasFlag(m_dwFlags, ACBS_ADDTOSTART); }
 	int AddUniqueItem(const CString& sItem, BOOL bAddToStart);
 
-	inline HWND GetEdit() const { return GetHwnd(); }
-	inline HWND GetListbox() const { return ScGetHwnd(); }
+	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
+	inline HWND GetListbox() const { return m_scList.GetHwnd(); }
 
 	void ParentCBNotify(UINT nIDNotify);
 	void ParentACNotify(UINT nMsgNotify, int nIndex, LPCTSTR szItem);

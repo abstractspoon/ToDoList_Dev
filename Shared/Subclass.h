@@ -17,7 +17,7 @@
 //
 // * Override CSubclassWnd::WindowProc to handle messages. Make sure you call
 //   CSubclassWnd::WindowProc if you don't handle the message, or your
-//   window will never get messages. If you write seperate message handlers,
+//   window will never get messages. If you write separate message handlers,
 //   you can call Default() to pass the message to the window.
 //
 // * Instantiate your derived class somewhere and call HookWindow(pWnd)
@@ -30,18 +30,22 @@
 //
 // heavily modified and extended by .dan.g. abstractspoon
 
+////////////////////////////////////////////////////////////////////
+
 #ifndef GET_X_LPARAM
 	#define GET_X_LPARAM(lp)	((int)(short)LOWORD(lp))
 	#define GET_Y_LPARAM(lp)	((int)(short)HIWORD(lp))
 #endif
 
-class CSubclassWnd;
+////////////////////////////////////////////////////////////////////
 
 class ISubclassCallback
 {
 public:
 	virtual void PostNcDestroy(HWND hWnd) = 0;
 };
+
+////////////////////////////////////////////////////////////////////
 
 class CSubclassWnd
 {
@@ -74,7 +78,22 @@ public:
 	inline BOOL IsWindowEnabled() const { return ::IsWindowEnabled(m_hWndHooked); }
 	inline BOOL IsWindowVisible() const { return ::IsWindowVisible(m_hWndHooked); }
 
+	void ClientToWindow(LPRECT pRect) const;
+	void ScreenToClient(LPRECT pRect) const;
+	void ClientToScreen(LPRECT pRect) const;
+	void ScreenToWindow(LPRECT pRect) const;
+	void ClientToWindow(LPPOINT pPoint) const;
+	void ScreenToClient(LPPOINT pPoint) const;
+	void ClientToScreen(LPPOINT pPoint) const;
+	void ScreenToWindow(LPPOINT pPoint) const;
+
+	virtual void Redraw() const { Invalidate(); }
+
+	virtual BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
+	virtual BOOL SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
+
 	static void SetCallback(ISubclassCallback* pCallback) { s_pCallback = pCallback; }
+	static const MSG* GetCurrentMessage();
 
 	void TraceMessages(BOOL bTrace) { m_bTracing = bTrace; };
 
@@ -102,20 +121,6 @@ protected:
 	virtual BOOL IsHooked() const { return m_hWndHooked != NULL; }
 	virtual BOOL IsValidHook() const { return ::IsWindow(m_hWndHooked); }
 
-	void ClientToWindow(LPRECT pRect) const;
-	void ScreenToClient(LPRECT pRect) const;
-	void ClientToScreen(LPRECT pRect) const;
-	void ScreenToWindow(LPRECT pRect) const;
-	void ClientToWindow(LPPOINT pPoint) const;
-	void ScreenToClient(LPPOINT pPoint) const;
-	void ClientToScreen(LPPOINT pPoint) const;
-	void ScreenToWindow(LPPOINT pPoint) const;
-
-	virtual void Redraw() const { Invalidate(); }
-
-	virtual BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
-	virtual BOOL SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
-
 	static LRESULT CALLBACK HookWndProc(HWND, UINT, WPARAM, LPARAM);
 
 	static CMapPtrToPtr& GetValidMap(); // map containing every CSubclassWnd
@@ -123,49 +128,37 @@ protected:
 
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT Default(); // call this at the end of handler fns if you are happy with the defaults
-	const MSG* GetCurrentMessage();
 };
 
 class CSubclasser
 {
-	friend class CSubclassWnd;
 	friend class CSubclassWndMap;
+	friend class CSubclassWnd;
 
 protected:
 	CSubclasser() {}
 
-	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	LRESULT ScWindowProc(CSubclassWnd& sc, UINT msg, WPARAM wp, LPARAM lp)
 	{
-		ASSERT(hRealWnd == m_subclass.GetHwnd()); 
-		return m_subclass.WindowProc(hRealWnd, msg, wp, lp); 
+		ASSERT(sc.IsHooked()); 
+		return sc.WindowProc(sc.GetHwnd(), msg, wp, lp); 
 	}
 
-	virtual CSubclasser* GetTopSubclasser() { return this; }
+	LRESULT ScDefault(CSubclassWnd& sc)
+	{
+		ASSERT(sc.IsHooked()); 
+		return sc.Default(); 
+	}
 
 	// this is called only when m_subclass.m_hWndHooked is detached as a result
 	// of receiving WM_NCDESTROY else m_subclass.HookWindow(NULL) was called
 	virtual void ScPreDetachWindow(HWND /*hRealWnd*/) { }
 	virtual void ScPostDetachWindow(HWND /*hRealWnd*/) { }
 
-	// Subclass a window. Hook(NULL) to unhook (automatic on WM_NCDESTROY)
-//	inline operator HWND() const { return m_subclass.GetHwnd(); }
-	inline BOOL ScHookWindow(HWND hWnd) { return m_subclass.HookWindow(hWnd, GetTopSubclasser()); }
-	inline BOOL ScIsHooked() const { return m_subclass.IsHooked(); }
-	inline BOOL ScIsValidHook() const { return m_subclass.IsValidHook(); }
-	inline CWnd* ScGetCWnd() const { return m_subclass.GetCWnd(); }
-	inline HWND ScGetHwnd() const { return m_subclass.GetHwnd(); }
-
-	inline BOOL ScPostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0)
-		{ return m_subclass.PostMessage(message, wParam, lParam); }
-
-	BOOL ScSendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0)
-		{ return m_subclass.SendMessage(message, wParam, lParam); }
+private:
+	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp) = 0;
 
 protected:
-	CSubclassWnd m_subclass;
-
-protected:
-	LRESULT ScDefault(HWND hRealWnd);
 };
 
 #endif // _SUBCLASSW_H

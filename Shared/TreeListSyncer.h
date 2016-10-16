@@ -109,6 +109,7 @@ public:
 protected:
 	// all tree/list window hooking gets routed to this function
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT ScDefault(HWND hwnd); // helper
 	
 	// parent of tree/list gets routed here
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -207,7 +208,6 @@ protected:
 	virtual BOOL ResyncScrollPos(HWND hwnd, HWND hwndTo);
 	virtual BOOL ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel = TRUE);
 	void PostResync(HWND hwnd, BOOL bIncSelection);
-	//void PostCheckVScrollBar() const;
 
 	int GetHeaderHeight(HWND hwnd) const;
 	int GetListItem(HWND hwndList, HWND hwndTree, HTREEITEM hti) const;

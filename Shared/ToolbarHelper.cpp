@@ -49,8 +49,12 @@ CToolbarHelper::~CToolbarHelper()
 BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr)
 {
 	ASSERT_VALID(pToolbar);
+	ASSERT_VALID(pToolbarParent);
 
-	if (!pToolbar || !pToolbar->GetSafeHwnd() || !pToolbarParent || !HookWindow(*pToolbarParent))
+	if (!pToolbar || !pToolbar->GetSafeHwnd())
+		return FALSE;
+
+	if (!pToolbarParent || !HookWindow(*pToolbarParent))
 		return FALSE;
 
 	m_pToolbar = pToolbar;
@@ -63,7 +67,7 @@ BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const 
 
 BOOL CToolbarHelper::Release(BOOL bClearDropBtns) 
 { 
-	if (HookWindow(NULL) && ScHookWindow(NULL))
+	if (HookWindow(NULL) && m_scToolbar.HookWindow(NULL))
 	{
 		if (bClearDropBtns)
 		{
@@ -229,7 +233,7 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_NOTIFY:
 		{
 			LPNMHDR pNMHDR = (LPNMHDR)lp;
-			
+
 			switch (pNMHDR->code)
 			{
 			case TBN_DROPDOWN:
@@ -238,12 +242,12 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				{
 					// load the menu
 					LPNMTOOLBAR pNMTB = (LPNMTOOLBAR)pNMHDR;
-					
+
 					if (DisplayDropMenu((UINT)pNMTB->iItem))
 						return FALSE; // we handled it
 				}
 				break;
-				
+
 #ifndef _UNICODE
 			case TTN_NEEDTEXTA:
 #else
@@ -256,21 +260,21 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 					// only handle this if it's not already been done
 					if (pTTT->lpszText && *(pTTT->lpszText))
 						break;
-										
+
 					UINT nID = pNMHDR->idFrom;
-					
+
 					if (pTTT->uFlags & TTF_IDISHWND) // idFrom is actually the HWND of the tool 
 						nID = ::GetDlgCtrlID((HWND)nID);
 
 					// get cursor pos
 					CPoint point(::GetMessagePos());
 					m_pToolbar->ScreenToClient(&point);
-					
+
 					// get tip
 					static CString sTipText;
-										
+
 					sTipText = GetTip(nID, &point);
-					
+
 					if (!sTipText.IsEmpty()) // will be zero on a separator
 					{
 						pTTT->lpszText = (LPTSTR)(LPCTSTR)sTipText;
@@ -349,7 +353,7 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 			}
 		}
 		break;
-	
+
 	case WM_COMMAND:
 		{
 			HWND hCtrlFrom = (HWND)lp;
@@ -383,13 +387,13 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_DESTROY:
 		{
 			// must call rest of chain first
-			LRESULT lr =  CSubclassWnd::WindowProc(hRealWnd, msg, wp, lp);
+			LRESULT lr =  CSubclassWnd::Default();
 			HookWindow(NULL);
 			return lr;
 		}
 	}
 
-	return CSubclassWnd::WindowProc(hRealWnd, msg, wp, lp);
+	return CSubclassWnd::Default();
 }
 
 LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -398,18 +402,18 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
-		m_tt.RelayEvent(const_cast<MSG*>(GetCurrentMessage()));
+		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
 		break;
 
 	case WM_SIZE:
 		{
-			LRESULT lr = CSubclasser::ScWindowProc(hRealWnd, msg, wp, lp);
+			LRESULT lr = CSubclasser::ScDefault(m_scToolbar);
 			RefreshTooltipRects();
 			return lr;
 		}
 	}
 
-	return CSubclasser::ScDefault(hRealWnd);
+	return CSubclasser::ScDefault(m_scToolbar);
 }
 
 void CToolbarHelper::InitTooltips()
@@ -418,7 +422,7 @@ void CToolbarHelper::InitTooltips()
 		return;
 
 	// hook the toolbar for mouse messages
-	VERIFY(ScHookWindow(m_pToolbar->GetSafeHwnd()));
+	VERIFY(m_scToolbar.HookWindow(*m_pToolbar, this));
 
 	// turn off default tooltips
 	m_pToolbar->SetBarStyle(m_pToolbar->GetBarStyle() & ~CBRS_TOOLTIPS);
@@ -487,7 +491,7 @@ void CToolbarHelper::PrepareMenuItems(CMenu* pMenu, CWnd* pWnd)
 
 BOOL CToolbarHelper::IsCmdEnabled(UINT nCmdID) const
 {
-	CWnd* pParent = CWnd::FromHandle(GetHwnd());
+	CWnd* pParent = GetCWnd();
 
 	if (pParent)
 	{
@@ -535,7 +539,7 @@ CString CToolbarHelper::GetTip(UINT nID, LPPOINT pPoint) const
 		if (!bOverDropBtn)
 		{
 			// try the default item first
-			if (dm.nDefCmdID && IsCmdEnabled(dm.nDefCmdID)/* && (dm.nDefCmdID != nID)*/)
+			if (dm.nDefCmdID && IsCmdEnabled(dm.nDefCmdID))
 			{
 				sTip = GetTip(dm.nDefCmdID);
 
@@ -585,7 +589,9 @@ BOOL CToolbarHelper::ProcessMessage(MSG* pMsg)
 		return FALSE;
 
 	// see if key press matches any hotkey
-	if (pMsg->message == WM_SYSKEYDOWN && pMsg->wParam != VK_MENU && Misc::IsKeyPressed(VK_MENU))
+	if ((pMsg->message == WM_SYSKEYDOWN) && 
+		(pMsg->wParam != VK_MENU) && 
+		Misc::IsKeyPressed(VK_MENU))
 	{
 		int nKey = (int)pMsg->wParam;
 		char cLower = 0, cUpper = 0;
@@ -601,7 +607,9 @@ BOOL CToolbarHelper::ProcessMessage(MSG* pMsg)
 			cLower = (char)tolower(nKey);
 		}
 		else
+		{
 			cUpper = cLower = (char)nKey;
+		}
 
 		// iterate the buttons the hard way
 		POSITION pos = m_mapTHButtons.GetStartPosition();
@@ -613,7 +621,7 @@ BOOL CToolbarHelper::ProcessMessage(MSG* pMsg)
 
 			m_mapTHButtons.GetNextAssoc(pos, nCmdID, dm);
 
-			if (nCmdID && (dm.cHotKey == cLower || dm.cHotKey == cUpper))
+			if (nCmdID && ((dm.cHotKey == cLower) || (dm.cHotKey == cUpper)))
 			{
 				DisplayDropMenu(nCmdID, TRUE);
 				return TRUE;

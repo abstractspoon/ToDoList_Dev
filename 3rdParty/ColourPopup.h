@@ -111,6 +111,8 @@ protected:
 	BOOL		   m_bIgnoreFirstLBtnUp;
     BOOL           m_bChildWindowVisible;
 
+	CSubclassWnd   m_scParent;
+
     // Generated message map functions
 protected:
     //{{AFX_MSG(CColourPopup)

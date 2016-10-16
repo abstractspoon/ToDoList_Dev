@@ -36,16 +36,8 @@ END_MESSAGE_MAP()
 
 void CTimeComboBox::PreSubclassWindow() 
 {
-	CLocalizer::EnableTranslation(*this, FALSE);
+	VERIFY(Initialize());
 
-	BuildCombo();
-	
-	// hook the edit ctrl so we can convert '.' and ',' to ':'
-	CWnd* pEdit = GetDlgItem(1001);
-
-	if (pEdit)
-		ScHookWindow(pEdit->GetSafeHwnd());
-	
 	CComboBox::PreSubclassWindow();
 }
 
@@ -54,17 +46,22 @@ int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	CLocalizer::EnableTranslation(*this, FALSE);
+	VERIFY(Initialize());
+	
+	return 0;
+}
 
+BOOL CTimeComboBox::Initialize()
+{
 	BuildCombo();
-
+	
 	// hook the edit ctrl so we can convert '.' and ',' to ':'
 	CWnd* pEdit = GetDlgItem(1001);
 
 	if (pEdit)
-		ScHookWindow(pEdit->GetSafeHwnd());
-	
-	return 0;
+		return m_scEdit.HookWindow(*pEdit, this);
+
+	return TRUE;
 }
 
 void CTimeComboBox::BuildCombo(BOOL bReset)
@@ -122,17 +119,17 @@ BOOL CTimeComboBox::SetOleTime(double dTime)
 
 void CTimeComboBox::SetStyle(DWORD dwStyle)
 {
-  BOOL bWasISO = (m_dwStyle & TCB_ISO);
-  BOOL bIsISO = (dwStyle & TCB_ISO);
+	BOOL bWasISO = (m_dwStyle & TCB_ISO);
+	BOOL bIsISO = (dwStyle & TCB_ISO);
 
-  m_dwStyle = dwStyle;
+	m_dwStyle = dwStyle;
 
-  if (bWasISO != bIsISO)
-  {
-    double date = GetOleTime();
-    BuildCombo(TRUE);
-    SetOleTime(date);
-  }
+	if (bWasISO != bIsISO)
+	{
+		double date = GetOleTime();
+		BuildCombo(TRUE);
+		SetOleTime(date);
+	}
 }
 
 double CTimeComboBox::Get24HourTime() const
@@ -143,8 +140,9 @@ double CTimeComboBox::Get24HourTime() const
 	// window text (it may be an edit change notification)
 	const MSG* pMsg = CWnd::GetCurrentMessage();
 
-	if (pMsg->message == WM_COMMAND && pMsg->lParam == (LPARAM)GetSafeHwnd() &&
-		HIWORD(pMsg->wParam) == CBN_SELCHANGE)
+	if ((pMsg->message == WM_COMMAND) && 
+		(pMsg->lParam == (LPARAM)GetSafeHwnd()) &&
+		(HIWORD(pMsg->wParam) == CBN_SELCHANGE))
 	{
 		// since the items in the combo are ordered from 1am to 11pm
 		// we can use the selection index as a direct link to the hour
@@ -202,17 +200,17 @@ LRESULT CTimeComboBox::ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, 
 	switch (message)
 	{
 	case WM_CHAR:
+		// Convert comma and period to time separator
+		if ((wParam == ',') || (wParam == '.'))
 		{
 			CString sSep = Misc::GetTimeSeparator();
 
-			if (((wParam == ',') || (wParam == '.')) && !sSep.IsEmpty())
-			{
-				return CSubclasser::ScWindowProc(hRealWnd, message, sSep[0], lParam);
-			}
+			if (!sSep.IsEmpty())
+				return CSubclasser::ScWindowProc(m_scEdit, message, sSep[0], lParam);
 		}
 		break;
 	}
 
 	// else
-	return ScDefault(hRealWnd);
+	return CSubclasser::ScDefault(m_scEdit);
 }

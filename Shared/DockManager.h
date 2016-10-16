@@ -50,6 +50,7 @@ protected:
 	CSize m_sizeMainMin, m_sizeDockMin;
 	BOOL m_bResizeUpdate;
 	BOOL m_bSizeUpdate;
+	CSubclassWnd m_scDockWnd;
 
 protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp); // main wnd

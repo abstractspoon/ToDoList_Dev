@@ -35,6 +35,7 @@ public:
 	
 protected:
 	DWORD m_dwStyle;
+	CSubclassWnd m_scEdit;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -59,6 +60,7 @@ protected:
 
 protected:
 	void BuildCombo(BOOL bReset = FALSE);
+	BOOL Initialize();
 };
 
 /////////////////////////////////////////////////////////////////////////////

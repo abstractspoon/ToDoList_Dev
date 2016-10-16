@@ -256,12 +256,12 @@ BOOL CTrayIcon::AddToTray()
 	}
 
 	// create top level parent hook first time around
-	if (!ScIsHooked())
+	if (!m_scParent.IsValid())
 	{
 		CWnd* pTLParent = GetTopLevelParent();
 
 		if (pTLParent)
-			ScHookWindow(pTLParent->GetSafeHwnd());
+			m_scParent.HookWindow(*pTLParent, this);
 	}
 
 	return Shell_NotifyIcon(NIM_ADD, (PNOTIFYICONDATA)&nid);
@@ -429,12 +429,11 @@ void CTrayIcon::SetAnimationDelay(int nDelay)
 
 LRESULT CTrayIcon::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (msg == WM_TASKBARCREATED && m_bVisible)
-	{
+	// Re-add tray icon if ever the Windows taskbar is recreated
+	if ((msg == WM_TASKBARCREATED) && m_bVisible)
 		AddToTray();
-	}
 
-	return CSubclasser::ScWindowProc(hRealWnd, msg, wp, lp); 
+	return CSubclasser::ScDefault(m_scParent); 
 }
 
 BOOL CTrayIcon::ShowBalloon(LPCTSTR szText, LPCTSTR szTitle, DWORD dwIcon, UINT uTimeout)
