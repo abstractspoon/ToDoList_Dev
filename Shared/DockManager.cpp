@@ -201,21 +201,27 @@ LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 		{
 		case SC_MAXIMIZE:
 		case SC_RESTORE:
-		case SC_CLOSE:
 			{
+				// Don't update position of dock window
+				// until after main window has finished moving
 				CAutoFlag af(m_bResizeUpdate, FALSE);
 				LRESULT lr = Default();
 				
 				if (wp == SC_MAXIMIZE)
-				{
 					OnMaximize();
-				}
-				else if (wp == SC_RESTORE)
-				{
+				else
 					OnRestore();
-				}
+
 				return lr;
 			}
+			break;
+
+		case SC_CLOSE:
+			// Don't update position of dock window at all
+			// Note: Don't use CAutoFlag because 'm_bResizeUpdate'
+			// will have been destructed by the time 'Default' returns
+			m_bResizeUpdate = FALSE;
+			break;
 		}
 		break;
 
@@ -237,9 +243,9 @@ LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 		break;
 
 	case WM_NCLBUTTONDOWN:
-		// if this is in the caption and the main window in maxed
+		// if this is in the caption and the main window is maxed
 		// then eat
-		if (wp == HTCAPTION && IsMaximized())
+		if ((wp == HTCAPTION) && IsMaximized())
 		{
 			// activate the window first
 			SendMessage(WM_ACTIVATE, WA_CLICKACTIVE, NULL);
