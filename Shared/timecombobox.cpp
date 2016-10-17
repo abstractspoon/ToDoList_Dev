@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
-CTimeComboBox::CTimeComboBox(DWORD dwStyle) : m_dwStyle(dwStyle)
+CTimeComboBox::CTimeComboBox(DWORD dwStyle) : m_dwStyle(dwStyle), m_hwndListbox(NULL)
 {
 }
 
@@ -29,6 +29,8 @@ BEGIN_MESSAGE_MAP(CTimeComboBox, CComboBox)
 	//{{AFX_MSG_MAP(CTimeComboBox)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
+	ON_WM_CTLCOLOR()
+	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -213,4 +215,37 @@ LRESULT CTimeComboBox::ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, 
 
 	// else
 	return CSubclasser::ScDefault(m_scEdit);
+}
+
+void CTimeComboBox::OnCaptureChanged(CWnd* pWnd)
+{
+	CComboBox::OnCaptureChanged(pWnd);
+
+	if (Get24HourTime() < 7) // before 7 am
+		return;
+
+	if (GetDroppedState())
+	{
+		ASSERT(m_hwndListbox);
+
+		// Indicates that the listbox is fully dropped
+		// so now we can try scrolling it to 7am
+		int nLine = 7;
+
+		if (m_dwStyle & TCB_HALFHOURS)
+			nLine *= 2;
+
+		while (nLine--)
+			::SendMessage(m_hwndListbox, WM_VSCROLL, SB_LINEDOWN, 0);
+
+		m_hwndListbox = NULL;
+	}
+}
+
+HBRUSH CTimeComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	if (nCtlColor == CTLCOLOR_LISTBOX)
+		m_hwndListbox = *pWnd;
+
+	return CComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
 }

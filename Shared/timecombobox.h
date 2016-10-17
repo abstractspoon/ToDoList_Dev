@@ -36,6 +36,7 @@ public:
 protected:
 	DWORD m_dwStyle;
 	CSubclassWnd m_scEdit;
+	HWND m_hwndListbox;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -53,6 +54,8 @@ protected:
 	//{{AFX_MSG(CTimeComboBox)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
