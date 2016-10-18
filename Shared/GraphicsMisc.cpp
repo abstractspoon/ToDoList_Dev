@@ -727,27 +727,6 @@ void GraphicsMisc::CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nN
 	}
 }
 
-BOOL GraphicsMisc::GetScreenWorkArea(HWND hWnd, CRect& rWorkArea, UINT nMonitor)
-{
-	HMONITOR hMonitor = MonitorFromWindow(hWnd, nMonitor);
-	ASSERT (hMonitor);
-
-	if (hMonitor)
-	{
-		MONITORINFO mi; 
-		mi.cbSize = sizeof(mi);
-		
-		if (GetMonitorInfo(hMonitor, &mi))
-		{
-			rWorkArea = mi.rcWork;
-			return TRUE;
-		}
-	}
-
-	// all else
-	return FALSE;
-}
-
 BOOL GraphicsMisc::ForceIconicRepresentation(HWND hWnd, BOOL bForce)
 {
 #ifndef DWMWA_FORCE_ICONIC_REPRESENTATION

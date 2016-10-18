@@ -898,7 +898,7 @@ CRect CDockManager::GetWorkArea(BOOL bMaximized)
 {
 	CRect rWorkArea(0, 0, 0, 0);
 
-	if (GraphicsMisc::GetScreenWorkArea(GetHwnd(), rWorkArea))
+	if (GraphicsMisc::GetAvailableScreenSpace(GetHwnd(), rWorkArea))
 	{
 		if (bMaximized)
 			rWorkArea.InflateRect(4, 4);

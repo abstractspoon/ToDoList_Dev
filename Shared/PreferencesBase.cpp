@@ -162,7 +162,7 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	// the screen's work area
 	CRect rWorkArea;
 
-	if (GraphicsMisc::GetScreenWorkArea(GetSafeHwnd(), rWorkArea))
+	if (GraphicsMisc::GetAvailableScreenSpace(GetSafeHwnd(), rWorkArea))
 	{
 		CRect rWindow;
 		GetWindowRect(rWindow);

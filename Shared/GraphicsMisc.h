@@ -181,7 +181,6 @@ namespace GraphicsMisc
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL EnableFlip3D(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
-	BOOL GetScreenWorkArea(HWND hWnd, CRect& rWorkArea, UINT nMonitor = MONITOR_DEFAULTTONEAREST); 
 
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen);
 	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen);
