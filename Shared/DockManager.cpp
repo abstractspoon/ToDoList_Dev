@@ -57,13 +57,29 @@ BOOL CDockManager::Initialize(CWnd* pMainWnd, CWnd* pDockWnd,
 	if (!HookWindow(*pMainWnd) || !m_scDockWnd.HookWindow(*pDockWnd, this))
 		return FALSE;
 
+	InitializeOSBorders();
+
 	m_nLastDockPos = nLastPos;
 	m_nWidthDocked = nWidthDocked;
 	m_nWidthDockedMax = nWidthDockedMax;
 	m_nHeightDocked = nHeightDocked;
 	m_nHeightDockedMax = nHeightDockedMax;
-
+	
 	return Dock(nPos);
+}
+
+void CDockManager::InitializeOSBorders()
+{
+	ASSERT(m_rOSBorders.IsRectNull());
+
+	CRect rMain, rBounds;
+	GetCWnd()->GetWindowRect(rMain);
+	GraphicsMisc::GetExtendedFrameBounds(GetHwnd(), rBounds);
+
+	m_rOSBorders.left	= abs(rMain.left - rBounds.left);
+	m_rOSBorders.top	= abs(rMain.top - rBounds.top);
+	m_rOSBorders.right	= abs(rMain.right - rBounds.right);
+	m_rOSBorders.bottom = abs(rMain.bottom - rBounds.bottom);
 }
 
 BOOL CDockManager::IsValidDock(DM_POS nPos)
@@ -84,11 +100,14 @@ BOOL CDockManager::IsValidDock(DM_POS nPos)
 BOOL CDockManager::Dock(DM_POS nPos)
 {
 	// sanity check
-	// Note: Use Undock() for undocking
-	if (!IsValidDock(nPos) || (nPos == DMP_UNDOCKED))
+	if (!IsValidDock(nPos))
 	{
 		ASSERT(0);
 		return FALSE;
+	}
+	else if (nPos == DMP_UNDOCKED)
+	{
+		return UnDock();
 	}
 	
 	// check if no change
@@ -586,7 +605,7 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				CAutoFlag af(m_bResizeUpdate, FALSE);
 				LRESULT lr = ScDefault(m_scDockWnd);
 
-				CRect rMain = GetWorkArea();
+				CRect rMain = GetWorkArea(TRUE);
 				MoveWindow(GetCWnd(), rMain);
 				
 				return lr;
@@ -796,7 +815,7 @@ void CDockManager::UpdateDockWindowPos()
 		}
 	}
 
-	MoveWindow(m_scDockWnd.GetCWnd(), rDock);
+	m_scDockWnd.GetCWnd()->MoveWindow(rDock);
 }
 
 void CDockManager::UpdateMainWindowPos()
@@ -815,7 +834,7 @@ void CDockManager::UpdateMainWindowPos()
 	// the window
 	if (IsMaximized())
 	{
-		rMain = GetWorkArea();
+		rMain = GetWorkArea(TRUE);
 
 		switch (m_nDockPos)
 		{
@@ -868,18 +887,20 @@ void CDockManager::UpdateMainWindowPos()
 		}
 	}
 
-	MoveWindow(GetCWnd(), rMain);
+	GetCWnd()->MoveWindow(rMain);
 }
 
-void CDockManager::MoveWindow(CWnd* pWnd, CRect rect)
+void CDockManager::MoveWindow(CWnd* pWnd, const CRect& rect)
 {
 	CRect rOrg;
 	pWnd->GetWindowRect(rOrg);
 
 	// don't move if nuthin's changed
 	if (rect != rOrg)
+	{
 		pWnd->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(),
 							SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_DRAWFRAME);
+	}
 }
 
 CRect CDockManager::GetUnDockedRect() const

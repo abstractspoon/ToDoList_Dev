@@ -747,6 +747,15 @@ BOOL GraphicsMisc::EnableAeroPeek(HWND hWnd, BOOL bEnable)
 	return DwmSetWindowAttribute(hWnd, DWMWA_DISALLOW_PEEK, &bDisallow, sizeof(bDisallow));
 }
 
+BOOL GraphicsMisc::GetExtendedFrameBounds(HWND hWnd, CRect& rBounds)
+{
+#ifndef DWMWA_EXTENDED_FRAME_BOUNDS
+# define DWMWA_EXTENDED_FRAME_BOUNDS 9
+#endif
+
+	return DwmGetWindowAttribute(hWnd, DWMWA_EXTENDED_FRAME_BOUNDS, &rBounds, sizeof(rBounds));
+}
+
 BOOL GraphicsMisc::EnableFlip3D(HWND hWnd, BOOL bEnable)
 {
 #ifndef DWMWA_FLIP3D_POLICY
@@ -777,6 +786,25 @@ BOOL GraphicsMisc::DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pDat
 		}
 	}
 	
+	return FALSE;
+}
+
+BOOL GraphicsMisc::DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize)
+{
+	HMODULE hMod = ::LoadLibrary(_T("Dwmapi.dll"));
+
+	if (hMod)
+	{
+		typedef HRESULT (WINAPI *PFNDWMGETWINDOWATTRIBUTE)(HWND, DWORD, PVOID, DWORD);
+		PFNDWMGETWINDOWATTRIBUTE pFn = (PFNDWMGETWINDOWATTRIBUTE)::GetProcAddress(hMod, "DwmGetWindowAttribute");
+
+		if (pFn)
+		{
+			HRESULT hr = pFn(hWnd, dwAttrib, pData, dwDataSize);
+			return SUCCEEDED(hr);
+		}
+	}
+
 	return FALSE;
 }
 

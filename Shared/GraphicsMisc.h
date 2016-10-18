@@ -180,7 +180,10 @@ namespace GraphicsMisc
 	BOOL ForceIconicRepresentation(HWND hWnd, BOOL bForce = TRUE);
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);
 	BOOL EnableFlip3D(HWND hWnd, BOOL bEnable = TRUE);
+	BOOL GetExtendedFrameBounds(HWND hWnd, CRect& rBounds);
+
 	BOOL DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
+	BOOL DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen);
 	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen);

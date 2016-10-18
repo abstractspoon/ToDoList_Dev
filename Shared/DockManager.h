@@ -51,6 +51,7 @@ protected:
 	BOOL m_bResizeUpdate;
 	BOOL m_bSizeUpdate;
 	CSubclassWnd m_scDockWnd;
+	CRect m_rOSBorders; // Windows 10 really
 
 protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp); // main wnd
@@ -61,9 +62,10 @@ protected:
 	void UpdateMainWindowPos();
 	
 	CRect GetWorkArea(BOOL bMaximized = TRUE);
-	void MoveWindow(CWnd* pWnd, CRect rect);
+	void MoveWindow(CWnd* pWnd, const CRect& rect);
 	CSize GetMinMaximizedSize();
 	void FitDockWindowToWorkArea();
+	void InitializeOSBorders();
 	
 	// pseudo message handlers
 	void OnMaximize();
