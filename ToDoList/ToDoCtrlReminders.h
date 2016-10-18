@@ -82,7 +82,7 @@ protected:
 	void LoadReminders(const CFilteredToDoCtrl& tdc);
 	void StartTimer();
 	BOOL ShowReminder(const TDCREMINDER& rem);
-	BOOL RemoveReminder(int nRem, BOOL bNotify = FALSE);
+	BOOL RemoveReminder(int nRem, BOOL bDismiss = FALSE);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
 
 	enum 

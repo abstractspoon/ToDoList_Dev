@@ -140,7 +140,7 @@ void CToDoCtrlReminders::RemoveReminder(DWORD dwTaskID, const CFilteredToDoCtrl*
 		RemoveReminder(nRem);
 }
 
-BOOL CToDoCtrlReminders::RemoveReminder(int nRem, BOOL bNotify)
+BOOL CToDoCtrlReminders::RemoveReminder(int nRem, BOOL bDismiss)
 {
 	ASSERT((nRem >= 0) && (nRem < m_aReminders.GetSize()));
 
@@ -152,10 +152,10 @@ BOOL CToDoCtrlReminders::RemoveReminder(int nRem, BOOL bNotify)
 
 	RemoveListReminder(rem);
 
-	// Delete unless it's a recurring task in which case we 
-	// disable it so that it can later be copied when the 
-	// recurring task is completed
-	if (rem.IsTaskRecurring())
+	// If we are dismissing a recurring task's reminder,  
+	// we only disable it so that it can later be copied 
+	// when the recurring task is completed
+	if (bDismiss && rem.IsTaskRecurring())
 	{
 		m_aReminders[nRem].bEnabled = FALSE;
 	}
@@ -169,7 +169,7 @@ BOOL CToDoCtrlReminders::RemoveReminder(int nRem, BOOL bNotify)
 	}
 
 	// Notify
-	if (bNotify)
+	if (bDismiss)
 		NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
 
 	return TRUE;
