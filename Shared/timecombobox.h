@@ -36,7 +36,7 @@ public:
 protected:
 	DWORD m_dwStyle;
 	CSubclassWnd m_scEdit;
-	HWND m_hwndListbox;
+	HWND m_hwndListBox;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -64,6 +64,7 @@ protected:
 protected:
 	void BuildCombo(BOOL bReset = FALSE);
 	BOOL Initialize();
+	void ScrollListBox();
 };
 
 /////////////////////////////////////////////////////////////////////////////

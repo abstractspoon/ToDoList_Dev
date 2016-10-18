@@ -6,6 +6,7 @@
 #include "timehelper.h"
 #include "misc.h"
 #include "localizer.h"
+#include "holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
-CTimeComboBox::CTimeComboBox(DWORD dwStyle) : m_dwStyle(dwStyle), m_hwndListbox(NULL)
+CTimeComboBox::CTimeComboBox(DWORD dwStyle) : m_dwStyle(dwStyle), m_hwndListBox(NULL)
 {
 }
 
@@ -219,33 +220,51 @@ LRESULT CTimeComboBox::ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, 
 
 void CTimeComboBox::OnCaptureChanged(CWnd* pWnd)
 {
+	// Receiving this message tells us that
+	// the listbox is now fully visible
 	CComboBox::OnCaptureChanged(pWnd);
 
-	if (Get24HourTime() < 7) // before 7 am
-		return;
-
-	if (GetDroppedState())
-	{
-		ASSERT(m_hwndListbox);
-
-		// Indicates that the listbox is fully dropped
-		// so now we can try scrolling it to 7am
-		int nLine = 7;
-
-		if (m_dwStyle & TCB_HALFHOURS)
-			nLine *= 2;
-
-		while (nLine--)
-			::SendMessage(m_hwndListbox, WM_VSCROLL, SB_LINEDOWN, 0);
-
-		m_hwndListbox = NULL;
-	}
+	ScrollListBox();
 }
 
 HBRUSH CTimeComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	if (nCtlColor == CTLCOLOR_LISTBOX)
-		m_hwndListbox = *pWnd;
+		m_hwndListBox = *pWnd;
 
 	return CComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+
+void CTimeComboBox::ScrollListBox()
+{
+	if (!GetDroppedState())
+	{
+		ASSERT(m_hwndListBox == NULL);
+		return;
+	}
+
+	ASSERT(m_hwndListBox);
+
+	// Scroll to beginning of working day unless the
+	// current time is earlier than that
+	const int STARTOFWORKDAY = 7;
+
+	double dCurTime = Get24HourTime();
+
+	if ((dCurTime < 0) || (dCurTime > STARTOFWORKDAY))
+	{
+		int nCurScrollPos = ::GetScrollPos(m_hwndListBox, SB_VERT);
+		int nMinScrollPos = STARTOFWORKDAY; 
+
+		if (m_dwStyle & TCB_HALFHOURS)
+			nMinScrollPos *= 2;
+
+		if (nMinScrollPos > nCurScrollPos)
+		{
+			CHoldRedraw hr(m_hwndListBox);
+			::SendMessage(m_hwndListBox, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMinScrollPos), 0);
+		}
+	}
+	
+	m_hwndListBox = NULL; // always
 }
