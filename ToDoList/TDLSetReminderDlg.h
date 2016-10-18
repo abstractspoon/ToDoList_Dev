@@ -68,6 +68,8 @@ protected:
 	//}}AFX_MSG
 	LRESULT OnPlaySound(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
+
+	static COleDateTime GetNextNearestHour();
 };
 
 //{{AFX_INSERT_LOCATION}}

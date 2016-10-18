@@ -107,13 +107,16 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 		m_sSoundFile = prefs.GetProfileString(_T("Reminders"), _T("SoundFile"), m_sSoundFile);
 
 		if (m_sSoundFile == NO_SOUND)
+		{
 			m_sSoundFile.Empty();
-		
+		}
 		else if (m_sSoundFile.IsEmpty()) // backwards compatibility
+		{
 			m_sSoundFile = FileMisc::GetWindowsFolder() + _T("\\media\\tada.wav");
+		}
 		
 		// init absolute date and time to now
-		m_dtAbsoluteDate = COleDateTime::GetCurrentTime();
+		m_dtAbsoluteDate = GetNextNearestHour();
 		m_dAbsoluteTime = CDateHelper::GetTimeOnly(m_dtAbsoluteDate);
 	}
 	else
@@ -126,7 +129,7 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 			m_bRelativeFromDueDate = (rem.nRelativeFromWhen == TDCR_DUEDATE);
 
 			// init absolute date and time to now
-			m_dtAbsoluteDate = COleDateTime::GetCurrentTime();
+			m_dtAbsoluteDate = GetNextNearestHour();
 		}
 		else
 		{
@@ -170,7 +173,7 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 		
 		if (m_bRelative)
 		{
-			rem.nRelativeFromWhen = m_bRelativeFromDueDate ? TDCR_DUEDATE : TDCR_STARTDATE;
+			rem.nRelativeFromWhen = (m_bRelativeFromDueDate ? TDCR_DUEDATE : TDCR_STARTDATE);
 			rem.dRelativeDaysLeadIn = (m_dRelativeLeadIn / 24);
 		}
 		else
@@ -232,7 +235,6 @@ LRESULT CTDLSetReminderDlg::OnPlaySound(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-
 void CTDLSetReminderDlg::OnChangeRelative() 
 {
 	UpdateData();
@@ -242,3 +244,15 @@ void CTDLSetReminderDlg::OnChangeRelative()
 	GetDlgItem(IDC_RELATIVEFROMWHERE)->EnableWindow(m_bRelative);
 	GetDlgItem(IDC_RELATIVELEADIN)->EnableWindow(m_bRelative);
 }
+
+COleDateTime CTDLSetReminderDlg::GetNextNearestHour()
+{
+	COleDateTime dtCur(COleDateTime::GetCurrentTime());
+	COleDateTime dtNearest = CDateHelper::GetNearestHour(dtCur, FALSE);
+
+	if (dtNearest < dtCur)
+		dtNearest.m_dt += (1.0 / 24.0);
+
+	return dtNearest;
+}
+
