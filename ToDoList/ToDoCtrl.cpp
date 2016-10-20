@@ -4940,9 +4940,8 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 			m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE);
 		}	
 
-		// if we're just about to edit the item text then do not sort
-		SelectItem(htiNew);
-		SetModified(TRUE, (bEdit ? TDCA_NONE : TDCA_NEWTASK), dwTaskID); 
+		SelectTask(dwTaskID);
+		SetModified(TRUE, TDCA_NEWTASK, dwTaskID); 
 		
 		m_taskTree.InvalidateAll();
 
