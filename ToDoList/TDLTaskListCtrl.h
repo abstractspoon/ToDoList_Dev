@@ -84,7 +84,7 @@ public:
 	DWORD GetFocusedListTaskID() const;
 	int GetFocusedListItem() const;
 	int FindTaskItem(DWORD dwTaskID) const;
-	int AddTask(DWORD dwTaskID, int nPos = -1);
+	int InsertItem(DWORD dwTaskID, int nPos = -1);
 
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();

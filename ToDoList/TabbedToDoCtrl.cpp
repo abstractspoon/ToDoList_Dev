@@ -2432,7 +2432,7 @@ void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	if (hti)
 	{
 		// if the add fails then it's a task reference
-		if (m_taskList.AddTask(GetTaskID(hti)) == -1)
+		if (m_taskList.InsertItem(GetTaskID(hti)) == -1)
 		{
 			return; 
 		}
@@ -2511,7 +2511,7 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		// have already handled this in CreateNewTask()
 		if (dwTaskID)
 		{
-			m_taskList.AddTask(dwTaskID);
+			m_taskList.InsertItem(dwTaskID);
 			break;
 		}
 		// else fall thru to rebuild list

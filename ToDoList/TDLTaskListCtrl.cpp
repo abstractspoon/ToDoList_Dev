@@ -351,7 +351,7 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	InvalidateAll(TRUE);
 }
 
-int CTDLTaskListCtrl::AddTask(DWORD dwTaskID, int nPos)
+int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 {
 	ASSERT(FindTaskItem(dwTaskID) == -1);
 

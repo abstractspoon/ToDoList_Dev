@@ -1073,7 +1073,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 					continue;
 			}
 
-			m_taskList.AddTask(res.dwTaskID);
+			m_taskList.InsertItem(res.dwTaskID);
 		}
 
 		// restore selection
@@ -1132,7 +1132,7 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 		}
 
 		if (bAdd)
-			m_taskList.AddTask(dwTaskID);
+			m_taskList.InsertItem(dwTaskID);
 	}
 
 	// always check the children unless collapsed tasks ignored
