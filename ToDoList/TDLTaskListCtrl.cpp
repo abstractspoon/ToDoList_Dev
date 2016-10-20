@@ -372,6 +372,19 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 								dwTaskID);
 }
 
+BOOL CTDLTaskListCtrl::DeleteItem(DWORD dwTaskID)
+{
+	int nDelItem = FindTaskItem(dwTaskID);
+	
+	if (nDelItem != -1)
+	{
+		m_lcTasks.DeleteItem(nDelItem);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 {
 	if (pLVDI->hdr.hwndFrom == m_lcTasks)
@@ -1182,7 +1195,7 @@ BOOL CTDLTaskListCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 	{
 		CDWordArray aTrueTaskIDs;
 		
-		aTrueTaskIDs.Copy(aTrueTaskIDs);
+		aTrueTaskIDs.Copy(aTaskIDs);
 		m_data.GetTrueTaskIDs(aTrueTaskIDs);
 		
 		SetSelectedTasks(aTrueTaskIDs, aTrueTaskIDs[0]);
@@ -1223,7 +1236,6 @@ void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFoc
 				m_lcColumns.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
 			}
 		}
-
 	}
 }
 
