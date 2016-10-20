@@ -606,10 +606,14 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 	case FTCV_TASKLIST:
 		{
-			// update sort
+			// Update tasks
 			VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
-			
-			if (pLVData->bNeedResort)
+
+			if (pLVData->bNeedTaskUpdate)
+			{
+				RebuildList(NULL);
+			}
+			else if (pLVData->bNeedResort)
 			{
 				pLVData->bNeedResort = FALSE;
 				m_taskList.Resort();
@@ -2426,10 +2430,15 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 
 		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
 
+		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
+		ASSERT(pLVData);
+
+		pLVData->bNeedTaskUpdate = FALSE;
+
 		// redo last sort
 		if ((GetView() == FTCV_TASKLIST) && IsSorting())
 		{
-			GetViewData(FTCV_TASKLIST)->bNeedResort = FALSE;
+			pLVData->bNeedResort = FALSE;
 			m_taskList.Resort();
 		}
 	}

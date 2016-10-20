@@ -241,7 +241,7 @@ LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView)
 {
 	if (nNewView != FTCV_TASKTREE)
 	{
-		const VIEWDATA2* pData = GetViewData2((FTC_VIEW)nNewView);
+		VIEWDATA2* pData = GetViewData2((FTC_VIEW)nNewView);
 		BOOL bFiltered = FALSE;
 
 		// take a note of what task is currently singly selected
@@ -292,6 +292,9 @@ LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView)
 			}
 			break;
 		}
+
+		if (bFiltered)
+			pData->bNeedTaskUpdate = FALSE;
 		
 		// update controls only if the selection has changed and 
 		// we didn't refilter (RefreshFilter will already have called UpdateControls)
