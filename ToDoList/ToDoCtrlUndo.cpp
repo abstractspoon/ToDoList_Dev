@@ -110,15 +110,17 @@ BOOL CToDoCtrlUndo::DeleteLastUndoAction()
 BOOL CToDoCtrlUndo::SaveElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
 								WORD wFlags, const TODOITEM* pTDI)
 {
-	ASSERT (m_nActiveAction != TDCUAT_NONE);
-
 	if (m_nActiveAction == TDCUAT_NONE)
+	{
+		ASSERT(0);
 		return FALSE;
-
-	ASSERT (IsValidElementOperation(nOp));
+	}
 
 	if (!IsValidElementOperation(nOp))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// add element to last action
 	TDCUNDOELEMENT tdcue(nOp, dwTaskID, dwParentID, dwPrevSiblingID, wFlags, pTDI);
@@ -143,7 +145,8 @@ BOOL CToDoCtrlUndo::IsValidElementOperation(TDCUNDOELMOP nOp) const
 		
 	case TDCUAT_ADD:
 		return (nOp == TDCUEO_ADD || 
-				nOp == TDCUEO_EDIT);
+				nOp == TDCUEO_EDIT ||
+				nOp == TDCUEO_DELETE);
 
 	case TDCUAT_DELETE:
 		return (nOp == TDCUEO_DELETE || 
