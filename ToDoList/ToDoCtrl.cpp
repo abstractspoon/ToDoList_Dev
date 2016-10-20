@@ -11374,8 +11374,7 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 		CacheTreeSelection(cache);
 
 		// fix up selection first in case we are about to delete the selected item
-		TSH().RemoveAll(FALSE, FALSE);
-		TCH().SelectItem(NULL);
+		m_taskTree.DeselectAll();
 
 		// get the list of the task IDs that will be undone/redone
 		CDWordArray aTaskIDs;

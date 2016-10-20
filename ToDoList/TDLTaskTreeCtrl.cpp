@@ -178,6 +178,8 @@ void CTDLTaskTreeCtrl::DeselectAll()
 	CTLSHoldResync hr(*this);
 
 	TSH().RemoveAll();
+	TCH().SelectItem(NULL);
+
 	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED);
 }
 
