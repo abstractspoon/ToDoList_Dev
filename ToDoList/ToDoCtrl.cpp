@@ -173,9 +173,9 @@ protected:
 
 #define HOLD_REDRAW(tdc, tree) 	CHoldRedraw hr(tdc); CHoldRedraw hr2(tree);
 
-#define IMPLEMENT_UNDO(op) CUndoAction ua(m_data, op)
+#define IMPLEMENT_UNDO(type) CUndoAction ua(m_data, type)
 #define IMPLEMENT_UNDOEDIT() CUndoAction ua(m_data, TDCUAT_EDIT)
-#define IMPLEMENT_UNDOEXT(op, extend) CUndoAction ua(m_data, op, extend)
+#define IMPLEMENT_UNDOEXT(type, extend) CUndoAction ua(m_data, type, extend)
 
 //////////////////////////////////////////////////////////////////////////////
 // static variables
@@ -5338,8 +5338,6 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
-		CHoldRedraw hr(m_taskTree);
-		
 		// make sure this item is not selected
 		HTREEITEM hti = GetSelectedItem();
 		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
@@ -5349,8 +5347,12 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 			TSH().RemoveAll();
 		
 		// then delete and remove from undo
-		m_taskTree.DeleteItem(hti);
-		m_data.DeleteTask(m_dwLastAddedID);
+		{
+			CHoldRedraw hr(m_taskTree);
+
+			IMPLEMENT_UNDOEXT(TDCUAT_DELETE, TRUE);
+			DeleteSelectedTask(FALSE, TRUE);
+		}
 		m_data.DeleteLastUndoAction();
 
 		// resync fields for selected task

@@ -2252,56 +2252,7 @@ IUI_APPCOMMAND CTabbedToDoCtrl::MapGetNextToCommand(TTC_NEXTTASK nNext)
 
 BOOL CTabbedToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
 {
-	FTC_VIEW nView = GetView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		return CToDoCtrl::CreateNewTask(sText, nWhere, bEditText, dwDependency);
-
-	case FTCV_TASKLIST:
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		if (CToDoCtrl::CreateNewTask(sText, nWhere, FALSE, dwDependency)) // note FALSE
-		{
-			DWORD dwTaskID = GetSelectedTaskID();
-			
-			// make the new task appear
-			RebuildList(NULL); 
-			
-			// re-select that task
-			SelectTask(dwTaskID);
-			
-			// Edit it as required
-			if (bEditText)
-			{
-				m_dwLastAddedID = dwTaskID;
-				EditSelectedTask(TRUE);
-			}
-
-			return TRUE;
-		}
-		break;
-	}
-
-	// all else
-	ASSERT(0);
-	return FALSE;
+	return CToDoCtrl::CreateNewTask(sText, nWhere, bEditText, dwDependency);
 }
 
 TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
@@ -2457,21 +2408,23 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	}
 }
 
-int CTabbedToDoCtrl::AddItemToList(DWORD dwTaskID)
-{
-	// omit task references from list
-	if (CToDoCtrl::IsTaskReference(dwTaskID))
-		return -1;
-
-	// else
-	return m_taskList.List().InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE, 
-							m_taskList.GetItemCount(), 
-							LPSTR_TEXTCALLBACK, 
-							0,
-							LVIS_STATEIMAGEMASK,
-							I_IMAGECALLBACK, 
-							dwTaskID);
-}
+// int CTabbedToDoCtrl::AddItemToList(DWORD dwTaskID)
+// {
+// 	ASSERT(m_taskList.FindTaskItem(dwTaskID) == -1);
+// 
+// 	// omit task references from list
+// 	if (CToDoCtrl::IsTaskReference(dwTaskID))
+// 		return -1;
+// 
+// 	// else
+// 	return m_taskList.List().InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE, 
+// 							m_taskList.GetItemCount(), 
+// 							LPSTR_TEXTCALLBACK, 
+// 							0,
+// 							LVIS_STATEIMAGEMASK,
+// 							I_IMAGECALLBACK, 
+// 							dwTaskID);
+// }
 
 void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 {
@@ -2479,7 +2432,7 @@ void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	if (hti)
 	{
 		// if the add fails then it's a task reference
-		if (CTabbedToDoCtrl::AddItemToList(GetTaskID(hti)) == -1)
+		if (m_taskList.AddTask(GetTaskID(hti)) == -1)
 		{
 			return; 
 		}
@@ -2518,75 +2471,63 @@ void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModT
 
 	if (bMod)
 	{
-		m_taskList.SetModified(nAttrib); // always
-
-		FTC_VIEW nView = GetView();
-		
-		switch (nView)
-		{
-		case FTCV_TASKTREE:
-		case FTCV_UNSET:
-			GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = TRUE;
-			break;
-			
-		case FTCV_TASKLIST:
-			{
-				switch (nAttrib)
-				{
-				case TDCA_DELETE:
-					if (m_taskTree.GetItemCount())
-						m_taskList.RemoveDeletedItems();
-					else
-						m_taskList.DeleteAll();
-					break;
-
-				case TDCA_ARCHIVE:
-					m_taskList.RemoveDeletedItems();
-					break;
-					
-				case TDCA_NEWTASK:
-					if (dwModTaskID) // means single new task added
-					{
-						AddItemToList(dwModTaskID);
-						break;
-					}
-					// else fall thru to rebuild list
-
-				case TDCA_UNDO:
-				case TDCA_PASTE:
-					RebuildList(NULL);
-					break;
-					
-				default: // all other attributes
-					m_taskList.InvalidateSelection();
-				}
-			}
-			break;
-			
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			// handled below
-			break;
-			
-		default:
-			ASSERT(0);
-		}
-		
+		UpdateListView(nAttrib, dwModTaskID);
 		UpdateExtensionViews(nAttrib, dwModTaskID);
+	}
+}
+
+void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
+{
+	m_taskList.SetModified(nAttrib); // always
+
+	switch (nAttrib)
+	{
+	case TDCA_DELETE:
+		// Deletion operations are fairly quick so we do those 
+		// even if the List View is not active
+		if (dwTaskID)
+		{
+			int nDelItem = m_taskList.FindTaskItem(dwTaskID);
+			
+			if (nDelItem != -1)
+				m_taskList.List().DeleteItem(nDelItem);
+		}
+		else if (m_taskTree.GetItemCount())
+		{
+			m_taskList.RemoveDeletedItems();
+		}
+		else
+		{
+			m_taskList.DeleteAll();
+		}
+		break;
+
+	case TDCA_ARCHIVE:
+		m_taskList.RemoveDeletedItems();
+		break;
+
+	case TDCA_NEWTASK:
+		// If this is a 'single new task' then we may
+		// have already handled this in CreateNewTask()
+		if (dwTaskID)
+		{
+			m_taskList.AddTask(dwTaskID);
+			break;
+		}
+		// else fall thru to rebuild list
+
+	case TDCA_UNDO:
+	case TDCA_PASTE:
+		if (InListView())
+			RebuildList(NULL);
+		else
+			GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = TRUE;
+		break;
+
+	default: // all other attributes
+		if (InListView())
+			m_taskList.InvalidateSelection();
+		break;
 	}
 }
 
@@ -2829,39 +2770,51 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 		return;
 	}
 
+	// If all extension views require a full task update
+	// then we've nothing to do
+	if (AllExtensionViewsNeedFullUpdate())
+	{
+		ASSERT(!IsExtensionView(GetView()));
+		return;
+	}
+
 	// Work out what tasks we want
 	DWORD dwFlags = TDCGSTF_RESOLVEREFERENCES;
 	CTDCAttributeMap mapAttrib;
 	IUI_UPDATETYPE nUpdate = IUI_EDIT; // default
 	
-	// New task is special case
-	if (nAttrib == TDCA_NEWTASK)
+	switch (nAttrib)
 	{
-		// Always include parent chain but not subtasks
-		dwFlags |= (TDCGSTF_ALLPARENTS | TDCGSTF_NOTSUBTASKS);
+	case TDCA_NEWTASK:
+		{
+			// Always include parent chain but not subtasks
+			dwFlags |= (TDCGSTF_ALLPARENTS | TDCGSTF_NOTSUBTASKS);
 
-		// Special update type
-		nUpdate = IUI_NEW;
+			// Special update type
+			nUpdate = IUI_NEW;
 
-		// Note: We leave mapAttrib empty to retrieve all attributes
-	}
-	else
-	{
-		// We don't need to proceed if no extension wants 
-		// any of the changes
-		GetAttributesAffectedByMod(nAttrib, mapAttrib);
+			// Note: We leave mapAttrib empty to retrieve all attributes
+		}
+		break;
+
+	default:
+		{
+			// We don't need to proceed if no extension wants 
+			// any of the changes
+			GetAttributesAffectedByMod(nAttrib, mapAttrib);
 		
-		if (!AnyExtensionViewWantsChange(mapAttrib))
-			return;
+			if (!AnyExtensionViewWantsChange(mapAttrib))
+				return;
 
-		// Include parents if there is a colour change 
-		// or a calculated attribute change
-		if (mapAttrib.HasAttribute(TDCA_COLOR) || IsCalculatedAttribute(nAttrib))
-			dwFlags |= TDCGSTF_ALLPARENTS;
+			// Include parents if there is a colour change 
+			// or a calculated attribute change
+			if (mapAttrib.HasAttribute(TDCA_COLOR) || IsCalculatedAttribute(nAttrib))
+				dwFlags |= TDCGSTF_ALLPARENTS;
 
-		// DONT include subtasks UNLESS the completion date has changed
-		if (nAttrib != TDCA_DONEDATE)
-			dwFlags |= TDCGSTF_NOTSUBTASKS;
+			// DONT include subtasks UNLESS the completion date has changed
+			if (nAttrib != TDCA_DONEDATE)
+				dwFlags |= TDCGSTF_NOTSUBTASKS;
+		}
 	}
 
 	// Get the actual tasks for the update
@@ -3077,10 +3030,27 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	return (pExtWnd && pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttrib(nAttrib)));
 }
 
+BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
+{
+	// find the first extension not needing a full task update
+	int nExt = m_aExtViews.GetSize();
+	
+	while (nExt--)
+	{
+		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+		const VIEWDATA* pData = GetViewData(nExtView);
+
+		if (pData && !pData->bNeedFullTaskUpdate)
+			return FALSE;
+	}
+
+	// not found
+	return TRUE;
+}
+
 BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const
 {
 	// find the first extension wanting this change
-	FTC_VIEW nCurView = GetView();
 	int nExt = m_aExtViews.GetSize();
 	
 	while (nExt--)
@@ -3323,58 +3293,6 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 	}
 
 	return bRes;
-}
-
-LRESULT CTabbedToDoCtrl::OnEditCancel(WPARAM wParam, LPARAM lParam)
-{
-	// check if we need to delete the just added item
-	FTC_VIEW nView = GetView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		// handled below
-		break;
-
-	case FTCV_TASKLIST:
-		// delete the just added task
-		if (GetSelectedTaskID() == m_dwLastAddedID)
-		{
-			int nDelItem = m_taskList.GetSelectedItem();
-			m_taskList.List().DeleteItem(nDelItem);
-		}
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		// delete the just added task from the active view
-		if (GetSelectedTaskID() == m_dwLastAddedID)
-		{
-			LRESULT lr = CToDoCtrl::OnEditCancel(wParam, lParam);
-			UpdateExtensionViews(TDCA_DELETE);
-		}
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return CToDoCtrl::OnEditCancel(wParam, lParam);
 }
 
 int CTabbedToDoCtrl::CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
@@ -3902,7 +3820,10 @@ BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const
 
 BOOL CTabbedToDoCtrl::GotoNextTask(TDC_GOTO nDirection)
 {
-	ASSERT(CanGotoNextTask(nDirection));
+	if (!CanGotoNextTask(nDirection))
+	{
+		return FALSE;
+	}
 
 	FTC_VIEW nView = GetView();
 
@@ -4971,7 +4892,7 @@ BOOL CTabbedToDoCtrl::InListView() const
 
 BOOL CTabbedToDoCtrl::InTreeView() const 
 { 
-	return (GetView() == FTCV_TASKTREE || !IsViewSet()); 
+	return ((GetView() == FTCV_TASKTREE) || !IsViewSet()); 
 }
 
 BOOL CTabbedToDoCtrl::InExtensionView() const
@@ -4981,7 +4902,7 @@ BOOL CTabbedToDoCtrl::InExtensionView() const
 
 BOOL CTabbedToDoCtrl::IsExtensionView(FTC_VIEW nView)
 {
-	return (nView >= FTCV_UIEXTENSION1 && nView <= FTCV_UIEXTENSION16);
+	return ((nView >= FTCV_UIEXTENSION1) && (nView <= FTCV_UIEXTENSION16));
 }
 
 BOOL CTabbedToDoCtrl::HasAnyExtensionViews() const

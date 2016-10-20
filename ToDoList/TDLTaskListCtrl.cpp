@@ -210,10 +210,13 @@ void CTDLTaskListCtrl::DeleteAll()
 
 void CTDLTaskListCtrl::RemoveDeletedItems()
 {
+	int nItem = m_lcTasks.GetItemCount();
+
+	if (nItem == 0)
+		return;
+	
 	CTLSHoldResync hr(*this);
 
-	int nItem = m_lcTasks.GetItemCount();
-	
 	while (nItem--)
 	{
 		if (GetTask(nItem) == NULL)
@@ -346,6 +349,27 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	}
 
 	InvalidateAll(TRUE);
+}
+
+int CTDLTaskListCtrl::AddTask(DWORD dwTaskID, int nPos)
+{
+	ASSERT(FindTaskItem(dwTaskID) == -1);
+
+	// omit task references from list
+	if (m_data.IsTaskReference(dwTaskID))
+		return -1;
+
+	// else
+	if (nPos == -1)
+		nPos = GetItemCount();
+
+	return m_lcTasks.InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE, 
+								nPos, 
+								LPSTR_TEXTCALLBACK, 
+								0,
+								LVIS_STATEIMAGEMASK,
+								I_IMAGECALLBACK, 
+								dwTaskID);
 }
 
 LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)

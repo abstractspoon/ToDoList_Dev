@@ -56,7 +56,6 @@ public:
 
 	virtual ~CTabbedToDoCtrl();
 	
-//	int GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
 
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
@@ -184,7 +183,6 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
@@ -229,12 +227,12 @@ protected:
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, int nStart = 0, BOOL bNext = TRUE);
-	int AddItemToList(DWORD dwTaskID);
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void ResortSelectedTaskParents();
 	void LoadPrefs();
 	void SavePrefs();
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
+	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
 
 	void ResyncListSelection();
 	void ResyncExtensionSelection(FTC_VIEW nView);
@@ -287,6 +285,7 @@ protected:
 	BOOL AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAttrib) const;
 	BOOL ExtensionViewWantsChange(int nExt, const CTDCAttributeMap& mapAttrib) const;
 	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const;
+	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib);
