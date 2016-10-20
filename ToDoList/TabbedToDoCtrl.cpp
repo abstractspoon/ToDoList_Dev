@@ -2519,9 +2519,18 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 	case TDCA_UNDO:
 	case TDCA_PASTE:
 		if (InListView())
+		{
+			TDCSELECTIONCACHE cache;
+			CacheTreeSelection(cache);
+
 			RebuildList(NULL);
+
+			RestoreListSelection(cache);
+		}
 		else
+		{
 			GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = TRUE;
+		}
 		break;
 
 	default: // all other attributes
