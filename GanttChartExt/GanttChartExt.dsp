@@ -161,6 +161,10 @@ SOURCE=.\GanttEnum.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttMsg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttPreferencesDlg.h
 # End Source File
 # Begin Source File

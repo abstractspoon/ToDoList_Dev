@@ -1169,10 +1169,10 @@ BOOL GraphicsMisc::GetAvailableScreenSpace(HWND hWnd, CRect& rScreen)
 
 void GraphicsMisc::GetTotalAvailableScreenSpace(CRect& rScreen)
 {
-	rScreen.left = rScreen.top = 0;
-
-	rScreen.right = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-	rScreen.bottom = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	rScreen.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	rScreen.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	rScreen.right = (rScreen.left + GetSystemMetrics(SM_CXVIRTUALSCREEN));
+	rScreen.bottom = (rScreen.top + GetSystemMetrics(SM_CYVIRTUALSCREEN));
 }
 
 void GraphicsMisc::DrawHorzLine(CDC* pDC, int nXFrom, int nXTo, int nYPos, COLORREF crFrom, COLORREF crTo)

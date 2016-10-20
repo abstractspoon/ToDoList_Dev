@@ -180,6 +180,10 @@ SOURCE=.\KanbanListCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Kanbanmsg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanPreferencesDlg.h
 # End Source File
 # Begin Source File

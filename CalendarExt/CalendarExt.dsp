@@ -154,6 +154,10 @@ SOURCE=.\CalEnum.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\CalMsg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\CalStruct.h
 # End Source File
 # Begin Source File
