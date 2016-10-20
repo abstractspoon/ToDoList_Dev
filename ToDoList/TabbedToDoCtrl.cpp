@@ -2408,24 +2408,6 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	}
 }
 
-// int CTabbedToDoCtrl::AddItemToList(DWORD dwTaskID)
-// {
-// 	ASSERT(m_taskList.FindTaskItem(dwTaskID) == -1);
-// 
-// 	// omit task references from list
-// 	if (CToDoCtrl::IsTaskReference(dwTaskID))
-// 		return -1;
-// 
-// 	// else
-// 	return m_taskList.List().InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE, 
-// 							m_taskList.GetItemCount(), 
-// 							LPSTR_TEXTCALLBACK, 
-// 							0,
-// 							LVIS_STATEIMAGEMASK,
-// 							I_IMAGECALLBACK, 
-// 							dwTaskID);
-// }
-
 void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 {
 	// add task
@@ -2433,9 +2415,7 @@ void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	{
 		// if the add fails then it's a task reference
 		if (m_taskList.InsertItem(GetTaskID(hti)) == -1)
-		{
 			return; 
-		}
 	}
 
 	// children
