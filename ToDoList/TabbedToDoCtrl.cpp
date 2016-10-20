@@ -537,7 +537,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	m_tabViews.SetViewHwnd((FTC_VIEW)nView, hWnd);
 	
 	// initialize update state
-	pData->bNeedTaskUpdate = TRUE;
+	pData->bNeedFullTaskUpdate = TRUE;
 
 	// and capabilities
 	if (pData->bCanPrepareNewTask == -1)
@@ -609,7 +609,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 			// Update tasks
 			VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 
-			if (pLVData->bNeedTaskUpdate)
+			if (pLVData->bNeedFullTaskUpdate)
 			{
 				RebuildList(NULL);
 			}
@@ -656,7 +656,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				{
 					nProgressMsg = IDS_INITIALISINGTABBEDVIEW;
 				}
-				else if (pData->bNeedTaskUpdate)
+				else if (pData->bNeedFullTaskUpdate)
 				{
 					nProgressMsg = IDS_UPDATINGTABBEDVIEW;
 				}
@@ -681,7 +681,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				return 1L; // prevent tab change
 			}
 			
-			if (pData->bNeedTaskUpdate)
+			if (pData->bNeedFullTaskUpdate)
 			{
 				// start progress if not already
 				// will be cleaned up in OnPostTabViewChange
@@ -693,7 +693,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				if (GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib))
 					UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib);
 				
-				pData->bNeedTaskUpdate = FALSE;
+				pData->bNeedFullTaskUpdate = FALSE;
 			}
 				
 			ResyncExtensionSelection(nNewView);
@@ -1954,11 +1954,11 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 						GetAllTasksForExtensionViewUpdate(tasks, mapAttribs);
 						
 						UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, mapAttribs);
-						pData->bNeedTaskUpdate = FALSE;
+						pData->bNeedFullTaskUpdate = FALSE;
 					}
 					else // mark for update
 					{
-						pData->bNeedTaskUpdate = TRUE;
+						pData->bNeedFullTaskUpdate = TRUE;
 					}
 				}
 
@@ -2433,7 +2433,7 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 		ASSERT(pLVData);
 
-		pLVData->bNeedTaskUpdate = FALSE;
+		pLVData->bNeedFullTaskUpdate = FALSE;
 
 		// redo last sort
 		if ((GetView() == FTCV_TASKLIST) && IsSorting())
@@ -2508,7 +2508,7 @@ void CTabbedToDoCtrl::SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 		VIEWDATA* pData = GetViewData(nView);
 		
 		if (pData)
-			pData->bNeedTaskUpdate = bUpdate;
+			pData->bNeedFullTaskUpdate = bUpdate;
 	}
 }
 
@@ -2526,7 +2526,7 @@ void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModT
 		{
 		case FTCV_TASKTREE:
 		case FTCV_UNSET:
-			GetViewData(FTCV_TASKLIST)->bNeedTaskUpdate = TRUE;
+			GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = TRUE;
 			break;
 			
 		case FTCV_TASKLIST:
@@ -2778,7 +2778,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 								nUpdate = IUI_DELETE;
 
 							UpdateExtensionView(pExtWnd, tasks, nUpdate, pData->mapWantedAttrib);
-							pData->bNeedTaskUpdate = FALSE;
+							pData->bNeedFullTaskUpdate = FALSE;
 
 							if ((nAttrib == TDCA_NEWTASK) && dwTaskID)
 								pExtWnd->SelectTask(dwTaskID);
@@ -2791,7 +2791,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 					}
 					else
 					{
-						pData->bNeedTaskUpdate = TRUE;
+						pData->bNeedFullTaskUpdate = TRUE;
 					}
 				}
 			}
@@ -2904,14 +2904,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 				if (nUpdate == IUI_NEW)
 					mapAttrib.CopyAttributes(pData->mapWantedAttrib);
 				
-				pData->bNeedTaskUpdate = FALSE;
+				pData->bNeedFullTaskUpdate = FALSE;
 			}
 			
 			UpdateExtensionView(pExtWnd, tasks, nUpdate, mapAttrib);
 		}
 		else if (pData)
 		{
-			pData->bNeedTaskUpdate = TRUE;
+			pData->bNeedFullTaskUpdate = TRUE;
 		}
 	}
 }
@@ -3055,7 +3055,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	{
 		const VIEWDATA* pData = GetViewData(nExtView);
 
-		if (!pData || pData->bNeedTaskUpdate)
+		if (!pData || pData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
 	else // active view

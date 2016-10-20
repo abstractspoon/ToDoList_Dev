@@ -294,7 +294,7 @@ LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		}
 
 		if (bFiltered)
-			pData->bNeedTaskUpdate = FALSE;
+			pData->bNeedFullTaskUpdate = FALSE;
 		
 		// update controls only if the selection has changed and 
 		// we didn't refilter (RefreshFilter will already have called UpdateControls)
@@ -982,7 +982,7 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 		UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib); 
 
 		// and clear all update flags
-		pData->bNeedTaskUpdate = FALSE;
+		pData->bNeedFullTaskUpdate = FALSE;
 		pData->bNeedRefilter = FALSE;
 
 		if (bShowProgress)

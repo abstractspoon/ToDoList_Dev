@@ -27,7 +27,7 @@ struct VIEWDATA
 		: 
 		bNeedResort(FALSE), 
 		pExtension(NULL),
-		bNeedTaskUpdate(TRUE),
+		bNeedFullTaskUpdate(TRUE),
 		bCanPrepareNewTask(-1)
 	{
 	}
@@ -40,7 +40,7 @@ struct VIEWDATA
 	CTDCAttributeMap mapWantedAttrib;
 
 	BOOL bNeedResort;
-	BOOL bNeedTaskUpdate;
+	BOOL bNeedFullTaskUpdate;
 	BOOL bCanPrepareNewTask;
 };
 
