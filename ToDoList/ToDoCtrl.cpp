@@ -4867,7 +4867,7 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 }
 
 HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
-								BOOL bEdit, DWORD dwDependency)
+								BOOL bEdit, DWORD dwDependency = 0)
 {
 	m_dwLastAddedID = 0;
 	
@@ -4941,9 +4941,8 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 		}	
 
 		// if we're just about to edit the item text then do not sort
-//		SetModified(TRUE, (bEdit ? TDCA_NONE : TDCA_NEWTASK), dwTaskID); 
-		SetModified(TRUE, TDCA_NEWTASK, dwTaskID); 
-		SelectTask(dwTaskID);
+		SelectItem(htiNew);
+		SetModified(TRUE, (bEdit ? TDCA_NONE : TDCA_NEWTASK), dwTaskID); 
 		
 		m_taskTree.InvalidateAll();
 
@@ -5068,9 +5067,6 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	if (!nSelCount)
 		return FALSE;
 
-	// If there is only one task to be deleted get its ID for later
-	DWORD dwDelTaskID = ((nSelCount == 1) ? GetSelectedTaskID() : 0);
-	
 	// end time tracking as required
 	if (m_dwTimeTrackTaskID && TSH().HasItem(m_dwTimeTrackTaskID))
 		EndTimeTracking(FALSE, TRUE);
@@ -5140,17 +5136,17 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	
 	if (TSH().HasItem(m_taskTree.GetSelectedItem()))
 		TCH().SelectItem(NULL);
+	
+	// Note: if removing all items we cannot prevent redrawing
+	// because Win9x gets itself into a state where the first
+	// new task created after the deletion is invisible
+	// So, if deleting all items, we withhold the first item
+	// and delete it after redrawing has been re-enabled
+	BOOL bRemoveAll = TSH().ContainsAllItems();
+	HTREEITEM htiDelayDelete = NULL;
 
-// 	// Note: if removing all items we cannot prevent redrawing
-// 	// because Win9x gets itself into a state where the first
-// 	// new task created after the deletion is invisible
-// 	// So, if deleting all items, we withhold the first item
-// 	// and delete it after redrawing has been re-enabled
-// 	BOOL bRemoveAll = TSH().ContainsAllItems();
-// 	HTREEITEM htiDelayDelete = NULL;
-// 
-// 	if (bRemoveAll)
-// 		htiDelayDelete = selection.RemoveHead();
+	if (bRemoveAll)
+		htiDelayDelete = selection.RemoveHead();
 
 	// clear selection before deleting
 	TSH().RemoveAll(TRUE);
@@ -5174,15 +5170,15 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	}
 
 	// delete the delayed item
-// 	if (htiDelayDelete)
-// 	{
-// 		DWORD dwTaskID = m_taskTree.GetTaskID(htiDelayDelete);
-// 		m_taskTree.DeleteItem(htiDelayDelete);
-// 		m_data.DeleteTask(dwTaskID);
-// 	}
+	if (htiDelayDelete)
+	{
+		DWORD dwTaskID = m_taskTree.GetTaskID(htiDelayDelete);
+		m_taskTree.DeleteItem(htiDelayDelete);
+		m_data.DeleteTask(dwTaskID);
+	}
 	
 	// refresh rest of UI
-	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
+	SetModified(TRUE, TDCA_DELETE, 0);
 	UpdateControls(FALSE); // don't update comments
 	
 	// set next selection
@@ -5307,8 +5303,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 		if ((nRes == SET_CHANGE) || bNewTask)
 		{
 			m_taskTree.InvalidateSelection(TRUE);
-//			SetModified(TRUE, (bNewTask ? TDCA_NEWTASK : TDCA_TASKNAME), m_dwEditTitleTaskID);
-			SetModified(TRUE, TDCA_TASKNAME);
+			SetModified(TRUE, (bNewTask ? TDCA_NEWTASK : TDCA_TASKNAME), m_dwEditTitleTaskID);
 
 			// If this was a new task and the parent was marked as done, 
 			// now mark it as incomplete
@@ -5354,13 +5349,8 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 			TSH().RemoveAll();
 		
 		// then delete and remove from undo
-		{
-			IMPLEMENT_UNDOEXT(TDCUAT_ADD, TRUE);
-			DeleteSelectedTask(FALSE, TRUE);
-		}
-
-// 		m_taskTree.DeleteItem(hti);
-// 		m_data.DeleteTask(m_dwLastAddedID);
+		m_taskTree.DeleteItem(hti);
+		m_data.DeleteTask(m_dwLastAddedID);
 		m_data.DeleteLastUndoAction();
 
 		// resync fields for selected task
@@ -6815,6 +6805,8 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD /*dwModTaskI
 		}
 
 		m_taskTree.SetModified(nAttrib);
+		
+		UpdateWindow();
 		GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
 
 		// special case: if this was the project name being edited make sure
