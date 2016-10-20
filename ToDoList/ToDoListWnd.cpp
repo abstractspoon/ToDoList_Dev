@@ -2681,7 +2681,10 @@ void CToDoListWnd::RestorePosition()
 			SetWindowPlacement(&wp);
 		}
 		else
+		{
+			ASSERT(0);
 			rect.SetRectEmpty();
+		}
 	}
 	
 	// first time or monitors changed?
@@ -2691,7 +2694,7 @@ void CToDoListWnd::RestorePosition()
 
 		// make sure it fits the screen
 		CRect rScreen;
-		GraphicsMisc::GetAvailableScreenSpace(rScreen, rScreen);
+		VERIFY(GraphicsMisc::GetAvailableScreenSpace(rect, rScreen));
 
 		if (rect.Height() > rScreen.Height())
 			rect.bottom = rScreen.Height();
