@@ -1799,7 +1799,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			// If the task does NOT have a due date but does have a time estimate
 			// then calculate an appropriate due date
 			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && 
-				CalcMissingDueDate(pTDI, pTDI->dateDue))
+				CalcMissingDueDateFromStart(pTDI))
 			{
 				nDate = TDCD_DUE; // to update dependencies
 				bRecalcTimeEstimate = FALSE;
@@ -1826,7 +1826,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			// If the task does NOT have a start date but does have a time estimate
 			// then back-calculate an appropriate start date
 			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) &&
-				CalcMissingStartDate(pTDI, pTDI->dateStart))
+				CalcMissingStartDateFromDue(pTDI))
 			{
 				bRecalcTimeEstimate = FALSE;
 			}
@@ -2037,7 +2037,7 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 		if (bTimeChange && (pTDI->HasStart() || pTDI->HasDue()))
 		{
 			// Make sure the task has a start date
-			CalcMissingStartDate(pTDI, pTDI->dateStart);
+			CalcMissingStartDateFromDue(pTDI);
 
 			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, dTime, nUnits);
 			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE);
@@ -2047,57 +2047,23 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 	return nRes;
 }
 
-BOOL CToDoCtrlData::CalcMissingStartDate(const TODOITEM* pTDI, COleDateTime& dtStart) const
+BOOL CToDoCtrlData::CalcMissingStartDateFromDue(TODOITEM* pTDI) const
 {
 	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
 		return FALSE;
 
-	dtStart = pTDI->dateDue;
-
-	if (pTDI->nTimeEstUnits == TDCU_WEEKDAYS)
-	{
-		dtStart.m_dt -= pTDI->dTimeEstimate;
-	}
-	else
-	{
-		CTimeHelper th;
-		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(pTDI->nTimeEstUnits);
-
-		dtStart.m_dt -= th.GetTime(pTDI->dTimeEstimate, nTHUnits, THU_DAYS);
-	}
-
-	// If the due date falls on the beginning of a day, 
-	// increment the start date
-	if (!CDateHelper::DateHasTime(pTDI->dateDue))
-		dtStart.m_dt++;
-
+	// Subtract time estimate from due date
+	pTDI->dateStart = AddDuration(pTDI->dateDue, -pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::CalcMissingDueDate(const TODOITEM* pTDI, COleDateTime& dtDue) const
+BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 {
 	if (!pTDI->HasStart() || pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
 		return FALSE;
 
-	dtDue = pTDI->dateStart;
-
-	if (pTDI->nTimeEstUnits == TDCU_WEEKDAYS)
-	{
-		dtDue.m_dt += pTDI->dTimeEstimate;
-	}
-	else
-	{
-		CTimeHelper th;
-		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(pTDI->nTimeEstUnits);
-
-		dtDue.m_dt += th.GetTime(pTDI->dTimeEstimate, nTHUnits, THU_DAYS);
-	}
-
-	// If due date falls on the beginning of a day, 
-	// move it to end of previous day
-	if (!CDateHelper::DateHasTime(dtDue))
-		dtDue.m_dt--;
-
+	// Add time estimate to start date
+	pTDI->dateDue = AddDuration(pTDI->dateStart, pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
 	return TRUE;
 }
 
@@ -5544,7 +5510,7 @@ BOOL CToDoCtrlData::IsEndOfDay(const COleDateTime& date)
 
 COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits)
 {
-	if (!CDateHelper::IsDateSet(dateStart) || (dDuration <= 0) || (nUnits == TDCU_NULL))
+	if (!CDateHelper::IsDateSet(dateStart) || (dDuration == 0.0) || (nUnits == TDCU_NULL))
 	{
 		ASSERT(0);
 		return dateStart;
@@ -5576,28 +5542,30 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// handle workdays
 			if (CDateHelper::HasWeekend())
 			{
+				BOOL bForward = (dDuration > 0.0);
+				int nDir = (bForward ? 1 : -1);
+
 				// Adjust start date if it falls on a weekend
-				CDateHelper::MakeWeekday(dateStart);
+				CDateHelper::MakeWeekday(dateStart, bForward);
 				dateEnd = dateStart;
 
-				// progressively add a day
+				// Adjust one day at a time
 				double dDaysLeft = dDuration;
-				
-				while (dDaysLeft > 0.0)
-				{
-					dDaysLeft--;
 
-					// adjust for partial day remaining
-					if (dDaysLeft < 0.0)
-						dateEnd.m_dt += (1.0 + dDaysLeft);
-					else
-						dateEnd.m_dt++;
-		
+				while ((dDaysLeft * nDir) > 0.0)
+				{
+					dDaysLeft -= nDir;
+					dateEnd.m_dt += nDir;
+
+					// adjust for partial day overrun
+					if ((dDaysLeft * nDir) < 0.0)
+						dateEnd.m_dt += dDaysLeft;
+
 					// step over weekends
-					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateEnd))
+					if (((dDaysLeft * nDir) > 0.0) || CDateHelper::DateHasTime(dateEnd))
 					{
 						// FALSE -> Don't truncate time
-						CDateHelper::MakeWeekday(dateEnd, TRUE, FALSE);
+						CDateHelper::MakeWeekday(dateEnd, bForward, FALSE);
 					}
 				}
 			}
@@ -5610,14 +5578,28 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	}
 
 	// If date falls on the beginning of a day, move to end of previous day
-	if (!CDateHelper::DateHasTime(dateEnd))
-		dateEnd.m_dt--;
-
+	if (dDuration > 0.0)
+	{
+		if (!CDateHelper::DateHasTime(dateEnd))
+			dateEnd.m_dt--;
+	}
+	else
+	{
+		if (!CDateHelper::DateHasTime(dateStart))
+			dateEnd.m_dt++;
+	}
+	
 	// sanity check
 #ifdef _DEBUG
 	if (nUnits != TDCU_WEEKDAYS)
 	{
-		double dCheck = CalcDuration(dateStart, dateEnd, nUnits);
+		double dCheck = 0.0;
+		
+		if (dDuration > 0.0)
+			dCheck = CalcDuration(dateStart, dateEnd, nUnits);
+		else
+			dCheck = -CalcDuration(dateEnd, dateStart, nUnits);
+
 		ASSERT(fabs(dCheck - dDuration) < 1e-3);
 	}
 #endif

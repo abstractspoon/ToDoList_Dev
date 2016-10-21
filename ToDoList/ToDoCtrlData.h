@@ -298,8 +298,8 @@ protected:
 	double SumWeightedPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
 	double CalcStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
-	BOOL CalcMissingStartDate(const TODOITEM* pTDI, COleDateTime& dtStart) const;
-	BOOL CalcMissingDueDate(const TODOITEM* pTDI, COleDateTime& dtDue) const;
+	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
+	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
 
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const;
 	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
