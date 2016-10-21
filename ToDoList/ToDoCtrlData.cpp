@@ -1790,11 +1790,20 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_STARTDATE:		
-			// add date to existing time component unless existing date is 0.0
+			// Add date to existing time component unless existing date is 0.0
 			if (!bDateIsSet || !pTDI->HasStart())
 				pTDI->dateStart = CDateHelper::GetDateOnly(dtDate);
 			else
-				pTDI->dateStart = CDateHelper::MakeDate(dtDate, pTDI->dateStart);		
+				pTDI->dateStart = CDateHelper::MakeDate(dtDate, pTDI->dateStart);	
+
+			// If the task does NOT have a due date but does have a time estimate
+			// then calculate an appropriate due date
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && 
+				CalcMissingDueDate(pTDI, pTDI->dateDue))
+			{
+				nDate = TDCD_DUE; // to update dependencies
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		case TDCD_STARTTIME:		
@@ -1813,6 +1822,14 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 				pTDI->dateDue = CDateHelper::GetDateOnly(dtDate);
 			else
 				pTDI->dateDue = CDateHelper::MakeDate(dtDate, pTDI->dateDue);		
+
+			// If the task does NOT have a start date but does have a time estimate
+			// then back-calculate an appropriate start date
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) &&
+				CalcMissingStartDate(pTDI, pTDI->dateStart))
+			{
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		case TDCD_DUETIME:		
@@ -2019,26 +2036,8 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 		
 		if (bTimeChange && (pTDI->HasStart() || pTDI->HasDue()))
 		{
-			// If the task has no start date then back-estimate it
-			// BUT don't recalculate the time estimate
-			if (!pTDI->HasStart())
-			{
-				COleDateTime dtStart(pTDI->dateDue);
-				
-				if (nOrgUnits == TDCU_WEEKDAYS)
-				{
-					dtStart.m_dt -= dOrgEstimate;
-				}
-				else
-				{
-					CTimeHelper th;
-					TH_UNITS nTHOrgUnits = TDC::MapUnitsToTHUnits(nOrgUnits);
-
-					dtStart.m_dt -= th.GetTime(dOrgEstimate, nTHOrgUnits, THU_DAYS);
-				}
-				
-				SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
-			}
+			// Make sure the task has a start date
+			CalcMissingStartDate(pTDI, pTDI->dateStart);
 
 			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, dTime, nUnits);
 			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE);
@@ -2046,6 +2045,60 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 	}
 
 	return nRes;
+}
+
+BOOL CToDoCtrlData::CalcMissingStartDate(const TODOITEM* pTDI, COleDateTime& dtStart) const
+{
+	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
+		return FALSE;
+
+	dtStart = pTDI->dateDue;
+
+	if (pTDI->nTimeEstUnits == TDCU_WEEKDAYS)
+	{
+		dtStart.m_dt -= pTDI->dTimeEstimate;
+	}
+	else
+	{
+		CTimeHelper th;
+		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(pTDI->nTimeEstUnits);
+
+		dtStart.m_dt -= th.GetTime(pTDI->dTimeEstimate, nTHUnits, THU_DAYS);
+	}
+
+	// If the due date falls on the beginning of a day, 
+	// increment the start date
+	if (!CDateHelper::DateHasTime(pTDI->dateDue))
+		dtStart.m_dt++;
+
+	return TRUE;
+}
+
+BOOL CToDoCtrlData::CalcMissingDueDate(const TODOITEM* pTDI, COleDateTime& dtDue) const
+{
+	if (!pTDI->HasStart() || pTDI->HasDue() || (pTDI->dTimeEstimate <= 0.0))
+		return FALSE;
+
+	dtDue = pTDI->dateStart;
+
+	if (pTDI->nTimeEstUnits == TDCU_WEEKDAYS)
+	{
+		dtDue.m_dt += pTDI->dTimeEstimate;
+	}
+	else
+	{
+		CTimeHelper th;
+		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(pTDI->nTimeEstUnits);
+
+		dtDue.m_dt += th.GetTime(pTDI->dTimeEstimate, nTHUnits, THU_DAYS);
+	}
+
+	// If due date falls on the beginning of a day, 
+	// move it to end of previous day
+	if (!CDateHelper::DateHasTime(dtDue))
+		dtDue.m_dt--;
+
+	return TRUE;
 }
 
 TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate)

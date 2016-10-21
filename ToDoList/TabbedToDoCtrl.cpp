@@ -861,6 +861,22 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 		{
 			mapAttrib.AddAttribute(TDCA_PRIORITY);
 		}
+
+		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			mapAttrib.AddAttribute(TDCA_STARTDATE);
+			mapAttrib.AddAttribute(TDCA_TIMEEST);
+		}
+		break;
+
+	case TDCA_STARTDATE:
+		mapAttrib.AddAttribute(nAttrib);
+
+		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+		{
+			mapAttrib.AddAttribute(TDCA_DUEDATE);
+			mapAttrib.AddAttribute(TDCA_TIMEEST);
+		}
 		break;
 
 	case TDCA_DONEDATE:
@@ -2815,6 +2831,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	case TDCA_DEPENDENCY:
 	case TDCA_DUEDATE:
 	case TDCA_DONEDATE:
+	case TDCA_STARTDATE:
 		// For the moment 
 		if (m_taskTree.SelectionHasDependents())
 		{
