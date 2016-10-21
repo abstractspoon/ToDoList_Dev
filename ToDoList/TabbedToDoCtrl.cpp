@@ -2452,7 +2452,7 @@ void CTabbedToDoCtrl::SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 		
 		if (nView == nIgnore)
 			continue;
-		
+
 		// else
 		VIEWDATA* pData = GetViewData(nView);
 		
@@ -2469,6 +2469,11 @@ void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModT
 	{
 		UpdateListView(nAttrib, dwModTaskID);
 		UpdateExtensionViews(nAttrib, dwModTaskID);
+
+		// Special case: Make sure the task is selected in the 
+		// non-tree view so that the task is visible for label editing
+		if ((nAttrib == TDCA_NEWTASK) && (dwModTaskID != 0))
+			SelectTask(dwModTaskID);
 	}
 }
 
@@ -2483,10 +2488,7 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		// even if the List View is not active
 		if (dwTaskID)
 		{
-			int nDelItem = m_taskList.FindTaskItem(dwTaskID);
-			
-			if (nDelItem != -1)
-				m_taskList.List().DeleteItem(nDelItem);
+			m_taskList.DeleteItem(dwTaskID);
 		}
 		else if (m_taskTree.GetItemCount())
 		{
@@ -2503,11 +2505,16 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		break;
 
 	case TDCA_NEWTASK:
-		// If this is a 'single new task' then we may
-		// have already handled this in CreateNewTask()
+		// If this is a 'single new task' we add it to the list
+		// below the currently selected item
 		if (dwTaskID)
 		{
-			m_taskList.InsertItem(dwTaskID);
+			int nSel = m_taskList.GetSelectedItem();
+
+			if (nSel != -1)
+				nSel++;
+
+			m_taskList.InsertItem(dwTaskID, nSel);
 			break;
 		}
 		// else fall thru to rebuild list
@@ -2516,6 +2523,8 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 	case TDCA_PASTE:
 		if (InListView())
 		{
+			// The tree will have selected the undone items
+			// so that's what the list also needs to show
 			TDCSELECTIONCACHE cache;
 			CacheTreeSelection(cache);
 
@@ -3250,21 +3259,10 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 
 	case FTCV_TASKLIST:
 		{
-			int nItem = m_taskList.FindTaskItem(dwTaskID);
+			CDWordArray aTaskIDs;
+			aTaskIDs.Add(GetSelectedTaskID());
 
-			if (nItem == -1)
-			{
-				ASSERT(0);
-				return FALSE;
-			}
-			
-			// remove focused state from existing task
-			int nFocus = m_taskList.List().GetNextItem(-1, LVNI_FOCUSED | LVNI_SELECTED);
-
-			if (nFocus != -1)
-				m_taskList.List().SetItemState(nFocus, 0, LVIS_SELECTED | LVIS_FOCUSED);
-
-			m_taskList.List().SetItemState(nItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+			m_taskList.SelectTasks(aTaskIDs, TRUE);
 			m_taskList.EnsureSelectionVisible();
 		}
 		break;
@@ -4377,7 +4375,7 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext)
 	SEARCHRESULT result;
 
 	int nFrom = nStart;
-	int nTo = bNext ? m_taskList.List().GetItemCount() : -1;
+	int nTo = bNext ? m_taskList.GetItemCount() : -1;
 	int nInc = bNext ? 1 : -1;
 
 	for (int nItem = nFrom; nItem != nTo; nItem += nInc)

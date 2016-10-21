@@ -4940,7 +4940,7 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 			m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE);
 		}	
 
-		SelectTask(dwTaskID);
+		SelectItem(htiNew);
 		SetModified(TRUE, TDCA_NEWTASK, dwTaskID); 
 		
 		m_taskTree.InvalidateAll();
@@ -5136,21 +5136,13 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	if (TSH().HasItem(m_taskTree.GetSelectedItem()))
 		TCH().SelectItem(NULL);
 	
-	// Note: if removing all items we cannot prevent redrawing
-	// because Win9x gets itself into a state where the first
-	// new task created after the deletion is invisible
-	// So, if deleting all items, we withhold the first item
-	// and delete it after redrawing has been re-enabled
-	BOOL bRemoveAll = TSH().ContainsAllItems();
-	HTREEITEM htiDelayDelete = NULL;
-
-	if (bRemoveAll)
-		htiDelayDelete = selection.RemoveHead();
-
 	// clear selection before deleting
 	TSH().RemoveAll(TRUE);
 
-	// now we can delete with impunity
+	// Cache the task ID of a singly selected task
+	// for later passing to SetModified
+	DWORD dwDelTaskID = ((nSelCount == 1) ? GetTaskID(selection.GetHead()) : 0);
+
 	{
 		HOLD_REDRAW(NULL, m_taskTree.Tree());
 		POSITION pos = selection.GetHeadPosition();
@@ -5168,16 +5160,8 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		m_taskTree.RemoveOrphanTreeItemReferences();
 	}
 
-	// delete the delayed item
-	if (htiDelayDelete)
-	{
-		DWORD dwTaskID = m_taskTree.GetTaskID(htiDelayDelete);
-		m_taskTree.DeleteItem(htiDelayDelete);
-		m_data.DeleteTask(dwTaskID);
-	}
-	
 	// refresh rest of UI
-	SetModified(TRUE, TDCA_DELETE, 0);
+	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
 	UpdateControls(FALSE); // don't update comments
 	
 	// set next selection
@@ -5302,7 +5286,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 		if ((nRes == SET_CHANGE) || bNewTask)
 		{
 			m_taskTree.InvalidateSelection(TRUE);
-			SetModified(TRUE, (bNewTask ? TDCA_NEWTASK : TDCA_TASKNAME), m_dwEditTitleTaskID);
+			SetModified(TRUE, TDCA_TASKNAME, m_dwEditTitleTaskID);
 
 			// If this was a new task and the parent was marked as done, 
 			// now mark it as incomplete
@@ -5341,18 +5325,20 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		HTREEITEM hti = GetSelectedItem();
 		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
 
-		// set selection to next task and if that fails then previous
-		if (!GotoNextTask(TDCG_NEXT) && !GotoNextTask(TDCG_PREV))
+		// set selection to previous task and if that fails then next task
+		if (!GotoNextTask(TDCG_PREV) && !GotoNextTask(TDCG_NEXT))
 			TSH().RemoveAll();
 		
 		// then delete and remove from undo
 		{
 			CHoldRedraw hr(m_taskTree);
 
-			IMPLEMENT_UNDOEXT(TDCUAT_DELETE, TRUE);
-			DeleteSelectedTask(FALSE, TRUE);
+			m_taskTree.DeleteItem(hti);
+			m_data.DeleteTask(m_dwLastAddedID);
+			m_data.DeleteLastUndoAction();
+
+			SetModified(TRUE, TDCA_DELETE, m_dwLastAddedID);
 		}
-		m_data.DeleteLastUndoAction();
 
 		// resync fields for selected task
 		UpdateControls();
@@ -6788,6 +6774,8 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD /*dwModTaskI
 	
 	if (bMod)
 	{
+		m_taskTree.SetModified(nAttrib);
+
 		if (ModNeedsResort(nAttrib))
 		{
 			// if the mod was a task completion and the parent completed state 
@@ -6805,9 +6793,6 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD /*dwModTaskI
 			}
 		}
 
-		m_taskTree.SetModified(nAttrib);
-		
-		UpdateWindow();
 		GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
 
 		// special case: if this was the project name being edited make sure
