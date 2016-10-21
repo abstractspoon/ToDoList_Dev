@@ -5542,27 +5542,27 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// handle workdays
 			if (CDateHelper::HasWeekend())
 			{
-				BOOL bForward = (dDuration > 0.0);
-				int nDir = (bForward ? 1 : -1);
-
 				// Adjust start date if it falls on a weekend
+				BOOL bForward = (dDuration > 0.0);
 				CDateHelper::MakeWeekday(dateStart, bForward);
-				dateEnd = dateStart;
 
 				// Adjust one day at a time
-				double dDaysLeft = dDuration;
+				double dDaysLeft = abs(dDuration);
+				int nDir = (bForward ? 1 : -1);
 
-				while ((dDaysLeft * nDir) > 0.0)
+				dateEnd = dateStart;
+
+				while (dDaysLeft > 0.0)
 				{
-					dDaysLeft -= nDir;
+					dDaysLeft--;
 					dateEnd.m_dt += nDir;
 
 					// adjust for partial day overrun
-					if ((dDaysLeft * nDir) < 0.0)
-						dateEnd.m_dt += dDaysLeft;
+					if (dDaysLeft < 0.0)
+						dateEnd.m_dt += (nDir * dDaysLeft);
 
 					// step over weekends
-					if (((dDaysLeft * nDir) > 0.0) || CDateHelper::DateHasTime(dateEnd))
+					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateEnd))
 					{
 						// FALSE -> Don't truncate time
 						CDateHelper::MakeWeekday(dateEnd, bForward, FALSE);
