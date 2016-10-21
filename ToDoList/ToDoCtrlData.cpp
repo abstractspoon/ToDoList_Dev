@@ -1888,12 +1888,12 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	return SET_NOCHANGE;
 }
 
-TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	DH_UNITS nDHUnits = TDC::MapDateOffsetToDHUnits(nOffset);
+	DH_UNITS nDHUnits = TDC::MapUnitsToDHUnits(nUnits);
 	COleDateTime date = pTDI->GetDate(nDate);
 
 	if (!CDateHelper::IsDateSet(date))
@@ -1922,7 +1922,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		{
 			DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 			
-			if (OffsetTaskDate(dwChildID, nDate, nAmount, nOffset, TRUE) == SET_CHANGE)
+			if (OffsetTaskDate(dwChildID, nDate, nAmount, nUnits, TRUE) == SET_CHANGE)
 				nRes = SET_CHANGE;
 		}
 	}

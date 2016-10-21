@@ -365,6 +365,22 @@ namespace TDC
 		return TDCO_NULL;
 	}
 
+	static TDC_UNITS MapDateOffsetToUnits(TDC_OFFSET nOffset)
+	{
+		switch (nOffset)
+		{
+		case TDCO_DAYS:		return TDCU_DAYS;
+		case TDCO_WEEKS:	return TDCU_WEEKS;
+		case TDCO_WEEKDAYS: return TDCU_WEEKDAYS;
+		case TDCO_MONTHS:	return TDCU_MONTHS;
+		case TDCO_YEARS:	return TDCU_YEARS;
+		}
+		
+		// all else
+		ASSERT(0);
+		return TDCU_NULL;
+	}
+
 	static DH_UNITS MapDateOffsetToDHUnits(TDC_OFFSET nOffset)
 	{
 		switch (nOffset)

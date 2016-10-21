@@ -14,6 +14,7 @@
 #include "todoctrlundo.h"
 #include "todoitem.h"
 #include "taskfile.h"
+
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -222,7 +223,7 @@ public:
 	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend);
 
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks);
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks);
 	TDC_SET MoveTaskDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 

@@ -3169,7 +3169,7 @@ BOOL CToDoCtrl::MoveSelectedTaskDates(const COleDateTime& dtNewStart, BOOL bFail
 	return (nRes != SET_FAILED);
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
 	if (IsReadOnly())
 		return FALSE;
@@ -3184,6 +3184,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	POSITION pos = htiSel.GetHeadPosition();
 	int nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
+	TDC_UNITS nUnits = TDC::MapDateOffsetToUnits(nOffset);
+
 	
 	IMPLEMENT_UNDOEDIT();
 		
@@ -3352,7 +3354,7 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			{
 				// Before we offset, make sure all subtasks have valid due dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCO_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE);
 			}
 			else
 			{
@@ -3366,14 +3368,14 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			if (bWantInheritStart)
 			{
 				// don't offset children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCO_DAYS, FALSE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE);
 				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
 			}
 			else // offset children
 			{
 				// Before we offset, make sure all subtasks have valid start dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCO_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE);
 			}
 		}
 	}
@@ -3392,7 +3394,7 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			{
 				// Before we offset, make sure all subtasks have valid start dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCO_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE);
 			}
 			else
 			{
@@ -3406,14 +3408,14 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			if (bWantInheritDue)
 			{
 				// don't update children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCO_DAYS, FALSE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE);
 				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
 			}
 			else // bump
 			{
 				// Before we offset, make sure all subtasks have valid due dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCO_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE);
 			}
 		}
 	}
