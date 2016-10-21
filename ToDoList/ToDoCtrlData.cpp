@@ -5547,7 +5547,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				CDateHelper::MakeWeekday(dateStart, bForward);
 
 				// Adjust one day at a time
-				double dDaysLeft = abs(dDuration);
+				double dDaysLeft = fabs(dDuration);
 				int nDir = (bForward ? 1 : -1);
 
 				dateEnd = dateStart;
@@ -5625,11 +5625,13 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
+			CTimeHelper thAllDay(24.0, 7.0);
+			dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
+
 			// handle 'whole' of due date
 			if (IsEndOfDay(dateEnd))
 				dDuration += 1.0;
 
-			dDuration = CTimeHelper().GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
 
