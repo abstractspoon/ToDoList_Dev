@@ -10,12 +10,12 @@
 #include "TaskCalendarCtrl.h"
 #include "calendarpreferencesdlg.h"
 
-#include "..\Shared\uitheme.h"
 #include "..\Shared\menubutton.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
+#include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
 #include "..\3rdparty\fpsminicalendarctrl.h"

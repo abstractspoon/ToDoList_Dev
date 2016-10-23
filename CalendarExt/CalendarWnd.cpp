@@ -11,13 +11,13 @@
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\TimeHelper.h"
 #include "..\Shared\FileMisc.h"
-#include "..\Shared\UITheme.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\dlgunits.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\localizer.h"
 
+#include "..\Interfaces\UITheme.h"
 #include "..\Interfaces\IPreferences.h"
 
 #ifdef _DEBUG
@@ -269,6 +269,7 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 		
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 }
 

@@ -10,13 +10,13 @@
 #include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
 
-#include "..\Shared\uitheme.h"
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\checkcombobox.h"
 
+#include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -337,6 +337,7 @@ void CKanbanWnd::SetUITheme(const UITHEME* pTheme)
 		
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 }
 

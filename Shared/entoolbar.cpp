@@ -16,14 +16,23 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 const UINT WM_REFRESHBUTTONSTATES = WM_APP+1;
+
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef TBCDRF_NOBACKGROUND
+#	define TBCDRF_NOBACKGROUND   0x00400000
+#endif
+/////////////////////////////////////////////////////////////////////////////
 
 void AFXAPI AfxDeleteObject(HGDIOBJ* pObject);
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnToolBar
 
-CEnToolBar::CEnToolBar() : m_crFrom(CLR_NONE), m_crTo(CLR_NONE)
+CEnToolBar::CEnToolBar() : m_crFrom(CLR_NONE), m_crTo(CLR_NONE), m_crHot(CLR_NONE)
 {
 }
 
@@ -32,7 +41,6 @@ CEnToolBar::~CEnToolBar()
 	m_ilNormal.DeleteImageList();
 	m_ilDisabled.DeleteImageList();
 }
-
 
 BEGIN_MESSAGE_MAP(CEnToolBar, CToolBar)
 	//{{AFX_MSG_MAP(CEnToolBar)
@@ -210,29 +218,25 @@ LRESULT CEnToolBar::OnRefreshButtonStates(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask) 
 {
-	// not under win9x
-	if (COSVersion() >= OSV_NT4)
+	// create 'nice' disabled imagelist 
+	if (pBitmap->GrayScale(crMask))
 	{
-		// create 'nice' disabled imagelist 
-		if (pBitmap->GrayScale(crMask))
-		{
-			if (crMask == CLR_NONE) // map 3d colors
-				pBitmap->RemapSysColors();
-
-			// button size
-			int nCx = m_sizeImage.cx, nCy = m_sizeImage.cy;
-			
-			m_ilDisabled.DeleteImageList();
-			m_ilDisabled.Create(nCx, nCy, ILC_COLOR24 | ILC_MASK, 0, 1);
-			m_ilDisabled.Add(pBitmap, crMask);
-			
-			CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
-
-			if (pILPrev)
-				pILPrev->DeleteImageList(); // cleanup
+		if (crMask == CLR_NONE) // map 3d colors
+			pBitmap->RemapSysColors();
 		
-			Invalidate();
-		}
+		// button size
+		int nCx = m_sizeImage.cx, nCy = m_sizeImage.cy;
+		
+		m_ilDisabled.DeleteImageList();
+		m_ilDisabled.Create(nCx, nCy, ILC_COLOR24 | ILC_MASK, 0, 1);
+		m_ilDisabled.Add(pBitmap, crMask);
+		
+		CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
+		
+		if (pILPrev)
+			pILPrev->DeleteImageList(); // cleanup
+		
+		Invalidate();
 	}
 }
 
@@ -268,6 +272,54 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
     default:
        break;
     }
+}
+
+LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw) 
+{ 
+	int nBtnID = lpNMCustomDraw->nmcd.dwItemSpec;
+	const CToolBarCtrl& tbc = GetToolBarCtrl();
+
+	CDC* pDC = CDC::FromHandle(lpNMCustomDraw->nmcd.hdc);
+	COLORREF crFill = CLR_NONE;
+
+	if (tbc.IsButtonPressed(nBtnID))
+	{
+		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
+	}
+	else if (CommandToIndex(nBtnID) == tbc.GetHotItem())
+	{
+		crFill = GetHotColor();
+	}
+	else if (tbc.IsButtonChecked(nBtnID))
+	{
+		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
+	}
+	else
+	{
+		return CDRF_DODEFAULT;
+	}
+
+	DrawButtonBackground(pDC, lpNMCustomDraw->nmcd.rc, crFill);
+	return (TBCDRF_NOBACKGROUND | TBCDRF_NOEDGES);
+}
+
+COLORREF CEnToolBar::GetHotColor() const
+{
+	return ((m_crHot != CLR_NONE) ? m_crHot : ((m_crFrom != CLR_NONE) ? m_crFrom : GetSysColor(COLOR_3DFACE)));
+}
+
+void CEnToolBar::DrawButtonBackground(CDC* pDC, const CRect& rBtn, COLORREF crFill)
+{
+	static int nRadius = ((COSVersion() >= OSV_WIN8) ? 0 : 3);
+
+	COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.2, FALSE);
+
+	GraphicsMisc::DrawRect(pDC, rBtn, crFill, crBorder, nRadius);
+}
+
+LRESULT CEnToolBar::OnItemPostPaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) 
+{ 
+	return CDRF_DODEFAULT; 
 }
 
 void CEnToolBar::OnNcPaint()

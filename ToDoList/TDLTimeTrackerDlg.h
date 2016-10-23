@@ -149,6 +149,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CString m_sOrgTitle;
 	DWORD m_dwOptions;
+	//CBrush m_brBack;
 	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

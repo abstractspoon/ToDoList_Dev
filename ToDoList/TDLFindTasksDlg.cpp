@@ -226,6 +226,7 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 									theme.crToolbarDark, 
 									theme.nRenderStyle != UIRS_GLASS, 
 									theme.nRenderStyle != UIRS_GRADIENT);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		ResizeDlg();
 		Invalidate();
@@ -251,6 +252,7 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 									m_theme.crToolbarDark, 
 									m_theme.nRenderStyle != UIRS_GLASS, 
 									m_theme.nRenderStyle != UIRS_GRADIENT);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 
 	if (m_theme.HasToolbarImageFile(_T("FIND_TASKS")))

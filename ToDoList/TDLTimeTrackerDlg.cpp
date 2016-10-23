@@ -513,9 +513,12 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	{
 		m_toolbar.SetImage(IDB_TIMETRACK_TOOLBAR_STD, RGB(255, 0, 255));
 		m_toolbar.SetDlgCtrlID(IDC_TOOLBAR);
-		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));
 		m_toolbar.GetToolBarCtrl().CheckButton(ID_TIMETRACKER_ONTOP, m_bAlwaysOnTop);
+
+		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
+		//m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
+		//m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_tbHelper.Initialize(&m_toolbar, this);
 	}
@@ -577,6 +580,12 @@ void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
 	if ((m_theme.crAppBackLight != oldTheme.crAppBackLight) ||
 		(m_theme.crAppBackDark != oldTheme.crAppBackDark))
 	{
+		//m_brBack.DeleteObject();
+
+		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
+		//m_toolbar.SetBackgroundColors(m_theme.crToolbarDark, m_theme.crToolbarLight, m_theme.HasGradient(), m_theme.HasGlass());
+		//m_toolbar.SetHotColor(m_theme.crToolbarHot);
+		
 		Invalidate(TRUE);
 		SendMessage(WM_NCPAINT);
 	}
@@ -993,7 +1002,12 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		if (nCtlColor == CTLCOLOR_STATIC)
 		{
 			pDC->SetBkMode(TRANSPARENT);
+
+			//if (!m_brBack.GetSafeHandle())
+			//	m_brBack.CreateSolidBrush(GetBkgndColor());
+
 			hbr = (HBRUSH)GetStockObject(WHITE_BRUSH);
+			//hbr = (HBRUSH)m_brBack.GetSafeHandle();
 		}
 		
 		if ((pWnd->GetDlgCtrlID() == IDC_TASKTIME) &&
@@ -1073,7 +1087,8 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 
 COLORREF CTDLTimeTrackerDlg::GetBkgndColor() const
 {
-	return RGB(255, 255, 255);
+	return WHITE;
+	//return m_theme.crAppBackLight;
 }
 
 void CTDLTimeTrackerDlg::OnChangeQuickFind()

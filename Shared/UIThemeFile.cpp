@@ -7,6 +7,7 @@
 #include "xmlfile.h"
 #include "filemisc.h"
 #include "misc.h"
+#include "graphicsmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -64,6 +65,7 @@ void CUIThemeFile::Trace() const
 	TRACECOLOR(crMenuBack);
 	TRACECOLOR(crToolbarDark);
 	TRACECOLOR(crToolbarLight);
+	TRACECOLOR(crToolbarHot);
 	TRACECOLOR(crStatusBarDark);
 	TRACECOLOR(crStatusBarLight);
 	TRACECOLOR(crStatusBarText);
@@ -88,6 +90,7 @@ CUIThemeFile& CUIThemeFile::operator=(const CUIThemeFile& theme)
 	crMenuBack = theme.crMenuBack;
 	crToolbarDark = theme.crToolbarDark;
 	crToolbarLight = theme.crToolbarLight;
+	crToolbarHot = theme.crToolbarHot;
 	crStatusBarDark = theme.crStatusBarDark;
 	crStatusBarLight = theme.crStatusBarLight;
 	crStatusBarText = theme.crStatusBarText;
@@ -110,6 +113,7 @@ BOOL CUIThemeFile::operator== (const CUIThemeFile& theme) const
 		(crMenuBack			!= theme.crMenuBack) ||
 		(crToolbarDark		!= theme.crToolbarDark) ||
 		(crToolbarLight		!= theme.crToolbarLight) ||
+		(crToolbarHot		!= theme.crToolbarHot) ||
 		(crStatusBarDark	!= theme.crStatusBarDark) ||
 		(crStatusBarLight	!= theme.crStatusBarLight) ||
 		(crStatusBarText	!= theme.crStatusBarText))
@@ -158,6 +162,11 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	crStatusBarDark		= GetColor(pXITheme, _T("STATUSBARDARK"),	COLOR_3DFACE);
 	crStatusBarLight	= GetColor(pXITheme, _T("STATUSBARLIGHT"),	COLOR_3DFACE);
 	crStatusBarText		= GetColor(pXITheme, _T("STATUSBARTEXT"),	COLOR_WINDOWTEXT);
+
+	crToolbarHot		= GetColor(pXITheme, _T("TOOLBARHOT"),		-1); // -1 == CLR_NONE
+
+	if (crToolbarHot == CLR_NONE)
+		crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
 
 	// toolbars
 	CString sFolder = FileMisc::GetFolderFromFilePath(szThemeFile);
@@ -231,6 +240,7 @@ void CUIThemeFile::Reset(UITHEME& theme)
 	theme.crMenuBack		= GetSysColor(COLOR_3DFACE);
 	theme.crToolbarDark		= GetSysColor(COLOR_3DFACE);
 	theme.crToolbarLight	= GetSysColor(COLOR_3DFACE);
+	theme.crToolbarHot		= GetSysColor(COLOR_3DHIGHLIGHT);
 	theme.crStatusBarDark	= GetSysColor(COLOR_3DFACE);
 	theme.crStatusBarLight	= GetSysColor(COLOR_3DFACE);
 	theme.crStatusBarText	= GetSysColor(COLOR_WINDOWTEXT);

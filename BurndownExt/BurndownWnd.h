@@ -10,10 +10,10 @@
 #include <afxtempl.h>
 
 #include "..\Shared\mapex.h"
-#include "..\Shared\uitheme.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
+#include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IUIExtension.h"
 

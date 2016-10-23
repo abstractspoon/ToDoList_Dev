@@ -6,12 +6,12 @@
 #include "ContentCtrl.h"
 #include "autoflag.h"
 #include "misc.h"
-#include "uitheme.h"
 #include "binarydata.h"
 #include "uithemefile.h"
 
 #include "..\Interfaces\IContentControl.h"
 #include "..\Interfaces\ISpellCheck.h"
+#include "..\Interfaces\uitheme.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

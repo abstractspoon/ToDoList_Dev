@@ -16,7 +16,6 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\uitheme.h"
 #include "..\shared\enstring.h"
 #include "..\shared\preferences.h"
 #include "..\shared\binarydata.h"
@@ -25,6 +24,7 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\clipboard.h"
 
+#include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\itasklist.h"
 
 #include "..\3rdparty\compression.h"
@@ -319,6 +319,7 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
  	}
 
 	m_toolbar.SetBackgroundColors(pTheme->crToolbarLight, pTheme->crToolbarDark, pTheme->nRenderStyle != UIRS_GLASS, pTheme->nRenderStyle != UIRS_GRADIENT);
+	m_toolbar.SetHotColor(pTheme->crToolbarHot);
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);
 }
 

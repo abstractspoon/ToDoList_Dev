@@ -670,6 +670,7 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 										m_theme.crToolbarDark, 
 										m_theme.HasGradient(), 
 										m_theme.HasGlass());
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 
 	m_statusBar.SetUIColors(m_theme.crStatusBarLight, 
@@ -1253,6 +1254,7 @@ BOOL CToDoListWnd::InitToolbar()
 										m_theme.crToolbarDark, 
 										m_theme.HasGradient(), 
 										m_theme.HasGlass());
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 	
 	// toolbar images

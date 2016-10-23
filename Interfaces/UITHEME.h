@@ -19,6 +19,9 @@ enum UI_RENDER_STYLE
 struct UITHEME
 {
 	UI_RENDER_STYLE nRenderStyle;
+	
+	TCHAR    szToolbarImage[MAX_PATH];
+	COLORREF crToolbarTransparency;
 
 	COLORREF crAppBackDark;
 	COLORREF crAppBackLight;
@@ -31,13 +34,9 @@ struct UITHEME
 	COLORREF crStatusBarDark;
 	COLORREF crStatusBarLight;
 	COLORREF crStatusBarText;
-	//COLORREF ;
-	//COLORREF ;
-	//COLORREF ;
-	//COLORREF ;
+	COLORREF crToolbarHot;
 
-	TCHAR    szToolbarImage[MAX_PATH];
-	COLORREF crToolbarTransparency;
+	// NEW ITEMS HERE ONLY
 };
 
 #endif // !defined(AFX_UITHEME_H__7747061B_7841_47E8_BB36_89C11D6DC934__INCLUDED_)

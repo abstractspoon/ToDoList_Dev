@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\SHARED\uitheme.h"
+#include "..\interfaces\uitheme.h"
 #include <afxtempl.h>
 
 class CXmlItem;

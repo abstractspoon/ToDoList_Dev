@@ -11,11 +11,11 @@
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
 
-#include "..\Shared\uitheme.h"
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
+#include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
 /////////////////////////////////////////////////////////////////////////////

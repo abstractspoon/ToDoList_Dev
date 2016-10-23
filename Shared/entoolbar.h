@@ -27,6 +27,7 @@ public:
 
 	void RefreshButtonStates(BOOL bImmediate = TRUE);
 	void SetBackgroundColors(COLORREF crFrom, COLORREF crTo, BOOL bGradient, BOOL bGlass);
+	void SetHotColor(COLORREF crHot) { m_crHot = crHot; }
 
 	int GetButtonCount(BOOL bIgnoreSeparators = FALSE) const;
 	CSize GetButtonSize() const { return m_sizeButton; }
@@ -37,7 +38,7 @@ public:
 	// Attributes
 protected:
 	CImageList m_ilDisabled, m_ilNormal;
-	COLORREF m_crFrom, m_crTo;
+	COLORREF m_crFrom, m_crTo, m_crHot;
 	BOOL m_bGradient, m_bGlass;
 	CUIntArray m_aRowHeights;
 	
@@ -62,20 +63,22 @@ protected:
 	afx_msg void OnNcPaint();
 	DECLARE_MESSAGE_MAP()
 		
-	virtual LRESULT OnItemPrePaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) { return CDRF_DODEFAULT; }
-	virtual LRESULT OnItemPostPaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) { return CDRF_DODEFAULT; }
+	virtual LRESULT OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
+	virtual LRESULT OnItemPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
 	
 	// pseudo message handler
 	void DrawBkgnd(CDC* pDC, BOOL bClient);
+	BOOL HasBkgndColor() const { return m_crFrom != CLR_NONE; }
+	COLORREF GetHotColor() const;
 	
 	BOOL SetImage(CEnBitmapEx* pBitmap, COLORREF crMask);
 	void RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask);
 
-	BOOL HasBkgndColor() const { return m_crFrom != CLR_NONE; }
-	
 	int EstimateHeightRequired(int cx) const;
 	int EstimateRowsRequired(int cx) const;
 	int RefreshRowHeights();
+	
+	static void DrawButtonBackground(CDC* pDC, const CRect& rBtn, COLORREF crFill);
 };
 
 /////////////////////////////////////////////////////////////////////////////
