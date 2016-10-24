@@ -526,16 +526,17 @@ BEGIN
                     7,25,381,10
     LTEXT           "Position e&dit fields:",IDC_STATIC,7,40,381,8
     COMBOBOX        IDC_CTRLSPOS,7,52,194,145,CBS_DROPDOWNLIST | WS_TABSTOP
+    CONTROL         "'Stack' edit fields and comments when they occupy the same position (left, right or below)",
+                    IDC_STACKFIELDSANDCOMMENTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,70,387,10
     CONTROL         "&Move the input focus to the tasklist when [Enter] is pressed",
                     IDC_FOCUSTREEONENTER,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,85,381,10
-    CONTROL         "&Show close button on each tasklist tab",
-                    IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,605,381,10
-    CONTROL         "&Use the following theme (XP and later only):",
-                    IDC_USEUITHEME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    100,381,10
-    EDITTEXT        IDC_UITHEMEFILE,18,112,183,13,ES_AUTOHSCROLL
+    CONTROL         "&Use the following colour theme:",IDC_USEUITHEME,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,100,381,10
+    COMBOBOX        IDC_UITHEMEFILE,17,113,184,126,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "Show &default task icons in icon selection dialog",
                     IDC_SHOWDEFAULTTASKICONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,130,381,10
@@ -598,17 +599,17 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,575,381,10
     CONTROL         "Keep tabs or&dered by name",IDC_KEEPTABSORDERED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,590,381,10
-    CONTROL         "Right &align attribute labels",IDC_RIGHTALIGNLABELS,
-                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | 
-                    WS_TABSTOP,363,10,25,17
+    CONTROL         "&Show close button on each tasklist tab",
+                    IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,605,381,10
     LTEXT           "Default Task View Visibility",IDC_TASKVIEWSGROUP,7,623,
                     381,8
     LISTBOX         IDC_TASKVIEWVISIBILITY,7,637,331,51,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "'Stack' edit fields and comments when they occupy the same position (left, right or below)",
-                    IDC_STACKFIELDSANDCOMMENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,70,387,10
+    CONTROL         "Right &align attribute labels",IDC_RIGHTALIGNLABELS,
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | 
+                    WS_TABSTOP,363,10,25,17
 END
 
 IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 517
@@ -1913,7 +1914,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_TIMETRACK_DIALOG DIALOG DISCARDABLE  0, 0, 134, 89
+IDD_TIMETRACK_DIALOG DIALOGEX 0, 0, 134, 89
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_STATICEDGE
 CAPTION "Time Tracker"
@@ -1929,7 +1930,7 @@ BEGIN
     LTEXT           "Time Estimate : Spent",IDC_TASKTIME_LABEL,4,64,70,8
     EDITTEXT        IDC_TASKTIME,4,72,81,12,ES_READONLY | NOT WS_BORDER,
                     WS_EX_CLIENTEDGE
-    EDITTEXT        IDC_QUICKFIND,35,4,95,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_QUICKFIND,36,3,94,14,ES_AUTOHSCROLL
     CONTROL         "",IDC_TOOLBAR,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
                     WS_DISABLED,4,3,31,14
 END
@@ -3844,7 +3845,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 130
-        TOPMARGIN, 4
+        TOPMARGIN, 3
         BOTTOMMARGIN, 84
     END
 

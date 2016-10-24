@@ -29,8 +29,7 @@ CPreferencesUIPage::CPreferencesUIPage(const CContentMgr* pMgrContent, const CUI
 		m_pMgrUIExt(pMgrUIExt),
 		m_cbCommentsFmt(pMgrContent),
 		m_nDefaultCommentsFormat(-1),
-		m_lbTaskViews(pMgrUIExt),
-		m_eUITheme(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_UITHEMEFILEFILTER))
+		m_lbTaskViews(pMgrUIExt)
 {
 	//{{AFX_DATA_INIT(CPreferencesUIPage)
 	//}}AFX_DATA_INIT
@@ -45,7 +44,6 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	CPreferencesPageBase::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CPreferencesUIPage)
-	DDX_Control(pDX, IDC_UITHEMEFILE, m_eUITheme);
 	DDX_Check(pDX, IDC_SHOWCOMMENTSALWAYS, m_bShowCommentsAlways);
 	DDX_Check(pDX, IDC_AUTOREPOSCTRLS, m_bAutoReposCtrls);
 	DDX_Check(pDX, IDC_SHAREDCOMMENTSHEIGHT, m_bSharedCommentsHeight);
@@ -66,6 +64,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ENABLECOLUMNHEADERSORTING, m_bEnableColumnHeaderSorting);
 	DDX_Check(pDX, IDC_STACKFIELDSANDCOMMENTS, m_bStackEditFieldsAndComments);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_UITHEMEFILE, m_cbThemes);
 	DDX_Radio(pDX, IDC_MATCHTITLES, (int&)m_nTitleFilterOption);
 	DDX_CBIndex(pDX, IDC_NEWTASKPOSITION, (int&)m_nNewTaskPos);
 	DDX_CBIndex(pDX, IDC_NEWSUBTASKPOSITION, (int&)m_nNewSubtaskPos);
@@ -103,10 +102,17 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	GetDlgItem(IDC_COMMENTSFORMAT)->EnableWindow(m_nDefaultCommentsFormat != CB_ERR);
 
 	// theming only available if XP themes are active
-	BOOL bThemeActive = CThemed::IsAppThemed();
-	GetDlgItem(IDC_USEUITHEME)->EnableWindow(bThemeActive);
-	GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(m_bUseUITheme && bThemeActive);
-
+	if (CThemed::IsAppThemed())
+	{
+		m_cbThemes.SetThemePath(m_sUIThemeFile);
+		GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(m_bUseUITheme);
+	}
+	else
+	{
+		GetDlgItem(IDC_USEUITHEME)->EnableWindow(FALSE);
+		GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(FALSE);
+	}
+	
 	m_lbTaskViews.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -151,17 +157,6 @@ void CPreferencesUIPage::LoadPreferences(const CPreferences& prefs)
 	m_bEnableColumnHeaderSorting = prefs.GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE);
 	m_bStackEditFieldsAndComments = prefs.GetProfileInt(_T("Preferences"), _T("StackEditFieldsAndComments"), TRUE);
 //	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), FALSE);
-
-	// set default theme to blue
-	if (CThemed::IsAppThemed())
-	{
-		CString sResFolder = FileMisc::GetAppResourceFolder() + "\\Themes";
-
-		m_eUITheme.SetCurrentFolder(sResFolder);
-		m_sUIThemeFile = FileMisc::GetRelativePath(m_sUIThemeFile, sResFolder, FALSE);
-	}
-	else
-		m_sUIThemeFile.Empty();
 
 	// comments format
 	if (m_cbCommentsFmt.IsInitialized())
@@ -226,7 +221,6 @@ void CPreferencesUIPage::SavePreferences(CPreferences& prefs)
 	prefs.WriteProfileInt(_T("Preferences"), _T("RestoreTasklistFilters"), m_bRestoreTasklistFilters);
 	prefs.WriteProfileInt(_T("Preferences"), _T("AutoRefilter"), m_bAutoRefilter);
 	prefs.WriteProfileInt(_T("Preferences"), _T("AutoResort"), m_bAutoResort);
-	prefs.WriteProfileString(_T("Preferences"), _T("UIThemeFile"), m_sUIThemeFile);
 	prefs.WriteProfileInt(_T("Preferences"), _T("UseUITheme"), m_bUseUITheme);
 	prefs.WriteProfileInt(_T("Preferences"), _T("TitleFilterOption"), m_nTitleFilterOption);
 	prefs.WriteProfileInt(_T("Preferences"), _T("ShowDefaultTaskIcons"), m_bShowDefaultTaskIcons);
@@ -234,6 +228,8 @@ void CPreferencesUIPage::SavePreferences(CPreferences& prefs)
 	prefs.WriteProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), m_bEnableColumnHeaderSorting);
 	prefs.WriteProfileInt(_T("Preferences"), _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
 //	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+
+	prefs.WriteProfileString(_T("Preferences"), _T("UIThemeFile"), m_cbThemes.GetThemePath());
 
 	// comments format
 	if (m_pMgrContent)

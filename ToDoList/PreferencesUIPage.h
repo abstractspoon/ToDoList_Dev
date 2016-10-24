@@ -9,9 +9,9 @@
 
 #include "TDLTaskViewListBox.h"
 #include "tdlcontenttypecombobox.h"
+#include "tdlthemecombobox.h"
 
 #include "..\shared\contentMgr.h"
-#include "..\shared\fileedit.h"
 #include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
@@ -87,7 +87,6 @@ protected:
 	//{{AFX_DATA(CPreferencesUIPage)
 	enum { IDD = IDD_PREFUI_PAGE };
 	CTDLTaskViewListBox	m_lbTaskViews;
-	CFileEdit	m_eUITheme;
 	BOOL	m_bShowCommentsAlways;
 	BOOL	m_bAutoReposCtrls;
 	BOOL	m_bSpecifyToolbarImage;
@@ -123,6 +122,7 @@ protected:
 	CGroupLineManager m_mgrGroupLines;
 	CONTENTFORMAT m_cfDefault;
 	int m_nDefaultCommentsFormat;
+	CTDLThemeComboBox m_cbThemes;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
