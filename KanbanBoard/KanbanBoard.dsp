@@ -220,6 +220,10 @@ SOURCE=.\res\column_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\help_button.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\icon1.ico
 # End Source File
 # Begin Source File
