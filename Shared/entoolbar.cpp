@@ -280,8 +280,11 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	const CToolBarCtrl& tbc = GetToolBarCtrl();
 
 	CDC* pDC = CDC::FromHandle(lpNMCustomDraw->nmcd.hdc);
-	COLORREF crFill = CLR_NONE;
 
+	COLORREF crFill = CLR_NONE;
+	LRESULT nFlags = (TBCDRF_NOBACKGROUND | TBCDRF_NOEDGES);
+
+	// Note: Only offset pressed buttons
 	if (tbc.IsButtonPressed(nBtnID))
 	{
 		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
@@ -289,10 +292,12 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	else if (CommandToIndex(nBtnID) == tbc.GetHotItem())
 	{
 		crFill = GetHotColor();
+		nFlags |= TBCDRF_NOOFFSET;
 	}
 	else if (tbc.IsButtonChecked(nBtnID))
 	{
 		crFill = GraphicsMisc::Darker(GetHotColor(), 0.1, FALSE);
+		nFlags |= TBCDRF_NOOFFSET;
 	}
 	else
 	{
@@ -300,7 +305,7 @@ LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 	}
 
 	DrawButtonBackground(pDC, lpNMCustomDraw->nmcd.rc, crFill);
-	return (TBCDRF_NOBACKGROUND | TBCDRF_NOEDGES);
+	return nFlags;
 }
 
 COLORREF CEnToolBar::GetHotColor() const
