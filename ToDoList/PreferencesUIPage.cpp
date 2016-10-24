@@ -107,16 +107,8 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	GetDlgItem(IDC_USEUITHEME)->EnableWindow(bThemeActive);
 	GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(m_bUseUITheme && bThemeActive);
 
-	// This is a horrible hack but recreating the Task View listbox
-	// seems to be the only way for it to handle WM_MEASUREITEM
-// 	CRect rCtrl = CDialogHelper::GetChildRect(&m_lbTaskViews);
-// 	DWORD dwStyle = m_lbTaskViews.GetStyle() | WS_BORDER;
-// 
-// 	m_lbTaskViews.DestroyWindow();
-// 	m_lbTaskViews.Create(dwStyle, rCtrl, this, IDC_TASKVIEWVISIBILITY);
 	m_lbTaskViews.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
-
-
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
