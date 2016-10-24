@@ -99,6 +99,8 @@ public:
 
 /////////////////////////////////////////////////////////////////////////
 
+//#define WHITETHEME
+
 class CTDLTimeTrackerDlg : public CDialog, protected CDialogHelper
 {
 public:
@@ -149,7 +151,12 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CString m_sOrgTitle;
 	DWORD m_dwOptions;
-	//CBrush m_brBack;
+
+#ifdef WHITETHEME
+#else
+	CBrush m_brBack;
+#endif
+
 	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

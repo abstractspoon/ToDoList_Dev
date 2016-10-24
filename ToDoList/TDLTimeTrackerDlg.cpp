@@ -516,9 +516,12 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));
 		m_toolbar.GetToolBarCtrl().CheckButton(ID_TIMETRACKER_ONTOP, m_bAlwaysOnTop);
 
+#ifdef WHITETHEME
 		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
-		//m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
-		//m_toolbar.SetHotColor(m_theme.crToolbarHot);
+#else
+		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+#endif
 
 		m_tbHelper.Initialize(&m_toolbar, this);
 	}
@@ -574,17 +577,20 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 
 void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
 {
-	UITHEME oldTheme = m_theme;
+	CUIThemeFile oldTheme = m_theme;
 	m_theme = theme;
 	
-	if ((m_theme.crAppBackLight != oldTheme.crAppBackLight) ||
-		(m_theme.crAppBackDark != oldTheme.crAppBackDark))
+	if (m_theme != oldTheme)
 	{
-		//m_brBack.DeleteObject();
-
+#ifdef WHITETHEME
 		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
-		//m_toolbar.SetBackgroundColors(m_theme.crToolbarDark, m_theme.crToolbarLight, m_theme.HasGradient(), m_theme.HasGlass());
-		//m_toolbar.SetHotColor(m_theme.crToolbarHot);
+#else
+		m_brBack.DeleteObject();
+
+		// Use crAppBackLight so the toolbar merges with the bkgnd
+		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, m_theme.HasGradient(), m_theme.HasGlass());
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+#endif
 		
 		Invalidate(TRUE);
 		SendMessage(WM_NCPAINT);
@@ -1003,11 +1009,16 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		{
 			pDC->SetBkMode(TRANSPARENT);
 
-			//if (!m_brBack.GetSafeHandle())
-			//	m_brBack.CreateSolidBrush(GetBkgndColor());
-
+#ifdef WHITETHEME
 			hbr = (HBRUSH)GetStockObject(WHITE_BRUSH);
-			//hbr = (HBRUSH)m_brBack.GetSafeHandle();
+#else
+			if (!m_brBack.GetSafeHandle())
+				m_brBack.CreateSolidBrush(GetBkgndColor());
+
+			hbr = (HBRUSH)m_brBack.GetSafeHandle();
+
+			pDC->SetTextColor(m_theme.crAppText);
+#endif
 		}
 		
 		if ((pWnd->GetDlgCtrlID() == IDC_TASKTIME) &&
@@ -1087,8 +1098,11 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 
 COLORREF CTDLTimeTrackerDlg::GetBkgndColor() const
 {
+#ifdef WHITETHEME
 	return WHITE;
-	//return m_theme.crAppBackLight;
+#else
+	return m_theme.crAppBackLight;
+#endif
 }
 
 void CTDLTimeTrackerDlg::OnChangeQuickFind()
