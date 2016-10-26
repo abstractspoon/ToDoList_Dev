@@ -364,6 +364,9 @@
     <ClCompile Include="TDLImpExpAttributeMappingListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLThemeComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -787,6 +790,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLImpExpAttributeMappingListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLThemeComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

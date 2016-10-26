@@ -56,7 +56,6 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_MULTISELFILTER, m_bMultiSelFilters);
 	DDX_Check(pDX, IDC_RESTORETASKLISTFILTERS, m_bRestoreTasklistFilters);
 	DDX_Check(pDX, IDC_AUTOREFILTER, m_bAutoRefilter);
-	DDX_Text(pDX, IDC_UITHEMEFILE, m_sUIThemeFile);
 	DDX_Check(pDX, IDC_USEUITHEME, m_bUseUITheme);
 	DDX_Check(pDX, IDC_SHOWDEFAULTTASKICONS, m_bShowDefaultTaskIcons);
 	DDX_Check(pDX, IDC_SHOWDEFAULTFILTERS, m_bShowDefaultFilters);
@@ -75,6 +74,11 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
 //	DDX_Check(pDX, IDC_RTLCOMMENTS, m_bRTLComments);
+
+	if (pDX->m_bSaveAndValidate)
+		m_sUIThemeFile = m_cbThemes.GetThemePath();
+	else
+		m_cbThemes.SetThemePath(m_sUIThemeFile);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesUIPage, CPreferencesPageBase)
@@ -229,7 +233,7 @@ void CPreferencesUIPage::SavePreferences(CPreferences& prefs)
 	prefs.WriteProfileInt(_T("Preferences"), _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
 //	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
 
-	prefs.WriteProfileString(_T("Preferences"), _T("UIThemeFile"), m_cbThemes.GetThemePath());
+	prefs.WriteProfileString(_T("Preferences"), _T("UIThemeFile"), m_sUIThemeFile);
 
 	// comments format
 	if (m_pMgrContent)

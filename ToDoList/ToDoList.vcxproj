@@ -520,6 +520,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDLThemeComboBox.cpp" />
     <ClCompile Include="TDLTimeTrackerDlg.cpp" />
     <ClCompile Include="TDLToolsUserInputDlg.cpp" />
     <ClCompile Include="TDLTransformDialog.cpp">
@@ -694,6 +695,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLTasklistStorageMgr.h" />
     <ClInclude Include="TDLTaskTreeCtrl.h" />
     <ClInclude Include="TDLTaskViewListBox.h" />
+    <ClInclude Include="TDLThemeComboBox.h" />
     <ClInclude Include="TDLTimeTrackerDlg.h" />
     <ClInclude Include="TDLToolsUserInputDlg.h" />
     <ClInclude Include="TDLTransformDialog.h" />
