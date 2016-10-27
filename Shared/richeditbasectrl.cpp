@@ -1243,5 +1243,6 @@ BOOL CRichEditBaseCtrl::IsInlineSpellCheckingEnabled() const
 
 BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking()
 {
-	return (COSVersion() >= OSV_WIN8);
+	return FALSE;
+	//return (COSVersion() >= OSV_WIN8);
 }
