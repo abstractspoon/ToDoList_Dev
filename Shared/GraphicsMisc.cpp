@@ -1061,18 +1061,12 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 		switch (nState)
 		{
 		case GMIS_SELECTED:
-			{
-				for (int i = 0; i < 2; i++)
-					th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
-			}
-			break;
-			
+			th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
+			// fall thru to overdraw again
+
 		case GMIS_SELECTEDNOTFOCUSED:
-			th.DrawBackground(pDC, LVP_LISTITEM, LIS_SELECTED, rDraw, prClip);
-			break;
-			
 		case GMIS_DROPHILITED:
-			th.DrawBackground(pDC, LVP_LISTITEM, LIS_SELECTEDNOTFOCUS, rDraw, prClip);
+			th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
 			break;
 			
 		default:
