@@ -3299,14 +3299,21 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 {
 	ASSERT(nTDC != -1);
 
-	// End time tracking on every other tasklist
-	if (Prefs().GetExclusiveTimeTracking())
+	// Handle time tracking on every OTHER tasklist first
+	BOOL bExclusive = Prefs().GetExclusiveTimeTracking();
+
+	for (int nCtrl = 0; nCtrl < GetTDCCount(); nCtrl++)
 	{
-		for (int nCtrl = 0; nCtrl < GetTDCCount(); nCtrl++)
+		if ((nCtrl != nTDC) && m_mgrToDoCtrls.IsLoaded(nCtrl))
 		{
-			if ((nCtrl != nTDC) && m_mgrToDoCtrls.IsLoaded(nCtrl))
+			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
+
+			if (tdc.GetTimeTrackTaskID(FALSE) != 0)
 			{
-				GetToDoCtrl(nCtrl).EndTimeTracking(FALSE);
+				if (bExclusive)
+					tdc.EndTimeTracking(FALSE);
+
+				m_dlgTimeTracker.UpdateTracking(&tdc);
 				m_mgrToDoCtrls.RefreshTimeTracking(nCtrl);
 			}
 		}

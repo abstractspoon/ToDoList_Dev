@@ -670,8 +670,11 @@ BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskF
 
 	UpdateTasklistName(pTDC);
 	
-	if (pTTL->UpdateTasks(tasks) && IsSelectedTasklist(pTDC))
+	if ((pTTL->UpdateTasks(tasks) || pTTL->RemoveTasks(TTL_REMOVEDELETED)) && 
+		IsSelectedTasklist(pTDC))
+	{
 		RebuildTaskCombo();
+	}
 	
 	UpdateButtonState();
 	UpdateTaskTime(pTDC);
