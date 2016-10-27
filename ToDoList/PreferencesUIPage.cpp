@@ -154,7 +154,7 @@ void CPreferencesUIPage::LoadPreferences(const CPreferences& prefs)
 	m_bAutoRefilter = prefs.GetProfileInt(_T("Preferences"), _T("AutoRefilter"), TRUE);
 	m_bAutoResort = prefs.GetProfileInt(_T("Preferences"), _T("AutoResort"), TRUE);
 	m_bUseUITheme = CThemed::IsAppThemed() && prefs.GetProfileInt(_T("Preferences"), _T("UseUITheme"), TRUE);
-	m_sUIThemeFile = prefs.GetProfileString(_T("Preferences"), _T("UIThemeFile"), _T(".\\ThemeBlueAndGold.xml"));
+	m_sUIThemeFile = prefs.GetProfileString(_T("Preferences"), _T("UIThemeFile"), _T(".\\ThemeBlue.xml"));
 	m_nTitleFilterOption = (PUIP_MATCHTITLE)prefs.GetProfileInt(_T("Preferences"), _T("TitleFilterOption"), PUIP_MATCHONTITLECOMMENTS);
 	m_bShowDefaultTaskIcons = prefs.GetProfileInt(_T("Preferences"), _T("ShowDefaultTaskIcons"), TRUE);
 	m_bShowDefaultFilters = prefs.GetProfileInt(_T("Preferences"), _T("ShowDefaultFilters"), TRUE);
