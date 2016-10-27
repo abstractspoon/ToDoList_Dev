@@ -24,7 +24,7 @@ CFG=TDLTest - Win32 Unicode Debug
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""$/TDLTest", TXGAAAAA"
-# PROP Scc_LocalPath "."
+# PROP Scc_LocalPath "..\..\tdltest"
 CPP=cl.exe
 RSC=rc.exe
 

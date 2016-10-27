@@ -24,7 +24,7 @@ CFG=GPExport - Win32 Unicode Debug
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""$/GPExport", IFEAAAAA"
-# PROP Scc_LocalPath "."
+# PROP Scc_LocalPath "..\..\gpexport"
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe

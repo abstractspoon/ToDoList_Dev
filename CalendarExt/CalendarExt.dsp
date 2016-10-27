@@ -24,7 +24,7 @@ CFG=CalendarExt - Win32 Unicode Debug
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""$/CalendarExt", DVFAAAAA"
-# PROP Scc_LocalPath "."
+# PROP Scc_LocalPath "..\..\calendarext"
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe

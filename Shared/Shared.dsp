@@ -24,7 +24,7 @@ CFG=Shared - Win32 Unicode Debug
 # Begin Project
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""$/Shared", HACAAAAA"
-# PROP Scc_LocalPath "."
+# PROP Scc_LocalPath "..\..\shared"
 CPP=cl.exe
 RSC=rc.exe
 
@@ -1282,10 +1282,6 @@ SOURCE=.\UIExtensionUIHelper.h
 # Begin Source File
 
 SOURCE=.\UIExtensionWnd.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UITHEME.h
 # End Source File
 # Begin Source File
 
