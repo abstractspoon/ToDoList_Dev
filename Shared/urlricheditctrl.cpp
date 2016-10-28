@@ -66,7 +66,6 @@ CUrlRichEditCtrl::~CUrlRichEditCtrl()
 
 BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 //{{AFX_MSG_MAP(CUrlRichEditCtrl)
-	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
 	ON_WM_RBUTTONUP()
 	ON_WM_KEYUP()
 	ON_WM_RBUTTONDOWN()
@@ -79,6 +78,9 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_DROPFILES, OnDropFiles)
+
+	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
+	ON_NOTIFY_REFLECT_EX(EN_CHANGE, OnChangeText)
 	ON_NOTIFY_REFLECT_EX(EN_LINK, OnNotifyLink)
 END_MESSAGE_MAP()
 
@@ -121,6 +123,13 @@ BOOL CUrlRichEditCtrl::OnChangeText()
 	// and start a new one
 	SetTimer(TIMER_REPARSE, PAUSE, NULL);
 	
+	return FALSE;
+}
+
+BOOL CUrlRichEditCtrl::OnChangeText(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	// TODO
+
 	return FALSE;
 }
 
