@@ -6811,7 +6811,7 @@ BOOL CToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	if (!m_ctrlComments.SettingContent())
+	if (!m_ctrlComments.IsSettingContent())
 		UpdateTask(TDCA_COMMENTS);
 
 	return 0L;

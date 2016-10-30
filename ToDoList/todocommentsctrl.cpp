@@ -132,6 +132,13 @@ BOOL CToDoCommentsCtrl::OnChangeText()
 {
 	CUrlRichEditCtrl::OnChangeText();
 
+	// If we don't have the focus and inline spell-checking
+	// is enabled then assume that this is not a 'real' change
+	// and don't pass it on
+	if ((GetFocus() != this) && IsInlineSpellCheckingEnabled())
+		return TRUE;
+
+
 	if (m_bAllowNotify && IsWindowEnabled() && !(GetStyle() & ES_READONLY))
 		GetParent()->SendMessage(WM_ICC_COMMENTSCHANGE);
 	

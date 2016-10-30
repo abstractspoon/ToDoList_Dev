@@ -798,7 +798,7 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 		
 		// notify parent of selection change
 		// unless up/down cursor key still pressed
-		if ((TSH() != lstPrevSel) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		if (!TSH().Matches(lstPrevSel) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
 		{
 			NotifyParentSelChange(SC_BYKEYBOARD);
 		}
@@ -1161,6 +1161,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	if (hRealWnd == m_tcTasks)
 	{
 		BOOL bSelChange = FALSE, bEatMsg = FALSE;
+		BOOL bColClick = FALSE, bColDblClk = FALSE;
+
 		SELCHANGE_ACTION nAction = SC_UNKNOWN;
 		CHTIList lstPrevSel;
 		
@@ -1425,16 +1427,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					{
 						// save item handle so we don't re-handle in LButtonUp handler
 						m_htiLastHandledLBtnDown = htiHit;
-						
-						if (HandleClientColumnClick(lp, FALSE))
-						{
-							TRACE(_T("Ate Listview LButtonDown\n"));
-							bEatMsg = TRUE;
-						}
-						else
-						{
-							m_htiLastHandledLBtnDown = NULL;
-						}
+						bColClick = TRUE;
 					}
 				}
 				
@@ -1492,11 +1485,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			
 		case WM_LBUTTONDBLCLK: // --------------------------------------------------------------------------
 			EndLabelEditTimer();
-
-			if (HandleClientColumnClick(lp, TRUE))
-			{
-				return 0L; // eat
-			}
+			bColDblClk = TRUE;
 			break;
 
 		case WM_VSCROLL:
@@ -1509,19 +1498,31 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 		} // -----------------------------------------------------------------------------------------------
 		
+		// Handle selection change before column click/dblclk
 		if (bSelChange)
 		{
 			SyncColumnSelectionToTasks();
 			
-			if (TSH() != lstPrevSel)
+			if (!TSH().Matches(lstPrevSel))
 			{
 				ASSERT(nAction != SC_UNKNOWN);
 				NotifyParentSelChange(nAction);
 			}
 		}
 
-		if (bEatMsg)
-			return 0L;
+		if (bColClick)
+		{
+			if (HandleClientColumnClick(lp, FALSE))
+				return 0L; // eat
+
+			// else
+			m_htiLastHandledLBtnDown = NULL;
+		}
+		else if (bColDblClk)
+		{
+			if (HandleClientColumnClick(lp, FALSE))
+				return 0L; // eat
+		}
 	}
 	else if (hRealWnd == m_lcColumns)
 	{
