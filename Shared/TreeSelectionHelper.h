@@ -69,9 +69,7 @@ public:
 	virtual ~CTreeSelectionHelper();
 
 	BOOL IsEmpty() const { return (m_lstSelection.GetCount() == 0); }
-
-	BOOL operator==(const CHTIList& list) { return (m_lstSelection == list); }
-	BOOL operator!=(const CHTIList& list) { return !(m_lstSelection == list); }
+ 	BOOL Matches(const CHTIList& list) { return (m_lstSelection == list); }
 
 	// 1 = add, 0 = remove, -1 = toggle
 	BOOL SetItem(HTREEITEM hti, TSH_SELECT nState, BOOL bRedraw = TRUE);

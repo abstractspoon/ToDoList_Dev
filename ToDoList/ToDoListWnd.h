@@ -69,6 +69,10 @@ public:
 	static CString GetTitle();
 
 	BOOL Create(const CTDCStartupOptions& startup);
+
+#ifdef _DEBUG
+	void ShowReminderDlg();
+#endif
 	
 protected:
 	// ClassWizard generated virtual function overrides

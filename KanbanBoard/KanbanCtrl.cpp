@@ -105,7 +105,6 @@ ON_WM_LBUTTONUP()
 ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
 ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
 ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
-ON_NOTIFY(NM_CLICK, IDC_LISTCTRL, OnListClick)
 ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
@@ -134,10 +133,7 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 		// handle 'escape' during dragging
 	case WM_KEYDOWN:
 		if (pMsg->wParam == VK_ESCAPE)
-		{
-			if (CancelOperation())
-				return true;
-		}
+			return (CancelOperation() == TRUE);
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -148,8 +144,8 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 			BOOL bHeader = FALSE;
 			CKanbanListCtrl* pList = HitTestListCtrl(ptScreen, &bHeader);
 
-			if (pList && bHeader && (pList != m_pSelectedList))
-				SelectListCtrl(pList);
+			if (bHeader && pList && pList->GetItemCount())
+				pList->SetFocus();
 		}
 		break;
 	}
@@ -2240,18 +2236,6 @@ void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
 
 		pList->SetSelected(pList == pIgnore);
 	}
-}
-
-void CKanbanCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	ASSERT(m_pSelectedList);
-
-	if ((m_pSelectedList->GetSelectedCount() == 0) && m_pSelectedList->GetItemCount())
-		m_pSelectedList->SelectItem(0);
-
-	NotifyParentSelectionChange();
-
-	*pResult = 0;
 }
 
 void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)

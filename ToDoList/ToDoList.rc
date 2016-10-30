@@ -3241,6 +3241,8 @@ BEGIN
         MENUITEM "Show Setup &Wizard...",       ID_DEBUGSHOWSETUPDLG
         MENUITEM "Show &Script Dialog...",      ID_DEBUGSHOWSCRIPTDLG
         MENUITEM "Show &Updater Dialog...",     ID_DEBUGSHOWUPDATEDLG
+        MENUITEM "Show Reminder Dialog...",     ID_DEBUGSHOWREMINDERDLG
+        MENUITEM SEPARATOR
         POPUP "Task &Dialog"
         BEGIN
             MENUITEM "I&nfo",                       ID_DEBUGTASKDIALOG_INFO

@@ -62,6 +62,7 @@ protected:
 	afx_msg void OnDebugShowLanguageDlg();
 	afx_msg void OnDebugTaskDialogWarning();
 	afx_msg void OnDebugTaskDialogError();
+	afx_msg void OnDebugShowReminderDlg();
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();
 	afx_msg void OnHelpWiki();

@@ -85,7 +85,6 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CUrlRichEditCtrl)
-	afx_msg BOOL OnChangeText(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnChangeText();
 	afx_msg void OnRButtonUp(UINT nHitTest, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);

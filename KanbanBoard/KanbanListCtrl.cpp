@@ -130,6 +130,8 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnListCustomDraw)
 	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -950,4 +952,45 @@ void CKanbanListCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 	}
 
 	SortItems(SortProc, (DWORD)&ks);
+}
+
+void CKanbanListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	if (HandleLButtonClick(point))
+		return;
+
+	// else
+	CListCtrl::OnLButtonDown(nFlags, point);
+}
+
+void CKanbanListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	if (HandleLButtonClick(point))
+		return;
+
+	// else
+	CListCtrl::OnLButtonDblClk(nFlags, point);
+}
+
+BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
+{
+	// don't let the selection to be set to -1
+	// when clicking below the last item
+	if (HitTest(point) == -1)
+	{
+		ClientToScreen(&point);
+
+		// we don't want to disable drag selecting
+		if (!::DragDetect(GetSafeHwnd(), point))
+		{
+			// Still set focus
+			SetFocus();
+
+			TRACE(_T("Ate Listview ButtonDown\n"));
+			return TRUE; // eat it
+		}
+	}
+	
+	// all else
+	return FALSE;
 }

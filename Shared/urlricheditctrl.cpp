@@ -80,7 +80,6 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 	ON_MESSAGE(WM_DROPFILES, OnDropFiles)
 
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
-	ON_NOTIFY_REFLECT_EX(EN_CHANGE, OnChangeText)
 	ON_NOTIFY_REFLECT_EX(EN_LINK, OnNotifyLink)
 END_MESSAGE_MAP()
 
@@ -123,13 +122,6 @@ BOOL CUrlRichEditCtrl::OnChangeText()
 	// and start a new one
 	SetTimer(TIMER_REPARSE, PAUSE, NULL);
 	
-	return FALSE;
-}
-
-BOOL CUrlRichEditCtrl::OnChangeText(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	// TODO
-
 	return FALSE;
 }
 

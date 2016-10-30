@@ -47,24 +47,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef CN_GENERIC
-	struct CHANGENOTIFY 
-	{
-		DWORD dwChangeType;
-		void  *pvCookieData;
-	};
-
-	enum CHANGETYPE 
-	{
-		CN_GENERIC = 0,
-		CN_TEXTCHANGED = 1,
-		CN_NEWUNDO = 2,
-		CN_NEWREDO = 4
-	};
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-
 enum // REBC_BORDERS
 {
 	REBCB_NONE		= 0x00,

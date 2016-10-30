@@ -1345,6 +1345,7 @@
 #define ID_TIMETRACK_HELP               34553
 #define ID_DEBUGSHOWLANGDLG             34554
 #define ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK 34555
+#define ID_DEBUGSHOWREMINDERDLG         34559
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2079,7 +2080,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        304
-#define _APS_NEXT_COMMAND_VALUE         34557
+#define _APS_NEXT_COMMAND_VALUE         34560
 #define _APS_NEXT_CONTROL_VALUE         1492
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

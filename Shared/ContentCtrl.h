@@ -38,7 +38,7 @@ public:
 	BOOL SetContent(const unsigned char* pContent, int nLength, BOOL bResetSelection);
 	BOOL SetContent(const CBinaryData& sContent, BOOL bResetSelection);
 	BOOL SetTextContent(LPCTSTR szContent, BOOL bResetSelection);
-	BOOL SettingContent() { return m_bSettingContent; }
+	BOOL IsSettingContent() const { return m_bSettingContent; }
 
 	LPCTSTR GetTypeID() const;
 	BOOL IsFormat(const CONTENTFORMAT& cf) const;

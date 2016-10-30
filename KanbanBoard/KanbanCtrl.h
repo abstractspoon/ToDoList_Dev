@@ -114,7 +114,6 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);

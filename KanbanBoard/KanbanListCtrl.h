@@ -103,6 +103,8 @@ protected:
 	afx_msg void OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -112,6 +114,7 @@ protected:
 	int CalcLineHeight() const;
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
+	BOOL HandleLButtonClick(CPoint point);
 
 	void DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, const CString& sValue, int nFlags) const;
 

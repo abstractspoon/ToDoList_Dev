@@ -85,7 +85,7 @@ void CToDoCtrlReminders::CloseToDoCtrl(const CFilteredToDoCtrl& tdc)
 	SaveAndRemoveReminders(tdc);
 }
 
-void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem)
+void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 {
 	ASSERT (m_pWndNotify);
 
@@ -104,6 +104,9 @@ void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem)
 	}
 
 	StartTimer();
+
+	if (bCheckNow)
+		OnTimer(1);
 }
 
 void CToDoCtrlReminders::StartTimer()
@@ -114,7 +117,7 @@ void CToDoCtrlReminders::StartTimer()
 	if (m_aReminders.GetSize())
 	{
 #ifdef _DEBUG
-		SetTimer(1, 10000, NULL);
+		SetTimer(1, 10000, NULL); // every 10 secs
 #else
 		SetTimer(1, 60000, NULL); // every minute
 #endif

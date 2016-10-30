@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUGSHOWSCRIPTDLG, OnDebugShowScriptDlg)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_WARNING, OnDebugTaskDialogWarning)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_ERROR, OnDebugTaskDialogError)
+	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
 #endif
 
 	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
@@ -1716,6 +1717,13 @@ void CToDoListApp::OnDebugShowScriptDlg()
 {
 #ifdef _DEBUG
 	CTDLWebUpdatePromptDlg::ShowDialog();
+#endif
+}
+
+void CToDoListApp::OnDebugShowReminderDlg() 
+{
+#ifdef _DEBUG
+	((CToDoListWnd*)m_pMainWnd)->ShowReminderDlg();
 #endif
 }
 

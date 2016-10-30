@@ -28,11 +28,13 @@ public:
 
 	BOOL Initialize(CWnd* pNotify);
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath = NULL);
+
 	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
+	BOOL IsForegroundWindow() const { return (GetForegroundWindow() == this); }
 
 	void AddToDoCtrl(const CFilteredToDoCtrl& tdc);
 	void CloseToDoCtrl(const CFilteredToDoCtrl& tdc);
-	void SetReminder(const TDCREMINDER& rem);
+	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
 	void RemoveReminder(const TDCREMINDER& rem);
 	void RemoveReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL GetReminder(int nRem, TDCREMINDER& rem) const;

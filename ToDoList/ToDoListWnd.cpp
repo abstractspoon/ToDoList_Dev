@@ -10334,6 +10334,11 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
     if (m_bClosing)
         return; 
 
+	// Don't any further processing if the Reminder dialog is active
+	// because the two windows get into a fight for activation!
+	if (m_reminders.IsForegroundWindow())
+		return;
+
 	if (!bActive)
 	{
 		// save focus to restore when we next get activated
@@ -12275,3 +12280,20 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);
 }
+
+#ifdef _DEBUG
+void CToDoListWnd::ShowReminderDlg()
+{
+	TDCREMINDER rem;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	rem.dwTaskID = tdc.GetSelectedTaskID();
+	rem.pTDC = &tdc;
+	rem.bRelative = TRUE;
+	rem.dRelativeDaysLeadIn = 0;
+	rem.nRelativeFromWhen = TDCR_STARTDATE;
+	rem.bEnabled = TRUE;
+
+	m_reminders.SetReminder(rem, TRUE);
+}
+#endif
