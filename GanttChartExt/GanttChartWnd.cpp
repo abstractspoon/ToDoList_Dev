@@ -39,6 +39,10 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int PADDING = 3;
+
+/////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
 
 CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
@@ -47,6 +51,7 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
+	m_dwTooltipTaskID(0),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -95,6 +100,8 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_WM_SETFOCUS()
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_GANTTTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
+	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
@@ -357,6 +364,8 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 	if (!IsWindowEnabled())
 		return false;
 
+	FilterToolTipMessage(pMsg);
+	
 	switch (pMsg->message)
 	{
 	// handle 'escape' during dependency editing
@@ -666,6 +675,8 @@ BOOL CGanttChartWnd::OnInitDialog()
 	
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
+
+	EnableToolTips(TRUE);
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -1150,7 +1161,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	UNREFERENCED_PARAMETER(lp);
 	ASSERT(((HWND)lp) == m_dlgDepends);
 	
-
 	if (m_dlgDepends.IsPickingCompleted())
 	{
 		// make sure the from task is selected
@@ -1218,3 +1228,55 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 	return 0L;
 }
+
+int CGanttChartWnd::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	// perform a hit-test
+	ClientToScreen(&point);
+	m_tree.ScreenToClient(&point);
+
+	HTREEITEM hti = m_tree.HitTest(point);
+
+	if (hti)
+	{
+		m_dwTooltipTaskID = m_tree.GetItemData(hti);
+// 		int nTextOffset = GetTaskTextOffset(m_dwTooltipTaskID);
+// 
+// 		if ((nTextOffset > 0) || 
+// 			!HasOption(TCCO_DISPLAYCONTINUOUS) ||
+// 			(GetTaskHeight() < MIN_TASK_HEIGHT))
+		{
+			pTI->hwnd = GetSafeHwnd();
+			pTI->uId = m_dwTooltipTaskID;
+			pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
+
+			// MFC will free the duplicated string
+			pTI->lpszText = _tcsdup(m_tree.GetItemText(hti));
+
+			m_tree.GetItemRect(hti, &pTI->rect, FALSE);
+			m_tree.ClientToScreen(&pTI->rect);
+			ScreenToClient(&pTI->rect);
+			
+			return m_dwTooltipTaskID;
+		}
+	}
+
+	return CDialog::OnToolHitTest(point, pTI);
+}
+
+void CGanttChartWnd::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+//	*pResult = TRUE; // we do the positioning
+
+// 	CRect rLabel;
+// 	VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
+// 	ClientToScreen(rLabel);
+// 	rLabel.OffsetRect(PADDING, 0);
+// 
+// 	::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)rLabel);
+// 	::SetWindowPos(pNMHDR->hwndFrom, 0, rLabel.left, rLabel.top, 0, 0,
+// 		(SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER));
+
+	m_dwTooltipTaskID = 0;
+}
+
