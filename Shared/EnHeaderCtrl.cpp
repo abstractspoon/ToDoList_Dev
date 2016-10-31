@@ -910,15 +910,10 @@ void CEnHeaderCtrl::RecalcItemTooltipRects()
 
 		while (nItem--)
 		{
-// 			CToolInfo ti;
-// 			
-// 			if (m_tooltips.GetToolInfo(ti, this, (nItem + 1)))
-			{
-				CRect rItem;
-				GetItemRect(nItem, rItem);
+			CRect rItem;
+			GetItemRect(nItem, rItem);
 				
-				m_tooltips.SetToolRect(this, (nItem + 1), rItem);
-			}
+			m_tooltips.SetToolRect(this, (nItem + 1), rItem);
 		}
 	}
 }

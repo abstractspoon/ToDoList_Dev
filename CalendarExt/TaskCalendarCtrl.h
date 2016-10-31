@@ -52,6 +52,8 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
+	bool ProcessMessage(MSG* pMsg);
+
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nEditAttribute);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nEditAttribute);
 	static int GetDefaultTaskHeight();
@@ -74,6 +76,7 @@ protected:
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
+	mutable DWORD m_dwTooltipTaskID;
 
 	// Generated message map functions
 protected:
@@ -90,6 +93,8 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSetFocus(CWnd* pFocus);
 	afx_msg void OnKillFocus(CWnd* pFocus);
+	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+
 #if _MSC_VER >= 1400
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 #else

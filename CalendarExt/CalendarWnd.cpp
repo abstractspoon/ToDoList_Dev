@@ -278,15 +278,15 @@ LPCTSTR CCalendarWnd::GetMenuText() const
 	return _T("Calendar");
 }
 
-bool CCalendarWnd::ProcessMessage(MSG* /*pMsg*/) 
+bool CCalendarWnd::ProcessMessage(MSG* pMsg) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	if (!IsWindowEnabled())
 		return false;
 
-	// process editing shortcuts
-	// TODO
+	if (m_BigCalendar.ProcessMessage(pMsg))
+		return true;
 
 	return false;
 }
