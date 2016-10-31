@@ -248,11 +248,7 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				}
 				break;
 
-#ifndef _UNICODE
-			case TTN_NEEDTEXTA:
-#else
-			case TTN_NEEDTEXTW:
-#endif
+			case TTN_NEEDTEXT:
 				{
 					// to be thorough we will need to handle UNICODE versions of the message also !!
 					TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;

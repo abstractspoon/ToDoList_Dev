@@ -91,7 +91,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
-	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 // Implementation
 protected:
@@ -121,7 +120,6 @@ protected:
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);
