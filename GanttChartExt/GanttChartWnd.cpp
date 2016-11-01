@@ -51,7 +51,6 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
-	m_dwTooltipTaskID(0),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -363,7 +362,7 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 	if (!IsWindowEnabled())
 		return false;
 
-	FilterToolTipMessage(pMsg);
+	m_tree.ProcessMessage(pMsg);
 	
 	switch (pMsg->message)
 	{
@@ -675,8 +674,6 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
-	//EnableToolTips(TRUE);
-	
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }

@@ -128,7 +128,9 @@ public:
 
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
-	BOOL GetLabelEditRect(LPRECT pEdit);
+	BOOL GetLabelEditRect(LPRECT pEdit) const;
+	CString GetItemTip(CPoint ptScreen) const;
+	HTREEITEM GetItem(CPoint ptScreen) const;
 
 	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 	GTLC_SNAPMODE GetSnapMode() const;

@@ -1916,10 +1916,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 			CRect rLabel;
 			VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
-
 			pTI->rect = rLabel;
-
-			//GetClientRect(&(pTI->rect));
 
 			return m_dwTooltipTaskID;
 		}
@@ -1930,18 +1927,21 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	*pResult = TRUE; // we do the positioning
+	if (m_dwTooltipTaskID)
+	{
+		*pResult = TRUE; // we do the positioning
 
-	CRect rLabel;
-	VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
-	ClientToScreen(rLabel);
-	rLabel.OffsetRect(PADDING, 0);
+		CRect rLabel;
+		VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
+		ClientToScreen(rLabel);
+		rLabel.OffsetRect(PADDING, 0);
 
-	::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)rLabel);
-	::SetWindowPos(pNMHDR->hwndFrom, 0, rLabel.left, rLabel.top, 0, 0,
-					(SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER));
+		::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)rLabel);
+		::SetWindowPos(pNMHDR->hwndFrom, 0, rLabel.left, rLabel.top, 0, 0,
+						(SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER));
 
-	m_dwTooltipTaskID = 0;
+		m_dwTooltipTaskID = 0;
+	}
 }
 
 

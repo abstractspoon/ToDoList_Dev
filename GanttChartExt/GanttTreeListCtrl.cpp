@@ -59,6 +59,7 @@ const int MIN_MONTH_WIDTH		= 10;
 const int MINS_IN_HOUR			= 60;
 const int MINS_IN_DAY			= (MINS_IN_HOUR * 24);
 const int LV_COLPADDING			= 3;
+const int TV_TIPPADDING			= 3;
 const int HD_COLPADDING			= 6;
 const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
 
@@ -2449,7 +2450,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-BOOL CGanttTreeListCtrl::GetLabelEditRect(LPRECT pEdit)
+BOOL CGanttTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 {
 	HTREEITEM htiSel = GetSelectedItem();
 	
@@ -5005,6 +5006,47 @@ HTREEITEM CGanttTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen)
 	TVHITTESTINFO tvht = { { ptTree.x, ptTree.y }, 0 };
 
 	return TreeView_HitTest(m_hwndTree, &tvht);
+}
+
+HTREEITEM CGanttTreeListCtrl::GetItem(CPoint ptScreen) const
+{
+	return TreeHitTestItem(ptScreen, TRUE);
+}
+
+CString CGanttTreeListCtrl::GetItemTip(CPoint ptScreen) const
+{
+	HTREEITEM htiHit = GetItem(ptScreen);
+
+	if (htiHit)
+	{
+		CRect rItem;
+
+		if (TreeView_GetItemRect(m_hwndTree, htiHit, &rItem, TRUE))
+		{
+			int nColWidth = m_treeHeader.GetItemWidth(0);
+
+			rItem.left = max(rItem.left, 0);
+			rItem.right = nColWidth;
+
+			CPoint ptClient(ptScreen);
+			::ScreenToClient(m_hwndTree, &ptClient);
+
+			if (rItem.PtInRect(ptClient))
+			{
+				const GANTTITEM* pGI = GetGanttItem(GetTaskID(htiHit));
+				ASSERT(pGI);
+
+				int nTextLen = GraphicsMisc::GetTextWidth(pGI->sTitle, *(CWnd::FromHandle(m_hwndTree)));
+				rItem.DeflateRect(TV_TIPPADDING, 0);
+
+				if (nTextLen > rItem.Width())
+					return pGI->sTitle;
+			}
+		}
+	}
+
+	// else
+	return _T("");
 }
 
 BOOL CGanttTreeListCtrl::PtInHeader(const CPoint& ptScreen) const

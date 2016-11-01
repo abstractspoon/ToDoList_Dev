@@ -7,6 +7,7 @@
 // GanttChartWnd.h : header file
 //
 
+#include "GanttTreeCtrl.h"
 #include "GanttTreeListCtrl.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
@@ -62,25 +63,24 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CGanttChartWnd)
-	CComboBox	m_cbSnapModes;
-	CListCtrl	m_list;
-	CTreeCtrl	m_tree;
 	//}}AFX_DATA
+	CComboBox m_cbSnapModes;
+	CListCtrl m_list;
+	CGanttTreeCtrl m_tree;
 	CTabbedComboBox	m_cbDisplayOptions;
 	CGanttTreeListCtrl m_ctrlGantt;
+	CGanttPreferencesDlg m_dlgPrefs;
+	CGanttCreateDependsDlg m_dlgDepends;
+	CEnToolBar m_toolbar;
+	CToolbarHelper m_tbHelper;
+
 	HICON m_hIcon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CGanttPreferencesDlg m_dlgPrefs;
 	CString m_sSelectedTaskDates;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
-	CEnToolBar m_toolbar;
-	CToolbarHelper m_tbHelper;
-	CGanttCreateDependsDlg m_dlgDepends;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
-
-	mutable DWORD m_dwTooltipTaskID;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

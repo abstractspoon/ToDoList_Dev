@@ -284,8 +284,6 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 					CWnd* pTooltipCtrl = CWnd::FromHandle(pNMHDR->hwndFrom);
 					ASSERT (pTooltipCtrl);
 
-					pTooltipCtrl->SendMessage(TTM_SETMAXTIPWIDTH, 0, (m_bMultiline ? m_nMultilineWidth : UINT_MAX));
-
 					if (m_pShortcutMgr)
 					{
 						static UINT nIDLastShow = 0;
@@ -323,6 +321,8 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 							if (!sShortcut.IsEmpty())
 							{
+								pTooltipCtrl->SendMessage(TTM_SETMAXTIPWIDTH, 0, (m_bMultiline ? m_nMultilineWidth : UINT_MAX));
+
 								// store original id immediately to prevent re-entrancy
 								nIDLastShow = pNMHDR->idFrom;
 

@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,15 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -44,15 +41,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "GanttChartExt DLL\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "GanttChartExt\0"
-            VALUE "LegalCopyright", "Copyright (C) 2012\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "GanttChartExt.DLL\0"
-            VALUE "ProductName", "GanttChartExt Dynamic Link Library\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "GanttChartExt DLL"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "GanttChartExt"
+            VALUE "LegalCopyright", "Copyright (C) 2012"
+            VALUE "OriginalFilename", "GanttChartExt.DLL"
+            VALUE "ProductName", "GanttChartExt Dynamic Link Library"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -61,8 +56,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -70,32 +63,20 @@ END
 //
 
 IDD_GANTTTREE_DIALOG DIALOGEX 0, 0, 594, 316
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,365,13,222,13,SS_CENTERIMAGE | 
-                    SS_SUNKEN
+    CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",IDC_SELECTEDTASKDATES,365,13,222,13,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
-    COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Custom2",IDC_TREEHEADER,"SysHeader32",0x0,0,31,160,13
-    CONTROL         "Tree1",IDC_GANTTTREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
-                    TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
-                    TVS_NONEVENHEIGHT | WS_TABSTOP,0,44,159,265
-    CONTROL         "List1",IDC_GANTTLIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
-                    WS_TABSTOP,162,31,425,278
-    COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Tree1",IDC_GANTTTREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | TVS_NONEVENHEIGHT | WS_HSCROLL | WS_TABSTOP,0,44,159,265
+    CONTROL         "List1",IDC_GANTTLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_TABSTOP,162,31,425,278
+    COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
-    LTEXT           "Selected Task Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    366,3,210,8
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,247,12,109,17
+    LTEXT           "Selected Task Date Range",IDC_SELECTEDTASKDATES_LABEL,366,3,210,8
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,247,12,109,17
 END
 
 
@@ -105,7 +86,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_GANTTTREE_DIALOG, DIALOG
     BEGIN
@@ -115,18 +96,16 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// English (United Kingdom) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -135,8 +114,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_GANTTCHART          ICON    DISCARDABLE     "res\\icon1.ico"
-#endif    // English (U.K.) resources
+IDR_GANTTCHART          ICON                    "res\\icon1.ico"
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -144,18 +123,16 @@ IDR_GANTTCHART          ICON    DISCARDABLE     "res\\icon1.ico"
 // English (Australia) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 373, 222
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_PREFERENCES_DIALOG DIALOG 0, 0, 373, 222
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Gantt Chart Preferences"
 FONT 8, "Tahoma"
 BEGIN
@@ -164,57 +141,43 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 292
-STYLE WS_CHILD
+IDD_PREFERENCES_PAGE DIALOG 0, 0, 347, 292
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "&Display 'Alloc To' after task's gantt bar",
-                    IDC_DISPLAYALLOCTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,7,333,10
-    CONTROL         "Show '% &Complete' as progress on task's gantt bar",
-                    IDC_DISPLAYPROGRESS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,22,333,10
-    CONTROL         "&Auto-scroll to task when selecting",
-                    IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,37,333,10
-    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
-                    IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,52,333,10
+    CONTROL         "&Display 'Alloc To' after task's gantt bar",IDC_DISPLAYALLOCTO,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,333,10
+    CONTROL         "Show '% &Complete' as progress on task's gantt bar",IDC_DISPLAYPROGRESS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,22,333,10
+    CONTROL         "&Auto-scroll to task when selecting",IDC_AUTOSCROLLSELECTION,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,37,333,10
+    CONTROL         "&Treat tasks with the following tag as 'Milestones':",IDC_USETAGFORMILESTONE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,52,333,10
     EDITTEXT        IDC_MILESTONETAG,18,64,151,13,ES_AUTOHSCROLL
     LTEXT           "Colours",IDC_COLORSGROUP,7,85,333,8
-    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,101,137,10
+    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,101,137,10
     PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,98,52,13,BS_RIGHT
-    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,116,137,10
+    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,116,137,10
     PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,113,52,13,BS_RIGHT
-    CONTROL         "'Bar' colour for tasks having no colour",
-                    IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    130,167,10
+    CONTROL         "'Bar' colour for tasks having no colour",IDC_DEFAULTCOLOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,130,167,10
     PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,128,52,13,BS_RIGHT
     GROUPBOX        "Parent Tasks",-1,7,147,333,63
-    CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,161,320,10
-    CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,176,320,10
-    CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,191,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,189,52,13,BS_RIGHT | 
-                    WS_GROUP
+    CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",BS_AUTORADIOBUTTON | WS_GROUP,16,161,320,10
+    CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",BS_AUTORADIOBUTTON,16,176,320,10
+    CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",BS_AUTORADIOBUTTON,16,191,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,189,52,13,BS_RIGHT | WS_GROUP
     LTEXT           "Dates",IDC_DATESGROUP,7,219,333,8
-    CONTROL         "A&uto-calculate parent task dates to include all subtasks",
-                    IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,235,333,10
-    CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
-                    IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,250,333,10
-    CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
-                    IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,265,333,10
+    CONTROL         "A&uto-calculate parent task dates to include all subtasks",IDC_CALCULATEPARENTDATES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,235,333,10
+    CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",IDC_CALCULATEMISSINGSTARTDATE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,250,333,10
+    CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",IDC_CALCULATEMISSINGDUEDATE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,265,333,10
 END
 
 IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -230,7 +193,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_PREFERENCES_DIALOG, DIALOG
     BEGIN
@@ -266,7 +229,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
+IDI_HELP_BUTTON         ICON                    "res\\help_button.ico"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -274,18 +237,18 @@ IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -311,7 +274,7 @@ END
 // Toolbar
 //
 
-IDR_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+IDR_TOOLBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_GANTT_GOTOTODAY
     SEPARATOR
@@ -330,15 +293,15 @@ END
 // Bitmap
 //
 
-IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
-IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
+IDR_TOOLBAR             BITMAP                  "res\\toolbar.bmp"
+IDB_TOOLBAR_STD         BITMAP                  "RES\\toolbar_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     IDS_GANTT_DAYS          "Days"
     IDS_GANTT_WEEKS         "Weeks"
@@ -353,7 +316,7 @@ BEGIN
     IDS_SNAP_NEARESTYEAR    "Nearest Year"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_GANTT_GOTOTODAY      "\nScroll To Today"
     ID_GANTT_PREFS          "\nGantt Preferences"
@@ -367,7 +330,7 @@ BEGIN
     IDS_PICKINGTOTASKEDIT   "Pick the new task on which the just picked task will be dependent..."
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     IDS_PICKED              "Done!\n"
     IDS_CREATEDEPEND_TITLE  "Create Task Dependency"
@@ -385,14 +348,14 @@ BEGIN
     IDS_DISPLAYWEEKSLONG    "Weeks, wide"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     IDS_DISPLAYDAYSSHORT    "Days, narrow"
     IDS_DISPLAYDAYSMID      "Days, mid"
     IDS_DISPLAYDAYSLONG     "Days, wide"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_HELP                 "\nOnline Help"
 END
