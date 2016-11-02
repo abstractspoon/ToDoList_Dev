@@ -126,6 +126,7 @@ protected:
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
+	void InitTooltipFont() const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

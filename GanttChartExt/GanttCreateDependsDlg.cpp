@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "GanttMsg.h"
 #include "GanttCreateDependsDlg.h"
 
 #include "..\shared\enstring.h"

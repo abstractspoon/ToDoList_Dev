@@ -12,19 +12,29 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_GTLC_DATECHANGE	= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANGE"));
+const UINT WM_GTLC_DATECHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANGE"));
 
 // WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_GTLC_DRAGCHANGE	= ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
+const UINT WM_GTLC_DRAGCHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYZOOM	= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYZOOM"));
+const UINT WM_GTLC_NOTIFYZOOM				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYZOOM"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYSORT	= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYSORT"));
+const UINT WM_GTLC_NOTIFYSORT				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYSORT"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_GTLC_PREFSHELP	= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"));
+const UINT WM_GTLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"));
+
+/////////////////////////////////////////////////////////////////////////////
+
+// WPARAM = GCDD_MODE, LPARAM = HWND
+const UINT WM_GANTTDEPENDDLG_CLOSE			= ::RegisterWindowMessage(_T("WM_GANTTDEPENDDLG_CLOSE"));
+
+/////////////////////////////////////////////////////////////////////////////
+
+// WPARAM = width, LPARAM = HWND
+const UINT WM_GTCN_TITLECOLUMNWIDTHCHANGE	= ::RegisterWindowMessage(_T("WM_GTCN_TITLECOLUMNWIDTHCHANGE"));
 
 /////////////////////////////////////////////////////////////////////////////
 

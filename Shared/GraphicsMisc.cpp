@@ -544,6 +544,17 @@ int GraphicsMisc::GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFo
 	return nLength;
 }
 
+int GraphicsMisc::GetTextWidth(const CString& sText, HWND hWnd, HFONT hFontRef)
+{
+	CWnd* pRefWnd = CWnd::FromHandle(hWnd);
+
+	if (!pRefWnd)
+		return -1;
+
+	// else
+	return GetTextWidth(sText, *pRefWnd, CFont::FromHandle(hFontRef));
+}
+
 int AFX_CDECL GraphicsMisc::GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 {
 	static TCHAR BUFFER[2048];

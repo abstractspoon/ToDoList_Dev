@@ -22,11 +22,6 @@ enum GCDD_MODE
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = GCDD_MODE, LPARAM = HWND
-const UINT WM_GANTTDEPENDDLG_CLOSE = ::RegisterWindowMessage(_T("WM_GANTTDEPENDDLG_CLOSE"));
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CGanttCreateDependsDlg : public CDialog, public CGanttDependencyEditor
 {
 // Construction

@@ -1,10 +1,6 @@
 #pragma once
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT WM_GTCN_TITLECOLUMNWIDTHCHANGE = ;
-
-/////////////////////////////////////////////////////////////////////////////
 // CGanttTreeCtrl
 
 class CGanttTreeCtrl : public CTreeCtrl
@@ -18,17 +14,23 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 
 protected:
+	int m_nTitleColumnWidth;
+
 	mutable HTREEITEM m_htiTooltip;
 
 protected:
+	virtual void PreSubclassWindow();
+	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	
+protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnTitleColumnWidthChange(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual void PreSubclassWindow();
-	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
-
+protected:
+	void InitTooltipFont() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

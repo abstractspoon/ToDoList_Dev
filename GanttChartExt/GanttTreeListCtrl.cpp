@@ -1396,8 +1396,9 @@ void CGanttTreeListCtrl::Resize(const CRect& rect)
 		m_treeHeader.GetItemRect(nLastCol, rItem);
 
 		int nTreeWidth = (rItem.right + 4);
-
 		CTreeListSyncer::Resize(rect, nTreeWidth);
+
+		::SendMessage(m_hwndTree, WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_treeHeader.GetItemWidth(0), (LPARAM)m_hwndTree);
 	}
 }
 
