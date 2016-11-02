@@ -2035,7 +2035,15 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 
 		// focused item
 		HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
-		dwFocusedTaskID = GetTaskID(htiFocus);
+
+		if (htiFocus)
+		{
+			dwFocusedTaskID = GetTaskID(htiFocus);
+		}
+		else if (aTaskIDs.GetSize())
+		{
+			dwFocusedTaskID = aTaskIDs[0];
+		}
 	}
 	
 	return (aTaskIDs.GetSize());
