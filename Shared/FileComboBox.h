@@ -42,7 +42,7 @@ protected:
 protected:
 	void PreSubclassWindow();
 	BOOL PreCreateWindow(CREATESTRUCT& cs);
-	BOOL OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);

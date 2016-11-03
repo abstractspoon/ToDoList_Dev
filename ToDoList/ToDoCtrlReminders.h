@@ -30,7 +30,7 @@ public:
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath = NULL);
 
 	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
-	BOOL IsForegroundWindow() const { return (GetForegroundWindow() == this); }
+	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
 	void AddToDoCtrl(const CFilteredToDoCtrl& tdc);
 	void CloseToDoCtrl(const CFilteredToDoCtrl& tdc);

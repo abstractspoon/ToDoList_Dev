@@ -127,7 +127,7 @@ BOOL CFileComboBox::OnNeedTooltipText(UINT /*id*/, NMHDR* pNMHDR, LRESULT* pResu
 	return FALSE;
 }
 
-BOOL CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	// CFileEdit's buttons will not work when embedded inside
 	// a combo box. I've spent long hours trying to work out
