@@ -38,8 +38,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nSnapMode(TCCSM_NEARESTHOUR),
 	m_dwOptions(TCCO_DISPLAYCONTINUOUS),
 	m_bReadOnly(FALSE),
-	m_nCellVScrollPos(0),
-	m_dwTooltipTaskID(0)
+	m_nCellVScrollPos(0)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 }
@@ -1879,14 +1878,19 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CCalendarCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	EnableToolTips(TRUE);
+	if (m_tooltip.Create(this))
+	{
+		m_tooltip.SetFont(&m_DefaultFont);
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 100);
+		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+	}
 	
 	return 0;
 }
 
 bool CTaskCalendarCtrl::ProcessMessage(MSG* pMsg) 
 {
-	FilterToolTipMessage(pMsg);
+	m_tooltip.FilterToolTipMessage(pMsg);
 
 	return false;
 }
@@ -1894,78 +1898,66 @@ bool CTaskCalendarCtrl::ProcessMessage(MSG* pMsg)
 int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	// perform a hit-test
-	m_dwTooltipTaskID = HitTest(point);
+	DWORD dwTaskID = HitTest(point);
 
-	if (m_dwTooltipTaskID)
+	if (dwTaskID)
 	{
-		int nTextOffset = GetTaskTextOffset(m_dwTooltipTaskID);
+		int nTextOffset = GetTaskTextOffset(dwTaskID);
 
 		if ((nTextOffset > 0) || 
 			!HasOption(TCCO_DISPLAYCONTINUOUS) ||
 			(GetTaskHeight() < MIN_TASK_HEIGHT))
 		{
-			InitTooltipFont();
-
 			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = m_dwTooltipTaskID;
+			pTI->uId = dwTaskID;
 			pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
 
-			const TASKCALITEM* pTCI = GetTaskCalItem(m_dwTooltipTaskID);
+			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 			ASSERT(pTCI);
 
 			// MFC will free the duplicated string
 			pTI->lpszText = _tcsdup(pTCI->GetName());
 
 			CRect rLabel;
-			VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
+			VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
 			pTI->rect = rLabel;
 
-			return m_dwTooltipTaskID;
+			return (int)dwTaskID;
 		}
 	}
 
+	// else
 	return CCalendarCtrl::OnToolHitTest(point, pTI);
 }
 
 void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	if (m_dwTooltipTaskID)
+	DWORD dwTaskID = m_tooltip.GetToolInfo().uId;
+
+	if (dwTaskID == 0)
 	{
-		*pResult = TRUE; // we do the positioning
-
-		CRect rLabel;
-		VERIFY(GetTaskLabelRect(m_dwTooltipTaskID, rLabel));
-		ClientToScreen(rLabel);
-
-		// Calculate exact width required
-		const TASKCALITEM* pTCI = GetTaskCalItem(m_dwTooltipTaskID);
-		ASSERT(pTCI);
-
-		rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(pTCI->GetName(), pNMHDR->hwndFrom));
-		
-		CRect rTip(rLabel);
-		::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)(LPCRECT)rTip);
-
-		rTip.top = rLabel.top;
-		rTip.bottom = rLabel.bottom;
-
-		::SetWindowPos(pNMHDR->hwndFrom, 0, 
-						rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
-						(SWP_NOACTIVATE | SWP_NOZORDER));
-	
-		m_dwTooltipTaskID = 0;
+		ASSERT(0);
+		return;
 	}
-}
 
-void CTaskCalendarCtrl::InitTooltipFont() const
-{
-	// Nasty hack
-#if _MSC_VER >= 1400
-	CToolTipCtrl* pTT = AfxGetModuleThreadState()->m_pToolTip;
-#else
-	CToolTipCtrl* pTT = AfxGetThreadState()->m_pToolTip;
-#endif
+	*pResult = TRUE; // we do the positioning
 
-	if (pTT && pTT->GetSafeHwnd())
-		pTT->SendMessage(WM_SETFONT, (WPARAM)m_DefaultFont.GetSafeHandle());
+	CRect rLabel;
+	VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
+	ClientToScreen(rLabel);
+
+	// Calculate exact width required
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	ASSERT(pTCI);
+
+	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(pTCI->GetName(), pNMHDR->hwndFrom));
+
+	CRect rTip(rLabel);
+	m_tooltip.AdjustRect(rTip, TRUE);
+
+	rTip.top = rLabel.top;
+	rTip.bottom = rLabel.bottom;
+
+	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
+							(SWP_NOACTIVATE | SWP_NOZORDER));
 }

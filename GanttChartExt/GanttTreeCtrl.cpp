@@ -18,7 +18,6 @@ IMPLEMENT_DYNAMIC(CGanttTreeCtrl, CTreeCtrl)
 
 CGanttTreeCtrl::CGanttTreeCtrl() 
 	:	
-	m_htiTooltip(NULL),
 	m_nTitleColumnWidth(-1)
 {
 
@@ -42,9 +41,9 @@ END_MESSAGE_MAP()
 
 void CGanttTreeCtrl::PreSubclassWindow()
 {
-	EnableToolTips(TRUE);
-
 	CTreeCtrl::PreSubclassWindow();
+
+	InitTooltip();
 }
 
 int CGanttTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -52,81 +51,77 @@ int CGanttTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CTreeCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	EnableToolTips(TRUE);
+	InitTooltip();
 
 	return 0;
 }
 
-INT_PTR CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+int CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	UINT nFlags = 0;
-	m_htiTooltip = HitTest(point, &nFlags);
+	HTREEITEM hti = HitTest(point, &nFlags);
 
-	if (m_htiTooltip && (nFlags & TVHT_ONITEMLABEL) && (point.x <= m_nTitleColumnWidth))
+	if (hti && (nFlags & TVHT_ONITEMLABEL) && (point.x <= m_nTitleColumnWidth))
 	{
 		CRect rLabel;
-		VERIFY(GetItemRect(m_htiTooltip, rLabel, TRUE));
+		VERIFY(GetItemRect(hti, rLabel, TRUE));
 
 		int nAvailWidth = (m_nTitleColumnWidth - rLabel.left);
 
-		CString sTip = GetItemText(m_htiTooltip);
-
-		if (GraphicsMisc::GetTextWidth(sTip, GetSafeHwnd()) > nAvailWidth)
+		if (rLabel.right > m_nTitleColumnWidth)
 		{
-			InitTooltipFont();
-
-			pTI->cbSize = sizeof(TOOLINFO);
 			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = (DWORD)m_htiTooltip;
+			pTI->uId = (DWORD)hti;
 			pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
-			pTI->lpszText = _tcsdup(sTip); // MFC will free the duplicated string
+			pTI->lpszText = _tcsdup(GetItemText(hti)); // MFC will free the duplicated string
 			pTI->rect = rLabel;
 
-			return (DWORD)m_htiTooltip;
+			return (DWORD)hti;
 		}
-
-		// else
-		m_htiTooltip = NULL;
 	}
 
+	// else
 	return CTreeCtrl::OnToolHitTest(point, pTI);
 }
 
 bool CGanttTreeCtrl::ProcessMessage(MSG* pMsg) 
 {
-	FilterToolTipMessage(pMsg);
+	m_tooltip.FilterToolTipMessage(pMsg);
 
 	return false;
 }
 
 void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	if (m_htiTooltip)
+	HTREEITEM hti = (HTREEITEM)m_tooltip.GetToolInfo().uId;
+	TRACE(_T("CGanttTreeCtrl::OnShowTooltip(%d)\n"), hti);
+
+	if (!hti)
 	{
-		*pResult = TRUE; // we do the positioning
-
-		CRect rLabel;
-		VERIFY(GetItemRect(m_htiTooltip, rLabel, TRUE));
-
-		ClientToScreen(rLabel);
-		rLabel.InflateRect(0, 1, 0, 0);
-
-		// Calculate exact width required
-		CString sTip = GetItemText(m_htiTooltip);
-		rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(sTip, pNMHDR->hwndFrom));
-
-		CRect rTip(rLabel);
-		::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)(LPCRECT)rTip);
-
-		rTip.top = rLabel.top;
-		rTip.bottom = rLabel.bottom;
-		
-		::SetWindowPos(pNMHDR->hwndFrom, 0, 
-						rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
-						(SWP_NOACTIVATE | SWP_NOZORDER));
-
-		m_htiTooltip = 0;
+		ASSERT(0);
+		return;
 	}
+
+	*pResult = TRUE; // we do the positioning
+
+	CRect rLabel;
+	VERIFY(GetItemRect(hti, rLabel, TRUE));
+
+	ClientToScreen(rLabel);
+	rLabel.InflateRect(0, 1, 0, 0);
+
+	// Calculate exact width required
+	CString sTip = GetItemText(hti);
+	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(sTip, pNMHDR->hwndFrom));
+
+	CRect rTip(rLabel);
+	m_tooltip.AdjustRect(rTip, TRUE);
+
+	rTip.top = rLabel.top;
+	rTip.bottom = rLabel.bottom;
+
+	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
+							(SWP_NOACTIVATE | SWP_NOZORDER));
 }
 
 LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)
@@ -139,18 +134,17 @@ LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-void CGanttTreeCtrl::InitTooltipFont() const
+BOOL CGanttTreeCtrl::InitTooltip()
 {
-	// Nasty hack
-#if _MSC_VER >= 1400
-	CToolTipCtrl* pTT = AfxGetModuleThreadState()->m_pToolTip;
-#else
-	CToolTipCtrl* pTT = AfxGetThreadState()->m_pToolTip;
-#endif
-
-	if (pTT && pTT->GetSafeHwnd())
+	if (!m_tooltip.GetSafeHwnd())
 	{
-		HFONT hFont = GraphicsMisc::GetFont(*this);
-		pTT->SendMessage(WM_SETFONT, (WPARAM)hFont);
+		if (!m_tooltip.Create(this))
+			return FALSE;
+
+		m_tooltip.SetFont(CFont::FromHandle(GraphicsMisc::GetFont(*this)));
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 100);
+		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	}
+
+	return TRUE;
 }

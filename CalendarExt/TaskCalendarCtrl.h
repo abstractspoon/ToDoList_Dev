@@ -13,6 +13,7 @@
 #include "CalEnum.h"
 
 #include "..\shared\mapex.h"
+#include "..\shared\tooltipctrlex.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
@@ -67,16 +68,15 @@ protected:
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	TASKCALITEM m_tciPreDrag;
 	CPoint m_ptDragOrigin;
-	CToolTipCtrl m_tooltip;
 	BOOL m_bReadOnly;
 	int m_nCellVScrollPos;
 	CScrollBar m_sbCellVScroll;
 	CFont m_fontAltText, m_fontDone;
+	CToolTipCtrlEx m_tooltip;
 
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
-	mutable DWORD m_dwTooltipTaskID;
 
 	// Generated message map functions
 protected:
@@ -126,7 +126,6 @@ protected:
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
-	void InitTooltipFont() const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "..\shared\tooltipctrlex.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CGanttTreeCtrl
 
@@ -15,12 +17,11 @@ public:
 
 protected:
 	int m_nTitleColumnWidth;
-
-	mutable HTREEITEM m_htiTooltip;
+	CToolTipCtrlEx m_tooltip;
 
 protected:
 	virtual void PreSubclassWindow();
-	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -30,7 +31,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void InitTooltipFont() const;
+	BOOL InitTooltip();
 };
 
 /////////////////////////////////////////////////////////////////////////////
