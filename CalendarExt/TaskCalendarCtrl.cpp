@@ -1880,8 +1880,9 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if (m_tooltip.Create(this))
 	{
+		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 		m_tooltip.SetFont(&m_DefaultFont);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 100);
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
 		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	}
 	
@@ -1908,21 +1909,24 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			!HasOption(TCCO_DISPLAYCONTINUOUS) ||
 			(GetTaskHeight() < MIN_TASK_HEIGHT))
 		{
-			pTI->hwnd = GetSafeHwnd();
-			pTI->uId = dwTaskID;
-			pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
-
 			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 			ASSERT(pTCI);
 
-			// MFC will free the duplicated string
-			pTI->lpszText = _tcsdup(pTCI->GetName());
-
 			CRect rLabel;
 			VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
-			pTI->rect = rLabel;
 
-			return (int)dwTaskID;
+			if (rLabel.PtInRect(point))
+			{
+				pTI->hwnd = GetSafeHwnd();
+				pTI->uId = dwTaskID;
+				pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
+				pTI->rect = rLabel;
+				
+				// MFC will free the duplicated string
+				pTI->lpszText = _tcsdup(pTCI->GetName());
+
+				return (int)dwTaskID;
+			}
 		}
 	}
 
@@ -1954,6 +1958,7 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
+	rTip.OffsetRect(PADDING, 0);
 
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;

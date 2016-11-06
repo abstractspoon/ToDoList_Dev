@@ -19,6 +19,11 @@ const int TOOLINFO_SIZE = sizeof(TOOLINFO);
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef TTM_ADJUSTRECT
+#	define TTM_ADJUSTRECT (WM_USER + 31)
+#endif
+/////////////////////////////////////////////////////////////////////////////
+
 IMPLEMENT_DYNAMIC(CToolTipCtrlEx, CToolTipCtrl)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,7 +105,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		
 		if (m_nLastHit != nHit)
 		{
-			TRACE(_T("CToolTipCtrlEx::FilterToolTipMessage(%d -> %d)\n"), m_nLastHit, nHit);
+			//TRACE(_T("CToolTipCtrlEx::FilterToolTipMessage(%d -> %d)\n"), m_nLastHit, nHit);
 
 			// Delete the old tool
 			if (m_tiLast.cbSize)
@@ -222,4 +227,11 @@ const TOOLINFO& CToolTipCtrlEx::GetToolInfo() const
 #endif
 
 	return m_tiLast; 
+}
+
+BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/)
+{ 
+	ASSERT(::IsWindow(m_hWnd));  
+	
+	return (BOOL)::SendMessage(m_hWnd, TTM_ADJUSTRECT, bLarger, (LPARAM)lprc); 
 }

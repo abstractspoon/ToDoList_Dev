@@ -609,6 +609,10 @@ SOURCE=.\ToolbarHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ToolTipCtrlEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TRAYICON.CPP
 # End Source File
 # Begin Source File
@@ -1250,6 +1254,10 @@ SOURCE=.\TimeHelper.h
 # Begin Source File
 
 SOURCE=.\ToolbarHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToolTipCtrlEx.h
 # End Source File
 # Begin Source File
 

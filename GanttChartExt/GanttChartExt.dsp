@@ -132,6 +132,10 @@ SOURCE=.\GanttStruct.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttTreeCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttTreeListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -174,6 +178,10 @@ SOURCE=.\GanttStatic.h
 # Begin Source File
 
 SOURCE=.\GanttStruct.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GanttTreeCtrl.h
 # End Source File
 # Begin Source File
 

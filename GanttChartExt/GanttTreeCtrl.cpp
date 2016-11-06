@@ -8,6 +8,9 @@
 
 #include "..\shared\graphicsmisc.h"
 
+//////////////////////////////////////////////////////////////////////
+
+int TIPPADDING = 2;
 
 //////////////////////////////////////////////////////////////////////
 // CGanttTreeCtrl
@@ -116,6 +119,7 @@ void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
+	rTip.OffsetRect(TIPPADDING, 0);
 
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
@@ -141,8 +145,9 @@ BOOL CGanttTreeCtrl::InitTooltip()
 		if (!m_tooltip.Create(this))
 			return FALSE;
 
+		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 		m_tooltip.SetFont(CFont::FromHandle(GraphicsMisc::GetFont(*this)));
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 100);
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
 		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	}
 
