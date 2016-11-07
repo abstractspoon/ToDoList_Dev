@@ -397,6 +397,15 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			ASSERT(pTDI);
 
 			pLVDI->item.pszText = (LPTSTR)(LPCTSTR)pTDI->sTitle;
+
+			// Hack to get tooltip delays consistent across all task views
+			CToolTipCtrl* pTT = m_lcTasks.GetToolTips();
+
+			if (pTT)
+			{
+				pTT->SetDelayTime(TTDT_INITIAL, 50);
+				pTT->SetDelayTime(TTDT_AUTOPOP, 10000);
+			}
 		}
 
 		if (pLVDI->item.mask & LVIF_IMAGE)
