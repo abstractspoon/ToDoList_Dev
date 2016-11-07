@@ -69,8 +69,6 @@ int CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		CRect rLabel;
 		VERIFY(GetItemRect(hti, rLabel, TRUE));
 
-		int nAvailWidth = (m_nTitleColumnWidth - rLabel.left);
-
 		if (rLabel.right > m_nTitleColumnWidth)
 		{
 			pTI->hwnd = GetSafeHwnd();
@@ -97,7 +95,6 @@ bool CGanttTreeCtrl::ProcessMessage(MSG* pMsg)
 void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	HTREEITEM hti = (HTREEITEM)m_tooltip.GetToolInfo().uId;
-	TRACE(_T("CGanttTreeCtrl::OnShowTooltip(%d)\n"), hti);
 
 	if (!hti)
 	{
