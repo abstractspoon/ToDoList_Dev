@@ -110,7 +110,6 @@ public:
 	BOOL Create(DWORD dwOptions = (TTDO_ALLOWPARENTTRACKING | TTDO_FORMATTIMESASHMS));
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetOption(DWORD dwOption, BOOL bEnable = TRUE);
-	void SetIcons(HICON hIconBig, HICON hIconSmall);
 	
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC);
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);

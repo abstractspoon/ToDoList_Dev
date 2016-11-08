@@ -10,6 +10,8 @@
 #include "misc.h"
 #include "runtimedlg.h"
 #include "enstring.h"
+#include "regkey.h"
+#include "graphicsmisc.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -1767,3 +1769,28 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 	return ::MessageBox(hwndParent, sText, sCaption, nFlags);
 }
 
+BOOL CDialogHelper::LoadSetWindowIcons(HWND hWnd, UINT nIconID, HICON& hIconBig, HICON& hIconSmall)
+{
+	// Update visible icons
+	int nBigIconSize = 24;
+
+	CRegKey2 reg;
+	DWORD dwSmallIcons = 0;
+
+	if (reg.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"), TRUE) == ERROR_SUCCESS)
+	{
+		if ((reg.Read(_T("TaskbarSmallIcons"), dwSmallIcons) == ERROR_SUCCESS) && dwSmallIcons)
+			nBigIconSize = 16;
+	}
+
+	::DestroyIcon(hIconBig);
+	::DestroyIcon(hIconSmall);
+
+	hIconSmall = GraphicsMisc::LoadIcon(nIconID, 16);
+	hIconBig = GraphicsMisc::LoadIcon(nIconID, nBigIconSize);
+
+	::SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
+	::SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconBig);
+
+	return (hIconBig && hIconSmall);
+}

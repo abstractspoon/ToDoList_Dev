@@ -6312,32 +6312,12 @@ void CToDoListWnd::OnTimerTimeTracking()
 
 void CToDoListWnd::UpdateCaptionIcons()
 {
-	// Update visible icons
-	int nBigIconSize = 24;
-
-	CRegKey2 reg;
-	DWORD dwSmallIcons = 0;
-
-	if (reg.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"), TRUE) == ERROR_SUCCESS)
-	{
-		if ((reg.Read(_T("TaskbarSmallIcons"), dwSmallIcons) == ERROR_SUCCESS) && dwSmallIcons)
-			nBigIconSize = 16;
-	}
-
 	BOOL bTimeTracking = IsActivelyTimeTracking();
-	UINT nIDTrayIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
+	UINT nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 
-	::DestroyIcon(m_hIconBig);
-	::DestroyIcon(m_hIconSmall);
-
-	m_hIconSmall = GraphicsMisc::LoadIcon(nIDTrayIcon, 16);
-	m_hIconBig = GraphicsMisc::LoadIcon(nIDTrayIcon, nBigIconSize);
-
-	SetIcon(m_hIconSmall, FALSE);
-	SetIcon(m_hIconBig, TRUE);
+	LoadSetWindowIcons(*this, nIDIcon, m_hIconBig, m_hIconSmall);
 
 	m_trayIcon.SetIcon(m_hIconSmall);
-	m_dlgTimeTracker.SetIcons(m_hIconBig, m_hIconSmall);
 }
 
 void CToDoListWnd::OnTimerTimeTrackReminder()

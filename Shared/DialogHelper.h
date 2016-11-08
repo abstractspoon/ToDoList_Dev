@@ -119,6 +119,7 @@ public:
 	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 
 	static int ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR szInstruction, LPCTSTR szText, UINT nFlags);
+	static BOOL LoadSetWindowIcons(HWND hWnd, UINT nIconID, HICON& hIconBig, HICON& hIconSmall);
 
 protected:
 	CDialogHelper() : m_bInUpdateEx(FALSE) {}
