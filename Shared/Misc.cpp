@@ -609,6 +609,16 @@ BOOL Misc::RemoveAt(CString& sText, int nPos)
 	return TRUE;
 }
 
+BOOL Misc::IsEmpty(LPCTSTR szText) 
+{ 
+	return (!szText || !szText[0]); 
+}
+
+BOOL Misc::IsEmpty(LPCSTR szText) 
+{ 
+	return (!szText || !szText[0]); 
+}
+
 TCHAR Misc::First(const CString& sText)
 {
 	if (sText.IsEmpty())

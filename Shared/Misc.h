@@ -332,8 +332,8 @@ namespace Misc
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
-	inline BOOL IsEmpty(LPCTSTR szText) { return (!szText || !szText[0]); }
-	inline BOOL IsEmpty(LPCSTR szText) { return (!szText || !szText[0]); }
+	BOOL IsEmpty(LPCTSTR szText);
+	BOOL IsEmpty(LPCSTR szText);
 
 	double Round(double dValue);
 	float Round(float fValue);
