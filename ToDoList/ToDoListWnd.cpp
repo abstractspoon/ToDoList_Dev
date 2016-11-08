@@ -757,13 +757,6 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	// set frame icon
-	m_hIconBig = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 24);
-	SetIcon(m_hIconBig, TRUE);
-
-	m_hIconSmall = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 16);
-	SetIcon(m_hIconSmall, FALSE);
-		
 	SetWindowPos(NULL, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOSIZE | SWP_NOZORDER | SWP_NOMOVE);
 
 	// Various key UI elements
@@ -790,6 +783,8 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	if (!InitTimeTrackDlg())
 		return -1;
+
+	UpdateCaptionIcons();
 	
 	// UI Font
 	InitUIFont();
@@ -6308,25 +6303,41 @@ void CToDoListWnd::OnTimerTimeTracking()
 		
 	if (bWasTimeTracking != bNowTimeTracking)
 	{
-		// Update visible icons
-		UINT nIDTrayIcon = (bNowTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
-
-		::DestroyIcon(m_hIconBig);
-		::DestroyIcon(m_hIconSmall);
-
-		m_hIconSmall = GraphicsMisc::LoadIcon(nIDTrayIcon, 16);
-		m_hIconBig = GraphicsMisc::LoadIcon(nIDTrayIcon, 24);
-		
-		SetIcon(m_hIconSmall, FALSE);
-		SetIcon(m_hIconBig, TRUE);
-
-		m_trayIcon.SetIcon(m_hIconSmall);
-		m_dlgTimeTracker.SetIcons(m_hIconBig, m_hIconSmall);
+		UpdateCaptionIcons();
+		bWasTimeTracking = bNowTimeTracking;
 	}
-	
-	bWasTimeTracking = bNowTimeTracking;
 
 	m_dlgTimeTracker.UpdateTaskTime(&GetToDoCtrl());
+}
+
+void CToDoListWnd::UpdateCaptionIcons()
+{
+	// Update visible icons
+	int nBigIconSize = 24;
+
+	CRegKey2 reg;
+	DWORD dwSmallIcons = 0;
+
+	if (reg.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"), TRUE) == ERROR_SUCCESS)
+	{
+		if ((reg.Read(_T("TaskbarSmallIcons"), dwSmallIcons) == ERROR_SUCCESS) && dwSmallIcons)
+			nBigIconSize = 16;
+	}
+
+	BOOL bTimeTracking = IsActivelyTimeTracking();
+	UINT nIDTrayIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
+
+	::DestroyIcon(m_hIconBig);
+	::DestroyIcon(m_hIconSmall);
+
+	m_hIconSmall = GraphicsMisc::LoadIcon(nIDTrayIcon, 16);
+	m_hIconBig = GraphicsMisc::LoadIcon(nIDTrayIcon, nBigIconSize);
+
+	SetIcon(m_hIconSmall, FALSE);
+	SetIcon(m_hIconBig, TRUE);
+
+	m_trayIcon.SetIcon(m_hIconSmall);
+	m_dlgTimeTracker.SetIcons(m_hIconBig, m_hIconSmall);
 }
 
 void CToDoListWnd::OnTimerTimeTrackReminder()
@@ -12276,7 +12287,11 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 			return;
 		}
 	}
-	
+	else if (StrCmp(lpszSection, _T("TraySettings")) == 0)
+	{
+		UpdateCaptionIcons();
+	}
+		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);
 }
 

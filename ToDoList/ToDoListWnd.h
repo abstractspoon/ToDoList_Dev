@@ -431,6 +431,7 @@ protected:
 	afx_msg void OnTabCtrlSelchange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTabCtrlSelchanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetPriority(UINT nCmdID);
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnShowTaskView(UINT nCmdID);
 	afx_msg void OnSort();
@@ -536,7 +537,6 @@ protected:
 	afx_msg void OnDebugEndSession();
 	afx_msg void OnDebugShowSetupDlg();
 #endif
-	void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	DECLARE_MESSAGE_MAP()
 		
 	// Pseudo-handlers
@@ -674,6 +674,7 @@ protected:
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateMenuBackgroundColor();
 	void UpdateTimeTrackerPreferences();
+	void UpdateCaptionIcons();
 
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
 	void UpdateActiveToDoCtrlPreferences();
