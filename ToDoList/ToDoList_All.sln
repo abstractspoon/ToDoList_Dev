@@ -34,6 +34,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoList", "ToDoList.vcxproj", "{255AD27A-87B1-4E26-A6A7-5E5AFB6BFAB5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E6E08038-E0F9-4822-B47D-85B248CC5833} = {E6E08038-E0F9-4822-B47D-85B248CC5833}
+		{B2CAB5A0-4903-F4BF-270C-26231829592F} = {B2CAB5A0-4903-F4BF-270C-26231829592F}
 		{26B386A3-6B16-41A5-8511-149900DD646B} = {26B386A3-6B16-41A5-8511-149900DD646B}
 	EndProjectSection
 EndProject
@@ -46,6 +47,13 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CalendarExt", "..\CalendarExt\CalendarExt.vcxproj", "{E6E08038-E0F9-4822-B47D-85B248CC5833}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BurndownExt", "..\BurndownExt\BurndownExt.vcxproj", "{DA896CDC-157D-472E-8F61-87E174E6B80C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TransTextEditor", "..\TransTextEditor\TransTextEditor.vcxproj", "{B2CAB5A0-4903-F4BF-270C-26231829592F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311} = {08879A40-EE3B-4D01-B13F-C6A2B4F03311}
+		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +145,10 @@ Global
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{B2CAB5A0-4903-F4BF-270C-26231829592F}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{B2CAB5A0-4903-F4BF-270C-26231829592F}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{B2CAB5A0-4903-F4BF-270C-26231829592F}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{B2CAB5A0-4903-F4BF-270C-26231829592F}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
