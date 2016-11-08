@@ -83,7 +83,9 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTransDictionary : protected CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*>
+typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*> CDictionaryItems;
+
+class CTransDictionary 
 {
 public:
 	CTransDictionary();
@@ -102,7 +104,7 @@ public:
 	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
 	void LoadItem(const CXmlItem* pXI);
 	BOOL LoadDictionaryItem(const CXmlItem* pXIDict);
-	BOOL IsEmpty() const { return (GetCount() == 0); }
+	BOOL IsEmpty() const { return (m_mapItems.GetCount() == 0); }
 
 	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
@@ -115,11 +117,14 @@ public:
 	
 	void IgnoreString(const CString& sText, BOOL bPrepare);
 	BOOL WantIgnore(const CString& sText) const;
+
+	const CDictionaryItems& GetItems() const { return m_mapItems; }
 	
 protected:
 	CString m_sDictFile, m_sDictVersion;
 	WORD m_wDictLanguageID;
 	CMapStringToPtr m_mapStringIgnore;
+	CDictionaryItems m_mapItems;
 	
 protected:
 	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate = TRUE);

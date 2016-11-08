@@ -696,7 +696,7 @@ CTransDictionary::CTransDictionary()
 	m_wDictLanguageID = (WORD)PRIMARYLANGID(nLangID);
 
 	// estimated size of dictionary
-	InitHashTable(1991); // prime number closest to 2000
+	m_mapItems.InitHashTable(1991); // prime number closest to 2000
 
 	// estimated size of ignore list
 	m_mapStringIgnore.InitHashTable(1991); // prime number closest to 2000
@@ -848,7 +848,7 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 
 					// assign to map
 					pDI = new DICTITEM(diTemp);
-					SetAt(sItem, pDI);
+					m_mapItems.SetAt(sItem, pDI);
 				}			
 			}
 		}
@@ -863,7 +863,7 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 
 void CTransDictionary::FixupDictionary()
 {
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 	BOOL bCleaned = FALSE;
 	
 	while (pos)
@@ -871,7 +871,7 @@ void CTransDictionary::FixupDictionary()
 		DICTITEM* pDI = NULL;
 		CString sKey;
 		
-		GetNextAssoc(pos, sKey, pDI);
+		m_mapItems.GetNextAssoc(pos, sKey, pDI);
 		ASSERT(pDI && sKey == pDI->GetTextIn());
 
 		if (pDI->Fixup())
@@ -900,7 +900,7 @@ BOOL CTransDictionary::LoadDictionaryItem(const CXmlItem* pXIDict)
 		else
 		{
 			pDI = new DICTITEM(diTemp);
-			SetAt(sItem, pDI);
+			m_mapItems.SetAt(sItem, pDI);
 		}
 
 		// next
@@ -936,18 +936,18 @@ void CTransDictionary::LoadItem(const CXmlItem* pXI)
 
 void CTransDictionary::DeleteDictionary()
 {
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 
 	while (pos)
 	{
 		DICTITEM* pDI = NULL;
 		CString sPath;
 
-		GetNextAssoc(pos, sPath, pDI);
+		m_mapItems.GetNextAssoc(pos, sPath, pDI);
 		delete pDI;
 	}
 
-	RemoveAll();
+	m_mapItems.RemoveAll();
 	m_sDictFile.Empty();
 	m_sDictVersion.Empty();
 }
@@ -958,7 +958,7 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 		return FALSE;
 
 	// build a list of all items not found in 'tdMaster'
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 	CStringArray aMissing;
 
 	DICTITEM* pDI = NULL;
@@ -967,7 +967,7 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 
 	while (pos)
 	{
-		GetNextAssoc(pos, sItem, pDI);
+		m_mapItems.GetNextAssoc(pos, sItem, pDI);
 
 		if (!tdMaster.HasDictItem(sItem))
 		{
@@ -983,21 +983,21 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 	{
 		sItem = aMissing[nItem];
 
-		VERIFY(Lookup(sItem, pDI));
+		VERIFY(m_mapItems.Lookup(sItem, pDI));
 
-		if (RemoveKey(sItem))
-			tdRemoved[sItem] = pDI;
+		if (m_mapItems.RemoveKey(sItem))
+			tdRemoved.m_mapItems[sItem] = pDI;
 	}
 
 	// now add all 'tdMaster' items not found in 'this'
-	pos = tdMaster.GetStartPosition();
+	pos = tdMaster.m_mapItems.GetStartPosition();
 	
 	while (pos)
 	{
 		DICTITEM* pDIMaster = NULL;
 		CString sItemMaster;
 		
-		tdMaster.GetNextAssoc(pos, sItemMaster, pDIMaster);
+		tdMaster.m_mapItems.GetNextAssoc(pos, sItemMaster, pDIMaster);
 		
 		if (!HasDictItem(sItemMaster))
 		{
@@ -1005,7 +1005,7 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 	
 			// remove text out from item before adding
 			pDI->ClearTextOut();
-			SetAt(sItemMaster, pDI);
+			m_mapItems.SetAt(sItemMaster, pDI);
 
 			bCleaned = TRUE;
 		}
@@ -1069,14 +1069,14 @@ BOOL CTransDictionary::SaveXmlDictionary(LPCTSTR szDictPath) const
 	CXmlItem* pXINeedTrans = file.AddItem(NEED_TRANSLATION);
 
 	// build xml file
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 
 	while (pos)
 	{
 		DICTITEM* pDI = NULL;
 		CString sKey;
 
-		GetNextAssoc(pos, sKey, pDI);
+		m_mapItems.GetNextAssoc(pos, sKey, pDI);
 		ASSERT(pDI && sKey == pDI->GetTextIn());
 
 		// separate translated and non-translated items
@@ -1135,7 +1135,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	aLines.Add(CSVCOLUMN_HEADER);
 
 	// dictionary
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 
 	while (pos)
 	{
@@ -1143,7 +1143,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 		CString sKey;
 		CStringArray aTransLines, aNeedTransLines;
 
-		GetNextAssoc(pos, sKey, pDI);
+		m_mapItems.GetNextAssoc(pos, sKey, pDI);
 		ASSERT(pDI && sKey == pDI->GetTextIn());
 
 		if (pDI->ToCsv(aTransLines, aNeedTransLines))
@@ -1216,7 +1216,7 @@ BOOL CTransDictionary::HasDictItem(CString& sText) const
 	if (TransText::PrepareLookupText(sText) && !WantIgnore(sText))
 	{
 		DICTITEM* pDI = NULL;
-		return Lookup(sText, pDI);
+		return m_mapItems.Lookup(sText, pDI);
 	}	
 
 	// all else
@@ -1240,10 +1240,10 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 	// to a new dictionary item
 	DICTITEM* pDI = NULL;
 	
-	if (!Lookup(sText, pDI) && bAutoCreate)
+	if (!m_mapItems.Lookup(sText, pDI) && bAutoCreate)
 	{
 		pDI = new DICTITEM(sText);
-		SetAt(sText, pDI);
+		m_mapItems.SetAt(sText, pDI);
 	}
 #ifdef DEBUG
 	else if (pDI && !pDI->GetTextOut().IsEmpty())
@@ -1392,17 +1392,17 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
 
 BOOL CTransDictionary::GetPossibleDuplicates(CTransDictionary& tdDuplicates) const
 {
-	POSITION pos = GetStartPosition();
+	POSITION pos = m_mapItems.GetStartPosition();
 	DICTITEM* pDI = NULL;
 	CString sItem;
 	DICTITEM diDup;
 	
 	while (pos)
 	{
-		GetNextAssoc(pos, sItem, pDI);
+		m_mapItems.GetNextAssoc(pos, sItem, pDI);
 		
 		if (pDI->GetPossibleDuplicates(diDup))
-			tdDuplicates.SetAt(sItem, new DICTITEM(diDup));
+			tdDuplicates.m_mapItems.SetAt(sItem, new DICTITEM(diDup));
 	}
 
 	return !tdDuplicates.IsEmpty();
