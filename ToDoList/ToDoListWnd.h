@@ -674,7 +674,7 @@ protected:
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateMenuBackgroundColor();
 	void UpdateTimeTrackerPreferences();
-	void UpdateCaptionIcons();
+	void UpdateWindowIcons();
 
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
 	void UpdateActiveToDoCtrlPreferences();

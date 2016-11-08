@@ -73,14 +73,15 @@ END_MESSAGE_MAP()
 // CTrayIcon construction/destruction
 
 CTrayIcon::CTrayIcon()
+	:
+	m_hIcon(NULL),
+	m_bVisible(FALSE),
+	m_bAnimationOn(FALSE),
+	m_nPrevMsg(0),
+	m_bTemporaryIcon(FALSE),
+	m_bIconOwner(FALSE)
 {
-	m_hIcon = NULL;
-	m_bVisible = FALSE;
 	memset(&m_nm, 0, sizeof(m_nm));
-	m_sTip = _T("");
-	m_bAnimationOn = FALSE;
-	m_nPrevMsg = 0;
-	m_bTemporaryIcon = FALSE;
 }
 
 CTrayIcon::~CTrayIcon()
@@ -90,27 +91,23 @@ CTrayIcon::~CTrayIcon()
 // this Create takes an ID for the tip text
 BOOL CTrayIcon::Create(CWnd* pParentWnd, UINT uID, UINT uIDIcon, UINT uIDTip)
 {
-	if (!CWnd::Create(NULL, _T("TrayIcon notification window"), WS_CHILD,
-		CRect(0,0,0,0), pParentWnd, uID))
+	CString sTip;
+
+	if (!sTip.LoadString(uIDTip))
 		return FALSE;
 
-	m_hIcon = GraphicsMisc::LoadIcon(uIDIcon, 16);
-	m_sTip.LoadString(uIDTip);
-
-	m_nm.hdr.hwndFrom = GetSafeHwnd();
-	m_nm.hdr.idFrom = GetDlgCtrlID();
-
-	return TRUE;
+	// else
+	return Create(pParentWnd, uID, uIDIcon, sTip);
 }
 
 // this create takes a text string for the ti text
 BOOL CTrayIcon::Create(CWnd* pParentWnd, UINT uID, UINT uIDIcon, LPCTSTR sTip)
 {
-	if (!CWnd::Create(NULL, _T("TrayIcon notification window"), WS_CHILD,
-		CRect(0,0,0,0), pParentWnd, uID))
+	if (!CWnd::Create(NULL, _T("TrayIcon"), WS_CHILD, CRect(0,0,0,0), pParentWnd, uID))
 		return FALSE;
 
-	m_hIcon = AfxGetApp()->LoadIcon(uIDIcon);
+	m_hIcon = GraphicsMisc::LoadIcon(uIDIcon, 16);
+	m_bIconOwner = TRUE;
 	m_sTip = sTip;
 
 	m_nm.hdr.hwndFrom = GetSafeHwnd();
@@ -278,11 +275,6 @@ BOOL CTrayIcon::DeleteFromTray()
 	return Shell_NotifyIcon(NIM_DELETE, (PNOTIFYICONDATA)&nid);
 }
 
-BOOL CTrayIcon::ModifyIcon(UINT uIDNewIcon)
-{
-	return ModifyIcon(GraphicsMisc::LoadIcon(uIDNewIcon, 16));
-}
-
 BOOL CTrayIcon::ModifyIcon(HICON hNewIcon)
 {
 	NOTIFYICONDATA_TI nid;
@@ -294,11 +286,6 @@ BOOL CTrayIcon::ModifyIcon(HICON hNewIcon)
 	nid.hIcon = m_hIcon = hNewIcon;
 
 	return Shell_NotifyIcon(NIM_MODIFY, (PNOTIFYICONDATA)&nid);
-}
-
-BOOL CTrayIcon::ModifyTip(UINT uIDNewTip)
-{
-	return ModifyTip(CString(MAKEINTRESOURCE(uIDNewTip)));
 }
 
 BOOL CTrayIcon::ModifyTip(LPCTSTR sNewTip)
@@ -332,23 +319,37 @@ BOOL CTrayIcon::ModifyTip(LPCTSTR sNewTip)
 
 BOOL CTrayIcon::SetIcon(UINT uIDNewIcon)
 {
-	if (m_bAnimationOn)
-		StopAnimation();
+	HICON hIcon = GraphicsMisc::LoadIcon(uIDNewIcon, 16);
 
-	return ModifyIcon(uIDNewIcon);
+	if (!hIcon)
+		return FALSE;
+
+	return SetIcon(hIcon, TRUE);
 }
 
-BOOL CTrayIcon::SetIcon(HICON hNewIcon)
+BOOL CTrayIcon::SetIcon(HICON hNewIcon, BOOL bAutoDelete)
 {
 	if (m_bAnimationOn)
 		StopAnimation();
+
+	// cleanup current icon
+	if (m_bIconOwner)
+		::DestroyIcon(m_hIcon);
+
+	m_bIconOwner = bAutoDelete;
 	
 	return ModifyIcon(hNewIcon);
 }
 
 BOOL CTrayIcon::SetTip(UINT uIDNewTip)
 {
-	return ModifyTip(uIDNewTip);
+	CString sTip;
+
+	if (!sTip.LoadString(uIDNewTip))
+		return FALSE;
+
+	// else
+	return SetTip(sTip);
 }
 
 BOOL CTrayIcon::SetTip(LPCTSTR sNewTip)
@@ -361,7 +362,7 @@ void CTrayIcon::StartAnimation()
 	ASSERT (m_aAnimationIconIDs.GetSize() && m_nAnimationDelay >= 100);
 
 	m_nCurIcon = 0; // reset animation
-	ModifyIcon(m_aAnimationIconIDs[m_nCurIcon]);
+	VERIFY(SetIcon(m_aAnimationIconIDs[m_nCurIcon]));
 
 	SetTimer(TIMER_ANIMATE, m_nAnimationDelay, NULL);
 	m_bAnimationOn = TRUE;
@@ -376,7 +377,7 @@ void CTrayIcon::StopAnimation()
 	m_bAnimationOn = FALSE;
 	
 	// reset animation
-	ModifyIcon(m_aAnimationIconIDs[0]);
+	VERIFY(SetIcon(m_aAnimationIconIDs[0]));
 }
 
 void CTrayIcon::OnTimer(UINT nIDEvent)
@@ -387,7 +388,7 @@ void CTrayIcon::OnTimer(UINT nIDEvent)
 		m_nCurIcon++;
 		m_nCurIcon %= m_aAnimationIconIDs.GetSize();
 
-		ModifyIcon(m_aAnimationIconIDs[m_nCurIcon]);
+		SetIcon(m_aAnimationIconIDs[m_nCurIcon]);
 		break;
 
 	case TIMER_SINGLECLK:

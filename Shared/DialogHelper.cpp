@@ -12,6 +12,7 @@
 #include "enstring.h"
 #include "regkey.h"
 #include "graphicsmisc.h"
+#include "osversion.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -1772,7 +1773,7 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 BOOL CDialogHelper::LoadSetWindowIcons(HWND hWnd, UINT nIconID, HICON& hIconBig, HICON& hIconSmall)
 {
 	// Update visible icons
-	int nBigIconSize = 24;
+	int nBigIconSize = ((COSVersion() < OSV_WIN8) ? 32 : 24);
 
 	CRegKey2 reg;
 	DWORD dwSmallIcons = 0;

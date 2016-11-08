@@ -375,8 +375,6 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_sizeMin(0, 0),
 	m_sizeMax(32000, 32000),
 	m_sizeLast(-1, -1),
-	m_hIconSmall(NULL),
-	m_hIconBig(NULL),
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
 	m_dwOptions(0)
@@ -386,8 +384,6 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 {
-	::DestroyIcon(m_hIconBig);
-	::DestroyIcon(m_hIconSmall);
 }
 
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
@@ -421,7 +417,6 @@ BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_COMMAND(ID_TIMETRACKER_ONTOP, OnToggleTopMost)
 	ON_COMMAND(ID_TIMETRACK_HELP, OnHelp)
 	ON_WM_HELPINFO()
-	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////
@@ -567,7 +562,6 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 					m_cbTasks.SetCurSel(nNext);
 					
 					UpdateButtonState();
-					UpdateCaptionIcons();
 					UpdateTaskTime(GetSelectedTasklist());
 					
 					return TRUE;
@@ -657,7 +651,6 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskF
 		
 		UpdateButtonState();
 		RebuildTaskCombo();
-		UpdateCaptionIcons();
 	}
 	
 	RefreshMaxDropWidth(m_cbTasklists);
@@ -681,7 +674,6 @@ BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskF
 		IsSelectedTasklist(pTDC))
 	{
 		RebuildTaskCombo();
-		UpdateCaptionIcons();
 	}
 	
 	UpdateButtonState();
@@ -741,11 +733,9 @@ void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRe
 	if (pTTL->RemoveTasks(dwToRemove) && IsSelectedTasklist(pTDC))
 	{
 		RebuildTaskCombo();
-		UpdateCaptionIcons();
 	}
 
 	UpdateButtonState();
-	UpdateCaptionIcons();
 	UpdateTaskTime(pTDC);
 }
 
@@ -881,7 +871,6 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 	UpdateData(FALSE);
 
 	UpdateButtonState();
-	UpdateCaptionIcons();
 }
 
 BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
@@ -909,35 +898,17 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	if (HasOption(TTDO_SHOWONBEGINTRACKING) && pTTL->IsTracking() && !bWasTracking)
 	{
 		SelectTaskList(pTDC);
-		UpdateCaptionIcons();
 
 		ShowWindow(SW_SHOWNORMAL);
 		SetForegroundWindow();
 	}
 	else
 	{
-		if (!pTTL->IsTracking() && bWasTracking)
-			UpdateCaptionIcons();
-
 		UpdateButtonState();
 		UpdateTaskTime(pTDC);
 	}
 	
 	return TRUE;
-}
-
-BOOL CTDLTimeTrackerDlg::IsActivelyTracking() const
-{
-	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
-	ASSERT(pTDC);
-
-	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(pTTL);
-
-	if (!pTTL)
-		return FALSE;
-
-	return pTTL->IsTracking();
 }
 
 BOOL CTDLTimeTrackerDlg::IsSelectedTask(DWORD dwTaskID) const
@@ -1105,14 +1076,12 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	SelectItemByData(m_cbTasks, dwTaskID);
 	
 	UpdateButtonState();
-	UpdateCaptionIcons();
 	UpdateTaskTime(pTDC);
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
 {
 	UpdateButtonState();
-	UpdateCaptionIcons();
 	UpdateTaskTime(GetSelectedTasklist());
 }
 
@@ -1157,7 +1126,6 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 			m_cbTasks.SetCurSel(nNext);
 
 			UpdateButtonState();
-			UpdateCaptionIcons();
 			UpdateTaskTime(pTDC);
 		}
 	}
@@ -1507,21 +1475,10 @@ BOOL CTDLTimeTrackerDlg::HasOption(DWORD dwOption) const
 	return Misc::HasFlag(m_dwOptions, dwOption);
 }
 
-void CTDLTimeTrackerDlg::UpdateCaptionIcons()
+void CTDLTimeTrackerDlg::SetWindowIcons(HICON hIconBig, HICON hIconSmall)
 {
-	BOOL bTracking = IsActivelyTracking();
-	UINT nIDIcon = (bTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
+	ASSERT(::IsWindow(GetSafeHwnd()));
 
-	VERIFY(LoadSetWindowIcons(*this, nIDIcon, m_hIconBig, m_hIconSmall));
+	SetIcon(hIconBig, TRUE);
+	SetIcon(hIconSmall, FALSE);
 }
-
-void CTDLTimeTrackerDlg::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
-{
-	if (StrCmp(lpszSection, _T("TraySettings")) == 0)
-	{
-		UpdateCaptionIcons();
-	}
-
-	CDialog::OnSettingChange(uFlags, lpszSection);
-}
-

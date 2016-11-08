@@ -784,7 +784,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!InitTimeTrackDlg())
 		return -1;
 
-	UpdateCaptionIcons();
+	UpdateWindowIcons();
 	
 	// UI Font
 	InitUIFont();
@@ -6303,21 +6303,22 @@ void CToDoListWnd::OnTimerTimeTracking()
 		
 	if (bWasTimeTracking != bNowTimeTracking)
 	{
-		UpdateCaptionIcons();
+		UpdateWindowIcons();
 		bWasTimeTracking = bNowTimeTracking;
 	}
 
 	m_dlgTimeTracker.UpdateTaskTime(&GetToDoCtrl());
 }
 
-void CToDoListWnd::UpdateCaptionIcons()
+void CToDoListWnd::UpdateWindowIcons()
 {
 	BOOL bTimeTracking = IsActivelyTimeTracking();
 	UINT nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 
 	LoadSetWindowIcons(*this, nIDIcon, m_hIconBig, m_hIconSmall);
 
-	m_trayIcon.SetIcon(m_hIconSmall);
+	m_trayIcon.SetIcon(m_hIconSmall, FALSE);
+	m_dlgTimeTracker.SetWindowIcons(m_hIconBig, m_hIconSmall);
 }
 
 void CToDoListWnd::OnTimerTimeTrackReminder()
@@ -12269,7 +12270,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	}
 	else if (StrCmp(lpszSection, _T("TraySettings")) == 0)
 	{
-		UpdateCaptionIcons();
+		UpdateWindowIcons();
 	}
 		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);

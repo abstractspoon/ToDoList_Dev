@@ -110,6 +110,7 @@ public:
 	BOOL Create(DWORD dwOptions = (TTDO_ALLOWPARENTTRACKING | TTDO_FORMATTIMESASHMS));
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetOption(DWORD dwOption, BOOL bEnable = TRUE);
+	void SetWindowIcons(HICON hIconBig, HICON hIconSmall);
 	
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC);
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
@@ -140,7 +141,6 @@ protected:
 	CIconButton m_btnStart;
 	CWndPromptManager m_mgrPrompts;
 	CSize m_sizeMin, m_sizeMax, m_sizeLast;
-	HICON m_hIconSmall, m_hIconBig;
 	
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;
@@ -188,7 +188,6 @@ protected:
 	afx_msg void OnToggleTopMost();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	
 protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
@@ -215,7 +214,5 @@ protected:
 	int CalcAvailableRows(int nHeight) const;
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
-	void UpdateCaptionIcons();
-	BOOL IsActivelyTracking() const;
 
 };

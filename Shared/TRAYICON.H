@@ -38,7 +38,7 @@ public:
 	BOOL SetTip(UINT uIDNewTip);
 	BOOL SetTip(LPCTSTR sNewTip);
 	BOOL SetIcon(UINT uIDNewIcon);
-	BOOL SetIcon(HICON hNewIcon);
+	BOOL SetIcon(HICON hNewIcon, BOOL bAutoDelete);
 
 	BOOL ShowBalloon(LPCTSTR szText, LPCTSTR szTitle = NULL,
                      DWORD dwIcon = NIIF_NONE, UINT uTimeout = 5);
@@ -55,6 +55,7 @@ private:
 	int m_nAnimationDelay;
 	int m_nCurIcon;
 	BOOL m_bTemporaryIcon;
+	BOOL m_bIconOwner;
 
 	CSubclassWnd m_scParent;
 
@@ -72,9 +73,7 @@ protected:
 private:
 	BOOL AddToTray();
 	BOOL DeleteFromTray();
-	BOOL ModifyTip(UINT uIDNewTip);
 	BOOL ModifyTip(LPCTSTR sNewTip);
-	BOOL ModifyIcon(UINT uIDNewIcon);
 	BOOL ModifyIcon(HICON hNewIcon);
 
 };
