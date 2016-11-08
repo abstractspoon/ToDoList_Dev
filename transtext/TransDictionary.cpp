@@ -1,14 +1,15 @@
-// TransTextMgr.cpp: implementation of the CTransTextMgr class.
+// TransDictionary.cpp: implementation of the CTransDictionary class.
 //
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TransTextMgr.h"
+#include "TransDictionary.h"
 #include "TransTextUtils.h"
 
 #include "..\shared\xmlfile.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\wclassdefines.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -209,11 +210,6 @@ BOOL DICTITEM::FromXml(const CXmlItem* pXI)
 		m_sTextOut = pXI->GetItemValue(TEXTOUT);
 		m_sClassID = pXI->GetItemValue(CLASSID);
 
-		// mark text out as being not-translatable
-		// else the translated text can itself be translated!
-		if (!m_sTextOut.IsEmpty())
-			CTransTextMgr::IgnoreString(m_sTextOut, TRUE);
-
 		//  alternatives
 		const CXmlItem* pXISub = pXI->GetItem(ALTERNATIVE);
 
@@ -223,14 +219,7 @@ BOOL DICTITEM::FromXml(const CXmlItem* pXI)
 			CString sAlternative = pXISub->GetItemValue(TEXTOUT);
 
 			if (!sClassID.IsEmpty())
-			{
 				m_mapAlternatives[sClassID] = sAlternative;
-
-				// mark text out as being not-translatable
-				// else the translated text can itself be translated!
-				if (!sAlternative.IsEmpty())
-					CTransTextMgr::IgnoreString(sAlternative, TRUE);
-			}
 
 			// next
 			pXISub = pXISub->GetSibling();
@@ -297,10 +286,6 @@ BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine)
 
 	if (FromCsv(sLine, *this))
 	{
-		// mark text out as being not-translatable
-		// else the translated text can itself be translated!
-		CTransTextMgr::IgnoreString(m_sTextOut, TRUE);
-
 		// check for alternatives
 		int nNextLine = nLine + 1;
 
@@ -315,10 +300,6 @@ BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine)
 
 				if (!diAlt.m_sClassID.IsEmpty())
 					m_mapAlternatives[diAlt.m_sClassID] = diAlt.m_sTextOut;
-
-				// mark text out as being not-translatable
-				// else the translated text can itself be translated!
-				CTransTextMgr::IgnoreString(diAlt.m_sTextOut, TRUE);
 
 				nLine++;
 				nNextLine++;
@@ -385,6 +366,28 @@ BOOL DICTITEM::Merge(const DICTITEM& di)
 	}
 
 	return TRUE;
+}
+
+int DICTITEM::GetTextOut(CStringArray& aTextOut) const
+{
+	aTextOut.RemoveAll();
+
+	if (!m_sTextOut.IsEmpty())
+		aTextOut.Add(m_sTextOut);
+
+	// add non-empty alternatives
+	POSITION pos = m_mapAlternatives.GetStartPosition();
+	
+	while (pos)
+	{
+		CString sAltTextOut, sUnused;
+		m_mapAlternatives.GetNextAssoc(pos, sUnused, sAltTextOut);
+		
+		if (!sAltTextOut.IsEmpty())
+			aTextOut.Add(sAltTextOut);
+	}
+
+	return aTextOut.GetSize();
 }
 
 int DICTITEM::GetClassIDs(CStringArray& aClassIDs) const
@@ -688,6 +691,23 @@ BOOL DICTITEM::GetPossibleDuplicates(DICTITEM& diDup) const
 	return (diDup.m_mapAlternatives.GetCount() > 0);
 }
 
+BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
+{
+	if (sClassID == m_sClassID)
+	{
+		m_sTextOut = sTextOut;
+		return TRUE;
+	}
+	else if (HasClassID(sClassID)) // check alternatives
+	{
+		m_mapAlternatives[sClassID] = sTextOut;
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 CTransDictionary::CTransDictionary()
@@ -880,6 +900,8 @@ void CTransDictionary::FixupDictionary()
 
 	if (bCleaned)
 		SaveDictionary();
+
+	IgnoreTranslatedText();
 }
 
 BOOL CTransDictionary::LoadDictionaryItem(const CXmlItem* pXIDict)
@@ -1012,6 +1034,31 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 	}
 
 	return bCleaned;
+}
+
+void CTransDictionary::IgnoreTranslatedText()
+{
+	POSITION pos = m_mapItems.GetStartPosition();
+	
+	while (pos)
+	{
+		DICTITEM* pDI = NULL;
+		CString sKey;
+		
+		m_mapItems.GetNextAssoc(pos, sKey, pDI);
+		ASSERT(pDI && sKey == pDI->GetTextIn());
+
+		CStringArray aTextOut;
+		int nItem = pDI->GetTextOut(aTextOut);
+
+		while (nItem--)
+		{
+			const CString sItem = aTextOut[nItem];
+			ASSERT(!sItem.IsEmpty());
+
+			IgnoreString(sItem, TRUE);
+		}
+	}
 }
 
 void CTransDictionary::IgnoreString(const CString& sText, BOOL bPrepare)
@@ -1227,8 +1274,15 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 {
 	// check for valid text
 	// and that we're ignoring this item
-	if (!TransText::PrepareLookupText(sText) || WantIgnore(sText))
+	if (!TransText::PrepareLookupText(sText))
+	{
+		IgnoreString(sText, FALSE);
 		return NULL;
+	}
+	else if (WantIgnore(sText))
+	{
+		return NULL;
+	}
 
 	// can't auto-create if translating only
 	if (DICTITEM::WantTranslateOnly())
@@ -1331,10 +1385,16 @@ BOOL CTransDictionary::TranslateMenuShortcut(CString& sShortcut)
 		{
 			sPart = Misc::GetKeyName(VK_ESCAPE);
 		}
-		else // must be the last item
+		else
 		{
 			ASSERT(i == (nNumParts - 1));
-			ASSERT((sPart.GetLength() == 1) || ((sPart.GetLength() == 2) && (sPart[0] == 'F')));
+
+			// Try for a single key or function key else quit
+			BOOL bSingleKey = (sPart.GetLength() == 1);
+			BOOL bFuncKey = ((sPart.GetLength() == 2) && (sPart[0] == 'F'));
+
+			if (!bSingleKey && !bFuncKey)
+				return FALSE;
 		}
 
 		// add delimiter
@@ -1406,6 +1466,19 @@ BOOL CTransDictionary::GetPossibleDuplicates(CTransDictionary& tdDuplicates) con
 	}
 
 	return !tdDuplicates.IsEmpty();
+}
+
+BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)
+{
+	CString sTemp(sTextIn);
+	DICTITEM* pDI = GetDictItem(sTemp, FALSE);
+
+	if (pDI)
+		return pDI->ModifyItem(sClassID, sTextOut);
+
+	// else
+	ASSERT(0);
+	return FALSE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -1151,6 +1151,10 @@ SOURCE=.\res\app_std.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\app_timetrack.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\app_toolbar.bmp
 # End Source File
 # Begin Source File

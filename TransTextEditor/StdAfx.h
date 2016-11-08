@@ -3,8 +3,8 @@
 //      are changed infrequently
 //
 
-#if !defined(AFX_STDAFX_H__BEB85A7E_10B8_410B_BC4B_56649653A624__INCLUDED_)
-#define AFX_STDAFX_H__BEB85A7E_10B8_410B_BC4B_56649653A624__INCLUDED_
+#if !defined(AFX_STDAFX_H__E82D54E9_18AF_4BF1_879E_8C420AAAF6CD__INCLUDED_)
+#define AFX_STDAFX_H__E82D54E9_18AF_4BF1_879E_8C420AAAF6CD__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -25,19 +25,14 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
 #include <afxwin.h>         // MFC core and standard components
-
 #include <afxext.h>         // MFC extensions
-#include <afxcmn.h>			// MFC support for Windows Common Controls
 #include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
+#ifndef _AFX_NO_AFXCMN_SUPPORT
+#include <afxcmn.h>			// MFC support for Windows Common Controls
+#endif // _AFX_NO_AFXCMN_SUPPORT
 
-#pragma warning(disable:4239)
-#pragma warning(disable:4505)
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_STDAFX_H__BEB85A7E_10B8_410B_BC4B_56649653A624__INCLUDED_)
+#endif // !defined(AFX_STDAFX_H__E82D54E9_18AF_4BF1_879E_8C420AAAF6CD__INCLUDED_)

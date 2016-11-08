@@ -134,7 +134,7 @@ CString TransText::GetClassIDName(HMENU /*hMenu*/, int nMenuID)
 
 BOOL TransText::PrepareLookupText(CString& sText)
 {
-	// remove trailing/leading spaces
+	// remove trailing/leading spaces and delimiters
 	Misc::Trim(sText, SPACECHAR).TrimRight(':');
 	
 	// remove accelerators
@@ -143,10 +143,7 @@ BOOL TransText::PrepareLookupText(CString& sText)
 	
 	// check for numbers and symbols
 	if (Misc::IsNumber(sText) || Misc::IsSymbol(sText))
-	{
-		CTransTextMgr::IgnoreString(sText, FALSE);
 		return FALSE;
-	}
 	
 	// finally decode 'tricky' characters like tabs and newlines
 	DecodeChars(sText);

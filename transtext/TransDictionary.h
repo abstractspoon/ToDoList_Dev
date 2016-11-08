@@ -46,13 +46,16 @@ public:
 	BOOL Fixup();
 	BOOL NeedFixup(const CString& sClassID, CString& sReplaceID, CString& sReplaceText) const;
 	BOOL GetPossibleDuplicates(DICTITEM& diDup) const;
+	BOOL ModifyItem(const CString& sClassID, const CString& sTextOut);
 
 	void ClearTextOut();
 	void Reset();
 
 	const CString& GetTextIn() const { return m_sTextIn; }
 	const CString& GetTextOut() const { return m_sTextOut; }
- 	void SetTextIn(const CString& sText) { m_sTextIn = sText; }
+	const CString& GetClassID() const { return m_sClassID; }
+	const CMapStringToString& GetAlternatives() const { return m_mapAlternatives; }
+	int GetTextOut(CStringArray& aTextOut) const; // including alternatives
 
 	static void SetTranslationOption(ITT_TRANSLATEOPTION nOption);
 	static ITT_TRANSLATEOPTION GetTranslationOption() { return s_nTranslationOption; }
@@ -95,20 +98,15 @@ public:
 	CString GetDictionaryVersion() const { return m_sDictVersion; }
 	WORD GetDictionaryLanguageID() const { return m_wDictLanguageID; }
 
-	BOOL SaveDictionary(LPCTSTR szAltPath = NULL, BOOL bForce = FALSE);
-	BOOL SaveXmlDictionary(LPCTSTR szDictPath) const;
-	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
-
 	BOOL LoadDictionary(LPCTSTR szDictPath);
-	BOOL LoadXmlDictionary(LPCTSTR szDictPath);
-	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
-	void LoadItem(const CXmlItem* pXI);
-	BOOL LoadDictionaryItem(const CXmlItem* pXIDict);
+	BOOL SaveDictionary(LPCTSTR szAltPath = NULL, BOOL bForce = FALSE);
 	BOOL IsEmpty() const { return (m_mapItems.GetCount() == 0); }
 
 	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
 	BOOL Translate(CString& sText, HMENU hMenu, int nMenuID);
+
+	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
 	void DeleteDictionary();
 	void FixupDictionary();
@@ -130,6 +128,14 @@ protected:
 	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate = TRUE);
 	BOOL HasDictItem(CString& sText) const;
 	BOOL TranslateMenuShortcut(CString& sShortcut);
+	void IgnoreTranslatedText();
+	void LoadItem(const CXmlItem* pXI);
+	BOOL LoadDictionaryItem(const CXmlItem* pXIDict);
+
+	BOOL SaveXmlDictionary(LPCTSTR szDictPath) const;
+	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
+	BOOL LoadXmlDictionary(LPCTSTR szDictPath);
+	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
 
 	static int CompareProc(const void* pFirst, const void* pSecond);
 };
