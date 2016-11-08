@@ -953,12 +953,6 @@
     <None Include="res\timetrack_btns.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\tray_std.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\tray_tracking_std.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\update_filter.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -1011,6 +1005,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\reset.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\app_timetrack.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -301,7 +301,7 @@ LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
 	ASSERT(wParam == IDC_SAMPLETASKLIST);
 	UNUSED(wParam);
 
-	static HICON hIcon = AfxGetApp()->LoadIcon(IDI_TRAY_STD);
+	static HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
 	return (LRESULT)hIcon;
 }
 

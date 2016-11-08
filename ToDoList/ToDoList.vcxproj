@@ -730,6 +730,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\app_extra_metro.bmp" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
+    <None Include="res\app_timetrack.ico" />
     <None Include="res\app_toolbar.bmp" />
     <None Include="res\app_toolbar_metro.bmp" />
     <None Include="res\app_toolbar_std.bmp" />
@@ -779,8 +780,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\timetrack_btns.bmp" />
     <None Include="res\timetrack_toolbar_std.bmp" />
     <None Include="res\ToDoList.rc2" />
-    <None Include="res\tray_std.ico" />
-    <None Include="res\tray_tracking_std.ico" />
     <None Include="res\update_filter.ico" />
     <None Include="res\wiz_header.bmp" />
     <None Include="RES\XPcheckboxes.bmp" />

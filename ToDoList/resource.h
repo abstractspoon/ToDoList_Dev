@@ -34,7 +34,6 @@
 #define IDD_PREFTASKDEF_PAGE            156
 #define IDD_PREFUITASKLISTCOLORS_PAGE   157
 #define IDD_PREFEXPORT_PAGE             158
-#define IDI_TRAYTRACK_STD               174
 #define IDD_PREFMULTIUSER_PAGE          180
 #define IDD_PRINT_DIALOG                182
 #define IDD_TASKSELECTION_DIALOG        183
@@ -42,7 +41,6 @@
 #define IDD_TRANSFORM_DIALOG            187
 #define IDD_OFFSETDATES_DIALOG          188
 #define IDD_FILTER_BAR                  192
-#define IDI_TRAY_STD                    196
 #define IDD_KEYBOARDSHORTCUTDISPLAYDIALOG 199
 #define IDD_COLUMNSELECTION_DIALOG      201
 #define IDD_REGMIGRATION_DIALOG         203
@@ -129,6 +127,7 @@
 #define IDB_TIMETRACK_TOOLBAR_STD       300
 #define IDI_SIMPLETEXT                  302
 #define IDI_RESET                       303
+#define IDI_TIMETRACK_STD               304
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2079,7 +2078,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        304
+#define _APS_NEXT_RESOURCE_VALUE        305
 #define _APS_NEXT_COMMAND_VALUE         34560
 #define _APS_NEXT_CONTROL_VALUE         1492
 #define _APS_NEXT_SYMED_VALUE           108

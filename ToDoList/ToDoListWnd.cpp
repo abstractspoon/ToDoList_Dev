@@ -168,7 +168,8 @@ CToDoListWnd::CToDoListWnd() : CFrameWnd(),
 		m_bPasswordPrompting(TRUE),
 		m_bShowToolbar(TRUE),
 		m_bReloading(FALSE),
-		m_hIcon(NULL),
+		m_hIconSmall(NULL),
+		m_hIconBig(NULL),
 		m_hwndLastFocus(NULL),
 		m_bStartHidden(FALSE),
 		m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
@@ -200,8 +201,8 @@ CToDoListWnd::~CToDoListWnd()
 {
 	delete m_pPrefs;
 
-	if (m_hIcon)
-		DestroyIcon(m_hIcon);
+	::DestroyIcon(m_hIconSmall);
+	::DestroyIcon(m_hIconBig);
 
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
@@ -757,13 +758,12 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	
 	// set frame icon
-	HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME);
-	SetIcon(hIcon, FALSE);
-		
-	// set taskbar icon
-	hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 32);
-	SetIcon(hIcon, TRUE);
+	m_hIconBig = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 24);
+	SetIcon(m_hIconBig, TRUE);
 
+	m_hIconSmall = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 16);
+	SetIcon(m_hIconSmall, FALSE);
+		
 	SetWindowPos(NULL, 0, 0, 0, 0, SWP_DRAWFRAME | SWP_NOSIZE | SWP_NOZORDER | SWP_NOMOVE);
 
 	// Various key UI elements
@@ -1118,16 +1118,7 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnGetIcon(WPARAM bLargeIcon, LPARAM /*not used*/)
 {
-	if (!bLargeIcon)
-	{
-		// cache small icon for reuse
-		if (!m_hIcon)
-			m_hIcon = CSysImageList(FALSE).ExtractAppIcon();
-		
-		return (LRESULT)m_hIcon;
-	}
-	else
-		return Default();
+	return (LRESULT)(bLargeIcon ? m_hIconBig : m_hIconSmall);
 }
 
 BOOL CToDoListWnd::InitStatusbar()
@@ -1216,7 +1207,7 @@ BOOL CToDoListWnd::InitTrayIcon()
 {
 	// we always create the trayicon (for simplicity) but we only
 	// show it if required
-	if (!m_trayIcon.Create(this, IDC_TRAYICON, IDI_TRAY_STD, CEnString(IDS_COPYRIGHT)))
+	if (!m_trayIcon.Create(this, IDC_TRAYICON, IDR_MAINFRAME_STD, CEnString(IDS_COPYRIGHT)))
 		return FALSE;
 
 	if (Prefs().GetUseSysTray())
@@ -6317,12 +6308,20 @@ void CToDoListWnd::OnTimerTimeTracking()
 		
 	if (bWasTimeTracking != bNowTimeTracking)
 	{
-		UINT nIDTrayIcon = (bNowTimeTracking ? IDI_TRAYTRACK_STD : IDI_TRAY_STD);
-		m_trayIcon.SetIcon(nIDTrayIcon);
+		// Update visible icons
+		UINT nIDTrayIcon = (bNowTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 
-		// set the main window icon also as this helps the user know what's going on
-		HICON hIcon = GraphicsMisc::LoadIcon(nIDTrayIcon);
-		SetIcon(hIcon, FALSE);
+		::DestroyIcon(m_hIconBig);
+		::DestroyIcon(m_hIconSmall);
+
+		m_hIconSmall = GraphicsMisc::LoadIcon(nIDTrayIcon, 16);
+		m_hIconBig = GraphicsMisc::LoadIcon(nIDTrayIcon, 24);
+		
+		SetIcon(m_hIconSmall, FALSE);
+		SetIcon(m_hIconBig, TRUE);
+
+		m_trayIcon.SetIcon(m_hIconSmall);
+		m_dlgTimeTracker.SetIcons(m_hIconBig, m_hIconSmall);
 	}
 	
 	bWasTimeTracking = bNowTimeTracking;

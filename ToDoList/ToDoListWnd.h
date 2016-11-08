@@ -108,7 +108,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
-	HICON m_hIcon;
+	HICON m_hIconSmall, m_hIconBig;
 	HWND m_hwndLastFocus;
 	CTDCStartupOptions m_startupOptions;
 	TDC_COLUMN m_nContextColumnID;

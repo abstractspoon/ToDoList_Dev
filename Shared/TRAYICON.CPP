@@ -94,7 +94,7 @@ BOOL CTrayIcon::Create(CWnd* pParentWnd, UINT uID, UINT uIDIcon, UINT uIDTip)
 		CRect(0,0,0,0), pParentWnd, uID))
 		return FALSE;
 
-	m_hIcon = AfxGetApp()->LoadIcon(uIDIcon);
+	m_hIcon = GraphicsMisc::LoadIcon(uIDIcon, 16);
 	m_sTip.LoadString(uIDTip);
 
 	m_nm.hdr.hwndFrom = GetSafeHwnd();
@@ -280,7 +280,7 @@ BOOL CTrayIcon::DeleteFromTray()
 
 BOOL CTrayIcon::ModifyIcon(UINT uIDNewIcon)
 {
-	return ModifyIcon(GraphicsMisc::LoadIcon(uIDNewIcon));
+	return ModifyIcon(GraphicsMisc::LoadIcon(uIDNewIcon, 16));
 }
 
 BOOL CTrayIcon::ModifyIcon(HICON hNewIcon)

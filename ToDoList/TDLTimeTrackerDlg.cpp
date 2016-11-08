@@ -383,7 +383,6 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
@@ -528,7 +527,7 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
 		
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME_STD);
+	HICON m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
 	SetIcon(m_hIcon, TRUE);
 
 	EnableToolTips(TRUE);
@@ -869,6 +868,12 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 	UpdateData(FALSE);
 
 	UpdateButtonState();
+}
+
+void CTDLTimeTrackerDlg::SetIcons(HICON hIconBig, HICON hIconSmall)
+{
+	SetIcon(hIconBig, TRUE);
+	SetIcon(hIconSmall, FALSE);
 }
 
 BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)

@@ -2487,8 +2487,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_MAINFRAME_STD       ICON    DISCARDABLE     "RES\\app_std.ico"
-IDI_TRAYTRACK_STD       ICON    DISCARDABLE     "res\\tray_tracking_std.ico"
-IDI_TRAY_STD            ICON    DISCARDABLE     "RES\\tray_std.ico"
 IDI_FIND_DIALOG_STD     ICON    DISCARDABLE     "res\\find_dialog_std.ico"
 IDI_VISTASHIELD         ICON    DISCARDABLE     "res\\shield.ico"
 IDI_TASKTREE_STD        ICON    DISCARDABLE     "res\\task_tree_std.ico"
@@ -2517,6 +2515,7 @@ IDI_NOTE                ICON    DISCARDABLE     "res\\note.ico"
 IDI_OUTLOOK             ICON    DISCARDABLE     "res\\outlook_16.ico"
 IDI_TASK                ICON    DISCARDABLE     "res\\task.ico"
 IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
+IDI_TIMETRACK_STD       ICON                    "res\\app_timetrack.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
