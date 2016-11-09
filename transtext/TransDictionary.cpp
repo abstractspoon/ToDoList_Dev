@@ -1302,7 +1302,7 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 #ifdef DEBUG
 	else if (pDI && !pDI->GetTextOut().IsEmpty())
 	{
-		int breakpoint = 0;
+		//int breakpoint = 0;
 	}
 #endif
 
@@ -1337,7 +1337,7 @@ BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID
 #ifdef DEBUG
 	else
 	{
-		int breakpoint = 0;
+		//int breakpoint = 0;
 	}
 #endif
 
@@ -1443,7 +1443,7 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
 #ifdef DEBUG
 	else
 	{
-		int breakpoint = 0;
+		//int breakpoint = 0;
 	}
 #endif
 	
