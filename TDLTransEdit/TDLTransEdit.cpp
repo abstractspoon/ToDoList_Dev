@@ -5,6 +5,8 @@
 #include "TDLTransEdit.h"
 #include "TDLTransEditDlg.h"
 
+#include "..\shared\filemisc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -45,6 +47,10 @@ BOOL CTDLTransEditApp::InitInstance()
 	// If you are not using these features and wish to reduce the size
 	//  of your final executable, you should remove from the following
 	//  the specific initialization routines you do not need.
+	CString sIniPath(FileMisc::GetAppFilePath());
+	FileMisc::ReplaceExtension(sIniPath, _T(".ini"));
+
+	m_pszProfileName = _tcsdup(sIniPath);
 
 	CTDLTransEditDlg dlg;
 	m_pMainWnd = &dlg;

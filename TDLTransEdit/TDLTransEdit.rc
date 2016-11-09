@@ -44,7 +44,11 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "ToDoList Translation Editor"
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "List1",IDC_DICTIONARY,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EDITLABELS | LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,0,0,445,276
+    CONTROL         "List1",IDC_DICTIONARY,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EDITLABELS | LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,5,4,435,231
+    EDITTEXT        IDC_ENGLISH,56,241,384,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "&English",IDC_ENGLISHLABEL,5,244,47,8
+    EDITTEXT        IDC_TRANSLATION,56,259,384,14,ES_AUTOHSCROLL
+    LTEXT           "&Translation",IDC_TRANSLABEL,5,261,48,8
 END
 
 
@@ -105,6 +109,13 @@ BEGIN
         RIGHTMARGIN, 228
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
+    END
+
+    IDD_TDLTRANSEDIT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 440
+        BOTTOMMARGIN, 273
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -200,10 +211,10 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// 24
+// RT_MANIFEST
 //
 
-IDR_MANIFEST            24      DISCARDABLE     "res\\TDLTransEdit.exe.manifest"
+IDR_MANIFEST            RT_MANIFEST             "res\\TDLTransEdit.exe.manifest"
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
