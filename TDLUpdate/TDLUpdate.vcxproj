@@ -195,7 +195,7 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
     <ClInclude Include="TDLWebUpdater.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\app_std.ico" />
+    <None Include="res\TDLUpdate.ico" />
     <None Include="res\TDLUpdate.rc2" />
     <None Include="res\wiz_header.bmp" />
   </ItemGroup>

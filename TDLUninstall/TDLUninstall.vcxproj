@@ -203,7 +203,7 @@ copy unicode_debug\TDLUninstall.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDLUninstall.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\app_std.ico" />
+    <None Include="res\TDLUninstall.ico" />
     <None Include="res\TDLUninstall.rc2" />
   </ItemGroup>
   <ItemGroup>

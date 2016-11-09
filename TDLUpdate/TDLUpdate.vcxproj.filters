@@ -55,7 +55,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\app_std.ico">
+    <None Include="res\TDLUpdate.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\TDLUpdate.rc2">

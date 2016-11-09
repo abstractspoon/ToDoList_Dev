@@ -150,7 +150,7 @@ SOURCE=.\TDLWebUpdater.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\res\app_std.ico
+SOURCE=.\res\TDLUpdate.ico
 # End Source File
 # Begin Source File
 
