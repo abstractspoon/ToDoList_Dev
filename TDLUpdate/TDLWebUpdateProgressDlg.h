@@ -7,6 +7,8 @@
 // WebUpdateProgressDlg.h : header file
 //
 
+#include "..\shared\WindowIcons.h"
+
 //////////////////////////////////////////////////////////////////////
 
 enum TDL_WEBUPDATE_PROGRESS
@@ -40,7 +42,7 @@ protected:
 	CString	m_sProgress;
 	//}}AFX_DATA
 	HFONT m_hFont;
-	
+
 	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLWebUpdatePromptDlg)
@@ -102,6 +104,7 @@ protected:
 	HFONT m_hFont;
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
+	CWindowIcons m_icons;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

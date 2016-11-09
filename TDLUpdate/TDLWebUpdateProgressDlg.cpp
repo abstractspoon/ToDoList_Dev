@@ -10,6 +10,7 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\filemisc.h"
+#include "..\Shared\windowicons.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -142,8 +143,7 @@ BOOL CTDLWebUpdateProgressDlg::OnInitDialog()
 	SetIcon(hIcon, FALSE);
 	
 	// set taskbar icon
-	hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME, 32);
-	SetIcon(hIcon, TRUE);
+	m_icons.Initialise(*this, IDR_MAINFRAME);
 
 	CPropertySheetEx::OnInitDialog();
 

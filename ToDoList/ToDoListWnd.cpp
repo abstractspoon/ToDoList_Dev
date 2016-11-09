@@ -168,8 +168,6 @@ CToDoListWnd::CToDoListWnd() : CFrameWnd(),
 		m_bPasswordPrompting(TRUE),
 		m_bShowToolbar(TRUE),
 		m_bReloading(FALSE),
-		m_hIconSmall(NULL),
-		m_hIconBig(NULL),
 		m_hwndLastFocus(NULL),
 		m_bStartHidden(FALSE),
 		m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
@@ -201,9 +199,6 @@ CToDoListWnd::~CToDoListWnd()
 {
 	delete m_pPrefs;
 
-	::DestroyIcon(m_hIconSmall);
-	::DestroyIcon(m_hIconBig);
-
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
 	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("ToDoList.print"), _T("html")), TRUE);
@@ -213,8 +208,8 @@ CToDoListWnd::~CToDoListWnd()
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 //{{AFX_MSG_MAP(CToDoListWnd)
-	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_COMMAND(ID_TOOLS_SELECTINEXPLORER, OnToolsSelectinExplorer)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTINEXPLORER, OnUpdateToolsSelectinExplorer)
@@ -1113,7 +1108,7 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnGetIcon(WPARAM bLargeIcon, LPARAM /*not used*/)
 {
-	return (LRESULT)(bLargeIcon ? m_hIconBig : m_hIconSmall);
+	return (LRESULT)(bLargeIcon ? m_icons.GetBigIcon() : m_icons.GetSmallIcon());
 }
 
 BOOL CToDoListWnd::InitStatusbar()
@@ -6315,10 +6310,13 @@ void CToDoListWnd::UpdateWindowIcons()
 	BOOL bTimeTracking = IsActivelyTimeTracking();
 	UINT nIDIcon = (bTimeTracking ? IDI_TIMETRACK_STD : IDR_MAINFRAME_STD);
 
-	LoadSetWindowIcons(*this, nIDIcon, m_hIconBig, m_hIconSmall);
+	if (!m_icons.IsInitialised())
+		VERIFY(m_icons.Initialise(*this, nIDIcon));
+	else
+		VERIFY(m_icons.ModifyIcon(nIDIcon));
 
-	m_trayIcon.SetIcon(m_hIconSmall, FALSE);
-	m_dlgTimeTracker.SetWindowIcons(m_hIconBig, m_hIconSmall);
+	m_trayIcon.SetIcon(m_icons.GetSmallIcon(), FALSE);
+	m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
 }
 
 void CToDoListWnd::OnTimerTimeTrackReminder()
@@ -12270,7 +12268,10 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	}
 	else if (StrCmp(lpszSection, _T("TraySettings")) == 0)
 	{
-		UpdateWindowIcons();
+		// Icons themselves will already have been updated
+		// so we just need to handle dependencies
+		m_trayIcon.SetIcon(m_icons.GetSmallIcon(), FALSE);
+		m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
 	}
 		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);

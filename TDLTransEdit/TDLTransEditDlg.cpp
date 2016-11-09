@@ -70,8 +70,6 @@ CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
@@ -102,6 +100,7 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	GetWindowText(m_sBaseTitle);
+	m_icons.Initialise(*this, IDR_MAINFRAME);
 
 	// Add "About..." menu item to system menu.
 
@@ -126,11 +125,6 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 	if (menu.LoadMenu(IDR_MAINFRAME))
 		SetMenu(&menu);
 
-	// Set the icon for this dialog.  The framework does this automatically
-	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
-	
 	m_lcDictItems.AddCol(_T("English Text"), 300);
 	m_lcDictItems.AddCol(_T("Translated Text"), 300);
 	m_lcDictItems.AddCol(_T("UI Element"), 100);

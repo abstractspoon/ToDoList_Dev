@@ -44,6 +44,7 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
+#include "..\shared\windowicons.h"
 
 #include "..\3rdparty\statusbarACT.h"
 
@@ -108,7 +109,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
-	HICON m_hIconSmall, m_hIconBig;
+	CWindowIcons m_icons;
 	HWND m_hwndLastFocus;
 	CTDCStartupOptions m_startupOptions;
 	TDC_COLUMN m_nContextColumnID;
@@ -154,8 +155,8 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
-	afx_msg void OnViewShowTimeTracker();
 	//}}AFX_MSG
+	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();
 	afx_msg void OnAddtimetologfile();
 	afx_msg void OnArchiveSelectedTasks();

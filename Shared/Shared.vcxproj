@@ -670,6 +670,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="WindowIcons.cpp" />
     <ClCompile Include="winhelpbutton.cpp" />
     <ClCompile Include="WndMisc.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -849,6 +850,7 @@
     <ClInclude Include="webbrowserctrl.h" />
     <ClInclude Include="WebMisc.h" />
     <ClInclude Include="WinClasses.h" />
+    <ClInclude Include="WindowIcons.h" />
     <ClInclude Include="WinHelpButton.h" />
     <ClInclude Include="winstyles.h" />
     <ClInclude Include="WndMisc.h" />

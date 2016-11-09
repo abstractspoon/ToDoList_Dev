@@ -13,6 +13,7 @@
 #include "..\transtext\transdictionary.h"
 
 #include "..\shared\InputListCtrl.h"
+#include "..\shared\WindowIcons.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
@@ -23,6 +24,7 @@ class CTDLTransEditDlg : public CDialog
 public:
 	CTDLTransEditDlg(CWnd* pParent = NULL);	// standard constructor
 
+protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTransEditDlg)
 	enum { IDD = IDD_TDLTRANSEDIT_DIALOG };
@@ -31,18 +33,15 @@ public:
 	CTransDictionary m_dictionary;
 	BOOL m_bEdited;
 	CString m_sBaseTitle;
+	CWindowIcons m_icons;
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTransEditDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
 	virtual void OnCancel();
-
-// Implementation
-protected:
-	HICON m_hIcon;
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTransEditDlg)

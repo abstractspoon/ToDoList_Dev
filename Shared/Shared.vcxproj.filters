@@ -457,6 +457,9 @@
     <ClCompile Include="ToolTipCtrlEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WindowIcons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -949,6 +952,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ToolTipCtrlEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowIcons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
