@@ -1,8 +1,8 @@
-// TransTextEditorDlg.h : header file
+// TDLTransEditDlg.h : header file
 //
 
-#if !defined(AFX_TRANSTEXTEDITORDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_)
-#define AFX_TRANSTEXTEDITORDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_
+#if !defined(AFX_TDLTRANSEDITDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_)
+#define AFX_TDLTRANSEDITDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -15,17 +15,17 @@
 #include "..\shared\InputListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorDlg dialog
+// CTDLTransEditDlg dialog
 
-class CTransTextEditorDlg : public CDialog
+class CTDLTransEditDlg : public CDialog
 {
 // Construction
 public:
-	CTransTextEditorDlg(CWnd* pParent = NULL);	// standard constructor
+	CTDLTransEditDlg(CWnd* pParent = NULL);	// standard constructor
 
 // Dialog Data
-	//{{AFX_DATA(CTransTextEditorDlg)
-	enum { IDD = IDD_TRANSTEXTEDITOR_DIALOG };
+	//{{AFX_DATA(CTDLTransEditDlg)
+	enum { IDD = IDD_TDLTRANSEDIT_DIALOG };
 	//}}AFX_DATA
 	CInputListCtrl	m_lcDictItems;
 	CTransDictionary m_dictionary;
@@ -33,7 +33,7 @@ public:
 	CString m_sBaseTitle;
 
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTransTextEditorDlg)
+	//{{AFX_VIRTUAL(CTDLTransEditDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -45,7 +45,7 @@ protected:
 	HICON m_hIcon;
 
 	// Generated message map functions
-	//{{AFX_MSG(CTransTextEditorDlg)
+	//{{AFX_MSG(CTDLTransEditDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnFileLoadDictionary();
@@ -70,4 +70,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TRANSTEXTEDITORDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_)
+#endif // !defined(AFX_TDLTRANSEDITDLG_H__0F67B66D_B692_4CF0_B237_D0698B2E44ED__INCLUDED_)

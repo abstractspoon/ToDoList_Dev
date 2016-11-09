@@ -1,9 +1,9 @@
-// TransTextEditor.cpp : Defines the class behaviors for the application.
+// TDLTransEdit.cpp : Defines the class behaviors for the application.
 //
 
 #include "stdafx.h"
-#include "TransTextEditor.h"
-#include "TransTextEditorDlg.h"
+#include "TDLTransEdit.h"
+#include "TDLTransEditDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -12,10 +12,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorApp
+// CTDLTransEditApp
 
-BEGIN_MESSAGE_MAP(CTransTextEditorApp, CWinApp)
-	//{{AFX_MSG_MAP(CTransTextEditorApp)
+BEGIN_MESSAGE_MAP(CTDLTransEditApp, CWinApp)
+	//{{AFX_MSG_MAP(CTDLTransEditApp)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 		//    DO NOT EDIT what you see in these blocks of generated code!
 	//}}AFX_MSG
@@ -23,30 +23,30 @@ BEGIN_MESSAGE_MAP(CTransTextEditorApp, CWinApp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorApp construction
+// CTDLTransEditApp construction
 
-CTransTextEditorApp::CTransTextEditorApp()
+CTDLTransEditApp::CTDLTransEditApp()
 {
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// The one and only CTransTextEditorApp object
+// The one and only CTDLTransEditApp object
 
-CTransTextEditorApp theApp;
+CTDLTransEditApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorApp initialization
+// CTDLTransEditApp initialization
 
-BOOL CTransTextEditorApp::InitInstance()
+BOOL CTDLTransEditApp::InitInstance()
 {
 	// Standard initialization
 	// If you are not using these features and wish to reduce the size
 	//  of your final executable, you should remove from the following
 	//  the specific initialization routines you do not need.
 
-	CTransTextEditorDlg dlg;
+	CTDLTransEditDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

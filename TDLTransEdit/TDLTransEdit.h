@@ -1,8 +1,8 @@
-// TransTextEditor.h : main header file for the TRANSTEXTEDITOR application
+// TDLTransEdit.h : main header file for the TDLTRANSEDIT application
 //
 
-#if !defined(AFX_TRANSTEXTEDITOR_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_)
-#define AFX_TRANSTEXTEDITOR_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_
+#if !defined(AFX_TDLTRANSEDIT_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_)
+#define AFX_TDLTRANSEDIT_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -15,25 +15,25 @@
 #include "resource.h"		// main symbols
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorApp:
-// See TransTextEditor.cpp for the implementation of this class
+// CTDLTransEditApp:
+// See TDLTransEdit.cpp for the implementation of this class
 //
 
-class CTransTextEditorApp : public CWinApp
+class CTDLTransEditApp : public CWinApp
 {
 public:
-	CTransTextEditorApp();
+	CTDLTransEditApp();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTransTextEditorApp)
+	//{{AFX_VIRTUAL(CTDLTransEditApp)
 	public:
 	virtual BOOL InitInstance();
 	//}}AFX_VIRTUAL
 
 // Implementation
 
-	//{{AFX_MSG(CTransTextEditorApp)
+	//{{AFX_MSG(CTDLTransEditApp)
 		// NOTE - the ClassWizard will add and remove member functions here.
 		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_MSG
@@ -46,4 +46,4 @@ public:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TRANSTEXTEDITOR_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_)
+#endif // !defined(AFX_TDLTRANSEDIT_H__E915F0C0_D396_4CCA_AD3C_BFD1B8B10A4D__INCLUDED_)

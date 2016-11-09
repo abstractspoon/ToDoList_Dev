@@ -21,10 +21,10 @@
     <ClCompile Include="..\transtext\TransDictionary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TransTextEditor.cpp">
+    <ClCompile Include="TDLTransEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TransTextEditorDlg.cpp">
+    <ClCompile Include="TDLTransEditDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\transtext\TransTextUtils.cpp">
@@ -32,7 +32,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TransTextEditor.rc">
+    <ResourceCompile Include="TDLTransEdit.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -46,10 +46,10 @@
     <ClInclude Include="..\TransText\TransDictionary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TransTextEditor.h">
+    <ClInclude Include="TDLTransEdit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TransTextEditorDlg.h">
+    <ClInclude Include="TDLTransEditDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\TransText\TransTextUtils.h">
@@ -57,13 +57,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="res\TransTextEditor.exe.manifest" />
+    <Manifest Include="res\TDLTransEdit.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="res\TransTextEditor.ico">
+    <CustomBuild Include="res\TDLTransEdit.ico">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="res\TransTextEditor.rc2">
+    <CustomBuild Include="res\TDLTransEdit.rc2">
       <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="ReadMe.txt" />

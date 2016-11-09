@@ -60,7 +60,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_MBCS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Unicode_Debug\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Unicode_Debug\TransTextEditor.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Unicode_Debug\TDLTransEdit.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <ObjectFileName>.\Unicode_Debug\</ObjectFileName>
@@ -70,7 +70,7 @@
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TypeLibraryName>.\Unicode_Debug\TransTextEditor.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Unicode_Debug\TDLTransEdit.tlb</TypeLibraryName>
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
     </Midl>
@@ -80,13 +80,13 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Debug\TransTextEditor.bsc</OutputFile>
+      <OutputFile>.\Unicode_Debug\TDLTransEdit.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>.\Unicode_Debug\TransTextEditor.exe</OutputFile>
+      <OutputFile>.\Unicode_Debug\TDLTransEdit.exe</OutputFile>
       <EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -101,7 +101,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_MBCS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Unicode_Release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Unicode_Release\TransTextEditor.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>.\Unicode_Release\TDLTransEdit.pch</PrecompiledHeaderOutputFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <ObjectFileName>.\Unicode_Release\</ObjectFileName>
@@ -110,7 +110,7 @@
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TypeLibraryName>.\Unicode_Release\TransTextEditor.tlb</TypeLibraryName>
+      <TypeLibraryName>.\Unicode_Release\TDLTransEdit.tlb</TypeLibraryName>
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
     </Midl>
@@ -120,12 +120,12 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Release\TransTextEditor.bsc</OutputFile>
+      <OutputFile>.\Unicode_Release\TDLTransEdit.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>.\Unicode_Release\TransTextEditor.exe</OutputFile>
+      <OutputFile>.\Unicode_Release\TDLTransEdit.exe</OutputFile>
       <EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -137,30 +137,38 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="..\transtext\TransDictionary.cpp" />
-    <ClCompile Include="TransTextEditor.cpp" />
-    <ClCompile Include="TransTextEditorDlg.cpp" />
+    <ClCompile Include="TDLTransEdit.cpp" />
+    <ClCompile Include="TDLTransEditDlg.cpp" />
     <ClCompile Include="..\transtext\TransTextUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TransTextEditor.rc" />
+    <ResourceCompile Include="TDLTransEdit.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="..\TransText\TransDictionary.h" />
-    <ClInclude Include="TransTextEditor.h" />
-    <ClInclude Include="TransTextEditorDlg.h" />
+    <ClInclude Include="TDLTransEdit.h" />
+    <ClInclude Include="TDLTransEditDlg.h" />
     <ClInclude Include="..\TransText\TransTextUtils.h" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="res\TransTextEditor.ico" />
-    <CustomBuild Include="res\TransTextEditor.rc2">
+    <CustomBuild Include="res\TDLTransEdit.ico" />
+    <CustomBuild Include="res\TDLTransEdit.rc2">
       <FileType>RC</FileType>
     </CustomBuild>
     <CustomBuild Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="res\TransTextEditor.exe.manifest" />
+    <Manifest Include="res\TDLTransEdit.exe.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">
+      <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Shared\Shared.vcxproj">
+      <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

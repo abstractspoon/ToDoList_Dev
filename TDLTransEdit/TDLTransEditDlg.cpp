@@ -1,9 +1,9 @@
-// TransTextEditorDlg.cpp : implementation file
+// TDLTransEditDlg.cpp : implementation file
 //
 
 #include "stdafx.h"
-#include "TransTextEditor.h"
-#include "TransTextEditorDlg.h"
+#include "TDLTransEdit.h"
+#include "TDLTransEditDlg.h"
 
 #include "..\shared\enfiledialog.h"
 #include "..\shared\holdredraw.h"
@@ -62,28 +62,28 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorDlg dialog
+// CTDLTransEditDlg dialog
 
-CTransTextEditorDlg::CTransTextEditorDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CTransTextEditorDlg::IDD, pParent), m_bEdited(FALSE)
+CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
+	: CDialog(CTDLTransEditDlg::IDD, pParent), m_bEdited(FALSE)
 {
-	//{{AFX_DATA_INIT(CTransTextEditorDlg)
+	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
-void CTransTextEditorDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTransTextEditorDlg)
+	//{{AFX_DATA_MAP(CTDLTransEditDlg)
 	DDX_Control(pDX, IDC_DICTIONARY, m_lcDictItems);
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(CTransTextEditorDlg, CDialog)
-	//{{AFX_MSG_MAP(CTransTextEditorDlg)
+BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
+	//{{AFX_MSG_MAP(CTDLTransEditDlg)
 	ON_WM_SYSCOMMAND()
 	ON_COMMAND(ID_FILE_LOADDICTIONARY, OnFileLoadDictionary)
 	ON_COMMAND(ID_FILE_SAVEDICTIONARY, OnFileSaveDictionary)
@@ -95,9 +95,9 @@ BEGIN_MESSAGE_MAP(CTransTextEditorDlg, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTransTextEditorDlg message handlers
+// CTDLTransEditDlg message handlers
 
-BOOL CTransTextEditorDlg::OnInitDialog()
+BOOL CTDLTransEditDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
@@ -154,7 +154,7 @@ BOOL CTransTextEditorDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
-void CTransTextEditorDlg::OnSysCommand(UINT nID, LPARAM lParam)
+void CTDLTransEditDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
@@ -167,7 +167,7 @@ void CTransTextEditorDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-void CTransTextEditorDlg::OnFileLoadDictionary() 
+void CTDLTransEditDlg::OnFileLoadDictionary() 
 {
 	CFileOpenDialog dialog(_T("Select Dictionary"), _T(".csv"), NULL, EOFN_DEFAULTOPEN, _T("Dictionaries (*.csv)|*.csv||"));
 
@@ -175,7 +175,7 @@ void CTransTextEditorDlg::OnFileLoadDictionary()
 		LoadDictionary(dialog.GetPathName());
 }
 
-BOOL CTransTextEditorDlg::LoadDictionary(LPCTSTR szDictPath)
+BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath)
 {
 	if (PromptAndSave())
 	{
@@ -238,7 +238,7 @@ BOOL CTransTextEditorDlg::LoadDictionary(LPCTSTR szDictPath)
 	return FALSE;
 }
 
-void CTransTextEditorDlg::OnFileSaveDictionary() 
+void CTDLTransEditDlg::OnFileSaveDictionary() 
 {
 	m_dictionary.SaveDictionary();
 
@@ -246,14 +246,14 @@ void CTransTextEditorDlg::OnFileSaveDictionary()
 	UpdateCaption();
 }
 
-void CTransTextEditorDlg::OnSize(UINT nType, int cx, int cy) 
+void CTDLTransEditDlg::OnSize(UINT nType, int cx, int cy) 
 {
 	CDialog::OnSize(nType, cx, cy);
 	
 	ResizeList(cx, cy);
 }
 
-void CTransTextEditorDlg::ResizeList(int cx, int cy)
+void CTDLTransEditDlg::ResizeList(int cx, int cy)
 {
 	if (m_lcDictItems.GetSafeHwnd())
 	{
@@ -276,7 +276,7 @@ void CTransTextEditorDlg::ResizeList(int cx, int cy)
 	}
 }
 
-void CTransTextEditorDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult) 
+void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
 
@@ -294,7 +294,7 @@ void CTransTextEditorDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResu
 	*pResult = 0;
 }
 
-void CTransTextEditorDlg::UpdateCaption()
+void CTDLTransEditDlg::UpdateCaption()
 {
 	CString sCaption(m_sBaseTitle);
 	CString sDictPath(m_dictionary.GetDictionaryPath());
@@ -311,17 +311,17 @@ void CTransTextEditorDlg::UpdateCaption()
 	SetWindowText(sCaption);
 }
 
-void CTransTextEditorDlg::OnOK()
+void CTDLTransEditDlg::OnOK()
 {
 	// do nothing
 }
 
-void CTransTextEditorDlg::OnCancel()
+void CTDLTransEditDlg::OnCancel()
 {
 	// do nothing
 }
 
-BOOL CTransTextEditorDlg::PromptAndSave()
+BOOL CTDLTransEditDlg::PromptAndSave()
 {
 	if (m_bEdited)
 	{
@@ -346,12 +346,12 @@ BOOL CTransTextEditorDlg::PromptAndSave()
 	return TRUE;
 }
 
-void CTransTextEditorDlg::OnFileExit() 
+void CTDLTransEditDlg::OnFileExit() 
 {
 	EndDialog(IDCANCEL);
 }
 
-void CTransTextEditorDlg::OnClose() 
+void CTDLTransEditDlg::OnClose() 
 {
 	if (PromptAndSave())
 	{
@@ -360,7 +360,7 @@ void CTransTextEditorDlg::OnClose()
 	}
 }
 
-void CTransTextEditorDlg::LoadState()
+void CTDLTransEditDlg::LoadState()
 {
 	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("Dictionary"));
 	
@@ -368,7 +368,7 @@ void CTransTextEditorDlg::LoadState()
 		LoadDictionary(sDictPath);
 }
 
-void CTransTextEditorDlg::SaveState()
+void CTDLTransEditDlg::SaveState()
 {
 	AfxGetApp()->WriteProfileString(_T("State"), _T("Dictionary"), m_dictionary.GetDictionaryPath());
 }

@@ -1,12 +1,12 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by TransTextEditor.rc
+// Used by TDLTransEdit.rc
 //
 #define IDR_MANIFEST                    1
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
-#define IDD_TRANSTEXTEDITOR_DIALOG      102
+#define IDD_TDLTRANSEDIT_DIALOG      102
 #define IDS_SAVECHANGES                 102
 #define IDR_MAINFRAME                   128
 #define IDC_DICTIONARY                  1000
