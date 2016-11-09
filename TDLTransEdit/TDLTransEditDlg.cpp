@@ -67,6 +67,8 @@ END_MESSAGE_MAP()
 
 CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CTDLTransEditDlg::IDD, pParent), m_bEdited(FALSE)
+	, m_sEnglish(_T(""))
+	, m_sTranslation(_T(""))
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 		// NOTE: the ClassWizard will add member initialization here
@@ -79,6 +81,8 @@ void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLTransEditDlg)
 	DDX_Control(pDX, IDC_DICTIONARY, m_lcDictItems);
 	//}}AFX_DATA_MAP
+	DDX_Text(pDX, IDC_ENGLISH, m_sEnglish);
+	DDX_Text(pDX, IDC_TRANSLATION, m_sTranslation);
 }
 
 BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
@@ -91,6 +95,7 @@ BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	ON_COMMAND(ID_FILE_CLOSE, OnFileExit)
 	ON_WM_CLOSE()
 	//}}AFX_MSG_MAP
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DICTIONARY, &CTDLTransEditDlg::OnListItemChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -130,7 +135,7 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 
 	DICTITEM::SetTranslationOption(ITTTO_ADD2DICTIONARY);
 	
-	ResizeList();
+	Resize();
 	LoadState();
 	
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -188,29 +193,44 @@ void CTDLTransEditDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 	
-	ResizeList(cx, cy);
+	Resize(cx, cy);
 }
 
-void CTDLTransEditDlg::ResizeList(int cx, int cy)
+void CTDLTransEditDlg::Resize(int cx, int cy)
 {
 	if (m_lcDictItems.GetSafeHwnd())
 	{
-		if ((cx == 0) && (cy == 0))
-		{
-			CRect rClient;
+		CRect rClient(0, 0, cx, cy);
+
+		if (rClient.IsRectNull())
 			GetClientRect(rClient);
 
-			cx = rClient.Width();
-			cy = rClient.Height();
-		}
+		rClient.DeflateRect(4, 4);
 
-		m_lcDictItems.MoveWindow(0, 0, cx, cy);
+		CRect rEnglish(GetCtrlRect(this, IDC_ENGLISH));
+		CRect rTrans(GetCtrlRect(this, IDC_TRANSLATION));
+
+		int nYOffset = (rClient.bottom - rTrans.bottom);
+		int nXOffset = (rClient.right - rTrans.right);
+
+		OffsetCtrl(this, IDC_ENGLISH, 0, nYOffset);
+		OffsetCtrl(this, IDC_ENGLISHLABEL, 0, nYOffset);
+		OffsetCtrl(this, IDC_TRANSLATION, 0, nYOffset);
+		OffsetCtrl(this, IDC_TRANSLABEL, 0, nYOffset);
+
+		ResizeCtrl(this, IDC_ENGLISH, nXOffset, 0);
+		ResizeCtrl(this, IDC_TRANSLATION, nXOffset, 0);
+
+		rClient.bottom = (rEnglish.top - 4);
+		m_lcDictItems.MoveWindow(rClient);
 
 		// Resize columns 0 and 1
-		int nColWidth = ((cx - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
+		int nColWidth = ((rClient.Width() - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
 
 		m_lcDictItems.SetColumnWidth(0, nColWidth);
 		m_lcDictItems.SetColumnWidth(1, nColWidth);
+
+		Invalidate(FALSE);
 	}
 }
 
@@ -308,5 +328,27 @@ void CTDLTransEditDlg::LoadState()
 
 void CTDLTransEditDlg::SaveState()
 {
-	AfxGetApp()->WriteProfileString(_T("State"), _T("Dictionary"), m_dictionary.GetDictionaryPath());
+	CString sDictPath = m_dictionary.GetDictionaryPath();
+
+	AfxGetApp()->WriteProfileString(_T("State"), _T("Dictionary"), sDictPath);
+}
+
+void CTDLTransEditDlg::OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	
+	// Only interested in the newly selected item
+	if (!(pNMLV->uOldState & LVIS_SELECTED) && (pNMLV->uNewState & LVIS_SELECTED))
+	{
+		m_sEnglish.Format(_T("%s (%s)"), 
+						m_lcDictItems.GetItemText(pNMLV->iItem, 0), 
+						m_lcDictItems.GetItemText(pNMLV->iItem, 2));
+		//m_sEnglish.Replace()
+
+		m_sTranslation = m_lcDictItems.GetItemText(pNMLV->iItem, 1);
+
+		UpdateData(FALSE);
+	}
+
+	*pResult = 0;
 }

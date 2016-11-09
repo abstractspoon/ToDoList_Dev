@@ -15,11 +15,12 @@
 #include "..\transtext\transdictionary.h"
 
 #include "..\shared\WindowIcons.h"
+#include "..\shared\dialoghelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
 
-class CTDLTransEditDlg : public CDialog
+class CTDLTransEditDlg : public CDialog, public CDialogHelper
 {
 // Construction
 public:
@@ -58,13 +59,17 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void ResizeList(int cx = 0, int cy = 0);
+	void Resize(int cx = 0, int cy = 0);
 	void UpdateCaption();
 	BOOL PromptAndSave();
 	void LoadState();
 	void SaveState();
 	BOOL LoadDictionary(LPCTSTR szDictPath);
 
+public:
+	CString m_sEnglish;
+	CString m_sTranslation;
+	afx_msg void OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 //{{AFX_INSERT_LOCATION}}
