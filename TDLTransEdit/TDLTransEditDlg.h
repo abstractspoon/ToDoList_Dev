@@ -10,9 +10,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "TDLTransEditListCtrl.h"
+
 #include "..\transtext\transdictionary.h"
 
-#include "..\shared\InputListCtrl.h"
 #include "..\shared\WindowIcons.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -29,7 +30,7 @@ protected:
 	//{{AFX_DATA(CTDLTransEditDlg)
 	enum { IDD = IDD_TDLTRANSEDIT_DIALOG };
 	//}}AFX_DATA
-	CInputListCtrl	m_lcDictItems;
+	CTDLTransEditListCtrl m_lcDictItems;
 	CTransDictionary m_dictionary;
 	BOOL m_bEdited;
 	CString m_sBaseTitle;

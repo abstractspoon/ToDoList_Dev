@@ -30,6 +30,9 @@
     <ClCompile Include="..\transtext\TransTextUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLTransEditListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLTransEdit.rc">
@@ -53,6 +56,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\TransText\TransTextUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTransEditListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

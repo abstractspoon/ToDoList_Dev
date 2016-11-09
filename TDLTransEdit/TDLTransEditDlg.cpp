@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
 
@@ -125,20 +126,7 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 	if (menu.LoadMenu(IDR_MAINFRAME))
 		SetMenu(&menu);
 
-	m_lcDictItems.AddCol(_T("English Text"), 300);
-	m_lcDictItems.AddCol(_T("Translated Text"), 300);
-	m_lcDictItems.AddCol(_T("UI Element"), 100);
-
-	m_lcDictItems.ShowGrid(TRUE, TRUE);
-	m_lcDictItems.SetMinItemHeight(18);
-	m_lcDictItems.DisableColumnEditing(0, TRUE);
-	m_lcDictItems.DisableColumnEditing(2, TRUE);
-	m_lcDictItems.SetColumnTextColor(0, RGB(100, 100, 100));
-	m_lcDictItems.SetColumnTextColor(2, RGB(100, 100, 100));
-
-	m_lcDictItems.EnableSorting(TRUE);
-	m_lcDictItems.SetSortColumn(0);
-	m_lcDictItems.SetSortAscending(TRUE);
+	m_lcDictItems.Initialise();
 
 	DICTITEM::SetTranslationOption(ITTTO_ADD2DICTIONARY);
 	
@@ -173,55 +161,11 @@ BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath)
 {
 	if (PromptAndSave())
 	{
-		CWaitCursor cursor;
-		CHoldRedraw hr(m_lcDictItems);
-		
-		m_lcDictItems.DeleteAllItems();
-		
 		if (m_dictionary.LoadDictionary(szDictPath))
 		{
-			const CDictionaryItems& items = m_dictionary.GetItems();
-			POSITION pos = items.GetStartPosition();
-			
-			while (pos)
-			{
-				CString sEnglish;
-				DICTITEM* pDI = NULL;
-				
-				items.GetNextAssoc(pos, sEnglish, pDI);
-				ASSERT(!sEnglish.IsEmpty() && pDI);
-				
-				if (!sEnglish.IsEmpty() && pDI)
-				{
-					int nItem = m_lcDictItems.InsertItem(m_lcDictItems.GetItemCount(), sEnglish);
-					ASSERT(nItem != -1);
-					
-					m_lcDictItems.SetItemText(nItem, 1, pDI->GetTextOut());
-					m_lcDictItems.SetItemText(nItem, 2, pDI->GetClassID());
-					m_lcDictItems.SetItemData(nItem, nItem);
-					
-					// Alternatives
-					const CMapStringToString& alts = pDI->GetAlternatives();
-					POSITION posAlt = alts.GetStartPosition();
-					
-					while (posAlt)
-					{
-						CString sTranslation, sClassID;
-						alts.GetNextAssoc(posAlt, sClassID, sTranslation);
-						
-						int nItem = m_lcDictItems.InsertItem(m_lcDictItems.GetItemCount(), sEnglish);
-						ASSERT(nItem != -1);
-						
-						m_lcDictItems.SetItemText(nItem, 1, sTranslation);
-						m_lcDictItems.SetItemText(nItem, 2, sClassID);
-						m_lcDictItems.SetItemData(nItem, nItem);
-					}
-				}
-			}
-			
-			m_lcDictItems.Sort();
-			
+			m_lcDictItems.RebuildList(m_dictionary);
 			m_bEdited = FALSE;
+
 			UpdateCaption();
 
 			return TRUE;

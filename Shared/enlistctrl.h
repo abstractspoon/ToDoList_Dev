@@ -193,6 +193,7 @@ protected:
 	CString GetSortText(DWORD dwItemData) const;
 	void ForceResize();
 	void ResizeStretchyColumns();
+	CString GetSortString(DWORD dwItemData) const;
 
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 //	static BOOL IsSelectionThemed(BOOL bClassic) { return IsSelectionThemed(s_dwSelectionTheming, bClassic); }

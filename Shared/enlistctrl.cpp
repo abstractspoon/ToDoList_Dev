@@ -1483,6 +1483,14 @@ void CEnListCtrl::BuildSortMap(int nCol)
 		m_mapSortStrings[GetItemData(nItem)] = GetItemText(nItem, nCol);
 }
 
+CString CEnListCtrl::GetSortString(DWORD dwItemData) const
+{
+	CString sItem;
+	m_mapSortStrings.Lookup(dwItemData, sItem);
+
+	return sItem;
+}
+
 int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/)
 {
 	// -1 if dwItemData1 should go BEFORE dwItemData2

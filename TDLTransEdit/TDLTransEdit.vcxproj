@@ -140,6 +140,7 @@
     <ClCompile Include="TDLTransEdit.cpp" />
     <ClCompile Include="TDLTransEditDlg.cpp" />
     <ClCompile Include="..\transtext\TransTextUtils.cpp" />
+    <ClCompile Include="TDLTransEditListCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLTransEdit.rc" />
@@ -151,6 +152,7 @@
     <ClInclude Include="TDLTransEdit.h" />
     <ClInclude Include="TDLTransEditDlg.h" />
     <ClInclude Include="..\TransText\TransTextUtils.h" />
+    <ClInclude Include="TDLTransEditListCtrl.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="res\TDLTransEdit.ico" />
@@ -173,4 +175,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="TDLTransEdit.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
