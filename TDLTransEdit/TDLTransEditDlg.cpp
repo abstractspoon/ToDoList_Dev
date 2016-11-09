@@ -195,19 +195,16 @@ void CTDLTransEditDlg::ResizeList(int cx, int cy)
 {
 	if (m_lcDictItems.GetSafeHwnd())
 	{
-		if ((cx == 0) && (cy == 0))
-		{
-			CRect rClient;
-			GetClientRect(rClient);
+		CRect rList(0, 0, cx, cy);
 
-			cx = rClient.Width();
-			cy = rClient.Height();
-		}
+		if (rList.IsRectNull())
+			GetClientRect(rList);
 
-		m_lcDictItems.MoveWindow(0, 0, cx, cy);
+		rList.DeflateRect(3, 3);
+		m_lcDictItems.MoveWindow(rList);
 
 		// Resize columns 0 and 1
-		int nColWidth = ((cx - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
+		int nColWidth = ((rList.Width() - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
 
 		m_lcDictItems.SetColumnWidth(0, nColWidth);
 		m_lcDictItems.SetColumnWidth(1, nColWidth);
