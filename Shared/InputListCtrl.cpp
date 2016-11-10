@@ -432,16 +432,16 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		// scroll cell into view
 		ScrollCellIntoView(nItem, nCol);
 	}
-	
-	// if the delete key is pressed and we're in col0 or row0 
-	// then delete correseponding row or column
-	// unless its the prompt row or column 
 	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
+	{
+		// if the delete key is pressed and we're in col0 or row0 
+		// then delete correseponding row or column
+		// unless its the prompt row or column 
 		DeleteSelectedCell();
-	
-	// if its the space bar then edit the current cell
+	}
 	else if ((nChar == VK_F2 || nChar == VK_SPACE || nChar == VK_RETURN) && CanEditSelectedCell())
 	{
+		// if its the space bar then edit the current cell
 		EditCell(nItem, nCol);
 	}
 
