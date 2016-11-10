@@ -16,6 +16,8 @@ public:
 
 	void Initialise();
 	BOOL RebuildList(const CTransDictionary& dict);
+	int GetSelectedItem() const;
+	void SelectItem(int nItem);
 
 protected:
 	DECLARE_MESSAGE_MAP()

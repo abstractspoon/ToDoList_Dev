@@ -135,7 +135,7 @@ IDB_WIZ_HEADER          BITMAP  DISCARDABLE     "res\\wiz_header.bmp"
 
 IDD_WEBUPDATE_PROGRESS_PAGE DIALOG DISCARDABLE  0, 0, 276, 107
 STYLE DS_CENTER | WS_CHILD | WS_VISIBLE | WS_CAPTION
-CAPTION "ToDoList Web Update"
+CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Progress:",IDC_STATIC,0,0,275,8

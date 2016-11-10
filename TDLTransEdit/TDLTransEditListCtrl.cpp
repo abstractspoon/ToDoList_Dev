@@ -10,7 +10,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-LPCTSTR ALTINDENT = _T("  --  ");
+LPCTSTR ALTINDENT = _T("[optional] ");
 // CTDLTransEditListCtrl
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ void CTDLTransEditListCtrl::Initialise()
 {
 	AddCol(_T("English Text"), 300);
 	AddCol(_T("Translated Text"), 300);
-	AddCol(_T("UI Element"), 100);
+	AddCol(_T("UI Hint"), 100);
 	
 	DisableColumnEditing(0, TRUE);
 	DisableColumnEditing(2, TRUE);
@@ -173,4 +173,18 @@ COLORREF CTDLTransEditListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSele
 	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
+int CTDLTransEditListCtrl::GetSelectedItem() const
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	return GetNextSelectedItem(pos);
+}
 
+void CTDLTransEditListCtrl::SelectItem(int nItem)
+{
+	DWORD dwFlags = (LVIS_SELECTED | LVIS_FOCUSED);
+
+	if (GetSelectedCount())
+		SetItemState(-1, 0, dwFlags);
+
+	SetItemState(nItem, dwFlags, dwFlags);
+}

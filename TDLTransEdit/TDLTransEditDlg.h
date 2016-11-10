@@ -36,6 +36,8 @@ protected:
 	BOOL m_bEdited;
 	CString m_sBaseTitle;
 	CWindowIcons m_icons;
+	CString m_sEnglish;
+	CString m_sTranslation;
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTransEditDlg)
@@ -55,6 +57,8 @@ protected:
 	afx_msg void OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnFileExit();
 	afx_msg void OnClose();
+	afx_msg void OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnChangeTranslation();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -65,11 +69,8 @@ protected:
 	void LoadState();
 	void SaveState();
 	BOOL LoadDictionary(LPCTSTR szDictPath);
-
 public:
-	CString m_sEnglish;
-	CString m_sTranslation;
-	afx_msg void OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -66,10 +66,7 @@ END_MESSAGE_MAP()
 // CTDLTransEditDlg dialog
 
 CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CTDLTransEditDlg::IDD, pParent), 
-     m_bEdited(FALSE),
-	  m_sEnglish(_T(""))
-	  m_sTranslation(_T(""))
+	: CDialog(CTDLTransEditDlg::IDD, pParent), m_bEdited(FALSE)
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 		// NOTE: the ClassWizard will add member initialization here
@@ -97,6 +94,8 @@ BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	ON_WM_CLOSE()
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DICTIONARY, &CTDLTransEditDlg::OnListItemChanged)
+	ON_EN_CHANGE(IDC_TRANSLATION, &CTDLTransEditDlg::OnChangeTranslation)
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -148,16 +147,17 @@ void CTDLTransEditDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
+
+		return;
 	}
-	else
-	{
-		CDialog::OnSysCommand(nID, lParam);
-	}
+
+	// else
+	CDialog::OnSysCommand(nID, lParam);
 }
 
 void CTDLTransEditDlg::OnFileLoadDictionary() 
 {
-	CFileOpenDialog dialog(_T("Select Dictionary"), _T(".csv"), NULL, EOFN_DEFAULTOPEN, _T("Dictionaries (*.csv)|*.csv||"));
+	CFileOpenDialog dialog(_T("Select Translation"), _T(".csv"), NULL, EOFN_DEFAULTOPEN, _T("Dictionaries (*.csv)|*.csv||"));
 
 	if (dialog.DoModal() == IDOK)
 		LoadDictionary(dialog.GetPathName());
@@ -206,7 +206,7 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 		if (rClient.IsRectNull())
 			GetClientRect(rClient);
 
-		rClient.DeflateRect(4, 4);
+		rClient.DeflateRect(4, 0, 4, 4);
 
 		CRect rEnglish(GetCtrlRect(this, IDC_ENGLISH));
 		CRect rTrans(GetCtrlRect(this, IDC_TRANSLATION));
@@ -222,7 +222,7 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 		ResizeCtrl(this, IDC_ENGLISH, nXOffset, 0);
 		ResizeCtrl(this, IDC_TRANSLATION, nXOffset, 0);
 
-		rClient.bottom = (rEnglish.top - 4);
+		rClient.bottom = (rEnglish.top + nYOffset - 6);
 		m_lcDictItems.MoveWindow(rClient);
 
 		// Resize columns 0 and 1
@@ -247,24 +247,36 @@ void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult)
 
 	VERIFY(m_dictionary.ModifyItem(sEnglish, sClassID, pDispInfo->item.pszText));
 
-	m_bEdited = TRUE;
-	UpdateCaption();
+	if (!m_bEdited)
+	{
+		m_bEdited = TRUE;
+		UpdateCaption();
+	}
+
+	// Move selection down one row
+	if (pDispInfo->item.iItem < (m_lcDictItems.GetItemCount() - 1))
+		m_lcDictItems.SelectItem(pDispInfo->item.iItem + 1);
 
 	*pResult = 0;
 }
 
 void CTDLTransEditDlg::UpdateCaption()
 {
-	CString sCaption(m_sBaseTitle);
-	CString sDictPath(m_dictionary.GetDictionaryPath());
+	CString sCaption, sDictPath(m_dictionary.GetDictionaryPath());
 
-	if (!sDictPath.IsEmpty())
+	if (sDictPath.IsEmpty())
 	{
-		sCaption += _T(" - ");
-		sCaption += FileMisc::GetFileNameFromPath(sDictPath);
-
+		sCaption = m_sBaseTitle;
+	}
+	else
+	{
+		sCaption = FileMisc::GetFileNameFromPath(sDictPath, FALSE);
+		
 		if (m_bEdited)
 			sCaption += '*';
+		
+		sCaption += _T(" - ");
+		sCaption += m_sBaseTitle;
 	}
 
 	SetWindowText(sCaption);
@@ -341,15 +353,48 @@ void CTDLTransEditDlg::OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
 	// Only interested in the newly selected item
 	if (!(pNMLV->uOldState & LVIS_SELECTED) && (pNMLV->uNewState & LVIS_SELECTED))
 	{
-		m_sEnglish.Format(_T("%s (%s)"), 
+		m_sEnglish.Format(_T("%s [%s]"), 
 						m_lcDictItems.GetItemText(pNMLV->iItem, 0), 
 						m_lcDictItems.GetItemText(pNMLV->iItem, 2));
-		//m_sEnglish.Replace()
 
 		m_sTranslation = m_lcDictItems.GetItemText(pNMLV->iItem, 1);
 
 		UpdateData(FALSE);
 	}
 
+	GetDlgItem(IDC_TRANSLATION)->EnableWindow(m_lcDictItems.GetSelectedItem() != -1);
+
 	*pResult = 0;
+}
+
+
+void CTDLTransEditDlg::OnChangeTranslation()
+{
+	UpdateData();
+
+	int nSel = m_lcDictItems.GetSelectedItem();
+
+	if (nSel != -1)
+	{
+		m_lcDictItems.SetItemText(nSel, 1, m_sTranslation);
+
+		if (!m_bEdited)
+		{
+			m_bEdited = TRUE;
+			UpdateCaption();
+		}
+	}
+	else
+	{
+		ASSERT(0);
+	}
+}
+
+BOOL CTDLTransEditDlg::OnEraseBkgnd(CDC* pDC)
+{
+	CDialogHelper::ExcludeCtrl(this, IDC_DICTIONARY, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ENGLISH, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_TRANSLATION, pDC);
+
+	return CDialog::OnEraseBkgnd(pDC);
 }
