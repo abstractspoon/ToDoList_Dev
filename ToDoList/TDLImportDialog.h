@@ -16,13 +16,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
-enum TDLID_IMPORTTO
-{
-	TDIT_NEWTASKLIST,
-	TDIT_TOPTASKLIST,
-	TDIT_SELECTEDTASK,
-};
-
 class CTDLImportDialog : public CTDLDialog
 {
 // Construction

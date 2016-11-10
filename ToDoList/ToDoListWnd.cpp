@@ -5469,22 +5469,21 @@ void CToDoListWnd::OnEditPasteSub()
 	}
 	else
 	{
-		switch (Prefs().GetNewSubtaskPos())
-		{
-		case PUIP_TOP:
-			DoPasteFromClipboard(tdc, TDC_INSERTATTOPOFSELTASK);
-			break;
-			
-		case PUIP_BOTTOM:
-			DoPasteFromClipboard(tdc, TDC_INSERTATBOTTOMOFSELTASK);
-			break;
-		}
+		DoPasteFromClipboard(TDIT_ONSELECTEDTASK);
 	}
 
 	UpdateTimeTrackerTasks(tdc, FALSE);
 }
 
-BOOL CToDoListWnd::DoPasteFromClipboard(CFilteredToDoCtrl& tdc, TDC_INSERTWHERE nWhere)
+void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	pCmdUI->Enable(tdc.CanPasteTasks(TDCP_ONSELTASK, FALSE) || 
+					Misc::ClipboardHasText());	
+}
+
+BOOL CToDoListWnd::DoPasteFromClipboard(TDLID_IMPORTTO nWhere)
 {
 	if (!Misc::ClipboardHasText())
 		return FALSE;
@@ -5493,30 +5492,12 @@ BOOL CToDoListWnd::DoPasteFromClipboard(CFilteredToDoCtrl& tdc, TDC_INSERTWHERE 
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
-
-	int nImporter = dialog.GetImporterIndex();
-
-	CString sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
-	FileMisc::SaveFile(sImportPath, dialog.GetClipboardText(), SFEF_UTF16);
-
-	CTaskFile tasks;
-
-	if (m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter))
-	{
-		return tdc.InsertTasks(tasks, nWhere);
-	}
-
-	// TODO
-	// MessageBox(IDS_PASTEFROMCLIPBOARDFAILED);
-
-	return FALSE;
-}
-
-void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
-{
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(tdc.CanPasteTasks(TDCP_ONSELTASK, FALSE));	
+	BOOL bFromClipboard = TRUE;
+	int nImporter = dialog.GetImporterIndex();
+	CString sImportFrom = dialog.GetClipboardText();
+
+	return ImportTasks(bFromClipboard, sImportFrom, nImporter, nWhere);
 }
 
 void CToDoListWnd::OnEditPasteAfter() 
@@ -5534,7 +5515,7 @@ void CToDoListWnd::OnEditPasteAfter()
 	}
 	else if (Misc::ClipboardHasText())
 	{
-		DoPasteFromClipboard(tdc, TDC_INSERTBEFORESELTASK);
+		DoPasteFromClipboard(TDIT_BELOWSELECTEDTASK);
 	}
 
 	UpdateTimeTrackerTasks(tdc, FALSE);
@@ -8175,90 +8156,133 @@ void CToDoListWnd::OnImportTasklist()
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
 			int nImporter = dialog.GetImporterIndex();
 			BOOL bFromClipboard = dialog.GetImportFromClipboard();
+			CString sImportFrom = (bFromClipboard ? dialog.GetImportClipboardText() : 
+													dialog.GetImportFilePath());
 
-			CString sImportPath;
-
-			if (bFromClipboard)
-			{
-				sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
-				FileMisc::SaveFile(sImportPath, dialog.GetImportClipboardText(), SFEF_UTF16);
-			}
-			else
-			{
-				sImportPath = dialog.GetImportFilePath();
-			}
-
-			// load/import tasks
-			DOPROGRESS(IDS_IMPORTPROGRESS);
-			
-			// do the import
-			CTaskFile tasks;
-			UINT nIcon = 0, nMessageID = 0;
-			
-			switch (m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter))
-			{
-			case IIR_CANCELLED:
-				break;
-				
-			case IIR_SUCCESS:
-				if (tasks.GetTaskCount())
-				{
-					if (nImportTo == TDIT_NEWTASKLIST)
-						VERIFY(CreateNewTaskList(FALSE));
-					
-					CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
-					TDC_INSERTWHERE nWhere = ((nImportTo == TDIT_SELECTEDTASK) ? TDC_INSERTATTOPOFSELTASK : TDC_INSERTATTOP);
-					
-					VERIFY(tdc.InsertTasks(tasks, nWhere, (nImportTo != TDIT_NEWTASKLIST)));
-					
-					// if a new tasklist then set the project name
-					if (nImportTo == TDIT_NEWTASKLIST)
-						tdc.SetProjectName(tasks.GetProjectName());
-					
-					UpdateCaption();
-					break;
-				}
-				// else fall thru
-
-			case IIR_SOMEFAILED:
-				if (bFromClipboard)
-					nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFROMCB_SOMETASKSFAILED : IDS_IMPORTFROMCB_NOTASKS);
-				else
-					nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFILE_SOMETASKSFAILED : IDS_IMPORTFILE_NOTASKS);
-
-				nIcon = MB_ICONWARNING;
-				break;
-				
-			case IIR_BADFILE:
-				if (!bFromClipboard)
-				{
-					nMessageID = IDS_IMPORTFILE_CANTOPEN;
-					nIcon = MB_ICONERROR;
-					break;
-				}
-				// else fall thru
-				
-			case IIR_BADFORMAT:
-				nMessageID = (bFromClipboard ? IDS_IMPORTFROMCB_BADFORMAT : IDS_IMPORTFILE_BADFORMAT);
-				nIcon = MB_ICONERROR;
-				break;
-				
-			case IIR_BADINTERFACE:
-				// TODO
-				break;
-			}
-			
-			if (nMessageID)
-				AfxMessageBox(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
-
-			// Reshow dialog only for errors
-			bShowDlg = (nIcon == MB_ICONERROR);
+			// Reshow dialog on error
+			bShowDlg = !ImportTasks(bFromClipboard, sImportFrom, nImporter, nImportTo);
 		}
 		else
 		{
 			bShowDlg = FALSE; // cancelled
 		}
 	}
+}
+
+BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
+								int nImporter, TDLID_IMPORTTO nImportTo) 
+{
+	CString sImportPath;
+
+	if (bFromClipboard)
+	{
+		sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
+		FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16);
+	}
+	else
+	{
+		sImportPath = sImportFrom;
+	}
+	ASSERT(!sImportPath.IsEmpty());
+
+	// load/import tasks
+	DOPROGRESS(IDS_IMPORTPROGRESS);
+
+	// do the import
+	CTaskFile tasks;
+	UINT nIcon = 0, nMessageID = 0;
+
+	switch (m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter))
+	{
+	case IIR_CANCELLED:
+		break;
+
+	case IIR_SUCCESS:
+		if (tasks.GetTaskCount())
+		{
+			if (nImportTo == TDIT_NEWTASKLIST)
+				VERIFY(CreateNewTaskList(FALSE));
+
+			CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
+			TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
+
+			switch (nImportTo)
+			{
+			case TDIT_ONSELECTEDTASK:
+				{
+					switch (Prefs().GetNewSubtaskPos())
+					{
+					case PUIP_TOP:
+						nWhere = TDC_INSERTATTOPOFSELTASK;
+						break;
+
+					case PUIP_BOTTOM:
+						nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+						break;
+					}
+				}
+				break;
+
+			case TDIT_BELOWSELECTEDTASK:
+				nWhere = TDC_INSERTAFTERSELTASK;
+				break;
+
+			case TDIT_NEWTASKLIST:
+			case TDIT_TOPTASKLIST:
+				// as-is
+				break;
+			}
+
+			if (nImportTo == TDIT_NEWTASKLIST)
+			{
+				VERIFY(tdc.InsertTasks(tasks, nWhere, FALSE));
+				tdc.SetProjectName(tasks.GetProjectName());
+			}
+			else
+			{
+				VERIFY(tdc.InsertTasks(tasks, nWhere, TRUE));
+			}
+
+			UpdateCaption();
+			break;
+		}
+		// else fall thru
+
+	case IIR_SOMEFAILED:
+		if (bFromClipboard)
+			nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFROMCB_SOMETASKSFAILED : IDS_IMPORTFROMCB_NOTASKS);
+		else
+			nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFILE_SOMETASKSFAILED : IDS_IMPORTFILE_NOTASKS);
+
+		nIcon = MB_ICONWARNING;
+		break;
+
+	case IIR_BADFILE:
+		if (!bFromClipboard)
+		{
+			nMessageID = IDS_IMPORTFILE_CANTOPEN;
+			nIcon = MB_ICONERROR;
+			break;
+		}
+		// else fall thru
+
+	case IIR_BADFORMAT:
+		nMessageID = (bFromClipboard ? IDS_IMPORTFROMCB_BADFORMAT : IDS_IMPORTFILE_BADFORMAT);
+		nIcon = MB_ICONERROR;
+		break;
+
+	case IIR_BADINTERFACE:
+		// TODO
+		break;
+	}
+
+	if (nMessageID)
+	{
+		AfxMessageBox(CEnString(nMessageID, sImportFrom), (MB_OK | nIcon));
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void CToDoListWnd::OnSetPriority(UINT nCmdID) 

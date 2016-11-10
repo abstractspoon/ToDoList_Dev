@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "tdcenum.h"
 #include "TDLImportDialog.h"
 
 #include "../shared/enstring.h"
@@ -41,7 +42,7 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 	if (m_bReadonlyTasklist)
 		m_nImportTo = TDIT_NEWTASKLIST;
 	else
-		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), TDIT_SELECTEDTASK);
+		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), TDIT_ONSELECTEDTASK);
 
 }
 

@@ -62,9 +62,9 @@ END_MESSAGE_MAP()
 
 void CTDLPasteFromClipboardDlg::OnOK() 
 {
-	CPreferences().WriteProfileInt(_T("Importing"), _T("ImportFormat"), m_nFormatOption);
-	
 	CTDLDialog::OnOK();
+	
+	CPreferences().WriteProfileInt(_T("PasteImporting"), _T("ImportFormat"), m_nFormatOption);
 }
 
 BOOL CTDLPasteFromClipboardDlg::OnInitDialog() 
