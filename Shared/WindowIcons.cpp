@@ -1,9 +1,15 @@
+/////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 
 #include "WindowIcons.h"
 #include "graphicsmisc.h"
 #include "osversion.h"
 #include "regkey.h"
+
+#include <Shlwapi.h.>
+
+/////////////////////////////////////////////////////////////////////////////
 
 CWindowIcons::CWindowIcons() : m_hIconBig(NULL), m_hIconSmall(NULL), m_nIconID(0)
 {

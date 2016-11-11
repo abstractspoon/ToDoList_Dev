@@ -673,6 +673,10 @@ SOURCE=.\WinClasses.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\WindowIcons.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\winhelpbutton.cpp
 # End Source File
 # Begin Source File
@@ -1322,6 +1326,10 @@ SOURCE=.\WebMisc.h
 # Begin Source File
 
 SOURCE=.\WinClasses.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WindowIcons.h
 # End Source File
 # Begin Source File
 
