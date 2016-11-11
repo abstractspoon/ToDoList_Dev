@@ -131,6 +131,7 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1418,12 +1419,42 @@ void CEnListCtrl::GetColumnExtents(int nCol, int& nColStart, int& nColEnd) const
 
 BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 {
-	NM_LISTVIEW* pNMLV = (NM_LISTVIEW*)pNMHDR;
+	NMLISTVIEW* pNMLV = (NM_LISTVIEW*)pNMHDR;
 
 	if (m_bSortingEnabled)
 		SetSortColumn(pNMLV->iSubItem);
 
 	return FALSE; // continue routing
+}
+
+void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
+{
+	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
+	*lResult = CDRF_DODEFAULT;
+
+	// draw sort direction
+	if (m_header.GetItemCount())
+	{
+		switch (pNMCD->dwDrawStage)
+		{
+		case CDDS_PREPAINT:
+			*lResult = CDRF_NOTIFYITEMDRAW;
+			break;
+			
+		case CDDS_ITEMPREPAINT:
+			if ((int)pNMCD->dwItemSpec == m_nSortColumn)
+				*lResult = CDRF_NOTIFYPOSTPAINT;
+			break;
+			
+		case CDDS_ITEMPOSTPAINT:
+			if ((int)pNMCD->dwItemSpec == m_nSortColumn)
+			{
+				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+				m_header.DrawItemSortArrow(pDC, m_nSortColumn, m_bSortAscending);
+			}
+			break;
+		}
+	}
 }
 
 void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
@@ -1435,9 +1466,14 @@ void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
 	{
 		m_nSortColumn = nColumn;
 		m_bSortAscending = TRUE;
+
+		if (m_header.GetSafeHwnd())
+			m_header.Invalidate(FALSE);
 	}
 	else
+	{
 		m_bSortAscending = !m_bSortAscending;
+	}
 
 	if (bResort)
 		Sort();
@@ -1453,6 +1489,8 @@ void CEnListCtrl::Sort()
 
 	// cleanup
 	m_mapSortStrings.RemoveAll();
+
+	EnsureVisible(GetCurSel(), FALSE);
 }
 
 int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam)

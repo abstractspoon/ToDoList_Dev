@@ -26,29 +26,26 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About TDLTransEdit"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "TDLTransEdit Version 1.0",IDC_STATIC,40,10,119,8,
-                    SS_NOPREFIX
-    LTEXT           "Copyright (C) 2016",IDC_STATIC,40,25,119,8
-    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
-END
-
-IDD_TDLTRANSEDIT_DIALOG DIALOGEX 0, 0, 445, 277
-STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+IDD_TDLTRANSEDIT_DIALOG DIALOGEX 0, 0, 523, 346
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "ToDoList Translation Editor"
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "List1",IDC_DICTIONARY,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EDITLABELS | LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,5,4,435,231
-    EDITTEXT        IDC_ENGLISH,56,241,384,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "&English",IDC_ENGLISHLABEL,5,244,47,8
-    EDITTEXT        IDC_TRANSLATION,56,259,384,14,ES_AUTOHSCROLL
-    LTEXT           "&Translation",IDC_TRANSLABEL,5,261,48,8
+    CONTROL         "List1",IDC_DICTIONARY,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EDITLABELS | 
+                    LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,5,23,513,162
+    EDITTEXT        IDC_ENGLISH,5,271,212,71,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_READONLY | WS_VSCROLL
+    LTEXT           "&English",IDC_ENGLISHLABEL,5,260,47,8
+    EDITTEXT        IDC_TRANSLATION,254,271,264,71,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | WS_VSCROLL
+    LTEXT           "&Translation",IDC_TRANSLABEL,254,260,48,8
+    LTEXT           "&Filter",IDC_STATIC,5,6,17,8
+    EDITTEXT        IDC_FILTER,27,4,192,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Clear",IDC_CLEARFILTER,275,4,50,14
+    PUSHBUTTON      "Filt&er",IDC_UPDATEFILTER,222,4,50,14
 END
 
 
@@ -103,19 +100,12 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO DISCARDABLE 
 BEGIN
-    IDD_ABOUTBOX, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 228
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 48
-    END
-
     IDD_TDLTRANSEDIT_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 5
-        RIGHTMARGIN, 440
-        BOTTOMMARGIN, 273
+        RIGHTMARGIN, 518
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 342
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -128,7 +118,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ABOUTBOX            "&About TDLTransEdit..."
     IDS_SAVECHANGES         "Do you want to save your changes to '%s'?"
 END
 
@@ -201,20 +190,32 @@ IDR_MAINFRAME MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Load Dictionary...",         ID_FILE_LOADDICTIONARY
-        MENUITEM "&Save Dictionary",            ID_FILE_SAVEDICTIONARY
+        MENUITEM "New Translation...",          ID_FILE_NEW_TRANSLATION
+        MENUITEM SEPARATOR
+        MENUITEM "&Open Translation...",        ID_FILE_OPEN_TRANSLATION
+        MENUITEM "&Save Translation",           ID_FILE_SAVE_TRANSLATION
         MENUITEM SEPARATOR
         MENUITEM "&Exit",                       ID_FILE_CLOSE
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "Show &Optional Items (duplicates)", 
+                                                ID_OPTIONS_SHOWOPTIONALS
+        MENUITEM "Show &Tooltips",              ID_OPTIONS_SHOWTOOLTIPS
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Clean Up...",                ID_TOOLS_CLEANUP
     END
 END
 
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// RT_MANIFEST
+// 24
 //
 
-IDR_MANIFEST            RT_MANIFEST             "res\\TDLTransEdit.exe.manifest"
+IDR_MANIFEST            24      MOVEABLE PURE   "res\\TDLTransEdit.exe.manifest"
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

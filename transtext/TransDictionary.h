@@ -15,16 +15,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CXmlItem;
-
-//////////////////////////////////////////////////////////////////////
-
 struct DICTITEM
 {
 public:
 	DICTITEM();
 	DICTITEM(const DICTITEM& di);
-	DICTITEM(const CXmlItem* pXI);
 	DICTITEM(const CString& sTextIn, LPCTSTR szTextOut = NULL, LPCTSTR szClassID = NULL);
 	virtual ~DICTITEM();
 
@@ -35,11 +30,8 @@ public:
 	BOOL Translate(CString& sText, HMENU hMenu, int nMenuID);
 	BOOL IsTranslated() const;
 
-	BOOL ToXml(CXmlItem* pXI) const;
-	BOOL FromXml(const CXmlItem* pXI);
-
 	BOOL ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const;
-	BOOL FromCsv(const CStringArray& aLines, int& nLine);
+	BOOL FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars = TRUE);
 	
 	BOOL Merge(const DICTITEM& di);
 	BOOL HasClassID(const CString& sClassID) const;
@@ -73,9 +65,8 @@ protected:
 	// map alternatives by path
 	CMapStringToString m_mapAlternatives;
 
-	static void ToXml(CXmlItem* pXI, const DICTITEM& di);
 	static int GetDlgCtrlID(HWND hWnd);
-	static BOOL FromCsv(const CString& sLine, DICTITEM& di);
+	static BOOL FromCsv(const CString& sLine, DICTITEM& di, BOOL bDecodeChars);
 
 	static void FixupFormatString(CString& sFormat);
 
@@ -88,6 +79,8 @@ protected:
 
 typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*> CDictionaryItems;
 
+//////////////////////////////////////////////////////////////////////
+
 class CTransDictionary 
 {
 public:
@@ -98,7 +91,7 @@ public:
 	CString GetDictionaryVersion() const { return m_sDictVersion; }
 	WORD GetDictionaryLanguageID() const { return m_wDictLanguageID; }
 
-	BOOL LoadDictionary(LPCTSTR szDictPath);
+	BOOL LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars = TRUE);
 	BOOL SaveDictionary(LPCTSTR szAltPath = NULL, BOOL bForce = FALSE);
 	BOOL IsEmpty() const { return (m_mapItems.GetCount() == 0); }
 
@@ -109,7 +102,6 @@ public:
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
 	void DeleteDictionary();
-	void FixupDictionary();
 	BOOL CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
 	BOOL GetPossibleDuplicates(CTransDictionary& tdDuplicates) const;
 	
@@ -123,18 +115,17 @@ protected:
 	WORD m_wDictLanguageID;
 	CMapStringToPtr m_mapStringIgnore;
 	CDictionaryItems m_mapItems;
+	BOOL m_bDecodeChars;
 	
 protected:
 	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate = TRUE);
 	BOOL HasDictItem(CString& sText) const;
 	BOOL TranslateMenuShortcut(CString& sShortcut);
 	void IgnoreTranslatedText();
-	void LoadItem(const CXmlItem* pXI);
-	BOOL LoadDictionaryItem(const CXmlItem* pXIDict);
+	void FixupDictionary();
+	BOOL KeyMatches(const CString& sKey, const DICTITEM* pDI) const;
 
-	BOOL SaveXmlDictionary(LPCTSTR szDictPath) const;
 	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
-	BOOL LoadXmlDictionary(LPCTSTR szDictPath);
 	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
 
 	static int CompareProc(const void* pFirst, const void* pSecond);

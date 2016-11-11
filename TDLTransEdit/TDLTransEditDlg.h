@@ -16,6 +16,7 @@
 
 #include "..\shared\WindowIcons.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\shortcutmanager.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
@@ -30,36 +31,51 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTransEditDlg)
 	enum { IDD = IDD_TDLTRANSEDIT_DIALOG };
+	CString	m_sFilter;
 	//}}AFX_DATA
 	CTDLTransEditListCtrl m_lcDictItems;
 	CTransDictionary m_dictionary;
+	CWindowIcons m_icons;
+	CShortcutManager m_mgrShortcuts;
+
 	BOOL m_bEdited;
 	CString m_sBaseTitle;
-	CWindowIcons m_icons;
 	CString m_sEnglish;
 	CString m_sTranslation;
+	CString m_sYourLanguagePath;
+	BOOL m_bShowAlternatives;
+	BOOL m_bShowTooltips;
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTransEditDlg)
-protected:
+	public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual BOOL OnInitDialog();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTransEditDlg)
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnFileLoadDictionary();
-	afx_msg void OnFileSaveDictionary();
+	afx_msg void OnOptionsShowTooltips();
+	//}}AFX_MSG
+	afx_msg void OnToolsCleanUp();
+	afx_msg void OnFileNewTranslation();
+	afx_msg void OnFileOpenTranslation();
+	afx_msg void OnFileSaveTranslation();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnFileExit();
 	afx_msg void OnClose();
+	afx_msg void OnShowAlternatives();
+	afx_msg void OnUpdateFilter();
+	afx_msg void OnClearFilter();
+	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	afx_msg void OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnChangeTranslation();
-	//}}AFX_MSG
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -69,8 +85,9 @@ protected:
 	void LoadState();
 	void SaveState();
 	BOOL LoadDictionary(LPCTSTR szDictPath);
-public:
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	BOOL InitYourLanguagePath();
+	BOOL ModifyDictionaryItem(int nItem, const CString& sTrans);
+
 };
 
 //{{AFX_INSERT_LOCATION}}

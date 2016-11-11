@@ -9,6 +9,7 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -132,7 +133,7 @@ CString TransText::GetClassIDName(HMENU /*hMenu*/, int nMenuID)
 	return sName;
 }
 
-BOOL TransText::PrepareLookupText(CString& sText)
+BOOL TransText::PrepareLookupText(CString& sText, BOOL bDecodeChars)
 {
 	// remove trailing/leading spaces and delimiters
 	Misc::Trim(sText, SPACECHAR).TrimRight(':');
@@ -146,7 +147,8 @@ BOOL TransText::PrepareLookupText(CString& sText)
 		return FALSE;
 	
 	// finally decode 'tricky' characters like tabs and newlines
-	DecodeChars(sText);
+	if (bDecodeChars)
+		DecodeChars(sText);
 	
 	return !sText.IsEmpty();
 }
@@ -174,4 +176,34 @@ BOOL TransText::IsPopup(HWND hWnd)
 	DWORD dwMask = (WS_POPUP | WS_CAPTION);
 	
 	return (dwStyle & dwMask);
+}
+
+BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
+{
+	if (FileMisc::IsSamePath(szMasterDictPath, szDictPath))
+		return FALSE;
+	
+	CTransDictionary dtActive, dtMaster, dtRemoved;
+	
+	if (!dtActive.LoadDictionary(szDictPath) || !dtMaster.LoadDictionary(szMasterDictPath))
+		return FALSE;
+	
+	TRACE(_T("TransText::CleanupDictionary(%s)\n"), szDictPath);
+	
+	BOOL bCleaned = dtActive.CleanupDictionary(dtMaster, dtRemoved);
+	
+	// Always save the 'master' so that newly translated strings get
+	// correctly moved to the 'TRANSLATED' section
+	dtActive.SaveDictionary(NULL, TRUE);
+	
+	// save any removed items
+	if (!dtRemoved.IsEmpty())
+	{
+		CString sRemovedPath = CFileBackup::BuildBackupPath(szDictPath, _T("backup"), FBS_TIMESTAMP, _T(".removed"));
+		
+		VERIFY(FileMisc::CreateFolderFromFilePath(sRemovedPath));
+		VERIFY(dtRemoved.SaveDictionary(sRemovedPath, TRUE));
+	}
+	
+	return bCleaned;
 }

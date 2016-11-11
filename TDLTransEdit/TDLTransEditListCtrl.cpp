@@ -6,18 +6,20 @@
 #include "TDLTransEditListCtrl.h"
 
 #include "..\transtext\transdictionary.h"
+
 #include "..\shared\holdredraw.h"
+#include "..\shared\misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 LPCTSTR ALTINDENT = _T("[optional] ");
-// CTDLTransEditListCtrl
 
 /////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_DYNAMIC(CTDLTransEditListCtrl, CInputListCtrl)
 
 /////////////////////////////////////////////////////////////////////////////
+// CTDLTransEditListCtrl
 
 CTDLTransEditListCtrl::CTDLTransEditListCtrl()
 {
@@ -31,6 +33,7 @@ CTDLTransEditListCtrl::~CTDLTransEditListCtrl()
 /////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTransEditListCtrl, CInputListCtrl)
+ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -49,16 +52,17 @@ void CTDLTransEditListCtrl::Initialise()
 	EnableSorting(TRUE);
 	SetSortColumn(0);
 	SetSortAscending(TRUE);
+
+	// Make sure header is subclassed
+	GetHeader();
 }
 
-BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict)
+BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShowAlternatives, const CString& sFilter)
 {
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	CWaitCursor cursor;
-	CHoldRedraw hr(*this);
-
+	ClearAll(); // selection
 	DeleteAllItems();
 
 	const CDictionaryItems& items = dict.GetItems();
@@ -72,9 +76,9 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict)
 		items.GetNextAssoc(pos, sEnglish, pDI);
 		ASSERT(!sEnglish.IsEmpty() && pDI);
 
-		if (!sEnglish.IsEmpty() && pDI)
+		if (MatchesFilter(pDI, sFilter))
 		{
-			int nItem = InsertItem(GetItemCount(), sEnglish);
+			int nItem = InsertItem(GetItemCount(), pDI->GetTextIn());
 			ASSERT(nItem != -1);
 
 			SetItemText(nItem, 1, pDI->GetTextOut());
@@ -82,28 +86,55 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict)
 			SetItemData(nItem, nItem);
 
 			// Alternatives
-			const CMapStringToString& alts = pDI->GetAlternatives();
-			POSITION posAlt = alts.GetStartPosition();
-
-			while (posAlt)
+			if (bShowAlternatives)
 			{
-				CString sTranslation, sClassID;
-				alts.GetNextAssoc(posAlt, sClassID, sTranslation);
-
-				int nItem = InsertItem(GetItemCount(), (ALTINDENT + sEnglish));
-				ASSERT(nItem != -1);
-
-				SetItemText(nItem, 1, sTranslation);
-				SetItemText(nItem, 2, sClassID);
-				SetItemData(nItem, nItem);
+				const CMapStringToString& alts = pDI->GetAlternatives();
+				POSITION posAlt = alts.GetStartPosition();
+				
+				while (posAlt)
+				{
+					CString sTranslation, sClassID;
+					alts.GetNextAssoc(posAlt, sClassID, sTranslation);
+					
+					int nItem = InsertItem(GetItemCount(), (ALTINDENT + sEnglish));
+					ASSERT(nItem != -1);
+					
+					SetItemText(nItem, 1, sTranslation);
+					SetItemText(nItem, 2, sClassID);
+					SetItemData(nItem, nItem);
+				}
 			}
 		}
 	}
 
 	Sort();
+	
+	if (GetItemCount())
+		SetCurSel(0);
 
 	return TRUE;
 }
+
+BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sFilter)
+{
+	if (!pDI || pDI->GetTextIn().IsEmpty())
+		return FALSE;
+
+	if (sFilter.IsEmpty())
+		return TRUE;
+		
+	if (Misc::FindWord(sFilter, pDI->GetTextIn(), FALSE, FALSE))
+		return TRUE;
+
+	if (Misc::FindWord(sFilter, pDI->GetTextOut(), FALSE, FALSE))
+		return TRUE;
+	
+	if (Misc::FindWord(sFilter, pDI->GetClassID(), FALSE, FALSE))
+		return TRUE;
+
+	return FALSE;
+}
+
 
 int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
 {
@@ -126,7 +157,7 @@ int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, in
 		BOOL bAlt1 = sItem1.Replace(ALTINDENT, _T(""));
 		BOOL bAlt2 = sItem2.Replace(ALTINDENT, _T(""));
 	
-		nCompare = sItem1.CompareNoCase(sItem2);
+		nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
 		if (nCompare == 0)
 		{
@@ -173,18 +204,39 @@ COLORREF CTDLTransEditListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSele
 	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
-int CTDLTransEditListCtrl::GetSelectedItem() const
+int CTDLTransEditListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	POSITION pos = GetFirstSelectedItemPosition();
-	return GetNextSelectedItem(pos);
+	int nItem = HitTest(point);
+
+	if (nItem != -1)
+	{
+		pTI->hwnd = m_hWnd;
+		pTI->uId = nItem;
+		pTI->uFlags = (TTF_ALWAYSTIP | TTF_NOTBUTTON);
+		pTI->lpszText = _tcsdup(FormatInfoTip(nItem));
+
+		GetItemRect(nItem, &pTI->rect, LVIR_BOUNDS);
+
+		return nItem;
+	}
+	
+	// else
+	return CInputListCtrl::OnToolHitTest(point, pTI);
 }
 
-void CTDLTransEditListCtrl::SelectItem(int nItem)
+CString CTDLTransEditListCtrl::FormatInfoTip(int nItem) const
 {
-	DWORD dwFlags = (LVIS_SELECTED | LVIS_FOCUSED);
+	CString sTip;
 
-	if (GetSelectedCount())
-		SetItemState(-1, 0, dwFlags);
+	sTip.Format(_T("English:\n%s\n\nTranslation:\n%s"),
+				GetItemText(nItem, ENG_COL),
+				GetItemText(nItem, TRANS_COL));
 
-	SetItemState(nItem, dwFlags, dwFlags);
+	return sTip;
+}
+
+void CTDLTransEditListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	::SendMessage(pNMHDR->hwndFrom, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELONG(SHRT_MAX, 0));
+	::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
 }

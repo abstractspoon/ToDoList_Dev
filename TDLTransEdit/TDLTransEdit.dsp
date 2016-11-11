@@ -95,10 +95,6 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\transtext\TransDictionary.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLTransEdit.cpp
 # End Source File
 # Begin Source File
@@ -108,6 +104,14 @@ SOURCE=.\TDLTransEdit.rc
 # Begin Source File
 
 SOURCE=.\TDLTransEditDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLTransEditListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\transtext\TransDictionary.cpp
 # End Source File
 # Begin Source File
 
@@ -127,15 +131,19 @@ SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\TransText\TransDictionary.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\TDLTransEdit.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\TDLTransEditDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLTransEditListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\TransText\TransDictionary.h
 # End Source File
 # Begin Source File
 

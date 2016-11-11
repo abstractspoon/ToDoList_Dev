@@ -77,41 +77,21 @@ ITT_TRANSLATEOPTION CTransTextMgr::GetTranslationOption()
 
 BOOL CTransTextMgr::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 {
-	if (FileMisc::IsSamePath(szMasterDictPath, szDictPath))
-		return FALSE;
-
 	CTransDictionary dtActive, dtMaster, dtRemoved;
 	CString sDictPath(szDictPath);
 
 	if (sDictPath.IsEmpty())
 		sDictPath = GetDictionaryFile();
 	
-	if (!dtActive.LoadDictionary(sDictPath) || !dtMaster.LoadDictionary(szMasterDictPath))
-		return FALSE;
-	
-	TRACE(_T("CTransTextMgr::CleanupDictionary(%s)\n"), sDictPath);
-	
-	BOOL bCleaned = dtActive.CleanupDictionary(dtMaster, dtRemoved);
-	
-	// Always save the 'master' so that newly translated strings get
-	// correctly moved to the 'TRANSLATED' section
-	dtActive.SaveDictionary(NULL, TRUE);
-	
-	// save any removed items
-	if (!dtRemoved.IsEmpty())
+	if (TransText::CleanupDictionary(szMasterDictPath, sDictPath))
 	{
-		CString sRemovedPath = CFileBackup::BuildBackupPath(sDictPath, _T("backup"), FBS_TIMESTAMP, _T(".removed"));
-		
-		VERIFY(FileMisc::CreateFolderFromFilePath(sRemovedPath));
-		VERIFY(dtRemoved.SaveDictionary(sRemovedPath, TRUE));
-	}
-	
-	if (bCleaned && FileMisc::IsSamePath(sDictPath, GetDictionaryFile()))
-	{
-		// reload dictionary
-		GetInstance().m_dictionary.LoadDictionary(GetDictionaryFile());
+		if (FileMisc::IsSamePath(sDictPath, GetDictionaryFile()))
+		{
+			// reload dictionary
+			GetInstance().m_dictionary.LoadDictionary(sDictPath);
+		}
 		return TRUE;
-	}
+	}	
 
 	return FALSE;
 }

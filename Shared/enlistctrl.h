@@ -164,7 +164,8 @@ protected:
 	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 	//}}AFX_MSG
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lParam);
+	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
+	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 	DECLARE_MESSAGE_MAP()
 
 // helpers

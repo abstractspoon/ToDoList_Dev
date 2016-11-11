@@ -13,7 +13,6 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
-// CInputListCtrl window
 
 enum { NOTVALID, ADDITEM, EDITITEM };
 
@@ -26,6 +25,8 @@ enum IL_COLUMNTYPE
 	ILCT_CHECK
 }; 
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CColumnData2 : public CColumnData
 {
 public:
@@ -34,8 +35,13 @@ public:
 	IL_COLUMNTYPE nType;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+// CInputListCtrl window
+
 class CInputListCtrl : public CEnListCtrl
 {
+	DECLARE_DYNAMIC(CInputListCtrl)
+
 // Construction
 public:
 	CInputListCtrl();

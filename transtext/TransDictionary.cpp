@@ -6,7 +6,6 @@
 #include "TransDictionary.h"
 #include "TransTextUtils.h"
 
-#include "..\shared\xmlfile.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\wclassdefines.h"
@@ -69,11 +68,6 @@ DICTITEM::DICTITEM(const DICTITEM& di)
 	*this = di;
 }
 
-DICTITEM::DICTITEM(const CXmlItem* pXI)
-{
-	FromXml(pXI);
-}
-
 DICTITEM::DICTITEM(const CString& sText, LPCTSTR szTextOut, LPCTSTR szClassID) 
 	: m_sTextIn(sText), m_sClassID(szClassID), m_sTextOut(szTextOut)
 {
@@ -117,15 +111,6 @@ int DICTITEM::GetDlgCtrlID(HWND hWnd)
 	return max(nCtrlID, -1);
 }
 
-void DICTITEM::ToXml(CXmlItem* pXI, const DICTITEM& di) 
-{
-	ASSERT(!di.m_sTextIn.IsEmpty());
-
-	pXI->SetItemValue(TEXTIN, di.m_sTextIn);
-	pXI->SetItemValue(TEXTOUT, di.m_sTextOut);
-	pXI->SetItemValue(CLASSID, di.m_sClassID);
-}
-
 CString DICTITEM::GetTextOut(const CString& sClassID) const
 {
 	if (m_sClassID == sClassID)
@@ -167,68 +152,6 @@ void DICTITEM::FixupFormatString(CString& sFormat)
 			nFind = sFormat.Find('%', nFind + 1);
 		}
 	}
-}
-
-BOOL DICTITEM::ToXml(CXmlItem* pXI) const
-{
-	if (pXI && pXI->NameIs(ITEM))
-	{
-		ToXml(pXI, *this);
-		
-		// alternatives
-		if (m_mapAlternatives.GetCount())
-		{
-			CString sClassID, sAlternative;
-			POSITION pos = m_mapAlternatives.GetStartPosition();
-
-			while (pos)
-			{
-				m_mapAlternatives.GetNextAssoc(pos, sClassID, sAlternative);
-				ASSERT (!sClassID.IsEmpty());
-
-				if (!sClassID.IsEmpty())
-				{
-					CXmlItem* pXISub = pXI->AddItem(ALTERNATIVE);
-
-					pXISub->SetItemValue(CLASSID, sClassID);
-					pXISub->SetItemValue(TEXTOUT, sAlternative);
-				}
-			}
-		}
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL DICTITEM::FromXml(const CXmlItem* pXI)
-{
-	if (pXI && pXI->NameIs(ITEM))
-	{
-		m_sTextIn = pXI->GetItemValue(TEXTIN);
-		m_sTextOut = pXI->GetItemValue(TEXTOUT);
-		m_sClassID = pXI->GetItemValue(CLASSID);
-
-		//  alternatives
-		const CXmlItem* pXISub = pXI->GetItem(ALTERNATIVE);
-
-		while (pXISub)
-		{
-			CString sClassID = pXISub->GetItemValue(CLASSID);
-			CString sAlternative = pXISub->GetItemValue(TEXTOUT);
-
-			if (!sClassID.IsEmpty())
-				m_mapAlternatives[sClassID] = sAlternative;
-
-			// next
-			pXISub = pXISub->GetSibling();
-		}
-
-		return TRUE;
-	}
-
-	return FALSE;
 }
 
 BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const
@@ -277,14 +200,14 @@ BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) c
 	return (aTransLines.GetSize() > 0 || aNeedTransLines.GetSize() > 0);
 }
 
-BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine)
+BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars)
 {
 	const CString& sLine = Misc::GetItem(aLines, nLine);
 
 	if (sLine.Find(NEED_TRANSLATION) == 0 || sLine.Find(TRANSLATED) == 0)
 		return FALSE;
 
-	if (FromCsv(sLine, *this))
+	if (FromCsv(sLine, *this, bDecodeChars))
 	{
 		// check for alternatives
 		int nNextLine = nLine + 1;
@@ -294,7 +217,7 @@ BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine)
 			const CString& sNextLine = Misc::GetItem(aLines, nNextLine);
 			DICTITEM diAlt;
 
-			if (FromCsv(sNextLine, diAlt) && diAlt.m_sTextIn == m_sTextIn)
+			if (FromCsv(sNextLine, diAlt, bDecodeChars) && diAlt.m_sTextIn == m_sTextIn)
 			{
 				ASSERT(!diAlt.m_sClassID.IsEmpty());
 
@@ -315,7 +238,7 @@ BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine)
 }
 
 // static helper
-BOOL DICTITEM::FromCsv(const CString& sLine, DICTITEM& di)
+BOOL DICTITEM::FromCsv(const CString& sLine, DICTITEM& di, BOOL bDecodeChars)
 {
 	CStringArray aFields;
 	int nNumFields = Misc::Split(sLine, aFields, '\t', TRUE);
@@ -328,13 +251,15 @@ BOOL DICTITEM::FromCsv(const CString& sLine, DICTITEM& di)
 
 	case 2:
 		di.m_sTextOut = aFields[1];
-		TransText::DecodeChars(di.m_sTextOut);
+
+		if (bDecodeChars)
+			TransText::DecodeChars(di.m_sTextOut);
 		// fall thru
 
 	case 1:
 		di.m_sTextIn = aFields[0];
 
-		if (TransText::PrepareLookupText(di.m_sTextIn))
+		if (TransText::PrepareLookupText(di.m_sTextIn, bDecodeChars))
 			return TRUE;
 	}
 
@@ -710,7 +635,7 @@ BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-CTransDictionary::CTransDictionary()
+CTransDictionary::CTransDictionary() : m_bDecodeChars(TRUE), m_wDictLanguageID(0)
 {
 	LANGID nLangID = Misc::GetUserDefaultUILanguage();
 	m_wDictLanguageID = (WORD)PRIMARYLANGID(nLangID);
@@ -725,52 +650,6 @@ CTransDictionary::CTransDictionary()
 CTransDictionary::~CTransDictionary()
 {
 	DeleteDictionary();
-}
-
-BOOL CTransDictionary::LoadXmlDictionary(LPCTSTR szDictPath)
-{
-	if (!FileMisc::HasExtension(szDictPath, _T("xml")))
-		return FALSE;
-
-	CXmlFile file(TRANSTEXT_HEADER);
-
-	if (file.Load(szDictPath))
-	{
-		DeleteDictionary();
-
-		m_sDictVersion = file.GetItemValue(DICTVER);
-
-		// process all top level items
-		const CXmlItem* pXITrans = file.GetItem(TRANSLATED);
-
-		if (pXITrans)
-		{
-			POSITION pos = pXITrans->GetFirstItemPos();
-			
-			while (pos)
-			{	
-				const CXmlItem* pXI = pXITrans->GetNextItem(pos);
-				LoadItem(pXI);
-			}
-		}
-
-		const CXmlItem* pXINeedTrans = file.GetItem(NEED_TRANSLATION);
-
-		if (pXINeedTrans)
-		{
-			POSITION pos = pXINeedTrans->GetFirstItemPos();
-			
-			while (pos)
-			{	
-				const CXmlItem* pXI = pXINeedTrans->GetNextItem(pos);
-				LoadItem(pXI);
-			}
-		}
-
-		return TRUE;
-	}
-
-	return FALSE;
 }
 
 BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
@@ -840,13 +719,13 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 				DICTITEM diTemp;
 
 				// this call will pull all consecutive lines having the same text
-				if (diTemp.FromCsv(aLines, nLine))
+				if (diTemp.FromCsv(aLines, nLine, m_bDecodeChars))
 				{
 					// NOTE: because we separate translated and untranslated
 					// text in the dictionary, and the untranslated comes first
 					// we need to append the untranslated AFTER the translated
 					// so that when we save the dictionary the untranslated 
-					// strings get moved t0 the translated section
+					// strings get moved to the translated section
 					CString sItem(diTemp.GetTextIn());
 					DICTITEM* pDI = GetDictItem(sItem, FALSE);
 
@@ -871,9 +750,9 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 					m_mapItems.SetAt(sItem, pDI);
 				}			
 			}
+			
+			FixupDictionary();
 		}
-
-		FixupDictionary();
 
 		return TRUE;
 	}
@@ -892,7 +771,7 @@ void CTransDictionary::FixupDictionary()
 		CString sKey;
 		
 		m_mapItems.GetNextAssoc(pos, sKey, pDI);
-		ASSERT(pDI && sKey == pDI->GetTextIn());
+		ASSERT(KeyMatches(sKey, pDI));
 
 		if (pDI->Fixup())
 			bCleaned = TRUE;
@@ -902,58 +781,6 @@ void CTransDictionary::FixupDictionary()
 		SaveDictionary();
 
 	IgnoreTranslatedText();
-}
-
-BOOL CTransDictionary::LoadDictionaryItem(const CXmlItem* pXIDict)
-{
-	if (pXIDict && pXIDict->NameIs(_T("ITEM")))
-	{
-		DICTITEM diTemp(pXIDict);
-
-		// make sure this item has not already been mapped
-		CString sItem(diTemp.GetTextIn());
-		DICTITEM* pDI = GetDictItem(sItem, FALSE);
-
-		// if it has we merge the items together
-		if (pDI)
-		{
-			pDI->Merge(diTemp);
-		}
-		else
-		{
-			pDI = new DICTITEM(diTemp);
-			m_mapItems.SetAt(sItem, pDI);
-		}
-
-		// next
-		LoadDictionaryItem(pXIDict->GetSibling());
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-void CTransDictionary::LoadItem(const CXmlItem* pXI)
-{
-	if (pXI == NULL)
-		return;
-
-	// trying loading a DICTITEM
-	if (LoadDictionaryItem(pXI))
-	{
-		// DICTITEM will have loaded itself and all subitems
-		// and all siblings
-	}
-	else // not a DICTITEM so process all children
-	{
-		POSITION pos = pXI->GetFirstItemPos();
-
-		while (pos)
-		{
-			const CXmlItem* pXISub = pXI->GetNextItem(pos);
-			LoadItem(pXISub);
-		}
-	}
 }
 
 void CTransDictionary::DeleteDictionary()
@@ -1046,7 +873,7 @@ void CTransDictionary::IgnoreTranslatedText()
 		CString sKey;
 		
 		m_mapItems.GetNextAssoc(pos, sKey, pDI);
-		ASSERT(pDI && sKey == pDI->GetTextIn());
+		ASSERT(KeyMatches(sKey, pDI));
 
 		CStringArray aTextOut;
 		int nItem = pDI->GetTextOut(aTextOut);
@@ -1060,6 +887,23 @@ void CTransDictionary::IgnoreTranslatedText()
 		}
 	}
 }
+
+BOOL CTransDictionary::KeyMatches(const CString& sKey, const DICTITEM* pDI) const
+{
+	if (sKey.IsEmpty() || !pDI)
+		return FALSE;
+
+	CString sTextIn(pDI->GetTextIn());
+	
+	if (!m_bDecodeChars)
+	{
+		if (!TransText::PrepareLookupText(sTextIn))
+			return FALSE;
+	}
+
+	return (sKey == sTextIn);
+}
+	
 
 void CTransDictionary::IgnoreString(const CString& sText, BOOL bPrepare)
 {
@@ -1093,70 +937,13 @@ BOOL CTransDictionary::SaveDictionary(LPCTSTR szAltPath, BOOL bForce)
 			szAltPath = m_sDictFile;
 	}
 
-	if (SaveCsvDictionary(szAltPath) || SaveXmlDictionary(szAltPath))
+	if (SaveCsvDictionary(szAltPath))
 	{
 		m_sDictFile = szAltPath;
 		return TRUE;
 	}
 
 	return FALSE;
-}
-
-BOOL CTransDictionary::SaveXmlDictionary(LPCTSTR szDictPath) const
-{
-	if (!FileMisc::HasExtension(szDictPath, _T("xml")))
-		return FALSE;
-
-	CXmlFile file(TRANSTEXT_HEADER);
-
-	// dtActive version
-	file.AddItem(DICTVER, FileMisc::GetAppVersion());
-
-	CXmlItem* pXITrans = file.AddItem(TRANSLATED);
-	CXmlItem* pXINeedTrans = file.AddItem(NEED_TRANSLATION);
-
-	// build xml file
-	POSITION pos = m_mapItems.GetStartPosition();
-
-	while (pos)
-	{
-		DICTITEM* pDI = NULL;
-		CString sKey;
-
-		m_mapItems.GetNextAssoc(pos, sKey, pDI);
-		ASSERT(pDI && sKey == pDI->GetTextIn());
-
-		// separate translated and non-translated items
-		// remember, in DEBUG we always override empty textout
-		// with UPPERCASED text
-		CXmlItem* pXItem = NULL;
-
-#ifdef _DEBUG
-		pXItem = pXITrans->AddItem(ITEM);
-#else
-		if (pDI->IsTranslated())
-			pXItem = pXITrans->AddItem(ITEM);
-		else
-			pXItem = pXINeedTrans->AddItem(ITEM);
-#endif
-
-		if (pXItem)
-			pDI->ToXml(pXItem);
-	}
-
-	// sort by original text to maintain some sort of order
-	pXITrans->SortItems(ITEM, TEXTIN);
-	pXINeedTrans->SortItems(ITEM, TEXTIN);
-
-	// mess about with the output to make it easier to understand
-	CString sFileContents;
-	file.Export(sFileContents);
-
-	sFileContents.Replace(_T("<ITEM"), _T("\t<ITEM"));
-	sFileContents.Replace(_T("</ITEM"), _T("\t</ITEM"));
-	sFileContents.Replace(_T("<ALTERNATIVE"), _T("\t\t<ALTERNATIVE"));
-
-	return FileMisc::SaveFile(szDictPath, sFileContents, SFEF_UTF16);
 }
 
 BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
@@ -1191,7 +978,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 		CStringArray aTransLines, aNeedTransLines;
 
 		m_mapItems.GetNextAssoc(pos, sKey, pDI);
-		ASSERT(pDI && sKey == pDI->GetTextIn());
+		ASSERT(KeyMatches(sKey, pDI));
 
 		if (pDI->ToCsv(aTransLines, aNeedTransLines))
 		{
@@ -1309,9 +1096,11 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 	return pDI;
 }
 
-BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath)
+BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 {
-	if (LoadCsvDictionary(szDictPath) || LoadXmlDictionary(szDictPath))
+	m_bDecodeChars = bDecodeChars;
+
+	if (LoadCsvDictionary(szDictPath))
 	{
 		m_sDictFile = szDictPath;
 		return TRUE;

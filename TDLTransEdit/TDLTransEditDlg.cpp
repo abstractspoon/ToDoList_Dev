@@ -5,10 +5,14 @@
 #include "TDLTransEdit.h"
 #include "TDLTransEditDlg.h"
 
+#include "..\transtext\transtextutils.h"
+
 #include "..\shared\enfiledialog.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\mousewheelmgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,59 +21,17 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CAboutDlg dialog used for App About
-
-class CAboutDlg : public CDialog
-{
-public:
-	CAboutDlg();
-
-// Dialog Data
-	//{{AFX_DATA(CAboutDlg)
-	enum { IDD = IDD_ABOUTBOX };
-	//}}AFX_DATA
-
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CAboutDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-	//{{AFX_MSG(CAboutDlg)
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
-{
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	//}}AFX_DATA_MAP
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
 
 CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CTDLTransEditDlg::IDD, pParent), m_bEdited(FALSE)
+	: 
+	CDialog(CTDLTransEditDlg::IDD, pParent), 
+	m_bEdited(FALSE), 
+	m_bShowAlternatives(TRUE),
+	m_bShowTooltips(TRUE)
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
-		// NOTE: the ClassWizard will add member initialization here
+	m_sFilter = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -78,6 +40,7 @@ void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLTransEditDlg)
 	DDX_Control(pDX, IDC_DICTIONARY, m_lcDictItems);
+	DDX_Text(pDX, IDC_FILTER, m_sFilter);
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_ENGLISH, m_sEnglish);
 	DDX_Text(pDX, IDC_TRANSLATION, m_sTranslation);
@@ -85,16 +48,22 @@ void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	//{{AFX_MSG_MAP(CTDLTransEditDlg)
-	ON_WM_SYSCOMMAND()
-	ON_COMMAND(ID_FILE_LOADDICTIONARY, OnFileLoadDictionary)
-	ON_COMMAND(ID_FILE_SAVEDICTIONARY, OnFileSaveDictionary)
+	ON_COMMAND(ID_OPTIONS_SHOWTOOLTIPS, OnOptionsShowTooltips)
+	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_TOOLS_CLEANUP, OnToolsCleanUp)
+	ON_COMMAND(ID_FILE_OPEN_TRANSLATION, OnFileOpenTranslation)
+	ON_COMMAND(ID_FILE_SAVE_TRANSLATION, OnFileSaveTranslation)
 	ON_WM_SIZE()
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_DICTIONARY, OnEndlabeleditDictionary)
 	ON_COMMAND(ID_FILE_CLOSE, OnFileExit)
 	ON_WM_CLOSE()
-	//}}AFX_MSG_MAP
-	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DICTIONARY, &CTDLTransEditDlg::OnListItemChanged)
-	ON_EN_CHANGE(IDC_TRANSLATION, &CTDLTransEditDlg::OnChangeTranslation)
+	ON_COMMAND(ID_OPTIONS_SHOWOPTIONALS, OnShowAlternatives)
+	ON_BN_CLICKED(IDC_UPDATEFILTER, OnUpdateFilter)
+	ON_BN_CLICKED(IDC_CLEARFILTER, OnClearFilter)
+	ON_WM_INITMENUPOPUP()
+	ON_COMMAND(ID_FILE_NEW_TRANSLATION, OnFileNewTranslation)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DICTIONARY, OnListItemChanged)
+	ON_EN_CHANGE(IDC_TRANSLATION, OnChangeTranslation)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
@@ -105,26 +74,11 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	CMouseWheelMgr::Initialize();
+	DICTITEM::SetTranslationOption(ITTTO_ADD2DICTIONARY);
+
 	GetWindowText(m_sBaseTitle);
 	m_icons.Initialise(*this, IDR_MAINFRAME);
-
-	// Add "About..." menu item to system menu.
-
-	// IDM_ABOUTBOX must be in the system command range.
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
-	{
-		CString strAboutMenu;
-		strAboutMenu.LoadString(IDS_ABOUTBOX);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
-	}
 
 	CMenu menu;
 
@@ -133,47 +87,46 @@ BOOL CTDLTransEditDlg::OnInitDialog()
 
 	m_lcDictItems.Initialise();
 
-	DICTITEM::SetTranslationOption(ITTTO_ADD2DICTIONARY);
+	if (m_mgrShortcuts.Initialize(this))
+	{
+		m_mgrShortcuts.AddShortcut(ID_FILE_NEW_TRANSLATION, 'N', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_FILE_OPEN_TRANSLATION, 'O', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_FILE_SAVE_TRANSLATION, 'S', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_TOOLS_CLEANUP, 'U', HOTKEYF_CONTROL);
+		m_mgrShortcuts.AddShortcut(ID_FILE_CLOSE, VK_F4, HOTKEYF_ALT);
+	}
 	
-	Resize();
 	LoadState();
-	
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
-void CTDLTransEditDlg::OnSysCommand(UINT nID, LPARAM lParam)
+void CTDLTransEditDlg::OnFileOpenTranslation() 
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-
-		return;
-	}
-
-	// else
-	CDialog::OnSysCommand(nID, lParam);
-}
-
-void CTDLTransEditDlg::OnFileLoadDictionary() 
-{
-	CFileOpenDialog dialog(_T("Select Translation"), _T(".csv"), NULL, EOFN_DEFAULTOPEN, _T("Dictionaries (*.csv)|*.csv||"));
+	CFileOpenDialog dialog(_T("Select Translation"), _T(".csv"), NULL, EOFN_DEFAULTOPEN, _T("Translations (*.csv)|*.csv||"));
 
 	if (dialog.DoModal() == IDOK)
+	{
+		m_sFilter.Empty();
+		UpdateData(FALSE);
+
 		LoadDictionary(dialog.GetPathName());
+	}
 }
 
 BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath)
 {
 	if (PromptAndSave())
 	{
-		if (m_dictionary.LoadDictionary(szDictPath))
+		CWaitCursor cursor;
+		CHoldRedraw hr(*this);
+		
+		if (m_dictionary.LoadDictionary(szDictPath, FALSE))
 		{
-			m_lcDictItems.RebuildList(m_dictionary);
+			m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
 			m_bEdited = FALSE;
 
 			UpdateCaption();
-
 			return TRUE;
 		}
 	}
@@ -182,7 +135,7 @@ BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath)
 	return FALSE;
 }
 
-void CTDLTransEditDlg::OnFileSaveDictionary() 
+void CTDLTransEditDlg::OnFileSaveTranslation() 
 {
 	m_dictionary.SaveDictionary();
 
@@ -212,21 +165,31 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 		CRect rTrans(GetCtrlRect(this, IDC_TRANSLATION));
 
 		int nYOffset = (rClient.bottom - rTrans.bottom);
-		int nXOffset = (rClient.right - rTrans.right);
+		int nEditWidth = ((rClient.Width() - 6) / 2);
+		
+		rEnglish.left = rClient.left;
+		rEnglish.right = (rEnglish.left + nEditWidth);
+		rTrans.left = (rEnglish.right + 6);
+		rTrans.right = (rTrans.left + nEditWidth);
 
-		OffsetCtrl(this, IDC_ENGLISH, 0, nYOffset);
-		OffsetCtrl(this, IDC_ENGLISHLABEL, 0, nYOffset);
-		OffsetCtrl(this, IDC_TRANSLATION, 0, nYOffset);
-		OffsetCtrl(this, IDC_TRANSLABEL, 0, nYOffset);
+		rEnglish.OffsetRect(0, nYOffset);
+		rTrans.OffsetRect(0, nYOffset);
 
-		ResizeCtrl(this, IDC_ENGLISH, nXOffset, 0);
-		ResizeCtrl(this, IDC_TRANSLATION, nXOffset, 0);
+		GetDlgItem(IDC_ENGLISH)->MoveWindow(rEnglish);
+		GetDlgItem(IDC_TRANSLATION)->MoveWindow(rTrans);
 
-		rClient.bottom = (rEnglish.top + nYOffset - 6);
-		m_lcDictItems.MoveWindow(rClient);
+		rEnglish = OffsetCtrl(this, IDC_ENGLISHLABEL, 0, nYOffset);
+		MoveCtrl(this, IDC_TRANSLABEL, rTrans.left, rEnglish.top);
+
+		CRect rList = GetChildRect(&m_lcDictItems);
+		rList.bottom = (rEnglish.top - 6);
+		rList.left = rClient.left;
+		rList.right = rClient.right;
+
+		m_lcDictItems.MoveWindow(rList);
 
 		// Resize columns 0 and 1
-		int nColWidth = ((rClient.Width() - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
+		int nColWidth = ((rList.Width() - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
 
 		m_lcDictItems.SetColumnWidth(0, nColWidth);
 		m_lcDictItems.SetColumnWidth(1, nColWidth);
@@ -238,26 +201,37 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-
 	ASSERT(pDispInfo->item.iSubItem == 1);
 
-	// Modify the dictionary item that this refers to
-	CString sEnglish = m_lcDictItems.GetItemText(pDispInfo->item.iItem, 0);
-	CString sClassID = m_lcDictItems.GetItemText(pDispInfo->item.iItem, 2);
-
-	VERIFY(m_dictionary.ModifyItem(sEnglish, sClassID, pDispInfo->item.pszText));
-
-	if (!m_bEdited)
+	if (ModifyDictionaryItem(pDispInfo->item.iItem, pDispInfo->item.pszText))
 	{
-		m_bEdited = TRUE;
-		UpdateCaption();
+		// Move selection down one row
+		if (pDispInfo->item.iItem < (m_lcDictItems.GetItemCount() - 1))
+			m_lcDictItems.SetCurSel(pDispInfo->item.iItem + 1);
 	}
 
-	// Move selection down one row
-	if (pDispInfo->item.iItem < (m_lcDictItems.GetItemCount() - 1))
-		m_lcDictItems.SelectItem(pDispInfo->item.iItem + 1);
-
 	*pResult = 0;
+}
+
+BOOL CTDLTransEditDlg::ModifyDictionaryItem(int nItem, const CString& sTrans)
+{
+	// Modify the dictionary item that this refers to
+	CString sEnglish = m_lcDictItems.GetItemText(nItem, ENG_COL);
+	CString sClassID = m_lcDictItems.GetItemText(nItem, HINT_COL);
+
+	if (m_dictionary.ModifyItem(sEnglish, sClassID, sTrans))
+	{
+		if (!m_bEdited)
+		{
+			m_bEdited = TRUE;
+			UpdateCaption();
+		}
+
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 void CTDLTransEditDlg::UpdateCaption()
@@ -333,7 +307,69 @@ void CTDLTransEditDlg::OnClose()
 
 void CTDLTransEditDlg::LoadState()
 {
-	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("Dictionary"));
+	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), TRUE);
+	m_sYourLanguagePath = AfxGetApp()->GetProfileString(_T("State"), _T("YourLanguage"));
+	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
+
+	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
+	m_lcDictItems.EnableToolTips(m_bShowTooltips);
+
+	int nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("EnglishColWidth"), 200);
+	m_lcDictItems.SetColumnWidth(ENG_COL, nColWidth);
+
+	nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("TransColWidth"), 200);
+	m_lcDictItems.SetColumnWidth(TRANS_COL, nColWidth);
+	
+	nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("HintColWidth"), 100);
+	m_lcDictItems.SetColumnWidth(HINT_COL, nColWidth);
+
+	CRect rect;
+
+	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
+	rect.top = AfxGetApp()->GetProfileInt(_T("State"), _T("Top"), -1);
+	rect.right = AfxGetApp()->GetProfileInt(_T("State"), _T("Right"), -1);
+	rect.bottom = AfxGetApp()->GetProfileInt(_T("State"), _T("Bottom"), -1);
+
+	if (rect.Width() > 0 && rect.Height() > 0)
+	{
+		// ensure this intersects with the closest screen by a decent amount
+		int BORDER = 200;
+		rect.DeflateRect(BORDER, BORDER);
+		
+		CRect rUnused;
+		
+		if (GraphicsMisc::GetAvailableScreenSpace(rect, rUnused))
+		{
+			rect.InflateRect(BORDER, BORDER);
+			
+			// because the position was saved using the results of 
+			// GetWindowPlacement we must use SetWindowPlacement
+			// to restore the window
+			WINDOWPLACEMENT wp = { 0 };
+			
+			wp.rcNormalPosition = rect;
+			wp.ptMaxPosition.x = -1;
+			wp.ptMaxPosition.y = -1;
+			wp.ptMinPosition.x = -1;
+			wp.ptMinPosition.y = -1;
+			
+			if (AfxGetApp()->GetProfileInt(_T("State"), _T("Maximised"), FALSE))
+				wp.showCmd = SW_MAXIMIZE;
+			
+			SetWindowPlacement(&wp);
+		}
+		else
+		{
+			ASSERT(0);
+			Resize();
+		}
+	}
+	else
+	{
+		Resize();
+	}
+	
+	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("LastDictionary"));
 	
 	if (!sDictPath.IsEmpty())
 		LoadDictionary(sDictPath);
@@ -342,8 +378,33 @@ void CTDLTransEditDlg::LoadState()
 void CTDLTransEditDlg::SaveState()
 {
 	CString sDictPath = m_dictionary.GetDictionaryPath();
+	AfxGetApp()->WriteProfileString(_T("State"), _T("LastDictionary"), sDictPath);
 
-	AfxGetApp()->WriteProfileString(_T("State"), _T("Dictionary"), sDictPath);
+	AfxGetApp()->WriteProfileString(_T("State"), _T("YourLanguage"), m_sYourLanguagePath);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("ShowAlternatives"), m_bShowAlternatives);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("ShowTooltips"), m_bShowTooltips);
+	AfxGetApp()->WriteProfileString(_T("State"), _T("LastFilter"), m_sFilter);
+
+	int nColWidth = m_lcDictItems.GetColumnWidth(ENG_COL);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("EnglishColWidth"), nColWidth);
+	
+	nColWidth = m_lcDictItems.GetColumnWidth(TRANS_COL);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("TransColWidth"), nColWidth);
+	
+	nColWidth =	m_lcDictItems.GetColumnWidth(HINT_COL);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("HintColWidth"), nColWidth);
+
+	WINDOWPLACEMENT wp = { 0 };
+	
+	if (GetWindowPlacement(&wp))
+	{
+		AfxGetApp()->WriteProfileInt(_T("State"), _T("Left"), wp.rcNormalPosition.left);
+		AfxGetApp()->WriteProfileInt(_T("State"), _T("Top"), wp.rcNormalPosition.top);
+		AfxGetApp()->WriteProfileInt(_T("State"), _T("Right"), wp.rcNormalPosition.right);
+		AfxGetApp()->WriteProfileInt(_T("State"), _T("Bottom"), wp.rcNormalPosition.bottom);
+
+		AfxGetApp()->WriteProfileInt(_T("State"), _T("Maximised"), IsZoomed());
+	}
 }
 
 void CTDLTransEditDlg::OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
@@ -354,15 +415,15 @@ void CTDLTransEditDlg::OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
 	if (!(pNMLV->uOldState & LVIS_SELECTED) && (pNMLV->uNewState & LVIS_SELECTED))
 	{
 		m_sEnglish.Format(_T("%s [%s]"), 
-						m_lcDictItems.GetItemText(pNMLV->iItem, 0), 
-						m_lcDictItems.GetItemText(pNMLV->iItem, 2));
+						m_lcDictItems.GetItemText(pNMLV->iItem, ENG_COL), 
+						m_lcDictItems.GetItemText(pNMLV->iItem, HINT_COL));
 
-		m_sTranslation = m_lcDictItems.GetItemText(pNMLV->iItem, 1);
+		m_sTranslation = m_lcDictItems.GetItemText(pNMLV->iItem, TRANS_COL);
 
 		UpdateData(FALSE);
 	}
 
-	GetDlgItem(IDC_TRANSLATION)->EnableWindow(m_lcDictItems.GetSelectedItem() != -1);
+	GetDlgItem(IDC_TRANSLATION)->EnableWindow(m_lcDictItems.GetCurSel() != -1);
 
 	*pResult = 0;
 }
@@ -372,17 +433,11 @@ void CTDLTransEditDlg::OnChangeTranslation()
 {
 	UpdateData();
 
-	int nSel = m_lcDictItems.GetSelectedItem();
+	int nSel = m_lcDictItems.GetCurSel();
 
 	if (nSel != -1)
 	{
-		m_lcDictItems.SetItemText(nSel, 1, m_sTranslation);
-
-		if (!m_bEdited)
-		{
-			m_bEdited = TRUE;
-			UpdateCaption();
-		}
+		ModifyDictionaryItem(nSel, m_sTranslation);
 	}
 	else
 	{
@@ -396,5 +451,138 @@ BOOL CTDLTransEditDlg::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeCtrl(this, IDC_ENGLISH, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_TRANSLATION, pDC);
 
-	return CDialog::OnEraseBkgnd(pDC);
+	CDialog::OnEraseBkgnd(pDC);
+
+	// Draw a divider under the menu
+	CRect rDivider;
+
+	GetClientRect(rDivider);
+	rDivider.bottom = (rDivider.top + 1);
+
+	pDC->FillSolidRect(rDivider, GetSysColor(COLOR_3DSHADOW));
+
+	return TRUE;
+}
+
+void CTDLTransEditDlg::OnShowAlternatives() 
+{
+	m_bShowAlternatives = !m_bShowAlternatives;
+
+	m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
+}
+
+void CTDLTransEditDlg::OnUpdateFilter() 
+{
+	// Only refilter on change
+	CString sPrevFilter(m_sFilter);
+	UpdateData();
+
+	if (m_sFilter.CompareNoCase(sPrevFilter) != 0)
+		m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
+}
+
+void CTDLTransEditDlg::OnClearFilter() 
+{
+	if (!m_sFilter.IsEmpty())
+	{
+		m_sFilter.Empty();
+		UpdateData(FALSE);
+		
+		m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
+	}
+}
+
+void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
+{
+	CDialog::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+	
+	switch (nIndex)
+	{
+	case 0: // File
+		pPopupMenu->EnableMenuItem(ID_FILE_SAVE_TRANSLATION, (m_bEdited ? MF_ENABLED : MF_DISABLED));
+		break;
+
+	case 1: // Options
+		pPopupMenu->CheckMenuItem(ID_OPTIONS_SHOWOPTIONALS, (m_bShowAlternatives ? MF_CHECKED : MF_UNCHECKED));
+		pPopupMenu->CheckMenuItem(ID_OPTIONS_SHOWTOOLTIPS, (m_bShowTooltips ? MF_CHECKED : MF_UNCHECKED));
+		break;
+
+	case 2: // Tools
+		pPopupMenu->EnableMenuItem(ID_TOOLS_CLEANUP, (m_dictionary.IsEmpty() ? MF_DISABLED : MF_ENABLED));
+		break;
+	}
+}
+
+BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg) 
+{
+	// Handle 'Enter' in the 'Filter' field
+	if ((pMsg->message == WM_KEYDOWN) && 
+		(pMsg->wParam == VK_RETURN) &&
+		(pMsg->hwnd == *GetDlgItem(IDC_FILTER)))
+	{
+		OnUpdateFilter();
+		return TRUE;
+	}
+	else if (m_mgrShortcuts.ProcessMessage(pMsg))
+	{
+		return TRUE;
+	}
+	
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CTDLTransEditDlg::OnToolsCleanUp() 
+{
+	if (!InitYourLanguagePath())
+		return;
+	
+	if (TransText::CleanupDictionary(m_sYourLanguagePath, m_dictionary.GetDictionaryPath()))
+	{
+		LoadDictionary(m_dictionary.GetDictionaryPath());
+	}
+}
+
+void CTDLTransEditDlg::OnFileNewTranslation() 
+{
+	if (!InitYourLanguagePath())
+		return;
+	
+	CFileSaveDialog dialog(_T("Save New Translation"), _T(".csv"), NULL, EOFN_DEFAULTSAVE, _T("Translations (*.csv)|*.csv||"));
+
+	while (dialog.DoModal() == IDOK)
+	{
+		CString sTransPath = dialog.GetPathName();
+
+		// Disallow 'YourLanguage.csv"
+		if (FileMisc::GetFileNameFromPath(sTransPath).CompareNoCase(_T("YourLanguage.csv")) != 0)
+		{
+			FileMisc::CopyFile(m_sYourLanguagePath, sTransPath, TRUE, TRUE);
+			VERIFY(LoadDictionary(sTransPath));
+
+			break;
+		}
+
+		// else
+		AfxMessageBox(_T("'YourLanguage.csv' is a reserved filename.\n\nPlease choose another."), MB_OK | MB_ICONEXCLAMATION);
+	}
+}
+
+BOOL CTDLTransEditDlg::InitYourLanguagePath()
+{
+	if (!FileMisc::FileExists(m_sYourLanguagePath))
+	{
+		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
+		
+		if (dialog.DoModal() == IDOK)
+			m_sYourLanguagePath = dialog.GetPathName();
+	}
+	
+	return FileMisc::FileExists(m_sYourLanguagePath);
+}
+
+void CTDLTransEditDlg::OnOptionsShowTooltips() 
+{
+	m_bShowTooltips = !m_bShowTooltips;
+
+	m_lcDictItems.EnableToolTips(m_bShowTooltips);
 }
