@@ -2625,12 +2625,12 @@ void CToDoListWnd::RestorePosition()
 {
 	CPreferences prefs;
 
-	int nLeft = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
-	int nTop = prefs.GetProfileInt(_T("Pos"), _T("Top"), -1);
-	int nRight = prefs.GetProfileInt(_T("Pos"), _T("Right"), -1);
-	int nBottom = prefs.GetProfileInt(_T("Pos"), _T("Bottom"), -1);
+	CRect rect;
 	
-	CRect rect(nLeft, nTop, nRight, nBottom);
+	rect.left = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
+	rect.top = prefs.GetProfileInt(_T("Pos"), _T("Top"), -1);
+	rect.right = prefs.GetProfileInt(_T("Pos"), _T("Right"), -1);
+	rect.bottom = prefs.GetProfileInt(_T("Pos"), _T("Bottom"), -1);
 	
 	if (rect.Width() > 0 && rect.Height() > 0)
 	{
@@ -2638,9 +2638,9 @@ void CToDoListWnd::RestorePosition()
 		int BORDER = 200;
 		rect.DeflateRect(BORDER, BORDER);
 
-		CRect rScreen;
+		CRect rUnused;
 
-		if (GraphicsMisc::GetAvailableScreenSpace(rect, rScreen))
+		if (GraphicsMisc::GetAvailableScreenSpace(rect, rUnused))
 		{
 			rect.InflateRect(BORDER, BORDER);
 
