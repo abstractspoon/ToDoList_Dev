@@ -1423,6 +1423,16 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (bSelChange || !bHadFocus)
 							m_htiLastHandledLBtnDown = htiHit;
 					}
+					else if (nHitFlags & TVHT_ONITEMICON)
+					{
+						// Allow drag-drop to take precedence over icon-editing
+						if (!DragDetect(m_tcTasks, CPoint(lp)))
+						{
+							// save item handle so we don't re-handle in LButtonUp handler
+							m_htiLastHandledLBtnDown = htiHit;
+							bColClick = TRUE;
+						}
+					}
 					else
 					{
 						// save item handle so we don't re-handle in LButtonUp handler
@@ -1575,7 +1585,7 @@ void CTDLTaskTreeCtrl::ExpandList(HTREEITEM hti)
 {
 	int nNextIndex = 0;
 	
-	if (hti)
+	if (hti && (hti != TVI_ROOT))
 	{
 		nNextIndex = FindListItem(m_lcColumns, (DWORD)hti);
 		ASSERT(nNextIndex != -1);
