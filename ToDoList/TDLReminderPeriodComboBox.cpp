@@ -25,7 +25,7 @@ const UINT ONE_YEAR		= ONE_DAY * 365;
 // ToDoList uses a dynamic runtime translation system
 static LEADINDATA data[] = 
 {
-	{ _T("<None>"),				TDLRPC_NOREMINDER },
+	{ _T("<none>"),				TDLRPC_NOREMINDER },
 	{ _T("0 minutes"),			0 },
 	{ _T("5 minutes"),			5 },
 	{ _T("10 minutes"),			10 },
