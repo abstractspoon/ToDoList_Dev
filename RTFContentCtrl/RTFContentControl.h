@@ -48,6 +48,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	// global settings
+	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }
 	static void SetConvertWithMSWord(BOOL bUseMSWord) { s_bConvertWithMSWord = bUseMSWord; }
 	static BOOL GetConvertWithMSWord() { return s_bConvertWithMSWord; }
 	static void EnableInlineSpellChecking(BOOL bEnable) { s_bInlineSpellChecking = bEnable; }
@@ -65,6 +66,7 @@ protected:
 	LOGFONT m_lfCurrent;
 	CRTFPreferencesDlg m_prefsDlg;
 
+	static BOOL s_bPasteSourceUrls;
 	static BOOL s_bConvertWithMSWord;
 	static BOOL s_bInlineSpellChecking;
 

@@ -883,7 +883,10 @@ void CTransDictionary::IgnoreTranslatedText()
 			const CString sItem = aTextOut[nItem];
 			ASSERT(!sItem.IsEmpty());
 
-			IgnoreString(sItem, TRUE);
+			// Only ignore translated items having
+			// DIFFERENT text to the text being translated
+			if (sItem != pDI->GetTextIn())
+				IgnoreString(sItem, TRUE);
 		}
 	}
 }

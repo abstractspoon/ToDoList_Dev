@@ -560,6 +560,7 @@ BOOL CToDoCtrl::CanEncrypt()
 BOOL CToDoCtrl::Create(const RECT& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible, BOOL bEnabled)
 {
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0) | (bEnabled ? 0 : WS_DISABLED) | WS_TABSTOP);
+	CLocalizer::IgnoreString(_T("ToDoCtrl"));
 	
 	return CRuntimeDlg::Create(_T("ToDoCtrl"), dwStyle, WS_EX_CONTROLPARENT, rect, pParentWnd, nID);
 }

@@ -6,6 +6,8 @@
 #include "TDLImpExpAttributeMappingListCtrl.h"
 #include "tdcstatic.h"
 
+#include "..\shared\Localizer.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -68,6 +70,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	CInputListCtrl::PreSubclassWindow();
 
 	// build column combo because that is static
+	CLocalizer::EnableTranslation(m_cbAttributes, FALSE);
+
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];

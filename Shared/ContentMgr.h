@@ -44,7 +44,7 @@ public:
 	BOOL ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, LPCTSTR szCharSet, LPCTSTR szImageDir = NULL);
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
 	
 protected:
 	BOOL m_bInitialized;

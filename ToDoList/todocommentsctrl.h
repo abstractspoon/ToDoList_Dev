@@ -42,6 +42,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	// global settings
+	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }
 	static void EnableInlineSpellChecking(BOOL bEnable) { s_bInlineSpellChecking = bEnable; }
 	static BOOL IsInlineSpellCheckingEnabled() { return s_bInlineSpellChecking; }
 
@@ -52,6 +53,7 @@ protected:
 	CRichEditSpellCheck m_reSpellCheck;
 
 	static BOOL s_bInlineSpellChecking;
+	static BOOL s_bPasteSourceUrls;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

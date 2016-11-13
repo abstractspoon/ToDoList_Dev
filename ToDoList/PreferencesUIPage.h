@@ -80,6 +80,7 @@ public:
 	BOOL GetEnableColumnHeaderSorting() const { return m_bEnableColumnHeaderSorting; }
 	int GetDefaultTaskViews(CStringArray& aTypeIDs) const;
 	BOOL GetStackEditFieldsAndComments() const { return m_bStackEditFieldsAndComments; }
+	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_bIncludeWebLinksInCommentsPaste; }
 //	BOOL Get() const { return ; }
 
 protected:
@@ -110,6 +111,7 @@ protected:
 	BOOL	m_bStackEditFieldsAndComments;
 	//}}AFX_DATA
 //	BOOL	m_bShowCtrlsAsColumns;
+	BOOL	m_bIncludeWebLinksInCommentsPaste;
 	PUIP_NEWTASKPOS	m_nNewTaskPos;
 	PUIP_NEWTASKPOS	m_nNewSubtaskPos;
 	PUIP_MATCHTITLE m_nTitleFilterOption;

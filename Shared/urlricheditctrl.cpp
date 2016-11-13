@@ -763,7 +763,7 @@ CString CUrlRichEditCtrl::CreateFileLink(LPCTSTR szFile)
 	return sLink;
 }
 
-void CUrlRichEditCtrl::Paste()
+void CUrlRichEditCtrl::Paste(BOOL bAppendSourceUrl)
 {
 	CString sClipText;
 	
@@ -778,23 +778,29 @@ void CUrlRichEditCtrl::Paste()
 	CRichEditBaseCtrl::Paste();
 
 	// If there is an associated URL then paste that after
-	CString sClipURL;
-
-	if (CClipboard().GetHTMLSourceLink(sClipURL))
-		VERIFY(AppendSourceUrls(sClipURL));
+	if (bAppendSourceUrl)
+	{
+		CString sClipURL;
+		
+		if (CClipboard().GetHTMLSourceLink(sClipURL))
+			VERIFY(AppendSourceUrls(sClipURL));
+	}
 }
 
-BOOL CUrlRichEditCtrl::PasteSimpleText()
+BOOL CUrlRichEditCtrl::PasteSimpleText(BOOL bAppendSourceUrl)
 {
 	// Do the default paste
 	if (CRichEditBaseCtrl::PasteSimpleText())
 	{
 		// If there is an associated URL then paste that after
-		CString sClipURL;
-		
-		if (CClipboard().GetHTMLSourceLink(sClipURL))
-			VERIFY(AppendSourceUrls(sClipURL));
-		
+		if (bAppendSourceUrl)
+		{
+			CString sClipURL;
+			
+			if (CClipboard().GetHTMLSourceLink(sClipURL))
+				VERIFY(AppendSourceUrls(sClipURL));
+		}
+
 		return TRUE;
 	}
 	

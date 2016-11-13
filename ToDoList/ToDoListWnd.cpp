@@ -4757,6 +4757,9 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		else
 			m_reminders.UseStickies(FALSE);
 
+		// Content controls
+		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
+
 		// Recently modified period
 		CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
 
@@ -7280,7 +7283,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 			CPreferences prefs;
 			
 			m_mgrUIExtensions.LoadPreferences(prefs, _T("UIExtensions"));
-			m_mgrContent.LoadPreferences(prefs, _T("ContentControls"));
+			m_mgrContent.LoadPreferences(prefs, _T("ContentControls"), FALSE);
 		}
 		
 		return pTDC;
@@ -9934,9 +9937,8 @@ void CToDoListWnd::ResetPrefs()
 	m_pPrefs->SetUITheme(m_theme);
 	m_mgrToDoCtrls.SetPrefs(m_pPrefs); 
 	
-	// grab current colors
-	Prefs().GetPriorityColors(m_aPriorityColors);
-
+	// Update Filter bar colours
+	m_pPrefs->GetPriorityColors(m_aPriorityColors);
 	m_filterBar.SetPriorityColors(m_aPriorityColors);
 }
 

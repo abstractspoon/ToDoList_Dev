@@ -73,6 +73,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKVIEWVISIBILITY, m_lbTaskViews);
 	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
+	DDX_Check(pDX, IDC_INCLUDEWEBLINKINCOMMENTSPASTE, m_bIncludeWebLinksInCommentsPaste);
 //	DDX_Check(pDX, IDC_RTLCOMMENTS, m_bRTLComments);
 
 	if (pDX->m_bSaveAndValidate)
@@ -160,6 +161,7 @@ void CPreferencesUIPage::LoadPreferences(const CPreferences& prefs)
 	m_bShowDefaultFilters = prefs.GetProfileInt(_T("Preferences"), _T("ShowDefaultFilters"), TRUE);
 	m_bEnableColumnHeaderSorting = prefs.GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE);
 	m_bStackEditFieldsAndComments = prefs.GetProfileInt(_T("Preferences"), _T("StackEditFieldsAndComments"), TRUE);
+	m_bIncludeWebLinksInCommentsPaste = prefs.GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE);
 //	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), FALSE);
 
 	// comments format
@@ -231,6 +233,7 @@ void CPreferencesUIPage::SavePreferences(CPreferences& prefs)
 	prefs.WriteProfileInt(_T("Preferences"), _T("ShowDefaultFilters"), m_bShowDefaultFilters);
 	prefs.WriteProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), m_bEnableColumnHeaderSorting);
 	prefs.WriteProfileInt(_T("Preferences"), _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
+	prefs.WriteProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), m_bIncludeWebLinksInCommentsPaste);
 //	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
 
 	prefs.WriteProfileString(_T("Preferences"), _T("UIThemeFile"), m_sUIThemeFile);

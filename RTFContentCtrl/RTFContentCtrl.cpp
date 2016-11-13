@@ -162,14 +162,19 @@ void CRTFContentCtrlApp::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), CRTFContentControl::IsInlineSpellCheckingEnabled());
 }
 
-void CRTFContentCtrlApp::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CRTFContentCtrlApp::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (CMSWordHelper::IsWordInstalled(12))
-		CRTFContentControl::SetConvertWithMSWord(pPrefs->GetProfileInt(szKey, _T("ConvertWithMSWord"), TRUE));
-	else
-		CRTFContentControl::SetConvertWithMSWord(FALSE);
+	if (!bAppOnly)
+	{
+		if (CMSWordHelper::IsWordInstalled(12))
+			CRTFContentControl::SetConvertWithMSWord(pPrefs->GetProfileInt(szKey, _T("ConvertWithMSWord"), TRUE));
+		else
+			CRTFContentControl::SetConvertWithMSWord(FALSE);
+		
+		CRTFContentControl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+	}
 
-	CRTFContentControl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+	CRTFContentControl::SetPasteSourceUrls(pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE));
 }

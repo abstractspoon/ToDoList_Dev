@@ -214,6 +214,7 @@ public:
 	BOOL GetEnableColumnHeaderSorting() const { return m_pageUI.GetEnableColumnHeaderSorting(); }
 	int GetDefaultTaskViews(CStringArray& aViews) const { return m_pageUI.GetDefaultTaskViews(aViews); }
 	BOOL GetStackEditFieldsAndComments() const { return m_pageUI.GetStackEditFieldsAndComments(); }
+	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_pageUI.GetIncludeWebLinksInCommentsPaste(); }
 
 	// CPreferencesUIVisibilityPage
 	void GetDefaultColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const { m_pageUIVisibility.GetColumnAttributeVisibility(vis); }
@@ -299,10 +300,8 @@ protected:
 	CWinHelpButton m_btnHelp;
 	TDCAUTOLISTDATA m_defaultListData;
 
-
 	CMap<CPreferencesPageBase*, CPreferencesPageBase*, HTREEITEM, HTREEITEM&> m_mapPP2HTI;
 	CMap<HTREEITEM, HTREEITEM, UINT, UINT&> m_mapHTIToSection;
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -280,7 +280,7 @@ void CContentMgr::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 }
 
-void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
+void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly)
 {
 	Initialize(); // initialize on demand
 	
@@ -294,6 +294,6 @@ void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), szKey, pContent->GetTypeID());
 		
-		pContent->LoadPreferences(pPrefs, sKey);
+		pContent->LoadPreferences(pPrefs, sKey, (bAppOnly != FALSE));
 	}
 }

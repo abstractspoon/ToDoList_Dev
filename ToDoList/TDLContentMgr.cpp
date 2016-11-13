@@ -65,9 +65,12 @@ public:
 		pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), CToDoCommentsCtrl::IsInlineSpellCheckingEnabled());
 	}
 	
-	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey) 
+	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) 
 	{
-		CToDoCommentsCtrl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+		if (!bAppOnly)
+			CToDoCommentsCtrl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+
+		CToDoCommentsCtrl::SetPasteSourceUrls(pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE));
 	}
 
 protected:

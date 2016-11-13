@@ -64,6 +64,7 @@ const int NUM_PASTE_FMTS = (sizeof(PASTE_FMTS) / sizeof(PASTE_FMTS[0]));
 
 BOOL CRTFContentControl::s_bConvertWithMSWord = FALSE;
 BOOL CRTFContentControl::s_bInlineSpellChecking = TRUE;
+BOOL CRTFContentControl::s_bPasteSourceUrls = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -536,7 +537,7 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 	case 0:
 		if (bSimple)
 		{
-			m_rtf.PasteSimpleText();
+			m_rtf.PasteSimpleText(s_bPasteSourceUrls);
 		}
 		else // may need conversion
 		{
@@ -570,13 +571,8 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 			}
 
 			// do the actual paste
-			m_rtf.Paste();
+			m_rtf.Paste(s_bPasteSourceUrls);
 
-			// In the case where we overwrote the clipboard
-			// we also need handle any source Url 
-			if (!sSourceUrl.IsEmpty())
-				m_rtf.AppendSourceUrls(sSourceUrl);
-			
 			// restore the clipboard
 			if (bClipboardSaved)
 				VERIFY(cbb.Restore());

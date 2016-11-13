@@ -124,7 +124,7 @@ public:
 	virtual void FreeHtmlBuffer(LPWSTR& szHtml) = 0;
 	
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
-	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

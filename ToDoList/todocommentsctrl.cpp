@@ -36,6 +36,7 @@ const DWORD SIMPLETEXT_COMMENTS = (DWORD)(LPCTSTR)_T("SIMPLETEXT_COMMENTS");
 /////////////////////////////////////////////////////////////////////////////
 
 BOOL CToDoCommentsCtrl::s_bInlineSpellChecking = TRUE;
+BOOL CToDoCommentsCtrl::s_bPasteSourceUrls = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCommentsCtrl
@@ -458,7 +459,7 @@ BOOL CToDoCommentsCtrl::Paste()
 		return FALSE;
 
 	case 0:
-		return PasteSimpleText();
+		return PasteSimpleText(s_bPasteSourceUrls);
 	}
 
 	// default > 0
