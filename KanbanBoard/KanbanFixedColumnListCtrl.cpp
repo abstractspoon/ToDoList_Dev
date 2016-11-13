@@ -8,6 +8,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -113,6 +114,7 @@ void CKanbanFixedColumnListCtrl::PreSubclassWindow()
 	// create child controls 
 	// we need combo to be created first
 	CreateControl(m_cbValues, IDC_VALUES);
+	CLocalizer::EnableTranslation(m_cbValues, FALSE);
 
 	CInputListCtrl::PreSubclassWindow();
 
