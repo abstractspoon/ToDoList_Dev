@@ -1093,7 +1093,7 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 void CGanttTreeListCtrl::AddListColumn(int nMonth, int nYear)
 {
-	ASSERT(nMonth >= 1 && nMonth <= 12/* && nYear > 1900*/);
+	ASSERT(nMonth >= 1 && nMonth <= 12);
 
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_TEXT | LVCF_WIDTH, 0 };
 
@@ -1114,7 +1114,7 @@ void CGanttTreeListCtrl::AddListColumn(int nMonth, int nYear)
 
 void CGanttTreeListCtrl::SetListColumnDate(int nCol, int nMonth, int nYear)
 {
-	ASSERT(nMonth >= 1 && nMonth <= 12/* && nYear > 1900*/);
+	ASSERT(nMonth >= 1 && nMonth <= 12);
 
 	// encode month and year into header item data
 	m_listHeader.SetItemData(nCol, MAKELONG(nMonth, nYear));
@@ -1319,7 +1319,7 @@ BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) co
 		nYear = HIWORD(dwData);
 	}
 
-	return (nMonth >= 1 && nMonth <= 12/* && nYear > 1900*/);
+	return (nMonth >= 1 && nMonth <= 12);
 }
 
 void CGanttTreeListCtrl::BuildTreeColumns()
@@ -4074,9 +4074,8 @@ void CGanttTreeListCtrl::ValidateMonthDisplay()
 
 	ValidateMonthDisplay(nDisplay, nMonthWidth);
 
-	if ((m_nMonthDisplay != nDisplay)/* || (m_nMonthWidth != nWidth)*/)
+	if (m_nMonthDisplay != nDisplay)
 	{
-		//ZoomTo(nDisplay, nWidth);
 		VERIFY(SetMonthDisplay(nDisplay));
 		GetCWnd()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 	}
@@ -4159,7 +4158,7 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 		return TRUE;
 
 	// validate month width
-	if (nNewMonthWidth < 10/* || nNewMonthWidth > 1000*/)
+	if (nNewMonthWidth < 10)
 		return FALSE;
 
 	// cache the current scroll-pos so we can restore it
@@ -4846,7 +4845,7 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date
 	return FALSE;
 }
 
-int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, BOOL bEndOfDay) const
+int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 {
 	// figure out which column contains 'date'
 	int nCol = FindColumn(date);
@@ -4861,7 +4860,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, BOOL bEnd
 			int nMonth = date.GetMonth();
 			int nYear = date.GetYear();
 
-			int nDayInCol = (bEndOfDay ? nDay : (nDay - 1));
+			double dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 			int nDaysInCol = 0;
 
 			switch (m_nMonthDisplay)
@@ -4869,7 +4868,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, BOOL bEnd
 			case GTLC_DISPLAY_YEARS:
 				// Column == 12 months
 				nDaysInCol = (int)DAYS_IN_YEAR;
-				nDayInCol += (int)((nMonth - 1) * DAYS_IN_MONTH);
+				dDayInCol += (int)((nMonth - 1) * DAYS_IN_MONTH);
 				break;
 				
 			case GTLC_DISPLAY_QUARTERS_SHORT:
@@ -4877,7 +4876,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, BOOL bEnd
 			case GTLC_DISPLAY_QUARTERS_LONG:
 				// Column == 3 months
 				nDaysInCol = (int)(DAYS_IN_MONTH * 3);
-				nDayInCol += (int)(((nMonth -1) % 3) * DAYS_IN_MONTH);
+				dDayInCol += (int)(((nMonth -1) % 3) * DAYS_IN_MONTH);
 				break;
 
 			default: 
@@ -4889,7 +4888,10 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date, BOOL bEnd
 			ASSERT(nDaysInCol > 0);
 
 			if (nDaysInCol > 0)
-				return (rColumn.left + MulDiv(rColumn.Width(), nDayInCol, nDaysInCol));
+			{
+				double dOffset = ((rColumn.Width() * dDayInCol) / nDaysInCol);
+				return (rColumn.left + (int)dOffset);
+			}
 		}
 	}
 
@@ -5141,9 +5143,12 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	CRect rTask;
 	VERIFY(ListView_GetItemRect(m_hwndList, nItem, rTask, LVIR_BOUNDS));
 
-	rTask.left = GetScrollPosFromDate(dtStart, FALSE);
-	rTask.right = GetScrollPosFromDate(dtDue, TRUE);
-	
+	if (!CDateHelper::DateHasTime(dtDue))
+		dtDue += 1.0;
+
+	rTask.right = GetScrollPosFromDate(dtDue);
+	rTask.left = GetScrollPosFromDate(dtStart);
+
 	rTask.OffsetRect(-GetScrollPos(m_hwndList, SB_HORZ), 0);
 
 	// Create 'hit' boxes around the two ends
@@ -5474,6 +5479,12 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 				{
 					// prevent the start and end dates from overlapping
 					pGI->dtDue.m_dt = max(dtDrag.m_dt, (dtStart.m_dt + dMinDuration));
+
+					// handle day boundary
+					if (!CDateHelper::DateHasTime(pGI->dtDue))
+					{
+						pGI->dtDue.m_dt = (CDateHelper::GetEndOfDay(pGI->dtDue).m_dt - 1.0);
+					}
 				}
 
 				szCursor = IDC_SIZEWE;
