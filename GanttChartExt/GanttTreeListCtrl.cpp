@@ -933,16 +933,11 @@ void CGanttTreeListCtrl::RecalcDateRange()
 
 COleDateTime CGanttTreeListCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
 {
-	COleDateTime date;
+	COleDateTime date = CDateHelper::GetDate(tDate);
 
-	//if (tDate > 0)
-	{
-		date = CDateHelper::GetDate(tDate);
-
-		// only implement 'end of day' if the date has no time
-		if (CDateHelper::IsDateSet(date) && bEndOfDay && !CDateHelper::DateHasTime(date))
-			date = CDateHelper::GetEndOfDay(date);
-	}
+	// only implement 'end of day' if the date has no time
+	if (CDateHelper::IsDateSet(date) && bEndOfDay && !CDateHelper::DateHasTime(date))
+		date = CDateHelper::GetEndOfDay(date);
 
 	return date;
 }
@@ -5502,6 +5497,7 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 		else
 		{
+			ASSERT(0);
 		}
 
 		return TRUE; // always
