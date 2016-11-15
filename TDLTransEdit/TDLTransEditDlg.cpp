@@ -188,12 +188,6 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 
 		m_lcDictItems.MoveWindow(rList);
 
-		// Resize columns 0 and 1
-		int nColWidth = ((rList.Width() - GetSystemMetrics(SM_CXVSCROLL) - 100 - 6) / 2);
-
-		m_lcDictItems.SetColumnWidth(0, nColWidth);
-		m_lcDictItems.SetColumnWidth(1, nColWidth);
-
 		Invalidate(FALSE);
 	}
 }
@@ -307,24 +301,20 @@ void CTDLTransEditDlg::OnClose()
 
 void CTDLTransEditDlg::LoadState()
 {
-	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), TRUE);
+	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), FALSE);
 	m_sYourLanguagePath = AfxGetApp()->GetProfileString(_T("State"), _T("YourLanguage"));
 	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
 
 	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
 
-	int nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("EnglishColWidth"), 200);
-	m_lcDictItems.SetColumnWidth(ENG_COL, nColWidth);
-
-	nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("TransColWidth"), 200);
-	m_lcDictItems.SetColumnWidth(TRANS_COL, nColWidth);
-	
-	nColWidth = AfxGetApp()->GetProfileInt(_T("State"), _T("HintColWidth"), 100);
-	m_lcDictItems.SetColumnWidth(HINT_COL, nColWidth);
+	int nColWidths[NUM_COLS];
+	nColWidths[TRANS_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("TransColWidth"), 300);
+	nColWidths[ENG_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("EnglishColWidth"), 300);
+	nColWidths[HINT_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("HintColWidth"), 100);
+	VERIFY(m_lcDictItems.SetColumnWidths(nColWidths));
 
 	CRect rect;
-
 	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
 	rect.top = AfxGetApp()->GetProfileInt(_T("State"), _T("Top"), -1);
 	rect.right = AfxGetApp()->GetProfileInt(_T("State"), _T("Right"), -1);
@@ -385,14 +375,12 @@ void CTDLTransEditDlg::SaveState()
 	AfxGetApp()->WriteProfileInt(_T("State"), _T("ShowTooltips"), m_bShowTooltips);
 	AfxGetApp()->WriteProfileString(_T("State"), _T("LastFilter"), m_sFilter);
 
-	int nColWidth = m_lcDictItems.GetColumnWidth(ENG_COL);
-	AfxGetApp()->WriteProfileInt(_T("State"), _T("EnglishColWidth"), nColWidth);
-	
-	nColWidth = m_lcDictItems.GetColumnWidth(TRANS_COL);
-	AfxGetApp()->WriteProfileInt(_T("State"), _T("TransColWidth"), nColWidth);
-	
-	nColWidth =	m_lcDictItems.GetColumnWidth(HINT_COL);
-	AfxGetApp()->WriteProfileInt(_T("State"), _T("HintColWidth"), nColWidth);
+	int nColWidths[NUM_COLS];
+	VERIFY(m_lcDictItems.GetColumnWidths(nColWidths));
+
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("EnglishColWidth"), nColWidths[ENG_COL]);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("TransColWidth"), nColWidths[TRANS_COL]);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("HintColWidth"), nColWidths[HINT_COL]);
 
 	WINDOWPLACEMENT wp = { 0 };
 	
