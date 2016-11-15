@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "TDLTransEdit.vcxproj", "{4CAD4459-B066-E987-883C-3A6477E1FC44}"
+	ProjectSection(ProjectDependencies) = postProject
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311} = {08879A40-EE3B-4D01-B13F-C6A2B4F03311}
+		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3rdParty", "..\3rdParty\3rdParty.vcxproj", "{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\Shared\Shared.vcxproj", "{95605899-9C90-40D8-8774-D1DA1FCE7464}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TransText", "..\TransText\TransText.vcxproj", "{08879A40-EE3B-4D01-B13F-C6A2B4F03311}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Unicode Debug|Win32 = Unicode Debug|Win32
+		Unicode Release|Win32 = Unicode Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{08879A40-EE3B-4D01-B13F-C6A2B4F03311}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
