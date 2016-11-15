@@ -141,16 +141,16 @@ int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, in
 	CString sItem1 = GetSortString(dwItemData1);
 	CString sItem2 = GetSortString(dwItemData2);
 
-	// empty items always appear BELOW others
+	// Always sort untranslated items ABOVE others
 	int nCompare = 0;
 
 	if (sItem1.IsEmpty())
 	{
-		nCompare = (m_bSortAscending ? 1 : -1);
+		nCompare = (m_bSortAscending ? -1 : 1);
 	}
 	else if (sItem2.IsEmpty())
 	{
-		nCompare = (m_bSortAscending ? -1 : 1);
+		nCompare = (m_bSortAscending ? 1 : -1);
 	}
 	else
 	{
