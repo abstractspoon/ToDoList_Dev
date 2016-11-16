@@ -55,12 +55,19 @@ void CTDLTransEditListCtrl::Initialise()
 	
 	// Make sure header is subclassed
 	GetHeader();
+
+	RecalcColumnWidths();
 }
 
 BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShowAlternatives, const CString& sFilter)
 {
 	if (!GetSafeHwnd())
 		return FALSE;
+
+	int nWidths[NUM_COLS];
+	GetColumnWidths(nWidths);
+
+	CHoldRedraw hr(*this);
 
 	ClearAll(); // selection
 	DeleteAllItems();
@@ -111,6 +118,8 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShow
 	
 	if (GetItemCount())
 		SetCurSel(0);
+
+	SetColumnWidths(nWidths);
 
 	return TRUE;
 }
@@ -245,13 +254,17 @@ void CTDLTransEditListCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CInputListCtrl::OnSize(nType, cx, cy);
 
-	RecalcColumnWidths(cx);
+	// Only recalc columns on an actual change
+	static int cxPrev = -1;
+
+	if (cx != cxPrev)
+		RecalcColumnWidths();
+
+	cxPrev = cx;
 }
 
-void CTDLTransEditListCtrl::RecalcColumnWidths(int cx)
+void CTDLTransEditListCtrl::RecalcColumnWidths()
 {
-	cx -= 6;
-
 	// Previous widths
 	int nWidths[NUM_COLS];
 	int nPrevWidth = GetColumnWidths(nWidths);
@@ -259,10 +272,14 @@ void CTDLTransEditListCtrl::RecalcColumnWidths(int cx)
 	if (nPrevWidth > 0)
 	{
 		// New widths
+		CRect rClient;
+		GetClientRect(rClient);
+		
+		int nNewWidth = (rClient.Width() - 6);
  		int nCol = NUM_COLS;
 
 		while (nCol--)
-			nWidths[nCol] = MulDiv(nWidths[nCol], cx, nPrevWidth);
+			nWidths[nCol] = MulDiv(nWidths[nCol], nNewWidth, nPrevWidth);
 
 		VERIFY(SetColumnWidths(nWidths));
 	}
@@ -277,6 +294,9 @@ BOOL CTDLTransEditListCtrl::SetColumnWidths(const int nWidths[NUM_COLS])
 
 	while (nCol--)
 		SetColumnWidth(nCol, nWidths[nCol]);
+
+	GetHeader()->Invalidate(TRUE);
+	GetHeader()->UpdateWindow();
 
 	return TRUE;
 }

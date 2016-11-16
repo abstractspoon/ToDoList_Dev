@@ -28,6 +28,7 @@ public:
 	BOOL RebuildList(const CTransDictionary& dict, BOOL bShowAlternatives = TRUE, const CString& sFilter = _T(""));
 	BOOL SetColumnWidths(const int nWidths[NUM_COLS]);
 	BOOL GetColumnWidths(int nWidths[NUM_COLS]) const;
+	void RecalcColumnWidths();
 
 protected:
 	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -44,7 +45,6 @@ protected:
 	COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 
 	CString FormatInfoTip(int nItem) const;
-	void RecalcColumnWidths(int cx);
 
 	static BOOL MatchesFilter(const DICTITEM* pDI, const CString& sFilter);
 };

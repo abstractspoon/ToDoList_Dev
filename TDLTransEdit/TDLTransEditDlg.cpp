@@ -301,18 +301,14 @@ void CTDLTransEditDlg::OnClose()
 
 void CTDLTransEditDlg::LoadState()
 {
+	BOOL bFirstTime = !FileMisc::FileExists(AfxGetApp()->m_pszProfileName);
+
 	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), FALSE);
 	m_sYourLanguagePath = AfxGetApp()->GetProfileString(_T("State"), _T("YourLanguage"));
 	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
 
 	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
-
-	int nColWidths[NUM_COLS];
-	nColWidths[TRANS_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("TransColWidth"), 300);
-	nColWidths[ENG_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("EnglishColWidth"), 300);
-	nColWidths[HINT_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("HintColWidth"), 100);
-	VERIFY(m_lcDictItems.SetColumnWidths(nColWidths));
 
 	CRect rect;
 	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
@@ -358,6 +354,16 @@ void CTDLTransEditDlg::LoadState()
 	{
 		Resize();
 	}
+	
+	// Right at the end so columns do not get auto-resized again
+	int nColWidths[NUM_COLS];
+	nColWidths[TRANS_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("TransColWidth"), 300);
+	nColWidths[ENG_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("EnglishColWidth"), 300);
+	nColWidths[HINT_COL] = AfxGetApp()->GetProfileInt(_T("State"), _T("HintColWidth"), 100);
+	VERIFY(m_lcDictItems.SetColumnWidths(nColWidths));
+	
+	if (bFirstTime)
+		m_lcDictItems.RecalcColumnWidths();
 	
 	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("LastDictionary"));
 	
