@@ -559,10 +559,19 @@ BOOL CTDLTransEditDlg::InitYourLanguagePath()
 {
 	if (!FileMisc::FileExists(m_sYourLanguagePath))
 	{
-		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
+		// Try to locate it in the same folder as the loaded dictionary
+		CString sFolder = FileMisc::GetFolderFromFilePath(m_dictionary.GetDictionaryPath());
+
+		FileMisc::MakePath(m_sYourLanguagePath, NULL, sFolder, _T("YourLanguage"), _T("csv"));
+
+		if (!FileMisc::FileExists(m_sYourLanguagePath))
+		{
+			// Browse for it
+			CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
 		
-		if (dialog.DoModal() == IDOK)
-			m_sYourLanguagePath = dialog.GetPathName();
+			if (dialog.DoModal() == IDOK)
+				m_sYourLanguagePath = dialog.GetPathName();
+		}
 	}
 	
 	return FileMisc::FileExists(m_sYourLanguagePath);
