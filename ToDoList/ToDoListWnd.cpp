@@ -406,9 +406,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTodoCtrlFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKISDONE, OnToDoCtrlTaskIsDone)
+	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnToDoCtrlDoTaskLink)
-	ON_REGISTERED_MESSAGE(WM_TDCN_DOUBLECLKREMINDERCOL, OnDoubleClkReminderCol)
+	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
@@ -3398,20 +3398,24 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp
 
 	if (nRem != -1)
 	{
-		// get the existing reminder
-		m_reminders.GetReminder(nRem, rem);
-
-		// init for new task
-		rem.bEnabled = TRUE;
-		rem.dDaysSnooze = 0.0;
-		rem.dwTaskID = dwNewTaskID;
-
-		// add for the new task ID
-		m_reminders.SetReminder(rem);
-
-		// delete the original only if the task id has changed
+		// Transfer the original if the task id has changed
 		if (dwNewTaskID != dwTaskID)		
-			m_reminders.RemoveReminder(dwTaskID, rem.pTDC);
+		{
+			if (m_reminders.TransferReminder(dwTaskID, dwNewTaskID, &tdc))
+				tdc.RedrawReminders();
+		}
+		else // Update the existing reminder
+		{
+			// get the existing reminder
+			m_reminders.GetReminder(nRem, rem);
+
+			// init for new task
+			rem.bEnabled = TRUE;
+			rem.dDaysSnooze = 0.0;
+
+			// Add
+			m_reminders.SetReminder(rem);
+		}
 	}
 
 	return 0L;
@@ -4133,7 +4137,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		m_mgrToDoCtrls.CheckNotifyReadonly(nTDC);
 
 		// reload any reminders
-		m_reminders.AddToDoCtrl(*pTDC);
+		m_reminders.AddToDoCtrl(pTDC);
 		
 		// notify user of due tasks if req
 		if (bNotifyDueTasks)
@@ -4554,7 +4558,7 @@ UINT CToDoListWnd::DueTaskNotifyThreadProc(LPVOID pParam)
 
 CString CToDoListWnd::GetTitle()
 {
-	static CString sTitle(_T("ToDoList 7.1.B4 (Beta)"));
+	static CString sTitle(_T("ToDoList 7.1.B5 (Beta)"));
 	CLocalizer::IgnoreString(sTitle);
 
 	return sTitle;
@@ -7669,7 +7673,7 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 	CWaitCursor cursor;
 
 	// save off current reminders
-	m_reminders.CloseToDoCtrl(tdc);
+	m_reminders.CloseToDoCtrl(&tdc);
 
 	int nNewSel = m_mgrToDoCtrls.RemoveToDoCtrl(nIndex, TRUE);
 	
@@ -7683,7 +7687,7 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 		// we must create another tasklist to hide the encrypted one.
 		// unless the tasklist being closed was not active and the 
 		// new selection hasn't actually changed
-		BOOL bCheckPassword = !m_bClosing && (&GetToDoCtrl(nNewSel) != &tdcSel);
+		BOOL bCheckPassword = (!m_bClosing && (&GetToDoCtrl(nNewSel) != &tdcSel));
 
 		if (!SelectToDoCtrl(nNewSel, bCheckPassword))
 		{
@@ -11187,7 +11191,7 @@ LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlTaskIsDone(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 {
 	ASSERT (lParam);
 	CString sFile((LPCTSTR)lParam);
@@ -11900,7 +11904,6 @@ void CToDoListWnd::OnUpdateEditSettaskicon(CCmdUI* pCmdUI)
 	pCmdUI->Enable(nSelCount && !tdc.IsReadOnly());	
 }
 
-
 LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 {
 	int nRem = m_reminders.FindReminder(wParam, (CFilteredToDoCtrl*)lParam, FALSE);
@@ -11924,7 +11927,7 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	return (LRESULT)tRem;
 }
 
-LRESULT CToDoListWnd::OnDoubleClkReminderCol(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnToDoCtrlNotifyClickReminderCol(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	OnEditSetReminder();
 	return 0L;
@@ -11998,7 +12001,7 @@ void CToDoListWnd::OnEditClearReminder()
 	while (nTask--)
 	{
 		DWORD dwTaskID = aTaskIDs[nTask];
-		m_reminders.RemoveReminder(dwTaskID, &tdc);
+		m_reminders.ClearReminder(dwTaskID, &tdc);
 	}
 	
 	tdc.RedrawReminders();

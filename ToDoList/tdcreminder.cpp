@@ -130,16 +130,23 @@ CString TDCREMINDER::FormatWhenString() const
 
 BOOL TDCREMINDER::IsTaskRecurring() const
 {
-	return pTDC->IsTaskRecurring(dwTaskID);
+	ASSERT(pTDC);
+
+	return (pTDC->IsTaskRecurring(dwTaskID) && 
+			pTDC->CanTaskRecur(dwTaskID));
 }
 
 BOOL TDCREMINDER::IsTaskDone() const
 {
+	ASSERT(pTDC);
+
 	return pTDC->IsTaskDone(dwTaskID, TDCCHECKALL);
 }
 
 BOOL TDCREMINDER::TaskExists() const
 {
+	ASSERT(pTDC);
+
 	return pTDC->HasTask(dwTaskID);
 }
 
@@ -180,5 +187,31 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	bEnabled = pPrefs->GetProfileInt(szKey, _T("Enabled"));
 	sSoundFile = pPrefs->GetProfileString(szKey, _T("SoundFile"));
 	sStickiesID = pPrefs->GetProfileString(szKey, _T("StickiesID"));
+}
+
+BOOL TDCREMINDER::GetReminderDate(COleDateTime& date) const
+{
+	date = dtAbsolute;
+	
+	if (bRelative)
+	{
+		ASSERT(pTDC);
+		ASSERT(dwTaskID);
+		
+		if (nRelativeFromWhen == TDCR_DUEDATE)
+		{
+			date = pTDC->GetTaskDate(dwTaskID, TDCD_DUE);
+		}
+		else // start date
+		{
+			date = pTDC->GetTaskDate(dwTaskID, TDCD_START);
+		}
+		
+		date -= dRelativeDaysLeadIn;
+	}
+	
+	date += dDaysSnooze;
+	
+	return CDateHelper::IsDateSet(date);
 }
 

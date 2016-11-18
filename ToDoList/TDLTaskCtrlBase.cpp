@@ -4703,7 +4703,7 @@ BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sI
 		}
 		else if (!sFile.IsEmpty()) // pass to parent if we can't handle
 		{
-			BOOL bDependentIsDone = CWnd::GetParent()->SendMessage(WM_TDCM_TASKISDONE, dwDependID, (LPARAM)(LPCTSTR)sFile);
+			BOOL bDependentIsDone = CWnd::GetParent()->SendMessage(WM_TDCM_ISTASKDONE, dwDependID, (LPARAM)(LPCTSTR)sFile);
 			
 			if (!bDependentIsDone)
 			{

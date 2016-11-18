@@ -181,7 +181,8 @@ LRESULT CTabbedToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 	ASSERT(wp && (((HWND)lp == m_taskTree.GetSafeHwnd()) || 
 					((HWND)lp == m_taskList.GetSafeHwnd())));
 	
-	return (LRESULT)GetTaskReminder(wp);
+	// Base class always expects to get this from the Task Tree
+	return CToDoCtrl::OnTDCGetTaskReminder(wp, (LRESULT)m_taskTree.GetSafeHwnd());
 }
 
 BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg) 

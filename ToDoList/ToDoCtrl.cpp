@@ -423,7 +423,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETCLIPBOARD, OnTDCGetClipboard)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKISDONE, OnTDCTaskIsDone)
+	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -8097,7 +8097,7 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_REMINDER:
-		AfxGetMainWnd()->SendMessage(WM_TDCN_DOUBLECLKREMINDERCOL);
+		AfxGetMainWnd()->SendMessage(WM_TDCN_CLICKREMINDERCOL);
 		break;
 		
 	default: // try custom columns
@@ -8483,6 +8483,14 @@ BOOL CToDoCtrl::IsTaskRecurring(DWORD dwTaskID) const
 	ASSERT(pTDI);
 
 	return (pTDI && pTDI->IsRecurring());
+}
+
+BOOL CToDoCtrl::CanTaskRecur(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = GetTask(dwTaskID);
+	ASSERT(pTDI);
+	
+	return (pTDI && pTDI->CanRecur());
 }
 
 void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
@@ -11174,7 +11182,7 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 LRESULT CToDoCtrl::OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam)
 {
 	// forward on to our parent
-	return GetParent()->SendMessage(WM_TDCM_TASKISDONE, wParam, lParam);
+	return GetParent()->SendMessage(WM_TDCM_ISTASKDONE, wParam, lParam);
 }
 
 BOOL CToDoCtrl::ShowTaskLink(const CString& sLink)
@@ -11476,12 +11484,7 @@ LRESULT CToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 	UNREFERENCED_PARAMETER(lp);
 	ASSERT(wp && ((HWND)lp == m_taskTree.GetSafeHwnd()));
 
-	return (LRESULT)GetTaskReminder(wp);
-}
-
-time_t CToDoCtrl::GetTaskReminder(DWORD dwTaskID) const
-{
-	return GetParent()->SendMessage(WM_TDCM_GETTASKREMINDER, dwTaskID, (LPARAM)this);
+	return GetParent()->SendMessage(WM_TDCM_GETTASKREMINDER, wp, (LPARAM)this);
 }
 
 void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
