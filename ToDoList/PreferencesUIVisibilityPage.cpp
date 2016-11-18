@@ -81,6 +81,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const CPreferences& prefs)
 		// first time OR backwards compatibility
 		CTDCColumnIDMap mapColumns;
 
+		mapColumns.AddColumn(TDCC_ID);
 		mapColumns.AddColumn(TDCC_PRIORITY);
 		mapColumns.AddColumn(TDCC_PERCENT);
 		mapColumns.AddColumn(TDCC_TIMEEST);
