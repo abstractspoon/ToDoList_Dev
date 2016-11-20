@@ -23,7 +23,8 @@ enum OSVERSION
 	OSV_VISTA,
 	OSV_WIN7, 
 	OSV_WIN8,
-	OSV_WIN8P, // after windows 8
+	OSV_WIN81,
+	OSV_WIN10,
 };
 
 
