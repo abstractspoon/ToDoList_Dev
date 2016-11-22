@@ -57,7 +57,7 @@ LINK32=link.exe
 # ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\transtext.dll ..\todolist\unicode_debug /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\TransText.dll ..\todolist\unicode_debug /y
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "TransText - Win32 Unicode Release"
@@ -89,7 +89,7 @@ LINK32=link.exe
 # ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\transtext.dll ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\TransText.dll ..\todolist\unicode_release /y
 # End Special Build Tool
 
 !ENDIF 
