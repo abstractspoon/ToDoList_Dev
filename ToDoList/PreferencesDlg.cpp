@@ -64,7 +64,6 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 
 	ForwardMessage(WM_PTP_TESTTOOL);
 	ForwardMessage(WM_PGP_CLEARMRU);
-	ForwardMessage(WM_PGP_CLEANUPDICTIONARY);
 	ForwardMessage(WM_PPB_CTRLCHANGE);
 	
 	LoadPreferences();
@@ -97,7 +96,6 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
-	ON_REGISTERED_MESSAGE(WM_PGP_CLEANUPDICTIONARY, OnGenPageCleanupDictionary)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
 END_MESSAGE_MAP()
 
@@ -399,12 +397,6 @@ LRESULT CPreferencesDlg::OnGenPageClearMRU(WPARAM wp, LPARAM lp)
 {
 	// forward on to main app
 	return AfxGetMainWnd()->SendMessage(WM_PGP_CLEARMRU, wp, lp);
-}
-
-LRESULT CPreferencesDlg::OnGenPageCleanupDictionary(WPARAM wp, LPARAM lp) 
-{
-	// forward on to main app
-	return AfxGetMainWnd()->SendMessage(WM_PGP_CLEANUPDICTIONARY, wp, lp);
 }
 
 void CPreferencesDlg::OnApply() 

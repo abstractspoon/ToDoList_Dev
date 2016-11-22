@@ -400,7 +400,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTALL, OnFindSelectAll)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTRESULT, OnFindSelectResult)
 	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
-	ON_REGISTERED_MESSAGE(WM_PGP_CLEANUPDICTIONARY, OnPreferencesCleanupDictionary)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnPreferencesClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnPreferencesTestTool)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTodoCtrlFailedLink)
@@ -8449,24 +8448,6 @@ LRESULT CToDoListWnd::OnPreferencesClearMRU(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_mruList.RemoveAll();
 	m_mruList.WriteList(CPreferences());
 	
-	return 0;
-}
-
-LRESULT CToDoListWnd::OnPreferencesCleanupDictionary(WPARAM /*wp*/, LPARAM lp)
-{
-	LPCTSTR szLangFile = (LPCTSTR)lp;
-
-	if (!Misc::IsEmpty(szLangFile))
-	{
-		DOPROGRESS(IDS_CLEANINGDICTPROGRESS);
-
-		CString sMasterDict = FileMisc::GetFolderFromFilePath(szLangFile);
-		sMasterDict += _T("\\YourLanguage.csv");
-
-		return CLocalizer::CleanupDictionary(sMasterDict);
-	}
-	
-	ASSERT(0);
 	return 0;
 }
 

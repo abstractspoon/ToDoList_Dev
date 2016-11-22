@@ -102,7 +102,6 @@ BEGIN_MESSAGE_MAP(CPreferencesGenPage, CPreferencesPageBase)
 	ON_CBN_SELCHANGE(IDC_LANGUAGE, OnSelchangeLanguage)
 	ON_BN_CLICKED(IDC_MINIMIZEONNOEDIT, OnMinimizeonnoedit)
 	ON_BN_CLICKED(IDC_USESTICKIES, OnUseStickies)
-	ON_BN_CLICKED(IDC_CLEANUP_DICTIONARY, OnCleanupDictionary)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_USESYSTRAY, OnUseSystray)
 END_MESSAGE_MAP()
@@ -259,6 +258,7 @@ void CPreferencesGenPage::OnSelchangeLanguage()
 	{
 	case LANG_HEBREW:
 	case LANG_ARABIC:
+	case LANG_URDU:
 		bEnable = TRUE;
 		break;
 	}
@@ -272,26 +272,19 @@ void CPreferencesGenPage::OnSelchangeLanguage()
 
 void CPreferencesGenPage::EnableDisableLanguageOptions()
 {
-	// disable the cleanup button for default language
-	CString sLangFile = m_cbLanguages.GetSelectedLanguageFile();
-	CString sCurLangFile = CLocalizer::GetDictionaryPath();
-
-	BOOL bEnable = (!m_cbLanguages.IsDefaultLanguageSelected() && (sLangFile == sCurLangFile));
-	GetDlgItem(IDC_CLEANUP_DICTIONARY)->EnableWindow(bEnable);
-
 	// Enable RTL support for RTL languages only
-	BOOL bRTL = FALSE;
+	BOOL bEnable = FALSE;
 
 	switch (m_cbLanguages.GetSelectedPrimaryLanguageID())
 	{
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
-		bRTL = TRUE;
+		bEnable = TRUE;
 		break;
 	}
 
-	GetDlgItem(IDC_ENABLERTLINPUT)->EnableWindow(bRTL);
+	GetDlgItem(IDC_ENABLERTLINPUT)->EnableWindow(bEnable);
 }
 
 void CPreferencesGenPage::OnMinimizeonnoedit() 
@@ -318,9 +311,4 @@ BOOL CPreferencesGenPage::GetUseStickies(CString& sStickiesPath) const
 	
 	// else
 	return FALSE; 
-}
-
-void CPreferencesGenPage::OnCleanupDictionary() 
-{
-	GetParent()->SendMessage(WM_PGP_CLEANUPDICTIONARY, 0L, (LPARAM)(LPCTSTR)m_cbLanguages.GetSelectedLanguageFile());
 }

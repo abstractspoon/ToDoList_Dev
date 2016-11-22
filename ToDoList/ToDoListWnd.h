@@ -344,7 +344,6 @@ protected:
 	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPowerBroadcast(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnPreferencesCleanupDictionary(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnQuickFindItemAdded(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
