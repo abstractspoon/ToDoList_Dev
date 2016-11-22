@@ -621,11 +621,15 @@ BOOL CTDLTransEditDlg::RecheckYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPr
 	}
 	else
 	{
+		// Compare version info
 		CString sTransVer = GetTranslationVersion(szDictPath);
 		CString sYourLangVer = GetTranslationVersion(sYourLangPath);
 
-		if (FileMisc::CompareVersions(sYourLangVer, sTransVer) < 0)
+		if ((FileMisc::CompareVersions(sYourLangVer, sTransVer) < 0) ||
+			(FileMisc::CompareVersions(m_sAppVersion, sYourLangVer) < 0))
+		{
 			sYourLangPath.Empty();
+		}
 	}
 
 	if (sYourLangPath.IsEmpty() && bAllowPrompt)
