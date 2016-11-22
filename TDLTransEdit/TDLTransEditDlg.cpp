@@ -114,13 +114,20 @@ void CTDLTransEditDlg::OnFileOpenTranslation()
 	}
 }
 
-BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath)
+BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath, BOOL bAllowPrompt)
 {
+	if (!VerifyYourLanguagePath(szDictPath, bAllowPrompt))
+		return FALSE;
+
 	if (PromptAndSave())
 	{
 		CWaitCursor cursor;
 		CHoldRedraw hr(*this);
+
+		// First clean it
+		TransText::CleanupDictionary(m_sYourLanguagePath, szDictPath);
 		
+		// Then load it
 		if (m_dictionary.LoadDictionary(szDictPath, FALSE))
 		{
 			m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
@@ -368,7 +375,7 @@ void CTDLTransEditDlg::LoadState()
 	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("LastDictionary"));
 	
 	if (!sDictPath.IsEmpty())
-		LoadDictionary(sDictPath);
+		LoadDictionary(sDictPath, FALSE);
 }
 
 void CTDLTransEditDlg::SaveState()
@@ -527,7 +534,7 @@ BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg)
 
 void CTDLTransEditDlg::OnToolsCleanUp() 
 {
-	if (!VerifyYourLanguagePath())
+	if (!VerifyYourLanguagePath(m_dictionary.GetDictionaryPath()))
 		return;
 
 	// Save any changes first
@@ -541,9 +548,19 @@ void CTDLTransEditDlg::OnToolsCleanUp()
 
 void CTDLTransEditDlg::OnFileNewTranslation() 
 {
-	if (!VerifyYourLanguagePath())
-		return;
-	
+	CString sYourLangPath(m_sYourLanguagePath);
+
+	if (!VerifyYourLanguagePath(sYourLangPath))
+	{
+		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
+
+		if (dialog.DoModal() != IDOK)
+			return;
+
+		// else
+		sYourLangPath = dialog.GetPathName();
+	}
+
 	CFileSaveDialog dialog(_T("Save New Translation"), _T(".csv"), NULL, EOFN_DEFAULTSAVE, _T("Translations (*.csv)|*.csv||"));
 
 	while (dialog.DoModal() == IDOK)
@@ -553,7 +570,7 @@ void CTDLTransEditDlg::OnFileNewTranslation()
 		// Disallow 'YourLanguage.csv"
 		if (FileMisc::GetFileNameFromPath(sTransPath).CompareNoCase(_T("YourLanguage.csv")) != 0)
 		{
-			FileMisc::CopyFile(m_sYourLanguagePath, sTransPath, TRUE, TRUE);
+			FileMisc::CopyFile(sYourLangPath, sTransPath, TRUE, TRUE);
 			VERIFY(LoadDictionary(sTransPath));
 
 			break;
@@ -564,43 +581,39 @@ void CTDLTransEditDlg::OnFileNewTranslation()
 	}
 }
 
-BOOL CTDLTransEditDlg::VerifyYourLanguagePath()
+BOOL CTDLTransEditDlg::VerifyYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPrompt)
 {
-	// Make sure 'YourLanguage.csv' has an equal or later
-	// version than the current dictionary
-	CString sTransVer = m_dictionary.GetDictionaryVersion();
+	if (!szDictPath || !szDictPath[0])
+		return FALSE;
 
-	if (!m_sYourLanguagePath.IsEmpty())
+	// Construct the 'YourLanguage.csv' path from the dictionary path
+	CString sDictFolder(FileMisc::GetFolderFromFilePath(szDictPath));
+
+	CString sYourLangPath;
+	FileMisc::MakePath(sYourLangPath, NULL, sDictFolder, _T("YourLanguage"), _T("csv"));
+
+	if (!FileMisc::FileExists(sYourLangPath))
 	{
-		CString sYourLangVer = GetTranslationVersion(m_sYourLanguagePath);
+		sYourLangPath.Empty();
+	}
+	else
+	{
+		CString sTransVer = GetTranslationVersion(szDictPath);
+		CString sYourLangVer = GetTranslationVersion(sYourLangPath);
 
-		if (FileMisc::CompareVersions(sYourLangVer, sTransVer) < 1)
-			m_sYourLanguagePath.Empty();
+		if (FileMisc::CompareVersions(sYourLangVer, sTransVer) < 0)
+			sYourLangPath.Empty();
+	}
+
+	if (sYourLangPath.IsEmpty() && bAllowPrompt)
+	{
+		MessageBox(_T("Before you can open a translation file there needs to be an up-to-date copy of 'YourLanguage.csv' in the same folder.\n\nPlease update to the latest 'YourLanguage.csv' and try again."),
+			_T("Missing File"), MB_OK | MB_ICONEXCLAMATION);
 	}
 	
-	if (!FileMisc::FileExists(m_sYourLanguagePath))
-	{
-		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
-		
-		if (dialog.DoModal() == IDOK)
-		{
-			// Check version as before
-			CString sYourLangPath = dialog.GetPathName();
-			CString sYourLangVer = GetTranslationVersion(sYourLangPath);
-
-			if (FileMisc::CompareVersions(sYourLangVer, sTransVer) >= 0)
-			{
-				m_sYourLanguagePath = sYourLangPath;
-			}
-			else
-			{
-				MessageBox(_T("The selected file has a earlier version than your translation file.\n\nPlease update the copy of 'YourLanguage.csv' and try again."),
-							_T("Invalid Version"), MB_OK | MB_ICONEXCLAMATION);
-			}
-		}
-	}
+	m_sYourLanguagePath = sYourLangPath;
 	
-	return FileMisc::FileExists(m_sYourLanguagePath);
+	return !sYourLangPath.IsEmpty();
 }
 
 void CTDLTransEditDlg::OnOptionsShowTooltips() 

@@ -84,8 +84,8 @@ protected:
 	BOOL PromptAndSave();
 	void LoadState();
 	void SaveState();
-	BOOL LoadDictionary(LPCTSTR szDictPath);
-	BOOL VerifyYourLanguagePath();
+	BOOL LoadDictionary(LPCTSTR szDictPath, BOOL bAllowPrompt = TRUE);
+	BOOL VerifyYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPrompt = TRUE);
 	BOOL ModifyDictionaryItem(int nItem, const CString& sTrans);
 
 	static CString GetTranslationVersion(const CString& sTransPath);
