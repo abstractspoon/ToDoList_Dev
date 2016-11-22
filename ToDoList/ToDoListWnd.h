@@ -325,7 +325,7 @@ protected:
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDueTaskThreadFinished(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnDoubleClkReminderCol(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoCtrlNotifyClickReminderCol(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
 	afx_msg void OnFileSaveToUserStorage(UINT nCmdID);
@@ -360,7 +360,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyViewChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnToDoCtrlTaskIsDone(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoListGetVersion(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListIsClosing(WPARAM /*wp*/, LPARAM /*lp*/) { return m_bClosing; }
 	afx_msg LRESULT OnToDoListRefreshPrefs(WPARAM wp, LPARAM lp);

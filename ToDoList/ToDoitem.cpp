@@ -327,7 +327,7 @@ BOOL TODOITEM::IsRecurring() const
 
 BOOL TODOITEM::CanRecur() const
 {
-	return (!IsDone() && trRecurrence.CanRecur());
+	return trRecurrence.CanRecur();
 }
 
 BOOL TODOITEM::RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccurrences) const

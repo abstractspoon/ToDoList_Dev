@@ -46,7 +46,7 @@ BOOL CWindowIcons::ModifyIcon(UINT nIconID)
 	}
 
 	// Update visible icons
-	int nBigIconSize = ((COSVersion() < OSV_WIN8) ? 32 : 24);
+	int nBigIconSize = ((COSVersion() <= OSV_WIN81) ? 32 : 24);
 
 	CRegKey2 reg;
 	DWORD dwSmallIcons = 0;

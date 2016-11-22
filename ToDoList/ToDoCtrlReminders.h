@@ -32,22 +32,21 @@ public:
 	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
-	void AddToDoCtrl(const CFilteredToDoCtrl& tdc);
-	void CloseToDoCtrl(const CFilteredToDoCtrl& tdc);
+	void AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
+	void CloseToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
-	void RemoveReminder(const TDCREMINDER& rem);
-	void RemoveReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
+	BOOL ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
+	BOOL TransferReminder(DWORD dwTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL GetReminder(int nRem, TDCREMINDER& rem) const;
 	int FindReminder(const TDCREMINDER& rem, BOOL bIncludeDisabled = TRUE) const;
 	int FindReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC, BOOL bIncludeDisabled = TRUE) const;
-	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl& tdc);
+	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl* pTDC);
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
 	BOOL RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 
 	static CString FormatWhenString(const TDCREMINDER& rem);
-	static COleDateTime GetReminderDate(const TDCREMINDER& rem);
 
 // Attributes
 protected:
@@ -80,11 +79,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void SaveAndRemoveReminders(const CFilteredToDoCtrl& tdc);
-	void LoadReminders(const CFilteredToDoCtrl& tdc);
+	void SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC);
+	void LoadReminders(const CFilteredToDoCtrl* pTDC);
 	void StartTimer();
 	BOOL ShowReminder(const TDCREMINDER& rem);
-	BOOL RemoveReminder(int nRem, BOOL bDismiss = FALSE);
+	BOOL DeleteReminder(int nRem);
+	BOOL DismissReminder(int nRem);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
 
 	enum 

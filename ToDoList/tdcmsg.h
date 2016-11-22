@@ -19,7 +19,7 @@ const UINT WM_TDCN_VIEWPOSTCHANGE			= ::RegisterWindowMessage(_T("WM_TDCN_VIEWPO
 const UINT WM_TDCN_SELECTIONCHANGE			= ::RegisterWindowMessage(_T("WM_TDCN_SELECTIONCHANGE"));
 const UINT WM_TDCN_SCROLLCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_SCROLLCHANGE"));
 const UINT WM_TDCN_RECREATERECURRINGTASK	= ::RegisterWindowMessage(_T("WM_TDCN_RECREATERECURRINGTASK"));
-const UINT WM_TDCN_DOUBLECLKREMINDERCOL		= ::RegisterWindowMessage(_T("WM_TDCN_DOUBLECLKREMINDERCOL"));
+const UINT WM_TDCN_CLICKREMINDERCOL			= ::RegisterWindowMessage(_T("WM_TDCN_CLICKREMINDERCOL"));
 const UINT WM_TDCN_COLUMNEDITCLICK			= ::RegisterWindowMessage(_T("WM_TDCN_COLUMNEDITCLICK")); // lParam == <TDC_COLUMN>
 
 // from the filterbar
@@ -31,7 +31,7 @@ const UINT WM_TDCN_LISTCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_LISTCHANG
 // request messages
 const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIPBOARD")); // lParam == match hwnd
 const UINT WM_TDCM_HASCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_HASCLIPBOARD")); // lParam == match hwnd
-const UINT WM_TDCM_TASKISDONE				= ::RegisterWindowMessage(_T("WM_TDCM_TASKISDONE")); // format as WM_TDCM_TASKLINK
+const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));   // format as WM_TDCM_TASKLINK
 const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_TASKHASREMINDER")); // wParam = TaskID, lParam = TDC* 
 
 // from CToDoCtrlReminders

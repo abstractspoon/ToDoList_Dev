@@ -883,25 +883,15 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 			prefs.WriteProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), FALSE);
 		}
 		
-		// setup default columns
-		CTDCColumnIDArray aColumns;
-		wizard.GetVisibleColumns(aColumns);
-		
-		int nCol = aColumns.GetSize();
-		prefs.WriteProfileInt(_T("Preferences\\ColumnVisibility"), _T("Count"), nCol);
-		
-		while (nCol--)
-		{
-			CString sKey = Misc::MakeKey(_T("Col%d"), nCol);
-			prefs.WriteProfileInt(_T("Preferences\\ColumnVisibility"), sKey, aColumns[nCol]);
-		}
-		
-		if (wizard.GetHideAttributes())
-		{
-			// hide clutter
-			prefs.WriteProfileInt(_T("Preferences"), _T("ShowCtrlsAsColumns"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("ShowEditMenuAsColumns"), TRUE);
-		}
+		// setup column visibility
+		TDCCOLEDITFILTERVISIBILITY vis;
+		wizard.GetColumnVisibility(vis);
+
+		vis.Save(prefs, _T("Preferences"));
+		prefs.WriteProfileInt(_T("Preferences"), _T("ShowEditMenuAsColumns"), wizard.GetHideAttributes());
+
+		// Save this config
+		prefs.Save();
 		
 		// set up initial file
 		CString sSample = wizard.GetSampleFilePath();

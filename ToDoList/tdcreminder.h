@@ -30,7 +30,8 @@ struct TDCREMINDER
 	BOOL IsTaskRecurring() const;
 	BOOL IsTaskDone() const;
 	BOOL TaskExists() const;
-	
+	BOOL GetReminderDate(COleDateTime& date) const;
+
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey);
 	

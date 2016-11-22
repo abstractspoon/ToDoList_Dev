@@ -13,6 +13,10 @@
 #include "..\shared\winhelpbutton.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+struct TDCCOLEDITFILTERVISIBILITY;
+
+/////////////////////////////////////////////////////////////////////////////
 // CWelcomePage1 dialog
 
 class CTDLWelcomePage1 : public CPropertyPageEx
@@ -69,7 +73,7 @@ public:
 	~CTDLWelcomePage2();
 
 	void AttachFont(HFONT hFont) { m_hFont = hFont; }
-	int GetVisibleColumns(CTDCColumnIDArray& aColumns) const { return m_lbColumns.GetVisibleColumns(aColumns); }
+	void GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
 protected:
 // Dialog Data
@@ -162,9 +166,9 @@ public:
 public:
 	BOOL GetUseIniFile() const { return m_page1.GetUseIniFile(); }
 	BOOL GetShareTasklists() const { return m_page1.GetShareTasklists(); }
-	int GetVisibleColumns(CTDCColumnIDArray& aColumns) const { return m_page2.GetVisibleColumns(aColumns); }
 	BOOL GetHideAttributes() const { return m_page3.GetHideAttributes(); }
 	CString GetSampleFilePath() const { return m_page3.GetSampleFilePath(); }
+	void GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 
 // Attributes
 protected:

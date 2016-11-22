@@ -184,8 +184,9 @@ public:
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
 
-	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = 0) const { return m_data.IsTaskDone(dwTaskID, dwExtraCheck); }
+	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKNONE) const { return m_data.IsTaskDone(dwTaskID, dwExtraCheck); }
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
+	BOOL CanTaskRecur(DWORD dwTaskID) const;
 
 	BOOL DeleteSelectedTask();
 	BOOL EditSelectedTask(BOOL bTaskIsNew = FALSE); 
@@ -246,7 +247,6 @@ public:
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
 	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
-	time_t GetTaskReminder(DWORD dwTaskID) const;
 	BOOL GetTaskTimes(DWORD dwTaskID, double& dTimeEst, TDC_UNITS& nEstUnits, double& dTimeSpent, TDC_UNITS& nSpentUnits) const;
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeEstimate(nUnits); }

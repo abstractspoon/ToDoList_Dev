@@ -93,7 +93,8 @@ OSVERSION COSVersion::GetOSVersion()
 								nVersion = OSV_XP;
 								break;
 								
-							default: // > xp (eg. XP 64-bit)
+							case 2: // XP 64-Bit, Server 2003, Server 2003 R2
+							default:
 								nVersion = OSV_XPP;
 								break;
 							}
@@ -104,27 +105,61 @@ OSVERSION COSVersion::GetOSVersion()
 						{
 							switch (vinfo.dwMinorVersion)
 							{
-							case 0: // vista
+							case 0: // Vista, Server 2008
 								nVersion = OSV_VISTA;
 								break;
 								
-							case 1: // w7
+							case 1: // W7, Server 2008 R2
 								nVersion = OSV_WIN7;
 								break;
 								
-							case 2: // w8
+							case 2: // W8, Server 2012
 								nVersion = OSV_WIN8;
 								break;
 								
+							case 3: // W8.1, Server 2012 R2, W10
+								{
+									// Check registry for Windows 10
+									HKEY hKey = NULL;
+									LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+																_T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"), 
+																REG_OPTION_NON_VOLATILE, 
+																KEY_READ, 
+																&hKey);
+
+									if (lResult == ERROR_SUCCESS)
+									{
+										DWORD dwType = 0;
+										DWORD dwSize = sizeof(DWORD);
+										DWORD dwMajorVer = 0;
+											
+										lResult = RegQueryValueEx(hKey, 
+																	_T("CurrentMajorVersionNumber"), 
+																	NULL, 
+																	&dwType, 
+																	(BYTE*)&dwMajorVer, 
+																	&dwSize);
+										
+										if ((lResult = ERROR_SUCCESS) && (dwMajorVer >= 10))
+										{
+											nVersion = OSV_WIN10;
+											break;
+										}
+									}
+								}
+								// else
+								nVersion = OSV_WIN81;
+								break;
+								
 							default: // > w8
-								nVersion = OSV_WIN8P;
+								nVersion = OSV_WIN81;
 								break;
 							}
 						}
 						break;
 						
 					default: // > w8
-						nVersion = OSV_WIN8P;
+						nVersion = OSV_WIN81;
 						break;
 					}
 				}

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "tdcStruct.h"
 #include "TDLWelcomeWizard.h"
 
 #include "..\shared\dialoghelper.h"
@@ -94,6 +95,16 @@ BOOL CTDLWelcomeWizard::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	AfxGetApp()->WinHelp(m_btnHelp.GetHelpID());
 	return TRUE;
+}
+
+void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
+{ 
+	m_page2.GetColumnVisibility(vis); 
+
+	if (m_page3.GetHideAttributes())
+		vis.SetShowEditsAndFilters(TDLSA_ASCOLUMN);
+	else
+		vis.SetShowEditsAndFilters(TDLSA_ALL);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -205,6 +216,20 @@ BOOL CTDLWelcomePage2::OnSetActive()
 	return CPropertyPageEx::OnSetActive();
 }
 
+void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const 
+{ 
+	CTDCColumnIDArray aColumns;
+	int nCol = m_lbColumns.GetVisibleColumns(aColumns); 
+
+	CTDCColumnIDMap mapCols;
+	
+	while (nCol--)
+		mapCols.AddColumn(aColumns[nCol]);
+
+	vis.Clear();
+	vis.SetVisibleColumns(mapCols);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CWelcomePage3 property page
 
@@ -304,5 +329,3 @@ LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
 	static HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
 	return (LRESULT)hIcon;
 }
-
-

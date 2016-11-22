@@ -75,21 +75,21 @@ BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath)
 	return FALSE;
 }
 
-void CToDoCtrlReminders::AddToDoCtrl(const CFilteredToDoCtrl& tdc)
+void CToDoCtrlReminders::AddToDoCtrl(const CFilteredToDoCtrl* pTDC)
 {
-	LoadReminders(tdc);
+	LoadReminders(pTDC);
 }
 
-void CToDoCtrlReminders::CloseToDoCtrl(const CFilteredToDoCtrl& tdc)
+void CToDoCtrlReminders::CloseToDoCtrl(const CFilteredToDoCtrl* pTDC)
 {
-	SaveAndRemoveReminders(tdc);
+	SaveAndRemoveReminders(pTDC);
 }
 
 void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 {
 	ASSERT (m_pWndNotify);
 
-	int nExist = FindReminder(rem);
+	int nExist = FindReminder(rem, TRUE);
 	TDCREMINDER temp = rem; // to get around constness
 
 	if (nExist != -1) // already exists
@@ -128,52 +128,89 @@ void CToDoCtrlReminders::StartTimer()
 	}
 }
 
-void CToDoCtrlReminders::RemoveReminder(const TDCREMINDER& rem)
+BOOL CToDoCtrlReminders::ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC)
 {
-	RemoveReminder(rem.dwTaskID, rem.pTDC);
-}
-
-void CToDoCtrlReminders::RemoveReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC)
-{
-	ASSERT (m_pWndNotify);
+	ASSERT(m_pWndNotify);
+	ASSERT(pTDC->HasTask(dwTaskID));
 
 	int nRem = FindReminder(dwTaskID, pTDC);
 
 	if (nRem != -1)
-		RemoveReminder(nRem);
+		DeleteReminder(nRem);
+
+	return (nRem != -1);
 }
 
-BOOL CToDoCtrlReminders::RemoveReminder(int nRem, BOOL bDismiss)
+BOOL CToDoCtrlReminders::TransferReminder(DWORD dwTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC)
+{
+	ASSERT (m_pWndNotify);
+	ASSERT(pTDC->HasTask(dwNewTaskID));
+	
+	int nRem = FindReminder(dwTaskID, pTDC);
+	
+	if (nRem != -1)
+	{
+		TDCREMINDER& rem = m_aReminders[nRem];
+		TRACE(_T("CToDoCtrlReminders::TransferReminder('%s', %d -> %d)\n"), rem.GetTaskTitle(), dwTaskID, dwNewTaskID);
+
+		RemoveListReminder(rem);
+
+		rem.dwTaskID = dwNewTaskID;
+		rem.bEnabled = !rem.IsTaskDone();
+	}
+
+	return (nRem != -1);
+}
+
+BOOL CToDoCtrlReminders::DeleteReminder(int nRem)
 {
 	ASSERT((nRem >= 0) && (nRem < m_aReminders.GetSize()));
 
 	if ((nRem < 0) || (nRem >= m_aReminders.GetSize()))
 		return FALSE;
 
-	// Cache before we delete
-	TDCREMINDER rem = m_aReminders[nRem];
+	// Scope the reminder because it will be invalid after deletion
+	{
+		const TDCREMINDER& rem = m_aReminders[nRem];
+		TRACE(_T("CToDoCtrlReminders::DeleteReminder(%s, %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
 
-	RemoveListReminder(rem);
+		RemoveListReminder(rem);
+	}
+
+	m_aReminders.RemoveAt(nRem);
+
+	// kill times if we have no reminders
+	if (m_aReminders.GetSize() == 0)
+		KillTimer(1);
+
+	return TRUE;
+}
+
+BOOL CToDoCtrlReminders::DismissReminder(int nRem)
+{
+	ASSERT((nRem >= 0) && (nRem < m_aReminders.GetSize()));
+
+	if ((nRem < 0) || (nRem >= m_aReminders.GetSize()))
+		return FALSE;
+
+	// Cache before we delete (for notification)
+	TDCREMINDER rem = m_aReminders[nRem];
 
 	// If we are dismissing a recurring task's reminder,  
 	// we only disable it so that it can later be copied 
 	// when the recurring task is completed
-	if (bDismiss && rem.IsTaskRecurring())
+	if (m_aReminders[nRem].IsTaskRecurring())
 	{
+		TRACE(_T("CToDoCtrlReminders::DismissReminder(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
 		m_aReminders[nRem].bEnabled = FALSE;
 	}
 	else
 	{
-		m_aReminders.RemoveAt(nRem);
-
-		// kill times if we have no reminders
-		if (m_aReminders.GetSize() == 0)
-			KillTimer(1);
+		DeleteReminder(nRem);
 	}
 
 	// Notify
-	if (bDismiss)
-		NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
+	NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
 
 	return TRUE;
 }
@@ -206,30 +243,46 @@ BOOL CToDoCtrlReminders::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
 
 BOOL CToDoCtrlReminders::RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC)
 {
+	if (!dwToRemove || !pTDC)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	int nNumRem = m_aReminders.GetSize(), nRem(nNumRem);
 
 	while (nRem--)
 	{
-		TDCREMINDER rem = m_aReminders[nRem];
+		TDCREMINDER& rem = m_aReminders[nRem];
 
-		if ((pTDC == NULL) || (pTDC == rem.pTDC))
+		if (pTDC == rem.pTDC)
 		{
-			BOOL bRemove = (Misc::HasFlag(dwToRemove, TCR_REMOVEDELETED) && 
-							!rem.pTDC->HasTask(rem.dwTaskID));
-
-			if (!bRemove)
+			BOOL bRemove = FALSE;
+			
+			if ((dwToRemove & TCR_REMOVEDELETED) && !rem.TaskExists())
 			{
-				bRemove = (Misc::HasFlag(dwToRemove, TCR_REMOVEDONE) && 
-							rem.pTDC->IsTaskDone(rem.dwTaskID));
-
-				// if (!bRemove)
-				// {
-				//    ...
-				// }
+				bRemove = TRUE;
 			}
+			else if ((dwToRemove & TCR_REMOVEDONE) && rem.IsTaskDone())
+			{
+				// Don't remove recurring task reminders just disable them
+				if (rem.IsTaskRecurring())
+				{
+					rem.bEnabled = FALSE;
+					TRACE(_T("CToDoCtrlReminders::RemoveTasks(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
+				}
+				else
+				{
+					bRemove = TRUE;
+				}
+			}
+			// else if ()
+			// {
+			//    bRemove = TRUE;
+			// }
 
 			if (bRemove)
-				RemoveReminder(nRem);
+				DeleteReminder(nRem);
 		}
 	}
 
@@ -259,23 +312,25 @@ int CToDoCtrlReminders::FindReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pT
 	return -1;
 }
 
-void CToDoCtrlReminders::SaveAndRemoveReminders(const CFilteredToDoCtrl& tdc)
+void CToDoCtrlReminders::SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC)
 {
-	CPreferences prefs;
+	ASSERT(pTDC);
+
 
 	// nRem is the total number of reminders for all tasklists
 	// nRemCount is the number of reminders for 'tdc'
 	int nRemCount = 0, nRem = m_aReminders.GetSize();
-	CString sFileKey = tdc.GetPreferencesKey(_T("Reminders"));
+	CString sFileKey = pTDC->GetPreferencesKey(_T("Reminders"));
 
 	// Delete all existing stored reminders for this tasklist
+	CPreferences prefs;
 	prefs.DeleteProfileSection(sFileKey, TRUE);
 
 	while (nRem--)
 	{
 		TDCREMINDER rem = m_aReminders[nRem];
 
-		if (rem.pTDC == &tdc)
+		if (rem.pTDC == pTDC)
 		{
 			// verify that the task for this reminder still exists
 			// and the task is not completed
@@ -287,7 +342,7 @@ void CToDoCtrlReminders::SaveAndRemoveReminders(const CFilteredToDoCtrl& tdc)
 				nRemCount++;
 			}
 
-			RemoveReminder(nRem);
+			DeleteReminder(nRem);
 		}
 	}
 
@@ -298,9 +353,9 @@ void CToDoCtrlReminders::SaveAndRemoveReminders(const CFilteredToDoCtrl& tdc)
 		KillTimer(1);
 }
 
-BOOL CToDoCtrlReminders::ToDoCtrlHasReminders(const CFilteredToDoCtrl& tdc)
+BOOL CToDoCtrlReminders::ToDoCtrlHasReminders(const CFilteredToDoCtrl* pTDC)
 {
-	return ToDoCtrlHasReminders(tdc.GetFilePath());
+	return ToDoCtrlHasReminders(pTDC->GetFilePath());
 }
 
 BOOL CToDoCtrlReminders::ToDoCtrlHasReminders(const CString& sFilePath)
@@ -316,10 +371,10 @@ BOOL CToDoCtrlReminders::ToDoCtrlHasReminders(const CString& sFilePath)
 	return (!sFileKey.IsEmpty() && prefs.GetProfileInt(sFileKey, _T("NumReminders")) > 0);
 }
 
-void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl& tdc)
+void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl* pTDC)
 {
 	CPreferences prefs;
-	CString sFileKey = tdc.GetPreferencesKey(_T("Reminders"));
+	CString sFileKey = pTDC->GetPreferencesKey(_T("Reminders"));
 	int nRemCount = prefs.GetProfileInt(sFileKey, _T("NumReminders"));
 
 	for (int nRem = 0; nRem < nRemCount; nRem++)
@@ -327,7 +382,7 @@ void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl& tdc)
 		CString sKey = Misc::MakeKey(_T("\\Reminder%d"), nRem, sFileKey);
 		TDCREMINDER rem;
 
-		rem.pTDC = &tdc;
+		rem.pTDC = pTDC;
 		rem.Load(prefs, sKey);
 
 		// Filter out 'orphan' reminders
@@ -347,8 +402,6 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 	// prevent re-entrancy
 	AF_NOREENTRANT
 
-	//CScopedTimer st(_T("CToDoCtrlReminders::OnTimer"));
-
 	int nRem = m_aReminders.GetSize();
 
 	if (nRem == 0)
@@ -357,31 +410,28 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 		return;
 	}
 
-	// iterate all the reminders looking for matches
+	// Iterate all the reminders looking for matches
 	while (nRem--)
 	{
-		TDCREMINDER rem = m_aReminders[nRem];
+		const TDCREMINDER& rem = m_aReminders[nRem];
 
-		// check for disabled reminders
+		// Skip disabled reminders
 		if (!rem.bEnabled)
 			continue;
 
-		// check for completed tasks
-		if (rem.pTDC->IsTaskDone(rem.dwTaskID, TDCCHECKALL))
+		// Delete invalid reminders as we go
+		BOOL bDelete = (!rem.TaskExists() || rem.IsTaskDone());
+		
+		if (!bDelete)
 		{
-			RemoveReminder(nRem);
-			continue;
+			COleDateTime dateRem, dateNow = COleDateTime::GetCurrentTime();
+			
+			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
+				bDelete = !ShowReminder(rem);
 		}
 
-		// else
-		COleDateTime dateNow = COleDateTime::GetCurrentTime();
-		COleDateTime dateRem = GetReminderDate(rem);
-
-		if (CDateHelper::IsDateSet(dateRem) && (dateNow > dateRem))
-		{
-			if (!ShowReminder(rem))
-				RemoveReminder(nRem);
-		}
+		if (bDelete)
+			DeleteReminder(nRem);
 	}
 	
 	CTDLShowReminderDlg::OnTimer(nIDEvent);
@@ -428,39 +478,14 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 
 BOOL CToDoCtrlReminders::GetReminderDate(int nRem, COleDateTime& dtRem) const
 {
-	CDateHelper::ClearDate(dtRem);
 	TDCREMINDER rem;
 
 	if (GetReminder(nRem, rem))
-		dtRem = GetReminderDate(rem);
+		return rem.GetReminderDate(dtRem);
 
-	return CDateHelper::IsDateSet(dtRem);
-}
-
-COleDateTime CToDoCtrlReminders::GetReminderDate(const TDCREMINDER& rem)
-{
-	COleDateTime dateRem(rem.dtAbsolute);
-	
-	if (rem.bRelative)
-	{
-		ASSERT(rem.pTDC);
-		ASSERT(rem.dwTaskID);
-		
-		if (rem.nRelativeFromWhen == TDCR_DUEDATE)
-		{
-			dateRem = rem.pTDC->GetTaskDate(rem.dwTaskID, TDCD_DUE);
-		}
-		else // start date
-		{
-			dateRem = rem.pTDC->GetTaskDate(rem.dwTaskID, TDCD_START);
-		}
-		
-		dateRem -= rem.dRelativeDaysLeadIn;
-	}
-
-	dateRem += rem.dDaysSnooze;
-	
-	return dateRem;
+	// else
+	CDateHelper::ClearDate(dtRem);
+	return FALSE;
 }
 
 void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
@@ -545,6 +570,6 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTas
 			ShowWindow(SW_HIDE);
 		}
 
-		RemoveReminder(nRem, TRUE); // TRUE == Notify
+		DismissReminder(nRem);
 	}
 }

@@ -23,7 +23,6 @@ IMPLEMENT_DYNAMIC(CTDLTransEditListCtrl, CInputListCtrl)
 
 CTDLTransEditListCtrl::CTDLTransEditListCtrl()
 {
-
 }
 
 CTDLTransEditListCtrl::~CTDLTransEditListCtrl()
@@ -34,6 +33,7 @@ CTDLTransEditListCtrl::~CTDLTransEditListCtrl()
 
 BEGIN_MESSAGE_MAP(CTDLTransEditListCtrl, CInputListCtrl)
 ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ void CTDLTransEditListCtrl::Initialise()
 	AddCol(_T("English Text"), 300);
 	AddCol(_T("Translated Text"), 300);
 	AddCol(_T("UI Hint"), 100);
-	
+
 	DisableColumnEditing(0, TRUE);
 	DisableColumnEditing(2, TRUE);
 
@@ -52,15 +52,22 @@ void CTDLTransEditListCtrl::Initialise()
 	EnableSorting(TRUE);
 	SetSortColumn(0);
 	SetSortAscending(TRUE);
-
+	
 	// Make sure header is subclassed
 	GetHeader();
+
+	RecalcColumnWidths();
 }
 
 BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShowAlternatives, const CString& sFilter)
 {
 	if (!GetSafeHwnd())
 		return FALSE;
+
+	int nWidths[NUM_COLS];
+	GetColumnWidths(nWidths);
+
+	CHoldRedraw hr(*this);
 
 	ClearAll(); // selection
 	DeleteAllItems();
@@ -112,6 +119,8 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShow
 	if (GetItemCount())
 		SetCurSel(0);
 
+	SetColumnWidths(nWidths);
+
 	return TRUE;
 }
 
@@ -134,7 +143,6 @@ BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sF
 
 	return FALSE;
 }
-
 
 int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
 {
@@ -239,4 +247,73 @@ void CTDLTransEditListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	::SendMessage(pNMHDR->hwndFrom, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELONG(SHRT_MAX, 0));
 	::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
+}
+
+
+void CTDLTransEditListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CInputListCtrl::OnSize(nType, cx, cy);
+
+	// Only recalc columns on an actual change
+	static int cxPrev = -1;
+
+	if (cx != cxPrev)
+		RecalcColumnWidths();
+
+	cxPrev = cx;
+}
+
+void CTDLTransEditListCtrl::RecalcColumnWidths()
+{
+	// Previous widths
+	int nWidths[NUM_COLS];
+	int nPrevWidth = GetColumnWidths(nWidths);
+
+	if (nPrevWidth > 0)
+	{
+		// New widths
+		CRect rClient;
+		GetClientRect(rClient);
+		
+		int nNewWidth = (rClient.Width() - 6);
+ 		int nCol = NUM_COLS;
+
+		while (nCol--)
+			nWidths[nCol] = MulDiv(nWidths[nCol], nNewWidth, nPrevWidth);
+
+		VERIFY(SetColumnWidths(nWidths));
+	}
+}
+
+BOOL CTDLTransEditListCtrl::SetColumnWidths(const int nWidths[NUM_COLS])
+{
+	if (!GetSafeHwnd())
+		return FALSE;
+
+	int nCol = NUM_COLS;
+
+	while (nCol--)
+		SetColumnWidth(nCol, nWidths[nCol]);
+
+	GetHeader()->Invalidate(TRUE);
+	GetHeader()->UpdateWindow();
+
+	return TRUE;
+}
+
+BOOL CTDLTransEditListCtrl::GetColumnWidths(int nWidths[NUM_COLS]) const
+{
+	if (!GetSafeHwnd())
+		return -1;
+
+	int nPrevWidth = 0;
+	int nCol = NUM_COLS;
+
+	while (nCol--)
+	{
+		nWidths[nCol] = GetColumnWidth(nCol);
+		nPrevWidth += nWidths[nCol];
+	}
+
+	return nPrevWidth;
 }
