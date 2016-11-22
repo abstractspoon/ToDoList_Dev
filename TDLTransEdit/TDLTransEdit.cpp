@@ -43,18 +43,28 @@ CTDLTransEditApp theApp;
 
 BOOL CTDLTransEditApp::InitInstance()
 {
-	// Standard initialization
-	// If you are not using these features and wish to reduce the size
-	//  of your final executable, you should remove from the following
-	//  the specific initialization routines you do not need.
+	// 'ToDoList.exe' must also exist in the same folder
+	CString sTDLPath(FileMisc::GetAppFilePath());
+	sTDLPath.Replace(FileMisc::GetFileNameFromPath(sTDLPath), _T("ToDoList.exe"));
+
+	if (!FileMisc::FileExists(sTDLPath))
+	{
+		AfxMessageBox(_T("This application can only be run if ToDoList.exe is present in the same folder."), MB_OK | MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+	// else
+	CTransDictionary::SetAppVersion(FileMisc::GetModuleVersion(sTDLPath));
+	
 	CString sIniPath(FileMisc::GetAppFilePath());
 	FileMisc::ReplaceExtension(sIniPath, _T(".ini"));
 
 	m_pszProfileName = _tcsdup(sIniPath);
-
+	
 	CTDLTransEditDlg dlg;
 	m_pMainWnd = &dlg;
+
 	int nResponse = dlg.DoModal();
+
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is

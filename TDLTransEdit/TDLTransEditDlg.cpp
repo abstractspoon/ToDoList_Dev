@@ -27,7 +27,6 @@ CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(CTDLTransEditDlg::IDD, pParent), 
 	m_bEdited(FALSE), 
-	m_bReadOnly(TRUE),
 	m_bShowAlternatives(TRUE),
 	m_bShowTooltips(TRUE)
 {
@@ -130,7 +129,7 @@ BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath, BOOL bAllowPrompt)
 		if (m_dictionary.LoadDictionary(szDictPath, FALSE))
 		{
 			m_lcDictItems.RebuildList(m_dictionary, m_bShowAlternatives, m_sFilter);
-			m_lcDictItems.SetReadOnly(m_bReadOnly);
+			m_lcDictItems.SetReadOnly(IsReadOnly());
 			
 			m_bEdited = FALSE;
 			m_sLastBrowsePath = FileMisc::GetFolderFromFilePath(szDictPath);
@@ -146,13 +145,13 @@ BOOL CTDLTransEditDlg::LoadDictionary(LPCTSTR szDictPath, BOOL bAllowPrompt)
 
 void CTDLTransEditDlg::OnFileSaveTranslation() 
 {
-	ASSERT(m_bReadOnly);
+	ASSERT(!IsReadOnly());
 
-	if (!m_bReadOnly)
+	if (!IsReadOnly())
 	{
 		m_dictionary.SaveDictionary();
-
 		m_bEdited = FALSE;
+
 		UpdateCaption();
 	}
 }
@@ -208,7 +207,7 @@ void CTDLTransEditDlg::Resize(int cx, int cy)
 
 void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	ASSERT(!m_bReadOnly);
+	ASSERT(!IsReadOnly());
 
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
 	ASSERT(pDispInfo->item.iSubItem == 1);
@@ -225,7 +224,7 @@ void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult)
 
 BOOL CTDLTransEditDlg::ModifyDictionaryItem(int nItem, const CString& sTrans)
 {
-	ASSERT(!m_bReadOnly);
+	ASSERT(!IsReadOnly());
 
 	// Modify the dictionary item that this refers to
 	CString sEnglish = m_lcDictItems.GetItemText(nItem, ENG_COL);
@@ -256,13 +255,15 @@ void CTDLTransEditDlg::UpdateCaption()
 	}
 	else
 	{
+		ASSERT(!(IsReadOnly() && m_bEdited));
+
 		sCaption = FileMisc::GetFileNameFromPath(sDictPath, FALSE);
 		
 		if (m_bEdited)
 		{
 			sCaption += '*';
 		}
-		else if (m_bReadOnly)
+		else if (IsReadOnly())
 		{
 			sCaption += _T(" [read-only]");
 		}
@@ -286,7 +287,7 @@ void CTDLTransEditDlg::OnCancel()
 
 BOOL CTDLTransEditDlg::PromptAndSave()
 {
-	if (!m_bReadOnly && m_bEdited)
+	if (!IsReadOnly() && m_bEdited)
 	{
 		CEnString sText(IDS_SAVECHANGES, FileMisc::GetFileNameFromPath(m_dictionary.GetDictionaryPath()));
 
@@ -516,7 +517,7 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 	switch (nIndex)
 	{
 	case 0: // File
-		pPopupMenu->EnableMenuItem(ID_FILE_SAVE_TRANSLATION, ((!m_bReadOnly && m_bEdited) ? MF_ENABLED : MF_DISABLED));
+		pPopupMenu->EnableMenuItem(ID_FILE_SAVE_TRANSLATION, ((!IsReadOnly() && m_bEdited) ? MF_ENABLED : MF_DISABLED));
 		break;
 
 	case 1: // Options
@@ -525,7 +526,7 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 		break;
 
 	case 2: // Tools
-		pPopupMenu->EnableMenuItem(ID_TOOLS_CLEANUP, ((!m_bReadOnly && !m_dictionary.IsEmpty()) ? MF_ENABLED : MF_DISABLED));
+		pPopupMenu->EnableMenuItem(ID_TOOLS_CLEANUP, ((!IsReadOnly() && !m_dictionary.IsEmpty()) ? MF_ENABLED : MF_DISABLED));
 		break;
 	}
 }
@@ -568,7 +569,9 @@ void CTDLTransEditDlg::OnFileNewTranslation()
 
 	if (!RecheckYourLanguagePath(sYourLangPath))
 	{
-		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
+		CFileOpenDialog dialog(_T("Select Base Language File"), m_sLastBrowsePath, 
+								_T("YourLanguage.csv"), EOFN_DEFAULTOPEN, 
+								_T("YourLanguage.csv|YourLanguage.csv||"));
 
 		if (dialog.DoModal() != IDOK)
 			return;
@@ -577,7 +580,9 @@ void CTDLTransEditDlg::OnFileNewTranslation()
 		sYourLangPath = dialog.GetPathName();
 	}
 
-	CFileSaveDialog dialog(_T("Save New Translation"), _T(".csv"), NULL, EOFN_DEFAULTSAVE, _T("Translations (*.csv)|*.csv||"));
+	CFileSaveDialog dialog(_T("Save New Translation"), _T(".csv"), 
+							m_sLastBrowsePath, EOFN_DEFAULTSAVE, 
+							_T("Translations (*.csv)|*.csv||"));
 
 	while (dialog.DoModal() == IDOK)
 	{
@@ -628,13 +633,18 @@ BOOL CTDLTransEditDlg::RecheckYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPr
 		CString sMessage;
 		sMessage.Format(_T("Before you can edit '%s' there needs to be an up-to-date copy of 'YourLanguage.csv' in the same folder.\n\nPlease update to the latest 'YourLanguage.csv' and re-open this file to edit."),
 						FileMisc::GetFileNameFromPath(szDictPath, FALSE));
+
 		MessageBox(sMessage, _T("Missing File"), MB_OK | MB_ICONEXCLAMATION);
 	}
 	
 	m_sYourLanguagePath = sYourLangPath;
-	m_bReadOnly = sYourLangPath.IsEmpty();
 	
-	return !m_bReadOnly;
+	return !m_sYourLanguagePath.IsEmpty();
+}
+
+BOOL CTDLTransEditDlg::IsReadOnly() const 
+{ 
+	return (m_sYourLanguagePath.IsEmpty() || m_dictionary.IsReadOnly()); 
 }
 
 void CTDLTransEditDlg::OnOptionsShowTooltips() 
@@ -644,7 +654,7 @@ void CTDLTransEditDlg::OnOptionsShowTooltips()
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
 }
 
-CString CTDLTransEditDlg::GetTranslationVersion(const CString& sTransPath)
+CString CTDLTransEditDlg::GetTranslationVersion(const CString& sTransPath) const
 {
 	CTransDictionary dict;
 

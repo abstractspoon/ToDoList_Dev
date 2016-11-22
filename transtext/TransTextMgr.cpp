@@ -27,6 +27,7 @@ const UINT POPUPMENU_ID = 0xFFFFFFFF;
 
 CTransTextMgr::CTransTextMgr()
 {
+	CTransDictionary::SetAppVersion(FileMisc::GetAppVersion());
 }
 
 CTransTextMgr::~CTransTextMgr()
@@ -56,7 +57,7 @@ BOOL CTransTextMgr::InitHooks(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
 	}
 
 	DICTITEM::SetTranslationOption(nOption);
-
+	
 	return CHookWndMgr<CTransTextMgr>::InitHooks();
 }
 

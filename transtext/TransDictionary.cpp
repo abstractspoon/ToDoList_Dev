@@ -635,7 +635,14 @@ BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-CTransDictionary::CTransDictionary() : m_bDecodeChars(TRUE), m_wDictLanguageID(0)
+CString CTransDictionary::s_sAppVersion;
+
+///////////////////////////////////////////////////////////////////////////////////
+
+CTransDictionary::CTransDictionary() 
+	: 
+	m_bDecodeChars(TRUE), 
+	m_wDictLanguageID(0)
 {
 	LANGID nLangID = Misc::GetUserDefaultUILanguage();
 	m_wDictLanguageID = (WORD)PRIMARYLANGID(nLangID);
@@ -732,12 +739,6 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 					// if it has we merge the items together
 					if (pDI)
 					{
-						// if our understanding is correct then the existing
-						// dictionary should be untranslated and the current
-						// one translated
-						//	ASSERT(pDI->GetTextOut().IsEmpty());
-						//	ASSERT(!diTemp.GetTextOut().IsEmpty());
-
 						// merge the untranslated dictionary into the 
 						// translated one and then delete the untranslated
 						// before reassign to the dictionary map
@@ -752,6 +753,7 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 			}
 			
 			FixupDictionary();
+			IgnoreTranslatedText();
 		}
 
 		return TRUE;
@@ -760,16 +762,25 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 	return FALSE;
 }
 
+BOOL CTransDictionary::IsReadOnly() const
+{
+	return (s_sAppVersion.IsEmpty() ||
+		    (FileMisc::CompareVersions(s_sAppVersion, m_sDictVersion) < 0));
+}
+
 void CTransDictionary::FixupDictionary()
 {
+	if (IsReadOnly())
+		return;
+
 	POSITION pos = m_mapItems.GetStartPosition();
 	BOOL bCleaned = FALSE;
-	
+
 	while (pos)
 	{
 		DICTITEM* pDI = NULL;
 		CString sKey;
-		
+
 		m_mapItems.GetNextAssoc(pos, sKey, pDI);
 		ASSERT(KeyMatches(sKey, pDI));
 
@@ -779,8 +790,6 @@ void CTransDictionary::FixupDictionary()
 
 	if (bCleaned)
 		SaveDictionary();
-
-	IgnoreTranslatedText();
 }
 
 void CTransDictionary::DeleteDictionary()
@@ -803,7 +812,11 @@ void CTransDictionary::DeleteDictionary()
 
 TD_CLEANUP CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved)
 {
-	if (FileMisc::CompareVersions(tdMaster.GetDictionaryVersion(), GetDictionaryVersion()) < 0)
+	if (IsReadOnly())
+	{
+		return TDCLEAN_READONLY;
+	}
+	else if (FileMisc::CompareVersions(tdMaster.GetDictionaryVersion(), GetDictionaryVersion()) < 0)
 	{
 		return TDCLEAN_BADVER;
 	}
@@ -935,6 +948,9 @@ BOOL CTransDictionary::WantIgnore(const CString& sText) const
 
 BOOL CTransDictionary::SaveDictionary(LPCTSTR szAltPath, BOOL bForce)
 {
+	if (IsReadOnly())
+		return FALSE;
+
 	if (!bForce && !DICTITEM::WantAddToDictionary())
 		return TRUE; // nothing to do
 
@@ -957,6 +973,8 @@ BOOL CTransDictionary::SaveDictionary(LPCTSTR szAltPath, BOOL bForce)
 
 BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 {
+	ASSERT(!IsReadOnly());
+
 	if (!FileMisc::HasExtension(szDictPath, _T("csv")) && 
 		!FileMisc::HasExtension(szDictPath, _T("txt")))
 		return FALSE;
@@ -966,7 +984,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 
 	// header
 	CString sHeader;
-	sHeader.Format(_T("%s %s"), TRANSTEXT_HEADER, FileMisc::GetAppVersion());
+	sHeader.Format(_T("%s %s"), TRANSTEXT_HEADER, s_sAppVersion);
 	aLines.Add(sHeader);
 
 	// language identifier
@@ -1107,6 +1125,12 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 
 BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 {
+	if (s_sAppVersion.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	m_bDecodeChars = bDecodeChars;
 
 	if (LoadCsvDictionary(szDictPath))
@@ -1268,6 +1292,12 @@ BOOL CTransDictionary::GetPossibleDuplicates(CTransDictionary& tdDuplicates) con
 
 BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)
 {
+	if (s_sAppVersion.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CString sTemp(sTextIn);
 	DICTITEM* pDI = GetDictItem(sTemp, FALSE);
 

@@ -39,12 +39,12 @@ protected:
 	CShortcutManager m_mgrShortcuts;
 
 	BOOL m_bEdited;
-	BOOL m_bReadOnly;
 	CString m_sBaseTitle;
 	CString m_sEnglish;
 	CString m_sTranslation;
 	CString m_sYourLanguagePath;
 	CString m_sLastBrowsePath;
+	CString m_sAppVersion;
 	BOOL m_bShowAlternatives;
 	BOOL m_bShowTooltips;
 
@@ -89,8 +89,8 @@ protected:
 	BOOL LoadDictionary(LPCTSTR szDictPath, BOOL bAllowPrompt = TRUE);
 	BOOL RecheckYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPrompt = TRUE);
 	BOOL ModifyDictionaryItem(int nItem, const CString& sTrans);
-
-	static CString GetTranslationVersion(const CString& sTransPath);
+	CString GetTranslationVersion(const CString& sTransPath) const;
+	BOOL IsReadOnly() const;
 
 };
 

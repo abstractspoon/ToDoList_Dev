@@ -87,6 +87,7 @@ enum TD_CLEANUP
 	TDCLEAN_CHANGE		= 1,
 	TDCLEAN_BADVER		= -1,
 	TDCLEAN_EMPTY		= -2,
+	TDCLEAN_READONLY	= -3,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -104,6 +105,7 @@ public:
 	BOOL LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars = TRUE);
 	BOOL SaveDictionary(LPCTSTR szAltPath = NULL, BOOL bForce = FALSE);
 	BOOL IsEmpty() const { return (m_mapItems.GetCount() == 0); }
+	BOOL IsReadOnly() const;
 
 	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
@@ -119,13 +121,17 @@ public:
 	BOOL WantIgnore(const CString& sText) const;
 
 	const CDictionaryItems& GetItems() const { return m_mapItems; }
-	
+
+	static void SetAppVersion(LPCTSTR szAppVer)	{ s_sAppVersion = szAppVer; }
+		
 protected:
 	CString m_sDictFile, m_sDictVersion;
 	WORD m_wDictLanguageID;
 	CMapStringToPtr m_mapStringIgnore;
 	CDictionaryItems m_mapItems;
 	BOOL m_bDecodeChars;
+
+	static CString s_sAppVersion;
 	
 protected:
 	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate = TRUE);
