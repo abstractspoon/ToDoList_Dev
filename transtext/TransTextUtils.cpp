@@ -188,22 +188,34 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 	if (!dtActive.LoadDictionary(szDictPath) || !dtMaster.LoadDictionary(szMasterDictPath))
 		return FALSE;
 	
-	TRACE(_T("TransText::CleanupDictionary(%s)\n"), szDictPath);
-	
-	BOOL bCleaned = dtActive.CleanupDictionary(dtMaster, dtRemoved);
-	
-	// Always save the 'master' so that newly translated strings get
-	// correctly moved to the 'TRANSLATED' section
-	dtActive.SaveDictionary(NULL, TRUE);
-	
-	// save any removed items
-	if (!dtRemoved.IsEmpty())
+	TD_CLEANUP nRes = dtActive.CleanupDictionary(dtMaster, dtRemoved);
+
+	switch (nRes)
 	{
-		CString sRemovedPath = CFileBackup::BuildBackupPath(szDictPath, _T("backup"), FBS_TIMESTAMP, _T(".removed"));
+	case TDCLEAN_CHANGE:
+	case TDCLEAN_NOCHANGE:
+		// Always save the 'target' so that newly translated strings get
+		// correctly moved to the 'TRANSLATED' section
+		dtActive.SaveDictionary(NULL, TRUE);
+
+		// save any removed items
+		if (!dtRemoved.IsEmpty())
+		{
+			CString sRemovedPath = CFileBackup::BuildBackupPath(szDictPath, _T("backup"), FBS_TIMESTAMP, _T(".removed"));
 		
-		VERIFY(FileMisc::CreateFolderFromFilePath(sRemovedPath));
-		VERIFY(dtRemoved.SaveDictionary(sRemovedPath, TRUE));
+			VERIFY(FileMisc::CreateFolderFromFilePath(sRemovedPath));
+			VERIFY(dtRemoved.SaveDictionary(sRemovedPath, TRUE));
+		}
+		break;
+
+	case TDCLEAN_BADVER:
+	case TDCLEAN_EMPTY:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 	
-	return bCleaned;
+	return (nRes == TDCLEAN_CHANGE);
 }

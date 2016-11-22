@@ -81,6 +81,16 @@ typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*> CDictionaryItems;
 
 //////////////////////////////////////////////////////////////////////
 
+enum TD_CLEANUP
+{
+	TDCLEAN_NOCHANGE	= 0,
+	TDCLEAN_CHANGE		= 1,
+	TDCLEAN_BADVER		= -1,
+	TDCLEAN_EMPTY		= -2,
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTransDictionary 
 {
 public:
@@ -101,8 +111,8 @@ public:
 
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
+	TD_CLEANUP CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
 	void DeleteDictionary();
-	BOOL CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
 	BOOL GetPossibleDuplicates(CTransDictionary& tdDuplicates) const;
 	
 	void IgnoreString(const CString& sText, BOOL bPrepare);

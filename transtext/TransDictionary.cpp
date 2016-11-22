@@ -801,10 +801,16 @@ void CTransDictionary::DeleteDictionary()
 	m_sDictVersion.Empty();
 }
 
-BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved)
+TD_CLEANUP CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved)
 {
-	if (tdMaster.IsEmpty() || IsEmpty())
-		return FALSE;
+	if (FileMisc::CompareVersions(tdMaster.GetDictionaryVersion(), GetDictionaryVersion()) < 0)
+	{
+		return TDCLEAN_BADVER;
+	}
+	else if (tdMaster.IsEmpty())
+	{
+		return TDCLEAN_EMPTY;
+	}
 
 	// build a list of all items not found in 'tdMaster'
 	POSITION pos = m_mapItems.GetStartPosition();
@@ -860,7 +866,7 @@ BOOL CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster, CTran
 		}
 	}
 
-	return bCleaned;
+	return (bCleaned ? TDCLEAN_CHANGE : TDCLEAN_NOCHANGE);
 }
 
 void CTransDictionary::IgnoreTranslatedText()

@@ -533,8 +533,11 @@ BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg)
 
 void CTDLTransEditDlg::OnToolsCleanUp() 
 {
-	if (!InitYourLanguagePath())
+	if (!VerifyYourLanguagePath())
 		return;
+
+	// Save any changes first
+	OnFileSaveTranslation();
 	
 	if (TransText::CleanupDictionary(m_sYourLanguagePath, m_dictionary.GetDictionaryPath()))
 	{
@@ -544,7 +547,7 @@ void CTDLTransEditDlg::OnToolsCleanUp()
 
 void CTDLTransEditDlg::OnFileNewTranslation() 
 {
-	if (!InitYourLanguagePath())
+	if (!VerifyYourLanguagePath())
 		return;
 	
 	CFileSaveDialog dialog(_T("Save New Translation"), _T(".csv"), NULL, EOFN_DEFAULTSAVE, _T("Translations (*.csv)|*.csv||"));
@@ -567,14 +570,40 @@ void CTDLTransEditDlg::OnFileNewTranslation()
 	}
 }
 
-BOOL CTDLTransEditDlg::InitYourLanguagePath()
+BOOL CTDLTransEditDlg::VerifyYourLanguagePath()
 {
+	// Make sure 'YourLanguage.csv' has an equal or later
+	// version than the current dictionary
+	CString sTransVer = m_dictionary.GetDictionaryVersion();
+
+	if (!m_sYourLanguagePath.IsEmpty())
+	{
+		CString sYourLangVer = GetTranslationVersion(m_sYourLanguagePath);
+
+		if (FileMisc::CompareVersions(sYourLangVer, sTransVer) < 1)
+			m_sYourLanguagePath.Empty();
+	}
+	
 	if (!FileMisc::FileExists(m_sYourLanguagePath))
 	{
 		CFileOpenDialog dialog(_T("Select Base Language File"), NULL, _T("YourLanguage.csv"), EOFN_DEFAULTOPEN, _T("YourLanguage.csv|YourLanguage.csv||"));
 		
 		if (dialog.DoModal() == IDOK)
-			m_sYourLanguagePath = dialog.GetPathName();
+		{
+			// Check version as before
+			CString sYourLangPath = dialog.GetPathName();
+			CString sYourLangVer = GetTranslationVersion(sYourLangPath);
+
+			if (FileMisc::CompareVersions(sYourLangVer, sTransVer) >= 0)
+			{
+				m_sYourLanguagePath = sYourLangPath;
+			}
+			else
+			{
+				MessageBox(_T("The selected file has a earlier version than your translation file.\n\nPlease update the copy of 'YourLanguage.csv' and try again."),
+							_T("Invalid Version"), MB_OK | MB_ICONEXCLAMATION);
+			}
+		}
 	}
 	
 	return FileMisc::FileExists(m_sYourLanguagePath);
@@ -585,4 +614,15 @@ void CTDLTransEditDlg::OnOptionsShowTooltips()
 	m_bShowTooltips = !m_bShowTooltips;
 
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
+}
+
+CString CTDLTransEditDlg::GetTranslationVersion(const CString& sTransPath)
+{
+	CTransDictionary dict;
+
+	if (dict.LoadDictionary(sTransPath))
+		return dict.GetDictionaryVersion();
+
+	// else
+	return _T("");
 }
