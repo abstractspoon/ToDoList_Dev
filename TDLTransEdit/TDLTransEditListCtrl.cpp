@@ -189,7 +189,7 @@ int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, in
 
 COLORREF CTDLTransEditListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if ((nCol == 0) || (nCol == 2))
+	if ((nCol == 0) || (nCol == 2) || m_bReadOnly)
 	{
 		return GetSysColor(COLOR_3DFACE);
 	}
