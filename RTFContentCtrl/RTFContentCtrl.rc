@@ -541,11 +541,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_EDIT_INLINESPELLCHECK "\nInline Spell-checking"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     ID_HELP                 "\nOnline Help"
 END
 
