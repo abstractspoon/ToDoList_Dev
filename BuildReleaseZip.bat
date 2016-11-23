@@ -1,16 +1,8 @@
 set OUTZIP=%1\Unicode_Release\todolist_exe_.zip
 set PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
 set RESPATH="D:\_code\ToDoList_Resources"
-set PLUGINSPATH="..\ToDoList_Plugins"
 
 del %OUTZIP%
-
-REM Copy C# Plugins
-REM xcopy %PLUGINSPATH%\*.dll c:\temp\tdlzip\ /Y /D /E
-REM cd c:\temp\tdlzip\
-REM for /r %%x in (.) do @Copy "%%x" %1\Unicode_Release\
-REM del c:\temp\tdlzip\*.*
-REM del c:\temp\tdlzip
 
 REM Zip C++ Binaries
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\ToDoList.exe
