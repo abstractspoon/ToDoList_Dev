@@ -100,7 +100,7 @@ public:
 	static CString BuildBackupPath(const CString& sFile, 
 									const CString& sFolder = _T(""), 
 									DWORD dwFlags = 0, 
-									const CString& sExt = ".bak");
+									const CString& sExt = _T(".bak"));
 
 protected:
 	CString m_sFile, m_sBackup;
