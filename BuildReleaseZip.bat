@@ -16,6 +16,7 @@ REM Zip C++ Binaries
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\ToDoList.exe
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TDLUpdate.exe
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TDLUninstall.exe
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TDLTransEdit.exe
 
 REM Handle dlls explicitly to maintain control over .NET plugins
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PlainTextImport.dll
