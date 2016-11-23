@@ -90,7 +90,6 @@ protected:
 	// Implementation
 protected:
 	CTDLQuickFindComboBox m_cbQuickFind;
-	CDWordArray m_aPriorityColors;
 	CEnBrowserCtrl m_IE;
 	CEnMenu m_menubar;
 	CEnRecentFileList m_mruList;

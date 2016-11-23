@@ -9923,8 +9923,10 @@ void CToDoListWnd::ResetPrefs()
 	m_mgrToDoCtrls.SetPrefs(m_pPrefs); 
 	
 	// Update Filter bar colours
-	m_pPrefs->GetPriorityColors(m_aPriorityColors);
-	m_filterBar.SetPriorityColors(m_aPriorityColors);
+	CDWordArray aPriorityColors;
+	m_pPrefs->GetPriorityColors(aPriorityColors);
+
+	m_filterBar.SetPriorityColors(aPriorityColors);
 }
 
 const CPreferencesDlg& CToDoListWnd::Prefs() const
@@ -10698,13 +10700,15 @@ void CToDoListWnd::OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DW
 
 void CToDoListWnd::OnViewFilter() 
 {
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	CStringArray aCustom;
 	m_filterBar.GetCustomFilters(aCustom);
 	
+	CDWordArray aPriorityColors;
+	Prefs().GetPriorityColors(aPriorityColors);
+	
 	CTDLFilterDlg dialog(Prefs().GetMultiSelFilters());
 
-	if (dialog.DoModal(aCustom, tdc, m_aPriorityColors) == IDOK)
+	if (dialog.DoModal(aCustom, GetToDoCtrl(), aPriorityColors) == IDOK)
 	{
 		FTDCFILTER filter;
 		CString sCustom;
