@@ -50,6 +50,20 @@ LRESULT CGroupLine::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
 	{
+	case WM_SETTEXT:
+		{
+			Invalidate(TRUE);
+
+			CRect rWindow;
+			GetWindowRect(rWindow);
+
+			CWnd* pParent = CWnd::FromHandle(GetParent());
+
+			pParent->ScreenToClient(rWindow);
+			pParent->InvalidateRect(rWindow, TRUE);
+		}
+		break;
+
 	case WM_PAINT:
 		{
 			CWnd* pWnd = GetCWnd();
