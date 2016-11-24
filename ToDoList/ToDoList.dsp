@@ -1335,14 +1335,6 @@ SOURCE=.\res\ToDoList.rc2
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\tray_std.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\tray_tracking_std.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\update_filter.ico
 # End Source File
 # Begin Source File
