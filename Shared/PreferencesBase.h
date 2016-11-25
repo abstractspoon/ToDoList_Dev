@@ -7,6 +7,7 @@
 
 #include "scrollingpropertypagehost.h"
 #include "dialoghelper.h"
+#include "winhelpbutton.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -17,6 +18,7 @@ const UINT WM_PPB_CTRLCHANGE = ::RegisterWindowMessage(_T("WM_PPB_CTRLCHANGE"));
 /////////////////////////////////////////////////////////////////////////////
 
 class IPreferences;
+class CDeferWndMove;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesPageBase dialog
@@ -27,7 +29,8 @@ class CPreferencesPageBase : public CPropertyPage, protected CDialogHelper
 
 	// Construction
 public:
-	CPreferencesPageBase(UINT nID);
+	CPreferencesPageBase(UINT nDlgTemplateID);
+	CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID);
 	~CPreferencesPageBase();
 	
 	virtual void LoadPreferences(const IPreferences* /*pPrefs*/) {}
@@ -56,24 +59,42 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlgBase dialog
 
-class CPreferencesDlgBase : public CDialog
+class CPreferencesDlgBase : public CDialog, protected CDialogHelper
 {
 	// Construction
 public:
-	CPreferencesDlgBase(UINT nID = 0, CWnd* pParent = NULL);   // standard constructor
+	CPreferencesDlgBase(UINT nDlgTemplateID, 
+						UINT nPPHostFrameCtrlID,
+						UINT nHelpBtnIconID = 0,
+						CWnd* pParent = NULL);   // standard constructor
 	
 	int DoModal(IPreferences* prefs, int nInitPage = -1);
 	void SetPageBackgroundColor(COLORREF color);
+
+	void LoadPreferences(const IPreferences* prefs);
+	void SavePreferences(IPreferences* prefs);
 	
 protected:
+	CScrollingPropertyPageHost m_ppHost;
+	CWinHelpButton m_btnHelp;
+
+	UINT m_nDlgTemplateID;
+	UINT m_nPPHostFrameCtrlID;
+	UINT m_nHelpBtnIconID;
+
 	int m_nInitPage;
-	CScrollingPropertyPageHost m_pphost;
+	CSize m_sizeOrgWindow;
+	CSize m_sizeCurClient;
 
 	// Temporary pointer only
-	IPreferences* m_pPrefs;
+	IPreferences* m_pDoModalPrefs;
 	
 protected:
 	afx_msg void OnDestroy();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
+	afx_msg void OnHelpButton();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	DECLARE_MESSAGE_MAP()
 		
 protected:
@@ -82,24 +103,23 @@ protected:
 	
 	void OnApply(); // called from derived class
 	
-	BOOL EnsurePageCreated(int nPage) { return m_pphost.EnsurePageCreated(nPage); }
-	BOOL EnsurePageCreated(const CPreferencesPageBase* pPage) { return m_pphost.EnsurePageCreated(pPage); }
+	BOOL EnsurePageCreated(int nPage) { return m_ppHost.EnsurePageCreated(nPage); }
+	BOOL EnsurePageCreated(const CPreferencesPageBase* pPage) { return m_ppHost.EnsurePageCreated(pPage); }
 
 	virtual BOOL SetActivePage(int nPage);
 	virtual BOOL SetActivePage(CPreferencesPageBase* pPage);
 	virtual BOOL AddPage(CPreferencesPageBase* pPage);
-	
+	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
+
 	BOOL CreatePPHost(UINT nHostID);
 	BOOL CreatePPHost(LPRECT pRect);
+	void Resize(int cx = 0, int cy = 0);
 
-	int GetActiveIndex() const { return m_pphost.GetActiveIndex(); }
-	CPreferencesPageBase* GetActivePage() { return (CPreferencesPageBase*)m_pphost.GetActivePage(); }
-	int FindPage(CPreferencesPageBase* pPage) { return m_pphost.FindPage(pPage); }
+	int GetActiveIndex() const { return m_ppHost.GetActiveIndex(); }
+	CPreferencesPageBase* GetActivePage() { return (CPreferencesPageBase*)m_ppHost.GetActivePage(); }
+	int FindPage(CPreferencesPageBase* pPage) { return m_ppHost.FindPage(pPage); }
 	
-	void ForwardMessage(UINT nMsg) { m_pphost.ForwardMessage(nMsg); }
-	
-	void LoadPreferences(const IPreferences* prefs);
-	void SavePreferences(IPreferences* prefs);
+	void ForwardMessage(UINT nMsg) { m_ppHost.ForwardMessage(nMsg); }
 };
 
 //{{AFX_INSERT_LOCATION}}

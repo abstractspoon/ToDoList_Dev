@@ -294,12 +294,10 @@ protected:
 	CPreferencesShortcutsPage m_pageShortcuts;
 	CPreferencesMultiUserPage m_pageMultiUser;
 
-	CSize m_sizeCurrent;
 	CTreeCtrl m_tcPages;
 	CString m_sPageTitle;
 	CEnStatic m_stCategoryTitle, m_stPageTitle; 
 	CUIThemeFile m_theme;
-	CWinHelpButton m_btnHelp;
 	TDCAUTOLISTDATA m_defaultListData;
 
 	CPreferences m_prefs;
@@ -319,16 +317,12 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnHelp();
 	afx_msg void OnSelchangedPages(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnApply();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	//}}AFX_MSG
 	afx_msg LRESULT OnToolPageTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGenPageClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnControlChange(WPARAM wp, LPARAM lp);
-	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
@@ -337,7 +331,8 @@ protected:
 	BOOL SetActivePage(int nPage); // override
 	CString GetItemPath(HTREEITEM hti) const;
 	void SynchronizeTree();
-	void Resize(int cx = 0, int cy = 0);
+	
+	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
 
 	static void SetTitleThemeColors(CEnStatic& stTitle, const CUIThemeFile& theme);
 

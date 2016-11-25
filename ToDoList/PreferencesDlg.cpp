@@ -39,13 +39,11 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
 								 CWnd* pParent /*=NULL*/)
 	: 
-	CPreferencesDlgBase(IDD_PREFERENCES, pParent), 
+	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, 0, pParent), 
 	m_pageShortcuts(pShortcutMgr), 
 	m_pageUI(pContentMgr, pMgrUIExt), 
 	m_pageFile2(pExportMgr),
-	m_pageUITasklistColors(m_defaultListData),
-	m_sizeCurrent(-1, -1),
-	m_btnHelp(IDD_PREFERENCES, FALSE)
+	m_pageUITasklistColors(m_defaultListData)
 {
 	CPreferencesDlgBase::AddPage(&m_pageGen);
 	CPreferencesDlgBase::AddPage(&m_pageMultiUser);
@@ -86,13 +84,9 @@ void CPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CPreferencesDlg)
-	ON_BN_CLICKED(IDC_HELPBUTTON, OnHelp)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PAGES, OnSelchangedPages)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
-	ON_WM_SIZE()
-	ON_WM_GETMINMAXINFO()
 	//}}AFX_MSG_MAP
-	ON_WM_HELPINFO()
 	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
@@ -115,17 +109,6 @@ int CPreferencesDlg::DoModal(int nInitPage)
 
 BOOL CPreferencesDlg::OnInitDialog() 
 {
-	CRect rClient;
-	GetClientRect(rClient);
-	m_sizeCurrent = rClient.Size();
-	
-	CRect rHost;
-	GetDlgItem(IDC_HOSTFRAME)->GetWindowRect(rHost);
-	ScreenToClient(rHost);
-	rHost.DeflateRect(1, 1);
-	
-	VERIFY(CreatePPHost(rHost));
-
 	CPreferencesDlgBase::OnInitDialog();
 	
 	// disable translation of category title because
@@ -173,21 +156,13 @@ BOOL CPreferencesDlg::OnInitDialog()
 
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
 
-	// fixup icon
+	// Set dlg icon
 	HICON hIcon = GraphicsMisc::LoadIcon(IDI_PREFERENCES_DIALOG_STD);
 	SetIcon(hIcon, FALSE);
-
-	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
 
 	m_tcPages.SetFocus();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
-}
-
-BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
-{
-	OnHelp();
-	return TRUE;
 }
 
 void CPreferencesDlg::SynchronizeTree()
@@ -216,17 +191,6 @@ BOOL CPreferencesDlg::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	return CPreferencesDlgBase::PreTranslateMessage(pMsg);
-}
-
-void CPreferencesDlg::OnHelp() 
-{
-	const CPreferencesPageBase* pPage = GetActivePage();
-	ASSERT(pPage);
-
-	if (pPage)
-		AfxGetApp()->WinHelp(pPage->GetHelpID());
-	else
-		AfxGetApp()->WinHelp(IDD_PREFERENCES);
 }
 
 void CPreferencesDlg::AddPage(CPreferencesPageBase* pPage, UINT nIDPath, UINT nIDSection)
@@ -310,11 +274,11 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		// move to the section
 		if (nIDSection == IDC_TOPOFPAGE) // pseudo control ID
 		{
-			m_pphost.ScrollToTop();
+			m_ppHost.ScrollToTop();
 		}
 		else if (nIDSection)
 		{
-			m_pphost.ScrollTo(pPage->GetDlgItem(nIDSection));
+			m_ppHost.ScrollTo(pPage->GetDlgItem(nIDSection));
 		}
 
 		// special page handling
@@ -328,13 +292,6 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		}
 		else if (pPage == &m_pageUITasklistColors)
 		{
-			// colours page then update 'colour by attribute'
-// 			CStringArray aAttrib;
-// 			TDC_ATTRIBUTE nAttrib = m_pageUITasklistColors.GetColorByAttribute();
-// 			
-// 			m_pageTaskDef.GetListItems(nAttrib, aAttrib);
-// 			m_pageUITasklistColors.AddAttributes(nAttrib, aAttrib);
-
 			GetDefaultListItems(m_defaultListData);
 		}
 		
@@ -424,64 +381,12 @@ LRESULT CPreferencesDlg::OnControlChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-void CPreferencesDlg::OnSize(UINT nType, int cx, int cy) 
+void CPreferencesDlg::ReposContents(CDeferWndMove& dwm, int nDX, int nDY)
 {
-	CPreferencesDlgBase::OnSize(nType, cx, cy);
-
-	if (!m_pphost.GetSafeHwnd())
-		return;
-	
-	Resize(cx, cy);
-
-	m_btnHelp.UpdatePosition();
-}
-
-void CPreferencesDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
-{
-	CPreferencesDlgBase::OnGetMinMaxInfo(lpMMI);
-
-	lpMMI->ptMinTrackSize.x = MIN_WIDTH;
-	lpMMI->ptMinTrackSize.y = MIN_HEIGHT;
-}
-
-void CPreferencesDlg::Resize(int cx, int cy)
-{
-	if (cx == 0 || cy == 0)
-	{
-		CRect rClient;
-		GetClientRect(rClient);
-
-		cx = rClient.Width();
-		cy = rClient.Height();
-	}
-
-	// calculate deltas
-	int nDX = cx - m_sizeCurrent.cx;
-	int nDY = cy - m_sizeCurrent.cy;
-
-	if (nDX == 0 && nDY == 0)
-		return;
-
-	m_sizeCurrent.cx = cx;
-	m_sizeCurrent.cy = cy;
-	
-	CDeferWndMove dwm(10);
-	
-	// offset buttons
-	dwm.OffsetCtrl(this, IDC_HELP2, 0, nDY);
-	dwm.OffsetCtrl(this, IDOK, nDX, nDY);
-	dwm.OffsetCtrl(this, IDCANCEL, nDX, nDY);
-	dwm.OffsetCtrl(this, IDC_APPLY, nDX, nDY);
+	CPreferencesDlgBase::ReposContents(dwm, nDX, nDY);
 
 	// resize tree
 	dwm.ResizeCtrl(this, IDC_PAGES, 0, nDY);
-	
-	// PPHost and label and border
-	dwm.ResizeCtrl(this, m_pphost.GetDlgCtrlID(), nDX, nDY);
-	dwm.ResizeCtrl(this, IDC_PAGE_TITLE, nDX, 0);
-	dwm.ResizeCtrl(this, IDC_HOSTFRAME, nDX, nDY);
-
-	GetDlgItem(IDC_HOSTFRAME)->Invalidate(TRUE);
 }
 
 void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
