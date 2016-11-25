@@ -11,6 +11,7 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
+#include "..\shared\preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -394,36 +395,36 @@ int CPreferencesTaskDefPage::GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, 
 }
 
 
-void CPreferencesTaskDefPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	// load settings
-	m_nDefPriority = prefs.GetProfileInt(_T("Preferences"), _T("DefaultPriority"), 5); 
-	m_nDefRisk = prefs.GetProfileInt(_T("Preferences"), _T("DefaultRisk"), 0); 
-	m_sDefAllocTo = prefs.GetProfileString(_T("Preferences"), _T("DefaultAllocTo"));
-	m_sDefAllocBy = prefs.GetProfileString(_T("Preferences"), _T("DefaultAllocBy"));
-	m_sDefStatus = prefs.GetProfileString(_T("Preferences"), _T("DefaultStatus"));
-	m_sDefTags = prefs.GetProfileString(_T("Preferences"), _T("DefaultTags"));
-	m_sDefCategory = prefs.GetProfileString(_T("Preferences"), _T("DefaultCategory"));
-	m_sDefCreatedBy = prefs.GetProfileString(_T("Preferences"), _T("DefaultCreatedBy"), Misc::GetUserName());
-	m_crDef = prefs.GetProfileInt(_T("Preferences"), _T("DefaultColor"), 0);
-	m_bInheritParentAttributes = prefs.GetProfileInt(_T("Preferences"), _T("InheritParentAttributes"), prefs.GetProfileInt(_T("Preferences"), _T("UseParentAttributes")));
-	m_bUpdateInheritAttributes = prefs.GetProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), FALSE);
-	m_bUseCreationForDefStartDate = prefs.GetProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), TRUE);
-	m_bUseCreationForDefDueDate = prefs.GetProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), FALSE);
-	m_dDefCost = Misc::Atof(prefs.GetProfileString(_T("Preferences"), _T("DefaultCost"), _T("0")));
-	m_dDefTimeEst = prefs.GetProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), 0);
-	m_eTimeEst.SetUnits((TH_UNITS)prefs.GetProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), THU_HOURS));
-	m_dDefTimeSpent = prefs.GetProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), 0);
-	m_eTimeSpent.SetUnits((TH_UNITS)prefs.GetProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), THU_HOURS));
-	m_bCatListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("CatListReadonly"), FALSE);
-	m_bStatusListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("StatusListReadonly"), FALSE);
-	m_bAllocToListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("AllocToListReadonly"), FALSE);
-	m_bAllocByListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("AllocByListReadonly"), FALSE);
-	m_bVersionListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("VersionListReadonly"), FALSE);
-	m_bTagListReadonly = prefs.GetProfileInt(_T("Preferences"), _T("TagListReadonly"), FALSE);
-	m_sDefIcon = prefs.GetProfileString(_T("Preferences"), _T("DefaultIcon"));
-	m_nDefReminderLeadin = prefs.GetProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
-	m_bReminderBeforeDue = prefs.GetProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), TRUE);
+	m_nDefPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultPriority"), 5); 
+	m_nDefRisk = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultRisk"), 0); 
+	m_sDefAllocTo = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultAllocTo"));
+	m_sDefAllocBy = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultAllocBy"));
+	m_sDefStatus = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultStatus"));
+	m_sDefTags = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultTags"));
+	m_sDefCategory = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCategory"));
+	m_sDefCreatedBy = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCreatedBy"), Misc::GetUserName());
+	m_crDef = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultColor"), 0);
+	m_bInheritParentAttributes = pPrefs->GetProfileInt(_T("Preferences"), _T("InheritParentAttributes"), pPrefs->GetProfileInt(_T("Preferences"), _T("UseParentAttributes")));
+	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), FALSE);
+	m_bUseCreationForDefStartDate = pPrefs->GetProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), TRUE);
+	m_bUseCreationForDefDueDate = pPrefs->GetProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), FALSE);
+	m_dDefCost = Misc::Atof(pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCost"), _T("0")));
+	m_dDefTimeEst = pPrefs->GetProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), 0);
+	m_eTimeEst.SetUnits((TH_UNITS)pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), THU_HOURS));
+	m_dDefTimeSpent = pPrefs->GetProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), 0);
+	m_eTimeSpent.SetUnits((TH_UNITS)pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), THU_HOURS));
+	m_bCatListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("CatListReadonly"), FALSE);
+	m_bStatusListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("StatusListReadonly"), FALSE);
+	m_bAllocToListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("AllocToListReadonly"), FALSE);
+	m_bAllocByListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("AllocByListReadonly"), FALSE);
+	m_bVersionListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("VersionListReadonly"), FALSE);
+	m_bTagListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("TagListReadonly"), FALSE);
+	m_sDefIcon = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultIcon"));
+	m_nDefReminderLeadin = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
+	m_bReminderBeforeDue = pPrefs->GetProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), TRUE);
 
    // attribute use
 	int nIndex = m_aAttribPrefs.GetSize();
@@ -431,66 +432,66 @@ void CPreferencesTaskDefPage::LoadPreferences(const CPreferences& prefs)
 	while (nIndex--)
 	{
 		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
-		m_aAttribPrefs[nIndex].bUse = prefs.GetProfileInt(_T("Preferences\\AttribUse"), sKey, FALSE);
+		m_aAttribPrefs[nIndex].bUse = pPrefs->GetProfileInt(_T("Preferences\\AttribUse"), sKey, FALSE);
 	}
 
 	// combo lists
-	m_sDefCategoryList = LoadDefaultListItems(prefs, _T("Preferences\\CategoryList"));
-	m_sDefStatusList = LoadDefaultListItems(prefs, _T("Preferences\\StatusList"));
-	m_sDefAllocToList = LoadDefaultListItems(prefs, _T("Preferences\\AllocToList"));
-	m_sDefAllocByList = LoadDefaultListItems(prefs, _T("Preferences\\AllocByList"));
-	m_sDefVersionList = LoadDefaultListItems(prefs, _T("Preferences\\VersionList"));
-	m_sDefTagList = LoadDefaultListItems(prefs, _T("Preferences\\TagList"));
+	m_sDefCategoryList = LoadDefaultListItems(pPrefs, _T("Preferences\\CategoryList"));
+	m_sDefStatusList = LoadDefaultListItems(pPrefs, _T("Preferences\\StatusList"));
+	m_sDefAllocToList = LoadDefaultListItems(pPrefs, _T("Preferences\\AllocToList"));
+	m_sDefAllocByList = LoadDefaultListItems(pPrefs, _T("Preferences\\AllocByList"));
+	m_sDefVersionList = LoadDefaultListItems(pPrefs, _T("Preferences\\VersionList"));
+	m_sDefTagList = LoadDefaultListItems(pPrefs, _T("Preferences\\TagList"));
 }
 
-CString CPreferencesTaskDefPage::LoadDefaultListItems(const CPreferences& prefs, LPCTSTR szKey)
+CString CPreferencesTaskDefPage::LoadDefaultListItems(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	CStringArray aItems;
 
-	prefs.GetProfileArray(szKey, aItems);
+	CPreferences::GetProfileArray(pPrefs, szKey, aItems);
 	Misc::SortArray(aItems);
 
 	return Misc::FormatArray(aItems, ENDL);
 }
 
-void CPreferencesTaskDefPage::SaveDefaultListItems(LPCTSTR szValueList, CPreferences& prefs, LPCTSTR szKey)
+void CPreferencesTaskDefPage::SaveDefaultListItems(LPCTSTR szValueList, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	CStringArray aItems;
 
 	Misc::Split(szValueList, aItems, ENDL);
-	prefs.WriteProfileArray(szKey, aItems);
+	CPreferences::WriteProfileArray(pPrefs, szKey, aItems);
 }
 
-void CPreferencesTaskDefPage::SavePreferences(CPreferences& prefs)
+void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultPriority"), m_nDefPriority);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultRisk"), m_nDefRisk);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultAllocTo"), m_sDefAllocTo);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultAllocBy"), m_sDefAllocBy);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultStatus"), m_sDefStatus);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultTags"), m_sDefTags);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultCategory"), m_sDefCategory);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultCreatedBy"), m_sDefCreatedBy);
-	prefs.WriteProfileString(_T("Preferences"), _T("DefaultIcon"), m_sDefIcon);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultColor"), m_crDef);
-	prefs.WriteProfileInt(_T("Preferences"), _T("InheritParentAttributes"), m_bInheritParentAttributes);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), m_bUseCreationForDefStartDate);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), m_bUseCreationForDefDueDate);
-	prefs.WriteProfileDouble(_T("Preferences"), _T("DefaultCost"), m_dDefCost);
-	prefs.WriteProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), m_dDefTimeEst);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), m_eTimeEst.GetUnits());
-	prefs.WriteProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), m_dDefTimeSpent);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
-	prefs.WriteProfileInt(_T("Preferences"), _T("CatListReadonly"), m_bCatListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("StatusListReadonly"), m_bStatusListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AllocToListReadonly"), m_bAllocToListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AllocByListReadonly"), m_bAllocByListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("VersionListReadonly"), m_bVersionListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TagListReadonly"), m_bTagListReadonly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), m_bReminderBeforeDue);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultPriority"), m_nDefPriority);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultRisk"), m_nDefRisk);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultAllocTo"), m_sDefAllocTo);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultAllocBy"), m_sDefAllocBy);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultStatus"), m_sDefStatus);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultTags"), m_sDefTags);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultCategory"), m_sDefCategory);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultCreatedBy"), m_sDefCreatedBy);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultIcon"), m_sDefIcon);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultColor"), m_crDef);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("InheritParentAttributes"), m_bInheritParentAttributes);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), m_bUseCreationForDefStartDate);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), m_bUseCreationForDefDueDate);
+	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultCost"), m_dDefCost);
+	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), m_dDefTimeEst);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), m_eTimeEst.GetUnits());
+	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), m_dDefTimeSpent);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("CatListReadonly"), m_bCatListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("StatusListReadonly"), m_bStatusListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllocToListReadonly"), m_bAllocToListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllocByListReadonly"), m_bAllocByListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("VersionListReadonly"), m_bVersionListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TagListReadonly"), m_bTagListReadonly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), m_bReminderBeforeDue);
 	
 	// attribute usage
 	int nIndex = m_aAttribPrefs.GetSize();
@@ -498,16 +499,16 @@ void CPreferencesTaskDefPage::SavePreferences(CPreferences& prefs)
 	while (nIndex--)
 	{
 		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
-		prefs.WriteProfileInt(_T("Preferences\\AttribUse"), sKey, m_aAttribPrefs[nIndex].bUse);
+		pPrefs->WriteProfileInt(_T("Preferences\\AttribUse"), sKey, m_aAttribPrefs[nIndex].bUse);
 	}
 
 	// combo lists
-	SaveDefaultListItems(m_sDefCategoryList, prefs, _T("Preferences\\CategoryList"));
-	SaveDefaultListItems(m_sDefStatusList, prefs, _T("Preferences\\StatusList"));
-	SaveDefaultListItems(m_sDefAllocToList, prefs, _T("Preferences\\AllocToList"));
-	SaveDefaultListItems(m_sDefAllocByList, prefs, _T("Preferences\\AllocByList"));
-	SaveDefaultListItems(m_sDefVersionList, prefs, _T("Preferences\\VersionList"));
-	SaveDefaultListItems(m_sDefTagList, prefs, _T("Preferences\\TagList"));
+	SaveDefaultListItems(m_sDefCategoryList, pPrefs, _T("Preferences\\CategoryList"));
+	SaveDefaultListItems(m_sDefStatusList, pPrefs, _T("Preferences\\StatusList"));
+	SaveDefaultListItems(m_sDefAllocToList, pPrefs, _T("Preferences\\AllocToList"));
+	SaveDefaultListItems(m_sDefAllocByList, pPrefs, _T("Preferences\\AllocByList"));
+	SaveDefaultListItems(m_sDefVersionList, pPrefs, _T("Preferences\\VersionList"));
+	SaveDefaultListItems(m_sDefTagList, pPrefs, _T("Preferences\\TagList"));
 }
 
 void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const

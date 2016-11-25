@@ -66,7 +66,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	ForwardMessage(WM_PGP_CLEARMRU);
 	ForwardMessage(WM_PPB_CTRLCHANGE);
 	
-	LoadPreferences();
+	LoadPreferences(m_prefs);
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -101,6 +101,17 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg message handlers
+
+void CPreferencesDlg::InitializePreferences()
+{
+	LoadPreferences(m_prefs); // this initializes the dialog data
+	SavePreferences(m_prefs); // this writes it back to the prefs
+}
+
+int CPreferencesDlg::DoModal(int nInitPage) 
+{ 
+	return CPreferencesDlgBase::DoModal(m_prefs, nInitPage); 
+}
 
 BOOL CPreferencesDlg::OnInitDialog() 
 {

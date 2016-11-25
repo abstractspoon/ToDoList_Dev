@@ -5,14 +5,21 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "preferences.h"
 #include "scrollingpropertypagehost.h"
 #include "dialoghelper.h"
 
+#include "..\Interfaces\IPreferences.h"
+
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesPageBase dialog
 
 const UINT WM_PPB_CTRLCHANGE = ::RegisterWindowMessage(_T("WM_PPB_CTRLCHANGE"));
+
+/////////////////////////////////////////////////////////////////////////////
+
+class IPreferences;
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesPageBase dialog
 
 class CPreferencesPageBase : public CPropertyPage, protected CDialogHelper
 {
@@ -23,8 +30,8 @@ public:
 	CPreferencesPageBase(UINT nID);
 	~CPreferencesPageBase();
 	
-	virtual void LoadPreferences(const CPreferences& /*prefs*/) {}
-	virtual void SavePreferences(CPreferences& /*prefs*/) {}
+	virtual void LoadPreferences(const IPreferences* /*pPrefs*/) {}
+	virtual void SavePreferences(IPreferences* /*pPrefs*/) {}
 
 	void SetBackgroundColor(COLORREF color);
 	CWnd* GetDlgItem(UINT nID) const;
@@ -37,7 +44,6 @@ protected:
 	UINT m_nHelpID;
 
 protected:
-
 	afx_msg void OnControlChange(UINT nID = -1);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
@@ -50,22 +56,21 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlgBase dialog
 
-const UINT WM_PDB_ONAPPLY = ::RegisterWindowMessage(_T("WM_PDB_ONAPPLY"));
-
 class CPreferencesDlgBase : public CDialog
 {
 	// Construction
 public:
 	CPreferencesDlgBase(UINT nID = 0, CWnd* pParent = NULL);   // standard constructor
 	
-	int DoModal(int nInitPage = -1);
-	void Initialize(CPreferences& prefs);
+	int DoModal(IPreferences* prefs, int nInitPage = -1);
 	void SetPageBackgroundColor(COLORREF color);
 	
 protected:
 	int m_nInitPage;
-	CPreferences m_prefs;
 	CScrollingPropertyPageHost m_pphost;
+
+	// Temporary pointer only
+	IPreferences* m_pPrefs;
 	
 protected:
 	afx_msg void OnDestroy();
@@ -84,9 +89,6 @@ protected:
 	virtual BOOL SetActivePage(CPreferencesPageBase* pPage);
 	virtual BOOL AddPage(CPreferencesPageBase* pPage);
 	
-	void LoadPreferences();
-	void SavePreferences();
-	
 	BOOL CreatePPHost(UINT nHostID);
 	BOOL CreatePPHost(LPRECT pRect);
 
@@ -96,9 +98,8 @@ protected:
 	
 	void ForwardMessage(UINT nMsg) { m_pphost.ForwardMessage(nMsg); }
 	
-private:
-	void LoadPreferences(CPreferences& prefs);
-	void SavePreferences(CPreferences& prefs);
+	void LoadPreferences(const IPreferences* prefs);
+	void SavePreferences(IPreferences* prefs);
 };
 
 //{{AFX_INSERT_LOCATION}}

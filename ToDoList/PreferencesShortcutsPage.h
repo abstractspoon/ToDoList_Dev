@@ -78,8 +78,8 @@ protected:
 
 	static BOOL IsMiscCommandID(UINT nCmdID);
 
-	virtual void LoadPreferences(const CPreferences& prefs);
-	virtual void SavePreferences(CPreferences& prefs);
+	virtual void LoadPreferences(const IPreferences* pPrefs);
+	virtual void SavePreferences(IPreferences* pPrefs);
 	void AddCommandIDsToTree(HTREEITEM hti, BOOL bAdd);
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
 

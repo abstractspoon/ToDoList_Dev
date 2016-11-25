@@ -61,6 +61,8 @@ public:
 					CWnd* pParent = NULL);   // standard constructor
 	virtual ~CPreferencesDlg();
 
+	void InitializePreferences(); // one time only
+	int DoModal(int nInitPage = -1);
 	void SetUITheme(const CUIThemeFile& theme);
 
 	// CPreferencesGenPage
@@ -300,6 +302,7 @@ protected:
 	CWinHelpButton m_btnHelp;
 	TDCAUTOLISTDATA m_defaultListData;
 
+	CPreferences m_prefs;
 	CMap<CPreferencesPageBase*, CPreferencesPageBase*, HTREEITEM, HTREEITEM&> m_mapPP2HTI;
 	CMap<HTREEITEM, HTREEITEM, UINT, UINT&> m_mapHTIToSection;
 

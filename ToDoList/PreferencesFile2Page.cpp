@@ -212,29 +212,29 @@ LRESULT CPreferencesFile2Page::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-void CPreferencesFile2Page::LoadPreferences(const CPreferences& prefs)
+void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs)
 {
-	m_bBackupOnSave = prefs.GetProfileInt(_T("Preferences"), _T("BackupOnSave"), TRUE);
-	m_sBackupLocation = prefs.GetProfileString(_T("Preferences"), _T("BackupLocation"), _T("backup"));
-	m_nKeepBackups = prefs.GetProfileInt(_T("Preferences"), _T("KeepBackups"), 10);
-	m_nBackupFolderType = prefs.GetProfileInt(_T("Preferences"), _T("BackupFolderType"), PFP_RELATIVETOAPP);
+	m_bBackupOnSave = pPrefs->GetProfileInt(_T("Preferences"), _T("BackupOnSave"), TRUE);
+	m_sBackupLocation = pPrefs->GetProfileString(_T("Preferences"), _T("BackupLocation"), _T("backup"));
+	m_nKeepBackups = pPrefs->GetProfileInt(_T("Preferences"), _T("KeepBackups"), 10);
+	m_nBackupFolderType = pPrefs->GetProfileInt(_T("Preferences"), _T("BackupFolderType"), PFP_RELATIVETOAPP);
 	
 	// saving
-	m_nAutoSaveFrequency = prefs.GetProfileInt(_T("Preferences"), _T("AutoSaveFrequency"), 1);
-	m_bAutoSave = prefs.GetProfileInt(_T("Preferences"), _T("AutoSave"), (m_nAutoSaveFrequency > 0));
-	m_bAutoExport = prefs.GetProfileInt(_T("Preferences"), _T("AutoHtmlExport"), FALSE);
-	m_sExportFolderPath = prefs.GetProfileString(_T("Preferences"), _T("ExportFolderPath"));
-	m_sSaveExportStylesheet = prefs.GetProfileString(_T("Preferences"), _T("SaveExportStylesheet"));
-	m_bAutoSaveOnSwitchTasklist = prefs.GetProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchTasklist"), FALSE);
-	m_bAutoSaveOnSwitchApp = prefs.GetProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchApp"), FALSE);
-	m_bOtherExport = prefs.GetProfileInt(_T("Preferences"), _T("OtherExport"), FALSE);
-	m_nOtherExporter = prefs.GetProfileInt(_T("Preferences"), _T("OtherExporter"), 1);
-	m_bExportFilteredOnly = prefs.GetProfileInt(_T("Preferences"), _T("ExportFilteredOnly"), FALSE);
-	m_bAutoSaveOnRunTools = prefs.GetProfileInt(_T("Preferences"), _T("AutoSaveOnRunTools"), TRUE);
+	m_nAutoSaveFrequency = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoSaveFrequency"), 1);
+	m_bAutoSave = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoSave"), (m_nAutoSaveFrequency > 0));
+	m_bAutoExport = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoHtmlExport"), FALSE);
+	m_sExportFolderPath = pPrefs->GetProfileString(_T("Preferences"), _T("ExportFolderPath"));
+	m_sSaveExportStylesheet = pPrefs->GetProfileString(_T("Preferences"), _T("SaveExportStylesheet"));
+	m_bAutoSaveOnSwitchTasklist = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchTasklist"), FALSE);
+	m_bAutoSaveOnSwitchApp = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchApp"), FALSE);
+	m_bOtherExport = pPrefs->GetProfileInt(_T("Preferences"), _T("OtherExport"), FALSE);
+	m_nOtherExporter = pPrefs->GetProfileInt(_T("Preferences"), _T("OtherExporter"), 1);
+	m_bExportFilteredOnly = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportFilteredOnly"), FALSE);
+	m_bAutoSaveOnRunTools = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoSaveOnRunTools"), TRUE);
 
 	// these are dependent on the values they control for backward compat
-	m_bUseStylesheetForSaveExport = prefs.GetProfileInt(_T("Preferences"), _T("UseStylesheetForSaveExport"), !m_sSaveExportStylesheet.IsEmpty());
-	m_bExportToFolder = prefs.GetProfileInt(_T("Preferences"), _T("ExportToFolder"), !m_sExportFolderPath.IsEmpty());
+	m_bUseStylesheetForSaveExport = pPrefs->GetProfileInt(_T("Preferences"), _T("UseStylesheetForSaveExport"), !m_sSaveExportStylesheet.IsEmpty());
+	m_bExportToFolder = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportToFolder"), !m_sExportFolderPath.IsEmpty());
 
 	Misc::Trim(m_sExportFolderPath);
 
@@ -249,33 +249,33 @@ void CPreferencesFile2Page::LoadPreferences(const CPreferences& prefs)
 	m_eSaveExportStylesheet.SetCurrentFolder(sFolder);
 	m_sSaveExportStylesheet = FileMisc::GetRelativePath(m_sSaveExportStylesheet, sFolder, FALSE);
 
-//	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), FALSE);
+//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
 }
 
-void CPreferencesFile2Page::SavePreferences(CPreferences& prefs)
+void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("BackupOnSave"), m_bBackupOnSave);
-	prefs.WriteProfileString(_T("Preferences"), _T("BackupLocation"), m_sBackupLocation);
-	prefs.WriteProfileInt(_T("Preferences"), _T("KeepBackups"), m_nKeepBackups);
-	prefs.WriteProfileInt(_T("Preferences"), _T("BackupFolderType"), m_nBackupFolderType);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("BackupOnSave"), m_bBackupOnSave);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("BackupLocation"), m_sBackupLocation);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("KeepBackups"), m_nKeepBackups);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("BackupFolderType"), m_nBackupFolderType);
 
 	// saving
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoSave"), m_bAutoSave);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoSaveFrequency"), m_nAutoSaveFrequency);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoHtmlExport"), m_bAutoExport);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ExportToFolder"), m_bExportToFolder);
-	prefs.WriteProfileString(_T("Preferences"), _T("ExportFolderPath"), m_sExportFolderPath);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseStylesheetForSaveExport"), m_bUseStylesheetForSaveExport);
-	prefs.WriteProfileString(_T("Preferences"), _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchTasklist"), m_bAutoSaveOnSwitchTasklist);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchApp"), m_bAutoSaveOnSwitchApp);
-	prefs.WriteProfileInt(_T("Preferences"), _T("OtherExport"), m_bOtherExport);
-	prefs.WriteProfileInt(_T("Preferences"), _T("OtherExporter"), m_nOtherExporter);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ExportFilteredOnly"), m_bExportFilteredOnly);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoSaveOnRunTools"), m_bAutoSaveOnRunTools);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoSave"), m_bAutoSave);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoSaveFrequency"), m_nAutoSaveFrequency);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoHtmlExport"), m_bAutoExport);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExportToFolder"), m_bExportToFolder);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("ExportFolderPath"), m_sExportFolderPath);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseStylesheetForSaveExport"), m_bUseStylesheetForSaveExport);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchTasklist"), m_bAutoSaveOnSwitchTasklist);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoSaveOnSwitchApp"), m_bAutoSaveOnSwitchApp);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("OtherExport"), m_bOtherExport);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("OtherExporter"), m_nOtherExporter);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExportFilteredOnly"), m_bExportFilteredOnly);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoSaveOnRunTools"), m_bAutoSaveOnRunTools);
 
-//	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
 }
 
 void CPreferencesFile2Page::OnBackuponsave() 

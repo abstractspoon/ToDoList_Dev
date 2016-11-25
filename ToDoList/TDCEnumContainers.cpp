@@ -7,6 +7,8 @@
 #include "..\shared\Misc.h"
 #include "..\shared\preferences.h"
 
+#include "..\Interfaces\IPreferences.h"
+
 //////////////////////////////////////////////////////////////////////
 
 CTDCAttributeMap::CTDCAttributeMap() 
@@ -68,14 +70,14 @@ void CTDCAttributeMap::AppendAttributes(const CTDCAttributeMap& mapOther)
 	CTDCBaseEnumMap<TDC_ATTRIBUTE>::Append(mapOther);
 }
 
-void CTDCAttributeMap::SaveAttributes(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
+void CTDCAttributeMap::SaveAttributes(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
 {
-	Save(prefs, szKey, szValueKeyFmt);
+	Save(pPrefs, szKey, szValueKeyFmt);
 }
 
-void CTDCAttributeMap::LoadAttributes(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
+void CTDCAttributeMap::LoadAttributes(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
 {
-	Load(prefs, szKey, szValueKeyFmt, TDCA_NONE);
+	Load(pPrefs, szKey, szValueKeyFmt, TDCA_NONE);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -173,14 +175,14 @@ void CTDCColumnIDMap::AppendColumns(const CTDCColumnIDMap& mapOther)
 	Append(mapOther);
 }
 
-void CTDCColumnIDMap::SaveColumns(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
+void CTDCColumnIDMap::SaveColumns(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
 {
-	Save(prefs, szKey, szValueKeyFmt);
+	Save(pPrefs, szKey, szValueKeyFmt);
 }
 
-void CTDCColumnIDMap::LoadColumns(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
+void CTDCColumnIDMap::LoadColumns(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
 {
-	Load(prefs, szKey, szValueKeyFmt, TDCC_NONE);
+	Load(pPrefs, szKey, szValueKeyFmt, TDCC_NONE);
 }
 
 //////////////////////////////////////////////////////////////////////

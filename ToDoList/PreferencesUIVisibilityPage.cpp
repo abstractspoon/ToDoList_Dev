@@ -72,11 +72,11 @@ void CPreferencesUIVisibilityPage::SetColumnAttributeVisibility(const TDCCOLEDIT
 	m_lcVisibility.SetVisibility(vis);
 }
 
-void CPreferencesUIVisibilityPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	TDCCOLEDITFILTERVISIBILITY vis;
 
-	if (!vis.Load(prefs, _T("Preferences")))
+	if (!vis.Load(pPrefs, _T("Preferences")))
 	{
 		// first time OR backwards compatibility
 		CTDCColumnIDMap mapColumns;
@@ -98,18 +98,18 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const CPreferences& prefs)
 	
 		vis.SetVisibleColumns(mapColumns);
 
-		if (prefs.GetProfileInt(_T("Preferences"), _T("ShowSubtaskCompletion"), FALSE))
+		if (pPrefs->GetProfileInt(_T("Preferences"), _T("ShowSubtaskCompletion"), FALSE))
 			vis.SetColumnVisible(TDCC_SUBTASKDONE);
 
-		BOOL bShowCtrlsAsColumns = prefs.GetProfileInt(_T("Preferences"), _T("ShowCtrlsAsColumns"), FALSE);
+		BOOL bShowCtrlsAsColumns = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowCtrlsAsColumns"), FALSE);
 
 		vis.SetShowEditsAndFilters(bShowCtrlsAsColumns ? TDLSA_ASCOLUMN : TDLSA_ALL);
 
 		// if any time field is hidden we must enable 'any' attribute
 		// and remove those fields
-		BOOL bHideDueTimeField = prefs.GetProfileInt(_T("Preferences"), _T("HideDueTimeField"), FALSE);
-		BOOL bHideStartTimeField = prefs.GetProfileInt(_T("Preferences"), _T("HideStartTimeField"), FALSE);
-		BOOL bHideDoneTimeField = prefs.GetProfileInt(_T("Preferences"), _T("HideDoneTimeField"), FALSE);
+		BOOL bHideDueTimeField = pPrefs->GetProfileInt(_T("Preferences"), _T("HideDueTimeField"), FALSE);
+		BOOL bHideStartTimeField = pPrefs->GetProfileInt(_T("Preferences"), _T("HideStartTimeField"), FALSE);
+		BOOL bHideDoneTimeField = pPrefs->GetProfileInt(_T("Preferences"), _T("HideDoneTimeField"), FALSE);
 
 		if (bHideDoneTimeField || bHideDueTimeField || bHideStartTimeField)
 		{
@@ -130,12 +130,12 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const CPreferences& prefs)
 	m_nAttribShow = vis.GetShowEditsAndFilters();
 }
 
-void CPreferencesUIVisibilityPage::SavePreferences(CPreferences& prefs)
+void CPreferencesUIVisibilityPage::SavePreferences(IPreferences* pPrefs)
 {
 	TDCCOLEDITFILTERVISIBILITY vis;
 	m_lcVisibility.GetVisibility(vis);
 
-	vis.Save(prefs, _T("Preferences"));
+	vis.Save(pPrefs, _T("Preferences"));
 }
 
 void CPreferencesUIVisibilityPage::OnSize(UINT nType, int cx, int cy) 

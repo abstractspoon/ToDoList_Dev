@@ -13,6 +13,7 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
+#include "..\shared\preferences.h"
 
 #include "..\3rdparty\ini.h"
 
@@ -603,21 +604,21 @@ void CPreferencesToolPage::OnImport()
 	}
 }
 
-void CPreferencesToolPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	// load tools
-	int nToolCount = prefs.GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
+	int nToolCount = pPrefs->GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
 
 	for (int nTool = 1; nTool <= nToolCount; nTool++)
 	{
 		CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool);
 
 		USERTOOL ut;
-		ut.sToolName = prefs.GetProfileString(sKey, _T("Name"), _T(""));
-		ut.sToolPath = prefs.GetProfileString(sKey, _T("Path"), _T(""));
-		ut.sCmdline = prefs.GetProfileString(sKey, _T("CmdLine"), _T("")); 
-		ut.bRunMinimized = prefs.GetProfileInt(sKey, _T("RunMinimized"), FALSE);
-		ut.sIconPath = prefs.GetProfileString(sKey, _T("IconPath"), _T(""));
+		ut.sToolName = pPrefs->GetProfileString(sKey, _T("Name"), _T(""));
+		ut.sToolPath = pPrefs->GetProfileString(sKey, _T("Path"), _T(""));
+		ut.sCmdline = pPrefs->GetProfileString(sKey, _T("CmdLine"), _T("")); 
+		ut.bRunMinimized = pPrefs->GetProfileInt(sKey, _T("RunMinimized"), FALSE);
+		ut.sIconPath = pPrefs->GetProfileString(sKey, _T("IconPath"), _T(""));
 		
 		// replace safe quotes with real quotes
 		ut.sCmdline.Replace(SAFEQUOTE, REALQUOTE);
@@ -626,7 +627,7 @@ void CPreferencesToolPage::LoadPreferences(const CPreferences& prefs)
 	}
 }
 
-void CPreferencesToolPage::SavePreferences(CPreferences& prefs)
+void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save tools to registry and m_aTools
 	int nToolCount = m_aTools.GetSize();
@@ -637,18 +638,18 @@ void CPreferencesToolPage::SavePreferences(CPreferences& prefs)
 
         CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
 		
-		prefs.WriteProfileString(sKey, _T("Name"), ut.sToolName);
-		prefs.WriteProfileString(sKey, _T("Path"), ut.sToolPath);
-		prefs.WriteProfileString(sKey, _T("IconPath"), ut.sIconPath);
-		prefs.WriteProfileInt(sKey, _T("RunMinimized"), ut.bRunMinimized);
+		pPrefs->WriteProfileString(sKey, _T("Name"), ut.sToolName);
+		pPrefs->WriteProfileString(sKey, _T("Path"), ut.sToolPath);
+		pPrefs->WriteProfileString(sKey, _T("IconPath"), ut.sIconPath);
+		pPrefs->WriteProfileInt(sKey, _T("RunMinimized"), ut.bRunMinimized);
 		
 		// GetPrivateProfileString strips a leading/trailing quote pairs if 
 		// it finds them so we replace quotes with safe quotes
 		ut.sCmdline.Replace(REALQUOTE, SAFEQUOTE);
-		prefs.WriteProfileString(sKey, _T("Cmdline"), ut.sCmdline);
+		pPrefs->WriteProfileString(sKey, _T("Cmdline"), ut.sCmdline);
 	}
 
-	prefs.WriteProfileInt(_T("Tools"), _T("ToolCount"), nToolCount);
+	pPrefs->WriteProfileInt(_T("Tools"), _T("ToolCount"), nToolCount);
 }
 
 void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy) 

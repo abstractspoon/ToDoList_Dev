@@ -100,9 +100,9 @@ public:
 
 	// directly from CWinApp
 	UINT GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault = 0) const;
-	bool WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue);
+	BOOL WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue);
 	CString GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault = NULL) const;
-	bool WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue);
+	BOOL WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue);
 
 	// note: Binary not currently supported by ini file
 
@@ -113,13 +113,18 @@ public:
 	int GetProfileSectionNames(CStringArray& aSections);
 	BOOL HasProfileSection(LPCTSTR lpszSection) const;
 	BOOL DeleteProfileSection(LPCTSTR lpszSection, BOOL bIncSubSections = FALSE);
-	bool DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry);
+	BOOL DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry);
 
 	int GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty = FALSE) const;
 	void WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection = TRUE);
 	int GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) const;
 	void WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
-	
+
+	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty = FALSE);
+	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection = TRUE);
+	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CDWordArray& aItems);
+	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
+		
 	static CString KeyFromFile(LPCTSTR szFilePath, BOOL bFilenameOnly = TRUE);
 	static BOOL Save();
 
@@ -168,6 +173,7 @@ private:
 		bool WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue);
 		
 		bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry);
+		bool DeleteProfileSection(LPCWSTR lpszSection);
 
 	protected:
 		CPreferences& m_prefs;

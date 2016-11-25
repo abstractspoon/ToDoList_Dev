@@ -171,34 +171,34 @@ void CPreferencesGenPage::OnClearMRU()
    GetParent()->SendMessage(WM_PGP_CLEARMRU);
 }
 
-void CPreferencesGenPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	// load settings
-	m_bAlwaysOnTop = prefs.GetProfileInt(_T("Preferences"), _T("AlwaysOnTop"), FALSE);
-	m_bUseSysTray = prefs.GetProfileInt(_T("Preferences"), _T("UseSysTray"), FALSE);
-	m_bConfirmDelete = prefs.GetProfileInt(_T("Preferences"), _T("ConfirmDelete"), FALSE);
-	m_bConfirmSaveOnExit = prefs.GetProfileInt(_T("Preferences"), _T("ConfirmSaveOnExit"), TRUE);
-	m_bMultiInstance = prefs.GetProfileInt(_T("Preferences"), _T("MultiInstance"), FALSE);
-	m_bShowOnStartup = prefs.GetProfileInt(_T("Preferences"), _T("ShowOnStartup"), TRUE);
-	m_nSysTrayOption = prefs.GetProfileInt(_T("Preferences"), _T("SysTrayOption"), STO_ONCLOSE);
-	m_bToggleTrayVisibility = prefs.GetProfileInt(_T("Preferences"), _T("ToggleTrayVisibility"), FALSE);
-	m_dwGlobalHotkey = prefs.GetProfileInt(_T("Preferences"), _T("GlobalHotkey"), 0);
+	m_bAlwaysOnTop = pPrefs->GetProfileInt(_T("Preferences"), _T("AlwaysOnTop"), FALSE);
+	m_bUseSysTray = pPrefs->GetProfileInt(_T("Preferences"), _T("UseSysTray"), FALSE);
+	m_bConfirmDelete = pPrefs->GetProfileInt(_T("Preferences"), _T("ConfirmDelete"), FALSE);
+	m_bConfirmSaveOnExit = pPrefs->GetProfileInt(_T("Preferences"), _T("ConfirmSaveOnExit"), TRUE);
+	m_bMultiInstance = pPrefs->GetProfileInt(_T("Preferences"), _T("MultiInstance"), FALSE);
+	m_bShowOnStartup = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowOnStartup"), TRUE);
+	m_nSysTrayOption = pPrefs->GetProfileInt(_T("Preferences"), _T("SysTrayOption"), STO_ONCLOSE);
+	m_bToggleTrayVisibility = pPrefs->GetProfileInt(_T("Preferences"), _T("ToggleTrayVisibility"), FALSE);
+	m_dwGlobalHotkey = pPrefs->GetProfileInt(_T("Preferences"), _T("GlobalHotkey"), 0);
 	m_bSpecifyGlobalHotkey = (m_dwGlobalHotkey ? 1 : 0);
-	m_bAddFilesToMRU = prefs.GetProfileInt(_T("Preferences"), _T("AddFilesToMRU"), TRUE);
-	m_bAutoCheckForUpdates = prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE);
-	m_bEscapeMinimizes = prefs.GetProfileInt(_T("Preferences"), _T("EscapeMinimizes"), FALSE);
-	m_bEnableDelayedLoading = prefs.GetProfileInt(_T("Preferences"), _T("EnableDelayedLoading"), TRUE);
-	m_bSaveStoragePasswords = prefs.GetProfileInt(_T("Preferences"), _T("SaveStoragePasswords"), FALSE);
-	m_nMinimizeNoEditTime = prefs.GetProfileInt(_T("Preferences"), _T("MinimizeNoEditTime"), 5);
-	m_bMinimizeNoChange = prefs.GetProfileInt(_T("Preferences"), _T("MinimizeNoEdit"), FALSE);
-	m_bReloadTasklists = prefs.GetProfileInt(_T("Preferences"), _T("ReloadTasklists"), TRUE);
-	m_bEnableRTLInput = prefs.GetProfileInt(_T("Preferences"), _T("EnableRTLInput"), FALSE);
+	m_bAddFilesToMRU = pPrefs->GetProfileInt(_T("Preferences"), _T("AddFilesToMRU"), TRUE);
+	m_bAutoCheckForUpdates = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE);
+	m_bEscapeMinimizes = pPrefs->GetProfileInt(_T("Preferences"), _T("EscapeMinimizes"), FALSE);
+	m_bEnableDelayedLoading = pPrefs->GetProfileInt(_T("Preferences"), _T("EnableDelayedLoading"), TRUE);
+	m_bSaveStoragePasswords = pPrefs->GetProfileInt(_T("Preferences"), _T("SaveStoragePasswords"), FALSE);
+	m_nMinimizeNoEditTime = pPrefs->GetProfileInt(_T("Preferences"), _T("MinimizeNoEditTime"), 5);
+	m_bMinimizeNoChange = pPrefs->GetProfileInt(_T("Preferences"), _T("MinimizeNoEdit"), FALSE);
+	m_bReloadTasklists = pPrefs->GetProfileInt(_T("Preferences"), _T("ReloadTasklists"), TRUE);
+	m_bEnableRTLInput = pPrefs->GetProfileInt(_T("Preferences"), _T("EnableRTLInput"), FALSE);
 
-	CString sLangFile = prefs.GetProfileString(_T("Preferences"), _T("LanguageFile"), _T(""));
+	CString sLangFile = pPrefs->GetProfileString(_T("Preferences"), _T("LanguageFile"), _T(""));
 	m_cbLanguages.SelectLanguageFile(sLangFile);
 
-	m_bUseStickies = prefs.GetProfileInt(_T("Preferences"), _T("UseStickies"), FALSE);
-	m_sStickiesPath = prefs.GetProfileString(_T("Preferences"), _T("PathToStickies"));
+	m_bUseStickies = pPrefs->GetProfileInt(_T("Preferences"), _T("UseStickies"), FALSE);
+	m_sStickiesPath = pPrefs->GetProfileString(_T("Preferences"), _T("PathToStickies"));
 
 	if (COSVersion() == OSV_LINUX)
 	{
@@ -206,45 +206,45 @@ void CPreferencesGenPage::LoadPreferences(const CPreferences& prefs)
 	}
 	else
 	{
-		m_bEnableTDLExtension = prefs.GetProfileInt(_T("Preferences"), _T("EnableTDLExtension"), TRUE);
-		m_bEnableTDLProtocol = prefs.GetProfileInt(_T("Preferences"), _T("EnableTDLProtocol"), FALSE);
+		m_bEnableTDLExtension = pPrefs->GetProfileInt(_T("Preferences"), _T("EnableTDLExtension"), TRUE);
+		m_bEnableTDLProtocol = pPrefs->GetProfileInt(_T("Preferences"), _T("EnableTDLProtocol"), FALSE);
 	}
 
-//	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), TRUE);
+//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), TRUE);
 }
 
-void CPreferencesGenPage::SavePreferences(CPreferences& prefs)
+void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("AlwaysOnTop"), m_bAlwaysOnTop);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseSysTray"), m_bUseSysTray);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ConfirmDelete"), m_bConfirmDelete);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ConfirmSaveOnExit"), m_bConfirmSaveOnExit);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowOnStartup"), m_bShowOnStartup);
-	prefs.WriteProfileInt(_T("Preferences"), _T("SysTrayOption"), m_nSysTrayOption);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ToggleTrayVisibility"), m_bToggleTrayVisibility);
-	prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), m_bMultiInstance);
-	prefs.WriteProfileInt(_T("Preferences"), _T("GlobalHotkey"), (m_bSpecifyGlobalHotkey ? m_dwGlobalHotkey : 0));
-	prefs.WriteProfileInt(_T("Preferences"), _T("AddFilesToMRU"), m_bAddFilesToMRU);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), m_bAutoCheckForUpdates);
-	prefs.WriteProfileInt(_T("Preferences"), _T("EscapeMinimizes"), m_bEscapeMinimizes);
-	prefs.WriteProfileInt(_T("Preferences"), _T("EnableDelayedLoading"), m_bEnableDelayedLoading);
-	prefs.WriteProfileInt(_T("Preferences"), _T("SaveStoragePasswords"), m_bSaveStoragePasswords);
-	prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
-	prefs.WriteProfileInt(_T("Preferences"), _T("MinimizeNoEditTime"), m_nMinimizeNoEditTime);
-	prefs.WriteProfileInt(_T("Preferences"), _T("MinimizeNoEdit"), m_bMinimizeNoChange);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseStickies"), m_bUseStickies);
-	prefs.WriteProfileString(_T("Preferences"), _T("PathToStickies"), m_sStickiesPath);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ReloadTasklists"), m_bReloadTasklists);
-	prefs.WriteProfileInt(_T("Preferences"), _T("EnableRTLInput"), m_bEnableRTLInput);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AlwaysOnTop"), m_bAlwaysOnTop);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseSysTray"), m_bUseSysTray);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ConfirmDelete"), m_bConfirmDelete);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ConfirmSaveOnExit"), m_bConfirmSaveOnExit);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowOnStartup"), m_bShowOnStartup);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("SysTrayOption"), m_nSysTrayOption);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ToggleTrayVisibility"), m_bToggleTrayVisibility);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("MultiInstance"), m_bMultiInstance);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("GlobalHotkey"), (m_bSpecifyGlobalHotkey ? m_dwGlobalHotkey : 0));
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AddFilesToMRU"), m_bAddFilesToMRU);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), m_bAutoCheckForUpdates);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("EscapeMinimizes"), m_bEscapeMinimizes);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("EnableDelayedLoading"), m_bEnableDelayedLoading);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("SaveStoragePasswords"), m_bSaveStoragePasswords);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("MinimizeNoEditTime"), m_nMinimizeNoEditTime);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("MinimizeNoEdit"), m_bMinimizeNoChange);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseStickies"), m_bUseStickies);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("PathToStickies"), m_sStickiesPath);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ReloadTasklists"), m_bReloadTasklists);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("EnableRTLInput"), m_bEnableRTLInput);
 
 	if (COSVersion() != OSV_LINUX)
 	{
-		prefs.WriteProfileInt(_T("Preferences"), _T("EnableTDLExtension"), m_bEnableTDLExtension);
-		prefs.WriteProfileInt(_T("Preferences"), _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
+		pPrefs->WriteProfileInt(_T("Preferences"), _T("EnableTDLExtension"), m_bEnableTDLExtension);
+		pPrefs->WriteProfileInt(_T("Preferences"), _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
 	}
 
-	//	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+	//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
 }
 
 void CPreferencesGenPage::OnSelchangeLanguage() 

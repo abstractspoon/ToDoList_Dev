@@ -862,10 +862,11 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		SetPreferences(bUseIni, sIniPath, FALSE);
 		
 		// initialize prefs to defaults
-		CPreferences prefs;
-		CPreferencesDlg().Initialize(prefs);
+		CPreferencesDlg().InitializePreferences();
 
 		// Save language choice 
+		CPreferences prefs;
+
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
 		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
 		

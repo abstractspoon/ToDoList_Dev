@@ -137,14 +137,14 @@ protected:
 	afx_msg void OnAttribUseChange();
 	DECLARE_MESSAGE_MAP()
 		
-	virtual void LoadPreferences(const CPreferences& prefs);
-	virtual void SavePreferences(CPreferences& prefs);
+	virtual void LoadPreferences(const IPreferences* pPrefs);
+	virtual void SavePreferences(IPreferences* pPrefs);
 	
 	BOOL HasCheckedAttributes() const;
 	CString* GetListText(TDC_ATTRIBUTE nList);
 
-	static CString LoadDefaultListItems(const CPreferences& prefs, LPCTSTR szKey);
-	static void SaveDefaultListItems(LPCTSTR szValueList, CPreferences& prefs, LPCTSTR szKey);
+	static CString LoadDefaultListItems(const IPreferences* pPrefs, LPCTSTR szKey);
+	static void SaveDefaultListItems(LPCTSTR szValueList, IPreferences* pPrefs, LPCTSTR szKey);
 
 };
 

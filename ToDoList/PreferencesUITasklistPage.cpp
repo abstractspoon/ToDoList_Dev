@@ -142,76 +142,76 @@ void CPreferencesUITasklistPage::OnLimitinfotipcomments()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesUITasklistPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	// prefs
-	m_bShowInfoTips = prefs.GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE);
-	m_bShowComments = prefs.GetProfileInt(_T("Preferences"), _T("ShowComments"), TRUE);
-	m_bDisplayFirstCommentLine = prefs.GetProfileInt(_T("Preferences"), _T("DisplayFirstCommentLine"), FALSE);
-	m_bStrikethroughDone = prefs.GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE);
-	m_bShowPathInHeader = prefs.GetProfileInt(_T("Preferences"), _T("ShowPathInHeader"), TRUE);
-	m_bUseISOForDates = prefs.GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
-	m_bShowWeekdayInDates = prefs.GetProfileInt(_T("Preferences"), _T("ShowWeekdayInDates"), FALSE);
-	m_bShowParentsAsFolders = prefs.GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE);
-	m_nMaxInfoTipCommentsLength = prefs.GetProfileInt(_T("Preferences"), _T("MaxInfoTipCommentsLength"), 100);
-	m_bLimitInfoTipCommentsLength = prefs.GetProfileInt(_T("Preferences"), _T("LimitInfoTipCommentsLength"), TRUE);
-	m_bHidePercentForDoneTasks = prefs.GetProfileInt(_T("Preferences"), _T("HidePercentForDoneTasks"), TRUE);
-	m_bHideStartDueForDoneTasks = prefs.GetProfileInt(_T("Preferences"), _T("HideStartDueForDoneTasks"), TRUE);
-	m_bHideZeroTimeCost = prefs.GetProfileInt(_T("Preferences"), _T("HideZeroTimeEst"), TRUE);
-	m_bShowPercentAsProgressbar = prefs.GetProfileInt(_T("Preferences"), _T("ShowPercentAsProgressbar"), FALSE);
-	m_bRoundTimeFractions = prefs.GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
-	m_bShowNonFilesAsText = prefs.GetProfileInt(_T("Preferences"), _T("ShowNonFilesAsText"), FALSE);
-	m_bUseHMSTimeFormat = prefs.GetProfileInt(_T("Preferences"), _T("UseHMSTimeFormat"), FALSE);
-	m_bAutoFocusTasklist = prefs.GetProfileInt(_T("Preferences"), _T("AutoFocusTasklist"), FALSE);
-	m_bShowColumnsOnRight = prefs.GetProfileInt(_T("Preferences"), _T("ShowColumnsOnRight"), TRUE);
-	m_bLimitColumnWidths = prefs.GetProfileInt(_T("Preferences"), _T("LimitColumnWidths"), FALSE);
-	m_nMaxColumnWidth = prefs.GetProfileInt(_T("Preferences"), _T("MaxColumnWidth"), 60);
-	m_bHideListParents = prefs.GetProfileInt(_T("Preferences"), _T("AlwaysHideListParents"), FALSE);
-	m_nPercentIncrement = prefs.GetProfileInt(_T("Preferences"), _T("PercentIncrement"), 5);
-	m_bHideZeroPercentDone = prefs.GetProfileInt(_T("Preferences"), _T("HideZeroPercentDone"), FALSE);
-	m_bAppendUserToDateTimePaste = prefs.GetProfileInt(_T("Preferences"), _T("AppendUserToDateTimePaste"), FALSE);
-	m_bAppendTextToDateTimePaste = prefs.GetProfileInt(_T("Preferences"), _T("AppendTextToDateTimePaste"), FALSE);
-	m_sDateTimeTrailText = prefs.GetProfileString(_T("Preferences"), _T("DateTimeTrail"));
-	m_bAllowCheckboxAgainstTreeItem = prefs.GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE);
-	m_bHidePaneSplitBar = prefs.GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), FALSE);
-	m_bShowRemindersAsDateAndTime = prefs.GetProfileInt(_T("Preferences"), _T("ShowRemindersAsDateAndTime"), FALSE);
-//	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), FALSE);
+	m_bShowInfoTips = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE);
+	m_bShowComments = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowComments"), TRUE);
+	m_bDisplayFirstCommentLine = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayFirstCommentLine"), FALSE);
+	m_bStrikethroughDone = pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE);
+	m_bShowPathInHeader = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowPathInHeader"), TRUE);
+	m_bUseISOForDates = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
+	m_bShowWeekdayInDates = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowWeekdayInDates"), FALSE);
+	m_bShowParentsAsFolders = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE);
+	m_nMaxInfoTipCommentsLength = pPrefs->GetProfileInt(_T("Preferences"), _T("MaxInfoTipCommentsLength"), 100);
+	m_bLimitInfoTipCommentsLength = pPrefs->GetProfileInt(_T("Preferences"), _T("LimitInfoTipCommentsLength"), TRUE);
+	m_bHidePercentForDoneTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("HidePercentForDoneTasks"), TRUE);
+	m_bHideStartDueForDoneTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("HideStartDueForDoneTasks"), TRUE);
+	m_bHideZeroTimeCost = pPrefs->GetProfileInt(_T("Preferences"), _T("HideZeroTimeEst"), TRUE);
+	m_bShowPercentAsProgressbar = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowPercentAsProgressbar"), FALSE);
+	m_bRoundTimeFractions = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
+	m_bShowNonFilesAsText = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowNonFilesAsText"), FALSE);
+	m_bUseHMSTimeFormat = pPrefs->GetProfileInt(_T("Preferences"), _T("UseHMSTimeFormat"), FALSE);
+	m_bAutoFocusTasklist = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoFocusTasklist"), FALSE);
+	m_bShowColumnsOnRight = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowColumnsOnRight"), TRUE);
+	m_bLimitColumnWidths = pPrefs->GetProfileInt(_T("Preferences"), _T("LimitColumnWidths"), FALSE);
+	m_nMaxColumnWidth = pPrefs->GetProfileInt(_T("Preferences"), _T("MaxColumnWidth"), 60);
+	m_bHideListParents = pPrefs->GetProfileInt(_T("Preferences"), _T("AlwaysHideListParents"), FALSE);
+	m_nPercentIncrement = pPrefs->GetProfileInt(_T("Preferences"), _T("PercentIncrement"), 5);
+	m_bHideZeroPercentDone = pPrefs->GetProfileInt(_T("Preferences"), _T("HideZeroPercentDone"), FALSE);
+	m_bAppendUserToDateTimePaste = pPrefs->GetProfileInt(_T("Preferences"), _T("AppendUserToDateTimePaste"), FALSE);
+	m_bAppendTextToDateTimePaste = pPrefs->GetProfileInt(_T("Preferences"), _T("AppendTextToDateTimePaste"), FALSE);
+	m_sDateTimeTrailText = pPrefs->GetProfileString(_T("Preferences"), _T("DateTimeTrail"));
+	m_bAllowCheckboxAgainstTreeItem = pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE);
+	m_bHidePaneSplitBar = pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), FALSE);
+	m_bShowRemindersAsDateAndTime = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowRemindersAsDateAndTime"), FALSE);
+//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
 }
 
-void CPreferencesUITasklistPage::SavePreferences(CPreferences& prefs)
+void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowInfoTips"), m_bShowInfoTips);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowComments"), m_bShowComments);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DisplayFirstCommentLine"), m_bDisplayFirstCommentLine);
-	prefs.WriteProfileInt(_T("Preferences"), _T("StrikethroughDone"), m_bStrikethroughDone);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowPathInHeader"), m_bShowPathInHeader);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), m_bUseISOForDates);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowWeekdayInDates"), m_bShowWeekdayInDates);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), m_bShowParentsAsFolders);
-	prefs.WriteProfileInt(_T("Preferences"), _T("MaxInfoTipCommentsLength"), max(m_nMaxInfoTipCommentsLength, 0));
-	prefs.WriteProfileInt(_T("Preferences"), _T("LimitInfoTipCommentsLength"), m_bLimitInfoTipCommentsLength);
-	prefs.WriteProfileInt(_T("Preferences"), _T("HidePercentForDoneTasks"), m_bHidePercentForDoneTasks);
-	prefs.WriteProfileInt(_T("Preferences"), _T("HideStartDueForDoneTasks"), m_bHideStartDueForDoneTasks);
-	prefs.WriteProfileInt(_T("Preferences"), _T("HideZeroTimeEst"), m_bHideZeroTimeCost);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowPercentAsProgressbar"), m_bShowPercentAsProgressbar);
-	prefs.WriteProfileInt(_T("Preferences"), _T("RoundTimeFractions"), m_bRoundTimeFractions);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowNonFilesAsText"), m_bShowNonFilesAsText);
-	prefs.WriteProfileInt(_T("Preferences"), _T("UseHMSTimeFormat"), m_bUseHMSTimeFormat);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoFocusTasklist"), m_bAutoFocusTasklist);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowColumnsOnRight"), m_bShowColumnsOnRight);
-	prefs.WriteProfileInt(_T("Preferences"), _T("LimitColumnWidths"), m_bLimitColumnWidths);
-	prefs.WriteProfileInt(_T("Preferences"), _T("MaxColumnWidth"), m_nMaxColumnWidth);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AlwaysHideListParents"), m_bHideListParents);
-	prefs.WriteProfileInt(_T("Preferences"), _T("PercentIncrement"), m_nPercentIncrement);
-	prefs.WriteProfileInt(_T("Preferences"), _T("HideZeroPercentDone"), m_bHideZeroPercentDone);
-	prefs.WriteProfileString(_T("Preferences"), _T("DateTimeTrail"), m_sDateTimeTrailText);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AppendUserToDateTimePaste"), m_bAppendUserToDateTimePaste);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AppendTextToDateTimePaste"), m_bAppendTextToDateTimePaste);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), m_bAllowCheckboxAgainstTreeItem);
-	prefs.WriteProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), m_bHidePaneSplitBar);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowRemindersAsDateAndTime"), m_bShowRemindersAsDateAndTime);
-//	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowInfoTips"), m_bShowInfoTips);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowComments"), m_bShowComments);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DisplayFirstCommentLine"), m_bDisplayFirstCommentLine);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("StrikethroughDone"), m_bStrikethroughDone);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowPathInHeader"), m_bShowPathInHeader);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), m_bUseISOForDates);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowWeekdayInDates"), m_bShowWeekdayInDates);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), m_bShowParentsAsFolders);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("MaxInfoTipCommentsLength"), max(m_nMaxInfoTipCommentsLength, 0));
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("LimitInfoTipCommentsLength"), m_bLimitInfoTipCommentsLength);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("HidePercentForDoneTasks"), m_bHidePercentForDoneTasks);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("HideStartDueForDoneTasks"), m_bHideStartDueForDoneTasks);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("HideZeroTimeEst"), m_bHideZeroTimeCost);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowPercentAsProgressbar"), m_bShowPercentAsProgressbar);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("RoundTimeFractions"), m_bRoundTimeFractions);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowNonFilesAsText"), m_bShowNonFilesAsText);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseHMSTimeFormat"), m_bUseHMSTimeFormat);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoFocusTasklist"), m_bAutoFocusTasklist);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowColumnsOnRight"), m_bShowColumnsOnRight);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("LimitColumnWidths"), m_bLimitColumnWidths);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("MaxColumnWidth"), m_nMaxColumnWidth);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AlwaysHideListParents"), m_bHideListParents);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("PercentIncrement"), m_nPercentIncrement);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("HideZeroPercentDone"), m_bHideZeroPercentDone);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("DateTimeTrail"), m_sDateTimeTrailText);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AppendUserToDateTimePaste"), m_bAppendUserToDateTimePaste);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AppendTextToDateTimePaste"), m_bAppendTextToDateTimePaste);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), m_bAllowCheckboxAgainstTreeItem);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), m_bHidePaneSplitBar);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowRemindersAsDateAndTime"), m_bShowRemindersAsDateAndTime);
+//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
 }
 
 void CPreferencesUITasklistPage::OnLimitcolwidths() 

@@ -139,42 +139,42 @@ void CPreferencesMultiUserPage::OnCheckinonnoedit()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesMultiUserPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesMultiUserPage::LoadPreferences(const IPreferences* pPrefs)
 {
-	m_bPromptReloadOnWritable = prefs.GetProfileInt(_T("Preferences"), _T("PromptReloadOnWritable"), TRUE);
-	m_bAutoCheckOut = prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckOut"), FALSE);
-	m_bPromptReloadOnTimestamp = prefs.GetProfileInt(_T("Preferences"), _T("PromptReloadOnTimestamp"), TRUE);
-	m_bKeepTryingToCheckout = prefs.GetProfileInt(_T("Preferences"), _T("CheckoutOnCheckin"), TRUE);
-	m_nReadonlyReloadOption = prefs.GetProfileInt(_T("Preferences"), _T("ReadonlyReloadOption"), RO_ASK) - 1;
-	m_nTimestampReloadOption = prefs.GetProfileInt(_T("Preferences"), _T("TimestampReloadOption"), RO_ASK) - 1;
-	m_bCheckinOnClose = prefs.GetProfileInt(_T("Preferences"), _T("CheckinOnClose"), TRUE);
-	m_nCheckinNoEditTime = prefs.GetProfileInt(_T("Preferences"), _T("CheckinNoEditTime"), 1);
-	m_bCheckinNoChange = prefs.GetProfileInt(_T("Preferences"), _T("CheckinNoEdit"), TRUE);
-	m_bIncludeUserNameInCheckout = prefs.GetProfileInt(_T("Preferences"), _T("IncludeUserNameInCheckout"), FALSE);
-	m_bUse3rdPartySourceControl = /*!m_bEnableSourceControl && */prefs.GetProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), FALSE);
+	m_bPromptReloadOnWritable = pPrefs->GetProfileInt(_T("Preferences"), _T("PromptReloadOnWritable"), TRUE);
+	m_bAutoCheckOut = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoCheckOut"), FALSE);
+	m_bPromptReloadOnTimestamp = pPrefs->GetProfileInt(_T("Preferences"), _T("PromptReloadOnTimestamp"), TRUE);
+	m_bKeepTryingToCheckout = pPrefs->GetProfileInt(_T("Preferences"), _T("CheckoutOnCheckin"), TRUE);
+	m_nReadonlyReloadOption = pPrefs->GetProfileInt(_T("Preferences"), _T("ReadonlyReloadOption"), RO_ASK) - 1;
+	m_nTimestampReloadOption = pPrefs->GetProfileInt(_T("Preferences"), _T("TimestampReloadOption"), RO_ASK) - 1;
+	m_bCheckinOnClose = pPrefs->GetProfileInt(_T("Preferences"), _T("CheckinOnClose"), TRUE);
+	m_nCheckinNoEditTime = pPrefs->GetProfileInt(_T("Preferences"), _T("CheckinNoEditTime"), 1);
+	m_bCheckinNoChange = pPrefs->GetProfileInt(_T("Preferences"), _T("CheckinNoEdit"), TRUE);
+	m_bIncludeUserNameInCheckout = pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeUserNameInCheckout"), FALSE);
+	m_bUse3rdPartySourceControl = /*!m_bEnableSourceControl && */pPrefs->GetProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), FALSE);
 
-	m_nRemoteFileCheckFreq = prefs.GetProfileInt(_T("Preferences"), _T("RemoteFileCheckFrequency"), 30);
+	m_nRemoteFileCheckFreq = pPrefs->GetProfileInt(_T("Preferences"), _T("RemoteFileCheckFrequency"), 30);
 
 	if (m_nRemoteFileCheckFreq < 10)
 		m_nRemoteFileCheckFreq = 30;
 }
 
-void CPreferencesMultiUserPage::SavePreferences(CPreferences& prefs)
+void CPreferencesMultiUserPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("PromptReloadOnWritable"), m_bPromptReloadOnWritable);
-	prefs.WriteProfileInt(_T("Preferences"), _T("PromptReloadOnTimestamp"), m_bPromptReloadOnTimestamp);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AutoCheckOut"), m_bAutoCheckOut);
-	prefs.WriteProfileInt(_T("Preferences"), _T("CheckoutOnCheckin"), m_bKeepTryingToCheckout);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ReadonlyReloadOption"), m_nReadonlyReloadOption + 1);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TimestampReloadOption"), m_nTimestampReloadOption + 1);
-	prefs.WriteProfileInt(_T("Preferences"), _T("CheckinOnClose"), m_bCheckinOnClose);
-	prefs.WriteProfileInt(_T("Preferences"), _T("RemoteFileCheckFrequency"), m_nRemoteFileCheckFreq);
-	prefs.WriteProfileInt(_T("Preferences"), _T("CheckinNoEditTime"), m_nCheckinNoEditTime);
-	prefs.WriteProfileInt(_T("Preferences"), _T("CheckinNoEdit"), m_bCheckinNoChange);
-	prefs.WriteProfileInt(_T("Preferences"), _T("IncludeUserNameInCheckout"), m_bIncludeUserNameInCheckout);
-	prefs.WriteProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), m_bUse3rdPartySourceControl);
-//	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("PromptReloadOnWritable"), m_bPromptReloadOnWritable);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("PromptReloadOnTimestamp"), m_bPromptReloadOnTimestamp);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoCheckOut"), m_bAutoCheckOut);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("CheckoutOnCheckin"), m_bKeepTryingToCheckout);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ReadonlyReloadOption"), m_nReadonlyReloadOption + 1);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TimestampReloadOption"), m_nTimestampReloadOption + 1);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("CheckinOnClose"), m_bCheckinOnClose);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("RemoteFileCheckFrequency"), m_nRemoteFileCheckFreq);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("CheckinNoEditTime"), m_nCheckinNoEditTime);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("CheckinNoEdit"), m_bCheckinNoChange);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("IncludeUserNameInCheckout"), m_bIncludeUserNameInCheckout);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), m_bUse3rdPartySourceControl);
+//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
 }
 
 void CPreferencesMultiUserPage::OnUse3rdpartysourcectrl() 

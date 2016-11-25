@@ -92,8 +92,8 @@ protected:
 	static CString MapCmdIDToPlaceholder(UINT nCmdID);
 	static CLA_TYPE MapCmdIDToType(UINT nCmdID);
 	
-	virtual void LoadPreferences(const CPreferences& prefs);
-	virtual void SavePreferences(CPreferences& prefs);
+	virtual void LoadPreferences(const IPreferences* pPrefs);
+	virtual void SavePreferences(IPreferences* pPrefs);
 
 };
 

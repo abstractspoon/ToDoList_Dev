@@ -2565,43 +2565,43 @@ struct TDCCOLEDITFILTERVISIBILITY
 		UpdateEditAndFilterVisibility();
 	}
 
-	void Save(CPreferences& prefs, LPCTSTR szKey) const
+	void Save(IPreferences* pPrefs, LPCTSTR szKey) const
 	{
-		prefs.WriteProfileInt(szKey, _T("ShowAttributes"), nShowEditsAndFilters);
+		pPrefs->WriteProfileInt(szKey, _T("ShowAttributes"), nShowEditsAndFilters);
 
 		CString sKey;
 		
 		sKey.Format(_T("%s\\ColumnVisibility"), szKey);
-		mapVisibleColumns.SaveColumns(prefs, sKey, _T("Col%d"));
+		mapVisibleColumns.SaveColumns(pPrefs, sKey, _T("Col%d"));
 
 		sKey.Format(_T("%s\\EditVisibility"), szKey);
-		mapVisibleEdits.SaveAttributes(prefs, sKey, _T("Edit%d"));
+		mapVisibleEdits.SaveAttributes(pPrefs, sKey, _T("Edit%d"));
 
 		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.SaveAttributes(prefs, sKey, _T("Filter%d"));
+		mapVisibleFilters.SaveAttributes(pPrefs, sKey, _T("Filter%d"));
 	}
 
-	BOOL Load(const CPreferences& prefs, LPCTSTR szKey)
+	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	{
-		nShowEditsAndFilters = (TDL_SHOWATTRIB)prefs.GetProfileInt(szKey, _T("ShowAttributes"));
+		nShowEditsAndFilters = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"));
 
 		// columns
 		CString sKey;
 		sKey.Format(_T("%s\\ColumnVisibility"), szKey);
 
-		int nCol = prefs.GetProfileInt(sKey, _T("Count"), -1);
+		int nCol = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
 
 		if (nCol == -1)
 			return FALSE; // old version OR first time
 
 		// else
-		mapVisibleColumns.LoadColumns(prefs, sKey, _T("Col%d"));
+		mapVisibleColumns.LoadColumns(pPrefs, sKey, _T("Col%d"));
 
 		sKey.Format(_T("%s\\EditVisibility"), szKey);
-		mapVisibleEdits.LoadAttributes(prefs, sKey, _T("Edit%d"));
+		mapVisibleEdits.LoadAttributes(pPrefs, sKey, _T("Edit%d"));
 
 		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.LoadAttributes(prefs, sKey, _T("Filter%d"));
+		mapVisibleFilters.LoadAttributes(pPrefs, sKey, _T("Filter%d"));
 
 		return TRUE;
 	}

@@ -128,23 +128,23 @@ void CPreferencesTaskPage::OnChangeWeekends()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesTaskPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs)
 {
 	// load settings
-	m_nDaysInWeek = prefs.GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
-	m_sHoursInDay = prefs.GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8.00"));
-	m_bLogTime = prefs.GetProfileInt(_T("Preferences"), _T("LogTime"), TRUE);
-	m_bLogTasksSeparately = prefs.GetProfileInt(_T("Preferences"), _T("LogTasksSeparately"), FALSE);
-	m_bExclusiveTimeTracking = prefs.GetProfileInt(_T("Preferences"), _T("ExclusiveTimeTracking"), TRUE);
-	m_bAllowParentTimeTracking = prefs.GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE);
-	m_bTrackNonActiveTasklists = prefs.GetProfileInt(_T("Preferences"), _T("TrackNonActiveTasklists"), TRUE);
-	m_bTrackNonSelectedTasks = prefs.GetProfileInt(_T("Preferences"), _T("TrackNonSelectedTasks"), TRUE);
-	m_bTrackOnScreenSaver = prefs.GetProfileInt(_T("Preferences"), _T("TrackOnScreenSaver"), TRUE);
-	m_bTrackHibernated = prefs.GetProfileInt(_T("Preferences"), _T("AllowTrackingWhenHibernated"), FALSE);
-	m_bDisplayLogConfirm = prefs.GetProfileInt(_T("Preferences"), _T("DisplayLogConfirm"), FALSE);
-	m_bTrackReminder = prefs.GetProfileInt(_T("Preferences"), _T("TrackReminder"), FALSE);
-	m_nTrackReminderFrequency = prefs.GetProfileInt(_T("Preferences"), _T("TrackReminderFrequency"), 5);
-	m_bShowTimeTracker = prefs.GetProfileInt(_T("Preferences"), _T("ShowTimeTracker"), TRUE);
+	m_nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
+	m_sHoursInDay = pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8.00"));
+	m_bLogTime = pPrefs->GetProfileInt(_T("Preferences"), _T("LogTime"), TRUE);
+	m_bLogTasksSeparately = pPrefs->GetProfileInt(_T("Preferences"), _T("LogTasksSeparately"), FALSE);
+	m_bExclusiveTimeTracking = pPrefs->GetProfileInt(_T("Preferences"), _T("ExclusiveTimeTracking"), TRUE);
+	m_bAllowParentTimeTracking = pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE);
+	m_bTrackNonActiveTasklists = pPrefs->GetProfileInt(_T("Preferences"), _T("TrackNonActiveTasklists"), TRUE);
+	m_bTrackNonSelectedTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("TrackNonSelectedTasks"), TRUE);
+	m_bTrackOnScreenSaver = pPrefs->GetProfileInt(_T("Preferences"), _T("TrackOnScreenSaver"), TRUE);
+	m_bTrackHibernated = pPrefs->GetProfileInt(_T("Preferences"), _T("AllowTrackingWhenHibernated"), FALSE);
+	m_bDisplayLogConfirm = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayLogConfirm"), FALSE);
+	m_bTrackReminder = pPrefs->GetProfileInt(_T("Preferences"), _T("TrackReminder"), FALSE);
+	m_nTrackReminderFrequency = pPrefs->GetProfileInt(_T("Preferences"), _T("TrackReminderFrequency"), 5);
+	m_bShowTimeTracker = pPrefs->GetProfileInt(_T("Preferences"), _T("ShowTimeTracker"), TRUE);
 
 	if (m_nTrackReminderFrequency <= 0)
 		m_bTrackReminder = FALSE;
@@ -155,35 +155,35 @@ void CPreferencesTaskPage::LoadPreferences(const CPreferences& prefs)
 	if (GetDaysInOneWeek() >= 7)
 		dwDefWeekend = 0; // some people work 7 days a week
 
-	m_dwWeekends = prefs.GetProfileInt(_T("Preferences"), _T("Weekends"), dwDefWeekend);
+	m_dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), dwDefWeekend);
 
-//	m_b = prefs.GetProfileInt(_T("Preferences"), _T(""), FALSE);
+//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
 }
 
-void CPreferencesTaskPage::SavePreferences(CPreferences& prefs)
+void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs)
 {
 	// save settings
-	prefs.WriteProfileInt(_T("Preferences"), _T("TrackNonSelectedTasks"), m_bTrackNonSelectedTasks);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TrackNonActiveTasklists"), m_bTrackNonActiveTasklists);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TrackOnScreenSaver"), m_bTrackOnScreenSaver);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AllowTrackingWhenHibernated"), m_bTrackHibernated);
-	prefs.WriteProfileInt(_T("Preferences"), _T("LogTime"), m_bLogTime);
-	prefs.WriteProfileInt(_T("Preferences"), _T("LogTasksSeparately"), m_bLogTasksSeparately);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ExclusiveTimeTracking"), m_bExclusiveTimeTracking);
-	prefs.WriteProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), m_bAllowParentTimeTracking);
-	prefs.WriteProfileInt(_T("Preferences"), _T("DisplayLogConfirm"), m_bDisplayLogConfirm);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TrackReminder"), m_bTrackReminder);
-	prefs.WriteProfileInt(_T("Preferences"), _T("TrackReminderFrequency"), m_nTrackReminderFrequency);
-	prefs.WriteProfileInt(_T("Preferences"), _T("ShowTimeTracker"), m_bShowTimeTracker);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TrackNonSelectedTasks"), m_bTrackNonSelectedTasks);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TrackNonActiveTasklists"), m_bTrackNonActiveTasklists);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TrackOnScreenSaver"), m_bTrackOnScreenSaver);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllowTrackingWhenHibernated"), m_bTrackHibernated);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("LogTime"), m_bLogTime);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("LogTasksSeparately"), m_bLogTasksSeparately);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExclusiveTimeTracking"), m_bExclusiveTimeTracking);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), m_bAllowParentTimeTracking);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DisplayLogConfirm"), m_bDisplayLogConfirm);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TrackReminder"), m_bTrackReminder);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("TrackReminderFrequency"), m_nTrackReminderFrequency);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("ShowTimeTracker"), m_bShowTimeTracker);
 
 	// validate time periods before writing
 	m_sHoursInDay.Format(_T("%.2f"), GetHoursInOneDay());
-	prefs.WriteProfileString(_T("Preferences"), _T("HoursInDay"), m_sHoursInDay);
+	pPrefs->WriteProfileString(_T("Preferences"), _T("HoursInDay"), m_sHoursInDay);
 
-	prefs.WriteProfileInt(_T("Preferences"), _T("DaysInWeek"), m_nDaysInWeek); // just for display purposes
-	prefs.WriteProfileInt(_T("Preferences"), _T("Weekends"), m_dwWeekends);
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("DaysInWeek"), m_nDaysInWeek); // just for display purposes
+	pPrefs->WriteProfileInt(_T("Preferences"), _T("Weekends"), m_dwWeekends);
 
-//	prefs.WriteProfileInt(_T("Preferences"), _T(""), m_b);
+//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
 }
 
 

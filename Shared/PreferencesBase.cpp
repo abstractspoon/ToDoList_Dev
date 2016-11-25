@@ -122,7 +122,11 @@ void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 // CPreferencesDlgBase dialog
 
 
-CPreferencesDlgBase::CPreferencesDlgBase(UINT nID, CWnd* pParent) : CDialog(nID, pParent), m_nInitPage(-1)
+CPreferencesDlgBase::CPreferencesDlgBase(UINT nID, CWnd* pParent) 
+	: 
+	CDialog(nID, pParent), 
+	m_nInitPage(-1),
+	m_pPrefs(NULL)
 {
 }
 
@@ -137,21 +141,28 @@ void CPreferencesDlgBase::OnOK()
 	CDialog::OnOK();
 	
 	m_pphost.OnOK();
-	SavePreferences();
+	SavePreferences(m_pPrefs);
 }
 
 void CPreferencesDlgBase::OnApply()
 {
 	m_pphost.OnApply();
-	SavePreferences();
+	SavePreferences(m_pPrefs);
 }
 
-int CPreferencesDlgBase::DoModal(int nInitPage)
+int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, int nInitPage)
 {
 	if (nInitPage != -1)
 		m_nInitPage = nInitPage;
+
+	// Temporary only
+	m_pPrefs = pPrefs;
 	
-	return CDialog::DoModal();
+	int nRet = CDialog::DoModal();
+
+	m_pPrefs = NULL;
+
+	return nRet;
 }
 
 BOOL CPreferencesDlgBase::OnInitDialog() 
@@ -167,8 +178,8 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 		CRect rWindow;
 		GetWindowRect(rWindow);
 
-		int nHeight = m_prefs.GetProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
-		int nWidth = m_prefs.GetProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
+		int nHeight = m_pPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
+		int nWidth = m_pPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
 
 		rWindow.bottom = rWindow.top + min(nHeight, rWorkArea.Height());
 		rWindow.right = rWindow.left + min(nWidth, rWorkArea.Width());
@@ -176,6 +187,7 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 		MoveWindow(rWindow);
 	}
 
+	LoadPreferences(m_pPrefs);
 	CenterWindow();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -243,18 +255,7 @@ void CPreferencesDlgBase::OnDestroy()
 	CDialog::OnDestroy();
 }
 
-void CPreferencesDlgBase::Initialize(CPreferences& prefs)
-{
-	LoadPreferences(prefs); // this initializes the dialog data
-	SavePreferences(prefs); // this writes it back to the prefs
-}
-
-void CPreferencesDlgBase::LoadPreferences()
-{
-	LoadPreferences(m_prefs);
-}
-
-void CPreferencesDlgBase::LoadPreferences(CPreferences& prefs)
+void CPreferencesDlgBase::LoadPreferences(const IPreferences* pPrefs)
 {
 	// cycle the page loading the preferences for each one
 	int nPage = m_pphost.GetPageCount();
@@ -264,23 +265,15 @@ void CPreferencesDlgBase::LoadPreferences(CPreferences& prefs)
 		CPreferencesPageBase* pPage = (CPreferencesPageBase*)m_pphost.GetPage(nPage);
 		ASSERT(pPage->IsKindOf(RUNTIME_CLASS(CPreferencesPageBase)));
 		
-		pPage->LoadPreferences(prefs);
+		pPage->LoadPreferences(pPrefs);
 	}
 	
 	// initial page
 	if (m_nInitPage < 0 || m_nInitPage >= m_pphost.GetPageCount())
-		m_nInitPage = prefs.GetProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), 0);
+		m_nInitPage = pPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), 0);
 }
 
-void CPreferencesDlgBase::SavePreferences()
-{
-	SavePreferences(m_prefs);
-
-	// notify parent
-	GetParent()->SendMessage(WM_PDB_ONAPPLY);
-}
-
-void CPreferencesDlgBase::SavePreferences(CPreferences& prefs)
+void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs)
 {
 	// cycle the page saving the preferences for each one
 	int nPage = m_pphost.GetPageCount();
@@ -290,7 +283,7 @@ void CPreferencesDlgBase::SavePreferences(CPreferences& prefs)
 		CPreferencesPageBase* pPage = (CPreferencesPageBase*)m_pphost.GetPage(nPage);
 		ASSERT(pPage->IsKindOf(RUNTIME_CLASS(CPreferencesPageBase)));
 		
-		pPage->SavePreferences(prefs);
+		pPage->SavePreferences(pPrefs);
 	}
 	
 	if (GetSafeHwnd())
@@ -298,12 +291,10 @@ void CPreferencesDlgBase::SavePreferences(CPreferences& prefs)
 		CRect rWindow;
 		GetWindowRect(rWindow);
 
-		prefs.WriteProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
-		prefs.WriteProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
-		prefs.WriteProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), m_pphost.GetActiveIndex());
+		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
+		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
+		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), m_pphost.GetActiveIndex());
 	}
-
-	prefs.Save();
 }
 
 void CPreferencesDlgBase::SetPageBackgroundColor(COLORREF color)

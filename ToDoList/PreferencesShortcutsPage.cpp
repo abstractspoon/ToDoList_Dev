@@ -683,17 +683,17 @@ BOOL CPreferencesShortcutsPage::PreTranslateMessage(MSG* pMsg)
 	return CPreferencesPageBase::PreTranslateMessage(pMsg);
 }
 
-void CPreferencesShortcutsPage::LoadPreferences(const CPreferences& prefs)
+void CPreferencesShortcutsPage::LoadPreferences(const IPreferences* pPrefs)
 {
-	m_bShowCommandIDs = prefs.GetProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), FALSE);
+	m_bShowCommandIDs = pPrefs->GetProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), FALSE);
 }
 
-void CPreferencesShortcutsPage::SavePreferences(CPreferences& prefs)
+void CPreferencesShortcutsPage::SavePreferences(IPreferences* pPrefs)
 {
-	prefs.WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
+	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
 
 	if (m_pShortcutMgr)
-		m_pShortcutMgr->SaveSettings(prefs);
+		m_pShortcutMgr->SaveSettings(pPrefs);
 }
 
 void CPreferencesShortcutsPage::OnShowCmdIDs() 

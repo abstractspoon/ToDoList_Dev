@@ -294,12 +294,12 @@ UINT CPreferences::GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDe
 	return nDefault;
 }
 
-bool CPreferences::WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue)
+BOOL CPreferences::WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue)
 {
 	if (s_bIni)
 	{
 		// FALSE -> We don't quote numbers
-		return (WritePreferenceString(lpszSection, lpszEntry, Misc::Format(nValue), FALSE) != FALSE);
+		return WritePreferenceString(lpszSection, lpszEntry, Misc::Format(nValue), FALSE);
 	}
 	else
 	{
@@ -314,7 +314,7 @@ bool CPreferences::WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int n
 		}
 	}
 
-	return false;
+	return FALSE;
 }
 
 CString CPreferences::GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault) const
@@ -346,10 +346,10 @@ CString CPreferences::GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, L
 	return lpszDefault;
 }
 
-bool CPreferences::WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue)
+BOOL CPreferences::WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue)
 {
 	// quote string values passed in from outside
-	return (WritePreferenceString(lpszSection, lpszEntry, lpszValue, TRUE) != FALSE);
+	return WritePreferenceString(lpszSection, lpszEntry, lpszValue, TRUE);
 }
 
 BOOL CPreferences::WritePreferenceString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue, BOOL bQuoted)
@@ -442,15 +442,20 @@ bool CPreferences::WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, do
 
 int CPreferences::GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty) const
 {
+	return GetProfileArray(&m_iPrefs, lpszSection, aItems);
+}
+
+int CPreferences::GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty)
+{
 	aItems.RemoveAll();
-	int nCount = GetProfileInt(lpszSection, _T("ItemCount"), 0);
+	int nCount = pPrefs->GetProfileInt(lpszSection, _T("ItemCount"), 0);
 	
 	// items
 	for (int nItem = 0; nItem < nCount; nItem++)
 	{
 		CString sItemKey, sItem;
 		sItemKey.Format(_T("Item%d"), nItem);
-		sItem = GetProfileString(lpszSection, sItemKey);
+		sItem = pPrefs->GetProfileString(lpszSection, sItemKey);
 		
 		if (bAllowEmpty || !sItem.IsEmpty())
 			aItems.Add(sItem);
@@ -461,9 +466,14 @@ int CPreferences::GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOO
 
 void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection)
 {
+	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bDelSection);
+}
+
+void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection)
+{
 	// pre-delete?
 	if (bDelSection)
-		DeleteProfileSection(lpszSection);
+		pPrefs->DeleteProfileSection(lpszSection);
 
 	int nCount = aItems.GetSize();
 	
@@ -472,17 +482,22 @@ void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aI
 	{
 		CString sItemKey;
 		sItemKey.Format(_T("Item%d"), nItem);
-		WriteProfileString(lpszSection, sItemKey, aItems[nItem]);
+		pPrefs->WriteProfileString(lpszSection, sItemKey, aItems[nItem]);
 	}
 	
 	// item count
-	WriteProfileInt(lpszSection, _T("ItemCount"), nCount);
+	pPrefs->WriteProfileInt(lpszSection, _T("ItemCount"), nCount);
 }
 
 int CPreferences::GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) const
 {
+	return GetProfileArray(&m_iPrefs, lpszSection, aItems);
+}
+
+int CPreferences::GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CDWordArray& aItems)
+{
 	aItems.RemoveAll();
-	int nCount = GetProfileInt(lpszSection, _T("ItemCount"), 0);
+	int nCount = pPrefs->GetProfileInt(lpszSection, _T("ItemCount"), 0);
 	
 	// items
 	for (int nItem = 0; nItem < nCount; nItem++)
@@ -490,7 +505,7 @@ int CPreferences::GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) cons
 		CString sItemKey, sItem;
 
 		sItemKey.Format(_T("Item%d"), nItem);
-		aItems.Add(GetProfileInt(lpszSection, sItemKey));
+		aItems.Add(pPrefs->GetProfileInt(lpszSection, sItemKey));
 	}
 	
 	return aItems.GetSize();
@@ -498,9 +513,14 @@ int CPreferences::GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) cons
 
 void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection)
 {
+	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bDelSection);
+}
+
+void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection)
+{
 	// pre-delete?
 	if (bDelSection)
-		DeleteProfileSection(lpszSection);
+		pPrefs->DeleteProfileSection(lpszSection);
 
 	int nCount = aItems.GetSize();
 	
@@ -509,11 +529,11 @@ void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aIt
 	{
 		CString sItemKey;
 		sItemKey.Format(_T("Item%d"), nItem);
-		WriteProfileInt(lpszSection, sItemKey, (int)aItems[nItem]);
+		pPrefs->WriteProfileInt(lpszSection, sItemKey, (int)aItems[nItem]);
 	}
 	
 	// item count
-	WriteProfileInt(lpszSection, _T("ItemCount"), nCount);
+	pPrefs->WriteProfileInt(lpszSection, _T("ItemCount"), nCount);
 }
 
 // THIS IS AN INTERNAL METHOD THAT ASSUMES CALLERS HAVE INITIALISED A LOCK ALREADY
@@ -679,7 +699,7 @@ BOOL CPreferences::DeleteProfileSection(LPCTSTR lpszSection, BOOL bIncSubSection
 	return CRegKey2::DeleteKey(HKEY_CURRENT_USER, sFullKey);
 }
 
-bool CPreferences::DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry)
+BOOL CPreferences::DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry)
 {
 	ASSERT(IsInitialised());
 	ASSERT(lpszSection && *lpszSection);
@@ -701,11 +721,11 @@ bool CPreferences::DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry)
 			pSection->aEntries.RemoveKey(sKey);
 			s_bDirty = TRUE;
 
-			return true;
+			return TRUE;
 		}
 
 		// not found
-		return false;
+		return FALSE;
 	}
 
 	// else registry
@@ -785,7 +805,7 @@ UINT CPreferences::CIPreferencesImpl::GetProfileInt(LPCWSTR lpszSection, LPCWSTR
 
 bool CPreferences::CIPreferencesImpl::WriteProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nValue)
 {
-	return m_prefs.WriteProfileInt(lpszSection, lpszEntry, nValue);
+	return (m_prefs.WriteProfileInt(lpszSection, lpszEntry, nValue) != FALSE);
 }
 
 LPCWSTR CPreferences::CIPreferencesImpl::GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault) const
@@ -798,7 +818,7 @@ LPCWSTR CPreferences::CIPreferencesImpl::GetProfileString(LPCWSTR lpszSection, L
 
 bool CPreferences::CIPreferencesImpl::WriteProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszValue)
 {
-	return m_prefs.WriteProfileString(lpszSection, lpszEntry, lpszValue);
+	return (m_prefs.WriteProfileString(lpszSection, lpszEntry, lpszValue) != FALSE);
 }
 	
 double CPreferences::CIPreferencesImpl::GetProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dDefault) const
@@ -808,12 +828,17 @@ double CPreferences::CIPreferencesImpl::GetProfileDouble(LPCWSTR lpszSection, LP
 
 bool CPreferences::CIPreferencesImpl::WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue)
 {
-	return m_prefs.WriteProfileDouble(lpszSection, lpszEntry, dValue);
+	return (m_prefs.WriteProfileDouble(lpszSection, lpszEntry, dValue) != FALSE);
 }
 	
 bool CPreferences::CIPreferencesImpl::DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry)
 {
-	return m_prefs.DeleteProfileEntry(lpszSection, lpszEntry);
+	return (m_prefs.DeleteProfileEntry(lpszSection, lpszEntry) != FALSE);
+}
+
+bool CPreferences::CIPreferencesImpl::DeleteProfileSection(LPCWSTR lpszSection)
+{
+	return (m_prefs.DeleteProfileSection(lpszSection) != FALSE);
 }
 
 //////////////////////////////////////////////////////////////////////

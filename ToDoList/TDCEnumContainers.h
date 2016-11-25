@@ -8,7 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CPreferences;
+class IPreferences;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -90,9 +90,9 @@ protected:
 		return t;
 	}
 
-	void Save(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
+	void Save(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
 	{
-		prefs.WriteProfileInt(szKey, _T("Count"), GetCount());
+		pPrefs->WriteProfileInt(szKey, _T("Count"), GetCount());
 
 		POSITION pos = GetStartPosition();
 		int nItem = 0;
@@ -102,20 +102,20 @@ protected:
 			CString sValueKey = Misc::MakeKey(szValueKeyFmt, nItem++);
 			T t = GetNext(pos);
 
-			prefs.WriteProfileInt(szKey, sValueKey, t);
+			pPrefs->WriteProfileInt(szKey, sValueKey, t);
 		}
 	}
 
-	void Load(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt, T tNone) 
+	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt, T tNone) 
 	{
 		RemoveAll();
 
-		int nItem = prefs.GetProfileInt(szKey, _T("Count"));
+		int nItem = pPrefs->GetProfileInt(szKey, _T("Count"));
 
 		while (nItem--)
 		{
 			CString sValueKey = Misc::MakeKey(szValueKeyFmt, nItem);
-			Add((T)prefs.GetProfileInt(szKey, sValueKey, tNone));
+			Add((T)pPrefs->GetProfileInt(szKey, sValueKey, tNone));
 		}
 	}
 };
@@ -139,8 +139,8 @@ public:
 	void CopyAttributes(const CTDCAttributeMap& mapOther);
 	void AppendAttributes(const CTDCAttributeMap& mapOther);
 
-	void SaveAttributes(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const;
-	void LoadAttributes(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
+	void SaveAttributes(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const;
+	void LoadAttributes(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -178,8 +178,8 @@ public:
 	void CopyColumns(const CTDCColumnIDMap& mapOther);
 	void AppendColumns(const CTDCColumnIDMap& mapOther);
 
-	void SaveColumns(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const;
-	void LoadColumns(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
+	void SaveColumns(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const;
+	void LoadColumns(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 };
 
 //////////////////////////////////////////////////////////////////////

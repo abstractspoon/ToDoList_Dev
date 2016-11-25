@@ -81,8 +81,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   virtual void LoadPreferences(const CPreferences& prefs);
-   virtual void SavePreferences(CPreferences& prefs);
+   virtual void LoadPreferences(const IPreferences* pPrefs);
+   virtual void SavePreferences(IPreferences* pPrefs);
 
 };
 
