@@ -45,6 +45,8 @@ CShortcutManager::~CShortcutManager()
 
 BOOL CShortcutManager::Initialize(CWnd* pOwner, const IPreferences* pPrefs, LPCTSTR szKey, WORD wInvalidComb, WORD wFallbackModifiers)
 {
+	ASSERT((pPrefs && szKey) || !(pPrefs || szKey));
+
 	if (!IsHooked() && pOwner && HookWindow(*pOwner))
 	{
 		m_wInvalidComb = wInvalidComb;
@@ -537,12 +539,12 @@ void CShortcutManager::LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey)
 	ASSERT(pPrefs);
 
 	// load shortcuts overriding any defaults
-	int nItem = pPrefs->GetProfileInt(_T("KeyboardShortcuts"), _T("NumItems"), 0);
+	int nItem = pPrefs->GetProfileInt(szKey, _T("NumItems"), 0);
 
 	while (nItem--)
 	{
 		CString sKey;
-		sKey.Format(_T("KeyboardShortcuts\\Item%02d"), nItem);
+		sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
 
 		UINT nCmdID = (UINT)pPrefs->GetProfileInt(sKey, _T("CmdID"), 0);
 		DWORD dwShortcut = (DWORD)pPrefs->GetProfileInt(sKey, _T("Shortcut"), 0);
