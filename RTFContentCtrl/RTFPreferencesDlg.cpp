@@ -147,5 +147,5 @@ void CRTFPreferencesDlg::DoHelp()
 	ASSERT(m_pParentWnd);
 	
 	if (m_pParentWnd)
-		m_pParentWnd->SendMessage(WM_ICC_DOHELP);
+		m_pParentWnd->SendMessage(WM_RTF_PREFSHELP);
 }

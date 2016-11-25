@@ -135,7 +135,7 @@ protected:
 	afx_msg void OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg LRESULT OnCustomUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFailedUrl(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnPrefsDoHelp(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 

@@ -147,13 +147,13 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_WM_STYLECHANGING()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
-	ON_REGISTERED_MESSAGE(WM_ICC_DOHELP, OnPrefsDoHelp)
+	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
 
-LRESULT CRTFContentControl::OnPrefsDoHelp(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CRTFContentControl::OnPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	OnHelp();
 	return 0L;
@@ -161,7 +161,10 @@ LRESULT CRTFContentControl::OnPrefsDoHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CRTFContentControl::OnHelp()
 {
-	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)GetTypeID());
+	CString sHelpID(GetTypeID());
+	sHelpID += _T("_PREFS");
+	
+	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)(LPCTSTR)sHelpID);
 }
 
 BOOL CRTFContentControl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)

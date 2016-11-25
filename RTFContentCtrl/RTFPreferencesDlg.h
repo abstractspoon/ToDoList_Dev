@@ -13,6 +13,11 @@
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+// WPARAM = , LPARAM = 
+const UINT WM_RTF_PREFSHELP			= ::RegisterWindowMessage(_T("WM_RTF_PREFSHELP"));
+
+/////////////////////////////////////////////////////////////////////////////
 // CRTFPreferencesDlg dialog
 
 class CRTFPreferencesPage : public CPreferencesPageBase
