@@ -72,16 +72,17 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+
 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos);
 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
 	void AddMiscShortcuts();
-
-	static BOOL IsMiscCommandID(UINT nCmdID);
-
-	virtual void LoadPreferences(const IPreferences* pPrefs);
-	virtual void SavePreferences(IPreferences* pPrefs);
 	void AddCommandIDsToTree(HTREEITEM hti, BOOL bAdd);
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
+
+	static BOOL IsMiscCommandID(UINT nCmdID);
 
 };
 

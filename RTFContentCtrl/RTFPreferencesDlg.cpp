@@ -24,7 +24,7 @@ static char THIS_FILE[] = __FILE__;
 
 CRTFPreferencesPage::CRTFPreferencesPage()
 	: 
-	CPropertyPage(IDD_PREFERENCES_PAGE), 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE), 
 	m_bPromptForFileLink(TRUE),
 	m_nLinkOption(REP_ASIMAGE),
 	m_bConvertWithMSWord(FALSE)
@@ -36,7 +36,7 @@ CRTFPreferencesPage::CRTFPreferencesPage()
 
 void CRTFPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CPreferencesPageBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CRTFPreferencesPage)
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_FILEURL, m_nLinkOption);
@@ -44,12 +44,9 @@ void CRTFPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_PROMPTFORFILELINK, m_bPromptForFileLink);
 }
 
-BEGIN_MESSAGE_MAP(CRTFPreferencesPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CRTFPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CRTFPreferencesPage)
 	//}}AFX_MSG_MAP
-	ON_WM_CTLCOLOR()
-	ON_WM_ERASEBKGND()
-	ON_WM_SHOWWINDOW()
 	ON_BN_CLICKED(IDC_PROMPTFORFILELINK, OnPromptForLink)
 END_MESSAGE_MAP()
 
@@ -64,7 +61,7 @@ void CRTFPreferencesPage::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt)
 
 BOOL CRTFPreferencesPage::OnInitDialog() 
 {
-	CPropertyPage::OnInitDialog();
+	CPreferencesPageBase::OnInitDialog();
 
 	m_groupLine.AddGroupLine(IDC_LINKTOFILE_GROUP, *this);
 
@@ -75,37 +72,6 @@ BOOL CRTFPreferencesPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-BOOL CRTFPreferencesPage::OnEraseBkgnd(CDC* pDC)
-{
-	CRect rClient;
-	GetClientRect(rClient);
-	pDC->FillSolidRect(rClient, ::GetSysColor(COLOR_WINDOW));
-	
-	return TRUE;
-}
-
-HBRUSH CRTFPreferencesPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-	
-	if (nCtlColor == CTLCOLOR_STATIC)
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		hbr = ::GetSysColorBrush(COLOR_WINDOW);
-	}
-	
-	return hbr;
-}
-
-void CRTFPreferencesPage::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	CPropertyPage::OnShowWindow(bShow, nStatus);
-	
-	// resize controls to fit text
-	if (bShow)
-		CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
 }
 
 void CRTFPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -136,7 +102,7 @@ void CRTFPreferencesPage::OnPromptForLink()
 // CCreateFileLinkDlg dialog
 
 CRTFPreferencesDlg::CRTFPreferencesDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_PREFERENCES_DIALOG, pParent)
+	: CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_RTFCOMMENTS, IDI_HELP_BUTTON, pParent)
 {
 	//{{AFX_DATA_INIT(CRTFPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -147,16 +113,15 @@ CRTFPreferencesDlg::CRTFPreferencesDlg(CWnd* pParent /*=NULL*/)
 
 void CRTFPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CPreferencesDlgBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CRTFPreferencesDlg)
 	//}}AFX_DATA_MAP
 }
 
 
-BEGIN_MESSAGE_MAP(CRTFPreferencesDlg, CDialog)
+BEGIN_MESSAGE_MAP(CRTFPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CRTFPreferencesDlg)
 	//}}AFX_MSG_MAP
-	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -164,54 +129,23 @@ END_MESSAGE_MAP()
 
 BOOL CRTFPreferencesDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
-
-	VERIFY(m_ppHost.Create(IDC_PPHOST, this));
-	
-	// shrink the ppHost by 1 pixel to allow the border to show
-	CRect rHost;
-	m_ppHost.GetWindowRect(rHost);
-	ScreenToClient(rHost);
-	
-	rHost.DeflateRect(1, 1);
-	m_ppHost.MoveWindow(rHost, FALSE);
-	
-	// Replace icon
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_RTFCOMMENTS);
-	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
+	CPreferencesDlgBase::OnInitDialog();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CRTFPreferencesDlg::OnOK()
-{
-	CDialog::OnOK();
-	
-	m_ppHost.OnOK();
-}
-
-void CRTFPreferencesDlg::OnDestroy()
-{
-	CDialog::OnDestroy();
-	
-	::DestroyIcon(m_hIcon);
-}
-
-void CRTFPreferencesDlg::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
-{
-	m_page.SavePreferences(pPrefs, szKey);
-}
-
-void CRTFPreferencesDlg::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
-{
-	m_page.LoadPreferences(pPrefs, szKey);
 }
 
 int CRTFPreferencesDlg::DoModal(BOOL bUseMSWord)
 {
 	m_page.SetConvertWithMSWord(bUseMSWord);
 
-	return CDialog::DoModal();
+	return CPreferencesDlgBase::DoModal();
 }
 
+void CRTFPreferencesDlg::DoHelp()
+{
+	ASSERT(m_pParentWnd);
+	
+	if (m_pParentWnd)
+		m_pParentWnd->SendMessage(WM_ICC_DOHELP);
+}

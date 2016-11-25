@@ -9,19 +9,18 @@
 
 #include "..\shared\colorbutton.h"
 #include "..\shared\groupline.h"
-#include "..\shared\scrollingpropertypagehost.h"
-#include "..\Shared\winhelpbutton.h"
+#include "..\Shared\preferencesbase.h"
 
 #include "..\Interfaces\ipreferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesPage dialog
 
-class CGanttPreferencesPage : public CPropertyPage
+class CGanttPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
-	CGanttPreferencesPage(CWnd* pParent = NULL);   // standard constructor
+	CGanttPreferencesPage(CWnd* pParent = NULL);
 
 	BOOL GetDisplayAllocTo() const { return m_bDisplayAllocTo; }
 	BOOL GetAutoScrollSelection() const { return m_bAutoScrollSelection; }
@@ -81,20 +80,17 @@ protected:
 	afx_msg void OnUseTagForMilestone();
 	//}}AFX_MSG
 	afx_msg void OnSetParentColor();
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesDlg dialog
 
-class CGanttPreferencesDlg : public CDialog
+class CGanttPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
-	CGanttPreferencesDlg(CWnd* pParent);   // standard constructor
+	CGanttPreferencesDlg(CWnd* pParent);
 
 	BOOL GetDisplayAllocTo() const { return m_page.GetDisplayAllocTo(); }
 	BOOL GetAutoScrollSelection() const { return m_page.GetAutoScrollSelection(); }
@@ -108,27 +104,18 @@ public:
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
 
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
-
 protected:
 	CGanttPreferencesPage m_page;
-	CScrollingPropertyPageHost m_ppHost;
-	HICON m_hIcon;
-	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	virtual void DoHelp();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CGanttPreferencesDlg)
 	//}}AFX_MSG
-	afx_msg void OnDestroy();
-	afx_msg void OnClickHelpButton();
-	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
 	DECLARE_MESSAGE_MAP()
 };

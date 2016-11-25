@@ -22,16 +22,16 @@ public:
 	void UpdatePosition();
 	UINT GetHelpID() const { return m_nHelpID; }
 
-	static BOOL SetIcon(HICON hIcon);
-	static BOOL SetTooltip(LPCTSTR szTooltip);
+	static BOOL SetDefaultIcon(HICON hIcon);
+	static BOOL SetDefaultTooltip(LPCTSTR szTooltip);
 
 protected:
 	UINT m_nHelpID;
 	BOOL m_bAutoHandleClick;
 	BOOL m_bAutoPosition;
 
-	static HICON s_hHelpIcon;
-	static CString s_sTooltip;
+	static HICON s_hDefIcon;
+	static CString s_sDefTooltip;
 
 protected:
 // Overrides

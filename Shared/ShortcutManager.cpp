@@ -43,7 +43,7 @@ CShortcutManager::~CShortcutManager()
 
 }
 
-BOOL CShortcutManager::Initialize(CWnd* pOwner, const IPreferences* pPrefs, WORD wInvalidComb, WORD wFallbackModifiers)
+BOOL CShortcutManager::Initialize(CWnd* pOwner, const IPreferences* pPrefs, LPCTSTR szKey, WORD wInvalidComb, WORD wFallbackModifiers)
 {
 	if (!IsHooked() && pOwner && HookWindow(*pOwner))
 	{
@@ -51,7 +51,7 @@ BOOL CShortcutManager::Initialize(CWnd* pOwner, const IPreferences* pPrefs, WORD
 		m_wFallbackModifiers = wFallbackModifiers;
 		
 		if (pPrefs)
-			LoadSettings(pPrefs);
+			LoadSettings(pPrefs, szKey);
 		
 		return TRUE;
 	}
@@ -59,13 +59,13 @@ BOOL CShortcutManager::Initialize(CWnd* pOwner, const IPreferences* pPrefs, WORD
 	return FALSE;
 }
 
-BOOL CShortcutManager::Release(IPreferences* pPrefs)
+BOOL CShortcutManager::Release(IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (!IsHooked())
 		return TRUE;
 
 	if (pPrefs)
-		SaveSettings(pPrefs);
+		SaveSettings(pPrefs, szKey);
 
 	return HookWindow(NULL);
 }
@@ -532,7 +532,7 @@ CString CShortcutManager::GetShortcutText(DWORD dwShortcut)
 	return _T("");
 }
 
-void CShortcutManager::LoadSettings(const IPreferences* pPrefs)
+void CShortcutManager::LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ASSERT(pPrefs);
 
@@ -552,11 +552,11 @@ void CShortcutManager::LoadSettings(const IPreferences* pPrefs)
 	}
 }
 
-void CShortcutManager::SaveSettings(IPreferences* pPrefs) const
+void CShortcutManager::SaveSettings(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	ASSERT(pPrefs);
 
-	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("NumItems"), m_mapID2Shortcut.GetCount());
+	pPrefs->WriteProfileInt(szKey, _T("NumItems"), m_mapID2Shortcut.GetCount());
 
 	POSITION pos = m_mapID2Shortcut.GetStartPosition();
 	int nItem = 0;
@@ -571,7 +571,7 @@ void CShortcutManager::SaveSettings(IPreferences* pPrefs) const
 		if (nCmdID && dwShortcut)
 		{
 			CString sKey;
-			sKey.Format(_T("KeyboardShortcuts\\Item%02d"), nItem);
+			sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
 
 			pPrefs->WriteProfileInt(sKey, _T("CmdID"), nCmdID);
 			pPrefs->WriteProfileInt(sKey, _T("Shortcut"), dwShortcut);

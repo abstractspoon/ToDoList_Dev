@@ -729,90 +729,70 @@ void CPreferencesUITasklistColorsPage::OnSetduetodaytaskcolor()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	m_crLow = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("Low"), PRIORITYLOWCOLOR);
-	m_crHigh = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("High"), PRIORITYHIGHCOLOR);
-
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P0"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P1"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P2"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P3"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P4"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P5"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P6"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P7"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P8"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P9"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P10"), RGB(255, 0, 0)));
-
-	// attribute colors
-	CString sKey = _T("Preferences\\AttribColors"), sAttrib(_T("Attrib"));
-	int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
-	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
-
-	// backwards compat
-	if (nNumColor == -1)
-	{
-		sKey = _T("Preferences\\CatColors");
-		nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
-		sAttrib = _T("Category");
-
-		ASSERT(m_nColorAttribute == TDCA_CATEGORY);
-	}
-
-	for (int nColor = 0; nColor < nNumColor; nColor++)
-	{
-		CString sColorKey = Misc::MakeKey(_T("\\P%d"), nColor, sKey);
-
-		ATTRIBCOLOR ac;
-		ac.color = pPrefs->GetProfileInt(sColorKey, _T("Color"), 0);
-		ac.sAttrib = pPrefs->GetProfileString(sColorKey, sAttrib);
-
-		if (!ac.sAttrib.IsEmpty())
-		{
-			m_aAttribColors.Add(ac);
-		}
-	}
-
 	// prefs
-	m_bColorPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("ColorPriority"), TRUE);
-	m_bGradientPriorityColors = !pPrefs->GetProfileInt(_T("Preferences"), _T("IndividualPriorityColors"), FALSE);
-	m_sTreeFont = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
-	m_nTreeFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
-	m_bSpecifyTreeFont = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), FALSE);
-	m_sCommentsFont = pPrefs->GetProfileString(_T("Preferences"), _T("CommentsFont"), _T("Arial"));
-	m_nCommentsFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("CommentsFontSize"), 8);
-	m_bSpecifyCommentsFont = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyCommentsFont"), TRUE);
-	m_bSpecifyGridColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyGridColor"), TRUE);
-	m_bSpecifyDoneColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyDoneColor"), TRUE);
-	m_bSpecifyStartColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyStartColor"), FALSE);
-	m_bSpecifyStartTodayColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyStartTodayColor"), FALSE);
-	m_bSpecifyDueColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyDueColor"), TRUE);
-	m_bSpecifyDueTodayColor = pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyDueTodayColor"), TRUE);
-	m_bColorTaskBackground = pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE);
-	m_bCommentsUseTreeFont = pPrefs->GetProfileInt(_T("Preferences"), _T("CommentsUseTreeFont"), FALSE);
-	m_bHLSColorGradient = pPrefs->GetProfileInt(_T("Preferences"), _T("HLSColorGradient"), TRUE);
-	m_bHidePriorityNumber = pPrefs->GetProfileInt(_T("Preferences"), _T("HidePriorityNumber"), FALSE);
-	m_bAlternateLineColor = pPrefs->GetProfileInt(_T("Preferences"), _T("AlternateLineColor"), TRUE);
-	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(_T("Preferences"), _T("FlaggedColor"), FALSE);
-	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(_T("Preferences"), _T("ReferenceColor"), FALSE);
+	m_bColorPriority = pPrefs->GetProfileInt(szKey, _T("ColorPriority"), TRUE);
+	m_bGradientPriorityColors = !pPrefs->GetProfileInt(szKey, _T("IndividualPriorityColors"), FALSE);
+	m_sTreeFont = pPrefs->GetProfileString(szKey, _T("TreeFont"), _T("Arial"));
+	m_nTreeFontSize = pPrefs->GetProfileInt(szKey, _T("FontSize"), 8);
+	m_bSpecifyTreeFont = pPrefs->GetProfileInt(szKey, _T("SpecifyTreeFont"), FALSE);
+	m_sCommentsFont = pPrefs->GetProfileString(szKey, _T("CommentsFont"), _T("Arial"));
+	m_nCommentsFontSize = pPrefs->GetProfileInt(szKey, _T("CommentsFontSize"), 8);
+	m_bSpecifyCommentsFont = pPrefs->GetProfileInt(szKey, _T("SpecifyCommentsFont"), TRUE);
+	m_bSpecifyGridColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGridColor"), TRUE);
+	m_bSpecifyDoneColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDoneColor"), TRUE);
+	m_bSpecifyStartColor = pPrefs->GetProfileInt(szKey, _T("SpecifyStartColor"), FALSE);
+	m_bSpecifyStartTodayColor = pPrefs->GetProfileInt(szKey, _T("SpecifyStartTodayColor"), FALSE);
+	m_bSpecifyDueColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDueColor"), TRUE);
+	m_bSpecifyDueTodayColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDueTodayColor"), TRUE);
+	m_bColorTaskBackground = pPrefs->GetProfileInt(szKey, _T("ColorTaskBackground"), FALSE);
+	m_bCommentsUseTreeFont = pPrefs->GetProfileInt(szKey, _T("CommentsUseTreeFont"), FALSE);
+	m_bHLSColorGradient = pPrefs->GetProfileInt(szKey, _T("HLSColorGradient"), TRUE);
+	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
+	m_bAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
+	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
+	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 
-	m_crGridlines = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("Gridlines"), GRIDLINECOLOR);
-	m_crDone = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), TASKDONECOLOR);
-	m_crStart = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("TaskStart"), TASKSTARTCOLOR);
-	m_crStartToday = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("TaskStartToday"), TASKSTARTCOLOR);
-	m_crDue = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("TaskDue"), TASKDUECOLOR);
-	m_crDueToday = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("TaskDueToday"), TASKDUECOLOR);
-	m_crAltLine = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), ALTERNATELINECOLOR);
-	m_crFlagged = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("Flagged"), FLAGGEDCOLOR);
-	m_crReference = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("Reference"), REFERENCECOLOR);
+	// colors
+	CString sColorKey(szKey);
+	sColorKey += _T("\\Colors");
+	
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P0"), RGB(30, 225, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P1"), RGB(30, 225, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P2"), RGB(30, 225, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P3"), RGB(30, 225, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P4"), RGB(0, 0, 255)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P5"), RGB(0, 0, 255)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P6"), RGB(0, 0, 255)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P7"), RGB(0, 0, 255)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P8"), RGB(255, 0, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P9"), RGB(255, 0, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P10"), RGB(255, 0, 0)));
+
+	m_crLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), PRIORITYLOWCOLOR);
+	m_crHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), PRIORITYHIGHCOLOR);
+	m_crGridlines = pPrefs->GetProfileInt(sColorKey, _T("Gridlines"), GRIDLINECOLOR);
+	m_crDone = pPrefs->GetProfileInt(sColorKey, _T("TaskDone"), TASKDONECOLOR);
+	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), TASKSTARTCOLOR);
+	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), TASKSTARTCOLOR);
+	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), TASKDUECOLOR);
+	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), TASKDUECOLOR);
+	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), ALTERNATELINECOLOR);
+	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), FLAGGEDCOLOR);
+	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), REFERENCECOLOR);
 
 	// bkwds compatibility
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("ColorByPriority"), FALSE))
+	if (pPrefs->GetProfileInt(szKey, _T("ColorByPriority"), FALSE))
 		m_nTextColorOption = COLOROPT_PRIORITY;
 
-	m_nTextColorOption = pPrefs->GetProfileInt(_T("Preferences"), _T("TextColorOption"), m_nTextColorOption);
+	m_nTextColorOption = pPrefs->GetProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
+
+	// attribute colors
+	CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
+	int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
+
+	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
 }
 
 void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
@@ -858,19 +838,22 @@ void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
 	}
 }
 
-void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save settings
+	CString sColorKey(szKey);
+	sColorKey += _T("\\Colors");
+	
 	// priority colors
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("Low"), m_crLow);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("High"), m_crHigh);
+	pPrefs->WriteProfileInt(sColorKey, _T("Low"), m_crLow);
+	pPrefs->WriteProfileInt(sColorKey, _T("High"), m_crHigh);
 
 	int nColor = 11;
 
 	while (nColor--)
 	{
 		CString sKey = Misc::MakeKey(_T("P%d"), nColor);
-		pPrefs->WriteProfileInt(_T("Preferences\\Colors"), sKey, m_aPriorityColors[nColor]);
+		pPrefs->WriteProfileInt(sColorKey, sKey, m_aPriorityColors[nColor]);
 	}
 
 	// attrib colors
@@ -889,38 +872,38 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs)
 	}
 
 	// save settings
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("TextColorOption"), m_nTextColorOption);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ColorPriority"), m_bColorPriority);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("IndividualPriorityColors"), !m_bGradientPriorityColors);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("TreeFont"), m_sTreeFont);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("FontSize"), m_nTreeFontSize);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), m_bSpecifyTreeFont);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("CommentsFont"), m_sCommentsFont);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CommentsFontSize"), m_nCommentsFontSize);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyCommentsFont"), m_bSpecifyCommentsFont);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyGridColor"), m_bSpecifyGridColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyDoneColor"), m_bSpecifyDoneColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyDueColor"), m_bSpecifyDueColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyDueTodayColor"), m_bSpecifyDueTodayColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyStartColor"), m_bSpecifyStartColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SpecifyStartTodayColor"), m_bSpecifyStartTodayColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ColorTaskBackground"), m_bColorTaskBackground);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CommentsUseTreeFont"), m_bCommentsUseTreeFont);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("HLSColorGradient"), m_bHLSColorGradient);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("HidePriorityNumber"), m_bHidePriorityNumber);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AlternateLineColor"), m_bAlternateLineColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("FlaggedColor"), m_bSpecifyFlaggedColor);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ReferenceColor"), m_bSpecifyReferenceColor);
+	pPrefs->WriteProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
+	pPrefs->WriteProfileInt(szKey, _T("ColorPriority"), m_bColorPriority);
+	pPrefs->WriteProfileInt(szKey, _T("IndividualPriorityColors"), !m_bGradientPriorityColors);
+	pPrefs->WriteProfileString(szKey, _T("TreeFont"), m_sTreeFont);
+	pPrefs->WriteProfileInt(szKey, _T("FontSize"), m_nTreeFontSize);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyTreeFont"), m_bSpecifyTreeFont);
+	pPrefs->WriteProfileString(szKey, _T("CommentsFont"), m_sCommentsFont);
+	pPrefs->WriteProfileInt(szKey, _T("CommentsFontSize"), m_nCommentsFontSize);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyCommentsFont"), m_bSpecifyCommentsFont);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyGridColor"), m_bSpecifyGridColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyDoneColor"), m_bSpecifyDoneColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyDueColor"), m_bSpecifyDueColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyDueTodayColor"), m_bSpecifyDueTodayColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartColor"), m_bSpecifyStartColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartTodayColor"), m_bSpecifyStartTodayColor);
+	pPrefs->WriteProfileInt(szKey, _T("ColorTaskBackground"), m_bColorTaskBackground);
+	pPrefs->WriteProfileInt(szKey, _T("CommentsUseTreeFont"), m_bCommentsUseTreeFont);
+	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
+	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
+	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bAlternateLineColor);
+	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
+	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
 
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("Gridlines"), m_crGridlines);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), m_crDone);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("TaskStart"), m_crStart);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("TaskStartToday"), m_crStartToday);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDue"), m_crDue);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDueToday"), m_crDueToday);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), m_crAltLine);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("Flagged"), m_crFlagged);
-	pPrefs->WriteProfileInt(_T("Preferences\\Colors"), _T("Reference"), m_crReference);
+	pPrefs->WriteProfileInt(sColorKey, _T("Gridlines"), m_crGridlines);
+	pPrefs->WriteProfileInt(sColorKey, _T("TaskDone"), m_crDone);
+	pPrefs->WriteProfileInt(sColorKey, _T("TaskStart"), m_crStart);
+	pPrefs->WriteProfileInt(sColorKey, _T("TaskStartToday"), m_crStartToday);
+	pPrefs->WriteProfileInt(sColorKey, _T("TaskDue"), m_crDue);
+	pPrefs->WriteProfileInt(sColorKey, _T("TaskDueToday"), m_crDueToday);
+	pPrefs->WriteProfileInt(sColorKey, _T("AlternateLines"), m_crAltLine);
+	pPrefs->WriteProfileInt(sColorKey, _T("Flagged"), m_crFlagged);
+	pPrefs->WriteProfileInt(sColorKey, _T("Reference"), m_crReference);
 }
 
 void CPreferencesUITasklistColorsPage::OnPopulateattriblist() 

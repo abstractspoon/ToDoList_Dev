@@ -112,9 +112,11 @@ protected:
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+
 	void SaveColumns() const;
-	virtual void LoadPreferences(const IPreferences* pPrefs);
-	virtual void SavePreferences(IPreferences* pPrefs);
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -121,8 +121,9 @@ protected:
 	afx_msg void OnChangeCompletionStatus();
 	DECLARE_MESSAGE_MAP()
 
-   virtual void LoadPreferences(const IPreferences* pPrefs);
-   virtual void SavePreferences(IPreferences* pPrefs);
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 };
 

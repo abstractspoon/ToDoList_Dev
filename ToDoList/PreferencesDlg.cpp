@@ -27,11 +27,10 @@ static char THIS_FILE[] = __FILE__;
 // default priority colors
 const COLORREF PRIORITYLOWCOLOR = RGB(30, 225, 0);
 const COLORREF PRIORITYHIGHCOLOR = RGB(255, 0, 0);
-const int MIN_WIDTH = 827;
-const int MIN_HEIGHT = 510;
 const UINT IDC_TOPOFPAGE = (UINT)-1; // pseudo control ID
 
 const TCHAR PATHDELIM = '>';
+const LPCTSTR PREFSKEY = _T("Preferences");
 
 CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr, 
 								 const CContentMgr* pContentMgr, 
@@ -39,7 +38,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
 								 CWnd* pParent /*=NULL*/)
 	: 
-	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, 0, pParent), 
+	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, IDI_PREFERENCES_DIALOG_STD, 0, pParent), 
 	m_pageShortcuts(pShortcutMgr), 
 	m_pageUI(pContentMgr, pMgrUIExt), 
 	m_pageFile2(pExportMgr),
@@ -64,7 +63,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	ForwardMessage(WM_PGP_CLEARMRU);
 	ForwardMessage(WM_PPB_CTRLCHANGE);
 	
-	LoadPreferences(m_prefs);
+	LoadPreferences(m_prefs, PREFSKEY);
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -87,7 +86,6 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PAGES, OnSelchangedPages)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
 	//}}AFX_MSG_MAP
-	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
@@ -98,13 +96,13 @@ END_MESSAGE_MAP()
 
 void CPreferencesDlg::InitializePreferences()
 {
-	LoadPreferences(m_prefs); // this initializes the dialog data
-	SavePreferences(m_prefs); // this writes it back to the prefs
+	LoadPreferences(m_prefs, PREFSKEY); // this initializes the dialog data
+	SavePreferences(m_prefs, PREFSKEY); // this writes it back to the prefs
 }
 
 int CPreferencesDlg::DoModal(int nInitPage) 
 { 
-	return CPreferencesDlgBase::DoModal(m_prefs, nInitPage); 
+	return CPreferencesDlgBase::DoModal(m_prefs, PREFSKEY, nInitPage); 
 }
 
 BOOL CPreferencesDlg::OnInitDialog() 
@@ -155,10 +153,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 	SynchronizeTree();
 
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
-
-	// Set dlg icon
-	HICON hIcon = GraphicsMisc::LoadIcon(IDI_PREFERENCES_DIALOG_STD);
-	SetIcon(hIcon, FALSE);
 
 	m_tcPages.SetFocus();
 

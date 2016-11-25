@@ -8,6 +8,8 @@
 
 #include "..\Shared\DialogHelper.h"
 
+#include "..\Interfaces\ipreferences.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -33,7 +35,7 @@ enum
 // CCalendarPreferencesPage dialog
 
 CCalendarPreferencesPage::CCalendarPreferencesPage()
-	: CPropertyPage(IDD_PREFERENCES_PAGE)
+	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesPage)
 	m_bShowCalcStartDates = FALSE;
@@ -45,7 +47,7 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 
 void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CPreferencesPageBase::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CCalendarPreferencesPage)
 	DDX_Check(pDX, IDC_SHOWDUEDATES, m_bShowDueDates);
@@ -62,15 +64,12 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CCalendarPreferencesPage)
 	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnShowTasksContinuous)
 	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnShowStartDates)
 	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnShowDueDates)
 	//}}AFX_MSG_MAP
-	ON_WM_CTLCOLOR()
-	ON_WM_ERASEBKGND()
-	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,7 +77,7 @@ END_MESSAGE_MAP()
 
 BOOL CCalendarPreferencesPage::OnInitDialog() 
 {
-	CPropertyPage::OnInitDialog();
+	CPreferencesPageBase::OnInitDialog();
 
 	// inter-dependencies
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
@@ -122,37 +121,6 @@ void CCalendarPreferencesPage::OnShowDueDates()
 	UpdateData();
 
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowDueDates);
-}
-
-BOOL CCalendarPreferencesPage::OnEraseBkgnd(CDC* pDC)
-{
-	CRect rClient;
-	GetClientRect(rClient);
-	pDC->FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-
-	return TRUE;
-}
-
-HBRUSH CCalendarPreferencesPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if (nCtlColor == CTLCOLOR_STATIC)
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		hbr = ::GetSysColorBrush(COLOR_WINDOW);
-	}
-	
-	return hbr;
-}
-
-void CCalendarPreferencesPage::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	CPropertyPage::OnShowWindow(bShow, nStatus);
-	
-	// resize controls to fit text
-	if (bShow)
-		CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
 }
 
 void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -219,9 +187,7 @@ const UINT IDC_HELPBUTTON = 1001;
 
 CCalendarPreferencesDlg::CCalendarPreferencesDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_PREFERENCES_DIALOG, pParent),
-	m_hIcon(NULL),
-	m_btnHelp(1, FALSE)
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_CALENDAR, IDI_HELP_BUTTON, pParent)
 {
 	//{{AFX_DATA_INIT(CCalendarPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -229,62 +195,23 @@ CCalendarPreferencesDlg::CCalendarPreferencesDlg(CWnd* pParent /*=NULL*/)
 	m_ppHost.AddPage(&m_page);
 }
 
-BEGIN_MESSAGE_MAP(CCalendarPreferencesDlg, CDialog)
+BEGIN_MESSAGE_MAP(CCalendarPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CCalendarPreferencesDlg)
 	//}}AFX_MSG_MAP
-	ON_WM_DESTROY()
-	ON_WM_HELPINFO()
-	ON_BN_CLICKED(IDC_HELPBUTTON, OnClickHelpButton)
 END_MESSAGE_MAP()
 
 BOOL CCalendarPreferencesDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CPreferencesDlgBase::OnInitDialog();
 
-	m_ppHost.Create(IDC_PPHOST, this);
-
-	// shrink the ppHost by 1 pixel to allow the border to show
-	CRect rHost;
-	m_ppHost.GetWindowRect(rHost);
-	ScreenToClient(rHost);
-
-	rHost.DeflateRect(1, 1);
-	m_ppHost.MoveWindow(rHost, FALSE);
-	
-	// Replace icon
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_CALENDAR);
-	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
-	
-	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
-	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CCalendarPreferencesDlg::OnOK()
-{
-	CDialog::OnOK();
-
-	m_ppHost.OnOK();
-}
-
-void CCalendarPreferencesDlg::OnDestroy()
-{
-	CDialog::OnDestroy();
-	
-	::DestroyIcon(m_hIcon);
-}
-
-void CCalendarPreferencesDlg::OnClickHelpButton()
+void CCalendarPreferencesDlg::DoHelp()
 {
 	ASSERT(m_pParentWnd);
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_CALENDAR_PREFSHELP);
-}
-
-BOOL CCalendarPreferencesDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
-{
-	OnClickHelpButton();
-	return TRUE;
 }

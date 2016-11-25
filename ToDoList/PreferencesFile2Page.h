@@ -103,8 +103,8 @@ protected:
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
-   virtual void LoadPreferences(const IPreferences* pPrefs);
-   virtual void SavePreferences(IPreferences* pPrefs);
+   virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+   virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 };
 

@@ -604,7 +604,7 @@ void CPreferencesToolPage::OnImport()
 	}
 }
 
-void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	// load tools
 	int nToolCount = pPrefs->GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
@@ -627,7 +627,7 @@ void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs)
 	}
 }
 
-void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
 {
 	// save tools to registry and m_aTools
 	int nToolCount = m_aTools.GetSize();

@@ -10,12 +10,12 @@
 #include "CreateFileLinkDlg.h"
 
 #include "..\shared\GroupLine.h"
-#include "..\shared\scrollingpropertypagehost.h"
+#include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFPreferencesDlg dialog
 
-class CRTFPreferencesPage : public CPropertyPage
+class CRTFPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
@@ -58,14 +58,11 @@ protected:
 	//{{AFX_MSG(CCreateFileLinkDlg)
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnPromptForLink();
 	DECLARE_MESSAGE_MAP()
 };
 
-class CRTFPreferencesDlg : public CDialog
+class CRTFPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
@@ -78,31 +75,20 @@ public:
 	BOOL GetPromptForFileLink() const { return m_page.GetPromptForFileLink(); }
 	BOOL GetConvertWithMSWord() { return m_page.GetConvertWithMSWord(); }
 
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
-
 protected:
 // Dialog Data
 	//{{AFX_DATA(CCreateFileLinkDlg)
 	//}}AFX_DATA
 	CRTFPreferencesPage m_page;
-	CScrollingPropertyPageHost m_ppHost;
-	HICON m_hIcon;
 
 protected:
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCreateFileLinkDlg)
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+	virtual void DoHelp();
 
 	// Generated message map functions
-	//{{AFX_MSG(CCreateFileLinkDlg)
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	afx_msg void OnDestroy();
+
 	DECLARE_MESSAGE_MAP()
 };
 

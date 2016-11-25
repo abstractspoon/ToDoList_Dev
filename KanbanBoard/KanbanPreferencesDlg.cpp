@@ -7,7 +7,6 @@
 #include "Kanbanenum.h"
 #include "KanbanMsg.h"
 
-#include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
@@ -22,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: 
-	CPropertyPage(IDD_PREFERENCES_PAGE), 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE), 
 	m_nFixedAttrib(IUI_STATUS),
 	m_bSortSubtaskBelowParent(FALSE),
 	m_bColorBarByPriority(FALSE),
@@ -34,7 +33,7 @@ CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 
 void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CPreferencesPageBase::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CKanbanPreferencesPage)
 	DDX_Control(pDX, IDC_DISPLAYATTRIBUTES, m_lbDisplayAttrib);
@@ -60,7 +59,7 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
 	ON_CBN_SELCHANGE(IDC_CUSTOMATTRIBID, OnSelchangeCustomAttribute)
@@ -74,9 +73,6 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_SHOWTASKCOLORASBAR, OnShowColorAsBar)
 	ON_COMMAND(ID_POPULATECOLUMNS, OnPopulateFixedColumns)
 	ON_UPDATE_COMMAND_UI(ID_POPULATECOLUMNS, OnUpdatePopulateColumns)
-	ON_WM_CTLCOLOR()
-	ON_WM_ERASEBKGND()
-	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,7 +80,7 @@ END_MESSAGE_MAP()
 
 BOOL CKanbanPreferencesPage::OnInitDialog() 
 {
-	CPropertyPage::OnInitDialog();
+	CPreferencesPageBase::OnInitDialog();
 	
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
@@ -94,7 +90,7 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, MAGENTA));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 		
-		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
+		CRect rToolbar = GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
 		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
 	}
@@ -102,10 +98,10 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	
 	m_cbAttributes.ShowCustomAttribute(m_aCustomAttribIDs.GetSize());
-	CDialogHelper::SelectItemByData(m_cbAttributes, m_nFixedAttrib);
+	SelectItemByData(m_cbAttributes, m_nFixedAttrib);
 
 	CLocalizer::EnableTranslation(m_cbCustomAttributes, FALSE);
-	CDialogHelper::SetComboBoxItems(m_cbCustomAttributes, m_aCustomAttribIDs);
+	SetComboBoxItems(m_cbCustomAttributes, m_aCustomAttribIDs);
 	m_cbCustomAttributes.SelectString(-1, m_sFixedCustomAttribID);
 
 	EnableDisableControls();
@@ -168,7 +164,7 @@ void CKanbanPreferencesPage::UpdateAttributeValueCombo()
 
 void CKanbanPreferencesPage::OnOK()
 {
-	CPropertyPage::OnOK();
+	CPreferencesPageBase::OnOK();
 
 	m_lcFixedColumnDefs.GetColumnDefinitions(m_aFixedColumnDefs);
 
@@ -194,36 +190,6 @@ int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColum
 		aColumnDefs.Copy(m_aFixedColumnDefs);
 
 	return aColumnDefs.GetSize();
-}
-
-BOOL CKanbanPreferencesPage::OnEraseBkgnd(CDC* pDC)
-{
-	CRect rClient;
-	GetClientRect(rClient);
-	pDC->FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-
-	return TRUE;
-}
-
-HBRUSH CKanbanPreferencesPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if (nCtlColor == CTLCOLOR_STATIC)
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		hbr = GetSysColorBrush(COLOR_WINDOW);
-	}
-	
-	return hbr;
-}
-
-void CKanbanPreferencesPage::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	CPropertyPage::OnShowWindow(bShow, nStatus);
-
-	if (bShow)
-		CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
 }
 
 void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -540,9 +506,7 @@ const UINT IDC_HELPBUTTON = 1001;
 
 CKanbanPreferencesDlg::CKanbanPreferencesDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_PREFERENCES_DIALOG, pParent),
-	m_hIcon(NULL),
-	m_btnHelp(1, FALSE)
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_KANBAN, IDI_HELP_BUTTON, pParent)
 {
 	//{{AFX_DATA_INIT(CKanbanPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -550,12 +514,9 @@ CKanbanPreferencesDlg::CKanbanPreferencesDlg(CWnd* pParent /*=NULL*/)
 	m_ppHost.AddPage(&m_page);
 }
 
-BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CDialog)
+BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesDlg)
 	//}}AFX_MSG_MAP
-	ON_WM_DESTROY()
-	ON_WM_HELPINFO()
-	ON_BN_CLICKED(IDC_HELPBUTTON, OnClickHelpButton)
 END_MESSAGE_MAP()
 
 int CKanbanPreferencesDlg::DoModal(const CStringArray& aCustomAttribIDs, 
@@ -566,57 +527,21 @@ int CKanbanPreferencesDlg::DoModal(const CStringArray& aCustomAttribIDs,
 	m_page.SetAttributeValues(mapValues);
 	m_page.SetDisplayAttributes(aDisplayAttrib);
 	
-	return CDialog::DoModal();
+	return CPreferencesDlgBase::DoModal();
 }
 
 BOOL CKanbanPreferencesDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CPreferencesDlgBase::OnInitDialog();
 
-	m_ppHost.Create(IDC_PPHOST, this);
-
-	// shrink the ppHost by 1 pixel to allow the border to show
-	CRect rHost;
-	m_ppHost.GetWindowRect(rHost);
-	ScreenToClient(rHost);
-
-	rHost.DeflateRect(1, 1);
-	m_ppHost.MoveWindow(rHost, FALSE);
-	
-	// Replace icon
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_KANBAN);
-	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
-
-	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
-	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CKanbanPreferencesDlg::OnOK()
-{
-	CDialog::OnOK();
-
-	m_ppHost.OnOK();
-}
-
-void CKanbanPreferencesDlg::OnDestroy()
-{
-	CDialog::OnDestroy();
-	
-	::DestroyIcon(m_hIcon);
-}
-
-void CKanbanPreferencesDlg::OnClickHelpButton()
+void CKanbanPreferencesDlg::DoHelp()
 {
 	ASSERT(m_pParentWnd);
 
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_KBC_PREFSHELP);
-}
-
-BOOL CKanbanPreferencesDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
-{
-	OnClickHelpButton();
-	return TRUE;
 }

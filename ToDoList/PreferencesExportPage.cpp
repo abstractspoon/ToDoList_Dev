@@ -132,38 +132,38 @@ CString CPreferencesExportPage::GetHtmlCharSet() const
 }
 
 
-void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	m_sHtmlFont = pPrefs->GetProfileString(_T("Preferences"), _T("HtmlFont"), _T("Verdana"));
-	m_bPreviewExport = pPrefs->GetProfileInt(_T("Preferences"), _T("PreviewSaveAs"), TRUE);
-	m_nHtmlFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("HtmlFontSize"), 2);
-	m_nTextIndent = pPrefs->GetProfileInt(_T("Preferences"), _T("TextIndent"), 2);
-	m_nLineSpaces = pPrefs->GetProfileInt(_T("Preferences"), _T("LineSpaces"), 8);
-	m_bExportVisibleOnly = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportVisibleOnly"), FALSE);
-	m_bExportParentTitleCommentsOnly = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
-	m_bExportSpaceForNotes = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportSpaceForNotes"), FALSE);
-	m_bUseSpaceIndents = pPrefs->GetProfileInt(_T("Preferences"), _T("UseSpaceIndents"), TRUE);
+	m_sHtmlFont = pPrefs->GetProfileString(szKey, _T("HtmlFont"), _T("Verdana"));
+	m_bPreviewExport = pPrefs->GetProfileInt(szKey, _T("PreviewSaveAs"), TRUE);
+	m_nHtmlFontSize = pPrefs->GetProfileInt(szKey, _T("HtmlFontSize"), 2);
+	m_nTextIndent = pPrefs->GetProfileInt(szKey, _T("TextIndent"), 2);
+	m_nLineSpaces = pPrefs->GetProfileInt(szKey, _T("LineSpaces"), 8);
+	m_bExportVisibleOnly = pPrefs->GetProfileInt(szKey, _T("ExportVisibleOnly"), FALSE);
+	m_bExportParentTitleCommentsOnly = pPrefs->GetProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), FALSE);
+	m_bExportSpaceForNotes = pPrefs->GetProfileInt(szKey, _T("ExportSpaceForNotes"), FALSE);
+	m_bUseSpaceIndents = pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE);
 
 	CString sDefCharset = "Windows-" + Misc::GetDefCharset();
-	m_sHtmlCharSet = pPrefs->GetProfileString(_T("Preferences"), _T("HtmlCharSet"), sDefCharset);
+	m_sHtmlCharSet = pPrefs->GetProfileString(szKey, _T("HtmlCharSet"), sDefCharset);
 
-//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
+//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
-void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save settings
-	pPrefs->WriteProfileString(_T("Preferences"), _T("HtmlFont"), m_sHtmlFont);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("HtmlFontSize"), m_nHtmlFontSize);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("PreviewSaveAs"), m_bPreviewExport);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("TextIndent"), m_nTextIndent);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("LineSpaces"), m_nLineSpaces);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExportVisibleOnly"), m_bExportVisibleOnly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), m_bExportParentTitleCommentsOnly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExportSpaceForNotes"), m_bExportSpaceForNotes);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("HtmlCharSet"), m_sHtmlCharSet);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseSpaceIndents"), m_bUseSpaceIndents);
-//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
+	pPrefs->WriteProfileString(szKey, _T("HtmlFont"), m_sHtmlFont);
+	pPrefs->WriteProfileInt(szKey, _T("HtmlFontSize"), m_nHtmlFontSize);
+	pPrefs->WriteProfileInt(szKey, _T("PreviewSaveAs"), m_bPreviewExport);
+	pPrefs->WriteProfileInt(szKey, _T("TextIndent"), m_nTextIndent);
+	pPrefs->WriteProfileInt(szKey, _T("LineSpaces"), m_nLineSpaces);
+	pPrefs->WriteProfileInt(szKey, _T("ExportVisibleOnly"), m_bExportVisibleOnly);
+	pPrefs->WriteProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), m_bExportParentTitleCommentsOnly);
+	pPrefs->WriteProfileInt(szKey, _T("ExportSpaceForNotes"), m_bExportSpaceForNotes);
+	pPrefs->WriteProfileString(szKey, _T("HtmlCharSet"), m_sHtmlCharSet);
+	pPrefs->WriteProfileInt(szKey, _T("UseSpaceIndents"), m_bUseSpaceIndents);
+//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 LRESULT CPreferencesExportPage::OnEEBtnClick(WPARAM wp, LPARAM lp)

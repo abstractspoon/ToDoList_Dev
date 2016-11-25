@@ -38,8 +38,8 @@ public:
 	virtual ~CShortcutManager();
 
 	// hooks AfxGetMainWnd() and only sends commands there
-	BOOL Initialize(CWnd* pOwner, const IPreferences* pPrefs = NULL, WORD wInvalidComb = HKCOMB_EDITCTRLS, WORD wFallbackModifiers = 0);
-	BOOL Release(IPreferences* pPrefs = NULL);
+	BOOL Initialize(CWnd* pOwner, const IPreferences* pPrefs = NULL, LPCTSTR szKey = NULL, WORD wInvalidComb = HKCOMB_EDITCTRLS, WORD wFallbackModifiers = 0);
+	BOOL Release(IPreferences* pPrefs = NULL, LPCTSTR szKey = NULL);
 
 	// call this in PreTranslateMessage. returns the cmd ID or 0
 	UINT ProcessMessage(const MSG* pMsg, DWORD* pShortcut = NULL) const; 
@@ -53,8 +53,8 @@ public:
 	void SetShortcut(UINT nCmdID, WORD wVirtKeyCode, WORD wModifiers = HOTKEYF_CONTROL); 
 	void SetShortcut(UINT nCmdID, DWORD dwShortcut); 
 	
-	void SaveSettings(IPreferences* pPrefs) const;
-	void LoadSettings(const IPreferences* pPrefs);
+	void SaveSettings(IPreferences* pPrefs, LPCTSTR szKey) const;
+	void LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	UINT GetCommandID(DWORD dwShortcut) const;
 	DWORD GetShortcut(UINT nCmdID) const;

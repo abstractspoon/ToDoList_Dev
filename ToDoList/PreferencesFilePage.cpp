@@ -155,26 +155,26 @@ void CPreferencesFilePage::OnOnlyshowduetaskforperson()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesFilePage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesFilePage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	m_bNotifyDueOnLoad = pPrefs->GetProfileInt(_T("Preferences"), _T("NotifyDue"), FALSE);
-	m_bNotifyDueOnSwitch = pPrefs->GetProfileInt(_T("Preferences"), _T("NotifyDueOnSwitch"), FALSE);
-	m_bAutoArchive = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoArchive"), FALSE);
-	m_bNotifyReadOnly = pPrefs->GetProfileInt(_T("Preferences"), _T("NotifyReadOnly"), TRUE);
-	m_bRemoveArchivedTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("RemoveArchivedTasks"), TRUE);
-	m_bRemoveOnlyOnAbsoluteCompletion = pPrefs->GetProfileInt(_T("Preferences"), _T("RemoveOnlyOnAbsoluteCompletion"), TRUE);
-	m_nNotifyDueByOnLoad = pPrefs->GetProfileInt(_T("Preferences"), _T("NotifyDueBy"), PFP_DUETODAY);
-	m_nNotifyDueByOnSwitch = pPrefs->GetProfileInt(_T("Preferences"), _T("NotifyDueByOnSwitch"), PFP_DUETODAY);
-	m_bDisplayDueTasksInHtml = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDueTasksInHtml"), TRUE);
-	m_bDisplayDueCommentsInText = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDueCommentsInText"), TRUE);
-	m_bRefreshFindOnLoad = pPrefs->GetProfileInt(_T("Preferences"), _T("RefreshFindOnLoad"), FALSE);
-	m_bDueTaskTitlesOnly = pPrefs->GetProfileInt(_T("Preferences"), _T("DueTaskTitlesOnly"), FALSE);
-	m_sDueTasksStylesheet = pPrefs->GetProfileString(_T("Preferences"), _T("DueTasksStylesheet"), FALSE);
-	m_sDueTaskPerson = pPrefs->GetProfileString(_T("Preferences"), _T("DueTaskPerson"));
-	m_bWarnAddDeleteArchive = pPrefs->GetProfileInt(_T("Preferences"), _T("WarnAddDeleteArchive"), TRUE);
-	m_bDontRemoveFlagged = pPrefs->GetProfileInt(_T("Preferences"), _T("DontRemoveFlagged"), FALSE);
-	m_bExpandTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("ExpandTasks"), FALSE);
-//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
+	m_bNotifyDueOnLoad = pPrefs->GetProfileInt(szKey, _T("NotifyDue"), FALSE);
+	m_bNotifyDueOnSwitch = pPrefs->GetProfileInt(szKey, _T("NotifyDueOnSwitch"), FALSE);
+	m_bAutoArchive = pPrefs->GetProfileInt(szKey, _T("AutoArchive"), FALSE);
+	m_bNotifyReadOnly = pPrefs->GetProfileInt(szKey, _T("NotifyReadOnly"), TRUE);
+	m_bRemoveArchivedTasks = pPrefs->GetProfileInt(szKey, _T("RemoveArchivedTasks"), TRUE);
+	m_bRemoveOnlyOnAbsoluteCompletion = pPrefs->GetProfileInt(szKey, _T("RemoveOnlyOnAbsoluteCompletion"), TRUE);
+	m_nNotifyDueByOnLoad = pPrefs->GetProfileInt(szKey, _T("NotifyDueBy"), PFP_DUETODAY);
+	m_nNotifyDueByOnSwitch = pPrefs->GetProfileInt(szKey, _T("NotifyDueByOnSwitch"), PFP_DUETODAY);
+	m_bDisplayDueTasksInHtml = pPrefs->GetProfileInt(szKey, _T("DisplayDueTasksInHtml"), TRUE);
+	m_bDisplayDueCommentsInText = pPrefs->GetProfileInt(szKey, _T("DisplayDueCommentsInText"), TRUE);
+	m_bRefreshFindOnLoad = pPrefs->GetProfileInt(szKey, _T("RefreshFindOnLoad"), FALSE);
+	m_bDueTaskTitlesOnly = pPrefs->GetProfileInt(szKey, _T("DueTaskTitlesOnly"), FALSE);
+	m_sDueTasksStylesheet = pPrefs->GetProfileString(szKey, _T("DueTasksStylesheet"), FALSE);
+	m_sDueTaskPerson = pPrefs->GetProfileString(szKey, _T("DueTaskPerson"));
+	m_bWarnAddDeleteArchive = pPrefs->GetProfileInt(szKey, _T("WarnAddDeleteArchive"), TRUE);
+	m_bDontRemoveFlagged = pPrefs->GetProfileInt(szKey, _T("DontRemoveFlagged"), FALSE);
+	m_bExpandTasks = pPrefs->GetProfileInt(szKey, _T("ExpandTasks"), FALSE);
+//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
 	// init the stylesheet folder to point to the resource folder and make path relative
 	CString sFolder = FileMisc::GetAppResourceFolder() + "\\Stylesheets";
@@ -184,34 +184,34 @@ void CPreferencesFilePage::LoadPreferences(const IPreferences* pPrefs)
 	m_sDueTasksStylesheet = FileMisc::GetRelativePath(m_sDueTasksStylesheet, sFolder, FALSE);
 
 	// these are dependent on the values they control for backward compat
-	m_bOnlyShowDueTasksForPerson = pPrefs->GetProfileInt(_T("Preferences"), _T("OnlyShowDueTasksForPerson"), !m_sDueTaskPerson.IsEmpty());
-	m_bUseStyleSheetForDueTasks = pPrefs->GetProfileInt(_T("Preferences"), _T("UseStylesheetForDueTasks"), !m_sDueTasksStylesheet.IsEmpty());
+	m_bOnlyShowDueTasksForPerson = pPrefs->GetProfileInt(szKey, _T("OnlyShowDueTasksForPerson"), !m_sDueTaskPerson.IsEmpty());
+	m_bUseStyleSheetForDueTasks = pPrefs->GetProfileInt(szKey, _T("UseStylesheetForDueTasks"), !m_sDueTasksStylesheet.IsEmpty());
 }
 
-void CPreferencesFilePage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesFilePage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save settings
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NotifyDue"), m_bNotifyDueOnLoad);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NotifyDueOnSwitch"), m_bNotifyDueOnSwitch);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoArchive"), m_bAutoArchive);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NotifyReadOnly"), m_bNotifyReadOnly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("RemoveArchivedTasks"), m_bRemoveArchivedTasks);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("RemoveOnlyOnAbsoluteCompletion"), m_bRemoveOnlyOnAbsoluteCompletion);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NotifyDueBy"), m_nNotifyDueByOnLoad);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NotifyDueByOnSwitch"), m_nNotifyDueByOnSwitch);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DisplayDueTasksInHtml"), m_bDisplayDueTasksInHtml);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DisplayDueCommentsInText"), m_bDisplayDueCommentsInText);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("RefreshFindOnLoad"), m_bRefreshFindOnLoad);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DueTaskTitlesOnly"), m_bDueTaskTitlesOnly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseStylesheetForDueTasks"), m_bUseStyleSheetForDueTasks);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DueTasksStylesheet"), m_sDueTasksStylesheet);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("OnlyShowDueTasksForPerson"), m_bOnlyShowDueTasksForPerson);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DueTaskPerson"), m_sDueTaskPerson);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("WarnAddDeleteArchive"), m_bWarnAddDeleteArchive);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DontRemoveFlagged"), m_bDontRemoveFlagged);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ExpandTasks"), m_bExpandTasks);
+	pPrefs->WriteProfileInt(szKey, _T("NotifyDue"), m_bNotifyDueOnLoad);
+	pPrefs->WriteProfileInt(szKey, _T("NotifyDueOnSwitch"), m_bNotifyDueOnSwitch);
+	pPrefs->WriteProfileInt(szKey, _T("AutoArchive"), m_bAutoArchive);
+	pPrefs->WriteProfileInt(szKey, _T("NotifyReadOnly"), m_bNotifyReadOnly);
+	pPrefs->WriteProfileInt(szKey, _T("RemoveArchivedTasks"), m_bRemoveArchivedTasks);
+	pPrefs->WriteProfileInt(szKey, _T("RemoveOnlyOnAbsoluteCompletion"), m_bRemoveOnlyOnAbsoluteCompletion);
+	pPrefs->WriteProfileInt(szKey, _T("NotifyDueBy"), m_nNotifyDueByOnLoad);
+	pPrefs->WriteProfileInt(szKey, _T("NotifyDueByOnSwitch"), m_nNotifyDueByOnSwitch);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayDueTasksInHtml"), m_bDisplayDueTasksInHtml);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayDueCommentsInText"), m_bDisplayDueCommentsInText);
+	pPrefs->WriteProfileInt(szKey, _T("RefreshFindOnLoad"), m_bRefreshFindOnLoad);
+	pPrefs->WriteProfileInt(szKey, _T("DueTaskTitlesOnly"), m_bDueTaskTitlesOnly);
+	pPrefs->WriteProfileInt(szKey, _T("UseStylesheetForDueTasks"), m_bUseStyleSheetForDueTasks);
+	pPrefs->WriteProfileString(szKey, _T("DueTasksStylesheet"), m_sDueTasksStylesheet);
+	pPrefs->WriteProfileInt(szKey, _T("OnlyShowDueTasksForPerson"), m_bOnlyShowDueTasksForPerson);
+	pPrefs->WriteProfileString(szKey, _T("DueTaskPerson"), m_sDueTaskPerson);
+	pPrefs->WriteProfileInt(szKey, _T("WarnAddDeleteArchive"), m_bWarnAddDeleteArchive);
+	pPrefs->WriteProfileInt(szKey, _T("DontRemoveFlagged"), m_bDontRemoveFlagged);
+	pPrefs->WriteProfileInt(szKey, _T("ExpandTasks"), m_bExpandTasks);
 
-//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
+//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 CString CPreferencesFilePage::GetDueTaskStylesheet() const 
