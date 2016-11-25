@@ -44,9 +44,10 @@ protected:
 	CString m_sTranslation;
 	CString m_sYourLanguagePath;
 	CString m_sLastBrowsePath;
-	CString m_sAppVersion;
 	BOOL m_bShowAlternatives;
 	BOOL m_bShowTooltips;
+
+	const CString m_sAppVersion;
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTransEditDlg)

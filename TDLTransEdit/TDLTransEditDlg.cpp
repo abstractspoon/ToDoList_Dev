@@ -28,7 +28,8 @@ CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
 	CDialog(CTDLTransEditDlg::IDD, pParent), 
 	m_bEdited(FALSE), 
 	m_bShowAlternatives(TRUE),
-	m_bShowTooltips(TRUE)
+	m_bShowTooltips(TRUE),
+	m_sAppVersion(CTransDictionary::GetAppVersion())
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 	m_sFilter = _T("");
@@ -331,9 +332,12 @@ void CTDLTransEditDlg::LoadState()
 	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), FALSE);
 	m_sYourLanguagePath = AfxGetApp()->GetProfileString(_T("State"), _T("YourLanguage"));
 	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
-	m_sLastBrowsePath = AfxGetApp()->GetProfileString(_T("State"), _T("LastBrowsePath"));
 	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
+
+	CString sDefBrowsePath;
+	FileMisc::MakePath(sDefBrowsePath, NULL, FileMisc::GetModuleFolder(), _T("Resources\\Translations"));
+	m_sLastBrowsePath = AfxGetApp()->GetProfileString(_T("State"), _T("LastBrowsePath"), sDefBrowsePath);
 
 	CRect rect;
 	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
