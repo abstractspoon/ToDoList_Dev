@@ -53,7 +53,7 @@ struct KANBANITEM
 	double dTimeEst, dTimeSpent, dCost;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
-	CString sExternalID, sRecurrence, sCreatedBy;
+	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
 	void SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetAttributeValue(LPCTSTR szAttrib, int nValue);

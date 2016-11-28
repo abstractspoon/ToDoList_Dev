@@ -371,6 +371,11 @@ BEGIN
     IDS_BKGNDCOLOR          "Colour"
 END
 
+STRINGTABLE
+BEGIN
+    IDS_DISPLAY_FILEREF     "File Link"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
