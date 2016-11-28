@@ -1514,11 +1514,16 @@ void CEnListCtrl::BuildSortMap(int nCol)
 	// because we can't reliably get back from the itemdata to the item index
 	// during a sort, we map the itemdata of each item index directly to
 	// the column string
-	m_mapSortStrings.RemoveAll();
+	BuildSortMap(nCol, m_mapSortStrings);
+}
+
+void CEnListCtrl::BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const
+{
+	mapSortStrings.RemoveAll();
 	int nItem = GetItemCount();
 
 	while (nItem--)
-		m_mapSortStrings[GetItemData(nItem)] = GetItemText(nItem, nCol);
+		mapSortStrings[GetItemData(nItem)] = GetItemText(nItem, nCol);
 }
 
 CString CEnListCtrl::GetSortString(DWORD dwItemData) const

@@ -199,9 +199,9 @@ BEGIN
     END
     POPUP "&Options"
     BEGIN
-        MENUITEM "Show &Optional Items (duplicates)", 
-                                                ID_OPTIONS_SHOWOPTIONALS
+        MENUITEM "Show &Optional Items (duplicates)", ID_OPTIONS_SHOWOPTIONALS
         MENUITEM "Show &Tooltips",              ID_OPTIONS_SHOWTOOLTIPS
+        MENUITEM "Sort &Untranslated Items at Top", ID_OPTIONS_SORTUNTRANSATTOP
     END
     POPUP "&Tools"
     BEGIN

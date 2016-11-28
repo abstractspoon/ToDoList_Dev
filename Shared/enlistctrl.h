@@ -190,16 +190,18 @@ protected:
 	void DeleteAllColumnData();
 	CColumnData* CreateColumnData(int nCol);
 	const CColumnData* GetColumnData(int nCol) const;
-	void BuildSortMap(int nCol);
 	CString GetSortText(DWORD dwItemData) const;
 	void ForceResize();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
 
+	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
+
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 //	static BOOL IsSelectionThemed(BOOL bClassic) { return IsSelectionThemed(s_dwSelectionTheming, bClassic); }
 
 private:
+	void BuildSortMap(int nCol);
 	int CalcItemHeight() const;
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };

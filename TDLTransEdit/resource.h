@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by TDLTransEdit.rc
 //
 #define IDR_MANIFEST                    1
@@ -20,13 +20,15 @@
 #define ID_FILE_NEW_TRANSLATION         32774
 #define ID_TOOLS_CLEANUP                32775
 #define ID_OPTIONS_SHOWTOOLTIPS         32776
+#define ID_OPTIONS_SORTUNTRANSLATEDITEMSATTOP 32777
+#define ID_OPTIONS_SORTUNTRANSATTOP     32778
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        131
-#define _APS_NEXT_COMMAND_VALUE         32777
+#define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

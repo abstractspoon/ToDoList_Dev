@@ -25,7 +25,7 @@ class CTDLTransEditDlg : public CDialog, public CDialogHelper
 {
 // Construction
 public:
-	CTDLTransEditDlg(CWnd* pParent = NULL);	// standard constructor
+	CTDLTransEditDlg(LPCTSTR szAppVer, CWnd* pParent = NULL);	// standard constructor
 
 protected:
 // Dialog Data
@@ -44,9 +44,10 @@ protected:
 	CString m_sTranslation;
 	CString m_sYourLanguagePath;
 	CString m_sLastBrowsePath;
-	CString m_sAppVersion;
+	CString m_sAppVer;
 	BOOL m_bShowAlternatives;
 	BOOL m_bShowTooltips;
+	BOOL m_bSortUntranslatedAtTop;
 
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTransEditDlg)
@@ -92,6 +93,8 @@ protected:
 	CString GetTranslationVersion(const CString& sTransPath) const;
 	BOOL IsReadOnly() const;
 
+public:
+	afx_msg void OnOptionsSortUntranslatedAtTop();
 };
 
 //{{AFX_INSERT_LOCATION}}

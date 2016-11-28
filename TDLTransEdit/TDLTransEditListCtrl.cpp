@@ -21,7 +21,7 @@ IMPLEMENT_DYNAMIC(CTDLTransEditListCtrl, CInputListCtrl)
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditListCtrl
 
-CTDLTransEditListCtrl::CTDLTransEditListCtrl()
+CTDLTransEditListCtrl::CTDLTransEditListCtrl() : m_bSortUntranslatedAtTop(TRUE)
 {
 }
 
@@ -144,42 +144,54 @@ BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sF
 	return FALSE;
 }
 
+void CTDLTransEditListCtrl::Sort()
+{
+	if (m_bSortUntranslatedAtTop)
+		BuildSortMap(TRANS_COL, m_mapSortTransCol);
+
+	CInputListCtrl::Sort();
+}
+
 int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
 {
+	if (m_bSortUntranslatedAtTop)
+	{
+		CString sTrans1, sTrans2;
+		m_mapSortTransCol.Lookup(dwItemData1, sTrans1);
+		m_mapSortTransCol.Lookup(dwItemData2, sTrans2);
+
+		if (sTrans1.IsEmpty() && !sTrans2.IsEmpty())
+		{
+			return (m_bSortAscending ? -1 : 1);
+		}
+		else if (sTrans2.IsEmpty() && !sTrans1.IsEmpty())
+		{
+			return (m_bSortAscending ? 1 : -1);
+		}
+
+		// else default processing
+	}
+
 	CString sItem1 = GetSortString(dwItemData1);
 	CString sItem2 = GetSortString(dwItemData2);
 
-	// Always sort untranslated items ABOVE others
-	int nCompare = 0;
+	BOOL bAlt1 = sItem1.Replace(ALTINDENT, _T(""));
+	BOOL bAlt2 = sItem2.Replace(ALTINDENT, _T(""));
 
-	if (sItem1.IsEmpty())
-	{
-		nCompare = (m_bSortAscending ? -1 : 1);
-	}
-	else if (sItem2.IsEmpty())
-	{
-		nCompare = (m_bSortAscending ? 1 : -1);
-	}
-	else
-	{
-		BOOL bAlt1 = sItem1.Replace(ALTINDENT, _T(""));
-		BOOL bAlt2 = sItem2.Replace(ALTINDENT, _T(""));
-	
-		nCompare = Misc::NaturalCompare(sItem1, sItem2);
+	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
-		if (nCompare == 0)
+	if (nCompare == 0)
+	{
+		// sort alternatives always BELOW 'principals'
+		if (bAlt1 != bAlt2)
 		{
-			// sort alternatives always BELOW 'principals'
-			if (bAlt1 != bAlt2)
+			if (bAlt1)
 			{
-				if (bAlt1)
-				{
-					nCompare = (m_bSortAscending ? 1 : -1);
-				}
-				else if (sItem2.IsEmpty())
-				{
-					nCompare = (m_bSortAscending ? -1 : 1);
-				}
+				nCompare = (m_bSortAscending ? 1 : -1);
+			}
+			else if (sItem2.IsEmpty())
+			{
+				nCompare = (m_bSortAscending ? -1 : 1);
 			}
 		}
 	}
@@ -316,4 +328,13 @@ BOOL CTDLTransEditListCtrl::GetColumnWidths(int nWidths[NUM_COLS]) const
 	}
 
 	return nPrevWidth;
+}
+
+void CTDLTransEditListCtrl::SetSortUntranslatedAtTop(BOOL bEnable)
+{
+	if (bEnable != m_bSortUntranslatedAtTop)
+	{
+		m_bSortUntranslatedAtTop = bEnable;
+		Sort();
+	}
 }

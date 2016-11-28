@@ -620,15 +620,29 @@ BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
 {
 	if (sClassID == m_sClassID)
 	{
-		m_sTextOut = sTextOut;
-		return TRUE;
-	}
-	else if (HasClassID(sClassID)) // check alternatives
-	{
-		m_mapAlternatives[sClassID] = sTextOut;
-		return TRUE;
+		if (m_sTextOut != sTextOut)
+		{
+			m_sTextOut = sTextOut;
+			return TRUE;
+		}
+
+		return FALSE; // no change
 	}
 
+	// else check alternatives
+	CString sExistTrans;
+
+	if (m_mapAlternatives.Lookup(sClassID, sExistTrans))
+	{
+		if (sExistTrans != sTextOut)
+		{
+			m_mapAlternatives[sClassID] = sTextOut;
+			return TRUE;
+		}
+
+		return FALSE; // no change
+	}
+	
 	ASSERT(0);
 	return FALSE;
 }

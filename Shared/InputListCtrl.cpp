@@ -1491,7 +1491,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 	}
 	else // just a normal column and row but we still need to check for duplication
 	{
-		if (!sText.IsEmpty())
+//		if (!sText.IsEmpty())
 		{
 			if ((m_bAutoAddRows && m_nEditCol == 0 && IsDuplicateRow(sText, m_nEditItem) && !m_bAllowDuplication) ||
 				(m_bAutoAddCols && m_nEditItem == 0 && IsDuplicateCol(sText, m_nEditCol) && !m_bAllowDuplication))
@@ -1513,13 +1513,13 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				*pResult = EDITITEM;
 			}
 		}
-		else // remove item
-		{
-			SetItemText(m_nEditItem, m_nEditCol, _T(""));
-			bItemDeleted = TRUE;
-			bNotifyParent = FALSE;
-			DeleteSelectedCell();
-		}
+// 		else // remove item
+// 		{
+// 			SetItemText(m_nEditItem, m_nEditCol, _T(""));
+// 			bItemDeleted = TRUE;
+// 			bNotifyParent = FALSE;
+// 			DeleteSelectedCell();
+// 		}
 	}
 
 	if (!bItemDeleted)

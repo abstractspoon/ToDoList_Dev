@@ -23,16 +23,20 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
 
-CTDLTransEditDlg::CTDLTransEditDlg(CWnd* pParent /*=NULL*/)
+CTDLTransEditDlg::CTDLTransEditDlg(LPCTSTR szAppVer, CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(CTDLTransEditDlg::IDD, pParent), 
+	m_sAppVer(szAppVer),
 	m_bEdited(FALSE), 
 	m_bShowAlternatives(TRUE),
-	m_bShowTooltips(TRUE)
+	m_bShowTooltips(TRUE),
+	m_bSortUntranslatedAtTop(TRUE)
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 	m_sFilter = _T("");
 	//}}AFX_DATA_INIT
+
+	CTransDictionary::SetAppVersion(szAppVer);
 }
 
 void CTDLTransEditDlg::DoDataExchange(CDataExchange* pDX)
@@ -65,6 +69,7 @@ BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DICTIONARY, OnListItemChanged)
 	ON_EN_CHANGE(IDC_TRANSLATION, OnChangeTranslation)
 	ON_WM_ERASEBKGND()
+	ON_COMMAND(ID_OPTIONS_SORTUNTRANSATTOP, OnOptionsSortUntranslatedAtTop)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -210,13 +215,16 @@ void CTDLTransEditDlg::OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult)
 	ASSERT(!IsReadOnly());
 
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-	ASSERT(pDispInfo->item.iSubItem == 1);
+	ASSERT(pDispInfo->item.iSubItem == TRANS_COL);
 
 	if (ModifyDictionaryItem(pDispInfo->item.iItem, pDispInfo->item.pszText))
 	{
-		// Move selection down one row
+		// Move selection down one row and edit
 		if (pDispInfo->item.iItem < (m_lcDictItems.GetItemCount() - 1))
+		{
 			m_lcDictItems.SetCurSel(pDispInfo->item.iItem + 1);
+			//m_lcDictItems.PostMessage(WM_KEYDOWN, VK_F2, 0);
+		}
 	}
 
 	*pResult = 0;
@@ -241,7 +249,6 @@ BOOL CTDLTransEditDlg::ModifyDictionaryItem(int nItem, const CString& sTrans)
 		return TRUE;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -333,8 +340,11 @@ void CTDLTransEditDlg::LoadState()
 	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
 	m_sLastBrowsePath = AfxGetApp()->GetProfileString(_T("State"), _T("LastBrowsePath"));
 	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
-	m_lcDictItems.EnableToolTips(m_bShowTooltips);
+	m_bSortUntranslatedAtTop = AfxGetApp()->GetProfileInt(_T("State"), _T("SortUntranslatedAtTop"), TRUE);
 
+	m_lcDictItems.EnableToolTips(m_bShowTooltips);
+	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
+	
 	CRect rect;
 	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
 	rect.top = AfxGetApp()->GetProfileInt(_T("State"), _T("Top"), -1);
@@ -403,6 +413,7 @@ void CTDLTransEditDlg::SaveState()
 	AfxGetApp()->WriteProfileString(_T("State"), _T("YourLanguage"), m_sYourLanguagePath);
 	AfxGetApp()->WriteProfileInt(_T("State"), _T("ShowAlternatives"), m_bShowAlternatives);
 	AfxGetApp()->WriteProfileInt(_T("State"), _T("ShowTooltips"), m_bShowTooltips);
+	AfxGetApp()->WriteProfileInt(_T("State"), _T("SortUntranslatedAtTop"), m_bSortUntranslatedAtTop);
 	AfxGetApp()->WriteProfileString(_T("State"), _T("LastFilter"), m_sFilter);
 
 	int nColWidths[NUM_COLS];
@@ -523,6 +534,7 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 	case 1: // Options
 		pPopupMenu->CheckMenuItem(ID_OPTIONS_SHOWOPTIONALS, (m_bShowAlternatives ? MF_CHECKED : MF_UNCHECKED));
 		pPopupMenu->CheckMenuItem(ID_OPTIONS_SHOWTOOLTIPS, (m_bShowTooltips ? MF_CHECKED : MF_UNCHECKED));
+		pPopupMenu->CheckMenuItem(ID_OPTIONS_SORTUNTRANSATTOP, (m_bSortUntranslatedAtTop ? MF_CHECKED : MF_UNCHECKED));
 		break;
 
 	case 2: // Tools
@@ -534,12 +546,18 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 BOOL CTDLTransEditDlg::PreTranslateMessage(MSG* pMsg) 
 {
 	// Handle 'Enter' in the 'Filter' field
-	if ((pMsg->message == WM_KEYDOWN) && 
-		(pMsg->wParam == VK_RETURN) &&
-		(pMsg->hwnd == *GetDlgItem(IDC_FILTER)))
+	if ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_RETURN))
 	{
-		OnUpdateFilter();
-		return TRUE;
+		if (pMsg->hwnd == *GetDlgItem(IDC_FILTER))
+		{
+			OnUpdateFilter();
+			return TRUE;
+		}
+		else if (pMsg->hwnd == m_lcDictItems)
+		{
+			m_lcDictItems.EditSelectedCell();
+			return TRUE;
+		}
 	}
 	else if (m_mgrShortcuts.ProcessMessage(pMsg))
 	{
@@ -626,9 +644,13 @@ BOOL CTDLTransEditDlg::RecheckYourLanguagePath(LPCTSTR szDictPath, BOOL bAllowPr
 		CString sYourLangVer = GetTranslationVersion(sYourLangPath);
 
 		if ((FileMisc::CompareVersions(sYourLangVer, sTransVer) < 0) ||
-			(FileMisc::CompareVersions(m_sAppVersion, sYourLangVer) < 0))
+			(FileMisc::CompareVersions(m_sAppVer, sYourLangVer) < 0))
 		{
 			sYourLangPath.Empty();
+		}
+		else
+		{
+			CTransDictionary::SetAppVersion(sYourLangVer);
 		}
 	}
 
@@ -667,4 +689,11 @@ CString CTDLTransEditDlg::GetTranslationVersion(const CString& sTransPath) const
 
 	// else
 	return _T("");
+}
+
+void CTDLTransEditDlg::OnOptionsSortUntranslatedAtTop()
+{
+	m_bSortUntranslatedAtTop = !m_bSortUntranslatedAtTop;
+
+	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
 }

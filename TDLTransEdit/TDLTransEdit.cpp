@@ -52,15 +52,13 @@ BOOL CTDLTransEditApp::InitInstance()
 		AfxMessageBox(_T("This application can only be run if ToDoList.exe is present in the same folder."), MB_OK | MB_ICONEXCLAMATION);
 		return FALSE;
 	}
-	// else
-	CTransDictionary::SetAppVersion(FileMisc::GetModuleVersion(sTDLPath));
 	
 	CString sIniPath(FileMisc::GetAppFilePath());
 	FileMisc::ReplaceExtension(sIniPath, _T(".ini"));
 
 	m_pszProfileName = _tcsdup(sIniPath);
 	
-	CTDLTransEditDlg dlg;
+	CTDLTransEditDlg dlg(FileMisc::GetModuleVersion(sTDLPath));
 	m_pMainWnd = &dlg;
 
 	int nResponse = dlg.DoModal();

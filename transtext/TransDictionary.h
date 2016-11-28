@@ -123,6 +123,7 @@ public:
 	const CDictionaryItems& GetItems() const { return m_mapItems; }
 
 	static void SetAppVersion(LPCTSTR szAppVer)	{ s_sAppVersion = szAppVer; }
+	static CString GetAppVersion() { return s_sAppVersion; }
 		
 protected:
 	CString m_sDictFile, m_sDictVersion;
