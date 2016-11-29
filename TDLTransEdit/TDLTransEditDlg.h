@@ -79,6 +79,7 @@ protected:
 	afx_msg void OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnChangeTranslation();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnOptionsSortUntranslatedAtTop();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -93,8 +94,6 @@ protected:
 	CString GetTranslationVersion(const CString& sTransPath) const;
 	BOOL IsReadOnly() const;
 
-public:
-	afx_msg void OnOptionsSortUntranslatedAtTop();
 };
 
 //{{AFX_INSERT_LOCATION}}

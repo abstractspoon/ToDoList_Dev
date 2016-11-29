@@ -73,7 +73,10 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 	m_bAllowNotify(TRUE), 
 	m_reSpellCheck(m_rtf),
 	m_mgrShortcuts(TRUE),
-	m_rtfHtml(rtfHtml)
+	m_rtfHtml(rtfHtml),
+#pragma warning(disable:4355)
+	m_dlgPrefs(this)
+#pragma warning(default:4355)
 {
 	ZeroMemory(&m_lfCurrent, sizeof(LOGFONT));
 
@@ -144,14 +147,24 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_WM_STYLECHANGING()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
+	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
 
+LRESULT CRTFContentControl::OnPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	OnHelp();
+	return 0L;
+}
+
 void CRTFContentControl::OnHelp()
 {
-	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)GetTypeID());
+	CString sHelpID(GetTypeID());
+	sHelpID += _T("_PREFS");
+	
+	GetParent()->SendMessage(WM_ICC_DOHELP, 0, (LPARAM)(LPCTSTR)sHelpID);
 }
 
 BOOL CRTFContentControl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
@@ -165,7 +178,7 @@ void CRTFContentControl::OnChangeText()
 	if (m_bAllowNotify && !m_rtf.IsIMEComposing())
 		GetParent()->SendMessage(WM_ICC_COMMENTSCHANGE);
 
-	m_prefsDlg.SetFileLinkOption(m_rtf.GetFileLinkOption(), !m_rtf.IsFileLinkOptionDefault());
+	m_dlgPrefs.SetFileLinkOption(m_rtf.GetFileLinkOption(), !m_rtf.IsFileLinkOptionDefault());
 }
 
 void CRTFContentControl::OnKillFocus() 
@@ -745,7 +758,7 @@ void CRTFContentControl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(sKey, _T("ForegroundColour"), m_toolbar.GetFontColor(TRUE));
 	pPrefs->WriteProfileInt(sKey, _T("BackgroundColour"), m_toolbar.GetFontColor(FALSE));
 
-	m_prefsDlg.SavePreferences(pPrefs, sKey);
+	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
 
 void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -765,7 +778,7 @@ void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_toolbar.SetFontColor((COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT), TRUE);
 	m_toolbar.SetFontColor((COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT), FALSE);
 
-	m_prefsDlg.LoadPreferences(pPrefs, sKey);
+	m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 	RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(sKey, _T("FileLinkOption"), REP_ASIMAGE);
 	BOOL bLinkOptionIsDefault = pPrefs->GetProfileInt(sKey, _T("FileLinkOptionIsDefault"), FALSE);
 
@@ -931,7 +944,7 @@ void CRTFContentControl::OnEditFileBrowse()
 				BOOL bDefault = dialog2.GetMakeLinkOptionDefault();
 				
 				m_rtf.SetFileLinkOption(nLinkOption, bDefault);
-				m_prefsDlg.SetFileLinkOption(nLinkOption, !bDefault);
+				m_dlgPrefs.SetFileLinkOption(nLinkOption, !bDefault);
 			}
 			else
 			{
@@ -1158,14 +1171,14 @@ void CRTFContentControl::OnUpdateEditSuperscript(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnPreferences() 
 {
-	if (m_prefsDlg.DoModal(s_bConvertWithMSWord) == IDOK)
+	if (m_dlgPrefs.DoModal(s_bConvertWithMSWord) == IDOK)
 	{
-		if (m_prefsDlg.GetPromptForFileLink())
+		if (m_dlgPrefs.GetPromptForFileLink())
 			m_rtf.SetFileLinkOption(m_rtf.GetFileLinkOption(), FALSE);
 		else
-			m_rtf.SetFileLinkOption(m_prefsDlg.GetFileLinkOption(), TRUE);
+			m_rtf.SetFileLinkOption(m_dlgPrefs.GetFileLinkOption(), TRUE);
 
-		s_bConvertWithMSWord = m_prefsDlg.GetConvertWithMSWord();
+		s_bConvertWithMSWord = m_dlgPrefs.GetConvertWithMSWord();
 	}
 }
 

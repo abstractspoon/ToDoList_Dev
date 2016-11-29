@@ -173,7 +173,7 @@ void CRTFContentCtrlApp::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szK
 		else
 			CRTFContentControl::SetConvertWithMSWord(FALSE);
 		
-		CRTFContentControl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+		CRTFContentControl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE));
 	}
 
 	CRTFContentControl::SetPasteSourceUrls(pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE));

@@ -137,8 +137,9 @@ protected:
 	afx_msg void OnAttribUseChange();
 	DECLARE_MESSAGE_MAP()
 		
-	virtual void LoadPreferences(const IPreferences* pPrefs);
-	virtual void SavePreferences(IPreferences* pPrefs);
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	
 	BOOL HasCheckedAttributes() const;
 	CString* GetListText(TDC_ATTRIBUTE nList);

@@ -338,13 +338,16 @@ void CTDLTransEditDlg::LoadState()
 	m_bShowAlternatives = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowAlternatives"), FALSE);
 	m_sYourLanguagePath = AfxGetApp()->GetProfileString(_T("State"), _T("YourLanguage"));
 	m_sFilter = AfxGetApp()->GetProfileString(_T("State"), _T("LastFilter"));
-	m_sLastBrowsePath = AfxGetApp()->GetProfileString(_T("State"), _T("LastBrowsePath"));
 	m_bShowTooltips = AfxGetApp()->GetProfileInt(_T("State"), _T("ShowTooltips"), TRUE);
 	m_bSortUntranslatedAtTop = AfxGetApp()->GetProfileInt(_T("State"), _T("SortUntranslatedAtTop"), TRUE);
 
 	m_lcDictItems.EnableToolTips(m_bShowTooltips);
 	m_lcDictItems.SetSortUntranslatedAtTop(m_bSortUntranslatedAtTop);
-	
+
+	CString sDefBrowsePath;
+	FileMisc::MakePath(sDefBrowsePath, NULL, FileMisc::GetModuleFolder(), _T("Resources\\Translations"));
+	m_sLastBrowsePath = AfxGetApp()->GetProfileString(_T("State"), _T("LastBrowsePath"), sDefBrowsePath);
+
 	CRect rect;
 	rect.left = AfxGetApp()->GetProfileInt(_T("State"), _T("Left"), -1);
 	rect.top = AfxGetApp()->GetProfileInt(_T("State"), _T("Top"), -1);

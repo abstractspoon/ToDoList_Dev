@@ -395,36 +395,36 @@ int CPreferencesTaskDefPage::GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, 
 }
 
 
-void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// load settings
-	m_nDefPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultPriority"), 5); 
-	m_nDefRisk = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultRisk"), 0); 
-	m_sDefAllocTo = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultAllocTo"));
-	m_sDefAllocBy = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultAllocBy"));
-	m_sDefStatus = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultStatus"));
-	m_sDefTags = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultTags"));
-	m_sDefCategory = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCategory"));
-	m_sDefCreatedBy = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCreatedBy"), Misc::GetUserName());
-	m_crDef = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultColor"), 0);
-	m_bInheritParentAttributes = pPrefs->GetProfileInt(_T("Preferences"), _T("InheritParentAttributes"), pPrefs->GetProfileInt(_T("Preferences"), _T("UseParentAttributes")));
-	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), FALSE);
-	m_bUseCreationForDefStartDate = pPrefs->GetProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), TRUE);
-	m_bUseCreationForDefDueDate = pPrefs->GetProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), FALSE);
-	m_dDefCost = Misc::Atof(pPrefs->GetProfileString(_T("Preferences"), _T("DefaultCost"), _T("0")));
-	m_dDefTimeEst = pPrefs->GetProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), 0);
-	m_eTimeEst.SetUnits((TH_UNITS)pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), THU_HOURS));
-	m_dDefTimeSpent = pPrefs->GetProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), 0);
-	m_eTimeSpent.SetUnits((TH_UNITS)pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), THU_HOURS));
-	m_bCatListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("CatListReadonly"), FALSE);
-	m_bStatusListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("StatusListReadonly"), FALSE);
-	m_bAllocToListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("AllocToListReadonly"), FALSE);
-	m_bAllocByListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("AllocByListReadonly"), FALSE);
-	m_bVersionListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("VersionListReadonly"), FALSE);
-	m_bTagListReadonly = pPrefs->GetProfileInt(_T("Preferences"), _T("TagListReadonly"), FALSE);
-	m_sDefIcon = pPrefs->GetProfileString(_T("Preferences"), _T("DefaultIcon"));
-	m_nDefReminderLeadin = pPrefs->GetProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
-	m_bReminderBeforeDue = pPrefs->GetProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), TRUE);
+	m_nDefPriority = pPrefs->GetProfileInt(szKey, _T("DefaultPriority"), 5); 
+	m_nDefRisk = pPrefs->GetProfileInt(szKey, _T("DefaultRisk"), 0); 
+	m_sDefAllocTo = pPrefs->GetProfileString(szKey, _T("DefaultAllocTo"));
+	m_sDefAllocBy = pPrefs->GetProfileString(szKey, _T("DefaultAllocBy"));
+	m_sDefStatus = pPrefs->GetProfileString(szKey, _T("DefaultStatus"));
+	m_sDefTags = pPrefs->GetProfileString(szKey, _T("DefaultTags"));
+	m_sDefCategory = pPrefs->GetProfileString(szKey, _T("DefaultCategory"));
+	m_sDefCreatedBy = pPrefs->GetProfileString(szKey, _T("DefaultCreatedBy"), Misc::GetUserName());
+	m_crDef = pPrefs->GetProfileInt(szKey, _T("DefaultColor"), 0);
+	m_bInheritParentAttributes = pPrefs->GetProfileInt(szKey, _T("InheritParentAttributes"), pPrefs->GetProfileInt(szKey, _T("UseParentAttributes")));
+	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(szKey, _T("UpdateInheritAttributes"), FALSE);
+	m_bUseCreationForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefStartDate"), TRUE);
+	m_bUseCreationForDefDueDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefDueDate"), FALSE);
+	m_dDefCost = Misc::Atof(pPrefs->GetProfileString(szKey, _T("DefaultCost"), _T("0")));
+	m_dDefTimeEst = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeEstimate"), 0);
+	m_eTimeEst.SetUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_HOURS));
+	m_dDefTimeSpent = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeSpent"), 0);
+	m_eTimeSpent.SetUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeSpentUnits"), THU_HOURS));
+	m_bCatListReadonly = pPrefs->GetProfileInt(szKey, _T("CatListReadonly"), FALSE);
+	m_bStatusListReadonly = pPrefs->GetProfileInt(szKey, _T("StatusListReadonly"), FALSE);
+	m_bAllocToListReadonly = pPrefs->GetProfileInt(szKey, _T("AllocToListReadonly"), FALSE);
+	m_bAllocByListReadonly = pPrefs->GetProfileInt(szKey, _T("AllocByListReadonly"), FALSE);
+	m_bVersionListReadonly = pPrefs->GetProfileInt(szKey, _T("VersionListReadonly"), FALSE);
+	m_bTagListReadonly = pPrefs->GetProfileInt(szKey, _T("TagListReadonly"), FALSE);
+	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
+	m_nDefReminderLeadin = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
+	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
 
    // attribute use
 	int nIndex = m_aAttribPrefs.GetSize();
@@ -462,36 +462,36 @@ void CPreferencesTaskDefPage::SaveDefaultListItems(LPCTSTR szValueList, IPrefere
 	CPreferences::WriteProfileArray(pPrefs, szKey, aItems);
 }
 
-void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save settings
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultPriority"), m_nDefPriority);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultRisk"), m_nDefRisk);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultAllocTo"), m_sDefAllocTo);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultAllocBy"), m_sDefAllocBy);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultStatus"), m_sDefStatus);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultTags"), m_sDefTags);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultCategory"), m_sDefCategory);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultCreatedBy"), m_sDefCreatedBy);
-	pPrefs->WriteProfileString(_T("Preferences"), _T("DefaultIcon"), m_sDefIcon);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultColor"), m_crDef);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("InheritParentAttributes"), m_bInheritParentAttributes);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseCreationForDefStartDate"), m_bUseCreationForDefStartDate);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseCreationForDefDueDate"), m_bUseCreationForDefDueDate);
-	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultCost"), m_dDefCost);
-	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultTimeEstimate"), m_dDefTimeEst);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultTimeEstUnits"), m_eTimeEst.GetUnits());
-	pPrefs->WriteProfileDouble(_T("Preferences"), _T("DefaultTimeSpent"), m_dDefTimeSpent);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CatListReadonly"), m_bCatListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("StatusListReadonly"), m_bStatusListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllocToListReadonly"), m_bAllocToListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AllocByListReadonly"), m_bAllocByListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("VersionListReadonly"), m_bVersionListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("TagListReadonly"), m_bTagListReadonly);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("ReminderBeforeDue"), m_bReminderBeforeDue);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultPriority"), m_nDefPriority);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultRisk"), m_nDefRisk);
+	pPrefs->WriteProfileString(szKey, _T("DefaultAllocTo"), m_sDefAllocTo);
+	pPrefs->WriteProfileString(szKey, _T("DefaultAllocBy"), m_sDefAllocBy);
+	pPrefs->WriteProfileString(szKey, _T("DefaultStatus"), m_sDefStatus);
+	pPrefs->WriteProfileString(szKey, _T("DefaultTags"), m_sDefTags);
+	pPrefs->WriteProfileString(szKey, _T("DefaultCategory"), m_sDefCategory);
+	pPrefs->WriteProfileString(szKey, _T("DefaultCreatedBy"), m_sDefCreatedBy);
+	pPrefs->WriteProfileString(szKey, _T("DefaultIcon"), m_sDefIcon);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultColor"), m_crDef);
+	pPrefs->WriteProfileInt(szKey, _T("InheritParentAttributes"), m_bInheritParentAttributes);
+	pPrefs->WriteProfileInt(szKey, _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
+	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefStartDate"), m_bUseCreationForDefStartDate);
+	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefDueDate"), m_bUseCreationForDefDueDate);
+	pPrefs->WriteProfileDouble(szKey, _T("DefaultCost"), m_dDefCost);
+	pPrefs->WriteProfileDouble(szKey, _T("DefaultTimeEstimate"), m_dDefTimeEst);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeEstUnits"), m_eTimeEst.GetUnits());
+	pPrefs->WriteProfileDouble(szKey, _T("DefaultTimeSpent"), m_dDefTimeSpent);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
+	pPrefs->WriteProfileInt(szKey, _T("CatListReadonly"), m_bCatListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("StatusListReadonly"), m_bStatusListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("AllocToListReadonly"), m_bAllocToListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("AllocByListReadonly"), m_bAllocByListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("VersionListReadonly"), m_bVersionListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("TagListReadonly"), m_bTagListReadonly);
+	pPrefs->WriteProfileInt(szKey, _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
+	pPrefs->WriteProfileInt(szKey, _T("ReminderBeforeDue"), m_bReminderBeforeDue);
 	
 	// attribute usage
 	int nIndex = m_aAttribPrefs.GetSize();

@@ -23,7 +23,7 @@ const COLORREF DEF_DEFAULTCOLOR		= RGB(70, 135, 245);
 // CGanttPreferencesPage dialog
 
 CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
-	: CPropertyPage(IDD_PREFERENCES_PAGE)
+	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CGanttPreferencesPage)
 	m_bDisplayAllocTo = TRUE;
@@ -70,7 +70,7 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CGanttPreferencesPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CGanttPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CGanttPreferencesPage)
 	ON_BN_CLICKED(IDC_SETWEEKENDCOLOR, OnSetWeekendcolor)
 	ON_BN_CLICKED(IDC_SETTODAYCOLOR, OnSetTodaycolor)
@@ -84,9 +84,6 @@ BEGIN_MESSAGE_MAP(CGanttPreferencesPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_SETPARENTCOLOR, OnSetParentColor)
 	ON_BN_CLICKED(IDC_SPECIFYPARENTCOLOR, OnChangeParentColoring)
 	//}}AFX_MSG_MAP
-	ON_WM_CTLCOLOR()
-	ON_WM_ERASEBKGND()
-	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -145,7 +142,7 @@ void CGanttPreferencesPage::OnTodaycolor()
 
 BOOL CGanttPreferencesPage::OnInitDialog() 
 {
-	CPropertyPage::OnInitDialog();
+	CPreferencesPageBase::OnInitDialog();
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLORSGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_DATESGROUP, *this);
@@ -164,36 +161,6 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-BOOL CGanttPreferencesPage::OnEraseBkgnd(CDC* pDC)
-{
-	CRect rClient;
-	GetClientRect(rClient);
-	pDC->FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-
-	return TRUE;
-}
-
-HBRUSH CGanttPreferencesPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if (nCtlColor == CTLCOLOR_STATIC)
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		hbr = ::GetSysColorBrush(COLOR_WINDOW);
-	}
-	
-	return hbr;
-}
-
-void CGanttPreferencesPage::OnShowWindow(BOOL bShow, UINT nStatus)
-{
-	CPropertyPage::OnShowWindow(bShow, nStatus);
-
-	if (bShow)
-		CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
 }
 
 void CGanttPreferencesPage::OnChangeParentColoring() 
@@ -272,9 +239,7 @@ const UINT IDC_HELPBUTTON = 1001;
 
 CGanttPreferencesDlg::CGanttPreferencesDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_PREFERENCES_DIALOG, pParent),
-	m_hIcon(NULL),
-	m_btnHelp(1, FALSE)
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_GANTTCHART, IDI_HELP_BUTTON, pParent)
 {
 	//{{AFX_DATA_INIT(CGanttPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -282,53 +247,20 @@ CGanttPreferencesDlg::CGanttPreferencesDlg(CWnd* pParent /*=NULL*/)
 	m_ppHost.AddPage(&m_page);
 }
 
-BEGIN_MESSAGE_MAP(CGanttPreferencesDlg, CDialog)
+BEGIN_MESSAGE_MAP(CGanttPreferencesDlg, CPreferencesDlgBase)
 	//{{AFX_MSG_MAP(CGanttPreferencesPage)
 	//}}AFX_MSG_MAP
-	ON_WM_DESTROY()
-	ON_WM_HELPINFO()
-	ON_BN_CLICKED(IDC_HELPBUTTON, OnClickHelpButton)
 END_MESSAGE_MAP()
 
 BOOL CGanttPreferencesDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CPreferencesDlgBase::OnInitDialog();
 
-	m_ppHost.Create(IDC_PPHOST, this);
-
-	// shrink the ppHost by 1 pixel to allow the border to show
-	CRect rHost;
-	m_ppHost.GetWindowRect(rHost);
-	ScreenToClient(rHost);
-
-	rHost.DeflateRect(1, 1);
-	m_ppHost.MoveWindow(rHost, FALSE);
-	
-	// Replace icon
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_GANTTCHART);
-	SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
-	
-	VERIFY(m_btnHelp.Create(IDC_HELPBUTTON, this));
-	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CGanttPreferencesDlg::OnOK()
-{
-	CDialog::OnOK();
-
-	m_ppHost.OnOK();
-}
-
-void CGanttPreferencesDlg::OnDestroy()
-{
-	CDialog::OnDestroy();
-	
-	::DestroyIcon(m_hIcon);
-}
-
-void CGanttPreferencesDlg::OnClickHelpButton()
+void CGanttPreferencesDlg::DoHelp()
 {
 	ASSERT(m_pParentWnd);
 	
@@ -336,8 +268,3 @@ void CGanttPreferencesDlg::OnClickHelpButton()
 		m_pParentWnd->SendMessage(WM_GTLC_PREFSHELP);
 }
 
-BOOL CGanttPreferencesDlg::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
-{
-	OnClickHelpButton();
-	return TRUE;
-}

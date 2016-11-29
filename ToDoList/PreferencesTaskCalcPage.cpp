@@ -139,33 +139,33 @@ void CPreferencesTaskCalcPage::OnAutocalcpercentdone()
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// load settings
-	m_bTreatSubCompletedAsDone = pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), TRUE);
-	m_bAveragePercentSubCompletion = pPrefs->GetProfileInt(_T("Preferences"), _T("AveragePercentSubCompletion"), TRUE);
-	m_bIncludeDoneInAverageCalc = pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeDoneInAverageCalc"), TRUE);
-	m_bUsePercentDoneInTimeEst = pPrefs->GetProfileInt(_T("Preferences"), _T("UsePercentDoneInTimeEst"), TRUE);
-	m_bUseHighestPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("UseHighestPriority"), FALSE);
-	m_bSyncTimeEstAndDates = pPrefs->GetProfileInt(_T("Preferences"), _T("SyncTimeEstAndDates"), TRUE);
-	m_bIncludeDoneInPriorityRiskCalc = pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeDoneInPriorityCalc"), FALSE);
-	m_bAutoCalcPercentDone = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoCalcPercentDone"), FALSE);
-	m_bAutoAdjustDependents = pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE);
-	m_bDueTasksHaveHighestPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("DueTasksHaveHighestPriority"), FALSE);
-	m_bDoneTasksHaveLowestPriority = pPrefs->GetProfileInt(_T("Preferences"), _T("DoneTasksHaveLowestPriority"), TRUE);
-	m_bNoDueDateDueTodayOrStart = pPrefs->GetProfileInt(_T("Preferences"), _T("NoDueDateIsDueToday"), FALSE);
-	m_bWeightPercentCompletionByNumSubtasks = pPrefs->GetProfileInt(_T("Preferences"), _T("WeightPercentCompletionByNumSubtasks"), TRUE);
-	m_nCalcRemainingTime = (PTCP_CALCTIMEREMAINING)pPrefs->GetProfileInt(_T("Preferences"), _T("CalcRemainingTime"), PTCP_REMAININGTTIMEISDUEDATE);
-	m_nCalcDueDate = (PTCP_CALCDUEDATE)pPrefs->GetProfileInt(_T("Preferences"), _T("CalcDueDate"), PTCP_NOCALCDUEDATE);
-	m_nCalcStartDate = (PTCP_CALCSTARTDATE)pPrefs->GetProfileInt(_T("Preferences"), _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
-	m_bSetCompletionStatus = pPrefs->GetProfileInt(_T("Preferences"), _T("SetCompletionStatus"), FALSE);
-	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(_T("Preferences"), _T("SyncCompletionToStatus"), TRUE);
-	m_sCompletionStatus = pPrefs->GetProfileString(_T("Preferences"), _T("CompletionStatus"), _T("Completed"));
+	m_bTreatSubCompletedAsDone = pPrefs->GetProfileInt(szKey, _T("TreatSubCompletedAsDone"), TRUE);
+	m_bAveragePercentSubCompletion = pPrefs->GetProfileInt(szKey, _T("AveragePercentSubCompletion"), TRUE);
+	m_bIncludeDoneInAverageCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInAverageCalc"), TRUE);
+	m_bUsePercentDoneInTimeEst = pPrefs->GetProfileInt(szKey, _T("UsePercentDoneInTimeEst"), TRUE);
+	m_bUseHighestPriority = pPrefs->GetProfileInt(szKey, _T("UseHighestPriority"), FALSE);
+	m_bSyncTimeEstAndDates = pPrefs->GetProfileInt(szKey, _T("SyncTimeEstAndDates"), TRUE);
+	m_bIncludeDoneInPriorityRiskCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInPriorityCalc"), FALSE);
+	m_bAutoCalcPercentDone = pPrefs->GetProfileInt(szKey, _T("AutoCalcPercentDone"), FALSE);
+	m_bAutoAdjustDependents = pPrefs->GetProfileInt(szKey, _T("AutoAdjustDependents"), TRUE);
+	m_bDueTasksHaveHighestPriority = pPrefs->GetProfileInt(szKey, _T("DueTasksHaveHighestPriority"), FALSE);
+	m_bDoneTasksHaveLowestPriority = pPrefs->GetProfileInt(szKey, _T("DoneTasksHaveLowestPriority"), TRUE);
+	m_bNoDueDateDueTodayOrStart = pPrefs->GetProfileInt(szKey, _T("NoDueDateIsDueToday"), FALSE);
+	m_bWeightPercentCompletionByNumSubtasks = pPrefs->GetProfileInt(szKey, _T("WeightPercentCompletionByNumSubtasks"), TRUE);
+	m_nCalcRemainingTime = (PTCP_CALCTIMEREMAINING)pPrefs->GetProfileInt(szKey, _T("CalcRemainingTime"), PTCP_REMAININGTTIMEISDUEDATE);
+	m_nCalcDueDate = (PTCP_CALCDUEDATE)pPrefs->GetProfileInt(szKey, _T("CalcDueDate"), PTCP_NOCALCDUEDATE);
+	m_nCalcStartDate = (PTCP_CALCSTARTDATE)pPrefs->GetProfileInt(szKey, _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
+	m_bSetCompletionStatus = pPrefs->GetProfileInt(szKey, _T("SetCompletionStatus"), FALSE);
+	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(szKey, _T("SyncCompletionToStatus"), TRUE);
+	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), _T("Completed"));
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
 	{
-		if (pPrefs->GetProfileInt(_T("Preferences"), _T("UseEarliestDueDate"), FALSE))
+		if (pPrefs->GetProfileInt(szKey, _T("UseEarliestDueDate"), FALSE))
 			m_nCalcDueDate = PTCP_EARLIESTDUEDATE;
 	}
 
@@ -173,43 +173,43 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs)
 	if (m_bAutoCalcPercentDone)
 		m_bAveragePercentSubCompletion = FALSE;
 
-	m_dRecentModTime = pPrefs->GetProfileDouble(_T("Preferences"), _T("RecentModTime"), 1.0);
-	m_nRecentModTimeUnits = (TH_UNITS)pPrefs->GetProfileInt(_T("Preferences"), _T("RecentModTimeUnits"), THU_HOURS);
+	m_dRecentModTime = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
+	m_nRecentModTimeUnits = (TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS);
 
-//	m_b = pPrefs->GetProfileInt(_T("Preferences"), _T(""), FALSE);
+//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
-void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs)
+void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	// save settings
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), m_bTreatSubCompletedAsDone);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AveragePercentSubCompletion"), m_bAveragePercentSubCompletion);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("IncludeDoneInAverageCalc"), m_bIncludeDoneInAverageCalc);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UsePercentDoneInTimeEst"), m_bUsePercentDoneInTimeEst);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("UseHighestPriority"), m_bUseHighestPriority);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SyncTimeEstAndDates"), m_bSyncTimeEstAndDates);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("IncludeDoneInPriorityCalc"), m_bIncludeDoneInPriorityRiskCalc);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("WeightPercentCompletionByNumSubtasks"), m_bWeightPercentCompletionByNumSubtasks);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoCalcPercentDone"), m_bAutoCalcPercentDone);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), m_bAutoAdjustDependents);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DueTasksHaveHighestPriority"), m_bDueTasksHaveHighestPriority);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("DoneTasksHaveLowestPriority"), m_bDoneTasksHaveLowestPriority);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("NoDueDateIsDueToday"), m_bNoDueDateDueTodayOrStart);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CalcRemainingTime"), m_nCalcRemainingTime);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CalcDueDate"), (int)m_nCalcDueDate);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("CalcStartDate"), (int)m_nCalcStartDate);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SetCompletionStatus"), m_bSetCompletionStatus);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("SyncCompletionToStatus"), m_bSyncCompletionToStatus);
+	pPrefs->WriteProfileInt(szKey, _T("TreatSubCompletedAsDone"), m_bTreatSubCompletedAsDone);
+	pPrefs->WriteProfileInt(szKey, _T("AveragePercentSubCompletion"), m_bAveragePercentSubCompletion);
+	pPrefs->WriteProfileInt(szKey, _T("IncludeDoneInAverageCalc"), m_bIncludeDoneInAverageCalc);
+	pPrefs->WriteProfileInt(szKey, _T("UsePercentDoneInTimeEst"), m_bUsePercentDoneInTimeEst);
+	pPrefs->WriteProfileInt(szKey, _T("UseHighestPriority"), m_bUseHighestPriority);
+	pPrefs->WriteProfileInt(szKey, _T("SyncTimeEstAndDates"), m_bSyncTimeEstAndDates);
+	pPrefs->WriteProfileInt(szKey, _T("IncludeDoneInPriorityCalc"), m_bIncludeDoneInPriorityRiskCalc);
+	pPrefs->WriteProfileInt(szKey, _T("WeightPercentCompletionByNumSubtasks"), m_bWeightPercentCompletionByNumSubtasks);
+	pPrefs->WriteProfileInt(szKey, _T("AutoCalcPercentDone"), m_bAutoCalcPercentDone);
+	pPrefs->WriteProfileInt(szKey, _T("AutoAdjustDependents"), m_bAutoAdjustDependents);
+	pPrefs->WriteProfileInt(szKey, _T("DueTasksHaveHighestPriority"), m_bDueTasksHaveHighestPriority);
+	pPrefs->WriteProfileInt(szKey, _T("DoneTasksHaveLowestPriority"), m_bDoneTasksHaveLowestPriority);
+	pPrefs->WriteProfileInt(szKey, _T("NoDueDateIsDueToday"), m_bNoDueDateDueTodayOrStart);
+	pPrefs->WriteProfileInt(szKey, _T("CalcRemainingTime"), m_nCalcRemainingTime);
+	pPrefs->WriteProfileInt(szKey, _T("CalcDueDate"), (int)m_nCalcDueDate);
+	pPrefs->WriteProfileInt(szKey, _T("CalcStartDate"), (int)m_nCalcStartDate);
+	pPrefs->WriteProfileInt(szKey, _T("SetCompletionStatus"), m_bSetCompletionStatus);
+	pPrefs->WriteProfileInt(szKey, _T("SyncCompletionToStatus"), m_bSyncCompletionToStatus);
 
-	pPrefs->WriteProfileDouble(_T("Preferences"), _T("RecentModTime"), m_dRecentModTime);
-	pPrefs->WriteProfileInt(_T("Preferences"), _T("RecentModTimeUnits"), m_nRecentModTimeUnits);
+	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_dRecentModTime);
+	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_nRecentModTimeUnits);
 
-	pPrefs->WriteProfileString(_T("Preferences"), _T("CompletionStatus"), m_sCompletionStatus);
+	pPrefs->WriteProfileString(szKey, _T("CompletionStatus"), m_sCompletionStatus);
 
 	// cleanup old entry	
-	pPrefs->DeleteProfileEntry(_T("Preferences"), _T("UseEarliestDueDate"));
+	pPrefs->DeleteProfileEntry(szKey, _T("UseEarliestDueDate"));
 
-//	pPrefs->WriteProfileInt(_T("Preferences"), _T(""), m_b);
+//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const

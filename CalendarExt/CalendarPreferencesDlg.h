@@ -8,15 +8,16 @@
 //
 
 #include "..\shared\groupline.h"
-#include "..\shared\scrollingpropertypagehost.h"
-#include "..\Shared\winhelpbutton.h"
+#include "..\shared\preferencesbase.h"
 
-#include "..\Interfaces\ipreferences.h"
+/////////////////////////////////////////////////////////////////////////////
+
+class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesPage dialog
 
-class CCalendarPreferencesPage : public CPropertyPage
+class CCalendarPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
@@ -76,16 +77,13 @@ protected:
 	afx_msg void OnShowStartDates();
 	afx_msg void OnShowDueDates();
 	//}}AFX_MSG
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	DECLARE_MESSAGE_MAP()
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesDlg dialog
 
-class CCalendarPreferencesDlg : public CDialog
+class CCalendarPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
@@ -113,22 +111,16 @@ public:
 
 protected:
 	CCalendarPreferencesPage m_page;
-	CScrollingPropertyPageHost m_ppHost;
-	HICON m_hIcon;
-	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	virtual void DoHelp();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CCalendarPreferencesDlg)
 	//}}AFX_MSG
-	afx_msg void OnDestroy();
-	afx_msg void OnClickHelpButton();
-	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
 	DECLARE_MESSAGE_MAP()
 };

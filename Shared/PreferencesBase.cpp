@@ -25,15 +25,15 @@ CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID)
 {
 }
 
-CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID)
-	: 
-	CPropertyPage(nDlgTemplateID), 
-	m_brush(NULL), 
-	m_crback(CLR_NONE), 
-	m_bFirstShow(TRUE), 
-	m_nHelpID(nHelpID)
-{
-}
+// CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID)
+// 	: 
+// 	CPropertyPage(nDlgTemplateID), 
+// 	m_brush(NULL), 
+// 	m_crback(CLR_NONE), 
+// 	m_bFirstShow(TRUE), 
+// 	m_nHelpID(nHelpID)
+// {
+// }
 
 CPreferencesPageBase::~CPreferencesPageBase()
 {
@@ -52,6 +52,20 @@ BEGIN_MESSAGE_MAP(CPreferencesPageBase, CPropertyPage)
 	ON_WM_ERASEBKGND()
 	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
+
+///////////////////////////////////////////////////////////////////
+
+BOOL CPreferencesPageBase::OnInitDialog() 
+{
+	CPropertyPage::OnInitDialog();
+	
+	if (m_crback != CLR_NONE)
+		SetBackgroundColor(m_crback);
+	else
+		SetBackgroundColor(GetSysColor(COLOR_WINDOW));
+
+	return TRUE;
+}
 
 CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 {
@@ -130,9 +144,13 @@ void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlgBase dialog
 
+const CSize UNDEF_SIZE(-1, -1);
 
 CPreferencesDlgBase::CPreferencesDlgBase(UINT nDlgTemplateID, 
-	UINT nPPHostFrameCtrlID, UINT nHelpBtnIconID, CWnd* pParent) 
+										 UINT nPPHostFrameCtrlID, 
+										 UINT nDlgIconID,
+										 UINT nHelpBtnIconID, 
+										 CWnd* pParent) 
 	: 
 	CDialog(nDlgTemplateID, pParent), 
 	m_nInitPage(-1),
@@ -140,13 +158,22 @@ CPreferencesDlgBase::CPreferencesDlgBase(UINT nDlgTemplateID,
 	m_nPPHostFrameCtrlID(nPPHostFrameCtrlID),
 	m_nHelpBtnIconID(nHelpBtnIconID),
 	m_nDlgTemplateID(nDlgTemplateID),
-	m_btnHelp(nDlgTemplateID, FALSE)
+	m_nDlgIconID(nDlgIconID),
+	m_btnHelp(nDlgTemplateID, FALSE),
+	m_sizeOrgWindow(UNDEF_SIZE),
+	m_sizeCurWindow(UNDEF_SIZE),
+	m_sizeCurClient(UNDEF_SIZE),
+	m_hIcon(NULL)
 {
 }
 
+CPreferencesDlgBase::~CPreferencesDlgBase()
+{
+	::DestroyIcon(m_hIcon);
+}
+
 BEGIN_MESSAGE_MAP(CPreferencesDlgBase, CDialog)
-	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDHELP, OnHelpButton)
+	ON_BN_CLICKED(IDHELP, OnClickHelpButton)
 	ON_WM_HELPINFO()
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -158,8 +185,14 @@ void CPreferencesDlgBase::OnOK()
 	
 	m_ppHost.OnOK();
 
+	// Keep track of window size
+	CRect rWindow;
+	GetWindowRect(rWindow);
+	
+	m_sizeCurWindow = rWindow.Size();
+
 	if (m_pDoModalPrefs)
-		SavePreferences(m_pDoModalPrefs);
+		SavePreferences(m_pDoModalPrefs, m_sDoModalKey);
 }
 
 void CPreferencesDlgBase::OnApply()
@@ -167,20 +200,24 @@ void CPreferencesDlgBase::OnApply()
 	m_ppHost.OnApply();
 
 	if (m_pDoModalPrefs)
-		SavePreferences(m_pDoModalPrefs);
+		SavePreferences(m_pDoModalPrefs, m_sDoModalKey);
 }
 
-int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, int nInitPage)
+int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, LPCTSTR szKey, int nInitPage)
 {
+	ASSERT((pPrefs && szKey && szKey[0]) || !(pPrefs || szKey));
+
 	if (nInitPage != -1)
 		m_nInitPage = nInitPage;
 
 	// Temporary only
 	m_pDoModalPrefs = pPrefs;
+	m_sDoModalKey = szKey;
 	
 	int nRet = CDialog::DoModal();
 
 	m_pDoModalPrefs = NULL;
+	m_sDoModalKey.Empty();
 
 	return nRet;
 }
@@ -206,23 +243,33 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 		HICON hIcon = GraphicsMisc::LoadIcon(m_nHelpBtnIconID);
 		m_btnHelp.SetIcon(hIcon);
 	}
+
+	// Replace icon
+	if (m_nDlgIconID)
+	{
+		if (!m_hIcon)
+			m_hIcon = AfxGetApp()->LoadIcon(m_nDlgIconID);
+
+		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
+	}
+
+	if (m_pDoModalPrefs)
+		LoadPreferences(m_pDoModalPrefs, m_sDoModalKey);
 	
 	// restore previous size, ensuring it does not exceed
 	// the screen's work area
-	CRect rWorkArea;
-
-	if (GraphicsMisc::GetAvailableScreenSpace(GetSafeHwnd(), rWorkArea))
+	if (m_sizeCurWindow != UNDEF_SIZE)
 	{
-		int nHeight = m_pDoModalPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
-		int nWidth = m_pDoModalPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
-
-		rWindow.bottom = rWindow.top + min(nHeight, rWorkArea.Height());
-		rWindow.right = rWindow.left + min(nWidth, rWorkArea.Width());
-
-		MoveWindow(rWindow);
+		CRect rWorkArea;
+		
+		if (GraphicsMisc::GetAvailableScreenSpace(GetSafeHwnd(), rWorkArea))
+		{
+			rWindow.bottom = (rWindow.top + min(m_sizeCurWindow.cy, rWorkArea.Height()));
+			rWindow.right = (rWindow.left + min(m_sizeCurWindow.cx, rWorkArea.Width()));
+			
+			MoveWindow(rWindow);
+		}
 	}
-
-	LoadPreferences(m_pDoModalPrefs);
 	CenterWindow();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -285,12 +332,7 @@ BOOL CPreferencesDlgBase::AddPage(CPreferencesPageBase* pPage)
 	return FALSE;
 }
 
-void CPreferencesDlgBase::OnDestroy() 
-{
-	CDialog::OnDestroy();
-}
-
-void CPreferencesDlgBase::LoadPreferences(const IPreferences* pPrefs)
+void CPreferencesDlgBase::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ASSERT(pPrefs);
 
@@ -302,15 +344,22 @@ void CPreferencesDlgBase::LoadPreferences(const IPreferences* pPrefs)
 		CPreferencesPageBase* pPage = (CPreferencesPageBase*)m_ppHost.GetPage(nPage);
 		ASSERT(pPage->IsKindOf(RUNTIME_CLASS(CPreferencesPageBase)));
 		
-		pPage->LoadPreferences(pPrefs);
+		pPage->LoadPreferences(pPrefs, szKey);
 	}
 	
 	// initial page
-	if (m_nInitPage < 0 || m_nInitPage >= m_ppHost.GetPageCount())
-		m_nInitPage = pPrefs->GetProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), 0);
+	if ((m_nInitPage < 0) || (m_nInitPage >= m_ppHost.GetPageCount()))
+		m_nInitPage = pPrefs->GetProfileInt(szKey, _T("StartPage"), 0);
+
+	// Only restore the previous window size once per class instance
+	if (m_sizeCurWindow == UNDEF_SIZE)
+	{
+		m_sizeCurWindow.cy = pPrefs->GetProfileInt(szKey, _T("Height"), m_sizeOrgWindow.cy);
+		m_sizeCurWindow.cx = pPrefs->GetProfileInt(szKey, _T("Width"), m_sizeOrgWindow.cx);
+	}	
 }
 
-void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs)
+void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	ASSERT(pPrefs);
 
@@ -322,18 +371,12 @@ void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs)
 		CPreferencesPageBase* pPage = (CPreferencesPageBase*)m_ppHost.GetPage(nPage);
 		ASSERT(pPage->IsKindOf(RUNTIME_CLASS(CPreferencesPageBase)));
 		
-		pPage->SavePreferences(pPrefs);
+		pPage->SavePreferences(pPrefs, szKey);
 	}
 	
-	if (GetSafeHwnd())
-	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-
-		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("Height"), rWindow.Height());
-		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("Width"), rWindow.Width());
-		pPrefs->WriteProfileInt(_T("Preferences\\DialogState"), _T("StartPage"), m_ppHost.GetActiveIndex());
-	}
+	pPrefs->WriteProfileInt(szKey, _T("Height"), m_sizeCurWindow.cy);
+	pPrefs->WriteProfileInt(szKey, _T("Width"), m_sizeCurWindow.cx);
+	pPrefs->WriteProfileInt(szKey, _T("StartPage"), m_ppHost.GetActiveIndex());
 }
 
 void CPreferencesDlgBase::SetPageBackgroundColor(COLORREF color)
@@ -372,7 +415,7 @@ void CPreferencesDlgBase::Resize(int cx, int cy)
 	int nDX = (cx - m_sizeCurClient.cx);
 	int nDY = (cy - m_sizeCurClient.cy);
 
-	if ((nDX == 0) || (nDY == 0))
+	if ((nDX == 0) && (nDY == 0))
 		return;
 
 	m_sizeCurClient.cx = cx;
@@ -410,15 +453,20 @@ void CPreferencesDlgBase::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 
 BOOL CPreferencesDlgBase::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
-	OnHelpButton();
+	DoHelp();
 	return TRUE;
 }
 
-void CPreferencesDlgBase::OnHelpButton() 
+void CPreferencesDlgBase::OnClickHelpButton() 
+{
+	DoHelp();
+}
+
+void CPreferencesDlgBase::DoHelp()
 {
 	const CPreferencesPageBase* pPage = GetActivePage();
 	ASSERT(pPage);
-
+	
 	if (pPage && pPage->IsKindOf(RUNTIME_CLASS(CPreferencesPageBase)))
 		AfxGetApp()->WinHelp(pPage->GetHelpID());
 	else

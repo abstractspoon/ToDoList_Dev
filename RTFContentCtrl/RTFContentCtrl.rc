@@ -100,6 +100,15 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 #pragma code_page(1252)
 #endif //_WIN32
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
+
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -351,14 +360,14 @@ BEGIN
                     BS_MULTILINE,7,99,346,10
 END
 
-IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 374, 189
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 375, 189
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Rich Text Preferences"
 FONT 8, "Tahoma"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,261,168,50,14,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,317,168,50,14
-    CONTROL         "",IDC_PPHOST,"Static",SS_BLACKFRAME,7,7,360,154
+    PUSHBUTTON      "Cancel",IDCANCEL,318,168,50,14
+    CONTROL         "",IDC_PPHOST,"Static",SS_BLACKFRAME,7,7,361,154
 END
 
 
@@ -405,7 +414,7 @@ BEGIN
     IDD_PREFERENCES_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 367
+        RIGHTMARGIN, 368
         TOPMARGIN, 7
         BOTTOMMARGIN, 182
     END

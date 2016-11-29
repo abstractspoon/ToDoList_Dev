@@ -18,6 +18,7 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\themed.h"
@@ -350,6 +351,7 @@ BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_DONEDATE:
 	case IUI_DUEDATE:
 	case IUI_EXTERNALID:
+	case IUI_FILEREF:
 	case IUI_FLAG:
 	case IUI_LASTMOD:
 	case IUI_PERCENT:
@@ -629,6 +631,15 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList15
 	
 	if (attrib.HasKey(IUI_RECURRENCE))
 		pKI->sRecurrence = pTasks->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
+
+	if (attrib.HasKey(IUI_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
+	{
+		pKI->sFileRef = pTasks->GetTaskFileLink(hTask, 0);
+
+		// Get the shortest meaningful bit because of space constraints
+		if (FileMisc::IsPath(pKI->sFileRef))
+			pKI->sFileRef = FileMisc::GetFileNameFromPath(pKI->sFileRef);
+	}
 }
 
 BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)

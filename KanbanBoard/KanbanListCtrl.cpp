@@ -536,7 +536,16 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				
 				DrawAttribute(pDC, rLine, 0, pKI->sTitle, nFlags);
 
-				// Rest
+				// Remove boldness for attributes
+				if (dwFontFlags & GMFS_BOLD)
+				{
+					pDC->SelectObject(pOldFont);
+
+					dwFontFlags &= ~GMFS_BOLD;
+					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
+				}
+
+				// Attribute display
 				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
 					crText = pDC->SetTextColor(GraphicsMisc::Lighter(crText, 0.3));
 				
@@ -573,6 +582,7 @@ UINT CKanbanListCtrl::GetDisplayNameID(IUI_ATTRIBUTE nAttrib)
 	case IUI_DUEDATE:		return IDS_DISPLAY_DUEDATE;
 	case IUI_EXTERNALID:	return IDS_DISPLAY_EXTERNALID;
 	case IUI_FLAG:			return IDS_DISPLAY_FLAG;
+	case IUI_FILEREF:		return IDS_DISPLAY_FILEREF;
 	case IUI_LASTMOD:		return IDS_DISPLAY_LASTMOD;
 	case IUI_PARENT:		return IDS_DISPLAY_PARENT;
 	case IUI_PERCENT:		return IDS_DISPLAY_PERCENT;

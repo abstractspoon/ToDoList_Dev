@@ -30,11 +30,11 @@ class CPreferencesPageBase : public CPropertyPage, protected CDialogHelper
 	// Construction
 public:
 	CPreferencesPageBase(UINT nDlgTemplateID);
-	CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID);
+//	CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID);
 	~CPreferencesPageBase();
 	
-	virtual void LoadPreferences(const IPreferences* /*pPrefs*/) {}
-	virtual void SavePreferences(IPreferences* /*pPrefs*/) {}
+	virtual void LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) = 0;
+	virtual void SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const = 0;
 
 	void SetBackgroundColor(COLORREF color);
 	CWnd* GetDlgItem(UINT nID) const;
@@ -46,6 +46,9 @@ protected:
 	BOOL m_bFirstShow;
 	UINT m_nHelpID;
 
+protected:
+	virtual BOOL OnInitDialog();
+	
 protected:
 	afx_msg void OnControlChange(UINT nID = -1);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -65,35 +68,40 @@ class CPreferencesDlgBase : public CDialog, protected CDialogHelper
 public:
 	CPreferencesDlgBase(UINT nDlgTemplateID, 
 						UINT nPPHostFrameCtrlID,
-						UINT nHelpBtnIconID = 0,
-						CWnd* pParent = NULL);   // standard constructor
+						UINT nDialogIconID,
+						UINT nHelpBtnIconID,
+						CWnd* pParent);
+
+	virtual ~CPreferencesDlgBase();
 	
-	int DoModal(IPreferences* prefs, int nInitPage = -1);
+	int DoModal(IPreferences* prefs = NULL, LPCTSTR szKey = NULL, int nInitPage = -1);
 	void SetPageBackgroundColor(COLORREF color);
 
-	void LoadPreferences(const IPreferences* prefs);
-	void SavePreferences(IPreferences* prefs);
+	void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
+	void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
 	
 protected:
 	CScrollingPropertyPageHost m_ppHost;
 	CWinHelpButton m_btnHelp;
+	HICON m_hIcon;
 
 	UINT m_nDlgTemplateID;
 	UINT m_nPPHostFrameCtrlID;
 	UINT m_nHelpBtnIconID;
+	UINT m_nDlgIconID;
 
 	int m_nInitPage;
-	CSize m_sizeOrgWindow;
+	CSize m_sizeOrgWindow, m_sizeCurWindow;
 	CSize m_sizeCurClient;
 
 	// Temporary pointer only
 	IPreferences* m_pDoModalPrefs;
+	CString m_sDoModalKey;
 	
 protected:
-	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
-	afx_msg void OnHelpButton();
+	afx_msg void OnClickHelpButton();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	DECLARE_MESSAGE_MAP()
 		
@@ -110,6 +118,7 @@ protected:
 	virtual BOOL SetActivePage(CPreferencesPageBase* pPage);
 	virtual BOOL AddPage(CPreferencesPageBase* pPage);
 	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
+	virtual void DoHelp();
 
 	BOOL CreatePPHost(UINT nHostID);
 	BOOL CreatePPHost(LPRECT pRect);

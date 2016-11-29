@@ -618,7 +618,7 @@ void CToDoListWnd::SetupUIStrings()
 	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
-	CWinHelpButton::SetTooltip(CEnString(IDS_ONLINEHELP));
+	CWinHelpButton::SetDefaultTooltip(CEnString(IDS_ONLINEHELP));
 }
 
 BOOL CToDoListWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
@@ -923,7 +923,7 @@ void CToDoListWnd::InitShortcutManager()
 	// with the users actual settings
 	CPreferences prefs;
 
-	if (m_mgrShortcuts.Initialize(this, prefs))
+	if (m_mgrShortcuts.Initialize(this, prefs, _T("KeyboardShortcuts")))
 	{
 		// fix for previously adding escape key as a shortcut for IDCLOSE 
 		// (big mistake)
@@ -2100,7 +2100,7 @@ void CToDoListWnd::SaveSettings()
 	if (CDialogHelper::GetComboBoxItems(m_cbQuickFind, aItems))
 		prefs.WriteProfileArray(_T("QuickFind"), aItems);
 
-	m_mgrShortcuts.SaveSettings(prefs);
+	m_mgrShortcuts.SaveSettings(prefs, _T("KeyboardShortcuts"));
 	m_mgrUIExtensions.SavePreferences(prefs, _T("UIExtensions"));
 	m_mgrContent.SavePreferences(prefs, _T("ContentControls"));
 }

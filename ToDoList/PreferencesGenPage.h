@@ -116,10 +116,12 @@ protected:
 	afx_msg void OnUseStickies();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
-   virtual void LoadPreferences(const IPreferences* pPrefs);
-   virtual void SavePreferences(IPreferences* pPrefs);
-   void EnableDisableLanguageOptions();
+		
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+	
+	void EnableDisableLanguageOptions();
 };
 
 //{{AFX_INSERT_LOCATION}}

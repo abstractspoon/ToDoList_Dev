@@ -85,6 +85,10 @@ protected:
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 		
+protected:
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+
 	void EnableControls();
 	int GetCurSel();
 	void RebuildListCtrlImages();
@@ -92,9 +96,6 @@ protected:
 	static CString MapCmdIDToPlaceholder(UINT nCmdID);
 	static CLA_TYPE MapCmdIDToType(UINT nCmdID);
 	
-	virtual void LoadPreferences(const IPreferences* pPrefs);
-	virtual void SavePreferences(IPreferences* pPrefs);
-
 };
 
 //{{AFX_INSERT_LOCATION}}

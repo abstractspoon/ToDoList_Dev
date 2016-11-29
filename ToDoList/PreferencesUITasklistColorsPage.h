@@ -182,8 +182,8 @@ protected:
 	int FindAttribValue(LPCTSTR szAttrib);
 	void AddDefaultListItemsToAttributeColors();
 	
-	virtual void LoadPreferences(const IPreferences* pPrefs);
-	virtual void SavePreferences(IPreferences* pPrefs);
+	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 };
 
 //{{AFX_INSERT_LOCATION}}

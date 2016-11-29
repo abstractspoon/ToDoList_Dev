@@ -12,12 +12,11 @@
 #include "KanbanFixedColumnListCtrl.h"
 
 #include "..\shared\groupline.h"
-#include "..\shared\scrollingpropertypagehost.h"
+#include "..\shared\preferencesbase.h"
 #include "..\shared\inputlistctrl.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\checklistboxex.h"
-#include "..\Shared\winhelpbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\iuiextension.h"
@@ -25,7 +24,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesPage dialog
 
-class CKanbanPreferencesPage : public CPropertyPage
+class CKanbanPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
@@ -113,7 +112,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesDlg dialog
 
-class CKanbanPreferencesDlg : public CDialog
+class CKanbanPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
@@ -135,22 +134,16 @@ public:
 
 protected:
 	CKanbanPreferencesPage m_page;
-	CScrollingPropertyPageHost m_ppHost;
-	HICON m_hIcon;
-	CWinHelpButton m_btnHelp;
 
 protected:
 	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	virtual void DoHelp();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CKanbanPreferencesDlg)
 	//}}AFX_MSG
-	afx_msg void OnDestroy();
-	afx_msg void OnClickHelpButton();
-	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
 };

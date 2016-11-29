@@ -173,10 +173,6 @@ SOURCE=.\res\TDLTransEdit.rc2
 # End Group
 # Begin Source File
 
-SOURCE=.\ReadMe.txt
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\TDLTransEdit.exe.manifest
 # End Source File
 # End Target

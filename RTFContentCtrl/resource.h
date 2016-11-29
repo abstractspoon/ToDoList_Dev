@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by RTFContentCtrl.rc
 //
+#define IDI_HELP_BUTTON                 1
 #define TOOLBAR_CONTROL                 10
 #define RULER_CONTROL                   11
 #define RTF_CONTROL                     12
@@ -83,7 +84,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        58189
+#define _APS_NEXT_RESOURCE_VALUE        2
 #define _APS_NEXT_COMMAND_VALUE         32816
 #define _APS_NEXT_CONTROL_VALUE         16018
 #define _APS_NEXT_SYMED_VALUE           58289

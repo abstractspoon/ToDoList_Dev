@@ -48,7 +48,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CalendarExt", "..\CalendarE
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BurndownExt", "..\BurndownExt\BurndownExt.vcxproj", "{DA896CDC-157D-472E-8F61-87E174E6B80C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "..\TDLTransEdit\TDLTransEdit.vcxproj", "{AEB056D3-947F-33ED-FC97-A619711FA7D8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "..\TDLTransEdit\TDLTransEdit.vcxproj", "{4CAD4459-B066-E987-883C-3A6477E1FC44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,10 +140,10 @@ Global
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{DA896CDC-157D-472E-8F61-87E174E6B80C}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{AEB056D3-947F-33ED-FC97-A619711FA7D8}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{AEB056D3-947F-33ED-FC97-A619711FA7D8}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{AEB056D3-947F-33ED-FC97-A619711FA7D8}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{AEB056D3-947F-33ED-FC97-A619711FA7D8}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{4CAD4459-B066-E987-883C-3A6477E1FC44}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

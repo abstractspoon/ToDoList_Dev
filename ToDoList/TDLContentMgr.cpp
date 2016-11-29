@@ -68,7 +68,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) 
 	{
 		if (!bAppOnly)
-			CToDoCommentsCtrl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), TRUE));
+			CToDoCommentsCtrl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE));
 
 		CToDoCommentsCtrl::SetPasteSourceUrls(pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE));
 	}

@@ -913,12 +913,12 @@ void CTransDictionary::IgnoreTranslatedText()
 
 		while (nItem--)
 		{
-			const CString sItem = aTextOut[nItem];
+			CString sItem = aTextOut[nItem];
 			ASSERT(!sItem.IsEmpty());
 
-			// Only ignore translated items having
-			// DIFFERENT text to the text being translated
-			if (sItem != pDI->GetTextIn())
+			// Only ignore translated items NOT having the same
+			// text as an untranslated string elsewhere
+			if (!HasDictItem(sItem))
 				IgnoreString(sItem, TRUE);
 		}
 	}

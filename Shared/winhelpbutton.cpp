@@ -14,8 +14,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-HICON	CWinHelpButton::s_hHelpIcon = NULL;
-CString CWinHelpButton::s_sTooltip = _T("Online Help");
+HICON	CWinHelpButton::s_hDefIcon = NULL;
+CString CWinHelpButton::s_sDefTooltip = _T("Online Help");
 
 /////////////////////////////////////////////////////////////////////////////
 // CWinHelpButton
@@ -27,9 +27,9 @@ CWinHelpButton::CWinHelpButton(UINT nHelpID, BOOL bAutoHandleClick)
 	m_bAutoPosition(TRUE)
 {
 	ASSERT(m_nHelpID);
-	ASSERT(s_hHelpIcon);
-
-	CIconButton::SetIcon(s_hHelpIcon, FALSE);
+	
+	if (s_hDefIcon)
+		CIconButton::SetIcon(s_hDefIcon, FALSE);
 }
 
 CWinHelpButton::~CWinHelpButton()
@@ -100,25 +100,25 @@ int CWinHelpButton::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CIconButton::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	ASSERT(!s_sTooltip.IsEmpty());
-	CIconButton::SetTooltip(s_sTooltip);
+	if (!s_sDefTooltip.IsEmpty());
+		CIconButton::SetTooltip(s_sDefTooltip);
 
 	return 0;
 }
 
-BOOL CWinHelpButton::SetIcon(HICON hIcon)
+BOOL CWinHelpButton::SetDefaultIcon(HICON hIcon)
 {
-	ASSERT(s_hHelpIcon == NULL);
+	ASSERT(s_hDefIcon == NULL);
 
-	if (s_hHelpIcon)
-		::DestroyIcon(s_hHelpIcon);
+	if (s_hDefIcon)
+		::DestroyIcon(s_hDefIcon);
 
-	s_hHelpIcon = hIcon;
+	s_hDefIcon = hIcon;
 
-	return (s_hHelpIcon != NULL);
+	return (s_hDefIcon != NULL);
 }
 
-BOOL CWinHelpButton::SetTooltip(LPCTSTR szTooltip)
+BOOL CWinHelpButton::SetDefaultTooltip(LPCTSTR szTooltip)
 {
 	if (Misc::IsEmpty(szTooltip))
 	{
@@ -126,7 +126,7 @@ BOOL CWinHelpButton::SetTooltip(LPCTSTR szTooltip)
 		return FALSE;
 	}
 
-	s_sTooltip = szTooltip;
+	s_sDefTooltip = szTooltip;
 	return TRUE;
 }
 

@@ -64,7 +64,7 @@ protected:
 	CShortcutManager m_mgrShortcuts;
 	CRtfHtmlConverter& m_rtfHtml;
 	LOGFONT m_lfCurrent;
-	CRTFPreferencesDlg m_prefsDlg;
+	CRTFPreferencesDlg m_dlgPrefs;
 
 	static BOOL s_bPasteSourceUrls;
 	static BOOL s_bConvertWithMSWord;
@@ -135,6 +135,7 @@ protected:
 	afx_msg void OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg LRESULT OnCustomUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFailedUrl(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 
