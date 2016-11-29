@@ -529,6 +529,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="SessionStatusWnd.cpp" />
     <ClCompile Include="ShortcutManager.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -810,6 +811,7 @@
     <ClInclude Include="SaveFocus.h" />
     <ClInclude Include="ScrollingPropertyPageHost.h" />
     <ClInclude Include="ServerDlg.h" />
+    <ClInclude Include="SessionStatusWnd.h" />
     <ClInclude Include="ShortcutManager.h" />
     <ClInclude Include="SizeGrip.h" />
     <ClInclude Include="SpellCheckDlg.h" />
@@ -871,7 +873,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="\Users\Daniel.Godson\Documents\GitHub\ToDoList_Core\BurndownExt\BurndownExt.rc" />
+      <UserProperties RESOURCE_FILE="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

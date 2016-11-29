@@ -77,6 +77,7 @@
 #include <windowsx.h>
 #include <direct.h>
 #include <math.h>
+#include <Wtsapi32.h>
 
 #include <afxpriv.h>        // for WM_KICKIDLE
 
@@ -135,48 +136,58 @@ enum
 
 enum 
 {
-	INTERVAL_READONLYSTATUS = 1000,
-	INTERVAL_TIMESTAMPCHANGE = 10000,
-	//	INTERVAL_AUTOSAVE, // dynamically determined
-	INTERVAL_CHECKOUTSTATUS = 5000,
-	INTERVAL_DUEITEMS = ONE_MINUTE,
-	INTERVAL_TIMETRACKING = 5000,
-	//	INTERVAL_AUTOMINIMIZE, // dynamically determined
+	INTERVAL_READONLYSTATUS		= 1000,
+	INTERVAL_TIMESTAMPCHANGE	= 10000,
+	//	INTERVAL_AUTOSAVE		= dynamically determined
+	INTERVAL_CHECKOUTSTATUS		= 5000,
+	INTERVAL_DUEITEMS			= ONE_MINUTE,
+	INTERVAL_TIMETRACKING		= 5000,
+	//	INTERVAL_AUTOMINIMIZE	= dynamically determined
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef WM_WTSSESSION_CHANGE
+#	define WM_WTSSESSION_CHANGE	0x02B1
+#	define WTS_SESSION_LOCK		0x7
+#	define WTS_SESSION_UNLOCK	0x8
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 
 
-CToDoListWnd::CToDoListWnd() : CFrameWnd(), 
-		m_bVisible(-1), 
-		m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, AFX_ABBREV_FILENAME_LEN, CEnString(IDS_RECENTFILES)),
-		m_nLastSelItem(-1), 
-		m_nMaxState(TDCMS_NORMAL), 
-		m_nPrevMaxState(TDCMS_NORMAL),
-		m_bShowFilterBar(TRUE),
-		m_bShowStatusBar(TRUE),
-		m_bInNewTask(FALSE),
-		m_bSaving(FALSE),
-		m_mgrShortcuts(FALSE),
-		m_pPrefs(NULL),
-		m_bClosing(FALSE),
-		m_tabCtrl(TCE_POSTDRAW | TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT),
-		m_mgrToDoCtrls(m_tabCtrl),
-		m_bFindShowing(FALSE),
-		m_bShowProjectName(TRUE),
-		m_bQueryOpenAllow(FALSE),
-		m_bPasswordPrompting(TRUE),
-		m_bShowToolbar(TRUE),
-		m_bReloading(FALSE),
-		m_hwndLastFocus(NULL),
-		m_bStartHidden(FALSE),
-		m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
-		m_bShowTasklistBar(TRUE), 
-		m_bShowTreeListBar(TRUE),
-		m_bEndingSession(FALSE),
-		m_nContextColumnID(TDCC_NONE),
-		m_nNumDueTaskThreads(0),
-		m_bReshowTimeTrackerOnEnable(FALSE)
+CToDoListWnd::CToDoListWnd() 
+	: 
+	CFrameWnd(), 
+	m_bVisible(-1), 
+	m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, AFX_ABBREV_FILENAME_LEN, CEnString(IDS_RECENTFILES)),
+	m_nLastSelItem(-1), 
+	m_nMaxState(TDCMS_NORMAL), 
+	m_nPrevMaxState(TDCMS_NORMAL),
+	m_bShowFilterBar(TRUE),
+	m_bShowStatusBar(TRUE),
+	m_bInNewTask(FALSE),
+	m_bSaving(FALSE),
+	m_mgrShortcuts(FALSE),
+	m_pPrefs(NULL),
+	m_bClosing(FALSE),
+	m_tabCtrl(TCE_POSTDRAW | TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT),
+	m_mgrToDoCtrls(m_tabCtrl),
+	m_bFindShowing(FALSE),
+	m_bShowProjectName(TRUE),
+	m_bQueryOpenAllow(FALSE),
+	m_bPasswordPrompting(TRUE),
+	m_bShowToolbar(TRUE),
+	m_bReloading(FALSE),
+	m_hwndLastFocus(NULL),
+	m_bStartHidden(FALSE),
+	m_cbQuickFind(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
+	m_bShowTasklistBar(TRUE), 
+	m_bShowTreeListBar(TRUE),
+	m_bEndingSession(FALSE),
+	m_nContextColumnID(TDCC_NONE),
+	m_nNumDueTaskThreads(0),
+	m_bReshowTimeTrackerOnEnable(FALSE)
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
@@ -380,7 +391,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
 	ON_MESSAGE(WM_HOTKEY, OnHotkey)
 	ON_MESSAGE(WM_POSTONCREATE, OnPostOnCreate)
-	ON_MESSAGE(WM_POWERBROADCAST, OnPowerBroadcast)
 	ON_NOTIFY(NM_CLICK, IDC_TRAYICON, OnTrayIconClick) 
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
 	ON_NOTIFY(NM_RCLICK, IDC_TRAYICON, OnTrayIconRClick)
@@ -423,6 +433,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STOPTRACKING, OnTimeTrackerStopTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_LOADDELAYEDTASKLIST, OnTimeTrackerLoadDelayedTasklist)
+	ON_REGISTERED_MESSAGE(WM_SESSIONSTATUS_CHANGE, OnSessionStatusChange)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ARCHIVE_COMPLETEDTASKS, OnUpdateArchiveCompletedtasks)
@@ -779,20 +790,15 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	UpdateWindowIcons();
-	
-	// UI Font
 	InitUIFont();
-
 	LoadSettings();
+
+	// Session notifications
+	m_sessionWnd.Initialize(*this);
 
 	// add a barebones tasklist while we're still hidden
 	if (!CreateNewTaskList(FALSE))
 		return -1;
-
-	// timers
-	SetTimer(TIMER_DUEITEMS, TRUE);
-	SetTimer(TIMER_TIMETRACKING, TRUE);
-	SetTimer(TIMER_TIMETRACKREMINDER, TRUE);
 
 	// notify users about dodgy content plugins
 	if (m_mgrContent.SomePluginsHaveBadversions())
@@ -2441,6 +2447,8 @@ void CToDoListWnd::LoadSettings()
 
 	// Recently modified period
 	CFilteredToDoCtrl::SetRecentlyModifiedPeriod(userPrefs.GetRecentlyModifiedPeriod());
+
+	RestoreTimers();
 }
 
 void CToDoListWnd::ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey)
@@ -4580,14 +4588,8 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	// take a copy of current userPrefs to check changes against
 	const CPreferencesDlg oldPrefs; 
 	
-	// kill timers
-	SetTimer(TIMER_READONLYSTATUS, FALSE);
-	SetTimer(TIMER_TIMESTAMPCHANGE, FALSE);
-	SetTimer(TIMER_CHECKOUTSTATUS, FALSE);
-	SetTimer(TIMER_AUTOSAVE, FALSE);
-	SetTimer(TIMER_TIMETRACKING, FALSE);
-	SetTimer(TIMER_AUTOMINIMIZE, FALSE);
-	SetTimer(TIMER_TIMETRACKREMINDER, FALSE);
+	// kill timers for the duration
+	KillTimers();
 
 	// restore translation of dynamic menu items shortcut prefs
 	EnableDynamicMenuTranslation(TRUE);
@@ -4775,13 +4777,8 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	}
 	
 	// finally set or terminate the various status check timers
-	SetTimer(TIMER_READONLYSTATUS, (newPrefs.GetReadonlyReloadOption() != RO_NO));
-	SetTimer(TIMER_TIMESTAMPCHANGE, (newPrefs.GetTimestampReloadOption() != RO_NO));
-	SetTimer(TIMER_AUTOSAVE, newPrefs.GetAutoSaveFrequency());
-	SetTimer(TIMER_CHECKOUTSTATUS, (newPrefs.GetKeepTryingToCheckout() || newPrefs.GetAutoCheckinFrequency()));
-	SetTimer(TIMER_TIMETRACKING, TRUE);
-	SetTimer(TIMER_AUTOMINIMIZE, newPrefs.GetAutoMinimizeFrequency());
-	SetTimer(TIMER_TIMETRACKREMINDER, newPrefs.GetTrackReminderFrequency());
+	RestoreTimers();
+
 }
 
 BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs)
@@ -4945,22 +4942,21 @@ void CToDoListWnd::UpdateGlobalHotkey()
 
 void CToDoListWnd::RefreshPauseTimeTracking()
 {
-	// time tracking
-	int nSel = GetSelToDoCtrl();
-	ASSERT(nSel != -1);
+	BOOL bPauseAll = (((m_sessionWnd.IsLocked() || m_sessionWnd.IsScreenSaverActive()) && !Prefs().GetTrackOnScreenSaver()) || 
+					  (m_sessionWnd.IsHibernated() && !Prefs().GetTrackHibernated()));
 
-	// always un-pause the active tasklist
-	if (nSel != -1)
-		GetToDoCtrl(nSel).PauseTimeTracking(FALSE);
-
-	// handle the others depending on user pref
 	BOOL bTrackActiveOnly = !Prefs().GetTrackNonActiveTasklists();
 	int nCtrl = GetTDCCount();
+
+	int nSel = GetSelToDoCtrl();
+	ASSERT(nSel != -1);
 	
 	while (nCtrl--)
 	{
-		if (nCtrl != nSel)
-			GetToDoCtrl(nCtrl).PauseTimeTracking(bTrackActiveOnly);
+		if (nCtrl == nSel)
+			GetToDoCtrl(nCtrl).PauseTimeTracking(bPauseAll);
+		else 
+			GetToDoCtrl(nCtrl).PauseTimeTracking(bPauseAll || bTrackActiveOnly);
 	}
 }
 
@@ -6129,21 +6125,37 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo, 
 	// if this is the only control then set or terminate the various status 
 	// check timers
 	if (GetTDCCount() == 1)
-	{
-		const CPreferencesDlg& userPrefs = Prefs();
-		
-		SetTimer(TIMER_READONLYSTATUS, userPrefs.GetReadonlyReloadOption() != RO_NO);
-		SetTimer(TIMER_TIMESTAMPCHANGE, userPrefs.GetTimestampReloadOption() != RO_NO);
-		SetTimer(TIMER_AUTOSAVE, userPrefs.GetAutoSaveFrequency());
-		SetTimer(TIMER_CHECKOUTSTATUS, 
-				userPrefs.GetKeepTryingToCheckout() ||	userPrefs.GetAutoCheckinFrequency());
-	}
+		RestoreTimers();
 	
 	// make sure everything looks okay
 	Invalidate();
 	UpdateWindow();
 	
 	return nSel;
+}
+
+void CToDoListWnd::KillTimers()
+{
+	SetTimer(TIMER_READONLYSTATUS, FALSE);
+	SetTimer(TIMER_TIMESTAMPCHANGE, FALSE);
+	SetTimer(TIMER_CHECKOUTSTATUS, FALSE);
+	SetTimer(TIMER_AUTOSAVE, FALSE);
+	SetTimer(TIMER_TIMETRACKING, FALSE);
+	SetTimer(TIMER_AUTOMINIMIZE, FALSE);
+	SetTimer(TIMER_TIMETRACKREMINDER, FALSE);
+}
+
+void CToDoListWnd::RestoreTimers()
+{
+	const CPreferencesDlg& prefs = Prefs();
+
+	SetTimer(TIMER_READONLYSTATUS, (prefs.GetReadonlyReloadOption() != RO_NO));
+	SetTimer(TIMER_TIMESTAMPCHANGE, (prefs.GetTimestampReloadOption() != RO_NO));
+	SetTimer(TIMER_AUTOSAVE, prefs.GetAutoSaveFrequency());
+	SetTimer(TIMER_CHECKOUTSTATUS, (prefs.GetKeepTryingToCheckout() || prefs.GetAutoCheckinFrequency()));
+	SetTimer(TIMER_TIMETRACKING, TRUE);
+	SetTimer(TIMER_AUTOMINIMIZE, prefs.GetAutoMinimizeFrequency());
+	SetTimer(TIMER_TIMETRACKREMINDER, prefs.GetTrackReminderFrequency());
 }
 
 void CToDoListWnd::SetTimer(UINT nTimerID, BOOL bOn)
@@ -6214,14 +6226,7 @@ void CToDoListWnd::OnTimer(UINT nIDEvent)
 	// if no controls are active kill the timers
 	if (!GetTDCCount())
 	{
-		SetTimer(TIMER_READONLYSTATUS, FALSE);
-		SetTimer(TIMER_TIMESTAMPCHANGE, FALSE);
-		SetTimer(TIMER_AUTOSAVE, FALSE);
-		SetTimer(TIMER_CHECKOUTSTATUS, FALSE);
-		SetTimer(TIMER_DUEITEMS, FALSE);
-		SetTimer(TIMER_TIMETRACKING, FALSE);
-		SetTimer(TIMER_AUTOMINIMIZE, FALSE);
-		SetTimer(TIMER_TIMETRACKREMINDER, FALSE);
+		KillTimers();
 		return;
 	}
 	
@@ -11217,52 +11222,24 @@ LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnPowerBroadcast(WPARAM wp, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnSessionStatusChange(WPARAM wp, LPARAM lp)
 {
-	const CPreferencesDlg& userPrefs = Prefs();
-
 	switch (wp)
 	{
-	case PBT_APMSUSPEND:
-	case PBT_APMSTANDBY:
-	case PBT_APMQUERYSUSPEND:
-	case PBT_APMQUERYSTANDBY:
-		// Terminate all timers
-		SetTimer(TIMER_DUEITEMS, FALSE);
-		SetTimer(TIMER_READONLYSTATUS, FALSE);
-		SetTimer(TIMER_TIMESTAMPCHANGE, FALSE);
-		SetTimer(TIMER_CHECKOUTSTATUS, FALSE);
-		SetTimer(TIMER_AUTOSAVE, FALSE);
-		SetTimer(TIMER_TIMETRACKING, FALSE);
-		SetTimer(TIMER_TIMETRACKREMINDER, FALSE);
-		break;
+	case SESSIONSTATUS_HIBERNATE:
+		if (lp)
+			KillTimers();
+		else
+			RestoreTimers();
+		// fall thru
 
-	case PBT_APMQUERYSUSPENDFAILED:
-	case PBT_APMQUERYSTANDBYFAILED:
-	case PBT_APMRESUMECRITICAL:
-	case PBT_APMRESUMESUSPEND: 
-	case PBT_APMRESUMESTANDBY:
-		// reset time tracking as required
-		if (!userPrefs.GetTrackHibernated())
-		{
-			int nCtrl = GetTDCCount();
-			
-			while (nCtrl--)
-				GetToDoCtrl(nCtrl).ResetTimeTracking();
-		}
-
-		// restart timers
-		SetTimer(TIMER_DUEITEMS, TRUE);
-		SetTimer(TIMER_READONLYSTATUS, userPrefs.GetReadonlyReloadOption() != RO_NO);
-		SetTimer(TIMER_TIMESTAMPCHANGE, userPrefs.GetTimestampReloadOption() != RO_NO);
-		SetTimer(TIMER_AUTOSAVE, userPrefs.GetAutoSaveFrequency());
-		SetTimer(TIMER_CHECKOUTSTATUS, userPrefs.GetKeepTryingToCheckout() || userPrefs.GetAutoCheckinFrequency());
-		SetTimer(TIMER_TIMETRACKING, TRUE);
-		SetTimer(TIMER_TIMETRACKREMINDER, userPrefs.GetTrackReminderFrequency());
+	case SESSIONSTATUS_LOCK:
+	case SESSIONSTATUS_SCREENSAVER:
+		RefreshPauseTimeTracking();
 		break;
 	}
-
-	return TRUE; // allow 
+	
+	return 0L;
 }
 
 LRESULT CToDoListWnd::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)

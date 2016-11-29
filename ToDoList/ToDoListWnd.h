@@ -45,6 +45,7 @@
 #include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
 #include "..\shared\windowicons.h"
+#include "..\shared\sessionstatuswnd.h"
 
 #include "..\3rdparty\statusbarACT.h"
 
@@ -115,6 +116,7 @@ protected:
 	TDC_MAXSTATE m_nMaxState, m_nPrevMaxState;
 	TODOITEM m_tdiDefault;
 	CTDLTimeTrackerDlg m_dlgTimeTracker;
+	CSessionStatusWnd m_sessionWnd;
 
 	int m_nLastSelItem; // just for flicker-free todoctrl switching
 	int m_nNumDueTaskThreads;
@@ -341,7 +343,7 @@ protected:
 	afx_msg LRESULT OnGetIcon(WPARAM bLargeIcon, LPARAM /*not used*/);
 	afx_msg LRESULT OnHotkey(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnPowerBroadcast(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnQuickFindItemAdded(WPARAM wp, LPARAM lp);
@@ -550,6 +552,9 @@ protected:
 	void OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags);
 	void OnEditUndoRedo(BOOL bUndo);
 	void OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo);
+
+	void KillTimers();
+	void RestoreTimers();
 
 	virtual void LoadSettings();
 	virtual void SaveSettings();
