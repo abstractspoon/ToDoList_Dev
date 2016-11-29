@@ -45,7 +45,6 @@ CSessionStatusWnd::~CSessionStatusWnd()
 BEGIN_MESSAGE_MAP(CSessionStatusWnd, CFrameWnd)
 	ON_MESSAGE(WM_POWERBROADCAST, OnPowerBroadcast)
 	ON_MESSAGE(WM_WTSSESSION_CHANGE, OnSessionChange)
-	ON_WM_SYSCOMMAND()
 	ON_WM_TIMER()
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
@@ -110,7 +109,31 @@ LRESULT CSessionStatusWnd::OnSessionChange(WPARAM wp, LPARAM /*lp*/)
 
 void CSessionStatusWnd::Notify(SESSIONSTATUS nStatus, BOOL bOn) const
 {
+#ifdef _DEBUG
+	CString sStatus;
+
+	switch (nStatus)
+	{
+	case SESSIONSTATUS_HIBERNATE:
+		sStatus = (bOn ? _T("Hibernated") : _T("Resumed"));
+		break;
+
+	case SESSIONSTATUS_LOCK:
+		sStatus = (bOn ? _T("Locked") : _T("Unlocked"));
+		break;
+
+	case SESSIONSTATUS_SCREENSAVER:
+		sStatus = (bOn ? _T("Screensaver on") : _T("Screensaver off"));
+		break;
+	}
+
+	TRACE(_T("CSessionStatusWnd(%s)\n"), sStatus);
+#endif
+
+
 	::SendMessage(m_hwndNotify, WM_SESSIONSTATUS_CHANGE, nStatus, bOn);
+
+
 }
 
 BOOL CSessionStatusWnd::RegisterForSessionNotification()
@@ -133,31 +156,25 @@ BOOL CSessionStatusWnd::RegisterForSessionNotification()
 	return FALSE;
 }
 
-void CSessionStatusWnd::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	switch (nID)
-	{
-	case SC_SCREENSAVE:
-		m_bScreenSaver = TRUE;
-		SetTimer(TIMER_SCREENSAVE, 30000, NULL);
-		Notify(SESSIONSTATUS_SCREENSAVER, FALSE);
-		break;
-	}
-
-	CFrameWnd::OnSysCommand(nID, lParam);
-}
-
 void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 {
 	switch (nIDEvent)
 	{
 	case TIMER_SCREENSAVE:
-		ASSERT(m_bScreenSaver);
-		if (!Misc::IsScreenSaverActive())
 		{
-			m_bScreenSaver = FALSE;
-			KillTimer(TIMER_SCREENSAVE);
-			Notify(SESSIONSTATUS_SCREENSAVER, FALSE);
+			BOOL bWasActive = m_bScreenSaver;
+			BOOL bIsActive = Misc::IsScreenSaverActive();
+
+			if (!bWasActive && bIsActive)
+			{
+				m_bScreenSaver = TRUE;
+				Notify(SESSIONSTATUS_SCREENSAVER, TRUE);
+			}
+			else if (bWasActive && !bIsActive)
+			{
+				m_bScreenSaver = FALSE;
+				Notify(SESSIONSTATUS_SCREENSAVER, FALSE);
+			}
 		}
 		break;
 
@@ -189,6 +206,9 @@ int CSessionStatusWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		// Use a timer for lock/unlock state
 		SetTimer(TIMER_LOCK, 30000, NULL);
 	}
+
+	// Use a timer for screensaver state
+	SetTimer(TIMER_SCREENSAVE, 30000, NULL);
 
 	return 0;
 }
