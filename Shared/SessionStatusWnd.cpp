@@ -130,10 +130,7 @@ void CSessionStatusWnd::Notify(SESSIONSTATUS nStatus, BOOL bOn) const
 	TRACE(_T("CSessionStatusWnd(%s)\n"), sStatus);
 #endif
 
-
 	::SendMessage(m_hwndNotify, WM_SESSIONSTATUS_CHANGE, nStatus, bOn);
-
-
 }
 
 BOOL CSessionStatusWnd::RegisterForSessionNotification()

@@ -11253,7 +11253,6 @@ void CToDoListWnd::OnViewStatusBar()
 	m_statusBar.ShowWindow(m_bShowStatusBar ? SW_SHOW : SW_HIDE);
 	
 	SendMessage(WM_SIZE, SIZE_RESTORED, 0L);
-	//Resize();
 
 	if (m_bShowStatusBar)
 		UpdateStatusbar();
