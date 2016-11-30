@@ -529,6 +529,10 @@ SOURCE=.\ServerDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SessionStatusWnd.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ShortcutManager.cpp
 # End Source File
 # Begin Source File
@@ -1170,6 +1174,10 @@ SOURCE=.\ScrollingPropertyPageHost.h
 # Begin Source File
 
 SOURCE=.\ServerDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SessionStatusWnd.h
 # End Source File
 # Begin Source File
 
