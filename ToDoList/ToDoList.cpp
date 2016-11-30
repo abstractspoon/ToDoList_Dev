@@ -1273,13 +1273,11 @@ void CToDoListApp::OnExportPrefs()
 		if (bUsingReg && reg.ExportToIni(sIniPath, TRUE))
 		{
 			// use them now? 
-			CString sAppFolder, sIniFolder;
+			CString sDefaultIniPath;
 			
-			FileMisc::SplitPath(sAppPath, NULL, &sAppFolder);
-			FileMisc::SplitPath(sIniPath, NULL, &sIniFolder);
-			
-			// only if they're in the same folder as the exe
-			if (sIniFolder.CompareNoCase(sAppFolder) == 0)
+			// Only if they have the right filename
+			if (GetDefaultIniPath(sDefaultIniPath, FALSE) &&
+				FileMisc::IsSamePath(sDefaultIniPath, sIniPath))
 			{
 				if (AfxMessageBox(CEnString(IDS_POSTEXPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 				{
