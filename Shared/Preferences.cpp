@@ -134,15 +134,18 @@ CPreferences::~CPreferences()
 	if ((s_nRef == 0) && s_bIni)
 	{
 		SaveInternal();
-
-		// cleanup
-		int nSection = s_aIni.GetSize();
-		
-		while (nSection--)
-			delete s_aIni[nSection];
-		
-		s_aIni.RemoveAll();
+		CleanupIni();
 	}
+}
+
+void CPreferences::CleanupIni()
+{
+	int nSection = s_aIni.GetSize();
+		
+	while (nSection--)
+		delete s_aIni[nSection];
+		
+	s_aIni.RemoveAll();
 }
 
 BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
@@ -153,11 +156,18 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 		return FALSE;
 	}
 
-	if (s_bIni && !s_sPrefsPath.IsEmpty())
-		Save();
+	if (s_bIni)
+	{
+		if (!s_sPrefsPath.IsEmpty())
+			Save();
+
+		if (!bIni)
+			CleanupIni();
+	}
 
 	s_sPrefsPath = szPrefsPath;
 	s_bIni = bIni;
+	s_nRef = 0;
 
 	return TRUE;
 }
