@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PAGES, OnSelchangedPages)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
 	//}}AFX_MSG_MAP
+	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
@@ -381,6 +382,10 @@ void CPreferencesDlg::ReposContents(CDeferWndMove& dwm, int nDX, int nDY)
 
 	// resize tree
 	dwm.ResizeCtrl(this, IDC_PAGES, 0, nDY);
+
+	// page title
+	dwm.ResizeCtrl(this, IDC_PAGE_TITLE, nDX, 0);
+
 }
 
 void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
