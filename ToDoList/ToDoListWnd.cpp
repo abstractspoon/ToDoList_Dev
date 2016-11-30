@@ -77,7 +77,6 @@
 #include <windowsx.h>
 #include <direct.h>
 #include <math.h>
-#include <Wtsapi32.h>
 
 #include <afxpriv.h>        // for WM_KICKIDLE
 
