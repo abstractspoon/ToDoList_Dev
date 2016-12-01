@@ -413,7 +413,7 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 	// Iterate all the reminders looking for matches
 	while (nRem--)
 	{
-		const TDCREMINDER& rem = m_aReminders[nRem];
+		TDCREMINDER& rem = m_aReminders[nRem];
 
 		// Skip disabled reminders
 		if (!rem.bEnabled)
@@ -427,7 +427,16 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 			COleDateTime dateRem, dateNow = COleDateTime::GetCurrentTime();
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
-				bDelete = !ShowReminder(rem);
+			{
+				// Don't delete recurring reminders
+				if (!ShowReminder(rem))
+				{
+					if (rem.IsTaskRecurring())
+						rem.bEnabled = FALSE;
+					else
+						bDelete = TRUE;
+				}
+			}
 		}
 
 		if (bDelete)
@@ -439,9 +448,11 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 
 BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 {
+	ASSERT(rem.TaskExists() && !rem.IsTaskDone());
+
 	if (m_bUseStickies)
 	{
-		if (m_stickies.IsValid() || m_stickies.Initialize(m_pWndNotify))
+		if (m_stickies.IsValid() || m_stickies.Initialize(m_pWndNotify, m_sStickiesPath))
 		{
 			CString sContent(rem.GetTaskTitle()), 
 					sWhen(rem.FormatWhenString()), 

@@ -34,6 +34,12 @@ BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickie
 	if (!Misc::IsEmpty(szStickiesPath))
 		m_sStickiesPath = szStickiesPath;
 
+	if (!FileMisc::FileExists(m_sStickiesPath))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// verify owner callback
 	ASSERT_VALID(pCallback);
 
