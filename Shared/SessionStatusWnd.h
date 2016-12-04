@@ -14,7 +14,7 @@ enum SESSIONSTATUS
 /////////////////////////////////////////////////////////////////////
 // CSessionStatusWnd
 
-class CSessionStatusWnd : public CFrameWnd
+class CSessionStatusWnd : protected CFrameWnd
 {
 	DECLARE_DYNAMIC(CSessionStatusWnd)
 
@@ -33,6 +33,7 @@ protected:
 	BOOL m_bHibernated;
 	BOOL m_bLocked;
 	BOOL m_bScreenSaver;
+	BOOL m_bLockRegistered;
 
 protected:
 	afx_msg LRESULT OnPowerBroadcast(WPARAM wp, LPARAM lp);
@@ -43,8 +44,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL RegisterForSessionNotification();
 	void Notify(SESSIONSTATUS nStatus, BOOL bOn) const;
+
+	static BOOL RegisterForSessionNotification(HWND hwnd);
+	static BOOL UnregisterForSessionNotification(HWND hwnd);
 };
 
 /////////////////////////////////////////////////////////////////////

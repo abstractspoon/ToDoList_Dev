@@ -31,13 +31,16 @@ CSessionStatusWnd::CSessionStatusWnd()
 	m_hwndNotify(NULL),
 	m_bHibernated(FALSE),
 	m_bLocked(FALSE),
-	m_bScreenSaver(FALSE)
+	m_bScreenSaver(FALSE),
+	m_bLockRegistered(FALSE)
 {
 
 }
 
 CSessionStatusWnd::~CSessionStatusWnd()
 {
+	if (m_bLockRegistered && GetSafeHwnd())
+		VERIFY(UnregisterForSessionNotification(GetSafeHwnd()));
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,7 +136,7 @@ void CSessionStatusWnd::Notify(SESSIONSTATUS nStatus, BOOL bOn) const
 	::SendMessage(m_hwndNotify, WM_SESSIONSTATUS_CHANGE, nStatus, bOn);
 }
 
-BOOL CSessionStatusWnd::RegisterForSessionNotification()
+BOOL CSessionStatusWnd::RegisterForSessionNotification(HWND hwnd)
 {
 	typedef BOOL (WINAPI *PFNWTSREGISTERSESSIONNOTIFICATION)(HWND, DWORD);
 
@@ -146,7 +149,27 @@ BOOL CSessionStatusWnd::RegisterForSessionNotification()
 			(PFNWTSREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSRegisterSessionNotification");
 
 		if (fnRegister)
-			return fnRegister(GetSafeHwnd(), 0/*NOTIFY_FOR_THIS_SESSION*/);
+			return fnRegister(hwnd, 0/*NOTIFY_FOR_THIS_SESSION*/);
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CSessionStatusWnd::UnregisterForSessionNotification(HWND hwnd)
+{
+	typedef BOOL (WINAPI *PFNWTSUNREGISTERSESSIONNOTIFICATION)(HWND);
+
+	// load dll once only
+	static HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
+
+	if (hDll)
+	{
+		static PFNWTSUNREGISTERSESSIONNOTIFICATION fnUnregister = 
+			(PFNWTSUNREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSUnRegisterSessionNotification");
+
+		if (fnUnregister)
+			return fnUnregister(hwnd);
 	}
 
 	// else
@@ -198,7 +221,9 @@ int CSessionStatusWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!RegisterForSessionNotification())
+	m_bLockRegistered = RegisterForSessionNotification(GetSafeHwnd());
+
+	if (!m_bLockRegistered)
 	{
 		// Use a timer for lock/unlock state
 		SetTimer(TIMER_LOCK, 30000, NULL);
@@ -209,3 +234,5 @@ int CSessionStatusWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
+
+
