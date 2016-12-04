@@ -91,7 +91,6 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& pr
 	styles[TDCS_LOGTASKTIMESEPARATELY] = prefs.GetLogTaskTimeSeparately();
 	styles[TDCS_LOGTIMETRACKING] = prefs.GetLogTimeTracking();
 	styles[TDCS_NODUEDATEISDUETODAYORSTART] = prefs.GetNoDueDateIsDueTodayOrStart();
-	styles[TDCS_PAUSETIMETRACKINGONSCRNSAVER] = !prefs.GetTrackOnScreenSaver();
 	styles[TDCS_REFILTERONMODIFY] = prefs.GetReFilterOnModify();
 	styles[TDCS_RESORTONMODIFY] = prefs.GetReSortOnModify();
 	styles[TDCS_RESTOREFILTERS] = prefs.GetRestoreTasklistFilters();

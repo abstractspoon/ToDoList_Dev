@@ -4650,16 +4650,10 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 		return FALSE;
 	
 	// does it permit tracking
-	DWORD dwTrackID = bTrackingSelTask ? dwSelTaskID : m_dwTimeTrackTaskID;
+	DWORD dwTrackID = (bTrackingSelTask ? dwSelTaskID : m_dwTimeTrackTaskID);
 
 	if (!m_data.IsTaskTimeTrackable(dwTrackID))
 		return FALSE;
-
-	if (HasStyle(TDCS_PAUSETIMETRACKINGONSCRNSAVER))
-	{
-		if (Misc::IsScreenSaverActive() || Misc::IsWorkStationLocked())
-			return FALSE;
-	}
 
 	// yeah!
 	return TRUE;
@@ -5575,7 +5569,6 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_SORTVISIBLETASKSONLY:
 		case TDCS_SYNCTIMEESTIMATESANDDATES:
 		case TDCS_FOCUSTREEONENTER:
-		case TDCS_PAUSETIMETRACKINGONSCRNSAVER:
 		case TDCS_TRACKSELECTEDTASKONLY:
 		case TDCS_LOGTIMETRACKING:
 		case TDCS_LOGTASKTIMESEPARATELY:
