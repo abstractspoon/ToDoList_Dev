@@ -67,57 +67,59 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShow
 	int nWidths[NUM_COLS];
 	GetColumnWidths(nWidths);
 
-	CHoldRedraw hr(*this);
-
-	ClearAll(); // selection
-	DeleteAllItems();
-
-	const CDictionaryItems& items = dict.GetItems();
-	POSITION pos = items.GetStartPosition();
-
-	while (pos)
 	{
-		CString sEnglish;
-		DICTITEM* pDI = NULL;
+		CHoldRedraw hr(*this);
 
-		items.GetNextAssoc(pos, sEnglish, pDI);
-		ASSERT(!sEnglish.IsEmpty() && pDI);
+		ClearAll(); // selection
+		DeleteAllItems();
 
-		if (MatchesFilter(pDI, sFilter))
+		const CDictionaryItems& items = dict.GetItems();
+		POSITION pos = items.GetStartPosition();
+
+		while (pos)
 		{
-			int nItem = InsertItem(GetItemCount(), pDI->GetTextIn());
-			ASSERT(nItem != -1);
+			CString sEnglish;
+			DICTITEM* pDI = NULL;
 
-			SetItemText(nItem, 1, pDI->GetTextOut());
-			SetItemText(nItem, 2, pDI->GetClassID());
-			SetItemData(nItem, nItem);
+			items.GetNextAssoc(pos, sEnglish, pDI);
+			ASSERT(!sEnglish.IsEmpty() && pDI);
 
-			// Alternatives
-			if (bShowAlternatives)
+			if (MatchesFilter(pDI, sFilter))
 			{
-				const CMapStringToString& alts = pDI->GetAlternatives();
-				POSITION posAlt = alts.GetStartPosition();
-				
-				while (posAlt)
+				int nItem = InsertItem(GetItemCount(), pDI->GetTextIn());
+				ASSERT(nItem != -1);
+
+				SetItemText(nItem, 1, pDI->GetTextOut());
+				SetItemText(nItem, 2, pDI->GetClassID());
+				SetItemData(nItem, nItem);
+
+				// Alternatives
+				if (bShowAlternatives)
 				{
-					CString sTranslation, sClassID;
-					alts.GetNextAssoc(posAlt, sClassID, sTranslation);
-					
-					int nItem = InsertItem(GetItemCount(), (ALTINDENT + sEnglish));
-					ASSERT(nItem != -1);
-					
-					SetItemText(nItem, 1, sTranslation);
-					SetItemText(nItem, 2, sClassID);
-					SetItemData(nItem, nItem);
+					const CMapStringToString& alts = pDI->GetAlternatives();
+					POSITION posAlt = alts.GetStartPosition();
+
+					while (posAlt)
+					{
+						CString sTranslation, sClassID;
+						alts.GetNextAssoc(posAlt, sClassID, sTranslation);
+
+						int nItem = InsertItem(GetItemCount(), (ALTINDENT + sEnglish));
+						ASSERT(nItem != -1);
+
+						SetItemText(nItem, 1, sTranslation);
+						SetItemText(nItem, 2, sClassID);
+						SetItemData(nItem, nItem);
+					}
 				}
 			}
 		}
-	}
 
-	Sort();
-	
-	if (GetItemCount())
-		SetCurSel(0);
+		Sort();
+
+		if (GetItemCount())
+			SetCurSel(0);
+	}
 
 	SetColumnWidths(nWidths);
 
