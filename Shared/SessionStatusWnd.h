@@ -25,7 +25,7 @@ public:
 	BOOL Initialize(HWND hwndNotify);
 
 	BOOL IsLocked() const { return m_bLocked; }
-	BOOL IsHibernated() const { return m_bLocked; }
+	BOOL IsHibernated() const { return m_bHibernated; }
 	BOOL IsScreenSaverActive() const { return m_bScreenSaver; }
 
 protected:
