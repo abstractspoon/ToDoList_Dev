@@ -294,7 +294,7 @@ public:
 	void SetPercentDoneIncrement(int nAmount);
 
 	// time tracking
-	void PauseTimeTracking(BOOL bPause = TRUE) { m_bTimeTrackingPaused = bPause; }
+	void PauseTimeTracking(BOOL bPause = TRUE);
 	BOOL TimeTrackSelectedTask();
 	BOOL CanTimeTrackSelectedTask() const;
 	BOOL IsSelectedTaskBeingTimeTracked() const;
@@ -303,7 +303,6 @@ public:
 	CString GetSelectedTaskTimeLogPath() const;
 	void EndTimeTracking(BOOL bAllowConfirm);
 	void BeginTimeTracking(DWORD dwTaskID);
-	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
 	BOOL DoAddTimeToLogFile();
 
 	static void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
@@ -659,6 +658,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual void BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 
+	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);

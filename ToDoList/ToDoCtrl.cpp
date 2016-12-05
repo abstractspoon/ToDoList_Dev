@@ -201,6 +201,7 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_bModified(FALSE), 
 	m_bSourceControlled(FALSE),
 	m_bSplitting(FALSE),
+	m_bTimeTrackingPaused(FALSE),
 	m_cbAllocBy(ACBS_ALLOWDELETE),
 	m_cbAllocTo(ACBS_ALLOWDELETE),
 	m_cbCategory(ACBS_ALLOWDELETE),
@@ -4604,6 +4605,19 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL b
 	return (nRes != SET_FAILED);
 }
 
+void CToDoCtrl::PauseTimeTracking(BOOL bPause) 
+{ 
+	if (bPause && !m_bTimeTrackingPaused)
+	{
+		m_bTimeTrackingPaused = TRUE;
+	}
+	else if (!bPause && m_bTimeTrackingPaused)
+	{
+		m_bTimeTrackingPaused = FALSE;
+		ResetTimeTracking();
+	}
+}
+
 BOOL CToDoCtrl::TimeTrackSelectedTask()
 {
 	if (!CanTimeTrackSelectedTask())
@@ -8290,7 +8304,7 @@ void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 		if (pTDI)
 		{
 			m_dwTimeTrackTaskID = dwTaskID;
-			m_dwTickLast = GetTickCount();
+			ResetTimeTracking();
 			
 			// if the task's start date has not been set then set it now
 			if (!pTDI->HasStart())
