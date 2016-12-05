@@ -4564,7 +4564,7 @@ UINT CToDoListWnd::DueTaskNotifyThreadProc(LPVOID pParam)
 
 CString CToDoListWnd::GetTitle()
 {
-	static CString sTitle(_T("ToDoList 7.1.RC1 (Release Candidate)"));
+	static CString sTitle(_T("ToDoList 7.1.RC2 (Release Candidate)"));
 	CLocalizer::IgnoreString(sTitle);
 
 	return sTitle;
