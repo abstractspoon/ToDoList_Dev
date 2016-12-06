@@ -789,10 +789,24 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_nTextColorOption = pPrefs->GetProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
 
 	// attribute colors
+	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
+
 	CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
 	int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
 
-	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
+	for (int nColor = 0; nColor < nNumColor; nColor++)
+	{
+		CString sColorKey = Misc::MakeKey(_T("\\P%d"), nColor, sKey);
+
+		ATTRIBCOLOR ac;
+		ac.color = pPrefs->GetProfileInt(sColorKey, _T("Color"), 0);
+		ac.sAttrib = pPrefs->GetProfileString(sColorKey, sAttrib);
+
+		if (!ac.sAttrib.IsEmpty())
+		{
+			m_aAttribColors.Add(ac);
+		}
+	}
 }
 
 void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
