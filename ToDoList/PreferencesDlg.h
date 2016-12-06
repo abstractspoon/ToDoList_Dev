@@ -299,6 +299,7 @@ protected:
 	CEnStatic m_stCategoryTitle, m_stPageTitle; 
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_defaultListData;
+	BOOL m_bInitDlg;
 
 	CPreferences m_prefs;
 	CMap<CPreferencesPageBase*, CPreferencesPageBase*, HTREEITEM, HTREEITEM&> m_mapPP2HTI;
@@ -333,6 +334,7 @@ protected:
 	void SynchronizeTree();
 	
 	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
+	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
 
 	static void SetTitleThemeColors(CEnStatic& stTitle, const CUIThemeFile& theme);
 

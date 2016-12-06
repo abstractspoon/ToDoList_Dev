@@ -77,8 +77,8 @@ public:
 	int DoModal(IPreferences* prefs = NULL, LPCTSTR szKey = NULL, int nInitPage = -1);
 	void SetPageBackgroundColor(COLORREF color);
 
-	void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
-	void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
+	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
+	virtual void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
 	
 protected:
 	CScrollingPropertyPageHost m_ppHost;

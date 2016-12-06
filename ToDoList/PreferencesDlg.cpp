@@ -14,6 +14,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\themed.h"
+#include "..\shared\autoflag.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,7 +43,8 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageShortcuts(pShortcutMgr), 
 	m_pageUI(pContentMgr, pMgrUIExt), 
 	m_pageFile2(pExportMgr),
-	m_pageUITasklistColors(m_defaultListData)
+	m_pageUITasklistColors(m_defaultListData),
+	m_bInitDlg(FALSE)
 {
 	CPreferencesDlgBase::AddPage(&m_pageGen);
 	CPreferencesDlgBase::AddPage(&m_pageMultiUser);
@@ -106,8 +108,17 @@ int CPreferencesDlg::DoModal(int nInitPage)
 	return CPreferencesDlgBase::DoModal(m_prefs, PREFSKEY, nInitPage); 
 }
 
+void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
+{
+	// 'Temporary' hack to prevent prefs being reloaded 
+	// by base class in OnInitDialog
+	if (!m_bInitDlg)
+		CPreferencesDlgBase::LoadPreferences(prefs, szKey);
+}
+
 BOOL CPreferencesDlg::OnInitDialog() 
 {
+	CAutoFlag af(m_bInitDlg, TRUE);
 	CPreferencesDlgBase::OnInitDialog();
 	
 	// disable translation of category title because
