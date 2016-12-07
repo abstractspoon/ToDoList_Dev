@@ -446,9 +446,12 @@ void CTDLTransEditDlg::OnListItemChanged(NMHDR *pNMHDR, LRESULT *pResult)
 	// Only interested in the newly selected item
 	if (!(pNMLV->uOldState & LVIS_SELECTED) && (pNMLV->uNewState & LVIS_SELECTED))
 	{
-		m_sEnglish.Format(_T("%s [%s]"), 
-						m_lcDictItems.GetItemText(pNMLV->iItem, ENG_COL), 
-						m_lcDictItems.GetItemText(pNMLV->iItem, HINT_COL));
+		CString sHint(m_lcDictItems.GetItemText(pNMLV->iItem, HINT_COL));
+
+		if (sHint.IsEmpty())
+			m_sEnglish = m_lcDictItems.GetItemText(pNMLV->iItem, ENG_COL);
+		else
+			m_sEnglish.Format(_T("%s [%s]"), m_lcDictItems.GetItemText(pNMLV->iItem, ENG_COL), sHint);
 
 		m_sTranslation = m_lcDictItems.GetItemText(pNMLV->iItem, TRANS_COL);
 
