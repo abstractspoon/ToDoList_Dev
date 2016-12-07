@@ -879,8 +879,9 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 	{
 		// don't delete it if its the topleft item
 		if (m_bAutoAddCols && GetCurSel() == 0 && m_bAutoAddRows && m_nCurCol == 0)
+		{
 			return FALSE;
-
+		}
 		// else delete the cell if its not the 'add row' prompt
 		else if (m_bAutoAddRows && m_nCurCol == 0)
 		{
@@ -889,7 +890,9 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 				DeleteItem(GetCurSel());
 			}
 			else
+			{
 				return FALSE;
+			}
 		}
 		// else delete the cell if its not the 'add col' prompt
 		else if (m_bAutoAddCols && GetCurSel() == 0)
@@ -900,7 +903,9 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 				m_nCurCol = -1;
 			}
 			else
+			{
 				return FALSE;
+			}
 		}
 		else // clear the field
 		{
@@ -1491,7 +1496,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 	}
 	else // just a normal column and row but we still need to check for duplication
 	{
-//		if (!sText.IsEmpty())
+		if (!sText.IsEmpty())
 		{
 			if ((m_bAutoAddRows && m_nEditCol == 0 && IsDuplicateRow(sText, m_nEditItem) && !m_bAllowDuplication) ||
 				(m_bAutoAddCols && m_nEditItem == 0 && IsDuplicateCol(sText, m_nEditCol) && !m_bAllowDuplication))
@@ -1513,13 +1518,23 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				*pResult = EDITITEM;
 			}
 		}
-// 		else // remove item
-// 		{
-// 			SetItemText(m_nEditItem, m_nEditCol, _T(""));
-// 			bItemDeleted = TRUE;
-// 			bNotifyParent = FALSE;
-// 			DeleteSelectedCell();
-// 		}
+		else // remove item
+		{
+			SetItemText(m_nEditItem, m_nEditCol, _T(""));
+			DeleteSelectedCell();
+
+			// Only treat it as a delete if the row count has changed
+			if (nLastRow == (GetItemCount() - 1))
+			{
+				bNotifyParent = TRUE;
+				*pResult = EDITITEM;
+			}
+			else
+			{
+				bItemDeleted = TRUE;
+				bNotifyParent = FALSE;
+			}
+		}
 	}
 
 	if (!bItemDeleted)
