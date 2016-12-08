@@ -141,6 +141,9 @@ public:
 
 	void SaveAttributes(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const;
 	void LoadAttributes(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
+
+protected:
+	static BOOL CanAddAttribute(TDC_ATTRIBUTE nAttrib);
 };
 
 //////////////////////////////////////////////////////////////////////

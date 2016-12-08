@@ -32,17 +32,26 @@ BOOL CTDCAttributeMap::HasAttribute(TDC_ATTRIBUTE nAttrib) const
 
 BOOL CTDCAttributeMap::AddAttribute(TDC_ATTRIBUTE nAttrib)
 {
-	if ((nAttrib < TDCA_FIRSTATTRIBUTE) || (nAttrib >= TDCA_ATTRIBUTECOUNT))
-	{
-		if ((nAttrib < TDCA_CUSTOMATTRIB) || (nAttrib > TDCA_CUSTOMATTRIB_LAST))
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-	}
+	if (CanAddAttribute(nAttrib))
+		return Add(nAttrib);
 
 	// else
-	return Add(nAttrib);
+	return FALSE;
+}
+
+BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
+{
+	if ((nAttrib >= TDCA_FIRSTATTRIBUTE) && (nAttrib < TDCA_ATTRIBUTECOUNT))
+		return TRUE;
+
+	if (nAttrib == TDCA_PARENTID)
+		return TRUE;
+	
+	if ((nAttrib >= TDCA_CUSTOMATTRIB) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST))
+		return TRUE;
+
+	ASSERT(0);
+	return FALSE;
 }
 
 void CTDCAttributeMap::RemoveAttribute(TDC_ATTRIBUTE nAttrib)
