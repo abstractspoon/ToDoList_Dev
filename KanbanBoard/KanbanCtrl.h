@@ -167,7 +167,7 @@ protected:
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
-	void NotifyParentAttibuteChange(LPCTSTR szStatus);
+	BOOL NotifyParentAttibuteChange(LPCTSTR szValue);
 	void NotifyParentSelectionChange();
 	BOOL GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CString& sNewValue);

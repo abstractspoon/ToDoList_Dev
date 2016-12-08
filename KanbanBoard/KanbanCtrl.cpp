@@ -2099,12 +2099,12 @@ BOOL CKanbanCtrl::IsDragging() const
 	return (m_pDragFromList && (m_aDragItems.GetSize() > 0));
 }
 
-void CKanbanCtrl::NotifyParentAttibuteChange(LPCTSTR szStatus)
+BOOL CKanbanCtrl::NotifyParentAttibuteChange(LPCTSTR szValue)
 {
 	ASSERT(!m_bReadOnly);
 //	ASSERT(GetSelectedTaskID());
 
-	GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)szStatus);
+	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)szValue);
 }
 
 void CKanbanCtrl::NotifyParentSelectionChange()
@@ -2216,14 +2216,25 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList)
 
 void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// only interested in selection changes
-	NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
-
-	if ((pNMLV->uChanged & LVIF_STATE) && 
-		((pNMLV->uNewState & LVIS_SELECTED) || (pNMLV->uOldState & LVIS_SELECTED)))
+	// only interested in selection changes occurring outside
+	// of a drag'n'drop, because the 'actual' selected task IDs
+	// will not change during a drag'n'drop
+	if (m_pDragFromList == NULL)
 	{
-		NotifyParentSelectionChange();
+		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
+		
+		if ((pNMLV->uChanged & LVIF_STATE) && 
+			((pNMLV->uNewState & LVIS_SELECTED) || (pNMLV->uOldState & LVIS_SELECTED)))
+		{
+			NotifyParentSelectionChange();
+		}
 	}
+#ifdef _DEBUG
+	else
+	{
+		int breakpoint = 0;
+	}
+#endif
 }
 
 void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
@@ -2238,12 +2249,12 @@ void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)
 		{
 			pList->SetItemState(-1, 0, (LVIS_FOCUSED | LVIS_SELECTED));
 		}
+#ifdef _DEBUG
 		else
 		{
-			CDWordArray aSelIDs;
-			GetSelectedTaskIDs(aSelIDs);
-			int breakpoint = 0;
+ 			int breakpoint = 0;
 		}
+#endif
 
 		pList->SetSelected(pList == pIgnore);
 	}
@@ -2296,6 +2307,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				m_pSelectedList = pDestList;
 				pDestList->SetItemState(-1, 0, (LVIS_FOCUSED | LVIS_SELECTED));
 
+				// 1. Copy the source tasks to the destination
 				int nDrag = m_aDragItems.GetSize();
 				
 				while (nDrag--)
@@ -2309,15 +2321,23 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 					
 					if (pKI)
 					{
-						// remove from src list
-						m_pDragFromList->DeleteItem(nDragItem);
-						m_pDragFromList->RefreshColumnTitle();
-						
 						pKI->SetAttributeValue(m_sTrackAttribID, sAttribValue);
 						
 						int nTask = pDestList->AddTask(pKI->sTitle, dwDragID, TRUE);
 						pDestList->SetItemState(nTask, (LVIS_FOCUSED | LVIS_SELECTED), (LVIS_FOCUSED | LVIS_SELECTED));
 					}
+				}
+
+				// 2. Remove the source tasks
+				nDrag = m_aDragItems.GetSize();
+				
+				while (nDrag--)
+				{
+					int nDragItem = m_aDragItems[nDrag];
+
+					// remove from src list
+					m_pDragFromList->DeleteItem(nDragItem);
+					m_pDragFromList->RefreshColumnTitle();
 				}
 
 				// Handle 'From' list now being empty

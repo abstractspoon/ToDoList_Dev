@@ -748,8 +748,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM /*wp*/, LPARAM lp)
 		return FALSE;
 	}
 	
-	GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
-	return 0L;
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/) 
