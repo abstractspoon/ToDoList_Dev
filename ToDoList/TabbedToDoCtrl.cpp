@@ -1172,14 +1172,16 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 		
 		if (aTaskIDs.GetSize() == 1)
 		{
-			if (aTaskIDs[0] == 0)
+			DWORD dwTaskID = aTaskIDs[0];
+
+			if (dwTaskID == 0)
 			{
 				m_taskTree.DeselectAll();
 				UpdateControls(TRUE);
 			}
-			else if (HasSingleSelectionChanged(aTaskIDs[0]))
+			else if (HasSingleSelectionChanged(dwTaskID))
 			{
-				return SelectTask(aTaskIDs[0]);	
+				return SelectTask(dwTaskID);	
 			}
 		}
 		else
