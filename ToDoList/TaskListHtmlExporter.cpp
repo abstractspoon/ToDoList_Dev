@@ -267,7 +267,6 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 
 	if (!sAttribVal.IsEmpty())
 	{
-		// special case: task title following pos
 		switch (nAttrib)
 		{
 		case TDCA_POSITION:
@@ -276,6 +275,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 
 		case TDCA_TASKNAME:
 			{
+				// special case: task title following pos
 				if (EXPORTSTYLE != STYLE_TABLE && WANTPOS)
 					sFmtAttrib = TAB;
 				
@@ -350,6 +350,15 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	
 	switch (nAttrib)
 	{
+	case TDCA_POSITION:
+	case TDCA_TASKNAME:
+		if ((nAttrib == TDCA_POSITION) || !WANTPOS)
+		{
+			while (--nDepth)
+				sItem = (TAB + sItem);
+		}
+		break;
+
 	case TDCA_PARENTID:
 		// ignore if not set
 		if (pTasks->GetTaskParentID(hTask) == 0)
