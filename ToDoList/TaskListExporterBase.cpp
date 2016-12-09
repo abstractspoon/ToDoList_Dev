@@ -360,7 +360,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		
 	case TDCA_POSITION:
 		if (WANTPOS)
-			sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOS);
+			sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPOSSTRING);
 		break;
 		
 	case TDCA_PRIORITY:

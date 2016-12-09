@@ -9165,7 +9165,10 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	if (!(bTitleOnly || bTitleCommentsOnly))
 	{
 		if (filter.WantAttribute(TDCA_POSITION))
+		{
 			file.SetTaskPosition(hTask, pTDS->GetPosition());
+			file.SetTaskPosition(hTask, m_data.GetTaskPositionString(pTDI, pTDS));
+		}
 		
 		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
 			file.SetTaskFlag(hTask, pTDI->bFlagged != FALSE);

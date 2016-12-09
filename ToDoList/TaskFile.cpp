@@ -2694,7 +2694,7 @@ unsigned long CTaskFile::GetTaskPosition(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskPositionString(HTASKITEM hTask) const
 {
-	return GetTaskString(hTask, TDL_TASKPOS);
+	return GetTaskString(hTask, TDL_TASKPOSSTRING);
 }
 
 bool CTaskFile::IsTaskDone(HTASKITEM hTask) const
@@ -3382,7 +3382,7 @@ BOOL CTaskFile::SetTaskCalcCost(HTASKITEM hTask, double dCost)
 
 bool CTaskFile::SetTaskPosition(HTASKITEM hTask, LPCTSTR szPos)
 {
-	return SetTaskString(hTask, TDL_TASKPOS, szPos);
+	return SetTaskString(hTask, TDL_TASKPOSSTRING, szPos);
 }
 
 bool CTaskFile::SetTaskPosition(HTASKITEM hTask, unsigned long nPos)
