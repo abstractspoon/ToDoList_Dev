@@ -96,7 +96,7 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CKanbanWnd)
-	afx_msg void OnSelchangeAttribute();
+	afx_msg void OnSelchangeTrackedAttribute();
 	afx_msg void OnSelchangeOptions();
 	//}}AFX_MSG
 	afx_msg void OnHelp();
@@ -123,7 +123,7 @@ protected:
 	void EnableDisableCtrls();
 	void BuildOptionsCombo();
 	void UpdatePriorityColors(const IPreferences* pPrefs);
-	void ProcessAttributeChange(); 
+	void ProcessTrackedAttributeChange(); 
 };
 
 /////////////////////////////////////////////////////////////////////////////

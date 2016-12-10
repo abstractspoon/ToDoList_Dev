@@ -79,8 +79,8 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	//{{AFX_MSG_MAP(CKanbanWnd)
-	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
-	ON_CBN_SELCHANGE(IDC_CUSTOMATTRIB, OnSelchangeAttribute)
+	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeTrackedAttribute)
+	ON_CBN_SELCHANGE(IDC_CUSTOMATTRIB, OnSelchangeTrackedAttribute)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_SETFOCUS()
@@ -692,7 +692,7 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences()
 	if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
 		m_nTrackedAttrib = IUI_STATUS;
 
-	ProcessAttributeChange();
+	ProcessTrackedAttributeChange();
 
 	CKanbanAttributeArray aAttrib;
 	m_dlgPrefs.GetDisplayAttributes(aAttrib);
@@ -809,14 +809,14 @@ void CKanbanWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 		m_ctrlKanban.CancelOperation();
 }
 
-void CKanbanWnd::OnSelchangeAttribute() 
+void CKanbanWnd::OnSelchangeTrackedAttribute() 
 {
 	UpdateData();
 
-	ProcessAttributeChange();
+	ProcessTrackedAttributeChange();
 }
 
-void CKanbanWnd::ProcessAttributeChange() 
+void CKanbanWnd::ProcessTrackedAttributeChange() 
 {
 	CKanbanColumnArray aColDefs;
 	IUI_ATTRIBUTE nTrackAttrib;
