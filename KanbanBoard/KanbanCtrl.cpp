@@ -194,9 +194,9 @@ const CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl() const
 
 BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
+	ClearOtherListSelections(NULL);
 	if (aTaskIDs.GetSize() == 0)
 	{
-		ClearOtherListSelections(NULL);
 		return FALSE;
 	}
 
@@ -2174,9 +2174,13 @@ void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	CKanbanListCtrl* pList = GetListCtrl(pNMHDR->hwndFrom);
-
-	SelectListCtrl(pList);
+	// Ignore focus changes during drag and drop
+	if (!IsDragging())
+	{
+		CKanbanListCtrl* pList = GetListCtrl(pNMHDR->hwndFrom);
+		
+		SelectListCtrl(pList);
+	}
 }
 
 BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList)
@@ -2214,12 +2218,17 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList)
 	return FALSE;
 }
 
+BOOL CKanbanCtrl::IsSelectedListCtrl(HWND hWnd) const
+{
+	return (m_pSelectedList && (m_pSelectedList->GetSafeHwnd() == hWnd));
+}
+
 void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// only interested in selection changes occurring outside
-	// of a drag'n'drop, because the 'actual' selected task IDs
-	// will not change during a drag'n'drop
-	if (m_pDragFromList == NULL)
+	// only interested in selection changes from the selected list 
+	// and occurring outside of a drag'n'drop, because the 'actual' 
+	// selected task IDs will not change during a drag'n'drop
+	if (!IsDragging() && IsSelectedListCtrl(pNMHDR->hwndFrom))
 	{
 		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
 		
@@ -2278,7 +2287,24 @@ void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 		
 		if (m_aDragItems.GetSize())
 		{
+			// This will prevent any selection updates
 			m_pDragFromList = pList;
+
+			// If the 'drag-from' list is not currently selected
+			// we select it and then reset the selection to the
+			// items we have just copied
+			if (pList != m_pSelectedList)
+			{
+				CDWordArray aTaskIDs;
+				int nItem = m_aDragItems.GetSize();
+			
+				while (nItem--)
+					aTaskIDs.Add(pList->GetItemData(m_aDragItems[nItem]));
+
+				VERIFY(pList->SelectTasks(aTaskIDs));
+				SelectListCtrl(pList);
+			}
+
 			SetCapture();
 		}
 	}

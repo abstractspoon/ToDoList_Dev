@@ -156,6 +156,7 @@ protected:
 	const CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const;
 
 	BOOL SelectListCtrl(CKanbanListCtrl* pList);
+	BOOL IsSelectedListCtrl(HWND hWnd) const;
 	void FixupSelection();
 	BOOL DeleteListCtrl(int nList);
 
