@@ -369,6 +369,7 @@ BEGIN
     IDS_FIXEDCOLUMNS        "- Fixed Columns -"
     IDS_DELETEALLROWS       "Do you want to delete the existing column definitions?"
     IDS_BKGNDCOLOR          "Colour"
+    IDS_DISPLAY_TASKID      "Task ID"
 END
 
 STRINGTABLE

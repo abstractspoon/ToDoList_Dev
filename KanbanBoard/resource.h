@@ -136,6 +136,7 @@
 #define IDS_FIXEDCOLUMNS                57701
 #define IDS_DELETEALLROWS               57702
 #define IDS_BKGNDCOLOR                  57703
+#define IDS_DISPLAY_TASKID              57704
 
 // Next default values for new objects
 // 

@@ -465,6 +465,7 @@ void CKanbanPreferencesPage::BuildDisplayAttributeListBox()
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,	IUI_STARTDATE);
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,		IUI_STATUS); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,		IUI_TAGS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,		IUI_ID); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,	IUI_TIMEEST); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,	IUI_TIMESPENT); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,	IUI_VERSION); 

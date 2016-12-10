@@ -205,6 +205,7 @@ CString KANBANITEM::GetAttributeValue(IUI_ATTRIBUTE nAttrib) const
 		break;
 
 	case IUI_FILEREF:		return sFileRef;
+	case IUI_ID:			return Misc::Format(dwTaskID);
 	case IUI_PERCENT:		return Misc::Format(nPercent);
 	case IUI_PARENT:		return sPath;
 	case IUI_FLAG:			return _T(""); // TODO
