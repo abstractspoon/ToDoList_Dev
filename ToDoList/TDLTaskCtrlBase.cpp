@@ -4874,7 +4874,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasSubtasks() const
 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 		ASSERT(pTDS);
 
-		if (pTDS && pTDS->GetSubTaskCount())
+		if (pTDS && pTDS->HasSubTasks())
 			return TRUE;
 	}
 	
