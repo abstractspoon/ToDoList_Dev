@@ -3080,6 +3080,57 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		}
 		break;
 
+	case TDCC_REMAINING:
+		{
+			TDC_UNITS nUnits = TDCU_NULL;
+
+			double dRemaining = m_data.CalcTaskRemainingTime(pTDI, pTDS, nUnits);
+			ASSERT(nUnits != TDCU_NULL);
+
+			// format appropriately
+			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
+
+			if (HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT) || HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
+			{
+				sTaskColText = CTimeHelper().FormatTime(dRemaining, nTHUnits, 2);
+			}
+			else // TDCS_CALCREMAININGTIMEBYDUEDATE
+			{
+				COleDateTime date = m_data.CalcTaskDueDate(pTDI, pTDS);
+
+				if (CDateHelper::IsDateSet(date)) 
+				{
+					if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+					{
+						sTaskColText = CTimeHelper().FormatTimeHMS(dRemaining, THU_DAYS, TRUE);
+					}
+					else
+					{
+						// find best units for display
+						if (fabs(dRemaining) >= 1.0)
+						{
+							sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_DAYS, 1);
+						}
+						else
+						{
+							dRemaining *= 24; // to hours
+
+							if (fabs(dRemaining) >= 1.0)
+							{
+								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_HOURS, 1);
+							}
+							else
+							{
+								dRemaining *= 60; // to mins
+								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_MINS, 0);
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
+
 	case TDCC_TIMEEST:
 	case TDCC_TIMESPENT:
 		{
@@ -3134,57 +3185,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_FLAG:
 	case TDCC_REMINDER:
 	case TDCC_FILEREF:
-		break;
-
-	case TDCC_REMAINING:
-		{
-			TDC_UNITS nUnits = TDCU_NULL;
-
-			double dRemaining = m_data.CalcRemainingTime(pTDI, pTDS, nUnits);
-			ASSERT(nUnits != TDCU_NULL);
-
-			// format appropriately
-			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
-
-			if (HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT) || HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
-			{
-				sTaskColText = CTimeHelper().FormatTime(dRemaining, nTHUnits, 2);
-			}
-			else // TDCS_CALCREMAININGTIMEBYDUEDATE
-			{
-				COleDateTime date = m_data.CalcDueDate(pTDI, pTDS);
-
-				if (CDateHelper::IsDateSet(date)) 
-				{
-					if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-					{
-						sTaskColText = CTimeHelper().FormatTimeHMS(dRemaining, THU_DAYS, TRUE);
-					}
-					else
-					{
-						// find best units for display
-						if (fabs(dRemaining) >= 1.0)
-						{
-							sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_DAYS, 1);
-						}
-						else
-						{
-							dRemaining *= 24; // to hours
-
-							if (fabs(dRemaining) >= 1.0)
-							{
-								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_HOURS, 1);
-							}
-							else
-							{
-								dRemaining *= 60; // to mins
-								sTaskColText = CTimeHelper().FormatTime(dRemaining, THU_MINS, 0);
-							}
-						}
-					}
-				}
-			}
-		}
 		break;
 
 	case TDCC_SUBTASKDONE:
@@ -4509,15 +4509,6 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 		nColWidth = pDC->GetTextExtent("10").cx;
 		break; 
 		
-	case TDCC_REMAINING:
-		{
-			int nWidth1 = pDC->GetTextExtent("12m4w").cx;
-			int nWidth2 = pDC->GetTextExtent("100.0W").cx;
-
-			nColWidth = max(nWidth1, nWidth2);
-		}
-		break; 
-		
 	case TDCC_FILEREF:
 		if (HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
 		{
@@ -4540,16 +4531,23 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 		
 	case TDCC_TIMEEST:
 	case TDCC_TIMESPENT:
+	case TDCC_REMAINING:
 		if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
 		{
-			nColWidth = pDC->GetTextExtent("12m4w").cx;
+			nColWidth = pDC->GetTextExtent("-12m4w").cx;
 		}
 		else
 		{
-			BOOL bTimeEst = (nColID == TDCC_TIMEEST);
-			CString sLongest = m_find.GetLongestTime(m_nDefTimeEstUnits, bTimeEst);
+			CString sLongest;
 
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC) + 4; // add a bit to handle different time unit widths
+			switch (nColID)
+			{
+			case TDCC_TIMEEST:   sLongest = m_find.GetLongestTimeEstimate(m_nDefTimeEstUnits);	break;
+			case TDCC_TIMESPENT: sLongest = m_find.GetLongestTimeSpent(m_nDefTimeEstUnits);		break;
+			case TDCC_REMAINING: sLongest = m_find.GetLongestTimeRemaining(m_nDefTimeEstUnits); break;
+			}
+
+			nColWidth = (pDC->GetTextExtent(sLongest).cx + 4); // add a bit to handle different time unit widths
 		}
 		break;
 		

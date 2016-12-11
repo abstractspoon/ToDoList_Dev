@@ -232,9 +232,19 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestTime(TDC_UNITS nDefUnits, BOOL bTimeEst, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestTimeEstimate(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const
 {
-	return GetLongestTime(NULL, NULL, NULL, nDefUnits, bTimeEst, bVisibleOnly);
+	return GetLongestTime(nDefUnits, TDCC_TIMEEST, bVisibleOnly);
+}
+
+CString CToDoCtrlFind::GetLongestTimeSpent(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const
+{
+	return GetLongestTime(nDefUnits, TDCC_TIMESPENT, bVisibleOnly);
+}
+
+CString CToDoCtrlFind::GetLongestTimeRemaining(TDC_UNITS nDefUnits, BOOL bVisibleOnly) const
+{
+	return GetLongestTime(nDefUnits, TDCC_REMAINING, bVisibleOnly);
 }
 
 CString CToDoCtrlFind::GetLongestCustomAttribute(const CString& sAttribID, BOOL bVisibleOnly) const
@@ -336,7 +346,23 @@ CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* 
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, BOOL bTimeEst, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestTime(TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const
+{
+	// Sanity check
+	switch (nCol)
+	{
+	case TDCC_TIMEEST:
+	case TDCC_TIMESPENT:
+	case TDCC_REMAINING:
+		return GetLongestTime(NULL, NULL, NULL, nDefUnits, nCol, bVisibleOnly);
+	}
+
+	// else
+	ASSERT(0);
+	return EMPTY_STR;
+}
+
+CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const
 {
 	if (hti && (!pTDI || !pTDS))
 	{
@@ -354,21 +380,42 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 	if (hti && pTDI && pTDS)
 	{
 		TDC_UNITS nUnits = nDefUnits;
+		double dTime = 0.0;
+		int nDecPlaces = m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2;
 
-		// get actual task time units
-		if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-			nUnits = (bTimeEst ? pTDI->nTimeEstUnits : pTDI->nTimeSpentUnits);
-				
-		// get time
-		double dTime = (bTimeEst ? m_data.CalcTimeEstimate(pTDI, pTDS, nUnits) : m_data.CalcTimeSpent(pTDI, pTDS, nUnits));
-				
+		// get actual task time units and time
+		switch (nCol)
+		{
+		case TDCC_TIMEEST:
+	 		if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+				nUnits = pTDI->nTimeEstUnits;
+
+			dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
+			break;
+
+		case TDCC_TIMESPENT:
+			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+				nUnits = pTDI->nTimeSpentUnits;
+			
+			dTime = m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits);
+			break;
+
+		case TDCC_REMAINING:
+			dTime = m_data.CalcTaskRemainingTime(pTDI, pTDS, nUnits);
+			nDecPlaces = 1;
+			break;
+
+		default:
+			ASSERT(0);
+			return sLongest;
+		}
+
 		// first handle zero times
 		if ((dTime != 0.0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
 		{
 			// then check for negative times
-			if (!bTimeEst || (dTime > 0.0))
+			if ((nCol != TDCC_TIMEEST) || (dTime > 0.0))
 			{
-				int nDecPlaces = m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2;
 				TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 				
 				if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
@@ -387,7 +434,7 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 
 		while (htiChild)
 		{
-			CString sChildLongest = GetLongestTime(htiChild, NULL, NULL, nDefUnits, bTimeEst, bVisibleOnly);
+			CString sChildLongest = GetLongestTime(htiChild, NULL, NULL, nDefUnits, nCol, bVisibleOnly);
 			sLongest = Misc::GetLongest(sLongest, sChildLongest);
 
 			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);

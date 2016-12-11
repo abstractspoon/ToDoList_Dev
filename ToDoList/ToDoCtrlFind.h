@@ -42,7 +42,9 @@ public:
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, const CString& sExtra, BOOL bVisibleOnly = TRUE) const;
 
 	// specific
-	CString GetLongestTime(TDC_UNITS nDefUnits, BOOL bTimeEst, BOOL bVisibleOnly = TRUE) const;
+	CString GetLongestTimeEstimate(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
+	CString GetLongestTimeSpent(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
+	CString GetLongestTimeRemaining(TDC_UNITS nDefUnits, BOOL bVisibleOnly = TRUE) const;
 	CString GetLongestCustomAttribute(const CString& sAttribID, BOOL bVisibleOnly = TRUE) const;
 	CString GetLongestCustomDoubleAttribute(const CString& sAttribID, BOOL bVisibleOnly = TRUE) const;
 
@@ -70,7 +72,8 @@ protected:
 	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;
 	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
 
- 	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, BOOL bTimeEst, BOOL bVisibleOnly) const;
+	CString GetLongestTime(TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly = TRUE) const;
+ 	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nDefUnits, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
  	CString GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const CString& sAttribID, BOOL bVisibleOnly, BOOL bDouble) const;
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
