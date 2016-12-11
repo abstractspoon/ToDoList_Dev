@@ -2772,7 +2772,7 @@ BOOL CToDoCtrlData::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 	return IsParentTaskDone(pTDSParent);
 }
 
-BOOL CToDoCtrlData::GetSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+BOOL CToDoCtrlData::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 									 int& nSubtasksCount, int& nSubtasksDone) const
 {
 	ASSERT (pTDS && pTDI);
@@ -2859,7 +2859,7 @@ CString CToDoCtrlData::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 	return sPath;
 }
 
-int CToDoCtrlData::CalcPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+int CToDoCtrlData::CalcTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	ASSERT (pTDS && pTDI);
 	
@@ -2909,8 +2909,8 @@ int CToDoCtrlData::CalcPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE
 	
 	ASSERT (HasStyle(TDCS_AUTOCALCPERCENTDONE)); // sanity check
 	
-	double dSpent = CalcTimeSpent(pTDI, pTDS, TDCU_HOURS);
-	double dUnused, dEstimate = CalcTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused);
+	double dSpent = CalcTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
+	double dUnused, dEstimate = CalcTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused);
 	
 	if (dSpent > 0 && dEstimate > 0)
 		return min(100, (int)(100 * dSpent / dEstimate));
@@ -2956,7 +2956,7 @@ double CToDoCtrlData::SumPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	}
 	else
 	{
-		GetSubtaskTotals(pTDI, pTDS, nNumSubtasks, nNumDoneSubtasks);
+		GetTaskSubtaskTotals(pTDI, pTDS, nNumSubtasks, nNumDoneSubtasks);
 
 		if (nNumDoneSubtasks == nNumSubtasks) // all subtasks are completed
 			return 0;
@@ -3076,7 +3076,7 @@ double CToDoCtrlData::SumWeightedPercentDone(const TODOITEM* pTDI, const TODOSTR
 	return dTotalPercentDone;
 }
 
-double CToDoCtrlData::CalcCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CToDoCtrlData::CalcTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3093,7 +3093,7 @@ double CToDoCtrlData::CalcCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) 
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 			const TODOITEM* pTDIChild = GetTask(pTDSChild);
 			
-			dCost += CalcCost(pTDIChild, pTDSChild);
+			dCost += CalcTaskCost(pTDIChild, pTDSChild);
 		}
 	}
 		
@@ -3162,18 +3162,18 @@ TDC_UNITS CToDoCtrlData::GetBestCalcTimeSpentUnits(const TODOITEM* pTDI, const T
 }
 
 // external version
-double CToDoCtrlData::CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
+double CToDoCtrlData::CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
 {
 	BOOL bReturnWeighted = HasStyle(TDCS_USEPERCENTDONEINTIMEEST);
 	
 	double dWeightedEstimate;
-	double dEstimate = CalcTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
+	double dEstimate = CalcTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
 
 	return (bReturnWeighted ? dWeightedEstimate : dEstimate);
 }
 
 // internal version
-double CToDoCtrlData::CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+double CToDoCtrlData::CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 										TDC_UNITS nUnits, double& dWeightedEstimate) const
 {
 	// sanity check
@@ -3195,7 +3195,7 @@ double CToDoCtrlData::CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE
 		// percent-done, because that will recurse back into here
 		if (!HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
-			int nPercent = CalcPercentDone(pTDI, pTDS);
+			int nPercent = CalcTaskPercentDone(pTDI, pTDS);
 			dWeightedEstimate = (dEstimate * ((100 - nPercent) / 100.0));
 		}
 		else
@@ -3213,7 +3213,7 @@ double CToDoCtrlData::CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 			double dChildWeightedEstimate = 0.0;
 			
-			dEstimate += CalcTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate);
+			dEstimate += CalcTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate);
 			dWeightedEstimate += dChildWeightedEstimate;
 		}
 	}
@@ -3227,7 +3227,7 @@ double CToDoCtrlData::CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return dEstimate;
 }
 
-double CToDoCtrlData::CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
+double CToDoCtrlData::CalcTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3239,7 +3239,7 @@ double CToDoCtrlData::CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTUR
 
 	if (HasStyle(TDCS_CALCREMAININGTIMEBYDUEDATE))
 	{
-		COleDateTime date = CalcDueDate(pTDI, pTDS);
+		COleDateTime date = CalcTaskDueDate(pTDI, pTDS);
 		nUnits = TDCU_DAYS; // always
 		
 		if (CDateHelper::IsDateSet(date)) 
@@ -3248,7 +3248,7 @@ double CToDoCtrlData::CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTUR
 	else
 	{
 		nUnits = pTDI->nTimeEstUnits;
-		dRemain = CalcTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
+		dRemain = CalcTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
 
 		if (dRemain > 0)
 		{
@@ -3258,7 +3258,7 @@ double CToDoCtrlData::CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTUR
 			}
 			else if (HasStyle(TDCS_CALCREMAININGTIMEBYSPENT))
 			{
-				dRemain -= CalcTimeSpent(pTDI, pTDS, nUnits);
+				dRemain -= CalcTaskTimeSpent(pTDI, pTDS, nUnits);
 			}
 		}
 	}
@@ -3266,7 +3266,7 @@ double CToDoCtrlData::CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTUR
 	return dRemain;
 }
 
-double CToDoCtrlData::CalcTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
+double CToDoCtrlData::CalcTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3288,7 +3288,7 @@ double CToDoCtrlData::CalcTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 			const TODOITEM* pTDIChild = GetTask(pTDSChild);
 			
-			dSpent += CalcTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS);
+			dSpent += CalcTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS);
 		}
 	}
 	
@@ -3313,7 +3313,7 @@ BOOL CToDoCtrlData::IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	if (!pTDS || !pTDI)
 		return FALSE;
 	
-	double dStarted = CalcStartDate(pTDI, pTDS);
+	double dStarted = CalcTaskStartDate(pTDI, pTDS);
 
 	if (bToday)
 		return CDateHelper::IsToday(dStarted);
@@ -3521,40 +3521,40 @@ int CToDoCtrlData::GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS
 	return aRefIDs.GetSize();
 }
 
-int CToDoCtrlData::GetHighestPriority(DWORD dwTaskID, BOOL bIncludeDue) const
+int CToDoCtrlData::GetTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
 		
-	return GetHighestPriority(pTDI, pTDS, bIncludeDue);
+	return GetTaskHighestPriority(pTDI, pTDS, bIncludeDue);
 }
 
-int CToDoCtrlData::GetHighestRisk(DWORD dwTaskID) const
+int CToDoCtrlData::GetTaskHighestRisk(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NORISK);
 		
-	return GetHighestRisk(pTDI, pTDS);
+	return GetTaskHighestRisk(pTDI, pTDS);
 }
 
-double CToDoCtrlData::CalcDueDate(DWORD dwTaskID) const
+double CToDoCtrlData::CalcTaskDueDate(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
 		
-	return CalcDueDate(pTDI, pTDS);
+	return CalcTaskDueDate(pTDI, pTDS);
 }
 
-double CToDoCtrlData::CalcStartDate(DWORD dwTaskID) const
+double CToDoCtrlData::CalcTaskStartDate(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
 		
-	return CalcStartDate(pTDI, pTDS);
+	return CalcTaskStartDate(pTDI, pTDS);
 }
 
 CString CToDoCtrlData::FormatTaskAllocTo(DWORD dwTaskID) const
@@ -3572,58 +3572,58 @@ CString CToDoCtrlData::FormatTaskTags(DWORD dwTaskID) const
 	return FormatTaskTags(GetTask(dwTaskID));
 }
 
-double CToDoCtrlData::CalcCost(DWORD dwTaskID) const
+double CToDoCtrlData::CalcTaskCost(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 		
-	return CalcCost(pTDI, pTDS);
+	return CalcTaskCost(pTDI, pTDS);
 }
 
-int CToDoCtrlData::CalcPercentDone(DWORD dwTaskID) const
+int CToDoCtrlData::CalcTaskPercentDone(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
 		
-	return CalcPercentDone(pTDI, pTDS);
+	return CalcTaskPercentDone(pTDI, pTDS);
 }
 
-double CToDoCtrlData::CalcTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const
+double CToDoCtrlData::CalcTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 		
-	return CalcTimeEstimate(pTDI, pTDS, nUnits);
+	return CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
 }
 
-double CToDoCtrlData::CalcTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const
+double CToDoCtrlData::CalcTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 		
-	return CalcTimeSpent(pTDI, pTDS, nUnits);
+	return CalcTaskTimeSpent(pTDI, pTDS, nUnits);
 }
 
-double CToDoCtrlData::CalcRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const
+double CToDoCtrlData::CalcTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 		
-	return CalcRemainingTime(pTDI, pTDS, nUnits);
+	return CalcTaskRemainingTime(pTDI, pTDS, nUnits);
 }
 
-BOOL CToDoCtrlData::GetSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const
+BOOL CToDoCtrlData::GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
 
-	return GetSubtaskTotals(pTDI, pTDS, nSubtasksTotal, nSubtasksDone);
+	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksTotal, nSubtasksDone);
 }
 
 BOOL CToDoCtrlData::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
@@ -3643,7 +3643,7 @@ BOOL CToDoCtrlData::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, B
 	if (!pTDS || !pTDI)
 		return FALSE;
 	
- 	double dDue = CalcDueDate(pTDI, pTDS);
+ 	double dDue = CalcTaskDueDate(pTDI, pTDS);
 
 	if (bToday)
 		return CDateHelper::IsToday(dDue);
@@ -3652,7 +3652,7 @@ BOOL CToDoCtrlData::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, B
 	return ((dDue > 0) && (dDue < COleDateTime::GetCurrentTime()));
 }
 
-double CToDoCtrlData::CalcDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CToDoCtrlData::CalcTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (HasStyle(TDCS_USEEARLIESTDUEDATE))
 	{
@@ -3667,7 +3667,7 @@ double CToDoCtrlData::CalcDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	return CalcStartDueDate(pTDI, pTDS, FALSE, TRUE, FALSE);
 }
 
-double CToDoCtrlData::CalcStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CToDoCtrlData::CalcTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (HasStyle(TDCS_USEEARLIESTSTARTDATE))
 	{
@@ -3759,7 +3759,7 @@ double CToDoCtrlData::GetBestDate(double dBest, double dDate, BOOL bEarliest)
 	return max(dDate, dBest);
 }
 
-int CToDoCtrlData::GetHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const
+int CToDoCtrlData::GetTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3791,7 +3791,7 @@ int CToDoCtrlData::GetHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE*
 				
 				if (HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 				{
-					int nChildHighest = GetHighestPriority(pTDIChild, pTDSChild, bIncludeDue);
+					int nChildHighest = GetTaskHighestPriority(pTDIChild, pTDSChild, bIncludeDue);
 					
 					// optimization
 					if (nChildHighest == MAX_TDPRIORITY)
@@ -3809,7 +3809,7 @@ int CToDoCtrlData::GetHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE*
 	return nHighest;
 }
 
-int CToDoCtrlData::GetHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+int CToDoCtrlData::GetTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3840,7 +3840,7 @@ int CToDoCtrlData::GetHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				
 				if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 				{
-					  int nChildHighest = GetHighestRisk(pTDIChild, pTDSChild);
+					  int nChildHighest = GetTaskHighestRisk(pTDIChild, pTDSChild);
 					  
 					  // optimization
 					  if (nChildHighest == MAX_TDRISK)
@@ -4098,12 +4098,12 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				if (bDone1 && !bHideDone)
 					date1 = pTDI1->dateDue;
 				else
-					date1 = CalcDueDate(pTDI1, pTDS1);
+					date1 = CalcTaskDueDate(pTDI1, pTDS1);
 				
 				if (bDone2 && !bHideDone)
 					date2 = pTDI2->dateDue;
 				else
-					date2 = CalcDueDate(pTDI2, pTDS2);
+					date2 = CalcTaskDueDate(pTDI2, pTDS2);
 								
 				nCompare = Compare(date1, date2, bIncDueTime, TDCD_DUE);
 			}
@@ -4111,8 +4111,8 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			
 		case TDCC_REMAINING:
 			{
-				COleDateTime date1 = CalcDueDate(pTDI1, pTDS1);
-				COleDateTime date2 = CalcDueDate(pTDI2, pTDS2);
+				COleDateTime date1 = CalcTaskDueDate(pTDI1, pTDS1);
+				COleDateTime date2 = CalcTaskDueDate(pTDI2, pTDS2);
 								
 				if (!CDateHelper::IsDateSet(date1) || 
 					!CDateHelper::IsDateSet(date2))
@@ -4137,12 +4137,12 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				if (bDone1 && !bHideDone)
 					date1 = pTDI1->dateStart;
 				else
-					date1 = CalcStartDate(pTDI1, pTDS1);
+					date1 = CalcTaskStartDate(pTDI1, pTDS1);
 				
 				if (bDone2 && !bHideDone)
 					date2 = pTDI2->dateStart;
 				else
-					date2 = CalcStartDate(pTDI2, pTDS2);
+					date2 = CalcTaskStartDate(pTDI2, pTDS2);
 								
 				nCompare = Compare(date1, date2, bIncStartTime, TDCD_START);
 			}
@@ -4170,7 +4170,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				}
 				else if (bUseHighestPriority)
 				{
-					nPriority1 = GetHighestPriority(pTDI1, pTDS1);
+					nPriority1 = GetTaskHighestPriority(pTDI1, pTDS1);
 				}
 				
 				// item2
@@ -4186,7 +4186,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				}
 				else if (bUseHighestPriority)
 				{
-					nPriority2 = GetHighestPriority(pTDI2, pTDS2);
+					nPriority2 = GetTaskHighestPriority(pTDI2, pTDS2);
 				}
 				
 				nCompare = Compare(nPriority1, nPriority2);
@@ -4209,7 +4209,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				}
 				else if (bUseHighestRisk)
 				{
-					nRisk1 = GetHighestRisk(pTDI1, pTDS1);
+					nRisk1 = GetTaskHighestRisk(pTDI1, pTDS1);
 				}
 				
 				// item2
@@ -4219,7 +4219,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				}
 				else if (bUseHighestRisk)
 				{
-					nRisk2 = GetHighestRisk(pTDI2, pTDS2);
+					nRisk2 = GetTaskHighestRisk(pTDI2, pTDS2);
 				}
 				
 				nCompare = Compare(nRisk1, nRisk2);
@@ -4267,8 +4267,8 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			
 		case TDCC_PERCENT:
 			{
-				int nPercent1 = CalcPercentDone(pTDI1, pTDS1);
-				int nPercent2 = CalcPercentDone(pTDI2, pTDS2);
+				int nPercent1 = CalcTaskPercentDone(pTDI1, pTDS1);
+				int nPercent2 = CalcTaskPercentDone(pTDI2, pTDS2);
 				
 				nCompare = Compare(nPercent1, nPercent2);
 			}
@@ -4294,8 +4294,8 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			
 		case TDCC_COST:
 			{
-				double dCost1 = CalcCost(pTDI1, pTDS1);
-				double dCost2 = CalcCost(pTDI2, pTDS2);
+				double dCost1 = CalcTaskCost(pTDI1, pTDS1);
+				double dCost2 = CalcTaskCost(pTDI2, pTDS2);
 				
 				nCompare = Compare(dCost1, dCost2);
 			}
@@ -4303,8 +4303,8 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			
 		case TDCC_TIMEEST:
 			{
-				double dTime1 = CalcTimeEstimate(pTDI1, pTDS1, TDCU_HOURS);
-				double dTime2 = CalcTimeEstimate(pTDI2, pTDS2, TDCU_HOURS);
+				double dTime1 = CalcTaskTimeEstimate(pTDI1, pTDS1, TDCU_HOURS);
+				double dTime2 = CalcTaskTimeEstimate(pTDI2, pTDS2, TDCU_HOURS);
 				
 				nCompare = Compare(dTime1, dTime2);
 			}
@@ -4312,8 +4312,8 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			
 		case TDCC_TIMESPENT:
 			{
-				double dTime1 = CalcTimeSpent(pTDI1, pTDS1, TDCU_HOURS);
-				double dTime2 = CalcTimeSpent(pTDI2, pTDS2, TDCU_HOURS);
+				double dTime1 = CalcTaskTimeSpent(pTDI1, pTDS1, TDCU_HOURS);
+				double dTime2 = CalcTaskTimeSpent(pTDI2, pTDS2, TDCU_HOURS);
 				
 				nCompare = Compare(dTime1, dTime2);
 			}
@@ -4362,10 +4362,10 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				double dPercent1 = -1.0, dPercent2 = -1.0;
 				
 				// compare first by % completion
-				if (GetSubtaskTotals(pTDI1, pTDS1, nSubtasksCount1, nSubtasksDone1))
+				if (GetTaskSubtaskTotals(pTDI1, pTDS1, nSubtasksCount1, nSubtasksDone1))
 					dPercent1 = ((double)nSubtasksDone1 / nSubtasksCount1);
 				
-				if (GetSubtaskTotals(pTDI2, pTDS2, nSubtasksCount2, nSubtasksDone2))
+				if (GetTaskSubtaskTotals(pTDI2, pTDS2, nSubtasksCount2, nSubtasksDone2))
 					dPercent2 = ((double)nSubtasksDone2 / nSubtasksCount2);
 				
 				nCompare = Compare(dPercent1, dPercent2);
@@ -4661,7 +4661,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 				}
 				else
 				{
-					COleDateTime dtStart = CalcStartDate(pTDI, pTDS);
+					COleDateTime dtStart = CalcTaskStartDate(pTDI, pTDS);
 					bMatch = TaskMatches(dtStart, sp, resTask, bIncTime, TDCD_START);
 				}
 			}
@@ -4680,7 +4680,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 				}
 				else
 				{
-					COleDateTime dtDue = CalcDueDate(pTDI, pTDS);
+					COleDateTime dtDue = CalcTaskDueDate(pTDI, pTDS);
 					bMatch = TaskMatches(dtDue, sp, resTask, bIncTime, TDCD_DUE);
 					
 					// handle overdue tasks
@@ -4715,7 +4715,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 			
 		case TDCA_PRIORITY:
 			{
-				int nPriority = GetHighestPriority(pTDI, pTDS);
+				int nPriority = GetTaskHighestPriority(pTDI, pTDS);
 				bMatch = TaskMatches(nPriority, sp, resTask);
 
 				// Replace '-2' with 'not set'
@@ -4726,7 +4726,7 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 			
 		case TDCA_RISK:
 			{
-				int nRisk = GetHighestRisk(pTDI, pTDS);
+				int nRisk = GetTaskHighestRisk(pTDI, pTDS);
 				bMatch = TaskMatches(nRisk, sp, resTask);
 
 				// Replace '-2' with 'not set'
@@ -4745,28 +4745,28 @@ BOOL CToDoCtrlData::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
 			
 		case TDCA_PERCENT:
 			{
-				int nPercent = CalcPercentDone(pTDI, pTDS);
+				int nPercent = CalcTaskPercentDone(pTDI, pTDS);
 				bMatch = TaskMatches(nPercent, sp, resTask);
 			}
 			break;
 			
 		case TDCA_TIMEEST:
 			{
-				double dTime = CalcTimeEstimate(pTDI, pTDS, TDCU_HOURS);
+				double dTime = CalcTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS);
 				bMatch = TaskMatches(dTime, sp, resTask);
 			}
 			break;
 			
 		case TDCA_TIMESPENT:
 			{
-				double dTime = CalcTimeSpent(pTDI, pTDS, TDCU_HOURS);
+				double dTime = CalcTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
 				bMatch = TaskMatches(dTime, sp, resTask);
 			}
 			break;
 			
 		case TDCA_COST:
 			{
-				double dCost = CalcCost(pTDI, pTDS);
+				double dCost = CalcTaskCost(pTDI, pTDS);
 				bMatch = TaskMatches(dCost, sp, resTask);
 			}
 			break;

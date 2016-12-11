@@ -1612,7 +1612,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 
 				if (bDueToday)
 				{
-					nPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE); // ignore due tasks
+					nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE); // ignore due tasks
 				}
 				else if (bOverDue && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
 				{
@@ -1620,7 +1620,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 				}
 				else
 				{
-					nPriority = m_data.GetHighestPriority(pTDI, pTDS);
+					nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS);
 				}
 
 				if (nPriority != FM_NOPRIORITY)
@@ -2194,7 +2194,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				rSubItem.DeflateRect(2, 1, 3, 2);
 				
 				// first draw the priority colour
-				int nPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE);
+				int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
 				BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
 				
 				if (bHasPriority)
@@ -2266,7 +2266,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					
 					if (!bDone || !HasStyle(TDCS_DONEHAVELOWESTPRIORITY)) // determine appropriate priority
 					{
-						int nPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE);
+						int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
 						crBar = GetPriorityColor(nPriority);
 						
 						// check for due
@@ -2294,7 +2294,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 						GraphicsMisc::DrawRect(pDC, rProgress, CLR_NONE, crBorder);
 						
 						// draw fill
-						int nPercent = m_data.CalcPercentDone(pTDI, pTDS);
+						int nPercent = m_data.CalcTaskPercentDone(pTDI, pTDS);
 
 						rProgress.DeflateRect(1, 1);
 						rProgress.right = rProgress.left + MulDiv(rProgress.Width(), nPercent, 100);
@@ -2370,7 +2370,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				}
 				else if (!bDone)
 				{
-					date = m_data.CalcStartDate(pTDI, pTDS);
+					date = m_data.CalcTaskStartDate(pTDI, pTDS);
 					bCalculated = (date != pTDI->dateStart);
 				}
 				
@@ -2390,7 +2390,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				}
 				else if (!bDone)
 				{
-					date = m_data.CalcDueDate(pTDI, pTDS);
+					date = m_data.CalcTaskDueDate(pTDI, pTDS);
 					bCalculated = (date != pTDI->dateDue);
 				}
 				
@@ -2975,7 +2975,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		// priority color
 		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
 		{
-			int nPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE);
+			int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
 			BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
 
 			// draw priority number over the top
@@ -2987,7 +2987,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_RISK:
 		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
 		{
-			int nRisk = m_data.GetHighestRisk(pTDI, pTDS);
+			int nRisk = m_data.GetTaskHighestRisk(pTDI, pTDS);
 
 			if (nRisk != FM_NORISK)
 				sTaskColText = Misc::Format(nRisk);
@@ -3017,7 +3017,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 	case TDCC_COST:
 		{
-			double dCost = m_data.CalcCost(pTDI, pTDS);
+			double dCost = m_data.CalcTaskCost(pTDI, pTDS);
 
 			if (dCost != 0.0 || !HasStyle(TDCS_HIDEZEROTIMECOST))
 				sTaskColText = Misc::Format(dCost, 2);
@@ -3065,16 +3065,13 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 	case TDCC_PERCENT:
 		{
-			BOOL bDone = -1; // so we know when it's set
-			BOOL bHideDone = HasStyle(TDCS_HIDEPERCENTFORDONETASKS);
-
-			if (bHideDone)
-				bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
-
-			if (bHideDone && bDone)
+			if (HasStyle(TDCS_HIDEPERCENTFORDONETASKS) && 
+				m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+			{
 				break; // nothing to do
+			}
 
-			int nPercent = m_data.CalcPercentDone(pTDI, pTDS);
+			int nPercent = m_data.CalcTaskPercentDone(pTDI, pTDS);
 
 			if (!nPercent && HasStyle(TDCS_HIDEZEROPERCENTDONE))
 				break; // nothing to do
@@ -3094,8 +3091,8 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 				nUnits = pTDI->GetTimeUnits(bTimeEst);
 
 			// draw time
-			double dTime = (bTimeEst ? m_data.CalcTimeEstimate(pTDI, pTDS, nUnits) :
-				m_data.CalcTimeSpent(pTDI, pTDS, nUnits));
+			double dTime = (bTimeEst ? m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits) :
+										m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits));
 
 			// first handle zero times
 			if ((dTime == 0.0) && HasStyle(TDCS_HIDEZEROTIMECOST))
@@ -3194,7 +3191,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		{
 			int nSubtasksCount, nSubtasksDone;
 
-			if (m_data.GetSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
+			if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
 				sTaskColText.Format(_T("%d/%d"), nSubtasksDone, nSubtasksCount);
 		}
 		break;
@@ -5739,26 +5736,26 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 			
 			if (IsColumnShowing(TDCC_PERCENT))
 			{
-				sItem.Format(_T("\n%s %d"), CEnString(IDS_TDCTIP_PERCENT), m_data.CalcPercentDone(dwTaskID));
+				sItem.Format(_T("\n%s %d"), CEnString(IDS_TDCTIP_PERCENT), m_data.CalcTaskPercentDone(dwTaskID));
 				sTip += sItem;
 			}
 			
 			if (IsColumnShowing(TDCC_TIMEEST))
 			{
-				sItem.Format(_T("\n%s %.2f %c"), CEnString(IDS_TDCTIP_TIMEEST), m_data.CalcTimeEstimate(dwTaskID, TDCU_HOURS), CTimeHelper::GetUnits(THU_HOURS));
+				sItem.Format(_T("\n%s %.2f %c"), CEnString(IDS_TDCTIP_TIMEEST), m_data.CalcTaskTimeEstimate(dwTaskID, TDCU_HOURS), CTimeHelper::GetUnits(THU_HOURS));
 				sTip += sItem;
 			}
 			
 			if (IsColumnShowing(TDCC_TIMESPENT))
 			{
-				sItem.Format(_T("\n%s %.2f %c"), CEnString(IDS_TDCTIP_TIMESPENT), m_data.CalcTimeSpent(dwTaskID, TDCU_HOURS), CTimeHelper::GetUnits(THU_HOURS));
+				sItem.Format(_T("\n%s %.2f %c"), CEnString(IDS_TDCTIP_TIMESPENT), m_data.CalcTaskTimeSpent(dwTaskID, TDCU_HOURS), CTimeHelper::GetUnits(THU_HOURS));
 				sTip += sItem;
 			}
 		}
 		
 		if (IsColumnShowing(TDCC_COST))
 		{
-			sItem.Format(_T("\n%s %.2f"), CEnString(IDS_TDCTIP_COST), m_data.CalcCost(dwTaskID));
+			sItem.Format(_T("\n%s %.2f"), CEnString(IDS_TDCTIP_COST), m_data.CalcTaskCost(dwTaskID));
 			sTip += sItem;
 		}
 		

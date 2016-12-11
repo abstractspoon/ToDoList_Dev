@@ -171,7 +171,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		case TDCA_COST:	
 			{
 				// get cost
-				double dCost = m_data.CalcCost(pTDI, pTDS);
+				double dCost = m_data.CalcTaskCost(pTDI, pTDS);
 				
 				if ((dCost != 0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
 					sLongest = Misc::Format(dCost, 2);
@@ -182,7 +182,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			{
 				int nSubtasksCount, nSubtasksDone;
 				
-				if (m_data.GetSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
+				if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
 					sLongest.Format(_T("%d/%d"), nSubtasksDone, nSubtasksCount);
 			}
 			break;
@@ -194,7 +194,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		case TDCA_PATH:
 			sLongest = m_data.GetTaskPath(pTDI, pTDS);
 			break;
-			
+
 		case TDCA_ALLOCTO:		
 		case TDCA_CATEGORY:		
 		case TDCA_TAGS:			

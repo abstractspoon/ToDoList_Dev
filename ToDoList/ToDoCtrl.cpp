@@ -1914,10 +1914,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		else
 		{
 			m_nTimeEstUnits = m_tdiDefault.nTimeEstUnits;
-			m_dTimeEstimate = m_data.CalcTimeEstimate(dwTaskID, m_nTimeEstUnits);
+			m_dTimeEstimate = m_data.CalcTaskTimeEstimate(dwTaskID, m_nTimeEstUnits);
 
 			m_nTimeSpentUnits = m_tdiDefault.nTimeSpentUnits;
-			m_dTimeSpent = m_data.CalcTimeSpent(dwTaskID, m_nTimeEstUnits);
+			m_dTimeSpent = m_data.CalcTaskTimeSpent(dwTaskID, m_nTimeEstUnits);
 		}
 
 		// chess clock for time spent
@@ -1940,7 +1940,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		else if (bEditPercent)
 			m_nPercentDone = GetSelectedTaskPercent();
 		else
-			m_nPercentDone = m_data.CalcPercentDone(dwTaskID);		
+			m_nPercentDone = m_data.CalcTaskPercentDone(dwTaskID);		
 		
 		// special handling for start date/time
 		COleDateTime dateStart = GetSelectedTaskDate(TDCD_START);
@@ -4073,7 +4073,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 			// update % complete?
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_data.CalcPercentDone(GetSelectedTaskID());		
+				m_nPercentDone = m_data.CalcTaskPercentDone(GetSelectedTaskID());		
 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 			
@@ -4151,7 +4151,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 		// update % complete?
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && GetSelectedCount() == 1)
 		{
-			m_nPercentDone = m_data.CalcPercentDone(GetSelectedTaskID());		
+			m_nPercentDone = m_data.CalcTaskPercentDone(GetSelectedTaskID());		
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
@@ -4223,7 +4223,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_data.CalcPercentDone(GetSelectedTaskID());		
+				m_nPercentDone = m_data.CalcTaskPercentDone(GetSelectedTaskID());		
 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 
@@ -4311,7 +4311,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_data.CalcPercentDone(GetSelectedTaskID());		
+				m_nPercentDone = m_data.CalcTaskPercentDone(GetSelectedTaskID());		
 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 		}
@@ -9160,7 +9160,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	}
 	
 	// highest priority, because we need it further down
-	int nHighestPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE);
+	int nHighestPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
 	
 	if (!(bTitleOnly || bTitleCommentsOnly))
 	{
@@ -9226,7 +9226,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		{
 			file.SetTaskRisk(hTask, pTDI->nRisk);
 			
-			int nHighestRisk = m_data.GetHighestRisk(pTDI, pTDS);
+			int nHighestRisk = m_data.GetTaskHighestRisk(pTDI, pTDS);
 			
 			if (nHighestRisk > pTDI->nRisk)
 				file.SetTaskHighestRisk(hTask, nHighestRisk);
@@ -9240,7 +9240,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			file.SetTaskPercentDone(hTask, (unsigned char)nPercent);
 			
 			// calculated percent
-			nPercent = m_data.CalcPercentDone(pTDI, pTDS);
+			nPercent = m_data.CalcTaskPercentDone(pTDI, pTDS);
 			
 			if (nPercent > 0)
 				file.SetTaskCalcCompletion(hTask, nPercent);
@@ -9252,7 +9252,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			//if (pTDI->dCost > 0)
 			file.SetTaskCost(hTask, pTDI->dCost);
 			
-			double dCost = m_data.CalcCost(pTDI, pTDS);
+			double dCost = m_data.CalcTaskCost(pTDI, pTDS);
 			
 			//if (dCost > 0)
 			file.SetTaskCalcCost(hTask, dCost);
@@ -9267,7 +9267,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			// for calc'ed estimate use this item's units if it
 			// has a non-zero time estimate, else its first subtask's units
 			TDC_UNITS nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
-			double dTime = m_data.CalcTimeEstimate(pTDI, pTDS, nUnits);
+			double dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
 			
 			if (dTime > 0)
 				file.SetTaskCalcTimeEstimate(hTask, dTime, nUnits);
@@ -9282,7 +9282,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			// for calc'ed spent use this item's units if it
 			// has a non-zero time estimate, else its first subtask's units
 			TDC_UNITS nUnits = m_data.GetBestCalcTimeSpentUnits(pTDI, pTDS);
-			double dTime = m_data.CalcTimeSpent(pTDI, pTDS, nUnits);
+			double dTime = m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits);
 			
 			if (dTime != 0)
 				file.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
@@ -9324,7 +9324,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		if (filter.WantAttribute(TDCA_DUEDATE) && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE)))
 		{
-			double dDate = m_data.CalcDueDate(pTDI, pTDS);
+			double dDate = m_data.CalcTaskDueDate(pTDI, pTDS);
 			
 			if (dDate > 0)
 				file.SetTaskCalcDueDate(hTask, dDate);
@@ -9338,7 +9338,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		
 			if (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))
 			{
-				double dDate = m_data.CalcStartDate(pTDI, pTDS);
+				double dDate = m_data.CalcTaskStartDate(pTDI, pTDS);
 				
 				if (dDate > 0)
 					file.SetTaskCalcStartDate(hTask, dDate);
@@ -9357,7 +9357,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		if (pTDS->HasSubTasks() && filter.WantAttribute(TDCA_SUBTASKDONE))
 		{
 			int nSubtaskCount = 0, nSubtaskDone = 0;
-			VERIFY (m_data.GetSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone));
+			VERIFY (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone));
 
 			CString sSubtasksDone;
 			sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
@@ -9451,24 +9451,24 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	file.SetTaskAttributes(hTask, pTDI);
 
 	// dynamically calculated attributes
-	int nHighestPriority = m_data.GetHighestPriority(pTDI, pTDS, FALSE); 
+	int nHighestPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE); 
 	
 	if (nHighestPriority > pTDI->nPriority)
 		file.SetTaskHighestPriority(hTask, nHighestPriority);
 	
-	int nHighestRisk = m_data.GetHighestRisk(pTDI, pTDS);
+	int nHighestRisk = m_data.GetTaskHighestRisk(pTDI, pTDS);
 	
 	if (nHighestRisk > pTDI->nRisk)
 		file.SetTaskHighestRisk(hTask, nHighestRisk);
 	
 	// calculated percent
-	int nPercent = m_data.CalcPercentDone(pTDI, pTDS);
+	int nPercent = m_data.CalcTaskPercentDone(pTDI, pTDS);
 	
 	if (nPercent > 0)
 		file.SetTaskCalcCompletion(hTask, nPercent);
 	
 	// cost
-	double dCost = m_data.CalcCost(pTDI, pTDS);
+	double dCost = m_data.CalcTaskCost(pTDI, pTDS);
 	
 	if (dCost != 0)
 		file.SetTaskCalcCost(hTask, dCost);
@@ -9476,7 +9476,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	// for calc'ed estimate use this item's units if it
 	// has a non-zero time estimate, else its first subtask's units
 	TDC_UNITS nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
-	double dTime = m_data.CalcTimeEstimate(pTDI, pTDS, nUnits);
+	double dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
 	
 	if (dTime > 0)
 		file.SetTaskCalcTimeEstimate(hTask, dTime, nUnits);
@@ -9484,7 +9484,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	// for calc'ed spent use this item's units if it
 	// has a non-zero time estimate, else its first subtask's units
 	nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
-	dTime = m_data.CalcTimeSpent(pTDI, pTDS, nUnits);
+	dTime = m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits);
 	
 	if (dTime != 0)
 		file.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
@@ -9492,7 +9492,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	// due date
 	if (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))
 	{
-		double dDate = m_data.CalcDueDate(pTDI, pTDS);
+		double dDate = m_data.CalcTaskDueDate(pTDI, pTDS);
 		
 		if (dDate > 0)
 			file.SetTaskCalcDueDate(hTask, dDate);
@@ -9501,7 +9501,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	// start date
 	if (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))
 	{
-		double dDate = m_data.CalcStartDate(pTDI, pTDS);
+		double dDate = m_data.CalcTaskStartDate(pTDI, pTDS);
 		
 		if (dDate > 0)
 			file.SetTaskCalcStartDate(hTask, dDate);
@@ -9520,7 +9520,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	// subtask completion
 	int nSubtaskCount = 0, nSubtaskDone = 0;
 
-	if (m_data.GetSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
+	if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
 	{
 		CString sSubtasksDone;
 		sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);

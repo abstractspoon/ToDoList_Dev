@@ -147,20 +147,20 @@ public:
 	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday = FALSE) const;
 	BOOL IsTaskOverDue(DWORD dwTaskID) const;
-	double CalcDueDate(DWORD dwTaskID) const;
-	double CalcStartDate(DWORD dwTaskID) const;
-	int GetHighestPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
-	int GetHighestRisk(DWORD dwTaskID) const;
-	int CalcPercentDone(DWORD dwTaskID) const;
-	double CalcCost(DWORD dwTaskID) const;
-	double CalcTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double CalcTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double CalcRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
+	double CalcTaskDueDate(DWORD dwTaskID) const;
+	double CalcTaskStartDate(DWORD dwTaskID) const;
+	int GetTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
+	int GetTaskHighestRisk(DWORD dwTaskID) const;
+	int CalcTaskPercentDone(DWORD dwTaskID) const;
+	double CalcTaskCost(DWORD dwTaskID) const;
+	double CalcTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
+	double CalcTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
+	double CalcTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
 	CString FormatTaskAllocTo(DWORD dwTaskID) const;
 	CString FormatTaskCategories(DWORD dwTaskID) const;
 	CString FormatTaskTags(DWORD dwTaskID) const;
 	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
-	BOOL GetSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
+	BOOL GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
@@ -169,19 +169,19 @@ public:
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskRecurring(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS = NULL, BOOL bCheckParent = FALSE) const;
-	double CalcDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int GetHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
-	int GetHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	double CalcRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
+	double CalcTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double CalcTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int GetTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
+	int GetTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double CalcTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
+	double CalcTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
 	TDC_UNITS GetBestCalcTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
+	double CalcTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	TDC_UNITS GetBestCalcTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int CalcPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int CalcTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	int CalcPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const; // spent / estimate
-	BOOL GetSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+	BOOL GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							int& nSubtasksTotal, int& nSubtasksDone) const;
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const;
@@ -297,7 +297,7 @@ protected:
 
 	double SumPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double SumWeightedPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
+	double CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
 	double CalcStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;

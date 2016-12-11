@@ -2422,7 +2422,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits) const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dTime += m_data.CalcTimeEstimate(dwTaskID, nUnits);
+		dTime += m_data.CalcTaskTimeEstimate(dwTaskID, nUnits);
 	}
 	
 	return dTime;
@@ -2443,7 +2443,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskTimeSpent(TDC_UNITS nUnits) const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dTime += m_data.CalcTimeSpent(dwTaskID, nUnits);
+		dTime += m_data.CalcTaskTimeSpent(dwTaskID, nUnits);
 	}
 	
 	return dTime;
@@ -2464,7 +2464,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskCost() const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dCost += m_data.CalcCost(dwTaskID);
+		dCost += m_data.CalcTaskCost(dwTaskID);
 	}
 	
 	return dCost;
