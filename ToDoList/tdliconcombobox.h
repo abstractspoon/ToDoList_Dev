@@ -24,7 +24,7 @@ public:
 	CString GetSelectedImage() const;
 
 	int GetChecked(CStringArray& aItems) const;
-	void SetChecked(const CStringArray& aItems);
+	BOOL SetChecked(const CStringArray& aItems);
 
 // Attributes
 protected:

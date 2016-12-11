@@ -22,7 +22,7 @@ public:
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems) const;
-	void SetChecked(const CStringArray& aItems);
+	BOOL SetChecked(const CStringArray& aItems);
 	int SetCheck(int nIndex, BOOL bCheck = TRUE); 
 
 protected:

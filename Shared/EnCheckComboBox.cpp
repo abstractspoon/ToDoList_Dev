@@ -125,26 +125,21 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems) const
 	return aItems.GetSize();
 }
 
-void CEnCheckComboBox::SetChecked(const CStringArray& aItems)
+BOOL CEnCheckComboBox::SetChecked(const CStringArray& aItems)
 {
 	if (m_bMultiSel)
+		return CCheckComboBox::SetChecked(aItems);
+
+	if (aItems.GetSize() == 0)
 	{
-		CCheckComboBox::SetChecked(aItems);
+		SetCurSel(-1);
+		return TRUE;
 	}
-	else
-	{
-		if (aItems.GetSize() == 0)
-		{
-			SetCurSel(-1);
-		}
-		else
-		{
-			// Call CComboBox::SelectString directly because the derived 
-			// versions are all virtual AND CCheckComboBox::SelectString
-			// calls back into here which results in infinite recursion
-			CComboBox::SelectString(0, aItems[0]);
-		}
-	}
+
+	// Call CComboBox::SelectString directly because the derived 
+	// versions are all virtual AND CCheckComboBox::SelectString
+	// calls back into here which results in infinite recursion
+	return (CComboBox::SelectString(0, aItems[0]) != CB_ERR);
 }
 
 int CEnCheckComboBox::SetCheck(int nIndex, BOOL bCheck)

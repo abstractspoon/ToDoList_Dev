@@ -29,7 +29,7 @@ public:
 	int GetCheckedCount() const;
 
 	virtual int GetChecked(CStringArray& aItems) const;
-	virtual void SetChecked(const CStringArray& aItems);
+	virtual BOOL SetChecked(const CStringArray& aItems);
 
 	BOOL IsAnyChecked() const;
 	BOOL IsAnyUnchecked() const;

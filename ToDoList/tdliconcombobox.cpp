@@ -142,7 +142,7 @@ int CTDLIconComboBox::GetChecked(CStringArray& aItems) const
 	return aItems.GetSize();
 }
 
-void CTDLIconComboBox::SetChecked(const CStringArray& aItems)
+BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 {
 	// clear existing checks first but don't update window
 	int nCount = GetCount();
@@ -159,9 +159,11 @@ void CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 		CString sPartial = TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(aItems[nItem], _T(""));
 		int nIndex = FindString(-1, sPartial);
 
-		ASSERT(nIndex != CB_ERR);
-
 		if (nIndex != CB_ERR)
 			SetCheck(nIndex, TRUE);
+		else
+			return FALSE;
 	}
+
+	return TRUE;
 }

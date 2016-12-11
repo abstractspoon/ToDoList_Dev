@@ -627,7 +627,7 @@ CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
 	return Misc::FormatArray(aChecked, szSep);
 }
 
-void CCheckComboBox::SetChecked(const CStringArray& aItems)
+BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 {
 	// make sure the items exist in the list
 	int nAdded = CAutoComboBox::AddUniqueItems(aItems);
@@ -643,7 +643,7 @@ void CCheckComboBox::SetChecked(const CStringArray& aItems)
 		{
 			// make sure window text matches checked items
 			RecalcText(TRUE, FALSE);
-			return; // nothing to do
+			return TRUE; // nothing to do
 		}
 	}
 
@@ -667,6 +667,11 @@ void CCheckComboBox::SetChecked(const CStringArray& aItems)
 			SetCheck(nIndex, TRUE, TRUE);
 			nChecked++;
 		}
+		else // this ought not to happen
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 	}
 	RecalcText(TRUE, FALSE);
 
@@ -675,6 +680,8 @@ void CCheckComboBox::SetChecked(const CStringArray& aItems)
 
 	// Redraw the window
 	Invalidate(FALSE);
+
+	return TRUE;
 }
 
 void CCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
