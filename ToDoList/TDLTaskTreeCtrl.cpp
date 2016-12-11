@@ -41,7 +41,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int  MIN_RESIZE_WIDTH		= 16;
 const UINT TIMER_EDITLABEL		= 101;
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
