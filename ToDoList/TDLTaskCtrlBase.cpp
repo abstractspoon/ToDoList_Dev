@@ -43,7 +43,7 @@ static char THIS_FILE[]=__FILE__;
 
 const int LV_COLPADDING			= 3;
 const int HD_COLPADDING			= 6;
-const int MIN_RESIZE_WIDTH		= 17; 
+const int MIN_RESIZE_WIDTH		= 19; 
 const int COL_ICON_WIDTH		= 16; 
 const int MIN_COL_WIDTH			= 6;
 const int MIN_TASKS_WIDTH		= 200;
