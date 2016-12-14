@@ -913,11 +913,11 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 					return nItem;
 			}
 		}
-		else // case sensitive
+		else // case insensitive
 		{
 			if (bPartialOK)
 			{
-				if (FindWord(szItem, sArrItem, TRUE, FALSE))
+				if (FindWord(szItem, sArrItem, FALSE, FALSE))
 					return nItem;
 			}
 			else

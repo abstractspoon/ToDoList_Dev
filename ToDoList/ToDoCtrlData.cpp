@@ -5156,16 +5156,17 @@ BOOL CToDoCtrlData::TaskMatches(const CStringArray& aItems, const SEARCHPARAM& s
 	{
 		bMatch = Misc::MatchAll(aItems, aSearchItems);
 	}
-	else // partial matches okay
+	else // only one match is required
 	{
+		BOOL bPartialOK = (sp.OperatorIs(FOP_INCLUDES) || sp.OperatorIs(FOP_NOT_INCLUDES));
+
 		if (aItems.GetSize())
 		{
-			bMatch = Misc::MatchAny(aSearchItems, aItems, FALSE, FALSE);
+			bMatch = Misc::MatchAny(aSearchItems, aItems, FALSE, bPartialOK);
 		}
 		else
 		{
-			// special case: task has no item and param.aItems
-			// contains an empty item
+			// special case: task has no item and param.aItems contains an empty item
 			bMatch = (Misc::Find(aSearchItems, EMPTY_STR) != -1);
 		}
 	}
