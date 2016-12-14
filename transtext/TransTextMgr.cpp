@@ -8,6 +8,7 @@
 #include "TransWnd.h"
 
 #include "..\shared\filemisc.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -365,27 +366,23 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 	
 	// copy back to TOOLTIPTEXT
 #ifndef _UNICODE
-	if (pNMHDR->code == TTN_NEEDTEXTA)
+	if (pNMHDR->code == TTN_NEEDTEXTW)
 	{
-		strncpy(pTTTA->szText, strTipText, sizeof(pTTTA->szText));
 		pTTTA->lpszText = (LPTSTR)(LPCTSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW
 	{
-		_mbstowcsz(pTTTW->szText, strTipText, _countof(pTTTW->szText));
+		Misc::EncodeAsUnicode(strTipText);
+		pTTTW->lpszText = (LPWSTR)(LPCWSTR)(LPCSTR)strTipText;
 	}
 #else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
-		_wcstombsz(pTTTA->szText, strTipText, _countof(pTTTA->szText));
+		Misc::EncodeAsMultiByte(strTipText);
+		pTTTA->lpszText = (LPSTR)(LPCSTR)(LPCWSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW
 	{
-#if _MSC_VER >= 1400
-		wcsncpy_s(pTTTW->szText, 80, strTipText, _countof(pTTTW->szText));
-#else
-		wcsncpy(pTTTW->szText, strTipText, _countof(pTTTW->szText));
-#endif
 		pTTTW->lpszText = (LPTSTR)(LPCTSTR)strTipText;
 	}
 #endif
