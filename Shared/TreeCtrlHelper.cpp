@@ -61,7 +61,7 @@ CTreeCtrlHelper::~CTreeCtrlHelper()
 BOOL CTreeCtrlHelper::SelectItem(HTREEITEM hti)
 {
 	// save restore focus if setting to NULL
-	CWnd* pFocus = hti ? NULL : CWnd::GetFocus();
+	CWnd* pFocus = (hti ? NULL : CWnd::GetFocus());
 
 	// won't auto edit if item already selected
 	if (hti && m_tree.GetSelectedItem() == hti)

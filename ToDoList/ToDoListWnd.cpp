@@ -10381,11 +10381,11 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 	CString sClass = CWinClasses::GetClass(hWnd);
 #endif
 
-	if (GetTDCCount() && hWnd == GetToDoCtrl().GetSafeHwnd())
+	if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
 	{
 		GetToDoCtrl().SetFocusToTasks();
 	}
-	else
+	else if (::IsWindowEnabled(hWnd))
 	{
 		::SetFocus(hWnd);
 		::SendMessage(hWnd, WM_SETFOCUS, 0L, 0L);

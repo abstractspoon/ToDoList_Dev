@@ -5180,7 +5180,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		SelectItem(htiNextSel);
 
 	// restore focus
-	if (hFocus)
+	if (hFocus && ::IsWindowEnabled(hFocus))
 		::SetFocus(hFocus);
 	else
 		SetFocusToTasks();
@@ -5550,7 +5550,7 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 			{
 				// ensure focus is ok
 				if (!bOn && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
-					m_taskTree.SetFocus();
+					SetFocusToTasks();
 				
 				if (bWantUpdate)
 				{
@@ -8571,7 +8571,9 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 		UpdateSelectedTaskPath();
 		
 		m_treeDragDrop.EnableDragDrop(!IsReadOnly());
-		::SendMessage(hFocus, WM_SETFOCUS, 0, 0);
+
+		if (IsChildOrSame(GetSafeHwnd(), hFocus))
+			::SendMessage(hFocus, WM_SETFOCUS, 0, 0);
 
 		// notify parent
 		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
@@ -9680,7 +9682,7 @@ void CToDoCtrl::SetFocusToTasks()
 
 void CToDoCtrl::SetFocusToComments()
 {
-	// fail if comments are not visible
+	// ignore if comments are not visible
 	if (!::IsWindowVisible(m_ctrlComments))
 		return;
 

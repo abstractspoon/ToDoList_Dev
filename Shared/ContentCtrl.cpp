@@ -150,7 +150,7 @@ void CContentCtrl::SetFocus()
 {
 	HWND hwndThis = GetSafeHwnd();
 
-	if (::IsWindowEnabled(hwndThis)/* && !HasFocus()*/)
+	if (::IsWindowEnabled(hwndThis))
 		::SetFocus(hwndThis);
 }
 

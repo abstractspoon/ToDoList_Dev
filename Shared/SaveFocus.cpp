@@ -23,7 +23,7 @@ CSaveFocus::CSaveFocus() : m_hwnd(NULL), m_bEdit(FALSE)
 
 CSaveFocus::~CSaveFocus()
 {
-	if (::IsWindow(m_hwnd))
+	if (::IsWindow(m_hwnd) && ::IsWindowEnabled(m_hwnd))
 	{
 		::SetFocus(m_hwnd);
 
