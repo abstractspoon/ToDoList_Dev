@@ -140,7 +140,7 @@ public:
 	BOOL GetExportSpaceForNotes() const { return m_pageExport.GetExportSpaceForNotes(); }
 	BOOL GetExportVisibleColsOnly() const { return m_pageExport.GetExportVisibleColsOnly(); }
 	BOOL GetExportAllAttributes() const { return !GetExportVisibleColsOnly(); }
-	CString GetHtmlCharSet() const { return m_pageExport.GetHtmlCharSet(); }
+	SFE_FORMAT GetExportEncoding() const { return m_pageExport.GetExportEncoding(); }
 	
 	// CPreferencesTaskDefPage
 	void GetDefaultTaskAttributes(TODOITEM& tdiDefault) const;

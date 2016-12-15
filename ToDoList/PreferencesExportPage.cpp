@@ -27,8 +27,7 @@ CPreferencesExportPage::CPreferencesExportPage()
 	: 
 	CPreferencesPageBase(CPreferencesExportPage::IDD), 
 	m_eTextIndent(_T("0123456789")), 
-	m_eLineSpaces(_T("0123456789")),
-	m_hResetCharSet(NULL)
+	m_eLineSpaces(_T("0123456789"))
 {
 //	m_psp.dwFlags &= ~PSP_HASHELP;
 
@@ -36,17 +35,10 @@ CPreferencesExportPage::CPreferencesExportPage()
 	m_nTextIndent = 2;
 	m_nLineSpaces = 8;
 	//}}AFX_DATA_INIT
-
-	// add a 'reset' button to the charset field
-	m_hResetCharSet = AfxGetApp()->LoadIconW(IDI_RESET); 
-
-	m_eCharset.InsertButton(0, ID_RESETCHARSET, m_hResetCharSet, 
-								CEnString(IDS_PEP_RESETCHARSET));
 }
 
 CPreferencesExportPage::~CPreferencesExportPage()
 {
-	::DestroyIcon(m_hResetCharSet);
 }
 
 void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
@@ -57,7 +49,6 @@ void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_HTMLFONTSIZE, m_cbFontSize);
 	DDX_Check(pDX, IDC_EXPORTPARENTTITLECOMMENTSONLY, m_bExportParentTitleCommentsOnly);
 	DDX_Check(pDX, IDC_EXPORTSPACEFORNOTES, m_bExportSpaceForNotes);
-	DDX_Text(pDX, IDC_CHARSET, m_sHtmlCharSet);
 	DDX_Radio(pDX, IDC_TABTEXTINDENT, m_bUseSpaceIndents);
 	DDX_Text(pDX, IDC_TABWIDTHS, m_nTextIndent);
 	DDX_Text(pDX, IDC_NUMLINESPACE, m_nLineSpaces);
@@ -66,7 +57,6 @@ void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_HTMLFONTLIST, m_cbFonts);
 	DDX_Check(pDX, IDC_PREVIEWEXPORT, m_bPreviewExport);
 	DDX_Check(pDX, IDC_EXPORTVISIBLEONLY, m_bExportVisibleOnly);
-	DDX_Control(pDX, IDC_CHARSET, m_eCharset);
 
 	m_cbFonts.DDX(pDX, m_sHtmlFont);
 
@@ -92,7 +82,6 @@ BEGIN_MESSAGE_MAP(CPreferencesExportPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SPACETEXTINDENT, OnChangeTextIndentType)
 	ON_BN_CLICKED(IDC_EXPORTSPACEFORNOTES, OnExportspacefornotes)
 	//}}AFX_MSG_MAP
-	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -122,13 +111,14 @@ void CPreferencesExportPage::OnChangeTextIndentType()
 	CPreferencesPageBase::OnControlChange();
 }
 
-CString CPreferencesExportPage::GetHtmlCharSet() const
+SFE_FORMAT CPreferencesExportPage::GetExportEncoding() const
 {
-	if (m_sHtmlCharSet.IsEmpty())
-		return _T("Windows - ") + Misc::GetDefCharset();
+// 	switch (m_nExportEncoding)
+// 	{
+// 
+// 	}
 
-	// else
-	return m_sHtmlCharSet;
+	return SFEF_UTF16;
 }
 
 
@@ -143,9 +133,7 @@ void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bExportParentTitleCommentsOnly = pPrefs->GetProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), FALSE);
 	m_bExportSpaceForNotes = pPrefs->GetProfileInt(szKey, _T("ExportSpaceForNotes"), FALSE);
 	m_bUseSpaceIndents = pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE);
-
-	CString sDefCharset = "Windows-" + Misc::GetDefCharset();
-	m_sHtmlCharSet = pPrefs->GetProfileString(szKey, _T("HtmlCharSet"), sDefCharset);
+	//m_nExportEncoding = pPrefs->GetProfileString(szKey, _T("ExportEncoding"), 0);
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
@@ -161,22 +149,11 @@ void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	pPrefs->WriteProfileInt(szKey, _T("ExportVisibleOnly"), m_bExportVisibleOnly);
 	pPrefs->WriteProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), m_bExportParentTitleCommentsOnly);
 	pPrefs->WriteProfileInt(szKey, _T("ExportSpaceForNotes"), m_bExportSpaceForNotes);
-	pPrefs->WriteProfileString(szKey, _T("HtmlCharSet"), m_sHtmlCharSet);
 	pPrefs->WriteProfileInt(szKey, _T("UseSpaceIndents"), m_bUseSpaceIndents);
+
+//	pPrefs->WriteProfileInt(szKey, _T("ExportEncoding"), m_nExportEncoding);
+
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
-}
-
-LRESULT CPreferencesExportPage::OnEEBtnClick(WPARAM wp, LPARAM lp)
-{
-	if (wp == IDC_CHARSET && lp == ID_RESETCHARSET)
-	{
-		m_sHtmlCharSet = _T("Windows-") + Misc::GetDefCharset();
-		UpdateData(FALSE);
-
-		CPreferencesPageBase::OnControlChange();
-	}
-
-	return 0L;
 }
 
 void CPreferencesExportPage::OnExportspacefornotes() 

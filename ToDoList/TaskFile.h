@@ -96,9 +96,7 @@ public:
 
 	BOOL SetArchive(BOOL bArchive = TRUE);
 	BOOL SetFileFormat(unsigned long lFormat);
-	BOOL SetCharSet(LPCTSTR szCharSet);
 	BOOL SetFileName(LPCTSTR szFilename);
-	CString GetCharSet() const;
 
 	BOOL SetLastModified(const COleDateTime& tLastMod);
 	COleDateTime GetLastModifiedOle() const;

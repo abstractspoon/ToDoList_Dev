@@ -1284,34 +1284,28 @@ BOOL CXmlFile::BuildDOM() const
 	return bRes;
 }
 
-BOOL CXmlFile::Transform(const CString& sTransformPath, CString& sOutput, const CString& sEncoding) const
+BOOL CXmlFile::Transform(const CString& sTransformPath, CString& sOutput) const
 {
 	if (BuildDOM() && m_xslDoc.Load(sTransformPath))
 	{
 		sOutput = m_xmlDoc.Transform(m_xslDoc);
-		
-		// encoding
-		// note: the Transform function always returns UTF-16
-#ifdef _UNICODE
-		UNREFERENCED_PARAMETER(sEncoding);
-#else
-		if (!sEncoding.IsEmpty())
-			sOutput.Replace(_T("UTF-16"), sEncoding);
-#endif
+		return TRUE;
 	}
-	else
-		sOutput.Empty();
 	
-	return TRUE;
+	// else
+	return FALSE;
 }
 
-BOOL CXmlFile::TransformToFile(const CString& sTransformPath, const CString& sOutputPath, const CString& sEncoding) const
+BOOL CXmlFile::TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat) const
 {
 	CString sOutput;
 	
-	if (Transform(sTransformPath, sOutput, sEncoding))
+	if (Transform(sTransformPath, sOutput))
 	{
-		return FileMisc::SaveFile(sOutputPath, sOutput, SFEF_UTF8WITHOUTBOM);
+		if ((nFormat == SFEF_UTF8) || (nFormat == SFEF_UTF8WITHOUTBOM))
+			sOutput.Replace(_T("UTF-16"), _T("UTF-8"));
+
+		return FileMisc::SaveFile(sOutputPath, sOutput, nFormat);
 	}
 	
 	return FALSE;

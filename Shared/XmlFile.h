@@ -215,8 +215,8 @@ public:
 	int GetLastFileError() const;
 
 	BOOL Export(CString& sOutput) const;
-	BOOL Transform(const CString& sTransformPath, CString& sOutput, const CString& sEncoding = EMPTY_STR) const;
-	BOOL TransformToFile(const CString& sTransformPath, const CString& sOutputPath, const CString& sEncoding = EMPTY_STR) const;
+	BOOL Transform(const CString& sTransformPath, CString& sOutput) const;
+	BOOL TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat) const;
 
 	const CXmlItem* Root() const;
 	CXmlItem* Root();

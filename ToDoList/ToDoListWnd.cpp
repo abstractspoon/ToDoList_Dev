@@ -3580,7 +3580,7 @@ BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath,
 	
 	if (FileMisc::FileExists(sStylesheet))
 	{
-		return tasks.TransformToFile(sStylesheet, sFilePath, Prefs().GetHtmlCharSet());
+		return tasks.TransformToFile(sStylesheet, sFilePath, Prefs().GetExportEncoding());
 	}
 	
 	// else default export
@@ -4463,7 +4463,6 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 	
 	// set an appropriate title
 	pDDNotify->tasks.SetReportAttributes(CEnString(nIDDueBy));
-	pDDNotify->tasks.SetCharSet(userPrefs.GetHtmlCharSet());
 
 	if (bTransform)
 		pDDNotify->sStylesheet = sStylesheet;
@@ -4537,7 +4536,7 @@ UINT CToDoListWnd::DueTaskNotifyThreadProc(LPVOID pParam)
 	{
 		if (FileMisc::FileExists(pDDNotify->sStylesheet)) // bTransform
 		{
-			bSuccess = pDDNotify->tasks.TransformToFile(pDDNotify->sStylesheet, pDDNotify->sExportPath, pDDNotify->tasks.GetCharSet());
+			bSuccess = pDDNotify->tasks.TransformToFile(pDDNotify->sStylesheet, pDDNotify->sExportPath, SFEF_UTF8);
 		}
 		else
 		{
@@ -9283,7 +9282,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	tasks.Reset();	
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
-	tasks.SetCharSet(userPrefs.GetHtmlCharSet());
+//	tasks.SetCharSet(userPrefs.GetExportEncoding());
 	
 	// export flags
 	filter.dwFlags |= TDCGTF_FILENAME;
@@ -9492,7 +9491,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// save intermediate tasklist to file as required
 	LogIntermediateTaskList(tasks, tdc.GetFilePath());
 	
-	if (tasks.TransformToFile(sStylesheet, sOutputPath, Prefs().GetHtmlCharSet()))
+	if (tasks.TransformToFile(sStylesheet, sOutputPath, Prefs().GetExportEncoding()))
 	{
 		// preview
 		if (Prefs().GetPreviewExport())

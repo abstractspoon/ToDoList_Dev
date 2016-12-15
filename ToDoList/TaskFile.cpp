@@ -1423,21 +1423,6 @@ BOOL CTaskFile::SetArchive(BOOL bArchive)
 	return TRUE;
 }
 
-CString CTaskFile::GetCharSet() const
-{
-	return GetItemValue(TDL_CHARSET);
-}
-
-BOOL CTaskFile::SetCharSet(LPCTSTR szCharSet)
-{
-	if (!Misc::IsEmpty(szCharSet))
-		return (NULL != SetItemValue(TDL_CHARSET, szCharSet));
-
-	// else
-	DeleteItem(TDL_CHARSET);
-	return TRUE;
-}
-
 BOOL CTaskFile::SetFileName(LPCTSTR szFilename)
 {
 	if (!Misc::IsEmpty(szFilename))
