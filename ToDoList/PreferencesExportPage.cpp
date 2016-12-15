@@ -111,17 +111,6 @@ void CPreferencesExportPage::OnChangeTextIndentType()
 	CPreferencesPageBase::OnControlChange();
 }
 
-SFE_FORMAT CPreferencesExportPage::GetExportEncoding() const
-{
-// 	switch (m_nExportEncoding)
-// 	{
-// 
-// 	}
-
-	return SFEF_UTF16;
-}
-
-
 void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_sHtmlFont = pPrefs->GetProfileString(szKey, _T("HtmlFont"), _T("Verdana"));
@@ -133,7 +122,6 @@ void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bExportParentTitleCommentsOnly = pPrefs->GetProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), FALSE);
 	m_bExportSpaceForNotes = pPrefs->GetProfileInt(szKey, _T("ExportSpaceForNotes"), FALSE);
 	m_bUseSpaceIndents = pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE);
-	//m_nExportEncoding = pPrefs->GetProfileString(szKey, _T("ExportEncoding"), 0);
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
@@ -150,8 +138,6 @@ void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	pPrefs->WriteProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), m_bExportParentTitleCommentsOnly);
 	pPrefs->WriteProfileInt(szKey, _T("ExportSpaceForNotes"), m_bExportSpaceForNotes);
 	pPrefs->WriteProfileInt(szKey, _T("UseSpaceIndents"), m_bUseSpaceIndents);
-
-//	pPrefs->WriteProfileInt(szKey, _T("ExportEncoding"), m_nExportEncoding);
 
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }

@@ -8,7 +8,6 @@
 //
 
 #include "..\3rdparty\fontcombobox.h"
-#include "..\3rdparty\stdiofileex.h"
 
 #include "..\shared\preferencesbase.h"
 #include "..\shared\enedit.h"
@@ -28,7 +27,6 @@ public:
 	int GetTextIndent() const { return m_bUseSpaceIndents ? m_nTextIndent : -1; }
 	BOOL GetExportVisibleColsOnly() const { return m_bExportVisibleOnly; }
 	CString GetHtmlFont() const { return m_sHtmlFont; }
-	SFE_FORMAT GetExportEncoding() const;
 	int GetHtmlFontSize() const { return m_nHtmlFontSize; }
 	BOOL GetPreviewExport() const { return m_bPreviewExport; }
 	BOOL GetExportParentTitleCommentsOnly() const { return m_bExportParentTitleCommentsOnly; }
