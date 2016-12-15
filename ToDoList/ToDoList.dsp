@@ -363,6 +363,10 @@ SOURCE=.\TDLExportDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLFileEncodingComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLFilterBar.cpp
 # End Source File
 # Begin Source File
@@ -888,6 +892,10 @@ SOURCE=.\TDLDialog.h
 # Begin Source File
 
 SOURCE=.\TDLExportDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLFileEncodingComboBox.h
 # End Source File
 # Begin Source File
 
