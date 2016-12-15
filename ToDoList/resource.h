@@ -2073,6 +2073,9 @@
 #define IDS_OA_STARTDATE                58451
 #define IDS_OA_STATUS                   58452
 #define IDS_OA_TOTALWORK                58453
+#define IDS_UTF16                       58454
+#define IDS_UTF8WBOM                    58455
+#define IDS_UTF8                        58456
 
 // Next default values for new objects
 // 
