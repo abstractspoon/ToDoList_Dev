@@ -870,13 +870,12 @@ CString CXmlItem::ToString(double dValue)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CXmlFile::CXmlFile(const CString& sRootItemName/*, int nCodePage*/) 
+CXmlFile::CXmlFile(const CString& sRootItemName) 
 	: 
 	m_xiRoot(NULL, sRootItemName), 
 	m_xmlDoc(NULL, sRootItemName),
 	m_pCallback(NULL)
 {
-//	SetCodePage(nCodePage);
 }
 
 CXmlFile::~CXmlFile()

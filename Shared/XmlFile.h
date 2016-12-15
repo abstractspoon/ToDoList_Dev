@@ -195,7 +195,7 @@ enum // load errors. if >0 then == GetLastFileError
 class CXmlFile : protected CStdioFileEx 
 {
 public:
-	CXmlFile(const CString& sRootItemName = EMPTY_STR/*, int nCodePage = -1*/);
+	CXmlFile(const CString& sRootItemName = EMPTY_STR);
 	virtual ~CXmlFile();
 
 	BOOL Load(const CString& sFilePath, const CString& sRootItemName = EMPTY_STR, IXmlParse* pCallback = NULL);
@@ -293,5 +293,7 @@ protected:
 	static int Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode);
 	static void FixInputString(CString& sXml, const CString& sRootItem);
 };
+
+/////////////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_XMLFILE_H__54045703_1A98_41AB_B1A1_0B165C350AA0__INCLUDED_)

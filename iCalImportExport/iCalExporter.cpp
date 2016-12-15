@@ -62,7 +62,6 @@ bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath
 		return false;
 
 	CStdioFileEx fileOut;
-//	fileOut.SetCodePage(CP_UTF8);
 	
 	if (fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
 	{
