@@ -69,6 +69,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\rtlstylemgr.h"
+#include "..\shared\xslfile.h"
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\sendfileto.h"
@@ -9436,22 +9437,16 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	
 	CString sStylesheet = dialog.GetStylesheet();
 	sTitle = dialog.GetTitle();
-
-	// Output file extension may be specified in the stylesheet
-	CXmlFile xsl;
-	CString sExtOut(_T("html")); // default
-
-	if (xsl.Load(sStylesheet))
-	{
-		CString sMediaType = xsl.GetItemValue(_T("output"), _T("media-type"));
-
-		if (!sMediaType.IsEmpty() && (sMediaType.Find(_T("text/")) == 0))
-			sExtOut = sMediaType.Mid(5);
-	}
+	
+	CXslFile xsl;
+	VERIFY (xsl.Load(sStylesheet));
 	
 	// output path
 	CString sOutputPath(tdc.GetFilePath()); 
 	{
+		// Output file extension may be specified in the stylesheet
+		CString sExtOut = xsl.GetOutputFileExtension();
+
 		if (!sOutputPath.IsEmpty())
 			FileMisc::ReplaceExtension(sOutputPath, sExtOut);
 
@@ -9491,7 +9486,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// save intermediate tasklist to file as required
 	LogIntermediateTaskList(tasks, tdc.GetFilePath());
 	
-	if (tasks.TransformToFile(sStylesheet, sOutputPath, Prefs().GetExportEncoding()))
+	if (tasks.TransformToFile(sStylesheet, sOutputPath, xsl.GetOutputFileEncoding()))
 	{
 		// preview
 		if (Prefs().GetPreviewExport())

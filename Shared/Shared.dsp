@@ -701,6 +701,10 @@ SOURCE=.\xmlfileex.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\XslFile.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Zipper.cpp
 # End Source File
 # End Group
@@ -1366,6 +1370,10 @@ SOURCE=.\XmlFile.h
 # Begin Source File
 
 SOURCE=.\xmlfileex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\XslFile.h
 # End Source File
 # Begin Source File
 
