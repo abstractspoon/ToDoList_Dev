@@ -156,6 +156,10 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 
 
+BOOL CToDoListWnd::s_bRestoreExportSpaceForNotes = -1;
+
+/////////////////////////////////////////////////////////////////////////////
+
 CToDoListWnd::CToDoListWnd() 
 	: 
 	CFrameWnd(), 
@@ -4440,12 +4444,6 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 	
 	// visible attributes only
 	TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
-
-	// nasty hack to prevent exporters adding space for notes
-	BOOL bSpaceForNotes = userPrefs.GetExportSpaceForNotes();
-
-	if (bSpaceForNotes)
-		CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), FALSE);
 			
 	// prepare structure
 	TDCDUETASKNOTIFY* pDDNotify = new TDCDUETASKNOTIFY(GetSafeHwnd(), tdc.GetFilePath(), bHtmlNotify);
@@ -4484,8 +4482,22 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 
 	if (pThread)
 	{
-		m_nNumDueTaskThreads++;
-		return (pThread->ResumeThread() <= 1);
+		// Hack to prevent exporters adding space for notes
+		if (s_bRestoreExportSpaceForNotes == -1)
+		{
+			s_bRestoreExportSpaceForNotes = userPrefs.GetExportSpaceForNotes();
+			CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), FALSE);
+		}
+
+		if (pThread->ResumeThread() == 1)
+		{
+			m_nNumDueTaskThreads++;
+			return TRUE;
+		}
+
+		// else
+		pThread->Delete();
+		// Fall thru
 	}
 
 	// else call thread proc directly
@@ -4494,7 +4506,15 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 
 LRESULT CToDoListWnd::OnDueTaskThreadFinished(WPARAM wp, LPARAM lp)
 {
+	ASSERT (s_bRestoreExportSpaceForNotes != -1);
 	m_nNumDueTaskThreads--;
+
+	// undo hack
+	if (m_nNumDueTaskThreads == 0)
+	{
+		CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), s_bRestoreExportSpaceForNotes);
+		s_bRestoreExportSpaceForNotes = -1;
+	}
 
 	TDCDUETASKNOTIFY* pDDNotify = (TDCDUETASKNOTIFY*)lp;
 	ASSERT(pDDNotify && pDDNotify->IsValid());
@@ -4511,10 +4531,6 @@ LRESULT CToDoListWnd::OnDueTaskThreadFinished(WPARAM wp, LPARAM lp)
 				m_mgrToDoCtrls.ShowDueTaskNotification(nTDC, pDDNotify->sExportPath, pDDNotify->bHtml);
 			}
 		}
-
-// 		// undo hack
-// 		if (bSpaceForNotes)
-// 			CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), TRUE);
  	}
 
 	// cleanup

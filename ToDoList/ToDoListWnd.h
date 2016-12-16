@@ -153,6 +153,8 @@ protected:
 	BOOL m_bLogging;
 	BOOL m_bSaveUIVisInTaskList;
 	BOOL m_bReshowTimeTrackerOnEnable;
+	
+	static BOOL s_bRestoreExportSpaceForNotes;
 
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
