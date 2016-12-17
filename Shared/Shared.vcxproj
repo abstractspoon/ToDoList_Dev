@@ -689,6 +689,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="XslFile.cpp" />
     <ClCompile Include="Zipper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -860,6 +861,7 @@
     <ClInclude Include="XmlCharMap.h" />
     <ClInclude Include="XmlFile.h" />
     <ClInclude Include="xmlfileex.h" />
+    <ClInclude Include="XslFile.h" />
     <ClInclude Include="Zipper.h" />
   </ItemGroup>
   <ItemGroup>
