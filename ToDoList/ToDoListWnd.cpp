@@ -119,7 +119,6 @@ enum
 	WM_ADDTOOLBARTOOLS,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
-	WM_DUETASKTHREADFINISHED,
 };
 
 enum 
@@ -190,7 +189,6 @@ CToDoListWnd::CToDoListWnd()
 	m_bShowTreeListBar(TRUE),
 	m_bEndingSession(FALSE),
 	m_nContextColumnID(TDCC_NONE),
-	m_nNumDueTaskThreads(0),
 	m_bReshowTimeTrackerOnEnable(FALSE)
 {
 	// must do this before initializing any controls
@@ -389,7 +387,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_ADDTOOLBARTOOLS, OnAddToolbarTools)
 	ON_MESSAGE(WM_APPRESTOREFOCUS, OnAppRestoreFocus)
 	ON_MESSAGE(WM_CLOSE, OnClose)
-	ON_MESSAGE(WM_DUETASKTHREADFINISHED, OnDueTaskThreadFinished)
 	ON_MESSAGE(WM_DOINITIALDUETASKNOTIFY, OnDoInitialDueTaskNotify)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
@@ -403,6 +400,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCONTROL, OnTabCtrlSelchange)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
 	ON_NOTIFY(TTN_NEEDTEXT, 0, OnNeedTooltipText)
+	ON_REGISTERED_MESSAGE(WM_TDLTE_EXPORTTHREADFINISHED, OnExportThreadFinished)
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnQuickFindItemAdded)
 	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHNG, OnSelchangeFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_ADDSEARCH, OnFindAddSearch)
@@ -798,7 +796,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	LoadSettings();
 
 	// Session notifications
-	m_sessionWnd.Initialize(*this);
+	m_wndSessionStatus.Initialize(*this);
 
 	// add a barebones tasklist while we're still hidden
 	if (!CreateNewTaskList(FALSE))
@@ -4372,15 +4370,20 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 
 	DOPROGRESS(IDS_DUETASKONLOADPROGRESS);
 
+	TDCEXPORTTASKLIST* pExport = PrepareNewDueTaskNotification(nTDC, nDueBy);
+	
+	if (!pExport)
+		return FALSE;
+
+	return m_wndExport.ExportTasks(pExport);
+}
+
+TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDueBy)
+{
 	// prepare thread structure
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	const CPreferencesDlg& userPrefs = Prefs();
 	
-	// preferences
-	BOOL bParentTitleCommentsOnly = userPrefs.GetExportParentTitleCommentsOnly();
-	BOOL bDueTaskTitlesOnly = userPrefs.GetDueTaskTitlesOnly();
-	BOOL bHtmlNotify = userPrefs.GetDisplayDueTasksInHtml();
-
 	CString sStylesheet(userPrefs.GetDueTaskStylesheet());
 	BOOL bTransform = GetStylesheetPath(tdc, sStylesheet);
 	
@@ -4395,11 +4398,14 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 		dwFlags |= TDCGTF_TRANSFORM;
 
 	// due task notification preference overrides Export preference
-	if (bDueTaskTitlesOnly)
+	if (userPrefs.GetDueTaskTitlesOnly())
+	{
 		dwFlags |= TDCGTF_TITLESONLY;
-
-	else if (bParentTitleCommentsOnly)
+	}
+	else if (userPrefs.GetExportParentTitleCommentsOnly())
+	{
 		dwFlags |= TDCGTF_PARENTTITLECOMMENTSONLY;
+	}
 
 	TDC_GETTASKS nFilter = TDCGT_DUE;
 	UINT nIDDueBy = IDS_DUETODAY;
@@ -4446,136 +4452,75 @@ BOOL CToDoListWnd::DoDueTaskNotification(int nTDC, int nDueBy)
 	TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
 			
 	// prepare structure
-	TDCDUETASKNOTIFY* pDDNotify = new TDCDUETASKNOTIFY(GetSafeHwnd(), tdc.GetFilePath(), bHtmlNotify);
-	ASSERT(pDDNotify);
+	int nExporter = -1;
+	CString sFileExt;
+	
+	if (userPrefs.GetDisplayDueTasksInHtml())
+	{
+		nExporter = EXPTOHTML;
+		sFileExt = _T("html");
+	}
+	else
+	{
+		nExporter = EXPTOTXT;
+		sFileExt = _T("txt");
+	}
+
+	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), tdc.GetFilePath(), nExporter);
+	ASSERT(pExport);
+
+	pExport->bDueTasksForNotification = TRUE;
 	
 	// different file for each
-	pDDNotify->sExportPath.Format(_T("ToDoList.due.%d"), nTDC);
-	pDDNotify->sExportPath = FileMisc::GetTempFilePath(pDDNotify->sExportPath, (bHtmlNotify ? _T("html") : _T("txt")));
+	pExport->sExportPath.Format(_T("ToDoList.due.%d"), nTDC);
+	pExport->sExportPath = FileMisc::GetTempFilePath(pExport->sExportPath, sFileExt);
 
-	if (!tdc.GetFilteredTasks(pDDNotify->tasks, filter))
+	if (FileMisc::IsLoggingEnabled())
+		pExport->sSaveIntermediatePath = GetIntermediateTaskListPath(tdc.GetFilePath());
+
+	if (!tdc.GetFilteredTasks(pExport->tasks, filter))
 	{
 		// cleanup
-		delete pDDNotify;
-		return FALSE;
+		delete pExport;
+		return NULL;
 	}
 	
 	// set an appropriate title
-	pDDNotify->tasks.SetReportAttributes(CEnString(nIDDueBy));
+	pExport->tasks.SetReportAttributes(CEnString(nIDDueBy));
 
 	if (bTransform)
-		pDDNotify->sStylesheet = sStylesheet;
+		pExport->sStylesheet = sStylesheet;
 
 	// make sure import export manager is initialised 
 	VERIFY(m_mgrImportExport.GetNumExporters());
-	pDDNotify->pImpExpMgr = &m_mgrImportExport;
+	pExport->pImpExpMgr = &m_mgrImportExport;
 
-	// start thread paused
-	ASSERT(pDDNotify && pDDNotify->IsValid());
-
-	CWinThread* pThread = AfxBeginThread(DueTaskNotifyThreadProc, 
-										(LPVOID)pDDNotify, 
-										THREAD_PRIORITY_NORMAL, 
-										0, 
-										CREATE_SUSPENDED);
-	ASSERT(pThread);
-
-	if (pThread)
-	{
-		// Hack to prevent exporters adding space for notes
-		if (s_bRestoreExportSpaceForNotes == -1)
-		{
-			s_bRestoreExportSpaceForNotes = userPrefs.GetExportSpaceForNotes();
-			CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), FALSE);
-		}
-
-		if (pThread->ResumeThread() == 1)
-		{
-			m_nNumDueTaskThreads++;
-			return TRUE;
-		}
-
-		// else
-		pThread->Delete();
-		// Fall thru
-	}
-
-	// else call thread proc directly
-	return DueTaskNotifyThreadProc((LPVOID)pDDNotify);
+	return pExport;
 }
 
-LRESULT CToDoListWnd::OnDueTaskThreadFinished(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 {
-	ASSERT (s_bRestoreExportSpaceForNotes != -1);
-	m_nNumDueTaskThreads--;
-
-	// undo hack
-	if (m_nNumDueTaskThreads == 0)
-	{
-		CPreferences().WriteProfileInt(PREF_KEY, _T("ExportSpaceForNotes"), s_bRestoreExportSpaceForNotes);
-		s_bRestoreExportSpaceForNotes = -1;
-	}
-
-	TDCDUETASKNOTIFY* pDDNotify = (TDCDUETASKNOTIFY*)lp;
-	ASSERT(pDDNotify && pDDNotify->IsValid());
+	TDCEXPORTTASKLIST* pExport = (TDCEXPORTTASKLIST*)lp;
+	ASSERT(pExport && pExport->IsValid());
 
 	if (!m_bClosing)
 	{
  		if (wp) // success
 		{
-			int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pDDNotify->sTDCPath);
+			int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pExport->sTDCPath);
 
 			if (nTDC != -1)
 			{
 				Show(FALSE);
-				m_mgrToDoCtrls.ShowDueTaskNotification(nTDC, pDDNotify->sExportPath, pDDNotify->bHtml);
+				m_mgrToDoCtrls.ShowDueTaskNotification(nTDC, pExport->sExportPath, Prefs().GetDisplayDueTasksInHtml());
 			}
 		}
  	}
 
 	// cleanup
-	delete pDDNotify;
+	delete pExport;
 
 	return 0L;
-}
-
-UINT CToDoListWnd::DueTaskNotifyThreadProc(LPVOID pParam)
-{
-	TDCDUETASKNOTIFY* pDDNotify = (TDCDUETASKNOTIFY*)pParam;
-	ASSERT(pDDNotify && pDDNotify->IsValid());
-	
-	// save intermediate tasklist to file as required
-	LogIntermediateTaskList(pDDNotify->tasks, pDDNotify->sTDCPath);
-
-	BOOL bSuccess = FALSE;
-
-	if (pDDNotify->bHtml) // display in browser?
-	{
-		if (FileMisc::FileExists(pDDNotify->sStylesheet)) // bTransform
-		{
-			bSuccess = pDDNotify->tasks.TransformToFile(pDDNotify->sStylesheet, pDDNotify->sExportPath, SFEF_UTF8);
-		}
-		else
-		{
-			bSuccess = pDDNotify->pImpExpMgr->ExportTaskListToHtml(&pDDNotify->tasks, pDDNotify->sExportPath);
-		}
-	}
-	else
-	{
-		bSuccess = pDDNotify->pImpExpMgr->ExportTaskListToText(&pDDNotify->tasks, pDDNotify->sExportPath);
-	}
-	
-	// notify parent
-	if (::IsWindow(pDDNotify->hWndNotify))
-	{
-		::PostMessage(pDDNotify->hWndNotify, WM_DUETASKTHREADFINISHED, bSuccess, (LPARAM)pDDNotify);
-	}
-	else
-	{
-		delete pDDNotify;
-	}
-	
-	return bSuccess;
 }
 
 CString CToDoListWnd::GetTitle()
@@ -4957,8 +4902,8 @@ void CToDoListWnd::UpdateGlobalHotkey()
 
 void CToDoListWnd::RefreshPauseTimeTracking()
 {
-	BOOL bPauseAll = (((m_sessionWnd.IsLocked() || m_sessionWnd.IsScreenSaverActive()) && !Prefs().GetTrackOnScreenSaver()) || 
-					  (m_sessionWnd.IsHibernated() && !Prefs().GetTrackHibernated()));
+	BOOL bPauseAll = (((m_wndSessionStatus.IsLocked() || m_wndSessionStatus.IsScreenSaverActive()) && !Prefs().GetTrackOnScreenSaver()) || 
+					  (m_wndSessionStatus.IsHibernated() && !Prefs().GetTrackHibernated()));
 
 	BOOL bTrackActiveOnly = !Prefs().GetTrackNonActiveTasklists();
 	int nCtrl = GetTDCCount();
@@ -8106,8 +8051,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 		delete m_pPrefs;
 		m_pPrefs = NULL;
 
-		// wait here until all remaining due task threads are done
-		while (m_nNumDueTaskThreads)
+		// wait here until all remaining export threads are done
+		while (!m_wndExport.IsFinished())
 		{
 			Misc::ProcessMsgLoop();
 			Sleep(50);

@@ -12,6 +12,7 @@
 #include "taskfile.h"
 #include "tdcmapping.h"
 #include "tdcenumcontainers.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\shared\TreeSelectionHelper.h"
 #include "..\shared\TreeCtrlHelper.h"
@@ -29,7 +30,6 @@ typedef CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&> CTDCStylesMap;
 
 class CToDoCtrl;
 class CFilteredToDoCtrl;
-class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -168,14 +168,15 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-struct TDCDUETASKNOTIFY
+struct TDCEXPORTTASKLIST
 {
-	TDCDUETASKNOTIFY(HWND hwnd, const CString sTDC, BOOL html) 
+	TDCEXPORTTASKLIST(HWND hwnd, const CString sTDC, int nExp) 
 		: 
 		hWndNotify(hwnd),
 		sTDCPath(sTDC), 
-		bHtml(html),
-		pImpExpMgr(NULL)
+		nExporter(nExp),
+		pImpExpMgr(NULL),
+		bDueTasksForNotification(FALSE)
 	{
 	}
 
@@ -190,6 +191,9 @@ struct TDCDUETASKNOTIFY
 		if (!pImpExpMgr)
 			return FALSE;
 
+		if ((nExporter < 0) || (nExporter > pImpExpMgr->GetNumExporters()))
+			return FALSE;
+
 		if (sExportPath.IsEmpty())
 			return FALSE;
 
@@ -202,11 +206,13 @@ struct TDCDUETASKNOTIFY
 	CString sTDCPath;
 	CString sExportPath;
 	CString sStylesheet;
+	CString sSaveIntermediatePath;
 
 	CTaskFile tasks;
-	BOOL bHtml;
+	int nExporter;
 	HWND hWndNotify;
 	CTDCImportExportMgr* pImpExpMgr;
+	BOOL bDueTasksForNotification;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

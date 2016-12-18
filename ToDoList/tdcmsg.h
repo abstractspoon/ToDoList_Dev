@@ -60,6 +60,9 @@ const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STA
 const UINT WM_TDLTTN_STOPTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STOPTRACKING")); // wParam = taskID, lParam = CFilteredToDoCtrl*
 const UINT WM_TDLTTN_LOADDELAYEDTASKLIST	= ::RegisterWindowMessage(_T("WM_TDLTTN_LOADDELAYEDTASKLIST")); // lParam = CFilteredToDoCtrl*
 
+// CTDLThreadedExporterWnd
+const UINT WM_TDLTE_EXPORTTHREADFINISHED	= ::RegisterWindowMessage(_T("WM_TDLTE_EXPORTTHREADFINISHED")); // wParam = success, lParam = TDCDUETASKNOTIFY*
+
 /////////////////////////////////////////////////////////////////////////////
 
 

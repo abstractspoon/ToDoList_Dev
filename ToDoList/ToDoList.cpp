@@ -938,7 +938,7 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		free((void*)m_pszRegistryKey);
 		m_pszRegistryKey = NULL;
 				
-		CPreferences::Initialise(szPrefs, TRUE);
+		VERIFY(CPreferences::Initialise(szPrefs, TRUE));
 	}
 	else
 	{
@@ -949,7 +949,7 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		free((void*)m_pszProfileName);
 		m_pszProfileName = NULL;
 		
-		CPreferences::Initialise(APPREGKEY, FALSE);
+		VERIFY(CPreferences::Initialise(APPREGKEY, FALSE));
 	}
 }
 

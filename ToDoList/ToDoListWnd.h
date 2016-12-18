@@ -23,6 +23,7 @@
 #include "tdcstartupoptions.h"
 #include "TDLTimeTrackerDlg.h"
 #include "tdlquickfindcombobox.h"
+#include "TDLThreadedExporterWnd.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -116,10 +117,10 @@ protected:
 	TDC_MAXSTATE m_nMaxState, m_nPrevMaxState;
 	TODOITEM m_tdiDefault;
 	CTDLTimeTrackerDlg m_dlgTimeTracker;
-	CSessionStatusWnd m_sessionWnd;
+	CSessionStatusWnd m_wndSessionStatus;
+	CTDLThreadedExporterWnd m_wndExport;
 
 	int m_nLastSelItem; // just for flicker-free todoctrl switching
-	int m_nNumDueTaskThreads;
 
 	CShortcutManager m_mgrShortcuts;
 	CTDCImportExportMgr m_mgrImportExport;
@@ -327,7 +328,7 @@ protected:
 	afx_msg LRESULT OnAddToolbarTools(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnDueTaskThreadFinished(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyClickReminderCol(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
@@ -708,6 +709,7 @@ protected:
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	BOOL DoQueryEndSession(BOOL bQuery, BOOL bEnding);
 
+	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	void UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks);
 	BOOL ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
@@ -722,7 +724,6 @@ protected:
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
-	static UINT DueTaskNotifyThreadProc(LPVOID pParam);
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static void HandleImportError(IIMPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
