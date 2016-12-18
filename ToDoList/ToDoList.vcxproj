@@ -521,6 +521,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDLThemeComboBox.cpp" />
+    <ClCompile Include="TDLThreadedExporterWnd.cpp" />
     <ClCompile Include="TDLTimeTrackerDlg.cpp" />
     <ClCompile Include="TDLToolsUserInputDlg.cpp" />
     <ClCompile Include="TDLTransformDialog.cpp">
@@ -696,6 +697,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLTaskTreeCtrl.h" />
     <ClInclude Include="TDLTaskViewListBox.h" />
     <ClInclude Include="TDLThemeComboBox.h" />
+    <ClInclude Include="TDLThreadedExporterWnd.h" />
     <ClInclude Include="TDLTimeTrackerDlg.h" />
     <ClInclude Include="TDLToolsUserInputDlg.h" />
     <ClInclude Include="TDLTransformDialog.h" />
@@ -860,6 +862,9 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ProjectReference Include="..\TDLTest\TDLTest.vcxproj">
       <Project>{9f8f45d4-c492-4653-8456-513d668def34}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\TDLTransEdit\TDLTransEdit.vcxproj">
+      <Project>{0feafc4e-5946-538a-1d54-2eafb9461394}</Project>
     </ProjectReference>
     <ProjectReference Include="..\TDLUninstall\TDLUninstall.vcxproj">
       <Project>{3bf70fa0-7245-4231-a0ef-7589e5805ffe}</Project>
