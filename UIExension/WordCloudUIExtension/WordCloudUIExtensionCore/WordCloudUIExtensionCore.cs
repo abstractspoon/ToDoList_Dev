@@ -98,25 +98,25 @@ namespace WordCloudUIExtension
 								TDLUIExtension.UpdateType type, 
 								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
-			switch (type)
-			{
-				case TDLUIExtension.UpdateType.Delete:
-				case TDLUIExtension.UpdateType.Move:
-				case TDLUIExtension.UpdateType.All:
-					// Rebuild
-					m_Items.Clear();
-					break;
-					
-				case TDLUIExtension.UpdateType.New:
-				case TDLUIExtension.UpdateType.Edit:
-					// In-place update
-					break;
-			}
-
-			TDLTask task = tasks.GetFirstTask();
-
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
-				task = task.GetNextTask();
+// 			switch (type)
+// 			{
+// 				case TDLUIExtension.UpdateType.Delete:
+// 				case TDLUIExtension.UpdateType.Move:
+// 				case TDLUIExtension.UpdateType.All:
+// 					// Rebuild
+// 					m_Items.Clear();
+// 					break;
+// 					
+// 				case TDLUIExtension.UpdateType.New:
+// 				case TDLUIExtension.UpdateType.Edit:
+// 					// In-place update
+// 					break;
+// 			}
+// 
+// 			TDLTask task = tasks.GetFirstTask();
+// 
+// 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
+// 				task = task.GetNextTask();
 
 
             // Clear selection
@@ -128,52 +128,52 @@ namespace WordCloudUIExtension
 									   TDLUIExtension.UpdateType type,
                                        System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
 		{
-			if (!task.IsValid())
-				return false;
-
-			CalendarItem item;
-
-			if (m_Items.TryGetValue(task.GetID(), out item))
-			{
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
-                    item.Title = task.GetTitle();
-
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
-                    item.EndDate = item.OrgEndDate = task.GetDoneDate();
-
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
-                    item.EndDate = item.OrgEndDate = task.GetDueDate();
-
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
-                    item.StartDate = item.OrgStartDate = task.GetStartDate();
-
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
-                    item.AllocTo = String.Join(", ", task.GetAllocatedTo());
-
-                item.TaskTextColor = task.GetTextDrawingColor();
-			}
-			else
-			{
-				item = new CalendarItem();
-
-				item.Title = task.GetTitle();
-				item.EndDate = item.OrgEndDate = task.GetDueDate();
-				item.StartDate = item.OrgStartDate = task.GetStartDate();
-				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
-				item.Id = task.GetID();
-				item.IsParent = task.IsParent();
-				item.TaskTextColor = task.GetTextDrawingColor();
-				item.DrawBorder = true;
-			}
-
-			if (item.EndDate > item.StartDate)
-				m_Items[task.GetID()] = item;
-
-			// Process children
-			TDLTask subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
-				subtask = subtask.GetNextTask();
+// 			if (!task.IsValid())
+// 				return false;
+// 
+// 			CalendarItem item;
+// 
+// 			if (m_Items.TryGetValue(task.GetID(), out item))
+// 			{
+//                 if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+//                     item.Title = task.GetTitle();
+// 
+//                 if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+//                     item.EndDate = item.OrgEndDate = task.GetDoneDate();
+// 
+//                 if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+//                     item.EndDate = item.OrgEndDate = task.GetDueDate();
+// 
+//                 if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+//                     item.StartDate = item.OrgStartDate = task.GetStartDate();
+// 
+//                 if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+//                     item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+// 
+//                 item.TaskTextColor = task.GetTextDrawingColor();
+// 			}
+// 			else
+// 			{
+// 				item = new CalendarItem();
+// 
+// 				item.Title = task.GetTitle();
+// 				item.EndDate = item.OrgEndDate = task.GetDueDate();
+// 				item.StartDate = item.OrgStartDate = task.GetStartDate();
+// 				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+// 				item.Id = task.GetID();
+// 				item.IsParent = task.IsParent();
+// 				item.TaskTextColor = task.GetTextDrawingColor();
+// 				item.DrawBorder = true;
+// 			}
+// 
+// 			if (item.EndDate > item.StartDate)
+// 				m_Items[task.GetID()] = item;
+// 
+// 			// Process children
+// 			TDLTask subtask = task.GetFirstSubtask();
+// 
+// 			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
+// 				subtask = subtask.GetNextTask();
 
 			return true;
 		}
@@ -298,7 +298,7 @@ namespace WordCloudUIExtension
 		private void InitializeComponent()
 		{
 			this.BackColor = System.Drawing.Color.White;
-			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
+//			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 
 			CreateWordCloud();
 		}
@@ -328,8 +328,8 @@ namespace WordCloudUIExtension
 //             Invalidate();
         }
 
-		private void OnWordCloudNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
-		{
+// 		private void OnWordCloudNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
+// 		{
 //             Calendar.Appointment m_Appointment = new Calendar.Appointment();
 // 
 //             m_Appointment.StartDate = args.StartDate;
@@ -338,10 +338,10 @@ namespace WordCloudUIExtension
 //             m_Appointment.Group = "2";
 // 
 //             m_Appointments.Add(m_Appointment);
-		}
+// 		}
 
-		private void OnWordCloudSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
-		{
+// 		private void OnWordCloudSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
+// 		{
 //             TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
 // 
 // 			switch (this.m_WordCloud.Selection)
@@ -356,101 +356,101 @@ namespace WordCloudUIExtension
 //                         notify.NotifySelChange(0);
 // 					break;
 // 			}
-		}
+// 		}
 
-		private void OnWordCloudAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
-		{
-			Calendar.MoveAppointmentEventArgs move = args as Calendar.MoveAppointmentEventArgs;
+// 		private void OnWordCloudAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
+// 		{
+// 			Calendar.MoveAppointmentEventArgs move = args as Calendar.MoveAppointmentEventArgs;
+// 
+// 			// Ignore moves whilst they are occurring
+// 			if ((move == null) || !move.Finished)
+// 				return;
+// 
+// 			CalendarItem item = args.Appointment as CalendarItem;
+// 
+// 			if (item == null)
+// 				return;
+// 
+//             TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
+// 
+// 			switch (move.Mode)
+// 			{
+// 				case Calendar.SelectionTool.Mode.Move:
+// 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
+// 					{
+// 						item.OrgStartDate = item.StartDate;
+// 						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
+// 					}
+// 					break;
+// 
+// 				case Calendar.SelectionTool.Mode.ResizeTop:
+// 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
+// 					{
+// 						item.OrgStartDate = item.StartDate;
+// 						notify.NotifyMod(TDLUIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
+// 					}
+// 					break;
+// 
+// 				case Calendar.SelectionTool.Mode.ResizeBottom:
+// 					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
+// 					{
+// 						item.OrgEndDate = item.EndDate;
+// 						notify.NotifyMod(TDLUIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
+// 					}
+// 					break;
+// 			}
+// 		}
 
-			// Ignore moves whilst they are occurring
-			if ((move == null) || !move.Finished)
-				return;
-
-			CalendarItem item = args.Appointment as CalendarItem;
-
-			if (item == null)
-				return;
-
-            TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
-
-			switch (move.Mode)
-			{
-				case Calendar.SelectionTool.Mode.Move:
-					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
-					{
-						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
-					}
-					break;
-
-				case Calendar.SelectionTool.Mode.ResizeTop:
-					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
-					{
-						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
-					}
-					break;
-
-				case Calendar.SelectionTool.Mode.ResizeBottom:
-					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
-					{
-						item.OrgEndDate = item.EndDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
-					}
-					break;
-			}
-		}
-
-		private void OnWordCloudResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
-		{
-			System.Collections.Generic.List<Calendar.Appointment> appts =
-				new System.Collections.Generic.List<Calendar.Appointment>();
-
-			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
-			{
-				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
-				{
-					// Recalculate colours
-					if (m_taskColorIsBkgnd)
-					{
-						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
-						item.Value.BorderColor = TDLColor.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
-						item.Value.BarColor = item.Value.TaskTextColor;
-						item.Value.FillColor = item.Value.TaskTextColor;
-					}
-					else
-					{
-						item.Value.TextColor = item.Value.TaskTextColor;
-						item.Value.BorderColor = item.Value.TaskTextColor;
-						item.Value.FillColor = TDLColor.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
-						item.Value.BarColor = item.Value.TaskTextColor;
-					}
-
-					appts.Add(item.Value);
-				}
-			}
-
-			args.Appointments = appts;
-		}
-
-		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
-		{
-			return ((item.StartDate >= startDate) && (item.EndDate <= endDate));
-		}
+// 		private void OnWordCloudResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
+// 		{
+// 			System.Collections.Generic.List<Calendar.Appointment> appts =
+// 				new System.Collections.Generic.List<Calendar.Appointment>();
+// 
+// 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
+// 			{
+// 				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
+// 				{
+// 					// Recalculate colours
+// 					if (m_taskColorIsBkgnd)
+// 					{
+// 						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
+// 						item.Value.BorderColor = TDLColor.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
+// 						item.Value.BarColor = item.Value.TaskTextColor;
+// 						item.Value.FillColor = item.Value.TaskTextColor;
+// 					}
+// 					else
+// 					{
+// 						item.Value.TextColor = item.Value.TaskTextColor;
+// 						item.Value.BorderColor = item.Value.TaskTextColor;
+// 						item.Value.FillColor = TDLColor.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
+// 						item.Value.BarColor = item.Value.TaskTextColor;
+// 					}
+// 
+// 					appts.Add(item.Value);
+// 				}
+// 			}
+// 
+// 			args.Appointments = appts;
+// 		}
+// 
+// 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+// 		{
+// 			return ((item.StartDate >= startDate) && (item.EndDate <= endDate));
+// 		}
 
 		// --------------------------------------------------------------------------------------
-		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
+//		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 	}
 
-	public class CalendarItem : Calendar.Appointment
-	{
-		public DateTime OrgStartDate { get; set; }
-		public DateTime OrgEndDate { get; set; }
-
-		public System.Drawing.Color TaskTextColor { get; set; }
-
-		public String AllocTo { get; set; }
-		public Boolean IsParent { get; set; }
-	}
+// 	public class CalendarItem : Calendar.Appointment
+// 	{
+// 		public DateTime OrgStartDate { get; set; }
+// 		public DateTime OrgEndDate { get; set; }
+// 
+// 		public System.Drawing.Color TaskTextColor { get; set; }
+// 
+// 		public String AllocTo { get; set; }
+// 		public Boolean IsParent { get; set; }
+// 	}
 
 }

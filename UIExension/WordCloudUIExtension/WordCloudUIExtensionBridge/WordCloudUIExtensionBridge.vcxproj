@@ -112,7 +112,7 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <ResourceCompile Include="WordCloudUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dayview.ico" />
+    <None Include="WordCloud.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WordCloudUIExtensionCore\WordCloudUIExtensionCore.csproj">
