@@ -9080,7 +9080,6 @@ void CToDoListWnd::OnExport()
 		{
 			sImgFolder = sExportPath;
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 		}
 		
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSelTDC);
