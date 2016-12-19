@@ -4442,7 +4442,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 		
 	default:
 		ASSERT (0);
-		return FALSE;
+		return NULL;
 	}
 	
 	TDCGETTASKS filter(nFilter, dwFlags);
