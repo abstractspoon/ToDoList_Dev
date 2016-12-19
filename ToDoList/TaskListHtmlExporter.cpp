@@ -276,7 +276,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 		case TDCA_TASKNAME:
 			{
 				// special case: task title following pos
-				if (EXPORTSTYLE != STYLE_TABLE && WANTPOS)
+				if ((EXPORTSTYLE != STYLE_TABLE) && WANTPOS)
 					sFmtAttrib = TAB;
 				
 				// embolden top-level tasks only
@@ -352,10 +352,14 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	{
 	case TDCA_POSITION:
 	case TDCA_TASKNAME:
-		if ((nAttrib == TDCA_POSITION) || !WANTPOS)
+		// Indent subtasks in table view only
+		if (EXPORTSTYLE == STYLE_TABLE)
 		{
-			while (--nDepth)
-				sItem = (TAB + sItem);
+			if ((nAttrib == TDCA_POSITION) || !WANTPOS)
+			{
+				while (--nDepth)
+					sItem = (TAB + sItem);
+			}
 		}
 		break;
 
