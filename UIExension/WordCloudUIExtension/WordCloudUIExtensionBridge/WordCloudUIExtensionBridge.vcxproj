@@ -114,6 +114,11 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
   <ItemGroup>
     <None Include="dayview.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WordCloudUIExtensionCore\WordCloudUIExtensionCore.csproj">
+      <Project>{8a0a687f-d652-4b51-9e33-6efd7da640f2}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -47,7 +47,7 @@ public:
    LPCWSTR GetTypeID() const; // caller must copy result only
 
    bool SelectTask(DWORD dwTaskID);
-   bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
+   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
    bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;

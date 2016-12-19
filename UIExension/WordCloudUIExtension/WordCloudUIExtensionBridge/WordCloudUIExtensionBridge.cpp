@@ -36,8 +36,8 @@ using namespace TDLPluginHelpers;
 
 // REPLACE THIS WITH NEW GUID!
 
-const LPCWSTR DAYVIEW_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
-const LPCWSTR DAYVIEW_NAME = L"Day View";
+const LPCWSTR WORDCLOUD_GUID = L"3BDEF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR WORDCLOUD_NAME = L"Word Cloud";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ void CWordCloudUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
 
 LPCTSTR CWordCloudUIExtensionBridge::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WORDCLOUD_NAME;
 }
 
 HICON CWordCloudUIExtensionBridge::GetIcon() const
@@ -70,7 +70,7 @@ HICON CWordCloudUIExtensionBridge::GetIcon() const
 
 LPCWSTR CWordCloudUIExtensionBridge::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WORDCLOUD_GUID;
 }
 
 IUIExtensionWindow* CWordCloudUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
@@ -136,12 +136,12 @@ HICON CWordCloudUIExtensionBridgeWindow::GetIcon() const
 
 LPCWSTR CWordCloudUIExtensionBridgeWindow::GetMenuText() const
 {
-	return DAYVIEW_NAME;
+	return WORDCLOUD_NAME;
 }
 
 LPCWSTR CWordCloudUIExtensionBridgeWindow::GetTypeID() const
 {
-	return DAYVIEW_GUID;
+	return WORDCLOUD_GUID;
 }
 
 bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
@@ -149,7 +149,7 @@ bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
 	return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CWordCloudUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
+bool CWordCloudUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 
