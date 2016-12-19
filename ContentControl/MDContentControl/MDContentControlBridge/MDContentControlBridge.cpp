@@ -8,10 +8,10 @@
 #include "MDContentControlBridge.h"
 #include "resource.h"
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\UITheme.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\ISpellcheck.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ISpellcheck.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -96,7 +96,7 @@ void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) cons
 
 }
 
-void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey/*, bool bAppOnly*/)
+void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	// TODO
 }

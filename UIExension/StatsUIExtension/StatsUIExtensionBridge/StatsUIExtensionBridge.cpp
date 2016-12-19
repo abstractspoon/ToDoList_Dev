@@ -9,10 +9,10 @@
 #include "resource.h"
 #include "StatsUIExtensionBridge.h"
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITasklist.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITasklist.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,7 +159,7 @@ bool CStatsUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
    return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CStatsUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
+bool CStatsUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 

@@ -24,7 +24,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleUIExtensionCore", "UI
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleUIExtensionBridge", "UIExension\SampleUIExtension\SampleUIExtensionBridge\SampleUIExtensionBridge.vcxproj", "{E687CC37-AA5B-4E28-91B9-A0E72B0E9B7D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{B3B64E1B-64F1-4835-838D-B5044244174E} = {B3B64E1B-64F1-4835-838D-B5044244174E}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject

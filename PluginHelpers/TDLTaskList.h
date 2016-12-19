@@ -4,7 +4,7 @@
 
 class IPreferences;
 class ITaskList;
-class ITaskList14;
+class ITaskList15;
 class ITransText;
 enum TDC_UNITS;
 
@@ -160,8 +160,8 @@ namespace TDLPluginHelpers
 	  static Int64 Map(DateTime^ date);
 
    private: // -------------------------------------------------------
-      ITaskList14* m_pTaskList;
-      const ITaskList14* m_pConstTaskList;
+      ITaskList15* m_pTaskList;
+      const ITaskList15* m_pConstTaskList;
       HTASKITEM m_hTask;
 
    private: // -------------------------------------------------------
@@ -201,8 +201,8 @@ namespace TDLPluginHelpers
       Boolean ClearMetaData(String^ sKey);
 
    private: // -------------------------------------------------------
-      ITaskList14* m_pTaskList;
-      const ITaskList14* m_pConstTaskList;
+      ITaskList15* m_pTaskList;
+      const ITaskList15* m_pConstTaskList;
 
    private: // -------------------------------------------------------
       TDLTaskList();

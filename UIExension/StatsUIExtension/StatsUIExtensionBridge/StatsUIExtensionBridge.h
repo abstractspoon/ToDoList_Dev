@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\IUIExtension.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
 
 #include <vcclr.h>
 using namespace StatsUIExtension;
@@ -50,7 +50,7 @@ public:
    LPCWSTR GetTypeID() const; // caller must copy result only
 
    bool SelectTask(DWORD dwTaskID);
-   bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
+   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
    bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;

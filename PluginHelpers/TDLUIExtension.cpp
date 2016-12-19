@@ -5,9 +5,9 @@
 #include "pluginhelpers.h"
 #include "TDLUIExtension.h"
 
-#include "..\..\ToDoList_Core\Interfaces\UITheme.h"
-#include "..\..\ToDoList_Core\Interfaces\IUIExtension.h"
-#include "..\..\ToDoList_Core\Interfaces\ITasklist.h"
+#include "..\..\ToDoList_Dev\Interfaces\UITheme.h"
+#include "..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
+#include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

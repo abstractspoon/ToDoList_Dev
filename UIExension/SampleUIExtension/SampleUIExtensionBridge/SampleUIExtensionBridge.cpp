@@ -8,10 +8,10 @@
 #include "stdafx.h"
 #include "SampleUIExtensionBridge.h"
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITasklist.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\UITheme.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITasklist.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +150,7 @@ bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
 	return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CSampleUIExtensionBridgeWindow::SelectTasks(DWORD* pdwTaskIDs, int nTaskCount)
+bool CSampleUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 

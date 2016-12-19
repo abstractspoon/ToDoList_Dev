@@ -8,13 +8,13 @@
 #include "..\..\..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
 
 #include <vcclr.h>
-using namespace DayViewUIExtension;
+using namespace WordCloudUIExtension;
 
-// This class is exported from DayViewUIExtensionBridge.dll
-class CDayViewUIExtensionBridge : public IUIExtension
+// This class is exported from WordCloudUIExtensionBridge.dll
+class CWordCloudUIExtensionBridge : public IUIExtension
 {
 public:
-	CDayViewUIExtensionBridge();
+	CWordCloudUIExtensionBridge();
 
    void Release(); // releases the interface
 
@@ -33,10 +33,10 @@ protected:
 	HICON m_hIcon;
 };
 
-class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
+class CWordCloudUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CDayViewUIExtensionBridgeWindow();
+	CWordCloudUIExtensionBridgeWindow();
 
    void Release(); // releases the interface
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
@@ -47,7 +47,7 @@ public:
    LPCWSTR GetTypeID() const; // caller must copy result only
 
    bool SelectTask(DWORD dwTaskID);
-   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
+   bool SelectTasks(DWORD* pdwTaskIDs, int nTaskCount);
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
    bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
@@ -69,7 +69,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
    
 protected:
-   gcroot<DayViewUIExtensionCore^> m_wnd;
+   gcroot<WordCloudUIExtensionCore^> m_wnd;
    //gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
@@ -80,6 +80,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CDayViewUIExtensionBridge();
+   return new CWordCloudUIExtensionBridge();
 }
 

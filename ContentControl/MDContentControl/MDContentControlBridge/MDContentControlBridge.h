@@ -5,7 +5,7 @@
 // EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\IContentControl.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IContentControl.h"
 
 #include <vcclr.h>
 using namespace MDContentControl;
@@ -33,7 +33,7 @@ public:
    void FreeHtmlBuffer(LPWSTR& szHtml);
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
-   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey/*, bool bAppOnly*/);
+   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 
 protected:
    HICON m_hIcon;

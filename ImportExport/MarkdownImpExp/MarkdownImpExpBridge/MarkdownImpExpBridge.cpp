@@ -7,9 +7,9 @@
 #include "stdafx.h"
 #include "MarkdownImpExpBridge.h"
 
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITasklist.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\ITransText.h"
-#include "..\..\..\..\ToDoList_Core\Interfaces\IPreferences.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITasklist.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
+#include "..\..\..\..\ToDoList_Dev\Interfaces\IPreferences.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 
-#include "..\..\ToDoList_Core\Interfaces\UITheme.h"
+#include "..\..\ToDoList_Dev\Interfaces\UITheme.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

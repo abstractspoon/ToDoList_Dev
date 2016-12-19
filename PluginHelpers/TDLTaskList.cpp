@@ -6,7 +6,7 @@
 #include "TDLTasklist.h"
 #include "TDLUIExtension.h"
 
-#include "..\..\ToDoList_Core\Interfaces\ITasklist.h"
+#include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@ using namespace TDLPluginHelpers;
 
 TDLTaskList::TDLTaskList(ITaskList* pTaskList) 
 	: 
-m_pTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)), 
+m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
 	m_pConstTaskList(nullptr) 
 {
 } 
@@ -24,7 +24,7 @@ m_pTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)),
 TDLTaskList::TDLTaskList(const ITaskList* pTaskList) 
 	: 
 m_pTaskList(nullptr), 
-	m_pConstTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)) 
+	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)) 
 {
 } 
 
@@ -163,7 +163,7 @@ m_pTaskList(nullptr),
 
 TDLTask::TDLTask(ITaskList* pTaskList, HTASKITEM hTask) 
 	: 
-m_pTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)), 
+m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
 	m_pConstTaskList(nullptr), 
 	m_hTask(hTask)
 {
@@ -173,7 +173,7 @@ m_pTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)),
 TDLTask::TDLTask(const ITaskList* pTaskList, HTASKITEM hTask)
 	: 
 m_pTaskList(nullptr), 
-	m_pConstTaskList(GetITLInterface<ITaskList14>(pTaskList, IID_TASKLIST14)), 
+	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
 	m_hTask(hTask)
 {
 
@@ -365,10 +365,10 @@ List<String^>^ TDLTask::GetDependency()
 List<String^>^ TDLTask::GetFileReference()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
-	int numItems = GETTASKVAL(GetTaskFileReferenceCount, 0);
+	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
-		items->Add(GETTASKSTR_ARG(GetTaskFileReference, nIndex));
+		items->Add(GETTASKSTR_ARG(GetTaskFileLink, nIndex));
 
 	return items;
 }
@@ -639,7 +639,7 @@ Boolean TDLTask::AddDependency(String^ sDependency)
 
 Boolean TDLTask::AddFileReference(String^ sFileLink)
 {
-	return SETTASKSTR(AddTaskFileReference, sFileLink);
+	return SETTASKSTR(AddTaskFileLink, sFileLink);
 }
 
 Boolean TDLTask::SetColor(UINT32 color)
