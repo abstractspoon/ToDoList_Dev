@@ -35,7 +35,7 @@ const LPCTSTR PREFSKEY = _T("Preferences");
 
 CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr, 
 								 const CContentMgr* pContentMgr, 
-								 const CImportExportMgr* pExportMgr,
+								 const CTDCImportExportMgr* pExportMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
 								 CWnd* pParent /*=NULL*/)
 	: 

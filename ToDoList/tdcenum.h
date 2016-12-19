@@ -69,6 +69,13 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TDC_THREADEDEXPORTPURPOSE
+{
+	TDCTEP_NONE = -1,
+	TDCTEP_DUETASKNOTIFY,
+	TDCTEP_EXPORTAFTERSAVE,
+};
+
 enum TDC_TITLERECT 
 { 
 	TDCTR_LABEL, 

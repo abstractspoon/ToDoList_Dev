@@ -4,11 +4,11 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PreferencesFile2Page.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\importexportmgr.h"
 #include "..\shared\misc.h"
 
 #include "Shlwapi.h"
@@ -32,15 +32,13 @@ enum
 
 IMPLEMENT_DYNCREATE(CPreferencesFile2Page, CPreferencesPageBase)
 
-CPreferencesFile2Page::CPreferencesFile2Page(const CImportExportMgr* pExportMgr) : 
+CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr) : 
 		CPreferencesPageBase(CPreferencesFile2Page::IDD),
 		m_eExportFolderPath(FES_FOLDERS | FES_COMBOSTYLEBTN | FES_RELATIVEPATHS),
 		m_eSaveExportStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
 		m_pExportMgr(pExportMgr),
 		m_eBackupLocation(FES_FOLDERS | FES_COMBOSTYLEBTN)
 {
-//	m_psp.dwFlags &= ~PSP_HASHELP;
-
 	//{{AFX_DATA_INIT(CPreferencesFile2Page)
 	//}}AFX_DATA_INIT
 	m_bAutoSaveOnRunTools = TRUE;
@@ -336,6 +334,30 @@ CString CPreferencesFile2Page::GetAutoExportFolderPath() const
 	
 	// else
 	return _T("");
+}
+
+BOOL CPreferencesFile2Page::GetAutoExporter() const 
+{ 
+	if (!m_bAutoExport)
+		return -1;
+	
+	if (m_bOtherExport)
+		return m_nOtherExporter;
+
+	// else
+	return EXPTOHTML;
+}
+
+BOOL CPreferencesFile2Page::GetAutoExportExtension(CString& sExt) const
+{
+	sExt.Empty();
+
+	int nExporter = GetAutoExporter();
+
+	if (nExporter != -1)
+		sExt = m_pExportMgr->GetExporterFileExtension(nExporter);
+
+	return !sExt.IsEmpty();
 }
 
 void CPreferencesFile2Page::OnUsestylesheetforsave() 

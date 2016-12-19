@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesFile2Page dialog
 
-class CImportExportMgr;
+class CTDCImportExportMgr;
 
 class CPreferencesFile2Page : public CPreferencesPageBase
 {
@@ -24,7 +24,7 @@ class CPreferencesFile2Page : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesFile2Page(const CImportExportMgr* pExportMgr = NULL);
+	CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr = NULL);
 	~CPreferencesFile2Page();
 
 	// backup
@@ -39,8 +39,8 @@ public:
 	BOOL GetAutoSaveOnSwitchApp() const { return m_bAutoSaveOnSwitchApp; }
 	CString GetAutoExportFolderPath() const;
 	BOOL GetAutoExport() const { return m_bAutoExport; }
-	BOOL GetExportToHTML() const { return m_bAutoExport && !m_bOtherExport; }
-	int GetOtherExporter() const { return (m_bAutoExport && m_bOtherExport) ? m_nOtherExporter : -1; }
+	BOOL GetAutoExporter() const;
+	BOOL GetAutoExportExtension(CString& sExt) const;
 	BOOL GetExportFilteredOnly() const { return m_bAutoExport && m_bExportFilteredOnly; }
 	BOOL GetAutoSaveOnRunTools() const { return m_bAutoSaveOnRunTools; }
 
@@ -76,7 +76,7 @@ protected:
 	int		m_bOtherExport;
 	int		m_nOtherExporter;
 	BOOL	m_bUseStylesheetForSaveExport;
-	const CImportExportMgr* m_pExportMgr;
+	const CTDCImportExportMgr* m_pExportMgr;
 	CString	m_sSaveExportStylesheet;
 
 // Overrides

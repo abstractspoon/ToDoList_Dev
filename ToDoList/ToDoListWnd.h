@@ -564,9 +564,6 @@ protected:
 	void RestorePosition();
 	void RestoreVisibility();
 	
-	BOOL Export2Html(const CTaskFile& tasks, const CString& sFilePath, const CString& sStylesheet) const;
-	BOOL GetAutoExportExtension(CString& sExt) const;
-
 	TDC_FILE DelayOpenTaskList(LPCTSTR szFilePath); // 0 = failed, 1 = success, -1 = cancelled
 	TDC_FILE OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks = TRUE); // 0 = failed, 1 = success, -1 = cancelled
 	TDC_FILE OpenTaskList(CFilteredToDoCtrl* pCtrl, LPCTSTR szFilePath = NULL, TSM_TASKLISTINFO* pInfo = NULL);
@@ -710,9 +707,14 @@ protected:
 	BOOL DoQueryEndSession(BOOL bQuery, BOOL bEnding);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
+	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
+
 	void UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks);
 	BOOL ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
+	BOOL Export2Html(const CTaskFile& tasks, const CString& sFilePath, 
+					const CString& sStylesheet) const;
+
 
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);

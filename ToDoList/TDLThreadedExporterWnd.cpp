@@ -182,10 +182,10 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 	{
 		bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath, SFEF_UTF8);
 	}
-	else if (pExport->bDueTasksForNotification)
+	else if (pExport->nPurpose == TDCTEP_DUETASKNOTIFY)
 	{
 		// For due task notifications we don't want space added for notes
-		// so we pass a proxy which handles this
+		// so we use a proxy which handles this
 		CPreferences prefs;
 		CTEWPreferencesWrap prefsWrap(prefs);
 

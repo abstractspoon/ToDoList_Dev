@@ -56,7 +56,7 @@ class CPreferencesDlg : public CPreferencesDlgBase
 public:
 	CPreferencesDlg(CShortcutManager* pShortcutMgr = NULL, 
 					const CContentMgr* pContentMgr = NULL, 
-					const CImportExportMgr* pExportMgr = NULL, 
+					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
 					CWnd* pParent = NULL);   // standard constructor
 	virtual ~CPreferencesDlg();
@@ -121,8 +121,8 @@ public:
 	CString GetBackupLocation(LPCTSTR szFilePath) const { return m_pageFile2.GetBackupLocation(szFilePath); }
 	int GetKeepBackupCount() const { return m_pageFile2.GetKeepBackupCount(); }
 	BOOL GetAutoExport() const { return m_pageFile2.GetAutoExport(); }
-	BOOL GetExportToHTML() const { return m_pageFile2.GetExportToHTML(); }
-	int GetOtherExporter() const { return m_pageFile2.GetOtherExporter(); }
+	int GetAutoExporter() const { return m_pageFile2.GetAutoExporter(); }
+	BOOL GetAutoExportExtension(CString& sExt) const { return m_pageFile2.GetAutoExportExtension(sExt); }
 	int GetAutoSaveFrequency() const { return m_pageFile2.GetAutoSaveFrequency(); }
 	CString GetAutoExportFolderPath() const { return m_pageFile2.GetAutoExportFolderPath(); }
 	CString GetSaveExportStylesheet() const { return m_pageFile2.GetSaveExportStylesheet(); }

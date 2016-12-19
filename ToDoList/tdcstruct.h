@@ -170,13 +170,13 @@ protected:
 
 struct TDCEXPORTTASKLIST
 {
-	TDCEXPORTTASKLIST(HWND hwnd, const CString sTDC, int nExp) 
+	TDCEXPORTTASKLIST(HWND hwnd, const CString& sTDC, int nExp) 
 		: 
 		hWndNotify(hwnd),
 		sTDCPath(sTDC), 
 		nExporter(nExp),
 		pImpExpMgr(NULL),
-		bDueTasksForNotification(FALSE)
+		nPurpose(TDCTEP_NONE)
 	{
 	}
 
@@ -200,6 +200,9 @@ struct TDCEXPORTTASKLIST
 		if (sTDCPath.IsEmpty())
 			return FALSE;
 
+		if (nPurpose == TDCTEP_NONE)
+			return FALSE;
+
 		return TRUE;
 	}
 
@@ -212,7 +215,7 @@ struct TDCEXPORTTASKLIST
 	int nExporter;
 	HWND hWndNotify;
 	CTDCImportExportMgr* pImpExpMgr;
-	BOOL bDueTasksForNotification;
+	TDC_THREADEDEXPORTPURPOSE nPurpose;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
