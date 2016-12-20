@@ -5,14 +5,21 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8A0A687F-D652-4B51-9E33-6EFD7DA640F2}</ProjectGuid>
+    <ProjectGuid>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WordCloudUIExtension</RootNamespace>
-    <AssemblyName>WordCloudUIExtensionCore</AssemblyName>
+    <RootNamespace>Gma.CodeCloud.Controls</RootNamespace>
+    <AssemblyName>Gma.CodeCloud.Controls</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,8 +29,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,42 +38,51 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="WordCloudUIExtensionCore.cs">
+    <Compile Include="CloudControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GdiGraphicEngine.cs" />
+    <Compile Include="Geometry\BaseLayout.cs" />
+    <Compile Include="Geometry\DataStructures\QuadTree.cs" />
+    <Compile Include="Geometry\DataStructures\QuadTreeNode.cs" />
+    <Compile Include="Geometry\IGraphicEgine.cs" />
+    <Compile Include="Geometry\ILayout.cs" />
+    <Compile Include="Geometry\LayoutItem.cs" />
+    <Compile Include="Geometry\SpiralLayout.cs" />
+    <Compile Include="Geometry\TypewriterLayout.cs" />
+    <Compile Include="LayoutFactory.cs" />
+    <Compile Include="LayoutType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextAnalyses\Processing\IWord.cs" />
+    <Compile Include="TextAnalyses\Processing\Word.cs" />
+    <Compile Include="TextAnalyses\Processing\WordExtensions.cs" />
+    <Compile Include="TextAnalyses\Processing\WordGroup.cs" />
+    <Compile Include="TextAnalyses\Blacklist\CommonBlacklist.cs" />
+    <Compile Include="TextAnalyses\Blacklist\En\CommonWords.cs" />
+    <Compile Include="TextAnalyses\Stemmers\En\PorterStem.cs" />
+    <Compile Include="TextAnalyses\Stemmers\En\PorterStemmer.cs" />
+    <Compile Include="TextAnalyses\Extractors\BaseExtractor.cs" />
+    <Compile Include="TextAnalyses\Extractors\FileExtractor.cs" />
+    <Compile Include="TextAnalyses\Blacklist\IBlacklist.cs" />
+    <Compile Include="TextAnalyses\Extractors\IProgressIndicator.cs" />
+    <Compile Include="TextAnalyses\Stemmers\IWordStemmer.cs" />
+    <Compile Include="TextAnalyses\Blacklist\NullBlacklist.cs" />
+    <Compile Include="TextAnalyses\Stemmers\NullStemmer.cs" />
+    <Compile Include="TextAnalyses\Extractors\UriExtractor.cs" />
+    <Compile Include="TextAnalyses\Extractors\StringExtractor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="PluginHelpers">
-      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Include="CloudControl.resx">
+      <DependentUpon>CloudControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"

@@ -55,9 +55,9 @@
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
-mkdir "$(SolutionDir)..\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Command>
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,9 +78,9 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Co
     <PostBuildEvent>
       <Command>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
-mkdir "$(SolutionDir)..\ToDoList"
-mkdir "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList\unicode_$(ConfigurationName)\"</Command>
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
+mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
