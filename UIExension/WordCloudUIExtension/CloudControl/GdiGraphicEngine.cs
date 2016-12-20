@@ -32,7 +32,8 @@ namespace Gma.CodeCloud.Controls
             MaxFontSize = maxFontSize;
             m_LastUsedFont = new Font(this.FontFamily, maxFontSize, this.FontStyle);
             m_Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        }
+			m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+		}
 
         public SizeF Measure(string text, int weight)
         {
