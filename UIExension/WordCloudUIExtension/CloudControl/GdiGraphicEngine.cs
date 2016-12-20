@@ -64,7 +64,11 @@ namespace Gma.CodeCloud.Controls
 
         private Font GetFont(int weight)
         {
-            float fontSize = (float)(weight - m_MinWordWeight) / (m_MaxWordWeight - m_MinWordWeight) * (MaxFontSize - MinFontSize) + MinFontSize;
+			float weightDiff = (weight - m_MinWordWeight);
+			float weightRange = Math.Max(1, (m_MaxWordWeight - m_MinWordWeight));
+			float fontRange = (MaxFontSize - MinFontSize);
+
+            float fontSize = MinFontSize + (fontRange * (weightDiff / weightRange));
             if (m_LastUsedFont.Size!=fontSize)
             {
                 m_LastUsedFont = new Font(this.FontFamily, fontSize, this.FontStyle);
