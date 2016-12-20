@@ -19,7 +19,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Extractors
             return GetWords(m_Text);
         }
 
-        protected override void OnCharPorcessed(char ch)
+        protected override void OnCharProcessed(char ch)
         {
             ProgressIndicator.Increment(1);
         }

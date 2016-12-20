@@ -34,11 +34,11 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Extractors
                 {
                     yield return word;
                 }
-                OnLinePorcessed(line);
+                OnLineProcessed(line);
             }
         }
 
-        protected override void OnLinePorcessed(string line)
+        protected override void OnLineProcessed(string line)
         {
             ProgressIndicator.Increment(1);
         }
