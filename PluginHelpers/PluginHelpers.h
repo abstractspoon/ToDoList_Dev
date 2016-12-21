@@ -89,6 +89,16 @@ namespace TDLPluginHelpers
 		UInt32 GetColor(AppColor color);
 	};
 
+	public ref class TDLWin32
+	{
+	public:
+		static void RemoveBorder(IntPtr hWnd);
+		static void AddBorder(IntPtr hWnd);
+		static void RemoveClientEdge(IntPtr hWnd);
+		static void AddClientEdge(IntPtr hWnd);
+		static HWND GetHwnd(IntPtr hWnd);
+	};
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
