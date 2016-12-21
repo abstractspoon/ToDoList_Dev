@@ -4,20 +4,21 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Windows.Forms;
-using TDLPluginHelpers;
 using MarkdownLog;
+
+using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MarkdownImpExp
 {
     public class MarkdownImpExpCore
     {
-        public bool Export(TDLTaskList srcTasks, string sDestFilePath, bool bSilent, TDLPreferences prefs, string sKey)
+        public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
             UInt32 taskCount = srcTasks.GetTaskCount();
 
             BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
 
-            TDLTask task = srcTasks.GetFirstTask();
+            Task task = srcTasks.GetFirstTask();
 
             while (task.IsValid())
             {
@@ -32,7 +33,7 @@ namespace MarkdownImpExp
             return true;
         }
 
-        protected bool ExportTask(TDLTask task, BulletedMarkdownContainer mdParent, bool root)
+        protected bool ExportTask(Task task, BulletedMarkdownContainer mdParent, bool root)
         {
             // add ourselves
             
@@ -41,7 +42,7 @@ namespace MarkdownImpExp
             // then our subtasks in a container
             BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
 
-            TDLTask subtask = task.GetFirstSubtask();
+            Task subtask = task.GetFirstSubtask();
 
             if (subtask.IsValid())
             {
@@ -58,7 +59,7 @@ namespace MarkdownImpExp
             return true;
         }
 
-        protected string FormatTaskAttributes(TDLTask task, bool root)
+        protected string FormatTaskAttributes(Task task, bool root)
         {
             StringBuilder taskAttrib = new StringBuilder();
 

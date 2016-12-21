@@ -27,19 +27,19 @@
     <ClInclude Include="PluginHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLPreferences.h">
+    <ClInclude Include="UIExtension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLTaskList.h">
+    <ClInclude Include="ContentControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLUIExtension.h">
+    <ClInclude Include="Preferences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLTranslate.h">
+    <ClInclude Include="Translate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TDLContentControl.h">
+    <ClInclude Include="TaskList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,19 +53,19 @@
     <ClCompile Include="PluginHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLPreferences.cpp">
+    <ClCompile Include="UIExtension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLTaskList.cpp">
+    <ClCompile Include="ContentControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLUIExtension.cpp">
+    <ClCompile Include="Preferences.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLTranslate.cpp">
+    <ClCompile Include="Translate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TDLContentControl.cpp">
+    <ClCompile Include="TaskList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,25 +3,25 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "TDLTasklist.h"
-#include "TDLUIExtension.h"
+#include "TaskList.h"
+#include "UIExtension.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLTaskList::TDLTaskList(ITaskList* pTaskList) 
+TaskList::TaskList(ITaskList* pTaskList) 
 	: 
 m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
 	m_pConstTaskList(nullptr) 
 {
 } 
 
-TDLTaskList::TDLTaskList(const ITaskList* pTaskList) 
+TaskList::TaskList(const ITaskList* pTaskList) 
 	: 
 m_pTaskList(nullptr), 
 	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)) 
@@ -29,12 +29,12 @@ m_pTaskList(nullptr),
 } 
 
 // private constructor
-TDLTaskList::TDLTaskList() : m_pTaskList(nullptr), m_pConstTaskList(nullptr)
+TaskList::TaskList() : m_pTaskList(nullptr), m_pConstTaskList(nullptr)
 {
 
 }
 
-bool TDLTaskList::IsValid()
+bool TaskList::IsValid()
 {
 	return (m_pConstTaskList || m_pTaskList);
 }
@@ -56,52 +56,52 @@ bool TDLTaskList::IsValid()
 
 // -------------------------------------------------------------
 
-String^ TDLTaskList::GetReportTitle()
+String^ TaskList::GetReportTitle()
 {
 	return GETSTR(GetReportTitle);
 }
 
-String^ TDLTaskList::GetReportDate()
+String^ TaskList::GetReportDate()
 {
 	return GETSTR(GetReportDate);
 }
 
-String^ TDLTaskList::GetMetaData(String^ sKey)
+String^ TaskList::GetMetaData(String^ sKey)
 {
 	return GETSTR_ARG(GetMetaData, MS(sKey));
 }
 
-UInt32 TDLTaskList::GetCustomAttributeCount()
+UInt32 TaskList::GetCustomAttributeCount()
 {
 	return GETVAL(GetCustomAttributeCount, 0);
 }
 
-String^ TDLTaskList::GetCustomAttributeLabel(int nIndex)
+String^ TaskList::GetCustomAttributeLabel(int nIndex)
 {
 	return GETSTR_ARG(GetCustomAttributeLabel, nIndex);
 }
 
-String^ TDLTaskList::GetCustomAttributeID(int nIndex)
+String^ TaskList::GetCustomAttributeID(int nIndex)
 {
 	return GETSTR_ARG(GetCustomAttributeID, nIndex);
 }
 
-UInt32  TDLTaskList::GetCustomAttributeType(int nIndex)
+UInt32  TaskList::GetCustomAttributeType(int nIndex)
 {
 	return GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
 }
 
-String^ TDLTaskList::GetCustomAttributeListData(int nIndex)
+String^ TaskList::GetCustomAttributeListData(int nIndex)
 {
 	return GETSTR_ARG(GetCustomAttributeListData, nIndex);
 }
 
-Boolean TDLTaskList::IsCustomAttributeEnabled(int nIndex)
+Boolean TaskList::IsCustomAttributeEnabled(int nIndex)
 {
 	return GETVAL_ARG(IsCustomAttributeEnabled, nIndex, false);
 }
 
-String^ TDLTaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
+String^ TaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : 
 		(m_pTaskList ? m_pTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : L""));
@@ -109,25 +109,25 @@ String^ TDLTaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
 return gcnew String(szValue);
 }
 
-UInt32 TDLTaskList::GetTaskCount()
+UInt32 TaskList::GetTaskCount()
 {
 	return GETVAL(GetTaskCount, 0);
 }
 
-TDLTask^ TDLTaskList::FindTask(UInt32 dwTaskID)
+Task^ TaskList::FindTask(UInt32 dwTaskID)
 {
 	HTASKITEM hTask = GETVAL_ARG(FindTask, dwTaskID, NULL);
 
-	return gcnew TDLTask((m_pConstTaskList ? m_pConstTaskList : m_pTaskList), hTask);
+	return gcnew Task((m_pConstTaskList ? m_pConstTaskList : m_pTaskList), hTask);
 }
 
-TDLTask^ TDLTaskList::GetFirstTask()
+Task^ TaskList::GetFirstTask()
 {
 	if (m_pConstTaskList)
-		return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetFirstTask(nullptr));
+		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetFirstTask(nullptr));
 
 	// else
-	return gcnew TDLTask(m_pTaskList, m_pTaskList->GetFirstTask(nullptr));
+	return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(nullptr));
 }
 
 // ---------------------------------------------------------
@@ -152,7 +152,7 @@ TDLTask^ TDLTaskList::GetFirstTask()
 
 // ---------------------------------------------------------
 
-TDLTask::TDLTask()
+Task::Task()
 	: 
 m_pTaskList(nullptr), 
 	m_pConstTaskList(nullptr), 
@@ -161,7 +161,7 @@ m_pTaskList(nullptr),
 
 }
 
-TDLTask::TDLTask(ITaskList* pTaskList, HTASKITEM hTask) 
+Task::Task(ITaskList* pTaskList, HTASKITEM hTask) 
 	: 
 m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
 	m_pConstTaskList(nullptr), 
@@ -170,7 +170,7 @@ m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)),
 
 }
 
-TDLTask::TDLTask(const ITaskList* pTaskList, HTASKITEM hTask)
+Task::Task(const ITaskList* pTaskList, HTASKITEM hTask)
 	: 
 m_pTaskList(nullptr), 
 	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
@@ -179,146 +179,146 @@ m_pTaskList(nullptr),
 
 }
 
-TDLTask::TDLTask(const TDLTask^ task)
+Task::Task(const Task^ task)
 {
 	m_pTaskList = task->m_pTaskList;
 	m_pConstTaskList = task->m_pConstTaskList;
 	m_hTask = task->m_hTask;
 }
 
-bool TDLTask::IsValid()
+bool Task::IsValid()
 {
 	return ((m_pConstTaskList || m_pTaskList) && (m_hTask != nullptr));
 }
 
-TDLTask^ TDLTask::GetFirstSubtask()
+Task^ Task::GetFirstSubtask()
 {
 	if (m_pConstTaskList)
-		return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetFirstTask(m_hTask));
+		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetFirstTask(m_hTask));
 
 	// else
-	return gcnew TDLTask(m_pTaskList, m_pTaskList->GetFirstTask(m_hTask));
+	return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(m_hTask));
 }
 
-TDLTask^ TDLTask::GetNextTask()
+Task^ Task::GetNextTask()
 {
 	if (m_pConstTaskList)
-		return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetNextTask(m_hTask));
+		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetNextTask(m_hTask));
 
 	// else
-	return gcnew TDLTask(m_pTaskList, m_pTaskList->GetNextTask(m_hTask));
+	return gcnew Task(m_pTaskList, m_pTaskList->GetNextTask(m_hTask));
 }
 
-TDLTask^ TDLTask::GetParentTask()
+Task^ Task::GetParentTask()
 {
 	if (m_pConstTaskList)
-		return gcnew TDLTask(m_pConstTaskList, m_pConstTaskList->GetTaskParent(m_hTask));
+		return gcnew Task(m_pConstTaskList, m_pConstTaskList->GetTaskParent(m_hTask));
 
 	// else
-	return gcnew TDLTask(m_pTaskList, m_pTaskList->GetTaskParent(m_hTask));
+	return gcnew Task(m_pTaskList, m_pTaskList->GetTaskParent(m_hTask));
 }
 
-String^ TDLTask::GetTitle()
+String^ Task::GetTitle()
 {
 	return GETTASKSTR(GetTaskTitle);
 }
 
-String^ TDLTask::GetComments()
+String^ Task::GetComments()
 {
 	return GETTASKSTR(GetTaskComments);
 }
 
-String^ TDLTask::GetAllocatedBy()
+String^ Task::GetAllocatedBy()
 {
 	return GETTASKSTR(GetTaskAllocatedBy);
 }
 
-String^ TDLTask::GetStatus()
+String^ Task::GetStatus()
 {
 	return GETTASKSTR(GetTaskStatus);
 }
 
-String^ TDLTask::GetWebColor()
+String^ Task::GetWebColor()
 {
 	return GETTASKSTR(GetTaskWebColor);
 }
 
-String^ TDLTask::GetPriorityWebColor()
+String^ Task::GetPriorityWebColor()
 {
 	return GETTASKSTR(GetTaskPriorityWebColor);
 }
 
-String^ TDLTask::GetVersion()
+String^ Task::GetVersion()
 {
 	return GETTASKSTR(GetTaskVersion);
 }
 
-String^ TDLTask::GetExternalID()
+String^ Task::GetExternalID()
 {
 	return GETTASKSTR(GetTaskExternalID);
 }
 
-String^ TDLTask::GetCreatedBy()
+String^ Task::GetCreatedBy()
 {
 	return GETTASKSTR(GetTaskCreatedBy);
 }
 
-String^ TDLTask::GetPositionString()
+String^ Task::GetPositionString()
 {
 	return GETTASKSTR(GetTaskPositionString);
 }
 
-String^ TDLTask::GetIcon()
+String^ Task::GetIcon()
 {
 	return GETTASKSTR(GetTaskIcon);
 }
 
-UInt32 TDLTask::GetID()
+UInt32 Task::GetID()
 {
 	return GETTASKVAL(GetTaskID, 0);
 }
 
-UInt32 TDLTask::GetColor()
+UInt32 Task::GetColor()
 {
 	return GETTASKVAL(GetTaskColor, 0);
 }
 
-System::Drawing::Color TDLTask::GetTextDrawingColor()
+System::Drawing::Color Task::GetTextDrawingColor()
 {
-	return TDLColor::GetDrawingColor(GETTASKVAL(GetTaskTextColor, 0));
+	return ColorUtil::GetDrawingColor(GETTASKVAL(GetTaskTextColor, 0));
 }
 
-System::Windows::Media::Color TDLTask::GetTextMediaColor()
+System::Windows::Media::Color Task::GetTextMediaColor()
 {
-	return TDLColor::GetMediaColor(GETTASKVAL(GetTaskTextColor, 0));
+	return ColorUtil::GetMediaColor(GETTASKVAL(GetTaskTextColor, 0));
 }
 
-System::Drawing::Color TDLTask::GetPriorityDrawingColor()
+System::Drawing::Color Task::GetPriorityDrawingColor()
 {
-	return TDLColor::GetDrawingColor(GETTASKVAL(GetTaskPriorityColor, 0));
+	return ColorUtil::GetDrawingColor(GETTASKVAL(GetTaskPriorityColor, 0));
 }
 
-System::Windows::Media::Color TDLTask::GetPriorityMediaColor()
+System::Windows::Media::Color Task::GetPriorityMediaColor()
 {
-	return TDLColor::GetMediaColor(GETTASKVAL(GetTaskPriorityColor, 0));
+	return ColorUtil::GetMediaColor(GETTASKVAL(GetTaskPriorityColor, 0));
 }
 
-UInt32 TDLTask::GetPosition()
+UInt32 Task::GetPosition()
 {
 	return GETTASKVAL(GetTaskPosition, 0);
 }
 
-UInt32 TDLTask::GetPriority()
+UInt32 Task::GetPriority()
 {
 	return GETTASKVAL_ARG(GetTaskPriority, FALSE, 0);
 }
 
-UInt32 TDLTask::GetRisk()
+UInt32 Task::GetRisk()
 {
 	return GETTASKVAL_ARG(GetTaskRisk, FALSE, 0);
 }
 
-List<String^>^ TDLTask::GetAllocatedTo()
+List<String^>^ Task::GetAllocatedTo()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskAllocatedToCount, 0);
@@ -329,7 +329,7 @@ List<String^>^ TDLTask::GetAllocatedTo()
 	return items;
 }
 
-List<String^>^ TDLTask::GetCategory()
+List<String^>^ Task::GetCategory()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskCategoryCount, 0);
@@ -340,7 +340,7 @@ List<String^>^ TDLTask::GetCategory()
 	return items;
 }
 
-List<String^>^ TDLTask::GetTag()
+List<String^>^ Task::GetTag()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskTagCount, 0);
@@ -351,7 +351,7 @@ List<String^>^ TDLTask::GetTag()
 	return items;
 }
 
-List<String^>^ TDLTask::GetDependency()
+List<String^>^ Task::GetDependency()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskDependencyCount, 0);
@@ -362,7 +362,7 @@ List<String^>^ TDLTask::GetDependency()
 	return items;
 }
 
-List<String^>^ TDLTask::GetFileReference()
+List<String^>^ Task::GetFileReference()
 {
 	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
@@ -373,17 +373,17 @@ List<String^>^ TDLTask::GetFileReference()
 	return items;
 }
 
-Byte TDLTask::GetPercentDone()
+Byte Task::GetPercentDone()
 {
 	return GETTASKVAL_ARG(GetTaskPercentDone, FALSE, 0);
 }
 
-double TDLTask::GetCost()
+double Task::GetCost()
 {
 	return GETTASKVAL_ARG(GetTaskCost, FALSE, 0);
 }
 
-DateTime TDLTask::GetLastModified()
+DateTime Task::GetLastModified()
 {
 	__int64 date = 0;
 	GETTASKDATE(GetTaskLastModified64, 0);
@@ -391,7 +391,7 @@ DateTime TDLTask::GetLastModified()
 	return Map(date);
 }
 
-DateTime TDLTask::GetDoneDate()
+DateTime Task::GetDoneDate()
 {
 	__int64 date = 0;
 	GETTASKDATE(GetTaskDoneDate64, 0);
@@ -399,7 +399,7 @@ DateTime TDLTask::GetDoneDate()
 	return Map(date);
 }
 
-DateTime TDLTask::GetDueDate()
+DateTime Task::GetDueDate()
 {
 	__int64 date = 0;
 	GETTASKDATE_ARG(GetTaskDueDate64, FALSE, 0);
@@ -407,7 +407,7 @@ DateTime TDLTask::GetDueDate()
 	return Map(date);
 }
 
-DateTime TDLTask::GetStartDate()
+DateTime Task::GetStartDate()
 {
 	__int64 date = 0;
 	GETTASKDATE_ARG(GetTaskStartDate64, FALSE, 0);
@@ -415,7 +415,7 @@ DateTime TDLTask::GetStartDate()
 	return Map(date);
 }
 
-DateTime TDLTask::GetCreationDate()
+DateTime Task::GetCreationDate()
 {
 	__int64 date = 0;
 	GETTASKDATE(GetTaskCreationDate64, 0);
@@ -423,54 +423,54 @@ DateTime TDLTask::GetCreationDate()
 	return Map(date);
 }
 
-String^ TDLTask::GetDoneDateString()
+String^ Task::GetDoneDateString()
 {
 	return GETTASKSTR(GetTaskDoneDateString);
 }
 
-String^ TDLTask::GetDueDateString()
+String^ Task::GetDueDateString()
 {
 	return GETTASKSTR_ARG(GetTaskDueDateString, FALSE);
 }
 
-String^ TDLTask::GetStartDateString()
+String^ Task::GetStartDateString()
 {
 	return GETTASKSTR_ARG(GetTaskStartDateString, FALSE);
 }
 
-String^ TDLTask::GetCreationDateString()
+String^ Task::GetCreationDateString()
 {
 	return GETTASKSTR(GetTaskCreationDateString);
 }
 
-Boolean TDLTask::IsDone()
+Boolean Task::IsDone()
 {
 	return GETTASKVAL(IsTaskDone, false);
 }
 
-Boolean TDLTask::IsDue()
+Boolean Task::IsDue()
 {
 	return GETTASKVAL(IsTaskDue, false);
 }
 
-Boolean TDLTask::IsGoodAsDone()
+Boolean Task::IsGoodAsDone()
 {
 	return GETTASKVAL(IsTaskGoodAsDone, false);
 }
 
-Boolean TDLTask::IsFlagged()
+Boolean Task::IsFlagged()
 {
 	return GETTASKVAL(IsTaskFlagged, false);
 }
 
-Boolean TDLTask::IsParent()
+Boolean Task::IsParent()
 {
 	return GETTASKVAL(IsTaskParent, false);
 }
 
 // ---------------------------------------------------------
 
-double TDLTask::GetTimeEstimate(TimeUnits% cUnits)
+double Task::GetTimeEstimate(TimeUnits% cUnits)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
@@ -481,7 +481,7 @@ double TDLTask::GetTimeEstimate(TimeUnits% cUnits)
 	return dTime;
 }
 
-double TDLTask::GetTimeSpent(TimeUnits% cUnits)
+double Task::GetTimeSpent(TimeUnits% cUnits)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
@@ -492,19 +492,19 @@ double TDLTask::GetTimeSpent(TimeUnits% cUnits)
 	return dTime;
 }
 
-Boolean TDLTask::GetRecurrence()
+Boolean Task::GetRecurrence()
 {
 	// TODO
 	return false;
 }
 
-Boolean TDLTask::HasAttribute(String^ sAttrib)
+Boolean Task::HasAttribute(String^ sAttrib)
 {
 	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : 
 		(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : false));
 }
 
-String^ TDLTask::GetAttribute(String^ sAttrib)
+String^ Task::GetAttribute(String^ sAttrib)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : 
 		(m_pTaskList ? m_pTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : L""));
@@ -512,7 +512,7 @@ String^ TDLTask::GetAttribute(String^ sAttrib)
 return gcnew String(szValue);
 }
 
-String^ TDLTask::GetCustomAttributeData(String^ sID)
+String^ Task::GetCustomAttributeData(String^ sID)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : 
 		(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : L""));
@@ -520,7 +520,7 @@ String^ TDLTask::GetCustomAttributeData(String^ sID)
 return gcnew String(szValue);
 }
 
-String^ TDLTask::GetMetaData(String^ sKey)
+String^ Task::GetMetaData(String^ sKey)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : 
 		(m_pTaskList ? m_pTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : L""));
@@ -533,24 +533,24 @@ return gcnew String(szValue);
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // SETTERS
 
-TDLTask^ TDLTaskList::NewTask(String^ sTitle)
+Task^ TaskList::NewTask(String^ sTitle)
 {
 	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
 
-	return gcnew TDLTask(m_pTaskList, hTask);
+	return gcnew Task(m_pTaskList, hTask);
 }
 
-Boolean TDLTaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
+Boolean TaskList::AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn)
 {
 	return (m_pTaskList ? m_pTaskList->AddCustomAttribute(MS(sID), MS(sLabel), MS(sColumn)) : false);
 }
 
-Boolean TDLTaskList::SetMetaData(String^ sKey, String^ sValue)
+Boolean TaskList::SetMetaData(String^ sKey, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetMetaData(MS(sKey), MS(sValue)) : false);
 }
 
-Boolean TDLTaskList::ClearMetaData(String^ sKey)
+Boolean TaskList::ClearMetaData(String^ sKey)
 {
 	return (m_pTaskList ? m_pTaskList->ClearMetaData(MS(sKey)) : false);
 }
@@ -565,169 +565,169 @@ Boolean TDLTaskList::ClearMetaData(String^ sKey)
 
 // ---------------------------------------------------------
 
-TDLTask^ TDLTask::NewSubtask(String^ sTitle)
+Task^ Task::NewSubtask(String^ sTitle)
 {
 	HTASKITEM hTask = (m_pTaskList ? m_pTaskList->NewTask(MS(sTitle), nullptr, 0) : nullptr);
 
-	return gcnew TDLTask(m_pTaskList, hTask);
+	return gcnew Task(m_pTaskList, hTask);
 }
 
-Boolean TDLTask::SetTitle(String^ sTitle)
+Boolean Task::SetTitle(String^ sTitle)
 {
 	return SETTASKSTR(SetTaskTitle, sTitle);
 }
 
-Boolean TDLTask::SetComments(String^ sComments)
+Boolean Task::SetComments(String^ sComments)
 {
 	return SETTASKSTR(SetTaskComments, sComments);
 }
 
-Boolean TDLTask::SetAllocatedBy(String^ sAllocBy)
+Boolean Task::SetAllocatedBy(String^ sAllocBy)
 {
 	return SETTASKSTR(SetTaskAllocatedBy, sAllocBy);
 }
 
-Boolean TDLTask::SetStatus(String^ sStatus)
+Boolean Task::SetStatus(String^ sStatus)
 {
 	return SETTASKSTR(SetTaskStatus, sStatus);
 }
 
-Boolean TDLTask::SetVersion(String^ sVersion)
+Boolean Task::SetVersion(String^ sVersion)
 {
 	return SETTASKSTR(SetTaskVersion, sVersion);
 }
 
-Boolean TDLTask::SetExternalID(String^ sExternalID)
+Boolean Task::SetExternalID(String^ sExternalID)
 {
 	return SETTASKSTR(SetTaskExternalID, sExternalID);
 }
 
-Boolean TDLTask::SetCreatedBy(String^ sCreatedBy)
+Boolean Task::SetCreatedBy(String^ sCreatedBy)
 {
 	return SETTASKSTR(SetTaskCreatedBy, sCreatedBy);
 }
 
-Boolean TDLTask::SetPosition(String^ sPosition)
+Boolean Task::SetPosition(String^ sPosition)
 {
 	return SETTASKSTR(SetTaskPosition, sPosition);
 }
 
-Boolean TDLTask::SetIcon(String^ sIcon)
+Boolean Task::SetIcon(String^ sIcon)
 {
 	return SETTASKSTR(SetTaskIcon, sIcon);
 }
 
-Boolean TDLTask::AddAllocatedTo(String^ sAllocTo)
+Boolean Task::AddAllocatedTo(String^ sAllocTo)
 {
 	return SETTASKSTR(AddTaskAllocatedTo, sAllocTo);
 }
 
-Boolean TDLTask::AddCategory(String^ sCategory)
+Boolean Task::AddCategory(String^ sCategory)
 {
 	return SETTASKSTR(AddTaskCategory, sCategory);
 }
 
-Boolean TDLTask::AddTag(String^ sTag)
+Boolean Task::AddTag(String^ sTag)
 {
 	return SETTASKSTR(AddTaskTag, sTag);
 }
 
-Boolean TDLTask::AddDependency(String^ sDependency)
+Boolean Task::AddDependency(String^ sDependency)
 {
 	return SETTASKSTR(AddTaskDependency, sDependency);
 }
 
-Boolean TDLTask::AddFileReference(String^ sFileLink)
+Boolean Task::AddFileReference(String^ sFileLink)
 {
 	return SETTASKSTR(AddTaskFileLink, sFileLink);
 }
 
-Boolean TDLTask::SetColor(UINT32 color)
+Boolean Task::SetColor(UINT32 color)
 {
 	return SETTASKVAL(SetTaskColor, color);
 }
 
-Boolean TDLTask::SetPriority(Byte nPriority)
+Boolean Task::SetPriority(Byte nPriority)
 {
 	return SETTASKVAL(SetTaskPriority, nPriority);
 }
 
-Boolean TDLTask::SetRisk(Byte Risk)
+Boolean Task::SetRisk(Byte Risk)
 {
 	return SETTASKVAL(SetTaskRisk, Risk);
 }
 
-Boolean TDLTask::SetPercentDone(Byte nPercent)
+Boolean Task::SetPercentDone(Byte nPercent)
 {
 	return SETTASKVAL(SetTaskPercentDone, nPercent);
 }
 
-Boolean TDLTask::SetCost(double dCost)
+Boolean Task::SetCost(double dCost)
 {
 	return SETTASKVAL(SetTaskCost, dCost);
 }
 
-Boolean TDLTask::SetFlag(Boolean bFlag)
+Boolean Task::SetFlag(Boolean bFlag)
 {
 	return SETTASKVAL(SetTaskFlag, bFlag);
 }
 
-Boolean TDLTask::SetLastModified(DateTime^ dtLastMod)
+Boolean Task::SetLastModified(DateTime^ dtLastMod)
 {
 	return SETTASKVAL(SetTaskLastModified, Map(dtLastMod));
 }
 
-Boolean TDLTask::SetDoneDate(DateTime^ dtCompletion)
+Boolean Task::SetDoneDate(DateTime^ dtCompletion)
 {
 	return SETTASKVAL(SetTaskDoneDate, Map(dtCompletion));
 }
 
-Boolean TDLTask::SetDueDate(DateTime^ dtDue)
+Boolean Task::SetDueDate(DateTime^ dtDue)
 {
 	return SETTASKVAL(SetTaskDueDate, Map(dtDue));
 }
 
-Boolean TDLTask::SetStartDate(DateTime^ dtStart)
+Boolean Task::SetStartDate(DateTime^ dtStart)
 {
 	return SETTASKVAL(SetTaskStartDate, Map(dtStart));
 }
 
-Boolean TDLTask::SetCreationDate(DateTime^ dtCreation)
+Boolean Task::SetCreationDate(DateTime^ dtCreation)
 {
 	return SETTASKVAL(SetTaskCreationDate, Map(dtCreation));
 }
 
-Boolean TDLTask::SetTimeEstimate(double dTime, TimeUnits cUnits)
+Boolean Task::SetTimeEstimate(double dTime, TimeUnits cUnits)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskTimeEstimate(m_hTask, dTime, Map(cUnits)) : false);
 }
 
-Boolean TDLTask::SetTimeSpent(double dTime, TimeUnits cUnits)
+Boolean Task::SetTimeSpent(double dTime, TimeUnits cUnits)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskTimeSpent(m_hTask, dTime, Map(cUnits)) : false);
 }
 
-Boolean TDLTask::SetCustomAttributeData(String^ sID, String^ sValue)
+Boolean Task::SetCustomAttributeData(String^ sID, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskCustomAttributeData(m_hTask, MS(sID), MS(sValue)) : false);
 }
 
-Boolean TDLTask::ClearCustomAttributeData(String^ sID)
+Boolean Task::ClearCustomAttributeData(String^ sID)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskCustomAttributeData(m_hTask, MS(sID)) : false);
 }
 
-Boolean TDLTask::SetMetaData(String^ sKey, String^ sValue)
+Boolean Task::SetMetaData(String^ sKey, String^ sValue)
 {
 	return (m_pTaskList ? m_pTaskList->SetTaskMetaData(m_hTask, MS(sKey), MS(sValue)) : false);
 }
 
-Boolean TDLTask::ClearMetaData(String^ sKey)
+Boolean Task::ClearMetaData(String^ sKey)
 {
 	return (m_pTaskList ? m_pTaskList->ClearTaskMetaData(m_hTask, MS(sKey)) : false);
 }
 
-TDLTask::TimeUnits TDLTask::Map(TDC_UNITS units)
+Task::TimeUnits Task::Map(TDC_UNITS units)
 {
 	switch (units)
 	{
@@ -744,7 +744,7 @@ TDLTask::TimeUnits TDLTask::Map(TDC_UNITS units)
 	return TimeUnits::Unknown;
 }
 
-TDC_UNITS TDLTask::Map(TimeUnits units)
+TDC_UNITS Task::Map(TimeUnits units)
 {
 	switch (units)
 	{
@@ -761,14 +761,14 @@ TDC_UNITS TDLTask::Map(TimeUnits units)
 	return TDCU_NULL;
 }
 
-DateTime TDLTask::Map(Int64 tDate)
+DateTime Task::Map(Int64 tDate)
 {
 	DateTime^ date = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
 
 	return date->AddSeconds(static_cast<double>(tDate)).ToLocalTime();
 }
 
-Int64 TDLTask::Map(DateTime^ date)
+Int64 Task::Map(DateTime^ date)
 {
 	DateTime utc = date->ToUniversalTime();
 	DateTime^ epoch = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);

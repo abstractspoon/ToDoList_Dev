@@ -3,26 +3,26 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "TDLPreferences.h"
+#include "Preferences.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\IPreferences.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLPreferences::TDLPreferences(IPreferences* pPrefs) : m_pPrefs(pPrefs), m_pConstPrefs(nullptr)  
+Preferences::Preferences(IPreferences* pPrefs) : m_pPrefs(pPrefs), m_pConstPrefs(nullptr)  
 {
 } 
 
-TDLPreferences::TDLPreferences(const IPreferences* pPrefs) : m_pPrefs(nullptr), m_pConstPrefs(pPrefs) 
+Preferences::Preferences(const IPreferences* pPrefs) : m_pPrefs(nullptr), m_pConstPrefs(pPrefs) 
 {
 } 
 
 // private constructor
-TDLPreferences::TDLPreferences() : m_pPrefs(nullptr), m_pConstPrefs(nullptr) 
+Preferences::Preferences() : m_pPrefs(nullptr), m_pConstPrefs(nullptr) 
 {
 
 }
@@ -38,32 +38,32 @@ TDLPreferences::TDLPreferences() : m_pPrefs(nullptr), m_pConstPrefs(nullptr)
 
 // ---------------------------------------------------------
 
-int TDLPreferences::GetProfileInt(String^ sSection, String^ sEntry, int nDefault)
+int Preferences::GetProfileInt(String^ sSection, String^ sEntry, int nDefault)
 {
    return GETPREF(GetProfileInt, nDefault);
 }
 
-bool TDLPreferences::WriteProfileInt(String^ sSection, String^ sEntry, int nValue)
+bool Preferences::WriteProfileInt(String^ sSection, String^ sEntry, int nValue)
 {
    return SETPREF(WriteProfileInt, nValue);
 }
 
-String^ TDLPreferences::GetProfileString(String^ sSection, String^ sEntry, String^ sDefault)
+String^ Preferences::GetProfileString(String^ sSection, String^ sEntry, String^ sDefault)
 {
    return gcnew String(GETPREF(GetProfileString, MS(sDefault)));
 }
 
-bool TDLPreferences::WriteProfileString(String^ sSection, String^ sEntry, String^ sValue)
+bool Preferences::WriteProfileString(String^ sSection, String^ sEntry, String^ sValue)
 {
    return SETPREF(WriteProfileString, MS(sValue));
 }
 
-double TDLPreferences::GetProfileDouble(String^ sSection, String^ sEntry, double dDefault)
+double Preferences::GetProfileDouble(String^ sSection, String^ sEntry, double dDefault)
 {
    return GETPREF(GetProfileDouble, dDefault);
 }
 
-bool TDLPreferences::WriteProfileDouble(String^ sSection, String^ sEntry, double dValue)
+bool Preferences::WriteProfileDouble(String^ sSection, String^ sEntry, double dValue)
 {
    return SETPREF(WriteProfileDouble, dValue);
 }

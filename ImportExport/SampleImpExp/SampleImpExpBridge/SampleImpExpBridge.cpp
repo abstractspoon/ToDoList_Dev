@@ -26,7 +26,7 @@ using namespace SampleImpExp;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -74,8 +74,8 @@ bool CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFi
 {
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<SampleImpExpCore^> expCore = gcnew SampleImpExpCore();
-	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
-	msclr::auto_gcroot<TDLTaskList^> srcTasks = gcnew TDLTaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
 	
 	// do the export
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));

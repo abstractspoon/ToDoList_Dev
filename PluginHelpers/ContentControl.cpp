@@ -3,29 +3,29 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "TDLContentControl.h"
+#include "ContentControl.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\UITheme.h"
 #include "..\..\ToDoList_Dev\Interfaces\IContentControl.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLContentControl::TDLNotify::TDLNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
+ContentControl::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 }
 
-TDLContentControl::TDLNotify::TDLNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
+ContentControl::ParentNotify::ParentNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool TDLContentControl::TDLNotify::NotifyChange()
+bool ContentControl::ParentNotify::NotifyChange()
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
@@ -34,7 +34,7 @@ bool TDLContentControl::TDLNotify::NotifyChange()
 	return true;
 }
 
-bool TDLContentControl::TDLNotify::NotifyKillFocus()
+bool ContentControl::ParentNotify::NotifyKillFocus()
 {
 	if (!IsWindow(m_hwndParent))
 		return false;

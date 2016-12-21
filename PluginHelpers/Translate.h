@@ -10,22 +10,26 @@ using namespace System;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace TDLPluginHelpers
+namespace Abstractspoon
 {
+	namespace Tdl
+	{
+		namespace PluginHelpers
+		{
 
-   public ref class TDLTranslate
-   {
-   public:
-      TDLTranslate(ITransText* pTaskList);
-      
-      // TODO
-      
-   private:
-      ITransText* m_pTransText;
+			public ref class Translate
+			{
+			public:
+				Translate(ITransText* pTaskList);
 
-   private:
-      TDLTranslate();
-   };
+				// TODO
 
+			private:
+				ITransText* m_pTransText;
+
+			private:
+				Translate();
+			};
+		}
+	}
 }
-

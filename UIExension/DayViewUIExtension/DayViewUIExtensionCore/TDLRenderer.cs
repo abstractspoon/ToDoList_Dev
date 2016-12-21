@@ -6,7 +6,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms.VisualStyles;
 
-using TDLPluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
@@ -52,9 +52,9 @@ namespace DayViewUIExtension
             }
         }
 
-        private TDLPluginHelpers.TDLTheme m_theme;
+        private UITheme m_theme;
 
-        public TDLPluginHelpers.TDLTheme Theme
+        public UITheme Theme
         {
             set { m_theme = value; }
         }
@@ -87,7 +87,7 @@ namespace DayViewUIExtension
             return BaseFont.Height;
         }
 
-        public override Color HourColor
+        public override System.Drawing.Color HourColor
         {
             get
             {
@@ -95,7 +95,7 @@ namespace DayViewUIExtension
             }
         }
 
-        public override Color HalfHourSeperatorColor
+        public override System.Drawing.Color HalfHourSeperatorColor
         {
             get
             {
@@ -103,7 +103,7 @@ namespace DayViewUIExtension
             }
         }
 
-        public override Color HourSeperatorColor
+        public override System.Drawing.Color HourSeperatorColor
         {
             get
             {
@@ -111,7 +111,7 @@ namespace DayViewUIExtension
             }
         }
 
-        public override Color WorkingHourColor
+        public override System.Drawing.Color WorkingHourColor
         {
             get
             {
@@ -123,11 +123,11 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppDrawingColor(TDLPluginHelpers.TDLTheme.AppColor.AppBackLight);
+                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
             }
         }
 
-        public override Color SelectionColor
+        public override System.Drawing.Color SelectionColor
         {
             get
             {
@@ -135,11 +135,11 @@ namespace DayViewUIExtension
             }
         }
 
-        public Color TextColor
+        public System.Drawing.Color TextColor
         {
             get
             {
-                return m_theme.GetAppDrawingColor(TDLPluginHelpers.TDLTheme.AppColor.AppText);
+                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppText);
             }
         }
 
@@ -181,7 +181,7 @@ namespace DayViewUIExtension
 
             if (hour)
             {
-                using (Pen pen = new Pen(InterpolateColors(this.TextColor, Color.White, 0.5f)))
+                using (Pen pen = new Pen(InterpolateColors(this.TextColor, System.Drawing.Color.White, 0.5f)))
                     g.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
             }
         }
@@ -239,7 +239,7 @@ namespace DayViewUIExtension
 
         public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
-            using (SolidBrush backBrush = new SolidBrush(Color.FromArgb(0xe6, 0xed, 0xf7)))
+            using (SolidBrush backBrush = new SolidBrush(System.Drawing.Color.FromArgb(0xe6, 0xed, 0xf7)))
                 g.FillRectangle(backBrush, rect);
         }
 
@@ -298,7 +298,7 @@ namespace DayViewUIExtension
 						g.FillRectangle(brush, gripRect);
 
 					// Draw gripper border
-					using (Pen m_Pen = new Pen(TDLColor.DarkerDrawing(appointment.BarColor, 0.5f), 1))
+					using (Pen m_Pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
 						g.DrawRectangle(m_Pen, gripRect);
 					
 					//  Draw appointment border if needed
@@ -314,7 +314,7 @@ namespace DayViewUIExtension
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-					Color textColor = (isSelected ? TDLColor.DarkerDrawing(appointment.TextColor, 0.5f) : appointment.TextColor);
+					Color textColor = (isSelected ? ColorUtil.DarkerDrawing(appointment.TextColor, 0.5f) : appointment.TextColor);
 
 					using (SolidBrush brush = new SolidBrush(textColor))
 						g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);

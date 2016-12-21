@@ -1,12 +1,12 @@
 ﻿
 using System;
-using TDLPluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace DayViewUIExtension
 {
-	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
+	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
@@ -66,7 +66,7 @@ namespace DayViewUIExtension
 
 		}
 
-		// ITDLUIExtension ------------------------------------------------------------------
+		// IUIExtension ------------------------------------------------------------------
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
@@ -94,26 +94,26 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public void UpdateTasks(TDLTaskList tasks, 
-								TDLUIExtension.UpdateType type, 
-								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks, 
+								UIExtension.UpdateType type, 
+								System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			switch (type)
 			{
-				case TDLUIExtension.UpdateType.Delete:
-				case TDLUIExtension.UpdateType.Move:
-				case TDLUIExtension.UpdateType.All:
+				case UIExtension.UpdateType.Delete:
+				case UIExtension.UpdateType.Move:
+				case UIExtension.UpdateType.All:
 					// Rebuild
 					m_Items.Clear();
 					break;
 					
-				case TDLUIExtension.UpdateType.New:
-				case TDLUIExtension.UpdateType.Edit:
+				case UIExtension.UpdateType.New:
+				case UIExtension.UpdateType.Edit:
 					// In-place update
 					break;
 			}
 
-			TDLTask task = tasks.GetFirstTask();
+			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
@@ -124,9 +124,9 @@ namespace DayViewUIExtension
 			m_DayView.Invalidate();
 		}
 
-		private bool ProcessTaskUpdate(TDLTask task, 
-									   TDLUIExtension.UpdateType type,
-                                       System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
+		private bool ProcessTaskUpdate(Task task, 
+									   UIExtension.UpdateType type,
+                                       System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			if (!task.IsValid())
 				return false;
@@ -135,19 +135,19 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+                if (attribs.Contains(UIExtension.TaskAttribute.Title))
                     item.Title = task.GetTitle();
 
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+                if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
                     item.EndDate = item.OrgEndDate = task.GetDoneDate();
 
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+                if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
                     item.EndDate = item.OrgEndDate = task.GetDueDate();
 
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+                if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
                     item.StartDate = item.OrgStartDate = task.GetStartDate();
 
-                if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+                if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
                     item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 
                 item.TaskTextColor = task.GetTextDrawingColor();
@@ -170,7 +170,7 @@ namespace DayViewUIExtension
 				m_Items[task.GetID()] = item;
 
 			// Process children
-			TDLTask subtask = task.GetFirstSubtask();
+			Task subtask = task.GetFirstSubtask();
 
 			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
 				subtask = subtask.GetNextTask();
@@ -178,15 +178,15 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
+		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
 			switch (attrib)
 			{
-				case TDLUIExtension.TaskAttribute.Title:
-				case TDLUIExtension.TaskAttribute.DoneDate:
-				case TDLUIExtension.TaskAttribute.DueDate:
-				case TDLUIExtension.TaskAttribute.StartDate:
-				case TDLUIExtension.TaskAttribute.AllocTo:
+				case UIExtension.TaskAttribute.Title:
+				case UIExtension.TaskAttribute.DoneDate:
+				case UIExtension.TaskAttribute.DueDate:
+				case UIExtension.TaskAttribute.StartDate:
+				case UIExtension.TaskAttribute.AllocTo:
 					return true;
 			}
 
@@ -194,12 +194,12 @@ namespace DayViewUIExtension
 			return false;
 		}
 	   
-		public bool WantSortUpdate(TDLUIExtension.TaskAttribute attrib)
+		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
 		{
 			return false;
 		}
 	   
-		public bool PrepareNewTask(ref TDLTask task)
+		public bool PrepareNewTask(ref Task task)
 		{
             // Set the start/due dates to match the current selection
             if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
@@ -216,12 +216,12 @@ namespace DayViewUIExtension
 			return false;
 		}
 	   
-		public bool DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool DoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
 			return false;
 		}
 
-		public bool CanDoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool CanDoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
 			return false;
 		}
@@ -246,41 +246,41 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
             System.Drawing.Point pt = m_DayView.PointToClient(new System.Drawing.Point(xPos, yPos));
             Calendar.Appointment appointment = m_DayView.GetAppointmentAt(pt.X, pt.Y);
 
             if (appointment != null)
             {
-                return TDLUIExtension.HitResult.Task;
+                return UIExtension.HitResult.Task;
             }
             else if (m_DayView.GetTrueRectangle().Contains(pt))
             {
-                return TDLUIExtension.HitResult.Tasklist;
+                return UIExtension.HitResult.Tasklist;
             }
 
             // else
-			return TDLUIExtension.HitResult.Nowhere;
+			return UIExtension.HitResult.Nowhere;
 		}
 
-		public void SetUITheme(TDLTheme theme)
+		public void SetUITheme(UITheme theme)
 		{
             m_renderer.Theme = theme;
             m_DayView.Invalidate(true);
 
-            this.BackColor = theme.GetAppDrawingColor(TDLTheme.AppColor.AppBackDark);
+            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
 		{
 		}
 
-		public void SavePreferences(TDLPreferences prefs, String key)
+		public void SavePreferences(Preferences prefs, String key)
 		{
 		}
 
-		public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
+		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
 			if (appOnly)
 			{
@@ -344,7 +344,7 @@ namespace DayViewUIExtension
 
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-            TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
+            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
 
 			switch (this.m_DayView.Selection)
 			{
@@ -373,7 +373,7 @@ namespace DayViewUIExtension
 			if (item == null)
 				return;
 
-            TDLUIExtension.TDLNotify notify = new TDLUIExtension.TDLNotify(m_hwndParent);
+			UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
 
 			switch (move.Mode)
 			{
@@ -381,7 +381,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
+						notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
 					}
 					break;
 
@@ -389,7 +389,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
+						notify.NotifyMod(UIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
 					}
 					break;
 
@@ -397,7 +397,7 @@ namespace DayViewUIExtension
 					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
 					{
 						item.OrgEndDate = item.EndDate;
-						notify.NotifyMod(TDLUIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
+						notify.NotifyMod(UIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
 					}
 					break;
 			}
@@ -416,7 +416,7 @@ namespace DayViewUIExtension
 					if (m_taskColorIsBkgnd)
 					{
 						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
-						item.Value.BorderColor = TDLColor.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
+						item.Value.BorderColor = ColorUtil.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
 						item.Value.BarColor = item.Value.TaskTextColor;
 						item.Value.FillColor = item.Value.TaskTextColor;
 					}
@@ -424,7 +424,7 @@ namespace DayViewUIExtension
 					{
 						item.Value.TextColor = item.Value.TaskTextColor;
 						item.Value.BorderColor = item.Value.TaskTextColor;
-						item.Value.FillColor = TDLColor.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
+						item.Value.FillColor = ColorUtil.LighterDrawing(item.Value.TaskTextColor, 0.9f); 
 						item.Value.BarColor = item.Value.TaskTextColor;
 					}
 

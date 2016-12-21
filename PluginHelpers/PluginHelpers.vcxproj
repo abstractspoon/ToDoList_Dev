@@ -97,11 +97,11 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(Configurati
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TDLContentControl.h" />
-    <ClInclude Include="TDLPreferences.h" />
-    <ClInclude Include="TDLTaskList.h" />
-    <ClInclude Include="TDLTranslate.h" />
-    <ClInclude Include="TDLUIExtension.h" />
+    <ClInclude Include="ContentControl.h" />
+    <ClInclude Include="Preferences.h" />
+    <ClInclude Include="TaskList.h" />
+    <ClInclude Include="Translate.h" />
+    <ClInclude Include="UIExtension.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -117,11 +117,11 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(Configurati
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TDLContentControl.cpp" />
-    <ClCompile Include="TDLPreferences.cpp" />
-    <ClCompile Include="TDLTaskList.cpp" />
-    <ClCompile Include="TDLTranslate.cpp" />
-    <ClCompile Include="TDLUIExtension.cpp" />
+    <ClCompile Include="ContentControl.cpp" />
+    <ClCompile Include="Preferences.cpp" />
+    <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="Translate.cpp" />
+    <ClCompile Include="UIExtension.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />

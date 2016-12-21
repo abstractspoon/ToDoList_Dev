@@ -29,7 +29,6 @@ using namespace MDContentControl;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
-using namespace TDLPluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +179,7 @@ int CMDContentBridgeControl::GetTextContent(LPWSTR szContent, int nLength) const
 
 	if (szContent != nullptr)
 	{
-		TDLPluginHelpers::TDLMarshalledString msContent(content);
+		Abstractspoon::Tdl::PluginHelpers::MarshalledString msContent(content);
 		CopyMemory(szContent, msContent, (nLength * sizeof(WCHAR)));
 	}
 

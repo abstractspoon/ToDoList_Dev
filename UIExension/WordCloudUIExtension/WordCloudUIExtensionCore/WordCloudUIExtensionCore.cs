@@ -3,11 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using TDLPluginHelpers;
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
+
+using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
@@ -15,7 +16,7 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 
 namespace WordCloudUIExtension
 {
-	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
+	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
         // Helper classes
         public class CloudTaskItem
@@ -44,7 +45,7 @@ namespace WordCloudUIExtension
             public string Recurrence;
             public string Version;
 
-            public IEnumerable<string> GetWords(TDLUIExtension.TaskAttribute attrib)
+            public IEnumerable<string> GetWords(UIExtension.TaskAttribute attrib)
             {
                 var words = new List<string>();
                 var delims = new char[] { ',', ' ', '\t', '\r', '\n' };
@@ -54,23 +55,23 @@ namespace WordCloudUIExtension
                 return words;
             }
 
-            public string GetAttribValue(TDLUIExtension.TaskAttribute attrib)
+            public string GetAttribValue(UIExtension.TaskAttribute attrib)
             {
                 switch (attrib)
                 {
-				case TDLUIExtension.TaskAttribute.Title: return Title;
-				case TDLUIExtension.TaskAttribute.DoneDate: return DoneDate;
-    			case TDLUIExtension.TaskAttribute.DueDate: return DueDate;
-				case TDLUIExtension.TaskAttribute.StartDate: return StartDate;
-				case TDLUIExtension.TaskAttribute.AllocTo: return AllocTo;
-				case TDLUIExtension.TaskAttribute.AllocBy: return AllocBy;
-				case TDLUIExtension.TaskAttribute.Status: return Status;
-				case TDLUIExtension.TaskAttribute.Category: return Category;
-				case TDLUIExtension.TaskAttribute.Comments: return Comments;
-				case TDLUIExtension.TaskAttribute.CreationDate: return CreationDate;
-				case TDLUIExtension.TaskAttribute.CreatedBy: return CreatedBy;
-				case TDLUIExtension.TaskAttribute.Version: return Version;
-				case TDLUIExtension.TaskAttribute.Tag: return Tags;
+				case UIExtension.TaskAttribute.Title: return Title;
+				case UIExtension.TaskAttribute.DoneDate: return DoneDate;
+    			case UIExtension.TaskAttribute.DueDate: return DueDate;
+				case UIExtension.TaskAttribute.StartDate: return StartDate;
+				case UIExtension.TaskAttribute.AllocTo: return AllocTo;
+				case UIExtension.TaskAttribute.AllocBy: return AllocBy;
+				case UIExtension.TaskAttribute.Status: return Status;
+				case UIExtension.TaskAttribute.Category: return Category;
+				case UIExtension.TaskAttribute.Comments: return Comments;
+				case UIExtension.TaskAttribute.CreationDate: return CreationDate;
+				case UIExtension.TaskAttribute.CreatedBy: return CreatedBy;
+				case UIExtension.TaskAttribute.Version: return Version;
+				case UIExtension.TaskAttribute.Tag: return Tags;
                 }
 
                 // all else
@@ -80,7 +81,7 @@ namespace WordCloudUIExtension
 
         public class AttributeItem
         {
-            public AttributeItem(string name, TDLUIExtension.TaskAttribute attrib)
+            public AttributeItem(string name, UIExtension.TaskAttribute attrib)
             {
                 Name = name;
                 Attrib = attrib;
@@ -92,7 +93,7 @@ namespace WordCloudUIExtension
             }
 
             public string Name { set; get; }
-            public TDLUIExtension.TaskAttribute Attrib { set; get; }
+            public UIExtension.TaskAttribute Attrib { set; get; }
         }
 
         // -------------------------------------------------------------
@@ -105,7 +106,7 @@ namespace WordCloudUIExtension
 
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
-        private TDLUIExtension.TaskAttribute m_Attrib;
+        private UIExtension.TaskAttribute m_Attrib;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private Gma.CodeCloud.Controls.CloudControl m_WordCloud;
@@ -158,16 +159,16 @@ namespace WordCloudUIExtension
             this.Controls.Add(m_AttributeCombo);
 
             // Add attributes to combo
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Title", TDLUIExtension.TaskAttribute.Title));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Comments", TDLUIExtension.TaskAttribute.Comments));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Status", TDLUIExtension.TaskAttribute.Status));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Category", TDLUIExtension.TaskAttribute.Category));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Title", UIExtension.TaskAttribute.Title));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Comments", UIExtension.TaskAttribute.Comments));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Status", UIExtension.TaskAttribute.Status));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Category", UIExtension.TaskAttribute.Category));
 
             // Add selection change handler
             this.m_AttributeCombo.SelectedIndexChanged += new EventHandler(OnAttributeSelChanged);
         }
 
-		// ITDLUIExtension ------------------------------------------------------------------
+		// IUIExtension ------------------------------------------------------------------
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
@@ -179,25 +180,25 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public void UpdateTasks(TDLTaskList tasks, 
-								TDLUIExtension.UpdateType type, 
-								System.Collections.Generic.HashSet<TDLUIExtension.TaskAttribute> attribs)
+		public void UpdateTasks(TaskList tasks, 
+								UIExtension.UpdateType type, 
+								System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			switch (type)
 			{
-				case TDLUIExtension.UpdateType.Delete:
-				case TDLUIExtension.UpdateType.Move:
-				case TDLUIExtension.UpdateType.All:
+				case UIExtension.UpdateType.Delete:
+				case UIExtension.UpdateType.Move:
+				case UIExtension.UpdateType.All:
 					// Rebuild
 					break;
 					
-				case TDLUIExtension.UpdateType.New:
-				case TDLUIExtension.UpdateType.Edit:
+				case UIExtension.UpdateType.New:
+				case UIExtension.UpdateType.Edit:
 					// In-place update
 					break;
 			}
 
-			TDLTask task = tasks.GetFirstTask();
+			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
@@ -206,9 +207,9 @@ namespace WordCloudUIExtension
 			UpdateWeightedWords();
 		}
 
-		private bool ProcessTaskUpdate(TDLTask task, 
-									   TDLUIExtension.UpdateType type,
-                                       HashSet<TDLUIExtension.TaskAttribute> attribs)
+		private bool ProcessTaskUpdate(Task task, 
+									   UIExtension.UpdateType type,
+                                       HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			if (!task.IsValid())
 				return false;
@@ -217,73 +218,73 @@ namespace WordCloudUIExtension
 
 			if (m_Items.TryGetValue(task.GetID(), out item))
 			{
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Title))
+				if (attribs.Contains(UIExtension.TaskAttribute.Title))
 					item.Title = task.GetTitle();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.DoneDate))
+				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
 					item.DoneDate = task.GetDoneDateString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.DueDate))
+				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
 					item.DueDate = task.GetDueDateString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.StartDate))
+				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
 					item.StartDate = task.GetStartDateString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Priority))
+				if (attribs.Contains(UIExtension.TaskAttribute.Priority))
 					item.Priority = task.GetPriority().ToString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Color))
+				if (attribs.Contains(UIExtension.TaskAttribute.Color))
 					item.Color = task.GetColor().ToString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocTo))
+				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
 					item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.AllocBy))
+				if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
 					item.AllocBy = task.GetAllocatedBy();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Status))
+				if (attribs.Contains(UIExtension.TaskAttribute.Status))
 					item.Status = task.GetStatus();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Category))
+				if (attribs.Contains(UIExtension.TaskAttribute.Category))
 					item.Category = String.Join(", ", task.GetCategory());
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Percent))
+				if (attribs.Contains(UIExtension.TaskAttribute.Percent))
 					item.Percent = task.GetPercentDone().ToString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.TimeEstimate))
+				if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
 				{
-					TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
+					Task.TimeUnits units = Task.TimeUnits.Hours;
 					item.TimeEstimate = (task.GetTimeEstimate(ref units).ToString() + units);
 				}
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.TimeSpent))
+				if (attribs.Contains(UIExtension.TaskAttribute.TimeSpent))
 				{
-					TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
+					Task.TimeUnits units = Task.TimeUnits.Hours;
 					item.TimeSpent = (task.GetTimeSpent(ref units).ToString() + units);
 				}
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.FileReference))
+				if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
 					item.FileReference = String.Join(", ", task.GetFileReference());
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Comments))
+				if (attribs.Contains(UIExtension.TaskAttribute.Comments))
 					item.Comments = task.GetComments();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.CreationDate))
+				if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
 					item.CreationDate = task.GetCreationDateString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.CreatedBy))
+				if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
 					item.CreatedBy = task.GetCreatedBy();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Risk))
+				if (attribs.Contains(UIExtension.TaskAttribute.Risk))
 					item.Risk = task.GetRisk().ToString();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Dependency))
+				if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
 					item.Dependency = String.Join(", ", task.GetDependency());
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Version))
+				if (attribs.Contains(UIExtension.TaskAttribute.Version))
 					item.Version = task.GetVersion();
 
-				if (attribs.Contains(TDLUIExtension.TaskAttribute.Tag))
+				if (attribs.Contains(UIExtension.TaskAttribute.Tag))
 					item.Tags = String.Join(", ", task.GetTag());
 			}
 			else
@@ -310,7 +311,7 @@ namespace WordCloudUIExtension
 				item.Version = task.GetVersion();
 				item.Tags = String.Join(", ", task.GetTag());
 
-				TDLTask.TimeUnits units = TDLTask.TimeUnits.Hours;
+				Task.TimeUnits units = Task.TimeUnits.Hours;
 				item.TimeEstimate = (task.GetTimeEstimate(ref units).ToString() + units);
 				item.TimeSpent = (task.GetTimeSpent(ref units).ToString() + units);
 			}
@@ -318,7 +319,7 @@ namespace WordCloudUIExtension
 			m_Items[task.GetID()] = item;
 
 			// Process children
-			TDLTask subtask = task.GetFirstSubtask();
+			Task subtask = task.GetFirstSubtask();
 
 			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
 				subtask = subtask.GetNextTask();
@@ -347,36 +348,36 @@ namespace WordCloudUIExtension
 					   : new NullBlacklist();
 		}
 
-		public bool WantEditUpdate(TDLUIExtension.TaskAttribute attrib)
+		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
 			switch (attrib)
 			{
-				case TDLUIExtension.TaskAttribute.Title:
-				case TDLUIExtension.TaskAttribute.DoneDate:
-				case TDLUIExtension.TaskAttribute.DueDate:
-				case TDLUIExtension.TaskAttribute.StartDate:
-				case TDLUIExtension.TaskAttribute.Priority:
-				case TDLUIExtension.TaskAttribute.Color:
-				case TDLUIExtension.TaskAttribute.AllocTo:
-				case TDLUIExtension.TaskAttribute.AllocBy:
-				case TDLUIExtension.TaskAttribute.Status:
-				case TDLUIExtension.TaskAttribute.Category:
-				case TDLUIExtension.TaskAttribute.Percent:
-				case TDLUIExtension.TaskAttribute.TimeEstimate:
-				case TDLUIExtension.TaskAttribute.TimeSpent:
-				case TDLUIExtension.TaskAttribute.FileReference:
-				case TDLUIExtension.TaskAttribute.Comments:
-				case TDLUIExtension.TaskAttribute.Flag:
-				case TDLUIExtension.TaskAttribute.CreationDate:
-				case TDLUIExtension.TaskAttribute.CreatedBy:
-				case TDLUIExtension.TaskAttribute.Risk:		
-				case TDLUIExtension.TaskAttribute.ExternalId:	
-				case TDLUIExtension.TaskAttribute.Cost:		
-				case TDLUIExtension.TaskAttribute.Dependency:	
-				case TDLUIExtension.TaskAttribute.Recurrence:	
-				case TDLUIExtension.TaskAttribute.Version:		
-				case TDLUIExtension.TaskAttribute.Position:
-				case TDLUIExtension.TaskAttribute.Tag:
+				case UIExtension.TaskAttribute.Title:
+				case UIExtension.TaskAttribute.DoneDate:
+				case UIExtension.TaskAttribute.DueDate:
+				case UIExtension.TaskAttribute.StartDate:
+				case UIExtension.TaskAttribute.Priority:
+				case UIExtension.TaskAttribute.Color:
+				case UIExtension.TaskAttribute.AllocTo:
+				case UIExtension.TaskAttribute.AllocBy:
+				case UIExtension.TaskAttribute.Status:
+				case UIExtension.TaskAttribute.Category:
+				case UIExtension.TaskAttribute.Percent:
+				case UIExtension.TaskAttribute.TimeEstimate:
+				case UIExtension.TaskAttribute.TimeSpent:
+				case UIExtension.TaskAttribute.FileReference:
+				case UIExtension.TaskAttribute.Comments:
+				case UIExtension.TaskAttribute.Flag:
+				case UIExtension.TaskAttribute.CreationDate:
+				case UIExtension.TaskAttribute.CreatedBy:
+				case UIExtension.TaskAttribute.Risk:		
+				case UIExtension.TaskAttribute.ExternalId:	
+				case UIExtension.TaskAttribute.Cost:		
+				case UIExtension.TaskAttribute.Dependency:	
+				case UIExtension.TaskAttribute.Recurrence:	
+				case UIExtension.TaskAttribute.Version:		
+				case UIExtension.TaskAttribute.Position:
+				case UIExtension.TaskAttribute.Tag:
 					return true;				  
 			}									  
 												  
@@ -384,12 +385,12 @@ namespace WordCloudUIExtension
 			return false;
 		}
 	   
-		public bool WantSortUpdate(TDLUIExtension.TaskAttribute attrib)
+		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
 		{
 			return false;
 		}
 	   
-		public bool PrepareNewTask(ref TDLTask task)
+		public bool PrepareNewTask(ref Task task)
 		{
 			return false;
 		}
@@ -399,12 +400,12 @@ namespace WordCloudUIExtension
 			return false;
 		}
 	   
-		public bool DoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool DoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
 			return false;
 		}
 
-		public bool CanDoAppCommand(TDLUIExtension.AppCommand cmd, UInt32 dwExtra)
+		public bool CanDoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
 			return false;
 		}
@@ -414,40 +415,40 @@ namespace WordCloudUIExtension
             return false;
 		}
 
-		public TDLUIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
 //             System.Drawing.Point pt = m_WordCloud.PointToClient(new System.Drawing.Point(xPos, yPos));
 //             Calendar.Appointment appointment = m_WordCloud.GetAppointmentAt(pt.X, pt.Y);
 // 
 //             if (appointment != null)
 //             {
-//                 return TDLUIExtension.HitResult.Task;
+//                 return UIExtension.HitResult.Task;
 //             }
 //             else if (m_WordCloud.GetTrueRectangle().Contains(pt))
 //             {
-//                 return TDLUIExtension.HitResult.Tasklist;
+//                 return UIExtension.HitResult.Tasklist;
 //             }
 
             // else
-			return TDLUIExtension.HitResult.Nowhere;
+			return UIExtension.HitResult.Nowhere;
 		}
 
-		public void SetUITheme(TDLTheme theme)
+		public void SetUITheme(UITheme theme)
 		{
 //             m_WordCloud.Invalidate(true);
 
-            this.BackColor = theme.GetAppDrawingColor(TDLTheme.AppColor.AppBackDark);
+            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
 		{
 		}
 
-		public void SavePreferences(TDLPreferences prefs, String key)
+		public void SavePreferences(Preferences prefs, String key)
 		{
 		}
 
-		public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
+		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
 			if (appOnly)
 			{
@@ -494,8 +495,8 @@ namespace WordCloudUIExtension
             m_WordCloud.Location = WordCloud.Location;
             m_WordCloud.Size = WordCloud.Size;
 
-            TDLWin32.RemoveBorder(m_WordCloud.Handle);
-            TDLWin32.RemoveClientEdge(m_WordCloud.Handle);
+            Win32.RemoveBorder(m_WordCloud.Handle);
+            Win32.RemoveClientEdge(m_WordCloud.Handle);
             Invalidate();
         }
 

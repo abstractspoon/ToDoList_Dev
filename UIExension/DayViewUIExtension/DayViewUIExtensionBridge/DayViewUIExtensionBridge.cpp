@@ -30,7 +30,7 @@ using namespace DayViewUIExtension;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -161,24 +161,24 @@ bool CDayViewUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int n
 
 void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
 {
-	msclr::auto_gcroot<TDLTaskList^> tasks = gcnew TDLTaskList(pTasks);
+	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), TDLUIExtension::Map(nUpdate), TDLUIExtension::Map(pAttributes, nNumAttributes));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
 }
 
 bool CDayViewUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantEditUpdate(TDLUIExtension::Map(nAttribute));
+	return m_wnd->WantEditUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CDayViewUIExtensionBridgeWindow::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantSortUpdate(TDLUIExtension::Map(nAttribute));
+	return m_wnd->WantSortUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
-	msclr::auto_gcroot<TDLTaskList^> task = gcnew TDLTaskList(pTask);
+	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
 
 	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
@@ -196,12 +196,12 @@ bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 
 bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-	return m_wnd->DoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
+	return m_wnd->DoAppCommand(UIExtension::Map(nCmd), dwExtra);
 }
 
 bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 {
-	return m_wnd->CanDoAppCommand(TDLUIExtension::Map(nCmd), dwExtra);
+	return m_wnd->CanDoAppCommand(UIExtension::Map(nCmd), dwExtra);
 }
 
 bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
@@ -211,12 +211,12 @@ bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 
 IUI_HITTEST CDayViewUIExtensionBridgeWindow::HitTest(const POINT& ptScreen) const
 {
-	return TDLUIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
 }
 
 void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
-	msclr::auto_gcroot<TDLTheme^> theme = gcnew TDLTheme(pTheme);
+	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
 	m_wnd->SetUITheme(theme.get());
 }
@@ -233,7 +233,7 @@ HWND CDayViewUIExtensionBridgeWindow::GetHwnd() const
 
 void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	m_wnd->SavePreferences(prefs.get(), key.get());
@@ -241,7 +241,7 @@ void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCW
 
 void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	msclr::auto_gcroot<TDLPreferences^> prefs = gcnew TDLPreferences(pPrefs);
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);

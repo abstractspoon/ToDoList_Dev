@@ -3,21 +3,21 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "TDLTranslate.h"
+#include "Translate.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\ITransText.h"
 
-using namespace TDLPluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TDLTranslate::TDLTranslate(ITransText* pTransText) : m_pTransText(pTransText) 
+Translate::Translate(ITransText* pTransText) : m_pTransText(pTransText) 
 {
    int breakpoint = 0;
 } 
 
 // private constructor
-TDLTranslate::TDLTranslate() : m_pTransText(NULL)
+Translate::Translate() : m_pTransText(NULL)
 {
 
 }

@@ -1,13 +1,14 @@
 ﻿
 using System;
-using TDLPluginHelpers;
 using System.Runtime.InteropServices;
+
+using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace MDContentControl
 {
-    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, ITDLContentControl
+    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, IContentControl
     {
         private IntPtr m_hwndParent;
 
@@ -64,7 +65,7 @@ namespace MDContentControl
             return false;
         }
 
-        public void SetUITheme(TDLTheme theme)
+        public void SetUITheme(UITheme theme)
         {
             // TODO
 
@@ -76,13 +77,13 @@ namespace MDContentControl
 
         }
 
-        public void SavePreferences(TDLPreferences prefs, String key)
+        public void SavePreferences(Preferences prefs, String key)
         {
             // TODO
 
         }
 
-        public void LoadPreferences(TDLPreferences prefs, String key, bool appOnly)
+        public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
             // TODO
 
@@ -94,7 +95,7 @@ namespace MDContentControl
         {
             base.OnResize(e);
 
-            TDLWin32.RemoveClientEdge(Handle);
+            Win32.RemoveClientEdge(Handle);
         }
 
         private void InitializeComponent()
@@ -112,14 +113,14 @@ namespace MDContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-            TDLContentControl.TDLNotify notify = new TDLContentControl.TDLNotify(m_hwndParent);
+			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
 
             notify.NotifyChange();
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
         {
-            TDLContentControl.TDLNotify notify = new TDLContentControl.TDLNotify(m_hwndParent);
+			ContentControl.ParentNotify notify = new ContentControl.ParentNotify(m_hwndParent);
 
             notify.NotifyKillFocus();
         }
