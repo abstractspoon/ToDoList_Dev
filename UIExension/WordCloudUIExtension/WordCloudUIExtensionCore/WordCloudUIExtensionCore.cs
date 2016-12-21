@@ -364,6 +364,8 @@ namespace WordCloudUIExtension
             m_WordCloud.Location = WordCloud.Location;
             m_WordCloud.Size = WordCloud.Size;
 
+            TDLWin32.RemoveBorder(m_WordCloud.Handle);
+            TDLWin32.RemoveClientEdge(m_WordCloud.Handle);
             Invalidate();
         }
 
