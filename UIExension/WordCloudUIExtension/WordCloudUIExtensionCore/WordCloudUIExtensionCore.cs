@@ -1,4 +1,6 @@
 ﻿
+///////////////////////////////////////////////////////////////////////////
+
 using System;
 using System.Collections.Generic;
 using TDLPluginHelpers;
@@ -9,15 +11,110 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
+///////////////////////////////////////////////////////////////////////////
+
 namespace WordCloudUIExtension
 {
 	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, ITDLUIExtension
 	{
+        // Helper classes
+        public class CloudTaskItem
+        {
+            public string Title;
+            public string DoneDate;
+            public string DueDate;
+            public string StartDate;
+            public string Priority;
+            public string Color;
+            public string AllocTo;
+            public string AllocBy;
+            public string Status;
+            public string Category;
+            public string Percent;
+            public string TimeEstimate;
+            public string TimeSpent;
+            public string FileReference;
+            public string Comments;
+            public string CreationDate;
+            public string CreatedBy;
+            public string Risk;
+            public string ExternalId;
+            public string Tags;
+            public string Dependency;
+            public string Recurrence;
+            public string Version;
+
+            public IEnumerable<string> GetWords(TDLUIExtension.TaskAttribute attrib)
+            {
+                var words = new List<string>();
+                var delims = new char[] { ',', ' ', '\t', '\r', '\n' };
+
+                words.AddRange(GetAttribValue(attrib).Split(delims, StringSplitOptions.RemoveEmptyEntries));
+
+                return words;
+            }
+
+            public string GetAttribValue(TDLUIExtension.TaskAttribute attrib)
+            {
+                switch (attrib)
+                {
+				case TDLUIExtension.TaskAttribute.Title: return Title;
+				case TDLUIExtension.TaskAttribute.DoneDate: return DoneDate;
+    			case TDLUIExtension.TaskAttribute.DueDate: return DueDate;
+				case TDLUIExtension.TaskAttribute.StartDate: return StartDate;
+				case TDLUIExtension.TaskAttribute.AllocTo: return AllocTo;
+				case TDLUIExtension.TaskAttribute.AllocBy: return AllocBy;
+				case TDLUIExtension.TaskAttribute.Status: return Status;
+				case TDLUIExtension.TaskAttribute.Category: return Category;
+				case TDLUIExtension.TaskAttribute.Comments: return Comments;
+				case TDLUIExtension.TaskAttribute.CreationDate: return CreationDate;
+				case TDLUIExtension.TaskAttribute.CreatedBy: return CreatedBy;
+				case TDLUIExtension.TaskAttribute.Version: return Version;
+				case TDLUIExtension.TaskAttribute.Tag: return Tags;
+                }
+
+                // all else
+                return "";
+            }
+        }
+
+        public class AttributeItem
+        {
+            public AttributeItem(string name, TDLUIExtension.TaskAttribute attrib)
+            {
+                Name = name;
+                Attrib = attrib;
+            }
+
+            public override string ToString()
+            {
+                return Name;
+            }
+
+            public string Name { set; get; }
+            public TDLUIExtension.TaskAttribute Attrib { set; get; }
+        }
+
+        // -------------------------------------------------------------
+
+        private const int ComboTop = 20;
+        private const int ControlTop = 50;
+        private const string FontName = "Tahoma";
+
+        // -------------------------------------------------------------
+
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
+        private TDLUIExtension.TaskAttribute m_Attrib;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private Gma.CodeCloud.Controls.CloudControl m_WordCloud;
+
+        private System.Windows.Forms.ComboBox m_AttributeCombo;
+        private System.Windows.Forms.Label m_AttributeLabel;
+        private System.Windows.Forms.ComboBoxRenderer m_AttributeDisplay;
+
+        // -------------------------------------------------------------
 
 		public WordCloudUIExtensionCore(IntPtr hwndParent)
 		{
@@ -29,13 +126,46 @@ namespace WordCloudUIExtension
 		{
 			this.m_WordCloud = new Gma.CodeCloud.Controls.CloudControl();
 
-			this.m_WordCloud.Font = new System.Drawing.Font("Tahoma", 8);
- 			this.m_WordCloud.Location = new System.Drawing.Point(0, 0);
+            this.m_WordCloud.Font = new System.Drawing.Font(FontName, 8);
+            this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
  			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
 			this.m_WordCloud.MaxFontSize = 50;
 
 			this.Controls.Add(m_WordCloud);
 		}
+
+        private void CreateAttributeCombo()
+        {
+            // Label
+            this.m_AttributeLabel = new System.Windows.Forms.Label();
+
+            this.m_AttributeLabel.Font = new System.Drawing.Font(FontName, 8);
+            this.m_AttributeLabel.Location = new System.Drawing.Point(-2, 0);
+            this.m_AttributeLabel.Size = new System.Drawing.Size(80, 16);
+            this.m_AttributeLabel.Text = "Attribute";
+            this.m_AttributeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            this.Controls.Add(m_AttributeLabel);
+            
+            // Combo
+            this.m_AttributeCombo = new System.Windows.Forms.ComboBox();
+
+            this.m_AttributeCombo.Font = new System.Drawing.Font(FontName, 8);
+            this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
+            this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
+            this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
+            this.Controls.Add(m_AttributeCombo);
+
+            // Add attributes to combo
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Title", TDLUIExtension.TaskAttribute.Title));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Comments", TDLUIExtension.TaskAttribute.Comments));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Status", TDLUIExtension.TaskAttribute.Status));
+            this.m_AttributeCombo.Items.Add(new AttributeItem("Category", TDLUIExtension.TaskAttribute.Category));
+
+            // Add selection change handler
+            this.m_AttributeCombo.SelectedIndexChanged += new EventHandler(OnAttributeSelChanged);
+        }
 
 		// ITDLUIExtension ------------------------------------------------------------------
 
@@ -74,7 +204,6 @@ namespace WordCloudUIExtension
 
             // Update
 			UpdateWeightedWords();
- 			//m_WordCloud.Invalidate();
 		}
 
 		private bool ProcessTaskUpdate(TDLTask task, 
@@ -203,7 +332,7 @@ namespace WordCloudUIExtension
 
 			foreach (var item in m_Items)
 			{
-				var taskWords = item.Value.GetWords();
+				var taskWords = item.Value.GetWords(m_Attrib);
 				words.AddRange(taskWords);
 			}
 
@@ -340,13 +469,14 @@ namespace WordCloudUIExtension
 			this.m_Items = new Dictionary<UInt32, CloudTaskItem>();
 
 			CreateWordCloud();
+            CreateAttributeCombo();
 		}
 
         protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
             System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-            Border.Y = 20;
-            Border.Height -= 20;
+            Border.Y = ControlTop;
+            Border.Height -= ControlTop;
 
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
@@ -357,8 +487,8 @@ namespace WordCloudUIExtension
 
             System.Drawing.Rectangle WordCloud = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
-            WordCloud.Y = 20;
-            WordCloud.Height -= 20;
+            WordCloud.Y = ControlTop;
+            WordCloud.Height -= ControlTop;
             WordCloud.Inflate(-1, -1);
 
             m_WordCloud.Location = WordCloud.Location;
@@ -369,42 +499,13 @@ namespace WordCloudUIExtension
             Invalidate();
         }
 
-	}
+        private void OnAttributeSelChanged(object sender, EventArgs args)
+        {
+            var comboBox = (System.Windows.Forms.ComboBox)sender;
+            AttributeItem selItem = (AttributeItem)comboBox.SelectedItem;
 
-	public class CloudTaskItem
-	{
-		public string Title;
-		public string DoneDate;
-		public string DueDate;
-		public string StartDate;
-		public string Priority;
-		public string Color;
-		public string AllocTo;
-		public string AllocBy;
-		public string Status;
-		public string Category;
-		public string Percent;
-		public string TimeEstimate;
-		public string TimeSpent;
-		public string FileReference;
-		public string Comments;
-		public string CreationDate;
-		public string CreatedBy;
-		public string Risk;			
-		public string ExternalId;	
-		public string Tags;			
-		public string Dependency;	
-		public string Recurrence;	
-		public string Version;
-
-		public IEnumerable<string> GetWords()
-		{
-			var words = new List<string>();
-			var delims = new char[] { ',', ' ', '\t', '\r', '\n' };
-
-			words.AddRange(Title.Split(delims, StringSplitOptions.RemoveEmptyEntries));
-
-			return words;
-		}
-	}
+            m_Attrib = selItem.Attrib;
+            UpdateWeightedWords();
+        }
+    }
 }
