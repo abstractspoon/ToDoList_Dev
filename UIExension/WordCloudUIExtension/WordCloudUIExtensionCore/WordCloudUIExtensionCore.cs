@@ -26,24 +26,14 @@ namespace WordCloudUIExtension
             public string DoneDate;
             public string DueDate;
             public string StartDate;
-            public string Priority;
-            public string Color;
             public string AllocTo;
             public string AllocBy;
             public string Status;
             public string Category;
-            public string Percent;
-            public string TimeEstimate;
-            public string TimeSpent;
-            public string FileReference;
             public string Comments;
             public string CreationDate;
             public string CreatedBy;
-            public string Risk;
-            public string ExternalId;
             public string Tags;
-            public string Dependency;
-            public string Recurrence;
             public string Version;
 
             public IEnumerable<string> GetWords(UIExtension.TaskAttribute attrib)
@@ -60,41 +50,24 @@ namespace WordCloudUIExtension
             {
                 switch (attrib)
                 {
-				case UIExtension.TaskAttribute.Title: return Title;
-				case UIExtension.TaskAttribute.DoneDate: return DoneDate;
-    			case UIExtension.TaskAttribute.DueDate: return DueDate;
-				case UIExtension.TaskAttribute.StartDate: return StartDate;
-				case UIExtension.TaskAttribute.AllocTo: return AllocTo;
-				case UIExtension.TaskAttribute.AllocBy: return AllocBy;
-				case UIExtension.TaskAttribute.Status: return Status;
-				case UIExtension.TaskAttribute.Category: return Category;
-				case UIExtension.TaskAttribute.Comments: return Comments;
+				case UIExtension.TaskAttribute.Title:        return Title;
+				case UIExtension.TaskAttribute.DoneDate:     return DoneDate;
+    			case UIExtension.TaskAttribute.DueDate:      return DueDate;
+				case UIExtension.TaskAttribute.StartDate:    return StartDate;
+				case UIExtension.TaskAttribute.AllocTo:      return AllocTo;
+				case UIExtension.TaskAttribute.AllocBy:      return AllocBy;
+				case UIExtension.TaskAttribute.Status:       return Status;
+				case UIExtension.TaskAttribute.Category:     return Category;
+				case UIExtension.TaskAttribute.Comments:     return Comments;
 				case UIExtension.TaskAttribute.CreationDate: return CreationDate;
-				case UIExtension.TaskAttribute.CreatedBy: return CreatedBy;
-				case UIExtension.TaskAttribute.Version: return Version;
-				case UIExtension.TaskAttribute.Tag: return Tags;
+				case UIExtension.TaskAttribute.CreatedBy:    return CreatedBy;
+				case UIExtension.TaskAttribute.Version:      return Version;
+				case UIExtension.TaskAttribute.Tag:          return Tags;
                 }
 
                 // all else
                 return "";
             }
-        }
-
-        public class AttributeItem
-        {
-            public AttributeItem(string name, UIExtension.TaskAttribute attrib)
-            {
-                Name = name;
-                Attrib = attrib;
-            }
-
-            public override string ToString()
-            {
-                return Name;
-            }
-
-            public string Name { set; get; }
-            public UIExtension.TaskAttribute Attrib { set; get; }
         }
 
         public class TdlGraphicEngine : Gma.CodeCloud.Controls.GdiGraphicEngine
@@ -151,7 +124,7 @@ namespace WordCloudUIExtension
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
 
-        private System.Windows.Forms.ComboBox m_AttributeCombo;
+        private AttributeComboBox m_AttributeCombo;
         private System.Windows.Forms.Label m_AttributeLabel;
 
         // -------------------------------------------------------------
@@ -187,21 +160,16 @@ namespace WordCloudUIExtension
             this.Controls.Add(m_AttributeLabel);
             
             // Combo
-            this.m_AttributeCombo = new System.Windows.Forms.ComboBox();
+            this.m_AttributeCombo = new AttributeComboBox();
 
             this.m_AttributeCombo.Font = new System.Drawing.Font(FontName, 8);
             this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
             this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
             this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.m_AttributeCombo.Initialise();
 
             this.Controls.Add(m_AttributeCombo);
-
-            // Add attributes to combo
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Title", UIExtension.TaskAttribute.Title));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Comments", UIExtension.TaskAttribute.Comments));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Status", UIExtension.TaskAttribute.Status));
-            this.m_AttributeCombo.Items.Add(new AttributeItem("Category", UIExtension.TaskAttribute.Category));
-
+            
             // Add selection change handler
             this.m_AttributeCombo.SelectedIndexChanged += new EventHandler(OnAttributeSelChanged);
         }
@@ -268,12 +236,6 @@ namespace WordCloudUIExtension
 				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
 					item.StartDate = task.GetStartDateString();
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Priority))
-					item.Priority = task.GetPriority().ToString();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.Color))
-					item.Color = task.GetColor().ToString();
-
 				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
 					item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 
@@ -286,24 +248,6 @@ namespace WordCloudUIExtension
 				if (attribs.Contains(UIExtension.TaskAttribute.Category))
 					item.Category = String.Join(", ", task.GetCategory());
 
-				if (attribs.Contains(UIExtension.TaskAttribute.Percent))
-					item.Percent = task.GetPercentDone().ToString();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
-				{
-					Task.TimeUnits units = Task.TimeUnits.Hours;
-					item.TimeEstimate = (task.GetTimeEstimate(ref units).ToString() + units);
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.TimeSpent))
-				{
-					Task.TimeUnits units = Task.TimeUnits.Hours;
-					item.TimeSpent = (task.GetTimeSpent(ref units).ToString() + units);
-				}
-
-				if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
-					item.FileReference = String.Join(", ", task.GetFileReference());
-
 				if (attribs.Contains(UIExtension.TaskAttribute.Comments))
 					item.Comments = task.GetComments();
 
@@ -312,12 +256,6 @@ namespace WordCloudUIExtension
 
 				if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
 					item.CreatedBy = task.GetCreatedBy();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.Risk))
-					item.Risk = task.GetRisk().ToString();
-
-				if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
-					item.Dependency = String.Join(", ", task.GetDependency());
 
 				if (attribs.Contains(UIExtension.TaskAttribute.Version))
 					item.Version = task.GetVersion();
@@ -333,25 +271,15 @@ namespace WordCloudUIExtension
 				item.DoneDate = task.GetDoneDateString();
 				item.DueDate = task.GetDueDateString();
 				item.StartDate = task.GetStartDateString();
-				item.Priority = task.GetPriority().ToString();
-				item.Color = task.GetColor().ToString();
 				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 				item.AllocBy = task.GetAllocatedBy();
 				item.Status = task.GetStatus();
 				item.Category = String.Join(", ", task.GetCategory());
-				item.Percent = task.GetPercentDone().ToString();
-				item.FileReference = String.Join(", ", task.GetFileReference());
 				item.Comments = task.GetComments();
 				item.CreationDate = task.GetCreationDateString();
 				item.CreatedBy = task.GetCreatedBy();
-				item.Risk = task.GetRisk().ToString();
-				item.Dependency = String.Join(", ", task.GetDependency());
 				item.Version = task.GetVersion();
 				item.Tags = String.Join(", ", task.GetTag());
-
-				Task.TimeUnits units = Task.TimeUnits.Hours;
-				item.TimeEstimate = (task.GetTimeEstimate(ref units).ToString() + units);
-				item.TimeSpent = (task.GetTimeSpent(ref units).ToString() + units);
 			}
 
 			m_Items[task.GetID()] = item;
@@ -388,39 +316,7 @@ namespace WordCloudUIExtension
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
-			switch (attrib)
-			{
-				case UIExtension.TaskAttribute.Title:
-				case UIExtension.TaskAttribute.DoneDate:
-				case UIExtension.TaskAttribute.DueDate:
-				case UIExtension.TaskAttribute.StartDate:
-				case UIExtension.TaskAttribute.Priority:
-				case UIExtension.TaskAttribute.Color:
-				case UIExtension.TaskAttribute.AllocTo:
-				case UIExtension.TaskAttribute.AllocBy:
-				case UIExtension.TaskAttribute.Status:
-				case UIExtension.TaskAttribute.Category:
-				case UIExtension.TaskAttribute.Percent:
-				case UIExtension.TaskAttribute.TimeEstimate:
-				case UIExtension.TaskAttribute.TimeSpent:
-				case UIExtension.TaskAttribute.FileReference:
-				case UIExtension.TaskAttribute.Comments:
-				case UIExtension.TaskAttribute.Flag:
-				case UIExtension.TaskAttribute.CreationDate:
-				case UIExtension.TaskAttribute.CreatedBy:
-				case UIExtension.TaskAttribute.Risk:		
-				case UIExtension.TaskAttribute.ExternalId:	
-				case UIExtension.TaskAttribute.Cost:		
-				case UIExtension.TaskAttribute.Dependency:	
-				case UIExtension.TaskAttribute.Recurrence:	
-				case UIExtension.TaskAttribute.Version:		
-				case UIExtension.TaskAttribute.Position:
-				case UIExtension.TaskAttribute.Tag:
-					return true;				  
-			}									  
-												  
-			// all else
-			return false;
+            return AttributeComboBox.IsSupportedAttribute(attrib);
 		}
 	   
 		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
@@ -455,17 +351,11 @@ namespace WordCloudUIExtension
 
 		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
-//             System.Drawing.Point pt = m_WordCloud.PointToClient(new System.Drawing.Point(xPos, yPos));
-//             Calendar.Appointment appointment = m_WordCloud.GetAppointmentAt(pt.X, pt.Y);
-// 
-//             if (appointment != null)
-//             {
-//                 return UIExtension.HitResult.Task;
-//             }
-//             else if (m_WordCloud.GetTrueRectangle().Contains(pt))
-//             {
-//                 return UIExtension.HitResult.Tasklist;
-//             }
+            System.Drawing.Point pt = m_WordCloud.PointToClient(new System.Drawing.Point(xPos, yPos));
+            Gma.CodeCloud.Controls.Geometry.LayoutItem foundItem;
+
+            if (m_WordCloud.TryGetItemAtLocation(pt, out foundItem))
+                return UIExtension.HitResult.Task;
 
             // else
 			return UIExtension.HitResult.Nowhere;
@@ -540,10 +430,8 @@ namespace WordCloudUIExtension
 
         private void OnAttributeSelChanged(object sender, EventArgs args)
         {
-            var comboBox = (System.Windows.Forms.ComboBox)sender;
-            AttributeItem selItem = (AttributeItem)comboBox.SelectedItem;
+            m_Attrib = m_AttributeCombo.GetSelAttribute();
 
-            m_Attrib = selItem.Attrib;
             UpdateWeightedWords();
         }
     }

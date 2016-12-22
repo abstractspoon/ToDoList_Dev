@@ -53,6 +53,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="AttributeComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WordCloudUIExtensionCore.cs">
       <SubType>Component</SubType>
     </Compile>
