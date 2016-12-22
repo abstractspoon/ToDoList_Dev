@@ -43,7 +43,7 @@ namespace WordCloudUIExtension
 			this.Items.Add(new AttributeItem("Creation date",   UIExtension.TaskAttribute.CreationDate));
 			this.Items.Add(new AttributeItem("Created by",      UIExtension.TaskAttribute.CreatedBy));
 			this.Items.Add(new AttributeItem("Version",         UIExtension.TaskAttribute.Version));
-			this.Items.Add(new AttributeItem("Tags",             UIExtension.TaskAttribute.Tag));
+			this.Items.Add(new AttributeItem("Tags",            UIExtension.TaskAttribute.Tag));
 
             SetSelAttribute(UIExtension.TaskAttribute.Title);
 
