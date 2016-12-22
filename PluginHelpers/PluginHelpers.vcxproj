@@ -94,16 +94,20 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(Configurati
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ContentControl.h" />
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="TaskList.h" />
-    <ClInclude Include="Translate.h" />
+    <ClInclude Include="Translator.h" />
     <ClInclude Include="UIExtension.h" />
+    <ClInclude Include="UITheme.h" />
+    <ClInclude Include="Win32.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -120,8 +124,10 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(Configurati
     <ClCompile Include="ContentControl.cpp" />
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="TaskList.cpp" />
-    <ClCompile Include="Translate.cpp" />
+    <ClCompile Include="Translator.cpp" />
     <ClCompile Include="UIExtension.cpp" />
+    <ClCompile Include="UITheme.cpp" />
+    <ClCompile Include="Win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />

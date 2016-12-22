@@ -5,6 +5,7 @@
 #include "PluginHelpers.h"
 #include "TaskList.h"
 #include "Preferences.h"
+#include "UITheme.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
 

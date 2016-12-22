@@ -17,26 +17,17 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			// converts System::String to LPCWSTR, and frees memory on exit
-			// DO NOT USE TO RETURN STRINGS
-			public ref class MarshalledString
+			public ref class Win32
 			{
 			public:
-				MarshalledString(String^ str);
-				~MarshalledString();
-
-				operator LPCWSTR();
-
-			private:
-				LPCWSTR m_wszGlobal;
+				static void RemoveBorder(IntPtr hWnd);
+				static void AddBorder(IntPtr hWnd);
+				static void RemoveClientEdge(IntPtr hWnd);
+				static void AddClientEdge(IntPtr hWnd);
+				static HWND GetHwnd(IntPtr hWnd);
 			};
-
-
 		}
 	}
 }
-
-#define MS(str) Abstractspoon::Tdl::PluginHelpers::MarshalledString(str)
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

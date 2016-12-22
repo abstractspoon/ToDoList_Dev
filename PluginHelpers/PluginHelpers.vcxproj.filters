@@ -36,10 +36,19 @@
     <ClInclude Include="Preferences.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Translate.h">
+    <ClInclude Include="TaskList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TaskList.h">
+    <ClInclude Include="Translator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UITheme.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,10 +71,19 @@
     <ClCompile Include="Preferences.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Translate.cpp">
+    <ClCompile Include="TaskList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TaskList.cpp">
+    <ClCompile Include="Translator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UITheme.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

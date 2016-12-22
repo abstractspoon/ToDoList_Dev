@@ -5,6 +5,7 @@
 #include "pluginhelpers.h"
 #include "TaskList.h"
 #include "UIExtension.h"
+#include "ColorUtil.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 
