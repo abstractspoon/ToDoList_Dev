@@ -28,27 +28,32 @@ namespace WordCloudUIExtension
 
         // ---------------------------------------------------------------
 
-        public bool Initialise()
+		public bool Initialise(Translator trans)
         {
             // Add attributes to combo
-            this.Items.Add(new AttributeItem("Title",           UIExtension.TaskAttribute.Title));
-            this.Items.Add(new AttributeItem("Comments",        UIExtension.TaskAttribute.Comments));
-            this.Items.Add(new AttributeItem("Status",          UIExtension.TaskAttribute.Status));
-            this.Items.Add(new AttributeItem("Category",        UIExtension.TaskAttribute.Category));
-			this.Items.Add(new AttributeItem("Completion date", UIExtension.TaskAttribute.DoneDate));
-    		this.Items.Add(new AttributeItem("Due date",        UIExtension.TaskAttribute.DueDate));
-			this.Items.Add(new AttributeItem("Start date",      UIExtension.TaskAttribute.StartDate));
-			this.Items.Add(new AttributeItem("Allocated to",    UIExtension.TaskAttribute.AllocTo));
-			this.Items.Add(new AttributeItem("Allocated by",    UIExtension.TaskAttribute.AllocBy));
-			this.Items.Add(new AttributeItem("Creation date",   UIExtension.TaskAttribute.CreationDate));
-			this.Items.Add(new AttributeItem("Created by",      UIExtension.TaskAttribute.CreatedBy));
-			this.Items.Add(new AttributeItem("Version",         UIExtension.TaskAttribute.Version));
-			this.Items.Add(new AttributeItem("Tags",            UIExtension.TaskAttribute.Tag));
+            AddItem(trans, "Title",           UIExtension.TaskAttribute.Title);
+            AddItem(trans, "Comments",        UIExtension.TaskAttribute.Comments);
+            AddItem(trans, "Status",          UIExtension.TaskAttribute.Status);
+            AddItem(trans, "Category",        UIExtension.TaskAttribute.Category);
+			AddItem(trans, "Completion Date", UIExtension.TaskAttribute.DoneDate);
+    		AddItem(trans, "Due Date",        UIExtension.TaskAttribute.DueDate);
+			AddItem(trans, "Start Date",      UIExtension.TaskAttribute.StartDate);
+			AddItem(trans, "Allocated To",    UIExtension.TaskAttribute.AllocTo);
+			AddItem(trans, "Allocated By",    UIExtension.TaskAttribute.AllocBy);
+			AddItem(trans, "Creation Date",   UIExtension.TaskAttribute.CreationDate);
+			AddItem(trans, "Created By",      UIExtension.TaskAttribute.CreatedBy);
+			AddItem(trans, "Version",         UIExtension.TaskAttribute.Version);
+			AddItem(trans, "Tags",            UIExtension.TaskAttribute.Tag);
 
             SetSelAttribute(UIExtension.TaskAttribute.Title);
 
             return true;
         }
+
+		private bool AddItem(Translator trans, string name, UIExtension.TaskAttribute attrib)
+		{
+            return (Items.Add(new AttributeItem(trans.Translate(name), attrib)) != -1);
+		}
 
         public UIExtension.TaskAttribute GetSelAttribute()
         {

@@ -120,6 +120,7 @@ namespace WordCloudUIExtension
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
         private UIExtension.TaskAttribute m_Attrib;
+		private Translator m_trans;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -129,9 +130,11 @@ namespace WordCloudUIExtension
 
         // -------------------------------------------------------------
 
-		public WordCloudUIExtensionCore(IntPtr hwndParent)
+		public WordCloudUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
 			m_hwndParent = hwndParent;
+			m_trans = trans;
+
 			InitializeComponent();
 		}
 
@@ -154,7 +157,7 @@ namespace WordCloudUIExtension
             this.m_AttributeLabel.Font = new System.Drawing.Font(FontName, 8);
             this.m_AttributeLabel.Location = new System.Drawing.Point(-2, 0);
             this.m_AttributeLabel.Size = new System.Drawing.Size(80, 16);
-            this.m_AttributeLabel.Text = "Attribute";
+            this.m_AttributeLabel.Text = m_trans.Translate("Attribute");
             this.m_AttributeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
             this.Controls.Add(m_AttributeLabel);
@@ -166,7 +169,7 @@ namespace WordCloudUIExtension
             this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
             this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
             this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.m_AttributeCombo.Initialise();
+            this.m_AttributeCombo.Initialise(m_trans);
 
             this.Controls.Add(m_AttributeCombo);
             

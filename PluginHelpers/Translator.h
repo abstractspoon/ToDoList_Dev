@@ -16,19 +16,18 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-
-			public ref class Translate
+			public ref class Translator
 			{
 			public:
-				Translate(ITransText* pTaskList);
+				Translator(ITransText* pTaskList);
 
-				String^ TranslateText(String^ sText);
+				String^ Translate(String^ sText);
 
 			private:
 				ITransText* m_pTransText;
 
 			private:
-				Translate();
+				Translator();
 			};
 		}
 	}

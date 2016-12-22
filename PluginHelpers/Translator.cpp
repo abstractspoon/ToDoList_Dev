@@ -3,9 +3,7 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "Translate.h"
-
-#include <msclr\auto_gcroot.h>
+#include "Translator.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\ITransText.h"
 
@@ -13,17 +11,17 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-Translate::Translate(ITransText* pTransText) : m_pTransText(pTransText) 
+Translator::Translator(ITransText* pTransText) : m_pTransText(pTransText) 
 {
 } 
 
 // private constructor
-Translate::Translate() : m_pTransText(nullptr)
+Translator::Translator() : m_pTransText(nullptr)
 {
 
 }
 
-String^ Translate::TranslateText(String^ sText)
+String^ Translator::Translate(String^ sText)
 {
 	if (m_pTransText == nullptr)
 		return sText;
@@ -33,7 +31,7 @@ String^ Translate::TranslateText(String^ sText)
 	if (!m_pTransText->TranslateText(MS(sText), szTemp))
 		return sText;
 
-	msclr::auto_gcroot<String^> sTextOut = gcnew String(szTemp);
+	String^ sTextOut = gcnew String(szTemp);
 	m_pTransText->FreeTextBuffer(szTemp);
 
 	return sTextOut;

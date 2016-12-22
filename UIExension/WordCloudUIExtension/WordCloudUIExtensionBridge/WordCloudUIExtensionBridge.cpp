@@ -41,7 +41,7 @@ const LPCWSTR WORDCLOUD_NAME = L"Word Cloud";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL)
+CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
 	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
 
@@ -53,9 +53,10 @@ void CWordCloudUIExtensionBridge::Release()
 	delete this;
 }
 
-void CWordCloudUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
+void CWordCloudUIExtensionBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCTSTR CWordCloudUIExtensionBridge::GetMenuText() const
@@ -76,7 +77,7 @@ LPCWSTR CWordCloudUIExtensionBridge::GetTypeID() const
 IUIExtensionWindow* CWordCloudUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CWordCloudUIExtensionBridgeWindow* pExtWnd = new CWordCloudUIExtensionBridgeWindow;
+	CWordCloudUIExtensionBridgeWindow* pExtWnd = new CWordCloudUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -99,7 +100,8 @@ void CWordCloudUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LP
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CWordCloudUIExtensionBridgeWindow::CWordCloudUIExtensionBridgeWindow()
+CWordCloudUIExtensionBridgeWindow::CWordCloudUIExtensionBridgeWindow(ITransText* pTT)
+	: m_pTT(pTT)
 {
 
 }
@@ -113,7 +115,9 @@ void CWordCloudUIExtensionBridgeWindow::Release()
 BOOL CWordCloudUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew WordCloudUIExtension::WordCloudUIExtensionCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+
+	m_wnd = gcnew WordCloudUIExtension::WordCloudUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
