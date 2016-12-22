@@ -22,7 +22,7 @@ namespace Abstractspoon
 			public:
 				Translate(ITransText* pTaskList);
 
-				// TODO
+				String^ TranslateText(String^ sText);
 
 			private:
 				ITransText* m_pTransText;
