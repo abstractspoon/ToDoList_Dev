@@ -48,9 +48,9 @@ namespace Gma.CodeCloud.Controls
             if (m_Layout == null) { return; }
 
             IEnumerable<LayoutItem> wordsToRedraw = m_Layout.GetWordsInArea(e.ClipRectangle);
-            using (Graphics graphics = e.Graphics)
+
             using (IGraphicEngine graphicEngine =
-                    new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
+                    NewGraphicEngine(e.Graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
             {
                 foreach (LayoutItem currentItem in wordsToRedraw)
                 {
@@ -64,6 +64,11 @@ namespace Gma.CodeCloud.Controls
                     }
                 }
             }
+        }
+
+        protected virtual IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
+        {
+            return new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
         }
 
         private void BuildLayout()

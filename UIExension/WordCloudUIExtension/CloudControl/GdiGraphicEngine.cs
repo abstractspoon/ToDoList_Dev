@@ -8,7 +8,7 @@ namespace Gma.CodeCloud.Controls
 {
     public class GdiGraphicEngine : IGraphicEngine, IDisposable
     {
-        private readonly Graphics m_Graphics;
+        protected readonly Graphics m_Graphics;
 
         private readonly int m_MinWordWeight;
         private readonly int m_MaxWordWeight;
@@ -31,31 +31,30 @@ namespace Gma.CodeCloud.Controls
             MinFontSize = minFontSize;
             MaxFontSize = maxFontSize;
             m_LastUsedFont = new Font(this.FontFamily, maxFontSize, this.FontStyle);
-            m_Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-			m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 		}
 
-        public SizeF Measure(string text, int weight)
+        public virtual SizeF Measure(string text, int weight)
         {
             Font font = GetFont(weight);
-            //return m_Graphics.MeasureString(text, font);
+
             return TextRenderer.MeasureText(m_Graphics, text, font);
         }
 
-        public void Draw(LayoutItem layoutItem)
+        public virtual void Draw(LayoutItem layoutItem)
         {
             Font font = GetFont(layoutItem.Word.Occurrences);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
-            //m_Graphics.DrawString(layoutItem.Word, font, brush, layoutItem.Rectangle);
+
             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
         }
 
-        public void DrawEmphasized(LayoutItem layoutItem)
+        public virtual void DrawEmphasized(LayoutItem layoutItem)
         {
             Font font = GetFont(layoutItem.Word.Occurrences);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
-            //m_Graphics.DrawString(layoutItem.Word, font, brush, layoutItem.Rectangle);
+
             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, Color.LightGray);
             int offset = (int)(5 *font.Size / MaxFontSize)+1;
@@ -63,7 +62,7 @@ namespace Gma.CodeCloud.Controls
             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
         }
 
-        private Font GetFont(int weight)
+        protected Font GetFont(int weight)
         {
 			float weightDiff = (weight - m_MinWordWeight);
 			float weightRange = Math.Max(1, (m_MaxWordWeight - m_MinWordWeight));
@@ -77,7 +76,7 @@ namespace Gma.CodeCloud.Controls
             return m_LastUsedFont;
         }
 
-        private Color GetPresudoRandomColorFromPalette(LayoutItem layoutItem)
+        protected Color GetPresudoRandomColorFromPalette(LayoutItem layoutItem)
         {
             Color color = Palette[layoutItem.Word.Occurrences * layoutItem.Word.Text.Length % Palette.Length];
             return color;
@@ -85,7 +84,7 @@ namespace Gma.CodeCloud.Controls
 
         public void Dispose()
         {
-            m_Graphics.Dispose();
+            // DO NOT DISPOSE OF THE GRAPHICS OBJECT - WE DON"T OWN IT!
         }
     }
 }

@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
@@ -96,6 +97,45 @@ namespace WordCloudUIExtension
             public UIExtension.TaskAttribute Attrib { set; get; }
         }
 
+        public class TdlGraphicEngine : Gma.CodeCloud.Controls.GdiGraphicEngine
+        {
+            public TdlGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
+                : base(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight)
+            {
+		    }
+
+            public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+            {
+                //base.DrawEmphasized(layoutItem);
+
+                Font font = GetFont(layoutItem.Word.Occurrences);
+                Color color = ColorUtil.LighterDrawing(GetPresudoRandomColorFromPalette(layoutItem), 0.2f);
+
+                // Draw offset shadow
+                Point pointShadow = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
+                int offset = (int)(2 * font.Size / MaxFontSize) + 1;
+                pointShadow.Offset(offset, offset);
+                System.Windows.Forms.TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, pointShadow, Color.LightGray);
+
+                Point pointText = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
+                System.Windows.Forms.TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, pointText, color);
+            }
+        }
+
+        public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
+        {
+            public TdlCloudControl()
+            {
+                DoubleBuffered = true;
+            }
+
+            protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
+            {
+                return new TdlGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
+            }
+           
+        }
+        
         // -------------------------------------------------------------
 
         private const int ComboTop = 20;
@@ -109,11 +149,10 @@ namespace WordCloudUIExtension
         private UIExtension.TaskAttribute m_Attrib;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
-		private Gma.CodeCloud.Controls.CloudControl m_WordCloud;
+		private TdlCloudControl m_WordCloud;
 
         private System.Windows.Forms.ComboBox m_AttributeCombo;
         private System.Windows.Forms.Label m_AttributeLabel;
-        private System.Windows.Forms.ComboBoxRenderer m_AttributeDisplay;
 
         // -------------------------------------------------------------
 
@@ -125,12 +164,11 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			this.m_WordCloud = new Gma.CodeCloud.Controls.CloudControl();
+			this.m_WordCloud = new TdlCloudControl();
 
             this.m_WordCloud.Font = new System.Drawing.Font(FontName, 8);
             this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
  			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
-			this.m_WordCloud.MaxFontSize = 50;
 
 			this.Controls.Add(m_WordCloud);
 		}
@@ -497,7 +535,7 @@ namespace WordCloudUIExtension
 
             Win32.RemoveBorder(m_WordCloud.Handle);
             Win32.RemoveClientEdge(m_WordCloud.Handle);
-            Invalidate();
+            m_WordCloud.Invalidate();
         }
 
         private void OnAttributeSelChanged(object sender, EventArgs args)
