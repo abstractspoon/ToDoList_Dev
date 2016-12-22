@@ -1,11 +1,12 @@
 // ExporterBridge.cpp : Defines the exported functions for the DLL application.
 //
 
-#include <unknwn.h>
-#include <tchar.h>
-
 #include "stdafx.h"
 #include "SampleImpExpBridge.h"
+
+#include <unknwn.h>
+#include <tchar.h>
+#include <msclr\auto_gcroot.h>
 
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
@@ -20,7 +21,6 @@
 #	using <..\..\..\Release\SampleImpExpCore.dll>
 #	using <..\..\..\Release\PluginHelpers.dll> as_friend
 #endif
-#include <msclr\auto_gcroot.h>
 
 using namespace SampleImpExp;
 using namespace System;

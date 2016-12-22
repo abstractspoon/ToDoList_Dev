@@ -1,11 +1,12 @@
 // ExporterBridge.cpp : Defines the exported functions for the DLL application.
 //
 
-#include <unknwn.h>
-#include <tchar.h>
-
 #include "stdafx.h"
 #include "MarkdownImpExpBridge.h"
+
+#include <unknwn.h>
+#include <tchar.h>
+#include <msclr\auto_gcroot.h>
 
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ITasklist.h"
 #include "..\..\..\..\ToDoList_Dev\Interfaces\ITransText.h"
@@ -20,8 +21,6 @@
 #	using <..\..\..\Release\MarkdownImpExpCore.dll>
 #	using <..\..\..\Release\PluginHelpers.dll> as_friend
 #endif
-
-#include <msclr\auto_gcroot.h>
 
 using namespace MarkdownImpExp;
 using namespace System;
