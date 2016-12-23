@@ -30,22 +30,24 @@ namespace WordCloudUIExtension
 
 		public bool Initialise(Translator trans)
         {
-            // Add attributes to combo
-            AddItem(trans, "Title",           UIExtension.TaskAttribute.Title);
-            AddItem(trans, "Comments",        UIExtension.TaskAttribute.Comments);
-            AddItem(trans, "Status",          UIExtension.TaskAttribute.Status);
-            AddItem(trans, "Category",        UIExtension.TaskAttribute.Category);
-			AddItem(trans, "Completion Date", UIExtension.TaskAttribute.DoneDate);
-    		AddItem(trans, "Due Date",        UIExtension.TaskAttribute.DueDate);
-			AddItem(trans, "Start Date",      UIExtension.TaskAttribute.StartDate);
-			AddItem(trans, "Allocated To",    UIExtension.TaskAttribute.AllocTo);
-			AddItem(trans, "Allocated By",    UIExtension.TaskAttribute.AllocBy);
-			AddItem(trans, "Creation Date",   UIExtension.TaskAttribute.CreationDate);
-			AddItem(trans, "Created By",      UIExtension.TaskAttribute.CreatedBy);
-			AddItem(trans, "Version",         UIExtension.TaskAttribute.Version);
-			AddItem(trans, "Tags",            UIExtension.TaskAttribute.Tag);
+			if (Items.Count == 0) // once only
+			{
+				AddItem(trans, "Title", UIExtension.TaskAttribute.Title);
+				AddItem(trans, "Comments", UIExtension.TaskAttribute.Comments);
+				AddItem(trans, "Status", UIExtension.TaskAttribute.Status);
+				AddItem(trans, "Category", UIExtension.TaskAttribute.Category);
+				AddItem(trans, "Completion Date", UIExtension.TaskAttribute.DoneDate);
+				AddItem(trans, "Due Date", UIExtension.TaskAttribute.DueDate);
+				AddItem(trans, "Start Date", UIExtension.TaskAttribute.StartDate);
+				AddItem(trans, "Allocated To", UIExtension.TaskAttribute.AllocTo);
+				AddItem(trans, "Allocated By", UIExtension.TaskAttribute.AllocBy);
+				AddItem(trans, "Creation Date", UIExtension.TaskAttribute.CreationDate);
+				AddItem(trans, "Created By", UIExtension.TaskAttribute.CreatedBy);
+				AddItem(trans, "Version", UIExtension.TaskAttribute.Version);
+				AddItem(trans, "Tags", UIExtension.TaskAttribute.Tag);
 
-            SetSelAttribute(UIExtension.TaskAttribute.Title);
+				SetSelAttribute(UIExtension.TaskAttribute.Title);
+			}
 
             return true;
         }
@@ -63,7 +65,6 @@ namespace WordCloudUIExtension
                 return UIExtension.TaskAttribute.Unknown;
 
             return selItem.Attrib;
-
         }
 
         public bool SetSelAttribute(UIExtension.TaskAttribute attrib)

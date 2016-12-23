@@ -59,7 +59,7 @@ void CWordCloudUIExtensionBridge::SetLocalizer(ITransText* pTT)
 		m_pTT = pTT;
 }
 
-LPCTSTR CWordCloudUIExtensionBridge::GetMenuText() const
+LPCWSTR CWordCloudUIExtensionBridge::GetMenuText() const
 {
 	return WORDCLOUD_NAME;
 }

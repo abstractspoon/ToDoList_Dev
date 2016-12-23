@@ -22,6 +22,12 @@ namespace WordCloudUIExtension
         // Helper classes
         public class CloudTaskItem
         {
+			public CloudTaskItem(UInt32 id)
+			{
+				Id = id;
+			}
+	
+			public readonly UInt32 Id;
             public string Title;
             public string DoneDate;
             public string DueDate;
@@ -40,8 +46,13 @@ namespace WordCloudUIExtension
             {
                 var words = new List<string>();
                 var delims = new char[] { ',', ' ', '\t', '\r', '\n' };
+				var trim = new char[] { '\'', '\"', '{', '}' };
 
-                words.AddRange(GetAttribValue(attrib).Split(delims, StringSplitOptions.RemoveEmptyEntries));
+				var value = GetAttribValue(attrib);
+				string[] parts = Array.ConvertAll(value.Split(delims, StringSplitOptions.RemoveEmptyEntries), 
+									p => p.Trim(trim));
+
+				words.AddRange(parts);
 
                 return words;
             }
@@ -158,7 +169,7 @@ namespace WordCloudUIExtension
             this.m_AttributeLabel.Font = new System.Drawing.Font(FontName, 8);
             this.m_AttributeLabel.Location = new System.Drawing.Point(-2, 0);
             this.m_AttributeLabel.Size = new System.Drawing.Size(80, 16);
-            this.m_AttributeLabel.Text = m_trans.Translate("Attribute");
+            this.m_AttributeLabel.Text = m_trans.Translate("Attribute to 'track'");
             this.m_AttributeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
             this.Controls.Add(m_AttributeLabel);
@@ -269,7 +280,7 @@ namespace WordCloudUIExtension
 			}
 			else
 			{
-				item = new CloudTaskItem();
+				item = new CloudTaskItem(task.GetID());
 
 				item.Title = task.GetTitle();
 				item.DoneDate = task.GetDoneDateString();
@@ -286,7 +297,7 @@ namespace WordCloudUIExtension
 				item.Tags = String.Join(", ", task.GetTag());
 			}
 
-			m_Items[task.GetID()] = item;
+			m_Items[item.Id] = item;
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
@@ -313,9 +324,7 @@ namespace WordCloudUIExtension
 
 		public static IBlacklist CreateBlacklist(bool excludeEnglishCommonWords)
 		{
-			return excludeEnglishCommonWords
-					   ? (IBlacklist)new CommonWords()
-					   : new NullBlacklist();
+			return (excludeEnglishCommonWords ? (IBlacklist)new CommonWords() : new NullBlacklist());
 		}
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
