@@ -100,6 +100,7 @@ namespace WordCloudUIExtension
             public TdlCloudControl()
             {
                 DoubleBuffered = true;
+                MaxFontSize = 30;
             }
 
             protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
