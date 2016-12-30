@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "ColorUtil.h"
 
+#include <Shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -12,54 +15,34 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 Windows::Media::Color ColorUtil::LighterMedia(Windows::Media::Color^ color, float amount)
 {
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
+	COLORREF rgbIn = RGB(color->R, color->G, color->B);
+	COLORREF rgbOut = ColorAdjustLuma(rgbIn, (int)(amount * 1000), TRUE);
 
-	red = ((255 - red) * amount) + red;
-	green = ((255 - green) * amount) + green;
-	blue = ((255 - blue) * amount) + blue;
-
-	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+	return Windows::Media::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
 Windows::Media::Color ColorUtil::DarkerMedia(Windows::Media::Color^ color, float amount)
 {
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
+	COLORREF rgbIn = RGB(color->R, color->G, color->B);
+	COLORREF rgbOut = ColorAdjustLuma(rgbIn, (int)(amount * -1000), TRUE);
 
-	red *= amount;
-	green *= amount;
-	blue *= amount;
-
-	return Windows::Media::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+	return Windows::Media::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
 Drawing::Color ColorUtil::LighterDrawing(Drawing::Color^ color, float amount)
 {
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
+	COLORREF rgbIn = RGB(color->R, color->G, color->B);
+	COLORREF rgbOut = ColorAdjustLuma(rgbIn, (int)(amount * 1000), TRUE);
 
-	red = ((255 - red) * amount) + red;
-	green = ((255 - green) * amount) + green;
-	blue = ((255 - blue) * amount) + blue;
-
-	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+	return Drawing::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
 Drawing::Color ColorUtil::DarkerDrawing(Drawing::Color^ color, float amount)
 {
-	float red = (float)color->R;
-	float green = (float)color->G;
-	float blue = (float)color->B;
+	COLORREF rgbIn = RGB(color->R, color->G, color->B);
+	COLORREF rgbOut = ColorAdjustLuma(rgbIn, (int)(amount * -1000), TRUE);
 
-	red *= amount;
-	green *= amount;
-	blue *= amount;
-
-	return Drawing::Color::FromArgb(color->A, (int)red, (int)green, (int)blue);
+	return Drawing::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
 Windows::Media::Color ColorUtil::GetMediaColor(UInt32 rgbColor)
