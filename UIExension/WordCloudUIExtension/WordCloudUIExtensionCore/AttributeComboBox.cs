@@ -7,7 +7,8 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace WordCloudUIExtension
 {
-    class AttributeComboBox : System.Windows.Forms.ComboBox
+	[System.ComponentModel.DesignerCategory("")]
+	class AttributeComboBox : System.Windows.Forms.ComboBox
     {
         protected class AttributeItem
         {
@@ -45,8 +46,6 @@ namespace WordCloudUIExtension
 				AddItem(trans, "Created By", UIExtension.TaskAttribute.CreatedBy);
 				AddItem(trans, "Version", UIExtension.TaskAttribute.Version);
 				AddItem(trans, "Tags", UIExtension.TaskAttribute.Tag);
-
-				SetSelAttribute(UIExtension.TaskAttribute.Title);
 			}
 
             return true;
@@ -57,7 +56,7 @@ namespace WordCloudUIExtension
             return (Items.Add(new AttributeItem(trans.Translate(name), attrib)) != -1);
 		}
 
-        public UIExtension.TaskAttribute GetSelAttribute()
+        public UIExtension.TaskAttribute GetSelectedAttribute()
         {
             AttributeItem selItem = (AttributeItem)SelectedItem;
 
@@ -67,7 +66,7 @@ namespace WordCloudUIExtension
             return selItem.Attrib;
         }
 
-        public bool SetSelAttribute(UIExtension.TaskAttribute attrib)
+        public bool SetSelectedAttribute(UIExtension.TaskAttribute attrib)
         {
             var item = FindAttribute(attrib);
 
