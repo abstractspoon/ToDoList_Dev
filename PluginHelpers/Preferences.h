@@ -13,6 +13,7 @@ using namespace System;
 #pragma warning( push )
 #undef GetProfileInt
 #undef GetProfileString
+#undef WriteProfileString
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
