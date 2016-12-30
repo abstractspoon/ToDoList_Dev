@@ -48,17 +48,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorSchemeComboBox.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="AttributeComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="WordCloudUIExtensionCore.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="AttributeComboBox.cs" />
+    <Compile Include="WordCloudUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
