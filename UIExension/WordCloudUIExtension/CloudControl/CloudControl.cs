@@ -44,7 +44,7 @@ namespace Gma.CodeCloud.Controls
         {
             base.OnPaint(e);
 
-            if (m_Words == null) { return; }
+            if (m_Words == null || !m_Words.Any()) { return; }
             if (m_Layout == null) { return; }
 
             IEnumerable<LayoutItem> wordsToRedraw = m_Layout.GetWordsInArea(e.ClipRectangle);
@@ -73,7 +73,8 @@ namespace Gma.CodeCloud.Controls
 
         private void BuildLayout()
         {
-            if (m_Words == null) { return; }
+            if (m_Words == null || !m_Words.Any())
+				return;
 
             using (Graphics graphics = this.CreateGraphics())
             {
@@ -183,7 +184,6 @@ namespace Gma.CodeCloud.Controls
             set
             {
                 m_Palette = value;
-                BuildLayout();
                 Invalidate();
             }
         }
@@ -193,17 +193,24 @@ namespace Gma.CodeCloud.Controls
             get { return m_Words; }
             set
             {
+				if (value == null)
+					return;
+
                 m_Words = value;
-                if (value==null) {return;}
 
-                IWord first = m_Words.First();
-                if (first!=null)
-                {
-                    m_MaxWordWeight = first.Occurrences;
-                    m_MinWordWeight = m_Words.Last().Occurrences;
-                }
+				if (m_Words.Any())
+				{
+					IWord first = m_Words.First();
 
-                BuildLayout();
+					if (first!=null)
+					{
+						m_MaxWordWeight = first.Occurrences;
+						m_MinWordWeight = m_Words.Last().Occurrences;
+					}
+
+					BuildLayout();
+				}
+
                 Invalidate();
             }
         }

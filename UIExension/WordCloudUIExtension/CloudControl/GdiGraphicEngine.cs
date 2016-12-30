@@ -64,16 +64,26 @@ namespace Gma.CodeCloud.Controls
 
         protected Font GetFont(int weight)
         {
-			float weightDiff = (weight - m_MinWordWeight);
-			float weightRange = Math.Max(1, (m_MaxWordWeight - m_MinWordWeight));
-			float fontRange = (MaxFontSize - MinFontSize);
+			float weightRange = (m_MaxWordWeight - m_MinWordWeight);
+            float fontSize = MinFontSize;
 
-            float fontSize = MinFontSize + (fontRange * (weightDiff / weightRange));
-            if (m_LastUsedFont.Size!=fontSize)
-            {
+			// Special case: all words have the same weight
+			if (weightRange == 0)
+			{
+				fontSize = MaxFontSize;
+			}
+			else // proportional
+			{
+				float weightDiff = (weight - m_MinWordWeight);
+				float fontRange = (MaxFontSize - MinFontSize);
+
+				fontSize += (fontRange * (weightDiff / weightRange));
+			}
+
+            if (m_LastUsedFont.Size != fontSize)
                 m_LastUsedFont = new Font(this.FontFamily, fontSize, this.FontStyle);
-            }
-            return m_LastUsedFont;
+
+			return m_LastUsedFont;
         }
 
         protected Color GetPresudoRandomColorFromPalette(LayoutItem layoutItem)
