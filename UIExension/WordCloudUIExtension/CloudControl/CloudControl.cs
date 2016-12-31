@@ -11,17 +11,17 @@ namespace Gma.CodeCloud.Controls
     public class CloudControl : Panel
     {
         private IEnumerable<IWord> m_Words;
-        readonly Color[] m_DefaultPalette = new[] { Color.DarkRed, Color.DarkBlue, Color.DarkGreen, Color.Navy, Color.DarkCyan, Color.DarkOrange, Color.DarkGoldenrod, Color.DarkKhaki, Color.Blue, Color.Red, Color.Green };
+        private readonly Color[] m_DefaultPalette = new[] { Color.DarkRed, Color.DarkBlue, Color.DarkGreen, Color.Navy, Color.DarkCyan, Color.DarkOrange, Color.DarkGoldenrod, Color.DarkKhaki, Color.Blue, Color.Red, Color.Green };
         private Color[] m_Palette;
         private LayoutType m_LayoutType;
-
-        private int m_MaxFontSize;
-        private int m_MinFontSize;
-        private ILayout m_Layout;
-        private Color m_BackColor;
-        private LayoutItem m_ItemUderMouse;
-        private int m_MinWordWeight;
-        private int m_MaxWordWeight;
+		private int m_MaxFontSize;
+		private int m_MinFontSize;
+		private ILayout m_Layout;
+		private Color m_BackColor;
+		private int m_MinWordWeight;
+		private int m_MaxWordWeight;
+		
+        protected LayoutItem m_ItemUnderMouse;
 
         public CloudControl()
         {
@@ -54,7 +54,7 @@ namespace Gma.CodeCloud.Controls
             {
                 foreach (LayoutItem currentItem in wordsToRedraw)
                 {
-                    if (m_ItemUderMouse == currentItem)
+                    if (m_ItemUnderMouse == currentItem)
                     {
                         graphicEngine.DrawEmphasized(currentItem);
                     }
@@ -106,19 +106,19 @@ namespace Gma.CodeCloud.Controls
             LayoutItem nextItemUnderMouse;
             Point mousePositionRelativeToControl = this.PointToClient(new Point(MousePosition.X, MousePosition.Y));
             this.TryGetItemAtLocation(mousePositionRelativeToControl, out nextItemUnderMouse);
-            if (nextItemUnderMouse != m_ItemUderMouse)
+            if (nextItemUnderMouse != m_ItemUnderMouse)
             {
                 if (nextItemUnderMouse != null)
                 {
                     Rectangle newRectangleToInvalidate = RectangleGrow(nextItemUnderMouse.Rectangle, 6);
                     this.Invalidate(newRectangleToInvalidate);
                 }
-                if (m_ItemUderMouse != null)
+                if (m_ItemUnderMouse != null)
                 {
-                    Rectangle prevRectangleToInvalidate = RectangleGrow(m_ItemUderMouse.Rectangle, 6);
+                    Rectangle prevRectangleToInvalidate = RectangleGrow(m_ItemUnderMouse.Rectangle, 6);
                     this.Invalidate(prevRectangleToInvalidate);
                 }
-                m_ItemUderMouse = nextItemUnderMouse;
+                m_ItemUnderMouse = nextItemUnderMouse;
             }
             base.OnMouseMove(e);
         }
@@ -183,8 +183,11 @@ namespace Gma.CodeCloud.Controls
             get { return m_Palette; }
             set
             {
-                m_Palette = value;
-                Invalidate();
+				if (value.Length > 0)
+				{
+					m_Palette = value;
+					Invalidate();
+				}
             }
         }
 
