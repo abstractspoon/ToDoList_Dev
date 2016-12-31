@@ -1877,8 +1877,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		BOOL bEditTime = !bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING);
 		BOOL bEditPercent = !HasStyle(TDCS_AUTOCALCPERCENTDONE) && (nSelCount > 1 || !bAveSubTaskCompletion);
 
-		m_nPriority = (int)GetSelectedTaskPriority();
-		m_nRisk = (int)GetSelectedTaskRisk();
+		m_nPriority = GetSelectedTaskPriority();
+		m_nRisk = GetSelectedTaskRisk();
 		m_sAllocBy = GetSelectedTaskAllocBy();
 		m_sStatus = GetSelectedTaskStatus();
 		m_sExternalID = GetSelectedTaskExtID();
