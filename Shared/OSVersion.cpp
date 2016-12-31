@@ -140,7 +140,7 @@ OSVERSION COSVersion::GetOSVersion()
 																	(BYTE*)&dwMajorVer, 
 																	&dwSize);
 										
-										if ((lResult = ERROR_SUCCESS) && (dwMajorVer >= 10))
+										if ((lResult == ERROR_SUCCESS) && (dwMajorVer >= 10))
 										{
 											nVersion = OSV_WIN10;
 											break;
