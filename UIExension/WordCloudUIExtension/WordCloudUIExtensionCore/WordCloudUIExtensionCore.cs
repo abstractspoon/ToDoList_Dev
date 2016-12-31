@@ -4,6 +4,9 @@
 using System;
 using System.Drawing;
 using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Linq;
+
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
@@ -120,18 +123,15 @@ namespace WordCloudUIExtension
             {
 				var values = GetAttributeValues(attrib);
 
-				// Split title and comments only into individual words
+				// Split title and comments only into individual words removing duplicates
 				if ((attrib == UIExtension.TaskAttribute.Title) ||
 					(attrib == UIExtension.TaskAttribute.Comments))
 				{
 					if (values.Count > 0)
 					{
-						string[] parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries);
+						List<string> parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim(WordTrim)).ToList();
 
-						values.Clear();
-
-						foreach (var p in parts)
-							values.Add(p.Trim(WordTrim));
+						values = parts.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 					}
 				}
 
@@ -170,42 +170,84 @@ namespace WordCloudUIExtension
             public TdlGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
                 : base(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight)
             {
+
 		    }
 
-            public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+			private void AdjustTextRenderHint(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+			{
+				// Add anti-aliasing for larger font sizes
+				if (GetFontSize(layoutItem.Word) > 10)
+					m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+				else
+					m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+			}
+
+			public override void Draw(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+			{
+				AdjustTextRenderHint(layoutItem);
+
+				base.Draw(layoutItem);
+			}
+
+			public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
             {
-                Font font = GetFont(layoutItem.Word.Occurrences);
+				AdjustTextRenderHint(layoutItem);
+
+				Font font = GetFont(layoutItem.Word);
 				Color color = GetPresudoRandomColorFromPalette(layoutItem);
 
-                // Draw offset shadow
-				Color shadowColor = ColorUtil.LighterDrawing(color, 0.7f);
-                Point pointShadow = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-                int offset = (int)(2 * font.Size / MaxFontSize) + 1;
-                pointShadow.Offset(offset, offset);
-                System.Windows.Forms.TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, pointShadow, shadowColor);
+				Color backColor = ColorUtil.LighterDrawing(color, 0.7f);
+				Color textColor = ColorUtil.DarkerDrawing(color, 0.2f);
 
-				// Then text
-                Color textColor = ColorUtil.DarkerDrawing(color, 0.2f);
-                Point pointText = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-                System.Windows.Forms.TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, pointText, textColor);
-            }
+ 				using (Brush brush = new SolidBrush(backColor))
+ 				{
+					m_Graphics.FillRectangle(brush, Rectangle.Ceiling(layoutItem.Rectangle));
+ 				}
+
+				Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
+				TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);
+			}
         }
 
         public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
         {
-            public TdlCloudControl()
+			private System.Windows.Forms.ToolTip m_ToolTip;
+
+			public TdlCloudControl()
             {
-                DoubleBuffered = true;
-                MaxFontSize = 30;
-				Font = new System.Drawing.Font(FontName, 10);
-            }
+				base.MaxFontSize = 30;
+
+				this.BorderStyle = BorderStyle.None;
+				this.DoubleBuffered = true;
+				this.Font = new System.Drawing.Font(FontName, 10);
+
+				m_ToolTip = new System.Windows.Forms.ToolTip();
+			}
 
             protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
             {
-                return new TdlGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
+                return new TdlGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1/*minWordWeight*/, maxWordWeight);
             }
-           
-        }
+
+			protected override void OnMouseMove(MouseEventArgs e)
+			{
+				base.OnMouseMove(e);
+
+				if (base.m_ItemUnderMouse != null)
+				{
+					 string tooltip = string.Format("'{0}' appears in {1} task(s)", 
+													base.m_ItemUnderMouse.Word.Text,
+													base.m_ItemUnderMouse.Word.Occurrences);
+
+					 if (m_ToolTip.GetToolTip(this) != tooltip)
+						 m_ToolTip.SetToolTip(this, tooltip);
+				}
+				else
+				{
+					m_ToolTip.SetToolTip(this, "");
+				}
+			}
+		}
         
         // -------------------------------------------------------------
 
@@ -407,11 +449,9 @@ namespace WordCloudUIExtension
 
 				m_AttributeCombo.SetSelectedAttribute(attrib);
 
-				var scheme = prefs.GetProfileString(key, "ColorScheme", "");
+				string scheme = prefs.GetProfileString(key, "ColorScheme", "");
 
-				if (scheme.Length > 0)
-					m_ColorsCombo.SetSelectedScheme(scheme);
-				else
+				if (!m_ColorsCombo.SetSelectedScheme(scheme))
 					m_ColorsCombo.SelectedIndex = 0;
 			}
 		}
