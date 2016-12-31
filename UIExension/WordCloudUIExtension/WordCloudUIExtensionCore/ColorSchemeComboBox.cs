@@ -26,16 +26,7 @@ namespace WordCloudUIExtension
 			{
 				Colors = new List<Color>();
 
-				foreach (String color in hexColors)
-				{
-					if (color.Length != 0)
-					{
-						Color c = ColorTranslator.FromHtml(color);
-
-						if (c != null)
-							Colors.Add(c);
-					}
-				}
+				FromHexColors(hexColors);
 			}
 
 			public override string ToString()
@@ -49,6 +40,24 @@ namespace WordCloudUIExtension
 				}
 				
 				return hex.ToString();
+			}
+
+			private bool FromHexColors(String[] hexColors)
+			{
+				Colors.Clear();
+
+				foreach (String color in hexColors)
+				{
+					if ((color.Length != 0) && (color[0] == '#'))
+					{
+						Color c = ColorTranslator.FromHtml(color);
+
+						if (c != null)
+							Colors.Add(c);
+					}
+				}
+
+				return (Colors.Count > 0);
 			}
 
 			public List<Color> Colors { private set; get; }
@@ -87,7 +96,7 @@ namespace WordCloudUIExtension
 // 			Items.Add(new ColorScheme(new String[] { "", "", "", "", "", "", "", "", "", "", "" }));
 // 			Items.Add(new ColorScheme(new String[] { "", "", "", "", "", "", "", "", "", "", "" }));
 
-			SelectedIndex = 0;
+			SelectedIndex = -1;
 		}
 
 		protected override void OnDrawItem(DrawItemEventArgs e)
@@ -119,7 +128,8 @@ namespace WordCloudUIExtension
 							e.Graphics.DrawRectangle(border, rect);
 						}
 
-						rect.Location = new Point(rect.Location.X + rect.Height + 2, rect.Location.Y);
+						// Next colour
+						rect.Offset(rect.Height + 2, 0);
 					}
 				}
 			}
@@ -141,7 +151,7 @@ namespace WordCloudUIExtension
 			ColorScheme selItem = (ColorScheme)SelectedItem;
 
 			if (selItem == null)
-				return null;
+				return new Color[] { Color.Black };
 
 			return selItem.Colors.ToArray();
 		}
