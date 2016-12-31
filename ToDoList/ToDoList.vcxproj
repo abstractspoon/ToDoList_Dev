@@ -807,75 +807,8 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\EncryptDecrypt\EncryptDecrypt.vcxproj">
-      <Project>{bb8151eb-f79e-4f32-bb83-840a4814c93f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\FMindImportExport\FMindImportExport.vcxproj">
-      <Project>{c42e0b8f-a962-4089-a166-4a032f248bef}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\FtpStorage\FtpStorage.vcxproj">
-      <Project>{547ec312-67d6-4271-8cc5-c82a94c1a09c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\GanttChartExt\GanttChartExt.vcxproj">
-      <Project>{68e99f7e-1f49-46c0-a945-bc64c58ab503}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\GPExport\GPExport.vcxproj">
-      <Project>{6da53a68-595a-47b9-b8ce-f73d392e58a7}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\iCalImportExport\iCalImportExport.vcxproj">
-      <Project>{d234b740-1bb7-4eca-88d0-242692b9a7bf}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\MLOImport\MLOImport.vcxproj">
-      <Project>{eb6baec9-49f2-4062-8208-5fb9fd461998}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\MySpellCheck\MySpellCheck.vcxproj">
-      <Project>{6311218d-2508-4629-a0fb-fc84f52a1857}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\OdbcStorage\OdbcStorage.vcxproj">
-      <Project>{a7c43c06-49e9-4f5f-aa84-4e3dc3eb6ca5}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\PlainTextImport\PlainTextImport.vcxproj">
-      <Project>{1ac5867e-0688-4c2e-8f23-e488f6594948}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\RTFContentCtrl\RTFContentCtrl.vcxproj">
-      <Project>{6690e3df-e9bf-4cdd-8019-5a331a566011}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\BurndownExt\BurndownExt.vcxproj">
-      <Project>{da896cdc-157d-472e-8f61-87e174e6b80c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\TDLTest\TDLTest.vcxproj">
-      <Project>{9f8f45d4-c492-4653-8456-513d668def34}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\TDLTransEdit\TDLTransEdit.vcxproj">
-      <Project>{0feafc4e-5946-538a-1d54-2eafb9461394}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\TDLUninstall\TDLUninstall.vcxproj">
-      <Project>{3bf70fa0-7245-4231-a0ef-7589e5805ffe}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\TDLUpdate\TDLUpdate.vcxproj">
-      <Project>{378a4533-2901-469b-84cb-10ea55d8f18e}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\TransText\TransText.vcxproj">
-      <Project>{08879a40-ee3b-4d01-b13f-c6a2b4f03311}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
