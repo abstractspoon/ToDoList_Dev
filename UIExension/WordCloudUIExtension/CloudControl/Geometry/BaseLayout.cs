@@ -28,7 +28,7 @@ namespace Gma.CodeCloud.Controls.Geometry
 
             foreach (IWord word in words)
             {
-                SizeF size = graphicEngine.Measure(word.Text, word.Occurrences);
+                SizeF size = graphicEngine.Measure(word);
                 RectangleF freeRectangle;
                 if (!TryFindFreeRectangle(size, out freeRectangle))
                 {

@@ -2,7 +2,9 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+
 using Gma.CodeCloud.Controls.Geometry;
+using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 
 namespace Gma.CodeCloud.Controls
 {
@@ -34,16 +36,16 @@ namespace Gma.CodeCloud.Controls
             m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 		}
 
-        public virtual SizeF Measure(string text, int weight)
+		public virtual SizeF Measure(IWord word)
         {
-            Font font = GetFont(weight);
+            Font font = GetFont(word);
 
-            return TextRenderer.MeasureText(m_Graphics, text, font);
+            return TextRenderer.MeasureText(m_Graphics, word.Text, font);
         }
 
         public virtual void Draw(LayoutItem layoutItem)
         {
-            Font font = GetFont(layoutItem.Word.Occurrences);
+            Font font = GetFont(layoutItem.Word);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
 
             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
@@ -52,7 +54,7 @@ namespace Gma.CodeCloud.Controls
 
         public virtual void DrawEmphasized(LayoutItem layoutItem)
         {
-            Font font = GetFont(layoutItem.Word.Occurrences);
+            Font font = GetFont(layoutItem.Word);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
 
             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
@@ -62,8 +64,18 @@ namespace Gma.CodeCloud.Controls
             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
         }
 
-        protected Font GetFont(int weight)
-        {
+		protected Font GetFont(IWord word)
+		{
+			float fontSize = GetFontSize(word);
+
+			if (m_LastUsedFont.Size != fontSize)
+				m_LastUsedFont = new Font(this.FontFamily, fontSize, this.FontStyle);
+
+			return m_LastUsedFont;
+		}
+
+		protected float GetFontSize(IWord word)
+		{
 			float weightRange = (m_MaxWordWeight - m_MinWordWeight);
             float fontSize = MinFontSize;
 
@@ -74,17 +86,14 @@ namespace Gma.CodeCloud.Controls
 			}
 			else // proportional
 			{
-				float weightDiff = (weight - m_MinWordWeight);
+				float weightDiff = (word.Occurrences - m_MinWordWeight);
 				float fontRange = (MaxFontSize - MinFontSize);
 
 				fontSize += (fontRange * (weightDiff / weightRange));
 			}
 
-            if (m_LastUsedFont.Size != fontSize)
-                m_LastUsedFont = new Font(this.FontFamily, fontSize, this.FontStyle);
-
-			return m_LastUsedFont;
-        }
+			return fontSize;
+		}
 
         protected Color GetPresudoRandomColorFromPalette(LayoutItem layoutItem)
         {
