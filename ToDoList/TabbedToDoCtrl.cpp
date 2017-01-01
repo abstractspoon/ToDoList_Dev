@@ -4139,14 +4139,6 @@ BOOL CTabbedToDoCtrl::ViewSupportsTaskSelection(FTC_VIEW nView) const
 	return FALSE;
 }
 
-// void CTabbedToDoCtrl::EnableDisableControls(HTREEITEM hti)
-// {
-// 	if (!ViewSupportsTaskSelection(GetView()))
-// 		hti = NULL;
-// 
-// 	return CToDoCtrl::EnableDisableControls(hti);
-// }
-
 HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
 {
 	HTREEITEM hti = CToDoCtrl::GetUpdateControlsItem();
@@ -4495,6 +4487,10 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 		ASSERT(0);
 		return;
 	}
+	else if (!ViewSupportsTaskSelection(nView))
+	{
+		return;
+	}
 
 	IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 	ASSERT(pExt);
@@ -4502,49 +4498,46 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 	if (pExt == NULL)
 		return;
 
-	if (pExt->SupportsTaskSelection())
+	// Get tree selection
+	TDCSELECTIONCACHE cache;
+
+	// If nothing is selected, work backwards until we find something
+	BOOL bNeedUpdate = FALSE;
+
+	while (!CacheTreeSelection(cache))
 	{
-		// Get tree selection
-		TDCSELECTIONCACHE cache;
+		if (!m_taskTree.SelectTasksInHistory(FALSE))
+			break;
 
-		// If nothing is selected, work backwards until we find something
-		BOOL bNeedUpdate = FALSE;
+		bNeedUpdate = TRUE; // selection has changed
+	}
 
-		while (!CacheTreeSelection(cache))
+	if (!cache.IsEmpty())
+	{
+		// If nothing can be selected, work backwards as before
+		while (!SelectExtensionTasks(pExt, cache.aSelTaskIDs, cache.dwFocusedTaskID))
 		{
+			cache.Clear();
+
 			if (!m_taskTree.SelectTasksInHistory(FALSE))
 				break;
 
+			CacheTreeSelection(cache);
 			bNeedUpdate = TRUE; // selection has changed
 		}
+	}
 
-		if (!cache.IsEmpty())
-		{
-			// If nothing can be selected, work backwards as before
-			while (!SelectExtensionTasks(pExt, cache.aSelTaskIDs, cache.dwFocusedTaskID))
-			{
-				cache.Clear();
+	// fallback
+	if (cache.IsEmpty())
+	{
+		pExt->SelectTask(0);
 
-				if (!m_taskTree.SelectTasksInHistory(FALSE))
-					break;
-
-				CacheTreeSelection(cache);
-				bNeedUpdate = TRUE; // selection has changed
-			}
-		}
-		
-		// fallback
-		if (cache.IsEmpty())
-		{
-			pExt->SelectTask(0);
-
-			m_taskTree.DeselectAll();
-			UpdateControls();
-		}
-		else if (bNeedUpdate)
-		{
-			UpdateControls();
-		}
+		m_taskTree.DeselectAll();
+		UpdateControls();
+	}
+	else if (bNeedUpdate)
+	{
+		UpdateControls();
 	}
 }
 

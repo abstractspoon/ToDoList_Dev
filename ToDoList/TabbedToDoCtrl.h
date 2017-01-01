@@ -76,7 +76,7 @@ public:
 	void SetVisibleExtensionViews(const CStringArray& aTypeIDs);
 	int GetVisibleExtensionViews(CStringArray& aTypeIDs) const;
 
-	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
+	BOOL SetTreeFont(HFONT hFont); // caller responsible for cleanup
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;
