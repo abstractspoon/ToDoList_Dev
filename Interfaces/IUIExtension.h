@@ -24,7 +24,8 @@
 #	define DLL_DECLSPEC __declspec(dllimport)
 #endif 
 
-#define IUIEXTENSION_VERSION 0x0001
+// Change this value when new interface methods get added
+#define IUIEXTENSION_VERSION 0x0002
 
 //////////////////////////////////////////////////////////////////////
 
@@ -262,7 +263,6 @@ public:
 
 	virtual bool SelectTask(DWORD dwTaskID) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
-	virtual bool SupportsTaskSelection() const = 0;
 
 	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
 	virtual bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const = 0;
@@ -284,6 +284,9 @@ public:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) = 0;
 
 	virtual void Release() = 0;
+
+	// New Methods here to maintain ABI
+	virtual bool SupportsTaskSelection() const = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
