@@ -4544,7 +4544,7 @@ LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 
 CString CToDoListWnd::GetTitle()
 {
-	static CString sTitle(_T("ToDoList 7.1.RC3 (Release Candidate)"));
+	static CString sTitle(_T("ToDoList 7.2.DR0 (Development Preview)"));
 	CLocalizer::IgnoreString(sTitle);
 
 	return sTitle;
