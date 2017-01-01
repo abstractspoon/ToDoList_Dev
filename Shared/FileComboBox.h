@@ -65,6 +65,7 @@ protected:
 	int GetMaxDropWidth() const { return 400; }
 	UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
 	BOOL DeleteLBItem(int nItem);
+	void HandleReturnKey();
 
 };
 
