@@ -346,13 +346,8 @@ public:
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }
     TDC_FILEFMT CompareFileFormat() const; // older, same, newer
 	
-	// tree related
-	inline HTREEITEM GetSelectedItem() const { return m_taskTree.GetSelectedItem(); }
 	inline UINT GetTaskCount() const { return m_taskTree.GetTaskCount(); }
-	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_taskTree.ItemHasChildren(hti); }
-	inline BOOL ItemHasParent(HTREEITEM hti) const { return (NULL != m_taskTree.ItemHasParent(hti)); }
 	inline int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
-	inline BOOL IsItemSelected(HTREEITEM hti) const { return m_taskTree.IsItemSelected(hti); }
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;
 
@@ -362,7 +357,6 @@ public:
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
-	void SelectItem(HTREEITEM hti);
 	void SelectAll();
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSlect);
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
@@ -640,6 +634,10 @@ protected:
 	inline DWORD GetTaskID(HTREEITEM hti) const { return m_taskTree.GetTaskID(hti); }
 	inline DWORD GetTrueTaskID(HTREEITEM hti) const { return m_taskTree.GetTrueTaskID(hti); }
 	inline BOOL IsTaskReference(DWORD dwTaskID) const { return m_data.IsTaskReference(dwTaskID); }
+	inline HTREEITEM GetSelectedItem() const { return m_taskTree.GetSelectedItem(); }
+	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_taskTree.ItemHasChildren(hti); }
+	inline BOOL ItemHasParent(HTREEITEM hti) const { return (NULL != m_taskTree.ItemHasParent(hti)); }
+	inline BOOL IsItemSelected(HTREEITEM hti) const { return m_taskTree.IsItemSelected(hti); }
 	
 	inline const CToDoCtrlFind& TCF() const { return m_taskTree.Find(); }
 	
@@ -831,6 +829,7 @@ protected:
 
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTrue);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
+	void SelectItem(HTREEITEM hti);
 
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL BuildTreeItem(HTREEITEM hti, const TODOSTRUCTURE* pTDS, const void* pContext);
