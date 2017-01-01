@@ -410,8 +410,7 @@ void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 
 	// draw 'delete' mark for non-empty deletable list items
 	// but not if we are a disabled simple combo
-	if (bList && !IsType(CBS_DROPDOWNLIST) && !sItem.IsEmpty() && 
-		(!IsType(CBS_SIMPLE) || IsWindowEnabled()))
+	if (bList && !sItem.IsEmpty() && AllowDelete())
 	{
 		// create font first time
 		if (m_fontClose.GetSafeHandle() == NULL)
@@ -715,12 +714,16 @@ void CAutoComboBox::ParentCBNotify(UINT nIDNotify)
 
 BOOL CAutoComboBox::AllowDelete() const 
 { 
-	if (Misc::HasFlag(m_dwFlags, ACBS_ALLOWDELETE))
+	if (IsWindowEnabled())
 	{
-		return ((GetStyle() & 0xf) != CBS_DROPDOWNLIST);
+		if (Misc::HasFlag(m_dwFlags, ACBS_ALLOWDELETE))
+		{
+			return ((GetStyle() & 0xf) != CBS_DROPDOWNLIST);
+		}
 	}
 
-	else return FALSE;
+	// all else
+	return FALSE;
 }
 
 void CAutoComboBox::SetEditMask(LPCTSTR szMask, DWORD dwMaskFlags)
