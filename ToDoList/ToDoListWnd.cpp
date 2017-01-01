@@ -1562,13 +1562,17 @@ void CToDoListWnd::OnCancel()
 
 void CToDoListWnd::OnDeleteTask() 
 {
-	if (GetToDoCtrl().GetSelectedItem())
-		GetToDoCtrl().DeleteSelectedTask();
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (!tdc.IsReadOnly() && tdc.HasSelection())
+		tdc.DeleteSelectedTask();
 }
 
 void CToDoListWnd::OnDeleteAllTasks() 
 {
-	if (GetToDoCtrl().DeleteAllTasks())
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (!tdc.IsReadOnly() && tdc.DeleteAllTasks())
 		UpdateStatusbar();
 }
 
@@ -2762,7 +2766,7 @@ void CToDoListWnd::OnUpdateEditTaskdone(CCmdUI* pCmdUI)
 	if (nSelCount == 1)
 		pCmdUI->SetCheck(tdc.IsSelectedTaskDone() ? 1 : 0);
 	
-	pCmdUI->Enable(!tdc.IsReadOnly() && tdc.GetSelectedItem());	
+	pCmdUI->Enable(!tdc.IsReadOnly() && tdc.HasSelection());	
 }
 
 void CToDoListWnd::OnUpdateDeletealltasks(CCmdUI* pCmdUI) 
@@ -5454,10 +5458,7 @@ void CToDoListWnd::OnEditPasteSub()
 
 void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	pCmdUI->Enable(tdc.CanPasteTasks(TDCP_ONSELTASK, FALSE) || 
-					Misc::ClipboardHasText());	
+	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, FALSE));	
 }
 
 BOOL CToDoListWnd::DoPasteFromClipboard(TDLID_IMPORTTO nWhere)
@@ -5490,7 +5491,7 @@ void CToDoListWnd::OnEditPasteAfter()
 	{
 		tdc.PasteTasks(nWhere, FALSE);
 	}
-	else if (Misc::ClipboardHasText())
+	else if (!tdc.IsReadOnly() && Misc::ClipboardHasText())
 	{
 		DoPasteFromClipboard(TDIT_BELOWSELECTEDTASK);
 	}
@@ -5500,15 +5501,14 @@ void CToDoListWnd::OnEditPasteAfter()
 
 void CToDoListWnd::OnUpdateEditPasteAfter(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedCount();
+	int nSelCount = GetToDoCtrl().GetSelectedCount();
 	
 	// modify the text appropriately if the tasklist is empty
 	if (nSelCount == 0)
 		pCmdUI->SetText(CEnString(IDS_PASTETOPLEVELTASK));
-	
-	pCmdUI->Enable(tdc.CanPasteTasks(((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK), FALSE) || 
-					Misc::ClipboardHasText());	
+
+	TDC_PASTE nWhere = ((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK);
+	pCmdUI->Enable(CanPasteTasks(nWhere, FALSE));	
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 
@@ -5521,9 +5521,21 @@ void CToDoListWnd::OnEditPasteAsRef()
 
 void CToDoListWnd::OnUpdateEditPasteAsRef(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, TRUE));
+}
 
-	pCmdUI->Enable(tdc.CanPasteTasks(TDCP_ONSELTASK, TRUE));
+BOOL CToDoListWnd::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
+{
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (bAsRef)
+		return tdc.CanPasteTasks(nWhere, TRUE);
+
+	if (tdc.CanPasteTasks(nWhere, FALSE))
+		return TRUE;
+
+	// else try clipboard
+	return (!tdc.IsReadOnly() && Misc::ClipboardHasText());
 }
 
 void CToDoListWnd::OnEditCopyastext() 
