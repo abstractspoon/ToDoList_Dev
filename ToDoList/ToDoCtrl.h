@@ -172,7 +172,7 @@ public:
 
 	void SetSubtaskDragDropPos(BOOL bTop = TRUE) { m_bDragDropSubtasksAtTop = bTop; }
 	BOOL SplitSelectedTask(int nNumSubtasks = 2);
-	BOOL CanSplitSelectedTask() const { return m_taskTree.CanSplitSelectedTask(); }
+	BOOL CanSplitSelectedTask() const;
 
 	inline DWORD GetSelectedTaskID() const { return m_taskTree.GetSelectedTaskID(); }
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
@@ -724,6 +724,8 @@ protected:
 	void EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly);
 	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
+
+	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
 
 	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CDlgUnits* pDLU, 
 						const CRect& rItem, int nClientRight);

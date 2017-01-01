@@ -92,11 +92,13 @@ public:
 	virtual void GetSortBy(TDSORTCOLUMNS& sort) const;
 	virtual BOOL IsMultiSorting() const;
 	virtual BOOL CanMultiSort() const;
+	virtual HTREEITEM GetUpdateControlsItem() const;
 
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
 	void SetModified(BOOL bMod = TRUE) { CToDoCtrl::SetModified(bMod); }
 	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE) { return CToDoCtrl::SetStyle(nStyle, bOn); }
 	void SetMaximizeState(TDC_MAXSTATE nState);
+	BOOL IsReadOnly() const;
 
 	BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelectedTask(TDC_MOVETASK nDirection) const;
@@ -273,6 +275,7 @@ protected:
 	BOOL InTreeView() const;
 	BOOL InExtensionView() const;
 	BOOL IsViewSet() const;
+	BOOL ViewSupportsTaskSelection(FTC_VIEW nView) const;
 
 	void UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
 	void ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, DWORD dwExtra = 0);
@@ -289,7 +292,6 @@ protected:
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib);
-	void RefreshExtensionViewSelection();
 	void SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	BOOL ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const;

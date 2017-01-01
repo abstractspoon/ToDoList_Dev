@@ -321,7 +321,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& file)
 					return FALSE;
 				
 				UpdateExtensionView(pExtWnd, file, IUI_ALL, pData->mapWantedAttrib);
-				RefreshExtensionViewSelection();
+				ResyncExtensionSelection(nView);
 
 				// mark rest of extensions needing update
 				SetExtensionsNeedUpdate(TRUE, nView);
@@ -444,10 +444,11 @@ void CTabbedToDoCtrl::UpdateVisibleColumns()
 
 IUIExtensionWindow* CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView) const
 {
-	ASSERT(nView >= FTCV_FIRSTUIEXTENSION && nView <= FTCV_LASTUIEXTENSION);
-
-	if (nView < FTCV_FIRSTUIEXTENSION || nView > FTCV_LASTUIEXTENSION)
+	if (!IsExtensionView(nView))
+	{
+		ASSERT(0);
 		return NULL;
+	}
 
 	int nExtension = (nView - FTCV_FIRSTUIEXTENSION);
 	ASSERT(nExtension < m_aExtViews.GetSize());
@@ -478,6 +479,12 @@ BOOL CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtW
 
 IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 {
+	if (!IsExtensionView(nView))
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
 	// try for existing first
 	IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 
@@ -977,13 +984,20 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		// stop any progress
-		GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, FALSE);
+		{
+			// stop any progress
+			GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, FALSE);
 
-		// resync selection
-		RefreshExtensionViewSelection();
+			// resync selection
+			ResyncExtensionSelection((FTC_VIEW)nNewView);
+		}
 		break;
 	}
+
+	// If we are switching to/from a view supporting selection 
+	// from/to a view not support selection then update controls
+	if (ViewSupportsTaskSelection((FTC_VIEW)nNewView) != ViewSupportsTaskSelection((FTC_VIEW)nOldView))
+		UpdateControls();
 
 	// notify parent
 	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
@@ -1000,58 +1014,6 @@ void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTa
 	
 	if (TDC::MapAttributesToIUIAttrib(mapAttrib, aAttrib))
 		pExtWnd->UpdateTasks(&tasks, nType, aAttrib.GetData(), aAttrib.GetSize());
-}
-
-void CTabbedToDoCtrl::RefreshExtensionViewSelection()
-{
-	FTC_VIEW nView = GetView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-	case FTCV_TASKLIST:
-		ASSERT(0);
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		{
-			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
-			ASSERT(pExtWnd && pExtWnd->GetHwnd());
-
-			CDWordArray aTaskIDs;
-			int nNumSel = CToDoCtrl::GetSelectedTaskIDs(aTaskIDs);
-
-			if (nNumSel && !pExtWnd->SelectTasks(aTaskIDs.GetData(), nNumSel))
-			{
-				if (!pExtWnd->SelectTask(aTaskIDs[0]))
-				{
-					// clear tasklist selection
-					TSH().RemoveAll();
-					UpdateControls();
-				}
-			}
-		}
-		break;
-
-	default:
-		ASSERT(0);
-	}
 }
 
 DWORD CTabbedToDoCtrl::GetSingleSelectedTaskID() const
@@ -1541,38 +1503,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
 {
-	FTC_VIEW nView = GetView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-	case FTCV_TASKLIST:
-		return TRUE;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		return TRUE;
-
-	default:
-		ASSERT(0);
-	}
-
-	return FALSE;
+	return ViewSupportsTaskSelection(GetView());
 }
 
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
@@ -2072,6 +2003,9 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 
 BOOL CTabbedToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 {
+	if (IsReadOnly())
+		return FALSE;
+
 	// Work out what to select after the deletion
 	DWORD dwNextSelID = 0;
 
@@ -2741,10 +2675,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 							if ((nAttrib == TDCA_NEWTASK) && dwTaskID)
 								pExtWnd->SelectTask(dwTaskID);
 							else
-								RefreshExtensionViewSelection();
+								ResyncExtensionSelection(nView);
 
 							EndExtensionProgress();
-							ResyncExtensionSelection(nView);
 						}
 					}
 					else
@@ -4166,6 +4099,64 @@ BOOL CTabbedToDoCtrl::ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nC
 	return FALSE;
 }
 
+BOOL CTabbedToDoCtrl::ViewSupportsTaskSelection(FTC_VIEW nView) const
+{
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		return TRUE;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			const IUIExtensionWindow* pExt = GetExtensionWnd(nView);
+			ASSERT(pExt);
+
+			if (pExt)
+				return (pExt->SupportsTaskSelection() ? TRUE : FALSE);
+		}
+		break;
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
+}
+
+// void CTabbedToDoCtrl::EnableDisableControls(HTREEITEM hti)
+// {
+// 	if (!ViewSupportsTaskSelection(GetView()))
+// 		hti = NULL;
+// 
+// 	return CToDoCtrl::EnableDisableControls(hti);
+// }
+
+HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
+{
+	HTREEITEM hti = CToDoCtrl::GetUpdateControlsItem();
+
+	if (!ViewSupportsTaskSelection(GetView()))
+		hti = NULL;
+
+	return hti;
+}
+
 void CTabbedToDoCtrl::SetFocusToTasks()
 {
 	FTC_VIEW nView = GetView();
@@ -4508,7 +4499,10 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 	IUIExtensionWindow* pExt = GetExtensionWnd(nView);
 	ASSERT(pExt);
 
-	if (pExt)
+	if (pExt == NULL)
+		return;
+
+	if (pExt->SupportsTaskSelection())
 	{
 		// Get tree selection
 		TDCSELECTIONCACHE cache;
@@ -4552,6 +4546,11 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 			UpdateControls();
 		}
 	}
+}
+
+BOOL CTabbedToDoCtrl::IsReadOnly() const
+{
+	return (CToDoCtrl::IsReadOnly()  || !ViewSupportsTaskSelection(GetView()));
 }
 
 BOOL CTabbedToDoCtrl::SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)

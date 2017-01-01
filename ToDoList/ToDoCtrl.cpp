@@ -1678,8 +1678,8 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		}
 		else
 		{
-			m_cbFileRef.SetReadOnly(bReadOnly);
 			m_cbFileRef.EnableWindow(TRUE);
+			m_cbFileRef.SetReadOnly(bReadOnly);
 		}
 		return;
 
@@ -1860,7 +1860,7 @@ void CToDoCtrl::UpdateSelectedTaskPath()
 void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 {
 	if (!hti)
-		hti = GetSelectedItem();
+		hti = GetUpdateControlsItem();
 	
 	BOOL bReadOnly = IsReadOnly();
 	CString sCommentsType(m_cfDefault);
@@ -4969,9 +4969,14 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 	return htiNew;
 }
 
+BOOL CToDoCtrl::CanSplitSelectedTask() const 
+{ 
+	return (!IsReadOnly() && m_taskTree.CanSplitSelectedTask()); 
+}
+
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 {
-	if (nNumSubtasks < 2)
+	if (!CanSplitSelectedTask() || (nNumSubtasks < 2))
 		return FALSE;
 	
 	if (!GetSelectedCount() || m_taskTree.SelectionHasReferences())
