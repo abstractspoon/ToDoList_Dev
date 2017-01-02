@@ -160,7 +160,7 @@ class CTDLWelcomeWizard : public CPropertySheetEx
 
 // Construction
 public:
-	CTDLWelcomeWizard();
+	CTDLWelcomeWizard(LPCTSTR szAppVer);
 
 // Operations
 public:
@@ -177,6 +177,7 @@ protected:
 	CTDLWelcomePage3 m_page3;
 	HFONT m_hFont;
 	CWinHelpButton m_btnHelp;
+	CString m_sTitle;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

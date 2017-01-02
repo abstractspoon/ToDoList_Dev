@@ -2074,8 +2074,14 @@
 #define IDS_OA_STATUS                   58452
 #define IDS_OA_TOTALWORK                58453
 #define IDS_UTF16                       58454
+#define IDS_GEN_RELEASE                 58454
 #define IDS_UTF8WBOM                    58455
+#define IDS_DEV_RELEASE                 58455
 #define IDS_UTF8                        58456
+#define IDS_ALPHA_RELEASE               58456
+#define IDS_BETA_RELEASE                58457
+#define IDS_RC_RELEASE                  58458
+#define IDS_SETUP_TITLE                 58459
 
 // Next default values for new objects
 // 

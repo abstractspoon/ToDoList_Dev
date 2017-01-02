@@ -535,6 +535,10 @@ SOURCE=.\TDLThemeComboBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLThreadedExporterWnd.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTimeTrackerDlg.cpp
 # End Source File
 # Begin Source File
@@ -1068,6 +1072,10 @@ SOURCE=.\TDLTaskViewListBox.h
 # Begin Source File
 
 SOURCE=.\TDLThemeComboBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLThreadedExporterWnd.h
 # End Source File
 # Begin Source File
 

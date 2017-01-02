@@ -509,7 +509,7 @@ BOOL CToDoListApp::ValidateFilePath(CString& sPath, const CString& sExt)
 // our own local version
 CString CToDoListApp::AfxGetAppName()
 {
-	return ((CToDoListWnd*)m_pMainWnd)->GetTitle();
+	return CToDoListWnd::GetTitle(FALSE);
 }
 
 void CToDoListApp::ParseCommandLine(CEnCommandLineInfo& cmdInfo)
@@ -852,7 +852,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 
 		FileMisc::LogText(_T("Neither ini file nor registry settings found -> Showing setup wizard"));
 
-		CTDLWelcomeWizard wizard;
+		CTDLWelcomeWizard wizard(CToDoListWnd::GetVersion(TRUE));
 		
 		if (wizard.DoModal() != ID_WIZFINISH)
 			return FALSE; // quit app
@@ -910,7 +910,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 				CString sUninstall;
 				sUninstall.Format(_T("\"%s\" -%s"), FileMisc::GetAppFilePath(), SWITCH_UNINSTALL);
 
-				reg.Write(_T("DisplayName"), CToDoListWnd::GetTitle());			
+				reg.Write(_T("DisplayName"), CToDoListWnd::GetTitle(TRUE));			
 				reg.Write(_T("NoModify"), 1);
 				reg.Write(_T("NoRepair"), 1);
 				reg.Write(_T("UninstallString"), sUninstall);

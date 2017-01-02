@@ -11,6 +11,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\Shared\enstring.h"
+#include "..\Shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,11 +28,13 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CTDLWelcomeWizard, CPropertySheetEx)
 
-CTDLWelcomeWizard::CTDLWelcomeWizard() 
+CTDLWelcomeWizard::CTDLWelcomeWizard(LPCTSTR szAppVer) 
 	: 
 	CPropertySheetEx(_T(""), NULL, 0),
 	m_btnHelp(IDD_WELCOME_PAGE1)
 {
+	m_sTitle.Format(_T("%s - %s"), CEnString(IDS_SETUP_TITLE), szAppVer);
+
 	InitSheet();
 }
 
@@ -47,7 +50,7 @@ void CTDLWelcomeWizard::InitSheet()
 	AddPage(&m_page2);
 	AddPage(&m_page3);
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID/* | PSH_WATERMARK*/;		
+	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID;		
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
@@ -75,6 +78,7 @@ BOOL CTDLWelcomeWizard::OnInitDialog()
 	CPropertySheetEx::OnInitDialog();
 
 	CDialogHelper::SetFont(this, m_hFont);
+	SetWindowText(m_sTitle);
 
 	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
 

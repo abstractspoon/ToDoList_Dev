@@ -89,7 +89,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int TD_VERSION = 31000;
 const int BEVEL = 3; // pixels
 const int BORDER = 3; // pixels
 const int MAX_NUM_TOOLS = 50;
@@ -425,7 +424,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACK, OnToDoCtrlNotifyTimeTrack)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnToDoCtrlNotifyViewChange)
-	ON_REGISTERED_MESSAGE(WM_TDL_GETVERSION , OnToDoListGetVersion)
 	ON_REGISTERED_MESSAGE(WM_TDL_ISCLOSING , OnToDoListIsClosing)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS , OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE , OnToDoListRestore)
@@ -727,11 +725,6 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 		FileMisc::EnableLogging(TRUE, _T("Abstractspoon"));
 	
 	return CFrameWnd::LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, NULL, NULL);
-}
-
-int CToDoListWnd::GetVersion()
-{
-	return TD_VERSION;
 }
 
 int CToDoListWnd::MessageBox(UINT nIDText, UINT nIDCaption, UINT nType, LPCTSTR szData)
@@ -1212,7 +1205,7 @@ BOOL CToDoListWnd::InitTrayIcon()
 
 	// show the upgrade message as required
 	if (m_startupOptions.HasFlag(TLD_UPGRADED))
-		m_trayIcon.ShowBalloon(CEnString(IDS_SUCCESSFUL_UPGRADE), GetTitle(), NIIF_INFO, 10);
+		m_trayIcon.ShowBalloon(CEnString(IDS_SUCCESSFUL_UPGRADE), GetTitle(TRUE), NIIF_INFO, 10);
 
 	return TRUE;
 }
@@ -2049,7 +2042,7 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
 	// version
-	prefs.WriteProfileInt(_T("Version"), _T("Version"), GetVersion());
+	prefs.WriteProfileString(_T("Version"), _T("Version"), GetVersion(FALSE));
 	
 	// last open files
 	int nCount = GetTDCCount();
@@ -3077,11 +3070,6 @@ LRESULT CToDoListWnd::OnToDoListShowWindow(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0;
 }
 
-LRESULT CToDoListWnd::OnToDoListGetVersion(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	return GetVersion();
-}
-
 LRESULT CToDoListWnd::OnToDoListRefreshPrefs(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	// sent by the app object if registry settings have changed
@@ -3858,7 +3846,7 @@ void CToDoListWnd::OnDebugEndSession()
 
 void CToDoListWnd::OnDebugShowSetupDlg() 
 { 
-	CTDLWelcomeWizard dialog;
+	CTDLWelcomeWizard dialog(CToDoListWnd::GetVersion(FALSE));
 	dialog.DoModal();
 }
 #endif
@@ -4542,17 +4530,63 @@ LRESULT CToDoListWnd::OnExportThreadFinished(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-CString CToDoListWnd::GetTitle()
+CString CToDoListWnd::GetTitle(BOOL bExtended)
 {
-	static CString sTitle(_T("ToDoList 7.2.DR0 (Development Preview)"));
+	CString sTitle;
+
+	sTitle.Format(_T("ToDoList %s"), GetVersion(bExtended));
 	CLocalizer::IgnoreString(sTitle);
 
 	return sTitle;
 }
 
+CString CToDoListWnd::GetVersion(BOOL bExtended)
+{
+	static CString sVersion("7.1");
+	CLocalizer::IgnoreString(sVersion);
+
+	if (!bExtended)
+		return sVersion;
+
+	// else extended version
+	static CString sExtVersion;
+
+	// One-time initialization
+	if (sExtVersion.IsEmpty())
+	{
+		CStringArray aVerParts;
+		UINT nReleaseStr = IDS_GEN_RELEASE;
+		
+		if (Misc::Split(sVersion, aVerParts, '.') == 3)
+		{
+			if (aVerParts[2].Find(_T("DR")) == 0)
+			{
+				nReleaseStr = IDS_DEV_RELEASE;
+			}
+			else if (aVerParts[2].Find(_T("A")) == 0)
+			{
+				nReleaseStr = IDS_ALPHA_RELEASE;
+			}
+			else if (aVerParts[2].Find(_T("B")) == 0)
+			{
+				nReleaseStr = IDS_BETA_RELEASE;
+			}
+			else if (aVerParts[2].Find(_T("RC")) == 0)
+			{
+				nReleaseStr = IDS_RC_RELEASE;
+			}
+		}
+
+		sExtVersion.Format(_T("%s (%s)"), sVersion, CEnString(nReleaseStr));
+		CLocalizer::IgnoreString(sExtVersion);
+	}
+
+	return sExtVersion;
+}
+
 void CToDoListWnd::OnAbout() 
 {
-	CTDLAboutDlg dialog(GetTitle());
+	CTDLAboutDlg dialog(GetTitle(TRUE));
 	
 	dialog.DoModal();
 }
@@ -9107,6 +9141,7 @@ void CToDoListWnd::OnExport()
 		{
 			sImgFolder = sExportPath;
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
+			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 		}
 		
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSelTDC);

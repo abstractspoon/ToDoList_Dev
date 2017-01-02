@@ -832,8 +832,7 @@ BEGIN
 END
 
 IDD_WELCOME_PAGE1 DIALOG DISCARDABLE  0, 0, 276, 139
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "ToDoList Setup"
+STYLE WS_CHILD | WS_DISABLED | WS_BORDER
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "1. Where do you want ToDoList to store your program settings ?",
@@ -1229,8 +1228,7 @@ BEGIN
 END
 
 IDD_WELCOME_PAGE2 DIALOG DISCARDABLE  0, 0, 276, 139
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "ToDoList Setup"
+STYLE WS_CHILD | WS_DISABLED | WS_BORDER
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "3. &Which columns do you initially want to see ?\n\nNote: You can modify this choice later using  'View > Select Columns'",
@@ -1241,8 +1239,7 @@ BEGIN
 END
 
 IDD_WELCOME_PAGE3 DIALOG DISCARDABLE  0, 0, 276, 139
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "ToDoList Setup"
+STYLE WS_CHILD | WS_DISABLED | WS_BORDER
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "4. Do you want to keep the user interface as simple as possible ?",
@@ -4646,7 +4643,7 @@ BEGIN
     IDS_PREF_FILEMORE       "File Actions (more)"
     IDS_PREF_FILEBACKUP     "File Actions (more)>Backup"
     IDS_PLAYSOUNDBTNTIP     "Play"
-    IDS_TDC_FIELD_DONETIME  "Compl. T&ime"
+    IDS_TDC_FIELD_DONETIME  "Completed T&ime"
     IDS_TDLBC_REMINDER      "Reminder"
     IDS_TIMEUNITS           "Time Units"
     IDS_BROWSE              "Browse"
@@ -4992,6 +4989,12 @@ BEGIN
     IDS_OA_STARTDATE        "Start Date"
     IDS_OA_STATUS           "Status"
     IDS_OA_TOTALWORK        "Total Work"
+    IDS_GEN_RELEASE         "Latest Release"
+    IDS_DEV_RELEASE         "Development Preview"
+    IDS_ALPHA_RELEASE       "Alpha Release"
+    IDS_BETA_RELEASE        "Beta Release"
+    IDS_RC_RELEASE          "Release Candidate"
+    IDS_SETUP_TITLE         "ToDoList Setup"
 END
 
 #endif    // English (Australia) resources

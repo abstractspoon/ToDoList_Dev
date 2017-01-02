@@ -51,13 +51,12 @@
 #include "..\3rdparty\statusbarACT.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoListWnd dialog
+// CToDoListWnd 
 
-const UINT WM_TDL_SHOWWINDOW = ::RegisterWindowMessage(_T("WM_TDL_SHOWWINDOW"));
-const UINT WM_TDL_GETVERSION = ::RegisterWindowMessage(_T("WM_TDL_GETVERSION"));
-const UINT WM_TDL_ISCLOSING = ::RegisterWindowMessage(_T("WM_TDL_ISCLOSING"));
-const UINT WM_TDL_REFRESHPREFS = ::RegisterWindowMessage(_T("WM_TDL_REFRESHPREFS"));
-const UINT WM_TDL_RESTORE = ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
+const UINT WM_TDL_SHOWWINDOW		= ::RegisterWindowMessage(_T("WM_TDL_SHOWWINDOW"));
+const UINT WM_TDL_ISCLOSING			= ::RegisterWindowMessage(_T("WM_TDL_ISCLOSING"));
+const UINT WM_TDL_REFRESHPREFS		= ::RegisterWindowMessage(_T("WM_TDL_REFRESHPREFS"));
+const UINT WM_TDL_RESTORE			= ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -68,8 +67,8 @@ public:
 	CToDoListWnd(); 
 	~CToDoListWnd();
 	
-	static int GetVersion();
-	static CString GetTitle();
+	static CString GetVersion(BOOL bExtended);
+	static CString GetTitle(BOOL bExtended);
 
 	BOOL Create(const CTDCStartupOptions& startup);
 
@@ -365,7 +364,6 @@ protected:
 	afx_msg LRESULT OnToDoCtrlNotifyViewChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnToDoListGetVersion(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListIsClosing(WPARAM /*wp*/, LPARAM /*lp*/) { return m_bClosing; }
 	afx_msg LRESULT OnToDoListRefreshPrefs(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListRestore(WPARAM wp, LPARAM lp);
