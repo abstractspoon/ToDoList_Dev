@@ -85,7 +85,7 @@ public:
 	CString GetXML(BOOL bPreserveWhiteSpace = TRUE) const;
 	BOOL IsValid() const;
 	BOOL Load(LPCTSTR path, BOOL bPreserveWhiteSpace = TRUE);
-	CString Transform(CXmlDocumentWrapper& xsl) const;
+	BOOL Transform(CXmlDocumentWrapper& xsl, CString& sOutput) const;
 	BOOL LoadXML(LPCTSTR xml, BOOL bPreserveWhiteSpace = TRUE);
 	BOOL Save(LPCTSTR path = _T(""), BOOL bPreserveWhiteSpace = TRUE);
 	void Reset();
