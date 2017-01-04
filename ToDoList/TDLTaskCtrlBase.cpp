@@ -3281,11 +3281,6 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 		::SetFocus(Tasks());
 		break;
 
-// 	case WM_SETREDRAW:
-// 		::SendMessage(m_lcColumns, WM_SETREDRAW, wp, lp);
-// 		::SendMessage(Tasks(), WM_SETREDRAW, wp, lp);
-// 		return 0L; // eat
-
 	case WM_LBUTTONDBLCLK:
 		{
 			CPoint ptCursor(lp);
@@ -3527,9 +3522,10 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						{
 							CClientDC dc(&m_lcColumns);
 							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
-							
 							int nColWidth = RecalcColumnWidth(nItem, &dc);
+							
 							m_hdrColumns.SetItemWidth(nItem, nColWidth);
+							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
 							
 							dc.SelectObject(pOldFont);
 						}

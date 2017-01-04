@@ -588,6 +588,7 @@ protected:
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
 	BOOL CreateNewDependentTaskBelowSelectedTask(const CString& sTitle, BOOL bEdit = TRUE);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
+	BOOL CanImportPasteFromClipboard() const;
 
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
 	void CheckMinWidth();
@@ -700,7 +701,7 @@ protected:
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
-	BOOL DoPasteFromClipboard(TDLID_IMPORTTO nWhere);
+	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	BOOL DoQueryEndSession(BOOL bQuery, BOOL bEnding);
