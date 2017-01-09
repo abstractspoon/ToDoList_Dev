@@ -744,7 +744,7 @@ void CTDLCustomAttributeDlg::OnImport()
 
 				if (UniqueIDExists(attribDef.sUniqueID))
 				{
-					if (IDYES == AfxMessageBox(IDS_IMPORTCUSTATTR_IDCOLLISION, MB_YESNO))
+					if (IDYES == AfxMessageBox(CEnString(IDS_IMPORTCUSTATTR_IDCOLLISION), MB_YESNO))
 					{
 						MakeUniqueID(attribDef.sUniqueID);
 					}

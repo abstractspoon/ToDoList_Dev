@@ -2554,6 +2554,9 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 				mapAttrib.AddAttribute((TDC_ATTRIBUTE)nAttrib);
 		}
 
+		// Add custom attributes
+		mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB);
+
 		// Include 'position' if extension supports 'unsorted'
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, IUI_NONE))
 			mapAttrib.AddAttribute(TDCA_POSITION);

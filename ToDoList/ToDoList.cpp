@@ -162,6 +162,9 @@ BOOL CToDoListApp::InitInstance()
 
 		// else strip off the restart switch and continue
 		cmdInfo.DeleteOption(SWITCH_RESTART);
+
+		// and turn on logging to capture the first run
+		FileMisc::EnableLogging(TRUE, _T("Abstractspoon"));
 	}
 
 	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
@@ -170,7 +173,7 @@ BOOL CToDoListApp::InitInstance()
 	// before anything else make sure we've got MSXML3 installed
 	if (!CXmlDocumentWrapper::IsVersion3orGreater())
 	{
-		AfxMessageBox(IDS_BADMSXML);
+		AfxMessageBox(CEnString(IDS_BADMSXML));
 		return FALSE; // quit app
 	}
 
@@ -203,7 +206,7 @@ BOOL CToDoListApp::InitInstance()
 	// commandline options
 	CTDCStartupOptions startup(cmdInfo);
 
-	if (ProcessStartupOptions(startup))
+	if (ProcessStartupOptions(startup, cmdInfo))
 		return FALSE; // quit
 
 	// if no one handled it simply create a new instance
@@ -219,7 +222,7 @@ BOOL CToDoListApp::InitInstance()
 	return FALSE; // quit app
 }
 
-BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup)
+BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo)
 {
 	// see if another instance can better handle this than us
 	HWND hwndOtherInst = NULL;
@@ -311,16 +314,41 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup)
 
 		return TRUE; // to quit this instance
 	}
-
-	// Under multi-instance, if nothing has been provided on the 
-	// commandline then open the new instance 'empty'
-	// ie. if someone double-clicked in explorer
 	ASSERT(bMultiInstance);
 
-	if (startup.IsEmpty(TRUE))
-		startup.ModifyFlags(0, TLD_STARTEMPTY); 
+	// To prevent the unexpected consequences of opening the
+	// previously open tasklists in multiple instances we check:
+	//
+	// 1. Do we have our own ini file
+	if (FileMisc::FileExists(cmdInfo.GetOption(SWITCH_INIFILE)))
+	{
+		// All good
+	}
+	// 2. Do we have our own tasklist(s)
+	else if (startup.HasFilePath())
+	{
+		// All good
+	}
+	// 3. Do we have a unique filepath
+	else
+	{
+		CString sThisModulePath = FileMisc::GetAppFilePath();
 
-	return FALSE; // not handled
+		for (int nWnd = 0; nWnd < nNumWnds; nWnd++)
+		{
+			HWND hWnd = find.aResults[nWnd];
+			CString sOtherModulePath = FileMisc::GetWindowModuleFilePath(hWnd);
+
+			if (FileMisc::IsSamePath(sThisModulePath, sOtherModulePath))
+			{
+				// No, so we start this instance empty
+				startup.ModifyFlags(0, TLD_STARTEMPTY); 
+				break;
+			}
+		}
+	}
+
+	return FALSE; // no need to quit
 }
 
 BOOL CToDoListApp::SendStartupOptions(HWND hWnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg)
@@ -355,20 +383,86 @@ BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
 	
 	// Preferred default location is app folder for portability
 	CString sExeIniPath = FileMisc::ReplaceExtension(sExePath, _T("ini"));
-	CString sTestIniPath;
 	
+	// However may already be in AppData/Roaming from previous version
+	CString sAppDataIniPath;
+	VERIFY (FileMisc::GetSpecialFilePath(CSIDL_APPDATA, APPDATAINI, sAppDataIniPath));
+
+	BOOL bHasAppDataIni = FileMisc::FileExists(sAppDataIniPath);
+	BOOL bHasExeIni = FileMisc::FileExists(sExeIniPath);
+	
+	CString sTestIni;
+
+	if (bHasExeIni && bHasAppDataIni)
+	{
+		// Prefer most recently modified file
+		if (FileMisc::GetFileLastModified(sExeIniPath) > 
+			FileMisc::GetFileLastModified(sAppDataIniPath))
+		{
+			sTestIni = sExeIniPath;
+		}
+		else
+		{
+			sTestIni = sAppDataIniPath;
+		}
+		
+		FileMisc::LogText(_T("Using newer ini '%s'\n"), sTestIni);
+	}
+	else if (bHasExeIni)
+	{
+		sTestIni = sExeIniPath;
+	}
+	else if (bHasAppDataIni)
+	{
+		sTestIni = sAppDataIniPath;
+	}
+	else if (FileMisc::IsFolderWritable(sExeFolder))
+	{
+		sTestIni = sExeIniPath;
+	}
+	else
+	{
+		sTestIni = sAppDataIniPath;
+	}
+
+	if (ValidateIniPath(sTestIni, bCheckExists))
+	{
+
+		sIniPath = sTestIni;
+		return TRUE;
+	}
+	
+	// else
+	return FALSE;
+}
+
+/*
+BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
+{
+	CString sExePath = FileMisc::GetAppFilePath();
+	CString sExeFolder = FileMisc::GetAppFolder();
+	
+	// Preferred default location is app folder for portability
+	CString sExeIniPath = FileMisc::ReplaceExtension(sExePath, _T("ini"));
+	CString sTestIniPath;
+
 	if (FileMisc::IsFolderWritable(sExeFolder))
 	{
 		sTestIniPath = sExeIniPath;
 	}
 	else
 	{
+		FileMisc::LogText(_T("Exe folder '%s' is not writable\n"), sExeFolder);
+
+
 		// May already be in AppData/Roaming which is the fallback
 		CString sAppDataIniPath;
 		VERIFY (FileMisc::GetSpecialFilePath(CSIDL_APPDATA, APPDATAINI, sAppDataIniPath));
 
 		if (!FileMisc::FileExists(sAppDataIniPath))
 		{
+			FileMisc::LogText(_T("AppData ini '%s' does not exist\n"), sExeFolder);
+
 			// If NOT it may already have been virtualised
 			CString sVirtualisedIni, sExistingIni;
 			FileMisc::GetVirtualStorePath(sExeIniPath, sVirtualisedIni);
@@ -382,29 +476,38 @@ BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
 				if (FileMisc::GetFileLastModified(sExeIniPath) > 
 					FileMisc::GetFileLastModified(sVirtualisedIni))
 				{
+					FileMisc::LogText(_T("Copying existing ini '%s' to '%s'\n"), sExeIniPath, sAppDataIniPath);
+
 					sExistingIni = sExeIniPath;
 				}
 				else
 				{
+					FileMisc::LogText(_T("Copying virtualised ini '%s' to '%s'\n"), sVirtualisedIni, sAppDataIniPath);
+
 					sExistingIni = sVirtualisedIni;
 				}
 			}
 			else if (bHasExeIni)
 			{
+				FileMisc::LogText(_T("Copying existing ini '%s' to '%s'\n"), sExeIniPath, sAppDataIniPath);
+
 				sExistingIni = sExeIniPath;
 			}
 			else if (bHasVirtualisedIni)
 			{
+				FileMisc::LogText(_T("Copying virtualised ini '%s' to '%s'\n"), sVirtualisedIni, sAppDataIniPath);
+
 				sExistingIni = sVirtualisedIni;
 			}
 
 			if (!sExistingIni.IsEmpty())
 			{
-				FileMisc::CreateFolderFromFilePath(sAppDataIniPath);
-				
-				if (FileMisc::CopyFile(sExistingIni, sAppDataIniPath, FALSE, TRUE))
+				if (FileMisc::CreateFolderFromFilePath(sAppDataIniPath))
 				{
-					FileMisc::DeleteFile(sExistingIni, TRUE);
+					if (FileMisc::CopyFile(sExistingIni, sAppDataIniPath, FALSE, TRUE))
+					{
+						FileMisc::DeleteFile(sExistingIni, TRUE);
+					}
 				}
 			}
 		}
@@ -421,6 +524,7 @@ BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
 	// else
 	return FALSE;
 }
+*/
 
 BOOL CToDoListApp::ValidateIniPath(CString& sFilePath, BOOL bCheckExists)
 {
@@ -448,7 +552,10 @@ BOOL CToDoListApp::ValidateIniPath(CString& sFilePath, BOOL bCheckExists)
 	FileMisc::CreateFolder(sIniFolder);
 	::SetFileAttributes(sIniFolder, FILE_ATTRIBUTE_NORMAL);
 		
-	if (FileMisc::IsFolderWritable(sIniFolder))
+	// Note: If the ini file already exists in a non-writable folder
+	// (eg. Program Files) then Windows will allow us to carry on
+	// using it even though backing up the ini will fail.
+	if (bFileExists || FileMisc::IsFolderWritable(sIniFolder))
 	{
 		sFilePath = sIniPath;
 		return TRUE;
@@ -1450,14 +1557,14 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 			// if this is windows 8 or above, assume 
 			// this was blocked by SmartScreen
 			if (COSVersion() >= OSV_WIN8)
-				AfxMessageBox(nIDSmartScreenErrorMsg);
+				AfxMessageBox(CEnString(nIDSmartScreenErrorMsg));
 
 			// else fall thru
 			break;
 		}
 
 		// all else
-		AfxMessageBox(nIDGenErrorMsg);
+		AfxMessageBox(CEnString(nIDGenErrorMsg));
 	}
 
 	return dwRes;

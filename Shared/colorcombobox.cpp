@@ -38,6 +38,9 @@ END_MESSAGE_MAP()
 void CColorComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								  DWORD dwItemData, const CString& sItem, BOOL bList)
 {
+	if (nItem == -1)
+		return;
+
 	CDlgUnits dlu(this, TRUE);
 	CRect rColor(rect), rText(rect);
 	

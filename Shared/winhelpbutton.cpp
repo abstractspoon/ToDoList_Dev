@@ -100,7 +100,7 @@ int CWinHelpButton::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CIconButton::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!s_sDefTooltip.IsEmpty());
+	if (!s_sDefTooltip.IsEmpty())
 		CIconButton::SetTooltip(s_sDefTooltip);
 
 	return 0;

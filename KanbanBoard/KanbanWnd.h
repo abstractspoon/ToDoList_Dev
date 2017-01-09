@@ -54,7 +54,6 @@ public:
 
 	bool SelectTask(DWORD dwTaskID);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-	bool SupportsTaskSelection() const { return true; }
 
 	bool ProcessMessage(MSG* pMsg);
 
@@ -119,7 +118,7 @@ protected:
 
 protected:
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateKanbanCtrlPreferences();
+	void UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled);
 	void SendParentSelectionUpdate();
 	void EnableDisableCtrls();
 	void BuildOptionsCombo();

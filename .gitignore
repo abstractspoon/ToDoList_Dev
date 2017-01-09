@@ -255,3 +255,8 @@ paket-files/
 .idea/
 *.sln.iml
 *.bak
+*.pdn
+*.db
+*.vsscc
+*.ini
+*.zip

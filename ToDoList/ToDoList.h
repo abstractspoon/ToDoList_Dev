@@ -86,7 +86,7 @@ protected:
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller();
 	void RunUpdater(BOOL bPreRelease);
-	BOOL ProcessStartupOptions(CTDCStartupOptions& startup);
+	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo);
 	
 	TDL_WEBUPDATE_CHECK CheckForUpdates(BOOL bManual);
 

@@ -320,7 +320,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		UpdateData(FALSE);
 
 		EnableDisableCtrls();
-		UpdateKanbanCtrlPreferences();
+		UpdateKanbanCtrlPreferences(FALSE);
 	}
 }
 
@@ -679,7 +679,7 @@ void CKanbanWnd::OnSetFocus(CWnd* pOldWnd)
 	m_ctrlKanban.SetFocus();
 }
 
-void CKanbanWnd::UpdateKanbanCtrlPreferences()
+void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 {
 	m_ctrlKanban.SetOption(KBCF_ALWAYSSHOWBACKLOG, m_dlgPrefs.GetAlwaysShowBacklog());
 	m_ctrlKanban.SetOption(KBCF_SHOWTASKCOLORASBAR, m_dlgPrefs.GetShowTaskColorAsBar());
@@ -689,8 +689,19 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences()
 
 	// If the user was previously tracking fixed columns
 	// but has now deleted them then we revert to 'status'
-	if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
-		m_nTrackedAttrib = IUI_STATUS;
+	if (bFixedColumnsToggled)
+	{
+		if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
+		{
+			m_nTrackedAttrib = IUI_STATUS;
+			UpdateData(FALSE);
+		}
+		else if ((m_nTrackedAttrib != IUI_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
+		{
+			m_nTrackedAttrib = (IUI_ATTRIBUTE)IUI_FIXEDCOLUMNS;
+			UpdateData(FALSE);
+		}
+	}
 
 	ProcessTrackedAttributeChange();
 
@@ -778,10 +789,14 @@ void CKanbanWnd::OnKanbanPreferences()
 
 	CKanbanAttributeArray aDisplayAttrib;
 	m_ctrlKanban.GetDisplayAttributes(aDisplayAttrib);
+
+	// If the user creates fixed column defs for the first time
+	// we will automatically turn them on
+	BOOL bHadFixedColumns = m_dlgPrefs.HasFixedColumns();
 	
 	if (m_dlgPrefs.DoModal(aCustAttribIDs, mapValues, aDisplayAttrib) == IDOK)
 	{
-		UpdateKanbanCtrlPreferences();
+		UpdateKanbanCtrlPreferences(bHadFixedColumns != m_dlgPrefs.HasFixedColumns());
 		Resize();
 
 		m_ctrlKanban.SetFocus();
