@@ -2423,18 +2423,10 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 	case TDCA_DELETE:
 		// Deletion operations are fairly quick so we do those 
 		// even if the List View is not active
-		if (dwTaskID)
-		{
-			m_taskList.DeleteItem(dwTaskID);
-		}
-		else if (m_taskTree.GetItemCount())
-		{
+		if (m_taskTree.GetItemCount())
 			m_taskList.RemoveDeletedItems();
-		}
 		else
-		{
 			m_taskList.DeleteAll();
-		}
 		break;
 
 	case TDCA_ARCHIVE:

@@ -466,8 +466,9 @@ protected:
 	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 								TDC_COLUMN nColID, CDC* pDC, const CRect& rSubItem, COLORREF crText);
-	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE);
 	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, BOOL bChecked);
+	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
+						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);
 
 	inline BOOL HasColor(COLORREF color) const { return (color != CLR_NONE); }
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }

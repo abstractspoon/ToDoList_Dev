@@ -709,6 +709,8 @@ void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 			m_lcColumns.SetSelectionMark(nItem);
 		}
 	}
+
+	m_lcColumns.Invalidate(FALSE);
 }
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)

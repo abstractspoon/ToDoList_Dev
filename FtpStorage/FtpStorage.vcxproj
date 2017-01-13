@@ -163,10 +163,6 @@ copy unicode_debug\ftpstorage.dll ..\todolist\unicode_debug /y
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FtpStorage.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="FtpTasklistStorage.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -190,7 +186,6 @@ copy unicode_debug\ftpstorage.dll ..\todolist\unicode_debug /y
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FtpStorage.h" />
     <ClInclude Include="FtpTasklistStorage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />

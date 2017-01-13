@@ -369,19 +369,6 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 								dwTaskID);
 }
 
-BOOL CTDLTaskListCtrl::DeleteItem(DWORD dwTaskID)
-{
-	int nDelItem = FindTaskItem(dwTaskID);
-	
-	if (nDelItem != -1)
-	{
-		m_lcTasks.DeleteItem(nDelItem);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 {
 	if (pLVDI->hdr.hwndFrom == m_lcTasks)
@@ -393,15 +380,18 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 			ASSERT(pTDI);
 
-			pLVDI->item.pszText = (LPTSTR)(LPCTSTR)pTDI->sTitle;
-
-			// Hack to get tooltip delays consistent across all task views
-			HWND hwndTooltip = (HWND)m_lcTasks.SendMessage(LVM_GETTOOLTIPS);
-
-			if (hwndTooltip)
+			if (pTDI)
 			{
-				::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_INITIAL, MAKELPARAM(50, 0));
-				::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(10000, 0));
+				pLVDI->item.pszText = (LPTSTR)(LPCTSTR)pTDI->sTitle;
+
+				// Hack to get tooltip delays consistent across all task views
+				HWND hwndTooltip = (HWND)m_lcTasks.SendMessage(LVM_GETTOOLTIPS);
+
+				if (hwndTooltip)
+				{
+					::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_INITIAL, MAKELPARAM(50, 0));
+					::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(10000, 0));
+				}
 			}
 		}
 

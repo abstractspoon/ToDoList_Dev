@@ -12,7 +12,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-LPCTSTR ALTINDENT = _T("[optional] ");
+static CString ALTINDENT = _T("[optional] ");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -124,6 +124,16 @@ BOOL CTDLTransEditListCtrl::RebuildList(const CTransDictionary& dict, BOOL bShow
 	SetColumnWidths(nWidths);
 
 	return TRUE;
+}
+
+CString CTDLTransEditListCtrl::GetEnglishText(int nItem) const
+{
+	CString sEnglish = GetItemText(nItem, ENG_COL);
+
+	if (sEnglish.Find(ALTINDENT) == 0)
+		sEnglish = sEnglish.Mid(ALTINDENT.GetLength());
+
+	return sEnglish;
 }
 
 BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sFilter)

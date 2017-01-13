@@ -42,17 +42,20 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904B0"
+        BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "TDLUpdate MFC Application\0"
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "AbstractSpoon Software\0"
+            VALUE "FileDescription", "TDLUpdate\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
             VALUE "InternalName", "TDLUpdate\0"
-            VALUE "LegalCopyright", "Copyright (C) 2014\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2015-17\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "TDLUpdate.EXE\0"
-            VALUE "ProductName", "TDLUpdate Application\0"
+            VALUE "OriginalFilename", "TDLUpdate.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "TDLUpdate\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"

@@ -4352,7 +4352,9 @@ BEGIN
     IDR_MAINFRAME           "ToDoList (c) AbstractSpoon"
     IDS_SAMPLETASK          "Sample Task"
     IDS_BACKUPFILEFOUND     "ToDoList has detected a backup version of file '%s', \nwhich suggests that there was previously a problem saving the tasklist.\n\nWould you like to restore the backup?"
-    IDS_SAMPLETEXT          "Sample Text"
+    IDS_COLOR_SAMPLETEXT    "Sample Text"
+    IDS_COLOR_AUTOMATIC     "Automatic"
+    IDS_COLOR_MORECOLORS    "More Colours..."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4473,6 +4475,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FIND_TITLE          "Find In Comments"
     IDS_REPLACE_TITLE       "Replace In Comments"
+    IDS_CAD_BROWSEIMAGES    "Images..."
+    IDS_CAD_INSERTSYMBOL    "Symbols..."
 END
 
 STRINGTABLE DISCARDABLE 

@@ -23,6 +23,7 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\localizer.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\itasklist.h"
@@ -82,6 +83,12 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 
 	// add custom protocol to comments field for linking to task IDs
 	m_rtf.AddProtocol(TDL_PROTOCOL, TRUE);
+
+	CString sTooltip;
+	sTooltip.LoadString(ID_HELP);
+	Misc::Trim(sTooltip);
+
+	CWinHelpButton::SetDefaultTooltip(CLocalizer::TranslateText((LPCTSTR)sTooltip));
 }
 
 CRTFContentControl::~CRTFContentControl()
@@ -428,7 +435,7 @@ void CRTFContentControl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 void CRTFContentControl::InitShortcutManager()
 {
-	if (!m_mgrShortcuts.Initialize(this, NULL, 0))
+	if (!m_mgrShortcuts.Initialize(this, NULL, NULL, 0))
 		return;
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYFORMATTING,	'C',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
@@ -525,8 +532,8 @@ BOOL CRTFContentControl::GetClipboardHtmlForPasting(CString& sHtml, CString& sSo
 		if (!sHtml.IsEmpty())
 		{
 #ifdef _UNICODE
-			// convert back to Ansi for translation
-			Misc::EncodeAsMultiByte(sHtml);
+			// convert back to UTF8 for translation
+			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
 #endif
 			return TRUE;
 		}

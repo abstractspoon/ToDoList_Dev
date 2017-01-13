@@ -553,6 +553,11 @@ BEGIN
     ID_HELP                 "\nOnline Help"
 END
 
+STRINGTABLE
+BEGIN
+    ID_EDIT_INLINESPELLCHECK "\nInline Spell Checking"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

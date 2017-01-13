@@ -2594,7 +2594,8 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			double dDate = TDCCADATA(sTaskColText).AsDate();
 			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate);
 
-			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, attribDef.HasFeature(TDCCAF_SHOWTIME));
+			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
+							attribDef.HasFeature(TDCCAF_SHOWTIME), attribDef.nTextAlignment);
 		}
 		break;
 		
@@ -2725,28 +2726,64 @@ BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CStr
 	return FALSE;
 }
 
-void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime)
+void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, 
+										COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime, int nAlign)
 {
-	if (!CDateHelper::IsDateSet(date)) 
-		return; // nothing to do
-	
 	CString sDate, sTime, sDow;
-	CRect rDraw(rect);
-	
+
 	if (!FormatDate(date, nDate, sDate, sTime, sDow, bCustomWantsTime))
 		return; // nothing to do
 	
-	// calculate max date widths for aligning the various parts
+	// Work out how much space we need
 	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);
 	
 	CString sDateMax, sTimeMax, sDummy;
 	FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDummy, bCustomWantsTime);
 	
-	// also compensate for the padding that happens inside DrawGutterItemText
-	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+	// Always want date
+	int nMaxDate = pDC->GetTextExtent(sDateMax).cx, nReqWidth = nMaxDate;
+
+	// If there's too little space even for the date then 
+	// switch to left alignment so that the month and day are visible
+	BOOL bWantDrawTime = FALSE, bWantDrawDOW = FALSE;
+	int nMaxTime = 0, nMaxDOW = 0;
+	int nDateAlign = DT_RIGHT;
+
+	if (nReqWidth > rect.Width())
+	{
+		nDateAlign = DT_LEFT;
+	}
+	else
+	{
+		int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+
+		nReqWidth += nSpace;
+		nMaxDate += nSpace;
+
+		// Check for time
+		if (WantDrawColumnTime(nDate, bCustomWantsTime))
+		{
+			nMaxTime = (pDC->GetTextExtent(sTimeMax).cx + nSpace);
+
+			if ((nReqWidth + nMaxTime) < rect.Width())
+			{	
+				nReqWidth += nMaxTime;
+				bWantDrawTime = TRUE;
+			}
+		}
 	
-	int nMaxDate = (pDC->GetTextExtent(sDateMax).cx + nSpace);
-	int nMaxTime = (pDC->GetTextExtent(sTimeMax).cx + nSpace);
+		// Check for day of week
+		if (!sDow.IsEmpty())
+		{
+			nMaxDOW = (CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE) + nSpace);
+
+			if ((nReqWidth + nMaxDOW) < rect.Width())
+			{
+				nReqWidth += nMaxDOW;
+				bWantDrawDOW = TRUE;
+			}
+		}
+	}
 	
 	// Draw calculated dates in a lighter colour
 	if (bCalculated && !Misc::IsHighContrastActive())
@@ -2755,8 +2792,26 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		crText = GraphicsMisc::Lighter(crText, 0.5);
 	}
 
-	// draw time
-	if (WantDrawColumnTime(nDate, bCustomWantsTime))
+	// We always draw from the right and with each component 
+	// aligned to the right
+	CRect rDraw(rect);
+
+	switch (nAlign)
+	{
+	case DT_LEFT:
+		rDraw.right = min(rDraw.right, (rDraw.left + nReqWidth));
+		break;
+
+	case DT_RIGHT:
+		break;
+
+	case DT_CENTER:
+		rDraw.right = min(rDraw.right, (rDraw.CenterPoint().x + (nReqWidth / 2)));
+		break;
+	}
+
+	// draw time first
+	if (bWantDrawTime)
 	{
 		// if NO time component, render 'default' start and due time 
 		// in a lighter colour to indicate it wasn't user-set
@@ -2787,11 +2842,11 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		}
 	}
 	
-	DrawColumnText(pDC, sDate, rDraw, TA_RIGHT, crText);
+	DrawColumnText(pDC, sDate, rDraw, nDateAlign, crText);
 	rDraw.right -= nMaxDate;
 	
 	// then dow
-	if (!sDow.IsEmpty())
+	if (bWantDrawDOW)
 		DrawColumnText(pDC, sDow, rDraw, TA_RIGHT, crText);
 }
 
@@ -4044,7 +4099,15 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		
 	case TDCA_TASKNAMEORCOMMENTS:
 	case TDCA_ANYTEXTATTRIBUTE:
+		ASSERT(0);
+		break;
+
 	default:
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+		{
+			nRecalcColID = TDCC_ALL;
+			break;
+		}
 		ASSERT(0);
 		break;
 	}

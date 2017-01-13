@@ -610,7 +610,9 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	InitEditPrompts();
 
-	m_cpColour.SetWindowText(CString((LPCTSTR)IDS_SAMPLETEXT));
+	m_cpColour.SetWindowText(CEnString(IDS_COLOR_SAMPLETEXT));
+	m_cpColour.SetDefaultText(CEnString(IDS_COLOR_AUTOMATIC));
+	m_cpColour.SetCustomText(CEnString(IDS_COLOR_MORECOLORS));
 	
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
@@ -2372,7 +2374,8 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	
 	if (nRes == SET_CHANGE)
 	{
- 		SetModified(TRUE, TDCA_CUSTOMATTRIB, dwModTaskID);
+		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sAttribID, m_aCustomAttribDefs);
+ 		SetModified(TRUE, nAttrib, dwModTaskID);
 
 		// update UI except if it's already up to date
 		CUSTOMATTRIBCTRLITEM ctrl;
@@ -5164,7 +5167,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	DWORD dwDelTaskID = ((nSelCount == 1) ? GetTaskID(selection.GetHead()) : 0);
 
 	{
-		HOLD_REDRAW(NULL, m_taskTree.Tree());
+		HOLD_REDRAW(NULL, m_taskTree.GetSafeHwnd());
 		POSITION pos = selection.GetHeadPosition();
 
 		while (pos)

@@ -1045,7 +1045,7 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 
 		CXmlItem* pXIAttribDef = AddItem(TDL_CUSTOMATTRIBDEFS);
 
-		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBID, attribDef.sUniqueID);
+		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBID, Misc::ToUpper(attribDef.sUniqueID));
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLABEL, attribDef.sLabel);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLTITLE, attribDef.sColumnTitle);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)attribDef.GetAttributeType());
@@ -1106,7 +1106,9 @@ CXmlItem* CTaskFile::GetCustomAttributeDef(const CString& sCustID)
 	
 	while (pXIAttribDef)
 	{
-		if (sCustID.CompareNoCase(pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID)) == 0)
+		CString sAttribDefID(pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID));
+
+		if (sCustID.CompareNoCase(sAttribDefID) == 0)
 			return pXIAttribDef;
 		
 		// next sibling

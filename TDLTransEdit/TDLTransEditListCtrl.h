@@ -31,6 +31,7 @@ public:
 	void RecalcColumnWidths();
 	void SetSortUntranslatedAtTop(BOOL bEnable);
 	void Sort();
+	CString GetEnglishText(int nItem) const;
 
 protected:
 	BOOL m_bSortUntranslatedAtTop;

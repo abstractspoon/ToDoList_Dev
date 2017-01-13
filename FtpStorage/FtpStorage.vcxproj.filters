@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FtpStorage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FtpTasklistStorage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,9 +39,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FtpStorage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FtpTasklistStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>

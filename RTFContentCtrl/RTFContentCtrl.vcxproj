@@ -231,6 +231,7 @@ copy unicode_release\rtfcontentctrl.dll ..\todolist\unicode_release /y
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\RTFContentCtrl.rc2" />
     <None Include="toolbar.bmp" />
