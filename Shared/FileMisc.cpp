@@ -810,10 +810,6 @@ BOOL FileMisc::CreateFolder(LPCTSTR szFolder)
 			bResult = FALSE;
 		}
 	}
-	}
-
-	if (!bResult)
-		LogText(_T("FileMisc::CreateFolder(%s) failed\n"), szFolder);
 
 	if (!bResult)
 		LogText(_T("FileMisc::CreateFolder(%s) failed\n"), szFolder);
