@@ -2139,7 +2139,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		{
 			TDC_COLUMN nColID = TDCC_NONE;
 			CPoint ptCursor(::GetMessagePos());
-
+			
 			int nHit = HitTestColumnsItem(ptCursor, FALSE, nColID);
 			
 			if (ItemColumnSupportsClickHandling(nHit, nColID, &ptCursor))
@@ -2942,7 +2942,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 										COLORREF crText, BOOL bCalculated, BOOL bCustomWantsTime, int nAlign)
 {
 	CString sDate, sTime, sDow;
-	
+
 	if (!FormatDate(date, nDate, sDate, sTime, sDow, bCustomWantsTime))
 		return; // nothing to do
 	
@@ -2967,8 +2967,8 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	}
 	else
 	{
-	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
-	
+		int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+
 		nReqWidth += nSpace;
 		nMaxDate += nSpace;
 
@@ -4146,7 +4146,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		if (pCursor)
 			bSupported = (HitTestFileLinkColumn(*pCursor) != -1);
 		else
-		bSupported = m_data.TaskHasFileRef(dwTaskID);
+			bSupported = m_data.TaskHasFileRef(dwTaskID);
 		break;
 			
 	case TDCC_DEPENDENCY:

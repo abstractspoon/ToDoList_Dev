@@ -204,7 +204,11 @@ namespace FileMisc
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
 	CString GetWindowModuleFilePath(HWND hWnd);
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> origin/master
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);
 	CString GetAppResourceFolder(LPCTSTR szResFolder = _T("Resources"));

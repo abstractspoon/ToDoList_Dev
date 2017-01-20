@@ -808,8 +808,12 @@ BOOL FileMisc::CreateFolder(LPCTSTR szFolder)
 		{
 			LogText(_T("::CreateDirectory(%s) failed\n"), sFolder);
 			bResult = FALSE;
+		}
 	}
 	}
+
+	if (!bResult)
+		LogText(_T("FileMisc::CreateFolder(%s) failed\n"), szFolder);
 
 	if (!bResult)
 		LogText(_T("FileMisc::CreateFolder(%s) failed\n"), szFolder);
@@ -1526,12 +1530,12 @@ CString FileMisc::GetModuleFilePath(HMODULE hMod)
 	CString sModulePath;
 
 	BOOL bSuccess = ::GetModuleFileName(hMod, sModulePath.GetBuffer(MAX_PATH+1), MAX_PATH);
-   sModulePath.ReleaseBuffer();
+	sModulePath.ReleaseBuffer();
 
-   ASSERT(bSuccess);
+	ASSERT(bSuccess);
 
-   if (!bSuccess || !CanonicalizePath(sModulePath))
-      return _T("");
+	if (!bSuccess || !CanonicalizePath(sModulePath))
+		return _T("");
 
 	return sModulePath;
 }

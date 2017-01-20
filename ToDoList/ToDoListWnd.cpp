@@ -4957,7 +4957,7 @@ void CToDoListWnd::UpdateGlobalHotkey()
 void CToDoListWnd::RefreshPauseTimeTracking()
 {
 	BOOL bPauseAll = (((m_wndSessionStatus.IsLocked() || m_wndSessionStatus.IsScreenSaverActive()) && !Prefs().GetTrackOnScreenSaver()) || 
-					  (m_wndSessionStatus.IsHibernated() && !Prefs().GetTrackHibernated()));
+					       (m_wndSessionStatus.IsHibernated() && !Prefs().GetTrackHibernated()));
 
 	BOOL bTrackActiveOnly = !Prefs().GetTrackNonActiveTasklists();
 	int nCtrl = GetTDCCount();
@@ -5493,7 +5493,7 @@ void CToDoListWnd::OnEditPasteSub()
 
 void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, FALSE));	
+	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, FALSE));
 }
 
 BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
@@ -5519,12 +5519,12 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 void CToDoListWnd::OnEditPasteAfter() 
 {
 	CWaitCursor wait;
-
+	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelCount = tdc.GetSelectedCount();
-
+	
 	TDC_PASTE nWhere = ((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK);
-
+	
 	if (tdc.CanPasteTasks(nWhere, FALSE))
 	{
 		tdc.PasteTasks(nWhere, FALSE);
