@@ -1073,7 +1073,7 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 
 		CXmlItem* pXIAttribDef = AddItem(TDL_CUSTOMATTRIBDEFS);
 
-		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBID, attribDef.sUniqueID);
+		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBID, Misc::ToUpper(attribDef.sUniqueID));
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLABEL, attribDef.sLabel);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLTITLE, attribDef.sColumnTitle);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)attribDef.GetAttributeType());
@@ -1134,7 +1134,9 @@ CXmlItem* CTaskFile::GetCustomAttributeDef(const CString& sCustID)
 	
 	while (pXIAttribDef)
 	{
-		if (sCustID.CompareNoCase(pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID)) == 0)
+		CString sAttribDefID(pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID));
+
+		if (sCustID.CompareNoCase(sAttribDefID) == 0)
 			return pXIAttribDef;
 		
 		// next sibling
@@ -2042,7 +2044,7 @@ HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID)
 		pXIParent->AddItem(pXINew);
 		AddTaskToMap(pXINew, FALSE, FALSE);
 
-		// set ID and name
+		// Set name, ID and creation date
 		SetTaskTitle((HTASKITEM)pXINew, szTitle);
 
 		if (dwID <= 0)
@@ -2051,6 +2053,7 @@ HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID)
 			m_dwNextUniqueID = max(m_dwNextUniqueID, dwID + 1);
 
 		SetTaskID((HTASKITEM)pXINew, dwID);
+		SetTaskCreationDate((HTASKITEM)pXINew, COleDateTime::GetCurrentTime());
 	}
 
 	return (HTASKITEM)pXINew;

@@ -151,9 +151,6 @@ void CTDLTaskListCtrl::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 	{
 	case TDCS_SHOWINFOTIPS:
 		ListView_SetExtendedListViewStyleEx(m_lcTasks, LVS_EX_INFOTIP, (bOn ? LVS_EX_INFOTIP : 0));
-		
-		if (bOn)
-			PrepareInfoTip((HWND)m_lcTasks.SendMessage(LVM_GETTOOLTIPS));
 		break;
 	}
 
@@ -369,19 +366,6 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 								dwTaskID);
 }
 
-BOOL CTDLTaskListCtrl::DeleteItem(DWORD dwTaskID)
-{
-	int nDelItem = FindTaskItem(dwTaskID);
-	
-	if (nDelItem != -1)
-	{
-		m_lcTasks.DeleteItem(nDelItem);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 {
 	if (pLVDI->hdr.hwndFrom == m_lcTasks)
@@ -393,6 +377,8 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 			ASSERT(pTDI);
 
+			if (pTDI)
+			{
 			pLVDI->item.pszText = (LPTSTR)(LPCTSTR)pTDI->sTitle;
 
 			// Hack to get tooltip delays consistent across all task views
@@ -403,6 +389,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 				::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_INITIAL, MAKELPARAM(50, 0));
 				::SendMessage(hwndTooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, MAKELPARAM(10000, 0));
 			}
+		}
 		}
 
 		if (pLVDI->item.mask & LVIF_IMAGE)
@@ -463,16 +450,6 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 				switch (pNMHDR->code)
 				{
-// 				case NM_CLICK:
-// 				case NM_DBLCLK:
-// 					{
-// 						NMITEMACTIVATE* pNMIA = (NMITEMACTIVATE*)pNMHDR;
-// 
-// 						if (HandleClientColumnClick(pNMIA->ptAction, (pNMHDR->code == NM_DBLCLK)))
-// 							return 0L; // eat
-// 					}
-// 					break;
-
  				case LVN_BEGINLABELEDIT:
 					// always eat this because we handle it ourselves
  					return 1L;
@@ -548,6 +525,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				break;
 				
 			case TTN_NEEDTEXT:
+				if (hwnd == m_hdrTasks)
 				{
 					// this has a nasty habit of redrawing the current item label
 					// even when a tooltip is not displayed which caused any
