@@ -930,7 +930,7 @@ int CTaskFile::GetMetaData(CMapStringToString& mapMetaData) const
 	return GetMetaData(Root(), mapMetaData);
 }
 
-BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
+BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
 	// delete old visibility settings
 	DeleteItem(TDL_ATTRIBVIS);
@@ -948,8 +948,8 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
 		pXIVis->AddItem(TDL_ATTRIBVISCOL, nColID, XIT_ELEMENT);
 	}
 
-	TDL_SHOWATTRIB nShow = vis.GetShowEditsAndFilters();
-	pXIVis->AddItem(TDL_ATTRIBVISSHOWEDITFILTER, nShow);
+	TDL_SHOWATTRIB nShow = vis.GetShowFields();
+	pXIVis->AddItem(TDL_ATTRIBVISSHOWFIELDS, nShow);
 
 	if (nShow == TDLSA_ANY)
 	{
@@ -962,22 +962,12 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
 			TDC_ATTRIBUTE nAttrib = mapEdit.GetNextAttribute(pos);
 			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttrib, XIT_ELEMENT);
 		}
-
-		// filter fields
-		const CTDCAttributeMap& mapFilter = vis.GetVisibleFilterFields();
-		pos = mapFilter.GetStartPosition();
-
-		while (pos)
-		{
-			TDC_ATTRIBUTE nAttrib = mapFilter.GetNextAttribute(pos);
-			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttrib, XIT_ELEMENT);
-		}
 	}
 
 	return TRUE;
 }
 
-BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
+BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITVISIBILITY& vis) const
 {
 	const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
 
@@ -998,9 +988,9 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 	}
 
 	vis.SetVisibleColumns(mapCols);
-	vis.SetShowEditsAndFilters(TDL_SHOWATTRIB(pXIVis->GetItemValueI(TDL_ATTRIBVISSHOWEDITFILTER)));
+	vis.SetShowFields(TDL_SHOWATTRIB(pXIVis->GetItemValueI(TDL_ATTRIBVISSHOWFIELDS)));
 
-	if (vis.GetShowEditsAndFilters() == TDLSA_ANY)
+	if (vis.GetShowFields() == TDLSA_ANY)
 	{
 		// edit fields
 		const CXmlItem* pXIEdit = pXIVis->GetItem(TDL_ATTRIBVISEDIT);
@@ -1011,8 +1001,47 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 			mapEdit.AddAttribute((TDC_ATTRIBUTE)pXIEdit->GetValueI());
 			pXIEdit = pXIEdit->GetSibling();
 		}
+		vis.SetVisibleEditFields(mapEdit);
+	}
+
+	return TRUE;
+}
+
+BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
+{
+	if (!SetAttributeVisibility((const TDCCOLEDITVISIBILITY&)vis))
+		return FALSE;
 
 		// filter fields
+	if (vis.GetShowFields() == TDLSA_ANY)
+	{
+		CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
+		ASSERT(pXIVis);
+
+		const CTDCAttributeMap& mapFilter = vis.GetVisibleFilterFields();
+		POSITION pos = mapFilter.GetStartPosition();
+
+		while (pos)
+		{
+			TDC_ATTRIBUTE nAttrib = mapFilter.GetNextAttribute(pos);
+			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttrib, XIT_ELEMENT);
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
+{
+	if (!GetAttributeVisibility((TDCCOLEDITVISIBILITY&)vis))
+		return FALSE;
+
+	const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
+	ASSERT(pXIVis);
+
+	// filter fields
+	if (vis.GetShowFields() == TDLSA_ANY)
+	{
 		const CXmlItem* pXIFilter = pXIVis->GetItem(TDL_ATTRIBVISFILTER);
 		CTDCAttributeMap mapFilter;
 
@@ -1022,7 +1051,6 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 			pXIFilter = pXIFilter->GetSibling();
 		}
 
-		vis.SetVisibleEditFields(mapEdit);
 		vis.SetVisibleFilterFields(mapFilter);
 	}
 

@@ -10804,7 +10804,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 
 	TDCCOLEDITFILTERVISIBILITY vis, visDefault;
 
-	tdc.GetColumnEditFilterVisibility(vis);
+	tdc.GetColumnFieldVisibility(vis);
 	Prefs().GetDefaultColumnEditFilterVisibility(visDefault);
 
 	CTDLColumnSelectionDlg dialog(vis, visDefault);
@@ -10824,7 +10824,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 
 		if (dialog.GetApplyActiveTasklist())
 		{
-			tdc.SetColumnEditFilterVisibility(vis);
+			tdc.SetColumnFieldVisibility(vis);
 		}
 		else
 		{
@@ -10834,7 +10834,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 			while (nTDC--)
 			{
 				CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-				tdc.SetColumnEditFilterVisibility(vis);
+				tdc.SetColumnFieldVisibility(vis);
 			}
 		}
 

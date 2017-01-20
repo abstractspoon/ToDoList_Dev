@@ -1561,3 +1561,51 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, cons
 	// else
 	return CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(tasks, mapAttrib);
 }
+
+void CFilteredToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
+{
+	CTabbedToDoCtrl::SetColumnFieldVisibility(vis);
+
+	m_visColEditFilter = vis;
+}
+
+void CFilteredToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
+{
+	CTabbedToDoCtrl::GetColumnFieldVisibility(vis);
+
+	vis.SetVisibleFilterFields(m_visColEditFilter.GetVisibleFilterFields());
+}
+
+const CTDCColumnIDMap& CFilteredToDoCtrl::GetVisibleColumns() const
+{
+	ASSERT(m_visColEditFilter.mapVisibleColumns == m_visColEdit.mapVisibleColumns);
+
+	return CTabbedToDoCtrl::GetVisibleColumns();
+}
+
+const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleEditFields() const
+{
+	ASSERT(m_visColEditFilter.mapVisibleEdits == m_visColEdit.mapVisibleEdits);
+
+	return CTabbedToDoCtrl::GetVisibleEditFields();
+}
+
+const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleFilterFields() const
+{
+	return m_visColEditFilter.GetVisibleFilterFields();
+}
+
+void CFilteredToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
+{
+	m_visColEditFilter.Save(prefs, GetPreferencesKey());
+}
+
+void CFilteredToDoCtrl::LoadAttributeVisibility(const CPreferences& prefs)
+{
+	TDCCOLEDITFILTERVISIBILITY vis;
+
+	if (!vis.Load(prefs, GetPreferencesKey()))
+		vis = m_visColEditFilter;
+
+	SetColumnFieldVisibility(vis);
+}

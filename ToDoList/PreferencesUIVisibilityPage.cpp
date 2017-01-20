@@ -103,7 +103,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 
 		BOOL bShowCtrlsAsColumns = pPrefs->GetProfileInt(szKey, _T("ShowCtrlsAsColumns"), FALSE);
 
-		vis.SetShowEditsAndFilters(bShowCtrlsAsColumns ? TDLSA_ASCOLUMN : TDLSA_ALL);
+		vis.SetShowFields(bShowCtrlsAsColumns ? TDLSA_ASCOLUMN : TDLSA_ALL);
 
 		// if any time field is hidden we must enable 'any' attribute
 		// and remove those fields
@@ -113,7 +113,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 
 		if (bHideDoneTimeField || bHideDueTimeField || bHideStartTimeField)
 		{
-			vis.SetShowEditsAndFilters(TDLSA_ANY);
+			vis.SetShowFields(TDLSA_ANY);
 
 			if (bHideStartTimeField)
 				vis.SetEditFieldVisible(TDCA_STARTTIME, FALSE);
@@ -127,7 +127,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 	}
 
 	m_lcVisibility.SetVisibility(vis);
-	m_nAttribShow = vis.GetShowEditsAndFilters();
+	m_nAttribShow = vis.GetShowFields();
 }
 
 void CPreferencesUIVisibilityPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const

@@ -52,6 +52,12 @@ public:
 	BOOL HasAnyFilter() const { return m_filter.HasAnyFilter(); }
 	BOOL CanToggleFilter() const { return m_filter.CanToggleFilter(); }
 
+	void SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILITY& vis);
+	void GetColumnFieldVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
+	const CTDCColumnIDMap& GetVisibleColumns() const;
+	const CTDCAttributeMap& GetVisibleEditFields() const;
+	const CTDCAttributeMap& GetVisibleFilterFields() const;
+
 	FILTER_SHOW GetFilter(FTDCFILTER& filter) const;
 	void SetFilter(const FTDCFILTER& filter);
 	BOOL FilterMatches(const FTDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0, DWORD dwIgnoreFlags = 0) const;
@@ -81,6 +87,7 @@ protected:
 	};
 	
 	CTDCFilter m_filter;
+	TDCCOLEDITFILTERVISIBILITY m_visColEditFilter;
 	CDWordArray m_aFilterSelectedTaskIDs; // for FT_SELECTED filter
 	BOOL m_bIgnoreListRebuild;
 	BOOL m_bIgnoreExtensionUpdate;
@@ -141,15 +148,17 @@ protected:
 
 	VIEWDATA2* GetActiveViewData2() const;
 	VIEWDATA2* GetViewData2(FTC_VIEW nView) const;
+	virtual VIEWDATA* NewViewData() { return new VIEWDATA2(); }
 
 	HTREEITEM RebuildTree(const void* pContext = NULL);
 	BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const; 
 
 	void RebuildList(const void* pContext); 
 	void RebuildList(const SEARCHPARAMS& filter);
-	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
 
-	virtual VIEWDATA* NewViewData() { return new VIEWDATA2(); }
+	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
+	virtual void LoadAttributeVisibility(const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 };
 
 #endif // !defined(AFX_FILTEREDTODOCTRL_H__356A6EB9_C7EC_4395_8716_623AFF4A269B__INCLUDED_)

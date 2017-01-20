@@ -2225,68 +2225,64 @@ struct TASKFILE_HEADER
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-struct TDCCOLEDITFILTERVISIBILITY
+struct TDCCOLEDITVISIBILITY
 {
-	TDCCOLEDITFILTERVISIBILITY() : nShowEditsAndFilters(TDLSA_ASCOLUMN) {}
+	TDCCOLEDITVISIBILITY() : nShowFields(TDLSA_ASCOLUMN) {}
 
-	TDCCOLEDITFILTERVISIBILITY(const TDCCOLEDITFILTERVISIBILITY& vis)
+	TDCCOLEDITVISIBILITY(const TDCCOLEDITVISIBILITY& vis)
 	{
 		*this = vis;
 	}
 	
-	TDCCOLEDITFILTERVISIBILITY& operator=(const TDCCOLEDITFILTERVISIBILITY& vis)
+	TDCCOLEDITVISIBILITY& operator=(const TDCCOLEDITVISIBILITY& vis)
 	{
 		mapVisibleColumns.CopyColumns(vis.mapVisibleColumns);
 		mapVisibleEdits.CopyAttributes(vis.mapVisibleEdits);
-		mapVisibleFilters.CopyAttributes(vis.mapVisibleFilters);
 
-		nShowEditsAndFilters = vis.nShowEditsAndFilters;
+		nShowFields = vis.nShowFields;
 		
 		return *this;
 	}
 	
-	BOOL operator!=(const TDCCOLEDITFILTERVISIBILITY& vis) const
+	BOOL operator!=(const TDCCOLEDITVISIBILITY& vis) const
 	{
 		return !(*this == vis);
 	}
 	
-	BOOL operator==(const TDCCOLEDITFILTERVISIBILITY& vis) const
+	BOOL operator==(const TDCCOLEDITVISIBILITY& vis) const
 	{
 		return (mapVisibleColumns.MatchAllColumns(vis.mapVisibleColumns) && 
 				mapVisibleEdits.MatchAllAttributes(vis.mapVisibleEdits) &&
-				mapVisibleFilters.MatchAllAttributes(vis.mapVisibleFilters) &&
-				(nShowEditsAndFilters == vis.nShowEditsAndFilters));
+				(nShowFields == vis.nShowFields));
 	}
 
 	void Clear()
 	{
 		mapVisibleColumns.RemoveAll();
 		mapVisibleEdits.RemoveAll();
-		mapVisibleFilters.RemoveAll();
 
-		nShowEditsAndFilters = TDLSA_ASCOLUMN;
+		nShowFields = TDLSA_ASCOLUMN;
 	}
 
-	BOOL CheckForDiff(const TDCCOLEDITFILTERVISIBILITY& vis, 
-						BOOL& bColumnChange, BOOL& bEditChange, BOOL& bFilterChange) const
+	BOOL CheckForDiff(const TDCCOLEDITVISIBILITY& vis, 
+						BOOL& bColumnChange, BOOL& bEditChange) const
 	{
 		bColumnChange = !mapVisibleColumns.MatchAllColumns(vis.mapVisibleColumns);
 		bEditChange = !mapVisibleEdits.MatchAllAttributes(vis.mapVisibleEdits);
-		bFilterChange = !mapVisibleEdits.MatchAllAttributes(vis.mapVisibleEdits);
 		
-		return (bEditChange || bColumnChange || bFilterChange);
+		return (bEditChange || bColumnChange);
 	}
 
-	TDL_SHOWATTRIB GetShowEditsAndFilters() const 
+	TDL_SHOWATTRIB GetShowFields() const 
 	{
-		return nShowEditsAndFilters;
+		return nShowFields;
 	}
 	
-	void SetShowEditsAndFilters(TDL_SHOWATTRIB nShow)
+	void SetShowFields(TDL_SHOWATTRIB nShow)
 	{
-		nShowEditsAndFilters = nShow;
+		nShowFields = nShow;
 
-		UpdateEditAndFilterVisibility();
+		UpdateEditVisibility();
 	}
 
 	const CTDCColumnIDMap& GetVisibleColumns() const
@@ -2309,24 +2305,20 @@ struct TDCCOLEDITFILTERVISIBILITY
 				mapVisibleColumns.AddColumn((TDC_COLUMN)nCol);
 		}
 
-		UpdateEditAndFilterVisibility();
+		UpdateEditVisibility();
 	}
 	
-	BOOL SetAllEditsAndFiltersVisible(BOOL bVisible = TRUE)
+	BOOL SetAllFieldsVisible(BOOL bVisible = TRUE)
 	{
-		ASSERT(nShowEditsAndFilters == TDLSA_ANY);
+		ASSERT(nShowFields == TDLSA_ANY);
 
-		if (nShowEditsAndFilters != TDLSA_ANY)
+		if (nShowFields != TDLSA_ANY)
 			return FALSE;
 
 		mapVisibleEdits.RemoveAll();
-		mapVisibleFilters.RemoveAll();
 		
 		if (bVisible)
-		{
 			GetAllEditFields(mapVisibleEdits);
-			GetAllFilterFields(mapVisibleFilters);
-		}
 
 		return TRUE;
 	}
@@ -2336,17 +2328,12 @@ struct TDCCOLEDITFILTERVISIBILITY
 		return mapVisibleEdits;
 	}
 	
-	const CTDCAttributeMap& GetVisibleFilterFields() const
-	{
-		return mapVisibleFilters;
-	}
-
 	BOOL SetVisibleEditFields(const CTDCAttributeMap& mapAttrib)
 	{
 		// only supported for 'any' attribute
-		ASSERT(nShowEditsAndFilters == TDLSA_ANY);
+		ASSERT(nShowFields == TDLSA_ANY);
 		
-		if (nShowEditsAndFilters != TDLSA_ANY)
+		if (nShowFields != TDLSA_ANY)
 			return FALSE;
 
 		// check and add attributes 
@@ -2369,39 +2356,13 @@ struct TDCCOLEDITFILTERVISIBILITY
 		return bAnySupported;
 	}
 
-	BOOL SetVisibleFilterFields(const CTDCAttributeMap& mapAttrib)
-	{
-		// only supported for 'any' attribute
-		ASSERT(nShowEditsAndFilters == TDLSA_ANY);
-		
-		if (nShowEditsAndFilters != TDLSA_ANY)
-			return FALSE;
-
-		// check and add attributes 
-		BOOL bAnySupported = FALSE;
-		POSITION pos = mapAttrib.GetStartPosition();
-
-		while (pos)
-		{
-			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
-
-			if (IsSupportedFilter(nAttrib))
-			{
-				mapVisibleFilters.AddAttribute(nAttrib);
-				bAnySupported = TRUE;
-			}
-		}
-		
-		return bAnySupported;
-	}
-	
 	BOOL IsEditFieldVisible(TDC_ATTRIBUTE nAttrib) const
 	{
 		// weed out unsupported attributes
 		if (!IsSupportedEdit(nAttrib))
 			return FALSE;
 
-		switch (nShowEditsAndFilters)
+		switch (nShowFields)
 		{
 		case TDLSA_ALL:
 			return TRUE;
@@ -2418,29 +2379,6 @@ struct TDCCOLEDITFILTERVISIBILITY
 		return FALSE;
 	}
 	
-	BOOL IsFilterFieldVisible(TDC_ATTRIBUTE nAttrib) const
-	{
-		// weed out unsupported attributes
-		if (!IsSupportedFilter(nAttrib))
-			return FALSE;
-
-		switch (nShowEditsAndFilters)
-		{
-		case TDLSA_ALL:
-			return TRUE;
-
-		case TDLSA_ASCOLUMN:
-			return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
-
-		case TDLSA_ANY:
-			return mapVisibleFilters.HasAttribute(nAttrib);
-		}
-
-		// how did we get here?
-		ASSERT(0);
-		return FALSE;
-	}
-
 	BOOL IsColumnVisible(TDC_COLUMN nCol) const
 	{
 		// special cases
@@ -2458,9 +2396,9 @@ struct TDCCOLEDITFILTERVISIBILITY
 	BOOL SetEditFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
 	{
 		// only supported for 'any' attribute
-		ASSERT(nShowEditsAndFilters == TDLSA_ANY);
+		ASSERT(nShowFields == TDLSA_ANY);
 
-		if (nShowEditsAndFilters != TDLSA_ANY)
+		if (nShowFields != TDLSA_ANY)
 			return FALSE;
 
 		// validate attribute
@@ -2521,34 +2459,6 @@ struct TDCCOLEDITFILTERVISIBILITY
 		return TRUE;
 	}
 	
-	BOOL SetFilterFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
-	{
-		// only supported for 'any' attribute
-		ASSERT(nShowEditsAndFilters == TDLSA_ANY);
-
-		if (nShowEditsAndFilters != TDLSA_ANY)
-			return FALSE;
-
-		// validate attribute
-		ASSERT (IsSupportedFilter(nAttrib));
-
-		if (!IsSupportedFilter(nAttrib))
-			return FALSE;
-
-		BOOL bFound = mapVisibleFilters.HasAttribute(nAttrib);
-		
-		if (bVisible && !bFound)
-		{
-			mapVisibleFilters.AddAttribute(nAttrib);
-		}
-		else if (!bVisible && bFound)
-		{
-			mapVisibleFilters.RemoveAttribute(nAttrib);
-		}
-
-		return TRUE;
-	}
-
 	void SetColumnVisible(TDC_COLUMN nCol, BOOL bVisible = TRUE)
 	{
 		// special cases
@@ -2604,12 +2514,12 @@ struct TDCCOLEDITFILTERVISIBILITY
 			mapVisibleColumns.RemoveColumn(nCol);
 		}
 
-		UpdateEditAndFilterVisibility();
+		UpdateEditVisibility();
 	}
 
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const
 	{
-		pPrefs->WriteProfileInt(szKey, _T("ShowAttributes"), nShowEditsAndFilters);
+		pPrefs->WriteProfileInt(szKey, _T("ShowAttributes"), nShowFields);
 
 		CString sKey;
 		
@@ -2618,14 +2528,11 @@ struct TDCCOLEDITFILTERVISIBILITY
 
 		sKey.Format(_T("%s\\EditVisibility"), szKey);
 		mapVisibleEdits.SaveAttributes(pPrefs, sKey, _T("Edit%d"));
-
-		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.SaveAttributes(pPrefs, sKey, _T("Filter%d"));
 	}
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	{
-		nShowEditsAndFilters = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"));
+		nShowFields = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"));
 
 		// columns
 		CString sKey;
@@ -2641,9 +2548,6 @@ struct TDCCOLEDITFILTERVISIBILITY
 
 		sKey.Format(_T("%s\\EditVisibility"), szKey);
 		mapVisibleEdits.LoadAttributes(pPrefs, sKey, _T("Edit%d"));
-
-		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.LoadAttributes(pPrefs, sKey, _T("Filter%d"));
 
 		return TRUE;
 	}
@@ -2707,13 +2611,12 @@ struct TDCCOLEDITFILTERVISIBILITY
 protected:
 	CTDCColumnIDMap mapVisibleColumns;
 	CTDCAttributeMap mapVisibleEdits;
-	CTDCAttributeMap mapVisibleFilters;
-	TDL_SHOWATTRIB nShowEditsAndFilters;
+	TDL_SHOWATTRIB nShowFields;
 
 protected:
-	int UpdateEditAndFilterVisibility()
+	int UpdateEditVisibility()
 	{
-		if (nShowEditsAndFilters != TDLSA_ANY)
+		if (nShowFields != TDLSA_ANY)
 		{
 			mapVisibleEdits.RemoveAll();
 			
@@ -2722,17 +2625,9 @@ protected:
 				if (IsEditFieldVisible((TDC_ATTRIBUTE)nEdit))
 					mapVisibleEdits.AddAttribute((TDC_ATTRIBUTE)nEdit);
 			}
-
-			mapVisibleFilters.RemoveAll();
-			
-			for (int nFilter = TDCA_FIRSTATTRIBUTE; nFilter < TDCA_ATTRIBUTECOUNT; nFilter++)
-			{
-				if (IsFilterFieldVisible((TDC_ATTRIBUTE)nFilter))
-					mapVisibleFilters.AddAttribute((TDC_ATTRIBUTE)nFilter);
-			}
 		}
 		
-		return (mapVisibleEdits.GetCount() || mapVisibleFilters.GetCount());
+		return mapVisibleEdits.GetCount();
 	}
 	
 	static int GetAllEditFields(CTDCAttributeMap& mapAttrib)
@@ -2748,6 +2643,222 @@ protected:
 		return mapAttrib.GetCount();
 	}
 	
+};
+
+struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
+{
+	TDCCOLEDITFILTERVISIBILITY() : TDCCOLEDITVISIBILITY() {}
+
+	TDCCOLEDITFILTERVISIBILITY(const TDCCOLEDITFILTERVISIBILITY& vis)
+	{
+		*this = vis;
+	}
+
+	TDCCOLEDITFILTERVISIBILITY& operator=(const TDCCOLEDITFILTERVISIBILITY& vis)
+	{
+		TDCCOLEDITVISIBILITY::operator=(vis);
+		mapVisibleFilters.CopyAttributes(vis.mapVisibleFilters);
+
+		return *this;
+	}
+
+	BOOL operator!=(const TDCCOLEDITFILTERVISIBILITY& vis) const
+	{
+		return !(*this == vis);
+	}
+
+	BOOL operator==(const TDCCOLEDITFILTERVISIBILITY& vis) const
+	{
+		return (TDCCOLEDITVISIBILITY::operator==(vis) && 
+				mapVisibleFilters.MatchAllAttributes(vis.mapVisibleFilters));
+	}
+
+	void Clear()
+	{
+		TDCCOLEDITVISIBILITY::Clear();
+
+		mapVisibleFilters.RemoveAll();
+	}
+
+	BOOL CheckForDiff(const TDCCOLEDITFILTERVISIBILITY& vis, 
+						BOOL& bColumnChange, BOOL& bEditChange, BOOL& bFilterChange) const
+	{
+		TDCCOLEDITVISIBILITY::CheckForDiff(vis, bColumnChange, bEditChange);
+		bFilterChange = !mapVisibleEdits.MatchAllAttributes(vis.mapVisibleEdits);
+
+		return (bEditChange || bColumnChange || bFilterChange);
+	}
+
+	void SetShowFields(TDL_SHOWATTRIB nShow)
+	{
+		TDCCOLEDITVISIBILITY::SetShowFields(nShow);
+
+		UpdateFilterVisibility();
+	}
+
+	void SetAllColumnsVisible(BOOL bVisible = TRUE)
+	{
+		TDCCOLEDITVISIBILITY::SetAllColumnsVisible(bVisible);
+
+		UpdateFilterVisibility();
+	}
+
+	BOOL SetAllFieldsVisible(BOOL bVisible = TRUE)
+	{
+		if (!TDCCOLEDITVISIBILITY::SetAllFieldsVisible(bVisible))
+			return FALSE;
+
+		mapVisibleFilters.RemoveAll();
+
+		if (bVisible)
+			GetAllFilterFields(mapVisibleFilters);
+
+		return TRUE;
+	}
+
+	const CTDCAttributeMap& GetVisibleFilterFields() const
+	{
+		return mapVisibleFilters;
+	}
+
+	BOOL SetVisibleFilterFields(const CTDCAttributeMap& mapAttrib)
+	{
+		// only supported for 'any' attribute
+		ASSERT(nShowFields == TDLSA_ANY);
+
+		if (nShowFields != TDLSA_ANY)
+			return FALSE;
+
+		// check and add attributes 
+		BOOL bAnySupported = FALSE;
+		POSITION pos = mapAttrib.GetStartPosition();
+
+		while (pos)
+		{
+			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+
+			if (IsSupportedFilter(nAttrib))
+			{
+				mapVisibleFilters.AddAttribute(nAttrib);
+				bAnySupported = TRUE;
+			}
+		}
+
+		return bAnySupported;
+	}
+
+	BOOL IsFilterFieldVisible(TDC_ATTRIBUTE nAttrib) const
+	{
+		// weed out unsupported attributes
+		if (!IsSupportedFilter(nAttrib))
+			return FALSE;
+
+		switch (nShowFields)
+		{
+		case TDLSA_ALL:
+			return TRUE;
+
+		case TDLSA_ASCOLUMN:
+			return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
+
+		case TDLSA_ANY:
+			return mapVisibleFilters.HasAttribute(nAttrib);
+		}
+
+		// how did we get here?
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL SetFilterFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
+	{
+		// only supported for 'any' attribute
+		ASSERT(nShowFields == TDLSA_ANY);
+
+		if (nShowFields != TDLSA_ANY)
+			return FALSE;
+
+		// validate attribute
+		ASSERT (IsSupportedFilter(nAttrib));
+
+		if (!IsSupportedFilter(nAttrib))
+			return FALSE;
+
+		BOOL bFound = mapVisibleFilters.HasAttribute(nAttrib);
+
+		if (bVisible && !bFound)
+		{
+			mapVisibleFilters.AddAttribute(nAttrib);
+		}
+		else if (!bVisible && bFound)
+		{
+			mapVisibleFilters.RemoveAttribute(nAttrib);
+		}
+
+		return TRUE;
+	}
+
+	void Save(IPreferences* pPrefs, LPCTSTR szKey) const
+	{
+		TDCCOLEDITVISIBILITY::Save(pPrefs, szKey);
+
+		CString sKey;
+		sKey.Format(_T("%s\\FilterVisibility"), szKey);
+		mapVisibleFilters.SaveAttributes(pPrefs, sKey, _T("Filter%d"));
+	}
+
+	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
+	{
+		TDCCOLEDITVISIBILITY::Load(pPrefs, szKey);
+
+		CString sKey;
+		sKey.Format(_T("%s\\FilterVisibility"), szKey);
+		mapVisibleFilters.LoadAttributes(pPrefs, sKey, _T("Filter%d"));
+
+		return TRUE;
+	}
+
+	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttrib)
+	{
+		switch (nAttrib)
+		{
+		case TDCA_DUEDATE:
+		case TDCA_STARTDATE:
+		case TDCA_PRIORITY:
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+		case TDCA_STATUS:
+		case TDCA_CATEGORY:
+		case TDCA_RISK:			
+		case TDCA_VERSION:		
+		case TDCA_TAGS:
+			return TRUE;
+		}
+
+		// else
+		return FALSE;
+	}
+
+protected:
+	CTDCAttributeMap mapVisibleFilters;
+
+protected:
+	int UpdateFilterVisibility()
+	{
+		if (nShowFields != TDLSA_ANY)
+		{
+			mapVisibleFilters.RemoveAll();
+
+			for (int nFilter = TDCA_FIRSTATTRIBUTE; nFilter < TDCA_ATTRIBUTECOUNT; nFilter++)
+			{
+				if (IsFilterFieldVisible((TDC_ATTRIBUTE)nFilter))
+					mapVisibleFilters.AddAttribute((TDC_ATTRIBUTE)nFilter);
+			}
+		}
+
+		return mapVisibleFilters.GetCount();
+	}
+
 	static int GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 	{
 		mapAttrib.RemoveAll();

@@ -239,13 +239,13 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_nMaxState(TDCMS_NORMAL),
 	m_nPriority(-1), 
 	m_treeDragDrop(TSH(), m_taskTree.Tree()),
-	m_visColAttrib(visDefault),
+	m_visColEdit(visDefault),
 	m_hIconClock(NULL), 
 	m_hIconLink(NULL),
 	m_nTimeEstUnits(TDCU_HOURS),
 	m_nTimeSpentUnits(TDCU_HOURS),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
-	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColAttrib.GetVisibleColumns(), m_aCustomAttribDefs)
+	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
 	SetBordersDLU(0);
 	
@@ -1841,7 +1841,7 @@ BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
 	switch (ctrl.nCtrlID)
 	{
 	case IDC_COLOUR:
-		if (m_visColAttrib.GetShowEditsAndFilters() == TDLSA_ASCOLUMN)
+		if (m_visColEdit.GetShowFields() == TDLSA_ASCOLUMN)
 		{
 			return (!HasStyle(TDCS_COLORTEXTBYATTRIBUTE) &&
 					!HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
@@ -1851,7 +1851,7 @@ BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
 	}
 	
 	// all else
-	return m_visColAttrib.IsEditFieldVisible(ctrl.nAttrib);
+	return m_visColEdit.IsEditFieldVisible(ctrl.nAttrib);
 }
 
 void CToDoCtrl::UpdateSelectedTaskPath()
@@ -5768,7 +5768,7 @@ void CToDoCtrl::UpdateVisibleColumns()
 	m_taskTree.OnColumnVisibilityChange();
 	
 	// hide/show controls which may have been affected
-	if (m_visColAttrib.GetShowEditsAndFilters() == TDLSA_ASCOLUMN)
+	if (m_visColEdit.GetShowFields() == TDLSA_ASCOLUMN)
 	{
 		UpdateControls(FALSE); // don't update comments
 		
@@ -5777,12 +5777,12 @@ void CToDoCtrl::UpdateVisibleColumns()
 	}
 }
 
-void CToDoCtrl::SetColumnEditFilterVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
+void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
-	BOOL bColumnChange, bEditChange, bUnused;
-	BOOL bChange = m_visColAttrib.CheckForDiff(vis, bColumnChange, bEditChange, bUnused);
+	BOOL bColumnChange, bEditChange;
+	BOOL bChange = m_visColEdit.CheckForDiff(vis, bColumnChange, bEditChange);
 
-	m_visColAttrib = vis;
+	m_visColEdit = vis;
 
 	if (bColumnChange)
 		UpdateVisibleColumns();
@@ -5800,24 +5800,19 @@ void CToDoCtrl::SetColumnEditFilterVisibility(const TDCCOLEDITFILTERVISIBILITY& 
 		m_bModified = TRUE;
 }
 
-void CToDoCtrl::GetColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
+void CToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const
 {
-	vis = m_visColAttrib;
+	vis = m_visColEdit;
 }
 
 const CTDCColumnIDMap& CToDoCtrl::GetVisibleColumns() const
 {
-	return m_visColAttrib.GetVisibleColumns();
+	return m_visColEdit.GetVisibleColumns();
 }
 
 const CTDCAttributeMap& CToDoCtrl::GetVisibleEditFields() const
 {
-	return m_visColAttrib.GetVisibleEditFields();
-}
-
-const CTDCAttributeMap& CToDoCtrl::GetVisibleFilterFields() const
-{
-	return m_visColAttrib.GetVisibleFilterFields();
+	return m_visColEdit.GetVisibleEditFields();
 }
 
 BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
@@ -5825,7 +5820,7 @@ BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 	if (nColumn == TDCC_CLIENT || CTDCCustomAttributeHelper::IsCustomColumn(nColumn))
 		return TRUE; // always visible
 
-	return m_visColAttrib.IsColumnVisible(nColumn);
+	return m_visColEdit.IsColumnVisible(nColumn);
 }
 
 BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const
@@ -5833,7 +5828,7 @@ BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const
 	if (nAttrib == TDCA_TASKNAME || CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 		return TRUE; // always visible
 
-	return m_visColAttrib.IsEditFieldVisible(nAttrib);
+	return m_visColEdit.IsEditFieldVisible(nAttrib);
 }
 
 BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const
@@ -5981,7 +5976,7 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave)
 
 	// attrib visibility
  	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
- 		tasks.SetAttributeVisibility(m_visColAttrib);
+ 		tasks.SetAttributeVisibility(m_visColEdit);
 
 	// and meta data
 	tasks.SetMetaData(m_mapMetaData);
@@ -6321,7 +6316,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& file)
  
  	if (file.GetAttributeVisibility(vis))
  	{
- 		SetColumnEditFilterVisibility(vis);
+ 		SetColumnFieldVisibility(vis);
  
  		// update style to match
  		SetStyle(TDCS_SAVEUIVISINTASKLIST);
@@ -9948,17 +9943,17 @@ void CToDoCtrl::LoadSplitPos(const CPreferences& prefs)
 
 void CToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
 {
-	m_visColAttrib.Save(prefs, GetPreferencesKey());
+	m_visColEdit.Save(prefs, GetPreferencesKey());
 }
 
 void CToDoCtrl::LoadAttributeVisibility(const CPreferences& prefs)
 {
-	TDCCOLEDITFILTERVISIBILITY vis;
+	TDCCOLEDITVISIBILITY vis;
 
 	if (!vis.Load(prefs, GetPreferencesKey()))
-		vis = m_visColAttrib;
+		vis = m_visColEdit;
 
-	SetColumnEditFilterVisibility(vis);
+	SetColumnFieldVisibility(vis);
 }
 
 void CToDoCtrl::SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree) const

@@ -106,9 +106,9 @@ void CTDLWelcomeWizard::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) con
 	m_page2.GetColumnVisibility(vis); 
 
 	if (m_page3.GetHideAttributes())
-		vis.SetShowEditsAndFilters(TDLSA_ASCOLUMN);
+		vis.SetShowFields(TDLSA_ASCOLUMN);
 	else
-		vis.SetShowEditsAndFilters(TDLSA_ALL);
+		vis.SetShowFields(TDLSA_ALL);
 }
 
 /////////////////////////////////////////////////////////////////////////////

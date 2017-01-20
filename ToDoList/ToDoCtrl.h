@@ -138,11 +138,10 @@ public:
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
 	BOOL IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const;
 	BOOL IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const;
-	void SetColumnEditFilterVisibility(const TDCCOLEDITFILTERVISIBILITY& vis);
-	void GetColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
+	void SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis);
+	void GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const;
 	const CTDCColumnIDMap& GetVisibleColumns() const;
 	const CTDCAttributeMap& GetVisibleEditFields() const;
-	const CTDCAttributeMap& GetVisibleFilterFields() const;
 
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
@@ -457,7 +456,7 @@ protected:
 	TDC_MAXSTATE m_nMaxState;
 	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;
 	int m_nPercentIncrement;
-	TDCCOLEDITFILTERVISIBILITY m_visColAttrib;
+	TDCCOLEDITVISIBILITY m_visColEdit;
 	TODOITEM m_tdiDefault;
 	TDI_RECURFROMOPTION m_nDefRecurFrom;
 	TDI_RECURREUSEOPTION m_nDefRecurReuse;
@@ -770,8 +769,8 @@ protected:
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
-	void LoadAttributeVisibility(const CPreferences& prefs);
-	void SaveAttributeVisibility(CPreferences& prefs) const;
+	virtual void LoadAttributeVisibility(const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 
 	void TimeTrackTask(HTREEITEM hti);
 	BOOL AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, const CString& sComment, BOOL bTracked, BOOL bAddToTimeSpent = FALSE);

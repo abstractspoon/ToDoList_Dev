@@ -232,7 +232,7 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol)
 {
 	// don't allow editing on the attribute column if
 	// user is displaying attributes as columns
-	if (m_vis.GetShowEditsAndFilters() != TDLSA_ANY)
+	if (m_vis.GetShowFields() != TDLSA_ANY)
 	{
 		switch (nCol)
 		{
@@ -260,7 +260,7 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol)
 		
 	case COL_EDITVIS:
 		ASSERT(nAttrib != TDCA_NONE);
-		ASSERT(m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+		ASSERT(m_vis.GetShowFields() == TDLSA_ANY);
 
 		m_vis.SetEditFieldVisible(nAttrib, bVisible);
 		UpdateVisibility();
@@ -268,7 +268,7 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol)
 		
 	case COL_FILTERVIS:
 		ASSERT(nAttrib != TDCA_NONE);
-		ASSERT(m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+		ASSERT(m_vis.GetShowFields() == TDLSA_ANY);
 		
 		m_vis.SetFilterFieldVisible(nAttrib, bVisible);
 		UpdateVisibility();
@@ -289,12 +289,12 @@ COLORREF CTDLColumnAttribVisibilityListCtrl::GetItemBackColor(int nItem, int nCo
 		switch (nCol)
 		{
 		case COL_EDITVIS:
-			if (m_vis.GetShowEditsAndFilters() != TDLSA_ANY)
+			if (m_vis.GetShowFields() != TDLSA_ANY)
 				return GetSysColor(COLOR_3DLIGHT);
 			break;
 
 		case COL_FILTERVIS:
-			if (m_vis.GetShowEditsAndFilters() != TDLSA_ANY)
+			if (m_vis.GetShowFields() != TDLSA_ANY)
 				return GetSysColor(COLOR_3DLIGHT);
 			break;
 		}
@@ -312,10 +312,10 @@ BOOL CTDLColumnAttribVisibilityListCtrl::IsButtonEnabled(int nRow, int nCol) con
 	switch (nCol)
 	{
 	case COL_EDITVIS:
-		return (m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+		return (m_vis.GetShowFields() == TDLSA_ANY);
 		
 	case COL_FILTERVIS:
-		return (m_vis.GetShowEditsAndFilters() == TDLSA_ANY);
+		return (m_vis.GetShowFields() == TDLSA_ANY);
 	}
 
 	// all else
@@ -364,15 +364,15 @@ void CTDLColumnAttribVisibilityListCtrl::SetAllVisible(BOOL bVisible)
 	// update visibility data
 	m_vis.SetAllColumnsVisible(bVisible);
 
-	if (m_vis.GetShowEditsAndFilters() == TDLSA_ANY)
-		m_vis.SetAllEditsAndFiltersVisible(bVisible);
+	if (m_vis.GetShowFields() == TDLSA_ANY)
+		m_vis.SetAllFieldsVisible(bVisible);
 
 	UpdateVisibility();
 }
 
 void CTDLColumnAttribVisibilityListCtrl::SetShowEditsAndFilters(TDL_SHOWATTRIB nShow)
 {
-	m_vis.SetShowEditsAndFilters(nShow);
+	m_vis.SetShowFields(nShow);
 
 	UpdateVisibility();
 }

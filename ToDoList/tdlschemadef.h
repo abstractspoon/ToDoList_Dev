@@ -39,7 +39,7 @@ static const CString TDL_ATTRIBVIS(_T("ATTRIBVIS"));
 static const CString TDL_ATTRIBVISCOL(_T("COL"));	
 static const CString TDL_ATTRIBVISEDIT(_T("EDIT"));	
 static const CString TDL_ATTRIBVISFILTER(_T("FILTER"));	
-static const CString TDL_ATTRIBVISSHOWEDITFILTER(_T("SHOWEDITFILTER"));	
+static const CString TDL_ATTRIBVISSHOWFIELDS(_T("SHOWEDITFILTER"));	
 
 // DEPRECATED
 static const CString TDL_CUSTOMATTRIBSORTABLE_DEP(_T("SORTABLE")); // => 'FEATURES'

@@ -24,7 +24,7 @@ CTDLColumnSelectionDlg::CTDLColumnSelectionDlg(const TDCCOLEDITFILTERVISIBILITY&
 	CTDLDialog(CTDLColumnSelectionDlg::IDD, pParent), 
 	m_visColAttrib(vis),
 	m_visDefault(visDefault),
-	m_nAttribShow(vis.GetShowEditsAndFilters())
+	m_nAttribShow(vis.GetShowFields())
 {
 	//{{AFX_DATA_INIT(CTDLColumnSelectionDlg)
 	//}}AFX_DATA_INIT
@@ -66,7 +66,7 @@ END_MESSAGE_MAP()
 void CTDLColumnSelectionDlg::GetColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 {
 	vis = m_visColAttrib;
-	vis.SetShowEditsAndFilters(m_nAttribShow);
+	vis.SetShowFields(m_nAttribShow);
 }
 
 void CTDLColumnSelectionDlg::OnOK()
@@ -104,7 +104,7 @@ void CTDLColumnSelectionDlg::OnClearallcols()
 
 void CTDLColumnSelectionDlg::OnDefaultcols() 
 {
-	m_nAttribShow = m_visDefault.GetShowEditsAndFilters();
+	m_nAttribShow = m_visDefault.GetShowFields();
 	UpdateData(FALSE);
 
 	m_lcVisibility.SetVisibility(m_visDefault);

@@ -31,6 +31,7 @@ class CTDCCustomAttribDataMap;
 
 struct TASKFILE_HEADER;
 struct TDCRECURRENCE; 
+struct TDCCOLEDITVISIBILITY;
 struct TDCCOLEDITFILTERVISIBILITY;
 struct TDCAUTOLISTDATA;
 
@@ -114,6 +115,8 @@ public:
 	int GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	BOOL HasCustomAttribute(const CString& sCustID) const;
 
+	BOOL SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
+	BOOL GetAttributeVisibility(TDCCOLEDITVISIBILITY& vis) const;
 	BOOL SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis);
 	BOOL GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const;
 

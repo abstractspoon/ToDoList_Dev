@@ -36,7 +36,7 @@ void CTDLTasklistImportCtrl::ShowAllColumns()
 	TDCCOLEDITFILTERVISIBILITY vis;
 	vis.SetAllColumnsVisible(TRUE);
 
-	SetColumnEditFilterVisibility(vis);
+	SetColumnFieldVisibility(vis);
 }
 
 void CTDLTasklistImportCtrl::DeselectAll()
