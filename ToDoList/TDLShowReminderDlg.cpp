@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
 	//}}AFX_MSG_MAP
+	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
@@ -432,9 +433,21 @@ void CTDLShowReminderDlg::UpdateControls()
 
 void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	//NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	*pResult = 0;
-
 	if (!m_bChangingReminders)
 		UpdateControls();
+
+	*pResult = 0;
+}
+
+void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+{
+	ASSERT(m_lcReminders.GetSelectedCount() == 1);
+
+	TDCREMINDER rem;
+	int nSel = GetSelectedReminder(rem);
+
+	if (nSel != -1)
+		DoGotoTask(rem);
+
+	*pResult = 0;
 }

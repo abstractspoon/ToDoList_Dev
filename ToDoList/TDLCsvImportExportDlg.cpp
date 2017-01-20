@@ -297,11 +297,13 @@ void CTDLCsvImportExportDlg::SaveMasterColumnMapping() const
 
 	for (int nCol = 0; nCol < nColumns; nCol++)
 	{
+		const TDCATTRIBUTEMAPPING& col = m_aMasterColumnMapping[nCol];
+
 		CString sKey = Misc::MakeKey(_T("ColumnName%d"), nCol);
-		m_pPrefs->WriteProfileString(m_sPrefKey, sKey, m_aMasterColumnMapping[nCol].sColumnName);
+		m_pPrefs->WriteProfileString(m_sPrefKey, sKey, col.sColumnName);
 		
 		sKey = Misc::MakeKey(_T("ColumnAttrib%d"), nCol);
-		m_pPrefs->WriteProfileInt(m_sPrefKey, sKey, m_aMasterColumnMapping[nCol].nTDCAttrib);
+		m_pPrefs->WriteProfileInt(m_sPrefKey, sKey, col.nTDCAttrib);
 	}
 
 	// save delimiter if different to default

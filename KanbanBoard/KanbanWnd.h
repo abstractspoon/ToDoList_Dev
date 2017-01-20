@@ -119,7 +119,7 @@ protected:
 
 protected:
 	void Resize(int cx = 0, int cy = 0);
-	void UpdateKanbanCtrlPreferences();
+	void UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled);
 	void SendParentSelectionUpdate();
 	void EnableDisableCtrls();
 	void BuildOptionsCombo();

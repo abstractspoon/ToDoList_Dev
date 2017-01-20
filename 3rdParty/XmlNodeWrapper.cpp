@@ -606,19 +606,20 @@ BOOL CXmlDocumentWrapper::Save(LPCTSTR path, BOOL bPreserveWhiteSpace)
 	}
 }
 
-CString CXmlDocumentWrapper::Transform(CXmlDocumentWrapper& xsl) const
+BOOL CXmlDocumentWrapper::Transform(CXmlDocumentWrapper& xsl, CString& sOutput) const
 {
+	sOutput.Empty();
+
     try
     {
-        return (LPTSTR)m_xmldoc->transformNode(xsl.AsNode());
+        sOutput = (LPTSTR)m_xmldoc->transformNode(xsl.AsNode());
     }
     catch( const _com_error & err)
     {
         AfxMessageBox(err.ErrorMessage(), MB_OK | MB_ICONERROR);
     }
 
-    // else
-    return "";
+	return !sOutput.IsEmpty();
 }
 
 MSXML2::IXMLDOMNodePtr CXmlDocumentWrapper::AsNode()

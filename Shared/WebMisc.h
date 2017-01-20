@@ -19,6 +19,7 @@ namespace WebMisc
 	BOOL DeleteCacheEntry(LPCTSTR szURI);
 	BOOL IsURL(LPCTSTR szURL);
 	BOOL IsAboutBlank(LPCTSTR szURL);
+	BOOL IsBrowser(LPCTSTR szFilePath);
 
 	int ExtractHtmlLinks(const CString& sHtml, CStringArray& aLinks, CStringArray& aLinkText);
 	int ExtractFirstHtmlLink(const CString& sHtml, CString& sLink, CString& sText);

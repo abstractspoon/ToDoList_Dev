@@ -30,7 +30,7 @@ class CKanbanPreferencesPage : public CPreferencesPageBase
 public:
 	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor
 
-	BOOL HasFixedColumns() const { return m_aFixedColumnDefs.GetSize(); }
+	BOOL HasFixedColumns() const { return (m_aFixedColumnDefs.GetSize() ? TRUE : FALSE); }
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
 	BOOL GetSortSubtasksBelowParents() const { return m_bSortSubtaskBelowParent; }
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }

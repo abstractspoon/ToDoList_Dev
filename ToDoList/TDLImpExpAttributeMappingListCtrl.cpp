@@ -267,13 +267,22 @@ BOOL CTDLImportExportAttributeMappingListCtrl::DeleteSelectedCell()
 	if ((m_bImporting && nCol == IMPORT_COLUMNID) ||
 		(!m_bImporting && nCol == EXPORT_COLUMNNAME))
 	{
+		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow);
+
+		int nMapping = m_aMapping.Find(nAttribID);
+		ASSERT(nMapping != -1);
+
+		TDCATTRIBUTEMAPPING& attrib = m_aMapping[nMapping];
+
 		if (m_bImporting)
 		{
-			m_aMapping[nRow].nTDCAttrib = TDCA_NONE;
+			attrib.nTDCAttrib = TDCA_NONE;
 			SetItemData(nRow, (DWORD)TDCA_NONE);
 		}
 		else // exporting
-			m_aMapping[nRow].sColumnName.Empty();
+		{
+			attrib.sColumnName.Empty();
+		}
 
 		return CInputListCtrl::DeleteSelectedCell();
 	}

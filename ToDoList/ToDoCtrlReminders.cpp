@@ -572,7 +572,7 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTas
 	{
 		if (bGotoTask)
 		{
-			m_pWndNotify->SendMessage(WM_TDCM_TASKLINK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+			DoGotoTask(rem);
 			ShowWindow(SW_HIDE);
 		}
 		// hide dialog if this is the last
@@ -584,3 +584,15 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTas
 		DismissReminder(nRem);
 	}
 }
+
+void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
+{
+#ifdef _DEBUG
+	int nRem = FindReminder(rem);
+	ASSERT(nRem != -1);
+#endif
+	
+	m_pWndNotify->SendMessage(WM_TDCM_TASKLINK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+}
+
+

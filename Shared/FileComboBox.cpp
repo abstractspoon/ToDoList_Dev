@@ -149,7 +149,7 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 			pTI->hwnd = m_hWnd;
 			pTI->uId = m_nLastTooltipBtnID;
-			pTI->uFlags = (TTF_ALWAYSTIP | TTF_NOTBUTTON);
+			pTI->uFlags = TTF_NOTBUTTON;
 			pTI->lpszText = LPSTR_TEXTCALLBACK;
 
 			CWnd::ScreenToClient(rButton);
@@ -176,7 +176,7 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 			pTI->hwnd = m_hWnd;
 			pTI->uId = MAKELONG(point.x, point.y);
-			pTI->uFlags = (TTF_ALWAYSTIP | TTF_NOTBUTTON);
+			pTI->uFlags = TTF_NOTBUTTON;
 			pTI->lpszText = LPSTR_TEXTCALLBACK;
 			
 			CWnd::ScreenToClient(rEdit);

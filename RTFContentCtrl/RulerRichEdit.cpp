@@ -230,6 +230,10 @@ HRESULT CRulerRichEdit::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD
 
 CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format) 
 { 
+#ifdef _DEBUG
+	CString sFormat = CClipboard::GetFormatName(format);
+#endif
+
 	CLIPFORMAT formats[] = 
 	{ 
 		CMSOutlookHelper::CF_OUTLOOK,
@@ -263,15 +267,17 @@ CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFO
     
 	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
 	{
-		if (format && format == formats[nFmt])
+		if (format && (format == formats[nFmt]))
 			return format;
 		
-		if (dataobj.IsDataAvailable(formats[nFmt]))
+		FORMATETC fmtEtc = { formats[nFmt], 0 };
+
+		if (dataobj.IsDataAvailable(formats[nFmt], &fmtEtc))
 			return formats[nFmt];
 	}
 	
 	// all else
-	return CF_HDROP; 
+	return CUrlRichEditCtrl::GetAcceptableClipFormat(lpDataOb, format);
 }
 
 UINT CRulerRichEdit::OnGetDlgCode() 

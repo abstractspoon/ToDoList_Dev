@@ -11,14 +11,14 @@
 
 #include "..\Interfaces\ITaskListStorage.h"
 
-class CFtpTasklistStorage : public ITasklistStorage  
+class CFtpTasklistStorageApp : public ITasklistStorage, public CWinApp  
 {
 public:
-	CFtpTasklistStorage();
-	virtual ~CFtpTasklistStorage();
+	CFtpTasklistStorageApp();
+	virtual ~CFtpTasklistStorageApp();
 
 	// interface implementation
-    void Release() { delete this; }
+    void Release();
 	void SetLocalizer(ITransText* pTT);
 
 	// caller must copy result only
@@ -31,6 +31,9 @@ public:
 
 protected:
 	HICON m_hIcon;
+
+protected:
+	BOOL InitInstance();
 };
 
 #endif // !defined(AFX_FTPTASKLISTSTORAGE_H__14908CE5_AA9F_4AFC_B72E_3F2BDD0993F0__INCLUDED_)

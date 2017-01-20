@@ -26,6 +26,7 @@
 #include "..\shared\iconcache.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\graphicsmisc.h"
+#include "..\shared\tooltipctrlex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -200,7 +201,9 @@ public:
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 	DWORD HitTestTask(const CPoint& ptScreen) const;
-	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL) const;
+	int HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COLUMN& nColID, DWORD* pTaskID = NULL, LPRECT pRect = NULL) const;
+	int HitTestFileLinkColumn(const CPoint& ptScreen) const;
+
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 		
 	void SetFocus() { CTreeListSyncer::SetFocus(); }
@@ -259,6 +262,7 @@ public:
 protected:
 	CListCtrl m_lcColumns;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
+	CToolTipCtrlEx m_tooltipColumns;
 
 	const CToDoCtrlData& m_data;
 	const CToDoCtrlFind& m_find;
@@ -321,6 +325,7 @@ protected:
 
 	// pseudo-handlers
 	void OnHeaderClick(TDC_COLUMN nColID);
+	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 
 protected:
 	// base-class overrides
@@ -369,6 +374,7 @@ protected:
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTaskCustomColumnText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
+	int GetTaskColumnTooltip(const CPoint& ptScreen, CString& sTooltip) const;
 	BOOL TaskHasReminder(DWORD dwTaskID) const;
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
 	time_t GetTaskReminder(DWORD dwTaskID) const;
@@ -453,7 +459,7 @@ protected:
 	void HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt);
 	void ShowFileLink(LPCTSTR szFilePath) const;
 	BOOL HandleListLBtnDown(CListCtrl& lc, CPoint pt);
-	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID) const;
+	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, TDC_COLUMN& nRecalcColID) const;
 
 	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
@@ -466,8 +472,9 @@ protected:
 	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 								TDC_COLUMN nColID, CDC* pDC, const CRect& rSubItem, COLORREF crText);
-	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE);
 	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, BOOL bChecked);
+	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
+						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);
 
 	inline BOOL HasColor(COLORREF color) const { return (color != CLR_NONE); }
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }
@@ -480,8 +487,8 @@ protected:
 	static BOOL InvalidateItem(CListCtrl& lc, int nItem, BOOL bUpdate = FALSE);
 	static CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImage = 0, int nCount = 1);
 	static BOOL CalcColumnIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1);
-	static void PrepareInfoTip(HWND hwndTooltip);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
+	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 

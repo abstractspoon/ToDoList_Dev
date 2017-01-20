@@ -1487,11 +1487,11 @@ void CFilteredToDoCtrl::OnTimerNow()
 		
 		if (bNewDue)
 		{
-			bRefilter = (AfxMessageBox(IDS_DUEBYNOW_CONFIRMREFILTER, MB_YESNO | MB_ICONQUESTION) == IDYES);
+			bRefilter = (AfxMessageBox(CEnString(IDS_DUEBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
 		}
 		else if (bNewStart)
 		{
-			bRefilter = (AfxMessageBox(IDS_STARTBYNOW_CONFIRMREFILTER, MB_YESNO | MB_ICONQUESTION) == IDYES);
+			bRefilter = (AfxMessageBox(CEnString(IDS_STARTBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
 		}
 		
 		if (bRefilter)

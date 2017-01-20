@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "FtpStorage.h"
+#include "resource.h"
 #include "FtpTasklistStorage.h"
 
 #include "..\shared\RemoteFile.h"
@@ -18,23 +18,43 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+// CKanbanBoardApp
+
+static CFtpTasklistStorageApp theApp;
+
+DLL_DECLSPEC ITasklistStorage* CreateTasklistStorageInterface()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return &theApp;
+}
+
+DLL_DECLSPEC int GetInterfaceVersion() 
+{ 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return ITASKLISTSTORAGE_VERSION; 
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFtpTasklistStorage::CFtpTasklistStorage() : m_hIcon(NULL)
+CFtpTasklistStorageApp::CFtpTasklistStorageApp() : m_hIcon(NULL)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_FTPSTORAGE);
 }
 
-CFtpTasklistStorage::~CFtpTasklistStorage()
+CFtpTasklistStorageApp::~CFtpTasklistStorageApp()
 {
 
 }
 
-bool CFtpTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* /*pDestTaskFile*/, 
+bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* /*pDestTaskFile*/, 
 										   IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CString sLocalPath(pFInfo->szLocalFileName);
 
 	if (sLocalPath.IsEmpty())
@@ -76,9 +96,11 @@ bool CFtpTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	return false;
 }
 
-bool CFtpTasklistStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* /*pSrcTaskFile*/, 
+bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* /*pSrcTaskFile*/, 
 										IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CString sLocalPath = pFInfo->szLocalFileName;
 
 	// if not yet saved then save to temp filepath
@@ -123,8 +145,33 @@ bool CFtpTasklistStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	return false;
 }
 
-void CFtpTasklistStorage::SetLocalizer(ITransText* pTT)
+void CFtpTasklistStorageApp::SetLocalizer(ITransText* pTT)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CLocalizer::Initialize(pTT);
 }
 
+void CFtpTasklistStorageApp::Release()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// Statically allocated -> do nothing
+}
+
+BOOL CFtpTasklistStorageApp::InitInstance()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// Set this before anything else
+//	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
+
+	m_hIcon = LoadIcon(IDR_FTPSTORAGE);
+
+	if (m_pszAppName)
+		free((void*)m_pszAppName);
+
+	m_pszAppName = _tcsdup(GetMenuText());
+
+	return CWinApp::InitInstance();
+}

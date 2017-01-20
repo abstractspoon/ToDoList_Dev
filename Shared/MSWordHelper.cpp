@@ -230,7 +230,7 @@ BOOL CMSWordHelper::ConvertFile(const CString& sInputFilename, WdOpenFormat nInp
 						varNull,							// WritePasswordDocument
 						varNull,							// WritePasswordTemplate
 						COleVariant((long)nInputFormat),	// Format
-						varZero,							// Encoding
+						COleVariant((long)nEncoding),		// Encoding
 						varFalse,							// Visible
 						varFalse,							// OpenAndRepair
 						varZero,							// DocumentDirection
@@ -251,8 +251,6 @@ BOOL CMSWordHelper::ConvertFile(const CString& sInputFilename, WdOpenFormat nInp
 
 	try 
 	{
-		doc.SetSaveEncoding(nEncoding);
-
 		doc.SaveAs(COleVariant(sOutputFilename),		// FileName
 					COleVariant((short)nOutputFormat),	// FileFormat
 					varFalse,							// LockComments
@@ -264,7 +262,7 @@ BOOL CMSWordHelper::ConvertFile(const CString& sInputFilename, WdOpenFormat nInp
 					varFalse,							// SaveNativePictureFormat
 					varFalse,							// SaveFormsData
 					varFalse,							// SaveAsAOCELetter
-					varZero,							// Encoding
+					COleVariant((long)nEncoding),		// Encoding
 					varFalse,							// InsertLineBreaks
 					varFalse,							// AllowSubstitutions
 					varOne,								// LineEnding
@@ -325,13 +323,13 @@ BOOL CMSWordHelper::IsDocumentDisabled(HKEY hKey, LPCTSTR szFilePath, CString& s
 	CRegKey2 reg;
 
 	if (reg.Open(hKey, sKey, TRUE) != ERROR_SUCCESS) // read-only
-		return FALSE;
+		return FALSE; // no such key
 
 	CStringArray aValueNames;
 	int nValue = reg.GetValueNames(aValueNames);
 
 	if (!nValue)
-		return TRUE; // empty key
+		return FALSE; // empty key
 
 	// Enumerate the values of the keys until we find the one we want
 	BYTE buffer[1024] = { 0 };

@@ -610,7 +610,9 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	InitEditPrompts();
 
-	m_cpColour.SetWindowText(CString((LPCTSTR)IDS_SAMPLETEXT));
+	m_cpColour.SetWindowText(CEnString(IDS_COLOR_SAMPLETEXT));
+	m_cpColour.SetDefaultText(CEnString(IDS_COLOR_AUTOMATIC));
+	m_cpColour.SetCustomText(CEnString(IDS_COLOR_MORECOLORS));
 	
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
@@ -1942,29 +1944,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		else
 			m_nPercentDone = m_data.CalcTaskPercentDone(dwTaskID);		
 		
-		// special handling for start date/time
-		COleDateTime dateStart = GetSelectedTaskDate(TDCD_START);
-		SetCtrlDate(m_dtcStart, dateStart);
-		m_cbTimeStart.SetOleTime(dateStart.m_dt);
-
-		// special handling for due date/time
-		COleDateTime dateDue = GetSelectedTaskDate(TDCD_DUE);
-		SetCtrlDate(m_dtcDue, dateDue, dateStart);
-		m_cbTimeDue.SetOleTime(dateDue.m_dt);
-
-		// special handling for done date/time
-		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
-		SetCtrlDate(m_dtcDone, dateDone);
-		m_cbTimeDone.SetOleTime(dateDone.m_dt);
-
 		// recurrence
 		GetSelectedTaskRecurrence(m_tRecurrence);
-
-		// use due date if present else start date
-		if (CDateHelper::IsDateSet(dateDue))
-			m_eRecurrence.SetDefaultDate(dateDue);
-		else
-			m_eRecurrence.SetDefaultDate(dateStart);
 
 		// custom attributes
 		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
@@ -1991,16 +1972,13 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_aTags.RemoveAll();
 		m_aFileRefs.RemoveAll();
 
-		COleDateTime date;
-		SetCtrlDate(m_dtcDue, date);
-		SetCtrlDate(m_dtcDone, date);
-		SetCtrlDate(m_dtcStart, date);
-
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
 	}
+
+	UpdateDateTimeControls(hti != NULL);
 
 	// update data controls excluding comments
 	UpdateData(FALSE);
@@ -2029,6 +2007,41 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	EnableDisableControls(hti);
 	
 	m_treeDragDrop.EnableDragDrop(!bReadOnly);
+}
+
+void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
+{
+	if (bHasSelection)
+	{
+		COleDateTime dateStart = GetSelectedTaskDate(TDCD_START);
+		SetCtrlDate(m_dtcStart, dateStart);
+		m_cbTimeStart.SetOleTime(dateStart.m_dt);
+		
+		COleDateTime dateDue = GetSelectedTaskDate(TDCD_DUE);
+		SetCtrlDate(m_dtcDue, dateDue, dateStart);
+		m_cbTimeDue.SetOleTime(dateDue.m_dt);
+		
+		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
+		SetCtrlDate(m_dtcDone, dateDone);
+		m_cbTimeDone.SetOleTime(dateDone.m_dt);
+
+		// use due date if present else start date
+		if (CDateHelper::IsDateSet(dateDue))
+			m_eRecurrence.SetDefaultDate(dateDue);
+		else
+			m_eRecurrence.SetDefaultDate(dateStart);
+	}
+	else
+	{
+		COleDateTime date;
+		SetCtrlDate(m_dtcDue, date);
+		SetCtrlDate(m_dtcDone, date);
+		SetCtrlDate(m_dtcStart, date);
+
+		m_cbTimeStart.SetOleTime(-1);
+		m_cbTimeDue.SetOleTime(-1);
+		m_cbTimeDone.SetOleTime(-1);
+	}
 }
 
 void CToDoCtrl::UpdateTasklistVisibility()
@@ -2372,7 +2385,8 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	
 	if (nRes == SET_CHANGE)
 	{
- 		SetModified(TRUE, TDCA_CUSTOMATTRIB, dwModTaskID);
+		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sAttribID, m_aCustomAttribDefs);
+ 		SetModified(TRUE, nAttrib, dwModTaskID);
 
 		// update UI except if it's already up to date
 		CUSTOMATTRIBCTRLITEM ctrl;
@@ -3196,7 +3210,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 		HTREEITEM hti = htiSel.GetNext(pos);
 		DWORD dwTaskID = m_taskTree.GetTaskID(hti);
 
-		int nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks);
+		int nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3355,8 +3369,9 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			if (bHasDue)
 			{
 				// Before we offset, make sure all subtasks have valid due dates
+				// And make sure the new date fits the recurring scheme
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE);
 			}
 			else
 			{
@@ -3367,17 +3382,18 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 		// adjust start dates similarly
 		if (bHasStart)
 		{
+			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
 			if (bWantInheritStart)
 			{
 				// don't offset children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE);
 				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
 			}
 			else // offset children
 			{
 				// Before we offset, make sure all subtasks have valid start dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE);
 			}
 		}
 	}
@@ -3395,8 +3411,9 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 			if (bHasStart)
 			{
 				// Before we offset, make sure all subtasks have valid start dates
+				// And make sure the new date fits the recurring scheme
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE);
 			}
 			else
 			{
@@ -3407,17 +3424,18 @@ void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTask
 		// adjust due dates similarly
 		if (bHasDue)
 		{
+			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
 			if (bWantInheritDue)
 			{
 				// don't update children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE);
 				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
 			}
 			else // bump
 			{
 				// Before we offset, make sure all subtasks have valid due dates
 				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE);
+				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE);
 			}
 		}
 	}
@@ -4574,15 +4592,15 @@ BOOL CToDoCtrl::SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAp
 
 BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends)
 {
-	return SetSelectedTaskDependencies(aDepends, FALSE);
+	return SetSelectedTaskDependencies(aDepends, FALSE, FALSE);
 }
 
 BOOL CToDoCtrl::AppendSelectedTaskDependencies(const CStringArray& aDepends)
 {
-	return SetSelectedTaskDependencies(aDepends, TRUE);
+	return SetSelectedTaskDependencies(aDepends, TRUE, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend)
+BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend, BOOL bEdit)
 {
 	DWORD dwRefTaskID = 0;
 	TDC_SET nRes = SetSelectedTaskArray(TDCA_DEPENDENCY, aDepends, bAppend, dwRefTaskID);
@@ -4592,10 +4610,14 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL b
 		// Start and due dates might also have changed
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			UpdateControls(FALSE);
+			UpdateDateTimeControls(TRUE);
 		}
-		else
+		else if (!bEdit)
 		{
+			// We only update the control if not editing otherwise
+			// if the user is partially way thru typing a task ID
+			// and the partial ID does not exist then it gets 
+			// removed from the edit field. 
 			ASSERT(dwRefTaskID);
 			m_sDepends = Misc::FormatArray(aDepends);
 			UpdateDataEx(this, IDC_DEPENDS, m_sDepends, FALSE);
@@ -5160,7 +5182,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	DWORD dwDelTaskID = ((nSelCount == 1) ? GetTaskID(selection.GetHead()) : 0);
 
 	{
-		HOLD_REDRAW(NULL, m_taskTree.Tree());
+		HOLD_REDRAW(NULL, m_taskTree.GetSafeHwnd());
 		POSITION pos = selection.GetHeadPosition();
 
 		while (pos)

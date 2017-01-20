@@ -203,6 +203,7 @@ namespace FileMisc
 	CString GetModuleVersion(LPCTSTR szModulePath, TCHAR cSep = '.');
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
+	CString GetWindowModuleFilePath(HWND hWnd);
 	
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);

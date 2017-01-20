@@ -2423,18 +2423,10 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 	case TDCA_DELETE:
 		// Deletion operations are fairly quick so we do those 
 		// even if the List View is not active
-		if (dwTaskID)
-		{
-			m_taskList.DeleteItem(dwTaskID);
-		}
-		else if (m_taskTree.GetItemCount())
-		{
+		if (m_taskTree.GetItemCount())
 			m_taskList.RemoveDeletedItems();
-		}
 		else
-		{
 			m_taskList.DeleteAll();
-		}
 		break;
 
 	case TDCA_ARCHIVE:
@@ -2553,6 +2545,9 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttrib((TDC_ATTRIBUTE)nAttrib)))
 				mapAttrib.AddAttribute((TDC_ATTRIBUTE)nAttrib);
 		}
+
+		// Add custom attributes
+		mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB);
 
 		// Include 'position' if extension supports 'unsorted'
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, IUI_NONE))

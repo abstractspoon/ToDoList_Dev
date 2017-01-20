@@ -80,6 +80,17 @@ BOOL WebMisc::IsURL(LPCTSTR szURL)
 	return ((sURL.Find(_T("www.")) == 0) || (sURL.Find(_T("ftp.")) == 0));
 }
 
+BOOL WebMisc::IsBrowser(LPCTSTR szFilePath)
+{
+	CString sFileName = FileMisc::GetFileNameFromPath(szFilePath, FALSE);
+
+	return ((sFileName.CompareNoCase(_T("chrome")) == 0) ||
+			(sFileName.CompareNoCase(_T("iexplore")) == 0) ||
+			(sFileName.CompareNoCase(_T("edge")) == 0) ||
+			(sFileName.CompareNoCase(_T("firefox")) == 0) ||
+			(sFileName.CompareNoCase(_T("opera")) == 0));
+}
+
 int WebMisc::ExtractFirstHtmlLink(const CString& sHtml, CString& sLink, CString& sText)
 {
 	return ExtractNextHtmlLink(sHtml, 0, sLink, sText);

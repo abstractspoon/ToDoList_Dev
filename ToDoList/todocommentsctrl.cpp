@@ -455,7 +455,7 @@ BOOL CToDoCommentsCtrl::Paste()
 	switch (nNumFiles)
 	{
 	case -1:
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		AfxMessageBox(CEnString(IDS_PASTE_ERROR), MB_OK | MB_ICONERROR);
 		return FALSE;
 
 	case 0:

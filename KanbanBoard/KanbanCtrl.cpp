@@ -523,6 +523,9 @@ BOOL CKanbanCtrl::UpdateData(const ITaskList15* pTasks, HTASKITEM hTask, const C
 			if (attrib.HasKey(IUI_ALLOCBY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
+			if (attrib.HasKey(IUI_ALLOCTO))
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCTO, pTasks->GetTaskAllocatedTo(hTask, 0));
+
 			if (attrib.HasKey(IUI_STATUS))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_STATUS, pTasks->GetTaskStatus(hTask));
 

@@ -805,8 +805,14 @@ BOOL FileMisc::CreateFolder(LPCTSTR szFolder)
 
 		// if the folder doesn't exist we try to create it
 		if (!FolderExists(sFolder) && (::CreateDirectory(sFolder, NULL) == FALSE))
+		{
+			LogText(_T("::CreateDirectory(%s) failed\n"), sFolder);
 			bResult = FALSE;
 	}
+	}
+
+	if (!bResult)
+		LogText(_T("FileMisc::CreateFolder(%s) failed\n"), szFolder);
 
 	return bResult;
 }
@@ -1528,6 +1534,22 @@ CString FileMisc::GetModuleFilePath(HMODULE hMod)
       return _T("");
 
 	return sModulePath;
+}
+
+CString FileMisc::GetWindowModuleFilePath(HWND hWnd)
+{
+	DWORD dwProcessID = 0;
+	::GetWindowThreadProcessId(hWnd, &dwProcessID);
+
+	if (dwProcessID == 0)
+		return _T("");
+
+	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE , dwProcessID);
+
+	if (hProcess == NULL)
+		return _T("");
+
+	return GetProcessFilePath(hProcess);
 }
 
 BOOL FileMisc::CanonicalizePath(CString& sFilePath)

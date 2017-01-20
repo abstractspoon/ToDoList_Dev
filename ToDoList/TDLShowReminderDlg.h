@@ -72,6 +72,7 @@ public:
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) {}
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/, BOOL /*bGotoTask*/) {}
+	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) {}
 
 // Implementation
 protected:
@@ -85,6 +86,7 @@ protected:
 	afx_msg void OnSnoozeUntil();
 	afx_msg void OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
+	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 	DECLARE_MESSAGE_MAP()

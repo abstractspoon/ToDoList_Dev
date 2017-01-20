@@ -6,6 +6,8 @@
 #define IDC_CLEARFILTER                 3
 #define IDS_FIND_TITLE                  56
 #define IDS_REPLACE_TITLE               57
+#define IDS_CAD_BROWSEIMAGES            58
+#define IDS_CAD_INSERTSYMBOL            59
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102
@@ -19,6 +21,9 @@
 #define IDD_RECURRING_TASK_DIALOG_OLD   129
 #define IDS_BACKUPFILEFOUND             130
 #define IDS_SAMPLETEXT                  131
+#define IDS_COLOR_SAMPLETEXT            131
+#define IDS_COLOR_AUTOMATIC             132
+#define IDS_COLOR_MORECOLORS            133
 #define IDR_MISC                        135
 #define IDD_PREFTASK_PAGE               138
 #define IDD_PREFGEN_PAGE                139

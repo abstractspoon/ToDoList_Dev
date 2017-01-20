@@ -147,7 +147,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bIncludeDoneInAverageCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInAverageCalc"), TRUE);
 	m_bUsePercentDoneInTimeEst = pPrefs->GetProfileInt(szKey, _T("UsePercentDoneInTimeEst"), TRUE);
 	m_bUseHighestPriority = pPrefs->GetProfileInt(szKey, _T("UseHighestPriority"), FALSE);
-	m_bSyncTimeEstAndDates = pPrefs->GetProfileInt(szKey, _T("SyncTimeEstAndDates"), TRUE);
+	m_bSyncTimeEstAndDates = pPrefs->GetProfileInt(szKey, _T("SyncTimeEstAndDates"), FALSE);
 	m_bIncludeDoneInPriorityRiskCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInPriorityCalc"), FALSE);
 	m_bAutoCalcPercentDone = pPrefs->GetProfileInt(szKey, _T("AutoCalcPercentDone"), FALSE);
 	m_bAutoAdjustDependents = pPrefs->GetProfileInt(szKey, _T("AutoAdjustDependents"), TRUE);

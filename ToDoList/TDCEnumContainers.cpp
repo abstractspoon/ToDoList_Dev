@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "TDCEnumContainers.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\Misc.h"
 #include "..\shared\preferences.h"
@@ -47,7 +48,7 @@ BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
 	if (nAttrib == TDCA_PARENTID)
 		return TRUE;
 	
-	if ((nAttrib >= TDCA_CUSTOMATTRIB) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST))
+	if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 		return TRUE;
 
 	ASSERT(0);

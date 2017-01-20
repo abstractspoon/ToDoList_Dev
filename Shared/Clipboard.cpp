@@ -159,6 +159,14 @@ BOOL CClipboard::HasFormat(UINT nFormat)
 	return (::IsClipboardFormatAvailable(nFormat));
 }
 
+CString CClipboard::GetFormatName(UINT nFormat)
+{
+	TCHAR szName[128] = { 0 };
+	::GetClipboardFormatName(nFormat, szName, 127);
+
+	return szName;
+}
+
 BOOL CClipboard::HasText()
 {
 	return HasFormat(GetFormat(0));

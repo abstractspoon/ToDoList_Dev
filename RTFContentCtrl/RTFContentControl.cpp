@@ -23,6 +23,7 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\localizer.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\itasklist.h"
@@ -82,6 +83,12 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 
 	// add custom protocol to comments field for linking to task IDs
 	m_rtf.AddProtocol(TDL_PROTOCOL, TRUE);
+
+	CString sTooltip;
+	sTooltip.LoadString(ID_HELP);
+	Misc::Trim(sTooltip);
+
+	CWinHelpButton::SetDefaultTooltip(CLocalizer::TranslateText((LPCTSTR)sTooltip));
 }
 
 CRTFContentControl::~CRTFContentControl()
@@ -428,12 +435,11 @@ void CRTFContentControl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 void CRTFContentControl::InitShortcutManager()
 {
-	if (!m_mgrShortcuts.Initialize(this, NULL, 0))
+	if (!m_mgrShortcuts.Initialize(this, NULL, NULL, 0))
 		return;
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYFORMATTING,	'C',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTEFORMATTING,	'V',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
-	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESIMPLE,		'P',		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_OUTDENT,			'J',		HOTKEYF_CONTROL | HOTKEYF_SHIFT); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPY,			'C',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYASHTML,		'C',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
@@ -510,6 +516,8 @@ BOOL CRTFContentControl::GetClipboardHtmlForPasting(CString& sHtml, CString& sSo
 	if (!cb.HasFormat(CBF_RTF) && 
 		!cb.HasFormat(CBF_RETEXTOBJ) && 
 		!cb.HasFormat(CBF_EMBEDDEDOBJ) &&
+		!cb.HasFormat(CF_DIB) &&
+		!cb.HasFormat(CF_BITMAP) &&
 		cb.GetText(sHtml, CBF_HTML))
 	{
 #ifdef _UNICODE
@@ -525,8 +533,8 @@ BOOL CRTFContentControl::GetClipboardHtmlForPasting(CString& sHtml, CString& sSo
 		if (!sHtml.IsEmpty())
 		{
 #ifdef _UNICODE
-			// convert back to Ansi for translation
-			Misc::EncodeAsMultiByte(sHtml);
+			// convert back to UTF8 for translation
+			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
 #endif
 			return TRUE;
 		}
@@ -554,8 +562,8 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 		}
 		else // may need conversion
 		{
-			// if there is HTML but not RTF then convert the HTML to RTF
-			// and add it to the current clipboard contents
+			// if there is HTML but not RTF or an image then convert the 
+			// HTML to RTF and add it to the current clipboard contents
 			CClipboardBackup cbb(*this);
 			BOOL bClipboardSaved = FALSE;
 

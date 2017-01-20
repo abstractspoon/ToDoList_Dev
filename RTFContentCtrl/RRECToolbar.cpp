@@ -30,6 +30,8 @@
 #include "ids.h"
 
 #include "..\shared\Themed.h"
+#include "..\shared\enstring.h"
+
 #include "..\3rdparty\colourpopup.h"
 
 #include <tchar.h>
@@ -411,10 +413,7 @@ void CRRECToolBar::OnColorDropDown(NMHDR* pNMHDR, LRESULT* pResult)
 			ClientToScreen(rButton);
 
 			COLORREF color = GetFontColor(nBtnID == ID_EDIT_TEXTCOLOR);
-			CString defaultText, customText;
-
-			defaultText.LoadString(STRING_DEFAULT);
-			customText.LoadString(STRING_CUSTOM);
+			CEnString defaultText(STRING_DEFAULT), customText(STRING_CUSTOM);
 
 			new CColourPopup(CPoint(rButton.left, rButton.bottom), color, 
 							 this, nBtnID, defaultText, customText, TRUE);

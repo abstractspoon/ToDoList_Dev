@@ -659,6 +659,7 @@ protected:
 	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
+	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
 	BOOL CreateContentControl(BOOL bResendComments);
 	int GetMaxTaskCategoryWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
@@ -671,7 +672,7 @@ protected:
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
-	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppends);
+	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppends, BOOL bEdit);
 	int SetTaskDone(HTREEITEM hti, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	int CheckWantSubtasksCompleted();

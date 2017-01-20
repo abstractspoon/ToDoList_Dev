@@ -1919,7 +1919,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			{
 				pTI->hwnd = GetSafeHwnd();
 				pTI->uId = dwTaskID;
-				pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
+				pTI->uFlags |= TTF_TRANSPARENT;
 				pTI->rect = rLabel;
 				
 				// MFC will free the duplicated string

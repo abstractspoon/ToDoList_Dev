@@ -13,6 +13,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
 #include "..\shared\rtlstylemgr.h"
+#include "..\shared\OSVersion.h"
 
 #include "..\todolist\tdcswitch.h"
 
@@ -182,7 +183,25 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		break;
 		
 	case TDLWUR_SUCCESS:
-		// all good
+		{
+			// Enable/Delete the XP-specific manifest
+			CString sXPManifestPath;
+			FileMisc::MakePath(sXPManifestPath, NULL, sAppFolder, _T("todolist.exe.xp.manifest"));
+
+			if (COSVersion() < OSV_VISTA)
+			{
+				// Rename without the '.xp'
+				CString sNewManifestName;
+
+				FileMisc::MakePath(sXPManifestPath, NULL, sAppFolder, _T("todolist.exe.manifest"));
+				FileMisc::CopyFile(sXPManifestPath, sNewManifestName, TRUE, TRUE);
+			}
+			else
+			{
+				FileMisc::LogText(_T("Deleting '%s'"), sXPManifestPath);
+				FileMisc::DeleteFile(sXPManifestPath, TRUE);
+			}
+		}
 		break;
 		
 	case TDLWUR_ERR_APPFOLDER:

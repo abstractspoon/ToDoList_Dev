@@ -213,9 +213,6 @@ void CTDLTaskTreeCtrl::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 	{
 	case TDCS_SHOWINFOTIPS:
 		m_tcTasks.ModifyStyle(bOn ? 0 : TVS_INFOTIP, (bOn ? TVS_INFOTIP : 0));
-		
-		if (bOn)
-			PrepareInfoTip(TreeView_GetToolTips(m_tcTasks));
 		break;
 	}
 }
@@ -709,6 +706,8 @@ void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 			m_lcColumns.SetSelectionMark(nItem);
 		}
 	}
+
+	m_lcColumns.Invalidate(FALSE);
 }
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
@@ -1848,7 +1847,7 @@ BOOL CTDLTaskTreeCtrl::SelectTasksInHistory(BOOL bForward)
 	BOOL bSelected = (bForward ? TSH().NextSelection() : TSH().PrevSelection());
 
 	if (bSelected)
-		InvalidateAll();
+		SyncColumnSelectionToTasks();
 
 	return bSelected;
 }

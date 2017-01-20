@@ -60,7 +60,6 @@ public:
 	int GetCustomAttributeArguments(CCLArgArray& aArgs) const; // may include USER attribs
 
 	BOOL ReplaceArgument(CLA_TYPE nType, LPCTSTR szValue);
-	BOOL ReplaceArgument(CLA_TYPE nType, DWORD dwValue);
 	BOOL ReplaceArgument(LPCTSTR szName, LPCTSTR szValue); // for USER/CUSTOM types sharing the same type
 
 	BOOL HasArgument(CLA_TYPE nType) const;

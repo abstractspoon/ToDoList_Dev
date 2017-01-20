@@ -73,7 +73,7 @@ int CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		{
 			pTI->hwnd = GetSafeHwnd();
 			pTI->uId = (DWORD)hti;
-			pTI->uFlags |= (TTF_ALWAYSTIP | TTF_TRANSPARENT);
+			pTI->uFlags |= TTF_TRANSPARENT;
 			pTI->lpszText = _tcsdup(GetItemText(hti)); // MFC will free the duplicated string
 			pTI->rect = rLabel;
 

@@ -70,6 +70,7 @@ public:
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask);
+	virtual void DoGotoTask(const TDCREMINDER& rem);
 
 	// Generated message map functions
 protected:

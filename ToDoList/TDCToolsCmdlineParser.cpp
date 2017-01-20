@@ -168,14 +168,6 @@ BOOL CTDCToolsCmdlineParser::ReplaceArgument(CLA_TYPE nType, LPCTSTR szValue)
 	return bFound;
 }
 
-BOOL CTDCToolsCmdlineParser::ReplaceArgument(CLA_TYPE nType, DWORD dwValue)
-{
-	CString sValue;
-	sValue.Format(_T("%lu"), dwValue);
-
-	return ReplaceArgument(nType, sValue);
-}
-
 BOOL CTDCToolsCmdlineParser::ReplaceArgument(LPCTSTR szName, LPCTSTR szValue)
 {
 	// see if we have a user item with that name
@@ -206,6 +198,45 @@ BOOL CTDCToolsCmdlineParser::ReplaceArgument(LPCTSTR szName, LPCTSTR szValue)
 	// not found
 	return FALSE;
 
+}
+
+BOOL CTDCToolsCmdlineParser::ReplaceArgument(int nArg, LPCTSTR szValue)
+{
+	if (nArg < 0 || nArg >= m_aArgs.GetSize())
+		return FALSE;
+	
+	CMDLINEARG& cla = m_aArgs[nArg];
+	
+	CString sValue(szValue);
+	Misc::Trim(sValue);
+	
+	if (m_sCmdLine.Replace(cla.sPlaceHolder, sValue))
+	{
+		// also check if there are any user references to this variable name
+		// and replace those too
+		if (IsUserInputType(cla.nType))
+		{
+			int nUserArg = m_aUserArgs.GetSize();
+			
+			while (nUserArg--)
+			{
+				CMDLINEARG& claUser = m_aUserArgs[nUserArg];
+				
+				if (claUser.sName.CompareNoCase(cla.sName) == 0)
+				{
+					m_sCmdLine.Replace(claUser.sPlaceHolder, sValue);
+					
+					// and remove
+					m_aUserArgs.RemoveAt(nUserArg);
+				}
+			}
+		}
+		
+		return TRUE;
+	}
+	
+	// else
+	return FALSE;
 }
 
 BOOL CTDCToolsCmdlineParser::IsUserInputRequired() const
@@ -261,45 +292,6 @@ BOOL CTDCToolsCmdlineParser::IsUserInputType(CLA_TYPE nType) const
 		return TRUE;
 	}
 	
-	return FALSE;
-}
-
-BOOL CTDCToolsCmdlineParser::ReplaceArgument(int nArg, LPCTSTR szValue)
-{
-	if (nArg < 0 || nArg >= m_aArgs.GetSize())
-		return FALSE;
-
-	CMDLINEARG& cla = m_aArgs[nArg];
-
-	CString sValue(szValue);
-	Misc::Trim(sValue);
-
-	if (m_sCmdLine.Replace(cla.sPlaceHolder, sValue))
-	{
-		// also check if there are any user references to this variable name
-		// and replace those too
-		if (IsUserInputType(cla.nType))
-		{
-			int nUserArg = m_aUserArgs.GetSize();
-
-			while (nUserArg--)
-			{
-				CMDLINEARG& claUser = m_aUserArgs[nUserArg];
-
-				if (claUser.sName.CompareNoCase(cla.sName) == 0)
-				{
-					m_sCmdLine.Replace(claUser.sPlaceHolder, sValue);
-
-					// and remove
-					m_aUserArgs.RemoveAt(nUserArg);
-				}
-			}
-		}
-
-		return TRUE;
-	}
-
-	// else
 	return FALSE;
 }
 

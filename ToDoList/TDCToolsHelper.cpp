@@ -15,6 +15,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\preferences.h"
 #include "..\shared\misc.h"
+#include "..\shared\webmisc.h"
 
 #include <shlwapi.h>
 
@@ -72,8 +73,9 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 	}
 	
 	CString sCmdline;
+	BOOL bEscapeSpaces = (WebMisc::IsBrowser(sToolPath) || WebMisc::IsURL(tool.sCmdline));
 	
-	if (!PrepareCmdline(tool, args, sCmdline))
+	if (!PrepareCmdline(tool, args, bEscapeSpaces, sCmdline))
 	{
 		return FALSE; // user cancelled dialog
 	}
@@ -248,7 +250,7 @@ void CTDCToolsHelper::UpdateMenu(CCmdUI* pCmdUI, const CUserToolArray& tools, CM
 	}
 }
 
-BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, CString& sCmdline)
+BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bEscapeSpaces, CString& sCmdline)
 {
 	// do necessary substitutions
 	CTDCToolsCmdlineParser tcp(tool.sCmdline);
@@ -276,20 +278,20 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		
 		FileMisc::SplitPath(sTasklist, &sDrive, &sPath, &sFName, &sExt);
 		
-		tcp.ReplaceArgument(CLAT_PATHNAME, sTasklist);
-		tcp.ReplaceArgument(CLAT_FOLDER, sDrive + sPath);
-		tcp.ReplaceArgument(CLAT_FILENAME, sFName + sExt);
-		tcp.ReplaceArgument(CLAT_FILETITLE, sFName);
+		ReplaceToolArgument(tcp, CLAT_PATHNAME, sTasklist, bEscapeSpaces);
+		ReplaceToolArgument(tcp, CLAT_FOLDER, (sDrive + sPath), bEscapeSpaces);
+		ReplaceToolArgument(tcp, CLAT_FILENAME, (sFName + sExt), bEscapeSpaces);
+		ReplaceToolArgument(tcp, CLAT_FILETITLE, sFName, bEscapeSpaces);
 	}
 	
-	tcp.ReplaceArgument(CLAT_TODOLIST, FileMisc::GetAppFilePath());
-	tcp.ReplaceArgument(CLAT_SELTASKID, args.sTaskIDs);
-	tcp.ReplaceArgument(CLAT_SELTASKTITLE, args.sTaskTitle);
-	tcp.ReplaceArgument(CLAT_SELTASKEXTID, args.sTaskExtID);
-	tcp.ReplaceArgument(CLAT_SELTASKCOMMENTS, args.sTaskComments);
-	tcp.ReplaceArgument(CLAT_SELTASKFILELINK, args.sTaskFileLink);
-	tcp.ReplaceArgument(CLAT_SELTASKALLOCBY, args.sTaskAllocBy);
-	tcp.ReplaceArgument(CLAT_SELTASKALLOCTO, args.sTaskAllocTo);
+	ReplaceToolArgument(tcp, CLAT_TODOLIST, FileMisc::GetAppFilePath(), bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKID, args.sTaskIDs, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKTITLE, args.sTaskTitle, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKEXTID, args.sTaskExtID, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKCOMMENTS, args.sTaskComments, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKFILELINK, args.sTaskFileLink, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCBY, args.sTaskAllocBy, bEscapeSpaces);
+	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCTO, args.sTaskAllocTo, bEscapeSpaces);
 
 	CCLArgArray aCustomArgs;
 	int nArg = tcp.GetCustomAttributeArguments(aCustomArgs);
@@ -299,7 +301,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		CString sAttribID(aCustomArgs[nArg].sName), sValue;
 		args.mapTaskCustData.Lookup(sAttribID, sValue);
 
-		tcp.ReplaceArgument(aCustomArgs[nArg].sPlaceHolder, sValue);
+		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, sValue, bEscapeSpaces);
 	}
 	
 	if (tcp.IsUserInputRequired())
@@ -316,13 +318,35 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 		while (nArg--)
 		{
 			CString sResult(dialog.GetResult(aArgs[nArg].sName));
-			tcp.ReplaceArgument(aArgs[nArg].sName, sResult);
+			ReplaceToolArgument(tcp, aArgs[nArg].sName, sResult, bEscapeSpaces);
 		}
 	}
 	
 	sCmdline = tcp.GetCmdLine();
 
 	return TRUE;
+}
+
+BOOL CTDCToolsHelper::ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 
+										const CString& sValue, BOOL bEscapeSpaces)
+{
+	CString sArgValue(sValue);
+
+	if (bEscapeSpaces)
+		sArgValue.Replace(_T(" "), _T("%20"));
+
+	return tcp.ReplaceArgument(nType, sArgValue);
+}
+
+BOOL CTDCToolsHelper::ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
+										const CString& sValue, BOOL bEscapeSpaces)
+{
+	CString sArgValue(sValue);
+	
+	if (bEscapeSpaces)
+		sArgValue.Replace(_T(" "), _T("%20"));
+	
+	return tcp.ReplaceArgument(sName, sArgValue);
 }
 
 void CTDCToolsHelper::RemoveToolsFromToolbar(CToolBar& toolbar, UINT nCmdAfter)

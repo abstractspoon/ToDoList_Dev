@@ -235,7 +235,7 @@ BOOL CTDLTransEditDlg::ModifyDictionaryItem(int nItem, const CString& sTrans)
 	ASSERT(!IsReadOnly());
 
 	// Modify the dictionary item that this refers to
-	CString sEnglish = m_lcDictItems.GetItemText(nItem, ENG_COL);
+	CString sEnglish = m_lcDictItems.GetEnglishText(nItem);
 	CString sClassID = m_lcDictItems.GetItemText(nItem, HINT_COL);
 
 	if (m_dictionary.ModifyItem(sEnglish, sClassID, sTrans))
@@ -472,7 +472,8 @@ void CTDLTransEditDlg::OnChangeTranslation()
 
 	if (nSel != -1)
 	{
-		ModifyDictionaryItem(nSel, m_sTranslation);
+		if (ModifyDictionaryItem(nSel, m_sTranslation))
+			m_lcDictItems.SetItemText(nSel, TRANS_COL, m_sTranslation);
 	}
 	else
 	{

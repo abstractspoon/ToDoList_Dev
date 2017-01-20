@@ -1290,8 +1290,7 @@ BOOL CXmlFile::Transform(const CString& sTransformPath, CString& sOutput) const
 {
 	if (BuildDOM() && m_xslDoc.Load(sTransformPath))
 	{
-		sOutput = m_xmlDoc.Transform(m_xslDoc);
-		return TRUE;
+		return m_xmlDoc.Transform(m_xslDoc, sOutput);
 	}
 	
 	// else

@@ -95,6 +95,7 @@ public:
 	
 	static BOOL HasText();
 	static BOOL HasFormat(UINT nFormat);
+	static CString GetFormatName(UINT nFormat);
 	static CString& PackageHTMLFragment(CString& sContent, const CString& sSourceUrl = _T(""));
 	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl);
 

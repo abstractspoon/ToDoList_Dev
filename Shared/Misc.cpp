@@ -1394,6 +1394,9 @@ const CString& Misc::GetLongest(const CString& str1, const CString& str2, BOOL b
 
 double Misc::Atof(const CString& sValue)
 {
+	if (sValue.IsEmpty())
+		return 0.0;
+
 	// needs special care to handle decimal point properly
 	// especially since we've no way of knowing how it is encoded.
 	// so we assume that if a period is present then it's encoded

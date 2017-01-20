@@ -439,7 +439,6 @@ BOOL TDCRECURRENCE::FitDayToScheme(COleDateTime& dtRecur) const
 				return FALSE;
 			
 			dtRecur = COleDateTime(st);
-			
 			return TRUE;
 		}
 		break;
