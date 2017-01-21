@@ -5975,8 +5975,7 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave)
 	SaveGlobals(tasks);
 
 	// attrib visibility
- 	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
- 		tasks.SetAttributeVisibility(m_visColEdit);
+	SaveAttributeVisibility(tasks);
 
 	// and meta data
 	tasks.SetMetaData(m_mapMetaData);
@@ -6310,21 +6309,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& file)
 	LoadCustomAttributeDefinitions(file);
 	LoadSplitPos(prefs);
 	LoadDefaultRecurrence(prefs);
-	
-	// attrib visibility can be stored inside the file or the preferences
- 	TDCCOLEDITFILTERVISIBILITY vis;
- 
- 	if (file.GetAttributeVisibility(vis))
- 	{
- 		SetColumnFieldVisibility(vis);
- 
- 		// update style to match
- 		SetStyle(TDCS_SAVEUIVISINTASKLIST);
- 	}
- 	else
-	{
-		LoadAttributeVisibility(prefs);
-	}
+	LoadAttributeVisibility(file, prefs);
 
 	if (file.GetTaskCount())
 	{
@@ -9941,17 +9926,31 @@ void CToDoCtrl::LoadSplitPos(const CPreferences& prefs)
 		m_nCommentsSize = s_nCommentsSize;
 }
 
+void CToDoCtrl::SaveAttributeVisibility(CTaskFile& file) const
+{
+	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
+		file.SetAttributeVisibility(m_visColEdit);
+}
+
 void CToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
 {
 	m_visColEdit.Save(prefs, GetPreferencesKey());
 }
 
-void CToDoCtrl::LoadAttributeVisibility(const CPreferences& prefs)
+void CToDoCtrl::LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs)
 {
+	// attrib visibility can be stored inside the file or the preferences
 	TDCCOLEDITVISIBILITY vis;
 
-	if (!vis.Load(prefs, GetPreferencesKey()))
+	if (file.GetAttributeVisibility(vis))
+	{
+		// update style to match
+		SetStyle(TDCS_SAVEUIVISINTASKLIST);
+	}
+	else if (!vis.Load(prefs, GetPreferencesKey()))
+	{
 		vis = m_visColEdit;
+	}
 
 	SetColumnFieldVisibility(vis);
 }

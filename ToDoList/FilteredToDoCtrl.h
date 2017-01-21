@@ -157,7 +157,8 @@ protected:
 	void RebuildList(const SEARCHPARAMS& filter);
 
 	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
-	virtual void LoadAttributeVisibility(const CPreferences& prefs);
+	virtual void LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& file) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 };
 

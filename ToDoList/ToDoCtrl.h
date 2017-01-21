@@ -690,6 +690,10 @@ protected:
 
 	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID = 0);
 
+	virtual void LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& file) const;
+	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
+
 	void SaveGlobals(CTaskFile& file) const;
 	void LoadGlobals(const CTaskFile& file);
 
@@ -768,9 +772,6 @@ protected:
 
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
-
-	virtual void LoadAttributeVisibility(const CPreferences& prefs);
-	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 
 	void TimeTrackTask(HTREEITEM hti);
 	BOOL AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, const CString& sComment, BOOL bTracked, BOOL bAddToTimeSpent = FALSE);

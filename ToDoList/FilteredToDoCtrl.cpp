@@ -1595,17 +1595,31 @@ const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleFilterFields() const
 	return m_visColEditFilter.GetVisibleFilterFields();
 }
 
+void CFilteredToDoCtrl::SaveAttributeVisibility(CTaskFile& file) const
+{
+	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
+		file.SetAttributeVisibility(m_visColEditFilter);
+}
+
 void CFilteredToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
 {
 	m_visColEditFilter.Save(prefs, GetPreferencesKey());
 }
 
-void CFilteredToDoCtrl::LoadAttributeVisibility(const CPreferences& prefs)
+void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs)
 {
+	// attrib visibility can be stored inside the file or the preferences
 	TDCCOLEDITFILTERVISIBILITY vis;
 
-	if (!vis.Load(prefs, GetPreferencesKey()))
+	if (file.GetAttributeVisibility(vis))
+	{
+		// update style to match
+		SetStyle(TDCS_SAVEUIVISINTASKLIST);
+	}
+	else if (!vis.Load(prefs, GetPreferencesKey()))
+	{
 		vis = m_visColEditFilter;
+	}
 
 	SetColumnFieldVisibility(vis);
 }
