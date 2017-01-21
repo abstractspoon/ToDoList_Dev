@@ -37,8 +37,6 @@ protected:
 	CIconCache m_imageIcons;
 	BOOL m_bReadOnly;
 
-	mutable UINT m_nLastTooltipBtnID;
-
 protected:
 	void PreSubclassWindow();
 	BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -50,7 +48,6 @@ protected:
 	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelChange();
-	afx_msg BOOL OnNeedTooltipText(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo message handler

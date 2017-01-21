@@ -21,6 +21,7 @@ public:
 	virtual ~CHotTracker();
 
 	BOOL Initialize(CWnd* pWnd);
+	BOOL IsInitialized() const { return IsHooked(); }
 	void Reset();
 
 	int AddRect(const CRect& rect);

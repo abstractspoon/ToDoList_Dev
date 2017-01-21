@@ -69,16 +69,13 @@ BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
-	ON_WM_CREATE()
 	ON_WM_NCHITTEST()
-	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
 	ON_WM_ENABLE()
 	ON_MESSAGE(EM_SETREADONLY, OnSetReadOnly)
 	ON_WM_STYLECHANGED()
 	ON_WM_NCPAINT()
-	//ON_MESSAGE(WM_NCPAINT, OnNcPaint)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -140,10 +137,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip,
 
 	if (GetSafeHwnd())
 	{
-		if (!eb.sTip.IsEmpty())
-			m_tooltip.AddTool(this, eb.sTip, CRect(0, 0, 10, 10), nID);
-
-		RecalcBtnRects();
+		RecalcBtnHotRects();
 
 		// force WM_NCCALCSIZE
 		if (!m_bFirstShow)
@@ -186,10 +180,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip)
 
 	if (GetSafeHwnd())
 	{
-		if (!eb.sTip.IsEmpty())
-			m_tooltip.AddTool(this, eb.sTip, CRect(0, 0, 10, 10), nID);
-		
-		RecalcBtnRects();
+		RecalcBtnHotRects();
 		
 		// force WM_NCCALCSIZE
 		if (!m_bFirstShow)
@@ -218,13 +209,12 @@ void CEnEdit::SetBorders(int nTop, int nBottom)
 void CEnEdit::PreSubclassWindow() 
 {
 	CMaskEdit::PreSubclassWindow();
+
+	InitializeTooltips();
 }
 
 BOOL CEnEdit::PreTranslateMessage(MSG* pMsg) 
 {
-	if (m_tooltip.GetSafeHwnd())
-		m_tooltip.RelayEvent(pMsg);
-
 	// Treat 'return' as a button click for single button controls
 	if ((pMsg->message == WM_KEYDOWN) && 
 		(pMsg->wParam == VK_RETURN) && 
@@ -342,37 +332,27 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 {
 	CMaskEdit::OnSize(nType, cx, cy);
 	
-	InitializeTooltips();
-
 	// update tool rects
-	RecalcBtnRects();
+	RecalcBtnHotRects();
 }
 
 BOOL CEnEdit::InitializeTooltips()
 {
-	// create tooltip
-	if (!m_tooltip.GetSafeHwnd() && m_tooltip.Create(this))
+	if (EnableToolTips(TRUE))
 	{
-		// add any existing buttons
-		int nBtn = GetButtonCount();
+ 		// hot tracking
+ 		if (CThemed().AreControlsThemed())
+ 			m_hotTrack.Initialize(this);
 
-		while (nBtn--)
-		{
-			const EDITBTN& eb = m_aButtons[nBtn];
-			m_tooltip.AddTool(this, eb.sTip, CRect(), eb.nID);
-		}
-
-		// hot tracking
-		if (CThemed().AreControlsThemed())
-			m_hotTrack.Initialize(this);
+		return TRUE;
 	}
 
-	return (m_tooltip.GetSafeHwnd() != NULL);
+	return FALSE;
 }
 
-void CEnEdit::RecalcBtnRects()
+void CEnEdit::RecalcBtnHotRects()
 {
-	if (!m_tooltip.GetSafeHwnd())
+	if (!m_hotTrack.IsInitialized())
 		return;
 	
 	int nBtn = GetButtonCount();
@@ -382,9 +362,6 @@ void CEnEdit::RecalcBtnRects()
 		CRect rBtn = GetButtonRectByIndex(nBtn);
 		ScreenToClient(rBtn);
 
-		m_tooltip.SetToolRect(this, m_aButtons[nBtn].nID, rBtn);
-
-		// update hottracker too
 		m_hotTrack.UpdateRect(nBtn, rBtn);
 	}
 }
@@ -432,42 +409,6 @@ void CEnEdit::OnNcPaint()
 	
 	Default();
 }
-
-/*
-LRESULT CEnEdit::OnNcPaint(WPARAM wp, LPARAM / *lp* /) 
-{
-	if (m_bFirstShow)
-	{
-		m_bFirstShow = FALSE;
-		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW); 
-	}
-	
-	// our custom drawing
-	{
-#ifdef _DEBUG
-		static int nCount = 1;
-		TRACE(_T("CEnEdit::OnNcPaint(%d)\n"), nCount++);
-#endif
-
-		UINT nFlags = (DCX_WINDOW | DCX_USESTYLE | DCX_LOCKWINDOWUPDATE);
-
-		if (wp)
-			nFlags |= DCX_INTERSECTRGN | DCX_NODELETERGN;
-
-		CDC* pDC = GetDCEx(CRgn::FromHandle((HRGN)wp), nFlags);
-		//CWindowDC dc(this);
-
-		CRect rWindow;
-		GetWindowRect(rWindow);
-
-		NcPaint(pDC, rWindow);
-
-		ReleaseDC(pDC);
-	}
-	
-	return 1L;//Default();
-}
-*/
 
 void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 {
@@ -621,17 +562,7 @@ BOOL CEnEdit::SetButtonTip(UINT nID, LPCTSTR szTip)
 	if (nBtn < 0)
 		return FALSE;
 
-	if (m_aButtons[nBtn].sTip.Compare(szTip) != 0)
-	{
-		m_aButtons[nBtn].sTip = szTip;
-
-		if (GetSafeHwnd())
-		{
-			m_tooltip.UpdateTipText(szTip, this, m_aButtons[nBtn].nID);
-			RedrawButton(nBtn);
-		}
-	}
-
+	m_aButtons[nBtn].sTip = szTip;
 	return TRUE;
 }
 
@@ -650,7 +581,7 @@ BOOL CEnEdit::SetButtonCaption(UINT nID, LPCTSTR szCaption)
 
 		// recalc width?
 		if (eb.nWidth == CALC_BTNWIDTH)
-			RecalcBtnRects();
+			RecalcBtnHotRects();
 
 		if (GetSafeHwnd())
 		{
@@ -741,8 +672,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	if (rBtn.IsRectEmpty())
 		return;
-
-//	int nSaveDC = pDC->SaveDC();
 
 	BOOL bThemed = CThemed().AreControlsThemed();
 	BOOL bHot = rBtn.PtInRect(ptCursor);
@@ -859,7 +788,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			pDC->SelectObject(pOld);
 	}
 
-//	pDC->RestoreDC(nSaveDC);
 	pDC->ExcludeClipRect(rBtn);
 }
 
@@ -949,7 +877,7 @@ BOOL CEnEdit::SetButtonWidth(UINT nID, int nWidth)
 			// force WM_NCCALCSIZE
 			SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 
-			RecalcBtnRects();
+			RecalcBtnHotRects();
 			SendMessage(WM_NCPAINT);
 		}
 	}
@@ -1015,21 +943,6 @@ void CEnEdit::OnEnable(BOOL bEnable)
 	SendMessage(WM_NCPAINT);	
 }
 
-int CEnEdit::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CMaskEdit::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	return 0;
-}
-
-void CEnEdit::OnDestroy() 
-{
-	CMaskEdit::OnDestroy();
-	
-	m_tooltip.DestroyWindow();
-}
-
 void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 {
 	if ((nStyleType == GWL_STYLE) && 
@@ -1041,3 +954,32 @@ void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 		SendMessage(WM_NCPAINT);
 	}
 }
+
+int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	ClientToScreen(&point);
+
+	int nBtn = ButtonHitTest(point);
+
+	if (nBtn != -1)
+	{
+		const EDITBTN& btn = m_aButtons[nBtn];
+
+		if (!btn.sTip.IsEmpty())
+		{
+			pTI->hwnd = m_hWnd;
+			pTI->uId = btn.nID;
+			pTI->uFlags = TTF_NOTBUTTON;
+			pTI->lpszText = _tcsdup(btn.sTip);
+
+			GetWindowRect(&pTI->rect);
+			CWnd::ScreenToClient(&pTI->rect);
+
+			return (int)btn.nID;
+		}
+	}
+
+	// else
+	return CMaskEdit::OnToolHitTest(point, pTI);
+}
+

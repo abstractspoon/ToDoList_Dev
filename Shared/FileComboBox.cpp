@@ -52,7 +52,6 @@ CFileComboBox::CFileComboBox(int nEditStyle)
 	CAutoComboBox(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
 	m_imageIcons(16, 16),
-	m_nLastTooltipBtnID(0),
 	m_bReadOnly(FALSE)
 {
 
@@ -62,15 +61,12 @@ CFileComboBox::~CFileComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
 	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileEditBrowseChange)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xffff, OnNeedTooltipText)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xffff, OnNeedTooltipText)
 END_MESSAGE_MAP()
 
 // CFileComboBox message handlers
@@ -80,6 +76,7 @@ void CFileComboBox::PreSubclassWindow()
 
 	VERIFY (InitFileEdit());
 
+	m_fileEdit.EnableToolTips(FALSE);
 	EnableToolTips(TRUE);
 }
 
@@ -89,105 +86,30 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 	if (cs.style & CBS_DROPDOWNLIST)
 		return FALSE;
 
-	if (!InitFileEdit())
-		return FALSE;
-
-	EnableToolTips(TRUE);
-
 	cs.style |= (CBS_OWNERDRAWFIXED | CBS_HASSTRINGS);
 
 	return CAutoComboBox::PreCreateWindow(cs);
 }
 
-BOOL CFileComboBox::OnNeedTooltipText(UINT /*id*/, NMHDR* pNMHDR, LRESULT* pResult)
-{
-	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
-	*pResult = 0;
-
-	if (m_nLastTooltipBtnID == -1)
-	{
-		CString sFilePath;
-		m_fileEdit.GetWindowText(sFilePath);
-		ASSERT(!sFilePath.IsEmpty());
-
-		pTTT->lpszText = _tcsdup((LPCTSTR)sFilePath);
-
-		return TRUE;
-	}
-	else if (m_nLastTooltipBtnID != 0)
-	{
-		CString sTip = m_fileEdit.GetButtonTip(m_nLastTooltipBtnID);
-
-		if (!sTip.IsEmpty())
-			pTTT->lpszText = _tcsdup((LPCTSTR)sTip);
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	// CFileEdit's buttons will not work when embedded inside
-	// a combo box. I've spent long hours trying to work out
-	// why but to no avail. Therefore we duplicate the tooltips
-	// ourselves
-	m_nLastTooltipBtnID = 0;
+	ClientToScreen(&point);
+	m_fileEdit.ScreenToClient(&point);
 
-	CWnd::ClientToScreen(&point);
+	int nTool = m_fileEdit.OnToolHitTest(point, pTI);
 
-	int nBtn = m_fileEdit.GetButtonCount();
-
-	while (nBtn--)
+	if (nTool != -1)
 	{
-		CRect rButton = m_fileEdit.GetButtonRectByIndex(nBtn);
+		pTI->hwnd = m_hWnd;
 
-		if (rButton.PtInRect(point))
-		{
-			m_nLastTooltipBtnID = m_fileEdit.GetButtonID(nBtn);
+		m_fileEdit.ClientToScreen(&pTI->rect);
+		ScreenToClient(&pTI->rect);
 
-			pTI->hwnd = m_hWnd;
-			pTI->uId = m_nLastTooltipBtnID;
-			pTI->uFlags = TTF_NOTBUTTON;
-			pTI->lpszText = LPSTR_TEXTCALLBACK;
-
-			CWnd::ScreenToClient(rButton);
-			pTI->rect = rButton;
-
-			return m_nLastTooltipBtnID;
-		}
-	}
-
-	// Now test edit field
-	if (m_fileEdit.m_bTipNeeded)
-	{
-		CRect rEdit, rCombo;
-		m_fileEdit.GetWindowRect(rEdit);
-
-		// Expand to combo borders
-		GetWindowRect(rCombo);
-		rEdit.top = rCombo.top;
-		rEdit.bottom = rCombo.bottom;
-
-		if (rEdit.PtInRect(point))
-		{
-			m_nLastTooltipBtnID = -1;
-
-			pTI->hwnd = m_hWnd;
-			pTI->uId = MAKELONG(point.x, point.y);
-			pTI->uFlags = TTF_NOTBUTTON;
-			pTI->lpszText = LPSTR_TEXTCALLBACK;
-			
-			CWnd::ScreenToClient(rEdit);
-			pTI->rect = rEdit;
-
-			return 1;
-		}
+		return nTool;
 	}
 
 	// else
-	return -1;
+	return CAutoComboBox::OnToolHitTest(point, pTI);
 }
 
 void CFileComboBox::OnSize(UINT nType, int cx, int cy)

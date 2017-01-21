@@ -88,16 +88,16 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		CWnd* pOwner = GetOwner();
 		ASSERT(pOwner);
 
-		CPoint point = pMsg->pt;
-		pOwner->ScreenToClient(&point);
-
 		CRect rOwner;
-		pOwner->GetClientRect(rOwner);
+		pOwner->GetWindowRect(rOwner);
 
-		if (!rOwner.PtInRect(point))
+		if (!rOwner.PtInRect(pMsg->pt))
 			return;
 
 		// determine which tool was hit
+		CPoint point = pMsg->pt;
+		pOwner->ScreenToClient(&point);
+
 		TOOLINFO tiHit;
 		InitToolInfo(tiHit, TRUE);
 

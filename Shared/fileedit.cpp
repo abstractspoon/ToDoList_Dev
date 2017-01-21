@@ -126,7 +126,6 @@ BEGIN_MESSAGE_MAP(CFileEdit, CEnEdit)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_PASTE, OnPaste)
-	ON_NOTIFY_RANGE(TTN_NEEDTEXT, 0, 0xffff, OnNeedTooltip)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -566,38 +565,6 @@ UINT CFileEdit::OnNcHitTest(CPoint point)
 	return CEnEdit::OnNcHitTest(point);
 }
 
-void CFileEdit::OnNeedTooltip(UINT /*id*/, NMHDR* pNMHDR, LRESULT* pResult)
-{
-	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
-	*pResult = 0;
-
-	switch (pTTT->hdr.idFrom)
-	{
-	case -1:
-		if (m_bTipNeeded)
-		{
-			static CString sFilePath;
-			GetWindowText(sFilePath);
- 
-			pTTT->lpszText = (LPTSTR)(LPCTSTR)sFilePath;
-		}
-		break;
-	}
-}
-
-void CFileEdit::RecalcBtnRects()
-{
-	CEnEdit::RecalcBtnRects();
-
-	if (m_tooltip.GetSafeHwnd())
-	{
-		CRect rClient;
-		GetClientRect(rClient);
-
-		m_tooltip.SetToolRect(this, (UINT)-1, rClient);
-	}
-}
-
 void CFileEdit::OnSetFocus(CWnd* pOldWnd) 
 {
 	CEnEdit::OnSetFocus(pOldWnd);
@@ -611,20 +578,6 @@ void CFileEdit::PreSubclassWindow()
 	
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	m_bFirstShow = TRUE;
-}
-
-BOOL CFileEdit::InitializeTooltips()
-{
-	// create tooltip
-	if (!m_tooltip.GetSafeHwnd() && CEnEdit::InitializeTooltips())
-	{
-		CRect rClient;
-		GetClientRect(rClient);
-
-		m_tooltip.AddTool(this, LPSTR_TEXTCALLBACK, rClient, (UINT)-1);
-	}
-
-	return (m_tooltip.GetSafeHwnd() != NULL);
 }
 
 CString CFileEdit::GetBrowseTitle(BOOL bFolder) const
@@ -644,4 +597,30 @@ CString CFileEdit::GetBrowseTitle(BOOL bFolder) const
 
 	// else
 	return (bFolder ? FILEEDIT_SELECTFOLDER : FILEEDIT_BROWSE_TITLE);
+}
+
+int CFileEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	if (m_bTipNeeded)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		if (rClient.PtInRect(point))
+		{
+			pTI->hwnd = m_hWnd;
+			pTI->uId = 0;
+			pTI->uFlags = TTF_NOTBUTTON;
+			pTI->rect = rClient;
+
+			CString sFilePath;
+			GetWindowText(sFilePath);
+			pTI->lpszText = _tcsdup(sFilePath);
+
+			return 0;
+		}
+	}
+
+	// else
+	return CEnEdit::OnToolHitTest(point, pTI);
 }

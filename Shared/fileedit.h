@@ -92,6 +92,7 @@ protected:
 	//{{AFX_VIRTUAL(CFileEdit)
 	protected:
 	virtual void PreSubclassWindow();
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
 
 	// Generated message map functions
@@ -110,19 +111,16 @@ protected:
 #endif
 	afx_msg LRESULT OnSetText(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPaste(WPARAM wp, LPARAM lp);
-	afx_msg void OnNeedTooltip(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 
 	virtual void OnBtnClick(UINT nID);
 	virtual void NcPaint(CDC* pDC, const CRect& rWindow);
-	virtual void RecalcBtnRects();
 	virtual void OnSetReadOnly(BOOL bReadOnly);
 	virtual void HandleBrowseForFile(CEnFileDialog& dlg);
 
 protected:
 	CRect GetIconRect() const; // screen coords
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
-	virtual BOOL InitializeTooltips();
 	CString GetBrowseTitle(BOOL bFolder) const;
 	void ClearImageIcon();
 	
