@@ -68,6 +68,7 @@ CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, CContentMgr& mgr
 									 const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
 	CTabbedToDoCtrl(mgrUIExt, mgrContent, cfDefault, visDefault),
+	m_visColEditFilter(visDefault),
 	m_bIgnoreListRebuild(FALSE),
 	m_bIgnoreExtensionUpdate(FALSE)
 {
