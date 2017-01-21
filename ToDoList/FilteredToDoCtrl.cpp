@@ -1573,21 +1573,22 @@ void CFilteredToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITFILTERVISIBILITY& vis
 {
 	CTabbedToDoCtrl::GetColumnFieldVisibility(vis);
 
-	vis.SetVisibleFilterFields(m_visColEditFilter.GetVisibleFilterFields());
+	if (vis.GetShowFields() == TDLSA_ANY)
+		vis.SetVisibleFilterFields(m_visColEditFilter.GetVisibleFilterFields());
 }
 
 const CTDCColumnIDMap& CFilteredToDoCtrl::GetVisibleColumns() const
 {
-	ASSERT(m_visColEditFilter.mapVisibleColumns == m_visColEdit.mapVisibleColumns);
+	ASSERT(m_visColEditFilter.GetVisibleColumns().MatchAllColumns(m_visColEdit.GetVisibleColumns()));
 
-	return CTabbedToDoCtrl::GetVisibleColumns();
+	return m_visColEditFilter.GetVisibleColumns();
 }
 
 const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleEditFields() const
 {
-	ASSERT(m_visColEditFilter.mapVisibleEdits == m_visColEdit.mapVisibleEdits);
+	ASSERT(m_visColEditFilter.GetVisibleEditFields().MatchAllAttributes(m_visColEdit.GetVisibleEditFields()));
 
-	return CTabbedToDoCtrl::GetVisibleEditFields();
+	return m_visColEditFilter.GetVisibleEditFields();
 }
 
 const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleFilterFields() const
