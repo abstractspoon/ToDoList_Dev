@@ -139,6 +139,7 @@ protected:
 	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, 
 						LPCTSTR szFont, BOOL bSymbolFont);
 	void RedrawButton(int nBtn);
+	int GetButtonTooltipID(int nBtn) const;
 
 	virtual BOOL InitializeTooltips();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

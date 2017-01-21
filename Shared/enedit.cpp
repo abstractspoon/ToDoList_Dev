@@ -967,19 +967,29 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (!btn.sTip.IsEmpty())
 		{
+			int nTool = GetButtonTooltipID(nBtn);
+
 			pTI->hwnd = m_hWnd;
-			pTI->uId = btn.nID;
+			pTI->uId = (UINT)nTool;
 			pTI->uFlags = TTF_NOTBUTTON;
 			pTI->lpszText = _tcsdup(btn.sTip);
 
 			GetWindowRect(&pTI->rect);
 			CWnd::ScreenToClient(&pTI->rect);
 
-			return (int)btn.nID;
+			return nTool;
 		}
 	}
 
 	// else
 	return CMaskEdit::OnToolHitTest(point, pTI);
+}
+
+int CEnEdit::GetButtonTooltipID(int nBtn) const
+{
+	CRect rWindow;
+	GetWindowRect(rWindow);
+
+	return ((int)MAKELPARAM(rWindow.left, rWindow.top) + GetButtonID(nBtn));
 }
 
