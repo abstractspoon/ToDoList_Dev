@@ -961,7 +961,7 @@ DWORD CRemoteFile::GetRemoteFileSize(LPCTSTR szRemotePath)
 		if (ff.FindFile(szRemotePath))
 		{
 			ff.FindNextFile();
-			return ff.GetLength();
+			return (DWORD)ff.GetLength();
 		}
 	}
 	catch(CInternetException* e)
@@ -1260,7 +1260,7 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 	// write out as we read in
 	BYTE ucBuffer[BUFSIZE];
 	DWORD dwBytesRead = 0, dwBytesWritten = 0;
-	DWORD dwFileSize = file.GetLength();
+	DWORD dwFileSize = (DWORD)file.GetLength();
 
 	while (pDlg->Continue())
 	{

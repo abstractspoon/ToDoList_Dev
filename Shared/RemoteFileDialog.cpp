@@ -471,7 +471,7 @@ void CRemoteFileDialog::FillFileList()
 						ff.GetLastWriteTime(&tLastMod);
 
 						/*int nIndex = */
-						AddFileItem(ff.GetFileName(), RFDT_FILE, nID++, ff.GetLength(), &tLastMod);
+						AddFileItem(ff.GetFileName(), RFDT_FILE, nID++, (DWORD)ff.GetLength(), &tLastMod);
 					}
 				}
 			}
