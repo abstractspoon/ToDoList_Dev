@@ -14,6 +14,13 @@
 
 #include "resource.h"		// main symbols
 
+// Some common defines
+const LPCTSTR GP_MENUTEXT	= _T("GanttProject"); 
+const LPCTSTR GP_FILEFILTER = _T("GanttProject Files (*.gan)|*.gan||"); 
+const LPCTSTR GP_FILEEXT	= _T("gan"); 
+
+const LPCTSTR GANTTVIEW_ID	= _T("83F6CBD3-5F3C-4567-9BA8-9544B899F949");
+
 /////////////////////////////////////////////////////////////////////////////
 // CGPExportApp
 // See GPExport.cpp for the implementation of this class

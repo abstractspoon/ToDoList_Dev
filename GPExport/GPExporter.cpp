@@ -9,9 +9,9 @@
 #include "..\shared\xmlfileex.h"
 #include "..\shared\misc.h"
 #include "..\shared\datehelper.h"
-//#include "..\shared\localizer.h"
+#include "..\shared\localizer.h"
 
-#include "..\todolist\tdlschemadef.h"
+#include "..\interfaces\ipreferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -38,21 +38,43 @@ CGPExporter::~CGPExporter()
 	::DestroyIcon(m_hIcon);
 }
 
-void CGPExporter::SetLocalizer(ITransText* /*pTT*/)
+void CGPExporter::SetLocalizer(ITransText* pTT)
 {
-	//CLocalizer::Initialize(pTT);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CLocalizer::Initialize(pTT);
 }
 
-bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+LPCTSTR CGPExporter::GetMenuText() const
 {
+	return GP_MENUTEXT;
+}
+
+LPCTSTR CGPExporter::GetFileFilter() const
+{
+	return GP_FILEFILTER;
+}
+
+LPCTSTR CGPExporter::GetFileExtension() const
+{
+	return GP_FILEEXT;
+}
+
+bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	const ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pSrcTaskFile, IID_TASKLIST9);
+	ASSERT (pITL9);
+
+	if (!InitConsts(pITL9, bSilent, pPrefs, szKey))
+		return false;
+
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
 
-	const ITaskList7* pITL7 = GetITLInterface<ITaskList7>(pSrcTaskFile, IID_TASKLIST7);
-	ASSERT (pITL7);
-
 	// export resource allocations
-	ExportResources(pITL7, fileDest.Root());
+	ExportResources(pITL9, fileDest.Root());
 
 	// clear the task map that will be populated in ExportTask
 	m_mapTasks.RemoveAll();
@@ -61,10 +83,10 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
 	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
 
-	if (!ExportTask(pITL7, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+	if (!ExportTask(pITL9, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
 		return false;
 
-	ExportDependencies(pITL7, pITL7->GetFirstTask(), pXITasks, TRUE);
+	ExportDependencies(pITL9, pITL9->GetFirstTask(), pXITasks, TRUE);
 
 	// important display stuff for GP
 	SetupDisplay(fileDest.Root());
@@ -74,8 +96,10 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
 }
 
-bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
 
@@ -85,21 +109,24 @@ bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFileP
 	
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		const ITaskList7* pITL7 = GetITLInterface<ITaskList7>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST7);
-		
-		if (pITL7)
+		const ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST9);
+
+		if ((nTaskList == 0) && !InitConsts(pITL9, bSilent, pPrefs, szKey))
+			return false;
+			
+		if (pITL9)
 		{
 			// export resource allocations
-			ExportResources(pITL7, fileDest.Root());
+			ExportResources(pITL9, fileDest.Root());
 			
 			// clear the task map that will be populated in ExportTask
 			m_mapTasks.RemoveAll();
 
 			// export tasks
-			if (!ExportTask(pITL7, pITL7->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+			if (!ExportTask(pITL9, pITL9->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
 				return false;
 
-			ExportDependencies(pITL7, pITL7->GetFirstTask(), pXITasks, TRUE);
+			ExportDependencies(pITL9, pITL9->GetFirstTask(), pXITasks, TRUE);
 		}
 	}
 
@@ -172,7 +199,7 @@ void CGPExporter::SetupCalendar(CXmlItem* pDestPrj)
 }
 
 
-bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, 
+bool CGPExporter::ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, 
 							 CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -195,10 +222,28 @@ bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	// colour
 	if (pSrcTaskFile->GetTaskTextColor(hTask) > 0)
 	{
-		CString sColor = pSrcTaskFile->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
+		CString sColor = pSrcTaskFile->GetTaskAttribute(hTask, _T("TEXTWEBCOLOR"));
 		ASSERT(!sColor.IsEmpty() && sColor[0] == '#');
 
 		pXIDestItem->AddItem(_T("color"), sColor);
+	}
+
+	// Milestone
+	BOOL bMilestone = FALSE;
+
+	if (!MILESTONETAG.IsEmpty())
+	{
+		int nTag = pSrcTaskFile->GetTaskTagCount(hTask);
+
+		while (nTag--)
+		{
+			if (MILESTONETAG.CompareNoCase(pSrcTaskFile->GetTaskTag(hTask, nTag)) == 0)
+			{
+				pXIDestItem->AddItem(_T("meeting"), _T("true"));
+				bMilestone = TRUE;
+				break;
+			}
+		}
 	}
 
 	// dates
@@ -210,15 +255,23 @@ bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 		COleDateTime start(tStart);
 		pXIDestItem->AddItem(_T("start"), CDateHelper::FormatDate(start, DHFD_ISO));
 
-		if (tDone >= tStart) // completion date takes precedence
+		// Duration
+		if (bMilestone)
 		{
-			int nDays = CDateHelper::CalcDaysFromTo(start, tDone, TRUE, TRUE);
-			pXIDestItem->AddItem(_T("duration"), nDays);
+			pXIDestItem->AddItem(_T("duration"), 0);
 		}
-		else if (tDue >= tStart)
+		else
 		{
-			int nDays = CDateHelper::CalcDaysFromTo(start, tDue, TRUE, TRUE);
-			pXIDestItem->AddItem(_T("duration"), nDays);
+			if (tDone >= tStart) // completion date takes precedence
+			{
+				int nDays = CDateHelper::CalcDaysFromTo(start, tDone, TRUE, TRUE);
+				pXIDestItem->AddItem(_T("duration"), nDays);
+			}
+			else if (tDue >= tStart)
+			{
+				int nDays = CDateHelper::CalcDaysFromTo(start, tDue, TRUE, TRUE);
+				pXIDestItem->AddItem(_T("duration"), nDays);
+			}
 		}
 	}
 
@@ -312,7 +365,7 @@ bool CGPExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	return true;
 }
 
-void CGPExporter::BuildResourceMap(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
+void CGPExporter::BuildResourceMap(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return;
@@ -348,7 +401,7 @@ void CGPExporter::BuildResourceMap(const ITaskList7* pSrcTaskFile, HTASKITEM hTa
 	}
 }
 
-void CGPExporter::ExportResources(const ITaskList7* pSrcTaskFile, CXmlItem* pDestPrj)
+void CGPExporter::ExportResources(const ITaskList9* pSrcTaskFile, CXmlItem* pDestPrj)
 {
 	BuildResourceMap(pSrcTaskFile, pSrcTaskFile->GetFirstTask(), pDestPrj, TRUE);
 
@@ -392,7 +445,7 @@ void CGPExporter::ExportResources(const ITaskList7* pSrcTaskFile, CXmlItem* pDes
 	}
 }
 
-void CGPExporter::ExportDependencies(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
+void CGPExporter::ExportDependencies(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return;
@@ -458,7 +511,7 @@ int CGPExporter::GetGPTaskID(DWORD dwTDLTaskID)
 	return ((int)dwTDLTaskID - 1);
 }
 
-void CGPExporter::GetTaskDates(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone)
+void CGPExporter::GetTaskDates(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone)
 {
 	tEarliestStart = INT_MAX;
 	tLatestDue = tLatestDone = 0;
@@ -513,4 +566,18 @@ void CGPExporter::GetTaskDates(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, 
 		// next
 		hTaskChild = pSrcTaskFile->GetNextTask(hTaskChild);
 	}
+}
+
+bool CGPExporter::InitConsts(const ITaskList9* pTaskFile, bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+{
+	// Hack to get Gantt View's tag for milestones
+	CString sFileName = pTaskFile->GetAttribute(_T("FILENAME"));
+
+	CString sPrefKey;
+	sPrefKey.Format(_T("FileStates\\%s\\UIExtensions\\%s"), sFileName, GANTTVIEW_ID);
+
+	if (pPrefs->GetProfileInt(sPrefKey, _T("UseTagForMilestone")))
+		MILESTONETAG = pPrefs->GetProfileString(sPrefKey, _T("MileStoneTag"));
+
+	return true;
 }

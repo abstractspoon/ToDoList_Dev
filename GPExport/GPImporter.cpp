@@ -9,9 +9,9 @@
 #include "..\shared\xmlfileex.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
-//#include "..\shared\localizer.h"
+#include "..\shared\localizer.h"
 
-#include "..\todolist\tdlschemadef.h"
+#include "..\Interfaces\IPreferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -35,16 +35,38 @@ CGPImporter::~CGPImporter()
 	::DestroyIcon(m_hIcon);
 }
 
-void CGPImporter::SetLocalizer(ITransText* /*pTT*/)
+void CGPImporter::SetLocalizer(ITransText* pTT)
 {
-	//CLocalizer::Initialize(pTT);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CLocalizer::Initialize(pTT);
+}
+
+LPCTSTR CGPImporter::GetMenuText() const
+{
+	return GP_MENUTEXT;
+}
+
+LPCTSTR CGPImporter::GetFileFilter() const
+{
+	return GP_FILEFILTER;
+}
+
+LPCTSTR CGPImporter::GetFileExtension() const
+{
+	return GP_FILEEXT;
 }
 
 IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	ITaskList8* pITL8 = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (!pITL8)
+	if (!InitConsts(bSilent, pPrefs, szKey))
+		return IIR_CANCELLED;
+
+	ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pDestTaskFile, IID_TASKLIST8);
+
+	if (!pITL9)
 	{
 		ASSERT(0);
 		return IIR_BADINTERFACE;
@@ -75,19 +97,19 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 	if (!pXISrcTask) // must exist
 		return IIR_BADFORMAT;
 
-	if (ImportTask(pXISrcTask, pITL8, NULL, TRUE))
+	if (ImportTask(pXISrcTask, pITL9, NULL, TRUE))
 	{
 		// fix up resource allocations
-		FixupResourceAllocations(fileSrc.Root(), pITL8);
+		FixupResourceAllocations(fileSrc.Root(), pITL9);
 
 		// and dependencies
-		FixupDependencies(pXISrcTask, pITL8, TRUE);
+		FixupDependencies(pXISrcTask, pITL9, TRUE);
 	}
 
 	return IIR_SUCCESS; 
 }
 
-bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings)
+bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings)
 {
 	if (!pXISrcTask)
 		return true;
@@ -151,6 +173,13 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFi
 		pDestTaskFile->SetTaskFileLinkPath(hTask, sFileRef);
 	}
 
+	// Milestone
+	if (!MILESTONETAG.IsEmpty())
+	{
+		if (pXISrcTask->GetItemValue(_T("meeting")) == _T("true"))
+			pDestTaskFile->AddTaskTag(hTask, MILESTONETAG);
+	}
+	
 	// comments
 	pDestTaskFile->SetTaskComments(hTask, pXISrcTask->GetItemValue(_T("notes")));
 
@@ -188,7 +217,7 @@ DWORD CGPImporter::GetTDLTaskID(int nGPTaskID)
 	return ((DWORD)nGPTaskID + 1);
 }
 
-void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList8* pDestTaskFile)
+void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList9* pDestTaskFile)
 {
 	BuildResourceMap(pXISrcPrj);
 			
@@ -219,7 +248,7 @@ void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList8
 	}
 }
 
-void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFile, BOOL bAndSiblings)
+void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, BOOL bAndSiblings)
 {
 	if (!pXISrcTask)
 		return;
@@ -279,4 +308,14 @@ void CGPImporter::BuildResourceMap(const CXmlItem* pXISrcPrj)
 			pXIRes = pXIRes->GetSibling();
 		}
 	}
+}
+
+bool CGPImporter::InitConsts(bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+{
+	CString sPrefKey;
+	sPrefKey.Format(_T("FileStates\\Introduction.tdl\\UIExtensions\\%s"), GANTTVIEW_ID);
+
+	MILESTONETAG = pPrefs->GetProfileString(sPrefKey, _T("MileStoneTag"), CEnString(_T("MileStone")));
+
+	return true;
 }

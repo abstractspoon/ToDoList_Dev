@@ -27,9 +27,9 @@ public:
 	void SetLocalizer(ITransText* pTT);
 
 	// caller must copy only
-	LPCTSTR GetMenuText() const { return _T("GanttProject"); }
-	LPCTSTR GetFileFilter() const { return _T("GanttProject Files (*.gan)|*.gan||"); }
-	LPCTSTR GetFileExtension() const { return _T("gan"); }
+	LPCTSTR GetMenuText() const;
+	LPCTSTR GetFileFilter() const;
+	LPCTSTR GetFileExtension() const;
 	HICON GetIcon() const { return m_hIcon; }
 
 	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
@@ -38,11 +38,15 @@ protected:
 	HICON m_hIcon;
 	CMap<int, int, CString, CString&> m_mapResources;
 
+	// Pseudo-const
+	CString MILESTONETAG;
+
 protected:
-	bool ImportTask(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings);
+	bool ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings);
 	void BuildResourceMap(const CXmlItem* pXISrcPrj);
-	void FixupDependencies(const CXmlItem* pXISrcTask, ITaskList8* pDestTaskFile, BOOL bAndSiblings);
-	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList8* pDestTaskFile);
+	void FixupDependencies(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, BOOL bAndSiblings);
+	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList9* pDestTaskFile);
+	bool InitConsts(bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
 
 	static DWORD GetTDLTaskID(int nGPTaskID);
 };
