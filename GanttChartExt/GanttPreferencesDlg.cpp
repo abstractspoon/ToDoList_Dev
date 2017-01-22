@@ -7,6 +7,7 @@
 #include "GanttMsg.h"
 
 #include "..\shared\dialoghelper.h"
+#include "..\shared\enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -203,7 +204,7 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 
 void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_sMilestoneTag = pPrefs->GetProfileString(szKey, _T("MilestoneTag"), _T("Milestone"));
+	m_sMilestoneTag = pPrefs->GetProfileString(szKey, _T("MilestoneTag"), CEnString(_T("Milestone")));
 	m_bUseTagForMilestone = pPrefs->GetProfileInt(szKey, _T("UseTagForMilestone"), TRUE);
 	m_bDisplayAllocTo = pPrefs->GetProfileInt(szKey, _T("DisplayAllocTo"), TRUE);
 	m_bAutoScrollSelection = pPrefs->GetProfileInt(szKey, _T("AutoScrollSelection"), TRUE);

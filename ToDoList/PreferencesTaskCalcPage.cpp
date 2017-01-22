@@ -6,8 +6,7 @@
 #include "PreferencesTaskCalcPage.h"
 
 #include "..\shared\Misc.h"
-
-//#include <locale.h>
+#include "..\shared\enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -160,7 +159,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_nCalcStartDate = (PTCP_CALCSTARTDATE)pPrefs->GetProfileInt(szKey, _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
 	m_bSetCompletionStatus = pPrefs->GetProfileInt(szKey, _T("SetCompletionStatus"), FALSE);
 	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(szKey, _T("SyncCompletionToStatus"), TRUE);
-	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), _T("Completed"));
+	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(_T("Completed")));
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
