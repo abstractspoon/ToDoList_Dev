@@ -278,7 +278,7 @@ IIMPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pD
 	CWaitCursor cursor;
 
 	ASSERT (m_aImporters[nByImporter] != NULL);
-	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, bSilent, pPrefs, IMPORTER_KEY);
+	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, (bSilent != FALSE), pPrefs, IMPORTER_KEY);
 }
 
 BOOL CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
@@ -288,7 +288,7 @@ BOOL CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDest
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, bSilent, pPrefs, EXPORTER_KEY);
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, EXPORTER_KEY);
 	}
 
 	// else
@@ -302,7 +302,7 @@ BOOL CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR 
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, bSilent, pPrefs, EXPORTER_KEY);
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, EXPORTER_KEY);
 	}
 
 	// else

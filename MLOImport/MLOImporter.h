@@ -29,7 +29,7 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("ml"); }
 	HICON GetIcon() const { return m_hIcon; }
 	
-	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	HICON m_hIcon;

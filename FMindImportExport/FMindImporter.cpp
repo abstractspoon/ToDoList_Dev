@@ -45,7 +45,7 @@ void CFMindImporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-IIMPORT_RESULT CFMindImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORT_RESULT CFMindImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	ITaskList10* pTL10 = GetITLInterface<ITaskList10>(pDestTaskFile, IID_TASKLIST10);
 

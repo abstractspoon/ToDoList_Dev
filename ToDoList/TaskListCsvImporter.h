@@ -29,7 +29,7 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("csv"); }
 	HICON GetIcon() const { return NULL; }
 
-	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CString DELIM;
@@ -39,7 +39,7 @@ protected:
 protected:
 	BOOL ImportTask(ITaskList14* pTasks, const CString& sLine) const;
 
-	bool InitConsts(LPCTSTR szSrcFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	int GetDepth(const CString& sLine);
 
 	void GetTaskAndParentIDs(const CStringArray& sValues, DWORD& dwTaskID, DWORD& dwParentID) const;

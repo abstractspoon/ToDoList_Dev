@@ -48,7 +48,7 @@ void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 	WriteString(fileOut, _T("VERSION:2.0"));
 }
 
-bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITaskList12* pTasks = GetITLInterface<ITaskList12>(pSrcTaskFile, IID_TASKLIST12);
 
@@ -80,7 +80,7 @@ bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath
 	return false;
 }
 
-bool CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// Sanity checks
 	if (!pSrcTaskFile->GetTaskListCount() || 

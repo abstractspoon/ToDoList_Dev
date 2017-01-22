@@ -27,7 +27,7 @@ CTaskListTdlImporter::~CTaskListTdlImporter()
 
 }
 
-IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	ITaskList8* pTasks8 = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
 

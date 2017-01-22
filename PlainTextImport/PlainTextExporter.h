@@ -28,15 +28,15 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
 	HICON GetIcon() const { return NULL; }
 	
-	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CString INDENT;
 	BOOL WANTPROJECT;
 
 protected:
-	bool InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	void ExportTask(const ITaskList* pSrcTaskFile, HTASKITEM hTask, 
 					CStdioFile& fileOut, int nDepth, BOOL bAndSiblings);
 };

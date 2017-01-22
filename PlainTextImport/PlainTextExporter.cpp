@@ -40,7 +40,7 @@ void CPlainTextExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CPlainTextExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextExporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -78,7 +78,7 @@ bool CPlainTextExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR 
 	return true;
 }
 
-bool CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (!InitConsts(bSilent, pPrefs, szKey))
 		return false;
@@ -112,7 +112,7 @@ bool CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFil
 	return true;
 }
 
-bool CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (!InitConsts(bSilent, pPrefs, szKey))
 		return false;

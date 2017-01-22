@@ -44,8 +44,7 @@ CTaskListCsvImporter::~CTaskListCsvImporter()
 
 }
 
-bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, BOOL bSilent, 
-									  IPreferences* pPrefs, LPCTSTR szKey)
+bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	CTDLCsvImportExportDlg dialog(szSrcFilePath, pPrefs, szKey);
 
@@ -80,7 +79,7 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, BOOL bSilent,
 	return true;
 }
 
-IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITaskList14* pTasks = GetITLInterface<ITaskList14>(pDestTaskFile, IID_TASKLIST12);
 

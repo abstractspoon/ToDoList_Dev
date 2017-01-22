@@ -26,7 +26,7 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("tdl"); }
 	HICON GetIcon() const { return NULL; }
 
-	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 };
 

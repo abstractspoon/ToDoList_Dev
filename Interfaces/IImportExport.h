@@ -168,7 +168,7 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual HICON GetIcon() const = 0;
 
-	virtual IIMPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -185,8 +185,8 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual HICON GetIcon() const = 0;
 
-	virtual bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
-	virtual bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

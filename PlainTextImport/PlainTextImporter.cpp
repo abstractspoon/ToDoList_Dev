@@ -35,7 +35,7 @@ void CPlainTextImporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CPlainTextImporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -62,7 +62,7 @@ bool CPlainTextImporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR 
 	return true;
 }
 
-IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITaskList8* pITL8 = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
 	

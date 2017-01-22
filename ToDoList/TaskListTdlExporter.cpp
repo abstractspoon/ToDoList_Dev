@@ -30,7 +30,7 @@ CTaskListTdlExporter::~CTaskListTdlExporter()
 
 }
 
-bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (pSrcTaskFile->GetTaskListCount() == 1)
 		return Export(pSrcTaskFile->GetTaskList(0), szDestFilePath, bSilent, pPrefs, szKey);
@@ -96,7 +96,7 @@ bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR sz
 	return (tasks.Save(szDestFilePath, SFEF_UTF16) != FALSE);
 }
 
-bool CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+bool CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CTaskFile tasks(pSrcTaskFile);
 
