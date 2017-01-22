@@ -341,7 +341,6 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 
 BOOL CEnEdit::InitializeTooltips()
 {
-//	if (EnableToolTips(TRUE))
 	if (m_tooltip.GetSafeHwnd() || m_tooltip.Create(this))
 	{
  		// hot tracking
@@ -971,15 +970,17 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		if (!btn.sTip.IsEmpty())
 		{
+			int nTool = GetButtonTooltipID(btn.nID);
+
 			pTI->hwnd = m_hWnd;
-			pTI->uId = (UINT)GetButtonTooltipID(btn.nID);
+			pTI->uId = (UINT)nTool;
 			pTI->uFlags = TTF_NOTBUTTON;
 			pTI->lpszText = _tcsdup(btn.sTip);
 
 			GetWindowRect(&pTI->rect);
 			CWnd::ScreenToClient(&pTI->rect);
 
-			return (int)pTI->uId;
+			return nTool;
 		}
 	}
 
@@ -987,10 +988,10 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CMaskEdit::OnToolHitTest(point, pTI);
 }
 
-int CEnEdit::GetButtonTooltipID(UINT nBtnID) const
+int CEnEdit::GetButtonTooltipID(UINT nID) const
 {
 	CRect rWindow;
 	GetWindowRect(rWindow);
 
-	return (int)(MAKELPARAM(rWindow.left, rWindow.top) + nBtnID);
+	return (int)(MAKELPARAM(rWindow.left, rWindow.top) + nID);
 }
