@@ -76,7 +76,8 @@ void CFileComboBox::PreSubclassWindow()
 
 	VERIFY (InitFileEdit());
 
-	m_fileEdit.EnableToolTips(FALSE);
+	// CFileEdit tooltips don't work when embedded in a combobox
+	m_fileEdit.m_tooltip.DestroyWindow();
 	EnableToolTips(TRUE);
 }
 

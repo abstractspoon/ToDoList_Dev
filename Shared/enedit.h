@@ -9,6 +9,7 @@
 
 #include "maskedit.h"
 #include "hottracker.h"
+#include "tooltipctrlex.h"
 
 #include <afxtempl.h>
 
@@ -90,6 +91,7 @@ protected:
 	CHotTracker m_hotTrack;
 	int m_nTopBorder, m_nBottomBorder;
 	CImageList m_ilBtns, m_ilDisabledBtns;
+	CToolTipCtrlEx m_tooltip;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -133,12 +135,13 @@ protected:
 	virtual void DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint& ptCursor);
 	int ButtonHitTest(CPoint ptScreen) const;
 	int ButtonHitTest(UINT nID) const;
-	int GetButtonWidth(int nBtn) const;
+	int GetButtonWidthByIndex(int nBtn) const;
+	int GetButtonTooltipID(UINT nID) const;
 	CRect GetButtonsRect() const;
 	int GetButtonsWidth() const;
 	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, 
 						LPCTSTR szFont, BOOL bSymbolFont);
-	void RedrawButton(int nBtn);
+	void RedrawButtonByIndex(int nBtn);
 
 	virtual BOOL InitializeTooltips();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

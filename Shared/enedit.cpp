@@ -215,6 +215,9 @@ void CEnEdit::PreSubclassWindow()
 
 BOOL CEnEdit::PreTranslateMessage(MSG* pMsg) 
 {
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+
 	// Treat 'return' as a button click for single button controls
 	if ((pMsg->message == WM_KEYDOWN) && 
 		(pMsg->wParam == VK_RETURN) && 
@@ -270,7 +273,7 @@ void CEnEdit::OnNcLButtonDown(UINT nHitTest, CPoint point)
 				SetCapture();
 				m_nButtonDown = nBtn;
 				
-				RedrawButton(nBtn);
+				RedrawButtonByIndex(nBtn);
 			}
 		}
 		else
@@ -293,7 +296,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 	ReleaseCapture();
 	m_nButtonDown = -1;
 
-	RedrawButton(nBtnDown);
+	RedrawButtonByIndex(nBtnDown);
 
 	// process
 	if (nBtnDown == nBtnUp)
@@ -304,7 +307,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 		// then parent
 		GetParent()->SendMessage(WM_EE_BTNCLICK, GetDlgCtrlID(), m_aButtons[nBtnUp].nID);
 		
-		RedrawButton(nBtnDown);
+		RedrawButtonByIndex(nBtnDown);
 	}
 }
 
@@ -323,7 +326,7 @@ void CEnEdit::OnMouseMove(UINT nFlags, CPoint point)
 			int nBtnDown = m_nButtonDown;
 			m_nButtonDown = -1;
 
-			RedrawButton(nBtnDown);
+			RedrawButtonByIndex(nBtnDown);
 		}
 	}
 }
@@ -338,7 +341,8 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 
 BOOL CEnEdit::InitializeTooltips()
 {
-	if (EnableToolTips(TRUE))
+//	if (EnableToolTips(TRUE))
+	if (m_tooltip.GetSafeHwnd() || m_tooltip.Create(this))
 	{
  		// hot tracking
  		if (CThemed().AreControlsThemed())
@@ -375,12 +379,12 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 		int nOffset = 0;
 		
 		for (int nIndex = 0; nIndex < nBtn; nIndex++)
-			nOffset += (GetButtonWidth(nIndex) + 1);
+			nOffset += (GetButtonWidthByIndex(nIndex) + 1);
 		
 		GetClientRect(rButton);
 		
 		rButton.left = rButton.right + nOffset;
-		rButton.right += nOffset + GetButtonWidth(nBtn);
+		rButton.right += nOffset + GetButtonWidthByIndex(nBtn);
 		rButton.top -= m_nTopBorder;
 		rButton.bottom += m_nBottomBorder;
 		
@@ -479,13 +483,13 @@ BOOL CEnEdit::EnableButton(UINT nID, BOOL bEnable)
 	if (m_aButtons[nBtn].bEnabled != bEnable)
 	{
 		m_aButtons[nBtn].bEnabled = bEnable;
-		RedrawButton(nBtn);
+		RedrawButtonByIndex(nBtn);
 	}
 
 	return TRUE;
 }
 
-void CEnEdit::RedrawButton(int nBtn)
+void CEnEdit::RedrawButtonByIndex(int nBtn)
 {
 	if (GetSafeHwnd())
 	{
@@ -509,7 +513,7 @@ BOOL CEnEdit::SetDropMenuButton(UINT nID, BOOL bDropMenu)
 	if (m_aButtons[nBtn].bDropMenu != bDropMenu)
 	{
 		m_aButtons[nBtn].bDropMenu = bDropMenu;
-		RedrawButton(nBtn);
+		RedrawButtonByIndex(nBtn);
 	}
 
 	return TRUE;
@@ -549,7 +553,7 @@ BOOL CEnEdit::CheckButton(UINT nID, BOOL bChecked)
 	if (m_aButtons[nBtn].bChecked != bChecked)
 	{
 		m_aButtons[nBtn].bChecked = bChecked;
-		RedrawButton(nBtn);
+		RedrawButtonByIndex(nBtn);
 	}
 
 	return TRUE;
@@ -629,7 +633,7 @@ int CEnEdit::GetButtonsWidth() const
 	if (GetButtonCount())
 	{
 		for (int nBtn = 0; nBtn < GetButtonCount(); nBtn++)
-			nWidth += (GetButtonWidth(nBtn) + 1);
+			nWidth += (GetButtonWidthByIndex(nBtn) + 1);
 
 		// trim extra final pixel
 		nWidth--;
@@ -853,10 +857,10 @@ LRESULT CEnEdit::OnHotChange(WPARAM wp, LPARAM lp)
 	ASSERT (((int)wp != -1 || (int)lp != -1) && (int)wp != (int)lp);
 
 	if (((int)wp != -1) && m_aButtons[wp].bEnabled)
-		RedrawButton(wp);
+		RedrawButtonByIndex(wp);
 
 	if (((int)lp != -1) && m_aButtons[lp].bEnabled)
-		RedrawButton(lp);
+		RedrawButtonByIndex(lp);
 
 	return lr;
 }
@@ -885,7 +889,7 @@ BOOL CEnEdit::SetButtonWidth(UINT nID, int nWidth)
 	return TRUE;
 }
 
-int CEnEdit::GetButtonWidth(int nBtn) const
+int CEnEdit::GetButtonWidthByIndex(int nBtn) const
 {
 	if (nBtn < 0 || nBtn >= GetButtonCount() || !GetSafeHwnd())
 		return 0;
@@ -968,14 +972,14 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (!btn.sTip.IsEmpty())
 		{
 			pTI->hwnd = m_hWnd;
-			pTI->uId = btn.nID;
+			pTI->uId = (UINT)GetButtonTooltipID(btn.nID);
 			pTI->uFlags = TTF_NOTBUTTON;
 			pTI->lpszText = _tcsdup(btn.sTip);
 
 			GetWindowRect(&pTI->rect);
 			CWnd::ScreenToClient(&pTI->rect);
 
-			return (int)btn.nID;
+			return (int)pTI->uId;
 		}
 	}
 
@@ -983,3 +987,10 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CMaskEdit::OnToolHitTest(point, pTI);
 }
 
+int CEnEdit::GetButtonTooltipID(UINT nBtnID) const
+{
+	CRect rWindow;
+	GetWindowRect(rWindow);
+
+	return (int)(MAKELPARAM(rWindow.left, rWindow.top) + nBtnID);
+}
