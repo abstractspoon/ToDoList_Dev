@@ -229,11 +229,6 @@ public:
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks);
 	TDC_SET MoveTaskDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 
-	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults) const;
-	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEARCHRESULT& result) const;
-	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result) const;
-	
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 	BOOL IsParentTaskDone(DWORD dwTaskID) const;
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
@@ -267,6 +262,8 @@ protected:
 	static TDC_UNITS s_nDefTimeEstUnits, s_nDefTimeSpentUnits;
 	static CTDCAttributeMap s_mapParentAttribs; // inheritable attribs
 	static BOOL s_bUpdateInheritAttrib; // update as changes are made to parents
+
+	static const CString EMPTY_STR;
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
@@ -354,34 +351,6 @@ protected:
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits);
 	static BOOL IsEndOfDay(const COleDateTime& date);
-};
-
-class CTDCTaskMatcher
-{
-public:
-	CTDCTaskMatcher(const CToDoCtrlData& data);
-
-	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults) const;
-
-	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& params, SEARCHRESULT& result) const;
-	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, SEARCHRESULT& result) const;
-
-protected:
-	const CToDoCtrlData& m_data;
-
-protected:
-	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const;
-	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(const TDCCADATA& data, DWORD dwAttribType, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-
-	BOOL ArrayMatches(const CStringArray& aItems, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bMatchWholeWordsOnly = TRUE) const;
-	BOOL ValueMatchesAsArray(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bMatchWholeWordsOnly) const;
-
-	CString FormatResultDate(const COleDateTime& date) const;
 };
 
 #endif // !defined(AFX_TODOCTRLDATA_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)

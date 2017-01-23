@@ -4248,7 +4248,7 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 				DWORD dwTaskID = GetTaskID(nItem);
 				SEARCHRESULT result;
 
-				if (m_data.TaskMatches(dwTaskID, params, result))
+				if (m_matcher.TaskMatches(dwTaskID, params, result))
 					aResults.Add(result);
 			}
 		}
@@ -4363,7 +4363,7 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext)
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
 
-		if (m_data.TaskMatches(dwTaskID, params, result))
+		if (m_matcher.TaskMatches(dwTaskID, params, result))
 			return nItem;
 	}
 

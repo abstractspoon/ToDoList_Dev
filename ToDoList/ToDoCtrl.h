@@ -9,6 +9,7 @@
 
 #include "TaskListDropTarget.h"
 #include "todoctrldata.h"
+#include "todoctrldatautils.h"
 #include "todoctrlfind.h"
 #include "taskfile.h"
 #include "tdcstruct.h"
@@ -471,6 +472,7 @@ protected:
 	COMMENTS_STATE m_nCommentsState;
 
 	CToDoCtrlData m_data;
+	CTDCTaskMatcher m_matcher;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;

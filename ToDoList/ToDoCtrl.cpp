@@ -227,6 +227,7 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_eTaskName(PEC_AUTODESTROY),
 	m_hFontComments(NULL),
 	m_hFontTree(NULL),
+	m_matcher(m_data),
 	m_mgrContent(mgr),
 	m_nCommentsPos(TDCUIL_RIGHT),
 	m_nCommentsSize(DEFCOMMENTSIZE),
@@ -6435,7 +6436,7 @@ BOOL CToDoCtrl::RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_
 			SEARCHPARAMS params;
 			params.aRules.Add(SEARCHPARAM(TDCA_FLAG, FOP_SET));
 
-			bRemove = !m_data.FindTasks(pTDI, pTDS, params, aResults);
+			bRemove = !m_matcher.FindTasks(pTDI, pTDS, params, aResults);
 		}
 		else
 			bRemove = TRUE;

@@ -626,7 +626,7 @@ int CFilteredToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResu
 		return CTabbedToDoCtrl::FindTasks(params, aResults);
 	
 	// else all tasks
-	return m_data.FindTasks(params, aResults);
+	return m_matcher.FindTasks(params, aResults);
 }
 
 BOOL CFilteredToDoCtrl::HasCustomFilter() const 
@@ -881,7 +881,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		}
 		else // rest of attributes
 		{
-			bWantTask = m_data.TaskMatches(pTDI, pTDS, *pFilter, result);
+			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
 		}
 
 		if (bWantTask && pTDS->HasSubTasks())
@@ -1049,7 +1049,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 
 		// do the find
 		CResultArray aResults;
-		m_data.FindTasks(filter, aResults);
+		m_matcher.FindTasks(filter, aResults);
 
 		// add tasks to list
 		for (int nRes = 0; nRes < aResults.GetSize(); nRes++)
@@ -1128,7 +1128,7 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 				SEARCHRESULT result;
 
 				// ie. check that parent actually matches
-				bAdd = m_data.TaskMatches(pTDI, pTDS, *pFilter, result);
+				bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
 			}
 		}
 
@@ -1343,7 +1343,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 		// This will handle custom and 'normal' filters
 		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-		bNeedRefilter = !m_data.TaskMatches(dwModTaskID, params, result);
+		bNeedRefilter = !m_matcher.TaskMatches(dwModTaskID, params, result);
 		
 		// extra handling for 'Find Tasks' filters 
 		if (bNeedRefilter && HasCustomFilter())
@@ -1523,7 +1523,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 			SEARCHRESULT result;
 
 			// This will handle custom and 'normal' filters
-			if (m_data.TaskMatches(dwTaskID, params, result))
+			if (m_matcher.TaskMatches(dwTaskID, params, result))
 				return TRUE;
 		}
 	}

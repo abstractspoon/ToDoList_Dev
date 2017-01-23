@@ -32,7 +32,8 @@ const static CString EMPTY_STR;
 
 CToDoCtrlFind::CToDoCtrlFind(CTreeCtrl& tree, const CToDoCtrlData& data) : 
 	m_tree(tree), 
-	m_data(data)
+	m_data(data),
+	m_matcher(data)
 {
 	
 }
@@ -715,7 +716,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 
 	// also we can ignore parent tasks if required but we still need 
 	// to process it's children
-	if (m_data.TaskMatches(dwID, params, result))
+	if (m_matcher.TaskMatches(dwID, params, result))
 	{
 		// check for overdue tasks
 		if (!params.bIgnoreOverDue || !m_data.IsTaskOverDue(dwID))
@@ -752,7 +753,7 @@ DWORD CToDoCtrlFind::FindNextTask(DWORD dwStart, const SEARCHPARAMS& params, SEA
 	{
 		DWORD dwNextID = GetTaskID(htiNext);
 
-		if (m_data.TaskMatches(dwNextID, params, result))
+		if (m_matcher.TaskMatches(dwNextID, params, result))
 			return dwNextID;
 
 		// next item
@@ -767,7 +768,7 @@ DWORD CToDoCtrlFind::FindFirstTask(HTREEITEM htiStart, const SEARCHPARAMS& param
 {
 	DWORD dwTaskID = GetTaskID(htiStart);
 
-	if (!m_data.TaskMatches(dwTaskID, params, result))
+	if (!m_matcher.TaskMatches(dwTaskID, params, result))
 	{
 		// also check first child (other children are handled by sibling check below)
 		HTREEITEM htiChild = m_tree.GetChildItem(htiStart);

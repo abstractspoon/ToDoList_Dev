@@ -370,6 +370,9 @@
     <ClCompile Include="TDLThreadedExporterWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ToDoCtrlDataUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -799,6 +802,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLThreadedExporterWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ToDoCtrlDataUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

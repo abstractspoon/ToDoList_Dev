@@ -11,6 +11,7 @@
 
 #include "tdcstruct.h"
 #include "tdcenum.h"
+#include "ToDoCtrlDataUtils.h"
 
 class TODOITEM;
 class TODOSTRUCTURE;
@@ -56,6 +57,7 @@ public:
 	BOOL FindVisibleTaskWithDoneTime() const;
 	BOOL FindVisibleTaskWithTime(TDC_DATE nDate);
 
+	// Finds tasks only in the tree
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	DWORD FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result) const;
 	DWORD FindNextTask(DWORD dwStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bNext = TRUE) const;
@@ -63,6 +65,7 @@ public:
 protected:
 	CTreeCtrl& m_tree; 
 	const CToDoCtrlData& m_data;
+	CTDCTaskMatcher m_matcher;
 
 protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults) const;
