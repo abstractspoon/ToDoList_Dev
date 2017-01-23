@@ -96,10 +96,8 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEnEdit)
-	public:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	protected:
-	virtual void PreSubclassWindow();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 	virtual void OnSetReadOnly(BOOL /*bReadOnly*/) {}
 	virtual void OnBtnClick(UINT /*nID*/) {}

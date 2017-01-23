@@ -206,13 +206,6 @@ void CEnEdit::SetBorders(int nTop, int nBottom)
 	}
 }
 
-void CEnEdit::PreSubclassWindow() 
-{
-	CMaskEdit::PreSubclassWindow();
-
-	InitializeTooltips();
-}
-
 BOOL CEnEdit::PreTranslateMessage(MSG* pMsg) 
 {
 	if (m_tooltip.GetSafeHwnd())
@@ -335,13 +328,20 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 {
 	CMaskEdit::OnSize(nType, cx, cy);
 	
+	// The only reliable place to initialise tooltips
+	InitializeTooltips();
+		
 	// update tool rects
 	RecalcBtnHotRects();
 }
 
 BOOL CEnEdit::InitializeTooltips()
 {
-	if (m_tooltip.GetSafeHwnd() || m_tooltip.Create(this))
+	if (m_tooltip.GetSafeHwnd())
+	{
+		return TRUE;
+	}
+	else if (m_tooltip.Create(this))
 	{
  		// hot tracking
  		if (CThemed().AreControlsThemed())
