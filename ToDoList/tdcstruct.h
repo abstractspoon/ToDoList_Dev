@@ -611,7 +611,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 		// Set default alignment if the previous also had the default
 		if (bUpdateDefaultAlignment)
-	{
+		{
 			if (nTextAlignment == GetDefaultTextAlignment(dwPrevType))
 				nTextAlignment = GetDefaultTextAlignment(dwAttribType);
 		}

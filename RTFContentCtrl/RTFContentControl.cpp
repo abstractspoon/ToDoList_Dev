@@ -944,7 +944,7 @@ void CRTFContentControl::OnEditFileBrowse()
 
 		if (!m_rtf.IsFileLinkOptionDefault())
 		{
-			CCreateFileLinkDlg dialog2(sFile, m_rtf.GetFileLinkOption(), FALSE);
+			CCreateFileLinkDlg dialog2(aPaths[0], m_rtf.GetFileLinkOption(), FALSE);
 			
 			if (dialog2.DoModal() == IDOK)
 			{

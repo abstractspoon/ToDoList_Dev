@@ -135,20 +135,30 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFi
 	{
 		pDestTaskFile->SetTaskStartDate(hTask, tStart);
 
-		int nDuration = pXISrcTask->GetItemValueI(_T("duration"));
-
 		// only add duration to leaf tasks else it'll double up
-		if (nDuration && !pXISrcTask->HasItem(_T("task")))
+		if (!pXISrcTask->HasItem(_T("task")))
 		{
-			if (nPercentDone == 100)
+			int nDuration = pXISrcTask->GetItemValueI(_T("duration"));
+			
+			if (pXISrcTask->GetItemValue(_T("meeting")) == _T("true"))
 			{
-				pDestTaskFile->SetTaskDoneDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
-				pDestTaskFile->SetTaskTimeSpent(hTask, nDuration, TDCU_WEEKDAYS);
+				if (!MILESTONETAG.IsEmpty())
+					pDestTaskFile->AddTaskTag(hTask, MILESTONETAG);
+
+				pDestTaskFile->SetTaskDueDate(hTask, tStart);
 			}
-			else
+			else if (nDuration > 0)
 			{
-				pDestTaskFile->SetTaskDueDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
-				pDestTaskFile->SetTaskTimeEstimate(hTask, nDuration, TDCU_WEEKDAYS);
+				if (nPercentDone == 100)
+				{
+					pDestTaskFile->SetTaskDoneDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
+					pDestTaskFile->SetTaskTimeSpent(hTask, nDuration, TDCU_WEEKDAYS);
+				}
+				else
+				{
+					pDestTaskFile->SetTaskDueDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
+					pDestTaskFile->SetTaskTimeEstimate(hTask, nDuration, TDCU_WEEKDAYS);
+				}
 			}
 		}
 	}
@@ -173,12 +183,6 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFi
 		pDestTaskFile->SetTaskFileLinkPath(hTask, sFileRef);
 	}
 
-	// Milestone
-	if (!MILESTONETAG.IsEmpty())
-	{
-		if (pXISrcTask->GetItemValue(_T("meeting")) == _T("true"))
-			pDestTaskFile->AddTaskTag(hTask, MILESTONETAG);
-	}
 	
 	// comments
 	pDestTaskFile->SetTaskComments(hTask, pXISrcTask->GetItemValue(_T("notes")));

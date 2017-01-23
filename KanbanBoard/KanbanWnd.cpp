@@ -691,9 +691,9 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	// but has now deleted them then we revert to 'status'
 	if (bFixedColumnsToggled)
 	{
-	if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
+		if ((m_nTrackedAttrib == IUI_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
 		{
-		m_nTrackedAttrib = IUI_STATUS;
+			m_nTrackedAttrib = IUI_STATUS;
 			UpdateData(FALSE);
 		}
 		else if ((m_nTrackedAttrib != IUI_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
@@ -789,7 +789,7 @@ void CKanbanWnd::OnKanbanPreferences()
 
 	CKanbanAttributeArray aDisplayAttrib;
 	m_ctrlKanban.GetDisplayAttributes(aDisplayAttrib);
-	
+
 	// If the user creates fixed column defs for the first time
 	// we will automatically turn them on
 	BOOL bHadFixedColumns = m_dlgPrefs.HasFixedColumns();

@@ -226,7 +226,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	RecalcColumnWidths();
 	OnColumnVisibilityChange();
 	PostResize();
-	
+
 	// Tooltips for columns
 	if (m_tooltipColumns.Create(this))
 	{
@@ -789,6 +789,12 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 		{
 			m_hdrColumns.SetItemText(nItem, attribDef.GetColumnTitle());
 			m_hdrColumns.SetItemToolTip(nItem, attribDef.GetToolTip());
+
+			LVCOLUMN lvc = { 0 };
+			lvc.mask = LVCF_FMT;
+			lvc.fmt = attribDef.GetColumnHeaderAlignment();
+
+			m_lcColumns.SetColumn(nItem, &lvc);
 		}
 		else
 		{
@@ -1325,7 +1331,7 @@ int CTDLTaskCtrlBase::HitTestColumnsItem(const CPoint& pt, BOOL bClient, TDC_COL
 		*pTaskID = GetColumnItemTaskID(lvHit.iItem);
 		ASSERT(*pTaskID);
 	}
-		
+
 	if (pRect)
 	{
 		ListView_GetSubItemRect(m_lcColumns, lvHit.iItem, lvHit.iSubItem, LVIR_BOUNDS, pRect);
@@ -2139,7 +2145,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		{
 			TDC_COLUMN nColID = TDCC_NONE;
 			CPoint ptCursor(::GetMessagePos());
-			
+
 			int nHit = HitTestColumnsItem(ptCursor, FALSE, nColID);
 			
 			if (ItemColumnSupportsClickHandling(nHit, nColID, &ptCursor))

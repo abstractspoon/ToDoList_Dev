@@ -4957,7 +4957,7 @@ void CToDoListWnd::UpdateGlobalHotkey()
 void CToDoListWnd::RefreshPauseTimeTracking()
 {
 	BOOL bPauseAll = (((m_wndSessionStatus.IsLocked() || m_wndSessionStatus.IsScreenSaverActive()) && !Prefs().GetTrackOnScreenSaver()) || 
-					       (m_wndSessionStatus.IsHibernated() && !Prefs().GetTrackHibernated()));
+					  (m_wndSessionStatus.IsHibernated() && !Prefs().GetTrackHibernated()));
 
 	BOOL bTrackActiveOnly = !Prefs().GetTrackNonActiveTasklists();
 	int nCtrl = GetTDCCount();
@@ -6404,10 +6404,13 @@ void CToDoListWnd::OnTimerDueItems(int nCtrl)
 			TDCM_DUESTATUS nStatus = TDCM_NONE;
 			
 			if (tdc.HasOverdueTasks()) // takes priority
+			{
 				nStatus = TDCM_PAST;
-
+			}
 			else if (tdc.HasDueTodayTasks())
+			{
 				nStatus = TDCM_TODAY;
+			}
 			
 			if (nStatus != m_mgrToDoCtrls.GetDueItemStatus(nCtrl))
 			{
@@ -6424,9 +6427,17 @@ void CToDoListWnd::OnTimerDueItems(int nCtrl)
 void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 {
 	AF_NOREENTRANT // macro helper
-		
+
+	// Skip if we are hidden or minimised and 
+	// we are configured to prompt the user
 	const CPreferencesDlg& userPrefs = Prefs();
 	
+	int nReloadOption = userPrefs.GetReadonlyReloadOption();
+	ASSERT (nReloadOption != RO_NO);
+	
+	if ((nReloadOption == RO_ASK) && (!IsWindowVisible() || IsIconic()))
+		return;
+			
 	// work out whether we should check remote files or not
 	BOOL bCheckRemoteFiles = (nCtrl != -1);
 	
@@ -6440,10 +6451,6 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 		
 		nElapsed += INTERVAL_READONLYSTATUS;
 	}
-	
-	int nReloadOption = userPrefs.GetReadonlyReloadOption();
-	
-	ASSERT (nReloadOption != RO_NO);
 	
 	// process files
 	CString sFileList;
@@ -6486,7 +6493,9 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 				bReload = (nRet == IDYES || nRet == IDOK);
 			}
 			else
+			{
 				bReload = !bReadOnly; // now writable
+			}
 			
 			if (bReload && ReloadTaskList(nCtrl, FALSE, (nReloadOption == RO_ASK)))
 			{
@@ -6520,10 +6529,15 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl)
 {
 	AF_NOREENTRANT // macro helper
 		
+	// Skip if we are hidden or minimised and 
+	// we are configured to prompt the user
 	const CPreferencesDlg& userPrefs = Prefs();
-	int nReloadOption = userPrefs.GetTimestampReloadOption();
 	
+	int nReloadOption = userPrefs.GetTimestampReloadOption();
 	ASSERT (nReloadOption != RO_NO);
+	
+	if ((nReloadOption == RO_ASK) && (!IsWindowVisible() || IsIconic()))
+		return;
 	
 	// work out whether we should check remote files or not
 	BOOL bCheckRemoteFiles = (nCtrl != -1);

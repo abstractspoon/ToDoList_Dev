@@ -548,7 +548,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 
 	// update list type in case it has changed
 	m_dwListType = attrib.GetListType();
-
+	
 	BuildListTypeCombo(m_dwDataType);
 	UpdateListDataMask();
 

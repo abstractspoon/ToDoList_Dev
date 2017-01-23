@@ -7,7 +7,7 @@
 // PreferencesFilePage.h : header file
 //
 
-//#include "TDLImportExportComboBox.h"
+#include "TDLImportExportComboBox.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\groupline.h"
@@ -62,8 +62,8 @@ protected:
 	CGroupLineManager m_mgrGroupLines;
 
 	// saving	
-	//CTDLImportExportComboBox	m_cbOtherExporters;
-	CComboBox	m_cbOtherExporters;
+	CTDLImportExportComboBox m_cbOtherExporters;
+	//CComboBox	m_cbOtherExporters;
 	CFileEdit	m_eSaveExportStylesheet;
 	CFileEdit	m_eExportFolderPath;
 	BOOL	m_bExportToFolder;

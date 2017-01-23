@@ -327,7 +327,7 @@ void CEnEdit::OnMouseMove(UINT nFlags, CPoint point)
 void CEnEdit::OnSize(UINT nType, int cx, int cy) 
 {
 	CMaskEdit::OnSize(nType, cx, cy);
-	
+
 	// The only reliable place to initialise tooltips
 	InitializeTooltips();
 		
@@ -343,9 +343,9 @@ BOOL CEnEdit::InitializeTooltips()
 	}
 	else if (m_tooltip.Create(this))
 	{
- 		// hot tracking
- 		if (CThemed().AreControlsThemed())
- 			m_hotTrack.Initialize(this);
+		// hot tracking
+		if (CThemed().AreControlsThemed())
+			m_hotTrack.Initialize(this);
 
 		return TRUE;
 	}
@@ -952,7 +952,7 @@ void CEnEdit::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
 		((lpStyleStruct->styleOld & ES_READONLY) != (lpStyleStruct->styleNew & ES_READONLY)))
 	{
 		Default();
-
+	
 		OnSetReadOnly((lpStyleStruct->styleNew & ES_READONLY));
 		SendMessage(WM_NCPAINT);
 	}

@@ -320,7 +320,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-		
+
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo-handlers

@@ -10,6 +10,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\localizer.h"
+#include "..\shared\enstring.h"
 
 #include "..\interfaces\ipreferences.h"
 
@@ -228,30 +229,30 @@ bool CGPExporter::ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask,
 		pXIDestItem->AddItem(_T("color"), sColor);
 	}
 
-	// Milestone
-	BOOL bMilestone = FALSE;
-
-	if (!MILESTONETAG.IsEmpty())
-	{
-		int nTag = pSrcTaskFile->GetTaskTagCount(hTask);
-
-		while (nTag--)
-		{
-			if (MILESTONETAG.CompareNoCase(pSrcTaskFile->GetTaskTag(hTask, nTag)) == 0)
-			{
-				pXIDestItem->AddItem(_T("meeting"), _T("true"));
-				bMilestone = TRUE;
-				break;
-			}
-		}
-	}
-
-	// dates
+	// Dates
 	time_t tStart = 0, tDue = 0, tDone = 0;
 	GetTaskDates(pSrcTaskFile, hTask, tStart, tDue, tDone);
-
-	if (tStart && (tDue || tDone))
+	
+	if (tStart)
 	{
+		// Milestone
+		BOOL bMilestone = FALSE;
+
+		if (!MILESTONETAG.IsEmpty())
+		{
+			int nTag = pSrcTaskFile->GetTaskTagCount(hTask);
+
+			while (nTag--)
+			{
+				if (MILESTONETAG.CompareNoCase(pSrcTaskFile->GetTaskTag(hTask, nTag)) == 0)
+				{
+					pXIDestItem->AddItem(_T("meeting"), _T("true"));
+					bMilestone = TRUE;
+					break;
+				}
+			}
+		}
+
 		COleDateTime start(tStart);
 		pXIDestItem->AddItem(_T("start"), CDateHelper::FormatDate(start, DHFD_ISO));
 
@@ -260,7 +261,7 @@ bool CGPExporter::ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask,
 		{
 			pXIDestItem->AddItem(_T("duration"), 0);
 		}
-		else
+		else if (tDue || tDone)
 		{
 			if (tDone >= tStart) // completion date takes precedence
 			{
@@ -570,14 +571,19 @@ void CGPExporter::GetTaskDates(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, 
 
 bool CGPExporter::InitConsts(const ITaskList9* pTaskFile, bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
+	MILESTONETAG = CEnString(_T("MileStone")); // default
+
 	// Hack to get Gantt View's tag for milestones
 	CString sFileName = pTaskFile->GetAttribute(_T("FILENAME"));
 
-	CString sPrefKey;
-	sPrefKey.Format(_T("FileStates\\%s\\UIExtensions\\%s"), sFileName, GANTTVIEW_ID);
-
-	if (pPrefs->GetProfileInt(sPrefKey, _T("UseTagForMilestone")))
-		MILESTONETAG = pPrefs->GetProfileString(sPrefKey, _T("MileStoneTag"));
+	if (!sFileName.IsEmpty())
+	{
+		CString sPrefKey;
+		sPrefKey.Format(_T("FileStates\\%s\\UIExtensions\\%s"), sFileName, GANTTVIEW_ID);
+		
+		if (pPrefs->GetProfileInt(sPrefKey, _T("UseTagForMilestone")))
+			MILESTONETAG = pPrefs->GetProfileString(sPrefKey, _T("MileStoneTag"), MILESTONETAG);
+	}
 
 	return true;
 }
