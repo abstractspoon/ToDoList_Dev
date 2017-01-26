@@ -838,8 +838,11 @@ void CTaskFile::AddTaskToMap(const CXmlItem* pXITask, BOOL bAndSiblings, BOOL bA
 	{
 		// sanity check
 		ASSERT (pXITask->NameIs(TDL_TASK));
+
+		DWORD dwTaskID = pXITask->GetItemValueI(TDL_TASKID);
+		ASSERT (dwTaskID);
 		
-		m_mapHandles[(HTASKITEM)pXITask] = const_cast<CXmlItem*>(pXITask);
+		m_mapHandles[dwTaskID] = (HTASKITEM)pXITask;
 
 		// children
 		// note: we only need do the first child
@@ -868,7 +871,10 @@ void CTaskFile::RemoveTaskFromMap(const CXmlItem* pXITask) const
 		// sanity check
 		ASSERT (pXITask->NameIs(TDL_TASK));
 		
-		m_mapHandles.RemoveKey((HTASKITEM)pXITask);
+		DWORD dwTaskID = pXITask->GetItemValueI(TDL_TASKID);
+		ASSERT (dwTaskID);
+
+		m_mapHandles.RemoveKey(dwTaskID);
 
 		// children
 		const CXmlItem* pXIChild = pXITask->GetItem(TDL_TASK);
@@ -883,21 +889,7 @@ void CTaskFile::RemoveTaskFromMap(const CXmlItem* pXITask) const
 
 CXmlItem* CTaskFile::TaskFromHandle(HTASKITEM hTask) const
 {
-#ifdef _DEBUG
-	CXmlItem* pXITask = NULL;
-
-	if (hTask)
-	{
-		if (m_mapHandles.GetCount() == 0)
-			BuildHandleMap();
-
-		m_mapHandles.Lookup(hTask, pXITask);
-	}
-
-	return pXITask;
-#else
 	return static_cast<CXmlItem*>(hTask);
-#endif
 }
 
 bool CTaskFile::IsArchive() const
@@ -1755,11 +1747,10 @@ HTASKITEM CTaskFile::FindTask(unsigned long dwTaskID) const
 	if (dwTaskID <= 0)
 		return NULL;
 
-	// find taskID attribute
-	const CXmlItem* pXI = FindItem(TDL_TASKID, (int)dwTaskID);
+	HTASKITEM hTask = NULL;
+	VERIFY(!m_mapHandles.Lookup(dwTaskID, hTask) || (hTask != NULL));
 
-	// then take it's parent as the task itself
-	return pXI ? (HTASKITEM)(pXI->GetParent()) : NULL;
+	return hTask;
 }
 
 bool CTaskFile::DeleteTask(HTASKITEM hTask)
@@ -2019,10 +2010,17 @@ CXmlItem* CTaskFile::NewItem(const CString& sName)
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent)
 {
-	return NewTask(szTitle, hParent, 0); // 0 means 'allocate new ID'
+	return NewTask(szTitle, hParent, 0); // Zero mean 'allocate ID'
 }
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID)
+{
+	return NewTask(szTitle, hParent, dwID, 0, TRUE);
+}
+
+// New wrapper that lets us set the parent ID if the parent task is NULL
+// And optionally initialise the creation date
+HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID, BOOL bInitCreationDate)
 {
 	ASSERT((dwID == 0) || (FindTask(dwID) == 0));
 
@@ -2041,40 +2039,36 @@ HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID)
 
 	if (pXINew)
 	{
-		pXIParent->AddItem(pXINew);
-		AddTaskToMap(pXINew, FALSE, FALSE);
-
-		// Set name, ID and creation date
-		SetTaskTitle((HTASKITEM)pXINew, szTitle);
-
+		// Must set ID before adding to handle map
 		if (dwID <= 0)
 			dwID = m_dwNextUniqueID++;
 		else
 			m_dwNextUniqueID = max(m_dwNextUniqueID, dwID + 1);
 
-		SetTaskID((HTASKITEM)pXINew, dwID);
-		SetTaskCreationDate((HTASKITEM)pXINew, COleDateTime::GetCurrentTime());
+		VERIFY(pXINew->SetItemValue(TDL_TASKID, (int)dwID));
+		
+		// Add to map
+		pXIParent->AddItem(pXINew);
+		AddTaskToMap(pXINew, FALSE, FALSE);
+
+		// Set name, parent ID and creation date
+		HTASKITEM hTask = (HTASKITEM)pXINew;
+		SetTaskTitle(hTask, szTitle);
+
+		if (dwParentID)
+		{
+			// sanity check
+			ASSERT((hParent == NULL) || (GetTaskID(hParent) == dwParentID));
+		
+			if (hParent == NULL)
+				SetTaskULong(hTask, TDL_TASKPARENTID, dwParentID);
+		}
+
+		if (bInitCreationDate)
+			SetTaskCreationDate(hTask, COleDateTime::GetCurrentTime());
 	}
 
 	return (HTASKITEM)pXINew;
-}
-
-// new wrapper that lets us set the parent ID if the parent task is NULL
-HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID)
-{
-	HTASKITEM hNewTask = NewTask(szTitle, hParent, dwID);
-	
-	// set parent ID
-	if (hNewTask && dwParentID)
-	{
-		// sanity check
-		ASSERT((hParent == NULL) || (GetTaskID(hParent) == dwParentID));
-		
-		if (hParent == NULL)
-			SetTaskULong(hNewTask, TDL_TASKPARENTID, dwParentID);
-	}
-	
-	return hNewTask;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -2823,10 +2817,6 @@ COLORREF CTaskFile::GetTaskTextColor(HTASKITEM hTask) const
 COLORREF CTaskFile::GetTaskBkgndColor(HTASKITEM /*hTask*/) const
 {
 	// DEPRECATED
-// 	if (TaskHasAttribute(hTask, TDL_TASKBACKCOLOR))
-// 		return GetTaskULong(hTask, TDL_TASKBACKCOLOR);
-
-	// else
 	return CLR_NONE;
 }
 

@@ -354,6 +354,7 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 
 private:
 	void PreFixVScrollSyncBug();

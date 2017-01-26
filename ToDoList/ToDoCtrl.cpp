@@ -196,6 +196,7 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_bArchive(FALSE),
 	m_bCheckedOut(FALSE),
 	m_bDelayLoaded(FALSE),
+	m_bDeletingTasks(FALSE),
 	m_bDragDropSubtasksAtTop(TRUE),
 	m_bFirstLoadCommentsPrefs(TRUE),
 	m_bModified(FALSE), 
@@ -1862,6 +1863,9 @@ void CToDoCtrl::UpdateSelectedTaskPath()
 
 void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 {
+	if (m_bDeletingTasks)
+		return;
+
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
@@ -5114,7 +5118,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	
 	if (bWarnUser && !ConfirmDeleteAllTasks(TRUE))
 		return FALSE;
-	
+
 	// Copy selected tasks without duplicate subtasks
 	CHTIList selection;
 	TSH().CopySelection(selection, TRUE);
@@ -5176,14 +5180,16 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		TCH().SelectItem(NULL);
 	
 	// clear selection before deleting
-	TSH().RemoveAll(TRUE);
+	TSH().RemoveAll(TRUE, FALSE);
 
 	// Cache the task ID of a singly selected task
 	// for later passing to SetModified
-	DWORD dwDelTaskID = ((nSelCount == 1) ? GetTaskID(selection.GetHead()) : 0);
+	BOOL bSingleTask = (nSelCount == 1);
+	DWORD dwDelTaskID = (bSingleTask ? GetTaskID(selection.GetHead()) : 0);
 
 	{
-		HOLD_REDRAW(NULL, m_taskTree.GetSafeHwnd());
+		CAutoFlag af(m_bDeletingTasks, TRUE);
+		CHoldRedraw hr(bSingleTask ? NULL : m_taskTree.GetSafeHwnd());
 		POSITION pos = selection.GetHeadPosition();
 
 		while (pos)
@@ -5198,15 +5204,18 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		// Note: CToDoCtrlData ought to have already cleaned up the data
 		m_taskTree.RemoveOrphanTreeItemReferences();
 	}
+	m_taskTree.UpdateAll();
 
-	// refresh rest of UI
-	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
-	UpdateControls(FALSE); // don't update comments
-	
 	// set next selection
 	if (htiNextSel)
 		SelectItem(htiNextSel);
+	else
+		UpdateControls(FALSE); // don't update comments
 
+
+	// refresh rest of UI
+	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
+	
 	// restore focus
 	if (hFocus && ::IsWindowEnabled(hFocus))
 		::SetFocus(hFocus);
@@ -8768,7 +8777,7 @@ BOOL CToDoCtrl::AddTaskToTaskFile(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	CString sTitle = pTDI->sTitle;
 	DWORD dwTaskID = pTDS->GetTaskID();
 	
-	HTASKITEM hTask = tasks.NewTask(sTitle, hParentTask, dwTaskID);
+	HTASKITEM hTask = tasks.NewTask(sTitle, hParentTask, dwTaskID, 0);
 	ASSERT(hTask);
 	
 	if (!hTask)
@@ -8950,7 +8959,7 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 		// does the user want this task's parent(s) ?
 		if (bWantAllParents || bWantImmediateParent)
 		{
-			VERIFY(AddItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks));
+			VERIFY(AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks));
 		}
 		else
 		{
@@ -8958,7 +8967,7 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 			DWORD dwParentID = m_taskTree.GetTaskParentID(hti);
 			HTASKITEM hParent = tasks.FindTask(dwParentID);
 
-			VERIFY(AddTreeItemToTaskFile(hti, tasks, hParent, filter, bWantSubtasks, dwParentID));
+			VERIFY(AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID));
 		}
 	}
 
@@ -8984,7 +8993,7 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter, DWO
 	return (tasks.GetTaskCount());
 }
 
-BOOL CToDoCtrl::AddItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, 
+BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, 
 											BOOL bAllParents, BOOL bWantSubtasks) const
 {
 	// add parents first, recursively if necessarily
@@ -8997,14 +9006,14 @@ BOOL CToDoCtrl::AddItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, cons
 		// Note: we never want parent's subtasks, so we pass FALSE
 		if (bAllParents)
 		{
-			VERIFY(AddItemAndParentToTaskFile(htiParent, tasks, filter, TRUE, FALSE));
+			VERIFY(AddTreeItemAndParentToTaskFile(htiParent, tasks, filter, TRUE, FALSE));
 		}
 		else
 		{
 			DWORD dwGrandParentID = m_taskTree.GetTaskParentID(htiParent);
 			HTASKITEM hGrandParent = tasks.FindTask(dwGrandParentID);
 
-			VERIFY(AddTreeItemToTaskFile(htiParent, tasks, hGrandParent, filter, FALSE, dwGrandParentID));
+			VERIFY(AddTreeItemToTaskFile(htiParent, 0, tasks, hGrandParent, filter, FALSE, dwGrandParentID));
 		}
 
 		// now find the parent we just added
@@ -9015,7 +9024,7 @@ BOOL CToDoCtrl::AddItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, cons
 	}
 
 	// now add item itself
-	return AddTreeItemToTaskFile(hti, tasks, hParent, filter, bWantSubtasks, dwParentID);
+	return AddTreeItemToTaskFile(hti, 0, tasks, hParent, filter, bWantSubtasks, dwParentID);
 }
 
 int CToDoCtrl::CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
@@ -9548,7 +9557,7 @@ int CToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKIT
 	
 	while (htiChild)
 	{
-		if (AddTreeItemToTaskFile(htiChild, file, hTask, filter, TRUE)) // TRUE = want subtasks
+		if (AddTreeItemToTaskFile(htiChild, 0, file, hTask, filter, TRUE)) // TRUE = want subtasks
 			nChildren++;
 		
 		// next
@@ -9558,11 +9567,28 @@ int CToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKIT
 	return nChildren;
 }
 
-BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hParentTask, 
+BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& file, HTASKITEM hParentTask, 
 										const TDCGETTASKS& filter, BOOL bWantSubtasks, DWORD dwParentID) const
 {
-	// attributes
-	DWORD dwTaskID = GetTaskID(hti);
+	// Sanity checks
+	if (hti == NULL)
+	{
+		if (bWantSubtasks || (dwTaskID == 0))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
+	else if (dwTaskID == 0)
+	{	
+		dwTaskID = GetTaskID(hti);
+		ASSERT(dwTaskID);
+	}
+	else
+	{
+		ASSERT (GetTaskID(hti) == dwTaskID);
+	}
+	
 	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, FALSE);
 	ASSERT (pTDI);
 	
@@ -9600,7 +9626,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM 
 		if (!bMatch) //  no children matched -> 'Check ourselves'
 		{
 			BOOL bDone = pTDI->IsDone();
-			BOOL bGoodAsDone = bDone ? TRUE : m_data.IsTaskDone(GetTaskID(hti), TDCCHECKALL);
+			BOOL bGoodAsDone = bDone ? TRUE : m_data.IsTaskDone(dwTaskID, TDCCHECKALL);
 			
 			switch (filter.nFilter)
 			{

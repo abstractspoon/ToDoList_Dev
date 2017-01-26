@@ -346,7 +346,7 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 			return FALSE;
 
 		// add task
-		HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, NULL, dwTaskID);
+		HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
 		ASSERT(hTask);
 		
 		if (!hTask)
@@ -470,7 +470,7 @@ void CFilteredToDoCtrl::GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& 
 		// we add the task if it is completed (and optionally selected) or it has children
 		if (pTDI->IsDone() || pTDS->HasSubTasks())
 		{
-			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID);
+			HTASKITEM hTask = tasks.NewTask(NULL, hTaskParent, dwTaskID, 0);
 			ASSERT(hTask);
 
 			// copy attributes

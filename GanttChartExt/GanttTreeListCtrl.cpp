@@ -315,7 +315,7 @@ BOOL CGanttTreeListCtrl::SelectTask(DWORD dwTaskID)
 
 	BOOL bWasVisible = IsTreeItemVisible(m_hwndTree, hti);
 
-	SelectTreeItem(m_hwndTree, hti);
+	SelectTreeItem(hti, FALSE);
 
 	if (!bWasVisible)
 		ExpandList();
@@ -5373,21 +5373,30 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 		RedrawList();
 
 		// keep parent informed
-		if (!NotifyParentDateChange(nDragWhat))
+		if (DragDatesDiffer(*pGI, m_giPreDrag))
 		{
-			GANTTITEM* pGI = GetGanttItem(dwTaskID);
-			ASSERT(pGI);
-			
-			(*pGI) = m_giPreDrag;
-			RedrawList();
+			if (!NotifyParentDateChange(nDragWhat))
+			{
+				GANTTITEM* pGI = GetGanttItem(dwTaskID);
+				ASSERT(pGI);
+				
+				(*pGI) = m_giPreDrag;
+				RedrawList();
+			}
+
+			NotifyParentDragChange();
 		}
-		NotifyParentDragChange();
 
 		return TRUE;
 	}
 
 	// else
 	return FALSE;
+}
+
+BOOL CGanttTreeListCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
+{
+	return ((gi1.dtStart != gi2.dtStart) || (gi1.dtDue != gi2.dtDue));
 }
 
 void CGanttTreeListCtrl::NotifyParentDragChange()

@@ -39,7 +39,7 @@ protected:
 	// overridables
 	virtual bool ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const;
 	virtual CString ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
-	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return _T(""); }
 	virtual CString ExportSubtasks(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
 	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const = 0;

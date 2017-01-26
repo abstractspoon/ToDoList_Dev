@@ -517,6 +517,7 @@ protected:
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bFirstLoadCommentsPrefs;
+	BOOL m_bDeletingTasks;
 //	BOOL m_bIsUnicode;
 
 	static int s_nCommentsSize; // TDCS_SHAREDCOMMENTSHEIGHT
@@ -750,8 +751,8 @@ protected:
 	COLORREF GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hTask, const TDCGETTASKS& filter) const;
-	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
-	BOOL AddItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, BOOL bAllParents, BOOL bWantSubtasks) const;
+	BOOL AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& file, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
+	BOOL AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, BOOL bAllParents, BOOL bWantSubtasks) const;
 	BOOL SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const;
 
 //	typedef BOOL (CALLBACK *PFNWANTADDTASK)(const CToDoCtrlData&, DWORD);

@@ -83,7 +83,7 @@ bool CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& 
 	return (FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM) != FALSE);
 }
 
-bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, BOOL /*bSilent*/, 
+bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, bool /*bSilent*/, 
 									   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// we go straight for the application preferences
@@ -111,33 +111,33 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 	if (pSrcTaskFile->GetTaskListCount() == 0)
 		return false;
 
-	const ITASKLISTBASE* pTasks10 = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLIST10);
-	ASSERT(pTasks10);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
+	ASSERT(pTasks);
 	
-	if (pTasks10 == NULL)
+	if (pTasks == NULL)
 		return false;
 
-	if (!InitConsts(pTasks10, szDestFilePath, bSilent, pPrefs, szKey))
+	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
 		return false;
 	
 	CString sOutput;
 	
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		pTasks10 = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST10);
-		ASSERT(pTasks10);
+		pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+		ASSERT(pTasks);
 		
-		if (pTasks10 == NULL)
+		if (pTasks == NULL)
 			return false;
 
 		// add title block
-		sOutput += FormatTitle(pTasks10);
+		sOutput += FormatTitle(pTasks);
 		
 		// then header
-		sOutput += FormatHeader(pTasks10);
+		sOutput += FormatHeader(pTasks);
 		
 		// then tasks
-		sOutput += ExportTaskAndSubtasks(pTasks10, NULL, 0);
+		sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
 	}
 	
 	return ExportOutput(szDestFilePath, sOutput);
@@ -146,23 +146,23 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 bool CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
 								   IPreferences* pPrefs, LPCTSTR szKey)
 {
-	const ITASKLISTBASE* pTasks10 = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLIST10);
-	ASSERT(pTasks10);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+	ASSERT(pTasks);
 	
-	if (pTasks10 == NULL)
+	if (pTasks == NULL)
 		return false;
 
-	if (!InitConsts(pTasks10, szDestFilePath, bSilent, pPrefs, szKey))
+	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
 		return false;
 
 	// add title block
-	CString sOutput = FormatTitle(pTasks10);
+	CString sOutput = FormatTitle(pTasks);
 	
 	// then header
-	sOutput += FormatHeader(pTasks10);
+	sOutput += FormatHeader(pTasks);
 	
 	// then tasks
-	sOutput += ExportTaskAndSubtasks(pTasks10, NULL, 0);
+	sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
 	
 	return ExportOutput(szDestFilePath, sOutput);
 }

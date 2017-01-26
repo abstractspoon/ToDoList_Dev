@@ -270,6 +270,7 @@ protected:
 		TTCNT_PREVTOPLEVEL,
 	};
 	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
+	DWORD GetNextNonSelectedTaskID() const;
 
 	BOOL InListView() const;
 	BOOL InTreeView() const;

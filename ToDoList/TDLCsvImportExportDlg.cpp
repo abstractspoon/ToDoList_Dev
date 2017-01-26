@@ -50,6 +50,7 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 	m_sPrefKey.Format(_T("%s\\CsvColumnMapping"), szKey);
 	m_sDelim = Misc::GetListSeparator();
 	m_bAlwaysExportTaskIDs = TRUE;
+	m_bImporting = (pExportAttributes ? FALSE : TRUE);
 
 	LoadMasterColumnMapping();
 
@@ -57,16 +58,10 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 	CTDCAttributeMapping aMapping;
 
 	if (pExportAttributes)
-	{
-		m_bImporting = FALSE;
 		m_aExportAttributes.Copy(*pExportAttributes);
-		BuildExportColumnMapping(aMapping);
-	}
-	else
-	{
-		m_bImporting = TRUE;
-		BuildImportColumnMapping(aMapping);
-	}
+
+	BuildExportColumnMapping(aMapping);
+
 	m_lcColumnSetup.SetColumnMapping(aMapping);
 
 	return TRUE;

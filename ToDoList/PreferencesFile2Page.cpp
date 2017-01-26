@@ -36,6 +36,7 @@ CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportM
 		CPreferencesPageBase(CPreferencesFile2Page::IDD),
 		m_eExportFolderPath(FES_FOLDERS | FES_COMBOSTYLEBTN | FES_RELATIVEPATHS),
 		m_eSaveExportStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
+		m_cbOtherExporters(*pExportMgr, FALSE, TRUE),
 		m_pExportMgr(pExportMgr),
 		m_eBackupLocation(FES_FOLDERS | FES_COMBOSTYLEBTN)
 {

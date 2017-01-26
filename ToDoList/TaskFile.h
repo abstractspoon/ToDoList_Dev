@@ -83,12 +83,13 @@ public:
 	int Merge(LPCTSTR szTaskFilePath, BOOL bByID, BOOL bMoveExist);
 #endif
 
-	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID);
+	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID, BOOL bInitCreationDate = FALSE);
 
-	// Note: we have to leave version above because it implements
-	// the equiv method in ITaskList8
-	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID);
+protected:
+	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent = NULL);		// ITasklist
+	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID);	// ITasklist8
 
+public:
 	DWORD GetNextUniqueID() const; 
 	BOOL SetNextUniqueID(DWORD dwNextID); 
 
@@ -363,8 +364,6 @@ public:
 	bool SetProjectName(LPCTSTR szName);
 	bool SetFileVersion(unsigned long nVersion);
 
-	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent = NULL);
-
 	HTASKITEM GetFirstTask(HTASKITEM hParent = NULL) const;
 	HTASKITEM GetNextTask(HTASKITEM hTask) const;
 
@@ -446,7 +445,7 @@ protected:
 	BOOL m_bHideParentID; // special case
 	CString m_sHtmlImgFolder;
 
-	mutable CMap <HTASKITEM, HTASKITEM, CXmlItem*, CXmlItem*&> m_mapHandles;
+	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
 
 protected:
 	void BuildHandleMap() const;

@@ -87,8 +87,6 @@ public:
 	void ClientToScreen(LPPOINT pPoint) const;
 	void ScreenToWindow(LPPOINT pPoint) const;
 
-	virtual void Redraw() const { Invalidate(); }
-
 	virtual BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
 	virtual BOOL SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
 

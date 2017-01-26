@@ -551,7 +551,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	if (pData->bCanPrepareNewTask == -1)
 	{
 		CTaskFile task;
-		task.NewTask(_T("Test Task"));
+		task.NewTask(_T("Test Task"), NULL, 0, 0);
 
 		pData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
 	}
@@ -762,10 +762,10 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 			// so we make sure we don't include subtasks
 			for (int nItem = 0; nItem < m_taskList.GetItemCount(); nItem++)
 			{
-				HTREEITEM hti = GetTreeItem(nItem);
-				DWORD dwParentID = m_data.GetTaskParentID(GetTaskID(hti));
+				DWORD dwTaskID = GetTaskID(nItem);
+				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
 
-				CToDoCtrl::AddTreeItemToTaskFile(hti, tasks, NULL, filter, FALSE, dwParentID);
+				CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID);
 			}
 
 			return tasks.GetTaskCount();
@@ -814,7 +814,7 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTAS
 	if (!m_data.GetTask(dwTaskID, pTDI, pTDS, FALSE))
 		return FALSE;
 
-	HTASKITEM hTask = file.NewTask(pTDI->sTitle, hParentTask, dwTaskID);
+	HTASKITEM hTask = file.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
 
 	if (!hTask)
 	{
@@ -1643,22 +1643,21 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 			{
 				int nItem = m_taskList.List().GetNextSelectedItem(pos);
 
-				HTREEITEM hti = GetTreeItem(nItem);
-				DWORD dwParentID = m_data.GetTaskParentID(GetTaskID(nItem));
+				DWORD dwTaskID = GetTaskID(nItem);
+				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
 				HTASKITEM htParent = NULL;
 				
 				// Add immediate parent as required.
 				// Note: we can assume that the selected task is always added successfully
 				if (dwParentID && (dwFlags & TDCGSTF_IMMEDIATEPARENT))
 				{
-					HTREEITEM htiParent = m_taskTree.GetParentItem(hti);
 					DWORD dwParentsParentID = m_data.GetTaskParentID(dwParentID);
 					
-					if (CToDoCtrl::AddTreeItemToTaskFile(htiParent, tasks, NULL, filter, FALSE, dwParentsParentID))  // FALSE == no subtasks
+					if (CToDoCtrl::AddTreeItemToTaskFile(NULL, dwParentID, tasks, NULL, filter, FALSE, dwParentsParentID))  // FALSE == no subtasks
 						htParent = tasks.FindTask(dwParentID);
 				}
 
-				VERIFY(CToDoCtrl::AddTreeItemToTaskFile(hti, tasks, NULL, filter, FALSE, dwParentID)); // FALSE == no subtasks
+				VERIFY(CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID)); // FALSE == no subtasks
 			}
 
 			return tasks.GetTaskCount();
@@ -2006,56 +2005,46 @@ BOOL CTabbedToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	if (IsReadOnly())
 		return FALSE;
 
+	if (InTreeView())
+		return CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel);
+
 	// Work out what to select after the deletion
-	DWORD dwNextSelID = 0;
+	DWORD dwNextSelID = GetNextNonSelectedTaskID();
 
-	FTC_VIEW nView = GetView();
-
-	switch (nView)
+	if (InListView())
 	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		// handled in CToDoCtrl::DeleteSelectedTask
-		break;
-
-	case FTCV_TASKLIST:
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
+		CHoldRedraw hr(m_taskList.GetSafeHwnd());
+		
+		if (CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel))
 		{
-			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE); // unselected
-
-			if (!dwNextSelID)
-				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE); // unselected
+			if (dwNextSelID)
+				SelectTask(dwNextSelID, FALSE);
+			
+			return TRUE;
 		}
-		break;
-
-	default:
-		ASSERT(0);
 	}
-
-	if (CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel))
+	else
 	{
-		if (dwNextSelID)
-			SelectTask(dwNextSelID, FALSE);
-
-		return TRUE;
+		if (CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel))
+		{
+			if (dwNextSelID)
+				SelectTask(dwNextSelID, FALSE);
+			
+			return TRUE;
+		}
 	}
 
 	return FALSE;
+}
+
+DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
+{
+	DWORD dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE);
+
+	if (!dwNextSelID)
+		dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE);
+
+	return dwNextSelID;
 }
 
 DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const
@@ -2241,7 +2230,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 			if (pExtWnd)
 			{
 				CTaskFile task;
-				HTASKITEM hTask = task.NewTask(pTDI->sTitle);
+				HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, 0, 0);
 
 				task.SetTaskAttributes(hTask, pTDI);
 
@@ -3382,7 +3371,8 @@ void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	UpdateTreeSelection();
+	if (!m_bDeletingTasks)
+		UpdateTreeSelection();
 }
 
 void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
@@ -4651,6 +4641,8 @@ void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 
 void CTabbedToDoCtrl::UpdateTreeSelection()
 {
+	ASSERT(!m_bDeletingTasks);
+
 	// update the tree selection as required
 	TDCSELECTIONCACHE cacheTree, cacheList;
 
@@ -4674,12 +4666,6 @@ void CTabbedToDoCtrl::UpdateTreeSelection()
 
 		UpdateControls();
 	}
-}
-
-BOOL CTabbedToDoCtrl::IsItemSelected(int nItem) const
-{
-	HTREEITEM hti = GetTreeItem(nItem);
-	return hti ? TSH().HasItem(hti) : FALSE;
 }
 
 HTREEITEM CTabbedToDoCtrl::GetTreeItem(int nItem) const

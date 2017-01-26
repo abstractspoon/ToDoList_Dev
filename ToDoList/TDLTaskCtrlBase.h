@@ -187,6 +187,7 @@ public:
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
+	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef = -1) const;
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
