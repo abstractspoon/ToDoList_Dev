@@ -291,7 +291,7 @@ bool CCalendarWnd::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) 
+bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -304,28 +304,19 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/)
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 	case IUI_RESIZEATTRIBCOLUMNS:
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
 		break;
+		
+	case IUI_SELECTTASK:
+		return SelectTask(dwExtra);
 		
 	case IUI_SETFOCUS:
 		m_BigCalendar.SetFocus();
 		return true;
-
-	case IUI_GETNEXTTASK:
-		// not handled
-		break;
-
-	case IUI_GETNEXTTOPLEVELTASK:
-		// not handled
-		break;
-
-	case IUI_GETPREVTASK:
-		// not handled
-		break;
-
-	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
-		break;
 	}
 
 	return false;
@@ -344,27 +335,16 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 	case IUI_RESIZEATTRIBCOLUMNS:
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
 		break;
 
 	case IUI_SETFOCUS:
+	case IUI_SELECTTASK:
 		return true;
-		
-	case IUI_GETNEXTTASK:
-		// not handled
-		break;
-		
-	case IUI_GETNEXTTOPLEVELTASK:
-		// not handled
-		break;
-
-	case IUI_GETPREVTASK:
-		// not handled
-		break;
-
-	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
-		break;
 	}
 	
 	return false;

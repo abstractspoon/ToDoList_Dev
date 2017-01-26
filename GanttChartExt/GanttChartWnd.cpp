@@ -536,6 +536,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		m_ctrlGantt.ResizeColumnsToFit();
 		return true;
 		
+	case IUI_SELECTTASK:
+		return SelectTask(dwExtra);
+		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
@@ -565,6 +568,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:
 	case IUI_RESIZEATTRIBCOLUMNS:
+	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_EXPANDSELECTED:

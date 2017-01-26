@@ -510,6 +510,9 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		m_ctrlKanban.SetFocus();
 		return true;
 		
+	case IUI_SELECTTASK:
+		return SelectTask(dwExtra);
+		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
@@ -549,6 +552,7 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 		return (CKanbanCtrl::WantEditUpdate((IUI_ATTRIBUTE)dwExtra) != FALSE);
 
 	case IUI_SETFOCUS:
+	case IUI_SELECTTASK:
 		return true;
 		
 	case IUI_GETNEXTTASK:

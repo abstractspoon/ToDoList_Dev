@@ -54,7 +54,6 @@ public:
 
 	bool SelectTask(DWORD dwTaskID);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-	bool SupportsTaskSelection() const { return true; }
 
 	bool ProcessMessage(MSG* pMsg);
 

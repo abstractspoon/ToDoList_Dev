@@ -4114,7 +4114,7 @@ BOOL CTabbedToDoCtrl::ViewSupportsTaskSelection(FTC_VIEW nView) const
 			ASSERT(pExt);
 
 			if (pExt)
-				return (pExt->SupportsTaskSelection() ? TRUE : FALSE);
+				return (pExt->CanDoAppCommand(IUI_SELECTTASK) ? TRUE : FALSE);
 		}
 		break;
 	}

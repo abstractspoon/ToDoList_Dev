@@ -76,7 +76,6 @@ public:
 
 	bool SelectTask(DWORD dwTaskID);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-	bool SupportsTaskSelection() const { return false; }
 
 	bool ProcessMessage(MSG* pMsg);
 

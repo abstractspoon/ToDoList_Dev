@@ -613,6 +613,7 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
+	case IUI_SELECTTASK:
 		// not handled
 		break;
 	}
