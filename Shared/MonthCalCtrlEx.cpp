@@ -176,7 +176,7 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 
 		for (int nWeek = 0; nWeek < 6; nWeek++)
 		{
-			int nWeekNum = CDateHelper::GetISOWeekofYear(dtWeek);
+			int nWeekNum = CDateHelper::GetWeekofYear(dtWeek);
 			pDC->DrawText(Misc::Format(nWeekNum), rWeek, (DT_BOTTOM | DT_CENTER));
 
 			// next row

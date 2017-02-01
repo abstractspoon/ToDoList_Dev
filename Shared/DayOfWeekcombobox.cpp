@@ -57,7 +57,11 @@ void CDayOfWeekComboBox::InitCombo()
 	CLocalizer::EnableTranslation(*this, FALSE);
 
 	ResetContent();
+	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nDOW = 1; nDOW <= 7; nDOW++)
-		AddString(CDateHelper::GetDayOfWeekName(nDOW, FALSE));
+	{
+		int nIndex = AddString(CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, FALSE));
+		SetItemData(nIndex, nDOW);
+	}
 }

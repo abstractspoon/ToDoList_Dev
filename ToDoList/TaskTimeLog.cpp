@@ -1241,7 +1241,7 @@ BOOL CTDCTaskTimeLogAnalysis::IsSamePeriod(const COleDateTime& date1, const COle
 		return (date1 == date2);
 
 	case TTLB_BYWEEK:
-		return (CDateHelper::GetISOWeekofYear(date1) == CDateHelper::GetISOWeekofYear(date2));
+		return (CDateHelper::GetWeekofYear(date1) == CDateHelper::GetWeekofYear(date2));
 
 	case TTLB_BYMONTH:
 		return ((date1.GetMonth() == date2.GetMonth()) &&

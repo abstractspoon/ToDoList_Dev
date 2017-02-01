@@ -280,28 +280,15 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
-	bool bShort = false;
+	bool bShort = (CDateHelper::CalcLongestDayOfWeekName(pDC) > nWidth);
 
-	for(i=0; i<CALENDAR_NUM_COLUMNS; i++)
-	{
-		CRect txtRect(i*nWidth, 0, (i+1)*nWidth, CALENDAR_HEADER_HEIGHT);
-		int nDOW = GetDayOfWeek(i);
-
-		CSize TitleSize(pDC->GetTextExtent(CDateHelper::GetDayOfWeekName(nDOW, FALSE)));
-
-		if (TitleSize.cx > txtRect.Width())
-		{
-			bShort = true;
-			break;
-		}
-	}
-	
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
 		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, CALENDAR_HEADER_HEIGHT);
 		int nDOW = GetDayOfWeek(i);
+		CString sDOW = CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, FALSE);
 
-		pDC->DrawText(CDateHelper::GetDayOfWeekName(nDOW, bShort), txtRect, DT_CENTER|DT_VCENTER);
+		pDC->DrawText(sDOW, txtRect, DT_CENTER|DT_VCENTER);
 	}
 	pDC->SelectObject(pOldFont);
 }
