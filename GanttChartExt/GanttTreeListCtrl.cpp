@@ -3089,7 +3089,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			double dMonthWidth = rMonth.Width();
 
 			// first week starts at 'First week of first DOW'
-			DH_OLEDOW nFirstDOW = CDateHelper::GetFirstDayOfWeek();
+			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 			int nDay = CDateHelper::CalcDayOfMonth(nFirstDOW, 1, nMonth, nYear);
 
 			// calc number of first week

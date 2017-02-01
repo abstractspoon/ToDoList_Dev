@@ -793,7 +793,7 @@ int CFPSMiniCalendarCtrl::DrawDaysOfWeek(CDC &dc, int iY, int iLeftX, int, int)
 	for (int i = m_iFirstDayOfWeek; i < (m_iFirstDayOfWeek + 7); i++)
 	{
 		int nDOW = (((i - 1) % 7) + 1);
-		dc.DrawText(CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, TRUE), 1, rect, DEFTEXTFLAGS);
+		dc.DrawText(CDateHelper::GetDayOfWeekName(nDOW, TRUE), 1, rect, DEFTEXTFLAGS);
 		rect.OffsetRect(m_iIndividualDayWidth + 5, 0);
 	}
 
@@ -858,7 +858,7 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 		// Draw week number
 		if (nWeekWidth)
 		{
-			int nWeek = CDateHelper::GetISOWeekofYear(dt);
+			int nWeek = CDateHelper::GetWeekofYear(dt);
 
 			CRect rect((iX - nWeekWidth), iY, (iX - WEEKNUMBERPADDING),iY+m_iDaysHeight);
 

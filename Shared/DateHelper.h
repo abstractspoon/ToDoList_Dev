@@ -17,7 +17,7 @@ enum DH_DATE
 	DHD_ENDTHISWEEK,   
 	DHD_ENDNEXTWEEK,   // DHD_ENDTHISWEEK + 7
 	DHD_ENDTHISMONTH,  // beginning of next month - 1
-	DHD_ENDNEXTMONTH,  // get's trickier :)
+	DHD_ENDNEXTMONTH,  // gets trickier :)
 	DHD_ENDTHISYEAR,
 	DHD_ENDNEXTYEAR,
 	DHD_YESTERDAY,
@@ -41,7 +41,7 @@ enum
 	DHFD_NOSEC	= 0x0008,
 };
 
-enum // days of week
+enum // Days of week bit flags
 {
 	DHW_SUNDAY		= 0X01,
 	DHW_MONDAY		= 0X02,
@@ -54,33 +54,21 @@ enum // days of week
 	DHW_EVERYDAY	= 0x7F
 };
 
-enum DH_OLEDOW
+enum // OLE Days of week
 {
-	DH_OLE_UNDEF	= -1,
-	DH_OLE_SUNDAY	= 1,
-	DH_OLE_MONDAY,
-	DH_OLE_TUESDAY,
-	DH_OLE_WEDNESDAY,
-	DH_OLE_THURSDAY,
-	DH_OLE_FRIDAY,
-	DH_OLE_SATURDAY,
+	DHO_UNDEF	= -1,
+	DHO_SUNDAY	= 1,
+	DHO_MONDAY,
+	DHO_TUESDAY,
+	DHO_WEDNESDAY,
+	DHO_THURSDAY,
+	DHO_FRIDAY,
+	DHO_SATURDAY,
 };
-
-enum DH_ISODOW
-{
-	DH_ISO_UNDEF	= -1,
-	DH_ISO_MONDAY	= 1,
-	DH_ISO_TUESDAY,
-	DH_ISO_WEDNESDAY,
-	DH_ISO_THURSDAY,
-	DH_ISO_FRIDAY,
-	DH_ISO_SATURDAY,
-	DH_ISO_SUNDAY,
-};
-
 // Note: 
 // 1 <= nMonth <= 12
 // 1 <= nDay <= 31
+// 1 <= nDOW <= 7
 
 typedef __int64 time64_t;
 
@@ -96,17 +84,13 @@ public:
 	static int CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive, BOOL bWeekdays);
 	static int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays);
 	static int CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive, BOOL bWeekdays);
-	//static int CalcWeekdaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 
 	static double GetDate(DH_DATE nDate); // 12am
 	static BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits);
 
 	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0);
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
-
-	static DH_ISODOW GetISODayOfWeek(const COleDateTime& date);   // 1=Mon, 2=Tue, ..., 7=Sun
-	static int GetWeekofYear(const COleDateTime& date);
-
+	
 	// DOW = 'day of week'
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 	static BOOL FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
@@ -121,12 +105,12 @@ public:
 	static BOOL DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign = TRUE);
 
-	static DH_OLEDOW GetDayOfWeek(const COleDateTime& date);
-	static DH_OLEDOW GetFirstDayOfWeek();
-	static DH_OLEDOW GetLastDayOfWeek();
-	static DH_OLEDOW GetNextDayOfWeek(DH_OLEDOW nDOW);
+	static int GetFirstDayOfWeek();
+	static int GetLastDayOfWeek();
+	static int GetNextDayOfWeek(int nDOW);
 	static int GetDaysInMonth(int nMonth, int nYear); 
 	static int GetDaysInMonth(const COleDateTime& date); 
+	static int GetWeekofYear(const COleDateTime& date);
 	static COleDateTime GetEndOfPreviousDay(const COleDateTime& date);
 	static COleDateTime GetEndOfDay(const COleDateTime& date);
 
@@ -134,10 +118,10 @@ public:
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1);
 
-	static COleDateTime CalcDate(DH_OLEDOW nDOW, int nWhich, int nMonth, int nYear);
-	static int CalcDayOfMonth(DH_OLEDOW nDOW, int nWhich, int nMonth, int nYear);
+	static COleDateTime CalcDate(int nDOW, int nWhich, int nMonth, int nYear);
+	static int CalcDayOfMonth(int nDOW, int nWhich, int nMonth, int nYear);
 
-	static CString GetDayOfWeekName(DH_OLEDOW nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
+	static CString GetDayOfWeekName(int nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
 	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
 	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
@@ -160,7 +144,7 @@ public:
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 
-	static BOOL IsWeekend(DH_OLEDOW nDOW);
+	static BOOL IsWeekend(int nDOW);
 	static BOOL IsWeekend(const COleDateTime& date);
 	static BOOL IsWeekend(double dDate);
 	static int GetWeekendDuration();
@@ -193,6 +177,7 @@ protected:
 	static DWORD s_dwWeekend; 
 
 protected:
+	static int GetISODayOfWeek(const COleDateTime& date); // 1-7 Mon-Sun
 	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime = FALSE);
 	static BOOL DecodeLocalShortDate(const CString& sDate, COleDateTime& date);
 	static BOOL GetTimeT(time64_t date, time_t& timeT);

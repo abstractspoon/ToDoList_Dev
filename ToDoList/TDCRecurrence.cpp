@@ -240,7 +240,7 @@ BOOL TDCRECURRENCE::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& d
 			int nDOW = HIWORD(dwSpecific1);
 			int nNumMonths = dwSpecific2;
 			
-			if (!CDateHelper::IsValidDayOfMonth((DH_OLEDOW)nDOW, nWhich, 1))
+			if (!CDateHelper::IsValidDayOfMonth(nDOW, nWhich, 1))
 			{
 				ASSERT(0);
 				return FALSE;
@@ -260,7 +260,7 @@ BOOL TDCRECURRENCE::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& d
 			}
 			
 			// calculate next instance
-			dtNext = CDateHelper::CalcDate((DH_OLEDOW)nDOW, nWhich, nMonth, nYear);
+			dtNext = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 		}
 		break;
 		
@@ -353,14 +353,14 @@ BOOL TDCRECURRENCE::GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& d
 			
 			// see if this year would work before trying next year
 			int nYear = dtNext.GetYear();
-			dtNext = CDateHelper::CalcDate((DH_OLEDOW)nDOW, nWhich, nMonth, nYear);
+			dtNext = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 			
 			// else try incrementing the year
 			if (dtNext <= dtFrom)
 			{
 				nYear++;
 				
-				dtNext = CDateHelper::CalcDate((DH_OLEDOW)nDOW, nWhich, nMonth, nYear);
+				dtNext = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 				ASSERT(dtNext > dtFrom);
 			}
 		}
@@ -423,7 +423,7 @@ BOOL TDCRECURRENCE::FitDayToScheme(COleDateTime& dtRecur) const
 			
 			if (CDateHelper::IsValidDayOfMonth(nDOW, nWhich, nMonth))
 			{
-				dtRecur = CDateHelper::CalcDate((DH_OLEDOW)nDOW, nWhich, nMonth, nYear);
+				dtRecur = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 				return TRUE;
 			}
 		}
@@ -465,7 +465,7 @@ BOOL TDCRECURRENCE::FitDayToScheme(COleDateTime& dtRecur) const
 			SYSTEMTIME st;
 			dtRecur.GetAsSystemTime(st);
 			
-			dtRecur = CDateHelper::CalcDate((DH_OLEDOW)nDOW, nWhich, st.wMonth, st.wYear);
+			dtRecur = CDateHelper::CalcDate(nDOW, nWhich, st.wMonth, st.wYear);
 			return TRUE;
 		}
 		break;

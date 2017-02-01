@@ -61,7 +61,7 @@ void CDayOfWeekComboBox::InitCombo()
 
 	for (int nDOW = 1; nDOW <= 7; nDOW++)
 	{
-		int nIndex = AddString(CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, FALSE));
+		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDOW, FALSE));
 		SetItemData(nIndex, nDOW);
 	}
 }

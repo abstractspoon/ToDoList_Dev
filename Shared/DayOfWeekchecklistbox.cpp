@@ -67,7 +67,7 @@ LRESULT CDayOfWeekCheckListBox::OnInitListbox(WPARAM /*wp*/, LPARAM /*lp*/)
 	// init weekdays
 	for (int nDay = 1; nDay <= 7; nDay++)
 	{
-		int nIndex = AddString(CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDay, FALSE));
+		int nIndex = AddString(CDateHelper::GetDayOfWeekName(nDay, FALSE));
 		SetItemData(nIndex, nDay);
 	}
 

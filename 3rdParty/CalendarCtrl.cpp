@@ -286,7 +286,7 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 	{
 		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, CALENDAR_HEADER_HEIGHT);
 		int nDOW = GetDayOfWeek(i);
-		CString sDOW = CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, FALSE);
+		CString sDOW = CDateHelper::GetDayOfWeekName(nDOW, FALSE);
 
 		pDC->DrawText(sDOW, txtRect, DT_CENTER|DT_VCENTER);
 	}

@@ -488,7 +488,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 			pDC->Draw3dRect(rCol, GetSysColor(COLOR_3DHIGHLIGHT), GetSysColor(COLOR_3DSHADOW));
 		}
 		
-		CString csTitle = CDateHelper::GetDayOfWeekName((DH_OLEDOW)nDOW, bShort);
+		CString csTitle = CDateHelper::GetDayOfWeekName(nDOW, bShort);
 		CRect rText(rCol);
 		rText.DeflateRect(0, 2, 0, 0);
 		
