@@ -1,6 +1,6 @@
 REM - Copy Resources to own build folders
 
-cd ..\..\..
+cd ..\..
 echo %cd%
 
 xcopy .\ToDoList_Resources\*.* .\ToDoList_Dev\ToDoList\Unicode_Debug\Resources\   /E /EXCLUDE:.\ToDoList_Dev\CopyResToBuildFolders_Exclude.txt /Y 
