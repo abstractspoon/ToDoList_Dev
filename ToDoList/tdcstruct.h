@@ -2482,6 +2482,10 @@ struct TDCCOLEDITVISIBILITY
 			case TDCC_STARTTIME:
 				bVisible &= IsColumnVisible(TDCC_STARTDATE);
 				break;
+
+			case TDCC_CREATIONTIME:
+				bVisible &= IsColumnVisible(TDCC_CREATIONDATE);
+				break;
 			}
 		}
 		else // !bVisible
@@ -2499,6 +2503,10 @@ struct TDCCOLEDITVISIBILITY
 				
 			case TDCC_STARTDATE:
 				SetColumnVisible(TDCC_STARTTIME, FALSE);
+				break;
+
+			case TDCC_CREATIONDATE:
+				SetColumnVisible(TDCC_CREATIONTIME, FALSE);
 				break;
 			}
 		}
@@ -2554,24 +2562,36 @@ struct TDCCOLEDITVISIBILITY
 
 	static BOOL IsSupportedEdit(TDC_ATTRIBUTE nAttrib)
 	{
-		// weed out unsupported attributes
 		switch (nAttrib)
 		{
-		case TDCA_TASKNAME:
-		case TDCA_COMMENTS:
-		case TDCA_PROJNAME:
-		case TDCA_FLAG:
-		case TDCA_ICON:
-		case TDCA_CREATIONDATE:
-		case TDCA_CREATEDBY:
-		case TDCA_POSITION:
-		case TDCA_ID:
-		case TDCA_LASTMOD:
-			return FALSE;
+		case TDCA_DONEDATE:
+		case TDCA_DUEDATE:
+		case TDCA_STARTDATE:
+		case TDCA_PRIORITY:
+		case TDCA_COLOR:
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+		case TDCA_STATUS:
+		case TDCA_CATEGORY:
+		case TDCA_PERCENT:
+		case TDCA_TIMEEST:
+		case TDCA_TIMESPENT:
+		case TDCA_FILEREF:
+		case TDCA_RISK:			
+		case TDCA_EXTERNALID:	
+		case TDCA_COST:			
+		case TDCA_DEPENDENCY:	
+		case TDCA_RECURRENCE:	
+		case TDCA_VERSION:		
+		case TDCA_DUETIME:
+		case TDCA_STARTTIME:
+		case TDCA_DONETIME:
+		case TDCA_TAGS:
+			return TRUE;
 		}
 
-		// else
-		return ((nAttrib >= TDCA_FIRSTATTRIBUTE) && (nAttrib < TDCA_ATTRIBUTECOUNT));
+		// all else
+		return FALSE;
 	}
 
 	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttrib)
@@ -2591,21 +2611,57 @@ struct TDCCOLEDITVISIBILITY
 			return TRUE;
 		}
 
-		// else
+		// all else
 		return FALSE;
 	}
 	
 	static BOOL IsSupportedColumn(TDC_COLUMN nColumn)
 	{
-		// weed out unsupported columns
 		switch (nColumn)
 		{
-		case TDCC_COLOR:
-			return FALSE;
+		case TDCC_PRIORITY:
+		case TDCC_PERCENT:
+		case TDCC_TIMEEST:
+		case TDCC_TIMESPENT:
+		case TDCC_STARTDATE:
+		case TDCC_DUEDATE:
+		case TDCC_DONEDATE:
+		case TDCC_ALLOCTO:
+		case TDCC_ALLOCBY:
+		case TDCC_STATUS:
+		case TDCC_CATEGORY:
+		case TDCC_FILEREF:
+		case TDCC_POSITION:
+		case TDCC_ID:
+		case TDCC_DONE:
+		case TDCC_TRACKTIME:
+		case TDCC_FLAG:
+		case TDCC_CREATIONDATE:
+		case TDCC_CREATEDBY:
+		case TDCC_LASTMOD:
+		case TDCC_RISK:
+		case TDCC_EXTERNALID:
+		case TDCC_COST:
+		case TDCC_DEPENDENCY:
+		case TDCC_RECURRENCE:
+		case TDCC_VERSION:
+		case TDCC_RECENTEDIT:
+		case TDCC_REMAINING:
+		case TDCC_ICON:
+		case TDCC_REMINDER:
+		case TDCC_PARENTID:
+		case TDCC_PATH:
+		case TDCC_TAGS:
+		case TDCC_SUBTASKDONE:
+		case TDCC_STARTTIME:
+		case TDCC_DUETIME:
+		case TDCC_DONETIME:
+		case TDCC_CREATIONTIME:
+			return TRUE;
 		}
 
-		// else
-		return ((nColumn >= TDCC_FIRST) && (nColumn < TDCC_CUSTOMCOLUMN_FIRST));
+		// all else
+		return FALSE;
 	}
 
 protected:

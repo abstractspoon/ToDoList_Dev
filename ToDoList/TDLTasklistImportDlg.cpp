@@ -24,7 +24,7 @@ static char THIS_FILE[] = __FILE__;
 
 static CUIExtensionMgr s_extm;
 static CTDLContentMgr s_cm;
-static CONTENTFORMAT s_cf = _T("PLAIN_TEXT");
+static CONTENTFORMAT s_cf;
 static TDCCOLEDITFILTERVISIBILITY s_vis;
 
 CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CFilteredToDoCtrl(s_extm, s_cm, s_cf, s_vis)

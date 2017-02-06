@@ -6,11 +6,14 @@
 #include "ToDoCtrlMgr.h"
 #include "tdstringres.h"
 #include "tasktimelog.h"
+#include "TDLContentMgr.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\preferences.h"
+#include "..\shared\ContentMgr.h"
+#include "..\shared\uiextensionmgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,9 +22,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoCtrlMgr dialog
 
 const LPCTSTR ARCHIVE_ID = _T(".done");
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum STATUS_IMAGE
 { 
@@ -33,7 +37,30 @@ enum STATUS_IMAGE
 	IM_TIMETRACKING
 };
 
-#define ASSERTVALIDINDEX(i) { ASSERT (i >= 0 && i < GetCount()); }
+/////////////////////////////////////////////////////////////////////////////
+
+#define VALIDINDEX(i) ((i >= 0) && (i < GetCount()))
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define CHECKVALIDINDEX(i)        \
+if (!VALIDINDEX(i))               \
+{                                 \
+	ASSERT(0);                    \
+	return;                       \
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define CHECKVALIDINDEXRET(i, ret)\
+if (!VALIDINDEX(i))               \
+{                                 \
+	ASSERT(0);                    \
+	return ret;                   \
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CToDoCtrlMgr dialog
 
 CToDoCtrlMgr::CToDoCtrlMgr(CTabCtrlEx& tabCtrl) : m_tabCtrl(tabCtrl), m_pPrefs(NULL)
 {
@@ -56,33 +83,49 @@ const CPreferencesDlg& CToDoCtrlMgr::Prefs() const
 
 CFilteredToDoCtrl& CToDoCtrlMgr::GetToDoCtrl(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, GetFallbackToDoCtrl());
 
 	return *(m_aToDoCtrls[nIndex].pTDC);
 }
 
 const CFilteredToDoCtrl& CToDoCtrlMgr::GetToDoCtrl(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, GetFallbackToDoCtrl());
 
-	return *(m_aToDoCtrls[nIndex].pTDC);
+	return *(m_aToDoCtrls.GetData()[nIndex].pTDC);
+}
+
+CFilteredToDoCtrl& CToDoCtrlMgr::GetFallbackToDoCtrl()
+{
+	// Only instantiated if called
+	static CUIExtensionMgr extm;
+	static CTDLContentMgr cm;
+	static CONTENTFORMAT cf;
+	static TDCCOLEDITFILTERVISIBILITY vis;
+	
+	static CFilteredToDoCtrl tdcFallback(extm, cm, cf, vis);
+
+	return tdcFallback;
 }
 
 CToDoCtrlMgr::TDCITEM& CToDoCtrlMgr::GetTDCItem(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	ASSERT(VALIDINDEX(nIndex));
 
 	return m_aToDoCtrls[nIndex];
 }
 
 const CToDoCtrlMgr::TDCITEM& CToDoCtrlMgr::GetTDCItem(int nIndex) const
 {
-	// hack to get around const problem
+	ASSERT(VALIDINDEX(nIndex));
+	
 	return m_aToDoCtrls.GetData()[nIndex];
 }
 
 BOOL CToDoCtrlMgr::GetFileNameAndExt(int nIndex, CString& sFileName, CString& sExt, BOOL bStrict) const
 {
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
 	CString sPath = GetFilePath(nIndex, bStrict);
 	FileMisc::SplitPath(sPath, NULL, NULL, &sFileName, &sExt);
 
@@ -91,12 +134,14 @@ BOOL CToDoCtrlMgr::GetFileNameAndExt(int nIndex, CString& sFileName, CString& sE
 
 CString CToDoCtrlMgr::GetFileName(int nIndex, BOOL bStrict) const
 {
+	CHECKVALIDINDEXRET(nIndex, _T(""));
+	
 	return FileMisc::GetFileNameFromPath(GetFilePath(nIndex, bStrict));
 }
 
 CString CToDoCtrlMgr::GetFilePath(int nIndex, BOOL bStrict) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	CString sPath = GetToDoCtrl(nIndex).GetFilePath();
 
@@ -117,7 +162,7 @@ CString CToDoCtrlMgr::GetFilePath(int nIndex, BOOL bStrict) const
 
 CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 	
 	CString sPath = GetToDoCtrl(nIndex).GetFilePath();
 	return FileMisc::GetFolderFromFilePath(sPath);
@@ -125,6 +170,8 @@ CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
 
 CString CToDoCtrlMgr::GetDisplayPath(int nIndex) const
 {
+	CHECKVALIDINDEXRET(nIndex, _T(""));
+
 	TSM_TASKLISTINFO storageInfo;
 
 	if (GetStorageDetails(nIndex, storageInfo))
@@ -136,14 +183,14 @@ CString CToDoCtrlMgr::GetDisplayPath(int nIndex) const
 
 BOOL CToDoCtrlMgr::UsesStorage(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
-
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+	
 	return GetTDCItem(nIndex).UsesStorage();
 }
 
 BOOL CToDoCtrlMgr::GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	if (!UsesStorage(nIndex))
 		return FALSE;
@@ -154,7 +201,7 @@ BOOL CToDoCtrlMgr::GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const
 
 BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	GetTDCItem(nIndex).SetStorageDetails(info);
 
@@ -166,7 +213,7 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 
 BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	if (!UsesStorage(nIndex))
 		return FALSE;
@@ -177,14 +224,14 @@ BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex)
 
 CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	return GetTDCItem(nIndex).GetFriendlyProjectName();
 }
 
 CString CToDoCtrlMgr::FormatProjectNameWithFileName(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
@@ -209,28 +256,28 @@ CString CToDoCtrlMgr::FormatProjectNameWithFileName(int nIndex) const
 
 void CToDoCtrlMgr::ClearFilePath(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	GetToDoCtrl(nIndex).ClearFilePath();
 }
 
 BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	return !GetFilePath(nIndex).IsEmpty();
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, TDCM_UNDEF);
 
 	return GetTDCItem(nIndex).GetPathType();
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::RefreshPathType(int nIndex) 
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, TDCM_UNDEF);
 
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
@@ -240,26 +287,28 @@ TDCM_PATHTYPE CToDoCtrlMgr::RefreshPathType(int nIndex)
 
 BOOL CToDoCtrlMgr::IsPristine(int nIndex) const
 {
-	return (!HasFilePath(nIndex) && !IsModified(nIndex));//GetModifiedStatus(nIndex));
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+	
+	return (!HasFilePath(nIndex) && !IsModified(nIndex));
 }
 
 BOOL CToDoCtrlMgr::IsLoaded(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	return GetTDCItem(nIndex).bLoaded;
 }
 
 BOOL CToDoCtrlMgr::IsModified(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	return GetToDoCtrl(nIndex).IsModified();
 }
 
 void CToDoCtrlMgr::SetLoaded(int nIndex, BOOL bLoaded)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
@@ -272,7 +321,7 @@ void CToDoCtrlMgr::SetLoaded(int nIndex, BOOL bLoaded)
 
 void CToDoCtrlMgr::RefreshTimeTracking(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 	ASSERT(GetTDCItem(nIndex).bLoaded);
 	
 	UpdateTabItemImage(nIndex);
@@ -280,7 +329,8 @@ void CToDoCtrlMgr::RefreshTimeTracking(int nIndex)
 
 BOOL CToDoCtrlMgr::RefreshFileLastModified(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
 	time_t timeNow = FileMisc::GetFileLastModified(tdci.pTDC->GetFilePath());
@@ -299,7 +349,8 @@ BOOL CToDoCtrlMgr::RefreshFileLastModified(int nIndex)
 
 BOOL CToDoCtrlMgr::RefreshReadOnlyStatus(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
 	BOOL bReadOnlyNow = CDriveInfo::IsReadonlyPath(tdci.pTDC->GetFilePath()) > 0;
@@ -315,23 +366,23 @@ BOOL CToDoCtrlMgr::RefreshReadOnlyStatus(int nIndex)
 	return bChange;
 }
 
-int CToDoCtrlMgr::GetReadOnlyStatus(int nIndex) const
+BOOL CToDoCtrlMgr::GetReadOnlyStatus(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	return GetTDCItem(nIndex).bLastStatusReadOnly;
 }
 
 void CToDoCtrlMgr::SetDueItemStatus(int nIndex, TDCM_DUESTATUS nStatus)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	GetTDCItem(nIndex).nDueStatus = nStatus;
 }
 
 BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL bBrowser)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	CBrowserDlg* pBrowser = NULL;
 	const TDCITEM& tdci = GetTDCItem(nIndex);
@@ -367,6 +418,8 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 
 BOOL CToDoCtrlMgr::VerifyPassword(int nIndex) const
 {
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
 	CEnString sExplanation(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex));
 		
 	return GetToDoCtrl(nIndex).VerifyPassword(sExplanation);
@@ -374,52 +427,58 @@ BOOL CToDoCtrlMgr::VerifyPassword(int nIndex) const
 
 TDCM_DUESTATUS CToDoCtrlMgr::GetDueItemStatus(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, TDCM_NONE);
 
 	return GetTDCItem(nIndex).nDueStatus;
 }
 
-int CToDoCtrlMgr::GetLastCheckoutSucceeded(int nIndex) const
+BOOL CToDoCtrlMgr::GetLastCheckoutSucceeded(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	return GetTDCItem(nIndex).bLastCheckoutSuccess;
 }
 
 void CToDoCtrlMgr::SetLastCheckoutSucceeded(int nIndex, BOOL bCheckedOut)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	GetTDCItem(nIndex).bLastCheckoutSuccess = bCheckedOut;
 }
 
 void CToDoCtrlMgr::RefreshLastCheckoutStatus(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 	
 	if (IsCheckedOut(nIndex))
 		GetTDCItem(nIndex).bLastCheckoutSuccess = TRUE;
 }
 
-int CToDoCtrlMgr::CanCheckOut(int nIndex) const
+BOOL CToDoCtrlMgr::CanCheckOut(int nIndex) const
 {
-	return (CanCheckInOut(nIndex) && !GetToDoCtrl(nIndex).IsCheckedOut());
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	return (CanCheckInOut(nIndex) && !IsCheckedOut(nIndex));
 }
 
-int CToDoCtrlMgr::CanCheckIn(int nIndex) const
+BOOL CToDoCtrlMgr::CanCheckIn(int nIndex) const
 {
-	return (CanCheckInOut(nIndex) && GetToDoCtrl(nIndex).IsCheckedOut());
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+	
+	return (CanCheckInOut(nIndex) && IsCheckedOut(nIndex));
 }
 
 TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex)
 {
+	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
+	
 	CString sTemp;
 	return CheckOut(nIndex, sTemp);
 }
 
 TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(CanCheckOut(nIndex));
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
@@ -442,7 +501,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo)
 
 TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
 	// sanity check
@@ -462,9 +521,9 @@ TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 	return nCheckin;
 }
 
-int CToDoCtrlMgr::CanCheckInOut(int nIndex) const
+BOOL CToDoCtrlMgr::CanCheckInOut(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
@@ -483,7 +542,7 @@ int CToDoCtrlMgr::CanCheckInOut(int nIndex) const
 
 int CToDoCtrlMgr::GetElapsedMinutesSinceLastMod(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, -1);
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	COleDateTimeSpan dtSpan(COleDateTime::GetCurrentTime() - tdc.GetLastTaskModified());
@@ -493,7 +552,7 @@ int CToDoCtrlMgr::GetElapsedMinutesSinceLastMod(int nIndex) const
 
 void CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	UpdateToDoCtrlReadOnlyUIState(tdc);
@@ -514,7 +573,7 @@ void CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState(CFilteredToDoCtrl& tdc)
 
 void CToDoCtrlMgr::CheckNotifyReadonly(int nIndex) const
 {
-	ASSERT(nIndex != -1);
+	CHECKVALIDINDEX(nIndex);
 	
 	const CPreferencesDlg& userPrefs = Prefs();
 	
@@ -542,7 +601,7 @@ void CToDoCtrlMgr::CheckNotifyReadonly(int nIndex) const
 
 int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, -1);
 
 	int nSel = GetSelToDoCtrl(), nNewSel = -1;
 
@@ -609,7 +668,7 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 		delete &tdc;
 	}
 
-   return nNewSel;
+	return nNewSel;
 }
 
 int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo, BOOL bLoaded)
@@ -631,7 +690,7 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* 
 
 void CToDoCtrlMgr::MoveToDoCtrl(int nIndex, int nNumPlaces)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 
 	if (nNumPlaces == 0)
 		return;
@@ -680,7 +739,7 @@ void CToDoCtrlMgr::MoveToDoCtrl(int nIndex, int nNumPlaces)
 
 BOOL CToDoCtrlMgr::CanMoveToDoCtrl(int nIndex, int nNumPlaces) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	if (nNumPlaces == 0)
 		return FALSE;
@@ -692,7 +751,7 @@ BOOL CToDoCtrlMgr::CanMoveToDoCtrl(int nIndex, int nNumPlaces) const
 
 BOOL CToDoCtrlMgr::ArchiveDoneTasks(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
@@ -711,7 +770,7 @@ BOOL CToDoCtrlMgr::ArchiveDoneTasks(int nIndex)
 
 BOOL CToDoCtrlMgr::ArchiveSelectedTasks(int nIndex)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
@@ -720,7 +779,7 @@ BOOL CToDoCtrlMgr::ArchiveSelectedTasks(int nIndex)
 
 CString CToDoCtrlMgr::GetArchivePath(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	CString sArchivePath;
 	GetToDoCtrl(nIndex).GetArchivePath(sArchivePath);
@@ -816,9 +875,10 @@ void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& 
 	}
 }
 
-
 CString CToDoCtrlMgr::UpdateTabItemText(int nIndex)
 {
+	CHECKVALIDINDEXRET(nIndex, _T(""));
+
 	if (nIndex < 0)
 	{
 		nIndex = GetSelToDoCtrl();
@@ -847,7 +907,7 @@ CString CToDoCtrlMgr::UpdateTabItemText(int nIndex)
 
 BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	// if removing, try to checkout the tasklist if not already done
 	if (!bAdd && !IsCheckedOut(nIndex) && (CheckOut(nIndex) != TDCF_SUCCESS))
@@ -868,6 +928,8 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 
 CString CToDoCtrlMgr::GetTabItemText(int nIndex) const
 {
+	CHECKVALIDINDEXRET(nIndex, _T(""));
+
 	CString sText = m_tabCtrl.GetItemText(nIndex);
 	
 	// cleanup
@@ -878,7 +940,7 @@ CString CToDoCtrlMgr::GetTabItemText(int nIndex) const
 
 int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, IM_NONE);
 
 	int nImage = IM_NONE;
 	const TDCITEM& tci = GetTDCItem(nIndex);
@@ -913,7 +975,7 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 
 CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	CEnString sTooltip;
 	const TDCITEM& tci = GetTDCItem(nIndex);
@@ -953,28 +1015,28 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 
 BOOL CToDoCtrlMgr::IsCheckedOut(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	return GetToDoCtrl(nIndex).IsCheckedOut();
 }
 
 BOOL CToDoCtrlMgr::IsSourceControlled(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	return GetToDoCtrl(nIndex).IsSourceControlled();
 }
 
 void CToDoCtrlMgr::SetNeedsPreferenceUpdate(int nIndex, BOOL bNeed)
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEX(nIndex);
 	
 	GetTDCItem(nIndex).bNeedPrefUpdate = bNeed;
 }
 
 BOOL CToDoCtrlMgr::GetNeedsPreferenceUpdate(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	return GetTDCItem(nIndex).bNeedPrefUpdate;
 }
@@ -1069,8 +1131,8 @@ COleDateTime CToDoCtrlMgr::GetMostRecentEdit() const
 
 void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 {
-	//fabio_2005
 	int nTDC = 0;
+
 	for (nTDC = 0; nTDC < GetCount() && nTDC < nMax; nTDC++)
 	{
 		CString sTaskList = GetFriendlyProjectName(nTDC);
@@ -1086,7 +1148,7 @@ void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 
 BOOL CToDoCtrlMgr::HasTasks(int nIndex) const
 {
-	ASSERTVALIDINDEX(nIndex);
+	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	return GetToDoCtrl(nIndex).GetTaskCount();
 }
@@ -1119,6 +1181,8 @@ BOOL CToDoCtrlMgr::AnyIsModified() const
 
 BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 {
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
 	if (!Prefs().GetBackupOnSave())
 		return TRUE;
 	

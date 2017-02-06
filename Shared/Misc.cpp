@@ -574,7 +574,7 @@ BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim)
 
 	int nPos = sTemp.Find(szSuffix);
 
-	if (nPos == (sTemp.GetLength() - lstrlen(szSuffix)))
+	if ((nPos != -1) && (nPos == (sTemp.GetLength() - lstrlen(szSuffix))))
 	{
 		sText = sTemp.Left(nPos);
 

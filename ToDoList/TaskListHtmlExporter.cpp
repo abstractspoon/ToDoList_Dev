@@ -96,7 +96,20 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
 	EXPORTSTYLE = _ttoi(pTasks->GetMetaData(TDL_EXPORTSTYLE));
+	INDENT.Empty();
 
+	if (pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE))
+	{
+		int nSpace = pPrefs->GetProfileInt(szKey, _T("TextIndent"), 2);
+
+		while (nSpace--)
+			INDENT += SPACE;
+	}
+	else
+	{
+		INDENT = TAB;
+	}
+	
 	// charset
 #ifdef _UNICODE
 	CString sCS = "UTF-16"; 
@@ -199,7 +212,7 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 		}
 		else
 		{
-			if (!ROOT/*nDepth > 0*/)
+			if (!ROOT)
 				sTask = _T("<li>") + sTask;
 			
 			// handle subtasks
@@ -270,15 +283,11 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 		switch (nAttrib)
 		{
 		case TDCA_POSITION:
-			sFmtAttrib.Format(_T("%s "), sAttribVal);
+			sFmtAttrib.Format(_T("%s%s"), sAttribVal, SPACE);
 			break;
 
 		case TDCA_TASKNAME:
 			{
-				// special case: task title following pos
-				if ((EXPORTSTYLE != STYLE_TABLE) && WANTPOS)
-					sFmtAttrib = TAB;
-				
 				// embolden top-level tasks only
 				if (ROOT)
 					sFmtAttrib += _T("<b>") + sAttribVal + _T("</b>");
@@ -358,7 +367,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			if ((nAttrib == TDCA_POSITION) || !WANTPOS)
 			{
 				while (--nDepth)
-					sItem = (TAB + sItem);
+					sItem = (INDENT + sItem);
 			}
 		}
 		break;

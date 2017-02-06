@@ -210,7 +210,7 @@ int CTDLFilterDlg::DoModal(const CStringArray& aCustomFilters,
 	tdc.GetAutoListData(m_tldListData);
 	
 	m_aPriorityColors.Copy(aPriorityColors);
-	m_nView = tdc.GetView();
+	m_nView = tdc.GetTaskView();
 
 	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
 

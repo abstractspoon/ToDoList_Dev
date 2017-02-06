@@ -1709,7 +1709,7 @@ BEGIN
     LTEXT           "week(s)",IDC_STATIC,42,15,193,8
     EDITTEXT        IDC_EVERYNWEEKS,10,44,25,13,ES_AUTOHSCROLL
     LTEXT           "week(s) &on",IDC_STATIC,42,46,193,8
-    LISTBOX         IDC_WEEKDAYS,10,61,243,30,LBS_OWNERDRAWFIXED | 
+    LISTBOX         IDC_WEEKDAYS,10,61,243,44,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
 END
@@ -4478,6 +4478,8 @@ BEGIN
     IDS_REPLACE_TITLE       "Replace In Comments"
     IDS_CAD_BROWSEIMAGES    "Images..."
     IDS_CAD_INSERTSYMBOL    "Symbols..."
+    IDS_TDLBC_CREATETIME    "Creation Time"
+    IDS_3RDPARTYSTORAGE     "3rd Party Storage"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4993,7 +4995,7 @@ BEGIN
     IDS_OA_STARTDATE        "Start Date"
     IDS_OA_STATUS           "Status"
     IDS_OA_TOTALWORK        "Total Work"
-    IDS_GEN_RELEASE         "Latest Release"
+    IDS_GEN_RELEASE         "Stable Release"
     IDS_DEV_RELEASE         "Development Preview"
     IDS_ALPHA_RELEASE       "Alpha Release"
     IDS_BETA_RELEASE        "Beta Release"

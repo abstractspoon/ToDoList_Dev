@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAddLoggedTimeDlg.h"
-#include "tdcmapping.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\Shared\localizer.h"
@@ -32,11 +31,13 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
 	//}}AFX_DATA_INIT
 	m_dtWhen = COleDateTime::GetCurrentTime();
-	m_nUnits = (TDC_UNITS)AfxGetApp()->GetProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), TDCU_MINS);
+	m_nUnits = (TH_UNITS)CPreferences().GetProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), THU_MINS);
 
 	// convert log time from hours to current units
-	m_dLoggedTime = CTimeHelper().GetTime(dHours, THU_HOURS, TDC::MapUnitsToTHUnits(m_nUnits));
-	m_eLoggedTime.EnableNegativeTimes(TRUE);
+	m_dLoggedTime = CTimeHelper().GetTime(dHours, THU_HOURS, m_nUnits);
+
+	// Allow negative values only for untracked times
+	m_eLoggedTime.EnableNegativeTimes(!m_bTracked);
 }
 
 void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
@@ -51,12 +52,12 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ADDTIMETOTIMESPENT, m_bAddTimeToTimeSpent);
 	DDX_Text(pDX, IDC_COMMENT, m_sComment);
 	//}}AFX_DATA_MAP
-	DDX_Text(pDX, IDC_LOGGEDTIME, m_dLoggedTime);
 	DDX_Control(pDX, IDC_TASKTITLE, m_stTaskTitle);
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nUnits = TDC::MapTHUnitsToUnits(m_eLoggedTime.GetUnits());
+		m_nUnits = m_eLoggedTime.GetUnits();
+		m_dLoggedTime = m_eLoggedTime.GetTime();
 
 		m_dateWhen.GetTime(m_dtWhen);
 		COleDateTime time = m_cbTimeWhen.GetOleTime();
@@ -65,7 +66,7 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		m_eLoggedTime.SetUnits(TDC::MapUnitsToTHUnits(m_nUnits));
+		m_eLoggedTime.SetTime(m_dLoggedTime, m_nUnits);
 
 		m_dateWhen.SetTime(m_dtWhen);
 		m_cbTimeWhen.SetOleTime(CDateHelper::GetTimeOnly(m_dtWhen));
@@ -90,17 +91,22 @@ END_MESSAGE_MAP()
 
 int CTDLAddLoggedTimeDlg::DoModal(BOOL bShowAddTimeToTimeSpent)
 {
-	m_bShowAddTimeToTimeSpent = bShowAddTimeToTimeSpent;
-
 	if (bShowAddTimeToTimeSpent)
+	{
+		m_bShowAddTimeToTimeSpent = TRUE;
 		m_bAddTimeToTimeSpent = AfxGetApp()->GetProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), TRUE);
+	}
+	else
+	{
+		ASSERT(!m_bShowAddTimeToTimeSpent);
+	}
 
 	return CTDLDialog::DoModal();
 }
 
 double CTDLAddLoggedTimeDlg::GetLoggedHours() const
 { 
-	return CTimeHelper().GetTime(m_dLoggedTime, TDC::MapUnitsToTHUnits(m_nUnits), THU_HOURS);
+	return CTimeHelper().GetTime(m_dLoggedTime, m_nUnits, THU_HOURS);
 }
 
 COleDateTime CTDLAddLoggedTimeDlg::GetWhen() const
@@ -113,15 +119,16 @@ void CTDLAddLoggedTimeDlg::OnOK()
 	CTDLDialog::OnOK();
 
 	CPreferences prefs;
+	prefs.WriteProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), m_nUnits);
 
 	if (m_bShowAddTimeToTimeSpent)
+	{
 		prefs.WriteProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), m_bAddTimeToTimeSpent);
 
-	prefs.WriteProfileInt(_T("Preferences"), _T("AddLoggedTimeUnits"), m_nUnits);
-	
-	// Treat as 'cancel' if 'Apply' button is still disabled
-	if (!GetDlgItem(IDAPPLY)->IsWindowEnabled())
-		EndDialog(IDCANCEL);
+		// Treat as 'cancel' if 'Apply' button is still disabled
+		if (!GetDlgItem(IDAPPLY)->IsWindowEnabled())
+			EndDialog(IDCANCEL);
+	}
 }
 
 BOOL CTDLAddLoggedTimeDlg::OnInitDialog() 
@@ -134,6 +141,16 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 	{
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->ShowWindow(SW_HIDE);
+
+		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
+		GetDlgItem(IDAPPLY)->ShowWindow(SW_HIDE);
+
+		CRect rApply = CDialogHelper::GetCtrlRect(this, IDAPPLY);
+		CRect rCancel = CDialogHelper::GetCtrlRect(this, IDCANCEL);
+		int nXOffset = (rApply.left - rCancel.left);
+
+		CDialogHelper::OffsetCtrl(this, IDOK, nXOffset, 0);
+		CDialogHelper::OffsetCtrl(this, IDCANCEL, nXOffset, 0);
 	}
 	
 	m_stTaskTitle.SetFontStyle(TRUE);
@@ -153,6 +170,8 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 
 void CTDLAddLoggedTimeDlg::OnApply() 
 {
+	ASSERT(m_bShowAddTimeToTimeSpent);
+
 	// make sure we are up to date
 	UpdateData();
 
@@ -169,8 +188,9 @@ void CTDLAddLoggedTimeDlg::OnApply()
 
 void CTDLAddLoggedTimeDlg::OnChange() 
 {
-	// reenable apply button
-	GetDlgItem(IDAPPLY)->EnableWindow(TRUE);
+	// re-enable apply button
+	if (m_bShowAddTimeToTimeSpent)
+		GetDlgItem(IDAPPLY)->EnableWindow(TRUE);
 }
 
 void CTDLAddLoggedTimeDlg::OnNotifyChange(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

@@ -4648,6 +4648,9 @@ BOOL CTDLTaskCtrlBase::WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime)
 {
 	switch (nDate)
 	{
+	case TDCD_CREATE:
+		return IsColumnShowing(TDCC_CREATIONTIME);
+
 	case TDCD_START:		
 	case TDCD_STARTDATE:	
 	case TDCD_STARTTIME:
@@ -4668,9 +4671,6 @@ BOOL CTDLTaskCtrlBase::WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime)
 		
 	case TDCD_LASTMOD:
 		return TRUE; // always
-
-	case TDCD_CREATE:
-		return FALSE; // never
 	}
 	
 	// all else

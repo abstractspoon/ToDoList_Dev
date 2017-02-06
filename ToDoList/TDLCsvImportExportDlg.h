@@ -95,7 +95,10 @@ protected:
 	BOOL DoInit(const CString& sFilePath, IPreferences* pPrefs, 
 				LPCTSTR szKey, const CTDCAttributeArray* pExportAttributes);
 
-
+	void InitialiseDelimiter();
+	static BOOL IsUsingExcel();
+	static CString GetFileDelimiter(const CString& sUIDelim);
+	static CString GetUIDelimiter(const CString& sFileDelim);
 };
 
 //{{AFX_INSERT_LOCATION}}

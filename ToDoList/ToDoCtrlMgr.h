@@ -79,7 +79,7 @@ public:
 
 	void RefreshTimeTracking(int nIndex);
 
-	int GetReadOnlyStatus(int nIndex) const;
+	BOOL GetReadOnlyStatus(int nIndex) const;
 	BOOL RefreshReadOnlyStatus(int nIndex); // true if changed
 	void UpdateToDoCtrlReadOnlyUIState(int nIndex);
 	void UpdateToDoCtrlReadOnlyUIState(CFilteredToDoCtrl& tdc);
@@ -89,12 +89,12 @@ public:
 	TDCM_DUESTATUS GetDueItemStatus(int nIndex) const;
 	BOOL ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL bBrowser);
 
-	int GetLastCheckoutSucceeded(int nIndex) const;
+	BOOL GetLastCheckoutSucceeded(int nIndex) const;
 	void SetLastCheckoutSucceeded(int nIndex, BOOL bSuccess);
 	void RefreshLastCheckoutStatus(int nIndex);
-	int CanCheckOut(int nIndex) const;
-	int CanCheckIn(int nIndex) const;
-	int CanCheckInOut(int nIndex) const;
+	BOOL CanCheckOut(int nIndex) const;
+	BOOL CanCheckIn(int nIndex) const;
+	BOOL CanCheckInOut(int nIndex) const;
 	BOOL IsSourceControlled(int nIndex) const;
 	BOOL AddToSourceControl(int nIndex, BOOL bAdd = TRUE);
 	BOOL IsCheckedOut(int nIndex) const;
@@ -281,7 +281,7 @@ protected:
 	int UpdateTabItemImage(int nIndex) const;
 
 	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups);
-
+	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -2237,12 +2237,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 					if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 					{
-						if (m_pDependEdit->SetToTask(dwToTaskID))
-						{
-							// cancel tracking
-// 							TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE | TME_CANCEL, hRealWnd, 0 };
-// 							TrackMouseEvent(&tme);
-						}
+						m_pDependEdit->SetToTask(dwToTaskID);
 					}
 
 					return 0; // eat
@@ -2310,6 +2305,18 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 		case WM_SETFOCUS:
 			::SetFocus(m_hwndTree);
 			break;
+
+		case WM_HSCROLL:
+		case WM_VSCROLL:
+			{
+				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+				
+				::InvalidateRect(hRealWnd, NULL, FALSE);
+				::UpdateWindow(hRealWnd);
+				
+				return lr;
+			}
+			break;
 		}
 	}
 	else if (hRealWnd == m_hwndTree)
@@ -2334,8 +2341,8 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			{
 				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 
-				::InvalidateRect(m_hwndTree, NULL, FALSE);
-				::UpdateWindow(m_hwndTree);
+				::InvalidateRect(hRealWnd, NULL, FALSE);
+				::UpdateWindow(hRealWnd);
 
 				return lr;
 			}
@@ -2343,7 +2350,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 		case WM_VSCROLL:
 			{
-				CHoldHScroll hhs(m_hwndTree);
+				CHoldHScroll hhs(hRealWnd);
 				
 				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 			}
@@ -3088,9 +3095,17 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dMonthWidth = rMonth.Width();
 
-			// first week starts at 'First week of first DOW'
+			// first week starts at 'First DOW of month'
 			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 			int nDay = CDateHelper::CalcDayOfMonth(nFirstDOW, 1, nMonth, nYear);
+
+			// If this is column 1 (column 0 is hidden) then we might need
+			// to draw part of the preceding week
+			if ((nCol == 1) && (nDay != -1))
+			{
+				rWeek.right = (rWeek.left + (int)((nDay - 1) * dMonthWidth / nNumDays) - 1);
+				DrawListHeaderRect(pDC, rWeek, _T(""), bThemed ? &th :NULL);
+			}
 
 			// calc number of first week
 			COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);

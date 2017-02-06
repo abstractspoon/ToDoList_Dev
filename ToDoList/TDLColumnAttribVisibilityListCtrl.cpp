@@ -39,6 +39,7 @@ TDCCOLATTRIBITEM ITEMS[] =
 	{ IDS_TDLBC_COLOR,			TDCC_COLOR			},
 	{ IDS_TDLBC_COST,			TDCC_COST			},
 	{ IDS_TDLBC_CREATEDATE,		TDCC_CREATIONDATE	},
+	{ IDS_TDLBC_CREATETIME,		TDCC_CREATIONTIME	},
 	{ IDS_TDLBC_CREATEDBY,		TDCC_CREATEDBY		},
 	{ IDS_TDLBC_DEPENDS,		TDCC_DEPENDENCY		},
 	{ IDS_TDLBC_DONE,			TDCC_DONE			},
@@ -336,6 +337,7 @@ BOOL CTDLColumnAttribVisibilityListCtrl::IsTimeCellEnabled(int nItem, int nCol) 
 			case TDCC_DUETIME:		return m_vis.IsColumnVisible(TDCC_DUEDATE);
 			case TDCC_DONETIME:		return m_vis.IsColumnVisible(TDCC_DONEDATE);
 			case TDCC_STARTTIME:	return m_vis.IsColumnVisible(TDCC_STARTDATE);
+			case TDCC_CREATIONTIME:	return m_vis.IsColumnVisible(TDCC_CREATIONDATE);
 			}
 		}
 		break;

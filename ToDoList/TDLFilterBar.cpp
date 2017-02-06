@@ -433,7 +433,7 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 		return;
 
 	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
-	m_nView = tdc.GetView();
+	m_nView = tdc.GetTaskView();
 	
 	// column visibility
 	SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);

@@ -2902,7 +2902,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_SORT_BYPATH:
-		pCmdUI->Enable(tdc.GetView() != FTCV_TASKTREE);
+		pCmdUI->Enable(tdc.GetTaskView() != FTCV_TASKTREE);
 		break;
 		
 	default:
@@ -4543,7 +4543,7 @@ CString CToDoListWnd::GetTitle(BOOL bExtended)
 
 CString CToDoListWnd::GetVersion(BOOL bExtended)
 {
-	static CString sVersion("7.1");
+	static CString sVersion(FileMisc::GetAppVersion());
 	CLocalizer::IgnoreString(sVersion);
 
 	if (!bExtended)
@@ -5076,7 +5076,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
-			CTDLTransformDialog dialog(_T(""), tdc.GetView(), _T(""));
+			CTDLTransformDialog dialog(_T(""), tdc.GetTaskView(), _T(""));
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
 			// add title and date 
@@ -6070,7 +6070,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 
 	// export to html and then print in IE
 	CString sStylesheet(tdc.GetStylesheetPath());
-	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetView(), sStylesheet);
+	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetTaskView(), sStylesheet);
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -6860,10 +6860,10 @@ void CToDoListWnd::OnShowTaskView(UINT nCmdID)
 		{
 			CStringArray aTypeIDs;
 			
-			if (tdc.GetVisibleExtensionViews(aTypeIDs))
+			if (tdc.GetVisibleTaskViews(aTypeIDs))
 			{
 				if (CTDCUIExtensionHelper::ProcessViewVisibilityMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
-					tdc.SetVisibleExtensionViews(aTypeIDs);
+					tdc.SetVisibleTaskViews(aTypeIDs);
 			}
 		}
 		break;
@@ -6929,7 +6929,7 @@ void CToDoListWnd::AddUserStorageToMenu(CMenu* pMenu)
 		}
 		else // if nothing to add just re-add placeholder
 		{
-			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, _T("3rd Party Storage"));
+			pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_3RDPARTYSTORAGE));
 		}
 	}
 }
@@ -7086,7 +7086,7 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 		if (hMenuUIExt)
 		{
 			CStringArray aTypeIDs;
-			GetToDoCtrl().GetVisibleExtensionViews(aTypeIDs);
+			GetToDoCtrl().GetVisibleTaskViews(aTypeIDs);
 			
 			CTDCUIExtensionHelper::PrepareViewVisibilityMenu(CMenu::FromHandle(hMenuUIExt), m_mgrUIExtensions, aTypeIDs);
 		} 
@@ -9084,7 +9084,7 @@ void CToDoListWnd::OnExport()
 
 	CTDLExportDlg dialog(m_mgrImportExport, 
 						nTDCCount == 1, 
-						GetToDoCtrl().GetView(),
+						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
 						m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE), 
 						userPrefs.GetAutoExportFolderPath());
@@ -9172,9 +9172,10 @@ void CToDoListWnd::OnExport()
 		}
 		
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSelTDC);
-		CTaskFile tasks;
+		tdc.SaveAllTaskViewPreferences();
 
 		// Note: don't need to verify password if encrypted tasklist is active
+		CTaskFile tasks;
 		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
 
 		// add project name as report title
@@ -9479,7 +9480,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// pass the project name as the title field
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
-	CTDLTransformDialog dialog(sTitle, tdc.GetView(), tdc.GetStylesheetPath());
+	CTDLTransformDialog dialog(sTitle, tdc.GetTaskView(), tdc.GetStylesheetPath());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -11667,12 +11668,12 @@ void CToDoListWnd::OnUpdateCloseallbutthis(CCmdUI* pCmdUI)
 
 void CToDoListWnd::DoSendTasks(BOOL bSelected)
 {
-	CTDLSendTasksDlg dialog(bSelected, GetToDoCtrl().GetView());
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLSendTasksDlg dialog(bSelected, tdc.GetTaskView());
 
 	if (dialog.DoModal() == IDOK)
 	{
 		// get tasks
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		CTaskFile tasks;
 
 		GetTasks(tdc, FALSE, FALSE, dialog.GetTaskSelection(), tasks, NULL);
@@ -11785,7 +11786,7 @@ void CToDoListWnd::OnViewCycleTaskViews()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	tdc.SetNextView();
+	tdc.SetNextTaskView();
 	tdc.SetFocusToTasks();
 }
 
@@ -11797,7 +11798,7 @@ void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI)
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	FTC_VIEW nView = tdc.GetView();
+	FTC_VIEW nView = tdc.GetTaskView();
 
 	switch (nView)
 	{
@@ -11811,7 +11812,7 @@ void CToDoListWnd::OnViewToggleTreeandList()
 		break;
 	}
 
-	tdc.SetView(nView);
+	tdc.SetTaskView(nView);
 	tdc.SetFocusToTasks();
 }
 

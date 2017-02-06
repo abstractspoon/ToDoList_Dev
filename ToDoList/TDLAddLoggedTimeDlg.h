@@ -50,8 +50,8 @@ protected:
 	CString	m_sComment;
 	//}}AFX_DATA
 	CDateTimeCtrlEx	m_dateWhen;
-	CTimeEdit	m_eLoggedTime;
-	TDC_UNITS m_nUnits;
+	CTimeEdit m_eLoggedTime;
+	TH_UNITS m_nUnits;
 	COleDateTime m_dtWhen;
 	BOOL m_bShowAddTimeToTimeSpent;
 	CEnStatic m_stTaskTitle;

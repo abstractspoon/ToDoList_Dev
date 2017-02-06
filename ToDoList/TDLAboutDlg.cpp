@@ -68,7 +68,7 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CTDLAboutDlg)
 	//}}AFX_DATA_INIT
-	m_sTitle.Format(_T("<b>%s</b> (c) AbstractSpoon 2003-16"), sAppTitle);
+	m_sTitle.Format(_T("<b>%s</b> (c) AbstractSpoon 2003-17"), sAppTitle);
 	m_sLicense.Format(CEnString(IDS_LICENSE), _T("\"https://github.com/abstractspoon/ToDoList_Wiki/wiki/Free-Open-Source-Software\""));
 
 	m_sAppFolder = FileMisc::GetAppFilePath();

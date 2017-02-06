@@ -8401,6 +8401,7 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 	COleDateTime dtWhen = COleDateTime::GetCurrentTime();
 	BOOL bAddToTimeSpent = FALSE;
 	BOOL bTracked = (dHours != 0.0);
+	double dOrgHours = dHours;
 
 	if (bShowDialog)
 	{
@@ -8415,10 +8416,27 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 		dHours = dialog.GetLoggedHours();
 		dtWhen = dialog.GetWhen();
 		sComment = dialog.GetComment();
-		bAddToTimeSpent = dialog.GetAddToTimeSpent();
+
+		if (!bTracked)
+			bAddToTimeSpent = dialog.GetAddToTimeSpent();
 	}
 
-	return AddTimeToTaskLogFile(dwTaskID, dHours, dtWhen, sComment, bTracked, bAddToTimeSpent);
+	if (!AddTimeToTaskLogFile(dwTaskID, dHours, dtWhen, sComment, bTracked))
+		return FALSE;
+
+	// If the user changed the tracked hours then manually adjust the task's
+	// time because it will have already been updated during time-tracking
+	if (bTracked && (dHours != dOrgHours))
+	{
+		return AdjustTaskTimeSpent(dwTaskID, (dHours - dOrgHours));
+	}
+	else if (bAddToTimeSpent)
+	{
+		return AdjustTaskTimeSpent(dwTaskID, dHours);
+	}
+
+	// else
+	return TRUE;
 }
 
 LRESULT CToDoCtrl::OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam)
@@ -8431,31 +8449,37 @@ LRESULT CToDoCtrl::OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam)
 	const CTDLAddLoggedTimeDlg* pDialog = (const CTDLAddLoggedTimeDlg*)lParam;
 	DWORD dwTaskID = wParam;
 
-	return AddTimeToTaskLogFile(dwTaskID, 
-								pDialog->GetLoggedHours(), 
-								pDialog->GetWhen(), 
-								pDialog->GetComment(), 
-								pDialog->IsTracked(), 
-								pDialog->GetAddToTimeSpent());
+	if (AddTimeToTaskLogFile(dwTaskID, 
+							pDialog->GetLoggedHours(), 
+							pDialog->GetWhen(), 
+							pDialog->GetComment(), 
+							pDialog->IsTracked()))
+	{
+		if (pDialog->GetAddToTimeSpent())
+			return AdjustTaskTimeSpent(dwTaskID, pDialog->GetLoggedHours());
+	}
+
+	// else
+	return 0L;
 }
 
 BOOL CToDoCtrl::AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, 
-									 const CString& sComment, BOOL bTracked, BOOL bAddToTimeSpent)
+									const CString& sComment, BOOL bTracked)
 {
 	// sanity check
 	if ((dHours == 0.0) && sComment.IsEmpty())
 		return FALSE; // sanity check
 
 	CTDCTaskTimeLog log(GetFilePath());
-	
+
 	if (!log.LogTime(dwTaskID, 
-					GetTaskTitle(dwTaskID), 
-					GetTaskPath(dwTaskID), 
-					dHours,
-					dtWhen, 
-					sComment, 
-					bTracked, 
-					HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
+						GetTaskTitle(dwTaskID), 
+						GetTaskPath(dwTaskID), 
+						dHours,
+						dtWhen, 
+						sComment, 
+						bTracked, 
+						HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
 	{
 		UpdateWindow();
 		AfxMessageBox(CEnString(IDS_LOGFILELOCKED));
@@ -8464,23 +8488,26 @@ BOOL CToDoCtrl::AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDa
 	}
 
 	// else
-	if (bAddToTimeSpent && (dHours != 0.0))
+	return TRUE;
+}
+
+BOOL CToDoCtrl::AdjustTaskTimeSpent(DWORD dwTaskID, double dHours)
+{
+	ASSERT(dwTaskID && (dHours != 0.0));
+
+	TDC_UNITS nUnits = TDCU_NULL;
+	double dTime = m_data.GetTaskTimeSpent(dwTaskID, nUnits);
+
+	dTime += CTimeHelper().GetTime(dHours, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
+
+	if ((GetSelectedCount() == 1) && (GetSelectedTaskID() == dwTaskID))
 	{
-		TDC_UNITS nUnits = TDCU_NULL;
-		double dTime = m_data.GetTaskTimeSpent(dwTaskID, nUnits);
-
-		dTime += CTimeHelper().GetTime(dHours, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
-
-		if (GetSelectedCount() == 1 && GetSelectedTaskID() == dwTaskID)
-		{
-			SetSelectedTaskTimeSpent(dTime, nUnits);
-		}
-		else
-		{
-			m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
-			SetModified(TRUE, TDCA_TIMESPENT, dwTaskID);
-		}
+		return SetSelectedTaskTimeSpent(dTime, nUnits);
 	}
+
+	// else
+	m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
+	SetModified(TRUE, TDCA_TIMESPENT, dwTaskID);
 
 	return TRUE;
 }
@@ -9890,6 +9917,7 @@ CString CToDoCtrl::GetPreferencesKey(const CString& sSubKey) const
 	{
 		sKeyPath = _T("Default");
 	}
+	ASSERT(!sKeyPath.IsEmpty());
 
 	CString sKey;
 	
@@ -9908,11 +9936,8 @@ void CToDoCtrl::SaveDefaultRecurrence(CPreferences& prefs) const
 	
 	CString sKey = GetPreferencesKey(); // no subkey
 	
-	if (!sKey.IsEmpty())
-	{
-		prefs.WriteProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), m_nDefRecurFrom);
-		prefs.WriteProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), m_nDefRecurReuse);
-	}
+	prefs.WriteProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), m_nDefRecurFrom);
+	prefs.WriteProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), m_nDefRecurReuse);
 }
 
 void CToDoCtrl::LoadDefaultRecurrence(const CPreferences& prefs)
@@ -9921,11 +9946,8 @@ void CToDoCtrl::LoadDefaultRecurrence(const CPreferences& prefs)
 	
 	CString sKey = GetPreferencesKey(); // no subkey
 	
-	if (!sKey.IsEmpty())
-	{
-		m_nDefRecurFrom = (TDI_RECURFROMOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), TDIRO_DUEDATE);
-		m_nDefRecurReuse = (TDI_RECURREUSEOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), TDIRO_REUSE);
-	}
+	m_nDefRecurFrom = (TDI_RECURFROMOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurFrom"), TDIRO_DUEDATE);
+	m_nDefRecurReuse = (TDI_RECURREUSEOPTION)prefs.GetProfileInt(_T("DefaultRecurrence"), _T("RecurReuse"), TDIRO_REUSE);
 }
 
 void CToDoCtrl::SaveSplitPos(CPreferences& prefs) const
@@ -9933,9 +9955,7 @@ void CToDoCtrl::SaveSplitPos(CPreferences& prefs) const
 	ASSERT (GetSafeHwnd());
 	
 	CString sKey = GetPreferencesKey(); // no subkey
-	
-	if (!sKey.IsEmpty())
-		prefs.WriteProfileInt(sKey, _T("SplitPos"), m_nCommentsSize);
+	prefs.WriteProfileInt(sKey, _T("SplitPos"), m_nCommentsSize);
 
 	if (HasStyle(TDCS_SHAREDCOMMENTSHEIGHT))
 		prefs.WriteProfileInt(_T("FileStates"), _T("SharedSplitPos"), s_nCommentsSize);
@@ -9947,7 +9967,7 @@ void CToDoCtrl::LoadSplitPos(const CPreferences& prefs)
 
 	CString sKey = GetPreferencesKey(); // no subkey
 	
-	if (!sKey.IsEmpty() && !HasStyle(TDCS_SHAREDCOMMENTSHEIGHT))
+	if (!HasStyle(TDCS_SHAREDCOMMENTSHEIGHT))
 		m_nCommentsSize = prefs.GetProfileInt(sKey, _T("SplitPos"), DEFCOMMENTSIZE);
 	else
 		m_nCommentsSize = s_nCommentsSize;

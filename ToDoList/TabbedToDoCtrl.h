@@ -67,16 +67,16 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	
-	void SetView(FTC_VIEW nView);
-	void SetNextView();
-	FTC_VIEW GetView() const { return m_tabViews.GetActiveView(); }
-
+	void SetTaskView(FTC_VIEW nView);
+	void SetNextTaskView();
+	FTC_VIEW GetTaskView() const { return m_tabViews.GetActiveView(); }
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
-	void SetVisibleExtensionViews(const CStringArray& aTypeIDs);
-	int GetVisibleExtensionViews(CStringArray& aTypeIDs) const;
+	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
+	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
+	void SaveAllTaskViewPreferences();
 
-	BOOL SetTreeFont(HFONT hFont); // caller responsible for cleanup
+	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;

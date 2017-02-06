@@ -17,15 +17,17 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLCsvImportExportDlg dialog
 
+static const CString COMMA(_T(","));
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLCsvImportExportDlg dialog
 
 CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath, 
 											   IPreferences* pPrefs, LPCTSTR szKey, CWnd* pParent /*=NULL*/)
 	: CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, pParent), 
 	m_lcColumnSetup(TRUE), 
-	m_eFilePath(FES_NOBROWSE),
-	m_sDelim(',')
+	m_eFilePath(FES_NOBROWSE)
 {
 	VERIFY(DoInit(sFilePath, pPrefs, szKey, NULL));
 }
@@ -52,15 +54,21 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 	m_bAlwaysExportTaskIDs = TRUE;
 	m_bImporting = (pExportAttributes ? FALSE : TRUE);
 
+	InitialiseDelimiter();
 	LoadMasterColumnMapping();
 
 	// user mapping
 	CTDCAttributeMapping aMapping;
 
-	if (pExportAttributes)
+	if (m_bImporting)
+	{
+		BuildImportColumnMapping(aMapping);
+	}
+	else
+	{
 		m_aExportAttributes.Copy(*pExportAttributes);
-
-	BuildExportColumnMapping(aMapping);
+		BuildExportColumnMapping(aMapping);
+	}
 
 	m_lcColumnSetup.SetColumnMapping(aMapping);
 
@@ -107,6 +115,74 @@ BOOL CTDLCsvImportExportDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CTDLCsvImportExportDlg::InitialiseDelimiter()
+{
+	ASSERT(GetSafeHwnd() == NULL);
+
+	// load last used delimiter
+	CString sUIDelim = m_pPrefs->GetProfileString(m_sPrefKey, _T("Delimiter"));
+
+	if (m_bImporting)
+	{
+		ASSERT(!m_sFilePath.IsEmpty());
+
+		// read first few lines from file
+		CStringArray aLines;
+
+		if (FileMisc::LoadFile(m_sFilePath, aLines, 5))
+		{
+			CStringArray aDelims;
+
+			if (!sUIDelim.IsEmpty())
+				aDelims.Add(GetFileDelimiter(sUIDelim));
+
+			if (IsUsingExcel())
+			{
+				aDelims.Add(_T("\t"));
+				aDelims.Add(Misc::GetListSeparator());
+			}
+			else
+			{
+				aDelims.Add(Misc::GetListSeparator());
+				aDelims.Add(_T("\t"));
+			}
+
+			if (Misc::GetListSeparator() != COMMA)
+				aDelims.Add(COMMA);
+
+			// Search the lines for the highest number of delimiter matches
+			int nMaxDelim = -1, nMaxSplits = 0;
+			CStringArray aUnused;
+
+			for (int nDelim = 0; nDelim < aDelims.GetSize(); nDelim++)
+			{
+				for (int nLine = 0; nLine < 5; nLine++)
+				{
+					int nSplits = Misc::Split(aLines[nLine], aUnused, aDelims[nDelim], TRUE);
+
+					if ((nMaxDelim == -1) || (nSplits > nMaxSplits))
+					{
+						nMaxDelim = nDelim;
+						nMaxSplits = nSplits;
+					}
+				}
+			}
+
+			if (nMaxDelim != -1)
+				sUIDelim = GetUIDelimiter(aDelims[nMaxDelim]);
+		}
+	}
+	else
+	{
+		// If Excel is the default app for csv we always use tab
+		if (IsExportingForExcel())
+			sUIDelim = _T("\\t");
+	}
+
+	if (!sUIDelim.IsEmpty())
+		m_sDelim = sUIDelim;
+}
+
 int CTDLCsvImportExportDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) const 
 { 
 	return m_lcColumnSetup.GetColumnMapping(aMapping);
@@ -114,22 +190,47 @@ int CTDLCsvImportExportDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) con
 
 CString CTDLCsvImportExportDlg::GetDelimiter() const 
 { 
+	return GetFileDelimiter(m_sDelim); 
+}
+
+CString CTDLCsvImportExportDlg::GetFileDelimiter(const CString& sUIDelim)
+{
 	// some special cases
-	if (m_sDelim == _T("\\t"))
+	if (sUIDelim == _T("\\t"))
 	{
 		return _T("\t");
 	}
-	else if (m_sDelim == _T("\\n"))
+	else if (sUIDelim == _T("\\n"))
 	{
 		return _T("\n");
 	}
-	else if (m_sDelim == _T("\\r\\n"))
+	else if (sUIDelim == _T("\\r\\n"))
 	{
 		return _T("\r\n");
 	}
 
 	// else
-	return m_sDelim; 
+	return sUIDelim; 
+}
+
+CString CTDLCsvImportExportDlg::GetUIDelimiter(const CString& sFileDelim)
+{
+	// some special cases
+	if (sFileDelim == _T("\t"))
+	{
+		return _T("\\t");
+	}
+	else if (sFileDelim == _T("\n"))
+	{
+		return _T("\\n");
+	}
+	else if (sFileDelim == _T("\r\n"))
+	{
+		return _T("\\r\\n");
+	}
+
+	// else
+	return sFileDelim; 
 }
 
 void CTDLCsvImportExportDlg::OnChangeCsvdelimiter() 
@@ -137,7 +238,7 @@ void CTDLCsvImportExportDlg::OnChangeCsvdelimiter()
 	CString sOldDelim = m_sDelim;
 	UpdateData();
 
-	if (!m_sDelim.IsEmpty() && m_bImporting && m_sDelim != sOldDelim)
+	if (!m_sDelim.IsEmpty() && m_bImporting && (m_sDelim != sOldDelim))
 	{
 		CTDCAttributeMapping aMapping;
 		
@@ -202,9 +303,13 @@ int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCAttributeMapping& aImpo
 
 BOOL CTDLCsvImportExportDlg::IsExportingForExcel() const
 {
-	return (!m_bImporting &&
-			!m_pPrefs->GetProfileInt(_T("Preferences"), _T("ExportCsvToUTF8"), FALSE) && 
-			CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE));
+	return (!m_bImporting && IsUsingExcel() && 
+			!m_pPrefs->GetProfileInt(_T("Preferences"), _T("ExportCsvToUTF8"), FALSE));
+}
+
+BOOL CTDLCsvImportExportDlg::IsUsingExcel()
+{
+	return CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE);
 }
 
 int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCAttributeMapping& aExportMapping) const
@@ -251,21 +356,6 @@ int CTDLCsvImportExportDlg::LoadMasterColumnMapping()
 		
 		if (!sName.IsEmpty())
 			SetMasterColumnName(attrib, sName);
-	}
-
-	// load last used delimiter
-	CString sDelim = m_pPrefs->GetProfileString(m_sPrefKey, _T("Delimiter"));
-
-	// If Excel is the default app for csv we always use tab
-	if (IsExportingForExcel())
-		sDelim = _T("\\t");
-
-	if (!sDelim.IsEmpty())
-	{
-		m_sDelim = sDelim;
-
-	    if (GetSafeHwnd())
-			UpdateData(FALSE);
 	}
 
 	return m_aMasterColumnMapping.GetSize();

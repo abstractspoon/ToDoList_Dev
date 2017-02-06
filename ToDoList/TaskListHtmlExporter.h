@@ -33,7 +33,7 @@ public:
 
 protected:
 	// Pseudo-const variables
-	CString CHARSET;
+	CString CHARSET, INDENT;
 	CString DEFAULTFONT, HTMLNOTES;
 	BOOL STRIKETHRUDONE;
 	int EXPORTSTYLE;

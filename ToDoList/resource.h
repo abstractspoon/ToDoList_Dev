@@ -8,6 +8,8 @@
 #define IDS_REPLACE_TITLE               57
 #define IDS_CAD_BROWSEIMAGES            58
 #define IDS_CAD_INSERTSYMBOL            59
+#define IDS_TDLBC_CREATETIME            60
+#define IDS_3RDPARTYSTORAGE             61
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102
