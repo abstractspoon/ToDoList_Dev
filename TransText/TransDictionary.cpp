@@ -362,6 +362,102 @@ void DICTITEM::ClearTextOut()
 	}
 }
 
+BOOL DICTITEM::Cleanup(const DICTITEM& diMaster)
+{
+	
+
+	
+	return FALSE;
+}
+
+BOOL DICTITEM::Fixup()
+{
+	BOOL bCleaned = FALSE;
+
+	if (m_sClassID.IsEmpty())
+	{
+		m_sClassID = _T("text");
+		bCleaned = TRUE;
+	}
+	else if (FixupClassID(m_sClassID))
+	{
+		bCleaned = TRUE;
+	}
+
+	// alternatives
+	CStringArray aAltClassIDs;
+	int nAlt = Misc::GetKeys(m_mapAlternatives, aAltClassIDs);
+
+	while (nAlt--)
+	{
+		CString sClassID(aAltClassIDs[nAlt]), sReplaceID(sClassID);
+
+		if (FixupClassID(sReplaceID))
+		{
+			// If the list of alternatives already has this 'fixed' class ID
+			// we need to decide whether to overwrite it or just delete this 
+			// alternative. We keep whichever has been translated.
+			if (sReplaceID != m_sClassID)
+			{
+				if (m_sClassID.IsEmpty())
+				{
+					m_sClassID = sReplaceID;
+				}
+				else
+				{
+					CString sAltText, sReplaceText;
+					
+					if (!m_mapAlternatives.Lookup(sReplaceID, sReplaceText) || sReplaceText.IsEmpty())
+					{
+						m_mapAlternatives.Lookup(sClassID, sAltText);
+						
+						m_mapAlternatives[sReplaceID] = sAltText;
+					}
+				}
+			}
+
+			// Always
+			m_mapAlternatives.RemoveKey(sClassID);
+			
+			bCleaned = TRUE;
+		}
+		else if (m_sClassID.IsEmpty())
+		{
+			if (sReplaceID.IsEmpty())
+				m_sClassID = _T("text");
+			else
+				m_sClassID = sReplaceID;
+
+			m_mapAlternatives.RemoveKey(sClassID);
+			
+			bCleaned = TRUE;
+		}
+		else if (sClassID == m_sClassID)
+		{
+			m_mapAlternatives.RemoveKey(sClassID);
+			
+			bCleaned = TRUE;
+		}
+	}
+
+	return bCleaned;
+}
+
+BOOL DICTITEM::FixupClassID(CString& sClassID) const
+{
+	// Strip off control IDs
+	CStringArray aParts;
+	
+	if (Misc::Split(sClassID, aParts, '.', TRUE) == 2)
+	{
+		sClassID = aParts[0];
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+/*
 BOOL DICTITEM::Fixup()
 {
 	CString sReplaceID, sReplaceText;
@@ -493,6 +589,7 @@ BOOL DICTITEM::NeedFixup(const CString& sClassID, CString& sReplaceID, CString& 
 
 	return FALSE;
 }
+*/
 
 BOOL DICTITEM::Translate(CString& sText)
 {
@@ -765,9 +862,6 @@ BOOL CTransDictionary::LoadCsvDictionary(LPCTSTR szDictPath)
 					m_mapItems.SetAt(sItem, pDI);
 				}			
 			}
-			
-			FixupDictionary();
-			IgnoreTranslatedText();
 		}
 
 		return TRUE;
@@ -844,6 +938,7 @@ TD_CLEANUP CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster,
 	CStringArray aMissing;
 
 	DICTITEM* pDI = NULL;
+	NULL;
 	CString sItem;
 	BOOL bCleaned = FALSE;
 
@@ -851,9 +946,15 @@ TD_CLEANUP CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster,
 	{
 		m_mapItems.GetNextAssoc(pos, sItem, pDI);
 
-		if (!tdMaster.HasDictItem(sItem))
+		const DICTITEM* pDIMaster = tdMaster.GetDictItem(sItem);
+
+		if (pDIMaster == NULL)
 		{
 			aMissing.Add(pDI->GetTextIn());
+			bCleaned = TRUE;
+		}
+		else if (pDI->Cleanup(*pDIMaster))
+		{
 			bCleaned = TRUE;
 		}
 	}
@@ -1100,8 +1201,7 @@ BOOL CTransDictionary::HasDictItem(CString& sText) const
 
 DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 {
-	// check for valid text
-	// and that we're ignoring this item
+	// check for invalid text or if we're ignoring this item
 	if (!TransText::PrepareLookupText(sText))
 	{
 		IgnoreString(sText, FALSE);
@@ -1116,10 +1216,6 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 	if (DICTITEM::WantTranslateOnly())
 		bAutoCreate = FALSE;
 	
-	// check list of items to be ignored
-	// NOTE: it is valid for (text.In == text.Out) so we
-	// only check for text out if it would otherwise lead
-	// to a new dictionary item
 	DICTITEM* pDI = NULL;
 	
 	if (!m_mapItems.Lookup(sText, pDI) && bAutoCreate)
@@ -1137,6 +1233,24 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 	return pDI;
 }
 
+const DICTITEM* CTransDictionary::GetDictItem(CString& sText) const
+{
+	// check for invalid text or if we're ignoring this item
+	if (!TransText::PrepareLookupText(sText))
+	{
+		return NULL;
+	}
+	else if (WantIgnore(sText))
+	{
+		return NULL;
+	}
+
+	DICTITEM* pDI = NULL;
+	m_mapItems.Lookup(sText, pDI);
+
+	return pDI;
+}
+
 BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 {
 	if (s_sAppVersion.IsEmpty())
@@ -1150,6 +1264,10 @@ BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 	if (LoadCsvDictionary(szDictPath))
 	{
 		m_sDictFile = szDictPath;
+
+		FixupDictionary();
+		IgnoreTranslatedText();
+		
 		return TRUE;
 	}
 
@@ -1159,7 +1277,7 @@ BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 
 BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID)
 {
-	DICTITEM* pDI = GetDictItem(sText); 
+	DICTITEM* pDI = GetDictItem(sText, TRUE); 
 
 	if (pDI && pDI->Translate(sText, hWndRef, szClassID))
 	{
@@ -1259,7 +1377,7 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
 		sItem = sItem.Left(nTab);
 	}
 
-	DICTITEM* pDI = GetDictItem(sItem);
+	DICTITEM* pDI = GetDictItem(sItem, TRUE);
 	
 	if (pDI && pDI->Translate(sItem, hMenu, nMenuID))
 	{

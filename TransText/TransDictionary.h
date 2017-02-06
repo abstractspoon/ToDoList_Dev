@@ -36,7 +36,7 @@ public:
 	BOOL Merge(const DICTITEM& di);
 	BOOL HasClassID(const CString& sClassID) const;
 	BOOL Fixup();
-	BOOL NeedFixup(const CString& sClassID, CString& sReplaceID, CString& sReplaceText) const;
+	BOOL Cleanup(const DICTITEM& diMaster);
 	BOOL GetPossibleDuplicates(DICTITEM& diDup) const;
 	BOOL ModifyItem(const CString& sClassID, const CString& sTextOut);
 
@@ -73,6 +73,8 @@ protected:
 	BOOL Translate(CString& sText, const CString& sClassID);
 	int GetClassIDs(CStringArray& aClassIDs) const;
 	CString GetTextOut(const CString& sClassID) const;
+//	BOOL NeedFixup(const CString& sClassID, CString& sReplaceID, CString& sReplaceText) const;
+	BOOL FixupClassID(CString& sClassID) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -135,7 +137,8 @@ protected:
 	static CString s_sAppVersion;
 	
 protected:
-	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate = TRUE);
+	const DICTITEM* GetDictItem(CString& sText) const;
+	DICTITEM* GetDictItem(CString& sText, BOOL bAutoCreate);
 	BOOL HasDictItem(CString& sText) const;
 	BOOL TranslateMenuShortcut(CString& sShortcut);
 	void IgnoreTranslatedText();

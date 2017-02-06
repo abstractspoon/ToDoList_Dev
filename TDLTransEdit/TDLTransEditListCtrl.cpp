@@ -190,7 +190,12 @@ int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, in
 	BOOL bAlt1 = sItem1.Replace(ALTINDENT, _T(""));
 	BOOL bAlt2 = sItem2.Replace(ALTINDENT, _T(""));
 
-	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
+	int nCompare = 0;
+
+	if (sItem1.CompareNoCase(sItem2) == 0)
+		nCompare = sItem1.Compare(sItem2);
+	else
+		nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
 	if (nCompare == 0)
 	{
