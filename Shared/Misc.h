@@ -218,6 +218,7 @@ namespace Misc
 	BOOL MatchAll(const CMapStringToString& map1, const CMapStringToString& map2);
 	BOOL HasKey(const CMapStringToString& map, const CString& sKey);
 	CString GetNextKey(const CMapStringToString& map, POSITION& pos);
+	int GetKeys(const CMapStringToString& map, CStringArray& aKeys);
 	void Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
 
 	template <class S, class T> 

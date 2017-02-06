@@ -2058,6 +2058,22 @@ CString Misc::GetNextKey(const CMapStringToString& map, POSITION& pos)
 	return sKey;
 }
 
+int Misc::GetKeys(const CMapStringToString& map, CStringArray& aKeys)
+{
+	aKeys.RemoveAll();
+
+	POSITION pos = map.GetStartPosition();
+	CString sKey, sUnused;
+	
+	while (pos)
+	{
+		map.GetNextAssoc(pos, sKey, sUnused);
+		aKeys.Add(sKey);
+	}
+
+	return aKeys.GetSize();
+}
+
 //////////////////////////////////////////////////////////////
 
 void Misc::MakeQuoted(CString& sText)
