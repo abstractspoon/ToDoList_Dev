@@ -35,6 +35,7 @@ REM Handle dlls explicitly to maintain control over .NET plugins
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\OdbcStorage.dll
  
 REM Copy latest Resources
+del %1\Unicode_Release\Resources\ /Q /S
 xcopy %RESPATH%\*.* %1\Unicode_Release\Resources\ /Y /D /E
 
 REM Zip Resources
