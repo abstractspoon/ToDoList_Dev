@@ -74,6 +74,7 @@
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\sendfileto.h"
+#include "..\3rdparty\dibdata.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>
@@ -12309,7 +12310,18 @@ void CToDoListWnd::OnViewSaveToImage()
 
 	if (GetToDoCtrl().SaveTaskViewToImage(bmImage))
 	{
-		// TODO
+#ifdef _DEBUG
+		CString sTempFile = FileMisc::GetTempFilePath(_T("TDLImage"), _T("bmp"));
+
+		CDibData dib;
+
+		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sTempFile))
+		{
+			FileMisc::Run(*this, sTempFile);
+		}
+#else
+		AfxMessageBox(_T("Saving not implemented"));
+#endif
 	}
 }
 
