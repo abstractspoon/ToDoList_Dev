@@ -204,32 +204,6 @@ BOOL CLocalizer::CleanupDictionary(LPCTSTR szMasterDictPath, LPCWSTR szDictPath)
 	return nNumCleaned;
 }
 
-BOOL CLocalizer::ReportPossibleDictionaryDuplicates(LPCTSTR szDictPath)
-{
-	BOOL bReported = FALSE;
-
-	if (ValidLocalizer())
-	{
-		if (szDictPath && FileMisc::FolderExists(szDictPath))
-		{
-			CStringArray aDictionaries;
-			int nDict = FileMisc::FindFiles(szDictPath, aDictionaries, FALSE, _T("*.csv"));
-
-			while (nDict--)
-			{
-				if (s_pTransText->ReportPossibleDictionaryDuplicates(aDictionaries[nDict]))
-					bReported = TRUE;
-			}
-		}
-		else // single dictionary
-		{
-			bReported = s_pTransText->ReportPossibleDictionaryDuplicates(szDictPath);
-		}
-	}
-
-	return bReported;
-}
-
 void CLocalizer::ForceTranslateAllUIElements(UINT nIDFirstStr, UINT nIDLastStr)
 {
 	CWnd* pAppWnd = AfxGetMainWnd();

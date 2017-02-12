@@ -23,7 +23,6 @@ const LPCTSTR SWITCH_RANDOMISE				= _T("rnd");
 // Translations
 const LPCTSTR SWITCH_ADDTODICT				= _T("t");
 const LPCTSTR SWITCH_TRANSUPPER				= _T("u");
-const LPCTSTR SWITCH_REPORTDUPLICATES		= _T("dup");
 const LPCTSTR SWITCH_CLEANDICTIONARY		= _T("clean");
 
 // temporary

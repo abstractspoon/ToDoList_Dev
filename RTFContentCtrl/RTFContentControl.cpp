@@ -571,6 +571,8 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 			
 			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
 			{
+				CWaitCursor cursor;
+
 				// Always set this to make sure it is current
 				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
 
@@ -596,7 +598,19 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 
 			// restore the clipboard
 			if (bClipboardSaved)
+			{
 				VERIFY(cbb.Restore());
+
+				// Pasting the trailing URL will have failed if we
+				// overwrote the clipboard so we have to do it manually
+				if (s_bPasteSourceUrls)
+				{
+					CString sClipURL;
+						
+					if (CClipboard().GetHTMLSourceLink(sClipURL))
+						VERIFY(m_rtf.AppendSourceUrls(sClipURL));
+				}
+			}
 		}
 		return TRUE;
 		

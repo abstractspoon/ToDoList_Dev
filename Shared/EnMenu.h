@@ -27,7 +27,7 @@ public:
 	CEnMenu();
 	virtual ~CEnMenu();
 
-	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslateAll = FALSE);
+	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE);
 	void SetBackgroundColor(COLORREF color);
 	
 	// pass -1 as nThemeBMID is you want ownerdraw
@@ -47,6 +47,8 @@ public:
 
 	BOOL DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp = FALSE);
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
+
+	BOOL TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat);
 
 	static void SetLocalizer(ITransText* pTT);
 

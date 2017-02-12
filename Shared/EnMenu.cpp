@@ -7,6 +7,7 @@
 #include "Themed.h"
 #include "osversion.h"
 #include "graphicsmisc.h"
+#include "enstring.h"
 
 #include "..\Interfaces\itranstext.h"
 
@@ -193,12 +194,12 @@ void CEnMenu::SetBackgroundColor(COLORREF color)
 	::SetMenuInfo(GetSafeHmenu(), &MenuInfo);
 }
 
-BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslateAll)
+BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate)
 {
 	if (CMenu::LoadMenu(nMenuResID))
 	{
 		if (s_pTT)
-			s_pTT->TranslateMenu(*this, hWndRef, bTranslateAll);
+			s_pTT->TranslateMenu(*this, hWndRef, bTranslate);
 
 		return TRUE;
 	}
@@ -416,4 +417,31 @@ HMENU CEnMenu::GetParentMenu(HMENU hMenu, HMENU hSubMenu)
 
 	return hParentMenu;
 
+}
+
+BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat)
+{
+	HMENU hSubMenu = GetSubMenu(*this, nCmdIDStart);
+
+	if (!hSubMenu)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nPos = 0;
+
+	for (UINT nCmdID = nCmdIDStart; nCmdID <= nCmdIDEnd; nCmdID++)
+	{
+		UINT nState = GetMenuState(nCmdID, MF_BYCOMMAND);
+		nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
+
+		// set menu text
+		UINT nFlags = (MF_BYCOMMAND | MF_STRING | nState);
+		CEnString sCmdText(szFormat, ++nPos);
+
+		::ModifyMenu(hSubMenu, nCmdID, nFlags, nCmdID, sCmdText);
+	}
+
+	return TRUE;
 }

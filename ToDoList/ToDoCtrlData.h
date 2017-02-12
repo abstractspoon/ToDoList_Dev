@@ -163,6 +163,8 @@ public:
 	CString FormatTaskTags(DWORD dwTaskID) const;
 	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
 	BOOL GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
+	CString FormatTaskSubtaskCompletion(DWORD dwTaskID) const;
+	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
@@ -185,6 +187,8 @@ public:
 	int CalcPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const; // spent / estimate
 	BOOL GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							int& nSubtasksTotal, int& nSubtasksDone) const;
+	CString FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double CalcTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck) const;
@@ -241,7 +245,7 @@ public:
 	void ResetRecurringSubtaskOcurrences(DWORD dwTaskID);
 	
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, 
-					BOOL bSortDueTodayHigh, BOOL bIncStartTime = FALSE, BOOL bIncDueTime = FALSE, BOOL bIncDoneTime = FALSE) const;
+					BOOL bSortDueTodayHigh, BOOL bIncTime = FALSE) const;
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
 
 	inline BOOL HasStyle(int nStyle) const { return m_aStyles[nStyle] ? TRUE : FALSE; }
@@ -263,7 +267,7 @@ protected:
 	static CTDCAttributeMap s_mapParentAttribs; // inheritable attribs
 	static BOOL s_bUpdateInheritAttrib; // update as changes are made to parents
 
-	static const CString EMPTY_STR;
+	static const CString EMPTY_STR; // for friend classes
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);

@@ -421,14 +421,43 @@ protected:
 			bSortDueTodayHigh(FALSE), 
 			dwTimeTrackID(0), 
 			bIncStartTime(FALSE), 
+			bIncCreateTime(FALSE), 
 			bIncDueTime(FALSE), 
 			bIncDoneTime(FALSE)
 		{
+		}
+
+		BOOL WantIncludeTime(TDC_COLUMN nColID) const
+		{
+			switch (nColID)
+			{
+			case TDCC_CREATIONDATE:
+			case TDCC_CREATIONTIME:
+				return bIncCreateTime;
+
+			case TDCC_STARTDATE:
+			case TDCC_STARTTIME:
+				return bIncStartTime;
+
+			case TDCC_DUEDATE:
+			case TDCC_DUETIME:
+				return bIncDueTime;
+
+			case TDCC_DONEDATE:
+			case TDCC_DONETIME:
+				return bIncDoneTime;
+
+			case TDCC_LASTMOD:
+				return TRUE;
+			}
+
+			return FALSE;
 		}
 		
 		BOOL bSortChildren;
 		BOOL bSortDueTodayHigh;
 		DWORD dwTimeTrackID;
+		BOOL bIncCreateTime;
 		BOOL bIncStartTime;
 		BOOL bIncDueTime;
 		BOOL bIncDoneTime;

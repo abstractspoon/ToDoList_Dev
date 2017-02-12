@@ -57,10 +57,18 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
+
+#define COPYSTRATTRIB(pFrom, hFrom, fFrom, pTo, hTo, fTo) \
+	{ LPCTSTR szVal = pFrom->fFrom(hFrom); \
+	if (!Misc::IsEmpty(szVal)) pTo->fTo(hTo, szVal); }
+
 //////////////////////////////////////////////////////////////////////
 
 #define GET_TASK(t, h, r) { t = TaskFromHandle(h); if (!t) return r; }
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CTaskFile::CTaskFile(LPCTSTR szPassword) 
 	: 
@@ -560,12 +568,6 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		return FALSE;
 
 	// simple attributes
-	pTasksDest->SetTaskComments(hTaskDest, pTasksSrc->GetTaskComments(hTaskSrc));
-	pTasksDest->SetTaskAllocatedTo(hTaskDest, pTasksSrc->GetTaskAllocatedTo(hTaskSrc));
-	pTasksDest->SetTaskAllocatedBy(hTaskDest, pTasksSrc->GetTaskAllocatedBy(hTaskSrc));
-	pTasksDest->SetTaskCategory(hTaskDest, pTasksSrc->GetTaskCategory(hTaskSrc));
-	pTasksDest->SetTaskStatus(hTaskDest, pTasksSrc->GetTaskStatus(hTaskSrc));
-	pTasksDest->SetTaskFileLinkPath(hTaskDest, pTasksSrc->GetTaskFileLinkPath(hTaskSrc));
 	pTasksDest->SetTaskColor(hTaskDest, pTasksSrc->GetTaskColor(hTaskSrc));
 	pTasksDest->SetTaskPriority(hTaskDest, pTasksSrc->GetTaskPriority(hTaskSrc, FALSE));
 	pTasksDest->SetTaskPercentDone(hTaskDest, pTasksSrc->GetTaskPercentDone(hTaskSrc, FALSE));
@@ -575,6 +577,14 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 	pTasksDest->SetTaskStartDate(hTaskDest, pTasksSrc->GetTaskStartDate(hTaskSrc));
 	pTasksDest->SetTaskFlag(hTaskDest, pTasksSrc->IsTaskFlagged(hTaskSrc));
 	
+	// string attributes
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskComments, pTasksDest, hTaskDest, SetTaskComments);
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskAllocatedTo, pTasksDest, hTaskDest, SetTaskAllocatedTo);
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskAllocatedBy, pTasksDest, hTaskDest, SetTaskAllocatedBy);
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskCategory, pTasksDest, hTaskDest, SetTaskCategory);
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskStatus, pTasksDest, hTaskDest, SetTaskStatus);
+	COPYSTRATTRIB(pTasksSrc, hTaskSrc, GetTaskFileLinkPath, pTasksDest, hTaskDest, SetTaskFileLinkPath);
+
 	// times
 	TDC_UNITS nUnits;
 	double dTime;
@@ -605,9 +615,9 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL3Src && pTL3Dest))
 			break;
 		
+		COPYSTRATTRIB(pTL3Src, hTaskSrc, GetTaskExternalID, pTL3Dest, hTaskDest, SetTaskExternalID);
 		pTL3Dest->SetTaskRisk(hTaskDest, pTL3Src->GetTaskRisk(hTaskSrc, FALSE));
-		pTL3Dest->SetTaskExternalID(hTaskDest, pTL3Src->GetTaskExternalID(hTaskSrc));
-		
+	
 		// ---------------------------------------------------------------------------
 		const ITaskList4* pTL4Src = GetITLInterface<ITaskList4>(pTasksSrc, IID_TASKLIST4);
 		ITaskList4* pTL4Dest = GetITLInterface<ITaskList4>(pTasksDest, IID_TASKLIST4);
@@ -615,7 +625,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL4Src && pTL4Dest))
 			break;
 		
-		pTL4Dest->SetTaskDependency(hTaskDest, pTL4Src->GetTaskDependency(hTaskSrc));
+		COPYSTRATTRIB(pTL4Src, hTaskSrc, GetTaskDependency, pTL4Dest, hTaskDest, SetTaskDependency);
 		pTL4Dest->SetTaskCost(hTaskDest, pTL4Src->GetTaskCost(hTaskSrc, FALSE));
 		
 		// ---------------------------------------------------------------------------
@@ -637,7 +647,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL6Src && pTL6Dest))
 			break;
 		
-		pTL6Dest->SetTaskVersion(hTaskDest, pTL6Src->GetTaskVersion(hTaskSrc));
+		COPYSTRATTRIB(pTL6Src, hTaskSrc, GetTaskVersion, pTL6Dest, hTaskDest, SetTaskVersion);
 		
 		// ---------------------------------------------------------------------------
 		const ITaskList7* pTL7Src = GetITLInterface<ITaskList7>(pTasksSrc, IID_TASKLIST7);
@@ -702,7 +712,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL11Src && pTL11Dest))
 			break;
 		
-		pTL11Dest->SetTaskIcon(hTaskDest, pTL11Src->GetTaskIcon(hTaskSrc));
+		COPYSTRATTRIB(pTL11Src, hTaskSrc, GetTaskIcon, pTL11Dest, hTaskDest, SetTaskIcon);
 		
 		// ---------------------------------------------------------------------------
 		const ITaskList12* pTL12Src = GetITLInterface<ITaskList12>(pTasksSrc, IID_TASKLIST12);
@@ -761,8 +771,10 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			break;
 
 		// Note: we don't deliberately don't expose SetTaskReferenceID to clients
-		CString sRefID = Misc::Format(pTL15Src->GetTaskReferenceID(hTaskSrc));
-		pTL15Dest->SetTaskAttribute(hTaskDest, TDL_TASKREFID, sRefID);
+		DWORD dwRefID = pTL15Src->GetTaskReferenceID(hTaskSrc);
+
+		if (dwRefID)
+			pTL15Dest->SetTaskAttribute(hTaskDest, TDL_TASKREFID, Misc::Format(dwRefID));
 		// ---------------------------------------------------------------------------
 	} 
 	while (0);

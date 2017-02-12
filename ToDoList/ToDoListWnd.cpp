@@ -2604,18 +2604,22 @@ void CToDoListWnd::RestoreVisibility()
 						(bMinimized ? SW_SHOWMINIMIZED : SW_SHOW));
 		
  		ShowWindow(nShowCmd);
-		SetForegroundWindow();
 
-		// Startup redraw problem
-		if (COSVersion() == OSV_LINUX)
+		if (!bMinimized)
 		{
-			m_toolbar.Invalidate(TRUE);
-			m_filterBar.Invalidate(TRUE);
-			m_cbQuickFind.Invalidate(TRUE);
-		}
+			SetForegroundWindow();
 
-		Invalidate();
-		UpdateWindow();
+			// Startup redraw problem
+			if (COSVersion() == OSV_LINUX)
+			{
+				m_toolbar.Invalidate(TRUE);
+				m_filterBar.Invalidate(TRUE);
+				m_cbQuickFind.Invalidate(TRUE);
+			}
+
+			Invalidate();
+			UpdateWindow();
+		}
 	}
 	else
 	{
@@ -4919,7 +4923,7 @@ void CToDoListWnd::EnableDynamicMenuTranslation(BOOL bEnable)
 {
 	CLocalizer::EnableTranslation(ID_FILE_MRU_FIRST, ID_FILE_MRU_LAST, bEnable);
 	CLocalizer::EnableTranslation(ID_WINDOW1, ID_WINDOW16, bEnable);
-	CLocalizer::EnableTranslation(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, bEnable);
+	CLocalizer::EnableTranslation(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, bEnable);
 	CLocalizer::EnableTranslation(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, bEnable);
 	CLocalizer::EnableTranslation(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, bEnable);
 	CLocalizer::EnableTranslation(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, bEnable);
@@ -7156,10 +7160,6 @@ void CToDoListWnd::OnSort()
 void CToDoListWnd::OnWindowPosChanged(WINDOWPOS FAR* lpwndpos) 
 {
 	CFrameWnd::OnWindowPosChanged(lpwndpos);
-
-// 	// Keep time tracker in front of us 
-// 	if (IsWindowVisible() && !IsIconic() && m_dlgTimeTracker.IsWindowVisible())
-// 		m_dlgTimeTracker.SetWindowPos(this, 0, 0, 0, 0, (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE));
 }
 
 void CToDoListWnd::OnArchiveCompletedtasks() 
@@ -7278,10 +7278,12 @@ const CFilteredToDoCtrl& CToDoListWnd::GetToDoCtrl(int nIndex) const
 
 CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 {
-	CHoldRedraw hr(*this);
-	BOOL bFirstTDC = (GetTDCCount() == 0);
+	BOOL bWantHoldRedraw = ((m_bVisible > 0) && !IsIconic());
+	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
 	
 	// if the active tasklist is unsaved and unmodified then delete it
+	BOOL bFirstTDC = (GetTDCCount() == 0);
+
 	if (!bFirstTDC)
 	{
 		// make sure that we don't accidentally delete a just edited tasklist
@@ -8522,51 +8524,19 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 			BOOL bIsSeparator = FALSE;
 
 			UINT nMenuID = pMenu->GetMenuItemID(nItem);
-			
-			switch (nMenuID)
+
+			if (nMenuID == ID_SEPARATOR)
 			{
-			case ID_SORT_BYALLOCBY:		bDelete = !tdc.IsColumnShowing(TDCC_ALLOCBY);		break; 
-			case ID_SORT_BYALLOCTO:		bDelete = !tdc.IsColumnShowing(TDCC_ALLOCTO);		break; 
-			case ID_SORT_BYCATEGORY:	bDelete = !tdc.IsColumnShowing(TDCC_CATEGORY);		break; 
-			case ID_SORT_BYCOST:		bDelete = !tdc.IsColumnShowing(TDCC_COST);			break;
-			case ID_SORT_BYCREATEDBY:	bDelete = !tdc.IsColumnShowing(TDCC_CREATEDBY);		break; 
-			case ID_SORT_BYCREATIONDATE:bDelete = !tdc.IsColumnShowing(TDCC_CREATIONDATE);	break; 
-			case ID_SORT_BYDEPENDENCY:	bDelete = !tdc.IsColumnShowing(TDCC_DEPENDENCY);	break; 
-			case ID_SORT_BYDONE:		bDelete = !tdc.IsColumnShowing(TDCC_DONE);			break; 
-			case ID_SORT_BYDONEDATE:	bDelete = !tdc.IsColumnShowing(TDCC_DONEDATE);		break; 
-			case ID_SORT_BYDUEDATE:		bDelete = !tdc.IsColumnShowing(TDCC_DUEDATE);		break; 
-			case ID_SORT_BYEXTERNALID:	bDelete = !tdc.IsColumnShowing(TDCC_EXTERNALID);	break; 
-			case ID_SORT_BYFILEREF:		bDelete = !tdc.IsColumnShowing(TDCC_FILEREF);		break; 
-			case ID_SORT_BYFLAG:		bDelete = !tdc.IsColumnShowing(TDCC_FLAG);			break; 
-			case ID_SORT_BYICON:		bDelete = !tdc.IsColumnShowing(TDCC_ICON);			break; 
-			case ID_SORT_BYID:			bDelete = !tdc.IsColumnShowing(TDCC_ID);			break; 
-			case ID_SORT_BYMODIFYDATE:	bDelete = !tdc.IsColumnShowing(TDCC_LASTMOD);		break; 
-			case ID_SORT_BYPATH:		bDelete = !tdc.IsColumnShowing(TDCC_PATH);			break; 
-			case ID_SORT_BYPERCENT:		bDelete = !tdc.IsColumnShowing(TDCC_PERCENT);		break; 
-			case ID_SORT_BYPOSITION:	bDelete = !tdc.IsColumnShowing(TDCC_POSITION);		break; 
-			case ID_SORT_BYPRIORITY:	bDelete = !tdc.IsColumnShowing(TDCC_PRIORITY);		break; 
-			case ID_SORT_BYRECENTEDIT:	bDelete = !tdc.IsColumnShowing(TDCC_RECENTEDIT);	break; 
-			case ID_SORT_BYRECURRENCE:	bDelete = !tdc.IsColumnShowing(TDCC_RECURRENCE);	break; 
-			case ID_SORT_BYREMAINING:	bDelete = !tdc.IsColumnShowing(TDCC_REMAINING);		break; 
-			case ID_SORT_BYRISK:		bDelete = !tdc.IsColumnShowing(TDCC_RISK);			break; 
-			case ID_SORT_BYSTARTDATE:	bDelete = !tdc.IsColumnShowing(TDCC_STARTDATE);		break; 
-			case ID_SORT_BYSTATUS:		bDelete = !tdc.IsColumnShowing(TDCC_STATUS);		break; 
-			case ID_SORT_BYSUBTASKDONE:	bDelete = !tdc.IsColumnShowing(TDCC_SUBTASKDONE);	break; 
-			case ID_SORT_BYTAG:			bDelete = !tdc.IsColumnShowing(TDCC_TAGS);			break; 
-			case ID_SORT_BYTIMEEST:		bDelete = !tdc.IsColumnShowing(TDCC_TIMEEST);		break; 
-			case ID_SORT_BYTIMESPENT:	bDelete = !tdc.IsColumnShowing(TDCC_TIMESPENT);		break; 
-			case ID_SORT_BYTIMETRACKING:bDelete = !tdc.IsColumnShowing(TDCC_TRACKTIME);		break; 
-			case ID_SORT_BYVERSION:		bDelete = !tdc.IsColumnShowing(TDCC_VERSION);		break; 
-	//		case ID_SORT_BYCOLOR: bDelete = (Prefs().GetTextColorOption() != COLOROPT_DEFAULT); break; 
-
-
-			case ID_SEPARATOR: 
 				bIsSeparator = TRUE;
 				bDelete = (nCountLastSep == 0);
 				nCountLastSep = 0;
-				break;
+			}
+			else
+			{
+				TDC_COLUMN nColID = TDC::MapSortIDToColumn(nMenuID);
 
-			default: bDelete = FALSE; break; 
+				if (nColID != TDCC_NONE)
+					bDelete = !tdc.IsColumnShowing(nColID);
 			}
 
 			// delete the item else increment the count since the last separator
@@ -8576,7 +8546,9 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 				nItem--;
 			}
 			else if (!bIsSeparator)
+			{
 				nCountLastSep++;
+			}
 		}
 	}
 
@@ -9684,6 +9656,8 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	if (m_findDlg.GetSearchParams(params))
 	{
+		CWaitCursor cursor;
+
 		int nSel = GetSelToDoCtrl();
 		
 		for (int nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
@@ -10384,7 +10358,7 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
     if (m_bClosing)
         return; 
 
-	// Don't any further processing if the Reminder dialog is active
+	// Don't do any further processing if the Reminder dialog is active
 	// because the two windows get into a fight for activation!
 	if (m_reminders.IsForegroundWindow())
 		return;

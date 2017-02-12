@@ -93,7 +93,7 @@ BOOL CToDoCtrlData::s_bUpdateInheritAttrib		= FALSE;
 CTDCAttributeMap CToDoCtrlData::s_mapParentAttribs; 
 CString CToDoCtrlData::s_cfDefault;
 
-const CString CToDoCtrlData::EMPTY_STR;
+const CString CToDoCtrlData::EMPTY_STR; // for friend classes
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -2795,6 +2795,36 @@ BOOL CToDoCtrlData::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTU
 	return (nSubtasksCount > 0);
 }
 
+CString CToDoCtrlData::FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	int nSubtaskCount = 0, nSubtaskDone = 0;
+	CString sSubtasksDone;
+	
+	if (GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
+	{
+		sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
+	}
+	
+	return sSubtasksDone;
+}
+
+double CToDoCtrlData::CalcTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	ASSERT (pTDS && pTDI);
+
+	if (!pTDS || !pTDS->HasSubTasks() || !pTDI)
+		return 0.0;
+
+	int nSubtasksDone = 0, nSubtasksCount = 0;
+
+	if (!GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
+		return 0;
+
+	// else
+	ASSERT(nSubtasksCount);
+	return ((double)nSubtasksDone / (double)nSubtasksCount);
+}
+
 CString CToDoCtrlData::GetTaskPositionString(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	ASSERT (pTDI && pTDS && pTDS->GetParentTask());
@@ -2837,7 +2867,7 @@ CString CToDoCtrlData::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 	
 	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
 	
-	if (!pTDSParent)
+	if (!pTDSParent || pTDSParent->IsRoot())
 		return EMPTY_STR;
 
 	CString sPath;
@@ -3625,6 +3655,24 @@ BOOL CToDoCtrlData::GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, in
 	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksTotal, nSubtasksDone);
 }
 
+CString CToDoCtrlData::FormatTaskSubtaskCompletion(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return FormatTaskSubtaskCompletion(pTDI, pTDS);
+}
+
+double CToDoCtrlData::CalcTaskSubtaskCompletion(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
+
+	return CalcTaskSubtaskCompletion(pTDI, pTDS);
+}
+
 BOOL CToDoCtrlData::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -3987,7 +4035,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTO
 
 
 int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, 
-								BOOL bSortDueTodayHigh, BOOL bIncStartTime, BOOL bIncDueTime, BOOL bIncDoneTime) const
+								BOOL bSortDueTodayHigh, BOOL bIncTime) const
 {
 	// sanity check
 	ASSERT(dwTask1ID && dwTask2ID && (dwTask1ID != dwTask2ID));
@@ -4067,7 +4115,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 			break;
 			
 		case TDCC_CREATIONDATE:
-			nCompare = Compare(pTDI1->dateCreated, pTDI2->dateCreated, FALSE, TDCD_CREATE);
+			nCompare = Compare(pTDI1->dateCreated, pTDI2->dateCreated, bIncTime, TDCD_CREATE);
 			break;
 			
 		case TDCC_LASTMOD:
@@ -4086,7 +4134,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				if (bDone2 && !CDateHelper::IsDateSet(date2))
 					date2 = 0.1;
 				
-				nCompare = Compare(date1, date2, bIncDoneTime, TDCD_DONE);
+				nCompare = Compare(date1, date2, bIncTime, TDCD_DONE);
 			}
 			break;
 			
@@ -4104,7 +4152,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				else
 					date2 = CalcTaskDueDate(pTDI2, pTDS2);
 								
-				nCompare = Compare(date1, date2, bIncDueTime, TDCD_DUE);
+				nCompare = Compare(date1, date2, bIncTime, TDCD_DUE);
 			}
 			break;
 			
@@ -4143,7 +4191,7 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 				else
 					date2 = CalcTaskStartDate(pTDI2, pTDS2);
 								
-				nCompare = Compare(date1, date2, bIncStartTime, TDCD_START);
+				nCompare = Compare(date1, date2, bIncTime, TDCD_START);
 			}
 			break;
 			
@@ -4341,16 +4389,6 @@ int CToDoCtrlData::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSo
 					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask1ID, dwTask2ID, dwTask2ID);
 					nCompare = 1;
 				}
-// 				// else if both have dependencies sort by ID
-// 				else if (dwDepends1 && dwDepends2)
-// 				{
-// 					nCompare = (dwDepends1 - dwDepends2);
-// 				}
-// 				// else the non-zero dependency always sorts high
-// 				else
-// 				{
-// 					nCompare = (dwDepends1 ? -1 : (dwDepends2 ? 1 : 0));
-// 				}
 			}
 			break;
 

@@ -79,7 +79,7 @@ public:
 	CStdioFileEx();
 	CStdioFileEx(LPCWSTR lpszFileName, UINT nOpenFlags);
 
-	virtual BOOL			Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat = SFEF_AUTODETECT, UINT nAnsiCodePage = CP_ACP, CFileException* pError = NULL);
+	virtual BOOL			Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat = SFEF_AUTODETECT, UINT nCodePage = CP_ACP, CFileException* pError = NULL);
 
 	virtual BOOL			ReadString(CString& rString);
 	virtual LPWSTR			ReadString(LPWSTR lpsz, UINT nMax);
@@ -93,7 +93,7 @@ public:
 
 	static BOOL				LoadFile(LPCWSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE);
 	static int				LoadFile(LPCWSTR szPathname, CStringArray& aLines, int nNumLines = -1);
-	static BOOL				SaveFile(LPCWSTR szPathname, const CString& sText, SFE_FORMAT nFormat, UINT nAnsiCodePage = CP_ACP);
+	static BOOL				SaveFile(LPCWSTR szPathname, const CString& sText, SFE_FORMAT nFormat, UINT nCodePage = CP_ACP);
 
 	static UINT				GetCurrentLocaleCodePage();
 	static BOOL				IsSaving(UINT nOpenFlags);
@@ -105,9 +105,9 @@ protected:
 	BOOL	ReadMultiByteLine(OUT CString& sOutputLine);
 	UINT	WriteUnicodeLine(IN LPCWSTR sInputLine);
 	UINT	WriteMultiByteLine(IN LPCWSTR sInputLine);
-	SFE_FORMAT ReadFormat(int nAnsiCodePage);
+	SFE_FORMAT ReadFormat(int nCodePage);
 	
-	static int GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage);
+	static int GetFileCodePage(SFE_FORMAT nFormat, int nCodePage);
 	static void ProcessOpenFlags(UINT& nOpenFlags, SFE_FORMAT nFormat);
 
 	SFE_FORMAT	m_nFormat;

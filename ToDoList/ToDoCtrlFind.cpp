@@ -180,12 +180,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			break;
 
 		case TDCA_SUBTASKDONE:	
-			{
-				int nSubtasksCount, nSubtasksDone;
-				
-				if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
-					sLongest.Format(_T("%d/%d"), nSubtasksDone, nSubtasksCount);
-			}
+			sLongest = m_data.FormatTaskSubtaskCompletion(pTDI, pTDS);
 			break;
 
 		case TDCA_POSITION:

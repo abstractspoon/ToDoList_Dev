@@ -1118,23 +1118,15 @@ BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime,
 		}
 	}
 
-	// These options can be run without having a translation active
+	// Thise option can be run without having a translation active
 	// but they still need a valid translator
-	if (cmdInfo.HasOption(SWITCH_REPORTDUPLICATES) || cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
+	if (cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
 	{
 		if (!bValidLocalizer)
 			CLocalizer::Initialize(NULL, ITTTO_ADD2DICTIONARY);
 
 		CString sDictPath;
 
-		if (cmdInfo.GetOption(SWITCH_REPORTDUPLICATES, sDictPath))
-		{
-			if (sDictPath.IsEmpty())
-				sDictPath = GetResourcePath(_T("Translations"), _T("YourLanguage.csv"));
-			
-			CLocalizer::ReportPossibleDictionaryDuplicates(sDictPath);
-		}
-		
 		if (cmdInfo.GetOption(SWITCH_CLEANDICTIONARY, sDictPath))
 		{
 			if (sDictPath.IsEmpty())
@@ -2025,10 +2017,17 @@ void CToDoListApp::CleanupAppFolder()
 	FileMisc::DeleteFile(sFolder + _T("OutlookImpExp.dll"), TRUE);
 
 	// gif translation 'flags' replaced with pngs
-	FileMisc::DeleteFolderContents(sFolder + _T("Resources\\Translations"), 
-									FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY,
-									_T("*.gif"));
+	CString sTranslations = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
+	FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
 
+	// Wrongly installed resource files
+	CString sTasklists = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Tasklists")));
+
+	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.txt")), 395, TRUE);
+	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.csv")), 10602, TRUE);
+	FileMisc::DeleteFileBySize((sTasklists + _T("Introduction.xml")), 177520, TRUE);
+
+	
 /*
 	// remove old RTF to HTML converter
 	FileMisc::DeleteFile(sFolder + _T("Itenso.Rtf.Converter.Html.dll"), TRUE);

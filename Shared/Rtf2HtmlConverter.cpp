@@ -407,7 +407,7 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithMSWord(LPCTSTR szRtfFile, LPCTSTR /*
 												sTempHtml, WordAPI::wdSaveFormatFilteredHTML,
 												WordAPI::msoEncodingUTF8);
 		
-		if (bSuccess && FileMisc::LoadFile(sTempHtml, sHtml))
+		if (bSuccess && FileMisc::LoadFile(sTempHtml, sHtml, FALSE, CP_UTF8))
 		{
 			bSuccess = (ProcessMSWordHtml(szUniqueDir, sHtml) > 0);
 		}
@@ -644,7 +644,7 @@ BOOL CRtfHtmlConverter::ConvertHtmlToRtfWithMSWord(LPCTSTR szHtmlFile, LPCTSTR /
 												WordAPI::msoEncodingUTF8);
 		
 		if (bSuccess)
-			bSuccess = FileMisc::LoadFile(sTempRtf, sRtf);
+			bSuccess = FileMisc::LoadFile(sTempRtf, sRtf, FALSE, CP_UTF8);
 
 		// remove the temp rtf file
 		::DeleteFile(sTempRtf);

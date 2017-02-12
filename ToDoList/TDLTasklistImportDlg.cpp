@@ -24,7 +24,7 @@ static char THIS_FILE[] = __FILE__;
 
 static CUIExtensionMgr s_extm;
 static CTDLContentMgr s_cm;
-static CONTENTFORMAT s_cf;
+static CONTENTFORMAT s_cf(_T("PLAIN_TEXT"));
 static TDCCOLEDITFILTERVISIBILITY s_vis;
 
 CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CFilteredToDoCtrl(s_extm, s_cm, s_cf, s_vis)
@@ -113,7 +113,6 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 
 			// Select All
 			PostMessage(WM_COMMAND, MAKEWPARAM(IDC_SELECTALL, BN_CLICKED), (LPARAM)::GetDlgItem(*this, IDC_SELECTALL));
-
 		}
 
 	}
@@ -197,7 +196,7 @@ void CTDLTasklistImportDlg::ResetSelectedTaskCreationDate(HTASKITEM hTask, BOOL 
 			while (hSibling)
 			{
 				// FALSE == don't recurse on siblings
-				ResetSelectedTaskCreationDate(hTask, FALSE);
+				ResetSelectedTaskCreationDate(hSibling, FALSE);
 				
 				hSibling = m_tasksSelected.GetNextTask(hSibling);
 			}

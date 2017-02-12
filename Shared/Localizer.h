@@ -47,7 +47,6 @@ public:
 
 	static ITransText* GetLocalizer() { return s_pTransText; }
 	static BOOL CleanupDictionary(LPCTSTR szMasterDictPath, LPCWSTR szDictPath = NULL);
-	static BOOL ReportPossibleDictionaryDuplicates(LPCTSTR szDictPath = NULL);
 
 protected:
 	static BOOL ValidLocalizer();

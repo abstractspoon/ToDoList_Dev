@@ -137,18 +137,22 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 
 	CLocalizer::EnableTranslation(::GetDlgItem(*this, IDC_TASKTITLE), FALSE);
 	
-	if (!m_bShowAddTimeToTimeSpent)
+	if (m_bShowAddTimeToTimeSpent)
+	{
+		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
+	}
+	else
 	{
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->ShowWindow(SW_HIDE);
-
+		
 		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
 		GetDlgItem(IDAPPLY)->ShowWindow(SW_HIDE);
-
+		
 		CRect rApply = CDialogHelper::GetCtrlRect(this, IDAPPLY);
 		CRect rCancel = CDialogHelper::GetCtrlRect(this, IDCANCEL);
 		int nXOffset = (rApply.left - rCancel.left);
-
+		
 		CDialogHelper::OffsetCtrl(this, IDOK, nXOffset, 0);
 		CDialogHelper::OffsetCtrl(this, IDCANCEL, nXOffset, 0);
 	}

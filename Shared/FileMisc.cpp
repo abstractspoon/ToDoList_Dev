@@ -957,6 +957,15 @@ BOOL FileMisc::DeleteFile(LPCTSTR szPath, BOOL bHiddenReadOnly)
 	return ::DeleteFile(szPath);
 }
 
+
+BOOL FileMisc::DeleteFileBySize(LPCTSTR szFilePath, double dSize, BOOL bHiddenReadOnly)
+{
+	if (FileMisc::FileExists(szFilePath) && (FileMisc::GetFileSize(szFilePath) == dSize))
+		return FileMisc::DeleteFile(szFilePath, bHiddenReadOnly);
+
+	return FALSE;
+}
+
 BOOL FileMisc::CopyFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, BOOL bHiddenReadOnly, BOOL bNewer)
 {
 	if (bNewer && (GetFileLastModified(szSrcPath) <= GetFileLastModified(szDestPath)))

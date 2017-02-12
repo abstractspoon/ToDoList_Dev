@@ -9401,15 +9401,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		// subtask completion
 		if (pTDS->HasSubTasks() && filter.WantAttribute(TDCA_SUBTASKDONE))
-		{
-			int nSubtaskCount = 0, nSubtaskDone = 0;
-			VERIFY (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone));
-
-			CString sSubtasksDone;
-			sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
-			
-			file.SetTaskSubtaskCompletion(hTask, sSubtasksDone);
-		}
+			file.SetTaskSubtaskCompletion(hTask, m_data.FormatTaskSubtaskCompletion(pTDI, pTDS));
 		
 		// custom comments
 		if (filter.WantAttribute(TDCA_COMMENTS) && !(bHtmlComments || bTextComments))
@@ -9564,15 +9556,8 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 		file.SetTaskGoodAsDone(hTask, TRUE);
 
 	// subtask completion
-	int nSubtaskCount = 0, nSubtaskDone = 0;
-
-	if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
-	{
-		CString sSubtasksDone;
-		sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
-
-		file.SetTaskSubtaskCompletion(hTask, sSubtasksDone);
-	}
+	if (pTDS->HasSubTasks())
+		file.SetTaskSubtaskCompletion(hTask, m_data.FormatTaskSubtaskCompletion(pTDI, pTDS));
 	
 	return TRUE;
 }

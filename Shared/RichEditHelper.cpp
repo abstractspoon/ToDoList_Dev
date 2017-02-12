@@ -228,7 +228,7 @@ BOOL CRichEditHelper::PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE 
 			{
 				if (CEnBitmap::CopyImageFileToClipboard(hWnd, szFilePath, CLR_NONE, 8))
 				{
-					::SendMessage(hWnd, WM_PASTE, 0, 0);
+					::SendMessage(hWnd, EM_PASTESPECIAL, CF_BITMAP, NULL);
 					bUsedClipboard = TRUE;
 	
 					return TRUE;

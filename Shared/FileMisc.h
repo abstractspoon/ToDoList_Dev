@@ -290,6 +290,8 @@ namespace FileMisc
 					HANDLE hTerminate = NULL);
 
 	BOOL DeleteFile(LPCTSTR szPath, BOOL bHiddenReadOnly = FALSE);
+	BOOL DeleteFileBySize(LPCTSTR szFilePath, double dSize, BOOL bHiddenReadOnly = FALSE);
+
 	BOOL CopyFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite = FALSE, BOOL bHiddenReadOnly = FALSE, BOOL bNewer = FALSE);
 	BOOL MoveFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite = FALSE, BOOL bHiddenReadOnly = FALSE);
 

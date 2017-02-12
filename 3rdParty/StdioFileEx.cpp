@@ -109,7 +109,7 @@ CStdioFileEx::CStdioFileEx(LPCWSTR lpszFileName,UINT nOpenFlags)
 {
 }
 
-BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat, UINT nAnsiCodePage, CFileException* pError /*=NULL*/)
+BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat, UINT nCodePage, CFileException* pError /*=NULL*/)
 {
 	// Process any Unicode stuff. This no longer checks for the Unicode BOM. We do this on
 	// opening for efficiency.
@@ -124,8 +124,8 @@ BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nForma
 	switch (nFormat)
 	{
 	case SFEF_AUTODETECT:
-		m_nFormat = ReadFormat(nAnsiCodePage);
-		m_nFileCodePage = GetFileCodePage(m_nFormat, nAnsiCodePage);
+		m_nFormat = ReadFormat(nCodePage);
+		m_nFileCodePage = GetFileCodePage(m_nFormat, nCodePage);
 		break;
 
 	case SFEF_UTF16:
@@ -133,7 +133,7 @@ BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nForma
 	case SFEF_UTF8:
 	case SFEF_ANSI:
 		m_nFormat = nFormat;
-		m_nFileCodePage = GetFileCodePage(nFormat, nAnsiCodePage);
+		m_nFileCodePage = GetFileCodePage(nFormat, nCodePage);
 		break;
 
 	default:
@@ -147,7 +147,7 @@ BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nForma
 	return TRUE;
 }
 
-int CStdioFileEx::GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage)
+int CStdioFileEx::GetFileCodePage(SFE_FORMAT nFormat, int nCodePage)
 {
 	switch (nFormat)
 	{
@@ -159,7 +159,7 @@ int CStdioFileEx::GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage)
 		return CP_UTF8;
 		
 	case SFEF_ANSI:
-		return nAnsiCodePage;
+		return nCodePage;
 	}
 	
 	// all else
@@ -167,7 +167,7 @@ int CStdioFileEx::GetFileCodePage(SFE_FORMAT nFormat, int nAnsiCodePage)
 	return -1;
 }
 
-SFE_FORMAT CStdioFileEx::ReadFormat(int nAnsiCodePage)
+SFE_FORMAT CStdioFileEx::ReadFormat(int nCodePage)
 {
 	SFE_FORMAT nFormat = SFEF_UNKNOWN;
 
@@ -187,7 +187,7 @@ SFE_FORMAT CStdioFileEx::ReadFormat(int nAnsiCodePage)
 		{
 			nFormat = SFEF_UTF8;
 		}
-		else if (nAnsiCodePage == CP_ACP)
+		else if (nCodePage == CP_ACP)
 		{
 			nFormat = SFEF_UTF8WITHOUTBOM;
 		}

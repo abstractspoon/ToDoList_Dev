@@ -1201,10 +1201,10 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 	// position so that the sort is stable
 	if (nCompare == 0)
 	{
-		nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							TDSORTCOLUMN(TDCC_NONE, FALSE),
-							TDSORTFLAGS());
+		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
+		static TDSORTFLAGS nullFlags;
+
+		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -1225,10 +1225,10 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 	// position so that the sort is stable
 	if (nCompare == 0)
 	{
-		nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							TDSORTCOLUMN(TDCC_NONE, FALSE),
-							TDSORTFLAGS());
+		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
+		static TDSORTFLAGS nullFlags;
+
+		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -1295,9 +1295,7 @@ int CTDLTaskCtrlBase::SortTasks(LPARAM lParam1,
 									sort.nBy, 
 									sort.bAscending, 
 									flags.bSortDueTodayHigh,
-									flags.bIncStartTime,
-									flags.bIncDueTime,
-									flags.bIncDoneTime);
+									flags.WantIncludeTime(sort.nBy));
 }
 
 DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen) const
@@ -1630,6 +1628,7 @@ PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 	ss.flags.bSortChildren = TRUE;
 	ss.flags.bSortDueTodayHigh = HasColor(m_crDueToday);
 	ss.flags.dwTimeTrackID = m_dwTimeTrackTaskID;
+	ss.flags.bIncCreateTime = IsColumnShowing(TDCC_CREATIONTIME);
 	ss.flags.bIncStartTime = IsColumnShowing(TDCC_STARTTIME);
 	ss.flags.bIncDueTime = IsColumnShowing(TDCC_DUETIME);
 	ss.flags.bIncDoneTime = IsColumnShowing(TDCC_DONETIME);
@@ -3441,8 +3440,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_PATH:
-		if (pTDS->GetParentTaskID())
-			sTaskColText = m_data.GetTaskPath(pTDI, pTDS);
+		sTaskColText = m_data.GetTaskPath(pTDI, pTDS);
 		break;
 
 		// items having no text or rendered differently
@@ -3461,12 +3459,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_SUBTASKDONE:
-		{
-			int nSubtasksCount, nSubtasksDone;
-
-			if (m_data.GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone))
-				sTaskColText.Format(_T("%d/%d"), nSubtasksDone, nSubtasksCount);
-		}
+		sTaskColText = m_data.FormatTaskSubtaskCompletion(pTDI, pTDS);
 		break;
 
 	default:

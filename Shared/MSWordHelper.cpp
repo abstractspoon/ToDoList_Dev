@@ -251,6 +251,7 @@ BOOL CMSWordHelper::ConvertFile(const CString& sInputFilename, WdOpenFormat nInp
 
 	try 
 	{
+		doc.SetSaveEncoding(nEncoding);
 		doc.SaveAs(COleVariant(sOutputFilename),		// FileName
 					COleVariant((short)nOutputFormat),	// FileFormat
 					varFalse,							// LockComments

@@ -151,9 +151,6 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 		}
 	}
 
-	// path attribute is special
-	CDialogHelper::AddString(*this, CEnString(IDS_TDC_COLUMN_PATH), EncodeItemData(TDCA_PATH)); 
-
 	// custom attributes
 	for (nAttrib = 0; nAttrib < m_aAttribDefs.GetSize(); nAttrib++)
 	{
