@@ -17,7 +17,7 @@ namespace TransText
 	CString& EncodeChars(CString& sText);
 	CString GetFriendlyClass(const CString& sClass, HWND hWndRef = NULL);
 	CString GetClassIDName(HWND hWnd);
-	CString GetClassIDName(HMENU hMenu, int nMenuID);
+	CString GetMenuClassIDName();
 	BOOL PrepareLookupText(CString& sText, BOOL bDecodeChars = TRUE);
 	BOOL IsOwnerDraw(int nCmdID, HMENU hMenu);
 	BOOL IsPopup(HWND hWnd);

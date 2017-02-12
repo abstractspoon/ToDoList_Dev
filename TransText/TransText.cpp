@@ -175,11 +175,6 @@ public:
 		return CTransTextMgr::CleanupDictionary(szMasterDictPath, szDictPath);
 	}
 
-	BOOL ReportPossibleDictionaryDuplicates(LPCTSTR szDictPath)
-	{
-		return CTransTextMgr::ReportPossibleDictionaryDuplicates(szDictPath);
-	}
-
 };
 
 DLL_DECLSPEC ITransText* CreateTransTextInterface(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)

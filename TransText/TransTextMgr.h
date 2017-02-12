@@ -33,6 +33,8 @@ public:
 
 	static LPCTSTR GetDictionaryFile();
 	static LPCTSTR GetDictionaryVersion();
+	static BOOL CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath = NULL);
+
 	static void SetTranslationOption(ITT_TRANSLATEOPTION nOption);
 	static ITT_TRANSLATEOPTION GetTranslationOption();
 	
@@ -47,9 +49,6 @@ public:
 	static void EnableTranslation(UINT nMenuID, BOOL bEnable);
 
 	static void IgnoreString(const CString& sText, BOOL bPrepare);
-
-	static BOOL CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath = NULL);
-	static BOOL ReportPossibleDictionaryDuplicates(LPCTSTR szDictPath = NULL);
 
 protected:
 	CTransDictionary m_dictionary;

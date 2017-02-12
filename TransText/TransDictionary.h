@@ -27,7 +27,7 @@ public:
 
 	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
-	BOOL Translate(CString& sText, HMENU hMenu, int nMenuID);
+	BOOL Translate(CString& sText, HMENU hMenu);
 	BOOL IsTranslated() const;
 
 	BOOL ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const;
@@ -37,7 +37,6 @@ public:
 	BOOL HasClassID(const CString& sClassID) const;
 	BOOL Fixup();
 	BOOL Cleanup(const DICTITEM& diMaster);
-	BOOL GetPossibleDuplicates(DICTITEM& diDup) const;
 	BOOL ModifyItem(const CString& sClassID, const CString& sTextOut);
 
 	void ClearTextOut();
@@ -60,11 +59,11 @@ protected:
 	CString m_sTextOut;
 	CString m_sClassID;
 
-	static ITT_TRANSLATEOPTION s_nTranslationOption;
-
-	// map alternatives by path
 	CMapStringToString m_mapAlternatives;
 
+	static ITT_TRANSLATEOPTION s_nTranslationOption;
+
+protected:
 	static int GetDlgCtrlID(HWND hWnd);
 	static BOOL FromCsv(const CString& sLine, DICTITEM& di, BOOL bDecodeChars);
 
@@ -73,7 +72,6 @@ protected:
 	BOOL Translate(CString& sText, const CString& sClassID);
 	int GetClassIDs(CStringArray& aClassIDs) const;
 	CString GetTextOut(const CString& sClassID) const;
-//	BOOL NeedFixup(const CString& sClassID, CString& sReplaceID, CString& sReplaceText) const;
 	BOOL FixupClassID(CString& sClassID) const;
 };
 
@@ -111,13 +109,12 @@ public:
 
 	BOOL Translate(CString& sText);
 	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
-	BOOL Translate(CString& sText, HMENU hMenu, int nMenuID);
+	BOOL Translate(CString& sText, HMENU hMenu);
 
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
 	TD_CLEANUP CleanupDictionary(const CTransDictionary& tdMaster, CTransDictionary& tdRemoved);
 	void DeleteDictionary();
-	BOOL GetPossibleDuplicates(CTransDictionary& tdDuplicates) const;
 	
 	void IgnoreString(const CString& sText, BOOL bPrepare);
 	BOOL WantIgnore(const CString& sText) const;

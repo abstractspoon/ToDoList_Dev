@@ -364,7 +364,64 @@ void DICTITEM::ClearTextOut()
 
 BOOL DICTITEM::Cleanup(const DICTITEM& diMaster)
 {
-	// TODO
+	// Make the principal item the same
+	if (m_sClassID != diMaster.m_sClassID)
+	{
+		// Do we already have master class ID as an alternative?
+		CString sAltTextOut;
+
+		if (m_mapAlternatives.Lookup(diMaster.m_sClassID, sAltTextOut))
+		{
+			// Delete this alternative
+			m_mapAlternatives.RemoveKey(diMaster.m_sClassID);
+
+			// If the alternative has a translation swap both 
+			// class ID and translation
+			if (!sAltTextOut.IsEmpty())
+			{
+				m_mapAlternatives[m_sClassID] = m_sTextOut;
+
+				m_sClassID = diMaster.m_sClassID;
+				m_sTextOut = sAltTextOut;
+			}
+			else // just swap class IDs
+			{
+				m_mapAlternatives[m_sClassID] = sAltTextOut;
+				m_sClassID = diMaster.m_sClassID;
+			}
+		}
+		else // just add as alt item
+		{
+			m_mapAlternatives[m_sClassID] = m_sTextOut;
+
+			// and update principal class ID
+			m_sClassID = diMaster.m_sClassID;
+		}
+	}
+
+	// Remove alternatives not in the master
+	POSITION pos = m_mapAlternatives.GetStartPosition();
+	CString sAltClassID, sAltTextOut, sUnused;
+
+	while (pos)
+	{
+		m_mapAlternatives.GetNextAssoc(pos, sAltClassID, sAltTextOut);
+
+		if (!diMaster.m_mapAlternatives.Lookup(sAltClassID, sUnused))
+			m_mapAlternatives.RemoveKey(sAltClassID);
+	}
+
+	// Add master alternatives not in 'us'
+	pos = m_mapAlternatives.GetStartPosition();
+	CString sMasterClassID;
+	
+	while (pos)
+	{
+		m_mapAlternatives.GetNextAssoc(pos, sMasterClassID, sUnused);
+		
+		if (!m_mapAlternatives.Lookup(sMasterClassID, sUnused))
+			m_mapAlternatives[sMasterClassID] = _T("");
+	}
 	
 	return FALSE;
 }
@@ -456,140 +513,6 @@ BOOL DICTITEM::FixupClassID(CString& sClassID) const
 	return FALSE;
 }
 
-/*
-BOOL DICTITEM::Fixup()
-{
-	CString sReplaceID, sReplaceText;
-	BOOL bCleaned = FALSE;
-
-	if (NeedFixup(m_sClassID, sReplaceID, sReplaceText))
-	{
-		// overwrite text if empty
-		if (m_sTextOut.IsEmpty())
-		{
-			m_sTextOut = sReplaceText;
-		}
-
-		m_sClassID = sReplaceID;
-		m_mapAlternatives.RemoveKey(sReplaceID);
-		bCleaned = TRUE;
-	}
-
-	// alternatives
-	POSITION pos = m_mapAlternatives.GetStartPosition();
-	
-	while (pos)
-	{
-		CString sText, sClassID, sReplaceText;
-		m_mapAlternatives.GetNextAssoc(pos, sClassID, sText);
-		
-		if (NeedFixup(sClassID, sReplaceID, sReplaceText))
-		{
-			// save the text for sClassID before deleting
-			if (!sText.IsEmpty() && sReplaceText.IsEmpty())
-			{
-				m_mapAlternatives[sReplaceID] = sText;
-			}
-
-			m_mapAlternatives.RemoveKey(sClassID);
-			bCleaned = TRUE;
-		}
-	}
-
-	return bCleaned;
-}
-
-BOOL DICTITEM::NeedFixup(const CString& sClassID, CString& sReplaceID, CString& sReplaceText) const
-{
-	CStringArray aParts;
-
-	if (Misc::Split(sClassID, aParts, '.', TRUE) == 2)
-	{
-		const CString& sClass = Misc::GetItem(aParts, 0);
-		const CString& sID = Misc::GetItem(aParts, 1);
-
-		if (sClass.CompareNoCase(WC_BUTTON) == 0)
-		{
-			// cleanup any 'button' text if there is a corresponding
-			// 'checkbox', 'radiobutton' or 'groupbox' item with the 
-			// same control ID
-			LPCTSTR szButtons[3] = { _T("checkbox"), _T("radiobutton"), _T("groupbox") };
-
-			for (int nBtn = 0; nBtn < 3; nBtn++)
-			{
-				CString sTryID;
-				sTryID.Format(_T("%s.%s"), szButtons[nBtn], sID);
-
-				// try top level item
-				if (m_sClassID == sTryID)
-				{
-					sReplaceID = m_sClassID;
-					sReplaceText = m_sTextOut;
-					return TRUE;
-				}
-				// try alternatives
-				else if (m_mapAlternatives.Lookup(sTryID, sReplaceText))
-				{
-					sReplaceID = sTryID;
-					return TRUE;
-				}
-			}
-		}
-		else if (sClass == TransText::GetFriendlyClass(WC_TOOLTIPS))
-		{
-			// Replace any 'tooltip.ID' with 'tooltip'
-
-			// try top level item
-			if (m_sClassID == sClass)
-			{
-				sReplaceID = sClass;
-				sReplaceText = m_sTextOut;
-				return TRUE;
-			}
-			// try alternatives
-			else if (m_mapAlternatives.Lookup(sClass, sReplaceText))
-			{
-				sReplaceID = sClass;
-				return TRUE;
-			}
-			// just strip off the ID part
-			else if (!sID.IsEmpty())
-			{
-				sReplaceID = sClass;
-				return TRUE;
-			}
-		}
-
-		// cleanup any items with '.65535'
-		if (sID == STATIC_ID)
-		{
-			// look for item with same class without ctrlID
-			if (m_sClassID == sClass)
-			{
-				sReplaceID = m_sClassID;
-				sReplaceText = m_sTextOut;
-				return TRUE;
-			}
-			
-			// try alternatives
-			if (m_mapAlternatives.Lookup(sID, sReplaceText))
-			{
-				sReplaceID = sID;
-				return TRUE;
-			}
-
-			// not found?
-			// just remove the control ID
-			sReplaceID = sClass;
-			sReplaceText = m_sTextOut;
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-*/
-
 BOOL DICTITEM::Translate(CString& sText)
 {
 	ASSERT (!sText.IsEmpty() && sText == m_sTextIn);
@@ -622,9 +545,9 @@ BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID)
 	return Translate(sText, TransText::GetClassIDName(hWndRef));
 }
 
-BOOL DICTITEM::Translate(CString& sText, HMENU hMenu, int nMenuID)
+BOOL DICTITEM::Translate(CString& sText, HMENU /*hMenu*/)
 {
-	return Translate(sText, TransText::GetClassIDName(hMenu, nMenuID)); 
+	return Translate(sText, TransText::GetMenuClassIDName()); 
 }
 
 BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
@@ -658,58 +581,6 @@ BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
 		m_mapAlternatives[sClassID] = _T("");
 
 	return Translate(sText);
-}
-
-BOOL DICTITEM::GetPossibleDuplicates(DICTITEM& diDup) const
-{
-	diDup.Reset();
-	
-	// Build a sorted list of all the class IDs
-	CStringArray aClassIDs;
-	int nNumIDs = GetClassIDs(aClassIDs);
-	
-	if (nNumIDs > 1)
-	{
-		Misc::SortArray(aClassIDs);
-		
-		CString sLastID(aClassIDs[0]), sLastType(sLastID), sNotUsed;
-		Misc::Split(sLastType, sNotUsed, '.');
-
-		BOOL bFirst = TRUE;
-		
-		for (int nID = 1; nID < nNumIDs; nID++)
-		{
-			CString sID(aClassIDs[nID]), sType(sID);
-			Misc::Split(sType, sNotUsed, '.');
-			
-			if (sType == sLastType)	// Possible duplicate
-			{
-				if (bFirst)
-				{
-					if (diDup.m_sTextIn.IsEmpty())
-					{
-						diDup.m_sTextIn = m_sTextIn;
-						diDup.m_sClassID = sLastID;
-					}
-					else
-					{
-						diDup.m_mapAlternatives.SetAt(sLastID, GetTextOut(sLastID));
-					}
-
-					bFirst = FALSE;
-				}
-				
-				diDup.m_mapAlternatives.SetAt(sID, GetTextOut(sID));
-			}
-			else // new class type
-			{
-				sLastType = sType;
-				sLastID = sID;
-			}
-		}
-	}
-	
-	return (diDup.m_mapAlternatives.GetCount() > 0);
 }
 
 BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
@@ -1363,7 +1234,7 @@ BOOL CTransDictionary::TranslateMenuShortcut(CString& sShortcut)
 	return (!sShortcut.IsEmpty());
 }
 			
-BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
+BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu)
 {
 	// trim off trailing shortcut
 	CString sShortcut;
@@ -1378,7 +1249,7 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
 
 	DICTITEM* pDI = GetDictItem(sItem, TRUE);
 	
-	if (pDI && pDI->Translate(sItem, hMenu, nMenuID))
+	if (pDI && pDI->Translate(sItem, hMenu))
 	{
 		// translate and reattach any shortcut
 		if (TranslateMenuShortcut(sShortcut))
@@ -1401,24 +1272,6 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, int nMenuID)
 #endif
 	
 	return FALSE;
-}
-
-BOOL CTransDictionary::GetPossibleDuplicates(CTransDictionary& tdDuplicates) const
-{
-	POSITION pos = m_mapItems.GetStartPosition();
-	DICTITEM* pDI = NULL;
-	CString sItem;
-	DICTITEM diDup;
-	
-	while (pos)
-	{
-		m_mapItems.GetNextAssoc(pos, sItem, pDI);
-		
-		if (pDI->GetPossibleDuplicates(diDup))
-			tdDuplicates.m_mapItems.SetAt(sItem, new DICTITEM(diDup));
-	}
-
-	return !tdDuplicates.IsEmpty();
 }
 
 BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)

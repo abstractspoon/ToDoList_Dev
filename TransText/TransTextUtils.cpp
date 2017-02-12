@@ -105,32 +105,12 @@ CString TransText::GetClassIDName(HWND hWnd)
 	if (hWnd == NULL)
 		return _T("text");
 	
-	CString sClass = GetFriendlyClass(CWinClasses::GetClassEx(hWnd), hWnd);
-	
-	// do we have a 'valid' id
-	int nCtrlID = ::GetDlgCtrlID(hWnd);
-	
-	if (nCtrlID <= 0 || nCtrlID >= 0xffff)
-		return sClass;
-	
-	// else
-	CString sName;
-	sName.Format(_T("%s.%d"), sClass, nCtrlID);
-	
-	return sName;
+	return GetFriendlyClass(CWinClasses::GetClassEx(hWnd), hWnd);
 }
 
-CString TransText::GetClassIDName(HMENU /*hMenu*/, int nMenuID)
+CString TransText::GetMenuClassIDName()
 {
-	CString sClass = GetFriendlyClass(WC_MENU);
-	
-	if (nMenuID < 0)
-		return sClass;
-	
-	CString sName;
-	sName.Format(_T("%s.%d"), sClass, nMenuID);	
-	
-	return sName;
+	return GetFriendlyClass(WC_MENU);
 }
 
 BOOL TransText::PrepareLookupText(CString& sText, BOOL bDecodeChars)

@@ -109,11 +109,10 @@ public:
 	
 	virtual LPCWSTR GetDictionaryFile() const = 0;
 	virtual LPCWSTR GetDictionaryVersion() const = 0;
+	virtual BOOL CleanupDictionary(LPCWSTR szMasterDictPath, LPCWSTR szDictPath) = 0;
+
 	virtual void SetTranslationOption(ITT_TRANSLATEOPTION nOption) = 0;
 	virtual ITT_TRANSLATEOPTION GetTranslationOption() const = 0;
-
-	virtual BOOL CleanupDictionary(LPCWSTR szMasterDictPath, LPCWSTR szDictPath) = 0;
-	virtual BOOL ReportPossibleDictionaryDuplicates(LPCWSTR szDictPath) = 0;
 
 	virtual BOOL TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 	virtual BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;

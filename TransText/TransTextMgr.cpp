@@ -98,27 +98,6 @@ BOOL CTransTextMgr::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPa
 	return FALSE;
 }
 	
-BOOL CTransTextMgr::ReportPossibleDictionaryDuplicates(LPCTSTR szDictPath)
-{
-	CTransDictionary dtActive, dtDuplicates;
-
-	if (!dtActive.LoadDictionary(szDictPath))
-		return FALSE;
-
-	if (dtActive.GetPossibleDuplicates(dtDuplicates))
-	{
-		CString sDuplicatesPath = CFileBackup::BuildBackupPath(szDictPath, _T("duplicates"), 0, _T(".dup"));
-
-		VERIFY(FileMisc::CreateFolderFromFilePath(sDuplicatesPath));
-		VERIFY(dtDuplicates.SaveDictionary(sDuplicatesPath, TRUE));
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE; // no duplicates
-}
-
 void CTransTextMgr::SetTranslationOption(ITT_TRANSLATEOPTION nOption)
 {
 	// if adding to dictionary there must be a dictionary specified
@@ -501,7 +480,7 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 
 		if (!sItem.IsEmpty())
 		{
-			if (ttm.m_dictionary.Translate(sItem, hMenu, nCmdID))
+			if (ttm.m_dictionary.Translate(sItem, hMenu))
 			{
 				ASSERT (!sItem.IsEmpty());
 			
@@ -514,7 +493,7 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 			}
 		
 			// submenus?
-			if (bRecursive && nCmdID == -1)
+			if (bRecursive && (nCmdID == -1))
 			{
 				HMENU hSubMenu = ::GetSubMenu(hMenu, nPos);
 
