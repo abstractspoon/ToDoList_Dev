@@ -5079,3 +5079,86 @@ LRESULT CTabbedToDoCtrl::OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam)
 
 	return 0L;
 }
+
+BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CBitmap& bmImage)
+{
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::SaveTaskViewToImage(bmImage);
+		
+	case FTCV_TASKLIST:
+		return m_taskList.SaveToImage(bmImage);
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		// TODO
+		return FALSE;
+		
+		
+	default:
+		ASSERT(0);
+	}
+	
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::CanSaveTaskViewToImage() const
+{
+	if (!CToDoCtrl::CanSaveTaskViewToImage())
+		return FALSE;
+
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return TRUE; // handle above
+		
+	case FTCV_TASKLIST:
+		return m_taskList.CanSaveToImage();
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		// TODO
+		return FALSE;
+		
+		
+	default:
+		ASSERT(0);
+	}
+	
+	return FALSE;
+}

@@ -362,6 +362,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_PREV_SEL, OnViewPrevSel)
 	ON_COMMAND(ID_VIEW_PROJECTNAME, OnViewProjectname)
 	ON_COMMAND(ID_VIEW_REFRESHFILTER, OnViewRefreshfilter)
+	ON_COMMAND(ID_VIEW_SAVETOIMAGE, OnViewSaveToImage)
 	ON_COMMAND(ID_VIEW_SHOWFILTERBAR, OnViewShowfilterbar)
 	ON_COMMAND(ID_VIEW_SHOWTASKLISTTABBAR, OnViewShowTasklistTabbar) 
 	ON_COMMAND(ID_VIEW_SHOWTREELISTTABBAR, OnViewShowTreeListTabbar)
@@ -555,6 +556,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PREV_SEL, OnUpdateViewPrevSel)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PROJECTNAME, OnUpdateViewProjectname)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_REFRESHFILTER, OnUpdateViewRefreshfilter)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SAVETOIMAGE, OnUpdateViewSaveToImage)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWFILTERBAR, OnUpdateViewShowfilterbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTASKLISTTABBAR, OnUpdateViewShowTasklistTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTREELISTTABBAR, OnUpdateViewShowTreeListTabbar)
@@ -12299,3 +12301,19 @@ void CToDoListWnd::ShowReminderDlg()
 	m_reminders.SetReminder(rem, TRUE);
 }
 #endif
+
+
+void CToDoListWnd::OnViewSaveToImage() 
+{
+	CBitmap bmImage;
+
+	if (GetToDoCtrl().SaveTaskViewToImage(bmImage))
+	{
+		// TODO
+	}
+}
+
+void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanSaveTaskViewToImage());
+}

@@ -24,6 +24,7 @@
 #include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\osversion.h"
+#include "..\shared\copywndcontents.h"
 
 #include "..\3rdparty\shellicons.h"
 
@@ -2468,3 +2469,9 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskCost() const
 	return dCost;
 }
 
+BOOL CTDLTaskTreeCtrl::SaveToImage(CBitmap& bmImage)
+{
+	CCopyTreeCtrlContents copy(m_tcTasks);
+
+	return copy.DoCopy(bmImage);
+}

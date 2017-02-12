@@ -523,6 +523,7 @@ protected:
 	afx_msg void OnUpdateViewPrev(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewPrevSel(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewRefreshfilter(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewSaveToImage(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUserTool(UINT nCmdID);
 	afx_msg void OnUserUIExtension(UINT nCmdID);
@@ -533,6 +534,7 @@ protected:
 	afx_msg void OnViewPrev();
 	afx_msg void OnViewPrevSel();
 	afx_msg void OnViewRefreshfilter();
+	afx_msg void OnViewSaveToImage();
 	afx_msg void OnViewToolbar();
 	afx_msg void OnWindow(UINT nCmdID);
 #ifdef _DEBUG

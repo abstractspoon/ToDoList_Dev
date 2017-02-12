@@ -1,4 +1,15 @@
+// ContentMgr.h: interface for the CContentMgr class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#if !defined(AFX_COPYWNDCONTENTS_H__C258D849_69ED_46A7_A2F0_351C5C9FB3B3__INCLUDED_)
+#define AFX_COPYWNDCONTENTS_H__C258D849_69ED_46A7_A2F0_351C5C9FB3B3__INCLUDED_
+
+#if _MSC_VER > 1000
 #pragma once
+#endif // _MSC_VER > 1000
+
+//////////////////////////////////////////////////////////////////////
 
 class CCopyWndContents
 {
@@ -33,6 +44,8 @@ private:
 private:
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class CCopyTreeCtrlContents : public CCopyWndContents
 {
 public:
@@ -48,6 +61,8 @@ protected:
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class CCopyListCtrlContents : public CCopyWndContents
 {
@@ -70,12 +85,16 @@ protected:
 	int CalcHeaderHeight() const;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class CCopyHeaderCtrlContents : public CCopyWndContents
 {
 public:
 	CCopyHeaderCtrlContents(CHeaderCtrl& hdr);
 	virtual ~CCopyHeaderCtrlContents();
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class CCopyEditContents : public CCopyWndContents
 {
@@ -91,3 +110,7 @@ protected:
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+#endif // AFX_COPYWNDCONTENTS_H__C258D849_69ED_46A7_A2F0_351C5C9FB3B3__INCLUDED_

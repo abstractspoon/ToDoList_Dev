@@ -141,6 +141,10 @@ SOURCE=.\ContentMgr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CopyWndContents.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\custombutton.cpp
 # End Source File
 # Begin Source File
@@ -766,6 +770,10 @@ SOURCE=.\ContentCtrl.h
 # Begin Source File
 
 SOURCE=.\ContentMgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CopyWndContents.h
 # End Source File
 # Begin Source File
 

@@ -56,16 +56,14 @@ public:
 
 	virtual ~CTabbedToDoCtrl();
 	
-	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
-
+	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
 						BOOL bEditText = TRUE, DWORD dwDependency = 0);
-	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
 
-	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
-
+	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
+	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
 	
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();
@@ -77,6 +75,8 @@ public:
 	void SaveAllTaskViewPreferences();
 
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
+	BOOL SaveTaskViewToImage(CBitmap& bmImage);
+	BOOL CanSaveTaskViewToImage() const;
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;

@@ -138,7 +138,9 @@ public:
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;
 	virtual BOOL EnsureSelectionVisible() = 0;
-
+	virtual BOOL SaveToImage(CBitmap& bmImage) = 0;
+	
+	BOOL CanSaveToImage() const;
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;

@@ -89,6 +89,7 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
+	BOOL SaveToImage(CBitmap& bmImage);
 	
 	BOOL CancelOperation();
 

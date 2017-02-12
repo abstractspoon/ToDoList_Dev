@@ -78,6 +78,9 @@ public:
 	TDC_FILE Save(const CString& sFilePath = _T(""));
 	TDC_FILE Save(CTaskFile& tasks/*out*/, const CString& sFilePath = _T(""));
 
+	BOOL SaveTaskViewToImage(CBitmap& bmImage) { return m_taskTree.SaveToImage(bmImage); }
+	BOOL CanSaveTaskViewToImage() const { return m_taskTree.CanSaveToImage(); }
+
 	TDC_FILE Load(const CString& sFilePath);
 	TDC_FILE Load(const CString& sFilePath, CTaskFile& tasks/*out*/);
 

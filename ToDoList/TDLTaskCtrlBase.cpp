@@ -6083,4 +6083,7 @@ BOOL CTDLTaskCtrlBase::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-
+BOOL CTDLTaskCtrlBase::CanSaveToImage() const
+{
+	return (GetTaskCount() > 0);
+}
