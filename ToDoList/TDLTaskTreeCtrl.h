@@ -126,7 +126,6 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	BOOL GetLabelEditRect(CRect& rLabel) const;
-	BOOL SaveToImage(CBitmap& bmImage);
 	
 	void ExpandAll(BOOL bExpand = TRUE);
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
@@ -183,6 +182,7 @@ protected:
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
+	BOOL DoSaveToImage(CBitmap& bmImage);
 
 protected:
 	// pseudo-message handlers

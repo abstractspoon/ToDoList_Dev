@@ -2469,9 +2469,10 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskCost() const
 	return dCost;
 }
 
-BOOL CTDLTaskTreeCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CTDLTaskTreeCtrl::DoSaveToImage(CBitmap& bmImage)
 {
 	CCopyTreeCtrlContents copy(m_tcTasks);
+	CLockUpdates lock(GetSafeHwnd());
 
 	return copy.DoCopy(bmImage);
 }

@@ -89,7 +89,6 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
-	BOOL SaveToImage(CBitmap& bmImage);
 	
 	BOOL CancelOperation();
 
@@ -130,6 +129,7 @@ protected:
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
 	void DeselectAll();
 	DWORD GetHelpID() const;
+	BOOL DoSaveToImage(CBitmap& bmImage);
 
 protected:
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;

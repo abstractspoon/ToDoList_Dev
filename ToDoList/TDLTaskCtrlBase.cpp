@@ -115,7 +115,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_bBoundSelecting(FALSE),
 	m_nDefTimeEstUnits(TDCU_HOURS), 
 	m_nDefTimeSpentUnits(TDCU_HOURS),
-	m_imageIcons(16, 16)
+	m_imageIcons(16, 16),
+	m_bSavingToImage(FALSE)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -3091,7 +3092,11 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 		break;
 	}
 	
-	UINT nFlags = (nAlign | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | (bTaskTitle ? DT_END_ELLIPSIS : 0) | GraphicsMisc::GetRTLDrawTextFlags(Tasks()));
+	UINT nFlags = (nAlign | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(Tasks()));
+
+	if (!m_bSavingToImage && bTaskTitle)
+		nFlags |= DT_END_ELLIPSIS;
+
 	COLORREF crOld = pDC->SetTextColor(crText);
 	
 	pDC->SetBkMode(TRANSPARENT);
@@ -6081,6 +6086,16 @@ BOOL CTDLTaskCtrlBase::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	AfxGetApp()->WinHelp(GetHelpID());
 	return TRUE;
+}
+
+BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
+{
+	if (!CanSaveToImage())
+		return FALSE;
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+
+	return DoSaveToImage(bmImage);
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const

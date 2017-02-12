@@ -1398,7 +1398,7 @@ GM_ITEMSTATE CTDLTaskListCtrl::GetColumnItemState(int nItem) const
 	return GetListItemState(nItem);
 }
 
-BOOL CTDLTaskListCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CTDLTaskListCtrl::DoSaveToImage(CBitmap& bmImage)
 {
 	CCopyListCtrlContents copy(m_lcTasks);
 	

@@ -138,9 +138,10 @@ public:
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;
 	virtual BOOL EnsureSelectionVisible() = 0;
-	virtual BOOL SaveToImage(CBitmap& bmImage) = 0;
 	
+	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
+
 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
 	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
@@ -276,6 +277,8 @@ protected:
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
+	BOOL m_bSavingToImage;
+
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
 	DWORD m_dwEditTitleTaskID;
@@ -364,6 +367,7 @@ protected:
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
+	virtual BOOL DoSaveToImage(CBitmap& bmImage) = 0;
 
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 
