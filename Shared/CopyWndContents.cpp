@@ -20,11 +20,13 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 	m_sizeContent = CalcContentsSize();
 	m_sizePage = CalcPageSize();
 
+	int nHeaderHeight = CalcHeaderHeight();
+
 	ASSERT((m_sizeContent.cx > 0) && (m_sizeContent.cy > 0));
 	ASSERT((m_sizePage.cx > 0) && (m_sizePage.cy > 0));
 
 	int nNumHorzPages = (m_sizeContent.cx / m_sizePage.cx);
-	int nNumVertPages = (m_sizeContent.cy / m_sizePage.cy);
+	int nNumVertPages = ((m_sizeContent.cy - nHeaderHeight) / m_sizePage.cy);
 	
 	if (m_sizeContent.cx % m_sizePage.cx)
 		nNumHorzPages++;
@@ -34,39 +36,53 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 
 	// create a temp dc to paint on
 	CDC* pDC = m_wnd.GetDC();
-	CDC dcTemp;
+	CDC dcContent, dcPage;
+	CBitmap bmpPage;
 
-	if (dcTemp.CreateCompatibleDC(pDC))
+	if (dcContent.CreateCompatibleDC(pDC) && dcPage.CreateCompatibleDC(pDC))
 	{
-		if (bmp.CreateCompatibleBitmap(pDC, m_sizeContent.cx, m_sizeContent.cy))
+		if (bmp.CreateCompatibleBitmap(pDC, m_sizeContent.cx, m_sizeContent.cy) &&
+			bmpPage.CreateCompatibleBitmap(pDC, m_sizePage.cx, m_sizePage.cy))
 		{
+			// Move to origin
 			m_wnd.SendMessage(WM_HSCROLL, SB_LEFT);
 			m_wnd.SendMessage(WM_VSCROLL, SB_TOP);
 
-			CBitmap* pOld = dcTemp.SelectObject(&bmp);
-			dcTemp.FillSolidRect(0, 0, m_sizeContent.cx, m_sizeContent.cy, GetSysColor(COLOR_WINDOW));
+			// prepare bitmaps
+			CBitmap* pOldContent = dcContent.SelectObject(&bmp);
+			dcContent.FillSolidRect(0, 0, m_sizeContent.cx, m_sizeContent.cy, GetSysColor(COLOR_WINDOW));
 
-			CPoint ptWinOrg(0, 0);
+			CBitmap* pOldPage = dcPage.SelectObject(&bmpPage);
+			CPoint ptPagePos(0, 0);
 
 			for (int nVert = 0; nVert < nNumVertPages; nVert++)
 			{
 				for (int nHorz = 0; nHorz < nNumHorzPages; nHorz++)
 				{
-					dcTemp.SetWindowOrg(ptWinOrg);
-					
-					DoPrint(dcTemp);
+					dcPage.FillSolidRect(0, 0, m_sizePage.cx, m_sizePage.cy, GetSysColor(COLOR_WINDOW));
+					DoPrint(dcPage, ptPagePos.x, ptPagePos.y);
 
-					ptWinOrg.x -= PageRight(-ptWinOrg.x);
+					// Copy page to correct content position
+					CPoint ptDCOrg = dcPage.GetWindowOrg();
+					dcPage.SetWindowOrg(0, 0);
+
+					dcContent.BitBlt(ptPagePos.x, ptPagePos.y, m_sizePage.cx, m_sizePage.cy, &dcPage, ptDCOrg.x, ptDCOrg.y, SRCCOPY);
+
+					// Scroll one page to right
+					ptPagePos.x = PageRight(ptPagePos.x);
 				}
 
+				// Reset horizontal scrollbar
 				m_wnd.SendMessage(WM_HSCROLL, SB_LEFT);
-				ptWinOrg.x = 0;
+				ptPagePos.x = 0;
 
-				ptWinOrg.y -= PageDown(-ptWinOrg.y);
+				// Scroll one page down
+				ptPagePos.y = PageDown(ptPagePos.y);
 			}
 
 			// cleanup
-			dcTemp.SelectObject(pOld);
+			dcContent.SelectObject(pOldContent);
+			dcPage.SelectObject(pOldPage);
 		}
 	}
 
@@ -75,7 +91,7 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 	return TRUE;
 }
 
-void CCopyWndContents::DoPrint(CDC& dc)
+void CCopyWndContents::DoPrint(CDC& dc, int /*nHPos*/, int /*nVPos*/)
 {
 	DoPrint(m_wnd, dc);
 }
@@ -87,22 +103,33 @@ void CCopyWndContents::DoPrint(HWND hwnd, HDC hdc, DWORD dwFlags)
 
 int CCopyWndContents::PageDown(int nCurVertPos)
 {
-	int nNewVertPos = (nCurVertPos + m_sizePage.cy);
-	nNewVertPos = min(nNewVertPos, m_sizeContent.cy);
-
 	DoPageDown();
 
-	return (nNewVertPos - nCurVertPos);
+	int nScrollPos = GetContentVScrollPos();
+
+	if (nScrollPos > 0)
+		return nScrollPos;
+
+	int nNewVertPos = (nCurVertPos + m_sizePage.cy);
+	nNewVertPos = min(nNewVertPos, m_sizeContent.cy - m_sizePage.cy);
+
+	return nNewVertPos;
 }
 
 int CCopyWndContents::PageRight(int nCurHorzPos)
 {
+	DoPageRight();
+
+	int nScrollPos = GetContentHScrollPos();
+
+	if (nScrollPos > 0)
+		return nScrollPos;
+
+	// else
 	int nNewHorzPos = (nCurHorzPos + m_sizePage.cx);
 	nNewHorzPos = min(nNewHorzPos, (m_sizeContent.cx - m_sizePage.cx));
 
-	DoPageRight();
-
-	return (nNewHorzPos - nCurHorzPos - 1);
+	return nNewHorzPos;
 }
 
 void CCopyWndContents::DoPageDown()
@@ -149,6 +176,36 @@ CSize CCopyWndContents::CalcPageSize() const
 	return rClient.Size();
 }
 
+int CCopyWndContents::GetContentVScrollPos() const
+{
+	int nPos = 0;
+
+	if (m_wnd.GetStyle() & WS_VSCROLL)
+	{
+		SCROLLINFO siVert = { 0 };
+		m_wnd.GetScrollInfo(SB_VERT, &siVert);
+
+		nPos = siVert.nPos;
+	}
+
+	return nPos;
+}
+
+int CCopyWndContents::GetContentHScrollPos() const
+{
+	int nPos = 0;
+
+	if (m_wnd.GetStyle() & WS_HSCROLL)
+	{
+		SCROLLINFO siHorz = { 0 };
+		m_wnd.GetScrollInfo(SB_HORZ, &siHorz);
+
+		nPos = siHorz.nPos;
+	}
+
+	return nPos;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 CCopyTreeCtrlContents::CCopyTreeCtrlContents(CTreeCtrl& tree) : CCopyWndContents(tree), m_tree(tree)
@@ -176,7 +233,7 @@ CSize CCopyTreeCtrlContents::CalcContentsSize() const
 {
 	CSize sizeContent(CCopyWndContents::CalcContentsSize());
 
-	//sizeContent.cx++;
+	sizeContent.cx++;
 
 	CTreeCtrlHelper tch(m_tree);
 	int nTotalVisible = tch.BuildVisibleIndexMap();
@@ -193,6 +250,24 @@ CSize CCopyTreeCtrlContents::CalcPageSize() const
 	sizePage.cy = (nPageVisible * m_nItemHeight);
 
 	return sizePage;
+}
+
+int CCopyTreeCtrlContents::GetContentVScrollPos() const
+{
+	int nPos = CCopyWndContents::GetContentVScrollPos();
+
+	if (nPos != 0)
+		return (nPos * m_nItemHeight);
+
+	// else
+	HTREEITEM hti = m_tree.GetFirstVisibleItem();
+	CRect rItem;
+
+	if (hti && m_tree.GetItemRect(hti, rItem, FALSE))
+		return rItem.top;
+
+	// else
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -224,9 +299,12 @@ CCopyListCtrlContents::~CCopyListCtrlContents()
 
 int CCopyListCtrlContents::PageDown(int nCurVertPos)
 {
-	int nOffset = CCopyWndContents::PageDown(nCurVertPos);
+	int nNewVPos = CCopyWndContents::PageDown(nCurVertPos);
 
-	return (nOffset/* - CalcHeaderHeight()*/);
+	if (nCurVertPos == 0)
+		nNewVPos += CalcHeaderHeight();
+
+	return nNewVPos;
 }
 
 
@@ -256,14 +334,13 @@ CSize CCopyListCtrlContents::CalcPageSize() const
 {
 	CSize sizePage(CCopyWndContents::CalcPageSize());
 
-//	int nPageVisible = m_list.GetCountPerPage();
-//	sizePage.cy = (nPageVisible * m_nItemHeight);
-
-	// deduct height of header
-	sizePage.cy -= CalcHeaderHeight();
-
-	// adjust for whole lines
-	sizePage.cy = ((sizePage.cy / m_nItemHeight) * m_nItemHeight);
+// 	// deduct height of header
+// 	sizePage.cy -= CalcHeaderHeight();
+// 
+// 	// adjust for whole lines
+ 	int nHeaderHeight = CalcHeaderHeight();
+ 	sizePage.cy = ((m_list.GetCountPerPage() * m_nItemHeight) + nHeaderHeight);
+//  	sizePage.cy = ((((sizePage.cy - nHeaderHeight) / m_nItemHeight) * m_nItemHeight) + nHeaderHeight);
 
 	return sizePage;
 }
@@ -284,12 +361,25 @@ int CCopyListCtrlContents::CalcHeaderHeight() const
 	return 0;
 }
 
-void CCopyListCtrlContents::DoPrint(CDC& dc)
+void CCopyListCtrlContents::DoPrint(CDC& dc, int nHPos, int nVPos)
 {
-	if (dc.GetWindowOrg().y == 0)
-		CCopyWndContents::DoPrint(m_wnd, dc, PRF_CLIENT | PRF_CHILDREN);
- 	else
- 		CCopyWndContents::DoPrint(dc);
+	CPoint ptOrg = dc.GetWindowOrg();
+
+
+	CCopyWndContents::DoPrint(m_wnd, dc, PRF_CLIENT | PRF_CHILDREN);
+
+	if (nVPos != 0)
+		dc.SetWindowOrg(ptOrg.x, CalcHeaderHeight());
+
+// 	if (nVPos != 0)
+// 		dc.SetWindowOrg(ptOrg);
+}
+
+int CCopyListCtrlContents::GetContentVScrollPos() const
+{
+	int nPos = CCopyWndContents::GetContentVScrollPos();
+
+	return (nPos * m_nItemHeight);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
