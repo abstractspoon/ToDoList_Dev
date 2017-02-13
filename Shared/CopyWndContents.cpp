@@ -1,6 +1,6 @@
 #include "StdAfx.h"
-#include "CopyWndContents.h"
 
+#include "CopyWndContents.h"
 #include "treectrlhelper.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 	return TRUE;
 }
 
-void CCopyWndContents::DoPrint(CDC& dc, int /*nHPos*/, int /*nVPos*/)
+void CCopyWndContents::DoPrint(CDC& dc, int /*nHPage*/, int /*nVPage*/)
 {
 	DoPrint(m_wnd, dc);
 }
@@ -259,14 +259,17 @@ int CCopyTreeCtrlContents::GetContentScrollPos(BOOL bVert) const
 	if (bVert)
 	{
 		if (nPos != 0)
-			return (nPos * m_nItemHeight);
-
-		// else
-		HTREEITEM hti = m_tree.GetFirstVisibleItem();
-		CRect rItem;
-
-		if (hti && m_tree.GetItemRect(hti, rItem, FALSE))
-			nPos = rItem.top;
+		{
+			nPos *= m_nItemHeight;
+		}
+		else
+		{
+			HTREEITEM hti = m_tree.GetFirstVisibleItem();
+			CRect rItem;
+			
+			if (hti && m_tree.GetItemRect(hti, rItem, FALSE))
+				nPos = rItem.top;
+		}
 	}
 
 	return nPos;
@@ -303,10 +306,7 @@ int CCopyListCtrlContents::PageDown(int nCurVertPos)
 {
 	int nNewVPos = CCopyWndContents::PageDown(nCurVertPos);
 
-	if (nCurVertPos == 0)
-		nNewVPos += CalcHeaderHeight();
-
-	return nNewVPos;
+	return (nNewVPos + CalcHeaderHeight());
 }
 
 int CCopyListCtrlContents::CalcPageCount(BOOL bVert) const
@@ -376,12 +376,12 @@ int CCopyListCtrlContents::CalcHeaderHeight() const
 	return 0;
 }
 
-void CCopyListCtrlContents::DoPrint(CDC& dc, int nHPos, int nVPos)
+void CCopyListCtrlContents::DoPrint(CDC& dc, int /*nHPage*/, int nVPage)
 {
 	CPoint ptOrg = dc.GetWindowOrg();
 	CCopyWndContents::DoPrint(m_wnd, dc, PRF_CLIENT | PRF_CHILDREN);
 
-	if (nVPos != 0)
+	if (nVPage != 0)
 		dc.SetWindowOrg(ptOrg.x, CalcHeaderHeight());
 }
 
@@ -392,9 +392,17 @@ int CCopyListCtrlContents::GetContentScrollPos(BOOL bVert) const
 	if (bVert)
 	{
 		if (nPos != 0)
+		{
 			nPos *= m_nItemHeight;
-
-		// TODO
+		}
+		else
+		{
+			int nItem = m_list.GetTopIndex();
+			CRect rItem;
+			
+			if ((nItem != -1) && m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS))
+				nPos = rItem.top;
+		}
 	}
 
 	return nPos;

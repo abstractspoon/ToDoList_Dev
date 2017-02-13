@@ -22,7 +22,6 @@
 #include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\osversion.h"
-#include "..\shared\copywndcontents.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1398,9 +1397,3 @@ GM_ITEMSTATE CTDLTaskListCtrl::GetColumnItemState(int nItem) const
 	return GetListItemState(nItem);
 }
 
-BOOL CTDLTaskListCtrl::DoSaveToImage(CBitmap& bmImage)
-{
-	CCopyListCtrlContents copy(m_lcTasks);
-	
-	return copy.DoCopy(bmImage);
-}

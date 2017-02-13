@@ -182,7 +182,6 @@ protected:
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
-	BOOL DoSaveToImage(CBitmap& bmImage);
 
 protected:
 	// pseudo-message handlers

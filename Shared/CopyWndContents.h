@@ -28,7 +28,7 @@ protected:
 	virtual int PageDown(int nCurVertPos);
 	virtual int PageRight(int nCurHorzPos);
 	
-	virtual void DoPrint(CDC& dc, int nHPos, int nVPos);
+	virtual void DoPrint(CDC& dc, int nHPage, int nVPage);
 	virtual void DoPageDown();
 	virtual void DoPageRight();
 
@@ -83,7 +83,7 @@ protected:
 protected:
 	virtual int PageDown(int nCurVertPos);
 	virtual void DoPageDown();
-	virtual void DoPrint(CDC& dc, int nHPos, int nVPos);
+	virtual void DoPrint(CDC& dc, int nHPage, int nVPage);
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
 	virtual int GetContentScrollPos(BOOL bVert) const;

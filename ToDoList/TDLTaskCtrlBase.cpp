@@ -26,6 +26,8 @@
 #include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\winclasses.h"
+#include "..\shared\copywndcontents.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2059,6 +2061,9 @@ COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 
 void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS)
 {
+	if (m_bSavingToImage)
+		return;
+
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 	
@@ -2254,7 +2259,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					if ((nState == GMIS_SELECTEDNOTFOCUSED) && m_dwEditTitleTaskID)
 						nState = GMIS_SELECTED;
 					
-					BOOL bSelected = (nState != GMIS_NONE);
+					BOOL bSelected = !((nState == GMIS_NONE) || m_bSavingToImage);
 					BOOL bRef = (dwTaskID != dwTrueID);
 					
 					// colors
@@ -2299,7 +2304,9 @@ BOOL CTDLTaskCtrlBase::HasThemedState(GM_ITEMSTATE nState) const
 
 void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, BOOL bAlternate, COLORREF crBack)
 {
-	if (nState == GMIS_NONE)
+	BOOL bSelected = ((nState != GMIS_NONE) && !m_bSavingToImage);
+
+	if (!bSelected)
 	{
 		// if we have gridlines we don't fill the bottom line so 
 		// as to avoid overwriting gridlines previously drawn
@@ -2317,7 +2324,7 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 	// draw horz gridline before selection
 	DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 	
-	if (nState != GMIS_NONE) // selection of some sort
+	if (bSelected) // selection of some sort
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT);
 		
@@ -6093,9 +6100,102 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 	if (!CanSaveToImage())
 		return FALSE;
 
+	CLockUpdates lock(GetSafeHwnd());
 	CAutoFlag af(m_bSavingToImage, TRUE);
+	CEnBitmap bmTasks, bmHeader, bmColumns;
 
-	return DoSaveToImage(bmImage);
+	HWND hwndTasks = Tasks();
+
+	if (CWinClasses::IsClass(hwndTasks, WC_TREEVIEW))
+	{
+		CTreeCtrl* pTree = (CTreeCtrl*)FromHandle(hwndTasks);
+		ASSERT(pTree);
+
+		if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmTasks))
+			return FALSE;
+	}
+	else // List view
+	{
+		CListCtrl* pList = (CListCtrl*)FromHandle(hwndTasks);
+		ASSERT(pList);
+		
+		if (!CCopyListCtrlContents(*pList).DoCopy(bmTasks))
+			return FALSE;
+	}
+
+	// Tasks header and attribute columns
+	if (!CCopyHeaderCtrlContents(m_hdrTasks).DoCopy(bmHeader) ||
+		!CCopyListCtrlContents(m_lcColumns).DoCopy(bmColumns))
+	{
+		return FALSE;
+	}
+
+	// Create the image big enough to fit the tasks and columns side-by-side
+	CSize sizeTasks = bmTasks.GetSize();
+	CSize sizeHeader = bmHeader.GetSize();
+	CSize sizeColumns = bmColumns.GetSize();
+	
+	CSize sizeImage;
+	
+	sizeImage.cx = (sizeTasks.cx + sizeColumns.cx);
+	sizeImage.cy = sizeColumns.cy;
+	
+	CDC* pDC = GetDC();
+	CDC dcImage, dcParts;
+	
+	if (dcImage.CreateCompatibleDC(pDC) && dcParts.CreateCompatibleDC(pDC))
+	{
+		if (bmImage.CreateCompatibleBitmap(pDC, sizeImage.cx, sizeImage.cy))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+			// TODO - Handle tasks and columns reversed
+			
+			// Task Tree
+			CBitmap* pOldPart = dcParts.SelectObject(&bmTasks);
+			dcImage.BitBlt(0, sizeHeader.cy, sizeTasks.cx, sizeTasks.cy, &dcParts, 0, 0, SRCCOPY);
+			dcParts.SelectObject(pOldPart);
+			
+			// Draw a gray column divider at the right hand edge
+			dcImage.FillSolidRect(sizeTasks.cx - 1, sizeHeader.cy, 1, sizeTasks.cy, m_crGridLine);
+			
+			// Task tree header
+			pOldPart = dcParts.SelectObject(&bmHeader);
+			dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+			dcParts.SelectObject(pOldPart);
+			
+			// if the task header is shorter than the tasks themselves
+			// then draw default header background for the remainder
+			if (sizeHeader.cx < sizeTasks.cx)
+			{
+				CThemed th;
+				BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+				
+				CRect rHeader((sizeHeader.cx - 2), 0, sizeTasks.cx, sizeHeader.cy);
+				
+				if (bThemed)
+				{
+					th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
+				}
+				else
+				{
+					dcImage.FillSolidRect(rHeader, ::GetSysColor(COLOR_3DFACE));
+					dcImage.Draw3dRect(rHeader, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
+				}
+			}
+			
+			// Attribute Columns
+			pOldPart = dcParts.SelectObject(&bmColumns);
+			dcImage.BitBlt(sizeTasks.cx, 0, sizeColumns.cx, sizeColumns.cy, &dcParts, 0, 0, SRCCOPY);
+			dcParts.SelectObject(pOldPart);
+		}
+	}
+	
+	ReleaseDC(pDC);
+
+	
+
+	return TRUE;
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const

@@ -367,7 +367,6 @@ protected:
 	virtual GM_ITEMSTATE GetColumnItemState(int nItem) const = 0;
 	virtual void DeselectAll() = 0;
 	virtual DWORD GetHelpID() const = 0;
-	virtual BOOL DoSaveToImage(CBitmap& bmImage) = 0;
 
 	virtual BOOL IsColumnShowing(TDC_COLUMN nColID) const;
 
