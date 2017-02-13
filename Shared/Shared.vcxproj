@@ -163,6 +163,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="CopyWndContents.cpp" />
     <ClCompile Include="custombutton.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -710,6 +711,7 @@
     <ClInclude Include="ColorDef.h" />
     <ClInclude Include="ContentCtrl.h" />
     <ClInclude Include="ContentMgr.h" />
+    <ClInclude Include="CopyWndContents.h" />
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="DatabaseEx.h" />
     <ClInclude Include="DateHelper.h" />
