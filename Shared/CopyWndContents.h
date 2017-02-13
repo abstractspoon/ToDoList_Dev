@@ -32,12 +32,11 @@ protected:
 	virtual void DoPageDown();
 	virtual void DoPageRight();
 
-	virtual int GetContentVScrollPos() const;
-	virtual int GetContentHScrollPos() const;
+	virtual int GetContentScrollPos(BOOL bVert) const;
+	virtual int CalcPageCount(BOOL bVert) const;
 
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
-	virtual int CalcHeaderHeight() const { return 0; }
 
 	CSize GetContentsSize() const { return m_sizeContent; }
 	CSize GetPageSize() const { return m_sizePage; }
@@ -66,7 +65,7 @@ protected:
 	virtual void DoPageDown();
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
-	virtual int GetContentVScrollPos() const;
+	virtual int GetContentScrollPos(BOOL bVert) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -87,8 +86,10 @@ protected:
 	virtual void DoPrint(CDC& dc, int nHPos, int nVPos);
 	virtual CSize CalcContentsSize() const;
 	virtual CSize CalcPageSize() const;
-	virtual int GetContentVScrollPos() const;
-	virtual int CalcHeaderHeight() const;
+	virtual int GetContentScrollPos(BOOL bVert) const;
+	virtual int CalcPageCount(BOOL bVert) const;
+	
+	int CalcHeaderHeight() const;
 };
 
 //////////////////////////////////////////////////////////////////////
