@@ -2866,7 +2866,8 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	{
-		TDCCOLEDITVISIBILITY::Load(pPrefs, szKey);
+		if (!TDCCOLEDITVISIBILITY::Load(pPrefs, szKey))
+			return FALSE;
 
 		CString sKey;
 		sKey.Format(_T("%s\\FilterVisibility"), szKey);
