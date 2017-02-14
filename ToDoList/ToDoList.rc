@@ -4482,6 +4482,7 @@ BEGIN
     IDS_CAD_INSERTSYMBOL    "Symbols..."
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
+    IDS_BMPFILEFILTER       "Bitmap Image (*.bmp)|*.bmp||"
 END
 
 STRINGTABLE DISCARDABLE 

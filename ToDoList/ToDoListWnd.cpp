@@ -12306,23 +12306,49 @@ void CToDoListWnd::ShowReminderDlg()
 
 void CToDoListWnd::OnViewSaveToImage() 
 {
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CPreferences prefs;
+
+	// Get filename first as this allows the user a chance to cancel
+	CString sFilePath(tdc.GetFilePath());
+
+	if (sFilePath.IsEmpty())
+		sFilePath = CEnString(IDS_TDC_UNTITLEDFILE);
+	else
+		FileMisc::RemoveExtension(sFilePath);
+
+	sFilePath += '.';
+	sFilePath += tdc.GetTaskViewName();
+	sFilePath += _T(".bmp");
+
+
+	CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
+							_T("bmp"), 
+							sFilePath, 
+							EOFN_DEFAULTSAVE,
+							CEnString(IDS_SAVEASIMAGE_FILTER), 
+							this);
+
+	if (dialog.DoModal(prefs) == IDCANCEL)
+		return;
+	
+	// else
+	sFilePath = dialog.GetPathName();
 	CBitmap bmImage;
-
-	if (GetToDoCtrl().SaveTaskViewToImage(bmImage))
+		
+	if (tdc.SaveTaskViewToImage(bmImage))
 	{
-#ifdef _DEBUG
-		CString sTempFile = FileMisc::GetTempFilePath(_T("TDLImage"), _T("bmp"));
-
 		CDibData dib;
 
-		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sTempFile))
+		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath))
 		{
-			FileMisc::Run(*this, sTempFile);
+			FileMisc::Run(*this, sFilePath);
+			return;
 		}
-#else
-		AfxMessageBox(_T("Saving not implemented"));
-#endif
 	}
+
+	// Error handling
+	// TODO
 }
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 

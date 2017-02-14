@@ -68,6 +68,7 @@ public:
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();
 	FTC_VIEW GetTaskView() const { return m_tabViews.GetActiveView(); }
+	CString GetTaskViewName() const { return m_tabViews.GetViewName(GetTaskView()); }
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
 	void SetVisibleTaskViews(const CStringArray& aTypeIDs);

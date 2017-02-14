@@ -236,7 +236,9 @@ CString CTDLViewTabControl::GetViewName(FTC_VIEW nView) const
 	if (nIndex < 0 || nIndex > m_aViews.GetSize())
 		return _T("");
 
-	return m_aViews[nIndex].sViewLabel;
+	CString sViewName(m_aViews[nIndex].sViewLabel);
+
+	return Misc::Trim(sViewName);
 }
 
 BOOL CTDLViewTabControl::SetViewHwnd(FTC_VIEW nView, HWND hWnd)
