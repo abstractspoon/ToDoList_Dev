@@ -277,7 +277,6 @@ protected:
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
-	BOOL m_bSavingToImage;
 
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;

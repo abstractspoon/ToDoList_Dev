@@ -25,6 +25,7 @@
 #include "..\shared\wndprompt.h"
 #include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
+#include "..\shared\enbitmap.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -114,8 +115,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_bBoundSelecting(FALSE),
 	m_nDefTimeEstUnits(TDCU_HOURS), 
 	m_nDefTimeSpentUnits(TDCU_HOURS),
-	m_imageIcons(16, 16),
-	m_bSavingToImage(FALSE)
+	m_imageIcons(16, 16)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -6101,7 +6101,6 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 		return FALSE;
 
 	CLockUpdates lock(GetSafeHwnd());
-	CAutoFlag af(m_bSavingToImage, TRUE);
 
 	return CTreeListSyncer::SaveToImage(bmImage);
 }

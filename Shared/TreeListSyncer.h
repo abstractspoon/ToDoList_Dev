@@ -124,6 +124,7 @@ protected:
 	BOOL m_bSplitting;
 	COLORREF m_crSplitBar;
 	HIMAGELIST m_hilSize;
+	BOOL m_bSavingToImage;
 
 private:
 	int m_nSplitPos, m_nSplitWidth;

@@ -76,7 +76,8 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_nSplitPos(INITIAL_SPLIT_POS),
 	m_nSplitWidth(MAX_SPLITBAR_WIDTH),
 	m_crSplitBar(GetSysColor(COLOR_3DSHADOW)),
-	m_nHidden(TLSH_NONE)
+	m_nHidden(TLSH_NONE),
+	m_bSavingToImage(FALSE)
 {
 }
 
@@ -3004,10 +3005,12 @@ int CALLBACK CTreeListSyncer::SortListProc(LPARAM lParam1, LPARAM lParam2, LPARA
 
 BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage)
 {
-	bmImage.DeleteObject();
-
 	HWND hwndPrimary = PrimaryWnd();
 	BOOL bPrimaryIsLeft = IsLeft(hwndPrimary);
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+
+	bmImage.DeleteObject();
 
 	CEnBitmap bmPrimary, bmPrimaryHeader, bmOther;
 
