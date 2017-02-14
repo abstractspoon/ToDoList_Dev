@@ -12326,7 +12326,7 @@ void CToDoListWnd::OnViewSaveToImage()
 							_T("bmp"), 
 							sFilePath, 
 							EOFN_DEFAULTSAVE,
-							CEnString(IDS_SAVEASIMAGE_FILTER), 
+							CEnString(IDS_BMPFILEFILTER), 
 							this);
 
 	if (dialog.DoModal(prefs) == IDCANCEL)
