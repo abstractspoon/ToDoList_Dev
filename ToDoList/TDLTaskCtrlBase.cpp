@@ -1894,7 +1894,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	}
 	ASSERT(HasColor(crText));
 	
-	if (bSelected)
+	if (bSelected && !m_bSavingToImage)
 	{
 		crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 	}
@@ -2310,7 +2310,7 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 	{
 		// if we have gridlines we don't fill the bottom line so 
 		// as to avoid overwriting gridlines previously drawn
-		CRect rBack(rLabel);
+		CRect rBack(m_bSavingToImage ? rRow : rLabel);
 
 		if (HasColor(m_crGridLine))
 			rBack.bottom--;
