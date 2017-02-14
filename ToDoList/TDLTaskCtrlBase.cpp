@@ -25,9 +25,6 @@
 #include "..\shared\wndprompt.h"
 #include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
-#include "..\shared\enbitmap.h"
-#include "..\shared\winclasses.h"
-#include "..\shared\copywndcontents.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2310,7 +2307,10 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 	{
 		// if we have gridlines we don't fill the bottom line so 
 		// as to avoid overwriting gridlines previously drawn
-		CRect rBack(m_bSavingToImage ? rRow : rLabel);
+		CRect rBack(rLabel);
+
+		if (m_bSavingToImage)
+			rBack.right = rRow.right;
 
 		if (HasColor(m_crGridLine))
 			rBack.bottom--;
@@ -6102,100 +6102,8 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 
 	CLockUpdates lock(GetSafeHwnd());
 	CAutoFlag af(m_bSavingToImage, TRUE);
-	CEnBitmap bmTasks, bmHeader, bmColumns;
 
-	HWND hwndTasks = Tasks();
-
-	if (CWinClasses::IsClass(hwndTasks, WC_TREEVIEW))
-	{
-		CTreeCtrl* pTree = (CTreeCtrl*)FromHandle(hwndTasks);
-		ASSERT(pTree);
-
-		if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmTasks))
-			return FALSE;
-	}
-	else // List view
-	{
-		CListCtrl* pList = (CListCtrl*)FromHandle(hwndTasks);
-		ASSERT(pList);
-		
-		if (!CCopyListCtrlContents(*pList).DoCopy(bmTasks))
-			return FALSE;
-	}
-
-	// Tasks header and attribute columns
-	if (!CCopyHeaderCtrlContents(m_hdrTasks).DoCopy(bmHeader) ||
-		!CCopyListCtrlContents(m_lcColumns).DoCopy(bmColumns))
-	{
-		return FALSE;
-	}
-
-	// Create the image big enough to fit the tasks and columns side-by-side
-	CSize sizeTasks = bmTasks.GetSize();
-	CSize sizeHeader = bmHeader.GetSize();
-	CSize sizeColumns = bmColumns.GetSize();
-	
-	CSize sizeImage;
-	
-	sizeImage.cx = (sizeTasks.cx + sizeColumns.cx);
-	sizeImage.cy = sizeColumns.cy;
-	
-	CDC* pDC = GetDC();
-	CDC dcImage, dcParts;
-	
-	if (dcImage.CreateCompatibleDC(pDC) && dcParts.CreateCompatibleDC(pDC))
-	{
-		if (bmImage.CreateCompatibleBitmap(pDC, sizeImage.cx, sizeImage.cy))
-		{
-			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
-
-			// TODO - Handle tasks and columns reversed
-			
-			// Task Tree
-			CBitmap* pOldPart = dcParts.SelectObject(&bmTasks);
-			dcImage.BitBlt(0, sizeHeader.cy, sizeTasks.cx, sizeTasks.cy, &dcParts, 0, 0, SRCCOPY);
-			dcParts.SelectObject(pOldPart);
-			
-			// Draw a gray column divider at the right hand edge
-			dcImage.FillSolidRect(sizeTasks.cx - 1, sizeHeader.cy, 1, sizeTasks.cy, m_crGridLine);
-			
-			// Task tree header
-			pOldPart = dcParts.SelectObject(&bmHeader);
-			dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
-			dcParts.SelectObject(pOldPart);
-			
-			// if the task header is shorter than the tasks themselves
-			// then draw default header background for the remainder
-			if (sizeHeader.cx < sizeTasks.cx)
-			{
-				CThemed th;
-				BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
-				
-				CRect rHeader((sizeHeader.cx - 2), 0, sizeTasks.cx, sizeHeader.cy);
-				
-				if (bThemed)
-				{
-					th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
-				}
-				else
-				{
-					dcImage.FillSolidRect(rHeader, ::GetSysColor(COLOR_3DFACE));
-					dcImage.Draw3dRect(rHeader, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
-				}
-			}
-			
-			// Attribute Columns
-			pOldPart = dcParts.SelectObject(&bmColumns);
-			dcImage.BitBlt(sizeTasks.cx, 0, sizeColumns.cx, sizeColumns.cy, &dcParts, 0, 0, SRCCOPY);
-			dcParts.SelectObject(pOldPart);
-		}
-	}
-	
-	ReleaseDC(pDC);
-
-	
-
-	return TRUE;
+	return CTreeListSyncer::SaveToImage(bmImage);
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const

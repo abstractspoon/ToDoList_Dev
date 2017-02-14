@@ -34,7 +34,7 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 
 // private enum for type checking
-enum TLS_TYPE {	TLST_NONE, TLST_TREE, TLST_LIST };
+enum TLS_TYPE {	TLST_NONE, TLST_TREE, TLST_LIST, TLST_HEADER };
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +98,7 @@ public:
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void Show(BOOL bShow = TRUE);
 	void SetSplitBarColor(COLORREF crSplitBar);
+	BOOL SaveToImage(CBitmap& bmImage);
 
 	HTREEITEM GetTreeSelItem() const;
 	int GetTreeSelItems(CHTIArray& aItems) const;
@@ -272,4 +273,5 @@ private:
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);
+	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage);
 };

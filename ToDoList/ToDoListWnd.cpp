@@ -12333,8 +12333,10 @@ void CToDoListWnd::OnViewSaveToImage()
 		return;
 	
 	// else
-	sFilePath = dialog.GetPathName();
+	CWaitCursor cursor;
 	CBitmap bmImage;
+
+	sFilePath = dialog.GetPathName();
 		
 	if (tdc.SaveTaskViewToImage(bmImage))
 	{

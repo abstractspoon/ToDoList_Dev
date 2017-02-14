@@ -7,6 +7,8 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 #include "..\shared\misc.h"
+#include "..\shared\copywndcontents.h"
+#include "..\shared\enbitmap.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -323,6 +325,7 @@ void CTreeListSyncer::Unsync()
 
 	RemoveType(m_scLeft.GetHwnd());
 	RemoveType(m_scRight.GetHwnd());
+	RemoveType(m_hwndPrimaryHeader);
 
 	m_scLeft.HookWindow(NULL);
 	m_scRight.HookWindow(NULL);
@@ -1154,12 +1157,20 @@ TLS_TYPE CTreeListSyncer::GetType(HWND hwnd)
 	if (!s_mapTypes.Lookup(hwnd, nType) || (nType == TLST_NONE))
 	{
 		// add value to map
-		BOOL bList = CWinClasses::IsClass(hwnd, WC_LISTVIEW);
-#ifdef _DEBUG
-		BOOL bTree = CWinClasses::IsClass(hwnd, WC_TREEVIEW);	
-		ASSERT(bList || bTree);
-#endif
-		nType = (bList ? TLST_LIST : TLST_TREE);
+		if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			nType = TLST_LIST;
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
+		{
+			nType = TLST_TREE;
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_HEADER))
+		{
+			nType = TLST_HEADER;
+		}
+		ASSERT(nType != TLST_NONE);
+
 		s_mapTypes[hwnd] = nType;
 	}
 
@@ -1175,6 +1186,7 @@ void CTreeListSyncer::PreDetachWindow()
 {
 	RemoveType(m_scLeft.GetHwnd());
 	RemoveType(m_scRight.GetHwnd());
+	RemoveType(m_hwndPrimaryHeader);
 }
 
 BOOL CTreeListSyncer::IsList(HWND hwnd)
@@ -2988,4 +3000,147 @@ int CALLBACK CTreeListSyncer::SortListProc(LPARAM lParam1, LPARAM lParam2, LPARA
 	// all else
 	ASSERT(0);
 	return 0;
+}
+
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage)
+{
+	bmImage.DeleteObject();
+
+	HWND hwndPrimary = PrimaryWnd();
+	BOOL bPrimaryIsLeft = IsLeft(hwndPrimary);
+
+	CEnBitmap bmPrimary, bmPrimaryHeader, bmOther;
+
+	if (!SaveToImage(hwndPrimary, bmPrimary))
+		return FALSE;
+
+	if (!SaveToImage(OtherWnd(hwndPrimary), bmOther))
+		return FALSE;
+
+	if (m_hwndPrimaryHeader && !SaveToImage(m_hwndPrimaryHeader, bmPrimaryHeader))
+		return FALSE;
+
+	// Create some memory DCs
+	HDC hDC = ::GetDC(::GetParent(hwndPrimary));
+	CDC* pDC = CDC::FromHandle(hDC);
+	CDC dcImage, dcParts;
+
+	if (dcImage.CreateCompatibleDC(pDC) && dcParts.CreateCompatibleDC(pDC))
+	{
+		// Create the image big enough to fit the tasks and columns side-by-side
+		CSize sizePrimary = bmPrimary.GetSize();
+		CSize sizeHeader = bmPrimaryHeader.GetSize();
+		CSize sizeOther = bmOther.GetSize();
+
+		CSize sizeImage;
+
+		sizeImage.cx = (sizePrimary.cx + sizeOther.cx);
+		sizeImage.cy = sizeOther.cy;
+
+		if (bmImage.CreateCompatibleBitmap(pDC, sizeImage.cx, sizeImage.cy))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+			// Primary
+			CBitmap* pOldPart = dcParts.SelectObject(&bmPrimary);
+
+			if (bPrimaryIsLeft)
+				dcImage.BitBlt(0, sizeHeader.cy, sizePrimary.cx, sizePrimary.cy, &dcParts, 0, 0, SRCCOPY);
+			else
+				dcImage.BitBlt(sizeOther.cx, sizeHeader.cy, sizePrimary.cx, sizePrimary.cy, &dcParts, 0, 0, SRCCOPY);
+
+			dcParts.SelectObject(pOldPart);
+
+			// Draw a gray column divider at the right hand edge
+			//dcImage.FillSolidRect(sizeTasks.cx - 1, sizeHeader.cy, 1, sizeTasks.cy, m_crGridLine);
+
+			// Primary header
+			if (m_hwndPrimaryHeader)
+			{
+				pOldPart = dcParts.SelectObject(&bmPrimaryHeader);
+
+				if (bPrimaryIsLeft)
+					dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+				else
+					dcImage.BitBlt(sizeOther.cx, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(pOldPart);
+
+				// if the task header is shorter than the tasks themselves
+				// then draw default header background for the remainder
+				if (sizeHeader.cx < sizePrimary.cx)
+				{
+					CRect rHeader((sizeHeader.cx - 2), 0, sizePrimary.cx, sizeHeader.cy);
+
+					if (!bPrimaryIsLeft)
+						rHeader.OffsetRect(sizeOther.cx, 0);
+			
+					CThemed th;
+					BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+
+					if (bThemed)
+					{
+						th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
+					}
+					else
+					{
+						dcImage.FillSolidRect(rHeader, ::GetSysColor(COLOR_3DFACE));
+						dcImage.Draw3dRect(rHeader, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
+					}
+				}
+			}
+
+			// Other part
+			pOldPart = dcParts.SelectObject(&bmOther);
+
+			if (bPrimaryIsLeft)
+				dcImage.BitBlt(sizePrimary.cx, 0, sizeOther.cx, sizeOther.cy, &dcParts, 0, 0, SRCCOPY);
+			else
+				dcImage.BitBlt(0, 0, sizeOther.cx, sizeOther.cy, &dcParts, 0, 0, SRCCOPY);
+
+			dcParts.SelectObject(pOldPart);
+		}
+	}
+
+	::ReleaseDC(hwndPrimary, hDC);
+
+	return (bmImage.GetSafeHandle() != NULL);
+}
+
+BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
+{
+	switch (GetType(hWnd))
+	{
+	case TLST_TREE:
+		{
+			CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pTree);
+
+			if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmImage))
+				return FALSE;
+		}
+		break;
+
+	case TLST_LIST:
+		{
+			CListCtrl* pList = (CListCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pList);
+
+			if (!CCopyListCtrlContents(*pList).DoCopy(bmImage))
+				return FALSE;
+		}
+		break;
+
+	case TLST_HEADER:
+		{
+			CHeaderCtrl* pHeader = (CHeaderCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pHeader);
+
+			if (!CCopyHeaderCtrlContents(*pHeader).DoCopy(bmImage))
+				return FALSE;
+		}
+		break;
+	}
+
+	return TRUE;
 }
