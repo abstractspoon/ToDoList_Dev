@@ -154,6 +154,7 @@ enum IUI_APPCOMMAND
 	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*
 	IUI_GETPREVTASK,			// dwExtra is DWORD* 
 	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*
+	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*
 
 	// new values here
 //  IUI_

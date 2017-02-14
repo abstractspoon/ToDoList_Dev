@@ -15,6 +15,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\holdredraw.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -543,6 +544,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
+		if (dwExtra)
 		{
 			DWORD* pTaskID = (DWORD*)dwExtra;
 			DWORD dwNextID =  m_ctrlGantt.GetNextTask(*pTaskID, nCmd);
@@ -550,6 +552,22 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 			if (dwNextID && (dwNextID != *pTaskID))
 			{
 				*pTaskID = dwNextID;
+				return true;
+			}
+		}
+		break;
+		
+	case IUI_SAVETOIMAGE:
+		if (dwExtra)
+		{
+			CLockUpdates lock(GetSafeHwnd());
+			CBitmap bmImage;
+
+			if (m_ctrlGantt.SaveToImage(bmImage))
+			{
+				HBITMAP* pHBM = (HBITMAP*)dwExtra;
+				*pHBM = (HBITMAP)bmImage.Detach();
+
 				return true;
 			}
 		}
@@ -569,6 +587,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_COLLAPSEALL:
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_SELECTTASK:
+	case IUI_SAVETOIMAGE:
 		return true;
 
 	case IUI_EXPANDSELECTED:

@@ -71,6 +71,8 @@ public:
 	BOOL Initialize(HWND hwndTree, HWND hwndList, UINT nIDTreeHeader);
 	void Release();
 
+	BOOL SaveToImage(CBitmap& bmImage);
+
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
 

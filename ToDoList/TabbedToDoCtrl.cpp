@@ -5082,6 +5082,11 @@ LRESULT CTabbedToDoCtrl::OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam)
 
 BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CBitmap& bmImage)
 {
+	if (!CanSaveTaskViewToImage())
+		return FALSE;
+
+	bmImage.DeleteObject();
+
 	FTC_VIEW nView = GetTaskView();
 	
 	switch (nView)
@@ -5109,9 +5114,17 @@ BOOL CTabbedToDoCtrl::SaveTaskViewToImage(CBitmap& bmImage)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		// TODO
-		return FALSE;
-		
+		{
+			HBITMAP hbm = NULL;
+			ExtensionDoAppCommand(nView, IUI_SAVETOIMAGE, (DWORD)&hbm);
+
+			if (hbm)
+			{
+				bmImage.Attach(hbm);
+				return TRUE;
+			}
+		}
+		break;
 		
 	default:
 		ASSERT(0);
@@ -5152,9 +5165,7 @@ BOOL CTabbedToDoCtrl::CanSaveTaskViewToImage() const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		// TODO
-		return FALSE;
-		
+		return ExtensionCanDoAppCommand(nView, IUI_SAVETOIMAGE);
 		
 	default:
 		ASSERT(0);
