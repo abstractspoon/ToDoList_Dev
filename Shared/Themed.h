@@ -37,6 +37,8 @@
 #	define DFC_POPUPMENU           5
 #endif
 
+#define DFCS_MIXED (DFCS_BUTTON3STATE | DFCS_CHECKED) // DrawFrameControl for checkbox
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef HPAINTBUFFER

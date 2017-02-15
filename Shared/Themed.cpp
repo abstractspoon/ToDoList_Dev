@@ -623,41 +623,61 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				nThPart = BP_PUSHBUTTON;
 				
 				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				{
 					nThState = PBS_PRESSED;
-				
-				else if (nState & DFCS_INACTIVE)
+				}
+				else if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+				{
 					nThState = PBS_DISABLED;
-				
-				else if (nState & DFCS_HOT)
+				}
+				else if ((nState & DFCS_HOT) == DFCS_HOT)
+				{
 					nThState = PBS_HOT;
+				}
 			}
-			/*			else if (nState & DFCS_BUTTONRADIO) 
+			/* 
+			else if (nState & DFCS_BUTTONRADIO) 
 			{
-			nThPart = BP_RADIOBUTTON;
-			}*/
+				nThPart = BP_RADIOBUTTON;
+			}
+			*/
 			else if ((nState & DFCS_BUTTONCHECK) == DFCS_BUTTONCHECK) 
 			{
 				nThPart = BP_CHECKBOX;
 				
 				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
 				{
-					if (nState & DFCS_INACTIVE)
+					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					{
 						nThState = CBS_CHECKEDDISABLED;
-
-					else if (nState & DFCS_HOT)
+					}
+					else if ((nState & DFCS_HOT) == DFCS_HOT)
+					{
 						nThState = CBS_CHECKEDHOT;
+					}
+					else if ((nState & DFCS_MIXED) == DFCS_MIXED)
+					{
+						nThState = CBS_MIXEDNORMAL;
+					}
 					else
+					{
 						nThState = CBS_CHECKEDNORMAL;
+					}
 				}
 				else
 				{
-					if (nState & DFCS_INACTIVE)
+					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					{
 						nThState = CBS_UNCHECKEDDISABLED;
-
-					else if (nState & DFCS_HOT)
+					}
+					else if ((nState & DFCS_HOT) == DFCS_HOT)
+					{
 						nThState = CBS_UNCHECKEDHOT;
+					}
 					else
+					{
 						nThState = CBS_UNCHECKEDNORMAL;
+					}
 				}
 			}
 			else 
