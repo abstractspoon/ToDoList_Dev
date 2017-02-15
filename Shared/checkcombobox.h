@@ -40,8 +40,7 @@ public:
 	void CheckAll(CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	int GetCheckedCount() const;
 
-	virtual int GetChecked(CStringArray& aItems) const;
-	virtual int GetChecked(CStringArray& aChecked, CStringArray& aIndeterminate) const;
+	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate);
 
@@ -109,7 +108,7 @@ protected:
 	BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD dwItemData) const;
 	void CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate);
 	BOOL ToggleCheck(int nItem);
-	BOOL SetChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck);
+	BOOL ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate);
 
 private:
 	CCB_CHECK_DATA* GetAddItemCheckData(int nItem);

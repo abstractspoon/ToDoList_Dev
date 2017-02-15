@@ -592,35 +592,19 @@ BOOL CCheckComboBox::DeleteLBItem(int nItem)
 	return FALSE;
 }
 
-int CCheckComboBox::GetChecked(CStringArray& aItems) const
+int CCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) const
 {
-	CStringArray aUnused;
-
-	return GetChecked(aItems, aUnused);
-}
-
-int CCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aIndeterminate) const
-{
-	aChecked.RemoveAll();
-	aIndeterminate.RemoveAll();
+	aItems.RemoveAll();
 
 	int nCount = GetCount();
 
 	for (int i = 0; i < nCount; i++)
 	{
-		switch (GetCheck(i))
-		{
-		case CCBC_CHECKED:
-			aChecked.Add(GetItemText(i));
-			break;
-
-		case CCBC_INDETERMINATE:
-			aIndeterminate.Add(GetItemText(i));
-			break;
-		}
+		if (GetCheck(i) == nCheck)
+			aItems.Add(GetItemText(i));
 	}	
 
-	return aChecked.GetSize();
+	return aItems.GetSize();
 }
 
 CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
@@ -640,6 +624,9 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 
 BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate)
 {
+	// Array should be mutually exclusive
+	ASSERT(Misc::MatchAny(aChecked, aIndeterminate, FALSE, FALSE) == FALSE);
+
 	// make sure the items exist in the list
 	int nAdded = CAutoComboBox::AddUniqueItems(aChecked);
 	nAdded += CAutoComboBox::AddUniqueItems(aIndeterminate);
@@ -649,7 +636,9 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 	{
 		// see if anything has actually changed
 		CStringArray aCBChecked, aCBIndeterminate;
-		GetChecked(aCBChecked, aCBIndeterminate);
+
+		GetChecked(aCBChecked, CCBC_CHECKED);
+		GetChecked(aCBIndeterminate, CCBC_INDETERMINATE);
 		
 		if (Misc::MatchAll(aCBChecked, aChecked, FALSE, TRUE) &&
 			Misc::MatchAll(aCBIndeterminate, aIndeterminate, FALSE, TRUE))
@@ -667,8 +656,8 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 		SetCheck(i, CCBC_UNCHECKED, FALSE);
 	
 	// now set the check states
-	if (!SetChecked(aChecked, CCBC_CHECKED) || 
-		!SetChecked(aIndeterminate, CCBC_INDETERMINATE))
+	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) || 
+		!ModifyChecked(aIndeterminate, CCBC_INDETERMINATE, FALSE))
 	{
 		return FALSE;
 	}
@@ -684,7 +673,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 	return TRUE;
 }
 
-BOOL CCheckComboBox::SetChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck)
+BOOL CCheckComboBox::ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
 	int nItem = aItems.GetSize();
 	
@@ -696,7 +685,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems, CCB_CHECKSTATE nChec
 		
 		if (nIndex != CB_ERR)
 		{
-			SetCheck(nIndex, CCBC_CHECKED, FALSE);
+			SetCheck(nIndex, CCBC_CHECKED, bUpdate);
 		}
 		else // this ought not to happen
 		{
