@@ -686,7 +686,7 @@ BOOL CCheckComboBox::ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nC
 		
 		if (nIndex != CB_ERR)
 		{
-			SetCheck(nIndex, CCBC_CHECKED, bUpdate);
+			SetCheck(nIndex, nCheck, bUpdate);
 		}
 		else // this ought not to happen
 		{
