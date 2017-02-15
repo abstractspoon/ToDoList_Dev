@@ -154,8 +154,10 @@ public:
 	CString GetSelectedTaskAllocBy() const;
 	CString GetSelectedTaskStatus() const;
 	int GetSelectedTaskCategories(CStringArray& aCats) const;
+	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetSelectedTaskDependencies(CStringArray& aDepends) const;
 	int GetSelectedTaskTags(CStringArray& aTags) const;
+	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetSelectedTaskFileRef(int nFile) const;
 	int GetSelectedTaskFileRefs(CStringArray& aFiles) const;
 	int GetSelectedTaskFileRefCount() const;

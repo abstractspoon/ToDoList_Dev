@@ -5792,9 +5792,19 @@ int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
 	return GetSelectedTaskArray(TDCA_CATEGORY, aCats);
 }
 
+int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	return GetSelectedTaskArray(TDCA_CATEGORY, aMatched, aMixed);
+}
+
 int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aTags) const
 {
 	return GetSelectedTaskArray(TDCA_TAGS, aTags);
+}
+
+int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	return GetSelectedTaskArray(TDCA_TAGS, aMatched, aMixed);
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CStringArray& aDepends) const
