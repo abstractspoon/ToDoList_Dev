@@ -4478,6 +4478,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 	
 	if (nRes == SET_CHANGE)
 	{
+		// Update combo to show new selection
 		ASSERT(dwRefTaskID);
 
 		switch (nAttrib)
@@ -7725,65 +7726,29 @@ void CToDoCtrl::OnSelChangeTag()
 
 void CToDoCtrl::OnSelCancelAllocTo()
 {
-	// reset selection
-	if (GetSelectedCount() > 1)
-	{
-		m_cbAllocTo.SetWindowText(_T(""));
-	}
-	else
-	{
-		HTREEITEM hti = TSH().GetFirstItem();
-
-		if (hti)
-		{
-			CStringArray aTo;
-			m_data.GetTaskAllocTo(GetTaskID(hti), aTo);
-
-			m_cbAllocTo.SetChecked(aTo);
-		}
-	}
+	// restore previous combo state
+	CStringArray aMatched, aMixed;
+	
+	m_taskTree.GetSelectedTaskAllocTo(aMatched, aMixed);
+	m_cbAllocTo.SetChecked(aMatched, aMixed);
 }
 
 void CToDoCtrl::OnSelCancelCategory()
 {
-	// reset selection
-	if (GetSelectedCount() > 1)
-	{
-		m_cbCategory.SetWindowText(_T(""));
-	}
-	else
-	{
-		HTREEITEM hti = TSH().GetFirstItem();
-
-		if (hti)
-		{
-			CStringArray aCats;
-			m_data.GetTaskCategories(GetTaskID(hti), aCats);
-
-			m_cbCategory.SetChecked(aCats);
-		}
-	}
+	// restore previous combo state
+	CStringArray aMatched, aMixed;
+	
+	m_taskTree.GetSelectedTaskCategories(aMatched, aMixed);
+	m_cbCategory.SetChecked(aMatched, aMixed);
 }
 
 void CToDoCtrl::OnSelCancelTag()
 {
-	// reset selection
-	if (GetSelectedCount() > 1)
-	{
-		m_cbTags.SetWindowText(_T(""));
-	}
-	else
-	{
-		HTREEITEM hti = TSH().GetFirstItem();
-
-		if (hti)
-		{
-			CStringArray aTags;
-			m_data.GetTaskTags(GetTaskID(hti), aTags);
-
-			m_cbTags.SetChecked(aTags);
-		}
-	}
+	// restore previous combo state
+	CStringArray aMatched, aMixed;
+	
+	m_taskTree.GetSelectedTaskTags(aMatched, aMixed);
+	m_cbTags.SetChecked(aMatched, aMixed);
 }
 
 void CToDoCtrl::OnChangeTimeEstimate()
