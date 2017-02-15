@@ -5827,6 +5827,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskFileRefs(CStringArray& aFiles) const
 		return m_data.GetTaskFileRefs(GetSelectedTaskID(), aFiles);
 	
 	// else
+	aFiles.RemoveAll();
 	return 0;
 }
 
