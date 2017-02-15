@@ -5622,32 +5622,12 @@ CString CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAtt
 
 int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aAllocTo) const
 {
-	aAllocTo.RemoveAll();
+	return GetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo);
+}
 
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskAllocTo(dwTaskID, aAllocTo);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-
-			CStringArray aTaskAllocTo;
-			m_data.GetTaskAllocTo(dwTaskID, aTaskAllocTo);
-			
-			if (!Misc::MatchAll(aAllocTo, aTaskAllocTo))
-			{
-				aAllocTo.RemoveAll();
-				break;
-			}
-		}
-	}
-	
-	return aAllocTo.GetSize();
+int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	return GetSelectedTaskArray(TDCA_ALLOCTO, aMatched, aMixed);
 }
 
 CString CTDLTaskCtrlBase::GetSelectedTaskAllocBy() const
@@ -5725,9 +5705,9 @@ CString CTDLTaskCtrlBase::GetSelectedTaskStatus() const
 	return sStatus;
 }
 
-int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
+int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const
 {
-	aCats.RemoveAll();
+	aItems.RemoveAll();
 
 	if (GetSelectedCount())
 	{
@@ -5735,84 +5715,91 @@ int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 		
-		m_data.GetTaskCategories(dwTaskID, aCats);
+		m_data.GetTaskArray(dwTaskID, nAttrib, aItems);
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
 
-			CStringArray aTaskCats;
-			m_data.GetTaskCategories(dwTaskID, aTaskCats);
+			CStringArray aTaskItems;
+			m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
 			
-			if (!Misc::MatchAll(aCats, aTaskCats))
+			if (!Misc::MatchAll(aItems, aTaskItems))
 			{
-				aCats.RemoveAll();
+				aItems.RemoveAll();
 				break;
 			}
 		}
 	}
 	
-	return aCats.GetSize();
+	return aItems.GetSize();
+}
+
+int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const
+{
+	aMatched.RemoveAll();
+	aMixed.RemoveAll();
+
+	int nSelCount = GetSelectedCount();
+
+	if (nSelCount)
+	{
+		CMap<CString, LPCTSTR, int, int> mapCounts;
+
+		POSITION pos = GetFirstSelectedTaskPos();
+
+		while (pos)
+		{
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+			CStringArray aTaskItems;
+			int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
+
+			while (nItem--)
+			{
+				int nCount = 0;
+				mapCounts.Lookup(aTaskItems[nItem], nCount);
+
+				mapCounts[aTaskItems[nItem]] = ++nCount;
+			}
+		}
+
+		pos = mapCounts.GetStartPosition();
+
+		while (pos)
+		{
+			CString sItem;
+			int nCount = 0;
+
+			mapCounts.GetNextAssoc(pos, sItem, nCount);
+
+			if (nCount == nSelCount)
+			{
+				aMatched.Add(sItem);
+			}
+			else if (nCount > 0)
+			{
+				aMixed.Add(sItem);
+			}
+		}
+	}
+
+	return aMatched.GetSize();
+}
+
+int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
+{
+	return GetSelectedTaskArray(TDCA_CATEGORY, aCats);
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aTags) const
 {
-	aTags.RemoveAll();
-
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskTags(dwTaskID, aTags);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-
-			CStringArray aTaskTags;
-			m_data.GetTaskTags(dwTaskID, aTaskTags);
-			
-			if (!Misc::MatchAll(aTags, aTaskTags))
-			{
-				aTags.RemoveAll();
-				break;
-			}
-		}
-	}
-	
-	return aTags.GetSize();
+	return GetSelectedTaskArray(TDCA_TAGS, aTags);
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CStringArray& aDepends) const
 {
-	aDepends.RemoveAll();
-
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskDependencies(dwTaskID, aDepends);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-
-			CStringArray aTaskaDepends;
-			m_data.GetTaskDependencies(dwTaskID, aTaskaDepends);
-			
-			if (!Misc::MatchAll(aDepends, aTaskaDepends))
-			{
-				aDepends.RemoveAll();
-				break;
-			}
-		}
-	}
-	
-	return aDepends.GetSize();
+	return GetSelectedTaskArray(TDCA_DEPENDENCY, aDepends);
 }
 
 CString CTDLTaskCtrlBase::GetSelectedTaskFileRef(int nFile) const

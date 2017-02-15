@@ -150,6 +150,7 @@ public:
 	double GetSelectedTaskTimeEstimate(TDC_UNITS& nUnits) const;
 	double GetSelectedTaskTimeSpent(TDC_UNITS& nUnits) const;
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
+	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetSelectedTaskAllocBy() const;
 	CString GetSelectedTaskStatus() const;
 	int GetSelectedTaskCategories(CStringArray& aCats) const;
@@ -406,6 +407,8 @@ protected:
 
 	POSITION GetFirstSelectedTaskPos() const;
 	DWORD GetNextSelectedTaskID(POSITION& pos) const;
+	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
+	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
 	void SaveSortState(CPreferences& prefs, const CString& sKey) const; 
 	void LoadSortState(const CPreferences& prefs, const CString& sKey);
