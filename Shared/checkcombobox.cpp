@@ -325,11 +325,14 @@ BOOL CCheckComboBox::ParseText(BOOL bAutoAdd)
 	CString sEditText;
 	GetDlgItem(1001)->GetWindowText(sEditText);
 	
-	// clear existing checks first but don't update window
-	int nCount = GetCount();
+	// Clear existing checks first but don't update window
+	int nItem = GetCount();
 	
-	for (int i = 0; i < nCount; i++)
-		SetCheck(i, CCBC_UNCHECKED, FALSE);
+	while (nItem--)
+	{
+		if (GetCheck(nItem) == CCBC_CHECKED)
+			SetCheck(nItem, CCBC_UNCHECKED, FALSE);
+	}
 	
 	// now parse the text and set the check states manually
 	CStringArray aText;
