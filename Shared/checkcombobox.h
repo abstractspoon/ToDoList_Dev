@@ -38,15 +38,13 @@ public:
 	CCB_CHECKSTATE GetCheckByData(DWORD dwItemData) const;
 	int SetCheckByData(DWORD dwItemData, CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	void CheckAll(CCB_CHECKSTATE nCheck = CCBC_CHECKED);
-	int GetCheckedCount() const;
+	int GetCheckedCount(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	BOOL IsAnyChecked(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 
 	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
-
-	BOOL IsAnyChecked() const;
-	BOOL IsAnyUnchecked() const;
-
+	
 	CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	CString GetTooltip() const;
 

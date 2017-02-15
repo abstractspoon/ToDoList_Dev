@@ -47,7 +47,6 @@ CCheckComboBox::~CCheckComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
 	//{{AFX_MSG_MAP(CCheckComboBox)
 	ON_WM_KEYDOWN()
@@ -166,7 +165,12 @@ void CCheckComboBox::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	// Windows converts Ctrl+A to special character
 	if ((nChar == CTRL_A) && GetDroppedState())
-		CheckAll(IsAnyUnchecked() ? CCBC_CHECKED : CCBC_UNCHECKED);
+	{
+		if (IsAnyChecked(CCBC_UNCHECKED))
+			CheckAll(CCBC_CHECKED);
+		else
+			CheckAll(CCBC_UNCHECKED);
+	}
 
 	CAutoComboBox::OnChar(nChar, nRepCnt, nFlags);
 }
@@ -178,10 +182,10 @@ void CCheckComboBox::CheckAll(CCB_CHECKSTATE nCheck)
 
 void CCheckComboBox::CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
-	int nCount = GetCount();
+	int nItem = GetCount();
 
-	for (int i = 0; i < nCount; i++)
-		SetCheck(i, nCheck, FALSE);
+	while (nItem--)
+		SetCheck(nItem, nCheck, FALSE);
 
 	// derived classes
 	OnCheckChange(-1);
@@ -197,30 +201,17 @@ void CCheckComboBox::CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate)
 	}
 }
 
-BOOL CCheckComboBox::IsAnyChecked() const
+BOOL CCheckComboBox::IsAnyChecked(CCB_CHECKSTATE nCheck) const
 {
-	int nCount = GetCount();
+	int nItem = GetCount();
 
-	for (int i = 0; i < nCount; i++)
+	while (nItem--)
 	{
-		if (GetCheck(i) == CCBC_CHECKED)
-			return true;
+		if (GetCheck(nItem) == nCheck)
+			return TRUE;
 	}
 
-	return false;
-}
-
-BOOL CCheckComboBox::IsAnyUnchecked() const
-{
-	int nCount = GetCount();
-
-	for (int i = 0; i < nCount; i++)
-	{
-		if (GetCheck(i) == CCBC_UNCHECKED)
-			return true;
-	}
-
-	return false;
+	return FALSE;
 }
 
 void CCheckComboBox::RecalcText(BOOL bUpdate, BOOL bNotify)
@@ -531,7 +522,10 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		// assume it was in response to CTRL+A in the edit field
 		if (GetDroppedState() && (wp == 0) && (lp == (LPARAM)-1))
 		{ 
-			CheckAll(IsAnyUnchecked() ? CCBC_CHECKED : CCBC_UNCHECKED);
+			if (IsAnyChecked(CCBC_UNCHECKED))
+				CheckAll(CCBC_CHECKED);
+			else
+				CheckAll(CCBC_UNCHECKED);
 			
 			// Notify that selection has changed
 			if (IsType(CBS_DROPDOWNLIST))
@@ -596,12 +590,13 @@ int CCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) cons
 {
 	aItems.RemoveAll();
 
+	// Maintain order
 	int nCount = GetCount();
 
-	for (int i = 0; i < nCount; i++)
+	for (int nItem = 0; nItem < nCount; nItem++)
 	{
-		if (GetCheck(i) == nCheck)
-			aItems.Add(GetItemText(i));
+		if (GetCheck(nItem) == nCheck)
+			aItems.Add(GetItemText(nItem));
 	}	
 
 	return aItems.GetSize();
@@ -650,10 +645,10 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 	}
 
 	// clear existing checks first but don't update window
-	int nCount = GetCount();
+	int nItem = GetCount();
 	
-	for (int i = 0; i < nCount; i++)
-		SetCheck(i, CCBC_UNCHECKED, FALSE);
+	while (nItem--)
+		SetCheck(nItem, CCBC_UNCHECKED, FALSE);
 	
 	// now set the check states
 	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) || 
@@ -709,13 +704,14 @@ void CCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CAutoComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-int CCheckComboBox::GetCheckedCount() const
+int CCheckComboBox::GetCheckedCount(CCB_CHECKSTATE nCheck) const
 {
 	int nCount = 0;
+	int nItem = GetCount();
 
-	for (int nItem = 0; nItem < GetCount(); nItem++)
+	while (nItem--)
 	{
-		if (GetCheck(nItem) == CCBC_CHECKED)
+		if (GetCheck(nItem) == nCheck)
 			nCount++;
 	}
 
@@ -767,10 +763,10 @@ LRESULT CCheckComboBox::OnCBDeleteString(WPARAM wParam, LPARAM lParam)
 
 void CCheckComboBox::DeleteAllCheckData()
 {
-	int nCount = GetCount();
+	int nItem = GetCount();
 
-	for (int i = 0; i < nCount; i++)
-		delete GetItemCheckData(i);
+	while (nItem--)
+		delete GetItemCheckData(nItem);
 }
 
 LRESULT CCheckComboBox::OnCBResetContent(WPARAM wParam, LPARAM lParam)
