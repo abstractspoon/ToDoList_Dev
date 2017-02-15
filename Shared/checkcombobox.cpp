@@ -577,7 +577,7 @@ void CCheckComboBox::HandleReturnKey()
 	}
 }
 
-CString CCheckComboBox::GetSelectedItem() const
+CString CCheckComboBox::GetSelectedItemText() const
 {
 	return m_sText;
 }

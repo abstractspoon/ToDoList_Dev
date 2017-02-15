@@ -166,7 +166,7 @@ BOOL CAutoComboBox::OnSelChange()
 		int nSel = GetCurSel();
 
 		if (nSel < GetCount() )
-			SetWindowText(GetSelectedItem());
+			SetWindowText(GetSelectedItemText());
 	}
 
 	// eat notification if dropped down
@@ -174,15 +174,11 @@ BOOL CAutoComboBox::OnSelChange()
 	return GetDroppedState() && !IsType(CBS_SIMPLE);
 }
 
-CString CAutoComboBox::GetSelectedItem() const
+CString CAutoComboBox::GetSelectedItemText() const
 {
-	CString sSel;
-	int nSel = GetCurSel();
+	return GetItemText(GetCurSel());
+}
 
-	if (nSel != CB_ERR)
-		GetLBText(nSel, sSel);
-	
-	return sSel;
 CString CAutoComboBox::GetItemText(int nItem) const
 {
 	CString sItem;
