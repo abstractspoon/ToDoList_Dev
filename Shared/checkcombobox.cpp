@@ -115,7 +115,7 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD d
 		nCheckState |= DFCS_CHECKED;
 		break;
 
-	case CCBC_INDETERMINATE:
+	case CCBC_MIXED:
 		nCheckState |= (DFCS_INACTIVE | DFCS_CHECKED);
 		break;
 	}
@@ -622,26 +622,26 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 	return SetChecked(aItems, aUnused);
 }
 
-BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate)
+BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aMixed)
 {
 	// Array should be mutually exclusive
-	ASSERT(Misc::MatchAny(aChecked, aIndeterminate, FALSE, FALSE) == FALSE);
+	ASSERT(Misc::MatchAny(aChecked, aMixed, FALSE, FALSE) == FALSE);
 
 	// make sure the items exist in the list
 	int nAdded = CAutoComboBox::AddUniqueItems(aChecked);
-	nAdded += CAutoComboBox::AddUniqueItems(aIndeterminate);
+	nAdded += CAutoComboBox::AddUniqueItems(aMixed);
 
 	// if nothing was added
 	if (!nAdded)
 	{
 		// see if anything has actually changed
-		CStringArray aCBChecked, aCBIndeterminate;
+		CStringArray aCBChecked, aCBMixed;
 
 		GetChecked(aCBChecked, CCBC_CHECKED);
-		GetChecked(aCBIndeterminate, CCBC_INDETERMINATE);
+		GetChecked(aCBMixed, CCBC_MIXED);
 		
 		if (Misc::MatchAll(aCBChecked, aChecked, FALSE, TRUE) &&
-			Misc::MatchAll(aCBIndeterminate, aIndeterminate, FALSE, TRUE))
+			Misc::MatchAll(aCBMixed, aMixed, FALSE, TRUE))
 		{
 			// make sure window text matches checked items
 			RecalcText(TRUE, FALSE);
@@ -657,7 +657,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 	
 	// now set the check states
 	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) || 
-		!ModifyChecked(aIndeterminate, CCBC_INDETERMINATE, FALSE))
+		!ModifyChecked(aMixed, CCBC_MIXED, FALSE))
 	{
 		return FALSE;
 	}
@@ -675,6 +675,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 
 BOOL CCheckComboBox::ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
+	// Note: Do not clear existing check states
 	int nItem = aItems.GetSize();
 	
 	while (nItem--)
@@ -820,7 +821,7 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 	switch (nCheck)
 	{
 	case CCBC_UNCHECKED:
-	case CCBC_INDETERMINATE:
+	case CCBC_MIXED:
 		nCheck = CCBC_CHECKED;
 		break;
 

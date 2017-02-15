@@ -21,7 +21,7 @@ enum CCB_CHECKSTATE
 { 
 	CCBC_UNCHECKED = 0, 
 	CCBC_CHECKED, 
-	CCBC_INDETERMINATE 
+	CCBC_MIXED 
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ public:
 
 	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);
-	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate);
+	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 
 	BOOL IsAnyChecked() const;
 	BOOL IsAnyUnchecked() const;
