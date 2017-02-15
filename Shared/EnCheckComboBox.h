@@ -21,8 +21,9 @@ public:
 	
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
 	BOOL GetCheck(int nIndex) const;
-	int GetChecked(CStringArray& aItems) const;
-	BOOL SetChecked(const CStringArray& aItems);
+	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	BOOL SetChecked(const CStringArray& aChecked);
+	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
 
 protected:

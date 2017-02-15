@@ -103,29 +103,41 @@ BOOL CEnCheckComboBox::GetCheck(int nIndex) const
 	return ((nIndex != CB_ERR) && (CComboBox::GetCurSel() == nIndex));
 }
 
-int CEnCheckComboBox::GetChecked(CStringArray& aItems) const
+int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) const
 {
 	if (m_bMultiSel)
-		return CCheckComboBox::GetChecked(aItems);
+		return CCheckComboBox::GetChecked(aItems, nCheck);
 	
 	// else
 	aItems.RemoveAll();
-	
-	CString sSelItem = GetItemText(CComboBox::GetCurSel());
 
-	// we don't add the blank item
-	if (!sSelItem.IsEmpty())
-		aItems.Add(sSelItem);
+	if (nCheck == CCBC_CHECKED)
+	{
+		CString sSelItem = GetItemText(CComboBox::GetCurSel());
+
+		// we don't add the blank item
+		if (!sSelItem.IsEmpty())
+			aItems.Add(sSelItem);
+	}
 	
 	return aItems.GetSize();
 }
 
-BOOL CEnCheckComboBox::SetChecked(const CStringArray& aItems)
+BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked)
+{
+	CStringArray aUnused;
+
+	return SetChecked(aChecked, aUnused);
+}
+
+BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aMixed)
 {
 	if (m_bMultiSel)
-		return CCheckComboBox::SetChecked(aItems);
+		return CCheckComboBox::SetChecked(aChecked, aMixed);
 
-	if (aItems.GetSize() == 0)
+	ASSERT(aMixed.GetSize() == 0);
+
+	if (aChecked.GetSize() == 0)
 	{
 		SetCurSel(-1);
 		return TRUE;
@@ -134,7 +146,7 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aItems)
 	// Call CComboBox::SelectString directly because the derived 
 	// versions are all virtual AND CCheckComboBox::SelectString
 	// calls back into here which results in infinite recursion
-	return (CComboBox::SelectString(0, aItems[0]) != CB_ERR);
+	return (CComboBox::SelectString(0, aChecked[0]) != CB_ERR);
 }
 
 int CEnCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
