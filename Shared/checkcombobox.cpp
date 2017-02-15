@@ -553,18 +553,16 @@ void CCheckComboBox::HandleReturnKey()
 		BOOL bSomeAdded = ParseText();
 		RecalcText(FALSE); // update m_sText only
 
-		CAutoComboBox::HandleReturnKey();
-
 		if (bSomeAdded)		
 			ParentACNotify(WM_ACBN_ITEMADDED, 0xFFFF, NULL);
 	}
 	else
 	{
 		ShowDropDown(FALSE);
-
-		// notify parent of (possible) selection change
-		ParentCBNotify(CBN_SELCHANGE);
 	}
+
+	// notify parent of (possible) selection change
+	ParentCBNotify(CBN_SELCHANGE);
 }
 
 CString CCheckComboBox::GetSelectedItemText() const
