@@ -147,7 +147,7 @@ BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 	int nCount = GetCount();
 	
 	for (int i = 0; i < nCount; i++)
-		CCheckComboBox::SetCheck(i, FALSE, FALSE);
+		CCheckComboBox::SetCheck(i, CCBC_UNCHECKED, FALSE);
 
 	// assume that all the correct items have already 
 	// been added to the list
@@ -159,7 +159,7 @@ BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 		int nIndex = FindString(-1, sPartial);
 
 		if (nIndex != CB_ERR)
-			SetCheck(nIndex, TRUE);
+			SetCheck(nIndex, CCBC_CHECKED);
 		else
 			return FALSE;
 	}

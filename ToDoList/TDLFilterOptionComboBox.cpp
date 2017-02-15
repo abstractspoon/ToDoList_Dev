@@ -62,7 +62,8 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 				SetItemData(nIndex, nFlag);
 
 				// is the item checked?
-				SetCheck(nIndex, Misc::HasFlag(dwOptions, nFlag));
+				BOOL bChecked = Misc::HasFlag(dwOptions, nFlag);
+				SetCheck(nIndex, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
 			}
 		}
 	}
@@ -164,8 +165,8 @@ void CTDLFilterOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		UINT nFlag = GetItemData(nItem);
 
 		// set state
-		BOOL bCheck = Misc::HasFlag(dwOptions, nFlag);
-		SetCheck(nItem, bCheck);
+		BOOL bChecked = Misc::HasFlag(dwOptions, nFlag);
+		SetCheck(nItem, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
 	}
 
 	m_dwOptions = dwOptions;

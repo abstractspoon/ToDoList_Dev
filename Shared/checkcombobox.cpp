@@ -21,15 +21,13 @@ static char THIS_FILE[] = __FILE__;
 struct CCB_CHECK_DATA
 {
 public:
-	BOOL m_bChecked;
-	//BOOL m_bEnabled;
-	DWORD m_dwUserData;
+	CCB_CHECKSTATE nCheck;
+	DWORD dwUserData;
 
 	CCB_CHECK_DATA()
 	{
-		m_bChecked = FALSE;
-		//m_bEnabled = TRUE;
-		m_dwUserData = 0;
+		nCheck = CCBC_UNCHECKED;
+		dwUserData = 0;
 	};
 };
 
@@ -42,7 +40,7 @@ CCheckComboBox::CCheckComboBox(DWORD dwFlags) : CAutoComboBox(dwFlags)
 	m_bDrawing = TRUE;
 	m_bTextFits = TRUE;
 	m_bChecking = FALSE;
-	m_nCheckItem = LB_ERR;
+	m_nClickedItem = LB_ERR;
 }
 
 CCheckComboBox::~CCheckComboBox()
@@ -101,38 +99,34 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 
 BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD dwItemData) const
 {
-	// 0 - No check, 1 - Empty check, 2 - Checked
-	int nCheck = 0;
+	if (nItem < 0) 	// Don't draw a checkbox on the static portion of the combobox
+		return FALSE;
+
+	// Otherwise it is one of the items
+	UINT nCheckState = DFCS_BUTTONCHECK;
+
+	switch (GetCheck(nItem))
+	{
+	case CCBC_UNCHECKED:
+		// no more to do
+		break;
+
+	case CCBC_CHECKED:
+		nCheckState |= DFCS_CHECKED;
+		break;
+
+	case CCBC_INDETERMINATE:
+		nCheckState |= (DFCS_INACTIVE | DFCS_CHECKED);
+		break;
+	}
+
 	CRect rCheck(rect);
-
-	// Check if we are drawing the static portion of the combobox
-	if (nItem < 0) 
-	{
-		// Don't draw any boxes on this item
-		nCheck = 0;
-	}
-	else // Otherwise it is one of the items
-	{
-		nCheck = 1; // unchecked
-
-		CCB_CHECK_DATA* pState = (CCB_CHECK_DATA*)dwItemData;
-
-		if (pState && pState->m_bChecked)
-			nCheck = 2;
-
-		rCheck.left = 0;
-		rCheck.right = (rCheck.left + CalcCheckBoxWidth(dc));
-	}
+	rCheck.left = 0;
+	rCheck.right = (rCheck.left + CalcCheckBoxWidth(dc));
 	
-	if (nCheck > 0) 
-	{
-		UINT nCheckState = DFCS_BUTTONCHECK | (nCheck > 1 ? DFCS_CHECKED : 0);
+	CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
 
-		// Draw the checkmark using DrawFrameControl
-		CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
-	}
-
-	return (nCheck > 0);
+	return TRUE;
 }
 
 int CCheckComboBox::CalcCheckBoxWidth(HDC hdc, HWND hwndRef)
@@ -172,22 +166,22 @@ void CCheckComboBox::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	// Windows converts Ctrl+A to special character
 	if ((nChar == CTRL_A) && GetDroppedState())
-		CheckAll(IsAnyUnchecked());
+		CheckAll(IsAnyUnchecked() ? CCBC_CHECKED : CCBC_UNCHECKED);
 
 	CAutoComboBox::OnChar(nChar, nRepCnt, nFlags);
 }
 
-void CCheckComboBox::CheckAll(BOOL bCheck)
+void CCheckComboBox::CheckAll(CCB_CHECKSTATE nCheck)
 {
-	CheckAll(bCheck, TRUE);
+	CheckAll(nCheck, TRUE);
 }
 
-void CCheckComboBox::CheckAll(BOOL bCheck, BOOL bUpdate)
+void CCheckComboBox::CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
 	int nCount = GetCount();
 
 	for (int i = 0; i < nCount; i++)
-		SetCheck(i, bCheck, FALSE);
+		SetCheck(i, nCheck, FALSE);
 
 	// derived classes
 	OnCheckChange(-1);
@@ -209,7 +203,7 @@ BOOL CCheckComboBox::IsAnyChecked() const
 
 	for (int i = 0; i < nCount; i++)
 	{
-		if (GetCheck(i))
+		if (GetCheck(i) == CCBC_CHECKED)
 			return true;
 	}
 
@@ -222,7 +216,7 @@ BOOL CCheckComboBox::IsAnyUnchecked() const
 
 	for (int i = 0; i < nCount; i++)
 	{
-		if (!GetCheck(i))
+		if (GetCheck(i) == CCBC_UNCHECKED)
 			return true;
 	}
 
@@ -269,7 +263,7 @@ int CCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
    return CAutoComboBox::SelectString(nStartAfter, lpszString);
 }
 
-int CCheckComboBox::SetCheckByData(DWORD dwItemData, BOOL bCheck)
+int CCheckComboBox::SetCheckByData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
 
@@ -277,15 +271,15 @@ int CCheckComboBox::SetCheckByData(DWORD dwItemData, BOOL bCheck)
 		return CB_ERR;
 
 	// else
-	return SetCheck(nIndex, bCheck, TRUE);
+	return SetCheck(nIndex, nCheck, TRUE);
 }
 
-int CCheckComboBox::SetCheck(int nIndex, BOOL bCheck)
+int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
 {
-	return SetCheck(nIndex, bCheck, TRUE);
+	return SetCheck(nIndex, nCheck, TRUE);
 }
 
-int CCheckComboBox::SetCheck(int nIndex, BOOL bCheck, BOOL bUpdate)
+int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
 	CCB_CHECK_DATA* pState = GetAddItemCheckData(nIndex);
 	ASSERT(pState);
@@ -293,7 +287,7 @@ int CCheckComboBox::SetCheck(int nIndex, BOOL bCheck, BOOL bUpdate)
 	if (pState == NULL)
 		return CB_ERR;
 
-	pState->m_bChecked = bCheck;
+	pState->nCheck = nCheck;
 
 	if (bUpdate && !m_bChecking) // prevent re-entrancy
 	{
@@ -312,22 +306,22 @@ int CCheckComboBox::SetCheck(int nIndex, BOOL bCheck, BOOL bUpdate)
 	return CB_OKAY;
 }
 
-BOOL CCheckComboBox::GetCheck(int nIndex) const
+CCB_CHECKSTATE CCheckComboBox::GetCheck(int nIndex) const
 {
 	CCB_CHECK_DATA* pState = GetItemCheckData(nIndex);
 
 	if (pState == NULL)
-		return FALSE; // default
+		return CCBC_UNCHECKED; // default
 
-	return pState->m_bChecked;
+	return pState->nCheck;
 }
 
-BOOL CCheckComboBox::GetCheckByData(DWORD dwItemData) const
+CCB_CHECKSTATE CCheckComboBox::GetCheckByData(DWORD dwItemData) const
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
 	
 	if (nIndex == CB_ERR)
-		return FALSE;
+		return CCBC_UNCHECKED;
 
 	return GetCheck(nIndex);
 }
@@ -344,7 +338,7 @@ BOOL CCheckComboBox::ParseText(BOOL bAutoAdd)
 	int nCount = GetCount();
 	
 	for (int i = 0; i < nCount; i++)
-		SetCheck(i, FALSE, FALSE);
+		SetCheck(i, CCBC_UNCHECKED, FALSE);
 	
 	// now parse the text and set the check states manually
 	CStringArray aText;
@@ -368,7 +362,7 @@ BOOL CCheckComboBox::ParseText(BOOL bAutoAdd)
 			}
 			
 			if (nIndex != CB_ERR)
-				SetCheck(nIndex, TRUE, FALSE);
+				SetCheck(nIndex, CCBC_CHECKED, FALSE);
 		}
 	}
 
@@ -406,8 +400,7 @@ LRESULT CCheckComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 			::InvalidateRect(GetListbox(), rcItem, FALSE);
 			
 			// Invert the check mark
-			SetCheck(nIndex, !GetCheck(nIndex));
-			
+			ToggleCheck(nIndex);
 			m_bEditChange = TRUE;
 			
 			// Notify that selection has changed
@@ -419,14 +412,14 @@ LRESULT CCheckComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	
 	case WM_LBUTTONDOWN:
-		m_nCheckItem = LB_ERR;
+		m_nClickedItem = LB_ERR;
 
 		// base class handling
 		if (HitTestListDeleteBtn(lp) == LB_ERR)
 		{
-			m_nCheckItem = HitTestList(lp);
+			m_nClickedItem = HitTestList(lp);
 
-			if (m_nCheckItem != LB_ERR)
+			if (m_nClickedItem != LB_ERR)
 				return 1L;
 		}
 		// Do the default handling now (such as close the popup
@@ -439,17 +432,17 @@ LRESULT CCheckComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		{
 			return 1L;
 		}
-		else if (m_nCheckItem != LB_ERR)
+		else if (m_nClickedItem != LB_ERR)
 		{
-			int nItem = m_nCheckItem;
-			m_nCheckItem = LB_ERR;
+			int nItem = m_nClickedItem;
+			m_nClickedItem = LB_ERR;
 
 			if (HitTestList(lp) == nItem)
 			{
 				// toggle check state
 				::InvalidateRect(GetListbox(), NULL, FALSE);
-					
-				SetCheck(nItem, !GetCheck(nItem));
+
+				ToggleCheck(nItem);
 				m_bEditChange = TRUE;
 					
 				// Notify that selection has changed
@@ -538,7 +531,7 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		// assume it was in response to CTRL+A in the edit field
 		if (GetDroppedState() && (wp == 0) && (lp == (LPARAM)-1))
 		{ 
-			CheckAll(IsAnyUnchecked());
+			CheckAll(IsAnyUnchecked() ? CCBC_CHECKED : CCBC_UNCHECKED);
 			
 			// Notify that selection has changed
 			if (IsType(CBS_DROPDOWNLIST))
@@ -601,22 +594,33 @@ BOOL CCheckComboBox::DeleteLBItem(int nItem)
 
 int CCheckComboBox::GetChecked(CStringArray& aItems) const
 {
-	aItems.RemoveAll();
+	CStringArray aUnused;
+
+	return GetChecked(aItems, aUnused);
+}
+
+int CCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aIndeterminate) const
+{
+	aChecked.RemoveAll();
+	aIndeterminate.RemoveAll();
 
 	int nCount = GetCount();
-	
+
 	for (int i = 0; i < nCount; i++)
 	{
-		if (GetCheck(i))
+		switch (GetCheck(i))
 		{
-			CString sItem;
-			GetLBText(i, sItem);
+		case CCBC_CHECKED:
+			aChecked.Add(GetItemText(i));
+			break;
 
-			aItems.Add(sItem);
+		case CCBC_INDETERMINATE:
+			aIndeterminate.Add(GetItemText(i));
+			break;
 		}
 	}	
 
-	return aItems.GetSize();
+	return aChecked.GetSize();
 }
 
 CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
@@ -629,17 +633,26 @@ CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
 
 BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 {
+	CStringArray aUnused;
+
+	return SetChecked(aItems, aUnused);
+}
+
+BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate)
+{
 	// make sure the items exist in the list
-	int nAdded = CAutoComboBox::AddUniqueItems(aItems);
+	int nAdded = CAutoComboBox::AddUniqueItems(aChecked);
+	nAdded += CAutoComboBox::AddUniqueItems(aIndeterminate);
 
 	// if nothing was added
 	if (!nAdded)
 	{
 		// see if anything has actually changed
-		CStringArray aCBItems;
-		GetChecked(aCBItems);
+		CStringArray aCBChecked, aCBIndeterminate;
+		GetChecked(aCBChecked, aCBIndeterminate);
 		
-		if (Misc::MatchAll(aCBItems, aItems, FALSE, TRUE))
+		if (Misc::MatchAll(aCBChecked, aChecked, FALSE, TRUE) &&
+			Misc::MatchAll(aCBIndeterminate, aIndeterminate, FALSE, TRUE))
 		{
 			// make sure window text matches checked items
 			RecalcText(TRUE, FALSE);
@@ -651,10 +664,29 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 	int nCount = GetCount();
 	
 	for (int i = 0; i < nCount; i++)
-		SetCheck(i, FALSE, FALSE);
+		SetCheck(i, CCBC_UNCHECKED, FALSE);
 	
 	// now set the check states
-	int nItem = aItems.GetSize(), nChecked = 0;
+	if (!SetChecked(aChecked, CCBC_CHECKED) || 
+		!SetChecked(aIndeterminate, CCBC_INDETERMINATE))
+	{
+		return FALSE;
+	}
+
+	RecalcText(TRUE, FALSE);
+
+	if (GetDroppedState())
+		::InvalidateRect(GetListbox(), NULL, TRUE);
+
+	// Redraw the window
+	Invalidate(FALSE);
+
+	return TRUE;
+}
+
+BOOL CCheckComboBox::SetChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck)
+{
+	int nItem = aItems.GetSize();
 	
 	while (nItem--)
 	{
@@ -664,8 +696,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 		
 		if (nIndex != CB_ERR)
 		{
-			SetCheck(nIndex, TRUE, TRUE);
-			nChecked++;
+			SetCheck(nIndex, CCBC_CHECKED, FALSE);
 		}
 		else // this ought not to happen
 		{
@@ -673,13 +704,6 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 			return FALSE;
 		}
 	}
-	RecalcText(TRUE, FALSE);
-
-	if (GetDroppedState())
-		::InvalidateRect(GetListbox(), NULL, TRUE);
-
-	// Redraw the window
-	Invalidate(FALSE);
 
 	return TRUE;
 }
@@ -701,7 +725,7 @@ int CCheckComboBox::GetCheckedCount() const
 
 	for (int nItem = 0; nItem < GetCount(); nItem++)
 	{
-		if (GetCheck(nItem))
+		if (GetCheck(nItem) == CCBC_CHECKED)
 			nCount++;
 	}
 
@@ -725,7 +749,7 @@ LRESULT CCheckComboBox::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
 	if (pState == NULL)
 		return CB_ERR;
 
-	pState->m_dwUserData = lParam;
+	pState->dwUserData = lParam;
 	return CB_OKAY;
 }
 
@@ -736,7 +760,7 @@ LRESULT CCheckComboBox::OnCBGetItemData(WPARAM wParam, LPARAM /*lParam*/)
 	if (pState == NULL)
 		return 0; // default
 
-	return pState->m_dwUserData;
+	return pState->dwUserData;
 }
 
 LRESULT CCheckComboBox::OnCBDeleteString(WPARAM wParam, LPARAM lParam)
@@ -800,3 +824,21 @@ CCB_CHECK_DATA* CCheckComboBox::GetAddItemCheckData(int nItem)
 	return pState;
 }
 
+BOOL CCheckComboBox::ToggleCheck(int nItem)
+{
+	CCB_CHECKSTATE nCheck = GetCheck(nItem);
+
+	switch (nCheck)
+	{
+	case CCBC_UNCHECKED:
+	case CCBC_INDETERMINATE:
+		nCheck = CCBC_CHECKED;
+		break;
+
+	case CCBC_CHECKED:
+		nCheck = CCBC_UNCHECKED;
+		break;
+	}
+
+	return SetCheck(nItem, nCheck);
+}

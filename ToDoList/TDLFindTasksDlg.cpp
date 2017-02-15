@@ -193,7 +193,7 @@ void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 	int nItem = CDialogHelper::FindItemByData(m_cbInclude, nOption);
 
 	if (nItem != CB_ERR)
-		m_cbInclude.SetCheck(nItem, bCheck);
+		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));
 }
 
 void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)

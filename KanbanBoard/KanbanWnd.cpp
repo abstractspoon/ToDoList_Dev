@@ -292,8 +292,12 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		CString sKey(szKey);
 		
 		// Options
-		m_cbOptions.SetCheckByData(KBCF_SHOWPARENTTASKS, pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE));
-		m_cbOptions.SetCheckByData(KBCF_SHOWEMPTYCOLUMNS, pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"), TRUE));
+		BOOL bChecked = pPrefs->GetProfileInt(sKey, _T("ShowParents"));
+		m_cbOptions.SetCheckByData(KBCF_SHOWPARENTTASKS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
+
+		bChecked = pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"));
+		m_cbOptions.SetCheckByData(KBCF_SHOWEMPTYCOLUMNS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
+
 		OnSelchangeOptions();
 		
 		// Last tracked attribute

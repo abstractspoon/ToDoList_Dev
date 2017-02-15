@@ -6,14 +6,26 @@
 #endif // _MSC_VER > 1000
 // checkcombobox.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "autocombobox.h"
 #include "subclass.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CCheckComboBox window
 
 struct CCB_CHECK_DATA;
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum CCB_CHECKSTATE
+{ 
+	CCBC_UNCHECKED = 0, 
+	CCBC_CHECKED, 
+	CCBC_INDETERMINATE 
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CCheckComboBox window
 
 class CCheckComboBox : public CAutoComboBox
 {
@@ -21,15 +33,17 @@ class CCheckComboBox : public CAutoComboBox
 public:
 	CCheckComboBox(DWORD dwFlags = 0);
 
-	BOOL GetCheck(int nIndex) const;
-	int SetCheck(int nIndex, BOOL bCheck = TRUE);
-	BOOL GetCheckByData(DWORD dwItemData) const;
-	int SetCheckByData(DWORD dwItemData, BOOL bCheck = TRUE);
-	void CheckAll(BOOL bCheck = TRUE);
+	CCB_CHECKSTATE GetCheck(int nIndex) const;
+	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED);
+	CCB_CHECKSTATE GetCheckByData(DWORD dwItemData) const;
+	int SetCheckByData(DWORD dwItemData, CCB_CHECKSTATE nCheck = CCBC_CHECKED);
+	void CheckAll(CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	int GetCheckedCount() const;
 
 	virtual int GetChecked(CStringArray& aItems) const;
+	virtual int GetChecked(CStringArray& aChecked, CStringArray& aIndeterminate) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);
+	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aIndeterminate);
 
 	BOOL IsAnyChecked() const;
 	BOOL IsAnyUnchecked() const;
@@ -44,7 +58,7 @@ protected:
 	CString m_sText;
 	BOOL m_bTextFits;
 	BOOL m_bChecking;
-	int m_nCheckItem;
+	int m_nClickedItem;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -84,16 +98,18 @@ protected:
 	virtual BOOL DeleteLBItem(int nItem);
 	virtual int GetExtraListboxWidth() const;
 	virtual void HandleReturnKey();
-	virtual CString GetSelectedItem() const;
+	virtual CString GetSelectedItemText() const;
 
 protected:
 	void RecalcText(BOOL bUpdate = TRUE, BOOL bNotify = TRUE);
 	BOOL ParseText(BOOL bAutoAdd = TRUE);
 
 	static int CalcCheckBoxWidth(HDC hdc = NULL, HWND hwndRef = NULL);
-	int SetCheck(int nIndex, BOOL bCheck, BOOL bUpdate);
+	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate);
 	BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD dwItemData) const;
-	void CheckAll(BOOL bCheck, BOOL bUpdate);
+	void CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate);
+	BOOL ToggleCheck(int nItem);
+	BOOL SetChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck);
 
 private:
 	CCB_CHECK_DATA* GetAddItemCheckData(int nItem);

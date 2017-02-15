@@ -79,7 +79,8 @@ void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINIT
 
 			if (nIndex != CB_ERR)
 			{
-				SetCheck(nIndex, attribDef.HasFeature(feature.dwFeature));
+				BOOL bChecked = attribDef.HasFeature(feature.dwFeature);
+				SetCheck(nIndex, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
 				SetItemData(nIndex, feature.dwFeature);
 			}
 		}
@@ -144,18 +145,18 @@ void CTDLCustomAttribFeatureComboBox::OnCheckChange(int nIndex)
 		switch (dwFeature)
 		{
 		case TDCCAF_ACCUMULATE:
-			SetCheckByData(TDCCAF_MAXIMIZE, FALSE);
-			SetCheckByData(TDCCAF_MINIMIZE, FALSE);
+			SetCheckByData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
+			SetCheckByData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
 			break;
 
 		case TDCCAF_MAXIMIZE:
-			SetCheckByData(TDCCAF_ACCUMULATE, FALSE);
-			SetCheckByData(TDCCAF_MINIMIZE, FALSE);
+			SetCheckByData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
+			SetCheckByData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
 			break;
 
 		case TDCCAF_MINIMIZE:
-			SetCheckByData(TDCCAF_MAXIMIZE, FALSE);
-			SetCheckByData(TDCCAF_ACCUMULATE, FALSE);
+			SetCheckByData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
+			SetCheckByData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
 			break;
 
 		default:

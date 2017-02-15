@@ -62,7 +62,7 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 			}
 			else
 			{
-				CheckAll(FALSE);
+				CheckAll(CCBC_UNCHECKED);
 				m_sText.Empty();
 			}
 		}
@@ -70,17 +70,16 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 		{
 			// set the current selection to whatever was singly selected
 			// provided it's not blank		
-			CheckAll(FALSE);
+			CheckAll(CCBC_UNCHECKED);
 
 			int nSel = GetCurSel();
 
 			if (nSel != CB_ERR)
 			{
-				CString sItem;
-				GetLBText(nSel, sItem);
+				CString sItem = GetItemText(nSel);
 
 				if (!sItem.IsEmpty())
-					SetCheck(nSel, TRUE);
+					SetCheck(nSel, CCBC_CHECKED);
 			}
 		}
 		
@@ -138,13 +137,13 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aItems)
 	return (CComboBox::SelectString(0, aItems[0]) != CB_ERR);
 }
 
-int CEnCheckComboBox::SetCheck(int nIndex, BOOL bCheck)
+int CEnCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
 {
 	if (m_bMultiSel)
-		return CCheckComboBox::SetCheck(nIndex, bCheck);
+		return CCheckComboBox::SetCheck(nIndex, nCheck);
 
 	// else
-	if (bCheck)
+	if (nCheck == CCBC_CHECKED)
 	{
 		SetCurSel(nIndex);
 	}
