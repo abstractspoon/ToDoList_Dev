@@ -116,7 +116,7 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD d
 		break;
 
 	case CCBC_MIXED:
-		nCheckState |= (DFCS_INACTIVE | DFCS_CHECKED);
+		nCheckState |= DFCS_MIXED;
 		break;
 	}
 
