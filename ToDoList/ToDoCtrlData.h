@@ -126,7 +126,7 @@ public:
 	int GetTaskDependencies(DWORD dwTaskID, CStringArray& aDepends) const;
 	int GetTaskFileRefs(DWORD dwTaskID, CStringArray& aFiles) const;
 	int GetTaskFileRefCount(DWORD dwTaskID) const;
-	int GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringArray& aItems);
+	int GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 
 	DWORD GetTrueTaskID(DWORD dwTaskID) const;
 	void GetTrueTaskIDs(CDWordArray& aTaskIDs) const;
