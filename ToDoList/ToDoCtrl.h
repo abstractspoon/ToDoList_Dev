@@ -268,13 +268,11 @@ public:
 	BOOL SetSelectedTaskCategories(const CStringArray& aCats);
 	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends);
 	BOOL SetSelectedTaskTags(const CStringArray& aTags);
-	BOOL SetSelectedTaskFileRef(const CString& sFilePath);
 	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths);
 	BOOL AppendSelectedTaskAllocTo(const CStringArray& aAllocTo);
 	BOOL AppendSelectedTaskCategories(const CStringArray& aCats);
 	BOOL AppendSelectedTaskDependencies(const CStringArray& aDepends);
 	BOOL AppendSelectedTaskTags(const CStringArray& aTags);
-	BOOL AppendSelectedTaskFileRef(const CString& sFilePath);
 	BOOL AppendSelectedTaskFileRefs(const CStringArray& aFilePaths);
 	BOOL SetSelectedTaskPriority(int nPriority); // 0-10 (10 is highest)
 	BOOL SetSelectedTaskRisk(int nRisk); // 0-10 (10 is highest)
@@ -688,7 +686,6 @@ protected:
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
-	BOOL SetSelectedTaskFileRef(const CString& sFilePath, BOOL bAppend);
 
 	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent); // overridable
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);

@@ -4750,31 +4750,6 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskFileRef(const CString& sFilePath)
-{
-	return SetSelectedTaskFileRef(sFilePath, FALSE);
-}
-
-BOOL CToDoCtrl::AppendSelectedTaskFileRef(const CString& sFilePath)
-{
-	return SetSelectedTaskFileRef(sFilePath, TRUE);
-}
-		
-BOOL CToDoCtrl::SetSelectedTaskFileRef(const CString& sFilePath, BOOL bAppend)
-{
-	if (sFilePath.IsEmpty())
-		return FALSE;
-	
-	CStringArray aFileRefs;
-
-	if (bAppend)
-		GetSelectedTaskFileRefs(aFileRefs); // full paths
-
-	Misc::AddUniqueItem(sFilePath, aFileRefs);
-
-	return SetSelectedTaskFileRefs(aFileRefs);
-}
-	
 BOOL CToDoCtrl::SetSelectedTaskExtID(const CString& sID)
 {
 	if (IsReadOnly())
