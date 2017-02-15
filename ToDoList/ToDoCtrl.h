@@ -481,7 +481,6 @@ protected:
 	CString m_sTextComments;
 	CString m_sAllocBy;
 	CString m_sStatus;
-	CStringArray m_aCategory, m_aAllocTo, m_aTags;
 	CString m_sProjectName;
 	CString m_sExternalID, m_sDepends;
 	CString m_sOccurrence;
@@ -787,6 +786,7 @@ protected:
 	BOOL SetTextChange(int nChange, CString& sItem, const CString& sNewItem, TDC_ATTRIBUTE nAttrib, UINT nIDC, DWORD dwTaskID, CAutoComboBox* pCombo = NULL);
 	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, DWORD& dwRefTaskID);
 	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CCheckComboBox& combo);
+	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo);
 
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOOL bTitle, BOOL bNotifyNoErrors);
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker);

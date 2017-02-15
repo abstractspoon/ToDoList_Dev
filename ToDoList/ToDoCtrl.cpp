@@ -343,9 +343,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 		m_nTimeEstUnits = TDC::MapTHUnitsToUnits(m_eTimeEstimate.GetUnits());
 		m_nTimeSpentUnits = TDC::MapTHUnitsToUnits(m_eTimeSpent.GetUnits());
 
-		m_cbCategory.GetChecked(m_aCategory);
-		m_cbAllocTo.GetChecked(m_aAllocTo);
-		m_cbTags.GetChecked(m_aTags);
 		m_cbFileRef.GetFileList(m_aFileRefs);
 		m_eRecurrence.GetRecurrenceOptions(m_tRecurrence);
 
@@ -361,11 +358,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 		m_eTimeEstimate.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeEstUnits));
 		m_eTimeSpent.SetUnits(TDC::MapUnitsToTHUnits(m_nTimeSpentUnits));
 
-		m_cbCategory.SetChecked(m_aCategory);
-		m_cbAllocTo.SetChecked(m_aAllocTo);
-		m_cbTags.SetChecked(m_aTags);
 		m_cbFileRef.SetFileList(m_aFileRefs);
-
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
 
 		if (m_mapCustomCtrlData.GetCount() == 0)
@@ -1903,10 +1896,18 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			m_customComments = GetSelectedTaskCustomComments(sCommentsType);
 		}
 		
+		CStringArray aMatched, aMixed;
+		
+		m_taskTree.GetSelectedTaskAllocTo(aMatched, aMixed);
+		m_cbAllocTo.SetChecked(aMatched, aMixed);
+
+		m_taskTree.GetSelectedTaskCategories(aMatched, aMixed);
+		m_cbCategory.SetChecked(aMatched, aMixed);
+
+		m_taskTree.GetSelectedTaskTags(aMatched, aMixed);
+		m_cbTags.SetChecked(aMatched, aMixed);
+
 		// special cases
-		GetSelectedTaskCategories(m_aCategory);
-		GetSelectedTaskAllocTo(m_aAllocTo);
-		GetSelectedTaskTags(m_aTags);
 		GetSelectedTaskFileRefs(m_aFileRefs, FALSE); // relative paths
 
 		CStringArray aDepends;
@@ -1972,9 +1973,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sVersion.Empty();
 		m_crColour = CLR_DEFAULT;
 
-		m_aCategory.RemoveAll();
-		m_aAllocTo.RemoveAll();
-		m_aTags.RemoveAll();
+		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
+		m_cbCategory.CheckAll(CCBC_UNCHECKED);
+		m_cbTags.CheckAll(CCBC_UNCHECKED);
+
 		m_aFileRefs.RemoveAll();
 
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
@@ -2213,7 +2215,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_ALLOCTO:
-		SetSelectedTaskAllocTo(m_aAllocTo);
+		SetSelectedTaskArray(TDCA_ALLOCTO, m_cbAllocTo);
 		break;
 		
 	case TDCA_ALLOCBY:
@@ -2229,11 +2231,11 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_CATEGORY:
-		SetSelectedTaskCategories(m_aCategory);
+		SetSelectedTaskArray(TDCA_CATEGORY, m_cbCategory);
 		break;
 		
 	case TDCA_TAGS:
-		SetSelectedTaskTags(m_aTags);
+		SetSelectedTaskArray(TDCA_TAGS, m_cbTags);
 		break;
 		
 	case TDCA_PERCENT:
@@ -4535,6 +4537,53 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 		SetModified(TRUE, nAttrib, dwRefTaskID);
 
 	return nRes;
+}
+
+BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo)
+{
+	CStringArray aChecked, aUnchecked, aMixed, aTaskItems;
+
+	combo.GetChecked(aChecked, CCBC_CHECKED);
+	
+	if (combo.GetChecked(aMixed, CCBC_MIXED))
+		combo.GetChecked(aUnchecked, CCBC_UNCHECKED);
+
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwRefTaskID = 0;
+
+	IMPLEMENT_UNDOEDIT();
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+
+		// We only need to be careful if the combo has any mixed items
+		// and if the task itself has any current array items
+		if (aMixed.GetSize() && m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems))
+		{
+			Misc::AddUniqueItems(aChecked, aTaskItems);
+			Misc::RemoveItems(aUnchecked, aTaskItems);
+		}
+		else
+		{
+			aTaskItems.Copy(aChecked);
+		}
+		
+		TDC_SET nItemRes = m_data.SetTaskArray(dwTaskID, nAttrib, aTaskItems, FALSE);
+
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwRefTaskID = dwTaskID;
+		}
+	}
+
+	if (nRes == SET_CHANGE)
+		SetModified(TRUE, nAttrib, dwRefTaskID);
+
+	return nRes;
+
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCategories(const CStringArray& aCats)
