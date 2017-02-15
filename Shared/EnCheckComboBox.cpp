@@ -112,15 +112,11 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems) const
 	// else
 	aItems.RemoveAll();
 	
-	if (CComboBox::GetCurSel() != CB_ERR)
-	{
-		CString sItem;
-		GetLBText(CComboBox::GetCurSel(), sItem);
+	CString sSelItem = GetItemText(CComboBox::GetCurSel());
 
-		// we don't add the blank item
-		if (!sItem.IsEmpty())
-			aItems.Add(sItem);
-	}
+	// we don't add the blank item
+	if (!sSelItem.IsEmpty())
+		aItems.Add(sSelItem);
 	
 	return aItems.GetSize();
 }

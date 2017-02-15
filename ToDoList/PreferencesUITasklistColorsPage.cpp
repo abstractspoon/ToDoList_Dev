@@ -594,7 +594,7 @@ void CPreferencesUITasklistColorsPage::OnSelchangeAttribValue()
 	int nSel = m_cbAttributes.GetCurSel();
 
 	if (nSel != CB_ERR)
-		m_cbAttributes.GetLBText(nSel, m_sSelAttribValue);
+		m_sSelAttribValue = m_cbAttributes.GetItemText(nSel);
 	
 	int nColor = FindAttribValue(m_sSelAttribValue);
 

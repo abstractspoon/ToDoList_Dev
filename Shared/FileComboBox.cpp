@@ -261,8 +261,7 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 BOOL CFileComboBox::DeleteLBItem(int nItem)
 {
 	// Cache item text for later image removal
-	CString sFilename;
-	GetLBText(nItem, sFilename);
+	CString sFilename = GetItemText(nItem);
 
 	if (CAutoComboBox::DeleteLBItem(nItem))
 	{

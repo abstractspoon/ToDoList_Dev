@@ -183,6 +183,14 @@ CString CAutoComboBox::GetSelectedItem() const
 		GetLBText(nSel, sSel);
 	
 	return sSel;
+CString CAutoComboBox::GetItemText(int nItem) const
+{
+	CString sItem;
+
+	if (nItem != CB_ERR)
+		GetLBText(nItem, sItem);
+
+	return sItem;
 }
 
 int CAutoComboBox::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const
@@ -226,8 +234,7 @@ int CAutoComboBox::FindStringExact(int nIndexStart, const CString& sItem, BOOL b
 				ASSERT (bCaseSensitive);
 				
 				// test for real exactness because FindStringExact is not case sensitive
-				CString sFind;
-				GetLBText(nFind, sFind);
+				CString sFind = GetItemText(nFind);
 				
 				bContinue = !(sItem == sFind); // differ in case
 			}
@@ -239,8 +246,7 @@ int CAutoComboBox::FindStringExact(int nIndexStart, const CString& sItem, BOOL b
 
 		while (nFind--)
 		{
-			CString sLBItem;
-			GetLBText(nFind, sLBItem);
+			CString sLBItem = GetItemText(nFind);
 
 			if (sLBItem.IsEmpty())
 				break;
@@ -316,8 +322,7 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 		
 		if (nFind != CB_ERR) // items already exists
 		{
-			CString sLBItem;
-			GetLBText(nFind, sLBItem);
+			CString sLBItem = GetItemText(nFind);
 
 			if (nIndex == -1)
 				nIndex = nFind; // leave it in it's current position
@@ -325,12 +330,8 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 			if (nIndex != nFind || sItem != sLBItem)
 			{
 				// save selection so we can restore it
-				int nSel = GetCurSel();
-				CString sSelItem;
+				CString sSelItem = GetItemText(GetCurSel());
 				
-				if (nSel != CB_ERR)
-					GetLBText(nSel, sSelItem);
-
 				// be sure to transfer item data
 				DWORD dwItemData = GetItemData(nFind);
 				
@@ -347,7 +348,7 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 					RefreshDropWidth();
 				
 				// restore selection
-				if (nSel != CB_ERR)
+				if (!sSelItem.IsEmpty())
 					SelectString(-1, sSelItem);
 				
 				return nIndex;
@@ -498,9 +499,7 @@ int CAutoComboBox::GetItems(CStringArray& aItems) const
 
     while (nItem--)
     {
-        CString sItem;
-		GetLBText(nItem, sItem);
-
+        CString sItem = GetItemText(nItem);
         aItems.SetAt(nItem, sItem); // maintain order
     }
 
@@ -760,14 +759,14 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 
 	if ((nItem >= 0) && (nItem < GetCount()))
 	{
-		CString sCurItem, sItem;
+		CString sCurItem, sItem = GetItemText(nItem); // for notifying parent
 		int nCurSel = GetCurSel();
 		
 		// save existing selection
 		if (nCurSel != nItem)
 			GetWindowText(sCurItem);
-		
-		GetLBText(nItem, sItem); // need this for notifying parent
+
+		// Do the delete
 		::SendMessage(GetSafeHwnd(), CB_DELETESTRING, nItem, 0);
 		
 		// restore combo selection

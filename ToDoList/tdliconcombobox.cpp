@@ -106,8 +106,7 @@ int CTDLIconComboBox::SelectImage(const CString& sImage)
 
 CString CTDLIconComboBox::GetSelectedImage() const
 {
-	CString sItem;
-	GetLBText(GetCurSel(), sItem);
+	CString sItem = GetItemText(GetCurSel());
 	
 	if (sItem.IsEmpty())
 		GetWindowText(sItem);
