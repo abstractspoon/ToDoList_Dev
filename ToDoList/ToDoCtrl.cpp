@@ -7619,12 +7619,6 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	switch (nCtrlID)
 	{
 	case IDC_FILEPATH:
-		{
-			CStringArray aFileRefs;
-			m_cbFileRef.GetFileList(aFileRefs);
-
-			SetSelectedTaskFileRefs(aFileRefs, FALSE, TRUE);
-		}
 		// Note: parent doesn't need to know about this
 		return 0L;
 		
