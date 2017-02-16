@@ -393,8 +393,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 					
 					if (attribDef.GetDataType() == TDCCA_STRING)
 					{
-						CString sValue = pTDI->GetCustomAttribValue(attribDef.sUniqueID);
-						bMatch = ValueMatches(sValue, rule, resTask);
+						TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
+						DWORD dwAttribType = (attribDef.GetListType() | TDCCA_STRING);
+
+						bMatch = ValueMatches(data, dwAttribType, rule, resTask);
 					}
 				}
 			}
