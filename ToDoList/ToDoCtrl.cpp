@@ -2269,7 +2269,11 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_FILEREF:
-		SetSelectedTaskFileRefs(m_aFileRefs);
+		if (!m_cbFileRef.GetDroppedState())
+		{
+			BOOL bAppend = (GetSelectedCount() > 1);
+			SetSelectedTaskFileRefs(m_aFileRefs, bAppend, TRUE);
+		}
 		break;
 		
 	default:
