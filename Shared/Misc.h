@@ -124,6 +124,7 @@ namespace Misc
 #endif
 	
 	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
+	int RemoveMissingItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int RemoveEmptyItems(CStringArray& aFrom);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);

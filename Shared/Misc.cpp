@@ -980,6 +980,25 @@ int Misc::RemoveItems(const CStringArray& array, CStringArray& aFrom, BOOL bCase
 	return nRemoved;
 }
 
+int Misc::RemoveMissingItems(const CStringArray& array, CStringArray& aFrom, BOOL bCaseSensitive)
+{
+	int nRemoved = 0; // counter
+	int nItem = aFrom.GetSize();
+
+	while (nItem--)
+	{
+		const CString& sItem = GetItem(aFrom, nItem);
+
+		if (Find(array, sItem, bCaseSensitive, FALSE) == -1)
+		{ 
+			aFrom.RemoveAt(nItem);
+			nRemoved++;
+		}
+	}
+
+	return nRemoved;
+}
+
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 {
 	int nFind = Find(aFrom, szItem, bCaseSensitive, FALSE);
