@@ -4542,13 +4542,17 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo)
 {
-	CStringArray aChecked, aUnchecked, aMixed, aTaskItems;
+	CStringArray aChecked, aUnchecked, aTaskItems;
+	BOOL bMergeItems = FALSE;
 
 	combo.GetChecked(aChecked, CCBC_CHECKED);
-	
-	if (combo.GetChecked(aMixed, CCBC_MIXED))
+		
+	if (combo.IsAnyChecked(CCBC_MIXED))
+	{
 		combo.GetChecked(aUnchecked, CCBC_UNCHECKED);
-
+		bMergeItems = TRUE;
+	}
+	
 	POSITION pos = TSH().GetFirstItemPos();
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwRefTaskID = 0;
@@ -4561,7 +4565,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 
 		// We only need to be careful if the combo has any mixed items
 		// and if the task itself has any current array items
-		if (aMixed.GetSize() && m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems))
+		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems))
 		{
 			Misc::AddUniqueItems(aChecked, aTaskItems);
 			Misc::RemoveItems(aUnchecked, aTaskItems);
@@ -9842,7 +9846,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	}
 	else if ((pTarget == &m_cbFileRef) && aFiles.GetSize())
 	{
-		SetSelectedTaskFileRefs(aFiles, TRUE, FALSE);
+		AppendSelectedTaskFileRefs(aFiles);
 		m_cbFileRef.SetFocus();
 	}
 	
