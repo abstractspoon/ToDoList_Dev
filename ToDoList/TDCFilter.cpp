@@ -285,6 +285,12 @@ BOOL CTDCFilter::BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDe
 	{
 	case TDCFS_FILTER:
 		BuildFilterQuery(m_filter, params);
+
+		if ((m_filter.nTitleOption == FT_FILTERONANYTEXT) && 
+			!m_filter.sTitle.IsEmpty())
+		{
+			params.aAttribDefs.Copy(aCustomAttribDefs);
+		}
 		return TRUE;
 
 	case TDCFS_CUSTOM:

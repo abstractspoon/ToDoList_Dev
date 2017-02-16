@@ -382,6 +382,22 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 						ValueMatchesAsArray(pTDI->sVersion, rule, resTask, TRUE) || // matches whole versions only
 						ValueMatchesAsArray(pTDI->sExternalID, rule, resTask, FALSE) ||
 						ValueMatchesAsArray(pTDI->sCreatedBy, rule, resTask, FALSE));
+
+			if (!bMatch)
+			{
+				int nDef = query.aAttribDefs.GetSize();
+
+				while (nDef-- && !bMatch)
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = query.aAttribDefs[nDef];
+					
+					if (attribDef.GetDataType() == TDCCA_STRING)
+					{
+						CString sValue = pTDI->GetCustomAttribValue(attribDef.sUniqueID);
+						bMatch = ValueMatches(sValue, rule, resTask);
+					}
+				}
+			}
 			break;
 
 		case TDCA_SELECTION:
