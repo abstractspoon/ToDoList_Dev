@@ -7955,10 +7955,12 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 
 void CToDoListWnd::UpdateAeroFeatures()
 {
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
 #ifdef _DEBUG
-	BOOL bEnable = !GetToDoCtrl().IsEncrypted();
+	BOOL bEnable = !tdc.IsEncrypted();
 #else
-	BOOL bEnable = (!m_bPasswordPrompting || !GetToDoCtrl().IsEncrypted());
+	BOOL bEnable = (!tdc.IsEncrypted() || !tdc.WantPasswordReprompting());
 #endif
 
 	// Disable peek and other dynamic views if the active tasklist is encrypted
