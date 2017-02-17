@@ -63,6 +63,9 @@ public:
 
 #ifndef NO_TL_ENCRYPTDECRYPT
 	virtual BOOL Decrypt(LPCTSTR szPassword = NULL); 
+
+	void SetDisablePasswordPrompting();
+	BOOL IsPasswordPromptingDisabled() const;
 #endif
 
 	BOOL CopyFrom(const CTaskFile& tasks);

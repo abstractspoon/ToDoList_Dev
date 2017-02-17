@@ -3786,7 +3786,7 @@ BOOL CToDoListWnd::VerifyToDoCtrlPassword() const
 
 BOOL CToDoListWnd::VerifyToDoCtrlPassword(int nIndex) const
 {
-	return (m_bPasswordPrompting ? m_mgrToDoCtrls.VerifyPassword(nIndex) : TRUE);
+	return m_mgrToDoCtrls.VerifyPassword(nIndex);
 }
 
 void CToDoListWnd::Show(BOOL bAllowToggle)
@@ -7329,9 +7329,12 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		// set font to our font
 		CDialogHelper::SetFont(pTDC, m_fontMain, FALSE);
 		
-		// set the 'save ui to tasklist' flag once only
-		// allowing the taskfile itself to override
+		// set global styles once only allowing the taskfile 
+		// itself to override from this point on
 		pTDC->SetStyle(TDCS_SAVEUIVISINTASKLIST, m_bSaveUIVisInTaskList);
+		pTDC->SetStyle(TDCS_DISABLEPASSWORDPROMPTING, m_bPasswordPrompting);
+
+		// Set initial theme before it becomes visible
 		pTDC->SetUITheme(m_theme);
 		
 		// rest of runtime preferences

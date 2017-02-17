@@ -540,6 +540,11 @@ void CToDoCtrl::EnableEncryption(BOOL bEnable)
 	}
 }
 
+BOOL CToDoCtrl::WantPasswordReprompting() const
+{
+	return !HasStyle(TDCS_DISABLEPASSWORDPROMPTING);
+}
+
 BOOL CToDoCtrl::VerifyPassword(const CString& sExplanation) const
 {
 	if (!IsEncrypted())
@@ -5664,6 +5669,8 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_INCLUDEUSERINCHECKOUT:
 		case TDCS_DISPLAYLOGCONFIRM:
 		case TDCS_SYNCCOMPLETIONTOSTATUS:
+		case TDCS_DISABLEPASSWORDPROMPTING:
+		case TDCS_SAVEUIVISINTASKLIST:
 			// do nothing
 			break;
 
@@ -6023,6 +6030,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave)
 	// and meta data
 	tasks.SetMetaData(m_mapMetaData);
 
+	// And password prompting disability
+	if (IsEncrypted() && HasStyle(TDCS_DISABLEPASSWORDPROMPTING))
+		tasks.SetDisablePasswordPrompting();
+	
 	// encrypt prior to setting checkout status and file info (so these are visible without decryption)
 	// this simply fails if password is empty
 	tasks.Encrypt(m_sPassword, SFEF_UTF16);
@@ -6354,6 +6365,9 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& file)
 	LoadDefaultRecurrence(prefs);
 	LoadAttributeVisibility(file, prefs);
 
+	if (file.IsPasswordPromptingDisabled())
+		SetStyle(TDCS_DISABLEPASSWORDPROMPTING);
+	
 	if (file.GetTaskCount())
 	{
 		HOLD_REDRAW(*this, m_taskTree.Tree());

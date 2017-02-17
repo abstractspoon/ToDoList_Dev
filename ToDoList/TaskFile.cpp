@@ -230,6 +230,16 @@ BOOL CTaskFile::Decrypt(LPCTSTR szPassword)
 	return bResult;
 }
 
+void CTaskFile::SetDisablePasswordPrompting()
+{
+	VERIFY(SetItemValue(TDL_DISABLEPASSWORDPROMPTING, (int)TRUE));
+}
+
+BOOL CTaskFile::IsPasswordPromptingDisabled() const
+{
+	return (GetItemValueI(TDL_DISABLEPASSWORDPROMPTING) != FALSE);
+}
+
 #endif
 
 BOOL CTaskFile::Load(LPCTSTR szFilePath, IXmlParse* pCallback, BOOL bDecrypt)

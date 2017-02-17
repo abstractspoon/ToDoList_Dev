@@ -420,9 +420,15 @@ BOOL CToDoCtrlMgr::VerifyPassword(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
+
+	if (!tdc.WantPasswordReprompting())
+		return TRUE;
+
+	// else
 	CEnString sExplanation(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex));
 		
-	return GetToDoCtrl(nIndex).VerifyPassword(sExplanation);
+	return tdc.VerifyPassword(sExplanation);
 }
 
 TDCM_DUESTATUS CToDoCtrlMgr::GetDueItemStatus(int nIndex) const
