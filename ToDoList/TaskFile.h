@@ -133,6 +133,8 @@ public:
 	BOOL SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date = 0.0);
 	BOOL HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide = TRUE);
 
+	void ApplyDefaultTaskAttributes(const TODOITEM& tdi);
+
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskDoneDateOle(HTASKITEM hTask) const;
@@ -512,6 +514,8 @@ protected:
 	// for handling arrays at *tasklist* level
 	BOOL SetArray(const CString& sItemTag, const CStringArray& aItems);
 	int GetArray(const CString& sItemTag, CStringArray& aItems) const;
+
+	void ApplyDefaultTaskAttributes(const TODOITEM& tdi, HTASKITEM hTask, BOOL bAndSiblings);
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// legacy support for reading 'old' arrays

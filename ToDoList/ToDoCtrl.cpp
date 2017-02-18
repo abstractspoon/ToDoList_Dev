@@ -9878,6 +9878,8 @@ int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)
 
 	if (CTDCOutlookImportHelper::ImportTasks(pData, IDS_CSV_MUSTMAPTASKTITLE, &tasks))
 	{
+		tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
+
 		// add to current tasklist
 		HTREEITEM htiInsert = pData->hti;
 		

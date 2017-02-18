@@ -8269,6 +8269,8 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 	case IIR_SUCCESS:
 		if (tasks.GetTaskCount())
 		{
+			tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
+			
 			if (nImportTo == TDIT_NEWTASKLIST)
 				VERIFY(CreateNewTaskList(FALSE));
 

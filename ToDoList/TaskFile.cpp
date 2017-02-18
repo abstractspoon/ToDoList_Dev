@@ -1608,7 +1608,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 			SetTaskString(hTask, TDL_TASKEXTERNALID, tdi.sExternalID);
 		
 		if (!tdi.sIcon.IsEmpty())
-			SetTaskIcon(hTask, tdi.sIcon);
+			SetTaskString(hTask, TDL_TASKICONINDEX, tdi.sIcon);
 		
 		// rest of non-string attributes
 		SetTaskPriority(hTask, tdi.nPriority);
@@ -3906,4 +3906,136 @@ BOOL CTaskFile::SetArray(const CString& sItemTag, const CStringArray& aItems)
 	return TRUE;
 }
 
+void CTaskFile::ApplyDefaultTaskAttributes(const TODOITEM& tdi)
+{
+	ApplyDefaultTaskAttributes(tdi, NULL, TRUE);
+}
 
+void CTaskFile::ApplyDefaultTaskAttributes(const TODOITEM& tdi, HTASKITEM hTask, BOOL bAndSiblings)
+{
+	BOOL bRefTask = (hTask && GetTaskReferenceID(hTask));
+
+	if (hTask)
+	{
+		// Only apply defaults to non-reference tasks
+		// AND if the target attribute is empty
+		if (!bRefTask)
+		{
+			ASSERT (tdi.sComments.IsEmpty());
+			SetTaskCustomComments(hTask, CBinaryData(), tdi.sCommentsTypeID);
+			
+			if (!tdi.sAllocBy.IsEmpty() && GetTaskString(hTask, TDL_TASKALLOCBY).IsEmpty())
+				SetTaskString(hTask, TDL_TASKALLOCBY, tdi.sAllocBy);
+			
+			if (!tdi.sStatus.IsEmpty() && GetTaskString(hTask, TDL_TASKSTATUS).IsEmpty())
+				SetTaskString(hTask, TDL_TASKSTATUS, tdi.sStatus);
+			
+			if (!tdi.sVersion.IsEmpty() && GetTaskString(hTask, TDL_TASKVERSION).IsEmpty())
+				SetTaskString(hTask, TDL_TASKVERSION, tdi.sVersion);
+			
+			if (!tdi.sCreatedBy.IsEmpty() && GetTaskString(hTask, TDL_TASKCREATEDBY).IsEmpty())
+				SetTaskString(hTask, TDL_TASKCREATEDBY, tdi.sCreatedBy);
+			
+			if (!tdi.sExternalID.IsEmpty() && GetTaskString(hTask, TDL_TASKEXTERNALID).IsEmpty())
+				SetTaskString(hTask, TDL_TASKEXTERNALID, tdi.sExternalID);
+			
+			if (!tdi.sIcon.IsEmpty() && GetTaskString(hTask, TDL_TASKICONINDEX).IsEmpty())
+				SetTaskString(hTask, TDL_TASKICONINDEX, tdi.sIcon);
+			
+			// rest of non-string attributes
+			if (GetTaskString(hTask, TDL_TASKPRIORITY).IsEmpty())
+				SetTaskPriority(hTask, tdi.nPriority);
+
+			if (GetTaskString(hTask, TDL_TASKRISK).IsEmpty())
+				SetTaskRisk(hTask, tdi.nRisk);
+			
+// 			if (tdi.bFlagged)
+// 				SetTaskFlag(hTask, tdi.bFlagged != FALSE);
+			
+// 			if (tdi.IsRecurring())
+// 				SetTaskRecurrence(hTask, tdi.trRecurrence);
+			
+			if (tdi.aAllocTo.GetSize() && GetTaskString(hTask, TDL_TASKALLOCTO).IsEmpty())
+				SetTaskAllocatedTo(hTask, tdi.aAllocTo);
+			
+			if (tdi.aCategories.GetSize() && GetTaskString(hTask, TDL_TASKCATEGORY).IsEmpty())
+				SetTaskCategories(hTask, tdi.aCategories);
+			
+			if (tdi.aTags.GetSize() && GetTaskString(hTask, TDL_TASKTAG).IsEmpty())
+				SetTaskTags(hTask, tdi.aTags);
+			
+// 			if (tdi.aDependencies.GetSize())
+// 				SetTaskDependencies(hTask, tdi.aDependencies);
+			
+// 			if (tdi.aFileLinks.GetSize())
+// 				SetTaskFileLinks(hTask, tdi.aFileLinks);
+			
+			if (tdi.dCost != 0 && GetTaskString(hTask, TDL_TASKCOST).IsEmpty())
+				SetTaskCost(hTask, tdi.dCost);
+			
+			if ((tdi.dTimeEstimate > 0) || (tdi.nTimeEstUnits != TDCU_HOURS))
+				SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
+			
+			if ((tdi.dTimeSpent != 0.0) || (tdi.nTimeSpentUnits != TDCU_HOURS))
+				SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
+			
+			// done date and percent
+// 			if (tdi.IsDone())
+// 			{
+// 				SetTaskDoneDate(hTask, tdi.dateDone);
+// 				SetTaskPercentDone(hTask, 100);
+// 			}
+// 			//////////////////////////////////////////////////////////////////////////
+// 			// SAVE PERCENT DONE REGARDLESS OF VALUE, ELSE GANTTVIEWER SPITS THE DUMMY
+// 			else// if (tdi.nPercentDone > 0)
+// 			{
+// 				SetTaskPercentDone(hTask, (unsigned char)min(99, tdi.nPercentDone));
+// 			}
+			//////////////////////////////////////////////////////////////////////////
+			
+			if (tdi.HasDue() && GetTaskString(hTask, TDL_TASKDUEDATE).IsEmpty())
+				SetTaskDueDate(hTask, tdi.dateDue);
+			
+			if (tdi.HasStart() && GetTaskString(hTask, TDL_TASKSTARTDATE).IsEmpty())
+				SetTaskStartDate(hTask, tdi.dateStart);
+			
+// 			if (tdi.HasCreation())
+// 				SetTaskCreationDate(hTask, tdi.dateCreated);
+			
+// 			if (tdi.HasLastMod())
+// 				SetTaskLastModified(hTask, tdi.dateLastMod);
+			
+			if (tdi.color && GetTaskString(hTask, TDL_TASKCOLOR).IsEmpty())
+				SetTaskColor(hTask, tdi.color);
+			
+// 			// meta data
+// 			SetTaskMetaData(hTask, tdi.mapMetaData);
+// 			
+// 			// custom data
+// 			SetTaskCustomAttributeData(hTask, tdi.mapCustomData);
+		}
+
+		// handle sibling tasks WITHOUT RECURSION
+		if (bAndSiblings)
+		{
+			HTASKITEM hSibling = GetNextTask(hTask);
+			
+			while (hSibling)
+			{
+				// FALSE == don't recurse on siblings
+				ApplyDefaultTaskAttributes(tdi, hSibling, FALSE);
+				hSibling = GetNextTask(hSibling);
+			}
+		}
+	}
+
+	// children of non-ref tasks
+	if (!bRefTask)
+	{
+		// note: we only need do the first child
+		HTASKITEM hSubtask = GetFirstTask(hTask);
+
+		if (hSubtask)
+			ApplyDefaultTaskAttributes(tdi, hSubtask, TRUE);
+	}
+}
