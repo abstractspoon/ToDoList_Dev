@@ -43,7 +43,7 @@ void CTDCAnonymizeTasklist::Anonymize(CTaskFile& tasks, HTASKITEM hTask, CMapStr
 	if (hTask)
 	{
 		TODOITEM tdi;
-		VERIFY(tasks.GetTaskAttributes(hTask, &tdi));
+		VERIFY(tasks.GetTaskAttributes(hTask, tdi));
 		
 		tasks.SetTaskTitle(hTask, Misc::Shuffle(tdi.sTitle));
 		tasks.SetTaskComments(hTask, Misc::Shuffle(tdi.sComments));

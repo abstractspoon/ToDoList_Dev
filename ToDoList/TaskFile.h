@@ -143,8 +143,8 @@ public:
 	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID, BOOL bVisible = TRUE);
 	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible = TRUE);
 
-	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM* pTDI);
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM* pTDI) const;
+	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
 
 	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);

@@ -9491,7 +9491,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	}
 
 	// 'true' tasks
-	file.SetTaskAttributes(hTask, pTDI);
+	file.SetTaskAttributes(hTask, *pTDI);
 
 	// dynamically calculated attributes
 	int nHighestPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE); 

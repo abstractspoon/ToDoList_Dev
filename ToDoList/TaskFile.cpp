@@ -1574,161 +1574,161 @@ BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date)
 	return bRes;
 }
 
-BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM* pTDI)
+BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 {
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
 
-	SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
+	SetTaskReferenceID(hTask, tdi.dwTaskRefID);
 
 	// set string items via lower-level call to prevent string copying
-	SetTaskString(hTask, TDL_TASKTITLE, pTDI->sTitle);
+	SetTaskString(hTask, TDL_TASKTITLE, tdi.sTitle);
 	
 	// Save attributes _only_ if this is a 'real' task
-	if (pTDI->dwTaskRefID == 0)
+	if (tdi.dwTaskRefID == 0)
 	{
-		if (!pTDI->sComments.IsEmpty())
-			SetTaskString(hTask, TDL_TASKCOMMENTS, pTDI->sComments, XIT_ELEMENT);
+		if (!tdi.sComments.IsEmpty())
+			SetTaskString(hTask, TDL_TASKCOMMENTS, tdi.sComments, XIT_ELEMENT);
 
-		SetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
+		SetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID);
 
-		if (!pTDI->sAllocBy.IsEmpty())
-			SetTaskString(hTask, TDL_TASKALLOCBY, pTDI->sAllocBy);
+		if (!tdi.sAllocBy.IsEmpty())
+			SetTaskString(hTask, TDL_TASKALLOCBY, tdi.sAllocBy);
 		
-		if (!pTDI->sStatus.IsEmpty())
-			SetTaskString(hTask, TDL_TASKSTATUS, pTDI->sStatus);
+		if (!tdi.sStatus.IsEmpty())
+			SetTaskString(hTask, TDL_TASKSTATUS, tdi.sStatus);
 		
-		if (!pTDI->sVersion.IsEmpty())
-			SetTaskString(hTask, TDL_TASKVERSION, pTDI->sVersion);
+		if (!tdi.sVersion.IsEmpty())
+			SetTaskString(hTask, TDL_TASKVERSION, tdi.sVersion);
 		
-		if (!pTDI->sCreatedBy.IsEmpty())
-			SetTaskString(hTask, TDL_TASKCREATEDBY, pTDI->sCreatedBy);
+		if (!tdi.sCreatedBy.IsEmpty())
+			SetTaskString(hTask, TDL_TASKCREATEDBY, tdi.sCreatedBy);
 		
-		if (!pTDI->sExternalID.IsEmpty())
-			SetTaskString(hTask, TDL_TASKEXTERNALID, pTDI->sExternalID);
+		if (!tdi.sExternalID.IsEmpty())
+			SetTaskString(hTask, TDL_TASKEXTERNALID, tdi.sExternalID);
 		
-		if (!pTDI->sIcon.IsEmpty())
-			SetTaskIcon(hTask, pTDI->sIcon);
+		if (!tdi.sIcon.IsEmpty())
+			SetTaskIcon(hTask, tdi.sIcon);
 		
 		// rest of non-string attributes
-		SetTaskPriority(hTask, pTDI->nPriority);
-		SetTaskRisk(hTask, pTDI->nRisk);
+		SetTaskPriority(hTask, tdi.nPriority);
+		SetTaskRisk(hTask, tdi.nRisk);
 		
-		if (pTDI->bFlagged)
-			SetTaskFlag(hTask, pTDI->bFlagged != FALSE);
+		if (tdi.bFlagged)
+			SetTaskFlag(hTask, tdi.bFlagged != FALSE);
 		
-		if (pTDI->IsRecurring())
-			SetTaskRecurrence(hTask, pTDI->trRecurrence);
+		if (tdi.IsRecurring())
+			SetTaskRecurrence(hTask, tdi.trRecurrence);
 		
-		if (pTDI->aAllocTo.GetSize())
-			SetTaskAllocatedTo(hTask, pTDI->aAllocTo);
+		if (tdi.aAllocTo.GetSize())
+			SetTaskAllocatedTo(hTask, tdi.aAllocTo);
 		
-		if (pTDI->aCategories.GetSize())
-			SetTaskCategories(hTask, pTDI->aCategories);
+		if (tdi.aCategories.GetSize())
+			SetTaskCategories(hTask, tdi.aCategories);
 		
-		if (pTDI->aTags.GetSize())
-			SetTaskTags(hTask, pTDI->aTags);
+		if (tdi.aTags.GetSize())
+			SetTaskTags(hTask, tdi.aTags);
 		
-		if (pTDI->aDependencies.GetSize())
-			SetTaskDependencies(hTask, pTDI->aDependencies);
+		if (tdi.aDependencies.GetSize())
+			SetTaskDependencies(hTask, tdi.aDependencies);
 			
-		if (pTDI->aFileLinks.GetSize())
-			SetTaskFileLinks(hTask, pTDI->aFileLinks);
+		if (tdi.aFileLinks.GetSize())
+			SetTaskFileLinks(hTask, tdi.aFileLinks);
 		
-		if (pTDI->dCost != 0)
-			SetTaskCost(hTask, pTDI->dCost);
+		if (tdi.dCost != 0)
+			SetTaskCost(hTask, tdi.dCost);
 		
-		if ((pTDI->dTimeEstimate > 0) || (pTDI->nTimeEstUnits != TDCU_HOURS))
-			SetTaskTimeEstimate(hTask, pTDI->dTimeEstimate, pTDI->nTimeEstUnits);
+		if ((tdi.dTimeEstimate > 0) || (tdi.nTimeEstUnits != TDCU_HOURS))
+			SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
 		
-		if ((pTDI->dTimeSpent != 0.0) || (pTDI->nTimeSpentUnits != TDCU_HOURS))
-			SetTaskTimeSpent(hTask, pTDI->dTimeSpent, pTDI->nTimeSpentUnits);
+		if ((tdi.dTimeSpent != 0.0) || (tdi.nTimeSpentUnits != TDCU_HOURS))
+			SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
 		
 		// done date and percent
-		if (pTDI->IsDone())
+		if (tdi.IsDone())
 		{
-			SetTaskDoneDate(hTask, pTDI->dateDone);
+			SetTaskDoneDate(hTask, tdi.dateDone);
 			SetTaskPercentDone(hTask, 100);
 		}
 		//////////////////////////////////////////////////////////////////////////
 		// SAVE PERCENT DONE REGARDLESS OF VALUE, ELSE GANTTVIEWER SPITS THE DUMMY
-		else// if (pTDI->nPercentDone > 0)
+		else// if (tdi.nPercentDone > 0)
 		{
-			SetTaskPercentDone(hTask, (unsigned char)min(99, pTDI->nPercentDone));
+			SetTaskPercentDone(hTask, (unsigned char)min(99, tdi.nPercentDone));
 		}
 		//////////////////////////////////////////////////////////////////////////
 
-		if (pTDI->HasDue())
-			SetTaskDueDate(hTask, pTDI->dateDue);
+		if (tdi.HasDue())
+			SetTaskDueDate(hTask, tdi.dateDue);
 		
-		if (pTDI->HasStart())
-			SetTaskStartDate(hTask, pTDI->dateStart);
+		if (tdi.HasStart())
+			SetTaskStartDate(hTask, tdi.dateStart);
 		
-		if (pTDI->HasCreation())
-			SetTaskCreationDate(hTask, pTDI->dateCreated);
+		if (tdi.HasCreation())
+			SetTaskCreationDate(hTask, tdi.dateCreated);
 		
-		if (pTDI->HasLastMod())
-			SetTaskLastModified(hTask, pTDI->dateLastMod);
+		if (tdi.HasLastMod())
+			SetTaskLastModified(hTask, tdi.dateLastMod);
 		
-		if (pTDI->color)
-			SetTaskColor(hTask, pTDI->color);
+		if (tdi.color)
+			SetTaskColor(hTask, tdi.color);
 
 		// meta data
-		SetTaskMetaData(hTask, pTDI->mapMetaData);
+		SetTaskMetaData(hTask, tdi.mapMetaData);
 
 		// custom data
-		SetTaskCustomAttributeData(hTask, pTDI->mapCustomData);
+		SetTaskCustomAttributeData(hTask, tdi.mapCustomData);
 	}
 
 	return TRUE;
 }
 
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM* pTDI) const
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
 
-	pTDI->dwTaskRefID = GetTaskReferenceID(hTask);
+	tdi.dwTaskRefID = GetTaskReferenceID(hTask);
 
 	// Load attributes _only_ if this is a 'real' task
-	if (pTDI->dwTaskRefID == 0)
+	if (tdi.dwTaskRefID == 0)
 	{
 		// Call GetTaskString directly wherever possible to avoid string copying
-		pTDI->dateLastMod = GetTaskLastModifiedOle(hTask);
-		pTDI->sTitle = GetTaskString(hTask, TDL_TASKTITLE);
-		pTDI->sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
-		pTDI->sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY);
-		pTDI->sStatus = GetTaskString(hTask, TDL_TASKSTATUS);
-		pTDI->sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY);
-		pTDI->bFlagged = IsTaskFlagged(hTask);
-		pTDI->color = (COLORREF)GetTaskColor(hTask);
-		pTDI->nPercentDone = (int)GetTaskPercentDone(hTask, FALSE);
-		pTDI->dTimeEstimate = GetTaskTimeEstimate(hTask, pTDI->nTimeEstUnits, FALSE);
-		pTDI->dTimeSpent = GetTaskTimeSpent(hTask, pTDI->nTimeSpentUnits, FALSE);
-		pTDI->nPriority = (int)GetTaskPriority(hTask, FALSE);
-		pTDI->dateDue = GetTaskDueDateOle(hTask);
-		pTDI->dateStart = GetTaskStartDateOle(hTask);
-		pTDI->dateDone = GetTaskDoneDateOle(hTask);
-		pTDI->dateCreated = GetTaskCreationDateOle(hTask);
-		pTDI->nRisk = GetTaskRisk(hTask, FALSE);
-		pTDI->sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID);
-		pTDI->dCost = GetTaskCost(hTask, FALSE);
-		pTDI->sVersion = GetTaskVersion(hTask);
-		pTDI->sIcon = GetTaskIcon(hTask);
+		tdi.dateLastMod = GetTaskLastModifiedOle(hTask);
+		tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE);
+		tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+		tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY);
+		tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS);
+		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY);
+		tdi.bFlagged = IsTaskFlagged(hTask);
+		tdi.color = (COLORREF)GetTaskColor(hTask);
+		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, FALSE);
+		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, FALSE);
+		tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, FALSE);
+		tdi.nPriority = (int)GetTaskPriority(hTask, FALSE);
+		tdi.dateDue = GetTaskDueDateOle(hTask);
+		tdi.dateStart = GetTaskStartDateOle(hTask);
+		tdi.dateDone = GetTaskDoneDateOle(hTask);
+		tdi.dateCreated = GetTaskCreationDateOle(hTask);
+		tdi.nRisk = GetTaskRisk(hTask, FALSE);
+		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID);
+		tdi.dCost = GetTaskCost(hTask, FALSE);
+		tdi.sVersion = GetTaskVersion(hTask);
+		tdi.sIcon = GetTaskIcon(hTask);
 
-		GetTaskCategories(hTask, pTDI->aCategories);
-		GetTaskTags(hTask, pTDI->aTags);
-		GetTaskAllocatedTo(hTask, pTDI->aAllocTo);
-		GetTaskRecurrence(hTask, pTDI->trRecurrence);
-		GetTaskDependencies(hTask, pTDI->aDependencies);
-		GetTaskFileLinks(hTask, pTDI->aFileLinks);
-		GetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
+		GetTaskCategories(hTask, tdi.aCategories);
+		GetTaskTags(hTask, tdi.aTags);
+		GetTaskAllocatedTo(hTask, tdi.aAllocTo);
+		GetTaskRecurrence(hTask, tdi.trRecurrence);
+		GetTaskDependencies(hTask, tdi.aDependencies);
+		GetTaskFileLinks(hTask, tdi.aFileLinks);
+		GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID);
 
 		// meta data
-		GetTaskMetaData(hTask, pTDI->mapMetaData);
+		GetTaskMetaData(hTask, tdi.mapMetaData);
 
 		// custom data
-		GetTaskCustomAttributeData(hTask, pTDI->mapCustomData);
+		GetTaskCustomAttributeData(hTask, tdi.mapCustomData);
 	}
 
 	return TRUE;

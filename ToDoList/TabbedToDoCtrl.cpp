@@ -2231,10 +2231,10 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 				CTaskFile task;
 				HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, 0, 0);
 
-				task.SetTaskAttributes(hTask, pTDI);
+				task.SetTaskAttributes(hTask, *pTDI);
 
 				if (pExtWnd->PrepareNewTask(&task))
-					task.GetTaskAttributes(hTask, pTDI);
+					task.GetTaskAttributes(hTask, *pTDI);
 
 				// fall thru
 			}
