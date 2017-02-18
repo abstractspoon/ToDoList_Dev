@@ -2199,7 +2199,12 @@ BOOL CTabbedToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere
 TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 {
 	TODOITEM* pTDI = CToDoCtrl::CreateNewTask(htiParent);
-	ASSERT(pTDI);
+
+	if (!pTDI)
+	{
+		ASSERT(0);
+		return NULL;
+	}
 
 	// give active extension view a chance to initialise
 	FTC_VIEW nView = GetTaskView();

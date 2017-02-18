@@ -211,10 +211,12 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask) const
 		return NULL;
 
 	TODOITEM* pTDI = NewTask();
-	ASSERT(pTDI);
 
 	if (!pTDI)
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	
 	tasks.GetTaskAttributes(hTask, *pTDI);
 	

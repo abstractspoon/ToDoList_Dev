@@ -4957,6 +4957,12 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 
 	// create the new task item
 	TODOITEM* pTDINew = CreateNewTask(htiParent);
+
+	if (!pTDINew)
+	{
+		ASSERT(0);
+		return NULL;
+	}
 	
 	// and initialize
 	pTDINew->sTitle = sText;
@@ -9474,10 +9480,11 @@ COLORREF CToDoCtrl::GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 
 BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, HTASKITEM hTask) const
 {
-	ASSERT(pTDI);
-	
 	if (!pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// SPECIAL CASE:
 	// if task is a reference we use a bit of sleight of hand
