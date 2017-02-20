@@ -56,6 +56,7 @@ protected:
 	afx_msg void OnHelpCommandline();
 	afx_msg void OnHelpDonate();
 	afx_msg void OnHelpUninstall();
+#ifdef _DEBUG
 	afx_msg void OnDebugTaskDialogInfo();
 	afx_msg void OnDebugShowUpdateDlg();
 	afx_msg void OnDebugShowScriptDlg();
@@ -63,6 +64,7 @@ protected:
 	afx_msg void OnDebugTaskDialogWarning();
 	afx_msg void OnDebugTaskDialogError();
 	afx_msg void OnDebugShowReminderDlg();
+#endif
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();
 	afx_msg void OnHelpWiki();

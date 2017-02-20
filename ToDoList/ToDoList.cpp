@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_WARNING, OnDebugTaskDialogWarning)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_ERROR, OnDebugTaskDialogError)
 	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
+	ON_COMMAND(ID_DEBUGSHOWLANGDLG, OnDebugShowLanguageDlg)
 #endif
 
 	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
@@ -97,7 +98,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
-	ON_COMMAND(ID_DEBUGSHOWLANGDLG, OnDebugShowLanguageDlg)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1740,7 +1740,9 @@ TDL_WEBUPDATE_CHECK CToDoListApp::CheckForUpdates(BOOL bManual)
 } 
 
 /////////////////////////////////////////////////////////////////////////////
+// DEBUG FUNCTIONS
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugTaskDialogInfo() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1752,7 +1754,9 @@ void CToDoListApp::OnDebugTaskDialogInfo()
 
 	AfxMessageBox(szTestMsg, MB_ICONINFORMATION);
 }
+#endif
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugTaskDialogWarning() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1764,7 +1768,9 @@ void CToDoListApp::OnDebugTaskDialogWarning()
 
 	AfxMessageBox(szTestMsg, MB_ICONWARNING);
 }
+#endif
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugTaskDialogError() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1776,7 +1782,9 @@ void CToDoListApp::OnDebugTaskDialogError()
 	
 	AfxMessageBox(szTestMsg, MB_ICONERROR);
 }
+#endif
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugShowUpdateDlg() 
 {
 	CString sAppPath = (FileMisc::TerminatePath(FileMisc::GetAppFolder()) + _T("TDLUpdate.exe"));
@@ -1800,20 +1808,32 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 
 	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdLine.GetCommandLine());
 }
+#endif
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugShowScriptDlg() 
 {
-#ifdef _DEBUG
 	CTDLWebUpdatePromptDlg::ShowDialog();
-#endif
 }
+#endif
 
+#ifdef _DEBUG
 void CToDoListApp::OnDebugShowReminderDlg() 
 {
-#ifdef _DEBUG
 	((CToDoListWnd*)m_pMainWnd)->ShowReminderDlg();
-#endif
 }
+#endif
+
+#ifdef _DEBUG
+void CToDoListApp::OnDebugShowLanguageDlg()
+{
+	CTDLLanguageDlg dialog;
+	dialog.DoModal();
+}
+#endif
+
+// DEBUG FUNCTIONS
+/////////////////////////////////////////////////////////////////////////////
 
 void CToDoListApp::OnHelpRecordBugReport() 
 {
@@ -1965,12 +1985,6 @@ BOOL CToDoListApp::CommandRequiresUI(UINT nCmdID)
 	// all else
 	ASSERT(0);
 	return FALSE;
-}
-
-void CToDoListApp::OnDebugShowLanguageDlg()
-{
-	CTDLLanguageDlg dialog;
-	dialog.DoModal();
 }
 
 CString CToDoListApp::GetResourcePath(LPCTSTR szSubFolder, LPCTSTR szFile)
