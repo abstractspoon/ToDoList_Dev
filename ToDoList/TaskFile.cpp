@@ -211,13 +211,7 @@ BOOL CTaskFile::Decrypt(LPCTSTR szPassword)
 	if (bResult && bWasEncrypted)
 	{
 		// fix corrupted tasklist where the root item has an ID
-		CXmlItem* pXI = GetItem(TDL_TASKID);
-
-		while (pXI)
-		{
-			DeleteItem(pXI);
-			pXI = GetItem(TDL_TASKID);
-		}
+		DeleteItem(TDL_TASKID);
 
 		m_dwNextUniqueID = (DWORD)GetItemValueI(TDL_NEXTUNIQUEID);
 
