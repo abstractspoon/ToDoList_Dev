@@ -932,7 +932,7 @@ public:
 	{
 		for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
 
 			if (Find(attribDef.sUniqueID) != -1)
 				return TRUE;
@@ -952,7 +952,7 @@ public:
 
 		while (nAttrib--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
 
 			if ((nAttrib != nIgnore) && (attribDef.sUniqueID == sAttribID))
 				return nAttrib;
@@ -967,7 +967,7 @@ public:
 
 		for (int nAttrib = 0; nAttrib < aSrc.GetSize(); nAttrib++)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc.ElementAt(nAttrib);
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc.GetData()[nAttrib];
 
 			// Append unique items only
 			if (Find(attribDef.sUniqueID) == -1)
