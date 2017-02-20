@@ -1074,7 +1074,10 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribs)
 {
 	// delete old attribDef
-	DeleteItem(const_cast<CXmlItem*>(GetCustomAttribDefs()));
+	if (!DeleteItem(TDL_CUSTOMATTRIBDEFS))
+		DeleteItem(TDL_CUSTOMATTRIBDEFS_DEP);
+
+	ASSERT(GetCustomAttribDefs() == NULL);
 
 	int nNumAttrib = aAttribs.GetSize();
 
@@ -3086,7 +3089,9 @@ BOOL CTaskFile::HideAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bHide)
 				pXIAttrib->AddItem(_T("HIDE"), 1);
 		}
 		else if (pXIHide)
+		{
 			pXIAttrib->DeleteItem(pXIHide);
+		}
 		
 		return TRUE;
 	}
