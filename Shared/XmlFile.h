@@ -101,9 +101,9 @@ public:
 	void SetValue(double dValue);
 	void ClearValue();
 
-	BOOL RemoveItem(CXmlItem* pXIChild); // must be a direct child (does not destroy item)
-	BOOL DeleteItem(CXmlItem* pXIChild); // must be a direct child
-	BOOL DeleteItem(const CString& sItemName, const CString& sSubItemName = EMPTY_STR); // must be a direct descendent
+	BOOL RemoveItem(CXmlItem* pXIChild); // does not remove siblings or delete item
+	BOOL DeleteItem(CXmlItem* pXIChild); // does not remove siblings
+	BOOL DeleteItem(const CString& sItemName, const CString& sSubItemName = EMPTY_STR); // Removes siblings
 	void DeleteAllItems();
 
 	const CXmlItem* GetParent() const;
