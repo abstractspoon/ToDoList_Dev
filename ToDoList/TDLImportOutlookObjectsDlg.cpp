@@ -325,6 +325,8 @@ CString CTDLImportOutlookObjectsDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaF
 
 void CTDLImportOutlookObjectsDlg::OnHideAttributes() 
 {
+	UpdateMasterMapping();
+
 	BOOL bHideConfidential = m_bHideConfidential;
 	UpdateData();
 
