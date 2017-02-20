@@ -483,7 +483,7 @@ BOOL CXmlItem::DeleteItem(CXmlItem* pXI)
 {
 	if (RemoveItem(pXI))
 	{
-		delete pXI;
+		delete pXI; // This will delete children
 		return TRUE;
 	}
 	
