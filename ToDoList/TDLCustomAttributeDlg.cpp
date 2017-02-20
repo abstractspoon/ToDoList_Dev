@@ -668,7 +668,7 @@ void CTDLCustomAttributeDlg::MakeUniqueID(CString& sID, int nIgnore) const
 
 BOOL CTDLCustomAttributeDlg::UniqueIDExists(const CString& sID, int nIgnore) const
 {
-	return (CTDCCustomAttributeHelper::FindAttribute(sID, m_aAttrib, nIgnore) != -1);
+	return (m_aAttrib.Find(sID, nIgnore) != -1);
 }
 
 void CTDLCustomAttributeDlg::OnBeginlabeleditAttributelist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 

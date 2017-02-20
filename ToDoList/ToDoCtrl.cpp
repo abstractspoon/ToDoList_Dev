@@ -9114,7 +9114,7 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 	
 	if (tasks.GetCustomAttributeDefs(aAttribDefs))
 	{
-		if (CTDCCustomAttributeHelper::AppendUniqueAttributes(aAttribDefs, m_aCustomAttribDefs))
+		if (m_aCustomAttribDefs.Append(aAttribDefs))
 			RebuildCustomAttributeUI();
 	}
 

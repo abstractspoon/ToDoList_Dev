@@ -582,7 +582,7 @@ BOOL CTDCCustomAttributeHelper::GetAttributeDef(const CString& sUniqueID,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
-	int nAttrib = FindAttribute(sUniqueID, aAttribDefs);
+	int nAttrib = aAttribDefs.Find(sUniqueID);
 
 	if (nAttrib != -1)
 	{
@@ -629,7 +629,7 @@ BOOL CTDCCustomAttributeHelper::GetAttributeDef(TDC_COLUMN nColID,
 DWORD CTDCCustomAttributeHelper::GetAttributeDataType(const CString& sUniqueID, 
 													const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	int nAttrib = FindAttribute(sUniqueID, aAttribDefs);
+	int nAttrib = aAttribDefs.Find(sUniqueID);
 
 	if (nAttrib != -1)
 	{
@@ -684,30 +684,6 @@ BOOL CTDCCustomAttributeHelper::IsCustomColumnEnabled(TDC_COLUMN nColID,
 BOOL CTDCCustomAttributeHelper::IsCustomControl(UINT nCtrlID)
 {
 	return (nCtrlID >= IDC_FIRST_CUSTOMDATAFIELD && nCtrlID <= IDC_LAST_CUSTOMDATAFIELD);
-}
-
-int CTDCCustomAttributeHelper::FindAttribute(const CString& sAttribID, 
-											 const CTDCCustomAttribDefinitionArray& aAttribDefs, int nIgnore)
-{
-	// validate attribute type id
-	ASSERT(!sAttribID.IsEmpty());
-
-	if (sAttribID.IsEmpty())
-		return -1;
-
-	// search attribute defs for unique ID
-	int nAttribDef = aAttribDefs.GetSize();
-
-	while (nAttribDef--)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttribDef];
-
-		if ((nAttribDef != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
-			return nAttribDef;
-	}
-
-	// not found
-	return -1;
 }
 
 void CTDCCustomAttributeHelper::SaveAutoListDataToDefs(const CWnd* pParent, 
@@ -1047,7 +1023,7 @@ BOOL CTDCCustomAttributeHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTRLI
 		return FALSE;
 
 	// search attribute defs for unique ID
-	int nAttribDef = FindAttribute(ctrl.sAttribID, aAttribDefs);
+	int nAttribDef = aAttribDefs.Find(ctrl.sAttribID);
 
 	if (nAttribDef != -1)
 	{
@@ -1108,70 +1084,3 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	return FT_NONE;
 }
 
-int CTDCCustomAttributeHelper::AppendUniqueAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-														CTDCCustomAttribDefinitionArray& aMasterDefs)
-{
-	if (aMasterDefs.GetSize() == 0)
-	{
-		aMasterDefs.Copy(aAttribDefs);
-	}
-	else
-	{
-		for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef = aAttribDefs[nAttrib];
-
-			// look for duplicate attrib ID in master list
-			if (FindAttribute(attribDef.sUniqueID, aMasterDefs) == -1)
-				aMasterDefs.Add(attribDef);
-			
-			// else skip
-		}
-	}
-
-	return aMasterDefs.GetSize();
-}
-
-int CTDCCustomAttributeHelper::CalcLongestListItem(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CDC* pDC)
-{
-	ASSERT (attribDef.IsList());
-
-	if (!attribDef.IsList())
-		return 0;
-
-	int nItem = attribDef.aDefaultListData.GetSize(), nLongest = 0;
-
-	while (nItem--)
-	{
-		const CString& sItem = Misc::GetItem(attribDef.aDefaultListData, nItem);
-		int nItemLen = 0;
-
-		switch (attribDef.GetDataType())
-		{
-		case TDCCA_STRING:
-		case TDCCA_INTEGER:	
-		case TDCCA_DOUBLE:	
-		case TDCCA_DATE:	
-		case TDCCA_BOOL:
-			nItemLen = pDC->GetTextExtent(sItem).cx;
-			break;
-
-		case TDCCA_ICON:
-			if (attribDef.IsList())
-			{
-				nItemLen = 20; // for the icon
-				
-				// check for trailing text
-				CString sDummy, sName;
-				
-				if (attribDef.DecodeImageTag(sItem, sDummy, sName) && !sName.IsEmpty())
-					nItemLen += pDC->GetTextExtent(sName).cx;
-			}
-			break;
-		}
-
-		nLongest = max(nLongest, nItemLen);
-	}
-
-	return nLongest;
-}

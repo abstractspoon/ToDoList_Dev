@@ -11,7 +11,6 @@
 
 #include "tdcstruct.h"
 
-class COrderedTreeCtrl;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomControlArray;
 class CTDCImageList;
@@ -106,13 +105,6 @@ public:
 
 	static void ValidateAttributeFindOperator(const SEARCHPARAM& sp, 
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static int AppendUniqueAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-										CTDCCustomAttribDefinitionArray& aMasterDefs);
-
-	static int FindAttribute(const CString& sAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs, int nIgnore = -1);
-
-	static int CalcLongestListItem(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CDC* pDC);
 
 protected:
 	static CWnd* CreateCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 

@@ -4875,7 +4875,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 							switch (attribDef.GetListType())
 							{
 							case TDCCA_FIXEDLIST:
-								nColWidth = CTDCCustomAttributeHelper::CalcLongestListItem(attribDef, pDC);
+								nColWidth = attribDef.CalcLongestListItem(pDC);
 								break;
 
 							case TDCCA_FIXEDMULTILIST:

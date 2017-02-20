@@ -4316,7 +4316,7 @@ void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
 		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 		tdc.GetCustomAttributeDefs(aTDCAttribDefs);
 
-		CTDCCustomAttributeHelper::AppendUniqueAttributes(aTDCAttribDefs, aAllAttribDefs);
+		aAllAttribDefs.Append(aTDCAttribDefs);
 	}
 	
 	// active tasklist
@@ -8306,6 +8306,29 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 			if (nImportTo == TDIT_NEWTASKLIST)
 			{
+				// If the imported tasks contain any custom attributes
+				// and those custom attributes match those of any open 
+				// tasklist then overwrite the imported custom attributes 
+				// with those from the matching tasklist
+				CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
+
+				if (tasks.GetCustomAttributeDefs(aImportedDefs))
+				{
+					int nTDC = GetTDCCount();
+
+					while (nTDC--)
+					{
+						if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
+							aImportedDefs.MatchAny(aTDCAttribDefs))
+						{
+							aTDCAttribDefs.Append(aImportedDefs);
+
+							tasks.SetCustomAttributeDefs(aTDCAttribDefs);
+							break;
+						}
+					}
+				}
+
 				VERIFY(tdc.InsertTasks(tasks, nWhere, FALSE));
 				tdc.SetProjectName(tasks.GetProjectName());
 			}

@@ -777,6 +777,50 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 		return sName;
 	}
+	
+	int CalcLongestListItem(CDC* pDC) const
+	{
+		if (!IsList())
+		{
+			ASSERT(0);
+			return 0;
+		}
+
+		int nItem = aDefaultListData.GetSize(), nLongest = 0;
+
+		while (nItem--)
+		{
+			const CString& sItem = Misc::GetItem(aDefaultListData, nItem);
+			int nItemLen = 0;
+
+			switch (GetDataType())
+			{
+			case TDCCA_STRING:
+			case TDCCA_INTEGER:	
+			case TDCCA_DOUBLE:	
+			case TDCCA_DATE:	
+			case TDCCA_BOOL:
+				nItemLen = pDC->GetTextExtent(sItem).cx;
+				break;
+
+			case TDCCA_ICON:
+				{
+					nItemLen = 20; // for the icon
+
+					// check for trailing text
+					CString sDummy, sName;
+
+					if (DecodeImageTag(sItem, sDummy, sName) && !sName.IsEmpty())
+						nItemLen += pDC->GetTextExtent(sName).cx;
+				}
+				break;
+			}
+
+			nLongest = max(nLongest, nItemLen);
+		}
+
+		return nLongest;
+	}
 
 	static CString EncodeImageTag(const CString& sImage, const CString& sName) 
 	{ 
@@ -882,6 +926,59 @@ public:
 	{
 		CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>::RemoveAt(nIndex, nCount);
 		RebuildIDs();
+	}
+
+	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+	{
+		for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
+
+			if (Find(attribDef.sUniqueID) != -1)
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	int Find(const CString& sAttribID, int nIgnore = -1) const
+	{
+		ASSERT(!sAttribID.IsEmpty());
+
+		if (sAttribID.IsEmpty())
+			return -1;
+
+		int nAttrib = GetSize();
+
+		while (nAttrib--)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
+
+			if ((nAttrib != nIgnore) && (attribDef.sUniqueID == sAttribID))
+				return nAttrib;
+		}
+
+		return -1;
+	}
+
+	int Append(const CTDCCustomAttribDefinitionArray& aSrc)
+	{
+		int nOrgSize = GetSize();
+
+		for (int nAttrib = 0; nAttrib < aSrc.GetSize(); nAttrib++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc.ElementAt(nAttrib);
+
+			// Append unique items only
+			if (Find(attribDef.sUniqueID) == -1)
+			{
+				TDCCUSTOMATTRIBUTEDEFINITION def = aSrc[nAttrib];
+				Add(def);
+			}
+			// else skip
+		}
+
+		return (GetSize() - nOrgSize);
 	}
 
 protected:
