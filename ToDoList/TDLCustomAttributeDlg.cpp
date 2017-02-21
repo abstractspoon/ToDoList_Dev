@@ -30,12 +30,13 @@ struct TDLCAD_TYPE
 
 static TDLCAD_TYPE DATA_TYPES[] = 
 {
-	{ IDS_CAD_STRING, TDCCA_STRING },
-	{ IDS_CAD_INT, TDCCA_INTEGER },
-	{ IDS_CAD_FLOAT, TDCCA_DOUBLE },
-	{ IDS_CAD_DATE, TDCCA_DATE },
-	{ IDS_CAD_BOOL, TDCCA_BOOL },
-	{ IDS_CAD_ICON, TDCCA_ICON },
+	{ IDS_CAD_STRING,	TDCCA_STRING },
+	{ IDS_CAD_INT,		TDCCA_INTEGER },
+	{ IDS_CAD_FLOAT,	TDCCA_DOUBLE },
+	{ IDS_CAD_DATE,		TDCCA_DATE },
+	{ IDS_CAD_BOOL,		TDCCA_BOOL },
+	{ IDS_CAD_ICON,		TDCCA_ICON },
+	{ IDS_CAD_FILELINK, TDCCA_FILELINK },
 };
 const int NUM_DATATYPES = sizeof(DATA_TYPES) / sizeof(TDLCAD_TYPE);
 
@@ -388,6 +389,14 @@ void CTDLCustomAttributeDlg::BuildListTypeCombo(DWORD dwDataType)
 			}
 			break;
 
+		case TDCCA_FILELINK:
+			if ((dwListType != TDCCA_NOTALIST) &&
+				(dwListType != TDCCA_AUTOLIST))
+			{
+				continue;
+			}
+			break;
+			
 		case TDCCA_STRING:
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
@@ -563,6 +572,7 @@ void CTDLCustomAttributeDlg::UpdateListDataMask()
 	case TDCCA_DATE:
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
+	case TDCCA_FILELINK:
 		m_eListData.SetMask(_T("")); // clear mask
 		break;
 

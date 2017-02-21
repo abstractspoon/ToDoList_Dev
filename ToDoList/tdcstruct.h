@@ -626,8 +626,11 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
 	inline BOOL HasFeature(DWORD dwFeature) const { return (dwFeatures & dwFeature); }
 
+	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
 	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }
 	inline BOOL IsAutoList() const { return ((GetListType() == TDCCA_AUTOLIST) || (GetListType() == TDCCA_AUTOMULTILIST)); }
+	inline BOOL IsMultiList() const { return ((GetListType() == TDCCA_FIXEDMULTILIST) || (GetListType() == TDCCA_AUTOMULTILIST)); }
+	inline BOOL IsFixedList() const { return ((GetListType() == TDCCA_FIXEDLIST) || (GetListType() == TDCCA_FIXEDMULTILIST)); }
 
 	int GetUniqueListData(CStringArray& aData) const
 	{
@@ -681,7 +684,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		// calculations not supported by multi-list types
 		DWORD dwListType = GetListType();
 
-		if (dwListType == TDCCA_AUTOMULTILIST || dwListType == TDCCA_FIXEDMULTILIST)
+		if (IsMultiList())
 			return FALSE;
 
 		DWORD dwDataType = GetDataType();
@@ -701,6 +704,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 					(dwFeature == TDCCAF_SHOWTIME));
 			
 		case TDCCA_STRING:
+		case TDCCA_FILELINK:
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
 			break;
@@ -877,7 +881,7 @@ private:
 	static DWORD ValidateListType(DWORD dwDataType, DWORD dwListType)
 	{
 		// ensure list-type cannot be applied to dates,
-		// or only partially to icons or flags
+		// or only partially to icons, flags and file links
 		switch (dwDataType)
 		{
 		case TDCCA_DATE:
@@ -887,8 +891,7 @@ private:
 		case TDCCA_BOOL:
 			if (dwListType)
 			{
-				if (dwListType != TDCCA_FIXEDLIST)
-					dwListType = TDCCA_FIXEDLIST;
+				dwListType = TDCCA_FIXEDLIST;
 			}
 			break;
 
@@ -897,6 +900,13 @@ private:
 			{
 				if ((dwListType != TDCCA_FIXEDLIST) && (dwListType != TDCCA_FIXEDMULTILIST))
 					dwListType = TDCCA_FIXEDLIST;
+			}
+			break;
+			
+		case TDCCA_FILELINK:
+			if (dwListType)
+			{
+				dwListType = TDCCA_AUTOLIST;
 			}
 			break;
 		}

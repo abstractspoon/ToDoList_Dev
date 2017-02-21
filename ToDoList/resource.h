@@ -2091,6 +2091,7 @@
 #define IDS_BETA_RELEASE                58457
 #define IDS_RC_RELEASE                  58458
 #define IDS_SETUP_TITLE                 58459
+#define IDS_CAD_FILELINK                58460
 
 // Next default values for new objects
 // 

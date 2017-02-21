@@ -381,7 +381,6 @@ protected:
 	BOOL GetAttributeColor(const CString& sAttrib, COLORREF& color) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
-	CString GetTaskCustomColumnText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	int GetTaskColumnTooltip(const CPoint& ptScreen, CString& sTooltip) const;
 	BOOL TaskHasReminder(DWORD dwTaskID) const;
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
@@ -505,6 +504,7 @@ protected:
 							COLORREF crText, BOOL bSelected);
 	void DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
 						COLORREF crText, BOOL bTaskTitle = FALSE);
+	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect, COLORREF crText);
 	void DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect);
 	void DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert);
 	void DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, BOOL bAlternate, COLORREF crBack = CLR_NONE);

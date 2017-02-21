@@ -17,6 +17,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\timecombobox.h"
+#include "..\shared\fileedit.h"
+#include "..\shared\FileComboBox.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -86,6 +88,12 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 				szClass = WC_EDIT;
 				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
 				break;
+
+			case TDCCA_FILELINK:
+				pControl = new CFileEdit(FES_GOBUTTON);
+				szClass = WC_EDIT;
+				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
+				break;
 		
 			// these don't have controls
 			case TDCCA_BOOL:
@@ -96,70 +104,85 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 		break;
 		
 	case TDCCA_AUTOLIST:
-		pControl = new CAutoComboBox(ACBS_ALLOWDELETE);
-		szClass = WC_COMBOBOX;
-		dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
-
-		// add number mask as required
-		switch (dwDataType)
+		if (dwDataType == TDCCA_FILELINK)
 		{
-		case TDCCA_INTEGER:
-			((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
-			break;
-			
-		case TDCCA_DOUBLE:
-			((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
-			break;
+			pControl = new CFileComboBox(FES_GOBUTTON);
+			szClass = WC_COMBOBOX;
+			dwStyle |= CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL;
+		}
+		else
+		{
+			pControl = new CAutoComboBox(ACBS_ALLOWDELETE);
+			szClass = WC_COMBOBOX;
+			dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
+
+			// add number mask as required
+			switch (dwDataType)
+			{
+			case TDCCA_INTEGER:
+				((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+				break;
+				
+			case TDCCA_DOUBLE:
+				((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+				break;
+			}
 		}
 		break;
 		
 	case TDCCA_FIXEDLIST:
-		szClass = WC_COMBOBOX;
-		dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
-
-		switch (dwDataType)
 		{
-		case TDCCA_ICON:
-			pControl = new CTDLIconComboBox(ilImages, FALSE);
-			break;
-			
-		default:
-			pControl = new COwnerdrawComboBoxBase; // so they render the same
-			break;
+			szClass = WC_COMBOBOX;
+			dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
+
+			switch (dwDataType)
+			{
+			case TDCCA_ICON:
+				pControl = new CTDLIconComboBox(ilImages, FALSE);
+				break;
+				
+			default:
+				pControl = new COwnerdrawComboBoxBase; // so they render the same
+				break;
+			}
 		}
 		break;
 		
 	case TDCCA_AUTOMULTILIST:
-		pControl = new CCheckComboBox(ACBS_ALLOWDELETE);
-		szClass = WC_COMBOBOX;
-		dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
-
-		// add number mask as required
-		switch (dwDataType)
 		{
-		case TDCCA_INTEGER:
-			((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
-			break;
-			
-		case TDCCA_DOUBLE:
-			((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
-			break;
+			pControl = new CCheckComboBox(ACBS_ALLOWDELETE);
+			szClass = WC_COMBOBOX;
+			dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
+
+			// add number mask as required
+			switch (dwDataType)
+			{
+			case TDCCA_INTEGER:
+				((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+				break;
+				
+			case TDCCA_DOUBLE:
+				((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+				break;
+			}
 		}
 		break;
 		
 	case TDCCA_FIXEDMULTILIST:
-		szClass = WC_COMBOBOX;
-		dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
-
-		switch (dwDataType)
 		{
-		case TDCCA_ICON:
-			pControl = new CTDLIconComboBox(ilImages, TRUE);
-			break;
+			szClass = WC_COMBOBOX;
+			dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
 			
-		default:
-			pControl = new CCheckComboBox;
-			break;
+			switch (dwDataType)
+			{
+			case TDCCA_ICON:
+				pControl = new CTDLIconComboBox(ilImages, TRUE);
+				break;
+				
+			default:
+				pControl = new CCheckComboBox;
+				break;
+			}
 		}
 		break;
 	}
@@ -187,8 +210,8 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 			// font
 			pControl->SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(pParent)); 
 
-			// add default data to lists
-			if (attribDef.IsList()) 
+			// add default data to non-filelink lists
+			if (attribDef.IsList() && !attribDef.IsDataType(TDCCA_FILELINK)) 
 			{
 				ASSERT(pControl->IsKindOf(RUNTIME_CLASS(CComboBox)));
 				CComboBox* pCB = (CComboBox*)pControl;
@@ -223,6 +246,7 @@ BOOL CTDCCustomAttributeHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFI
 	case TDCCA_DOUBLE:
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
+	case TDCCA_FILELINK:
 		return FALSE;
 		
 	case TDCCA_DATE:
@@ -248,6 +272,7 @@ CString CTDCCustomAttributeHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFIN
 		case TDCCA_DOUBLE:
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
+		case TDCCA_FILELINK:
 			return _T("");
 			
 		case TDCCA_DATE:
@@ -696,7 +721,7 @@ void CTDCCustomAttributeHelper::SaveAutoListDataToDefs(const CWnd* pParent,
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
 
-		if (def.bEnabled && def.IsAutoList())
+		if (def.bEnabled && def.IsAutoList() && !def.IsDataType(TDCCA_FILELINK))
 		{
 			const CComboBox* pCombo = (const CComboBox*)GetControlFromAttributeDef(pParent, def, aControls);
 			ASSERT(pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)));
@@ -819,6 +844,7 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 		case TDCCA_STRING:
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
+		case TDCCA_FILELINK:
 			pCtrl->GetWindowText(sText);
 			data.Set(sText);
 			break;
@@ -852,14 +878,23 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 		break;
 		
 	case TDCCA_AUTOLIST:
-		pCtrl->GetWindowText(sText);
-		data.Set(sText);
+		if (dwDataType == TDCCA_FILELINK)
+		{
+			((CFileComboBox*)pCtrl)->GetFileList(aItems);
+			data.Set(aItems);
+		}
+		else
+		{
+			pCtrl->GetWindowText(sText);
+			data.Set(sText);
+		}
+
 		break;
 		
 	case TDCCA_FIXEDLIST:
-		// decode icons
 		if (dwDataType == TDCCA_ICON)
 		{
+			// decode icons
 			sText = ((CTDLIconComboBox*)pCtrl)->GetSelectedImage();
 		}
 		else
@@ -928,6 +963,7 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 			case TDCCA_STRING:
 			case TDCCA_INTEGER:
 			case TDCCA_DOUBLE:
+			case TDCCA_FILELINK:
 				pCtrl->SetWindowText(data.AsString());
 				break;
 				
@@ -968,11 +1004,19 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 		break;
 		
 	case TDCCA_AUTOLIST:
+		if (dwDataType == TDCCA_FILELINK)
+		{
+			data.AsArray(aItems);
+			((CFileComboBox*)pCtrl)->SetFileList(aItems);
+		}
+		else
 		{
 			CAutoComboBox* pACB = (CAutoComboBox*)pCtrl;
 
 			if (sData.IsEmpty())
+			{
 				pACB->SetCurSel(-1);
+			}
 			else
 			{
 				pACB->AddString(sData);
@@ -994,17 +1038,17 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 				((CTDLIconComboBox*)pCtrl)->SelectImage(sData);
 			}
 			else
+			{
 				pCB->SelectString(-1, sData);
+			}
 		}
 		break;
 		
 	case TDCCA_AUTOMULTILIST:
 	case TDCCA_FIXEDMULTILIST:
 		{
-			CCheckComboBox* pCCB = (CCheckComboBox*)pCtrl;
-
 			data.AsArray(aItems);
-			pCCB->SetChecked(aItems);
+			((CCheckComboBox*)pCtrl)->SetChecked(aItems);
 		}
 		break;
 	}

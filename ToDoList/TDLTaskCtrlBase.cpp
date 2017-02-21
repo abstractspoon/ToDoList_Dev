@@ -2666,63 +2666,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_FILEREF:
-			if (pTDI->aFileLinks.GetSize())
-			{
-				int nNumFiles = pTDI->aFileLinks.GetSize();
-
-				// TDCS_SHOWNONFILEREFSASTEXT only works for one file
-				if ((nNumFiles == 1) && HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
-				{
-					CString sFileRef = pTDI->aFileLinks[0];
-					int nImage = m_ilFileRef.GetFileImageIndex(sFileRef, TRUE);
-					
-					if (nImage == -1)
-					{
-						DrawColumnText(pDC, sFileRef, rSubItem, DT_LEFT, crText);
-						break;
-					}
-				}
-
-				// Everything else
-				for (int nFile = 0; nFile < nNumFiles; nFile++)
-				{
-					CRect rIcon;
-
-					if (!CalcColumnIconRect(rSubItem, rIcon, nFile, nNumFiles))
-						break; // out of bounds
-
-					// first check for a tdl://
-					CString sFileRef = pTDI->aFileLinks[nFile];
-
-					if (sFileRef.Find(TDL_PROTOCOL) != -1)
-					{
-						// draw our app icon 
-						if (m_imageIcons.HasIcon(APP_ICON) || 
-							m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
-						{
-							m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft());
-						}
-					}
-					else
-					{
-						// get the associated image, failing if necessary
-						sFileRef.Remove('\"'); // remove quotes
-						FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
-
-						if (m_imageIcons.HasIcon(sFileRef) || 
-							(CEnBitmap::IsSupportedImageFile(sFileRef) && 
-							FileMisc::PathExists(sFileRef) &&
-							m_imageIcons.Add(sFileRef, sFileRef)))
-						{
-							m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft());
-						}
-						else
-						{
-							m_ilFileRef.Draw(pDC, sFileRef, rIcon.TopLeft());
-						}
-					}
-				}
-			}
+			DrawColumnFileLinks(pDC, pTDI->aFileLinks, rSubItem, crText);
 			break;
 			
 		case TDCC_DONE:
@@ -2734,6 +2678,76 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			VERIFY (DrawItemCustomColumn(pTDI, pTDS, nColID, pDC, rSubItem, crText));
 			break;
 		}
+	}
+}
+
+void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect, COLORREF crText)
+{
+	int nNumFiles = aFileLinks.GetSize();
+
+	switch (nNumFiles)
+	{
+	case 0:
+		break;
+
+	case 1:
+		// TDCS_SHOWNONFILEREFSASTEXT only works for one file
+		if (HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
+		{
+			CString sFileRef = aFileLinks[0];
+			int nImage = m_ilFileRef.GetFileImageIndex(sFileRef, TRUE);
+			
+			if (nImage == -1)
+			{
+				DrawColumnText(pDC, sFileRef, rect, DT_LEFT, crText);
+				break;
+			}
+		}
+		// else fall thru
+		
+	default:
+		{
+			// Everything else
+			for (int nFile = 0; nFile < nNumFiles; nFile++)
+			{
+				CRect rIcon;
+				
+				if (!CalcColumnIconRect(rect, rIcon, nFile, nNumFiles))
+					break; // out of bounds
+				
+				// first check for a tdl://
+				CString sFileRef = aFileLinks[nFile];
+				
+				if (sFileRef.Find(TDL_PROTOCOL) != -1)
+				{
+					// draw our app icon 
+					if (m_imageIcons.HasIcon(APP_ICON) || 
+						m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
+					{
+						m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft());
+					}
+				}
+				else
+				{
+					// get the associated image, failing if necessary
+					sFileRef.Remove('\"'); // remove quotes
+					FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
+					
+					if (m_imageIcons.HasIcon(sFileRef) || 
+						(CEnBitmap::IsSupportedImageFile(sFileRef) && 
+						FileMisc::PathExists(sFileRef) &&
+						m_imageIcons.Add(sFileRef, sFileRef)))
+					{
+						m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft());
+					}
+					else
+					{
+						m_ilFileRef.Draw(pDC, sFileRef, rIcon.TopLeft());
+					}
+				}
+			}
+		}
+		break;
 	}
 }
 
@@ -2809,14 +2823,14 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	if (!CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
 		return TRUE;
 
-	CString sTaskColText = GetTaskCustomColumnText(pTDI, pTDS, nColID);
+	TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
 	CRect rCol(rSubItem);
 	
 	switch (attribDef.GetDataType())
 	{
 	case TDCCA_DATE:
 		{
-			double dDate = TDCCADATA(sTaskColText).AsDate();
+			double dDate = data.AsDate();
 			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate);
 
 			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
@@ -2825,10 +2839,8 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 		
 	case TDCCA_ICON:
-		if (!sTaskColText.IsEmpty() && (rCol.Width() > 16)) // min width for one icon
+		if (!data.IsEmpty() && (rCol.Width() > 16)) // min width for one icon
 		{
-			TDCCADATA data(sTaskColText);
-
 			CStringArray aImages;
 			int nNumImage = data.AsArray(aImages);
 			int nTotalWidth = (nNumImage * 18) - 2;
@@ -2895,29 +2907,45 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 		
 	case TDCCA_BOOL:
-		DrawColumnCheckBox(pDC, rSubItem, !sTaskColText.IsEmpty());
+		DrawColumnCheckBox(pDC, rSubItem, data.AsBool());
 		break;
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
-		DrawColumnText(pDC, sTaskColText, rCol, attribDef.nTextAlignment, crText);
+		{
+			double dValue = data.AsDouble();
+			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
+			
+			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
+			{
+				CString sText(Misc::Format(dValue, (attribDef.IsDataType(TDCCA_DOUBLE) ? 2 : 0)));
+				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+			}			
+		}
+		break;
+
+	case TDCCA_FILELINK:
+		{
+			CStringArray aItems;
+			data.AsArray(aItems);
+
+			DrawColumnFileLinks(pDC, aItems, rSubItem, crText);
+		}
 		break;
 
 	default:
-		if (!sTaskColText.IsEmpty())
+		if (!data.IsEmpty())
 		{
-			if (attribDef.GetListType() == TDCCA_FIXEDMULTILIST || attribDef.GetListType() == TDCCA_AUTOMULTILIST)
+			if (attribDef.IsMultiList())
 			{
-				CStringArray aItems;
-				
-				if (TDCCADATA(sTaskColText).AsArray(aItems))
-					DrawColumnText(pDC, Misc::FormatArray(aItems), rCol, attribDef.nTextAlignment, crText);
+				DrawColumnText(pDC, data.FormatAsArray(), rCol, attribDef.nTextAlignment, crText);
 			}
 			else
 			{
-				DrawColumnText(pDC, sTaskColText, rCol, attribDef.nTextAlignment, crText);
+				DrawColumnText(pDC, data.AsString(), rCol, attribDef.nTextAlignment, crText);
 			}
 		}
+		break;
 	}
 
 	return TRUE; // we handled it
@@ -3481,55 +3509,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	}
 	
 	return sTaskColText;
-}
-
-CString CTDLTaskCtrlBase::GetTaskCustomColumnText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
-{
-	if (!CTDCCustomAttributeHelper::IsCustomColumn(nColID))
-		return _T("");
-
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-	VERIFY (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef));
-	
-	TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
-	DWORD dwDataType = attribDef.GetDataType();
-	
-	switch (dwDataType)
-	{
-	case TDCCA_DATE:
-	case TDCCA_ICON:
-	case TDCCA_BOOL:
-		break;
-				
-	case TDCCA_DOUBLE:
-	case TDCCA_INTEGER:
-		{
-			double dValue = data.AsDouble();
-			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
-
-			if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
-				return _T("");
-
-			return Misc::Format(dValue, ((dwDataType == TDCCA_DOUBLE) ? 2 : 0));
-		}
-		break;
-		
-	default:
-		if (!data.IsEmpty())
-		{
-			if (attribDef.GetListType() == TDCCA_FIXEDMULTILIST || attribDef.GetListType() == TDCCA_AUTOMULTILIST)
-			{
-				CStringArray aItems;
-				
-				if (data.AsArray(aItems))
-					return Misc::FormatArray(aItems);
-			}
-		}
-		break;
-	}
-
-	// else
-	return data.AsString();
 }
 
 // message and notifications for 'us'
@@ -4197,7 +4176,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 					break;
 					
 					default:
-						// do item cycling for fixed lists unless they support calculation
+						// do item cycling for fixed lists
 						bSupported = (attribDef.GetListType() == TDCCA_FIXEDLIST);
 						break;
 				}
@@ -4521,9 +4500,7 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	default:
 		if (CTDCCustomAttributeHelper::IsCustomAttribute(nModType))
 		{
-			ASSERT(nModCol != TDCC_NONE);
-			ASSERT (CTDCCustomAttributeHelper::IsColumnSortable(nSortBy, m_aCustomAttribDefs));
-
+			ASSERT(CTDCCustomAttributeHelper::IsColumnSortable(nModCol, m_aCustomAttribDefs));
 			return (nModCol == nSortBy);
 		}
 		// else unhandled attribute
@@ -4898,24 +4875,24 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 						break;
 
 					case TDCCA_DOUBLE:
+					case TDCCA_INTEGER:
 						{
 							// numerals are always the same width so we don't need average width
-							CString sLongest = m_find.GetLongestCustomDoubleAttribute(attribDef.sUniqueID, bVisibleOnly);
+							CString sLongest = m_find.GetLongestCustomAttribute(attribDef, bVisibleOnly);
 							nColWidth = GraphicsMisc::GetTextWidth(pDC, sLongest);
 						}
 						break;
 
-					case TDCCA_INTEGER:
+					case TDCCA_FILELINK:
 						{
-							// numerals are always the same width so we don't need average width
-							CString sLongest = m_find.GetLongestCustomAttribute(attribDef.sUniqueID, bVisibleOnly);
-							nColWidth = GraphicsMisc::GetTextWidth(pDC, sLongest); // 
+							nColWidth = (attribDef.aDefaultListData.GetSize() * 18);
+
 						}
 						break;
 
 					default:
 						{
-							CString sLongest = m_find.GetLongestCustomAttribute(attribDef.sUniqueID, bVisibleOnly);
+							CString sLongest = m_find.GetLongestCustomAttribute(attribDef, bVisibleOnly);
 							nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
 						}
 						break;

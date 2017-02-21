@@ -846,6 +846,7 @@ enum // custom attribute data types
 	TDCCA_DOUBLE			= 0x0003,
 	TDCCA_BOOL				= 0x0004,
 	TDCCA_ICON				= 0x0005,
+	TDCCA_FILELINK			= 0x0006,
 
 	TDCCA_DATAMASK			= 0x00ff,
 };

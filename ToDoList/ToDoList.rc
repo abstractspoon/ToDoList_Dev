@@ -5004,6 +5004,7 @@ BEGIN
     IDS_BETA_RELEASE        "Beta Release"
     IDS_RC_RELEASE          "Release Candidate"
     IDS_SETUP_TITLE         "ToDoList Setup"
+    IDS_CAD_FILELINK        "File Link"
 END
 
 #endif    // English (Australia) resources
