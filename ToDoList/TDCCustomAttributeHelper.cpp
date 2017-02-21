@@ -890,10 +890,7 @@ CString CTDCCustomAttributeHelper::FormatData(const CString& sData, const CStrin
 
 	if (def.IsList())
 	{
-		CStringArray aData;
-		VERIFY(TDCCADATA(sData).AsArray(aData));
-
-		return Misc::FormatArray(aData, '+');
+		return TDCCADATA(sData).FormatAsArray('+');
 	}
 	else if (def.GetDataType() == TDCCA_DATE)
 	{

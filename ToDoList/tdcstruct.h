@@ -2298,6 +2298,21 @@ struct TDCCADATA
 			sData.Empty(); 
 	}
 
+	CString FormatAsArray(TCHAR cSep = 0) const
+	{
+		if (cSep == '\n')
+			return sData;
+
+		CString sArray(sData);
+
+		if (cSep != 0)
+			sArray.Replace('\n', cSep);
+		else
+			sArray.Replace(_T("\n"), Misc::GetListSeparator());
+
+		return sArray;
+	}
+
 protected:
 	CString sData;
 };

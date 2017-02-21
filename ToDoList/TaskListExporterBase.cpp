@@ -534,10 +534,8 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 			if (sValue.IsEmpty())
 				sValue = pTasks->GetTaskCustomAttributeData(hTask, sID);
 
-			CStringArray aValues;
-			TDCCADATA(sValue).AsArray(aValues);
-
-			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, Misc::FormatArray(aValues, '+'));
+			CString sValues = TDCCADATA(sValue).FormatAsArray('+');
+			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValues);
 		}
 	}
 
