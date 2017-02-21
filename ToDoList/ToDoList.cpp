@@ -1118,7 +1118,7 @@ BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime,
 		}
 	}
 
-	// Thise option can be run without having a translation active
+	// This option can be run without having a translation active
 	// but they still need a valid translator
 	if (cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
 	{

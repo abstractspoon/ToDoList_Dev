@@ -333,6 +333,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		
 	case TDCA_FLAG:
 		sItem = (pTasks->IsTaskFlagged(hTask) ? sAttribLabel : _T(""));
+		sItem = FormatAttribute(TDCA_FLAG, _T(""), sItem);
 		break;
 		
 	case TDCA_ICON:

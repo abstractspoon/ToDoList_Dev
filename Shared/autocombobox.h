@@ -63,16 +63,13 @@ public:
 	
     virtual int GetItems(CStringArray& aItems) const; // returns item count
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString) { return COwnerdrawComboBoxBase::SelectString(nStartAfter, lpszString); }
-	
+    
 	BOOL AddEmptyString();
 	void SetEditMask(LPCTSTR szMask, DWORD dwMaskFlags = 0);
 	void Flush();
 	int GetCurSel() const;
 	void ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	CString GetItemText(int nItem) const;
-
-    int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
-    int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
 	operator HWND() const { return GetSafeHwnd(); }
 

@@ -254,3 +254,69 @@ int COwnerdrawComboBoxBase::GetExtraListboxWidth() const
 	// space for icon
 	return (HasIcon() ? 18 : 0);
 }
+
+int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const
+{ 
+	return FindStringExact(nIndexStart, lpszFind, FALSE); 
+}
+
+int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const
+{
+	if (GetCount() == 0)
+		return CB_ERR;
+	
+	int nFind = nIndexStart; // default
+	
+	if (!sItem.IsEmpty())
+	{
+		// because more than one item might exist if were doing a case-sensitive
+		// search we can't just stop if the first find doesn't exactly match
+		// because there still may be further matches
+		BOOL bContinue = TRUE;
+		
+		while (bContinue)
+        {
+			int nPrevFind = nFind;
+			nFind = CComboBox::FindStringExact(nFind, sItem);
+			
+			// if no match then definitely done
+			if (nFind <= nPrevFind && nFind != nIndexStart)
+			{
+				nFind = CB_ERR;
+				bContinue = FALSE;
+			}
+			else if (!bCaseSensitive)
+			{
+				bContinue = FALSE;
+			}
+			else
+			{
+				// else if (bCaseSensitive)
+				ASSERT (nFind != CB_ERR);
+				ASSERT (bCaseSensitive);
+				
+				// test for real exactness because FindStringExact is not case sensitive
+				CString sFind;
+				GetLBText(nFind, sFind);
+				
+				bContinue = !(sItem == sFind); // differ in case
+			}
+        }
+	}
+	else // special case: look for empty item
+	{
+		nFind = GetCount();
+		
+		while (nFind--)
+		{
+			CString sLBItem;
+			GetLBText(nFind, sLBItem);
+			
+			if (sLBItem.IsEmpty())
+				break;
+		}
+	}
+	
+	return nFind;
+}
+

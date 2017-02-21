@@ -22,6 +22,9 @@ public:
 	int GetMinDluHeight() const { return m_nMinDLUHeight; }
 	void RefreshDropWidth();
 
+    int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
+    int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
+
 // Attributes
 protected:
 	BOOL m_bItemHeightSet;

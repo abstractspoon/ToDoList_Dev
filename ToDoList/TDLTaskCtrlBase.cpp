@@ -2843,7 +2843,15 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		{
 			CStringArray aImages;
 			int nNumImage = data.AsArray(aImages);
-			int nTotalWidth = (nNumImage * 18) - 2;
+
+			int nReqWidth = (nNumImage * 18) - 2;
+			int nAvailWidth = rCol.Width();
+
+			if (nAvailWidth < nReqWidth)
+			{
+				nNumImage = min(nNumImage, ((nAvailWidth - 2) / 18));
+				nReqWidth = (nNumImage * 18) - 2;
+			}
 
 			// centre icon vertically
 			CPoint pt(rCol.left, (rCol.CenterPoint().y - 8));
@@ -2857,15 +2865,16 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			switch (nTextAlign)
 			{
 			case DT_RIGHT:
-				rCol.right -= (LV_COLPADDING + 16);
-				pt.x = rCol.right;
+				// We still draw from the left just like text
+				rCol.right -= LV_COLPADDING;
+				pt.x = (rCol.right - nReqWidth);
 				break;
 				
 			case DT_CENTER:
 				// if there is associated text then we align left
 				if (sName.IsEmpty())
 				{
-					pt.x = (rCol.left + ((rCol.Width() - nTotalWidth) / 2));
+					pt.x = (rCol.left + ((rCol.Width() - nReqWidth) / 2));
 					break;
 				}
 				else 
@@ -3740,19 +3749,21 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_TIMER:
-			// very weird horizontal scroll issue when LVS_EX_FULLROWSELECT
-			// is enabled and the mouse is very slowly moved off a just
-			// selected task. Research suggests that this relates to the
-			// listview's handling of it's internal timer messages, and
-			// it scrolls to the start because it thinks it's about to
-			// start editing the label, even though LVS_EDITLABELS is not set
-			if ((wp == 0x2B) && (lp == 0))
 			{
-				ASSERT(!CTreeListSyncer::HasStyle(hRealWnd, LVS_EDITLABELS, FALSE));
-				return TRUE; // eat it
+				switch (wp)
+				{
+				case 0x2A:
+				case 0x2B:
+					// These are timers internal to the list view associated
+					// with editing labels and which cause unwanted selection
+					// changes. Given that we have disabled label editing for 
+					// the attribute columns we can safely kill these timers
+					::KillTimer(hRealWnd, wp);
+					return TRUE;
+				}
 			}
 			break;
-			
+		
 		case WM_NOTIFY:
 			{
 				LPNMHDR pNMHDR = (LPNMHDR)lp;

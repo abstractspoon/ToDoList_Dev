@@ -1014,8 +1014,8 @@ void CTDLFindTasksDlg::DeleteAllResults()
 
 	m_lcResults.DeleteAllResults();
 
-	// update 'found' count
-	m_sResultsLabel.Format(IDS_FTD_SOMERESULTS, m_lcResults.GetItemCount());
+	// clear 'found' count
+	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	UpdateData(FALSE);
 }
 
