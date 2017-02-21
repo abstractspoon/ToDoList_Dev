@@ -10,6 +10,8 @@
 
 class CFileComboBox : public CAutoComboBox
 {
+	DECLARE_DYNAMIC(CFileComboBox)
+		
 public:
 	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
 	virtual ~CFileComboBox();
@@ -38,7 +40,6 @@ protected:
 	BOOL m_bReadOnly;
 
 protected:
-	void PreSubclassWindow();
 	BOOL PreCreateWindow(CREATESTRUCT& cs);
 	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
@@ -48,6 +49,7 @@ protected:
 	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelChange();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo message handler

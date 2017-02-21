@@ -61,31 +61,39 @@ CFileComboBox::~CFileComboBox()
 {
 }
 
+IMPLEMENT_DYNAMIC(CFileComboBox, CAutoComboBox)
+
 BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
 	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileEditBrowseChange)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
-END_MESSAGE_MAP()
-
+	ON_WM_CTLCOLOR()
+	END_MESSAGE_MAP()
+	
 // CFileComboBox message handlers
-void CFileComboBox::PreSubclassWindow()
-{
-	CAutoComboBox::PreSubclassWindow();
-
-	VERIFY (InitFileEdit());
-}
-
 BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// only support combos with edit boxes
-	if (cs.style & CBS_DROPDOWNLIST)
+	if ((cs.style & 0xf) == CBS_DROPDOWNLIST)
 		return FALSE;
-
+	
 	cs.style |= (CBS_OWNERDRAWFIXED | CBS_HASSTRINGS);
-
+	
 	return CAutoComboBox::PreCreateWindow(cs);
+}
+
+HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CAutoComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if ((nCtlColor == CTLCOLOR_EDIT) && (m_fileEdit.GetSafeHwnd() == NULL))
+	{
+		VERIFY (InitFileEdit());
+	}
+
+	return hbr;
 }
 
 int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
@@ -140,12 +148,14 @@ void CFileComboBox::ResizeEdit()
 
 BOOL CFileComboBox::InitFileEdit()
 {
-	ASSERT (!m_fileEdit.GetSafeHwnd());
+	if (!m_fileEdit.GetSafeHwnd())
+	{
+		if (!m_fileEdit.SubclassDlgItem(1001, this))
+			return FALSE;
 
-	if (!m_fileEdit.SubclassDlgItem(1001, this))
-		return FALSE;
-
-	ResizeEdit();
+		m_fileEdit.SendMessage(EM_SETREADONLY, m_bReadOnly);
+		ResizeEdit();
+	}
 
 	return TRUE;
 }
@@ -206,9 +216,13 @@ int CFileComboBox::SetFileList(const CStringArray& aFiles)
 	int nNumFiles = SetStrings(aFiles);
 	
 	if (nNumFiles)
+	{
 		SetCurSel(0);
-	else
+	}
+	else if (m_fileEdit.GetSafeHwnd())
+	{
 		m_fileEdit.Invalidate();
+	}
 	
 	return nNumFiles;
 }
@@ -316,9 +330,10 @@ LRESULT CFileComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 void CFileComboBox::SetReadOnly(BOOL bReadOnly)
 {
 	m_bReadOnly = bReadOnly;
-
 	ModifyFlags((bReadOnly ? ACBS_ALLOWDELETE : 0), (bReadOnly ? 0 : ACBS_ALLOWDELETE));
-	m_fileEdit.SendMessage(EM_SETREADONLY, bReadOnly);
+
+	if (m_fileEdit.GetSafeHwnd())
+		m_fileEdit.SendMessage(EM_SETREADONLY, bReadOnly);
 }
 
 void CFileComboBox::HandleReturnKey()
