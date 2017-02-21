@@ -737,7 +737,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 		default:
 			{
-				int nFind = Misc::Find(aDefaultListData, sItem);
+				int nFind = Misc::Find(aDefaultListData, sItem, FALSE, FALSE);
 				ASSERT((nFind != -1) || sItem.IsEmpty());
 
 				if (bNext)
