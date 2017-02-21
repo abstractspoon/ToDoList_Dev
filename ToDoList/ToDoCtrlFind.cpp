@@ -243,14 +243,9 @@ CString CToDoCtrlFind::GetLongestTimeRemaining(TDC_UNITS nDefUnits, BOOL bVisibl
 	return GetLongestTime(nDefUnits, TDCC_REMAINING, bVisibleOnly);
 }
 
-CString CToDoCtrlFind::GetLongestCustomAttribute(const CString& sAttribID, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
-	return GetLongestCustomAttribute(NULL, NULL, sAttribID, bVisibleOnly, FALSE);
-}
-
-CString CToDoCtrlFind::GetLongestCustomDoubleAttribute(const CString& sAttribID, BOOL bVisibleOnly) const
-{
-	return GetLongestCustomAttribute(NULL, NULL, sAttribID, bVisibleOnly, TRUE);
+	return GetLongestCustomAttribute(NULL, NULL, attribDef, bVisibleOnly);
 }
 
 CString CToDoCtrlFind::GetLongerString(const CString& str1, const CString& str2)
@@ -313,8 +308,8 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 	return ((hti == NULL) || !bVisibleOnly || (m_tree.GetItemState(hti, TVIS_EXPANDED) & TVIS_EXPANDED));
 }
 
-CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, const CString& sAttribID, 
-												 BOOL bVisibleOnly, BOOL bDouble) const
+CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* pTDI, 
+												 const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
 {
 	if (hti && !pTDI)
 		pTDI = GetTask(hti);
@@ -322,18 +317,20 @@ CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* 
 	CString sLongest;
 
 	if (pTDI)
-		pTDI->mapCustomData.Lookup(sAttribID, sLongest);
+		pTDI->mapCustomData.Lookup(attribDef.sUniqueID, sLongest);
 
 	// children
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
+		BOOL bAsDouble = attribDef.IsDataType(TDCCA_DOUBLE);
+
 		// check children
 		HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 		while (htiChild)
 		{
-			CString sChildLongest = GetLongestCustomAttribute(htiChild, NULL, sAttribID, bVisibleOnly, bDouble);
-			sLongest = Misc::GetLongest(sLongest, sChildLongest, bDouble);
+			CString sChildLongest = GetLongestCustomAttribute(htiChild, NULL, attribDef, bVisibleOnly);
+			sLongest = Misc::GetLongest(sLongest, sChildLongest, bAsDouble);
 
 			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
