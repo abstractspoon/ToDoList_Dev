@@ -551,6 +551,26 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 				}
 				break;
+
+			case TTN_SHOW:
+				if (hRealWnd == m_lcTasks)
+				{
+					// Set the font to bold for top-level items
+					CPoint pt(GetMessagePos());
+					m_lcTasks.ScreenToClient(&pt);
+					
+					int nItem = m_lcTasks.HitTest(pt);
+					
+					if (nItem != -1)
+					{
+						const TODOSTRUCTURE* pTDS = m_data.LocateTask(GetTaskID(nItem));
+						ASSERT(pTDS);
+
+						BOOL bTopLevel = (pTDS && pTDS->ParentIsRoot());
+						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(bTopLevel ? GMFS_BOLD : 0), TRUE);
+					}
+				}
+				break;
 			}
 		}
 		break;
