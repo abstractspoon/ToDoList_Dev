@@ -137,6 +137,7 @@ public:
 	void DeselectAll();
 	BOOL CancelOperation();
 	BOOL PreTranslateMessage(MSG* pMsg);
+	void SetModified(TDC_ATTRIBUTE nAttrib);
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 	void OnStylesUpdated();
@@ -217,6 +218,7 @@ protected:
 	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
+	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

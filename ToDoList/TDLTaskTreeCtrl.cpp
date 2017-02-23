@@ -2349,6 +2349,8 @@ void CTDLTaskTreeCtrl::SaveState(CPreferences& prefs, const CString& sKey, BOOL 
 
 HTREEITEM CTDLTaskTreeCtrl::LoadState(const CPreferences& prefs, const CString& sKey, BOOL bExpandedOnly) 
 {
+	RefreshItemBoldState();
+
 	if (!bExpandedOnly)
 		CTDLTaskCtrlBase::LoadState(prefs, sKey);
 
@@ -2468,3 +2470,36 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskCost() const
 	return dCost;
 }
 
+void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
+{
+	if (hti && (hti != TVI_ROOT))
+		TCH().SetItemBold(hti, m_tcTasks.GetParentItem(hti) == NULL);
+	
+	// children
+	if (bAndChildren)
+	{
+		HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+		
+		while (htiChild)
+		{
+			RefreshItemBoldState(htiChild);
+			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+}
+
+void CTDLTaskTreeCtrl::SetModified(TDC_ATTRIBUTE nAttrib)
+{
+	// Update bold-states
+	switch (nAttrib)
+	{
+	case TDCA_PASTE:
+	case TDCA_POSITION: // == move
+	case TDCA_UNDO:
+	case TDCA_NEWTASK:
+		RefreshItemBoldState();
+		break;
+	}
+
+	CTDLTaskCtrlBase::SetModified(nAttrib);
+}
