@@ -115,7 +115,7 @@ class CGanttLockUpdates : public CLockUpdates
 public:
 	CGanttLockUpdates(CGanttTreeListCtrl* pCtrl, BOOL bTree, BOOL bAndSync) 
 		: 
-	CLockUpdates(bTree ? pCtrl->m_hwndTree : pCtrl->m_hwndList),
+	CLockUpdates(bTree ? pCtrl->m_tree.GetSafeHwnd() : pCtrl->m_list.GetSafeHwnd()),
 		m_bAndSync(bAndSync), 
 		m_pCtrl(pCtrl)
 	{
@@ -141,9 +141,11 @@ private:
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CGanttTreeListCtrl::CGanttTreeListCtrl() 
+CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list) 
 	:
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA),
+	m_tree(tree),
+	m_list(list),
 	m_bSortAscending(-1), 
 	m_nSortBy(GTLCC_NONE),
 	m_pTCH(NULL),
@@ -175,28 +177,26 @@ CGanttTreeListCtrl::~CGanttTreeListCtrl()
 	Release();
 }
 
-BOOL CGanttTreeListCtrl::Initialize(HWND hwndTree, HWND hwndList, UINT nIDTreeHeader)
+BOOL CGanttTreeListCtrl::Initialize(UINT nIDTreeHeader)
 {
+	ASSERT(m_tree.GetSafeHwnd());
+	ASSERT(m_list.GetSafeHwnd());
+
 	// misc
 	m_nMonthWidth = DEF_MONTH_WIDTH;
-	m_fonts.Initialise(hwndTree);
 
 	// initialize tree header
-	if (!m_treeHeader.SubclassDlgItem(nIDTreeHeader, CWnd::FromHandle(::GetParent(hwndTree))))
+	if (!m_treeHeader.SubclassDlgItem(nIDTreeHeader, m_tree.GetParent()))
 		return FALSE;
 
 	m_treeHeader.ModifyStyle(0, (HDS_FULLDRAG | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP));
 
-	// keep our own handles to these to speed lookups
-	m_hwndList = hwndList;
-	m_hwndTree = hwndTree;
-
 	// subclass the tree and list
-	if (!CTreeListSyncer::Sync(hwndTree, hwndList, TLSL_RIGHTDATA_IS_LEFTITEM, m_treeHeader))
+	if (!CTreeListSyncer::Sync(m_tree, m_list, TLSL_RIGHTDATA_IS_LEFTITEM, m_treeHeader))
 		return FALSE;
 
 	// subclass the list header
-	VERIFY(m_listHeader.SubclassWindow(ListView_GetHeader(hwndList)));
+	VERIFY(m_listHeader.SubclassWindow(ListView_GetHeader(m_list)));
 	
 	// prevent column reordering on columns
 	m_listHeader.ModifyStyle(HDS_DRAGDROP, 0);
@@ -205,9 +205,10 @@ BOOL CGanttTreeListCtrl::Initialize(HWND hwndTree, HWND hwndList, UINT nIDTreeHe
 	CLocalizer::EnableTranslation(m_listHeader, FALSE);
 
 	// misc
-	CWnd::ModifyStyle(hwndTree, TVS_SHOWSELALWAYS, 0, 0);
-	CWnd::ModifyStyle(hwndList, LVS_SHOWSELALWAYS, 0, 0);
-	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	m_tree.ModifyStyle(TVS_SHOWSELALWAYS, 0, 0);
+	m_list.ModifyStyle(LVS_SHOWSELALWAYS, 0, 0);
+
+	ListView_SetExtendedListViewStyleEx(m_list, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
 	BuildTreeColumns();
 	BuildListColumns();
@@ -224,7 +225,7 @@ void CGanttTreeListCtrl::InitItemHeights()
 {
 	CTreeListSyncer::InitItemHeights();
 
-	GANTTDEPENDENCY::STUB = (TreeView_GetItemHeight(m_hwndTree) / 2);
+	GANTTDEPENDENCY::STUB = (m_tree.GetItemHeight() / 2);
 }
 
 void CGanttTreeListCtrl::Release() 
@@ -236,7 +237,6 @@ void CGanttTreeListCtrl::Release()
 		m_listHeader.UnsubclassWindow();
 
 	Unsync(); 
-	m_hwndTree = m_hwndList = NULL;
 
 	delete m_pTCH;
 	m_pTCH = NULL;
@@ -310,12 +310,12 @@ BOOL CGanttTreeListCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTim
 
 BOOL CGanttTreeListCtrl::SelectTask(DWORD dwTaskID)
 {
-	HTREEITEM hti = FindTreeItem(m_hwndTree, dwTaskID);
+	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
 
 	if (hti == NULL)
 		return FALSE;
 
-	BOOL bWasVisible = IsTreeItemVisible(m_hwndTree, hti);
+	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 
 	SelectTreeItem(hti, FALSE);
 
@@ -335,15 +335,13 @@ void CGanttTreeListCtrl::RecalcParentDates()
 
 void CGanttTreeListCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 {
-	const CTreeCtrl& tree = TCH()->TreeCtrl();
-
 	// ignore root
 	DWORD dwTaskID = 0;
 
 	// get gantt item for this tree item
 	if (htiParent)
 	{
-		dwTaskID = tree.GetItemData(htiParent);
+		dwTaskID = m_tree.GetItemData(htiParent);
 		GET_GI(dwTaskID, pGI);
 	}
 	
@@ -356,7 +354,7 @@ void CGanttTreeListCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 	pGI->dtMaxDue = pGI->dtDue;
 
 	// iterate children 
-	HTREEITEM htiChild = tree.GetChildItem(htiParent);
+	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 	
 	while (htiChild)
 	{
@@ -371,7 +369,7 @@ void CGanttTreeListCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 			pGI->MinMaxDates(*pGIChild);
 
 		// next child
-		htiChild = tree.GetNextItem(htiChild, TVGN_NEXT);
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 }
 
@@ -382,9 +380,9 @@ int CGanttTreeListCtrl::GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti) 
 	if (hti == NULL)
 	{
 		// guestimate initial size
-		aExpanded.SetSize(0, TreeView_GetCount(m_hwndTree) / 4);
+		aExpanded.SetSize(0, m_tree.GetCount() / 4);
 	}
-	else if (TCH()->IsItemExpanded(hti) <= 0)
+	else if (TCH().IsItemExpanded(hti) <= 0)
 	{
 		return 0; // nothing added
 	}
@@ -395,12 +393,12 @@ int CGanttTreeListCtrl::GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti) 
 	}
 
 	// process children
-	HTREEITEM htiChild = TreeView_GetChild(m_hwndTree, hti);
+	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 	while (htiChild)
 	{
 		GetExpandedState(aExpanded, htiChild);
-		htiChild = TreeView_GetNextItem(m_hwndTree, htiChild, TVGN_NEXT);
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 
 	return (aExpanded.GetSize() - nStart);
@@ -413,14 +411,14 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	if (nNumExpanded)
 	{
 		CHTIMap mapID;
-		TCH()->BuildHTIMap(mapID);
+		TCH().BuildHTIMap(mapID);
 		
 		HTREEITEM hti = NULL;
 		
 		for (int nItem = 0; nItem < nNumExpanded; nItem++)
 		{
 			if (mapID.Lookup(aExpanded[nItem], hti) && hti)
-				TreeView_Expand(m_hwndTree, hti, TVE_EXPAND);
+				m_tree.Expand(hti, TVE_EXPAND);
 		}
 
 		ExpandList();
@@ -430,7 +428,7 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	// we must have been initialized already
-	ASSERT(m_hwndList && m_hwndTree);
+	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
 
 	// always cancel any ongoing operation
 	CancelOperation();
@@ -475,8 +473,8 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 	case IUI_NEW:
 	case IUI_EDIT:
 		{
-			CHoldRedraw hr(m_hwndTree);
-			CHoldRedraw hr2(m_hwndList);
+			CHoldRedraw hr(m_tree);
+			CHoldRedraw hr2(m_list);
 			
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths();
@@ -499,14 +497,17 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 				}
 
 				bResort = ((m_nSortBy != GTLCC_NONE) && attrib.HasKey(MapColumnToAttrib(m_nSortBy)));
+
+				if (nUpdate == IUI_NEW)
+					RefreshItemBoldState();
 			}
 		}
 		break;
 		
 	case IUI_DELETE:
 		{
-			CHoldRedraw hr(m_hwndTree);
-			CHoldRedraw hr2(m_hwndList);
+			CHoldRedraw hr(m_tree);
+			CHoldRedraw hr2(m_list);
 
 			CSet<DWORD> mapIDs;
 			BuildTaskMap(pTasks14, pTasks14->GetFirstTask(), mapIDs, TRUE);
@@ -546,12 +547,12 @@ void CGanttTreeListCtrl::PreFixVScrollSyncBug()
 {
 	// Odd bug: The very last tree item will not scroll into view. 
 	// Expanding and collapsing an item is enough to resolve the issue.
-	HTREEITEM hti = TCH()->FindFirstParent();
+	HTREEITEM hti = TCH().FindFirstParent();
 		
 	if (hti)
 	{
-		TCH()->ExpandItem(hti, TRUE);
-		TCH()->ExpandItem(hti, FALSE);
+		TCH().ExpandItem(hti, TRUE);
+		TCH().ExpandItem(hti, FALSE);
 	}
 }
 
@@ -663,7 +664,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 				return FALSE;
 			}
 
-			htiParent = TCH()->FindItem(dwParentID);
+			htiParent = TCH().FindItem(dwParentID);
 
 			if (!htiParent)
 			{
@@ -672,9 +673,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 			}
 		}
 
-		CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(m_hwndTree);
-
-		BuildTreeItem(pTasks, hTask, *pTree, htiParent, FALSE);
+		BuildTreeItem(pTasks, hTask, m_tree, htiParent, FALSE);
 		return TRUE;
 	}
 	
@@ -826,12 +825,12 @@ void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList15* pT
 	}
 
 	// check its children
-	HTREEITEM htiChild = TreeView_GetChild(m_hwndTree, hti);
+	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 	
 	while (htiChild)
 	{
 		// get next sibling before we (might) delete this one
-		HTREEITEM htiNext = TreeView_GetNextItem(m_hwndTree, htiChild, TVGN_NEXT);
+		HTREEITEM htiNext = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		
 		RemoveDeletedTasks(htiChild, pTasks, mapIDs);
 		htiChild = htiNext;
@@ -883,10 +882,8 @@ GANTTDISPLAY* CGanttTreeListCtrl::GetGanttDisplay(DWORD dwTaskID)
 
 void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
 {
-	CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(m_hwndTree);
-
-	TreeView_DeleteAllItems(m_hwndTree);
-	ListView_DeleteAllItems(m_hwndList);
+	m_tree.DeleteAllItems();
+	m_list.DeleteAllItems();
 
 	m_data.RemoveAll();
 	m_display.RemoveAll();
@@ -898,7 +895,7 @@ void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
 	CDateHelper::ClearDate(m_dtEarliest);
 	CDateHelper::ClearDate(m_dtLatest);
 
-	BuildTreeItem(pTasks, pTasks->GetFirstTask(), *pTree, NULL, TRUE);
+	BuildTreeItem(pTasks, pTasks->GetFirstTask(), m_tree, NULL, TRUE);
 
 	// restore previous date range if no data
 	if (m_data.GetCount() == 0)
@@ -909,6 +906,7 @@ void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
 
 	RecalcParentDates();
 	ExpandList();
+	RefreshItemBoldState();
 }
 
 void CGanttTreeListCtrl::RecalcDateRange()
@@ -1074,7 +1072,7 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			switch (dwOption)
 			{
 			case GTLCF_STRIKETHRUDONETASKS:
-				m_fonts.Clear();
+				m_tree.Fonts().Clear();
 				Invalidate(FALSE);
 				break;
 			}
@@ -1103,7 +1101,7 @@ void CGanttTreeListCtrl::AddListColumn(int nMonth, int nYear)
 	lvc.cchTextMax = sTitle.GetLength() + 1;
 
 	int nCol = m_listHeader.GetItemCount();
-	ListView_InsertColumn(m_hwndList, nCol, &lvc);
+	m_list.InsertColumn(nCol, &lvc);
 
 	// encode month and year into header item data
 	SetListColumnDate(nCol, nMonth, nYear);
@@ -1334,33 +1332,9 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	m_treeHeader.InsertItem(GTLCC_PERCENT, 0, _T("%"), (HDF_CENTER | HDF_STRING));
 }
 
-CTreeCtrlHelper* CGanttTreeListCtrl::TCH()
-{
-	if (m_pTCH == NULL) // first time init
-	{
-		CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(m_hwndTree);
-		m_pTCH = new CTreeCtrlHelper(*pTree);
-	}
-
-	ASSERT(m_pTCH);
-	return m_pTCH;
-}
-
-const CTreeCtrlHelper* CGanttTreeListCtrl::TCH() const
-{
-	if (m_pTCH == NULL) // first time init
-	{
-		CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(m_hwndTree);
-		m_pTCH = new CTreeCtrlHelper(*pTree);
-	}
-
-	ASSERT(m_pTCH);
-	return m_pTCH;
-}
-
 BOOL CGanttTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
 {
-	int nItem = CTreeListSyncer::FindListItem(m_hwndList, (DWORD)hti);
+	int nItem = CTreeListSyncer::FindListItem(m_list, (DWORD)hti);
 	return IsListItemLineOdd(nItem);
 }
 
@@ -1372,7 +1346,7 @@ BOOL CGanttTreeListCtrl::IsListItemLineOdd(int nItem) const
 void CGanttTreeListCtrl::SetFocus()
 {
 	if (!HasFocus())
-		::SetFocus(m_hwndTree);
+		m_tree.SetFocus();
 }
 
 void CGanttTreeListCtrl::Resize()
@@ -1395,7 +1369,7 @@ void CGanttTreeListCtrl::Resize(const CRect& rect)
 		int nTreeWidth = (rItem.right + 4);
 		CTreeListSyncer::Resize(rect, nTreeWidth);
 
-		::SendMessage(m_hwndTree, WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_treeHeader.GetItemWidth(0), (LPARAM)m_hwndTree);
+		m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_treeHeader.GetItemWidth(0), (LPARAM)m_tree.GetSafeHwnd());
 	}
 }
 
@@ -1416,10 +1390,10 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	CAutoFlag af(m_bTreeExpanding, TRUE);
 	EnableResync(FALSE);
 
-	CHoldRedraw hr(m_hwndList);
-	CHoldRedraw hr2(m_hwndTree);
+	CHoldRedraw hr(m_list);
+	CHoldRedraw hr2(m_tree);
 
-	TCH()->ExpandItem(hti, bExpand, bAndChildren);
+	TCH().ExpandItem(hti, bExpand, bAndChildren);
 
 	if (bExpand)
 	{
@@ -1436,15 +1410,15 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 		CollapseList(hti);
 	}
 	
-	TreeView_EnsureVisible(m_hwndTree, TreeView_GetChild(m_hwndTree, NULL));
+	m_tree.EnsureVisible(m_tree.GetChildItem(NULL));
 
-	EnableResync(TRUE, m_hwndTree);
+	EnableResync(TRUE, m_tree);
 	Resize();
 }
 
 BOOL CGanttTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
 {
-	int nFullyExpanded = TCH()->IsItemExpanded(hti, TRUE);
+	int nFullyExpanded = TCH().IsItemExpanded(hti, TRUE);
 			
 	if (nFullyExpanded == -1)	// item has no children
 	{
@@ -1456,7 +1430,7 @@ BOOL CGanttTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
 	}
 			
 	// else
-	return TCH()->IsItemExpanded(hti, FALSE);
+	return TCH().IsItemExpanded(hti, FALSE);
 }
 
 LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
@@ -1546,14 +1520,14 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
 {
-	if (IsListItemSelected(m_hwndList, nItem))
+	if (IsListItemSelected(m_list, nItem))
 	{
 		if (HasFocus())
 			return GMIS_SELECTED;
 		else
 			return GMIS_SELECTEDNOTFOCUSED;
 	}
-	else if (ListItemHasState(m_hwndList, nItem, LVIS_DROPHILITED))
+	else if (ListItemHasState(m_list, nItem, LVIS_DROPHILITED))
 	{
 		return GMIS_DROPHILITED;
 	}
@@ -1564,14 +1538,14 @@ GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
 
 GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(HTREEITEM hti) const
 {
-	if (IsTreeItemSelected(m_hwndTree, hti))
+	if (IsTreeItemSelected(m_tree, hti))
 	{
 		if (HasFocus())
 			return GMIS_SELECTED;
 		else
 			return GMIS_SELECTEDNOTFOCUSED;
 	}
-	else if (TreeItemHasState(m_hwndTree, hti, TVIS_DROPHILITED))
+	else if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
 	{
 		return GMIS_DROPHILITED;
 	}
@@ -1602,10 +1576,10 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
 			CRect rItem;
-			ListView_GetItemRect(m_hwndList, nItem, rItem, LVIR_BOUNDS);
+			m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
 			CRect rFullWidth(rItem);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_hwndList);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
 			DrawItemDivider(pDC, rFullWidth, FALSE, FALSE, FALSE);
@@ -1614,11 +1588,11 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
 
-			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_hwndList, nState, rItem, dwFlags);
+			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
 
 			// draw row
 			int nNumCol = GetRequiredColumnCount();
-			BOOL bSelected = IsListItemSelected(m_hwndList, nItem);
+			BOOL bSelected = IsListItemSelected(m_list, nItem);
 
 			for (int nCol = 1; nCol <= nNumCol; nCol++)
 			{
@@ -1643,7 +1617,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				
 				CRect rClient;
-				::GetClientRect(m_hwndList, rClient);
+				m_list.GetClientRect(rClient);
 
 				// see if we are currently editing a dependency
 				DWORD dwFromTaskID = 0, dwToTaskID = 0;
@@ -1742,7 +1716,7 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 
 	if (hwnd == m_treeHeader)
 	{
-		CClientDC dc(CWnd::FromHandle(m_hwndTree));
+		CClientDC dc(&m_tree);
 		
 		RecalcTreeColumnWidth((GTLC_COLUMN)nCol, &dc);
 		Resize();
@@ -1793,7 +1767,7 @@ void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscendin
 	}
 
 	// do the sort
-	CHoldRedraw hr(m_hwndTree);
+	CHoldRedraw hr(m_tree);
 	CTreeListSyncer::Sort(SortProc, (DWORD)this);
 
 	// tell parent
@@ -1831,7 +1805,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				{
 				case HDN_ENDDRAG:
 					if (lr == 0) // success
-						::InvalidateRect(m_hwndTree, NULL, TRUE);
+						m_tree.InvalidateRect(NULL, TRUE);
 					break;
 
 				case HDN_ITEMCLICK:
@@ -1954,10 +1928,10 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 		BOOL bNullDC = (pDC == NULL);
 
 		if (bNullDC)
-			pDC = CDC::FromHandle(::GetDC(m_hwndList));
+			pDC = m_list.GetDC();
 			
 		CRect rClient;
-		::GetClientRect(m_hwndList, rClient);
+		m_list.GetClientRect(rClient);
 		
 		// calc 'from' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
@@ -1974,7 +1948,7 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 
 		// cleanup
 		if (bNullDC)
-			::ReleaseDC(m_hwndList, pDC->Detach());
+			m_list.ReleaseDC(pDC);
 	}
 }
 
@@ -1999,7 +1973,7 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 {
 	if (IsPickingDependencyToTask())
 	{
-		CDC* pDC = CDC::FromHandle(::GetDC(m_hwndList));
+		CClientDC dc(&m_list);
 		
 		// calc 'from ' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
@@ -2021,7 +1995,7 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		else // use current cursor pos
 		{
 			ptTo = ::GetMessagePos();
-			::ScreenToClient(m_hwndList, &ptTo);
+			m_list.ScreenToClient(&ptTo);
 			
 			depend.SetTo(m_ptLastDependPick);
 		}
@@ -2029,25 +2003,22 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		if (ptTo != m_ptLastDependPick)
 		{
 			CRect rClient;
-			::GetClientRect(m_hwndList, rClient);
+			m_list.GetClientRect(rClient);
 			
 			// clear 'old' line
 			if (IsDependencyPickLinePosValid())
 			{
 				depend.SetTo(m_ptLastDependPick);
-				depend.Draw(pDC, rClient, TRUE);
+				depend.Draw(&dc, rClient, TRUE);
 			}		
 			
 			// draw 'new' line
 			depend.SetTo(ptTo);
-			depend.Draw(pDC, rClient, TRUE);
+			depend.Draw(&dc, rClient, TRUE);
 
 			// update pos
 			m_ptLastDependPick = ptTo;
 		}
-
-		// cleanup
-		::ReleaseDC(m_hwndList, pDC->Detach());
 
 		return TRUE;
 	}
@@ -2061,21 +2032,21 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 	if (!IsResyncEnabled())
 		return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 
-	if (hRealWnd == m_hwndList)
+	if (hRealWnd == m_list)
 	{
 		switch (msg)
 		{
 		case WM_TIMER:
-			// very weird horizontal scroll issue when LVS_EX_FULLROWSELECT
-			// is enabled and the mouse is very slowly moved off a just
-			// selected task. Research suggests that this relates to the
-			// listview's handling of it's internal timer messages, and
-			// it scrolls to the start because it thinks it's about to
-			// start editing the label, even though LVS_EDITLABELS is not set
-			if ((hRealWnd == m_hwndList) && (wp == 0x2B) && (lp == 0) )
+			switch (wp)
 			{
-				ASSERT(!HasStyle(hRealWnd, LVS_EDITLABELS, FALSE));
-				return TRUE; // eat it
+			case 0x2A:
+			case 0x2B:
+				// These are timers internal to the list view associated
+				// with editing labels and which cause unwanted selection
+				// changes. Given that we have disabled label editing for 
+				// the attribute columns we can safely kill these timers
+				::KillTimer(hRealWnd, wp);
+				return TRUE;
 			}
 			break;
 			
@@ -2127,7 +2098,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			if (COSVersion() == OSV_LINUX)
 			{
 				CRect rClient;
-				::GetClientRect(m_hwndList, rClient);
+				m_list.GetClientRect(rClient);
 				
 				CDC::FromHandle((HDC)wp)->FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
 			}
@@ -2305,7 +2276,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			break;
 
 		case WM_SETFOCUS:
-			::SetFocus(m_hwndTree);
+			m_tree.SetFocus();
 			break;
 
 		case WM_HSCROLL:
@@ -2321,7 +2292,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			break;
 		}
 	}
-	else if (hRealWnd == m_hwndTree)
+	else if (hRealWnd == m_tree)
 	{
 		switch (msg)
 		{
@@ -2365,7 +2336,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				
 				if (tvi.flags & (TVHT_ONITEM | TVHT_ONITEMRIGHT))
 				{
-					if (TCH()->TreeCtrl().ItemHasChildren(hti))
+					if (TCH().TreeCtrl().ItemHasChildren(hti))
 					{
 						TreeView_Expand(hRealWnd, hti, TVE_TOGGLE);
 					}
@@ -2400,12 +2371,12 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				COleDateTime dtScroll;
 
 				// centre on the mouse if over the list
-				if (hRealWnd == m_hwndList)
+				if (hRealWnd == m_list)
 				{
 					CPoint pt(::GetMessagePos());
-					::ScreenToClient(m_hwndList, &pt);
+					m_list.ScreenToClient(&pt);
 
-					GetDateFromScrollPos((pt.x + ::GetScrollPos(m_hwndList, SB_HORZ)), dtScroll);
+					GetDateFromScrollPos((pt.x + m_list.GetScrollPos(SB_HORZ)), dtScroll);
 				}
 				else // centre on the task beneath the mouse
 				{
@@ -2460,9 +2431,9 @@ BOOL CGanttTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scroll into view first
-	TreeView_EnsureVisible(m_hwndTree, htiSel);
+	m_tree.EnsureVisible(htiSel);
 	
-	if (TreeView_GetItemRect(m_hwndTree, htiSel, pEdit, TRUE)) // label only
+	if (m_tree.GetItemRect(htiSel, pEdit, TRUE)) // label only
 	{
 		// make width of tree column or 200 whichever is larger
 		int nWidth = (m_treeHeader.GetItemWidth(GTLCC_TITLE) - pEdit->left);
@@ -2471,9 +2442,7 @@ BOOL CGanttTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 		pEdit->right = (pEdit->left + nWidth);
 
 		// convert from tree to 'our' coords
-		::ClientToScreen(m_hwndTree, (LPPOINT)pEdit);
-		::ClientToScreen(m_hwndTree, ((LPPOINT)pEdit) + 1);
-
+		m_tree.ClientToScreen(pEdit);
 		ScreenToClient(pEdit);
 
 		return true;
@@ -2619,7 +2588,7 @@ void CGanttTreeListCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, int nCol, const G
 
 		// text color and alignment
 		BOOL bLighter = FALSE; 
-		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_hwndTree));
+		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
 
 		switch (nCol)
 		{
@@ -2716,9 +2685,9 @@ CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti)
 	}
 
 	// children
-	if (!hti || TCH()->IsItemExpanded(hti))
+	if (!hti || TCH().IsItemExpanded(hti))
 	{
-		HTREEITEM htiChild = TreeView_GetChild(m_hwndTree, hti);
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
 		
 		while (htiChild)
 		{
@@ -2727,7 +2696,7 @@ CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti)
 			if (sLongestChild.GetLength() > sLongest.GetLength())
 				sLongest = sLongestChild;
 			
-			htiChild = TreeView_GetNextItem(m_hwndTree, htiChild, TVGN_NEXT);
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 	
@@ -2737,10 +2706,10 @@ CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti)
 HFONT CGanttTreeListCtrl::GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, int nCol)
 {
 	BOOL bStrikThru = (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE));
-	BOOL bBold = ((nCol == GTLCC_TITLE) && (TreeView_GetParent(m_hwndTree, hti) == NULL));
+	BOOL bBold = ((nCol == GTLCC_TITLE) && (m_tree.GetParentItem(hti) == NULL));
 
 	if (bStrikThru || bBold)
-		return m_fonts.GetHFont(bBold, FALSE, FALSE, bStrikThru);
+		return m_tree.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
 
 	// else
 	return NULL;
@@ -2750,7 +2719,7 @@ void CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 {
 	rItem.SetRectEmpty();
 
-	if (TreeView_GetItemRect(m_hwndTree, hti, &rItem, TRUE)) // text rect only
+	if (m_tree.GetItemRect(hti, rItem, TRUE)) // text rect only
 	{
 		switch (nCol)
 		{
@@ -2792,7 +2761,7 @@ void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
 	if (HasOption(GTLCF_DISPLAYALLOCTOAFTERITEM))
 	{
 		CRect rItem;
-		ListView_GetItemRect(m_hwndList, nItem, rItem, LVIR_BOUNDS);
+		m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 		
 		// get the data for this item
 		GANTTITEM* pGI = NULL;
@@ -2808,7 +2777,7 @@ void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
 
 			if (nTextPos > GCDR_NOTDRAWN)
 			{
-				int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+				int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 				rItem.left = (nTextPos + 3 - nScrollPos);
 				rItem.top += 2;
@@ -2818,7 +2787,7 @@ void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
 
 				pDC->SetBkMode(TRANSPARENT);
 				pDC->SetTextColor(crBorder);
-				pDC->DrawText(pGI->sAllocTo, rItem, (DT_LEFT | GraphicsMisc::GetRTLDrawTextFlags(m_hwndList)));
+				pDC->DrawText(pGI->sAllocTo, rItem, (DT_LEFT | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
 			}
 		}
 	}
@@ -2831,7 +2800,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 
 	// see if we can avoid drawing this sub-item at all
 	CRect rItem, rClip;
-	ListView_GetSubItemRect(m_hwndList, nItem, nCol, LVIR_BOUNDS, &rItem);
+	m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rItem);
 	pDC->GetClipBox(rClip);
 
 	if (rItem.right < rClip.left)
@@ -3025,7 +2994,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	}
 
 	// save off the absolute item end pos
-	int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 	GANTTDISPLAY* pGD = NULL;
 	GET_GD_RET(dwTaskID, pGD, FALSE);
@@ -3489,7 +3458,7 @@ DWORD CGanttTreeListCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwTo
 
 int CGanttTreeListCtrl::FindListItem(DWORD dwTaskID) const
 {
-	HTREEITEM hti = FindTreeItem(m_hwndTree, NULL, dwTaskID);
+	HTREEITEM hti = FindTreeItem(m_tree, NULL, dwTaskID);
 
 	return (hti ? GetListItem(hti) : -1);
 }
@@ -3506,16 +3475,16 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 	aDepends.RemoveAll();
 
 	CRect rClient;
-	::GetClientRect(m_hwndList, rClient);
+	m_list.GetClientRect(rClient);
 
 	CHTIMap mapItems;
-	TCH()->BuildHTIMap(mapItems, TRUE);
+	TCH().BuildHTIMap(mapItems, TRUE);
 	
 	// iterate all list items checking for dependencies
-	int nFirstVis = ListView_GetTopIndex(m_hwndList);
-	int nLastVis = (nFirstVis + ListView_GetCountPerPage(m_hwndList));
+	int nFirstVis = m_list.GetTopIndex();
+	int nLastVis = (nFirstVis + m_list.GetCountPerPage());
 	
-	int nNumItems = ListView_GetItemCount(m_hwndList);
+	int nNumItems = m_list.GetItemCount();
 	
 	for (int nFrom = 0; nFrom < nNumItems; nFrom++)
 	{
@@ -3576,13 +3545,13 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend
 		return FALSE;
 
 	int nPos = (bFrom ? pGD->nStartPos : pGD->nEndPos);
-	int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 	if (nPos == GCDR_NOTDRAWN)
 		return FALSE;
 	
 	CRect rItem;
-	VERIFY(ListView_GetItemRect(m_hwndList, nItem, rItem, LVIR_BOUNDS));
+	VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
 	
 	CPoint pt((nPos - nScrollPos), ((rItem.top + rItem.bottom) / 2));
 
@@ -3957,7 +3926,7 @@ int CGanttTreeListCtrl::GetListItem(HTREEITEM hti) const
 	if (!hti)
 		return -1;
 
-	return CTreeListSyncer::FindListItem(m_hwndList, (DWORD)hti);
+	return CTreeListSyncer::FindListItem(m_list, (DWORD)hti);
 }
 
 void CGanttTreeListCtrl::ExpandList()
@@ -3968,12 +3937,12 @@ void CGanttTreeListCtrl::ExpandList()
 
 void CGanttTreeListCtrl::ExpandList(HTREEITEM hti, int& nNextIndex)
 {
-	CTreeListSyncer::ExpandList(m_hwndList, m_hwndTree, hti, nNextIndex);
+	CTreeListSyncer::ExpandList(m_list, m_tree, hti, nNextIndex);
 }
 
 void CGanttTreeListCtrl::CollapseList(HTREEITEM hti)
 {
-	CTreeListSyncer::CollapseList(m_hwndList, m_hwndTree, hti);
+	CTreeListSyncer::CollapseList(m_list, m_tree, hti);
 }
 
 void CGanttTreeListCtrl::DeleteTreeItem(HTREEITEM hti)
@@ -3982,8 +3951,7 @@ void CGanttTreeListCtrl::DeleteTreeItem(HTREEITEM hti)
 
 	DWORD dwTaskID = GetTaskID(hti);
 
-	TreeView_DeleteItem(m_hwndTree, hti);
-
+	m_tree.DeleteItem(hti);
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
@@ -4115,7 +4083,7 @@ void CGanttTreeListCtrl::OnEndDepedencyEdit()
 	
 	ResetDependencyPickLinePos();
 	SetFocus();
-	InvalidateRect(m_hwndList, NULL, TRUE);
+	m_list.InvalidateRect(NULL, TRUE);
 }
 
 void CGanttTreeListCtrl::EndDependencyEdit()
@@ -4174,7 +4142,7 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 		return FALSE;
 
 	// cache the current scroll-pos so we can restore it
-	int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 	COleDateTime dtPos;
 
 	if (nScrollPos)
@@ -4214,7 +4182,7 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 	if (nScrollPos)
 	{
 		nScrollPos = GetScrollPosFromDate(dtPos);
-		ListView_Scroll(m_hwndList, nScrollPos - ::GetScrollPos(m_hwndList, SB_HORZ), 0);
+		ListView_Scroll(m_list, nScrollPos - m_list.GetScrollPos(SB_HORZ), 0);
 	}
 
 	return TRUE;
@@ -4260,7 +4228,7 @@ void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 void CGanttTreeListCtrl::ResizeColumnsToFit()
 {
 	// tree columns
-	CClientDC dc(CWnd::FromHandle(m_hwndTree));
+	CClientDC dc(&m_tree);
 	int nCol = m_treeHeader.GetItemCount();
 
 	while (nCol--)
@@ -4283,7 +4251,7 @@ BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 
 	if (bTitle || bAllocTo)
 	{
-		CClientDC dc(CWnd::FromHandle(m_hwndTree));
+		CClientDC dc(&m_tree);
 
 		if (bTitle)
 			RecalcTreeColumnWidth(GTLCC_TITLE, &dc);
@@ -4303,7 +4271,7 @@ BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
 {
 	ASSERT(pDC);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_hwndTree);
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
 
 	int nColWidth = 0;
 
@@ -4349,17 +4317,17 @@ void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
 int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 {
 	// if this task has no children then return itself
-	HTREEITEM htiChild = TreeView_GetChild(m_hwndTree, htiParent);
+	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 	
 	if (htiChild == NULL)
 		return 0;
 	
 	// or we only want expanded items
-	if (htiParent && !TCH()->IsItemExpanded(htiParent, FALSE))
+	if (htiParent && !TCH().IsItemExpanded(htiParent, FALSE))
 		return 0;
 	
 	// Prepare font
-	HFONT hFont = m_fonts.GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
+	HFONT hFont = m_tree.Fonts().GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
 	HGDIOBJ hOldFont = pDC->SelectObject(hFont);
 	
 	// else try children
@@ -4369,7 +4337,7 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 	{
 		CRect rChild;
 		
-		if (TreeView_GetItemRect(m_hwndTree, htiChild, &rChild, TRUE)) // text rect only
+		if (m_tree.GetItemRect(htiChild, rChild, TRUE)) // text rect only
 		{
 			DWORD dwTaskID = GetTaskID(htiChild);
 			const GANTTITEM* pGI = NULL;
@@ -4384,7 +4352,7 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 			nWidest = max(max(nWidest, nWidth), nWidestChild);
 		}
 		
-		htiChild = TreeView_GetNextSibling(m_hwndTree, htiChild);
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
 	
 	pDC->SelectObject(hOldFont);
@@ -4488,7 +4456,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 	// easily replace the other columns without
 	// losing all our items too
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
-	ListView_InsertColumn(m_hwndList, 0, &lvc);
+	m_list.InsertColumn(0, &lvc);
 	
 	// add other columns
 	for (int i = 0; i < GetNumMonths(); i++)
@@ -4499,7 +4467,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 		lvc.cchTextMax = 50;
 
 		int nCol = m_listHeader.GetItemCount();
-		ListView_InsertColumn(m_hwndList, nCol, &lvc);
+		m_list.InsertColumn(nCol, &lvc);
 	}
 
 	UpdateColumnsWidthAndText();
@@ -4508,7 +4476,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 {
 	// cache the scrolled position
-	int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 	COleDateTime dtPos;
 	BOOL bRestorePos = GetDateFromScrollPos(nScrollPos, dtPos);
@@ -4532,7 +4500,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 			lvc.cchTextMax = 50;
 
 			int nCol = m_listHeader.GetItemCount();
-			ListView_InsertColumn(m_hwndList, nCol, &lvc);
+			m_list.InsertColumn(nCol, &lvc);
 		}
 	}
 	else if (nDiffMonths < 0)
@@ -4542,7 +4510,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 		while (i--)
 		{
 			int nCol = (m_listHeader.GetItemCount() - 1);
-			ListView_DeleteColumn(m_hwndList, nCol);
+			m_list.DeleteColumn(nCol);
 		}
 		
 	}
@@ -4556,11 +4524,11 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	if (bRestorePos)
 	{
 		nScrollPos = GetScrollPosFromDate(dtPos);
-		ListView_Scroll(m_hwndList, nScrollPos - ::GetScrollPos(m_hwndList, SB_HORZ), 0);
+		m_list.Scroll(CSize(nScrollPos - m_list.GetScrollPos(SB_HORZ), 0));
 	}
 	else
 	{
-		::SetScrollPos(m_hwndList, SB_HORZ, 0, TRUE);
+		m_list.SetScrollPos(SB_HORZ, 0, TRUE);
 	}
 
 	// clear display cache since it's probably going to change
@@ -4572,7 +4540,7 @@ void CGanttTreeListCtrl::CalculateMinMonthWidths()
 	m_aMinMonthWidths.SetSize(GTLC_DISPLAY_COUNT);
 
 	CClientDC dcClient(&m_treeHeader);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_hwndList);
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
 
 	for (int nCol = 0; nCol < GTLC_DISPLAY_COUNT; nCol++)
 	{
@@ -4768,10 +4736,10 @@ void CGanttTreeListCtrl::ScrollTo(const COleDateTime& date)
 	int nEndPos = GetScrollPosFromDate(dateOnly.m_dt + 1.0);
 
 	// if it is already visible no need to scroll
-	int nListStart = ::GetScrollPos(m_hwndList, SB_HORZ);
+	int nListStart = m_list.GetScrollPos(SB_HORZ);
 
 	CRect rList;
-	::GetClientRect(m_hwndList, rList);
+	m_list.GetClientRect(rList);
 
 	if ((nStartPos >= nListStart) && (nEndPos <= (nListStart + rList.Width())))
 		return;
@@ -4782,17 +4750,17 @@ void CGanttTreeListCtrl::ScrollTo(const COleDateTime& date)
 	// and arbitrary offset
 	nStartPos -= 50;
 
-	ListView_Scroll(m_hwndList, nStartPos, 0);
+	m_list.Scroll(CSize(nStartPos, 0));
 	Invalidate(FALSE);
 }
 
 BOOL CGanttTreeListCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
 {
-	if (ListView_GetSubItemRect(m_hwndList, 0, nCol, LVIR_BOUNDS, (LPRECT)rColumn))
+	if (m_list.GetSubItemRect(0, nCol, LVIR_BOUNDS, rColumn))
 	{
 		if (!bScrolled)
 		{
-			int nScroll = ::GetScrollPos(m_hwndList, SB_HORZ);
+			int nScroll = m_list.GetScrollPos(SB_HORZ);
 			rColumn.OffsetRect(nScroll, 0);
 		}
 
@@ -5016,11 +4984,9 @@ HTREEITEM CGanttTreeListCtrl::TreeHitTestItem(const CPoint& point, BOOL bScreen)
 	CPoint ptTree(point);
 
 	if (bScreen)
-		::ScreenToClient(m_hwndTree, &ptTree);
+		m_tree.ScreenToClient(&ptTree);
 	
-	TVHITTESTINFO tvht = { { ptTree.x, ptTree.y }, 0 };
-
-	return TreeView_HitTest(m_hwndTree, &tvht);
+	return m_tree.HitTest(ptTree);
 }
 
 HTREEITEM CGanttTreeListCtrl::GetItem(CPoint ptScreen) const
@@ -5036,7 +5002,7 @@ CString CGanttTreeListCtrl::GetItemTip(CPoint ptScreen) const
 	{
 		CRect rItem;
 
-		if (TreeView_GetItemRect(m_hwndTree, htiHit, &rItem, TRUE))
+		if (m_tree.GetItemRect(htiHit, rItem, TRUE))
 		{
 			int nColWidth = m_treeHeader.GetItemWidth(0);
 
@@ -5044,14 +5010,14 @@ CString CGanttTreeListCtrl::GetItemTip(CPoint ptScreen) const
 			rItem.right = nColWidth;
 
 			CPoint ptClient(ptScreen);
-			::ScreenToClient(m_hwndTree, &ptClient);
+			m_tree.ScreenToClient(&ptClient);
 
 			if (rItem.PtInRect(ptClient))
 			{
 				const GANTTITEM* pGI = GetGanttItem(GetTaskID(htiHit));
 				ASSERT(pGI);
 
-				int nTextLen = GraphicsMisc::GetTextWidth(pGI->sTitle, *(CWnd::FromHandle(m_hwndTree)));
+				int nTextLen = GraphicsMisc::GetTextWidth(pGI->sTitle, m_tree);
 				rItem.DeflateRect(TV_TIPPADDING, 0);
 
 				if (nTextLen > rItem.Width())
@@ -5084,8 +5050,8 @@ void CGanttTreeListCtrl::GetWindowRect(CRect& rWindow, BOOL bWithHeader) const
 {
 	CRect rTree, rList;
 
-	::GetWindowRect(m_hwndTree, rTree);
-	::GetWindowRect(m_hwndList, rList);
+	m_tree.GetWindowRect(rTree);
+	m_list.GetWindowRect(rList);
 
 	if (bWithHeader)
 		rWindow = rList; // height will include header
@@ -5106,9 +5072,9 @@ int CGanttTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& 
 	lvht.pt = point;
 
 	if (bScreen)
-		::ScreenToClient(m_hwndList, &(lvht.pt));
+		m_list.ScreenToClient(&(lvht.pt));
 
-	if ((ListView_SubItemHitTest(m_hwndList, &lvht) != -1) &&	(lvht.iSubItem > 0))
+	if ((ListView_SubItemHitTest(m_list, &lvht) != -1) &&	(lvht.iSubItem > 0))
 	{
 		ASSERT(lvht.iItem != -1);
 
@@ -5153,7 +5119,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 
 	// Calculate the task rect
 	CRect rTask;
-	VERIFY(ListView_GetItemRect(m_hwndList, nItem, rTask, LVIR_BOUNDS));
+	VERIFY(m_list.GetItemRect(nItem, rTask, LVIR_BOUNDS));
 
 	if (!CDateHelper::DateHasTime(dtDue))
 		dtDue += 1.0;
@@ -5161,7 +5127,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	rTask.right = GetScrollPosFromDate(dtDue);
 	rTask.left = GetScrollPosFromDate(dtStart);
 
-	rTask.OffsetRect(-GetScrollPos(m_hwndList, SB_HORZ), 0);
+	rTask.OffsetRect(-m_list.GetScrollPos(SB_HORZ), 0);
 
 	// Create 'hit' boxes around the two ends
 	const int nDragTol = GetSystemMetrics(SM_CXDOUBLECLK);
@@ -5176,7 +5142,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 	CPoint ptClient(point);
 	
 	if (bScreen)
-		::ScreenToClient(m_hwndList, &ptClient);
+		m_list.ScreenToClient(&ptClient);
 	
 	if (rStart.PtInRect(ptClient))
 	{
@@ -5196,12 +5162,12 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 
 DWORD CGanttTreeListCtrl::GetTaskID(HTREEITEM hti) const
 {
-	return GetTreeItemData(m_hwndTree, hti);
+	return GetTreeItemData(m_tree, hti);
 }
 
 DWORD CGanttTreeListCtrl::GetTaskID(int nItem) const
 {
-	return GetListTaskID(GetListItemData(m_hwndList, nItem));
+	return GetListTaskID(GetListItemData(m_list, nItem));
 }
 
 DWORD CGanttTreeListCtrl::GetListTaskID(DWORD dwItemData) const
@@ -5220,7 +5186,7 @@ BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
 		return FALSE;
 
 	CRect rClient;
-	::GetClientRect(m_hwndList, rClient);
+	m_list.GetClientRect(rClient);
 
 	ptDrag.x = max(ptDrag.x, rClient.left);
 	ptDrag.x = min(ptDrag.x, rClient.right);
@@ -5247,9 +5213,9 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 		SelectTask(dwTaskID);
 
 	CPoint ptScreen(ptCursor);
-	::ClientToScreen(m_hwndList, &ptScreen);
+	m_list.ClientToScreen(&ptScreen);
 	
-	if (!DragDetect(m_hwndList, ptScreen))
+	if (!DragDetect(m_list, ptScreen))
 		return FALSE;
 
 	switch (nHit)
@@ -5303,7 +5269,7 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 		pGI->dtStart = pGI->dtMinStart = dtStart;
 	}
 	
-	::SetCapture(m_hwndList);
+	m_list.SetCapture();
 	
 	// keep parent informed
 	NotifyParentDragChange();
@@ -5359,7 +5325,7 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 
 			// dropping outside the list is a cancel
 			CRect rList;
-			::GetClientRect(m_hwndList, rList);
+			m_list.GetClientRect(rList);
 			
 			if (!rList.PtInRect(ptCursor))
 			{
@@ -5602,14 +5568,14 @@ BOOL CGanttTreeListCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
 
 void CGanttTreeListCtrl::RedrawList(BOOL bErase)
 {
-	::InvalidateRect(m_hwndList, NULL, bErase);
-	::UpdateWindow(m_hwndList);
+	m_list.InvalidateRect(NULL, bErase);
+	m_list.UpdateWindow();
 }
 
 void CGanttTreeListCtrl::RedrawTree(BOOL bErase)
 {
-	::InvalidateRect(m_hwndTree, NULL, bErase);
-	::UpdateWindow(m_hwndTree);
+	m_tree.InvalidateRect(NULL, bErase);
+	m_tree.UpdateWindow();
 }
 
 BOOL CGanttTreeListCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
@@ -5647,13 +5613,13 @@ BOOL CGanttTreeListCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& 
 {
 	// quick hit test
 	CRect rList;
-	::GetClientRect(m_hwndList, rList);
+	m_list.GetClientRect(rList);
 
 	if (!rList.PtInRect(ptCursor))
 		return FALSE;
 
 	// convert pos to date
-	int nScrollPos = (::GetScrollPos(m_hwndList, SB_HORZ) + ptCursor.x);
+	int nScrollPos = (m_list.GetScrollPos(SB_HORZ) + ptCursor.x);
 
 	return (GetDateFromScrollPos(nScrollPos, date) && CDateHelper::IsDateSet(date));
 }
@@ -5924,7 +5890,7 @@ BOOL CGanttTreeListCtrl::IsMilestone(const GANTTITEM& gi) const
 
 DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	HTREEITEM hti = FindTreeItem(m_hwndTree, dwTaskID);
+	HTREEITEM hti = FindTreeItem(m_tree, dwTaskID);
 	
 	if (!hti)
 	{
@@ -5938,29 +5904,29 @@ DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	{
 	case IUI_GETNEXTTASK:
 		{
-			HTREEITEM htiNext = TCH()->GetNextVisibleItem(hti);
+			HTREEITEM htiNext = TCH().GetNextVisibleItem(hti);
 			
 			if (htiNext)
-				dwNextID = GetTreeItemData(m_hwndTree, htiNext);
+				dwNextID = GetTreeItemData(m_tree, htiNext);
 		}
 		break;
 		
 	case IUI_GETPREVTASK:
 		{
-			HTREEITEM htiPrev = TCH()->GetPrevVisibleItem(hti);
+			HTREEITEM htiPrev = TCH().GetPrevVisibleItem(hti);
 			
 			if (htiPrev)
-				dwNextID = GetTreeItemData(m_hwndTree, htiPrev);
+				dwNextID = GetTreeItemData(m_tree, htiPrev);
 		}
 		break;
 		
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		{
-			HTREEITEM htiNext = TCH()->GetNextTopLevelItem(hti, (nCmd == IUI_GETNEXTTOPLEVELTASK));
+			HTREEITEM htiNext = TCH().GetNextTopLevelItem(hti, (nCmd == IUI_GETNEXTTOPLEVELTASK));
 			
 			if (htiNext)
-				dwNextID = GetTreeItemData(m_hwndTree, htiNext);
+				dwNextID = GetTreeItemData(m_tree, htiNext);
 		}
 		break;
 		
@@ -5978,3 +5944,22 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	return CTreeListSyncer::SaveToImage(bmImage);
 }
 
+void CGanttTreeListCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
+{
+	if (hti && (hti != TVI_ROOT))
+	{
+		TCH().SetItemBold(hti, (m_tree.GetParentItem(hti) == NULL));
+	}
+	
+	// children
+	if (bAndChildren)
+	{
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+		
+		while (htiChild)
+		{
+			RefreshItemBoldState(htiChild);
+			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+}

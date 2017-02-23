@@ -1,6 +1,8 @@
 #pragma once
 
 #include "..\shared\tooltipctrlex.h"
+#include "..\shared\fontcache.h"
+#include "..\shared\treectrlhelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttTreeCtrl
@@ -13,11 +15,19 @@ public:
 	CGanttTreeCtrl();
 	virtual ~CGanttTreeCtrl();
 
+	CTreeCtrlHelper& TCH() { return m_tch; }
+	const CTreeCtrlHelper& TCH() const { return m_tch; }
+
+	CFontCache& Fonts() { return m_fonts; }
+	const CFontCache& Fonts() const { return m_fonts; }
+	
 	bool ProcessMessage(MSG* pMsg);
 
 protected:
 	int m_nTitleColumnWidth;
 	CToolTipCtrlEx m_tooltip;
+	CFontCache m_fonts;
+	CTreeCtrlHelper m_tch;
 
 protected:
 	virtual void PreSubclassWindow();

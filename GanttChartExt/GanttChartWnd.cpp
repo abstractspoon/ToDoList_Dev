@@ -49,6 +49,7 @@ const int PADDING = 3;
 CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
+	m_ctrlGantt(m_tree, m_list),
 	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
@@ -684,7 +685,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	}
 	
 	// init syncer
-	m_ctrlGantt.Initialize(m_tree, m_list, IDC_TREEHEADER);
+	m_ctrlGantt.Initialize(IDC_TREEHEADER);
 	m_ctrlGantt.ExpandAll();
 
 	CRect rClient;

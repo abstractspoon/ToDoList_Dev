@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Ganttstruct.h"
+#include "GanttTreeCtrl.h"
 
 #include "..\shared\TreeListSyncer.h"
 #include "..\shared\enheaderctrl.h"
@@ -56,7 +57,6 @@ public:
 
 class CThemed;
 class CGanttCreateDependsDlg;
-class CTreeCtrlHelper;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -65,10 +65,10 @@ class CGanttTreeListCtrl : protected CTreeListSyncer
 	friend class CGanttLockUpdates;
 
 public:
-	CGanttTreeListCtrl();
+	CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list);
 	virtual ~CGanttTreeListCtrl();
 
-	BOOL Initialize(HWND hwndTree, HWND hwndList, UINT nIDTreeHeader);
+	BOOL Initialize(UINT nIDTreeHeader);
 	void Release();
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -169,10 +169,9 @@ protected:
 	GTLC_PARENTCOLORING m_nParentColoring;
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
-	mutable CFontCache m_fonts;
 
-	// keep our own handles to these to speed lookups
-	HWND m_hwndList, m_hwndTree;
+	CGanttTreeCtrl& m_tree;
+	CListCtrl& m_list;
 
 	CGanttItemMap m_data;
 	CGanttDisplayMap m_display;
@@ -302,6 +301,7 @@ protected:
 	CString GetTreeItemColumnText(const GANTTITEM& gi, int nCol);
 	BOOL IsMilestone(const GANTTITEM& gi) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const;
+	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	COLORREF GetWeekendColor(BOOL bSelected) const;
@@ -324,8 +324,8 @@ protected:
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);
 
-	CTreeCtrlHelper* TCH();
-	const CTreeCtrlHelper* TCH() const;
+	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
+	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
 
 	BOOL CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
 	BOOL BuildDependency(int nFrom, int nTo, GANTTDEPENDENCY& depend) const;

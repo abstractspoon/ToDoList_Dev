@@ -7,6 +7,7 @@
 #include "GanttMsg.h"
 
 #include "..\shared\graphicsmisc.h"
+#include "..\shared\treectrlhelper.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -21,7 +22,8 @@ IMPLEMENT_DYNAMIC(CGanttTreeCtrl, CTreeCtrl)
 
 CGanttTreeCtrl::CGanttTreeCtrl() 
 	:	
-	m_nTitleColumnWidth(-1)
+	m_nTitleColumnWidth(-1),
+	m_tch(*this)
 {
 
 }
@@ -47,6 +49,7 @@ void CGanttTreeCtrl::PreSubclassWindow()
 	CTreeCtrl::PreSubclassWindow();
 
 	InitTooltip();
+	m_fonts.Initialise(*this);
 }
 
 int CGanttTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -55,6 +58,7 @@ int CGanttTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	InitTooltip();
+	m_fonts.Initialise(*this);
 
 	return 0;
 }
@@ -103,6 +107,10 @@ void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = TRUE; // we do the positioning
+
+	// First set up the font
+	BOOL bTopLevel = (GetParentItem(hti) == NULL);
+	m_tooltip.SetFont(m_fonts.GetFont(bTopLevel ? GMFS_BOLD : 0));
 
 	CRect rLabel;
 	VERIFY(GetItemRect(hti, rLabel, TRUE));
