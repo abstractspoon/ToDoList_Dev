@@ -37,19 +37,20 @@ REM Handle dlls explicitly to maintain control over .NET plugins
 REM .Net Plugins - Dev only for now
 echo.%1 | findstr /C:"_Dev" 1>nul
 
-if errorlevel 0 (
+IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Calendar.DayView.dll
-)
+:CONTINUE
  
 REM Copy latest Resources
 del %1\Unicode_Release\Resources\ /Q /S
-xcopy %RESPATH%\*.* %1\Unicode_Release\Resources\ /Y /D /E
+xcopy %RESPATH%\*.* %1\Unicode_Release\Resources\ /Y /D /E /EXCLUDE:D:\_code\ToDoList_Dev\BuildReleaseZip_Exclude.txt
+del %1\Unicode_Release\Resources\Translations\backup\ /Q
 
 REM Zip Resources
-%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Resources\ -r -x!.git*
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Resources\ -x!.git*
 
 %OUTZIP%
 

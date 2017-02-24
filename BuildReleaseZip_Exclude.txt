@@ -1,0 +1,6 @@
+vssver.scc
+backup\
+Resources\Translations\backup\
+.gitattributes
+.gitignore
+README.md
