@@ -1067,7 +1067,7 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 		CThemed th(hwnd, _T("Explorer::ListView"));
 		
 		// always fill background with white to get the exact selection colour
-		pDC->FillSolidRect(rDraw, RGB(255, 255, 255));
+		pDC->FillSolidRect(prClip ? prClip : rDraw, RGB(255, 255, 255));
 		
 		switch (nState)
 		{
