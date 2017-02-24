@@ -28,7 +28,8 @@ TASKCALITEM::TASKCALITEM()
 	color(CLR_NONE), 
 	bDone(FALSE),
 	bGoodAsDone(FALSE),
-	dwTaskID(0)
+	dwTaskID(0),
+	bTopLevel(FALSE)
 {
 
 }
@@ -38,9 +39,13 @@ TASKCALITEM::TASKCALITEM(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<
 	color(CLR_NONE), 
 	bDone(FALSE),
 	bGoodAsDone(FALSE),
-	dwTaskID(0)
+	dwTaskID(0),
+	bTopLevel(FALSE)
 {
 	UpdateTask(pTasks, hTask, attrib, dwCalcDates);
+
+	// Handle TopLevel only on creation
+	bTopLevel = (pTasks->GetTaskParentID(hTask) == 0);
 }
 
 	

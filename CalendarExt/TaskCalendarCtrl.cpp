@@ -38,7 +38,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nSnapMode(TCCSM_NEARESTHOUR),
 	m_dwOptions(TCCO_DISPLAYCONTINUOUS),
 	m_bReadOnly(FALSE),
-	m_nCellVScrollPos(0)
+	m_nCellVScrollPos(0),
+	m_bStrikeThruDone(FALSE)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 }
@@ -651,7 +652,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		if (nTaskHeight >= MIN_TASK_HEIGHT)
 		{
 			int nOffset = GetTaskTextOffset(pTCI->GetTaskID());
-			CFont* pOldFont = NULL;
 			
 			if (nOffset != -1)
 			{
@@ -661,17 +661,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				int nLeft = (rTask.left - nOffset);
 				int nTop = (rTask.top + 1);
 				
-				if (m_fontAltText.GetSafeHandle())
-				{
-					pOldFont = pDC->SelectObject(&m_fontAltText);
-				}
-				else
-				{
-					if (pTCI->IsDone(FALSE) && m_fontDone.GetSafeHandle())
-						pOldFont = pDC->SelectObject(&m_fontDone);
-
-					nTop++;
-				}
+				CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTCI));
 
 				COLORREF crOld = pDC->SetTextColor(crText);
 				CString sTitle = pTCI->GetName();
@@ -680,7 +670,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				pDC->SetTextColor(crOld);
 				
 				// update text pos
-				nOffset += rTask.Width();
+				nOffset += (rTask.Width() + 1); // +1 for the cell border
 				
 				// if the offset now exceeds the text extent we can stop
 				int nExtent = pDC->GetTextExtent(sTitle).cx;
@@ -700,16 +690,25 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	}
 }
 
+CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
+{
+	if (m_fontAltText.GetSafeHandle())
+		return &m_fontAltText;
+
+	DWORD dwFlags = 0;
+		
+	if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
+		dwFlags |= GMFS_STRIKETHRU;
+		
+	if (pTCI->bTopLevel)
+		dwFlags |= GMFS_BOLD;
+		
+	return m_fonts.GetFont(dwFlags);
+}
+
 void CTaskCalendarCtrl::SetStrikeThruDoneTasks(BOOL bStrikeThru)
 {
-	if (bStrikeThru)
-	{
-		VERIFY(GraphicsMisc::CreateFont(m_fontDone, m_DefaultFont, GMFS_STRIKETHRU, GMFS_STRIKETHRU));
-	}
-	else
-	{
-		GraphicsMisc::VerifyDeleteObject(m_fontDone);
-	}
+	m_bStrikeThruDone = bStrikeThru;
 }
 
 void CTaskCalendarCtrl::OnSetFocus(CWnd* pFocus)
@@ -1868,6 +1867,8 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CCalendarCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	m_fonts.Initialise(*this);
+
 	if (m_tooltip.Create(this))
 	{
 		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
@@ -1924,7 +1925,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CCalendarCtrl::OnToolHitTest(point, pTI);
 }
 
-void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	DWORD dwTaskID = m_tooltip.GetToolInfo().uId;
 
@@ -1936,15 +1937,18 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	*pResult = TRUE; // we do the positioning
 
+	// Set the font first, bold for top level items
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	ASSERT(pTCI);
+	
+	m_tooltip.SetFont(m_fonts.GetFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
+
+	// Calculate exact width required
 	CRect rLabel;
 	VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
 	ClientToScreen(rLabel);
 
-	// Calculate exact width required
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-	ASSERT(pTCI);
-
-	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(pTCI->GetName(), pNMHDR->hwndFrom));
+	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip));
 
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);

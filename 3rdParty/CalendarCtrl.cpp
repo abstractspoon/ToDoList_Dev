@@ -68,8 +68,10 @@ BEGIN_MESSAGE_MAP(CCalendarCtrl, CWnd)
 	ON_WM_KEYDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_GETDLGCODE()
+	ON_MESSAGE(WM_GETFONT, OnGetFont)
 END_MESSAGE_MAP()
 
+/////////////////////////////////////////////////////////////////////////////
 
 BOOL CCalendarCtrl::Create(DWORD dwStyle, const CRect &wndRect, CWnd *pParent, UINT nID, LPFN_CALENDAR_DATA_CALLBACK pfnDataCallback)
 {
@@ -80,6 +82,11 @@ BOOL CCalendarCtrl::Create(DWORD dwStyle, const CRect &wndRect, CWnd *pParent, U
 	Reset();
 
 	return bResult;
+}
+
+LRESULT CCalendarCtrl::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return (LRESULT)m_DefaultFont.GetSafeHandle();
 }
 
 BOOL CCalendarCtrl::SetVisibleWeeks(int nWeeks)

@@ -14,6 +14,7 @@
 
 #include "..\shared\mapex.h"
 #include "..\shared\tooltipctrlex.h"
+#include "..\shared\fontcache.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
@@ -63,16 +64,19 @@ protected:
 	CTaskCalItemMap m_mapData;
 	CSpecialDateMap m_mapSpecial;
 
+	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
+	BOOL m_bReadOnly;
+	BOOL m_bStrikeThruDone;
+
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
-	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	TASKCALITEM m_tciPreDrag;
 	CPoint m_ptDragOrigin;
-	BOOL m_bReadOnly;
 	int m_nCellVScrollPos;
 	CScrollBar m_sbCellVScroll;
-	CFont m_fontAltText, m_fontDone;
+	CFont m_fontAltText;
 	CToolTipCtrlEx m_tooltip;
+	CFontCache m_fonts;
 
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
@@ -131,6 +135,7 @@ protected:
 	BOOL IsCellScrollBarActive() const;
 	int GetTaskHeight() const;
 	int CalcRequiredTaskFontPointSize() const;
+	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 
 	DWORD HitTest(const CPoint& ptCursor, TCC_HITTEST& nHit) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
