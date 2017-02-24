@@ -70,7 +70,7 @@ LPCWSTR CMarkdownImpExpBridge::GetFileExtension() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
    const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
 
@@ -89,7 +89,7 @@ bool CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDest
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
 }
 
-bool CMarkdownImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+bool CMarkdownImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return false;
