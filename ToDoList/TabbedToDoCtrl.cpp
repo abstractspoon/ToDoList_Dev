@@ -4551,7 +4551,9 @@ BOOL CTabbedToDoCtrl::SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CD
 	// Try single task
 	if (dwFocusedTaskID && pExtWnd->SelectTask(dwFocusedTaskID))
 	{
+		CToDoCtrl::SelectTask(dwFocusedTaskID, FALSE);
 		UpdateControls();
+
 		return TRUE;
 	}
 

@@ -1019,7 +1019,7 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 	CRect rDraw(rItem), rClip(prClip);
 	DWORD dwDRFlags = GMDR_ALL; // for classic theme
 
-	if (dwFlags)
+	if (dwFlags & (GMIB_EXTENDLEFT | GMIB_EXTENDRIGHT | GMIB_CLIPLEFT | GMIB_CLIPRIGHT))
 	{
 		if (!prClip)
 			::GetClientRect(hwnd, rClip);
@@ -1067,7 +1067,14 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 		CThemed th(hwnd, _T("Explorer::ListView"));
 		
 		// always fill background with white to get the exact selection colour
-		pDC->FillSolidRect(prClip ? prClip : rDraw, RGB(255, 255, 255));
+		CRect rBkgnd;
+
+		if (prClip)
+			rBkgnd.IntersectRect(prClip, rDraw);
+		else
+			rBkgnd = rDraw;
+
+		pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
 		
 		switch (nState)
 		{
