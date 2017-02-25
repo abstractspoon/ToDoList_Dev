@@ -70,6 +70,8 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
+	ON_WM_VSCROLL()
+	ON_WM_HSCROLL()
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_COMMAND(ID_CAL_GOTOTODAY, OnGototoday)
@@ -401,10 +403,18 @@ IUI_HITTEST CCalendarWnd::HitTest(const POINT& ptScreen) const
 bool CCalendarWnd::SelectTask(DWORD dwTaskID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	DWORD dwPrevTaskID = m_BigCalendar.GetSelectedTaskID();
 	
 	bool bSet = (m_BigCalendar.SelectTask(dwTaskID) != FALSE);
 
-	UpdateSelectedTaskDates();
+	if (bSet)
+	{
+		m_BigCalendar.ScrollToSelectedTask();
+
+		UpdateSelectedTaskDates();
+		SyncMiniCalendar(TRUE);
+	}
 
 	return bSet;
 }
@@ -567,40 +577,53 @@ void CCalendarWnd::ResizeControls(int cx, int cy)
 	Invalidate(TRUE);
 }
 
+void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
+{
+	if (bScroll)
+		m_MiniCalendar.SetCurrentMonthAndYear(m_BigCalendar.GetMinDate());
+	else
+		m_MiniCalendar.SetCurrentMonthAndYear(m_BigCalendar.GetFirstSelectedItem());
+}
+
+void CCalendarWnd::SyncBigCalendar(BOOL bScroll)
+{
+	m_BigCalendar.Goto(m_MiniCalendar.GetCurrentMonthAndYear(), !bScroll);
+}
+
 void CCalendarWnd::OnBigCalendarNotifyClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	COleDateTime dtSel(m_BigCalendar.GetFirstSelectedItem());
-
-	if (CDateHelper::IsDateSet(dtSel))
-		m_MiniCalendar.SetDate(dtSel);
+	SyncMiniCalendar(FALSE);
 
 	*pResult = 0;
 }
 
-void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult)
+void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	OnBigCalendarNotifyClick(pNMHDR, pResult);
+	SyncMiniCalendar(FALSE);
+	
+	*pResult = 0;
 }
 
 void CCalendarWnd::OnMiniCalendarNotifyClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	COleDateTime dtSel = m_MiniCalendar.GetDate();
-	m_BigCalendar.Goto(dtSel, true);
+	SyncBigCalendar(FALSE);
 
 	*pResult = 0;
 }
 
-void CCalendarWnd::OnMiniCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult)
+void CCalendarWnd::OnMiniCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
-	OnMiniCalendarNotifyClick(pNMHDR, pResult);
+	SyncBigCalendar(FALSE);
+	
+	*pResult = 0;
 }
 
 void CCalendarWnd::OnGototoday() 
 {
 	COleDateTime dtToday = COleDateTime::GetCurrentTime();
 
-	m_MiniCalendar.SetDate(dtToday);
 	m_BigCalendar.GotoToday(true);
+	SyncMiniCalendar(FALSE);
 }
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
@@ -693,4 +716,37 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyVisibleWeekChange(WPARAM /*wp*/, LPARAM
 	m_cbNumWeeks.SetCurSel(m_BigCalendar.GetVisibleWeeks() - 1);
 
 	return 0L;
+}
+
+void CCalendarWnd::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (pScrollBar->GetSafeHwnd() == m_BigCalendar.GetSafeHwnd())
+	{
+		SyncMiniCalendar(TRUE);
+		return;
+	}
+	
+	// else
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CCalendarWnd::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (pScrollBar->GetSafeHwnd() == m_MiniCalendar.GetSafeHwnd())
+	{
+		ASSERT((nSBCode == SB_LEFT) || (nSBCode == SB_RIGHT));
+
+// 		// Move current date to start of month
+// 		int nYear = m_MiniCalendar.GetCurrentYear();
+// 		int nMonth = m_MiniCalendar.GetCurrentMonth();
+// 
+// 		COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
+// 		m_MiniCalendar.SetDate(date);
+
+		SyncBigCalendar(TRUE);
+		return;
+	}
+	
+	// else
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 }

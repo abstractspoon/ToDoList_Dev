@@ -36,17 +36,20 @@ public:
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	BOOL IsSpecialDate(const COleDateTime& date) const;
-	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
-	DWORD GetSelectedTaskID() const { return m_dwSelectedTaskID; }
 	BOOL CancelDrag();
-	BOOL SelectTask(DWORD dwTaskID);
 	BOOL HasTask(DWORD dwTaskID) const;
 	DWORD HitTest(const CPoint& ptCursor) const;
-	void EnsureVisible(DWORD dwTaskID, BOOL bShowStart);
-	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
+	void EnsureVisible(DWORD dwTaskID, BOOL bShowStart);
+	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
+
+	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
+	DWORD GetSelectedTaskID() const { return m_dwSelectedTaskID; }
+	BOOL SelectTask(DWORD dwTaskID);
+	void ScrollToSelectedTask();
+	void ScrollToTask(DWORD dwTaskID);
 
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }

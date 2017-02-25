@@ -166,8 +166,10 @@ public:
 	CString GetDefaultFont() {return m_strDefaultFontName;}
 
 	void SetCurrentMonthAndYear(int iMonth, int iYear);
-	int GetCurrentMonth() {return m_iCurrentMonth;}
-	int GetCurrentYear() {return m_iCurrentYear;}
+	int GetCurrentMonth() const {return m_iCurrentMonth;}
+	int GetCurrentYear() const {return m_iCurrentYear;}
+	void SetCurrentMonthAndYear(const COleDateTime& date);
+	COleDateTime GetCurrentMonthAndYear() const { return COleDateTime(m_iCurrentYear, m_iCurrentMonth, 1, 0, 0, 0); }
 
 	void SetFirstWeekDay(int nWeekday) { m_iFirstDayOfWeek = nWeekday; }
 	int GetFirstWeekDay() const { return m_iFirstDayOfWeek; }
@@ -306,6 +308,7 @@ protected:
 	void FireNoneButton();
 	void FireNotifyDblClick();
 	void FireNotifyClick();
+	void FireNotifyHScroll(int nDirection);
 	void FireTodayButton();
 	CFPSMiniCalendarCtrlFontInfo& GetFontInfo(FMC_FONT_TYPE nFont);
 

@@ -248,6 +248,14 @@ void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(int iMonth, int iYear)
 
 	if (iYear >= 100 && iYear <= 9999)
 		m_iCurrentYear = iYear;
+
+	if (GetSafeHwnd())
+		Invalidate(FALSE);
+}
+
+void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(const COleDateTime& date)
+{
+	SetCurrentMonthAndYear(date.GetMonth(), date.GetYear());
 }
 
 void CFPSMiniCalendarCtrl::SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold, BOOL bItalic, BOOL bUnderline, COLORREF crText, COLORREF crBkgnd)
@@ -1473,6 +1481,7 @@ void CFPSMiniCalendarCtrl::ScrollLeft(int iCount)
 		}
 	}
 	RedrawWindow();
+	FireNotifyHScroll(SB_LEFT);
 }
 
 void CFPSMiniCalendarCtrl::ScrollRight(int iCount)
@@ -1496,6 +1505,7 @@ void CFPSMiniCalendarCtrl::ScrollRight(int iCount)
 		}
 	}
 	RedrawWindow();
+	FireNotifyHScroll(SB_RIGHT);
 }
 
 void CFPSMiniCalendarCtrl::FireTodayButton()
@@ -1539,6 +1549,11 @@ void CFPSMiniCalendarCtrl::FireNotifyDblClick()
 	NotifyArea.idFrom = ::GetDlgCtrlID(m_hWnd);
 
 	GetParent()->SendMessage(WM_NOTIFY, ::GetDlgCtrlID(m_hWnd), (WPARAM)&NotifyArea);
+}
+
+void CFPSMiniCalendarCtrl::FireNotifyHScroll(int nDirection)
+{
+	GetParent()->SendMessage(WM_HSCROLL, MAKEWPARAM(nDirection, 0), (LPARAM)GetSafeHwnd());
 }
 
 COleDateTime CFPSMiniCalendarCtrl::GetDate()

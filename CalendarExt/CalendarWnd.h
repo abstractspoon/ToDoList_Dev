@@ -110,6 +110,8 @@ protected:
 	afx_msg void OnMiniCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	
 	afx_msg LRESULT OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifySelectionChange(WPARAM wp, LPARAM lp);
@@ -124,6 +126,8 @@ protected:
 	void UpdateSelectedTaskDates();
 	void InitSnapCombo();
 	void UpdateCalendarCtrlPreferences();
+	void SyncMiniCalendar(BOOL bScroll);
+	void SyncBigCalendar(BOOL bScroll);
 
 	static BOOL CALLBACK IsMiniCalSpecialDateCallback(COleDateTime &dt, DWORD dwUserData);
 };

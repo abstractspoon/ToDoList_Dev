@@ -887,8 +887,15 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		return;
 	}
 
-	// else
+	int nCurPos = GetScrollPos(SB_VERT);
+	
 	CCalendarCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
+	
+	if (GetScrollPos(SB_VERT) != nCurPos)
+	{
+		// Notify Parent
+		GetParent()->SendMessage(WM_VSCROLL, nPos, (LPARAM)GetSafeHwnd());
+	}
 }
 
 int CTaskCalendarCtrl::GetTaskHeight() const
@@ -1339,6 +1346,43 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bNotify)
 	}
 
 	return TRUE;
+}
+
+void CTaskCalendarCtrl::ScrollToSelectedTask()
+{
+	if (m_dwSelectedTaskID)
+		ScrollToTask(m_dwSelectedTaskID);
+}
+
+void CTaskCalendarCtrl::ScrollToTask(DWORD dwTaskID)
+{
+	if (!dwTaskID)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return;
+	}
+	
+	COleDateTime dtCellsMin = GetMinDate();
+	COleDateTime dtCellsMax = GetMaxDate();
+
+	if (pTCI->GetAnyEndDate() < dtCellsMin)
+	{
+		Goto(pTCI->GetAnyEndDate());
+	}
+	else if (pTCI->GetAnyStartDate() > dtCellsMax)
+	{
+		Goto(pTCI->GetAnyStartDate());
+	}
+
+	// else task is visible
 }
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
