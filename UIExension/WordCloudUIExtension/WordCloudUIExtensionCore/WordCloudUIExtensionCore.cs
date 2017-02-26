@@ -486,7 +486,7 @@ namespace WordCloudUIExtension
 			// Label
 			this.m_AttributeLabel = new System.Windows.Forms.Label();
 
-			this.m_AttributeLabel.Font = new System.Drawing.Font(FontName, 8);
+            this.m_AttributeLabel.Font = m_ControlsFont;
 			this.m_AttributeLabel.Location = new System.Drawing.Point(-2, LabelTop);
 			this.m_AttributeLabel.Size = new System.Drawing.Size(200, 16);
 			this.m_AttributeLabel.Text = m_trans.Translate("&Attribute to 'track'");
@@ -497,7 +497,7 @@ namespace WordCloudUIExtension
 			// Combo
 			this.m_AttributeCombo = new AttributeComboBox();
 
-			this.m_AttributeCombo.Font = new System.Drawing.Font(FontName, 8);
+            this.m_AttributeCombo.Font = m_ControlsFont;
 			this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
 			this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
 			this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -514,7 +514,7 @@ namespace WordCloudUIExtension
 			// Label
 			this.m_ColorsLabel = new System.Windows.Forms.Label();
 
-			this.m_ColorsLabel.Font = new System.Drawing.Font(FontName, 8);
+			this.m_ColorsLabel.Font = m_ControlsFont;
 			this.m_ColorsLabel.Location = new System.Drawing.Point(218, LabelTop);
 			this.m_ColorsLabel.Size = new System.Drawing.Size(200, 16);
 			this.m_ColorsLabel.Text = m_trans.Translate("&Colour Scheme");
@@ -525,7 +525,7 @@ namespace WordCloudUIExtension
 			// Combo
 			this.m_ColorsCombo = new ColorSchemeComboBox();
 
-			this.m_ColorsCombo.Font = new System.Drawing.Font(FontName, 8);
+            this.m_ColorsCombo.Font = m_ControlsFont;
 			this.m_ColorsCombo.Location = new System.Drawing.Point(220, ComboTop);
 			this.m_ColorsCombo.Size = new System.Drawing.Size(200, 16);
 			this.m_ColorsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
