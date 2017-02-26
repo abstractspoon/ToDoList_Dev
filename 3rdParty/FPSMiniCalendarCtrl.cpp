@@ -742,7 +742,7 @@ int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow,
 			dc.LineTo(iX2, iLineY);
 		}
 
-		m_rectScrollLeft.SetRect(iX1-1, iTop-1, iX2+1, iBottom+1);
+		m_rectScrollLeft.SetRect(iX1-3, iTop-3, iX2+3, iBottom+3);
 	}
 
 	// deal with right scroll bar
@@ -764,7 +764,7 @@ int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow,
 			dc.LineTo(iX2, iLineY);
 		}
 
-		m_rectScrollRight.SetRect(iX2-1, iTop-1, iX1+1, iBottom+1);
+		m_rectScrollRight.SetRect(iX2-3, iTop-3, iX1+3, iBottom+3);
 	}
 
 	return m_iHeaderHeight;
@@ -1305,6 +1305,8 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 		if (m_pHeaderList && m_pHeaderCell)
 		{
+			COleDateTime dtPrev(GetCurrentMonthAndYear());
+
 			int iSelMonth = m_pHeaderList->GetSelMonth();
 			int iSelYear = m_pHeaderList->GetSelYear();
 
@@ -1321,6 +1323,9 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 
 			SetCurrentMonthAndYear(iSelMonth, iSelYear);
+
+			int nDirection = ((GetCurrentMonthAndYear() < dtPrev) ? SB_LEFT : SB_RIGHT);
+			FireNotifyHScroll(nDirection);
 		}
 
 		if (m_pHeaderList)

@@ -70,8 +70,8 @@ public:
 
 	BOOL GetSaveIntermediateAll() const;
 
-	UINT GetCommandID() const { return m_nCmdID; }
-	BOOL HasCommandID() const { return (m_nCmdID != 0); }
+	int GetCommandIDs(CUIntArray& aCmdIDs) const;
+	BOOL HasCommandID() const { return !m_sCmdIDs.IsEmpty(); }
 
 	BOOL HasFilePath() const { return (lstrlen(m_szFilePaths) > 0); }
 	int GetFilePaths(CStringArray& aFiles) const;
@@ -116,7 +116,7 @@ protected:
 	DWORD m_dwParentID; // parent task for new subtask
 	DWORD m_dwSiblingID; // sibling task for new subtask
 
-	TDCSTARTUPATTRIB m_sNewTask, m_sComments;
+	TDCSTARTUPATTRIB m_sNewTask, m_sComments, m_sCmdIDs;
 	TDCSTARTUPATTRIB m_sVersion, m_sExternalID, m_sAllocBy, m_sStatus;
 	TDCSTARTUPATTRIB m_sAllocTo, m_sCategory, m_sTags, m_sDepends, m_sFileRef;
 	TDCSTARTUPATTRIB m_sCustomAttrib;
@@ -127,7 +127,6 @@ protected:
 	TDCSTARTUPATTRIB m_dTimeEst, m_dTimeSpent, m_dCost;
 
 	DWORD m_dwFlags;
-	UINT m_nCmdID;
 	BOOL m_bSaveIntermediateAll;
 
 protected:

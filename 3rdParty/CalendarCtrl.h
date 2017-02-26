@@ -64,6 +64,7 @@ public:
 
 	void Goto(const COleDateTime& dtDate, bool bSelect = false);
 	void GotoToday(bool bSelect = false);
+	BOOL SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll);
 
 	void SetFirstWeekDay(int nWeekday) { m_nFirstWeekDay = nWeekday; }
 	int GetFirstWeekDay() const { return m_nFirstWeekDay; }
@@ -82,6 +83,7 @@ public:
 
 	const COleDateTime& GetMinDate() const;
 	const COleDateTime& GetMaxDate() const;
+	BOOL IsDateVisible(const COleDateTime& date) const;
 
 	void SetThemeColour(COLORREF crTheme);
 	

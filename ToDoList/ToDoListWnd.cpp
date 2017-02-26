@@ -573,7 +573,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_SPLITTASKINTO_TWO, ID_NEWTASK_SPLITTASKINTO_FIVE, OnUpdateSplitTaskIntoPieces)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORT_BYFIRST, ID_SORT_BYLAST, OnUpdateSortBy)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, OnUpdateUserTool)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
 	ON_WM_ACTIVATEAPP()
 	ON_WM_CONTEXTMENU()
 	ON_WM_COPYDATA()
@@ -2435,7 +2435,6 @@ void CToDoListWnd::LoadSettings()
 
 	// default attributes
 	userPrefs.GetDefaultTaskAttributes(m_tdiDefault);
-	m_mgrImportExport.SetDefaultTaskAttributes(m_tdiDefault);
 	
 	// hotkey
 	UpdateGlobalHotkey();
@@ -4669,7 +4668,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 
 		// default task attributes
 		newPrefs.GetDefaultTaskAttributes(m_tdiDefault);
-		m_mgrImportExport.SetDefaultTaskAttributes(m_tdiDefault);
 
 		// source control
 		BOOL bAutoCheckOut = newPrefs.GetAutoCheckOut();
@@ -5008,7 +5006,12 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	// 2. execute a command
 	if (startup.HasCommandID())
 	{
-		SendMessage(WM_COMMAND, MAKEWPARAM(startup.GetCommandID(), 0), 0);
+		CUIntArray aCmdIDs;
+		int nNumCmd = startup.GetCommandIDs(aCmdIDs);
+
+		for (int nCmd = 0; nCmd < nNumCmd; nCmd++)
+			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
+
 		return TRUE;
 	}
 
@@ -5447,13 +5450,18 @@ BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 		return FALSE;
 
 	CTaskFile tasks;
-	m_mgrImportExport.ImportTaskList(szFilePath, &tasks, nImporter, bSilent);
+
+	if (m_mgrImportExport.ImportTaskList(szFilePath, &tasks, nImporter, bSilent) != IIR_SUCCESS)
+		return FALSE;
+
+	tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
 		
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
-	if (tdc.InsertTasks(tasks, TDC_INSERTATTOP, FALSE))
-		UpdateCaption();
+	if (!tdc.InsertTasks(tasks, TDC_INSERTATTOP, TRUE))
+		return FALSE;
 
+	UpdateCaption();
 	return TRUE;
 }
 
@@ -8314,7 +8322,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 				if (tasks.GetCustomAttributeDefs(aImportedDefs))
 				{
-					int nTDC = GetTDCCount();
+					int nTDC = (GetTDCCount() - 1); // ignore just created tasklist
 
 					while (nTDC--)
 					{
@@ -8334,7 +8342,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 			}
 			else
 			{
-				VERIFY(tdc.InsertTasks(tasks, nWhere, TRUE));
+				VERIFY(tdc.InsertTasks(tasks, nWhere));
 			}
 
 			UpdateCaption();

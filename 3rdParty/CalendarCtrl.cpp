@@ -625,12 +625,46 @@ bool CCalendarCtrl::GetGridCellFromPoint(const CPoint& point, int &nRow, int &nC
 const COleDateTime& CCalendarCtrl::GetMinDate() const 
 { 
 	return m_dayCells[0][0].date; 
-};
+}
 
 const COleDateTime& CCalendarCtrl::GetMaxDate() const 
 { 
 	return m_dayCells[GetVisibleWeeks()-1][CALENDAR_NUM_COLUMNS-1].date; 
-};
+}
+
+BOOL CCalendarCtrl::IsDateVisible(const COleDateTime& date) const
+{
+	return ((date >= GetMinDate()) && (date.m_dt < (GetMaxDate().m_dt + 1)));
+}
+
+BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
+{
+	if (!IsDateVisible(dtDate))
+	{
+		if (!bAutoScroll)
+			return FALSE;
+
+		Goto(dtDate, true);
+	}
+	else // just select
+	{
+		m_DateCurrent = dtDate;
+		m_SingleSelection.RemoveAll();
+		
+		m_SelectionRange[2] = 0;
+		m_SelectionRange[1] = DateToSeconds(COleDateTime(m_DateCurrent.GetYear(), m_DateCurrent.GetMonth(), m_DateCurrent.GetDay(),0,0,0));
+		m_SelectionRange[0] = m_SelectionRange[1];
+		
+		// Scrolling pos
+		COleDateTime today(time(NULL));
+		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
+		
+		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+		Invalidate(FALSE);
+	}
+
+	return TRUE;
+}
 
 bool CCalendarCtrl::GetLastSelectedGridCell(int &nRow, int &nCol) const
 {

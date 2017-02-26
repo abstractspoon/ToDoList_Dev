@@ -290,6 +290,9 @@ bool CCalendarWnd::ProcessMessage(MSG* pMsg)
 	if (m_BigCalendar.ProcessMessage(pMsg))
 		return true;
 
+	if (m_MiniCalendar.PreTranslateMessage(pMsg))
+		return true;
+
 	return false;
 }
 
@@ -587,7 +590,10 @@ void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
 
 void CCalendarWnd::SyncBigCalendar(BOOL bScroll)
 {
-	m_BigCalendar.Goto(m_MiniCalendar.GetCurrentMonthAndYear(), !bScroll);
+	if (bScroll)
+		m_BigCalendar.Goto(m_MiniCalendar.GetCurrentMonthAndYear(), FALSE);
+	else
+		m_BigCalendar.SelectDate(m_MiniCalendar.GetDate(), TRUE);
 }
 
 void CCalendarWnd::OnBigCalendarNotifyClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
@@ -735,13 +741,6 @@ void CCalendarWnd::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	if (pScrollBar->GetSafeHwnd() == m_MiniCalendar.GetSafeHwnd())
 	{
 		ASSERT((nSBCode == SB_LEFT) || (nSBCode == SB_RIGHT));
-
-// 		// Move current date to start of month
-// 		int nYear = m_MiniCalendar.GetCurrentYear();
-// 		int nMonth = m_MiniCalendar.GetCurrentMonth();
-// 
-// 		COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
-// 		m_MiniCalendar.SetDate(date);
 
 		SyncBigCalendar(TRUE);
 		return;

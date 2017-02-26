@@ -942,7 +942,7 @@ public:
 	{
 		for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
 
 			if (Find(attribDef.sUniqueID) != -1)
 				return TRUE;

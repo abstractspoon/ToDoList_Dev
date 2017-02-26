@@ -101,11 +101,12 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 			
 			if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE))
 			{
-				menu.TranslateDynamicMenuItems(ID_FILE_MRU_FIRST, ID_FILE_MRU_LAST, _T("Recent Tasklist %d"));
+				menu.TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
 				menu.TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
 				menu.TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
 				menu.TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
 				menu.TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
+				menu.TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
 
 				for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
 				{

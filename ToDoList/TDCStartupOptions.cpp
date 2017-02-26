@@ -303,7 +303,7 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 	}
 	else if (cmdInfo.GetOption(SWITCH_COMMANDID, sValue))
 	{
-		m_nCmdID = _ttoi(sValue);
+		m_sCmdIDs.SetValue(sValue);
 	}
 
 	// other task attribs
@@ -482,7 +482,7 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_dwSiblingID == startup.m_dwSiblingID) &&
 		(m_dwFlags == startup.m_dwFlags) &&
 		(m_bSaveIntermediateAll == startup.m_bSaveIntermediateAll) &&
-		(m_nCmdID == startup.m_nCmdID)
+		(m_sCmdIDs == startup.m_sCmdIDs)
 		);
 }
 
@@ -598,6 +598,7 @@ void CTDCStartupOptions::Reset()
 	m_sFileRef.ClearValue();
 	m_sDepends.ClearValue();
 	m_sCustomAttrib.ClearValue();
+	m_sCmdIDs.ClearValue();
 
 	m_dtCreateDate.ClearValue();
 	m_dtStartDate.ClearValue();
@@ -618,7 +619,6 @@ void CTDCStartupOptions::Reset()
 	m_dwParentID = 0; 
 	m_dwSiblingID = 0; 
 	m_dwFlags = TLD_PASSWORDPROMPTING;
-	m_nCmdID = 0;
 	m_bSaveIntermediateAll = FALSE;
 }
 
@@ -686,4 +686,22 @@ BOOL CTDCStartupOptions::GetCustomAttribute(CString& sCustomID, CString& sValue)
 	sValue.Empty();
 
 	return FALSE;
+}
+
+int CTDCStartupOptions::GetCommandIDs(CUIntArray& aCmdIDs) const
+{
+	CStringArray aCommands;
+	int nNumCmds = Misc::Split(m_sCmdIDs.GetValue(), aCommands, '|');
+
+	aCmdIDs.RemoveAll();
+
+	for (int nCmd = 0; nCmd < nNumCmds; nCmd++)
+	{
+		UINT nCmdID = _ttoi(aCommands[nCmd]);
+
+		if (nCmdID != 0)
+			aCmdIDs.Add(nCmdID);
+	}
+
+	return aCmdIDs.GetSize();
 }

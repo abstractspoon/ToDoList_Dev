@@ -31,6 +31,8 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+
+/////////////////////////////////////////////////////////////////////////////
 // FPSMiniCalendarCtrl.h : header file
 //
 
@@ -75,8 +77,11 @@ enum FMC_FONT_TYPE
 	FMC_NUM_FONTS
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 // forward declration for list popup
 class CFPSMiniCalendarListCtrl;
+
 /////////////////////////////////////////////////////////////////////////////
 // CFPSMiniCalendarCtrl window
 
@@ -100,6 +105,8 @@ public:
 	BOOL m_bFontCreated;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CFPSMiniCalendarCtrlFontHotSpot
 {
 public:
@@ -109,6 +116,8 @@ public:
 	CRect			m_rect;
 	COleDateTime	m_dt;
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CFPSMiniCalendarCtrlCell
 {
@@ -124,6 +133,8 @@ public:
 	
 	CFPSMiniCalendarCtrlFontHotSpot* m_parHotSpots;
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CFPSMiniCalendarCtrl : public CWnd
 {
@@ -143,6 +154,7 @@ public:
 	void ScrollRight(int iCount = 1);
 	void ScrollLeft(int iCount = 1);
 	void ClearSelections();
+
 	CFPSMiniCalendarCtrlFontHotSpot* HitTest(POINT& pt);
 	CFPSMiniCalendarCtrlCell* HeaderHitTest(POINT& point);
 

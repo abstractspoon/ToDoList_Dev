@@ -3005,7 +3005,29 @@ BEGIN
             , CHECKED, GRAYED
             MENUITEM SEPARATOR
             MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
-            MENUITEM "",                            ID_SHOWVIEW_UIEXTENSION1
+            MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
+            MENUITEM "Task View Visibility 2",      ID_SHOWVIEW_UIEXTENSION2
+            MENUITEM "Task View Visibility 3",      ID_SHOWVIEW_UIEXTENSION3
+            MENUITEM "Task View Visibility 4",      ID_SHOWVIEW_UIEXTENSION4
+            MENUITEM "Task View Visibility 5",      ID_SHOWVIEW_UIEXTENSION5
+            MENUITEM "Task View Visibility 6",      ID_SHOWVIEW_UIEXTENSION6
+            MENUITEM "Task View Visibility 7",      ID_SHOWVIEW_UIEXTENSION7
+            MENUITEM "Task View Visibility 8",      ID_SHOWVIEW_UIEXTENSION8
+            MENUITEM "Task View Visibility 9",      ID_SHOWVIEW_UIEXTENSION9
+            MENUITEM "Task View Visibility 10",     ID_SHOWVIEW_UIEXTENSION10
+
+            MENUITEM "Task View Visibility 11",     ID_SHOWVIEW_UIEXTENSION11
+
+            MENUITEM "Task View Visibility 12",     ID_SHOWVIEW_UIEXTENSION12
+
+            MENUITEM "Task View Visibility 13",     ID_SHOWVIEW_UIEXTENSION13
+
+            MENUITEM "Task View Visibility 14",     ID_SHOWVIEW_UIEXTENSION14
+
+            MENUITEM "Task View Visibility 15",     ID_SHOWVIEW_UIEXTENSION15
+
+            MENUITEM "Task View Visibility 16",     ID_SHOWVIEW_UIEXTENSION16
+
         END
         MENUITEM SEPARATOR
         POPUP "Bar &Visibility"
@@ -3576,7 +3598,7 @@ BEGIN
         , CHECKED, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
-        MENUITEM "",                            ID_SHOWVIEW_UIEXTENSION1
+        MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
     END
 END
 

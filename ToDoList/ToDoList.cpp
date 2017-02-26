@@ -302,9 +302,17 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		// 3. A new task name requires editing
 		// 4. A command requiring UI executed
 		BOOL bShow = (startup.IsEmpty(TRUE) || bTaskLink ||
-			(startup.HasFilePath() && bTasklistOpened) ||
-			(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskName()) ||
-			(startup.HasCommandID() && CommandRequiresUI(startup.GetCommandID())));
+					(startup.HasFilePath() && bTasklistOpened) ||
+					(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskName()));
+
+		if (!bShow && startup.HasCommandID())
+		{
+			CUIntArray aCmdIDs;
+			int nCmd = startup.GetCommandIDs(aCmdIDs);
+
+			while (nCmd-- && !bShow)
+				bShow = CommandRequiresUI(aCmdIDs[nCmd]);
+		}
 
 		if (bShow)
 		{
