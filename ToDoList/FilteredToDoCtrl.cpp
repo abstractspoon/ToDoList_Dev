@@ -1401,15 +1401,10 @@ void CFilteredToDoCtrl::OnTimerMidnight()
 
 void CFilteredToDoCtrl::ResetNowFilterTimer()
 {
-	FTDCFILTER filter;
-
-	if (m_filter.GetFilter(filter) != FS_CUSTOM)
+	if (m_filter.HasNowFilter())
 	{
-		if ((filter.nDueBy == FD_NOW) || (filter.nStartBy == FD_NOW))
-		{
-			SetTimer(TIMER_NOWFILTER, ONE_MINUTE, NULL);
-			return;
-		}
+		SetTimer(TIMER_NOWFILTER, ONE_MINUTE, NULL);
+		return;
 	}
 
 	// all else
@@ -1479,31 +1474,42 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	if (FindNewNowFilterTasks(pTDS, params, htiMap))
 	{
-		FTDCFILTER filter;
-		VERIFY(m_filter.GetFilter(filter) != FS_CUSTOM);
-		
-		BOOL bNewDue = (filter.nDueBy == FD_NOW);
-		BOOL bNewStart = (filter.nStartBy == FD_NOW);
-		ASSERT(bNewDue || bNewStart);
-		
-		BOOL bRefilter = FALSE;
-		
-		if (bNewDue)
+		TDC_ATTRIBUTE nNowAttrib;
+
+		if (m_filter.HasNowFilter(nNowAttrib))
 		{
-			bRefilter = (AfxMessageBox(CEnString(IDS_DUEBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-		}
-		else if (bNewStart)
-		{
-			bRefilter = (AfxMessageBox(CEnString(IDS_STARTBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-		}
+			BOOL bRefilter = FALSE;
 		
-		if (bRefilter)
-		{
-			RefreshFilter();
-		}
-		else // make the timer 10 minutes so we don't annoy them too soon
-		{
-			SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
+			switch (nNowAttrib)
+			{
+			case TDCA_DUEDATE:
+				bRefilter = (AfxMessageBox(CEnString(IDS_DUEBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
+				break;
+
+			case TDCA_STARTDATE:
+				bRefilter = (AfxMessageBox(CEnString(IDS_STARTBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
+				break;
+
+			default:
+				if (CTDCCustomAttributeHelper::IsCustomAttribute(nNowAttrib))
+				{
+					// TODO
+					//bRefilter = (AfxMessageBox(CEnString(IDS_CUSTOMBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
+				}
+				else
+				{
+					ASSERT(0);
+				}
+			}
+		
+			if (bRefilter)
+			{
+				RefreshFilter();
+			}
+			else // make the timer 10 minutes so we don't re-prompt them too soon
+			{
+				SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
+			}
 		}
 	}
 }

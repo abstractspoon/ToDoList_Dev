@@ -23,11 +23,14 @@ public:
 	BOOL ToggleFilter();
 
 	BOOL HasAnyFilter(DWORD dwIgnoreFlags = 0) const;
-	CString GetCustomFilterName() const;
 	BOOL HasCustomFilter() const;
 	BOOL HasCustomFilterAttribute(TDC_ATTRIBUTE nAttrib) const;
-	DWORD GetFilterFlags() const;
 	BOOL HasFilterFlag(DWORD dwFlag) const;
+	BOOL HasNowFilter() const;
+	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const;
+
+	CString GetCustomFilterName() const;
+	DWORD GetFilterFlags() const;
 	BOOL CanToggleFilter() const;
 	BOOL BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;

@@ -182,6 +182,31 @@ BOOL CTDCFilter::HasCustomFilter() const
 	return (m_nState == TDCFS_CUSTOM);
 }
 
+BOOL CTDCFilter::HasNowFilter() const
+{
+	TDC_ATTRIBUTE nUnused;
+	return HasNowFilter(nUnused);
+}
+
+BOOL CTDCFilter::HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
+{
+	switch (m_nState)
+	{
+	case TDCFS_FILTER:
+		return m_filter.HasNowFilter(nAttrib);
+
+	case TDCFS_CUSTOM:
+		return m_custom.HasNowFilter(nAttrib);
+
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_CUSTOM_TOGGLED:
+		break;
+	}
+
+	return FALSE;
+}
+
 BOOL CTDCFilter::HasCustomFilterAttribute(TDC_ATTRIBUTE nAttrib) const
 {
 	if (m_nState == TDCFS_CUSTOM)

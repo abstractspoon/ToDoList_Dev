@@ -21,6 +21,7 @@ enum DH_DATE
 	DHD_ENDTHISYEAR,
 	DHD_ENDNEXTYEAR,
 	DHD_YESTERDAY,
+	DHD_NOW,
 };
 
 enum DH_UNITS
@@ -104,6 +105,7 @@ public:
 
 	static BOOL DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign = TRUE);
+	static BOOL IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign = TRUE);
 
 	static int GetFirstDayOfWeek();
 	static int GetLastDayOfWeek();

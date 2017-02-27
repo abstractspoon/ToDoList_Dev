@@ -1192,6 +1192,21 @@ struct SEARCHPARAM
 	DWORD GetFlags() const { return dwFlags; }
 	BOOL IsCustomAttribute() const { return IsCustomAttribute(attrib); }
 
+	BOOL IsNowRelativeDate() const
+	{
+		if ((GetAttribType() != FT_DATE_REL) || sValue.IsEmpty())
+			return FALSE;
+
+		if (((sValue[0] == 'n') || (sValue[0] == 'N')) && 
+			CDateHelper::IsValidRelativeDate(sValue, FALSE))
+		{
+			return TRUE;
+		}
+
+		// else
+		return FALSE;
+	}
+
 	BOOL SetCustomAttribute(TDC_ATTRIBUTE a, const CString& id, FIND_ATTRIBTYPE t)
 	{
 		ASSERT (IsCustomAttribute(a));
@@ -1806,6 +1821,23 @@ struct FTDCFILTER
 		return !FiltersMatch(*this, filterEmpty, dwIgnore);
 	}
 
+	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
+	{
+		if (nDueBy == FD_NOW)
+		{
+			nAttrib = TDCA_DUEDATE;
+			return TRUE;
+		}
+		else if (nStartBy == FD_NOW)
+		{
+			nAttrib = TDCA_STARTDATE;
+			return TRUE;
+		}
+
+		// else
+		return FALSE;
+	}
+
 	DWORD GetFlags() const { return dwFlags; }
 
 	BOOL HasFlag(DWORD dwFlag) const
@@ -2045,6 +2077,27 @@ struct FTDCCUSTOMFILTER
 		return !Matches(filterEmpty, dwIgnore);
 	}
 	
+	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
+	{
+		// look thru the rules for a 'Now' relative date
+		int nRule = params.aRules.GetSize();
+
+		while (nRule--)
+		{
+			const SEARCHPARAM& rule = params.aRules.GetData()[nRule];
+			
+			if (rule.IsNowRelativeDate())
+			{
+				nAttrib = rule.GetAttribute();
+				return TRUE;
+			}
+		}
+
+		// else
+		return FALSE;
+
+	}
+
 	DWORD GetFlags() const { return dwFlags; }
 	
 	BOOL HasFlag(DWORD dwFlag) const

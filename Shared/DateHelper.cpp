@@ -193,13 +193,21 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bF
 
 	// leading char can define starting date 
 	TCHAR nFirst(Misc::First(sDate));
+	BOOL bTruncateTime = TRUE;
 
 	switch (nFirst)
 	{
-	case 'T': 			date = GetDate(DHD_TODAY);			break;
-	case 't': 			date = GetDate(DHD_TODAY);			break;
-	case DHU_WEEKDAYS:	date = GetDate(DHD_TODAY);			break;
+	case 'N': 			
+	case 'n': 			
+		date = GetDate(DHD_NOW);
+		bTruncateTime = FALSE;
+		break;
+
+	case 'T': 			
+	case 't': 			
+	case DHU_WEEKDAYS:	
 	case DHU_DAYS:		date = GetDate(DHD_TODAY);			break;
+
 	case DHU_WEEKS:		date = GetDate(DHD_ENDTHISWEEK);	break;
 	case DHU_MONTHS:	date = GetDate(DHD_ENDTHISMONTH);	break;
 	case DHU_YEARS:		date = GetDate(DHD_ENDTHISYEAR);	break;
@@ -235,9 +243,16 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bF
 
 	// does the caller only want weekdays
 	if (HasWeekend() && bForceWeekday)
-		MakeWeekday(date, (dAmount >= 0.0));
+		MakeWeekday(date, (dAmount >= 0.0), bTruncateTime);
 
 	return TRUE;
+}
+
+BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
+{
+	COleDateTime dtUnused;
+
+	return DecodeRelativeDate(szDate, dtUnused, FALSE, bMustHaveSign);
 }
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime)
@@ -396,6 +411,10 @@ double CDateHelper::GetDate(DH_DATE nDate)
 
 	switch (nDate)
 	{
+	case DHD_NOW:
+		return COleDateTime::GetCurrentTime(); // no truncation
+
+	// All the rest have 'time of day' removed
 	case DHD_TODAY:
 		date = COleDateTime::GetCurrentTime();
 		break;
