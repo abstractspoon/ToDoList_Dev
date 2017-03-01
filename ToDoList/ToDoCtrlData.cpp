@@ -41,6 +41,8 @@ enum
 #define EDIT_GET_TDI(id, tdi)	\
 {								\
 	GET_TDI(id, tdi, SET_FAILED)\
+	if (tdi->bLocked)           \
+		return SET_FAILED;		\
 }					
 
 #define GET_TDI(id, tdi, ret)	\
