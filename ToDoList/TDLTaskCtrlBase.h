@@ -176,6 +176,8 @@ public:
 	CString GetSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bFormatted) const;
 	BOOL IsSelectedTaskReference() const;
 	DWORD GetSelectedTaskParentID() const;
+	BOOL IsSelectedTaskDone() const;
+	BOOL IsSelectedTaskDue() const;
 
 	BOOL SelectionHasIncompleteDependencies(CString& sIncomplete) const;
 	BOOL SelectionHasIncompleteSubtasks(BOOL bExcludeRecurring) const;
@@ -186,9 +188,8 @@ public:
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasSubtasks() const;
 	BOOL SelectionHasIcons() const;
+	BOOL SelectionHasUnlocked() const;
 	BOOL SelectionAreAllDone() const;
-	BOOL IsSelectedTaskDone() const;
-	BOOL IsSelectedTaskDue() const;
 	BOOL CanSplitSelectedTask() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);

@@ -1744,7 +1744,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
 	BOOL bEnable = (hti && !bMaximize);
 	BOOL bIsParent = TSH().ItemsAreAllParents();
-	BOOL bReadOnly = IsReadOnly();
+	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 	BOOL bEditTime = (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING));
 
 	// now enable/disable appropriate controls
@@ -1867,7 +1867,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
-	BOOL bReadOnly = IsReadOnly();
+	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 	CString sCommentsType(m_cfDefault);
 	
 	if (hti)

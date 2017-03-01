@@ -4137,47 +4137,82 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	DWORD dwTaskID = GetColumnItemTaskID(nItem);
 	ASSERT(dwTaskID);
 
-	BOOL bSupported = FALSE;
 	BOOL bNoModifiers = Misc::ModKeysArePressed(0);
 	BOOL bSingleSelection = (GetSelectedCount() == 1);
 	BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
+	BOOL bReadOnly = IsReadOnly();
+	BOOL bLocked = m_data.IsTaskLocked(dwTaskID);
 
+	// Edit operations
+	if (!bReadOnly)
+	{
+		switch (nColID)
+		{
+		case TDCC_DONE:
+		case TDCC_FLAG:
+		case TDCC_RECURRENCE:
+		case TDCC_ICON:
+			return !bLocked;
+
+		case TDCC_LOCK:
+			return TRUE;
+			
+		case TDCC_TRACKTIME:
+			// check tasklist is editable, task is trackable and 
+			// neither the ctrl not shift keys are pressed (ie => multiple selection)
+			// and either the task is not selected or it's only singly selected
+			return (bNoModifiers && !bLocked &&
+					m_data.IsTaskTimeTrackable(dwTaskID) &&
+					(!bTaskSelected || bSingleSelection));
+
+		default: // try custom columns
+			if (!bLocked && CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+			{
+				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			
+				if (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
+				{
+					switch (attribDef.GetDataType())
+					{
+					case TDCCA_BOOL:
+						return TRUE;
+					
+					case TDCCA_ICON:
+						switch (attribDef.GetListType())
+						{
+						case TDCCA_FIXEDLIST:
+						case TDCCA_NOTALIST:
+							return TRUE;
+						}
+						break;
+					
+					default: // Allow item cycling for fixed lists
+						return (attribDef.GetListType() == TDCCA_FIXEDLIST);
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	// Non-edit operations
 	switch (nColID)
 	{
-	case TDCC_DONE:
-	case TDCC_FLAG:
-	case TDCC_LOCK:
-	case TDCC_ICON:
-	case TDCC_RECURRENCE:
-		bSupported = !IsReadOnly();
-		break;
-		
 	case TDCC_REMINDER:
-		bSupported = !m_data.IsTaskDone(dwTaskID, TDCCHECKALL);
-		break;
+		return !m_data.IsTaskDone(dwTaskID, TDCCHECKALL);
 
 	case TDCC_FILEREF:
 		if (pCursor)
-			bSupported = (HitTestFileLinkColumn(*pCursor) != -1);
-		else
-			bSupported = m_data.TaskHasFileRef(dwTaskID);
-		break;
+			return (HitTestFileLinkColumn(*pCursor) != -1);
+		
+		// else
+		return m_data.TaskHasFileRef(dwTaskID);
 			
 	case TDCC_DEPENDENCY:
-		bSupported = m_data.IsTaskDependent(dwTaskID);
-		break;
+		return m_data.IsTaskDependent(dwTaskID);
 			
-	case TDCC_TRACKTIME:
-		// check tasklist is editable, task is trackable and 
-		// neither the ctrl not shift keys are pressed (ie => multiple selection)
-		// and either the task is not selected or it's only singly selected
-		bSupported = (bNoModifiers && !IsReadOnly() && 
-					m_data.IsTaskTimeTrackable(dwTaskID) &&
-					(!bTaskSelected || bSingleSelection));
-		break;
-
 	default: // try custom columns
-		if (!IsReadOnly() && CTDCCustomAttributeHelper::IsCustomColumn(nColID))
+		if (CTDCCustomAttributeHelper::IsCustomColumn(nColID))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 			
@@ -4185,31 +4220,16 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			{
 				switch (attribDef.GetDataType())
 				{
-				case TDCCA_BOOL:
-					bSupported = TRUE;
-					break;
-					
-				case TDCCA_ICON:
-					switch (attribDef.GetListType())
-					{
-					case TDCCA_FIXEDLIST:
-					case TDCCA_NOTALIST:
-						bSupported = TRUE;
-						break;
-					}
-					break;
-					
-					default:
-						// do item cycling for fixed lists
-						bSupported = (attribDef.GetListType() == TDCCA_FIXEDLIST);
-						break;
+				case TDCCA_FILELINK:
+					// TODO
+					return TRUE;
 				}
 			}
 		}
 		break;
 	}
 
-	return bSupported;
+	return FALSE;
 }
 
 void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
@@ -5047,6 +5067,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasIcons() const
 	}
 
 	return FALSE; // there were no tasks with icons
+}
+
+BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+	
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (!m_data.IsTaskLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE; // All selected tasks were locked
 }
 
 BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
