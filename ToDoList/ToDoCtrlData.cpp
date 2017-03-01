@@ -1728,8 +1728,9 @@ TDC_SET CToDoCtrlData::SetTaskFlag(DWORD dwTaskID, BOOL bFlagged)
 
 TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
 {
+	// Can't use EDIT_GET_TDI here because that fails if this task is Locked!
 	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
+	GET_TDI(dwTaskID, pTDI, SET_FAILED);
 
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_LOCK, pTDI->bLocked, bLocked);
 }
