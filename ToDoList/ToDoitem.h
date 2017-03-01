@@ -114,8 +114,10 @@ public:
 	double dCost;
 	double dTimeEstimate, dTimeSpent;
 	
-	COLORREF color;
 	BOOL bFlagged;
+	BOOL bLocked;
+
+	COLORREF color;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	CBinaryData customComments;
 	TDCRECURRENCE trRecurrence;

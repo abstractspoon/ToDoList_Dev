@@ -28,6 +28,7 @@ static const GUID IID_TASKLIST12 = { 0x6c65c122, 0x6406, 0x4d53, { 0x97, 0x3a, 0
 static const GUID IID_TASKLIST13 = { 0x5951fde6, 0x508a, 0x4a9d, { 0xa5, 0x5d, 0xd1, 0x6e, 0xb0, 0x26, 0xae, 0xf7 } };
 static const GUID IID_TASKLIST14 = { 0x0e95dc97, 0x41f7, 0x4d9c, { 0xb4, 0x25, 0xf5, 0xd4, 0xc2, 0xb1, 0xba, 0x4c } };
 static const GUID IID_TASKLIST15 = { 0x2a8fd5f0, 0x63ae, 0x485f, { 0xbc, 0x5e, 0xa2, 0xa2, 0xc2, 0xc2, 0x51, 0x5e } };
+static const GUID IID_TASKLIST16 = { 0x66fc35d2, 0xc471, 0x4af6, { 0xbe, 0xfc, 0xf3, 0xba, 0x5f, 0xfd, 0x90, 0xd1 } };
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -384,6 +385,15 @@ public:
 	
 	virtual DWORD GetTaskReferenceID(HTASKITEM hTask) const = 0;
 	virtual bool IsTaskReference(HTASKITEM hTask) const = 0;
+
+};
+
+class ITaskList16 : public ITaskList15
+{
+	// new methods
+public:
+	virtual bool IsTaskLocked(HTASKITEM hTask) const = 0;
+	virtual bool SetTaskLock(HTASKITEM hTask, bool bLocked) = 0;
 
 };
 

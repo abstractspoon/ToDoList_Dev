@@ -63,6 +63,7 @@ static const CString TDL_TASKFILEREFPATH(_T("FILEREFPATH"));
 static const CString TDL_TASKCREATEDBY(_T("CREATEDBY"));
 static const CString TDL_TASKCOLOR(_T("COLOR"));
 static const CString TDL_TASKFLAG(_T("FLAG"));
+static const CString TDL_TASKLOCK(_T("LOCK"));
 static const CString TDL_TASKWEBCOLOR(_T("WEBCOLOR"));
 static const CString TDL_TASKPRIORITY(_T("PRIORITY"));
 static const CString TDL_TASKPERCENTDONE(_T("PERCENTDONE"));

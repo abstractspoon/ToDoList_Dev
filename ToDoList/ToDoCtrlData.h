@@ -111,6 +111,7 @@ public:
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
 	BOOL IsTaskFlagged(DWORD dwTaskID) const;
+	BOOL IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent = FALSE) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetTaskNextOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
 	BOOL IsTaskRecurring(DWORD dwTaskID, BOOL bCheckParent = FALSE) const;
@@ -169,6 +170,7 @@ public:
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
 
+	BOOL IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent = FALSE) const;
 	BOOL IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -217,6 +219,7 @@ public:
 	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk); // 0-10 (10 is highest)
 	TDC_SET SetTaskTitle(DWORD dwTaskID, const CString& sTitle);
 	TDC_SET SetTaskFlag(DWORD dwTaskID, BOOL bFlagged);
+	TDC_SET SetTaskLock(DWORD dwTaskID, BOOL bLocked);
 	TDC_SET SetTaskRecurrence(DWORD dwTaskID, const TDCRECURRENCE& tr);
 	TDC_SET SetTaskVersion(DWORD dwTaskID, const CString& sVersion);
 	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const CString& sData);

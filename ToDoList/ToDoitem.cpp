@@ -42,19 +42,8 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	nTimeSpentUnits(TDCU_HOURS),
 	dCost(0),
 	bFlagged(FALSE),
+	bLocked(FALSE),
 	dateCreated(COleDateTime::GetCurrentTime()),
-// 	dwCalculated(0),
-// 	nCalcPriority(0),
-// 	nCalcPriorityIncDue(0),
-// 	nCalcPercent(0),
-// 	nCalcRisk(0),
-// 	dCalcTimeEstimate(0),
-// 	dCalcWeightedTimeEstimate(0),
-// 	dCalcTimeSpent(0),
-// 	dCalcCost(0),
-// 	bGoodAsDone(0),
-// 	nSubtasksCount(0),
-// 	nSubtasksDone(0),
 	dwTaskRefID(0)
 { 
 }
@@ -95,6 +84,7 @@ const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	dateDone = tdi.dateDone;
 	dateCreated = tdi.dateCreated;
 	bFlagged = tdi.bFlagged;
+	bLocked = tdi.bLocked;
 	sCreatedBy = tdi.sCreatedBy;
 	nRisk = tdi.nRisk;
 	sExternalID = tdi.sExternalID;

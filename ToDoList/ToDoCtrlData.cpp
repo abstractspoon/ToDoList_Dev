@@ -918,6 +918,33 @@ BOOL CToDoCtrlData::IsTaskFlagged(DWORD dwTaskID) const
 	return pTDI->bFlagged;
 }
 
+BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+
+	const TODOSTRUCTURE* pTDS = (bCheckParent ? LocateTask(dwTaskID) : NULL);
+	ASSERT(pTDS || !bCheckParent);
+
+	return IsTaskLocked(pTDI, pTDS, bCheckParent);
+}
+
+BOOL CToDoCtrlData::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent) const
+{
+	if (!pTDI || (bCheckParent && !pTDS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bLocked = pTDI->bLocked;
+
+	if (!bLocked && bCheckParent)
+		bLocked = IsTaskLocked(pTDS->GetParentTaskID(), TRUE);
+
+	return bLocked;
+}
+
 BOOL CToDoCtrlData::TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const
 {
 	return IsTaskRecurring(pTDS->GetParentTaskID(), TRUE);
@@ -1683,6 +1710,14 @@ TDC_SET CToDoCtrlData::SetTaskFlag(DWORD dwTaskID, BOOL bFlagged)
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_FLAG, pTDI->bFlagged, bFlagged);
+}
+
+TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_LOCK, pTDI->bLocked, bLocked);
 }
 
 TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const CString& sData)

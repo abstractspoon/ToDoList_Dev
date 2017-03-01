@@ -525,11 +525,11 @@ enum TDC_ATTRIBUTE
 	// pseudo attributes for Find Tasks dialog
 	TDCA_TASKNAMEORCOMMENTS,
 	TDCA_ANYTEXTATTRIBUTE,
-	TDCA_DONEDATE_RELATIVE,		// deprecated
-	TDCA_DUEDATE_RELATIVE,		// deprecated
-	TDCA_STARTDATE_RELATIVE,	// deprecated
-	TDCA_CREATIONDATE_RELATIVE,	// deprecated
-	TDCA_LASTMOD_RELATIVE,		// deprecated
+	TDCA_DONEDATE_RELATIVE_DEP,		// deprecated
+	TDCA_DUEDATE_RELATIVE_DEP,		// deprecated
+	TDCA_STARTDATE_RELATIVE_DEP,	// deprecated
+	TDCA_CREATIONDATE_RELATIVE_DEP,	// deprecated
+	TDCA_LASTMOD_RELATIVE_DEP,		// deprecated
 
 	// custom attributes
 	TDCA_CUSTOMATTRIBDEFS,
@@ -542,13 +542,14 @@ enum TDC_ATTRIBUTE
 	TDCA_RECENTMODIFIED,
 
 	// pseudo attribute for printing
-	TDCA_NOTES,
+	TDCA_NOTES_DEP,					// deprecated
 
 	// pseudo attributes for Find Tasks dialog
 	TDCA_PATH,
 
 	// ADD NEW ATTRIBUTES HERE!
 	TDCA_SUBTASKDONE,
+	TDCA_LOCK,
 
 	TDCA_ALL = 0xfffffff0,
 };

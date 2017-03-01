@@ -721,5 +721,31 @@ namespace TDC
 		return TDCC_NONE;
 	}
 
+	static TDC_ATTRIBUTE MapDeprecatedAttribute(TDC_ATTRIBUTE nAttribID)
+	{
+		switch (nAttribID)
+		{
+			case TDCA_DONEDATE_RELATIVE_DEP:		return TDCA_DONEDATE;
+			case TDCA_DUEDATE_RELATIVE_DEP:			return TDCA_DUEDATE;
+			case TDCA_STARTDATE_RELATIVE_DEP:		return TDCA_STARTDATE;
+			case TDCA_CREATIONDATE_RELATIVE_DEP:	return TDCA_CREATIONDATE;
+			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMOD;
+		}
+
+		// All else
+		return nAttribID;
+	}
+
+	static TDC_COLUMN MapDeprecatedColumn(TDC_COLUMN nColumnID)
+	{
+// 		switch (nColumnID)
+// 		{
+// 		}
+
+		// All else
+		return nColumnID;
+	}
+
 }
+
 #endif // AFX_TDCMAP_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

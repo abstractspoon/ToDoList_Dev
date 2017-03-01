@@ -1144,28 +1144,12 @@ struct SEARCHPARAM
 		// handle deprecated relative date attributes
 		switch (attrib)
 		{
-		case TDCA_STARTDATE_RELATIVE:
-			a = TDCA_STARTDATE;
-			t = FT_DATE_REL;
-			break;
-
-		case TDCA_DUEDATE_RELATIVE:
-			a = TDCA_DUEDATE;
-			t = FT_DATE_REL;
-			break;
-
-		case TDCA_DONEDATE_RELATIVE:
-			a = TDCA_DONEDATE;
-			t = FT_DATE_REL;
-			break;
-
-		case TDCA_CREATIONDATE_RELATIVE:
-			a = TDCA_CREATIONDATE;
-			t = FT_DATE_REL;
-			break;
-
-		case TDCA_LASTMOD_RELATIVE:
-			a = TDCA_LASTMOD;
+		case TDCA_STARTDATE_RELATIVE_DEP:
+		case TDCA_DUEDATE_RELATIVE_DEP:
+		case TDCA_DONEDATE_RELATIVE_DEP:
+		case TDCA_CREATIONDATE_RELATIVE_DEP:
+		case TDCA_LASTMOD_RELATIVE_DEP:
+			a = TDC::MapDeprecatedAttribute(attrib);
 			t = FT_DATE_REL;
 			break;
 		}

@@ -199,6 +199,11 @@ public:
 	bool SetTaskIsParent(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
+	// ITaskList16 implementation 
+	bool IsTaskLocked(HTASKITEM hTask) const;
+	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
+
+	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 
 	bool IsTaskParent(HTASKITEM hTask) const;
 

@@ -780,6 +780,14 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (dwRefID)
 			pTL15Dest->SetTaskAttribute(hTaskDest, TDL_TASKREFID, Misc::Format(dwRefID));
 		// ---------------------------------------------------------------------------
+		const ITaskList16* pTL16Src = GetITLInterface<ITaskList16>(pTasksSrc, IID_TASKLIST16);
+		ITaskList16* pTL16Dest = GetITLInterface<ITaskList16>(pTasksDest, IID_TASKLIST16);
+		
+		if (!(pTL16Src && pTL16Dest))
+			break;
+
+		pTL16Dest->SetTaskLock(hTaskDest, pTL16Src->IsTaskLocked(hTaskSrc));
+		// ---------------------------------------------------------------------------
 	} 
 	while (0);
 
@@ -1614,6 +1622,9 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 		if (tdi.bFlagged)
 			SetTaskFlag(hTask, tdi.bFlagged != FALSE);
 		
+		if (tdi.bLocked)
+			SetTaskLock(hTask, tdi.bLocked != FALSE);
+
 		if (tdi.IsRecurring())
 			SetTaskRecurrence(hTask, tdi.trRecurrence);
 		
@@ -1698,6 +1709,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 		tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS);
 		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY);
 		tdi.bFlagged = IsTaskFlagged(hTask);
+		tdi.bLocked = IsTaskLocked(hTask);
 		tdi.color = (COLORREF)GetTaskColor(hTask);
 		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, FALSE);
 		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, FALSE);
@@ -2325,6 +2337,11 @@ unsigned long CTaskFile::GetTaskID(HTASKITEM hTask) const
 bool CTaskFile::IsTaskFlagged(HTASKITEM hTask) const
 {
 	return (GetTaskUChar(hTask, TDL_TASKFLAG) > 0);
+}
+
+bool CTaskFile::IsTaskLocked(HTASKITEM hTask) const
+{
+	return (GetTaskUChar(hTask, TDL_TASKLOCK) > 0);
 }
 
 unsigned long CTaskFile::GetTaskColor(HTASKITEM hTask) const
@@ -3010,6 +3027,11 @@ bool CTaskFile::SetTaskStatus(HTASKITEM hTask, LPCTSTR szStatus)
 bool CTaskFile::SetTaskFlag(HTASKITEM hTask, bool bFlag)
 {
 	return SetTaskUChar(hTask, TDL_TASKFLAG, (unsigned char)(bFlag ? 1 : 0));
+}
+
+bool CTaskFile::SetTaskLock(HTASKITEM hTask, bool bLocked)
+{
+	return SetTaskUChar(hTask, TDL_TASKLOCK, (unsigned char)(bLocked ? 1 : 0));
 }
 
 bool CTaskFile::SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath)
