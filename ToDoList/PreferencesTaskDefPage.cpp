@@ -50,6 +50,7 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage()
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_PTDP_VERSION, TDCA_VERSION, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_STARTDATE, TDCA_STARTDATE, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_FLAG, TDCA_FLAG, -1)); 
+	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_LOCK, TDCA_LOCK, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_EXTERNALID, TDCA_EXTERNALID, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_TAGS, TDCA_TAGS, -1)); 
 

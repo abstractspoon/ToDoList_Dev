@@ -1279,6 +1279,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 			case TDCA_VERSION:		COPYATTRIB(sVersion); break;
 			case TDCA_EXTERNALID:	COPYATTRIB(sExternalID); break;
 			case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
+			case TDCA_LOCK:			COPYATTRIB(bLocked); break;
 			
 			case TDCA_TIMEEST:		COPYATTRIB(dTimeEstimate); 
 									COPYATTRIB(nTimeEstUnits); break;
@@ -1384,6 +1385,10 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 
 	case TDCA_FLAG:			
 		nRes = SetTaskFlag(dwTaskID, FALSE);
+		break;
+
+	case TDCA_LOCK:			
+		nRes = SetTaskLock(dwTaskID, FALSE);
 		break;
 
 	case TDCA_COST:			
@@ -1611,6 +1616,11 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 				pTDIChild->bFlagged = pTDI->bFlagged;
 			break;
 			
+		case TDCA_LOCK:
+			if (bIncludeBlank || pTDI->bLocked)
+				pTDIChild->bLocked = pTDI->bLocked;
+			break;
+
 		case TDCA_EXTERNALID:
 			if (bIncludeBlank || !pTDI->sExternalID.IsEmpty())
 				pTDIChild->sExternalID = pTDI->sExternalID;

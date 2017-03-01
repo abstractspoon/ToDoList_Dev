@@ -2601,6 +2601,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 	case TDCA_FILEREF:
 	case TDCA_COMMENTS:
 	case TDCA_FLAG:
+	case TDCA_LOCK:
 	case TDCA_CREATIONDATE:
 	case TDCA_CREATEDBY:
 	case TDCA_RISK: 
@@ -2828,6 +2829,10 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_DEPENDENCY: 
 	case TDCA_RECURRENCE: 
 	case TDCA_VERSION:
+		return FALSE;
+
+	case TDCA_LOCK:
+		// TODO
 		return FALSE;
 
 	case TDCA_DONEDATE:

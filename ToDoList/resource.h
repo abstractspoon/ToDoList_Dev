@@ -11,6 +11,11 @@
 #define IDS_TDLBC_CREATETIME            60
 #define IDS_3RDPARTYSTORAGE             61
 #define IDS_BMPFILEFILTER               62
+#define IDS_FILTER_LOCKED               63
+#define IDS_TDLBC_LOCK                  64
+#define IDS_TDCTIP_LOCK                 65
+#define IDS_UNLOCKED                    66
+#define IDS_LOCKED                      67
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102
@@ -998,6 +1003,7 @@
 #define ID_SORT_BYPOSITION              33156
 #define ID_SORT_BYSUBTASKDONE           33157
 #define ID_SORT_BYREMINDER              33158
+#define ID_SORT_BYLOCK                  33159
 #define ID_SORT_BYCUSTOMCOLUMN_FIRST    33201
 #define ID_SORT_BYCUSTOMCOLUMN1         33201
 #define ID_SORT_BYCUSTOMCOLUMN2         33202
@@ -1291,6 +1297,8 @@
 #define ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK 34555
 #define ID_DEBUGSHOWREMINDERDLG         34559
 #define ID_VIEW_SAVETOIMAGE             34560
+#define ID_SORTBY_LOCK                  34561
+#define ID_EDIT_LOCKTASK                34562
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2034,7 +2042,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
-#define _APS_NEXT_COMMAND_VALUE         34561
+#define _APS_NEXT_COMMAND_VALUE         34563
 #define _APS_NEXT_CONTROL_VALUE         1493
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

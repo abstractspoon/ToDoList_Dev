@@ -175,6 +175,7 @@ protected:
 	afx_msg void OnEditDectaskpercentdone();
 	afx_msg void OnEditDectaskpriority();
 	afx_msg void OnEditFlagtask();
+	afx_msg void OnEditLocktask();
 	afx_msg void OnEditInctaskpercentdone();
 	afx_msg void OnEditInctaskpriority();
 	afx_msg void OnEditInsertdate();
@@ -222,6 +223,7 @@ protected:
 	afx_msg void OnUpdateEditDectaskpercentdone(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditDectaskpriority(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditFlagtask(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditLocktask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInctaskpercentdone(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInctaskpriority(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInsertdate(CCmdUI* pCmdUI);

@@ -260,6 +260,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_DECTASKPRIORITY, OnEditDectaskpriority)
 	ON_COMMAND(ID_EDIT_FINDTASKS, OnFindTasks)
 	ON_COMMAND(ID_EDIT_FLAGTASK, OnEditFlagtask)
+	ON_COMMAND(ID_EDIT_LOCKTASK, OnEditLocktask)
 	ON_COMMAND(ID_EDIT_GOTODEPENDENCY, OnEditGotoDependency)
 	ON_COMMAND(ID_EDIT_INCTASKPERCENTDONE, OnEditInctaskpercentdone)
 	ON_COMMAND(ID_EDIT_INCTASKPRIORITY, OnEditInctaskpriority)
@@ -463,6 +464,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DECTASKPERCENTDONE, OnUpdateEditDectaskpercentdone)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DECTASKPRIORITY, OnUpdateEditDectaskpriority)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FLAGTASK, OnUpdateEditFlagtask)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_LOCKTASK, OnUpdateEditLocktask)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_GOTODEPENDENCY, OnUpdateEditGotoDependency)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INCTASKPERCENTDONE, OnUpdateEditInctaskpercentdone)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INCTASKPRIORITY, OnUpdateEditInctaskpriority)
@@ -8738,6 +8740,10 @@ void CToDoListWnd::PrepareEditMenu(CMenu* pMenu)
 			bDelete = !tdc.IsColumnShowing(TDCC_FLAG); 
 			break;
 
+		case ID_EDIT_LOCKTASK:				
+			bDelete = !tdc.IsColumnShowing(TDCC_LOCK); 
+			break;
+
         case ID_EDIT_RECURRENCE:			
 			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE); 
 			break;
@@ -10589,6 +10595,21 @@ void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(nSelCount && !tdc.IsReadOnly());	
 	pCmdUI->SetCheck(tdc.IsSelectedTaskFlagged() ? 1 : 0);
+}
+
+void CToDoListWnd::OnEditLocktask() 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	tdc.SetSelectedTaskLock(!tdc.IsSelectedTaskLocked());
+}
+
+void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI) 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	int nSelCount = tdc.GetSelectedCount();
+
+	pCmdUI->Enable(nSelCount && !tdc.IsReadOnly());	
+	pCmdUI->SetCheck(tdc.IsSelectedTaskLocked() ? 1 : 0);
 }
 
 void CToDoListWnd::OnEditGotoDependency() 

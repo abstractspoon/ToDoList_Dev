@@ -167,6 +167,7 @@ public:
 	int GetSelectedTaskRisk() const;
 	double GetSelectedTaskCost() const;
 	BOOL IsSelectedTaskFlagged() const;
+	BOOL IsSelectedTaskLocked() const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
 	CString GetSelectedTaskVersion() const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const;

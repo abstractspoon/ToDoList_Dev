@@ -1317,6 +1317,7 @@ struct SEARCHPARAM
 			return FT_DOUBLE;
 
 		case TDCA_FLAG:
+		case TDCA_LOCK:
 		case TDCA_RECENTMODIFIED:
 		case TDCA_DEPENDENCY: 
 			return FT_BOOL;
@@ -2796,6 +2797,7 @@ struct TDCCOLEDITVISIBILITY
 		case TDCC_DONE:
 		case TDCC_TRACKTIME:
 		case TDCC_FLAG:
+		case TDCC_LOCK:
 		case TDCC_CREATIONDATE:
 		case TDCC_CREATEDBY:
 		case TDCC_LASTMOD:

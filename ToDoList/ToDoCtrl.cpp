@@ -2971,6 +2971,47 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 	return (nRes != SET_FAILED);
 }
 
+BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
+{
+	if (IsReadOnly())
+		return FALSE;
+
+	Flush();
+	
+	POSITION pos = TSH().GetFirstItemPos();
+	int nRes = SET_FAILED;
+	DWORD dwModTaskID = 0;
+	
+	IMPLEMENT_UNDOEDIT();
+		
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		int nItemRes = m_data.SetTaskLock(dwTaskID, bLocked);
+		
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+	
+	if (nRes == SET_CHANGE)
+	{
+		SetModified(TRUE, TDCA_LOCK, dwModTaskID);
+	
+		if (IsColumnShowing(TDCC_LOCK))
+		{
+			if (TSH().GetCount() > 1)
+				m_taskTree.RedrawColumns();
+			else
+				m_taskTree.InvalidateTask(dwModTaskID);
+		}
+	}
+	
+	return (nRes != SET_FAILED);
+}
+
 BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 {
 	if (IsReadOnly())
@@ -8117,6 +8158,11 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 		SetSelectedTaskFlag(!m_data.IsTaskFlagged(dwTaskID));
 		break;
 		
+	case TDCC_LOCK:
+		ASSERT(!IsReadOnly());
+		SetSelectedTaskLock(!m_data.IsTaskLocked(dwTaskID));
+		break;
+
 	case TDCC_ICON:
 		ASSERT(!IsReadOnly());
 		EditSelectedTaskIcon();
@@ -9234,6 +9280,9 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
 			file.SetTaskFlag(hTask, pTDI->bFlagged != FALSE);
 		
+		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
+			file.SetTaskLock(hTask, pTDI->bLocked != FALSE);
+
 		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
 			file.SetTaskRecurrence(hTask, pTDI->trRecurrence);
 		
@@ -11698,6 +11747,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 		
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
+	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
 	case TDCA_COST:			return SetSelectedTaskCost(0.0);
 	case TDCA_COLOR:		return SetSelectedTaskColor(0);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());

@@ -2558,20 +2558,20 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_TRACKTIME:
-			// show icon in red if we're currently tracking
 			if (m_dwTimeTrackTaskID == dwTrueID)
-			{
 				DrawColumnImage(pDC, nColID, rSubItem);
-			}
 			break;
 			
 		case TDCC_FLAG:
 			if (pTDI->bFlagged)
-			{
 				DrawColumnImage(pDC, nColID, rSubItem);
-			}
 			break;
 			
+		case TDCC_LOCK:
+			if (pTDI->bLocked)
+				DrawColumnImage(pDC, nColID, rSubItem);
+			break;
+
 		case TDCC_REMINDER:
 			{
 				time_t tRem = GetTaskReminder(dwTrueID);
@@ -2649,7 +2649,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_ICON:
-			//if (rSubItem.Width() >= 16)
 			{
 				int nIcon = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
 									
@@ -3515,6 +3514,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_DONE:
 	case TDCC_TRACKTIME:
 	case TDCC_FLAG:
+	case TDCC_LOCK:
 	case TDCC_REMINDER:
 	case TDCC_FILEREF:
 		break;
@@ -4146,6 +4146,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	{
 	case TDCC_DONE:
 	case TDCC_FLAG:
+	case TDCC_LOCK:
 	case TDCC_ICON:
 	case TDCC_RECURRENCE:
 		bSupported = !IsReadOnly();
@@ -4245,10 +4246,6 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_DUEDATE:
 		if (!AccumulateRecalcColumn(TDCC_DUEDATE, nRecalcColID))
 			bRedrawCols = IsColumnShowing(TDCC_PRIORITY);
-		
-		// don't redraw while month cal control is visible
-		// 			if (m_dateDue.GetMonthCalCtrl() == NULL)
-		// 				m_taskTree.InvalidateAll(); // text color can be affected 
 		break;
 		
 	case TDCA_PRIORITY:
@@ -4288,6 +4285,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_DEPENDENCY:
 	case TDCA_RISK:
 	case TDCA_FLAG:
+	case TDCA_LOCK:
 	case TDCA_PERCENT:
 		if (!bRedrawTasks)
 			bRedrawCols = IsColumnShowing(nColID);
@@ -4728,6 +4726,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 	{
 	case TDCC_TRACKTIME:
 	case TDCC_FLAG:
+	case TDCC_LOCK:
 	case TDCC_RECENTEDIT:
 	case TDCC_DEPENDENCY:
 	case TDCC_ICON:
@@ -5422,6 +5421,11 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 int CTDLTaskCtrlBase::IsSelectedTaskFlagged() const
 {
 	return m_data.IsTaskFlagged(GetSelectedTaskID());
+}
+
+int CTDLTaskCtrlBase::IsSelectedTaskLocked() const
+{
+	return m_data.IsTaskLocked(GetSelectedTaskID());
 }
 
 BOOL CTDLTaskCtrlBase::IsSelectedTaskReference() const

@@ -371,6 +371,10 @@ void CTDCFilter::BuildFilterQuery(const FTDCFILTER& filter, SEARCHPARAMS& params
 		params.aRules.Add(SEARCHPARAM(TDCA_RECENTMODIFIED, FOP_SET));
 		break;
 
+	case FS_LOCKED:
+		params.aRules.Add(SEARCHPARAM(TDCA_LOCK, FOP_SET));
+		break;
+
 	default:
 		ASSERT(0); // to catch unimplemented filters
 		break;
@@ -949,6 +953,10 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 
 		case TDCA_FLAG:		
 			bNeedRefilter = (m_filter.nShow == FS_FLAGGED); 
+			break;
+
+		case TDCA_LOCK:		
+			bNeedRefilter = (m_filter.nShow == FS_LOCKED); 
 			break;
 
 		case TDCA_RISK:			

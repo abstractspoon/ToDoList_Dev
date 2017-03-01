@@ -207,6 +207,7 @@ enum IUI_ATTRIBUTE
 	IUI_TAGS,		
 	IUI_CUSTOMATTRIB,		
 	IUI_OFFSETTASK,		
+	IUI_LOCK,		
 
 	// new values here
 };

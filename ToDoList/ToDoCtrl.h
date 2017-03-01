@@ -237,6 +237,7 @@ public:
 	int GetSelectedTaskRisk() const { return m_taskTree.GetSelectedTaskRisk(); }
 	double GetSelectedTaskCost() const { return m_taskTree.GetSelectedTaskCost(); }
 	BOOL IsSelectedTaskFlagged() const { return m_taskTree.IsSelectedTaskFlagged(); }
+	BOOL IsSelectedTaskLocked() const { return m_taskTree.IsSelectedTaskLocked(); }
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
 	CString GetSelectedTaskVersion() const { return m_taskTree.GetSelectedTaskVersion(); }
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
@@ -279,6 +280,7 @@ public:
 	BOOL SetSelectedTaskRisk(int nRisk); // 0-10 (10 is highest)
 	BOOL SetSelectedTaskExtID(const CString& sID);
 	BOOL SetSelectedTaskFlag(BOOL bFlagged);
+	BOOL SetSelectedTaskLock(BOOL bLocked);
 	BOOL SetSelectedTaskCost(double dCost);
 	BOOL SetSelectedTaskVersion(const CString& sVersion);
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments);

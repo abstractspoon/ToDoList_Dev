@@ -342,19 +342,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
 				
 			if (bMatch)
-			{
 				resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_FLAGGED : IDS_UNFLAGGED));
-			}
 			break;
 
 		case TDCA_LOCK:
 			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
 
 			if (bMatch)
-			{
-				// TODO
-				//resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_LOCKED : IDS_UNLOCKED));
-			}
+				resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_LOCKED : IDS_UNLOCKED));
 			break;
 			
 		case TDCA_VERSION:
