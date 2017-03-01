@@ -24,6 +24,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+static const CString EMPTY_STR;
+
+//////////////////////////////////////////////////////////////////////
+
 CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data) : m_data(data)
 {
 
@@ -340,6 +344,16 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			if (bMatch)
 			{
 				resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_FLAGGED : IDS_UNFLAGGED));
+			}
+			break;
+
+		case TDCA_LOCK:
+			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
+
+			if (bMatch)
+			{
+				// TODO
+				//resTask.aMatched.Add(CEnString(rule.OperatorIs(FOP_SET) ? IDS_LOCKED : IDS_UNLOCKED));
 			}
 			break;
 			
@@ -738,7 +752,7 @@ BOOL CTDCTaskMatcher::ArrayMatches(const CStringArray& aItems, const SEARCHPARAM
 	BOOL bMatchAll = (sp.OperatorIs(FOP_EQUALS) || sp.OperatorIs(FOP_NOT_EQUALS));
 	
 	CStringArray aSearchItems;
-	Misc::Split(sp.ValueAsString(), aSearchItems, m_data.EMPTY_STR, TRUE);
+	Misc::Split(sp.ValueAsString(), aSearchItems, EMPTY_STR, TRUE);
 	
 	if (bMatchAll)
 	{
@@ -753,7 +767,7 @@ BOOL CTDCTaskMatcher::ArrayMatches(const CStringArray& aItems, const SEARCHPARAM
 		else
 		{
 			// special case: task has no item and param.aItems contains an empty item
-			bMatch = (Misc::Find(aSearchItems, m_data.EMPTY_STR) != -1);
+			bMatch = (Misc::Find(aSearchItems, EMPTY_STR) != -1);
 		}
 	}
 	
@@ -948,3 +962,543 @@ BOOL CTDCTaskMatcher::ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRE
 	return bMatch;
 }
 
+CTDCTaskComparer::CTDCTaskComparer(const CToDoCtrlData& data) : m_data(data)
+{
+
+}
+
+int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const
+{
+	// sanity check
+	if (!dwTask1ID  || !dwTask2ID || (dwTask1ID == dwTask2ID))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	const TODOITEM* pTDI1 = NULL, *pTDI2 = NULL;
+	const TODOSTRUCTURE* pTDS1 = NULL, *pTDS2 = NULL;
+
+	VERIFY(m_data.GetTask(dwTask1ID, pTDI1, pTDS1));
+	VERIFY(m_data.GetTask(dwTask2ID, pTDI2, pTDS2));
+
+	if (!pTDI1 || !pTDS1 || !pTDI2 || !pTDS2)		
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	// handle 'sort done below'
+	BOOL bSortDoneBelow = m_data.HasStyle(TDCS_SORTDONETASKSATBOTTOM);
+
+	if (bSortDoneBelow)
+	{
+		BOOL bDone1 = m_data.IsTaskDone(pTDI1, pTDS1, TDCCHECKALL);
+		BOOL bDone2 = m_data.IsTaskDone(pTDI2, pTDS2, TDCCHECKALL);
+
+		if (bDone1 != bDone2)
+			return bDone1 ? 1 : -1;
+	}
+
+	// else compare actual data if 
+	int nCompare = 0;
+	double dVal1, dVal2;
+
+	if (m_data.CalcTaskCustomAttributeData(pTDI1, pTDS1, attribDef, dVal1) &&
+		m_data.CalcTaskCustomAttributeData(pTDI2, pTDS2, attribDef, dVal2))
+	{
+		nCompare = Compare(dVal1, dVal2);
+	}
+	else
+	{
+		nCompare = Compare(pTDI1->GetCustomAttribValue(attribDef.sUniqueID), 
+							pTDI2->GetCustomAttribValue(attribDef.sUniqueID));
+	}
+
+	return bAscending ? nCompare : -nCompare;
+}
+
+
+int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, 
+									BOOL bSortDueTodayHigh, BOOL bIncTime) const
+{
+	// sanity check
+	if (!dwTask1ID  || !dwTask2ID || (dwTask1ID == dwTask2ID))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nCompare = 0;
+
+	// special case: sort by ID can be optimized
+	if (nSortBy == TDCC_ID)
+	{
+		nCompare = (dwTask1ID - dwTask2ID);
+	}
+	else
+	{
+		const TODOITEM* pTDI1 = NULL, *pTDI2 = NULL;
+		const TODOSTRUCTURE* pTDS1 = NULL, *pTDS2 = NULL;
+
+		VERIFY(m_data.GetTask(dwTask1ID, pTDI1, pTDS1));
+		VERIFY(m_data.GetTask(dwTask2ID, pTDI2, pTDS2));
+
+		if (!pTDI1 || !pTDS1 || !pTDI2 || !pTDS2)		
+		{
+			ASSERT(0);
+			return 0;
+		}
+
+		// special case: 'unsorted' == (sort by position + ascending)
+		if (nSortBy == TDCC_NONE)
+		{
+			nSortBy = TDCC_POSITION;
+			bAscending = TRUE;
+		}
+
+		// figure out if either or both tasks are completed
+		// but only if the user has specified to sort these differently
+		BOOL bHideDone = m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS);
+		BOOL bSortDoneBelow = m_data.HasStyle(TDCS_SORTDONETASKSATBOTTOM);
+
+		BOOL bDone1 = m_data.IsTaskDone(pTDI1, pTDS1, TDCCHECKALL);
+		BOOL bDone2 = m_data.IsTaskDone(pTDI2, pTDS2, TDCCHECKALL);
+
+		// can also do a partial optimization
+		if (bSortDoneBelow && 
+			(nSortBy != TDCC_DONE) && 
+			(nSortBy != TDCC_DONEDATE) && 
+			(nSortBy != TDCC_POSITION))
+		{
+			if (bDone1 != bDone2)
+				return bDone1 ? 1 : -1;
+		}
+
+		// else default attribute
+		switch (nSortBy)
+		{
+		case TDCC_POSITION:
+			nCompare = Compare(m_data.GetTaskPositionString(pTDI1, pTDS1), m_data.GetTaskPositionString(pTDI2, pTDS2));
+			break;
+
+		case TDCC_PATH:
+			nCompare = Compare(m_data.GetTaskPath(pTDI1, pTDS1), m_data.GetTaskPath(pTDI2, pTDS2));
+			break;
+
+		case TDCC_CLIENT:
+			nCompare = Compare(pTDI1->sTitle, pTDI2->sTitle);
+			break;
+
+		case TDCC_DONE:
+			nCompare = Compare(bDone1, bDone2);
+			break;
+
+		case TDCC_FLAG:
+			nCompare = Compare(pTDI1->bFlagged, pTDI2->bFlagged);
+			break;
+
+		case TDCC_LOCK:
+			nCompare = Compare(pTDI1->bLocked, pTDI2->bLocked);
+			break;
+
+		case TDCC_RECURRENCE:
+			nCompare = Compare(pTDI1->trRecurrence.GetRegularity(), pTDI2->trRecurrence.GetRegularity());
+			break;
+
+		case TDCC_VERSION:
+			nCompare = FileMisc::CompareVersions(pTDI1->sVersion, pTDI2->sVersion);
+			break;
+
+		case TDCC_CREATIONDATE:
+			nCompare = Compare(pTDI1->dateCreated, pTDI2->dateCreated, bIncTime, TDCD_CREATE);
+			break;
+
+		case TDCC_LASTMOD:
+			nCompare = Compare(pTDI1->dateLastMod, pTDI2->dateLastMod, TRUE, TDCD_LASTMOD);
+			break;
+
+		case TDCC_DONEDATE:
+			{
+				COleDateTime date1(pTDI1->dateDone);
+				COleDateTime date2(pTDI2->dateDone);
+
+				// sort tasks 'good as done' between done and not-done
+				if (bDone1 && !CDateHelper::IsDateSet(date1))
+					date1 = 0.1;
+
+				if (bDone2 && !CDateHelper::IsDateSet(date2))
+					date2 = 0.1;
+
+				nCompare = Compare(date1, date2, bIncTime, TDCD_DONE);
+			}
+			break;
+
+		case TDCC_DUEDATE:
+			{
+				COleDateTime date1, date2;
+
+				if (bDone1 && !bHideDone)
+					date1 = pTDI1->dateDue;
+				else
+					date1 = m_data.CalcTaskDueDate(pTDI1, pTDS1);
+
+				if (bDone2 && !bHideDone)
+					date2 = pTDI2->dateDue;
+				else
+					date2 = m_data.CalcTaskDueDate(pTDI2, pTDS2);
+
+				nCompare = Compare(date1, date2, bIncTime, TDCD_DUE);
+			}
+			break;
+
+		case TDCC_REMAINING:
+			{
+				COleDateTime date1 = m_data.CalcTaskDueDate(pTDI1, pTDS1);
+				COleDateTime date2 = m_data.CalcTaskDueDate(pTDI2, pTDS2);
+
+				if (!CDateHelper::IsDateSet(date1) || 
+					!CDateHelper::IsDateSet(date2))
+				{
+					return nCompare = Compare(date1, date2, TRUE, TDCD_DUE);
+				}
+
+				// Both dates set => calc remaining time
+				COleDateTime dtCur = COleDateTime::GetCurrentTime();
+
+				double dRemain1 = date1 - dtCur;
+				double dRemain2 = date2 - dtCur;
+
+				nCompare = Compare(dRemain1, dRemain2);
+			}
+			break;
+
+		case TDCC_STARTDATE:
+			{
+				COleDateTime date1, date2; 
+
+				if (bDone1 && !bHideDone)
+					date1 = pTDI1->dateStart;
+				else
+					date1 = m_data.CalcTaskStartDate(pTDI1, pTDS1);
+
+				if (bDone2 && !bHideDone)
+					date2 = pTDI2->dateStart;
+				else
+					date2 = m_data.CalcTaskStartDate(pTDI2, pTDS2);
+
+				nCompare = Compare(date1, date2, bIncTime, TDCD_START);
+			}
+			break;
+
+		case TDCC_PRIORITY:
+			{
+				// done items have even less than zero priority!
+				// and due items have greater than the highest priority
+				int nPriority1 = pTDI1->nPriority; // default
+				int nPriority2 = pTDI2->nPriority; // default
+
+				BOOL bUseHighestPriority = m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
+
+				// item1
+				if (bDone1)
+				{
+					nPriority1 = -1;
+				}
+				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
+						m_data.IsTaskDue(pTDI1, pTDS1) && 
+						(bSortDueTodayHigh || !m_data.IsTaskDue(pTDI1, pTDS1, TRUE)))
+				{
+					nPriority1 = pTDI1->nPriority + 11;
+				}
+				else if (bUseHighestPriority)
+				{
+					nPriority1 = m_data.GetTaskHighestPriority(pTDI1, pTDS1);
+				}
+
+				// item2
+				if (bDone2)
+				{
+					nPriority2 = -1;
+				}
+				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && m_data.IsTaskDue(pTDI2, pTDS2) && 
+					(bSortDueTodayHigh || !m_data.IsTaskDue(pTDI2, pTDS2, TRUE)))
+				{
+					nPriority2 = pTDI2->nPriority + 11;
+				}
+				else if (bUseHighestPriority)
+				{
+					nPriority2 = m_data.GetTaskHighestPriority(pTDI2, pTDS2);
+				}
+
+				nCompare = Compare(nPriority1, nPriority2);
+			}
+			break;
+
+		case TDCC_RISK:
+			{
+				// done items have even less than zero priority!
+				// and due items have greater than the highest priority
+				int nRisk1 = pTDI1->nRisk; // default
+				int nRisk2 = pTDI2->nRisk; // default
+
+				BOOL bUseHighestRisk = m_data.HasStyle(TDCS_USEHIGHESTRISK);
+
+				// item1
+				if (bDone1)
+				{
+					nRisk1 = -1;
+				}
+				else if (bUseHighestRisk)
+				{
+					nRisk1 = m_data.GetTaskHighestRisk(pTDI1, pTDS1);
+				}
+
+				// item2
+				if (bDone2)
+				{
+					nRisk2 = -1;
+				}
+				else if (bUseHighestRisk)
+				{
+					nRisk2 = m_data.GetTaskHighestRisk(pTDI2, pTDS2);
+				}
+
+				nCompare = Compare(nRisk1, nRisk2);
+			}
+			break;
+
+		case TDCC_COLOR:
+			nCompare = Compare((int)pTDI1->color, (int)pTDI2->color);
+			break;
+
+		case TDCC_ALLOCTO:
+			nCompare = Compare(Misc::FormatArray(pTDI1->aAllocTo), 
+								Misc::FormatArray(pTDI2->aAllocTo), TRUE);
+			break;
+
+		case TDCC_ALLOCBY:
+			nCompare = Compare(pTDI1->sAllocBy, pTDI2->sAllocBy, TRUE);
+			break;
+
+		case TDCC_CREATEDBY:
+			nCompare = Compare(pTDI1->sCreatedBy, pTDI2->sCreatedBy, TRUE);
+			break;
+
+		case TDCC_STATUS:
+			nCompare = Compare(pTDI1->sStatus, pTDI2->sStatus, TRUE);
+			break;
+
+		case TDCC_EXTERNALID:
+			nCompare = Compare(pTDI1->sExternalID, pTDI2->sExternalID, TRUE);
+			break;
+
+		case TDCC_CATEGORY:
+			nCompare = Compare(Misc::FormatArray(pTDI1->aCategories), 
+								Misc::FormatArray(pTDI2->aCategories), TRUE);
+			break;
+
+		case TDCC_TAGS:
+			nCompare = Compare(Misc::FormatArray(pTDI1->aTags), 
+								Misc::FormatArray(pTDI2->aTags), TRUE);
+			break;
+
+		case TDCC_FILEREF:
+			nCompare = Compare(pTDI1->aFileLinks.GetSize(), pTDI2->aFileLinks.GetSize());
+			break;
+
+		case TDCC_PERCENT:
+			{
+				int nPercent1 = m_data.CalcTaskPercentDone(pTDI1, pTDS1);
+				int nPercent2 = m_data.CalcTaskPercentDone(pTDI2, pTDS2);
+
+				nCompare = Compare(nPercent1, nPercent2);
+			}
+			break;
+
+		case TDCC_ICON:
+			{
+				CString sIcon1 = pTDI1->sIcon; 
+				CString sIcon2 = pTDI2->sIcon; 
+
+				nCompare = Compare(sIcon1, sIcon2);
+			}
+			break;
+
+		case TDCC_PARENTID:
+			{
+				DWORD dwPID1 = (pTDS1 ? pTDS1->GetParentTaskID() : 0);
+				DWORD dwPID2 = (pTDS2 ? pTDS2->GetParentTaskID() : 0);
+
+				nCompare = (dwPID1 - dwPID2);
+			}
+			break;
+
+		case TDCC_COST:
+			{
+				double dCost1 = m_data.CalcTaskCost(pTDI1, pTDS1);
+				double dCost2 = m_data.CalcTaskCost(pTDI2, pTDS2);
+
+				nCompare = Compare(dCost1, dCost2);
+			}
+			break;
+
+		case TDCC_TIMEEST:
+			{
+				double dTime1 = m_data.CalcTaskTimeEstimate(pTDI1, pTDS1, TDCU_HOURS);
+				double dTime2 = m_data.CalcTaskTimeEstimate(pTDI2, pTDS2, TDCU_HOURS);
+
+				nCompare = Compare(dTime1, dTime2);
+			}
+			break;
+
+		case TDCC_TIMESPENT:
+			{
+				double dTime1 = m_data.CalcTaskTimeSpent(pTDI1, pTDS1, TDCU_HOURS);
+				double dTime2 = m_data.CalcTaskTimeSpent(pTDI2, pTDS2, TDCU_HOURS);
+
+				nCompare = Compare(dTime1, dTime2);
+			}
+			break;
+
+		case TDCC_RECENTEDIT:
+			{
+				BOOL bRecent1 = pTDI1->IsRecentlyEdited();
+				BOOL bRecent2 = pTDI2->IsRecentlyEdited();
+
+				nCompare = Compare(bRecent1, bRecent2);
+			}
+			break;
+
+		case TDCC_DEPENDENCY:
+			{
+				// If Task2 is dependent on Task1 then Task1 comes first
+				if (m_data.IsTaskLocallyDependentOn(dwTask2ID, dwTask1ID, FALSE))
+				{
+					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask2ID, dwTask1ID, dwTask1ID);
+					nCompare = -1;
+				}
+				// else if Task1 is dependent on Task2 then Task2 comes first
+				else if (m_data.IsTaskLocallyDependentOn(dwTask1ID, dwTask2ID, FALSE))
+				{
+					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTask1ID, dwTask2ID, dwTask2ID);
+					nCompare = 1;
+				}
+			}
+			break;
+
+		case TDCC_SUBTASKDONE:
+			{
+				int nSubtasksCount1 = -1, nSubtasksDone1 = -1;
+				int nSubtasksCount2 = -1, nSubtasksDone2 = -1;
+				double dPercent1 = -1.0, dPercent2 = -1.0;
+
+				// compare first by % completion
+				if (m_data.GetTaskSubtaskTotals(pTDI1, pTDS1, nSubtasksCount1, nSubtasksDone1))
+					dPercent1 = ((double)nSubtasksDone1 / nSubtasksCount1);
+
+				if (m_data.GetTaskSubtaskTotals(pTDI2, pTDS2, nSubtasksCount2, nSubtasksDone2))
+					dPercent2 = ((double)nSubtasksDone2 / nSubtasksCount2);
+
+				nCompare = Compare(dPercent1, dPercent2);
+
+				if (nCompare == 0)
+				{
+					// compare by number of subtasks
+					nCompare = -Compare(nSubtasksCount1, nSubtasksCount2);
+				}
+			}
+			break;
+
+		default:
+			ASSERT(0);
+			return 0;
+		}
+	}
+
+	return bAscending ? nCompare : -nCompare;
+}
+
+int CTDCTaskComparer::Compare(const COleDateTime& date1, const COleDateTime& date2, BOOL bIncTime, TDC_DATE nDate)
+{
+	// Sort Non-dates below others
+	BOOL bHas1 = CDateHelper::IsDateSet(date1);
+	BOOL bHas2 = CDateHelper::IsDateSet(date2);
+
+	if (bHas1 != bHas2)
+	{
+		return (bHas1 ? -1 : 1);
+	}
+	else if (!bHas1 && !bHas2)
+	{
+		return 0;
+	}
+
+	// Both dates are valid
+	COleDateTime dateTime1(date1), dateTime2(date2);
+
+	if (bIncTime)
+	{
+		BOOL bHasTime1 = CDateHelper::DateHasTime(date1);
+		BOOL bHasTime2 = CDateHelper::DateHasTime(date2);
+
+		if (bHasTime1 != bHasTime2)
+		{
+			switch (nDate)
+			{
+			case TDCD_START:
+				// Start dates default to the beginning of the day,
+				// so nothing to do because it's already zero
+				break;
+
+			case TDCD_DUE:
+			case TDCD_DONE:
+				if (!bHasTime1)
+					dateTime1 = CDateHelper::GetEndOfDay(dateTime1);
+				else
+					dateTime2 = CDateHelper::GetEndOfDay(dateTime2);
+				break;
+
+			case TDCD_CREATE:
+			case TDCD_LASTMOD:
+				// Should never end up here
+			default: 
+				// No other values permissible
+				ASSERT(0);
+				return 0;
+			}
+		}
+	}
+	else
+	{
+		dateTime1 = CDateHelper::GetDateOnly(date1);
+		dateTime2 = CDateHelper::GetDateOnly(date2);
+	}
+
+
+	return ((dateTime1 < dateTime2) ? -1 : (dateTime1 > dateTime2) ? 1 : 0);
+}
+
+int CTDCTaskComparer::Compare(const CString& sText1, const CString& sText2, BOOL bCheckEmpty)
+{
+	if (bCheckEmpty)
+	{
+		BOOL bEmpty1 = sText1.IsEmpty();
+		BOOL bEmpty2 = sText2.IsEmpty();
+
+		if (bEmpty1 != bEmpty2)
+			return (bEmpty1 ? 1 : -1);
+	}
+
+	return Misc::NaturalCompare(sText1, sText2);
+}
+
+int CTDCTaskComparer::Compare(int nNum1, int nNum2)
+{
+	return (nNum1 - nNum2);
+}
+
+int CTDCTaskComparer::Compare(double dNum1, double dNum2)
+{
+	return (dNum1 < dNum2) ? -1 : (dNum1 > dNum2) ? 1 : 0;
+}

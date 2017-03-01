@@ -46,6 +46,7 @@ protected:
 class CToDoCtrlData  
 {
 	friend class CTDCTaskMatcher;
+	friend class CTDCTaskComparer;
 
 public:
 	CToDoCtrlData(const CWordArray& aStyles);
@@ -247,10 +248,6 @@ public:
 	void ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	void ResetRecurringSubtaskOcurrences(DWORD dwTaskID);
 	
-	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, 
-					BOOL bSortDueTodayHigh, BOOL bIncTime = FALSE) const;
-	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
-
 	inline BOOL HasStyle(int nStyle) const { return m_aStyles[nStyle] ? TRUE : FALSE; }
 	
 	static void SetDefaultCommentsFormat(const CString& format);
@@ -269,8 +266,6 @@ protected:
 	static TDC_UNITS s_nDefTimeEstUnits, s_nDefTimeSpentUnits;
 	static CTDCAttributeMap s_mapParentAttribs; // inheritable attribs
 	static BOOL s_bUpdateInheritAttrib; // update as changes are made to parents
-
-	static const CString EMPTY_STR; // for friend classes
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
@@ -348,11 +343,6 @@ protected:
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
 							 TODOSTRUCTURE* pTDSDestParent, int nDestPos);
 	BOOL SetTaskModified(DWORD dwTaskID);
-
-	static int Compare(const COleDateTime& date1, const COleDateTime& date2, BOOL bIncTime, TDC_DATE nDate);
-	static int Compare(const CString& sText1, const CString& sText2, BOOL bCheckEmpty = FALSE);
-	static int Compare(int nNum1, int nNum2);
-	static int Compare(double dNum1, double dNum2);
 
 	static double GetBestDate(double dBest, double dDate, BOOL bEarliest);
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);

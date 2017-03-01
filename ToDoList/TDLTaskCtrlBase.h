@@ -473,11 +473,12 @@ protected:
 		
 	struct TDSORTPARAMS
 	{
-		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) : base(tcb) 
+		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) : base(tcb), comparer(tcb.m_data)
 		{
 		}
 		
 		const CTDLTaskCtrlBase& base;
+		CTDCTaskComparer comparer;
 		TDSORT sort;
 		TDSORTFLAGS flags;
 	};
@@ -534,6 +535,7 @@ protected:
 	static int SortTasks(LPARAM lParam1, 
 						LPARAM lParam2, 
 						const CTDLTaskCtrlBase& base, 
+						const CTDCTaskComparer& comparer,
 						const TDSORTCOLUMN& sort, 
 						const TDSORTFLAGS& flags);
 	

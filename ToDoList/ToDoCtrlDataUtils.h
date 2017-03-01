@@ -51,4 +51,23 @@ protected:
 	CString FormatResultDate(const COleDateTime& date) const;
 };
 
+class CTDCTaskComparer
+{
+public:
+	CTDCTaskComparer(const CToDoCtrlData& data);
+
+	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, BOOL bSortDueTodayHigh, BOOL bIncTime = FALSE) const;
+	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+
+protected:
+	static int Compare(const COleDateTime& date1, const COleDateTime& date2, BOOL bIncTime, TDC_DATE nDate);
+	static int Compare(const CString& sText1, const CString& sText2, BOOL bCheckEmpty = FALSE);
+	static int Compare(int nNum1, int nNum2);
+	static int Compare(double dNum1, double dNum2);
+
+};
+
 #endif // !defined(AFX_TODOCTRLDATAUTILS_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)

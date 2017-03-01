@@ -1178,6 +1178,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 	
 	int nCompare = SortTasks(lParam1, lParam2, 
 							pSS->base, 
+							pSS->comparer, 
 							pSS->sort.multi.col1, 
 							pSS->flags);
 	
@@ -1185,6 +1186,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 	{
 		nCompare = SortTasks(lParam1, lParam2, 
 							pSS->base, 
+							pSS->comparer, 
 							pSS->sort.multi.col2, 
 							pSS->flags);
 		
@@ -1192,6 +1194,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 		{
 			nCompare = SortTasks(lParam1, lParam2, 
 							pSS->base, 
+							pSS->comparer, 
 							pSS->sort.multi.col3, 
 							pSS->flags);
 		}
@@ -1204,7 +1207,11 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
+		nCompare = SortTasks(lParam1, lParam2, 
+							pSS->base, 
+							pSS->comparer, 
+							nullCol, 
+							nullFlags);
 	}
 	
 	return nCompare;
@@ -1218,6 +1225,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 	
 	int nCompare = SortTasks(lParam1, lParam2, 
 							pSS->base, 
+							pSS->comparer, 
 							pSS->sort.single, 
 							pSS->flags);
 	
@@ -1228,7 +1236,11 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
+		nCompare = SortTasks(lParam1, lParam2, 
+							pSS->base, 
+							pSS->comparer, 
+							nullCol, 
+							nullFlags);
 	}
 	
 	return nCompare;
@@ -1237,6 +1249,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 int CTDLTaskCtrlBase::SortTasks(LPARAM lParam1, 
 								LPARAM lParam2, 
 								 const CTDLTaskCtrlBase& base, 
+								 const CTDCTaskComparer& comparer,
 								 const TDSORTCOLUMN& sort, 
 								 const TDSORTFLAGS& flags)
 {
@@ -1277,7 +1290,6 @@ int CTDLTaskCtrlBase::SortTasks(LPARAM lParam1,
 		
 		return (sort.bAscending ? nCompare : -nCompare);
 	}
-	// handle custom attribute
 	else if (sort.IsSortingByCustom())
 	{
 		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
@@ -1286,16 +1298,16 @@ int CTDLTaskCtrlBase::SortTasks(LPARAM lParam1,
 		if (!CTDCCustomAttributeHelper::GetAttributeDef(sort.nBy, base.m_aCustomAttribDefs, attribDef))
 			return 0;
 		
-		return base.m_data.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
+		return comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
 	}
 	
 	// else default attribute
-	return base.m_data.CompareTasks(dwTaskID1, 
-									dwTaskID2, 
-									sort.nBy, 
-									sort.bAscending, 
-									flags.bSortDueTodayHigh,
-									flags.WantIncludeTime(sort.nBy));
+	return comparer.CompareTasks(dwTaskID1, 
+								dwTaskID2, 
+								sort.nBy, 
+								sort.bAscending, 
+								flags.bSortDueTodayHigh,
+								flags.WantIncludeTime(sort.nBy));
 }
 
 DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen) const
