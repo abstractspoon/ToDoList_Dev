@@ -264,6 +264,8 @@ public:
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
+	const CTDCTaskComparer& Comparer() const { return m_comparer; }
+
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
@@ -296,6 +298,7 @@ protected:
 	int m_nMaxInfotipCommentsLength;
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CString m_sTasklistFolder;
+	CTDCTaskComparer m_comparer;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;
@@ -427,7 +430,7 @@ protected:
 	{
 		TDSORTFLAGS() 
 			: 
-		bSortChildren(TRUE), 
+			bSortChildren(TRUE), 
 			bSortDueTodayHigh(FALSE), 
 			dwTimeTrackID(0), 
 			bIncStartTime(FALSE), 
@@ -475,12 +478,11 @@ protected:
 		
 	struct TDSORTPARAMS
 	{
-		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) : base(tcb), comparer(tcb.m_data)
+		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) : base(tcb)
 		{
 		}
 		
 		const CTDLTaskCtrlBase& base;
-		CTDCTaskComparer comparer;
 		TDSORT sort;
 		TDSORTFLAGS flags;
 	};
@@ -537,7 +539,6 @@ protected:
 	static int SortTasks(LPARAM lParam1, 
 						LPARAM lParam2, 
 						const CTDLTaskCtrlBase& base, 
-						const CTDCTaskComparer& comparer,
 						const TDSORTCOLUMN& sort, 
 						const TDSORTFLAGS& flags);
 	
