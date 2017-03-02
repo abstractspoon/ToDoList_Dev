@@ -25,27 +25,7 @@ CClipboardBackup::CClipboardBackup(HWND hWnd) : m_hWnd(hWnd)
 
 CClipboardBackup::~CClipboardBackup()
 {
-	if (m_bFilled)
-	{
-		POSITION pos = m_lstData.GetHeadPosition();
-		while( pos != NULL)
-		{
-			ClipboardData & data = m_lstData.GetNext( pos);
-
-			switch( data.m_nFormat)
-			{
-			case CF_ENHMETAFILE:
-			case CF_DSPENHMETAFILE:
-				::DeleteMetaFile((HMETAFILE)data.m_hData);
-				break;
-
-			default:
-				::GlobalFree( data.m_hData);
-			}
-		}
-
-		m_lstData.RemoveAll();
-	}
+	Restore();
 }
 
 BOOL CClipboardBackup::AddData(LPCTSTR szData, UINT nFormat)
