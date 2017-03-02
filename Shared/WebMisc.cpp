@@ -64,6 +64,9 @@ BOOL WebMisc::DeleteCacheEntry(LPCTSTR szURI)
 	bSuccess = DeleteUrlCacheEntry(szURI);
 #endif
 
+	if (!bSuccess && (GetLastError() == ERROR_FILE_NOT_FOUND))
+		bSuccess = TRUE;
+
 	return bSuccess;
 }
 

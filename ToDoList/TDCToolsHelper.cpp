@@ -93,7 +93,7 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 	
 	// error handling
 	if (dwRes <= 32)
-		pWnd->MessageBox(CEnString(IDS_TH_RUNTOOLERROR), CEnString(IDS_TH_RUNTOOLERROR_TITLE), MB_OK | MB_ICONERROR);
+		pWnd->MessageBox(CEnString(IDS_TH_RUNTOOLERROR, tool.sToolName), CEnString(IDS_TH_RUNTOOLERROR_TITLE), MB_OK | MB_ICONERROR);
 
 	return (dwRes > 32);
 }
@@ -299,7 +299,7 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 	while (nArg--)
 	{
 		CString sAttribID(aCustomArgs[nArg].sName), sValue;
-		args.mapTaskCustData.Lookup(sAttribID, sValue);
+		args.mapTaskCustData.Lookup(Misc::ToUpper(sAttribID), sValue);
 
 		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, sValue, bEscapeSpaces);
 	}

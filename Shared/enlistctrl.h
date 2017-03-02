@@ -94,7 +94,7 @@ public:
 	// group methods
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
-	int GetRowGroupId(int nRow);
+	int GetItemGroupId(int nRow);
 	BOOL SetItemGroupId(int nRow, int nGroupID);
 	
 	void OverrideSelectionTheming(BOOL bThemed, BOOL bClassic) { m_dwSelectionTheming = MAKELONG(bThemed, bClassic); }

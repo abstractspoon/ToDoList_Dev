@@ -599,6 +599,12 @@ protected:
 	afx_msg void OnSelCancelAllocTo();
 	afx_msg void OnSelCancelCategory();
 	afx_msg void OnSelCancelTag();
+	afx_msg void OnSelCancelAllocBy();
+	afx_msg void OnSelCancelPriority();
+	afx_msg void OnSelCancelRisk();
+	afx_msg void OnSelCancelStatus();	
+	afx_msg void OnSelCancelVersion();
+
 	afx_msg void OnChangeRisk();
 	afx_msg void OnChangeProjectName();
 	afx_msg void OnChangeCost();

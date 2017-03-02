@@ -182,8 +182,11 @@ LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
 
 BOOL CFileComboBox::OnSelChange()
 {
-	// this constitutes an edit
-	m_bEditChange = TRUE;
+	if (!m_bNotifyingParent)
+	{
+		// this constitutes an edit
+		m_bEditChange = TRUE;
+	}
 	
 	return CAutoComboBox::OnSelChange();
 }

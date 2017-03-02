@@ -504,8 +504,12 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 	switch (msg)
 	{
 	case WM_CHAR: 
+		{
+			switch (wp)
+			{
 		// forward CTRL+Space to listbox
-		if (wp == VK_SPACE && Misc::IsKeyPressed(VK_CONTROL))
+			case VK_SPACE:
+				if (Misc::IsKeyPressed(VK_CONTROL))
 		{
 			if ((GetDroppedState() && IsType(CBS_DROPDOWN)) || IsType(CBS_SIMPLE)) 
 			{
@@ -513,10 +517,15 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 				return 0;
 			}
 		}
-		else if (wp == VK_ESCAPE)
-		{
-			m_bEditChange = FALSE;
-			ShowDropDown(FALSE);
+				break;
+
+// 			case VK_ESCAPE:
+// 				{
+// 					m_bEditChange = FALSE;
+// 					ShowDropDown(FALSE);
+// 				}
+// 				break;
+			}
 		}
 		break;
 
@@ -553,16 +562,18 @@ void CCheckComboBox::HandleReturnKey()
 		BOOL bSomeAdded = ParseText();
 		RecalcText(FALSE); // update m_sText only
 
+		CAutoComboBox::HandleReturnKey();
+
 		if (bSomeAdded)		
 			ParentACNotify(WM_ACBN_ITEMADDED, 0xFFFF, NULL);
 	}
 	else
 	{
 		ShowDropDown(FALSE);
-	}
 
-	// notify parent of (possible) selection change
-	ParentCBNotify(CBN_SELCHANGE);
+		// notify parent of (possible) selection change
+		ParentCBNotify(CBN_SELCHANGE);
+	}
 }
 
 CString CCheckComboBox::GetSelectedItemText() const

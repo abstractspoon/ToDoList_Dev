@@ -1954,7 +1954,7 @@ void CEnListCtrl::EnableAlternateRowColoring(BOOL bEnable)
 
 BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 {
-	return (S_OK == SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0));
+	return (SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
 }
 
 BOOL CEnListCtrl::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
@@ -1980,7 +1980,7 @@ BOOL CEnListCtrl::InsertGroupHeader(int nIndex, int nGroupID, const CString& str
 	return (S_OK == SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
 }
 
-int CEnListCtrl::GetRowGroupId(int nRow)
+int CEnListCtrl::GetItemGroupId(int nRow)
 {
 	LVGROUPITEM lvgi = { 0 };
 

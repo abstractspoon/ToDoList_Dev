@@ -479,7 +479,7 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	}
 		
 	// all else (fallback)
-	ShowWindow(SW_SHOW);
+	ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
 	AddListReminder(rem);
 
 	GraphicsMisc::FlashWindowEx(*AfxGetMainWnd(), (FLASHW_ALL | FLASHW_TIMERNOFG), 6, 0);

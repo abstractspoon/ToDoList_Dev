@@ -89,6 +89,7 @@ public:
 	BOOL SetData(const CBitmap& bm) const;
 	BOOL SetData(const CClipboardDataArray& aData) const;
 	int GetData(CClipboardDataArray& aData) const;
+	HBITMAP GetBitmap() const;
 
 	int GetDropFilePaths(CStringArray& aFilePaths) const;
 	BOOL GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank = TRUE) const;

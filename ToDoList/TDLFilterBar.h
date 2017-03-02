@@ -114,6 +114,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeFilter();
+	afx_msg void OnSelcancelFilter();
 	afx_msg void OnCloseUpOptions();
 	afx_msg void OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDateFilter();

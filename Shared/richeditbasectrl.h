@@ -90,6 +90,7 @@ public:
 	void SelectCurrentWord();
 	BOOL CanEdit() const;
 
+	BOOL PasteSpecial(CLIPFORMAT nFormat); // EM_PASTESPECIAL
 	BOOL PasteSimpleText();
 	BOOL CanPasteSimpleText() const;
 

@@ -82,6 +82,8 @@ protected:
 	afx_msg void OnClearfilter();
 	afx_msg void OnSelchangeFiltercombo();
 	//}}AFX_MSG
+	afx_msg void OnSelchangeFilter();
+	afx_msg void OnSelcancelFilter();
 	afx_msg void OnSelchangeStartNextNDays();
 	afx_msg void OnSelchangeDueNextNDays();
 	afx_msg void OnSelchangeDatecombo();

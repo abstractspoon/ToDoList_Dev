@@ -168,6 +168,16 @@ BOOL CRichEditBaseCtrl::Redo()
 	return CTextDocument(GetSafeHwnd()).Redo();
 }
 
+BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
+{
+	if ((nFormat == 0) || !CClipboard().HasFormat(nFormat))
+		return FALSE;
+
+	// else
+	::SendMessage(m_hWnd, EM_PASTESPECIAL, nFormat, NULL);
+	return TRUE;
+}
+
 BOOL CRichEditBaseCtrl::PasteSimpleText()
 {
 	if (!CanPasteSimpleText())

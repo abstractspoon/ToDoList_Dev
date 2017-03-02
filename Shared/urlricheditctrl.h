@@ -51,7 +51,7 @@ public:
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);
 	int GetContextUrl() { return m_nContextUrl; }
-	void Paste(BOOL bAppendSourceUrl);
+	void Paste(BOOL bAppendSourceUrl, CLIPFORMAT nFormat = 0);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
 
 	// Attributes

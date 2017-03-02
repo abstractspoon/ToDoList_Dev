@@ -112,6 +112,16 @@ int CClipboard::GetData(CClipboardDataArray& aData) const
 	return aData.GetSize();
 }
 
+HBITMAP CClipboard::GetBitmap() const
+{
+	ASSERT(m_bOpen);
+
+	if (!m_bOpen)
+		return NULL;
+
+	return (HBITMAP)GetClipboardData(CF_BITMAP);
+}
+
 BOOL CClipboard::SetData(const CClipboardDataArray& aData) const
 {
 	// sanity checks

@@ -761,7 +761,7 @@ CString CUrlRichEditCtrl::CreateFileLink(LPCTSTR szFile)
 	return sLink;
 }
 
-void CUrlRichEditCtrl::Paste(BOOL bAppendSourceUrl)
+void CUrlRichEditCtrl::Paste(BOOL bAppendSourceUrl, CLIPFORMAT nFormat)
 {
 	CString sClipText;
 	
@@ -773,7 +773,10 @@ void CUrlRichEditCtrl::Paste(BOOL bAppendSourceUrl)
 	}
 
 	// Do the default paste
+	if ((nFormat == 0) || !CRichEditBaseCtrl::PasteSpecial(nFormat))
+	{
 	CRichEditBaseCtrl::Paste();
+	}
 
 	// If there is an associated URL then paste that after
 	if (bAppendSourceUrl)

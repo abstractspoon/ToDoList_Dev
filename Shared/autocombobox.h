@@ -88,13 +88,14 @@ public:
 
 protected:
 	DWORD m_dwFlags;
-	BOOL m_bEditChange;
-	BOOL m_bClosingUp;
 	CMaskEdit m_eMask;
 	CFont m_fontClose;
 
 	CSubclassWnd m_scEdit;
 	CSubclassWnd m_scList;
+
+	BOOL m_bEditChange;
+	BOOL m_bNotifyingParent;
 
 	mutable BOOL m_bDrawing;
 
@@ -122,6 +123,7 @@ protected:
 	afx_msg BOOL OnDropDown();
 	afx_msg BOOL OnCloseUp();
 	afx_msg BOOL OnEditChange();
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo handlers

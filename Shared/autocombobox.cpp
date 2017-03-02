@@ -74,7 +74,7 @@ void AFXAPI DDX_AutoCBString(CDataExchange* pDX, int nIDC, CString& value)
 CAutoComboBox::CAutoComboBox(DWORD dwFlags) 
 	: 
 	m_dwFlags(dwFlags), 
-	m_bClosingUp(FALSE), 
+	m_bNotifyingParent(FALSE), 
 	m_bEditChange(FALSE), 
 	m_nDeleteItem(LB_ERR)
 {
@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CAutoComboBox, COwnerdrawComboBoxBase)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	//}}AFX_MSG_MAP
+	ON_WM_KEYDOWN()
 	ON_CONTROL_REFLECT_EX(CBN_SELENDCANCEL, OnSelEndCancel)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
@@ -118,10 +119,13 @@ int CAutoComboBox::SetStrings(const CStringArray& aItems)
 
 BOOL CAutoComboBox::OnCloseUp()
 {
-	CAutoFlag af(m_bClosingUp, TRUE);
+	// Clear edit change flag to protect against
+	// re-entrancy during parent notifications
+	BOOL bEditChange = m_bEditChange;
+	m_bEditChange = FALSE;
 
 	// notify parent of (possible) selection change
-	if (m_bEditChange && GetCount())
+	if (bEditChange && GetCount())
 		ParentCBNotify(CBN_SELCHANGE);
 	else
 		ParentCBNotify(CBN_SELENDCANCEL);
@@ -131,9 +135,6 @@ BOOL CAutoComboBox::OnCloseUp()
 
 BOOL CAutoComboBox::OnDropDown()
 {
-// 	if (ScIsHooked())
-// 		FixupListBoxPosition();
-
 	return FALSE; // pass to parent
 }
 
@@ -155,18 +156,24 @@ BOOL CAutoComboBox::OnSelEndOK()
 BOOL CAutoComboBox::OnSelEndCancel()
 {
 	// eat this unless we sent it explicitly
-	return (!m_bClosingUp);
+	return (!m_bNotifyingParent);
 }
 
 BOOL CAutoComboBox::OnSelChange()
 {
+	if (!m_bNotifyingParent)
+	{
 	// make sure the edit control is up to date
+		// unless we sent this notification
 	if (m_scEdit.IsValid())
 	{
 		int nSel = GetCurSel();
 
 		if (nSel < GetCount() )
 			SetWindowText(GetSelectedItemText());
+	}
+
+		m_bEditChange = TRUE;
 	}
 
 	// eat notification if dropped down
@@ -507,8 +514,11 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 	switch (msg)
 	{
 	case WM_KEYDOWN:
-		// <Ctrl> + <Delete>
-		if (AllowDelete() && (wp == VK_DELETE) && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
+		{
+			switch (wp)
+			{
+			case VK_DELETE:
+				if (AllowDelete() && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
 		{
 			if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
 			{
@@ -516,20 +526,29 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 				return 0L;
 			}
 		}
-		// <Return>
-		else if (wp == VK_RETURN)
-		{
+				break;
+
+			case VK_RETURN:
 			if (GetDroppedState() && !IsType(CBS_SIMPLE))
 				ShowDropDown(FALSE);
 
 			HandleReturnKey();
+				return 0L;
 			
-			return 0L;
-		}
-		else if (wp == VK_DOWN && !GetDroppedState() && !IsType(CBS_SIMPLE) && GetCount())
+			case VK_UP:
+			case VK_DOWN:
+				if (!GetDroppedState() && !IsType(CBS_SIMPLE) && GetCount())
 		{
 			ShowDropDown();
 			return 0L; // eat
+		}
+		break;
+		
+			case VK_ESCAPE:
+				m_bEditChange = FALSE;
+				ShowDropDown(FALSE);
+				break;
+			}
 		}
 		break;
 		
@@ -555,6 +574,20 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 	}
 
 	return CSubclasser::ScDefault(m_scEdit);
+}
+
+void CAutoComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if ((nChar == VK_ESCAPE) && GetDroppedState() && !m_scEdit.IsValid())
+	{
+		m_bEditChange = FALSE;
+		ShowDropDown(FALSE);
+
+		return;
+	}
+
+	// else
+	COwnerdrawComboBoxBase::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 int CAutoComboBox::HitTestListDeleteBtn(const CPoint& ptList) const
@@ -601,6 +634,15 @@ int CAutoComboBox::GetCurSel() const
 
 void CAutoComboBox::HandleReturnKey()
 {
+	// Prevent re-entrancy
+	if (m_bNotifyingParent)
+		return;
+
+	// Only clear the change flag if we are not
+	// dropped else it will be handled in OnCloseUp
+	BOOL bDroppedDown = GetDroppedState();
+
+	if (!bDroppedDown)
 	m_bEditChange = FALSE;
 
 	if (m_scEdit.IsValid())
@@ -611,14 +653,14 @@ void CAutoComboBox::HandleReturnKey()
 		int nAdd = AddUniqueItem(sEdit);
 		
 		if (nAdd != CB_ERR)
-		{
 			ParentACNotify(WM_ACBN_ITEMADDED, nAdd, sEdit);
-		}
 
 		if (!sEdit.IsEmpty())
 			SelectString(-1, sEdit);
 			
-		// send a possible selection change
+		// Send a possible selection change if we are not
+		// dropped else it will be handled in OnCloseUp
+		if (!bDroppedDown)
 		ParentCBNotify(CBN_SELCHANGE);
 	}
 }
@@ -629,6 +671,8 @@ void CAutoComboBox::ParentACNotify(UINT nMsgNotify, int nIndex, LPCTSTR szItem)
 
 	if ((nIndex >= 0) && (!szItem || szItem[0]))
 	{
+		CAutoFlag af(m_bNotifyingParent, TRUE);
+		
 		GetParent()->SendMessage(nMsgNotify, MAKEWPARAM(GetDlgCtrlID(), nIndex), (LPARAM)szItem);
 	}
 }
@@ -639,6 +683,8 @@ void CAutoComboBox::ParentCBNotify(UINT nIDNotify)
 
 	if (pParent)
 	{
+		CAutoFlag af(m_bNotifyingParent, TRUE);
+		
 		UINT nID = GetDlgCtrlID();
 		pParent->SendMessage(WM_COMMAND, MAKEWPARAM(nID, nIDNotify), (LPARAM)m_hWnd);
 	}

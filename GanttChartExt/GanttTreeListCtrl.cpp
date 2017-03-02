@@ -1938,10 +1938,12 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 		int nFrom = FindListItem(dwFromTaskID);
 
 		GANTTDEPENDENCY depend;
-		VERIFY(CalcDependencyEndPos(nFrom, depend, TRUE));
 
+		if (CalcDependencyEndPos(nFrom, depend, TRUE))
+		{
 		depend.SetTo(m_ptLastDependPick);
 		depend.Draw(pDC, rClient, TRUE);
+		}
 			
 		// clear last drag pos
 		ResetDependencyPickLinePos();
@@ -1973,14 +1975,14 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 {
 	if (IsPickingDependencyToTask())
 	{
-		CClientDC dc(&m_list);
-		
 		// calc 'from ' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		int nFrom = FindListItem(dwFromTaskID);
 		
 		GANTTDEPENDENCY depend;
-		VERIFY(CalcDependencyEndPos(nFrom, depend, TRUE));
+
+		if (!CalcDependencyEndPos(nFrom, depend, TRUE))
+			return FALSE;
 
 		// calc new 'To' point to see if anything has actually changed
 		GTLC_HITTEST nHit = GTLCHT_NOWHERE;
@@ -1990,7 +1992,9 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 		{
 			int nTo = FindListItem(dwToTaskID);
-			VERIFY(CalcDependencyEndPos(nTo, depend, FALSE, &ptTo));
+			
+			if (!CalcDependencyEndPos(nTo, depend, FALSE, &ptTo))
+				return FALSE;
 		}
 		else // use current cursor pos
 		{
@@ -2002,6 +2006,8 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 
 		if (ptTo != m_ptLastDependPick)
 		{
+			CClientDC dc(&m_list);
+			
 			CRect rClient;
 			m_list.GetClientRect(rClient);
 			
@@ -3531,10 +3537,11 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 
 BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
-	ASSERT(nItem >= 0);
-
 	if (nItem < 0)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	DWORD dwTaskID = GetTaskID(nItem);
 	ASSERT(dwTaskID);
@@ -3542,7 +3549,10 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend
 	GANTTDISPLAY* pGD = NULL;
 	
 	if (!m_display.Lookup(dwTaskID, pGD))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	int nPos = (bFrom ? pGD->nStartPos : pGD->nEndPos);
 	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
