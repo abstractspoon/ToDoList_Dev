@@ -549,95 +549,114 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 	CStringArray aFiles;
 	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
 	
-	switch (nNumFiles)
+	// Check for error
+	if (nNumFiles == -1)
 	{
-	case -1:
 		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
-		
-	case 0:
-		if (bSimple)
-		{
-			m_rtf.PasteSimpleText(s_bPasteSourceUrls);
-		}
-		else // may need conversion
-		{
-			// if there is HTML but not RTF or an image then convert the 
-			// HTML to RTF and add it to the current clipboard contents
-			CClipboardBackup cbb(*this);
-			BOOL bClipboardSaved = FALSE;
-
-			CString sHtml, sSourceUrl;
-			
-			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
-			{
-				CWaitCursor cursor;
-
-				// Always set this to make sure it is current
-				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
-
-				CString sRTF;
-				
-				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
-				{
-#ifdef _UNICODE
-					// convert back to Ansi (not UTF8) for clipboard
-					Misc::EncodeAsMultiByte(sRTF);
-#endif
-					// backup the current clipboard
-					bClipboardSaved = cbb.Backup();
-					ASSERT(bClipboardSaved);
-					
-					// overwrite with RTF
-					CClipboard(*this).SetText(sRTF, CBF_RTF);
-				}
-			}
-
-			// do the actual paste
-			m_rtf.Paste(s_bPasteSourceUrls);
-
-			// restore the clipboard
-			if (bClipboardSaved)
-			{
-				VERIFY(cbb.Restore());
-
-				// Pasting the trailing URL will have failed if we
-				// overwrote the clipboard so we have to do it manually
-				if (s_bPasteSourceUrls)
-				{
-					CString sClipURL;
-						
-					if (CClipboard().GetHTMLSourceLink(sClipURL))
-						VERIFY(m_rtf.AppendSourceUrls(sClipURL));
-				}
-			}
-		}
-		return TRUE;
-		
-	default: // 1 or more filenames 
-		if (bSimple)
-		{
-			return CRichEditHelper::PasteFiles(m_rtf, aFiles, REP_ASFILEURL);
-		}
-		else
-		{
-			if (!m_rtf.IsFileLinkOptionDefault())
-			{
-				CCreateFileLinkDlg dialog(aFiles[0], m_rtf.GetFileLinkOption(), FALSE);
-				
-				if (dialog.DoModal() != IDOK)
-					return FALSE; // cancelled
-
-				// else
-				RE_PASTE nLinkOption = dialog.GetLinkOption();
-				BOOL bDefault = dialog.GetMakeLinkOptionDefault();
-					
-				m_rtf.SetFileLinkOption(nLinkOption, bDefault);
-			}
-			
-			return CRichEditHelper::PasteFiles(m_rtf, aFiles, m_rtf.GetFileLinkOption());
-		}
 	}
+
+	// Keep simple paste together because it's so simple!
+	if (bSimple)
+	{
+		if (nNumFiles == 0)
+			return m_rtf.PasteSimpleText(s_bPasteSourceUrls);
+
+		// else one or more filepaths
+		return CRichEditHelper::PasteFiles(m_rtf, aFiles, REP_ASFILEURL);
+	}
+
+	// No file paths
+	if (nNumFiles == 0)
+	{
+		// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
+		// This also allows us to prevent richedit's default resizing by using paste special
+		if (CClipboard::HasFormat(CF_BITMAP))
+		{
+			CEnBitmap bmp;
+			{
+				CClipboard cb;
+				bmp.CopyImage(cb.GetBitmap());
+			}
+
+			if (bmp.GetSafeHandle() && bmp.CopyToClipboard(m_rtf, 8))
+			{
+				return m_rtf.PasteSpecial(CF_BITMAP);
+			}
+
+			// else 
+			return FALSE; //??
+		}
+
+		// if there is HTML but not RTF or an image then convert the 
+		// HTML to RTF and add it to the current clipboard contents
+		CClipboardBackup cbb(*this);
+		BOOL bClipboardSaved = FALSE;
+
+		CString sHtml, sSourceUrl;
+
+		if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
+		{
+			CWaitCursor cursor;
+
+			// Always set this to make sure it is current
+			m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+
+			CString sRTF;
+
+			if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+			{
+#ifdef _UNICODE
+				// convert back to Ansi (not UTF8) for clipboard
+				Misc::EncodeAsMultiByte(sRTF);
+#endif
+				// backup the current clipboard
+				bClipboardSaved = cbb.Backup();
+				ASSERT(bClipboardSaved);
+
+				// overwrite with RTF
+				CClipboard(*this).SetText(sRTF, CBF_RTF);
+			}
+		}
+
+		// do the actual paste
+		m_rtf.Paste(s_bPasteSourceUrls);
+
+		// restore the clipboard if necessary
+		if (bClipboardSaved)
+		{
+			VERIFY(cbb.Restore());
+
+			// Pasting the trailing URL will have failed if we
+			// overwrote the clipboard so we have to do it manually
+			if (s_bPasteSourceUrls)
+			{
+				CString sClipURL;
+
+				if (CClipboard().GetHTMLSourceLink(sClipURL))
+					VERIFY(m_rtf.AppendSourceUrls(sClipURL));
+			}
+		}
+
+		return TRUE;
+	}
+
+	// else one or more filenames 
+	if (!m_rtf.IsFileLinkOptionDefault())
+	{
+		CCreateFileLinkDlg dialog(aFiles[0], m_rtf.GetFileLinkOption(), FALSE);
+
+		if (dialog.DoModal() != IDOK)
+			return FALSE; // cancelled
+
+		// else
+		RE_PASTE nLinkOption = dialog.GetLinkOption();
+		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
+
+		m_rtf.SetFileLinkOption(nLinkOption, bDefault);
+	}
+
+	return CRichEditHelper::PasteFiles(m_rtf, aFiles, m_rtf.GetFileLinkOption());
 }
 
 BOOL CRTFContentControl::CanPaste()
