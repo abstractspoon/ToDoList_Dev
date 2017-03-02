@@ -178,6 +178,8 @@ void CRichEditHelper::ClearUndo(HWND hWnd)
 
 BOOL CRichEditHelper::PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow)
 {
+	CWaitCursor cursor;
+
 	if (aFiles.GetSize() == 0)
 		return FALSE;
 
