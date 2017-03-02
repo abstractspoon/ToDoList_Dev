@@ -2933,7 +2933,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
 		{
-			double dValue = data.AsDouble();
+			double dValue = 0.0;
 			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
 			
 			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
