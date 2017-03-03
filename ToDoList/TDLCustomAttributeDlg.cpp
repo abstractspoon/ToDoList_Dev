@@ -730,6 +730,7 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 
 	// Strangely, it seems the act of auto-editing the label
 	// interferes with the update of the toolbar button states
+	// so we post a little prompt
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
