@@ -727,6 +727,10 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 
 	UpdateData(FALSE); // update unique ID field
 	EnableControls();
+
+	// Strangely, it seems the act of auto-editing the label
+	// interferes with the update of the toolbar button states
+	m_toolbar.RefreshButtonStates(FALSE);
 }
 
 void CTDLCustomAttributeDlg::OnChangeUniqueid() 
@@ -952,7 +956,7 @@ void CTDLCustomAttributeDlg::OnNewAttribute()
 
 void CTDLCustomAttributeDlg::OnUpdateNewAttribute(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_lcAttributes.GetItemCount() < 128);
+	pCmdUI->Enable(m_lcAttributes.GetItemCount() < 64);
 }
 
 void CTDLCustomAttributeDlg::OnDeleteAttribute() 
