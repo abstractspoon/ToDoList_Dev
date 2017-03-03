@@ -163,15 +163,15 @@ BOOL CAutoComboBox::OnSelChange()
 {
 	if (!m_bNotifyingParent)
 	{
-	// make sure the edit control is up to date
+		// make sure the edit control is up to date
 		// unless we sent this notification
-	if (m_scEdit.IsValid())
-	{
-		int nSel = GetCurSel();
+		if (m_scEdit.IsValid())
+		{
+			int nSel = GetCurSel();
 
-		if (nSel < GetCount() )
-			SetWindowText(GetSelectedItemText());
-	}
+			if (nSel < GetCount() )
+				SetWindowText(GetSelectedItemText());
+		}
 
 		m_bEditChange = TRUE;
 	}
@@ -519,31 +519,31 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 			{
 			case VK_DELETE:
 				if (AllowDelete() && GetDroppedState() && Misc::IsKeyPressed(VK_CONTROL))
-		{
-			if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
-			{
-				// eat message else it'll go to the edit window
-				return 0L;
-			}
-		}
+				{
+					if (DeleteLBItem(m_scList.SendMessage(LB_GETCURSEL)))
+					{
+						// eat message else it'll go to the edit window
+						return 0L;
+					}
+				}
 				break;
 
 			case VK_RETURN:
-			if (GetDroppedState() && !IsType(CBS_SIMPLE))
-				ShowDropDown(FALSE);
+				if (GetDroppedState() && !IsType(CBS_SIMPLE))
+					ShowDropDown(FALSE);
 
-			HandleReturnKey();
+				HandleReturnKey();
 				return 0L;
-			
+
 			case VK_UP:
 			case VK_DOWN:
 				if (!GetDroppedState() && !IsType(CBS_SIMPLE) && GetCount())
-		{
-			ShowDropDown();
-			return 0L; // eat
-		}
-		break;
-		
+				{
+					ShowDropDown();
+					return 0L; // eat
+				}
+				break;
+
 			case VK_ESCAPE:
 				m_bEditChange = FALSE;
 				ShowDropDown(FALSE);
@@ -643,7 +643,7 @@ void CAutoComboBox::HandleReturnKey()
 	BOOL bDroppedDown = GetDroppedState();
 
 	if (!bDroppedDown)
-	m_bEditChange = FALSE;
+		m_bEditChange = FALSE;
 
 	if (m_scEdit.IsValid())
 	{
@@ -661,7 +661,7 @@ void CAutoComboBox::HandleReturnKey()
 		// Send a possible selection change if we are not
 		// dropped else it will be handled in OnCloseUp
 		if (!bDroppedDown)
-		ParentCBNotify(CBN_SELCHANGE);
+			ParentCBNotify(CBN_SELCHANGE);
 	}
 }
 

@@ -7,7 +7,6 @@
 #include "GanttMsg.h"
 
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\treectrlhelper.h"
 
 //////////////////////////////////////////////////////////////////////
 

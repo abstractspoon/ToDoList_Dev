@@ -507,16 +507,16 @@ LRESULT CCheckComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		{
 			switch (wp)
 			{
-		// forward CTRL+Space to listbox
+				// forward CTRL+Space to listbox
 			case VK_SPACE:
 				if (Misc::IsKeyPressed(VK_CONTROL))
-		{
-			if ((GetDroppedState() && IsType(CBS_DROPDOWN)) || IsType(CBS_SIMPLE)) 
-			{
-				OnListboxMessage(msg, wp, lp);
-				return 0;
-			}
-		}
+				{
+					if ((GetDroppedState() && IsType(CBS_DROPDOWN)) || IsType(CBS_SIMPLE)) 
+					{
+						OnListboxMessage(msg, wp, lp);
+						return 0;
+					}
+				}
 				break;
 
 // 			case VK_ESCAPE:
