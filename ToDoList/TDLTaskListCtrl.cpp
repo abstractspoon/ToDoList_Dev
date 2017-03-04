@@ -1394,19 +1394,22 @@ int CTDLTaskListCtrl::FindTaskItem(DWORD dwTaskID) const
 
 GM_ITEMSTATE CTDLTaskListCtrl::GetListItemState(int nItem) const
 {
-	if (m_lcTasks.GetItemState(nItem, LVIS_DROPHILITED) & LVIS_DROPHILITED)
+	if (!m_bSavingToImage)
 	{
-		return GMIS_DROPHILITED;
-	}
-	else if (m_lcTasks.GetItemState(nItem, LVIS_SELECTED) & LVIS_SELECTED)
-	{
-		DWORD dwTaskID = GetTaskID(nItem);
+		if (m_lcTasks.GetItemState(nItem, LVIS_DROPHILITED) & LVIS_DROPHILITED)
+		{
+			return GMIS_DROPHILITED;
+		}
+		else if (m_lcTasks.GetItemState(nItem, LVIS_SELECTED) & LVIS_SELECTED)
+		{
+			DWORD dwTaskID = GetTaskID(nItem);
 
-		if (HasFocus() || (dwTaskID == m_dwEditTitleTaskID))
-			return GMIS_SELECTED;
+			if (HasFocus() || (dwTaskID == m_dwEditTitleTaskID))
+				return GMIS_SELECTED;
 
-		// else 
-		return GMIS_SELECTEDNOTFOCUSED;
+			// else 
+			return GMIS_SELECTEDNOTFOCUSED;
+		}
 	}
 	
 	return GMIS_NONE;
@@ -1475,5 +1478,5 @@ int CTDLTaskListCtrl::CalcRequiredImageTitleColumnWidth()
 	CRect rLabel;
 	m_lcTasks.GetItemRect(0, rLabel, LVIR_LABEL);
 
-	return (rLabel.left + nMaxTextWidth);
+	return (rLabel.left + nMaxTextWidth + (LV_COLPADDING * 2));
 }

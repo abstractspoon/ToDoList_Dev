@@ -2262,7 +2262,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					if ((nState == GMIS_SELECTEDNOTFOCUSED) && m_dwEditTitleTaskID)
 						nState = GMIS_SELECTED;
 					
-					BOOL bSelected = !((nState == GMIS_NONE) || m_bSavingToImage);
+					BOOL bSelected = (nState == GMIS_NONE);
 					BOOL bRef = (dwTaskID != dwTrueID);
 					
 					// colors
@@ -2307,6 +2307,8 @@ BOOL CTDLTaskCtrlBase::HasThemedState(GM_ITEMSTATE nState) const
 
 void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, BOOL bAlternate, COLORREF crBack)
 {
+	ASSERT(!m_bSavingToImage || (nState == GMIS_NONE));
+
 	BOOL bSelected = ((nState != GMIS_NONE) && !m_bSavingToImage);
 
 	if (!bSelected)

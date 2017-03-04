@@ -575,19 +575,22 @@ BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 
 GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 {
-	if (m_tcTasks.GetItemState(hti, TVIS_DROPHILITED) & TVIS_DROPHILITED)
+	if (!m_bSavingToImage)
 	{
-		return GMIS_DROPHILITED;
-	}
-	else if (IsItemSelected(hti))
-	{
-		DWORD dwTaskID = GetTaskID(hti);
+		if (m_tcTasks.GetItemState(hti, TVIS_DROPHILITED) & TVIS_DROPHILITED)
+		{
+			return GMIS_DROPHILITED;
+		}
+		else if (IsItemSelected(hti))
+		{
+			DWORD dwTaskID = GetTaskID(hti);
 		
-		if (HasFocus() || (dwTaskID == m_dwEditTitleTaskID))
-			return GMIS_SELECTED;
+			if (HasFocus() || (dwTaskID == m_dwEditTitleTaskID))
+				return GMIS_SELECTED;
 		
-		// else 
-		return GMIS_SELECTEDNOTFOCUSED;
+			// else 
+			return GMIS_SELECTEDNOTFOCUSED;
+		}
 	}
 	
 	return GMIS_NONE;
