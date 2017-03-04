@@ -16,7 +16,7 @@ class CCopyWndContents
 public:
 	virtual ~CCopyWndContents();
 
-	BOOL DoCopy(CBitmap& bmp);
+	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
 	CCopyWndContents(CWnd& wnd);

@@ -3005,6 +3005,11 @@ int CALLBACK CTreeListSyncer::SortListProc(LPARAM lParam1, LPARAM lParam2, LPARA
 
 BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crGridline)
 {
+	return SaveToImage(bmImage, 0, -1, crGridline);
+}
+
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline)
+{
 	HWND hwndPrimary = PrimaryWnd();
 	BOOL bPrimaryIsLeft = IsLeft(hwndPrimary);
 
@@ -3017,7 +3022,7 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crGridline)
 	if (!SaveToImage(hwndPrimary, bmPrimary))
 		return FALSE;
 
-	if (!SaveToImage(OtherWnd(hwndPrimary), bmOther))
+	if (!SaveToImage(OtherWnd(hwndPrimary), bmOther, CRect(nOtherFrom, 0, nOtherTo, -1)))
 		return FALSE;
 
 	if (m_hwndPrimaryHeader && !SaveToImage(m_hwndPrimaryHeader, bmPrimaryHeader))
@@ -3116,7 +3121,7 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crGridline)
 	return (bmImage.GetSafeHandle() != NULL);
 }
 
-BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
+BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage, const CRect& rFromTo)
 {
 	switch (GetType(hWnd))
 	{
@@ -3125,7 +3130,7 @@ BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
 			CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hWnd);
 			ASSERT(pTree);
 
-			if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmImage))
+			if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmImage, rFromTo))
 				return FALSE;
 		}
 		break;
@@ -3135,7 +3140,7 @@ BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
 			CListCtrl* pList = (CListCtrl*)CWnd::FromHandle(hWnd);
 			ASSERT(pList);
 
-			if (!CCopyListCtrlContents(*pList).DoCopy(bmImage))
+			if (!CCopyListCtrlContents(*pList).DoCopy(bmImage, rFromTo))
 				return FALSE;
 		}
 		break;
@@ -3145,7 +3150,7 @@ BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage)
 			CHeaderCtrl* pHeader = (CHeaderCtrl*)CWnd::FromHandle(hWnd);
 			ASSERT(pHeader);
 
-			if (!CCopyHeaderCtrlContents(*pHeader).DoCopy(bmImage))
+			if (!CCopyHeaderCtrlContents(*pHeader).DoCopy(bmImage, rFromTo))
 				return FALSE;
 		}
 		break;

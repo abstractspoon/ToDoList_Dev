@@ -13,7 +13,7 @@ CCopyWndContents::~CCopyWndContents()
 {
 }
 
-BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
+BOOL CCopyWndContents::DoCopy(CBitmap& bmp, const CRect& rFromTo)
 {
 	ASSERT(bmp.GetSafeHandle() == NULL);
 
@@ -25,7 +25,20 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 
 	int nNumHorzPages = CalcPageCount(FALSE);
 	int nNumVertPages = CalcPageCount(TRUE);
+
+	// Adjust content size to match passed-in rect
+	if (rFromTo.right != -1)
+		m_sizeContent.cx = rFromTo.Width();
+	else
+		m_sizeContent.cx -= rFromTo.left;
 	
+	if (rFromTo.bottom != -1)
+		m_sizeContent.cy = rFromTo.Height();
+	else
+		m_sizeContent.cy -= rFromTo.top;
+
+	ASSERT((m_sizeContent.cx > 0) && (m_sizeContent.cy > 0));
+
 	// create a temp dc to paint on
 	CDC* pDC = m_wnd.GetDC();
 	CDC dcContent, dcPage;
@@ -49,24 +62,47 @@ BOOL CCopyWndContents::DoCopy(CBitmap& bmp)
 
 			for (int nVert = 0; nVert < nNumVertPages; nVert++)
 			{
-				for (int nHorz = 0; nHorz < nNumHorzPages; nHorz++)
+				// Only draw pages within passed-in rect
+				if ((rFromTo.bottom != -1) && (ptPagePos.y >= rFromTo.bottom))
+					break;
+
+				if ((ptPagePos.y + m_sizePage.cy) > rFromTo.top)
 				{
-					dcPage.FillSolidRect(0, 0, m_sizePage.cx, m_sizePage.cy, GetSysColor(COLOR_WINDOW));
-					DoPrint(dcPage, ptPagePos.x, ptPagePos.y);
+					for (int nHorz = 0; nHorz < nNumHorzPages; nHorz++)
+					{
+						// Only draw pages within passed-in rect
+						if ((rFromTo.right != -1) && (ptPagePos.x >= rFromTo.right))
+							break;
 
-					// Copy page to correct content position
-					CPoint ptDCOrg = dcPage.GetWindowOrg();
-					dcPage.SetWindowOrg(0, 0);
+						if ((ptPagePos.x + m_sizePage.cx) > rFromTo.left)
+						{
+							// Copy the current page
+							dcPage.FillSolidRect(0, 0, m_sizePage.cx, m_sizePage.cy, GetSysColor(COLOR_WINDOW));
+							DoPrint(dcPage, ptPagePos.x, ptPagePos.y);
 
-					dcContent.BitBlt(ptPagePos.x, ptPagePos.y, m_sizePage.cx, m_sizePage.cy, &dcPage, ptDCOrg.x, ptDCOrg.y, SRCCOPY);
+							// GetWindowOrg contains the point from which
+							// we copy the page bitmap to the content bitmap
+							CPoint ptDCOrg = dcPage.GetWindowOrg();
+							dcPage.SetWindowOrg(0, 0);
 
-					// Scroll one page to right
-					ptPagePos.x = PageRight(ptPagePos.x);
+							dcContent.BitBlt((ptPagePos.x - rFromTo.left), 
+											(ptPagePos.y - rFromTo.top), 
+											m_sizePage.cx, 
+											m_sizePage.cy, 
+											&dcPage, 
+											ptDCOrg.x, 
+											ptDCOrg.y, 
+											SRCCOPY);
+						}
+
+						// Scroll one page to right
+						ptPagePos.x = PageRight(ptPagePos.x);
+					}
+
+					// Reset horizontal scrollbar
+					m_wnd.SendMessage(WM_HSCROLL, SB_LEFT);
+					ptPagePos.x = 0;
 				}
-
-				// Reset horizontal scrollbar
-				m_wnd.SendMessage(WM_HSCROLL, SB_LEFT);
-				ptPagePos.x = 0;
 
 				// Scroll one page down
 				ptPagePos.y = PageDown(ptPagePos.y);

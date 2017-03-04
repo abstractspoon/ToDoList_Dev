@@ -1520,16 +1520,19 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
 {
-	if (IsListItemSelected(m_list, nItem))
+	if (!m_bSavingToImage)
 	{
-		if (HasFocus())
-			return GMIS_SELECTED;
-		else
-			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (ListItemHasState(m_list, nItem, LVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
+		if (IsListItemSelected(m_list, nItem))
+		{
+			if (HasFocus())
+				return GMIS_SELECTED;
+			else
+				return GMIS_SELECTEDNOTFOCUSED;
+		}
+		else if (ListItemHasState(m_list, nItem, LVIS_DROPHILITED))
+		{
+			return GMIS_DROPHILITED;
+		}
 	}
 
 	// else
@@ -1538,16 +1541,19 @@ GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(int nItem) const
 
 GM_ITEMSTATE CGanttTreeListCtrl::GetItemState(HTREEITEM hti) const
 {
-	if (IsTreeItemSelected(m_tree, hti))
+	if (!m_bSavingToImage)
 	{
-		if (HasFocus())
-			return GMIS_SELECTED;
-		else
-			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
+		if (IsTreeItemSelected(m_tree, hti))
+		{
+			if (HasFocus())
+				return GMIS_SELECTED;
+			else
+				return GMIS_SELECTEDNOTFOCUSED;
+		}
+		else if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
+		{
+			return GMIS_DROPHILITED;
+		}
 	}
 
 	// else
@@ -2759,6 +2765,9 @@ void CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 			break;
 		}
 	}
+
+	if (m_bSavingToImage)
+		rItem.OffsetRect(-1, 0);
 }
 
 void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
@@ -5960,7 +5969,7 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 
 	ResizeColumnsToFit();	
 	
-	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, m_crGridLine);
+	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, 200, 600/*, m_crGridLine*/);
 	
 	// Restore title column width
 	m_treeHeader.SetItemWidth(0, nColWidth);

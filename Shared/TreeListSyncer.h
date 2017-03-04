@@ -100,6 +100,7 @@ public:
 	void Show(BOOL bShow = TRUE);
 	void SetSplitBarColor(COLORREF crSplitBar);
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
+	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);
 
 	HTREEITEM GetTreeSelItem() const;
 	int GetTreeSelItems(CHTIArray& aItems) const;
@@ -275,5 +276,5 @@ private:
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);
-	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage);
+	static BOOL SaveToImage(HWND hWnd, CBitmap& bmImage, const CRect& rFromTo = CRect(0, 0, -1, -1));
 };
