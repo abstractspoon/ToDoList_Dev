@@ -12,6 +12,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
+#include "..\shared\autoflag.h"
+#include "..\shared\copywndcontents.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,7 +48,6 @@ CKanbanListCtrlArray::~CKanbanListCtrlArray()
 {
 	RemoveAll();
 }
-
 
 void CKanbanListCtrlArray::RemoveAll()
 {
@@ -113,7 +114,8 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_bSelected(FALSE),
 	m_bShowTaskColorAsBar(TRUE),
 	m_bColorByPriority(FALSE),
-	m_nLineHeight(-1)
+	m_nLineHeight(-1),
+	m_bSavingToImage(FALSE)
 {
 }
 
@@ -440,19 +442,18 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	case CDDS_ITEMPREPAINT:
 		{
 			const KANBANITEM* pKI = GetKanbanItem(pLVCD->nmcd.lItemlParam);
-			//ASSERT(pKI);
 			
 			if (pKI)
 			{
 				int nItem = (int)pLVCD->nmcd.dwItemSpec;
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 		
-				// draw backgound
+				// draw background
 				CRect rItem;
 				GetItemRect(nItem, rItem, LVIR_BOUNDS);
 				rItem.DeflateRect(1, 1);
 				
-				BOOL bSelected = (GetItemState(nItem, LVIS_SELECTED) == LVIS_SELECTED);
+				BOOL bSelected = (!m_bSavingToImage && (GetItemState(nItem, LVIS_SELECTED) == LVIS_SELECTED));
 				BOOL bFocused = (bSelected && (::GetFocus() == pNMHDR->hwndFrom));
 				COLORREF crText = pKI->GetTextColor(bSelected, m_bTextColorIsBkgnd);
 
@@ -614,8 +615,6 @@ void CKanbanListCtrl::DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, cons
 
 		if (!sValue.IsEmpty())
 			sAttrib += sValue;
-// 		else
-// 			sAttrib += CEnString(IDS_NONE);
 	}
 	else
 	{
@@ -634,7 +633,6 @@ void CKanbanListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	HWND hwndHdr = pNMCD->hdr.hwndFrom;
 
-	//ASSERT(hwndHdr == m_header);
 	if (hwndHdr != m_header)
 		return;
 	
@@ -1004,4 +1002,11 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 	
 	// all else
 	return FALSE;
+}
+
+BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage)
+{
+	CAutoFlag af(m_bSavingToImage, TRUE);
+
+	return CCopyListCtrlContents(*this).DoCopy(bmImage);
 }

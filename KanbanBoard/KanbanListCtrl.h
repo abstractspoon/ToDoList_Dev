@@ -41,6 +41,7 @@ public:
 	void RefreshColumnTitle();
 	void SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru);
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL SaveToImage(CBitmap& bmImage);
 
 	int FindTask(DWORD dwItemID) const;
 	int FindTask(const CPoint& ptScreen) const;
@@ -70,6 +71,7 @@ protected:
 	BOOL m_bShowTaskColorAsBar;
 	BOOL m_bColorByPriority;
 	BOOL m_bStrikeThruDoneTasks;
+	BOOL m_bSavingToImage;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;

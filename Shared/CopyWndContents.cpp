@@ -355,6 +355,10 @@ int CCopyListCtrlContents::CalcPageCount(BOOL bVert) const
 	int nSizeContent = CalcContentsSize().cy - nHeaderHeight;
 	int nSizePage = CalcPageSize().cy - nHeaderHeight;
 
+	if (nSizePage == 0)
+		return 1;
+
+	// else
 	int nCount = (nSizeContent / nSizePage);
 
 	if (nSizeContent % nSizePage)
@@ -404,8 +408,16 @@ CSize CCopyListCtrlContents::CalcPageSize() const
 	CSize sizePage(CCopyWndContents::CalcPageSize());
 
  	// adjust for header and whole lines
- 	int nHeaderHeight = CalcHeaderHeight();
- 	sizePage.cy = ((m_list.GetCountPerPage() * m_nItemHeight) + nHeaderHeight);
+	int nHeaderHeight = CalcHeaderHeight();
+
+	if (m_list.GetCountPerPage() > 0)
+	{
+		sizePage.cy = ((m_list.GetCountPerPage() * m_nItemHeight) + nHeaderHeight);
+	}
+	else // item height > page size
+	{
+		sizePage.cy += nHeaderHeight;
+	}
 
 	return sizePage;
 }

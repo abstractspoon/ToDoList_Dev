@@ -24,6 +24,8 @@
 #include "..\shared\themed.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
+#include "..\shared\copywndcontents.h"
+#include "..\shared\enbitmap.h"
 
 #include "..\Interfaces\iuiextension.h"
 #include "..\Interfaces\ipreferences.h"
@@ -2455,3 +2457,85 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 	CWnd::OnMouseMove(nFlags, point);
 }
+
+BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
+{
+	int nNumLists = m_aListCtrls.GetSize();
+
+	CArray<CBitmap, CBitmap&> aListBmps;
+	aListBmps.SetSize(nNumLists, 1);
+
+	int nListWidth = 0, nListHeight = 0;
+
+	for (int nList = 0; nList < nNumLists; nList++)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		CEnBitmap bmp;
+
+		if (!pList->SaveToImage(bmp))
+			return FALSE;
+
+		CSize size = bmp.GetSize();
+		nListHeight = max(nListHeight, size.cy);
+
+		if (nListWidth == 0)
+			nListWidth = size.cx;
+		else
+			ASSERT(nListWidth == size.cx);
+
+		aListBmps[nList].Attach(bmp.Detach());
+	}
+
+	// Create some memory DCs
+	CClientDC dc(this);
+	CDC dcImage, dcList;
+
+	if (dcImage.CreateCompatibleDC(&dc) && dcList.CreateCompatibleDC(&dc))
+	{
+		// Create the image big enough to fit the lists side-by-side
+		int nTotalWidth = (nNumLists * nListWidth);
+
+		if (bmImage.CreateCompatibleBitmap(&dc, nTotalWidth, nListHeight))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+			// Fill with background colour
+			dcImage.FillSolidRect(0, 0, nTotalWidth, nListHeight, GetSysColor(COLOR_WINDOW));
+
+			for (int nList = 0, nPos = 0; nList < nNumLists; nList++)
+			{
+				CBitmap* pOldList = dcList.SelectObject(&(aListBmps[nList]));
+				
+				dcImage.BitBlt(nPos, 0, nListWidth, nListHeight, &dcList, 0, 0, SRCCOPY);
+				nPos += nListWidth;
+
+				dcImage.FillSolidRect((nPos - 1) , 0, 1, nListHeight, GetSysColor(COLOR_3DFACE));
+				dcList.SelectObject(pOldList);
+			}
+		}
+	}
+
+	return (bmImage.GetSafeHandle() != NULL);
+}
+
+BOOL CKanbanCtrl::CanSaveToImage() const
+{
+	// At least one column must have items
+	// And the item count per page must be 1 or more
+	int nList = m_aListCtrls.GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+
+		if (pList->GetCountPerPage() == 0)
+			return FALSE;
+
+		// else
+		if (pList->GetItemCount())
+			return TRUE;
+	}
+
+	return FALSE;
+}
+

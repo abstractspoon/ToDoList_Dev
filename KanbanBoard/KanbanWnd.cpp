@@ -17,6 +17,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\holdredraw.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -502,6 +503,22 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		// not handled
 		break;
 
+	case IUI_SAVETOIMAGE:
+		if (dwExtra)
+		{
+			CLockUpdates lock(GetSafeHwnd());
+			CBitmap bmImage;
+
+			if (m_ctrlKanban.SaveToImage(bmImage))
+			{
+				HBITMAP* pHBM = (HBITMAP*)dwExtra;
+				*pHBM = (HBITMAP)bmImage.Detach();
+
+				return true;
+			}
+		}
+		break;
+
 	case IUI_TOGGLABLESORT:
 		m_ctrlKanban.Sort((IUI_ATTRIBUTE)dwExtra, TRUE);
 		return true;
@@ -550,6 +567,9 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_COLLAPSESELECTED:
 		// not handled
 		break;
+
+	case IUI_SAVETOIMAGE:
+		return m_ctrlKanban.CanSaveToImage();
 
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
