@@ -2262,7 +2262,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					if ((nState == GMIS_SELECTEDNOTFOCUSED) && m_dwEditTitleTaskID)
 						nState = GMIS_SELECTED;
 					
-					BOOL bSelected = (nState == GMIS_NONE);
+					BOOL bSelected = (nState != GMIS_NONE);
 					BOOL bRef = (dwTaskID != dwTrueID);
 					
 					// colors
