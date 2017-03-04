@@ -72,6 +72,7 @@ public:
 	BOOL Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWND hwndMainHeader = NULL);
 	BOOL IsSyncing() const;
 	void Unsync();
+	HWND GetHwnd() const { return CSubclassWnd::GetHwnd(); }
 
 	inline TLS_LINKAGE GetLinkage() const { return m_nLinkage; }
 	
@@ -98,7 +99,7 @@ public:
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void Show(BOOL bShow = TRUE);
 	void SetSplitBarColor(COLORREF crSplitBar);
-	BOOL SaveToImage(CBitmap& bmImage);
+	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
 
 	HTREEITEM GetTreeSelItem() const;
 	int GetTreeSelItems(CHTIArray& aItems) const;

@@ -203,7 +203,7 @@ TODOITEM* CToDoCtrlData::NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID) c
 	// copy over parent attribs
 	if (dwParentTaskID && !s_mapParentAttribs.IsEmpty())
 		CopyTaskAttributes(pTDI, dwParentTaskID, s_mapParentAttribs);
-
+	
 	return pTDI;
 }
 

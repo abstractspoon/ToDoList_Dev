@@ -1417,3 +1417,63 @@ GM_ITEMSTATE CTDLTaskListCtrl::GetColumnItemState(int nItem) const
 	return GetListItemState(nItem);
 }
 
+BOOL CTDLTaskListCtrl::SaveToImage(CBitmap& bmImage)
+{
+	if (!CanSaveToImage())
+		return FALSE;
+
+	CLockUpdates lock(GetSafeHwnd());
+
+	// Resize the title column to the actual width of the title text
+	int nColWidth = m_lcTasks.GetColumnWidth(0);
+
+	int nReqWidth = CalcRequiredImageTitleColumnWidth();
+	m_lcTasks.SetColumnWidth(0, nReqWidth);
+
+	BOOL bRes = CTDLTaskCtrlBase::SaveToImage(bmImage);
+
+	// Restore title column width
+	m_lcTasks.SetColumnWidth(0, nColWidth);
+
+	return bRes;
+}
+
+int CTDLTaskListCtrl::CalcRequiredImageTitleColumnWidth()
+{
+	int nItem = m_lcTasks.GetItemCount();
+	CString sLongestTopLevel, sLongestChild;
+
+	while (nItem--)
+	{
+		DWORD dwTaskID = GetTaskID(nItem);
+
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+		int nTitleLen = pTDI->sTitle.GetLength();
+
+		if (pTDS->ParentIsRoot())
+		{
+			if (nTitleLen > sLongestTopLevel.GetLength())
+				sLongestTopLevel = pTDI->sTitle;
+		}
+		else
+		{
+			if (nTitleLen > sLongestChild.GetLength())
+				sLongestChild = pTDI->sTitle;
+		}
+	}
+
+	CClientDC dc(this);
+
+	int nMaxTopLevelWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongestTopLevel, &dc, m_fonts.GetFont(GMFS_BOLD));
+	int nMaxChildWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongestChild, &dc, m_fonts.GetFont());
+
+	int nMaxTextWidth = max(nMaxTopLevelWidth, nMaxChildWidth);
+
+	// Add to this the left margin
+	CRect rLabel;
+	m_lcTasks.GetItemRect(0, rLabel, LVIR_LABEL);
+
+	return (rLabel.left + nMaxTextWidth);
+}

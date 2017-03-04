@@ -346,6 +346,20 @@ CSize CCopyListCtrlContents::CalcContentsSize() const
 	// add height of header
 	sizeContent.cy += CalcHeaderHeight();
 
+	// Restrict width to total width of columns
+	HWND hwndHdr = ListView_GetHeader(m_wnd);
+	
+	if (hwndHdr)
+	{
+		int nCol = Header_GetItemCount(hwndHdr);
+		int nWidth = 0;
+
+		while (nCol--)
+			nWidth += m_list.GetColumnWidth(nCol);
+
+		sizeContent.cx = min(sizeContent.cx, nWidth);
+	}
+
 	return sizeContent;
 }
 

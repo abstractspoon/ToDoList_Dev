@@ -72,7 +72,6 @@ public:
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
 	BOOL EnsureSelectionVisible();
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
-	BOOL GetLabelEditRect(CRect& rLabel) const;
 
 	// list related
 	int GetSelectedItem() const;
@@ -86,11 +85,12 @@ public:
 	int FindTaskItem(DWORD dwTaskID) const;
 	int InsertItem(DWORD dwTaskID, int nPos = -1);
 
+	BOOL GetLabelEditRect(CRect& rLabel) const;
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
-	
 	BOOL CancelOperation();
+	BOOL SaveToImage(CBitmap& bmImage);
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 
@@ -142,7 +142,8 @@ protected:
 	void SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	BOOL GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
-	
+	int CalcRequiredImageTitleColumnWidth();
+
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
 	GM_ITEMSTATE GetListItemState(int nItem) const;

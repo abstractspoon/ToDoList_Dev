@@ -6133,7 +6133,7 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 
 	CLockUpdates lock(GetSafeHwnd());
 
-	return CTreeListSyncer::SaveToImage(bmImage);
+	return CTreeListSyncer::SaveToImage(bmImage, m_crGridLine);
 }
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const

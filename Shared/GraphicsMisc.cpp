@@ -592,22 +592,30 @@ float GraphicsMisc::GetAverageCharWidth(CDC* pDC, CFont* pFont)
 	return (float)tm.tmAveCharWidth;
 }
 
-int GraphicsMisc::GetAverageStringWidth(const CString& sText, CDC* pDC)
+int GraphicsMisc::GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont)
 {
 	if (sText.IsEmpty())
 		return 0;
 
-	return (int)(GetAverageCharWidth(pDC) * sText.GetLength());
+	return (int)(GetAverageCharWidth(pDC, pFont) * sText.GetLength());
 }
 
-int GraphicsMisc::GetAverageMaxStringWidth(const CString& sText, CDC* pDC)
+int GraphicsMisc::GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont* pFont)
 {
 	if (sText.IsEmpty())
 		return 0;
 
+	CFont* pOld = NULL;
+	
+	if (pFont)
+		pOld = pDC->SelectObject(pFont);
+	
 	int nAveWidth = GetAverageStringWidth(sText, pDC);
 	int nActualWidth = pDC->GetTextExtent(sText).cx;
 
+	if (pFont)
+		pDC->SelectObject(pOld);
+	
 	return max(nAveWidth, nActualWidth);
 }
 

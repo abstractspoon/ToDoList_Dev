@@ -5949,9 +5949,24 @@ DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 
 BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 {
-	//CAutoFlag af(m_bSavingToImage, TRUE);
+	if (m_tree.GetCount() == 0)
+		return FALSE;
 
-	return CTreeListSyncer::SaveToImage(bmImage);
+	CLockUpdates lock(m_tree);
+
+	// Resize tree header width to suit title text width
+	int nColWidth = m_treeHeader.GetItemWidth(0);
+	BOOL bTracked = m_treeHeader.IsItemTracked(0);
+
+	ResizeColumnsToFit();	
+	
+	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, m_crGridLine);
+	
+	// Restore title column width
+	m_treeHeader.SetItemWidth(0, nColWidth);
+	m_treeHeader.SetItemTracked(0, bTracked);
+	
+	return bRes;
 }
 
 void CGanttTreeListCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
