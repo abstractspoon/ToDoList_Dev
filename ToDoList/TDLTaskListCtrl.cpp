@@ -1430,7 +1430,7 @@ BOOL CTDLTaskListCtrl::SaveToImage(CBitmap& bmImage)
 	// Resize the title column to the actual width of the title text
 	int nColWidth = m_lcTasks.GetColumnWidth(0);
 
-	int nReqWidth = CalcRequiredImageTitleColumnWidth();
+	int nReqWidth = CalcRequiredTitleColumnWidthForImage();
 	m_lcTasks.SetColumnWidth(0, nReqWidth);
 
 	BOOL bRes = CTDLTaskCtrlBase::SaveToImage(bmImage);
@@ -1441,7 +1441,7 @@ BOOL CTDLTaskListCtrl::SaveToImage(CBitmap& bmImage)
 	return bRes;
 }
 
-int CTDLTaskListCtrl::CalcRequiredImageTitleColumnWidth()
+int CTDLTaskListCtrl::CalcRequiredTitleColumnWidthForImage()
 {
 	int nItem = m_lcTasks.GetItemCount();
 	CString sLongestTopLevel, sLongestChild;

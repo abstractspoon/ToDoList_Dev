@@ -142,7 +142,7 @@ protected:
 	void SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	BOOL GetItemTitleRect(int nItem, TDC_TITLERECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
-	int CalcRequiredImageTitleColumnWidth();
+	int CalcRequiredTitleColumnWidthForImage();
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
