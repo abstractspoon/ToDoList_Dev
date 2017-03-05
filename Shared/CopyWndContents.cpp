@@ -364,7 +364,7 @@ int CCopyListCtrlContents::CalcPageCount(BOOL bVert) const
 	if (nSizeContent % nSizePage)
 		nCount++;
 
-	return nCount;
+	return max(nCount, 1);
 }
 
 void CCopyListCtrlContents::DoPageDown()
