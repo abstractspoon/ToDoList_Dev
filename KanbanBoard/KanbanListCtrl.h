@@ -41,7 +41,7 @@ public:
 	void RefreshColumnTitle();
 	void SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru);
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL SaveToImage(CBitmap& bmImage);
+	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
 
 	int FindTask(DWORD dwItemID) const;
 	int FindTask(const CPoint& ptScreen) const;
@@ -117,7 +117,6 @@ protected:
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point);
-
 	void DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, const CString& sValue, int nFlags) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

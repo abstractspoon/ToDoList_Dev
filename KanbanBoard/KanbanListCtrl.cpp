@@ -14,6 +14,7 @@
 #include "..\shared\timehelper.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\copywndcontents.h"
+#include "..\shared\holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1004,9 +1005,21 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage)
+BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
 {
+	CLockUpdates lock(*this);
 	CAutoFlag af(m_bSavingToImage, TRUE);
 
-	return CCopyListCtrlContents(*this).DoCopy(bmImage);
+	// Resize column width to suit text
+	int nPrevColWidth = m_header.GetItemWidth(0);
+
+	SetColumnWidth(0, nColWidth);
+
+	// Do the copy
+	BOOL bRes = CCopyListCtrlContents(*this).DoCopy(bmImage);
+
+	// Restore column width
+	SetColumnWidth(0, nPrevColWidth);
+
+	return bRes;
 }

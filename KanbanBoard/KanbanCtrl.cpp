@@ -2466,13 +2466,14 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 	aListBmps.SetSize(nNumLists, 1);
 
 	int nListWidth = 0, nListHeight = 0;
+	int nReqColWidth = CalcRequiredColumnWidthForImage();
 
 	for (int nList = 0; nList < nNumLists; nList++)
 	{
 		CKanbanListCtrl* pList = m_aListCtrls[nList];
 		CEnBitmap bmp;
 
-		if (!pList->SaveToImage(bmp))
+		if (!pList->SaveToImage(bmp, nReqColWidth))
 			return FALSE;
 
 		CSize size = bmp.GetSize();
@@ -2516,6 +2517,23 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 	}
 
 	return (bmImage.GetSafeHandle() != NULL);
+}
+
+int CKanbanCtrl::CalcRequiredColumnWidthForImage() const
+{
+	POSITION pos = m_data.GetStartPosition();
+	DWORD dwTaskID = 0;
+	KANBANITEM* pKI = NULL;
+
+	while (pos)
+	{
+		m_data.GetNextAssoc(pos, dwTaskID, pKI);
+
+
+
+	}
+
+	return 200;
 }
 
 BOOL CKanbanCtrl::CanSaveToImage() const
