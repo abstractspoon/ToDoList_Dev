@@ -1063,7 +1063,7 @@ void CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 		CKanbanListCtrl* pList = m_aListCtrls[nList];
 		ASSERT(pList && !pList->HasMultipleValues());
 		
-		if (pGlobals == NULL)
+		if ((pGlobals == NULL) || !WantShowColumn(pList))
 		{
 			DeleteListCtrl(nList);
 		}
@@ -1183,14 +1183,23 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
 	CKanbanItemArrayMap mapKIArray;
 	m_data.BuildTempItemMaps(m_sTrackAttribID, mapKIArray);
 
-	if (m_aColumnDefs.GetSize() == 0) // Dynamic columns
+	if (UsingDynamicColumns())
 		RebuildDynamicListCtrls(mapKIArray);
 	else
 		RebuildFixedListCtrls(mapKIArray);
 
 	// Rebuild the list data for each list (which can be empty)
 	if (bRebuildData)
+	{
 		RebuildListCtrlData(mapKIArray);
+	}
+	else if (UsingDynamicColumns())
+	{
+		// If not rebuilding the data (which will remove lists
+		// which are empty as consequence of not showing parent
+		// tasks) we made need to remove such lists.
+		RemoveOldDynamicListCtrls(mapKIArray);
+	}
 
 	Resize();
 	FixupSelection();
@@ -2521,19 +2530,18 @@ BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
 
 int CKanbanCtrl::CalcRequiredColumnWidthForImage() const
 {
-	POSITION pos = m_data.GetStartPosition();
-	DWORD dwTaskID = 0;
-	KANBANITEM* pKI = NULL;
+	int nMaxWidth = 0;
+	int nList = m_aListCtrls.GetSize();
 
-	while (pos)
+	while (nList--)
 	{
-		m_data.GetNextAssoc(pos, dwTaskID, pKI);
+		const CKanbanListCtrl* pList = m_aListCtrls[nList];
 
-
-
+		int nListWidth = pList->CalcRequiredAttributeLineWidthForImage();
+		nMaxWidth = max(nMaxWidth, nListWidth);
 	}
 
-	return 200;
+	return nMaxWidth;
 }
 
 BOOL CKanbanCtrl::CanSaveToImage() const

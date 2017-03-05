@@ -42,6 +42,9 @@ static char THIS_FILE[] = __FILE__;
 
 const int MIN_LABEL_EDIT_WIDTH	= 200;
 const int BAR_WIDTH				= 6;
+const int NUM_TEXTLINES			= 2;
+const int TITLE_VPADDING		= 6;
+const int ATTRIB_INDENT			= 6;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -157,7 +160,7 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if (pFont)
 		SendMessage(WM_SETFONT, (WPARAM)pFont->GetSafeHandle());
-	
+
 	// the only column
 	InsertColumn(0, _T(""), LVCFMT_RIGHT, 100);
 	
@@ -221,6 +224,7 @@ void CKanbanListCtrl::OnDisplayAttributeChanged()
 	m_nLineHeight = CalcLineHeight();
 	int nItemHeight = CalcRequiredItemHeight();
 
+	// Use an image list to force required height
 	m_ilHeight.Create(1, nItemHeight, ILC_COLOR32, 1, 0);
 	
 	SetImageList(&m_ilHeight, LVSIL_SMALL);
@@ -336,10 +340,26 @@ int CKanbanListCtrl::CalcRequiredItemHeight(int nNumLines) const
 {
 	ASSERT(m_nLineHeight != -1);
 
-	if (nNumLines == -1)
-		nNumLines = (1 + m_aDisplayAttrib.GetSize());
+	int nHeight = TITLE_VPADDING;
 
-	return ((m_nLineHeight * nNumLines) + 6);
+	if (nNumLines == -1) // Full height of item
+	{
+		nHeight += CalcItemTitleHeight();
+		nHeight += (m_aDisplayAttrib.GetSize() * m_nLineHeight);
+	}
+	else
+	{
+		nHeight += (m_nLineHeight * nNumLines);
+	}
+
+	return nHeight;
+}
+
+int CKanbanListCtrl::CalcItemTitleHeight() const
+{
+	ASSERT(m_nLineHeight != -1);
+
+	return ((NUM_TEXTLINES * m_nLineHeight) + 2);
 }
 
 int CKanbanListCtrl::CalcLineHeight() const
@@ -516,10 +536,6 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				
 				// draw text
 				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-				
-				// first line is the task title
-				CRect rLine(rItem);
-				rLine.DeflateRect(4, 1, 3, 2);
 
 				pDC->SetBkMode(TRANSPARENT);
 				pDC->SetTextColor(crText);
@@ -536,7 +552,17 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (dwFontFlags)
 					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
 				
-				DrawAttribute(pDC, rLine, 0, pKI->sTitle, nFlags);
+				// first 'n' lines is the task title
+				rItem.DeflateRect(4, 1, 3, 2);
+
+				CRect rTitle(rItem);
+				rTitle.bottom = (rTitle.top + CalcItemTitleHeight());
+
+				pDC->DrawText(pKI->sTitle, rTitle, nFlags | DT_WORDBREAK);
+
+				// Attribute display
+				CRect rLine(rItem);
+				rLine.top = rTitle.bottom;
 
 				// Remove boldness for attributes
 				if (dwFontFlags & GMFS_BOLD)
@@ -547,16 +573,15 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
 				}
 
-				// Attribute display
 				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
 					crText = pDC->SetTextColor(GraphicsMisc::Lighter(crText, 0.3));
 				
-				rLine.left += 6; // indent
+				rLine.left += ATTRIB_INDENT;
 
 				for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 				{
 					IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-					UINT nFormatID = GetDisplayNameID(nAttrib);
+					UINT nFormatID = GetDisplayFormat(nAttrib);
 
 					DrawAttribute(pDC, rLine, nFormatID, pKI->GetAttributeValue(nAttrib), nFlags);
 				}
@@ -570,7 +595,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-UINT CKanbanListCtrl::GetDisplayNameID(IUI_ATTRIBUTE nAttrib)
+UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -605,22 +630,24 @@ UINT CKanbanListCtrl::GetDisplayNameID(IUI_ATTRIBUTE nAttrib)
 
 }
 
-void CKanbanListCtrl::DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, const CString& sValue, int nFlags) const
+CString CKanbanListCtrl::FormatAttributeValue(const CString& sValue, UINT nFormatID) const
 {
+	ASSERT(nFormatID);
+
 	CEnString sAttrib;
 				
-	if (nFormatID)
-	{
-		sAttrib.LoadString(nFormatID);
-		sAttrib += _T(": ");
+	sAttrib.LoadString(nFormatID);
+	sAttrib += _T(": ");
 
-		if (!sValue.IsEmpty())
-			sAttrib += sValue;
-	}
-	else
-	{
-		sAttrib = sValue;
-	}
+	if (!sValue.IsEmpty())
+		sAttrib += sValue;
+
+	return sAttrib;
+}
+
+void CKanbanListCtrl::DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, const CString& sValue, int nFlags) const
+{
+	CString sAttrib(FormatAttributeValue(sValue, nFormatID));
 
 	pDC->DrawText(sAttrib, rLine, nFlags);
 
@@ -1022,4 +1049,33 @@ BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
 	SetColumnWidth(0, nPrevColWidth);
 
 	return bRes;
+}
+
+int CKanbanListCtrl::CalcRequiredAttributeLineWidthForImage() const
+{
+	int nMaxAttribLength = 0;
+	int nItem = GetItemCount();
+
+	while (nItem--)
+	{
+		DWORD dwTaskID = GetItemData(nItem);
+		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+		ASSERT(pKI);
+
+		if (pKI)
+		{
+			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
+			{
+				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+				UINT nFormatID = GetDisplayFormat(nAttrib);
+
+				CString sAttrib = FormatAttributeValue(pKI->GetAttributeValue(nAttrib), nFormatID);
+				nMaxAttribLength = max(nMaxAttribLength, sAttrib.GetLength());
+			}
+		}
+	}
+
+	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
+
+	return ((int)(nMaxAttribLength * GraphicsMisc::GetAverageCharWidth(&dc)) + ATTRIB_INDENT);
 }
