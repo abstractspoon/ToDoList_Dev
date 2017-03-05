@@ -1443,7 +1443,7 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 	return TRUE;
 }
 
-void CKanbanCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, 
+void CKanbanCtrl::BuildTaskIDMap(const ITaskList15* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -1452,7 +1452,7 @@ void CKanbanCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask,
 	mapIDs.AddKey(pTasks->GetTaskID(hTask));
 	
 	// children
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
 	
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -1462,7 +1462,7 @@ void CKanbanCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);
+			BuildTaskIDMap(pTasks, hSibling, mapIDs, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -1471,7 +1471,7 @@ void CKanbanCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask,
 void CKanbanCtrl::RemoveDeletedTasks(const ITaskList15* pTasks)
 {
 	CSet<DWORD> mapIDs;
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
 
 	POSITION pos = m_data.GetStartPosition();
 	DWORD dwTaskID = 0;
