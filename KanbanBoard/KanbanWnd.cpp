@@ -569,7 +569,7 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 		break;
 
 	case IUI_SAVETOIMAGE:
-		return m_ctrlKanban.CanSaveToImage();
+		return (m_ctrlKanban.CanSaveToImage() != FALSE);
 
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
