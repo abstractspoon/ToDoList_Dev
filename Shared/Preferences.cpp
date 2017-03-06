@@ -452,7 +452,7 @@ bool CPreferences::WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, do
 
 int CPreferences::GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty) const
 {
-	return GetProfileArray(&m_iPrefs, lpszSection, aItems);
+	return GetProfileArray(&m_iPrefs, lpszSection, aItems, bAllowEmpty);
 }
 
 int CPreferences::GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty)
