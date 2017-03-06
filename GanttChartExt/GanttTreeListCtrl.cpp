@@ -1376,6 +1376,8 @@ void CGanttTreeListCtrl::Resize(const CRect& rect)
 void CGanttTreeListCtrl::ExpandAll(BOOL bExpand)
 {
 	ExpandItem(NULL, bExpand, TRUE);
+
+	RecalcTreeColumns(TRUE);
 }
 
 void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
