@@ -792,6 +792,16 @@ COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 	return dtEnd;
 }
 
+COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
+{
+	return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
+{
+	return (GetStartOfMonth(date).m_dt + GetDaysInMonth(date));
+}
+
 CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags)
 {
 	CString sDate, sTime, sDow;
@@ -1429,10 +1439,25 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy)
 
 	IncrementMonth(nMonth, nYear, nBy);
 
-	// convert back
+	// Validate day
+	int nDayInMonth = GetDaysInMonth(nMonth, nYear);
+
+	st.wDay = max(st.wDay, 1);
+	st.wDay = min(st.wDay, nDayInMonth);
+
 	st.wMonth = (WORD)nMonth;
 	st.wYear = (WORD)nYear;
+}
 
+void CDateHelper::IncrementMonth(COleDateTime& date, int nBy)
+{
+	SYSTEMTIME st = { 0 };
+	
+	if (date.GetAsSystemTime(st))
+	{
+		IncrementMonth(st, nBy);
+		date = COleDateTime(st);
+	}
 }
 
 void CDateHelper::IncrementMonth(int& nMonth, int& nYear, int nBy)

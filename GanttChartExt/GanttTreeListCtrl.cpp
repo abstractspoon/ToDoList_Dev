@@ -5970,8 +5970,22 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	BOOL bTracked = m_treeHeader.IsItemTracked(0);
 
 	ResizeColumnsToFit();	
+
+	// Calculate the date range in scroll units
+	// allow a month's buffer at each end
+	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(m_dtEarliest);
+	COleDateTime dtTo = CDateHelper::GetEndOfMonth(m_dtLatest);
+
+	CDateHelper::IncrementMonth(dtFrom, -1);
+	CDateHelper::IncrementMonth(dtTo, 1);
+
+	int nFrom = GetScrollPosFromDate(dtFrom);
+	int nTo = GetScrollPosFromDate(dtTo);
+
+	if (nTo == nFrom)
+		nTo = -1;
 	
-	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, 200, 600/*, m_crGridLine*/);
+	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
 	
 	// Restore title column width
 	m_treeHeader.SetItemWidth(0, nColWidth);

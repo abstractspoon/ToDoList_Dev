@@ -119,6 +119,7 @@ public:
 	static void GetNextMonth(int& nMonth, int& nYear, BOOL bNext = TRUE);
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1);
+	static void IncrementMonth(COleDateTime& date, int nBy = 1);
 
 	static COleDateTime CalcDate(int nDOW, int nWhich, int nMonth, int nYear);
 	static int CalcDayOfMonth(int nDOW, int nWhich, int nMonth, int nYear);
@@ -156,6 +157,8 @@ public:
 
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
+	static COleDateTime GetStartOfMonth(const COleDateTime& date);
+	static COleDateTime GetEndOfMonth(const COleDateTime& date);
 
 	static BOOL GetTimeT(const COleDateTime& date, time_t& timeT);
 	static BOOL GetTimeT64(const COleDateTime& date, time64_t& timeT);
