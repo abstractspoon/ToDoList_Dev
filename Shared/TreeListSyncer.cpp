@@ -1202,7 +1202,7 @@ BOOL CTreeListSyncer::IsTree(HWND hwnd)
 
 BOOL CTreeListSyncer::IsHeader(HWND hwnd)
 {
-	return (CWinClasses::IsClass(hwnd, WC_HEADER) ? TRUE : FALSE);
+	return (GetType(hwnd) == TLST_HEADER);
 }
 
 void CTreeListSyncer::ResyncListHeader(HWND hwnd)
