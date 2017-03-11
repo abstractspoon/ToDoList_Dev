@@ -293,17 +293,12 @@ BEGIN
     EDITTEXT        IDC_WEBLINK,27,7,205,14,ES_AUTOHSCROLL
 END
 
-IDD_LINKTOFILE_DIALOG DIALOG DISCARDABLE  0, 0, 256, 151
+IDD_LINKTOFILE_DIALOG DIALOG DISCARDABLE  0, 0, 256, 167
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create Link to File"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Options",IDC_STATIC,7,7,242,116
-    CONTROL         "&Make this my automatic choice",IDC_MAKEDEFAULT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,14,105,234,10
-    DEFPUSHBUTTON   "OK",IDOK,143,130,50,14,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,199,130,50,14
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,15,97,227,1
+    GROUPBOX        "Options",IDC_STATIC,7,7,242,132
     CONTROL         "&Link to the file using 'file://...'",IDC_FILEURL,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,14,21,226,10
     CONTROL         "&Embed a copy of the file which can be viewed by double-clicking the icon",
@@ -315,6 +310,14 @@ BEGIN
     CONTROL         "&Display the image file directly\n(currently supports bmp, ico, gif, jpg, png)",
                     IDC_FILEIMAGE,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
                     BS_MULTILINE,14,76,226,18
+    CONTROL         "Limit colour depth of images to reduce tasklist file size",
+                    IDC_REDUCEIMAGECOLORS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,24,97,225,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,15,113,227,1
+    CONTROL         "&Make this my automatic choice",IDC_MAKEDEFAULT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,121,234,10
+    DEFPUSHBUTTON   "OK",IDOK,143,146,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,199,146,50,14
 END
 
 IDD_INSERTTABLE_DIALOG DIALOG DISCARDABLE  0, 0, 197, 102
@@ -337,7 +340,7 @@ BEGIN
     GROUPBOX        "Size",IDC_STATIC,7,7,183,67
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 360, 116
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 360, 133
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -358,6 +361,9 @@ BEGIN
     CONTROL         "&Display the image file directly (currently supports bmp, ico, gif, jpg, png)",
                     IDC_FILEIMAGE,"Button",BS_AUTORADIOBUTTON | BS_TOP | 
                     BS_MULTILINE,7,99,346,10
+    CONTROL         "Limit colour depth of images to reduce tasklist file size",
+                    IDC_REDUCEIMAGECOLORS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,113,230,10
 END
 
 IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 375, 189
@@ -392,7 +398,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 249
         TOPMARGIN, 7
-        BOTTOMMARGIN, 144
+        BOTTOMMARGIN, 160
     END
 
     IDD_INSERTTABLE_DIALOG, DIALOG
@@ -408,7 +414,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 353
         TOPMARGIN, 7
-        BOTTOMMARGIN, 109
+        BOTTOMMARGIN, 126
     END
 
     IDD_PREFERENCES_DIALOG, DIALOG
@@ -553,7 +559,7 @@ BEGIN
     ID_HELP                 "\nOnline Help"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INLINESPELLCHECK "\nInline Spell Checking"
 END

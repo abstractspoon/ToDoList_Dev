@@ -16,15 +16,17 @@ class CCreateFileLinkDlg : public CDialog
 {
 // Construction
 public:
-	CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, BOOL bDefault, CWnd* pParent = NULL);
+	CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceColors, CWnd* pParent = NULL);
 
 	RE_PASTE GetLinkOption() const { return (RE_PASTE)m_nLinkOption; }
 	BOOL GetMakeLinkOptionDefault() const { return m_bMakeDefault; }
+	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CCreateFileLinkDlg)
 	//}}AFX_DATA
+	BOOL	m_bReduceImageColors;
 	BOOL	m_bMakeDefault;
 	int		m_nLinkOption;
 	CString m_sRefFile;

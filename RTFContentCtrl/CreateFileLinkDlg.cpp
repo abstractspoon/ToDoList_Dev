@@ -19,12 +19,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CCreateFileLinkDlg dialog
 
-CCreateFileLinkDlg::CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, BOOL bDefault, CWnd* pParent /*=NULL*/)
+CCreateFileLinkDlg::CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceColors, CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_LINKTOFILE_DIALOG, pParent),
 	m_sRefFile(szRefFile), 
 	m_nLinkOption(nLinkOption), 
-	m_bMakeDefault(bDefault)
+	m_bMakeDefault(bDefault),
+	m_bReduceImageColors(bReduceColors)
 {
 	//{{AFX_DATA_INIT(CCreateFileLinkDlg)
 	//}}AFX_DATA_INIT
@@ -38,6 +39,7 @@ void CCreateFileLinkDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_MAKEDEFAULT, m_bMakeDefault);
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_FILEURL, m_nLinkOption);
+	DDX_Check(pDX, IDC_REDUCEIMAGECOLORS, m_bReduceImageColors);
 }
 
 

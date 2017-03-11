@@ -102,11 +102,11 @@ public:
 	static BOOL InitRichEdit();
 	static void ClearUndo(HWND hWnd);
 
-	static BOOL PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow);
-	static BOOL PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow);
+	static BOOL PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors);
+	static BOOL PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow, BOOL bReduceImageColors);
 
 protected:
-	static BOOL PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL& bUsedClipboard);
+	static BOOL PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors, BOOL& bUsedClipboard);
 	static BOOL CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, BOOL bAutoRTL);
 
 };

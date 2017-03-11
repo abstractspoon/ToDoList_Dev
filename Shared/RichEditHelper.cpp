@@ -176,8 +176,10 @@ void CRichEditHelper::ClearUndo(HWND hWnd)
 	}
 }
 
-BOOL CRichEditHelper::PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow)
+BOOL CRichEditHelper::PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow, BOOL bReduceImageColors)
 {
+	ASSERT(!bReduceImageColors || (nPasteHow == REP_ASIMAGE));
+
 	CWaitCursor cursor;
 
 	if (aFiles.GetSize() == 0)
@@ -196,7 +198,7 @@ BOOL CRichEditHelper::PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE
 		const CString& sFile = Misc::GetItem(aFiles, i);
 		BOOL bUsedClipboard = FALSE;
 
-		if (PasteFileInternal(hWnd, sFile, nPasteHow, bUsedClipboard))
+		if (PasteFileInternal(hWnd, sFile, nPasteHow, bReduceImageColors, bUsedClipboard))
 		{
 			bRestoreClipboard |= bUsedClipboard;
 			nFilesPasted++;
@@ -209,15 +211,15 @@ BOOL CRichEditHelper::PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE
 	return (nFileCount == nFilesPasted);
 }
 
-BOOL CRichEditHelper::PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow)
+BOOL CRichEditHelper::PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors)
 {
 	CStringArray aFiles;
 	aFiles.Add(szFilePath);
 
-	return PasteFiles(hWnd, aFiles, nPasteHow);
+	return PasteFiles(hWnd, aFiles, nPasteHow, bReduceImageColors);
 }
 
-BOOL CRichEditHelper::PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL& bUsedClipboard)
+BOOL CRichEditHelper::PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors, BOOL& bUsedClipboard)
 {
 	bUsedClipboard = FALSE;
 
@@ -228,7 +230,9 @@ BOOL CRichEditHelper::PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE 
 		case REP_ASIMAGE:
 			if (CEnBitmap::IsSupportedImageFile(szFilePath))
 			{
-				if (CEnBitmap::CopyImageFileToClipboard(hWnd, szFilePath, CLR_NONE, 8))
+				WORD nBpp = (bReduceImageColors ? 8 : 0); 
+
+				if (CEnBitmap::CopyImageFileToClipboard(hWnd, szFilePath, CLR_NONE, nBpp))
 				{
 					::SendMessage(hWnd, EM_PASTESPECIAL, CF_BITMAP, NULL);
 					bUsedClipboard = TRUE;

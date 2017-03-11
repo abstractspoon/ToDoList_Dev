@@ -145,7 +145,7 @@ LRESULT CUrlRichEditCtrl::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	::CloseClipboard();
 
 	if (nNumFiles > 0)
-		return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL);
+		return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
 
 	// else 
 	return nNumFiles;

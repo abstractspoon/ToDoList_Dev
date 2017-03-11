@@ -38,6 +38,7 @@
 #define IDC_USEMSWORD                   16013
 #define IDC_PROMPTFORFILELINK           16015
 #define IDC_PPHOST                      16016
+#define IDC_REDUCEIMAGECOLORS            16019
 #define ID_EDIT_FONT                    32771
 #define ID_EDIT_COLOR                   32772
 #define ID_EDIT_BOLD                    32773
@@ -86,7 +87,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        2
 #define _APS_NEXT_COMMAND_VALUE         32816
-#define _APS_NEXT_CONTROL_VALUE         16018
+#define _APS_NEXT_CONTROL_VALUE         16020
 #define _APS_NEXT_SYMED_VALUE           58289
 #endif
 #endif

@@ -185,7 +185,11 @@ void CRTFContentControl::OnChangeText()
 	if (m_bAllowNotify && !m_rtf.IsIMEComposing())
 		GetParent()->SendMessage(WM_ICC_COMMENTSCHANGE);
 
-	m_dlgPrefs.SetFileLinkOption(m_rtf.GetFileLinkOption(), !m_rtf.IsFileLinkOptionDefault());
+	RE_PASTE nFileLink = m_rtf.GetFileLinkOption();
+	BOOL bDefault = m_rtf.IsFileLinkOptionDefault();
+	BOOL bReduceImageColors = m_rtf.GetReduceImageColors();
+
+	m_dlgPrefs.SetFileLinkOption(nFileLink, !bDefault, bReduceImageColors);
 }
 
 void CRTFContentControl::OnKillFocus() 
@@ -563,12 +567,14 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 			return m_rtf.PasteSimpleText(s_bPasteSourceUrls);
 
 		// else one or more filepaths
-		return CRichEditHelper::PasteFiles(m_rtf, aFiles, REP_ASFILEURL);
+		return CRichEditHelper::PasteFiles(m_rtf, aFiles, REP_ASFILEURL, FALSE);
 	}
 
 	// No file paths
 	if (nNumFiles == 0)
 	{
+		CWaitCursor cursor;
+		
 		// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
 		// This also allows us to prevent richedit's default resizing by using paste special
 		if (CClipboard::HasFormat(CF_BITMAP))
@@ -579,13 +585,12 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 				bmp.CopyImage(cb.GetBitmap());
 			}
 
-			if (bmp.GetSafeHandle() && bmp.CopyToClipboard(m_rtf, 8))
-			{
-				return m_rtf.PasteSpecial(CF_BITMAP);
-			}
+			if (bmp.GetSafeHandle() == NULL)
+				return NULL;
 
-			// else 
-			return FALSE; //??
+			WORD nBpp = (WORD)(m_rtf.GetReduceImageColors() ? 8 : 0); 
+			
+			return (bmp.CopyToClipboard(m_rtf, nBpp) && m_rtf.PasteSpecial(CF_BITMAP));
 		}
 
 		// if there is HTML but not RTF or an image then convert the 
@@ -597,8 +602,6 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 
 		if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
 		{
-			CWaitCursor cursor;
-
 			// Always set this to make sure it is current
 			m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
 
@@ -644,7 +647,7 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 	// else one or more filenames 
 	if (!m_rtf.IsFileLinkOptionDefault())
 	{
-		CCreateFileLinkDlg dialog(aFiles[0], m_rtf.GetFileLinkOption(), FALSE);
+		CCreateFileLinkDlg dialog(aFiles[0], m_rtf.GetFileLinkOption(), FALSE, m_rtf.GetReduceImageColors());
 
 		if (dialog.DoModal() != IDOK)
 			return FALSE; // cancelled
@@ -652,11 +655,12 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 		// else
 		RE_PASTE nLinkOption = dialog.GetLinkOption();
 		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
+		BOOL bReduceImageColors = dialog.GetReduceImageColors();
 
-		m_rtf.SetFileLinkOption(nLinkOption, bDefault);
+		m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
 	}
 
-	return CRichEditHelper::PasteFiles(m_rtf, aFiles, m_rtf.GetFileLinkOption());
+	return CRichEditHelper::PasteFiles(m_rtf, aFiles, m_rtf.GetFileLinkOption(), m_rtf.GetReduceImageColors());
 }
 
 BOOL CRTFContentControl::CanPaste()
@@ -820,10 +824,12 @@ void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_toolbar.SetFontColor((COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT), FALSE);
 
 	m_dlgPrefs.LoadPreferences(pPrefs, sKey);
+
 	RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(sKey, _T("FileLinkOption"), REP_ASIMAGE);
 	BOOL bLinkOptionIsDefault = pPrefs->GetProfileInt(sKey, _T("FileLinkOptionIsDefault"), FALSE);
+	BOOL bReduceImageColors = pPrefs->GetProfileInt(sKey, _T("ReduceImageColors"), TRUE);
 
-	m_rtf.SetFileLinkOption(nLinkOption, bLinkOptionIsDefault);
+	m_rtf.SetFileLinkOption(nLinkOption, bLinkOptionIsDefault, bReduceImageColors);
 }
 
 void CRTFContentControl::OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyleStruct)
@@ -977,15 +983,20 @@ void CRTFContentControl::OnEditFileBrowse()
 
 		if (!m_rtf.IsFileLinkOptionDefault())
 		{
-			CCreateFileLinkDlg dialog2(aPaths[0], m_rtf.GetFileLinkOption(), FALSE);
+			RE_PASTE nLinkOption = m_rtf.GetFileLinkOption();
+			BOOL bDefault = FALSE;
+			BOOL bReduceImageColors = m_rtf.GetReduceImageColors();
+
+			CCreateFileLinkDlg dialog2(aPaths[0], nLinkOption, FALSE, bReduceImageColors);
 			
 			if (dialog2.DoModal() == IDOK)
 			{
-				RE_PASTE nLinkOption = dialog2.GetLinkOption();
-				BOOL bDefault = dialog2.GetMakeLinkOptionDefault();
-				
-				m_rtf.SetFileLinkOption(nLinkOption, bDefault);
-				m_dlgPrefs.SetFileLinkOption(nLinkOption, !bDefault);
+				nLinkOption = dialog2.GetLinkOption();
+				bDefault = dialog2.GetMakeLinkOptionDefault();
+				bReduceImageColors = dialog2.GetReduceImageColors();
+		
+				m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
+				m_dlgPrefs.SetFileLinkOption(nLinkOption, !bDefault, bReduceImageColors);
 			}
 			else
 			{
@@ -993,7 +1004,7 @@ void CRTFContentControl::OnEditFileBrowse()
 			}
 		}
 		
-		CRichEditHelper::PasteFiles(m_rtf, aPaths, m_rtf.GetFileLinkOption());
+		CRichEditHelper::PasteFiles(m_rtf, aPaths, m_rtf.GetFileLinkOption(), m_rtf.GetReduceImageColors());
 	}
 }
 
@@ -1215,9 +1226,9 @@ void CRTFContentControl::OnPreferences()
 	if (m_dlgPrefs.DoModal(s_bConvertWithMSWord) == IDOK)
 	{
 		if (m_dlgPrefs.GetPromptForFileLink())
-			m_rtf.SetFileLinkOption(m_rtf.GetFileLinkOption(), FALSE);
+			m_rtf.SetFileLinkOption(m_rtf.GetFileLinkOption(), FALSE, m_rtf.GetReduceImageColors());
 		else
-			m_rtf.SetFileLinkOption(m_dlgPrefs.GetFileLinkOption(), TRUE);
+			m_rtf.SetFileLinkOption(m_dlgPrefs.GetFileLinkOption(), TRUE, m_dlgPrefs.GetReduceImageColors());
 
 		s_bConvertWithMSWord = m_dlgPrefs.GetConvertWithMSWord();
 	}

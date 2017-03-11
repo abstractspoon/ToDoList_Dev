@@ -42,21 +42,27 @@ void CRTFPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_FILEURL, m_nLinkOption);
 	DDX_Check(pDX, IDC_USEMSWORD, m_bConvertWithMSWord);
 	DDX_Check(pDX, IDC_PROMPTFORFILELINK, m_bPromptForFileLink);
+	DDX_Check(pDX, IDC_REDUCEIMAGECOLORS, m_bReduceImageColors);
 }
 
 BEGIN_MESSAGE_MAP(CRTFPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CRTFPreferencesPage)
 	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_PROMPTFORFILELINK, OnPromptForLink)
+	ON_BN_CLICKED(IDC_PROMPTFORFILELINK, OnClickPromptForLink)
+	ON_BN_CLICKED(IDC_FILEIMAGE, OnChangeLinkOption)
+	ON_BN_CLICKED(IDC_FILELINK, OnChangeLinkOption)
+	ON_BN_CLICKED(IDC_FILECOPY, OnChangeLinkOption)
+	ON_BN_CLICKED(IDC_FILEURL, OnChangeLinkOption)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFPreferencesPage message handlers
 
-void CRTFPreferencesPage::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt)
+void CRTFPreferencesPage::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors)
 {
 	m_bPromptForFileLink = bPrompt;
 	m_nLinkOption = nLinkOption;
+	m_bReduceImageColors = bReduceImageColors;
 }
 
 BOOL CRTFPreferencesPage::OnInitDialog() 
@@ -68,7 +74,7 @@ BOOL CRTFPreferencesPage::OnInitDialog()
 	if (!CMSWordHelper::IsWordInstalled(12))
 		GetDlgItem(IDC_USEMSWORD)->EnableWindow(FALSE);
 
-	OnPromptForLink();
+	OnClickPromptForLink();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -79,6 +85,7 @@ void CRTFPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 	// Note: Parent App handles global settings
 	pPrefs->WriteProfileInt(szKey, _T("FileLinkOption"), m_nLinkOption);
 	pPrefs->WriteProfileInt(szKey, _T("FileLinkOptionIsDefault"), !m_bPromptForFileLink);
+	pPrefs->WriteProfileInt(szKey, _T("ReduceImageColors"), m_bReduceImageColors);
 }
 
 void CRTFPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -86,9 +93,10 @@ void CRTFPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 	// Note: Parent App handles global settings
 	m_nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(szKey, _T("FileLinkOption"), REP_ASIMAGE);
 	m_bPromptForFileLink = !pPrefs->GetProfileInt(szKey, _T("FileLinkOptionIsDefault"), TRUE);
+	m_bReduceImageColors = pPrefs->GetProfileInt(szKey, _T("ReduceImageColors"), TRUE);
 }
 
-void CRTFPreferencesPage::OnPromptForLink()
+void CRTFPreferencesPage::OnClickPromptForLink()
 {
 	UpdateData();
 	
@@ -96,6 +104,14 @@ void CRTFPreferencesPage::OnPromptForLink()
 	GetDlgItem(IDC_FILECOPY)->EnableWindow(!m_bPromptForFileLink);
 	GetDlgItem(IDC_FILELINK)->EnableWindow(!m_bPromptForFileLink);
 	GetDlgItem(IDC_FILEIMAGE)->EnableWindow(!m_bPromptForFileLink);
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
+}
+
+void CRTFPreferencesPage::OnChangeLinkOption()
+{
+	UpdateData();
+	
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -148,4 +164,9 @@ void CRTFPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_RTF_PREFSHELP);
+}
+
+void CRTFPreferencesDlg::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors) 
+{ 
+	m_page.SetFileLinkOption(nLinkOption, bPrompt, bReduceImageColors); 
 }

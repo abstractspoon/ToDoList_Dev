@@ -26,9 +26,10 @@ class CRTFPreferencesPage : public CPreferencesPageBase
 public:
 	CRTFPreferencesPage();
 
-	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt);
+	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors);
 	RE_PASTE GetLinkOption() const { return (RE_PASTE)m_nLinkOption; }
 	BOOL GetPromptForFileLink() const { return m_bPromptForFileLink; }
+	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
 
 	// global settings
 	void SetConvertWithMSWord(BOOL bUseMSWord) { m_bConvertWithMSWord = bUseMSWord; }
@@ -45,6 +46,7 @@ protected:
 
 	int m_nLinkOption;
 	BOOL m_bPromptForFileLink;
+	BOOL m_bReduceImageColors;
 
 	// global setting
 	BOOL m_bConvertWithMSWord;
@@ -63,7 +65,8 @@ protected:
 	//{{AFX_MSG(CCreateFileLinkDlg)
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
-	afx_msg void OnPromptForLink();
+	afx_msg void OnClickPromptForLink();
+	afx_msg void OnChangeLinkOption();
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -75,9 +78,10 @@ public:
 
 	int DoModal(BOOL bUseMSWord);
 	
-	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt) { m_page.SetFileLinkOption(nLinkOption, bPrompt); }
+	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors);
 	RE_PASTE GetFileLinkOption() const { return m_page.GetLinkOption(); }
 	BOOL GetPromptForFileLink() const { return m_page.GetPromptForFileLink(); }
+	BOOL GetReduceImageColors() const { return m_page.GetReduceImageColors(); }
 	BOOL GetConvertWithMSWord() { return m_page.GetConvertWithMSWord(); }
 
 protected:

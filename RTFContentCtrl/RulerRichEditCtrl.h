@@ -34,7 +34,7 @@ public:
 	void SetRTF(const CString& rtf);
 	void SetSelectedWebLink(const CString& sWebLink);
 
-	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault) { m_rtf.SetFileLinkOption(nLinkOption, bDefault); }
+	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceImageColors) { m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors); }
 	RE_PASTE GetFileLinkOption() const { return m_rtf.GetFileLinkOption(); }
 	BOOL IsFileLinkOptionDefault() const { return m_rtf.IsFileLinkOptionDefault(); }
 

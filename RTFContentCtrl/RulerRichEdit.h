@@ -104,15 +104,17 @@ public:
 
 	BOOL IsIMEComposing() const { return m_bIMEComposing; }
 
-	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault);
+	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceImageColors);
 	RE_PASTE GetFileLinkOption() const { return m_nFileLinkOption; }
 	BOOL IsFileLinkOptionDefault() const { return m_bLinkOptionIsDefault; }
+	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
 	BOOL AppendSourceUrls(LPCTSTR szUrls);
 
 protected:
 	BOOL m_bIMEComposing;
 	RE_PASTE m_nFileLinkOption;
 	BOOL m_bLinkOptionIsDefault;
+	BOOL m_bReduceImageColors;
 
 protected:
 // Message handlers

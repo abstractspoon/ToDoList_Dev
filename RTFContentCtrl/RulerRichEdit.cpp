@@ -103,7 +103,7 @@ CFindReplaceDialog* CRulerRichEdit::NewFindReplaceDlg()
 /////////////////////////////////////////////////////////////////////////////
 // CRulerRichEdit
 
-CRulerRichEdit::CRulerRichEdit() : m_bIMEComposing(FALSE), m_nFileLinkOption(REP_ASIMAGE)
+CRulerRichEdit::CRulerRichEdit() : m_bIMEComposing(FALSE), m_nFileLinkOption(REP_ASIMAGE), m_bReduceImageColors(TRUE)
 {
 	EnableSelectOnFocus(FALSE);
 }
@@ -127,10 +127,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CRulerRichEdit message handlers
 
-void CRulerRichEdit::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault) 
+void CRulerRichEdit::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceImageColors) 
 { 
 	m_nFileLinkOption = nLinkOption; 
 	m_bLinkOptionIsDefault = bDefault;
+	m_bReduceImageColors = bReduceImageColors;
 }
 
 int CRulerRichEdit::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -174,16 +175,17 @@ LRESULT CRulerRichEdit::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	{
 		if (!m_bLinkOptionIsDefault)
 		{
-			CCreateFileLinkDlg dialog(aFiles[0], m_nFileLinkOption, FALSE);
+			CCreateFileLinkDlg dialog(aFiles[0], m_nFileLinkOption, FALSE, m_bReduceImageColors);
 
 			if (dialog.DoModal() != IDOK)
 				return 0L;
 
 			m_nFileLinkOption = dialog.GetLinkOption();
 			m_bLinkOptionIsDefault = dialog.GetMakeLinkOptionDefault();
+			m_bReduceImageColors = dialog.GetReduceImageColors();
 		}
 
-		return CRichEditHelper::PasteFiles(*this, aFiles, m_nFileLinkOption);
+		return CRichEditHelper::PasteFiles(*this, aFiles, m_nFileLinkOption, m_bReduceImageColors);
 	}
 	else if (nNumFiles == -1) // error
 	{
