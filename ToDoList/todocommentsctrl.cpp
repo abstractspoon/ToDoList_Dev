@@ -314,7 +314,7 @@ void CToDoCommentsCtrl::OnCommentsMenuCmd(UINT nCmdID)
 				CStringArray aPaths;
 
 				if (dialog.GetPathNames(aPaths) > 0)
-					CRichEditHelper::PasteFiles(*this, aPaths, REP_ASFILEURL);
+					CRichEditHelper::PasteFiles(*this, aPaths, REP_ASFILEURL, FALSE);
 			}
 
 			// reset
@@ -463,7 +463,7 @@ BOOL CToDoCommentsCtrl::Paste()
 	}
 
 	// default > 0
-	return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL);
+	return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
 }
 
 BOOL CToDoCommentsCtrl::CanPaste()

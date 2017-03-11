@@ -944,7 +944,19 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 			// checkbox image
 			pTVDI->item.mask |= TVIF_STATE;
 			pTVDI->item.stateMask = TVIS_STATEIMAGEMASK;
-			pTVDI->item.state = (pTDI->IsDone() ? TCHC_CHECKED : TCHC_UNCHECKED);
+
+			if (pTDI->IsDone())
+			{
+				pTVDI->item.state = TCHC_CHECKED;
+			}
+			else if (m_data.TaskHasCompletedSubtasks(pTDS))
+			{
+				pTVDI->item.state = TCHC_MIXED;
+			}
+			else 
+			{
+				pTVDI->item.state = TCHC_UNCHECKED;
+			}
 		}
 	}
 

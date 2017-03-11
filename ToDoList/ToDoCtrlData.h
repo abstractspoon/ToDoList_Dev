@@ -168,6 +168,7 @@ public:
 	CString FormatTaskSubtaskCompletion(DWORD dwTaskID) const;
 	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
+	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
 
@@ -192,7 +193,6 @@ public:
 							int& nSubtasksTotal, int& nSubtasksDone) const;
 	CString FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double CalcTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck) const;
 	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -202,6 +202,9 @@ public:
 	CString FormatTaskTags(const TODOITEM* pTDI) const;
 	CString GetTaskCustomAttributeData(const TODOITEM* pTDI, const CString& sAttribID) const;
 	BOOL CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
+
+	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
+	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
 
 	// Sets
 	TDC_SET SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);

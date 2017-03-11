@@ -2753,6 +2753,40 @@ BOOL CToDoCtrlData::SetTaskModified(DWORD dwTaskID)
 	return TRUE;
 }
 
+
+BOOL CToDoCtrlData::TaskHasCompletedSubtasks(DWORD dwTaskID) const
+{
+	return TaskHasCompletedSubtasks(LocateTask(dwTaskID));
+}
+
+BOOL CToDoCtrlData::TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const
+{
+	if (!pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// process its subtasks
+	int nPos = pTDS->GetSubTaskCount();
+	
+	while (nPos--)
+	{
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos);
+		const TODOITEM* pTDIChild = GetTask(pTDSChild);
+		
+		if (IsTaskDone(pTDIChild, pTDSChild, 0))
+			return TRUE;
+		
+		// Grandchildren
+		if (TaskHasCompletedSubtasks(pTDSChild))
+			return TRUE;
+	}
+	
+	// else
+	return FALSE;
+}
+
 BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const
 {
 	const TODOSTRUCTURE* pTDS = LocateTask(dwTaskID);
@@ -2766,6 +2800,12 @@ BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecur
 
 BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const
 {
+	if (!pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// process its subtasks
 	int nPos = pTDS->GetSubTaskCount();
 
@@ -4385,4 +4425,3 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 		}
 	}
 }
-

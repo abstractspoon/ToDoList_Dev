@@ -61,6 +61,7 @@ enum LCH_CHECK
 	LCHC_NONE		= INDEXTOSTATEIMAGEMASK(1), 
 	LCHC_UNCHECKED	= INDEXTOSTATEIMAGEMASK(2), 
 	LCHC_CHECKED	= INDEXTOSTATEIMAGEMASK(3), 
+	LCHC_MIXED		= INDEXTOSTATEIMAGEMASK(4), 
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -423,7 +424,19 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 				{
 					pLVDI->item.mask |= LVIF_STATE;
 					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK;
-					pLVDI->item.state = (pTDI->IsDone() ? LCHC_CHECKED : LCHC_UNCHECKED);
+
+					if (pTDI->IsDone())
+					{
+						pLVDI->item.state = LCHC_CHECKED;
+					}
+					else if (m_data.TaskHasCompletedSubtasks(pTDS))
+					{
+						pLVDI->item.state = LCHC_MIXED;
+					}
+					else 
+					{
+						pLVDI->item.state = LCHC_UNCHECKED;
+					}
 				}
 			}
 		}

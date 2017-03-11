@@ -2677,7 +2677,14 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_DONE:
-			DrawColumnCheckBox(pDC, rSubItem, pTDI->IsDone());
+			{
+				TTCB_CHECK nCheck = (pTDI->IsDone() ? TTCBC_CHECKED : TTCNC_UNCHECKED);
+
+				if ((nCheck == TTCNC_UNCHECKED) && m_data.TaskHasCompletedSubtasks(pTDS))
+					nCheck = TTCBC_MIXED;
+
+				DrawColumnCheckBox(pDC, rSubItem, nCheck);
+			}
 			break;
 			
 		default:
@@ -2775,7 +2782,7 @@ void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect&
 	}
 }
 
-void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, BOOL bChecked)
+void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck)
 {
 	CPoint pt(CalcColumnIconTopLeft(rSubItem));
 				
@@ -2783,7 +2790,7 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, BOOL 
 	// to avoid collision with selection rect
 	pt.y += (rSubItem.Height() % 2);
 
-	int nImage = (bChecked ? 2 : 1); // first image is blank
+	int nImage = (nCheck + 1); // first image is blank
 	m_ilCheckboxes.Draw(pDC, nImage, pt, ILD_TRANSPARENT);
 }
 
@@ -2923,7 +2930,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 		
 	case TDCCA_BOOL:
-		DrawColumnCheckBox(pDC, rSubItem, data.AsBool());
+		DrawColumnCheckBox(pDC, rSubItem, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
 		break;
 
 	case TDCCA_DOUBLE:
@@ -5918,7 +5925,7 @@ BOOL CTDLTaskCtrlBase::InitCheckboxImageList()
 	if (m_ilCheckboxes.GetSafeHandle())
 		return TRUE;
 	
-	const int nStates[] = { -1, CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL };//, CBS_MIXEDNORMAL };
+	const int nStates[] = { -1, CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL, CBS_MIXEDNORMAL };
 	const int nNumStates = sizeof(nStates) / sizeof(int);
 	
 	CThemed th;
