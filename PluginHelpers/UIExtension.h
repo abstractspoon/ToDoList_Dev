@@ -48,7 +48,7 @@ namespace Abstractspoon
 					ToggleSort,		// dwExtra is column ID
 					SetFocus,
 					ResizeAttributeColumns,
-
+					SelectTask,
 				};
 
 				enum class HitResult

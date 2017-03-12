@@ -134,6 +134,7 @@ UIExtension::AppCommand UIExtension::Map(IUI_APPCOMMAND cmd)
 	case IUI_TOGGLABLESORT:			return UIExtension::AppCommand::ToggleSort;
 	case IUI_SETFOCUS:				return UIExtension::AppCommand::SetFocus;
 	case IUI_RESIZEATTRIBCOLUMNS:	return UIExtension::AppCommand::ResizeAttributeColumns;
+	case IUI_SELECTTASK:			return UIExtension::AppCommand::SelectTask;
 	//  case IUI_
 	}
 
