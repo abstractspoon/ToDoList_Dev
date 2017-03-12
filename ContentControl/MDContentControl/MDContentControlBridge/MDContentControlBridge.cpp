@@ -59,7 +59,7 @@ void CMDContentBridge::SetLocalizer(ITransText* /*pTT*/)
 	// TODO
 }
 
-LPCTSTR CMDContentBridge::GetTypeDescription() const
+LPCWSTR CMDContentBridge::GetTypeDescription() const
 {
 	return MARKDOWN_NAME;
 }

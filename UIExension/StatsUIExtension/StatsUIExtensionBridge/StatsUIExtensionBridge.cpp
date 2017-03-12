@@ -62,7 +62,7 @@ void CStatsUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
 	// TODO
 }
 
-LPCTSTR CStatsUIExtensionBridge::GetMenuText() const
+LPCWSTR CStatsUIExtensionBridge::GetMenuText() const
 {
 	return SAMPLE_NAME;
 }

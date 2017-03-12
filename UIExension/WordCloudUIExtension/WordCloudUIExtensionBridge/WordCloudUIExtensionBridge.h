@@ -14,7 +14,7 @@ public:
 
 	void Release(); // releases the interface
 
-	LPCTSTR GetMenuText() const;
+	LPCWSTR GetMenuText() const;
 	HICON GetIcon() const;
 	LPCWSTR GetTypeID() const; // caller must copy result only
 

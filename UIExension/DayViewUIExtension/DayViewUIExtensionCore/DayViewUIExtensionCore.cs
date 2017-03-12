@@ -33,13 +33,12 @@ namespace DayViewUIExtension
                                      System.Windows.Forms.AnchorStyles.Right);
             this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			this.m_DayView.DaysToShow = 7;
-			//this.m_dayView.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_DayView.DrawAllAppBorder = false;
 			this.m_DayView.Font = new System.Drawing.Font("Tahoma", 8);
 			this.m_DayView.Location = new System.Drawing.Point(0, 0);
 			this.m_DayView.MinHalfHourApp = false;
 			this.m_DayView.Name = "m_dayView";
-			this.m_DayView.Renderer = m_renderer;
+			this.m_DayView.Renderer = m_Renderer;
 			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
 			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
 			this.m_DayView.Size = new System.Drawing.Size(798, 328);
@@ -53,7 +52,6 @@ namespace DayViewUIExtension
 
             // I want the hour height to always be 20 for now
             int hourHeight = 20;
-            //this.m_DayView.SlotsPerHour = 4;
             this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
 
 			this.m_DayView.StartDate = DateTime.Now;
@@ -237,7 +235,7 @@ namespace DayViewUIExtension
                 left = rect.Left;
                 top = rect.Top;
                 right = rect.Right;
-                bottom = (rect.Top + m_renderer.GetFontHeight() + 4); // 4 = border
+                bottom = (rect.Top + m_Renderer.GetFontHeight() + 4); // 4 = border
 
                 return true;
             }
@@ -266,10 +264,10 @@ namespace DayViewUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            m_renderer.Theme = theme;
+            m_Renderer.Theme = theme;
             m_DayView.Invalidate(true);
 
-            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
+            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
@@ -300,7 +298,7 @@ namespace DayViewUIExtension
 		{
 			this.BackColor = System.Drawing.Color.White;
 			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
-            this.m_renderer = new TDLRenderer();
+            this.m_Renderer = new TDLRenderer();
 
 			CreateDayView();
 		}
@@ -443,7 +441,7 @@ namespace DayViewUIExtension
 		// --------------------------------------------------------------------------------------
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 		private Calendar.DayView m_DayView;
-        private TDLRenderer m_renderer;
+        private TDLRenderer m_Renderer;
 	}
 
 	public class CalendarItem : Calendar.Appointment

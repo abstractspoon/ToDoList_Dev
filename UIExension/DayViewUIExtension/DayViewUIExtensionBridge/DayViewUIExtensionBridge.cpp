@@ -58,7 +58,7 @@ void CDayViewUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
 	// TODO
 }
 
-LPCTSTR CDayViewUIExtensionBridge::GetMenuText() const
+LPCWSTR CDayViewUIExtensionBridge::GetMenuText() const
 {
 	return DAYVIEW_NAME;
 }
