@@ -41,7 +41,7 @@ const LPCWSTR DAYVIEW_NAME = L"Day View";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CDayViewUIExtensionBridge::CDayViewUIExtensionBridge() : m_hIcon(NULL)
+CDayViewUIExtensionBridge::CDayViewUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
 	HMODULE hMod = LoadLibrary(L"DayViewUIExtensionBridge.dll"); // us
 
@@ -53,9 +53,10 @@ void CDayViewUIExtensionBridge::Release()
 	delete this;
 }
 
-void CDayViewUIExtensionBridge::SetLocalizer(ITransText* /*pTT*/)
+void CDayViewUIExtensionBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCWSTR CDayViewUIExtensionBridge::GetMenuText() const
@@ -76,7 +77,7 @@ LPCWSTR CDayViewUIExtensionBridge::GetTypeID() const
 IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CDayViewUIExtensionBridgeWindow* pExtWnd = new CDayViewUIExtensionBridgeWindow;
+	CDayViewUIExtensionBridgeWindow* pExtWnd = new CDayViewUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -99,7 +100,8 @@ void CDayViewUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow()
+CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow(ITransText* pTT)
+	: m_pTT(pTT)
 {
 
 }
@@ -113,7 +115,9 @@ void CDayViewUIExtensionBridgeWindow::Release()
 BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+
+	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 

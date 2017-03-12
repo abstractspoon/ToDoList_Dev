@@ -31,12 +31,13 @@ public:
 
 protected:
 	HICON m_hIcon;
+	ITransText* m_pTT;
 };
 
 class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CDayViewUIExtensionBridgeWindow();
+	CDayViewUIExtensionBridgeWindow(ITransText* pTT);
 
    void Release(); // releases the interface
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
@@ -71,6 +72,7 @@ public:
    
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;
+   ITransText* m_pTT;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

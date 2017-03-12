@@ -69,9 +69,7 @@
     <Compile Include="Appointment.cs" />
     <Compile Include="AppointmentEventArgs.cs" />
     <Compile Include="DataBoundAppointment.cs" />
-    <Compile Include="DayView.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DayView.cs" />
     <Compile Include="DrawTool.cs" />
     <Compile Include="ITool.cs" />
     <Compile Include="NewAppointmentEvent.cs" />
@@ -83,6 +81,7 @@
     <Compile Include="ResolveAppointmentsEvent.cs" />
     <Compile Include="Selection.cs" />
     <Compile Include="SelectionTool.cs" />
+    <Compile Include="WeekChangeEventArgs.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>

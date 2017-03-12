@@ -6,80 +6,33 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	[System.ComponentModel.DesignerCategory("")]
 	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent;
 
-		public DayViewUIExtensionCore(IntPtr hwndParent)
+		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
 			m_hwndParent = hwndParent;
+			m_trans = trans;
+
+			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+
 			InitializeComponent();
 		}
-
-		private void CreateDayView()
-		{
-			Calendar.DrawTool drawTool = new Calendar.DrawTool();
-
-			this.m_DayView = new Calendar.DayView();
-			drawTool.DayView = this.m_DayView;
-
-			this.m_DayView.ActiveTool = drawTool;
-			this.m_DayView.AllowInplaceEditing = true;
-			this.m_DayView.AllowNew = true;
-			this.m_DayView.AmPmDisplay = true;
-            this.m_DayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
-                                     System.Windows.Forms.AnchorStyles.Left |
-                                     System.Windows.Forms.AnchorStyles.Right);
-            this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.m_DayView.DaysToShow = 7;
-			this.m_DayView.DrawAllAppBorder = false;
-			this.m_DayView.Font = new System.Drawing.Font("Tahoma", 8);
-			this.m_DayView.Location = new System.Drawing.Point(0, 0);
-			this.m_DayView.MinHalfHourApp = false;
-			this.m_DayView.Name = "m_dayView";
-			this.m_DayView.Renderer = m_Renderer;
-			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
-			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
-			this.m_DayView.Size = new System.Drawing.Size(798, 328);
-			this.m_DayView.StartDate = DateTime.Now;
-			this.m_DayView.TabIndex = 0;
-			this.m_DayView.Text = "m_dayView";
-			this.m_DayView.WorkingHourEnd = 19;
-			this.m_DayView.WorkingHourStart = 9;
-			this.m_DayView.WorkingMinuteEnd = 0;
-			this.m_DayView.WorkingMinuteStart = 0;
-
-            // I want the hour height to always be 20 for now
-            int hourHeight = 20;
-            this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
-
-			this.m_DayView.StartDate = DateTime.Now;
-			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
-			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
-			this.m_DayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
-			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
-
-			this.Controls.Add(m_DayView);
-
-		}
-
-		// IUIExtension ------------------------------------------------------------------
-
+		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
 			CalendarItem item;
 
 			if (m_Items.TryGetValue(dwTaskID, out item))
 			{
-				DateTime startDate, endDate;
-				m_DayView.GetDateRange(out startDate, out endDate);
+				m_SelectedTaskID = dwTaskID;
+				m_DayView.StartDate = item.StartDate;				
 
-				if (IsItemWithinRange(item, startDate, endDate))
-				{
-					m_DayView.SelectedAppointment = item;
-					return true;
-				}
+				m_DayView.SelectedAppointment = item;
+				return true;
 			}
 
 			// all else 
@@ -216,11 +169,24 @@ namespace DayViewUIExtension
 	   
 		public bool DoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+			switch (cmd)
+			{
+				case UIExtension.AppCommand.SelectTask:
+					return SelectTask(dwExtra);
+			}
+
 			return false;
 		}
 
 		public bool CanDoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+			switch (cmd)
+			{
+				case UIExtension.AppCommand.SelectTask:
+					return true;
+			}
+
+			// else
 			return false;
 		}
 
@@ -300,14 +266,100 @@ namespace DayViewUIExtension
 			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
             this.m_Renderer = new TDLRenderer();
 
+			CreateWeekLabel(); // create before day view
+			CreateMonthYearCombos();
 			CreateDayView();
 		}
 
-        protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
+		private void CreateDayView()
+		{
+			Calendar.DrawTool drawTool = new Calendar.DrawTool();
+
+			this.m_DayView = new Calendar.DayView();
+			drawTool.DayView = this.m_DayView;
+
+			this.m_DayView.ActiveTool = drawTool;
+			this.m_DayView.AllowInplaceEditing = true;
+			this.m_DayView.AllowNew = true;
+			this.m_DayView.AmPmDisplay = true;
+			this.m_DayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+									 System.Windows.Forms.AnchorStyles.Left |
+									 System.Windows.Forms.AnchorStyles.Right);
+			this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			this.m_DayView.DaysToShow = 7;
+			this.m_DayView.DrawAllAppBorder = false;
+			this.m_DayView.Font = m_ControlsFont;
+			this.m_DayView.Location = new System.Drawing.Point(0, 0);
+			this.m_DayView.MinHalfHourApp = false;
+			this.m_DayView.Name = "m_dayView";
+			this.m_DayView.Renderer = m_Renderer;
+			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
+			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
+			this.m_DayView.Size = new System.Drawing.Size(798, 328);
+			this.m_DayView.TabIndex = 0;
+			this.m_DayView.Text = "m_dayView";
+			this.m_DayView.WorkingHourEnd = 19;
+			this.m_DayView.WorkingHourStart = 9;
+			this.m_DayView.WorkingMinuteEnd = 0;
+			this.m_DayView.WorkingMinuteStart = 0;
+
+			// I want the hour height to always be 20 for now
+			int hourHeight = 20;
+			this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
+
+			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
+			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
+			this.m_DayView.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
+			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
+			this.m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(this.OnDayViewWeekChanged);
+			this.m_DayView.StartDate = DateTime.Now;
+
+			this.Controls.Add(m_DayView);
+		}
+
+		private void CreateWeekLabel()
+		{
+			this.m_WeekLabel = new DayViewWeekLabel();
+
+			this.m_WeekLabel.Font = new System.Drawing.Font(FontName, 14);
+			this.m_WeekLabel.Location = new System.Drawing.Point(210, LabelTop);
+			this.m_WeekLabel.Size = new System.Drawing.Size(350, 20);
+			this.m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+			this.Controls.Add(m_WeekLabel);
+		}
+
+		private void CreateMonthYearCombos()
+		{
+			m_MonthCombo = new DayViewMonthComboBox();
+
+			m_MonthCombo.Font = m_ControlsFont;
+			m_MonthCombo.Location = new System.Drawing.Point(0, ComboTop);
+			m_MonthCombo.Size = new System.Drawing.Size(100, 16);
+			
+			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
+			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
+			
+			this.Controls.Add(m_MonthCombo);
+
+			m_YearCombo = new DayViewYearComboBox();
+
+			m_YearCombo.Font = m_ControlsFont;
+			m_YearCombo.Location = new System.Drawing.Point(105, ComboTop);
+			m_YearCombo.Size = new System.Drawing.Size(100, 16);
+
+			m_YearCombo.SelectedYear = DateTime.Now.Year;
+			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
+			
+			this.Controls.Add(m_YearCombo);
+		}
+
+		// IUIExtension ------------------------------------------------------------------
+		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
             System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-            Border.Y = 20;
-            Border.Height -= 20;
+			Border.Y = ControlTop;
+			Border.Height -= ControlTop;
 
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
@@ -318,14 +370,14 @@ namespace DayViewUIExtension
 
             System.Drawing.Rectangle DayView = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
-            DayView.Y = 20;
-            DayView.Height -= 20;
+            DayView.Y = ControlTop;
+			DayView.Height -= ControlTop;
             DayView.Inflate(-1, -1);
 
             m_DayView.Location = DayView.Location;
             m_DayView.Size = DayView.Size;
 
-            Invalidate();
+            Invalidate(true);
         }
 
 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
@@ -355,6 +407,33 @@ namespace DayViewUIExtension
                     else
                         notify.NotifySelChange(0);
 					break;
+			}
+		}
+
+		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+		{
+			m_WeekLabel.StartDate = args.StartDate;
+
+			if (!m_SettingDayViewStartDate)
+			{
+				m_SettingMonthYear = true;
+
+				m_MonthCombo.SelectedMonth = args.StartDate.Month;
+				m_YearCombo.SelectedYear = args.StartDate.Year;
+
+				m_SettingMonthYear = false;
+			}
+		}
+
+		private void OnMonthYearSelChanged(object sender, EventArgs args)
+		{
+			if (!m_SettingMonthYear)
+			{
+				m_SettingDayViewStartDate = true;
+
+				m_DayView.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
+
+				m_SettingDayViewStartDate = false;
 			}
 		}
 
@@ -439,9 +518,23 @@ namespace DayViewUIExtension
 		}
 
 		// --------------------------------------------------------------------------------------
+		private const int LabelTop = 2;
+		private const int ComboTop = 0;
+		private const int ControlTop = 25;
+		private const string FontName = "Tahoma";
+
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 		private Calendar.DayView m_DayView;
         private TDLRenderer m_Renderer;
+		private UInt32 m_SelectedTaskID;
+		private Translator m_trans;
+		bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
+
+		private DayViewWeekLabel m_WeekLabel;
+		private DayViewMonthComboBox m_MonthCombo;
+		private DayViewYearComboBox m_YearCombo;
+		private System.Drawing.Font m_ControlsFont;
+
 	}
 
 	public class CalendarItem : Calendar.Appointment

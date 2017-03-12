@@ -48,15 +48,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DayViewMonthComboBox.cs" />
+    <Compile Include="DayViewWeekLabel.cs" />
+    <Compile Include="DayViewYearComboBox.cs" />
     <Compile Include="TDLRenderer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="DayViewUIExtensionCore.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="DayViewUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -34,7 +34,8 @@ namespace Calendar
         }
     }
 
-    public class DayView : Control
+	[System.ComponentModel.DesignerCategory("")]
+	public class DayView : Control
     {
         #region Variables
 
@@ -285,8 +286,13 @@ namespace Calendar
             set
             {
                 // Move start date to start of week
-                startDate = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
-                OnStartDateChanged();
+				DateTime firstDayOfWeek = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
+
+				if (startDate != firstDayOfWeek)
+				{
+					startDate = firstDayOfWeek;
+					OnStartDateChanged();
+				}
             }
         }
 
@@ -299,6 +305,7 @@ namespace Calendar
             selection = SelectionType.DateRange;
 
             Invalidate();
+			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
 
         private int startHour = 8;
@@ -600,6 +607,7 @@ namespace Calendar
             }
 
             Invalidate();
+			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
 
         protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
@@ -817,6 +825,12 @@ namespace Calendar
             if (AppointmentMove != null)
                 AppointmentMove(this, e);
         }
+
+		internal void RaiseWeekChange(WeekChangeEventArgs e)
+		{
+			if (WeekChange != null)
+				WeekChange(this, e);
+		}
 
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
@@ -1582,6 +1596,7 @@ namespace Calendar
         public event ResolveAppointmentsEventHandler ResolveAppointments;
         public event NewAppointmentEventHandler NewAppointment;
         public event AppointmentEventHandler AppointmentMove;
+		public event WeekChangeEventHandler WeekChange;
 
         #endregion
     }
