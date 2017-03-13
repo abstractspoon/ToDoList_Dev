@@ -31,6 +31,7 @@ namespace DayViewUIExtension
 				m_SelectedTaskID = dwTaskID;
 				m_DayView.StartDate = item.StartDate;				
 				m_DayView.SelectedAppointment = item;
+                m_DayView.ScrollToTop();
                 
 				return true;
 			}

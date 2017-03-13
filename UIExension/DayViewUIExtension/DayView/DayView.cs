@@ -906,6 +906,12 @@ namespace Calendar
 
         #region Public Methods
 
+        public void ScrollToTop()
+        {
+            this.vscroll.Value = this.vscroll.Minimum;
+            this.Invalidate();
+        }
+
         public void ScrollMe(bool down)
         {
             if (this.AllowScroll)
