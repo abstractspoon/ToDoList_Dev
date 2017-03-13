@@ -24,31 +24,31 @@ namespace Calendar
             set { id = value; }
         }
 
-        public override bool Equals(object obj)
-        {
-            Appointment appt = obj as Appointment;
-
-            if (appt == null)
-                return false;
-
-            if (base.Equals(appt))
-                return true;
-
-            // Check ID for efficiency
-            if ((id != 0) && (appt.id != 0))
-                return (id == appt.id);
-
-            // else value comparison
-            return ((title == appt.title) &&
-                    (layer == appt.layer) &&
-                    (group == appt.group) &&
-                    (startDate == appt.startDate) &&
-                    (endDate == appt.endDate) &&
-                    (locked == appt.locked) &&
-                    (barColor == appt.barColor) &&
-                    (textColor == appt.textColor) &&
-                    (allDayEvent == appt.allDayEvent));
-        }
+//         public override bool Equals(object obj)
+//         {
+//             Appointment appt = obj as Appointment;
+// 
+//             if (appt == null)
+//                 return false;
+// 
+//             if (base.Equals(appt))
+//                 return true;
+// 
+//             // Check ID for efficiency
+//             if ((id != 0) && (appt.id != 0))
+//                 return (id == appt.id);
+// 
+//             // else value comparison
+//             return ((title == appt.title) &&
+//                     (layer == appt.layer) &&
+//                     (group == appt.group) &&
+//                     (startDate == appt.startDate) &&
+//                     (endDate == appt.endDate) &&
+//                     (locked == appt.locked) &&
+//                     (barColor == appt.barColor) &&
+//                     (textColor == appt.textColor) &&
+//                     (allDayEvent == appt.allDayEvent));
+//         }
 
         private int layer;
 
