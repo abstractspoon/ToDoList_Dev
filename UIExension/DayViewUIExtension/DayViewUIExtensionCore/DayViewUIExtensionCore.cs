@@ -30,8 +30,8 @@ namespace DayViewUIExtension
 			{
 				m_SelectedTaskID = dwTaskID;
 				m_DayView.StartDate = item.StartDate;				
-
 				m_DayView.SelectedAppointment = item;
+                
 				return true;
 			}
 
@@ -83,8 +83,9 @@ namespace DayViewUIExtension
 				return false;
 
 			CalendarItem item;
+            UInt32 taskID = task.GetID();
 
-			if (m_Items.TryGetValue(task.GetID(), out item))
+			if (m_Items.TryGetValue(taskID, out item))
 			{
                 if (attribs.Contains(UIExtension.TaskAttribute.Title))
                     item.Title = task.GetTitle();
@@ -93,7 +94,10 @@ namespace DayViewUIExtension
                     item.EndDate = item.OrgEndDate = task.GetDoneDate();
 
                 if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-                    item.EndDate = item.OrgEndDate = task.GetDueDate();
+                {
+                    DateTime dueDate = GetEditableDueDate(task.GetDueDate());
+                    item.EndDate = item.OrgEndDate = dueDate;
+                }
 
                 if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
                     item.StartDate = item.OrgStartDate = task.GetStartDate();
@@ -108,17 +112,16 @@ namespace DayViewUIExtension
 				item = new CalendarItem();
 
 				item.Title = task.GetTitle();
-				item.EndDate = item.OrgEndDate = task.GetDueDate();
+				item.EndDate = item.OrgEndDate = GetEditableDueDate(task.GetDueDate());
 				item.StartDate = item.OrgStartDate = task.GetStartDate();
 				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
-				item.Id = task.GetID();
+                item.Id = taskID;
 				item.IsParent = task.IsParent();
 				item.TaskTextColor = task.GetTextDrawingColor();
 				item.DrawBorder = true;
 			}
 
-			if (item.EndDate > item.StartDate)
-				m_Items[task.GetID()] = item;
+            m_Items[taskID] = item;
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
@@ -128,6 +131,19 @@ namespace DayViewUIExtension
 
 			return true;
 		}
+
+        private DateTime GetEditableDueDate(DateTime dueDate)
+        {
+            // Whole days
+            if ((dueDate != DateTime.MinValue) && (dueDate.TimeOfDay.TotalMinutes == 0.0))
+            {
+                // return end-of-day
+                return dueDate.AddDays(1).AddSeconds(-1);
+            }
+
+            // else
+            return dueDate;
+        }
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
