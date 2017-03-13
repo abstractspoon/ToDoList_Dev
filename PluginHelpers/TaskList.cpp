@@ -387,41 +387,56 @@ double Task::GetCost()
 DateTime Task::GetLastModified()
 {
 	__int64 date = 0;
-	GETTASKDATE(GetTaskLastModified64, 0);
+	
+	if (GETTASKDATE(GetTaskLastModified64, false))
+		return Map(date);
 
-	return Map(date);
+	// else
+	return DateTime::MinValue;
 }
 
 DateTime Task::GetDoneDate()
 {
 	__int64 date = 0;
-	GETTASKDATE(GetTaskDoneDate64, 0);
+	
+	if (GETTASKDATE(GetTaskDoneDate64, false))
+		return Map(date);
 
-	return Map(date);
+	// else
+	return DateTime::MinValue;
 }
 
 DateTime Task::GetDueDate()
 {
 	__int64 date = 0;
-	GETTASKDATE_ARG(GetTaskDueDate64, FALSE, 0);
+	
+	if (GETTASKDATE_ARG(GetTaskDueDate64, FALSE, false))
+		return Map(date);
 
-	return Map(date);
+	// else
+	return DateTime::MinValue;
 }
 
 DateTime Task::GetStartDate()
 {
 	__int64 date = 0;
-	GETTASKDATE_ARG(GetTaskStartDate64, FALSE, 0);
+	
+	if (GETTASKDATE_ARG(GetTaskStartDate64, FALSE, false))
+		return Map(date);
 
-	return Map(date);
+	// else
+	return DateTime::MinValue;
 }
 
 DateTime Task::GetCreationDate()
 {
 	__int64 date = 0;
-	GETTASKDATE(GetTaskCreationDate64, 0);
+	
+	if (GETTASKDATE(GetTaskCreationDate64, false))
+		return Map(date);
 
-	return Map(date);
+	// else
+	return DateTime::MinValue;
 }
 
 String^ Task::GetDoneDateString()
