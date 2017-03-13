@@ -41,5 +41,11 @@ namespace DayViewUIExtension
 				Invalidate();
 			}
 		}
-	}
+
+        protected override void OnPaint(System.Windows.Forms.PaintEventArgs pe)
+        {
+            pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
+            base.OnPaint(pe);
+        }
+    }
 }
