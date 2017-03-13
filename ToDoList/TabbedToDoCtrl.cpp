@@ -1143,12 +1143,12 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 			}
 			else if (HasSingleSelectionChanged(dwTaskID))
 			{
-				return SelectTask(dwTaskID);	
+				return CToDoCtrl::SelectTask(dwTaskID, FALSE);	
 			}
 		}
 		else
 		{
-			return SelectTasks(aTaskIDs, FALSE);
+			return CToDoCtrl::SelectTasks(aTaskIDs, FALSE);
 		}
 	}
 
