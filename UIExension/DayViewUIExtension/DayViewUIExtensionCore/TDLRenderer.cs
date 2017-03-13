@@ -310,7 +310,7 @@ namespace DayViewUIExtension
 
 					// draw appointment text
                     rect.X = gripRect.Right/* + 2*/;
-                    rect.Y++;
+                    rect.Y += 2;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
