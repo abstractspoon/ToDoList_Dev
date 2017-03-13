@@ -313,16 +313,13 @@ namespace DayViewUIExtension
 			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
 			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
 			this.m_DayView.Size = new System.Drawing.Size(798, 328);
+			this.m_DayView.SlotsPerHour = 4;
 			this.m_DayView.TabIndex = 0;
 			this.m_DayView.Text = "m_dayView";
 			this.m_DayView.WorkingHourEnd = 19;
 			this.m_DayView.WorkingHourStart = 9;
 			this.m_DayView.WorkingMinuteEnd = 0;
 			this.m_DayView.WorkingMinuteStart = 0;
-
-			// I want the hour height to always be 20 for now
-			int hourHeight = 20;
-			this.m_DayView.SlotHeight = (hourHeight / this.m_DayView.SlotsPerHour);
 
 			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
 			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
@@ -531,7 +528,8 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
-			return ((item.StartDate >= startDate) && (item.EndDate <= endDate));
+			return ((item.StartDate >= startDate) && (item.EndDate <= endDate) &&
+					(item.StartDate.Date == item.EndDate.Date));
 		}
 
 		// --------------------------------------------------------------------------------------

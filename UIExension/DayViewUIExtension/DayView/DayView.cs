@@ -58,8 +58,10 @@ namespace Calendar
         private int dayHeadersHeight = 20;
         private int appointmentGripWidth = 5;
         private int horizontalAppointmentHeight = 20;
-        private int allDayEventsHeaderHeight = 20;
+        private int allDayEventsHeaderHeight = 0;
         private int headerBorder = 2;
+
+		static private int minSlotHeight = 5;
 
         public enum AppHeightDrawMode
         {
@@ -85,15 +87,14 @@ namespace Calendar
             vscroll.Visible = allowScroll;
             vscroll.Scroll += new ScrollEventHandler(OnVScroll);
             AdjustScrollbar();
-            vscroll.Value = (startHour * slotsPerHour * slotHeight);
+			vscroll.Value = 0;
 
             this.Controls.Add(vscroll);
 
             hscroll = new HScrollBar();
-            //vscroll.Dock = DockStyle.Right;
             hscroll.Visible = true;
             hscroll.Location = new System.Drawing.Point(0, 0);
-            hscroll.Width = hourLabelWidth/* + 2*/;
+            hscroll.Width = hourLabelWidth;
             hscroll.Height = dayHeadersHeight;
             hscroll.Scroll += new ScrollEventHandler(OnHScroll);
             hscroll.Minimum = -1000; // ~-20 years
@@ -141,9 +142,8 @@ namespace Calendar
             set { appHeightMode = value; }
         }
 
-        private int slotHeight = 18;
+		private int slotHeight = minSlotHeight;
 
-        [System.ComponentModel.DefaultValue(18)]
         public int SlotHeight
         {
             get
@@ -152,7 +152,7 @@ namespace Calendar
             }
             set
             {
-                slotHeight = value;
+                slotHeight = ((value < minSlotHeight) ? minSlotHeight : value);
                 OnSlotHeightChanged();
             }
         }
@@ -524,6 +524,7 @@ namespace Calendar
         private void OnAllowScrollChanged()
         {
             this.vscroll.Visible = this.AllowScroll;
+            this.vscroll.Enabled = this.AllowScroll;
         }
 
         private bool allowInplaceEditing = true;
@@ -622,10 +623,35 @@ namespace Calendar
 
         private void AdjustScrollbar()
         {
- 			vscroll.SmallChange = (slotHeight * slotsPerHour);
- 			vscroll.LargeChange = (slotHeight * slotsPerHour * 4);
- 			vscroll.Maximum = (slotsPerHour * slotHeight * 24) - this.Height + this.HeaderHeight + vscroll.LargeChange;
-            vscroll.Minimum = 0;
+			if (this.Height < this.HeaderHeight)
+				return;
+
+			// Auto-calculate best 'hour' height
+			int availHeight = (this.Height - this.HeaderHeight);
+			slotHeight = (availHeight / (24 * slotsPerHour));
+
+			if (slotHeight < minSlotHeight)
+				slotHeight = minSlotHeight;
+
+			int oneHour = (slotHeight * slotsPerHour);
+			AllowScroll = ((oneHour * 24) > availHeight);
+
+			vscroll.Minimum = 0;
+			vscroll.SmallChange = oneHour;
+
+			if (AllowScroll)
+			{
+				vscroll.Maximum = (oneHour * 24);
+				vscroll.LargeChange = availHeight;
+
+				if (vscroll.Value > (vscroll.Maximum - vscroll.LargeChange))
+					vscroll.Value = (vscroll.Maximum - vscroll.LargeChange);
+			}
+			else
+			{
+				vscroll.Value = 0;
+				Invalidate(false);
+			}
         }
 
 		public void GetDateRange(out DateTime start, out DateTime end)
@@ -916,23 +942,22 @@ namespace Calendar
         {
             if (this.AllowScroll)
             {
-                int newScrollValue;
-
                 if (down)
                 {
-					// mouse wheel scroll down
-					int maxLimit = (this.vscroll.Maximum - this.vscroll.LargeChange - this.HeaderHeight);
-                    newScrollValue = this.vscroll.Value + this.vscroll.SmallChange;
+					int maxRange = (this.vscroll.Maximum - this.vscroll.LargeChange);
 
-					if (newScrollValue < maxLimit)
+					// mouse wheel scroll down
+                    int newScrollValue = this.vscroll.Value + this.vscroll.SmallChange;
+
+					if (newScrollValue < maxRange)
                         this.vscroll.Value = newScrollValue;
                     else
-						this.vscroll.Value = maxLimit;
+						this.vscroll.Value = maxRange;
                 }
                 else
                 {
 					// mouse wheel scroll up
-                    newScrollValue = this.vscroll.Value - this.vscroll.SmallChange;
+                    int newScrollValue = this.vscroll.Value - this.vscroll.SmallChange;
 
                     if (newScrollValue > this.vscroll.Minimum)
                         this.vscroll.Value = newScrollValue;
