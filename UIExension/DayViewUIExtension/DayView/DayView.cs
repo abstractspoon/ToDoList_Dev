@@ -1253,7 +1253,7 @@ namespace Calendar
                 rect2.X += (appointmentGripWidth + 2);
                 rect2.Width -= (appointmentGripWidth + 2);
 
-                rect2.Width = rect2.Width / groups.Count;
+                rect2.Width = (rect2.Width / groups.Count) - 2;
 
                 groups.Sort();
 
