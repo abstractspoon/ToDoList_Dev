@@ -45,7 +45,6 @@ namespace Calendar
         private ToolTip tooltip;
         private DrawTool drawTool;
         private SelectionTool selectionTool;
-        private int allDayEventsHeaderHeight = 20;
 
         private DateTime workStart;
         private DateTime workEnd;
@@ -59,6 +58,8 @@ namespace Calendar
         private int dayHeadersHeight = 20;
         private int appointmentGripWidth = 5;
         private int horizontalAppointmentHeight = 20;
+        private int allDayEventsHeaderHeight = 20;
+        private int headerBorder = 2;
 
         public enum AppHeightDrawMode
         {
@@ -363,6 +364,9 @@ namespace Calendar
 						if (appt == value)
 						{
 							selectedAppointment = appt;
+
+                            // Initialise selection tool
+                            ActiveTool = selectionTool;
 							break;
 						}
 					}
@@ -558,7 +562,7 @@ namespace Calendar
         {
             get
             {
-                return dayHeadersHeight + allDayEventsHeaderHeight;
+                return dayHeadersHeight + allDayEventsHeaderHeight + headerBorder;
             }
         }
 
@@ -1153,11 +1157,10 @@ namespace Calendar
             int startY;
             int endY;
 
-            startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
-            endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / /*30*/(60 / slotsPerHour));
+            startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
+            endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
 
             rect.Y = startY - vscroll.Value + this.HeaderHeight;
-
             rect.Height = System.Math.Max(1, endY - startY);
 
             return rect;
@@ -1193,6 +1196,7 @@ namespace Calendar
 
                 Color color1 = renderer.HourSeperatorColor;
                 Color color2 = renderer.HalfHourSeperatorColor;
+
                 using (Pen pen = new Pen(((hour % slotsPerHour) == 0 ? color1 : color2)))
                     e.Graphics.DrawLine(pen, rect.Left, y, rect.Right, y);
 
