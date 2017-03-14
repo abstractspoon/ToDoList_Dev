@@ -10,7 +10,7 @@ namespace DayViewUIExtension
 	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
 		private Boolean m_taskColorIsBkgnd = false;
-		private IntPtr m_hwndParent;
+		private IntPtr m_hwndParent = IntPtr.Zero;
 
 		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
@@ -437,6 +437,12 @@ namespace DayViewUIExtension
 
 				m_SettingMonthYear = false;
 			}
+
+            // Restore the selection if it is present in this week
+			CalendarItem item;
+
+            if (m_Items.TryGetValue(m_SelectedTaskID, out item))
+				m_DayView.SelectedAppointment = item;
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
@@ -541,7 +547,7 @@ namespace DayViewUIExtension
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 		private Calendar.DayView m_DayView;
         private TDLRenderer m_Renderer;
-		private UInt32 m_SelectedTaskID;
+		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_trans;
 		bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
 
