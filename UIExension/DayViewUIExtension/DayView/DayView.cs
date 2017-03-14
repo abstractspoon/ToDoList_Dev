@@ -628,7 +628,7 @@ namespace Calendar
 
 			// Auto-calculate best 'hour' height
 			int availHeight = (this.Height - this.HeaderHeight);
-			slotHeight = (availHeight / (24 * slotsPerHour));
+			slotHeight = ((availHeight / (24 * slotsPerHour)) + 1);
 
 			if (slotHeight < minSlotHeight)
 				slotHeight = minSlotHeight;
