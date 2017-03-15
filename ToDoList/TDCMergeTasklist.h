@@ -11,7 +11,7 @@
 
 #include <afxtempl.h>
 
-enum TDL_MERGEBY
+enum TDL_MATCHBY
 {
 	TDLM_BYTITLE,
 	TDLM_BYID
@@ -28,7 +28,7 @@ class CXmlItem;
 class CTDCMergeTasklist  
 {
 public:
-	CTDCMergeTasklist(TDL_MERGEBY nBy, TDL_MERGEHOW nHow = TDLM_MOVE);
+	CTDCMergeTasklist(TDL_MATCHBY nBy, TDL_MERGEHOW nHow = TDLM_MOVE);
 	virtual ~CTDCMergeTasklist();
 
 	int Merge(LPCTSTR szSrcPath, LPCTSTR szDestPath);
@@ -40,7 +40,7 @@ public:
 
 protected:
 	CXmlItem* m_pXIDestRoot;
-	TDL_MERGEBY m_nMergeBy;
+	TDL_MATCHBY m_nMatchBy;
 	TDL_MERGEHOW m_nMergeHow;
 	DWORD m_dwNextID, m_dwOrgNextID;
 	CMap<DWORD, DWORD, CXmlItem*, CXmlItem*&> m_mapID2Item;

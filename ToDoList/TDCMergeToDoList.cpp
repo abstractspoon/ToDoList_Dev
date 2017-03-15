@@ -17,8 +17,8 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCMergeTasklist::CTDCMergeTasklist(TDL_MERGEBY nBy, TDL_MERGEHOW nHow) 
-	: m_pXIDestRoot(NULL), m_nMergeBy(nBy), m_nMergeHow(nHow), m_dwNextID(0)
+CTDCMergeTasklist::CTDCMergeTasklist(TDL_MATCHBY nBy, TDL_MERGEHOW nHow) 
+	: m_pXIDestRoot(NULL), m_nMatchBy(nBy), m_nMergeHow(nHow), m_dwNextID(0)
 {
 }
 
@@ -76,14 +76,14 @@ int CTDCMergeTasklist::MergeTasks(const CXmlItem* pXISrc, CXmlItem* pXIDest)
 	if (!pXISrc || !pXIDest)
 		return 0;
 
-	ASSERT (!(m_nMergeBy == TDLM_BYTITLE && m_dwNextID == 0));
+	ASSERT (!(m_nMatchBy == TDLM_BYTITLE && m_dwNextID == 0));
 
-	if (m_nMergeBy == TDLM_BYTITLE && m_dwNextID == 0)
+	if (m_nMatchBy == TDLM_BYTITLE && m_dwNextID == 0)
 		return 0;
 
 	BuildDestLookupMap();
 
-	switch (m_nMergeBy)
+	switch (m_nMatchBy)
 	{
 	case TDLM_BYID:
 		return MergeTasksByID(pXISrc, pXIDest);
