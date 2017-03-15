@@ -172,8 +172,6 @@ BOOL CToDoCtrlReminders::DeleteReminder(int nRem)
 	// Scope the reminder because it will be invalid after deletion
 	{
 		const TDCREMINDER& rem = m_aReminders[nRem];
-		TRACE(_T("CToDoCtrlReminders::DeleteReminder(%s, %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
-
 		RemoveListReminder(rem);
 	}
 
