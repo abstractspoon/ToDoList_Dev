@@ -126,6 +126,12 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 	EnableOK();
 	
+	// Because we are combining WS_THICKFRAME and WS_SYSMENU
+	// to get a resizing dialog with a close button we also
+	// get a generic system menu icon which we don't really 
+	// want. This call gets rid of the icon.
+	ModifyStyleEx(0, WS_EX_DLGMODALFRAME);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
