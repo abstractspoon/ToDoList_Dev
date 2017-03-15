@@ -8,6 +8,7 @@
 #include "../shared/preferences.h"
 #include "../shared/dialoghelper.h"
 #include "../shared/misc.h"
+#include "../shared/graphicsmisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,6 +72,10 @@ BOOL CTDLPasteFromClipboardDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
+	// Set clipboard text font to be mono-spaced
+	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
+		GetDlgItem(IDC_CLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
+
 	// update clipboard text
 	OnRefresh();
 	

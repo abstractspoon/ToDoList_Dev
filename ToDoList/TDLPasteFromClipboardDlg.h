@@ -32,6 +32,7 @@ protected:
 	//}}AFX_DATA
 
 	int	m_nFormatOption;
+	CFont m_fontMonospace;
 
 protected:
 // Overrides
