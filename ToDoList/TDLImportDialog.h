@@ -43,6 +43,7 @@ protected:
 	const CImportExportMgr& m_mgrImportExport;
 	CSize m_sizeMin;
 	BOOL m_bReadonlyTasklist;
+	CFont m_fontMonospace;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

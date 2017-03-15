@@ -9,6 +9,7 @@
 #include "../shared/enstring.h"
 #include "../shared/misc.h"
 #include "../shared/filemisc.h"
+#include "../shared/graphicsmisc.h"
 #include "../shared/preferences.h"
 #include "../shared/dialoghelper.h"
 #include "../shared/clipboard.h"
@@ -20,8 +21,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportDialog dialog
 
+const LPCTSTR CRLF = _T("\r\n");
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLImportDialog dialog
 
 CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
 	: CTDLDialog(CTDLImportDialog::IDD, pParent),
@@ -43,7 +47,6 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 		m_nImportTo = TDIT_NEWTASKLIST;
 	else
 		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), TDIT_ONSELECTEDTASK);
-
 }
 
 
@@ -101,6 +104,10 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
+	// Set clipboard text font to be mono-spaced
+	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
+		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
+	
 	// init file edit
 	BOOL bHasFilter = CurImporterHasFilter();
 
@@ -119,11 +126,7 @@ BOOL CTDLImportDialog::OnInitDialog()
 		GetDlgItem(IDC_TOSELECTEDTASK)->EnableWindow(FALSE);
 	}
 	
-	m_sClipboardText = _T("\r\n") + CClipboard().GetText();
-
-	if (bHasFilter)
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText);
-
+	OnRefreshclipboard();
 	EnableOK();
 	
 	// Because we are combining WS_THICKFRAME and WS_SYSMENU
@@ -253,9 +256,16 @@ void CTDLImportDialog::OnChangeFilepath()
 
 void CTDLImportDialog::OnRefreshclipboard() 
 {
-	m_sClipboardText = _T("\r\n") + CClipboard().GetText();
+	m_sClipboardText = CClipboard().GetText();
 
-	// set clipboard text
+	// Edit control wants CRLF not just LF
+	if (m_sClipboardText.Find(CRLF) == -1)
+		m_sClipboardText.Replace(_T("\n"), CRLF);
+
+	// Add blank line at start in case the chosen importer
+	// treats the first line as a header line
+	m_sClipboardText = (CRLF + m_sClipboardText);
+
 	if (CurImporterHasFilter())
 		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText);
 }
