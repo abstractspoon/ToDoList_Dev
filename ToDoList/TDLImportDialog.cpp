@@ -25,6 +25,17 @@ static char THIS_FILE[] = __FILE__;
 const LPCTSTR CRLF = _T("\r\n");
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum IMPORTTO 
+{
+	// Match order of radio buttons
+	NEWTASKLIST,
+	TOPOFTASKLIST,
+	SELECTEDTASK,
+	MERGE,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
 CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
@@ -40,13 +51,15 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 
 	m_bFromClipboard = prefs.GetProfileInt(_T("Importing"), _T("ImportOption"), FALSE);
 	m_sFromFilePath = prefs.GetProfileString(_T("Importing"), _T("ImportFilePath"));
+	m_bMatchByTaskID = FALSE; // always
+
 	m_nFormatOption = prefs.GetProfileInt(_T("Importing"), _T("ImportFormat"), 0);
 	m_nFormatOption = min(m_nFormatOption, mgr.GetNumImporters());
 
 	if (m_bReadonlyTasklist)
-		m_nImportTo = TDIT_NEWTASKLIST;
+		m_nImportTo = NEWTASKLIST;
 	else
-		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), TDIT_ONSELECTEDTASK);
+		m_nImportTo = prefs.GetProfileInt(_T("Importing"), _T("ImportToWhere"), SELECTEDTASK);
 }
 
 
@@ -58,7 +71,8 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Radio(pDX, IDC_FROMFILE, m_bFromClipboard);
 	DDX_Text(pDX, IDC_FROMFILEPATH, m_sFromFilePath);
-	DDX_Radio(pDX, IDC_TONEWTASKLIST, m_nImportTo);
+	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
+	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
@@ -79,8 +93,12 @@ BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	ON_EN_CHANGE(IDC_FROMFILEPATH, OnChangeFilepath)
 	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, OnRefreshclipboard)
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
 	ON_WM_GETMINMAXINFO()
+	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
+	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, OnChangeMergeTo)
+	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, OnChangeMergeTo)
+	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, OnChangeMergeTo)
+	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, OnChangeMergeTo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -125,6 +143,10 @@ BOOL CTDLImportDialog::OnInitDialog()
 		GetDlgItem(IDC_TOACTIVETASLIST)->EnableWindow(FALSE);
 		GetDlgItem(IDC_TOSELECTEDTASK)->EnableWindow(FALSE);
 	}
+	
+	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGE);
 	
 	OnRefreshclipboard();
 	EnableOK();
@@ -172,7 +194,15 @@ int CTDLImportDialog::GetImporterIndex() const
 
 TDLID_IMPORTTO CTDLImportDialog::GetImportTo() const
 {
-	return (TDLID_IMPORTTO)m_nImportTo;
+	switch (m_nImportTo)
+	{
+	case 0: return TDIT_CREATENEWTASKLIST;
+	case 1: return TDIT_ADDTOTOPOFTASKLIST;
+	case 2: return TDIT_ADDTOSELECTEDTASK;
+	case 3: return (m_bMatchByTaskID ? TDIT_MERGETOTASKLISTBYID : TDIT_MERGETOTASKLISTBYTITLE);
+	}
+
+	return (TDLID_IMPORTTO)-1;
 }
 
 BOOL CTDLImportDialog::GetImportFromClipboard() const
@@ -228,8 +258,9 @@ void CTDLImportDialog::OnSelchangeFormatoptions()
 void CTDLImportDialog::EnableOK()
 {
 	if (!CurImporterHasFilter())
+	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
-
+	}
 	else if (GetImportFromClipboard())
 	{
 		GetDlgItem(IDOK)->EnableWindow(!m_sClipboardText.IsEmpty());
@@ -288,18 +319,21 @@ void CTDLImportDialog::OnSize(UINT nType, int cx, int cy)
 	// move the controls required
 	if (m_eFilePath.GetSafeHwnd() && (sizePrev.cx > 0 || sizePrev.cy > 0))
 	{
-		int nDx = cx - sizePrev.cx;
-		int nDy = cy - sizePrev.cy;
+		int nDx = (cx - sizePrev.cx);
+		int nDy = (cy - sizePrev.cy);
 
 		CDialogHelper::ResizeCtrl(this, IDC_FROMBORDER, nDx, nDy);
 		CDialogHelper::ResizeCtrl(this, IDC_FROMCLIPBOARDTEXT, nDx, nDy);
+		CDialogHelper::ResizeCtrl(this, IDC_FROMFILEPATH, nDx, 0);
 		CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, nDx, nDy);
 
-		CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, 0, nDy);
-		CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_TOACTIVETASLIST, 0, nDy);
-		CDialogHelper::OffsetCtrl(this, IDC_TOSELECTEDTASK, 0, nDy);
-		CDialogHelper::OffsetCtrl(this, IDC_TONEWTASKLIST, 0, nDy);
+		CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, nDx, 0);
+		CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, 0, nDy);
+		CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_ADDTOSELECTEDTASK, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, nDx, 0);
 
 		CDialogHelper::OffsetCtrl(this, IDOK, nDx, nDy);
 		CDialogHelper::OffsetCtrl(this, IDCANCEL, nDx, nDy);
@@ -320,4 +354,13 @@ void CTDLImportDialog::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 
 	lpMMI->ptMinTrackSize.x = m_sizeMin.cx;
 	lpMMI->ptMinTrackSize.y = m_sizeMin.cy;
+}
+
+void CTDLImportDialog::OnChangeMergeTo() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGE);
+	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGE);
 }

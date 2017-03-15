@@ -5502,7 +5502,7 @@ void CToDoListWnd::OnEditPasteSub()
 	}
 	else if (CanImportPasteFromClipboard())
 	{
-		DoImportPasteFromClipboard(TDIT_ONSELECTEDTASK);
+		DoImportPasteFromClipboard(TDIT_ADDTOSELECTEDTASK);
 	}
 
 	UpdateTimeTrackerTasks(tdc, FALSE);
@@ -5548,7 +5548,7 @@ void CToDoListWnd::OnEditPasteAfter()
 	}
 	else if (CanImportPasteFromClipboard())
 	{
-		DoImportPasteFromClipboard(TDIT_BELOWSELECTEDTASK);
+		DoImportPasteFromClipboard(TDIT_ADDBELOWSELECTEDTASK);
 	}
 
 	UpdateTimeTrackerTasks(tdc, FALSE);
@@ -8281,15 +8281,16 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 		{
 			tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
 			
-			if (nImportTo == TDIT_NEWTASKLIST)
+			if (nImportTo == TDIT_CREATENEWTASKLIST)
 				VERIFY(CreateNewTaskList(FALSE));
 
 			CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
 			TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
+			BOOL bMerge = FALSE;
 
 			switch (nImportTo)
 			{
-			case TDIT_ONSELECTEDTASK:
+			case TDIT_ADDTOSELECTEDTASK:
 				{
 					switch (Prefs().GetNewSubtaskPos())
 					{
@@ -8304,17 +8305,22 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 				}
 				break;
 
-			case TDIT_BELOWSELECTEDTASK:
+			case TDIT_ADDBELOWSELECTEDTASK:
 				nWhere = TDC_INSERTAFTERSELTASK;
 				break;
 
-			case TDIT_NEWTASKLIST:
-			case TDIT_TOPTASKLIST:
+			case TDIT_CREATENEWTASKLIST:
+			case TDIT_ADDTOTOPOFTASKLIST:
 				// as-is
+				break;
+
+			case TDIT_MERGETOTASKLISTBYTITLE:
+			case TDIT_MERGETOTASKLISTBYID:
+				bMerge = TRUE;
 				break;
 			}
 
-			if (nImportTo == TDIT_NEWTASKLIST)
+			if (nImportTo == TDIT_CREATENEWTASKLIST)
 			{
 				// If the imported tasks contain any custom attributes
 				// and those custom attributes match those of any open 
@@ -8341,6 +8347,10 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 				VERIFY(tdc.InsertTasks(tasks, nWhere, FALSE));
 				tdc.SetProjectName(tasks.GetProjectName());
+			}
+			else if (bMerge)
+			{
+				VERIFY(tdc.MergeTasks(tasks, (nImportTo == TDIT_MERGETOTASKLISTBYID)));
 			}
 			else
 			{

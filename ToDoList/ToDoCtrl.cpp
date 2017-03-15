@@ -9220,6 +9220,12 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 	return AddTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
 }
 
+BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL nMergeByID)
+{
+	ASSERT(0);
+	return FALSE;
+}
+
 BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, 
 								  HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const
 {

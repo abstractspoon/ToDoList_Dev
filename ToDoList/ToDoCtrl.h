@@ -132,6 +132,7 @@ public:
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
 
 	BOOL InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll = TRUE);
+	BOOL MergeTasks(const CTaskFile& tasks, BOOL nMergeByID);
 
 	void SetReadonly(BOOL bReadOnly) { SetStyle(TDCS_READONLY, bReadOnly); }
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }

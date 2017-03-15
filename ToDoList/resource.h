@@ -310,16 +310,19 @@
 #define IDC_CREATETASK                  1058
 #define IDC_OTHEREXPORT                 1058
 #define IDC_RELATIVE                    1058
+#define IDC_CREATENEWTASKLIST           1058
 #define IDC_SETPRIORITYCOLOR            1059
 #define IDC_IMPORT                      1059
 #define IDC_TOACTIVETASLIST             1059
 #define IDC_INIFILE                     1059
 #define IDC_SAMPLE                      1059
 #define IDC_DEFAULTCOLS                 1059
+#define IDC_ADDTOACTIVETASKLIST         1059
 #define IDC_TABCONTROL                  1060
 #define IDC_SETDEFAULTCOLOR             1060
 #define IDC_SETGRIDLINECOLOR            1060
 #define IDC_TOSELECTEDTASK              1060
+#define IDC_ADDTOSELECTEDTASK           1060
 #define IDC_USEPARENTATTRIB             1061
 #define IDC_SPECIFYTREEFONT             1061
 #define IDC_ENABLESOURCECONTROL         1061
@@ -332,6 +335,7 @@
 #define IDC_INCLUDECOMMENTS             1061
 #define IDC_OFFSETFROMTODAY             1061
 #define IDC_SYNCTIMEESTANDDATES         1061
+#define IDC_MERGETOACTIVETASKLIST       1061
 #define IDC_EXPORTPATH                  1062
 #define IDC_SETDONECOLOR                1062
 #define IDC_AUTOCALCPERCENTDONE         1062
@@ -752,6 +756,10 @@
 #define IDC_SNOOZEUNTILDATE             1489
 #define IDC_SNOOZEUNTILTIME             1490
 #define IDC_INCLUDEWEBLINKINCOMMENTSPASTE 1492
+#define IDC_TODIVIDER                   1493
+#define IDC_MERGEBYTITLE                1494
+#define IDC_MERGEBYTASKID               1495
+#define IDC_MERGEBYTASKIDWARNING        1496
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2043,7 +2051,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
 #define _APS_NEXT_COMMAND_VALUE         34563
-#define _APS_NEXT_CONTROL_VALUE         1493
+#define _APS_NEXT_CONTROL_VALUE         1497
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
