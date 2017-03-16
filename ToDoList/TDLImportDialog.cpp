@@ -332,8 +332,12 @@ void CTDLImportDialog::OnSize(UINT nType, int cx, int cy)
 		CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, nDx, 0);
 		CDialogHelper::OffsetCtrl(this, IDC_ADDTOSELECTEDTASK, nDx, 0);
 		CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, nDx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, nDx, 0);
+
 		CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTITLE, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKID, nDx, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKIDWARNING, nDx, 0);
 
 		CDialogHelper::OffsetCtrl(this, IDOK, nDx, nDy);
 		CDialogHelper::OffsetCtrl(this, IDCANCEL, nDx, nDy);
