@@ -36,6 +36,17 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox message handlers
 
+void CTDLImportExportComboBox::SetFileBasedOnly(BOOL bFileBased)
+{
+	m_bFileBasedOnly = bFileBased;
+
+	if (GetSafeHwnd())
+	{
+		ResetContent();
+		BuildCombo();
+	}
+}
+
 void CTDLImportExportComboBox::PreSubclassWindow() 
 {
 	BuildCombo();

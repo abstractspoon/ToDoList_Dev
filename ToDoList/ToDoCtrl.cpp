@@ -9913,37 +9913,46 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	TLDT_DATA* pData = (TLDT_DATA*)wParam;
 	CWnd* pTarget = (CWnd*)lParam;
 
-	int nNumFiles = pData->GetFileCount();
-	BOOL bSingleOutlookObj = (pData->pOutlookSelection && (pData->pOutlookSelection->GetCount() == 1));
-
-	// common handling
+	// Handle dropping files on to a tree item or the 'File Link' field
 	CStringArray aFiles;
 
-	if (bSingleOutlookObj)
+	if (pData->pOutlookSelection && pData->pOutlookSelection->GetCount())
 	{
-		// format outlook link
-		OutlookAPI::_Item obj(pData->pOutlookSelection->Item(COleVariant((short)1)));
+		int nNumItems = pData->pOutlookSelection->GetCount();
 
-		DWORD dwFlags = (Misc::ModKeysArePressed(MKS_SHIFT) ? 0 : OAFMT_NICE);
-		aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(obj, dwFlags));
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			// format outlook link
+			OutlookAPI::_Item obj(pData->pOutlookSelection->Item(COleVariant((short)(nItem + 1))));
+
+			DWORD dwFlags = (Misc::ModKeysArePressed(MKS_SHIFT) ? 0 : OAFMT_NICE);
+			aFiles.Add(CMSOutlookHelper::FormatItemAsUrl(obj, dwFlags));
+		}
 	}
-	else if (nNumFiles)
-	{ 
+	else if (pData->pFilePaths && pData->pFilePaths->GetSize())
+	{
 		aFiles.Copy(*(pData->pFilePaths));
 	}
 
 	// specific handling
 	if (pTarget == &m_taskTree.Tree())
 	{
-		// check for one or more file paths to add to file refs
-		if (pData->hti && aFiles.GetSize())
+		if (aFiles.GetSize())
 		{
-			IMPLEMENT_UNDOEDIT();
+			if (pData->hti)
+			{
+				// Add file paths to target's existing file Links
+				IMPLEMENT_UNDOEDIT();
 			
-			DWORD dwTaskID = GetTaskID(pData->hti);
-			m_data.SetTaskFileRefs(dwTaskID, aFiles, TRUE);
+				DWORD dwTaskID = GetTaskID(pData->hti);
+				m_data.SetTaskFileRefs(dwTaskID, aFiles, TRUE);
 
-			SetModified(TRUE, TDCA_FILEREF, dwTaskID);
+				SetModified(TRUE, TDCA_FILEREF, dwTaskID);
+			}
+			else
+			{
+				return GetParent()->SendMessage(WM_TDCM_IMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)&aFiles);
+			}
 		}
 		else if (CreateTasksFromOutlookObjects(pData) != 0)
 		{
@@ -9962,8 +9971,9 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		AppendSelectedTaskFileRefs(aFiles);
 		m_cbFileRef.SetFocus();
 	}
-	
-	return 0;
+
+	// else ignore
+	return 0L;
 }
 
 int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)

@@ -39,10 +39,10 @@ const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMI
 const UINT WM_TDCN_SNOOZEREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_SNOOZEREMINDER")); // wParam = TaskID, lParam = TDC* 
 
 // instruction messages
-// sent to AfxGetWnd() for help
 const UINT WM_TDCM_TASKLINK					= ::RegisterWindowMessage(_T("WM_TDCM_TASKLINK")); // wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK")); // wParam = hwnd, lParam = url
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION")); // wParam = start/stop, lParam = text to display
+const UINT WM_TDCM_IMPORTDROPFILES			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPFILES")); // wParam = hwnd, lParam = CStringArray*
 
 // find tasks dialog
 const UINT WM_FTD_FIND						= ::RegisterWindowMessage(_T("WM_FTD_FIND"));

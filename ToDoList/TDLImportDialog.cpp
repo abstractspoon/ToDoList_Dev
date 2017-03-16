@@ -43,6 +43,7 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 	  m_mgrImportExport(mgr),
 	  m_sizeMin(0, 0),
 	  m_cbFormat(mgr, TRUE),
+	  m_bFixedFile(FALSE),
 	  m_bReadonlyTasklist(bReadonlyTasklist)
 {
 	//{{AFX_DATA_INIT(CTDLImportDialog)
@@ -81,7 +82,9 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
 	}
 	else
+	{
 		CDialogHelper::SelectItemByData(m_cbFormat, m_nFormatOption);
+	}
 }
 
 
@@ -108,15 +111,27 @@ END_MESSAGE_MAP()
 int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
 {
 	m_sFromFilePath = szFilePath;
+	m_bFixedFile = !m_sFromFilePath.IsEmpty();
 
-	if (!m_sFromFilePath.IsEmpty())
+	if (m_bFixedFile)
+	{
 		m_nFormatOption = m_mgrImportExport.FindImporter(szFilePath);
+
+		if (m_nFormatOption == -1)
+			return IDCANCEL;
+
+		m_bFromClipboard = FALSE;
+		m_sClipboardText.Empty();
+		m_cbFormat.SetFileBasedOnly(TRUE);
+	}
 
 	return CTDLDialog::DoModal();
 }
 
 void CTDLImportDialog::OnChangeImportFrom() 
 {
+	ASSERT(!m_bFixedFile);
+
 	UpdateData();
 
 	BOOL bHasFilter = CurImporterHasFilter();
@@ -132,21 +147,36 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	// Set clipboard text font to be mono-spaced
-	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
-	
-	// init file edit
-	BOOL bHasFilter = CurImporterHasFilter();
+	ASSERT(!m_bFixedFile || !m_bFromClipboard);
 
+	BOOL bHasFilter = CurImporterHasFilter();
+	ASSERT(!m_bFixedFile || bHasFilter);
+
+	m_cbFormat.EnableWindow(!m_bFixedFile);
 	m_eFilePath.SetFilter(GetCurImporterFilter());
-	m_eFilePath.EnableWindow(bHasFilter);
+
+	if (m_bFixedFile)
+	{
+		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
+		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(FALSE);
+		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(FALSE);
+		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
+		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
+		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(bHasFilter);
+		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(m_bFromClipboard && bHasFilter);
+		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromClipboard && bHasFilter);
+
+		// Set clipboard text font to be mono-spaced
+		if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
+			GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
 	
-	GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(bHasFilter);
-	GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(m_bFromClipboard && bHasFilter);
-	GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromClipboard && bHasFilter);
+		OnRefreshclipboard();
+	}
 
 	if (m_bReadonlyTasklist)
 	{
@@ -157,8 +187,7 @@ BOOL CTDLImportDialog::OnInitDialog()
 	GetDlgItem(IDC_MERGEBYTITLE)->EnableWindow(m_nImportTo == MERGE);
 	GetDlgItem(IDC_MERGEBYTASKID)->EnableWindow(m_nImportTo == MERGE);
 	GetDlgItem(IDC_MERGEBYTASKIDWARNING)->EnableWindow(m_nImportTo == MERGE);
-	
-	OnRefreshclipboard();
+
 	EnableOK();
 	
 	// Because we are combining WS_THICKFRAME and WS_SYSMENU
@@ -297,18 +326,21 @@ void CTDLImportDialog::OnChangeFilepath()
 
 void CTDLImportDialog::OnRefreshclipboard() 
 {
-	m_sClipboardText = CClipboard().GetText();
+	if (!m_bFixedFile)
+	{
+		m_sClipboardText = CClipboard().GetText();
 
-	// Edit control wants CRLF not just LF
-	if (m_sClipboardText.Find(CRLF) == -1)
-		m_sClipboardText.Replace(_T("\n"), CRLF);
+		// Edit control wants CRLF not just LF
+		if (m_sClipboardText.Find(CRLF) == -1)
+			m_sClipboardText.Replace(_T("\n"), CRLF);
 
-	// Add blank line at start in case the chosen importer
-	// treats the first line as a header line
-	m_sClipboardText = (CRLF + m_sClipboardText);
+		// Add blank line at start in case the chosen importer
+		// treats the first line as a header line
+		m_sClipboardText = (CRLF + m_sClipboardText);
 
-	if (CurImporterHasFilter())
-		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText);
+		if (CurImporterHasFilter())
+			GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetWindowText(m_sClipboardText);
+	}
 }
 
 void CTDLImportDialog::OnSize(UINT nType, int cx, int cy) 

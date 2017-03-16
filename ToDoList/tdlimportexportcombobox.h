@@ -20,6 +20,8 @@ class CTDLImportExportComboBox : public COwnerdrawComboBoxBase
 public:
 	CTDLImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE);
 
+	void SetFileBasedOnly(BOOL bFileBased);
+
 protected:
 	const CImportExportMgr& m_mgrImpExp;
 	BOOL m_bImporting, m_bFileBasedOnly;

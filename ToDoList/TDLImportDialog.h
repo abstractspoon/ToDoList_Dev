@@ -47,6 +47,7 @@ protected:
 	CSize m_sizeMin;
 	BOOL m_bReadonlyTasklist;
 	CFont m_fontMonospace;
+	BOOL m_bFixedFile;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
