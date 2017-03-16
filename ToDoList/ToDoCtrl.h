@@ -132,7 +132,7 @@ public:
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL, DWORD dwFlags = 0) const;
 
 	BOOL InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll = TRUE);
-	BOOL MergeTasks(const CTaskFile& tasks, BOOL nMergeByID);
+	BOOL MergeTasks(const CTaskFile& tasks, BOOL bMergeByID);
 
 	void SetReadonly(BOOL bReadOnly) { SetStyle(TDCS_READONLY, bReadOnly); }
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
@@ -773,6 +773,10 @@ protected:
 	HTREEITEM AddTaskToTreeItem(const CTaskFile& file, HTASKITEM hTask, HTREEITEM htiParent = NULL, HTREEITEM htiAfter = TVI_LAST, TDC_RESETIDS nResetID = TDCR_NO);
 	virtual BOOL AddTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll, TDC_ATTRIBUTE nModAttrib);
 	HTREEITEM InsertItem(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
+
+	BOOL MergeTaskWithTree(const CTaskFile& file, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
+	BOOL MergeTaskAttributes(const CTaskFile& file, HTASKITEM hTask, BOOL bMergeByID);
+	BOOL MergeTaskAttributes(const CTaskFile& file, HTASKITEM hTask, DWORD dwTaskID);
 
 	virtual BOOL LoadTasks(const CTaskFile& file);
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);

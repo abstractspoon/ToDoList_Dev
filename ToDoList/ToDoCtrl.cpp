@@ -6764,7 +6764,7 @@ HTREEITEM CToDoCtrl::AddTaskToTreeItem(const CTaskFile& file, HTASKITEM hTask, H
 		else if (dwTaskID && nResetID == TDCR_CHECK)
 		{
 			// see if it already exist
-			if (HasTask(dwTaskID))
+			if (m_data.HasTask(dwTaskID))
 			{
 				// provide a new unique ID
 				dwTaskID = m_dwNextUniqueID++; 
@@ -7296,7 +7296,7 @@ void CToDoCtrl::BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD&
 	// we map this task only if it needs a new ID
 	DWORD dwTaskID = tasks.GetTaskID(hTask);
 
-	if ((dwTaskID <= 0) || (nResetID == TDCR_YES) || HasTask(dwTaskID))
+	if ((dwTaskID <= 0) || (nResetID == TDCR_YES) || m_data.HasTask(dwTaskID))
 		mapID[dwTaskID] = dwNextID++;
 
 	// children
@@ -9220,10 +9220,77 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 	return AddTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
 }
 
-BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL nMergeByID)
+BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 {
-	ASSERT(0);
+	HTASKITEM hTask = tasks.GetFirstTask();
+
+	if (!hTask)
+		return FALSE;
+
+	// cache and clear current selection
+	DWORD dwSelID = GetTaskID(TSH().GetFirstItem());
+
+	TCH().SelectItem(NULL);
+	TSH().RemoveAll();
+
+	CDWordArray aTaskIDs;
+
+	while (hTask)
+	{
+		MergeTaskWithTree(tasks, hTask, NULL, bMergeByID, aTaskIDs);
+
+		// next task
+		hTask = tasks.GetNextTask(hTask);
+	}
 	return FALSE;
+}
+
+BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs)
+{
+	if (!MergeTaskAttributes(tasks, hTask, bMergeByID))
+	{
+		// Add task to existing parent
+		DWORD dwParentID = tasks.GetTaskID(hTask);
+		HTREEITEM htiParent = (dwParentID ? m_taskTree.Find().GetItem(dwParentID) : NULL);
+
+		HTREEITEM htiNew = AddTaskToTreeItem(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES);
+
+		if (!htiNew)
+			return FALSE;
+
+		aNewTaskIDs.Add(GetTaskID(htiNew));
+	}
+
+	return TRUE;
+}
+
+BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, BOOL bMergeByID)
+{
+	DWORD dwTaskID = tasks.GetTaskID(hTask);
+
+	if (!bMergeByID)
+	{
+		CDWordArray aTaskIDs;
+
+		if (m_matcher.FindTasks(TDCA_TASKNAME, FOP_EQUALS, tasks.GetTaskTitle(hTask), aTaskIDs) != 1)
+			return FALSE;
+
+		// else
+		dwTaskID = aTaskIDs[0];
+	}
+	ASSERT(dwTaskID);
+
+	return MergeTaskAttributes(tasks, hTask, dwTaskID);
+}
+
+BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& file, HTASKITEM hTask, DWORD dwTaskID)
+{
+	if (!m_data.HasTask(dwTaskID))
+		return FALSE;
+
+
+
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, 
