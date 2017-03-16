@@ -28,16 +28,24 @@ class CTDCTaskMatcher
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data);
 
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults) const;
 	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const;
 	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults) const;
 
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CDWordArray& aTaskIDs) const;
+	int FindTasks(const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const;
+	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const;
+
 	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& params, SEARCHRESULT& result) const;
 	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, SEARCHRESULT& result) const;
+
+	static int Convert(const CResultArray& aResults, CDWordArray& aTaskIDs);
 
 protected:
 	const CToDoCtrlData& m_data;
 
 protected:
+
 	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const;
 	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
 	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
@@ -49,6 +57,7 @@ protected:
 	BOOL ValueMatchesAsArray(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bMatchWholeWordsOnly) const;
 
 	CString FormatResultDate(const COleDateTime& date) const;
+
 };
 
 class CTDCTaskComparer

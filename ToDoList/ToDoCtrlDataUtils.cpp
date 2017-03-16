@@ -33,6 +33,53 @@ CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data) : m_data(data)
 
 }
 
+int CTDCTaskMatcher::Convert(const CResultArray& aResults, CDWordArray& aTaskIDs)
+{
+	int nRes = aResults.GetSize();
+	aTaskIDs.SetSize(nRes);
+
+	while (nRes--)
+		aTaskIDs[nRes] = aResults[nRes].dwTaskID;
+
+	return aTaskIDs.GetSize();
+}
+
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CDWordArray& aTaskIDs) const
+{
+	CResultArray aResults;
+	FindTasks(nAttrib, nOp, sValue, aResults);
+
+	return Convert(aResults, aTaskIDs);
+}
+
+int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const
+{
+	CResultArray aResults;
+	FindTasks(query, aResults);
+
+	return Convert(aResults, aTaskIDs);
+}
+
+int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CDWordArray& aTaskIDs) const
+{
+	CResultArray aResults;
+	FindTasks(pTDI, pTDS, query, aResults);
+
+	return Convert(aResults, aTaskIDs);
+}
+
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults) const
+{
+	// sanity check
+	if (!m_data.GetTaskCount())
+		return 0;
+	
+	SEARCHPARAMS query;
+	query.aRules.Add(SEARCHPARAM(nAttrib, nOp, sValue));
+
+	return FindTasks(query, aResults);
+}
+
 int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, CResultArray& aResults) const
 {
 	// sanity check
