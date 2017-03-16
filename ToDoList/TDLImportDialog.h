@@ -22,6 +22,8 @@ class CTDLImportDialog : public CTDLDialog
 public:
 	CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
 
+	int DoModal(LPCTSTR szFilePath = NULL);
+
 	int GetImporterIndex() const; 
 	TDLID_IMPORTTO GetImportTo() const;
 	BOOL GetImportFromClipboard() const;

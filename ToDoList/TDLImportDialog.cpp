@@ -105,6 +105,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog message handlers
 
+int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
+{
+	m_sFromFilePath = szFilePath;
+
+	if (!m_sFromFilePath.IsEmpty())
+		m_nFormatOption = m_mgrImportExport.FindImporter(szFilePath);
+
+	return CTDLDialog::DoModal();
+}
+
 void CTDLImportDialog::OnChangeImportFrom() 
 {
 	UpdateData();
