@@ -309,7 +309,7 @@ BOOL CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR 
 	return FALSE;
 }
 
-int CImportExportMgr::FindImporter(LPCTSTR szFilePath)
+int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
 {
 	Initialize(); // initialize on demand
 

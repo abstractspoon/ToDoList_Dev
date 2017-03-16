@@ -47,7 +47,7 @@ public:
 	BOOL ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;
 	BOOL ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;
 	
-	int FindImporter(LPCTSTR szFilePath);
+	int FindImporter(LPCTSTR szFilePath) const;
 	
 protected:
 	BOOL m_bInitialized;
