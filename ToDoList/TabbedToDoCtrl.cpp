@@ -269,9 +269,9 @@ void CTabbedToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 	}
 }
 
-BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& file)
+BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
-	if (!CToDoCtrl::LoadTasks(file))
+	if (!CToDoCtrl::LoadTasks(tasks))
 		return FALSE;
 
 	m_taskList.SetTasklistFolder(FileMisc::GetFolderFromFilePath(m_sLastSavePath));
@@ -320,7 +320,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& file)
 				if (!GetExtensionWnd(nView, pExtWnd, pData))
 					return FALSE;
 				
-				UpdateExtensionView(pExtWnd, file, IUI_ALL, pData->mapWantedAttrib);
+				UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib);
 				ResyncExtensionSelection(nView);
 
 				// mark rest of extensions needing update
@@ -783,14 +783,14 @@ int CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const C
 	return GetTasks(tasks, FTCV_TASKTREE, filter);
 }
 
-BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hTask, const TDCGETTASKS& filter) const
+BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
 {
 	HTREEITEM htiChild = m_taskTree.GetChildItem(hti);
 	int nChildren = 0;
 
 	while (htiChild)
 	{
-		if (!AddTreeItemToTaskFile(htiChild, file, hTask, filter))
+		if (!AddTreeItemToTaskFile(htiChild, tasks, hTask, filter))
 		{
 			ASSERT(0);
 			return FALSE;
@@ -803,7 +803,7 @@ BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, 
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hParentTask, const TDCGETTASKS& filter) const
+BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const
 {
 	DWORD dwTaskID = GetTaskID(hti);
 
@@ -813,7 +813,7 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTAS
 	if (!m_data.GetTask(dwTaskID, pTDI, pTDS, FALSE))
 		return FALSE;
 
-	HTASKITEM hTask = file.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
+	HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
 
 	if (!hTask)
 	{
@@ -822,10 +822,10 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& file, HTAS
 	}
 
 	// Attributes
-	SetTaskAttributes(pTDI, pTDS, file, hTask, filter, FALSE);
+	SetTaskAttributes(pTDI, pTDS, tasks, hTask, filter, FALSE);
 
 	// Subtasks
-	AddTreeChildrenToTaskFile(hti, file, hTask, filter);
+	AddTreeChildrenToTaskFile(hti, tasks, hTask, filter);
 
 	return TRUE;
 }

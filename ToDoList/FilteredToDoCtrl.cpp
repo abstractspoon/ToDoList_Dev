@@ -99,7 +99,7 @@ BOOL CFilteredToDoCtrl::OnInitDialog()
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& file)
+BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
 	// handle reloading of tasklist with a filter present
 	if (GetTaskCount() && m_filter.HasAnyFilter())
@@ -109,7 +109,7 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& file)
 
 	BOOL bViewWasSet = IsViewSet();
 
-	if (!CTabbedToDoCtrl::LoadTasks(file))
+	if (!CTabbedToDoCtrl::LoadTasks(tasks))
 		return FALSE;
 
 	FTC_VIEW nView = GetTaskView();
@@ -1605,10 +1605,10 @@ const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleFilterFields() const
 	return m_visColEditFilter.GetVisibleFilterFields();
 }
 
-void CFilteredToDoCtrl::SaveAttributeVisibility(CTaskFile& file) const
+void CFilteredToDoCtrl::SaveAttributeVisibility(CTaskFile& tasks) const
 {
 	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
-		file.SetAttributeVisibility(m_visColEditFilter);
+		tasks.SetAttributeVisibility(m_visColEditFilter);
 }
 
 void CFilteredToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
@@ -1616,12 +1616,12 @@ void CFilteredToDoCtrl::SaveAttributeVisibility(CPreferences& prefs) const
 	m_visColEditFilter.Save(prefs, GetPreferencesKey());
 }
 
-void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs)
+void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs)
 {
 	// attrib visibility can be stored inside the file or the preferences
 	TDCCOLEDITFILTERVISIBILITY vis;
 
-	if (file.GetAttributeVisibility(vis))
+	if (tasks.GetAttributeVisibility(vis))
 	{
 		// update style to match
 		SetStyle(TDCS_SAVEUIVISINTASKLIST);

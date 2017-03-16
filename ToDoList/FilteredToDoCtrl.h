@@ -122,7 +122,7 @@ protected:
 	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
 
-	virtual BOOL LoadTasks(const CTaskFile& file);
+	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual BOOL CopyCurrentSelection() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
@@ -157,8 +157,8 @@ protected:
 	void RebuildList(const SEARCHPARAMS& filter);
 
 	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
-	virtual void LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs);
-	virtual void SaveAttributeVisibility(CTaskFile& file) const;
+	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 };
 

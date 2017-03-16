@@ -702,15 +702,15 @@ protected:
 
 	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID = 0);
 
-	virtual void LoadAttributeVisibility(const CTaskFile& file, const CPreferences& prefs);
-	virtual void SaveAttributeVisibility(CTaskFile& file) const;
+	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 
-	void SaveGlobals(CTaskFile& file) const;
-	void LoadGlobals(const CTaskFile& file);
+	void SaveGlobals(CTaskFile& tasks) const;
+	void LoadGlobals(const CTaskFile& tasks);
 
-	void SaveCustomAttributeDefinitions(CTaskFile& file) const;
-	void LoadCustomAttributeDefinitions(const CTaskFile& file);
+	void SaveCustomAttributeDefinitions(CTaskFile& tasks) const;
+	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
 	virtual void RebuildCustomAttributeUI();
 
 	virtual BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
@@ -759,26 +759,26 @@ protected:
 	void ValidateCommentsSize();
 	COLORREF GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
-	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& file, HTASKITEM hTask, const TDCGETTASKS& filter) const;
-	BOOL AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& file, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
+	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
+	BOOL AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
 	BOOL AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, BOOL bAllParents, BOOL bWantSubtasks) const;
-	BOOL SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const;
+	BOOL SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter, BOOL bTitleCommentsOnly) const;
 
 //	typedef BOOL (CALLBACK *PFNWANTADDTASK)(const CToDoCtrlData&, DWORD);
 
 	BOOL AddTaskToTaskFile(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const;
 	BOOL AddSubTasksToTaskFile(const TODOSTRUCTURE* pTDSParent, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const;
-	BOOL SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& file, HTASKITEM hTask) const;
+	BOOL SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
 
-	HTREEITEM AddTaskToTreeItem(const CTaskFile& file, HTASKITEM hTask, HTREEITEM htiParent = NULL, HTREEITEM htiAfter = TVI_LAST, TDC_RESETIDS nResetID = TDCR_NO);
+	HTREEITEM AddTaskToTreeItem(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent = NULL, HTREEITEM htiAfter = TVI_LAST, TDC_RESETIDS nResetID = TDCR_NO);
 	virtual BOOL AddTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll, TDC_ATTRIBUTE nModAttrib);
 	HTREEITEM InsertItem(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 
-	BOOL MergeTaskWithTree(const CTaskFile& file, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
-	BOOL MergeTaskAttributes(const CTaskFile& file, HTASKITEM hTask, BOOL bMergeByID);
-	BOOL MergeTaskAttributes(const CTaskFile& file, HTASKITEM hTask, DWORD dwTaskID);
+	BOOL MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
+	BOOL MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, BOOL bMergeByID);
+	BOOL MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwTaskID);
 
-	virtual BOOL LoadTasks(const CTaskFile& file);
+	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 
 	void SaveSplitPos(CPreferences& prefs) const;
