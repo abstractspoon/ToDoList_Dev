@@ -8279,19 +8279,55 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 	case IIR_SUCCESS:
 		if (tasks.GetTaskCount())
 		{
-			tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
-			
-			if (nImportTo == TDIT_CREATENEWTASKLIST)
-				VERIFY(CreateNewTaskList(FALSE));
+			// Don't apply default attributes if we are merging else
+			// we won't know what came from the file and what did not
+			bool bMerge = ((nImportTo == TDIT_MERGETOTASKLISTBYTITLE) || 
+							(nImportTo == TDIT_MERGETOTASKLISTBYID));
 
-			CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
-			TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
-			BOOL bMerge = FALSE;
-
-			switch (nImportTo)
+			if (bMerge)
 			{
-			case TDIT_ADDTOSELECTEDTASK:
+				CFilteredToDoCtrl& tdc = GetToDoCtrl();
+				VERIFY(tdc.MergeTasks(tasks, (nImportTo == TDIT_MERGETOTASKLISTBYID)));
+			}
+			else
+			{
+				tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
+			
+				if (nImportTo == TDIT_CREATENEWTASKLIST)
 				{
+					// If the imported tasks contain any custom attributes
+					// and those custom attributes match those of any open 
+					// tasklist then overwrite the imported custom attributes 
+					// with those from the matching tasklist
+					CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
+
+					if (tasks.GetCustomAttributeDefs(aImportedDefs))
+					{
+						int nTDC = GetTDCCount();
+
+						while (nTDC--)
+						{
+							if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
+								aImportedDefs.MatchAny(aTDCAttribDefs))
+							{
+								aTDCAttribDefs.Append(aImportedDefs);
+
+								tasks.SetCustomAttributeDefs(aTDCAttribDefs);
+								break;
+							}
+						}
+					}
+
+					VERIFY(CreateNewTaskList(FALSE));
+				}
+
+				CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
+				TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
+				BOOL bSelectAll = TRUE;
+
+				switch (nImportTo)
+				{
+				case TDIT_ADDTOSELECTEDTASK:
 					switch (Prefs().GetNewSubtaskPos())
 					{
 					case PUIP_TOP:
@@ -8302,59 +8338,22 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 						nWhere = TDC_INSERTATBOTTOMOFSELTASK;
 						break;
 					}
-				}
-				break;
+					break;
 
-			case TDIT_ADDBELOWSELECTEDTASK:
-				nWhere = TDC_INSERTAFTERSELTASK;
-				break;
+				case TDIT_ADDBELOWSELECTEDTASK:
+					nWhere = TDC_INSERTAFTERSELTASK;
+					break;
 
-			case TDIT_CREATENEWTASKLIST:
-			case TDIT_ADDTOTOPOFTASKLIST:
-				// as-is
-				break;
+				case TDIT_CREATENEWTASKLIST:
+					bSelectAll = FALSE;
+					tdc.SetProjectName(tasks.GetProjectName());
+					break;
 
-			case TDIT_MERGETOTASKLISTBYTITLE:
-			case TDIT_MERGETOTASKLISTBYID:
-				bMerge = TRUE;
-				break;
-			}
-
-			if (nImportTo == TDIT_CREATENEWTASKLIST)
-			{
-				// If the imported tasks contain any custom attributes
-				// and those custom attributes match those of any open 
-				// tasklist then overwrite the imported custom attributes 
-				// with those from the matching tasklist
-				CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
-
-				if (tasks.GetCustomAttributeDefs(aImportedDefs))
-				{
-					int nTDC = (GetTDCCount() - 1); // ignore just created tasklist
-
-					while (nTDC--)
-					{
-						if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
-							aImportedDefs.MatchAny(aTDCAttribDefs))
-						{
-							aTDCAttribDefs.Append(aImportedDefs);
-
-							tasks.SetCustomAttributeDefs(aTDCAttribDefs);
-							break;
-						}
-					}
+				case TDIT_ADDTOTOPOFTASKLIST:
+					break;
 				}
 
-				VERIFY(tdc.InsertTasks(tasks, nWhere, FALSE));
-				tdc.SetProjectName(tasks.GetProjectName());
-			}
-			else if (bMerge)
-			{
-				VERIFY(tdc.MergeTasks(tasks, (nImportTo == TDIT_MERGETOTASKLISTBYID)));
-			}
-			else
-			{
-				VERIFY(tdc.InsertTasks(tasks, nWhere));
+				VERIFY(tdc.InsertTasks(tasks, nWhere, bSelectAll));
 			}
 
 			UpdateCaption();
