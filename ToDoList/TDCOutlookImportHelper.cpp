@@ -23,17 +23,25 @@
 
 int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMappingError, ITaskList* pTasks)
 {
-	// first figure out if we've got something to process
-	// and grab its data for the dialog
-	
+	// If the data contains files which are not from Outlook
+	// then quit before starting up outlook
+	if (!pData->pOutlookSelection && pData->pFilePaths)
+	{
+		if ((pData->pFilePaths->GetSize() == 0) ||
+			!CMSOutlookHelper::IsOutlookObject(pData->pFilePaths->GetAt(0)))
+		{
+			return 0;
+		}
+	}
+
+	// first thing to do is to get the first outlook object so we 
+	// can prime the dialog
+
 	// NOTE: we've got to be a bit clever here because if the dialog
 	// has been displayed before, the user may have elected to hide
 	// confidential fields in which case we need to know this so as not
 	// to ask for that data which in turn will trigger the outlook
 	// security popup.
-	
-	// first thing to do is to get the first outlook object so we 
-	// can prime the dialog
 	CMSOutlookHelper outlook;
 	OutlookAPI::_Item* pItem = NULL;
 	
