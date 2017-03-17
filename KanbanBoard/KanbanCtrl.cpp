@@ -1307,30 +1307,37 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	}
 
 	// Check if only display attributes have changed
-	if (!bChange && UsingFixedColumns())
+	if (!bChange)
 	{
-		if (m_aColumnDefs.MatchesAll(aColumnDefs))
+		if (UsingFixedColumns())
 		{
-			return TRUE;
-		}
-		else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
-		{
-			int nCol = aColumnDefs.GetSize();
-			ASSERT(nCol == m_aListCtrls.GetSize());
-
-			while (nCol--)
+			if (m_aColumnDefs.MatchesAll(aColumnDefs))
 			{
-				const KANBANCOLUMN& colDef = aColumnDefs[nCol];
-				CKanbanListCtrl* pList = m_aListCtrls[nCol];
-				ASSERT(pList);
-
-				if (pList)
-				{
-					pList->SetBackgroundColor(colDef.crBackground);
-					//pList->SetExcessColor(colDef.crExcess);
-					//pList->SetMaximumTaskCount(colDef.nMaxTaskCount);
-				}
+				return TRUE;
 			}
+			else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
+			{
+				int nCol = aColumnDefs.GetSize();
+				ASSERT(nCol == m_aListCtrls.GetSize());
+
+				while (nCol--)
+				{
+					const KANBANCOLUMN& colDef = aColumnDefs[nCol];
+					CKanbanListCtrl* pList = m_aListCtrls[nCol];
+					ASSERT(pList);
+
+					if (pList)
+					{
+						pList->SetBackgroundColor(colDef.crBackground);
+						//pList->SetExcessColor(colDef.crExcess);
+						//pList->SetMaximumTaskCount(colDef.nMaxTaskCount);
+					}
+				}
+				return TRUE;
+			}
+		}
+		else
+		{
 			return TRUE;
 		}
 	}
@@ -2246,8 +2253,7 @@ void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		NMLISTVIEW* pNMLV = (NMLISTVIEW*)pNMHDR;
 		
-		if ((pNMLV->uChanged & LVIF_STATE) && 
-			((pNMLV->uNewState & LVIS_SELECTED) || (pNMLV->uOldState & LVIS_SELECTED)))
+		if (CKanbanListCtrl::IsSelectionChange(pNMLV))
 		{
 			NotifyParentSelectionChange();
 		}

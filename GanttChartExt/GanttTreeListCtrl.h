@@ -143,12 +143,13 @@ public:
 	int GetColumnOrder(CIntArray& aTreeOrder) const;
 	BOOL SetColumnOrder(const CIntArray& aTreeOrder);
 	void GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const;
-	void SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths);
-	void SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked);
+	BOOL SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths);
+	BOOL SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked);
 	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute);
+	static IUI_ATTRIBUTE MapColumnToAttrib(GTLC_COLUMN nCol);
 
 protected:
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
@@ -163,6 +164,7 @@ protected:
 	COleDateTime m_dtEarliest, m_dtLatest;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
+	DWORD m_dwMaxTaskID;
 	GANTTITEM m_giPreDrag;
 	GTLC_COLUMN m_nSortBy;
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
@@ -352,7 +354,6 @@ protected:
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
 	static CString GetTaskAllocTo(const ITaskList15* pTasks, HTASKITEM hTask);
-	static IUI_ATTRIBUTE MapColumnToAttrib(GTLC_COLUMN nCol);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);

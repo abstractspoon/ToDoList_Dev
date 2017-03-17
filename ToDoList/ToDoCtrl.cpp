@@ -5947,6 +5947,12 @@ TDC_FILE CToDoCtrl::Save(const CString& sFilePath)
 
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	CString sFileName = FileMisc::GetFileNameFromPath(sFilePath);
+	DWORD dwTick = GetTickCount();
+	///////////////////////////////////////////////////////////////////////
+	
 	ASSERT (GetSafeHwnd());
 	
 	if (!GetSafeHwnd())
@@ -6009,9 +6015,14 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 			}
 		}
 	}
-	
+
 	// prepare task file
 	BuildTasksForSave(tasks, bFirstSave);
+
+	///////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	FileMisc::LogTimeElapsed(dwTick, _T("CToDoCtrl::BuildTasksForSave(%s)"), sFileName);
+	///////////////////////////////////////////////////////////////////
 
 	// backup the file if opening in read-write
 	CTempFileBackup backup(sSavePath);
@@ -6019,6 +6030,11 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 	// do the save
 	if (tasks.Save(sSavePath, SFEF_UTF16))
 	{
+		///////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
+		FileMisc::LogTimeElapsed(dwTick, _T("CTaskFile::Save(%s)"), sFileName);
+		///////////////////////////////////////////////////////////////////
+
 		m_sLastSavePath = sSavePath;
 		m_bModified = FALSE;
 		m_bCheckedOut = tasks.IsCheckedOutTo(GetSourceControlID());

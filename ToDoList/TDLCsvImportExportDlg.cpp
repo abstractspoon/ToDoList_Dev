@@ -275,7 +275,7 @@ int CTDLCsvImportExportDlg::BuildImportColumnMapping(CTDCAttributeMapping& aImpo
 	// we can use as column heading names
 	CStringArray aColumnHeaders;
 
-	for (int nLine = 0; nLine < 5; nLine++)
+	for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
 	{
 		if (Misc::Split(aLines[nLine], aColumnHeaders, GetDelimiter(), TRUE))
 			break;

@@ -470,7 +470,7 @@ void CFilteredToDoCtrl::GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& 
 		// we add the task if it is completed (and optionally selected) or it has children
 		if (pTDI->IsDone() || pTDS->HasSubTasks())
 		{
-			HTASKITEM hTask = tasks.NewTask(NULL, hTaskParent, dwTaskID, 0);
+			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID, 0);
 			ASSERT(hTask);
 
 			// copy attributes

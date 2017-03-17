@@ -167,6 +167,7 @@ CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list)
 	m_ptDragStart(0),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
+	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE)
 {
 
@@ -583,6 +584,7 @@ BOOL CGanttTreeListCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	switch (nAttrib)
 	{
 	case IUI_TASKNAME:
+	case IUI_ID:
 	case IUI_DONEDATE:
 	case IUI_DUEDATE:
 	case IUI_STARTDATE:
@@ -606,6 +608,7 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	switch (nAttrib)
 	{
 	case IUI_TASKNAME:
+	case IUI_ID:
 	case IUI_DUEDATE:
 	case IUI_STARTDATE:
 	case IUI_ALLOCTO:
@@ -623,7 +626,7 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	switch (nCol)
 	{
 	case GTLCC_TITLE:		return IUI_TASKNAME;
-//	case GTLCC_ENDDATE:		return IUI_DONEDATE;
+	case GTLCC_TASKID:		return IUI_ID;
 	case GTLCC_ENDDATE:		return IUI_DUEDATE;
 	case GTLCC_STARTDATE:	return IUI_STARTDATE;
 	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
@@ -645,7 +648,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 
 	// handle task if not NULL (== root)
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
-	time64_t tDate = 0;
+	m_dwMaxTaskID = max(m_dwMaxTaskID, dwTaskID);
 
 	// This can be a new task
 	if (!m_data.HasTask(dwTaskID))
@@ -691,6 +694,8 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 	GANTTITEM giOrg = *pGI;
 
 	// can't use a switch here because we also need to check for IUI_ALL
+	time64_t tDate = 0;
+	
 	if (attrib.HasKey(IUI_TASKNAME))
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
@@ -888,6 +893,8 @@ void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
 	m_data.RemoveAll();
 	m_display.RemoveAll();
 
+	m_dwMaxTaskID = 0;
+
 	// cache and reset year range which will get 
 	// recalculated as we build the tree
 	COleDateTime dtPrevEarliest = m_dtEarliest, dtPrevLatest = m_dtLatest;
@@ -950,11 +957,14 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTas
 
 	// map the data
 	GANTTITEM* pGI = new GANTTITEM;
-	time64_t tDate = 0;
 	
+	pGI->dwTaskID = pTasks->GetTaskID(hTask);
+	m_dwMaxTaskID = max(m_dwMaxTaskID, pGI->dwTaskID);
+
+	// Only save data for non-references
 	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 
-	if (pGI->dwRefID == 0) // 'true' task
+	if (pGI->dwRefID == 0)
 	{
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
 		pGI->color = pTasks->GetTaskTextColor(hTask);
@@ -963,6 +973,8 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTas
 		pGI->bParent = pTasks->IsTaskParent(hTask);
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->nPosition = pTasks->GetTaskPosition(hTask);
+
+		time64_t tDate = 0;
 
 		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
 			pGI->dtStart = GetDate(tDate, FALSE);
@@ -1330,6 +1342,7 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	m_treeHeader.InsertItem(GTLCC_ENDDATE,	0, _T("Due"), (HDF_RIGHT | HDF_STRING));
 	m_treeHeader.InsertItem(GTLCC_ALLOCTO, 0, _T("Alloc To"), (HDF_LEFT | HDF_STRING));
 	m_treeHeader.InsertItem(GTLCC_PERCENT, 0, _T("%"), (HDF_CENTER | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_TASKID, 0, _T("ID"), (HDF_RIGHT | HDF_STRING));
 }
 
 BOOL CGanttTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
@@ -1415,7 +1428,7 @@ void CGanttTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildr
 	m_tree.EnsureVisible(m_tree.GetChildItem(NULL));
 
 	EnableResync(TRUE, m_tree);
-	Resize();
+	RecalcTreeColumns(TRUE);
 }
 
 BOOL CGanttTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
@@ -1849,6 +1862,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 								case GTLCC_ENDDATE:
 								case GTLCC_ALLOCTO:
 								case GTLCC_PERCENT:
+								case GTLCC_TASKID:
 									if (pHDN->pitem->cxy < MIN_COL_WIDTH)
 										pHDN->pitem->cxy = MIN_COL_WIDTH;
 									break;
@@ -1946,11 +1960,11 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 		int nFrom = FindListItem(dwFromTaskID);
 
 		GANTTDEPENDENCY depend;
-
+		
 		if (CalcDependencyEndPos(nFrom, depend, TRUE))
 		{
-		depend.SetTo(m_ptLastDependPick);
-		depend.Draw(pDC, rClient, TRUE);
+			depend.SetTo(m_ptLastDependPick);
+			depend.Draw(pDC, rClient, TRUE);
 		}
 			
 		// clear last drag pos
@@ -2530,6 +2544,10 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 			sItem = gi.sTitle;
 			break;
 
+		case GTLCC_TASKID:
+			sItem.Format(_T("%ld"), gi.dwTaskID);
+			break;
+			
 		case GTLCC_STARTDATE:
 			{
 				COleDateTime dtStart, dtDummy;
@@ -2608,6 +2626,10 @@ void CGanttTreeListCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, int nCol, const G
 		{
 		case GTLCC_TITLE:
 			nFlags |= DT_END_ELLIPSIS;
+			break;
+
+		case  GTLCC_TASKID:
+			nFlags |= DT_RIGHT;
 			break;
 			
 		case GTLCC_STARTDATE:
@@ -2748,6 +2770,7 @@ void CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 			}
 			break;
 
+		case GTLCC_TASKID:
 		case GTLCC_STARTDATE:
 		case GTLCC_ENDDATE:
 		case GTLCC_ALLOCTO:
@@ -2836,7 +2859,11 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
+	GANTTDISPLAY* pGD = NULL;
+	GET_GD_RET(dwTaskID, pGD, FALSE);
+
 	int nSaveDC = pDC->SaveDC();
+
 	float fMonthWidth = GetMonthWidth(rItem.Width());
 	GANTTDISPLAY gdTemp;
 	BOOL bToday = FALSE;
@@ -3010,21 +3037,10 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 		break;
 	}
 
-	// save off the absolute item end pos
+	// Update the absolute item start/end positions
 	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
-
-	GANTTDISPLAY* pGD = NULL;
-	GET_GD_RET(dwTaskID, pGD, FALSE);
+	pGD->UpdatePositions(gdTemp, nScrollPos);
 	
-	if (gdTemp.nStartPos > GCDR_NOTDRAWN)
-		pGD->nStartPos = (gdTemp.nStartPos + nScrollPos);
-	
-	if (gdTemp.nEndPos > GCDR_NOTDRAWN)
-		pGD->nEndPos = (gdTemp.nEndPos + nScrollPos);
-	
-	if (gdTemp.nDonePos > GCDR_NOTDRAWN)
-		pGD->nDonePos = (gdTemp.nDonePos + nScrollPos);
-
 	pDC->RestoreDC(nSaveDC);
 
 	return TRUE;
@@ -3435,7 +3451,7 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 			rDate.right -= (int)(((dtMonthEnd - dtTo) * dMultiplier) + 0.5);
 	}
 
-	return TRUE;
+	return (rDate.right > 0);
 }
 
 BOOL CGanttTreeListCtrl::BuildDependency(int nFrom, int nTo, GANTTDEPENDENCY& depend) const
@@ -3561,7 +3577,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend
 	
 	if (!m_display.Lookup(dwTaskID, pGD))
 	{
-		ASSERT(0);
+		//ASSERT(0);
 		return FALSE;
 	}
 
@@ -4302,6 +4318,10 @@ void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
 		nColWidth = CalcWidestItemTitle(NULL, pDC);
 		nColWidth = max(nColWidth, TREE_TITLE_MIN_WIDTH);
 		break;
+
+	case GTLCC_TASKID:
+		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
+		break;
 		
 	case GTLCC_ALLOCTO:
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(GetLongestVisibleAllocTo(NULL), pDC);
@@ -4319,6 +4339,9 @@ void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
 	case GTLCC_PERCENT: 
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
 		break;
+
+	default:
+		ASSERT(0);
 	}
 
 	if (nColWidth < MIN_COL_WIDTH)
@@ -4669,41 +4692,53 @@ GTLC_MONTH_DISPLAY CGanttTreeListCtrl::GetColumnDisplay(int nMonthWidth)
 
 int CALLBACK CGanttTreeListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
-
-	const GANTTITEM* pGI1 = pThis->GetGanttItem(lParam1);
-	const GANTTITEM* pGI2 = pThis->GetGanttItem(lParam2);
-
 	int nCompare = 0;
-
-	if (pGI1 && pGI2)
+	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
+	
+	// Optimise for task ID
+	if (pThis->m_nSortBy == GTLCC_TASKID)
 	{
-		switch (pThis->m_nSortBy)
+		nCompare = (lParam1 - lParam2);
+	}
+	else
+	{
+		const GANTTITEM* pGI1 = pThis->GetGanttItem(lParam1);
+		const GANTTITEM* pGI2 = pThis->GetGanttItem(lParam2);
+		
+		if (pGI1 && pGI2)
 		{
-		case GTLCC_TITLE:
-			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
-			break;
-			
-		case GTLCC_STARTDATE:
-			nCompare = (int)(pGI1->dtStart - pGI2->dtStart);
-			break;
-			
-		case GTLCC_ENDDATE:
-			nCompare = (int)(pGI1->dtDue - pGI2->dtDue);
-			break;
-			
-		case GTLCC_ALLOCTO:
-			nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
-			break;
-			
-		case GTLCC_PERCENT:
-			nCompare = (pGI1->nPercent - pGI2->nPercent);
-			break;
+			switch (pThis->m_nSortBy)
+			{
+			case GTLCC_TITLE:
+				nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
+				break;
+				
+			case GTLCC_STARTDATE:
+				nCompare = (int)(pGI1->dtStart - pGI2->dtStart);
+				break;
+				
+			case GTLCC_ENDDATE:
+				nCompare = (int)(pGI1->dtDue - pGI2->dtDue);
+				break;
+				
+			case GTLCC_ALLOCTO:
+				nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
+				break;
+				
+			case GTLCC_PERCENT:
+				nCompare = (pGI1->nPercent - pGI2->nPercent);
+				break;
+				
+			case GTLCC_NONE:
+				nCompare = (pGI1->nPosition - pGI2->nPosition);
+				break;
 
-		case GTLCC_NONE:
-			nCompare = (pGI1->nPosition - pGI2->nPosition);
-			break;
+			default:
+				ASSERT(0);
+				break;
+			}
 		}
+
 	}
 
 	return (pThis->m_bSortAscending ? nCompare : -nCompare);
@@ -5715,8 +5750,11 @@ void CGanttTreeListCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aLis
 		aListWidths.RemoveAt(nItem);
 }
 
-void CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
+BOOL CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
 {
+	if (aTreeWidths.GetSize() != GTLCC_NUMCOLUMNS)
+		return FALSE;
+
 	m_treeHeader.SetItemWidths(aTreeWidths);
 
 	// save list column widths for when we've initialised our columns
@@ -5725,6 +5763,8 @@ void CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIn
 		m_listHeader.SetItemWidths(aListWidths);
 	else
 		m_aPrevColWidths.Copy(aListWidths);
+
+	return TRUE;
 }
 
 void CGanttTreeListCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const
@@ -5741,8 +5781,11 @@ void CGanttTreeListCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& a
 		aListTracked.RemoveAt(nItem);
 }
 
-void CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
+BOOL CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
 {
+	if (aTreeTracked.GetSize() != GTLCC_NUMCOLUMNS)
+		return FALSE;
+	
 	m_treeHeader.SetTrackedItems(aTreeTracked); 
 
 	// save list column tracking for when we've initialised our columns
@@ -5751,6 +5794,8 @@ void CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const 
 		m_listHeader.SetTrackedItems(aListTracked);
 	else
 		m_aPrevTrackedCols.Copy(aListTracked);
+	
+	return TRUE;
 }
 
 GTLC_SNAPMODE CGanttTreeListCtrl::GetSnapMode() const

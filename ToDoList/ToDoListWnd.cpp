@@ -1578,8 +1578,12 @@ void CToDoListWnd::OnDeleteAllTasks()
 
 void CToDoListWnd::OnSave() 
 {
-	if (SaveTaskList(GetSelToDoCtrl()) == TDCF_SUCCESS)
-		UpdateCaption();
+	///////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	CScopedLogTime log(_T("CToDoListWnd::OnSave()"));
+	///////////////////////////////////////////////////////////////////
+
+	SaveTaskList(GetSelToDoCtrl());
 }
 
 TDC_FILE CToDoListWnd::DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath)
@@ -1761,26 +1765,23 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, BOOL bAuto)
 	ASSERT (nResult == TDCF_SUCCESS);
 
 	// post-process success
-	if (nResult == TDCF_SUCCESS)
-	{
-		m_mgrToDoCtrls.RefreshFileLastModified(nTDC);
-		m_mgrToDoCtrls.RefreshReadOnlyStatus(nTDC);
-		m_mgrToDoCtrls.RefreshPathType(nTDC);
+	m_mgrToDoCtrls.RefreshFileLastModified(nTDC);
+	m_mgrToDoCtrls.RefreshReadOnlyStatus(nTDC);
+	m_mgrToDoCtrls.RefreshPathType(nTDC);
 
-		CString sFilePath = tdc.GetFilePath();
+	CString sFilePath = tdc.GetFilePath();
 
-		if (userPrefs.GetAddFilesToMRU() && !bUsesStorage)
-			m_mruList.Add(sFilePath);
+	if (userPrefs.GetAddFilesToMRU() && !bUsesStorage)
+		m_mruList.Add(sFilePath);
 
-		UpdateCaption();
-		UpdateStatusbar();
+	UpdateCaption();
+	UpdateStatusbar();
 
-		// auto-export after saving
-		TDCEXPORTTASKLIST* pExport = PrepareNewExportAfterSave(nTDC, tasks);
+	// auto-export after saving
+	TDCEXPORTTASKLIST* pExport = PrepareNewExportAfterSave(nTDC, tasks);
 
-		if (pExport)
-			m_wndExport.ExportTasks(pExport);
-	}
+	if (pExport)
+		m_wndExport.ExportTasks(pExport);
 
 	return nResult;
 }
@@ -3622,8 +3623,10 @@ void CToDoListWnd::OnSaveas()
 			m_mgrToDoCtrls.ClearStorageDetails(nSel);
 			tdc.SetAlternatePreferencesKey(_T(""));
 		}
-
-		UpdateStatusbar();
+		else
+		{
+			UpdateStatusbar();
+		}
 	}
 }
 

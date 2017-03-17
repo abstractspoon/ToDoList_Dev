@@ -56,8 +56,6 @@ public:
 
  	void Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending = -1);
  	BOOL IsSorted() const;
-// 	GTLC_COLUMN GetSortColumn() const { return m_nSortBy; }
-// 	BOOL GetSortAscending() const { return m_bSortAscending; }
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }

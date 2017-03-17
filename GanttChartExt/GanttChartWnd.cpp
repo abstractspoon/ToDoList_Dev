@@ -305,12 +305,9 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		}
 		
 		// column widths
-		if (LoadColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths) &&
-			LoadColumnState(pPrefs, (sKey + _T("\\ListWidths")), aListWidths))
-		{
-			m_ctrlGantt.SetColumnWidths(aTreeWidths, aListWidths);
-		}
-		else
+		if (!LoadColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths) ||
+			!LoadColumnState(pPrefs, (sKey + _T("\\ListWidths")), aListWidths) ||
+			!m_ctrlGantt.SetColumnWidths(aTreeWidths, aListWidths))
 		{
 			m_ctrlGantt.ResizeColumnsToFit();
 		}
@@ -635,6 +632,7 @@ GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 {
 	switch ((int)dwColumn)
 	{
+	case IUI_ID:			return GTLCC_TASKID;
 	case IUI_ALLOCTO:		return GTLCC_ALLOCTO;
 	case IUI_TASKNAME:		return GTLCC_TITLE;
 	case IUI_DUEDATE:		return GTLCC_ENDDATE;
@@ -647,16 +645,7 @@ GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 
 DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
 {
-	switch (nColumn)
-	{
-	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
-	case GTLCC_TITLE:		return IUI_TASKNAME;
-	case GTLCC_ENDDATE:		return IUI_DUEDATE;
-	case GTLCC_STARTDATE:	return IUI_STARTDATE;
-	case GTLCC_PERCENT:		return IUI_PERCENT;
-	}
-	
-	return (DWORD)IUI_NONE;
+	return (DWORD)CGanttTreeListCtrl::MapColumnToAttrib(nColumn);
 }
 
 void CGanttChartWnd::OnSize(UINT nType, int cx, int cy) 

@@ -13,7 +13,9 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
+
+#define STR2BSTR(s) _bstr_t(CXmlNodeWrapper::ConvertStringToBSTR(s), false)
+
 //////////////////////////////////////////////////////////////////////
 
 // fix for bad typedef in <wtypes.h>
@@ -22,7 +24,13 @@ static char THIS_FILE[]=__FILE__;
 #	define VARIANT_TRUE ((VARIANT_BOOL)(-1))
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 LPCTSTR DEFAULT_HEADER = _T("version=\"1.0\" encoding=\"windows-1252\"");
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CXmlNodeWrapper::CXmlNodeWrapper()
 {
@@ -49,12 +57,12 @@ CXmlNodeWrapper::~CXmlNodeWrapper()
 		m_xmlnode.Detach();
 }
 
-CString CXmlNodeWrapper::GetValue(LPCTSTR valueName)
+CString CXmlNodeWrapper::GetValue(const CString& valueName)
 {
 	if (!IsValid())
 		return _T("");
 	
-	MSXML2::IXMLDOMNodePtr attribute = m_xmlnode->Getattributes()->getNamedItem(valueName);
+	MSXML2::IXMLDOMNodePtr attribute = m_xmlnode->Getattributes()->getNamedItem(STR2BSTR(valueName));
 	if (attribute)
 	{
 		return (LPCTSTR)attribute->Gettext();
@@ -86,12 +94,12 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::GetNextSibling()
 	return m_xmlnode->GetnextSibling();
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::GetNode(LPCTSTR nodeName)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::GetNode(const CString& nodeName)
 {
 	if (!IsValid())
 		return NULL;
 	try{
-		return m_xmlnode->selectSingleNode(nodeName);
+		return m_xmlnode->selectSingleNode(STR2BSTR(nodeName));
 	}
 	catch (_com_error e)
 	{
@@ -116,14 +124,14 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::GetFirstChildNode()
 	return m_xmlnode->GetfirstChild();
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::FindNode(LPCTSTR searchString)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::FindNode(const CString& searchString)
 {
 	if (!IsValid())
 		return NULL;
 
 	try
 	{
-		return m_xmlnode->selectSingleNode(searchString);
+		return m_xmlnode->selectSingleNode(STR2BSTR(searchString));
 	}
 	catch (_com_error e)
 	{
@@ -150,7 +158,7 @@ long CXmlNodeWrapper::NumNodes()
 		return 0;
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,LPCTSTR value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,const CString& value)
 {
 	MSXML2::IXMLDOMDocumentPtr xmlDocument = m_xmlnode->GetownerDocument();
 
@@ -160,46 +168,46 @@ void CXmlNodeWrapper::SetValue(LPCTSTR valueName,LPCTSTR value)
 
 		if (attributes)
 		{
-			MSXML2::IXMLDOMAttributePtr attribute = xmlDocument->createAttribute(valueName);
+			MSXML2::IXMLDOMAttributePtr attribute = xmlDocument->createAttribute(STR2BSTR(valueName));
 			
 			if (attribute)
 			{
-				attribute->Puttext(value);
+				attribute->Puttext(STR2BSTR(value));
 				attributes->setNamedItem(attribute);
 			}
 		}
 	}
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,int value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,int value)
 {
 	CString str;
 	str.Format(_T("%ld"),value);
 	SetValue(valueName,str);
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,short value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,short value)
 {
 	CString str;
 	str.Format(_T("%hd"),value);
 	SetValue(valueName,str);
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,double value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,double value)
 {
 	CString str;
 	str.Format(_T("%f"),value);
 	SetValue(valueName,str);
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,float value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,float value)
 {
 	CString str;
 	str.Format(_T("%f"),value);
 	SetValue(valueName,str);
 }
 
-void CXmlNodeWrapper::SetValue(LPCTSTR valueName,bool value)
+void CXmlNodeWrapper::SetValue(const CString& valueName,bool value)
 {
 	CString str;
 	if (value)
@@ -214,13 +222,13 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::AppendChild(MSXML2::IXMLDOMNodePtr pNode
 	return m_xmlnode->appendChild(pNode);
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertNode(int index,LPCTSTR nodeName)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertNode(int index, const CString& nodeName)
 {
 	MSXML2::IXMLDOMDocumentPtr xmlDocument = m_xmlnode->GetownerDocument();
 
 	if (xmlDocument)
 	{
-		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),nodeName,"");
+		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),STR2BSTR(nodeName),"");
 		MSXML2::IXMLDOMNodePtr refNode = GetNode(index);
 
 		if (refNode)
@@ -271,8 +279,25 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::RemoveNode(MSXML2::IXMLDOMNodePtr pNode)
 
 BOOL CXmlDocumentWrapper::s_bVer3orGreater = -1;
 
-CXmlDocumentWrapper::CXmlDocumentWrapper(LPCTSTR szHeader, LPCTSTR szRootItem) 
-	: m_bHeaderSet(FALSE), m_sRootItemName(szRootItem)
+CXmlDocumentWrapper::CXmlDocumentWrapper()
+	: m_bHeaderSet(FALSE)
+{
+	VERIFY(Initialise());
+}
+
+CXmlDocumentWrapper::CXmlDocumentWrapper(const CString& header)
+	: m_bHeaderSet(FALSE)
+{
+	VERIFY(Initialise(header));
+}
+
+CXmlDocumentWrapper::CXmlDocumentWrapper(const CString& sHeader, const CString& sRootItem) 
+	: m_bHeaderSet(FALSE), m_sRootItemName(sRootItem)
+{
+	VERIFY(Initialise(sHeader));
+}
+
+BOOL CXmlDocumentWrapper::Initialise()
 {
 	try
 	{
@@ -282,13 +307,26 @@ CXmlDocumentWrapper::CXmlDocumentWrapper(LPCTSTR szHeader, LPCTSTR szRootItem)
 		
 		Reset();
 
-	   // set header afterwards so it not overwritten
-		if (szHeader && *szHeader)
-			SetXmlHeader(szHeader);
+		return TRUE;
 	}
 	catch (...)
 	{
 	}
+
+	return FALSE;
+}
+
+BOOL CXmlDocumentWrapper::Initialise(const CString& header)
+{
+	if (Initialise())
+	{
+		if (!header.IsEmpty())
+			SetXmlHeader(header);
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 CXmlDocumentWrapper::CXmlDocumentWrapper(MSXML2::IXMLDOMDocumentPtr pDoc)
@@ -334,7 +372,7 @@ BOOL CXmlDocumentWrapper::IsValid() const
 
 CString CXmlDocumentWrapper::GetXmlHeader(BOOL bAsXml) const
 {
-	return GetHeader(NULL, bAsXml);
+	return GetHeader(_T(""), bAsXml);
 }
 
 CString CXmlDocumentWrapper::GetXslHeader(BOOL bAsXml) const
@@ -342,14 +380,14 @@ CString CXmlDocumentWrapper::GetXslHeader(BOOL bAsXml) const
 	return GetHeader(_T("stylesheet"), bAsXml);
 }
 
-CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
+CString CXmlDocumentWrapper::GetHeader(const CString& sName, BOOL bAsXml) const
 {
 	CString sHeader;
 	
 	if (IsValid())
 	{
-		BOOL bRootItem = (!szName || !szName[0]);
-		long nItem = FindHeaderItem(szName);
+		BOOL bRootItem = sName.IsEmpty();
+		long nItem = FindHeaderItem(sName);
 
 		if (nItem != -1)
 		{
@@ -366,7 +404,7 @@ CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 
 				// remove name
 				if (!bRootItem)
-					sHeader = sHeader.Mid(lstrlen(szName));
+					sHeader = sHeader.Mid(sName.GetLength());
 
 				sHeader.TrimLeft();
 				sHeader.TrimRight();
@@ -404,7 +442,7 @@ CString CXmlDocumentWrapper::GetHeader(LPCTSTR szName, BOOL bAsXml) const
 	return sHeader;
 }
 
-long CXmlDocumentWrapper::FindHeaderItem(LPCTSTR szName) const
+long CXmlDocumentWrapper::FindHeaderItem(const CString& sName) const
 {
 	if (IsValid())
 	{
@@ -419,10 +457,10 @@ long CXmlDocumentWrapper::FindHeaderItem(LPCTSTR szName) const
 				CString sNodeXml(node.GetXML());
 				CString sHeaderItem(_T("?xml"));
 
-				if (szName && *szName)
+				if (!sName.IsEmpty())
 				{
 					sHeaderItem += '-';
-					sHeaderItem += szName;
+					sHeaderItem += sName;
 				}
 				
 				if (sNodeXml.Find(sHeaderItem) == 1)
@@ -437,18 +475,15 @@ long CXmlDocumentWrapper::FindHeaderItem(LPCTSTR szName) const
 	return -1;
 }
 
-BOOL CXmlDocumentWrapper::SetXmlHeader(LPCTSTR szHeader)
+BOOL CXmlDocumentWrapper::SetXmlHeader(const CString& sHeader)
 {
 	ASSERT(IsValid());
-	ASSERT(szHeader && *szHeader);
+	ASSERT(!sHeader.IsEmpty());
 	ASSERT(!m_bHeaderSet);
 
-	if (IsValid() && (szHeader && *szHeader) && !m_bHeaderSet)
+	if (IsValid() && !sHeader.IsEmpty() && !m_bHeaderSet)
 	{
-		_bstr_t name(CXmlNodeWrapper::ConvertStringToBSTR(_T("xml")), FALSE);
-		_bstr_t bstr(CXmlNodeWrapper::ConvertStringToBSTR(szHeader), FALSE);
-		
-		MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(name, bstr);
+		MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(STR2BSTR(_T("xml")), STR2BSTR(sHeader));
 		
 		// always insert header right at the start
 		MSXML2::IXMLDOMNodePtr pNode = m_xmldoc->childNodes->item[0];
@@ -471,13 +506,13 @@ BOOL CXmlDocumentWrapper::SetXmlHeader(LPCTSTR szHeader)
 	return m_bHeaderSet;
 }
 
-BOOL CXmlDocumentWrapper::SetXslHeader(LPCTSTR szHeader)
+BOOL CXmlDocumentWrapper::SetXslHeader(const CString& sHeader)
 {
 	ASSERT(IsValid());
 
 	if (IsValid())
 	{
-		if (!szHeader || !szHeader[0])
+		if (sHeader.IsEmpty())
 		{
 			// delete the xsl header
 			long nItem = FindHeaderItem(_T("stylesheet"));
@@ -489,13 +524,13 @@ BOOL CXmlDocumentWrapper::SetXslHeader(LPCTSTR szHeader)
 		}
 		else
 		{
-			_bstr_t name(CXmlNodeWrapper::ConvertStringToBSTR(_T("xml-stylesheet")), FALSE);
-			_bstr_t bstr(CXmlNodeWrapper::ConvertStringToBSTR(szHeader), FALSE);
+			_bstr_t name(STR2BSTR(_T("xml-stylesheet")));
+			_bstr_t bstr(STR2BSTR(sHeader));
 		
 			MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(name, bstr);
 		
 			// always insert header right at the start but after root header
-			long nItem = (FindHeaderItem(NULL) + 1);
+			long nItem = (FindHeaderItem() + 1);
 			MSXML2::IXMLDOMNodePtr pNode = m_xmldoc->childNodes->item[nItem];
 		
 			if (pNode)
@@ -547,7 +582,7 @@ MSXML2::IXMLDOMDocument* CXmlDocumentWrapper::Interface()
 	return NULL;
 }
 
-BOOL CXmlDocumentWrapper::Load(LPCTSTR path, BOOL bPreserveWhiteSpace)
+BOOL CXmlDocumentWrapper::Load(const CString& path, BOOL bPreserveWhiteSpace)
 {
 	if (!IsValid())
 		return FALSE;
@@ -555,12 +590,10 @@ BOOL CXmlDocumentWrapper::Load(LPCTSTR path, BOOL bPreserveWhiteSpace)
 	m_xmldoc->put_preserveWhiteSpace(bPreserveWhiteSpace ? VARIANT_TRUE : VARIANT_FALSE);
 	m_xmldoc->put_async(VARIANT_FALSE);
 	
-	_bstr_t bstr(CXmlNodeWrapper::ConvertStringToBSTR(path), FALSE);
-
-	return (VARIANT_TRUE == m_xmldoc->load(bstr));
+	return (VARIANT_TRUE == m_xmldoc->load(STR2BSTR(path)));
 }
 
-BOOL CXmlDocumentWrapper::LoadXML(LPCTSTR xml, BOOL bPreserveWhiteSpace)
+BOOL CXmlDocumentWrapper::LoadXML(const CString& xml, BOOL bPreserveWhiteSpace)
 {
 	if (!IsValid())
 		return FALSE;
@@ -568,23 +601,17 @@ BOOL CXmlDocumentWrapper::LoadXML(LPCTSTR xml, BOOL bPreserveWhiteSpace)
 	m_xmldoc->put_preserveWhiteSpace(bPreserveWhiteSpace ? VARIANT_TRUE : VARIANT_FALSE);
 	m_xmldoc->put_async(VARIANT_FALSE);
 
-#ifdef _UNICODE
-	_bstr_t bstr(xml); 
-#else
-	_bstr_t bstr(CXmlNodeWrapper::ConvertStringToBSTR(xml), FALSE); 
-#endif
-	
-	return (VARIANT_TRUE == m_xmldoc->loadXML(bstr));
+	return (VARIANT_TRUE == m_xmldoc->loadXML(STR2BSTR(xml)));
 }
 
-BOOL CXmlDocumentWrapper::Save(LPCTSTR path, BOOL bPreserveWhiteSpace)
+BOOL CXmlDocumentWrapper::Save(const CString& path, BOOL bPreserveWhiteSpace)
 {
 	if (!IsValid())
 		return FALSE;
 	
 	try
 	{
-		_bstr_t bPath(CXmlNodeWrapper::ConvertStringToBSTR(path), FALSE);
+		_bstr_t bPath(STR2BSTR(path));
 		
 		if (bPath.length() == 0)
 			bPath = m_xmldoc->Geturl();
@@ -695,15 +722,13 @@ BOOL CXmlDocumentWrapper::IsVersion3orGreater()
 //------------------------//
 // Convert char * to BSTR //
 //------------------------//
-BSTR CXmlNodeWrapper::ConvertStringToBSTR(LPCTSTR pSrc)
+BSTR CXmlNodeWrapper::ConvertStringToBSTR(const CString& src)
 {
-	if(!pSrc) return NULL;
-	
 #ifdef _UNICODE
-	BSTR wsOut = ::SysAllocStringLen(pSrc, lstrlen(pSrc));
+	BSTR wsOut = ::SysAllocStringLen((LPCWSTR)src, src.GetLength());
 #else
 	BSTR wsOut(NULL);
-	DWORD cwch = ::MultiByteToWideChar(CP_ACP, 0, pSrc, -1, NULL, 0);//get size minus NULL terminator
+	DWORD cwch = ::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)src, -1, NULL, 0);//get size minus NULL terminator
 
 	if (cwch)
 	{
@@ -712,7 +737,7 @@ BSTR CXmlNodeWrapper::ConvertStringToBSTR(LPCTSTR pSrc)
 		
 		if(wsOut)
 		{
-			if(!::MultiByteToWideChar(CP_ACP, 0, pSrc, -1, wsOut, cwch))
+			if(!::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)src, -1, wsOut, cwch))
 			{
 				if(ERROR_INSUFFICIENT_BUFFER == ::GetLastError())
 					return wsOut;
@@ -749,12 +774,12 @@ MSXML2::IXMLDOMNode* CXmlNodeWrapper::Interface()
 	return NULL;
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertBefore(MSXML2::IXMLDOMNodePtr refNode, LPCTSTR nodeName)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertBefore(MSXML2::IXMLDOMNodePtr refNode, const CString& nodeName)
 {
 	MSXML2::IXMLDOMDocumentPtr xmlDocument = m_xmlnode->GetownerDocument();
 	if (xmlDocument)
 	{
-		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),nodeName,"");
+		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),STR2BSTR(nodeName),"");
 		newNode = m_xmlnode->insertBefore(newNode,_variant_t(refNode.GetInterfacePtr()));
 
 		return newNode;
@@ -762,12 +787,12 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertBefore(MSXML2::IXMLDOMNodePtr refN
 	return NULL;
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertAfter(MSXML2::IXMLDOMNodePtr refNode, LPCTSTR nodeName)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertAfter(MSXML2::IXMLDOMNodePtr refNode, const CString& nodeName)
 {
 	MSXML2::IXMLDOMDocumentPtr xmlDocument = m_xmlnode->GetownerDocument();
 	if (xmlDocument)
 	{
-		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),nodeName,"");
+		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),STR2BSTR(nodeName),"");
 		MSXML2::IXMLDOMNodePtr nextNode = refNode->GetnextSibling();
 
 		if (nextNode.GetInterfacePtr() != NULL)
@@ -791,12 +816,12 @@ void CXmlNodeWrapper::Reset()
 	VERIFY(SUCCEEDED(nodeList->reset()));
 }
 
-void CXmlNodeWrapper::RemoveNodes(LPCTSTR searchStr)
+void CXmlNodeWrapper::RemoveNodes(const CString& searchStr)
 {
 	if (!IsValid())
 		return;
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = m_xmlnode->selectNodes(searchStr);
+	MSXML2::IXMLDOMNodeListPtr nodeList = m_xmlnode->selectNodes(STR2BSTR(searchStr));
 	for (int i = 0; i < nodeList->Getlength(); i++)
 	{
 		try
@@ -900,13 +925,13 @@ MSXML2::IXMLDOMDocumentPtr CXmlNodeListWrapper::AsDocument()
 		return NULL;
 }
 
-MSXML2::IXMLDOMNodeListPtr CXmlNodeWrapper::FindNodes(LPCTSTR searchStr)
+MSXML2::IXMLDOMNodeListPtr CXmlNodeWrapper::FindNodes(const CString& searchStr)
 {
 	if(IsValid())
 	{
 		try
 		{
-			return m_xmlnode->selectNodes(searchStr);
+			return m_xmlnode->selectNodes(STR2BSTR(searchStr));
 		}
 		catch (_com_error e)
 		{
@@ -938,12 +963,11 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertAfter(MSXML2::IXMLDOMNodePtr refNo
 	return newNode;
 }
 
-void CXmlNodeWrapper::SetText(LPCTSTR text)
+void CXmlNodeWrapper::SetText(const CString& text)
 {
 	if (IsValid())
 	{
-		_bstr_t bstr(ConvertStringToBSTR(text), FALSE);
-		m_xmlnode->Puttext(bstr);
+		m_xmlnode->Puttext(STR2BSTR(text));
 	}
 }
 

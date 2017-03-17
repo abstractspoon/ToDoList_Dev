@@ -31,7 +31,7 @@ struct GANTTITEM
 	COLORREF color;
 	CString sAllocTo;
 	BOOL bParent;
-	DWORD dwRefID, dwOrgRefID;
+	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	CStringArray aDepends;
 	CStringArray aTags;
 	int nPercent;
@@ -76,7 +76,9 @@ struct GANTTDISPLAY
 	BOOL IsEndSet() const;
 	BOOL IsDoneSet() const;
 	BOOL HasNoDates() const;
+
 	void SetHasNoDates();
+	void UpdatePositions(const GANTTDISPLAY& gdDrawn, int nScrollPos);
 };
 
 /////////////////////////////////////////////////////////////////////////////

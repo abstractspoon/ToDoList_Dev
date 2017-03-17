@@ -73,8 +73,7 @@ BOOL CXmlFileEx::Encrypt(LPCWSTR szPassword, SFE_FORMAT nFormat)
 
 		while (pXI)
 		{
-			CString sItem = pXI->GetName();
-			CXmlNodeWrapper nodeChild(nodeDoc.InsertNode(nNode++, (LPCWSTR)sItem));
+			CXmlNodeWrapper nodeChild(nodeDoc.InsertNode(nNode++, pXI->GetName()));
 			ASSERT (nodeChild.IsValid());
 
 			Export(pXI, &nodeChild);

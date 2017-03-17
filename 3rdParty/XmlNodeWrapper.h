@@ -32,43 +32,43 @@ public:
 	int NumAttributes();
 	void ReplaceNode(MSXML2::IXMLDOMNodePtr pOldNode,MSXML2::IXMLDOMNodePtr pNewNode);
 	CString GetText();
-	void SetText(LPCTSTR text);
+	void SetText(const CString& text);
 	MSXML2::IXMLDOMNodePtr InsertAfter(MSXML2::IXMLDOMNodePtr refNode, MSXML2::IXMLDOMNodePtr pNode);
 	CString Name();
-	MSXML2::IXMLDOMNodeListPtr FindNodes(LPCTSTR searchStr);
+	MSXML2::IXMLDOMNodeListPtr FindNodes(const CString& searchStr);
 	MSXML2::IXMLDOMNodePtr Parent();
-	void RemoveNodes(LPCTSTR searchStr);
+	void RemoveNodes(const CString& searchStr);
 	void Reset();
-	MSXML2::IXMLDOMNodePtr InsertAfter(MSXML2::IXMLDOMNodePtr refNode, LPCTSTR nodeName);
-	MSXML2::IXMLDOMNodePtr InsertBefore(MSXML2::IXMLDOMNodePtr refNode, LPCTSTR nodeName);
+	MSXML2::IXMLDOMNodePtr InsertAfter(MSXML2::IXMLDOMNodePtr refNode, const CString& nodeName);
+	MSXML2::IXMLDOMNodePtr InsertBefore(MSXML2::IXMLDOMNodePtr refNode, const CString& nodeName);
 	MSXML2::IXMLDOMNode* Interface();
 	MSXML2::IXMLDOMDocumentPtr ParentDocument();
 	CString GetXML();
 	MSXML2::IXMLDOMNodePtr RemoveNode(MSXML2::IXMLDOMNodePtr pNode);
-	MSXML2::IXMLDOMNodePtr InsertNode(int index,LPCTSTR nodeName);
+	MSXML2::IXMLDOMNodePtr InsertNode(int index, const CString& nodeName);
 	MSXML2::IXMLDOMNodePtr InsertNode(int index,MSXML2::IXMLDOMNodePtr pNode);
 	MSXML2::IXMLDOMNodePtr AppendChild(MSXML2::IXMLDOMNodePtr pNode);
 	long NumNodes();
 	MSXML2::IXMLDOMNode* Detach();
-	MSXML2::IXMLDOMNodePtr GetNode(LPCTSTR nodeName);
+	MSXML2::IXMLDOMNodePtr GetNode(const CString& nodeName);
 	MSXML2::IXMLDOMNodePtr GetNode(int nodeIndex);
-	MSXML2::IXMLDOMNodePtr FindNode(LPCTSTR searchString);
+	MSXML2::IXMLDOMNodePtr FindNode(const CString& searchString);
 	MSXML2::IXMLDOMNodePtr GetPrevSibling();
 	MSXML2::IXMLDOMNodePtr GetNextSibling();
 	MSXML2::IXMLDOMNodePtr GetFirstChildNode();
 
-	void SetValue(LPCTSTR valueName,LPCTSTR value);
-	void SetValue(LPCTSTR valueName,int value);
-	void SetValue(LPCTSTR valueName,short value);
-	void SetValue(LPCTSTR valueName,double value);
-	void SetValue(LPCTSTR valueName,float value);
-	void SetValue(LPCTSTR valueName,bool value);
+	void SetValue(const CString& valueName,const CString& value);
+	void SetValue(const CString& valueName,int value);
+	void SetValue(const CString& valueName,short value);
+	void SetValue(const CString& valueName,double value);
+	void SetValue(const CString& valueName,float value);
+	void SetValue(const CString& valueName,bool value);
 	BOOL IsValid();
-	CString GetValue(LPCTSTR valueName);
+	CString GetValue(const CString& valueName);
 	BOOL IsPreservingWhiteSpace() const;
 
 	// fixed version
-	static BSTR ConvertStringToBSTR(LPCTSTR pSrc);
+	static BSTR ConvertStringToBSTR(const CString& pSrc);
 
 private:
 	BOOL m_bAutoRelease;
@@ -80,23 +80,25 @@ private:
 class CXmlDocumentWrapper
 {
 public:
-	CXmlDocumentWrapper(LPCTSTR header = NULL, LPCTSTR szRootItem = NULL);
+	CXmlDocumentWrapper();
+	CXmlDocumentWrapper(const CString& header);
+	CXmlDocumentWrapper(const CString& header, const CString& sRootItem);
 	CXmlDocumentWrapper(MSXML2::IXMLDOMDocumentPtr pDoc);
 	virtual ~CXmlDocumentWrapper();
 
 	CString GetUrl() const;
 	CString GetXML(BOOL bPreserveWhiteSpace = TRUE) const;
 	BOOL IsValid() const;
-	BOOL Load(LPCTSTR path, BOOL bPreserveWhiteSpace = TRUE);
+	BOOL Load(const CString& path, BOOL bPreserveWhiteSpace = TRUE);
 	BOOL Transform(CXmlDocumentWrapper& xsl, CString& sOutput) const;
-	BOOL LoadXML(LPCTSTR xml, BOOL bPreserveWhiteSpace = TRUE);
-	BOOL Save(LPCTSTR path = _T(""), BOOL bPreserveWhiteSpace = TRUE);
+	BOOL LoadXML(const CString& xml, BOOL bPreserveWhiteSpace = TRUE);
+	BOOL Save(const CString& path = _T(""), BOOL bPreserveWhiteSpace = TRUE);
 	void Reset();
 
 	CString GetXmlHeader(BOOL bAsXml = FALSE) const;
 	CString GetXslHeader(BOOL bAsXml = FALSE) const;
-	BOOL SetXmlHeader(LPCTSTR szHeader);
-	BOOL SetXslHeader(LPCTSTR szHeader);
+	BOOL SetXmlHeader(const CString& szHeader);
+	BOOL SetXslHeader(const CString& szHeader);
 
 	static BOOL IsVersion3orGreater();
 
@@ -108,8 +110,8 @@ public:
 	MSXML2::IXMLDOMNodePtr AsNode();
 
 protected:
-	long FindHeaderItem(LPCTSTR szName) const;
-	CString GetHeader(LPCTSTR szName, BOOL bAsXml = FALSE) const;
+	long FindHeaderItem(const CString& sName = _T("")) const;
+	CString GetHeader(const CString& sName, BOOL bAsXml = FALSE) const;
 
 private:
 	MSXML2::IXMLDOMDocumentPtr m_xmldoc;
@@ -117,9 +119,13 @@ private:
 	CString m_sRootItemName;
 
 	static BOOL s_bVer3orGreater;
-};
+
+private:
+	BOOL Initialise();
+	BOOL Initialise(const CString& header);
 
 //////////////////////////////////////////////////////////////////////////////
+};
 
 class CXmlNodeListWrapper
 {
@@ -139,6 +145,7 @@ public:
 private:
 	MSXML2::IXMLDOMNodeListPtr m_xmlnodelist;
 
+	
 };
 
 //////////////////////////////////////////////////////////////////////////////

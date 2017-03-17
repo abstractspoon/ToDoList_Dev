@@ -483,7 +483,7 @@ BOOL CXmlItem::DeleteItem(CXmlItem* pXI)
 {
 	if (RemoveItem(pXI))
 	{
-		delete pXI; // This will delete children
+		delete pXI;
 		return TRUE;
 	}
 	
@@ -722,7 +722,7 @@ void CXmlItem::ValidateString(CString& sText, TCHAR cReplace)
 	// remove nasties that XML does not like
 	int nLen = sText.GetLength();
 	
-	for(int nChar = 0; nChar < nLen; nChar++)
+	for (int nChar = 0; nChar < nLen; nChar++)
 	{
 		TCHAR c = sText[nChar];
 		
@@ -730,15 +730,15 @@ void CXmlItem::ValidateString(CString& sText, TCHAR cReplace)
 		{
 		case 0x2026: // ellipsis
 			sText.SetAt(nChar, cReplace);
-			break;
+			continue;
 		}
 		
 		// default handling
 		// from http://support.microsoft.com/kb/315580
 		BOOL bValid =  ((c >= 0xE000 && c <= 0xFFFD) ||
-			(c >  0x009F && c <= 0xD7FF) ||
-			(c >= 0x0020 && c <  0x0082) ||
-			(c == 0x09 || c == 0x0A || c == 0x0D));
+						(c >  0x009F && c <= 0xD7FF) ||
+						(c >= 0x0020 && c <  0x0082) ||
+						(c == 0x09 || c == 0x0A || c == 0x0D));
 		
 		if (!bValid)
 		{
@@ -873,7 +873,7 @@ CString CXmlItem::ToString(double dValue)
 CXmlFile::CXmlFile(const CString& sRootItemName) 
 	: 
 	m_xiRoot(NULL, sRootItemName), 
-	m_xmlDoc(NULL, sRootItemName),
+	m_xmlDoc(_T(""), sRootItemName),
 	m_pCallback(NULL)
 {
 }
@@ -1000,6 +1000,12 @@ BOOL CXmlFile::SaveEx()
 	{	
 		try
 		{
+			///////////////////////////////////////////////////////////////////////
+			// PERMANENT LOGGING
+			CString sFileName = FileMisc::GetFileNameFromPath(GetFilePath());
+			DWORD dwTick = GetTickCount();
+			///////////////////////////////////////////////////////////////////////
+
 			// move to start
 			Seek(0, CStdioFileEx::begin);
 			
@@ -1015,6 +1021,11 @@ BOOL CXmlFile::SaveEx()
 			
 			if (dwFileSizeInBytes == dwXmlSizeInBytes)
 				bRes = TRUE;
+
+			///////////////////////////////////////////////////////////////////
+			// PERMANENT LOGGING
+			FileMisc::LogTimeElapsed(dwTick, _T("CStdioFileEx::WriteString(%s)"), sFileName);
+			///////////////////////////////////////////////////////////////////
 		}
 		catch (...)
 		{
@@ -1239,22 +1250,35 @@ void CXmlFile::CopyFrom(const CXmlFile& file)
 
 BOOL CXmlFile::Export(CString& sOutput) const
 {
-	BOOL bRes = FALSE;
+	BOOL bSuccess = FALSE;
 	sOutput.Empty();
 	
 	try
 	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
+		DWORD dwTick = GetTickCount();
+		///////////////////////////////////////////////////////////////////////
+
 		if (BuildDOM())
 		{
+			///////////////////////////////////////////////////////////////////
+			// PERMANENT LOGGING
+			FileMisc::LogTimeElapsed(dwTick, _T("CXmlFile::Export(BuildDOM)"));
+			///////////////////////////////////////////////////////////////////
+
 			sOutput = m_xmlDoc.GetXML(TRUE);
+
+			///////////////////////////////////////////////////////////////////
+			// PERMANENT LOGGING
+			FileMisc::LogTimeElapsed(dwTick, _T("CXmlFile::Export(GetXML)"));
+			///////////////////////////////////////////////////////////////////
+
+			bSuccess = !sOutput.IsEmpty();
 			
-			if (sOutput.IsEmpty()) // sanity check
-				m_nFileError = XFL_BADMSXML;
-			else
+			if (bSuccess) // sanity check
 			{
-				// carriage return after each attribute
-				sOutput.Replace(_T("><"), _T(">\r\n<"));
-				bRes = TRUE;
+				m_nFileError = XFL_BADMSXML;
 			}
 		}
 	}
@@ -1263,7 +1287,7 @@ BOOL CXmlFile::Export(CString& sOutput) const
 		m_nFileError = XFL_BADMSXML;
 	}
 	
-	return bRes;
+	return bSuccess;
 }
 
 BOOL CXmlFile::BuildDOM() const
@@ -1327,17 +1351,15 @@ BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode)
 		const CXmlItem* pXIChild = pItem->GetNextItem(pos);
 		ASSERT (pXIChild);
 		
-		CString sItem = pXIChild->GetName();
-		
 		if (pXIChild->IsAttribute())
 		{
 			ASSERT (!pXIChild->GetSibling());
-			pNode->SetValue(sItem, pXIChild->GetValue());
+			pNode->SetValue(pXIChild->GetName(), pXIChild->GetValue());
 		}
 		else if (pXIChild->IsCDATA())
 		{
 			// create a named node to wrap the CDATA
-			MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, (LPCTSTR)sItem);
+			MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, pXIChild->GetName());
 			MSXML2::IXMLDOMCDATASectionPtr pCData = 
 				pNode->ParentDocument()->createCDATASection((LPCTSTR)pXIChild->GetValue());
 			pChildNode->appendChild(pCData);
@@ -1346,8 +1368,7 @@ BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode)
 		{
 			while (pXIChild)
 			{
-				// Valik - Change IXMLDOMNode* to IXMLDOMNodePtr to prevent an ambiguous symbol error (C2872) in VC 7.1
-				MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, (LPCTSTR)sItem);
+				MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, pXIChild->GetName());
 				CXmlNodeWrapper nodeChild(pChildNode);
 				ASSERT (nodeChild.IsValid());
 				

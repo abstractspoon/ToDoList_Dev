@@ -980,25 +980,6 @@ int Misc::RemoveItems(const CStringArray& array, CStringArray& aFrom, BOOL bCase
 	return nRemoved;
 }
 
-int Misc::RemoveMissingItems(const CStringArray& array, CStringArray& aFrom, BOOL bCaseSensitive)
-{
-	int nRemoved = 0; // counter
-	int nItem = aFrom.GetSize();
-
-	while (nItem--)
-	{
-		const CString& sItem = GetItem(aFrom, nItem);
-
-		if (Find(array, sItem, bCaseSensitive, FALSE) == -1)
-		{ 
-			aFrom.RemoveAt(nItem);
-			nRemoved++;
-		}
-	}
-
-	return nRemoved;
-}
-
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 {
 	int nFind = Find(aFrom, szItem, bCaseSensitive, FALSE);
@@ -1753,15 +1734,20 @@ int Misc::ParseSearchString(LPCTSTR szLookFor, CStringArray& aWords)
 
 CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 {
+	return (Format(dVal, nDecPlaces) + szTrail);
+}
+
+CString Misc::Format(double dVal, int nDecPlaces)
+{
 	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
 	setlocale(LC_NUMERIC, ""); // local default
 
 	CString sValue;
 
 	if (nDecPlaces < 0)
-		sValue.Format(_T("%f%s"), dVal, szTrail);
+		sValue.Format(_T("%f"), dVal);
 	else
-		sValue.Format(_T("%.*f%s"), nDecPlaces, dVal, szTrail);
+		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
 				
 	// restore locale
 	setlocale(LC_NUMERIC, szLocale);
@@ -1772,17 +1758,27 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 CString Misc::Format(int nVal, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%ld%s"), nVal, szTrail);
-
-	return sValue;
+	return (Format(nVal) + szTrail);
 }
 
 CString Misc::Format(DWORD dwVal, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%lu%s"), dwVal, szTrail);
+	return (Format(dwVal) + szTrail);
+}
 
+CString Misc::Format(int nVal)
+{
+	CString sValue;
+	sValue.Format(_T("%ld"), nVal);
+	
+	return sValue;
+}
+
+CString Misc::Format(DWORD dwVal)
+{
+	CString sValue;
+	sValue.Format(_T("%lu"), dwVal);
+	
 	return sValue;
 }
 

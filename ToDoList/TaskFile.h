@@ -86,7 +86,7 @@ public:
 	int Merge(LPCTSTR szTaskFilePath, BOOL bByID, BOOL bMoveExist);
 #endif
 
-	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID, BOOL bInitCreationDate = FALSE);
+	HTASKITEM NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwID, DWORD dwParentID, BOOL bInitCreationDate = FALSE);
 
 protected:
 	HTASKITEM NewTask(LPCTSTR szTitle, HTASKITEM hParent = NULL);		// ITasklist
@@ -167,7 +167,7 @@ public:
 	BOOL SetTaskHighestPriority(HTASKITEM hTask, int nPriority);
 	BOOL SetTaskHighestRisk(HTASKITEM hTask, int nRisk);
 	BOOL SetTaskCalcCost(HTASKITEM hTask, double dCost);
-	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, LPCTSTR szSubtaskDone);
+	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone);
 	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bHasIncomplete);
 	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
 

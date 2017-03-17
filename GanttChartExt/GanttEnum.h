@@ -103,6 +103,10 @@ enum GTLC_COLUMN
 	GTLCC_ENDDATE,
 	GTLCC_ALLOCTO,
 	GTLCC_PERCENT,
+	GTLCC_TASKID,
+
+	// Always the last item
+	GTLCC_NUMCOLUMNS
 };
 /////////////////////////////////////////////////////////////////////////////
 

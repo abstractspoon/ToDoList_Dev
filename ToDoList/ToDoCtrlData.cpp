@@ -4350,49 +4350,42 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
-			CTimeHelper thAllDay(24.0, 7.0);
-			dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-
 			// handle 'whole' of due date
 			if (IsEndOfDay(dateEnd))
 				dDuration += 1.0;
 
+			CTimeHelper thAllDay(24.0, 7.0);
+			dDuration = thAllDay.GetTime(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
+
+	case TDCU_WEEKDAYS:
+		if (CDateHelper::HasWeekend())
+		{
+			// process each whole or part day  
+			double dDayStart(dateStart);
+			dDuration = 0.0;
+
+			while (dDayStart < dateEnd)
+			{
+				// determine the end of this day
+				double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
+
+				if (!CDateHelper::IsWeekend(dDayStart))
+				{
+					dDuration += (min(dDayEnd, dateEnd) - dDayStart); // in days
+				}
+
+				// next day
+				dDayStart = dDayEnd;
+			}
+		}
+		// fall thru to handle 'whole' of due date
 
 	case TDCU_DAYS:
 		// handle 'whole' of due date
 		if (IsEndOfDay(dateEnd))
 			dDuration += 1.0;
-		break;
-
-	case TDCU_WEEKDAYS:
-		{
-			if (CDateHelper::HasWeekend())
-			{
-				// process each whole or part day  
-				double dDayStart(dateStart);
-				dDuration = 0.0;
-
-				while (dDayStart < dateEnd)
-				{
-					// determine the end of this day
-					double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
-
-					if (!CDateHelper::IsWeekend(dDayStart))
-					{
-						dDuration += (min(dDayEnd, dateEnd) - dDayStart); // in days
-					}
-
-					// next day
-					dDayStart = dDayEnd;
-				}
-			}
-
-			// handle 'whole' of due date
-			if (IsEndOfDay(dateEnd))
-				dDuration += 1.0;
-		}
 		break;
 	}
 
@@ -4425,3 +4418,4 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 		}
 	}
 }
+
