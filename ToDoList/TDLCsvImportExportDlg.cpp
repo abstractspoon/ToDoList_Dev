@@ -156,7 +156,7 @@ void CTDLCsvImportExportDlg::InitialiseDelimiter()
 
 			for (int nDelim = 0; nDelim < aDelims.GetSize(); nDelim++)
 			{
-				for (int nLine = 0; nLine < 5; nLine++)
+				for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
 				{
 					int nSplits = Misc::Split(aLines[nLine], aUnused, aDelims[nDelim], TRUE);
 
