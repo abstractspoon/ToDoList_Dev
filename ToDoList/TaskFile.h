@@ -197,6 +197,7 @@ public:
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToString& mapData);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
+	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;
 	BOOL SetTaskIsParent(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
