@@ -9258,7 +9258,8 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 		// next task
 		hTask = tasks.GetNextTask(hTask);
 	}
-	return FALSE;
+
+	return TRUE;
 }
 
 BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs)
@@ -9323,7 +9324,7 @@ BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWO
 		m_data.SetTaskVersion(dwTaskID, sValue);
 
 	if (tasks.GetTaskAttribute(hTask, TDL_TASKEXTERNALID, sValue) && !sValue.IsEmpty())
-			m_data.SetTaskExtID(dwTaskID, sValue);
+		m_data.SetTaskExtID(dwTaskID, sValue);
 
 	if (tasks.GetTaskAttribute(hTask, TDL_TASKICONINDEX, sValue) && !sValue.IsEmpty())
 		m_data.SetTaskIcon(dwTaskID, sValue);
@@ -9413,22 +9414,24 @@ BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWO
 		m_data.SetTaskComments(dwTaskID, tasks.GetTaskComments(hTask), content, sType);
 	}
 
-// 	if (tasks.TaskHasAttribute(hTask, ))
-// 		m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
-// 
-// 	if (tasks.TaskHasAttribute(hTask, ))
-// 		m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
-// 
-// 		
-// 		TDL_TASKMETADATA
-// 	
-// 
-// 		TDL_TASKCUSTOMATTRIBDATA
-// 		TDL_TASKCUSTOMATTRIBID
-// 		TDL_TASKCUSTOMATTRIBNAME
-// 		TDL_TASKCUSTOMATTRIBVALUE
-// 		TDL_TASKCUSTOMATTRIBDATESTRING
-// 
+	CMapStringToString mapValues;
+
+	if (tasks.GetTaskCustomAttributeData(hTask, mapValues))
+	{
+		POSITION pos = mapValues.GetStartPosition();
+
+		while (pos)
+		{
+			CString sKey, sValue;
+			mapValues.GetNextAssoc(pos, sKey, sValue);
+
+			m_data.SetTaskCustomAttributeData(dwTaskID, sKey, sValue);
+		}
+	}
+	
+	// TDL_TASKMETADATA
+	// if (tasks.TaskHasAttribute(hTask, ))
+	//	m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
 
 	return TRUE;
 }
