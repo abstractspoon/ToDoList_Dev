@@ -3469,6 +3469,11 @@ bool CTaskFile::SetTaskIsParent(HTASKITEM hTask)
 	return SetTaskUChar(hTask, TDL_TASKISPARENT, 1);
 }
 
+BOOL CTaskFile::SetTaskPath(HTASKITEM hTask, const CString& sPath)
+{
+	return SetTaskString(hTask, TDL_TASKPATH, sPath);
+}
+
 ////////////////////////////////////////////////
 // utility functions
 
