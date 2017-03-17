@@ -2009,27 +2009,27 @@ bool CTaskFile::AddTaskTag(HTASKITEM hTask, LPCTSTR szTag)
 
 int CTaskFile::GetTaskCategories(HTASKITEM hTask, CStringArray& aCategories) const
 {
-	return GetTaskArray(hTask, TDL_TASKCATEGORY, aCategories);
+	return GetTaskArray(hTask, TDL_TASKCATEGORY, aCategories, FALSE);
 }
 
 int CTaskFile::GetTaskTags(HTASKITEM hTask, CStringArray& aTags) const
 {
-	return GetTaskArray(hTask, TDL_TASKTAG, aTags);
+	return GetTaskArray(hTask, TDL_TASKTAG, aTags, FALSE);
 }
 
 int CTaskFile::GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const
 {
-	return GetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles);
+	return GetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles, FALSE);
 }
 
 int CTaskFile::GetTaskDependencies(HTASKITEM hTask, CStringArray& aDepends) const
 {
-	return GetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends);
+	return GetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends, FALSE);
 }
 
 int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const
 {
-	return GetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo);
+	return GetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo, FALSE);
 }
 
 CXmlItem* CTaskFile::NewItem(const CString& sName)
@@ -3823,7 +3823,7 @@ bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const
 	return true;
 }
 
-int CTaskFile::GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems) const
+int CTaskFile::GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems, BOOL bAllowEmpty) const
 {
 	aItems.RemoveAll();
 
@@ -3835,7 +3835,9 @@ int CTaskFile::GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArr
 	
 	while (pXI)
 	{
-		aItems.Add(pXI->GetValue());
+		if (bAllowEmpty || pXI->GetValueLen())
+			aItems.Add(pXI->GetValue());
+
 		pXI = pXI->GetSibling();
 	}
 
@@ -3870,8 +3872,20 @@ int CTaskFile::LegacyGetTaskArray(HTASKITEM hTask, const CString& sNumItemTag,
 
 int CTaskFile::GetTaskArraySize(HTASKITEM hTask, const CString& sItemTag) const
 {
-	CStringArray aTemp;
-	return GetTaskArray(hTask, sItemTag, aTemp);
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, 0);
+
+	int nSize = 0;
+	const CXmlItem* pXI = pXITask->GetItem(sItemTag);
+
+	while (pXI)
+	{
+		nSize++;
+
+		pXI = pXI->GetSibling();
+	}
+
+	return nSize;
 }
 
 bool CTaskFile::DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag)

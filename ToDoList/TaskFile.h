@@ -514,7 +514,7 @@ protected:
 	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem);
 	CString GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
 	BOOL SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems);
-	int GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems) const;
+	int GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems, BOOL bAllowEmpty) const;
 	bool DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag);
 	int GetTaskArraySize(HTASKITEM hTask, const CString& sItemTag) const;
 
