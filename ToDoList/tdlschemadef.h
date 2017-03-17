@@ -64,7 +64,6 @@ static const CString TDL_TASKCREATEDBY(_T("CREATEDBY"));
 static const CString TDL_TASKCOLOR(_T("COLOR"));
 static const CString TDL_TASKFLAG(_T("FLAG"));
 static const CString TDL_TASKLOCK(_T("LOCK"));
-static const CString TDL_TASKWEBCOLOR(_T("WEBCOLOR"));
 static const CString TDL_TASKPRIORITY(_T("PRIORITY"));
 static const CString TDL_TASKPERCENTDONE(_T("PERCENTDONE"));
 static const CString TDL_TASKTIMEESTIMATE(_T("TIMEESTIMATE"));
@@ -86,45 +85,26 @@ static const CString TDL_TASKMETADATA(_T("METADATA"));
 static const CString TDL_TASKRISK(_T("RISK"));		
 static const CString TDL_TASKCOST(_T("COST"));		
 static const CString TDL_TASKEXTERNALID(_T("EXTERNALID"));
-static const CString TDL_TASKSUBTASKDONE(_T("SUBTASKDONE"));
-static const CString TDL_TASKGOODASDONE(_T("GOODASDONE"));
-
-// DEPRECATED
-static const CString TDL_TASKRECURRENCEREG_DEP(_T("REGULARITY"));     // => 'RECURFREQ'
-static const CString TDL_TASKRECURRENCESPEC1_DEP(_T("REGPECIFIC1"));  // => 'RECURSPECIFIC1'
-static const CString TDL_TASKRECURRENCESPEC2_DEP(_T("REGPECIFIC2"));  // => 'RECURSPECIFIC2'
-static const CString TDL_TASKRECURRENCEFROMDUE_DEP(_T("REGFROMDUE")); // => 'RECURFROM'
-static const CString TDL_TASKNUMALLOCTO_DEP(_T("NUMPERSON"));         // no longer required
-static const CString TDL_TASKNUMCATEGORY_DEP(_T("NUMCATEGORY"));      // no longer required
-static const CString TDL_TASKNUMTAGS_DEP(_T("NUMTAGS"));              // no longer required
-static const CString TDL_TASKNUMDEPENDENCY_DEP(_T("NUMDEPENDS"));     // no longer required
 
 // custom attributes
 static const CString TDL_TASKCUSTOMATTRIBDATA(_T("CUSTOMATTRIB"));	
 static const CString TDL_TASKCUSTOMATTRIBID(_T("ID"));	
 static const CString TDL_TASKCUSTOMATTRIBNAME(_T("NAME"));	
 static const CString TDL_TASKCUSTOMATTRIBVALUE(_T("VALUE"));	
-static const CString TDL_TASKCUSTOMATTRIBDATESTRING(_T("DATESTRING"));	
 
 // comments		
 static const CString TDL_TASKCOMMENTS(_T("COMMENTS"));
 static const CString TDL_TASKCUSTOMCOMMENTS(_T("CUSTOMCOMMENTS"));		
 static const CString TDL_TASKCOMMENTSTYPE(_T("COMMENTSTYPE"));
-static const CString TDL_TASKHTMLCOMMENTS(_T("HTMLCOMMENTS"));		
 
 // dates
 static const CString TDL_TASKDONEDATE(_T("DONEDATE"));
-static const CString TDL_TASKDONEDATESTRING(_T("DONEDATESTRING"));		
 static const CString TDL_TASKDUEDATE(_T("DUEDATE"));
-static const CString TDL_TASKDUEDATESTRING(_T("DUEDATESTRING")); 	
 static const CString TDL_TASKSTARTDATE(_T("STARTDATE"));
-static const CString TDL_TASKSTARTDATESTRING(_T("STARTDATESTRING"));
 static const CString TDL_TASKCREATIONDATE(_T("CREATIONDATE"));
-static const CString TDL_TASKCREATIONDATESTRING(_T("CREATIONDATESTRING"));		
 static const CString TDL_TASKLASTMOD(_T("LASTMOD"));
-static const CString TDL_TASKLASTMODSTRING(_T("LASTMODSTRING"));
 		
-// calculated values
+// 'calculated' values
 static const CString TDL_TASKTEXTCOLOR(_T("TEXTCOLOR"));		
 static const CString TDL_TASKBACKCOLOR(_T("BACKCOLOR"));		
 static const CString TDL_TASKTEXTWEBCOLOR(_T("TEXTWEBCOLOR"));		
@@ -146,6 +126,25 @@ static const CString TDL_TASKCALCCOST(_T("CALCCOST"));
 static const CString TDL_TASKPATH(_T("PATH"));		
 static const CString TDL_TASKISPARENT(_T("ISPARENT"));		
 static const CString TDL_TASKPOSSTRING(_T("POSSTRING"));
+static const CString TDL_TASKSUBTASKDONE(_T("SUBTASKDONE"));
+static const CString TDL_TASKGOODASDONE(_T("GOODASDONE"));
+static const CString TDL_TASKHTMLCOMMENTS(_T("HTMLCOMMENTS"));		
+static const CString TDL_TASKWEBCOLOR(_T("WEBCOLOR"));
+static const CString TDL_TASKDONEDATESTRING(_T("DONEDATESTRING"));		
+static const CString TDL_TASKDUEDATESTRING(_T("DUEDATESTRING")); 	
+static const CString TDL_TASKSTARTDATESTRING(_T("STARTDATESTRING"));
+static const CString TDL_TASKCREATIONDATESTRING(_T("CREATIONDATESTRING"));		
+static const CString TDL_TASKLASTMODSTRING(_T("LASTMODSTRING"));
+static const CString TDL_TASKCUSTOMATTRIBDATESTRING(_T("DATESTRING"));	
 
+// DEPRECATED -------------------------------------------------------------
+static const CString TDL_TASKRECURRENCEREG_DEP(_T("REGULARITY"));     // => 'RECURFREQ'
+static const CString TDL_TASKRECURRENCESPEC1_DEP(_T("REGPECIFIC1"));  // => 'RECURSPECIFIC1'
+static const CString TDL_TASKRECURRENCESPEC2_DEP(_T("REGPECIFIC2"));  // => 'RECURSPECIFIC2'
+static const CString TDL_TASKRECURRENCEFROMDUE_DEP(_T("REGFROMDUE")); // => 'RECURFROM'
+static const CString TDL_TASKNUMALLOCTO_DEP(_T("NUMPERSON"));         // no longer required
+static const CString TDL_TASKNUMCATEGORY_DEP(_T("NUMCATEGORY"));      // no longer required
+static const CString TDL_TASKNUMTAGS_DEP(_T("NUMTAGS"));              // no longer required
+static const CString TDL_TASKNUMDEPENDENCY_DEP(_T("NUMDEPENDS"));     // no longer required
 
 #endif // AFX_TDLSCHEMADEF_5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_
