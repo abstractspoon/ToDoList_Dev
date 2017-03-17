@@ -3464,7 +3464,7 @@ bool CTaskFile::SetTaskExternalID(HTASKITEM hTask, LPCTSTR szID)
 	return SetTaskString(hTask, TDL_TASKEXTERNALID, szID);
 }
 
-bool CTaskFile::SetTaskIsParent(HTASKITEM hTask)
+BOOL CTaskFile::SetTaskIsParent(HTASKITEM hTask)
 {
 	return SetTaskUChar(hTask, TDL_TASKISPARENT, 1);
 }

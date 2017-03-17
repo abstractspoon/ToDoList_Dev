@@ -197,7 +197,7 @@ public:
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToString& mapData);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
-	bool SetTaskIsParent(HTASKITEM hTask);
+	BOOL SetTaskIsParent(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
