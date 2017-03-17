@@ -9288,7 +9288,131 @@ BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWO
 	if (!m_data.HasTask(dwTaskID))
 		return FALSE;
 
+	// Explicitly check each attribute for existence and content before
+	// updating the task's current value
 
+	// Single text values
+	CString sValue;
+
+ 	if (tasks.GetTaskAttribute(hTask, TDL_TASKTITLE, sValue) && !sValue.IsEmpty())
+ 		m_data.SetTaskTitle(dwTaskID, sValue);
+
+	if (tasks.GetTaskAttribute(hTask, TDL_TASKALLOCBY, sValue) && !sValue.IsEmpty())
+		m_data.SetTaskAllocBy(dwTaskID, sValue);
+		
+	if (tasks.GetTaskAttribute(hTask, TDL_TASKSTATUS, sValue) && !sValue.IsEmpty())
+		m_data.SetTaskStatus(dwTaskID, sValue);
+
+	if (tasks.GetTaskAttribute(hTask, TDL_TASKVERSION, sValue) && !sValue.IsEmpty())
+		m_data.SetTaskVersion(dwTaskID, sValue);
+
+	if (tasks.GetTaskAttribute(hTask, TDL_TASKEXTERNALID, sValue) && !sValue.IsEmpty())
+			m_data.SetTaskExtID(dwTaskID, sValue);
+
+	if (tasks.GetTaskAttribute(hTask, TDL_TASKICONINDEX, sValue) && !sValue.IsEmpty())
+		m_data.SetTaskIcon(dwTaskID, sValue);
+
+	// Text arrays
+	CStringArray aValues;
+
+	if (tasks.GetTaskCategories(hTask, aValues))
+		m_data.SetTaskCategories(dwTaskID, aValues, FALSE);
+
+	if (tasks.GetTaskAllocatedTo(hTask, aValues))
+		m_data.SetTaskAllocTo(dwTaskID, aValues, FALSE);
+
+	if (tasks.GetTaskTags(hTask, aValues))
+		m_data.SetTaskTags(dwTaskID, aValues, FALSE);
+
+	if (tasks.GetTaskFileLinks(hTask, aValues))
+		m_data.SetTaskFileRefs(dwTaskID, aValues, FALSE);
+
+	if (tasks.GetTaskDependencies(hTask, aValues))
+		m_data.SetTaskDependencies(dwTaskID, aValues, FALSE);
+
+	// Boolean values
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKFLAG))
+		m_data.SetTaskFlag(dwTaskID, tasks.IsTaskFlagged(hTask));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKLOCK))
+		m_data.SetTaskLock(dwTaskID, tasks.IsTaskLocked(hTask));
+
+	// Numeric values
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOLOR))
+		m_data.SetTaskColor(dwTaskID, tasks.GetTaskColor(hTask));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKPRIORITY))
+		m_data.SetTaskPriority(dwTaskID, tasks.GetTaskPriority(hTask, FALSE));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKPERCENTDONE))
+		m_data.SetTaskPercent(dwTaskID, tasks.GetTaskPercentDone(hTask, FALSE));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKRISK))
+		m_data.SetTaskRisk(dwTaskID, tasks.GetTaskRisk(hTask, FALSE));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOST))
+		m_data.SetTaskCost(dwTaskID, tasks.GetTaskCost(hTask, FALSE));
+
+	// Times
+	double dValue;
+	TDC_UNITS nUnits;
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKTIMEESTIMATE))
+	{
+		dValue = tasks.GetTaskTimeEstimate(hTask, nUnits, FALSE);
+		m_data.SetTaskTimeEstimate(dwTaskID, dValue, nUnits);
+	}
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKTIMESPENT))
+	{
+		dValue = tasks.GetTaskTimeSpent(hTask, nUnits, FALSE);
+		m_data.SetTaskTimeSpent(dwTaskID, dValue, nUnits);
+	}
+
+	// Dates
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKSTARTDATE))
+		m_data.SetTaskDate(dwTaskID, TDCD_START, tasks.GetTaskStartDateOle(hTask));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKDUEDATE))
+		m_data.SetTaskDate(dwTaskID, TDCD_DUE, tasks.GetTaskDueDateOle(hTask));
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKDONEDATE))
+		m_data.SetTaskDate(dwTaskID, TDCD_DONE, tasks.GetTaskDoneDate(hTask));
+
+	// Misc
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKRECURRENCE))
+	{
+		TDCRECURRENCE tr;
+		tasks.GetTaskRecurrence(hTask, tr);
+
+		m_data.SetTaskRecurrence(dwTaskID, tr);
+	}
+
+	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOMMENTS))
+	{
+		CBinaryData content;
+		CString sType;
+		tasks.GetTaskCustomComments(hTask, content, sType);
+
+		m_data.SetTaskComments(dwTaskID, tasks.GetTaskComments(hTask), content, sType);
+	}
+
+// 	if (tasks.TaskHasAttribute(hTask, ))
+// 		m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
+// 
+// 	if (tasks.TaskHasAttribute(hTask, ))
+// 		m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
+// 
+// 		
+// 		TDL_TASKMETADATA
+// 	
+// 
+// 		TDL_TASKCUSTOMATTRIBDATA
+// 		TDL_TASKCUSTOMATTRIBID
+// 		TDL_TASKCUSTOMATTRIBNAME
+// 		TDL_TASKCUSTOMATTRIBVALUE
+// 		TDL_TASKCUSTOMATTRIBDATESTRING
+// 
 
 	return TRUE;
 }
