@@ -9429,7 +9429,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			CString sPath = m_data.GetTaskPath(pTDI, pTDS);
 
 			if (!sPath.IsEmpty())
- 				tasks.SetTaskAttribute(hTask, TDL_TASKPATH, sPath);
+ 				tasks.SetTaskPath(hTask, sPath);
 		}
 		
 		if (filter.WantAttribute(TDCA_PRIORITY))
