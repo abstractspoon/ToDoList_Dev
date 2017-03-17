@@ -2180,7 +2180,12 @@ LPCTSTR CTaskFile::GetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey) const
 		return _T("");
 	}
 
-	return GetTaskAttribute(hTask, TDL_TASKMETADATA, szKey);
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, NULLSTRING);
+
+	return pXITask->GetItemValue(TDL_TASKMETADATA, szKey);
+
+//	return GetTaskAttribute(hTask, TDL_TASKMETADATA, szKey);
 }
 
 const CXmlItem* CTaskFile::GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const
@@ -2899,7 +2904,14 @@ bool CTaskFile::SetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey, LPCTSTR szMetaDa
 	}
 
 	// else
-	return SetTaskAttribute(hTask, TDL_TASKMETADATA, szKey, szMetaData);
+	CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, false);
+
+	// else
+	CXmlItem* pXItem = pXITask->GetAddItem(TDL_TASKMETADATA);
+	ASSERT (pXItem);
+
+	return (NULL != pXItem->SetItemValue(szKey, szMetaData));
 }
 
 bool CTaskFile::ClearTaskMetaData(HTASKITEM hTask, LPCTSTR szKey)
@@ -3531,13 +3543,13 @@ double CTaskFile::GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const
 	return GetTaskDouble(hTask, sTimeItem);
 }
 
-CString CTaskFile::GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey) const
-{
-	const CXmlItem* pXITask = NULL;
-	GET_TASK(pXITask, hTask, NULLSTRING);
-
-	return pXITask->GetItemValue(sAttrib, sKey);
-}
+// CString CTaskFile::GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey) const
+// {
+// 	const CXmlItem* pXITask = NULL;
+// 	GET_TASK(pXITask, hTask, NULLSTRING);
+// 
+// 	return pXITask->GetItemValue(sAttrib, sKey);
+// }
 
 ////////////////////////////////////////////////////////////////////
 
@@ -3549,25 +3561,25 @@ bool CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, con
 	return (pXITask->DeleteItem(sAttrib, sKey) != FALSE);
 }
 
-bool CTaskFile::SetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey, const CString& sValue)
-{
-	ASSERT(!sAttrib.IsEmpty());
-
-	if (sAttrib.IsEmpty())
-		return false;
-
-	CXmlItem* pXITask = NULL;
-	GET_TASK(pXITask, hTask, false);
-
-	if (sKey.IsEmpty())
-		return (NULL != pXITask->SetItemValue(sAttrib, sValue));
-
-	// else
-	CXmlItem* pXItem = pXITask->GetAddItem(sAttrib);
-	ASSERT (pXItem);
-
-	return (NULL != pXItem->SetItemValue(sKey, sValue));
-}
+// bool CTaskFile::SetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey, const CString& sValue)
+// {
+// 	ASSERT(!sAttrib.IsEmpty());
+// 
+// 	if (sAttrib.IsEmpty())
+// 		return false;
+// 
+// 	CXmlItem* pXITask = NULL;
+// 	GET_TASK(pXITask, hTask, false);
+// 
+// 	if (sKey.IsEmpty())
+// 		return (NULL != pXITask->SetItemValue(sAttrib, sValue));
+// 
+// 	// else
+// 	CXmlItem* pXItem = pXITask->GetAddItem(sAttrib);
+// 	ASSERT (pXItem);
+// 
+// 	return (NULL != pXItem->SetItemValue(sKey, sValue));
+// }
 
 bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& date, 
 							const CString& sDateStringItem, BOOL bCalculated)

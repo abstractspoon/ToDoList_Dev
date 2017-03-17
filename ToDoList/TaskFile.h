@@ -486,8 +486,8 @@ protected:
 							DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
 							int nNumOccur, int nRemainingOccur);
 		
-	CString GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey) const;
-	bool SetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey, const CString& sValue);
+	//CString GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey) const;
+	//bool SetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey, const CString& sValue);
 	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
 
