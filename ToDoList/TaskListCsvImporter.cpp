@@ -81,7 +81,7 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPref
 
 IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	ITaskList14* pTasks = GetITLInterface<ITaskList14>(pDestTaskFile, IID_TASKLIST12);
+	ITaskList16* pTasks = GetITLInterface<ITaskList16>(pDestTaskFile, IID_TASKLIST16);
 
 	if (!pTasks)
 	{
@@ -166,7 +166,7 @@ CString CTaskListCsvImporter::GetTaskTitle(const CStringArray& sValues) const
 	return sEmpty;
 }
 
-BOOL CTaskListCsvImporter::ImportTask(ITaskList14* pTasks, const CString& sLine) const
+BOOL CTaskListCsvImporter::ImportTask(ITaskList16* pTasks, const CString& sLine) const
 {
 	// must have at least one field
 	CStringArray aValues;
@@ -207,9 +207,11 @@ BOOL CTaskListCsvImporter::ImportTask(ITaskList14* pTasks, const CString& sLine)
 	AddAttributeToTask(pTasks, hTask, TDCA_PRIORITY, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_RISK, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_FLAG, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_LOCK, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_TIMEEST, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_TIMESPENT, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_COST, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_PERCENT, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_STARTDATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_DUEDATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_DONEDATE, aValues);
@@ -262,7 +264,7 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 	return FALSE;
 }
 
-void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList14* pTasks) const
+void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList16* pTasks) const
 {
 	int nAttrib = m_aColumnMapping.GetSize();
 	
@@ -281,7 +283,7 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList14* pTasks) co
 	}
 }
 
-void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList14* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
+void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList16* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
 {
 	int nAttrib = min(aValues.GetSize(), m_aColumnMapping.GetSize());
 	
@@ -314,7 +316,7 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList14* pTasks, HTASKI
 }
 
 
-void CTaskListCsvImporter::AddAttributeToTask(ITaskList14* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
+void CTaskListCsvImporter::AddAttributeToTask(ITaskList16* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
 {
 	ASSERT(nAttrib < TDCA_CUSTOMATTRIB_FIRST);
 
@@ -385,8 +387,16 @@ void CTaskListCsvImporter::AddAttributeToTask(ITaskList14* pTasks, HTASKITEM hTa
 		pTasks->SetTaskRisk(hTask, (unsigned char)_ttoi(sValue));
 		break;
 
+	case TDCA_PERCENT: 
+		pTasks->SetTaskPercentDone(hTask, (unsigned char)_ttoi(sValue));
+		break;
+		
 	case TDCA_FLAG: 
 		pTasks->SetTaskFlag(hTask, (_ttoi(sValue) != 0));
+		break;
+		
+	case TDCA_LOCK: 
+		pTasks->SetTaskLock(hTask, (_ttoi(sValue) != 0));
 		break;
 
 	case TDCA_COST: 
