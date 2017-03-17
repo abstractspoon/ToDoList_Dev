@@ -9250,7 +9250,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASK
 	if (!MergeTaskAttributes(tasks, hTask, bMergeByID))
 	{
 		// Add task to existing parent
-		DWORD dwParentID = tasks.GetTaskID(hTask);
+		DWORD dwParentID = tasks.GetTaskID(hParentTask);
 		HTREEITEM htiParent = (dwParentID ? m_taskTree.Find().GetItem(dwParentID) : NULL);
 
 		HTREEITEM htiNew = AddTaskToTreeItem(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES);
