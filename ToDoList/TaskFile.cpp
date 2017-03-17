@@ -1871,22 +1871,22 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 
 BOOL CTaskFile::SetTaskCategories(HTASKITEM hTask, const CStringArray& aCategories)
 {
-	return SetTaskArray(hTask, TDL_TASKCATEGORY, aCategories);
+	return SetTaskArray(hTask, TDL_TASKCATEGORY, aCategories, FALSE);
 }
 
 BOOL CTaskFile::SetTaskTags(HTASKITEM hTask, const CStringArray& aTags)
 {
-	return SetTaskArray(hTask, TDL_TASKTAG, aTags);
+	return SetTaskArray(hTask, TDL_TASKTAG, aTags, FALSE);
 }
 
 BOOL CTaskFile::SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles)
 {
-	return SetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles);
+	return SetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles, FALSE);
 }
 
 BOOL CTaskFile::SetTaskDependencies(HTASKITEM hTask, const CStringArray& aDepends)
 {
-	return SetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends);
+	return SetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends, FALSE);
 }
 
 BOOL CTaskFile::SetTaskMetaData(HTASKITEM hTask, const CMapStringToString& mapMetaData)
@@ -1971,12 +1971,12 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToSt
 
 BOOL CTaskFile::SetTaskAllocatedTo(HTASKITEM hTask, const CStringArray& aAllocTo)
 {
-	return SetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo);
+	return SetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo, FALSE);
 }
 
 bool CTaskFile::AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKDEPENDENCY, szDepends);
+	return AddTaskArrayItem(hTask, TDL_TASKDEPENDENCY, szDepends, FALSE);
 }
 
 bool CTaskFile::AddTaskDependency(HTASKITEM hTask, unsigned long dwID)
@@ -1989,22 +1989,22 @@ bool CTaskFile::AddTaskDependency(HTASKITEM hTask, unsigned long dwID)
 
 bool CTaskFile::AddTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKALLOCTO, szAllocTo);
+	return AddTaskArrayItem(hTask, TDL_TASKALLOCTO, szAllocTo, FALSE);
 }
 
 bool CTaskFile::AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKFILEREFPATH, szFileRef);
+	return AddTaskArrayItem(hTask, TDL_TASKFILEREFPATH, szFileRef, FALSE);
 }
 
 bool CTaskFile::AddTaskCategory(HTASKITEM hTask, LPCTSTR szCategory)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKCATEGORY, szCategory);
+	return AddTaskArrayItem(hTask, TDL_TASKCATEGORY, szCategory, FALSE);
 }
 
 bool CTaskFile::AddTaskTag(HTASKITEM hTask, LPCTSTR szTag)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKTAG, szTag);
+	return AddTaskArrayItem(hTask, TDL_TASKTAG, szTag, FALSE);
 }
 
 int CTaskFile::GetTaskCategories(HTASKITEM hTask, CStringArray& aCategories) const
@@ -3809,8 +3809,11 @@ bool CTaskFile::LegacyDeleteTaskArray(HTASKITEM hTask, const CString& sNumItemTa
 	return true;
 }
 
-bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem)
+bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty)
 {
+	if (!bAllowEmpty && sItem.IsEmpty())
+		return false;
+
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
 
@@ -3897,7 +3900,7 @@ bool CTaskFile::DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag)
 	return (pXITask->DeleteItem(sItemTag) == TRUE);
 }
 
-BOOL CTaskFile::SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems)
+BOOL CTaskFile::SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems, BOOL bAllowEmpty)
 {
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
@@ -3909,7 +3912,7 @@ BOOL CTaskFile::SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CSt
 	int nCount = aItems.GetSize();
 	
 	for (int nItem = 0; nItem < nCount; nItem++)
-		AddTaskArrayItem(hTask, sItemTag, aItems[nItem]);
+		AddTaskArrayItem(hTask, sItemTag, aItems[nItem], bAllowEmpty);
 
 	return TRUE;
 }

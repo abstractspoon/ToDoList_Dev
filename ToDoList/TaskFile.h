@@ -511,9 +511,9 @@ protected:
 					 const CString& sUnitsItem, TDC_UNITS cUnits);
 
 	// for handling arrays at *task* level
-	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem);
+	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty);
 	CString GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
-	BOOL SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems);
+	BOOL SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems, BOOL bAllowEmpty);
 	int GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems, BOOL bAllowEmpty) const;
 	bool DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag);
 	int GetTaskArraySize(HTASKITEM hTask, const CString& sItemTag) const;
