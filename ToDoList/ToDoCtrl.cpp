@@ -9259,6 +9259,15 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 		hTask = tasks.GetNextTask(hTask);
 	}
 
+	// Merge in any additional custom attributes definitions
+	CTDCCustomAttribDefinitionArray aImportedDefs;
+				
+	if (tasks.GetCustomAttributeDefs(aImportedDefs))
+	{
+		if (m_aCustomAttribDefs.Append(aImportedDefs))
+			RebuildCustomAttributeUI();
+	}
+
 	return TRUE;
 }
 
