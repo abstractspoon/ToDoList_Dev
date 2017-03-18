@@ -2147,7 +2147,6 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				{
 					if (m_data.IsLocked(dwTaskID))
 					{
-						//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_NO));
 						SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 						return TRUE;
 					}
