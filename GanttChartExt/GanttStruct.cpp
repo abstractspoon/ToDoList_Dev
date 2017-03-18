@@ -241,6 +241,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	nPercent = gi.nPercent;
 	bGoodAsDone = gi.bGoodAsDone;
 	nPosition = gi.nPosition;
+	bLocked = gi.bLocked;
 	
 	aTags.Copy(gi.aTags);
 	aDepends.Copy(gi.aDepends);
@@ -264,6 +265,7 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi)
 			(nPercent == gi.nPercent) &&	
 			(nPosition == gi.nPosition) &&
 			(bGoodAsDone == gi.bGoodAsDone) &&
+			(bLocked == gi.bLocked) &&
 			Misc::MatchAll(aTags, gi.aTags) &&
 			Misc::MatchAll(aDepends, gi.aDepends));
 }
