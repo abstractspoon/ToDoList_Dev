@@ -1293,8 +1293,7 @@ int CTaskCalendarCtrl::GetTaskTextOffset(DWORD dwTaskID) const
 	int nPos = 0;
 
 	// special case: Always return zero if NOT drawing continuous
-	// and this task is NOT selected
-	if (!HasOption(TCCO_DISPLAYCONTINUOUS)/* && (m_dwSelectedTaskID != dwTaskID)*/)
+	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
 		return 0;
 
 	if (!m_mapTextOffset.Lookup(dwTaskID, nPos))
