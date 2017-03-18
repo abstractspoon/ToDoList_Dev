@@ -9233,11 +9233,15 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 		return AddTasksToTree(copy, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
 	}
 
+	// else
 	return AddTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
 }
 
 BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 {
+	if (!GetTaskCount())
+		return InsertTasks(tasks, TDC_INSERTATTOP, FALSE);
+
 	HTASKITEM hTask = tasks.GetFirstTask();
 
 	if (!hTask)
@@ -9251,9 +9255,13 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 
 	CDWordArray aTaskIDs;
 
+	// add the tasks
+	IMPLEMENT_UNDO(TDCUAT_ADD);
+	HOLD_REDRAW(*this, m_taskTree);
+	
 	while (hTask)
 	{
-		MergeTaskWithTree(tasks, hTask, NULL, bMergeByID, aTaskIDs);
+		VERIFY(MergeTaskWithTree(tasks, hTask, NULL, bMergeByID, aTaskIDs));
 
 		// next task
 		hTask = tasks.GetNextTask(hTask);
@@ -9266,6 +9274,23 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	{
 		if (m_aCustomAttribDefs.Append(aImportedDefs))
 			RebuildCustomAttributeUI();
+	}
+
+	int nNumNewTasks = aTaskIDs.GetSize();
+
+	switch (nNumNewTasks)
+	{
+	case 0:
+		SetModified(TRUE, TDCA_MERGE, 0);
+		break;
+
+	case 1:
+		SetModified(TRUE, TDCA_PASTE, aTaskIDs[0]);
+		break;
+
+	default:
+		SetModified(TRUE, TDCA_PASTE, 0);
+		break;
 	}
 
 	return TRUE;

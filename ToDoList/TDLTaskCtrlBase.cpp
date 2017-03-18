@@ -4336,6 +4336,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		
 	case TDCA_NONE:
 	case TDCA_PASTE:
+	case TDCA_MERGE:
 	case TDCA_POSITION: // == move
 	case TDCA_DELETE:
 	case TDCA_ARCHIVE:
@@ -4443,6 +4444,9 @@ BOOL CTDLTaskCtrlBase::AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const
 {
 	if (!m_sort.IsSorting())
 		return FALSE;
+
+	if (nAttrib == TDCA_ALL)
+		return TRUE;
 	
 	BOOL bNeedSort = FALSE;
 	
@@ -4525,6 +4529,7 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	case TDCA_NEWTASK:
 	case TDCA_UNDO:
 	case TDCA_PASTE:
+	case TDCA_MERGE:
 		ASSERT(nModCol == TDCC_NONE);
 		return TRUE;
 

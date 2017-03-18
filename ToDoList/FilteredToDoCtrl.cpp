@@ -1284,7 +1284,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 	if (!m_filter.HasAnyFilter())
 		return FALSE;
-	
+
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
 	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
@@ -1305,6 +1305,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 			
 		case TDCA_UNDO:
 		case TDCA_PASTE:
+		case TDCA_MERGE:
 			// CTabbedToDoCtrl::SetModified() will force a refilter
 			// of the list automatically in response to an undo/paste
 			// so we don't need to handle it ourselves

@@ -2460,6 +2460,7 @@ void CTabbedToDoCtrl::UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		}
 		break;
 
+	case TDCA_MERGE:
 	default: // all other attributes
 		if (InListView())
 			m_taskList.InvalidateSelection();
@@ -2630,6 +2631,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 	case TDCA_UNDO:
 	case TDCA_POSITION: // == move
 	case TDCA_PASTE:
+	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 		{
 			int nExt = m_aExtViews.GetSize();
@@ -2702,6 +2704,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	case TDCA_UNDO:
 	case TDCA_POSITION: // == move
 	case TDCA_PASTE:
+	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 	case TDCA_PROJNAME:
 	case TDCA_ENCRYPT:
@@ -2868,6 +2871,7 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_UNDO:
 	case TDCA_POSITION: // == move
 	case TDCA_PASTE:
+	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 	case TDCA_CUSTOMATTRIBDEFS:
 	case TDCA_PROJNAME:
