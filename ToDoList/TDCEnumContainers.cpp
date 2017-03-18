@@ -42,14 +42,50 @@ BOOL CTDCAttributeMap::AddAttribute(TDC_ATTRIBUTE nAttrib)
 
 BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
 {
-	if ((nAttrib >= TDCA_FIRSTATTRIBUTE) && (nAttrib < TDCA_ATTRIBUTECOUNT))
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCBY:			
+	case TDCA_ALLOCTO:			
+	case TDCA_CATEGORY:			
+	case TDCA_COLOR:			
+	case TDCA_COMMENTS:			
+	case TDCA_COST:				
+	case TDCA_CREATEDBY:		
+	case TDCA_CREATIONDATE:		
+	case TDCA_DEPENDENCY:		
+	case TDCA_DONEDATE:			
+	case TDCA_DONETIME:			
+	case TDCA_DUEDATE:			
+	case TDCA_DUETIME:			
+	case TDCA_EXTERNALID:		
+	case TDCA_FILEREF:			
+	case TDCA_FLAG:				
+	case TDCA_ICON:				
+	case TDCA_LOCK:				
+	case TDCA_ID:				
+	case TDCA_LASTMOD:	
+	case TDCA_PARENTID:
+	case TDCA_PERCENT:			
+	case TDCA_POSITION:	
+	case TDCA_PROJNAME:
+	case TDCA_PRIORITY:			
+	case TDCA_RECURRENCE:		
+	case TDCA_RISK:				
+	case TDCA_STARTDATE:		
+	case TDCA_STARTTIME:		
+	case TDCA_STATUS:			
+	case TDCA_TAGS:				
+	case TDCA_TASKNAME:			
+	case TDCA_TIMEEST:			
+	case TDCA_TIMESPENT:		
+	case TDCA_VERSION:	
 		return TRUE;
 
-	if (nAttrib == TDCA_PARENTID)
-		return TRUE;
-	
-	if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
-		return TRUE;
+	default:
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+			return TRUE;
+		break;
+	}
 
 	ASSERT(0);
 	return FALSE;

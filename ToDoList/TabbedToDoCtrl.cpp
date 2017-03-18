@@ -2543,6 +2543,9 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		// Add custom attributes
 		mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB);
 
+		// Always add lock state
+		mapAttrib.AddAttribute(TDCA_LOCK);
+
 		// Include 'position' if extension supports 'unsorted'
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, IUI_NONE))
 			mapAttrib.AddAttribute(TDCA_POSITION);
@@ -3021,6 +3024,10 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAtt
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+
+		// Mandate lock state changes
+		if (nAttrib == TDCA_LOCK)
+			return TRUE;
 		
 		if (AnyExtensionViewWantsChange(nAttrib))
 			return TRUE;
