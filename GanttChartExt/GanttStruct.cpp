@@ -412,16 +412,24 @@ BOOL CGanttItemMap::RemoveKey(DWORD dwKey)
 
 BOOL CGanttItemMap::HasTask(DWORD dwKey) const
 {
+	return (GetItem(dwKey) != NULL);
+}
+
+BOOL CGanttItemMap::IsLocked(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+	
+	return (pGI && pGI->bLocked);
+}
+
+GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID) const
+{
 	GANTTITEM* pGI = NULL;
 	
-	if (Lookup(dwKey, pGI))
-	{
+	if (Lookup(dwTaskID, pGI))
 		ASSERT(pGI);
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
+
+	return pGI;
 }
 
 //////////////////////////////////////////////////////////////////////

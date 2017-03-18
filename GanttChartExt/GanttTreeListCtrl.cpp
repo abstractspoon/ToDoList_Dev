@@ -847,12 +847,10 @@ void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList16* pT
 
 GANTTITEM* CGanttTreeListCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) const
 {
-	GANTTITEM* pGI = NULL;
+	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
 
-	if (dwTaskID && m_data.Lookup(dwTaskID, pGI))
+	if (pGI)
 	{
-		ASSERT(pGI);
-
 		// handle reference tasks
 		DWORD dwRefID = pGI->dwRefID;
 
@@ -2147,7 +2145,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 				if (nHit != GTLCHT_NOWHERE)
 				{
-					if (IsTaskLocked(dwTaskID))
+					if (m_data.IsLocked(dwTaskID))
 					{
 						//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_NO));
 						SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
@@ -2183,7 +2181,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 					if (dwFromTaskID)
 					{
-						if (IsTaskLocked(dwFromTaskID))
+						if (m_data.IsLocked(dwFromTaskID))
 						{
 							MessageBeep(MB_ICONEXCLAMATION);
 						}
@@ -2205,7 +2203,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 					
 					if (dwFromTaskID && dwCurToTaskID)
 					{
-						if (IsTaskLocked(dwFromTaskID))
+						if (m_data.IsLocked(dwFromTaskID))
 						{
 							MessageBeep(MB_ICONEXCLAMATION);
 						}
@@ -5279,14 +5277,6 @@ BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::IsTaskLocked(DWORD dwTaskID) const
-{
-	const GANTTITEM* pGI = GetGanttItem(dwTaskID, FALSE);
-	ASSERT(pGI);
-	
-	return (pGI && pGI->bLocked);
-}
-
 BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
@@ -5303,7 +5293,7 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	if (dwTaskID != GetSelectedTaskID())
 		SelectTask(dwTaskID);
 
-	if (IsTaskLocked(dwTaskID))
+	if (m_data.IsLocked(dwTaskID))
 		return FALSE;
 	
 	CPoint ptScreen(ptCursor);

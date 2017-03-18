@@ -281,7 +281,6 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetListTaskID(DWORD nItemData) const;
-	BOOL IsTaskLocked(DWORD dwTaskID) const;
 
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);

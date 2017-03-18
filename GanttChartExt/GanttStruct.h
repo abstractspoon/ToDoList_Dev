@@ -61,6 +61,9 @@ public:
 	void RemoveAll();
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasTask(DWORD dwTaskID) const;
+	BOOL IsLocked(DWORD dwTaskID) const;
+	GANTTITEM* GetItem(DWORD dwTaskID) const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
