@@ -132,6 +132,7 @@ protected:
 	int GetTaskVertPos(DWORD dwTaskID, BOOL bVScrolled/* = FALSE*/) const;
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
+	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 
 	BOOL UpdateCellScrollBarVisibility();
@@ -157,14 +158,14 @@ protected:
 	void NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
 
-	BOOL UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL RemoveDeletedTasks(const ITaskList15* pTasks);
-	void BuildData(const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL RemoveDeletedTasks(const ITaskList16* pTasks);
+	void BuildData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
 
 	// helpers
 	static int CompareTCItems(const void* pV1, const void* pV2);
-	static void BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static void BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 
 };
 

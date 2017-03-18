@@ -74,6 +74,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_VSCROLL()
 	ON_WM_SETFOCUS()
+	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
@@ -182,28 +183,28 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 
 void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
-	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
+	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
 	BOOL bChange = FALSE;
 
 	switch (nUpdate)
 	{
 	case IUI_ALL:
 		DeleteData();
-		BuildData(pTasks14, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks16, pTasks->GetFirstTask(), attrib, TRUE);
 		bChange = TRUE;
 		break;
 
 	case IUI_NEW:
-		BuildData(pTasks14, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks16, pTasks->GetFirstTask(), attrib, TRUE);
 		bChange = TRUE;
 		break;
 		
 	case IUI_EDIT:
-		bChange = UpdateTask(pTasks14, pTasks14->GetFirstTask(), nUpdate, attrib, TRUE);
+		bChange = UpdateTask(pTasks16, pTasks16->GetFirstTask(), nUpdate, attrib, TRUE);
 		break;
 		
 	case IUI_DELETE:
-		bChange = RemoveDeletedTasks(pTasks14);
+		bChange = RemoveDeletedTasks(pTasks16);
 		break;
 		
 	case IUI_MOVE:
@@ -218,7 +219,7 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpd
 		Invalidate(FALSE);
 }
 
-void CTaskCalendarCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, 
+void CTaskCalendarCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, 
 							   CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -243,7 +244,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask,
 	}
 }
 
-BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList15* pTasks)
+BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList16* pTasks)
 {
 	CSet<DWORD> mapIDs;
 	BuildTaskMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
@@ -277,7 +278,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList15* pTasks)
 	return bChange;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
+BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
 									const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -352,7 +353,7 @@ BOOL CTaskCalendarCtrl::IsSpecialDate(const COleDateTime& date) const
 	return m_mapSpecial.Lookup(CDateHelper::GetDateOnly(date).m_dt, bDummy);
 }
 
-void CTaskCalendarCtrl::BuildData(const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CTaskCalendarCtrl::BuildData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;
@@ -1313,6 +1314,13 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 	return pTCI;
 }
 
+BOOL CTaskCalendarCtrl::IsTaskCalItemLocked(DWORD dwTaskID) const
+{
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+
+	return (pTCI && pTCI->bLocked);
+}
+
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID) const
 {
 	if (dwTaskID == 0)
@@ -1414,6 +1422,9 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
 
 	if (nHit == TCCHT_NOWHERE)
+		return FALSE;
+
+	if (IsTaskCalItemLocked(dwTaskID))
 		return FALSE;
 
 	// when not drawing tasks continuously, it's possible
@@ -1755,16 +1766,24 @@ BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		TCC_HITTEST nHit = TCCHT_NOWHERE;
 		DWORD dwHitID = HitTest(ptCursor, nHit);
 
-		switch (nHit)
+		if (dwHitID && IsTaskCalItemLocked(dwHitID))
 		{
-		case TCCHT_BEGIN:
-		case TCCHT_END:
-			SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+			SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 			return TRUE;
+		}
+		else
+		{
+			switch (nHit)
+			{
+			case TCCHT_BEGIN:
+			case TCCHT_END:
+				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+				return TRUE;
 
-		case TCCHT_MIDDLE:
-			//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
-			break;
+			case TCCHT_MIDDLE:
+				//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
+				break;
+			}
 		}
 	}
 	

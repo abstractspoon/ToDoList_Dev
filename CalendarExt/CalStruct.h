@@ -23,12 +23,12 @@ struct TASKCALITEM
 public:
 	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
-	TASKCALITEM(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	TASKCALITEM(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
 
 	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
 	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
 
-	BOOL UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	BOOL UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
 	void RecalcDates(DWORD dwCalcDates);
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
@@ -57,6 +57,7 @@ public:
 public:
 	COLORREF color;
 	BOOL bDone, bGoodAsDone, bTopLevel;
+	BOOL bLocked;
 
 protected:
 	COleDateTime dtCreation, dtStart, dtEnd;
@@ -65,7 +66,7 @@ protected:
 	DWORD dwTaskID;
 
 protected:
-	void UpdateTaskDates(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
+	void UpdateTaskDates(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);
 	void ReformatName();
 
 	static COleDateTime GetDate(time64_t tDate);

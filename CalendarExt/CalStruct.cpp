@@ -29,18 +29,20 @@ TASKCALITEM::TASKCALITEM()
 	bDone(FALSE),
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
-	bTopLevel(FALSE)
+	bTopLevel(FALSE),
+	bLocked(FALSE)
 {
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
+TASKCALITEM::TASKCALITEM(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
 	bDone(FALSE),
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
-	bTopLevel(FALSE)
+	bTopLevel(FALSE),
+	bLocked(FALSE)
 {
 	UpdateTask(pTasks, hTask, attrib, dwCalcDates);
 
@@ -62,6 +64,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	dwTaskID = tci.dwTaskID;
 	bDone = tci.bDone;
 	bGoodAsDone = tci.bGoodAsDone;
+	bLocked = tci.bLocked;
 	dtCreation = tci.dtCreation;
 	dtStart = tci.dtStart;
 	dtEnd = tci.dtEnd;
@@ -78,6 +81,7 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dwTaskID == tci.dwTaskID) &&
 		(bDone == tci.bDone) &&
 		(bGoodAsDone == tci.bGoodAsDone) &&
+		(bLocked == tci.bLocked) &&
 		(dtCreation == tci.dtCreation) &&
 		(dtStart == tci.dtStart) &&
 		(dtEnd == tci.dtEnd) &&
@@ -85,7 +89,7 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dtEndCalc == tci.dtEndCalc));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+void TASKCALITEM::UpdateTaskDates(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	// check for quick exit
 	BOOL bUpdateStart = attrib.HasKey(IUI_STARTDATE);
@@ -205,7 +209,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 		dtStartCalc = CDateHelper::GetDateOnly(dtEnd);
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 
@@ -222,6 +226,9 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList14* pTasks, HTASKITEM hTask, const C
 
 	// always update colour
 	color = pTasks->GetTaskTextColor(hTask);
+
+	// always update lock state
+	bLocked = pTasks->IsTaskLocked(hTask);
 
 	// and 'Good as Done'
 	bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
