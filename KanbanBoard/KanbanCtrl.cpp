@@ -109,6 +109,7 @@ ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
 ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
 ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
 ON_WM_SETFOCUS()
+ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
@@ -258,7 +259,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 	// always cancel any ongoing operation
 	CancelOperation();
 
-	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
+	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
 	BOOL bResort = FALSE;
 	
 	switch (nUpdate)
@@ -268,7 +269,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
  			CDWordArray aSelIDs;
 			GetSelectedTaskIDs(aSelIDs);
 
- 			RebuildData(pTasks14, attrib);
+ 			RebuildData(pTasks16, attrib);
  			RebuildListCtrls(TRUE);
 
 			SelectTasks(aSelIDs);
@@ -285,8 +286,8 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 			GetSelectedTaskIDs(aSelIDs);
 			
  			// update the task(s)
-			BOOL bChange = UpdateGlobalAttributeValues(pTasks14, attrib);
-			bChange |= UpdateData(pTasks14, pTasks14->GetFirstTask(), attrib, TRUE);
+			BOOL bChange = UpdateGlobalAttributeValues(pTasks16, attrib);
+			bChange |= UpdateData(pTasks16, pTasks16->GetFirstTask(), attrib, TRUE);
 
 			if (bChange)
 				RebuildListCtrls(TRUE);
@@ -302,7 +303,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 		
 	case IUI_DELETE:
 		{
- 			RemoveDeletedTasks(pTasks14);
+ 			RemoveDeletedTasks(pTasks16);
 		}
 		break;
 		
@@ -315,7 +316,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 	}
 }
 
-CString CKanbanCtrl::GetTaskAllocTo(const ITaskList15* pTasks, HTASKITEM hTask)
+CString CKanbanCtrl::GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -380,7 +381,7 @@ BOOL CKanbanCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return WantEditUpdate(nAttrib);
 }
 
-BOOL CKanbanCtrl::RebuildData(const ITaskList15* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::RebuildData(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	// Rebuild global attribute value lists
 	m_mapAttributeValues.RemoveAll();
@@ -394,7 +395,7 @@ BOOL CKanbanCtrl::RebuildData(const ITaskList15* pTasks, const CSet<IUI_ATTRIBUT
 	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, attrib, TRUE);
 }
 
-BOOL CKanbanCtrl::AddTaskToData(const ITaskList15* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::AddTaskToData(const ITaskList16* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return FALSE;
@@ -414,6 +415,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITaskList15* pTasks, HTASKITEM hTask, DWOR
 	pKI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 	pKI->bParent = pTasks->IsTaskParent(hTask);
 	pKI->dwParentID = dwParentID;
+	pKI->bLocked = pTasks->IsTaskLocked(hTask);
 
 	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
@@ -479,7 +481,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITaskList15* pTasks, HTASKITEM hTask, DWOR
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::UpdateData(const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::UpdateData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -572,6 +574,9 @@ BOOL CKanbanCtrl::UpdateData(const ITaskList15* pTasks, HTASKITEM hTask, const C
 			
 			// always update colour because it can change for so many reasons
 			pKI->SetColor(pTasks->GetTaskTextColor(hTask));
+
+			// Always update lock state
+			pKI->bLocked = pTasks->IsTaskLocked(hTask);
 		}
 	}
 		
@@ -597,7 +602,7 @@ BOOL CKanbanCtrl::UpdateData(const ITaskList15* pTasks, HTASKITEM hTask, const C
 	return bChange;
 }
 
-void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList15* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	time64_t tDate = 0;
 	
@@ -647,7 +652,7 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList15
 	}
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	BOOL bChange = FALSE;
 
@@ -681,7 +686,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, const C
 	return bChange;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, IUI_ATTRIBUTE nAttribute)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, IUI_ATTRIBUTE nAttribute)
 {
 	switch (nAttribute)
 	{
@@ -757,7 +762,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, IUI_ATT
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList15* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID)
 {
 	CKanbanValueMap mapNewValues;
 	
@@ -1459,7 +1464,7 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 	return TRUE;
 }
 
-void CKanbanCtrl::BuildTaskIDMap(const ITaskList15* pTasks, HTASKITEM hTask, 
+void CKanbanCtrl::BuildTaskIDMap(const ITaskList16* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -1484,7 +1489,7 @@ void CKanbanCtrl::BuildTaskIDMap(const ITaskList15* pTasks, HTASKITEM hTask,
 	}
 }
 
-void CKanbanCtrl::RemoveDeletedTasks(const ITaskList15* pTasks)
+void CKanbanCtrl::RemoveDeletedTasks(const ITaskList16* pTasks)
 {
 	CSet<DWORD> mapIDs;
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
@@ -2300,36 +2305,55 @@ void CKanbanCtrl::OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult)
 		ASSERT(pNMLV->iItem != -1);
 		
 		CKanbanListCtrl* pList = (CKanbanListCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
-		POSITION pos = pList->GetFirstSelectedItemPosition();
-		
-		while (pos)
-			m_aDragItems.Add(pList->GetNextSelectedItem(pos));
-		
-		if (m_aDragItems.GetSize())
+
+		if (!pList->SelectionHasLockedTasks())
 		{
-			// This will prevent any selection updates
-			m_pDragFromList = pList;
-
-			// If the 'drag-from' list is not currently selected
-			// we select it and then reset the selection to the
-			// items we have just copied
-			if (pList != m_pSelectedList)
-			{
-				CDWordArray aTaskIDs;
-				int nItem = m_aDragItems.GetSize();
+			POSITION pos = pList->GetFirstSelectedItemPosition();
 			
-				while (nItem--)
-					aTaskIDs.Add(pList->GetItemData(m_aDragItems[nItem]));
+			while (pos)
+				m_aDragItems.Add(pList->GetNextSelectedItem(pos));
+			
+			if (m_aDragItems.GetSize())
+			{
+				// This will prevent any selection updates
+				m_pDragFromList = pList;
 
-				VERIFY(pList->SelectTasks(aTaskIDs));
-				SelectListCtrl(pList);
+				// If the 'drag-from' list is not currently selected
+				// we select it and then reset the selection to the
+				// items we have just copied
+				if (pList != m_pSelectedList)
+				{
+					CDWordArray aTaskIDs;
+					int nItem = m_aDragItems.GetSize();
+				
+					while (nItem--)
+						aTaskIDs.Add(pList->GetItemData(m_aDragItems[nItem]));
+
+					VERIFY(pList->SelectTasks(aTaskIDs));
+					SelectListCtrl(pList);
+				}
+
+				SetCapture();
 			}
-
-			SetCapture();
 		}
 	}
 	
 	*pResult = 0;
+}
+
+BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CPoint ptCursor(GetMessagePos());
+	DWORD dwTaskID = HitTestTask(ptCursor);
+
+	if (m_data.IsLocked(dwTaskID))
+	{
+		SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
+		return TRUE;
+	}
+
+	// else
+	return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
@@ -2570,4 +2594,3 @@ BOOL CKanbanCtrl::CanSaveToImage() const
 
 	return FALSE;
 }
-

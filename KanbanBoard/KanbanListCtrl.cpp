@@ -866,14 +866,12 @@ int CKanbanListCtrl::FindTask(DWORD dwTaskID) const
 
 int CKanbanListCtrl::FindTask(const CPoint& ptScreen) const
 {
-	LVFINDINFO lvfi = { 0 };
+	LVHITTESTINFO lvht = { 0 };
 	
-	lvfi.flags = LVFI_NEARESTXY;
-	lvfi.pt = ptScreen;
-
-	ScreenToClient(&lvfi.pt);
+	CPoint ptClient(ptScreen);
+	ScreenToClient(&ptClient);
 	
-	return CListCtrl::FindItem(&lvfi);
+	return CListCtrl::HitTest(ptClient);
 }
 
 int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -1163,4 +1161,20 @@ int CKanbanListCtrl::CalcRequiredAttributeLineWidthForImage() const
 	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
 
 	return ((int)(nMaxAttribLength * GraphicsMisc::GetAverageCharWidth(&dc)) + ATTRIB_INDENT);
+}
+
+BOOL CKanbanListCtrl::SelectionHasLockedTasks() const
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+
+	while (pos)
+	{
+		int nItem = GetNextSelectedItem(pos);
+		DWORD dwTaskID = GetItemData(nItem);
+
+		if (m_data.IsLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
 }

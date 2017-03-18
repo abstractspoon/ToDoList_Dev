@@ -67,6 +67,7 @@ public:
 
 	void OnDisplayAttributeChanged();
 	BOOL IsSelectingTask() const { return (m_dwSelectingTask != 0); }
+	BOOL SelectionHasLockedTasks() const;
 
 	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV);
 

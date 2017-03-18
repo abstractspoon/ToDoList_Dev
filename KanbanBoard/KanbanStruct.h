@@ -48,6 +48,7 @@ struct KANBANITEM
 	BOOL bDone, bGoodAsDone;
 	BOOL bParent, bFlag;
 	int nPercent;
+	BOOL bLocked;
 
 	CString sTitle, sPath;
 	double dTimeEst, dTimeSpent, dCost;
@@ -95,6 +96,7 @@ public:
 	void RemoveAll();
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwTaskID) const;
+	BOOL IsLocked(DWORD dwTaskID) const;
 	int BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const;
 	KANBANITEM* GetItem(DWORD dwTaskID) const;
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);

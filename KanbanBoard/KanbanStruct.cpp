@@ -73,7 +73,8 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	bDone(FALSE), 
 	bGoodAsDone(FALSE),
 	bParent(FALSE),
-	dwParentID(0)
+	dwParentID(0),
+	bLocked(FALSE)
 {
 	CDateHelper::ClearDate(dtCreate);
 	CDateHelper::ClearDate(dtDone);
@@ -99,6 +100,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	bGoodAsDone = ki.bGoodAsDone;
 	bParent = ki.bParent;
 	dwParentID = ki.dwParentID;
+	bLocked = ki.bLocked;
 
 	Misc::Copy(ki.mapAttribValues, mapAttribValues);
 	
@@ -116,6 +118,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bDone == ki.bDone) &&
 			(bGoodAsDone == ki.bGoodAsDone) &&
 			(bParent == ki.bParent) &&
+			(bParent == ki.bLocked) &&
 			(dwParentID == ki.dwParentID) &&
 			Misc::MatchAll(mapAttribValues, ki.mapAttribValues));
 }
@@ -380,6 +383,13 @@ KANBANITEM* CKanbanItemMap::GetItem(DWORD dwTaskID) const
 BOOL CKanbanItemMap::HasItem(DWORD dwTaskID) const
 {
 	return (GetItem(dwTaskID) != NULL);
+}
+
+BOOL CKanbanItemMap::IsLocked(DWORD dwTaskID) const
+{
+	const KANBANITEM* pKI = GetItem(dwTaskID);
+
+	return (pKI && pKI->bLocked);
 }
 
 KANBANITEM* CKanbanItemMap::NewItem(DWORD dwTaskID, const CString& sTitle)
