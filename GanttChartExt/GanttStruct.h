@@ -37,6 +37,7 @@ struct GANTTITEM
 	int nPercent;
 	BOOL bGoodAsDone;
 	int nPosition;
+	BOOL bLocked;
 	
 	void MinMaxDates(const GANTTITEM& giOther);
 	BOOL IsDone(BOOL bIncGoodAs) const;

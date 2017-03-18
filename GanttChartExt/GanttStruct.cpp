@@ -19,7 +19,12 @@ static char THIS_FILE[]=__FILE__;
 
 int GANTTDEPENDENCY::STUB = 0;
 
-GANTTDEPENDENCY::GANTTDEPENDENCY() : ptFrom(0), ptTo(0), dwFromID(0), dwToID(0)
+GANTTDEPENDENCY::GANTTDEPENDENCY() 
+	: 
+	ptFrom(0), 
+	ptTo(0), 
+	dwFromID(0), 
+	dwToID(0)
 {
 }
 
@@ -210,7 +215,8 @@ GANTTITEM::GANTTITEM()
 	dwRefID(0), 
 	dwOrgRefID(0), 
 	bGoodAsDone(FALSE),
-	nPosition(-1)
+	nPosition(-1),
+	bLocked(FALSE)
 {
 }
 

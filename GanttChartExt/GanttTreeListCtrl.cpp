@@ -434,7 +434,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 	// always cancel any ongoing operation
 	CancelOperation();
 
-	const ITaskList15* pTasks14 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
+	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
 	BOOL bResort = FALSE;
 	
 	switch (nUpdate)
@@ -448,7 +448,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			
 			DWORD dwSelID = GetSelectedTaskID();
 			
-			RebuildTree(pTasks14);
+			RebuildTree(pTasks16);
 
 			ValidateMonthDisplay();
 			UpdateListColumns();
@@ -481,7 +481,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			int nNumMonths = GetNumMonths();
 			
 			// update the task(s)
-			if (UpdateTask(pTasks14, pTasks14->GetFirstTask(), nUpdate, attrib, TRUE))
+			if (UpdateTask(pTasks16, pTasks16->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
 				// recalc parent dates as required
 				if (attrib.HasKey(IUI_STARTDATE) || attrib.HasKey(IUI_DUEDATE) || attrib.HasKey(IUI_DONEDATE))
@@ -511,9 +511,9 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			CHoldRedraw hr2(m_list);
 
 			CSet<DWORD> mapIDs;
-			BuildTaskMap(pTasks14, pTasks14->GetFirstTask(), mapIDs, TRUE);
+			BuildTaskMap(pTasks16, pTasks16->GetFirstTask(), mapIDs, TRUE);
 			
-			RemoveDeletedTasks(NULL, pTasks14, mapIDs);
+			RemoveDeletedTasks(NULL, pTasks16, mapIDs);
 
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths();
@@ -557,7 +557,7 @@ void CGanttTreeListCtrl::PreFixVScrollSyncBug()
 	}
 }
 
-CString CGanttTreeListCtrl::GetTaskAllocTo(const ITaskList15* pTasks, HTASKITEM hTask)
+CString CGanttTreeListCtrl::GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -637,7 +637,7 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	return IUI_NONE;
 }
 
-BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, 
+BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, 
 									IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, 
 									BOOL bAndSiblings)
 {
@@ -760,6 +760,9 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 	// update date range
 	MinMaxDates(*pGI);
 	
+	// always update lock states
+	pGI->bLocked = pTasks->IsTaskLocked(hTask);
+
 	// always update colour because it can change for so many reasons
 	pGI->color = pTasks->GetTaskTextColor(hTask);
 
@@ -794,7 +797,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask,
 	return bChange;
 }
 
-void CGanttTreeListCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -819,7 +822,7 @@ void CGanttTreeListCtrl::BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask
 	}
 }
 
-void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList15* pTasks, const CSet<DWORD>& mapIDs)
+void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList16* pTasks, const CSet<DWORD>& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
@@ -885,7 +888,7 @@ GANTTDISPLAY* CGanttTreeListCtrl::GetGanttDisplay(DWORD dwTaskID)
 	return pGD;
 }
 
-void CGanttTreeListCtrl::RebuildTree(const ITaskList15* pTasks)
+void CGanttTreeListCtrl::RebuildTree(const ITaskList16* pTasks)
 {
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
@@ -949,7 +952,7 @@ COleDateTime CGanttTreeListCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
 	return date;
 }
 
-void CGanttTreeListCtrl::BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTreeItem(const ITaskList16* pTasks, HTASKITEM hTask, 
 									   CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -973,6 +976,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTas
 		pGI->bParent = pTasks->IsTaskParent(hTask);
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->nPosition = pTasks->GetTaskPosition(hTask);
+		pGI->bLocked = pTasks->IsTaskLocked(hTask);
 
 		time64_t tDate = 0;
 
@@ -2143,16 +2147,25 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 				if (nHit != GTLCHT_NOWHERE)
 				{
-					switch (nHit)
+					if (IsTaskLocked(dwTaskID))
 					{
-					case GTLCHT_BEGIN:
-					case GTLCHT_END:
-						SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+						//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_NO));
+						SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 						return TRUE;
-
-					case GTLCHT_MIDDLE:
-						//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
-						break;
+					}
+					else
+					{
+						switch (nHit)
+						{
+						case GTLCHT_BEGIN:
+						case GTLCHT_END:
+							SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+							return TRUE;
+							
+						case GTLCHT_MIDDLE:
+							//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
+							break;
+						}
 					}
 				}
 			}
@@ -2168,10 +2181,17 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 					
 					DWORD dwFromTaskID = HitTestTask(ptScreen);
 
-					if (dwFromTaskID && m_pDependEdit->SetFromTask(dwFromTaskID))
+					if (dwFromTaskID)
 					{
-						// initialise last drag pos
-						ResetDependencyPickLinePos();
+						if (IsTaskLocked(dwFromTaskID))
+						{
+							MessageBeep(MB_ICONEXCLAMATION);
+						}
+						else if (m_pDependEdit->SetFromTask(dwFromTaskID))
+						{
+							// initialise last drag pos
+							ResetDependencyPickLinePos();
+						}
 					}
 
 					return 0; // eat
@@ -2185,13 +2205,20 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 					
 					if (dwFromTaskID && dwCurToTaskID)
 					{
-						if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
+						if (IsTaskLocked(dwFromTaskID))
 						{
-							// initialise last drag pos
-							ResetDependencyPickLinePos();
+							MessageBeep(MB_ICONEXCLAMATION);
+						}
+						else
+						{
+							if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
+							{
+								// initialise last drag pos
+								ResetDependencyPickLinePos();
 
-							// redraw to hide the dependency being edited
-							RedrawList(FALSE);
+								// redraw to hide the dependency being edited
+								RedrawList(FALSE);
+							}
 						}
 					}
 
@@ -5252,6 +5279,14 @@ BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
 	return TRUE;
 }
 
+BOOL CGanttTreeListCtrl::IsTaskLocked(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetGanttItem(dwTaskID, FALSE);
+	ASSERT(pGI);
+	
+	return (pGI && pGI->bLocked);
+}
+
 BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
@@ -5268,6 +5303,9 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	if (dwTaskID != GetSelectedTaskID())
 		SelectTask(dwTaskID);
 
+	if (IsTaskLocked(dwTaskID))
+		return FALSE;
+	
 	CPoint ptScreen(ptCursor);
 	m_list.ClientToScreen(&ptScreen);
 	
@@ -5295,10 +5333,10 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 		return FALSE;
 	}
 	
+	// cache the original task
 	GANTTITEM* pGI = GetGanttItem(dwTaskID, FALSE);
 	ASSERT(pGI);
-
-	// cache the original task
+	
 	m_giPreDrag = *pGI;
 	m_ptDragStart = ptCursor;
 	m_dtDragMin = CalcMinDragDate(m_giPreDrag);

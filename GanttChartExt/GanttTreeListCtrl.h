@@ -245,7 +245,7 @@ protected:
 	int GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
 	BOOL ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
 	void DeleteTreeItem(HTREEITEM hti);
-	void RemoveDeletedTasks(HTREEITEM hti, const ITaskList15* pTasks, const CSet<DWORD>& mapIDs);
+	void RemoveDeletedTasks(HTREEITEM hti, const ITaskList16* pTasks, const CSet<DWORD>& mapIDs);
 	int FindColumn(int nScrollPos) const;
 	int FindColumn(int nMonth, int nYear) const;
 	int FindColumn(const COleDateTime& date) const;
@@ -281,6 +281,7 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetListTaskID(DWORD nItemData) const;
+	BOOL IsTaskLocked(DWORD dwTaskID) const;
 
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
@@ -312,9 +313,9 @@ protected:
 	COLORREF GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 
-	void RebuildTree(const ITaskList15* pTasks);
-	void BuildTreeItem(const ITaskList15* pTasks, HTASKITEM hTask, CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings);
-	BOOL UpdateTask(const ITaskList15* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	void RebuildTree(const ITaskList16* pTasks);
+	void BuildTreeItem(const ITaskList16* pTasks, HTASKITEM hTask, CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings);
+	BOOL UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RecalcParentDates();
 	void RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI);
 	BOOL GetStartDueDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
@@ -353,10 +354,10 @@ protected:
 							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
-	static CString GetTaskAllocTo(const ITaskList15* pTasks, HTASKITEM hTask);
+	static CString GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
-	static void BuildTaskMap(const ITaskList15* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static void BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 
 private:
