@@ -193,6 +193,11 @@ HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObj
 		*ppvObject = reinterpret_cast<ITaskList15*>(this);
 		AddRef();
 	}
+	else if (IsEqualIID(riid, IID_TASKLIST16))
+	{
+		*ppvObject = reinterpret_cast<ITaskList16*>(this);
+		AddRef();
+	}
 	else
 	{
 		ASSERT(0);
