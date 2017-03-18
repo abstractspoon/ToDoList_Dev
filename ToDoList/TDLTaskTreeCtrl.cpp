@@ -426,6 +426,8 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		CHoldHScroll hhs(m_tcTasks);
 		m_tcTasks.EnsureVisible(htiSel);
 	}
+
+	RecalcColumnWidths();
 }
 
 BOOL CTDLTaskTreeCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
