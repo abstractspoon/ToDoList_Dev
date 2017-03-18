@@ -318,8 +318,6 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList16* pTasks, HTASKI
 
 void CTaskListCsvImporter::AddAttributeToTask(ITaskList16* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
 {
-	ASSERT(nAttrib < TDCA_CUSTOMATTRIB_FIRST);
-
 	int nCol = m_aColumnMapping.FindMappedAttribute(nAttrib);
 	
 	if ((nCol == -1) || (nCol >= aColValues.GetSize()))
