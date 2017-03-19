@@ -2906,6 +2906,8 @@ BEGIN
 
         END
         MENUITEM SEPARATOR
+        MENUITEM "&Lock Task Attributes",       ID_EDIT_LOCKTASK
+        MENUITEM SEPARATOR
         MENUITEM "Set &Reminder...",            ID_EDIT_SETREMINDER
         MENUITEM "&Clear Reminder",             ID_EDIT_CLEARREMINDER
         MENUITEM SEPARATOR
