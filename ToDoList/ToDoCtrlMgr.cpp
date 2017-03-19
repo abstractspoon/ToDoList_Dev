@@ -160,6 +160,13 @@ CString CToDoCtrlMgr::GetFilePath(int nIndex, BOOL bStrict) const
 	return sPath;
 }
 
+BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	return GetToDoCtrl(nIndex).GetFilePath().IsEmpty();
+}
+
 CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));
@@ -259,13 +266,6 @@ void CToDoCtrlMgr::ClearFilePath(int nIndex)
 	CHECKVALIDINDEX(nIndex);
 
 	GetToDoCtrl(nIndex).ClearFilePath();
-}
-
-BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
-{
-	CHECKVALIDINDEXRET(nIndex, FALSE);
-
-	return !GetFilePath(nIndex).IsEmpty();
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
