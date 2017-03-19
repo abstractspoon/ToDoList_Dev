@@ -3077,7 +3077,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	// update the cache if we are NOT scrolling
 	if (!m_bPageScrolling)
 	{
-		int nScrollPos = ::GetScrollPos(m_hwndList, SB_HORZ);
+		int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 		pGD->UpdatePositions(gdTemp, nScrollPos);
 	}
 	
