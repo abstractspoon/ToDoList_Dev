@@ -189,6 +189,7 @@ public:
 	BOOL SelectionHasSubtasks() const;
 	BOOL SelectionHasIcons() const;
 	BOOL SelectionHasUnlocked() const;
+	BOOL SelectionHasLocked() const;
 	BOOL SelectionAreAllDone() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);

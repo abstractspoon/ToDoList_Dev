@@ -5092,6 +5092,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
 	return FALSE; // All selected tasks were locked
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+	
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (m_data.IsTaskLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE; // All selected tasks were unlocked
+}
+
 BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
 {
 	POSITION pos = GetFirstSelectedTaskPos();

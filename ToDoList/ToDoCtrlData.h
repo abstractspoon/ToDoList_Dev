@@ -73,6 +73,7 @@ public:
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
 	double GetEarliestDueDate() const;
+	BOOL HasLockedTasks() const;
 
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
@@ -341,6 +342,7 @@ protected:
 	}
 
 	BOOL HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const;
+	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
 							 TODOSTRUCTURE* pTDSDestParent, int nDestPos);

@@ -3474,6 +3474,15 @@ BOOL CToDoCtrlData::HasOverdueTasks() const
 	return ((dEarliest > 0.0) && (dEarliest < dtToday));
 }
 
+BOOL CToDoCtrlData::HasLockedTasks() const
+{
+	if (GetTaskCount() == 0)
+		return FALSE;
+	
+	// search all tasks for first locked one
+	return HasLockedTasks(GetStructure());
+}
+
 BOOL CToDoCtrlData::HasDueTodayTasks() const
 {
 	if (GetTaskCount() == 0)
@@ -3513,6 +3522,31 @@ BOOL CToDoCtrlData::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 
 	// no due todays found
 	return FALSE;
+}
+
+BOOL CToDoCtrlData::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
+{
+	// sanity check
+	ASSERT(pTDS);
+
+	if (!pTDS)
+		return FALSE;
+
+	if (IsTaskLocked(pTDS->GetTaskID()))
+		return TRUE;
+
+	// subtasks
+	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	{
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		
+		if (HasLockedTasks(pTDSChild))
+			return TRUE;
+	}
+
+	// no locked tasks found
+	return FALSE;
+
 }
 
 double CToDoCtrlData::GetEarliestDueDate() const

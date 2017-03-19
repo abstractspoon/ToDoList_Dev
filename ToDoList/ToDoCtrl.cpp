@@ -2378,7 +2378,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData, BOOL bCtrlEdited)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	if (sAttribID.IsEmpty())
@@ -2636,7 +2636,7 @@ void CToDoCtrl::NewList()
 
 BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -2679,7 +2679,7 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 
 BOOL CToDoCtrl::EditSelectedTaskIcon()
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon());
@@ -2692,7 +2692,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 
 BOOL CToDoCtrl::ClearSelectedTaskIcon()
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	return SetSelectedTaskIcon(_T(""));
@@ -2728,7 +2728,7 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 
 BOOL CToDoCtrl::CanPasteText()
 {
-	return (!IsReadOnly() && CWinClasses::IsEditControl(::GetFocus()));
+	return (CanEditSelectedTask() && CWinClasses::IsEditControl(::GetFocus()));
 }
 
 BOOL CToDoCtrl::PasteText(const CString& sText)
@@ -2749,7 +2749,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 
 BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	if (!bInternal)
@@ -2807,7 +2807,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 
 BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
 {
-	if (IsReadOnly() || GetSelectedCount() != 1)
+	if (!CanEditSelectedTask() || (GetSelectedCount() != 1))
 		return FALSE;
 
 	Flush();
@@ -2859,7 +2859,7 @@ BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, double& dTimeEst, TDC_UNITS& nEstUn
 
 BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -2898,7 +2898,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 
 BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -2937,7 +2937,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 
 BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -2978,7 +2978,7 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 
 BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3019,7 +3019,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 
 BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3110,7 +3110,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	if (nDate == TDCD_DONE)
 		return SetSelectedTaskDone(date, bDateEdited);
 
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	POSITION pos = TSH().GetFirstItemPos();
@@ -3218,7 +3218,7 @@ BOOL CToDoCtrl::MoveSelectedTaskDates(const COleDateTime& dtNewStart, BOOL bFail
 		return FALSE;
 	}
 
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -3249,7 +3249,7 @@ BOOL CToDoCtrl::MoveSelectedTaskDates(const COleDateTime& dtNewStart, BOOL bFail
 
 BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3316,7 +3316,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 
 BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 	
 	Flush();
@@ -3507,7 +3507,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 {
 	ASSERT(m_aRecreateTaskIDs.GetSize() == 0);
 
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3882,7 +3882,7 @@ int CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date,
 
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3921,7 +3921,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 
 BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -3960,7 +3960,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 
 BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4042,7 +4042,7 @@ int CToDoCtrl::GetNextPercentDone(int nPercent, BOOL bUp)
 
 BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4105,7 +4105,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4186,7 +4186,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 
 BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4243,7 +4243,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4330,7 +4330,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 
 BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4437,7 +4437,7 @@ BOOL CToDoCtrl::AppendSelectedTaskAllocTo(const CStringArray& aAllocTo)
 
 BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4465,7 +4465,7 @@ BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
 
 BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4493,7 +4493,7 @@ BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 
 BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -4566,7 +4566,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 
 TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, DWORD& dwRefTaskID)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return SET_FAILED;
 
 	Flush();
@@ -4766,7 +4766,7 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 
 BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 {
-	if (IsReadOnly() || GetSelectedCount() != 1)
+	if (!CanEditSelectedTask() || (GetSelectedCount() > 1))
 		return FALSE;
 	
 	return (m_data.IsTaskTimeTrackable(GetSelectedTaskID()));
@@ -4811,7 +4811,7 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 
 BOOL CToDoCtrl::SetSelectedTaskExtID(const CString& sID)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	Flush();
@@ -5204,7 +5204,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 
 BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 	
 	// check there's something to delete
@@ -7949,12 +7949,15 @@ BOOL CToDoCtrl::CopySelectedTask() const
 
 BOOL CToDoCtrl::CutSelectedTask()
 {
-	if (CopyCurrentSelection())
+	if (m_taskTree.SelectionHasUnlocked())
 	{
-		IMPLEMENT_UNDO(TDCUAT_DELETE);
-
-		DeleteSelectedTask(FALSE, TRUE);
-		return TRUE;
+		if (CopyCurrentSelection())
+		{
+			IMPLEMENT_UNDO(TDCUAT_DELETE);
+			
+			DeleteSelectedTask(FALSE, TRUE);
+			return TRUE;
+		}
 	}
 	
 	return FALSE;
@@ -10203,9 +10206,9 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 				IMPLEMENT_UNDOEDIT();
 			
 				DWORD dwTaskID = GetTaskID(pData->hti);
-				m_data.SetTaskFileRefs(dwTaskID, aFiles, TRUE);
 
-				SetModified(TRUE, TDCA_FILEREF, dwTaskID);
+				if (m_data.SetTaskFileRefs(dwTaskID, aFiles, TRUE) == SET_CHANGE)
+					SetModified(TRUE, TDCA_FILEREF, dwTaskID);
 			}
 			else
 			{
@@ -10643,6 +10646,11 @@ BOOL CToDoCtrl::HasDueTodayTasks() const
 	return m_data.HasDueTodayTasks();
 }
 
+BOOL CToDoCtrl::HasLockedTasks() const
+{
+	return m_data.HasLockedTasks();
+}
+
 BOOL CToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 {
 	SEARCHRESULT result;
@@ -11035,7 +11043,7 @@ BOOL CToDoCtrl::CanSpellcheckSelectedTaskComments()
 	if (!CanSpellcheckComments())
 		return FALSE;
 
-	return !GetSelectedTaskComments().IsEmpty();
+	return (CanEditSelectedTask() && !GetSelectedTaskComments().IsEmpty());
 }
 
 BOOL CToDoCtrl::CanSpellcheckComments()
@@ -11998,7 +12006,7 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 
 BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
 {
-	if (IsReadOnly())
+	if (!CanEditSelectedTask())
 		return FALSE;
 
 	TDC_ATTRIBUTE nAttrib = GetFocusedControlAttribute();
@@ -12018,7 +12026,7 @@ BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
 
 BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 {
-	if (IsReadOnly())
+	if (IsReadOnly() || !CanEditSelectedTask())
 		return FALSE;
 
 	return ((nAttrib >= TDCA_FIRSTATTRIBUTE && 
@@ -12102,4 +12110,11 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	// else something we've missed
 	ASSERT(0);
 	return FALSE;
+}
+
+BOOL CToDoCtrl::CanEditSelectedTask() const 
+{ 
+	return (!IsReadOnly() &&
+			GetSelectedCount() &&
+			m_taskTree.SelectionHasUnlocked()); 
 }

@@ -259,6 +259,7 @@ public:
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
 	double CalcSelectedTaskCost() const { return m_taskTree.CalcSelectedTaskCost(); }
 
+	BOOL CanEditSelectedTask() const;
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle);
@@ -381,6 +382,7 @@ public:
 	BOOL HasTask(DWORD dwTaskID) const { return m_data.HasTask(dwTaskID); }
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
+	BOOL HasLockedTasks() const;
 
 	// undo/redo
 	BOOL UndoLastAction(BOOL bUndo);
