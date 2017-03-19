@@ -190,7 +190,6 @@ public:
 	BOOL SelectionHasIcons() const;
 	BOOL SelectionHasUnlocked() const;
 	BOOL SelectionAreAllDone() const;
-	BOOL CanSplitSelectedTask() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);

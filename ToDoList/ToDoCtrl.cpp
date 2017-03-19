@@ -5088,7 +5088,21 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (!IsReadOnly() && m_taskTree.CanSplitSelectedTask()); 
+	if (IsReadOnly() || !CanEditSelectedTask())
+		return FALSE;
+	
+	if (m_taskTree.SelectionHasReferences())
+		return FALSE;
+	
+	int nSelCount = GetSelectedCount();
+	
+	if (nSelCount == 1)
+	{
+		if (IsSelectedTaskDone() || m_taskTree.SelectionHasSubtasks())
+			return FALSE;
+	}
+	
+	return (nSelCount > 0);
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)

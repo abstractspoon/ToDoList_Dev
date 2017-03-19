@@ -5896,25 +5896,6 @@ CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 	return _T("");
 }
 
-BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
-{
-	if (IsReadOnly())
-		return FALSE;
-	
-	if (SelectionHasReferences())
-		return FALSE;
-	
-	int nSelCount = GetSelectedCount();
-	
-	if (nSelCount == 1)
-	{
-		if (IsSelectedTaskDone() || SelectionHasSubtasks())
-			return FALSE;
-	}
-	
-	return (nSelCount > 0);
-}
-
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
 {
 	return m_data.IsTaskDone(GetSelectedTaskID());
