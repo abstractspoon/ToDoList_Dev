@@ -4379,8 +4379,12 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 				// next day
 				dDayStart = dDayEnd;
 			}
+
+			// handle 'whole' of due date
+			if (CDateHelper::IsWeekend(dateEnd) || !IsEndOfDay(dateEnd))
+				break;
 		}
-		// fall thru to handle 'whole' of due date
+		// else fall thru to handle 'whole' of due date
 
 	case TDCU_DAYS:
 		// handle 'whole' of due date

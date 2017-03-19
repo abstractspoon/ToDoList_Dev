@@ -155,6 +155,8 @@ protected:
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
+	BOOL m_bPageScrolling;
+
 	CEnHeaderCtrl m_treeHeader, m_listHeader;
 	CGanttDependencyEditor* m_pDependEdit;
 	CIntArray m_aMinMonthWidths;

@@ -534,8 +534,6 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 	}
 	else if (IsList(hwnd) && IsList(hwndTo)) // syncing list to list
 	{
-		TRACE(_T("Full Selection Resync called on List-List\n"));
-		
 		// clear existing selection first
 		ListView_SetItemState(hwnd, -1, 0, LVIS_SELECTED);
 		
@@ -2250,10 +2248,13 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		case VK_DOWN:
 		case VK_PRIOR:
 		case VK_NEXT:
-			lr = ScDefault(hRealWnd);
-			bDoneDefault = TRUE;
+			{
+				lr = ScDefault(hRealWnd);
+				bDoneDefault = TRUE;
 				
-			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+				ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+			}
+			break;
 		}
 		break;
 		
@@ -2866,8 +2867,6 @@ BOOL CTreeListSyncer::SetStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle)
 
 void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITEM hti)
 {
-	TRACE(_T("CTreeListSyncer::Sort\n"));
-
 	HWND hwndPrimary = PrimaryWnd();
 	HWND hwndOther = OtherWnd(hwndPrimary);
 

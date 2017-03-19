@@ -2447,6 +2447,7 @@ void CToDoListWnd::LoadSettings()
 	// time periods
 	CTimeHelper::SetHoursInWorkday(userPrefs.GetHoursInWorkday());
 	CTimeHelper::SetWorkdaysInWeek(userPrefs.GetWorkdaysInWeek());
+	CDateHelper::SetWeekendDays(userPrefs.GetWeekendDays());
 
 	// support for .tdl extension and tdl:// protocol
 	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
