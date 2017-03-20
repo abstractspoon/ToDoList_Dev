@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\TreeCtrlHelper.h"
+
 #include <afxole.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -27,8 +29,7 @@ struct TLDT_DATA
 	int GetFileCount() const;
 	CString GetFile(int nFile) const;
 
-	HTREEITEM hti;
-	int nItem;
+	DWORD dwTaskID;
 	COleDataObject* pObject;
 	CStringArray* pFilePaths;
 	OutlookAPI::Selection* pOutlookSelection;
@@ -52,10 +53,11 @@ public:
 
 protected:
 	CWnd* m_pOwner;
-	int m_nLVPrevHilite;
-	HTREEITEM m_htiTVPrevItem;
-	DWORD m_dwTVHoverStart;
+	DWORD m_dwPrevItem; 
 	CMSOutlookHelper* m_pOutlook;
+
+	DWORD m_dwTVHoverStart;
+	CHTIMap m_mapTVItems;
 
 protected:
 	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point);
@@ -68,18 +70,18 @@ protected:
 	enum TLDT_HITTEST
 	{
 		TLDTHT_NONE = -1,
-		TLDTHT_TREE,
-		TLDTHT_LIST,
+		TLDTHT_TASKVIEW,
 		TLDTHT_FILEEDIT,
 		TLDTHT_CAPTION,
 	};
 
-	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, HTREEITEM& htiHit, int& nHit, BOOL& bClient);
+	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID);
 	BOOL InitializeOutlook();
-	
+	void ResetDrag(CWnd* pWnd);
+
 	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
-	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bClientHit = FALSE, BOOL bFromText = FALSE);
-	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit = FALSE, BOOL bClientHit = FALSE, BOOL bFromText = FALSE);
+	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFromText = FALSE);
+	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit = FALSE, BOOL bFromText = FALSE);
 };
 
 #endif // !defined(AFX_TASKLISTDROPTARGET_H__56519FB1_2923_45BB_97A2_08B8B1DC7C97__INCLUDED_)

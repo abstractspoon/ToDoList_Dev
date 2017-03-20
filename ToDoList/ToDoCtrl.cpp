@@ -10177,9 +10177,9 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 	if (pTarget == &m_taskTree.Tree())
 	{
-		if (pData->hti)
+		if (pData->dwTaskID)
 		{
-			return !m_data.IsTaskLocked(GetTaskID(pData->hti));
+			return !m_data.IsTaskLocked(pData->dwTaskID);
 		}
 		else if (pData->GetFileCount())
 		{
@@ -10231,15 +10231,13 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	{
 		if (aFiles.GetSize())
 		{
-			if (pData->hti)
+			if (pData->dwTaskID)
 			{
 				// Add file paths to target's existing file Links
 				IMPLEMENT_UNDOEDIT();
 			
-				DWORD dwTaskID = GetTaskID(pData->hti);
-
-				if (m_data.SetTaskFileRefs(dwTaskID, aFiles, TRUE) == SET_CHANGE)
-					SetModified(TRUE, TDCA_FILEREF, dwTaskID);
+				if (m_data.SetTaskFileRefs(pData->dwTaskID, aFiles, TRUE) == SET_CHANGE)
+					SetModified(TRUE, TDCA_FILEREF, pData->dwTaskID);
 			}
 			else
 			{
@@ -10256,7 +10254,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		}
 
 		SetFocusToTasks();
-		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->hti);
+		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
 	else if ((pTarget == &m_cbFileRef) && aFiles.GetSize())
 	{
@@ -10277,7 +10275,7 @@ int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)
 		tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
 
 		// add to current tasklist
-		HTREEITEM htiInsert = pData->hti;
+		HTREEITEM htiInsert = m_taskTree.GetItem(pData->dwTaskID);
 		
 		if (!htiInsert)
 			htiInsert = m_taskTree.HitTestItem(CPoint(1, pData->ptClient.y));
@@ -11759,7 +11757,7 @@ LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM /*wp*/, LPARAM /*lp*/)
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 {
 	if (lp)
-		SelectItem((HTREEITEM)lp);
+		SelectTask(lp, FALSE);
 
     return 0L;
 }

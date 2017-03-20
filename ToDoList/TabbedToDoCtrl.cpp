@@ -4716,9 +4716,9 @@ LRESULT CTabbedToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 	if (InListView())
 	{
-		if (pData->nItem != -1)
+		if (pData->dwTaskID > 0)
 		{
-			return !m_data.IsTaskLocked(GetTaskID(pData->nItem));
+			return !m_data.IsTaskLocked(pData->dwTaskID);
 		}
 		else if (pData->GetFileCount())
 		{
@@ -4743,24 +4743,23 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		CToDoCtrl::OnDropObject(wParam, lParam); // default handling
+		CToDoCtrl::OnDropObject(wParam, lParam);
 		break;
 
 
-	case FTCV_TASKLIST:
-		// simply convert the list item into the corresponding tree
-		// item and pass to base class
-		if (pTarget == &m_taskList.List())
+ 	case FTCV_TASKLIST:
 		{
-			ASSERT (InListView());
+			ASSERT(pTarget == &m_taskList.List());
 
- 			if (pData->nItem != -1)
- 				m_taskList.SelectItem(pData->nItem);
+ 			if (pData->dwTaskID > 0)
+			{
+				int nItem = m_taskList.FindTaskItem(pData->dwTaskID);
+				ASSERT(nItem != -1);
 
-			pData->hti = GetTreeItem(pData->nItem);
-			pData->nItem = -1;
+ 				m_taskList.SelectItem(nItem);
+			}
 
-			CToDoCtrl::OnDropObject(wParam, (LPARAM)&m_taskTree.Tree()); // default handling
+			CToDoCtrl::OnDropObject(wParam, (LPARAM)&m_taskTree.Tree());
 		}
 		break;
 

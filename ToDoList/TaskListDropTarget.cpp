@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TaskListDropTarget.h"
+#include "TDLTaskCtrlBase.h"
 
 #include "..\shared\wclassdefines.h"
 #include "..\shared\winclasses.h"
@@ -21,14 +22,19 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 using namespace OutlookAPI;
+
+//////////////////////////////////////////////////////////////////////
+
+static const CPoint NULL_POINT(-1000, -1000);
 
 //////////////////////////////////////////////////////////////////////
 
 TLDT_DATA::TLDT_DATA(COleDataObject* pObj, CPoint pt) 
 	: 
-	hti(NULL), 
-	nItem(-1), 
+	dwTaskID(0), 
 	pObject(pObj), 
 	pFilePaths(NULL), 
 	pOutlookSelection(NULL),
@@ -72,8 +78,7 @@ CString TLDT_DATA::GetFile(int nFile) const
 CTaskListDropTarget::CTaskListDropTarget() 
 	: 
 	m_pOwner(NULL), 
-	m_nLVPrevHilite(-1), 
-	m_htiTVPrevItem(NULL),
+	m_dwPrevItem(0), 
 	m_dwTVHoverStart(0),
 	m_pOutlook(NULL)
 {
@@ -92,69 +97,77 @@ BOOL CTaskListDropTarget::Register(CWnd* pTarget, CWnd* pOwner)
 	return COleDropTarget::Register(pTarget);
 }
 
-DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* /*pObject*/, DWORD /*dwKeyState*/, CPoint /*point*/)
+DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point)
 {
+	ResetDrag(pWnd);
+
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
-		TreeView_SelectDropTarget(pWnd->GetSafeHwnd(), NULL);
-
-		m_htiTVPrevItem = NULL;
-		m_dwTVHoverStart = 0;
-	}
-	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
-	{
-		if (m_nLVPrevHilite != -1) // shouldn't happen
-			ListView_SetItemState(pWnd->GetSafeHwnd(), m_nLVPrevHilite, 0, LVIS_DROPHILITED); // all items
-
-		m_nLVPrevHilite = -1;
+		CTreeCtrlHelper tch((CTreeCtrl&)*pWnd);
+		tch.BuildHTIMap(m_mapTVItems);
 	}
 
-	return DROPEFFECT_NONE;
+	return OnDragOver(pWnd, pObject, dwKeyState, point);
 }
 
 void CTaskListDropTarget::OnDragLeave(CWnd* pWnd)
 {
+	ResetDrag(pWnd);
+}
+
+void CTaskListDropTarget::ResetDrag(CWnd* pWnd)
+{
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
 		TreeView_SelectDropTarget(pWnd->GetSafeHwnd(), NULL);
-
-		m_htiTVPrevItem = NULL;
-		m_dwTVHoverStart = 0;
 	}
 	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
-		if (m_nLVPrevHilite != -1) // shouldn't happen
-			ListView_SetItemState(pWnd->GetSafeHwnd(), m_nLVPrevHilite, 0, LVIS_DROPHILITED); // all items
-
-		m_nLVPrevHilite = -1;
+		ListView_SetItemState(pWnd->GetSafeHwnd(), -1, 0, LVIS_DROPHILITED); // all items
 	}
+	
+	m_dwTVHoverStart = 0;
+	m_dwPrevItem = 0;
+	m_mapTVItems.RemoveAll();
 }
 
-CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, 
-																 HTREEITEM& htiHit, int& nHit, BOOL& bClient)
+CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID)
 {
 	TLDT_HITTEST nHitResult = TLDTHT_NONE;
-
-	htiHit = NULL;
-	nHit = -1;
-
+	dwHitTaskID = 0;
+	
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
 		TVHITTESTINFO tvhti = { { point.x, point.y }, 0, 0 };
-		TreeView_HitTest(pWnd->GetSafeHwnd(), &tvhti);
-		
-		htiHit = tvhti.hItem;
-		nHitResult = TLDTHT_TREE;
-		bClient = (point.x >= 0);
+		HTREEITEM htiHit = TreeView_HitTest(pWnd->GetSafeHwnd(), &tvhti);
+
+		if (htiHit != NULL)
+		{
+			TVITEM item = { 0 };
+			item.hItem = htiHit;
+			item.mask = TVIF_PARAM;
+			VERIFY(::SendMessage(m_hWnd, TVM_GETITEM, 0, (LPARAM)&item));
+
+			dwHitTaskID = item.lParam;
+		}
+
+		nHitResult = TLDTHT_TASKVIEW;
 	}
 	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
 		LVHITTESTINFO lvhti = { { point.x, point.y }, 0 };
-		ListView_HitTest(pWnd->GetSafeHwnd(), &lvhti);
-		
-		nHit = lvhti.iItem;
-		nHitResult = TLDTHT_LIST;
-		bClient = (point.x >= 0);
+		int nHit = ListView_HitTest(pWnd->GetSafeHwnd(), &lvhti);
+
+		if (nHit != -1)
+		{
+			LVITEM lvi = { 0 };
+			lvi.iItem = nHit;
+			lvi.mask = LVIF_PARAM;
+			VERIFY(::SendMessage(m_hWnd, LVM_GETITEM, 0, (LPARAM)&lvi));
+
+			dwHitTaskID = lvi.lParam;
+		}
+		nHitResult = TLDTHT_TASKVIEW;
 	}
 	else if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
 	{
@@ -177,20 +190,20 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	if (!pWnd->IsWindowEnabled())
 		return DROPEFFECT_NONE;
 
-	HTREEITEM htiHit = NULL;
-	int nListHit = -1;
-	BOOL bClientHit = TRUE;
-
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, htiHit, nListHit, bClientHit);
+	DWORD dwHitTaskID = 0;
+	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, dwHitTaskID);
 
 	if (nHitTest == TLDTHT_NONE)
 		return DROPEFFECT_NONE;
 
-	// update drop hilites
-	if (nHitTest == TLDTHT_TREE)
+	// update drop hilite
+	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
+		HTREEITEM htiHit = NULL;
+		m_mapTVItems.Lookup(dwHitTaskID, htiHit);
+
 		// check hover time and expand parent tasks appropriately
-		if (htiHit && (m_htiTVPrevItem == htiHit))
+		if (dwHitTaskID && (m_dwPrevItem == dwHitTaskID))
 		{
 			ASSERT(m_dwTVHoverStart);
 
@@ -206,31 +219,47 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 		else 
 		{
 			TreeView_SelectDropTarget(*pWnd, htiHit);
-			m_htiTVPrevItem = htiHit;
+			m_dwPrevItem = dwHitTaskID;
 
-			if (htiHit)
+			if (dwHitTaskID)
 				m_dwTVHoverStart = GetTickCount();
 			else
 				m_dwTVHoverStart = 0;
 		}
 	}
-	else if (nHitTest == TLDTHT_LIST)
+	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
+		int nHit = -1;
+
 		// remove previous highlighting
-		if (m_nLVPrevHilite != -1 && m_nLVPrevHilite != nListHit)
-			ListView_SetItemState(pWnd->GetSafeHwnd(), m_nLVPrevHilite, 0, LVIS_DROPHILITED); 
-		
-		if (nListHit != -1)
-			ListView_SetItemState(pWnd->GetSafeHwnd(), nListHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
-		
-		m_nLVPrevHilite = nListHit;
+		if ((m_dwPrevItem != 0) && (m_dwPrevItem != dwHitTaskID))
+		{
+			LVFINDINFO lvfi = { 0 };
+			lvfi.flags = LVFI_PARAM;
+			lvfi.lParam = m_dwPrevItem;
+			lvfi.vkDirection = VK_DOWN;
+
+			int nPrev = ListView_FindItem(*pWnd, -1, &lvfi);
+			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED); 
+		}
+
+		if (dwHitTaskID != 0)
+		{
+			LVFINDINFO lvfi = { 0 };
+			lvfi.flags = LVFI_PARAM;
+			lvfi.lParam = dwHitTaskID;
+			lvfi.vkDirection = VK_DOWN;
+
+			int nHit = ListView_FindItem(*pWnd, -1, &lvfi);
+			ListView_SetItemState(pWnd->GetSafeHwnd(), nHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
+		}
+
+		m_dwPrevItem = dwHitTaskID;
 	}
 
 	// Allow parent to veto the drop
-	TLDT_DATA drop(pObject);
-
-	drop.hti = htiHit;
-	drop.nItem = nListHit;
+	TLDT_DATA drop(pObject, point);
+	drop.dwTaskID = dwHitTaskID;
 
 	CStringArray aFilePaths;
 	BOOL bFromText = FALSE;
@@ -241,13 +270,13 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	BOOL bCanDrop = m_pOwner->SendMessage(WM_TLDT_CANDROP, (WPARAM)&drop, (LPARAM)pWnd);
 
 	if (bCanDrop)
-		return GetDropEffect(nHitTest, drop, bClientHit, bFromText);
+		return GetDropEffect(nHitTest, drop, bFromText);
 	
 	// else
 	return DROPEFFECT_NONE;
 }
 
-DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bClientHit, BOOL bFromText)
+DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFromText)
 {
 	DROPEFFECT deResult = DROPEFFECT_NONE;
 
@@ -255,12 +284,8 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 	{
 		switch (nHitTest)
 		{
-		case TLDTHT_TREE:
-			deResult = GetDropEffect(nHitTest, (drop.hti != NULL), bClientHit);
-			break;
-
-		case TLDTHT_LIST:
-			deResult = GetDropEffect(nHitTest, (drop.nItem != -1), bClientHit);
+		case TLDTHT_TASKVIEW:
+			deResult = GetDropEffect(nHitTest, (drop.dwTaskID != 0));
 			break;
 
 		case TLDTHT_FILEEDIT:
@@ -272,16 +297,12 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 	{
 		switch (nHitTest)
 		{
-		case TLDTHT_TREE:
-			deResult = GetDropEffect(nHitTest, (drop.hti != NULL), bClientHit, bFromText);
-			break;
-
-		case TLDTHT_LIST:
-			deResult = GetDropEffect(nHitTest, (drop.nItem != -1), bClientHit, bFromText);
+		case TLDTHT_TASKVIEW:
+			deResult = GetDropEffect(nHitTest, (drop.dwTaskID != 0), bFromText);
 			break;
 
 		case TLDTHT_FILEEDIT:
-			deResult = GetDropEffect(nHitTest, FALSE, FALSE, bFromText);
+			deResult = GetDropEffect(nHitTest, FALSE, bFromText);
 			break;
 
 		case TLDTHT_CAPTION:
@@ -301,17 +322,12 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 	return deResult;
 }
 
-DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit, BOOL bClientHit, BOOL bFromText)
+DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit, BOOL bFromText)
 {
 	switch (nHitTest)
 	{
-	case TLDTHT_TREE:
-	case TLDTHT_LIST:
-		if (bItemHit)
-			return (bClientHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-		
-		// else
-		return DROPEFFECT_MOVE;
+	case TLDTHT_TASKVIEW:
+		return (bItemHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
 
 	case TLDTHT_FILEEDIT:
 		return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
@@ -361,9 +377,7 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 	m_pOwner->SetForegroundWindow();
 
 	TLDT_DATA data(pObject, point);
-	BOOL bClientHit = TRUE;
-
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, data.hti, data.nItem, bClientHit);
+	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, data.dwTaskID);
 
 	if (CMSOutlookHelper::IsOutlookObject(pObject) && InitializeOutlook())
 	{
@@ -392,23 +406,7 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 	}
 	
 	// cleanup
-	if (nHitTest == TLDTHT_TREE)
-	{
-		TreeView_SelectDropTarget(pWnd->GetSafeHwnd(), NULL);
-		m_htiTVPrevItem = NULL;
-	}
-	else if (nHitTest == TLDTHT_LIST)
-	{
-		// remove previous highlighting
-		if (m_nLVPrevHilite != -1)
-		{
-			ListView_SetItemState(pWnd->GetSafeHwnd(), m_nLVPrevHilite, 0, LVIS_DROPHILITED); 
-			m_nLVPrevHilite = -1;
-		}
-		
-		if (data.nItem != -1)
-			ListView_SetItemState(pWnd->GetSafeHwnd(), data.nItem, 0, LVIS_DROPHILITED);
-	}
+	ResetDrag(pWnd);
 
 	return TRUE; // because we handle it
 }
@@ -416,9 +414,7 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 BOOL CTaskListDropTarget::InitializeOutlook()
 {
 	if (m_pOutlook == NULL)
-	{
 		m_pOutlook = new CMSOutlookHelper;
-	}
 
 	return (m_pOutlook != NULL);
 }
