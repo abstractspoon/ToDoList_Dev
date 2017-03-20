@@ -575,6 +575,9 @@ protected:
 	afx_msg void OnTreeGetInfoTip(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnColumnEditClick(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTreeDragAbort(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTreeDragEnter(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTreeDragPreMove(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragOver(WPARAM wParam, LPARAM lParam);
 

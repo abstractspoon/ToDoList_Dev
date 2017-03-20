@@ -1830,7 +1830,7 @@ void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 {
-	if (IsReadOnly())
+	if (IsReadOnly() || SelectionHasLocked(TRUE))
 		return FALSE;
 	
 	// get selected tasks ordered, and without duplicate subtasks
@@ -1852,6 +1852,43 @@ BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 	}
 	
 	return TRUE;
+}
+
+BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren) const
+{
+	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked();
+
+	if (bLocked || !bCheckChildren)
+		return bLocked;
+
+	// Check children of selection
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (TaskHasLockedSubtasks(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE; // All subtasks were unlocked
+}
+
+BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID) const
+{
+	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	{
+		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
+
+		// Check this task and its children
+		if (m_data.IsTaskLocked(dwSubtaskID) || TaskHasLockedSubtasks(dwSubtaskID))
+			return TRUE;
+	}
+
+	return FALSE; // All subtasks were unlocked
 }
 
 BOOL CTDLTaskTreeCtrl::CanSelectTasksInHistory(BOOL bForward) const 

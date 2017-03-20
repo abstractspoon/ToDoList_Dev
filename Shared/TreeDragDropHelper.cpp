@@ -305,11 +305,9 @@ UINT CTreeDragDropHelper::OnDragOver(const DRAGDROPINFO* pDDI)
 
 BOOL CTreeDragDropHelper::OnDragDrop(const DRAGDROPINFO* pDDI)
 {
+	ASSERT(m_bEnabled && m_selection.GetCount());
 	//TRACE ("CTreeDragDropHelper::OnDragDrop(enter)\n");
 
-	if (!m_bEnabled || !m_selection.GetCount())
-		return FALSE;
-	
 	if (pDDI->hwndTarget == m_tree.GetSafeHwnd() && m_dropPos.htiDrop)
 	{
 		//TRACE ("CTreeDragDropHelper::OnDragDrop(%s, %s)\n", m_tree.GetItemText(m_dropPos.htiDrop),
@@ -348,7 +346,7 @@ BOOL CTreeDragDropHelper::OnDragDrop(const DRAGDROPINFO* pDDI)
 	
 	SetTimer(TIMER_SCROLL, 0);
 	SetTimer(TIMER_EXPAND, 0);
-	
+
 	m_tree.SetInsertMark(NULL);
 	m_tree.SelectDropTarget(NULL);
 	m_tree.Invalidate(FALSE);

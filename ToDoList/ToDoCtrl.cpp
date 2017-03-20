@@ -464,11 +464,11 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_STARTDATE, OnStartDatechange)
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnAutoComboAddDelete)
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMDELETED, OnAutoComboAddDelete)
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragDrop)
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGDROP, OnTreeDragDrop)
-	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragDrop)
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGOVER, OnTreeDragOver)
-	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreeDragDrop)
+	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreeDragPreMove)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditWantIcon)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
@@ -2979,7 +2979,9 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 
 BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 {
-	if (!CanEditSelectedTask())
+	// Can't use 'CanEditSelectedTask' because that
+	// will prevent locked tasks being unlocked
+	if (IsReadOnly() || !GetSelectedCount())
 		return FALSE;
 
 	Flush();
@@ -6975,14 +6977,12 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 LRESULT CToDoCtrl::OnCommentsKillFocus(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	HandleUnsavedComments();
-
 	return 0L;
 }
 
 LRESULT CToDoCtrl::OnCommentsDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 {
 	AfxGetApp()->WinHelp(lParam);
-
 	return 0L;
 }
 
@@ -6998,30 +6998,53 @@ void CToDoCtrl::OnChangeProjectName()
 	SetModified(TRUE, TDCA_PROJNAME);
 }
 
+LRESULT CToDoCtrl::OnTreeDragAbort(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+}
+
+LRESULT CToDoCtrl::OnTreeDragEnter(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	// Allow locked tasks to start dragging so we can 
+	// give feedback later that they can't be moved
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+}
+
+LRESULT CToDoCtrl::OnTreeDragPreMove(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+}
+
 LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 {
-	const MSG* pMsg = GetCurrentMessage();
-	UINT nRes = m_treeDragDrop.ProcessMessage(pMsg);
-	
-	// handle WM_DD_DRAGOVER for creating task shortcuts
+	UINT nRes = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
+
 	if (nRes != DD_DROPEFFECT_NONE)
 	{
-		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
-
-		// only interested in left button drags with ctrl+shift pressed
-		if (pDDI->bLeftDrag)
+		// Prevent dragging of locked tasks
+		if (m_taskTree.SelectionHasLocked(TRUE))
 		{
-			HTREEITEM htiOver = m_taskTree.HitTestItem(pDDI->pt);
-			DWORD dwOverTaskID = GetTaskID(htiOver);
+			nRes = DD_DROPEFFECT_NONE;
+		}
+		else 
+		{
+			const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 
-			if (m_data.IsTaskReference(dwOverTaskID) && m_taskTree.SelectionHasNonReferences())
+			// handle WM_DD_DRAGOVER for creating task shortcuts
+			// only interested in left button drags with ctrl+shift pressed
+			if (pDDI->bLeftDrag)
 			{
-				nRes = DD_DROPEFFECT_LINK;
-			}
-			else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
-					Misc::ModKeysArePressed(MKS_ALT)) 
-			{
-				nRes = DD_DROPEFFECT_LINK;
+				HTREEITEM htiOver = m_taskTree.HitTestItem(pDDI->pt);
+				DWORD dwOverTaskID = GetTaskID(htiOver);
+
+				if (m_data.IsTaskReference(dwOverTaskID) && m_taskTree.SelectionHasNonReferences())
+				{
+					nRes = DD_DROPEFFECT_LINK;
+				}
+				else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT)) 
+				{
+					nRes = DD_DROPEFFECT_LINK;
+				}
 			}
 		}
 	}
@@ -7031,208 +7054,208 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 
 LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 {
-	const MSG* pMsg = GetCurrentMessage();
-	UINT nRes = m_treeDragDrop.ProcessMessage(pMsg);
+	BOOL bDropped = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 	
-	// handle WM_DD_DRAGDROP
-	if (nRes)
+	if (bDropped)
 	{
+		// Prevent dragging of locked tasks
+		if (m_taskTree.SelectionHasLocked(TRUE))
+			return FALSE;
+
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;
 		HTREEITEM htiDrop, htiAfter;
 		
-		if (pMsg->message == WM_DD_DRAGDROP)
+		if (!m_treeDragDrop.GetDropTarget(htiDrop, htiAfter))
+			return 0;
+
+		DWORD dwTargetID = GetTaskID(htiDrop);
+		BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
+
+		// make target ID point to 'true' task
+		if (bTargetIsRef)
+			dwTargetID = m_data.GetTrueTaskID(dwTargetID);
+
+		BOOL bCopy = FALSE;
+		BOOL bMove = FALSE;
+		BOOL bRef = FALSE;
+
+		m_taskTree.RedrawColumns();
+
+		// if htiAfter is NULL then we are dropping 'on' an item
+		// so we need to decide where
+		BOOL bDropOn = (htiAfter == NULL);
+
+		if (bDropOn)
 		{
-			if (!m_treeDragDrop.GetDropTarget(htiDrop, htiAfter))
-				return 0;
-			
-			DWORD dwTargetID = GetTaskID(htiDrop);
-			BOOL bTargetIsRef = m_data.IsTaskReference(dwTargetID);
-			
-			// make target ID point to 'true' task
-			if (bTargetIsRef)
-				dwTargetID = m_data.GetTrueTaskID(dwTargetID);
-			
-			BOOL bCopy = FALSE;
-			BOOL bMove = FALSE;
-			BOOL bRef = FALSE;
-			
-			m_taskTree.RedrawColumns();
-			
-			// if htiAfter is NULL then we are dropping 'on' an item
-			// so we need to decide where
-			BOOL bDropOn = (htiAfter == NULL);
-			
-			if (bDropOn)
+			if (m_bDragDropSubtasksAtTop)
+				htiAfter = TVI_FIRST;
+			else
+				htiAfter = m_taskTree.TCH().GetLastChildItem(htiDrop);
+		}
+
+		if (pDDI->bLeftDrag) 
+		{
+			// Only allow non-refs to be dropped on references
+			// as references
+			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 			{
-				if (m_bDragDropSubtasksAtTop)
-					htiAfter = TVI_FIRST;
-				else
-					htiAfter = m_taskTree.TCH().GetLastChildItem(htiDrop);
+				bRef = TRUE;
 			}
-			
-			if (pDDI->bLeftDrag) 
+			else
 			{
-				// Only allow non-refs to be dropped on references
-				// as references
-				if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
-				{
-					bRef = TRUE;
-				}
-				else
-				{
-					bMove  = Misc::ModKeysArePressed(MKS_NONE);
-					bCopy = Misc::ModKeysArePressed(MKS_CTRL);
-					bRef = (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
-							Misc::ModKeysArePressed(MKS_ALT));
-				}
+				bMove  = Misc::ModKeysArePressed(MKS_NONE);
+				bCopy = Misc::ModKeysArePressed(MKS_CTRL);
+				bRef = (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
+					Misc::ModKeysArePressed(MKS_ALT));
 			}
-			else // right drag
+		}
+		else // right drag
+		{
+			CEnMenu menu;
+
+			if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
 			{
-				CEnMenu menu;
-				
-				if (menu.LoadMenu(IDR_TREEDRAGDROP, *this, TRUE))
+				if (htiDrop && htiDrop != TVI_ROOT)
+					m_taskTree.SelectDropTarget(htiDrop);
+
+				// disable task ref, dependency and file links
+				// if dropping in-between tasks
+				CMenu* pSubMenu = menu.GetSubMenu(0);
+				UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
+
+				if (!bDropOn)
 				{
-					if (htiDrop && htiDrop != TVI_ROOT)
-						m_taskTree.SelectDropTarget(htiDrop);
-					
-					CMenu* pSubMenu = menu.GetSubMenu(0);
-					CPoint ptCursor(pMsg->pt);
-					
-					// disable task ref, dependency and file links
-					// if dropping in-between tasks
-					UINT nDisabled = (MF_BYCOMMAND | MF_GRAYED);
-					
-					if (!bDropOn)
+					pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
+					pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
+					pSubMenu->EnableMenuItem(ID_TDD_SETFILELINK, nDisabled);
+					pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
+				}
+				// if the target is a reference disable copying and moving
+				else if (bTargetIsRef) 
+				{
+					pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
+					pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
+
+					// cannot create dependency to self
+					if (TSH().HasItem(dwTargetID))
 					{
 						pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
 						pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
-						pSubMenu->EnableMenuItem(ID_TDD_SETFILELINK, nDisabled);
-						pSubMenu->EnableMenuItem(ID_TDD_REFTASK, nDisabled);
 					}
-					// if the target is a reference disable copying and moving
-					else if (bTargetIsRef) 
-					{
-						pSubMenu->EnableMenuItem(ID_TDD_COPYTASK, nDisabled);
-						pSubMenu->EnableMenuItem(ID_TDD_MOVETASK, nDisabled);
-						
-						// cannot create dependency to self
-						if (TSH().HasItem(dwTargetID))
-						{
-							pSubMenu->EnableMenuItem(ID_TDD_SETTASKDEPENDENCY, nDisabled);
-							pSubMenu->EnableMenuItem(ID_TDD_ADDTASKDEPENDENCY, nDisabled);
-						}
-					}
-					
-					UINT nCmdID = ::TrackPopupMenu(*pSubMenu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 
-													ptCursor.x, ptCursor.y, 0, *this, NULL);
-
-					switch (nCmdID)
-					{
-					case ID_TDD_REFTASK:
-						bRef = TRUE;
-						break;
-						
-					case ID_TDD_COPYTASK:
-						bCopy = TRUE;
-						break;
-						
-					case ID_TDD_MOVETASK:
-						bMove = TRUE;
-						break;
-						
-					case ID_TDD_SETTASKDEPENDENCY:
-					case ID_TDD_ADDTASKDEPENDENCY:
-						{
-							IMPLEMENT_UNDOEDIT();
-
-							// replace task dependencies with this one
-							CStringArray aDepends;
-							aDepends.Add(TODOITEM::FormatTaskDependency(GetSelectedTaskID()));
-
-							m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
-							SetModified(TRUE, TDCA_DEPENDENCY, dwTargetID);
-						}
-						break;
-						
-					case ID_TDD_SETFILELINK:
-						{
-							IMPLEMENT_UNDOEDIT();
-
-							CString sTaskRef;
-							sTaskRef.Format(_T("tdl://%lu"), GetSelectedTaskID());
-
-							CStringArray aFileRefs;
-							aFileRefs.Add(sTaskRef);
-
-							m_data.SetTaskFileRefs(dwTargetID, aFileRefs, TRUE);
-
-							SetModified(TRUE, TDCA_FILEREF, dwTargetID);
-						}
-						break;
-						
-					default:
-						break;
-					}
-
-					m_taskTree.SelectDropTarget(NULL);
-					m_taskTree.RedrawColumns();
 				}
-			}
-			
-			if (bCopy || bRef)
-			{
-				// copy selection as xml
-				CTaskFile tasks;
-				TDCGETTASKS filter;
-				
-				// if pasting references then we don't want all subtasks just 
-				// the ones actually selected
-				if (GetSelectedTasks(tasks, filter, (bRef ? TDCGSTF_NOTSUBTASKS : 0)))
+
+				CPoint ptCursor(pDDI->pt);
+				::ClientToScreen(pDDI->hwndTarget, &ptCursor);
+
+				UINT nCmdID = ::TrackPopupMenu(*pSubMenu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 
+					ptCursor.x, ptCursor.y, 0, *this, NULL);
+
+				switch (nCmdID)
 				{
-					IMPLEMENT_UNDO(TDCUAT_COPY);
-					HOLD_REDRAW(*this, m_taskTree);
+				case ID_TDD_REFTASK:
+					bRef = TRUE;
+					break;
 
-					// fix up the dependencies of the copied tasks
-					if (bCopy)
-						PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
-					else
-						PrepareTaskIDsForPasteAsRef(tasks);
-					
-					// then add them with impunity!
-					AddTasksToTree(tasks, htiDrop, htiAfter, TDCR_NO, TRUE, TDCA_PASTE);
-					
-					// if the parent was marked as done and this task is not
-					// then mark the parent as incomplete too
-					m_data.FixupParentCompletion(dwTargetID);
+				case ID_TDD_COPYTASK:
+					bCopy = TRUE;
+					break;
+
+				case ID_TDD_MOVETASK:
+					bMove = TRUE;
+					break;
+
+				case ID_TDD_SETTASKDEPENDENCY:
+				case ID_TDD_ADDTASKDEPENDENCY:
+					{
+						IMPLEMENT_UNDOEDIT();
+
+						// replace task dependencies with this one
+						CStringArray aDepends;
+						aDepends.Add(TODOITEM::FormatTaskDependency(GetSelectedTaskID()));
+
+						m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
+						SetModified(TRUE, TDCA_DEPENDENCY, dwTargetID);
+					}
+					break;
+
+				case ID_TDD_SETFILELINK:
+					{
+						IMPLEMENT_UNDOEDIT();
+
+						CString sTaskRef;
+						sTaskRef.Format(_T("tdl://%lu"), GetSelectedTaskID());
+
+						CStringArray aFileRefs;
+						aFileRefs.Add(sTaskRef);
+
+						m_data.SetTaskFileRefs(dwTargetID, aFileRefs, TRUE);
+
+						SetModified(TRUE, TDCA_FILEREF, dwTargetID);
+					}
+					break;
+
+				default:
+					break;
 				}
+
+				m_taskTree.SelectDropTarget(NULL);
+				m_taskTree.RedrawColumns();
 			}
-			else if (bMove)
+		}
+
+		if (bCopy || bRef)
+		{
+			// copy selection as xml
+			CTaskFile tasks;
+			TDCGETTASKS filter;
+
+			// if pasting references then we don't want all subtasks just 
+			// the ones actually selected
+			if (GetSelectedTasks(tasks, filter, (bRef ? TDCGSTF_NOTSUBTASKS : 0)))
 			{
-				IMPLEMENT_UNDO(TDCUAT_MOVE);
-				
-				DWORD dwDestParentID = m_taskTree.GetTaskID(htiDrop);
-				DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiAfter);
+				IMPLEMENT_UNDO(TDCUAT_COPY);
+				HOLD_REDRAW(*this, m_taskTree);
 
-				CDWordArray aSelTaskIDs;
-				DWORD dwUnused = 0;
-				
-				m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
-				
-				if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
-				{
-					m_taskTree.MoveSelection(htiDrop, htiAfter);
-				
-					// if the parent was marked as done and this task is not
-					// then mark the parent as incomplete too
-					m_data.FixupParentCompletion(dwDestParentID);
+				// fix up the dependencies of the copied tasks
+				if (bCopy)
+					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
+				else
+					PrepareTaskIDsForPasteAsRef(tasks);
 
-					SetModified(TRUE, TDCA_POSITION);
-				}
+				// then add them with impunity!
+				AddTasksToTree(tasks, htiDrop, htiAfter, TDCR_NO, TRUE, TDCA_PASTE);
+
+				// if the parent was marked as done and this task is not
+				// then mark the parent as incomplete too
+				m_data.FixupParentCompletion(dwTargetID);
+			}
+		}
+		else if (bMove)
+		{
+			IMPLEMENT_UNDO(TDCUAT_MOVE);
+
+			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDrop);
+			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiAfter);
+
+			CDWordArray aSelTaskIDs;
+			DWORD dwUnused = 0;
+
+			m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
+
+			if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
+			{
+				m_taskTree.MoveSelection(htiDrop, htiAfter);
+
+				// if the parent was marked as done and this task is not
+				// then mark the parent as incomplete too
+				m_data.FixupParentCompletion(dwDestParentID);
+
+				SetModified(TRUE, TDCA_POSITION);
 			}
 		}
 	}
 
-	return nRes;
+	return bDropped;
 }
 
 void CToDoCtrl::RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask) const

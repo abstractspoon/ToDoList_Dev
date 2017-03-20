@@ -83,6 +83,7 @@ public:
 	BOOL EnsureSelectionVisible();
 	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
+	BOOL SelectionHasLocked(BOOL bCheckChildren) const;
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const;
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const;
@@ -219,6 +220,7 @@ protected:
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
+	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
