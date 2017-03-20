@@ -359,6 +359,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTodoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTodoCtrlCanImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyListChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMinWidthChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);

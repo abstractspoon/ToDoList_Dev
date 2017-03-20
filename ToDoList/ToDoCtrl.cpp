@@ -476,6 +476,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDL_APPLYADDLOGGEDTIME, OnApplyAddLoggedTime)
 	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
+	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
  	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
@@ -10162,6 +10163,36 @@ void CToDoCtrl::MakeFullPaths(CStringArray& aFilePaths) const
 		if (!WebMisc::IsURL(sFilePath))
 			FileMisc::MakeFullPath(sFilePath, sParentFolder);
 	}
+}
+
+LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
+{
+	if (IsReadOnly())
+		return FALSE;
+
+	ASSERT(wParam && lParam);
+
+	TLDT_DATA* pData = (TLDT_DATA*)wParam;
+	CWnd* pTarget = (CWnd*)lParam;
+
+	if (pTarget == &m_taskTree.Tree())
+	{
+		if (pData->hti)
+		{
+			return !m_data.IsTaskLocked(GetTaskID(pData->hti));
+		}
+		else if (pData->GetFileCount())
+		{
+			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
+		}
+	}
+	else if (pTarget == &m_cbFileRef)
+	{
+		return CanEditSelectedTask();
+	}
+
+	// else
+	return TRUE;
 }
 
 LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)

@@ -423,6 +423,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnToDoCtrlDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnTodoCtrlImportDropFiles)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnTodoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
@@ -8244,6 +8245,29 @@ LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 	}
 	
 	return 0L;
+}
+
+LRESULT CToDoListWnd::OnTodoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
+{
+	ASSERT(lp);
+	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
+
+	if (lp)
+	{
+		// Look for the first importable file
+		const CStringArray* pFiles = (const CStringArray*)lp;
+		int nNumFiles = pFiles->GetSize();
+
+		for (int nFile = 0; nFile < nNumFiles; nFile++)
+		{
+			CString sFilePath = pFiles->GetAt(nFile);
+
+			if (m_mgrImportExport.FindImporter(sFilePath) != -1)
+				return TRUE;
+		}
+	}
+	
+	return FALSE;
 }
 
 void CToDoListWnd::OnImportTasklist() 

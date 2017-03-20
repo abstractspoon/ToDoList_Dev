@@ -183,6 +183,9 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 
 	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, htiHit, nListHit, bClientHit);
 
+	if (nHitTest == TLDTHT_NONE)
+		return DROPEFFECT_NONE;
+
 	// update drop hilites
 	if (nHitTest == TLDTHT_TREE)
 	{
@@ -223,55 +226,100 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 		m_nLVPrevHilite = nListHit;
 	}
 
+	// Allow parent to veto the drop
+	TLDT_DATA drop(pObject);
+
+	drop.hti = htiHit;
+	drop.nItem = nListHit;
+
+	CStringArray aFilePaths;
+	BOOL bFromText = FALSE;
+
+	if (GetDropFilePaths(pObject, aFilePaths, bFromText))
+		drop.pFilePaths = &aFilePaths;
+
+	BOOL bCanDrop = m_pOwner->SendMessage(WM_TLDT_CANDROP, (WPARAM)&drop, (LPARAM)pWnd);
+
+	if (bCanDrop)
+		return GetDropEffect(nHitTest, drop, bClientHit, bFromText);
+	
+	// else
+	return DROPEFFECT_NONE;
+}
+
+DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bClientHit, BOOL bFromText)
+{
 	DROPEFFECT deResult = DROPEFFECT_NONE;
 
-	if (CMSOutlookHelper::IsOutlookObject(pObject))
+	if (CMSOutlookHelper::IsOutlookObject(drop.pObject))
 	{
 		switch (nHitTest)
 		{
 		case TLDTHT_TREE:
-			deResult = (bClientHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
+			deResult = GetDropEffect(nHitTest, (drop.hti != NULL), bClientHit);
 			break;
-			
+
 		case TLDTHT_LIST:
-			deResult = (bClientHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
+			deResult = GetDropEffect(nHitTest, (drop.nItem != -1), bClientHit);
 			break;
-			
+
 		case TLDTHT_FILEEDIT:
-			deResult = DROPEFFECT_LINK;
+			deResult = GetDropEffect(nHitTest);
 			break;
 		}
 	}
-	else if (nHitTest != TLDTHT_NONE)
+	else if ((nHitTest != TLDTHT_NONE) && drop.GetFileCount())
 	{
-		CStringArray aFilePaths;
-		BOOL bFromText = FALSE;
-
-		int nNumFiles = GetDropFilePaths(pObject, aFilePaths, bFromText);
-
-		if (nNumFiles)
+		switch (nHitTest)
 		{
-			switch (nHitTest)
-			{
-			case TLDTHT_TREE:
-			case TLDTHT_LIST:
-			case TLDTHT_FILEEDIT:
-				deResult = (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
-				break;
+		case TLDTHT_TREE:
+			deResult = GetDropEffect(nHitTest, (drop.hti != NULL), bClientHit, bFromText);
+			break;
 
-			case TLDTHT_CAPTION:
-				if (FileMisc::HasExtension(aFilePaths[0], _T(".TDL")) ||
-					FileMisc::HasExtension(aFilePaths[0], _T(".XML")))
+		case TLDTHT_LIST:
+			deResult = GetDropEffect(nHitTest, (drop.nItem != -1), bClientHit, bFromText);
+			break;
+
+		case TLDTHT_FILEEDIT:
+			deResult = GetDropEffect(nHitTest, FALSE, FALSE, bFromText);
+			break;
+
+		case TLDTHT_CAPTION:
+			{
+				CString sFilePath(drop.GetFile(0));
+
+				if (FileMisc::HasExtension(sFilePath, _T(".TDL")) ||
+					FileMisc::HasExtension(sFilePath, _T(".XML")))
 				{
-					deResult = DROPEFFECT_COPY;
+					deResult = DROPEFFECT_MOVE;
 				}
-				break;
 			}
+			break;
 		}
 	}
 
-	// else
 	return deResult;
+}
+
+DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit, BOOL bClientHit, BOOL bFromText)
+{
+	switch (nHitTest)
+	{
+	case TLDTHT_TREE:
+	case TLDTHT_LIST:
+		if (bItemHit)
+			return (bClientHit ? DROPEFFECT_LINK : DROPEFFECT_COPY);
+		
+		// else
+		return DROPEFFECT_MOVE;
+
+	case TLDTHT_FILEEDIT:
+		return (bFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
+	}
+
+	// all else
+	ASSERT(0);
+	return DROPEFFECT_NONE;
 }
 
 int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText)

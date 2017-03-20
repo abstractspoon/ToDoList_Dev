@@ -186,6 +186,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);

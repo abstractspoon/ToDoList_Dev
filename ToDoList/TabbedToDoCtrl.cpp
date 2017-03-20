@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
+	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
@@ -4703,6 +4704,30 @@ int CTabbedToDoCtrl::GetListItem(HTREEITEM hti) const
 {
 	DWORD dwID = GetTaskID(hti);
 	return (dwID ? m_taskList.FindTaskItem(dwID) : -1);
+}
+
+LRESULT CTabbedToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
+{
+	if (IsReadOnly())
+		return 0L;
+
+	TLDT_DATA* pData = (TLDT_DATA*)wParam;
+	CWnd* pTarget = (CWnd*)lParam;
+
+	if (InListView())
+	{
+		if (pData->nItem != -1)
+		{
+			return !m_data.IsTaskLocked(GetTaskID(pData->nItem));
+		}
+		else if (pData->GetFileCount())
+		{
+			return GetParent()->SendMessage(WM_TDCM_CANIMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)pData->pFilePaths);
+		}
+	}
+
+	// all else
+	return CToDoCtrl::OnCanDropObject(wParam, lParam);
 }
 
 LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)

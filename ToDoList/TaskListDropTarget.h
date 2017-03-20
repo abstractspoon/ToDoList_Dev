@@ -37,7 +37,8 @@ struct TLDT_DATA
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT WM_TLDT_DROP = ::RegisterWindowMessage(_T("WM_TLDT_DROP")); // wparam = TLDT_DATA*, lParam == (CWnd*)target
+const UINT WM_TLDT_DROP		= ::RegisterWindowMessage(_T("WM_TLDT_DROP"));		// wparam = TLDT_DATA*, lParam == (CWnd*)target
+const UINT WM_TLDT_CANDROP	= ::RegisterWindowMessage(_T("WM_TLDT_CANDROP"));	// wparam = TLDT_DATA*, lParam == (CWnd*)target
 
 //////////////////////////////////////////////////////////////////////
 
@@ -75,7 +76,10 @@ protected:
 
 	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, HTREEITEM& htiHit, int& nHit, BOOL& bClient);
 	BOOL InitializeOutlook();
-	int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
+	
+	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
+	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bClientHit = FALSE, BOOL bFromText = FALSE);
+	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, BOOL bItemHit = FALSE, BOOL bClientHit = FALSE, BOOL bFromText = FALSE);
 };
 
 #endif // !defined(AFX_TASKLISTDROPTARGET_H__56519FB1_2923_45BB_97A2_08B8B1DC7C97__INCLUDED_)
