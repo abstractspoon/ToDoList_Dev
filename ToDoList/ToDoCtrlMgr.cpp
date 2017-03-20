@@ -164,7 +164,7 @@ BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return GetToDoCtrl(nIndex).GetFilePath().IsEmpty();
+	return !GetToDoCtrl(nIndex).GetFilePath().IsEmpty();
 }
 
 CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
