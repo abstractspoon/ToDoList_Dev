@@ -47,6 +47,8 @@ CHMXChart::~CHMXChart()
 BEGIN_MESSAGE_MAP(CHMXChart, CWnd)
 	//{{AFX_MSG_MAP(CHMXChart)
 	ON_WM_PAINT()
+	ON_MESSAGE(WM_PRINTCLIENT, OnPrintClient)
+	ON_MESSAGE(WM_PRINT, OnPrintClient)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -59,7 +61,23 @@ void CHMXChart::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 	
-	PaintBkGnd(dc);
+	DoPaint(dc);
+}
+
+LRESULT CHMXChart::OnPrintClient(WPARAM wp, LPARAM lp)
+{
+	CDC* pDC = CDC::FromHandle((HDC)wp);
+
+	if (pDC)
+		DoPaint(*pDC, (lp & PRF_ERASEBKGND));
+
+	return 0L;
+}
+
+void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
+{
+	if (bPaintBkgnd)
+		PaintBkGnd(dc);
 
 	DrawDatasets(dc);
 	DrawGrid(dc);
@@ -68,7 +86,6 @@ void CHMXChart::OnPaint()
 	DrawAxes(dc);
 	DrawYScale(dc);
 	DrawXScale(dc);
-
 }
 
 void CHMXChart::OnSize(UINT nType, int cx, int cy)

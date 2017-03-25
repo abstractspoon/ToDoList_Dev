@@ -179,12 +179,13 @@ protected:
 	//{{AFX_MSG(CHMXChart)
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnPrintClient(WPARAM wp, LPARAM lp);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	int CalcScaleFontSize(CDC& dc) const;
-
+	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 };
 
 /////////////////////////////////////////////////////////////////////////////

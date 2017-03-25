@@ -570,12 +570,27 @@ void CBurndownWnd::Release()
 	delete this;
 }
 
-bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) 
+bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	switch (nCmd)
 	{
+	case IUI_SAVETOIMAGE:
+		if (dwExtra)
+		{
+			CBitmap bmImage;
+
+			if (m_graph.SaveToImage(bmImage))
+			{
+				HBITMAP* pHBM = (HBITMAP*)dwExtra;
+				*pHBM = (HBITMAP)bmImage.Detach();
+
+				return true;
+			}
+		}
+		break;
+
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:
 	case IUI_EXPANDSELECTED:
@@ -601,6 +616,9 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	
 	switch (nCmd)
 	{
+	case IUI_SAVETOIMAGE:
+		return true;
+
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:
 	case IUI_EXPANDSELECTED:
@@ -807,9 +825,7 @@ int CBurndownWnd::CalculateRequiredScale() const
 	int nNumDays = GetDataDuration();
 
 	// work thru the available scales until we find a suitable one
-	int nScale = 0;
-
-	for (; nScale < NUM_SCALES; nScale++)
+	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
 	{
 		int nSpacing = MulDiv(SCALES[nScale], nDataWidth, nNumDays);
 
@@ -877,8 +893,6 @@ void CBurndownWnd::RebuildXScale()
 			ASSERT(0);
 		}
 	}
-
-	//m_graph.Invalidate();
 }
 
 COleDateTime CBurndownWnd::GetGraphStartDate() const

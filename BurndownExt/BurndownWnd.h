@@ -9,6 +9,8 @@
 
 #include <afxtempl.h>
 
+#include "BurndownChart.h"
+
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
@@ -16,8 +18,6 @@
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IUIExtension.h"
-
-#include "..\3rdparty\hmxchart.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +92,7 @@ protected:
 	HICON m_hIcon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CHMXChart m_graph;
+	CBurndownChart m_graph;
 	int m_nScale;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
@@ -136,7 +136,7 @@ protected:
 	void BuildGraph();
 	int CalculateIncompleteTaskCount(const COleDateTime& date);
 	BOOL GetStatsItem(DWORD dwTaskID, STATSITEM& si) const;
-	void RebuildXScale(); // returns the previous scale
+	void RebuildXScale();
 	int GetDataDuration() const;
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
