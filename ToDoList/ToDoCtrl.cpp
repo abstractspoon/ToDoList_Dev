@@ -7022,7 +7022,7 @@ LRESULT CToDoCtrl::OnTreeDragOver(WPARAM /*wParam*/, LPARAM lParam)
 	if (nRes != DD_DROPEFFECT_NONE)
 	{
 		// Prevent dragging of locked tasks
-		if (m_taskTree.SelectionHasLocked(TRUE))
+		if (m_taskTree.SelectionHasLocked(FALSE))
 		{
 			nRes = DD_DROPEFFECT_NONE;
 		}
@@ -7059,7 +7059,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 	if (bDropped)
 	{
 		// Prevent dragging of locked tasks
-		if (m_taskTree.SelectionHasLocked(TRUE))
+		if (m_taskTree.SelectionHasLocked(FALSE))
 			return FALSE;
 
 		const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lParam;

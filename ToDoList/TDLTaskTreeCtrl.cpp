@@ -1830,7 +1830,7 @@ void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 
 BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 {
-	if (IsReadOnly() || SelectionHasLocked(TRUE))
+	if (IsReadOnly() || SelectionHasLocked(FALSE))
 		return FALSE;
 	
 	// get selected tasks ordered, and without duplicate subtasks
