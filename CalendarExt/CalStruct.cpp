@@ -301,6 +301,28 @@ COleDateTime TASKCALITEM::GetAnyEndDate() const
 		return dtEnd;
 }
 
+void TASKCALITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
+{
+	MinMax(GetAnyStartDate(), dtMin, dtMax);
+	MinMax(GetAnyEndDate(), dtMin, dtMax);
+}
+
+void TASKCALITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax)
+{
+	if (CDateHelper::IsDateSet(date))
+	{
+		if (CDateHelper::IsDateSet(dtMin))
+			dtMin.m_dt = min(dtMin.m_dt, date.m_dt);
+		else
+			dtMin = date;
+
+		if (CDateHelper::IsDateSet(dtMax))
+			dtMax.m_dt = max(dtMax.m_dt, date.m_dt);
+		else
+			dtMax = date;
+	}
+}
+
 void TASKCALITEM::SetStartDate(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));

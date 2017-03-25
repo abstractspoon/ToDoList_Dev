@@ -11,6 +11,8 @@
 #include "..\Shared\TimeHelper.h"
 #include "..\Shared\misc.h"
 #include "..\Shared\dialoghelper.h"
+#include "..\Shared\holdredraw.h"
+#include "..\Shared\autoflag.h"
 
 #include <math.h>
 
@@ -39,7 +41,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_dwOptions(TCCO_DISPLAYCONTINUOUS),
 	m_bReadOnly(FALSE),
 	m_nCellVScrollPos(0),
-	m_bStrikeThruDone(FALSE)
+	m_bStrikeThruDone(FALSE),
+	m_bSavingToImage(FALSE)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 }
@@ -216,7 +219,10 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpd
 	}
 	
 	if (bChange)
+	{
+		RecalcDataRange();
 		Invalidate(FALSE);
+	}
 }
 
 void CTaskCalendarCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, 
@@ -611,7 +617,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		int nSaveDC = pDC->SaveDC();
 
 		// draw selection
-		BOOL bSelTask = (pTCI->GetTaskID() == m_dwSelectedTaskID);
+		BOOL bSelTask = (!m_bSavingToImage && (pTCI->GetTaskID() == m_dwSelectedTaskID));
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -662,13 +668,11 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				int nLeft = (rTask.left - nOffset);
 				int nTop = (rTask.top + 1);
 				
-				CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTCI));
+				pDC->SelectObject(GetTaskFont(pTCI));
+				pDC->SetTextColor(crText);
 
-				COLORREF crOld = pDC->SetTextColor(crText);
 				CString sTitle = pTCI->GetName();
-				
 				pDC->ExtTextOut(nLeft, nTop, ETO_CLIPPED, rTask, sTitle, NULL);
-				pDC->SetTextColor(crOld);
 				
 				// update text pos
 				nOffset += (rTask.Width() + 1); // +1 for the cell border
@@ -680,10 +684,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 					nOffset = -1;
 				
 				m_mapTextOffset[pTCI->GetTaskID()] = nOffset;
-
-				// restore font
-				pDC->SelectObject(pOldFont);
 			}
+
+			pDC->RestoreDC(nSaveDC);
 						
 			if (rTask.bottom >= rCellTrue.bottom)
 				break;
@@ -2021,4 +2024,105 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
 							(SWP_NOACTIVATE | SWP_NOZORDER));
+}
+
+BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
+{
+	if (!CanSaveToImage())
+		return FALSE;
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+	CLockUpdates lock(GetSafeHwnd());
+	CClientDC dc(this);
+	CDC dcImage, dcClient;
+
+	if (dcImage.CreateCompatibleDC(&dc) && dcClient.CreateCompatibleDC(&dc))
+	{
+		CBitmap bmClient;
+		CRect rClient;
+		GetClientRect(rClient);
+
+		CRect rData(rClient), rCell;
+		GetCellRect(0, 0, rCell);
+
+		Goto(m_dtMin);
+		COleDateTime dtStart(CDateHelper::GetStartOfWeek(GetMinDate()));
+
+		int nDataWeeks = ((int)((m_dtMax.m_dt - dtStart.m_dt) / 7)) + 1;
+		rData.bottom = (nDataWeeks * rCell.Height());
+
+		if (bmImage.CreateCompatibleBitmap(&dc, rData.Width(), rData.Height()) &&
+			bmClient.CreateCompatibleBitmap(&dc, rClient.Width(), rClient.Height()))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+			CBitmap* pOldClient = dcClient.SelectObject(&bmClient);
+
+			dcImage.FillSolidRect(rData, GetSysColor(COLOR_WINDOW));
+
+			BOOL bFirst = TRUE;
+			int nVImageOffset = 0;
+			int nClientWidth = rClient.Width(), nClientHeight = rClient.Height();
+			int nHeaderOffset = 0;
+
+			do 
+			{
+				dcClient.FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
+
+				// Draw days of week header once only
+				if (bFirst)
+					DrawHeader(&dcClient);
+
+				DrawCells(&dcClient);	
+				DrawGrid(&dcClient);
+
+				// Draw gridline at top of cells for subsequent
+				if (!bFirst)
+					dcClient.FillSolidRect(0, CALENDAR_HEADER_HEIGHT, nClientWidth, 1, m_crGrid);
+
+				dcImage.BitBlt(0, nVImageOffset, nClientWidth, nClientHeight, &dcClient, 0, nHeaderOffset, SRCCOPY);
+
+				nVImageOffset += rClient.Height();
+
+				if (bFirst)
+				{
+					nHeaderOffset = CALENDAR_HEADER_HEIGHT;
+					nClientHeight -= nHeaderOffset;
+				
+					bFirst = FALSE;
+				}
+				else
+				{
+					nVImageOffset -= nHeaderOffset;
+				}
+
+				dtStart.m_dt += (m_nVisibleWeeks * 7.0);
+				Goto(dtStart);
+			}
+			while (dtStart < m_dtMax);
+		}
+	}
+
+	return (bmImage.GetSafeHandle() != NULL);
+}
+
+BOOL CTaskCalendarCtrl::CanSaveToImage() const
+{
+	return ((m_mapData.GetCount() > 0) && ((m_dtMax.m_dt - m_dtMin.m_dt) > 0));
+}
+
+void CTaskCalendarCtrl::RecalcDataRange()
+{
+	CDateHelper::ClearDate(m_dtMin);
+	CDateHelper::ClearDate(m_dtMax);
+
+	POSITION pos = m_mapData.GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwTaskID = 0;
+		TASKCALITEM* pTCI = NULL;
+
+		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
+		pTCI->MinMax(m_dtMin, m_dtMax);
+	}
 }

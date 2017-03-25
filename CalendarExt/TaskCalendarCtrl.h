@@ -35,6 +35,9 @@ public:
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
+	BOOL SaveToImage(CBitmap& bmImage);
+	BOOL CanSaveToImage() const;
+	
 	BOOL IsSpecialDate(const COleDateTime& date) const;
 	BOOL CancelDrag();
 	BOOL HasTask(DWORD dwTaskID) const;
@@ -70,6 +73,7 @@ protected:
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
 	BOOL m_bStrikeThruDone;
+	BOOL m_bSavingToImage;
 
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
@@ -80,6 +84,7 @@ protected:
 	CFont m_fontAltText;
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
+	COleDateTime m_dtMin, m_dtMax;
 
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
@@ -162,6 +167,7 @@ protected:
 	BOOL RemoveDeletedTasks(const ITaskList16* pTasks);
 	void BuildData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
+	void RecalcDataRange();
 
 	// helpers
 	static int CompareTCItems(const void* pV1, const void* pV2);

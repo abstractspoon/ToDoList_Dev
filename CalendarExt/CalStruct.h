@@ -54,6 +54,8 @@ public:
 
 	CString GetName() const;
 
+	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
+
 public:
 	COLORREF color;
 	BOOL bDone, bGoodAsDone, bTopLevel;
@@ -70,6 +72,7 @@ protected:
 	void ReformatName();
 
 	static COleDateTime GetDate(time64_t tDate);
+	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
 };
 
 /////////////////////////////////////////////////////////////////////////////

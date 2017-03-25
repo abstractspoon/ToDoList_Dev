@@ -163,7 +163,7 @@ protected:
 	int				m_nVisibleWeeks;
 	BOOL			m_bShowWeekends;
 	BOOL			m_bEnableMultiSel;
-	COLORREF		m_crTheme;
+	COLORREF		m_crTheme, m_crGrid;
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };

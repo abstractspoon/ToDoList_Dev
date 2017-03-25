@@ -322,6 +322,20 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_SETFOCUS:
 		m_BigCalendar.SetFocus();
 		return true;
+
+	case IUI_SAVETOIMAGE:
+		if (dwExtra)
+		{
+			CBitmap bmImage;
+
+			if (m_BigCalendar.SaveToImage(bmImage))
+			{
+				HBITMAP* pHBM = (HBITMAP*)dwExtra;
+				*pHBM = (HBITMAP)bmImage.Detach();
+
+				return true;
+			}
+		}
 	}
 
 	return false;
@@ -350,6 +364,9 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	case IUI_SETFOCUS:
 	case IUI_SELECTTASK:
 		return true;
+
+	case IUI_SAVETOIMAGE:
+		return (m_BigCalendar.CanSaveToImage() != FALSE);
 	}
 	
 	return false;

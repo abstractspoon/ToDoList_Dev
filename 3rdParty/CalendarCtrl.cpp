@@ -28,7 +28,12 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarCtrl
 
-CCalendarCtrl::CCalendarCtrl() : m_nVisibleWeeks(6), m_bShowWeekends(TRUE), m_bEnableMultiSel(FALSE)
+CCalendarCtrl::CCalendarCtrl() 
+	: 
+	m_nVisibleWeeks(6), 
+	m_bShowWeekends(TRUE), 
+	m_bEnableMultiSel(FALSE),
+	m_crGrid(RGB(125,175,255))
 {
 	LOGFONT lf;
 	::GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT),sizeof(lf),&lf);
@@ -307,7 +312,7 @@ void CCalendarCtrl::DrawGrid(CDC* pDC)
 	int nHeight = (rc.Height()-CALENDAR_HEADER_HEIGHT)/GetVisibleWeeks();
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
-	CPen thinPen(PS_SOLID, 1, RGB(125,175,255));
+	CPen thinPen(PS_SOLID, 1, m_crGrid);
 	CPen* pOldPen = pDC->SelectObject(&thinPen);
 
 	int i;
@@ -330,8 +335,6 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 {
 	CRect rc;
 	GetClientRect(&rc);
-// 	int ncHeight = (rc.Height()-CALENDAR_HEADER_HEIGHT)/GetVisibleWeeks();
-// 	int ncWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 
@@ -483,8 +486,9 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	else
 		nColor = pDC->SetTextColor(RGB(0,0,0));
 	
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rCell, DT_RIGHT|DT_TOP);
 	pDC->SetTextColor(nColor);
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rCell, DT_RIGHT|DT_TOP);
 
 	// draw inside...
 	CRect rContent(rCell);
