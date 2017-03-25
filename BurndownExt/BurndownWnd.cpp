@@ -577,7 +577,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		if (dwExtra)
+		if (dwExtra && (m_data.GetSize() > 0))
 		{
 			CBitmap bmImage;
 
@@ -617,7 +617,7 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		return true;
+		return (m_data.GetSize() > 0);
 
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:
