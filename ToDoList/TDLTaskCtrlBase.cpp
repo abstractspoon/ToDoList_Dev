@@ -2564,7 +2564,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_LOCK:
-			if (pTDI->bLocked)
+			if (m_data.IsTaskLocked(pTDI, pTDS))
 				DrawColumnImage(pDC, nColID, rSubItem);
 			break;
 
@@ -4144,7 +4144,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	BOOL bSingleSelection = (GetSelectedCount() == 1);
 	BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
 	BOOL bReadOnly = IsReadOnly();
-	BOOL bLocked = m_data.IsTaskLocked(dwTaskID);
+	BOOL bLocked = m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK));
 
 	// Edit operations
 	if (!bReadOnly)
@@ -4158,6 +4158,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			return !bLocked;
 
 		case TDCC_LOCK:
+			// Prevent editing of inherited subtask lock states
+			if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
+				return !m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID), TRUE);
+
+			// else
 			return TRUE;
 			
 		case TDCC_TRACKTIME:
@@ -5101,7 +5106,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (!m_data.IsTaskLocked(dwTaskID))
+		if (!m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK)))
 			return TRUE;
 	}
 
@@ -5116,7 +5121,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (m_data.IsTaskLocked(dwTaskID))
+		if (m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK)))
 			return TRUE;
 	}
 

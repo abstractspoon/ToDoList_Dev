@@ -61,6 +61,7 @@ public:
 	BOOL GetNoDueDateIsDueTodayOrStart() const { return m_bNoDueDateDueTodayOrStart; }
 	BOOL GetCompletionStatus(CString& sStatus) const;
 	BOOL GetSyncCompletionToStatus() const;
+	BOOL GetSubtasksInheritLockStatus() const { return m_bSubtasksInheritLockStatus; }
 
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const;
 
@@ -100,6 +101,7 @@ protected:
 	BOOL	m_bUsePercentDoneInTimeEst;
 	BOOL	m_bAveragePercentSubCompletion;
 	BOOL	m_bIncludeDoneInAverageCalc;
+	BOOL	m_bSubtasksInheritLockStatus;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

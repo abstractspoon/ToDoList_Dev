@@ -50,6 +50,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SYNCCOMPLETIONTOSTATUS, m_bSyncCompletionToStatus);
 	DDX_Text(pDX, IDC_DONESTATUS, m_sCompletionStatus);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_SUBTASKSINHERITLOCK, m_bSubtasksInheritLockStatus);
 	DDX_Radio(pDX, IDC_REMAININGTIMEISDUEDATE, (int&)m_nCalcRemainingTime);
 	DDX_Radio(pDX, IDC_USEEARLIESTDUEDATE, (int&)m_nCalcDueDate);
 	DDX_Radio(pDX, IDC_USEEARLIESTSTARTDATE, (int&)m_nCalcStartDate);
@@ -160,6 +161,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bSetCompletionStatus = pPrefs->GetProfileInt(szKey, _T("SetCompletionStatus"), FALSE);
 	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(szKey, _T("SyncCompletionToStatus"), TRUE);
 	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(_T("Completed")));
+	m_bSubtasksInheritLockStatus = pPrefs->GetProfileInt(szKey, _T("SubtasksInheritLockStatus"), FALSE);
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
@@ -199,6 +201,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("CalcStartDate"), (int)m_nCalcStartDate);
 	pPrefs->WriteProfileInt(szKey, _T("SetCompletionStatus"), m_bSetCompletionStatus);
 	pPrefs->WriteProfileInt(szKey, _T("SyncCompletionToStatus"), m_bSyncCompletionToStatus);
+	pPrefs->WriteProfileInt(szKey, _T("SubtasksInheritLockStatus"), m_bSubtasksInheritLockStatus);
 
 	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_dRecentModTime);
 	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_nRecentModTimeUnits);

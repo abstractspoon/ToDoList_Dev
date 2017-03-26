@@ -932,31 +932,45 @@ BOOL CToDoCtrlData::IsTaskFlagged(DWORD dwTaskID) const
 	return pTDI->bFlagged;
 }
 
-BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const
+BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 
-	const TODOSTRUCTURE* pTDS = (bCheckParent ? LocateTask(dwTaskID) : NULL);
-	ASSERT(pTDS || !bCheckParent);
+	return pTDI->bLocked;
+}
 
-	return IsTaskLocked(pTDI, pTDS, bCheckParent);
+BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const
+{
+	if (bCheckParent == -1)
+		bCheckParent = HasStyle(TDCS_SUBTASKSINHERITLOCK);
+
+	if (!bCheckParent)
+		return IsTaskLocked(dwTaskID);
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+	
+	return IsTaskLocked(pTDI, pTDS);
 }
 
 BOOL CToDoCtrlData::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent) const
 {
-	if (!pTDI || (bCheckParent && !pTDS))
+	if (!pTDI || (!pTDS && bCheckParent))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	BOOL bLocked = pTDI->bLocked;
+	if (bCheckParent == -1)
+		bCheckParent = HasStyle(TDCS_SUBTASKSINHERITLOCK);
 
-	if (!bLocked && bCheckParent)
-		bLocked = IsTaskLocked(pTDS->GetParentTaskID(), TRUE);
+	if (!bCheckParent)
+		return pTDI->bLocked;
 
-	return bLocked;
+	return (pTDI->bLocked || IsTaskLocked(pTDS->GetParentTaskID(), TRUE));
 }
 
 BOOL CToDoCtrlData::TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const

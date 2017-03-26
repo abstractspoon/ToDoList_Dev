@@ -760,6 +760,7 @@
 #define IDC_MERGEBYTITLE                1494
 #define IDC_MERGEBYTASKID               1495
 #define IDC_MERGEBYTASKIDWARNING        1496
+#define IDC_SUBTASKSINHERITLOCK         1497
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2055,7 +2056,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
 #define _APS_NEXT_COMMAND_VALUE         34567
-#define _APS_NEXT_CONTROL_VALUE         1497
+#define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

@@ -112,7 +112,7 @@ public:
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
 	BOOL IsTaskFlagged(DWORD dwTaskID) const;
-	BOOL IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent = FALSE) const;
+	BOOL IsTaskLocked(DWORD dwTaskID) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetTaskNextOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
 	BOOL IsTaskRecurring(DWORD dwTaskID, BOOL bCheckParent = FALSE) const;
@@ -148,6 +148,7 @@ public:
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
 	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
+	BOOL IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const;
 	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKNONE) const;
 	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday = FALSE) const;
@@ -173,7 +174,7 @@ public:
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
 
-	BOOL IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent = FALSE) const;
+	BOOL IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent = -1) const;
 	BOOL IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;

@@ -111,8 +111,8 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& pr
 	styles[TDCS_SHOWTREELISTBAR] = bShowTreeListBar;
 	styles[TDCS_SHOWWEEKDAYINDATES] = prefs.GetShowWeekdayInDates();
 	styles[TDCS_SORTDONETASKSATBOTTOM] = prefs.GetSortDoneTasksAtBottom();
-	styles[TDCS_SORTVISIBLETASKSONLY] = FALSE;//prefsNew.GetSortVisibleOnly();
 	styles[TDCS_STRIKETHOUGHDONETASKS] = prefs.GetStrikethroughDone();
+	styles[TDCS_SUBTASKSINHERITLOCK] = prefs.GetSubtasksInheritLockStatus();
 	styles[TDCS_TASKCOLORISBACKGROUND] = prefs.GetColorTaskBackground();
 	styles[TDCS_TRACKSELECTEDTASKONLY] = !prefs.GetTrackNonSelectedTasks();
 	styles[TDCS_TREATSUBCOMPLETEDASDONE] = prefs.GetTreatSubCompletedAsDone();

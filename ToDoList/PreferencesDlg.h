@@ -182,6 +182,7 @@ public:
 	BOOL GetNoDueDateIsDueTodayOrStart() const { return m_pageTaskCalc.GetNoDueDateIsDueTodayOrStart(); }
 	BOOL GetCompletionStatus(CString& sStatus) const { return m_pageTaskCalc.GetCompletionStatus(sStatus); }
 	BOOL GetSyncCompletionToStatus() const { return m_pageTaskCalc.GetSyncCompletionToStatus(); }
+	BOOL GetSubtasksInheritLockStatus() const { return m_pageTaskCalc.GetSubtasksInheritLockStatus(); }
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const { return m_pageTaskCalc.GetRecentlyModifiedPeriod(); }
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_pageTaskCalc.GetTimeRemainingCalculation(); }

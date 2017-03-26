@@ -1413,89 +1413,92 @@ BEGIN
     EDITTEXT        IDC_EXPORTFOLDER,28,349,171,13,ES_AUTOHSCROLL
 END
 
-IDD_PREFTASKCALC_PAGE DIALOG DISCARDABLE  0, 0, 400, 487
+IDD_PREFTASKCALC_PAGE DIALOG DISCARDABLE  0, 0, 400, 505
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
+    CONTROL         "Treat subtasks of 'Locked' tasks as also being locked",
+                    IDC_SUBTASKSINHERITLOCK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,10,385,10
     CONTROL         "After completing a task, set its 'Status' to:",
                     IDC_SETSTATUSONDONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,10,392,10
-    EDITTEXT        IDC_DONESTATUS,18,23,134,13,ES_AUTOHSCROLL
+                    WS_TABSTOP,7,25,392,10
+    EDITTEXT        IDC_DONESTATUS,18,38,134,13,ES_AUTOHSCROLL
+    CONTROL         "&Synchronise a task's 'Completion' to changes in its 'Status'",
+                    IDC_SYNCCOMPLETIONTOSTATUS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,56,377,10
     CONTROL         "&Treat due tasks as having the highest priority",
                     IDC_DUEHAVEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,58,385,10
+                    BS_TOP | WS_TABSTOP,7,73,385,10
     CONTROL         "T&reat completed tasks as having the lowest priority/risk",
                     IDC_DONEHAVELOWESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,73,385,10
+                    BS_TOP | WS_TABSTOP,7,88,385,10
     CONTROL         "Tr&eat tasks whose subtasks are all completed as also being 'completed'",
                     IDC_TREATSUBCOMPLETEDASDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,88,385,10
+                    BS_TOP | WS_TABSTOP,7,103,385,10
     CONTROL         "Di&splay a task's '% Completion' as being equal to its 'Time Spent' divided by its 'Time Estimate'",
                     IDC_AUTOCALCPERCENTDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,103,385,10
+                    BS_TOP | WS_TABSTOP,7,118,385,10
     CONTROL         "&Display a parent task's '% Completion' as being the average of all its subtasks' % completions",
                     IDC_AVERAGEPERCENTSUBCOMPLETION,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,118,385,10
+                    BS_TOP | WS_TABSTOP,7,133,385,10
     CONTROL         "I&nclude completed subtasks in this calculation",
                     IDC_INCLUDEDONEINAVERAGECALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,133,373,10
+                    WS_TABSTOP,18,148,373,10
     CONTROL         "&Weight % completion by number of subtasks",
                     IDC_WEIGHTPERCENTCALCBYNUMSUB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,148,373,10
+                    WS_TABSTOP,18,163,373,10
     CONTROL         "T&ake a task's '% Complete' into account when calculating time estimates",
                     IDC_USEPERCENTDONEINTIMEEST,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,163,385,10
+                    BS_TOP | WS_TABSTOP,7,178,385,10
     CONTROL         "Di&splay a task's priority/risk as being the highest of its and all its subtasks' priorities/risks",
                     IDC_USEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,178,385,10
+                    WS_TABSTOP,7,193,385,10
     CONTROL         "Inclu&de completed subtasks in this assessment",
                     IDC_INCLUDEDONEINPRIORITYCALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,193,374,10
+                    WS_TABSTOP,18,208,374,10
     CONTROL         "&Keep a task's time estimate synchronised with its start and due dates (and vice versa)",
                     IDC_SYNCTIMEESTANDDATES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,208,385,10
+                    BS_TOP | WS_TABSTOP,7,223,385,10
     CONTROL         "A&utomatically adjust a task's dates when its dependency's dates changes",
                     IDC_AUTOUPDATEDEPENDEES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,223,385,10
+                    BS_TOP | WS_TABSTOP,7,238,385,10
     CONTROL         "Tre&at tasks without a due date as being due 'Today' or on the 'Start' date whichever is later",
                     IDC_NODUEDATEDUETODAY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,238,385,10
+                    WS_TABSTOP,7,253,385,10
     LTEXT           "&Period defining 'Recently Modified' tasks",IDC_STATIC,
-                    7,253,392,10
-    EDITTEXT        IDC_RECENTMODPERIOD,18,266,69,13,ES_AUTOHSCROLL
+                    7,268,392,10
+    EDITTEXT        IDC_RECENTMODPERIOD,18,281,69,13,ES_AUTOHSCROLL
     GROUPBOX        "Calculate a task's 'Remaining Time' as:",IDC_STATIC,7,
-                    285,368,60
+                    300,368,60
     CONTROL         "Due date - &Current date",IDC_REMAININGTIMEISDUEDATE,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,300,
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,315,
                     351,10
     CONTROL         "&Time estimate - Time spent",IDC_REMAININGTIMEISSPENT,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,315,351,10
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,330,351,10
     CONTROL         "Time &estimate x ( 1 - % Completion)",
                     IDC_REMAININGTIMEISPERCENT,"Button",BS_AUTORADIOBUTTON | 
-                    BS_TOP,15,330,351,10
-    GROUPBOX        "Display a task's 'Due Date' as:",IDC_STATIC,7,350,368,
+                    BS_TOP,15,345,351,10
+    GROUPBOX        "Display a task's 'Due Date' as:",IDC_STATIC,7,365,368,
                     65
     CONTROL         "The &earliest of its due date and all its subtasks' due dates",
                     IDC_USEEARLIESTDUEDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,365,351,10
+                    WS_GROUP,15,380,351,10
     CONTROL         "The l&atest of its due date and all its subtasks' due dates",
-                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,380,
+                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,395,
                     351,10
     CONTROL         "I&ts assigned date",IDC_NOCALCDUEDATE,"Button",
-                    BS_AUTORADIOBUTTON,15,395,351,10
-    GROUPBOX        "Display a task's 'Start Date' as:",IDC_STATIC,7,420,368,
+                    BS_AUTORADIOBUTTON,15,410,351,10
+    GROUPBOX        "Display a task's 'Start Date' as:",IDC_STATIC,7,435,368,
                     65
     CONTROL         "The ea&rliest of its start date and all its subtasks' start dates",
                     IDC_USEEARLIESTSTARTDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,435,351,10
+                    WS_GROUP,15,450,351,10
     CONTROL         "The late&st of its start date and all its subtasks' start dates",
                     IDC_USELATESTSTARTDATE,"Button",BS_AUTORADIOBUTTON,15,
-                    450,351,10
+                    465,351,10
     CONTROL         "It&s assigned date",IDC_NOCALCDUEDATE2,"Button",
-                    BS_AUTORADIOBUTTON,15,465,351,10
-    CONTROL         "&Synchronise a task's 'Completion' to changes in its 'Status'",
-                    IDC_SYNCCOMPLETIONTOSTATUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,41,377,10
+                    BS_AUTORADIOBUTTON,15,480,351,10
 END
 
 IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 240, 188
@@ -3780,6 +3783,11 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 225
         BOTTOMMARGIN, 87
+    END
+
+    IDD_PREFTASKCALC_PAGE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 487
     END
 
     IDD_ADDLOGGEDTIME_DIALOG, DIALOG
