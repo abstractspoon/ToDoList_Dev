@@ -142,6 +142,8 @@ protected:
 	void CheckAddBacklogListCtrl();
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
+	BOOL WantDrawListAttributeLabels(int nListWidth);
+	float GetAverageListCharWidth();
 	int CalcRequiredColumnWidthForImage() const;
 
 	KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;

@@ -4850,7 +4850,7 @@ BEGIN
     IDS_SHUTDOWNBLOCKREASONSAVING 
                             "ToDoList is closing tasklists and saving its settings."
     IDS_CUSTOMRELDATECOLUMN "%s (Custom, Relative)"
-    IDS_TDLBC_RELATIVEDATESUFFIX "(Relative)"
+    IDS_TDLBC_RELATIVESUFFIX "(Relative)"
     IDS_UPDATINGDICTIONARY  "Updating language file..."
     IDS_SETFOCUS2TASKLIST   "Sets the focus to the tasklist"
     IDS_COMMENTSTYPE        "Comments"

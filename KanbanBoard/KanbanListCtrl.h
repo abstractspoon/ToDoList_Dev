@@ -51,6 +51,7 @@ public:
 	int GetSelectedTasks(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(DWORD dwTaskID);
+	BOOL IsSelectingTask() const { return (m_dwSelectingTask != 0); }
 	void ScrollToSelection();
 	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
 	BOOL GetLabelEditRect(LPRECT pEdit);
@@ -63,13 +64,15 @@ public:
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTasksByPriority(BOOL bSet = TRUE);
+	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
 	void SetSelected(BOOL bSelected);
 
 	void OnDisplayAttributeChanged();
-	BOOL IsSelectingTask() const { return (m_dwSelectingTask != 0); }
+	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
 
 	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV);
+	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, BOOL bWithLabel = TRUE);
 
 protected:
 	BOOL m_bTextColorIsBkgnd;
@@ -77,6 +80,7 @@ protected:
 	BOOL m_bShowTaskColorAsBar;
 	BOOL m_bColorByPriority;
 	BOOL m_bStrikeThruDoneTasks;
+	BOOL m_bDrawAttribLabels;
 	BOOL m_bSavingToImage;
 
 	const CKanbanItemMap& m_data;
@@ -117,6 +121,7 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -128,8 +133,8 @@ protected:
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point);
-	void DrawAttribute(CDC* pDC, CRect& rLine, UINT nFormatID, const CString& sValue, int nFlags) const;
-	CString FormatAttributeValue(const CString& sValue, UINT nFormatID) const;
+
+	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(IUI_ATTRIBUTE nAttrib);

@@ -408,6 +408,7 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	_tcscpy(m_szFilePaths, startup.m_szFilePaths); 
 #endif
 
+	m_sCmdIDs = startup.m_sCmdIDs;
 	m_sNewTask = startup.m_sNewTask; 
 	m_sComments = startup.m_sComments; 
 	m_sExternalID = startup.m_sExternalID; 

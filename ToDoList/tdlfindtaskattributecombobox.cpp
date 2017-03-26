@@ -65,10 +65,10 @@ TDC_ATTRIBUTE CTDLFindTaskAttributeComboBox::GetSelectedAttribute() const
 
 	if (nSel != CB_ERR)
 	{
-		BOOL bRelativeDate = FALSE;
+		BOOL bRelative = FALSE;
 		DWORD dwItemData = GetItemData(nSel);
 
-		DecodeItemData(dwItemData, nAttrib, bRelativeDate);
+		DecodeItemData(dwItemData, nAttrib, bRelative);
 	}
 
 	return nAttrib;
@@ -82,21 +82,21 @@ BOOL CTDLFindTaskAttributeComboBox::GetSelectedAttribute(SEARCHPARAM& sp) const
 	{
 		FIND_ATTRIBTYPE nType = FT_NONE;
 		TDC_ATTRIBUTE nAttrib = TDCA_NONE;
-		BOOL bRelativeDate = FALSE;
+		BOOL bRelative = FALSE;
 
 		DWORD dwItemData = GetItemData(nSel);
-		DecodeItemData(dwItemData, nAttrib, bRelativeDate);
+		DecodeItemData(dwItemData, nAttrib, bRelative);
 
 		if (SEARCHPARAM::IsCustomAttribute(nAttrib))
 		{
 			CString sUniqueID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aAttribDefs);
-			nType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, bRelativeDate, m_aAttribDefs);
+			nType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, bRelative, m_aAttribDefs);
 
 			sp.SetCustomAttribute(nAttrib, sUniqueID, nType);
 		}
 		else
 		{
-			nType = SEARCHPARAM::GetAttribType(nAttrib, bRelativeDate);
+			nType = SEARCHPARAM::GetAttribType(nAttrib, bRelative);
 			sp.SetAttribute(nAttrib, nType);
 		}
 
@@ -144,7 +144,7 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 				dwItemData = EncodeItemData(ap.attrib, TRUE);
 
 				sAttrib += ' ';
-				sAttrib += CEnString(IDS_TDLBC_RELATIVEDATESUFFIX);
+				sAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);
 
 				CDialogHelper::AddString(*this, sAttrib, dwItemData); 
 			}
@@ -178,7 +178,7 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) const
 {
 	TDC_ATTRIBUTE attrib = sp.GetAttribute();
-	BOOL bRelativeDate = sp.GetFlags();
+	BOOL bRelative = sp.GetFlags();
 	CEnString sName;
 
 	switch (attrib)
@@ -197,7 +197,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) c
 			{
 				if (m_aAttribDefs[nAttrib].GetAttributeID() == attrib)
 				{
-					if (AttributeIsDate(attrib) && bRelativeDate)
+					if (AttributeIsDate(attrib) && bRelative)
 					{
 						sName.Format(IDS_CUSTOMRELDATECOLUMN, m_aAttribDefs[nAttrib].sLabel);
 					}
@@ -223,10 +223,10 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) c
 						// handle relative dates
 						sName.LoadString(ATTRIBUTES[nAttrib].nAttribResID);
 
-						if (AttributeIsDate(attrib) && bRelativeDate)
+						if (AttributeIsDate(attrib) && bRelative)
 						{
 							sName += ' ';
-							sName += CEnString(IDS_TDLBC_RELATIVEDATESUFFIX);
+							sName += CEnString(IDS_TDLBC_RELATIVESUFFIX);
 						}
 						
 						break;
@@ -243,13 +243,13 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& sp) c
 	return sName;
 }
 
-DWORD CTDLFindTaskAttributeComboBox::EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelativeDate) const
+DWORD CTDLFindTaskAttributeComboBox::EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelative) const
 {
 	// sanity check
 	if (!AttributeIsDate(nAttrib))
-		bRelativeDate = FALSE;
+		bRelative = FALSE;
 
-	return MAKELONG(nAttrib, bRelativeDate);
+	return MAKELONG(nAttrib, bRelative);
 }
 
 BOOL CTDLFindTaskAttributeComboBox::AttributeIsTime(TDC_ATTRIBUTE attrib) const
@@ -294,11 +294,11 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE attrib) const
 	return FALSE;
 }
 
-void CTDLFindTaskAttributeComboBox::DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelativeDate) const
+void CTDLFindTaskAttributeComboBox::DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelative) const
 {
 	nAttrib = (TDC_ATTRIBUTE)LOWORD(dwItemData);
-	bRelativeDate = (BOOL)HIWORD(dwItemData);
+	bRelative = (BOOL)HIWORD(dwItemData);
 
 	// sanity check
-	ASSERT (!bRelativeDate || AttributeIsDate(nAttrib));
+	ASSERT (!bRelative || AttributeIsDate(nAttrib));
 }

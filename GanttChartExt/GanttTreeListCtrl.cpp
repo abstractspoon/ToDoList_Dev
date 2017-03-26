@@ -5582,7 +5582,17 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 			}
 			ASSERT(szCursor);
 
-			::SetCursor(bNoDrag ? GraphicsMisc::OleDragDropCursor(GMOC_NO) : AfxGetApp()->LoadStandardCursor(szCursor));
+			if (bNoDrag)
+			{
+				::SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
+			}
+			else
+			{
+				::SetCursor(AfxGetApp()->LoadStandardCursor(szCursor));
+
+				// Recalculate the dragged task's start/end
+				m_display.RemoveKey(dwTaskID);
+			}
 
 			RecalcParentDates();
 			RedrawList();

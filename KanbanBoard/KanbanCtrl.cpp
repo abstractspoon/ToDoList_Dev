@@ -1625,6 +1625,10 @@ void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 			if (pList)
 				pList->OnDisplayAttributeChanged();
 		}
+
+		// Update list attribute label visibility
+		if (m_aDisplayAttrib.GetSize())
+			Resize();
 	}
 }
 
@@ -1766,11 +1770,6 @@ void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
 		pList->Invalidate(FALSE);
 
 		ScrollToSelectedTask();
-// 		TRACE(_T("CKanbanCtrl::SetFocus(OnSetFocus: %s)\n"), pList->GetAttributeValue());
-// 
-// 		CDWordArray aSelIDs;
-// 		pList->GetSelectedTasks(aSelIDs);
-// 		int breakpoint = 0;
 	}
 }
 
@@ -1812,6 +1811,9 @@ void CKanbanCtrl::Resize(const CRect& rect)
 		CString sStatus;
 		int nListWidth = (rAvail.Width() / nNumVisibleLists);
 
+		// Check whether the lists are wide enough to show attribute labels
+		BOOL bDrawAttribLabels = WantDrawListAttributeLabels(nListWidth);
+
 		// Also update tab order as we go
 		CWnd* pPrev = NULL;
 
@@ -1847,12 +1849,82 @@ void CKanbanCtrl::Resize(const CRect& rect)
 				rList.right = (rList.left + nListWidth);
 
 			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width(), rList.Height(), 0);
-			pList->SetColumnWidth(0, (rList.Width() - 1 - GetSystemMetrics(SM_CXVSCROLL)));
+			pList->SetDrawAttributeLabels(bDrawAttribLabels);
 
 			pPrev = pList;
 			nVis++;
 		}
 	}
+}
+
+float CKanbanCtrl::GetAverageListCharWidth()
+{
+	ASSERT(m_aListCtrls.GetSize());
+
+	if (!m_aListCtrls.GetSize())
+		return 1.0f;
+
+	// else
+	CWnd* pRef = m_aListCtrls[0];
+	CClientDC dc(pRef);
+
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
+	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
+
+	dc.SelectObject(pOldFont);
+
+	return fAveCharWidth;
+}
+
+BOOL CKanbanCtrl::WantDrawListAttributeLabels(int nListWidth)
+{
+	if (!m_aDisplayAttrib.GetSize() || !m_aListCtrls.GetSize())
+		return FALSE;
+
+	// Calculate the available width for attributes
+	int nAvailWidth = m_aListCtrls[0]->CalcAvailableAttributeWidth(nListWidth);
+
+	// Calculate the fixed attribute label lengths and check if any
+	// of them exceed the list width
+	float fAveCharWidth = GetAverageListCharWidth();
+	CUIntArray aLabelLen;
+
+	int nAtt = m_aDisplayAttrib.GetSize();
+	aLabelLen.SetSize(nAtt);
+
+	while (nAtt--)
+	{
+		IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+		aLabelLen[nAtt] = CKanbanListCtrl::FormatAttribute(nAttribID, _T("")).GetLength();
+
+		if ((int)(aLabelLen[nAtt] * fAveCharWidth) > nAvailWidth)
+			return FALSE;
+	}
+
+	// Look for the first 'Label: Value' item which exceeds the list width
+	POSITION pos = m_data.GetStartPosition();
+
+	while (pos)
+	{
+		KANBANITEM* pKI = NULL;
+		DWORD dwTaskID = 0;
+
+		m_data.GetNextAssoc(pos, dwTaskID, pKI);
+
+		int nAtt = m_aDisplayAttrib.GetSize();
+
+		while (nAtt--)
+		{
+			IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+			int nValueLen = pKI->GetAttributeValue(nAttribID).GetLength();
+
+			if ((int)((aLabelLen[nAtt] + nValueLen) * fAveCharWidth) > nAvailWidth)
+				return FALSE;
+		}
+	}
+
+	// all else
+	return TRUE;
 }
 
 void CKanbanCtrl::Resize()

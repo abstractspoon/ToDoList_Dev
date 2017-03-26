@@ -25,7 +25,6 @@ public:
 
 	BOOL SelectAttribute(const SEARCHPARAM& sp);
 	BOOL GetSelectedAttribute(SEARCHPARAM& sp) const;
-	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	BOOL SelectedAttributeIsDate() const;
 
 	CString GetSelectedAttributeText() const;
@@ -53,6 +52,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	void BuildCombo();
 	DWORD EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelativeDate = FALSE) const;
 	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelativeDate) const;

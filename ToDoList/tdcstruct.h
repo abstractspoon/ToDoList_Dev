@@ -1659,15 +1659,18 @@ struct SEARCHPARAMS
 			// special cases
 			if (aRules[nRule].attrib == TDCA_TASKNAMEORCOMMENTS &&
 				(attrib == TDCA_TASKNAME || attrib == TDCA_COMMENTS))
+			{
 				return TRUE;
-
+			}
 			else if (aRules[nRule].attrib == TDCA_ANYTEXTATTRIBUTE &&
 				(attrib == TDCA_TASKNAME || attrib == TDCA_COMMENTS ||
 				 attrib == TDCA_STATUS || attrib == TDCA_CATEGORY ||
 				 attrib == TDCA_ALLOCBY || attrib == TDCA_ALLOCTO ||
 				 attrib == TDCA_VERSION || attrib == TDCA_TAGS ||
 				 attrib == TDCA_EXTERNALID))
+			{
 				return TRUE;
+			}
 		}
 
 		// else
