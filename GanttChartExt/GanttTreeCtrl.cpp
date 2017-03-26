@@ -22,7 +22,9 @@ IMPLEMENT_DYNAMIC(CGanttTreeCtrl, CTreeCtrl)
 CGanttTreeCtrl::CGanttTreeCtrl() 
 	:	
 	m_nTitleColumnWidth(-1),
+#pragma warning (disable: 4355)
 	m_tch(*this)
+#pragma warning (default: 4355)
 {
 
 }
