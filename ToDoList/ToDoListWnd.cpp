@@ -8220,7 +8220,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	return FALSE;
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(lp);
 	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
@@ -8249,7 +8249,7 @@ LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnTodoCtrlCanImportDropFiles(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(lp);
 	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
