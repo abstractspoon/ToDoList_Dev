@@ -6954,10 +6954,19 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD /*dwModTaskI
 
 		GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)nAttrib);
 
-		// special case: if this was the project name being edited make sure
-		// the focus is set back to the name
-		if (nAttrib == TDCA_PROJNAME)
+		// special cases: 
+		switch (nAttrib)
+		{
+		case TDCA_PROJNAME:
+			// if this was the project name being edited make sure
+			// the focus is set back to the name
 			GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+			break;
+
+		case TDCA_LOCK:
+			UpdateControls(FALSE);
+			break;
+		}
 	}
 }
 
