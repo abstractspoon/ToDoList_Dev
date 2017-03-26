@@ -7,8 +7,6 @@
 
 class CBurndownChart : public CHMXChart
 {
-	DECLARE_DYNAMIC(CBurndownChart)
-
 public:
 	CBurndownChart();
 	virtual ~CBurndownChart();

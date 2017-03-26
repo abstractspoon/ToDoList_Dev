@@ -7,9 +7,6 @@
 
 
 // CBurndownChart
-
-IMPLEMENT_DYNAMIC(CBurndownChart, CHMXChart)
-
 CBurndownChart::CBurndownChart()
 {
 
