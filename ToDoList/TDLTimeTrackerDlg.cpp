@@ -108,7 +108,8 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 
 	if (hTask)
 	{
-		bDone = tasks.IsTaskGoodAsDone(hTask);
+//		bDone = tasks.IsTaskGoodAsDone(hTask);
+		bDone = tasks.IsTaskDone(hTask);
 
 		if (!bDone)
 		{
