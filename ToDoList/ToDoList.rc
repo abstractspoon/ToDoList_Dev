@@ -3121,6 +3121,17 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Unsorted",                   ID_SORT_BYNONE
     END
+    POPUP "Source &Control"
+    BEGIN
+        MENUITEM "Check &Out to Edit",          ID_TOOLS_CHECKOUT
+        MENUITEM "Check &In",                   ID_TOOLS_CHECKIN
+        MENUITEM SEPARATOR
+        MENUITEM "&Add Tasklist to Source Control", 
+                                                ID_TOOLS_ADDTOSOURCECONTROL
+        MENUITEM "&Remove Tasklist from Source Control", 
+                                                ID_TOOLS_REMOVEFROMSOURCECONTROL
+
+    END
     POPUP "&Tools"
     BEGIN
         MENUITEM "I&mport Tasks...",            ID_TOOLS_IMPORT
@@ -3211,17 +3222,6 @@ BEGIN
         MENUITEM "User Defined Tool 48",        ID_TOOLS_USERTOOL48, GRAYED
         MENUITEM "User Defined Tool 49",        ID_TOOLS_USERTOOL49, GRAYED
         MENUITEM "User Defined Tool 50",        ID_TOOLS_USERTOOL50, GRAYED
-    END
-    POPUP "Source &Control"
-    BEGIN
-        MENUITEM "Check &Out to Edit",          ID_TOOLS_CHECKOUT
-        MENUITEM "Check &In",                   ID_TOOLS_CHECKIN
-        MENUITEM SEPARATOR
-        MENUITEM "&Add Tasklist to Source Control", 
-                                                ID_TOOLS_ADDTOSOURCECONTROL
-        MENUITEM "&Remove Tasklist from Source Control", 
-                                                ID_TOOLS_REMOVEFROMSOURCECONTROL
-
     END
     POPUP "&Window"
     BEGIN
