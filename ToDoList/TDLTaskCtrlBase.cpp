@@ -4987,6 +4987,22 @@ BOOL CTDLTaskCtrlBase::SelectionHasIncompleteDependencies(CString& sIncomplete) 
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasDependencies() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+	CString sUnused;
+	
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		
+		if (m_data.TaskHasDependencies(dwTaskID))
+			return TRUE;
+	}
+	
+	return FALSE;
+}
+
 BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const
 {
 	CStringArray aDepends;

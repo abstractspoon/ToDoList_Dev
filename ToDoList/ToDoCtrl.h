@@ -185,7 +185,9 @@ public:
 
 	BOOL SelectTask(DWORD dwTaskID) { return SelectTask(dwTaskID, TRUE); }
 	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return SelectTasks(aTaskIDs, TRUE); }
-
+	void SelectAll();
+	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect);
+	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
 
@@ -201,6 +203,8 @@ public:
 	BOOL GotoSelectedTaskDependency(); 
 	BOOL GotoSelectedReferenceTaskTarget();
 	BOOL GotoSelectedTaskReferences();
+	BOOL GotoSelectedTaskLocalDependencies();
+	BOOL GotoSelectedTaskLocalDependents();
 
 	BOOL EditSelectedTaskRecurrence(); 
 	BOOL SetSelectedTaskRecurrence(const TDCRECURRENCE& tr);
@@ -363,11 +367,10 @@ public:
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
-	void SelectAll();
-	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSlect);
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
+	BOOL SelectedTasksHaveDependencies() { return m_taskTree.SelectionHasDependencies(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	void SelectTasksInHistory(BOOL bForward);

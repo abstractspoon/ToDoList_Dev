@@ -138,6 +138,7 @@ public:
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
 
+	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL TaskHasDependents(DWORD dwTaskID) const;
 	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;

@@ -302,6 +302,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVETASKLEFT, OnMovetaskleft)
 	ON_COMMAND(ID_MOVETASKRIGHT, OnMovetaskright)
 	ON_COMMAND(ID_MOVETASKUP, OnMovetaskup)
+	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
+	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
 	ON_COMMAND(ID_NEW, OnNew)
 	ON_COMMAND(ID_NEWSUBTASK, OnNewsubtask)
 	ON_COMMAND(ID_NEWSUBTASK_ATBOTTOM, OnNewsubtaskAtbottom)
@@ -474,6 +476,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATE, OnUpdateEditInsertdate)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATETIME, OnUpdateEditInsertdatetime)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTTIME, OnUpdateEditInserttime)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OFFSETDATES, OnUpdateEditOffsetdates)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OPENFILEREF1, OnUpdateEditOpenfileref)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEAFTER, OnUpdateEditPasteAfter)
@@ -8220,10 +8224,11 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	return FALSE;
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM /*wp*/, LPARAM lp)
+LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 {
 	ASSERT(lp);
 	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
+	UNREFERENCED_PARAMETER(wp);
 
 	if (lp)
 	{
@@ -8249,10 +8254,11 @@ LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlCanImportDropFiles(WPARAM /*wp*/, LPARAM lp)
+LRESULT CToDoListWnd::OnTodoCtrlCanImportDropFiles(WPARAM wp, LPARAM lp)
 {
 	ASSERT(lp);
 	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
+	UNREFERENCED_PARAMETER(wp);
 
 	if (lp)
 	{
@@ -12407,4 +12413,26 @@ void CToDoListWnd::OnToolsCopyTasklistPath()
 void CToDoListWnd::OnUpdateToolsCopyTasklistPath(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
+}
+
+void CToDoListWnd::OnMoveSelectTaskDependencies()
+{
+	GetToDoCtrl().GotoSelectedTaskLocalDependencies();
+}
+
+void CToDoListWnd::OnMoveSelectTaskDependents()
+{
+	if (!GetToDoCtrl().GotoSelectedTaskLocalDependents())
+		MessageBox(IDS_NOTASKSDEPENDENTONSELECTION);
+}
+
+void CToDoListWnd::OnUpdateMoveSelectTaskDependencies(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().SelectedTasksHaveDependencies());
+}
+
+void CToDoListWnd::OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI)
+{
+	// It can be an expensive call to get dependents so we don't do it
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }

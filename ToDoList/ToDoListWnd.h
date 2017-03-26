@@ -193,6 +193,8 @@ protected:
 	afx_msg void OnGotoNexttask();
 	afx_msg void OnGotoPrevtask();
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
+	afx_msg void OnMoveSelectTaskDependencies();
+	afx_msg void OnMoveSelectTaskDependents();
 	afx_msg void OnNewsubtask();
 	afx_msg void OnNewtask();
 	afx_msg void OnPrintpreview();
@@ -240,6 +242,8 @@ protected:
 	afx_msg void OnUpdateFileOpenarchive(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateGotoNexttask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateGotoPrevtask(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMoveSelectTaskDependencies(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateNewsubtask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateQuickFind(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateQuickFindNext(CCmdUI* pCmdUI);

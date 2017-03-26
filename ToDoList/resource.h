@@ -1308,6 +1308,8 @@
 #define ID_SORTBY_LOCK                  34561
 #define ID_EDIT_LOCKTASK                34562
 #define ID_TOOLS_COPYTASKLISTPATH       34564
+#define ID_MOVE_SELECTTASKDEPENDENCIES  34565
+#define ID_MOVE_SELECTTASKDEPENDENTS    34566
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2045,13 +2047,14 @@
 #define IDS_RC_RELEASE                  58458
 #define IDS_SETUP_TITLE                 58459
 #define IDS_CAD_FILELINK                58460
+#define IDS_NOTASKSDEPENDENTONSELECTION 58461
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
-#define _APS_NEXT_COMMAND_VALUE         34565
+#define _APS_NEXT_COMMAND_VALUE         34567
 #define _APS_NEXT_CONTROL_VALUE         1497
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

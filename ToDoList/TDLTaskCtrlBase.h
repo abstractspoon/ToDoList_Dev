@@ -179,6 +179,7 @@ public:
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
 
+	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasIncompleteDependencies(CString& sIncomplete) const;
 	BOOL SelectionHasIncompleteSubtasks(BOOL bExcludeRecurring) const;
 	int SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const;

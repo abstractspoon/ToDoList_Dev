@@ -614,6 +614,14 @@ BOOL CToDoCtrlData::RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID)
 	return pTDI->RemoveLocalDependency(dwDependID);
 }
 
+BOOL CToDoCtrlData::TaskHasDependencies(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, 0);
+	
+	return (pTDI->aDependencies.GetSize() > 0);
+}
+
 BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 {
 	ASSERT(dwTaskID);
@@ -621,6 +629,8 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	if (!dwTaskID)
 		return FALSE;
 
+	// Search the entire tasklist for tasks having 'dwTaskID'
+	// in their list of dependencies
 	POSITION pos = m_mapID2TDI.GetStartPosition();
 	CString sTaskID = Misc::Format(dwTaskID);
 		

@@ -3068,6 +3068,10 @@ BEGIN
                                                 ID_EDIT_SELECTREFERENCETARGET
 
         MENUITEM SEPARATOR
+        MENUITEM "Select Task &Dependencies",   ID_MOVE_SELECTTASKDEPENDENCIES
+
+        MENUITEM "Select Task D&ependents",     ID_MOVE_SELECTTASKDEPENDENTS
+        MENUITEM SEPARATOR
         MENUITEM "Select &Previous Top Level Task", ID_PREVTOPLEVELTASK
         MENUITEM "Select &Next Top Level Task", ID_NEXTTOPLEVELTASK
         MENUITEM SEPARATOR
@@ -3453,6 +3457,10 @@ BEGIN
         MENUITEM "Select Reference &Target Task", 
                                                 ID_EDIT_SELECTREFERENCETARGET
 
+        MENUITEM SEPARATOR
+        MENUITEM "Select Task &Dependencies",   ID_MOVE_SELECTTASKDEPENDENCIES
+
+        MENUITEM "Select Task D&ependents",     ID_MOVE_SELECTTASKDEPENDENTS
         MENUITEM SEPARATOR
         MENUITEM "Spell Chec&k Task Title",     ID_EDIT_SPELLCHECKTITLE
         MENUITEM "Spell Chec&k Task Comments",  ID_EDIT_SPELLCHECKCOMMENTS
@@ -5044,6 +5052,7 @@ BEGIN
     IDS_RC_RELEASE          "Release Candidate"
     IDS_SETUP_TITLE         "ToDoList Setup"
     IDS_CAD_FILELINK        "File Link"
+    IDS_NOTASKSDEPENDENTONSELECTION "The selected tasks have no dependents."
 END
 
 STRINGTABLE DISCARDABLE 

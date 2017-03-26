@@ -11308,7 +11308,6 @@ BOOL CToDoCtrl::GotoSelectedTaskReferences()
 	// traverse the selected items adding any
 	// reference task's target to a list
 	CDWordArray aTaskRefIDs;
-
 	POSITION pos = TSH().GetFirstItemPos();
 			
 	while (pos)
@@ -11327,6 +11326,52 @@ BOOL CToDoCtrl::GotoSelectedTaskReferences()
 	// select any found items
 	if (aTaskRefIDs.GetSize())
 		return SelectTasks(aTaskRefIDs, FALSE);
+
+	// else
+	return FALSE;
+}
+
+BOOL CToDoCtrl::GotoSelectedTaskLocalDependencies()
+{
+	// traverse the selected items adding any dependencies to a list
+	CDWordArray aDependIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+			
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		CDWordArray aLocalDepends;
+
+		if (m_data.GetTaskLocalDependencies(dwTaskID, aLocalDepends))
+			aDependIDs.Append(aLocalDepends);
+	}
+
+	// select any found items
+	if (aDependIDs.GetSize())
+		return SelectTasks(aDependIDs, FALSE);
+
+	// else
+	return FALSE;
+}
+
+BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
+{
+	// traverse the selected items adding any dependents to a list
+	CDWordArray aDependentIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+			
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		CDWordArray aLocalDependents;
+
+		if (m_data.GetTaskLocalDependents(dwTaskID, aLocalDependents))
+			aDependentIDs.Append(aLocalDependents);
+	}
+
+	// select any found items
+	if (aDependentIDs.GetSize())
+		return SelectTasks(aDependentIDs, FALSE);
 
 	// else
 	return FALSE;
