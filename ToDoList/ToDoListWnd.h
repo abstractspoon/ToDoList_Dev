@@ -208,6 +208,7 @@ protected:
 	afx_msg void OnTabctrlPreferences();
 	afx_msg void OnTasklistSelectColumns();
 	afx_msg void OnToolsCheckforupdates();
+	afx_msg void OnToolsCopyTasklistPath();
 	afx_msg void OnToolsTransformactivetasklist();
 	afx_msg void OnUpdateAddtimetologfile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI);
@@ -246,6 +247,7 @@ protected:
 	afx_msg void OnUpdateShowTimelogfile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSendTasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSendSelectedTasks(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateToolsCopyTasklistPath(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewClearfilter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCollapseDuetasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCollapseStartedtasks(CCmdUI* pCmdUI);

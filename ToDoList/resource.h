@@ -1307,6 +1307,7 @@
 #define ID_VIEW_SAVETOIMAGE             34560
 #define ID_SORTBY_LOCK                  34561
 #define ID_EDIT_LOCKTASK                34562
+#define ID_TOOLS_COPYTASKLISTPATH       34564
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2050,7 +2051,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        305
-#define _APS_NEXT_COMMAND_VALUE         34563
+#define _APS_NEXT_COMMAND_VALUE         34565
 #define _APS_NEXT_CONTROL_VALUE         1497
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

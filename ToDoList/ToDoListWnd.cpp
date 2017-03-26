@@ -336,6 +336,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TOOLS_ANALYSELOGGEDTIME, OnToolsAnalyseLoggedTime)
 	ON_COMMAND(ID_TOOLS_CHECKIN, OnToolsCheckin)
 	ON_COMMAND(ID_TOOLS_CHECKOUT, OnToolsCheckout)
+	ON_COMMAND(ID_TOOLS_COPYTASKLISTPATH, OnToolsCopyTasklistPath)
 	ON_COMMAND(ID_TOOLS_EXPORT, OnExport)
 	ON_COMMAND(ID_TOOLS_IMPORT, OnImportTasklist)
 	ON_COMMAND(ID_TOOLS_SPELLCHECKTASKLIST, OnSpellcheckTasklist)
@@ -537,6 +538,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANALYSELOGGEDTIME, OnUpdateToolsAnalyseLoggedTime)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKIN, OnUpdateToolsCheckin)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKOUT, OnUpdateToolsCheckout)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_COPYTASKLISTPATH, OnUpdateToolsCopyTasklistPath)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORT, OnUpdateExport)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORT, OnUpdateImport)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SPELLCHECKTASKLIST, OnUpdateSpellcheckTasklist)
@@ -12395,4 +12397,14 @@ void CToDoListWnd::OnViewSaveToImage()
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().CanSaveTaskViewToImage());
+}
+
+void CToDoListWnd::OnToolsCopyTasklistPath()
+{
+	CClipboard(*this).SetText(GetToDoCtrl().GetFilePath());
+}
+
+void CToDoListWnd::OnUpdateToolsCopyTasklistPath(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
 }
