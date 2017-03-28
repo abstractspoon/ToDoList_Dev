@@ -429,7 +429,7 @@ struct TDCCOLUMN
 	UINT nIDLongName;
 	UINT nTextAlignment;
 	BOOL bSortAscending;
-	int iImage;
+	TDCC_IMAGE iImage, iCalcImage;
 
 	UINT GetColumnHeaderAlignment() const
 	{

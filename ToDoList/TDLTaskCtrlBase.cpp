@@ -2559,13 +2559,25 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_FLAG:
-			if (m_data.IsTaskFlagged(pTDI, pTDS))
+			if (pTDI->bFlagged)
+			{
 				DrawColumnImage(pDC, nColID, rSubItem);
+			}
+			else if (m_data.IsTaskFlagged(pTDI, pTDS))
+			{
+				DrawColumnImage(pDC, nColID, rSubItem, TRUE);
+			}
 			break;
 			
 		case TDCC_LOCK:
-			if (m_data.IsTaskLocked(pTDI, pTDS))
+			if (pTDI->bLocked)
+			{
 				DrawColumnImage(pDC, nColID, rSubItem);
+			}
+			else if (m_data.IsTaskLocked(pTDI, pTDS))
+			{
+				DrawColumnImage(pDC, nColID, rSubItem, TRUE);
+			}
 			break;
 
 		case TDCC_REMINDER:
@@ -2765,19 +2777,20 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 	}
 }
 
-void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect)
+void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bCalc)
 {
 	const TDCCOLUMN* pCol = GetColumn(nColID);
 	ASSERT(pCol);
 
 	if (pCol)
 	{
-		ASSERT(pCol->iImage != -1);
+		TDCC_IMAGE iImage = (bCalc ? pCol->iCalcImage : pCol->iImage);
+		ASSERT(iImage != TDCC_NONE);
 	
-		if (pCol->iImage != -1)
+		if (iImage != TDCC_NONE)
 		{
 			CPoint ptDraw(CalcColumnIconTopLeft(rect));
-			m_ilColSymbols.Draw(pDC, pCol->iImage, ptDraw, ILD_TRANSPARENT);
+			m_ilColSymbols.Draw(pDC, iImage, ptDraw, ILD_TRANSPARENT);
 		}
 	}
 }

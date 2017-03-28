@@ -69,6 +69,27 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TDCC_IMAGE
+{
+	// Order must match the image list
+	TDCCI_NONE = -1,
+	TDCCI_RISK,
+	TDCCI_TRACKTIME,
+	TDCCI_REMAINING,
+	TDCCI_DEPENDENCY,
+	TDCCI_FILEREF,
+	TDCCI_FLAG,
+	TDCCI_REMINDER,
+	TDCCI_ICON,
+	TDCCI_DONE,
+	TDCCI_PRIORITY,
+	TDCCI_LOCK,
+	TDCCI_LOCKCALC,
+	TDCCI_FLAGCALC,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum TDC_THREADEDEXPORTPURPOSE
 {
 	TDCTEP_NONE = -1,
