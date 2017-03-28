@@ -148,6 +148,7 @@ public:
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
 	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
+	BOOL IsTaskFlagged(DWORD dwTaskID, BOOL bCheckSubtasks) const;
 	BOOL IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const;
 	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKNONE) const;
 	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
@@ -174,6 +175,7 @@ public:
 	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
 
+	BOOL IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckSubtasks = -1) const;
 	BOOL IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent = -1) const;
 	BOOL IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;

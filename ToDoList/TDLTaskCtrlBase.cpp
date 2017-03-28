@@ -2559,7 +2559,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_FLAG:
-			if (pTDI->bFlagged)
+			if (m_data.IsTaskFlagged(pTDI, pTDS))
 				DrawColumnImage(pDC, nColID, rSubItem);
 			break;
 			

@@ -62,13 +62,13 @@ public:
 	BOOL GetCompletionStatus(CString& sStatus) const;
 	BOOL GetSyncCompletionToStatus() const;
 	BOOL GetSubtasksInheritLockStatus() const { return m_bSubtasksInheritLockStatus; }
+	BOOL GetTaskInheritsSubtaskFlags() const { return m_bTaskInheritsSubtaskFlags; }
 
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const;
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_nCalcRemainingTime; }
 	PTCP_CALCDUEDATE GetDueDateCalculation() const { return m_nCalcDueDate; }
 	PTCP_CALCSTARTDATE GetStartDateCalculation() const { return m_nCalcStartDate; }
-
 
 //	BOOL Get() const { return m_b; }
 
@@ -102,6 +102,7 @@ protected:
 	BOOL	m_bAveragePercentSubCompletion;
 	BOOL	m_bIncludeDoneInAverageCalc;
 	BOOL	m_bSubtasksInheritLockStatus;
+	BOOL	m_bTaskInheritsSubtaskFlags;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

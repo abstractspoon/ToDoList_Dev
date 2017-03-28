@@ -114,6 +114,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& pr
 	styles[TDCS_STRIKETHOUGHDONETASKS] = prefs.GetStrikethroughDone();
 	styles[TDCS_SUBTASKSINHERITLOCK] = prefs.GetSubtasksInheritLockStatus();
 	styles[TDCS_TASKCOLORISBACKGROUND] = prefs.GetColorTaskBackground();
+	styles[TDCS_TASKINHERITSSUBTASKFLAGS] = prefs.GetTaskInheritsSubtaskFlags();
 	styles[TDCS_TRACKSELECTEDTASKONLY] = !prefs.GetTrackNonSelectedTasks();
 	styles[TDCS_TREATSUBCOMPLETEDASDONE] = prefs.GetTreatSubCompletedAsDone();
 	styles[TDCS_USEEARLIESTDUEDATE] = (prefs.GetDueDateCalculation() == PTCP_EARLIESTDUEDATE);

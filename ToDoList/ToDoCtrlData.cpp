@@ -932,6 +932,49 @@ BOOL CToDoCtrlData::IsTaskFlagged(DWORD dwTaskID) const
 	return pTDI->bFlagged;
 }
 
+BOOL CToDoCtrlData::IsTaskFlagged(DWORD dwTaskID, BOOL bCheckSubtasks) const
+{
+	if (bCheckSubtasks == -1)
+		bCheckSubtasks = HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS);
+
+	if (!bCheckSubtasks)
+		return IsTaskFlagged(dwTaskID);
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return IsTaskFlagged(pTDI, pTDS, TRUE);
+}
+
+BOOL CToDoCtrlData::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckSubtasks) const
+{
+	if (!pTDI || (!pTDS && bCheckSubtasks))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (pTDI->bFlagged || !bCheckSubtasks || (pTDS && !pTDS->HasSubTasks()))
+		return pTDI->bFlagged;
+
+	if (bCheckSubtasks == -1)
+		bCheckSubtasks = HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS);
+
+	if (!bCheckSubtasks)
+		return pTDI->bFlagged;
+
+	// check subtasks
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	{
+		if (IsTaskFlagged(pTDS->GetSubTaskID(nSubtask), TRUE))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -953,7 +996,7 @@ BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const
 
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
 	
-	return IsTaskLocked(pTDI, pTDS);
+	return IsTaskLocked(pTDI, pTDS, TRUE);
 }
 
 BOOL CToDoCtrlData::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent) const

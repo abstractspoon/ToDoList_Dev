@@ -761,6 +761,7 @@
 #define IDC_MERGEBYTASKID               1495
 #define IDC_MERGEBYTASKIDWARNING        1496
 #define IDC_SUBTASKSINHERITLOCK         1497
+#define IDC_TASKINHERITSSUBTASKFLAGS    1498
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
