@@ -170,6 +170,8 @@ public:
 	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone);
 	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bHasIncomplete);
 	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
+	BOOL SetTaskFlag(HTASKITEM hTask, BOOL bFlag, BOOL bCalc);
+	BOOL SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc);
 
 	BOOL SetTaskCategories(HTASKITEM hTask, const CStringArray& aCategories);
 	int  GetTaskCategories(HTASKITEM hTask, CStringArray& aCategories) const;
@@ -202,8 +204,9 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList16 implementation 
-	bool IsTaskLocked(HTASKITEM hTask) const;
+	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
+	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 

@@ -791,7 +791,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		if (!(pTL16Src && pTL16Dest))
 			break;
 
-		pTL16Dest->SetTaskLock(hTaskDest, pTL16Src->IsTaskLocked(hTaskSrc));
+		pTL16Dest->SetTaskLock(hTaskDest, pTL16Src->IsTaskLocked(hTaskSrc, false));
 		// ---------------------------------------------------------------------------
 	} 
 	while (0);
@@ -1714,7 +1714,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 		tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS);
 		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY);
 		tdi.bFlagged = IsTaskFlagged(hTask);
-		tdi.bLocked = IsTaskLocked(hTask);
+		tdi.bLocked = IsTaskLocked(hTask, false);
 		tdi.color = (COLORREF)GetTaskColor(hTask);
 		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, FALSE);
 		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, FALSE);
@@ -2346,11 +2346,22 @@ unsigned long CTaskFile::GetTaskID(HTASKITEM hTask) const
 
 bool CTaskFile::IsTaskFlagged(HTASKITEM hTask) const
 {
+	return IsTaskFlagged(hTask, false);
+}
+
+bool CTaskFile::IsTaskFlagged(HTASKITEM hTask, bool bCalc) const
+{
+	if (bCalc && (GetTaskUChar(hTask, TDL_TASKCALCFLAG) > 0))
+		return TRUE;
+
 	return (GetTaskUChar(hTask, TDL_TASKFLAG) > 0);
 }
 
-bool CTaskFile::IsTaskLocked(HTASKITEM hTask) const
+bool CTaskFile::IsTaskLocked(HTASKITEM hTask, bool bCalc) const
 {
+	if (bCalc && (GetTaskUChar(hTask, TDL_TASKCALCLOCK) > 0))
+		return TRUE;
+
 	return (GetTaskUChar(hTask, TDL_TASKLOCK) > 0);
 }
 
@@ -3043,12 +3054,12 @@ bool CTaskFile::SetTaskStatus(HTASKITEM hTask, LPCTSTR szStatus)
 
 bool CTaskFile::SetTaskFlag(HTASKITEM hTask, bool bFlag)
 {
-	return SetTaskUChar(hTask, TDL_TASKFLAG, (unsigned char)(bFlag ? 1 : 0));
+	return (SetTaskFlag(hTask, bFlag, FALSE) != FALSE);
 }
 
 bool CTaskFile::SetTaskLock(HTASKITEM hTask, bool bLocked)
 {
-	return SetTaskUChar(hTask, TDL_TASKLOCK, (unsigned char)(bLocked ? 1 : 0));
+	return (SetTaskLock(hTask, bLocked, FALSE) != FALSE);
 }
 
 bool CTaskFile::SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath)
@@ -3423,6 +3434,24 @@ BOOL CTaskFile::SetTaskCalcStartDate(HTASKITEM hTask, const COleDateTime& date)
 BOOL CTaskFile::SetTaskCalcCompletion(HTASKITEM hTask, int nPercent)
 {
 	return SetTaskUChar(hTask, TDL_TASKCALCCOMPLETION, (unsigned char)nPercent);
+}
+
+BOOL CTaskFile::SetTaskFlag(HTASKITEM hTask, BOOL bFlag, BOOL bCalc)
+{
+	if (bCalc)
+		return SetTaskUChar(hTask, TDL_TASKCALCFLAG, (unsigned char)(bFlag ? 1 : 0));
+
+	// else
+	return SetTaskUChar(hTask, TDL_TASKFLAG, (unsigned char)(bFlag ? 1 : 0));
+}
+
+BOOL CTaskFile::SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc)
+{
+	if (bCalc)
+		return SetTaskUChar(hTask, TDL_TASKCALCLOCK, (unsigned char)(bLock ? 1 : 0));
+
+	// else
+	return SetTaskUChar(hTask, TDL_TASKCALCFLAG, (unsigned char)(bLock ? 1 : 0));
 }
 
 BOOL CTaskFile::SetTaskHighestPriority(HTASKITEM hTask, int nPriority)

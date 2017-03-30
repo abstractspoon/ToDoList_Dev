@@ -9435,7 +9435,7 @@ BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWO
 		m_data.SetTaskFlag(dwTaskID, tasks.IsTaskFlagged(hTask));
 
 	if (tasks.TaskHasAttribute(hTask, TDL_TASKLOCK))
-		m_data.SetTaskLock(dwTaskID, tasks.IsTaskLocked(hTask));
+		m_data.SetTaskLock(dwTaskID, tasks.IsTaskLocked(hTask, false));
 
 	// Numeric values
 	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOLOR))
@@ -9612,10 +9612,10 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		}
 		
 		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
-			tasks.SetTaskFlag(hTask, pTDI->bFlagged != FALSE);
+			tasks.SetTaskFlag(hTask, m_data.IsTaskFlagged(pTDI, pTDS), TRUE);
 		
 		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
-			tasks.SetTaskLock(hTask, pTDI->bLocked != FALSE);
+			tasks.SetTaskLock(hTask, m_data.IsTaskLocked(pTDI, pTDS), TRUE);
 
 		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
 			tasks.SetTaskRecurrence(hTask, pTDI->trRecurrence);

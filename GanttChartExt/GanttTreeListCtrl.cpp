@@ -762,7 +762,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask,
 	MinMaxDates(*pGI);
 	
 	// always update lock states
-	pGI->bLocked = pTasks->IsTaskLocked(hTask);
+	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
 	// always update colour because it can change for so many reasons
 	pGI->color = pTasks->GetTaskTextColor(hTask);
@@ -975,7 +975,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITaskList16* pTasks, HTASKITEM hTas
 		pGI->bParent = pTasks->IsTaskParent(hTask);
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->nPosition = pTasks->GetTaskPosition(hTask);
-		pGI->bLocked = pTasks->IsTaskLocked(hTask);
+		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
 		time64_t tDate = 0;
 

@@ -228,7 +228,7 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const C
 	color = pTasks->GetTaskTextColor(hTask);
 
 	// always update lock state
-	bLocked = pTasks->IsTaskLocked(hTask);
+	bLocked = pTasks->IsTaskLocked(hTask, true);
 
 	// and 'Good as Done'
 	bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);

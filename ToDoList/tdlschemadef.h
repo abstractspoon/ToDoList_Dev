@@ -136,6 +136,8 @@ static const CString TDL_TASKSTARTDATESTRING(_T("STARTDATESTRING"));
 static const CString TDL_TASKCREATIONDATESTRING(_T("CREATIONDATESTRING"));		
 static const CString TDL_TASKLASTMODSTRING(_T("LASTMODSTRING"));
 static const CString TDL_TASKCUSTOMATTRIBDATESTRING(_T("DATESTRING"));	
+static const CString TDL_TASKCALCFLAG(_T("CALCFLAG"));
+static const CString TDL_TASKCALCLOCK(_T("CALCLOCK"));
 
 // DEPRECATED -------------------------------------------------------------
 static const CString TDL_TASKRECURRENCEREG_DEP(_T("REGULARITY"));     // => 'RECURFREQ'

@@ -415,7 +415,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITaskList16* pTasks, HTASKITEM hTask, DWOR
 	pKI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 	pKI->bParent = pTasks->IsTaskParent(hTask);
 	pKI->dwParentID = dwParentID;
-	pKI->bLocked = pTasks->IsTaskLocked(hTask);
+	pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
 	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
@@ -576,7 +576,7 @@ BOOL CKanbanCtrl::UpdateData(const ITaskList16* pTasks, HTASKITEM hTask, const C
 			pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
 			// Always update lock state
-			pKI->bLocked = pTasks->IsTaskLocked(hTask);
+			pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		}
 	}
 		
