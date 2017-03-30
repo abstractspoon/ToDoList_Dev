@@ -4161,14 +4161,6 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		// notify user of due tasks if req
 		if (bNotifyDueTasks)
 			DoDueTaskNotification(nTDC, userPrefs.GetNotifyDueByOnLoad());
-
-		// check for automatic naming when handling WM_ENDSESSION. 
-		// so we clear the filename and mark it as modified
-		if (IsEndSessionFilePath(sFilePath))
-		{
-			pTDC->ClearFilePath();
-			pTDC->SetModified();
-		}
 		
 		UpdateCaption();
 		UpdateStatusbar();
@@ -4278,8 +4270,17 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 					pTDC->ArchiveDoneTasks(nRemove, bRemoveFlagged);
 			}
 
-			if (userPrefs.GetAddFilesToMRU())
+			// check for automatic naming when handling WM_ENDSESSION. 
+			// so we clear the filename and mark it as modified
+			if (IsEndSessionFilePath(sFilePath))
+			{
+				pTDC->ClearFilePath();
+				pTDC->SetModified();
+			}
+			else if (userPrefs.GetAddFilesToMRU())
+			{
 				m_mruList.Add(sFilePath);
+			}
 		}
 		else // storage
 		{
@@ -8076,10 +8077,12 @@ BOOL CToDoListWnd::DoQueryEndSession(BOOL bQuery, BOOL bEnding)
 	// else do a proper shutdown
 	m_bEndingSession = TRUE;
 
-	DoExit(FALSE, bEnding);
-		
-	// cleanup our shutdown reason if not handled in DoExit
-	Misc::ShutdownBlockReasonDestroy(hWnd);
+	if (!DoExit(FALSE, bEnding))
+	{
+		// cleanup our shutdown reason if not handled in DoExit
+		Misc::ShutdownBlockReasonDestroy(hWnd);
+		return FALSE;
+	}
 
 	// and return anything because it's ignored
 	return TRUE;
