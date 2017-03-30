@@ -427,7 +427,7 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
-void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	// we must have been initialized already
 	ASSERT(m_list.GetSafeHwnd() && m_tree.GetSafeHwnd());
@@ -435,7 +435,14 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 	// always cancel any ongoing operation
 	CancelOperation();
 
-	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return;
+	}
+
 	BOOL bResort = FALSE;
 	
 	switch (nUpdate)
@@ -449,7 +456,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			
 			DWORD dwSelID = GetSelectedTaskID();
 			
-			RebuildTree(pTasks16);
+			RebuildTree(pTasks);
 
 			ValidateMonthDisplay();
 			UpdateListColumns();
@@ -482,7 +489,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			int nNumMonths = GetNumMonths();
 			
 			// update the task(s)
-			if (UpdateTask(pTasks16, pTasks16->GetFirstTask(), nUpdate, attrib, TRUE))
+			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
 				// recalc parent dates as required
 				if (attrib.HasKey(IUI_STARTDATE) || attrib.HasKey(IUI_DUEDATE) || attrib.HasKey(IUI_DONEDATE))
@@ -512,9 +519,9 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUp
 			CHoldRedraw hr2(m_list);
 
 			CSet<DWORD> mapIDs;
-			BuildTaskMap(pTasks16, pTasks16->GetFirstTask(), mapIDs, TRUE);
+			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 			
-			RemoveDeletedTasks(NULL, pTasks16, mapIDs);
+			RemoveDeletedTasks(NULL, pTasks, mapIDs);
 
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths();
@@ -558,7 +565,7 @@ void CGanttTreeListCtrl::PreFixVScrollSyncBug()
 	}
 }
 
-CString CGanttTreeListCtrl::GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask)
+CString CGanttTreeListCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -638,7 +645,7 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	return IUI_NONE;
 }
 
-BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, 
+BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, 
 									BOOL bAndSiblings)
 {
@@ -798,7 +805,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask,
 	return bChange;
 }
 
-void CGanttTreeListCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -823,7 +830,7 @@ void CGanttTreeListCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask
 	}
 }
 
-void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITaskList16* pTasks, const CSet<DWORD>& mapIDs)
+void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
@@ -887,7 +894,7 @@ GANTTDISPLAY* CGanttTreeListCtrl::GetGanttDisplay(DWORD dwTaskID)
 	return pGD;
 }
 
-void CGanttTreeListCtrl::RebuildTree(const ITaskList16* pTasks)
+void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
@@ -951,7 +958,7 @@ COleDateTime CGanttTreeListCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
 	return date;
 }
 
-void CGanttTreeListCtrl::BuildTreeItem(const ITaskList16* pTasks, HTASKITEM hTask, 
+void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									   CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings)
 {
 	if (hTask == NULL)

@@ -82,8 +82,8 @@ struct ODBCTASK
 	BOOL HasAttribute(DWORD dwAttrib) const;
 	void SetHasAttribute(DWORD dwAttrib, BOOL bSet = TRUE);
 
-	BOOL Save(ITaskList12* pTasks, HTASKITEM hTask, const COdbcMapKeyToID& mapTasks) const;
-	BOOL Load(const ITaskList12* pTasks, HTASKITEM hTask, COdbcMapIDToKey& mapTasks);
+	BOOL Save(ITASKLISTBASE* pTasks, HTASKITEM hTask, const COdbcMapKeyToID& mapTasks) const;
+	BOOL Load(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COdbcMapIDToKey& mapTasks);
 
 	static CString GetMetaDataKey(LPCTSTR szSubKey);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);

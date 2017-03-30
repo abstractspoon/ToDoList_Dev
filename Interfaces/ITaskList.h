@@ -377,7 +377,7 @@ public:
 	virtual bool IsTaskParent(HTASKITEM hTask) const = 0;
 
 	virtual int GetAttributeCount(LPCWSTR szAttrib) const = 0;
-	virtual LPCWSTR GetAttribute(LPCWSTR szAttrib, int nIndex) const = 0;
+	virtual LPCWSTR GetAttributeItem(LPCWSTR szAttrib, int nIndex) const = 0;
 
 	virtual unsigned long GetCustomAttributeType(int nIndex) const = 0;
 	virtual LPCWSTR GetCustomAttributeListData(int nIndex) const = 0;

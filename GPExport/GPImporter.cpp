@@ -61,16 +61,16 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (!InitConsts(bSilent, pPrefs, szKey))
-		return IIR_CANCELLED;
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pDestTaskFile, IID_TASKLIST8);
-
-	if (!pITL9)
+	if (!pTasks)
 	{
 		ASSERT(0);
 		return IIR_BADINTERFACE;
 	}
+
+	if (!InitConsts(bSilent, pPrefs, szKey))
+		return IIR_CANCELLED;
 	
 	CXmlFile fileSrc;
 
@@ -97,19 +97,19 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 	if (!pXISrcTask) // must exist
 		return IIR_BADFORMAT;
 
-	if (ImportTask(pXISrcTask, pITL9, NULL, TRUE))
+	if (ImportTask(pXISrcTask, pTasks, NULL, TRUE))
 	{
 		// fix up resource allocations
-		FixupResourceAllocations(fileSrc.Root(), pITL9);
+		FixupResourceAllocations(fileSrc.Root(), pTasks);
 
 		// and dependencies
-		FixupDependencies(pXISrcTask, pITL9, TRUE);
+		FixupDependencies(pXISrcTask, pTasks, TRUE);
 	}
 
 	return IIR_SUCCESS; 
 }
 
-bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings)
+bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings)
 {
 	if (!pXISrcTask)
 		return true;
@@ -221,7 +221,7 @@ DWORD CGPImporter::GetTDLTaskID(int nGPTaskID)
 	return ((DWORD)nGPTaskID + 1);
 }
 
-void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList9* pDestTaskFile)
+void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITASKLISTBASE* pDestTaskFile)
 {
 	BuildResourceMap(pXISrcPrj);
 			
@@ -252,7 +252,7 @@ void CGPImporter::FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList9
 	}
 }
 
-void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, BOOL bAndSiblings)
+void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, BOOL bAndSiblings)
 {
 	if (!pXISrcTask)
 		return;

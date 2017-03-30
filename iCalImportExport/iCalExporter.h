@@ -38,7 +38,7 @@ protected:
 	BOOL EXPORTASVTASK;
 
 protected:
-	void ExportTask(const ITaskList12* pTasks, HTASKITEM hTask, const CString& sParentUID, 
+	void ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
 							CStdioFile& fileOut, BOOL bAndSiblings);
 	bool InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
@@ -48,7 +48,7 @@ protected:
 	static CString FormatDayOfMonth(DWORD dwDOM);
 	static void WriteHeader(CStdioFileEx& fileOut);
 	static CString FormatUID(LPCTSTR szFileName, DWORD dwTaskID);
-	static BOOL GetTaskDates(const ITaskList12* pTasks, HTASKITEM hTask, time64_t& tStart, time64_t& tEnd, COleDateTime& dtDue);
+	static BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, time64_t& tStart, time64_t& tEnd, COleDateTime& dtDue);
 };
 
 #endif // !defined(AFX_ICALEXPORTER_H__5CDCA505_6C5C_4342_8F80_67368C7EE6A5__INCLUDED_)

@@ -44,15 +44,15 @@ protected:
 	CString MILESTONETAG;
 
 protected:
-	bool ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings);
-	void BuildResourceMap(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
-	void ExportResources(const ITaskList9* pSrcTaskFile, CXmlItem* pDestPrj);
+	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings);
+	void BuildResourceMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
+	void ExportResources(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
 	void SetupDisplay(CXmlItem* pDestPrj);
 	void SetupCalendar(CXmlItem* pDestPrj);
-	void ExportDependencies(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
-	bool InitConsts(const ITaskList9* pTaskFile, bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
+	void ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
+	bool InitConsts(const ITASKLISTBASE* pTaskFile, bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
 
-	static void GetTaskDates(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone);
+	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone);
 	static int GetGPTaskID(DWORD dwTDLTaskID);
 };
 

@@ -9,6 +9,7 @@
 
 #include "..\Shared\wndprompt.h"
 
+#include "..\Interfaces\ITasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ namespace OutlookAPI
 	class _Item;
 }
 
-class ITaskList10;
+class ITASKLISTBASE;
 class ITaskList;
 class IPreferences;
 
@@ -45,7 +46,7 @@ public:
 	BOOL	m_bHideUnflaggedEmails;
 	//}}AFX_DATA
 	CTreeCtrl	m_tcTasks;
-	ITaskList10* m_pDestTaskFile;
+	ITASKLISTBASE* m_pDestTaskFile;
 	OutlookAPI::_Application* m_pOutlook;
 	OutlookAPI::MAPIFolder* m_pFolder;
 	CWndPromptManager m_wndPrompt;

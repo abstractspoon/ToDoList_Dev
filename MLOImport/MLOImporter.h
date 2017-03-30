@@ -35,7 +35,7 @@ protected:
 	HICON m_hIcon;
 
 protected:
-	bool ImportTask(const CXmlItem* pXIMLOTask, ITaskList5* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const;
+	bool ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const;
 	time_t GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) const;
 
 };

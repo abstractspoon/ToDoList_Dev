@@ -42,10 +42,10 @@ protected:
 	CString MILESTONETAG;
 
 protected:
-	bool ImportTask(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings);
+	bool ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings);
 	void BuildResourceMap(const CXmlItem* pXISrcPrj);
-	void FixupDependencies(const CXmlItem* pXISrcTask, ITaskList9* pDestTaskFile, BOOL bAndSiblings);
-	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITaskList9* pDestTaskFile);
+	void FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, BOOL bAndSiblings);
+	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITASKLISTBASE* pDestTaskFile);
 	bool InitConsts(bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
 
 	static DWORD GetTDLTaskID(int nGPTaskID);

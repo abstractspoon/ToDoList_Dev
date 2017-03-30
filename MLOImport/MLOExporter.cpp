@@ -38,19 +38,24 @@ void CMLOExporter::SetLocalizer(ITransText* /*pTT*/)
 
 bool CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+	
 	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
-	
-	const ITaskList7* pITL7 = GetITLInterface<ITaskList7>(pSrcTaskFile, IID_TASKLIST7);
-	ASSERT (pITL7);
-	
+
 	// export tasks
 	CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
 	
-	if (!ExportTask(pITL7, pSrcTaskFile->GetFirstTask(), pXITasks, TRUE))
+	if (!ExportTask(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, TRUE))
 		return false;
 	
 	// export resource allocations
-	ExportPlaces(pITL7, fileDest.Root());
+	ExportPlaces(pTasks, fileDest.Root());
 	
 	// save result
 	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
@@ -58,23 +63,22 @@ bool CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath,
 
 bool CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
-	
 	// export tasks
+	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
 	CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
 	
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		const ITaskList7* pITL7 = GetITLInterface<ITaskList7>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST7);
+		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 		
-		if (pITL7)
+		if (pTasks)
 		{
 			// export tasks
-			if (!ExportTask(pITL7, pITL7->GetFirstTask(), pXITasks, TRUE))
+			if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
 				return false;
 			
 			// export resource allocations
-			ExportPlaces(pITL7, fileDest.Root());
+			ExportPlaces(pTasks, fileDest.Root());
 		}
 	}
 	
@@ -82,7 +86,7 @@ bool CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFile
 	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
 }
 
-bool CMLOExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, 
+bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 							  CXmlItem* pXIDestParent, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -151,7 +155,7 @@ bool CMLOExporter::ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask,
 	return true;
 }
 
-void CMLOExporter::BuildPlacesMap(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, 
+void CMLOExporter::BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 								  CMapStringToString& mapPlaces, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -185,7 +189,7 @@ void CMLOExporter::BuildPlacesMap(const ITaskList7* pSrcTaskFile, HTASKITEM hTas
 	}
 }
 
-void CMLOExporter::ExportPlaces(const ITaskList7* pSrcTaskFile, CXmlItem* pDestPrj)
+void CMLOExporter::ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj)
 {
 	CMapStringToString mapPlaces;
 	BuildPlacesMap(pSrcTaskFile, pSrcTaskFile->GetFirstTask(), mapPlaces, TRUE);

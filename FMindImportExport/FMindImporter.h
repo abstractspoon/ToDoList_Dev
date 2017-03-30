@@ -38,7 +38,7 @@ protected:
 	HICON m_hIcon;
 	
 protected:
-	static bool ImportTask(const CXmlItem* pFMTask, ITaskList10* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings);
+	static bool ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings);
 	static COLORREF GetFMColor(const CXmlItem* pFMTask, LPCTSTR szColorField);
 	static time_t GetFMDate(const CXmlItem* pFMTask, LPCTSTR szDateField);
 	static CString GetAttribValueS(const CXmlItem* pFMTask, LPCTSTR szAttribName);

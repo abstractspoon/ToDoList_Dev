@@ -65,17 +65,22 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	const ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pSrcTaskFile, IID_TASKLIST9);
-	ASSERT (pITL9);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
-	if (!InitConsts(pITL9, bSilent, pPrefs, szKey))
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	if (!InitConsts(pTasks, bSilent, pPrefs, szKey))
 		return false;
 
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
 
 	// export resource allocations
-	ExportResources(pITL9, fileDest.Root());
+	ExportResources(pTasks, fileDest.Root());
 
 	// clear the task map that will be populated in ExportTask
 	m_mapTasks.RemoveAll();
@@ -84,10 +89,10 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
 	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
 
-	if (!ExportTask(pITL9, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+	if (!ExportTask(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
 		return false;
 
-	ExportDependencies(pITL9, pITL9->GetFirstTask(), pXITasks, TRUE);
+	ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 
 	// important display stuff for GP
 	SetupDisplay(fileDest.Root());
@@ -101,6 +106,14 @@ bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFileP
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
+
+	if ((pTasks == NULL) || !InitConsts(pTasks, bSilent, pPrefs, szKey))
+	{
+		ASSERT(0);
+		return false;
+	}
+
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
 
@@ -110,24 +123,21 @@ bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFileP
 	
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		const ITaskList9* pITL9 = GetITLInterface<ITaskList9>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST9);
+		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 
-		if ((nTaskList == 0) && !InitConsts(pITL9, bSilent, pPrefs, szKey))
-			return false;
-			
-		if (pITL9)
+		if (pTasks)
 		{
 			// export resource allocations
-			ExportResources(pITL9, fileDest.Root());
+			ExportResources(pTasks, fileDest.Root());
 			
 			// clear the task map that will be populated in ExportTask
 			m_mapTasks.RemoveAll();
 
 			// export tasks
-			if (!ExportTask(pITL9, pITL9->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+			if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
 				return false;
 
-			ExportDependencies(pITL9, pITL9->GetFirstTask(), pXITasks, TRUE);
+			ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 		}
 	}
 
@@ -200,7 +210,7 @@ void CGPExporter::SetupCalendar(CXmlItem* pDestPrj)
 }
 
 
-bool CGPExporter::ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, 
+bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 							 CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -366,7 +376,7 @@ bool CGPExporter::ExportTask(const ITaskList9* pSrcTaskFile, HTASKITEM hTask,
 	return true;
 }
 
-void CGPExporter::BuildResourceMap(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
+void CGPExporter::BuildResourceMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return;
@@ -402,7 +412,7 @@ void CGPExporter::BuildResourceMap(const ITaskList9* pSrcTaskFile, HTASKITEM hTa
 	}
 }
 
-void CGPExporter::ExportResources(const ITaskList9* pSrcTaskFile, CXmlItem* pDestPrj)
+void CGPExporter::ExportResources(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj)
 {
 	BuildResourceMap(pSrcTaskFile, pSrcTaskFile->GetFirstTask(), pDestPrj, TRUE);
 
@@ -446,7 +456,7 @@ void CGPExporter::ExportResources(const ITaskList9* pSrcTaskFile, CXmlItem* pDes
 	}
 }
 
-void CGPExporter::ExportDependencies(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
+void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return;
@@ -512,13 +522,13 @@ int CGPExporter::GetGPTaskID(DWORD dwTDLTaskID)
 	return ((int)dwTDLTaskID - 1);
 }
 
-void CGPExporter::GetTaskDates(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone)
+void CGPExporter::GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time_t& tEarliestStart, time_t& tLatestDue, time_t& tLatestDone)
 {
 	tEarliestStart = INT_MAX;
 	tLatestDue = tLatestDone = 0;
 
-	time_t tTaskStart = pSrcTaskFile->GetTaskStartDate(hTask);
-	time_t tTaskDue = pSrcTaskFile->GetTaskDueDate(hTask, FALSE);
+	time_t tTaskStart = pSrcTaskFile->GetTaskStartDate(hTask, false);
+	time_t tTaskDue = pSrcTaskFile->GetTaskDueDate(hTask, false);
 	time_t tTaskDone = pSrcTaskFile->GetTaskDoneDate(hTask);
 
 	// if we are _not_ a parent make up what we don't have
@@ -569,7 +579,7 @@ void CGPExporter::GetTaskDates(const ITaskList9* pSrcTaskFile, HTASKITEM hTask, 
 	}
 }
 
-bool CGPExporter::InitConsts(const ITaskList9* pTaskFile, bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+bool CGPExporter::InitConsts(const ITASKLISTBASE* pTaskFile, bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	MILESTONETAG = CEnString(_T("MileStone")); // default
 

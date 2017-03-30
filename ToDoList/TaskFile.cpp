@@ -1370,7 +1370,7 @@ int CTaskFile::GetAttributeCount(LPCTSTR szAttrib) const
 	return GetItemCount(szAttrib);
 }
 
-LPCTSTR CTaskFile::GetAttribute(LPCTSTR szAttrib, int nIndex) const
+LPCTSTR CTaskFile::GetAttributeItem(LPCTSTR szAttrib, int nIndex) const
 {
 	const CXmlItem* pXI = GetItem(szAttrib, nIndex);
 

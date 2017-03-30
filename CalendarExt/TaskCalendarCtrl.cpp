@@ -184,30 +184,37 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 	return FALSE;
 }
 
-void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
-	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return;
+	}
+
 	BOOL bChange = FALSE;
 
 	switch (nUpdate)
 	{
 	case IUI_ALL:
 		DeleteData();
-		BuildData(pTasks16, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
 		bChange = TRUE;
 		break;
 
 	case IUI_NEW:
-		BuildData(pTasks16, pTasks->GetFirstTask(), attrib, TRUE);
+		BuildData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
 		bChange = TRUE;
 		break;
 		
 	case IUI_EDIT:
-		bChange = UpdateTask(pTasks16, pTasks16->GetFirstTask(), nUpdate, attrib, TRUE);
+		bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE);
 		break;
 		
 	case IUI_DELETE:
-		bChange = RemoveDeletedTasks(pTasks16);
+		bChange = RemoveDeletedTasks(pTasks);
 		break;
 		
 	case IUI_MOVE:
@@ -225,7 +232,7 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpd
 	}
 }
 
-void CTaskCalendarCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask, 
+void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 							   CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -250,7 +257,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITaskList16* pTasks, HTASKITEM hTask,
 	}
 }
 
-BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList16* pTasks)
+BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 {
 	CSet<DWORD> mapIDs;
 	BuildTaskMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
@@ -284,7 +291,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITaskList16* pTasks)
 	return bChange;
 }
 
-BOOL CTaskCalendarCtrl::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
+BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, 
 									const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -359,7 +366,7 @@ BOOL CTaskCalendarCtrl::IsSpecialDate(const COleDateTime& date) const
 	return m_mapSpecial.Lookup(CDateHelper::GetDateOnly(date).m_dt, bDummy);
 }
 
-void CTaskCalendarCtrl::BuildData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return;

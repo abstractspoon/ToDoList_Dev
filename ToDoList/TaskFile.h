@@ -213,7 +213,7 @@ public:
 	bool IsTaskParent(HTASKITEM hTask) const;
 
 	int GetAttributeCount(LPCTSTR szAttrib) const;
-	LPCTSTR GetAttribute(LPCTSTR szAttrib, int nIndex) const;
+	LPCTSTR GetAttributeItem(LPCTSTR szAttrib, int nIndex) const;
 
 	unsigned long GetCustomAttributeType(int nIndex) const;
 	LPCTSTR GetCustomAttributeListData(int nIndex) const;

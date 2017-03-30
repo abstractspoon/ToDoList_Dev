@@ -50,7 +50,7 @@ void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 
 bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	const ITaskList12* pTasks = GetITLInterface<ITaskList12>(pSrcTaskFile, IID_TASKLIST12);
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
 	if (!pTasks)
 	{
@@ -82,19 +82,10 @@ bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath
 
 bool CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// Sanity checks
-	if (!pSrcTaskFile->GetTaskListCount() || 
-		!GetITLInterface<ITaskList12>(pSrcTaskFile->GetTaskList(0), IID_TASKLIST12))
-	{
-		ASSERT(0);
-		return false;
-	}
-	
 	if (!InitConsts(bSilent, pPrefs, szKey))
 		return false;
 	
 	CStdioFileEx fileOut;
-//	fileOut.SetCodePage(CP_UTF8);
 	
 	if (fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
 	{
@@ -103,7 +94,7 @@ bool CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFil
 		
 		for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 		{
-			const ITaskList12* pTasks = GetITLInterface<ITaskList12>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST12);
+			const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 
 			// export first task only and the rest will follow
 			if (pTasks)
@@ -156,7 +147,7 @@ CString CiCalExporter::FormatUID(LPCTSTR szFileName, DWORD dwTaskID)
 	return sUID;
 }
 
-BOOL CiCalExporter::GetTaskDates(const ITaskList12* pTasks, HTASKITEM hTask, 
+BOOL CiCalExporter::GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	time64_t& tStart, time64_t& tEnd, COleDateTime& dtDue)
 {
 	// Neither Google Calendar not Outlook pay any attention to the 'DUE',
@@ -200,7 +191,7 @@ BOOL CiCalExporter::GetTaskDates(const ITaskList12* pTasks, HTASKITEM hTask,
 	return (bStartDate || bEndDate);
 }
 
-void CiCalExporter::ExportTask(const ITaskList12* pTasks, HTASKITEM hTask, 
+void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	const CString& sParentUID, CStdioFile& fileOut, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -275,7 +266,7 @@ void CiCalExporter::ExportTask(const ITaskList12* pTasks, HTASKITEM hTask,
 		int nRegularity, nUnused;
 		DWORD dwSpecific1, dwSpecific2;
 
-		if (pTasks->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nUnused, nUnused))
+		if (pTasks->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nUnused, nUnused, nUnused))
 			WriteString(fileOut, FormatRecurrence(nRegularity, dwSpecific1, dwSpecific2));
 
 		// parent child relationship

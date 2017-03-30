@@ -252,14 +252,21 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	return (pList != NULL);
 }
 
-void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	ASSERT(GetSafeHwnd());
+
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return;
+	}
 
 	// always cancel any ongoing operation
 	CancelOperation();
 
-	const ITaskList16* pTasks16 = GetITLInterface<ITaskList16>(pTasks, IID_TASKLIST16);
 	BOOL bResort = FALSE;
 	
 	switch (nUpdate)
@@ -269,7 +276,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
  			CDWordArray aSelIDs;
 			GetSelectedTaskIDs(aSelIDs);
 
- 			RebuildData(pTasks16, attrib);
+ 			RebuildData(pTasks, attrib);
  			RebuildListCtrls(TRUE);
 
 			SelectTasks(aSelIDs);
@@ -286,8 +293,8 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 			GetSelectedTaskIDs(aSelIDs);
 			
  			// update the task(s)
-			BOOL bChange = UpdateGlobalAttributeValues(pTasks16, attrib);
-			bChange |= UpdateData(pTasks16, pTasks16->GetFirstTask(), attrib, TRUE);
+			BOOL bChange = UpdateGlobalAttributeValues(pTasks, attrib);
+			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), attrib, TRUE);
 
 			if (bChange)
 				RebuildListCtrls(TRUE);
@@ -303,7 +310,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 		
 	case IUI_DELETE:
 		{
- 			RemoveDeletedTasks(pTasks16);
+ 			RemoveDeletedTasks(pTasks);
 		}
 		break;
 		
@@ -316,7 +323,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, c
 	}
 }
 
-CString CKanbanCtrl::GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask)
+CString CKanbanCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
 	
@@ -381,7 +388,7 @@ BOOL CKanbanCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return WantEditUpdate(nAttrib);
 }
 
-BOOL CKanbanCtrl::RebuildData(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	// Rebuild global attribute value lists
 	m_mapAttributeValues.RemoveAll();
@@ -395,7 +402,7 @@ BOOL CKanbanCtrl::RebuildData(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUT
 	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, attrib, TRUE);
 }
 
-BOOL CKanbanCtrl::AddTaskToData(const ITaskList16* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (!hTask)
 		return FALSE;
@@ -481,7 +488,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITaskList16* pTasks, HTASKITEM hTask, DWOR
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::UpdateData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
+BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
 		return FALSE;
@@ -602,7 +609,7 @@ BOOL CKanbanCtrl::UpdateData(const ITaskList16* pTasks, HTASKITEM hTask, const C
 	return bChange;
 }
 
-void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib)
+void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	time64_t tDate = 0;
 	
@@ -652,7 +659,7 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList16
 	}
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	BOOL bChange = FALSE;
 
@@ -686,7 +693,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, const C
 	return bChange;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, IUI_ATTRIBUTE nAttribute)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_ATTRIBUTE nAttribute)
 {
 	switch (nAttribute)
 	{
@@ -762,7 +769,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, IUI_ATT
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID)
 {
 	CKanbanValueMap mapNewValues;
 	
@@ -770,7 +777,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITaskList16* pTasks, LPCTSTR
 
 	while (nValue--)
 	{
-		CString sValue(pTasks->GetAttribute(szXMLTag, nValue));
+		CString sValue(pTasks->GetAttributeItem(szXMLTag, nValue));
 
 		if (!sValue.IsEmpty())
 			mapNewValues.AddValue(sValue);
@@ -1464,7 +1471,7 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 	return TRUE;
 }
 
-void CKanbanCtrl::BuildTaskIDMap(const ITaskList16* pTasks, HTASKITEM hTask, 
+void CKanbanCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									  CSet<DWORD>& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -1489,7 +1496,7 @@ void CKanbanCtrl::BuildTaskIDMap(const ITaskList16* pTasks, HTASKITEM hTask,
 	}
 }
 
-void CKanbanCtrl::RemoveDeletedTasks(const ITaskList16* pTasks)
+void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 {
 	CSet<DWORD> mapIDs;
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);

@@ -47,9 +47,9 @@ void CFMindImporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORT_RESULT CFMindImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	ITaskList10* pTL10 = GetITLInterface<ITaskList10>(pDestTaskFile, IID_TASKLIST10);
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	if (!pTL10)
+	if (!pTasks)
 	{
 		ASSERT(0);
 		return IIR_BADINTERFACE;
@@ -87,7 +87,7 @@ IIMPORT_RESULT CFMindImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTas
 		pFMTask = pFMTask->GetItem(_T("node"));
 
 		if (pFMTask)
-			ImportTask(pFMTask, pTL10, NULL, TRUE); // NULL ==  root
+			ImportTask(pFMTask, pTasks, NULL, TRUE); // NULL ==  root
 		// else it was an empty tasklist
 	}
 	// else it was an empty tasklist
@@ -95,7 +95,7 @@ IIMPORT_RESULT CFMindImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTas
 	return IIR_SUCCESS;
 }
 
-bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITaskList10* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings)
+bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings)
 {
 	ASSERT (pFMTask);
 	
@@ -148,8 +148,9 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITaskList10* pDestTaskF
 	DWORD dwSpecific2 = GetAttribValueI(pFMTask, FM_CUSTOMRECURSPEC2);
 	int nRecalcFrom = GetAttribValueI(pFMTask, FM_CUSTOMRECURRECALCFROM);
 	int nReuse = GetAttribValueI(pFMTask, FM_CUSTOMRECURREUSE);
+	int nNumOccur = GetAttribValueI(pFMTask, FM_CUSTOMNUMOCCUR);
 
-	pDestTaskFile->SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse);
+	pDestTaskFile->SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse, nNumOccur);
 
 	// then overwrite with FreeMind native attributes
 	pDestTaskFile->SetTaskCreationDate(hTask, GetFMDate(pFMTask, _T("CREATED")));

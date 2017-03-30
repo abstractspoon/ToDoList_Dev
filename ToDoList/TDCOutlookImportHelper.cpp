@@ -294,67 +294,69 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 	return TRUE;
 }
 
-BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTasks, HTASKITEM hTask, const TODOITEM& tdi)
+BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTaskList, HTASKITEM hTask, const TODOITEM& tdi)
 {
-	ITaskList15* pTasks15 = GetITLInterface<ITaskList15>(pTasks, IID_TASKLIST15);
-	ASSERT(pTasks15);
-	
-	if (!pTasks15)
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	// ------------------------------------------------------------
-	pTasks15->SetTaskComments(hTask, tdi.sComments);
-	pTasks15->SetTaskAllocatedBy(hTask, tdi.sAllocBy);
-	pTasks15->SetTaskStatus(hTask, tdi.sStatus);
-	pTasks15->SetTaskCreatedBy(hTask, tdi.sCreatedBy);
-	pTasks15->SetTaskExternalID(hTask, tdi.sExternalID);
-	pTasks15->SetTaskVersion(hTask, tdi.sVersion);
-	pTasks15->SetTaskIcon(hTask, tdi.sIcon);
+	pTasks->SetTaskComments(hTask, tdi.sComments);
+	pTasks->SetTaskAllocatedBy(hTask, tdi.sAllocBy);
+	pTasks->SetTaskStatus(hTask, tdi.sStatus);
+	pTasks->SetTaskCreatedBy(hTask, tdi.sCreatedBy);
+	pTasks->SetTaskExternalID(hTask, tdi.sExternalID);
+	pTasks->SetTaskVersion(hTask, tdi.sVersion);
+	pTasks->SetTaskIcon(hTask, tdi.sIcon);
 
 	// ------------------------------------------------------------
 	int nItem;
 
 	for (nItem = 0; nItem < tdi.aAllocTo.GetSize(); nItem++)
-		pTasks15->AddTaskAllocatedTo(hTask, tdi.aAllocTo[nItem]);
+		pTasks->AddTaskAllocatedTo(hTask, tdi.aAllocTo[nItem]);
 	
 	for (nItem = 0; nItem < tdi.aCategories.GetSize(); nItem++)
-		pTasks15->AddTaskCategory(hTask, tdi.aCategories[nItem]);
+		pTasks->AddTaskCategory(hTask, tdi.aCategories[nItem]);
 	
 	for (nItem = 0; nItem < tdi.aDependencies.GetSize(); nItem++)
-		pTasks15->AddTaskDependency(hTask, tdi.aDependencies[nItem]);
+		pTasks->AddTaskDependency(hTask, tdi.aDependencies[nItem]);
 	
 	for (nItem = 0; nItem < tdi.aTags.GetSize(); nItem++)
-		pTasks15->AddTaskTag(hTask, tdi.aTags[nItem]);
+		pTasks->AddTaskTag(hTask, tdi.aTags[nItem]);
 	
 	for (nItem = 0; nItem < tdi.aFileLinks.GetSize(); nItem++)
-		pTasks15->AddTaskFileLink(hTask, tdi.aFileLinks[nItem]);
+		pTasks->AddTaskFileLink(hTask, tdi.aFileLinks[nItem]);
 
 	// ------------------------------------------------------------
 	time64_t time;
 
 	if (CDateHelper::GetTimeT64(tdi.dateStart, time))
-		pTasks15->SetTaskStartDate64(hTask, time);
+		pTasks->SetTaskStartDate64(hTask, time);
 
 	if (CDateHelper::GetTimeT64(tdi.dateDue, time))
-		pTasks15->SetTaskStartDate64(hTask, time);
+		pTasks->SetTaskStartDate64(hTask, time);
 	
 	if (CDateHelper::GetTimeT64(tdi.dateDone, time))
-		pTasks15->SetTaskStartDate64(hTask, time);
+		pTasks->SetTaskStartDate64(hTask, time);
 	
 	if (CDateHelper::GetTimeT64(tdi.dateCreated, time))
-		pTasks15->SetTaskCreationDate64(hTask, time);
+		pTasks->SetTaskCreationDate64(hTask, time);
 	
 	if (CDateHelper::GetTimeT64(tdi.dateLastMod, time))
-		pTasks15->SetTaskLastModified64(hTask, time);
+		pTasks->SetTaskLastModified64(hTask, time);
 	
 	// ------------------------------------------------------------
-	pTasks15->SetTaskPriority(hTask, tdi.nPriority);
-	pTasks15->SetTaskRisk(hTask, tdi.nRisk);
-	pTasks15->SetTaskPercentDone(hTask, (unsigned char)tdi.nPercentDone);
-	pTasks15->SetTaskCost(hTask, tdi.dCost);
-	pTasks15->SetTaskFlag(hTask, (tdi.bFlagged == TRUE));
-	pTasks15->SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
-	pTasks15->SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
+	pTasks->SetTaskPriority(hTask, tdi.nPriority);
+	pTasks->SetTaskRisk(hTask, tdi.nRisk);
+	pTasks->SetTaskPercentDone(hTask, (unsigned char)tdi.nPercentDone);
+	pTasks->SetTaskCost(hTask, tdi.dCost);
+	pTasks->SetTaskFlag(hTask, (tdi.bFlagged == TRUE));
+	pTasks->SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
+	pTasks->SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
 
 	return TRUE;
 }

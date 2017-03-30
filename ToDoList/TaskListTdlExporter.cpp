@@ -47,7 +47,7 @@ bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR sz
 		const ITaskList* pTasks = pSrcTaskFile->GetTaskList(nTaskList);
 		const ITaskList8* pTasks8 = GetITLInterface<ITaskList8>(pTasks, IID_TASKLIST8);
 		
-		if (pTasks8)
+		if (pTasks8) // minimum requirement
 		{
 			// do not export the destination file if it also appears in the list
 			CString sFilePath = pTasks8->GetAttribute(TDL_FILENAME);

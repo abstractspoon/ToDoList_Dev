@@ -47,10 +47,13 @@ void COdbcTasklistStorage::SetLocalizer(ITransText* pTT)
 
 bool COdbcTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
-	ITaskList12* pTasks = GetITLInterface<ITaskList12>(pDestTaskFile, IID_TASKLIST12);
-
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
+	
 	if (!pTasks)
+	{
+		ASSERT(0);
 		return false;
+	}
 
 	COdbcDatabaseSetupArray aDbSetup;
 	LoadDatabaseSetups(pPrefs, szKey, aDbSetup);
@@ -119,10 +122,13 @@ bool COdbcTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList*
 
 bool COdbcTasklistStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
-	const ITaskList12* pTasks = GetITLInterface<ITaskList12>(pSrcTaskFile, IID_TASKLIST12);
-	
-	if (!pTasks)
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
 		return false;
+	}
 	
 	COdbcDatabaseSetupArray aDbSetup;
 	LoadDatabaseSetups(pPrefs, szKey, aDbSetup);
@@ -321,7 +327,7 @@ void COdbcTasklistStorage::SaveDatabaseSetups(IPreferences* pPrefs, LPCTSTR szKe
 	}
 }
 
-bool COdbcTasklistStorage::LoadFromDatabase(const ODBCDATABASESETUP& dbSetup, ITaskList12* pTasks, CString& sErrMsg)
+bool COdbcTasklistStorage::LoadFromDatabase(const ODBCDATABASESETUP& dbSetup, ITASKLISTBASE* pTasks, CString& sErrMsg)
 {
 	CDatabaseEx db;
 
@@ -420,7 +426,7 @@ bool COdbcTasklistStorage::LoadFromDatabase(const ODBCDATABASESETUP& dbSetup, IT
 	return false;
 }
 
-bool COdbcTasklistStorage::SaveToDatabase(const ITaskList12* pTasks, const ODBCDATABASESETUP& dbSetup, CString& sErrMsg)
+bool COdbcTasklistStorage::SaveToDatabase(const ITASKLISTBASE* pTasks, const ODBCDATABASESETUP& dbSetup, CString& sErrMsg)
 {
 	// extract meta-data to help us decide what needs updating
 	time64_t tLoad = _ttoi64(pTasks->GetMetaData(ODBCTASK::GetMetaDataKey(_T("LOADTIME"))));
@@ -455,7 +461,7 @@ bool COdbcTasklistStorage::SaveToDatabase(const ITaskList12* pTasks, const ODBCD
 	return false;
 }
 
-BOOL COdbcTasklistStorage::AddOrUpdateTask(const ITaskList12* pTasks, HTASKITEM hTask, time64_t tLoad, 
+BOOL COdbcTasklistStorage::AddOrUpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, time64_t tLoad, 
 										   COdbcTaskWriter& rs, const ODBCDATABASESETUP& dbSetup, 
 										   COdbcMapIDToKey& mapIDs, BOOL bAndSiblings)
 {

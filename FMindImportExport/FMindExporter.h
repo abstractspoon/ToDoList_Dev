@@ -39,7 +39,7 @@ protected:
 	HICON m_hIcon;
 	
 protected:
-	void ExportTask(const ITaskList10* pSrcTaskFile, HTASKITEM hTask, 
+	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 					CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings);
 	CString FormatDate(time_t tDate);
 

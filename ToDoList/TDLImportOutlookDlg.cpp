@@ -87,7 +87,7 @@ END_MESSAGE_MAP()
 
 IIMPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	m_pDestTaskFile = GetITLInterface<ITaskList10>(pDestTaskFile, IID_TASKLIST10);
+	m_pDestTaskFile = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
 	if (!m_pDestTaskFile)
 	{

@@ -42,10 +42,10 @@ protected:
 	HICON m_hIcon;
 
 protected:
-	bool ExportTask(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings);
+	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings);
 
-	void BuildPlacesMap(const ITaskList7* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings);
-	void ExportPlaces(const ITaskList7* pSrcTaskFile, CXmlItem* pDestPrj);
+	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings);
+	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
 
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 };

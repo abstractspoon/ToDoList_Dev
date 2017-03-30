@@ -43,11 +43,11 @@ protected:
 	void SaveDatabaseSetups(IPreferences* pPrefs, LPCTSTR szKey, const COdbcDatabaseSetupArray& aDbSetup) const;
 	bool GetDatabaseSetup(const CString& sConnect, const COdbcDatabaseSetupArray& aDbSetup, ODBCDATABASESETUP& dbSetup) const;
 
-	static bool LoadFromDatabase(const ODBCDATABASESETUP& dbSetup, ITaskList12* pTasks, CString& sErrMsg);
+	static bool LoadFromDatabase(const ODBCDATABASESETUP& dbSetup, ITASKLISTBASE* pTasks, CString& sErrMsg);
 
-	static bool SaveToDatabase(const ITaskList12* pTasks, const ODBCDATABASESETUP& dbSetup, CString& sErrMsg);
+	static bool SaveToDatabase(const ITASKLISTBASE* pTasks, const ODBCDATABASESETUP& dbSetup, CString& sErrMsg);
 
-	static BOOL AddOrUpdateTask(const ITaskList12* pTasks, HTASKITEM hTask, time64_t tLoad, COdbcTaskWriter& rs, 
+	static BOOL AddOrUpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, time64_t tLoad, COdbcTaskWriter& rs, 
 								const ODBCDATABASESETUP& dbSetup, COdbcMapIDToKey& mapIDs, BOOL bAndSiblings);
 
 };

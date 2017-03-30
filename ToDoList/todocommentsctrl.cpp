@@ -249,7 +249,9 @@ void CToDoCommentsCtrl::OnCommentsMenuCmd(UINT nCmdID)
 				sFileName.Replace(_T(" "), _T("%20"));
 			}
 			else // get the clipboard for just this tasklist
+			{
 				pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, TRUE);
+			}
 
 			if (pClipboard && pClipboard->GetFirstTask())
 			{

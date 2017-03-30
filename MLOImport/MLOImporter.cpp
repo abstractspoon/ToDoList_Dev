@@ -35,9 +35,9 @@ void CMLOImporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	ITaskList5* pTL5 = GetITLInterface<ITaskList5>(pDestTaskFile, IID_TASKLIST5);
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 	
-	if (!pTL5)
+	if (!pTasks)
 	{
 		ASSERT(0);
 		return IIR_BADINTERFACE;
@@ -74,16 +74,16 @@ IIMPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskF
 	pXIMLOTask = pXIMLOTask->GetItem(_T("TaskNode"));
 
 	if (pXIMLOTask)
-		ImportTask(pXIMLOTask, pTL5, NULL, TRUE); // NULL ==  root
+		ImportTask(pXIMLOTask, pTasks, NULL, TRUE); // NULL ==  root
 
 	return IIR_SUCCESS;
 }
 
-bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITaskList5* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const
+bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const
 {
 	ASSERT (pXIMLOTask);
 
-	HTASKITEM hTask = pDestTaskFile->NewTask(pXIMLOTask->GetItemValue(_T("Caption")), hParent);
+	HTASKITEM hTask = pDestTaskFile->NewTask(pXIMLOTask->GetItemValue(_T("Caption")), hParent, 0);
 
 	if (!hTask)
 		return false;

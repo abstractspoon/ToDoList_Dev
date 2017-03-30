@@ -37,7 +37,7 @@ protected:
 	CTDCAttributeMapping m_aColumnMapping;
 
 protected:
-	BOOL ImportTask(ITaskList16* pTasks, const CString& sLine) const;
+	BOOL ImportTask(ITASKLISTBASE* pTasks, const CString& sLine) const;
 
 	bool InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	int GetDepth(const CString& sLine);
@@ -48,9 +48,9 @@ protected:
 	static CString GetLine(const CStringArray& aLines, int& nLine);
 	static BOOL String2Date(const CString& sDate, time64_t& t64, BOOL bAndTime);
 
-	void AddAttributeToTask(ITaskList16* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aValues) const;
-	void AddCustomAttributesToTask(ITaskList16* pTasks, HTASKITEM hTask, const CStringArray& aValues) const;
-	void AddCustomAttributeDefinitions(ITaskList16* pTasks) const;
+	void AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aValues) const;
+	void AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const;
+	void AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const;
 
 	static TDC_UNITS GetTimeUnits(const CStringArray& aValues, int nCol);
 	static BOOL GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sID, CString& sLabel);

@@ -128,7 +128,7 @@ void CiCalImporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	ITaskList12* pTasks = GetITLInterface<ITaskList12>(pDestTaskFile, IID_TASKLIST12);
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
 	if (!pTasks)
 	{
@@ -321,7 +321,7 @@ int CiCalImporter::SortProc(const void* v1, const void* v2)
 	return 0;
 }
 
-bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITaskList12* pTasks)
+bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITASKLISTBASE* pTasks)
 {
 	// map tasks as we go so we can lookup parents when we need
 	CMapStringToPtr mapTasks;
@@ -375,7 +375,7 @@ bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITaskList12* pTas
 		// recurrence
 		if (pEvent->nRegularity != TDIR_ONCE)
 		{
-			pTasks->SetTaskRecurrence(hTask, pEvent->nRegularity, pEvent->dwRegSpecific1, pEvent->dwRegSpecific2, TRUE, TDIRO_REUSE);
+			pTasks->SetTaskRecurrence(hTask, pEvent->nRegularity, pEvent->dwRegSpecific1, pEvent->dwRegSpecific2, TDIRO_DUEDATE, TDIRO_REUSE, -1);
 		}
 		
 		CStringArray aCats;

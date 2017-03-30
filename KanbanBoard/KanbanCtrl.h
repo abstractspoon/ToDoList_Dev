@@ -129,7 +129,7 @@ protected:
 	GM_ITEMSTATE GetItemState(int nItem) const;
 	
 	void RedrawListCtrls(BOOL bErase = FALSE);
-	void RemoveDeletedTasks(const ITaskList16* pTasks);
+	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void Resize();
 	void Resize(const CRect& rect);
 	void ClearOtherListSelections(const CKanbanListCtrl* pList);
@@ -181,24 +181,24 @@ protected:
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CString& sNewValue);
 	void LoadDefaultAttributeValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 
-	BOOL UpdateData(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL RebuildData(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
-	BOOL AddTaskToData(const ITaskList16* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	BOOL UpdateGlobalAttributeValues(const ITaskList16* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
-	BOOL UpdateGlobalAttributeValues(const ITaskList16* pTasks, IUI_ATTRIBUTE nAttribute);
-	BOOL UpdateGlobalAttributeValues(const ITaskList16* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID);
+	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
+	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_ATTRIBUTE nAttribute);
+	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, LPCTSTR szXMLTag, LPCTSTR szAttribID);
 
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
 	BOOL WantShowColumn(const CKanbanListCtrl* pList) const;
 
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
-	static CString GetTaskAllocTo(const ITaskList16* pTasks, HTASKITEM hTask);
+	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents);
 	static CString GetXMLTag(IUI_ATTRIBUTE nAttrib);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
-	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib);
-	static void BuildTaskIDMap(const ITaskList16* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib);
+	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 
 	static int ListSortProc(const void* pV1, const void* pV2);
 

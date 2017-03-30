@@ -128,7 +128,7 @@ void ODBCTASK::SetHasAttribute(DWORD dwAttrib, BOOL bSet)
 		dwAttribs &= ~dwAttrib;
 }
 
-BOOL ODBCTASK::Save(ITaskList12* pTasks, HTASKITEM hTask, const COdbcMapKeyToID& mapTasks) const
+BOOL ODBCTASK::Save(ITASKLISTBASE* pTasks, HTASKITEM hTask, const COdbcMapKeyToID& mapTasks) const
 {
 	ASSERT(pTasks && hTask);
 
@@ -247,7 +247,7 @@ BOOL ODBCTASK::Save(ITaskList12* pTasks, HTASKITEM hTask, const COdbcMapKeyToID&
 	return TRUE;
 }
 
-BOOL ODBCTASK::Load(const ITaskList12* pTasks, HTASKITEM hTask, COdbcMapIDToKey& mapTasks)
+BOOL ODBCTASK::Load(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COdbcMapIDToKey& mapTasks)
 {
 	ASSERT(pTasks && hTask);
 
@@ -273,28 +273,28 @@ BOOL ODBCTASK::Load(const ITaskList12* pTasks, HTASKITEM hTask, COdbcMapIDToKey&
 	SetAttrib(sComments,	pTasks->GetTaskComments(hTask),				OT_COMMENTS);
 	SetAttrib(sCreatedBy,	pTasks->GetTaskCreatedBy(hTask),			OT_CREATEDBY);
 	SetAttrib(sExternalID,	pTasks->GetTaskExternalID(hTask),			OT_EXTERNALID);
-	SetAttrib(sFileRef,		pTasks->GetTaskFileLinkPath(hTask),	OT_FILEREF);
+	SetAttrib(sFileRef,		pTasks->GetTaskFileLinkPath(hTask),			OT_FILEREF);
 	SetAttrib(sIcon,		pTasks->GetTaskIcon(hTask),					OT_ICON);
 	SetAttrib(sStatus,		pTasks->GetTaskStatus(hTask),				OT_STATUS);
 	SetAttrib(sVersion,		pTasks->GetTaskVersion(hTask),				OT_VERSION);
 	SetAttrib(color,		pTasks->GetTaskColor(hTask),				OT_COLOR);
-	SetAttrib(bFlag,		pTasks->IsTaskFlagged(hTask) ? 1L : 0L,		OT_FLAG);
-	SetAttrib(nPercent,		pTasks->GetTaskPercentDone(hTask, FALSE),	OT_PERCENT);
-	SetAttrib(nPriority,	pTasks->GetTaskPriority(hTask, FALSE),		OT_PRIORITY);
-	SetAttrib(nRisk,		pTasks->GetTaskRisk(hTask, FALSE),			OT_RISK);//, -2);
-	SetAttrib(dCost,		pTasks->GetTaskCost(hTask, FALSE),			OT_COST);//, -2);
+	SetAttrib(bFlag,		pTasks->IsTaskFlagged(hTask, false) ? 1L : 0L,		OT_FLAG);
+	SetAttrib(nPercent,		pTasks->GetTaskPercentDone(hTask, false),	OT_PERCENT);
+	SetAttrib(nPriority,	pTasks->GetTaskPriority(hTask, false),		OT_PRIORITY);
+	SetAttrib(nRisk,		pTasks->GetTaskRisk(hTask, false),			OT_RISK);//, -2);
+	SetAttrib(dCost,		pTasks->GetTaskCost(hTask, false),			OT_COST);//, -2);
 
- 	SetAttrib(dTimeEst,		pTasks->GetTaskTimeEstimate(hTask, nUnits, FALSE),	OT_TIMEEST);
+ 	SetAttrib(dTimeEst,		pTasks->GetTaskTimeEstimate(hTask, nUnits, false),	OT_TIMEEST);
  	dTimeEst = th.GetTime(dTimeEst, MapUnitsToTHUnits(nUnits), THU_HOURS);
 
- 	SetAttrib(dTimeSpent,	pTasks->GetTaskTimeSpent(hTask, nUnits, FALSE),		OT_TIMESPENT);
+ 	SetAttrib(dTimeSpent,	pTasks->GetTaskTimeSpent(hTask, nUnits, false),		OT_TIMESPENT);
  	dTimeSpent = th.GetTime(dTimeSpent, MapUnitsToTHUnits(nUnits), THU_HOURS);
 	
 	SetHasAttribute(OT_CREATIONDATE,	pTasks->GetTaskCreationDate64(hTask, tCreation));
 	SetHasAttribute(OT_DONEDATE,		pTasks->GetTaskDoneDate64(hTask, tDone));
 	SetHasAttribute(OT_LASTMOD,			pTasks->GetTaskLastModified64(hTask, tModified));
-	SetHasAttribute(OT_STARTDATE,		pTasks->GetTaskStartDate64(hTask, FALSE, tStart));
-	SetHasAttribute(OT_DUEDATE,			pTasks->GetTaskDueDate64(hTask, FALSE, tDue));
+	SetHasAttribute(OT_STARTDATE,		pTasks->GetTaskStartDate64(hTask, false, tStart));
+	SetHasAttribute(OT_DUEDATE,			pTasks->GetTaskDueDate64(hTask, false, tDue));
 
 	// arrays
 	SetAttrib(nItem, pTasks->GetTaskAllocatedToCount(hTask), OT_ALLOCTO);

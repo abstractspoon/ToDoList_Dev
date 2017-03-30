@@ -81,7 +81,7 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPref
 
 IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	ITaskList16* pTasks = GetITLInterface<ITaskList16>(pDestTaskFile, IID_TASKLIST16);
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
 	if (!pTasks)
 	{
@@ -166,7 +166,7 @@ CString CTaskListCsvImporter::GetTaskTitle(const CStringArray& sValues) const
 	return sEmpty;
 }
 
-BOOL CTaskListCsvImporter::ImportTask(ITaskList16* pTasks, const CString& sLine) const
+BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLine) const
 {
 	// must have at least one field
 	CStringArray aValues;
@@ -264,7 +264,7 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 	return FALSE;
 }
 
-void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList16* pTasks) const
+void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const
 {
 	int nAttrib = m_aColumnMapping.GetSize();
 	
@@ -283,7 +283,7 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITaskList16* pTasks) co
 	}
 }
 
-void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList16* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
+void CTaskListCsvImporter::AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
 {
 	int nAttrib = min(aValues.GetSize(), m_aColumnMapping.GetSize());
 	
@@ -316,7 +316,7 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITaskList16* pTasks, HTASKI
 }
 
 
-void CTaskListCsvImporter::AddAttributeToTask(ITaskList16* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
+void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
 {
 	int nCol = m_aColumnMapping.FindMappedAttribute(nAttrib);
 	

@@ -64,9 +64,9 @@ bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 
 IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	ITaskList8* pITL8 = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
+	ITaskList8* pTasks = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
 	
-	if (!pITL8)
+	if (!pTasks)
 	{
 		ASSERT(0);
 		return IIR_BADINTERFACE;
@@ -87,7 +87,7 @@ IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDes
 		file.ReadString(sProjectName);
 		Misc::Trim(sProjectName);
 
-		pITL8->SetProjectName(sProjectName);
+		pTasks->SetProjectName(sProjectName);
 	}
 
 	// what follows are the tasks, indented to express subtasks
@@ -111,7 +111,7 @@ IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDes
 
 		if (nDepth == nLastDepth) // sibling
 		{
-			hParent = hLastTask ? pITL8->GetTaskParent(hLastTask) : NULL;
+			hParent = hLastTask ? pTasks->GetTaskParent(hLastTask) : NULL;
 		}
 		else if (nDepth > nLastDepth) // child
 		{
@@ -119,19 +119,19 @@ IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDes
 		}
 		else if (hLastTask) // we need to work up the tree
 		{
-			hParent = pITL8->GetTaskParent(hLastTask);
+			hParent = pTasks->GetTaskParent(hLastTask);
 
 			while (hParent && nDepth < nLastDepth)
 			{
-				hParent = pITL8->GetTaskParent(hParent);
+				hParent = pTasks->GetTaskParent(hParent);
 				nLastDepth--;
 			}
 		}
 		
-		HTASKITEM hTask = pITL8->NewTask(sTitle, hParent, 0);
+		HTASKITEM hTask = pTasks->NewTask(sTitle, hParent, 0);
 
 		if (!sComments.IsEmpty())
-			pITL8->SetTaskComments(hTask, sComments);
+			pTasks->SetTaskComments(hTask, sComments);
 
 		// update state
 		hLastTask = hTask;

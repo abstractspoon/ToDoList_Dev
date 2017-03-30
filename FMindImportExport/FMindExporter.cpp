@@ -64,6 +64,14 @@ void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)
 
 bool CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
 	CXmlFile fileDest(_T("map"));
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
 
@@ -73,16 +81,13 @@ bool CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePat
 	CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
 	hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
 
-	//Attrib Manager settings
-	//This will make the attribs not to be shown as a list view at every node;	
+	// Attrib Manager settings
+	// This will make the attribs not to be shown as a list view at every node;	
 	CXmlItem *attribManItem = firstItem->AddItem(_T("attribute_registry"),_T(""));	
 	attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
 
 	// export first task
-	const ITaskList10* pITL10 = GetITLInterface<ITaskList10>(pSrcTaskFile, IID_TASKLIST10);
-	ASSERT (pITL10);
-
-	ExportTask(pITL10, pITL10->GetFirstTask(), firstItem , 0, TRUE);
+	ExportTask(pTasks, pTasks->GetFirstTask(), firstItem , 0, TRUE);
 
 	// save output manually to restore non-escaping of & and <>
 	CString sOutput = Export(fileDest);
@@ -97,18 +102,12 @@ bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFi
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
-		const ITaskList10* pITL10 = GetITLInterface<ITaskList10>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST8);
+		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 		
-		if (pITL10)
+		if (pTasks)
 		{
 			CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
-
-			CString sProjectName = pITL10->GetProjectName();
-
-// 			if (sProjectName.IsEmpty())
-// 				sProjectName = FileMisc::GetFileNameFromPath(pITL8->GetAttribute(TDL_FILENAME), FALSE);
-
-			firstItem->AddItem(_T("TEXT"), sProjectName);	
+			firstItem->AddItem(_T("TEXT"), pTasks->GetProjectName());	
 
 			CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
 			hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
@@ -119,7 +118,7 @@ bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFi
 			attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
 
 			// export first task
-			ExportTask(pITL10, pITL10->GetFirstTask(), firstItem, 0, TRUE);
+			ExportTask(pTasks, pTasks->GetFirstTask(), firstItem, 0, TRUE);
 		}
 	}
 
@@ -172,7 +171,7 @@ CString CFMindExporter::Translate(LPCTSTR szText)
 	return sTranslated;
 }
 
-void CFMindExporter::ExportTask(const ITaskList10* pSrcTaskFile, HTASKITEM hTask, 
+void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 								CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings)
 {
 	if (!hTask)
@@ -262,40 +261,41 @@ void CFMindExporter::ExportTask(const ITaskList10* pSrcTaskFile, HTASKITEM hTask
 	ADDCUSTOMATTRIB(FM_CUSTOMSTATUS, pSrcTaskFile->GetTaskStatus(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMFILEREF, pSrcTaskFile->GetTaskFileLinkPath(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMCOLOR, (int)pSrcTaskFile->GetTaskColor(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMPRIORITY, pSrcTaskFile->GetTaskPriority(hTask, FALSE))
-	ADDCUSTOMATTRIB(FM_CUSTOMRISK, pSrcTaskFile->GetTaskRisk(hTask, FALSE))
-	ADDCUSTOMATTRIB(FM_CUSTOMPERCENT, pSrcTaskFile->GetTaskPercentDone(hTask, FALSE))
+	ADDCUSTOMATTRIB(FM_CUSTOMPRIORITY, pSrcTaskFile->GetTaskPriority(hTask, false))
+	ADDCUSTOMATTRIB(FM_CUSTOMRISK, pSrcTaskFile->GetTaskRisk(hTask, false))
+	ADDCUSTOMATTRIB(FM_CUSTOMPERCENT, pSrcTaskFile->GetTaskPercentDone(hTask, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMPOS, (int)pSrcTaskFile->GetTaskPosition(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMFLAG, pSrcTaskFile->IsTaskFlagged(hTask))
+	ADDCUSTOMATTRIB(FM_CUSTOMFLAG, pSrcTaskFile->IsTaskFlagged(hTask, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMCREATEDBY, pSrcTaskFile->GetTaskCreatedBy(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMEXTID, pSrcTaskFile->GetTaskExternalID(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMCOST, pSrcTaskFile->GetTaskCost(hTask, FALSE))
+	ADDCUSTOMATTRIB(FM_CUSTOMCOST, pSrcTaskFile->GetTaskCost(hTask, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMVERSION, pSrcTaskFile->GetTaskVersion(hTask))
 
 	// dates
 	ADDCUSTOMATTRIB(FM_CUSTOMDONEDATE, pSrcTaskFile->GetTaskDoneDateString(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMDUEDATE, pSrcTaskFile->GetTaskDueDateString(hTask, FALSE))
-	ADDCUSTOMATTRIB(FM_CUSTOMSTARTDATE, pSrcTaskFile->GetTaskStartDateString(hTask))
+	ADDCUSTOMATTRIB(FM_CUSTOMDUEDATE, pSrcTaskFile->GetTaskDueDateString(hTask, false))
+	ADDCUSTOMATTRIB(FM_CUSTOMSTARTDATE, pSrcTaskFile->GetTaskStartDateString(hTask, false))
 
 	// times
 	TDC_UNITS nUnits;
-	ADDCUSTOMATTRIB(FM_CUSTOMTIMEEST, pSrcTaskFile->GetTaskTimeEstimate(hTask, nUnits, FALSE))
+	ADDCUSTOMATTRIB(FM_CUSTOMTIMEEST, pSrcTaskFile->GetTaskTimeEstimate(hTask, nUnits, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMTIMEESTUNITS, nUnits)
-	ADDCUSTOMATTRIB(FM_CUSTOMTIMESPENT, pSrcTaskFile->GetTaskTimeSpent(hTask, nUnits, FALSE))
+	ADDCUSTOMATTRIB(FM_CUSTOMTIMESPENT, pSrcTaskFile->GetTaskTimeSpent(hTask, nUnits, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMTIMESPENTUNITS, nUnits)
 
 	// recurrence
 	int nRegularity = 0, nReuse = 0;
 	DWORD dwSpecific1 = 0, dwSpecific2 = 0;
-	int nRecalcFrom = 0;
+	int nRecalcFrom = 0, nNumOccur = 0;
 
-	if (pSrcTaskFile->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse))
+	if (pSrcTaskFile->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse, nNumOccur))
 	{
 		ADDCUSTOMATTRIB(FM_CUSTOMREGULARITY, nRegularity)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURSPEC1, (int)dwSpecific1)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURSPEC2, (int)dwSpecific2)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURRECALCFROM, nRecalcFrom)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURREUSE, nReuse)
+		ADDCUSTOMATTRIB(FM_CUSTOMNUMOCCUR, nNumOccur)
 	}
 	
 	// End of Attrib List not Supported by FreeMind

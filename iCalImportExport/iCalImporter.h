@@ -99,7 +99,7 @@ protected:
 
 protected:
 	int ImportTasks(const CStringArray& aLines, CiCalEventArray& aTasks);
-	bool ImportTasks(const CiCalEventArray& aTasks, ITaskList12* pTasks);
+	bool ImportTasks(const CiCalEventArray& aTasks, ITASKLISTBASE* pTasks);
 
 protected:
 	static int PreProcessFileLines(CStringArray& aLines);

@@ -88,16 +88,15 @@ bool CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFil
 	if (!fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
 		return false;
 
-	// else
-	const ITaskList4* pITL4 = GetITLInterface<ITaskList4>(pSrcTaskFile, IID_TASKLIST4);
-	
 	// export report title as dummy task
+	const ITaskList4* pTasks = GetITLInterface<ITaskList4>(pSrcTaskFile, IID_TASKLIST4);
+
 	if (WANTPROJECT)
 	{
-		CString sTitle = pITL4->GetReportTitle();
+		CString sTitle = pTasks->GetReportTitle();
 		
 		if (sTitle.IsEmpty())
-			sTitle = pITL4->GetProjectName();
+			sTitle = pTasks->GetProjectName();
 		
 		// note: we export the title even if it's empty
 		// to maintain consistency with the importer that the first line
@@ -123,16 +122,17 @@ bool CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDe
 		return false;
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
-	{
-		const ITaskList4* pITL4 = GetITLInterface<ITaskList4>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST4);
+	{ 
+		// minimum interface
+		const ITaskList4* pTasks = GetITLInterface<ITaskList4>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST4);
 		
-		if (pITL4)
+		if (pTasks)
 		{
 			// always export report title as dummy task 
-			CString sTitle = pITL4->GetReportTitle();
+			CString sTitle = pTasks->GetReportTitle();
 			
 			if (sTitle.IsEmpty())
-				sTitle = pITL4->GetProjectName();
+				sTitle = pTasks->GetProjectName();
 			
 			// note: we export the title even if it's empty
 			// to maintain consistency with the importer that the first line
@@ -142,7 +142,7 @@ bool CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDe
 			
 			// export first task at depth == 1 to indent 
 			// it from the project name
-			ExportTask(pITL4, pITL4->GetFirstTask(), fileOut, 1, TRUE);
+			ExportTask(pTasks, pTasks->GetFirstTask(), fileOut, 1, TRUE);
 		}
 		
 		// add blank line before next tasklist
