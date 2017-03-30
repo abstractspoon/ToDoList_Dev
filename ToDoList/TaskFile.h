@@ -233,10 +233,10 @@ public:
 	//////////////////////////////////////////////////////////////
 	// ITaskList13 implementation 
 	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-		DWORD& dwSpecific2, BOOL& bRecalcFrom, int& nReuse, int& nNumOccur) const;
+		DWORD& dwSpecific2, int& nRecalcFrom, int& nReuse, int& nNumOccur) const;
 	
 	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-		DWORD dwSpecific2, BOOL bRecalcFrom, int nReuse, int nNumOccur);
+		DWORD dwSpecific2, int nRecalcFrom, int nReuse, int nNumOccur);
 
 	LPCTSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const;
 	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList);
@@ -244,8 +244,8 @@ public:
 	//////////////////////////////////////////////////////////////
 	// ITaskList12 implementation 
 	bool GetTaskCreationDate64(HTASKITEM hTask, time64_t& timeT) const;
-	bool GetTaskStartDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const;
-	bool GetTaskDueDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const;
+	bool GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const;
+	bool GetTaskDueDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const;
 	bool GetTaskDoneDate64(HTASKITEM hTask, time64_t& timeT) const;
 	bool GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const;
 	
@@ -260,8 +260,8 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList11 implementation 
-	time_t GetTaskStartDate(HTASKITEM hTask, BOOL bCalc) const;
-	LPCTSTR GetTaskStartDateString(HTASKITEM hTask, BOOL bCalc) const;
+	time_t GetTaskStartDate(HTASKITEM hTask, bool bCalc) const;
+	LPCTSTR GetTaskStartDateString(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskIcon(HTASKITEM hTask, LPCTSTR szIcon);
 	LPCTSTR GetTaskIcon(HTASKITEM hTask) const;
 
@@ -314,11 +314,11 @@ public:
 	// ITaskList6 implementation 
 	LPCTSTR GetTaskVersion(HTASKITEM hTask) const;
 	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-							DWORD& dwSpecific2, BOOL& bRecalcFromDue, int& nReuse) const;
+							DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const;
 
 	bool SetTaskVersion(HTASKITEM hTask, LPCTSTR szVersion);
 	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-							DWORD dwSpecific2, BOOL bRecalcFromDue, int nReuse);
+							DWORD dwSpecific2, bool bRecalcFromDue, int nReuse);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList5 implementation 
@@ -331,7 +331,7 @@ public:
 	LPCTSTR GetHtmlCharSet() const;
 	LPCTSTR GetReportTitle() const;
 	LPCTSTR GetReportDate() const;
-	double GetTaskCost(HTASKITEM hTask, BOOL bCalc) const;
+	double GetTaskCost(HTASKITEM hTask, bool bCalc) const;
 	int GetTaskCategoryCount(HTASKITEM hTask) const;
 	LPCTSTR GetTaskCategory(HTASKITEM hTask, int nIndex) const;
 	LPCTSTR GetTaskDependency(HTASKITEM hTask) const;
@@ -341,10 +341,10 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList3 implementation 
-	time_t GetTaskDueDate(HTASKITEM hTask, BOOL bCalc) const;
-	LPCTSTR GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const;
+	time_t GetTaskDueDate(HTASKITEM hTask, bool bCalc) const;
+	LPCTSTR GetTaskDueDateString(HTASKITEM hTask, bool bCalc) const;
 	COLORREF GetTaskTextColor(HTASKITEM hTask) const;
-	int GetTaskRisk(HTASKITEM hTask, BOOL bHighest) const;
+	int GetTaskRisk(HTASKITEM hTask, bool bHighest) const;
 	LPCTSTR GetTaskExternalID(HTASKITEM hTask) const;
 
 	bool SetTaskRisk(HTASKITEM hTask, int nRisk);
@@ -397,11 +397,11 @@ public:
 	unsigned long GetTaskPriorityColor(HTASKITEM hTask) const;
 	unsigned long GetTaskPosition(HTASKITEM hTask) const;
 
-	int GetTaskPriority(HTASKITEM hTask, BOOL bHighest) const;
-	unsigned char GetTaskPercentDone(HTASKITEM hTask, BOOL bCalc) const;
+	int GetTaskPriority(HTASKITEM hTask, bool bHighest) const;
+	unsigned char GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const;
 
-	double GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& cUnits, BOOL bCalc) const;
-	double GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& cUnits, BOOL bCalc) const;
+	double GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& cUnits, bool bCalc) const;
+	double GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& cUnits, bool bCalc) const;
 
 	time_t GetTaskLastModified(HTASKITEM hTask) const;
 	time_t GetTaskDoneDate(HTASKITEM hTask) const;

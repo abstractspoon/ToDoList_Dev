@@ -128,11 +128,11 @@ public:
 	virtual unsigned long GetTaskColor(HTASKITEM hTask) const = 0;
 	virtual unsigned long GetTaskPriorityColor(HTASKITEM hTask) const = 0;
 
-	virtual int GetTaskPriority(HTASKITEM hTask, BOOL bHighest) const = 0;
-	virtual unsigned char GetTaskPercentDone(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual int GetTaskPriority(HTASKITEM hTask, bool bHighest) const = 0;
+	virtual unsigned char GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const = 0;
 
-	virtual double GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& cUnits, BOOL bCalc) const = 0;
-	virtual double GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& cUnits, BOOL bCalc) const = 0;
+	virtual double GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& cUnits, bool bCalc) const = 0;
+	virtual double GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& cUnits, bool bCalc) const = 0;
 
 	virtual time_t GetTaskLastModified(HTASKITEM hTask) const = 0;
 	virtual time_t GetTaskDoneDate(HTASKITEM hTask) const = 0;
@@ -198,10 +198,10 @@ class ITaskList3 : public ITaskList2
 {
 	// new methods
 public:
-	virtual time_t GetTaskDueDate(HTASKITEM hTask, BOOL bCalc) const = 0;
-	virtual LPCWSTR GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual time_t GetTaskDueDate(HTASKITEM hTask, bool bCalc) const = 0;
+	virtual LPCWSTR GetTaskDueDateString(HTASKITEM hTask, bool bCalc) const = 0;
 	virtual COLORREF GetTaskTextColor(HTASKITEM hTask) const = 0;
-	virtual int GetTaskRisk(HTASKITEM hTask, BOOL bHighest) const = 0;
+	virtual int GetTaskRisk(HTASKITEM hTask, bool bHighest) const = 0;
 	virtual LPCWSTR GetTaskExternalID(HTASKITEM hTask) const = 0;
 	
 	virtual bool SetTaskRisk(HTASKITEM hTask, int nRisk) = 0;
@@ -217,7 +217,7 @@ public:
 	virtual LPCWSTR GetHtmlCharSet() const = 0;
 	virtual LPCWSTR GetReportTitle() const = 0;
 	virtual LPCWSTR GetReportDate() const = 0;
-	virtual double GetTaskCost(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual double GetTaskCost(HTASKITEM hTask, bool bCalc) const = 0;
 	virtual int GetTaskCategoryCount(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskCategory(HTASKITEM hTask, int nIndex) const = 0;
 	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask) const = 0;
@@ -238,9 +238,9 @@ class ITaskList6 : public ITaskList5
 	// new methods
 public:
 	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, BOOL bRecalcFromDue, int nReuse) = 0;
+									DWORD dwSpecific2, bool bRecalcFromDue, int nReuse) = 0;
 	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, BOOL& bRecalcFromDue, int& nReuse) const = 0;
+									DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const = 0;
 
 	virtual bool SetTaskVersion(HTASKITEM hTask, LPCWSTR szVersion) = 0;
 	virtual LPCWSTR GetTaskVersion(HTASKITEM hTask) const = 0;
@@ -315,8 +315,8 @@ class ITaskList11 : public ITaskList10
 {
 	// new methods
 public:
-	virtual time_t GetTaskStartDate(HTASKITEM hTask, BOOL bCalc) const = 0;
-	virtual LPCWSTR GetTaskStartDateString(HTASKITEM hTask, BOOL bCalc) const = 0;
+	virtual time_t GetTaskStartDate(HTASKITEM hTask, bool bCalc) const = 0;
+	virtual LPCWSTR GetTaskStartDateString(HTASKITEM hTask, bool bCalc) const = 0;
 
 	virtual bool SetTaskIcon(HTASKITEM hTask, LPCWSTR szIcon) = 0;
 	virtual LPCWSTR GetTaskIcon(HTASKITEM hTask) const = 0;
@@ -327,8 +327,8 @@ class ITaskList12 : public ITaskList11
 	// new methods
 public:
 	virtual bool GetTaskCreationDate64(HTASKITEM hTask, time64_t& timeT) const = 0;
-	virtual bool GetTaskStartDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const = 0;
-	virtual bool GetTaskDueDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const = 0;
+	virtual bool GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const = 0;
+	virtual bool GetTaskDueDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const = 0;
 	virtual bool GetTaskDoneDate64(HTASKITEM hTask, time64_t& timeT) const = 0;
 	virtual bool GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const = 0;
 
@@ -349,10 +349,10 @@ class ITaskList13 : public ITaskList12
 	// new methods
 public:
 	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, BOOL bRecalcFromDue, 
+									DWORD dwSpecific2, int nRecalcFrom, 
 									int nReuse, int nNumOccur) = 0;
 	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, BOOL& bRecalcFromDue, 
+									DWORD& dwSpecific2, int& nRecalcFrom, 
 									int& nReuse, int& nNumOccur) const = 0;
 
 	virtual LPCWSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const = 0;

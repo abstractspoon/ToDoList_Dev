@@ -1716,17 +1716,17 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 		tdi.bFlagged = IsTaskFlagged(hTask);
 		tdi.bLocked = IsTaskLocked(hTask, false);
 		tdi.color = (COLORREF)GetTaskColor(hTask);
-		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, FALSE);
-		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, FALSE);
-		tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, FALSE);
-		tdi.nPriority = (int)GetTaskPriority(hTask, FALSE);
+		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false);
+		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, false);
+		tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, false);
+		tdi.nPriority = (int)GetTaskPriority(hTask, false);
 		tdi.dateDue = GetTaskDueDateOle(hTask);
 		tdi.dateStart = GetTaskStartDateOle(hTask);
 		tdi.dateDone = GetTaskDoneDateOle(hTask);
 		tdi.dateCreated = GetTaskCreationDateOle(hTask);
-		tdi.nRisk = GetTaskRisk(hTask, FALSE);
+		tdi.nRisk = GetTaskRisk(hTask, false);
 		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID);
-		tdi.dCost = GetTaskCost(hTask, FALSE);
+		tdi.dCost = GetTaskCost(hTask, false);
 		tdi.sVersion = GetTaskVersion(hTask);
 		tdi.sIcon = GetTaskIcon(hTask);
 
@@ -2400,7 +2400,7 @@ unsigned long CTaskFile::GetTaskPriorityColor(HTASKITEM hTask) const
 	return color;
 }
 
-int CTaskFile::GetTaskPriority(HTASKITEM hTask, BOOL bHighest) const
+int CTaskFile::GetTaskPriority(HTASKITEM hTask, bool bHighest) const
 {
 	if (bHighest && TaskHasAttribute(hTask, TDL_TASKHIGHESTPRIORITY))
 		return GetTaskInt(hTask, TDL_TASKHIGHESTPRIORITY);
@@ -2408,7 +2408,7 @@ int CTaskFile::GetTaskPriority(HTASKITEM hTask, BOOL bHighest) const
 	return GetTaskInt(hTask, TDL_TASKPRIORITY);
 }
 
-unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, BOOL bCalc) const
+unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCCOMPLETION))
 		return GetTaskUChar(hTask, TDL_TASKCALCCOMPLETION);
@@ -2416,7 +2416,7 @@ unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, BOOL bCalc) const
 	return GetTaskUChar(hTask, TDL_TASKPERCENTDONE);
 }
 
-double CTaskFile::GetTaskCost(HTASKITEM hTask, BOOL bCalc) const
+double CTaskFile::GetTaskCost(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCCOST))
 		return GetTaskDouble(hTask, TDL_TASKCALCCOST);
@@ -2550,12 +2550,19 @@ bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSp
 
 // ITaskList6 interface
 bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, BOOL& bRecalcFromDue, int& nReuse) const
+									DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const
 {
 	int nDummy1, nDummy2;
+	int nRecalcFrom;
 
-	return GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-							bRecalcFromDue, nReuse, nDummy1, nDummy2);
+	if (GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+							nRecalcFrom, nReuse, nDummy1, nDummy2))
+	{
+		bRecalcFromDue = (nRecalcFrom == TDIRO_DUEDATE);
+		return true;
+	}
+
+	return false;
 }
 
 // ITaskList13 interface
@@ -2565,7 +2572,7 @@ bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSp
 {
 	int nDummy;
 
-	// Note: for backwards compatibility nNumOccur maps to the remaining occurences
+	// Note: for backwards compatibility nNumOccur maps to the remaining occurrences
 	return GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
 							nRecalcFrom, nReuse, nDummy, nNumOccur);
 }
@@ -2586,7 +2593,7 @@ TDC_UNITS CTaskFile::GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem
 	return nUnits;
 }
 
-double CTaskFile::GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& nUnits, BOOL bCalc) const
+double CTaskFile::GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& nUnits, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCTIMEESTIMATE))
 	{
@@ -2599,7 +2606,7 @@ double CTaskFile::GetTaskTimeEstimate(HTASKITEM hTask, TDC_UNITS& nUnits, BOOL b
 	return GetTaskDouble(hTask, TDL_TASKTIMEESTIMATE);
 }
 
-double CTaskFile::GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& nUnits, BOOL bCalc) const
+double CTaskFile::GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& nUnits, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCTIMESPENT))
 	{
@@ -2631,7 +2638,7 @@ time_t CTaskFile::GetTaskDueDate(HTASKITEM hTask) const
 	return GetTaskDueDate(hTask, FALSE);
 }
 
-time_t CTaskFile::GetTaskDueDate(HTASKITEM hTask, BOOL bCalc) const
+time_t CTaskFile::GetTaskDueDate(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATE))
 		return GetTaskDate(hTask, TDL_TASKCALCDUEDATE, TRUE);
@@ -2639,7 +2646,7 @@ time_t CTaskFile::GetTaskDueDate(HTASKITEM hTask, BOOL bCalc) const
 	return GetTaskDate(hTask, TDL_TASKDUEDATE, TRUE);
 }
 
-LPCTSTR CTaskFile::GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const
+LPCTSTR CTaskFile::GetTaskDueDateString(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATESTRING))
 		return GetTaskString(hTask, TDL_TASKCALCDUEDATESTRING);
@@ -2647,7 +2654,7 @@ LPCTSTR CTaskFile::GetTaskDueDateString(HTASKITEM hTask, BOOL bCalc) const
 	return GetTaskString(hTask, TDL_TASKDUEDATESTRING);
 }
 
-time_t CTaskFile::GetTaskStartDate(HTASKITEM hTask, BOOL bCalc) const
+time_t CTaskFile::GetTaskStartDate(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATE))
 		return GetTaskDate(hTask, TDL_TASKCALCSTARTDATE, TRUE);
@@ -2655,7 +2662,7 @@ time_t CTaskFile::GetTaskStartDate(HTASKITEM hTask, BOOL bCalc) const
 	return GetTaskDate(hTask, TDL_TASKSTARTDATE, TRUE);
 }
 
-LPCTSTR CTaskFile::GetTaskStartDateString(HTASKITEM hTask, BOOL bCalc) const
+LPCTSTR CTaskFile::GetTaskStartDateString(HTASKITEM hTask, bool bCalc) const
 {
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATESTRING))
 		return GetTaskString(hTask, TDL_TASKCALCSTARTDATESTRING);
@@ -2675,7 +2682,7 @@ bool CTaskFile::GetTaskCreationDate64(HTASKITEM hTask, time64_t& timeT) const
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
-bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const
+bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskStartDateOle(hTask);
 
@@ -2685,7 +2692,7 @@ bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT)
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
-bool CTaskFile::GetTaskDueDate64(HTASKITEM hTask, BOOL bCalc, time64_t& timeT) const
+bool CTaskFile::GetTaskDueDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskDueDateOle(hTask);
 	
@@ -2877,7 +2884,7 @@ COLORREF CTaskFile::GetTaskBkgndColor(HTASKITEM /*hTask*/) const
 	return CLR_NONE;
 }
 
-int CTaskFile::GetTaskRisk(HTASKITEM hTask, BOOL bHighest) const
+int CTaskFile::GetTaskRisk(HTASKITEM hTask, bool bHighest) const
 {
 	if (bHighest && TaskHasAttribute(hTask, TDL_TASKHIGHESTRISK))
 		return GetTaskInt(hTask, TDL_TASKHIGHESTRISK);
@@ -3336,7 +3343,7 @@ bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpec
 
 // ITaskList6 interface
 bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, BOOL bRecalcFromDue, int nReuse)
+									DWORD dwSpecific2, bool bRecalcFromDue, int nReuse)
 {
 	return SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
 							(bRecalcFromDue ? TDIRO_DUEDATE : TDIRO_DONEDATE), nReuse, -1);
