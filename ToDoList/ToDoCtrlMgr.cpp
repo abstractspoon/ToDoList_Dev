@@ -160,13 +160,6 @@ CString CToDoCtrlMgr::GetFilePath(int nIndex, BOOL bStrict) const
 	return sPath;
 }
 
-BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
-{
-	CHECKVALIDINDEXRET(nIndex, FALSE);
-
-	return !GetToDoCtrl(nIndex).GetFilePath().IsEmpty();
-}
-
 CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));
@@ -266,6 +259,13 @@ void CToDoCtrlMgr::ClearFilePath(int nIndex)
 	CHECKVALIDINDEX(nIndex);
 
 	GetToDoCtrl(nIndex).ClearFilePath();
+}
+
+BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	return !GetFilePath(nIndex, TRUE).IsEmpty();
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
@@ -1202,36 +1202,11 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 
 	if (CreateBackup(sTDLPath, sBackupFolder, nKeepBackups))
 	{
-		// backup task time log files
-		if (Prefs().GetLogTaskTimeSeparately())
-		{
-			FileMisc::TerminatePath(sBackupFolder);
-			sBackupFolder += FileMisc::GetFileNameFromPath(sTDLPath, FALSE);
-						
-#define MAGIC_TASKID	    999999999
-#define MAGIC_TASKIDSTR _T("999999999")
-			
-			// get a file filter
-			CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
-			sLogPath.Replace(MAGIC_TASKIDSTR, _T("*"));
-			
-			CString sDrive, sFolder, sFName, sExt;
-			
-			FileMisc::SplitPath(sLogPath, &sDrive, &sFolder, &sFName, &sExt);
-			FileMisc::MakePath(sLogPath, sDrive, sFolder);
-			
-			CStringArray aLogFiles;
-			int nFile = FileMisc::FindFiles(sFolder, aLogFiles, FALSE, sFName + sExt);
-
-			while (nFile--)
-				CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
-		}
-		else // single log file
-		{
-			CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath();
-			
-			CreateBackup(sLogPath, sBackupFolder, nKeepBackups);
-		}
+		// Back up task time log files
+		FileMisc::TerminatePath(sBackupFolder);
+		sBackupFolder += FileMisc::GetFileNameFromPath(sTDLPath, FALSE);
+		
+		BackupLogFiles(sTDLPath, sBackupFolder, nKeepBackups);
 
 		return TRUE;
 	}
@@ -1239,8 +1214,42 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 	return FALSE;
 }
 
+void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const
+{
+	if (Prefs().GetLogTaskTimeSeparately())
+	{
+#define MAGIC_TASKID	    999999999
+#define MAGIC_TASKIDSTR _T("999999999")
+		
+		// get a file filter
+		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
+		sLogPath.Replace(MAGIC_TASKIDSTR, _T("*"));
+		
+		CString sDrive, sFolder, sFName, sExt;
+		
+		FileMisc::SplitPath(sLogPath, &sDrive, &sFolder, &sFName, &sExt);
+		FileMisc::MakePath(sLogPath, sDrive, sFolder);
+		
+		CStringArray aLogFiles;
+		int nFile = FileMisc::FindFiles(sFolder, aLogFiles, FALSE, sFName + sExt);
+		
+		while (nFile--)
+			CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
+	}
+	else // single log file
+	{
+		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath();
+		
+		CreateBackup(sLogPath, sBackupFolder, nKeepBackups);
+	}
+}
+
 BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups)
 {
+	// No need to create a backup of non-existent file
+	if (!FileMisc::FileExists(sPath))
+		return FALSE;
+
 	// NOTE: We encode the app version in the backup name to ensure that
 	// in the event that an update contains a breaking bug which corrupts 
 	// tasklists we haven't already deleted 'good' backups of the previous 
@@ -1259,7 +1268,7 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 		FileMisc::MakePath(sBackupPath, sDrive, sFolder);
 		
 		CStringArray aFiles;
-		int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFName + _T("*") + sExt);
+		int nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
 
 		if (nNumFiles >= nKeepBackups)
 		{
@@ -1290,7 +1299,7 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 				CString sPrevVer = Misc::FormatArray(aPrevVer, '_');
 				sFName.Replace(sAppVer, sPrevVer);
 
-				nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFName + _T("*") + sExt);
+				nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
 
 				switch (nNumFiles)
 				{
