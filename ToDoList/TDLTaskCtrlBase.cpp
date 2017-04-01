@@ -396,7 +396,7 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 			::GetClientRect(m_hdrTasks, rHeader);
 			
 			int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
-			CString sPath = m_data.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
+			CString sPath = m_data.FormatTaskPath(GetSelectedTaskID(), nColWidthInChars);
 			
 			if (!sPath.IsEmpty())
 				sHeader.Format(_T("%s [%s]"), CEnString(IDS_TDC_COLUMN_TASK), sPath);
@@ -1833,7 +1833,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 
 				if (bDueToday)
 				{
-					nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE); // ignore due tasks
+					nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS, FALSE); // ignore due tasks
 				}
 				else if (bOverDue && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
 				{
@@ -1841,7 +1841,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 				}
 				else
 				{
-					nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS);
+					nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS);
 				}
 
 				if (nPriority != FM_NOPRIORITY)
@@ -2427,7 +2427,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				rSubItem.DeflateRect(2, 1, 3, 2);
 				
 				// first draw the priority colour
-				int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+				int nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS, FALSE);
 				BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
 				
 				if (bHasPriority)
@@ -2499,7 +2499,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					
 					if (!bDone || !HasStyle(TDCS_DONEHAVELOWESTPRIORITY)) // determine appropriate priority
 					{
-						int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+						int nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS, FALSE);
 						crBar = GetPriorityColor(nPriority);
 						
 						// check for due
@@ -3316,14 +3316,14 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_POSITION:
-		sTaskColText = m_data.GetTaskPositionString(pTDI, pTDS);
+		sTaskColText = m_data.FormatTaskPosition(pTDI, pTDS);
 		break;
 
 	case TDCC_PRIORITY:
 		// priority color
 		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
 		{
-			int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+			int nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS, FALSE);
 			BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
 
 			// draw priority number over the top
@@ -3335,7 +3335,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_RISK:
 		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
 		{
-			int nRisk = m_data.GetTaskHighestRisk(pTDI, pTDS);
+			int nRisk = m_data.CalcTaskHighestRisk(pTDI, pTDS);
 
 			if (nRisk != FM_NORISK)
 				sTaskColText = Misc::Format(nRisk);
@@ -3516,7 +3516,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_PATH:
-		sTaskColText = m_data.GetTaskPath(pTDI, pTDS);
+		sTaskColText = m_data.FormatTaskPath(pTDI, pTDS);
 		break;
 
 		// items having no text or rendered differently
@@ -5654,7 +5654,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 		if (bIncludeTaskName && nMaxLen != -1)
 			nMaxLen -= sTaskTitle.GetLength();
 
-		sPath = m_data.GetTaskPath(dwTaskID, nMaxLen);
+		sPath = m_data.FormatTaskPath(dwTaskID, nMaxLen);
 	
 		if (bIncludeTaskName)
 			sPath += sTaskTitle;

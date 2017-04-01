@@ -253,7 +253,7 @@ public:
 	BOOL IsSelectedTaskReference() const { return m_taskTree.IsSelectedTaskReference(); }
 	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
 
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_data.GetTaskPath(dwTaskID, nMaxLen); }
+	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_data.FormatTaskPath(dwTaskID, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
 	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;

@@ -218,7 +218,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			
 		case TDCA_PATH:
 			{
-				CString sPath = m_data.GetTaskPath(pTDI, pTDS);
+				CString sPath = m_data.FormatTaskPath(pTDI, pTDS);
 
 				// needs care in the handling of trailing back-slashes 
 				// when testing for equality
@@ -329,7 +329,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			
 		case TDCA_PRIORITY:
 			{
-				int nPriority = m_data.GetTaskHighestPriority(pTDI, pTDS);
+				int nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS);
 				bMatch = ValueMatches(nPriority, rule, resTask);
 
 				// Replace '-2' with 'not set'
@@ -340,7 +340,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			
 		case TDCA_RISK:
 			{
-				int nRisk = m_data.GetTaskHighestRisk(pTDI, pTDS);
+				int nRisk = m_data.CalcTaskHighestRisk(pTDI, pTDS);
 				bMatch = ValueMatches(nRisk, rule, resTask);
 
 				// Replace '-2' with 'not set'
@@ -422,7 +422,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			if (bMatch)
 			{
 				// replace the default 'int' with full position path
-				Misc::ReplaceLastT(resTask.aMatched, m_data.GetTaskPositionString(pTDI, pTDS));
+				Misc::ReplaceLastT(resTask.aMatched, m_data.FormatTaskPosition(pTDI, pTDS));
 			}
 			break;
 			
@@ -1121,11 +1121,11 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		switch (nSortBy)
 		{
 		case TDCC_POSITION:
-			nCompare = Compare(m_data.GetTaskPositionString(pTDI1, pTDS1), m_data.GetTaskPositionString(pTDI2, pTDS2));
+			nCompare = Compare(m_data.FormatTaskPosition(pTDI1, pTDS1), m_data.FormatTaskPosition(pTDI2, pTDS2));
 			break;
 
 		case TDCC_PATH:
-			nCompare = Compare(m_data.GetTaskPath(pTDI1, pTDS1), m_data.GetTaskPath(pTDI2, pTDS2));
+			nCompare = Compare(m_data.FormatTaskPath(pTDI1, pTDS1), m_data.FormatTaskPath(pTDI2, pTDS2));
 			break;
 
 		case TDCC_CLIENT:
@@ -1255,7 +1255,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 				else if (bUseHighestPriority)
 				{
-					nPriority1 = m_data.GetTaskHighestPriority(pTDI1, pTDS1);
+					nPriority1 = m_data.CalcTaskHighestPriority(pTDI1, pTDS1);
 				}
 
 				// item2
@@ -1270,7 +1270,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 				else if (bUseHighestPriority)
 				{
-					nPriority2 = m_data.GetTaskHighestPriority(pTDI2, pTDS2);
+					nPriority2 = m_data.CalcTaskHighestPriority(pTDI2, pTDS2);
 				}
 
 				nCompare = Compare(nPriority1, nPriority2);
@@ -1293,7 +1293,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 				else if (bUseHighestRisk)
 				{
-					nRisk1 = m_data.GetTaskHighestRisk(pTDI1, pTDS1);
+					nRisk1 = m_data.CalcTaskHighestRisk(pTDI1, pTDS1);
 				}
 
 				// item2
@@ -1303,7 +1303,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 				else if (bUseHighestRisk)
 				{
-					nRisk2 = m_data.GetTaskHighestRisk(pTDI2, pTDS2);
+					nRisk2 = m_data.CalcTaskHighestRisk(pTDI2, pTDS2);
 				}
 
 				nCompare = Compare(nRisk1, nRisk2);
@@ -1436,10 +1436,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				double dPercent1 = -1.0, dPercent2 = -1.0;
 
 				// compare first by % completion
-				if (m_data.GetTaskSubtaskTotals(pTDI1, pTDS1, nSubtasksCount1, nSubtasksDone1))
+				if (m_data.CalcTaskSubtaskTotals(pTDI1, pTDS1, nSubtasksCount1, nSubtasksDone1))
 					dPercent1 = ((double)nSubtasksDone1 / nSubtasksCount1);
 
-				if (m_data.GetTaskSubtaskTotals(pTDI2, pTDS2, nSubtasksCount2, nSubtasksDone2))
+				if (m_data.CalcTaskSubtaskTotals(pTDI2, pTDS2, nSubtasksCount2, nSubtasksDone2))
 					dPercent2 = ((double)nSubtasksDone2 / nSubtasksCount2);
 
 				nCompare = Compare(dPercent1, dPercent2);

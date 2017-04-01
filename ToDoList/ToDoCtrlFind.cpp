@@ -184,11 +184,11 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			break;
 
 		case TDCA_POSITION:
-			sLongest = m_data.GetTaskPositionString(pTDI, pTDS);
+			sLongest = m_data.FormatTaskPosition(pTDI, pTDS);
 			break;
 
 		case TDCA_PATH:
-			sLongest = m_data.GetTaskPath(pTDI, pTDS);
+			sLongest = m_data.FormatTaskPath(pTDI, pTDS);
 			break;
 
 		case TDCA_ALLOCTO:		
