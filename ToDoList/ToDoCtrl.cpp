@@ -3813,7 +3813,7 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	m_data.SetTaskStatus(dwNewTaskID, m_tdiDefault.sStatus);
 
 	// Reset number of occurrences
-	m_data.ResetRecurringSubtaskOcurrences(dwNewTaskID);
+	m_data.ResetRecurringSubtaskOccurrences(dwNewTaskID);
 
 	// Special handling for recreated tasks
 	if (dwNewTaskID != dwPrevTaskID)

@@ -253,7 +253,7 @@ public:
 
 	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
 	void ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
-	void ResetRecurringSubtaskOcurrences(DWORD dwTaskID);
+	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	
 	inline BOOL HasStyle(int nStyle) const { return m_aStyles[nStyle] ? TRUE : FALSE; }
 	

@@ -2194,35 +2194,29 @@ TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, double dTime, TDC_UNITS 
 	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->dTimeSpent, dTime, pTDI->nTimeSpentUnits, nUnits);
 }
 
-void CToDoCtrlData::ResetRecurringSubtaskOcurrences(DWORD dwTaskID)
+BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID)
 {
-	const TODOSTRUCTURE* pTDS = m_struct.FindTask(dwTaskID);
-
-	if (!pTDS)
-	{
-		ASSERT(0);
-		return;
-	}
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDS(dwTaskID, pTDS, FALSE);
 	
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
 		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
-		TODOITEM* pTDI = GetTask(dwSubtaskID, TRUE);
-		ASSERT(pTDI);
-		
-		if (pTDI)
-		{
-			if (pTDI->IsRecurring())
-			{
-				int nNumOccur = pTDI->trRecurrence.GetOccurrenceCount();
-				pTDI->trRecurrence.SetOccurrenceCount(nNumOccur, nNumOccur);
-			}
+		TODOITEM* pTDI = NULL;
+		GET_TDI(dwSubtaskID, pTDI, FALSE);
 
-			// then its subtasks
-			ResetRecurringSubtaskOcurrences(dwSubtaskID);
+		if (pTDI->IsRecurring())
+		{
+			int nNumOccur = pTDI->trRecurrence.GetOccurrenceCount();
+			pTDI->trRecurrence.SetOccurrenceCount(nNumOccur, nNumOccur);
 		}
+
+		// then its subtasks
+		ResetRecurringSubtaskOccurrences(dwSubtaskID);
 	}
+
+	return TRUE;
 }
 
 TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend)
