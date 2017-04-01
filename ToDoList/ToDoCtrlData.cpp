@@ -248,7 +248,7 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask) const
 
 BOOL CToDoCtrlData::HasTask(DWORD dwTaskID) const
 {
-	return (GetTask(dwTaskID) != NULL);
+	return m_items.HasTask(dwTaskID);
 }
 
 // external version returning const

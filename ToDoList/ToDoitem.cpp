@@ -576,6 +576,19 @@ TODOITEM* CToDoCtrlDataItems::GetTask(DWORD dwTaskID) const
 	return pTDI;
 }
 
+BOOL CToDoCtrlDataItems::HasTask(DWORD dwTaskID) const
+{
+	TODOITEM* pTDI = NULL;
+	
+	if (Lookup(dwTaskID, pTDI))
+	{
+		ASSERT(pTDI);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 POSITION CToDoCtrlDataItems::GetStartPosition() const
 {
 	return CMapIDToTDI::GetStartPosition();

@@ -151,6 +151,7 @@ public:
 
 	int GetCount() const;
 	TODOITEM* GetTask(DWORD dwTaskID) const;
+	BOOL HasTask(DWORD dwTaskID) const;
 	POSITION GetStartPosition() const;
 	void GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
 
