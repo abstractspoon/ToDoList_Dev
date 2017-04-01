@@ -117,7 +117,6 @@ CToDoCtrlData::CToDoCtrlData(const CWordArray& aStyles)
 	: 
 	m_aStyles(aStyles)
 {
-	m_mapID2TDI.InitHashTable(1991); // prime number closest to 2000
 }
 
 CToDoCtrlData::~CToDoCtrlData()
@@ -178,7 +177,7 @@ BOOL CToDoCtrlData::AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, 
 			TODOITEM* pTDI = NewTask(tasks, hTask);
 			ASSERT(pTDI);
 			
-			m_mapID2TDI[dwTaskID] = pTDI;
+			m_items.AddTask(dwTaskID, pTDI);
 			
 			// New task becomes the parent
 			pTDSParent = m_struct.AddTask(dwTaskID, pTDSParent);
@@ -267,20 +266,13 @@ const TODOITEM* CToDoCtrlData::GetTrueTask(DWORD& dwTaskID) const
 // internal version returning non-const
 TODOITEM* CToDoCtrlData::GetTask(DWORD& dwTaskID, BOOL bTrue) const
 {
-	TODOITEM* pTDI = NULL;
+	TODOITEM* pTDI = m_items.GetTask(dwTaskID);
 
-	if (dwTaskID && m_mapID2TDI.Lookup(dwTaskID, pTDI) && bTrue)
+	if (pTDI && bTrue && pTDI->dwTaskRefID)
 	{
-		// check for reference task
-		if (pTDI->dwTaskRefID)
-		{
-			DWORD dwRefID = pTDI->dwTaskRefID;
-			
-			if (dwRefID && m_mapID2TDI.Lookup(dwRefID, pTDI))
-			{
-				dwTaskID = dwRefID;
-			}
-		}
+		DWORD dwRefID = pTDI->dwTaskRefID;
+		pTDI = m_items.GetTask(dwRefID);
+		dwTaskID = dwRefID;
 	}
 	
 	return pTDI;
@@ -348,17 +340,11 @@ const TODOSTRUCTURE* CToDoCtrlData::LocateTask(DWORD dwTaskID) const
 
 void CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
 { 
+	ASSERT (pTDI && dwTaskID);
+
+	// must delete duplicates else we'll get a memory leak
 	if (dwTaskID && pTDI)
-	{
-		// must delete duplicates else we'll get a memory leak
-		TODOITEM* pExist = GetTask(dwTaskID, FALSE);
-		
-		if (pExist)
-		{
-			m_mapID2TDI.RemoveKey(dwTaskID);
-			delete pExist;
-		}
-	}
+		m_items.DeleteTask(dwTaskID);
 	
 	// add to structure
 	TODOSTRUCTURE* pTDSParent = NULL;
@@ -367,8 +353,8 @@ void CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DW
 	if (!Locate(dwParentID, dwPrevSiblingID, pTDSParent, nPrevSibling))
 		return;
 	
-	m_struct.InsertTask(dwTaskID, pTDSParent, nPrevSibling + 1);
-	m_mapID2TDI.SetAt(dwTaskID, pTDI); 
+	VERIFY(m_struct.InsertTask(dwTaskID, pTDSParent, nPrevSibling + 1));
+	VERIFY(m_items.AddTask(dwTaskID, pTDI)); 
 	
 	AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID);
 }
@@ -377,20 +363,7 @@ void CToDoCtrlData::DeleteAllTasks()
 {
 	if (m_undo.CurrentAction() == TDCUAT_NONE)
 	{
-		// delete the data
-		DWORD dwID;
-		TODOITEM* pTDI;
-		POSITION pos = m_mapID2TDI.GetStartPosition();
-
-		while (pos)
-		{
-			m_mapID2TDI.GetNextAssoc(pos, dwID, pTDI);
-			delete pTDI;
-		}
-
-		m_mapID2TDI.RemoveAll();
-
-		// delete the structure
+		m_items.DeleteAll();
 		m_struct.DeleteAll();
 	}
 	else
@@ -662,7 +635,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 
 	// Search the entire tasklist for tasks having 'dwTaskID'
 	// in their list of dependencies
-	POSITION pos = m_mapID2TDI.GetStartPosition();
+	POSITION pos = m_items.GetStartPosition();
 	CString sTaskID = Misc::Format(dwTaskID);
 		
 	while (pos)
@@ -670,7 +643,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 		TODOITEM* pTDI = NULL;
 		DWORD dwDependsID;
 			
-		m_mapID2TDI.GetNextAssoc(pos, dwDependsID, pTDI);
+		m_items.GetNextAssoc(pos, dwDependsID, pTDI);
 		ASSERT (pTDI);
 			
 		if (pTDI && (dwDependsID != dwTaskID) && Misc::Find(pTDI->aDependencies, sTaskID) != -1)
@@ -688,14 +661,14 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependen
 
 	if (dwTaskID)
 	{
-		POSITION pos = m_mapID2TDI.GetStartPosition();
+		POSITION pos = m_items.GetStartPosition();
 		
 		while (pos)
 		{
 			TODOITEM* pTDI = NULL;
 			DWORD dwDependsID;
 			
-			m_mapID2TDI.GetNextAssoc(pos, dwDependsID, pTDI);
+			m_items.GetNextAssoc(pos, dwDependsID, pTDI);
 			ASSERT (pTDI);
 			
 			if (pTDI && (dwDependsID != dwTaskID))
@@ -1218,8 +1191,7 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos)
 	AddUndoElement(TDCUEO_DELETE, dwTaskID, dwParentID, dwPrevSiblingID);
 	
 	// then this item
-	delete GetTask(dwTaskID, FALSE);
-	m_mapID2TDI.RemoveKey(dwTaskID);
+	m_items.DeleteTask(dwTaskID);
 	m_struct.DeleteTask(dwTaskID);
 
 	// then update it's referees and dependents unless it was a reference itself

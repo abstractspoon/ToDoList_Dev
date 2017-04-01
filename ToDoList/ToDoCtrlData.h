@@ -23,10 +23,6 @@ class CBinaryData;
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&> CMapIDToTDI;
-
-//////////////////////////////////////////////////////////////////////
-
 // class to help start and end undo actions
 // only one can be active at one time
 class CUndoAction
@@ -53,7 +49,7 @@ public:
 
 	int BuildDataModel(const CTaskFile& tasks);
 	
-	inline int GetTaskCount() const { return m_mapID2TDI.GetCount(); }
+	inline int GetTaskCount() const { return m_items.GetCount(); }
 	
 	TODOITEM* NewTask() const;
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
@@ -266,7 +262,7 @@ public:
 	static DH_UNITS MapUnitsToDHUnits();
 
 protected:
-	CMapIDToTDI m_mapID2TDI; // the real data
+	CToDoCtrlDataItems m_items; // the real data
 	const CWordArray& m_aStyles; // CToDoCtrl styles
 	CToDoCtrlUndo m_undo;
 	CToDoCtrlStructure m_struct;

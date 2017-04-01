@@ -510,6 +510,84 @@ TH_UNITS TODOITEM::GetTHTimeUnits(BOOL bTimeEst) const
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrlDataItems::CToDoCtrlDataItems() 
+{
+	InitHashTable(1991); // prime number closest to 2000
+}
+
+CToDoCtrlDataItems::~CToDoCtrlDataItems() 
+{
+	CleanUp();
+}
+
+int CToDoCtrlDataItems::GetCount() const 
+{ 
+	return CMapIDToTDI::GetCount(); 
+}
+
+void CToDoCtrlDataItems::CleanUp()
+{
+	DWORD dwID = 0;
+	TODOITEM* pTDI = NULL;
+	POSITION pos = CMapIDToTDI::GetStartPosition();
+
+	while (pos)
+	{
+		CMapIDToTDI::GetNextAssoc(pos, dwID, pTDI);
+		delete pTDI;
+	}
+
+	CMapIDToTDI::RemoveAll();
+}
+
+BOOL CToDoCtrlDataItems::DeleteTask(DWORD dwTaskID)
+{
+	TODOITEM* pTDI = NULL;
+
+	if (CMapIDToTDI::Lookup(dwTaskID, pTDI))
+	{
+		delete pTDI;
+		RemoveKey(dwTaskID);
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrlDataItems::AddTask(DWORD dwTaskID, TODOITEM* pTDI)
+{
+	if (!pTDI || !dwTaskID)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	SetAt(dwTaskID, pTDI);
+	return TRUE;
+}
+
+TODOITEM* CToDoCtrlDataItems::GetTask(DWORD dwTaskID) const
+{
+	TODOITEM* pTDI = NULL;
+	Lookup(dwTaskID, pTDI);
+
+	ASSERT(pTDI);
+	return pTDI;
+}
+
+POSITION CToDoCtrlDataItems::GetStartPosition() const
+{
+	return CMapIDToTDI::GetStartPosition();
+}
+
+void CToDoCtrlDataItems::GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
+{
+	return CMapIDToTDI::GetNextAssoc(rNextPosition, dwTaskID, pTDI);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 TODOSTRUCTURE::TODOSTRUCTURE(DWORD dwID) : m_dwID(dwID), m_pTDSParent(NULL)
 {
 	ASSERT(dwID);

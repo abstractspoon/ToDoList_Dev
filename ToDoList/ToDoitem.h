@@ -9,7 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-//#include "tdcstruct.h"
+///////////////////////////////////////////////////////////////////////////////////
+
 #include "tdcenum.h"
 #include "tdcrecurrence.h"
 
@@ -19,6 +20,8 @@
 #include "..\interfaces\ITasklist.h"
 
 #include <afxtempl.h>
+
+///////////////////////////////////////////////////////////////////////////////////
 
 class TODOITEM
 {
@@ -135,6 +138,31 @@ private:
 	static double NULL_VALUE;
 	static COleDateTimeSpan s_dtsRecentModPeriod;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+typedef CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&> CMapIDToTDI;
+
+class CToDoCtrlDataItems : protected CMapIDToTDI
+{
+public:
+	CToDoCtrlDataItems();
+	virtual ~CToDoCtrlDataItems();
+
+	int GetCount() const;
+	TODOITEM* GetTask(DWORD dwTaskID) const;
+	POSITION GetStartPosition() const;
+	void GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+
+	void DeleteAll() { CleanUp(); }
+	BOOL DeleteTask(DWORD dwTaskID);
+	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI);
+
+protected:
+	void CleanUp();
+};
+
+///////////////////////////////////////////////////////////////////////////////////
 
 class TODOSTRUCTURE
 {
