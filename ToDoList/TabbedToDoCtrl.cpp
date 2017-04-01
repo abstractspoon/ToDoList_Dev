@@ -811,7 +811,7 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTA
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
 		return FALSE;
 
 	HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
