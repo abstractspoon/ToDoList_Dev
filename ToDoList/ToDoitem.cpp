@@ -841,9 +841,11 @@ BOOL CToDoCtrlStructure::DeleteTask(DWORD dwID)
 
 TODOSTRUCTURE* CToDoCtrlStructure::FindTask(DWORD dwID) const
 {
+	ASSERT(dwID);
+
 	TODOSTRUCTURE* pTDS = NULL;
 	
-	return (dwID && m_mapStructure.Lookup(dwID, pTDS)) ? pTDS : NULL;
+	return ((dwID && m_mapStructure.Lookup(dwID, pTDS)) ? pTDS : NULL);
 }
 
 BOOL CToDoCtrlStructure::FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const
@@ -867,24 +869,19 @@ BOOL CToDoCtrlStructure::FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& n
 	nPos = pTDSParent->GetSubTaskPosition(pTDS);
 	ASSERT(nPos != -1);
 	
-	return (nPos !=-1);
+	return (nPos != -1);
 }
 
 BOOL CToDoCtrlStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos)
 {
-	return InsertTask(TODOSTRUCTURE(dwID), pTDSParent, nPos);
-}
+	TODOSTRUCTURE* pTDSChild = new TODOSTRUCTURE(dwID);
 
-BOOL CToDoCtrlStructure::InsertTask(const TODOSTRUCTURE& tds, TODOSTRUCTURE* pTDSParent, int nPos)
-{
-	TODOSTRUCTURE* pTDSChild = new TODOSTRUCTURE(tds);
-	
 	if (!InsertTask(pTDSChild, pTDSParent, nPos))
 	{
 		delete pTDSChild;
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 

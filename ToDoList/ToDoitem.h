@@ -177,6 +177,7 @@ protected:
 	CArray<TODOSTRUCTURE*, TODOSTRUCTURE*&> m_aSubTasks; 
 	
 protected:
+	// For CToDoCtrlStructure only
 	TODOSTRUCTURE(const TODOSTRUCTURE& tds);
 	const TODOSTRUCTURE& operator=(const TODOSTRUCTURE& tds); 
 	
@@ -202,9 +203,7 @@ public:
 	BOOL DeleteTask(DWORD dwID);
 	
 	TODOSTRUCTURE* AddTask(DWORD dwID, TODOSTRUCTURE* pTDSParent);
-	BOOL InsertTask(const TODOSTRUCTURE& tds, TODOSTRUCTURE* pTDSParent, int nPos);
 	BOOL InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos);
-	BOOL InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDSParent, int nPos);
 	
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
@@ -216,8 +215,10 @@ protected:
 	void BuildMap();
 	void AddToMap(const TODOSTRUCTURE* pTDS);
 	void RemoveFromMap(const TODOSTRUCTURE* pTDS);
+
 	const CToDoCtrlStructure& operator=(const CToDoCtrlStructure& tds); 
 	
+	BOOL InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDSParent, int nPos);
 };
 
 

@@ -366,11 +366,14 @@ BOOL CFilteredToDoCtrl::CopyCurrentSelection() const
 	{
 		DWORD dwSelID = TSH().GetNextItemData(pos);
 		ASSERT(dwSelID);
-		
-		HTASKITEM hSelTask = tasks.FindTask(dwSelID);
-		ASSERT(hSelTask);
-		
-		tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
+
+		if (!m_data.IsTaskReference(dwSelID))
+		{
+			HTASKITEM hSelTask = tasks.FindTask(dwSelID);
+			ASSERT(hSelTask);
+
+			tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
+		}
 	}
 	
 	// and their titles (including child dupes)
@@ -467,7 +470,7 @@ void CFilteredToDoCtrl::GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& 
 		if (!pTDI)
 			return;
 
-		// we add the task if it is completed (and optionally selected) or it has children
+		// we add the task if it is completed or it has children
 		if (pTDI->IsDone() || pTDS->HasSubTasks())
 		{
 			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID, 0);
@@ -860,7 +863,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		if (pFilter->HasAttribute(TDCA_SELECTION))
 		{
 			// check completion
-			if (pFilter->bIgnoreDone && m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+			if (pFilter->bIgnoreDone && m_data.CalcIsTaskDone(pTDI, pTDS))
 			{
 				bWantTask = FALSE;
 			}
@@ -1061,10 +1064,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 			// some more filtering required
 			if (HasStyle(TDCS_ALWAYSHIDELISTPARENTS) || m_filter.HasFilterFlag(FO_HIDEPARENTS))
 			{
-				const TODOSTRUCTURE* pTDS = m_data.LocateTask(res.dwTaskID);
-				ASSERT(pTDS);
-
-				if (pTDS->HasSubTasks())
+				if (m_data.TaskHasSubtasks(res.dwTaskID))
 					continue;
 			}
 			else if (m_filter.HasFilterFlag(FO_HIDECOLLAPSED))
@@ -1112,10 +1112,7 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 			}
 			else // item might have children currently filtered out
 			{
-				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-				ASSERT(pTDS);
-
-				bAdd = !pTDS->HasSubTasks();
+				bAdd = !m_data.TaskHasSubtasks(dwTaskID);
 			}
 		}
 		// else check if it's a parent item that's only present because
@@ -1130,7 +1127,10 @@ void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 				SEARCHRESULT result;
 
 				// ie. check that parent actually matches
-				bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
+				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+
+				if (pTDS)
+					bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);
 			}
 		}
 

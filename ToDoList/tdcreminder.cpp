@@ -140,7 +140,7 @@ BOOL TDCREMINDER::IsTaskDone() const
 {
 	ASSERT(pTDC);
 
-	return pTDC->IsTaskDone(dwTaskID, TDCCHECKALL);
+	return pTDC->IsTaskGoodAsDone(dwTaskID);
 }
 
 BOOL TDCREMINDER::TaskExists() const

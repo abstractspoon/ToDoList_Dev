@@ -6562,7 +6562,7 @@ BOOL CToDoCtrl::RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_
 	}
 
 	BOOL bRemove = FALSE;
-	BOOL bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
+	BOOL bDone = m_data.CalcIsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
 
 	// filter on completed tasks (and flagged tasks if requested)
 	if (bDone)
@@ -8689,22 +8689,6 @@ LRESULT CToDoCtrl::OnGetFont(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return (LRESULT)::SendMessage(::GetParent(*this), WM_GETFONT, 0, 0);
 }
 
-BOOL CToDoCtrl::IsTaskRecurring(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = GetTask(dwTaskID);
-	ASSERT(pTDI);
-
-	return (pTDI && pTDI->IsRecurring());
-}
-
-BOOL CToDoCtrl::CanTaskRecur(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = GetTask(dwTaskID);
-	ASSERT(pTDI);
-	
-	return (pTDI && pTDI->CanRecur());
-}
-
 void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
@@ -9046,8 +9030,12 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 
 		DWORD dwTaskID = m_taskTree.GetTaskID(htiParent);
 		pTDS = m_data.LocateTask(dwTaskID);
+		ASSERT(pTDS);
 	}
 #endif
+
+	if (!pTDS)
+		return FALSE;
 
 	// rebuild
 	int nSubtask = pTDS->GetSubTaskCount();
@@ -9612,10 +9600,10 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		}
 		
 		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
-			tasks.SetTaskFlag(hTask, m_data.IsTaskFlagged(pTDI, pTDS), TRUE);
+			tasks.SetTaskFlag(hTask, m_data.CalcIsTaskFlagged(pTDI, pTDS), TRUE);
 		
 		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
-			tasks.SetTaskLock(hTask, m_data.IsTaskLocked(pTDI, pTDS), TRUE);
+			tasks.SetTaskLock(hTask, m_data.CalcIsTaskLocked(pTDI, pTDS), TRUE);
 
 		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
 			tasks.SetTaskRecurrence(hTask, pTDI->trRecurrence);
@@ -9745,7 +9733,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
 			}
 		}
-		else if (m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+		else if (m_data.CalcIsTaskDone(pTDI, pTDS))
 		{
 			tasks.SetTaskGoodAsDone(hTask, TRUE);
 		}
@@ -9828,7 +9816,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		tasks.HideAttribute(hTask, TDL_TASKDONEDATE);
 		tasks.HideAttribute(hTask, TDL_TASKDONEDATESTRING);
 	}
-	else if (m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+	else if (m_data.CalcIsTaskDone(pTDI, pTDS))
 	{
 		tasks.SetTaskGoodAsDone(hTask, TRUE);
 	}
@@ -9951,7 +9939,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
 
 	// 'good as done'
-	if (m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+	if (m_data.CalcIsTaskDone(pTDI, pTDS))
 		tasks.SetTaskGoodAsDone(hTask, TRUE);
 
 	// subtask completion
@@ -10018,7 +10006,12 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 				return FALSE;
 
 			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-			ASSERT (pTDS);
+
+			if (!pTDS)
+			{
+				ASSERT(0);
+				return FALSE;
+			}
 			
 			BOOL bTitleCommentsOnly = (m_taskTree.ItemHasChildren(hti) &&
 									filter.HasFlag(TDCGTF_PARENTTITLECOMMENTSONLY));
@@ -10037,7 +10030,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 		if (!bMatch) //  no children matched -> 'Check ourselves'
 		{
 			BOOL bDone = pTDI->IsDone();
-			BOOL bGoodAsDone = bDone ? TRUE : m_data.IsTaskDone(dwTaskID, TDCCHECKALL);
+			BOOL bGoodAsDone = (bDone ? TRUE : m_data.CalcIsTaskDone(dwTaskID));
 			
 			switch (filter.nFilter)
 			{

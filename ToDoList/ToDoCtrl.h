@@ -191,9 +191,10 @@ public:
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
 
-	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKNONE) const { return m_data.IsTaskDone(dwTaskID, dwExtraCheck); }
-	BOOL IsTaskRecurring(DWORD dwTaskID) const;
-	BOOL CanTaskRecur(DWORD dwTaskID) const;
+	BOOL IsTaskDone(DWORD dwTaskID) const { return m_data.IsTaskDone(dwTaskID); }
+	BOOL IsTaskGoodAsDone(DWORD dwTaskID) const { return m_data.CalcIsTaskDone(dwTaskID); }
+	BOOL IsTaskRecurring(DWORD dwTaskID) const { return m_data.IsTaskRecurring(dwTaskID); }
+	BOOL CanTaskRecur(DWORD dwTaskID) const { return m_data.CanTaskRecur(dwTaskID); }
 
 	BOOL DeleteSelectedTask();
 	BOOL EditSelectedTask(BOOL bTaskIsNew = FALSE); 
@@ -654,7 +655,6 @@ protected:
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_taskTree.GetTask(dwTaskID); }
 	inline DWORD GetTaskID(HTREEITEM hti) const { return m_taskTree.GetTaskID(hti); }
 	inline DWORD GetTrueTaskID(HTREEITEM hti) const { return m_taskTree.GetTrueTaskID(hti); }
-	inline BOOL IsTaskReference(DWORD dwTaskID) const { return m_data.IsTaskReference(dwTaskID); }
 	inline HTREEITEM GetSelectedItem() const { return m_taskTree.GetSelectedItem(); }
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_taskTree.ItemHasChildren(hti); }
 	inline BOOL ItemHasParent(HTREEITEM hti) const { return (NULL != m_taskTree.ItemHasParent(hti)); }

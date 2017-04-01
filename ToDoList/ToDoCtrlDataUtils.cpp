@@ -113,7 +113,7 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	
 	// if the item is done and we're ignoring completed tasks 
 	// (and by corollary their children) then we can stop right-away
-	if (query.bIgnoreDone && m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+	if (query.bIgnoreDone && m_data.CalcIsTaskDone(pTDI, pTDS))
 		return 0;
 	
 	if (TaskMatches(pTDI, pTDS, query, result))
@@ -176,7 +176,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	if (!pTDI || !pTDS)
 		return FALSE;
 	
-	BOOL bIsDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
+	BOOL bIsDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 	
 	// if the item is done and we're ignoring completed tasks 
 	// (and by corollary their children) then we can stop right-away
@@ -298,7 +298,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 					bMatch = ValueMatches(dtDue, rule, resTask, bIncTime, TDCD_DUE);
 					
 					// handle overdue tasks
-					if (bMatch && query.bIgnoreOverDue && m_data.IsTaskOverDue(pTDI, pTDS))
+					if (bMatch && query.bIgnoreOverDue && m_data.CalcIsTaskOverDue(pTDI, pTDS))
 					{
 						bMatch = FALSE;
 					}
@@ -541,19 +541,18 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		{
 			const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent);
 
-			if (pTDIParent)
-			{
-				if (TaskMatches(pTDIParent, pTDSParent, query, result))
-				{
-					bMatches = TRUE;
-					break;
-				}
-				
-				// next parent
-				pTDSParent = pTDSParent->GetParentTask();
-			}
-			else
+			if (!pTDIParent)
 				break;
+
+			// else
+			if (TaskMatches(pTDIParent, pTDSParent, query, result))
+			{
+				bMatches = TRUE;
+				break;
+			}
+				
+			// next parent
+			pTDSParent = pTDSParent->GetParentTask();
 		}
 	}
 	
@@ -1021,10 +1020,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 	const TODOITEM* pTDI1 = NULL, *pTDI2 = NULL;
 	const TODOSTRUCTURE* pTDS1 = NULL, *pTDS2 = NULL;
 
-	VERIFY(m_data.GetTask(dwTask1ID, pTDI1, pTDS1));
-	VERIFY(m_data.GetTask(dwTask2ID, pTDI2, pTDS2));
-
-	if (!pTDI1 || !pTDS1 || !pTDI2 || !pTDS2)		
+	if (!m_data.GetTask(dwTask1ID, pTDI1, pTDS1) || 
+		!m_data.GetTask(dwTask2ID, pTDI2, pTDS2))
 	{
 		ASSERT(0);
 		return 0;
@@ -1035,8 +1032,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 
 	if (bSortDoneBelow)
 	{
-		BOOL bDone1 = m_data.IsTaskDone(pTDI1, pTDS1, TDCCHECKALL);
-		BOOL bDone2 = m_data.IsTaskDone(pTDI2, pTDS2, TDCCHECKALL);
+		BOOL bDone1 = m_data.CalcIsTaskDone(pTDI1, pTDS1);
+		BOOL bDone2 = m_data.CalcIsTaskDone(pTDI2, pTDS2);
 
 		if (bDone1 != bDone2)
 			return bDone1 ? 1 : -1;
@@ -1104,8 +1101,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		BOOL bHideDone = m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS);
 		BOOL bSortDoneBelow = m_data.HasStyle(TDCS_SORTDONETASKSATBOTTOM);
 
-		BOOL bDone1 = m_data.IsTaskDone(pTDI1, pTDS1, TDCCHECKALL);
-		BOOL bDone2 = m_data.IsTaskDone(pTDI2, pTDS2, TDCCHECKALL);
+		BOOL bDone1 = m_data.CalcIsTaskDone(pTDI1, pTDS1);
+		BOOL bDone2 = m_data.CalcIsTaskDone(pTDI2, pTDS2);
 
 		// can also do a partial optimization
 		if (bSortDoneBelow && 
@@ -1248,8 +1245,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 					nPriority1 = -1;
 				}
 				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
-						m_data.IsTaskDue(pTDI1, pTDS1) && 
-						(bSortDueTodayHigh || !m_data.IsTaskDue(pTDI1, pTDS1, TRUE)))
+						m_data.CalcIsTaskDue(pTDI1, pTDS1) && 
+						(bSortDueTodayHigh || !m_data.CalcIsTaskDue(pTDI1, pTDS1, TRUE)))
 				{
 					nPriority1 = pTDI1->nPriority + 11;
 				}
@@ -1263,8 +1260,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				{
 					nPriority2 = -1;
 				}
-				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && m_data.IsTaskDue(pTDI2, pTDS2) && 
-					(bSortDueTodayHigh || !m_data.IsTaskDue(pTDI2, pTDS2, TRUE)))
+				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && m_data.CalcIsTaskDue(pTDI2, pTDS2) && 
+					(bSortDueTodayHigh || !m_data.CalcIsTaskDue(pTDI2, pTDS2, TRUE)))
 				{
 					nPriority2 = pTDI2->nPriority + 11;
 				}

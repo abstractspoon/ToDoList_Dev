@@ -78,7 +78,7 @@ public:
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
-	void FixupParentCompletion(DWORD dwParentID);
+	BOOL FixupParentCompletion(DWORD dwParentID);
 
 	// undo/redo
 	BOOL BeginNewUndoAction(TDCUNDOACTIONTYPE nType);
@@ -113,9 +113,10 @@ public:
 	int GetTaskRisk(DWORD dwTaskID) const;
 	BOOL IsTaskFlagged(DWORD dwTaskID) const;
 	BOOL IsTaskLocked(DWORD dwTaskID) const;
+	BOOL IsTaskDone(DWORD dwTaskID) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetTaskNextOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
-	BOOL IsTaskRecurring(DWORD dwTaskID, BOOL bCheckParent = FALSE) const;
+	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
 	CString GetTaskVersion(DWORD dwTaskID) const;
 	CString FormatTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
@@ -150,12 +151,13 @@ public:
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
 	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
-	BOOL IsTaskFlagged(DWORD dwTaskID, BOOL bCheckSubtasks) const;
-	BOOL IsTaskLocked(DWORD dwTaskID, BOOL bCheckParent) const;
-	BOOL IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKNONE) const;
-	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
-	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday = FALSE) const;
-	BOOL IsTaskOverDue(DWORD dwTaskID) const;
+	BOOL CalcIsTaskRecurring(DWORD dwTaskID) const;
+	BOOL CalcIsTaskFlagged(DWORD dwTaskID) const;
+	BOOL CalcIsTaskLocked(DWORD dwTaskID) const;
+	BOOL CalcIsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKALL) const;
+	BOOL CalcIsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
+	BOOL CalcIsTaskDue(DWORD dwTaskID, BOOL bToday = FALSE) const;
+	BOOL CalcIsTaskOverDue(DWORD dwTaskID) const;
 	double CalcTaskDueDate(DWORD dwTaskID) const;
 	double CalcTaskStartDate(DWORD dwTaskID) const;
 	int CalcTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
@@ -165,27 +167,26 @@ public:
 	double CalcTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double CalcTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double CalcTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
+	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
+	BOOL CalcTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
+	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
+
 	CString FormatTaskAllocTo(DWORD dwTaskID) const;
 	CString FormatTaskCategories(DWORD dwTaskID) const;
 	CString FormatTaskTags(DWORD dwTaskID) const;
-	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
-	BOOL CalcTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
 	CString FormatTaskSubtaskCompletion(DWORD dwTaskID) const;
-	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
+
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
-	BOOL TaskHasRecurringParent(DWORD dwTaskID) const;
+	BOOL TaskHasSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
 
-	BOOL IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckSubtasks = -1) const;
-	BOOL IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckParent = -1) const;
-	BOOL IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
-	BOOL IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck) const;
-	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
-	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL IsTaskRecurring(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS = NULL, BOOL bCheckParent = FALSE) const;
-	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
-
+	BOOL CalcIsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	BOOL CalcIsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	BOOL CalcIsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
+	BOOL CalcIsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck = TDCCHECKALL) const;
+	BOOL CalcIsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
+	BOOL CalcIsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double CalcTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double CalcTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	int CalcTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
@@ -210,7 +211,6 @@ public:
 	CString FormatTaskCategories(const TODOITEM* pTDI) const;
 	CString FormatTaskTags(const TODOITEM* pTDI) const;
 
-	BOOL TaskHasRecurringParent(const TODOSTRUCTURE* pTDS) const;
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
 
@@ -345,6 +345,7 @@ protected:
 		return SET_CHANGE;
 	}
 
+	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	BOOL HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;

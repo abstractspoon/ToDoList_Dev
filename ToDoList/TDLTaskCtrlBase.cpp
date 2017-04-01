@@ -1758,7 +1758,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	crBack = CLR_NONE;
 	crText = GetSysColor(COLOR_WINDOWTEXT);
 
-	BOOL bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
+	BOOL bDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 
 	if (bDone)
 	{
@@ -1787,8 +1787,8 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			}
 
 			// else
-			BOOL bDue = m_data.IsTaskDue(pTDI, pTDS); // due today or overdue
-			BOOL bDueToday = bDue ? m_data.IsTaskDue(pTDI, pTDS, TRUE) : FALSE;
+			BOOL bDue = m_data.CalcIsTaskDue(pTDI, pTDS); // due today or overdue
+			BOOL bDueToday = bDue ? m_data.CalcIsTaskDue(pTDI, pTDS, TRUE) : FALSE;
 			BOOL bOverDue = (bDue && !bDueToday);
 
 			if (bDue)
@@ -1809,12 +1809,12 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			}
 
 			// else
-			if (HasColor(m_crStartedToday) && m_data.IsTaskStarted(pTDI, pTDS, TRUE))
+			if (HasColor(m_crStartedToday) && m_data.CalcIsTaskStarted(pTDI, pTDS, TRUE))
 			{
 				crText = m_crStartedToday;
 				break;
 			}
-			else if (HasColor(m_crStarted) && m_data.IsTaskStarted(pTDI, pTDS)) // started by now
+			else if (HasColor(m_crStarted) && m_data.CalcIsTaskStarted(pTDI, pTDS)) // started by now
 			{
 				crText = m_crStarted;
 				break;
@@ -1905,7 +1905,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	{
 		if (HasStyle(TDCS_TASKCOLORISBACKGROUND) && 
 			(crText != GetSysColor(COLOR_WINDOWTEXT)) &&
-			!m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+			!m_data.CalcIsTaskDone(pTDI, pTDS))
 		{
 			crBack = crText;
 			crText = GraphicsMisc::GetBestTextColor(crBack);
@@ -2113,7 +2113,7 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 		
 		COLORREF crPrev = pDC->SetTextColor(COMMENTSCOLOR);
 		
-		if (m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+		if (m_data.CalcIsTaskDone(pTDI, pTDS))
 		{
 			if (HasColor(m_crDone))
 				crPrev = pDC->SetTextColor(m_crDone);
@@ -2422,7 +2422,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			
 		case TDCC_PRIORITY:
 			// priority color
-			if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+			if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.CalcIsTaskDone(pTDI, pTDS))
 			{
 				rSubItem.DeflateRect(2, 1, 3, 2);
 				
@@ -2439,9 +2439,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				}
 				
 				// then, if the task is also due, draw a small tag
-				if (m_data.IsTaskDue(pTDI, pTDS))
+				if (m_data.CalcIsTaskDue(pTDI, pTDS))
 				{
-					BOOL bDueToday = m_data.IsTaskDue(pTDI, pTDS, TRUE);
+					BOOL bDueToday = m_data.CalcIsTaskDue(pTDI, pTDS, TRUE);
 					
 					// unless it's due today and the user doesn't want today's tasks marked as due
 					// or there's no due color 
@@ -2493,7 +2493,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				if (HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
 				{
 					// if the task is done then draw in 'done' colour else priority colour
-					BOOL bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
+					BOOL bDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 					
 					COLORREF crBar(m_crDone);
 					
@@ -2503,9 +2503,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 						crBar = GetPriorityColor(nPriority);
 						
 						// check for due
-						if (m_data.IsTaskDue(pTDI, pTDS))
+						if (m_data.CalcIsTaskDue(pTDI, pTDS))
 						{
-							BOOL bDueToday = m_data.IsTaskDue(pTDI, pTDS, TRUE);
+							BOOL bDueToday = m_data.CalcIsTaskDue(pTDI, pTDS, TRUE);
 							
 							if (bDueToday && HasColor(m_crDueToday))
 							{
@@ -2563,7 +2563,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			{
 				DrawColumnImage(pDC, nColID, rSubItem);
 			}
-			else if (m_data.IsTaskFlagged(pTDI, pTDS))
+			else if (m_data.CalcIsTaskFlagged(pTDI, pTDS))
 			{
 				DrawColumnImage(pDC, nColID, rSubItem, TRUE);
 			}
@@ -2574,7 +2574,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			{
 				DrawColumnImage(pDC, nColID, rSubItem);
 			}
-			else if (m_data.IsTaskLocked(pTDI, pTDS))
+			else if (m_data.CalcIsTaskLocked(pTDI, pTDS))
 			{
 				DrawColumnImage(pDC, nColID, rSubItem, TRUE);
 			}
@@ -2606,7 +2606,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_STARTDATE:
 			{
 				COleDateTime date;
-				BOOL bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
+				BOOL bDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 				BOOL bCalculated = FALSE;
 				
 				if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
@@ -2626,7 +2626,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_DUEDATE:
 			{
 				COleDateTime date;
-				BOOL bDone = m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL);
+				BOOL bDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 				BOOL bCalculated = FALSE;
 				
 				if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
@@ -3321,7 +3321,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 	case TDCC_PRIORITY:
 		// priority color
-		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_data.CalcIsTaskDone(pTDI, pTDS))
 		{
 			int nPriority = m_data.CalcTaskHighestPriority(pTDI, pTDS, FALSE);
 			BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
@@ -3333,7 +3333,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_RISK:
-		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_data.CalcIsTaskDone(pTDI, pTDS))
 		{
 			int nRisk = m_data.CalcTaskHighestRisk(pTDI, pTDS);
 
@@ -3394,7 +3394,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 
 			// if a task is completed and has no status and the completion status
 			// has been specified then draw the completion status
-			if (sTaskColText.IsEmpty() && !m_sCompletionStatus.IsEmpty() && m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+			if (sTaskColText.IsEmpty() && !m_sCompletionStatus.IsEmpty() && m_data.CalcIsTaskDone(pTDI, pTDS))
 				sTaskColText = m_sCompletionStatus;
 		}
 		break;
@@ -3414,7 +3414,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_PERCENT:
 		{
 			if (HasStyle(TDCS_HIDEPERCENTFORDONETASKS) && 
-				m_data.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+				m_data.CalcIsTaskDone(pTDI, pTDS))
 			{
 				break; // nothing to do
 			}
@@ -4157,7 +4157,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	BOOL bSingleSelection = (GetSelectedCount() == 1);
 	BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
 	BOOL bReadOnly = IsReadOnly();
-	BOOL bLocked = m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK));
+	BOOL bLocked = m_data.CalcIsTaskLocked(dwTaskID);
 
 	// Edit operations
 	if (!bReadOnly)
@@ -4171,9 +4171,9 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			return !bLocked;
 
 		case TDCC_LOCK:
-			// Prevent editing of inherited subtask lock states
+			// Prevent editing of subtasks inheriting parent lock state
 			if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
-				return !m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID), TRUE);
+				return !m_data.CalcIsTaskLocked(m_data.GetTaskParentID(dwTaskID));
 
 			// else
 			return TRUE;
@@ -4220,7 +4220,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	switch (nColID)
 	{
 	case TDCC_REMINDER:
-		return !m_data.IsTaskDone(dwTaskID, TDCCHECKALL);
+		return !m_data.CalcIsTaskDone(dwTaskID);
 
 	case TDCC_FILEREF:
 		if (pCursor)
@@ -5119,7 +5119,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (!m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK)))
+		if (!m_data.CalcIsTaskLocked(dwTaskID))
 			return TRUE;
 	}
 
@@ -5134,7 +5134,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (m_data.IsTaskLocked(dwTaskID, HasStyle(TDCS_SUBTASKSINHERITLOCK)))
+		if (m_data.CalcIsTaskLocked(dwTaskID))
 			return TRUE;
 	}
 
@@ -5952,7 +5952,7 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
 
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 {
-	return m_data.IsTaskDue(GetSelectedTaskID());
+	return m_data.CalcIsTaskDue(GetSelectedTaskID());
 }
 
 BOOL CTDLTaskCtrlBase::InitCheckboxImageList()
@@ -5991,11 +5991,12 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 	const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 	ASSERT(pTDI);
 	
-	CString sTip, sItem;
+	CString sTip;
 	
 	if (pTDI)
 	{
-		// format text multilined
+		// format text multi-lined
+		CString sItem;
 		sItem.Format(_T("%s %s"), CEnString(IDS_TDCTIP_TASK), pTDI->sTitle);
 		sTip += sItem;
 		

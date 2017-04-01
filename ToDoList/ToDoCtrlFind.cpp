@@ -703,7 +703,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 
 	// if the item is done and we're ignoring completed tasks 
 	// (and by corollary their children) then we can stop right-away
-	if (params.bIgnoreDone && m_data.IsTaskDone(dwID, TDCCHECKALL))
+	if (params.bIgnoreDone && m_data.CalcIsTaskDone(dwID))
 		return;
 
 	// also we can ignore parent tasks if required but we still need 
@@ -711,7 +711,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 	if (m_matcher.TaskMatches(dwID, params, result))
 	{
 		// check for overdue tasks
-		if (!params.bIgnoreOverDue || !m_data.IsTaskOverDue(dwID))
+		if (!params.bIgnoreOverDue || !m_data.CalcIsTaskOverDue(dwID))
 			aResults.Add(result);
 	}
 	
