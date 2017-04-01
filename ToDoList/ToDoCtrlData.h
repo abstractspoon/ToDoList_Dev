@@ -65,10 +65,12 @@ public:
 
 	const TODOSTRUCTURE* LocateTask(DWORD dwTaskID) const;
 	const TODOSTRUCTURE* GetStructure() const { return &m_struct; }
-
-	const TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue) const;
-	BOOL GetTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS, BOOL bTrue = TRUE) const;
 	BOOL HasTask(DWORD dwTaskID) const;
+
+	const TODOITEM* GetTask(DWORD dwTaskID) const;
+	const TODOITEM* GetTrueTask(DWORD& dwTaskID) const;
+	BOOL GetTask(DWORD dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
+	BOOL GetTrueTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
@@ -305,9 +307,11 @@ protected:
 
 	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 
-	// internal non-const versions
-	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS, BOOL bTrue) const;
-	TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue);
+	// internal versions
+	TODOITEM* GetTrueTask(const TODOSTRUCTURE* pTDS) const;
+	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS) const;
+	TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue) const;
+	BOOL GetTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS, BOOL bTrue) const;
 
 	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 

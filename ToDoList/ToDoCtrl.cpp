@@ -3741,7 +3741,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
 
-		if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		{
 			ASSERT(0);
 			return 0L;
@@ -6555,7 +6555,7 @@ BOOL CToDoCtrl::RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -8908,7 +8908,7 @@ BOOL CToDoCtrl::AddSubTasksToTaskFile(const TODOSTRUCTURE* pTDSParent, CTaskFile
 		if (!dwTaskID)
 			return FALSE;
 		
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID, FALSE);
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 		ASSERT(pTDI);
 
 		if (!pTDI)
@@ -9983,7 +9983,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 		ASSERT (GetTaskID(hti) == dwTaskID);
 	}
 	
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, FALSE);
+	const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
 	ASSERT (pTDI);
 	
 	if (pTDI)

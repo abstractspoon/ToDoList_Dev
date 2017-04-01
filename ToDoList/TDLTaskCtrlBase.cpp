@@ -286,7 +286,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 	ASSERT(nColID != TDCC_NONE);
 	ASSERT(dwTaskID);
 
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 
 	if (!pTDI)
 	{
@@ -1357,7 +1357,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 	}
 	ASSERT(nColID == TDCC_FILEREF);
 
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 	
 	if (!pTDI)
 	{
@@ -1730,11 +1730,11 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLOR
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	
-	if (m_data.GetTask(dwTaskID, pTDI, pTDS))
-		return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
+	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+		return FALSE;
 	
 	// else
-	return FALSE;
+	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
 }
 
 BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
@@ -2233,7 +2233,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				const TODOITEM* pTDI = NULL;
 				const TODOSTRUCTURE* pTDS = NULL;
 				
-				if (m_data.GetTask(dwTrueID, pTDI, pTDS))
+				if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 				{
 					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
@@ -5357,7 +5357,7 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CString& sCom
     {
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 		
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+		const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 		ASSERT (pTDI);
 		
 		if (pTDI)
@@ -5988,7 +5988,7 @@ BOOL CTDLTaskCtrlBase::InitCheckboxImageList()
 
 CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 {
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 	ASSERT(pTDI);
 	
 	CString sTip;

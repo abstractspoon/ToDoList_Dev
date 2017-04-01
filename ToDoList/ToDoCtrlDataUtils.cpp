@@ -91,7 +91,7 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, CResultArray& aResults
 		const TODOSTRUCTURE* pTDS = m_data.m_struct.GetSubTask(nSubTask);
 		ASSERT(pTDS);
 
-		const TODOITEM* pTDI = m_data.GetTask(pTDS, TRUE);
+		const TODOITEM* pTDI = m_data.GetTrueTask(pTDS);
 		ASSERT(pTDI);
 		
 		FindTasks(pTDI, pTDS, query, aResults);
@@ -127,7 +127,7 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 
-		const TODOITEM* pTDIChild = m_data.GetTask(pTDSChild, TRUE);
+		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 		ASSERT(pTDIChild);
 		
 		FindTasks(pTDIChild, pTDSChild, query, aResults);
@@ -148,7 +148,7 @@ BOOL CTDCTaskMatcher::TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEA
 	const TODOITEM* pTDI = NULL; 
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -539,7 +539,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		while (pTDSParent)
 		{
-			const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent, TRUE);
+			const TODOITEM* pTDIParent = m_data.GetTrueTask(pTDSParent);
 
 			if (!pTDIParent)
 				break;
@@ -1020,8 +1020,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 	const TODOITEM* pTDI1 = NULL, *pTDI2 = NULL;
 	const TODOSTRUCTURE* pTDS1 = NULL, *pTDS2 = NULL;
 
-	if (!m_data.GetTask(dwTask1ID, pTDI1, pTDS1) || 
-		!m_data.GetTask(dwTask2ID, pTDI2, pTDS2))
+	if (!m_data.GetTrueTask(dwTask1ID, pTDI1, pTDS1) || 
+		!m_data.GetTrueTask(dwTask2ID, pTDI2, pTDS2))
 	{
 		ASSERT(0);
 		return 0;
@@ -1080,8 +1080,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		const TODOITEM* pTDI1 = NULL, *pTDI2 = NULL;
 		const TODOSTRUCTURE* pTDS1 = NULL, *pTDS2 = NULL;
 
-		VERIFY(m_data.GetTask(dwTask1ID, pTDI1, pTDS1));
-		VERIFY(m_data.GetTask(dwTask2ID, pTDI2, pTDS2));
+		VERIFY(m_data.GetTrueTask(dwTask1ID, pTDI1, pTDS1));
+		VERIFY(m_data.GetTrueTask(dwTask2ID, pTDI2, pTDS2));
 
 		if (!pTDI1 || !pTDS1 || !pTDI2 || !pTDS2)		
 		{

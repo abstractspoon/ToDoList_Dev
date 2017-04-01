@@ -464,7 +464,7 @@ void CFilteredToDoCtrl::GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& 
 	{
 		DWORD dwTaskID = pTDS->GetTaskID();
 
-		pTDI = m_data.GetTask(dwTaskID, TRUE);
+		pTDI = m_data.GetTrueTask(dwTaskID);
 		ASSERT(pTDI);
 
 		if (!pTDI)

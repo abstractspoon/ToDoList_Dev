@@ -278,7 +278,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			
 			DWORD dwTaskID = GetTaskID(nItem), dwTrueID(dwTaskID);
 			
-			if (m_data.GetTask(dwTrueID, pTDI, pTDS))
+			if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 			{
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
@@ -375,7 +375,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 		{
 			DWORD dwTaskID = pLVDI->item.lParam;
 			
-			const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+			const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 			ASSERT(pTDI);
 
 			if (pTDI)
@@ -400,7 +400,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			const TODOITEM* pTDI = NULL;
 			const TODOSTRUCTURE* pTDS = NULL;
 			
-			if (m_data.GetTask(dwTaskID, pTDI, pTDS))
+			if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 			{
 				// user icon
 				if (!IsColumnShowing(TDCC_ICON))
@@ -828,7 +828,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				int nItem = GetSelectedItem();
 				DWORD dwTaskID = GetTaskID(nItem);
 				
-				if (m_data.GetTask(dwTaskID, pTDI, pTDS))
+				if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 				{
 					CClientDC dc(&m_lcTasks);
 					CFont* pOldFont = dc.SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
@@ -1463,7 +1463,7 @@ int CTDLTaskListCtrl::CalcRequiredTitleColumnWidthForImage()
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
 
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
+		const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 
 		int nTitleLen = pTDI->sTitle.GetLength();

@@ -524,7 +524,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				
 				DWORD dwTrueID(dwTaskID);
 				
-				if (m_data.GetTask(dwTrueID, pTDI, pTDS))
+				if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 				{
 					CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
@@ -921,7 +921,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
 
-		if (m_data.GetTask(dwTaskID, pTDI, pTDS))
+		if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		{
 			if (IsColumnShowing(TDCC_ICON))
 			{

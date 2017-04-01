@@ -69,7 +69,7 @@ enum
 {										\
 	if (id == 0)						\
 		return ret;						\
-	VERIFY(GetTask(id, tdi, tds));		\
+	VERIFY(GetTask(id, tdi, tds, TRUE));\
 	ASSERT(tdi && tds);					\
 	if (tdi == NULL || tds == NULL)		\
 		return ret;						\
@@ -249,24 +249,30 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask) const
 
 BOOL CToDoCtrlData::HasTask(DWORD dwTaskID) const
 {
-	return (GetTask(dwTaskID, FALSE) != NULL);
+	return (GetTask(dwTaskID) != NULL);
 }
 
-// external const version
-const TODOITEM* CToDoCtrlData::GetTask(DWORD& dwTaskID, BOOL bTrue) const
+// external version returning const
+const TODOITEM* CToDoCtrlData::GetTask(DWORD dwTaskID) const
 {
-	return const_cast<CToDoCtrlData*>(this)->GetTask(dwTaskID, bTrue);
+	return GetTask(dwTaskID, FALSE);
 }
 
-// internal non-const version
-TODOITEM* CToDoCtrlData::GetTask(DWORD& dwTaskID, BOOL bTrue)
+// external version returning const
+const TODOITEM* CToDoCtrlData::GetTrueTask(DWORD& dwTaskID) const
+{
+	return GetTask(dwTaskID, TRUE);
+}
+
+// internal version returning non-const
+TODOITEM* CToDoCtrlData::GetTask(DWORD& dwTaskID, BOOL bTrue) const
 {
 	TODOITEM* pTDI = NULL;
 
-	if (dwTaskID && m_mapID2TDI.Lookup(dwTaskID, pTDI))
+	if (dwTaskID && m_mapID2TDI.Lookup(dwTaskID, pTDI) && bTrue)
 	{
 		// check for reference task
-		if (bTrue && pTDI->dwTaskRefID)
+		if (pTDI->dwTaskRefID)
 		{
 			DWORD dwRefID = pTDI->dwTaskRefID;
 			
@@ -280,17 +286,32 @@ TODOITEM* CToDoCtrlData::GetTask(DWORD& dwTaskID, BOOL bTrue)
 	return pTDI;
 }
 
-// internal non-const version
-TODOITEM* CToDoCtrlData::GetTask(const TODOSTRUCTURE* pTDS, BOOL bTrue) const
+// internal version returning non-const
+TODOITEM* CToDoCtrlData::GetTask(const TODOSTRUCTURE* pTDS) const
 {
 	if (!pTDS || !pTDS->GetTaskID())
+	{
+		ASSERT(0);
 		return NULL;
+	}
+
+	// else
+	DWORD dwTaskID = pTDS->GetTaskID();
+	return GetTask(dwTaskID, FALSE);
+}
+
+// internal version returning non-const
+TODOITEM* CToDoCtrlData::GetTrueTask(const TODOSTRUCTURE* pTDS) const
+{
+	if (!pTDS || !pTDS->GetTaskID())
+	{
+		ASSERT(0);
+		return NULL;
+	}
 	
 	// else
 	DWORD dwTaskID = pTDS->GetTaskID();
-	const TODOITEM* pTDI = GetTask(dwTaskID, bTrue);
-
-	return const_cast<TODOITEM*>(pTDI);
+	return GetTask(dwTaskID, TRUE);
 }
 
 BOOL CToDoCtrlData::Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const
@@ -299,12 +320,17 @@ BOOL CToDoCtrlData::Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTUR
 	nPos = -1;
 	
 	if (dwPrevSiblingID)
+	{
 		m_struct.FindTask(dwPrevSiblingID, pTDSParent, nPos);
-	
+	}
 	else if (dwParentID)
+	{
 		pTDSParent = m_struct.FindTask(dwParentID);
+	}
 	else
+	{
 		pTDSParent = const_cast<CToDoCtrlStructure*>(&m_struct); // root
+	}
 	
 	ASSERT (pTDSParent);
 	return (pTDSParent != NULL);
@@ -828,7 +854,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
 		
-		if (GetTask(dwTaskID, pTDI, pTDS))
+		if (GetTrueTask(dwTaskID, pTDI, pTDS))
 			return CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
 
 		ASSERT(0);
@@ -1124,9 +1150,6 @@ DWORD CToDoCtrlData::GetTaskReferenceID(DWORD dwTaskID) const
 {
 	// NOTE: don't use GET_TDI macro here because 
 	// that'll give us the 'true' task
-	if (dwTaskID == 0)
-		return 0;
-
 	const TODOITEM* pTDI = GetTask(dwTaskID, FALSE);
 	ASSERT(pTDI);
 
@@ -1228,7 +1251,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 			bRemoved = TRUE;
 		
 		// then child
-		TODOITEM* pTDIChild = GetTask(pTDSChild, FALSE);
+		const TODOITEM* pTDIChild = GetTask(pTDSChild);
 		ASSERT(pTDIChild);
 		
 		if (pTDIChild)
@@ -1563,11 +1586,9 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
 		DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
-		TODOITEM* pTDIChild = GetTask(dwChildID, TRUE);
-		ASSERT(pTDIChild);
 
-		if (!pTDIChild)
-			return FALSE;
+		TODOITEM* pTDIChild = NULL;
+		GET_TDI(dwChildID, pTDIChild, FALSE);
 
 		// save undo data
 		SaveEditUndo(dwChildID, pTDIChild, nAttrib);
@@ -2462,7 +2483,7 @@ BOOL CToDoCtrlData::AddUndoElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwPar
 	if (!m_undo.IsActive())
 		return FALSE;
 	
-	const TODOITEM* pTDI = GetTask(dwTaskID, FALSE);
+	const TODOITEM* pTDI = GetTask(dwTaskID);
 	ASSERT (pTDI);
 	
 	if (!pTDI)
@@ -2674,7 +2695,7 @@ BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID)
 		
 	// if the parent was marked as done and it has any incomplete
 	// subtasks then mark the parent as incomplete too
-	const TODOITEM* pTDI = GetTask(dwParentID, TRUE);
+	const TODOITEM* pTDI = GetTrueTask(dwParentID);
 	ASSERT(pTDI);
 	
 	if (pTDI && pTDI->IsDone())
@@ -2845,7 +2866,7 @@ BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bE
 	while (nPos--)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos);
-		const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 		if (!pTDIChild || !pTDSChild)
 		{
@@ -2890,7 +2911,7 @@ BOOL CToDoCtrlData::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 		return FALSE;
 	
 	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-	const TODOITEM* pTDIParent = GetTask(pTDSParent, TRUE);
+	const TODOITEM* pTDIParent = GetTrueTask(pTDSParent);
 	
 	ASSERT (pTDIParent && pTDSParent);
 	
@@ -2919,7 +2940,7 @@ BOOL CToDoCtrlData::CalcTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCT
 		nSubtasksCount++;
 		
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 		
 		if (CalcIsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 			nSubtasksDone++;
@@ -2978,7 +2999,7 @@ CString CToDoCtrlData::FormatTaskPosition(const TODOITEM* pTDI, const TODOSTRUCT
 	}
 	else
 	{
-		const TODOITEM* pTDIParent = GetTask(pTDSParent, TRUE);
+		const TODOITEM* pTDIParent = GetTrueTask(pTDSParent);
 		ASSERT (pTDIParent);
 		
 		if (!pTDIParent)
@@ -3007,7 +3028,7 @@ CString CToDoCtrlData::FormatTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE*
 
 	while (pTDSParent && !pTDSParent->IsRoot())
 	{
-		const TODOITEM* pTDIParent = GetTask(pTDSParent, TRUE);
+		const TODOITEM* pTDIParent = GetTrueTask(pTDSParent);
 		ASSERT (pTDIParent);
 		
 		if (!pTDIParent)
@@ -3133,7 +3154,7 @@ double CToDoCtrlData::CalcPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE*
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 		
-		const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 		ASSERT(pTDIChild);
 
 		if (pTDSChild && pTDIChild)
@@ -3177,7 +3198,7 @@ int CToDoCtrlData::CalcTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE); 
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild); 
 
 		nLeafCount += CalcTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone);
 	}
@@ -3223,7 +3244,7 @@ double CToDoCtrlData::CalcWeightedPercentDone(const TODOITEM* pTDI, const TODOST
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 		int nChildNumSubtasks = CalcTaskLeafCount(pTDIChild, pTDSChild, HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
 
@@ -3253,7 +3274,7 @@ double CToDoCtrlData::CalcTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+			const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 			
 			dCost += CalcTaskCost(pTDIChild, pTDSChild);
 		}
@@ -3291,7 +3312,7 @@ TDC_UNITS CToDoCtrlData::CalcBestTimeEstUnits(const TODOITEM* pTDI, const TODOST
 	{
 		DWORD dwID = pTDS->GetSubTaskID(0);
 
-		if (GetTask(dwID, pTDI, pTDS, FALSE))
+		if (GetTask(dwID, pTDI, pTDS))
 			nUnits = CalcBestTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
 	}
 
@@ -3316,7 +3337,7 @@ TDC_UNITS CToDoCtrlData::CalcBestTimeSpentUnits(const TODOITEM* pTDI, const TODO
 	{
 		DWORD dwID = pTDS->GetSubTaskID(0);
 
-		if (GetTask(dwID, pTDI, pTDS, FALSE))
+		if (GetTask(dwID, pTDI, pTDS))
 			nUnits = CalcBestTimeSpentUnits(pTDI, pTDS); // RECURSIVE CALL
 	}
 
@@ -3371,7 +3392,7 @@ double CToDoCtrlData::CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUC
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+			const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 			double dChildWeightedEstimate = 0.0;
 			
@@ -3448,7 +3469,7 @@ double CToDoCtrlData::CalcTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTUR
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+			const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 			
 			dSpent += CalcTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS);
 		}
@@ -3598,7 +3619,7 @@ double CToDoCtrlData::GetEarliestDueDate() const
 	for (int nSubTask = 0; nSubTask < m_struct.GetSubTaskCount(); nSubTask++)
 	{
 		const TODOSTRUCTURE* pTDS = m_struct.GetSubTask(nSubTask);
-		const TODOITEM* pTDI = GetTask(pTDS, TRUE);
+		const TODOITEM* pTDI = GetTrueTask(pTDS);
 		
 		double dTaskEarliest = CalcStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE);
 		
@@ -3609,6 +3630,19 @@ double CToDoCtrlData::GetEarliestDueDate() const
 	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
 }
 
+// external version returning const
+BOOL CToDoCtrlData::GetTask(DWORD dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const
+{
+	return GetTask(dwTaskID, pTDI, pTDS, FALSE);
+}
+
+// external version returning const
+BOOL CToDoCtrlData::GetTrueTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const
+{
+	return GetTask(dwTaskID, pTDI, pTDS, TRUE);
+}
+
+// internal version returning const
 BOOL CToDoCtrlData::GetTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS, BOOL bTrue) const
 {
 	// get item and structure
@@ -3753,17 +3787,17 @@ double CToDoCtrlData::CalcTaskStartDate(DWORD dwTaskID) const
 
 CString CToDoCtrlData::FormatTaskAllocTo(DWORD dwTaskID) const
 {
-	return FormatTaskAllocTo(GetTask(dwTaskID, TRUE));
+	return FormatTaskAllocTo(GetTrueTask(dwTaskID));
 }
 
 CString CToDoCtrlData::FormatTaskCategories(DWORD dwTaskID) const
 {
-	return FormatTaskCategories(GetTask(dwTaskID, TRUE));
+	return FormatTaskCategories(GetTrueTask(dwTaskID));
 }
 
 CString CToDoCtrlData::FormatTaskTags(DWORD dwTaskID) const
 {
-	return FormatTaskTags(GetTask(dwTaskID, TRUE));
+	return FormatTaskTags(GetTrueTask(dwTaskID));
 }
 
 double CToDoCtrlData::CalcTaskCost(DWORD dwTaskID) const
@@ -3933,7 +3967,7 @@ double CToDoCtrlData::CalcStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE
 		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 		{
 			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+			const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 			ASSERT (pTDSChild && pTDIChild);
 			
@@ -4005,7 +4039,7 @@ int CToDoCtrlData::CalcTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUC
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
 				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-				const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+				const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 				ASSERT (pTDSChild && pTDIChild);
 				
@@ -4054,7 +4088,7 @@ int CToDoCtrlData::CalcTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
 				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-				const TODOITEM* pTDIChild = GetTask(pTDSChild, TRUE);
+				const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
 
 				ASSERT (pTDSChild && pTDIChild);
 				

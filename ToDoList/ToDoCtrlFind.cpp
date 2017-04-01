@@ -64,7 +64,12 @@ DWORD CToDoCtrlFind::GetTaskID(HTREEITEM hti) const
 const TODOITEM* CToDoCtrlFind::GetTask(HTREEITEM hti, BOOL bTrue) const
 {
 	DWORD dwTaskID = GetTaskID(hti);
-	return m_data.GetTask(dwTaskID, bTrue);
+
+	if (bTrue)
+		return m_data.GetTrueTask(dwTaskID);
+
+	// else
+	return m_data.GetTask(dwTaskID);
 }
 
 DWORD CToDoCtrlFind::GetLargestReferenceID(BOOL bVisibleOnly) const
@@ -159,7 +164,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	{
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 			return EMPTY_STR;
 	}
 	
@@ -361,7 +366,7 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 	{
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+		if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		{
 			ASSERT(0);
 			return EMPTY_STR;

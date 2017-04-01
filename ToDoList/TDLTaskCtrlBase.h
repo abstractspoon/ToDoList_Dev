@@ -121,7 +121,7 @@ public:
 	void RecalcColumnWidths();
 	void RecalcAllColumnWidths();
 	
- 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTask(dwTaskID, TRUE); }
+ 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
  	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
 	inline BOOL HasSelection() const { return GetSelectedCount(); }
 	inline BOOL VisibleItemCountsMatch() const { return (GetVisibleItemCount() == m_lcColumns.GetItemCount()); }
