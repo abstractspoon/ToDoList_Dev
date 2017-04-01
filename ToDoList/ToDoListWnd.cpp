@@ -8077,15 +8077,7 @@ BOOL CToDoListWnd::DoQueryEndSession(BOOL bQuery, BOOL bEnding)
 	// else do a proper shutdown
 	m_bEndingSession = TRUE;
 
-	if (!DoExit(FALSE, bEnding))
-	{
-		// cleanup our shutdown reason if not handled in DoExit
-		Misc::ShutdownBlockReasonDestroy(hWnd);
-		return FALSE;
-	}
-
-	// and return anything because it's ignored
-	return TRUE;
+	return DoExit(FALSE, bEnding);
 }
 
 BOOL CToDoListWnd::OnQueryEndSession() 
@@ -8191,6 +8183,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 		DestroyWindow();
 		
+		// By the time we get here 'this' has been destroyed
+		// so we must NOT attempt to call any non-static functions
 		if (bRestart)
 		{
 			CString sParams = AfxGetApp()->m_lpCmdLine;
@@ -8223,6 +8217,9 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 			ShowWindow(SW_SHOW);
 		}
 	}
+	
+	// cleanup our shutdown reason
+	Misc::ShutdownBlockReasonDestroy(*this);
 
 	return FALSE;
 }
