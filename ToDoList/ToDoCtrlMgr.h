@@ -279,6 +279,7 @@ protected:
 	const CPreferencesDlg& Prefs() const;
 
 	int UpdateTabItemImage(int nIndex) const;
+	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const;
 
 	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups);
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
