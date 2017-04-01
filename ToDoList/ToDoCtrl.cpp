@@ -51,6 +51,7 @@
 #include "..\shared\savefocus.h"
 #include "..\shared\localizer.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\mapex.h"
 
 #include "..\interfaces\IContentControl.h"
 
@@ -3034,10 +3035,18 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 
 	IMPLEMENT_UNDOEDIT();
 		
+	// Keep track of what we've processed to avoid incrementing
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
+
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nPriority = m_data.GetTaskPriority(dwTaskID) + nAmount;
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
+
+		if (mapProcessed.HasKey(dwTaskID))
+			continue;
+
+		int nPriority = (m_data.GetTaskPriority(dwTaskID) + nAmount);
 
 		// need to jump over -1
 		if (nPriority < 0)
@@ -3055,6 +3064,8 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 			nRes = SET_CHANGE;
 			dwModTaskID = dwTaskID;
 		}
+
+		mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3266,14 +3277,19 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	int nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	TDC_UNITS nUnits = TDC::MapDateOffsetToUnits(nOffset);
-
 	
 	IMPLEMENT_UNDOEDIT();
-		
+
+	// Keep track of what we've processed to avoid offsetting
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
+	
 	while (pos)
 	{
-		HTREEITEM hti = htiSel.GetNext(pos);
-		DWORD dwTaskID = m_taskTree.GetTaskID(hti);
+		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
+
+		if (mapProcessed.HasKey(dwTaskID))
+			continue;
 
 		int nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
 		
@@ -3284,6 +3300,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 
 			nRes = SET_CHANGE;
 		}
+
+		 mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3328,18 +3346,24 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 	// processing subtasks anyway
 	CHTIList htiSel;
 	TSH().CopySelection(htiSel, bAndSubtasks);
-	
+
 	POSITION pos = htiSel.GetHeadPosition();
 	int nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	DH_UNITS nDHUnits = TDC::MapDateOffsetToDHUnits(nOffset);
+
+	// Keep track of what we've processed to avoid offsetting
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
 	
 	IMPLEMENT_UNDOEDIT();
 	
 	while (pos)
 	{
-		HTREEITEM hti = htiSel.GetNext(pos);
-		DWORD dwTaskID = m_taskTree.GetTaskID(hti);
+		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
+
+		if (mapProcessed.HasKey(dwTaskID))
+			continue;
 
 		COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
 		ASSERT(CDateHelper::IsDateSet(dtStart));
@@ -3355,6 +3379,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 			
 			nRes = SET_CHANGE;
 		}
+
+		mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -4056,10 +4082,16 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	
 	IMPLEMENT_UNDOEDIT();
 	
+	// Keep track of what we've processed to avoid incrementing
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
+
 	while (pos)
 	{
-		HTREEITEM hti = TSH().GetNextItem(pos);
-		DWORD dwTaskID = GetTaskID(hti);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
+
+		if (mapProcessed.HasKey(dwTaskID))
+			continue;
 
 		BOOL bDone = m_data.IsTaskDone(dwTaskID);
 
@@ -4083,6 +4115,8 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 			nRes = SET_CHANGE;
 			dwModTaskID = dwTaskID;
 		}
+
+		mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)

@@ -100,6 +100,9 @@ public:
 	}
 };
 
+typedef CSet<DWORD> CDWordSet;
+typedef CSet<UINT> CUintSet;
+
 //////////////////////////////////////////////////////////////////////
 
 template <class T>
