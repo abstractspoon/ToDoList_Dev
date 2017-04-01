@@ -286,7 +286,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 	ASSERT(nColID != TDCC_NONE);
 	ASSERT(dwTaskID);
 
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 
 	if (!pTDI)
 	{
@@ -1357,7 +1357,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 	}
 	ASSERT(nColID == TDCC_FILEREF);
 
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 	
 	if (!pTDI)
 	{
@@ -5357,7 +5357,7 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CString& sCom
     {
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 		
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 		ASSERT (pTDI);
 		
 		if (pTDI)
@@ -5988,7 +5988,7 @@ BOOL CTDLTaskCtrlBase::InitCheckboxImageList()
 
 CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 {
-	const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+	const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 	ASSERT(pTDI);
 	
 	CString sTip;

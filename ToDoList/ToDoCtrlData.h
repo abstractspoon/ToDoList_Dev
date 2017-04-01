@@ -66,7 +66,7 @@ public:
 	const TODOSTRUCTURE* LocateTask(DWORD dwTaskID) const;
 	const TODOSTRUCTURE* GetStructure() const { return &m_struct; }
 
-	const TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue = TRUE) const;
+	const TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue) const;
 	BOOL GetTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS, BOOL bTrue = TRUE) const;
 	BOOL HasTask(DWORD dwTaskID) const;
 
@@ -306,8 +306,8 @@ protected:
 	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 
 	// internal non-const versions
-	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS, BOOL bTrue = TRUE) const;
-	TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue = TRUE);
+	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS, BOOL bTrue) const;
+	TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue);
 
 	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 

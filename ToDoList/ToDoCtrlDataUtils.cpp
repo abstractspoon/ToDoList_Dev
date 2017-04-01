@@ -91,7 +91,7 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, CResultArray& aResults
 		const TODOSTRUCTURE* pTDS = m_data.m_struct.GetSubTask(nSubTask);
 		ASSERT(pTDS);
 
-		const TODOITEM* pTDI = m_data.GetTask(pTDS);
+		const TODOITEM* pTDI = m_data.GetTask(pTDS, TRUE);
 		ASSERT(pTDI);
 		
 		FindTasks(pTDI, pTDS, query, aResults);
@@ -127,7 +127,7 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 
-		const TODOITEM* pTDIChild = m_data.GetTask(pTDSChild);
+		const TODOITEM* pTDIChild = m_data.GetTask(pTDSChild, TRUE);
 		ASSERT(pTDIChild);
 		
 		FindTasks(pTDIChild, pTDSChild, query, aResults);
@@ -539,7 +539,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		while (pTDSParent)
 		{
-			const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent);
+			const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent, TRUE);
 
 			if (!pTDIParent)
 				break;

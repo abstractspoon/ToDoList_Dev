@@ -9044,12 +9044,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 	while (nSubtask--)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		DWORD dwTaskID = pTDSChild->GetTaskID();
-
-		// Get the 'True' task for matching but also hang
-		// on to the 'original' task ID because it may get
-		// overwritten and we need it for when we add the item
-		DWORD dwOrgID = dwTaskID;
+		DWORD dwTaskID = pTDSChild->GetTaskID(), dwOrgID(dwTaskID);
 
 		const TODOITEM* pTDIChild = GetTask(dwTaskID);
 		ASSERT(pTDIChild);

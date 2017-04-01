@@ -52,7 +52,7 @@ public:
 	inline CListCtrl& List() { return m_lcTasks; }
 	inline const CListCtrl& List() const { return m_lcTasks; }
 	
-	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTask(dwTaskID); }
+	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTask(dwTaskID, TRUE); }
 	inline const TODOITEM* GetTask(int nItem) const { return GetTask(GetTaskID(nItem)); }
 	inline DWORD GetTaskID(int nItem) const { return m_lcTasks.GetItemData(nItem); }
 	inline DWORD GetTrueTaskID(int nItem) const { return m_data.GetTrueTaskID(GetTaskID(nItem)); }

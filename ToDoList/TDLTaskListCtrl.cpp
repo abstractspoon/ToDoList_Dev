@@ -375,7 +375,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 		{
 			DWORD dwTaskID = pLVDI->item.lParam;
 			
-			const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+			const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 			ASSERT(pTDI);
 
 			if (pTDI)
@@ -1463,7 +1463,7 @@ int CTDLTaskListCtrl::CalcRequiredTitleColumnWidthForImage()
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
 
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+		const TODOITEM* pTDI = m_data.GetTask(dwTaskID, TRUE);
 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 
 		int nTitleLen = pTDI->sTitle.GetLength();
