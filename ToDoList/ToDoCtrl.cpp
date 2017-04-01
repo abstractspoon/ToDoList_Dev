@@ -4293,13 +4293,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		
 	while (pos)
 	{
-		HTREEITEM hti = TSH().GetNextItem(pos);
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+		if (!m_data.TaskHasSubtasks(dwTaskID) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
-			DWORD dwTaskID = GetTaskID(hti);
-
 			TDC_UNITS nCurUnits;
 			double dCurTime = m_data.GetTaskTimeEstimate(dwTaskID, nCurUnits);
 
@@ -4380,13 +4378,11 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 		
 	while (pos)
 	{
-		HTREEITEM hti = TSH().GetNextItem(pos);
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		// ignore parent tasks
-		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+		if (!m_data.TaskHasSubtasks(dwTaskID) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
-			DWORD dwTaskID = GetTaskID(hti);
-
 			TDC_UNITS nCurUnits;
 			double dCurTime = m_data.GetTaskTimeSpent(dwTaskID, nCurUnits);
 
