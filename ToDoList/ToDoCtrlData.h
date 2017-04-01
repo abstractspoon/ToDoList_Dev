@@ -265,7 +265,7 @@ protected:
 	CToDoCtrlDataItems m_items; // the real data
 	const CWordArray& m_aStyles; // CToDoCtrl styles
 	CToDoCtrlUndo m_undo;
-	CToDoCtrlStructure m_struct;
+	CToDoCtrlDataStructure m_struct;
 
 	static CString s_cfDefault;
 	static TDC_UNITS s_nDefTimeEstUnits, s_nDefTimeSpentUnits;

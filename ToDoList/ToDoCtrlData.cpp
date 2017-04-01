@@ -321,7 +321,7 @@ BOOL CToDoCtrlData::Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTUR
 	}
 	else
 	{
-		pTDSParent = const_cast<CToDoCtrlStructure*>(&m_struct); // root
+		pTDSParent = const_cast<CToDoCtrlDataStructure*>(&m_struct); // root
 	}
 	
 	ASSERT (pTDSParent);
@@ -2526,7 +2526,7 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 	
 	// copy the structre because we're going to be changing it and we need 
 	// to be able to lookup the original previous sibling IDs for undo info
-	CToDoCtrlStructure tdsCopy(m_struct);
+	CToDoCtrlDataStructure tdsCopy(m_struct);
 	
 	// now undo
 	for (int nElm = nStart; nElm != nEnd; nElm += nInc)
@@ -2703,7 +2703,7 @@ BOOL CToDoCtrlData::MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID,
 	
 	// copy the structure because we're going to be changing it and we need 
 	// to be able to lookup the original previous sibling IDs for undo info
-	CToDoCtrlStructure tdsCopy(m_struct);
+	CToDoCtrlDataStructure tdsCopy(m_struct);
 	
 	// get destination location
 	TODOSTRUCTURE* pTDSDestParent = NULL;

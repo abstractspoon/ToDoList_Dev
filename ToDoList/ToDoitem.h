@@ -166,7 +166,7 @@ protected:
 
 class TODOSTRUCTURE
 {
-	friend class CToDoCtrlStructure;
+	friend class CToDoCtrlDataStructure;
 	
 public:
 	TODOSTRUCTURE() : m_dwID(0), m_pTDSParent(NULL) {}
@@ -205,10 +205,11 @@ protected:
 	CArray<TODOSTRUCTURE*, TODOSTRUCTURE*&> m_aSubTasks; 
 	
 protected:
-	// For CToDoCtrlStructure only
+	// For CToDoCtrlDataStructure only
 	TODOSTRUCTURE(const TODOSTRUCTURE& tds);
 	const TODOSTRUCTURE& operator=(const TODOSTRUCTURE& tds); 
 	
+private:
 	void CleanUp();
 	BOOL DeleteSubTask(int nPos);
 	BOOL InsertSubTask(TODOSTRUCTURE* pTDS, int nPos);
@@ -216,25 +217,27 @@ protected:
 	TODOSTRUCTURE* AddSubTask(DWORD dwID);
 };
 
-class CToDoCtrlStructure : public TODOSTRUCTURE
+///////////////////////////////////////////////////////////////////////////////////
+
+class CToDoCtrlDataStructure : public TODOSTRUCTURE
 {
 public:
-	CToDoCtrlStructure() : TODOSTRUCTURE() {}
-	CToDoCtrlStructure(const CToDoCtrlStructure& tds); 
-	~CToDoCtrlStructure();
+	CToDoCtrlDataStructure() : TODOSTRUCTURE() {}
+	CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds); 
+	~CToDoCtrlDataStructure();
 	
 	TODOSTRUCTURE* GetParentTask(DWORD dwID) const;
 	DWORD GetParentTaskID(DWORD dwID) const;
-	
 	DWORD GetPreviousTaskID(DWORD dwID) const;
-	
-	BOOL DeleteTask(DWORD dwID);
 	
 	TODOSTRUCTURE* AddTask(DWORD dwID, TODOSTRUCTURE* pTDSParent);
 	BOOL InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos);
 	
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
+
+	BOOL DeleteTask(DWORD dwID);
+	void DeleteAll();
 	
 protected:
 	CMap<DWORD, DWORD, TODOSTRUCTURE*, TODOSTRUCTURE*&> m_mapStructure;
@@ -244,10 +247,11 @@ protected:
 	void AddToMap(const TODOSTRUCTURE* pTDS);
 	void RemoveFromMap(const TODOSTRUCTURE* pTDS);
 
-	const CToDoCtrlStructure& operator=(const CToDoCtrlStructure& tds); 
+	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
 	
 	BOOL InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDSParent, int nPos);
 };
 
+///////////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_TODOITEM_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)
