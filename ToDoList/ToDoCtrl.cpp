@@ -9710,7 +9710,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			
 			// for calc'ed estimate use this item's units if it
 			// has a non-zero time estimate, else its first subtask's units
-			TDC_UNITS nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
+			TDC_UNITS nUnits = m_data.CalcBestTimeEstUnits(pTDI, pTDS);
 			double dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
 			
 			if (dTime > 0)
@@ -9912,7 +9912,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	
 	// for calc'ed estimate use this item's units if it
 	// has a non-zero time estimate, else its first subtask's units
-	TDC_UNITS nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
+	TDC_UNITS nUnits = m_data.CalcBestTimeEstUnits(pTDI, pTDS);
 	double dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
 	
 	if (dTime > 0)
@@ -9920,7 +9920,7 @@ BOOL CToDoCtrl::SetAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	
 	// for calc'ed spent use this item's units if it
 	// has a non-zero time estimate, else its first subtask's units
-	nUnits = m_data.GetBestCalcTimeEstUnits(pTDI, pTDS);
+	nUnits = m_data.CalcBestTimeEstUnits(pTDI, pTDS);
 	dTime = m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits);
 	
 	if (dTime != 0)

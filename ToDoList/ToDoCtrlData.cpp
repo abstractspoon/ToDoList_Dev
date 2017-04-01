@@ -3176,7 +3176,7 @@ double CToDoCtrlData::CalcPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE*
 	return dTotalPercentDone;
 }
 
-int CToDoCtrlData::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const
+int CToDoCtrlData::CalcTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const
 {
 	// sanity check
 	ASSERT(pTDS && pTDI);
@@ -3205,7 +3205,7 @@ int CToDoCtrlData::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		const TODOITEM* pTDIChild = GetTask(pTDSChild); 
 
-		nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone);
+		nLeafCount += CalcTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone);
 	}
 
 	ASSERT(nLeafCount);
@@ -3241,7 +3241,7 @@ double CToDoCtrlData::CalcWeightedPercentDone(const TODOITEM* pTDI, const TODOST
 
 	// calculate the total number of task leaves for this task
 	// we will proportion our children percentages against these values
-	int nTotalNumSubtasks = GetTaskLeafCount(pTDI, pTDS, HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
+	int nTotalNumSubtasks = CalcTaskLeafCount(pTDI, pTDS, HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
 	double dTotalPercentDone = 0;
 
 	// process the children multiplying the split percent by the 
@@ -3251,7 +3251,7 @@ double CToDoCtrlData::CalcWeightedPercentDone(const TODOITEM* pTDI, const TODOST
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		const TODOITEM* pTDIChild = GetTask(pTDSChild);
 
-		int nChildNumSubtasks = GetTaskLeafCount(pTDIChild, pTDSChild, HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
+		int nChildNumSubtasks = CalcTaskLeafCount(pTDIChild, pTDSChild, HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
 
 		if (HasStyle(TDCS_INCLUDEDONEINAVERAGECALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 		{
@@ -3299,7 +3299,7 @@ void CToDoCtrlData::SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTime
 	s_nDefTimeSpentUnits = nTimeSpentUnits;
 }
 
-TDC_UNITS CToDoCtrlData::GetBestCalcTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+TDC_UNITS CToDoCtrlData::CalcBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3318,7 +3318,7 @@ TDC_UNITS CToDoCtrlData::GetBestCalcTimeEstUnits(const TODOITEM* pTDI, const TOD
 		DWORD dwID = pTDS->GetSubTaskID(0);
 
 		if (GetTask(dwID, pTDI, pTDS, FALSE))
-			nUnits = GetBestCalcTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
+			nUnits = CalcBestTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
 	}
 
 	return nUnits;
