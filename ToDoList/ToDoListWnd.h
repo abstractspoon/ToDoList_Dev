@@ -554,10 +554,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	// Pseudo-handlers
-	void OnTimerReadOnlyStatus(int nCtrl = -1);
-	void OnTimerTimestampChange(int nCtrl = -1);
+	void OnTimerReadOnlyStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void OnTimerTimestampChange(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void OnTimerCheckoutStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void OnTimerCheckReloadTasklists(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+
 	void OnTimerAutoSave();
-	void OnTimerCheckoutStatus(int nCtrl = -1);
 	void OnTimerDueItems(int nCtrl = -1);
 	void OnTimerTimeTracking();
 	void OnTimerTimeTrackReminder();
@@ -624,6 +626,8 @@ protected:
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
+	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
+	BOOL WantCheckReloadFiles(int nOption) const;
 
 	BOOL HandleReservedShortcut(DWORD dwShortcut);
 	BOOL SendShortcutCommand(UINT nCmdID);

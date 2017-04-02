@@ -40,7 +40,7 @@ public:
 	int AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect);
 	void RefreshColumnTitle();
 	void SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru);
-	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
+	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 	
 	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
 	int CalcRequiredAttributeLineWidthForImage() const;

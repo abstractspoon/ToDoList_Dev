@@ -421,9 +421,6 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		}
 		break;
 		
-	case IUI_MOVE:
-		break;
-		
 	default:
 		ASSERT(0);
 	}

@@ -286,7 +286,8 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 {
 	CHoldRedraw hr(m_tcTasks);
 	CHoldRedraw hr2(m_lcColumns);
-	
+	CTLSHoldResync hr3(*this);
+
 	CHTIMap mapID;
 	TCH().BuildHTIMap(mapID);
 	
@@ -296,11 +297,14 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 	for (int nItem = 0; nItem < nNumExpanded; nItem++)
 	{
 		if (mapID.Lookup(aExpanded[nItem], hti) && hti)
-			ExpandItem(hti, TRUE, FALSE);
+			ExpandItemRaw(hti, TRUE, FALSE);
 	}
 	
 	if (nNumExpanded)
+	{
 		ExpandList();
+		RecalcColumnWidths();
+	}
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
@@ -401,24 +405,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		CHoldRedraw hr2(m_tcTasks);
 		CTLSHoldResync hr3(*this);
 		
-		TCH().ExpandItem(hti, bExpand, bAndChildren);
-		
-		if (bExpand)
-		{
-			if (hti)
-			{
-				int nNextIndex = (GetListItem(hti) + 1);
-				ExpandList(hti, nNextIndex);
-			}
-			else
-			{
-				ExpandList(); // all
-			}
-		}
-		else
-		{
-			CollapseList(hti);
-		}
+		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
 
 	if (htiSel)
@@ -428,6 +415,28 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	}
 
 	RecalcColumnWidths();
+}
+
+void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
+{
+	TCH().ExpandItem(hti, bExpand, bAndChildren);
+
+	if (bExpand)
+	{
+		if (hti)
+		{
+			int nNextIndex = (GetListItem(hti) + 1);
+			ExpandList(hti, nNextIndex);
+		}
+		else
+		{
+			ExpandList(); // all
+		}
+	}
+	else
+	{
+		CollapseList(hti);
+	}
 }
 
 BOOL CTDLTaskTreeCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const

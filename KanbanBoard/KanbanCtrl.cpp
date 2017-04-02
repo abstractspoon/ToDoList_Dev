@@ -314,10 +314,6 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 		}
 		break;
 		
-	case IUI_MOVE:
-		ASSERT(0);
-		break;
-		
 	default:
 		ASSERT(0);
 	}
@@ -436,6 +432,12 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 			pKI->sPath = pKIParent->sTitle;
 		else
 			pKI->sPath = pKIParent->sPath + '\\' + pKIParent->sTitle;
+
+		pKI->nLevel = (pKIParent->nLevel + 1);
+	}
+	else
+	{
+		pKI->nLevel = 0;
 	}
 
 	// trackable attributes
@@ -1501,6 +1503,27 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	CSet<DWORD> mapIDs;
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
 
+	// Go thru each list removing deleted items
+	int nList = m_aListCtrls.GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		int nItem = pList->GetItemCount();
+
+		while (nItem--)
+		{
+			DWORD dwTaskID = pList->GetItemData(nItem);
+
+			if (!mapIDs.HasKey(dwTaskID))
+			{
+				pList->DeleteItem(nItem);
+				m_data.RemoveKey(dwTaskID);
+			}
+		}
+	}
+
+	// Remove any other 'hidden' items
 	POSITION pos = m_data.GetStartPosition();
 	DWORD dwTaskID = 0;
 	KANBANITEM* pKI = NULL;
@@ -1510,23 +1533,7 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 		m_data.GetNextAssoc(pos, dwTaskID, pKI);
 
 		if (!mapIDs.HasKey(dwTaskID))
-		{
-			// Find the list containing this task and delete it
-			int nList = m_aListCtrls.GetSize();
-			
-			while (nList--)
-			{
-				int nItem = m_aListCtrls[nList]->FindTask(dwTaskID);
-
-				if (nItem != -1)
-				{
-					m_aListCtrls[nList]->DeleteItem(nItem);
-					break;
-				}
-			}
-
 			m_data.RemoveKey(dwTaskID);
-		}
 	}
 }
 
@@ -1977,6 +1984,7 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending)
 
 		// do the sort
  		CHoldRedraw hr(*this);
+		BOOL bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 
 		int nList = m_aListCtrls.GetSize();
 
@@ -1986,7 +1994,7 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending)
 			ASSERT(pList);
 
 			if (pList)
-				pList->Sort(nBy, m_bSortAscending);
+				pList->Sort(nBy, m_bSortAscending, bSubtasksBelowParent);
 		}
 	}
 }

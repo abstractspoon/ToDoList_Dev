@@ -3839,17 +3839,7 @@ void CToDoListWnd::Show(BOOL bAllowToggle)
 
 	// refresh all tasklists if we are visible
 	if (m_bVisible && !IsIconic())
-	{
-		const CPreferencesDlg& userPrefs = Prefs();
-		
-		if (userPrefs.GetReadonlyReloadOption() != RO_NO)
-			OnTimerReadOnlyStatus();
-		
-		if (userPrefs.GetTimestampReloadOption() != RO_NO)
-			OnTimerTimestampChange();
-		
-		OnTimerCheckoutStatus();
-	}	
+		OnTimerCheckReloadTasklists(-1, TRUE);
 
 	GetToDoCtrl().SetFocusToTasks();
 }
@@ -5014,19 +5004,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		return FALSE;
 	}
 
-	// 2. execute a command
-	if (startup.HasCommandID())
-	{
-		CUIntArray aCmdIDs;
-		int nNumCmd = startup.GetCommandIDs(aCmdIDs);
-
-		for (int nCmd = 0; nCmd < nNumCmd; nCmd++)
-			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
-
-		return TRUE;
-	}
-
-	// 3. try open/import file
+	// 2. try open/import file
 	if (startup.HasFilePath())
 	{
 		int nFirstSel = -1;
@@ -5077,6 +5055,18 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT((nFirstSel != -1) && (nFirstSel < GetTDCCount()));
 
 		SelectToDoCtrl(nFirstSel, FALSE);
+	}
+
+	// 3. execute a command
+	if (startup.HasCommandID())
+	{
+		CUIntArray aCmdIDs;
+		int nNumCmd = startup.GetCommandIDs(aCmdIDs);
+
+		for (int nCmd = 0; nCmd < nNumCmd; nCmd++)
+			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
+
+		return TRUE;
 	}
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -6445,38 +6435,30 @@ void CToDoListWnd::OnTimerDueItems(int nCtrl)
 		m_tabCtrl.Invalidate(FALSE);
 }
 
-void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
+void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 {
 	AF_NOREENTRANT // macro helper
 
-	// Skip if we are hidden or minimised and 
-	// we are configured to prompt the user
+	// Don't distract the user unnecessarily
 	const CPreferencesDlg& userPrefs = Prefs();
-	
 	int nReloadOption = userPrefs.GetReadonlyReloadOption();
-	ASSERT (nReloadOption != RO_NO);
-	
-	if ((nReloadOption == RO_ASK) && (!IsWindowVisible() || IsIconic()))
+
+	if (!WantCheckReloadFiles(nReloadOption))
 		return;
 			
 	// work out whether we should check remote files or not
-	BOOL bCheckRemoteFiles = (nCtrl != -1);
-	
+	BOOL bCheckRemoteFiles = bForceCheckRemote;
+
 	if (!bCheckRemoteFiles)
 	{
 		static int nElapsed = 0;
-		UINT nRemoteFileCheckInterval = userPrefs.GetRemoteFileCheckFrequency() * 1000; // in ms
-		
-		nElapsed %= nRemoteFileCheckInterval;
-		bCheckRemoteFiles = !nElapsed;
-		
-		nElapsed += INTERVAL_READONLYSTATUS;
+		bCheckRemoteFiles = WantCheckRemoteFiles(nCtrl, INTERVAL_READONLYSTATUS, nElapsed);
 	}
 	
 	// process files
 	CString sFileList;
-	int nFrom = (nCtrl == -1) ? 0 : nCtrl;
-	int nTo = (nCtrl == -1) ? GetTDCCount() - 1 : nCtrl;
+	int nFrom = ((nCtrl == -1) ? 0 : nCtrl);
+	int nTo = ((nCtrl == -1) ? (GetTDCCount() - 1) : nCtrl);
 	
 	for (nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
 	{
@@ -6484,7 +6466,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 		if (!m_mgrToDoCtrls.IsLoaded(nCtrl))
 			continue;
 		
-		// don't check removeable drives
+		// don't check removable drives
 		int nType = m_mgrToDoCtrls.GetFilePathType(nCtrl);
 		
         if (nType == TDCM_UNDEF || nType == TDCM_REMOVABLE)
@@ -6499,7 +6481,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 		
 			BOOL bReadOnly = m_mgrToDoCtrls.GetReadOnlyStatus(nCtrl);
-			BOOL bReload = FALSE;
+			BOOL bReload = !bReadOnly; // now writable
 			
 			if (nReloadOption == RO_ASK)
 			{
@@ -6512,10 +6494,6 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 				UINT nRet = MessageBox(sMessage, IDS_STATUSCHANGE_TITLE, !bReadOnly ? MB_YESNOCANCEL : MB_OK);
 				
 				bReload = (nRet == IDYES || nRet == IDOK);
-			}
-			else
-			{
-				bReload = !bReadOnly; // now writable
 			}
 			
 			if (bReload && ReloadTaskList(nCtrl, FALSE, (nReloadOption == RO_ASK)))
@@ -6546,38 +6524,48 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl)
 	}
 }
 
-void CToDoListWnd::OnTimerTimestampChange(int nCtrl)
+BOOL CToDoListWnd::WantCheckReloadFiles(int nOption) const
+{
+	switch (nOption)
+	{
+	case RO_NO:	
+		return FALSE;
+
+	case RO_ASK:
+		return (IsWindowVisible() && !IsIconic());
+
+	case RO_NOTIFY: // Means reload and notify
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 {
 	AF_NOREENTRANT // macro helper
 		
-	// Skip if we are hidden or minimised and 
-	// we are configured to prompt the user
+	// Don't distract the user unnecessarily
 	const CPreferencesDlg& userPrefs = Prefs();
-	
 	int nReloadOption = userPrefs.GetTimestampReloadOption();
-	ASSERT (nReloadOption != RO_NO);
-	
-	if ((nReloadOption == RO_ASK) && (!IsWindowVisible() || IsIconic()))
+
+	if (!WantCheckReloadFiles(nReloadOption))
 		return;
-	
+
 	// work out whether we should check remote files or not
-	BOOL bCheckRemoteFiles = (nCtrl != -1);
-	
+	BOOL bCheckRemoteFiles = bForceCheckRemote;
+
 	if (!bCheckRemoteFiles)
 	{
 		static int nElapsed = 0;
-		UINT nRemoteFileCheckInterval = userPrefs.GetRemoteFileCheckFrequency() * 1000; // in ms
-		
-		nElapsed %= nRemoteFileCheckInterval;
-		bCheckRemoteFiles = !nElapsed;
-		
-		nElapsed += INTERVAL_TIMESTAMPCHANGE;
+		bCheckRemoteFiles = WantCheckRemoteFiles(nCtrl, INTERVAL_TIMESTAMPCHANGE, nElapsed);
 	}
 	
 	// process files
 	CString sFileList;
-	int nFrom = (nCtrl == -1) ? 0 : nCtrl;
-	int nTo = (nCtrl == -1) ? GetTDCCount() - 1 : nCtrl;
+	int nFrom = ((nCtrl == -1) ? 0 : nCtrl);
+	int nTo = ((nCtrl == -1) ? (GetTDCCount() - 1) : nCtrl);
 	
 	for (nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
 	{
@@ -6585,7 +6573,7 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl)
 		if (!m_mgrToDoCtrls.IsLoaded(nCtrl))
 			continue;
 
-		// don't check removeable drives
+		// don't check removable drives
 		int nType = m_mgrToDoCtrls.GetFilePathType(nCtrl);
 		
         if (nType == TDCM_UNDEF || nType == TDCM_REMOVABLE)
@@ -6663,29 +6651,42 @@ void CToDoListWnd::OnTimerAutoMinimize()
 		ShowWindow(SW_MINIMIZE);
 }
 
-void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl)
+BOOL CToDoListWnd::WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const
 {
-	AF_NOREENTRANT // macro helper
-		
-	const CPreferencesDlg& userPrefs = Prefs();
-	
 	// work out whether we should check remote files or not
 	BOOL bCheckRemoteFiles = (nCtrl != -1);
 	
 	if (!bCheckRemoteFiles)
 	{
-		static int nElapsed = 0;
-		UINT nRemoteFileCheckInterval = userPrefs.GetRemoteFileCheckFrequency() * 1000; // in ms
+		UINT nRemoteFileCheckInterval = Prefs().GetRemoteFileCheckFrequency() * 1000; // in ms
 		
 		nElapsed %= nRemoteFileCheckInterval;
 		bCheckRemoteFiles = !nElapsed;
 		
-		nElapsed += INTERVAL_CHECKOUTSTATUS;
+		nElapsed += nInterval;
+	}
+
+	return bCheckRemoteFiles;
+}
+
+void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
+{
+	AF_NOREENTRANT // macro helper
+		
+	// work out whether we should check remote files or not
+	BOOL bCheckRemoteFiles = bForceCheckRemote;
+	
+	if (!bCheckRemoteFiles)
+	{
+		static int nElapsed = 0;
+		bCheckRemoteFiles = WantCheckRemoteFiles(nCtrl, INTERVAL_CHECKOUTSTATUS, nElapsed);
 	}
 	
 	// process files
-	int nFrom = (nCtrl == -1) ? 0 : nCtrl;
-	int nTo = (nCtrl == -1) ? GetTDCCount() - 1 : nCtrl;
+	const CPreferencesDlg& userPrefs = Prefs();
+	
+	int nFrom = ((nCtrl == -1) ? 0 : nCtrl);
+	int nTo = ((nCtrl == -1) ? (GetTDCCount() - 1) : nCtrl);
 
 	CString sCheckedInFiles, sCheckedOutFiles;
 	
@@ -7520,8 +7521,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		tdcShow.SetFocusToTasks();
 
 		// check for external changes to file
-		OnTimerTimestampChange(nCurSel);
-		OnTimerReadOnlyStatus(nCurSel);
+		OnTimerCheckReloadTasklists(nCurSel, TRUE);
 
 		// notify user of due tasks if req
 		DoDueTaskNotification(nCurSel, nDueBy);
@@ -7533,6 +7533,13 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	RefreshPauseTimeTracking();
 	
 	*pResult = 0;
+}
+
+void CToDoListWnd::OnTimerCheckReloadTasklists(int nCtrl, BOOL bForceCheckRemote)
+{
+	OnTimerTimestampChange(nCtrl, bForceCheckRemote);
+	OnTimerReadOnlyStatus(nCtrl, bForceCheckRemote);
+	OnTimerCheckoutStatus(nCtrl, bForceCheckRemote);
 }
 
 void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
@@ -7942,15 +7949,9 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	
 	if (!m_bClosing)
 	{
-		if (userPrefs.GetReadonlyReloadOption() != RO_NO)
-			OnTimerReadOnlyStatus(nIndex);
-		
-		if (userPrefs.GetTimestampReloadOption() != RO_NO)
-			OnTimerTimestampChange(nIndex);
-		
-		if (tdcShow.IsSourceControlled())
-			OnTimerCheckoutStatus(nIndex);
-		
+		// Reload as required
+		OnTimerCheckReloadTasklists(nIndex, TRUE);
+
 		// update various dependencies
 		UpdateCaption();
 		UpdateStatusbar();
@@ -8914,10 +8915,18 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 
 	case SC_RESTORE:
 	case SC_MAXIMIZE:
-		CFrameWnd::OnSysCommand(nID, lParam);
+		{
+			BOOL bWasMinimised = IsIconic();
+			CFrameWnd::OnSysCommand(nID, lParam);
+			
+			Resize();
 
-		Resize();
-		PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)m_hwndLastFocus);
+			if (m_hwndLastFocus)
+				PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)m_hwndLastFocus);
+
+			if (bWasMinimised)
+				OnTimerCheckReloadTasklists(-1, TRUE);
+		}
 		return;
 	}
 
@@ -10448,6 +10457,10 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	// don't do any further processing if closing
     if (m_bClosing)
         return; 
+
+	// Reload tasklists as required
+	if (bActive)
+		OnTimerCheckReloadTasklists(-1, TRUE);
 
 	// Don't do any further processing if the Reminder dialog is active
 	// because the two windows get into a fight for activation!

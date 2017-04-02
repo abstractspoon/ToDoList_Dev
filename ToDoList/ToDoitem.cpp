@@ -522,29 +522,29 @@ CToDoCtrlDataItems::~CToDoCtrlDataItems()
 
 int CToDoCtrlDataItems::GetCount() const 
 { 
-	return CMapIDToTDI::GetCount(); 
+	return CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetCount(); 
 }
 
 void CToDoCtrlDataItems::CleanUp()
 {
 	DWORD dwID = 0;
 	TODOITEM* pTDI = NULL;
-	POSITION pos = CMapIDToTDI::GetStartPosition();
+	POSITION pos = GetStartPosition();
 
 	while (pos)
 	{
-		CMapIDToTDI::GetNextAssoc(pos, dwID, pTDI);
+		GetNextAssoc(pos, dwID, pTDI);
 		delete pTDI;
 	}
 
-	CMapIDToTDI::RemoveAll();
+	RemoveAll();
 }
 
 BOOL CToDoCtrlDataItems::DeleteTask(DWORD dwTaskID)
 {
 	TODOITEM* pTDI = NULL;
 
-	if (CMapIDToTDI::Lookup(dwTaskID, pTDI))
+	if (Lookup(dwTaskID, pTDI))
 	{
 		delete pTDI;
 		RemoveKey(dwTaskID);
@@ -591,12 +591,12 @@ BOOL CToDoCtrlDataItems::HasTask(DWORD dwTaskID) const
 
 POSITION CToDoCtrlDataItems::GetStartPosition() const
 {
-	return CMapIDToTDI::GetStartPosition();
+	return CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetStartPosition();
 }
 
 void CToDoCtrlDataItems::GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
 {
-	return CMapIDToTDI::GetNextAssoc(rNextPosition, dwTaskID, pTDI);
+	CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetNextAssoc(rNextPosition, dwTaskID, pTDI);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

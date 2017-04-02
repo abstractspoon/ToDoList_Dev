@@ -522,6 +522,62 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
+	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
+	{
+		switch (nAttrib)
+		{
+		case TDCA_UNDO:
+		case TDCA_POSITION: // == move
+		case TDCA_PASTE:
+		case TDCA_NEWTASK:			
+			return IUI_ALL;
+
+		case TDCA_DELETE:
+		case TDCA_ARCHIVE:			
+			return IUI_DELETE;
+
+		case TDCA_ALLOCBY:			
+		case TDCA_ALLOCTO:			
+		case TDCA_CATEGORY:			
+		case TDCA_COLOR:			
+		case TDCA_COMMENTS:			
+		case TDCA_COST:				
+		case TDCA_CREATEDBY:		
+		case TDCA_CREATIONDATE:		
+		case TDCA_DEPENDENCY:		
+		case TDCA_DONEDATE:			
+		case TDCA_DONETIME:			
+		case TDCA_DUEDATE:			
+		case TDCA_DUETIME:			
+		case TDCA_EXTERNALID:		
+		case TDCA_FILEREF:			
+		case TDCA_FLAG:				
+		case TDCA_ICON:				
+		case TDCA_ID:				
+		case TDCA_LASTMOD:			
+		case TDCA_PERCENT:			
+		case TDCA_PRIORITY:			
+		case TDCA_RECURRENCE:		
+		case TDCA_RISK:				
+		case TDCA_STARTDATE:		
+		case TDCA_STARTTIME:		
+		case TDCA_STATUS:			
+		case TDCA_TAGS:				
+		case TDCA_TASKNAME:			
+		case TDCA_TIMEEST:			
+		case TDCA_TIMESPENT:		
+		case TDCA_VERSION:			
+		case TDCA_CUSTOMATTRIBDEFS:
+			return IUI_EDIT;
+
+		default: // handle custom attrib
+			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))
+				return IUI_EDIT;
+		}
+
+		ASSERT(0);
+		return IUI_EDIT;
+	}
 	static IUI_ATTRIBUTE MapAttributeToIUIAttrib(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)

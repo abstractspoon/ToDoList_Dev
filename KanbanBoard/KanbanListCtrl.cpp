@@ -924,11 +924,39 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 	
 	const KANBANITEM* pKI1 = pSort->data.GetItem(lParam1);
 	const KANBANITEM* pKI2 = pSort->data.GetItem(lParam2);
-	
+
 	int nCompare = 0;
 	
 	if (pKI1 && pKI2)
 	{
+		if (pSort->bSubtasksBelowParent && (pKI1->dwParentID != pKI2->dwParentID))
+		{
+			// If one is the parent of another always sort below
+			if (pSort->IsParent(lParam2, pKI1))
+				return 1;
+
+			if (pSort->IsParent(lParam1, pKI2))
+				return -1;
+
+			// We can't sort items that are not in the same 
+			// branch of the tree ie. they need to have the same parent
+
+			// First we raise the items to the same level
+			while (pKI1->nLevel > pKI2->nLevel)
+				pKI1 = pSort->GetParent(pKI1);
+
+			while (pKI2->nLevel > pKI1->nLevel)
+				pKI2 = pSort->GetParent(pKI2);
+
+			// Then we raise them to have the same parent
+			while (pKI1->dwParentID != pKI2->dwParentID)
+			{
+				pKI1 = pSort->GetParent(pKI1);
+				pKI2 = pSort->GetParent(pKI2);
+			}
+		}
+		ASSERT(pKI1->dwParentID == pKI2->dwParentID);
+	
 		switch (pSort->nBy)
 		{
 		case IUI_TASKNAME:
@@ -1017,12 +1045,13 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 	return (pSort->bAscending ? nCompare : -nCompare);
 }
 
-void CKanbanListCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
+void CKanbanListCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
 {
 	KANBANSORT ks(m_data);
 	
 	ks.nBy = nBy;
 	ks.bAscending = bAscending;
+	ks.bSubtasksBelowParent = bSubtasksBelowParent;
 
 	switch (nBy)
 	{

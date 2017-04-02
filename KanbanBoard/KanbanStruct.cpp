@@ -74,6 +74,7 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	bGoodAsDone(FALSE),
 	bParent(FALSE),
 	dwParentID(0),
+	nLevel(0),
 	bLocked(FALSE)
 {
 	CDateHelper::ClearDate(dtCreate);
@@ -100,6 +101,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	bGoodAsDone = ki.bGoodAsDone;
 	bParent = ki.bParent;
 	dwParentID = ki.dwParentID;
+	nLevel = ki.nLevel;
 	bLocked = ki.bLocked;
 
 	Misc::Copy(ki.mapAttribValues, mapAttribValues);
@@ -118,7 +120,8 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bDone == ki.bDone) &&
 			(bGoodAsDone == ki.bGoodAsDone) &&
 			(bParent == ki.bParent) &&
-			(bParent == ki.bLocked) &&
+			(nLevel == ki.nLevel) &&
+			(bLocked == ki.bLocked) &&
 			(dwParentID == ki.dwParentID) &&
 			Misc::MatchAll(mapAttribValues, ki.mapAttribValues));
 }
@@ -591,8 +594,31 @@ KANBANSORT::KANBANSORT(const CKanbanItemMap& map)
 	:
 	data(map),
 	nBy(IUI_NONE),
-	bAscending(TRUE)
+	bAscending(TRUE),
+	bSubtasksBelowParent(FALSE)
 {
+}
+	
+BOOL KANBANSORT::IsParent(DWORD dwTaskID, const KANBANITEM* pKIChild) const
+{
+	ASSERT(dwTaskID);
+
+	if (pKIChild->dwParentID == dwTaskID)
+		return TRUE;
+
+	if (pKIChild->dwParentID == 0)
+		return FALSE;
+
+	return IsParent(dwTaskID, GetParent(pKIChild));
+}
+
+const KANBANITEM* KANBANSORT::GetParent(const KANBANITEM* pKIChild) const
+{
+	if (pKIChild->dwParentID == 0)
+		return NULL;
+
+	// else
+	return data.GetItem(pKIChild->dwParentID);
 }
 
 //////////////////////////////////////////////////////////////////////

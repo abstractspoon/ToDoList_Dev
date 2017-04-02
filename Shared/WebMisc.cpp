@@ -243,7 +243,10 @@ BOOL WebMisc::IsRelativeFileURI(LPCTSTR szFileURI)
 	CString sFileURI(szFileURI);
 
 	if (TrimFileProtocol(sFileURI))
+	{
+		sFileURI.Replace('/', '\\');
 		return ::PathIsRelative(sFileURI);
+	}
 
 	return FALSE;
 }

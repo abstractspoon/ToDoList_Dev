@@ -192,6 +192,7 @@ public:
 	BOOL SelectionHasUnlocked() const;
 	BOOL SelectionHasLocked() const;
 	BOOL SelectionAreAllDone() const;
+	BOOL CanSplitSelectedTask() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);

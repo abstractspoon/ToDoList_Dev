@@ -217,10 +217,6 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		bChange = RemoveDeletedTasks(pTasks);
 		break;
 		
-	case IUI_MOVE:
-		ASSERT(0);
-		break;
-		
 	default:
 		ASSERT(0);
 	}

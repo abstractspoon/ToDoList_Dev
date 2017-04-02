@@ -1205,10 +1205,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							nullCol, 
-							nullFlags);
+		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -1232,10 +1229,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							nullCol, 
-							nullFlags);
+		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -5943,6 +5937,25 @@ CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 	
 	// else
 	return _T("");
+}
+
+BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
+{
+	if (IsReadOnly())
+		return FALSE;
+	
+	if (SelectionHasReferences())
+		return FALSE;
+	
+	int nSelCount = GetSelectedCount();
+	
+	if (nSelCount == 1)
+	{
+		if (IsSelectedTaskDone() || SelectionHasSubtasks())
+			return FALSE;
+	}
+	
+	return (nSelCount > 0);
 }
 
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const

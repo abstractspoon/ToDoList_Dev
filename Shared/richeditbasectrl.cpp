@@ -375,12 +375,12 @@ BOOL CRichEditBaseCtrl::InsertTable(int nRows, int nCols, int nColWidth, int nTe
 	// rows
 	for (int nRow = 0; nRow < nRows; nRow++)
 	{
-		CString sRow("{");
+		CString sRow('{');
 
 		for (int nCol = 0; nCol < nCols; nCol++)
 			sRow += RTF_COLUMN_CELL;
 
-		sRow += "}";
+		sRow += '}';
 		sRow += RTF_ROW;
 
 		sTable += sRow;

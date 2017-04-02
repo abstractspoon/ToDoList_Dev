@@ -141,9 +141,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&> CMapIDToTDI;
-
-class CToDoCtrlDataItems : protected CMapIDToTDI
+class CToDoCtrlDataItems : protected CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>
 {
 public:
 	CToDoCtrlDataItems();
