@@ -99,6 +99,8 @@ public:
 	static CString GetFormatName(UINT nFormat);
 	static CString& PackageHTMLFragment(CString& sContent, const CString& sSourceUrl = _T(""));
 	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl);
+	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs);
+	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
 
 protected:
 	HWND m_hWnd;

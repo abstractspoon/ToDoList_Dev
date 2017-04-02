@@ -9,6 +9,8 @@
 #include "WebMisc.h"
 #include "Misc.h"
 
+#include <AFXOLE.H>
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -409,4 +411,28 @@ BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
 		return FALSE;
 
 	return TRUE;
+}
+
+int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs)
+{
+	COleDataObject dataobj;
+	FORMATETC formatEtc = { 0 };
+
+    dataobj.Attach(lpDataOb, FALSE);
+	dataobj.BeginEnumFormats();
+
+	while (dataobj.GetNextFormat(&formatEtc))
+		aFormatIDs.Add(formatEtc.cfFormat);
+
+	return aFormatIDs.GetSize();
+}
+
+int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames)
+{
+	int nNumFmt = GetAvailableFormats(lpDataOb, aFormatIDs);
+
+	for (int nFmt = 0; nFmt < nNumFmt; nFmt++)
+		aFormatNames.Add(GetFormatName(aFormatIDs[nFmt]));
+
+	return nNumFmt;
 }

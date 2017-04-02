@@ -232,11 +232,7 @@ HRESULT CRulerRichEdit::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD
 
 CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format) 
 { 
-#ifdef _DEBUG
-	CString sFormat = CClipboard::GetFormatName(format);
-#endif
-
-	CLIPFORMAT formats[] = 
+	CLIPFORMAT CF_PREFERRED[] = 
 	{ 
 		CMSOutlookHelper::CF_OUTLOOK,
 		CF_HDROP,
@@ -261,25 +257,9 @@ CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFO
 		CF_WAVE,            
 		CF_ENHMETAFILE
 	};
+	const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 	
-	const long nNumFmts = sizeof(formats) / sizeof(CLIPFORMAT);
-	
-	COleDataObject dataobj;
-    dataobj.Attach(lpDataOb, FALSE);
-    
-	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
-	{
-		if (format && (format == formats[nFmt]))
-			return format;
-		
-		FORMATETC fmtEtc = { formats[nFmt], 0 };
-
-		if (dataobj.IsDataAvailable(formats[nFmt], &fmtEtc))
-			return formats[nFmt];
-	}
-	
-	// all else
-	return CUrlRichEditCtrl::GetAcceptableClipFormat(lpDataOb, format);
+	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF);
 }
 
 UINT CRulerRichEdit::OnGetDlgCode() 

@@ -1255,3 +1255,41 @@ BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking()
 {
 	return (COSVersion() >= OSV_WIN8);
 }
+
+CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, const CLIPFORMAT fmtPreferred[], int nNumFmts)
+{
+	CDWordArray aFormatIDs;
+	
+#ifdef _DEBUG
+	CStringArray aFormatNames;
+	CString sFormatNames, sFormatIDs;
+	
+	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
+	{
+		sFormatNames = Misc::FormatArray(aFormatNames);
+		sFormatIDs = Misc::FormatArray(aFormatIDs);
+	}
+#else
+	CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs);
+#endif
+	
+	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
+	{
+		UINT nFormat = fmtPreferred[nFmt];
+		
+		if (format && (format == nFormat))
+			return format;
+		
+		if (Misc::FindT(aFormatIDs, (DWORD)nFormat) != -1)
+			return nFormat;
+	}
+	
+	if (format)
+		return format;
+	
+#ifndef _UNICODE
+	return CF_TEXT;
+#else
+	return CF_UNICODETEXT;
+#endif
+}

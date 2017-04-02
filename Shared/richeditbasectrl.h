@@ -256,6 +256,8 @@ protected:
 	static DWORD CALLBACK StreamInCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
 	static DWORD CALLBACK StreamOutCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
 	static DWORD CALLBACK StreamOutLenCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
+
+	static CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, const CLIPFORMAT fmtPreferred[], int nNumFmts);
 	
 };
 

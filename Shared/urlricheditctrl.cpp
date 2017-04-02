@@ -601,8 +601,9 @@ HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lp
 
 CLIPFORMAT CUrlRichEditCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format)
 { 
-	CLIPFORMAT formats[] = 
+	CLIPFORMAT CF_PREFERRED[] = 
 	{ 
+		CMSOutlookHelper::CF_OUTLOOK,
 		CF_HDROP,
 			
 #ifndef _UNICODE
@@ -612,28 +613,9 @@ CLIPFORMAT CUrlRichEditCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIP
 #endif
 	};
 	
-	const long nNumFmts = sizeof(formats) / sizeof(CLIPFORMAT);
-	
-	// check for outlook first
-	if (CMSOutlookHelper::IsOutlookObject(lpDataOb))
-		return CMSOutlookHelper::CF_OUTLOOK;
-    
-	// else
-	COleDataObject dataobj;
-    dataobj.Attach(lpDataOb, FALSE);
+	const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 
-	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
-	{
-		if (format && (format == formats[nFmt]))
-			return format;
-		
-		FORMATETC fmtEtc = { formats[nFmt], 0 };
-
-		if (dataobj.IsDataAvailable(formats[nFmt], &fmtEtc))
-			return formats[nFmt];
-	}
-	
-	return format;
+	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF);
 }
 
 HRESULT CUrlRichEditCtrl::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD pdwEffect)
