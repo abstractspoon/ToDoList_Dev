@@ -486,7 +486,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			CHoldRedraw hr2(m_list);
 			
 			// cache current year range to test for changes
-			int nNumMonths = GetNumMonths();
+			int nNumMonths = GetNumMonths(m_nMonthDisplay);
 			
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
@@ -499,7 +499,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 				}
 				
 				// fixup list columns as required
-				if (GetNumMonths() != nNumMonths)
+				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
 				{
 					ValidateMonthDisplay();
 					UpdateListColumns();
@@ -524,12 +524,12 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
 
 			// cache current year range to test for changes
-			int nNumMonths = GetNumMonths();
+			int nNumMonths = GetNumMonths(m_nMonthDisplay);
 			
 			RecalcDateRange();
 
 			// fixup list columns as required
-			if (GetNumMonths() != nNumMonths)
+			if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
 			{
 				ValidateMonthDisplay();
 				UpdateListColumns();
@@ -1045,32 +1045,53 @@ void CGanttTreeListCtrl::MinMaxDates(const COleDateTime& date)
 	CDateHelper::Max(m_dtLatest, date);
 }
 
-int CGanttTreeListCtrl::GetStartYear() const
+int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
+	int nYear = COleDateTime::GetCurrentTime().GetYear();
+
 	if (CDateHelper::IsDateSet(m_dtEarliest))
-		return m_dtEarliest.GetYear();
+		nYear = m_dtEarliest.GetYear();
 
-	// else
-	return COleDateTime::GetCurrentTime().GetYear();
-}
-
-int CGanttTreeListCtrl::GetEndYear() const
-{
-	if (CDateHelper::IsDateSet(m_dtLatest))
+	switch (nDisplay)
 	{
-		// for now, do not let end year exceed MAX_YEAR
-		int nYear = m_dtLatest.GetYear();
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		nYear = ((nYear / 25) * 25);
+		break;
 
-		return min(nYear, MAX_YEAR);
+	case GTLC_DISPLAY_DECADES:
+		nYear = ((nYear / 10) * 10);
+		break;
 	}
 
-	// else
-	return COleDateTime::GetCurrentTime().GetYear();
+	return nYear;
+
 }
 
-int CGanttTreeListCtrl::GetNumMonths() const
+int CGanttTreeListCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ((GetEndYear() - GetStartYear() + 1) * 12);
+	int nYear = COleDateTime::GetCurrentTime().GetYear();
+	
+	if (CDateHelper::IsDateSet(m_dtLatest))
+		nYear = m_dtLatest.GetYear();
+	
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		nYear = ((nYear / 25) * 25) + 25;
+		break;
+		
+	case GTLC_DISPLAY_DECADES:
+		nYear = ((nYear / 10) * 10) + 10;
+		break;
+	}
+	
+	// for now, do not let end year exceed MAX_YEAR
+	return min(nYear, MAX_YEAR);
+}
+
+int CGanttTreeListCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
+{
+	return ((GetEndYear(nDisplay) - GetStartYear(nDisplay) + 1) * 12);
 }
 
 void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1143,6 +1164,16 @@ CString CGanttTreeListCtrl::FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, 
 	
 	switch (nDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		nYear = ((nYear / 25) * 25);
+		sHeader.Format(_T("%d-%d"), nYear, (nYear + 24));
+		break;
+		
+	case GTLC_DISPLAY_DECADES:
+		nYear = ((nYear / 10) * 10);
+		sHeader.Format(_T("%d-%d"), nYear, (nYear + 9));
+		break;
+
 	case GTLC_DISPLAY_YEARS:
 		sHeader.Format(_T("%d"), nYear);
 		break;
@@ -1197,6 +1228,12 @@ float CGanttTreeListCtrl::GetMonthWidth(int nColWidth) const
 {
 	switch (m_nMonthDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return (nColWidth / (25 * 12.0f));
+		
+	case GTLC_DISPLAY_DECADES:
+		return (nColWidth / (10 * 12.0f));
+		
 	case GTLC_DISPLAY_YEARS:
 		return (nColWidth / 12.0f);
 		
@@ -1235,37 +1272,42 @@ int CGanttTreeListCtrl::GetRequiredColumnCount() const
 
 int CGanttTreeListCtrl::GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
+	int nNumMonths = GetNumMonths(nDisplay);
+
 	switch (nDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return (nNumMonths / (25 * 12));
+		
+	case GTLC_DISPLAY_DECADES:
+		return (nNumMonths / (10 * 12));
+		
 	case GTLC_DISPLAY_YEARS:
-		return (GetNumMonths() / 12);
+		return (nNumMonths / 12);
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		return (GetNumMonths() / 3);
-		break;
+		return (nNumMonths / 3);
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
-		// fall thru
+		return nNumMonths;
 
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		// fall thru
+		return nNumMonths;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		return GetNumMonths();
-		
-	default:
-		ASSERT(0);
-		break;
+		return nNumMonths;
 	}
 
+	// else
+	ASSERT(0);
 	return 0;
 }
 
@@ -1281,42 +1323,41 @@ int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const
 
 int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
 {
-	int nColWidth = 0;
-
 	switch (nDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return (nMonthWidth * (25 * 12));
+		
+	case GTLC_DISPLAY_DECADES:
+		return (nMonthWidth * (10 * 12));
+		
 	case GTLC_DISPLAY_YEARS:
-		nColWidth = nMonthWidth * 12;
-		break;
+		return (nMonthWidth * 12);
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		nColWidth = nMonthWidth * 3;
-		break;
+		return (nMonthWidth * 3);
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
-		// fall thru
+		return nMonthWidth;
 
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		// fall thru
+		return nMonthWidth;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		nColWidth = nMonthWidth;
-		break;
-		
-	default:
-		ASSERT(0);
-		break;
+		return nMonthWidth;
 	}
 
-	return nColWidth;
+	// else
+	ASSERT(0);
+	return 0;
 }
 
 BOOL CGanttTreeListCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) const
@@ -2913,6 +2954,14 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 
 	switch (m_nMonthDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		// TODO
+		break;
+		
+	case GTLC_DISPLAY_DECADES:
+		// TODO
+		break;
+		
 	case GTLC_DISPLAY_YEARS:
 		for (i = 0; i < 12; i++)
 		{
@@ -3115,6 +3164,8 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 	switch (m_nMonthDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case GTLC_DISPLAY_DECADES:
 	case GTLC_DISPLAY_YEARS:
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
@@ -4056,6 +4107,8 @@ BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	// adjust the header height where we need to draw days/weeks
 	switch (nNewDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case GTLC_DISPLAY_DECADES:
 	case GTLC_DISPLAY_YEARS:
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
@@ -4299,7 +4352,7 @@ void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 	}
 
 	// and zero out the rest
-	for (; i <= GetNumMonths(); i++)
+	for (; i <= GetNumMonths(m_nMonthDisplay); i++)
 	{
 		m_listHeader.EnableItemTracking(i, FALSE);
 		m_listHeader.SetItemWidth(i, 0);
@@ -4468,9 +4521,15 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 
 		switch (m_nMonthDisplay)
 		{
+		case GTLC_DISPLAY_QUARTERCENTURIES:
+		case GTLC_DISPLAY_DECADES:
+			nMonth = 1;
+			nYear = GetStartYear(m_nMonthDisplay) + (i - 1);
+			break;
+
 		case GTLC_DISPLAY_YEARS:
 			nMonth = 1;
-			nYear = GetStartYear() + (i - 1);
+			nYear = GetStartYear(m_nMonthDisplay) + (i - 1);
 			break;
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
@@ -4480,7 +4539,7 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 			// the first month of each quarter has the 
 			// indices: 1, 4, 7, 10
 			nMonth = (((i - 1) % 4) * 3) + 1;
-			nYear = (GetStartYear() + ((i - 1) / 4));
+			nYear = (GetStartYear(m_nMonthDisplay) + ((i - 1) / 4));
 			break;
 			
 		case GTLC_DISPLAY_MONTHS_SHORT:
@@ -4497,7 +4556,7 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
 			nMonth = ((i - 1) % 12) + 1;
-			nYear = GetStartYear() + ((i - 1) / 12);
+			nYear = GetStartYear(m_nMonthDisplay) + ((i - 1) / 12);
 			break;
 			
 		default:
@@ -4523,7 +4582,9 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 	TRACE(_T("CGanttTreeListCtrl(Total Column Widths = %d)\n"), nTotalReqdWidth);
 
 	// for the rest, clear the text and item data and prevent tracking
-	for (; i <= GetNumMonths(); i++)
+	int nNumMonths = GetNumMonths(m_nMonthDisplay);
+
+	for (; i <= nNumMonths; i++)
 	{
 		m_listHeader.EnableItemTracking(i, FALSE);
 		m_listHeader.SetItem(i, 0, _T(""), 0);
@@ -4547,7 +4608,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 	m_list.InsertColumn(0, &lvc);
 	
 	// add other columns
-	for (int i = 0; i < GetNumMonths(); i++)
+	for (int i = 0; i < GetNumMonths(m_nMonthDisplay); i++)
 	{
 		lvc.cx = 0;
 		lvc.fmt = LVCFMT_CENTER | HDF_STRING;
@@ -4572,7 +4633,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
 
-	int nReqMonths = (GetNumMonths() + 1);
+	int nReqMonths = (GetNumMonths(m_nMonthDisplay) + 1);
 	int nDiffMonths = (nReqMonths - m_listHeader.GetItemCount());
 
 	if (nDiffMonths > 0)
@@ -4637,74 +4698,80 @@ void CGanttTreeListCtrl::CalculateMinMonthWidths()
 
 		switch (nDisplay)
 		{
-			case GTLC_DISPLAY_YEARS:
+		case GTLC_DISPLAY_QUARTERCENTURIES:
+		case GTLC_DISPLAY_DECADES:
+			// TODO
+			nMinMonthWidth = 10;
+			break;
+
+		case GTLC_DISPLAY_YEARS:
+			{
+				CString sText = FormatColumnHeaderText(nDisplay, 1, 2013);
+				
+				int nMinTextWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
+				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
+			}
+			break;
+			
+		case GTLC_DISPLAY_QUARTERS_SHORT:
+			{
+				CString sText = FormatColumnHeaderText(nDisplay, 1, 2013);
+				
+				int nMinTextWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
+				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
+			}
+			break;
+			
+		case GTLC_DISPLAY_QUARTERS_MID:
+		case GTLC_DISPLAY_QUARTERS_LONG:
+			{
+				int nMinTextWidth = 0;
+				
+				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatColumnHeaderText(nDisplay, 1, 2013);
-
-					int nMinTextWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
-					nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
+					CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
+					
+					int nWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
+					nMinTextWidth = max(nWidth, nMinTextWidth);
 				}
-				break;
-
-			case GTLC_DISPLAY_QUARTERS_SHORT:
+				
+				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
+			}
+			break;
+			
+		case GTLC_DISPLAY_MONTHS_SHORT:
+		case GTLC_DISPLAY_MONTHS_MID:
+		case GTLC_DISPLAY_MONTHS_LONG:
+			{
+				int nMinTextWidth = 0;
+				
+				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatColumnHeaderText(nDisplay, 1, 2013);
-
-					int nMinTextWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
-					nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
+					CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
+					
+					int nWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
+					nMinTextWidth = max(nWidth, nMinTextWidth);
 				}
-				break;
-
-			case GTLC_DISPLAY_QUARTERS_MID:
-			case GTLC_DISPLAY_QUARTERS_LONG:
-				{
-					int nMinTextWidth = 0;
-
-					for (int nMonth = 1; nMonth <= 12; nMonth += 3)
-					{
-						CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
-
-						int nWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
-						nMinTextWidth = max(nWidth, nMinTextWidth);
-					}
-
-					nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
-				}
-				break;
-
-			case GTLC_DISPLAY_MONTHS_SHORT:
-			case GTLC_DISPLAY_MONTHS_MID:
-			case GTLC_DISPLAY_MONTHS_LONG:
-				{
-					int nMinTextWidth = 0;
-
-					for (int nMonth = 1; nMonth <= 12; nMonth++)
-					{
-						CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
-
-						int nWidth = GraphicsMisc::GetTextWidth(&dcClient, sText);
-						nMinTextWidth = max(nWidth, nMinTextWidth);
-					}
-
-					nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING);
-				}
-				break;
-
-			case GTLC_DISPLAY_WEEKS_SHORT:
-			case GTLC_DISPLAY_WEEKS_MID:
-			case GTLC_DISPLAY_WEEKS_LONG:
-				// fall thru
-
-			case GTLC_DISPLAY_DAYS_SHORT:
-			case GTLC_DISPLAY_DAYS_MID:
-			case GTLC_DISPLAY_DAYS_LONG:
-				// just increase the length of the preceding display
-				nMinMonthWidth = (int)(m_aMinMonthWidths[nCol-1] * DAY_WEEK_MULTIPLIER);
-				break;
-
-			default:
-				ASSERT(0);
-				break;
+				
+				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING);
+			}
+			break;
+			
+		case GTLC_DISPLAY_WEEKS_SHORT:
+		case GTLC_DISPLAY_WEEKS_MID:
+		case GTLC_DISPLAY_WEEKS_LONG:
+			// fall thru
+			
+		case GTLC_DISPLAY_DAYS_SHORT:
+		case GTLC_DISPLAY_DAYS_MID:
+		case GTLC_DISPLAY_DAYS_LONG:
+			// just increase the length of the preceding display
+			nMinMonthWidth = (int)(m_aMinMonthWidths[nCol-1] * DAY_WEEK_MULTIPLIER);
+			break;
+			
+		default:
+			ASSERT(0);
+			break;
 		}
 
 		if (nMinMonthWidth > 0)
@@ -4891,6 +4958,11 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date
 		// further clip 'rColumn' if in 'Year' or 'Quarter' mode
 		switch (m_nMonthDisplay)
 		{
+		case GTLC_DISPLAY_QUARTERCENTURIES:
+		case GTLC_DISPLAY_DECADES:
+			// TODO
+			break;
+
 		case GTLC_DISPLAY_YEARS:
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 		case GTLC_DISPLAY_QUARTERS_MID:
@@ -4949,6 +5021,18 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 
 			switch (m_nMonthDisplay)
 			{
+			case GTLC_DISPLAY_QUARTERCENTURIES:
+				// Column == 25 years
+				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
+				dDayInCol = 1.0;
+				break;
+
+			case GTLC_DISPLAY_DECADES:
+				// Column == 10 years
+				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
+				dDayInCol = 1.0;
+				break;
+
 			case GTLC_DISPLAY_YEARS:
 				// Column == 12 months
 				nDaysInCol = (int)DAYS_IN_YEAR;
@@ -5627,6 +5711,11 @@ double CGanttTreeListCtrl::CalcMinDragDuration() const
 
 	switch (m_nMonthDisplay)
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case GTLC_DISPLAY_DECADES:
+		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTYEAR, dMin));
+		break;
+
 	case GTLC_DISPLAY_YEARS:
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
@@ -5870,6 +5959,11 @@ GTLC_SNAPMODE CGanttTreeListCtrl::GetSnapMode() const
 		{
 			switch (m_nMonthDisplay)
 			{
+			case GTLC_DISPLAY_QUARTERCENTURIES:
+			case GTLC_DISPLAY_DECADES:
+				// TODO
+				break;
+
 			case GTLC_DISPLAY_YEARS:
 				if (bCtrl && bShift)
 				{

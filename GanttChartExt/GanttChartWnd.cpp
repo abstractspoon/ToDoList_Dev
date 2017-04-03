@@ -170,6 +170,8 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// snap modes
 	CString sSnapKey = sKey + _T("\\Snap");
 
+	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERCENTURIES, _T("QuarterCentury"));
+	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DECADES, _T("Decade"));
 	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_YEARS, _T("Year"));
 	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_SHORT, _T("QuarterShort"));
 	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_MID, _T("QuarterMid"));
@@ -268,6 +270,8 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		// snap modes
 		CString sSnapKey = sKey + _T("\\Snap");
 
+		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERCENTURIES, _T("QuarterCentury"), GTLCSM_NEARESTYEAR);
+		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DECADES, _T("Decade"), GTLCSM_NEARESTYEAR);
 		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_YEARS, _T("Year"), GTLCSM_NEARESTMONTH);
 		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_SHORT, _T("QuarterShort"), GTLCSM_NEARESTMONTH);
 		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_MID, _T("QuarterMid"), GTLCSM_NEARESTMONTH);
@@ -1010,11 +1014,21 @@ void CGanttChartWnd::BuildSnapCombo()
 
 	switch (m_ctrlGantt.GetMonthDisplay())
 	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
+		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDECADE, GTLCSM_NEARESTDECADE);
+		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTQUARTERCENTURY, GTLCSM_NEARESTQUARTERCENTURY);
+		break;
+		
+	case GTLC_DISPLAY_DECADES:
+		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
+		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDECADE, GTLCSM_NEARESTDECADE);
+		break;
+		
 	case GTLC_DISPLAY_YEARS:
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
@@ -1022,7 +1036,6 @@ void CGanttChartWnd::BuildSnapCombo()
 	case GTLC_DISPLAY_QUARTERS_LONG:
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTQUARTER, GTLCSM_NEARESTQUARTER);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
@@ -1030,7 +1043,6 @@ void CGanttChartWnd::BuildSnapCombo()
 	case GTLC_DISPLAY_MONTHS_LONG:
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 		break;
 		
 	case GTLC_DISPLAY_WEEKS_SHORT:
@@ -1038,7 +1050,6 @@ void CGanttChartWnd::BuildSnapCombo()
 	case GTLC_DISPLAY_WEEKS_LONG:
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTWEEK, GTLCSM_NEARESTWEEK);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 		break;
 		
 	case GTLC_DISPLAY_DAYS_SHORT:
@@ -1046,10 +1057,10 @@ void CGanttChartWnd::BuildSnapCombo()
 	case GTLC_DISPLAY_DAYS_LONG:
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
 		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR, GTLCSM_NEARESTHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 		break;
 	}
+	// Add to all
+	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
 
 	CDialogHelper::SelectItemByData(m_cbSnapModes, m_ctrlGantt.GetSnapMode());
 }

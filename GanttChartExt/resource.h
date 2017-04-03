@@ -85,6 +85,10 @@
 #define IDS_DISPLAYDAYSSHORT            32800
 #define IDS_DISPLAYDAYSMID              32801
 #define IDS_DISPLAYDAYSLONG             32802
+#define IDS_DISPLAYQUARTERCENTURIES     57671
+#define IDS_DISPLAYDECADES              57672
+#define IDS_SNAP_NEARESTQUARTERCENTURY  57673
+#define IDS_SNAP_NEARESTDECADE          57674
 
 // Next default values for new objects
 // 

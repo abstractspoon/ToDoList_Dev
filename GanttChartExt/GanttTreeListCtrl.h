@@ -258,9 +258,9 @@ protected:
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
 	int CalcTreeWidth() const;
-	int GetStartYear() const;
-	int GetEndYear() const;
-	int GetNumMonths() const;
+	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
 	void Resize();
 	void ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
 	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nWidth) const;
