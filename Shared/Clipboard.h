@@ -41,6 +41,7 @@ CF_DSPENHMETAFILE   0x008E
 
 static UINT CBF_HTML		= ::RegisterClipboardFormat(_T("HTML Format"));
 static UINT CBF_MSURL		= ::RegisterClipboardFormat(_T("msSourceUrl"));
+static UINT CBF_URLW		= ::RegisterClipboardFormat(_T("UniformResourceLocatorW"));
 static UINT CBF_RTF			= ::RegisterClipboardFormat(CF_RTF);
 static UINT CBF_RETEXTOBJ	= ::RegisterClipboardFormat(CF_RETEXTOBJ);
 static UINT CBF_EMBEDDEDOBJ	= ::RegisterClipboardFormat(_T("Embedded Object"));
