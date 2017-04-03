@@ -1557,14 +1557,16 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 			// if this is windows 8 or above, assume 
 			// this was blocked by SmartScreen
 			if (COSVersion() >= OSV_WIN8)
+			{
 				AfxMessageBox(CEnString(nIDSmartScreenErrorMsg));
-
+				break;
+			}
 			// else fall thru
+
+		default:
+			AfxMessageBox(CEnString(nIDGenErrorMsg));
 			break;
 		}
-
-		// all else
-		AfxMessageBox(CEnString(nIDGenErrorMsg));
 	}
 
 	return dwRes;
