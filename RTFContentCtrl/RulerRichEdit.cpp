@@ -44,8 +44,35 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CFindReplaceDialogEx
 
+static const CLIPFORMAT CF_PREFERRED[] = 
+{ 
+	CF_HDROP,
+	(CLIPFORMAT)CBF_RTF,
+	(CLIPFORMAT)CBF_RETEXTOBJ, 
+	CF_BITMAP,
+
+#ifndef _UNICODE
+	CF_TEXT,
+#else
+	CF_UNICODETEXT,
+#endif
+	CF_METAFILEPICT,    
+	CF_SYLK,            
+	CF_DIF,             
+	CF_TIFF,            
+	CF_OEMTEXT,         
+	CF_DIB,             
+	CF_PALETTE,         
+	CF_PENDATA,         
+	CF_RIFF,            
+	CF_WAVE,            
+	CF_ENHMETAFILE
+};
+const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
+
+/////////////////////////////////////////////////////////////////////////////
+// CFindReplaceDialogEx
 
 // for some reason (that I cannot divine) dialog keyboard handling 
 // is not working so we install a keyboard hook and handle
@@ -232,33 +259,10 @@ HRESULT CRulerRichEdit::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD
 
 CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format) 
 { 
-	CLIPFORMAT CF_PREFERRED[] = 
-	{ 
-		CMSOutlookHelper::CF_OUTLOOK,
-		CF_HDROP,
-		(CLIPFORMAT)CBF_RTF,
-		(CLIPFORMAT)CBF_RETEXTOBJ, 
-		CF_BITMAP,
+	// check for outlook first
+	if (CMSOutlookHelper::IsOutlookObject(lpDataOb))
+		return CMSOutlookHelper::CF_OUTLOOK;
 
-#ifndef _UNICODE
-		CF_TEXT,
-#else
-		CF_UNICODETEXT,
-#endif
-		CF_METAFILEPICT,    
-		CF_SYLK,            
-		CF_DIF,             
-		CF_TIFF,            
-		CF_OEMTEXT,         
-		CF_DIB,             
-		CF_PALETTE,         
-		CF_PENDATA,         
-		CF_RIFF,            
-		CF_WAVE,            
-		CF_ENHMETAFILE
-	};
-	const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
-	
 	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF);
 }
 

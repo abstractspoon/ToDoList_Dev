@@ -31,6 +31,20 @@ const UINT TIMER_REPARSE = 1;
 const UINT PAUSE = 1000; // 1 second
 
 /////////////////////////////////////////////////////////////////////////////
+
+static const CLIPFORMAT CF_PREFERRED[] = 
+{ 
+	CF_HDROP,
+
+#ifndef _UNICODE
+	CF_TEXT,
+#else
+	CF_UNICODETEXT,
+#endif
+};
+const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
+
+/////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl
 
 CUrlRichEditCtrl::CUrlRichEditCtrl() 
@@ -601,19 +615,9 @@ HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lp
 
 CLIPFORMAT CUrlRichEditCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format)
 { 
-	CLIPFORMAT CF_PREFERRED[] = 
-	{ 
-		CMSOutlookHelper::CF_OUTLOOK,
-		CF_HDROP,
-			
-#ifndef _UNICODE
-		CF_TEXT,
-#else
-		CF_UNICODETEXT,
-#endif
-	};
-	
-	const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
+	// check for outlook first
+	if (CMSOutlookHelper::IsOutlookObject(lpDataOb))
+		return CMSOutlookHelper::CF_OUTLOOK;
 
 	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF);
 }
