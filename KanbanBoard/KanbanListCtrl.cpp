@@ -46,6 +46,7 @@ const int NUM_TEXTLINES			= 2;
 const int TITLE_VPADDING		= 6;
 const int LV_PADDING			= 3;
 const int ATTRIB_INDENT			= 6;
+//const int TIPPADDING			= 2;
 
 const CRect TEXT_BORDER			= CRect(4, 1, 3, 2);
 
@@ -147,6 +148,7 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
 	ON_WM_SIZE()
+	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1186,6 +1188,48 @@ void CKanbanListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	m_dwSelectingTask = 0;
 
 	CListCtrl::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+void CKanbanListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CPoint ptScreen(::GetMessagePos());
+	int nHit = FindTask(ptScreen);
+	ASSERT(nHit != -1);
+
+	DWORD dwTaskID = GetItemData(nHit);
+	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+	if (pKI)
+	{
+		// First set up the font for top-level items
+		HFONT hFont = m_fonts.GetHFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0);
+		::SendMessage(pNMHDR->hwndFrom, WM_SETFONT, (WPARAM)hFont, 0L);
+
+		// Always position the tooltip at the top of the item
+		CRect rLabel;
+		VERIFY(GetItemRect(nHit, rLabel, LVIR_BOUNDS));
+
+		rLabel.bottom = (rLabel.top + CalcRequiredItemHeight(1));
+
+		ClientToScreen(rLabel);
+		rLabel.InflateRect(0, 1, 0, 0);
+
+		// Calculate exact width required
+		CString sTip = GetItemText(nHit, 0);
+		rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(sTip, pNMHDR->hwndFrom));
+
+		CRect rTip(rLabel);
+		::SendMessage(m_hWnd, TTM_ADJUSTRECT, TRUE, (LPARAM)&rTip);
+		//rTip.OffsetRect(TIPPADDING, 0);
+
+		rTip.top = rLabel.top;
+		rTip.bottom = rLabel.bottom;
+
+		::SetWindowPos(pNMHDR->hwndFrom, NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
+			(SWP_NOACTIVATE | SWP_NOZORDER));
+
+		*pResult = TRUE; // we do the positioning
+	}
 }
 
 BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
