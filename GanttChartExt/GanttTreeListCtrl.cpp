@@ -1767,6 +1767,7 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 		if (nCol > 0) // first column always zero width
 		{
 			m_listHeader.SetItemWidth(nCol, GetColumnWidth());
+			m_display.RemoveAll();
 		}
 	}
 }
@@ -2133,6 +2134,9 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 						{
 							if (m_listHeader.IsItemTrackable(pHDN->iItem) && (pHDN->pitem->cxy < MIN_COL_WIDTH))
 								pHDN->pitem->cxy = MIN_COL_WIDTH;
+
+							m_display.RemoveAll();
+							m_list.Invalidate(FALSE);
 						}
 					}
 					break;
