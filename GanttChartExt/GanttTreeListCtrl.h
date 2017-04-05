@@ -208,6 +208,15 @@ protected:
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 
+	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
+							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
+							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
+							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
+							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
@@ -234,8 +243,6 @@ protected:
 	HFONT GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, int nCol);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
-	void AddListColumn(int nMonth = 0, int nYear = 0);
-	void SetListColumnDate(int nCol, int nMonth, int nYear);
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
 	void CalculateMinMonthWidths();
 	void BuildTreeColumns();
