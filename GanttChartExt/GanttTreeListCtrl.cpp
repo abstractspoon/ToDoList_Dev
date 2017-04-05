@@ -4302,9 +4302,9 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 	if ((nNewDisplay == m_nMonthDisplay) && (nNewMonthWidth == m_nMonthWidth))
 		return TRUE;
 
-// 	// validate month width
-// 	if (nNewMonthWidth < 10)
-// 		return FALSE;
+	// validate month width
+	if (nNewMonthWidth < 10)
+		return FALSE;
 
 	// cache the scroll-pos at the centre of the view so we can restore it
 	CRect rClient;
