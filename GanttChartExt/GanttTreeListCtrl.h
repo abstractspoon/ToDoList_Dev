@@ -209,19 +209,23 @@ protected:
 	void RedrawTree(BOOL bErase = FALSE);
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
-							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL bToday);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL bToday, BOOL bHalfYears = FALSE);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL bToday, BOOL bHalfYears = FALSE);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, BOOL bSelected, BOOL bToday);
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL bToday, BOOL bDrawDivider = TRUE);
 
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 
-	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected = FALSE);
+	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bColumn, BOOL bVert, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, HBRUSH hbrParent);

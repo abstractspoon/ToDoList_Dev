@@ -2906,7 +2906,7 @@ void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 		else
 			rYear.right = (rItem.left + (int)(fYearWidth * (j + 1)));
 
-		DrawListItemYear(pDC, rYear, (nYear + j), gi, gd, bSelected, bToday);
+		DrawListItemYear(pDC, rYear, (nYear + j), gi, gd, bSelected, bToday, TRUE);
 
 		// next year
 		rYear.left = rYear.right; 
@@ -2915,27 +2915,29 @@ void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 
 void CGanttTreeListCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
 											const GANTTITEM& gi, GANTTDISPLAY& gd,
-											BOOL bSelected, BOOL bToday)
+											BOOL bSelected, BOOL bToday, BOOL bHalfYears)
 {
-	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, gd, bSelected, bToday);
+	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, gd, bSelected, bToday, bHalfYears);
 }
 
 void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
 											int nMonth, int nNumMonths, int nYear, 
 											const GANTTITEM& gi, GANTTDISPLAY& gd,
-											BOOL bSelected, BOOL bToday)
+											BOOL bSelected, BOOL bToday, BOOL bHalfYears)
 {
 	float fMonthWidth = (rItem.Width() / (float)nNumMonths);
 	CRect rMonth(rItem);
 
 	for (int i = 0; i < nNumMonths; i++)
 	{
+		BOOL bDrawDivider = (!bHalfYears || (((nMonth + i) % 6) == 0));
+
 		if ((nMonth + i) == 12)
 			rMonth.right = rItem.right;
 		else
 			rMonth.right = (rItem.left + (int)(fMonthWidth * (i + 1)));
 
-		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, gd, bSelected, bToday);
+		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, gd, bSelected, bToday, bDrawDivider);
 
 		// next item
 		rMonth.left = rMonth.right; 
@@ -2945,10 +2947,10 @@ void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 void CGanttTreeListCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, GANTTDISPLAY& gd,
-											BOOL bSelected, BOOL bToday)
+											BOOL bSelected, BOOL bToday, BOOL bDrawDivider)
 {
-	// draw vertical month divider
-	DrawItemDivider(pDC, rMonth, (nMonth == 12), TRUE, bSelected);
+	if (bDrawDivider)
+		DrawItemDivider(pDC, rMonth, (nMonth == 12), TRUE, bSelected);
 
 	if (!bToday)
 		bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -4301,10 +4303,6 @@ BOOL CGanttTreeListCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWid
 
 	if ((nNewDisplay == m_nMonthDisplay) && (nNewMonthWidth == m_nMonthWidth))
 		return TRUE;
-
-	// validate month width
-	if (nNewMonthWidth < 10)
-		return FALSE;
 
 	// cache the scroll-pos at the centre of the view so we can restore it
 	CRect rClient;
