@@ -4581,11 +4581,15 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 		switch (m_nMonthDisplay)
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
-		case GTLC_DISPLAY_DECADES:
 			nMonth = 1;
-			nYear = GetStartYear(m_nMonthDisplay) + (i - 1);
+			nYear = GetStartYear(m_nMonthDisplay) + ((i - 1) * 25);
 			break;
 
+		case GTLC_DISPLAY_DECADES:
+			nMonth = 1;
+			nYear = GetStartYear(m_nMonthDisplay) + ((i - 1) * 10);
+			break;
+			
 		case GTLC_DISPLAY_YEARS:
 			nMonth = 1;
 			nYear = GetStartYear(m_nMonthDisplay) + (i - 1);
