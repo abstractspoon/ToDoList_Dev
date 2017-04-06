@@ -109,7 +109,7 @@ public:
 	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay);
 	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay) const;
-	void ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const;
+	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const;
 	void ValidateMonthDisplay();
 
 	void ScrollToToday();
@@ -159,7 +159,7 @@ protected:
 
 	CEnHeaderCtrl m_treeHeader, m_listHeader;
 	CGanttDependencyEditor* m_pDependEdit;
-	CIntArray m_aMinMonthWidths;
+	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crToday, m_crWeekend, m_crParent, m_crDefault;
 	COleDateTime m_dtDragMin;
@@ -249,6 +249,7 @@ protected:
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
 	void CalculateMinMonthWidths();
+	int GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	void BuildTreeColumns();
 	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
 	int GetColumnWidth() const;
@@ -273,7 +274,7 @@ protected:
 	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
 	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
 	void Resize();
-	void ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
+	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
 	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nWidth) const;
 	void RecalcDateRange();
 
@@ -371,6 +372,7 @@ protected:
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
+	static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
 
 private:
 	void PreFixVScrollSyncBug();

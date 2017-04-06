@@ -35,6 +35,8 @@ static GTCDISPLAYMODE DISPLAYMODES[] =
 	{ GTLC_DISPLAY_DAYS_LONG,			IDS_DISPLAYDAYSLONG },
 };
 
+const int NUM_DISPLAYMODES = (sizeof(DISPLAYMODES) / sizeof(DISPLAYMODES[0]));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

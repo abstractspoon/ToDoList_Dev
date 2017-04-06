@@ -1071,7 +1071,7 @@ void CGanttChartWnd::BuildDisplayCombo()
 
 	m_cbDisplayOptions.ResetContent();
 
-	for (int nMode = 0; nMode < GTLC_DISPLAY_COUNT; nMode++)
+	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
 	{
 		const GTCDISPLAYMODE& mode = DISPLAYMODES[nMode];
 
