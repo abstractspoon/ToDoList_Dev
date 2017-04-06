@@ -210,16 +210,16 @@ protected:
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL bToday);
+							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = TRUE);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL bToday, BOOL bHalfYears = FALSE);
+							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = FALSE);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL bToday, BOOL bHalfYears = FALSE);
+							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = FALSE);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL bToday, BOOL bDrawDivider = TRUE);
+							BOOL bSelected, BOOL& bToday, BOOL bDrawDivider = TRUE);
 
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
@@ -320,7 +320,6 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
-	COLORREF GetWeekendColor(BOOL bSelected) const;
 	HBRUSH GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
  	COLORREF GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const;
