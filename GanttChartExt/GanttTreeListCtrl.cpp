@@ -5766,7 +5766,8 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 		else
 		{
-			ASSERT(0);
+			// We've dragged beyond the last column
+			// ASSERT(0);
 		}
 
 		return TRUE; // always
@@ -5789,9 +5790,6 @@ double CGanttTreeListCtrl::CalcMinDragDuration() const
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
 	case GTLC_DISPLAY_DECADES:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTYEAR, dMin));
-		break;
-
 	case GTLC_DISPLAY_YEARS:
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
@@ -5829,14 +5827,16 @@ BOOL CGanttTreeListCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
 
 	switch (nMode)
 	{
-	case GTLCSM_NEARESTYEAR:		dMin = 365.0;		break;
-	case GTLCSM_NEARESTHALFYEAR:	dMin = 182.0;		break;
-	case GTLCSM_NEARESTQUARTER:		dMin = 91.0;		break;
-	case GTLCSM_NEARESTMONTH:		dMin = 30.0;		break;
-	case GTLCSM_NEARESTWEEK:		dMin = 7.0;			break;
-	case GTLCSM_NEARESTDAY:			dMin = 1.0;			break;
-	case GTLCSM_NEARESTHALFDAY:		dMin = 0.5;			break;
-	case GTLCSM_NEARESTHOUR:		dMin = (1.0 / 24);	break;
+	case GTLCSM_NEARESTQUARTERCENTURY:	dMin = 9125.0;		break;
+	case GTLCSM_NEARESTDECADE:			dMin = 3650.0;		break;
+	case GTLCSM_NEARESTYEAR:			dMin = 365.0;		break;
+	case GTLCSM_NEARESTHALFYEAR:		dMin = 182.0;		break;
+	case GTLCSM_NEARESTQUARTER:			dMin = 91.0;		break;
+	case GTLCSM_NEARESTMONTH:			dMin = 30.0;		break;
+	case GTLCSM_NEARESTWEEK:			dMin = 7.0;			break;
+	case GTLCSM_NEARESTDAY:				dMin = 1.0;			break;
+	case GTLCSM_NEARESTHALFDAY:			dMin = 0.5;			break;
+	case GTLCSM_NEARESTHOUR:			dMin = (1.0 / 24);	break;
 
 	case GTLCSM_FREE:
 		break;
@@ -6140,9 +6140,15 @@ COleDateTime CGanttTreeListCtrl::GetNearestDate(const COleDateTime& dtDrag) cons
 
 	switch (GetSnapMode())
 	{
+	case GTLCSM_NEARESTQUARTERCENTURY:
+		return CDateHelper::GetNearestQuarterCentury(dtDrag, m_bDraggingEnd);
+		
+	case GTLCSM_NEARESTDECADE:
+		return CDateHelper::GetNearestDecade(dtDrag, m_bDraggingEnd);
+
 	case GTLCSM_NEARESTYEAR:
 		return CDateHelper::GetNearestYear(dtDrag, m_bDraggingEnd);
-
+		
 	case GTLCSM_NEARESTHALFYEAR:
 		return CDateHelper::GetNearestHalfYear(dtDrag, m_bDraggingEnd);
 
