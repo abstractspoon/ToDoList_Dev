@@ -37,6 +37,19 @@ static GTCDISPLAYMODE DISPLAYMODES[] =
 
 const int NUM_DISPLAYMODES = (sizeof(DISPLAYMODES) / sizeof(DISPLAYMODES[0]));
 
+static int FindDisplayMode(GTLC_MONTH_DISPLAY nDisplay)
+{
+	int nMode = NUM_DISPLAYMODES;
+	
+	while (nMode--)
+	{
+		if (DISPLAYMODES[nMode].nDisplay == nDisplay)
+			return nMode;
+	}
+	
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

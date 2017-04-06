@@ -4124,25 +4124,20 @@ void CGanttTreeListCtrl::DeleteTreeItem(HTREEITEM hti)
 
 BOOL CGanttTreeListCtrl::ZoomIn(BOOL bIn)
 {
-	GTLC_MONTH_DISPLAY nNewDisplay = (GTLC_MONTH_DISPLAY)(m_nMonthDisplay + (bIn ? 1 : -1));
+	int nMode = FindDisplayMode(m_nMonthDisplay);
+	ASSERT(nMode != -1);
 
-	if (!IsValidDisplay(nNewDisplay))
+	int nNewMode = (nMode + (bIn ? 1 : -1));
+
+	if ((nNewMode < 0) || (nNewMode >= NUM_DISPLAYMODES))
 		return FALSE;
 
-	return SetMonthDisplay(nNewDisplay);
+	return SetMonthDisplay(DISPLAYMODES[nNewMode].nDisplay);
 }
 
 BOOL CGanttTreeListCtrl::IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
-	int nMode = NUM_DISPLAYMODES;
-
-	while (nMode--)
-	{
-		if (DISPLAYMODES[nMode].nDisplay == nDisplay)
-			return TRUE;
-	}
-
-	return FALSE;
+	return (FindDisplayMode(nDisplay) != -1);
 }
 
 BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
@@ -5110,13 +5105,13 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			case GTLC_DISPLAY_QUARTERCENTURIES:
 				// Column == 25 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-				dDayInCol = (int)(((nYear % 25) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH));
+				dDayInCol = (int)(((nYear % 25) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
 			case GTLC_DISPLAY_DECADES:
 				// Column == 10 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-				dDayInCol = (int)(((nYear % 10) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH));
+				dDayInCol = (int)(((nYear % 10) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
 			case GTLC_DISPLAY_YEARS:
