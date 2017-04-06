@@ -802,6 +802,44 @@ COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 	return (GetStartOfMonth(date).m_dt + GetDaysInMonth(date));
 }
 
+COleDateTime CDateHelper::GetStartOfYear(const COleDateTime& date)
+{
+	return COleDateTime(date.GetYear(), 1, 1, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetEndOfYear(const COleDateTime& date)
+{
+	return COleDateTime(date.GetYear(), 12, 31, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetStartOfDecade(const COleDateTime& date)
+{
+	int nYear = ((date.GetYear() / 10) * 10);
+
+	return COleDateTime(nYear, 1, 1, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetEndOfDecade(const COleDateTime& date)
+{
+	int nYear = (((date.GetYear() / 10) * 10) + 9);
+	
+	return COleDateTime(nYear, 12, 31, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetStartOfQuarterCentury(const COleDateTime& date)
+{
+	int nYear = ((date.GetYear() / 25) * 25);
+	
+	return COleDateTime(nYear, 1, 1, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date)
+{
+	int nYear = (((date.GetYear() / 25) * 25) + 24);
+	
+	return COleDateTime(nYear, 12, 31, 0, 0, 0);
+}
+
 CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags)
 {
 	CString sDate, sTime, sDow;
@@ -1237,52 +1275,52 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetNearestDay(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtDay = GetDateOnly(date);
+	COleDateTime dtNearest = GetDateOnly(date);
 
-	if ((date.m_dt - dtDay.m_dt) < 0.5)
+	if ((date.m_dt - dtNearest.m_dt) < 0.5)
 	{
 		if (bEnd) // end of previous day
 		{
-			dtDay = GetEndOfPreviousDay(dtDay);
+			dtNearest = GetEndOfPreviousDay(dtNearest);
 		}
 	}
 	else if (bEnd)
 	{
-		dtDay.m_dt += END_OF_DAY;
+		dtNearest.m_dt += END_OF_DAY;
 	}
 	else // start
 	{
-		dtDay.m_dt += 1.0;
+		dtNearest.m_dt += 1.0;
 	}
 
-	return dtDay;
+	return dtNearest;
 }
 
 COleDateTime CDateHelper::GetNearestHalfDay(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtDay = GetDateOnly(date);
+	COleDateTime dtNearest = GetDateOnly(date);
 
-	if ((date.m_dt - dtDay.m_dt) < 0.25)
+	if ((date.m_dt - dtNearest.m_dt) < 0.25)
 	{
 		if (bEnd) // end of previous day
 		{
-			dtDay = GetEndOfPreviousDay(dtDay);
+			dtNearest = GetEndOfPreviousDay(dtNearest);
 		}
 	}
-	else if ((date.m_dt - dtDay.m_dt) < 0.75)
+	else if ((date.m_dt - dtNearest.m_dt) < 0.75)
 	{
-		dtDay.m_dt += 0.5;
+		dtNearest.m_dt += 0.5;
 	}
 	else if (bEnd)
 	{
-		dtDay.m_dt += END_OF_DAY;
+		dtNearest.m_dt += END_OF_DAY;
 	}
 	else // start
 	{
-		dtDay.m_dt += 1.0;
+		dtNearest.m_dt += 1.0;
 	}
 
-	return dtDay;
+	return dtNearest;
 }
 
 COleDateTime CDateHelper::GetEndOfPreviousDay(const COleDateTime& date)
@@ -1331,7 +1369,7 @@ COleDateTime CDateHelper::GetNearestHour(const COleDateTime& date, BOOL bEnd)
 
 COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtYear;
+	COleDateTime dtNearest;
 
 	int nYear  = date.GetYear();
 	int nMonth = date.GetMonth();
@@ -1339,21 +1377,74 @@ COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
 	if (nMonth > 6)
 	{
 		// beginning of next year
-		dtYear.SetDate(nYear+1, 1, 1);
+		dtNearest.SetDate(nYear+1, 1, 1);
 	}
 	else
 	{
 		// beginning of this year
-		dtYear.SetDate(nYear, 1, 1);
+		dtNearest.SetDate(nYear, 1, 1);
 	}
 
-	ASSERT(IsDateSet(dtYear));
+	ASSERT(IsDateSet(dtNearest));
 
 	// handle end - last second of day before
 	if (bEnd)
-		dtYear = GetEndOfPreviousDay(dtYear);
+		dtNearest = GetEndOfPreviousDay(dtNearest);
 
-	return dtYear;
+	return dtNearest;
+}
+
+COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades)
+{
+	COleDateTime dtNearest;
+
+	int nYear = (date.GetYear() - (bZeroBasedDecades ? 0 : 1));
+	int nMonth = date.GetMonth();
+
+	if (((nYear % 25) > 5) || (((nYear % 25) == 5) && (nMonth > 6)))
+	{
+		// beginning of next decade
+		dtNearest = (GetEndOfQuarterCentury(date).m_dt + 1.0);
+	}
+	else
+	{
+		// beginning of this year
+		dtNearest = GetStartOfQuarterCentury(date);
+	}
+
+	ASSERT(IsDateSet(dtNearest));
+
+	// handle end - last second of day before
+	if (bEnd)
+		dtNearest = GetEndOfPreviousDay(dtNearest);
+
+	return dtNearest;
+}
+
+COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades)
+{
+	COleDateTime dtNearest;
+
+	int nYear = (date.GetYear() - (bZeroBasedDecades ? 0 : 1));
+
+	if ((nYear % 10) > 5)
+	{
+		// beginning of next decade
+		dtNearest = (GetEndOfDecade(date).m_dt + 1.0);
+	}
+	else
+	{
+		// beginning of this year
+		dtNearest = GetStartOfDecade(date);
+	}
+
+	ASSERT(IsDateSet(dtNearest));
+
+	// handle end - last second of day before
+	if (bEnd)
+		dtNearest = GetEndOfPreviousDay(dtNearest);
+
+	return dtNearest;
 }
 
 COleDateTime CDateHelper::GetNearestHalfYear(const COleDateTime& date, BOOL bEnd)
@@ -1399,7 +1490,6 @@ COleDateTime CDateHelper::GetNearestQuarter(const COleDateTime& date, BOOL bEnd)
 	{
 		// beginning of next year
 		dtQuarter.SetDate(nYear+1, 1, 1);
-
 	}
 	else if (date > COleDateTime(nYear, 8, 15, 0, 0, 0))
 	{
