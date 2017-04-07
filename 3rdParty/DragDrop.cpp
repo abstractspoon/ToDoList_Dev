@@ -27,7 +27,7 @@ CDragDropMgr::CDragDropMgr() : m_hInstOle32(NULL)
 	m_hwndTracking = NULL;
 	m_hCursorSave = NULL;
 	m_pDragImage = NULL;
-	m_iState = 0;
+	m_iState = NONE;
 
 	memset(&m_ddi,0,sizeof(m_ddi));
 }
@@ -91,28 +91,51 @@ UINT CDragDropMgr::ProcessMessage(const MSG* pMsg, BOOL bAllowNcDrag)
 
 	if (IsSourceWnd(msg.hwnd)) 
     {
-		if (msg.message == WM_LBUTTONDOWN || (bAllowNcDrag && msg.message == WM_NCLBUTTONDOWN) ||
-			msg.message == WM_RBUTTONDOWN || (bAllowNcDrag && msg.message == WM_NCRBUTTONDOWN)) 
+		BOOL bAbort = FALSE;
+
+		switch (msg.message)
 		{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
 			return OnButtonDown(msg);
-		}
-        else if (msg.message == WM_MOUSEMOVE) 
-		{
+			
+		case WM_NCLBUTTONDOWN:
+		case WM_NCRBUTTONDOWN:
+			if (bAllowNcDrag) 
+				return OnButtonDown(msg);
+			break;
+
+		case WM_MOUSEMOVE:
 			return OnMouseMove(msg);
-		}
-        else if (msg.message == WM_LBUTTONUP || msg.message == WM_RBUTTONUP) 
-		{
+
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
 			return OnButtonUp(msg);
+
+		case WM_KEYDOWN:
+			bAbort = ((m_iState != NONE) && (msg.wParam == VK_ESCAPE));
+			break;
+
+		case WM_CONTEXTMENU:
+		case WM_KILLFOCUS:
+			bAbort = TRUE;
+			break;
+
+		case WM_ENABLE:
+			bAbort = (pMsg->wParam == FALSE);
+			break;
 		}
-        else if (m_iState && ((msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE) ||
-							   msg.message == WM_CONTEXTMENU || msg.message == WM_KILLFOCUS)) 
-        {
+
+		if (bAbort)
+		{
 			SendDragMessage(WM_DD_DRAGABORT);
 			SetState(NONE);
 
 			return TRUE;
 		}
 	}
+
+	// not handled
 	return FALSE;
 }
 
@@ -155,7 +178,9 @@ BOOL CDragDropMgr::OnButtonDown(const MSG& msg)
 		m_ptOrg = pt;
 	}
 	else
+	{
 		m_ptOrg = GETPOINT(msg.lParam);
+	}
 	
 	m_hwndTracking = msg.hwnd;
 	SetState(CAPTURED);
