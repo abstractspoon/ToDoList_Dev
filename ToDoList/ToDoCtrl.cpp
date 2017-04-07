@@ -8311,6 +8311,10 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 
 	case TDCC_ICON:
 		ASSERT(!IsReadOnly());
+
+		// Cancel any drag started by clicking on the tree item icon
+		m_treeDragDrop.CancelDrag();
+
 		EditSelectedTaskIcon();
 		break;
 		

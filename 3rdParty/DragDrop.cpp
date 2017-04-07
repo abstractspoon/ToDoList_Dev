@@ -506,8 +506,8 @@ void CDragDropText::OnDrawData(CDC& dc, CRect& rc, COLORREF& crMask)
 void CDragDropMgr::CancelDrag()
 {
     if (IsDragging())
-    {
         SendDragMessage(WM_DD_DRAGABORT);
-        SetState(NONE);
-    }
+
+	// Always
+	SetState(NONE);
 }
