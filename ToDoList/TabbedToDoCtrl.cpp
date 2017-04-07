@@ -2616,6 +2616,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 	case TDCA_RECURRENCE: 
 	case TDCA_VERSION:
 	case TDCA_CUSTOMATTRIBDEFS:
+	case TDCA_ICON:
 		UpdateExtensionViewsSelection(nAttrib);
 		break;
 		
