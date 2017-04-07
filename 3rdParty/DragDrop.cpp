@@ -93,14 +93,17 @@ UINT CDragDropMgr::ProcessMessage(const MSG* pMsg, BOOL bAllowNcDrag)
     {
 		if (msg.message == WM_LBUTTONDOWN || (bAllowNcDrag && msg.message == WM_NCLBUTTONDOWN) ||
 			msg.message == WM_RBUTTONDOWN || (bAllowNcDrag && msg.message == WM_NCRBUTTONDOWN)) 
+		{
 			return OnButtonDown(msg);
-
+		}
         else if (msg.message == WM_MOUSEMOVE) 
+		{
 			return OnMouseMove(msg);
-
+		}
         else if (msg.message == WM_LBUTTONUP || msg.message == WM_RBUTTONUP) 
+		{
 			return OnButtonUp(msg);
-
+		}
         else if (m_iState && ((msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE) ||
 							   msg.message == WM_CONTEXTMENU || msg.message == WM_KILLFOCUS)) 
         {
