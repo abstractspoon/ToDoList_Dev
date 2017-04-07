@@ -119,10 +119,7 @@ void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	ClientToScreen(rLabel);
 	rLabel.InflateRect(0, 1, 0, 0);
 
-	// Calculate exact width required
-	CString sTip = GetItemText(hti);
-	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(sTip, pNMHDR->hwndFrom));
-
+	// Calculate exact position required
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
 	rTip.OffsetRect(TIPPADDING, 0);
@@ -130,8 +127,7 @@ void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
 
-	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
-							(SWP_NOACTIVATE | SWP_NOZORDER));
+	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 }
 
 LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)

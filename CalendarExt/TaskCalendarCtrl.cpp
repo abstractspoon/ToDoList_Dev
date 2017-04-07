@@ -2003,20 +2003,21 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		return;
 	}
 
-	*pResult = TRUE; // we do the positioning
-
 	// Set the font first, bold for top level items
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-	ASSERT(pTCI);
-	
+
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return;
+	}
+
 	m_tooltip.SetFont(m_fonts.GetFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
 
-	// Calculate exact width required
+	// Calculate exact position required
 	CRect rLabel;
 	VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
 	ClientToScreen(rLabel);
-
-	rLabel.right = (rLabel.left + GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip));
 
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
@@ -2025,8 +2026,9 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
 
-	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), 
-							(SWP_NOACTIVATE | SWP_NOZORDER));
+	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+
+	*pResult = TRUE; // we do the positioning
 }
 
 BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
