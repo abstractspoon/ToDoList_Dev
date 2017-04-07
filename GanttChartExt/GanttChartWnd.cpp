@@ -894,6 +894,7 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 	m_ctrlGantt.SetOption(GTLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
 	m_ctrlGantt.SetOption(GTLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYPROGRESSINBAR, m_dlgPrefs.GetDisplayProgressInBar());
+	m_ctrlGantt.SetOption(GTLCF_DECADESAREONEBASED, m_dlgPrefs.GetDecadesAreOneBased());
 
 	m_ctrlGantt.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlGantt.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
@@ -1078,7 +1079,11 @@ void CGanttChartWnd::BuildDisplayCombo()
 
 		if (!m_ctrlGantt.CanSetMonthDisplay(mode.nDisplay))
 		{
-			nCurDisplay = min(nCurDisplay, mode.nDisplay);
+			int nCurMode = FindDisplayMode(nCurDisplay);
+
+			if (nMode < nCurMode)
+				nCurDisplay = mode.nDisplay;
+
 			break;
 		}
 

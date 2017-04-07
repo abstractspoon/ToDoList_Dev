@@ -162,53 +162,56 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 292
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 305
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
+    CONTROL         "Decades start on year '1' instead of year '0'. eg. '2001' instead of '2000'",
+                    IDC_DECADESAREONEBASED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,333,10
     CONTROL         "&Display 'Alloc To' after task's gantt bar",
                     IDC_DISPLAYALLOCTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,7,333,10
+                    7,22,333,10
     CONTROL         "Show '% &Complete' as progress on task's gantt bar",
                     IDC_DISPLAYPROGRESS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,22,333,10
+                    WS_TABSTOP,7,37,333,10
     CONTROL         "&Auto-scroll to task when selecting",
                     IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,37,333,10
+                    WS_TABSTOP,7,52,333,10
     CONTROL         "&Treat tasks with the following tag as 'Milestones':",
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,52,333,10
-    EDITTEXT        IDC_MILESTONETAG,18,64,151,13,ES_AUTOHSCROLL
-    LTEXT           "Colours",IDC_COLORSGROUP,7,85,333,8
+                    WS_TABSTOP,7,67,333,10
+    EDITTEXT        IDC_MILESTONETAG,18,79,151,13,ES_AUTOHSCROLL
+    LTEXT           "Colours",IDC_COLORSGROUP,7,100,333,8
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,101,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,98,52,13,BS_RIGHT
-    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,116,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,113,52,13,BS_RIGHT
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,113,52,13,BS_RIGHT
+    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,131,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,128,52,13,BS_RIGHT
     CONTROL         "'Bar' colour for tasks having no colour",
                     IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    130,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,128,52,13,BS_RIGHT
-    GROUPBOX        "Parent Tasks",-1,7,147,333,63
+                    145,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,143,52,13,BS_RIGHT
+    GROUPBOX        "Parent Tasks",-1,7,162,333,63
     CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,161,320,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,176,320,10
     CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,176,320,10
+                    BS_AUTORADIOBUTTON,16,191,320,10
     CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,191,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,189,52,13,BS_RIGHT | 
+                    BS_AUTORADIOBUTTON,16,206,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,204,52,13,BS_RIGHT | 
                     WS_GROUP
-    LTEXT           "Dates",IDC_DATESGROUP,7,219,333,8
+    LTEXT           "Dates",IDC_DATESGROUP,7,234,333,8
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
                     IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,235,333,10
+                    WS_TABSTOP,7,250,333,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,250,333,10
+                    WS_TABSTOP,7,265,333,10
     CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,265,333,10
+                    WS_TABSTOP,7,280,333,10
 END
 
 IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
@@ -243,7 +246,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 285
+        BOTTOMMARGIN, 298
     END
 
     IDD_CREATEDEPENDS_DIALOG, DIALOG

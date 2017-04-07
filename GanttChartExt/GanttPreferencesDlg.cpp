@@ -39,6 +39,7 @@ CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_bUseTagForMilestone = FALSE;
 	m_sMilestoneTag = _T("");
 	m_bDisplayProgressInBar = FALSE;
+	m_bDecadesAreOneBased = FALSE;
 	//}}AFX_DATA_INIT
 	m_crParent = DEF_PARENTCOLOR;
 	m_crToday = DEF_TODAYCOLOR;
@@ -63,6 +64,7 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USETAGFORMILESTONE, m_bUseTagForMilestone);
 	DDX_Text(pDX, IDC_MILESTONETAG, m_sMilestoneTag);
 	DDX_Check(pDX, IDC_DISPLAYPROGRESS, m_bDisplayProgressInBar);
+	DDX_Check(pDX, IDC_DECADESAREONEBASED, m_bDecadesAreOneBased);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btTodayColor);
 	DDX_Control(pDX, IDC_SETWEEKENDCOLOR, m_btWeekendColor);
@@ -200,6 +202,7 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("ParentColoring"), m_nParentColoring);
 	pPrefs->WriteProfileInt(szKey, _T("ParentColor"), (int)m_crParent);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayProgressInBar"), m_bDisplayProgressInBar);
+	pPrefs->WriteProfileInt(szKey, _T("DecadesAreOneBased"), m_bDecadesAreOneBased);
 }
 
 void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -220,6 +223,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_crParent = (COLORREF)pPrefs->GetProfileInt(szKey, _T("ParentColor"), DEF_PARENTCOLOR);
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
 	m_bDisplayProgressInBar = pPrefs->GetProfileInt(szKey, _T("DisplayProgressInBar"), FALSE);
+	m_bDecadesAreOneBased = pPrefs->GetProfileInt(szKey, _T("DecadesAreOneBased"), FALSE);
 }
 
 void CGanttPreferencesPage::OnUseTagForMilestone() 

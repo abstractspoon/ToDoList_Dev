@@ -210,25 +210,29 @@ protected:
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = TRUE);
+							BOOL bSelected, BOOL& bToday);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = FALSE);
+							BOOL bSelected, BOOL& bToday);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday, BOOL bHalfYears = FALSE);
+							BOOL bSelected, BOOL& bToday);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday, BOOL bDrawDivider = TRUE);
+							BOOL bSelected, BOOL& bToday);
 
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bColumn, BOOL bVert, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, HBRUSH hbrParent);
+
+	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
+
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
+	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
 	BOOL DrawDependencyPickLine(const CPoint& ptClient);
@@ -238,6 +242,7 @@ protected:
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
 	void UpdateColumnsWidthAndText(int nWidth = -1);
+	CString FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
 
 	int GetListItem(HTREEITEM hti) const;
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
@@ -271,7 +276,9 @@ protected:
 	void InitItemHeights();
 	int CalcTreeWidth() const;
 	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const;
 	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const;
 	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
 	void Resize();
 	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
@@ -355,7 +362,6 @@ protected:
 	BOOL IsDependencyEditingCancelled() const;
 	BOOL IsDependencyEditingComplete() const;
 
-	static CString FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);

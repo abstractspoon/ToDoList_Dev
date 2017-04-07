@@ -58,6 +58,7 @@
 #define IDC_DISPLAY_LABEL               16026
 #define IDC_SNAPMODES_LABEL             16027
 #define IDC_SELECTEDTASKDATES_LABEL     16028
+#define IDC_DECADESAREONEBASED          16029
 #define ID_GANTT_GOTOTODAY              32774
 #define ID_GANTT_PREFS                  32775
 #define ID_GANTT_NEWDEPENDS             32776
@@ -96,7 +97,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16010
 #define _APS_NEXT_COMMAND_VALUE         32781
-#define _APS_NEXT_CONTROL_VALUE         16029
+#define _APS_NEXT_CONTROL_VALUE         16032
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

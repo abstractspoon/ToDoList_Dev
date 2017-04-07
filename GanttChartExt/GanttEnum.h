@@ -47,6 +47,7 @@ enum // options
 	GTLCF_TREATSUBCOMPLETEDASDONE	= 0x0080,
 	GTLCF_STRIKETHRUDONETASKS		= 0x0100,
 	GTLCF_SHOWPROGRESSONBAR			= 0x0200,
+	GTLCF_DECADESAREONEBASED		= 0x0400,
 };
 
 /////////////////////////////////////////////////////////////////////////////

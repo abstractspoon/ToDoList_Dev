@@ -33,6 +33,7 @@ public:
 	COLORREF GetDefaultColor() const;
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
+	BOOL GetDecadesAreOneBased() const { return m_bDecadesAreOneBased; }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -52,6 +53,7 @@ protected:
 	BOOL	m_bUseTagForMilestone;
 	CString	m_sMilestoneTag;
 	BOOL	m_bDisplayProgressInBar;
+	BOOL	m_bDecadesAreOneBased;
 	//}}AFX_DATA
 	CColorButton m_btWeekendColor, m_btTodayColor, m_btParentColor, m_btDefaultColor;
 	COLORREF m_crWeekend, m_crToday, m_crParent, m_crDefault;
@@ -103,6 +105,7 @@ public:
 	COLORREF GetDefaultColor() const { return m_page.GetDefaultColor(); }
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
+	BOOL GetDecadesAreOneBased() const { return m_page.GetDecadesAreOneBased(); }
 
 protected:
 	CGanttPreferencesPage m_page;
