@@ -1321,7 +1321,7 @@ int CCalendarCtrl::GetSelectedItems(CDWordArray& dwaSelection) const
 
 			while(dcur <= dmax)
 			{	
-				dwaSelection.Add(DateToSeconds(dcur));
+				dwaSelection.Add((DWORD)DateToSeconds(dcur));
 				dcur = dmin + COleDateTimeSpan(nDays,0,0,0);				
 				dcur = COleDateTime(DateToSeconds(dcur));
 
