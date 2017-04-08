@@ -37,7 +37,7 @@ static GTCDISPLAYMODE DISPLAYMODES[] =
 
 const int NUM_DISPLAYMODES = (sizeof(DISPLAYMODES) / sizeof(DISPLAYMODES[0]));
 
-static int FindDisplayMode(GTLC_MONTH_DISPLAY nDisplay)
+static int FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	int nMode = NUM_DISPLAYMODES;
 	

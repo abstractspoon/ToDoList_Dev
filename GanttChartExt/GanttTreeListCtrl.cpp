@@ -217,7 +217,7 @@ BOOL CGanttTreeListCtrl::Initialize(UINT nIDTreeHeader)
 	BuildTreeColumns();
 	BuildListColumns();
 
-	CalculateMinMonthWidths();
+	CalcMinMonthWidths();
 
 	if (m_nMonthWidth != DEF_MONTH_WIDTH)
 		RecalcListColumnWidths(DEF_MONTH_WIDTH, m_nMonthWidth);
@@ -4248,7 +4248,7 @@ BOOL CGanttTreeListCtrl::ZoomIn(BOOL bIn)
 
 BOOL CGanttTreeListCtrl::IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
-	return (FindDisplayMode(nDisplay) != -1);
+	return (FindDisplay(nDisplay) != -1);
 }
 
 BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
@@ -4872,7 +4872,7 @@ int CGanttTreeListCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
 	return max(nWidth, MIN_MONTH_WIDTH);
 }
 
-void CGanttTreeListCtrl::CalculateMinMonthWidths()
+void CGanttTreeListCtrl::CalcMinMonthWidths()
 {
 	CClientDC dcClient(&m_treeHeader);
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
@@ -5414,7 +5414,7 @@ CString CGanttTreeListCtrl::GetItemTip(CPoint ptScreen) const
 	return _T("");
 }
 
-BOOL CGanttTreeListCtrl::PtInHeader(const CPoint& ptScreen) const
+BOOL CGanttTreeListCtrl::PointInHeader(const CPoint& ptScreen) const
 {
 	CRect rHeader;
 

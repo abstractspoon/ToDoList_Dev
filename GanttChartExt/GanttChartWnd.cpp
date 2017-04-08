@@ -421,7 +421,7 @@ IUI_HITTEST CGanttChartWnd::HitTest(const POINT& ptScreen) const
 	// try tree header
 	// 6.9: disable header click because it changes the 
 	// tree/list columns not the gantt columns
-	if (m_ctrlGantt.PtInHeader(ptScreen))
+	if (m_ctrlGantt.PointInHeader(ptScreen))
 		return IUI_NOWHERE;//IUI_COLUMNHEADER;
 
 	// then specific task
@@ -1079,7 +1079,7 @@ void CGanttChartWnd::BuildDisplayCombo()
 
 		if (!m_ctrlGantt.CanSetMonthDisplay(mode.nDisplay))
 		{
-			int nCurMode = FindDisplayMode(nCurDisplay);
+			int nCurMode = FindDisplay(nCurDisplay);
 
 			if (nMode < nCurMode)
 				nCurDisplay = mode.nDisplay;

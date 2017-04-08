@@ -86,7 +86,7 @@ public:
 	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends);
 
 	DWORD HitTestTask(const CPoint& ptScreen) const;
-	BOOL PtInHeader(const CPoint& ptScreen) const;
+	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
@@ -253,7 +253,7 @@ protected:
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
-	void CalculateMinMonthWidths();
+	void CalcMinMonthWidths();
 	int GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	void BuildTreeColumns();
 	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
