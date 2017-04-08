@@ -50,6 +50,50 @@ static int FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return FALSE;
 }
 
+static GTLC_MONTH_DISPLAY GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay)
+{
+	int nMode = FindDisplay(nDisplay);
+
+	switch (nMode)
+	{
+	case -1: 
+		return GTLC_DISPLAY_NONE;
+
+	case 0:  
+		return nDisplay;
+	}
+
+	// Default
+	return DISPLAYMODES[nMode - 1].nDisplay;
+}
+
+static GTLC_MONTH_DISPLAY GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay)
+{
+	int nMode = FindDisplay(nDisplay);
+
+	switch (nMode)
+	{
+	case -1:
+		return GTLC_DISPLAY_NONE;
+
+	case (NUM_DISPLAYMODES - 1):
+		return nDisplay;
+	}
+
+	// Default
+	return DISPLAYMODES[nMode + 1].nDisplay;
+}
+
+static GTLC_MONTH_DISPLAY GetLastDisplay()
+{
+	return DISPLAYMODES[NUM_DISPLAYMODES + 1].nDisplay;
+}
+
+static GTLC_MONTH_DISPLAY GetFirstDisplay()
+{
+	return DISPLAYMODES[0].nDisplay;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
