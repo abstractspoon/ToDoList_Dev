@@ -216,6 +216,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
     <ClInclude Include="GanttEnum.h" />
     <ClInclude Include="GanttMsg.h" />
     <ClInclude Include="GanttPreferencesDlg.h" />
+    <ClInclude Include="GanttStatic.h" />
     <ClInclude Include="GanttStruct.h" />
     <ClInclude Include="GanttTreeCtrl.h" />
     <ClInclude Include="GanttTreeListCtrl.h" />

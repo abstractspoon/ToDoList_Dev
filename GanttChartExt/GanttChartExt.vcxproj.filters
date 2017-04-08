@@ -99,5 +99,8 @@
     <ClInclude Include="GanttMsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GanttStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
