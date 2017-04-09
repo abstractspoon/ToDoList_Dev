@@ -210,7 +210,7 @@ LRESULT CRulerRichEdit::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	default:
 		// Only ever link to folders so no need to prompt
 		if (FileMisc::FolderExists(aFiles[0]))
-			return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL);
+			return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
 
 		// else
 		if (!m_bLinkOptionIsDefault)
