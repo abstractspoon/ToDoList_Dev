@@ -643,31 +643,35 @@ HRESULT CUrlRichEditCtrl::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWO
 			}
 			else
 			{
-				// we can deduce (I think) that what's being dragged is a file
-				// by whether pdwEffect include the LINK effect.
-				BOOL bFileDrop = Misc::HasFlag(*pdwEffect, DROPEFFECT_LINK);
+				CLIPFORMAT cf = GetAcceptableClipFormat(m_lpDragObject, 0);
 
-				// if so save off the current selection pos (for now) because it gets reset
-				// when the files are dropped
-				if (bFileDrop)
+				switch (cf)
 				{
+				case CF_HDROP:
 					// can't return DROPEFFECT_LINK else we don't
 					// get notified of the file drop (go figure)
 					dwEffect = DROPEFFECT_MOVE;
+					break;
 
-// 					// keep track of cursor
-// 					TrackDragCursor();
-				}
-				else // it's text
-				{
-					BOOL bCtrl = Misc::HasFlag(grfKeyState, MK_CONTROL);
+#ifndef _UNICODE
+				case CF_TEXT:
+#else
+				case CF_UNICODETEXT:
+#endif
+					{
+						BOOL bCtrl = Misc::HasFlag(grfKeyState, MK_CONTROL);
+						dwEffect = (bCtrl ? DROPEFFECT_COPY : DROPEFFECT_MOVE);
+					}
+					break;
 
-					dwEffect = (bCtrl ? DROPEFFECT_COPY : DROPEFFECT_MOVE);
+				default:
+					if (cf != 0)
+						dwEffect = DROPEFFECT_COPY;
+					break;
 				}
 			}
 			
-			if (dwEffect & *pdwEffect) // make sure allowed type
-				*pdwEffect = dwEffect;
+			*pdwEffect = dwEffect;
 		}
 		
 		// keep track of cursor

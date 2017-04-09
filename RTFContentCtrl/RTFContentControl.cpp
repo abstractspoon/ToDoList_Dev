@@ -654,22 +654,29 @@ BOOL CRTFContentControl::Paste(BOOL bSimple)
 	}
 
 	// else one or more filenames 
-	if (!m_rtf.IsFileLinkOptionDefault())
+	RE_PASTE nLinkOption = m_rtf.GetFileLinkOption();
+
+	if (FileMisc::FolderExists(aFiles[0]))
 	{
-		CCreateFileLinkDlg dialog(aFiles[0], m_rtf.GetFileLinkOption(), FALSE, m_rtf.GetReduceImageColors());
+		// Only ever paste folders as links
+		nLinkOption = REP_ASFILEURL;
+	}
+	else if (!m_rtf.IsFileLinkOptionDefault())
+	{
+		CCreateFileLinkDlg dialog(aFiles[0], nLinkOption, FALSE, m_rtf.GetReduceImageColors());
 
 		if (dialog.DoModal() != IDOK)
 			return FALSE; // cancelled
 
 		// else
-		RE_PASTE nLinkOption = dialog.GetLinkOption();
+		nLinkOption = dialog.GetLinkOption();
 		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
 		BOOL bReduceImageColors = dialog.GetReduceImageColors();
 
 		m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
 	}
 
-	return CRichEditHelper::PasteFiles(m_rtf, aFiles, m_rtf.GetFileLinkOption(), m_rtf.GetReduceImageColors());
+	return CRichEditHelper::PasteFiles(m_rtf, aFiles, nLinkOption, m_rtf.GetReduceImageColors());
 }
 
 BOOL CRTFContentControl::CanPaste()

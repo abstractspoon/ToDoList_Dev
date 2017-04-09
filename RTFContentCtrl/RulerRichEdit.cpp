@@ -198,25 +198,34 @@ LRESULT CRulerRichEdit::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	::DragFinish((HDROP)wp);
 	::CloseClipboard();
 
-	if (nNumFiles > 0)
+	switch (nNumFiles)
 	{
+	case -1: // error
+		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		break;
+
+	case 0:
+		break;
+
+	default:
+		// Only ever link to folders so no need to prompt
+		if (FileMisc::FolderExists(aFiles[0]))
+			return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL);
+
+		// else
 		if (!m_bLinkOptionIsDefault)
 		{
 			CCreateFileLinkDlg dialog(aFiles[0], m_nFileLinkOption, FALSE, m_bReduceImageColors);
 
 			if (dialog.DoModal() != IDOK)
 				return 0L;
-
+			
 			m_nFileLinkOption = dialog.GetLinkOption();
 			m_bLinkOptionIsDefault = dialog.GetMakeLinkOptionDefault();
 			m_bReduceImageColors = dialog.GetReduceImageColors();
 		}
 
 		return CRichEditHelper::PasteFiles(*this, aFiles, m_nFileLinkOption, m_bReduceImageColors);
-	}
-	else if (nNumFiles == -1) // error
-	{
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 	}
 
 	// else

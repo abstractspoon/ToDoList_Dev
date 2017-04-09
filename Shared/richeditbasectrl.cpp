@@ -1287,9 +1287,14 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 	if (format)
 		return format;
 	
+	// Fallback
 #ifndef _UNICODE
-	return CF_TEXT;
+	if (Misc::FindT(aFormatIDs, (DWORD)CF_TEXT) != -1)
+		return CF_TEXT;
 #else
-	return CF_UNICODETEXT;
+	if (Misc::FindT(aFormatIDs, (DWORD)CF_UNICODETEXT) != -1)
+		return CF_UNICODETEXT;
 #endif
+
+	return 0;
 }
