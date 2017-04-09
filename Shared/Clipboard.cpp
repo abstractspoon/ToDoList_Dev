@@ -443,3 +443,20 @@ int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatI
 
 	return nNumFmt;
 }
+
+CString CClipboard::GetText(LPDATAOBJECT lpDataOb, UINT nFormat)
+{
+	CString sText;
+	COleDataObject dataobj;
+    dataobj.Attach(lpDataOb, FALSE);
+
+	HGLOBAL hGlobal = dataobj.GetGlobalData((CLIPFORMAT)nFormat);
+	
+	if (hGlobal)
+	{
+		sText = (LPCTSTR)GlobalLock(hGlobal);
+		::GlobalUnlock(hGlobal);
+	}
+
+	return sText;
+}

@@ -102,6 +102,7 @@ public:
 	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl);
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs);
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
+	static CString GetText(LPDATAOBJECT lpDataOb, UINT nFormat = 0);
 
 protected:
 	HWND m_hWnd;
