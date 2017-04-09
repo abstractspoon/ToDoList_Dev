@@ -31,6 +31,7 @@ File :			RuleRichEdit.cpp
 #include "..\shared\autoflag.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
+#include "..\shared\webmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\subclass.h"
 #include "..\shared\HookMgr.h"
@@ -406,7 +407,7 @@ BOOL CRulerRichEdit::ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl)
 
 		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
 		
-		if (!sHtml.IsEmpty())
+		if (!sHtml.IsEmpty() && !WebMisc::IsAboutBlank(sSourceUrl))
 		{
 #ifdef _UNICODE
 			// convert back to UTF8 for translation
@@ -524,7 +525,7 @@ BOOL CRulerRichEdit::Paste(BOOL bSimple)
 	}
 	else if (!IsFileLinkOptionDefault())
 	{
-		CCreateFileLinkDlg dialog(aFiles[0], nLinkOption, FALSE, GetReduceImageColors());
+		CCreateFileLinkDlg dialog(aFiles[0], nLinkOption, FALSE, m_bReduceImageColors);
 
 		if (dialog.DoModal() != IDOK)
 			return FALSE; // cancelled
@@ -537,7 +538,7 @@ BOOL CRulerRichEdit::Paste(BOOL bSimple)
 		SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
 	}
 
-	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, nLinkOption, GetReduceImageColors());
+	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, nLinkOption, m_bReduceImageColors);
 }
 
 BOOL CRulerRichEdit::PasteFiles(const CStringArray& aFiles)
@@ -557,7 +558,7 @@ BOOL CRulerRichEdit::PasteFiles(const CStringArray& aFiles)
 		SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
 	}
 
-	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, GetFileLinkOption(), GetReduceImageColors());
+	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, m_nFileLinkOption, m_bReduceImageColors);
 }
 
 BOOL CRulerRichEdit::CanPaste() const
@@ -634,38 +635,84 @@ BOOL CRulerRichEdit::Cut()
 HRESULT CRulerRichEdit::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lpcfFormat, 
 										  DWORD reco, BOOL fReally, HGLOBAL hMetaPict)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	HRESULT hr = CUrlRichEditCtrl::QueryAcceptData(lpdataobj, lpcfFormat, reco, fReally, hMetaPict);
 
 	// is this a HTML drop actually happening?
 	if ((hr == S_OK) && fReally && (*lpcfFormat == CBF_HTML))
 	{
 		CWaitCursor cursor;
+		CString sHtml = CClipboard::GetText(lpdataobj, CBF_HTML), sSourceUrl;
 		
-		COleDataObject dataObj;
-		dataObj.Attach(lpdataobj, FALSE);
-		
-		HGLOBAL hGlobal = dataObj.GetGlobalData((CLIPFORMAT)CBF_HTML);
-		
-		if (hGlobal)
+		if (ProcessHtmlForPasting(sHtml, sSourceUrl))
 		{
-			CString sHtml = (LPCTSTR)GlobalLock(hGlobal), sSourceUrl;
-			::GlobalUnlock(hGlobal);
+			// Always set this to make sure it is current
+			m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
 			
-			if (ProcessHtmlForPasting(sHtml, sSourceUrl))
+			CString sRTF;
+			
+			if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
 			{
-				// Always set this to make sure it is current
-				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
-				
-				CString sRTF;
-				
-				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+				VERIFY(SetTextEx(sRTF));
+				AppendSourceUrls(sSourceUrl);
+			}
+			
+			return S_OK;
+		}
+
+		// else try for plain URL
+		sSourceUrl = CClipboard::GetText(lpdataobj, CBF_URLW);
+
+		if (!sSourceUrl.IsEmpty())
+		{
+			if (CEnBitmap::IsSupportedImageFile(sSourceUrl))
+			{
+				CString sImagePath;
+
+				// If it's not a file URI then download the image
+				if (!WebMisc::DecodeFileURI(sSourceUrl, sImagePath))
 				{
-					VERIFY(SetTextEx(sRTF));
-					AppendSourceUrls(sSourceUrl);
+					CString sFileName = FileMisc::GetFileNameFromPath(sSourceUrl, FALSE);
+					CString sExt = FileMisc::GetExtension(sSourceUrl);
+
+					sImagePath = FileMisc::GetTempFilePath(sFileName, sExt);
+					FileMisc::DeleteFile(sImagePath, TRUE);
+
+					HRESULT hr = ::URLDownloadToFile(NULL, sSourceUrl, sImagePath, 0, NULL);
+					
+					if (hr != S_OK)
+						sImagePath.Empty();
 				}
 
-				return S_OK;
+				if (!sImagePath.IsEmpty())
+				{
+					if (!IsFileLinkOptionDefault())
+					{
+						CCreateFileLinkDlg dialog(sImagePath, m_nFileLinkOption, FALSE, m_bReduceImageColors);
+						
+						if (dialog.DoModal() != IDOK)
+							return E_FAIL;
+						
+						// else
+						RE_PASTE nLinkOption = dialog.GetLinkOption();
+						BOOL bDefault = dialog.GetMakeLinkOptionDefault();
+						BOOL bReduceImageColors = dialog.GetReduceImageColors();
+						
+						SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
+					}
+
+					if (m_nFileLinkOption != REP_ASFILEURL)
+					{
+						if (CRichEditHelper::PasteFile(*this, sImagePath, m_nFileLinkOption, m_bReduceImageColors))
+							return S_OK;
+					}
+				}
 			}
+
+			// else
+			ReplaceSel(sSourceUrl, TRUE);
+			return S_OK;
 		}
 
 		// else
