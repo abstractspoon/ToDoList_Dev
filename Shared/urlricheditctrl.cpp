@@ -528,12 +528,10 @@ LRESULT CUrlRichEditCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lpcfFormat, 
 										 DWORD /*reco*/, BOOL fReally, HGLOBAL /*hMetaPict*/)
 {
-	BOOL bEnable = !(GetStyle() & ES_READONLY) && IsWindowEnabled();
-		
 	// always clear drag object
 	m_lpDragObject = NULL;
 
-	if (bEnable)
+	if (CanEdit())
 	{
 		// snap-shot drag object when dragging
 		if (!fReally)
@@ -544,12 +542,6 @@ HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lp
 		// is this an outlook drop actually happening?
 		if (fReally && (*lpcfFormat == CMSOutlookHelper::CF_OUTLOOK))
 		{
-			BOOL bEnable = !(GetStyle() & ES_READONLY) && IsWindowEnabled();
-			ASSERT(bEnable);
-
-			if (!bEnable)
-				return E_FAIL;
-
 			// insert outlook links at the cursor position
 			SetSel(m_crDropSel);
 
