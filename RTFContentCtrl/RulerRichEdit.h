@@ -95,26 +95,44 @@ struct ParaFormat : public PARAFORMAT
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CRtfHtmlConverter;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CRulerRichEdit : public CUrlRichEditCtrl
 {
 public:
 // Construction/destruction
-	CRulerRichEdit();
+	CRulerRichEdit(CRtfHtmlConverter& rtfHtml);
 	virtual ~CRulerRichEdit();
 
 	BOOL IsIMEComposing() const { return m_bIMEComposing; }
+	BOOL IsRTF(const char* szRTF) const;
 
 	void SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceImageColors);
 	RE_PASTE GetFileLinkOption() const { return m_nFileLinkOption; }
 	BOOL IsFileLinkOptionDefault() const { return m_bLinkOptionIsDefault; }
 	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
-	BOOL AppendSourceUrls(LPCTSTR szUrls);
+
+	BOOL PasteFiles(const CStringArray& aFiles);
+	BOOL Paste(BOOL bSimple);
+	BOOL CanPaste() const;
+	BOOL CopyToClipboardAsHtml();
+	BOOL Cut();
+
+	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }
+	static void SetConvertWithMSWord(BOOL bUseMSWord) { s_bConvertWithMSWord = bUseMSWord; }
+	static BOOL GetConvertWithMSWord() { return s_bConvertWithMSWord; }
 
 protected:
 	BOOL m_bIMEComposing;
 	RE_PASTE m_nFileLinkOption;
 	BOOL m_bLinkOptionIsDefault;
 	BOOL m_bReduceImageColors;
+	CRtfHtmlConverter& m_rtfHtml;
+
+	static BOOL s_bPasteSourceUrls;
+	static BOOL s_bConvertWithMSWord;
 
 protected:
 // Message handlers
@@ -130,12 +148,21 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual HRESULT QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT FAR *lpcfFormat,
+									DWORD reco, BOOL fReally, HGLOBAL hMetaPict);
 	virtual CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format);
 	virtual HRESULT GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD pdwEffect);
 	virtual HRESULT GetContextMenu(WORD seltyp, LPOLEOBJECT lpoleobj, CHARRANGE FAR* lpchrg,
 									HMENU FAR* lphmenu);
-
+	
 	virtual CFindReplaceDialog* NewFindReplaceDlg();
+
+	BOOL AppendSourceUrls(LPCTSTR szUrls);
+	BOOL CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend = TRUE);
+
+	static BOOL GetClipboardHtmlForPasting(CString& sHtml, CString& sSourceUrl);
+	static BOOL ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl);
+
 };
 
 #endif // !defined(AFX_RULERRICHEDIT_H__E10A8ED3_2E1D_402E_A599_003214085F1A__INCLUDED_)

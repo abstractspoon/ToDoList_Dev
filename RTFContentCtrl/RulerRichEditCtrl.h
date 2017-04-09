@@ -7,6 +7,10 @@
 #include "ids.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CRtfHtmlConverter;
+
+/////////////////////////////////////////////////////////////////////////////
 // CRulerRichEditCtrl window
 
 class CRulerRichEditCtrl : public CWnd
@@ -14,7 +18,7 @@ class CRulerRichEditCtrl : public CWnd
 
 public:
 // Construction/creation/destruction
-	CRulerRichEditCtrl();
+	CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml);
 	virtual ~CRulerRichEditCtrl();
 	virtual BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID, BOOL autohscroll = FALSE);
 

@@ -141,7 +141,6 @@ int CRTFContentCtrlApp::ConvertToHtml(const unsigned char* pContent, int nLength
 		}
 	}
 
-
 	// cleanup
 	delete [] pDecompressed;
 

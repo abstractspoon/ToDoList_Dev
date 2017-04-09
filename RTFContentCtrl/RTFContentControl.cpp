@@ -41,40 +41,19 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT PASTE_FMTS[] = 
-{ 
-	CBF_RTF,
-	CBF_RETEXTOBJ, 
-	CBF_EMBEDDEDOBJ,
-	CF_BITMAP,
-		
-#ifndef _UNICODE
-	CF_TEXT,
-#else
-	CF_UNICODETEXT,
-#endif
-	CF_DIB,
-	CF_HDROP,
-	CBF_HTML
-};
-const int NUM_PASTE_FMTS = (sizeof(PASTE_FMTS) / sizeof(PASTE_FMTS[0]));
-
-/////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl
 
-BOOL CRTFContentControl::s_bConvertWithMSWord = FALSE;
 BOOL CRTFContentControl::s_bInlineSpellChecking = TRUE;
-BOOL CRTFContentControl::s_bPasteSourceUrls = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
 
 CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml) 
 	: 
+	CRulerRichEditCtrl(rtfHtml),
 	m_bAllowNotify(TRUE), 
 	m_reSpellCheck(m_rtf),
 	m_mgrShortcuts(TRUE),
-	m_rtfHtml(rtfHtml),
+
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -94,7 +73,6 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 CRTFContentControl::~CRTFContentControl()
 {
 }
-
 
 BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	//{{AFX_MSG_MAP(CRTFContentControl)
@@ -257,7 +235,7 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 
 	// content may need decompressing 
 	// always work in bytes
-	if (nLength && !m_rtfHtml.IsRTF((const char*)pContent))
+	if (nLength && !m_rtf.IsRTF((const char*)pContent))
 	{
 		int nLenDecompressed = 0;
 
@@ -271,7 +249,7 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 	}
 
 	// content must begin with rtf tag or be empty
-	if (nLength && !m_rtfHtml.IsRTF((const char*)pContent))
+	if (nLength && !m_rtf.IsRTF((const char*)pContent))
 		return false;
 
 	CAutoFlag af(m_bAllowNotify, FALSE);
@@ -513,192 +491,6 @@ BOOL CRTFContentControl::IsTDLClipboardEmpty() const
 	return (!GetParent()->SendMessage(WM_TDCM_HASCLIPBOARD, 0, TRUE)); 
 }
 
-BOOL CRTFContentControl::GetClipboardHtmlForPasting(CString& sHtml, CString& sSourceUrl)
-{
-	CClipboard cb;
-	
-	if (!cb.HasFormat(CBF_RTF) && 
-		!cb.HasFormat(CBF_RETEXTOBJ) && 
-		!cb.HasFormat(CBF_EMBEDDEDOBJ) &&
-		!cb.HasFormat(CF_DIB) &&
-		!cb.HasFormat(CF_BITMAP) &&
-		cb.GetText(sHtml, CBF_HTML))
-	{
-#ifdef _UNICODE
-		// convert to unicode for unpackaging because
-		// CF_HTML is saved to the clipboard as UTF8
-		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
-#endif
-		Misc::Trim(sHtml);
-
-		cb.UnpackageHTMLFragment(sHtml, sSourceUrl);
-		cb.Close();
-		
-		if (!sHtml.IsEmpty())
-		{
-#ifdef _UNICODE
-			// convert back to UTF8 for translation
-			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
-#endif
-			return TRUE;
-		}
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL CRTFContentControl::Paste(BOOL bSimple)
-{
-	CStringArray aFiles;
-	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
-	
-	// Check for error
-	if (nNumFiles == -1)
-	{
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
-		return FALSE;
-	}
-
-	// Keep simple paste together because it's so simple!
-	if (bSimple)
-	{
-		if (nNumFiles == 0)
-			return m_rtf.PasteSimpleText(s_bPasteSourceUrls);
-
-		// else one or more filepaths
-		return CRichEditHelper::PasteFiles(m_rtf, aFiles, REP_ASFILEURL, FALSE);
-	}
-
-	// No file paths
-	if (nNumFiles == 0)
-	{
-		CWaitCursor cursor;
-		
-		// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
-		// This also allows us to prevent richedit's default resizing by using paste special
-		CClipboardBackup cbb(*this);
-		BOOL bClipboardSaved = FALSE;
-		
-		CString sSourceUrl;
-
-		if (CClipboard::HasFormat(CF_BITMAP))
-		{
-			CClipboard cb;
-			cb.GetHTMLSourceLink(sSourceUrl);
-
-			if (m_rtf.GetReduceImageColors())
-			{
-				CEnBitmap bmp;
-				
-				if (!bmp.CopyImage(cb.GetBitmap()))
-					return FALSE;
-
-				bClipboardSaved = cbb.Backup();
-				ASSERT(bClipboardSaved);
-
-				if (!bmp.CopyToClipboard(m_rtf, 8))
-					return FALSE;
-			}
-
-			m_rtf.PasteSpecial(CF_BITMAP);
-		}
-		else
-		{
-			// if there is HTML but not RTF or an image then convert the 
-			// HTML to RTF and add it to the current clipboard contents
-			CString sHtml;
-
-			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
-			{
-				// Always set this to make sure it is current
-				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
-
-				CString sRTF;
-
-				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
-				{
-	#ifdef _UNICODE
-					// convert back to Ansi (not UTF8) for clipboard
-					Misc::EncodeAsMultiByte(sRTF);
-	#endif
-					// backup the current clipboard
-					bClipboardSaved = cbb.Backup();
-					ASSERT(bClipboardSaved);
-
-					// overwrite with RTF
-					CClipboard(*this).SetText(sRTF, CBF_RTF);
-
-					// do the paste WITHOUT source Urls
-					m_rtf.Paste(FALSE);
-				}
-			}
-			else
-			{
-				// Default
-				m_rtf.Paste(s_bPasteSourceUrls);
-			}
-		}
-
-		// restore the clipboard if necessary
-		if (bClipboardSaved)
-		{
-			VERIFY(cbb.Restore());
-
-			// If we overwrote the clipboard we have to paste source URLs manually
-			if (s_bPasteSourceUrls && !sSourceUrl.IsEmpty())
-				VERIFY(m_rtf.AppendSourceUrls(sSourceUrl));
-		}
-
-		return TRUE;
-	}
-
-	// else one or more filenames 
-	RE_PASTE nLinkOption = m_rtf.GetFileLinkOption();
-
-	if (FileMisc::FolderExists(aFiles[0]))
-	{
-		// Only ever paste folders as links
-		nLinkOption = REP_ASFILEURL;
-	}
-	else if (!m_rtf.IsFileLinkOptionDefault())
-	{
-		CCreateFileLinkDlg dialog(aFiles[0], nLinkOption, FALSE, m_rtf.GetReduceImageColors());
-
-		if (dialog.DoModal() != IDOK)
-			return FALSE; // cancelled
-
-		// else
-		nLinkOption = dialog.GetLinkOption();
-		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
-		BOOL bReduceImageColors = dialog.GetReduceImageColors();
-
-		m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
-	}
-
-	return CRichEditHelper::PasteFiles(m_rtf, aFiles, nLinkOption, m_rtf.GetReduceImageColors());
-}
-
-BOOL CRTFContentControl::CanPaste()
-{
-	// for reasons that I'm not entirely clear on even if we 
-	// return that CF_HDROP is okay, the richedit itself will
-	// veto the drop. So I'm experimenting with handling this ourselves
-	if (CClipboard::HasFormat(CF_HDROP))
-		return TRUE;
-
-	// else try richedit itself
-	BOOL bCanPaste = FALSE;
-	
-	for (int i=0; i < NUM_PASTE_FMTS; i++)
-		bCanPaste |= m_rtf.CanPaste(PASTE_FMTS[i]);
-
-	if (!bCanPaste)
-		bCanPaste = m_rtf.CanPaste(0);
-	
-	return bCanPaste;
-}
-
 int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	CAutoFlag af(m_bAllowNotify, FALSE);
@@ -887,45 +679,7 @@ void CRTFContentControl::OnEditCopy()
 
 void CRTFContentControl::OnEditCopyAsHtml() 
 {
-	m_rtf.Copy();	
-
-	// convert RTF to HTML and copy to clipboard
-	CString sRTF;
-	
-	if (CClipboard().GetText(sRTF, CBF_RTF))
-		CopyRtfToClipboardAsHtml(sRTF, FALSE);
-}
-
-BOOL CRTFContentControl::CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend)
-{
-	// convert RTF to HTML and copy to clipboard
-	CString sHtml;
-
-	if (m_rtfHtml.ConvertRtfToHtml((LPCSTR)(LPCTSTR)sRTF, NULL, sHtml, NULL))
-	{
-		CClipboard::PackageHTMLFragment(sHtml);
-
-#ifdef _UNICODE
-		// must be multibyte format for clipboard
-		Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
-#endif
-		if (bAppend)
-		{
-			CClipboardBackup cb(*this);
-			
-			cb.Backup();
-			cb.AddData(sHtml, CBF_HTML);
-			
-			return cb.Restore();
-		}
-		else
-		{
-			CClipboard(*this).SetText(sHtml, CBF_HTML);
-		}
-	}
-
-	// else
-	return FALSE;
+	m_rtf.CopyToClipboardAsHtml();
 }
 
 void CRTFContentControl::OnUpdateEditCopy(CCmdUI* pCmdUI) 
@@ -948,13 +702,7 @@ void CRTFContentControl::OnUpdateEditCopyFormatting(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditCut() 
 {
-	// snapshot RTF for copying to clipboard as HTML
-	CString sRtf = m_rtf.GetRTF();
-
 	m_rtf.Cut();	
-
-	// do the copy
-	CopyRtfToClipboardAsHtml(sRtf);
 }
 
 void CRTFContentControl::OnUpdateEditCut(CCmdUI* pCmdUI) 
@@ -997,30 +745,12 @@ void CRTFContentControl::OnEditFileBrowse()
 			return;
 		}
 
-		if (!m_rtf.IsFileLinkOptionDefault())
+		if (m_rtf.PasteFiles(aPaths))
 		{
-			RE_PASTE nLinkOption = m_rtf.GetFileLinkOption();
-			BOOL bDefault = FALSE;
-			BOOL bReduceImageColors = m_rtf.GetReduceImageColors();
-
-			CCreateFileLinkDlg dialog2(aPaths[0], nLinkOption, FALSE, bReduceImageColors);
-			
-			if (dialog2.DoModal() == IDOK)
-			{
-				nLinkOption = dialog2.GetLinkOption();
-				bDefault = dialog2.GetMakeLinkOptionDefault();
-				bReduceImageColors = dialog2.GetReduceImageColors();
-		
-				m_rtf.SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
-				m_dlgPrefs.SetFileLinkOption(nLinkOption, !bDefault, bReduceImageColors);
-			}
-			else
-			{
-				return; // user cancelled
-			}
+			m_dlgPrefs.SetFileLinkOption(m_rtf.GetFileLinkOption(), 
+										!m_rtf.IsFileLinkOptionDefault(), 
+										m_rtf.GetReduceImageColors());
 		}
-		
-		CRichEditHelper::PasteFiles(m_rtf, aPaths, m_rtf.GetFileLinkOption(), m_rtf.GetReduceImageColors());
 	}
 }
 
@@ -1102,12 +832,12 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditPaste() 
 {
-	Paste(FALSE);
+	m_rtf.Paste(FALSE);
 }
 
 void CRTFContentControl::OnUpdateEditPaste(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_rtf.CanEdit() && CanPaste());
+	pCmdUI->Enable(m_rtf.CanPaste());
 }
 
 void CRTFContentControl::OnEditPasteasRef() 
@@ -1167,12 +897,12 @@ void CRTFContentControl::OnUpdateEditPasteFormatting(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditPasteSimple() 
 {
-	Paste(TRUE); // TRUE ==  simple
+	m_rtf.Paste(TRUE); // TRUE ==  simple
 }
 
 void CRTFContentControl::OnUpdateEditPasteSimple(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_rtf.CanEdit() && CanPaste());
+	pCmdUI->Enable(m_rtf.CanPaste());
 }
 
 void CRTFContentControl::OnEditSelectAll() 
@@ -1239,14 +969,14 @@ void CRTFContentControl::OnUpdateEditSuperscript(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnPreferences() 
 {
-	if (m_dlgPrefs.DoModal(s_bConvertWithMSWord) == IDOK)
+	if (m_dlgPrefs.DoModal(CRulerRichEdit::GetConvertWithMSWord()) == IDOK)
 	{
 		if (m_dlgPrefs.GetPromptForFileLink())
 			m_rtf.SetFileLinkOption(m_rtf.GetFileLinkOption(), FALSE, m_rtf.GetReduceImageColors());
 		else
 			m_rtf.SetFileLinkOption(m_dlgPrefs.GetFileLinkOption(), TRUE, m_dlgPrefs.GetReduceImageColors());
 
-		s_bConvertWithMSWord = m_dlgPrefs.GetConvertWithMSWord();
+		CRulerRichEdit::SetConvertWithMSWord(m_dlgPrefs.GetConvertWithMSWord());
 	}
 }
 

@@ -36,6 +36,9 @@ File :			RuleRichEdit.cpp
 #include "..\shared\HookMgr.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\Rtf2HtmlConverter.h"
+
+#include "..\3rdparty\clipboardbackup.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,6 +54,7 @@ static const CLIPFORMAT CF_PREFERRED[] =
 	(CLIPFORMAT)CBF_RTF,
 	(CLIPFORMAT)CBF_RETEXTOBJ, 
 	CF_BITMAP,
+	(CLIPFORMAT)CBF_HTML,
 
 #ifndef _UNICODE
 	CF_TEXT,
@@ -130,7 +134,18 @@ CFindReplaceDialog* CRulerRichEdit::NewFindReplaceDlg()
 /////////////////////////////////////////////////////////////////////////////
 // CRulerRichEdit
 
-CRulerRichEdit::CRulerRichEdit() : m_bIMEComposing(FALSE), m_nFileLinkOption(REP_ASIMAGE), m_bReduceImageColors(TRUE)
+BOOL CRulerRichEdit::s_bConvertWithMSWord = FALSE;
+BOOL CRulerRichEdit::s_bPasteSourceUrls = TRUE;
+
+/////////////////////////////////////////////////////////////////////////////
+
+CRulerRichEdit::CRulerRichEdit(CRtfHtmlConverter& rtfHtml) 
+	: 
+	m_bIMEComposing(FALSE), 
+	m_nFileLinkOption(REP_ASIMAGE), 
+	m_bReduceImageColors(TRUE),
+	m_rtfHtml(rtfHtml)
+	
 {
 	EnableSelectOnFocus(FALSE);
 }
@@ -289,7 +304,10 @@ void CRulerRichEdit::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CRulerRichEdit::AppendSourceUrls(LPCTSTR szUrls)
 {
-	return CUrlRichEditCtrl::AppendSourceUrls(szUrls);
+	if (s_bPasteSourceUrls)
+		return CUrlRichEditCtrl::AppendSourceUrls(szUrls);
+
+	return FALSE;
 }
 
 LRESULT CRulerRichEdit::OnIMEStartComposition(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -351,3 +369,310 @@ HRESULT CRulerRichEdit::GetContextMenu(WORD seltyp, LPOLEOBJECT lpoleobj,
 	// all else
 	return CUrlRichEditCtrl::GetContextMenu(seltyp, lpoleobj, lpchrg, lphmenu);
 }
+
+BOOL CRulerRichEdit::IsRTF(const char* szRTF) const 
+{ 
+	return m_rtfHtml.IsRTF(szRTF); 
+}
+
+BOOL CRulerRichEdit::GetClipboardHtmlForPasting(CString& sHtml, CString& sSourceUrl)
+{
+	CClipboard cb;
+	
+	if (!cb.HasFormat(CBF_RTF) && 
+		!cb.HasFormat(CBF_RETEXTOBJ) && 
+		!cb.HasFormat(CBF_EMBEDDEDOBJ) &&
+		!cb.HasFormat(CF_DIB) &&
+		!cb.HasFormat(CF_BITMAP) &&
+		cb.GetText(sHtml, CBF_HTML))
+	{
+		return ProcessHtmlForPasting(sHtml, sSourceUrl);
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL CRulerRichEdit::ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl)
+{
+	if (!sHtml.IsEmpty())
+	{
+#ifdef _UNICODE
+		// convert to unicode for unpackaging because
+		// CF_HTML is saved to the clipboard as UTF8
+		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+#endif
+		Misc::Trim(sHtml);
+
+		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
+		
+		if (!sHtml.IsEmpty())
+		{
+#ifdef _UNICODE
+			// convert back to UTF8 for translation
+			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
+#endif
+			return TRUE;
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL CRulerRichEdit::Paste(BOOL bSimple)
+{
+	CStringArray aFiles;
+	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
+	
+	// Check for error
+	if (nNumFiles == -1)
+	{
+		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		return FALSE;
+	}
+
+	// Keep simple paste together because it's so simple!
+	if (bSimple)
+	{
+		if (nNumFiles == 0)
+			return PasteSimpleText(s_bPasteSourceUrls);
+
+		// else one or more filepaths
+		return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
+	}
+
+	// No file paths
+	if (nNumFiles == 0)
+	{
+		CWaitCursor cursor;
+		
+		// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
+		// This also allows us to prevent richedit's default resizing by using paste special
+		CString sSourceUrl;
+
+		if (CClipboard::HasFormat(CF_BITMAP))
+		{
+			CClipboardBackup cbb(*this);
+			BOOL bClipboardSaved = FALSE;
+			
+			CClipboard cb;
+			cb.GetHTMLSourceLink(sSourceUrl);
+
+			if (GetReduceImageColors())
+			{
+				CEnBitmap bmp;
+				
+				if (!bmp.CopyImage(cb.GetBitmap()))
+					return FALSE;
+
+				bClipboardSaved = cbb.Backup();
+				ASSERT(bClipboardSaved);
+
+				if (!bmp.CopyToClipboard(GetSafeHwnd(), 8))
+					return FALSE;
+			}
+
+			PasteSpecial(CF_BITMAP);
+			
+			// restore the clipboard if necessary
+			if (bClipboardSaved)
+			{
+				VERIFY(cbb.Restore());
+				
+				// If we overwrote the clipboard we have to paste source URLs manually
+				AppendSourceUrls(sSourceUrl);
+			}
+		}
+		else
+		{
+			// if there is HTML convert it to RTF and insert it
+			CString sHtml;
+
+			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
+			{
+				CWaitCursor cursor;
+				
+				// Always set this to make sure it is current
+				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+
+				CString sRTF;
+
+				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+				{
+					VERIFY(SetTextEx(sRTF));
+					AppendSourceUrls(sSourceUrl);
+				}
+			}
+			else
+			{
+				// Default paste
+				Paste(s_bPasteSourceUrls);
+			}
+		}
+
+		return TRUE;
+	}
+
+	// else one or more filenames 
+	RE_PASTE nLinkOption = GetFileLinkOption();
+
+	if (FileMisc::FolderExists(aFiles[0]))
+	{
+		// Only ever paste folders as links
+		nLinkOption = REP_ASFILEURL;
+	}
+	else if (!IsFileLinkOptionDefault())
+	{
+		CCreateFileLinkDlg dialog(aFiles[0], nLinkOption, FALSE, GetReduceImageColors());
+
+		if (dialog.DoModal() != IDOK)
+			return FALSE; // cancelled
+
+		// else
+		nLinkOption = dialog.GetLinkOption();
+		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
+		BOOL bReduceImageColors = dialog.GetReduceImageColors();
+
+		SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
+	}
+
+	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, nLinkOption, GetReduceImageColors());
+}
+
+BOOL CRulerRichEdit::PasteFiles(const CStringArray& aFiles)
+{
+	if (!IsFileLinkOptionDefault())
+	{
+		CCreateFileLinkDlg dialog(aFiles[0], m_nFileLinkOption, FALSE, m_bReduceImageColors);
+		
+		if (dialog.DoModal() != IDOK)
+			return FALSE;
+
+		// else
+		RE_PASTE nLinkOption = dialog.GetLinkOption();
+		BOOL bDefault = dialog.GetMakeLinkOptionDefault();
+		BOOL bReduceImageColors = dialog.GetReduceImageColors();
+			
+		SetFileLinkOption(nLinkOption, bDefault, bReduceImageColors);
+	}
+
+	return CRichEditHelper::PasteFiles(GetSafeHwnd(), aFiles, GetFileLinkOption(), GetReduceImageColors());
+}
+
+BOOL CRulerRichEdit::CanPaste() const
+{
+	if (!CanEdit())
+		return FALSE;
+
+	for (int i=0; i < NUM_PREF; i++)
+	{
+		if (CClipboard::HasFormat(CF_PREFERRED[i]))
+			return TRUE;
+	}
+
+	// else
+	return CRichEditCtrl::CanPaste(0);
+}
+
+BOOL CRulerRichEdit::CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend)
+{
+	// convert RTF to HTML and copy to clipboard
+	CString sHtml;
+	
+	if (m_rtfHtml.ConvertRtfToHtml((LPCSTR)(LPCTSTR)sRTF, NULL, sHtml, NULL))
+	{
+		CClipboard::PackageHTMLFragment(sHtml);
+		
+#ifdef _UNICODE
+		// must be multibyte format for clipboard
+		Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
+#endif
+		if (bAppend)
+		{
+			CClipboardBackup cb(*this);
+			
+			cb.Backup();
+			cb.AddData(sHtml, CBF_HTML);
+			
+			return cb.Restore();
+		}
+		else
+		{
+			CClipboard(*this).SetText(sHtml, CBF_HTML);
+		}
+	}
+	
+	// else
+	return FALSE;
+}
+
+BOOL CRulerRichEdit::CopyToClipboardAsHtml()
+{
+	Copy();	
+
+	// convert RTF to HTML and copy to clipboard
+	CString sRTF;
+
+	if (CClipboard().GetText(sRTF, CBF_RTF))
+		return CopyRtfToClipboardAsHtml(sRTF, FALSE);
+
+	// else
+	return FALSE;
+}
+
+BOOL CRulerRichEdit::Cut() 
+{
+	// snapshot RTF for copying to clipboard as HTML
+	CString sRtf = GetRTF();
+	Cut();	
+	
+	// do the copy
+	return CopyRtfToClipboardAsHtml(sRtf);
+}
+
+HRESULT CRulerRichEdit::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lpcfFormat, 
+										  DWORD reco, BOOL fReally, HGLOBAL hMetaPict)
+{
+	HRESULT hr = CUrlRichEditCtrl::QueryAcceptData(lpdataobj, lpcfFormat, reco, fReally, hMetaPict);
+
+	// is this a HTML drop actually happening?
+	if ((hr == S_OK) && fReally && (*lpcfFormat == CBF_HTML))
+	{
+		CWaitCursor cursor;
+		
+		COleDataObject dataObj;
+		dataObj.Attach(lpdataobj, FALSE);
+		
+		HGLOBAL hGlobal = dataObj.GetGlobalData((CLIPFORMAT)CBF_HTML);
+		
+		if (hGlobal)
+		{
+			CString sHtml = (LPCTSTR)GlobalLock(hGlobal), sSourceUrl;
+			::GlobalUnlock(hGlobal);
+			
+			if (ProcessHtmlForPasting(sHtml, sSourceUrl))
+			{
+				// Always set this to make sure it is current
+				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+				
+				CString sRTF;
+				
+				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+				{
+					VERIFY(SetTextEx(sRTF));
+					AppendSourceUrls(sSourceUrl);
+				}
+
+				return S_OK;
+			}
+		}
+
+		// else
+		return E_FAIL;
+	}
+	
+	// else
+	return hr;
+}
+

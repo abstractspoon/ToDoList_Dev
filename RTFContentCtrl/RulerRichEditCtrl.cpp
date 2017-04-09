@@ -88,7 +88,7 @@ UINT urm_SETCURRENTFONTCOLOR = ::RegisterWindowMessage(_T("_RULERRICHEDITCTRL_SE
 /////////////////////////////////////////////////////////////////////////////
 // CRulerRichEditCtrl
 
-CRulerRichEditCtrl::CRulerRichEditCtrl() : m_pen(PS_DOT, 0, RGB(0, 0, 0))
+CRulerRichEditCtrl::CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml) : m_pen(PS_DOT, 0, RGB(0, 0, 0)), m_rtf(rtfHtml)
 {
 	m_rulerPosition = 0;
 	m_margin = 0;

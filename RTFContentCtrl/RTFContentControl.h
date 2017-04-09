@@ -48,9 +48,10 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	// global settings
-	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }
-	static void SetConvertWithMSWord(BOOL bUseMSWord) { s_bConvertWithMSWord = bUseMSWord; }
-	static BOOL GetConvertWithMSWord() { return s_bConvertWithMSWord; }
+	static void SetPasteSourceUrls(BOOL bPasteUrls) { CRulerRichEdit::SetPasteSourceUrls(bPasteUrls); }
+	static void SetConvertWithMSWord(BOOL bUseMSWord) { CRulerRichEdit::SetConvertWithMSWord(bUseMSWord); }
+	static BOOL GetConvertWithMSWord() { return CRulerRichEdit::GetConvertWithMSWord(); }
+
 	static void EnableInlineSpellChecking(BOOL bEnable) { s_bInlineSpellChecking = bEnable; }
 	static BOOL IsInlineSpellCheckingEnabled() { return s_bInlineSpellChecking; }
 
@@ -62,12 +63,9 @@ protected:
 	CMenuIconMgr m_mgrMenuIcons;
 	CharFormat m_cfCopiedFormat;
 	CShortcutManager m_mgrShortcuts;
-	CRtfHtmlConverter& m_rtfHtml;
 	LOGFONT m_lfCurrent;
 	CRTFPreferencesDlg m_dlgPrefs;
 
-	static BOOL s_bPasteSourceUrls;
-	static BOOL s_bConvertWithMSWord;
 	static BOOL s_bInlineSpellChecking;
 
 // Overrides
@@ -141,18 +139,13 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	BOOL CanPaste();
-	BOOL Paste(BOOL bSimple);
-	void PrepareForPaste(BOOL bSimple);
 	BOOL IsTDLClipboardEmpty() const;
 	void InitMenuIconManager();
 	void InitShortcutManager();
-	BOOL CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend = TRUE);
 	void RemoveAdvancedFeatures(CMenu* pMenu) const;
 
 	static void EnableMenuItem(CMenu* pMenu, UINT nCmdID, BOOL bEnable);
 	static void CheckMenuItem(CMenu* pMenu, UINT nCmdID, BOOL bCheck);
-	static BOOL GetClipboardHtmlForPasting(CString& sHtml, CString& sSourceUrl);
 };
 
 /////////////////////////////////////////////////////////////////////////////
