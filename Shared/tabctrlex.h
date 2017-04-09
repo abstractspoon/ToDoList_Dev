@@ -66,7 +66,7 @@ public:
 
 	int HitTest(const CPoint& point) const;
 	int HitTest(TCHITTESTINFO* pHitTestInfo) const;
-
+	
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 
 // Attributes
