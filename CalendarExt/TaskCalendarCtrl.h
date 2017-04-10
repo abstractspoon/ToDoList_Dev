@@ -139,6 +139,7 @@ protected:
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
+	int GetGridRowFromPoint(const CPoint& point) const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;
@@ -159,6 +160,8 @@ protected:
 	double CalcDateDragTolerance() const;
 	BOOL SelectTask(DWORD dwTaskID, BOOL bNotify);
 	void RecalcTaskDates();
+	void GetAllowableDragLimits(CRect& rLimits) const;
+	double GetSnapIncrement() const;
 
 	void NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();

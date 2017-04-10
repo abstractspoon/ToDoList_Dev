@@ -1438,26 +1438,21 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	if (dwTaskID != m_dwSelectedTaskID)
 		return FALSE;
 
+	if (nHit == TCCHT_BEGIN || nHit == TCCHT_END)
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+	
 	if (!::DragDetect(GetSafeHwnd(), ptCursor))
 		return FALSE;
 	
+	SetCapture();
+
 	switch (nHit)
 	{
-	case TCCHT_BEGIN:
-		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-		m_bDraggingStart = TRUE;
-		break;
+	case TCCHT_BEGIN:	m_bDraggingStart = TRUE;	break;
+	case TCCHT_END:		m_bDraggingEnd = TRUE;		break;
+	case TCCHT_MIDDLE:	m_bDragging = TRUE;			break;
 		
-	case TCCHT_END:
-		m_bDraggingEnd = TRUE;
-		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-		break;
-		
-	case TCCHT_MIDDLE:
-		m_bDragging = TRUE;
-		break;
-		
-	default:
+	default:			
 		ASSERT(0);
 		return FALSE;
 	}
@@ -1465,23 +1460,45 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	m_tciPreDrag = *(GetTaskCalItem(dwTaskID));
 	m_ptDragOrigin = ptCursor;
 
-	SetCapture();
-
 	// keep parent informed
 	NotifyParentDragChange();
 
 	return TRUE;
 }
 
+int CTaskCalendarCtrl::GetGridRowFromPoint(const CPoint& point) const
+{
+	int nRow, nCol;
+
+	if (GetGridCellFromPoint(point, nRow, nCol))
+		return nRow;
+
+	// else
+	return -1;
+}
+
 BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
 {
 	CPoint ptDrag(ptCursor);
 
-	if (!ValidateDragPoint(ptDrag))
+	if (!ValidateDragPoint(ptDrag) || !GetDateFromPoint(ptDrag, dtDrag))
+	{
+		SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 		return FALSE;
+	}
 
-	if (!GetDateFromPoint(ptDrag, dtDrag))
+	int nRow = GetGridRowFromPoint(ptDrag);
+
+	if (nRow == -1)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	COleDateTime dtRowMin = GetMinDate(nRow);
+	COleDateTime dtRowMax = GetMaxDate(nRow);
+
+	double dSnap = GetSnapIncrement();
 
 	// if dragging the whole task, then we calculate
 	// dtDrag as TASKCALITEM::dtStart/dtEnd offset by the
@@ -1495,21 +1512,43 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 		GetDateFromPoint(m_ptDragOrigin, dtOrg);
 		
 		// offset from pre-drag position
-		double dOffset = dtDrag.m_dt - dtOrg.m_dt;
+		double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
 
 		if (m_tciPreDrag.IsStartDateSet())
 		{
-			dtDrag = m_tciPreDrag.GetAnyStartDate().m_dt + dOffset;
+			dtDrag = (m_tciPreDrag.GetAnyStartDate().m_dt + dOffset);
+
+			dtDrag.m_dt = min(dtDrag.m_dt, (dtRowMax.m_dt + 1.0 - dSnap));
+			dtDrag.m_dt = max(dtDrag.m_dt, dtRowMin.m_dt);
+
 			bEndOfDay = FALSE;
 		}
 		else
 		{
 			ASSERT(m_tciPreDrag.IsEndDateSet());
-			dtDrag = m_tciPreDrag.GetAnyEndDate().m_dt + dOffset;
+
+			dtDrag = (m_tciPreDrag.GetAnyEndDate().m_dt + dOffset);
+
+			dtDrag.m_dt = min(dtDrag.m_dt, (dtRowMax.m_dt + 1.0));
+			dtDrag.m_dt = max(dtDrag.m_dt, (dtRowMin.m_dt + dSnap));
+
 			bEndOfDay = TRUE;
 		}
 		
 		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
+	}
+	else
+	{
+		if (m_bDraggingStart)
+		{
+			dtDrag.m_dt = min(dtDrag.m_dt, (dtRowMax.m_dt + 1.0 - dSnap));
+		}
+		else // if (m_bDraggingEnd)
+		{
+			dtDrag.m_dt = max(dtDrag.m_dt, (dtRowMin.m_dt + dSnap));
+		}
+
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
 	}
 	
 	// adjust date depending on snap mode
@@ -1544,6 +1583,20 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 	}
 	
 	return TRUE;
+}
+
+double CTaskCalendarCtrl::GetSnapIncrement() const
+{
+	switch (GetSnapMode())
+	{
+	case TCCSM_NEARESTDAY:		return 1.0;
+	case TCCSM_NEARESTHALFDAY:	return TWELVE_HOURS;
+	case TCCSM_NEARESTHOUR:		return ONE_HOUR;
+	case TCCSM_FREE:			return ONE_MINUTE;
+	}
+
+	ASSERT(0);
+	return 0.0;
 }
 
 TCC_SNAPMODE CTaskCalendarCtrl::GetSnapMode() const
@@ -1592,20 +1645,46 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 				// prevent the start and end dates from overlapping
 				if (m_bDraggingStart)
 				{
-					pTCI->SetStartDate(min(dtDrag.m_dt, pTCI->GetAnyEndDate().m_dt - ONE_HOUR));
+					// but only if the due date is set
+					if (pTCI->IsEndDateSet())
+						pTCI->SetStartDate(min(dtDrag.m_dt, pTCI->GetAnyEndDate().m_dt - ONE_HOUR));
+					else
+						pTCI->SetStartDate(dtDrag);
 				}
 				else if (m_bDraggingEnd)
 				{
-					pTCI->SetEndDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
+					// but only if the start date is set
+					if (pTCI->IsStartDateSet())
+						pTCI->SetEndDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
+					else
+						pTCI->SetEndDate(dtDrag);
 				}
 				else // m_bDragging
 				{
 					if (pTCI->IsStartDateSet() && pTCI->IsEndDateSet())
 					{
-						double dDuration = (pTCI->GetAnyEndDate().m_dt - pTCI->GetAnyStartDate().m_dt);
+						COleDateTime dtStart = pTCI->GetAnyStartDate();
+						COleDateTime dtEnd = pTCI->GetAnyEndDate();
+
+						// If the end date is currently at 'end of day'
+						// then bump it to the start of the next day so
+						// that the calculated duration is accurate
+						if (CDateHelper::GetEndOfDay(dtEnd) == dtEnd)
+							dtEnd = (CDateHelper::GetDateOnly(dtEnd).m_dt + 1.0);
+
+						double dDuration = (dtEnd.m_dt - dtStart.m_dt);
+						TRACE(_T("CTaskCalendarCtrl::UpdateDragging(duration = %f)\n"), dDuration);
 						
 						pTCI->SetStartDate(dtDrag);
-						pTCI->SetEndDate(dtDrag.m_dt + dDuration);
+
+						// If end date would fall on the start of a new day
+						// move it to the previous day
+						dtEnd = (dtDrag.m_dt + dDuration);
+
+						if (!CDateHelper::DateHasTime(dtEnd))
+							dtEnd.m_dt--;
+						
+						pTCI->SetEndDate(dtEnd);
 					}
 					else if (pTCI->IsStartDateSet())
 					{
@@ -1623,11 +1702,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			*pTCI = m_tciPreDrag;
 		}
 
-		// always recalc dates
-		if (pTCI->IsEndDateSet() && !pTCI->IsStartDateSet() && (pTCI->GetAnyEndDate() < pTCI->GetAnyStartDate()))
-		{
-			int breakpoint = 0;
-		}
+		// Recalc dates if either start/end is not set
 		pTCI->RecalcDates(m_dwOptions);
 			
 		Invalidate();
@@ -1659,13 +1734,12 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 		ASSERT(pTCI);
 
 		// dropping outside the calendar is a cancel
-		CRect rClient;
-		GetClientRect(rClient);
-		rClient.top += CALENDAR_HEADER_HEIGHT;
+		CRect rLimits;
+		GetAllowableDragLimits(rLimits);
 
 		TCC_HITTEST nDragWhat = TCCHT_NOWHERE;
 
-		if (!rClient.PtInRect(ptCursor) || !IsValidDrag(ptCursor))
+		if (!rLimits.PtInRect(ptCursor) || !IsValidDrag(ptCursor))
 		{
 			*pTCI = m_tciPreDrag;
 		}
@@ -1821,16 +1895,29 @@ BOOL CTaskCalendarCtrl::IsValidDrag(const CPoint& ptDrag) const
 			(abs(size.cy) > nCyDrag));
 }
 
+void CTaskCalendarCtrl::GetAllowableDragLimits(CRect& rLimits) const
+{
+	GetClientRect(rLimits);
+	rLimits.top += CALENDAR_HEADER_HEIGHT;
+
+	// Allow a border all the way round
+	rLimits.InflateRect(50, 50);
+}
+
 BOOL CTaskCalendarCtrl::ValidateDragPoint(CPoint& ptDrag) const
 {
 	if (!IsDragging())
 		return FALSE;
 
+	CRect rLimits;
+	GetAllowableDragLimits(rLimits);
+
+	if (!rLimits.PtInRect(ptDrag))
+		return FALSE;
+
 	// Validate against client rect
 	CRect rClient;
 	GetClientRect(rClient);
-
-	rClient.top += CALENDAR_HEADER_HEIGHT;
 
 	ptDrag.x = max(ptDrag.x, rClient.left);
 	ptDrag.x = min(ptDrag.x, rClient.right);
