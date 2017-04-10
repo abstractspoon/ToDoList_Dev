@@ -78,6 +78,7 @@ class CDateHelper
 public:
 	static BOOL IsDateSet(const COleDateTime& date);
 	static void ClearDate(COleDateTime& date);
+	static COleDateTime NullDate();
 
 	static BOOL IsValidDayInMonth(int nDay, int nMonth, int nYear);
 	static BOOL IsValidDayOfMonth(int nDOW, int nWhich, int nMonth);
@@ -185,6 +186,7 @@ public:
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
 
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2);
+
 
 protected:
 	static DWORD s_dwWeekend; 

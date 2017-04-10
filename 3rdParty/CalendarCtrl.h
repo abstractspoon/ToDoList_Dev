@@ -81,8 +81,8 @@ public:
 	int GetSelectedItems(CDWordArray& dwaSelection) const;
 	time_t GetFirstSelectedItem() const;
 
-	const COleDateTime& GetMinDate() const;
-	const COleDateTime& GetMaxDate() const;
+	COleDateTime GetMinDate() const;
+	COleDateTime GetMaxDate() const;
 	BOOL IsDateVisible(const COleDateTime& date) const;
 
 	void SetThemeColour(COLORREF crTheme);
@@ -123,6 +123,8 @@ protected:
 	CCalendarCell* GetCell(int nRow, int nCol);
 	COLORREF GetFadedThemeColour(int percent);
 	int GetDayOfWeek(int nColumn) const;
+	COleDateTime GetMinDate(int nRow) const;
+	COleDateTime GetMaxDate(int nRow) const;
 
 	// helper func
 	static time_t DateToSeconds(const COleDateTime& date);

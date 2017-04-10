@@ -626,14 +626,37 @@ bool CCalendarCtrl::GetGridCellFromPoint(const CPoint& point, int &nRow, int &nC
 	return false;
 }
 
-const COleDateTime& CCalendarCtrl::GetMinDate() const 
+COleDateTime CCalendarCtrl::GetMinDate() const 
 { 
-	return m_dayCells[0][0].date; 
+	return GetMinDate(0);
 }
 
-const COleDateTime& CCalendarCtrl::GetMaxDate() const 
+COleDateTime CCalendarCtrl::GetMaxDate() const 
 { 
-	return m_dayCells[GetVisibleWeeks()-1][CALENDAR_NUM_COLUMNS-1].date; 
+	return GetMaxDate(m_nVisibleWeeks - 1); 
+}
+
+COleDateTime CCalendarCtrl::GetMinDate(int nRow) const
+{
+	if (nRow < 0 || nRow >= m_nVisibleWeeks)
+	{
+		ASSERT(0);
+		return CDateHelper::NullDate();
+	}
+
+	return m_dayCells[nRow][0].date; 
+}
+
+COleDateTime CCalendarCtrl::GetMaxDate(int nRow) const
+{
+	if (nRow < 0 || nRow >= m_nVisibleWeeks)
+	{
+		ASSERT(0);
+		return CDateHelper::NullDate();
+	}
+
+	// else
+	return m_dayCells[nRow][CALENDAR_NUM_COLUMNS-1].date; 
 }
 
 BOOL CCalendarCtrl::IsDateVisible(const COleDateTime& date) const

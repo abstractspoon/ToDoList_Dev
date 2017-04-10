@@ -557,6 +557,14 @@ void CDateHelper::ClearDate(COleDateTime& date)
 	date.m_status = COleDateTime::null;
 }
 
+COleDateTime CDateHelper::NullDate()
+{
+	COleDateTime null;
+	ClearDate(null);
+
+	return null;
+}
+
 int CDateHelper::GetISODayOfWeek(const COleDateTime& date) 
 {
 	int nDOW = date.GetDayOfWeek(); // 1-7 = Sun-Sat
