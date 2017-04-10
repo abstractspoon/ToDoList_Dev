@@ -211,7 +211,7 @@ void CTabCtrlEx::OnPaint()
 	CPaintDC dc(this); // device context for painting
 
 	// default drawing
-	if (IsExtendedTabThemedXP() || (m_dwFlags & TCE_TABCOLORS)
+	if (IsExtendedTabThemedXP() || (m_dwFlags & TCE_TABCOLORS))
 	{
 		CXPTabCtrl::DoPaint(&dc); // handles bkgnd
 	}
