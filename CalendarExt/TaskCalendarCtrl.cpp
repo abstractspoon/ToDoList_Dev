@@ -1842,8 +1842,8 @@ BOOL CTaskCalendarCtrl::ValidateDragPoint(CPoint& ptDrag) const
 
 void CTaskCalendarCtrl::OnCaptureChanged(CWnd *pWnd) 
 {
-	// if someone else grabs the capture we cancel any drag
-	if (pWnd && (pWnd != this) && IsDragging())
+	// if something grabs the capture we cancel any drag
+	if (IsDragging() && (pWnd != this))
 		CancelDrag(FALSE);
 	
 	CCalendarCtrl::OnCaptureChanged(pWnd);
