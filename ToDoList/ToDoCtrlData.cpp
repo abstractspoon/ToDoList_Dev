@@ -3672,7 +3672,7 @@ BOOL CToDoCtrlData::IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) 
 		return FALSE;
 	
 	// test this task
-	if (GetTaskReferenceID(pTDS->GetTaskID()) == dwTaskID)
+	if (!pTDS->IsRoot() && (GetTaskReferenceID(pTDS->GetTaskID()) == dwTaskID))
 		return TRUE;
 
 	// then its children

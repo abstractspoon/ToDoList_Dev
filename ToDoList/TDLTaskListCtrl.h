@@ -54,6 +54,7 @@ public:
 	
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
 	inline const TODOITEM* GetTask(int nItem) const { return GetTask(GetTaskID(nItem)); }
+	inline const BOOL HasTask(int nItem) const { return m_data.HasTask(GetTaskID(nItem)); }
 	inline DWORD GetTaskID(int nItem) const { return m_lcTasks.GetItemData(nItem); }
 	inline DWORD GetTrueTaskID(int nItem) const { return m_data.GetTrueTaskID(GetTaskID(nItem)); }
 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
