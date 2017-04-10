@@ -175,7 +175,7 @@ CToDoListWnd::CToDoListWnd()
 	m_mgrShortcuts(FALSE),
 	m_pPrefs(NULL),
 	m_bClosing(FALSE),
-	m_tabCtrl(TCE_POSTDRAW | TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT),
+	m_tabCtrl(TCE_POSTDRAW | TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT | TCE_TABCOLORS),
 	m_mgrToDoCtrls(m_tabCtrl),
 	m_bFindShowing(FALSE),
 	m_bShowProjectName(TRUE),
@@ -7373,16 +7373,63 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	return NULL;
 }
 
+void CToDoListWnd::OnTabCtrlGetBackColor(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
+
+	// TODO
+
+	*pResult = 255;
+} 
+
+void CToDoListWnd::OnTabCtrlPostDrawTab(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
+	DRAWITEMSTRUCT* pDIS = (DRAWITEMSTRUCT*)pNMTCE->dwExtra;
+
+	TDCM_DUESTATUS nStatus = m_mgrToDoCtrls.GetDueItemStatus(pDIS->itemID);
+
+	if (nStatus == TDCM_PAST || nStatus == TDCM_TODAY)
+	{
+		// determine appropriate due colour
+		COLORREF crDue, crDueToday;
+
+		GetToDoCtrl(pDIS->itemID).GetDueTaskColors(crDue, crDueToday);
+
+		COLORREF crTag = (nStatus == TDCM_PAST) ? crDue : crDueToday;
+
+		if (crTag != CLR_NONE)
+		{
+			CDC* pDC = CDC::FromHandle(pDIS->hDC);
+			const CRect& rect = pDIS->rcItem;
+
+			// draw a little tag in the top left corner
+			for (int nHPos = 0; nHPos < 6; nHPos++)
+			{
+				for (int nVPos = 0; nVPos < 6 - nHPos; nVPos++)
+				{
+					pDC->SetPixelV(rect.left + nHPos, rect.top + nVPos, crTag);
+				}
+			}
+
+			// draw a black line between the two
+			pDC->SelectStockObject(BLACK_PEN);
+			pDC->MoveTo(rect.left, rect.top + 6);
+			pDC->LineTo(rect.left + 7, rect.top - 1);
+		}
+	}
+
+	*pResult = 0;
+} 
+
 void CToDoListWnd::OnTabCtrlCloseTab(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	*pResult = 0;
+	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
 
 	// don't close the tab if only one is open and it is pristine
 	if ((GetTDCCount() == 1) && m_mgrToDoCtrls.IsPristine(0))
 		return;
 
-	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
-	
 	// check valid tab
 	if (pNMTCE->iTab >= 0)
 	{
@@ -7394,6 +7441,7 @@ void CToDoListWnd::OnTabCtrlCloseTab(NMHDR* pNMHDR, LRESULT* pResult)
 		if (!GetTDCCount())
 			CreateNewTaskList(FALSE);
 	}
+
 	*pResult = 0;
 }
 
@@ -7402,11 +7450,11 @@ void CToDoListWnd::OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
 	
 	// check valid tab indices
-	ASSERT((pNMTCE->iTab != -1) && (pNMTCE->nExtra != 0));
+	ASSERT((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0));
 
-	if ((pNMTCE->iTab != -1) && (pNMTCE->nExtra != 0))
+	if ((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0))
 	{
-		m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, pNMTCE->nExtra);
+		m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, pNMTCE->dwExtra);
 		
 		// disable alpha-sorting on tabs
 		if (Prefs().GetKeepTabsOrdered())
@@ -10213,42 +10261,7 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 
 void CToDoListWnd::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	if (nIDCtl == IDC_TABCONTROL)
-	{
-		TDCM_DUESTATUS nStatus = m_mgrToDoCtrls.GetDueItemStatus(lpDrawItemStruct->itemID);
-
-		if (nStatus == TDCM_PAST || nStatus == TDCM_TODAY)
-		{
-			// determine appropriate due colour
-			COLORREF crDue, crDueToday;
-
-			GetToDoCtrl(lpDrawItemStruct->itemID).GetDueTaskColors(crDue, crDueToday);
-
-			COLORREF crTag = (nStatus == TDCM_PAST) ? crDue : crDueToday;
-
-			if (crTag != CLR_NONE)
-			{
-				CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-				const CRect& rect = lpDrawItemStruct->rcItem;
-
-				// draw a little tag in the top left corner
-				for (int nHPos = 0; nHPos < 6; nHPos++)
-				{
-					for (int nVPos = 0; nVPos < 6 - nHPos; nVPos++)
-					{
-						pDC->SetPixelV(rect.left + nHPos, rect.top + nVPos, crTag);
-					}
-				}
-
-				// draw a black line between the two
-				pDC->SelectStockObject(BLACK_PEN);
-				pDC->MoveTo(rect.left, rect.top + 6);
-				pDC->LineTo(rect.left + 7, rect.top - 1);
-			}
-		}
-		return;
-	}
-	else if (nIDCtl == 0 && lpDrawItemStruct->itemID == ID_CLOSE)
+	if (nIDCtl == 0 && lpDrawItemStruct->itemID == ID_CLOSE)
 	{
 		if (m_menubar.DrawMDIButton(lpDrawItemStruct))
 			return;

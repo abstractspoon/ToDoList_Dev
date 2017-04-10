@@ -92,9 +92,10 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 
 BOOL CTabCtrlEx::NeedCustomPaint() const
 {
+	BOOL bPreDraw = (m_dwFlags & TCE_TABCOLORS);
 	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON));
 
-	return (bPostDraw || IsExtendedTabThemedXP());
+	return (bPreDraw || bPostDraw || IsExtendedTabThemedXP());
 }
 
 BOOL CTabCtrlEx::OnTabSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
@@ -210,7 +211,7 @@ void CTabCtrlEx::OnPaint()
 	CPaintDC dc(this); // device context for painting
 
 	// default drawing
-	if (IsExtendedTabThemedXP())
+	if (IsExtendedTabThemedXP() || (m_dwFlags & TCE_TABCOLORS)
 	{
 		CXPTabCtrl::DoPaint(&dc); // handles bkgnd
 	}
@@ -254,7 +255,6 @@ void CTabCtrlEx::OnPaint()
 	DrawTabDropMark(&dc);
 }
 
-
 CFont* CTabCtrlEx::GetTabFont(int nTab)
 {
 	// first time init of selected tab font
@@ -281,6 +281,36 @@ CRect CTabCtrlEx::GetTabTextRect(int nTab, LPCRECT pRect)
 	return rTab;
 }
 
+void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
+{
+	if (HasFlag(TCE_TABCOLORS))
+	{
+		NMTABCTRLEX nmtce = { 0 };
+	
+		nmtce.iTab = nTab;
+		nmtce.hdr.code = TCN_GETBACKCOLOR;
+		nmtce.hdr.hwndFrom = GetSafeHwnd();
+		nmtce.hdr.idFrom = GetDlgCtrlID();
+
+		COLORREF crBack = GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr));
+
+		if (crBack != 0)
+		{
+			CRect rTab(rcItem);
+			rTab.DeflateRect(1, 2, 2, 0);
+				
+			pDC->FillSolidRect(rTab, crBack);
+			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+		}
+		else
+		{
+			pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+		}
+	}
+
+	CXPTabCtrl::DrawTabItem(pDC, nTab, rcItem, uiFlags);
+}
+
 void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip)
 {
 	BOOL bPostDraw = HasFlag(TCE_POSTDRAW);
@@ -291,12 +321,7 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rCl
 	
 	// check for anything to draw
 	CRect rTab;
-	VERIFY(GetItemRect(nTab, rTab));
-
-	if (bSelected)
-		rTab.bottom += 2;
-	else
-		rTab.DeflateRect(2, 2);
+	VERIFY(GetTabRect(nTab, bSelected, rTab));
 				
 	if (!CRect().IntersectRect(rClip, rTab))
 		return;
@@ -315,12 +340,34 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rCl
 		dis.itemState = (bSelected ? ODS_SELECTED : 0);
 		dis.rcItem = rTab;
 
-		GetParent()->SendMessage(WM_DRAWITEM, dis.CtlID, (LPARAM)&dis);
+		// notify parent
+		NMTABCTRLEX nmtce = { 0 };
+
+		nmtce.hdr.code = TCN_POSTDRAW;
+		nmtce.hdr.hwndFrom = GetSafeHwnd();
+		nmtce.hdr.idFrom = GetDlgCtrlID();
+		nmtce.iTab = nTab;
+		nmtce.dwExtra = (DWORD)&dis;
+		
+		GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr));
 	}
 	
 	// then close button
 	if (bCloseBtn)
 		DrawTabCloseButton(dc, nTab);
+}
+
+BOOL CTabCtrlEx::GetTabRect(int nTab, BOOL bSelected, CRect& rTab)
+{
+	if (!GetItemRect(nTab, rTab))
+		return FALSE;
+
+	if (bSelected)
+		rTab.bottom += 2;
+	else
+		rTab.DeflateRect(2, 2);
+
+	return TRUE;
 }
 
 void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
@@ -521,10 +568,10 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 			nmtce.hdr.code = TCN_ENDDRAG;
 
 			// calculating number of positions needs care
-			nmtce.nExtra = (m_nDropTab - m_nDragTab);
+			nmtce.dwExtra = (m_nDropTab - m_nDragTab);
 
 			if (m_nDropTab > m_nDragTab)
-				nmtce.nExtra--;
+				nmtce.dwExtra--;
 		}
 		// fall thru
 	}	
@@ -587,7 +634,7 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 					else if (HasFlag(TCE_MBUTTONCLICK))
 					{
 						nmtce.iTab = nTab;
-						nmtce.nExtra = nFlags;
+						nmtce.dwExtra = nFlags;
 						nmtce.hdr.code = TCN_MCLICK;
 					}
 				}

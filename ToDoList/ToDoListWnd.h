@@ -442,6 +442,8 @@ protected:
 	afx_msg void OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTabCtrlSelchange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTabCtrlSelchanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTabCtrlGetBackColor(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTabCtrlPostDrawTab(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetPriority(UINT nCmdID);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

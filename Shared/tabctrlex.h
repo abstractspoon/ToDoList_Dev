@@ -21,6 +21,7 @@ enum
 	TCE_MBUTTONCLOSE	= 0x0008,
 	TCE_CLOSEBUTTON		= 0x0010,
 	TCE_BOLDSELTEXT		= 0x0020,
+	TCE_TABCOLORS		= 0x0040,
 
 	TCE_ALL				= 0xffff
 };
@@ -28,22 +29,30 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef TCN_CLOSETAB
-#	define TCN_CLOSETAB (TCN_FIRST-11)
+#	define TCN_CLOSETAB		(TCN_FIRST-11)
 #endif
 
 #ifndef TCN_MCLICK
-#	define TCN_MCLICK (TCN_FIRST-12)
+#	define TCN_MCLICK		(TCN_FIRST-12)
 #endif
 
 #ifndef TCN_ENDDRAG
-#	define TCN_ENDDRAG (TCN_FIRST-13)
+#	define TCN_ENDDRAG		(TCN_FIRST-13)
+#endif
+
+#ifndef TCN_GETBACKCOLOR
+#	define TCN_GETBACKCOLOR	(TCN_FIRST-14)
+#endif
+
+#ifndef TCN_POSTDRAW
+#	define TCN_POSTDRAW		(TCN_FIRST-15)
 #endif
 
 struct NMTABCTRLEX
 {
     NMHDR hdr;
     int iTab;
-	UINT nExtra;
+	DWORD dwExtra;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -119,6 +128,7 @@ protected:
 	virtual void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip);
 	virtual CFont* GetTabFont(int nTab);
 	virtual CRect GetTabTextRect(int nTab, LPCRECT pRect);
+	virtual void DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags);
 
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	BOOL IsValidClick(UINT nBtn, const CPoint& ptUp) const;
@@ -133,6 +143,7 @@ protected:
 	BOOL NeedCustomPaint() const;
 	void UpdateTabItemWidths(BOOL bSel = FALSE);
 	CString GetRequiredTabText(int nTab);
+	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
 
 };
 

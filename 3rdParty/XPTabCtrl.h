@@ -76,11 +76,11 @@ protected:
 
 	void DoPaint(CDC* pDC);
 	void DrawThemesXpTabItem(CDC* pDC, int ixItem, const CRect& rcItem, UINT uiFlag);
-	void DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT uiFlags);
 	BOOL IsExtendedTabThemedXP() const;
 
 	virtual CRect GetTabTextRect(int nTab, LPCRECT pRect);
 	virtual CFont* GetTabFont(int nTab);
+	virtual void DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT uiFlags);
 };
 /////////////////////////////////////////////////////////////////////////////
 // Helper functions
