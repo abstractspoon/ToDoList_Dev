@@ -207,6 +207,7 @@ void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 
 	pPrefs->WriteProfileInt(szKey, _T("NumWeeks"), m_BigCalendar.GetVisibleWeeks());
+	pPrefs->WriteProfileInt(szKey, _T("SnapMode"), m_BigCalendar.GetSnapMode());
 }
 
 void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -231,6 +232,10 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (m_BigCalendar.SetVisibleWeeks(nWeeks))
 			m_cbNumWeeks.SetCurSel(nWeeks-1);
 
+		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
+		m_BigCalendar.SetSnapMode(nSnap);
+		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+	
 		// make sure 'today' is visible
 		COleDateTime dtToday = COleDateTime::GetCurrentTime();
 
