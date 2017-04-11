@@ -225,8 +225,11 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		CString sFontName = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
 		int nFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
 
-		if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
-			m_BigCalendar.SetFont(&m_font);
+		if (!m_font.GetSafeHandle() || !GraphicsMisc::SameFont(m_font, sFontName, nFontSize))
+		{
+			if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
+				m_BigCalendar.SetFont(&m_font);
+		}
 	}
 	else if (m_font.GetSafeHandle())
 	{
