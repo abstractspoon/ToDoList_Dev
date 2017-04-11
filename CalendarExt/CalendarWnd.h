@@ -79,6 +79,7 @@ protected:
 	HICON m_hIcon;
 	BOOL m_bReadOnly;
 	CString m_sSelectedTaskDates;
+	CFont m_font;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -33,7 +33,9 @@ CCalendarCtrl::CCalendarCtrl()
 	m_nVisibleWeeks(6), 
 	m_bShowWeekends(TRUE), 
 	m_bEnableMultiSel(FALSE),
-	m_crGrid(RGB(125,175,255))
+	m_crGrid(RGB(125,175,255)),
+	m_nHeaderHeight(CALENDAR_MIN_HEADER_HEIGHT),
+	m_nDayHeaderHeight(CALENDAR_MIN_DAY_HEADER_HEIGHT)
 {
 	LOGFONT lf;
 	::GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT),sizeof(lf),&lf);
@@ -73,7 +75,6 @@ BEGIN_MESSAGE_MAP(CCalendarCtrl, CWnd)
 	ON_WM_KEYDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_GETDLGCODE()
-	ON_MESSAGE(WM_GETFONT, OnGetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,11 +88,6 @@ BOOL CCalendarCtrl::Create(DWORD dwStyle, const CRect &wndRect, CWnd *pParent, U
 	Reset();
 
 	return bResult;
-}
-
-LRESULT CCalendarCtrl::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	return (LRESULT)m_DefaultFont.GetSafeHandle();
 }
 
 BOOL CCalendarCtrl::SetVisibleWeeks(int nWeeks)
@@ -211,6 +207,28 @@ void CCalendarCtrl::SetThemeColour(COLORREF crTheme)
 		Invalidate();
 }
 
+void CCalendarCtrl::SetHeaderHeight(int nHeight)
+{
+	nHeight = max(nHeight, CALENDAR_MIN_HEADER_HEIGHT);
+
+	if (m_nHeaderHeight != nHeight)
+	{
+		m_nHeaderHeight = nHeight;
+		Invalidate(FALSE);
+	}
+}
+
+void CCalendarCtrl::SetDayHeaderHeight(int nHeight)
+{
+	nHeight = max(nHeight, CALENDAR_MIN_DAY_HEADER_HEIGHT);
+
+	if (m_nDayHeaderHeight != nHeight)
+	{
+		m_nDayHeaderHeight = nHeight;
+		Invalidate(FALSE);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarCtrl message handlers
 
@@ -262,7 +280,7 @@ BOOL CCalendarCtrl::PtInHeader(const CPoint& ptScreen) const
 
 	CRect rHeader;
 	GetClientRect(rHeader);
-	rHeader.bottom = rHeader.top + CALENDAR_HEADER_HEIGHT;
+	rHeader.bottom = rHeader.top + m_nHeaderHeight;
 
 	return rHeader.PtInRect(ptHeader);
 }
@@ -276,14 +294,14 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 {
 	CRect rc;
 	GetClientRect(&rc);
-	rc.bottom = rc.top + CALENDAR_HEADER_HEIGHT;
+	rc.bottom = rc.top + m_nHeaderHeight;
 
 	CRect rcLine(rc);
 	rcLine.top = rcLine.bottom-1;
 
 	int i;
 
-	for(i=0; i<CALENDAR_HEADER_HEIGHT; i++)
+	for(i=0; i<m_nHeaderHeight; i++)
 	{
 		pDC->FillSolidRect(rcLine, GetFadedThemeColour(i*4));
 		rcLine.bottom--;
@@ -296,7 +314,7 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
-		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, CALENDAR_HEADER_HEIGHT);
+		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, m_nHeaderHeight);
 		int nDOW = GetDayOfWeek(i);
 		CString sDOW = CDateHelper::GetDayOfWeekName(nDOW, FALSE);
 
@@ -309,7 +327,7 @@ void CCalendarCtrl::DrawGrid(CDC* pDC)
 {
 	CRect rc;
 	GetClientRect(&rc);
-	int nHeight = (rc.Height()-CALENDAR_HEADER_HEIGHT)/GetVisibleWeeks();
+	int nHeight = (rc.Height()-m_nHeaderHeight)/GetVisibleWeeks();
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
 	CPen thinPen(PS_SOLID, 1, m_crGrid);
@@ -319,14 +337,14 @@ void CCalendarCtrl::DrawGrid(CDC* pDC)
 
 	for(i=1; i<CALENDAR_NUM_COLUMNS; i++)
 	{
-		pDC->MoveTo(i*nWidth, CALENDAR_HEADER_HEIGHT);
+		pDC->MoveTo(i*nWidth, m_nHeaderHeight);
 		pDC->LineTo(i*nWidth, rc.Height());
 	}
 	
 	for(i=1; i<GetVisibleWeeks(); i++)
 	{
-		pDC->MoveTo(0,			(i*nHeight)+CALENDAR_HEADER_HEIGHT);
-		pDC->LineTo(rc.Width(),	(i*nHeight)+CALENDAR_HEADER_HEIGHT);
+		pDC->MoveTo(0,			(i*nHeight)+m_nHeaderHeight);
+		pDC->LineTo(rc.Width(),	(i*nHeight)+m_nHeaderHeight);
 	}
 	pDC->SelectObject(pOldPen);
 }
@@ -433,7 +451,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		CRect selRect(rCell);
 
 		if (bToday)	
-			selRect.top += CALENDAR_DAY_HEADER_CY;
+			selRect.top += m_nDayHeaderHeight;
 
 		pDC->FillRect(&selRect, &br);
 	}
@@ -492,7 +510,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 
 	// draw inside...
 	CRect rContent(rCell);
-	rContent.DeflateRect(1,CALENDAR_DAY_HEADER_CY, 0, 0);		
+	rContent.DeflateRect(1,m_nDayHeaderHeight, 0, 0);		
 	
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
 }
@@ -558,12 +576,12 @@ bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeade
 		CRect rc;
 		GetClientRect(&rc);
 
-		int nHeight = (rc.Height()-CALENDAR_HEADER_HEIGHT)/GetVisibleWeeks();
+		int nHeight = (rc.Height()-m_nHeaderHeight)/GetVisibleWeeks();
 		int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
 		rect.left = nWidth*nCol;
 		rect.right = rect.left + nWidth;
-		rect.top = CALENDAR_HEADER_HEIGHT + nRow*nHeight;
+		rect.top = m_nHeaderHeight + nRow*nHeight;
 		rect.bottom = rect.top + nHeight;
 
 		// right-most column extends to client extent
@@ -571,7 +589,7 @@ bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeade
 			rect.right = rc.right;
 
 		if (bOmitHeader)
-			rect.top += CALENDAR_DAY_HEADER_CY;
+			rect.top += m_nDayHeaderHeight;
 
 		return true;
 	}
@@ -600,7 +618,7 @@ const CCalendarCell* CCalendarCtrl::GetCell(const CPoint& point) const
 
 bool CCalendarCtrl::GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const
 {
-	if (point.y > CALENDAR_HEADER_HEIGHT) 
+	if (point.y > m_nHeaderHeight) 
 	{
 		CRect rc;
 		GetClientRect(&rc);
@@ -608,12 +626,12 @@ bool CCalendarCtrl::GetGridCellFromPoint(const CPoint& point, int &nRow, int &nC
 		if (point.x < 0 || point.x > rc.right || point.y < 0 || point.y > rc.bottom)
 			return false;
 
-		int nHeight = (rc.Height()-CALENDAR_HEADER_HEIGHT)/GetVisibleWeeks();
+		int nHeight = (rc.Height()-m_nHeaderHeight)/GetVisibleWeeks();
 		int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
 		if (nHeight && nWidth)
 		{
-			nRow = (point.y-CALENDAR_HEADER_HEIGHT)/nHeight;
+			nRow = (point.y-m_nHeaderHeight)/nHeight;
 			nCol = point.x/nWidth;
 			
 			// correct for last row and column

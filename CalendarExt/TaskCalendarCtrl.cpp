@@ -42,7 +42,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bReadOnly(FALSE),
 	m_nCellVScrollPos(0),
 	m_bStrikeThruDone(FALSE),
-	m_bSavingToImage(FALSE)
+	m_bSavingToImage(FALSE),
+	m_nTaskHeight(DEF_TASK_HEIGHT)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 }
@@ -81,10 +82,31 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrl)
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+	ON_MESSAGE(WM_GETFONT, OnGetFont)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl message handlers
+
+LRESULT CTaskCalendarCtrl::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return (LRESULT)m_DefaultFont.GetSafeHandle();
+}
+
+LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	GraphicsMisc::VerifyDeleteObject(m_DefaultFont);
+	GraphicsMisc::CreateFont(m_DefaultFont, (HFONT)wp);
+
+	// Recalc the task height
+	m_nTaskHeight = (GraphicsMisc::GetFontPixelSize((HFONT)wp) + 6);
+	SetHeaderHeight(m_nTaskHeight + 2);
+	SetDayHeaderHeight(m_nTaskHeight);
+
+	return 0L;
+}
 
 int CTaskCalendarCtrl::GetDefaultTaskHeight()
 {
@@ -464,7 +486,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	CRect rc;
 	GetClientRect(&rc);
 	
-	rc.bottom = CALENDAR_HEADER_HEIGHT;
+	rc.bottom = m_nHeaderHeight;
 	int nWidth = (rc.Width() / CALENDAR_NUM_COLUMNS);
 	
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
@@ -907,7 +929,7 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 
 int CTaskCalendarCtrl::GetTaskHeight() const
 {
-	int nHeight = DEF_TASK_HEIGHT;
+	int nHeight = m_nTaskHeight;
 
 	if (m_nMaxDayTaskCount && HasOption(TCCO_ADJUSTTASKHEIGHTS))
 	{
@@ -917,7 +939,7 @@ int CTaskCalendarCtrl::GetTaskHeight() const
 		nHeight = (rCell.Height() / m_nMaxDayTaskCount);
 	}
 
-	return max(MIN_TASK_HEIGHT, min(nHeight, DEF_TASK_HEIGHT));
+	return max(MIN_TASK_HEIGHT, min(nHeight, m_nTaskHeight));
 }
 
 int CTaskCalendarCtrl::GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArray& aTasks, BOOL bOrdered) const
@@ -1898,7 +1920,7 @@ BOOL CTaskCalendarCtrl::IsValidDrag(const CPoint& ptDrag) const
 void CTaskCalendarCtrl::GetAllowableDragLimits(CRect& rLimits) const
 {
 	GetClientRect(rLimits);
-	rLimits.top += CALENDAR_HEADER_HEIGHT;
+	rLimits.top += m_nHeaderHeight;
 
 	// Allow a border all the way round
 	rLimits.InflateRect(50, 50);
@@ -2179,7 +2201,7 @@ BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
 
 				// Draw gridline at top of cells for subsequent
 				if (!bFirst)
-					dcClient.FillSolidRect(0, CALENDAR_HEADER_HEIGHT, nClientWidth, 1, m_crGrid);
+					dcClient.FillSolidRect(0, m_nHeaderHeight, nClientWidth, 1, m_crGrid);
 
 				dcImage.BitBlt(0, nVImageOffset, nClientWidth, nClientHeight, &dcClient, 0, nHeaderOffset, SRCCOPY);
 
@@ -2187,7 +2209,7 @@ BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
 
 				if (bFirst)
 				{
-					nHeaderOffset = CALENDAR_HEADER_HEIGHT;
+					nHeaderOffset = m_nHeaderHeight;
 					nClientHeight -= nHeaderOffset;
 				
 					bFirst = FALSE;

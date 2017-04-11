@@ -18,12 +18,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define CALENDAR_LIGHTGREY		RGB(235,235,235)
-#define CALENDAR_LINE_HEIGHT	15
-#define CALENDAR_HEADER_HEIGHT	19
-#define CALENDAR_NUM_COLUMNS	7
-#define CALENDAR_MAX_ROWS		9
-#define CALENDAR_DAY_HEADER_CY	15
+#define CALENDAR_LIGHTGREY				RGB(235,235,235)
+#define CALENDAR_LINE_HEIGHT			15
+#define CALENDAR_MIN_HEADER_HEIGHT		19
+#define CALENDAR_NUM_COLUMNS			7
+#define CALENDAR_MAX_ROWS				9
+#define CALENDAR_MIN_DAY_HEADER_HEIGHT	15
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -86,6 +86,8 @@ public:
 	BOOL IsDateVisible(const COleDateTime& date) const;
 
 	void SetThemeColour(COLORREF crTheme);
+	void SetHeaderHeight(int nHeight);
+	void SetDayHeaderHeight(int nHeight);
 	
 	void UpdateCells();
 	BOOL PtInHeader(const CPoint& ptScreen) const;
@@ -145,7 +147,6 @@ protected:
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg UINT OnGetDlgCode();
-	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -166,6 +167,7 @@ protected:
 	BOOL			m_bShowWeekends;
 	BOOL			m_bEnableMultiSel;
 	COLORREF		m_crTheme, m_crGrid;
+	int				m_nHeaderHeight, m_nDayHeaderHeight;
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };
