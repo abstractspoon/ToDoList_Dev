@@ -55,6 +55,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 
 CKanbanWnd::~CKanbanWnd()
 {
+	GraphicsMisc::VerifyDeleteObject(m_font);
 }
 
 void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
@@ -93,6 +94,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_ERASEBKGND()
+	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
@@ -102,6 +104,15 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanWnd message handlers
+
+LRESULT CKanbanWnd::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (m_font.GetSafeHandle())
+		return (LRESULT)m_font.GetSafeHandle();
+
+	// else
+	return Default();
+}
 
 void CKanbanWnd::OnHelp()
 {
@@ -281,6 +292,33 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	// application preferences
 	m_ctrlKanban.SetOption(KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_ctrlKanban.SetOption(KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+
+	// Task View font
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), FALSE))
+	{
+		CString sFontName = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
+		int nFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
+
+		if (!m_font.GetSafeHandle() || !GraphicsMisc::SameFont(m_font, sFontName, nFontSize))
+		{
+			GraphicsMisc::VerifyDeleteObject(m_font);
+
+			if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
+			{
+				m_fonts.Clear();
+				m_ctrlKanban.SetFont(&m_font);
+			}
+		}
+	}
+	else if (m_font.GetSafeHandle())
+	{
+		// Clear existing font
+		m_font.DeleteObject();
+		m_fonts.Clear();
+
+		HFONT hFont = CDialogHelper::GetFont(GetParent());
+		m_ctrlKanban.SetFont(CFont::FromHandle(hFont));
+	}
 
 	UpdatePriorityColors(pPrefs);
 	

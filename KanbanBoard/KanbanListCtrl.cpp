@@ -153,6 +153,7 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
 	ON_WM_KEYUP()
 	ON_WM_SIZE()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1292,4 +1293,13 @@ BOOL CKanbanListCtrl::SelectionHasLockedTasks() const
 	}
 
 	return FALSE;
+}
+
+LRESULT CKanbanListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = Default();
+
+	OnDisplayAttributeChanged();
+
+	return lr;
 }

@@ -98,18 +98,20 @@ CKanbanCtrl::~CKanbanCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
-//{{AFX_MSG_MAP(CKanbanCtrl)
-//}}AFX_MSG_MAP
-ON_WM_SIZE()
-ON_WM_ERASEBKGND()
-ON_WM_CREATE()
-ON_WM_MOUSEMOVE()
-ON_WM_LBUTTONUP()
-ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
-ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
-ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
-ON_WM_SETFOCUS()
-ON_WM_SETCURSOR()
+	//{{AFX_MSG_MAP(CKanbanCtrl)
+	//}}AFX_MSG_MAP
+	ON_WM_SIZE()
+	ON_WM_ERASEBKGND()
+	ON_WM_CREATE()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
+	ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
+	ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
+	ON_WM_SETFOCUS()
+	ON_WM_SETCURSOR()
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
+
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
@@ -2680,4 +2682,20 @@ BOOL CKanbanCtrl::CanSaveToImage() const
 	}
 
 	return FALSE;
+}
+
+LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = Default();
+
+	// Update all the lists
+	int nList = m_aListCtrls.GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = m_aListCtrls[nList];
+		pList->SendMessage(WM_SETFONT, wp, lp);
+	}
+
+	return lr;
 }
