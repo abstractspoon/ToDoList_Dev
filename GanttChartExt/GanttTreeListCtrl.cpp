@@ -4532,7 +4532,9 @@ void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 	}
 
 	// and zero out the rest
-	for (; i <= GetNumMonths(m_nMonthDisplay); i++)
+	int nNumCols = m_listHeader.GetItemCount();
+
+	for (; i <= nNumCols; i++)
 	{
 		m_listHeader.EnableItemTracking(i, FALSE);
 		m_listHeader.SetItemWidth(i, 0);
