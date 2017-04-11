@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CGanttTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_REGISTERED_MESSAGE(WM_GTCN_TITLECOLUMNWIDTHCHANGE, OnTitleColumnWidthChange)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
@@ -138,6 +139,13 @@ LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)
 	}
 
 	return 0L;
+}
+
+LRESULT CGanttTreeCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	m_fonts.Clear();
+
+	return Default();
 }
 
 BOOL CGanttTreeCtrl::InitTooltip()

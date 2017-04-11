@@ -4255,7 +4255,7 @@ BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	}
 
 	// calculate the min month width for this display
-	int nMinMonthWidth = m_mapMinMonthWidths[nNewDisplay];
+	int nMinMonthWidth = GetMinMonthWidth(nNewDisplay);
 	
 	// Check that the new mode does not exceed the max allowed
 	if (!CanSetMonthDisplay(nNewDisplay, nMinMonthWidth))
@@ -6435,4 +6435,27 @@ void CGanttTreeListCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 			htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
+}
+
+BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
+{
+	if (!hFont || !m_tree.GetSafeHwnd() || !m_list.GetSafeHwnd())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CFont* pFont = CFont::FromHandle(hFont);
+
+	m_tree.SetFont(pFont, bRedraw);
+	m_list.SetFont(pFont, bRedraw);
+
+	if (m_treeHeader.GetSafeHwnd())
+		m_treeHeader.SetFont(pFont, bRedraw);
+
+	CalcMinMonthWidths();
+	SetMonthDisplay(m_nMonthDisplay);
+	ResizeColumnsToFit();
+
+	return TRUE;
 }

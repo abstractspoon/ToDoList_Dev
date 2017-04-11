@@ -62,6 +62,7 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 
 CGanttChartWnd::~CGanttChartWnd()
 {
+	GraphicsMisc::VerifyDeleteObject(m_font);
 }
 
 void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
@@ -262,6 +263,22 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CDateHelper::SetWeekendDays(dwWeekends);
 
+	// Task View font
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), FALSE))
+	{
+		CString sFontName = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
+		int nFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
+
+		if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
+			m_ctrlGantt.SetFont(m_font);
+	}
+	else if (m_font.GetSafeHandle())
+	{
+		// Clear existing font
+		m_font.DeleteObject();
+		m_ctrlGantt.SetFont(CDialogHelper::GetFont(GetParent()));
+	}
+	
 	// gantt specific options
 	if (!bAppOnly)
 	{
@@ -678,7 +695,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
-	
+		
 	// init syncer
 	m_ctrlGantt.Initialize(IDC_TREEHEADER);
 	m_ctrlGantt.ExpandAll();

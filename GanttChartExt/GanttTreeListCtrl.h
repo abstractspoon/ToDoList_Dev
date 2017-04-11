@@ -72,6 +72,7 @@ public:
 	void Release();
 
 	BOOL SaveToImage(CBitmap& bmImage);
+	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
