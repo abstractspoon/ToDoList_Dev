@@ -1036,9 +1036,9 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 
 void CGanttTreeListCtrl::MinMaxDates(const GANTTITEM& gi)
 {
-	CDateHelper::Min(m_dtEarliest, gi.dtStart);
-	CDateHelper::Max(m_dtLatest, gi.dtDue);
-	CDateHelper::Max(m_dtLatest, gi.dtDone);
+	MinMaxDates(gi.dtStart);
+	MinMaxDates(gi.dtDue);
+	MinMaxDates(gi.dtDone);
 }
 
 void CGanttTreeListCtrl::MinMaxDates(const COleDateTime& date)
