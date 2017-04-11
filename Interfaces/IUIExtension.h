@@ -145,16 +145,17 @@ enum IUI_APPCOMMAND
 	IUI_COLLAPSEALL,
 	IUI_EXPANDSELECTED,
 	IUI_COLLAPSESELECTED,
-	IUI_SORT,					// dwExtra is column ID
-	IUI_TOGGLABLESORT,			// dwExtra is column ID
+	IUI_SORT,					// dwExtra is column ID [in]
+	IUI_TOGGLABLESORT,			// dwExtra is column ID [in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,				// dwExtra is task ID
+	IUI_SELECTTASK,				// dwExtra is task ID   [in]
 	IUI_RESIZEATTRIBCOLUMNS,
-	IUI_GETNEXTTASK,			// dwExtra is DWORD* 
-	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*
-	IUI_GETPREVTASK,			// dwExtra is DWORD* 
-	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*
-	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*
+	IUI_GETNEXTTASK,			// dwExtra is DWORD*    [out]
+	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*    [out]
+	IUI_GETPREVTASK,			// dwExtra is DWORD*    [out]
+	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*    [out]
+	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*  [out]
+	IUI_SETTASKFONT,		// dwExtra is HFONT     [in]
 
 	// new values here
 //  IUI_

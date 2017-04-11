@@ -10,7 +10,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFontCache::CFontCache() : m_hWnd(NULL)
+CFontCache::CFontCache() : m_hWnd(NULL), m_hFont(NULL), m_bAutoCleanupFont(FALSE)
 {
 }
 
@@ -21,19 +21,55 @@ CFontCache::~CFontCache()
 
 BOOL CFontCache::Initialise(HWND hWnd)
 {
-	if (m_hWnd || !IsWindow(hWnd))
+	if (!IsWindow(hWnd))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
+	Release();
+
 	m_hWnd = hWnd;
 	return TRUE;
+}
+
+BOOL CFontCache::Initialise(HFONT hFont, BOOL bAutoCleanup)
+{
+	if (!hFont)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	Release();
+
+	m_hFont = hFont;
+	m_bAutoCleanupFont = bAutoCleanup;
+
+	return TRUE;
+}
+
+BOOL CFontCache::Initialise(const CString& sFaceName, int nPointSize)
+{
+	if (sFaceName.IsEmpty() || (nPointSize < 4))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return Initialise(GraphicsMisc::CreateFont(sFaceName, nPointSize), TRUE);
 }
 
 void CFontCache::Release()
 {
 	m_hWnd = NULL;
+
+	if (m_bAutoCleanupFont)
+	{
+		GraphicsMisc::VerifyDeleteObject(m_hFont);
+		m_bAutoCleanupFont = FALSE;
+	}
+
 	Clear();
 }
 
@@ -63,16 +99,7 @@ CFont* CFontCache::GetFont(DWORD dwFontStyle)
 
 HFONT CFontCache::GetHFont(DWORD dwFontStyle)
 {
-	ASSERT(m_hWnd);
-
-	if (m_hWnd == NULL)
-		return NULL;
-
-	HFONT hFont = (HFONT)::SendMessage(m_hWnd, WM_GETFONT, 0, 0); // base font
-
-	if (hFont == NULL)
-		hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-	
+	HFONT hFont = GetBaseFont();
 	ASSERT(hFont);
 
 	if (hFont == NULL)
@@ -93,6 +120,21 @@ HFONT CFontCache::GetHFont(DWORD dwFontStyle)
 		hFont = hOtherFont;
 	}
 	
+	return hFont;
+}
+
+HFONT CFontCache::GetBaseFont() const
+{
+	HFONT hFont = m_hFont;
+
+	if (m_hWnd)
+	{
+		hFont = (HFONT)::SendMessage(m_hWnd, WM_GETFONT, 0, 0); // base font
+
+		if (hFont == NULL)
+			hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+	}
+
 	return hFont;
 }
 

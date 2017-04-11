@@ -3254,16 +3254,22 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 	{
 		if (!hFont) // set to our font
 		{
-			// for some reason i can not yet explain, our font
-			// is not correctly set so we use our parent's font instead
-			// hFont = (HFONT)SendMessage(WM_GETFONT);
+			// We don't have a font so we use our parents
 			hFont = (HFONT)GetParent()->SendMessage(WM_GETFONT);
 		}
 
 		VERIFY(m_taskList.SetFont(hFont));
 
-		// other views
-		// TODO
+		// Update all extension views
+		int nView = m_aExtViews.GetSize();
+
+		while (nView--)
+		{
+			IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
+
+			if (pExtWnd)
+				pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)hFont);
+		}
 
 		return TRUE;
 	}

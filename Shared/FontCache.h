@@ -24,13 +24,22 @@ public:
 	HFONT GetHFont(DWORD dwFontStyle = 0); // GraphicsMisc.h
 
 	BOOL Initialise(HWND hWnd);
+	BOOL Initialise(HFONT hFont, BOOL bAutoCleanup = FALSE);
+	BOOL Initialise(const CString& sFaceName, int nPointSize);
 	void Release();
 	void Clear();
+
 	HWND GetHwnd() const { return m_hWnd; }
+	HFONT GetFont() const { return m_hFont; }
 
 protected:
 	HWND m_hWnd;
+	HFONT m_hFont;
+	BOOL m_bAutoCleanupFont;
 	CMap<DWORD, DWORD, HFONT, HFONT&> m_mapFonts;
+
+protected:
+	HFONT GetBaseFont() const;
 };
 
 #endif // !defined(AFX_FONTCACHE_H__FEE6A504_2955_4272_ABD6_984ABC4CCB4D__INCLUDED_)
