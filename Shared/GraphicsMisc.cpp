@@ -447,6 +447,12 @@ HFONT GraphicsMisc::GetFont(HWND hWnd)
 
 BOOL GraphicsMisc::SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint)
 {
+	if (!hFont)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CString sFontName;
 	int nFontSize = GetFontNameAndPointSize(hFont, sFontName);
 
@@ -456,6 +462,12 @@ BOOL GraphicsMisc::SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint)
 
 BOOL GraphicsMisc::SameFontNameSize(HFONT hFont1, HFONT hFont2)
 {
+	if (!hFont1 || !hFont2)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
 	CString sName1;
 	int nSize1 = GetFontNameAndPointSize(hFont1, sName1);
 

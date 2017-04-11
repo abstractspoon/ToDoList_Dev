@@ -24,6 +24,7 @@ public:
 	HFONT GetHFont(DWORD dwFontStyle = 0); // GraphicsMisc.h
 
 	BOOL Initialise(HWND hWnd);
+	void Release();
 	void Clear();
 	HWND GetHwnd() const { return m_hWnd; }
 

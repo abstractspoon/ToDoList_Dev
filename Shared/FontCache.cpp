@@ -21,13 +21,20 @@ CFontCache::~CFontCache()
 
 BOOL CFontCache::Initialise(HWND hWnd)
 {
-	ASSERT((m_hWnd == NULL) && ::IsWindow(hWnd));
-
 	if (m_hWnd || !IsWindow(hWnd))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	m_hWnd = hWnd;
 	return TRUE;
+}
+
+void CFontCache::Release()
+{
+	m_hWnd = NULL;
+	Clear();
 }
 
 CFont* CFontCache::GetFont(BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bStrikeThru)
