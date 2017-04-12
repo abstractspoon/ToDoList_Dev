@@ -222,6 +222,9 @@ CToDoListWnd::~CToDoListWnd()
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 //{{AFX_MSG_MAP(CToDoListWnd)
+	ON_COMMAND(ID_EDIT_SETTASKLISTCOLOR, OnEditSetTasklistTabColor)
+	ON_COMMAND(ID_EDIT_CLEARTASKLISTCOLOR, OnEditClearTasklistTabColor)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARTASKLISTCOLOR, OnUpdateEditClearTasklistTabColor)
 	ON_COMMAND(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnViewIncrementTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnUpdateViewIncrementTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnViewDecrementTaskViewFontSize)
@@ -12468,6 +12471,20 @@ void CToDoListWnd::OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI)
 	// It can be an expensive call to get dependents so we don't do it
 	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
+
+void CToDoListWnd::OnEditSetTasklistTabColor() 
+{
+	// TODO: Add your command handler code here
+	
+}
+
+void CToDoListWnd::OnEditClearTasklistTabColor() 
+{
+	// TODO: Add your command handler code here
+	
+}
+
+void CToDoListWnd::OnUpdateEditClearTasklistTabColor(CCmdUI* pCmdUI) 
 {
 	// TODO: Add your command update UI handler code here
 	

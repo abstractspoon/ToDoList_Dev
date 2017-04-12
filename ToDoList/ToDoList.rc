@@ -2856,6 +2856,9 @@ BEGIN
         MENUITEM "&Undo",                       ID_EDIT_UNDO
         MENUITEM "&Redo",                       ID_EDIT_REDO
         MENUITEM SEPARATOR
+        MENUITEM "&Set Tasklist Tab Colour...", ID_EDIT_SETTASKLISTCOLOR
+        MENUITEM "&Clear Tasklist Tab Colour...", ID_EDIT_CLEARTASKLISTCOLOR
+        MENUITEM SEPARATOR
         MENUITEM "&Edit Task Title",            ID_EDIT_TASKTEXT
         POPUP "&Other Task Attributes"
         BEGIN
