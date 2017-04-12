@@ -421,6 +421,21 @@ BOOL CPreferencesUITasklistColorsPage::GetTreeFont(CString& sFaceName, int& nPoi
 	return m_bSpecifyTreeFont;
 }
 
+BOOL CPreferencesUITasklistColorsPage::IncrementTreeFontSize(BOOL bLarger)
+{
+
+	
+	return FALSE;
+}
+
+BOOL CPreferencesUITasklistColorsPage::CanIncrementTreeFontSize(BOOL bLarger) const
+{
+	
+
+
+	return FALSE;
+}
+
 BOOL CPreferencesUITasklistColorsPage::GetCommentsFont(CString& sFaceName, int& nPointSize) const
 {
 	if ((m_bSpecifyTreeFont && m_bCommentsUseTreeFont) || !m_bSpecifyCommentsFont)

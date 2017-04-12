@@ -261,6 +261,8 @@ public:
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { m_pageUITasklistColors.GetDueTaskColors(crDue, crDueToday); }
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) const { m_pageUITasklistColors.GetStartedTaskColors(crStarted, crStartedToday); }
 	BOOL GetTreeFont(CString& sFaceName, int& nPointSize) const { return m_pageUITasklistColors.GetTreeFont(sFaceName, nPointSize); }
+	BOOL IncrementTreeFontSize(BOOL bLarger) { return m_pageUITasklistColors.IncrementTreeFontSize(bLarger); }
+	BOOL CanIncrementTreeFontSize(BOOL bLarger) const { return m_pageUITasklistColors.CanIncrementTreeFontSize(bLarger); }
 	BOOL GetCommentsFont(CString& sFaceName, int& nPointSize) const { return m_pageUITasklistColors.GetCommentsFont(sFaceName, nPointSize); }
 	COLORREF GetGridlineColor() const { return m_pageUITasklistColors.GetGridlineColor(); }
 	COLORREF GetDoneTaskColor() const { return m_pageUITasklistColors.GetDoneTaskColor(); }

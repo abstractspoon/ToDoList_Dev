@@ -53,6 +53,8 @@ public:
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
 	TDC_ATTRIBUTE GetColorByAttribute() const { return m_nColorAttribute; }
 	BOOL GetTreeFont(CString& sFaceName, int& nPointSize) const;
+	BOOL IncrementTreeFontSize(BOOL bLarger);
+	BOOL CanIncrementTreeFontSize(BOOL bLarger) const;
 	BOOL GetCommentsFont(CString& sFaceName, int& nPointSize) const;
 	COLORREF GetGridlineColor() const { return m_bSpecifyGridColor ? m_crGridlines : -1; }
 	COLORREF GetDoneTaskColor() const { return m_bSpecifyDoneColor ? m_crDone : -1; }

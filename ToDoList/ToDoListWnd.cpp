@@ -222,6 +222,10 @@ CToDoListWnd::~CToDoListWnd()
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 //{{AFX_MSG_MAP(CToDoListWnd)
+	ON_COMMAND(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnViewIncrementTaskViewFontSize)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnUpdateViewIncrementTaskViewFontSize)
+	ON_COMMAND(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnViewDecrementTaskViewFontSize)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnUpdateViewDecrementTaskViewFontSize)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -913,6 +917,8 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_TOOLS_IMPORT, 'I', HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_TOOLS_TRANSFORM, 'T', HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_CYCLETASKVIEWS, VK_F10, HOTKEYF_SHIFT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, VK_DOWN, HOTKEYF_ALT | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, VK_UP, HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_NEXT, VK_TAB, HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_NEXT_SEL, VK_RIGHT, HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_PREV, VK_TAB, HOTKEYF_CONTROL | HOTKEYF_SHIFT);
@@ -12461,4 +12467,28 @@ void CToDoListWnd::OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI)
 {
 	// It can be an expensive call to get dependents so we don't do it
 	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+}
+{
+	// TODO: Add your command update UI handler code here
+	
+}
+
+void CToDoListWnd::OnViewIncrementTaskViewFontSize() 
+{
+	m_pPrefs->IncrementTreeFontSize(TRUE);
+}
+
+void CToDoListWnd::OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(TRUE));
+}
+
+void CToDoListWnd::OnViewDecrementTaskViewFontSize() 
+{
+	m_pPrefs->IncrementTreeFontSize(FALSE);
+}
+
+void CToDoListWnd::OnUpdateViewDecrementTaskViewFontSize(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(FALSE));
 }

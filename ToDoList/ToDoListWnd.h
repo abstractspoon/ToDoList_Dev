@@ -158,6 +158,10 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
+	afx_msg void OnViewIncrementTaskViewFontSize();
+	afx_msg void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI);
+	afx_msg void OnViewDecrementTaskViewFontSize();
+	afx_msg void OnUpdateViewDecrementTaskViewFontSize(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

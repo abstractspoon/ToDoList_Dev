@@ -2973,6 +2973,13 @@ BEGIN
                                                 ID_VIEW_TOGGLETREEANDLIST
         MENUITEM "Next Task Vie&w",             ID_VIEW_CYCLETASKVIEWS
         MENUITEM SEPARATOR
+        MENUITEM "I&ncrement Task View Font Size", 
+                                                ID_VIEW_INCREMENTTASKVIEWFONTSIZE
+
+        MENUITEM "&Decrement Task View Font Size", 
+                                                ID_VIEW_DECREMENTTASKVIEWFONTSIZE
+
+        MENUITEM SEPARATOR
         MENUITEM "Save Task View to &Image...", ID_VIEW_SAVETOIMAGE
         MENUITEM SEPARATOR
         MENUITEM "To&ggle between Tasks and Comments", 
