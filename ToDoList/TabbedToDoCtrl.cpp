@@ -3251,11 +3251,6 @@ void CTabbedToDoCtrl::RestoreListSelection(const TDCSELECTIONCACHE& cache)
 
 BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 {
-#ifdef _DEBUG
-	CString sFaceName;
-	int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
-#endif
-
 	if (CToDoCtrl::SetTreeFont(hFont))
 	{
 		VERIFY(m_taskList.SetFont(hFont));
