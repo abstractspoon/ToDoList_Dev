@@ -9,16 +9,17 @@ class CPreferencesDlg;
 class CTDCToDoCtrlPreferenceHelper
 {
 public:
-	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
-								BOOL bShowProjectName, BOOL bShowTreeListBar, const CFont& fontMain,
-								CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc);
-	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, CFilteredToDoCtrl& tdc,
+	static void UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
+								BOOL bShowProjectName, BOOL bShowTreeListBar, 
+								const CFont& fontMain, CFont& fontTree, CFont& fontComments);
+	static void UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
 								BOOL bShowProjectName = FALSE, BOOL bShowTreeListBar = FALSE);
+	static void UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
+								const CFont& fontMain, CFont& fontTree, CFont& fontComments);
 
 protected:
-	static void UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, 
-									BOOL bShowTreeListBar, CFilteredToDoCtrl& tdc);
-
+	static void UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
+									BOOL bShowProjectName, BOOL bShowTreeListBar);
 };
 
 #endif // AFX_TDCTODOCTRLPREFERENCEHELPER_H__F9A9753D_D022_4FC7_B781_DB11A4B4A6E4__INCLUDED_

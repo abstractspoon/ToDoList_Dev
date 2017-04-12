@@ -8057,9 +8057,9 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl& tdc = *pTDC;
 
-	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(userPrefs, m_tdiDefault, 
+	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
-												m_fontMain, m_fontTree, m_fontComments, tdc);
+												m_fontMain, m_fontTree, m_fontComments);
 }
 
 void CToDoListWnd::OnSaveall() 

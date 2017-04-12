@@ -5,29 +5,28 @@
 #include "preferencesdlg.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
 
-void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, CFilteredToDoCtrl& tdc, 
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
 													BOOL bShowProjectName, BOOL bShowTreeListBar)
 {
-	// simplified version
-	tdc.NotifyBeginPreferencesUpdate();
-
-	UpdateToDoCtrlPrefs(prefs, bShowProjectName, bShowTreeListBar, tdc);
-
-	// we're done
-	tdc.NotifyEndPreferencesUpdate();
+	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar);
 }
 
-void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
-													BOOL bShowProjectName, BOOL bShowTreeListBar, const CFont& fontMain,
-													CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc)
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
+													BOOL bShowProjectName, BOOL bShowTreeListBar, 
+													const CFont& fontMain, CFont& fontTree, CFont& fontComments)
 {
-	tdc.NotifyBeginPreferencesUpdate();
+	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar);
 
-	UpdateToDoCtrlPrefs(prefs, bShowProjectName, bShowTreeListBar, tdc);
+	// Fonts handled separately from rest of preferences
+	UpdateToDoCtrl(tdc, prefs, fontMain, fontTree, fontComments);
 	
 	// App-controlled settings
 	tdc.SetDefaultTaskAttributes(tdiDefault);
+}
 
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
+													const CFont& fontMain, CFont& fontTree, CFont& fontComments)
+{
 	// Tree font
 	CString sFaceName;
 	int nFontSize;
@@ -54,14 +53,13 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 	{
 		tdc.SetCommentsFont(fontMain);
 	}
-
-	// we're done
-	tdc.NotifyEndPreferencesUpdate();
 }
 
-void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& prefs, BOOL bShowProjectName, BOOL bShowTreeListBar, CFilteredToDoCtrl& tdc)
+void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
+														BOOL bShowProjectName, BOOL bShowTreeListBar)
 {
-	// Assumes CtoDoCtrl::NotifyBeginPreferencesUpdate has already been called
+	tdc.NotifyBeginPreferencesUpdate();
+
 	CTDCStylesMap styles;
 
 	styles[TDCS_ALLOWCOMMENTSSTACKING] = prefs.GetStackEditFieldsAndComments();
@@ -195,4 +193,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(const CPreferencesDlg& pr
 	CString sStatus;
 	prefs.GetCompletionStatus(sStatus);
 	tdc.SetCompletionStatus(sStatus);
+
+	// we're done
+	tdc.NotifyEndPreferencesUpdate();
 }
