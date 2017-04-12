@@ -77,9 +77,8 @@ static CString EMPTY_STR;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CKanbanCtrl::CKanbanCtrl(CFontCache& fonts) 
+CKanbanCtrl::CKanbanCtrl() 
 	:
-	m_fonts(fonts),
 	m_bSortAscending(-1), 
 	m_dwOptions(0),
 	m_bDragging(FALSE),
@@ -126,6 +125,8 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	m_fonts.Initialise(*this);
+	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 	m_ilHeight.Create(1, 32, ILC_COLOR32, 1, 0);
 
@@ -2686,8 +2687,8 @@ BOOL CKanbanCtrl::CanSaveToImage() const
 
 LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
-	LRESULT lr = Default();
-
+	m_fonts.Initialise((HFONT)wp, FALSE);
+	
 	// Update all the lists
 	int nList = m_aListCtrls.GetSize();
 
@@ -2697,5 +2698,5 @@ LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 		pList->SendMessage(WM_SETFONT, wp, lp);
 	}
 
-	return lr;
+	return 0L;
 }

@@ -1495,7 +1495,7 @@ BOOL CTDLTaskCtrlBase::PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords
 void CTDLTaskCtrlBase::Release() 
 { 
 	m_imageIcons.Clear();
-	m_fonts.Clear();
+	m_fonts.Release();
 	m_ilCheckboxes.DeleteImageList();
 	
 	GraphicsMisc::VerifyDeleteObject(m_brDue);
@@ -1512,7 +1512,7 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 	ASSERT(Tasks() != NULL);
 	ASSERT(hFont);
 
-	HFONT hTaskFont = (HFONT)::SendMessage(m_lcColumns, WM_GETFONT, 0, 0);
+	HFONT hTaskFont = GetFont();
 	BOOL bChange = !GraphicsMisc::SameFontNameSize(hFont, hTaskFont);
 	
 	if (bChange)
@@ -1524,6 +1524,11 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 	}
 	
 	return bChange;
+}
+
+HFONT CTDLTaskCtrlBase::GetFont() const
+{
+	return (HFONT)::SendMessage(m_lcColumns, WM_GETFONT, 0, 0);
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnLineOdd(int nItem) const

@@ -526,7 +526,8 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	
 	pExtWnd->SetUITheme(&m_theme);
 	pExtWnd->SetReadOnly(HasStyle(TDCS_READONLY) != FALSE);
-	
+ 	pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskList.GetFont());
+
 	// update focus first because initializing views can take time
 	::SetFocus(hWnd);
 	
@@ -3250,14 +3251,13 @@ void CTabbedToDoCtrl::RestoreListSelection(const TDCSELECTIONCACHE& cache)
 
 BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 {
+#ifdef _DEBUG
+	CString sFaceName;
+	int nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFont, sFaceName);
+#endif
+
 	if (CToDoCtrl::SetTreeFont(hFont))
 	{
-		if (!hFont) // set to our font
-		{
-			// We don't have a font so we use our parents
-			hFont = (HFONT)GetParent()->SendMessage(WM_GETFONT);
-		}
-
 		VERIFY(m_taskList.SetFont(hFont));
 
 		// Update all extension views

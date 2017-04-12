@@ -108,6 +108,7 @@ public:
 	void OnReminderChange();
  
 	// setter responsible for deleting these shared resources
+	HFONT GetFont() const;
 	BOOL SetFont(HFONT hFont);
 	const CImageList& GetCheckImageList() const { return m_ilCheckboxes; }
 

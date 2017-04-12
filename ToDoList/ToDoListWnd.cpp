@@ -8059,7 +8059,7 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
-												m_fontTree, m_fontComments, tdc);
+												m_fontMain, m_fontTree, m_fontComments, tdc);
 }
 
 void CToDoListWnd::OnSaveall() 

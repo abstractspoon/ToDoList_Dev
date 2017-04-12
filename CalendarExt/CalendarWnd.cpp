@@ -219,27 +219,6 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_BigCalendar.SetOption(TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	m_BigCalendar.SetOption(TCCO_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 
-	// Task View font
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), FALSE))
-	{
-		CString sFontName = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
-		int nFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
-
-		if (!m_font.GetSafeHandle() || !GraphicsMisc::SameFont(m_font, sFontName, nFontSize))
-		{
-			if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
-				m_BigCalendar.SetFont(&m_font);
-		}
-	}
-	else if (m_font.GetSafeHandle())
-	{
-		// Clear existing font
-		m_font.DeleteObject();
-
-		HFONT hFont = CDialogHelper::GetFont(GetParent());
-		m_BigCalendar.SetFont(CFont::FromHandle(hFont));
-	}
-
 	// calendar specific preferences
 	if (!bAppOnly)
 	{
@@ -363,6 +342,10 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 				return true;
 			}
 		}
+
+	case IUI_SETTASKFONT:
+		m_BigCalendar.SendMessage(WM_SETFONT, dwExtra, TRUE);
+		break;
 	}
 
 	return false;

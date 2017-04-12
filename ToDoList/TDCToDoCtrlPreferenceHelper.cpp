@@ -18,7 +18,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 }
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
-													BOOL bShowProjectName, BOOL bShowTreeListBar,
+													BOOL bShowProjectName, BOOL bShowTreeListBar, const CFont& fontMain,
 													CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc)
 {
 	tdc.NotifyBeginPreferencesUpdate();
@@ -29,20 +29,47 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 	tdc.SetDefaultTaskAttributes(tdiDefault);
 
 	// fonts
-	if (!fontTree.GetSafeHandle() || !fontComments.GetSafeHandle())
+	CString sFaceName;
+	int nFontSize;
+
+	if (!fontTree.GetSafeHandle())
 	{
-		CString sFaceName;
-		int nFontSize;
-
-		if (!fontTree.GetSafeHandle() && prefs.GetTreeFont(sFaceName, nFontSize))
-			fontTree.Attach(GraphicsMisc::CreateFont(sFaceName, nFontSize));
-
-		if (!fontComments.GetSafeHandle() && prefs.GetCommentsFont(sFaceName, nFontSize))
-			fontComments.Attach(GraphicsMisc::CreateFont(sFaceName, nFontSize));
+		if (prefs.GetTreeFont(sFaceName, nFontSize))
+		{
+			VERIFY(GraphicsMisc::CreateFont(fontTree, sFaceName, nFontSize));
+			tdc.SetTreeFont(fontTree);
+		}
+		else
+		{
+			tdc.SetTreeFont(fontMain);
+		}
+	}
+	else
+	{
+		tdc.SetTreeFont(fontTree);
 	}
 
-	tdc.SetTreeFont(fontTree);
-	tdc.SetCommentsFont(fontComments);
+	if (!fontComments.GetSafeHandle())
+	{
+		if (prefs.GetCommentsFont(sFaceName, nFontSize))
+		{
+			VERIFY(GraphicsMisc::CreateFont(fontComments, sFaceName, nFontSize));
+			tdc.SetCommentsFont(fontComments);
+		}
+		else if (prefs.GetCommentsUseTreeFont())
+		{
+			ASSERT(fontTree.GetSafeHandle());
+			tdc.SetCommentsFont(fontTree);
+		}
+		else
+		{
+			tdc.SetCommentsFont(fontMain);
+		}
+	}
+	else
+	{
+		tdc.SetCommentsFont(fontComments);
+	}
 
 	// we're done
 	tdc.NotifyEndPreferencesUpdate();

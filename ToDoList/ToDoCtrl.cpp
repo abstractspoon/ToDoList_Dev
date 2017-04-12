@@ -757,15 +757,18 @@ void CToDoCtrl::InitEditPrompts()
 
 BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 {
-	m_hFontTree = hFont;
+	ASSERT(hFont);
 
-	if (m_taskTree.GetSafeHwnd())
+	if (hFont)
 	{
-		if (!hFont)
-			hFont = CDialogHelper::GetFont(GetParent());
+		m_hFontTree = hFont;
 
-		UpdateCommentsFont(TRUE);
-		return m_taskTree.SetFont(hFont);
+		if (m_taskTree.GetSafeHwnd())
+		{
+			UpdateCommentsFont(TRUE);
+
+			return m_taskTree.SetFont(hFont);
+		}
 	}
 
 	// no change
@@ -774,9 +777,17 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 
 BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 {
-	m_hFontComments = hFont;
+	ASSERT(hFont);
 
-	return UpdateCommentsFont(TRUE);
+	if (hFont)
+	{
+		m_hFontComments = hFont;
+
+		return UpdateCommentsFont(TRUE);
+	}
+
+	// no change
+	return FALSE;
 }
 
 BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)

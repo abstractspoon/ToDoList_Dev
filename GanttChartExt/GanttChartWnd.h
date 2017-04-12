@@ -81,7 +81,6 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
-	CFont m_font;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

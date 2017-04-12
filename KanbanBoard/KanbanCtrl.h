@@ -31,7 +31,7 @@ class CThemed;
 class CKanbanCtrl : public CWnd  
 {
 public:
-	CKanbanCtrl(CFontCache& fonts);
+	CKanbanCtrl();
 	virtual ~CKanbanCtrl();
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
@@ -93,10 +93,10 @@ protected:
 	UINT m_nNextColor;
 	IUI_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
-	CFontCache& m_fonts;
 	CImageList m_ilHeight;
 	CStringArray m_aCustomAttribIDs;
 	CDWordArray m_aPriorityColors;
+	CFontCache m_fonts;
 
 	CArray<int, int> m_aDragItems;
 	CKanbanListCtrl* m_pDragFromList;

@@ -10,7 +10,7 @@ class CTDCToDoCtrlPreferenceHelper
 {
 public:
 	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
-								BOOL bShowProjectName, BOOL bShowTreeListBar,
+								BOOL bShowProjectName, BOOL bShowTreeListBar, const CFont& fontMain,
 								CFont& fontTree, CFont& fontComments, CFilteredToDoCtrl& tdc);
 	static void UpdateToDoCtrl(const CPreferencesDlg& prefs, CFilteredToDoCtrl& tdc,
 								BOOL bShowProjectName = FALSE, BOOL bShowTreeListBar = FALSE);

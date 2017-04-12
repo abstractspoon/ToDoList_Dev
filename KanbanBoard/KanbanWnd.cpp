@@ -43,7 +43,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
-	m_ctrlKanban(m_fonts),
+	m_ctrlKanban(),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -55,7 +55,6 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 
 CKanbanWnd::~CKanbanWnd()
 {
-	GraphicsMisc::VerifyDeleteObject(m_font);
 }
 
 void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
@@ -107,11 +106,7 @@ END_MESSAGE_MAP()
 
 LRESULT CKanbanWnd::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	if (m_font.GetSafeHandle())
-		return (LRESULT)m_font.GetSafeHandle();
-
-	// else
-	return Default();
+	return m_ctrlKanban.SendMessage(WM_GETFONT);
 }
 
 void CKanbanWnd::OnHelp()
@@ -154,7 +149,6 @@ BOOL CKanbanWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 
-	m_fonts.Initialise(*this);
 	m_ctrlKanban.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, CRect(0, 0, 0, 0), this, 101);
 	m_ctrlKanban.SetFocus();
 
@@ -292,33 +286,6 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	// application preferences
 	m_ctrlKanban.SetOption(KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_ctrlKanban.SetOption(KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-
-	// Task View font
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyTreeFont"), FALSE))
-	{
-		CString sFontName = pPrefs->GetProfileString(_T("Preferences"), _T("TreeFont"), _T("Arial"));
-		int nFontSize = pPrefs->GetProfileInt(_T("Preferences"), _T("FontSize"), 8);
-
-		if (!m_font.GetSafeHandle() || !GraphicsMisc::SameFont(m_font, sFontName, nFontSize))
-		{
-			GraphicsMisc::VerifyDeleteObject(m_font);
-
-			if (GraphicsMisc::CreateFont(m_font, sFontName, nFontSize))
-			{
-				m_fonts.Clear();
-				m_ctrlKanban.SetFont(&m_font);
-			}
-		}
-	}
-	else if (m_font.GetSafeHandle())
-	{
-		// Clear existing font
-		m_font.DeleteObject();
-		m_fonts.Clear();
-
-		HFONT hFont = CDialogHelper::GetFont(GetParent());
-		m_ctrlKanban.SetFont(CFont::FromHandle(hFont));
-	}
 
 	UpdatePriorityColors(pPrefs);
 	
@@ -586,6 +553,10 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 				return true;
 			}
 		}
+		break;
+
+	case IUI_SETTASKFONT:
+		m_ctrlKanban.SendMessage(WM_SETFONT, dwExtra, TRUE);
 		break;
 	}
 

@@ -4534,7 +4534,7 @@ void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 	// and zero out the rest
 	int nNumCols = m_listHeader.GetItemCount();
 
-	for (; i <= nNumCols; i++)
+	for (; i < nNumCols; i++)
 	{
 		m_listHeader.EnableItemTracking(i, FALSE);
 		m_listHeader.SetItemWidth(i, 0);
@@ -5328,7 +5328,6 @@ int CGanttTreeListCtrl::FindColumn(int nScrollPos) const
 	}
 
 	// not found
-	ASSERT(0);
 	return -1;
 }
 
@@ -6447,13 +6446,7 @@ BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 		return FALSE;
 	}
 
-	CFont* pFont = CFont::FromHandle(hFont);
-
-	m_tree.SetFont(pFont, bRedraw);
-	m_list.SetFont(pFont, bRedraw);
-
-	if (m_treeHeader.GetSafeHwnd())
-		m_treeHeader.SetFont(pFont, bRedraw);
+	m_tree.SetFont(CFont::FromHandle(hFont), bRedraw);
 
 	CalcMinMonthWidths();
 	SetMonthDisplay(m_nMonthDisplay);

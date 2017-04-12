@@ -80,8 +80,6 @@ protected:
 	UITHEME m_theme;
 	CString	m_sCustomAttribID;
 	IUI_ATTRIBUTE m_nTrackedAttrib;
-	CFontCache m_fonts;
-	CFont m_font;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
