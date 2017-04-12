@@ -28,47 +28,31 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(const CPreferencesDlg& prefs, 
 	// App-controlled settings
 	tdc.SetDefaultTaskAttributes(tdiDefault);
 
-	// fonts
+	// Tree font
 	CString sFaceName;
 	int nFontSize;
 
-	if (!fontTree.GetSafeHandle())
-	{
-		if (prefs.GetTreeFont(sFaceName, nFontSize))
-		{
-			VERIFY(GraphicsMisc::CreateFont(fontTree, sFaceName, nFontSize));
-			tdc.SetTreeFont(fontTree);
-		}
-		else
-		{
-			tdc.SetTreeFont(fontMain);
-		}
-	}
-	else
-	{
-		tdc.SetTreeFont(fontTree);
-	}
+	if (!fontTree.GetSafeHandle() && prefs.GetTreeFont(sFaceName, nFontSize))
+		VERIFY(GraphicsMisc::CreateFont(fontTree, sFaceName, nFontSize));
 
-	if (!fontComments.GetSafeHandle())
-	{
-		if (prefs.GetCommentsFont(sFaceName, nFontSize))
-		{
-			VERIFY(GraphicsMisc::CreateFont(fontComments, sFaceName, nFontSize));
-			tdc.SetCommentsFont(fontComments);
-		}
-		else if (prefs.GetCommentsUseTreeFont())
-		{
-			ASSERT(fontTree.GetSafeHandle());
-			tdc.SetCommentsFont(fontTree);
-		}
-		else
-		{
-			tdc.SetCommentsFont(fontMain);
-		}
-	}
-	else
+	tdc.SetTreeFont(fontTree.GetSafeHandle() ? fontTree : fontMain);
+
+	// Comments font
+	if (!fontComments.GetSafeHandle() && prefs.GetCommentsFont(sFaceName, nFontSize))
+		VERIFY(GraphicsMisc::CreateFont(fontComments, sFaceName, nFontSize));
+
+	if (fontComments.GetSafeHandle())
 	{
 		tdc.SetCommentsFont(fontComments);
+	}
+	else if (prefs.GetCommentsUseTreeFont())
+	{
+		ASSERT(fontTree.GetSafeHandle());
+		tdc.SetCommentsFont(fontTree);
+	}
+	else
+	{
+		tdc.SetCommentsFont(fontMain);
 	}
 
 	// we're done
