@@ -115,6 +115,7 @@ namespace GraphicsMisc
 
 	DWORD GetFontFlags(HFONT hFont);
 	int GetFontNameAndPointSize(HFONT hFont, CString& sFaceName);
+	int GetFontNameAndPointSize(HWND hWnd, CString& sFaceName);
 	int GetFontPointSize(HFONT hFont);
 	int GetFontPixelSize(HFONT hFont);
 	int GetFontPointSize(HWND hWnd);

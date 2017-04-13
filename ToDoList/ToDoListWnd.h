@@ -573,9 +573,13 @@ protected:
 	void OnTimerTimeTracking();
 	void OnTimerTimeTrackReminder();
 	void OnTimerAutoMinimize();
+
 	void OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags);
 	void OnEditUndoRedo(BOOL bUndo);
 	void OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo);
+
+	void OnViewIncrementTaskViewFontSize(BOOL bLarger);
+	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
 
 	void KillTimers();
 	void RestoreTimers();

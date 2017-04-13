@@ -6445,7 +6445,7 @@ BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 		ASSERT(0);
 		return FALSE;
 	}
-
+	
 	m_tree.SetFont(CFont::FromHandle(hFont), bRedraw);
 
 	CalcMinMonthWidths();

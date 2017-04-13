@@ -1518,6 +1518,8 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 	if (bChange)
 	{
 		m_fonts.Clear();
+
+		CHoldRedraw hr(*this);
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		RecalcColumnWidths();

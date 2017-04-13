@@ -377,6 +377,11 @@ DWORD GraphicsMisc::GetFontFlags(HFONT hFont)
 	return dwFlags;
 }
 
+int GraphicsMisc::GetFontNameAndPointSize(HWND hWnd, CString& sFaceName)
+{
+	return GetFontNameAndPointSize(GetFont(hWnd), sFaceName);
+}
+
 int GraphicsMisc::GetFontNameAndPointSize(HFONT hFont, CString& sFaceName)
 {
 	if (!hFont)

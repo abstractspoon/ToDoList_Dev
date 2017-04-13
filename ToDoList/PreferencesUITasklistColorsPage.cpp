@@ -421,19 +421,75 @@ BOOL CPreferencesUITasklistColorsPage::GetTreeFont(CString& sFaceName, int& nPoi
 	return m_bSpecifyTreeFont;
 }
 
-BOOL CPreferencesUITasklistColorsPage::IncrementTreeFontSize(BOOL bLarger)
+BOOL CPreferencesUITasklistColorsPage::GetTreeFont(CString& sFaceName, int& nPointSize, HFONT hFontFallback) const
 {
+	if (!hFontFallback)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	
-	return FALSE;
+	if (!GetTreeFont(sFaceName, nPointSize))
+		nPointSize = GraphicsMisc::GetFontNameAndPointSize(hFontFallback, sFaceName);
+
+	return TRUE;
 }
 
-BOOL CPreferencesUITasklistColorsPage::CanIncrementTreeFontSize(BOOL bLarger) const
+BOOL CPreferencesUITasklistColorsPage::IncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback)
 {
+	CString sFaceName;
+	int nPointSize;
+
+	VERIFY(GetTreeFont(sFaceName, nPointSize, hFontFallback));
 	
+	int nNewSize = GetNextTreeFontIncrement(nPointSize, bLarger);
 
+	if (nNewSize == nPointSize)
+		return FALSE;
 
-	return FALSE;
+	// else
+	m_nTreeFontSize = nNewSize;
+	m_sTreeFont = sFaceName;
+	m_bSpecifyTreeFont = TRUE;
+	
+	return TRUE;
+}
+
+int CPreferencesUITasklistColorsPage::GetNextTreeFontIncrement(int nPointSize, BOOL bLarger) const
+{
+	static int FONTSIZES[] = { 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20 };
+	static int NUM_FONTSIZES = (sizeof(FONTSIZES) / sizeof(int));
+
+	int nFind = NUM_FONTSIZES;
+
+	while (nFind--)
+	{
+		if (FONTSIZES[nFind] == nPointSize)
+			break;
+	}
+
+	if (nFind == -1)
+	{
+		if (nPointSize < FONTSIZES[0])
+			nFind = 0;
+		else
+			nFind = (NUM_FONTSIZES - 1);
+	}
+
+	nFind += (bLarger ? 1 : -1);
+	nFind = max(0, min(nFind, (NUM_FONTSIZES - 1)));
+
+	return FONTSIZES[nFind];
+}
+
+BOOL CPreferencesUITasklistColorsPage::CanIncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) const
+{
+	CString sFaceName;
+	int nPointSize;
+
+	VERIFY(GetTreeFont(sFaceName, nPointSize, hFontFallback));
+
+	return (GetNextTreeFontIncrement(nPointSize, bLarger) != nPointSize);
 }
 
 BOOL CPreferencesUITasklistColorsPage::GetCommentsFont(CString& sFaceName, int& nPointSize) const

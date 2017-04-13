@@ -12492,20 +12492,37 @@ void CToDoListWnd::OnUpdateEditClearTasklistTabColor(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewIncrementTaskViewFontSize() 
 {
-	m_pPrefs->IncrementTreeFontSize(TRUE);
+	OnViewIncrementTaskViewFontSize(TRUE);
 }
 
 void CToDoListWnd::OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(TRUE));
+	OnUpdateViewIncrementTaskViewFontSize(pCmdUI, TRUE);
 }
 
 void CToDoListWnd::OnViewDecrementTaskViewFontSize() 
 {
-	m_pPrefs->IncrementTreeFontSize(FALSE);
+	OnViewIncrementTaskViewFontSize(FALSE);
 }
 
 void CToDoListWnd::OnUpdateViewDecrementTaskViewFontSize(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(FALSE));
+	OnUpdateViewIncrementTaskViewFontSize(pCmdUI, FALSE);
 }
+
+void CToDoListWnd::OnViewIncrementTaskViewFontSize(BOOL bLarger) 
+{
+	if (m_pPrefs->IncrementTreeFontSize(bLarger, m_fontMain))
+	{
+		GraphicsMisc::VerifyDeleteObject(m_fontTree);
+		GraphicsMisc::VerifyDeleteObject(m_fontComments);
+
+		CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
+	}
+}
+
+void CToDoListWnd::OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger) 
+{
+	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(bLarger, m_fontMain));
+}
+

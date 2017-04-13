@@ -293,7 +293,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		{
 		case FTCV_TASKTREE:
 		case FTCV_TASKLIST:
-			SetExtensionsNeedUpdate(TRUE);
+			SetExtensionsNeedTaskUpdate(TRUE);
 			break;
 
 		case FTCV_UIEXTENSION1:
@@ -325,7 +325,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 				ResyncExtensionSelection(nView);
 
 				// mark rest of extensions needing update
-				SetExtensionsNeedUpdate(TRUE, nView);
+				SetExtensionsNeedTaskUpdate(TRUE, nView);
 			}
 			break;
 		}
@@ -526,7 +526,6 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	
 	pExtWnd->SetUITheme(&m_theme);
 	pExtWnd->SetReadOnly(HasStyle(TDCS_READONLY) != FALSE);
- 	pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskList.GetFont());
 
 	// update focus first because initializing views can take time
 	::SetFocus(hWnd);
@@ -627,6 +626,12 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pLVData->bNeedResort = FALSE;
 				m_taskList.Resort();
 			}
+
+			if (pLVData->bNeedFontUpdate)
+			{
+				pLVData->bNeedFontUpdate = FALSE;
+				m_taskList.SetFont(m_taskTree.GetFont());
+			}
 			
 			ResyncListSelection();
 			m_taskList.EnsureSelectionVisible();
@@ -692,6 +697,8 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 			
 			if (pData->bNeedFullTaskUpdate)
 			{
+				pData->bNeedFullTaskUpdate = FALSE;
+
 				// start progress if not already
 				// will be cleaned up in OnPostTabViewChange
 				if (nProgressMsg == 0)
@@ -701,8 +708,12 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 				if (GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib))
 					UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib);
-				
-				pData->bNeedFullTaskUpdate = FALSE;
+			}
+
+			if (pData->bNeedFontUpdate)
+			{
+				pData->bNeedFontUpdate = FALSE;
+				pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskTree.GetFont());
 			}
 				
 			ResyncExtensionSelection(nNewView);
@@ -2376,7 +2387,7 @@ void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
 	}
 }
 
-void CTabbedToDoCtrl::SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
+void CTabbedToDoCtrl::SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 {
 	for (int nExt = 0; nExt < m_aExtViews.GetSize(); nExt++)
 	{
@@ -2392,6 +2403,33 @@ void CTabbedToDoCtrl::SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
 			pData->bNeedFullTaskUpdate = bUpdate;
 	}
 }
+
+void CTabbedToDoCtrl::SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore)
+{
+	for (int nExt = 0; nExt < m_aExtViews.GetSize(); nExt++)
+	{
+		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
+		
+		if (nView == nIgnore)
+			continue;
+
+		// else
+		VIEWDATA* pData = GetViewData(nView);
+		
+		if (pData)
+			pData->bNeedFontUpdate = bUpdate;
+	}
+}
+
+void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
+{
+	VIEWDATA* pData = GetViewData(FTCV_TASKLIST);
+	ASSERT(pData);
+
+	if (pData)
+		pData->bNeedFontUpdate = bUpdate;
+}
+
 
 void CTabbedToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID)
 {
@@ -3253,17 +3291,58 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 {
 	if (CToDoCtrl::SetTreeFont(hFont))
 	{
-		VERIFY(m_taskList.SetFont(hFont));
+		// Update other views
+		FTC_VIEW nView = GetTaskView();
 
-		// Update all extension views
-		int nView = m_aExtViews.GetSize();
-
-		while (nView--)
+		switch (nView)
 		{
-			IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
+		case FTCV_TASKTREE:
+			{
+				SetListViewNeedFontUpdate(TRUE);
+				SetExtensionsNeedFontUpdate(TRUE);
+			}
+			break;
 
-			if (pExtWnd)
+		case FTCV_TASKLIST:
+			{
+				SetListViewNeedFontUpdate(FALSE);
+				SetExtensionsNeedFontUpdate(TRUE);
+
+				VERIFY(m_taskList.SetFont(hFont));
+			}
+			break;
+
+		case FTCV_UIEXTENSION1:
+		case FTCV_UIEXTENSION2:
+		case FTCV_UIEXTENSION3:
+		case FTCV_UIEXTENSION4:
+		case FTCV_UIEXTENSION5:
+		case FTCV_UIEXTENSION6:
+		case FTCV_UIEXTENSION7:
+		case FTCV_UIEXTENSION8:
+		case FTCV_UIEXTENSION9:
+		case FTCV_UIEXTENSION10:
+		case FTCV_UIEXTENSION11:
+		case FTCV_UIEXTENSION12:
+		case FTCV_UIEXTENSION13:
+		case FTCV_UIEXTENSION14:
+		case FTCV_UIEXTENSION15:
+		case FTCV_UIEXTENSION16:
+			{
+				VIEWDATA* pData = NULL;
+				IUIExtensionWindow* pExtWnd = NULL;
+
+				if (!GetExtensionWnd(nView, pExtWnd, pData))
+					return FALSE;
+
+				pData->bNeedFontUpdate = FALSE;
 				pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)hFont);
+
+				// mark rest of extensions needing update
+				SetExtensionsNeedFontUpdate(TRUE, nView);
+				SetListViewNeedFontUpdate(TRUE);
+			}
+			break;
 		}
 
 		return TRUE;

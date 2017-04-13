@@ -652,7 +652,7 @@ void CTreeListSyncer::InitItemHeights()
 			ASSERT(nItemHeight != -1);
 
 			// handle other window
-			if (nItemHeight > nOtherItemHeight)
+			if (nItemHeight != nOtherItemHeight)
 			{
 				if (OsIsXP())
 					nItemHeight--;

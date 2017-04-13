@@ -576,7 +576,10 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		break;
 
 	case IUI_SETTASKFONT:
-		m_ctrlGantt.SetFont((HFONT)dwExtra, TRUE);
+		{
+			CHoldRedraw hr(*this);
+			m_ctrlGantt.SetFont((HFONT)dwExtra, TRUE);
+		}
 		break;
 	}
 

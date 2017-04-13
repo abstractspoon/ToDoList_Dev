@@ -25,6 +25,11 @@ CNcRedraw::~CNcRedraw()
 
 CRedrawAll::CRedrawAll(HWND hWnd, DWORD dwFlags) : m_hWnd(hWnd), m_dwFlags(dwFlags)
 {
+	if (!::IsWindowVisible(m_hWnd))
+	{
+		m_hWnd = NULL;
+		m_dwFlags = 0;
+	}
 }
 
 CRedrawAll::~CRedrawAll()

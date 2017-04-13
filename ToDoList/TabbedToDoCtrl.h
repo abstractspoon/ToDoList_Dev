@@ -28,6 +28,7 @@ struct VIEWDATA
 		bNeedResort(FALSE), 
 		pExtension(NULL),
 		bNeedFullTaskUpdate(TRUE),
+		bNeedFontUpdate(TRUE),
 		bCanPrepareNewTask(-1)
 	{
 	}
@@ -41,6 +42,7 @@ struct VIEWDATA
 
 	BOOL bNeedResort;
 	BOOL bNeedFullTaskUpdate;
+	BOOL bNeedFontUpdate;
 	BOOL bCanPrepareNewTask;
 };
 
@@ -295,7 +297,9 @@ protected:
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType, const CTDCAttributeMap& mapAttrib);
-	void SetExtensionsNeedUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	BOOL ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const;
 	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);

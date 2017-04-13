@@ -53,8 +53,8 @@ public:
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
 	TDC_ATTRIBUTE GetColorByAttribute() const { return m_nColorAttribute; }
 	BOOL GetTreeFont(CString& sFaceName, int& nPointSize) const;
-	BOOL IncrementTreeFontSize(BOOL bLarger);
-	BOOL CanIncrementTreeFontSize(BOOL bLarger) const;
+	BOOL IncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback);
+	BOOL CanIncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) const;
 	BOOL GetCommentsFont(CString& sFaceName, int& nPointSize) const;
 	COLORREF GetGridlineColor() const { return m_bSpecifyGridColor ? m_crGridlines : -1; }
 	COLORREF GetDoneTaskColor() const { return m_bSpecifyDoneColor ? m_crDone : -1; }
@@ -183,9 +183,12 @@ protected:
 protected:
 	int FindAttribValue(LPCTSTR szAttrib);
 	void AddDefaultListItemsToAttributeColors();
-	
+	int GetNextTreeFontIncrement(int nPointSize, BOOL bLarger) const;
+	BOOL GetTreeFont(CString& sFaceName, int& nPointSize, HFONT hFontFallback) const;
+		
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+
 };
 
 //{{AFX_INSERT_LOCATION}}
