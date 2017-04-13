@@ -229,6 +229,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnUpdateViewIncrementTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnViewDecrementTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnUpdateViewDecrementTaskViewFontSize)
+	ON_COMMAND(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnViewRestoreDefaultTaskViewFontSize)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -12526,3 +12528,21 @@ void CToDoListWnd::OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bL
 	pCmdUI->Enable(m_pPrefs->CanIncrementTreeFontSize(bLarger, m_fontMain));
 }
 
+void CToDoListWnd::OnViewRestoreDefaultTaskViewFontSize() 
+{
+	if (m_pPrefs->RestoreTreeFontSize(m_fontMain))
+	{
+		GraphicsMisc::VerifyDeleteObject(m_fontTree);
+		GraphicsMisc::VerifyDeleteObject(m_fontComments);
+		
+		CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
+	}
+}
+
+void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI) 
+{
+	CString sUnused;
+	int nUnused;
+
+	pCmdUI->Enable(Prefs().GetTreeFont(sUnused, nUnused));
+}

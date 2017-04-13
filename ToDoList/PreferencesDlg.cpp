@@ -437,3 +437,31 @@ void CPreferencesDlg::GetDefaultTaskAttributes(TODOITEM& tdiDefault) const
 	// extra
 	tdiDefault.sCommentsTypeID = m_pageUI.GetDefaultCommentsFormat();
 }
+
+BOOL CPreferencesDlg::IncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) 
+{ 
+	if (m_pageUITasklistColors.IncrementTreeFontSize(bLarger, hFontFallback))
+	{
+		CPreferencesPageBase* pPage = &m_pageUITasklistColors;
+		pPage->SavePreferences(m_prefs, PREFSKEY);
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CPreferencesDlg::RestoreTreeFontSize(HFONT hFontFallback) 
+{ 
+	if (m_pageUITasklistColors.RestoreTreeFontSize(hFontFallback))
+	{
+		CPreferencesPageBase* pPage = &m_pageUITasklistColors;
+		pPage->SavePreferences(m_prefs, PREFSKEY);
+		
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}

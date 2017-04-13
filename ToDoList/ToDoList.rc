@@ -2970,12 +2970,15 @@ BEGIN
                                                 ID_VIEW_TOGGLETREEANDLIST
         MENUITEM "Next Task Vie&w",             ID_VIEW_CYCLETASKVIEWS
         MENUITEM SEPARATOR
-        MENUITEM "I&ncrement Task View Font Size", 
-                                                ID_VIEW_INCREMENTTASKVIEWFONTSIZE
+        POPUP "Task &View Font"
+        BEGIN
+            MENUITEM "I&ncrement Font Size",        ID_VIEW_INCREMENTTASKVIEWFONTSIZE
 
-        MENUITEM "&Decrement Task View Font Size", 
-                                                ID_VIEW_DECREMENTTASKVIEWFONTSIZE
+            MENUITEM "&Decrement Font Size",        ID_VIEW_DECREMENTTASKVIEWFONTSIZE
 
+            MENUITEM "Restore &Default Font Size",  ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "Save Task View to &Image...", ID_VIEW_SAVETOIMAGE
         MENUITEM SEPARATOR

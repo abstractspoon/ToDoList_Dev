@@ -33,6 +33,8 @@ const COLORREF FILTEREDCOLOR		= RGB(200, 200, 200);
 const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
 const COLORREF REFERENCECOLOR		= RGB(128, 0, 64);
 
+const int DEFFONTSIZE = 8;
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistColorsPage property page
 
@@ -457,7 +459,7 @@ BOOL CPreferencesUITasklistColorsPage::IncrementTreeFontSize(BOOL bLarger, HFONT
 
 int CPreferencesUITasklistColorsPage::GetNextTreeFontIncrement(int nPointSize, BOOL bLarger) const
 {
-	static int FONTSIZES[] = { 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20 };
+	static int FONTSIZES[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24 };
 	static int NUM_FONTSIZES = (sizeof(FONTSIZES) / sizeof(int));
 
 	int nFind = NUM_FONTSIZES;
@@ -490,6 +492,30 @@ BOOL CPreferencesUITasklistColorsPage::CanIncrementTreeFontSize(BOOL bLarger, HF
 	VERIFY(GetTreeFont(sFaceName, nPointSize, hFontFallback));
 
 	return (GetNextTreeFontIncrement(nPointSize, bLarger) != nPointSize);
+}
+
+BOOL CPreferencesUITasklistColorsPage::RestoreTreeFontSize(HFONT hFontDefault)
+{
+	CString sFaceName;
+	int nPointSize;
+
+	if (!GetTreeFont(sFaceName, nPointSize))
+		return FALSE;
+
+	CString sDefFaceName;
+	int nDefPointSize = GraphicsMisc::GetFontNameAndPointSize(hFontDefault, sDefFaceName);
+
+	// If the font name is the same just turn off the tree font altogether
+	if (sFaceName == sDefFaceName)
+	{
+		m_bSpecifyTreeFont = FALSE;
+	}
+	else 
+	{
+		m_nTreeFontSize = nDefPointSize;
+	}
+	
+	return TRUE;
 }
 
 BOOL CPreferencesUITasklistColorsPage::GetCommentsFont(CString& sFaceName, int& nPointSize) const
@@ -806,10 +832,10 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bColorPriority = pPrefs->GetProfileInt(szKey, _T("ColorPriority"), TRUE);
 	m_bGradientPriorityColors = !pPrefs->GetProfileInt(szKey, _T("IndividualPriorityColors"), FALSE);
 	m_sTreeFont = pPrefs->GetProfileString(szKey, _T("TreeFont"), _T("Arial"));
-	m_nTreeFontSize = pPrefs->GetProfileInt(szKey, _T("FontSize"), 8);
+	m_nTreeFontSize = pPrefs->GetProfileInt(szKey, _T("FontSize"), DEFFONTSIZE);
 	m_bSpecifyTreeFont = pPrefs->GetProfileInt(szKey, _T("SpecifyTreeFont"), FALSE);
 	m_sCommentsFont = pPrefs->GetProfileString(szKey, _T("CommentsFont"), _T("Arial"));
-	m_nCommentsFontSize = pPrefs->GetProfileInt(szKey, _T("CommentsFontSize"), 8);
+	m_nCommentsFontSize = pPrefs->GetProfileInt(szKey, _T("CommentsFontSize"), DEFFONTSIZE);
 	m_bSpecifyCommentsFont = pPrefs->GetProfileInt(szKey, _T("SpecifyCommentsFont"), TRUE);
 	m_bSpecifyGridColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGridColor"), TRUE);
 	m_bSpecifyDoneColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDoneColor"), TRUE);

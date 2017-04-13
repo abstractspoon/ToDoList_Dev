@@ -55,6 +55,7 @@ public:
 	BOOL GetTreeFont(CString& sFaceName, int& nPointSize) const;
 	BOOL IncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback);
 	BOOL CanIncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) const;
+	BOOL RestoreTreeFontSize(HFONT hFontDefault);
 	BOOL GetCommentsFont(CString& sFaceName, int& nPointSize) const;
 	COLORREF GetGridlineColor() const { return m_bSpecifyGridColor ? m_crGridlines : -1; }
 	COLORREF GetDoneTaskColor() const { return m_bSpecifyDoneColor ? m_crDone : -1; }

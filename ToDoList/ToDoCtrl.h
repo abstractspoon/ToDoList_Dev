@@ -528,7 +528,6 @@ protected:
 	BOOL m_bDelayLoaded;
 	BOOL m_bFirstLoadCommentsPrefs;
 	BOOL m_bDeletingTasks;
-//	BOOL m_bIsUnicode;
 
 	static int s_nCommentsSize; // TDCS_SHAREDCOMMENTSHEIGHT
 
