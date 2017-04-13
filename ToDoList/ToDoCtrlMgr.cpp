@@ -979,6 +979,23 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	return nImage;
 }
 
+COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
+{
+	CHECKVALIDINDEXRET(nIndex, CLR_NONE);
+	
+	return GetTDCItem(nIndex).crTab;
+}
+
+BOOL CToDoCtrlMgr::SetTabColor(int nIndex, COLORREF crTab)
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+	
+	GetTDCItem(nIndex).crTab = crTab;
+	m_tabCtrl.Invalidate();
+
+	return TRUE;
+}
+
 CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));

@@ -281,30 +281,44 @@ CRect CTabCtrlEx::GetTabTextRect(int nTab, LPCRECT pRect)
 	return rTab;
 }
 
-void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
+COLORREF CTabCtrlEx::GetItemBkColor(int nTab)
 {
 	if (HasFlag(TCE_TABCOLORS))
 	{
 		NMTABCTRLEX nmtce = { 0 };
-	
+		
 		nmtce.iTab = nTab;
 		nmtce.hdr.code = TCN_GETBACKCOLOR;
 		nmtce.hdr.hwndFrom = GetSafeHwnd();
 		nmtce.hdr.idFrom = GetDlgCtrlID();
-
+		
 		COLORREF crBack = GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr));
-
+		
 		if (crBack != 0)
+			return crBack;
+	}
+
+	// all else
+	return CLR_NONE;
+}
+
+void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
+{
+	if (HasFlag(TCE_TABCOLORS))
+	{
+		COLORREF crBack = GetItemBkColor(nTab);
+
+		if (crBack == CLR_NONE)
 		{
-			CRect rTab(rcItem);
-			rTab.DeflateRect(1, 2, 2, 0);
-				
-			pDC->FillSolidRect(rTab, crBack);
-			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+			pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 		}
 		else
 		{
-			pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			CRect rTab(rcItem);
+			rTab.DeflateRect(1, 2, 2, 0);
+			
+			pDC->FillSolidRect(rTab, crBack);
+			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
 		}
 	}
 
@@ -402,11 +416,14 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	}
 	else
 	{
-		dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+		COLORREF crText = GraphicsMisc::GetBestTextColor(GetItemBkColor(nTab));
+
+		if (crText == RGB(255, 255, 255))
+			crText = WHITE;
+		else
+			crText = GetSysColor(COLOR_3DDKSHADOW);
 		
-#ifdef _DEBUG
-//		dc.FillSolidRect(rBtn, 0);
-#endif
+		dc.SetTextColor(crText);
 	}
 	
 	dc.SetTextAlign(TA_TOP | TA_LEFT);

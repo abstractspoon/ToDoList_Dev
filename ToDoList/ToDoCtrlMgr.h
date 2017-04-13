@@ -111,6 +111,8 @@ public:
 	CString UpdateTabItemText(int nIndex);
 	CString GetTabItemText(int nIndex) const;
 	CString GetTabItemTooltip(int nIndex) const;
+	COLORREF GetTabColor(int nIndex) const;
+	BOOL SetTabColor(int nIndex, COLORREF crTab);
 
 	BOOL ArchiveDoneTasks(int nIndex);
 	BOOL ArchiveSelectedTasks(int nIndex);
@@ -141,6 +143,7 @@ protected:
 			bNeedPrefUpdate = TRUE;
 			nUntitled = -1;
 			bLoaded = TRUE;
+			crTab = CLR_NONE;
 		}
 		
 		TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo = NULL) 
@@ -156,6 +159,7 @@ protected:
 			bLastCheckoutSuccess = -1;
 			nDueStatus = TDCM_NONE;
 			bNeedPrefUpdate = TRUE;
+			crTab = CLR_NONE;
 
 			if (pInfo && pInfo->HasInfo())
 			{
@@ -192,6 +196,7 @@ protected:
 		BOOL bNeedPrefUpdate;
 		int nUntitled; // creation index regardless of actual position
 		BOOL bLoaded;
+		COLORREF crTab;
 
 		TSM_TASKLISTINFO storageinfo;
 		

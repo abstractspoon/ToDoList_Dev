@@ -144,6 +144,7 @@ protected:
 	void UpdateTabItemWidths(BOOL bSel = FALSE);
 	CString GetRequiredTabText(int nTab);
 	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
+	COLORREF GetItemBkColor(int nTab);
 
 };
 

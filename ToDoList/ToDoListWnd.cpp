@@ -411,6 +411,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
 	ON_NOTIFY(NM_RCLICK, IDC_TRAYICON, OnTrayIconRClick)
 	ON_NOTIFY(TCN_CLOSETAB, IDC_TABCONTROL, OnTabCtrlCloseTab)
+	ON_NOTIFY(TCN_GETBACKCOLOR, IDC_TABCONTROL, OnTabCtrlGetBackColor)
 	ON_NOTIFY(TCN_ENDDRAG, IDC_TABCONTROL, OnTabCtrlEndDrag)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCONTROL, OnTabCtrlSelchange)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
@@ -7387,10 +7388,17 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 void CToDoListWnd::OnTabCtrlGetBackColor(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
+	*pResult = 0;
 
-	// TODO
+	COLORREF crTab = m_mgrToDoCtrls.GetTabColor(pNMTCE->iTab);
 
-	*pResult = 255;
+	if (crTab != CLR_NONE)
+	{
+		if (crTab == 0)
+			*pResult = 1;
+		else
+			*pResult = crTab;
+	}
 } 
 
 void CToDoListWnd::OnTabCtrlPostDrawTab(NMHDR* pNMHDR, LRESULT* pResult)
@@ -12476,20 +12484,22 @@ void CToDoListWnd::OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditSetTasklistTabColor() 
 {
-	// TODO: Add your command handler code here
-	
+	int nSelTDC = GetSelToDoCtrl();
+
+	CColorDialog dialog(m_mgrToDoCtrls.GetTabColor(nSelTDC), CC_FULLOPEN | CC_ANYCOLOR);
+
+	if (dialog.DoModal() == IDOK)
+		m_mgrToDoCtrls.SetTabColor(nSelTDC, dialog.GetColor());
 }
 
 void CToDoListWnd::OnEditClearTasklistTabColor() 
 {
-	// TODO: Add your command handler code here
-	
+	m_mgrToDoCtrls.SetTabColor(GetSelToDoCtrl(), CLR_NONE);
 }
 
 void CToDoListWnd::OnUpdateEditClearTasklistTabColor(CCmdUI* pCmdUI) 
 {
-	// TODO: Add your command update UI handler code here
-	
+	pCmdUI->Enable(m_mgrToDoCtrls.GetTabColor(GetSelToDoCtrl()) != CLR_NONE);
 }
 
 void CToDoListWnd::OnViewIncrementTaskViewFontSize() 

@@ -2850,8 +2850,12 @@ BEGIN
         MENUITEM "&Undo",                       ID_EDIT_UNDO
         MENUITEM "&Redo",                       ID_EDIT_REDO
         MENUITEM SEPARATOR
-        MENUITEM "&Set Tasklist Tab Colour...", ID_EDIT_SETTASKLISTCOLOR
-        MENUITEM "&Clear Tasklist Tab Colour...", ID_EDIT_CLEARTASKLISTCOLOR
+        POPUP "Tasklist Tab &Colour"
+        BEGIN
+            MENUITEM "&Set...",                     ID_EDIT_SETTASKLISTCOLOR
+            MENUITEM "&Clear",                      ID_EDIT_CLEARTASKLISTCOLOR
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Edit Task Title",            ID_EDIT_TASKTEXT
         POPUP "&Other Task Attributes"
@@ -3519,6 +3523,13 @@ BEGIN
         MENUITEM "Arc&hive Completed Tasks",    ID_ARCHIVE_COMPLETEDTASKS
         MENUITEM SEPARATOR
         MENUITEM "&Print Tasklist...",          ID_PRINT
+        MENUITEM SEPARATOR
+        POPUP "Tasklist Tab &Colour"
+        BEGIN
+            MENUITEM "&Set...",                     ID_EDIT_SETTASKLISTCOLOR
+            MENUITEM "&Clear",                      ID_EDIT_CLEARTASKLISTCOLOR
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Order Tabs by Name",         ID_VIEW_SORTTASKLISTTABS
         MENUITEM SEPARATOR
