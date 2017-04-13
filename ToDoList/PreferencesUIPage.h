@@ -58,6 +58,7 @@ public:
 	BOOL GetAutoReposCtrls() const { return m_bAutoReposCtrls; }
 	BOOL GetSharedCommentsHeight() const { return m_bSharedCommentsHeight; }
 	BOOL GetAutoHideTabbar() const { return m_bAutoHideTabbar; }
+	BOOL SetAutoHideTabbar(BOOL bAutoHide);
 	BOOL GetStackTabbarItems() const { return m_bStackTabbarItems; }
 	BOOL GetFocusTreeOnEnter() const { return m_bFocusTreeOnEnter; }
 	PUIP_NEWTASKPOS GetNewTaskPos() const { return m_nNewTaskPos; }

@@ -196,6 +196,7 @@ public:
 	BOOL GetAutoReposCtrls() const { return m_pageUI.GetAutoReposCtrls(); }
 	BOOL GetSharedCommentsHeight() const { return m_pageUI.GetSharedCommentsHeight(); }
 	BOOL GetAutoHideTabbar() const { return m_pageUI.GetAutoHideTabbar(); }
+	BOOL SetAutoHideTabbar(BOOL bAutoHide);
 	BOOL GetStackTabbarItems() const { return m_pageUI.GetStackTabbarItems(); }
 	BOOL GetFocusTreeOnEnter() const { return m_pageUI.GetFocusTreeOnEnter(); }
 	PUIP_NEWTASKPOS GetNewTaskPos() const { return m_pageUI.GetNewTaskPos(); }

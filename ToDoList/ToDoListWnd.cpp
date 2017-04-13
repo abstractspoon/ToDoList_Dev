@@ -12489,7 +12489,19 @@ void CToDoListWnd::OnEditSetTasklistTabColor()
 	CColorDialog dialog(m_mgrToDoCtrls.GetTabColor(nSelTDC), CC_FULLOPEN | CC_ANYCOLOR);
 
 	if (dialog.DoModal() == IDOK)
+	{
 		m_mgrToDoCtrls.SetTabColor(nSelTDC, dialog.GetColor());
+
+		// Make sure the tasklist tab bar is visible
+		if (!m_bShowTasklistBar || Prefs().GetAutoHideTabbar())
+		{
+			m_bShowTasklistBar = TRUE;
+			m_pPrefs->SetAutoHideTabbar(FALSE);
+
+			if (!m_tabCtrl.IsWindowVisible())
+				Resize();
+		}
+	}
 }
 
 void CToDoListWnd::OnEditClearTasklistTabColor() 

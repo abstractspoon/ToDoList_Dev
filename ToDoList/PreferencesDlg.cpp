@@ -465,3 +465,17 @@ BOOL CPreferencesDlg::RestoreTreeFontSize(HFONT hFontFallback)
 	// else
 	return FALSE;
 }
+
+BOOL CPreferencesDlg::SetAutoHideTabbar(BOOL bAutoHide)
+{
+	if (m_pageUI.SetAutoHideTabbar(bAutoHide))
+	{
+		CPreferencesPageBase* pPage = &m_pageUI;
+		pPage->SavePreferences(m_prefs, PREFSKEY);
+		
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}

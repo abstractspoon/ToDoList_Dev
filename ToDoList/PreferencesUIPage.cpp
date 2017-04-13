@@ -279,3 +279,12 @@ int CPreferencesUIPage::GetDefaultTaskViews(CStringArray& aTypeIDs) const
 {
 	return m_lbTaskViews.GetVisibleViews(aTypeIDs);
 }
+
+BOOL CPreferencesUIPage::SetAutoHideTabbar(BOOL bAutoHide)
+{
+	if ((m_bAutoHideTabbar && bAutoHide) || (!m_bAutoHideTabbar && !bAutoHide))
+		return FALSE;
+
+	m_bAutoHideTabbar = bAutoHide;
+	return TRUE;
+}
