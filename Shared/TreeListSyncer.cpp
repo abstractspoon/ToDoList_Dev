@@ -654,11 +654,11 @@ void CTreeListSyncer::InitItemHeights()
 			// handle other window
 			if (nItemHeight != nOtherItemHeight)
 			{
-				if (OsIsXP())
-					nItemHeight--;
+				//if (OsIsXP())
+				//	nItemHeight--;
 
 				ImageList_Destroy(m_hilSize);
-				m_hilSize = ImageList_Create(1, nItemHeight, ILC_COLOR, 1, 1);
+				m_hilSize = ImageList_Create(1, (nItemHeight - 1), ILC_COLOR, 1, 1);
 
 				ListView_SetImageList(hwndOther, m_hilSize, LVSIL_STATE);
 			}
