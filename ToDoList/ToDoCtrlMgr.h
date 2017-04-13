@@ -22,7 +22,6 @@
 enum TDCM_PATHTYPE { TDCM_UNDEF = -1, TDCM_REMOVABLE, TDCM_FIXED, TDCM_REMOTE, TDCM_OTHER }; // drive types
 enum TDCM_DUESTATUS { TDCM_NONE = -1, TDCM_PAST, TDCM_TODAY, TDCM_FUTURE }; 
 
-class CPreferences;
 class CTabCtrlEx;
 
 class CToDoCtrlMgr

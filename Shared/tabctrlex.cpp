@@ -315,7 +315,7 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 		else
 		{
 			CRect rTab(rcItem);
-			rTab.DeflateRect(1, 2, 2, 0);
+			rTab.DeflateRect(1, 1, 1, 0);
 			
 			pDC->FillSolidRect(rTab, crBack);
 			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));

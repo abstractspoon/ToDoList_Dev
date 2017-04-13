@@ -619,6 +619,19 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 		// checkin as our final task
 		if (tdci.bLoaded && tdc.IsCheckedOut() && Prefs().GetCheckinOnClose())
 			tdc.CheckIn();
+
+		// Save tasklist tab colour if any
+		CString sKey = tdc.GetPreferencesKey();
+
+		if (!sKey.IsEmpty())
+		{
+			CPreferences prefs;
+
+			if (tdci.crTab == CLR_NONE)
+				prefs.DeleteProfileEntry(sKey, _T("TabColor"));
+			else
+				prefs.WriteProfileInt(sKey, _T("TabColor"), tdci.crTab);
+		}
 	}
 	
 	m_aToDoCtrls.RemoveAt(nIndex);
@@ -680,6 +693,12 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo, BOOL bLoaded)
 {
 	TDCITEM tdci(pCtrl, bLoaded, pInfo);
+
+	// Restore tasklist tab colour if any
+	CString sKey = pCtrl->GetPreferencesKey();
+	
+	if (!sKey.IsEmpty())
+		tdci.crTab = (COLORREF)CPreferences().GetProfileInt(sKey, _T("TabColor"), CLR_NONE);
 
 	// add to tab
 	int nSel = m_aToDoCtrls.Add(tdci);

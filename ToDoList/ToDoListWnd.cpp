@@ -2043,7 +2043,6 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 		FileMisc::LogText(_T("Loading of the file '%s' failed with the error code: %d"), szTaskList, nErr);
 		MessageBox(sMessage, CEnString(IDS_OPENTASKLIST_TITLE), MB_OK);
 	}
-	
 }
 
 void CToDoListWnd::SaveSettings()
