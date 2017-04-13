@@ -30,7 +30,6 @@ class CPreferencesPageBase : public CPropertyPage, protected CDialogHelper
 	// Construction
 public:
 	CPreferencesPageBase(UINT nDlgTemplateID);
-//	CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID);
 	~CPreferencesPageBase();
 	
 	virtual void LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) = 0;
