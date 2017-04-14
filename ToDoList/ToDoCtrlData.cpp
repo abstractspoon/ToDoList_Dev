@@ -2035,7 +2035,8 @@ TDC_SET CToDoCtrlData::MoveTaskDates(DWORD dwTaskID, const COleDateTime& dtNewSt
 	COleDateTime dtStart(dtNewStart);
 	COleDateTime dtNewDue = AddDuration(dtStart, dDuration, pTDI->nTimeEstUnits);
 
-	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, TRUE);
+	// FALSE -> don't recalc time estimate until due date is set
+	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
 	ASSERT(nRes == SET_CHANGE);
 
 	if (nRes == SET_CHANGE)
@@ -2118,7 +2119,9 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNI
 			CalcMissingStartDateFromDue(pTDI);
 
 			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, dTime, nUnits);
-			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE);
+
+			// FALSE = don't recalc time estimate
+			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE); 
 		}
 	}
 
