@@ -67,8 +67,8 @@ public:
 	CToDoListWnd(); 
 	~CToDoListWnd();
 	
-	static CString GetVersion(BOOL bExtended);
-	static CString GetTitle(BOOL bExtended);
+	static CString GetVersion(BOOL bExtended = TRUE);
+	static CString GetTitle(BOOL bExtended = TRUE);
 
 	BOOL Create(const CTDCStartupOptions& startup);
 

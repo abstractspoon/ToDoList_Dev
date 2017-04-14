@@ -4561,51 +4561,61 @@ CString CToDoListWnd::GetTitle(BOOL bExtended)
 
 CString CToDoListWnd::GetVersion(BOOL bExtended)
 {
-	static CString sVersion(FileMisc::GetAppVersion());
-	CLocalizer::IgnoreString(sVersion);
-
-	if (!bExtended)
-		return sVersion;
-
-	// else extended version
-	static CString sExtVersion;
-
+	static CString sVersion, sExtVersion;
+	
 	// One-time initialization
-	if (sExtVersion.IsEmpty())
+	if (sVersion.IsEmpty())
 	{
+		sVersion = sExtVersion = FileMisc::GetAppVersion();
+
+		// Tidy up pre-release version numbers
 		CStringArray aVerParts;
-		UINT nReleaseStr = IDS_GEN_RELEASE;
+		UINT nExtendedStr = IDS_GEN_RELEASE;
+		CString sShortStr;
 		
-		if (Misc::Split(sVersion, aVerParts, '.') == 3)
+		if (Misc::Split(sVersion, aVerParts, '.') == 4)
 		{
-			if (aVerParts[2].Find(_T("DR")) == 0)
+			if (aVerParts[2].Find(_T("996")) == 0)
 			{
-				nReleaseStr = IDS_DEV_RELEASE;
+				sShortStr = _T("DR");
+				nExtendedStr = IDS_DEV_RELEASE;
 			}
-			else if (aVerParts[2].Find(_T("A")) == 0)
+			else if (aVerParts[2].Find(_T("997")) == 0)
 			{
-				nReleaseStr = IDS_ALPHA_RELEASE;
+				sShortStr = _T("A");
+				nExtendedStr = IDS_ALPHA_RELEASE;
 			}
-			else if (aVerParts[2].Find(_T("B")) == 0)
+			else if (aVerParts[2].Find(_T("998")) == 0)
 			{
-				nReleaseStr = IDS_BETA_RELEASE;
+				sShortStr = _T("B");
+				nExtendedStr = IDS_BETA_RELEASE;
 			}
-			else if (aVerParts[2].Find(_T("RC")) == 0)
+			else if (aVerParts[2].Find(_T("999")) == 0)
 			{
-				nReleaseStr = IDS_RC_RELEASE;
+				sShortStr = _T("RC");
+				nExtendedStr = IDS_RC_RELEASE;
 			}
+
+			int nMinorVer = _ttoi(aVerParts[1]);
+			aVerParts[1] = Misc::Format(++nMinorVer); // next minor upgrade
+			aVerParts[2] = (sShortStr + aVerParts[3]);
+			aVerParts.RemoveAt(3); // always
+
+			// Rebuild version strings
+			sVersion = Misc::FormatArray(aVerParts, '.');
+			sExtVersion.Format(_T("%s (%s)"), sVersion, CEnString(nExtendedStr));
 		}
 
-		sExtVersion.Format(_T("%s (%s)"), sVersion, CEnString(nReleaseStr));
+		CLocalizer::IgnoreString(sVersion);
 		CLocalizer::IgnoreString(sExtVersion);
 	}
 
-	return sExtVersion;
+	return (bExtended ? sExtVersion : sVersion);
 }
 
 void CToDoListWnd::OnAbout() 
 {
-	CTDLAboutDlg dialog(GetTitle(TRUE));
+	CTDLAboutDlg dialog(GetTitle());
 	
 	dialog.DoModal();
 }

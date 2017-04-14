@@ -967,7 +967,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 
 		FileMisc::LogText(_T("Neither ini file nor registry settings found -> Showing setup wizard"));
 
-		CTDLWelcomeWizard wizard(CToDoListWnd::GetVersion(TRUE));
+		CTDLWelcomeWizard wizard(CToDoListWnd::GetVersion());
 		
 		if (wizard.DoModal() != ID_WIZFINISH)
 			return FALSE; // quit app
