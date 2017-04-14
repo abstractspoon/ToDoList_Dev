@@ -9,29 +9,36 @@ namespace Calendar
 {
     public class SelectionTool : ITool
     {
-        private DayView dayView;
+        private DayView m_dayView;
 
         public DayView DayView
         {
             get
             {
-                return dayView;
+                return m_dayView;
             }
             set
             {
-                dayView = value;
+                m_dayView = value;
             }
         }
 
-        private DateTime startDate;
-        private TimeSpan length;
-        private Mode mode;
-        private TimeSpan delta;
+        private Mode m_mode;
+
+        public Mode CurrentMode
+        {
+            get { return m_mode; }
+        }
+
+        private DateTime m_startDate;
+        private TimeSpan m_length;
+        private TimeSpan m_delta;
+        private Point m_lastMouseMove;
 
         public void Reset()
         {
-            length = TimeSpan.Zero;
-            delta = TimeSpan.Zero;
+            m_length = TimeSpan.Zero;
+            m_delta = TimeSpan.Zero;
         }
 
         public void MouseMove(System.Windows.Forms.MouseEventArgs e)
@@ -39,9 +46,9 @@ namespace Calendar
             if (e == null)
                 throw new ArgumentNullException("e");
 
-            Appointment selection = dayView.SelectedAppointment;
-            Rectangle viewrect = dayView.GetTrueRectangle();
-            Rectangle fdrect = dayView.GetFullDayApptsRectangle();
+            Appointment selection = m_dayView.SelectedAppointment;
+            Rectangle viewrect = m_dayView.GetTrueRectangle();
+            Rectangle fdrect = m_dayView.GetFullDayApptsRectangle();
 
             if (viewrect.Contains(e.Location) || fdrect.Contains(e.Location))
             {
@@ -52,9 +59,9 @@ namespace Calendar
                         case System.Windows.Forms.MouseButtons.Left:
 
                             // Get time at mouse position
-                            DateTime m_Date = dayView.GetTimeAt(e.X, e.Y);
+                            DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y);
 
-                            switch (mode)
+                            switch (m_mode)
                             {
                                 case Mode.Move:
 
@@ -62,24 +69,47 @@ namespace Calendar
 
                                     if (!selection.AllDayEvent && viewrect.Contains(e.Location))
                                     {
-                                        // add delta value
-                                        m_Date = m_Date.Add(delta);
-
-                                        if (length == TimeSpan.Zero)
+                                        if (m_length == TimeSpan.Zero)
                                         {
-                                            startDate = selection.StartDate;
-                                            length = selection.EndDate - startDate;
+                                            m_startDate = selection.StartDate;
+                                            m_length = selection.Length;
                                         }
                                         else
                                         {
-                                            DateTime m_EndDate = m_Date.Add(length);
+                                            DateTime startDate = dateAtCursor.Add(m_delta);
+                                            DateTime endDate = startDate.Add(m_length);
 
-                                            if (m_EndDate.Day == m_Date.Day)
+                                            if (startDate.Date < dateAtCursor.Date)
                                             {
-                                                selection.StartDate = m_Date;
-                                                selection.EndDate = m_EndDate;
-                                                dayView.Invalidate();
-                                                dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                                // User has dragged off the top
+                                                startDate = dateAtCursor.Date;
+                                                endDate = startDate.Add(m_length);
+                                            }
+                                            else if (endDate > dateAtCursor.Date.AddDays(1))
+                                            {
+                                                // User has dragged off the bottom
+                                                startDate = endDate.Date.Subtract(m_length);
+                                                endDate = (startDate + m_length);
+                                            }
+
+                                            // Handle horizontal drag
+                                            DateTime date = m_dayView.GetDateAt(e.X);
+                                            DateTime datePrev = m_dayView.GetDateAt(m_lastMouseMove.X);
+
+                                            if (date != datePrev)
+                                            {
+                                                startDate = date.Date.Add(startDate.TimeOfDay);
+                                                endDate = startDate.Add(m_length);
+                                            }
+
+                                            // Check for a change
+                                            if (startDate != selection.StartDate)
+                                            {
+                                                selection.StartDate = startDate;
+                                                selection.EndDate = endDate;
+
+                                                m_dayView.Invalidate();
+                                                m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
                                             }
                                         }
                                     }
@@ -87,18 +117,18 @@ namespace Calendar
                                     {
                                         if (fdrect.Contains(e.Location))
                                         {
-                                            m_Date = m_Date.Add(delta);
+                                            dateAtCursor = dateAtCursor.Add(m_delta);
 
-                                            int m_DateDiff = m_Date.Subtract(selection.StartDate).Days;
+                                            int dateDiff = dateAtCursor.Subtract(selection.StartDate).Days;
 
-                                            if (m_DateDiff != 0)
+                                            if (dateDiff != 0)
                                             {
-                                                if (selection.StartDate.AddDays(m_DateDiff) > dayView.StartDate)
+                                                if (selection.StartDate.AddDays(dateDiff) > m_dayView.StartDate)
                                                 {
-                                                    selection.StartDate = selection.StartDate.AddDays(m_DateDiff);
-                                                    selection.EndDate = selection.EndDate.AddDays(m_DateDiff);
-                                                    dayView.Invalidate();
-													dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                                    selection.StartDate = selection.StartDate.AddDays(dateDiff);
+                                                    selection.EndDate = selection.EndDate.AddDays(dateDiff);
+                                                    m_dayView.Invalidate();
+													m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
                                                 }
                                             }
                                         }
@@ -108,13 +138,17 @@ namespace Calendar
 
                                 case Mode.ResizeBottom:
 
-                                    if (m_Date > selection.StartDate)
+                                    if (dateAtCursor > selection.StartDate)
                                     {
-                                        if (selection.EndDate.Day == m_Date.Day)
+                                        if (SameDay(selection.EndDate, dateAtCursor.Date))
                                         {
-                                            selection.EndDate = m_Date;
-                                            dayView.Invalidate();
-											dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                            selection.EndDate = dateAtCursor;
+                                            m_dayView.Invalidate();
+											m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
+                                        }
+                                        else
+                                        {
+                                            int breakpoint = 0;
                                         }
                                     }
 
@@ -122,32 +156,32 @@ namespace Calendar
 
                                 case Mode.ResizeTop:
 
-                                    if (m_Date < selection.EndDate)
+                                    if (dateAtCursor < selection.EndDate)
                                     {
-                                        if (selection.StartDate.Day == m_Date.Day)
+                                        if (selection.StartDate.Day == dateAtCursor.Day)
                                         {
-                                            selection.StartDate = m_Date;
-                                            dayView.Invalidate();
-											dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                            selection.StartDate = dateAtCursor;
+                                            m_dayView.Invalidate();
+											m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
                                         }
                                     }
                                     break;
 
                                 case Mode.ResizeLeft:
-                                    if (m_Date.Date < selection.EndDate.Date)
+                                    if (dateAtCursor.Date < selection.EndDate.Date)
                                     {
-                                        selection.StartDate = m_Date.Date;
-                                        dayView.Invalidate();
-										dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                        selection.StartDate = dateAtCursor.Date;
+                                        m_dayView.Invalidate();
+										m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
                                     }
                                     break;
 
                                 case Mode.ResizeRight:
-                                    if (m_Date.Date >= selection.StartDate.Date)
+                                    if (dateAtCursor.Date >= selection.StartDate.Date)
                                     {
-                                        selection.EndDate = m_Date.Date.AddDays(1);
-                                        dayView.Invalidate();
-										dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, mode, false));
+                                        selection.EndDate = dateAtCursor.Date.AddDays(1);
+                                        m_dayView.Invalidate();
+										m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
                                     }
                                     break;
                             }
@@ -161,12 +195,12 @@ namespace Calendar
                             switch (tmpNode)
                             {
                                 case Mode.Move:
-                                    dayView.Cursor = System.Windows.Forms.Cursors.Default;
+                                    m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
                                     break;
                                 case Mode.ResizeBottom:
                                 case Mode.ResizeTop:
                                     if (!selection.AllDayEvent)
-                                        dayView.Cursor = System.Windows.Forms.Cursors.SizeNS;
+                                        m_dayView.Cursor = System.Windows.Forms.Cursors.SizeNS;
                                     break;
                                 case Mode.ResizeLeft: // changed by Gimlei
                                 case Mode.ResizeRight:
@@ -177,8 +211,22 @@ namespace Calendar
 
                             break;
                     }
+
+                    m_lastMouseMove = e.Location;
                 }
             }
+        }
+
+        static private bool SameDay(DateTime startDate, DateTime endDate)
+        {
+            if (endDate.Date == startDate.Date)
+                return true;
+
+            if ((endDate.Date == startDate.Date.AddDays(1)) && (endDate == endDate.Date))
+                return true;
+
+            // all else
+            return false;
         }
 
         private Mode GetMode(System.Windows.Forms.MouseEventArgs e)
@@ -186,18 +234,18 @@ namespace Calendar
             DayView.AppointmentView view = null;
             Boolean gotview = false;
 
-            if (dayView.SelectedAppointment == null)
+            if (m_dayView.SelectedAppointment == null)
                 return Mode.None;
 
-            if (dayView.appointmentViews.ContainsKey(dayView.SelectedAppointment))
+            if (m_dayView.appointmentViews.ContainsKey(m_dayView.SelectedAppointment))
             {
-                view = dayView.appointmentViews[dayView.SelectedAppointment];
+                view = m_dayView.appointmentViews[m_dayView.SelectedAppointment];
                 gotview = true;
             }
 
-            else if (dayView.longappointmentViews.ContainsKey(dayView.SelectedAppointment))
+            else if (m_dayView.longappointmentViews.ContainsKey(m_dayView.SelectedAppointment))
             {
-                view = dayView.longappointmentViews[dayView.SelectedAppointment];
+                view = m_dayView.longappointmentViews[m_dayView.SelectedAppointment];
                 gotview = true;
             }
 
@@ -215,16 +263,25 @@ namespace Calendar
                 rightRect.X += rightRect.Width - 5;
                 rightRect.Width = 5;
 
-                if (topRect.Contains(e.Location))
+                if (m_dayView.AllowMode(Mode.ResizeTop) && topRect.Contains(e.Location))
+                {
                     return Mode.ResizeTop;
-                else if (bottomRect.Contains(e.Location))
+                }
+                else if (m_dayView.AllowMode(Mode.ResizeBottom) && bottomRect.Contains(e.Location))
+                {
                     return Mode.ResizeBottom;
-                else if (rightRect.Contains(e.Location)) // changed by Gimlei
+                }
+                else if (m_dayView.AllowMode(Mode.ResizeRight) && rightRect.Contains(e.Location))
+                {
                     return Mode.ResizeRight;
-                else if (leftRect.Contains(e.Location))
+                }
+                else if (m_dayView.AllowMode(Mode.ResizeLeft) && leftRect.Contains(e.Location))
+                {
                     return Mode.ResizeLeft;
-                else
-                    return Mode.Move;
+                }
+
+                // all else
+                return Mode.Move;
             }
 
             return Mode.None;
@@ -241,38 +298,41 @@ namespace Calendar
                     Complete(this, EventArgs.Empty);
             }
 
-			dayView.RaiseSelectionChanged(new AppointmentEventArgs(dayView.SelectedAppointment));
-			dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(dayView.SelectedAppointment, mode, true));
+			m_dayView.RaiseSelectionChanged(new AppointmentEventArgs(m_dayView.SelectedAppointment));
+			m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
-            mode = Mode.Move;
-
-            delta = TimeSpan.Zero;
+            m_mode = Mode.None;
+            m_delta = TimeSpan.Zero;
         }
 
         public void MouseDown(System.Windows.Forms.MouseEventArgs e)
         {
-            if (dayView.SelectedAppointmentIsNew)
+            if (m_dayView.SelectedAppointmentIsNew)
             {
-                dayView.RaiseNewAppointment();
+                m_dayView.RaiseNewAppointment();
             }
 
-            if (dayView.CurrentlyEditing)
-                dayView.FinishEditing(false);
+            if (m_dayView.CurrentlyEditing)
+                m_dayView.FinishEditing(false);
 
-            mode = GetMode(e);
+            m_mode = GetMode(e);
 
-            if (dayView.SelectedAppointment != null)
+            if (m_mode != Mode.None)
             {
-                DateTime downPos = dayView.GetTimeAt(e.X, e.Y);
-                // Calculate delta time between selection and clicked point
-                delta = dayView.SelectedAppointment.StartDate - downPos;
-            }
-            else
-            {
-                delta = TimeSpan.Zero;
-            }
+                if (m_dayView.SelectedAppointment != null)
+                {
+                    DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
+                    // Calculate delta time between selection and clicked point
+                    m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
+                }
+                else
+                {
+                    m_delta = TimeSpan.Zero;
+                }
 
-            length = TimeSpan.Zero;
+                m_length = TimeSpan.Zero;
+                m_lastMouseMove = e.Location;
+            }
         }
 
         public event EventHandler Complete;

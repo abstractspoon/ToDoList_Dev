@@ -26,7 +26,7 @@ namespace Calendar
             {
                 if (m_SelectionStarted)
                 {
-                    DateTime m_Time = m_DayView.GetTimeAt(e.X, e.Y);
+                    DateTime m_Time = m_DayView.GetDateTimeAt(e.X, e.Y);
                     m_Time = m_Time.AddMinutes(60 / m_DayView.SlotsPerHour);
 
                     if (m_Time < m_SelectionStart)
@@ -68,7 +68,7 @@ namespace Calendar
 
             if (e.Button == MouseButtons.Left)
             {
-                m_SelectionStart = m_DayView.GetTimeAt(e.X, e.Y);
+                m_SelectionStart = m_DayView.GetDateTimeAt(e.X, e.Y);
 
                 m_DayView.SelectionStart = m_SelectionStart;
                 m_DayView.SelectionEnd = m_SelectionStart.AddMinutes(60 / m_DayView.SlotsPerHour);

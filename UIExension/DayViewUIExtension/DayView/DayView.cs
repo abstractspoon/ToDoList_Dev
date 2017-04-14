@@ -265,6 +265,11 @@ namespace Calendar
             Invalidate();
         }
 
+        public virtual bool AllowMode(SelectionTool.Mode mode)
+        {
+            return true; // default
+        }
+
         private SelectionType selection;
 
         [System.ComponentModel.Browsable(false)]
@@ -482,8 +487,22 @@ namespace Calendar
             }
             set
             {
-                slotsPerHour = value;
-                Invalidate();
+                // Must be sensible values
+                bool valid = false;
+
+                switch (value)
+                {
+                    case  1: valid = true; break;
+                    case  2: valid = true; break;
+                    case  4: valid = true; break;
+                    case 12: valid = true; break;
+                }
+
+                if (valid)
+                {
+                    slotsPerHour = value;
+                    Invalidate();
+                }
             }
         }
 
@@ -737,7 +756,7 @@ namespace Calendar
                     selection = SelectionType.Appointment;
                     RaiseSelectionChanged(new AppointmentEventArgs(null));
 
-                    DateTime click = GetTimeAt(e.X, e.Y);
+                    DateTime click = GetDateTimeAt(e.X, e.Y);
                     selection = SelectionType.DateRange;
 
                     if ((click < SelectionStart) || (click > SelectionEnd))
@@ -1036,22 +1055,42 @@ namespace Calendar
             this.Focus();
         }
 
-        public DateTime GetTimeAt(int x, int y)
+        public DateTime GetDateTimeAt(int x, int y)
         {
+            DateTime date = GetDateAt(x);
+            TimeSpan time = GetTimeAt(y);
+
+            return date.Add(time);
+        }
+
+        public virtual DateTime GetDateAt(int x)
+        {
+            DateTime date = startDate.Date;
             int dayWidth = (this.Width - (vscroll.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
 
-            int hour = (y - this.HeaderHeight + vscroll.Value) / slotHeight;
-            x -= hourLabelWidth;
+            date = date.AddDays((x - hourLabelWidth) / dayWidth);
+            return date.Date;
+        }
 
-            DateTime date = startDate;
+        public virtual TimeSpan GetTimeAt(int y)
+        {
+            double numSlots = (y - this.HeaderHeight + vscroll.Value) / (double)slotHeight;
 
-            date = date.Date;
-            date = date.AddDays(x / dayWidth);
+            // Clip at top and bottom
+            numSlots = Math.Max(0, Math.Min((24 * slotsPerHour), numSlots));
 
-            if ((hour > 0) && (hour < 24 * slotsPerHour))
-                date = date.AddMinutes((hour * (60 / slotsPerHour)));
+            int minutes = (int)((60 * numSlots) / slotsPerHour);
 
-            return date;
+            int minsPerSlot = (60 / slotsPerHour);
+            int lastSlotMins = ((24 * 60) - minsPerSlot);
+
+            if (minutes > (lastSlotMins + (minsPerSlot / 2)))
+                return new TimeSpan(1, 0, 0, 0);
+
+            // nearest slot
+            minutes = ((int)numSlots * minsPerSlot);
+
+            return new TimeSpan((minutes / 60), (minutes % 60), 0);
         }
 
         public Appointment GetAppointmentAt(int x, int y)

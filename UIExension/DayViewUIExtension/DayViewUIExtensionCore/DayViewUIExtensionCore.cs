@@ -18,6 +18,7 @@ namespace DayViewUIExtension
 			m_trans = trans;
 
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 
 			InitializeComponent();
 		}
@@ -69,7 +70,6 @@ namespace DayViewUIExtension
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
-
 
             // Clear selection
             m_DayView.SelectionStart = m_DayView.SelectionEnd;
@@ -136,7 +136,7 @@ namespace DayViewUIExtension
         private DateTime GetEditableDueDate(DateTime dueDate)
         {
             // Whole days
-            if ((dueDate != DateTime.MinValue) && (dueDate.TimeOfDay.TotalMinutes == 0.0))
+            if ((dueDate != DateTime.MinValue) && (dueDate.Date == dueDate))
             {
                 // return end-of-day
                 return dueDate.AddDays(1).AddSeconds(-1);
@@ -218,7 +218,7 @@ namespace DayViewUIExtension
                 left = rect.Left;
                 top = rect.Top;
                 right = rect.Right;
-                bottom = (rect.Top + m_Renderer.GetFontHeight() + 4); // 4 = border
+                bottom = (rect.Top + m_DayView.GetFontHeight() + 4); // 4 = border
 
                 return true;
             }
@@ -247,8 +247,7 @@ namespace DayViewUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            m_Renderer.Theme = theme;
-            m_DayView.Invalidate(true);
+            m_DayView.SetUITheme(theme);
 
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
@@ -279,10 +278,6 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
-			this.BackColor = System.Drawing.Color.White;
-			this.m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
-            this.m_Renderer = new TDLRenderer();
-
 			CreateWeekLabel(); // create before day view
 			CreateMonthYearCombos();
 			CreateDayView();
@@ -290,36 +285,7 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			Calendar.DrawTool drawTool = new Calendar.DrawTool();
-
-			this.m_DayView = new Calendar.DayView();
-			drawTool.DayView = this.m_DayView;
-
-			this.m_DayView.ActiveTool = drawTool;
-			this.m_DayView.AllowInplaceEditing = true;
-			this.m_DayView.AllowNew = true;
-			this.m_DayView.AmPmDisplay = true;
-			this.m_DayView.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
-									 System.Windows.Forms.AnchorStyles.Left |
-									 System.Windows.Forms.AnchorStyles.Right);
-			this.m_DayView.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.m_DayView.DaysToShow = 7;
-			this.m_DayView.DrawAllAppBorder = false;
-			this.m_DayView.Font = m_ControlsFont;
-			this.m_DayView.Location = new System.Drawing.Point(0, 0);
-			this.m_DayView.MinHalfHourApp = false;
-			this.m_DayView.Name = "m_dayView";
-			this.m_DayView.Renderer = m_Renderer;
-			this.m_DayView.SelectionEnd = new System.DateTime(((long)(0)));
-			this.m_DayView.SelectionStart = new System.DateTime(((long)(0)));
-			this.m_DayView.Size = new System.Drawing.Size(798, 328);
-			this.m_DayView.SlotsPerHour = 4;
-			this.m_DayView.TabIndex = 0;
-			this.m_DayView.Text = "m_dayView";
-			this.m_DayView.WorkingHourEnd = 19;
-			this.m_DayView.WorkingHourStart = 9;
-			this.m_DayView.WorkingMinuteEnd = 0;
-			this.m_DayView.WorkingMinuteStart = 0;
+			this.m_DayView = new TDLDayView(m_ControlsFont);
 
 			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
 			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
@@ -457,7 +423,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
+        private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
 			Calendar.MoveAppointmentEventArgs move = args as Calendar.MoveAppointmentEventArgs;
 
@@ -478,7 +444,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, args.Appointment.StartDate);
+						notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, item.StartDate);
 					}
 					break;
 
@@ -486,7 +452,7 @@ namespace DayViewUIExtension
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
 						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(UIExtension.TaskAttribute.StartDate, args.Appointment.StartDate);
+                        notify.NotifyMod(UIExtension.TaskAttribute.StartDate, item.StartDate);
 					}
 					break;
 
@@ -494,7 +460,7 @@ namespace DayViewUIExtension
 					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
 					{
 						item.OrgEndDate = item.EndDate;
-						notify.NotifyMod(UIExtension.TaskAttribute.DueDate, args.Appointment.EndDate);
+                        notify.NotifyMod(UIExtension.TaskAttribute.DueDate, item.EndDate);
 					}
 					break;
 			}
@@ -545,8 +511,7 @@ namespace DayViewUIExtension
 		private const string FontName = "Tahoma";
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-		private Calendar.DayView m_DayView;
-        private TDLRenderer m_Renderer;
+        private TDLDayView m_DayView;
 		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_trans;
 		bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
@@ -567,6 +532,39 @@ namespace DayViewUIExtension
 
 		public String AllocTo { get; set; }
 		public Boolean IsParent { get; set; }
-	}
+
+        public override DateTime EndDate
+        {
+            get
+            {
+                return base.EndDate;
+            }
+            set
+            {
+                // Handle 'end of day'
+                if (value.Date == value)
+                    base.EndDate = value.AddSeconds(-1);
+                else
+                    base.EndDate = value;
+            }
+        }
+
+        public override TimeSpan Length
+        {
+            get 
+            {
+                // Handle 'end of day'
+                if (IsEndOfDay(EndDate))
+                    return (EndDate.Date.AddDays(1) - StartDate);
+
+                return base.Length; 
+            }
+        }
+
+        public static bool IsEndOfDay(DateTime date)
+        {
+            return (date == date.Date.AddDays(1).AddSeconds(-1));
+        }
+    }
 
 }
