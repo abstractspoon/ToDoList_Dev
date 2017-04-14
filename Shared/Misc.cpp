@@ -456,13 +456,10 @@ CString Misc::FormatArray(const CDWordArray& array, LPCTSTR szSep)
 
 	for (int nItem = 0; nItem < nCount; nItem++)
 	{
-		CString sItem;
-		sItem.Format(_T("%lu"), array[nItem]);
-
 		if (nItem > 0)
 			sText += sSep;
 
-		sText += sItem;
+		sText += Format(array[nItem]);
 	}
 
 	return sText;
