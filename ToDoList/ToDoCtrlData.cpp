@@ -2148,6 +2148,15 @@ BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 	return TRUE;
 }
 
+int CToDoCtrlData::IsValidDateRange(const COleDateTime& dateStart, const COleDateTime& dateDue)
+{
+	if (CDateHelper::DateHasTime(dateDue))
+		return (dateStart <= dateDue);
+
+	// else
+	return (dateStart < CDateHelper::GetEndOfDay(dateDue));
+}
+
 TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate)
 {
 	if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
@@ -2164,11 +2173,16 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 			{
 				ASSERT(pTDI);
 				
-				COleDateTime dateStart = pTDI->dateStart, dateDue = pTDI->dateDue;
-				
-				if (pTDI->HasStart() && pTDI->HasDue() && (dateDue >= dateStart)) // both exist
+				if (pTDI->HasStart() && pTDI->HasDue()) // both exist
 				{
-					double dDuration = CalcDuration(dateStart, dateDue, pTDI->nTimeEstUnits);
+					// End date must be greater then start date
+					if (!IsValidDateRange(pTDI->dateStart, pTDI->dateDue))
+					{
+						ASSERT(0);
+						break;
+					}
+
+					double dDuration = CalcDuration(pTDI->dateStart, pTDI->dateDue, pTDI->nTimeEstUnits);
 					ASSERT(dDuration > 0.0);
 
 					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->dTimeEstimate, dDuration, pTDI->nTimeEstUnits, pTDI->nTimeEstUnits);
@@ -4322,7 +4336,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		return dateStart;
 	}
 
-	COleDateTime dateEnd(dateStart);
+	COleDateTime dateDue(dateStart);
 	
 	switch (nUnits)
 	{
@@ -4335,12 +4349,12 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			CTimeHelper thAllDay(24.0, 7.0);
 
 			double dDays = thAllDay.GetTime(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
-			dateEnd.m_dt += dDays;
+			dateDue.m_dt += dDays;
 		}
 		break;
 
 	case TDCU_DAYS:
-		dateEnd.m_dt += dDuration;
+		dateDue.m_dt += dDuration;
 		break;
 
 	case TDCU_WEEKDAYS:
@@ -4356,28 +4370,28 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				double dDaysLeft = fabs(dDuration);
 				int nDir = (bForward ? 1 : -1);
 
-				dateEnd = dateStart;
+				dateDue = dateStart;
 
 				while (dDaysLeft > 0.0)
 				{
 					dDaysLeft--;
-					dateEnd.m_dt += nDir;
+					dateDue.m_dt += nDir;
 
 					// adjust for partial day overrun
 					if (dDaysLeft < 0.0)
-						dateEnd.m_dt += (nDir * dDaysLeft);
+						dateDue.m_dt += (nDir * dDaysLeft);
 
 					// step over weekends
-					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateEnd))
+					if ((dDaysLeft > 0.0) || CDateHelper::DateHasTime(dateDue))
 					{
 						// FALSE -> Don't truncate time
-						CDateHelper::MakeWeekday(dateEnd, bForward, FALSE);
+						CDateHelper::MakeWeekday(dateDue, bForward, FALSE);
 					}
 				}
 			}
 			else
 			{
-				dateEnd.m_dt += dDuration;
+				dateDue.m_dt += dDuration;
 			}
 		}
 		break;
@@ -4386,13 +4400,13 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	// If date falls on the beginning of a day, move to end of previous day
 	if (dDuration > 0.0)
 	{
-		if (!CDateHelper::DateHasTime(dateEnd))
-			dateEnd.m_dt--;
+		if (!CDateHelper::DateHasTime(dateDue))
+			dateDue.m_dt--;
 	}
 	else
 	{
 		if (!CDateHelper::DateHasTime(dateStart))
-			dateEnd.m_dt++;
+			dateDue.m_dt++;
 	}
 	
 	// sanity check
@@ -4402,26 +4416,34 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 		double dCheck = 0.0;
 		
 		if (dDuration > 0.0)
-			dCheck = CalcDuration(dateStart, dateEnd, nUnits);
+			dCheck = CalcDuration(dateStart, dateDue, nUnits);
 		else
-			dCheck = -CalcDuration(dateEnd, dateStart, nUnits);
+			dCheck = -CalcDuration(dateDue, dateStart, nUnits);
 
 		ASSERT(fabs(dCheck - dDuration) < 1e-3);
 	}
 #endif
 
-	return dateEnd;
+	return dateDue;
 }
 
-double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateEnd, TDC_UNITS nUnits)
+double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
 {
-	if (!CDateHelper::IsDateSet(dateStart) || !CDateHelper::IsDateSet(dateEnd) || (dateEnd < dateStart))
+	// Sanity checks
+	if (!CDateHelper::IsDateSet(dateStart) || !CDateHelper::IsDateSet(dateDue))
 	{
 		ASSERT(0);
 		return 0.0;
 	}
 
-	double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
+	// End date must be greater then start date
+	if (!IsValidDateRange(dateStart, dateDue))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	double dDuration = (dateDue.m_dt - dateStart.m_dt); // in days
 	
 	switch (nUnits)
 	{
@@ -4432,7 +4454,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_YEARS:
 		{
 			// handle 'whole' of due date
-			if (IsEndOfDay(dateEnd))
+			if (IsEndOfDay(dateDue))
 				dDuration += 1.0;
 
 			CTimeHelper thAllDay(24.0, 7.0);
@@ -4447,14 +4469,14 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 			double dDayStart(dateStart);
 			dDuration = 0.0;
 
-			while (dDayStart < dateEnd)
+			while (dDayStart < dateDue)
 			{
 				// determine the end of this day
 				double dDayEnd = (CDateHelper::GetDateOnly(dDayStart).m_dt + 1.0);
 
 				if (!CDateHelper::IsWeekend(dDayStart))
 				{
-					dDuration += (min(dDayEnd, dateEnd) - dDayStart); // in days
+					dDuration += (min(dDayEnd, dateDue) - dDayStart); // in days
 				}
 
 				// next day
@@ -4462,14 +4484,14 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 			}
 
 			// handle 'whole' of due date
-			if (CDateHelper::IsWeekend(dateEnd) || !IsEndOfDay(dateEnd))
+			if (CDateHelper::IsWeekend(dateDue) || !IsEndOfDay(dateDue))
 				break;
 		}
 		// else fall thru to handle 'whole' of due date
 
 	case TDCU_DAYS:
 		// handle 'whole' of due date
-		if (IsEndOfDay(dateEnd))
+		if (IsEndOfDay(dateDue))
 			dDuration += 1.0;
 		break;
 	}
