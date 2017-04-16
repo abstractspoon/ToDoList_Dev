@@ -8,6 +8,10 @@
 #include "ColorUtil.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\ITasklist.h"
+#include "..\..\ToDoList_Dev\3rdParty\T64Utils.h"
+
+#include <OleAuto.h>
+#include <time.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -779,17 +783,35 @@ TDC_UNITS Task::Map(TimeUnits units)
 
 DateTime Task::Map(Int64 tDate)
 {
-	DateTime^ date = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
+	SYSTEMTIME st = { 0 };
+	T64Utils::T64ToSystemTime(&tDate, &st);
 
-	return date->AddSeconds(static_cast<double>(tDate)).ToLocalTime();
+	DateTime^ date = gcnew DateTime(
+		st.wYear,
+		st.wMonth, 
+		st.wDay,
+		st.wHour,
+		st.wMinute,
+		st.wSecond,
+		DateTimeKind::Local);
+	
+	return *date;
 }
 
 Int64 Task::Map(DateTime^ date)
 {
-	DateTime utc = date->ToUniversalTime();
-	DateTime^ epoch = gcnew DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc);
+	SYSTEMTIME st = { 0 };
 
-	return static_cast<Int64>((utc - *epoch).TotalSeconds);
+	st.wYear = date->Year;
+	st.wMonth = date->Month;
+	st.wDay = date->Day; 
+	st.wHour = date->Hour;
+	st.wMinute = date->Minute;
+	st.wSecond = date->Second; 
+
+	Int64 tDate;
+	T64Utils::SystemTimeToT64(&st, &tDate);
+
+	return tDate;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
