@@ -2400,7 +2400,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -2655,7 +2655,7 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -2716,7 +2716,7 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -2769,7 +2769,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 		Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 
 	IMPLEMENT_UNDOEDIT();
@@ -3285,7 +3285,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	TSH().CopySelection(htiSel, bAndSubtasks);
 
 	POSITION pos = htiSel.GetHeadPosition();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	TDC_UNITS nUnits = TDC::MapDateOffsetToUnits(nOffset);
 	
@@ -3359,7 +3359,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 	TSH().CopySelection(htiSel, bAndSubtasks);
 
 	POSITION pos = htiSel.GetHeadPosition();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	DH_UNITS nDHUnits = TDC::MapDateOffsetToDHUnits(nOffset);
 
@@ -3595,7 +3595,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	CHTIList selection;
 	TSH().CopySelection(selection, bDone);
 
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	BOOL bSomeRecurred = FALSE, bSomeDone = FALSE;
 	
@@ -3928,7 +3928,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -3967,7 +3967,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4006,7 +4006,7 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4088,7 +4088,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4240,7 +4240,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4297,7 +4297,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4382,7 +4382,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
@@ -4515,7 +4515,7 @@ BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_NOCHANGE;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDOEDIT();
