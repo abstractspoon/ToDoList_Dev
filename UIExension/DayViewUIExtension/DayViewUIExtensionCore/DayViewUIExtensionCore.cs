@@ -74,6 +74,7 @@ namespace DayViewUIExtension
             // Clear selection
             m_DayView.SelectionStart = m_DayView.SelectionEnd;
 			m_DayView.Invalidate();
+            m_DayView.Update();
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
