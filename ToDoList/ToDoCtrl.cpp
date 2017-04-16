@@ -174,10 +174,6 @@ protected:
 
 #define HOLD_REDRAW(tdc, tree) 	CHoldRedraw hr(tdc); CHoldRedraw hr2(tree);
 
-#define IMPLEMENT_UNDO(type) CUndoAction ua(m_data, type)
-#define IMPLEMENT_UNDOEDIT() CUndoAction ua(m_data, TDCUAT_EDIT)
-#define IMPLEMENT_UNDOEXT(type, extend) CUndoAction ua(m_data, type, extend)
-
 //////////////////////////////////////////////////////////////////////////////
 // static variables
 
@@ -2403,7 +2399,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -2658,7 +2654,7 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -2719,7 +2715,7 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -2772,7 +2768,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	// do not change the custom comments unless the comments
 	// type matches the current content control type
@@ -2825,7 +2821,7 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
 
 	Flush();
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	DWORD dwTaskID = GetSelectedTaskID();
 	int nRes = m_data.SetTaskTitle(dwTaskID, sTitle);
@@ -2881,7 +2877,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 	int nRes = SET_FAILED;
 	DWORD dwModTaskID = 0;
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -2920,7 +2916,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 	int nRes = SET_FAILED;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -2959,7 +2955,7 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 	int nRes = SET_FAILED;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -3002,7 +2998,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	int nRes = SET_FAILED;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -3044,7 +3040,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	DWORD dwModTaskID = 0;
 	int nAmount = (bUp ? 1 : -1);
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	// Keep track of what we've processed to avoid incrementing
 	// the same task multiple times via references
@@ -3142,7 +3138,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -3252,7 +3248,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	DWORD dwModTaskID = 0;
 	TDC_UNITS nUnits = TDC::MapDateOffsetToUnits(nOffset);
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	// Keep track of what we've processed to avoid offsetting
 	// the same task multiple times via references
@@ -3328,7 +3324,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffs
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 	
 	while (pos)
 	{
@@ -3586,7 +3582,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	DWORD dwModTaskID = 0;
 	BOOL bSomeRecurred = FALSE, bSomeDone = FALSE;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	POSITION pos = selection.GetHeadPosition();
 
@@ -3754,7 +3750,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 
 	// Always extend the previous undo action which completed
 	// the recurring task(s) we are about to recreate
-	IMPLEMENT_UNDOEXT(TDCUAT_ADD, TRUE);
+	IMPLEMENT_UNDO_EXTEND(m_data, TDCUAT_ADD, TRUE);
 
 	CDWordArray aTaskIDs, aNewTaskIDs;
 
@@ -3918,7 +3914,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -3957,7 +3953,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -3996,7 +3992,7 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 	
 	while (pos)
 	{
@@ -4078,7 +4074,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 	
 	// Keep track of what we've processed to avoid incrementing
 	// the same task multiple times via references
@@ -4149,7 +4145,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4230,7 +4226,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4287,7 +4283,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4372,7 +4368,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4477,7 +4473,7 @@ BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4505,7 +4501,7 @@ BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4533,7 +4529,7 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -4606,7 +4602,7 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 	TDC_SET nRes = SET_NOCHANGE;
 	dwRefTaskID = 0;
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	while (pos)
 	{
@@ -4643,7 +4639,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwRefTaskID = 0;
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	while (pos)
 	{
@@ -4851,7 +4847,7 @@ BOOL CToDoCtrl::SetSelectedTaskExtID(const CString& sID)
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	while (pos)
 	{
@@ -5030,7 +5026,7 @@ HTREEITEM CToDoCtrl::InsertItem(const CString& sText, HTREEITEM htiParent, HTREE
 	if (sText.IsEmpty())
 		return NULL;
 	
-	IMPLEMENT_UNDO(TDCUAT_ADD);
+	IMPLEMENT_UNDO(m_data, TDCUAT_ADD);
 
 	// create the new task item
 	TODOITEM* pTDINew = CreateNewTask(htiParent);
@@ -5132,7 +5128,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 
 	Flush();
 	
-	IMPLEMENT_UNDO(TDCUAT_ADD);
+	IMPLEMENT_UNDO(m_data, TDCUAT_ADD);
 	HOLD_REDRAW(NULL, m_taskTree.Tree());
 	
 	POSITION pos = TSH().GetFirstItemPos();
@@ -5350,7 +5346,7 @@ BOOL CToDoCtrl::DeleteSelectedTask()
 {
 	Flush();
 
-	IMPLEMENT_UNDO(TDCUAT_DELETE);
+	IMPLEMENT_UNDO(m_data, TDCUAT_DELETE);
 
 	// else do the standard warning against deletion
 	return DeleteSelectedTask(TRUE, TRUE);
@@ -5448,7 +5444,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 		BOOL bNewTask = (m_dwEditTitleTaskID == m_dwLastAddedID);
 		TDCUNDOACTIONTYPE nAction = (bNewTask ? TDCUAT_ADD : TDCUAT_EDIT);
 
-		IMPLEMENT_UNDOEXT(nAction, bNewTask);
+		IMPLEMENT_UNDO_EXTEND(m_data, nAction, bNewTask);
 		
 		int nRes = m_data.SetTaskTitle(m_dwEditTitleTaskID, sText);
 		
@@ -5569,7 +5565,7 @@ BOOL CToDoCtrl::DeleteAllTasks()
 	
 	CWaitCursor cursor;
 	
-	IMPLEMENT_UNDO(TDCUAT_DELETE);
+	IMPLEMENT_UNDO(m_data, TDCUAT_DELETE);
 	HOLD_REDRAW(*this, 0);
 
 	m_taskTree.DeleteAll();
@@ -6573,7 +6569,7 @@ void CToDoCtrl::RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove,
 	CPreferences prefs;
 	SaveTasksState(prefs);
 	
-	IMPLEMENT_UNDO(TDCUAT_ARCHIVE);
+	IMPLEMENT_UNDO(m_data, TDCUAT_ARCHIVE);
 	
 	// clear selection
 	TSH().RemoveAll();
@@ -7219,7 +7215,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 				case ID_TDD_SETTASKDEPENDENCY:
 				case ID_TDD_ADDTASKDEPENDENCY:
 					{
-						IMPLEMENT_UNDOEDIT();
+						IMPLEMENT_UNDO_EDIT(m_data);
 
 						// replace task dependencies with this one
 						CStringArray aDepends;
@@ -7232,7 +7228,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 				case ID_TDD_SETFILELINK:
 					{
-						IMPLEMENT_UNDOEDIT();
+						IMPLEMENT_UNDO_EDIT(m_data);
 
 						CString sTaskRef;
 						sTaskRef.Format(_T("tdl://%lu"), GetSelectedTaskID());
@@ -7265,7 +7261,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			// the ones actually selected
 			if (GetSelectedTasks(tasks, filter, (bRef ? TDCGSTF_NOTSUBTASKS : 0)))
 			{
-				IMPLEMENT_UNDO(TDCUAT_COPY);
+				IMPLEMENT_UNDO(m_data, TDCUAT_COPY);
 				HOLD_REDRAW(*this, m_taskTree);
 
 				// fix up the dependencies of the copied tasks
@@ -7284,7 +7280,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 		}
 		else if (bMove)
 		{
-			IMPLEMENT_UNDO(TDCUAT_MOVE);
+			IMPLEMENT_UNDO(m_data, TDCUAT_MOVE);
 
 			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDrop);
 			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiAfter);
@@ -7623,7 +7619,7 @@ BOOL CToDoCtrl::MoveSelection(TDC_MOVETASK nDirection)
 	if (CanMoveSelectedTask(nDirection))
 	{
 		// move the tasks
-		IMPLEMENT_UNDO(TDCUAT_MOVE);
+		IMPLEMENT_UNDO(m_data, TDCUAT_MOVE);
 
 		DWORD dwDestParentID = 0, dwDestPrevSiblingID = 0;
 		VERIFY(m_taskTree.GetInsertLocation(nDirection, dwDestParentID, dwDestPrevSiblingID));
@@ -8029,7 +8025,7 @@ BOOL CToDoCtrl::CutSelectedTask()
 	{
 		if (CopyCurrentSelection())
 		{
-			IMPLEMENT_UNDO(TDCUAT_DELETE);
+			IMPLEMENT_UNDO(m_data, TDCUAT_DELETE);
 			
 			DeleteSelectedTask(FALSE, TRUE);
 			return TRUE;
@@ -8175,7 +8171,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 			PrepareTasksForPaste(tasks, nResetID, TRUE);
 		}
 
-		IMPLEMENT_UNDO(TDCUAT_PASTE);
+		IMPLEMENT_UNDO(m_data, TDCUAT_PASTE);
 		HOLD_REDRAW(*this, m_taskTree);
 
 		// no need to re-check IDs as we've already done it
@@ -9321,7 +9317,7 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 	}
 
 	// add the tasks
-	IMPLEMENT_UNDO(TDCUAT_ADD);
+	IMPLEMENT_UNDO(m_data, TDCUAT_ADD);
 	HOLD_REDRAW(*this, m_taskTree);
 
 	// Fix up dependencies if not inserting into new tasklist
@@ -9357,7 +9353,7 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	CDWordArray aTaskIDs;
 
 	// add the tasks
-	IMPLEMENT_UNDO(TDCUAT_ADD);
+	IMPLEMENT_UNDO(m_data, TDCUAT_ADD);
 	HOLD_REDRAW(*this, m_taskTree);
 	
 	while (hTask)
@@ -10322,7 +10318,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			if (pData->dwTaskID)
 			{
 				// Add file paths to target's existing file Links
-				IMPLEMENT_UNDOEDIT();
+				IMPLEMENT_UNDO_EDIT(m_data);
 			
 				if (m_data.SetTaskFileRefs(pData->dwTaskID, aFiles, TRUE) == SET_CHANGE)
 					SetModified(TRUE, TDCA_FILEREF, pData->dwTaskID);
@@ -11139,7 +11135,7 @@ void CToDoCtrl::SpellcheckSelectedTask(BOOL bTitle)
 {
 	Flush();
 
-	IMPLEMENT_UNDO(TDCUAT_EDIT);
+	IMPLEMENT_UNDO(m_data, TDCUAT_EDIT);
 
 	// one off spell check
 	CSpellCheckDlg dialog;
@@ -11170,7 +11166,7 @@ BOOL CToDoCtrl::CanSpellcheckComments()
 
 void CToDoCtrl::Spellcheck()
 {
-	IMPLEMENT_UNDO(TDCUAT_EDIT);
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	// top level items
 	CSpellCheckDlg dialog;
@@ -11841,7 +11837,7 @@ void CToDoCtrl::OnSelChangeCommentsType()
 	m_cbCommentsType.GetSelectedFormat(m_cfComments);
 	CreateContentControl(TRUE);
 
-	IMPLEMENT_UNDOEDIT();
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	// modify the comments type of the selected tasks
 	// without clearing any custom comments

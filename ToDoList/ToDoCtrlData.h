@@ -24,17 +24,23 @@ class CBinaryData;
 //////////////////////////////////////////////////////////////////////
 
 // class to help start and end undo actions
-// only one can be active at one time
+// CToDoCtrlData only allows a single action to be active at any one time
 class CUndoAction
 {
 public:
-	CUndoAction(CToDoCtrlData& data, TDCUNDOACTIONTYPE nType = TDCUAT_EDIT, BOOL bExtendLastAction = FALSE);
+	CUndoAction(CToDoCtrlData& data, TDCUNDOACTIONTYPE nType, BOOL bExtendLastAction);
 	~CUndoAction();
 
 protected:
 	CToDoCtrlData& m_data;
 	BOOL m_bActive;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+#define IMPLEMENT_UNDO(data, type)					CUndoAction ua(m_data, type, FALSE)
+#define IMPLEMENT_UNDO_EDIT(data)					CUndoAction ua(m_data, TDCUAT_EDIT, FALSE)
+#define IMPLEMENT_UNDO_EXTEND(data, type, extend)	CUndoAction ua(m_data, type, extend)
 
 //////////////////////////////////////////////////////////////////////
 

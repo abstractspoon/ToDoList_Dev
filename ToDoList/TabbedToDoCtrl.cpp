@@ -1324,7 +1324,7 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 
 	Flush();
 
-	CUndoAction ua(m_data, TDCUAT_EDIT);
+	IMPLEMENT_UNDO_EDIT(m_data);
 
 	POSITION pos = TSH().GetFirstItemPos();
 	DWORD dwModTaskID = 0;
@@ -1361,10 +1361,10 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	HandleUnsavedComments();
 
+	IMPLEMENT_UNDO_EDIT(m_data);
+
 	BOOL bDependChange = FALSE, bMoveTask = FALSE, bSuccess = TRUE;
 	
-	CUndoAction ua(m_data, TDCUAT_EDIT);
-
 	try
 	{
 		const IUITASKMOD* pMods = (const IUITASKMOD*)lParam;
