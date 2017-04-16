@@ -43,7 +43,7 @@ const int DEFFONTSIZE = 8;
 CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage(const TDCAUTOLISTDATA& defaultListData) : 
 	CPreferencesPageBase(CPreferencesUITasklistColorsPage::IDD),
 	m_defaultListData(defaultListData),
-	m_nTextColorOption(COLOROPT_DEFAULT), 
+	m_nTextColorOption(COLOROPT_PRIORITY), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
 	m_nColorAttribute(TDCA_NONE)
 
