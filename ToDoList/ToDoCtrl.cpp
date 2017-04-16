@@ -11598,8 +11598,6 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	if (!CanExpandTasks(nWhat, bExpand))
 		return;
 
-	HOLD_REDRAW(*this, m_taskTree);
-
 	switch (nWhat)
 	{
 	case TDCEC_ALL:
