@@ -2404,7 +2404,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskCustomAttributeData(dwTaskID, sAttribID, sData);
+		TDC_SET nItemRes = m_data.SetTaskCustomAttributeData(dwTaskID, sAttribID, sData);
 			
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2659,7 +2659,7 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskColor(dwTaskID, color);
+		TDC_SET nItemRes = m_data.SetTaskColor(dwTaskID, color);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2720,7 +2720,7 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskIcon(dwTaskID, sIcon);
+		TDC_SET nItemRes = m_data.SetTaskIcon(dwTaskID, sIcon);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2778,7 +2778,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskComments(dwTaskID, sComments, customComments, szFormat);
+		TDC_SET nItemRes = m_data.SetTaskComments(dwTaskID, sComments, customComments, szFormat);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2824,7 +2824,7 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle)
 	IMPLEMENT_UNDO_EDIT(m_data);
 		
 	DWORD dwTaskID = GetSelectedTaskID();
-	int nRes = m_data.SetTaskTitle(dwTaskID, sTitle);
+	TDC_SET nRes = m_data.SetTaskTitle(dwTaskID, sTitle);
 	
 	if (nRes == SET_CHANGE)
 	{
@@ -2874,7 +2874,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 	Flush();
 
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_FAILED;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 
 	IMPLEMENT_UNDO_EDIT(m_data);
@@ -2882,7 +2882,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskPriority(dwTaskID, nPriority);
+		TDC_SET nItemRes = m_data.SetTaskPriority(dwTaskID, nPriority);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2913,7 +2913,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_FAILED;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDO_EDIT(m_data);
@@ -2921,7 +2921,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskRisk(dwTaskID, nRisk);
+		TDC_SET nItemRes = m_data.SetTaskRisk(dwTaskID, nRisk);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2952,7 +2952,7 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_FAILED;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDO_EDIT(m_data);
@@ -2960,7 +2960,7 @@ BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskFlag(dwTaskID, bFlagged);
+		TDC_SET nItemRes = m_data.SetTaskFlag(dwTaskID, bFlagged);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2995,7 +2995,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_FAILED;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	
 	IMPLEMENT_UNDO_EDIT(m_data);
@@ -3003,7 +3003,7 @@ BOOL CToDoCtrl::SetSelectedTaskLock(BOOL bLocked)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskLock(dwTaskID, bLocked);
+		TDC_SET nItemRes = m_data.SetTaskLock(dwTaskID, bLocked);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3036,7 +3036,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	Flush();
 	
 	POSITION pos = TSH().GetFirstItemPos();
-	int nRes = SET_FAILED;
+	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
 	int nAmount = (bUp ? 1 : -1);
 
@@ -3064,7 +3064,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 				nPriority = 0;
 		}
 
-		int nItemRes = m_data.SetTaskPriority(dwTaskID, nPriority);
+		TDC_SET nItemRes = m_data.SetTaskPriority(dwTaskID, nPriority);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3261,7 +3261,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 		if (mapProcessed.HasKey(dwTaskID))
 			continue;
 
-		int nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
+		TDC_SET nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
 
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3638,7 +3638,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		}
 
 		// FALSE == Don't update the dates of any already-completed subtasks
-		int nItemRes = SetTaskDone(hti, dtDone, bAndSubtasks, FALSE);
+		TDC_SET nItemRes = SetTaskDone(hti, dtDone, bAndSubtasks, FALSE);
 
 		// handle recreation of recurring task
 		if (bRecurring)
@@ -3919,7 +3919,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
+		TDC_SET nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3958,7 +3958,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(double dCost)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskCost(dwTaskID, dCost);
+		TDC_SET nItemRes = m_data.SetTaskCost(dwTaskID, dCost);
 			
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3997,7 +3997,7 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		int nItemRes = m_data.SetTaskRecurrence(dwTaskID, tr);
+		TDC_SET nItemRes = m_data.SetTaskRecurrence(dwTaskID, tr);
 			
 		if (nItemRes == SET_CHANGE)
 		{
@@ -4102,7 +4102,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 			m_data.SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
 		}
 
-		int nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
+		TDC_SET nItemRes = m_data.SetTaskPercent(dwTaskID, nPercent);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -4155,7 +4155,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(double dTime, TDC_UNITS nUnits)
 		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
-			int nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, dTime, nUnits);
+			TDC_SET nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, dTime, nUnits);
 			
 			if (nItemRes == SET_CHANGE)
 			{
@@ -4236,7 +4236,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(double dTime, TDC_UNITS nUnits)
 		if (!m_taskTree.ItemHasChildren(hti) || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
-			int nItemRes = m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
+			TDC_SET nItemRes = m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
 			
 			if (nItemRes == SET_CHANGE)
 			{
@@ -4302,7 +4302,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 				if (bRecalcTime)
 					dTime = CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nCurUnits), TDC::MapUnitsToTHUnits(nUnits));
 
-				int nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, dTime, nUnits);
+				TDC_SET nItemRes = m_data.SetTaskTimeEstimate(dwTaskID, dTime, nUnits);
 				
 				if (nItemRes == SET_CHANGE)
 				{
@@ -4387,7 +4387,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 				if (bRecalcTime)
 					dTime = CTimeHelper().GetTime(dTime, TDC::MapUnitsToTHUnits(nCurUnits), TDC::MapUnitsToTHUnits(nUnits));
 
-				int nItemRes = m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
+				TDC_SET nItemRes = m_data.SetTaskTimeSpent(dwTaskID, dTime, nUnits);
 				
 				if (nItemRes == SET_CHANGE)
 				{
