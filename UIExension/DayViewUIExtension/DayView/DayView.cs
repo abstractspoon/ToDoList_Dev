@@ -1253,10 +1253,9 @@ namespace Calendar
             {
                 Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
-                if (rect.Height > 1)
+                if ((selectionRectangle.Height > 1) && (selectionRectangle.Top + 1 > this.HeaderHeight))
                 {
-                    if (selectionRectangle.Top + 1 > this.HeaderHeight)
-                        renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+                    renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
                 }
             }
 
