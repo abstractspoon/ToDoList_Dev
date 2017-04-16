@@ -2607,7 +2607,7 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		
 		while (nAttrib--)
 		{
-			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttrib((TDC_ATTRIBUTE)nAttrib)))
+			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIEdit((TDC_ATTRIBUTE)nAttrib)))
 				mapAttrib.AddAttribute((TDC_ATTRIBUTE)nAttrib);
 		}
 
@@ -3036,7 +3036,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
 		// attribute, then we assume that it won't want the update
-		if (TDC::AttributeMatchesIUIAttrib(nAttrib, m_nExtModifyingAttrib))
+		if (TDC::AttributeMatchesIUIEdit(nAttrib, m_nExtModifyingAttrib))
 			return FALSE;
 	}
 
@@ -3047,7 +3047,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 	ASSERT(pExtWnd);
 	
-	return (pExtWnd && pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttrib(nAttrib)));
+	return (pExtWnd && pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIEdit(nAttrib)));
 }
 
 BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const

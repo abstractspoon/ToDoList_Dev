@@ -579,7 +579,7 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static IUI_ATTRIBUTE MapAttributeToIUIAttrib(TDC_ATTRIBUTE nAttrib)
+	static IUI_ATTRIBUTE MapAttributeToIUIEdit(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
 		{
@@ -634,29 +634,6 @@ namespace TDC
 		return IUI_NONE;
 	}
 
-	static BOOL AttributeMatchesIUIAttrib(TDC_ATTRIBUTE nAttrib, IUI_ATTRIBUTE nIUIAttrib)
-	{
-		if (nIUIAttrib == IUI_NONE)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-
-		IUI_ATTRIBUTE nMapAttrib = MapAttributeToIUIAttrib(nAttrib);
-
-		switch (nMapAttrib)
-		{
-		case IUI_OFFSETTASK:
-			return (nAttrib == TDCA_DUEDATE || nAttrib == TDCA_STARTDATE);
-
-		case IUI_NONE:
-			return FALSE;
-		}
-
-		// all else
-		return (nMapAttrib == nIUIAttrib);
-	}
-
 	static int MapAttributesToIUIAttrib(const CTDCAttributeMap& mapAttrib, CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE>& aAttrib)
 	{
 		POSITION pos = mapAttrib.GetStartPosition();
@@ -664,7 +641,7 @@ namespace TDC
 		while (pos)
 		{
 			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
-			aAttrib.Add(MapAttributeToIUIAttrib(nAttrib));
+			aAttrib.Add(MapAttributeToIUIEdit(nAttrib));
 		}
 		
 		return aAttrib.GetSize();
@@ -748,6 +725,7 @@ namespace TDC
 		case IUI_ID:			return TDCA_ID;
 		case IUI_LASTMOD:		return TDCA_LASTMOD;
 		case IUI_LOCK:			return TDCA_LOCK;
+		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
 		case IUI_PERCENT:		return TDCA_PERCENT;
 		case IUI_POSITION:		return TDCA_POSITION;
 		case IUI_PRIORITY:		return TDCA_PRIORITY;
@@ -808,6 +786,30 @@ namespace TDC
 		// all else
 		ASSERT(0);
 		return TDCC_NONE;
+	}
+	
+	static BOOL AttributeMatchesIUIEdit(TDC_ATTRIBUTE nAttrib, IUI_ATTRIBUTE nIUIAttrib)
+	{
+		if ((nAttrib == TDCA_NONE) || (nIUIAttrib == IUI_NONE))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+		
+		TDC_ATTRIBUTE nMapEdit = MapIUIEditToAttribute(nIUIAttrib);
+		
+		if (nAttrib == nMapEdit)
+			return TRUE;
+		
+		// else
+		switch (nIUIAttrib)
+		{
+		case IUI_OFFSETTASK:
+			return (nAttrib == TDCA_DUEDATE || nAttrib == TDCA_STARTDATE);
+		}
+		
+		// all else
+		return FALSE;
 	}
 
 	static TDC_ATTRIBUTE MapDeprecatedAttribute(TDC_ATTRIBUTE nAttribID)
