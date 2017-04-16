@@ -1288,8 +1288,8 @@ namespace Calendar
 
                 Rectangle rect2 = rect;
                 rect2.X += (appointmentGripWidth + 2);
-                rect2.Width -= (appointmentGripWidth + 2);
 
+                rect2.Width -= appointmentGripWidth;
                 rect2.Width = (rect2.Width / groups.Count) - 2;
 
                 groups.Sort();
@@ -1629,8 +1629,10 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                if (day == 0)
-                    rectangle.Width += (rect.Width % daysToShow) - 1;
+                // last day takes up any slack
+                if (day == (daysToShow - 1))
+                    rectangle.Width = (rect.Right - rectangle.Left);
+
                 DrawDay(e, rectangle, time);
 
                 rectangle.X += dayWidth;
