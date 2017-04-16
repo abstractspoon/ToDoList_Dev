@@ -2015,11 +2015,12 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	return nRes;
 }
 
-TDC_SET CToDoCtrlData::MoveTaskDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
+TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
+	// Sanity checks
 	if (!(pTDI->HasStart() && (pTDI->HasDue() || (pTDI->dTimeEstimate > 0.0))))
 	{
 		ASSERT(0);
@@ -2032,6 +2033,11 @@ TDC_SET CToDoCtrlData::MoveTaskDates(DWORD dwTaskID, const COleDateTime& dtNewSt
 		return SET_NOCHANGE;
 	}
 
+	// Ignore tasks with dependencies where their dates 
+	// are automatically calculated
+	if (pTDI->aDependencies.GetSize() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		return SET_NOCHANGE;
+	
 	// Cache current time estimate before doing anything
 	double dDuration = pTDI->dTimeEstimate;
 	

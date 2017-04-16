@@ -3235,43 +3235,6 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return (nRes != SET_FAILED);
 }
 
-BOOL CToDoCtrl::MoveSelectedTaskDates(const COleDateTime& dtNewStart, BOOL bFailOnNoChange)
-{
-	if (GetSelectedCount() != 1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (!CanEditSelectedTask())
-		return FALSE;
-	
-	IMPLEMENT_UNDOEDIT();
-	
-	DWORD dwTaskID = TSH().GetFirstItemData();
-	TDC_SET nRes = m_data.MoveTaskDates(dwTaskID, dtNewStart);
-		
-	// post-processing
-	if (nRes == SET_CHANGE)
-	{
-		COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-
-		if (CDateHelper::IsDateSet(dtDue))
-			m_eRecurrence.SetDefaultDate(dtDue);
-
-		SetModified(TRUE, TDCA_STARTDATE, dwTaskID); 
-		SetModified(TRUE, TDCA_DUEDATE, dwTaskID); 
-
-		UpdateControls(FALSE); // don't update comments
-	}
-	
-	if (bFailOnNoChange && (nRes == SET_NOCHANGE))
-		return FALSE;
-
-	// else
-	return (nRes != SET_FAILED);
-}
-
 BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
 	if (!CanEditSelectedTask())
@@ -3344,7 +3307,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	return (nRes != SET_FAILED);
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
 	if (!CanEditSelectedTask())
 		return FALSE;
@@ -3359,7 +3322,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 	POSITION pos = htiSel.GetHeadPosition();
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwModTaskID = 0;
-	DH_UNITS nDHUnits = TDC::MapDateOffsetToDHUnits(nOffset);
+	TDC_UNITS nTDCUnits = TDC::MapDateOffsetToUnits(nOffset);
 
 	// Keep track of what we've processed to avoid offsetting
 	// the same task multiple times via references
@@ -3371,23 +3334,11 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
 
-		if (mapProcessed.HasKey(dwTaskID))
-			continue;
-
-		COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
-		ASSERT(CDateHelper::IsDateSet(dtStart));
-
-		CDateHelper::OffsetDate(dtStart, nAmount, nDHUnits);
-		
-		int nItemRes = m_data.MoveTaskDates(dwTaskID, dtStart);
-		
-		if (nItemRes == SET_CHANGE)
+		if (SET_CHANGE == OffsetTaskStartAndDueDates(dwTaskID, nAmount, nTDCUnits, bAndSubtasks, mapProcessed))
 		{
 			dwModTaskID = dwTaskID;
 			nRes = SET_CHANGE;
 		}
-
-		mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3399,6 +3350,46 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 	}
 	
 	return (nRes != SET_FAILED);
+}
+
+TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed)
+{
+	ASSERT(!IsReadOnly());
+
+	if (mapProcessed.HasKey(dwTaskID))
+		return SET_NOCHANGE;
+
+	if (m_data.IsTaskLocked(dwTaskID))
+		return SET_FAILED;
+
+	COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
+	ASSERT(CDateHelper::IsDateSet(dtStart));
+
+	CDateHelper::OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
+
+	TDC_SET nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
+
+	mapProcessed.AddKey(dwTaskID);
+
+	// subtasks
+	if (bAndSubtasks)
+	{
+		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+		ASSERT(pTDS);
+
+		if (pTDS)
+		{
+			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			{
+				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+
+				if (OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, mapProcessed) == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+		}
+	}
+
+	return nRes;
 }
 
 void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib)

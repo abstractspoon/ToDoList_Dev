@@ -11012,7 +11012,7 @@ void CToDoListWnd::OnEditOffsetdates()
 		{
 			// special case: Moving due dates as well
 			if (dwWhat & ODD_DUEDATE)
-				tdc.OffsetSelectedTaskDates(nAmount, nUnits, bSubtasks);
+				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, nUnits, bSubtasks);
 			else
 				tdc.OffsetSelectedTaskDate(TDCD_START, nAmount, nUnits, bSubtasks);
 		}

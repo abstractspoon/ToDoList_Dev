@@ -37,6 +37,7 @@
 #include "..\shared\popupeditctrl.h"
 #include "..\shared\uithemefile.h"
 #include "..\shared\datetimectrlex.h"
+#include "..\shared\mapex.h"
 
 #include "..\3rdparty\colourpicker.h"
 
@@ -217,7 +218,7 @@ public:
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
-	BOOL OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
+	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
 	COleDateTime GetEarliestDueDate() const { return m_data.GetEarliestDueDate(); } // entire tasklist
 
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
@@ -696,7 +697,6 @@ protected:
 	int SetTaskDone(HTREEITEM hti, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	int CheckWantSubtasksCompleted();
-	BOOL MoveSelectedTaskDates(const COleDateTime& dtNewStart, BOOL bFailOnNoChange);
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData, BOOL bCtrlEdited);
 	int GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) const;
@@ -704,6 +704,7 @@ protected:
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
+	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 
 	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent); // overridable
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
