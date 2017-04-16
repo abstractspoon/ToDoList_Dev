@@ -7,6 +7,8 @@
 #include "TimeHelper.h"
 #include "misc.h"
 
+#include "..\3rdParty\T64Utils.h"
+
 #include <math.h>
 
 #ifdef _DEBUG
@@ -309,7 +311,7 @@ BOOL CDateHelper::GetTimeT64(const COleDateTime& date, time64_t& timeT)
 	if (!date.GetAsSystemTime(st))
 		return FALSE;
 
-	SystemTimeToT64(&st, &timeT);
+	T64Utils::SystemTimeToT64(&st, &timeT);
 	ASSERT(timeT != 0);
 
 	return TRUE;
@@ -318,7 +320,7 @@ BOOL CDateHelper::GetTimeT64(const COleDateTime& date, time64_t& timeT)
 COleDateTime CDateHelper::GetDate(time64_t date)
 {
 	SYSTEMTIME st = { 0 };
-	T64ToSystemTime(&date, &st);
+	T64Utils::T64ToSystemTime(&date, &st);
 
 	return COleDateTime(st);
 }
@@ -1643,60 +1645,3 @@ COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
 	return dtWeek;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Original code Copyright (c) Robert Walker, support@tunesmithy.co.uk 
-
-#define SECS_TO_FT_MULT 10000000
-#define TIME_T_BASE ((time64_t)11644473600)
-
-void CDateHelper::T64ToFileTime(time64_t *pt, FILETIME *pft)
-{
-	ASSERT(pft && pt);
-
-	LARGE_INTEGER li = { 0 };  
-	
-	li.QuadPart = ((*pt) * SECS_TO_FT_MULT);
-
-	pft->dwLowDateTime = li.LowPart;
-	pft->dwHighDateTime = li.HighPart;
-}
-
-void CDateHelper::FileTimeToT64(FILETIME *pft, time64_t *pt)
-{
-	ASSERT(pft && pt);
-
-	LARGE_INTEGER li = { 0 }; 
-	
-	li.LowPart = pft->dwLowDateTime;
-	li.HighPart = pft->dwHighDateTime;
-
-	(*pt) = (li.QuadPart / SECS_TO_FT_MULT);
-}
-
-void CDateHelper::SystemTimeToT64(SYSTEMTIME *pst, time64_t *pt)
-{
-	ASSERT(pst && pt);
-
-	FILETIME ft = { 0 }, ftLocal = { 0 };
-
-	SystemTimeToFileTime(pst, &ftLocal);
-	LocalFileTimeToFileTime(&ftLocal, &ft);
-	FileTimeToT64(&ft, pt);
-
-	(*pt) -= TIME_T_BASE;
-}
-
-void CDateHelper::T64ToSystemTime(time64_t *pt, SYSTEMTIME *pst)
-{
-	ASSERT(pst && pt);
-
-	FILETIME ft = { 0 }, ftLocal = { 0 };
-	time64_t t = ((*pt) + TIME_T_BASE);
-
-	T64ToFileTime(&t, &ft);
-	FileTimeToLocalFileTime(&ft, &ftLocal);
-	FileTimeToSystemTime(&ftLocal, pst);
-}
-
-// Original code Copyright (c) Robert Walker, support@tunesmithy.co.uk
-////////////////////////////////////////////////////////////////////////////////
