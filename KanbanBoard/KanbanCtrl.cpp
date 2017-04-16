@@ -1403,6 +1403,7 @@ CKanbanListCtrl* CKanbanCtrl::NewListCtrl(const KANBANCOLUMN& colDef)
 		pList->SetTextColorIsBackground(HasOption(KBCF_TASKTEXTCOLORISBKGND));
 		pList->SetStrikeThruDoneTasks(HasOption(KBCF_STRIKETHRUDONETASKS));
 		pList->SetColorTasksByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
+		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
 
 		if (pList->Create(IDC_LISTCTRL, this))
 		{
