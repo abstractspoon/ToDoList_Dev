@@ -578,6 +578,7 @@ namespace TDC
 		ASSERT(0);
 		return IUI_EDIT;
 	}
+
 	static IUI_ATTRIBUTE MapAttributeToIUIAttrib(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
@@ -631,6 +632,29 @@ namespace TDC
 
 		ASSERT(0);
 		return IUI_NONE;
+	}
+
+	static BOOL AttributeMatchesIUIAttrib(TDC_ATTRIBUTE nAttrib, IUI_ATTRIBUTE nIUIAttrib)
+	{
+		if (nIUIAttrib == IUI_NONE)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		IUI_ATTRIBUTE nMapAttrib = MapAttributeToIUIAttrib(nAttrib);
+
+		switch (nMapAttrib)
+		{
+		case IUI_OFFSETTASK:
+			return (nAttrib == TDCA_DUEDATE || nAttrib == TDCA_STARTDATE);
+
+		case IUI_NONE:
+			return FALSE;
+		}
+
+		// all else
+		return (nMapAttrib == nIUIAttrib);
 	}
 
 	static int MapAttributesToIUIAttrib(const CTDCAttributeMap& mapAttrib, CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE>& aAttrib)

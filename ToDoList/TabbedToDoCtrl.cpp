@@ -3031,12 +3031,12 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		if (!pData || pData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
-	else // active view
+	else if (m_nExtModifyingAttrib != IUI_NONE) // active view
 	{
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
 		// attribute, then we assume that it won't want the update
-		if (TDC::MapAttributeToIUIAttrib(nAttrib) == m_nExtModifyingAttrib)
+		if (TDC::AttributeMatchesIUIAttrib(nAttrib, m_nExtModifyingAttrib))
 			return FALSE;
 	}
 
