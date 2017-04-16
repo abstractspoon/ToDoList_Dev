@@ -4793,7 +4793,7 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 
 BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 {
-	if (!CanEditSelectedTask() || (GetSelectedCount() > 1))
+	if (!CanEditSelectedTask() || (GetSelectedCount() != 1))
 		return FALSE;
 	
 	return (m_data.IsTaskTimeTrackable(GetSelectedTaskID()));
