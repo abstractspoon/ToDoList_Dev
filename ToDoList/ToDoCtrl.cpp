@@ -3303,16 +3303,14 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 			continue;
 
 		int nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
-		
+
 		if (nItemRes == SET_CHANGE)
 		{
-			if (!dwModTaskID)
-				dwModTaskID = dwTaskID;
-
+			dwModTaskID = dwTaskID;
 			nRes = SET_CHANGE;
 		}
 
-		 mapProcessed.AddKey(dwTaskID);
+		mapProcessed.AddKey(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3385,9 +3383,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(int nAmount, TDC_OFFSET nOffset, BOOL bA
 		
 		if (nItemRes == SET_CHANGE)
 		{
-			if (!dwModTaskID)
-				dwModTaskID = dwTaskID;
-			
+			dwModTaskID = dwTaskID;
 			nRes = SET_CHANGE;
 		}
 
