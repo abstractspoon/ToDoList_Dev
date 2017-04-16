@@ -3847,11 +3847,11 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	}
 }
 
-int CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date, 
+TDC_SET CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date, 
 						   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates)
 {
 	DWORD dwTaskID = GetTaskID(hti);
-	int nRes = 0;
+	TDC_SET nRes = SET_NOCHANGE;
 
 	// If bUpdateAllSubtaskDates == FALSE, we only update a task's
 	// completion if its completion state has changed else we leave

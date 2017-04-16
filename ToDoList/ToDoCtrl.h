@@ -694,7 +694,6 @@ protected:
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
 	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppends, BOOL bEdit);
-	int SetTaskDone(HTREEITEM hti, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	int CheckWantSubtasksCompleted();
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
@@ -704,6 +703,7 @@ protected:
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
+	TDC_SET SetTaskDone(HTREEITEM hti, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 
 	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent); // overridable
