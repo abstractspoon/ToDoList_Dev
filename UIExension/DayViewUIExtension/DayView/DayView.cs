@@ -819,8 +819,6 @@ namespace Calendar
 
         protected virtual void OnResolveAppointments(ResolveAppointmentsEventArgs args)
         {
-            System.Diagnostics.Debug.WriteLine("Resolve app");
-
             if (ResolveAppointments != null)
                 ResolveAppointments(this, args);
 
