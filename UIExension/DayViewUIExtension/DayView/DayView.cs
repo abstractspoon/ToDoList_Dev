@@ -1252,8 +1252,12 @@ namespace Calendar
             if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
             {
                 Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
-                if (selectionRectangle.Top + 1 > this.HeaderHeight)
-                    renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+
+                if (rect.Height > 1)
+                {
+                    if (selectionRectangle.Top + 1 > this.HeaderHeight)
+                        renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+                }
             }
 
             e.Graphics.SetClip(rect);
