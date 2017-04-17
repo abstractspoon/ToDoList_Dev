@@ -42,6 +42,10 @@ IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Calendar.DayView.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\WordCloudUIExtensionCore.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\WordCloudUIExtensionBridge.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TagCloud.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Gma.CodeCloud.Controls.dll
 :CONTINUE
  
 REM Copy latest Resources
