@@ -227,7 +227,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateCalendarCtrlPreferences();
 
-		int nWeeks = pPrefs->GetProfileInt(sKey, _T("NumWeeks"), 6);
+		int nWeeks = pPrefs->GetProfileInt(sKey, _T("NumWeeks"), 2);
 		nWeeks = max(0, min(nWeeks, 9));
 		
 		if (m_BigCalendar.SetVisibleWeeks(nWeeks))

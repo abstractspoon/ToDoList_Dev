@@ -298,10 +298,10 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		CString sKey(szKey);
 		
 		// Options
-		BOOL bChecked = pPrefs->GetProfileInt(sKey, _T("ShowParents"));
+		BOOL bChecked = pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE);
 		m_cbOptions.SetCheckByData(KBCF_SHOWPARENTTASKS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
 
-		bChecked = pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"));
+		bChecked = pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"),TRUE);
 		m_cbOptions.SetCheckByData(KBCF_SHOWEMPTYCOLUMNS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
 
 		OnSelchangeOptions();
@@ -326,6 +326,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 				m_nTrackedAttrib = IUI_STATUS;
 			break;
 		}
+
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		UpdateData(FALSE);
 
