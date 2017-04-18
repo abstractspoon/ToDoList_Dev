@@ -302,6 +302,14 @@ namespace Calendar
             }
         }
 
+        public DateTime EndDate
+        {
+            get
+            {
+                return StartDate.AddDays(daysToShow);
+            }
+        }
+
         protected virtual void OnStartDateChanged()
         {
             startDate = startDate.Date;
@@ -361,7 +369,7 @@ namespace Calendar
 					if (ResolveAppointments == null)
 						return;
 
-					ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.StartDate.AddDays(daysToShow));
+					ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.EndDate);
 					ResolveAppointments(this, args);
 
 					foreach (Appointment appt in args.Appointments)
@@ -676,7 +684,7 @@ namespace Calendar
 		public void GetDateRange(out DateTime start, out DateTime end)
 		{
 			start = this.StartDate;
-			end = this.StartDate.AddDays(daysToShow);
+			end = this.EndDate;
 		}
 
         protected override void OnPaintBackground(PaintEventArgs pevent)
@@ -1117,7 +1125,7 @@ namespace Calendar
             }
 
             // resolve appointments on visible date range.
-            ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.StartDate.AddDays(daysToShow));
+            ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.EndDate);
             OnResolveAppointments(args);
 
             using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
