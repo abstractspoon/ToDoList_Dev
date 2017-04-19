@@ -3638,7 +3638,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		}
 
 		// FALSE == Don't update the dates of any already-completed subtasks
-		TDC_SET nItemRes = SetTaskDone(hti, dtDone, bAndSubtasks, FALSE);
+		TDC_SET nItemRes = SetTaskDone(hti, dtDone, bAndSubtasks, FALSE, FALSE);
 
 		// handle recreation of recurring task
 		if (bRecurring)
@@ -3820,7 +3820,7 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	ASSERT(GetTaskID(htiNew) == dwNewTaskID);
 
 	// reset new task(s) state to 'undone' including all children
-	SetTaskDone(htiNew, 0.0, TRUE, TRUE);
+	SetTaskDone(htiNew, 0.0, TRUE, TRUE, FALSE);
 
 	// we need to move both the due date and the start date forward
 	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);
@@ -3848,32 +3848,36 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 }
 
 TDC_SET CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date, 
-						   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates)
+						   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates,
+						   BOOL bIsSubtask)
 {
+	ASSERT(bAndSubtasks || !bIsSubtask);
+	ASSERT(!CDateHelper::IsDateSet(date) || !bUpdateAllSubtaskDates);
+
 	DWORD dwTaskID = GetTaskID(hti);
 	TDC_SET nRes = SET_NOCHANGE;
 
-	// If bUpdateAllSubtaskDates == FALSE, we only update a task's
-	// completion if its completion state has changed else we leave
-	// the date as it was
+	// If bUpdateAllSubtaskDates == FALSE, we only update a subtask's 
+	// completion date if its completion state has also changed
 	BOOL bDone = CDateHelper::IsDateSet(date);
 	BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
-	BOOL bDoneChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
-
-	if (bDoneChange || bUpdateAllSubtaskDates)
+	BOOL bStateChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
+	BOOL bDateChange = (date != m_data.GetTaskDate(dwTaskID, TDCD_DONE));
+	
+	if (bDateChange && (!bIsSubtask || bUpdateAllSubtaskDates || bStateChange))
 	{
 		if (m_data.SetTaskDate(dwTaskID, TDCD_DONE, date) == SET_CHANGE)
 		{
 			nRes = SET_CHANGE;
 
-			// update status?
-			if (!m_sCompletionStatus.IsEmpty())
+			// update 'status' if done status has switched
+			if (bStateChange && !m_sCompletionStatus.IsEmpty())
 			{
 				if (bDone)
 				{
 					m_data.SetTaskStatus(dwTaskID, m_sCompletionStatus);
 				}
-				else if (m_data.GetTaskStatus(dwTaskID) == m_sCompletionStatus)
+				else
 				{
 					m_data.SetTaskStatus(dwTaskID, _T(""));
 				}
@@ -3893,7 +3897,7 @@ TDC_SET CToDoCtrl::SetTaskDone(HTREEITEM hti, const COleDateTime& date,
 		
 		while (htiChild)
 		{
-			if (SetTaskDone(htiChild, date, TRUE, bUpdateAllSubtaskDates) == SET_CHANGE)
+			if (SetTaskDone(htiChild, date, TRUE, bUpdateAllSubtaskDates, TRUE) == SET_CHANGE)
 				nRes = SET_CHANGE;
 			
 			htiChild = m_taskTree.GetNextItem(htiChild, TVGN_NEXT);
