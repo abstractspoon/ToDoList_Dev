@@ -55,6 +55,7 @@ BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
 	ON_WM_CHAR()
 	ON_CONTROL_REFLECT_EX(CBN_EDITCHANGE, OnEditchange)
 	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropdown)
+	ON_CONTROL_REFLECT_EX(CBN_CLOSEUP, OnCloseUp)
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -374,16 +375,17 @@ LRESULT CCheckComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg) 
 	{
-	// Make the combobox always return -1 as the current selection for
-	// combos without an edit potion when drawing. This
-	// causes the lpDrawItemStruct->itemID in DrawItem() to be -1
-	// when the always-visible-portion of the combo is drawn
 	case LB_GETCURSEL: 
+		// Make the combobox always return -1 as the current selection for
+		// combos without an edit potion when drawing. This
+		// causes the lpDrawItemStruct->itemID in DrawItem() to be -1
+		// when the always-visible-portion of the combo is drawn
 		if (IsType(CBS_DROPDOWNLIST) && m_bDrawing)
 			return -1;
 		break;
 				
-	case WM_CHAR: // sent by the edit control (if present) or the list box
+	case WM_CHAR: 
+		// sent by the edit control (if present) or the list box
 		if (wp == VK_SPACE && GetDroppedState()) 
 		{
 			// Get the current selection
@@ -492,8 +494,22 @@ BOOL CCheckComboBox::OnDropdown()
 {
 	CAutoComboBox::OnDropDown();
 
+	// Snapshot the mixed items so that we can handle
+	// them as tri-state checkboxes while dropped
+	GetChecked(m_aMixedItems, CCBC_MIXED);
+
 	ParseText();
 	RecalcText(FALSE); // updates m_sText only
+	
+	return FALSE; // pass to parent
+}
+
+BOOL CCheckComboBox::OnCloseUp() 
+{
+	CAutoComboBox::OnCloseUp();
+
+	// cleanup
+	m_aMixedItems.RemoveAll();
 	
 	return FALSE; // pass to parent
 }
@@ -829,6 +845,20 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 	switch (nCheck)
 	{
 	case CCBC_UNCHECKED:
+		// If this item was originally a mixed item when
+		// the list was dropped down we treat it as a 
+		// tri-state checkbox
+		{
+			CString sItem = GetItemText(nItem);
+			BOOL bTriState = (Misc::Find(m_aMixedItems, sItem, FALSE, FALSE) != -1);
+
+			if (bTriState)
+				nCheck = CCBC_MIXED;
+			else
+				nCheck = CCBC_CHECKED;
+		}
+		break;
+
 	case CCBC_MIXED:
 		nCheck = CCBC_CHECKED;
 		break;

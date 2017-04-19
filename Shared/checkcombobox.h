@@ -56,6 +56,7 @@ protected:
 	BOOL m_bTextFits;
 	BOOL m_bChecking;
 	int m_nClickedItem;
+	CStringArray m_aMixedItems;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -75,6 +76,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnEditchange();
 	afx_msg BOOL OnDropdown();
+	afx_msg BOOL OnCloseUp();
 	afx_msg void OnLBSelChange();
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
