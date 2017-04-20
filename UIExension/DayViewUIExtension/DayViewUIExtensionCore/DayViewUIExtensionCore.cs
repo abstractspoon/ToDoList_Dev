@@ -72,7 +72,9 @@ namespace DayViewUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
 				task = task.GetNextTask();
 
-            // Clear selection
+            // Refresh selection
+            RestoreSelectedItem();
+
             m_DayView.SelectionStart = m_DayView.SelectionEnd;
 			m_DayView.Invalidate();
             m_DayView.Update();
@@ -383,14 +385,41 @@ namespace DayViewUIExtension
 				case Calendar.SelectionType.DateRange:
 					break;
 
-				case Calendar.SelectionType.Appointment:
-					if (args.Appointment != null)
-						notify.NotifySelChange(args.Appointment.Id);
-                    else
-                        notify.NotifySelChange(0);
+                case Calendar.SelectionType.Appointment:
+                    {
+                        UInt32 prevSelTaskID = m_SelectedTaskID;
+
+                        if (args.Appointment != null)
+                            m_SelectedTaskID = args.Appointment.Id;
+                        else
+                            m_SelectedTaskID = 0;
+
+                        if (m_SelectedTaskID != prevSelTaskID)
+                            notify.NotifySelChange(m_SelectedTaskID);
+                    }
 					break;
 			}
 		}
+
+        private void RestoreSelectedItem()
+        {
+            // Restore the selection if it is present in this week
+            if (m_SelectedTaskID > 0)
+            {
+                CalendarItem item;
+
+                if (m_Items.TryGetValue(m_SelectedTaskID, out item))
+                {
+                    if (IsItemWithinRange(item, m_DayView.StartDate, m_DayView.EndDate))
+                    {
+                        m_DayView.SelectedAppointment = item;
+                        return;
+                    }
+                }
+            }
+
+            m_DayView.SelectedAppointment = null;
+        }
 
 		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
@@ -406,11 +435,7 @@ namespace DayViewUIExtension
 				m_SettingMonthYear = false;
 			}
 
-            // Restore the selection if it is present in this week
-			CalendarItem item;
-
-            if (m_Items.TryGetValue(m_SelectedTaskID, out item))
-				m_DayView.SelectedAppointment = item;
+			RestoreSelectedItem();
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
@@ -502,13 +527,9 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
-            // Sanity check
-            if ((item.StartDate == DateTime.MinValue) || (item.EndDate == DateTime.MinValue))
-                return false;
-
-            // else
-			return ((item.StartDate >= startDate) && (item.EndDate <= endDate) &&
-					(item.StartDate.Date == item.EndDate.Date));
+			return (item.IsSingleDay() && 
+                    (item.StartDate.Date >= startDate) && 
+                    (item.StartDate.Date <= endDate));
 		}
 
 		// --------------------------------------------------------------------------------------
@@ -549,7 +570,7 @@ namespace DayViewUIExtension
             set
             {
                 // Handle 'end of day'
-                if (value.Date == value)
+                if ((value != DateTime.MinValue) && (value.Date == value))
                     base.EndDate = value.AddSeconds(-1);
                 else
                     base.EndDate = value;
@@ -571,6 +592,11 @@ namespace DayViewUIExtension
         public static bool IsEndOfDay(DateTime date)
         {
             return (date == date.Date.AddDays(1).AddSeconds(-1));
+        }
+
+        public bool IsSingleDay()
+        {
+            return (StartDate.Date == EndDate.Date);
         }
     }
 
