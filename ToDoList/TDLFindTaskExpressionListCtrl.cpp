@@ -540,7 +540,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 		break;
 		
 	case FT_DATE_REL:
-		m_editBox.SetMask(_T("tTdDWMY+-1234567890"));
+		m_editBox.SetMask(_T("nNtTdDWMY+-1234567890"));
 		break;
 		
 	case FT_DOUBLE:
