@@ -27,10 +27,10 @@ namespace DayViewUIExtension
 		{
 			CalendarItem item;
 
-			if (m_Items.TryGetValue(dwTaskID, out item))
+			if (m_Items.TryGetValue(dwTaskID, out item) && (item.StartDate != DateTime.MinValue))
 			{
 				m_SelectedTaskID = dwTaskID;
-				m_DayView.StartDate = item.StartDate;				
+                m_DayView.StartDate = item.StartDate;				
 				m_DayView.SelectedAppointment = item;
                 m_DayView.ScrollToTop();
                 
@@ -44,6 +44,7 @@ namespace DayViewUIExtension
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
 		{
+            // not currently supported
 			return false;
 		}
 
@@ -501,6 +502,11 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
+            // Sanity check
+            if ((item.StartDate == DateTime.MinValue) || (item.EndDate == DateTime.MinValue))
+                return false;
+
+            // else
 			return ((item.StartDate >= startDate) && (item.EndDate <= endDate) &&
 					(item.StartDate.Date == item.EndDate.Date));
 		}

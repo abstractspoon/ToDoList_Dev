@@ -64,7 +64,9 @@
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
 mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"</Command>
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,7 +89,9 @@ copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(Configurati
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
 mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList"
 mkdir "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)"
-copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"</Command>
+copy $(TargetPath) "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unicode_$(ConfigurationName)\"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
