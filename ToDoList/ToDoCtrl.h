@@ -816,8 +816,6 @@ protected:
 	void MakeFullPaths(CStringArray& aFilePaths) const;
 	CString GetLastSaveFolder() const;
 
-	inline const TODOITEM* GetSelectedTask() const { return m_taskTree.GetSelectedTask(); }
-
 	void HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);
 	void LoadTaskIcons();
