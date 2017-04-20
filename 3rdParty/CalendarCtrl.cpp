@@ -429,31 +429,21 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	
 	if (bToday)
 	{
-		// Draw the frame 
-		CRect rcLine(rCell);
-		rcLine.bottom = rcLine.top+15;
-		rcLine.top = rcLine.bottom-1;
-		
-		for(int c=0; c<15; c++)
-		{
-			pDC->FillSolidRect(rcLine, GetFadedThemeColour(c*6));
-			rcLine.bottom--;
-			rcLine.top = rcLine.bottom-1;
-		}
+		CRect selRect(rCell);
+		selRect.bottom = selRect.top + m_nDayHeaderHeight - 1;
+
+		pDC->FillSolidRect(selRect, m_crTheme);
 	}
 	
 	// Draw the selection
 	if (bSelected)
 	{	
-		CBrush br;
-		br.CreateSolidBrush(GetFadedThemeColour(40));
-
 		CRect selRect(rCell);
 
 		if (bToday)	
 			selRect.top += m_nDayHeaderHeight;
 
-		pDC->FillRect(&selRect, &br);
+		pDC->FillSolidRect(selRect, GetFadedThemeColour(40));
 	}
 	
 	// Out of range
@@ -463,21 +453,17 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		CRect selRect(rCell);
 		CBrush br;
 
-		br.CreateSolidBrush(RGB(255,225,225));
-		pDC->FillRect(&selRect, &br);
+		pDC->FillSolidRect(selRect, RGB(255,225,225));
 	}
 	
 	if (pCell->bMark)
 	{
-		CBrush br;
-		br.CreateSolidBrush(RGB(255,104,4));
-
 		CRect rcMark(rCell);
 		rcMark.DeflateRect(3,3);
 		rcMark.right = rcMark.left +6;
 		rcMark.bottom = rcMark.top +6;
 
-		pDC->FillRect(&rcMark, &br);
+		pDC->FillSolidRect(rcMark, RGB(255,104,4));
 	}
 	
 	// draw day/month numbers

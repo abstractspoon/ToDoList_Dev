@@ -95,8 +95,10 @@ LRESULT CTaskCalendarCtrl::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 	return (LRESULT)m_DefaultFont.GetSafeHandle();
 }
 
-LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 {
+	m_fonts.Clear();
+
 	GraphicsMisc::VerifyDeleteObject(m_DefaultFont);
 	GraphicsMisc::CreateFont(m_DefaultFont, (HFONT)wp);
 
@@ -710,12 +712,12 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				
 				m_mapTextOffset[pTCI->GetTaskID()] = nOffset;
 			}
-
-			pDC->RestoreDC(nSaveDC);
 						
 			if (rTask.bottom >= rCellTrue.bottom)
 				break;
 		}
+
+		pDC->RestoreDC(nSaveDC);
 	}
 }
 
