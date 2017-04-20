@@ -3785,7 +3785,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(hti);
 
 		HTREEITEM htiParent = m_taskTree.GetParentItem(hti);
-		HTREEITEM htiNew = AddTaskToTreeItem(task, task.GetFirstTask(), htiParent, hti, TDCR_YES);
+		HTREEITEM htiNew = AddTaskToTreeItem(task, task.GetFirstTask(), htiParent, hti, TDCR_YES, TRUE);
 
 		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, htiNew, dtNext, bDueDate);
 
@@ -6817,10 +6817,10 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 	return TRUE;
 }
 
-HTREEITEM CToDoCtrl::AddTaskToTreeItem(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, HTREEITEM htiAfter, TDC_RESETIDS nResetID)
+HTREEITEM CToDoCtrl::AddTaskToTreeItem(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, 
+										HTREEITEM htiAfter, TDC_RESETIDS nResetID, BOOL bAndSubtasks)
 {
 	HTREEITEM hti = TVI_ROOT; // default for root item
-	TODOITEM* pTDI = NULL;
 	
 	if (hTask)
 	{
@@ -6860,12 +6860,14 @@ HTREEITEM CToDoCtrl::AddTaskToTreeItem(const CTaskFile& tasks, HTASKITEM hTask, 
 		// add items to map
 		DWORD dwParentID = GetTaskID(htiParent);
 		DWORD dwPrevTaskID = GetTaskID(htiAfter);
-		
-		pTDI = m_data.NewTask(tasks, hTask);
-		ASSERT(pTDI);
+
+		TODOITEM* pTDI = m_data.NewTask(tasks, hTask, &m_tdiDefault);
 
 		if (!pTDI)
+		{
+			ASSERT(0);
 			return NULL;
+		}
 		
 		// add this item to data structure
 		m_data.AddTask(dwTaskID, pTDI, dwParentID, dwPrevTaskID);
@@ -6873,19 +6875,24 @@ HTREEITEM CToDoCtrl::AddTaskToTreeItem(const CTaskFile& tasks, HTASKITEM hTask, 
 		// add this item to tree
 		hti = InsertTreeItem(pTDI, dwTaskID, htiParent, htiAfter);
 	}
+
+	HTREEITEM htiFirstItem = (hti == TVI_ROOT) ? NULL : hti;
 	
 	// then children
-	HTREEITEM htiFirstItem = (hti == TVI_ROOT) ? NULL : hti;
-	HTASKITEM hChildTask = tasks.GetFirstTask(hTask);
-	
-	while (hChildTask)
+	if (bAndSubtasks)
 	{
-		HTREEITEM htiChild = AddTaskToTreeItem(tasks, hChildTask, hti, TVI_LAST, nResetID);
+		HTREEITEM htiFirstItem = (hti == TVI_ROOT) ? NULL : hti;
+		HTASKITEM hChildTask = tasks.GetFirstTask(hTask);
+	
+		while (hChildTask)
+		{
+			HTREEITEM htiChild = AddTaskToTreeItem(tasks, hChildTask, hti, TVI_LAST, nResetID, bAndSubtasks);
 		
-		if (!htiFirstItem)
-			htiFirstItem = htiChild;
+			if (!htiFirstItem)
+				htiFirstItem = htiChild;
 		
-		hChildTask = tasks.GetNextTask(hChildTask); // next
+			hChildTask = tasks.GetNextTask(hChildTask); // next
+		}
 	}
 		
 	return htiFirstItem;
@@ -7275,7 +7282,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 					PrepareTaskIDsForPasteAsRef(tasks);
 
 				// then add them with impunity!
-				AddTasksToTree(tasks, htiDrop, htiAfter, TDCR_NO, TRUE, TDCA_PASTE);
+				AddTasksToTree(tasks, htiDrop, htiAfter, TDCR_NO, TRUE);
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
@@ -8179,7 +8186,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		HOLD_REDRAW(*this, m_taskTree);
 
 		// no need to re-check IDs as we've already done it
-		if (AddTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE, TDCA_PASTE))
+		if (AddTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
 		{
 			m_data.FixupParentCompletion(GetTaskID(htiDest));
 
@@ -8192,7 +8199,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 }
 
 BOOL CToDoCtrl::AddTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, 
-							   TDC_RESETIDS nResetIDs, BOOL bSelectAll, TDC_ATTRIBUTE nModAttrib)
+							   TDC_RESETIDS nResetIDs, BOOL bSelectAll)
 {
 	if (!htiDest)
 		htiDest = TVI_ROOT;
@@ -8212,7 +8219,7 @@ BOOL CToDoCtrl::AddTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEI
 
 	while (hTask)
 	{
-		htiDestAfter = AddTaskToTreeItem(tasks, hTask, htiDest, htiDestAfter, nResetIDs);
+		htiDestAfter = AddTaskToTreeItem(tasks, hTask, htiDest, htiDestAfter, nResetIDs, TRUE);
 
 		// cache items for selection
 		if (bSelectAll)
@@ -8238,7 +8245,7 @@ BOOL CToDoCtrl::AddTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEI
 		SelectItem(m_taskTree.GetChildItem());
 	}
 	
-	SetModified(TRUE, nModAttrib, 0);
+	SetModified(TRUE, TDCA_PASTE, 0);
 	UpdateControls();
 	
 	return TRUE;
@@ -9305,7 +9312,17 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 {
 	if (IsReadOnly())
 		return FALSE;
-	
+
+	switch (nWhere)
+	{
+	case TDIT_MERGETOTASKLISTBYTITLE:
+		return MergeTasks(tasks, FALSE);
+
+	case TDIT_MERGETOTASKLISTBYID:
+		return MergeTasks(tasks, TRUE);
+	}
+
+	// else
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
 	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
@@ -9331,11 +9348,11 @@ BOOL CToDoCtrl::InsertTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL
 
 		// and always assign new IDs
 		PrepareTasksForPaste(copy, TDCR_YES, FALSE);
-		return AddTasksToTree(copy, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
+		return AddTasksToTree(copy, htiParent, htiAfter, TDCR_NO, bSelectAll);
 	}
 
 	// else
-	return AddTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll, TDCA_PASTE);
+	return AddTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll);
 }
 
 BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
@@ -9405,12 +9422,21 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASK
 		DWORD dwParentID = tasks.GetTaskID(hParentTask);
 		HTREEITEM htiParent = (dwParentID ? m_taskTree.Find().GetItem(dwParentID) : NULL);
 
-		HTREEITEM htiNew = AddTaskToTreeItem(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES);
+		HTREEITEM htiNew = AddTaskToTreeItem(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES, FALSE); // Not subtasks
 
 		if (!htiNew)
 			return FALSE;
 
 		aNewTaskIDs.Add(GetTaskID(htiNew));
+	}
+
+	// Subtasks
+	HTASKITEM hChildTask = tasks.GetFirstTask(hTask);
+
+	while (hChildTask)
+	{
+		VERIFY(MergeTaskWithTree(tasks, hChildTask, hTask, bMergeByID, aNewTaskIDs));
+		hChildTask = tasks.GetNextTask(hChildTask); // next
 	}
 
 	return TRUE;
@@ -10360,8 +10386,6 @@ int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)
 
 	if (CTDCOutlookImportHelper::ImportTasks(pData, IDS_CSV_MUSTMAPTASKTITLE, &tasks))
 	{
-		tasks.ApplyDefaultTaskAttributes(m_tdiDefault);
-
 		// add to current tasklist
 		HTREEITEM htiInsert = m_taskTree.GetItem(pData->dwTaskID);
 		

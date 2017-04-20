@@ -216,14 +216,15 @@ TODOITEM* CToDoCtrlData::NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID) c
 	return pTDI;
 }
 
-TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask) const
+TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef) const
 {
 	ASSERT(hTask);
 
 	if (!hTask)
 		return NULL;
 
-	TODOITEM* pTDI = NewTask();
+	BOOL bDefAttrib = (pTDIRef != NULL);
+	TODOITEM* pTDI = (bDefAttrib ? NewTask(*pTDIRef) : NewTask());
 
 	if (!pTDI)
 	{
@@ -231,7 +232,8 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask) const
 		return NULL;
 	}
 	
-	tasks.GetTaskAttributes(hTask, *pTDI);
+	// Don't overwrite default attributes except with actual values
+	tasks.GetTaskAttributes(hTask, *pTDI, !bDefAttrib);
 	
 	// make sure incomplete tasks are not 100% and vice versa
 	if (pTDI->IsDone())

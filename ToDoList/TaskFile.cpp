@@ -1696,7 +1696,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 	return TRUE;
 }
 
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
@@ -1706,43 +1706,48 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 	// Load attributes _only_ if this is a 'real' task
 	if (tdi.dwTaskRefID == 0)
 	{
-		// Call GetTaskString directly wherever possible to avoid string copying
-		tdi.dateLastMod = GetTaskLastModifiedOle(hTask);
-		tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE);
-		tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
-		tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY);
-		tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS);
-		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY);
-		tdi.bFlagged = IsTaskFlagged(hTask);
-		tdi.bLocked = IsTaskLocked(hTask, false);
-		tdi.color = (COLORREF)GetTaskColor(hTask);
-		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false);
-		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, false);
-		tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, false);
-		tdi.nPriority = (int)GetTaskPriority(hTask, false);
-		tdi.dateDue = GetTaskDueDateOle(hTask);
-		tdi.dateStart = GetTaskStartDateOle(hTask);
-		tdi.dateDone = GetTaskDoneDateOle(hTask);
-		tdi.dateCreated = GetTaskCreationDateOle(hTask);
-		tdi.nRisk = GetTaskRisk(hTask, false);
-		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID);
-		tdi.dCost = GetTaskCost(hTask, false);
-		tdi.sVersion = GetTaskVersion(hTask);
-		tdi.sIcon = GetTaskIcon(hTask);
+#define GETATTRIB(att, expr) if (bOverwrite || TaskHasAttribute(hTask, att)) expr
 
-		GetTaskCategories(hTask, tdi.aCategories);
-		GetTaskTags(hTask, tdi.aTags);
-		GetTaskAllocatedTo(hTask, tdi.aAllocTo);
-		GetTaskRecurrence(hTask, tdi.trRecurrence);
-		GetTaskDependencies(hTask, tdi.aDependencies);
-		GetTaskFileLinks(hTask, tdi.aFileLinks);
-		GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID);
+		// Call GetTaskString wherever possible to avoid string copying
+		GETATTRIB(TDL_TASKTITLE,			tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE));
+		GETATTRIB(TDL_TASKCOMMENTS,			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS));
+		GETATTRIB(TDL_TASKALLOCBY,			tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY));
+		GETATTRIB(TDL_TASKSTATUS,			tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS));
+		GETATTRIB(TDL_TASKCREATEDBY,		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY));
+		GETATTRIB(TDL_TASKEXTERNALID,		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
+		GETATTRIB(TDL_TASKVERSION,			tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
+		GETATTRIB(TDL_TASKICONINDEX,		tdi.sIcon = GetTaskString(hTask, TDL_TASKICONINDEX));
+
+		GETATTRIB(TDL_TASKFLAG,				tdi.bFlagged = IsTaskFlagged(hTask, false));
+		GETATTRIB(TDL_TASKLOCK,				tdi.bLocked = IsTaskLocked(hTask, false));
+
+		GETATTRIB(TDL_TASKCOLOR,			tdi.color = (COLORREF)GetTaskColor(hTask));
+		GETATTRIB(TDL_TASKPERCENTDONE,		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false));
+		GETATTRIB(TDL_TASKTIMEESTIMATE,		tdi.dTimeEstimate = GetTaskTimeEstimate(hTask, tdi.nTimeEstUnits, false));
+		GETATTRIB(TDL_TASKTIMESPENT,		tdi.dTimeSpent = GetTaskTimeSpent(hTask, tdi.nTimeSpentUnits, false));
+		GETATTRIB(TDL_TASKPRIORITY,			tdi.nPriority = (int)GetTaskPriority(hTask, false));
+		GETATTRIB(TDL_TASKRISK,				tdi.nRisk = GetTaskRisk(hTask, false));
+		GETATTRIB(TDL_TASKCOST,				tdi.dCost = GetTaskCost(hTask, false));
+
+		GETATTRIB(TDL_TASKDUEDATE,			tdi.dateDue = GetTaskDueDateOle(hTask));
+		GETATTRIB(TDL_TASKSTARTDATE,		tdi.dateStart = GetTaskStartDateOle(hTask));
+		GETATTRIB(TDL_TASKDONEDATE,			tdi.dateDone = GetTaskDoneDateOle(hTask));
+		GETATTRIB(TDL_TASKCREATIONDATE,		tdi.dateCreated = GetTaskCreationDateOle(hTask));
+		GETATTRIB(TDL_TASKLASTMOD,			tdi.dateLastMod = GetTaskLastModifiedOle(hTask));
+
+		GETATTRIB(TDL_TASKCATEGORY,			GetTaskCategories(hTask, tdi.aCategories));
+		GETATTRIB(TDL_TASKTAG,				GetTaskTags(hTask, tdi.aTags));
+		GETATTRIB(TDL_TASKALLOCTO,			GetTaskAllocatedTo(hTask, tdi.aAllocTo));
+		GETATTRIB(TDL_TASKRECURRENCE,		GetTaskRecurrence(hTask, tdi.trRecurrence));
+		GETATTRIB(TDL_TASKDEPENDENCY,		GetTaskDependencies(hTask, tdi.aDependencies));
+		GETATTRIB(TDL_TASKFILEREFPATH,		GetTaskFileLinks(hTask, tdi.aFileLinks));
+		GETATTRIB(TDL_TASKCUSTOMCOMMENTS,	GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID));
 
 		// meta data
-		GetTaskMetaData(hTask, tdi.mapMetaData);
+		GETATTRIB(TDL_TASKMETADATA,			GetTaskMetaData(hTask, tdi.mapMetaData));
 
 		// custom data
-		GetTaskCustomAttributeData(hTask, tdi.mapCustomData);
+		GETATTRIB(TDL_TASKCUSTOMATTRIBDATA, GetTaskCustomAttributeData(hTask, tdi.mapCustomData));
 	}
 
 	return TRUE;
@@ -4016,136 +4021,3 @@ BOOL CTaskFile::SetArray(const CString& sItemTag, const CStringArray& aItems)
 	return TRUE;
 }
 
-void CTaskFile::ApplyDefaultTaskAttributes(const TODOITEM& tdi)
-{
-	ApplyDefaultTaskAttributes(tdi, NULL, TRUE);
-}
-
-void CTaskFile::ApplyDefaultTaskAttributes(const TODOITEM& tdi, HTASKITEM hTask, BOOL bAndSiblings)
-{
-	BOOL bRefTask = (hTask && GetTaskReferenceID(hTask));
-
-	if (hTask)
-	{
-		// Only apply defaults to non-reference tasks
-		// AND if the target attribute is empty
-		if (!bRefTask)
-		{
-			ASSERT (tdi.sComments.IsEmpty());
-			SetTaskCustomComments(hTask, CBinaryData(), tdi.sCommentsTypeID);
-			
-			if (!tdi.sAllocBy.IsEmpty() && GetTaskString(hTask, TDL_TASKALLOCBY).IsEmpty())
-				SetTaskString(hTask, TDL_TASKALLOCBY, tdi.sAllocBy);
-			
-			if (!tdi.sStatus.IsEmpty() && GetTaskString(hTask, TDL_TASKSTATUS).IsEmpty())
-				SetTaskString(hTask, TDL_TASKSTATUS, tdi.sStatus);
-			
-			if (!tdi.sVersion.IsEmpty() && GetTaskString(hTask, TDL_TASKVERSION).IsEmpty())
-				SetTaskString(hTask, TDL_TASKVERSION, tdi.sVersion);
-			
-			if (!tdi.sCreatedBy.IsEmpty() && GetTaskString(hTask, TDL_TASKCREATEDBY).IsEmpty())
-				SetTaskString(hTask, TDL_TASKCREATEDBY, tdi.sCreatedBy);
-			
-			if (!tdi.sExternalID.IsEmpty() && GetTaskString(hTask, TDL_TASKEXTERNALID).IsEmpty())
-				SetTaskString(hTask, TDL_TASKEXTERNALID, tdi.sExternalID);
-			
-			if (!tdi.sIcon.IsEmpty() && GetTaskString(hTask, TDL_TASKICONINDEX).IsEmpty())
-				SetTaskString(hTask, TDL_TASKICONINDEX, tdi.sIcon);
-			
-			// rest of non-string attributes
-			if (GetTaskString(hTask, TDL_TASKPRIORITY).IsEmpty())
-				SetTaskPriority(hTask, tdi.nPriority);
-
-			if (GetTaskString(hTask, TDL_TASKRISK).IsEmpty())
-				SetTaskRisk(hTask, tdi.nRisk);
-			
-// 			if (tdi.bFlagged)
-// 				SetTaskFlag(hTask, tdi.bFlagged != FALSE);
-			
-// 			if (tdi.IsRecurring())
-// 				SetTaskRecurrence(hTask, tdi.trRecurrence);
-			
-			if (tdi.aAllocTo.GetSize() && GetTaskString(hTask, TDL_TASKALLOCTO).IsEmpty())
-				SetTaskAllocatedTo(hTask, tdi.aAllocTo);
-			
-			if (tdi.aCategories.GetSize() && GetTaskString(hTask, TDL_TASKCATEGORY).IsEmpty())
-				SetTaskCategories(hTask, tdi.aCategories);
-			
-			if (tdi.aTags.GetSize() && GetTaskString(hTask, TDL_TASKTAG).IsEmpty())
-				SetTaskTags(hTask, tdi.aTags);
-			
-// 			if (tdi.aDependencies.GetSize())
-// 				SetTaskDependencies(hTask, tdi.aDependencies);
-			
-// 			if (tdi.aFileLinks.GetSize())
-// 				SetTaskFileLinks(hTask, tdi.aFileLinks);
-			
-			if (tdi.dCost != 0 && GetTaskString(hTask, TDL_TASKCOST).IsEmpty())
-				SetTaskCost(hTask, tdi.dCost);
-			
-			if ((tdi.dTimeEstimate > 0) || (tdi.nTimeEstUnits != TDCU_HOURS))
-				SetTaskTimeEstimate(hTask, tdi.dTimeEstimate, tdi.nTimeEstUnits);
-			
-			if ((tdi.dTimeSpent != 0.0) || (tdi.nTimeSpentUnits != TDCU_HOURS))
-				SetTaskTimeSpent(hTask, tdi.dTimeSpent, tdi.nTimeSpentUnits);
-			
-			// done date and percent
-// 			if (tdi.IsDone())
-// 			{
-// 				SetTaskDoneDate(hTask, tdi.dateDone);
-// 				SetTaskPercentDone(hTask, 100);
-// 			}
-// 			//////////////////////////////////////////////////////////////////////////
-// 			// SAVE PERCENT DONE REGARDLESS OF VALUE, ELSE GANTTVIEWER SPITS THE DUMMY
-// 			else// if (tdi.nPercentDone > 0)
-// 			{
-// 				SetTaskPercentDone(hTask, (unsigned char)min(99, tdi.nPercentDone));
-// 			}
-			//////////////////////////////////////////////////////////////////////////
-			
-			if (tdi.HasDue() && GetTaskString(hTask, TDL_TASKDUEDATE).IsEmpty())
-				SetTaskDueDate(hTask, tdi.dateDue);
-			
-			if (tdi.HasStart() && GetTaskString(hTask, TDL_TASKSTARTDATE).IsEmpty())
-				SetTaskStartDate(hTask, tdi.dateStart);
-			
-// 			if (tdi.HasCreation())
-// 				SetTaskCreationDate(hTask, tdi.dateCreated);
-			
-// 			if (tdi.HasLastMod())
-// 				SetTaskLastModified(hTask, tdi.dateLastMod);
-			
-			if (tdi.color && GetTaskString(hTask, TDL_TASKCOLOR).IsEmpty())
-				SetTaskColor(hTask, tdi.color);
-			
-// 			// meta data
-// 			SetTaskMetaData(hTask, tdi.mapMetaData);
-// 			
-// 			// custom data
-// 			SetTaskCustomAttributeData(hTask, tdi.mapCustomData);
-		}
-
-		// handle sibling tasks WITHOUT RECURSION
-		if (bAndSiblings)
-		{
-			HTASKITEM hSibling = GetNextTask(hTask);
-			
-			while (hSibling)
-			{
-				// FALSE == don't recurse on siblings
-				ApplyDefaultTaskAttributes(tdi, hSibling, FALSE);
-				hSibling = GetNextTask(hSibling);
-			}
-		}
-	}
-
-	// children of non-ref tasks
-	if (!bRefTask)
-	{
-		// note: we only need do the first child
-		HTASKITEM hSubtask = GetFirstTask(hTask);
-
-		if (hSubtask)
-			ApplyDefaultTaskAttributes(tdi, hSubtask, TRUE);
-	}
-}

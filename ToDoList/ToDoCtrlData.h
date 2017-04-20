@@ -59,7 +59,7 @@ public:
 	
 	TODOITEM* NewTask() const;
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
-	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask) const;
+	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
 
 	void AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID);
 	BOOL DeleteTask(DWORD dwTaskID);
