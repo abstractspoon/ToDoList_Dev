@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 
 const LPCTSTR  STR_CLOSEBTN	= _T("r");
 const COLORREF RED			= RGB(200, 90, 90);
-const COLORREF WHITE		= RGB(240, 240, 240);
+const COLORREF WHITE		= RGB(255, 255, 255);
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
 
@@ -174,7 +174,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 
 	if (nExtra)
 	{
-		// calculate the sixe of a space char
+		// calculate the size of a space char
 		const LPCTSTR SPACE = _T(" ");
 
 		int nSpaceWidth = GraphicsMisc::GetTextWidth(SPACE, *this, GetTabFont(nTab));
@@ -315,9 +315,29 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 		else
 		{
 			CRect rTab(rcItem);
-			rTab.DeflateRect(1, 1, 1, 0);
+			int nOffset = (nTab - GetCurSel());
+
+			switch (nOffset)
+			{
+			case 0: // == selected tab
+				rTab.DeflateRect(2, 2, 1, -1);
+				break;
+
+			case -1: // == immediately before selected tab
+				rTab.DeflateRect(1, 2, 2, -1);
+				break;
+
+			case 1: // == immediately after selected tab
+				rTab.DeflateRect(3, 2, 1, -1);
+				break;
+
+			default:
+				rTab.DeflateRect(1, 2, 1, -1);
+				break;
+			}
+			GraphicsMisc::DrawRect(pDC, rTab, crBack, CLR_NONE, 2);
 			
-			pDC->FillSolidRect(rTab, crBack);
+			//pDC->FillSolidRect(rTab, crBack);
 			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
 		}
 	}
@@ -416,14 +436,12 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	}
 	else
 	{
-		COLORREF crText = GraphicsMisc::GetBestTextColor(GetItemBkColor(nTab));
+		COLORREF crTab = GetItemBkColor(nTab);
 
-		if (crText == RGB(255, 255, 255))
-			crText = WHITE;
+		if (crTab != CLR_NONE)
+			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
-			crText = GetSysColor(COLOR_3DDKSHADOW);
-		
-		dc.SetTextColor(crText);
+			dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 	}
 	
 	dc.SetTextAlign(TA_TOP | TA_LEFT);
@@ -720,27 +738,17 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 		rBtn.bottom = rBtn.top + m_sizeClose.cy;
 		
 		if (bSel)
-		{
 			rBtn.OffsetRect(0, 1);
-		}
 		else
-		{
  			rBtn.OffsetRect(-2, 3);
-		}
 		break;
 
 	case e_tabBottom:
 		rBtn.left = rBtn.right - m_sizeClose.cx;
 		rBtn.top = rBtn.bottom - m_sizeClose.cy;
 		
-		if (bSel)
-		{
-			// rBtn.OffsetRect(0, 1);
-		}
-		else
-		{
+		if (!bSel)
 			rBtn.OffsetRect(-2, -2);
-		}
 		break;
 		
 	case e_tabLeft:
@@ -753,7 +761,10 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 	default:
 		return FALSE;
 	}
-	
+
+	if (nTab == (nSel - 1))
+		rBtn.OffsetRect(-1, 0);
+		
 	return TRUE;
 }
 

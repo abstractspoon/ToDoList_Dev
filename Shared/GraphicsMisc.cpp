@@ -929,12 +929,20 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 			brFill.CreateSolidBrush(crFill);
 			pOldBrush = pDC->SelectObject(&brFill);
 		}
+		else
+		{
+			pOldBrush = (CBrush* )pDC->SelectStockObject(NULL_BRUSH);
+		}
 
 		// border
 		if (crBorder != CLR_NONE)
 		{
 			penBorder.CreatePen(PS_SOLID, 1, crBorder);
 			pOldPen = pDC->SelectObject(&penBorder);
+		}
+		else
+		{
+			pOldPen = (CPen*)pDC->SelectStockObject(NULL_PEN);
 		}
 
 		pDC->RoundRect(rect, CPoint(nCornerRadius, nCornerRadius));
