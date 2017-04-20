@@ -5478,7 +5478,7 @@ BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
-	if (!tdc.InsertTasks(tasks, TDC_INSERTATTOP, TRUE))
+	if (!tdc.PasteTasks(tasks, TDC_INSERTATTOP, TRUE))
 		return FALSE;
 
 	UpdateCaption();
@@ -8471,7 +8471,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 				break;
 			}
 
-			VERIFY(tdc.InsertTasks(tasks, nWhere, bSelectAll));
+			VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
 
 			UpdateCaption();
 			break;
