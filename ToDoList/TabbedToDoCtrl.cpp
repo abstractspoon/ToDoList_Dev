@@ -533,8 +533,13 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	// For automation
 	::SetWindowText(hWnd, pExtWnd->GetTypeID());
 
+	// Save off
 	m_aExtViews[nExtension] = pExtWnd;
-	
+
+	// Set font before loading preferences
+	pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskTree.GetFont());
+	pData->bNeedFontUpdate = FALSE;
+		
 	// restore state
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(GetExtensionPrefsSubKey(pExtWnd));
