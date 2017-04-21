@@ -94,6 +94,11 @@ static GTLC_MONTH_DISPLAY GetFirstDisplay()
 	return DISPLAYMODES[0].nDisplay;
 }
 
+static int CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
+{
+	return (FindDisplay(nDisplay1) - FindDisplay(nDisplay2));
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

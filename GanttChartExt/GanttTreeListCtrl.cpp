@@ -3257,6 +3257,10 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	GANTTDISPLAY gdTemp;
 	BOOL bToday = FALSE;
 
+	// Use higher resolution where possible
+	GTLC_MONTH_DISPLAY nCalcDisplay = GetColumnDisplay((int)fMonthWidth);
+	BOOL bUseHigherRes = (CompareDisplays(nCalcDisplay, m_nMonthDisplay) > 0);
+
 	switch (m_nMonthDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
@@ -3280,13 +3284,19 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
-		DrawListItemMonth(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+		if (bUseHigherRes)
+			DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+		else
+			DrawListItemMonth(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+		if (bUseHigherRes)
+			DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+		else
+			DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
