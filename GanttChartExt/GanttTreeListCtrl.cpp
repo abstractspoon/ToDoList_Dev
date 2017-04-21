@@ -3939,7 +3939,7 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	
 	// adjust bar height
 	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
-		rBar.DeflateRect(0, 4, 0, 6);
+		rBar.DeflateRect(0, 2, 0, 8);
 	else
 		rBar.DeflateRect(0, 2, 0, 3);
 	
@@ -4040,34 +4040,47 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 	if (!gi.bParent || !HasOption(GTLCF_CALCPARENTDATES))
 		return;
 
-	pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
-	pDC->SelectStockObject(NULL_PEN);
-
 	COleDateTime dtStart, dtDue;
 	GetStartDueDates(gi, dtStart, dtDue);
-	
-	if (dtStart >= dtMonthStart)
+
+	const int ARROW_SIZE = 6;
+
+	if (rBar.Width() < ARROW_SIZE)
 	{
-		POINT pt[3] = 
-		{ 
-			{ rBar.left, rBar.bottom }, 
-			{ rBar.left, rBar.bottom + 6 }, 
-			{ rBar.left + 6, rBar.bottom } 
-		};
-		
-		pDC->Polygon(pt, 3);
+		if (dtStart >= dtMonthStart)
+			pDC->FillSolidRect(rBar.left, rBar.bottom, 1, ARROW_SIZE, GetSysColor(COLOR_WINDOWTEXT));
+
+		if (dtDue <= dtMonthEnd)
+			pDC->FillSolidRect(rBar.right - 1, rBar.bottom, 1, ARROW_SIZE, GetSysColor(COLOR_WINDOWTEXT));
 	}
-	
-	if (dtDue <= dtMonthEnd)
+	else
 	{
-		POINT pt[3] = 
-		{ 
-			{ rBar.right, rBar.bottom }, 
-			{ rBar.right, rBar.bottom + 6 }, 
-			{ rBar.right - 6, rBar.bottom } 
-		};
+		pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+		pDC->SelectStockObject(NULL_PEN);
+
+		if (dtStart >= dtMonthStart)
+		{
+			POINT pt[3] = 
+			{ 
+				{ rBar.left, rBar.bottom }, 
+				{ rBar.left, rBar.bottom + ARROW_SIZE }, 
+				{ rBar.left + ARROW_SIZE, rBar.bottom } 
+			};
 		
-		pDC->Polygon(pt, 3);
+			pDC->Polygon(pt, 3);
+		}
+	
+		if (dtDue <= dtMonthEnd)
+		{
+			POINT pt[3] = 
+			{ 
+				{ rBar.right, rBar.bottom }, 
+				{ rBar.right, rBar.bottom + ARROW_SIZE }, 
+				{ rBar.right - ARROW_SIZE, rBar.bottom } 
+			};
+		
+			pDC->Polygon(pt, 3);
+		}
 	}
 }
 
