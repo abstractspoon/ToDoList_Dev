@@ -3654,7 +3654,7 @@ COLORREF CGanttTreeListCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelecte
 	return crText;
 }
 
-HBRUSH CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
+void CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
 {
 	// darker shade of the item crText/crBack
 	COLORREF crDefFill = gi.GetFillColor();
@@ -3675,8 +3675,6 @@ HBRUSH CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBo
 		}
 	}
 
-	HBRUSH hbrParent = NULL;
-	
 	if (gi.bParent)
 	{
 		switch (m_nParentColoring)
@@ -3697,16 +3695,12 @@ HBRUSH CGanttTreeListCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBo
 			crFill = crDefFill;
 			break;
 		}
-		
-		hbrParent = GetSysColorBrush(COLOR_WINDOWTEXT);
 	}
 	else
 	{
 		crBorder = crDefBorder;
 		crFill = crDefFill;
 	}
-
-	return hbrParent;
 }
 
 BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
@@ -3941,7 +3935,7 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 		return;
 
 	COLORREF crBorder, crFill;
-	HBRUSH hbrParent = GetGanttBarColors(gi, crBorder, crFill);
+	GetGanttBarColors(gi, crBorder, crFill);
 	
 	// adjust bar height
 	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
@@ -4037,19 +4031,16 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder, 0, dwBorders);
 	
 	// for parent items draw downward facing pointers at the ends
-	DrawGanttParentEnds(pDC, gi, rBar, dtMonthStart, dtMonthEnd, hbrParent);
+	DrawGanttParentEnds(pDC, gi, rBar, dtMonthStart, dtMonthEnd);
 }
 
 void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
-											 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd,
-											 HBRUSH hbrParent)
+											 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd)
 {
 	if (!gi.bParent || !HasOption(GTLCF_CALCPARENTDATES))
 		return;
 
-	ASSERT(hbrParent);
-	
-	pDC->SelectObject(hbrParent);
+	pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
 	pDC->SelectStockObject(NULL_PEN);
 
 	COleDateTime dtStart, dtDue;
