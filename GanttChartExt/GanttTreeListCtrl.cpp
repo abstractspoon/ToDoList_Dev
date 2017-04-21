@@ -1050,7 +1050,9 @@ void CGanttTreeListCtrl::MinMaxDates(const COleDateTime& date)
 COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	COleDateTime dtStart = COleDateTime::GetCurrentTime();
-	CDateHelper::Min(dtStart, m_dtEarliest);
+
+	if (CDateHelper::IsDateSet(m_dtEarliest))
+		dtStart = m_dtEarliest;
 
 	switch (nDisplay)
 	{
@@ -1069,20 +1071,15 @@ COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		dtStart = CDateHelper::GetStartOfYear(dtStart);
-		//dtStart = CDateHelper::GetStartOfQuarter(dtStart);
+		dtStart = CDateHelper::GetStartOfQuarter(dtStart);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
-		// fall thru
-
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		// fall thru
-
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
@@ -1100,7 +1097,9 @@ COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	COleDateTime dtEnd = COleDateTime::GetCurrentTime();
-	CDateHelper::Max(dtEnd, m_dtLatest);
+
+	if (CDateHelper::IsDateSet(m_dtLatest))
+		dtEnd = m_dtLatest;
 
 	switch (nDisplay)
 	{
@@ -1113,21 +1112,21 @@ COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 		break;
 
 	case GTLC_DISPLAY_YEARS:
+		dtEnd = CDateHelper::GetEndOfYear(dtEnd);
+		break;
+
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		dtEnd = CDateHelper::GetEndOfYear(dtEnd);
+		dtEnd = CDateHelper::GetEndOfQuarter(dtEnd);
+		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
-		// fall thru
-
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		// fall thru
-
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
@@ -4043,22 +4042,17 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 	COleDateTime dtStart, dtDue;
 	GetStartDueDates(gi, dtStart, dtDue);
 
+	BOOL bDrawStart = (dtStart >= dtMonthStart);
+	BOOL bDrawEnd = (dtDue <= dtMonthEnd);
+
 	const int ARROW_SIZE = 6;
 
-	if (rBar.Width() < ARROW_SIZE)
-	{
-		if (dtStart >= dtMonthStart)
-			pDC->FillSolidRect(rBar.left, rBar.bottom, 1, ARROW_SIZE, GetSysColor(COLOR_WINDOWTEXT));
-
-		if (dtDue <= dtMonthEnd)
-			pDC->FillSolidRect(rBar.right - 1, rBar.bottom, 1, ARROW_SIZE, GetSysColor(COLOR_WINDOWTEXT));
-	}
-	else
+	if (bDrawStart || bDrawEnd)
 	{
 		pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
 		pDC->SelectStockObject(NULL_PEN);
 
-		if (dtStart >= dtMonthStart)
+		if (bDrawStart)
 		{
 			POINT pt[3] = 
 			{ 
@@ -4070,7 +4064,7 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 			pDC->Polygon(pt, 3);
 		}
 	
-		if (dtDue <= dtMonthEnd)
+		if (bDrawEnd)
 		{
 			POINT pt[3] = 
 			{ 
@@ -4750,42 +4744,56 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
 
-	int nNumReqColumns = (GetRequiredColumnCount() + 1), i;
+	int nNumReqColumns = (GetRequiredColumnCount() + 1);
 	BOOL bUsePrevWidth = (m_aPrevColWidths.GetSize() == nNumReqColumns);
 	int nTotalReqdWidth = 0;
 
 	COleDateTime dtStart = GetStartDate(m_nMonthDisplay);
-	int nStartYear = dtStart.GetYear(), nStartMonth = (dtStart.GetMonth() - 1);
+	int nYear = dtStart.GetYear(), nMonth = dtStart.GetMonth();
 	
-	for (i = 1; i < nNumReqColumns; i++)
-	{
-		int nYear = 0, nMonth = 0;
+	int nCol = 1;
 
+	do
+	{
+		if (nMonth && nYear)
+		{
+			CString sTitle = FormatColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
+			DWORD dwData = MAKELONG(nMonth, nYear);
+
+			if (bUsePrevWidth)
+				nWidth = m_aPrevColWidths[nCol];
+
+			m_listHeader.SetItem(nCol, nWidth, sTitle, dwData);
+			m_listHeader.EnableItemTracking(nCol, TRUE);
+
+			nTotalReqdWidth += nWidth;
+		}
+
+		// Next column
 		switch (m_nMonthDisplay)
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
-			nMonth = 1;
-			nYear = (nStartYear + ((i - 1) * 25));
+			nYear += 25;
 			break;
 
 		case GTLC_DISPLAY_DECADES:
-			nMonth = 1;
-			nYear = (nStartYear + ((i - 1) * 10));
+			nYear += 10;
 			break;
 			
 		case GTLC_DISPLAY_YEARS:
-			nMonth = 1;
-			nYear = (nStartYear + (i - 1));
+			nYear += 1;
 			break;
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 		case GTLC_DISPLAY_QUARTERS_MID:
 		case GTLC_DISPLAY_QUARTERS_LONG:
-			// each column represents 3 months
-			// the first month of each quarter has the 
-			// indices: 1, 4, 7, 10
-			nMonth = (((i - 1) % 4) * 3) + 1;
-			nYear = (nStartYear + ((i - 1) / 4));
+			nMonth += 3;
+
+			if (nMonth > 12)
+			{
+				nMonth = 1;
+				nYear += 1;
+			}
 			break;
 			
 		case GTLC_DISPLAY_MONTHS_SHORT:
@@ -4801,8 +4809,13 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 		case GTLC_DISPLAY_DAYS_SHORT:
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
-			nMonth = ((nStartMonth + (i - 1)) % 12) + 1;
-			nYear = (nStartYear + ((nStartMonth + (i - 1)) / 12));
+			nMonth += 1;
+
+			if (nMonth > 12)
+			{
+				nMonth = 1;
+				nYear += 1;
+			}
 			break;
 			
 		default:
@@ -4810,31 +4823,18 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 			break;
 		}
 		ASSERT(CDateHelper::IsValidDayInMonth(1, nMonth, nYear));
-
-		if (nMonth && nYear)
-		{
-			CString sTitle = FormatColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
-			DWORD dwData = MAKELONG(nMonth, nYear);
-
-			if (bUsePrevWidth)
-				nWidth = m_aPrevColWidths[i];
-
-			m_listHeader.SetItem(i, nWidth, sTitle, dwData);
-			m_listHeader.EnableItemTracking(i, TRUE);
-
-			nTotalReqdWidth += nWidth;
-		}
 	}
+	while (++nCol < nNumReqColumns);
 
 	TRACE(_T("CGanttTreeListCtrl(Total Column Widths = %d)\n"), nTotalReqdWidth);
 
 	// for the rest, clear the text and item data and prevent tracking
 	int nNumCols = m_listHeader.GetItemCount();
 
-	for (; i < nNumCols; i++)
+	for (; nCol < nNumCols; nCol++)
 	{
-		m_listHeader.EnableItemTracking(i, FALSE);
-		m_listHeader.SetItem(i, 0, _T(""), 0);
+		m_listHeader.EnableItemTracking(nCol, FALSE);
+		m_listHeader.SetItem(nCol, 0, _T(""), 0);
 	}
 
 	// always clear previous width/tracked arrays
@@ -5311,7 +5311,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			case GTLC_DISPLAY_QUARTERS_LONG:
 				// Column == 3 months
 				nDaysInCol = (int)(DAYS_IN_MONTH * 3);
-				dDayInCol += (int)(((nMonth -1) % 3) * DAYS_IN_MONTH);
+				dDayInCol += (int)(((nMonth - 1) % 3) * DAYS_IN_MONTH);
 				break;
 
 			default: 
