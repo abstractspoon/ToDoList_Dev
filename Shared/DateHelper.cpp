@@ -809,7 +809,25 @@ COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 {
-	return (GetStartOfMonth(date).m_dt + GetDaysInMonth(date));
+	COleDateTime dtEnd = GetStartOfMonth(date);
+
+	return (dtEnd.m_dt + GetDaysInMonth(date) - 1);
+}
+
+COleDateTime CDateHelper::GetStartOfQuarter(const COleDateTime& date)
+{
+	int nQuarter = ((date.GetMonth() - 1) / 3);
+	int nMonth = (1 + (nQuarter * 3));
+
+	return COleDateTime(date.GetYear(), nMonth, 1, 0, 0, 0);
+}
+
+COleDateTime CDateHelper::GetEndOfQuarter(const COleDateTime& date)
+{
+	COleDateTime dtEnd = GetStartOfQuarter(date);
+	VERIFY(OffsetDate(dtEnd, 3, DHU_MONTHS));
+
+	return (dtEnd.m_dt - 1.0);
 }
 
 COleDateTime CDateHelper::GetStartOfYear(const COleDateTime& date)
@@ -822,32 +840,42 @@ COleDateTime CDateHelper::GetEndOfYear(const COleDateTime& date)
 	return COleDateTime(date.GetYear(), 12, 31, 0, 0, 0);
 }
 
-COleDateTime CDateHelper::GetStartOfDecade(const COleDateTime& date)
+COleDateTime CDateHelper::GetStartOfDecade(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = ((date.GetYear() / 10) * 10);
+	int nYear = date.GetYear();
+
+	if (bZeroBased)
+		nYear = ((nYear / 10) * 10);
+	else
+		nYear = ((((nYear - 1) / 10) * 10) + 1);
 
 	return COleDateTime(nYear, 1, 1, 0, 0, 0);
 }
 
-COleDateTime CDateHelper::GetEndOfDecade(const COleDateTime& date)
+COleDateTime CDateHelper::GetEndOfDecade(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = (((date.GetYear() / 10) * 10) + 9);
+	int nYear = GetStartOfDecade(date, bZeroBased).GetYear();
 	
-	return COleDateTime(nYear, 12, 31, 0, 0, 0);
+	return COleDateTime((nYear + 9), 12, 31, 0, 0, 0);
 }
 
-COleDateTime CDateHelper::GetStartOfQuarterCentury(const COleDateTime& date)
+COleDateTime CDateHelper::GetStartOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = ((date.GetYear() / 25) * 25);
+	int nYear = date.GetYear();
+	
+	if (bZeroBased)
+		nYear = ((nYear / 25) * 25);
+	else
+		nYear = ((((nYear - 1) / 25) * 25) + 1);
 	
 	return COleDateTime(nYear, 1, 1, 0, 0, 0);
 }
 
-COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date)
+COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = (((date.GetYear() / 25) * 25) + 24);
+	int nYear = GetStartOfQuarterCentury(date, bZeroBased).GetYear();
 	
-	return COleDateTime(nYear, 12, 31, 0, 0, 0);
+	return COleDateTime((nYear + 24), 12, 31, 0, 0, 0);
 }
 
 CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags)
@@ -1404,11 +1432,11 @@ COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
 	return dtNearest;
 }
 
-COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades)
+COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
 	COleDateTime dtNearest;
 
-	int nYear = (date.GetYear() - (bZeroBasedDecades ? 0 : 1));
+	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
 	int nMonth = date.GetMonth();
 
 	if (((nYear % 25) > 5) || (((nYear % 25) == 5) && (nMonth > 6)))
@@ -1431,11 +1459,11 @@ COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOO
 	return dtNearest;
 }
 
-COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades)
+COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
 	COleDateTime dtNearest;
 
-	int nYear = (date.GetYear() - (bZeroBasedDecades ? 0 : 1));
+	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
 
 	if ((nYear % 10) > 5)
 	{

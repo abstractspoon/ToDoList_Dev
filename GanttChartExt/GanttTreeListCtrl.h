@@ -284,9 +284,9 @@ protected:
 	void InitItemHeights();
 	int CalcTreeWidth() const;
 	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
-	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const;
 	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
-	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const;
+	COleDateTime GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const;
+	COleDateTime GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const;
 	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
 	void Resize();
 	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
@@ -386,6 +386,7 @@ protected:
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
+	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
 
 private:
 	void PreFixVScrollSyncBug();

@@ -1047,72 +1047,125 @@ void CGanttTreeListCtrl::MinMaxDates(const COleDateTime& date)
 	CDateHelper::Max(m_dtLatest, date);
 }
 
-int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
+COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nYear = COleDateTime::GetCurrentTime().GetYear();
+	COleDateTime dtStart = COleDateTime::GetCurrentTime();
+	CDateHelper::Min(dtStart, m_dtEarliest);
 
-	if (CDateHelper::IsDateSet(m_dtEarliest))
-		nYear = m_dtEarliest.GetYear();
-
-	return GetStartYear(nDisplay, nYear);
-}
-
-int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const
-{
 	switch (nDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
-		{
-			if (HasOption(GTLCF_DECADESAREONEBASED))
-				nYear = ((((nYear - 1) / 25) * 25) + 1);
-			else
-				nYear = ((nYear / 25) * 25);
-		}
+		dtStart = CDateHelper::GetStartOfQuarterCentury(dtStart, !HasOption(GTLCF_DECADESAREONEBASED));
 		break;
-		
+
 	case GTLC_DISPLAY_DECADES:
-		{
-			if (HasOption(GTLCF_DECADESAREONEBASED))
-				nYear = ((((nYear - 1) / 10) * 10) + 1);
-			else
-				nYear = ((nYear / 10) * 10);
-		}
+		dtStart = CDateHelper::GetStartOfDecade(dtStart, !HasOption(GTLCF_DECADESAREONEBASED));
+		break;
+
+	case GTLC_DISPLAY_YEARS:
+		dtStart = CDateHelper::GetStartOfYear(dtStart);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		dtStart = CDateHelper::GetStartOfYear(dtStart);
+		//dtStart = CDateHelper::GetStartOfQuarter(dtStart);
+		break;
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+		// fall thru
+
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+		// fall thru
+
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+		dtStart = CDateHelper::GetStartOfMonth(dtStart);
+		break;
+
+	default:
+		ASSERT(0);
 		break;
 	}
-	
-	return nYear;
+
+	return dtStart;
+}
+
+COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
+{
+	COleDateTime dtEnd = COleDateTime::GetCurrentTime();
+	CDateHelper::Max(dtEnd, m_dtLatest);
+
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		dtEnd = CDateHelper::GetEndOfQuarterCentury(dtEnd, !HasOption(GTLCF_DECADESAREONEBASED));
+		break;
+
+	case GTLC_DISPLAY_DECADES:
+		dtEnd = CDateHelper::GetEndOfDecade(dtEnd, !HasOption(GTLCF_DECADESAREONEBASED));
+		break;
+
+	case GTLC_DISPLAY_YEARS:
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		dtEnd = CDateHelper::GetEndOfYear(dtEnd);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+		// fall thru
+
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+		// fall thru
+
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+		dtEnd = CDateHelper::GetEndOfMonth(dtEnd);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return dtEnd;
+}
+
+int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
+{
+	return GetStartDate(nDisplay).GetYear();
 }
 
 int CGanttTreeListCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nYear = COleDateTime::GetCurrentTime().GetYear();
-	
-	if (CDateHelper::IsDateSet(m_dtLatest))
-		nYear = m_dtLatest.GetYear();
-	
-	return GetEndYear(nDisplay, nYear);
-}
+	int nYear = GetEndDate(nDisplay).GetYear();
 
-int CGanttTreeListCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay, int nYear) const
-{
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		nYear = (GetStartYear(nDisplay, nYear) + 24);
-		break;
-		
-	case GTLC_DISPLAY_DECADES:
-		nYear = (GetStartYear(nDisplay, nYear) + 9);
-		break;
-	}
-	
 	// for now, do not let end year exceed MAX_YEAR
 	return min(nYear, MAX_YEAR);
 }
 
 int CGanttTreeListCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return ((GetEndYear(nDisplay) - GetStartYear(nDisplay) + 1) * 12);
+	COleDateTime dtStart(GetStartDate(nDisplay)), dtEnd(GetEndDate(nDisplay));
+	
+	int nStartMonth = dtStart.GetMonth(), nStartYear = dtStart.GetYear();
+	int nEndMonth = dtEnd.GetMonth(), nEndYear = dtEnd.GetYear();
+
+	int nNumMonths = ((((nEndYear * 12) + nEndMonth) - ((nStartYear * 12) + nStartMonth)) + 1);
+	ASSERT(nNumMonths > 0);
+
+	return nNumMonths;
 }
 
 void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1167,8 +1220,8 @@ CString CGanttTreeListCtrl::FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, 
 	case GTLC_DISPLAY_QUARTERCENTURIES:
 	case GTLC_DISPLAY_DECADES:
 		{
-			int nStartYear = GetStartYear(nDisplay, nYear);
-			int nEndYear = GetEndYear(nDisplay, nYear);
+			int nStartYear = GetStartYear(nDisplay);
+			int nEndYear = GetEndYear(nDisplay);
 
 			sHeader.Format(_T("%d-%d"), nStartYear, nEndYear);
 		}
@@ -2775,7 +2828,7 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 
 			if (nMonth == 12)
 			{
-				if (nYear == (GetEndYear(m_nMonthDisplay, nYear)))
+				if (nYear == (GetEndYear(m_nMonthDisplay)))
 					return DIV_VERT_DARK;
 
 				return DIV_VERT_MID;
@@ -2788,7 +2841,7 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 		{
 			if (nMonth == 12)
 			{
-				if (nYear == (GetEndYear(m_nMonthDisplay, nYear)))
+				if (nYear == (GetEndYear(m_nMonthDisplay)))
 					return DIV_VERT_DARK;
 
 				return DIV_VERT_MID;
@@ -4695,13 +4748,14 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 
 	int nNumReqColumns = (GetRequiredColumnCount() + 1), i;
 	BOOL bUsePrevWidth = (m_aPrevColWidths.GetSize() == nNumReqColumns);
-
 	int nTotalReqdWidth = 0;
+
+	COleDateTime dtStart = GetStartDate(m_nMonthDisplay);
+	int nStartYear = dtStart.GetYear(), nStartMonth = (dtStart.GetMonth() - 1);
 	
 	for (i = 1; i < nNumReqColumns; i++)
 	{
 		int nYear = 0, nMonth = 0;
-		int nStartYear = GetStartYear(m_nMonthDisplay);
 
 		switch (m_nMonthDisplay)
 		{
@@ -4743,14 +4797,15 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 		case GTLC_DISPLAY_DAYS_SHORT:
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
-			nMonth = ((i - 1) % 12) + 1;
-			nYear = (nStartYear + ((i - 1) / 12));
+			nMonth = ((nStartMonth + (i - 1)) % 12) + 1;
+			nYear = (nStartYear + ((nStartMonth + (i - 1)) / 12));
 			break;
 			
 		default:
 			ASSERT(0);
 			break;
 		}
+		ASSERT(CDateHelper::IsValidDayInMonth(1, nMonth, nYear));
 
 		if (nMonth && nYear)
 		{
@@ -5182,8 +5237,11 @@ BOOL CGanttTreeListCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date
 				rColumn.left += nPxOffset;
 				rColumn.right = (rColumn.left + (int)fMonthWidth);
 
-				nYear += (nMonthOffset / 12);
-				nMonth += (nMonthOffset % 12);
+				nMonth += nMonthOffset;
+
+				// Months here are one-based
+				nYear += ((nMonth - 1) / 12);
+				nMonth = (((nMonth - 1) % 12) + 1);
 			}
 			break;
 		}
@@ -5221,7 +5279,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			int nMonth = date.GetMonth();
 			int nYear = date.GetYear();
 
-			double dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
+			double dDayInCol = 0;
 			int nDaysInCol = 0;
 
 			switch (m_nMonthDisplay)
@@ -5229,13 +5287,13 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			case GTLC_DISPLAY_QUARTERCENTURIES:
 				// Column == 25 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay, nYear)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
 			case GTLC_DISPLAY_DECADES:
 				// Column == 10 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay, nYear)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
+				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
 			case GTLC_DISPLAY_YEARS:
@@ -5255,6 +5313,7 @@ int CGanttTreeListCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 			default: 
 				// Column == Month
 				nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
+				dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 				break;
 			}
 

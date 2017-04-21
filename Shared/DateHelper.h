@@ -160,19 +160,21 @@ public:
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
 	static COleDateTime GetStartOfMonth(const COleDateTime& date);
 	static COleDateTime GetEndOfMonth(const COleDateTime& date);
+	static COleDateTime GetStartOfQuarter(const COleDateTime& date);
+	static COleDateTime GetEndOfQuarter(const COleDateTime& date);
 	static COleDateTime GetStartOfYear(const COleDateTime& date);
 	static COleDateTime GetEndOfYear(const COleDateTime& date);
-	static COleDateTime GetStartOfDecade(const COleDateTime& date);
-	static COleDateTime GetEndOfDecade(const COleDateTime& date);
-	static COleDateTime GetStartOfQuarterCentury(const COleDateTime& date);
-	static COleDateTime GetEndOfQuarterCentury(const COleDateTime& date);
+	static COleDateTime GetStartOfDecade(const COleDateTime& date, BOOL bZeroBased = TRUE);
+	static COleDateTime GetEndOfDecade(const COleDateTime& date, BOOL bZeroBased = TRUE);
+	static COleDateTime GetStartOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased = TRUE);
+	static COleDateTime GetEndOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased = TRUE);
 
 	static BOOL GetTimeT(const COleDateTime& date, time_t& timeT);
 	static BOOL GetTimeT64(const COleDateTime& date, time64_t& timeT);
 	static COleDateTime GetDate(time64_t date);
 
-	static COleDateTime GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades = TRUE);
-	static COleDateTime GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBasedDecades = TRUE);
+	static COleDateTime GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
+	static COleDateTime GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestYear(const COleDateTime& date, BOOL bEnd);
 	static COleDateTime GetNearestHalfYear(const COleDateTime& date, BOOL bEnd);
 	static COleDateTime GetNearestQuarter(const COleDateTime& date, BOOL bEnd);
