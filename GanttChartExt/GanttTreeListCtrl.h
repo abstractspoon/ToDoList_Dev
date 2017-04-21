@@ -221,11 +221,18 @@ protected:
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
 							BOOL bSelected, BOOL& bToday);
+	void DrawListItemWeeks(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL& bToday);
+	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
+							const GANTTITEM& gi, GANTTDISPLAY& gd, 
+							BOOL bSelected, BOOL& bToday);
 
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 
+	void DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, HBRUSH hbrParent);

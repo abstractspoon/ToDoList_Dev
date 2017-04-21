@@ -3087,6 +3087,89 @@ void CGanttTreeListCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi, gd);
 }
 
+void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
+											int nMonth, int nYear, 
+											const GANTTITEM& gi, GANTTDISPLAY& gd,
+											BOOL bSelected, BOOL& bToday)
+{
+	// draw vertical week dividers
+	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+	double dMonthWidth = rMonth.Width();
+
+	int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
+	CRect rDay(rMonth);
+
+	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
+
+	for (int nDay = 1; nDay <= nNumDays; nDay++)
+	{
+		rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
+		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
+
+		// fill weekends if not selected
+		if (!bSelected)
+			DrawWeekend(pDC, dtDay, rDay);
+
+		// draw divider
+		if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
+		{
+			rDay.right = rDay.left; // draw at start of day
+			DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+		}
+
+		// next day
+		dtDay += 1;
+	}
+
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, gd, bSelected, bToday);
+}
+
+void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
+{
+	if ((m_crWeekend != CLR_NONE) && CDateHelper::IsWeekend(dtDay))
+	{
+		// don't overdraw gridlines
+		CRect rWeekend(rDay);
+
+		if (HasGridlines())
+			rWeekend.bottom--;
+
+		pDC->FillSolidRect(rWeekend, m_crWeekend);
+	}
+}
+
+void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
+											int nMonth, int nYear, 
+											const GANTTITEM& gi, GANTTDISPLAY& gd,
+											BOOL bSelected, BOOL& bToday)
+{
+	// draw vertical day dividers
+	double dMonthWidth = rMonth.Width();
+	CRect rDay(rMonth);
+	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
+
+	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+
+	for (int nDay = 1; nDay <= nNumDays; nDay++)
+	{
+		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
+
+		// fill weekends if not selected
+		if (!bSelected)
+			DrawWeekend(pDC, dtDay, rDay);
+
+		// draw all but the last divider
+		if (nDay < nNumDays)
+			DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+
+		// next day
+		dtDay.m_dt += 1;
+		rDay.left = rDay.right;
+	}
+
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, gd, bSelected, bToday);
+}
+
 BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD dwTaskID, BOOL bSelected)
 {
 	if (nCol == 0)
@@ -3151,96 +3234,13 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		{
-			CRect rMonth(rItem);
-
- 			// draw vertical week dividers
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-			double dMonthWidth = rMonth.Width();
-
-			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-			CRect rDay(rMonth);
-
-			COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-
-			for (int nDay = 1; nDay <= nNumDays; nDay++)
-			{
-				rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
-				rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
-
-				// fill weekends if not selected
-				if ((m_crWeekend != CLR_NONE) && !bSelected)
-				{
-					if (CDateHelper::IsWeekend(dtDay))
-					{
-						// don't overdraw gridlines
-						CRect rWeekend(rDay);
-
-						if (HasGridlines())
-							rWeekend.bottom--;
-
-						pDC->FillSolidRect(rWeekend, m_crWeekend);
-					}
-				}
-
-				// draw divider
-				if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
-				{
-					rDay.right = rDay.left; // draw at start of day
-					DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
-				}
-
-				// next day
-				dtDay += 1;
-			}
-
-			DrawListItemMonth(pDC, rMonth, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
-		}
+		DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		{
-			CRect rMonth(rItem);
-
-			// draw vertical day dividers
-			double dMonthWidth = rMonth.Width();
-			CRect rDay(rMonth);
-			COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-			for (int nDay = 1; nDay <= nNumDays; nDay++)
-			{
-				rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
-
-				// fill weekends if not selected
-				if ((m_crWeekend != CLR_NONE) && !bSelected)
-				{
-					if (CDateHelper::IsWeekend(dtDay))
-					{
-						// don't overdraw gridlines
-						CRect rWeekend(rDay);
-						
-						if (HasGridlines())
-							rWeekend.bottom--;
-						
-						pDC->FillSolidRect(rWeekend, m_crWeekend);
-					}
-				}
-
-				// draw all but the last divider
-				if (nDay < nNumDays)
-					DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
-
-				// next day
-				dtDay.m_dt += 1;
-				rDay.left = rDay.right;
-			}
-				
-			DrawListItemMonth(pDC, rMonth, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
-		}
+		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
 		break;
 		
 	default:
