@@ -86,6 +86,7 @@ enum GTLC_SNAPMODE
 	GTLCSM_FREE,
 	GTLCSM_NEARESTDECADE,
 	GTLCSM_NEARESTQUARTERCENTURY,
+	GTLCSM_NEARESTHALFHOUR,
 };
 
 /////////////////////////////////////////////////////////////////////////////

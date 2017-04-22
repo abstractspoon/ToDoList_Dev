@@ -91,6 +91,7 @@
 #define IDS_DISPLAYDECADES              57672
 #define IDS_SNAP_NEARESTQUARTERCENTURY  57673
 #define IDS_SNAP_NEARESTDECADE          57674
+#define IDS_SNAP_NEARESTHALFHOUR        57675
 
 // Next default values for new objects
 // 

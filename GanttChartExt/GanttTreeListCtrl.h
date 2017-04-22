@@ -267,7 +267,7 @@ protected:
 	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
 	int GetColumnWidth() const;
 	int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const;
-	float GetMonthWidth(int nColWidth) const;
+	double GetMonthWidth(int nColWidth) const;
 	int GetRequiredColumnCount() const;
 	int GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
 	BOOL ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
@@ -319,6 +319,7 @@ protected:
 	BOOL IsValidDragPoint(const CPoint& ptDrag) const;
 	void CancelDrag(BOOL bReleaseCapture);
 	BOOL IsDragging() const;
+	void GetDragLimits(CRect& rLimits) const;
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
@@ -386,6 +387,10 @@ protected:
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
+	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
+	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
+	static int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
+	static BOOL IsVerticalDivider(DIV_TYPE nType);
 
 private:
 	void PreFixVScrollSyncBug();
