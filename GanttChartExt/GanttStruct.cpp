@@ -621,7 +621,7 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
 
 	if (CDateHelper::IsDateSet(dtEnd))
-		return dtTemp = dtEnd;
+		dtTemp = dtEnd;
 
 	switch (nDisplay)
 	{
