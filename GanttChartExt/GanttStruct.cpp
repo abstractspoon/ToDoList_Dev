@@ -552,3 +552,142 @@ BOOL CGanttDisplayMap::HasTask(DWORD dwKey) const
 
 //////////////////////////////////////////////////////////////////////
 
+GANTTDATERANGE::GANTTDATERANGE()
+{
+	Clear();
+}
+
+void GANTTDATERANGE::Clear()
+{
+	CDateHelper::ClearDate(dtStart);
+	CDateHelper::ClearDate(dtEnd);
+}
+
+void GANTTDATERANGE::MinMax(const GANTTITEM& gi)
+{
+	MinMax(gi.dtStart);
+	MinMax(gi.dtDue);
+	MinMax(gi.dtDone);
+}
+
+void GANTTDATERANGE::MinMax(const COleDateTime& date)
+{
+	CDateHelper::Min(dtStart, date);
+	CDateHelper::Max(dtEnd, date);
+}
+
+COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
+{
+	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
+
+	if (CDateHelper::IsDateSet(dtStart))
+		dtTemp = dtStart;
+
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return CDateHelper::GetStartOfQuarterCentury(dtTemp, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_DECADES:
+		return CDateHelper::GetStartOfDecade(dtTemp, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_YEARS:
+		return CDateHelper::GetStartOfYear(dtTemp);
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return CDateHelper::GetStartOfQuarter(dtTemp);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		return CDateHelper::GetStartOfMonth(dtTemp);
+	}
+
+	ASSERT(0);
+	return dtTemp;
+}
+
+COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
+{
+	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
+
+	if (CDateHelper::IsDateSet(dtEnd))
+		return dtTemp = dtEnd;
+
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		return CDateHelper::GetEndOfQuarterCentury(dtTemp, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_DECADES:
+		return CDateHelper::GetEndOfDecade(dtTemp, bZeroBasedDecades);
+
+	case GTLC_DISPLAY_YEARS:
+		return CDateHelper::GetEndOfYear(dtTemp);
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case GTLC_DISPLAY_QUARTERS_MID:
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		return CDateHelper::GetEndOfQuarter(dtTemp);
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+	case GTLC_DISPLAY_MONTHS_MID:
+	case GTLC_DISPLAY_MONTHS_LONG:
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		return CDateHelper::GetEndOfMonth(dtTemp);
+	}
+
+	ASSERT(0);
+	return dtTemp;
+}
+
+int GANTTDATERANGE::Compare(const COleDateTime& date) const
+{
+	ASSERT(CDateHelper::IsDateSet(date) && IsValid());
+
+	if (date < dtStart)
+		return -1;
+
+	if (date > dtEnd)
+		return 1;
+
+	// else
+	return 0; // contains
+}
+
+BOOL GANTTDATERANGE::IsValid() const
+{
+	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtEnd) &&
+			(dtStart <= dtEnd));
+}
+
+BOOL GANTTDATERANGE::IsEmpty() const
+{
+	ASSERT(IsValid());
+
+	return (dtEnd == dtStart);
+}
+
+BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi)
+{
+	return ((Compare(gi.dtStart) == 0) && (Compare(gi.dtDue) == 0));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+

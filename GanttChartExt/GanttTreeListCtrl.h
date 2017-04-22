@@ -164,7 +164,7 @@ protected:
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crToday, m_crWeekend, m_crParent, m_crDefault;
 	COleDateTime m_dtDragMin;
-	COleDateTime m_dtEarliest, m_dtLatest;
+	GANTTDATERANGE m_dateRange;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
@@ -315,6 +315,7 @@ protected:
 	BOOL EndDragging(const CPoint& ptCursor);
 	BOOL UpdateDragging(const CPoint& ptCursor);
 	BOOL ValidateDragPoint(CPoint& ptDrag) const;
+	BOOL IsValidDragPoint(const CPoint& ptDrag) const;
 	void CancelDrag(BOOL bReleaseCapture);
 	BOOL IsDragging() const;
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
@@ -348,8 +349,6 @@ protected:
 	BOOL GetStartDueDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
 	BOOL HasDisplayDates(const GANTTITEM& gi) const;
 	BOOL HasDoneDate(const GANTTITEM& gi) const;
-	void MinMaxDates(const GANTTITEM& gi);
-	void MinMaxDates(const COleDateTime& date);
 
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);

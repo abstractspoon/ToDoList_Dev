@@ -138,12 +138,28 @@ typedef CArray<GANTTDEPENDENCY, GANTTDEPENDENCY&> CGanttDependArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
-// struct GTCDISPLAYMODE
-// {
-// 	GTLC_MONTH_DISPLAY nMode;
-// 	UINT nStringID;
-// };
-// 
+struct GANTTDATERANGE
+{
+	GANTTDATERANGE();
+
+	void Clear();
+	void MinMax(const GANTTITEM& gi);
+	void MinMax(const COleDateTime& date);
+
+	COleDateTime GetStart() const { return dtStart; }
+	COleDateTime GetEnd() const { return dtEnd; }
+	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+
+	BOOL IsValid() const;
+	BOOL IsEmpty() const;
+	BOOL Contains(const GANTTITEM& gi);
+	int Compare(const COleDateTime& date) const;
+
+protected:
+	COleDateTime dtStart, dtEnd;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

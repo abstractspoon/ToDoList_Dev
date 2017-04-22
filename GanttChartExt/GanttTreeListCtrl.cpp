@@ -65,6 +65,7 @@ const int LV_COLPADDING			= 3;
 const int TV_TIPPADDING			= 3;
 const int HD_COLPADDING			= 6;
 const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
+const int DRAG_BUFFER			= 50;
 
 const LONG DEPENDPICKPOS_NONE = 0xFFFFFFFF;
 const double DAY_WEEK_MULTIPLIER = 1.5;
@@ -162,8 +163,6 @@ CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list)
 	m_crToday(CLR_NONE),
 	m_crWeekend(CLR_NONE),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-	m_dtEarliest(COleDateTime::GetCurrentTime()),
-	m_dtLatest(COleDateTime::GetCurrentTime()),
 	m_bDraggingStart(FALSE), 
 	m_bDraggingEnd(FALSE),
 	m_bDragging(FALSE),
@@ -767,7 +766,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	}
 
 	// update date range
-	MinMaxDates(*pGI);
+	m_dateRange.MinMax(*pGI);
 	
 	// always update lock states
 	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
@@ -907,19 +906,14 @@ void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 
 	// cache and reset year range which will get 
 	// recalculated as we build the tree
-	COleDateTime dtPrevEarliest = m_dtEarliest, dtPrevLatest = m_dtLatest;
-
-	CDateHelper::ClearDate(m_dtEarliest);
-	CDateHelper::ClearDate(m_dtLatest);
+	GANTTDATERANGE prevRange = m_dateRange;
+	m_dateRange.Clear();
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), m_tree, NULL, TRUE);
 
 	// restore previous date range if no data
 	if (m_data.GetCount() == 0)
-	{
-		m_dtEarliest = dtPrevEarliest;
-		m_dtLatest = dtPrevLatest;
-	}
+		m_dateRange = prevRange;
 
 	RecalcParentDates();
 	ExpandList();
@@ -930,8 +924,7 @@ void CGanttTreeListCtrl::RecalcDateRange()
 {
 	if (m_data.GetCount())
 	{
-		CDateHelper::ClearDate(m_dtEarliest);
-		CDateHelper::ClearDate(m_dtLatest);
+		m_dateRange.Clear();
 
 		POSITION pos = m_data.GetStartPosition();
 		GANTTITEM* pGI = NULL;
@@ -943,7 +936,7 @@ void CGanttTreeListCtrl::RecalcDateRange()
 			ASSERT(pGI);
 
 			if (pGI)
-				MinMaxDates(*pGI);
+				m_dateRange.MinMax(*pGI);
 		}
 	}
 }
@@ -1007,7 +1000,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 			pGI->aDepends.Add(pTasks->GetTaskDependency(hTask, nDepend));
 		
 		// track earliest and latest dates
-		MinMaxDates(*pGI);
+		m_dateRange.MinMax(*pGI);
 	}
 	
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
@@ -1037,113 +1030,14 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	}
 }
 
-void CGanttTreeListCtrl::MinMaxDates(const GANTTITEM& gi)
-{
-	MinMaxDates(gi.dtStart);
-	MinMaxDates(gi.dtDue);
-	MinMaxDates(gi.dtDone);
-}
-
-void CGanttTreeListCtrl::MinMaxDates(const COleDateTime& date)
-{
-	CDateHelper::Min(m_dtEarliest, date);
-	CDateHelper::Max(m_dtLatest, date);
-}
-
 COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	COleDateTime dtStart = COleDateTime::GetCurrentTime();
-
-	if (CDateHelper::IsDateSet(m_dtEarliest))
-		dtStart = m_dtEarliest;
-
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		dtStart = CDateHelper::GetStartOfQuarterCentury(dtStart, !HasOption(GTLCF_DECADESAREONEBASED));
-		break;
-
-	case GTLC_DISPLAY_DECADES:
-		dtStart = CDateHelper::GetStartOfDecade(dtStart, !HasOption(GTLCF_DECADESAREONEBASED));
-		break;
-
-	case GTLC_DISPLAY_YEARS:
-		dtStart = CDateHelper::GetStartOfYear(dtStart);
-		break;
-
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		dtStart = CDateHelper::GetStartOfQuarter(dtStart);
-		break;
-
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		dtStart = CDateHelper::GetStartOfMonth(dtStart);
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return dtStart;
+	return m_dateRange.GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	COleDateTime dtEnd = COleDateTime::GetCurrentTime();
-
-	if (CDateHelper::IsDateSet(m_dtLatest))
-		dtEnd = m_dtLatest;
-
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		dtEnd = CDateHelper::GetEndOfQuarterCentury(dtEnd, !HasOption(GTLCF_DECADESAREONEBASED));
-		break;
-
-	case GTLC_DISPLAY_DECADES:
-		dtEnd = CDateHelper::GetEndOfDecade(dtEnd, !HasOption(GTLCF_DECADESAREONEBASED));
-		break;
-
-	case GTLC_DISPLAY_YEARS:
-		dtEnd = CDateHelper::GetEndOfYear(dtEnd);
-		break;
-
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		dtEnd = CDateHelper::GetEndOfQuarter(dtEnd);
-		break;
-
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		dtEnd = CDateHelper::GetEndOfMonth(dtEnd);
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return dtEnd;
+	return m_dateRange.GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
 }
 
 int CGanttTreeListCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
@@ -5679,9 +5573,28 @@ BOOL CGanttTreeListCtrl::IsDragging() const
 	return (m_bDragging || m_bDraggingStart || m_bDraggingEnd);
 }
 
-BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
+BOOL CGanttTreeListCtrl::IsValidDragPoint(const CPoint& ptDrag) const
 {
 	if (!IsDragging())
+		return FALSE;
+
+	CRect rClient;
+	m_list.GetClientRect(rClient);
+
+	// Allow a buffer at start and end
+	rClient.InflateRect(DRAG_BUFFER, 0);
+
+	// Clip the right hand end to the last column
+	CRect rCol;
+	m_listHeader.GetItemRect(m_listHeader.GetItemCount() - 1, rCol);
+	rClient.right = min(rClient.right, rCol.right);
+
+	return rClient.PtInRect(ptDrag);
+}
+
+BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
+{
+	if (!IsValidDragPoint(ptDrag))
 		return FALSE;
 
 	CRect rClient;
@@ -5826,15 +5739,13 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 			}
 
 			// dropping outside the list is a cancel
-			CRect rList;
-			m_list.GetClientRect(rList);
-			
-			if (!rList.PtInRect(ptCursor))
+			if (!IsValidDragPoint(ptCursor))
 			{
 				GANTTITEM* pGI = GetGanttItem(dwTaskID);
 				ASSERT(pGI);
 
 				(*pGI) = m_giPreDrag;
+				RedrawList();
 			}
 			else if (m_bDraggingStart)
 			{
@@ -5860,6 +5771,7 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 		if (DragDatesDiffer(*pGI, m_giPreDrag))
 		{
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
+			GANTTDATERANGE prevRange = m_dateRange;
 
 			if (!NotifyParentDateChange(nDragWhat))
 			{
@@ -5875,8 +5787,13 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 				RecalcParentDates();
 
 				// Refresh list columns as required
-				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
+				if ((GetNumMonths(m_nMonthDisplay) != nNumMonths) ||
+					(!prevRange.Contains(*pGI)))
 				{
+					// For reasons I don't understand, the resource context is
+					// wrong when handling the LButtonUp
+					AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 					ValidateMonthDisplay();
 					UpdateListColumns();
 				}
@@ -6014,8 +5931,8 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 		else
 		{
-			// We've dragged beyond the last column
-			// ASSERT(0);
+			// We've dragged outside the client rect
+			::SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 		}
 
 		return TRUE; // always
@@ -6518,8 +6435,8 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 
 	// Calculate the date range in scroll units
 	// allow a month's buffer at each end
-	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(m_dtEarliest);
-	COleDateTime dtTo = CDateHelper::GetEndOfMonth(m_dtLatest);
+	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(m_dateRange.GetStart());
+	COleDateTime dtTo = CDateHelper::GetEndOfMonth(m_dateRange.GetEnd());
 
 	CDateHelper::IncrementMonth(dtFrom, -1);
 	CDateHelper::IncrementMonth(dtTo, 1);
