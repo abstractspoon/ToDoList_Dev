@@ -1599,7 +1599,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
 			CRect rItem;
-			m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+			VERIFY(GetListItemRect(nItem, rItem));
 
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
@@ -2809,7 +2809,7 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 
 void CGanttTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
-	if ((nType == DIV_NONE) || !HasGridlines())
+	if (!HasGridlines() || (nType == DIV_NONE) || (IsVerticalDivider(nType) && (rItem.right < 0)))
 		return;
 
 	COLORREF color = m_crGridLine;
@@ -2943,7 +2943,7 @@ void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
 	if (HasOption(GTLCF_DISPLAYALLOCTOAFTERITEM))
 	{
 		CRect rItem;
-		m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+		VERIFY(GetListItemRect(nItem, rItem));
 		
 		// get the data for this item
 		GANTTITEM* pGI = NULL;
@@ -3802,7 +3802,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend
 		return FALSE;
 	
 	CRect rItem;
-	VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
+	VERIFY(GetListItemRect(nItem, rItem));
 	
 	CPoint pt((nPos - nScrollPos), ((rItem.top + rItem.bottom) / 2));
 
@@ -5485,6 +5485,21 @@ int CGanttTreeListCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& 
 	return -1;
 }
 
+BOOL CGanttTreeListCtrl::GetListItemRect(int nItem, CRect& rItem) const
+{
+	if (m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS))
+	{
+		// Extend to end of client rect
+		CRect rClient;
+		GetClientRect(rClient);
+
+		rItem.right = max(rItem.right, rClient.right);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
 {
 	nHit = GTLCHT_NOWHERE;
@@ -5512,7 +5527,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 
 	// Calculate the task rect
 	CRect rTask;
-	VERIFY(m_list.GetItemRect(nItem, rTask, LVIR_BOUNDS));
+	VERIFY(GetListItemRect(nItem, rTask));
 
 	if (!CDateHelper::DateHasTime(dtDue))
 		dtDue += 1.0;
