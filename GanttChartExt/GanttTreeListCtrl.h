@@ -385,7 +385,6 @@ protected:
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
-	static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay);
 	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
 
 private:

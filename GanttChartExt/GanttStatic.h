@@ -100,6 +100,12 @@ static int CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDis
 	return (FindDisplay(nDisplay1) - FindDisplay(nDisplay2));
 }
 
+static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
+{
+	return (FindDisplay(nDisplay) != -1);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
