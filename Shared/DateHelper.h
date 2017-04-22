@@ -183,6 +183,7 @@ public:
 	static COleDateTime GetNearestDay(const COleDateTime& date, BOOL bEnd);
 	static COleDateTime GetNearestHalfDay(const COleDateTime& date, BOOL bEnd);
 	static COleDateTime GetNearestHour(const COleDateTime& date, BOOL bEnd);
+	static COleDateTime GetNearestHalfHour(const COleDateTime& date, BOOL bEnd);
 
 	static BOOL Min(COleDateTime& date, const COleDateTime& dtOther);
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
@@ -200,6 +201,7 @@ protected:
 	static BOOL GetTimeT(time64_t date, time_t& timeT);
 	static BOOL IsValidUnit(TCHAR nUnits);
 	static BOOL DecodeOffsetEx(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
+	static COleDateTime GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd);
 
 	// Copyright (c) Robert Walker, support@tunesmithy.co.uk
 	static void T64ToFileTime(time64_t *pt, FILETIME *pft);

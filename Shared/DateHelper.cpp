@@ -1313,52 +1313,56 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetNearestDay(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtNearest = GetDateOnly(date);
-
-	if ((date.m_dt - dtNearest.m_dt) < 0.5)
-	{
-		if (bEnd) // end of previous day
-		{
-			dtNearest = GetEndOfPreviousDay(dtNearest);
-		}
-	}
-	else if (bEnd)
-	{
-		dtNearest.m_dt += END_OF_DAY;
-	}
-	else // start
-	{
-		dtNearest.m_dt += 1.0;
-	}
-
-	return dtNearest;
+	return GetNearestDayPart(date, 1, bEnd);
 }
 
 COleDateTime CDateHelper::GetNearestHalfDay(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtNearest = GetDateOnly(date);
+	return GetNearestDayPart(date, 2, bEnd);
+}
 
-	if ((date.m_dt - dtNearest.m_dt) < 0.25)
+COleDateTime CDateHelper::GetNearestHour(const COleDateTime& date, BOOL bEnd)
+{
+	return GetNearestDayPart(date, 24, bEnd);
+}
+
+COleDateTime CDateHelper::GetNearestHalfHour(const COleDateTime& date, BOOL bEnd)
+{
+	return GetNearestDayPart(date, 48, bEnd);
+}
+
+COleDateTime CDateHelper::GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd)
+{
+	COleDateTime dtDay = GetDateOnly(date);
+
+	double dPart = (1.0 / nNumParts);
+	double dTest = (dtDay.m_dt + (dPart / 2));
+
+	for (int nPart = 0; nPart < nNumParts; nPart++)
 	{
-		if (bEnd) // end of previous day
+		if (date.m_dt < dTest)
 		{
-			dtNearest = GetEndOfPreviousDay(dtNearest);
+			// special case: dragging end and first part
+			if (bEnd && (nPart == 0))
+			{
+				// end of previous day
+				return GetEndOfPreviousDay(dtDay);
+			}
+
+			// else return part 
+			return MakeDate(dtDay, (nPart * dPart));
 		}
-	}
-	else if ((date.m_dt - dtNearest.m_dt) < 0.75)
-	{
-		dtNearest.m_dt += 0.5;
-	}
-	else if (bEnd)
-	{
-		dtNearest.m_dt += END_OF_DAY;
-	}
-	else // start
-	{
-		dtNearest.m_dt += 1.0;
+
+		// test for next part
+		dTest += dPart;
 	}
 
-	return dtNearest;
+	// handle end of day
+	if (bEnd)
+		return MakeDate(dtDay, END_OF_DAY);
+
+	// else start of next day
+	return (dtDay.m_dt + 1.0);
 }
 
 COleDateTime CDateHelper::GetEndOfPreviousDay(const COleDateTime& date)
@@ -1371,38 +1375,6 @@ COleDateTime CDateHelper::GetEndOfDay(const COleDateTime& date)
 	ASSERT(IsDateSet(date));
 
 	return (GetDateOnly(date).m_dt + END_OF_DAY);
-}
-
-COleDateTime CDateHelper::GetNearestHour(const COleDateTime& date, BOOL bEnd)
-{
-	COleDateTime dtDay = GetDateOnly(date);
-	COleDateTime dtTest = dtDay.m_dt + HALF_HOUR;
-
-	for (int nHour = 0; nHour < 24; nHour++)
-	{
-		if (date < dtTest)
-		{
-			// special case: dragging end and nHour == 0
-			if (bEnd && (nHour == 0))
-			{
-				// end of previous day
-				return GetEndOfPreviousDay(dtDay);
-			}
-
-			// else return hour 
-			return MakeDate(dtDay, nHour * ONE_HOUR);
-		}
-
-		// test for next hour
-		dtTest.m_dt += ONE_HOUR;
-	}
-
-	// handle end of day
-	if (bEnd)
-		return MakeDate(dtDay, END_OF_DAY);
-
-	// else start of next day
-	return (dtDay.m_dt + 1.0);
 }
 
 COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
