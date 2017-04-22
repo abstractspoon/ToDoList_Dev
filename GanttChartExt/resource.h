@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by GanttChartExt.rc
 //
 #define IDD_GANTTTREE_DIALOG            103
@@ -30,6 +30,7 @@
 #define IDS_SNAP_NEARESTQUARTER         2009
 #define IDS_SNAP_NEARESTWEEK            2010
 #define IDS_SNAP_NEARESTYEAR            2011
+#define IDS_DISPLAYDAYSHOURS            2012
 #define IDC_DIVIDER                     16001
 #define IDC_AUTOSCROLLSELECTION         16002
 #define IDD_PREFERENCES_DIALOG          16002

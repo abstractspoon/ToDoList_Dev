@@ -226,7 +226,7 @@ protected:
 							BOOL bSelected, BOOL& bToday);
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
 							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							BOOL bSelected, BOOL& bToday, BOOL bDrawHours);
 
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);

@@ -68,6 +68,7 @@ const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
 
 const LONG DEPENDPICKPOS_NONE = 0xFFFFFFFF;
 const double DAY_WEEK_MULTIPLIER = 1.5;
+const double HOUR_DAY_MULTIPLIER = 6;
 const double MULTIYEAR_MULTIPLIER = 2.0;
 const double DAYS_IN_YEAR = 365.25;
 const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
@@ -322,6 +323,7 @@ BOOL CGanttTreeListCtrl::SelectTask(DWORD dwTaskID)
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 
 	SelectTreeItem(hti, FALSE);
+	ResyncSelection(m_list, m_tree, FALSE);
 
 	if (!bWasVisible)
 		ExpandList();
@@ -500,7 +502,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 					RecalcParentDates();
 				}
 				
-				// fixup list columns as required
+				// Refresh list columns as required
 				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
 				{
 					ValidateMonthDisplay();
@@ -529,6 +531,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
 			
 			RecalcDateRange();
+			RecalcParentDates();
 
 			// fixup list columns as required
 			if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
@@ -1083,6 +1086,7 @@ COleDateTime CGanttTreeListCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		dtStart = CDateHelper::GetStartOfMonth(dtStart);
 		break;
 
@@ -1130,6 +1134,7 @@ COleDateTime CGanttTreeListCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		dtEnd = CDateHelper::GetEndOfMonth(dtEnd);
 		break;
 
@@ -1265,6 +1270,7 @@ CString CGanttTreeListCtrl::FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
 		break;
 		
@@ -1307,6 +1313,7 @@ float CGanttTreeListCtrl::GetMonthWidth(int nColWidth) const
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		return (float)nColWidth;
 		
 	default:
@@ -1355,6 +1362,7 @@ int CGanttTreeListCtrl::GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) cons
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		return nNumMonths;
 	}
 
@@ -1404,6 +1412,7 @@ int CGanttTreeListCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWi
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		return nMonthWidth;
 	}
 
@@ -2896,12 +2905,11 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 		}
 		break;
 		
-	default:
-		ASSERT(0);
-		break;
+	case GTLC_DISPLAY_HOURS:
+		return DIV_VERT_DARK;
 	}
 
-
+	ASSERT(0);
 	return DIV_NONE;
 }
 
@@ -3193,7 +3201,7 @@ void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const 
 void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, GANTTDISPLAY& gd,
-											BOOL bSelected, BOOL& bToday)
+											BOOL bSelected, BOOL& bToday, BOOL bDrawHours)
 {
 	// draw vertical day dividers
 	double dMonthWidth = rMonth.Width();
@@ -3206,13 +3214,30 @@ void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	{
 		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
 
-		// fill weekends if not selected
-		if (!bSelected)
-			DrawWeekend(pDC, dtDay, rDay);
+		// only draw visible days
+		if (rDay.right > 0)
+		{
+			// fill weekends if not selected
+			if (!bSelected)
+				DrawWeekend(pDC, dtDay, rDay);
 
-		// draw all but the last divider
-		if (nDay < nNumDays)
-			DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+			if (bDrawHours)
+			{
+				// draw all but the first and last hours dividers
+				double dHourWidth = (dMonthWidth / (nNumDays * 24.0f));
+				CRect rHour(rDay);
+
+				for (int nHour = 1; nHour < 24; nHour++)
+				{
+					rHour.right = (rDay.left + (int)(dHourWidth * nHour));
+					DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+				}
+			}
+
+			// draw all but the last day divider
+			if (nDay < nNumDays)
+				DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
+		}
 
 		// next day
 		dtDay.m_dt += 1;
@@ -3294,7 +3319,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
 		if (bUseHigherRes)
-			DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+			DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday, FALSE);
 		else
 			DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
 		break;
@@ -3302,9 +3327,13 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday);
+		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday, bUseHigherRes);
 		break;
-		
+
+	case GTLC_DISPLAY_HOURS:
+		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, gdTemp, bSelected, bToday, TRUE);
+		break;
+	
 	default:
 		ASSERT(0);
 		break;
@@ -3423,10 +3452,11 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
 			int nWeek = CDateHelper::GetWeekofYear(dtWeek);
 			BOOL bDone = FALSE;
+			double dDayWidth = (dMonthWidth / nNumDays);
 
 			while (!bDone)
 			{
-				rWeek.left = rMonth.left + (int)((nDay - 1) * dMonthWidth / nNumDays);
+				rWeek.left = rMonth.left + (int)((nDay - 1) * dDayWidth);
 
 				// if this week bridges into next month this needs special handling
 				if ((nDay + 6) > nNumDays)
@@ -3449,7 +3479,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 						nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 						dMonthWidth = rMonth.Width();
 
-						rWeek.right += (int)(nDay * dMonthWidth / nNumDays);
+						rWeek.right += (int)(nDay * dDayWidth);
 					}
 
 					// if this is week 53, check that its not really week 1 of the next year
@@ -3465,7 +3495,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				}
 				else 
 				{
-					rWeek.right = rMonth.left + (int)((nDay + 6) * dMonthWidth / nNumDays);
+					rWeek.right = rMonth.left + (int)((nDay + 6) * dDayWidth);
 				}
 
 				// check if we can stop
@@ -3489,6 +3519,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		{
 			CRect rMonth(rItem), rDay(rItem);
 			rDay.top += (rDay.Height() / 2);
@@ -3500,13 +3531,14 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			// draw day elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dMonthWidth = rMonth.Width();
+			double dDayWidth = (dMonthWidth / nNumDays);
 
 			rDay.right = rDay.left;
 			
 			for (int nDay = 0; nDay < nNumDays; nDay++)
 			{
 				rDay.left = rDay.right;
-				rDay.right = rMonth.left + (int)((nDay + 1) * dMonthWidth / nNumDays);
+				rDay.right = rMonth.left + (int)((nDay + 1) * dDayWidth);
 
 				// check if we can stop
 				if (rDay.left > rClip.right)
@@ -3733,20 +3765,17 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	if (dtFrom > dtTo || dtTo < dtMonthStart || dtFrom > dtMonthEnd)
 		return FALSE;
 
-	rDate = rMonth;
-
-	double dMultiplier = (rMonth.Width() / (double)nDaysInMonth);
+	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 	if (dtFrom > dtMonthStart)
-		rDate.left += (int)(((dtFrom - dtMonthStart) * dMultiplier));
+		rDate.left = (rMonth.left + (int)(((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth)));
+	else
+		rDate.left = rMonth.left;
 
 	if (dtTo < dtMonthEnd)
-	{
-		if (dtTo == dtFrom)
-			rDate.right = rDate.left;
-		else
-			rDate.right -= (int)(((dtMonthEnd - dtTo) * dMultiplier) + 0.5);
-	}
+		rDate.right = (rMonth.left + (int)(((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth)/* + 0.5*/));
+	else
+		rDate.right = rMonth.right;
 
 	return (rDate.right > 0);
 }
@@ -3754,13 +3783,7 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 BOOL CGanttTreeListCtrl::BuildDependency(int nFrom, int nTo, GANTTDEPENDENCY& depend) const
 {
 	if (CalcDependencyEndPos(nFrom, depend, TRUE) && CalcDependencyEndPos(nTo, depend, FALSE))
-	{
-// #ifdef _DEBUG
-// 		depend.Trace();
-// #endif
-
 		return TRUE;
-	}
 
 	// else
 	return FALSE;
@@ -4344,6 +4367,7 @@ BOOL CGanttTreeListCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
 		m_listHeader.SetRowCount(2);
 		m_treeHeader.SetRowCount(2);
 		break;
@@ -4819,6 +4843,7 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 		case GTLC_DISPLAY_DAYS_SHORT:
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
+		case GTLC_DISPLAY_HOURS:
 			nMonth += 1;
 
 			if (nMonth > 12)
@@ -5029,8 +5054,6 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 		case GTLC_DISPLAY_WEEKS_SHORT:
 		case GTLC_DISPLAY_WEEKS_MID:
 		case GTLC_DISPLAY_WEEKS_LONG:
-			// fall thru
-			
 		case GTLC_DISPLAY_DAYS_SHORT:
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
@@ -5040,6 +5063,16 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
+			}
+			break;
+			
+		case GTLC_DISPLAY_HOURS:
+			{
+				// just increase the width of the preceding display
+				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+
+				nMinMonthWidth = GetMinMonthWidth(nPrev);
+				nMinMonthWidth = (int)(nMinMonthWidth * HOUR_DAY_MULTIPLIER);
 			}
 			break;
 			
@@ -5822,11 +5855,12 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 		m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
 
 		::ReleaseCapture();
-		RedrawList();
 
 		// keep parent informed
 		if (DragDatesDiffer(*pGI, m_giPreDrag))
 		{
+			int nNumMonths = GetNumMonths(m_nMonthDisplay);
+
 			if (!NotifyParentDateChange(nDragWhat))
 			{
 				GANTTITEM* pGI = GetGanttItem(dwTaskID);
@@ -5834,6 +5868,18 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 				
 				(*pGI) = m_giPreDrag;
 				RedrawList();
+			}
+			else
+			{
+				RecalcDateRange();
+				RecalcParentDates();
+
+				// Refresh list columns as required
+				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
+				{
+					ValidateMonthDisplay();
+					UpdateListColumns();
+				}
 			}
 
 			NotifyParentDragChange();
@@ -6322,6 +6368,10 @@ GTLC_SNAPMODE CGanttTreeListCtrl::GetSnapMode() const
 				{
 					m_nSnapMode = GTLCSM_NEARESTDAY;
 				}
+				break;
+
+			case GTLC_DISPLAY_HOURS:
+				// TODO
 				break;
 				
 			default:
