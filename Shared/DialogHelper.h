@@ -118,6 +118,8 @@ public:
 	static void ExcludeCtrl(const CWnd* pParent, UINT nCtrlID, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 
+	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
+
 	static int ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR szInstruction, LPCTSTR szText, UINT nFlags);
 
 protected:

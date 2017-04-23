@@ -60,6 +60,10 @@ const UINT WM_TDL_RESTORE			= ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CTDLPrintDialog;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CToDoListWnd : public CFrameWnd, public CDialogHelper
 {
 public:
@@ -745,7 +749,7 @@ protected:
 					int nImporter, TDLID_IMPORTTO nImportTo);
 	BOOL Export2Html(const CTaskFile& tasks, const CString& sFilePath, 
 					const CString& sStylesheet) const;
-
+	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
@@ -760,6 +764,7 @@ protected:
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static void HandleImportError(IIMPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
+	static BOOL SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath);
 
 	void TranslateUIElements();
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);

@@ -6099,47 +6099,24 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CString sStylesheet(tdc.GetStylesheetPath());
-	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetTaskView(), sStylesheet);
+	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetTaskView(), tdc.GetStylesheetPath());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
 
 	RedrawWindow();
 	
+	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
+	
 	// always use the same file
 	CString sTempFile = FileMisc::GetTempFilePath(_T("ToDoList.print"), _T("html"));
-	
-	sTitle = dialog.GetTitle();
-	BOOL bTransform = dialog.GetStylesheet(sStylesheet);
-	
-	// export
-	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
 
-	CTaskFile tasks;
-	GetTasks(tdc, TRUE, bTransform, dialog.GetTaskSelection(), tasks, NULL);
-
-	// add title and date, and style 
-	COleDateTime date;
-
-	if (dialog.GetWantDate())
-		date = COleDateTime::GetCurrentTime();
-
-	tasks.SetReportAttributes(sTitle, date);
-
-	// add export style
-	if (!bTransform)
+	if (!CreateTempPrintFile(dialog, sTempFile))
 	{
-		TDLPD_STYLE nStyle = dialog.GetExportStyle();
-		tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
-	}
-	
-	// save intermediate tasklist to file as required
-	LogIntermediateTaskList(tasks, tdc.GetFilePath());
-
-	if (!Export2Html(tasks, sTempFile, sStylesheet))
+		// Cancelled or error handled
 		return;
-	
+	}
+
 	// print from browser
 	CRect rHidden(-20, -20, -10, -10); // create IE off screen
 	
@@ -6160,6 +6137,76 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 		if (dwRes < 32)
 			MessageBox(IDS_PRINTFAILED, IDS_PRINTFAILED_TITLE, MB_OK);
 	}
+}
+
+BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
+{
+	TDLPD_STYLE nStyle = dlg.GetExportStyle();
+
+	if (nStyle == TDLPDS_IMAGE)
+	{
+		CString sTempImg = FileMisc::GetTempFilePath(_T("ToDoList.view"), _T("bmp"));
+
+		if (SaveViewToImage(GetToDoCtrl(), sTempImg))
+		{
+			CString sHtmlOutput;
+			
+			sHtmlOutput += _T("<html>\n<head>\n");
+			sHtmlOutput += _T("</head>\n<body>\n");
+
+			CString sTitle, sDate, sImage;
+
+			if (dlg.GetWantDate())
+				sDate = COleDateTime::GetCurrentTime().Format(VAR_DATEVALUEONLY);
+
+			sTitle.Format(_T("<h2>%s</h2>%s<p/>"), dlg.GetTitle(), sDate);
+			sHtmlOutput += sTitle;
+
+			sImage.Format(_T("<img src=\"%s\">"), sTempImg);
+			sHtmlOutput += sImage;
+
+			sHtmlOutput += _T("</body>\n</html>\n");
+
+			FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
+		}
+		else
+		{
+			// Error handling
+			// TODO
+
+			return FALSE;
+		}
+	}
+	else
+	{
+		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+		CString sStylesheet;
+		BOOL bTransform = dlg.GetStylesheet(sStylesheet);
+		
+		CTaskFile tasks;
+		GetTasks(tdc, TRUE, bTransform, dlg.GetTaskSelection(), tasks, NULL);
+		
+		if (!bTransform)
+			tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
+
+		if (dlg.GetWantDate())
+			tasks.SetReportAttributes(dlg.GetTitle(), COleDateTime::GetCurrentTime());
+		else
+			tasks.SetReportAttributes(dlg.GetTitle());
+
+		// save intermediate tasklist to file as required
+		LogIntermediateTaskList(tasks, tdc.GetFilePath());
+
+		// export
+		if (!Export2Html(tasks, sFilePath, sStylesheet))
+		{
+			// cancelled
+			return FALSE; 
+		}
+	}
+
+	return TRUE;
 }
 
 void CToDoListWnd::OnUpdatePrint(CCmdUI* pCmdUI) 
@@ -12405,7 +12452,6 @@ void CToDoListWnd::OnViewSaveToImage()
 	sFilePath += tdc.GetTaskViewName();
 	sFilePath += _T(".bmp");
 
-
 	CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
 							_T("bmp"), 
 							sFilePath, 
@@ -12417,24 +12463,36 @@ void CToDoListWnd::OnViewSaveToImage()
 		return;
 	
 	// else
+	sFilePath = dialog.GetPathName();
+
+	if (SaveViewToImage(tdc, sFilePath))
+	{
+		FileMisc::Run(*this, sFilePath);
+	}
+	else
+	{
+		// Error handling
+		// TODO
+	}
+}
+
+BOOL CToDoListWnd::SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath) 
+{
 	CWaitCursor cursor;
 	CBitmap bmImage;
-
-	sFilePath = dialog.GetPathName();
-		
+	
 	if (tdc.SaveTaskViewToImage(bmImage))
 	{
 		CDibData dib;
 
 		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath))
 		{
-			FileMisc::Run(*this, sFilePath);
-			return;
+			return TRUE;
 		}
 	}
 
-	// Error handling
-	// TODO
+	// else
+	return FALSE;
 }
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 

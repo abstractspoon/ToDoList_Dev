@@ -18,9 +18,12 @@
 
 enum TDLPD_STYLE
 {
+	TDLPDS_STYLESHEET = -1,
+
 	TDLPDS_WRAP,
 	TDLPDS_TABLE,
 	TDLPDS_PARA,
+	TDLPDS_IMAGE,
 };
 
 class CTDLPrintDialog : public CTDLDialog
@@ -29,19 +32,20 @@ class CTDLPrintDialog : public CTDLDialog
 public:
 	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
-	BOOL GetWantDate() { return m_bDate; }
+	BOOL GetWantDate() const { return m_bDate; }
 	BOOL GetStylesheet(CString& sStylesheet) const;
 	CString GetTitle() const { return m_sTitle; }
-	TDLPD_STYLE GetExportStyle() const { return m_nExportStyle; }
+	TDLPD_STYLE GetExportStyle() const;
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_taskSel; }
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLPrintDialog)
+	enum { IDD = IDD_PRINT_DIALOG };
 	CFileEdit	m_eStylesheet;
 	CString	m_sStylesheet;
-    CTaskSelectionDlg m_taskSel;
+    CTaskSelectionDlg m_dlgTaskSel;
 	//}}AFX_DATA
 	TDLPD_STYLE	m_nExportStyle;
 	CString	m_sTitle;
@@ -66,6 +70,7 @@ protected:
 	//{{AFX_MSG(CTDLPrintDialog)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeStylesheet();
+	afx_msg void OnChangeStyle();
 	//}}AFX_MSG
     afx_msg void OnUsestylesheet();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);

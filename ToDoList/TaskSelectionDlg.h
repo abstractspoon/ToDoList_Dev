@@ -82,6 +82,7 @@ protected:
 
 // Implementation
 protected:
+	virtual BOOL OnInitDialog();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTaskSelectionDlg)
@@ -90,9 +91,11 @@ protected:
 	afx_msg void OnChangetasksOption();
 	afx_msg void OnIncludeDone();
 	afx_msg void OnIncludeNotDone();
-	virtual BOOL OnInitDialog();
-   afx_msg void OnDestroy();
+	afx_msg void OnDestroy();
+	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
+
+	void UpdateEnableStates();
 };
 
 //{{AFX_INSERT_LOCATION}}

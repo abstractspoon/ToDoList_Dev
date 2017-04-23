@@ -806,29 +806,32 @@ CAPTION "Print Tasklist"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Title",IDC_STATIC,7,9,28,8
+    COMBOBOX        IDC_PRINTTITLE,40,7,128,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "T&oday's date",IDC_PRINTDATE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,184,9,164,10
     CONTROL         "U&se the following stylesheet",IDC_USESTYLESHEET,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,26,273,10
     EDITTEXT        IDC_STYLESHEET,18,39,211,13,ES_AUTOHSCROLL
+    LTEXT           "Stylesheet not found",IDC_STYLESHEETNOTFOUND,236,41,140,
+                    8,NOT WS_VISIBLE
     GROUPBOX        "Style",IDC_STATIC,7,61,93,157
     CONTROL         "&Wrapped",IDC_STYLE_WRAP,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,74,85,10
+                    WS_GROUP,15,74,80,10
     CONTROL         "&Tabular",IDC_STYLE_TABLE,"Button",BS_AUTORADIOBUTTON,
-                    15,108,85,10
+                    15,108,80,10
     CONTROL         "&Paragraph",IDC_STYLE_PARA,"Button",BS_AUTORADIOBUTTON,
-                    15,142,85,10
-    ICON            IDI_STYLE_WRAP,IDC_STATIC,26,84,20,20
+                    15,142,80,10
+    CONTROL         "Task &View",IDC_STYLE_IMAGE,"Button",BS_AUTORADIOBUTTON,
+                    15,179,80,10
+    ICON            IDI_STYLE_WRAP,IDC_STATIC,26,84,20,20,WS_GROUP
     ICON            IDI_STYLE_TABLE,IDC_STATIC,26,118,20,20
     ICON            IDI_STYLE_PARA,IDC_STATIC,26,154,20,20
+    ICON            IDI_STYLE_IMAGE,IDC_STATIC,26,190,21,20
     CONTROL         "",IDC_FRAME,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
                     WS_DISABLED | WS_GROUP,110,61,370,157
     DEFPUSHBUTTON   "OK",IDOK,376,225,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,430,225,50,14
-    COMBOBOX        IDC_PRINTTITLE,40,7,128,30,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Stylesheet not found",IDC_STYLESHEETNOTFOUND,236,41,140,
-                    8,NOT WS_VISIBLE
 END
 
 IDD_WELCOME_PAGE1 DIALOG DISCARDABLE  0, 0, 276, 139
@@ -2524,6 +2527,7 @@ IDI_OUTLOOK             ICON    DISCARDABLE     "res\\outlook_16.ico"
 IDI_TASK                ICON    DISCARDABLE     "res\\task.ico"
 IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
 IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
+IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

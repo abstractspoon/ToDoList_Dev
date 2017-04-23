@@ -7,6 +7,7 @@
 
 #include "..\shared\Preferences.h"
 #include "..\shared\misc.h"
+#include "..\shared\dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,6 +86,7 @@ BEGIN_MESSAGE_MAP(CTaskSelectionDlg, CDialog)
 	ON_BN_CLICKED(IDC_SELTASK, OnChangetasksOption)
 	ON_BN_CLICKED(IDC_INCLUDENOTDONE, OnIncludeNotDone)
 	ON_WM_DESTROY()
+	ON_WM_ENABLE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -202,11 +204,19 @@ BOOL CTaskSelectionDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	BOOL bWantSelTasks = GetWantSelectedTasks();
-		
+	UpdateEnableStates();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTaskSelectionDlg::UpdateEnableStates()
+{
 	GetDlgItem(IDC_CUSTOMATTRIBLIST)->EnableWindow(m_nAttribOption == TSDA_USER);
 	GetDlgItem(IDC_INCLUDECOMMENTS)->EnableWindow(m_nAttribOption == TSDA_VISIBLE);
 
+	BOOL bWantSelTasks = GetWantSelectedTasks();
+	
 	GetDlgItem(IDC_INCLUDEDONE)->EnableWindow(!bWantSelTasks);
 	GetDlgItem(IDC_INCLUDENOTDONE)->EnableWindow(!bWantSelTasks);
 	GetDlgItem(IDC_INCLUDEPARENTTASK)->EnableWindow(bWantSelTasks);
@@ -221,9 +231,6 @@ BOOL CTaskSelectionDlg::OnInitDialog()
 	{
 		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks);
 	}
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
@@ -287,4 +294,12 @@ int CTaskSelectionDlg::GetUserAttributes(CTDCAttributeMap& mapAttrib) const
 		ASSERT(0);
 
 	return mapAttrib.GetCount();
+}
+
+void CTaskSelectionDlg::OnEnable(BOOL bEnable)
+{
+	CDialogHelper::EnableAllCtrls(this, bEnable);
+
+	if (bEnable)
+		UpdateEnableStates();
 }

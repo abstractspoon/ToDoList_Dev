@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent /*=NULL*/)
 	: CTDLDialog(IDD_PRINT_DIALOG, pParent), 
 	m_bPreview(bPreview), 
-	m_taskSel(_T("Print"), nView),
+	m_dlgTaskSel(_T("Print"), nView),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
@@ -56,6 +56,10 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLPrintDialog)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
+	ON_BN_CLICKED(IDC_STYLE_WRAP, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_TABLE, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_PARA, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_IMAGE, OnChangeStyle)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_USESTYLESHEET, OnUsestylesheet)
 	ON_WM_CTLCOLOR()
@@ -115,19 +119,27 @@ BOOL CTDLPrintDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-    VERIFY(m_taskSel.Create(IDC_FRAME, this));
+    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 
 	if (m_bPreview)
 		SetWindowText(CEnString(IDS_PRINTDLG_PREVIEW_TITLE));
 	else
 		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
-	
-	GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet);
-	GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
-	GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
-	GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
 
-	OnChangeStylesheet();
+	if (m_nExportStyle == TDLPDS_IMAGE)
+	{
+		m_dlgTaskSel.EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet);
+		GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
+		GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
+		GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
+		GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet); 
+		
+		OnChangeStylesheet();
+	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -141,6 +153,7 @@ void CTDLPrintDialog::OnUsestylesheet()
 	GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
+	GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet); 
 
 	OnChangeStylesheet();
 }
@@ -171,6 +184,17 @@ BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const
 	return FileMisc::FileExists(sStylesheet); 
 }
 
+TDLPD_STYLE CTDLPrintDialog::GetExportStyle() const 
+{ 
+	CString sUnused;
+
+	if (GetStylesheet(sUnused))
+		return TDLPDS_STYLESHEET;
+	
+	// else
+	return m_nExportStyle; 
+}
+
 HBRUSH CTDLPrintDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
@@ -183,4 +207,11 @@ HBRUSH CTDLPrintDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	}
 
 	return hbr;
+}
+
+void CTDLPrintDialog::OnChangeStyle() 
+{
+	UpdateData();
+
+	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
 }

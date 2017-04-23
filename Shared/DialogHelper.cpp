@@ -1352,6 +1352,17 @@ int CDialogHelper::GetChildCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LP
 	return aCtrlIDs.GetSize();
 }
 
+void CDialogHelper::EnableAllCtrls(const CWnd* pParent, BOOL bEnable)
+{
+	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+	
+	while (pChild)
+	{
+		pChild->EnableWindow(bEnable);
+		pChild = pChild->GetNextWindow();
+	}
+}
+
 void CDialogHelper::RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs)
 {
 	int nFind = Misc::FindT(aCtrlIDs, nCtrlID);

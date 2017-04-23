@@ -141,6 +141,7 @@
 #define IDI_SIMPLETEXT                  302
 #define IDI_RESET                       303
 #define IDI_TIMETRACK_STD               304
+#define IDI_STYLE_IMAGE                 305
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -318,6 +319,7 @@
 #define IDC_SAMPLE                      1059
 #define IDC_DEFAULTCOLS                 1059
 #define IDC_ADDTOACTIVETASKLIST         1059
+#define IDC_STYLE_IMAGE                 1059
 #define IDC_TABCONTROL                  1060
 #define IDC_SETDEFAULTCOLOR             1060
 #define IDC_SETGRIDLINECOLOR            1060
@@ -2060,7 +2062,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        305
+#define _APS_NEXT_RESOURCE_VALUE        306
 #define _APS_NEXT_COMMAND_VALUE         34572
 #define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           108
