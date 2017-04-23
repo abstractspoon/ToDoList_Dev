@@ -4577,7 +4577,7 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 		{
 			if (aVerParts[2].Find(_T("996")) == 0)
 			{
-				sShortStr = _T("DR");
+				sShortStr = _T("DP");
 				nExtendedStr = IDS_DEV_RELEASE;
 			}
 			else if (aVerParts[2].Find(_T("997")) == 0)
