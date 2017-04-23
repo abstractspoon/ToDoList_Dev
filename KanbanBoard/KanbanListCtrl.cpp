@@ -1251,9 +1251,9 @@ BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
 	return bRes;
 }
 
-int CKanbanListCtrl::CalcRequiredAttributeLineWidthForImage() const
+int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 {
-	int nMaxAttribLength = 0;
+	int nMaxItemLength = 0;
 	int nItem = GetItemCount();
 
 	while (nItem--)
@@ -1264,19 +1264,21 @@ int CKanbanListCtrl::CalcRequiredAttributeLineWidthForImage() const
 
 		if (pKI)
 		{
+			nMaxItemLength = max(nMaxItemLength, (pKI->sTitle.GetLength() / 2)); // title is on two lines
+
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeValue(nAttrib), TRUE);
 
-				nMaxAttribLength = max(nMaxAttribLength, sAttrib.GetLength());
+				nMaxItemLength = max(nMaxItemLength, sAttrib.GetLength());
 			}
 		}
 	}
 
 	CClientDC dc(const_cast<CKanbanListCtrl*>(this));
 
-	return ((int)(nMaxAttribLength * GraphicsMisc::GetAverageCharWidth(&dc)) + ATTRIB_INDENT);
+	return ((int)(nMaxItemLength * GraphicsMisc::GetAverageCharWidth(&dc)) + ATTRIB_INDENT);
 }
 
 BOOL CKanbanListCtrl::SelectionHasLockedTasks() const

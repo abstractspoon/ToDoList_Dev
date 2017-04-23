@@ -2584,7 +2584,7 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		BOOL bValidDest = (pDestList && (pDestList != m_pDragFromList));
 		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? GMOC_MOVE : GMOC_NO));
 	}
-
+	
 	CWnd::OnMouseMove(nFlags, point);
 }
 
@@ -2658,7 +2658,7 @@ int CKanbanCtrl::CalcRequiredColumnWidthForImage() const
 	{
 		const CKanbanListCtrl* pList = m_aListCtrls[nList];
 
-		int nListWidth = pList->CalcRequiredAttributeLineWidthForImage();
+		int nListWidth = pList->CalcRequiredColumnWidthForImage();
 		nMaxWidth = max(nMaxWidth, nListWidth);
 	}
 

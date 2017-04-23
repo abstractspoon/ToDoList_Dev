@@ -43,7 +43,7 @@ public:
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
 	
 	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
-	int CalcRequiredAttributeLineWidthForImage() const;
+	int CalcRequiredColumnWidthForImage() const;
 
 	int FindTask(DWORD dwItemID) const;
 	int FindTask(const CPoint& ptScreen) const;
