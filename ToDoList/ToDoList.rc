@@ -2662,6 +2662,8 @@ BEGIN
         MENUITEM "Save Tasklist &As...",        ID_SAVEAS
         MENUITEM "Save A&ll",                   ID_SAVEALL
         MENUITEM SEPARATOR
+        MENUITEM "Save Task View to &Image...", ID_VIEW_SAVETOIMAGE
+        MENUITEM SEPARATOR
         POPUP "Open &From"
         BEGIN
             MENUITEM "Open from 3rd Party Storage 1", 
@@ -2983,8 +2985,6 @@ BEGIN
             MENUITEM "Restore &Default Font Size",  ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE
 
         END
-        MENUITEM SEPARATOR
-        MENUITEM "Save Task View to &Image...", ID_VIEW_SAVETOIMAGE
         MENUITEM SEPARATOR
         MENUITEM "To&ggle between Tasks and Comments", 
                                                 ID_VIEW_TOGGLETASKSANDCOMMENTS
