@@ -2724,15 +2724,16 @@ CGanttTreeListCtrl::DIV_TYPE CGanttTreeListCtrl::GetVerticalDivider(int nMonth, 
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
 		{
-			if (nMonth == 6)
-				return DIV_VERT_LIGHT;
-
 			if (nMonth == 12)
 			{
 				if (nYear == (GetEndYear(m_nMonthDisplay)))
 					return DIV_VERT_DARK;
 
 				return DIV_VERT_MID;
+			}
+			else if ((nMonth % 3) == 0)
+			{
+				return DIV_VERT_LIGHT;
 			}
 
 			return DIV_NONE;
