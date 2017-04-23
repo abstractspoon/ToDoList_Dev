@@ -369,10 +369,21 @@ int CCopyListCtrlContents::CalcPageCount(BOOL bVert) const
 
 void CCopyListCtrlContents::DoPageDown()
 {
-	int nLine = m_list.GetCountPerPage();
+	// Avoid animations by not using WM_VSCROLL
+	CSize amount(0, (m_list.GetCountPerPage() * m_nItemHeight));
 
-	while (nLine--)
-		m_wnd.SendMessage(WM_VSCROLL, SB_LINEDOWN);
+	m_list.Scroll(amount);
+}
+
+void CCopyListCtrlContents::DoPageRight()
+{
+	// Avoid animations by not using WM_VHCROLL
+	CRect rClient;
+	m_list.GetClientRect(rClient);
+
+	CSize amount(rClient.Width(), 0);
+	
+	m_list.Scroll(amount);
 }
 
 CSize CCopyListCtrlContents::CalcContentsSize() const
