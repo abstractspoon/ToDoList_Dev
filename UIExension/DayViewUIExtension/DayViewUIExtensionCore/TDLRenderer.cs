@@ -24,7 +24,12 @@ namespace DayViewUIExtension
 					const int LVP_LISTITEM = 1;
 					const int LISS_MORESELECTED = 6;
 
-					m_ExplorerSelection = new VisualStyleRenderer("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+                    VisualStyleElement visElm = VisualStyleElement.CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+
+                    if (VisualStyleRenderer.IsElementDefined(visElm))
+                    {
+                        m_ExplorerSelection = new VisualStyleRenderer(visElm);
+                    }
 				}
 
 				return m_ExplorerSelection;
@@ -278,9 +283,20 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-						g.FillRectangle(System.Drawing.Brushes.White, rect);
-						ExplorerSelection.DrawBackground(g, rect);
-						ExplorerSelection.DrawBackground(g, rect);
+                        if (ExplorerSelection != null)
+                        {
+                            g.FillRectangle(System.Drawing.Brushes.White, rect);
+                            ExplorerSelection.DrawBackground(g, rect);
+                            ExplorerSelection.DrawBackground(g, rect);
+                        }
+                        else
+                        {
+						    using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 175, 195, 240)))
+							    g.FillRectangle(brush, rect);
+       
+                            using (Pen pen = new Pen(Color.FromArgb(255, 50, 105, 200)))
+                                g.DrawRectangle(pen, rect);
+                        }
 					}
 					else
 					{
@@ -298,8 +314,8 @@ namespace DayViewUIExtension
 						g.FillRectangle(brush, gripRect);
 
 					// Draw gripper border
-					using (Pen m_Pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
-						g.DrawRectangle(m_Pen, gripRect);
+					using (Pen pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
+						g.DrawRectangle(pen, gripRect);
 					
 					//  Draw appointment border if needed
 					if (!isSelected && appointment.DrawBorder)
