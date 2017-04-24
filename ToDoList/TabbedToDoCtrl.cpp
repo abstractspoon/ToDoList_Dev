@@ -607,18 +607,24 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	switch (nNewView)
 	{
 	case FTCV_TASKTREE:
-		// update sort
-		if (m_bTreeNeedResort)
 		{
-			m_bTreeNeedResort = FALSE;
-			CToDoCtrl::Resort();
+			m_taskTree.CWnd::SetRedraw(FALSE);
+			
+			// update sort
+			if (m_bTreeNeedResort)
+			{
+				m_bTreeNeedResort = FALSE;
+				CToDoCtrl::Resort();
+			}
+			
+			m_taskTree.EnsureSelectionVisible();
 		}
-
-		m_taskTree.EnsureSelectionVisible();
 		break;
 
 	case FTCV_TASKLIST:
 		{
+			m_taskList.CWnd::SetRedraw(FALSE);
+
 			// Update tasks
 			VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 
@@ -731,6 +737,55 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 		UpdateControls();
 
 	return 0L; // allow tab change
+}
+
+LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
+{
+	switch (nNewView)
+	{
+	case FTCV_TASKTREE:
+		m_taskTree.CWnd::SetRedraw();
+		break;
+		
+	case FTCV_TASKLIST:
+		m_taskList.CWnd::SetRedraw();
+		break;
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			// stop any progress
+			GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, FALSE);
+			
+			// resync selection
+			ResyncExtensionSelection((FTC_VIEW)nNewView);
+		}
+		break;
+	}
+	
+	// If we are switching to/from a view supporting selection 
+	// from/to a view not support selection then update controls
+	if (ViewSupportsTaskSelection((FTC_VIEW)nNewView) != ViewSupportsTaskSelection((FTC_VIEW)nOldView))
+		UpdateControls();
+	
+	// notify parent
+	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
+	
+	return 0L;
 }
 
 int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
@@ -975,51 +1030,6 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks,
 	}
 
 	return tasks.GetTaskCount();
-}
-
-LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
-{
-	switch (nNewView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_TASKLIST:
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		{
-			// stop any progress
-			GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, FALSE);
-
-			// resync selection
-			ResyncExtensionSelection((FTC_VIEW)nNewView);
-		}
-		break;
-	}
-
-	// If we are switching to/from a view supporting selection 
-	// from/to a view not support selection then update controls
-	if (ViewSupportsTaskSelection((FTC_VIEW)nNewView) != ViewSupportsTaskSelection((FTC_VIEW)nOldView))
-		UpdateControls();
-
-	// notify parent
-	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
-
-	return 0L;
 }
 
 void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, 
