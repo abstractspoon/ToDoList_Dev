@@ -146,11 +146,13 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 		return FALSE;
 
 	// make sure we have a valid HWND to switch to
-	const TDCVIEW& newView = m_aViews[nIndex];
-	ASSERT(newView.hwndView);
+	HWND hwndNew = m_aViews[nIndex].hwndView, hwndOld = NULL;
 
-	if (newView.hwndView == NULL)
+	if (!hwndNew || !::IsWindow(hwndNew))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	CRect rView(0, 0, 0, 0);
 
@@ -173,24 +175,28 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 	{
 		int nOldIndex = TabToIndex(m_nSelTab);
 		TDCVIEW& oldView = m_aViews[nOldIndex];
-
+		
 		GetViewRect(oldView, rView);
+		hwndOld = oldView.hwndView;
 	}
 
 	if (!rView.IsRectEmpty())
-		::MoveWindow(newView.hwndView, rView.left, rView.top, rView.Width(), rView.Height(), FALSE);
+		::MoveWindow(hwndNew, rView.left, rView.top, rView.Width(), rView.Height(), FALSE);
 
-	::ShowWindow(newView.hwndView, SW_SHOW);
-
-	if (m_nSelTab != -1)
 	{
-		int nOldIndex = TabToIndex(m_nSelTab);
-		::ShowWindow(m_aViews[nOldIndex].hwndView, SW_HIDE);
-	}
+		CHoldRedraw hr(hwndNew, NCR_ALL);
 
+		if (hwndOld)
+			::ShowWindow(hwndOld, SW_HIDE);
+		
+		::ShowWindow(hwndNew, SW_SHOW);
+	}
+		
 	m_nSelTab = nTab;
 	SetCurSel(nTab);
 	UpdateTabItemWidths(FALSE);
+
+	// Make sure the spin control is always drawn
 
 	return TRUE;
 }

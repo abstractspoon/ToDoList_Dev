@@ -608,8 +608,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	{
 	case FTCV_TASKTREE:
 		{
-			m_taskTree.CWnd::SetRedraw(FALSE);
-			
 			// update sort
 			if (m_bTreeNeedResort)
 			{
@@ -623,8 +621,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 	case FTCV_TASKLIST:
 		{
-			m_taskList.CWnd::SetRedraw(FALSE);
-
 			// Update tasks
 			VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 
@@ -744,11 +740,7 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	switch (nNewView)
 	{
 	case FTCV_TASKTREE:
-		m_taskTree.CWnd::SetRedraw();
-		break;
-		
 	case FTCV_TASKLIST:
-		m_taskList.CWnd::SetRedraw();
 		break;
 		
 	case FTCV_UIEXTENSION1:
