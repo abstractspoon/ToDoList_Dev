@@ -2290,7 +2290,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 				if (pExtWnd->PrepareNewTask(&task))
 				{
 					// Don't overwrite default attributes
-					task.GetTaskAttributes(hTask, *pTDI, FALSE);
+					task.MergeTaskAttributes(hTask, *pTDI);
 				}
 			}
 		}

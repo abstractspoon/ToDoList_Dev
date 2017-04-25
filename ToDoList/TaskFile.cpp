@@ -1696,6 +1696,16 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 	return TRUE;
 }
 
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+{
+	return GetTaskAttributes(hTask, tdi, TRUE); // overwrite
+}
+
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+{
+	return GetTaskAttributes(hTask, tdi, FALSE); // merge
+}
+
 BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const
 {
 	const CXmlItem* pXITask = NULL;

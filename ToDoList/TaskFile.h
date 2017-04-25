@@ -144,7 +144,8 @@ public:
 	BOOL SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible = TRUE);
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite = TRUE) const;
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
 
 	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);
@@ -481,6 +482,7 @@ protected:
 	CString GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
 
 	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
 							DWORD& dwSpecific2, BOOL& bRecalcFrom, int& nReuse, 

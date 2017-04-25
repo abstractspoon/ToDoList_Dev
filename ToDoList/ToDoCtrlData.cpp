@@ -233,7 +233,7 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const 
 	}
 	
 	// Don't overwrite default attributes except with actual values
-	tasks.GetTaskAttributes(hTask, *pTDI, !bDefAttrib);
+	tasks.MergeTaskAttributes(hTask, *pTDI);
 	
 	// make sure incomplete tasks are not 100% and vice versa
 	if (pTDI->IsDone())
