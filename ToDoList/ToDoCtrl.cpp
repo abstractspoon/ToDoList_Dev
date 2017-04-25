@@ -5164,34 +5164,34 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		
 		for (int nSubtask = 0; nSubtask < nNumSubtasks; nSubtask++)
 		{
-			TODOITEM* tdiSub = m_data.NewTask(*pTDI); // copy parent
+			TODOITEM* pTDISub = m_data.NewTask(*pTDI); // copy parent
 			nNewTaskCount++;
 			
 			// allocate time slice and dates
-			tdiSub->dTimeEstimate = dSubEst;
+			pTDISub->dTimeEstimate = dSubEst;
 			
 			if (dSubTime)
 			{
-				tdiSub->dateStart += (nSubtask * dSubTime);
-				tdiSub->dateDue = tdiSub->dateStart + COleDateTime(dSubTime);
+				pTDISub->dateStart += (nSubtask * dSubTime);
+				pTDISub->dateDue = pTDISub->dateStart + COleDateTime(dSubTime);
 
 				// clear due time if parent didn't have any
 				if (!bHasDueTime)
-					tdiSub->dateDue = CDateHelper::GetDateOnly(tdiSub->dateDue);
+					pTDISub->dateDue = CDateHelper::GetDateOnly(pTDISub->dateDue);
 			}
 			else if (nSubtask) // not the first
 			{
-				tdiSub->ClearStart();
-				tdiSub->ClearDue();
+				pTDISub->ClearStart();
+				pTDISub->ClearDue();
 			}
 
 			// clear time spent from all but first task
 			if (nSubtask)
-				tdiSub->dTimeSpent = 0;
+				pTDISub->dTimeSpent = 0;
 
 			// map it
 			DWORD dwChildID = m_dwNextUniqueID++;
-			m_data.AddTask(dwChildID, tdiSub, dwTaskID, dwPrevSiblingID);
+			m_data.AddTask(dwChildID, pTDISub, dwTaskID, dwPrevSiblingID);
 			
 			// create tree item
 			HTREEITEM htiSub = m_taskTree.InsertItem(dwChildID, hti, NULL);
@@ -9313,16 +9313,6 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	if (IsReadOnly())
 		return FALSE;
 
-	switch (nWhere)
-	{
-	case TDIT_MERGETOTASKLISTBYTITLE:
-		return MergeTasks(tasks, FALSE);
-
-	case TDIT_MERGETOTASKLISTBYID:
-		return MergeTasks(tasks, TRUE);
-	}
-
-	// else
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
 	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
@@ -9379,7 +9369,7 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	
 	while (hTask)
 	{
-		VERIFY(MergeTaskWithTree(tasks, hTask, NULL, bMergeByID, aTaskIDs));
+		VERIFY(MergeTaskWithTree(tasks, hTask, tasks.GetTaskParentID(hTask), bMergeByID, aTaskIDs));
 
 		// next task
 		hTask = tasks.GetNextTask(hTask);
@@ -9394,9 +9384,7 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 			RebuildCustomAttributeUI();
 	}
 
-	int nNumNewTasks = aTaskIDs.GetSize();
-
-	switch (nNumNewTasks)
+	switch (aTaskIDs.GetSize())
 	{
 	case 0:
 		SetModified(TRUE, TDCA_MERGE, 0);
@@ -9414,187 +9402,73 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs)
+BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bMergeByID, CDWordArray& aNewTaskIDs)
 {
-	if (!MergeTaskAttributes(tasks, hTask, bMergeByID))
+	DWORD dwTaskID = 0;
+
+	if (bMergeByID)
 	{
-		// Add task to existing parent
-		DWORD dwParentID = tasks.GetTaskID(hParentTask);
-		HTREEITEM htiParent = (dwParentID ? m_taskTree.Find().GetItem(dwParentID) : NULL);
+		dwTaskID = tasks.GetTaskID(hTask);
 
-		HTREEITEM htiNew = PasteTaskToTree(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES, FALSE); // Not subtasks
+		// If this task does not exist then treat it as a new task
+		if (!m_data.HasTask(dwTaskID))
+			dwTaskID = 0;
+	}
+	else
+	{
+		CDWordArray aTaskIDs;
 
-		if (!htiNew)
+		// Task name must be unique else treat it as a new task
+		if (m_matcher.FindTasks(TDCA_TASKNAME, FOP_EQUALS, tasks.GetTaskTitle(hTask), aTaskIDs) == 1)
+			dwTaskID = aTaskIDs[0];
+	}
+
+	if (m_data.HasTask(dwTaskID))
+	{
+		TODOITEM tdi;
+		VERIFY(m_data.GetTaskAttributes(dwTaskID, tdi));
+
+		if (tasks.MergeTaskAttributes(hTask, tdi))
+			m_data.SetTaskAttributes(dwTaskID, tdi);
+	}
+	else 
+	{
+		dwTaskID = MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, FALSE); // not subtasks
+
+		if (!dwTaskID)
 			return FALSE;
 
-		aNewTaskIDs.Add(GetTaskID(htiNew));
+		aNewTaskIDs.Add(dwTaskID);
 	}
+	ASSERT(dwTaskID);
 
 	// Subtasks
 	HTASKITEM hChildTask = tasks.GetFirstTask(hTask);
 
 	while (hChildTask)
 	{
-		VERIFY(MergeTaskWithTree(tasks, hChildTask, hTask, bMergeByID, aNewTaskIDs));
+		VERIFY(MergeTaskWithTree(tasks, hChildTask, dwTaskID, bMergeByID, aNewTaskIDs));
 		hChildTask = tasks.GetNextTask(hChildTask); // next
 	}
 
 	return TRUE;
 }
 
-BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, BOOL bMergeByID)
+DWORD CToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks)
 {
-	DWORD dwTaskID = tasks.GetTaskID(hTask);
-
-	if (!bMergeByID)
-	{
-		CDWordArray aTaskIDs;
-
-		if (m_matcher.FindTasks(TDCA_TASKNAME, FOP_EQUALS, tasks.GetTaskTitle(hTask), aTaskIDs) != 1)
-			return FALSE;
-
-		// else
-		dwTaskID = aTaskIDs[0];
-	}
-	ASSERT(dwTaskID);
-
-	return MergeTaskAttributes(tasks, hTask, dwTaskID);
-}
-
-BOOL CToDoCtrl::MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwTaskID)
-{
-	if (!m_data.HasTask(dwTaskID))
-		return FALSE;
-
-	// Explicitly check each attribute for existence and content before
-	// updating the task's current value
-
-	// Single text values
-	CString sValue;
-
- 	if (tasks.GetTaskAttribute(hTask, TDL_TASKTITLE, sValue) && !sValue.IsEmpty())
- 		m_data.SetTaskTitle(dwTaskID, sValue);
-
-	if (tasks.GetTaskAttribute(hTask, TDL_TASKALLOCBY, sValue) && !sValue.IsEmpty())
-		m_data.SetTaskAllocBy(dwTaskID, sValue);
+	// Add task to existing parent or root
+	HTREEITEM htiParent = NULL;
 		
-	if (tasks.GetTaskAttribute(hTask, TDL_TASKSTATUS, sValue) && !sValue.IsEmpty())
-		m_data.SetTaskStatus(dwTaskID, sValue);
+	if (dwParentTaskID)
+		htiParent = m_taskTree.Find().GetItem(dwParentTaskID);
 
-	if (tasks.GetTaskAttribute(hTask, TDL_TASKVERSION, sValue) && !sValue.IsEmpty())
-		m_data.SetTaskVersion(dwTaskID, sValue);
+	HTREEITEM htiNew = PasteTaskToTree(tasks, hTask, htiParent, TVI_FIRST, TDCR_YES, bAndSubtasks);
 
-	if (tasks.GetTaskAttribute(hTask, TDL_TASKEXTERNALID, sValue) && !sValue.IsEmpty())
-		m_data.SetTaskExtID(dwTaskID, sValue);
+	if (!htiNew)
+		return 0;
 
-	if (tasks.GetTaskAttribute(hTask, TDL_TASKICONINDEX, sValue) && !sValue.IsEmpty())
-		m_data.SetTaskIcon(dwTaskID, sValue);
-
-	// Text arrays
-	CStringArray aValues;
-
-	if (tasks.GetTaskCategories(hTask, aValues))
-		m_data.SetTaskCategories(dwTaskID, aValues, FALSE);
-
-	if (tasks.GetTaskAllocatedTo(hTask, aValues))
-		m_data.SetTaskAllocTo(dwTaskID, aValues, FALSE);
-
-	if (tasks.GetTaskTags(hTask, aValues))
-		m_data.SetTaskTags(dwTaskID, aValues, FALSE);
-
-	if (tasks.GetTaskFileLinks(hTask, aValues))
-		m_data.SetTaskFileRefs(dwTaskID, aValues, FALSE);
-
-	if (tasks.GetTaskDependencies(hTask, aValues))
-		m_data.SetTaskDependencies(dwTaskID, aValues, FALSE);
-
-	// Boolean values
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKFLAG))
-		m_data.SetTaskFlag(dwTaskID, tasks.IsTaskFlagged(hTask));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKLOCK))
-		m_data.SetTaskLock(dwTaskID, tasks.IsTaskLocked(hTask, false));
-
-	// Numeric values
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOLOR))
-		m_data.SetTaskColor(dwTaskID, tasks.GetTaskColor(hTask));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKPRIORITY))
-		m_data.SetTaskPriority(dwTaskID, tasks.GetTaskPriority(hTask, FALSE));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKPERCENTDONE))
-		m_data.SetTaskPercent(dwTaskID, tasks.GetTaskPercentDone(hTask, FALSE));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKRISK))
-		m_data.SetTaskRisk(dwTaskID, tasks.GetTaskRisk(hTask, FALSE));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOST))
-		m_data.SetTaskCost(dwTaskID, tasks.GetTaskCost(hTask, FALSE));
-
-	// Times
-	double dValue;
-	TDC_UNITS nUnits;
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKTIMEESTIMATE))
-	{
-		dValue = tasks.GetTaskTimeEstimate(hTask, nUnits, FALSE);
-		m_data.SetTaskTimeEstimate(dwTaskID, dValue, nUnits);
-	}
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKTIMESPENT))
-	{
-		dValue = tasks.GetTaskTimeSpent(hTask, nUnits, FALSE);
-		m_data.SetTaskTimeSpent(dwTaskID, dValue, nUnits);
-	}
-
-	// Dates
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKSTARTDATE))
-		m_data.SetTaskDate(dwTaskID, TDCD_START, tasks.GetTaskStartDateOle(hTask));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKDUEDATE))
-		m_data.SetTaskDate(dwTaskID, TDCD_DUE, tasks.GetTaskDueDateOle(hTask));
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKDONEDATE))
-		m_data.SetTaskDate(dwTaskID, TDCD_DONE, tasks.GetTaskDoneDate(hTask));
-
-	// Misc
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKRECURRENCE))
-	{
-		TDCRECURRENCE tr;
-		tasks.GetTaskRecurrence(hTask, tr);
-
-		m_data.SetTaskRecurrence(dwTaskID, tr);
-	}
-
-	if (tasks.TaskHasAttribute(hTask, TDL_TASKCOMMENTS))
-	{
-		CBinaryData content;
-		CString sType;
-		tasks.GetTaskCustomComments(hTask, content, sType);
-
-		m_data.SetTaskComments(dwTaskID, tasks.GetTaskComments(hTask), content, sType);
-	}
-
-	CMapStringToString mapValues;
-
-	if (tasks.GetTaskCustomAttributeData(hTask, mapValues))
-	{
-		POSITION pos = mapValues.GetStartPosition();
-
-		while (pos)
-		{
-			CString sKey, sValue;
-			mapValues.GetNextAssoc(pos, sKey, sValue);
-
-			m_data.SetTaskCustomAttributeData(dwTaskID, sKey, sValue);
-		}
-	}
-	
-	// TDL_TASKMETADATA
-	// if (tasks.TaskHasAttribute(hTask, ))
-	//	m_data.SetTask(dwTaskID, tasks.GetTask(hTask, ));
-
-	return TRUE;
+	// else
+	return GetTaskID(htiNew);
 }
 
 BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 

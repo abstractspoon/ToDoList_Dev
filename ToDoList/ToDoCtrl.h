@@ -781,9 +781,8 @@ protected:
 	HTREEITEM PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, HTREEITEM htiAfter, TDC_RESETIDS nResetID, BOOL bAndSubtasks);
 	BOOL PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll);
 
-	BOOL MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, HTASKITEM hParentTask, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
-	BOOL MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, BOOL bMergeByID);
-	BOOL MergeTaskAttributes(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwTaskID);
+	BOOL MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
+	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
