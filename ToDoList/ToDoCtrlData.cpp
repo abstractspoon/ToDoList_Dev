@@ -223,8 +223,7 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const 
 	if (!hTask)
 		return NULL;
 
-	BOOL bDefAttrib = (pTDIRef != NULL);
-	TODOITEM* pTDI = (bDefAttrib ? NewTask(*pTDIRef) : NewTask());
+	TODOITEM* pTDI = (pTDIRef ? NewTask(*pTDIRef) : NewTask());
 
 	if (!pTDI)
 	{
@@ -340,25 +339,37 @@ const TODOSTRUCTURE* CToDoCtrlData::LocateTask(DWORD dwTaskID) const
 	return m_struct.FindTask(dwTaskID);
 }
 
-void CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
+BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
 { 
-	ASSERT (pTDI && dwTaskID);
+	if (!dwTaskID || !pTDI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	// must delete duplicates else we'll get a memory leak
-	if (dwTaskID && pTDI)
-		m_items.DeleteTask(dwTaskID);
+	m_items.DeleteTask(dwTaskID);
 	
 	// add to structure
 	TODOSTRUCTURE* pTDSParent = NULL;
 	int nPrevSibling = -1;
 	
 	if (!Locate(dwParentID, dwPrevSiblingID, pTDSParent, nPrevSibling))
-		return;
+		return FALSE;
 	
-	VERIFY(m_struct.InsertTask(dwTaskID, pTDSParent, nPrevSibling + 1));
-	VERIFY(m_items.AddTask(dwTaskID, pTDI)); 
+	if (!m_struct.InsertTask(dwTaskID, pTDSParent, nPrevSibling + 1))
+		return FALSE;
+
+	if (!m_items.AddTask(dwTaskID, pTDI))
+	{
+		// remove from structure
+		m_struct.DeleteTask(dwTaskID);
+		return FALSE;
+	}
 	
-	AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID);
+	VERIFY(AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID));
+
+	return TRUE;
 }
 
 void CToDoCtrlData::DeleteAllTasks()
@@ -1341,6 +1352,30 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 	}
 	
 	return nRes;
+}
+
+TDC_SET CToDoCtrlData::SetTaskAttributes(DWORD dwTaskID, const TODOITEM& tdi)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	if (*pTDI != tdi)
+	{
+		*pTDI = tdi;
+		return SET_CHANGE;
+	}
+
+	// else
+	return SET_NOCHANGE;
+}
+
+BOOL CToDoCtrlData::GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+
+	tdi = *pTDI;
+	return TRUE;
 }
 
 TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren)

@@ -61,7 +61,7 @@ public:
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
 
-	void AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID);
+	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID);
 	BOOL DeleteTask(DWORD dwTaskID);
 	void DeleteAllTasks();
 
@@ -93,8 +93,10 @@ public:
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
 	TDCUNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
 	BOOL DeleteLastUndoAction();
-	
+
 	// Gets
+	BOOL GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const;
+
 	DWORD GetTaskParentID(DWORD dwTaskID) const;
 	CString GetTaskTitle(DWORD dwTaskID) const;
 	CString GetTaskIcon(DWORD dwTaskID) const;
@@ -219,6 +221,8 @@ public:
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
 
 	// Sets
+	TDC_SET SetTaskAttributes(DWORD dwTaskID, const TODOITEM& tdi);
+	
 	TDC_SET SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
 	TDC_SET SetTaskColor(DWORD dwTaskID, COLORREF color);
 	TDC_SET SetTaskIcon(DWORD dwTaskID, const CString& sIcon);
