@@ -1634,3 +1634,32 @@ void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CP
 
 	SetColumnFieldVisibility(vis);
 }
+
+DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks)
+{
+	// If the parent has been filtered out we just add 
+	// directly to the data model
+	if (dwParentTaskID && !m_taskTree.Find().GetItem(dwParentTaskID))
+	{
+		TODOITEM* pTDI = m_data.NewTask(tasks, hTask);
+
+		DWORD dwChildID = m_dwNextUniqueID++;
+		m_data.AddTask(dwChildID, pTDI, dwParentTaskID, 0);
+
+		if (bAndSubtasks)
+		{
+			HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
+
+			while (hSubtask)
+			{
+				MergeNewTaskIntoTree(tasks, hSubtask, dwChildID, TRUE);
+				hSubtask = tasks.GetNextTask(hSubtask);
+			}
+		}
+
+		return dwChildID;
+	}
+
+	// else
+	return CTabbedToDoCtrl::MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, bAndSubtasks);
+}
