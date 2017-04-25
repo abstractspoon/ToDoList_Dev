@@ -32,6 +32,9 @@ public:
 	TODOITEM(const TODOITEM& tdi); 
 	
 	const TODOITEM& operator=(const TODOITEM& tdi); 
+
+	BOOL operator==(const TODOITEM& tdi); 
+	BOOL operator!=(const TODOITEM& tdi); 
 	
 	// helpers
 	BOOL HasLastMod() const;

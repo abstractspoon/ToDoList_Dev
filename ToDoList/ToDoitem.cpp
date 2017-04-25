@@ -109,6 +109,51 @@ const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	return *this;
 }
 
+BOOL TODOITEM::operator==(const TODOITEM& tdi) 
+{
+	// least expensive checks first
+	return ((dwTaskRefID == tdi.dwTaskRefID) &&
+			(bFlagged == tdi.bFlagged) &&
+			(bLocked == tdi.bLocked) &&
+			(color == tdi.color) && 
+			(nPriority == tdi.nPriority) &&
+			(nRisk == tdi.nRisk) &&
+			(nPercentDone == tdi.nPercentDone) &&
+			(dTimeEstimate == tdi.dTimeEstimate) &&
+			(dTimeSpent == tdi.dTimeSpent) &&
+			(nTimeEstUnits == tdi.nTimeEstUnits) &&
+			(nTimeSpentUnits == tdi.nTimeSpentUnits) &&
+			(dCost == tdi.dCost) &&
+			(dateStart == tdi.dateStart) &&
+			(dateDue == tdi.dateDue) &&
+			(dateDone == tdi.dateDone) &&
+			(dateCreated == tdi.dateCreated) &&
+			(dateLastMod == tdi.dateLastMod) &&
+			(sTitle = tdi.sTitle) &&
+			(sComments == tdi.sComments) &&
+			(customComments == tdi.customComments) &&
+			(sCommentsTypeID == tdi.sCommentsTypeID) &&
+			(sAllocBy == tdi.sAllocBy) &&
+			(sStatus == tdi.sStatus) &&
+			(sCreatedBy == tdi.sCreatedBy) &&
+			(sExternalID == tdi.sExternalID) &&
+			(sVersion == tdi.sVersion) &&
+			(sIcon == tdi.sIcon) &&
+			(trRecurrence == tdi.trRecurrence) &&
+			Misc::MatchAll(aCategories, tdi.aCategories) &&
+			Misc::MatchAll(aTags, tdi.aTags) &&
+			Misc::MatchAll(aAllocTo, tdi.aAllocTo) &&
+			Misc::MatchAll(aDependencies, tdi.aDependencies) &&
+			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
+			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
+			Misc::MatchAll(tdi.mapCustomData, mapCustomData));
+}
+
+BOOL TODOITEM::operator!=(const TODOITEM& tdi) 
+{
+	return !(*this == tdi);
+}
+
 // only interested in dependencies within this tasklist
 BOOL TODOITEM::RemoveLocalDependency(DWORD dwDependID)
 {
