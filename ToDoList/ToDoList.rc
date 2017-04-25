@@ -4563,6 +4563,7 @@ BEGIN
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
     IDS_BMPFILEFILTER       "Bitmap Image (*.bmp)|*.bmp||"
+    IDS_FILTER_LOCKED       "Locked Tasks"
 END
 
 STRINGTABLE DISCARDABLE 
