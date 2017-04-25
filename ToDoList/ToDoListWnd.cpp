@@ -8490,35 +8490,42 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 			TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
 			BOOL bSelectAll = TRUE;
 
-			switch (nImportTo)
+			if (nImportTo == TDIT_MERGETOTASKLISTBYID)
 			{
-			case TDIT_ADDTOSELECTEDTASK:
-				switch (Prefs().GetNewSubtaskPos())
-				{
-				case PUIP_TOP:
-					nWhere = TDC_INSERTATTOPOFSELTASK;
-					break;
-
-				case PUIP_BOTTOM:
-					nWhere = TDC_INSERTATBOTTOMOFSELTASK;
-					break;
-				}
-				break;
-
-			case TDIT_ADDBELOWSELECTEDTASK:
-				nWhere = TDC_INSERTAFTERSELTASK;
-				break;
-
-			case TDIT_CREATENEWTASKLIST:
-				bSelectAll = FALSE;
-				tdc.SetProjectName(tasks.GetProjectName());
-				break;
-
-			case TDIT_ADDTOTOPOFTASKLIST:
-				break;
+				VERIFY(tdc.MergeTasks(tasks, TRUE));
 			}
-
-			VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
+			else if (nImportTo == TDIT_MERGETOTASKLISTBYTITLE)
+			{
+				VERIFY(tdc.MergeTasks(tasks, FALSE));
+			}
+			else // Paste
+			{
+				switch (nImportTo)
+				{
+				case TDIT_ADDTOSELECTEDTASK:
+					{
+						if (Prefs().GetNewSubtaskPos() == PUIP_TOP)
+							nWhere = TDC_INSERTATTOPOFSELTASK;
+						else
+							nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+					}
+					break;
+					
+					case TDIT_ADDBELOWSELECTEDTASK:
+						nWhere = TDC_INSERTAFTERSELTASK;
+						break;
+						
+					case TDIT_CREATENEWTASKLIST:
+						bSelectAll = FALSE;
+						tdc.SetProjectName(tasks.GetProjectName());
+						break;
+						
+					case TDIT_ADDTOTOPOFTASKLIST:
+						break;
+				}
+				
+				VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
+			}
 
 			UpdateCaption();
 			break;
