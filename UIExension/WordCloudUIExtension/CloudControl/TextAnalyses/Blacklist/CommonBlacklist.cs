@@ -6,47 +6,74 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Blacklist
 {
     public class CommonBlacklist : IBlacklist
     {
-        private readonly HashSet<string> m_ExcludedWordsHashSet;
+		private readonly HashSet<string> m_ExcludedWordsHashSet;
 
-        public CommonBlacklist() :  this(new string[] {})
-        {
-        }
+		public CommonBlacklist()
+			: this(new string[] { })
+		{
+		}
 
-        public CommonBlacklist(IEnumerable<string> excludedWords) 
-            : this(excludedWords, StringComparer.InvariantCultureIgnoreCase)
-        {
-        }
+		public CommonBlacklist(IEnumerable<string> excludedWords)
+			: this(excludedWords, StringComparer.InvariantCultureIgnoreCase)
+		{
+		}
 
 
-        public static IBlacklist CreateFromTextFile(string fileName)
-        {
-            return 
-                !File.Exists(fileName) 
-                    ? new NullBlacklist() 
-                    : CreateFromStreamReader(new FileInfo(fileName).OpenText());
-        }
+		public static IBlacklist CreateFromTextFile(string fileName)
+		{
+			if (!File.Exists(fileName))
+				return new NullBlacklist();
 
-        public static IBlacklist CreateFromStreamReader(TextReader reader)
-        {
-            if (reader == null) throw new ArgumentNullException("reader");
-            CommonBlacklist commonBlacklist = new CommonBlacklist();
-            using (reader)
-            {
-                string line = reader.ReadLine();
-                while (line != null)
-                {
-                    line.Trim();
-                    commonBlacklist.Add(line);
-                    line = reader.ReadLine();
-                }
-            }
-            return commonBlacklist;
-        }
+			// else
+			return CreateFromStreamReader(new FileInfo(fileName).OpenText());
+		}
 
-        public CommonBlacklist(IEnumerable<string> excludedWords, StringComparer comparer)
-        {
-            m_ExcludedWordsHashSet = new HashSet<string>(excludedWords, comparer);   
-        }
+		public static IBlacklist CreateFromStreamReader(TextReader reader)
+		{
+			CommonBlacklist commonBlacklist = new CommonBlacklist();
+
+			commonBlacklist.Append(reader);
+
+			return commonBlacklist;
+		}
+
+		public int Append(TextReader reader)
+		{
+			if (reader == null)
+				throw new ArgumentNullException("reader");
+
+			int numWords = m_ExcludedWordsHashSet.Count;
+
+			using (reader)
+			{
+				string line = reader.ReadLine();
+				while (line != null)
+				{
+					line = line.Trim();
+
+					// allow comment lines
+					if ((line.Length > 0) && !line.StartsWith("//"))
+						Add(line);
+
+					line = reader.ReadLine();
+				}
+			}
+
+			return (m_ExcludedWordsHashSet.Count - numWords);
+		}
+
+		public int Append(string fileName)
+		{
+			if (!File.Exists(fileName))
+				return 0;
+
+			return Append(new FileInfo(fileName).OpenText());
+		}
+
+		public CommonBlacklist(IEnumerable<string> excludedWords, StringComparer comparer)
+		{
+			m_ExcludedWordsHashSet = new HashSet<string>(excludedWords, comparer);
+		}
 
         public bool Countains(string word)
         {
