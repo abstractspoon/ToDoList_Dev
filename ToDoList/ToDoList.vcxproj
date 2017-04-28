@@ -106,7 +106,8 @@
       <Command>mkdir ..\..\ToDoList_Plugins
 mkdir ..\..\ToDoList_Plugins\debug
 copy unicode_debug\ToDoList.exe ..\..\todolist_Plugins\debug /y
-copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y</Command>
+copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
