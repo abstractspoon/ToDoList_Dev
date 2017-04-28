@@ -265,7 +265,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		case TDCA_STARTDATE:
 		case TDCA_STARTTIME:
 			{
-				BOOL bIncTime = (rule.GetAttribute() == TDCA_STARTTIME);
+				BOOL bIncTime = ((rule.GetAttribute() == TDCA_STARTTIME) || rule.IsNowRelativeDate());
 
 				// CalcStartDate will ignore completed tasks so we have
 				// to handle that specific situation
@@ -284,7 +284,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		case TDCA_DUEDATE:
 		case TDCA_DUETIME:
 			{
-				BOOL bIncTime = (rule.GetAttribute() == TDCA_DUETIME);
+				BOOL bIncTime = ((rule.GetAttribute() == TDCA_DUETIME) || rule.IsNowRelativeDate());
 
 				// CalcDueDate will ignore completed tasks so we have
 				// to handle that specific situation
