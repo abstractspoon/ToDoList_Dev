@@ -371,11 +371,6 @@ namespace WordCloudUIExtension
 			this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
 		}
 
-		public static IBlacklist CreateBlacklist(bool excludeEnglishCommonWords)
-		{
-			return (excludeEnglishCommonWords ? (IBlacklist)new CommonWords() : new NullBlacklist());
-		}
-
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
             return AttributeComboBox.IsSupportedAttribute(attrib);
