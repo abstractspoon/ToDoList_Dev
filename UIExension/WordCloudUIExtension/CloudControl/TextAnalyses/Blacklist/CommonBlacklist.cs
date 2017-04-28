@@ -23,10 +23,10 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Blacklist
             return 
                 !File.Exists(fileName) 
                     ? new NullBlacklist() 
-                    : CreateFromStremReader(new FileInfo(fileName).OpenText());
+                    : CreateFromStreamReader(new FileInfo(fileName).OpenText());
         }
 
-        public static IBlacklist CreateFromStremReader(TextReader reader)
+        public static IBlacklist CreateFromStreamReader(TextReader reader)
         {
             if (reader == null) throw new ArgumentNullException("reader");
             CommonBlacklist commonBlacklist = new CommonBlacklist();
