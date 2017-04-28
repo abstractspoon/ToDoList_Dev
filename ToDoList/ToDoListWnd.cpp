@@ -9973,6 +9973,12 @@ LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (!m_findDlg.GetResultCount())
 		return 0;
 	
+	// if find dialog is floating then hide it
+	if (!m_findDlg.IsDocked())
+		m_findDlg.Show(FALSE);
+	
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CHoldRedraw hr(tdc);
 	CWaitCursor cursor;
 	
 	for (int nTDC = 0; nTDC < GetTDCCount(); nTDC++)
@@ -9984,32 +9990,28 @@ LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
 			tdc.SelectTasks(aTaskIDs);
 	}
 
-	// if find dialog is floating then hide it
-	if (!m_findDlg.IsDocked())
-	{
-		m_findDlg.Show(FALSE);
-		GetToDoCtrl().SetFocusToTasks();
-	}
-	
+	tdc.SetFocusToTasks();
+
 	return 0;
 }
 
 LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 {
+	// if find dialog is floating then hide it
+	if (!m_findDlg.IsDocked())
+		m_findDlg.Show(FALSE);
+	
 	FTDCCUSTOMFILTER filter((LPCTSTR)lp);
 	m_findDlg.GetSearchParams(filter);
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.SetCustomFilter(filter);
-	tdc.SetFocusToTasks();
 	
 	RefreshFilterBarCustomFilters();
 	m_filterBar.RefreshFilterControls(tdc);
 
-	// if find dialog is floating then hide it
-	if (!m_findDlg.IsDocked())
-		m_findDlg.Show(FALSE);
-	
+	tdc.SetFocusToTasks();
+
 	return 0;
 }
 
