@@ -445,21 +445,28 @@ namespace WordCloudUIExtension
 		{
             if (appOnly)
             {
-                // Look for localised excluded words
-                var ignoreFile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                ignoreFile = Path.Combine(ignoreFile, "Translations");
+                // Look for user-defined 'Ignore' file
+                string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string ignoreFile = Path.Combine(appPath, "WordCloud.ignore.txt");
 
-                var language = prefs.GetProfileString("Preferences", "LanguageFile", "");
-                ignoreFile = Path.Combine(ignoreFile, language);
-
-                ignoreFile = Path.ChangeExtension(ignoreFile, ".ignore.txt");
-
-                IBlacklist ignore = CommonBlacklist.CreateFromTextFile(ignoreFile);
-
-                if ((ignore != null) && !(ignore is NullBlacklist))
+                if (!File.Exists(ignoreFile))
                 {
-                    m_ExcludedWords = ignore;
-                    UpdateWeightedWords();
+                    // look for localised ignore file
+                    var language = prefs.GetProfileString("Preferences", "LanguageFile", "");
+                    
+                    ignoreFile = Path.Combine(appPath, language);
+                    ignoreFile = Path.ChangeExtension(ignoreFile, "ignore.txt");
+                }
+
+                if (File.Exists(ignoreFile))
+                {
+                    IBlacklist ignore = CommonBlacklist.CreateFromTextFile(ignoreFile);
+
+                    if ((ignore != null) && !(ignore is NullBlacklist))
+                    {
+                        m_ExcludedWords = ignore;
+                        UpdateWeightedWords();
+                    }
                 }
             }
             else // private settings
