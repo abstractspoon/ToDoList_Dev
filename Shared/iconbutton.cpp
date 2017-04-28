@@ -65,24 +65,6 @@ void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 		Invalidate();
 }
 
-void CIconButton::SetTooltip(LPCTSTR szTooltip)
-{
-	if (!Misc::IsEmpty(szTooltip))
-	{
-		if (!m_tooltip.GetSafeHwnd())
-			VERIFY(m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP)));
-		else
-			m_tooltip.DelTool(this);
-
-		m_tooltip.AddTool(this, szTooltip);
-	}
-	else
-	{
-		m_tooltip.DestroyWindow();
-	}
-}
-
-
 void CIconButton::CalcExtraSpace(const CRect& rClient, CRect& rExtra) const
 {
 	if (GetWindowTextLength() == 0)

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "custombutton.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -197,15 +198,19 @@ LRESULT CCustomButton::OnShowAccelerators(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CCustomButton::SetTooltip(LPCTSTR lpszString)
 {
-	if (!m_tooltip.GetSafeHwnd())
-		m_tooltip.Create(this);
+	if (!Misc::IsEmpty(lpszString))
+	{
+		if (!m_tooltip.GetSafeHwnd())
+			VERIFY(m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP)));
+		else
+			m_tooltip.DelTool(this);
+		
+		m_tooltip.AddTool(this, lpszString);
+	}
 	else
-		m_tooltip.DelTool(this, 1);
-
-	CRect rect; 
-	GetClientRect(rect);
-	
-	m_tooltip.AddTool(this, lpszString, rect, 1);
+	{
+		m_tooltip.DestroyWindow();
+	}
 }
 
 BOOL CCustomButton::PreTranslateMessage(MSG* pMsg)

@@ -2116,7 +2116,7 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	if (IsDragging())
 		return;
 
-	DWORD dwTaskID = m_tooltip.GetToolInfo().uId;
+	DWORD dwTaskID = m_tooltip.GetLastHitToolInfo().uId;
 
 	if (dwTaskID == 0)
 	{

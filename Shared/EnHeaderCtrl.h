@@ -15,6 +15,8 @@
 #if !defined ( ENHEADERCTRL_H )
 #define ENHEADERCTRL_H 
 
+#include "ToolTipCtrlEx.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,20 +98,27 @@ public:
 
 #ifdef _DEBUG
 	void TraceVisibleItemWidths(LPCTSTR szKey = NULL) const;
-	void TraceVisibleToolTipRects(LPCTSTR szKey = NULL);
 #endif
 
 	BOOL EnableToolTips(BOOL bEnable = TRUE);
 	BOOL SetItemToolTip(int nItem, LPCTSTR szTip);
-	CString GetItemToolTip(int nItem);
+	CString GetItemToolTip(int nItem) const;
 
 // Attributes
 private:
 	BOOL m_bEnableTracking;
-	CDWordArray m_aItemFlags;
-	CWordArray m_aItemWidths;
 	int m_nRowCount;
-	CToolTipCtrl m_tooltips;
+	CToolTipCtrlEx m_tooltips;
+
+	struct ITEMEXTRA
+	{
+		ITEMEXTRA(DWORD flags = 0, int width = 0) : dwFlags(flags), nWidth(width) {}
+
+		DWORD dwFlags;
+		int nWidth;
+		CString sTooltip;
+	};
+	mutable CArray<ITEMEXTRA, ITEMEXTRA&> m_aItemExtras;
 
 // Overrides
 protected:
@@ -136,7 +145,6 @@ protected:
 	afx_msg LRESULT OnLayout(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnInsertItem(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDeleteItem(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnRecalcItemTooltipRects(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -146,10 +154,8 @@ protected:
 	BOOL ModifyItemFlags(int nItem, DWORD dwFlag, BOOL bAdd);
 	BOOL ModifyAllItemFlags(DWORD dwFlag, BOOL bAdd);
 	BOOL InitializeTooltips();
-	void RecalcItemTooltipRects();
-
-	BOOL SetItemWidth(int nItem, int nWidth, BOOL bRecalcTooltipRect);
-	BOOL SetItem(int nItem, HDITEM* pHeaderItem, BOOL bRecalcTooltipRect);
+	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	ITEMEXTRA& GetItemExtra(int nItem) const;
 
 	static int GetItemPosition(int nItem, const CIntArray& aOrder);
 };

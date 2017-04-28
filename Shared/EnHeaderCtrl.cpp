@@ -24,10 +24,6 @@ enum // item flags
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT WM_EHC_RECALCITEMTOOLTIPRECTS = (WM_APP + 1);
-
-/////////////////////////////////////////////////////////////////////////////
 // CEnHeaderCtrl
 
 CEnHeaderCtrl::CEnHeaderCtrl() : m_nRowCount(1), m_bEnableTracking(TRUE)
@@ -52,7 +48,6 @@ BEGIN_MESSAGE_MAP(CEnHeaderCtrl, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 	ON_MESSAGE(HDM_INSERTITEM, OnInsertItem)
 	ON_MESSAGE(HDM_DELETEITEM, OnDeleteItem)
-	ON_MESSAGE(WM_EHC_RECALCITEMTOOLTIPRECTS, OnRecalcItemTooltipRects)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -102,7 +97,7 @@ LRESULT CEnHeaderCtrl::OnInsertItem(WPARAM wp, LPARAM lp)
 
 	// our handling
 	if ((int)lResult != -1)
-		m_aItemFlags.SetAtGrow(lResult, 0);
+		m_aItemExtras.SetAtGrow(lResult, ITEMEXTRA());
 
 	return lResult;
 }
@@ -115,8 +110,8 @@ LRESULT CEnHeaderCtrl::OnDeleteItem(WPARAM wp, LPARAM lp)
 	// our handling
 	if (lResult)
 	{
-		if ((int)wp < m_aItemFlags.GetSize())
-			m_aItemFlags.RemoveAt(wp);
+		if ((int)wp < m_aItemExtras.GetSize())
+			m_aItemExtras.RemoveAt(wp);
 	}
 
 	return lResult;
@@ -126,13 +121,9 @@ void CEnHeaderCtrl::OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMHEADER pNMH = (LPNMHEADER)pNMHDR;
 
+	// mark item as having been tracked
 	if (IsItemTrackable(pNMH->iItem))
-	{
-		// mark item as having been tracked
 		ModifyItemFlags(pNMH->iItem, EHCF_TRACKED, TRUE);
-
-		RecalcItemTooltipRects();
-	}
 }
 
 void CEnHeaderCtrl::OnBeginTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -204,9 +195,6 @@ BOOL CEnHeaderCtrl::OnEndDragHeader(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 	}
 
-	if (*pResult == 0) // success
-		PostMessage(WM_EHC_RECALCITEMTOOLTIPRECTS);
-
 	return FALSE; // continue routing
 }
 
@@ -267,14 +255,14 @@ void CEnHeaderCtrl::ShowItem(int nItem, BOOL bShow)
 		// resize as necessary
 		if (bShow)
 		{
-			ASSERT(nItem < m_aItemWidths.GetSize());
+			ASSERT(nItem < m_aItemExtras.GetSize());
 
-			int nWidth = m_aItemWidths[nItem];
+			int nWidth = GetItemExtra(nItem).nWidth;
 			SetItemWidth(nItem, nWidth);
 		}
 		else // hide
 		{
-			m_aItemWidths.SetAtGrow(nItem, (WORD)GetItemWidth(nItem));
+			GetItemExtra(nItem).nWidth = GetItemWidth(nItem);
 			SetItemWidth(nItem, 0);
 		}
 	}
@@ -499,11 +487,7 @@ DWORD CEnHeaderCtrl::GetItemFlags(int nItem) const
 {
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 
-	if (nItem < m_aItemFlags.GetSize())
-		return m_aItemFlags[nItem];
-
-	// else 
-	return 0;
+	return GetItemExtra(nItem).dwFlags;
 }
 
 BOOL CEnHeaderCtrl::ModifyItemFlags(int nItem, DWORD dwFlag, BOOL bAdd)
@@ -517,9 +501,19 @@ BOOL CEnHeaderCtrl::ModifyItemFlags(int nItem, DWORD dwFlag, BOOL bAdd)
 	else
 		dwNewFlags &= ~dwFlag;
 
-	m_aItemFlags.SetAtGrow(nItem, dwNewFlags);
+	GetItemExtra(nItem).dwFlags = dwNewFlags;
 
 	return (dwNewFlags != dwFlags);
+}
+
+CEnHeaderCtrl::ITEMEXTRA& CEnHeaderCtrl::GetItemExtra(int nItem) const
+{
+	ASSERT (nItem >= 0 && nItem < GetItemCount());
+
+	if (nItem >= m_aItemExtras.GetSize())
+		m_aItemExtras.SetAt(nItem, ITEMEXTRA());
+
+	return m_aItemExtras[nItem];
 }
 
 BOOL CEnHeaderCtrl::ModifyAllItemFlags(DWORD dwFlag, BOOL bAdd)
@@ -595,22 +589,9 @@ int CEnHeaderCtrl::InsertItem(int nItem, int nWidth, LPCTSTR szText, int nFormat
 	return CHeaderCtrl::InsertItem(nItem, &hdi);
 }
 
-BOOL CEnHeaderCtrl::SetItem(int nItem, HDITEM* pHeaderItem, BOOL bRecalcTooltipRect)
-{
-	if (CHeaderCtrl::SetItem(nItem, pHeaderItem))
-	{
-		if (bRecalcTooltipRect && (pHeaderItem->mask & HDI_WIDTH))
-			RecalcItemTooltipRects();
-		
-		return TRUE;
-	}
-	
-	return FALSE;
-}
-
 BOOL CEnHeaderCtrl::SetItem(int nItem, HDITEM* pHeaderItem)
 {
-	return SetItem(nItem, pHeaderItem, TRUE);
+	return CHeaderCtrl::SetItem(nItem, pHeaderItem);
 }
 
 BOOL CEnHeaderCtrl::SetItem(int nItem, int nWidth, LPCTSTR szText, DWORD dwData)
@@ -628,11 +609,6 @@ BOOL CEnHeaderCtrl::SetItem(int nItem, int nWidth, LPCTSTR szText, DWORD dwData)
 
 BOOL CEnHeaderCtrl::SetItemWidth(int nItem, int nWidth)
 {
-	return SetItemWidth(nItem, nWidth, TRUE);
-}
-
-BOOL CEnHeaderCtrl::SetItemWidth(int nItem, int nWidth, BOOL bRecalcTooltipRect)
-{
 	if (nWidth == GetItemWidth(nItem))
 		return TRUE;
 
@@ -641,7 +617,7 @@ BOOL CEnHeaderCtrl::SetItemWidth(int nItem, int nWidth, BOOL bRecalcTooltipRect)
 	hdi.mask = HDI_WIDTH;
 	hdi.cxy = nWidth;
 
-	if (SetItem(nItem, &hdi, bRecalcTooltipRect))
+	if (SetItem(nItem, &hdi))
 	{
 		SetItemTracked(nItem, FALSE);
 		return TRUE;
@@ -679,39 +655,6 @@ void CEnHeaderCtrl::TraceVisibleItemWidths(LPCTSTR szKey) const
 
 	TRACE(_T(")\n"));
 }
-
-void CEnHeaderCtrl::TraceVisibleToolTipRects(LPCTSTR szKey)
-{
-	TRACE(_T("CEnHeaderCtrl::TraceVisibleItemWidths(%s "), szKey);
-	
-	CIntArray aItems;
-	int nNumItem = GetItemOrder(aItems);
-	
-	if (nNumItem)
-	{
-		for (int nItem = 0; nItem < nNumItem; nItem++)
-		{
-			if (IsItemVisible(aItems[nItem]))
-			{
-				CToolInfo ti;
-				CRect rItem;
-
-				if (m_tooltips.GetToolInfo(ti, this, (nItem + 1)) && GetItemRect(nItem, rItem))
-				{
-					TRACE(_T("\n   %s: item (%d, %d, %d, %d), tip (%d, %d, %d, %d)"), ti.szText,
-							rItem.left, rItem.top, rItem.right, rItem.bottom,
-							ti.rect.left, ti.rect.top, ti.rect.right, ti.rect.bottom);
-				}
-			}
-		}
-	}
-	else
-	{
-		TRACE(_T("empty"));
-	}
-	
-	TRACE(_T(")\n"));
-}
 #endif // _DEBUG
 
 int CEnHeaderCtrl::GetItemWidths(CIntArray& aWidths) const
@@ -735,11 +678,10 @@ BOOL CEnHeaderCtrl::SetItemWidths(const CIntArray& aWidths)
 
 	while (nItem--)
 	{
-		if (!SetItemWidth(nItem, aWidths[nItem], FALSE))
+		if (!SetItemWidth(nItem, aWidths[nItem]))
 			return FALSE;
 	}
 
-	RecalcItemTooltipRects();
 	return TRUE;
 }
 
@@ -880,7 +822,7 @@ void CEnHeaderCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 BOOL CEnHeaderCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	if (m_tooltips.GetSafeHwnd())
-		m_tooltips.RelayEvent(pMsg);
+		m_tooltips.FilterToolTipMessage(pMsg);
 
 	return CHeaderCtrl::PreTranslateMessage(pMsg);
 }
@@ -902,29 +844,6 @@ BOOL CEnHeaderCtrl::InitializeTooltips()
 	return (m_tooltips.GetSafeHwnd() || m_tooltips.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)));
 }
 
-void CEnHeaderCtrl::RecalcItemTooltipRects()
-{
-	if (m_tooltips.GetSafeHwnd())
-	{
-		int nItem = GetItemCount();
-
-		while (nItem--)
-		{
-			CRect rItem;
-			GetItemRect(nItem, rItem);
-				
-			m_tooltips.SetToolRect(this, (nItem + 1), rItem);
-		}
-	}
-}
-
-LRESULT CEnHeaderCtrl::OnRecalcItemTooltipRects(WPARAM wp, LPARAM lp)
-{
-	RecalcItemTooltipRects();
-
-	return 0L;
-}
-
 BOOL CEnHeaderCtrl::SetItemToolTip(int nItem, LPCTSTR szTip)
 {
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
@@ -932,41 +851,18 @@ BOOL CEnHeaderCtrl::SetItemToolTip(int nItem, LPCTSTR szTip)
 
 	if (InitializeTooltips())
 	{
-		CToolInfo ti;
-
-		if (!m_tooltips.GetToolInfo(ti, this, (nItem + 1)))
-		{
-			CRect rItem;
-			GetItemRect(nItem, rItem);
-
-			m_tooltips.AddTool(this, szTip, rItem, (nItem + 1));
-		}
-		else
-		{
-			lstrcpyn(ti.szText, szTip, ((sizeof(ti.szText) / sizeof(TCHAR)) - 1)); 
-			m_tooltips.SetToolInfo(&ti);
-		}
-
+		GetItemExtra(nItem).sTooltip = szTip;
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-CString CEnHeaderCtrl::GetItemToolTip(int nItem)
+CString CEnHeaderCtrl::GetItemToolTip(int nItem) const
 {
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 
-	if (m_tooltips.GetSafeHwnd())
-	{
-		CToolInfo ti;
-		
-		if (m_tooltips.GetToolInfo(ti, this, nItem))
-			return ti.szText;
-	}
-
-	// else
-	return _T("");
+	return GetItemExtra(nItem).sTooltip;
 }
 
 int CEnHeaderCtrl::GetItemFormat(int nItem) const
@@ -1001,4 +897,22 @@ BOOL CEnHeaderCtrl::ModifyItemFormat(int nItem, int nRemove, int nAdd)
 	nFormat |= nAdd;
 
 	return SetItemFormat(nItem, nFormat);
+}
+
+int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	int nItem = HitTest(point);
+	
+	if (nItem != -1)
+	{
+		pTI->hwnd = GetSafeHwnd();
+		pTI->uId = nItem;
+		pTI->lpszText = _tcsdup(GetItemToolTip(nItem)); // MFC will free the duplicated string
+
+		GetItemRect(nItem, &pTI->rect);
+
+		return nItem;
+	}
+
+	return -1;
 }

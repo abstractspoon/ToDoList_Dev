@@ -19,12 +19,10 @@ public:
 	CIconButton(int nSize = 16);
 
 	void SetIcon(HICON hIcon, BOOL bCleanup = TRUE);
-	void SetTooltip(LPCTSTR szTooltip);
 
 protected:
 	CImageList m_ilIcon;
 	int m_nSize;
-	CToolTipCtrl m_tooltip;
 
 protected:
 	virtual void DoExtraPaint(CDC* pDC, const CRect& rExtra);

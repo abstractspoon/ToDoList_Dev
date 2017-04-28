@@ -78,11 +78,15 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 	// Adapted from CWnd::FilterToolTipMessage()
 	UINT message = pMsg->message;
 
-	if ((message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE ||
-		message == WM_LBUTTONUP || message == WM_RBUTTONUP ||
-		message == WM_MBUTTONUP) &&
-		(GetKeyState(VK_LBUTTON) >= 0 && GetKeyState(VK_RBUTTON) >= 0 &&
-		GetKeyState(VK_MBUTTON) >= 0))
+	if (message == WM_MOUSELEAVE)
+	{
+		Activate(FALSE);
+	}
+	else if ((message == WM_MOUSEMOVE || message == WM_NCMOUSEMOVE ||
+				message == WM_LBUTTONUP || message == WM_RBUTTONUP ||
+				message == WM_MBUTTONUP) &&
+				(GetKeyState(VK_LBUTTON) >= 0 && GetKeyState(VK_RBUTTON) >= 0 &&
+				GetKeyState(VK_MBUTTON) >= 0))
 	{
 		// Check it's within our owner's rect
 		CWnd* pOwner = GetOwner();
@@ -108,10 +112,9 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 			//TRACE(_T("CToolTipCtrlEx::FilterToolTipMessage(%d -> %d)\n"), m_nLastHit, nHit);
 
 			// Delete the old tool
-			if (m_tiLast.cbSize)
+			if ((m_nLastHit != -1) && m_tiLast.cbSize)
 			{
  				Activate(FALSE);
- 				SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
 			}
 			ASSERT(GetToolCount() == 0);
 
@@ -146,10 +149,6 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 			else
 			{
 				Activate(FALSE);
-				SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
-
-				InitToolInfo(m_tiLast, FALSE);
-				m_nLastHit = -1;
 			}
 
 			CToolTipCtrl::RelayEvent(pMsg);
@@ -203,6 +202,19 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 	}
 }
 
+void CToolTipCtrlEx::Activate(BOOL bActivate)
+{
+	CToolTipCtrl::Activate(bActivate);
+
+	if (!bActivate)
+	{
+		SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
+		
+		InitToolInfo(m_tiLast, FALSE);
+		m_nLastHit = -1;
+	}
+}
+
 void CToolTipCtrlEx::InitToolInfo(TOOLINFO& ti, BOOL bInitSize)
 {
 	ZeroMemory(&ti, TOOLINFO_SIZE);
@@ -211,21 +223,8 @@ void CToolTipCtrlEx::InitToolInfo(TOOLINFO& ti, BOOL bInitSize)
 		ti.cbSize = TOOLINFO_SIZE;
 }
 
-const TOOLINFO& CToolTipCtrlEx::GetToolInfo() const 
+const TOOLINFO& CToolTipCtrlEx::GetLastHitToolInfo() const 
 { 
-#ifdef _DEBUG
-// 	TOOLINFO ti;
-// 	InitToolInfo(ti, TRUE);
-// 
-// 	GetCurrentTool(&ti);
-// 
-// 	ASSERT(ti.cbSize == m_tiLast.cbSize);
-// 	ASSERT(ti.uId    == m_tiLast.uId);
-// 	ASSERT(ti.uFlags == m_tiLast.uFlags);
-// 	ASSERT(ti.hwnd   == m_tiLast.hwnd);
-// 	ASSERT(ti.lParam == m_tiLast.lParam);
-#endif
-
 	return m_tiLast; 
 }
 

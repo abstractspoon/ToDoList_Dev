@@ -122,13 +122,12 @@ BOOL CPreferencesGenPage::OnInitDialog()
 	GetDlgItem(IDC_STICKIESPATHLABEL)->EnableWindow(m_bUseStickies);
 	GetDlgItem(IDC_PATHTOSTICKIESEXE)->EnableWindow(m_bUseStickies);
 
-	// OS constraints
-	OSVERSION nOS = COSVersion();
-
-	GetDlgItem(IDC_VISTASHIELD)->ShowWindow((nOS >= OSV_VISTA) || (nOS != OSV_LINUX));
-	GetDlgItem(IDC_VISTASHIELD2)->ShowWindow((nOS >= OSV_VISTA) || (nOS != OSV_LINUX));
-	GetDlgItem(IDC_ENABLETDLEXTENSION)->EnableWindow(nOS != OSV_LINUX);
-	GetDlgItem(IDC_ENABLETDLPROTOCOL)->EnableWindow(nOS != OSV_LINUX);
+	// Hide admin indicators for OSes below vista
+	if (COSVersion() < OSV_VISTA)
+	{
+		GetDlgItem(IDC_VISTASHIELD)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_VISTASHIELD2)->ShowWindow(SW_HIDE);
+	}
 
 	EnableDisableLanguageOptions();
 
@@ -193,22 +192,14 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 	m_bMinimizeNoChange = pPrefs->GetProfileInt(szKey, _T("MinimizeNoEdit"), FALSE);
 	m_bReloadTasklists = pPrefs->GetProfileInt(szKey, _T("ReloadTasklists"), TRUE);
 	m_bEnableRTLInput = pPrefs->GetProfileInt(szKey, _T("EnableRTLInput"), FALSE);
+	m_bEnableTDLExtension = pPrefs->GetProfileInt(szKey, _T("EnableTDLExtension"), TRUE);
+	m_bEnableTDLProtocol = pPrefs->GetProfileInt(szKey, _T("EnableTDLProtocol"), FALSE);
 
 	CString sLangFile = pPrefs->GetProfileString(szKey, _T("LanguageFile"), _T(""));
 	m_cbLanguages.SelectLanguageFile(sLangFile);
 
 	m_bUseStickies = pPrefs->GetProfileInt(szKey, _T("UseStickies"), FALSE);
 	m_sStickiesPath = pPrefs->GetProfileString(szKey, _T("PathToStickies"));
-
-	if (COSVersion() == OSV_LINUX)
-	{
-		m_bEnableTDLExtension = m_bEnableTDLProtocol = FALSE;
-	}
-	else
-	{
-		m_bEnableTDLExtension = pPrefs->GetProfileInt(szKey, _T("EnableTDLExtension"), TRUE);
-		m_bEnableTDLProtocol = pPrefs->GetProfileInt(szKey, _T("EnableTDLProtocol"), FALSE);
-	}
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), TRUE);
 }
@@ -230,19 +221,16 @@ void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 	pPrefs->WriteProfileInt(szKey, _T("EscapeMinimizes"), m_bEscapeMinimizes);
 	pPrefs->WriteProfileInt(szKey, _T("EnableDelayedLoading"), m_bEnableDelayedLoading);
 	pPrefs->WriteProfileInt(szKey, _T("SaveStoragePasswords"), m_bSaveStoragePasswords);
-	pPrefs->WriteProfileString(szKey, _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
 	pPrefs->WriteProfileInt(szKey, _T("MinimizeNoEditTime"), m_nMinimizeNoEditTime);
 	pPrefs->WriteProfileInt(szKey, _T("MinimizeNoEdit"), m_bMinimizeNoChange);
 	pPrefs->WriteProfileInt(szKey, _T("UseStickies"), m_bUseStickies);
-	pPrefs->WriteProfileString(szKey, _T("PathToStickies"), m_sStickiesPath);
 	pPrefs->WriteProfileInt(szKey, _T("ReloadTasklists"), m_bReloadTasklists);
 	pPrefs->WriteProfileInt(szKey, _T("EnableRTLInput"), m_bEnableRTLInput);
+	pPrefs->WriteProfileInt(szKey, _T("EnableTDLExtension"), m_bEnableTDLExtension);
+	pPrefs->WriteProfileInt(szKey, _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
 
-	if (COSVersion() != OSV_LINUX)
-	{
-		pPrefs->WriteProfileInt(szKey, _T("EnableTDLExtension"), m_bEnableTDLExtension);
-		pPrefs->WriteProfileInt(szKey, _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
-	}
+	pPrefs->WriteProfileString(szKey, _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
+	pPrefs->WriteProfileString(szKey, _T("PathToStickies"), m_sStickiesPath);
 
 	//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }

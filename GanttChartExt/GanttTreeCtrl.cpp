@@ -100,7 +100,7 @@ bool CGanttTreeCtrl::ProcessMessage(MSG* pMsg)
 
 void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	HTREEITEM hti = (HTREEITEM)m_tooltip.GetToolInfo().uId;
+	HTREEITEM hti = (HTREEITEM)m_tooltip.GetLastHitToolInfo().uId;
 
 	if (!hti)
 	{

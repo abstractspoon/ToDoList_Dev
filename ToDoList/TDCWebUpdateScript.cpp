@@ -32,9 +32,10 @@ const LPCTSTR DESCRIPTION_KEY		= _T("DESCRIPTION");
 
 enum PRE_RELEASE_VER
 {
-	DEV_RELEASE_VER	= 997,
+	DEV_PREVIEW_VER	= 996,
 	ALPHA_RELEASE_VER,
-	BETA_RELEASE_VER
+	BETA_RELEASE_VER,
+	RELEASE_CANDIDATE_VER
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -72,6 +73,15 @@ BOOL CTDCWebUpdateScript::CheckForUpdates()
 
 BOOL CTDCWebUpdateScript::CheckForUpdates(BOOL bPreRelease)
 {
+	// NEVER update stable-release with pre-release
+	CString sAppVer(FileMisc::GetAppVersion());
+
+	if (bPreRelease && !IsPreRelease(sAppVer))
+	{
+		return FALSE;
+	}
+
+	// else
 	if (!LoadScript(GetScriptUrl(bPreRelease)))
 		return FALSE;
 
@@ -82,19 +92,8 @@ BOOL CTDCWebUpdateScript::CheckForUpdates(BOOL bPreRelease)
 		FileMisc::LogText(_T("CTDCWebUpdateScript::LoadScript(unable to get exe version from script)"));
 		return FALSE;
 	}
-	
-	// check against current app version
-	CString sAppVer(FileMisc::GetAppVersion());
-
-	// NOTE: only allow updates to pre-releases 
-	// if the app already is one of these versions
-	if (bPreRelease)
-	{
-		if (IsPreRelease(sScriptExeVer) && !IsPreRelease(sAppVer))
-			return FALSE;
-	}
-	
-	// else simple compare
+		
+	// simple compare
 	return (FileMisc::CompareVersions(sAppVer, sScriptExeVer, 4) < 0);
 }
 
@@ -171,8 +170,14 @@ BOOL CTDCWebUpdateScript::IsPreRelease(const CString& sVer)
 
 	if (FileMisc::SplitVersionNumber(sVer, aVer) >= 3)
 	{
-		return ((aVer[2] >= DEV_RELEASE_VER) &&
-				(aVer[2] <= BETA_RELEASE_VER));
+		switch (aVer[2])
+		{
+		case DEV_PREVIEW_VER:
+		case ALPHA_RELEASE_VER:
+		case BETA_RELEASE_VER:
+		case RELEASE_CANDIDATE_VER:
+			return TRUE;
+		}
 	}
 
 	// else
