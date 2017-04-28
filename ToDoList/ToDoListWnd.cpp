@@ -10729,7 +10729,7 @@ void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	pCmdUI->Enable(tdc.CanEditSelectedTask());	
+	pCmdUI->Enable(tdc.CanEditSelectedTaskLock());	
 	pCmdUI->SetCheck(tdc.IsSelectedTaskLocked() ? 1 : 0);
 }
 

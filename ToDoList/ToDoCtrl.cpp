@@ -12172,7 +12172,11 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 
 BOOL CToDoCtrl::CanEditSelectedTask() const 
 { 
-	return (!IsReadOnly() &&
-			GetSelectedCount() &&
+	return (!IsReadOnly() && GetSelectedCount() &&
 			m_taskTree.SelectionHasUnlocked()); 
+}
+
+BOOL CToDoCtrl::CanEditSelectedTaskLock() const
+{
+	return (!IsReadOnly() && GetSelectedCount());
 }
