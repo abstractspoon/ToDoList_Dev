@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Linq;
+using System.IO;
+using System.Reflection;
 
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
@@ -267,6 +269,7 @@ namespace WordCloudUIExtension
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
+        private IBlacklist m_ExcludedWords;
 
         private AttributeComboBox m_AttributeCombo;
         private System.Windows.Forms.Label m_AttributeLabel;
@@ -282,6 +285,7 @@ namespace WordCloudUIExtension
 			m_hwndParent = hwndParent;
 			m_trans = trans;
 			m_Attrib = UIExtension.TaskAttribute.Title;
+            m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
 
@@ -364,8 +368,7 @@ namespace WordCloudUIExtension
 				words.AddRange(taskWords);
 			}
 
-			IBlacklist blacklist = CreateBlacklist(true);
-			this.m_WordCloud.WeightedWords = words.Filter(blacklist).CountOccurences().SortByOccurences();
+			this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
 		}
 
 		public static IBlacklist CreateBlacklist(bool excludeEnglishCommonWords)
@@ -440,7 +443,26 @@ namespace WordCloudUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			if (!appOnly)
+            if (appOnly)
+            {
+                // Look for localised excluded words
+                var ignoreFile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                ignoreFile = Path.Combine(ignoreFile, "Translations");
+
+                var language = prefs.GetProfileString("Preferences", "LanguageFile", "");
+                ignoreFile = Path.Combine(ignoreFile, language);
+
+                ignoreFile = Path.ChangeExtension(ignoreFile, ".ignore.txt");
+
+                IBlacklist ignore = CommonBlacklist.CreateFromTextFile(ignoreFile);
+
+                if ((ignore != null) && !(ignore is NullBlacklist))
+                {
+                    m_ExcludedWords = ignore;
+                    UpdateWeightedWords();
+                }
+            }
+            else // private settings
 			{
 				var attrib = (UIExtension.TaskAttribute)prefs.GetProfileInt(key, "AttribToTrack", (int)UIExtension.TaskAttribute.Title);
 
