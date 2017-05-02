@@ -15,6 +15,7 @@
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
+#include "..\shared\Icon.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -34,7 +35,7 @@ public:
 	void Release();
 
 	LPCTSTR GetMenuText() const { return _T("Gantt Chart"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return GANTT_TYPEID; }
 
 	void SetReadOnly(bool bReadOnly);
@@ -74,7 +75,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 
-	HICON m_hIcon;
+	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString m_sSelectedTaskDates;

@@ -377,15 +377,12 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_sizeLast(-1, -1),
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
-	m_dwOptions(0),
-	m_hIcon(NULL)
+	m_dwOptions(0)
 {
-	
 }
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
@@ -530,8 +527,8 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
 		
-	m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
-	SetIcon(m_hIcon, TRUE);
+	m_icon.LoadIcon(IDR_MAINFRAME_STD);
+	SetIcon(m_icon, TRUE);
 
 	EnableToolTips(TRUE);
 	CalcMinMaxSizes();

@@ -15,6 +15,7 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\wndprompt.h"
 #include "..\shared\uithemefile.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +91,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aActiveTDCAttribDefs, m_aAllTDCAttribDefs;
 	CStringArray m_aSavedSearches;
 	TDCAUTOLISTDATA m_tldActive, m_tldAll;
-	HICON m_hIcon;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

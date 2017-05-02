@@ -39,7 +39,7 @@ public:
 
 	// IUIExtensionWindow
 	LPCTSTR GetTypeID() const { return CAL_TYPEID; }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetMenuText() const;
 
 	void SetReadOnly(bool bReadOnly);
@@ -76,7 +76,7 @@ protected:
 
 	CBrush m_brBack;
 	UITHEME m_theme;
-	HICON m_hIcon;
+	CIcon m_icon;
 	BOOL m_bReadOnly;
 	CString m_sSelectedTaskDates;
 	CFont m_font;

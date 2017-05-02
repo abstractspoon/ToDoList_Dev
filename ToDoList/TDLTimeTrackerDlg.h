@@ -14,6 +14,7 @@
 #include "..\shared\entoolbar.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\subclass.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +152,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CString m_sOrgTitle;
 	DWORD m_dwOptions;
-	HICON m_hIcon;
+	CIcon m_icon;
 
 #ifdef WHITETHEME
 #else

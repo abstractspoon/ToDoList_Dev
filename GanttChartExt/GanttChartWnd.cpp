@@ -50,14 +50,13 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
 	m_ctrlGantt(m_tree, m_list),
-	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_GANTTCHART);
+	m_icon.LoadIcon(IDR_GANTTCHART);
 }
 
 CGanttChartWnd::~CGanttChartWnd()

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\Icon.h"
+
 #include "..\Interfaces\IImportExport.h"
 #include "..\Interfaces\ITasklist.h"
 
@@ -89,12 +91,12 @@ public:
 	LPCTSTR GetMenuText() const { return _T("iCalendar"); }
 	LPCTSTR GetFileFilter() const { return _T("iCalendar Files (*.ics)|*.ics||"); }
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 
 	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 	CStringArray m_aUnhandledTaskAttrib;
 
 protected:

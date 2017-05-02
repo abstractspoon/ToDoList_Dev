@@ -3,6 +3,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "subclass.h"
+#include "icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -16,11 +17,11 @@ public:
 	BOOL IsInitialised() { return IsHooked(); }
 	BOOL ModifyIcon(UINT nIconID);
 
-	HICON GetBigIcon() const { return m_hIconBig; }
-	HICON GetSmallIcon() const { return m_hIconSmall; }
+	HICON GetBigIcon() const { return m_iconBig; }
+	HICON GetSmallIcon() const { return m_iconSmall; }
 	
 protected:
-	HICON m_hIconBig, m_hIconSmall;
+	CIcon m_iconBig, m_iconSmall;
 	UINT m_nIconID;
 
 protected:

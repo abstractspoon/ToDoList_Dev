@@ -74,7 +74,7 @@ END_MESSAGE_MAP()
 
 CTrayIcon::CTrayIcon()
 	:
-	m_hIcon(NULL),
+	m_icon(NULL),
 	m_bVisible(FALSE),
 	m_bAnimationOn(FALSE),
 	m_nPrevMsg(0),
@@ -86,8 +86,6 @@ CTrayIcon::CTrayIcon()
 
 CTrayIcon::~CTrayIcon()
 {
-	if (m_hIcon)
-		::DestroyIcon(m_hIcon);
 }
 
 // this Create takes an ID for the tip text
@@ -108,7 +106,7 @@ BOOL CTrayIcon::Create(CWnd* pParentWnd, UINT uID, UINT uIDIcon, LPCTSTR sTip)
 	if (!CWnd::Create(NULL, _T("TrayIcon"), WS_CHILD, CRect(0,0,0,0), pParentWnd, uID))
 		return FALSE;
 
-	m_hIcon = GraphicsMisc::LoadIcon(uIDIcon, 16);
+	m_icon.LoadIcon(uIDIcon);
 	m_bIconOwner = TRUE;
 	m_sTip = sTip;
 
@@ -239,7 +237,7 @@ BOOL CTrayIcon::AddToTray()
 	nid.uID = GetDlgCtrlID();
 	nid.uFlags = NIF_MESSAGE | NIF_ICON;
 	nid.uCallbackMessage = WM_TINOTIFY;
-	nid.hIcon = m_hIcon;
+	nid.hIcon = m_icon;
 
 	if (!m_sTip.IsEmpty())
 	{
@@ -277,7 +275,7 @@ BOOL CTrayIcon::DeleteFromTray()
 	return Shell_NotifyIcon(NIM_DELETE, (PNOTIFYICONDATA)&nid);
 }
 
-BOOL CTrayIcon::ModifyIcon(HICON hNewIcon)
+BOOL CTrayIcon::ModifyIcon(HICON hNewIcon, BOOL bAutoDelete)
 {
 	NOTIFYICONDATA_TI nid;
 
@@ -285,7 +283,11 @@ BOOL CTrayIcon::ModifyIcon(HICON hNewIcon)
 	nid.hWnd = GetSafeHwnd();
 	nid.uID = GetDlgCtrlID();
 	nid.uFlags = NIF_ICON;
-	nid.hIcon = m_hIcon = hNewIcon;
+	nid.hIcon = hNewIcon;
+
+	// Don't delete previous icon if we don't own it
+	m_icon.SetIcon(hNewIcon, m_bIconOwner);
+	m_bIconOwner = bAutoDelete;
 
 	return Shell_NotifyIcon(NIM_MODIFY, (PNOTIFYICONDATA)&nid);
 }
@@ -334,13 +336,7 @@ BOOL CTrayIcon::SetIcon(HICON hNewIcon, BOOL bAutoDelete)
 	if (m_bAnimationOn)
 		StopAnimation();
 
-	// cleanup current icon
-	if (m_bIconOwner)
-		::DestroyIcon(m_hIcon);
-
-	m_bIconOwner = bAutoDelete;
-	
-	return ModifyIcon(hNewIcon);
+	return ModifyIcon(hNewIcon, bAutoDelete);
 }
 
 BOOL CTrayIcon::SetTip(UINT uIDNewTip)

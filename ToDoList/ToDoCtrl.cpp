@@ -239,8 +239,6 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_nPriority(-1), 
 	m_treeDragDrop(TSH(), m_taskTree.Tree()),
 	m_visColEdit(visDefault),
-	m_hIconClock(NULL), 
-	m_hIconLink(NULL),
 	m_nTimeEstUnits(TDCU_HOURS),
 	m_nTimeSpentUnits(TDCU_HOURS),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
@@ -267,12 +265,12 @@ CToDoCtrl::CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDC
 	m_eCost.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add chess clock button to 'time spent'
-	m_hIconClock = AfxGetApp()->LoadIcon(IDI_TIME_TRACK);
-	m_eTimeSpent.InsertButton(0, ID_TIME_TRACK, m_hIconClock, CEnString(IDS_TDC_STARTSTOPCLOCK));
+	m_iconClock.LoadIcon(IDI_TIME_TRACK);
+	m_eTimeSpent.InsertButton(0, ID_TIME_TRACK, m_iconClock, CEnString(IDS_TDC_STARTSTOPCLOCK));
 
 	// add link button to dependency
-	m_hIconLink = AfxGetApp()->LoadIcon(IDI_DEPENDS_LINK);
-	m_eDependency.AddButton(ID_DEPENDS_LINK, m_hIconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_iconLink.LoadIcon(IDI_DEPENDS_LINK);
+	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 
 	// misc
 	m_cpColour.SetSelectionMode(CP_MODE_TEXT);

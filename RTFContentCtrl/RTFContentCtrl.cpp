@@ -43,7 +43,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-CRTFContentCtrlApp::CRTFContentCtrlApp() : m_hIcon(NULL)
+CRTFContentCtrlApp::CRTFContentCtrlApp()
 {
 }
 
@@ -51,7 +51,7 @@ BOOL CRTFContentCtrlApp::InitInstance()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_hIcon = LoadIcon(IDR_RTFCOMMENTS);
+	m_icon.LoadIcon(IDR_RTFCOMMENTS);
 	
 	return CWinApp::InitInstance();
 }

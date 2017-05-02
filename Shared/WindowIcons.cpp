@@ -11,15 +11,13 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-CWindowIcons::CWindowIcons() : m_hIconBig(NULL), m_hIconSmall(NULL), m_nIconID(0)
+CWindowIcons::CWindowIcons() : m_nIconID(0)
 {
 }
 
 
 CWindowIcons::~CWindowIcons()
 {
-	::DestroyIcon(m_hIconBig);
-	::DestroyIcon(m_hIconSmall);
 }
 
 BOOL CWindowIcons::Initialise(HWND hWnd, UINT nIconID)
@@ -57,27 +55,20 @@ BOOL CWindowIcons::ModifyIcon(UINT nIconID)
 			nBigIconSize = 16;
 	}
 
-	HICON hIconSmall = GraphicsMisc::LoadIcon(nIconID, 16);
-	HICON hIconBig = GraphicsMisc::LoadIcon(nIconID, nBigIconSize);
+	CIcon iconSmall(GraphicsMisc::LoadIcon(nIconID, 16));
+	CIcon iconBig(GraphicsMisc::LoadIcon(nIconID, nBigIconSize));
 
-	if (hIconBig && hIconSmall)
+	if (iconBig.IsValid() && iconSmall.IsValid())
 	{
-		::DestroyIcon(m_hIconBig);
-		::DestroyIcon(m_hIconSmall);
-
-		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
-		SendMessage(WM_SETICON, ICON_BIG, (LPARAM)hIconBig);
-
-		m_hIconBig = hIconBig;
-		m_hIconSmall = hIconSmall;
+		m_iconBig.SetIcon(iconBig.Detach());
+		m_iconSmall.SetIcon(iconSmall.Detach());
 		m_nIconID = nIconID;
+
+		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)(HICON)m_iconSmall);
+		SendMessage(WM_SETICON, ICON_BIG, (LPARAM)(HICON)m_iconBig);
 
 		return TRUE;
 	}
-
-	// else
-	::DestroyIcon(hIconBig);
-	::DestroyIcon(hIconSmall);
 
 	return FALSE;
 }

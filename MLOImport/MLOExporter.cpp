@@ -21,14 +21,13 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CMLOExporter::CMLOExporter() : m_hIcon(NULL)
+CMLOExporter::CMLOExporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_MYLIFEORGANISED);
+	m_icon.LoadIcon(IDI_MYLIFEORGANISED);
 }
 
 CMLOExporter::~CMLOExporter() 
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CMLOExporter::SetLocalizer(ITransText* /*pTT*/)

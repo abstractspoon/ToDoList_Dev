@@ -30,14 +30,13 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFMindImporter::CFMindImporter() : m_hIcon(NULL)
+CFMindImporter::CFMindImporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_FREEMIND);
+	m_icon.LoadIcon(IDI_FREEMIND);
 }
 
 CFMindImporter::~CFMindImporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CFMindImporter::SetLocalizer(ITransText* /*pTT*/)

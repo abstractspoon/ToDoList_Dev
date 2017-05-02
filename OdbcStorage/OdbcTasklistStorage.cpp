@@ -30,14 +30,13 @@ typedef CMap<CString, LPCTSTR, HTASKITEM, HTASKITEM&> CMapKeyToTask;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-COdbcTasklistStorage::COdbcTasklistStorage() : m_hIcon(NULL)
+COdbcTasklistStorage::COdbcTasklistStorage()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_ODBCSTORAGE);
+	m_icon.LoadIcon(IDR_ODBCSTORAGE);
 }
 
 COdbcTasklistStorage::~COdbcTasklistStorage()
 {
-
 }
 
 void COdbcTasklistStorage::SetLocalizer(ITransText* pTT)

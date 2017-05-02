@@ -13,6 +13,7 @@
 #include "resource.h"		// main symbols
 
 #include "..\shared\Rtf2HtmlConverter.h"
+#include "..\shared\Icon.h"
 
 #include "..\Interfaces\icontentcontrol.h"
 
@@ -30,7 +31,7 @@ public:
 	// IContent implementation
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	LPCTSTR GetTypeDescription() const { return _T("Rich Text"); }
-	HICON GetTypeIcon() const { return m_hIcon; }
+	HICON GetTypeIcon() const { return m_icon; }
 
 	void SetLocalizer(ITransText* pTT);
 
@@ -47,7 +48,7 @@ public:
 
 protected:
 	CRtfHtmlConverter m_rtfHtml;
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	BOOL InitInstance();

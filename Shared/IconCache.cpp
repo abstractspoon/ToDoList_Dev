@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "IconCache.h"
+#include "Icon.h"
 #include "enbitmap.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 {
 	if (IsValidName(sName) && hbm)
 	{
-		CTempIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_sizeIcon.cx, m_sizeIcon.cy));
+		CIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_sizeIcon.cx, m_sizeIcon.cy));
 		ASSERT(icon.IsValid());
 
 		return Add(sName, icon);
@@ -65,7 +66,7 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 {
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
-		CTempIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_sizeIcon.cx, m_sizeIcon.cy));
+		CIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_sizeIcon.cx, m_sizeIcon.cy));
 		ASSERT(icon.IsValid());
 
 		return Add(sName, icon);

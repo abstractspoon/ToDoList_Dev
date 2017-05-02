@@ -18,14 +18,13 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CMLOImporter::CMLOImporter() : m_hIcon(NULL)
+CMLOImporter::CMLOImporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_MYLIFEORGANISED);
+	m_icon.LoadIcon(IDI_MYLIFEORGANISED);
 }
 
 CMLOImporter::~CMLOImporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CMLOImporter::SetLocalizer(ITransText* /*pTT*/)

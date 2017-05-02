@@ -162,14 +162,12 @@ CPreferencesDlgBase::CPreferencesDlgBase(UINT nDlgTemplateID,
 	m_btnHelp(nDlgTemplateID, FALSE),
 	m_sizeOrgWindow(UNDEF_SIZE),
 	m_sizeCurWindow(UNDEF_SIZE),
-	m_sizeCurClient(UNDEF_SIZE),
-	m_hIcon(NULL)
+	m_sizeCurClient(UNDEF_SIZE)
 {
 }
 
 CPreferencesDlgBase::~CPreferencesDlgBase()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesDlgBase, CDialog)
@@ -247,10 +245,9 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	// Replace icon
 	if (m_nDlgIconID)
 	{
-		if (!m_hIcon)
-			m_hIcon = AfxGetApp()->LoadIcon(m_nDlgIconID);
+		m_icon.LoadIcon(m_nDlgIconID);
 
-		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)m_hIcon);
+		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)(HICON)m_icon);
 	}
 
 	if (m_pDoModalPrefs)

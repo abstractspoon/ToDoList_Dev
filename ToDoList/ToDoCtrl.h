@@ -38,6 +38,7 @@
 #include "..\shared\uithemefile.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\mapex.h"
+#include "..\shared\icon.h"
 
 #include "..\3rdparty\colourpicker.h"
 
@@ -452,7 +453,7 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
-	HICON m_hIconClock, m_hIconLink;
+	CIcon m_iconClock, m_iconLink;
 
 	CWordArray m_aStyles;
 	CString m_sXmlHeader, m_sXslHeader;

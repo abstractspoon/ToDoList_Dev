@@ -98,7 +98,7 @@ CAboutDlg::CAboutDlg(UINT nAppIconID, AB_STYLE nStyle,
     AddRCControl(_T("CONTROL"), _T("static"), _T(""), SS_ETCHEDHORZ, 0, 7, nTop + 4, nWidth + 30, 1, IDC_DIVIDER);
 	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), BTN_OK, WS_GROUP | BS_DEFPUSHBUTTON, 0, (nWidth + 36 - 50) / 2, nTop + 10, 50, 14, IDOK);
 
-	m_hIcon = AfxGetApp()->LoadIcon(nAppIconID);
+	m_icon.LoadIcon(nAppIconID);
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
@@ -148,8 +148,8 @@ BOOL CAboutDlg::OnInitDialog()
 {
 	CRuntimeDlg::OnInitDialog();
 	
-	if (m_hIcon)
-		((CStatic*)GetDlgItem(IDC_APPICON))->SetIcon(m_hIcon);
+	if (m_icon)
+		((CStatic*)GetDlgItem(IDC_APPICON))->SetIcon(m_icon);
 
 	if (m_reCopyright.GetSafeHwnd())
 	{

@@ -13,42 +13,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CTempIcon
-{
-public:
-	CTempIcon(HICON hIcon = NULL) : m_hIcon(hIcon)
-	{
-	}
-
-	virtual ~CTempIcon()
-	{
-		if (m_hIcon)
-			::DestroyIcon(m_hIcon);
-	}
-
-	BOOL IsValid() const { return (m_hIcon != NULL); }
-
-	BOOL SetIcon(HICON hIcon)
-	{
-		if (hIcon == NULL)
-			return FALSE;
-
-		if (m_hIcon)
-			::DestroyIcon(m_hIcon);
-
-		m_hIcon = hIcon;
-		return TRUE;
-	}
-
-	operator HICON() const { return m_hIcon; }
-	operator HICON() { return m_hIcon; }
-
-protected:
-	HICON m_hIcon;
-};
-
-//////////////////////////////////////////////////////////////////////
-
 class CIconCache  
 {
 public:

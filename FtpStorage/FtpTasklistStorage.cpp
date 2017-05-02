@@ -41,13 +41,12 @@ DLL_DECLSPEC int GetInterfaceVersion()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFtpTasklistStorageApp::CFtpTasklistStorageApp() : m_hIcon(NULL)
+CFtpTasklistStorageApp::CFtpTasklistStorageApp()
 {
 }
 
 CFtpTasklistStorageApp::~CFtpTasklistStorageApp()
 {
-
 }
 
 bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* /*pDestTaskFile*/, 
@@ -166,7 +165,7 @@ BOOL CFtpTasklistStorageApp::InitInstance()
 	// Set this before anything else
 //	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
-	m_hIcon = LoadIcon(IDR_FTPSTORAGE);
+	m_icon.LoadIcon(IDR_FTPSTORAGE);
 
 	if (m_pszAppName)
 		free((void*)m_pszAppName);

@@ -56,7 +56,7 @@ public:
 
 	// IUIExtensionWindow
 	LPCTSTR GetMenuText() const { return _T("Burndown"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return STATS_TYPEID; }
 
 	void SetReadOnly(bool /*bReadOnly*/) {}
@@ -89,7 +89,7 @@ protected:
 	CStatic	m_stFrame;
 	int		m_nDisplay;
 	//}}AFX_DATA
-	HICON m_hIcon;
+	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CBurndownChart m_graph;

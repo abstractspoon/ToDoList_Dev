@@ -109,14 +109,13 @@ CiCalEventArray::~CiCalEventArray()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CiCalImporter::CiCalImporter() : m_hIcon(NULL)
+CiCalImporter::CiCalImporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICALENDAR);
+	m_icon.LoadIcon(IDI_ICALENDAR);
 }
 
 CiCalImporter::~CiCalImporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CiCalImporter::SetLocalizer(ITransText* /*pTT*/)

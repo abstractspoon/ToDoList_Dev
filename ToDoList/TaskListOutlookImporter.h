@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\icon.h"
+
 #include "..\Interfaces\IImportExport.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -33,12 +35,12 @@ public:
 	LPCTSTR GetMenuText() const { return _T("Microsoft Outlook"); }
 	LPCTSTR GetFileFilter() const { return NULL; }
 	LPCTSTR GetFileExtension() const { return NULL; }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	
 	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 };
 

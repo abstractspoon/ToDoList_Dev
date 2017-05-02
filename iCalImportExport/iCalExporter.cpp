@@ -26,14 +26,13 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CiCalExporter::CiCalExporter() : m_hIcon(NULL), EXPORTASVTASK(TRUE)
+CiCalExporter::CiCalExporter() : EXPORTASVTASK(TRUE)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICALENDAR);
+	m_icon.LoadIcon(IDI_ICALENDAR);
 }
 
 CiCalExporter::~CiCalExporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CiCalExporter::SetLocalizer(ITransText* /*pTT*/)

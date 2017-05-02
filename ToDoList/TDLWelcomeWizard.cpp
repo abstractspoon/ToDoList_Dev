@@ -245,7 +245,6 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 	: 
 	CPropertyPageEx(CTDLWelcomePage3::IDD, 0),
 	m_eSampleTasklist(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS), 
-	m_hIcon(NULL), 
 	m_hFont(NULL)
 {
 	//{{AFX_DATA_INIT(CWelcomePage3)
@@ -264,7 +263,6 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 
 CTDLWelcomePage3::~CTDLWelcomePage3()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
@@ -334,8 +332,8 @@ LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
 	ASSERT(wParam == IDC_SAMPLETASKLIST);
 	UNUSED(wParam);
 
-	if (m_hIcon == NULL) 
-		m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
+	if (!m_icon.IsValid()) 
+		m_icon.LoadIcon(IDR_MAINFRAME_STD);
 
-	return (LRESULT)m_hIcon;
+	return (LRESULT)(HICON)m_icon;
 }

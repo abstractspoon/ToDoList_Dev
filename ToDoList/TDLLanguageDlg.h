@@ -10,6 +10,8 @@
 #include "TDLLanguageComboBox.h"
 #include "TDLDialog.h"
 
+#include "..\shared\icon.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageDlg dialog
 
@@ -28,7 +30,7 @@ public:
 	enum { IDD = IDD_LANGUAGE_DIALOG };
 
 	CTDLLanguageComboBox	m_cbLanguages;
-	HICON m_hIcon;
+	CIcon m_icon;
 	//}}AFX_DATA
 
 

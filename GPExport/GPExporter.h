@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\Icon.h"
+
 #include "..\Interfaces\IImportExport.h"
 #include "..\Interfaces\ITasklist.h"
 
@@ -30,13 +32,13 @@ public:
 	LPCTSTR GetMenuText() const;
 	LPCTSTR GetFileFilter() const;
 	LPCTSTR GetFileExtension() const;
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 
 	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 	CMap<CString, LPCTSTR, int, int&> m_mapResources;
 	CMap<int, int, CXmlItem*, CXmlItem*&> m_mapTasks;
 

@@ -25,14 +25,13 @@ const UINT ONEDAY = 24 * 60 * 60;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CGPImporter::CGPImporter() : m_hIcon(NULL)
+CGPImporter::CGPImporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_GANTTPROJECT);
+	m_icon.LoadIcon(IDI_GANTTPROJECT);
 }
 
 CGPImporter::~CGPImporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CGPImporter::SetLocalizer(ITransText* pTT)

@@ -6,6 +6,8 @@
 #define TRAYICON_H
 
 #include "subclass.h"
+#include "icon.h"
+
 #include <afxtempl.h>
 
 #ifndef NIIF_NONE
@@ -46,7 +48,7 @@ public:
 // Attributes
 private:
 	CString m_sTip;
-	HICON m_hIcon;
+	CIcon m_icon;
 	BOOL m_bVisible;
 	NM_TRAYICON m_nm;
 	UINT m_nPrevMsg;
@@ -74,7 +76,7 @@ private:
 	BOOL AddToTray();
 	BOOL DeleteFromTray();
 	BOOL ModifyTip(LPCTSTR sNewTip);
-	BOOL ModifyIcon(HICON hNewIcon);
+	BOOL ModifyIcon(HICON hNewIcon, BOOL bAutoDelete);
 
 };
 

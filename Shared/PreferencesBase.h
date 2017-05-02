@@ -8,6 +8,7 @@
 #include "scrollingpropertypagehost.h"
 #include "dialoghelper.h"
 #include "winhelpbutton.h"
+#include "icon.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -82,7 +83,7 @@ public:
 protected:
 	CScrollingPropertyPageHost m_ppHost;
 	CWinHelpButton m_btnHelp;
-	HICON m_hIcon;
+	CIcon m_icon;
 
 	UINT m_nDlgTemplateID;
 	UINT m_nPPHostFrameCtrlID;

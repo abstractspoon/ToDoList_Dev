@@ -39,7 +39,7 @@ public:
 	virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	CString FormatDisplayName(const CString& sFilePath);
@@ -169,7 +169,7 @@ public:
 	
 	// caller must copy result only
 	LPCTSTR GetMenuText() const { return _T("Google Drive"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("3ADF91FF-CAB9-44FF-BAA6-F397172149AF"); }
 	
 	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
@@ -189,7 +189,7 @@ public:
 	
 	// caller must copy result only
 	LPCTSTR GetMenuText() const { return _T("SkyDrive"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("0BE9A394-86EC-412C-A88A-496A737E6110"); }
 	
 	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
@@ -209,7 +209,7 @@ public:
 	
 	// caller must copy result only
 	LPCTSTR GetMenuText() const { return _T("DropBox"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("9F553544-85AA-4EDD-B0FD-71486246C3E2"); }
 	
 	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);

@@ -469,6 +469,9 @@
     <ClCompile Include="CopyWndContents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -973,6 +976,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CopyWndContents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Icon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

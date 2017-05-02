@@ -11,6 +11,7 @@
 
 #include "..\shared\fileedit.h"
 #include "..\shared\winhelpbutton.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -129,7 +130,7 @@ protected:
 	int		m_bViewSample;
 	//}}AFX_DATA
 	HFONT m_hFont;
-	HICON m_hIcon;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

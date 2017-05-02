@@ -8,6 +8,7 @@
 #include "resource.h"
 
 #include "..\shared\localizer.h"
+#include "..\shared\Icon.h"
 
 #include "..\interfaces\ipreferences.h"
 
@@ -22,20 +23,18 @@ static char THIS_FILE[]=__FILE__;
 class CTDCDefaultContent : public IContent
 {
 public:
-	CTDCDefaultContent() : m_hIcon(NULL)
+	CTDCDefaultContent()
 	{
-		m_hIcon = AfxGetApp()->LoadIcon(IDI_SIMPLETEXT);
+		m_icon.LoadIcon(IDI_SIMPLETEXT);
 	}
 
 	virtual ~CTDCDefaultContent()
 	{
-		if (m_hIcon)
-			::DestroyIcon(m_hIcon);
 	}
 
 	LPCTSTR GetTypeID() const { static LPCTSTR sID = _T("PLAIN_TEXT"); return sID; }
 	LPCTSTR GetTypeDescription() const { static LPCTSTR sDesc = _T("Simple Text"); return sDesc; }
-	HICON GetTypeIcon() const { return m_hIcon; }
+	HICON GetTypeIcon() const { return m_icon; }
 
 	IContentControl* CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 						long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
@@ -74,7 +73,7 @@ public:
 	}
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 	
 };
 

@@ -29,14 +29,13 @@ const LPCTSTR UTF8_HEADER = _T("version=\"1.0\" encoding=\"UTF-8\"");
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CGPExporter::CGPExporter() : m_hIcon(NULL)
+CGPExporter::CGPExporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_GANTTPROJECT);
+	m_icon.LoadIcon(IDI_GANTTPROJECT);
 }
 
 CGPExporter::~CGPExporter() 
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CGPExporter::SetLocalizer(ITransText* pTT)

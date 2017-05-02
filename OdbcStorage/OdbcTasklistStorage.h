@@ -11,6 +11,8 @@
 
 #include "OdbcStruct.h"
 
+#include "..\shared\Icon.h"
+
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\ITaskListStorage.h"
 
@@ -29,14 +31,14 @@ public:
 
 	// caller must copy result only
 	LPCTSTR GetMenuText() const { return _T("ODBC Connection"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return ODBCTASK::GetMetaDataKey(NULL); }
 	
 	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
 	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	int LoadDatabaseSetups(IPreferences* pPrefs, LPCTSTR szKey, COdbcDatabaseSetupArray& aDbSetup) const;

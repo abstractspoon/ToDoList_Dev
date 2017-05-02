@@ -338,6 +338,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="Icon.cpp" />
     <ClCompile Include="iconbutton.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -760,6 +761,7 @@
     <ClInclude Include="hotkeyctrlex.h" />
     <ClInclude Include="HotTracker.h" />
     <ClInclude Include="HtmlCharMap.h" />
+    <ClInclude Include="Icon.h" />
     <ClInclude Include="iconbutton.h" />
     <ClInclude Include="IconCache.h" />
     <ClInclude Include="ImageProcessors.h" />

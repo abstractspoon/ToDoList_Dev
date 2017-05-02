@@ -39,13 +39,12 @@ DLL_DECLSPEC int GetInterfaceVersion()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CCalendarExtApp::CCalendarExtApp() : m_hIcon(NULL)
+CCalendarExtApp::CCalendarExtApp()
 {
 }
 
 CCalendarExtApp::~CCalendarExtApp()
 {
-	DestroyIcon(m_hIcon);
 }
 
 void CCalendarExtApp::Release()
@@ -89,7 +88,7 @@ BOOL CCalendarExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 	
-	m_hIcon = LoadIcon(IDR_CALENDAR);
+	m_icon.LoadIcon(IDR_CALENDAR);
 	
 	return CWinApp::InitInstance();
 }

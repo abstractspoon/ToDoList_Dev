@@ -8,7 +8,7 @@
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
 #include "osversion.h"
-#include "iconcache.h"
+#include "icon.h"
 
 #ifndef ULONG_PTR
 	typedef unsigned long ULONG_PTR; 
@@ -222,7 +222,7 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& 
 
 						for (int nImg = 0; nImg < nImgCount; nImg++)
 						{
-							CTempIcon icon(ilTemp.ExtractIcon(nImg));
+							CIcon icon(ilTemp.ExtractIcon(nImg));
 							VERIFY(il.Add(icon) != -1);
 						}
 					}

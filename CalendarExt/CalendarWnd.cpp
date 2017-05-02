@@ -42,12 +42,12 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 
 CCalendarWnd::CCalendarWnd()
 	:	
-	m_hIcon(AfxGetApp()->LoadIcon(IDR_CALENDAR)),
 	m_bReadOnly(FALSE),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
+	m_icon.LoadIcon(IDR_CALENDAR);
 }
 
 CCalendarWnd::~CCalendarWnd()

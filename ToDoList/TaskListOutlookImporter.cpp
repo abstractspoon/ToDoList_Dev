@@ -20,14 +20,13 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTaskListOutlookImporter::CTaskListOutlookImporter() : m_hIcon(NULL)
+CTaskListOutlookImporter::CTaskListOutlookImporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_OUTLOOK);
+	m_icon.LoadIcon(IDI_OUTLOOK);
 }
 
 CTaskListOutlookImporter::~CTaskListOutlookImporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CTaskListOutlookImporter::SetLocalizer(ITransText* pTT)

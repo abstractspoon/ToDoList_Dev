@@ -34,7 +34,7 @@ public:
 	void Release();
 
 	LPCTSTR GetMenuText() const { return _T("Kanban"); } 
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return KANBAN_TYPEID; }
 
 	void SetReadOnly(bool bReadOnly);
@@ -75,7 +75,7 @@ protected:
 
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
-	HICON m_hIcon;
+	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString	m_sCustomAttribID;

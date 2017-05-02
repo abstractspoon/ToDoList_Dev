@@ -11,6 +11,8 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#include "..\shared\Icon.h"
+
 #include "..\Interfaces\IUIExtension.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -29,7 +31,7 @@ public:
 	void SetLocalizer(ITransText* pTT);
 
 	LPCTSTR GetMenuText() const { return _T("Burndown"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return STATS_TYPEID; }
 
 	IUIExtensionWindow* CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
@@ -40,7 +42,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	BOOL InitInstance();

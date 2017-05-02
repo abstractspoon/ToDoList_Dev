@@ -41,7 +41,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CBurndownExtApp::CBurndownExtApp() : m_hIcon(NULL)
+CBurndownExtApp::CBurndownExtApp()
 {
 }
 
@@ -88,7 +88,7 @@ BOOL CBurndownExtApp::InitInstance()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	m_hIcon = LoadIcon(IDR_STATISTICS);
+	m_icon.LoadIcon(IDR_STATISTICS);
 	
 	return CWinApp::InitInstance();
 }

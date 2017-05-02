@@ -9,10 +9,11 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\Icon.h"
+#include "..\Shared\TimeHelper.h"
+
 #include "..\Interfaces\IImportExport.h"
 #include "..\Interfaces\ITasklist.h"
-
-#include "..\Shared\TimeHelper.h"
 
 #include <afxtempl.h>
 
@@ -33,13 +34,13 @@ public:
     LPCTSTR GetMenuText() const { return _T("My Life Organized"); }
 	LPCTSTR GetFileFilter() const { return _T("MLO Task Files (*.ml)|*.ml||"); }
 	LPCTSTR GetFileExtension() const { return _T("ml"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 
 	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings);

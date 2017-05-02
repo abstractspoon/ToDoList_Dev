@@ -39,7 +39,6 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
-	m_hIcon(NULL),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
@@ -48,7 +47,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_KANBAN);
+	m_icon.LoadIcon(IDR_KANBAN);
 	m_cbOptions.SetMinDLUHeight(10);
 
 }

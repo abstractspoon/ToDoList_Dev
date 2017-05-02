@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\Icon.h"
+
 #include "..\Interfaces\IImportExport.h"
 #include "..\Interfaces\iTasklist.h"
 
@@ -27,12 +29,12 @@ public:
 	LPCTSTR GetMenuText() const { return _T("My Life Organized"); }
 	LPCTSTR GetFileFilter() const { return _T("MLO Task Files (*.ml, *.xml)|*.ml;*.xml||"); }
 	LPCTSTR GetFileExtension() const { return _T("ml"); }
-	HICON GetIcon() const { return m_hIcon; }
+	HICON GetIcon() const { return m_icon; }
 	
 	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 
 protected:
 	bool ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const;

@@ -10,7 +10,7 @@
 #include "..\shared\EnString.h"
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\iconcache.h"
+#include "..\shared\icon.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -95,7 +95,7 @@ void CTDLTaskViewListBox::BuildList()
 		SetItemData(nItem, LISTVIEW_INDEX);
 		SetCheck(nItem, TRUE); // default
 
-		CTempIcon icon(GraphicsMisc::LoadIcon(IDI_LISTVIEW_STD));
+		CIcon icon(GraphicsMisc::LoadIcon(IDI_LISTVIEW_STD));
 
 		int nImage = AddItemImage(icon);
 		ASSERT(nImage == nItem);

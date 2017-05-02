@@ -106,12 +106,11 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nDisplay(0),
-	m_nScale(1),
-	m_hIcon(NULL)
+	m_nScale(1)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_STATISTICS);
+	m_icon.LoadIcon(IDR_STATISTICS);
 }
 
 CBurndownWnd::~CBurndownWnd()

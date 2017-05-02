@@ -47,14 +47,13 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFMindExporter::CFMindExporter() : m_hIcon(NULL)
+CFMindExporter::CFMindExporter()
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDI_FREEMIND);
+	m_icon.LoadIcon(IDI_FREEMIND);
 }
 
 CFMindExporter::~CFMindExporter()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)

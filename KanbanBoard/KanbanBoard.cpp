@@ -38,7 +38,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CKanbanExtApp::CKanbanExtApp() : m_hIcon(NULL)
+CKanbanExtApp::CKanbanExtApp()
 {
 }
 
@@ -96,7 +96,7 @@ BOOL CKanbanExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
-	m_hIcon = LoadIcon(IDR_KANBAN);
+	m_icon.LoadIcon(IDR_KANBAN);
 
 	if (m_pszAppName)
 		free((void*)m_pszAppName);

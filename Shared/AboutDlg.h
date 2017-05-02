@@ -10,6 +10,7 @@
 #include "runtimedlg.h"
 #include "richeditncborder.h"
 #include "richeditbasectrl.h"
+#include "icon.h"
 
 #include "..\3rdparty\xhtmlstatic.h"
 
@@ -47,7 +48,7 @@ protected:
 	CXHTMLStatic m_stAppDescription;
 	CXHTMLStatic m_stCopyright;
 	CXHTMLStatic m_stLicense;
-	HICON m_hIcon;
+	CIcon m_icon;
 	AB_STYLE m_nStyle;
 	CRichEditNcBorder m_reBorder;
 	CRichEditBaseCtrl m_reCopyright;
