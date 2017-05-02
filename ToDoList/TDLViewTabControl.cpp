@@ -73,8 +73,6 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 
 		if (m_ilTabs.GetSafeHandle())
 			nImage = m_ilTabs.Add(hIcon);
-		else
-			hIcon = NULL;
 	}
 
 	TDCVIEW view(hWnd, nView, szLabel, nImage, pData);

@@ -108,7 +108,6 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 
 	if (hTask)
 	{
-//		bDone = tasks.IsTaskGoodAsDone(hTask);
 		bDone = tasks.IsTaskDone(hTask);
 
 		if (!bDone)
@@ -378,13 +377,15 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_sizeLast(-1, -1),
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
-	m_dwOptions(0)
+	m_dwOptions(0),
+	m_hIcon(NULL)
 {
 	
 }
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 {
+	::DestroyIcon(m_hIcon);
 }
 
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
@@ -529,7 +530,7 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
 		
-	HICON m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
+	m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
 	SetIcon(m_hIcon, TRUE);
 
 	EnableToolTips(TRUE);

@@ -129,6 +129,7 @@ protected:
 	int		m_bViewSample;
 	//}}AFX_DATA
 	HFONT m_hFont;
+	HICON m_hIcon;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

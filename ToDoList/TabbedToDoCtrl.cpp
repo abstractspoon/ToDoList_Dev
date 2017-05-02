@@ -149,8 +149,11 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 
 	// add tree and list as tabbed views
-	m_tabViews.AttachView(m_taskTree.GetSafeHwnd(), FTCV_TASKTREE, CEnString(IDS_TASKTREE), GraphicsMisc::LoadIcon(IDI_TASKTREE_STD), NULL);
-	m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), GraphicsMisc::LoadIcon(IDI_LISTVIEW_STD), NewViewData());
+	CTempIcon icon(GraphicsMisc::LoadIcon(IDI_TASKTREE_STD));
+	m_tabViews.AttachView(m_taskTree.GetSafeHwnd(), FTCV_TASKTREE, CEnString(IDS_TASKTREE), icon, NULL);
+
+	icon.SetIcon(GraphicsMisc::LoadIcon(IDI_LISTVIEW_STD));
+	m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData());
 
 	for (int nExt = 0; nExt < m_mgrUIExt.GetNumUIExtensions(); nExt++)
 	{

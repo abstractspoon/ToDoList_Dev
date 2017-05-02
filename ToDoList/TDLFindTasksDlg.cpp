@@ -43,7 +43,7 @@ const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 // CTDLFindTasksDlg dialog
 
 CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CTDLFindTasksDlg::IDD, pParent), m_bDockable(FALSE)
+	: CDialog(CTDLFindTasksDlg::IDD, pParent), m_bDockable(FALSE), m_hIcon(NULL)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -56,7 +56,7 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
 {
-
+	::DestroyIcon(m_hIcon);
 }
 
 void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
@@ -132,8 +132,8 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 	BuildOptionCombo();
 
-	HICON hIcon = GraphicsMisc::LoadIcon(IDI_FIND_DIALOG_STD);
-	SetIcon(hIcon, FALSE);
+	m_hIcon = GraphicsMisc::LoadIcon(IDI_FIND_DIALOG_STD);
+	SetIcon(m_hIcon, FALSE);
 
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);
 

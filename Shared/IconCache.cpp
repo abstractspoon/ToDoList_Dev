@@ -24,10 +24,10 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 {
 	if (IsValidName(sName) && hbm)
 	{
-		HICON hIcon = CEnBitmap::ExtractIcon(hbm, crMask, m_sizeIcon.cx, m_sizeIcon.cy);
-		ASSERT(hIcon);
+		CTempIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_sizeIcon.cx, m_sizeIcon.cy));
+		ASSERT(icon.IsValid());
 
-		return Add(sName, hIcon);
+		return Add(sName, icon);
 	}
 	
 	ASSERT(0);
@@ -65,9 +65,10 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 {
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
-		HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_sizeIcon.cx, m_sizeIcon.cy);
-		
-		return Add(sName, hIcon);
+		CTempIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_sizeIcon.cx, m_sizeIcon.cy));
+		ASSERT(icon.IsValid());
+
+		return Add(sName, icon);
 	}
 	
 	ASSERT(0);

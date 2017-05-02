@@ -11,6 +11,44 @@
 
 #include <AFXTEMPL.H>
 
+//////////////////////////////////////////////////////////////////////
+
+class CTempIcon
+{
+public:
+	CTempIcon(HICON hIcon = NULL) : m_hIcon(hIcon)
+	{
+	}
+
+	virtual ~CTempIcon()
+	{
+		if (m_hIcon)
+			::DestroyIcon(m_hIcon);
+	}
+
+	BOOL IsValid() const { return (m_hIcon != NULL); }
+
+	BOOL SetIcon(HICON hIcon)
+	{
+		if (hIcon == NULL)
+			return FALSE;
+
+		if (m_hIcon)
+			::DestroyIcon(m_hIcon);
+
+		m_hIcon = hIcon;
+		return TRUE;
+	}
+
+	operator HICON() const { return m_hIcon; }
+	operator HICON() { return m_hIcon; }
+
+protected:
+	HICON m_hIcon;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CIconCache  
 {
 public:
@@ -36,5 +74,7 @@ protected:
 protected:
 	BOOL IsValidName(const CString& sName) const;
 };
+
+//////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_ICONCACHE_H__14DC1401_E4EC_43EA_BECE_6E0B4D9868CE__INCLUDED_)

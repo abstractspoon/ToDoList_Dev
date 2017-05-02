@@ -138,13 +138,12 @@ BOOL CTDLWebUpdateProgressDlg::OnInitDialog()
 {
 	CDialogHelper::SetFont(this, m_hFont);
 
-	// set dialog icon
-	HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME);
-	SetIcon(hIcon, FALSE);
-	
 	// set taskbar icon
 	m_icons.Initialise(*this, IDR_MAINFRAME);
 
+	// set dialog icon
+	SetIcon(m_icons.GetSmallIcon(), FALSE);
+	
 	CPropertySheetEx::OnInitDialog();
 
 	SetWizardButtons(0);

@@ -18,10 +18,15 @@ static char THIS_FILE[] = __FILE__;
 // CTDLLanguageDlg dialog
 
 CTDLLanguageDlg::CTDLLanguageDlg(CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLLanguageDlg::IDD, pParent), m_cbLanguages(_T("*.csv"))
+	: CTDLDialog(CTDLLanguageDlg::IDD, pParent), m_cbLanguages(_T("*.csv")), m_hIcon(NULL)
 {
 	//{{AFX_DATA_INIT(CTDLLanguageDlg)
 	//}}AFX_DATA_INIT
+}
+
+CTDLLanguageDlg::~CTDLLanguageDlg()
+{
+	::DestroyIcon(m_hIcon);
 }
 
 void CTDLLanguageDlg::DoDataExchange(CDataExchange* pDX)
@@ -45,8 +50,8 @@ BOOL CTDLLanguageDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-	HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME);
-	SetIcon(hIcon, FALSE);
+	m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME);
+	SetIcon(m_hIcon, FALSE);
 
 	// Initialise language to user's UI language
 	m_cbLanguages.SelectUserLanguage();

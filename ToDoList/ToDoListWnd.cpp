@@ -11563,6 +11563,8 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 			if (!::RegisterClass(&wndcls))
 			{
 				ASSERT(0);
+
+				::DestroyIcon(wndcls.hIcon);
 				return FALSE;
 			}
 		}

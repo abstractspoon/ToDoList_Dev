@@ -10,6 +10,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
+#include "..\shared\iconcache.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -45,9 +46,9 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 	{
 		// add folder icon first always
 		// because we may need it for parent tasks
-		HICON hIcon = CSysImageList().ExtractFolderIcon();
-		ASSERT (hIcon);
-		VERIFY (Add(hIcon) == 0);
+		CTempIcon icon(CSysImageList().ExtractFolderIcon());
+		ASSERT (icon.IsValid());
+		VERIFY (Add(icon) == 0);
 
 		m_mapNameToIndex[_T("0")] = 0;
 		m_mapIndexToName[0] = _T("0");

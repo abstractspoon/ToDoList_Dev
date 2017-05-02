@@ -86,6 +86,8 @@ CTrayIcon::CTrayIcon()
 
 CTrayIcon::~CTrayIcon()
 {
+	if (m_hIcon)
+		::DestroyIcon(m_hIcon);
 }
 
 // this Create takes an ID for the tip text

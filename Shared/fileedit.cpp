@@ -13,6 +13,7 @@
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "clipboard.h"
+#include "iconcache.h"
 
 #include <shlwapi.h>
 
@@ -335,10 +336,10 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 
 				if (m_ilImageIcon.GetImageCount() == 0)
 				{
-					HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), 16, 16);
+					CTempIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), 16, 16));
 
-					if (hIcon)
-						m_ilImageIcon.Add(hIcon);
+					if (icon.IsValid())
+						m_ilImageIcon.Add(icon);
 				}
 
 				if (m_ilImageIcon.GetImageCount() > 0)

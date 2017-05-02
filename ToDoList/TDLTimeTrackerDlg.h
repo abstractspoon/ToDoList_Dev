@@ -151,6 +151,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CString m_sOrgTitle;
 	DWORD m_dwOptions;
+	HICON m_hIcon;
 
 #ifdef WHITETHEME
 #else

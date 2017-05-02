@@ -169,7 +169,6 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 		}
 		else // try for supported image
 		{
-
 			hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
 
 			// All else/Fallback

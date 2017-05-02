@@ -120,7 +120,8 @@ CTDLWelcomePage1::CTDLWelcomePage1()
 	: 
 	CPropertyPageEx(CTDLWelcomePage1::IDD, 0), 
 	m_bUseIniFile(1),
-	m_bShareTasklists(0)
+	m_bShareTasklists(0),
+	m_hFont(NULL)
 {
 	//{{AFX_DATA_INIT(CWelcomePage1)
 	//}}AFX_DATA_INIT
@@ -175,7 +176,8 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CPropertyPageEx)
 
 CTDLWelcomePage2::CTDLWelcomePage2() 
 	: 
-	CPropertyPageEx(CTDLWelcomePage2::IDD, 0)
+	CPropertyPageEx(CTDLWelcomePage2::IDD, 0),
+	m_hFont(NULL)
 {
 	//{{AFX_DATA_INIT(CWelcomePage2)
 	//}}AFX_DATA_INIT
@@ -242,7 +244,9 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
 	CPropertyPageEx(CTDLWelcomePage3::IDD, 0),
-	m_eSampleTasklist(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS)
+	m_eSampleTasklist(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS), 
+	m_hIcon(NULL), 
+	m_hFont(NULL)
 {
 	//{{AFX_DATA_INIT(CWelcomePage3)
 	m_bHideAttrib = 1;
@@ -260,6 +264,7 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 
 CTDLWelcomePage3::~CTDLWelcomePage3()
 {
+	::DestroyIcon(m_hIcon);
 }
 
 void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
@@ -317,7 +322,6 @@ void CTDLWelcomePage3::OnSample()
 	m_eSampleTasklist.EnableWindow(m_bViewSample);
 }
 
-
 BOOL CTDLWelcomePage3::OnSetActive() 
 {
 	((CPropertySheetEx*)GetParent())->SetWizardButtons(PSWIZB_BACK | PSWIZB_FINISH);
@@ -330,6 +334,8 @@ LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
 	ASSERT(wParam == IDC_SAMPLETASKLIST);
 	UNUSED(wParam);
 
-	static HICON hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
-	return (LRESULT)hIcon;
+	if (m_hIcon == NULL) 
+		m_hIcon = GraphicsMisc::LoadIcon(IDR_MAINFRAME_STD, 16);
+
+	return (LRESULT)m_hIcon;
 }

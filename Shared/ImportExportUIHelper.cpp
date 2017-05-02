@@ -107,8 +107,6 @@ void CImportExportUIHelper::UpdateImportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 
 		if (nNumImporters)
 		{
-//			CSysImageList sil;
-
 			int nPos = 0;
 			UINT nFlags = MF_BYPOSITION | MF_STRING | (bEnabled ? 0 : MF_GRAYED);
 			
@@ -128,9 +126,6 @@ void CImportExportUIHelper::UpdateImportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 				CString sExt('.');
 				sExt += m_mgrImpExp.GetImporterFileExtension(nTool);
 
-//				HICON hIcon = sil.ExtractFileIcon(sExt);
-//				m_mgrIcon.SetImage(nStartID + nTool, hIcon);
-				
 				nPos++;
 			}
 			

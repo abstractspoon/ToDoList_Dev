@@ -90,6 +90,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aActiveTDCAttribDefs, m_aAllTDCAttribDefs;
 	CStringArray m_aSavedSearches;
 	TDCAUTOLISTDATA m_tldActive, m_tldAll;
+	HICON m_hIcon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

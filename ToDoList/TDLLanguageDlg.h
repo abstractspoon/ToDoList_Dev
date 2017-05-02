@@ -18,6 +18,7 @@ class CTDLLanguageDlg : public CTDLDialog
 // Construction
 public:
 	CTDLLanguageDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CTDLLanguageDlg();
 
 	CString GetLanguageFile() const;
 	static CString GetDefaultLanguage();
@@ -25,7 +26,9 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CTDLLanguageDlg)
 	enum { IDD = IDD_LANGUAGE_DIALOG };
+
 	CTDLLanguageComboBox	m_cbLanguages;
+	HICON m_hIcon;
 	//}}AFX_DATA
 
 
