@@ -610,7 +610,7 @@ BOOL CRulerRichEdit::CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend)
 
 BOOL CRulerRichEdit::CopyToClipboardAsHtml()
 {
-	Copy();	
+	CUrlRichEditCtrl::Copy();	
 
 	// convert RTF to HTML and copy to clipboard
 	CString sRTF;
@@ -626,7 +626,7 @@ BOOL CRulerRichEdit::Cut()
 {
 	// snapshot RTF for copying to clipboard as HTML
 	CString sRtf = GetRTF();
-	Cut();	
+	CUrlRichEditCtrl::Cut();	
 	
 	// do the copy
 	return CopyRtfToClipboardAsHtml(sRtf);
