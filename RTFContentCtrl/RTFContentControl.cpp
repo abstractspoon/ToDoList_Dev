@@ -832,7 +832,7 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditPaste() 
 {
-	m_rtf.Paste(FALSE);
+	m_rtf.Paste();
 }
 
 void CRTFContentControl::OnUpdateEditPaste(CCmdUI* pCmdUI) 
@@ -897,7 +897,7 @@ void CRTFContentControl::OnUpdateEditPasteFormatting(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditPasteSimple() 
 {
-	m_rtf.Paste(TRUE); // TRUE ==  simple
+	m_rtf.PasteSimple();
 }
 
 void CRTFContentControl::OnUpdateEditPasteSimple(CCmdUI* pCmdUI) 

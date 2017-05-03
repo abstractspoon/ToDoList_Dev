@@ -115,7 +115,8 @@ public:
 	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
 
 	BOOL PasteFiles(const CStringArray& aFiles);
-	BOOL Paste(BOOL bSimple);
+	BOOL PasteSimple();
+	BOOL Paste();
 	BOOL CanPaste() const;
 	BOOL CopyToClipboardAsHtml();
 	BOOL Cut();

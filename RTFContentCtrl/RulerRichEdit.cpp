@@ -421,100 +421,106 @@ BOOL CRulerRichEdit::ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl)
 	return FALSE;
 }
 
-BOOL CRulerRichEdit::Paste(BOOL bSimple)
+BOOL CRulerRichEdit::PasteSimple()
 {
 	CStringArray aFiles;
-	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
-	
-	// Check for error
-	if (nNumFiles == -1)
+
+	switch (CClipboard().GetDropFilePaths(aFiles))
 	{
+	case -1:
 		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
+
+	case 0:
+		return PasteSimpleText(s_bPasteSourceUrls);
 	}
 
-	// Keep simple paste together because it's so simple!
-	if (bSimple)
+	// else one or more filenames 
+	return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
+}
+
+BOOL CRulerRichEdit::Paste()
+{
+	CStringArray aFiles;
+	
+	switch (CClipboard().GetDropFilePaths(aFiles))
 	{
-		if (nNumFiles == 0)
-			return PasteSimpleText(s_bPasteSourceUrls);
+	case -1:
+		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		return FALSE;
 
-		// else one or more filepaths
-		return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
-	}
-
-	// No file paths
-	if (nNumFiles == 0)
-	{
-		CWaitCursor cursor;
-		
-		// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
-		// This also allows us to prevent richedit's default resizing by using paste special
-		CString sSourceUrl;
-
-		if (CClipboard::HasFormat(CF_BITMAP))
+	case 0:
 		{
-			CClipboardBackup cbb(*this);
-			BOOL bClipboardSaved = FALSE;
-			
-			CClipboard cb;
-			cb.GetHTMLSourceLink(sSourceUrl);
+			CWaitCursor cursor;
 
-			if (GetReduceImageColors())
+			// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
+			// This also allows us to prevent richedit's default resizing by using paste special
+			CString sSourceUrl;
+
+			if (CClipboard::HasFormat(CF_BITMAP))
 			{
-				CEnBitmap bmp;
-				
-				if (!bmp.CopyImage(cb.GetBitmap()))
-					return FALSE;
+				CClipboardBackup cbb(*this);
+				BOOL bClipboardSaved = FALSE;
 
-				bClipboardSaved = cbb.Backup();
-				ASSERT(bClipboardSaved);
+				CClipboard cb;
+				cb.GetHTMLSourceLink(sSourceUrl);
 
-				if (!bmp.CopyToClipboard(GetSafeHwnd(), 8))
-					return FALSE;
-			}
-
-			PasteSpecial(CF_BITMAP);
-			
-			// restore the clipboard if necessary
-			if (bClipboardSaved)
-			{
-				VERIFY(cbb.Restore());
-				
-				// If we overwrote the clipboard we have to paste source URLs manually
-				AppendSourceUrls(sSourceUrl);
-			}
-		}
-		else
-		{
-			// if there is HTML convert it to RTF and insert it
-			CString sHtml;
-
-			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
-			{
-				CWaitCursor cursor;
-				
-				// Always set this to make sure it is current
-				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
-
-				CString sRTF;
-
-				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+				if (GetReduceImageColors())
 				{
-					VERIFY(SetTextEx(sRTF));
+					CEnBitmap bmp;
+
+					if (!bmp.CopyImage(cb.GetBitmap()))
+						return FALSE;
+
+					bClipboardSaved = cbb.Backup();
+					ASSERT(bClipboardSaved);
+
+					if (!bmp.CopyToClipboard(GetSafeHwnd(), 8))
+						return FALSE;
+				}
+
+				PasteSpecial(CF_BITMAP);
+
+				// restore the clipboard if necessary
+				if (bClipboardSaved)
+				{
+					VERIFY(cbb.Restore());
+
+					// If we overwrote the clipboard we have to paste source URLs manually
 					AppendSourceUrls(sSourceUrl);
 				}
 			}
 			else
 			{
-				// Default paste
-				Paste(s_bPasteSourceUrls);
-			}
-		}
+				// if there is HTML convert it to RTF and insert it
+				CString sHtml;
 
+				if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
+				{
+					CWaitCursor cursor;
+
+					// Always set this to make sure it is current
+					m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+
+					CString sRTF;
+
+					if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
+					{
+						VERIFY(SetTextEx(sRTF));
+						AppendSourceUrls(sSourceUrl);
+					}
+				}
+				else
+				{
+					// Default paste
+					CUrlRichEditCtrl::Paste(s_bPasteSourceUrls);
+				}
+			}
+
+		}
 		return TRUE;
 	}
-
+	
 	// else one or more filenames 
 	RE_PASTE nLinkOption = GetFileLinkOption();
 
