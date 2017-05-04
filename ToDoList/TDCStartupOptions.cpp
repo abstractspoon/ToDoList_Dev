@@ -364,7 +364,12 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 		m_dwFlags &= ~TLD_PASSWORDPROMPTING;
 
 	if (cmdInfo.HasOption(SWITCH_LOGGING))
+	{
 		m_dwFlags |= TLD_LOGGING;
+
+		if (cmdInfo.GetOption(SWITCH_LOGGING) != _T("x"))
+			m_dwFlags |= TLD_LOG_MODULES;
+	}
 
 	if (cmdInfo.HasOption(SWITCH_STARTEMPTY))
 		m_dwFlags |= TLD_STARTEMPTY;
