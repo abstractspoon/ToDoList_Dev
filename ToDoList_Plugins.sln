@@ -118,8 +118,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoogleCalendarImpExp", "GoogleCalendarImpExp", "{A233C827-237F-4072-A1E1-6EA71DB6D989}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GoogleCalendarImpExpBridge", "ImportExport\GoogleCalendarImpExp\GoogleCalendarImpExpBridge\GoogleCalendarImpExpBridge.vcxproj", "{DF4D0784-6F52-4E42-B0FA-1854478F4D6C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57931F07-37A1-4A3F-935D-E1C3A5539CCC} = {57931F07-37A1-4A3F-935D-E1C3A5539CCC}
+		{92FEFDB8-3F95-4404-A620-8003B51C5A53} = {92FEFDB8-3F95-4404-A620-8003B51C5A53}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleCalendarImpExpCore", "ImportExport\GoogleCalendarImpExp\GoogleCalendarImpExpCore\GoogleCalendarImpExpCore.csproj", "{57931F07-37A1-4A3F-935D-E1C3A5539CCC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{30FF0BC3-D301-426B-9D31-68A96F6F56B8} = {30FF0BC3-D301-426B-9D31-68A96F6F56B8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Google-Clndr-Api-dotnet", "ImportExport\GoogleCalendarImpExp\Google-Clndr-Api-dotnet\Google-Clndr-Api-dotnet.csproj", "{30FF0BC3-D301-426B-9D31-68A96F6F56B8}"
 EndProject
