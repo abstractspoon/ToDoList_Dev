@@ -8435,13 +8435,13 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 	if (bFromClipboard)
 	{
 		sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
-		FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16);
+		VERIFY(FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16));
 	}
 	else
 	{
 		sImportPath = sImportFrom;
+		ASSERT(!sImportPath.IsEmpty() || !m_mgrImportExport.ImporterHasFileExtension(nImporter));
 	}
-	ASSERT(!sImportPath.IsEmpty());
 
 	// load/import tasks
 	DOPROGRESS(IDS_IMPORTPROGRESS);
