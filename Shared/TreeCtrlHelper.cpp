@@ -154,7 +154,6 @@ void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BO
 	else if (hti)
 	{
 		m_tree.Expand(hti, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
-//		m_tree.SetItemState(hti, bExpand ? TVIS_EXPANDED : 0, TVIS_EXPANDED);
 	}
 	
 	if (bChildren)
@@ -177,8 +176,7 @@ void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BO
 		
 		while (htiParent)
 		{
-			m_tree.Expand(htiParent, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
-//			m_tree.SetItemState(htiParent, TVIS_EXPANDED, TVIS_EXPANDED);
+			m_tree.Expand(htiParent, TVE_EXPAND);
 			htiParent = m_tree.GetParentItem(htiParent);
 		}
 	}
