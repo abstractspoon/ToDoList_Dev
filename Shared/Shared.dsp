@@ -325,6 +325,10 @@ SOURCE=.\HotTracker.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Icon.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\iconbutton.cpp
 # End Source File
 # Begin Source File
@@ -966,6 +970,10 @@ SOURCE=.\HotTracker.h
 # Begin Source File
 
 SOURCE=.\HtmlCharMap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Icon.h
 # End Source File
 # Begin Source File
 
