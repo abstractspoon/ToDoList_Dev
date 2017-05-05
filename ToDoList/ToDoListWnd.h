@@ -164,6 +164,7 @@ protected:
 	//{{AFX_MSG(CToDoListWnd)
 	afx_msg void OnEditSetTasklistTabColor();
 	afx_msg void OnEditClearTasklistTabColor();
+	afx_msg void OnUpdateEditSetTasklistTabColor(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditClearTasklistTabColor(CCmdUI* pCmdUI);
 	afx_msg void OnViewIncrementTaskViewFontSize();
 	afx_msg void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI);

@@ -45,6 +45,9 @@ static char THIS_FILE[] = __FILE__;
 #define IDS_UTIL_THEMEBCKG      "DrawThemeBackground"
 #define IDS_UTIL_THEMEAPPPROPS  "GetThemeAppProperties"
 
+
+template <class T> void SwapVars(T& a,T& b) { T t=a; a=b; b=t; }
+
 /***********************************************************************************************************/
 // CXPTabCtrl
 /***********************************************************************************************************/
@@ -364,11 +367,8 @@ CRect CXPTabCtrl::GetTabTextRect(int /*nTab*/, LPCRECT pRect)
 }
 
 //----------------------------------------------------------------------------------------------------------
-BOOL CXPTabCtrl::IsExtendedTabThemedXP() const
+BOOL CXPTabCtrl::IsExtendedTabThemedXP()
 {
-	if(!m_bTabExtended || !::IsWindow(GetSafeHwnd()))
-		return FALSE;
-
 	return IsThemeActiveXP();
 }
 //==========================================================================================================
@@ -399,7 +399,7 @@ BOOL CXPTabCtrl::OnTabSelChanged(NMHDR* pNMHDR, LRESULT* pResult)
 /***********************************************************************************************************/
 // Helper functions
 /***********************************************************************************************************/
-int DWordAlign(int n)
+int CXPTabCtrl::DWordAlign(int n)
 	{ const int rem=n%4; if(rem) n+=(4-rem); return n; }
 //----------------------------------------------------------------------------------------------------------
 BOOL IsThemeActiveEx()
@@ -440,10 +440,10 @@ DWORD GetWinVersion()
 //----------------------------------------------------------------------------------------------------------
 BOOL IsWinXP()         { return GetWinVersion()>=PACKVERSION(5,1)?TRUE:FALSE; }
 //----------------------------------------------------------------------------------------------------------
-BOOL IsThemeActiveXP() { return (IsWinXP()  && IsThemeActiveEx())?TRUE:FALSE; }
+BOOL CXPTabCtrl::IsThemeActiveXP() { return (IsWinXP()  && IsThemeActiveEx())?TRUE:FALSE; }
 //----------------------------------------------------------------------------------------------------------
 #define WPART_NAME_SZ 128
-HRESULT DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR uiPartNameID, LPRECT prcBox)
+HRESULT CXPTabCtrl::DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR uiPartNameID, LPRECT prcBox)
 {
 	if(!IsWinXP()) return E_FAIL;
 	HINSTANCE hDll=LoadLibrary(IDS_UTIL_UXTHEME);								// 'UxTheme.dll'

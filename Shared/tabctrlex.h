@@ -77,7 +77,9 @@ public:
 	int HitTest(TCHITTESTINFO* pHitTestInfo) const;
 	
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
-
+	
+	static BOOL IsSupportedFlag(DWORD dwFlag);
+		
 // Attributes
 protected:
 	DWORD m_dwFlags;
@@ -146,6 +148,7 @@ protected:
 	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
 	COLORREF GetItemBkColor(int nTab);
 
+	static void RemoveUnsupportedFlags(DWORD& dwFlags);
 };
 
 /////////////////////////////////////////////////////////////////////////////

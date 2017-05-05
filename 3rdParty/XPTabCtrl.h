@@ -59,7 +59,6 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXPTabCtrl)
 	//}}AFX_VIRTUAL
-	void SetExtended(BOOL bTabExtended) { m_bTabExtended=bTabExtended; }
 	void InitImageList(UINT nBitmapID);
 	void SetBackgroundColor(COLORREF color);
 	ETabOrientation GetOrientation() const { return m_eTabOrientation; }
@@ -76,18 +75,17 @@ protected:
 
 	void DoPaint(CDC* pDC);
 	void DrawThemesXpTabItem(CDC* pDC, int ixItem, const CRect& rcItem, UINT uiFlag);
-	BOOL IsExtendedTabThemedXP() const;
 
 	virtual CRect GetTabTextRect(int nTab, LPCRECT pRect);
 	virtual CFont* GetTabFont(int nTab);
 	virtual void DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT uiFlags);
+
+	// Helper functions
+	static BOOL IsExtendedTabThemedXP();
+	static HRESULT DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR uiPartNameID, LPRECT prcRcBx);
+	static BOOL IsThemeActiveXP();
+	static int DWordAlign(int n);
 };
-/////////////////////////////////////////////////////////////////////////////
-// Helper functions
-HRESULT DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR uiPartNameID, LPRECT prcRcBx);
-BOOL    IsThemeActiveXP();
-int	    DWordAlign(int n);
-template <class T> void SwapVars(T& a,T& b) { T t=a; a=b; b=t; }
 /////////////////////////////////////////////////////////////////////////////
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

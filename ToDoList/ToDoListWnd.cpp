@@ -8860,6 +8860,11 @@ void CToDoListWnd::PrepareEditMenu(CMenu* pMenu)
 				}
 			}
 			break;
+
+		case ID_EDIT_SETTASKLISTCOLOR:
+		case ID_EDIT_CLEARTASKLISTCOLOR:
+			bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
+			break;
 			
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:

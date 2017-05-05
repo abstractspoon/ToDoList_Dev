@@ -38,6 +38,7 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_bUpdatingTabWidth(FALSE),
 	m_bFirstPaint(TRUE)
 {
+	RemoveUnsupportedFlags(m_dwFlags);
 }
 
 CTabCtrlEx::~CTabCtrlEx()
@@ -68,12 +69,32 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTabCtrlEx message handlers
 
+BOOL CTabCtrlEx::IsSupportedFlag(DWORD dwFlag)
+{
+	if (!IsExtendedTabThemedXP())
+		return !(dwFlag & (TCE_TABCOLORS | TCE_BOLDSELTEXT));
+
+	// else
+	return TRUE;
+}
+
+void CTabCtrlEx::RemoveUnsupportedFlags(DWORD& dwFlags)
+{
+	if (!IsSupportedFlag(TCE_TABCOLORS))
+		dwFlags &= ~TCE_TABCOLORS;
+
+	if (!IsSupportedFlag(TCE_BOLDSELTEXT))
+		dwFlags &= ~TCE_BOLDSELTEXT;
+}
+
 BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 {
 	DWORD dwPrevFlags = m_dwFlags;
 
 	m_dwFlags &= ~dwRemove;
 	m_dwFlags |= dwAdd;
+
+	RemoveUnsupportedFlags(m_dwFlags);
 
 	if (m_dwFlags != dwPrevFlags)
 	{
@@ -92,7 +113,7 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 
 BOOL CTabCtrlEx::NeedCustomPaint() const
 {
-	BOOL bPreDraw = (m_dwFlags & TCE_TABCOLORS);
+	BOOL bPreDraw = ((m_dwFlags & TCE_TABCOLORS) && IsSupportedFlag(TCE_TABCOLORS));
 	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON));
 
 	return (bPreDraw || bPostDraw || IsExtendedTabThemedXP());
@@ -211,7 +232,7 @@ void CTabCtrlEx::OnPaint()
 	CPaintDC dc(this); // device context for painting
 
 	// default drawing
-	if (IsExtendedTabThemedXP() || (m_dwFlags & TCE_TABCOLORS))
+	if (IsExtendedTabThemedXP())
 	{
 		CXPTabCtrl::DoPaint(&dc); // handles bkgnd
 	}
