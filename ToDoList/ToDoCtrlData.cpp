@@ -931,6 +931,10 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = TODOITEM::NULL_VALUE;
 	}
+	else
+	{
+		dCalcValue = Misc::Atof(sTaskVal);
+	}
 
 	if (dCalcValue == TODOITEM::NULL_VALUE)
 		return FALSE;
