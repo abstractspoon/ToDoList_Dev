@@ -903,8 +903,13 @@ int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	int nItem = HitTest(point);
 	
-	if (nItem != -1)
+	if ((nItem != -1) && IsItemVisible(nItem))
 	{
+#ifdef _DEBUG
+		if (m_tooltips.GetLastHitToolInfo().uId != nItem)
+			TRACE(_T("CEnHeaderCtrl::OnToolHitTest(%d, %s)\n"), nItem, GetItemToolTip(nItem));
+#endif
+
 		pTI->hwnd = GetSafeHwnd();
 		pTI->uId = nItem;
 		pTI->lpszText = _tcsdup(GetItemToolTip(nItem)); // MFC will free the duplicated string
