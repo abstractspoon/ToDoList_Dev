@@ -106,6 +106,8 @@ public:
 	void OnUndoRedo(BOOL bUndo);
 	void OnImageListChange();
 	void OnReminderChange();
+	void OnBeginRebuild();
+	void OnEndRebuild();
  
 	// setter responsible for deleting these shared resources
 	HFONT GetFont() const;

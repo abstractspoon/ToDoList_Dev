@@ -565,6 +565,14 @@ void CFilteredToDoCtrl::ClearFilter()
 
 void CFilteredToDoCtrl::ToggleFilter()
 {
+	//////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	CString sScope;
+	sScope.Format(_T("CFilteredToDoCtrl::ToggleFilter(%s)"), (m_filter.HasAnyFilter() ? _T("off") : _T("on")));
+
+	CScopedLogTime log(sScope);
+	//////////////////////////////////////////////////////////////////////
+
 	if (m_filter.ToggleFilter())
 		RefreshFilter();
 
@@ -779,22 +787,8 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		CSaveFocus sf;
 		SetFocusToTasks();
 		
-		// cache current selection and task breadcrumbs before clearing selection
-		TDCSELECTIONCACHE cache;
-		CacheTreeSelection(cache);
-
 		// grab the selected items for the filtering
-		m_aFilterSelectedTaskIDs.Copy(cache.aSelTaskIDs);
-		
-		TSH().RemoveAll();
-		
-		// and expanded state
- 		CPreferences prefs;
- 		SaveTasksState(prefs, TRUE);
-		
-		CHoldRedraw hr(GetSafeHwnd());
-		CHoldRedraw hr2(m_taskTree);
-		CWaitCursor cursor;
+		m_taskTree.GetSelectedTaskIDs(m_aFilterSelectedTaskIDs, FALSE);
 		
 		// rebuild the tree
 		RebuildTree();
@@ -809,20 +803,6 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		{
 			m_bTreeNeedResort = TRUE;
 		}
-		
-		// restore expanded state
-		LoadTasksState(prefs, TRUE); 
-		
-		// restore selection
-		if (!RestoreTreeSelection(cache))
-		{
-			HTREEITEM hti = m_taskTree.GetChildItem(NULL); // select first item
-
-			if (hti)
-				SelectItem(hti);
-			else
-				UpdateControls();
-		}
 	}
 	
 	// modify the tree prompt depending on whether there is a filter set
@@ -833,9 +813,6 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
 {
 	ASSERT(pContext == NULL);
-
-	m_taskTree.DeleteAll();
-	TCH().SelectItem(NULL);
 
 	// build a find query that matches the filter
 	if (HasAnyFilter())

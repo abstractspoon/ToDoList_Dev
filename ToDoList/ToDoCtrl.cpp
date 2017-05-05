@@ -9059,21 +9059,51 @@ HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 
 HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 {
+	// cache current selection and task breadcrumbs before clearing selection
+	TDCSELECTIONCACHE cache;
+	CacheTreeSelection(cache);
+		
+	CHoldRedraw hr(GetSafeHwnd());
+	CWaitCursor cursor;
+	CDWordArray aExpanded;
+	
+	// Allow task tree to prepare for a rebuild
+	m_taskTree.OnBeginRebuild();
+
 	if (m_taskTree.GetItemCount())
 	{
+		m_taskTree.GetExpandedTasks(aExpanded);
+		
+		TSH().RemoveAll();
 		TCH().SelectItem(NULL);
 		m_taskTree.DeleteAll();
 	}
 
+	HTREEITEM hti = NULL;
+	
 	if (BuildTreeItem(NULL, m_data.GetStructure(), pContext))
 	{
 		m_taskTree.SetNextUniqueTaskID(m_dwNextUniqueID);
 
-		return m_taskTree.GetChildItem();
+		hti = m_taskTree.GetChildItem();
+	}
+	
+	m_taskTree.SetExpandedTasks(aExpanded);
+
+	// Notify tree that the rebuild is over
+	m_taskTree.OnEndRebuild();
+
+	if (!RestoreTreeSelection(cache))
+	{
+		HTREEITEM hti = m_taskTree.GetChildItem(NULL); // select first item
+		
+		if (hti)
+			SelectItem(hti);
+		else
+			UpdateControls();
 	}
 
-	// else
-	return NULL;
+	return hti;
 }
 
 BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, const void* pContext)

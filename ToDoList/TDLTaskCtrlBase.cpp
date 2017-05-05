@@ -4668,6 +4668,22 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 	::UpdateWindow(Tasks());
 }
 
+void CTDLTaskCtrlBase::OnBeginRebuild()
+{
+	EnableResync(FALSE);
+
+	m_lcColumns.SetRedraw(FALSE);
+	::SendMessage(Tasks(), WM_SETREDRAW, 0, 0);
+}
+
+void CTDLTaskCtrlBase::OnEndRebuild()
+{
+	m_lcColumns.SetRedraw(TRUE);
+	::SendMessage(Tasks(), WM_SETREDRAW, TRUE, 0);
+
+	EnableResync(TRUE, Tasks());
+}
+
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
 {
 	// basic date string

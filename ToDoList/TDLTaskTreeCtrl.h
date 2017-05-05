@@ -74,6 +74,8 @@ public:
 	inline BOOL IsItemSelected(HTREEITEM hti) const { return TSH().HasItem(hti); }
 	inline BOOL IsTaskSelected(DWORD dwTaskID) const { return TSH().HasItem(dwTaskID); }
 
+	void OnEndRebuild();
+
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
@@ -221,7 +223,7 @@ protected:
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
-	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren);
+	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

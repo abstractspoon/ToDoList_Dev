@@ -1898,7 +1898,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	{
 		return ScDefault(hRealWnd);
 	}
-	else if (!IsResyncEnabled() && (msg != WM_NCCALCSIZE))
+	else if (!IsResyncEnabled())
 	{
 		return ScDefault(hRealWnd);
 	}
@@ -1974,14 +1974,12 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			if (hti == TVI_ROOT)
 			{
 				// temporary disable of resyncing required
-				m_bResyncEnabled = FALSE; 
+				CAutoFlag af(m_bResyncEnabled, FALSE); 
 
 				lr = ScDefault(hRealWnd);
 				bDoneDefault = TRUE;
 				
 				::SendMessage(OtherWnd(hRealWnd), LVM_DELETEALLITEMS, 0, 0);
-
-				m_bResyncEnabled = TRUE; 
 			}
 			// we only need to handle this if the item is visible
 			else if (hti && IsTreeItemVisible(hRealWnd, hti))
