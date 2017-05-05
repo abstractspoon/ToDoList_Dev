@@ -244,6 +244,10 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
     *pResult = CDRF_DODEFAULT;
+
+	if (!CThemed::AreControlsThemed())
+		return;
+
     LPNMTBCUSTOMDRAW lpNMCustomDraw = ( LPNMTBCUSTOMDRAW )pNMHDR;
     
     switch ( lpNMCustomDraw->nmcd.dwDrawStage )
@@ -277,9 +281,6 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw) 
 { 
-	if (!CThemed::AreControlsThemed())
-		return CDRF_DODEFAULT;
-
 	int nBtnID = lpNMCustomDraw->nmcd.dwItemSpec;
 	const CToolBarCtrl& tbc = GetToolBarCtrl();
 
