@@ -7,6 +7,7 @@
 #include "imageprocessors.h"
 #include "osversion.h"
 #include "graphicsmisc.h"
+#include "themed.h"
 
 #include <afxpriv.h>
 
@@ -276,6 +277,9 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 LRESULT CEnToolBar::OnItemPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw) 
 { 
+	if (!CThemed::AreControlsThemed())
+		return CDRF_DODEFAULT;
+
 	int nBtnID = lpNMCustomDraw->nmcd.dwItemSpec;
 	const CToolBarCtrl& tbc = GetToolBarCtrl();
 
