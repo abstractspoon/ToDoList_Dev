@@ -298,6 +298,13 @@ BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
 	return (bIncGoodAs && bGoodAsDone);
 }
 
+BOOL CGanttItemMap::IsLocked(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+	
+	return (pGI && pGI->bLocked);
+}
+
 BOOL GANTTITEM::HasStart() const
 {
 	return CDateHelper::IsDateSet(dtStart);
@@ -410,26 +417,33 @@ BOOL CGanttItemMap::RemoveKey(DWORD dwKey)
 	return FALSE;
 }
 
-BOOL CGanttItemMap::HasTask(DWORD dwKey) const
+BOOL CGanttItemMap::HasItem(DWORD dwKey) const
 {
 	return (GetItem(dwKey) != NULL);
 }
 
-BOOL CGanttItemMap::IsLocked(DWORD dwTaskID) const
-{
-	const GANTTITEM* pGI = GetItem(dwTaskID);
-	
-	return (pGI && pGI->bLocked);
-}
-
-GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID) const
+GANTTITEM* CGanttItemMap::GetItem(DWORD dwKey) const
 {
 	GANTTITEM* pGI = NULL;
 	
-	if (Lookup(dwTaskID, pGI))
+	if (Lookup(dwKey, pGI))
 		ASSERT(pGI);
-
+	
 	return pGI;
+}
+
+BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
+{
+	GANTTITEM* pGI = NULL;
+
+	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+	{
+		*pGI = giPrev;
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -536,7 +550,7 @@ BOOL CGanttDisplayMap::RemoveKey(DWORD dwKey)
 	return FALSE;
 }
 
-BOOL CGanttDisplayMap::HasTask(DWORD dwKey) const
+BOOL CGanttDisplayMap::HasItem(DWORD dwKey) const
 {
 	GANTTDISPLAY* pGD = NULL;
 	
@@ -550,6 +564,29 @@ BOOL CGanttDisplayMap::HasTask(DWORD dwKey) const
 	return FALSE;
 }
 
+GANTTDISPLAY* CGanttDisplayMap::GetAddItem(DWORD dwKey)
+{
+	GANTTDISPLAY* pGD = GetItem(dwKey);
+
+	if (!pGD)
+	{
+		pGD = new GANTTDISPLAY;
+		SetAt(dwKey, pGD);
+	}
+
+	ASSERT(pGD);
+	return pGD;
+}
+
+GANTTDISPLAY* CGanttDisplayMap::GetItem(DWORD dwKey) const
+{
+	GANTTDISPLAY* pGD = NULL;
+	
+	if (Lookup(dwKey, pGD))
+		ASSERT(pGD);
+
+	return pGD;
+}
 //////////////////////////////////////////////////////////////////////
 
 GANTTDATERANGE::GANTTDATERANGE()

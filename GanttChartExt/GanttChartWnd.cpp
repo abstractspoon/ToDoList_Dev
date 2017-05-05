@@ -650,6 +650,7 @@ GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 	case IUI_DUEDATE:		return GTLCC_ENDDATE;
 	case IUI_STARTDATE:		return GTLCC_STARTDATE;
 	case IUI_PERCENT:		return GTLCC_PERCENT;
+	case IUI_POSITION:		break; // same as 'none'
 	}
 
 	return GTLCC_NONE;

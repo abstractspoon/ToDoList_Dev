@@ -60,10 +60,10 @@ public:
 
 	void RemoveAll();
 	BOOL RemoveKey(DWORD dwKey);
-	BOOL HasTask(DWORD dwTaskID) const;
+	BOOL HasItem(DWORD dwKey) const;
+	GANTTITEM* GetItem(DWORD dwKey) const;
+	BOOL RestoreItem(const GANTTITEM& giPrev);
 	BOOL IsLocked(DWORD dwTaskID) const;
-	GANTTITEM* GetItem(DWORD dwTaskID) const;
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,9 @@ public:
 
 	void RemoveAll();
 	BOOL RemoveKey(DWORD dwKey);
-	BOOL HasTask(DWORD dwTaskID) const;
+	BOOL HasItem(DWORD dwKey) const;
+	GANTTDISPLAY* GetAddItem(DWORD dwKey);
+	GANTTDISPLAY* GetItem(DWORD dwKey) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

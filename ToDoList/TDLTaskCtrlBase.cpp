@@ -3317,7 +3317,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		break;
 
 	case TDCC_POSITION:
-		sTaskColText = m_data.FormatTaskPosition(pTDI, pTDS);
+		sTaskColText = m_data.FormatTaskPosition(pTDS);
 		break;
 
 	case TDCC_PRIORITY:

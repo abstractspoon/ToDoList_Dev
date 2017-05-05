@@ -292,12 +292,14 @@ protected:
 	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
 	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nWidth) const;
 	void RecalcDateRange();
-	BOOL GetListItemRect(int nItem, CRect& rItem) const;
+   BOOL GetListItemRect(int nItem, CRect& rItem) const;
+	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
 	GANTTDISPLAY* GetGanttDisplay(DWORD dwTaskID);
+	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;

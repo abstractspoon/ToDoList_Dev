@@ -422,7 +422,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			if (bMatch)
 			{
 				// replace the default 'int' with full position path
-				Misc::ReplaceLastT(resTask.aMatched, m_data.FormatTaskPosition(pTDI, pTDS));
+				Misc::ReplaceLastT(resTask.aMatched, m_data.FormatTaskPosition(pTDS));
 			}
 			break;
 			
@@ -1118,7 +1118,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		switch (nSortBy)
 		{
 		case TDCC_POSITION:
-			nCompare = Compare(m_data.FormatTaskPosition(pTDI1, pTDS1), m_data.FormatTaskPosition(pTDI2, pTDS2));
+			nCompare = Compare(m_data.FormatTaskPosition(pTDS1), m_data.FormatTaskPosition(pTDS2));
 			break;
 
 		case TDCC_PATH:

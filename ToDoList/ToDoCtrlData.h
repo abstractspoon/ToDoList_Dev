@@ -212,7 +212,7 @@ public:
 
 	CString FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString FormatTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString FormatTaskPosition(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString FormatTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	CString FormatTaskAllocTo(const TODOITEM* pTDI) const;
 	CString FormatTaskCategories(const TODOITEM* pTDI) const;
 	CString FormatTaskTags(const TODOITEM* pTDI) const;
