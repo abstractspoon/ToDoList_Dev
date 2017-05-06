@@ -215,7 +215,7 @@ namespace FileMisc
 	
 	CString GetAppVersion(TCHAR cSep = '.');
 	BOOL GetAppVersion(CDWordArray& aVersionParts);
-	BOOL SplitVersionNumber(LPCTSTR szVersion, CDWordArray& aVersionParts);
+	int SplitVersionNumber(LPCTSTR szVersion, CDWordArray& aVersionParts);
 	int CompareVersions(LPCTSTR szVersion1, LPCTSTR szVersion2, int nNumItems = 0);
 	int CompareVersions(CDWordArray& aVersion1, CDWordArray& aVersion2, int nNumItems = 0);
 	CString GetPrevAppVersion(DWORD nMaxVer2 = 0, DWORD nMaxVer3 = 0, DWORD nMaxVer4 = 0);
