@@ -899,6 +899,8 @@ BOOL CGanttTreeListCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
 	if (m_data.RestoreItem(giPrev))
 	{
 		m_display.RemoveKey(giPrev.dwTaskID); // recalc start/end
+
+		RecalcParentDates();
 		RedrawList();
 	
 		return TRUE;
