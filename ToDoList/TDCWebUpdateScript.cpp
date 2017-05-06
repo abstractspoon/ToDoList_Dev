@@ -30,14 +30,6 @@ const LPCTSTR EXE_VER_KEY			= _T("EXE_VERSION");
 const LPCTSTR DISPLAY_VER_KEY		= _T("DISPLAY_VERSION");
 const LPCTSTR DESCRIPTION_KEY		= _T("DESCRIPTION");
 
-enum PRE_RELEASE_VER
-{
-	DEV_PREVIEW_VER	= 996,
-	ALPHA_RELEASE_VER,
-	BETA_RELEASE_VER,
-	RELEASE_CANDIDATE_VER
-};
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////

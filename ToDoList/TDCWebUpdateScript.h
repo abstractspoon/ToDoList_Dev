@@ -9,6 +9,18 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
+enum PRE_RELEASE_VER
+{
+	DEV_PREVIEW_VER	= 997,
+	ALPHA_RELEASE_VER,
+	BETA_RELEASE_VER,
+	RELEASE_CANDIDATE_VER,
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDCWebUpdateScript  
 {
 public:
