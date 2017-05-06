@@ -4570,40 +4570,39 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 		sVersion = sExtVersion = FileMisc::GetAppVersion();
 
 		// Tidy up pre-release version numbers
-		CStringArray aVerParts;
-		UINT nExtendedStr = IDS_GEN_RELEASE;
-		CString sShortStr;
+		CDWordArray aVer;
 		
-		if (Misc::Split(sVersion, aVerParts, '.') == 4)
+		if (FileMisc::SplitVersionNumber(sVersion, aVer) == 4)
 		{
-			if (aVerParts[2].Find(_T("996")) == 0)
+			UINT nExtendedStr = IDS_GEN_RELEASE;
+			CString sShortStr;
+
+			switch (aVer[2])
 			{
+			case DEV_PREVIEW_VER:
 				sShortStr = _T("DP");
 				nExtendedStr = IDS_DEV_RELEASE;
-			}
-			else if (aVerParts[2].Find(_T("997")) == 0)
-			{
+				break;
+
+			case ALPHA_RELEASE_VER:
 				sShortStr = _T("A");
 				nExtendedStr = IDS_ALPHA_RELEASE;
-			}
-			else if (aVerParts[2].Find(_T("998")) == 0)
-			{
+				break;
+
+			case BETA_RELEASE_VER:
 				sShortStr = _T("B");
 				nExtendedStr = IDS_BETA_RELEASE;
-			}
-			else if (aVerParts[2].Find(_T("999")) == 0)
-			{
+				break;
+
+			case RELEASE_CANDIDATE_VER:
 				sShortStr = _T("RC");
 				nExtendedStr = IDS_RC_RELEASE;
+				break;
 			}
+			
+			if (!sShortStr.IsEmpty())
+				sVersion.Format(_T("%d.%d.%s%d"), aVer[0], (aVer[1] + 1), sShortStr, aVer[3]);
 
-			int nMinorVer = _ttoi(aVerParts[1]);
-			aVerParts[1] = Misc::Format(++nMinorVer); // next minor upgrade
-			aVerParts[2] = (sShortStr + aVerParts[3]);
-			aVerParts.RemoveAt(3); // always
-
-			// Rebuild version strings
-			sVersion = Misc::FormatArray(aVerParts, '.');
 			sExtVersion.Format(_T("%s (%s)"), sVersion, CEnString(nExtendedStr));
 		}
 
