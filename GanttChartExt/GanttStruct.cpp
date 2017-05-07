@@ -298,11 +298,18 @@ BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
 	return (bIncGoodAs && bGoodAsDone);
 }
 
-BOOL CGanttItemMap::IsLocked(DWORD dwTaskID) const
+BOOL CGanttItemMap::ItemIsLocked(DWORD dwTaskID) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID);
 	
 	return (pGI && pGI->bLocked);
+}
+
+BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID);
+	
+	return (pGI && pGI->aDepends.GetSize());
 }
 
 BOOL GANTTITEM::HasStart() const

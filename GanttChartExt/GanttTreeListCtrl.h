@@ -153,7 +153,6 @@ public:
 	static IUI_ATTRIBUTE MapColumnToAttrib(GTLC_COLUMN nCol);
 
 protected:
-	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
 	BOOL m_bPageScrolling;
@@ -174,6 +173,7 @@ protected:
 	GTLC_PARENTCOLORING m_nParentColoring;
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
+	GTLC_DRAG m_nDragging;
 
 	CGanttTreeCtrl& m_tree;
 	CListCtrl& m_list;
@@ -327,8 +327,9 @@ protected:
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
 	COleDateTime CalcMinDragDate(const GANTTITEM& gi) const;
 	double CalcMinDragDuration() const;
+	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 
-	BOOL NotifyParentDateChange(GTLC_HITTEST nHit);
+	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();
 
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
@@ -393,6 +394,8 @@ protected:
 	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
+	static BOOL IsDragging(GTLC_DRAG nDrag);
+	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
 private:
 	void PreFixVScrollSyncBug();

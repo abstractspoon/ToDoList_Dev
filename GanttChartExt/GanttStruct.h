@@ -63,7 +63,8 @@ public:
 	BOOL HasItem(DWORD dwKey) const;
 	GANTTITEM* GetItem(DWORD dwKey) const;
 	BOOL RestoreItem(const GANTTITEM& giPrev);
-	BOOL IsLocked(DWORD dwTaskID) const;
+	BOOL ItemIsLocked(DWORD dwTaskID) const;
+	BOOL ItemHasDependecies(DWORD dwTaskID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -49,6 +49,7 @@ enum // options
 	GTLCF_STRIKETHRUDONETASKS		= 0x0100,
 	GTLCF_SHOWPROGRESSONBAR			= 0x0200,
 	GTLCF_DECADESAREONEBASED		= 0x0400,
+	GTLCF_DISABLEDEPENDENTDRAGGING	= 0x0800,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -113,6 +114,18 @@ enum GTLC_COLUMN
 	// Always the last item
 	GTLCC_NUMCOLUMNS
 };
+
+//////////////////////////////////////////////////////////////////////
+
+enum GTLC_DRAG
+{
+	GTLCD_NONE = -1,
+	GTLCD_START,
+	GTLCD_END,
+	GTLCD_WHOLE,
+	GTLCD_ANY,
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_GANTTENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)

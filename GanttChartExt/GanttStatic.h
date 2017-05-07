@@ -105,6 +105,32 @@ static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return (FindDisplay(nDisplay) != -1);
 }
 
+static GTLC_DRAG MapHitTestToDrag(GTLC_HITTEST nHit)
+{
+	switch (nHit)
+	{
+	case GTLCHT_BEGIN:	return GTLCD_START;
+	case GTLCHT_END:	return GTLCD_END;
+	case GTLCHT_MIDDLE:	return GTLCD_WHOLE;
+	}
+
+	// all else
+	return GTLCD_NONE;
+}
+
+static GTLC_HITTEST MapDragToHitTest(GTLC_DRAG nDrag)
+{
+	switch (nDrag)
+	{
+	case GTLCD_START:	return GTLCHT_BEGIN;
+	case GTLCD_END:		return GTLCHT_END;
+	case GTLCD_WHOLE:	return GTLCHT_MIDDLE;
+	}
+
+	// all else
+	return GTLCHT_NOWHERE;
+	
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

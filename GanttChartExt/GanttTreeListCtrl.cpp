@@ -163,9 +163,7 @@ CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list)
 	m_crToday(CLR_NONE),
 	m_crWeekend(CLR_NONE),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-	m_bDraggingStart(FALSE), 
-	m_bDraggingEnd(FALSE),
-	m_bDragging(FALSE),
+	m_nDragging(GTLCD_NONE), 
 	m_ptDragStart(0),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
@@ -261,8 +259,8 @@ DWORD CGanttTreeListCtrl::GetSelectedTaskID() const
 BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CStringArray& aDepends) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	
 	const GANTTITEM* pGI = NULL;
+	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
 	aDepends.Copy(pGI->aDepends);
@@ -272,8 +270,8 @@ BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CStringArray& aDepends) con
 BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	
 	GANTTITEM* pGI = NULL;
+	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
 	pGI->aDepends.Copy(aDepends);
@@ -285,8 +283,8 @@ BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CStringArray& aDepend
 BOOL CGanttTreeListCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-
 	const GANTTITEM* pGI = NULL;
+
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
 	if (GetStartDueDates(*pGI, dtStart, dtDue))
@@ -869,13 +867,13 @@ GANTTITEM* CGanttTreeListCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) con
 {
 	GANTTITEM* pGI = m_data.GetItem(dwTaskID);
 	ASSERT(pGI);
-
+	
 	if (pGI)
 	{
 		// For references we use the 'real' task but with the 
 		// original reference reference ID copied over
 		DWORD dwRefID = pGI->dwRefID;
-
+		
 		if (dwRefID && (dwRefID != dwTaskID) && m_data.Lookup(dwRefID, pGI))
 		{
 			// copy over the reference id so that the caller can still detect it
@@ -890,7 +888,7 @@ GANTTITEM* CGanttTreeListCtrl::GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID) con
 			pGI->dwOrgRefID = 0;
 		}
 	}
-
+	
 	return pGI;
 }
 
@@ -1060,9 +1058,11 @@ void CGanttTreeListCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPo
 	while (htiChild)
 	{
 		DWORD dwTaskID = GetTaskID(htiChild);
-		GANTTITEM* pGI = m_data.GetItem(dwTaskID);
+		GANTTITEM* pGI = NULL;
 
-		if (pGI && (pGI->nPosition >= nFromPos))
+		GET_GI(dwTaskID, pGI);
+
+		if (pGI->nPosition >= nFromPos)
 			pGI->nPosition++;
 		
 		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
@@ -1133,6 +1133,9 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 					UpdateColumnsWidthAndText();
 				}
 				break;
+
+			case GTLCF_DISABLEDEPENDENTDRAGGING:
+				return;
 			}
 
 			if (IsSyncing())
@@ -1500,8 +1503,10 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 								
 	case CDDS_ITEMPREPAINT:
 		{
+			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 			GANTTITEM* pGI = NULL;
-			GET_GI_RET(pTVCD->nmcd.lItemlParam, pGI, 0L);
+
+			GET_GI_RET(dwTaskID, pGI, 0L);
 				
 			BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
 			COLORREF crBack = GetTreeTextBkColor(*pGI, FALSE, bAlternate);
@@ -1532,8 +1537,10 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				GM_ITEMSTATE nState = GetItemState(hti);
 				BOOL bSelected = (nState != GMIS_NONE);
 
+				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 				GANTTITEM* pGI = NULL;
-				GET_GI_RET(pTVCD->nmcd.lItemlParam, pGI, 0L);
+
+				GET_GI_RET(dwTaskID, pGI, 0L);
 				
 				// draw horz gridline before selection
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
@@ -1933,23 +1940,23 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					break;
 
-				case LVN_GETDISPINFO:
-					{
-						LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-
-						if (pDispInfo->item.iSubItem == 0)
-						{
-							DWORD dwTaskID = GetTaskID((DWORD)pDispInfo->item.lParam);
-
-							const GANTTITEM* pGI = NULL;
-							GET_GI_RET(dwTaskID, pGI, 0L);
-
-							static CString sCallback;
-							sCallback = pGI->sTitle;
-							pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)sCallback;
-						}
-					}
-					break;
+// 				case LVN_GETDISPINFO:
+// 					{
+// 						LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+// 
+// 						if (pDispInfo->item.iSubItem == 0)
+// 						{
+// 							DWORD dwTaskID = GetTaskID((DWORD)pDispInfo->item.lParam);
+// 							const GANTTITEM* pGI = NULL;
+// 
+// 							GET_GI_RET(dwTaskID, pGI, 0L);
+// 
+// 							static CString sCallback;
+// 							sCallback = pGI->sTitle;
+// 							pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)sCallback;
+// 						}
+// 					}
+// 					break;
 
 				case TVN_SELCHANGED:
 					if (HasOption(GTLCF_AUTOSCROLLTOTASK))
@@ -1963,8 +1970,8 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (pDispInfo->item.mask & TVIF_TEXT)
 						{
 							DWORD dwTaskID = pDispInfo->item.lParam;
-
 							const GANTTITEM* pGI = NULL;
+
 							GET_GI_RET(dwTaskID, pGI, 0L);
 
 							pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)pGI->sTitle;
@@ -2189,7 +2196,10 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 				if (nHit != GTLCHT_NOWHERE)
 				{
-					if (m_data.IsLocked(dwTaskID))
+					GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
+					ASSERT(IsDragging(nDrag));
+
+					if (!CanDragTask(dwTaskID, nDrag))
 					{
 						SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 						return TRUE;
@@ -2224,7 +2234,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 					if (dwFromTaskID)
 					{
-						if (m_data.IsLocked(dwFromTaskID))
+						if (m_data.ItemIsLocked(dwFromTaskID))
 						{
 							MessageBeep(MB_ICONEXCLAMATION);
 						}
@@ -2246,7 +2256,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 					
 					if (dwFromTaskID && dwCurToTaskID)
 					{
-						if (m_data.IsLocked(dwFromTaskID))
+						if (m_data.ItemIsLocked(dwFromTaskID))
 						{
 							MessageBeep(MB_ICONEXCLAMATION);
 						}
@@ -2911,9 +2921,10 @@ CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti)
 	if (hti)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		const GANTTITEM* pGI = NULL;
 
+		const GANTTITEM* pGI = NULL;
 		GET_GI_RET(dwTaskID, pGI, _T(""));
+
 		sLongest = GetTreeItemColumnText(*pGI, GTLCC_ALLOCTO);
 	}
 
@@ -5457,8 +5468,10 @@ CString CGanttTreeListCtrl::GetItemTip(CPoint ptScreen) const
 
 			if (rItem.PtInRect(ptClient))
 			{
-				const GANTTITEM* pGI = GetGanttItem(GetTaskID(htiHit));
-				ASSERT(pGI);
+				DWORD dwTaskID = GetTaskID(htiHit);
+				GANTTITEM* pGI = NULL;
+
+				GET_GI_RET(dwTaskID, pGI, _T(""));
 
 				int nTextLen = GraphicsMisc::GetTextWidth(pGI->sTitle, m_tree);
 				rItem.DeflateRect(TV_TIPPADDING, 0);
@@ -5635,7 +5648,17 @@ DWORD CGanttTreeListCtrl::GetListTaskID(DWORD dwItemData) const
 
 BOOL CGanttTreeListCtrl::IsDragging() const
 {
-	return (m_bDragging || m_bDraggingStart || m_bDraggingEnd);
+	return IsDragging(m_nDragging);
+}
+
+BOOL CGanttTreeListCtrl::IsDragging(GTLC_DRAG nDrag)
+{
+	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
+}
+
+BOOL CGanttTreeListCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
+{
+	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
 }
 
 BOOL CGanttTreeListCtrl::IsValidDragPoint(const CPoint& ptDrag) const
@@ -5679,6 +5702,25 @@ BOOL CGanttTreeListCtrl::ValidateDragPoint(CPoint& ptDrag) const
 	return TRUE;
 }
 
+BOOL CGanttTreeListCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
+{
+	if (m_data.ItemIsLocked(dwTaskID))
+		return FALSE;
+
+	// else
+	switch (nDrag)
+	{
+	case GTLCD_START:
+	case GTLCD_WHOLE:
+		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependecies(dwTaskID))
+			return FALSE;
+		break;
+	}
+	
+	// else
+	return TRUE;
+}
+
 BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
@@ -5692,48 +5734,28 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	if (nHit == GTLCHT_NOWHERE)
 		return FALSE;
 
+	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
+	ASSERT(IsDragging(nDrag));
+
+	if (!CanDragTask(dwTaskID, nDrag))
+	{
+		MessageBeep(MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+	
 	if (dwTaskID != GetSelectedTaskID())
 		SelectTask(dwTaskID);
 
-	if (m_data.IsLocked(dwTaskID))
-		return FALSE;
-	
 	CPoint ptScreen(ptCursor);
 	m_list.ClientToScreen(&ptScreen);
 	
 	if (!DragDetect(m_list, ptScreen))
 		return FALSE;
 
-	switch (nHit)
-	{
-	case GTLCHT_BEGIN:
-		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-		m_bDraggingStart = TRUE;
-		break;
-		
-	case GTLCHT_END:
-		m_bDraggingEnd = TRUE;
-		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-		break;
-		
-	case GTLCHT_MIDDLE:
-		m_bDragging = TRUE;
-		break;
-		
-	default:
-		ASSERT(0);
-		return FALSE;
-	}
+	// Ensure the gantt item has valid dates
+	GANTTITEM* pGI = NULL;
+	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
-	// cache the original task
-	GANTTITEM* pGI = GetGanttItem(dwTaskID, FALSE);
-	ASSERT(pGI);
-	
-	m_giPreDrag = *pGI;
-	m_ptDragStart = ptCursor;
-	m_dtDragMin = CalcMinDragDate(m_giPreDrag);
-
-	// make sure the gantt item actually has valid dates
 	COleDateTime dtStart, dtDue;
 	GetStartDueDates(*pGI, dtStart, dtDue);
 	
@@ -5755,6 +5777,14 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 		pGI->dtStart = pGI->dtMinStart = dtStart;
 	}
 	
+	// cache the original task and the start point
+	m_giPreDrag = *pGI;
+	m_ptDragStart = ptCursor;
+
+	// Start dragging
+	m_nDragging = nDrag;
+	m_dtDragMin = CalcMinDragDate(m_giPreDrag);
+
 	m_list.SetCapture();
 	
 	// keep parent informed
@@ -5777,11 +5807,10 @@ COleDateTime CGanttTreeListCtrl::CalcMinDragDate(const GANTTITEM& gi) const
 		if (dwDependID == 0)
 			continue;
 
-		const GANTTITEM* pGI = GetGanttItem(dwDependID);
-		ASSERT(pGI);
+		GANTTITEM* pGI = NULL;
+		GET_GI_RET(dwDependID, pGI, dtMin);
 
-		if (pGI)
-			CDateHelper::Max(dtMin, pGI->dtDue);
+		CDateHelper::Max(dtMin, pGI->dtDue);
 	}
 
 	return dtMin;
@@ -5791,51 +5820,33 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
-	
+	ASSERT(IsDragging());
+
 	if (IsDragging())
 	{
 		DWORD dwTaskID = GetSelectedTaskID();
-		GANTTITEM* pGI = GetGanttItem(dwTaskID);
-		ASSERT(pGI);
 
-		GTLC_HITTEST nDragWhat = GTLCHT_NOWHERE;
+		GANTTITEM* pGI = NULL;
+		GET_GI_RET(dwTaskID, pGI, FALSE);
 
-		if (pGI)
+		// Restore original refID because that's what we've been really dragging
+		if (pGI->dwOrgRefID)
 		{
-			// update taskID to refID because we're really dragging the refID
-			if (pGI->dwOrgRefID)
-			{
-				dwTaskID = pGI->dwOrgRefID;
-				pGI->dwOrgRefID = 0;
-			}
-
-			// dropping outside the list is a cancel
-			if (!IsValidDragPoint(ptCursor))
-			{
-				GANTTITEM* pGI = GetGanttItem(dwTaskID);
-				ASSERT(pGI);
-
-				(*pGI) = m_giPreDrag;
-				RedrawList();
-			}
-			else if (m_bDraggingStart)
-			{
-				nDragWhat = GTLCHT_BEGIN;
-			}
-			else if (m_bDraggingEnd)
-			{
-				nDragWhat = GTLCHT_END;
-			}
-			else
-			{
-				ASSERT(m_bDragging);
-				nDragWhat = GTLCHT_MIDDLE;
-			}
+			dwTaskID = pGI->dwOrgRefID;
+			pGI->dwOrgRefID = 0;
 		}
+
+		// dropping outside the list is a cancel
+		if (!IsValidDragPoint(ptCursor))
+		{
+			CancelDrag(TRUE);
+			return FALSE;
+		}
+
+		GTLC_DRAG nDrag = m_nDragging;
 		
 		// cleanup
-		m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
-
+		m_nDragging = GTLCD_NONE;
 		::ReleaseCapture();
 
 		// keep parent informed
@@ -5844,7 +5855,7 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
 			GANTTDATERANGE prevRange = m_dateRange;
 
-			if (!NotifyParentDateChange(nDragWhat))
+			if (!NotifyParentDateChange(nDrag))
 			{
 				RestoreGanttItem(m_giPreDrag);
 			}
@@ -5889,13 +5900,13 @@ void CGanttTreeListCtrl::NotifyParentDragChange()
 	GetCWnd()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
-BOOL CGanttTreeListCtrl::NotifyParentDateChange(GTLC_HITTEST nHit)
+BOOL CGanttTreeListCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
 
-	if (nHit != GTLCHT_NOWHERE)
-		return GetCWnd()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nHit, (LPARAM)&m_giPreDrag);
+	if (IsDragging(nDrag))
+		return GetCWnd()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
 
 	// else
 	return 0L;
@@ -5909,8 +5920,8 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 	if (IsDragging())
 	{
 		DWORD dwTaskID = GetSelectedTaskID();
-
 		GANTTITEM* pGI = NULL;
+
 		GET_GI_RET(dwTaskID, pGI, FALSE);
 
 		COleDateTime dtStart, dtDue;
@@ -5934,36 +5945,22 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 
 			CDateHelper::Max(dtDrag, m_dtDragMin);
 
-			if (m_bDragging) 
+			switch (m_nDragging)
 			{
-				// preserve task duration
-				COleDateTime dtDuration(dtDue - dtStart);
-
-				// handle whole days
-				if (CDateHelper::DateHasTime(dtStart) && 
-					CDateHelper::DateHasTime(dtDue) && 
-					!CDateHelper::DateHasTime(dtDuration))
-				{
-					dtDuration = CDateHelper::GetEndOfPreviousDay(dtDuration);
-				}
-
-				pGI->dtStart = dtDrag;
-				pGI->dtDue = (dtDrag + dtDuration);
-
-				szCursor = IDC_SIZEALL;
-			}
-			else // dragging start/end
-			{
-				double dMinDuration = CalcMinDragDuration();
-
-				if (m_bDraggingStart)
+			case GTLCD_START:
 				{
 					// prevent the start and end dates from overlapping
+					double dMinDuration = CalcMinDragDuration();
 					pGI->dtStart.m_dt = min(dtDrag.m_dt, (dtDue.m_dt - dMinDuration));
+
+					szCursor = IDC_SIZEWE;
 				}
-				else if (m_bDraggingEnd)
+				break;
+
+			case GTLCD_END:
 				{
 					// prevent the start and end dates from overlapping
+					double dMinDuration = CalcMinDragDuration();
 					pGI->dtDue.m_dt = max(dtDrag.m_dt, (dtStart.m_dt + dMinDuration));
 
 					// handle day boundary
@@ -5971,9 +5968,30 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 					{
 						pGI->dtDue.m_dt = (CDateHelper::GetEndOfDay(pGI->dtDue).m_dt - 1.0);
 					}
-				}
 
-				szCursor = IDC_SIZEWE;
+					szCursor = IDC_SIZEWE;
+				}
+				break;
+
+			case GTLCD_WHOLE:
+				{
+					// preserve task duration
+					COleDateTime dtDuration(dtDue - dtStart);
+
+					// handle whole days
+					if (CDateHelper::DateHasTime(dtStart) && 
+						CDateHelper::DateHasTime(dtDue) && 
+						!CDateHelper::DateHasTime(dtDuration))
+					{
+						dtDuration = CDateHelper::GetEndOfPreviousDay(dtDuration);
+					}
+
+					pGI->dtStart = dtDrag;
+					pGI->dtDue = (dtDrag + dtDuration);
+
+					szCursor = IDC_SIZEALL;
+				}
+				break;
 			}
 			ASSERT(szCursor);
 
@@ -6011,7 +6029,7 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 
 double CGanttTreeListCtrl::CalcMinDragDuration() const
 {
-	ASSERT(m_bDraggingStart || m_bDraggingEnd);
+	ASSERT((m_nDragging == GTLCD_START) || (m_nDragging == GTLCD_END));
 	
 	double dMin;
 
@@ -6099,6 +6117,7 @@ void CGanttTreeListCtrl::RedrawTree(BOOL bErase)
 
 BOOL CGanttTreeListCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
 {
+	ASSERT(IsDragging());
 	CPoint ptDrag(ptCursor);
 
 	if (!ValidateDragPoint(ptDrag))
@@ -6111,7 +6130,7 @@ BOOL CGanttTreeListCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& 
 	// dtDrag as GANTTITEM::dtStart offset by the
 	// difference between the current drag pos and the
 	// initial drag pos
-	if (m_bDragging)
+	if (m_nDragging == GTLCD_WHOLE)
 	{
 		COleDateTime dtOrg;
 		GetDateFromPoint(m_ptDragStart, dtOrg);
@@ -6187,19 +6206,12 @@ void CGanttTreeListCtrl::CancelDrag(BOOL bReleaseCapture)
 {
 	ASSERT(IsDragging());
 
-	// cancel drag, restoring original task dates
-	DWORD dwTaskID = GetSelectedTaskID();
-
-	GANTTITEM* pGI = GetGanttItem(dwTaskID);
-	ASSERT(pGI);
-
-	(*pGI) = m_giPreDrag;
-	m_bDragging = m_bDraggingStart = m_bDraggingEnd = FALSE;
-	
 	if (bReleaseCapture)
 		ReleaseCapture();
-
-	RedrawList();
+	
+	// cancel drag, restoring original task dates
+	RestoreGanttItem(m_giPreDrag);
+	m_nDragging = GTLCD_NONE;
 
 	// keep parent informed
 	NotifyParentDragChange();
@@ -6412,43 +6424,45 @@ COleDateTime CGanttTreeListCtrl::GetNearestDate(const COleDateTime& dtDrag) cons
 {
 	ASSERT(IsDragging());
 
+	BOOL bDraggingEnd = (m_nDragging == GTLCD_END);
+
 	switch (GetSnapMode())
 	{
 	case GTLCSM_NEARESTQUARTERCENTURY:
-		return CDateHelper::GetNearestQuarterCentury(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestQuarterCentury(dtDrag, bDraggingEnd);
 		
 	case GTLCSM_NEARESTDECADE:
-		return CDateHelper::GetNearestDecade(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestDecade(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTYEAR:
-		return CDateHelper::GetNearestYear(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestYear(dtDrag, bDraggingEnd);
 		
 	case GTLCSM_NEARESTHALFYEAR:
-		return CDateHelper::GetNearestHalfYear(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestHalfYear(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTQUARTER:
-		return CDateHelper::GetNearestQuarter(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestQuarter(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTMONTH:
-		return CDateHelper::GetNearestMonth(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestMonth(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTWEEK:
-		return CDateHelper::GetNearestWeek(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestWeek(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTDAY:
-		return CDateHelper::GetNearestDay(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestDay(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTHALFDAY:
-		return CDateHelper::GetNearestHalfDay(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestHalfDay(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTHOUR:
-		return CDateHelper::GetNearestHour(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestHour(dtDrag, bDraggingEnd);
 
 	case GTLCSM_NEARESTHALFHOUR:
-		return CDateHelper::GetNearestHalfHour(dtDrag, m_bDraggingEnd);
+		return CDateHelper::GetNearestHalfHour(dtDrag, bDraggingEnd);
 
 	case GTLCSM_FREE:
-		if (m_bDraggingEnd)
+		if (bDraggingEnd)
 		{
 			COleDateTime dtEndOfDragDay(CDateHelper::GetEndOfDay(dtDrag));
 

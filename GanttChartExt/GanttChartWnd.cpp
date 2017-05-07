@@ -242,6 +242,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	m_ctrlGantt.SetOption(GTLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	m_ctrlGantt.SetOption(GTLCF_DISABLEDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -926,14 +927,21 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 		
 		switch (wp)
 		{
-		case GTLCHT_BEGIN:
+		case GTLCD_START:
 			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
 			{
 				mod[0].nAttrib = IUI_STARTDATE;
 			}
 			break;
 			
-		case GTLCHT_MIDDLE:
+		case GTLCD_END:
+			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
+			{
+				mod[0].nAttrib = IUI_DUEDATE;
+			}
+			break;
+			
+		case GTLCD_WHOLE:
 			{
 				const GANTTITEM* pGIPreDrag = (const GANTTITEM*)lp;
 				ASSERT(pGIPreDrag);
@@ -958,13 +966,6 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 						nNumMod = 2;
 					}
 				}
-			}
-			break;
-			
-		case GTLCHT_END:
-			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
-			{
-				mod[0].nAttrib = IUI_DUEDATE;
 			}
 			break;
 		}
