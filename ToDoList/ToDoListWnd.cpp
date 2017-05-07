@@ -8921,7 +8921,7 @@ void CToDoListWnd::PrepareEditMenu(CMenu* pMenu)
 			break;
 
 		case ID_EDIT_LOCKTASK:				
-			bDelete = !tdc.IsColumnShowing(TDCC_LOCK); 
+			bDelete = FALSE;
 			break;
 
         case ID_EDIT_RECURRENCE:			
