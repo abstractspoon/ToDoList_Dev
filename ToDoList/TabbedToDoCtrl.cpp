@@ -1267,7 +1267,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM 
 	return bEdit;
 }
 
-BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
+BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
 	CStringArray aValues;
 	CBinaryData bdEmpty;
@@ -1291,7 +1291,19 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	case IUI_CUSTOMATTRIB:	return SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
 	case IUI_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, CDateHelper::GetDate(mod.tValue));
 	case IUI_STARTDATE:		return SetSelectedTaskDate(TDCD_START, CDateHelper::GetDate(mod.tValue));
-	case IUI_DUEDATE:		return SetSelectedTaskDate(TDCD_DUE, CDateHelper::GetDate(mod.tValue));
+
+	case IUI_DUEDATE:		
+		if (SetSelectedTaskDate(TDCD_DUE, CDateHelper::GetDate(mod.tValue)))
+		{
+			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+				bDependChange = TRUE;
+			else
+				bMoveTask = TRUE;
+
+			return TRUE;
+		}
+		// else
+		return FALSE;
 		
 	case IUI_ALLOCTO:
 		Misc::Split(mod.szValue, aValues);
@@ -1311,12 +1323,30 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		
 	case IUI_DEPENDENCY: 
 		Misc::Split(mod.szValue, aValues);
-		return SetSelectedTaskDependencies(aValues);
+		
+		if (SetSelectedTaskDependencies(aValues))
+		{
+			bDependChange = TRUE;
+			return TRUE;
+		}
+		// else
+		return FALSE;
 
 	case IUI_OFFSETTASK:
 		if (GetSelectedCount() == 1)
-			return ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue));
-		break;
+		{
+			if (ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue)))
+			{
+				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+					bDependChange = TRUE;
+				else
+					bMoveTask = TRUE;
+				
+				return TRUE;
+			}
+		}
+		// else
+		return FALSE;
 		
 	// not supported
 	case IUI_RECURRENCE: 
@@ -1393,7 +1423,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			// back to itself
 			m_nExtModifyingAttrib = mod.nAttrib;
 
-			if (!ProcessUIExtensionMod(mod))
+			if (!ProcessUIExtensionMod(mod, bDependChange, bMoveTask))
 			{
 				ASSERT(0);
 				bSuccess = FALSE;
