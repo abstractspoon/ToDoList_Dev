@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "OSVersion.h"
+#include "regkey.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -113,42 +114,40 @@ OSVERSION COSVersion::GetOSVersion()
 								nVersion = OSV_WIN7;
 								break;
 								
-							case 2: // W8, Server 2012
-								nVersion = OSV_WIN8;
-								break;
-								
-							case 3: // W8.1, Server 2012 R2, W10
+							case 2: // W8, Server 2012, W8.1, Server 2012 R2, W10
 								{
-									// Check registry for Windows 10
-									HKEY hKey = NULL;
-									LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-																_T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"), 
-																REG_OPTION_NON_VOLATILE, 
-																KEY_READ, 
-																&hKey);
+									// Check registry for Windows 8.1, 10
+									CRegKey2 reg;
+
+									LONG lResult = reg.Open(HKEY_LOCAL_MACHINE, 
+															_T("Software\\Microsoft\\Windows NT\\CurrentVersion"), 
+															TRUE);
 
 									if (lResult == ERROR_SUCCESS)
 									{
-										DWORD dwType = 0;
-										DWORD dwSize = sizeof(DWORD);
+										// Check for Windows 10
 										DWORD dwMajorVer = 0;
-											
-										lResult = RegQueryValueEx(hKey, 
-																	_T("CurrentMajorVersionNumber"), 
-																	NULL, 
-																	&dwType, 
-																	(BYTE*)&dwMajorVer, 
-																	&dwSize);
+										lResult = reg.Read(_T("CurrentMajorVersionNumber"), dwMajorVer);
 										
 										if ((lResult == ERROR_SUCCESS) && (dwMajorVer >= 10))
 										{
 											nVersion = OSV_WIN10;
 											break;
 										}
+
+										// Check for Windows 8.1
+										CString sVersion;
+										lResult = reg.Read(_T("CurrentVersion"), sVersion);
+
+										if ((lResult == ERROR_SUCCESS) && (sVersion == _T("6.3")))
+										{
+											nVersion = OSV_WIN81;
+											break;
+										}
 									}
 								}
-								// else
-								nVersion = OSV_WIN81;
+								// else 
+								nVersion = OSV_WIN8;
 								break;
 								
 							default: // > w8
