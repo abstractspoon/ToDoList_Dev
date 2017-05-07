@@ -6,6 +6,7 @@
 
 #include "GraphicsMisc.h"
 #include "autoflag.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -336,24 +337,58 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 		else
 		{
 			CRect rTab(rcItem);
+
+			// Default adjustment
+			rTab.DeflateRect(2, 2, 1, -1);
+
+			// Further horizontal adjustments influenced by OS
+			OSVERSION nOsVer = COSVersion();
 			int nOffset = (nTab - GetCurSel());
 
 			switch (nOffset)
 			{
-			case 0: // == selected tab
-				rTab.DeflateRect(2, 2, 1, -1);
+			case -1: // == immediately before selected tab
+				if (nOsVer < OSV_WIN10)
+				{
+					rTab.DeflateRect(0, 0, 1, 0);
+				}
+				else
+				{
+					rTab.DeflateRect(-1, 0, 1, 0);
+				}
 				break;
 
-			case -1: // == immediately before selected tab
-				rTab.DeflateRect(1, 2, 2, -1);
+			case 0: // == selected tab
+				if (nOsVer <= OSV_XPP)
+				{
+					rTab.DeflateRect(0, 0, -1, -1);
+				}
+				else if (nOsVer <= OSV_WIN7)
+				{
+					rTab.DeflateRect(0, 0, 0, -1);
+				}
 				break;
 
 			case 1: // == immediately after selected tab
-				rTab.DeflateRect(3, 2, 1, -1);
+				if (nOsVer <= OSV_XPP)
+				{
+					rTab.DeflateRect(1, 0, 1, 0);
+				}
+				else // Win 7, 8, 8.1, 10
+				{
+					rTab.DeflateRect(1, 0, 0, 0);
+				}
 				break;
 
 			default:
-				rTab.DeflateRect(1, 2, 1, -1);
+				if (nOsVer <= OSV_XPP)
+				{
+					rTab.DeflateRect(0, 0, 1, 0);
+				}
+				else if (nOsVer >= OSV_WIN10)
+				{
+					rTab.DeflateRect(-1, 0, 0, 0);
+				}
 				break;
 			}
 			GraphicsMisc::DrawRect(pDC, rTab, crBack, CLR_NONE, 2);
