@@ -7,6 +7,7 @@
 
 #include "..\Shared\localizer.h"
 #include "..\Shared\misc.h"
+#include "..\Shared\graphicsmisc.h"
 #include "..\Shared\filemisc.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\themed.h"
@@ -64,13 +65,11 @@ _T("Valik\tPlain Text importer\n");
 // CTDLAboutDlg dialog
 
 CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_ABOUT_DIALOG, pParent)
+	: CDialog(IDD_ABOUT_DIALOG, pParent), m_sAppTitle(sAppTitle)
 {
 	//{{AFX_DATA_INIT(CTDLAboutDlg)
 	//}}AFX_DATA_INIT
-	m_sTitle.Format(_T("<b>%s</b> (c) AbstractSpoon 2003-17"), sAppTitle);
 	m_sLicense.Format(CEnString(IDS_LICENSE), _T("\"https://github.com/abstractspoon/ToDoList_Wiki/wiki/Free-Open-Source-Software\""));
-
 	m_sAppFolder = FileMisc::GetAppFilePath();
 
 	if (CPreferences().UsesIni())
@@ -78,7 +77,7 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 	else
 		m_sPrefsFile = _T("HKEY_CURRENT_USER\\Software\\AbstractSpoon\\ToDoList");
 	
-	CLocalizer::IgnoreString(m_sTitle);
+	CLocalizer::IgnoreString(m_sAppTitle);
 	CLocalizer::IgnoreString(m_sLicense);
 	CLocalizer::IgnoreString(ABOUTCONTRIBUTION);
 }
@@ -88,10 +87,10 @@ void CTDLAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLAboutDlg)
-	DDX_Control(pDX, IDC_TITLE, m_stTitle);
+	DDX_Control(pDX, IDC_TITLE, m_eAppTitle);
 	DDX_Control(pDX, IDC_LICENSE, m_stLicense);
 	DDX_Control(pDX, IDC_CONTRIBUTORS, m_lcContributors);
-	DDX_Text(pDX, IDC_TITLE, m_sTitle);
+	DDX_Text(pDX, IDC_TITLE, m_sAppTitle);
 	DDX_Text(pDX, IDC_LICENSE, m_sLicense);
 	DDX_Text(pDX, IDC_APPFOLDER, m_sAppFolder);
 	DDX_Text(pDX, IDC_PREFSFILE, m_sPrefsFile);
@@ -146,7 +145,10 @@ BOOL CTDLAboutDlg::OnInitDialog()
 
 	CThemed::SetWindowTheme(&m_lcContributors, _T("Explorer"));
 
-	m_stTitle.SetBkColor(GetSysColor(COLOR_3DFACE));
+	HFONT hFont = GraphicsMisc::GetFont(*this);
+	VERIFY(GraphicsMisc::CreateFont(m_fontAppTitle, hFont, GMFS_BOLD));
+	m_eAppTitle.SetFont(&m_fontAppTitle);
+	
 	m_stLicense.SetBkColor(GetSysColor(COLOR_3DFACE));
 
 	// setup social media toolbar
@@ -166,11 +168,10 @@ BOOL CTDLAboutDlg::OnInitDialog()
 
 		m_toolbar.MoveWindow(rToolbar, FALSE);
 	}
-
-
+	
 	GetDlgItem(IDOK)->SetFocus();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
+	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 

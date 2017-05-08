@@ -25,16 +25,17 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLAboutDlg)
 	//}}AFX_DATA
-	CXHTMLStatic	m_stTitle;
+	CEdit			m_eAppTitle;
 	CXHTMLStatic	m_stLicense;
 	CListCtrl		m_lcContributors;
-	CString			m_sTitle;
+	CString			m_sAppTitle;
 	CString			m_sLicense;
 	CString			m_sAppFolder;
 	CString			m_sPrefsFile;
 	CEnToolBar		m_toolbar;
 	CToolbarHelper	m_tbHelper;
 	CImageList		m_il;
+	CFont			m_fontAppTitle;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
