@@ -42,6 +42,8 @@ const int OCCURS_INFINITELY = -1;
 //	TDIR_YEARLY	(TDIR_YEAR_SPECIFIC_DAY_MONTH)				
 //	TDIR_YEAR_SPECIFIC_DAY_MONTH					month (1-12)			day of month (1-31)
 //	TDIR_YEAR_EVERY_NYEARS							every 'n' years			--- (0)
+//  TDIR_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)	specific month (1-12)
+//													HIWORD = DOW (1-7)		
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

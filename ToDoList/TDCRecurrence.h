@@ -16,23 +16,23 @@
 struct TDCRECURRENCE
 {
 	//  nRegularity										dwSpecific1				dwSpecific2
-	
+
 	//	TDIR_DAILY (TDIR_DAY_EVERY_NDAYS)
 	//	TDIR_DAY_EVERY_NDAYS							every 'n' days			--- (0)
 	//	TDIR_DAY_EVERY_WEEKDAY							--- (0)					--- (0)
 	//	TDIR_DAY_EVERY_NWEEKDAYS						every 'n' days			--- (0)
-	
+
 	//	TDIR_WEEKLY	(TDIR_WEEK_SPECIFIC_DOWS_NWEEKS)				
 	//	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS					every 'n' weeks			weekdays (TDIW_...)
 	//	TDIR_WEEK_EVERY_NWEEKS							every 'n' weeks			--- (0)
-	
+
 	//	TDIR_MONTHLY (TDIR_MONTH_SPECIFIC_DAY_NMONTHS)				
 	//	TDIR_MONTH_EVERY_NMONTHS						every 'n' months		--- (0)
 	//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS					every 'n' months		day of month (1-31)
-	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS				every 'n' months		first(0), last(!0)
+	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS				first(0), last(!0)		every 'n' months
 	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS					LOWORD = which (1-5)	every 'n' months
 	//													HIWORD = DOW (1-7)		
-	
+
 	//	TDIR_YEARLY	(TDIR_YEAR_SPECIFIC_DAY_MONTH)				
 	//	TDIR_YEAR_SPECIFIC_DAY_MONTH					month (1-12)			day of month (1-31)
 	//	TDIR_YEAR_EVERY_NYEARS							every 'n' years			--- (0)
