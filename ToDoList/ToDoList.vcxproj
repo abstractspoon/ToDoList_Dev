@@ -775,6 +775,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\social_toolbar.bmp" />
     <None Include="res\social_toolbar_std.bmp" />
     <None Include="res\src_control_std.bmp" />
+    <None Include="res\style_image.ico" />
     <None Include="res\style_para.ico" />
     <None Include="res\style_table.ico" />
     <None Include="res\style_wrap.ico" />

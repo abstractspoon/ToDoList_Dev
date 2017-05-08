@@ -1022,6 +1022,9 @@
     <None Include="res\app_timetrack.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\style_image.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
