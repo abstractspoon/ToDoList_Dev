@@ -134,7 +134,7 @@ void CPreferencesMultiUserPage::OnPromptreloadontimestamp()
 void CPreferencesMultiUserPage::OnCheckinonnoedit() 
 {
 	UpdateData();
-	GetDlgItem(IDC_NOCHANGETIME)->EnableWindow(/*m_bEnableSourceControl && */m_bCheckinNoChange);
+	GetDlgItem(IDC_NOCHANGETIME)->EnableWindow(m_bCheckinNoChange);
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -151,7 +151,7 @@ void CPreferencesMultiUserPage::LoadPreferences(const IPreferences* pPrefs, LPCT
 	m_nCheckinNoEditTime = pPrefs->GetProfileInt(szKey, _T("CheckinNoEditTime"), 1);
 	m_bCheckinNoChange = pPrefs->GetProfileInt(szKey, _T("CheckinNoEdit"), TRUE);
 	m_bIncludeUserNameInCheckout = pPrefs->GetProfileInt(szKey, _T("IncludeUserNameInCheckout"), FALSE);
-	m_bUse3rdPartySourceControl = /*!m_bEnableSourceControl && */pPrefs->GetProfileInt(szKey, _T("Use3rdPartySourceControl"), FALSE);
+	m_bUse3rdPartySourceControl = pPrefs->GetProfileInt(szKey, _T("Use3rdPartySourceControl"), FALSE);
 
 	m_nRemoteFileCheckFreq = pPrefs->GetProfileInt(szKey, _T("RemoteFileCheckFrequency"), 30);
 
