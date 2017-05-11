@@ -511,7 +511,7 @@ CEnHeaderCtrl::ITEMEXTRA& CEnHeaderCtrl::GetItemExtra(int nItem) const
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 
 	if (nItem >= m_aItemExtras.GetSize())
-		m_aItemExtras.SetAt(nItem, ITEMEXTRA());
+		m_aItemExtras.SetSize(nItem + 1);
 
 	return m_aItemExtras[nItem];
 }
