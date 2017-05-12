@@ -2698,8 +2698,11 @@ struct TDCCOLEDITVISIBILITY
 		sKey.Format(_T("%s\\ColumnVisibility"), szKey);
 		mapVisibleColumns.SaveColumns(pPrefs, sKey, _T("Col%d"));
 
-		sKey.Format(_T("%s\\EditVisibility"), szKey);
-		mapVisibleEdits.SaveAttributes(pPrefs, sKey, _T("Edit%d"));
+		if (nShowFields == TDLSA_ANY)
+		{
+			sKey.Format(_T("%s\\EditVisibility"), szKey);
+			mapVisibleEdits.SaveAttributes(pPrefs, sKey, _T("Edit%d"));
+		}
 	}
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -2718,8 +2721,15 @@ struct TDCCOLEDITVISIBILITY
 		// else
 		mapVisibleColumns.LoadColumns(pPrefs, sKey, _T("Col%d"));
 
-		sKey.Format(_T("%s\\EditVisibility"), szKey);
-		mapVisibleEdits.LoadAttributes(pPrefs, sKey, _T("Edit%d"));
+		if (nShowFields == TDLSA_ANY)
+		{
+			sKey.Format(_T("%s\\EditVisibility"), szKey);
+			mapVisibleEdits.LoadAttributes(pPrefs, sKey, _T("Edit%d"));
+		}
+		else
+		{
+			UpdateEditVisibility();
+		}
 
 		return TRUE;
 	}
@@ -3023,9 +3033,12 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 	{
 		TDCCOLEDITVISIBILITY::Save(pPrefs, szKey);
 
-		CString sKey;
-		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.SaveAttributes(pPrefs, sKey, _T("Filter%d"));
+		if (nShowFields == TDLSA_ANY)
+		{
+			CString sKey;
+			sKey.Format(_T("%s\\FilterVisibility"), szKey);
+			mapVisibleFilters.SaveAttributes(pPrefs, sKey, _T("Filter%d"));
+		}
 	}
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -3033,9 +3046,16 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		if (!TDCCOLEDITVISIBILITY::Load(pPrefs, szKey))
 			return FALSE;
 
-		CString sKey;
-		sKey.Format(_T("%s\\FilterVisibility"), szKey);
-		mapVisibleFilters.LoadAttributes(pPrefs, sKey, _T("Filter%d"));
+		if (nShowFields == TDLSA_ANY)
+		{
+			CString sKey;
+			sKey.Format(_T("%s\\FilterVisibility"), szKey);
+			mapVisibleFilters.LoadAttributes(pPrefs, sKey, _T("Filter%d"));
+		}
+		else
+		{
+			UpdateFilterVisibility();
+		}
 
 		return TRUE;
 	}
