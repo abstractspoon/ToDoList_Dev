@@ -25,16 +25,6 @@ CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID)
 {
 }
 
-// CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID, UINT nHelpID)
-// 	: 
-// 	CPropertyPage(nDlgTemplateID), 
-// 	m_brush(NULL), 
-// 	m_crback(CLR_NONE), 
-// 	m_bFirstShow(TRUE), 
-// 	m_nHelpID(nHelpID)
-// {
-// }
-
 CPreferencesPageBase::~CPreferencesPageBase()
 {
 	GraphicsMisc::VerifyDeleteObject(m_brush);
