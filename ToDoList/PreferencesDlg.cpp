@@ -15,6 +15,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\themed.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\HookMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,8 +24,78 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesDlg dialog
 
+/////////////////////////////////////////////////////////////////////////////
+// Private class for tracking mouse-wheel so we can cancel
+// the edit in the event of the user scrolling
+
+class CPreferencesDlgCopyHookMgr : public CHookMgr<CPreferencesDlgCopyHookMgr>  
+{
+	friend class CHookMgr<CPreferencesDlgCopyHookMgr>;
+	
+public:
+	virtual ~CPreferencesDlgCopyHookMgr()
+	{
+	}
+	
+	static BOOL Initialize(HWND hwndNotify)
+	{
+		if (GetInstance().InitHooks(HM_MOUSE))
+		{
+			GetInstance().m_hwndNotify = hwndNotify;
+			return TRUE;
+		}
+		
+		// else
+		return FALSE;
+	}
+	
+	static void Release()
+	{
+		GetInstance().ReleaseHooks();
+	}
+	
+protected:
+	CPreferencesDlgCopyHookMgr()  : m_hwndNotify(NULL)
+	{
+	}
+	
+	static CPreferencesDlgCopyHookMgr& Instance() 
+	{ 
+		return CHookMgr<CPreferencesDlgCopyHookMgr>::GetInstance(); 
+	}
+	
+protected:
+	HWND m_hwndNotify;
+	
+protected:
+	virtual BOOL OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
+	{
+		switch (uMouseMsg)
+		{
+		case WM_MBUTTONDOWN:
+			{
+				HWND hwndHit = CDialogHelper::GetWindowFromPoint(::GetParent(info.hwnd), info.pt);
+
+#ifdef _DEBUG
+				CString sMouseClass = CWinClasses::GetClass(info.hwnd);
+				CString sHitClass = CWinClasses::GetClass(hwndHit);
+#endif
+
+				if (CDialogHelper::IsChildOrSame(m_hwndNotify, hwndHit))
+				{
+					::SendMessage(m_hwndNotify, WM_COPY, ::GetDlgCtrlID(hwndHit), (LPARAM)hwndHit);
+					return TRUE;
+				}
+			}
+			break;
+		}
+		
+		return FALSE;
+	}
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // default priority colors
 const COLORREF PRIORITYLOWCOLOR = RGB(30, 225, 0);
 const COLORREF PRIORITYHIGHCOLOR = RGB(255, 0, 0);
@@ -32,6 +103,9 @@ const UINT IDC_TOPOFPAGE = (UINT)-1; // pseudo control ID
 
 const TCHAR PATHDELIM = '>';
 const LPCTSTR PREFSKEY = _T("Preferences");
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesDlg dialog
 
 CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr, 
 								 const CContentMgr* pContentMgr, 
@@ -89,9 +163,11 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_BN_CLICKED(IDC_APPLY, OnApply)
 	//}}AFX_MSG_MAP
 	ON_WM_ERASEBKGND()
+	ON_WM_DESTROY()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
+	ON_MESSAGE(WM_COPY, OnCopy)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -119,7 +195,10 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 BOOL CPreferencesDlg::OnInitDialog() 
 {
 	CAutoFlag af(m_bInitDlg, TRUE);
+
 	CPreferencesDlgBase::OnInitDialog();
+
+	CPreferencesDlgCopyHookMgr::Initialize(*this);
 	
 	// disable translation of category title because
 	// categories will already been translated
@@ -168,7 +247,50 @@ BOOL CPreferencesDlg::OnInitDialog()
 
 	m_tcPages.SetFocus();
 
+
 	return FALSE;  // return TRUE unless you set the focus to a control
+}
+
+void CPreferencesDlg::OnDestroy()
+{
+	CPreferencesDlgCopyHookMgr::Release();
+
+	CDialog::OnDestroy();
+}
+
+LRESULT CPreferencesDlg::OnCopy(WPARAM wp, LPARAM lp)
+{
+	if (lp)
+	{
+		LPCTSTR szMenu = _T("Tools > Preferences");
+
+		CString sTreePath = GetItemPath(m_tcPages.GetSelectedItem()), sItemText, sCopyText;
+		CWnd::FromHandle((HWND)lp)->GetWindowText(sItemText);
+
+		switch (wp)
+		{
+		case IDC_PAGES:
+			sCopyText.Format(_T("%s > %s"), szMenu, sTreePath);
+			break;
+
+		case IDC_PAGE_TITLE:
+		case IDC_CATEGORY_TITLE:
+		case IDOK:
+		case IDCANCEL:
+			sCopyText.Format(_T("%s > %s"), szMenu, sItemText);
+			break;
+
+		default:
+			if (!sItemText.IsEmpty())
+				sCopyText.Format(_T("%s > %s > %s"), szMenu, sTreePath, sItemText);
+			break;
+		}
+
+		if (!sCopyText.IsEmpty())
+			Misc::CopyTexttoClipboard(sCopyText, *this);
+	}
+
+	return 0L;
 }
 
 void CPreferencesDlg::SynchronizeTree()

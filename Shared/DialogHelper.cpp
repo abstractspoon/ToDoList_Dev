@@ -1777,3 +1777,23 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 		
 	return ::MessageBox(hwndParent, sText, sCaption, nFlags);
 }
+
+HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
+{
+	HWND hWnd = ::WindowFromPoint(ptScreen);
+
+	while (hWnd)
+	{
+		::ScreenToClient(hWnd, &ptScreen);
+		
+		HWND hwndChild = ::ChildWindowFromPoint(hWnd, ptScreen);
+		
+		if ((hwndChild == NULL) || (hwndChild == hWnd))
+			break;
+		
+		hWnd = hwndChild; // keep going
+	}
+	ASSERT(hWnd && ::IsChild(hwndParent, hWnd));
+
+	return hWnd;
+}

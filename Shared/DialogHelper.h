@@ -38,6 +38,7 @@ public:
 	static BOOL CtrlWantsEnter(HWND hwnd);
 	static CString GetCtrlLabel(const CWnd* pWnd);
 	static CString GetCtrlText(const CWnd* pWnd);
+	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
 
 	static int GetChildCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
 	static void RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs);
