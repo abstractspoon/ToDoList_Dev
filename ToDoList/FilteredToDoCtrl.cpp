@@ -1659,7 +1659,7 @@ DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, cons
 		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, dtNext, bDueDate);
 		RefreshFilter();
 		
-		ASSERT(m_taskTree.GetItem(dwNewTaskID) != NULL));
+		ASSERT(m_taskTree.GetItem(dwNewTaskID) != NULL);
 		return dwNewTaskID;
 	}
 
