@@ -2401,9 +2401,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		switch (nColID)
 		{
 		case TDCC_POSITION:
-			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
-			break;
-			
 		case TDCC_RISK:
 		case TDCC_RECURRENCE:
 		case TDCC_ID:
@@ -2987,13 +2984,9 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		if (!data.IsEmpty())
 		{
 			if (attribDef.IsMultiList())
-			{
 				DrawColumnText(pDC, data.FormatAsArray(), rCol, attribDef.nTextAlignment, crText);
-			}
 			else
-			{
 				DrawColumnText(pDC, data.AsString(), rCol, attribDef.nTextAlignment, crText);
-			}
 		}
 		break;
 	}
