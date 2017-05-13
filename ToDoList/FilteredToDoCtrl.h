@@ -127,7 +127,6 @@ protected:
 	virtual BOOL CopyCurrentSelection() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
-	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 
 	void GetCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent, BOOL bSelectedOnly = FALSE) const;
 
@@ -158,6 +157,12 @@ protected:
 	void RebuildList(const SEARCHPARAMS& filter);
 
 	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
+	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
+	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
+
+	// Helper allowing insert position to be specified
+	DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks);
+
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
