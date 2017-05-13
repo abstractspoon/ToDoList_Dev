@@ -1916,6 +1916,16 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	return TRUE;
 }
 
+COLORREF CTDLTaskCtrlBase::GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	COLORREF crText = COMMENTSCOLOR;
+
+	if (HasColor(m_crDone) && m_data.CalcIsTaskDone(pTDI, pTDS, TDCCHECKALL))
+		crText = m_crDone;
+
+	return crText;
+}
+
 BOOL CTDLTaskCtrlBase::SetPriorityColors(const CDWordArray& aColors)
 {
 	ASSERT (aColors.GetSize() == 11);
@@ -2065,8 +2075,11 @@ COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 
 void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS)
 {
-	if (m_bSavingToImage)
+	// Avoid drawing wherever possible
+	if (m_bSavingToImage || IsEditingTask(pTDS->GetTaskID()) || pTDI->sComments.IsEmpty())
+	{
 		return;
+	}
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -2075,57 +2088,57 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 
 	if ((rClip.right <= rComments.left) || (rComments.Width() <= 0))
 	{
-		return; // nothing to do
+		return;
 	}
 
-	if ((m_dwEditTitleTaskID != pTDS->GetTaskID()) && !pTDI->sComments.IsEmpty())
+	// Draw the minimum necessary
+	COLORREF crText = GetTaskCommentsTextColor(pTDI, pTDS);
+
+	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
-		CString sComments(_T("[...]"));
-		
-		// if we're showing the comments but not the first line
-		// and the first line is empty then scoot
-		if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
+		int nFind = pTDI->sComments.FindOneOf(_T("\n\r")); 
+
+		if (HasStyle(TDCS_SHOWFIRSTCOMMENTLINEINLIST))
 		{
-			CString sTemp(pTDI->sComments);
-			int nFind = sTemp.FindOneOf(_T("\n\r")); 
-			
-			if (HasStyle(TDCS_SHOWFIRSTCOMMENTLINEINLIST))
-			{
-				if (nFind == 0) 
-				{
-					return; 
-				}
-				else if (nFind > 0) 
-				{
-					sTemp = sTemp.Left(nFind); 
-				}
-			}
-			else if (nFind != -1)
-			{
-				sTemp.Replace(_T("\r\n"), _T("|"));
-				sTemp.Replace('\n', '|');
+			if (nFind == 0) 
+				return; // comments start with a newline -> show nothing
 
-				// trim trailing delimiters
-				sTemp.TrimRight(_T(" |"));
-			}
-			
-			sComments = sTemp;
+			// else
+			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nFind);
 		}
-		
-		COLORREF crPrev = pDC->SetTextColor(COMMENTSCOLOR);
-		
-		if (m_data.CalcIsTaskDone(pTDI, pTDS))
+		else
 		{
-			if (HasColor(m_crDone))
-				crPrev = pDC->SetTextColor(m_crDone);
+			// Calculate the max length of comments we are likely to show
+			int nShow = ((int)(rComments.Width() / GraphicsMisc::GetAverageCharWidth(pDC)) * 2);
+			nShow = min(nShow, pTDI->sComments.GetLength());
+
+			CString sShow;
+			LPTSTR szBuffer = sShow.GetBuffer(nShow);
+			
+			for (int nChar = 0; nChar < nShow; nChar++)
+			{
+				TCHAR cChar = pTDI->sComments[nChar];
+
+				switch (cChar)
+				{
+				case '\r':
+				case '\n':
+				case '\t':
+					cChar = ' ';
+					// fall thru
+				}
+
+				szBuffer[nChar] = cChar;
+			}
+			sShow.ReleaseBuffer(nShow);
+			sShow.TrimRight();
+
+			DrawColumnText(pDC, sShow, rComments, DT_LEFT, crText, TRUE, nShow);
 		}
-
-		int nPrevBkMode = pDC->SetBkMode(TRANSPARENT);
-		UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_END_ELLIPSIS | GraphicsMisc::GetRTLDrawTextFlags(Tasks()));
-
-		pDC->DrawText(sComments, (LPRECT)&rComments, nFlags);
-		pDC->SetTextColor(crPrev);
-		pDC->SetBkMode(nPrevBkMode);
+	}
+	else
+	{
+		DrawColumnText(pDC, _T("[...]"), rComments, DT_LEFT, crText, FALSE, 5);
 	}
 }
 
@@ -3140,12 +3153,16 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		DrawColumnText(pDC, sDow, rDraw, TA_RIGHT, crText);
 }
 
-void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, COLORREF crText, BOOL bTaskTitle)
+void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
+										COLORREF crText, BOOL bTaskTitle, int nTextLen)
 {
 	ASSERT(crText != CLR_NONE);
 
 	if (sText.IsEmpty())
 		return;
+
+	if (nTextLen == -1)
+		nTextLen = sText.GetLength();
 	
 	CRect rText(rect);
 	CPoint ptText(0, rText.top);
@@ -3172,7 +3189,7 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 	COLORREF crOld = pDC->SetTextColor(crText);
 	
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(sText, rText, nFlags);
+	pDC->DrawText(sText, nTextLen, rText, nFlags);
 	
 	// cleanup
 	if (HasColor(crOld))

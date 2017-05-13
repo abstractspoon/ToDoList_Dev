@@ -513,7 +513,7 @@ protected:
 	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							COLORREF crText, BOOL bSelected);
 	void DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
-						COLORREF crText, BOOL bTaskTitle = FALSE);
+						COLORREF crText, BOOL bTaskTitle = FALSE, int nTextLen = -1);
 	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect, COLORREF crText);
 	void DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bCalc = FALSE);
 	void DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert);
@@ -530,10 +530,12 @@ protected:
 
 	inline BOOL HasColor(COLORREF color) const { return (color != CLR_NONE); }
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }
+	inline BOOL IsEditingTask(DWORD dwTaskID) const { return (m_dwEditTitleTaskID == dwTaskID); }
 
 	// internal version
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
+	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);
 	static BOOL InvalidateItem(CListCtrl& lc, int nItem, BOOL bUpdate = FALSE);
