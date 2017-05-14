@@ -3892,7 +3892,12 @@ BOOL CTabbedToDoCtrl::CanSortBy(TDC_COLUMN nBy) const
 			IUI_ATTRIBUTE nCol = TDC::MapColumnToIUIEdit(nBy);
 
 			if ((nCol != IUI_NONE) || (nBy == TDCC_NONE))
-				return ExtensionCanDoAppCommand(nView, IUI_SORT, nCol);
+			{
+				const IUIExtensionWindow* pExt = GetExtensionWnd(nView);
+				ASSERT(pExt);
+
+				return (pExt && pExt->WantSortUpdate(nCol));
+			}
 			
 			// else
 			return FALSE;

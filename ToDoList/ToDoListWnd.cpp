@@ -2929,7 +2929,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_SORT_BYPATH:
-		pCmdUI->Enable(tdc.GetTaskView() != FTCV_TASKTREE);
+		pCmdUI->Enable(tdc.GetTaskView() == FTCV_TASKLIST);
 		break;
 		
 	default:
@@ -2950,7 +2950,6 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		}
 	}
 }
-
 
 void CToDoListWnd::OnNewtaskAttopSelected() 
 {

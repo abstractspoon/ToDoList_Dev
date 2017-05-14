@@ -52,7 +52,7 @@ public:
 	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 	BOOL HasColor() const;
 
-	CString GetName() const;
+	CString GetName(BOOL bFormatted = TRUE) const;
 
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
 

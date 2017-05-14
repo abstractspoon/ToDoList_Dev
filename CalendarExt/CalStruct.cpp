@@ -397,9 +397,13 @@ BOOL TASKCALITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-CString TASKCALITEM::GetName() const
+CString TASKCALITEM::GetName(BOOL bFormatted) const
 {
-	return (sFormattedName.IsEmpty() ? sName : sFormattedName);
+	if (!bFormatted || sFormattedName.IsEmpty()) 
+		return sName;
+	
+	// else
+	return sFormattedName;
 }
 
 void TASKCALITEM::ReformatName()

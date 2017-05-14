@@ -311,8 +311,6 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_COLLAPSEALL:
 	case IUI_EXPANDSELECTED:
 	case IUI_COLLAPSESELECTED:
-	case IUI_TOGGLABLESORT:
-	case IUI_SORT:
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -320,6 +318,10 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_GETPREVTOPLEVELTASK:
 		// not handled
 		break;
+
+	case IUI_TOGGLABLESORT:
+	case IUI_SORT:
+		return (m_BigCalendar.SortBy((IUI_ATTRIBUTE)dwExtra, (nCmd == IUI_TOGGLABLESORT)) != FALSE);
 		
 	case IUI_SELECTTASK:
 		return SelectTask(dwExtra);
@@ -350,7 +352,7 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	return false;
 }
 
-bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const 
+bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -360,8 +362,6 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	case IUI_COLLAPSEALL:
 	case IUI_EXPANDSELECTED:
 	case IUI_COLLAPSESELECTED:
-	case IUI_TOGGLABLESORT:
-	case IUI_SORT:
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -373,6 +373,10 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	case IUI_SETFOCUS:
 	case IUI_SELECTTASK:
 		return true;
+
+	case IUI_TOGGLABLESORT:
+	case IUI_SORT:
+		return WantSortUpdate((IUI_ATTRIBUTE)dwExtra);
 
 	case IUI_SAVETOIMAGE:
 		return (m_BigCalendar.CanSaveToImage() != FALSE);

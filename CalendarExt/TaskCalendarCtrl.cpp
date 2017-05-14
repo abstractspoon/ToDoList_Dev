@@ -27,6 +27,12 @@ static char THIS_FILE[] = __FILE__;
 const int PADDING = 3;
 
 /////////////////////////////////////////////////////////////////////////////
+
+// Used temporarily by CompareTCItems
+static IUI_ATTRIBUTE s_nSortBy = IUI_NONE;
+static BOOL s_bSortAscending = TRUE;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
 CTaskCalendarCtrl::CTaskCalendarCtrl() 
@@ -43,7 +49,9 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nCellVScrollPos(0),
 	m_bStrikeThruDone(FALSE),
 	m_bSavingToImage(FALSE),
-	m_nTaskHeight(DEF_TASK_HEIGHT)
+	m_nTaskHeight(DEF_TASK_HEIGHT),
+	m_nSortBy(IUI_NONE),
+	m_bSortAscending(-1)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 }
@@ -198,6 +206,8 @@ BOOL CTaskCalendarCtrl::WantSortUpdate(IUI_ATTRIBUTE nEditAttrib)
 	switch (nEditAttrib)
 	{
 	case IUI_TASKNAME:
+	case IUI_ID:
+	case IUI_NONE:
 // 	case IUI_DONEDATE:
 // 	case IUI_DUEDATE:
 // 	case IUI_STARTDATE:
@@ -944,6 +954,28 @@ int CTaskCalendarCtrl::GetTaskHeight() const
 	return max(MIN_TASK_HEIGHT, min(nHeight, m_nTaskHeight));
 }
 
+BOOL CTaskCalendarCtrl::SortBy(IUI_ATTRIBUTE nSortBy, BOOL bToggle)
+{
+	if (!WantSortUpdate(nSortBy))
+		return FALSE;
+
+	m_nSortBy = nSortBy;
+
+	if (m_bSortAscending == -1)
+	{
+		m_bSortAscending = TRUE;
+	}
+	else if (bToggle)
+	{
+		m_bSortAscending = !m_bSortAscending;
+	}
+
+	if (GetSafeHwnd())
+		Invalidate(FALSE);
+
+	return TRUE;
+}
+
 int CTaskCalendarCtrl::GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArray& aTasks, BOOL bOrdered) const
 {
 	ASSERT(dtCell);
@@ -1008,7 +1040,15 @@ int CTaskCalendarCtrl::GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArra
 	}
 
 	if (bOrdered && aTasks.GetSize() > 1)
+	{
+		s_nSortBy = m_nSortBy;
+		s_bSortAscending = m_bSortAscending;
+
 		qsort(aTasks.GetData(), aTasks.GetSize(), sizeof(TASKCALITEM*), CompareTCItems);
+
+		s_nSortBy = IUI_NONE;
+		s_bSortAscending = -1;
+	}
 
 	// now go thru the list and set the position of each item 
 	// if not already done
@@ -1045,10 +1085,7 @@ int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
 	// special case: Not drawing tasks continuous means that
 	// the same task can appear twice
 	if (pTCI1->GetTaskID() == pTCI2->GetTaskID())
-	{
-		//ASSERT(!HasOption(TCCO_DISPLAYCONTINUOUS));
 		return 0;
-	}
 	
 	// earlier start date
 	if (pTCI1->GetAnyStartDate() < pTCI2->GetAnyStartDate())
@@ -1064,12 +1101,31 @@ int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
 	if (pTCI1->GetAnyEndDate() < pTCI2->GetAnyEndDate())
 		return 1;
 
-	// equal so test for task ID
-	if (pTCI1->GetTaskID() < pTCI2->GetTaskID())
-		return -1;
+	// equal so test for sort attribute
+	int nCompare = 0;
 
-	ASSERT(pTCI1->GetTaskID() > pTCI2->GetTaskID());
-	return 1;
+	switch (s_nSortBy)
+	{
+	case IUI_TASKNAME:
+		ASSERT(s_bSortAscending != -1);
+		nCompare = pTCI1->GetName(FALSE).CompareNoCase(pTCI2->GetName(FALSE));
+		break;
+
+	case IUI_ID:
+		ASSERT(s_bSortAscending != -1);
+		// fall thru
+	case IUI_NONE:
+		nCompare = ((pTCI1->GetTaskID() < pTCI2->GetTaskID()) ? -1 : 1);
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	if (!s_bSortAscending && (nCompare != 0) && (s_nSortBy != IUI_NONE))
+		nCompare = -nCompare;
+
+	return nCompare;
 }
 
 DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptCursor) const

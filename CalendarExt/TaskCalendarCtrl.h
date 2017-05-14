@@ -53,6 +53,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID);
 	void ScrollToSelectedTask();
 	void ScrollToTask(DWORD dwTaskID);
+	BOOL SortBy(IUI_ATTRIBUTE nSortBy, BOOL bToggle);
 
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
@@ -86,11 +87,13 @@ protected:
 	CFontCache m_fonts;
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
-
+	IUI_ATTRIBUTE m_nSortBy;
+	BOOL m_bSortAscending;
+	
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
-
+	
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskCalendarCtrl)
