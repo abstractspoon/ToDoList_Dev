@@ -3123,7 +3123,7 @@ BEGIN
         MENUITEM "Fil&e Link",                  ID_SORT_BYFILEREF
         MENUITEM "&Flag",                       ID_SORT_BYFLAG
         MENUITEM "Icon",                        ID_SORT_BYICON
-        MENUITEM "&Lock",                       ID_SORTBY_LOCK
+        MENUITEM "&Lock",                       ID_SORT_BYLOCK
         MENUITEM "&Modified Date",              ID_SORT_BYMODIFYDATE
         MENUITEM "&Path",                       ID_SORT_BYPATH
         MENUITEM "Percent Co&mplete",           ID_SORT_BYPERCENT
