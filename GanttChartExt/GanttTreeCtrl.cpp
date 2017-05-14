@@ -98,7 +98,7 @@ bool CGanttTreeCtrl::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-void CGanttTreeCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+void CGanttTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	HTREEITEM hti = (HTREEITEM)m_tooltip.GetLastHitToolInfo().uId;
 
@@ -141,7 +141,7 @@ LRESULT CGanttTreeCtrl::OnTitleColumnWidthChange(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CGanttTreeCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+LRESULT CGanttTreeCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	m_fonts.Clear();
 
