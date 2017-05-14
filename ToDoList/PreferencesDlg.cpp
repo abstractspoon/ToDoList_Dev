@@ -26,8 +26,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
-// Private class for tracking mouse-wheel so we can cancel
-// the edit in the event of the user scrolling
+// Private class for tracking mouse middle-button clicking
+// so we can copy the clicked items text to the clipboard
 
 class CPreferencesDlgCopyHookMgr : public CHookMgr<CPreferencesDlgCopyHookMgr>  
 {
@@ -246,7 +246,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
 
 	m_tcPages.SetFocus();
-
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 }
