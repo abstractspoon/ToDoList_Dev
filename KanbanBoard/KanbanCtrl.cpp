@@ -1728,16 +1728,23 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case KBCF_SHOWTASKCOLORASBAR:
-				int nList = m_aListCtrls.GetSize();
-				
-				while (nList--)
 				{
-					CKanbanListCtrl* pList = m_aListCtrls[nList];
-					ASSERT(pList);
+					int nList = m_aListCtrls.GetSize();
 					
-					if (pList)
-						pList->SetShowTaskColorAsBar(bSet);
+					while (nList--)
+					{
+						CKanbanListCtrl* pList = m_aListCtrls[nList];
+						ASSERT(pList);
+						
+						if (pList)
+							pList->SetShowTaskColorAsBar(bSet);
+					}
 				}
+				break;
+
+			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
+				if (m_nSortBy != IUI_NONE)
+					Sort(m_nSortBy, FALSE, m_bSortAscending);
 				break;
 			}
 		}
