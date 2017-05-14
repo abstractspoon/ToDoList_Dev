@@ -8,7 +8,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-//#include "todoctrl.h"
 #include "filteredtodoctrl.h"
 #include "preferencesdlg.h"
 #include "tdlfindtasksDlg.h"

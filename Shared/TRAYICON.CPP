@@ -74,7 +74,6 @@ END_MESSAGE_MAP()
 
 CTrayIcon::CTrayIcon()
 	:
-	m_icon(NULL),
 	m_bVisible(FALSE),
 	m_bAnimationOn(FALSE),
 	m_nPrevMsg(0),

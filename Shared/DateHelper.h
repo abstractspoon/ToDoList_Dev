@@ -190,7 +190,6 @@ public:
 
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2);
 
-
 protected:
 	static DWORD s_dwWeekend; 
 

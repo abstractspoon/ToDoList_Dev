@@ -6875,7 +6875,6 @@ HTREEITEM CToDoCtrl::PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HT
 	// then children
 	if (bAndSubtasks)
 	{
-		HTREEITEM htiFirstItem = (hti == TVI_ROOT) ? NULL : hti;
 		HTASKITEM hChildTask = tasks.GetFirstTask(hTask);
 	
 		while (hChildTask)

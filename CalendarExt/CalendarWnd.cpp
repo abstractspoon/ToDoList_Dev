@@ -52,7 +52,6 @@ CCalendarWnd::CCalendarWnd()
 
 CCalendarWnd::~CCalendarWnd()
 {
-	GraphicsMisc::VerifyDeleteObject(m_font);
 }
 
 void CCalendarWnd::DoDataExchange(CDataExchange* pDX)
