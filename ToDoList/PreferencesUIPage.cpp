@@ -61,8 +61,9 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWDEFAULTFILTERS, m_bShowDefaultFilters);
 	DDX_Check(pDX, IDC_AUTORESORT, m_bAutoResort);
 	DDX_Check(pDX, IDC_ENABLECOLUMNHEADERSORTING, m_bEnableColumnHeaderSorting);
-	DDX_Check(pDX, IDC_STACKFIELDSANDCOMMENTS, m_bStackEditFieldsAndComments);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_STACKFIELDSANDCOMMENTS, m_bStackEditFieldsAndComments);
+//	DDX_Check(pDX, IDC_STACKFIELDSABOVECOMMENTS, m_bStackEditFieldsAboveComments);
 	DDX_Control(pDX, IDC_UITHEMEFILE, m_cbThemes);
 	DDX_Radio(pDX, IDC_MATCHTITLES, (int&)m_nTitleFilterOption);
 	DDX_CBIndex(pDX, IDC_NEWTASKPOSITION, (int&)m_nNewTaskPos);
@@ -74,7 +75,6 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
 	DDX_Check(pDX, IDC_INCLUDEWEBLINKINCOMMENTSPASTE, m_bIncludeWebLinksInCommentsPaste);
-//	DDX_Check(pDX, IDC_RTLCOMMENTS, m_bRTLComments);
 
 	if (pDX->m_bSaveAndValidate)
 		m_sUIThemeFile = m_cbThemes.GetThemePath();
@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CPreferencesUIPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_USEUITHEME, OnUseuitheme)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_COMMENTSFORMAT, OnSelchangeCommentsformat)
+	ON_BN_CLICKED(IDC_STACKFIELDSANDCOMMENTS, OnStackEditFieldsAndComments)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -105,6 +106,7 @@ BOOL CPreferencesUIPage::OnInitDialog()
 
 	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
 	GetDlgItem(IDC_COMMENTSFORMAT)->EnableWindow(m_nDefaultCommentsFormat != CB_ERR);
+	//GetDlgItem(IDC_STACKFIELDSABOVECOMMENTS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	// theming only available if XP themes are active
 	if (CThemed::IsAppThemed())
@@ -127,6 +129,15 @@ BOOL CPreferencesUIPage::OnInitDialog()
 void CPreferencesUIPage::OnSelchangeCommentsformat() 
 {
 	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
+
+	CPreferencesPageBase::OnControlChange();
+}
+
+void CPreferencesUIPage::OnStackEditFieldsAndComments() 
+{
+	UpdateData();
+
+	//GetDlgItem(IDC_STACKFIELDSABOVECOMMENTS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -161,6 +172,7 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bShowDefaultFilters = pPrefs->GetProfileInt(szKey, _T("ShowDefaultFilters"), TRUE);
 	m_bEnableColumnHeaderSorting = pPrefs->GetProfileInt(szKey, _T("EnableColumnHeaderSorting"), TRUE);
 	m_bStackEditFieldsAndComments = pPrefs->GetProfileInt(szKey, _T("StackEditFieldsAndComments"), TRUE);
+	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), FALSE);
 	m_bIncludeWebLinksInCommentsPaste = pPrefs->GetProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), TRUE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
@@ -233,6 +245,7 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("ShowDefaultFilters"), m_bShowDefaultFilters);
 	pPrefs->WriteProfileInt(szKey, _T("EnableColumnHeaderSorting"), m_bEnableColumnHeaderSorting);
 	pPrefs->WriteProfileInt(szKey, _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
+	pPrefs->WriteProfileInt(szKey, _T("StackCommentsAboveEditFields"), m_bStackCommentsAboveEditFields);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), m_bIncludeWebLinksInCommentsPaste);
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 

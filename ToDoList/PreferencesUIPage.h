@@ -81,6 +81,7 @@ public:
 	BOOL GetEnableColumnHeaderSorting() const { return m_bEnableColumnHeaderSorting; }
 	int GetDefaultTaskViews(CStringArray& aTypeIDs) const;
 	BOOL GetStackEditFieldsAndComments() const { return m_bStackEditFieldsAndComments; }
+	BOOL GetStackCommentsAboveEditFields() const { return (m_bStackEditFieldsAndComments && m_bStackCommentsAboveEditFields); }
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_bIncludeWebLinksInCommentsPaste; }
 //	BOOL Get() const { return ; }
 
@@ -109,9 +110,9 @@ protected:
 	BOOL	m_bShowDefaultFilters;
 	BOOL	m_bAutoResort;
 	BOOL	m_bEnableColumnHeaderSorting;
-	BOOL	m_bStackEditFieldsAndComments;
 	//}}AFX_DATA
-//	BOOL	m_bShowCtrlsAsColumns;
+	BOOL	m_bStackEditFieldsAndComments;
+	BOOL	m_bStackCommentsAboveEditFields;
 	BOOL	m_bIncludeWebLinksInCommentsPaste;
 	PUIP_NEWTASKPOS	m_nNewTaskPos;
 	PUIP_NEWTASKPOS	m_nNewSubtaskPos;
@@ -142,6 +143,7 @@ protected:
 	//}}AFX_MSG
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeCommentsformat();
+	afx_msg void OnStackEditFieldsAndComments();
 	DECLARE_MESSAGE_MAP()
 
 protected:

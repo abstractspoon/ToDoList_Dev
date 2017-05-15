@@ -966,6 +966,7 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	// figure out number of ctrl rows / columns
 	nCols = nRows = 2;
 	BOOL bStackedWithComments = GetStackCommentsAndControls();
+	BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
 
 	CDlgUnits dlu(this);
 	
@@ -1063,7 +1064,10 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	case TDCUIL_RIGHT: // vertical
 		if (bStackedWithComments)
 		{
-			rRequired.top = (rRequired.bottom - nRequiredHeight);
+			if (bStackCommentsAbove)
+				rRequired.top = (rRequired.bottom - nRequiredHeight);
+			else
+				rRequired.bottom = (rRequired.top + nRequiredHeight);
 
 			if (bPreserveSplitPos)
 				nRequiredWidth = m_nCommentsSize;
@@ -1078,8 +1082,11 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	case TDCUIL_LEFT:
 		if (bStackedWithComments)
 		{
-			rRequired.top = (rRequired.bottom - nRequiredHeight);
-	
+			if (bStackCommentsAbove)
+				rRequired.top = (rRequired.bottom - nRequiredHeight);
+			else
+				rRequired.bottom = (rRequired.top + nRequiredHeight);
+
 			if (bPreserveSplitPos)
 				nRequiredWidth = m_nCommentsSize;
 		}
@@ -1093,7 +1100,10 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	case TDCUIL_BOTTOM: // horizontal
 		if (bStackedWithComments)
 		{
-			rRequired.left = (rRequired.right - nRequiredWidth);
+			if (bStackCommentsAbove)
+				rRequired.left = (rRequired.right - nRequiredWidth);
+			else
+				rRequired.right = (rRequired.left + nRequiredWidth);
 
 			// align controls at top
 			rRequired.top = (rAvailable.bottom - m_nCommentsSize);
@@ -1130,6 +1140,8 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 
 	if (!bSplitting && bStackCommentsAndControls)
 	{
+		BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
+
 		const int MIN_STACKED_COMMENT_SIZE = 60;
 		CRect rStackedAvail(rAvailable);
 
@@ -1137,17 +1149,37 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 		{
 		case TDCUIL_RIGHT: // vertical
 		case TDCUIL_LEFT:
-			bCtrlsFit = ((rCtrls.top - rAvailable.top) >= MIN_STACKED_COMMENT_SIZE);
+			if (bStackCommentsAbove)
+			{
+				bCtrlsFit = ((rCtrls.top - rAvailable.top) >= MIN_STACKED_COMMENT_SIZE);
 
-			if (!bCtrlsFit)
-				rStackedAvail.top += MIN_STACKED_COMMENT_SIZE;
+				if (!bCtrlsFit)
+					rStackedAvail.top += MIN_STACKED_COMMENT_SIZE;
+			}
+			else
+			{
+				bCtrlsFit = ((rAvailable.bottom - rCtrls.bottom) >= MIN_STACKED_COMMENT_SIZE);
+
+				if (!bCtrlsFit)
+					rStackedAvail.bottom -= MIN_STACKED_COMMENT_SIZE;
+			}
 			break;
 			
 		case TDCUIL_BOTTOM: // horizontal
-			bCtrlsFit = ((rCtrls.left - rAvailable.left) >= MIN_STACKED_COMMENT_SIZE);
-			
-			if (!bCtrlsFit)
-				rStackedAvail.left += MIN_STACKED_COMMENT_SIZE;
+			if (bStackCommentsAbove)
+			{
+				bCtrlsFit = ((rCtrls.left - rAvailable.left) >= MIN_STACKED_COMMENT_SIZE);
+
+				if (!bCtrlsFit)
+					rStackedAvail.left += MIN_STACKED_COMMENT_SIZE;
+			}
+			else
+			{
+				bCtrlsFit = ((rAvailable.right - rCtrls.right) >= MIN_STACKED_COMMENT_SIZE);
+
+				if (!bCtrlsFit)
+					rStackedAvail.right -= MIN_STACKED_COMMENT_SIZE;
+			}
 			break;
 		}
 
@@ -1412,32 +1444,65 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 			
 			if (CalcRequiredControlsRect(rAvailable, rCtrls, nCols, nRows, TRUE))
 			{
+				BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
+
 				switch (m_nCommentsPos)
 				{
 				case TDCUIL_RIGHT: // vertical
-					rComments.top += 2;
-					rComments.bottom = rCtrls.top;
-					rComments.left = rAvailable.right - nCommentSize;
-					rComments.right = rCtrls.right;
+					{
+						if (bStackCommentsAbove)
+						{
+							rComments.top += 2;
+							rComments.bottom = rCtrls.top;
+						}
+						else
+						{
+							rComments.bottom -= 2;
+							rComments.top = rCtrls.bottom + SPLITSIZE;
+						}
+						rComments.left = rAvailable.right - nCommentSize;
+						rComments.right = rCtrls.right;
 
-					rAvailable.right = rComments.left - SPLITSIZE;
+						rAvailable.right = rComments.left - SPLITSIZE;
+					}
 					break;
 
 				case TDCUIL_LEFT: // vertical
-					rComments.top += 2;
-					rComments.bottom = rCtrls.top;
-					rComments.left = rAvailable.left;
-					rComments.right = rAvailable.left + nCommentSize;
+					{
+						if (bStackCommentsAbove)
+						{
+							rComments.top += 2;
+							rComments.bottom = rCtrls.top;
+						}
+						else
+						{
+							rComments.bottom -= 2;
+							rComments.top = rCtrls.bottom + SPLITSIZE;
+						}
+						rComments.left = rAvailable.left;
+						rComments.right = rAvailable.left + nCommentSize;
 
-					rAvailable.left = rComments.right + SPLITSIZE;
+						rAvailable.left = rComments.right + SPLITSIZE;
+					}
 					break;
 					
 				case TDCUIL_BOTTOM: // horizontal
-					rComments.right = rCtrls.left - SPLITSIZE;				
-					rComments.top = rAvailable.bottom - nCommentSize;				
-					rComments.bottom = rAvailable.bottom;
-					
-					rAvailable.bottom = rComments.top - SPLITSIZE;
+					{
+						if (bStackCommentsAbove)
+						{
+							rComments.left += 2;
+							rComments.right = rCtrls.left - SPLITSIZE;
+						}
+						else
+						{
+							rComments.right -= 2;
+							rComments.left = rCtrls.right + SPLITSIZE;
+						}
+						rComments.top = rCtrls.top;
+						rComments.bottom = rCtrls.top + nCommentSize;
+
+						rAvailable.bottom = rComments.top - SPLITSIZE;
+					}
 					break;
 				}
 			}
@@ -5683,6 +5748,7 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_COLORTEXTBYATTRIBUTE:
 		case TDCS_COLORTEXTBYNONE:
 		case TDCS_ALLOWCOMMENTSSTACKING:
+		case TDCS_STACKCOMMENTSABOVEEDITS:
 			if (bWantUpdate)
 				Resize();
 			break;

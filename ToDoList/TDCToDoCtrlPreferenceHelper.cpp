@@ -63,6 +63,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	CTDCStylesMap styles;
 
 	styles[TDCS_ALLOWCOMMENTSSTACKING] = prefs.GetStackEditFieldsAndComments();
+	styles[TDCS_STACKCOMMENTSABOVEEDITS] = prefs.GetStackCommentsAboveEditFields();
 	styles[TDCS_ALLOWPARENTTIMETRACKING] = prefs.GetAllowParentTimeTracking();
 	styles[TDCS_ALLOWTREEITEMCHECKBOX] = prefs.GetAllowCheckboxAgainstTreeItem();
 	styles[TDCS_ALWAYSHIDELISTPARENTS] = prefs.GetAlwaysHideListParents();

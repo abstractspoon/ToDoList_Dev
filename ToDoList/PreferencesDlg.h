@@ -218,6 +218,7 @@ public:
 	BOOL GetEnableColumnHeaderSorting() const { return m_pageUI.GetEnableColumnHeaderSorting(); }
 	int GetDefaultTaskViews(CStringArray& aViews) const { return m_pageUI.GetDefaultTaskViews(aViews); }
 	BOOL GetStackEditFieldsAndComments() const { return m_pageUI.GetStackEditFieldsAndComments(); }
+	BOOL GetStackCommentsAboveEditFields() const { return m_pageUI.GetStackCommentsAboveEditFields(); }
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_pageUI.GetIncludeWebLinksInCommentsPaste(); }
 
 	// CPreferencesUIVisibilityPage
