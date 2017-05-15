@@ -1474,48 +1474,6 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 				break;
 			}
 		}
-		
-		// splitter control between comments and controls/task tree
-		if (m_nCommentsPos == TDCUIL_BOTTOM)
-		{
-			CRect rDiv(rComments);
-			
-			switch (m_nCommentsPos)
-			{
-			case TDCUIL_RIGHT: // vertical
-				{
-					rDiv.right = rDiv.left - SPLITSIZE;
-					rDiv.left = rDiv.right - 2;
-					rDiv.bottom = rAvailable.bottom;
-					
-					if (!bMaxTasklist)
-						rAvailable.right -= (SPLITSIZE + 2);
-				}
-				break;
-				
-			case TDCUIL_LEFT:
-				{
-					rDiv.left = rDiv.right + SPLITSIZE;
-					rDiv.right = rDiv.left + 2;
-					rDiv.bottom = rAvailable.bottom;
-					
-					if (!bMaxTasklist)
-						rAvailable.left += (SPLITSIZE + 2);
-				}
-				break;
-				
-			case TDCUIL_BOTTOM: // horizontal
-				{
-					rDiv.bottom = rDiv.top - SPLITSIZE;
-					rDiv.top = rDiv.bottom - 2;
-					rDiv.right = rAvailable.right;
-
-					if (!bMaxTasklist)
-						rAvailable.bottom -= (SPLITSIZE + 2);
-				}
-				break;
-			}
-		}
 	}
 
 	if (!rComments.IsRectEmpty())
