@@ -123,10 +123,10 @@ CString CTDLIconComboBox::GetSelectedImage() const
 	return sItem; // empty
 }
 
-int CTDLIconComboBox::GetChecked(CStringArray& aItems) const
+int CTDLIconComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) const
 {
 	CStringArray aTemp;
-	int nNumItems = CEnCheckComboBox::GetChecked(aTemp);
+	int nNumItems = CEnCheckComboBox::GetChecked(aTemp, nCheck);
 
 	aItems.RemoveAll();
 

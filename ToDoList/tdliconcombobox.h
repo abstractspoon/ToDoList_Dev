@@ -23,7 +23,7 @@ public:
 	int SelectImage(const CString& sImage);
 	CString GetSelectedImage() const;
 
-	int GetChecked(CStringArray& aItems) const;
+	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	BOOL SetChecked(const CStringArray& aItems);
 
 // Attributes
