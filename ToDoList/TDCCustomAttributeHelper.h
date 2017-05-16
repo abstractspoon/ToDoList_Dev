@@ -18,9 +18,14 @@ class CTDCImageList;
 class CTDCCustomAttributeHelper  
 {
 public:
-	static BOOL RebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+	static BOOL RebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
-										const CTDCImageList& ilImages, CWnd* pParent, UINT nCtrlIDPos);
+										const CTDCImageList& ilImages, 
+										CWnd* pParent, UINT nCtrlIDPos);
+	static BOOL RebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										CTDCCustomControlArray& aControls, 
+										const CTDCImageList& ilImages, 
+										CWnd* pParent, UINT nCtrlIDPos);
 
 	static void CleanupCustomAttributeUI(CTDCCustomControlArray& aControls, CWnd* pParent);
 	
@@ -118,6 +123,13 @@ protected:
 	
 	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 	static CString GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy);
+
+	enum RCAUI_TYPE { RCAUIT_EDIT, RCAUIT_FILTER };
+	static BOOL RebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										CTDCCustomControlArray& aControls, 
+										const CTDCImageList& ilImages, 
+										CWnd* pParent, UINT nCtrlIDPos, RCAUI_TYPE nType);
+	static BOOL WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, RCAUI_TYPE nType);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

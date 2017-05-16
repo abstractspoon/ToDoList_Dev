@@ -366,54 +366,30 @@ BOOL CTDCCustomAttributeHelper::GetControl(const CString& sUniqueID, const CTDCC
 
 void CTDCCustomAttributeHelper::CleanupCustomAttributeUI(CTDCCustomControlArray& aControls, CWnd* pParent)
 {
-	for (int nCtrl = 0; nCtrl < aControls.GetSize(); nCtrl++)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-		
-		CWnd* pCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
-		
-		if (pCtrl)
-		{
-			pCtrl->DestroyWindow();
-			delete pCtrl;
-		}
-		
-		CWnd* pLabel = pParent->GetDlgItem(ctrl.nLabelID);
-		
-		if (pLabel)
-		{
-			pLabel->DestroyWindow();
-			delete pLabel;
-		}
-
-		// Buddy controls
-		if (ctrl.nBuddyCtrlID)
-		{
-			CWnd* pCtrl = pParent->GetDlgItem(ctrl.nBuddyCtrlID);
-			
-			if (pCtrl)
-			{
-				pCtrl->DestroyWindow();
-				delete pCtrl;
-			}
-			
-			CWnd* pLabel = pParent->GetDlgItem(ctrl.nBuddyLabelID);
-			
-			if (pLabel)
-			{
-				pLabel->DestroyWindow();
-				delete pLabel;
-			}
-		}
-	}
-	
+	aControls.DeleteCtrls(pParent);
 	aControls.RemoveAll();
+}
+
+BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										CTDCCustomControlArray& aControls, 
+										const CTDCImageList& ilImages, 
+										CWnd* pParent, UINT nCtrlIDPos)
+{
+	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, RCAUIT_EDIT);
+}
+
+BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										CTDCCustomControlArray& aControls, 
+										const CTDCImageList& ilImages, 
+										CWnd* pParent, UINT nCtrlIDPos)
+{
+	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, RCAUIT_FILTER);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 														 CTDCCustomControlArray& aControls, 
 														 const CTDCImageList& ilImages,
-														 CWnd* pParent, UINT nCtrlIDPos)
+														 CWnd* pParent, UINT nCtrlIDPos, RCAUI_TYPE nType)
 {
 	ASSERT_VALID(pParent);
 
@@ -430,10 +406,10 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
 
-		// don't add disabled controls
-		if (!attribDef.bEnabled)
+		// don't add unwanted controls
+		if (!WantCtrlUI(attribDef, nType))
 			continue;
-
+		
 		// NOTE: flag and image types don't need controls because they are 
 		// handled by clicking the tasklist directly
 		switch (attribDef.GetDataType())
@@ -518,6 +494,29 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 	}
 
 	return TRUE;
+}
+
+BOOL CTDCCustomAttributeHelper::WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, RCAUI_TYPE nType)
+{
+	if (attribDef.bEnabled)
+	{
+		switch (nType)
+		{
+		case RCAUIT_EDIT:
+			return TRUE;
+
+		case RCAUIT_FILTER:
+			if (attribDef.HasFeature(TDCCAF_FILTER))
+				return TRUE;
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return FALSE;
 }
 
 CString CTDCCustomAttributeHelper::GetAttributeTypeID(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs)

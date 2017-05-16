@@ -897,6 +897,7 @@ enum // custom attribute features
 	TDCCAF_MAXIMIZE			= 0x0008, // Numbers/Dates only
 	TDCCAF_HIDEZERO			= 0x0010, // Numbers only
 	TDCCAF_SHOWTIME			= 0x0020, // Dates only
+	TDCCAF_FILTER			= 0x0040, 
 };
 
 enum TDC_PREPAREPATH 

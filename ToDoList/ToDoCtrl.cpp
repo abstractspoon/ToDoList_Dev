@@ -6224,7 +6224,7 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
- 	CTDCCustomAttributeHelper::RebuildCustomAttributeUI(m_aCustomAttribDefs, m_aCustomControls, 
+ 	CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(m_aCustomAttribDefs, m_aCustomControls, 
  														m_ilTaskIcons, this, IDC_VERSION);
 	Resize();
 

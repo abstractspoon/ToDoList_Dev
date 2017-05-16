@@ -30,35 +30,28 @@ const int CTRLLABELLEN = 45;
 const int CTRLLEN = 75;
 const int CTRLHEIGHT = 13;
 
-struct FILTERCTRL
+static CTRLITEM FILTERCTRLS[] = 
 {
-	UINT nIDLabel;
-	UINT nIDCtrl;
-	TDC_ATTRIBUTE nType;
+	{ IDC_FILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE },
+	{ IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_NONE },
+	{ IDC_STARTFILTERCOMBO,		IDC_STARTFILTERLABEL,		TDCA_STARTDATE },
+	{ IDC_USERSTARTDATE,		0,							TDCA_STARTDATE },
+	{ IDC_STARTNEXTNDAYS,		0,							TDCA_STARTDATE },
+	{ IDC_DUEFILTERCOMBO,		IDC_DUEFILTERLABEL,			TDCA_DUEDATE },
+	{ IDC_USERDUEDATE,			0,							TDCA_DUEDATE },
+	{ IDC_DUENEXTNDAYS,			0,							TDCA_DUEDATE },
+	{ IDC_PRIORITYFILTERCOMBO,	IDC_PRIORITYFILTERLABEL,	TDCA_PRIORITY },
+	{ IDC_RISKFILTERCOMBO,		IDC_RISKFILTERLABEL,		TDCA_RISK },
+	{ IDC_ALLOCTOFILTERCOMBO,	IDC_ALLOCTOFILTERLABEL,		TDCA_ALLOCTO },
+	{ IDC_ALLOCBYFILTERCOMBO,	IDC_ALLOCBYFILTERLABEL,		TDCA_ALLOCBY },
+	{ IDC_STATUSFILTERCOMBO,	IDC_STATUSFILTERLABEL,		TDCA_STATUS },
+	{ IDC_CATEGORYFILTERCOMBO,	IDC_CATEGORYFILTERLABEL,	TDCA_CATEGORY },
+	{ IDC_TAGFILTERCOMBO,		IDC_TAGFILTERLABEL,			TDCA_TAGS },
+	{ IDC_VERSIONFILTERCOMBO,	IDC_VERSIONFILTERLABEL,		TDCA_VERSION },
+	{ IDC_OPTIONFILTERCOMBO,	IDC_OPTIONFILTERLABEL,		TDCA_NONE }
 };
 
-static FILTERCTRL FILTERCTRLS[] = 
-{
-	{ IDC_FILTERLABEL,			IDC_FILTERCOMBO,			TDCA_NONE },
-	{ IDC_TITLEFILTERLABEL,		IDC_TITLEFILTERTEXT,		TDCA_NONE },
-	{ IDC_STARTFILTERLABEL,		IDC_STARTFILTERCOMBO,		TDCA_STARTDATE },
-	{ 0,						IDC_USERSTARTDATE,			TDCA_STARTDATE },
-	{ 0,						IDC_STARTNEXTNDAYS,			TDCA_STARTDATE },
-	{ IDC_DUEFILTERLABEL,		IDC_DUEFILTERCOMBO,			TDCA_DUEDATE },
-	{ 0,						IDC_USERDUEDATE,			TDCA_DUEDATE },
-	{ 0,						IDC_DUENEXTNDAYS,			TDCA_DUEDATE },
-	{ IDC_PRIORITYFILTERLABEL,	IDC_PRIORITYFILTERCOMBO,	TDCA_PRIORITY },
-	{ IDC_RISKFILTERLABEL,		IDC_RISKFILTERCOMBO,		TDCA_RISK },
-	{ IDC_ALLOCTOFILTERLABEL,	IDC_ALLOCTOFILTERCOMBO,		TDCA_ALLOCTO },
-	{ IDC_ALLOCBYFILTERLABEL,	IDC_ALLOCBYFILTERCOMBO,		TDCA_ALLOCBY },
-	{ IDC_STATUSFILTERLABEL,	IDC_STATUSFILTERCOMBO,		TDCA_STATUS },
-	{ IDC_CATEGORYFILTERLABEL,	IDC_CATEGORYFILTERCOMBO,	TDCA_CATEGORY },
-	{ IDC_TAGFILTERLABEL,		IDC_TAGFILTERCOMBO,			TDCA_TAGS },
-	{ IDC_VERSIONFILTERLABEL,	IDC_VERSIONFILTERCOMBO,		TDCA_VERSION },
-	{ IDC_OPTIONFILTERLABEL,	IDC_OPTIONFILTERCOMBO,		TDCA_NONE }
-};
-
-const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(FILTERCTRL);
+const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(CTRLITEM);
 
 #define WM_WANTCOMBOPROMPT (WM_APP+1)
 
@@ -523,7 +516,7 @@ void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
 	
 	while (nLabel--)
 	{
-		UINT nLabelID = FILTERCTRLS[nLabel].nIDLabel;
+		UINT nLabelID = FILTERCTRLS[nLabel].nLabelID;
 
 		if (nLabelID)
 		{
@@ -625,14 +618,14 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 	for (int nCtrl = 0; nCtrl < NUMFILTERCTRLS; nCtrl++)
 	{
 		CRect rCtrl, rCtrlDLU;
-		const FILTERCTRL& fc = FILTERCTRLS[nCtrl];
+		const CTRLITEM& fc = FILTERCTRLS[nCtrl];
 		
 		// display this control only if the corresponding column
 		// is also showing
-		BOOL bWantCtrl = WantShowFilter(fc.nType);
+		BOOL bWantCtrl = WantShowFilter(fc.nAttrib);
 		
 		// special case: User Dates
-		switch (fc.nIDCtrl)
+		switch (fc.nCtrlID)
 		{
 		case IDC_USERSTARTDATE:
 			bWantCtrl &= (m_filter.nStartBy == FD_USER);
@@ -675,8 +668,8 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 			rCtrl = rCtrlDLU;
 			dlu.ToPixels(rCtrl);
 			
-			if (fc.nIDLabel && !bCalcOnly)
-				dwm.MoveWindow(GetDlgItem(fc.nIDLabel), rCtrl);
+			if (fc.nLabelID && !bCalcOnly)
+				dwm.MoveWindow(GetDlgItem(fc.nLabelID), rCtrl);
 			
 			// update YPos for the ctrl
 			rCtrlDLU.OffsetRect(0, nCtrlHeightDLU);
@@ -688,7 +681,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 			if (!bCalcOnly)
 			{
 				// add 200 to combo dropdowns
-				CWnd* pCtrl = GetDlgItem(fc.nIDCtrl);
+				CWnd* pCtrl = GetDlgItem(fc.nCtrlID);
 				
 				if (CWinClasses::IsComboBox(*pCtrl))
 					rCtrl.bottom += 200;
@@ -706,7 +699,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 			BOOL bEnable = bWantCtrl;
 			
 			// special cases
-			switch (fc.nIDCtrl)
+			switch (fc.nCtrlID)
 			{
 			case IDC_USERSTARTDATE:
 				bEnable &= (m_filter.nStartBy == FD_USER);
@@ -725,14 +718,14 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 				bEnable &= ((m_filter.nShow != FS_SELECTED) && !m_bCustomFilter);
 			}
 
-			if (fc.nIDLabel)
+			if (fc.nLabelID)
 			{
-				GetDlgItem(fc.nIDLabel)->ShowWindow(bWantCtrl ? SW_SHOW : SW_HIDE);
-				GetDlgItem(fc.nIDLabel)->EnableWindow(bNonGrayBkgnd ? bWantCtrl : bEnable);
+				GetDlgItem(fc.nLabelID)->ShowWindow(bWantCtrl ? SW_SHOW : SW_HIDE);
+				GetDlgItem(fc.nLabelID)->EnableWindow(bNonGrayBkgnd ? bWantCtrl : bEnable);
 			}
 			
-			GetDlgItem(fc.nIDCtrl)->ShowWindow(bWantCtrl ? SW_SHOW : SW_HIDE);
-			GetDlgItem(fc.nIDCtrl)->EnableWindow(bEnable);
+			GetDlgItem(fc.nCtrlID)->ShowWindow(bWantCtrl ? SW_SHOW : SW_HIDE);
+			GetDlgItem(fc.nCtrlID)->EnableWindow(bEnable);
 		}
 	}
 
@@ -901,8 +894,8 @@ BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC)
 
 		while (nCtrl--)
 		{
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nIDLabel, pDC, TRUE);
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nIDCtrl, pDC, TRUE);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, pDC, TRUE);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, pDC, TRUE);
 		}
 	}
 	m_bRefreshBkgndColor = FALSE;

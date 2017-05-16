@@ -459,6 +459,8 @@ struct CTRLITEM
 
 struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 {
+	friend class CTDCCustomControlArray;
+
 	CUSTOMATTRIBCTRLITEM()
 	{
 		nCtrlID = nLabelID = nBuddyCtrlID = nBuddyLabelID = 0;
@@ -481,14 +483,49 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 
 		return TRUE;
 	}
+
+	void DeleteCtrls(const CWnd* pParent)
+	{
+		DeleteCtrl(pParent, nCtrlID);
+		DeleteCtrl(pParent, nLabelID);
+		DeleteCtrl(pParent, nBuddyCtrlID);
+		DeleteCtrl(pParent, nBuddyLabelID);
+	}
 	
 	CString sAttribID;
 	UINT nBuddyCtrlID;
 	UINT nBuddyLabelID;
+
+protected:
+	void DeleteCtrl(const CWnd* pParent, UINT& nCtrlID)
+	{
+		CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
+
+		if (pCtrl)
+		{
+			pCtrl->DestroyWindow();
+			delete pCtrl;
+		}
+
+		nCtrlID = 0;
+	}
+
 };
 
 class CTDCControlArray : public CArray<CTRLITEM, CTRLITEM&> {};
-class CTDCCustomControlArray : public CArray<CUSTOMATTRIBCTRLITEM, CUSTOMATTRIBCTRLITEM&> {};
+
+class CTDCCustomControlArray : public CArray<CUSTOMATTRIBCTRLITEM, CUSTOMATTRIBCTRLITEM&> 
+{
+public:
+	void DeleteCtrls(const CWnd* pParent)
+	{
+		for (int nCtrl = 0; nCtrl < GetSize(); nCtrl++)
+		{
+			GetAt(nCtrl).DeleteCtrls(pParent);
+		}
+	}
+
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
