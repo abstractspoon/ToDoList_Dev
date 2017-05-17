@@ -1643,6 +1643,8 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 						break;
 				}
 			}
+
+			PostDrawListItem(pDC, nItem, dwTaskID);
 		}
 		return CDRF_SKIPDEFAULT;
 								
