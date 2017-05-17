@@ -270,7 +270,7 @@ BOOL CGanttTreeListCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTim
 
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
-	if (GetStartDueDates(*pGI, dtStart, dtDue))
+	if (GetTaskStartDueDates(*pGI, dtStart, dtDue))
 	{
 		// handle durations of whole days
 		COleDateTime dtDuration(dtDue - dtStart);
@@ -2582,7 +2582,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 		case GTLCC_STARTDATE:
 			{
 				COleDateTime dtStart, dtDummy;
-				GetStartDueDates(gi, dtStart, dtDummy);
+				GetTaskStartDueDates(gi, dtStart, dtDummy);
 
 				sItem = CDateHelper::FormatDate(dtStart);
 			}
@@ -2591,7 +2591,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 		case GTLCC_ENDDATE:
 			{
 				COleDateTime dtDue, dtDummy;
-				GetStartDueDates(gi, dtDummy, dtDue);
+				GetTaskStartDueDates(gi, dtDummy, dtDue);
 
 				sItem = CDateHelper::FormatDate(dtDue);
 			}
@@ -3466,7 +3466,7 @@ BOOL CGanttTreeListCtrl::HasDisplayDates(const GANTTITEM& gi) const
 
 	// else
 	COleDateTime dummy1, dummy2;
-	return GetStartDueDates(gi, dummy1, dummy2);
+	return GetTaskStartDueDates(gi, dummy1, dummy2);
 }
 
 BOOL CGanttTreeListCtrl::HasDoneDate(const GANTTITEM& gi) const
@@ -3478,7 +3478,7 @@ BOOL CGanttTreeListCtrl::HasDoneDate(const GANTTITEM& gi) const
 	return CDateHelper::IsDateSet(gi.dtDone);
 }
 
-BOOL CGanttTreeListCtrl::GetStartDueDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL CGanttTreeListCtrl::GetTaskStartDueDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	BOOL bDoneSet = FALSE;
 
@@ -3843,7 +3843,7 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	// else normal bar
 	COleDateTime dtStart, dtDue;
 	
-	if (!GetStartDueDates(gi, dtStart, dtDue))
+	if (!GetTaskStartDueDates(gi, dtStart, dtDue))
 		return;
 
 	// check for visibility
@@ -3953,7 +3953,7 @@ void CGanttTreeListCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, cons
 		return;
 
 	COleDateTime dtStart, dtDue;
-	GetStartDueDates(gi, dtStart, dtDue);
+	GetTaskStartDueDates(gi, dtStart, dtDue);
 
 	BOOL bDrawStart = (dtStart >= dtMonthStart);
 	BOOL bDrawEnd = (dtDue <= dtMonthEnd);
@@ -5062,7 +5062,7 @@ void CGanttTreeListCtrl::ScrollToTask(DWORD dwTaskID)
 	
 	COleDateTime dtStart, dtDue;
 	
-	if (GetStartDueDates(*pGI, dtStart, dtDue))
+	if (GetTaskStartDueDates(*pGI, dtStart, dtDue))
 	{
 		ScrollTo(dtStart);
 	}
@@ -5508,7 +5508,7 @@ DWORD CGanttTreeListCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTL
 		return 0;
 
 	COleDateTime dtStart, dtDue;
-	GetStartDueDates(*pGI, dtStart, dtDue);
+	GetTaskStartDueDates(*pGI, dtStart, dtDue);
 
 	// Calculate the task rect
 	CRect rTask;
@@ -5679,7 +5679,7 @@ BOOL CGanttTreeListCtrl::StartDragging(const CPoint& ptCursor)
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
 	COleDateTime dtStart, dtDue;
-	GetStartDueDates(*pGI, dtStart, dtDue);
+	GetTaskStartDueDates(*pGI, dtStart, dtDue);
 	
 	if (!pGI->HasDue())
 	{
@@ -5847,7 +5847,7 @@ BOOL CGanttTreeListCtrl::UpdateDragging(const CPoint& ptCursor)
 		GET_GI_RET(dwTaskID, pGI, FALSE);
 
 		COleDateTime dtStart, dtDue;
-		GetStartDueDates(*pGI, dtStart, dtDue);
+		GetTaskStartDueDates(*pGI, dtStart, dtDue);
 
 		// update taskID to refID because we're really dragging the refID
 		if (pGI->dwOrgRefID)
