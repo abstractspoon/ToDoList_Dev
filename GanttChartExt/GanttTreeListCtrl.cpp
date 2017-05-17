@@ -2007,11 +2007,9 @@ void CGanttTreeListCtrl::ClearDependencyPickLine(CDC* pDC)
 		
 		// calc 'from' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
-		int nFrom = FindListItem(dwFromTaskID);
-
 		GANTTDEPENDENCY depend;
 		
-		if (CalcDependencyEndPos(nFrom, depend, TRUE))
+		if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
 		{
 			depend.SetTo(m_ptLastDependPick);
 			depend.Draw(pDC, rClient, TRUE);
@@ -2049,11 +2047,9 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 	{
 		// calc 'from ' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
-		int nFrom = FindListItem(dwFromTaskID);
-		
 		GANTTDEPENDENCY depend;
 
-		if (!CalcDependencyEndPos(nFrom, depend, TRUE))
+		if (!CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
 			return FALSE;
 
 		// calc new 'To' point to see if anything has actually changed
@@ -2063,9 +2059,7 @@ BOOL CGanttTreeListCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 		{
-			int nTo = FindListItem(dwToTaskID);
-			
-			if (!CalcDependencyEndPos(nTo, depend, FALSE, &ptTo))
+			if (!CalcDependencyEndPos(dwToTaskID, depend, FALSE, &ptTo))
 				return FALSE;
 		}
 		else // use current cursor pos
@@ -3738,9 +3732,9 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	return (rDate.right > 0);
 }
 
-BOOL CGanttTreeListCtrl::BuildDependency(int nFrom, int nTo, GANTTDEPENDENCY& depend) const
+BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
 {
-	if (CalcDependencyEndPos(nFrom, depend, TRUE) && CalcDependencyEndPos(nTo, depend, FALSE))
+	if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE) && CalcDependencyEndPos(dwToTaskID, depend, FALSE))
 		return TRUE;
 
 	// else
@@ -3819,7 +3813,12 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 
 				// the 'to' item may not be visible (expanded)
 				if (nTo == -1)
+				{
+					// Look up the chain for the first visible parent
+
+
 					continue;
+				}
 				
 				// and both items may be above or below the visible range
 				if ((nFrom < nFirstVis) && (nTo < nFirstVis))
@@ -3840,18 +3839,9 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 	return aDepends.GetSize();
 }
 
-BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwToTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
-	if (nItem < 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	DWORD dwTaskID = GetTaskID(nItem);
-	ASSERT(dwTaskID);
-	
-	GANTTDISPLAY* pGD = m_display.GetItem(dwTaskID);
+	GANTTDISPLAY* pGD = m_display.GetItem(dwToTaskID);
 	
 	if (!pGD)
 	{
@@ -3865,19 +3855,24 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(int nItem, GANTTDEPENDENCY& depend
 	if (nPos == GCDR_NOTDRAWN)
 		return FALSE;
 	
+	int nTo = FindListItem(dwToTaskID);
+
+	if (nTo == -1)
+		return FALSE;
+
 	CRect rItem;
-	VERIFY(GetListItemRect(nItem, rItem));
+	VERIFY(GetListItemRect(nTo, rItem));
 	
 	CPoint pt((nPos - nScrollPos), ((rItem.top + rItem.bottom) / 2));
 
 	if (bFrom)
 	{
-		depend.SetFrom(pt, dwTaskID);
+		depend.SetFrom(pt, dwToTaskID);
 	}
 	else
 	{
 		pt.x--;
-		depend.SetTo(pt, dwTaskID);
+		depend.SetTo(pt, dwToTaskID);
 	}
 
 	if (lpp)
