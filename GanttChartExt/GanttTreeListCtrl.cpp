@@ -2264,7 +2264,7 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 
 					return 0; // eat
 				}
-				else if (EndDragging(lp))
+				else if (IsDragging() && EndDragging(lp))
 				{
 					return 0; // eat
 				}
