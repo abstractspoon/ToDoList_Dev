@@ -3725,20 +3725,11 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 		rDate.left = rMonth.left;
 
 	if (dtTo < dtMonthEnd)
-		rDate.right = (rMonth.left + (int)(((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth)/* + 0.5*/));
+		rDate.right = (rMonth.left + (int)(((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth)));
 	else
 		rDate.right = rMonth.right;
 
 	return (rDate.right > 0);
-}
-
-BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
-{
-	if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE) && CalcDependencyEndPos(dwToTaskID, depend, FALSE))
-		return TRUE;
-
-	// else
-	return FALSE;
 }
 
 DWORD CGanttTreeListCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
@@ -3783,7 +3774,7 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 	m_list.GetClientRect(rClient);
 
 	CHTIMap mapItems;
-	TCH().BuildHTIMap(mapItems, TRUE);
+	TCH().BuildHTIMap(mapItems);
 	
 	// iterate all list items checking for dependencies
 	int nFirstVis = m_list.GetTopIndex();
@@ -3811,26 +3802,17 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 
 				int nTo = FindListItem(dwToTaskID, mapItems);
 
-				// the 'to' item may not be visible (expanded)
-				if (nTo == -1)
-				{
-					// Look up the chain for the first visible parent
-
-
-					continue;
-				}
-				
 				// and both items may be above or below the visible range
-				if ((nFrom < nFirstVis) && (nTo < nFirstVis))
+				if ((nFrom < nFirstVis) && (nTo < nFirstVis) && (nTo != -1))
 					continue;
-				
-				if ((nFrom >= nLastVis) && (nTo >= nLastVis))
+
+				if ((nFrom >= nLastVis) && (nTo >= nLastVis) && (nTo != -1))
 					continue;
 				
 				// else
 				GANTTDEPENDENCY depend;
 
-				if (BuildDependency(nFrom, nTo, depend))
+				if (BuildDependency(dwFromTaskID, dwToTaskID, mapItems, depend))
 					aDepends.Add(depend);
 			}
 		}
@@ -3839,40 +3821,103 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 	return aDepends.GetSize();
 }
 
-BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwToTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, const CHTIMap& mapItems, GANTTDEPENDENCY& depend) const
 {
-	GANTTDISPLAY* pGD = m_display.GetItem(dwToTaskID);
+	if (CalcDependencyEndPos(dwFromTaskID, mapItems, depend, TRUE) && 
+		CalcDependencyEndPos(dwToTaskID, mapItems, depend, FALSE))
+	{
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, const CHTIMap& mapItems, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+{
+	int nItem = FindListItem(dwTaskID, mapItems), nPos = GCDR_NOTDRAWN;
+	const GANTTDISPLAY* pGD = m_display.GetItem(dwTaskID);
+
+	if (pGD)
+	{
+		if (nItem == -1) // == Collapsed
+		{
+			// Use first visible parent as surrogate
+			HTREEITEM hti = mapItems.GetItem(dwTaskID);
+			ASSERT(hti);
+
+			while (!TCH().IsItemVisible(hti))
+				hti = m_tree.GetParentItem(hti);
+
+			DWORD dwParentID = GetTaskID(hti);
+
+			nItem = FindListItem(dwParentID, mapItems);
+			ASSERT(nItem != -1);
+		}
+
+		nPos = (bFrom ? pGD->nStartPos : pGD->nEndPos);
+	}
+	else
+	{
+		if (nItem != -1)
+		{
+			// Means it's out of view and hasn't been drawn yet
+			// so we guesstimate where the item is
+			const GANTTITEM* pGI = NULL;
+			GET_GI_RET(dwTaskID, pGI, FALSE);
+
+			if (bFrom)
+				nPos = GetScrollPosFromDate(pGI->dtStart);
+			else
+				nPos = GetScrollPosFromDate(pGI->dtDue);
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+
+	return CalcDependencyEndPos(dwTaskID, nItem, nPos, depend, bFrom, lpp);
+}
+
+BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+{
+	const GANTTDISPLAY* pGD = m_display.GetItem(dwTaskID);
 	
 	if (!pGD)
 	{
-		// Just means it's out of view and hasn't been drawn yet
 		return FALSE;
 	}
 
+	int nItem = FindListItem(dwTaskID);
 	int nPos = (bFrom ? pGD->nStartPos : pGD->nEndPos);
-	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
+
+	return CalcDependencyEndPos(dwTaskID, nItem, nPos, depend, bFrom, lpp);
+}
+
+BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, int nPos, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+{
+	if (nItem == -1)
+		return FALSE;
 
 	if (nPos == GCDR_NOTDRAWN)
 		return FALSE;
-	
-	int nTo = FindListItem(dwToTaskID);
 
-	if (nTo == -1)
-		return FALSE;
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 	CRect rItem;
-	VERIFY(GetListItemRect(nTo, rItem));
+	VERIFY(GetListItemRect(nItem, rItem));
 	
 	CPoint pt((nPos - nScrollPos), ((rItem.top + rItem.bottom) / 2));
 
 	if (bFrom)
 	{
-		depend.SetFrom(pt, dwToTaskID);
+		depend.SetFrom(pt, dwTaskID);
 	}
 	else
 	{
 		pt.x--;
-		depend.SetTo(pt, dwToTaskID);
+		depend.SetTo(pt, dwTaskID);
 	}
 
 	if (lpp)

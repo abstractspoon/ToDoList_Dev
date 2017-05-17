@@ -361,8 +361,9 @@ protected:
 	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
 	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
 
-	BOOL CalcDependencyEndPos(DWORD dwToTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, const CHTIMap& mapItems, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, const CHTIMap& mapItems, GANTTDEPENDENCY& depend) const;
 	int BuildVisibleDependencyList(CGanttDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
 	void ResetDependencyPickLinePos();
@@ -399,6 +400,7 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, int nPos, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 
 };
 
