@@ -30,7 +30,7 @@ typedef CMap<HTREEITEM, HTREEITEM, int, int&> CMapIndices;
 class CHTIMap : public CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&>
 {
 public:
-	inline HTREEITEM GetItem(DWORD dwItemID)
+	inline HTREEITEM GetItem(DWORD dwItemID) const
 	{
 		HTREEITEM hti = NULL;
 		Lookup(dwItemID, hti);
