@@ -2886,11 +2886,11 @@ void CGanttTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE 
 		break;
 		
 	case DIV_VERT_MID:
-		color = GraphicsMisc::Darker(m_crGridLine, 0.35);
+		color = GraphicsMisc::Darker(m_crGridLine, 0.25);
 		break;
 		
 	case DIV_VERT_DARK:
-		color = 0; // Black
+		color = GraphicsMisc::Darker(m_crGridLine, 0.5);
 		break;
 	}
 
