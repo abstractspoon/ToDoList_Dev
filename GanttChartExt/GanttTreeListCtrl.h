@@ -155,7 +155,7 @@ public:
 protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
-	BOOL m_bPageScrolling;
+//	BOOL m_bPageScrolling;
 
 	CEnHeaderCtrl m_treeHeader, m_listHeader;
 	CGanttDependencyEditor* m_pDependEdit;
@@ -179,7 +179,6 @@ protected:
 	CListCtrl& m_list;
 
 	CGanttItemMap m_data;
-	CGanttDisplayMap m_display;
 
 private:
 	mutable CTreeCtrlHelper* m_pTCH;
@@ -210,27 +209,21 @@ protected:
 	void RedrawTree(BOOL bErase = FALSE);
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
 	void DrawListItemWeeks(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, GANTTDISPLAY& gd, 
-							BOOL bSelected, BOOL& bToday, BOOL bDrawHours);
+							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday, BOOL bDrawHours);
 
-	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
-	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
-	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, GANTTDISPLAY& gd);
+	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
+	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
+	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 
 	void DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
@@ -279,6 +272,7 @@ protected:
 	int GetDateInMonths(int nMonth, int nYear) const;
 	BOOL GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const;
 	int GetScrollPosFromDate(const COleDateTime& date) const;
+	int GetDrawPosFromDate(const COleDateTime& date) const;
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
@@ -298,7 +292,6 @@ protected:
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
-	GANTTDISPLAY* GetGanttDisplay(DWORD dwTaskID);
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
@@ -339,6 +332,8 @@ protected:
 	BOOL IsMilestone(const GANTTITEM& gi) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
+	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
+	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	void GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
@@ -400,7 +395,7 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, int nPos, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 
 };
 

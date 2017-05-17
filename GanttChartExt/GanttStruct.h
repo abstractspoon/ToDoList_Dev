@@ -69,39 +69,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GANTTDISPLAY
-{ 
-	GANTTDISPLAY();
-	
-	int nStartPos, nEndPos, nDonePos;
-	
-	int GetBestTextPos() const;
-	BOOL IsPosSet() const;
-	BOOL IsStartSet() const;
-	BOOL IsEndSet() const;
-	BOOL IsDoneSet() const;
-	BOOL HasNoDates() const;
-
-	void SetHasNoDates();
-	void UpdatePositions(const GANTTDISPLAY& gdDrawn, int nScrollPos);
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CGanttDisplayMap : public CMap<DWORD, DWORD, GANTTDISPLAY*, GANTTDISPLAY*&>
-{
-public:
-	virtual ~CGanttDisplayMap();
-
-	void RemoveAll();
-	BOOL RemoveKey(DWORD dwKey);
-	BOOL HasItem(DWORD dwKey) const;
-	GANTTDISPLAY* GetAddItem(DWORD dwKey);
-	GANTTDISPLAY* GetItem(DWORD dwKey) const;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 struct GANTTDEPENDENCY
 {
 	GANTTDEPENDENCY();
