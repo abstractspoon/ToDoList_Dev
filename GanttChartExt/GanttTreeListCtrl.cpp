@@ -3143,14 +3143,16 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 		return TRUE;
 
 	// see if we can avoid drawing this sub-item at all
-	CRect rItem, rClip;
-	m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rItem);
+	CRect rColumn;
+	m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+
+	CRect rClip;
 	pDC->GetClipBox(rClip);
 
-	if (rItem.right < rClip.left)
+	if (rColumn.right < rClip.left)
 		return TRUE;
 	
-	if (rItem.left > rClip.right)
+	if (rColumn.left > rClip.right)
 		return FALSE; // we can stop
 
 	// get the date range for this column
@@ -3165,7 +3167,7 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 
 	int nSaveDC = pDC->SaveDC();
 
-	double dMonthWidth = GetMonthWidth(rItem.Width());
+	double dMonthWidth = GetMonthWidth(rColumn.Width());
 	BOOL bToday = FALSE;
 
 	// Use higher resolution where possible
@@ -3175,49 +3177,49 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	switch (m_nMonthDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
-		DrawListItemYears(pDC, rItem, nYear, 25, *pGI, bSelected, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 25, *pGI, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_DECADES:
-		DrawListItemYears(pDC, rItem, nYear, 10, *pGI, bSelected, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 10, *pGI, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_YEARS:
-		DrawListItemYear(pDC, rItem, nYear, *pGI, bSelected, bToday);
+		DrawListItemYear(pDC, rColumn, nYear, *pGI, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		DrawListItemMonths(pDC, rItem, nMonth, 3, nYear, *pGI, bSelected, bToday);
+		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, *pGI, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
 		if (bUseHigherRes)
-			DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
 		else
-			DrawListItemMonth(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemMonth(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
 		break;
 		
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
 		if (bUseHigherRes)
-			DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday, FALSE);
+			DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, FALSE);
 		else
-			DrawListItemWeeks(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday, bUseHigherRes);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, bUseHigherRes);
 		break;
 
 	case GTLC_DISPLAY_HOURS:
-		DrawListItemDays(pDC, rItem, nMonth, nYear, *pGI, bSelected, bToday, TRUE);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, TRUE);
 		break;
 	
 	default:
