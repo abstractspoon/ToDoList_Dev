@@ -214,7 +214,7 @@ void CTDLTaskListCtrl::RemoveDeletedItems()
 
 	while (nItem--)
 	{
-		if (HasTask(nItem))
+		if (!HasTask(nItem))
 		{
 			m_lcTasks.DeleteItem(nItem);
 			m_lcColumns.DeleteItem(nItem);
