@@ -24,9 +24,9 @@ class CTDLTransformDialog : public CTDLDialog
 public:
 	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
-	BOOL GetWantDate() { return m_bDate; }
 	CString GetStylesheet() const;
 	CString GetTitle() const { return m_sTitle; }
+	COleDateTime GetDate() const;
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_taskSel; }
 

@@ -5112,13 +5112,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			CTDLTransformDialog dialog(_T(""), tdc.GetTaskView(), _T(""));
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
-			// add title and date 
-			COleDateTime date;
-
-			if (dialog.GetWantDate())
-				date = COleDateTime::GetCurrentTime();
-
-			tasks.SetReportAttributes(_T(""), date);
+			tasks.SetReportAttributes(_T(""), dialog.GetDate());
 		}
 
 		VERIFY(tasks.Save(sOutputFile, SFEF_UTF16));
@@ -6155,17 +6149,22 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			sHtmlOutput += _T("<html>\n<head>\n");
 			sHtmlOutput += _T("</head>\n<body>\n");
 
-			CString sTitle, sDate, sImage;
+			CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
-			if (dlg.GetWantDate())
-				sDate = COleDateTime::GetCurrentTime().Format(VAR_DATEVALUEONLY);
+			if (!sDate.IsEmpty() || !sTitle.IsEmpty())
+			{
+				CString sTitleTag;
+				sTitleTag.Format(_T("<font face='%s' size='%d'>\n<h2>%s</h2>%s<p/>"), 
+								Prefs().GetHtmlFont(), Prefs().GetHtmlFontSize(),
+								sTitle, sDate);
+				
+				sHtmlOutput += sTitleTag;
+			}
 
-			sTitle.Format(_T("<h2>%s</h2>%s<p/>"), dlg.GetTitle(), sDate);
-			sHtmlOutput += sTitle;
-
+			CString sImage;
 			sImage.Format(_T("<img src=\"%s\">"), sTempImg);
-			sHtmlOutput += sImage;
 
+			sHtmlOutput += sImage;
 			sHtmlOutput += _T("</body>\n</html>\n");
 
 			FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
@@ -6191,10 +6190,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		if (!bTransform)
 			tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
 
-		if (dlg.GetWantDate())
-			tasks.SetReportAttributes(dlg.GetTitle(), COleDateTime::GetCurrentTime());
-		else
-			tasks.SetReportAttributes(dlg.GetTitle());
+		tasks.SetReportAttributes(dlg.GetTitle(), dlg.GetDate());
 
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
@@ -9728,12 +9724,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
 	// add title and date 
-	COleDateTime date;
-
-	if (dialog.GetWantDate())
-		date = COleDateTime::GetCurrentTime();
-
-	tasks.SetReportAttributes(sTitle, date);
+	tasks.SetReportAttributes(sTitle, dialog.GetDate());
 	
 	// save intermediate tasklist to file as required
 	LogIntermediateTaskList(tasks, tdc.GetFilePath());

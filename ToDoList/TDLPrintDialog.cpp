@@ -9,6 +9,7 @@
 #include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\DateHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -214,4 +215,13 @@ void CTDLPrintDialog::OnChangeStyle()
 	UpdateData();
 
 	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
+}
+
+COleDateTime CTDLPrintDialog::GetDate() const 
+{ 
+	if (m_bDate)
+		return CDateHelper::GetDate(DHD_TODAY);
+
+	// else
+	return CDateHelper::NullDate();
 }

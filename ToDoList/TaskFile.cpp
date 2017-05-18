@@ -1572,7 +1572,7 @@ BOOL CTaskFile::SetReportAttributes(LPCTSTR szTitle, const COleDateTime& date)
 			bRes &= (NULL != AddItem(TDL_REPORTDATEOLE, date));
 
 		// date string
-		CString sDate = date.Format(VAR_DATEVALUEONLY);
+		CString sDate = CDateHelper::FormatDate(date);
 		pXItem = GetItem(TDL_REPORTDATE);
 
 		if (pXItem)

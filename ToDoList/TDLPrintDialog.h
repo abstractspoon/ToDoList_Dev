@@ -32,9 +32,9 @@ class CTDLPrintDialog : public CTDLDialog
 public:
 	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
 
-	BOOL GetWantDate() const { return m_bDate; }
 	BOOL GetStylesheet(CString& sStylesheet) const;
 	CString GetTitle() const { return m_sTitle; }
+	COleDateTime GetDate() const;
 	TDLPD_STYLE GetExportStyle() const;
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }

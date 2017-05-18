@@ -8,6 +8,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\preferences.h"
 #include "..\shared\misc.h"
+#include "..\shared\datehelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -133,5 +134,13 @@ void CTDLTransformDialog::InitStylesheet(LPCTSTR szStylesheet)
 		m_sStylesheet = CPreferences().GetProfileString(_T("Transform"), _T("Stylesheet"));
 
 	m_sStylesheet = FileMisc::GetRelativePath(m_sStylesheet, sFolder, FALSE);
+}
 
+COleDateTime CTDLTransformDialog::GetDate() const 
+{ 
+	if (m_bDate)
+		return CDateHelper::GetDate(DHD_TODAY);
+
+	// else
+	return CDateHelper::NullDate();
 }
