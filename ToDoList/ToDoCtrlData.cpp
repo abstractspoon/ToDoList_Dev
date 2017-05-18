@@ -2630,13 +2630,15 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 			aElms.Add(elmRet);
 			
 			// restore task
-			TODOITEM* pTDI = GetTask(elm.dwTaskID, FALSE);
-			ASSERT(pTDI == NULL);
-			
-			if (!pTDI)
+			if (HasTask(elm.dwTaskID))
 			{
-				pTDI = NewTask(elm.tdi);
-				AddTask(elm.dwTaskID, pTDI, elm.dwParentID, elm.dwPrevSiblingID);
+				// Should not exist
+				ASSERT(0);
+			}
+			else
+			{
+				TODOITEM* pTDI = NewTask(elm.tdi);
+				AddTask(elm.dwTaskID, pTDI, elm.dwParentID, elm.dwPrevSiblingID, FALSE);
 			}
 		}
 		else if (elm.nOp == TDCUEO_MOVE)
