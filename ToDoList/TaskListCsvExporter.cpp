@@ -29,7 +29,7 @@ static LPCTSTR SPACE = _T(" ");
 static LPCTSTR ONEDBLQUOTE = _T("\"");
 static LPCTSTR TWODBLQUOTE = _T("\"\"");
 
-CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE)
+CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE), m_bFirstHeader(TRUE)
 {
 }
 
@@ -40,11 +40,15 @@ CTaskListCsvExporter::~CTaskListCsvExporter()
 
 bool CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
+	m_bFirstHeader = TRUE;
+
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
 }
 
 bool CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
+	m_bFirstHeader = TRUE;
+
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
 }
 
@@ -72,7 +76,14 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	// base consts
 	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, bSilent, pPrefs, szKey))
 		return false;
-
+	
+	// Add project identifier if exporting multiple files
+	if (MULTIFILE)
+	{
+		ARRATTRIBUTES.InsertAt(0, TDCA_PROJNAME);
+		ARRLABELS.Add(GetAttribLabel(TDCA_PROJNAME));
+	}
+	
 	// we read direct from app preferences
 	szKey = _T("Preferences");
 
@@ -95,15 +106,21 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	// Note: Do parent ID first so that task ID is inserted before it
 	CheckAddIDField(TDCA_PARENTID);
 	CheckAddIDField(TDCA_ID);
-
+	
 	return true;
 }
 
 void CTaskListCsvExporter::CheckAddIDField(TDC_ATTRIBUTE nAttrib)
 {
 	// sanity check
-	if ((nAttrib != TDCA_PARENTID) && (nAttrib != TDCA_ID))
+	switch (nAttrib)
 	{
+	case TDCA_PARENTID:
+	case TDCA_ID:
+	case TDCA_PROJNAME:
+		break;
+
+	default:
 		ASSERT(0);
 		return;
 	}
@@ -122,6 +139,11 @@ void CTaskListCsvExporter::CheckAddIDField(TDC_ATTRIBUTE nAttrib)
 
 CString CTaskListCsvExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 {
+	if (!m_bFirstHeader)
+		return _T("");
+
+	// else
+	m_bFirstHeader = FALSE;
 	CString sHeader = CTaskListExporterBase::FormatHeader(pTasks);
 
 	// remove trailing delimiter

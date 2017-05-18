@@ -30,7 +30,7 @@ protected: // this is a base class only
 
 protected:
 	// Pseudo-const overridable variables
-	BOOL ROUNDTIMEFRACTIONS, WANTPOS;
+	BOOL ROUNDTIMEFRACTIONS, WANTPOS, MULTIFILE;
 	CTDCAttributeArray ARRATTRIBUTES;
 	CStringArray ARRLABELS;
 	CString ENDL;

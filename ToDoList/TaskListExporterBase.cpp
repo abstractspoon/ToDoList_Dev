@@ -28,6 +28,7 @@ static char THIS_FILE[]=__FILE__;
 
 static TDC_ATTRIBUTE ATTRIB_ORDER[] = 
 {
+	TDCA_PROJNAME,
 	TDCA_POSITION,
 	TDCA_TASKNAME,
 	TDCA_ID,
@@ -66,7 +67,8 @@ CTaskListExporterBase::CTaskListExporterBase()
 	: 
 	WANTPOS(FALSE), 
 	ROUNDTIMEFRACTIONS(TRUE),
-	ENDL(_T("\r\n"))
+	ENDL(_T("\r\n")),
+	MULTIFILE(FALSE)
 {
 }
 
@@ -108,7 +110,16 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
 
-	if ((pTasks == NULL) || !InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	// else
+	MULTIFILE = TRUE;
+
+	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
 	{
 		ASSERT(0);
 		return false;
@@ -131,6 +142,8 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 		
 			// then tasks
 			sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
+
+			sOutput += ENDL;
 		}
 	}
 	
@@ -361,6 +374,10 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	case TDCA_PRIORITY:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHIGHESTPRIORITY, TDL_TASKPRIORITY);
 		break;
+
+	case TDCA_PROJNAME:
+		sItem = FormatAttribute(pTasks, NULL, nAttrib, sAttribLabel, TDL_PROJECTNAME, TDL_FILENAME);
+		break;
 		
 	case TDCA_RISK:			
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHIGHESTRISK, TDL_TASKRISK);
@@ -435,38 +452,50 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 
 	if (WantAttribute(nAttrib))
 	{
-		// get the attribute name that we will be using
-		CString sAttribName;
+		CString sAttribVal;
 
-		if (pTasks->TaskHasAttribute(hTask, szAttribName) || (szAltAttribName == NULL))
+		if (hTask == NULL)
 		{
-			sAttribName = szAttribName;
-		}
-		else if (szAltAttribName)
-		{
-			sAttribName = szAltAttribName;
-		}
-
-		CString sAttribVal = pTasks->GetTaskAttribute(hTask, sAttribName);
-
-		// special handling
-		switch (nAttrib)
-		{
-		case TDCA_PRIORITY:
-		case TDCA_RISK:			
-			// -2 == <none>
-			if (sAttribVal == _T("-2"))
-				sAttribVal = CEnString(IDS_TDC_NONE);
-			break;
+			sAttribVal = pTasks->GetAttribute(szAttribName);
 			
-		case TDCA_COST:			
-			sAttribVal = Misc::Format(_ttof(sAttribVal), 2);
-			break;
+			if (sAttribVal.IsEmpty() && (szAltAttribName != NULL))
+				sAttribVal = pTasks->GetAttribute(szAltAttribName);
+		}
+		else
+		{
+			// get the attribute name that we will be using
+			CString sAttribName;
+
+			if (pTasks->TaskHasAttribute(hTask, szAttribName) || (szAltAttribName == NULL))
+			{
+				sAttribName = szAttribName;
+			}
+			else if (szAltAttribName)
+			{
+				sAttribName = szAltAttribName;
+			}
+
+			sAttribVal = pTasks->GetTaskAttribute(hTask, sAttribName);
+
+			// special handling
+			switch (nAttrib)
+			{
+			case TDCA_PRIORITY:
+			case TDCA_RISK:			
+				// -2 == <none>
+				if (sAttribVal == _T("-2"))
+					sAttribVal = CEnString(IDS_TDC_NONE);
+				break;
 			
-		case TDCA_PARENTID:
-			if (sAttribVal.IsEmpty())
-				sAttribVal = Misc::Format(pTasks->GetTaskParentID(hTask));
-			break;
+			case TDCA_COST:			
+				sAttribVal = Misc::Format(_ttof(sAttribVal), 2);
+				break;
+			
+			case TDCA_PARENTID:
+				if (sAttribVal.IsEmpty())
+					sAttribVal = Misc::Format(pTasks->GetTaskParentID(hTask));
+				break;
+			}
 		}
 
 		// virtual call

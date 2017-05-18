@@ -36,6 +36,8 @@ protected:
 	CString DELIM, INDENT;
 	CTDCAttributeMapping m_aColumnMapping;
 	BOOL m_bExportingForExcel;
+	
+	mutable BOOL m_bFirstHeader;
 
 protected:
 	// base-class overrides
