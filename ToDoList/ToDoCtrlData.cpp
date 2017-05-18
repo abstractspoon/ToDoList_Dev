@@ -339,7 +339,7 @@ const TODOSTRUCTURE* CToDoCtrlData::LocateTask(DWORD dwTaskID) const
 	return m_struct.FindTask(dwTaskID);
 }
 
-BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
+BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID, BOOL bWantUndo) 
 { 
 	if (!dwTaskID || !pTDI)
 	{
@@ -367,9 +367,14 @@ BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DW
 		return FALSE;
 	}
 	
-	VERIFY(AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID));
+	VERIFY(!bWantUndo || AddUndoElement(TDCUEO_ADD, dwTaskID, dwParentID, dwPrevSiblingID));
 
 	return TRUE;
+}
+
+BOOL CToDoCtrlData::AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID) 
+{ 
+	return AddTask(dwTaskID, pTDI, dwParentID, dwPrevSiblingID, TRUE);
 }
 
 void CToDoCtrlData::DeleteAllTasks()
@@ -1286,7 +1291,6 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 
 			bRemoved = TRUE;
 		}
-		
 	}
 	
 	return bRemoved;
