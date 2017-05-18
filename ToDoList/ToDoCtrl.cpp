@@ -5268,51 +5268,10 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	// remove real tree selection first if its going to be deleted
 	// but before we do, lets figure out where the selection is
 	// going to go _after_ the deletion
-	HTREEITEM htiNextSel = NULL;
-	
+	DWORD dwNextID = 0;
+
 	if (bResetSel)
-	{
-		HTREEITEM hti = TSH().GetFirstItem();
-		DWORD dwSelID = GetTaskID(hti);
-		
-		htiNextSel = TCH().GetNextVisibleItem(hti, FALSE);
-		
-		// don't include items we're about to delete!
-		while (htiNextSel)
-		{
-			if (TSH().HasItem(htiNextSel) || 
-				TSH().HasSelectedParent(htiNextSel) || 
-				m_data.IsReferenceToTask(GetTaskID(htiNextSel), dwSelID))
-			{
-				htiNextSel = TCH().GetNextVisibleItem(htiNextSel);
-			}
-			else
-			{
-				break;
-			}
-		}
-		
-		// else try previous item
-		if (!htiNextSel)
-		{
-			htiNextSel = TCH().GetPrevVisibleItem(hti, FALSE);
-			
-			// don't include items we're about to delete!
-			while (htiNextSel)
-			{
-				if (TSH().HasItem(htiNextSel) || 
-					TSH().HasSelectedParent(htiNextSel) ||
-					m_data.IsReferenceToTask(GetTaskID(htiNextSel), dwSelID))
-				{
-					htiNextSel = TCH().GetPrevVisibleItem(htiNextSel);
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-	}
+		dwNextID = GetNextNonSelectedTaskID();
 	
 	if (TSH().HasItem(m_taskTree.GetSelectedItem()))
 		TCH().SelectItem(NULL);
@@ -5344,16 +5303,15 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	}
 	m_taskTree.UpdateAll();
 
+	// Update other views before changing selection
+	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
+	
 	// set next selection
-	if (htiNextSel)
-		SelectItem(htiNextSel);
+	if (dwNextID)
+		SelectTask(dwNextID);
 	else
 		UpdateControls(FALSE); // don't update comments
 
-
-	// refresh rest of UI
-	SetModified(TRUE, TDCA_DELETE, dwDelTaskID);
-	
 	// restore focus
 	if (hFocus && ::IsWindowEnabled(hFocus))
 		::SetFocus(hFocus);
@@ -5361,6 +5319,52 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		SetFocusToTasks();
 
 	return TRUE;
+}
+
+DWORD CToDoCtrl::GetNextNonSelectedTaskID() const
+{
+	HTREEITEM hti = TSH().GetFirstItem();
+	HTREEITEM htiNextSel = TCH().GetNextVisibleItem(hti, FALSE);
+
+	// don't include items we're about to delete!
+	DWORD dwSelID = GetTaskID(hti);
+
+	while (htiNextSel)
+	{
+		if (TSH().HasItem(htiNextSel) || 
+			TSH().HasSelectedParent(htiNextSel) || 
+			m_data.IsReferenceToTask(GetTaskID(htiNextSel), dwSelID))
+		{
+			htiNextSel = TCH().GetNextVisibleItem(htiNextSel);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	// else try previous item
+	if (!htiNextSel)
+	{
+		htiNextSel = TCH().GetPrevVisibleItem(hti, FALSE);
+
+		// don't include items we're about to delete!
+		while (htiNextSel)
+		{
+			if (TSH().HasItem(htiNextSel) || 
+				TSH().HasSelectedParent(htiNextSel) ||
+				m_data.IsReferenceToTask(GetTaskID(htiNextSel), dwSelID))
+			{
+				htiNextSel = TCH().GetPrevVisibleItem(htiNextSel);
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+
+	return GetTaskID(htiNextSel);
 }
 
 BOOL CToDoCtrl::DeleteSelectedTask()

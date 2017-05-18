@@ -661,7 +661,8 @@ protected:
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_taskTree.ItemHasChildren(hti); }
 	inline BOOL ItemHasParent(HTREEITEM hti) const { return (NULL != m_taskTree.ItemHasParent(hti)); }
 	inline BOOL IsItemSelected(HTREEITEM hti) const { return m_taskTree.IsItemSelected(hti); }
-	
+	virtual DWORD GetNextNonSelectedTaskID() const;
+
 	inline const CToDoCtrlFind& TCF() const { return m_taskTree.Find(); }
 	
 	inline CTreeCtrlHelper& TCH() { return m_taskTree.TCH(); }

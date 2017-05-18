@@ -209,7 +209,6 @@ protected:
 	BOOL ModCausesColorChange(const CTDCAttributeMap& mapAttrib) const;
 	const TDSORT& GetSort() const;
 
-	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID);
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate); // one style at a time only 
@@ -218,6 +217,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual void BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
+	virtual DWORD GetNextNonSelectedTaskID() const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 
@@ -274,7 +274,6 @@ protected:
 		TTCNT_PREVTOPLEVEL,
 	};
 	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
-	DWORD GetNextNonSelectedTaskID() const;
 
 	BOOL InListView() const;
 	BOOL InTreeView() const;

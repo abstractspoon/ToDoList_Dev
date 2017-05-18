@@ -2086,50 +2086,45 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 	return CToDoCtrl::GetControlDescription(pCtrl);
 }
 
-BOOL CTabbedToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
-{
-	if (IsReadOnly())
-		return FALSE;
-
-	if (InTreeView())
-		return CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel);
-
-	// Work out what to select after the deletion
-	DWORD dwNextSelID = GetNextNonSelectedTaskID();
-
-	if (InListView())
-	{
-		CHoldRedraw hr(m_taskList.GetSafeHwnd());
-		
-		if (CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel))
-		{
-			if (dwNextSelID)
-				SelectTask(dwNextSelID, FALSE);
-			
-			return TRUE;
-		}
-	}
-	else
-	{
-		if (CToDoCtrl::DeleteSelectedTask(bWarnUser, bResetSel))
-		{
-			if (dwNextSelID)
-				SelectTask(dwNextSelID, FALSE);
-			
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
 DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
 {
-	DWORD dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE);
+	FTC_VIEW nView = GetTaskView();
+	DWORD dwNextSelID = 0;
 
-	if (!dwNextSelID)
-		dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE);
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		dwNextSelID = CToDoCtrl::GetNextNonSelectedTaskID();
+		break;
 
+	case FTCV_TASKLIST:
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_NEXT, TRUE);
+
+			if (!dwNextSelID)
+				dwNextSelID = GetNextTaskID(GetSelectedTaskID(), TTCNT_PREV, TRUE);
+		}
+		break;
+	}
+
+	ASSERT(dwNextSelID);
 	return dwNextSelID;
 }
 
@@ -5007,7 +5002,7 @@ void CTabbedToDoCtrl::UpdateSelectedTaskPath()
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.UpdateSelectedTaskPath();
+		//m_taskList.UpdateSelectedTaskPath();
 		break;
 
 	case FTCV_UIEXTENSION1:
