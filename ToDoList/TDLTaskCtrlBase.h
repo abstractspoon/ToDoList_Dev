@@ -401,7 +401,6 @@ protected:
 	void RecalcColumnWidth(TDC_COLUMN nColID, CDC* pDC);
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
-	BOOL InitCheckboxImageList();
 	void UpdateHeaderSorting();
 	CString FormatInfoTip(DWORD dwTaskID) const;
 	void RecalcColumnWidths(BOOL bCustom);

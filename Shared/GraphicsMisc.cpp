@@ -1530,3 +1530,37 @@ BOOL GraphicsMisc::FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT uCount, DWORD dw
 	// else
 	return FALSE;
 }
+
+BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd)
+{
+	if (ilCheckboxes.GetSafeHandle())
+		return TRUE;
+
+	const int nStates[] = { -1, CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL, CBS_MIXEDNORMAL };
+	const int nNumStates = sizeof(nStates) / sizeof(int);
+
+	CThemed th;
+
+	if (th.Open(hWnd, _T("BUTTON")) && th.AreControlsThemed())
+	{
+		th.BuildImageList(ilCheckboxes, BP_CHECKBOX, nStates, nNumStates);
+	}
+
+	// unthemed + fallback
+	if (!ilCheckboxes.GetSafeHandle() && nFallbackBmpID)
+	{
+		CBitmap bitmap;
+		
+		if (bitmap.LoadBitmap(nFallbackBmpID))
+		{
+			BITMAP BM;
+			bitmap.GetBitmap(&BM);
+
+			if (ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
+				ilCheckboxes.Add(&bitmap, crBkgnd);
+		}
+	}
+
+	return (NULL != ilCheckboxes.GetSafeHandle());
+}
+

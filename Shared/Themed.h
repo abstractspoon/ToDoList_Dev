@@ -93,6 +93,7 @@ public:
 	static BOOL GetBufferedPaintBits(HPAINTBUFFER, RGBQUAD **, int*);
 	static BOOL EndBufferedPaint(HPAINTBUFFER, BOOL);
 	
+	BOOL Open(HWND hWnd, LPCTSTR szClassList);
 	BOOL Open(const CWnd* pWnd, LPCTSTR szClassList);
 	BOOL IsValid() { return (s_hUxTheme && m_hTheme); }
 	BOOL Close();

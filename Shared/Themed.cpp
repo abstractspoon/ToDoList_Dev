@@ -143,7 +143,12 @@ BOOL CThemed::EndBufferedPaint(HPAINTBUFFER pb, BOOL bUpdatetarget)
 
 BOOL CThemed::Open(const CWnd* pWnd, LPCTSTR szClassList)
 {
-	if (pWnd && pWnd->GetSafeHwnd())
+	return (pWnd && Open(pWnd->GetSafeHwnd(), szClassList));
+}
+
+BOOL CThemed::Open(HWND hWnd, LPCTSTR szClassList)
+{
+	if (::IsWindow(hWnd))
 	{
 		if (!s_hUxTheme)
 		{
@@ -159,12 +164,12 @@ BOOL CThemed::Open(const CWnd* pWnd, LPCTSTR szClassList)
 		
 		if (sClassList.IsEmpty())
 		{
-			::GetClassName(pWnd->GetSafeHwnd(), sClassList.GetBuffer(128), 128);
+			::GetClassName(hWnd, sClassList.GetBuffer(128), 128);
 			sClassList.ReleaseBuffer();
 		}
 		
-		m_hTheme = OpenThemeData(pWnd->GetSafeHwnd(), WSTR(sClassList));
-		m_hWnd = pWnd->GetSafeHwnd();
+		m_hTheme = OpenThemeData(hWnd, WSTR(sClassList));
+		m_hWnd = hWnd;
 		
 		return (NULL != m_hTheme);
 	}

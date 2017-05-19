@@ -196,6 +196,8 @@ namespace GraphicsMisc
 	void DrawGlassWithGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder);
 
 	BOOL FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT  uCount, DWORD dwTimeout);
+	BOOL InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd);
+
 };
 
 #endif // !defined(AFX_GRAPHICSMISC_H__A3408501_A44D_407B_A8C3_B6AB31370CD2__INCLUDED_)

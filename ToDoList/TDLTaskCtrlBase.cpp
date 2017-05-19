@@ -221,7 +221,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CClientDC dc(&m_hdrTasks);
 	m_fAveHeaderCharWidth = GraphicsMisc::GetAverageCharWidth(&dc, pFont);
 
-	VERIFY(InitCheckboxImageList());
+	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
 
 	BuildColumns();
 	RecalcColumnWidths();
@@ -5999,37 +5999,6 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 {
 	return m_data.CalcIsTaskDue(GetSelectedTaskID());
-}
-
-BOOL CTDLTaskCtrlBase::InitCheckboxImageList()
-{
-	if (m_ilCheckboxes.GetSafeHandle())
-		return TRUE;
-	
-	const int nStates[] = { -1, CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL, CBS_MIXEDNORMAL };
-	const int nNumStates = sizeof(nStates) / sizeof(int);
-	
-	CThemed th;
-	
-	if (th.Open(this, _T("BUTTON")) && th.AreControlsThemed())
-	{
-		th.BuildImageList(m_ilCheckboxes, BP_CHECKBOX, nStates, nNumStates);
-	}
-	
-	// unthemed + fallback
-	if (!m_ilCheckboxes.GetSafeHandle())
-	{
-		CBitmap bitmap;
-		bitmap.LoadBitmap(IDB_CHECKBOXES);
-		
-		BITMAP BM;
-		bitmap.GetBitmap(&BM);
-		
-		if (m_ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
-			m_ilCheckboxes.Add(&bitmap, 255);
-	}
-	
-	return (NULL != m_ilCheckboxes.GetSafeHandle());
 }
 
 CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
