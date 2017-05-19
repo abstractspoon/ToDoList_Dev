@@ -319,6 +319,10 @@ BOOL CDateHelper::GetTimeT64(const COleDateTime& date, time64_t& timeT)
 
 COleDateTime CDateHelper::GetDate(time64_t date)
 {
+	if (date == T64Utils::T64_NULL)
+		return NullDate();
+
+	// else
 	SYSTEMTIME st = { 0 };
 	T64Utils::T64ToSystemTime(&date, &st);
 
