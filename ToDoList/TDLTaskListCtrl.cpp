@@ -420,7 +420,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 				}
 
 				// checkbox icon
-				if (!IsColumnShowing(TDCC_DONE))
+				if (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX))
 				{
 					pLVDI->item.mask |= LVIF_STATE;
 					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK;
