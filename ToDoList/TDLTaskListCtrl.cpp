@@ -423,7 +423,7 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 				if (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX))
 				{
 					pLVDI->item.mask |= LVIF_STATE;
-					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK;
+					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK | LVIS_SELECTED;
 
 					if (pTDI->IsDone())
 					{
