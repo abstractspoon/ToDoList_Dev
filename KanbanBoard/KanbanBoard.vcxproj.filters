@@ -92,6 +92,9 @@
     <None Include="res\help_button.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\XPcheckboxes.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

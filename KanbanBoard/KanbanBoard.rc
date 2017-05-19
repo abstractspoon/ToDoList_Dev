@@ -273,6 +273,7 @@ IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
 IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
+IDB_CHECKBOXES          BITMAP                  "res\\XPcheckboxes.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -110,6 +110,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_MESSAGE(KLCN_CHECKCHANGE, OnListCheckChange)
 
 END_MESSAGE_MAP()
 
@@ -1746,6 +1747,21 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				if (m_nSortBy != IUI_NONE)
 					Sort(m_nSortBy, FALSE, m_bSortAscending);
 				break;
+
+			case KBCF_SHOWCOMPLETIONCHECKBOXES:
+				{
+					int nList = m_aListCtrls.GetSize();
+					
+					while (nList--)
+					{
+						CKanbanListCtrl* pList = m_aListCtrls[nList];
+						ASSERT(pList);
+						
+						if (pList)
+							pList->SetShowCompletionCheckboxes(bSet);
+					}
+				}
+				break;
 			}
 		}
 	}
@@ -2706,5 +2722,19 @@ LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 		pList->SendMessage(WM_SETFONT, wp, lp);
 	}
 
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+
+	const KANBANITEM* pKI = m_data.GetItem(lp);
+	ASSERT(pKI);
+
+	if (pKI)
+		return GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
+
+	// else
 	return 0L;
 }

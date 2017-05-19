@@ -202,6 +202,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     <None Include="res\KanbanBoard.rc2" />
     <None Include="res\toolbar.bmp" />
     <None Include="RES\toolbar_std.bmp" />
+    <None Include="res\XPcheckboxes.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KanbanBoard.rc">

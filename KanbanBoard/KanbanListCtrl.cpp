@@ -42,13 +42,24 @@ static char THIS_FILE[] = __FILE__;
 #	define WM_THEMECHANGED 0x031A
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
+enum // checkbox images 
+{ 
+	KLCC_NONE,
+	KLCC_UNCHECKED, 
+	KLCC_CHECKED, 
+	KLCC_MIXED, 
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 const int MIN_LABEL_EDIT_WIDTH	= 200;
 const int BAR_WIDTH				= 6;
 const int NUM_TEXTLINES			= 2;
-const int TITLE_VPADDING		= 6;
+const int TITLE_VPADDING		= 8;
 const int LV_PADDING			= 3;
+const int IMAGE_PADDING			= 1;
 const int ATTRIB_INDENT			= 6;
 const int TIP_PADDING			= 4;
 
@@ -182,6 +193,12 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	SetExtendedStyle(GetExtendedStyle() | (LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP));
 
+	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
+	{
+		SetCallbackMask(LVIS_STATEIMAGEMASK);
+		SetImageList(&m_ilCheckboxes, LVSIL_STATE);
+	}
+	
 	VERIFY(m_header.SubclassWindow(ListView_GetHeader(*this)));
 	m_header.EnableTracking(FALSE);
 	m_header.ModifyStyle(HDS_FULLDRAG | HDS_DRAGDROP, 0, 0);
@@ -360,6 +377,14 @@ void CKanbanListCtrl::SetSelected(BOOL bSelected)
 		m_header.Invalidate(TRUE);
 }
 
+void CKanbanListCtrl::SetShowCompletionCheckboxes(BOOL bShow)
+{
+	m_bShowCompletionCheckboxes = bShow;
+
+	if (GetSafeHwnd())
+		Invalidate(TRUE);
+}
+
 int CKanbanListCtrl::CalcRequiredItemHeight(int nNumLines) const
 {
 	ASSERT(m_nLineHeight != -1);
@@ -396,13 +421,17 @@ int CKanbanListCtrl::CalcLineHeight() const
 
 int CKanbanListCtrl::AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect)
 {
-	int nNewItem = InsertItem(GetItemCount(), szTitle, -1);
+	int nNewItem = InsertItem(LVIF_TEXT | LVIF_PARAM, 
+								GetItemCount(), 
+								szTitle, 
+								0,
+								0,
+								0, 
+								dwTaskID);
 	ASSERT(nNewItem != -1);
 
 	if (nNewItem != -1)
 	{
-		SetItemData(nNewItem, dwTaskID);
-		
 		// select item and make visible
 		if (bSelect)
 		{
@@ -524,10 +553,12 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				int nItem = (int)pLVCD->nmcd.dwItemSpec;
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 		
-				// draw background and bar
+				// draw checkbox, background and bar
 				CRect rItem;
 				GetItemRect(nItem, rItem, LVIR_BOUNDS);
 				rItem.DeflateRect(1, 1);
+
+				DrawItemCheckbox(pDC, pKI, rItem);
 				
 				BOOL bSelected = (!m_bSavingToImage && (GetItemState(nItem, LVIS_SELECTED) == LVIS_SELECTED));
 				BOOL bFocused = (bSelected && (::GetFocus() == pNMHDR->hwndFrom));
@@ -609,7 +640,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
 				
 				// first 'n' lines is the task title
-				rItem.DeflateRect(4, 1, 3, 2);
+				rItem.DeflateRect(4, 3, 3, 2);
 
 				CRect rTitle(rItem);
 				rTitle.bottom = (rTitle.top + CalcItemTitleHeight());
@@ -649,6 +680,59 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			*pResult |= CDRF_SKIPDEFAULT;
 		}
 	}
+}
+
+void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
+{
+	if (m_bShowCompletionCheckboxes)
+	{
+		CRect rCheckbox(rItem);
+
+		if (GetItemCheckboxRect(rCheckbox))
+		{
+			int iImage = KLCC_UNCHECKED;
+		
+			if (pKI->IsDone(FALSE))
+			{
+				iImage = KLCC_CHECKED;
+			}
+			// else if (m_data.TaskHasCompletedSubtasks(pTDS))
+			// {
+			//		return KLCC_MIXED;
+			// }
+
+			m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
+			rItem.left = (rCheckbox.right + IMAGE_PADDING);
+		}
+	}
+}
+
+BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem)
+{
+	if (m_bShowCompletionCheckboxes)
+	{
+		GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+		return GetItemCheckboxRect(rItem);
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem)
+{
+	if (m_bShowCompletionCheckboxes)
+	{
+		rItem.bottom = (rItem.top + CalcRequiredItemHeight(1));
+		rItem.DeflateRect(0, ((rItem.Height() - 16) / 2));
+		rItem.right = (rItem.left + rItem.Height());
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib)
@@ -1127,6 +1211,16 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 	else
 	{
 		m_dwSelectingTask = GetItemData(nHit);
+
+		// Test for checkbox hit
+		CRect rCheckbox;
+
+		if (GetItemCheckboxRect(nHit, rCheckbox) && rCheckbox.PtInRect(point))
+		{
+			SelectItem(-1);
+			SelectItem(nHit);
+			GetParent()->PostMessage(KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTask);
+		}
 	}
 	
 	// all else
@@ -1217,7 +1311,7 @@ void CKanbanListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	// Always position the tooltip at the top of the item
 	CRect rLabel;
 
-	VERIFY(GetItemRect(nHit, rLabel, LVIR_BOUNDS));
+	VERIFY(GetItemRect(nHit, rLabel, LVIR_LABEL));
 	ClientToScreen(rLabel);
 
 	CRect rTip(rLabel);
@@ -1225,7 +1319,8 @@ void CKanbanListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
-	rTip.left += TIP_PADDING;
+
+	rTip.OffsetRect(TIP_PADDING, 2);
 
 	::SetWindowPos(pNMHDR->hwndFrom, NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 
@@ -1305,3 +1400,4 @@ LRESULT CKanbanListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 
 	return lr;
 }
+

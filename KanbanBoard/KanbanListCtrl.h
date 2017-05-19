@@ -7,10 +7,16 @@
 // KanbanListCtrl.h : header file
 //
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "Kanbanstruct.h"
 
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\fontcache.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define KLCN_CHECKCHANGE (WM_APP+1) // WPARAM = HWND, LPARAM = Task ID
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrl window
@@ -66,6 +72,7 @@ public:
 	void SetColorTasksByPriority(BOOL bSet = TRUE);
 	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
 	void SetSelected(BOOL bSelected);
+	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
@@ -82,6 +89,7 @@ protected:
 	BOOL m_bStrikeThruDoneTasks;
 	BOOL m_bDrawAttribLabels;
 	BOOL m_bSavingToImage;
+	BOOL m_bShowCompletionCheckboxes;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -89,7 +97,7 @@ protected:
 	const CKanbanAttributeArray& m_aDisplayAttrib;
 
 	CEnHeaderCtrl m_header;
-	CImageList m_ilHeight;
+	CImageList m_ilHeight, m_ilCheckboxes;
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay;
@@ -135,7 +143,10 @@ protected:
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point);
+	BOOL GetItemCheckboxRect(int nItem, CRect& rItem);
+	BOOL GetItemCheckboxRect(CRect& rItem);
 
+	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

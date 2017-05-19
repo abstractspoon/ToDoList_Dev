@@ -19,6 +19,8 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
 
+#include "..\3rdparty\T64Utils.h"
+
 #include "..\Interfaces\ipreferences.h"
 
 #include <afxpriv.h>
@@ -94,6 +96,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
+	ON_REGISTERED_MESSAGE(WM_KBC_COMPLETIONCHANGE, OnKanbanNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
@@ -285,6 +288,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	// application preferences
 	m_ctrlKanban.SetOption(KBCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_ctrlKanban.SetOption(KBCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	m_ctrlKanban.SetOption(KBCF_SHOWCOMPLETIONCHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 
 	UpdatePriorityColors(pPrefs);
 	
@@ -805,6 +809,18 @@ LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	SendParentSelectionUpdate();
 	
 	return 0L;
+}
+
+LRESULT CKanbanWnd::OnKanbanNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
+{
+	IUITASKMOD mod = { IUI_DONEDATE, 0 };
+
+	if (lp) // done/not done
+		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
+	else
+		mod.tValue = T64Utils::T64_NULL;
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM /*wp*/, LPARAM /*lp*/)

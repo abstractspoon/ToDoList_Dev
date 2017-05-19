@@ -12,7 +12,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = , LPARAM = LPCTSTR
-const UINT WM_KBC_VALUECHANGE		= ::RegisterWindowMessage(_T("WM_KBC_STATUSCHANGE"));
+const UINT WM_KBC_VALUECHANGE		= ::RegisterWindowMessage(_T("WM_KBC_VALUECHANGE"));
+
+// WPARAM = , LPARAM = TRUE/FALSE
+const UINT WM_KBC_COMPLETIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_COMPLETIONCHANGE"));
 
 // WPARAM = , LPARAM = 
 const UINT WM_KBC_SELECTIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_SELECTIONCHANGE"));
