@@ -49,6 +49,12 @@ static char THIS_FILE[]=__FILE__;
 #	define CDRF_SKIPPOSTPAINT	(0x00000100)
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
+const UINT WM_KCM_SELECTTASK = (WM_APP+10); // WPARAM , LPARAM = Task ID
+
+//////////////////////////////////////////////////////////////////////
+
 const UINT IDC_LISTCTRL = 101;
 
 //////////////////////////////////////////////////////////////////////
@@ -111,6 +117,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
+	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
 
@@ -2733,8 +2740,18 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 	ASSERT(pKI);
 
 	if (pKI)
-		return GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
+	{
+		LRESULT lr = GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
+		PostMessage(WM_KCM_SELECTTASK, 0, lp);
+
+		return lr;
+	}
 
 	// else
 	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
+{
+	return SelectTask(lp);
 }

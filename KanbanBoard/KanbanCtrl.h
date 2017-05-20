@@ -124,6 +124,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* );
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSelectTask(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
