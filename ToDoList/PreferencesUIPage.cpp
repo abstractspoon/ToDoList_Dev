@@ -63,7 +63,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ENABLECOLUMNHEADERSORTING, m_bEnableColumnHeaderSorting);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_STACKFIELDSANDCOMMENTS, m_bStackEditFieldsAndComments);
-//	DDX_Check(pDX, IDC_STACKFIELDSABOVECOMMENTS, m_bStackEditFieldsAboveComments);
+	DDX_Check(pDX, IDC_STACKCOMMENTSABOVEFIELDS, m_bStackCommentsAboveEditFields);
 	DDX_Control(pDX, IDC_UITHEMEFILE, m_cbThemes);
 	DDX_Radio(pDX, IDC_MATCHTITLES, (int&)m_nTitleFilterOption);
 	DDX_CBIndex(pDX, IDC_NEWTASKPOSITION, (int&)m_nNewTaskPos);
@@ -106,7 +106,7 @@ BOOL CPreferencesUIPage::OnInitDialog()
 
 	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
 	GetDlgItem(IDC_COMMENTSFORMAT)->EnableWindow(m_nDefaultCommentsFormat != CB_ERR);
-	//GetDlgItem(IDC_STACKFIELDSABOVECOMMENTS)->EnableWindow(m_bStackEditFieldsAndComments);
+	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	// theming only available if XP themes are active
 	if (CThemed::IsAppThemed())
@@ -137,7 +137,7 @@ void CPreferencesUIPage::OnStackEditFieldsAndComments()
 {
 	UpdateData();
 
-	//GetDlgItem(IDC_STACKFIELDSABOVECOMMENTS)->EnableWindow(m_bStackEditFieldsAndComments);
+	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -172,7 +172,7 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bShowDefaultFilters = pPrefs->GetProfileInt(szKey, _T("ShowDefaultFilters"), TRUE);
 	m_bEnableColumnHeaderSorting = pPrefs->GetProfileInt(szKey, _T("EnableColumnHeaderSorting"), TRUE);
 	m_bStackEditFieldsAndComments = pPrefs->GetProfileInt(szKey, _T("StackEditFieldsAndComments"), TRUE);
-	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), FALSE);
+	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), TRUE);
 	m_bIncludeWebLinksInCommentsPaste = pPrefs->GetProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), TRUE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
