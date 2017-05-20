@@ -42,7 +42,7 @@ static char THIS_FILE[] = __FILE__;
 #	define WM_THEMECHANGED 0x031A
 #endif
 
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 enum // checkbox images 
 { 
@@ -1219,7 +1219,9 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 		{
 			SelectItem(-1);
 			SelectItem(nHit);
-			GetParent()->PostMessage(KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTask);
+
+			// Post message to let mouse-click time to process
+			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTask);
 		}
 	}
 	
