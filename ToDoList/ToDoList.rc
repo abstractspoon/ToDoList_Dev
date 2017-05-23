@@ -4974,7 +4974,7 @@ BEGIN
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
     IDS_CSV_CUSTOMLISTATTRIB "Custom Attribute (List)"
     IDS_WEBUPDATE_PROMPT    "\nWould you like to update to this version?"
-    IDS_WEBUPDATE_PROMPTHEADER "Hi %s, version %s is now available"
+    IDS_WEBUPDATE_PROMPTHEADER "Hi %s, version %s is now available."
     IDS_UNINSTALLER_RUNFAILURE 
                             "The uninstaller could not be run at this time.\n\nPlease try again after your next reboot."
     IDS_UPDATER_RUNFAILURE  "The updater could not be run at this time.\n\nPlease try again after your next reboot."
