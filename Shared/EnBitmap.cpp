@@ -291,15 +291,7 @@ BOOL CEnBitmap::CopyImage(HICON hIcon, COLORREF crBack, int cx, int cy)
 
 	if ((cx == 0) || (cy == 0))
 	{
-		ICONINFO ii = { 0 };
-		
-		if (!::GetIconInfo(hIcon, &ii))
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-
-		CSize size = GetImageSize(ii.hbmColor);
+		CSize size = GraphicsMisc::GetIconSize(hIcon);
 			
 		cx = size.cx;
 		cy = size.cy;
