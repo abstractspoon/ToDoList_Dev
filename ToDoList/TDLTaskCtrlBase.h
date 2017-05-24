@@ -508,6 +508,7 @@ protected:
 	BOOL HandleListLBtnDown(CListCtrl& lc, CPoint pt);
 	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, TDC_COLUMN& nRecalcColID) const;
+	CString FormatTimeValue(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							COLORREF crText, BOOL bSelected);

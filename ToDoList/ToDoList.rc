@@ -5100,6 +5100,7 @@ BEGIN
     IDS_TDCTIP_LOCK         "Locked"
     IDS_UNLOCKED            "Unlocked"
     IDS_LOCKED              "Locked"
+    IDS_CAD_DURATION        "Duration"
 END
 
 #endif    // English (Australia) resources

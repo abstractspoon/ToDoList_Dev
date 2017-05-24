@@ -3200,11 +3200,23 @@ bool CTaskFile::SetTaskCost(HTASKITEM hTask, double dCost)
 
 bool CTaskFile::SetTaskTimeEstimate(HTASKITEM hTask, double dTimeEst, TDC_UNITS cUnits)
 {
+	if (!IsValidUnits(cUnits))
+	{
+		ASSERT(0);
+		return false;
+	}
+
 	return SetTaskTime(hTask, TDL_TASKTIMEESTIMATE, dTimeEst, TDL_TASKTIMEESTUNITS, cUnits);
 }
 
 bool CTaskFile::SetTaskTimeSpent(HTASKITEM hTask, double dTimeSpent, TDC_UNITS cUnits)
 {
+	if (!IsValidUnits(cUnits))
+	{
+		ASSERT(0);
+		return false;
+	}
+
 	return SetTaskTime(hTask, TDL_TASKTIMESPENT, dTimeSpent, TDL_TASKTIMESPENTUNITS, cUnits);
 }
 

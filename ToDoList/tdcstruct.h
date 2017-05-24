@@ -623,6 +623,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		case TDCCA_DATE:
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
+		case TDCCA_DURATION:
 			return TA_RIGHT;
 		}
 
@@ -730,6 +731,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		{
 		case TDCCA_DOUBLE:
 		case TDCCA_INTEGER:
+		case TDCCA_DURATION:
 			return ((dwFeature == TDCCAF_ACCUMULATE) || 
 					(dwFeature == TDCCAF_MAXIMIZE) || 
 					(dwFeature == TDCCAF_MINIMIZE) ||
@@ -841,6 +843,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 			case TDCCA_DOUBLE:	
 			case TDCCA_DATE:	
 			case TDCCA_BOOL:
+			case TDCCA_DURATION:
 				nItemLen = pDC->GetTextExtent(sItem).cx;
 				break;
 
@@ -917,11 +920,12 @@ private:
 
 	static DWORD ValidateListType(DWORD dwDataType, DWORD dwListType)
 	{
-		// ensure list-type cannot be applied to dates,
+		// ensure list-type cannot be applied to dates or times,
 		// or only partially to icons, flags and file links
 		switch (dwDataType)
 		{
 		case TDCCA_DATE:
+		case TDCCA_DURATION:
 			dwListType = TDCCA_NOTALIST;
 			break;
 
@@ -2339,6 +2343,7 @@ struct TDCCADATA
 {
 	TDCCADATA(const CString& sValue = _T("")) { Set(sValue); }
 	TDCCADATA(double dValue) { Set(dValue); }
+	TDCCADATA(double dValue, TDC_UNITS nUnits) { Set(dValue, nUnits); }
 	TDCCADATA(const CStringArray& aValues) { Set(aValues); }
 	TDCCADATA(int nValue) { Set(nValue); }
 	TDCCADATA(const COleDateTime& dtValue) { Set(dtValue); }
@@ -2366,12 +2371,31 @@ struct TDCCADATA
 	int AsInteger() const { return _ttoi(sData); } 
 	COleDateTime AsDate() const { return _ttof(sData); }
 	bool AsBool() const { return !IsEmpty(); }
+	double AsDuration(TDC_UNITS& nUnits) const
+	{
+		if (IsEmpty())
+		{
+			nUnits = TDCU_HOURS;
+			return 0.0;
+		}
+
+		// else
+		nUnits = (TDC_UNITS)Misc::Last(sData);
+		ASSERT(IsValidUnits(nUnits));
+
+		return _ttof(sData);
+	}
 
 	void Set(const CString& sValue) { sData = sValue; }
 	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
 	void Set(const CStringArray& aValues) { sData = Misc::FormatArray(aValues, '\n'); }
 	void Set(int nValue) { sData.Format(_T("%d"), nValue); }
 	void Set(const COleDateTime& dtValue) { sData.Format(_T("%lf"), dtValue); }
+
+	void Set(double dValue, TDC_UNITS nUnits) 
+	{ 
+		ASSERT(IsValidUnits(nUnits));
+		sData.Format(_T("%lf:%lc"), dValue, (TCHAR)nUnits); }
 
 	void Set(bool bValue, TCHAR nChar = 0) 
 	{ 

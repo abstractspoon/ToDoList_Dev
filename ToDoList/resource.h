@@ -16,6 +16,7 @@
 #define IDS_TDCTIP_LOCK                 65
 #define IDS_UNLOCKED                    66
 #define IDS_LOCKED                      67
+#define IDS_CAD_DURATION                68
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102

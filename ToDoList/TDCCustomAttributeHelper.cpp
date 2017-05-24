@@ -17,6 +17,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\timecombobox.h"
+#include "..\shared\timeedit.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\FileComboBox.h"
 
@@ -95,6 +96,12 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
 				break;
 		
+			case TDCCA_DURATION:
+				pControl = new CTimeEdit();
+				szClass = WC_EDIT;
+				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
+				break;
+
 			// these don't have controls
 			case TDCCA_BOOL:
 			case TDCCA_ICON:
@@ -247,6 +254,7 @@ BOOL CTDCCustomAttributeHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFI
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
+	case TDCCA_DURATION:
 		return FALSE;
 		
 	case TDCCA_DATE:
@@ -273,6 +281,7 @@ CString CTDCCustomAttributeHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFIN
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
 		case TDCCA_FILELINK:
+		case TDCCA_DURATION:
 			return _T("");
 			
 		case TDCCA_DATE:
@@ -847,7 +856,7 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 			pCtrl->GetWindowText(sText);
 			data.Set(sText);
 			break;
-			
+
 		case TDCCA_DATE:
 			((CDateTimeCtrlEx*)pCtrl)->GetTime(date);
 			date = CDateHelper::GetDateOnly(date);
@@ -868,6 +877,15 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 			data.Set(date);
 			break;
 			
+		case TDCCA_DURATION:
+			{
+				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
+				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
+
+				data.Set(dTime, TDC::MapTHUnitsToUnits(nUnits));
+			}
+			break;
+
 			// these don't have controls
 		case TDCCA_ICON:
 		case TDCCA_BOOL:
@@ -991,6 +1009,15 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 						
 						pBuddy->SetOleTime(date);
 					}
+				}
+				break;
+
+			case TDCCA_DURATION:
+				{
+					TDC_UNITS nUnits = TDCU_HOURS;
+					double dTime = data.AsDuration(nUnits);
+					
+					((CTimeEdit*)pCtrl)->SetTime(dTime, TDC::MapUnitsToTHUnits(nUnits));
 				}
 				break;
 				

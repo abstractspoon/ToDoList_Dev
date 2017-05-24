@@ -49,6 +49,24 @@ enum TDC_UNITS
 	TDCU_YEARS		= 'Y',
 };
 
+static bool IsValidUnits(TDC_UNITS nUnits)
+{
+	switch (nUnits)
+	{
+	case TDCU_NULL:
+	case TDCU_MINS:
+	case TDCU_HOURS:
+	case TDCU_DAYS:
+	case TDCU_WEEKDAYS : 
+	case TDCU_WEEKS:
+	case TDCU_MONTHS:	
+	case TDCU_YEARS:
+		return true;
+	}
+
+	return false;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 
 class ITaskList;

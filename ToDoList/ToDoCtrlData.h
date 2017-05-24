@@ -173,7 +173,7 @@ public:
 	double CalcTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double CalcTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double CalcTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
-	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
+	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 	BOOL CalcTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
 	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
 
@@ -208,7 +208,7 @@ public:
 	BOOL CalcTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 							int& nSubtasksTotal, int& nSubtasksDone) const;
 	double CalcTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const;
+	BOOL CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 
 	CString FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString FormatTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;

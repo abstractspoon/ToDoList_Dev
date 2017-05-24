@@ -836,7 +836,7 @@ CString CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 	return pTDI->GetCustomAttribValue(sAttribID);
 }
 
-BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const
+BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
 	if (dwTaskID && attribDef.SupportsCalculation())
 	{
@@ -844,7 +844,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 		const TODOSTRUCTURE* pTDS = NULL;
 		
 		if (GetTrueTask(dwTaskID, pTDI, pTDS))
-			return CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
+			return CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 
 		ASSERT(0);
 	}
@@ -853,13 +853,13 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue) const
+BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
 	if (!attribDef.SupportsCalculation())
 		return FALSE;
 
-	const CString& sAttribID = attribDef.sUniqueID;
-	CString sTaskVal = pTDI->GetCustomAttribValue(sAttribID);
+	TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
+
 	DWORD dwDataType = attribDef.GetDataType();
 	double dCalcValue = TODOITEM::NULL_VALUE;
 
@@ -867,11 +867,10 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	// -----------------------------------------------------------
 	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
-		ASSERT(dwDataType == TDCCA_DOUBLE || 
-				dwDataType == TDCCA_INTEGER);
+		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = Misc::Atof(sTaskVal);
+		dCalcValue = data.AsDouble();
 		
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -887,14 +886,12 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	// -----------------------------------------------------------
 	else if (attribDef.HasFeature(TDCCAF_MAXIMIZE))
 	{
-		ASSERT(dwDataType == TDCCA_DOUBLE || 
-				dwDataType == TDCCA_INTEGER ||
-				dwDataType == TDCCA_DATE);
+		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE));
 
-		if (sTaskVal.IsEmpty())
+		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = Misc::Atof(sTaskVal);
+			dCalcValue = data.AsDouble();
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -913,14 +910,12 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	// -----------------------------------------------------------
 	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
 	{
-		ASSERT(dwDataType == TDCCA_DOUBLE || 
-			dwDataType == TDCCA_INTEGER ||
-			dwDataType == TDCCA_DATE);
+		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE));
 		
-		if (sTaskVal.IsEmpty())
+		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = Misc::Atof(sTaskVal);
+			dCalcValue = data.AsDouble();
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -938,7 +933,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		dCalcValue = Misc::Atof(sTaskVal);
+		dCalcValue = data.AsDouble();
 	}
 
 	if (dCalcValue == TODOITEM::NULL_VALUE)

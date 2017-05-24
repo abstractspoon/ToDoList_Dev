@@ -2971,6 +2971,16 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		}
 		break;
 
+	case TDCCA_DURATION:
+		{
+			double dValue = 0.0;
+			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, m_nDefTimeEstUnits);
+
+			CString sText(FormatTimeValue(dValue, m_nDefTimeEstUnits, TRUE));
+			DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+		}
+		break;
+
 	case TDCCA_FILELINK:
 		{
 			CStringArray aItems;
@@ -3504,25 +3514,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 			double dTime = (bTimeEst ? m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits) :
 										m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits));
 
-			// first handle zero times
-			if ((dTime == 0.0) && HasStyle(TDCS_HIDEZEROTIMECOST))
-			{
-				break;
-			}
-			// then check for negative times
-			else if (bTimeEst && (dTime < 0.0))
-			{
-				break;
-			}
-
-			// else
-			int nDecPlaces = HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2;
-			TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
-
-			if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-				sTaskColText = CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
-			else
-				sTaskColText = CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
+			sTaskColText = FormatTimeValue(dTime, nUnits, !bTimeEst);
 		}
 		break;
 
@@ -3557,6 +3549,34 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	}
 	
 	return sTaskColText;
+}
+
+CString CTDLTaskCtrlBase::FormatTimeValue(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const
+{
+	CString sTime;
+
+	// first handle zero times
+	if ((dTime == 0.0) && HasStyle(TDCS_HIDEZEROTIMECOST))
+	{
+		// do nothing
+	}
+	// then check for negative times
+	else if (!bAllowNegative && (dTime < 0.0))
+	{
+		// do nothing
+	}
+	else
+	{
+		int nDecPlaces = HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2;
+		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
+
+		if (HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+			sTime = CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
+		else
+			sTime = CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
+	}
+
+	return sTime;
 }
 
 // message and notifications for 'us'
