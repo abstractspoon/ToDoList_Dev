@@ -11074,7 +11074,11 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 			break;
 		
 		case IDC_TIMESPENT:
-			bWantQueryRecalc = (GetSelectedTaskTimeSpent(nDummy) > 0.0);
+			bWantQueryRecalc = (GetSelectedTaskTimeSpent(nDummy) != 0.0);
+			break;
+
+		default:
+			ASSERT(CTDCCustomAttributeHelper::IsCustomControl(wParam));
 			break;
 		}
 	}
@@ -11094,6 +11098,10 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 		
 		case IDC_TIMESPENT:
 			UpdateTask(TDCA_TIMESPENT, dwFlags); 
+			break;
+
+		default:
+			OnCustomAttributeChange(wParam);
 			break;
 		}
 	}

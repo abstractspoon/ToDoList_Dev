@@ -853,6 +853,33 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 	return FALSE;
 }
 
+double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, BOOL bDuration, TDC_UNITS nUnits)
+{
+	double dValue = TODOITEM::NULL_VALUE;
+
+	if (bDuration)
+	{
+		ASSERT(IsValidUnits(nUnits));
+
+		TDC_UNITS nTaskUnits;
+		dValue = data.AsDuration(nTaskUnits);
+
+		// Convert to requested units
+		if ((dValue != 0.0) && nTaskUnits != nUnits)
+		{
+			dValue = CTimeHelper().GetTime(dValue, 
+											TDC::MapUnitsToTHUnits(nTaskUnits), 
+											TDC::MapUnitsToTHUnits(nUnits));
+		}
+	}
+	else // double/int
+	{
+		dValue = data.AsDouble();
+	}
+
+	return dValue;
+}
+
 BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
 	if (!attribDef.SupportsCalculation())
@@ -870,7 +897,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = data.AsDouble();
+		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
 		
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -879,7 +906,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(i);
 			
 			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal))
+			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
 				dCalcValue += dSubtaskVal;
 		}
 	}
@@ -891,7 +918,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = data.AsDouble();
+			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -900,7 +927,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(i);
 			
 			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal))
+			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
 				dCalcValue = max(dSubtaskVal, dCalcValue);
 		}
 
@@ -915,7 +942,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = data.AsDouble();
+			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -924,7 +951,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(i);
 			
 			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal))
+			if (!IsTaskReference(dwSubtaskID) && CalcTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
 				dCalcValue = min(dSubtaskVal, dCalcValue);
 		}
 
@@ -933,7 +960,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		dCalcValue = data.AsDouble();
+		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
 	}
 
 	if (dCalcValue == TODOITEM::NULL_VALUE)
@@ -3406,10 +3433,11 @@ double CToDoCtrlData::CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUC
 	dWeightedEstimate = 0.0;
 
 	BOOL bIsParent = pTDS->HasSubTasks();
+	CTimeHelper th;
 	
 	if (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 	{
-		dEstimate = CTimeHelper().GetTime(pTDI->dTimeEstimate, pTDI->GetTHTimeUnits(TRUE), THU_HOURS);
+		dEstimate = th.GetTime(pTDI->dTimeEstimate, pTDI->GetTHTimeUnits(TRUE), THU_HOURS);
 		
 		// DON'T WEIGHT BY PERCENT if we are auto-calculating
 		// percent-done, because that will recurse back into here
@@ -3439,8 +3467,6 @@ double CToDoCtrlData::CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUC
 	}
 	
 	// Estimate is calculated internally in hours so we need to convert it to nUnits
-	CTimeHelper th;
-	
 	dEstimate = th.GetTime(dEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 	dWeightedEstimate = th.GetTime(dWeightedEstimate, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
 
