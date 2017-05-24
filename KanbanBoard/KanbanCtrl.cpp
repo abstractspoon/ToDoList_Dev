@@ -2742,7 +2742,9 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 	if (pKI)
 	{
 		LRESULT lr = GetParent()->SendMessage(WM_KBC_COMPLETIONCHANGE, (WPARAM)GetSafeHwnd(), !pKI->IsDone(FALSE));
-		PostMessage(WM_KCM_SELECTTASK, 0, lp);
+
+		if (lr)
+			PostMessage(WM_KCM_SELECTTASK, 0, lp);
 
 		return lr;
 	}
