@@ -36,12 +36,12 @@ public:
 
 	BOOL Create(CWnd* pParentWnd, UINT nID = 0, BOOL bVisible = TRUE);
 
-	FILTER_SHOW GetFilter(FTDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
+	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 	FILTER_SHOW GetFilter(CString& sCustom) const;
 
-	void AddCustomFilters(const CStringArray& aFilters);
-	int GetCustomFilters(CStringArray& aFilters) const;
-	void RemoveCustomFilters();
+	void AddAdvancedFilters(const CStringArray& aFilters);
+	int GetAdvancedFilterNames(CStringArray& aFilters) const;
+	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 
 	void RefreshFilterControls(const CFilteredToDoCtrl& tdc);
@@ -49,7 +49,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 	int CalcHeight(int nWidth);
 	void SetVisibleFilters(const CTDCAttributeMap& mapFilters);
-	BOOL FilterMatches(const FTDCFILTER& filter) { return (filter == m_filter); }
+	BOOL FilterMatches(const TDCFILTER& filter) { return (filter == m_filter); }
 
 	void EnableMultiSelection(BOOL bEnable);
 	void SetUITheme(const CUIThemeFile& theme);
@@ -77,7 +77,7 @@ protected:
 
 	CTDCCustomControlArray		m_aCustomControls;
 	
-	FTDCFILTER m_filter;
+	TDCFILTER m_filter;
 	CMap<CString, LPCTSTR, DWORD, DWORD&> m_mapCustomFlags;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapVisibility;
@@ -85,8 +85,8 @@ protected:
 	CBrush m_brUIBack;
 	COLORREF m_crUIBack;
 	CUIThemeFile m_theme;
-	BOOL m_bCustomFilter;
-	CString m_sCustomFilter;
+	BOOL m_bAdvancedFilter;
+	CString m_sAdvancedFilter;
 	BOOL m_bWantHideParents;
 	CWndPromptManager m_mgrPrompts;
 	BOOL m_bRefreshBkgndColor;

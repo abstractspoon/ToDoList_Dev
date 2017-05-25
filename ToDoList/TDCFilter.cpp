@@ -18,7 +18,7 @@ CTDCFilter& CTDCFilter::operator=(const CTDCFilter& filter)
 {
 	m_nState = filter.m_nState;
 	m_filter = filter.m_filter;
-	m_custom = filter.m_custom;
+	m_advFilter = filter.m_advFilter;
 	
 	return *this;
 }
@@ -34,16 +34,16 @@ BOOL CTDCFilter::operator==(const CTDCFilter& filter) const
 		}
 		break;
 
-	case TDCFS_CUSTOM:
-		if (filter.m_nState == TDCFS_CUSTOM)
+	case TDCFS_ADVANCED:
+		if (filter.m_nState == TDCFS_ADVANCED)
 		{
-			return m_custom.Matches(filter.m_custom);
+			return m_advFilter.Matches(filter.m_advFilter);
 		}
 		break;
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		break;
 
 	default:
@@ -54,14 +54,14 @@ BOOL CTDCFilter::operator==(const CTDCFilter& filter) const
 	return FALSE;
 }
 
-BOOL CTDCFilter::FilterMatches(const FTDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
+BOOL CTDCFilter::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
 {
-	BOOL bCustom = HasCustomFilter();
+	BOOL bCustom = HasAdvancedFilter();
 	BOOL bOtherCustom = (szCustom && *szCustom);
 
 	if (bCustom && bOtherCustom)
 	{
-		return m_custom.Matches(szCustom, dwCustomFlags, dwIgnoreFlags);
+		return m_advFilter.Matches(szCustom, dwCustomFlags, dwIgnoreFlags);
 	}
 	else if (!bCustom && !bOtherCustom)
 	{
@@ -77,7 +77,7 @@ BOOL CTDCFilter::FlagsMatch(DWORD dwFlags1, DWORD dwFlags2, DWORD dwIgnore)
 	return ((dwFlags1 & ~dwIgnore) == (dwFlags2 & ~dwIgnore));
 }
 
-FILTER_SHOW CTDCFilter::GetFilter(FTDCFILTER& filter) const
+FILTER_SHOW CTDCFilter::GetFilter(TDCFILTER& filter) const
 {
 	switch (m_nState)
 	{
@@ -85,10 +85,10 @@ FILTER_SHOW CTDCFilter::GetFilter(FTDCFILTER& filter) const
 		filter = m_filter;
 		break;
 
-	case TDCFS_CUSTOM:
+	case TDCFS_ADVANCED:
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 	default:
 		filter.Reset();
 		break;
@@ -104,12 +104,12 @@ FILTER_SHOW CTDCFilter::GetFilter() const
 	case TDCFS_FILTER:
 		return m_filter.nShow;
 
-	case TDCFS_CUSTOM:
-		return FS_CUSTOM;
+	case TDCFS_ADVANCED:
+		return FS_ADVANCED;
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		break;
 
 	default:
@@ -126,12 +126,12 @@ BOOL CTDCFilter::HasAnyFilter(DWORD dwIgnoreFlags) const
 	case TDCFS_FILTER:
 		return m_filter.IsSet(dwIgnoreFlags);
 
-	case TDCFS_CUSTOM:
-		return (m_custom.params.GetRuleCount() != 0);
+	case TDCFS_ADVANCED:
+		return (m_advFilter.params.GetRuleCount() != 0);
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		return FALSE;
 	}
 
@@ -139,18 +139,18 @@ BOOL CTDCFilter::HasAnyFilter(DWORD dwIgnoreFlags) const
 	return FALSE;
 }
 
-BOOL CTDCFilter::SetFilter(const FTDCFILTER& filter)
+BOOL CTDCFilter::SetFilter(const TDCFILTER& filter)
 {
 	m_filter = filter;
 	m_nState = TDCFS_FILTER;
 
 	// clear custom filter
-	m_custom.Reset();
+	m_advFilter.Reset();
 
 	return TRUE;
 }
 
-BOOL CTDCFilter::SetCustomFilter(const FTDCCUSTOMFILTER& filter)
+BOOL CTDCFilter::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 {
 	// error checking
 	ASSERT(!filter.sName.IsEmpty() && filter.params.GetRuleCount());
@@ -158,8 +158,8 @@ BOOL CTDCFilter::SetCustomFilter(const FTDCCUSTOMFILTER& filter)
 	if (filter.sName.IsEmpty() || !filter.params.GetRuleCount())
 		return FALSE;
 
-	m_custom = filter;
-	m_nState = TDCFS_CUSTOM;
+	m_advFilter = filter;
+	m_nState = TDCFS_ADVANCED;
 
 	// clear user filter
 	m_filter.Reset();
@@ -167,19 +167,19 @@ BOOL CTDCFilter::SetCustomFilter(const FTDCCUSTOMFILTER& filter)
 	return TRUE;
 }
 
-CString CTDCFilter::GetCustomFilterName() const
+CString CTDCFilter::GetAdvancedFilterName() const
 {
-	if (m_nState == TDCFS_CUSTOM)
-		return m_custom.sName;
+	if (m_nState == TDCFS_ADVANCED)
+		return m_advFilter.sName;
 
 	// else
 	ASSERT(0);
 	return _T("");
 }
 
-BOOL CTDCFilter::HasCustomFilter() const
+BOOL CTDCFilter::HasAdvancedFilter() const
 {
-	return (m_nState == TDCFS_CUSTOM);
+	return (m_nState == TDCFS_ADVANCED);
 }
 
 BOOL CTDCFilter::HasNowFilter() const
@@ -195,22 +195,22 @@ BOOL CTDCFilter::HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
 	case TDCFS_FILTER:
 		return m_filter.HasNowFilter(nAttrib);
 
-	case TDCFS_CUSTOM:
-		return m_custom.HasNowFilter(nAttrib);
+	case TDCFS_ADVANCED:
+		return m_advFilter.HasNowFilter(nAttrib);
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		break;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCFilter::HasCustomFilterAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const
 {
-	if (m_nState == TDCFS_CUSTOM)
-		return m_custom.params.HasAttribute(nAttrib);
+	if (m_nState == TDCFS_ADVANCED)
+		return m_advFilter.params.HasAttribute(nAttrib);
 
 	// else
 	ASSERT(0);
@@ -224,12 +224,12 @@ DWORD CTDCFilter::GetFilterFlags() const
 	case TDCFS_FILTER:
 		return m_filter.dwFlags;
 
-	case TDCFS_CUSTOM:
-		return m_custom.dwFlags;
+	case TDCFS_ADVANCED:
+		return m_advFilter.dwFlags;
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		return 0;
 	}
 
@@ -247,7 +247,7 @@ BOOL CTDCFilter::ClearFilter()
 	if (HasAnyFilter() || CanToggleFilter())
 	{
 		m_filter.Reset();
-		m_custom.Reset();
+		m_advFilter.Reset();
 		m_nState = TDCFS_NONE;
 
 		return TRUE;
@@ -264,16 +264,16 @@ BOOL CTDCFilter::ToggleFilter()
 		m_nState = TDCFS_FILTER_TOGGLED;
 		return TRUE;
 
-	case TDCFS_CUSTOM:
-		m_nState = TDCFS_CUSTOM_TOGGLED;
+	case TDCFS_ADVANCED:
+		m_nState = TDCFS_ADVANCED_TOGGLED;
 		return TRUE;
 
 	case TDCFS_FILTER_TOGGLED:
 		m_nState = TDCFS_FILTER;
 		return TRUE;
 
-	case TDCFS_CUSTOM_TOGGLED:
-		m_nState = TDCFS_CUSTOM;
+	case TDCFS_ADVANCED_TOGGLED:
+		m_nState = TDCFS_ADVANCED;
 		return TRUE;
 
 	case TDCFS_NONE:
@@ -289,9 +289,9 @@ BOOL CTDCFilter::CanToggleFilter() const
 	switch (m_nState)
 	{
 	case TDCFS_FILTER:
-	case TDCFS_CUSTOM:
+	case TDCFS_ADVANCED:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		return TRUE;
 
 	case TDCFS_NONE:
@@ -318,17 +318,17 @@ BOOL CTDCFilter::BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDe
 		}
 		return TRUE;
 
-	case TDCFS_CUSTOM:
-		params = m_custom.params;
+	case TDCFS_ADVANCED:
+		params = m_advFilter.params;
 		params.aAttribDefs.Copy(aCustomAttribDefs);
-		params.bIgnoreDone = m_custom.HasFlag(FO_HIDEDONE);
-		params.bIgnoreOverDue = m_custom.HasFlag(FO_HIDEOVERDUE);
-		params.bWantAllSubtasks = m_custom.HasFlag(FO_SHOWALLSUB);
+		params.bIgnoreDone = m_advFilter.HasFlag(FO_HIDEDONE);
+		params.bIgnoreOverDue = m_advFilter.HasFlag(FO_HIDEOVERDUE);
+		params.bWantAllSubtasks = m_advFilter.HasFlag(FO_SHOWALLSUB);
 		return TRUE;
 
 	case TDCFS_NONE:
 	case TDCFS_FILTER_TOGGLED:
-	case TDCFS_CUSTOM_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		return FALSE;
 	}
 
@@ -336,7 +336,7 @@ BOOL CTDCFilter::BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDe
 	return FALSE;
 }
 
-void CTDCFilter::BuildFilterQuery(const FTDCFILTER& filter, SEARCHPARAMS& params)
+void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, SEARCHPARAMS& params)
 {
 	// reset the search
 	params.aRules.RemoveAll();
@@ -425,7 +425,7 @@ void CTDCFilter::BuildFilterQuery(const FTDCFILTER& filter, SEARCHPARAMS& params
 	AddNonDateFilterQueryRules(filter, params);
 }
 
-void CTDCFilter::AddNonDateFilterQueryRules(const FTDCFILTER& filter, SEARCHPARAMS& params)
+void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, SEARCHPARAMS& params)
 {
 	// title text
 	if (!filter.sTitle.IsEmpty())
@@ -655,12 +655,12 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey) const
 	{
 	case TDCFS_FILTER:
 	case TDCFS_FILTER_TOGGLED:
-		SaveUserFilter(prefs, sKey);
+		SaveFilter(prefs, sKey, m_filter);
 		break;
 
-	case TDCFS_CUSTOM:
-	case TDCFS_CUSTOM_TOGGLED:
-		SaveCustomFilter(prefs, sKey);
+	case TDCFS_ADVANCED:
+	case TDCFS_ADVANCED_TOGGLED:
+		SaveAdvancedFilter(prefs, sKey, m_advFilter);
 		break;
 
 	case TDCFS_NONE:
@@ -679,12 +679,12 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, cons
 	{
 	case TDCFS_FILTER:
 	case TDCFS_FILTER_TOGGLED:
-		LoadUserFilter(prefs, sKey);
+		LoadFilter(prefs, sKey, m_filter);
 		break;
 
-	case TDCFS_CUSTOM:
-	case TDCFS_CUSTOM_TOGGLED:
-		LoadCustomFilter(prefs, sKey, aCustomAttribDefs);
+	case TDCFS_ADVANCED:
+	case TDCFS_ADVANCED_TOGGLED:
+		LoadAdvancedFilter(prefs, sKey, aCustomAttribDefs, m_advFilter);
 		break;
 
 	case TDCFS_NONE:
@@ -695,17 +695,23 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, cons
 	}
 }
 
-void CTDCFilter::LoadCustomFilter(const CPreferences& prefs, const CString& sKey, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs)
+void CTDCFilter::LoadAdvancedFilter(const CPreferences& prefs, const CString& sKey, 
+									const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
+									TDCADVANCEDFILTER& filter)
 {
-	CString sSubKey = (sKey + _T("\\Custom"));
+	CString sSubKey = (sKey + _T("\\Advanced"));
 
-	m_custom.sName = prefs.GetProfileString(sSubKey, _T("Name"));
-	m_custom.dwFlags = LoadFlags(prefs, sSubKey);
+	// Backward compatibility
+	if (!prefs.HasProfileSection(sSubKey))
+		sSubKey = (sKey + _T("\\Custom"));
+
+	filter.sName = prefs.GetProfileString(sSubKey, _T("Name"));
+	filter.dwFlags = LoadFlags(prefs, sSubKey);
 
 	// rules
-	m_custom.params.bIgnoreDone = prefs.GetProfileInt(sSubKey, _T("IgnoreDone"), FALSE);
-	m_custom.params.bIgnoreOverDue = prefs.GetProfileInt(sSubKey, _T("IgnoreOverDue"), FALSE);
-	m_custom.params.bWantAllSubtasks = prefs.GetProfileInt(sSubKey, _T("WantAllSubtasks"), FALSE);
+	filter.params.bIgnoreDone = prefs.GetProfileInt(sSubKey, _T("IgnoreDone"), FALSE);
+	filter.params.bIgnoreOverDue = prefs.GetProfileInt(sSubKey, _T("IgnoreOverDue"), FALSE);
+	filter.params.bWantAllSubtasks = prefs.GetProfileInt(sSubKey, _T("WantAllSubtasks"), FALSE);
 
 	int nNumRules = prefs.GetProfileInt(sSubKey, _T("NumRules"), 0), nNumDupes = 0;
 	SEARCHPARAM rule, rulePrev;
@@ -734,31 +740,35 @@ void CTDCFilter::LoadCustomFilter(const CPreferences& prefs, const CString& sKey
 			rulePrev = rule; // new 'previous rule
 		}
 
-		m_custom.params.aRules.Add(rule);
+		filter.params.aRules.Add(rule);
 	}
 }
 
-void CTDCFilter::SaveCustomFilter(CPreferences& prefs, const CString& sKey) const
+void CTDCFilter::SaveAdvancedFilter(CPreferences& prefs, const CString& sKey, const TDCADVANCEDFILTER& filter)
 {
+	// Delete old key(s)
+	prefs.DeleteProfileSection(sKey + _T("\\Custom"));
+
+	CString sSubKey = (sKey + _T("\\Advanced"));
+	prefs.DeleteProfileSection(sSubKey);
+
 	// check anything to save
-	if (m_custom.params.aRules.GetSize() == 0)
+	if (filter.params.aRules.GetSize() == 0)
 		return;
 
-	CString sSubKey = (sKey + _T("\\Custom"));
+	prefs.WriteProfileString(sSubKey, _T("Name"), filter.sName);
 
-	prefs.WriteProfileString(sSubKey, _T("Name"), m_custom.sName);
-
-	prefs.WriteProfileInt(sSubKey, _T("IgnoreDone"), m_custom.params.bIgnoreDone);
-	prefs.WriteProfileInt(sSubKey, _T("IgnoreOverDue"), m_custom.params.bIgnoreOverDue);
-	prefs.WriteProfileInt(sSubKey, _T("WantAllSubtasks"), m_custom.params.bWantAllSubtasks);
+	prefs.WriteProfileInt(sSubKey, _T("IgnoreDone"), filter.params.bIgnoreDone);
+	prefs.WriteProfileInt(sSubKey, _T("IgnoreOverDue"), filter.params.bIgnoreOverDue);
+	prefs.WriteProfileInt(sSubKey, _T("WantAllSubtasks"), filter.params.bWantAllSubtasks);
 
 	int nNumRules = 0, nNumDupes = 0;
 	SEARCHPARAM rulePrev;
 
-	for (int nRule = 0; nRule < m_custom.params.aRules.GetSize(); nRule++)
+	for (int nRule = 0; nRule < filter.params.aRules.GetSize(); nRule++)
 	{
 		CString sRule = Misc::MakeKey(_T("Rule%d"), nRule, sSubKey);
-		const SEARCHPARAM& rule = m_custom.params.aRules[nRule];
+		const SEARCHPARAM& rule = filter.params.aRules[nRule];
 
 		// stop saving if we meet an invalid rule
 		if (!CTDCSearchParamHelper::SaveRule(prefs, sRule, rule))
@@ -785,42 +795,42 @@ void CTDCFilter::SaveCustomFilter(CPreferences& prefs, const CString& sKey) cons
 	prefs.WriteProfileInt(sSubKey, _T("NumRules"), nNumRules);
 
 	// options
-	SaveFlags(m_custom.dwFlags, prefs, sSubKey);
+	SaveFlags(filter.dwFlags, prefs, sSubKey);
 }
 
-void CTDCFilter::LoadUserFilter(const CPreferences& prefs, const CString& sKey)
+void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCFILTER& filter)
 {
-	m_filter.nShow = (FILTER_SHOW)prefs.GetProfileInt(sKey, _T("Show"), FS_ALL);
-	m_filter.nStartBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Start"), FD_ANY);
-	m_filter.nDueBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Due"), FD_ANY);
+	filter.nShow = (FILTER_SHOW)prefs.GetProfileInt(sKey, _T("Show"), FS_ALL);
+	filter.nStartBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Start"), FD_ANY);
+	filter.nDueBy = (FILTER_DATE)prefs.GetProfileInt(sKey, _T("Due"), FD_ANY);
 
-	m_filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
-	m_filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
-	m_filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
-	m_filter.nStartNextNDays = prefs.GetProfileInt(sKey, _T("StartNextNDays"), 7);
-	m_filter.nDueNextNDays = prefs.GetProfileInt(sKey, _T("DueNextNDays"), 7);
+	filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
+	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
+	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
+	filter.nStartNextNDays = prefs.GetProfileInt(sKey, _T("StartNextNDays"), 7);
+	filter.nDueNextNDays = prefs.GetProfileInt(sKey, _T("DueNextNDays"), 7);
 
 	// dates
-	if (m_filter.nStartBy == FD_USER)
-		m_filter.dtUserStart = prefs.GetProfileDouble(sKey, _T("UserStart"), COleDateTime::GetCurrentTime());
+	if (filter.nStartBy == FD_USER)
+		filter.dtUserStart = prefs.GetProfileDouble(sKey, _T("UserStart"), COleDateTime::GetCurrentTime());
 	else
-		m_filter.dtUserStart = COleDateTime::GetCurrentTime();
+		filter.dtUserStart = COleDateTime::GetCurrentTime();
 
-	if (m_filter.nDueBy == FD_USER)
-		m_filter.dtUserDue = prefs.GetProfileDouble(sKey, _T("UserDue"), COleDateTime::GetCurrentTime());
+	if (filter.nDueBy == FD_USER)
+		filter.dtUserDue = prefs.GetProfileDouble(sKey, _T("UserDue"), COleDateTime::GetCurrentTime());
 	else
-		m_filter.dtUserDue = COleDateTime::GetCurrentTime();
+		filter.dtUserDue = COleDateTime::GetCurrentTime();
 
 	// arrays
-	prefs.GetProfileArray(sKey + _T("\\Category"), m_filter.aCategories, TRUE);
-	prefs.GetProfileArray(sKey + _T("\\AllocTo"), m_filter.aAllocTo, TRUE);
-	prefs.GetProfileArray(sKey + _T("\\AllocBy"), m_filter.aAllocBy, TRUE);
-	prefs.GetProfileArray(sKey + _T("\\Status"), m_filter.aStatus, TRUE);
-	prefs.GetProfileArray(sKey + _T("\\Version"), m_filter.aVersions, TRUE);
-	prefs.GetProfileArray(sKey + _T("\\Tags"), m_filter.aTags, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\Category"), filter.aCategories, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\AllocTo"), filter.aAllocTo, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\AllocBy"), filter.aAllocBy, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\Status"), filter.aStatus, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\Version"), filter.aVersions, TRUE);
+	prefs.GetProfileArray(sKey + _T("\\Tags"), filter.aTags, TRUE);
 
 	// options
-	m_filter.dwFlags = LoadFlags(prefs, sKey);
+	filter.dwFlags = LoadFlags(prefs, sKey);
 }
 
 DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
@@ -866,32 +876,32 @@ void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sK
 	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"), Misc::HasFlag(dwFlags, FO_SHOWALLSUB));
 }
 
-void CTDCFilter::SaveUserFilter(CPreferences& prefs, const CString& sKey) const
+void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCFILTER& filter)
 {
-	prefs.WriteProfileString(sKey, _T("Title"), m_filter.sTitle);
+	prefs.WriteProfileString(sKey, _T("Title"), filter.sTitle);
 
-	prefs.WriteProfileInt(sKey, _T("Show"), m_filter.nShow);
-	prefs.WriteProfileInt(sKey, _T("Start"), m_filter.nStartBy);
-	prefs.WriteProfileInt(sKey, _T("Due"), m_filter.nDueBy);
-	prefs.WriteProfileInt(sKey, _T("Priority"), m_filter.nPriority);
-	prefs.WriteProfileInt(sKey, _T("Risk"), m_filter.nRisk);
-	prefs.WriteProfileInt(sKey, _T("StartNextNDays"), m_filter.nStartNextNDays);
-	prefs.WriteProfileInt(sKey, _T("DueNextNDays"), m_filter.nDueNextNDays);
+	prefs.WriteProfileInt(sKey, _T("Show"), filter.nShow);
+	prefs.WriteProfileInt(sKey, _T("Start"), filter.nStartBy);
+	prefs.WriteProfileInt(sKey, _T("Due"), filter.nDueBy);
+	prefs.WriteProfileInt(sKey, _T("Priority"), filter.nPriority);
+	prefs.WriteProfileInt(sKey, _T("Risk"), filter.nRisk);
+	prefs.WriteProfileInt(sKey, _T("StartNextNDays"), filter.nStartNextNDays);
+	prefs.WriteProfileInt(sKey, _T("DueNextNDays"), filter.nDueNextNDays);
 
 	// dates
-	prefs.WriteProfileDouble(sKey, _T("UserStart"), m_filter.dtUserStart);
-	prefs.WriteProfileDouble(sKey, _T("UserDue"), m_filter.dtUserDue);
+	prefs.WriteProfileDouble(sKey, _T("UserStart"), filter.dtUserStart);
+	prefs.WriteProfileDouble(sKey, _T("UserDue"), filter.dtUserDue);
 
 	// arrays
-	prefs.WriteProfileArray(sKey + _T("\\AllocBy"), m_filter.aAllocBy);
-	prefs.WriteProfileArray(sKey + _T("\\Status"), m_filter.aStatus);
-	prefs.WriteProfileArray(sKey + _T("\\Version"), m_filter.aVersions);
-	prefs.WriteProfileArray(sKey + _T("\\AllocTo"), m_filter.aAllocTo);
-	prefs.WriteProfileArray(sKey + _T("\\Category"), m_filter.aCategories);
-	prefs.WriteProfileArray(sKey + _T("\\Tags"), m_filter.aTags);
+	prefs.WriteProfileArray(sKey + _T("\\AllocBy"), filter.aAllocBy);
+	prefs.WriteProfileArray(sKey + _T("\\Status"), filter.aStatus);
+	prefs.WriteProfileArray(sKey + _T("\\Version"), filter.aVersions);
+	prefs.WriteProfileArray(sKey + _T("\\AllocTo"), filter.aAllocTo);
+	prefs.WriteProfileArray(sKey + _T("\\Category"), filter.aCategories);
+	prefs.WriteProfileArray(sKey + _T("\\Tags"), filter.aTags);
 
 	// options
-	SaveFlags(m_filter.dwFlags, prefs, sKey);
+	SaveFlags(filter.dwFlags, prefs, sKey);
 }
 
 BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const 
@@ -900,9 +910,9 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 	// actually affects the filter
 	BOOL bNeedRefilter = FALSE;
 
-	if (m_nState == TDCFS_CUSTOM) // 'Find' filter
+	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
 	{
-		bNeedRefilter = m_custom.params.HasAttribute(nModType); 
+		bNeedRefilter = m_advFilter.params.HasAttribute(nModType); 
 
 		if (bNeedRefilter)
 		{

@@ -23,18 +23,18 @@ public:
 public:
 	FILTER_SHOW GetSelectedFilter() const;
 	FILTER_SHOW GetSelectedFilter(CString& sCustom) const;
-	BOOL SelectFilter(FILTER_SHOW nFilter);
-	BOOL SelectFilter(const CString& sCustom);
+	BOOL SelectAdvancedFilter(FILTER_SHOW nFilter);
+	BOOL SelectAdvancedFilter(const CString& sCustom);
 	
-	void AddCustomFilters(const CStringArray& aFilters, LPCTSTR szCustomSel = NULL);
-	int GetCustomFilters(CStringArray& aFilters) const;
-	void RemoveCustomFilters();
+	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szCustomSel = NULL);
+	int GetAdvancedFilters(CStringArray& aFilters) const;
+	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 
 // Operations
 protected:
 	BOOL m_bShowDefaultFilters;
-	CStringArray m_aCustomFilters;
+	CStringArray m_aAdvancedFilterNames;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -63,8 +63,8 @@ protected:
 	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szCustom = NULL);
 	int AddDefaultFilterItem(int nItem);
 
-	static CString FormatCustomFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncCustomLabel = TRUE);
-	static CString ExtractCustomFilterName(const CString& sDisplay);
+	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncCustomLabel = TRUE);
+	static CString ExtractAdvancedFilterName(const CString& sDisplay);
 };
 
 /////////////////////////////////////////////////////////////////////////////

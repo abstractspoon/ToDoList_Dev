@@ -1177,7 +1177,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
 	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFilters());
 
-	RefreshFilterBarCustomFilters();
+	RefreshFilterBarAdvancedFilters();
 
 	return TRUE;
 }
@@ -7736,7 +7736,7 @@ void CToDoListWnd::RefreshFilterBarControls()
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		// if this tasklist's filter is an unnamed custom one
-		RefreshFilterBarCustomFilters();
+		RefreshFilterBarAdvancedFilters();
 
 		// get existing filter bar size so we can determine if a 
 		// resize if required
@@ -9999,13 +9999,13 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	if (!m_findDlg.IsDocked())
 		m_findDlg.Show(FALSE);
 	
-	FTDCCUSTOMFILTER filter((LPCTSTR)lp);
+	TDCADVANCEDFILTER filter((LPCTSTR)lp);
 	m_findDlg.GetSearchParams(filter);
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	tdc.SetCustomFilter(filter);
+	tdc.SetAdvancedFilter(filter);
 	
-	RefreshFilterBarCustomFilters();
+	RefreshFilterBarAdvancedFilters();
 	m_filterBar.RefreshFilterControls(tdc);
 
 	tdc.SetFocusToTasks();
@@ -10015,7 +10015,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	RefreshFilterBarCustomFilters();
+	RefreshFilterBarAdvancedFilters();
 	return 0;
 }
 
@@ -10026,12 +10026,12 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 	CString sActive;
 	LPCTSTR szSearch = (LPCTSTR)lp;
 
-	if ((m_filterBar.GetFilter(sActive) == FS_CUSTOM) && (sActive == szSearch))
+	if ((m_filterBar.GetFilter(sActive) == FS_ADVANCED) && (sActive == szSearch))
 	{
-		FTDCCUSTOMFILTER filter;
+		TDCADVANCEDFILTER filter;
 		m_findDlg.GetSearchParams(szSearch, filter);
 
-		GetToDoCtrl().SetCustomFilter(filter);
+		GetToDoCtrl().SetAdvancedFilter(filter);
 	}
 
 	return 0;
@@ -10039,11 +10039,11 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	RefreshFilterBarCustomFilters();
+	RefreshFilterBarAdvancedFilters();
 	return 0;
 }
 
-void CToDoListWnd::RefreshFilterBarCustomFilters()
+void CToDoListWnd::RefreshFilterBarAdvancedFilters()
 {
 	CStringArray aFilters;
 	
@@ -10058,7 +10058,7 @@ void CToDoListWnd::RefreshFilterBarCustomFilters()
 			aFilters.Add(sUnNamed);
 	}
 
-	m_filterBar.AddCustomFilters(aFilters);
+	m_filterBar.AddAdvancedFilters(aFilters);
 
 	CRect rFilter;
 
@@ -10771,9 +10771,9 @@ void CToDoListWnd::OnUpdateFileOpenarchive(CCmdUI* pCmdUI)
 	pCmdUI->Enable(bArchiveExists);
 }
 
-void CToDoListWnd::PrepareFilter(FTDCFILTER& filter) const
+void CToDoListWnd::PrepareFilter(TDCFILTER& filter) const
 {
-	if (filter.nShow != FS_CUSTOM)
+	if (filter.nShow != FS_ADVANCED)
 	{
 		// handle title filter option
 		switch (Prefs().GetTitleFilterOption())
@@ -10858,7 +10858,7 @@ LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp)
 
 	ASSERT((nCtrlID == m_filterBar.GetDlgCtrlID()) && (hWnd == m_filterBar));
 
-	FTDCFILTER filter;
+	TDCFILTER filter;
 	CString sCustom;
 	DWORD dwCustomFlags;
 
@@ -10868,16 +10868,16 @@ LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-void CToDoListWnd::OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
+void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	if (!sCustom.IsEmpty())
 	{
-		FTDCCUSTOMFILTER filter(sCustom, dwCustomFlags);
+		TDCADVANCEDFILTER filter(sCustom, dwCustomFlags);
 		VERIFY(m_findDlg.GetSearchParams(sCustom, filter));
 
-		tdc.SetCustomFilter(filter);
+		tdc.SetAdvancedFilter(filter);
 	}
 	else
 	{
@@ -10901,7 +10901,7 @@ void CToDoListWnd::OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DW
 void CToDoListWnd::OnViewFilter() 
 {
 	CStringArray aCustom;
-	m_filterBar.GetCustomFilters(aCustom);
+	m_filterBar.GetAdvancedFilterNames(aCustom);
 	
 	CDWordArray aPriorityColors;
 	Prefs().GetPriorityColors(aPriorityColors);
@@ -10910,7 +10910,7 @@ void CToDoListWnd::OnViewFilter()
 
 	if (dialog.DoModal(aCustom, GetToDoCtrl(), aPriorityColors) == IDOK)
 	{
-		FTDCFILTER filter;
+		TDCFILTER filter;
 		CString sCustom;
 		DWORD dwCustomFlags = 0;
 		
@@ -10930,7 +10930,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 
 	// if the filter has changed then set the new one else
 	// refresh the current one
-	FTDCFILTER filter;
+	TDCFILTER filter;
 	CString sCustom;
 	DWORD dwCustomFlags;
 

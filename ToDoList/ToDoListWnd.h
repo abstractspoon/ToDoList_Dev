@@ -580,7 +580,7 @@ protected:
 	void OnTimerTimeTrackReminder();
 	void OnTimerAutoMinimize();
 
-	void OnChangeFilter(FTDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags);
+	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags);
 	void OnEditUndoRedo(BOOL bUndo);
 	void OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo);
 
@@ -663,9 +663,9 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void PrepareFilter(FTDCFILTER& filter) const;
+	void PrepareFilter(TDCFILTER& filter) const;
 	void RefreshFilterBarControls();
-	void RefreshFilterBarCustomFilters();
+	void RefreshFilterBarAdvancedFilters();
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

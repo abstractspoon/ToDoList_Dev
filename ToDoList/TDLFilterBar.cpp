@@ -72,7 +72,7 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	  m_cbVersionFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	  m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	  m_nView(FTCV_UNSET),
-	  m_bCustomFilter(FALSE),
+	  m_bAdvancedFilter(FALSE),
 	  m_bRefreshBkgndColor(TRUE),
 	  m_crUIBack(CLR_NONE),
 	  m_eStartNextNDays(TRUE, _T("-0123456789")),
@@ -127,8 +127,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		// filter
-		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sCustomFilter);
-		m_bCustomFilter = (m_filter.nShow == FS_CUSTOM);
+		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sAdvancedFilter);
+		m_bAdvancedFilter = (m_filter.nShow == FS_ADVANCED);
 
 		m_filter.nStartBy = m_cbStartFilter.GetSelectedFilter();
 		m_filter.nDueBy = m_cbDueFilter.GetSelectedFilter();
@@ -175,18 +175,18 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		m_cbTagFilter.GetChecked(m_filter.aTags);
 
 		// flags
-		if (m_bCustomFilter)
-			m_mapCustomFlags[m_sCustomFilter] = m_cbOptions.GetSelectedOptions();
+		if (m_bAdvancedFilter)
+			m_mapCustomFlags[m_sAdvancedFilter] = m_cbOptions.GetSelectedOptions();
 		else
 			m_filter.dwFlags = m_cbOptions.GetSelectedOptions();
 	}
 	else
 	{
 		// filter
-		if (m_bCustomFilter)
-			m_cbTaskFilter.SelectFilter(m_sCustomFilter);
+		if (m_bAdvancedFilter)
+			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
-			m_cbTaskFilter.SelectFilter(m_filter.nShow);
+			m_cbTaskFilter.SelectAdvancedFilter(m_filter.nShow);
 		
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
@@ -236,10 +236,10 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		m_cbTagFilter.SetChecked(m_filter.aTags);
 
 		// options
-		if (m_bCustomFilter)
+		if (m_bAdvancedFilter)
 		{
-			DWORD dwFlags = FTDCFILTER().dwFlags; // default
-			m_mapCustomFlags.Lookup(m_sCustomFilter, dwFlags);
+			DWORD dwFlags = TDCFILTER().dwFlags; // default
+			m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwFlags);
 
 			DWORD dwOptions = (FO_HIDEPARENTS | FO_HIDEOVERDUE | FO_HIDEDONE | FO_HIDECOLLAPSED | FO_SHOWALLSUB);
 			m_cbOptions.Initialize(dwOptions, dwFlags);
@@ -313,11 +313,11 @@ BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
 
 void CTDLFilterBar::OnSelchangeFilter() 
 {
-	BOOL bWasCustom = m_bCustomFilter;
+	BOOL bWasCustom = m_bAdvancedFilter;
 	UpdateData();
 
 	// Refresh the labels if switching from custom to not, or vice versa
-	if ((bWasCustom && !m_bCustomFilter) || (!bWasCustom && m_bCustomFilter))
+	if ((bWasCustom && !m_bAdvancedFilter) || (!bWasCustom && m_bAdvancedFilter))
 		Invalidate(FALSE);
 
 	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
@@ -334,8 +334,8 @@ void CTDLFilterBar::OnCloseUpOptions()
 	// only notify parent if there has been a change
 	DWORD dwCurFlags = 0;
 
-	if (m_bCustomFilter)
-		m_mapCustomFlags.Lookup(m_sCustomFilter, dwCurFlags);
+	if (m_bAdvancedFilter)
+		m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwCurFlags);
 	else
 		dwCurFlags = m_filter.dwFlags;
 
@@ -401,12 +401,12 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-FILTER_SHOW CTDLFilterBar::GetFilter(FTDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
+FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
-	if (m_bCustomFilter)
+	if (m_bAdvancedFilter)
 	{
 		filter.Reset();
-		sCustom = m_sCustomFilter;
+		sCustom = m_sAdvancedFilter;
 
 		m_mapCustomFlags.Lookup(sCustom, dwCustomFlags);
 	}
@@ -417,7 +417,7 @@ FILTER_SHOW CTDLFilterBar::GetFilter(FTDCFILTER& filter, CString& sCustom, DWORD
 		dwCustomFlags = 0;
 	}
 
-	return (m_bCustomFilter ? FS_CUSTOM : filter.nShow);
+	return (m_bAdvancedFilter ? FS_ADVANCED : filter.nShow);
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
@@ -425,19 +425,19 @@ FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
 	return m_cbTaskFilter.GetSelectedFilter(sCustom);
 }
 
-void CTDLFilterBar::AddCustomFilters(const CStringArray& aFilters)
+void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 {
-	m_cbTaskFilter.AddCustomFilters(aFilters); 
+	m_cbTaskFilter.AddAdvancedFilters(aFilters); 
 }
 
-int CTDLFilterBar::GetCustomFilters(CStringArray& aFilters) const
+int CTDLFilterBar::GetAdvancedFilterNames(CStringArray& aFilters) const
 {
-	return m_cbTaskFilter.GetCustomFilters(aFilters); 
+	return m_cbTaskFilter.GetAdvancedFilters(aFilters); 
 }
 
-void CTDLFilterBar::RemoveCustomFilters()
+void CTDLFilterBar::RemoveAdvancedFilters()
 {
-	m_cbTaskFilter.RemoveCustomFilters(); 
+	m_cbTaskFilter.RemoveAdvancedFilters(); 
 }
 
 void CTDLFilterBar::ShowDefaultFilters(BOOL bShow)
@@ -459,17 +459,17 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);
 
 	// get filter
-	if (tdc.GetFilter(m_filter) == FS_CUSTOM)
+	if (tdc.GetFilter(m_filter) == FS_ADVANCED)
 	{
-		m_bCustomFilter = TRUE;
-		m_sCustomFilter = tdc.GetCustomFilterName();
+		m_bAdvancedFilter = TRUE;
+		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
 
-		m_mapCustomFlags[m_sCustomFilter] = tdc.GetCustomFilterFlags();
+		m_mapCustomFlags[m_sAdvancedFilter] = tdc.GetAdvancedFilterFlags();
 	}
 	else
 	{
-		m_bCustomFilter = FALSE;
-		m_sCustomFilter.Empty();
+		m_bAdvancedFilter = FALSE;
+		m_sAdvancedFilter.Empty();
 	}
 	
 	// alloc to filter
@@ -760,7 +760,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 				break;
 
 			default: // all the rest
-				bEnable &= ((m_filter.nShow != FS_SELECTED) && !m_bCustomFilter);
+				bEnable &= ((m_filter.nShow != FS_SELECTED) && !m_bAdvancedFilter);
 			}
 
 			if (fc.nLabelID)
@@ -937,7 +937,7 @@ COLORREF CTDLFilterBar::CalcUIBkgndColor() const
 {
 	if (CThemed::IsAppThemed())
 	{
-		if (m_filter.IsSet() || m_bCustomFilter)
+		if (m_filter.IsSet() || m_bAdvancedFilter)
 		{
 			if (m_theme.crAppBackDark != CLR_NONE)
 			{
@@ -1019,7 +1019,7 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			break;
 			
 		default: // all the rest
-			bEnabled = ((m_filter.nShow != FS_SELECTED) && !m_bCustomFilter);
+			bEnabled = ((m_filter.nShow != FS_SELECTED) && !m_bAdvancedFilter);
 			break;
 		}
 

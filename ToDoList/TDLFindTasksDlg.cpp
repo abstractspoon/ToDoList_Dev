@@ -562,7 +562,7 @@ BOOL CTDLFindTasksDlg::GetSearchAllTasklists()
 	return m_bAllTasklists;
 }
 
-int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter) const
+int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const
 {
 	if (GetSearchParams(szName, filter.params))
 	{
@@ -573,7 +573,7 @@ int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter) 
 	return filter.params.aRules.GetSize();
 }
 
-int CTDLFindTasksDlg::GetSearchParams(FTDCCUSTOMFILTER& filter)
+int CTDLFindTasksDlg::GetSearchParams(TDCADVANCEDFILTER& filter)
 {
 	if (GetSearchParams(filter.params))
 		Misc::SetFlag(filter.dwFlags, FO_HIDEDONE, filter.params.bIgnoreDone);

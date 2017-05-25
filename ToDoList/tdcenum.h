@@ -693,7 +693,7 @@ enum TDC_EXPANDCOLLAPSE
 
 enum FILTER_SHOW
 {
-	FS_CUSTOM = -1,
+	FS_ADVANCED = -1,
 	FS_ALL = 100, // to not coincide with previous enum
 	FS_NOTDONE,
 	FS_DONE, 

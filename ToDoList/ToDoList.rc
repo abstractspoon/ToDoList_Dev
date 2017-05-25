@@ -4750,7 +4750,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
-    IDS_CUSTOMFILTER        "Find Tasks Filter"
+    IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated.\n\nPlease ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
     IDS_FLAGGED             "Flagged"
     IDS_UNFLAGGED           "Unflagged"

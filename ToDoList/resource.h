@@ -1778,7 +1778,7 @@
 #define IDS_VIEW                        58189
 #define IDS_OPTIONS                     58190
 #define IDS_TDC_UPDATEFILTER_TIP        58192
-#define IDS_CUSTOMFILTER                58193
+#define IDS_ADVANCEDFILTER              58193
 #define IDS_LOGFILELOCKED               58194
 #define IDS_FLAGGED                     58195
 #define IDS_UNFLAGGED                   58196

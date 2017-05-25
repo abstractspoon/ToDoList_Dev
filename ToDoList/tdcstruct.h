@@ -1805,9 +1805,9 @@ typedef CArray<FTDRESULT, FTDRESULT&> CFTDResultsArray;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-struct FTDCFILTER
+struct TDCFILTER
 {
-	FTDCFILTER() 
+	TDCFILTER() 
 		: 
 		nShow(FS_ALL), 
 		nStartBy(FD_ANY), 
@@ -1823,12 +1823,12 @@ struct FTDCFILTER
 		dtUserStart = dtUserDue = COleDateTime::GetCurrentTime();
 	}
 
-	FTDCFILTER(const FTDCFILTER& filter)
+	TDCFILTER(const TDCFILTER& filter)
 	{
 		*this = filter;
 	}
 
-	FTDCFILTER& operator=(const FTDCFILTER& filter)
+	TDCFILTER& operator=(const TDCFILTER& filter)
 	{
 		nShow = filter.nShow;
 		nStartBy = filter.nStartBy;
@@ -1853,19 +1853,19 @@ struct FTDCFILTER
 		return *this;
 	}
 
-	BOOL operator==(const FTDCFILTER& filter) const
+	BOOL operator==(const TDCFILTER& filter) const
 	{
 		return FiltersMatch(*this, filter);
 	}
 
-	BOOL operator!=(const FTDCFILTER& filter) const
+	BOOL operator!=(const TDCFILTER& filter) const
 	{
 		return !FiltersMatch(*this, filter);
 	}
 	
 	BOOL IsSet(DWORD dwIgnore = 0) const
 	{
-		FTDCFILTER filterEmpty;
+		TDCFILTER filterEmpty;
 
 		return !FiltersMatch(*this, filterEmpty, dwIgnore);
 	}
@@ -1942,15 +1942,15 @@ struct FTDCFILTER
 
 	void Reset()
 	{
-		*this = FTDCFILTER(); // empty filter
+		*this = TDCFILTER(); // empty filter
 	}
 
-	BOOL Matches(const FTDCFILTER& filter, DWORD dwIgnore = 0) const
+	BOOL Matches(const TDCFILTER& filter, DWORD dwIgnore = 0) const
 	{
 		return FiltersMatch(*this, filter, dwIgnore);
 	}
 
-	static BOOL FiltersMatch(const FTDCFILTER& filter1, const FTDCFILTER& filter2, DWORD dwIgnore = 0)
+	static BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, DWORD dwIgnore = 0)
 	{
 		// simple exclusion test first
 		if ((filter1.nShow != filter2.nShow) ||
@@ -2089,18 +2089,18 @@ struct FTDCFILTER
 	int nStartNextNDays, nDueNextNDays;
 };
 
-struct FTDCCUSTOMFILTER
+struct TDCADVANCEDFILTER
 {
-	FTDCCUSTOMFILTER(LPCTSTR szName = NULL, DWORD flags = 0) : sName(szName), dwFlags(flags)
+	TDCADVANCEDFILTER(LPCTSTR szName = NULL, DWORD flags = 0) : sName(szName), dwFlags(flags)
 	{
 	}
 
-	FTDCCUSTOMFILTER(const FTDCCUSTOMFILTER& filter)
+	TDCADVANCEDFILTER(const TDCADVANCEDFILTER& filter)
 	{
 		*this = filter;
 	}
 	
-	FTDCCUSTOMFILTER& operator=(const FTDCCUSTOMFILTER& filter)
+	TDCADVANCEDFILTER& operator=(const TDCADVANCEDFILTER& filter)
 	{
 		params = filter.params;
 		dwFlags = filter.dwFlags;
@@ -2109,19 +2109,19 @@ struct FTDCCUSTOMFILTER
 		return *this;
 	}
 	
-	BOOL operator==(const FTDCCUSTOMFILTER& filter) const
+	BOOL operator==(const TDCADVANCEDFILTER& filter) const
 	{
 		return Matches(filter);
 	}
 	
-	BOOL operator!=(const FTDCCUSTOMFILTER& filter) const
+	BOOL operator!=(const TDCADVANCEDFILTER& filter) const
 	{
 		return !Matches(filter);
 	}
 	
 	BOOL IsSet(DWORD dwIgnore = 0) const
 	{
-		FTDCCUSTOMFILTER filterEmpty;
+		TDCADVANCEDFILTER filterEmpty;
 		
 		return !Matches(filterEmpty, dwIgnore);
 	}
@@ -2161,7 +2161,7 @@ struct FTDCCUSTOMFILTER
 		dwFlags = 0;
 	}
 
-	BOOL Matches(const FTDCCUSTOMFILTER& filter, DWORD dwIgnoreFlags = 0) const
+	BOOL Matches(const TDCADVANCEDFILTER& filter, DWORD dwIgnoreFlags = 0) const
 	{
 		if (!Matches(filter.sName, filter.dwFlags, dwIgnoreFlags))
 			return FALSE;

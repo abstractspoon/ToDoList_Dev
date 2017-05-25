@@ -37,8 +37,8 @@ public:
 
 	BOOL GetSearchAllTasklists();
 	int GetSearchParams(SEARCHPARAMS& params);
-	int GetSearchParams(FTDCCUSTOMFILTER& filter);
-	int GetSearchParams(LPCTSTR szName, FTDCCUSTOMFILTER& filter) const;
+	int GetSearchParams(TDCADVANCEDFILTER& filter);
+	int GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const;
 
 	CString GetActiveSearch() const { return m_sActiveSearch; }
 	int GetSavedSearches(CStringArray& aNames);

@@ -30,11 +30,11 @@ class CTDLFilterDlg : public CTDLDialog
 public:
 	CTDLFilterDlg(BOOL bMultiSelFilters, CWnd* pParent = NULL);   // standard constructor
 
-	int DoModal(const CStringArray& aCustomFilters, 
+	int DoModal(const CStringArray& aAdvancedFilterNames, 
 				const CFilteredToDoCtrl& tdc, 
 				const CDWordArray& aPriorityColors);
 
-	FILTER_SHOW GetFilter(FTDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
+	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 
 protected:
 // Dialog Data
@@ -56,14 +56,14 @@ protected:
 	CEnEdit						m_eStartNextNDays, m_eDueNextNDays;
 	CTDLFilterOptionComboBox	m_cbOptions;
 
-	FTDCFILTER m_filter;
+	TDCFILTER m_filter;
 	TDCAUTOLISTDATA m_tldListData;
 	CDWordArray m_aPriorityColors;
 	FTC_VIEW m_nView;
-	CString m_sCustomFilter;
+	CString m_sAdvancedFilter;
 	DWORD m_dwCustomFlags;
 	BOOL m_bWantHideParents;
-	CStringArray m_aCustomFilters;
+	CStringArray m_aAdvancedFilterNames;
 	CWndPromptManager m_mgrPrompts;
 
 // Overrides

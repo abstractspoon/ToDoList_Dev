@@ -69,7 +69,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		// filter
-		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sCustomFilter);
+		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sAdvancedFilter);
 		m_filter.nStartBy = m_cbStartFilter.GetSelectedFilter();
 		m_filter.nDueBy = m_cbDueFilter.GetSelectedFilter();
 
@@ -106,7 +106,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 		m_cbTagFilter.GetChecked(m_filter.aTags);
 
 		// build the filter options from the listbox
-		if (m_sCustomFilter.IsEmpty())
+		if (m_sAdvancedFilter.IsEmpty())
 			m_filter.dwFlags = m_cbOptions.GetSelectedOptions();
 		else
 			m_dwCustomFlags = m_cbOptions.GetSelectedOptions();
@@ -114,10 +114,10 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		// filter
-		if (m_filter.nShow == FS_CUSTOM)
-			m_cbTaskFilter.SelectFilter(m_sCustomFilter);
+		if (m_filter.nShow == FS_ADVANCED)
+			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
-			m_cbTaskFilter.SelectFilter(m_filter.nShow);
+			m_cbTaskFilter.SelectAdvancedFilter(m_filter.nShow);
 
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
@@ -155,7 +155,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 		m_cbTagFilter.SetChecked(m_filter.aTags);
 
 		// options states set in OnInitDialog
-		if (m_sCustomFilter.IsEmpty())
+		if (m_sAdvancedFilter.IsEmpty())
 		{
 			m_cbOptions.Initialize(m_filter, m_nView, m_bWantHideParents);
 		}
@@ -199,7 +199,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDlg message handlers
 
-int CTDLFilterDlg::DoModal(const CStringArray& aCustomFilters,
+int CTDLFilterDlg::DoModal(const CStringArray& aAdvFilterNames,
 						   const CFilteredToDoCtrl& tdc, 
 						   const CDWordArray& aPriorityColors)
 {
@@ -207,18 +207,18 @@ int CTDLFilterDlg::DoModal(const CStringArray& aCustomFilters,
 	tdc.GetFilter(m_filter);
 
 	// get custom filter
-	m_aCustomFilters.Copy(aCustomFilters);
+	m_aAdvancedFilterNames.Copy(aAdvFilterNames);
 	
-	if (tdc.HasCustomFilter())
+	if (tdc.HasAdvancedFilter())
 	{
-		m_sCustomFilter = tdc.GetCustomFilterName();
-		m_dwCustomFlags = tdc.GetCustomFilterFlags();
+		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
+		m_dwCustomFlags = tdc.GetAdvancedFilterFlags();
 
-		m_filter.nShow = FS_CUSTOM;
+		m_filter.nShow = FS_ADVANCED;
 	}
 	else
 	{
-		m_sCustomFilter.Empty();
+		m_sAdvancedFilter.Empty();
 		m_dwCustomFlags = 0;
 	}
 
@@ -233,10 +233,10 @@ int CTDLFilterDlg::DoModal(const CStringArray& aCustomFilters,
 	return CTDLDialog::DoModal();
 }
 
-FILTER_SHOW CTDLFilterDlg::GetFilter(FTDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
+FILTER_SHOW CTDLFilterDlg::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
 	filter = m_filter;
-	sCustom = m_sCustomFilter;
+	sCustom = m_sAdvancedFilter;
 	dwCustomFlags = m_dwCustomFlags;
 
 	return filter.nShow;
@@ -291,7 +291,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 	m_mgrPrompts.SetEditPrompt(IDC_TITLEFILTERTEXT, *this, sAny);
 
 	// custom filters
-	m_cbTaskFilter.AddCustomFilters(m_aCustomFilters, m_sCustomFilter);
+	m_cbTaskFilter.AddAdvancedFilters(m_aAdvancedFilterNames, m_sAdvancedFilter);
 
 	m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 	m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
@@ -309,8 +309,8 @@ BOOL CTDLFilterDlg::OnInitDialog()
 void CTDLFilterDlg::EnableDisableControls()
 {
 	BOOL bSelFilter = (m_filter.nShow == FS_SELECTED);
-	BOOL bCustomFilter = (m_filter.nShow == FS_CUSTOM);
-	BOOL bEnable = !(bSelFilter || bCustomFilter);
+	BOOL bAdvFilter = (m_filter.nShow == FS_ADVANCED);
+	BOOL bEnable = !(bSelFilter || bAdvFilter);
 
 	GetDlgItem(IDC_TITLEFILTERTEXT)->EnableWindow(bEnable);
 
@@ -343,7 +343,7 @@ void CTDLFilterDlg::EnableDisableControls()
 void CTDLFilterDlg::OnClearfilter() 
 {
 	m_filter.Reset();
-	m_sCustomFilter.Empty();
+	m_sAdvancedFilter.Empty();
 		
 	UpdateData(FALSE);
 }

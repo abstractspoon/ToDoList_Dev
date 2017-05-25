@@ -69,7 +69,7 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 	}
 }
 
-void CTDLFilterOptionComboBox::Initialize(const FTDCFILTER& filter, FTC_VIEW /*nView*/, BOOL bWantHideParents)
+void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, FTC_VIEW /*nView*/, BOOL bWantHideParents)
 {
 	// translation done via CEnString
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
@@ -90,7 +90,7 @@ void CTDLFilterOptionComboBox::Initialize(const FTDCFILTER& filter, FTC_VIEW /*n
 		case FO_ANYCATEGORY:
 		case FO_ANYALLOCTO:
 		case FO_ANYTAG:
-			bAddFlag = ((filter.nShow != FS_CUSTOM) && (filter.nShow != FS_SELECTED));
+			bAddFlag = ((filter.nShow != FS_ADVANCED) && (filter.nShow != FS_SELECTED));
 			break;
 
 		case FO_SHOWALLSUB:

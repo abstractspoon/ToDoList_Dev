@@ -512,12 +512,12 @@ int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& fil
 	return GetTasks(tasks, GetTaskView(), filter);
 }
 
-FILTER_SHOW CFilteredToDoCtrl::GetFilter(FTDCFILTER& filter) const
+FILTER_SHOW CFilteredToDoCtrl::GetFilter(TDCFILTER& filter) const
 {
 	return m_filter.GetFilter(filter);
 }
 
-void CFilteredToDoCtrl::SetFilter(const FTDCFILTER& filter)
+void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -579,7 +579,7 @@ void CFilteredToDoCtrl::ToggleFilter()
 	ResetNowFilterTimer();
 }
 
-BOOL CFilteredToDoCtrl::FiltersMatch(const FTDCFILTER& filter1, const FTDCFILTER& filter2, FTC_VIEW nView) const
+BOOL CFilteredToDoCtrl::FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, FTC_VIEW nView) const
 {
 	if (nView == FTCV_UNSET)
 		return FALSE;
@@ -589,10 +589,10 @@ BOOL CFilteredToDoCtrl::FiltersMatch(const FTDCFILTER& filter1, const FTDCFILTER
 	if (nView == FTCV_TASKTREE)
 		dwIgnore = (FO_HIDECOLLAPSED | FO_HIDEPARENTS);
 
-	return FTDCFILTER::FiltersMatch(filter1, filter2, dwIgnore);
+	return TDCFILTER::FiltersMatch(filter1, filter2, dwIgnore);
 }
 
-BOOL CFilteredToDoCtrl::FilterMatches(const FTDCFILTER& filter, FTC_VIEW nView) const
+BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, FTC_VIEW nView) const
 {
 	if (nView == FTCV_UNSET)
 		return FALSE;
@@ -640,28 +640,28 @@ int CFilteredToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResu
 	return m_matcher.FindTasks(params, aResults);
 }
 
-BOOL CFilteredToDoCtrl::HasCustomFilter() const 
+BOOL CFilteredToDoCtrl::HasAdvancedFilter() const 
 { 
-	return m_filter.HasCustomFilter(); 
+	return m_filter.HasAdvancedFilter(); 
 }
 
-CString CFilteredToDoCtrl::GetCustomFilterName() const 
+CString CFilteredToDoCtrl::GetAdvancedFilterName() const 
 { 
-	return m_filter.GetCustomFilterName();
+	return m_filter.GetAdvancedFilterName();
 }
 
-DWORD CFilteredToDoCtrl::GetCustomFilterFlags() const 
+DWORD CFilteredToDoCtrl::GetAdvancedFilterFlags() const 
 { 
-	if (HasCustomFilter())
+	if (HasAdvancedFilter())
 		return m_filter.GetFilterFlags();
 
 	// else
 	return 0L;
 }
 
-BOOL CFilteredToDoCtrl::SetCustomFilter(const FTDCCUSTOMFILTER& filter)
+BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 {
-	if (m_filter.SetCustomFilter(filter))
+	if (m_filter.SetAdvancedFilter(filter))
 	{
 		if (m_bDelayLoaded)
 		{
@@ -707,7 +707,7 @@ LRESULT CFilteredToDoCtrl::OnRefreshFilter(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-BOOL CFilteredToDoCtrl::FilterMatches(const FTDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
+BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
 {
 	return m_filter.FilterMatches(filter, szCustom, dwCustomFlags, dwIgnoreFlags);
 }
@@ -1247,7 +1247,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	CTabbedToDoCtrl::EndTimeTracking(bAllowConfirm, bNotify);
 	
 	// do we need to refilter?
-	if (bWasTimeTracking && m_filter.HasCustomFilter() && m_filter.HasCustomFilterAttribute(TDCA_TIMESPENT))
+	if (bWasTimeTracking && m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterAttribute(TDCA_TIMESPENT))
 	{
 		RefreshFilter();
 	}
@@ -1326,7 +1326,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 		bNeedRefilter = !m_matcher.TaskMatches(dwModTaskID, params, result);
 		
 		// extra handling for 'Find Tasks' filters 
-		if (bNeedRefilter && HasCustomFilter())
+		if (bNeedRefilter && HasAdvancedFilter())
 		{
 			// don't refilter on Time Spent if time tracking
 			bNeedRefilter = !(nModType == TDCA_TIMESPENT && IsActivelyTimeTracking());
@@ -1360,12 +1360,12 @@ void CFilteredToDoCtrl::OnTimerMidnight()
 		return;
 
 	BOOL bRefilter = FALSE;
-	FTDCFILTER filter;
+	TDCFILTER filter;
 	
-	if (m_filter.GetFilter(filter) == FS_CUSTOM)
+	if (m_filter.GetFilter(filter) == FS_ADVANCED)
 	{
-		bRefilter = (m_filter.HasCustomFilterAttribute(TDCA_STARTDATE) || 
-						m_filter.HasCustomFilterAttribute(TDCA_DUEDATE));
+		bRefilter = (m_filter.HasAdvancedFilterAttribute(TDCA_STARTDATE) || 
+						m_filter.HasAdvancedFilterAttribute(TDCA_DUEDATE));
 	}
 	else
 	{

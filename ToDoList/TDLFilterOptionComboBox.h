@@ -28,7 +28,7 @@ protected:
 
 // Operations
 public:
-	void Initialize(const FTDCFILTER& filter, FTC_VIEW nView, BOOL bWantHideParents = TRUE);
+	void Initialize(const TDCFILTER& filter, FTC_VIEW nView, BOOL bWantHideParents = TRUE);
 	void Initialize(DWORD dwFlags, DWORD dwOptions = 0);
 
 	DWORD GetSelectedOptions() const;

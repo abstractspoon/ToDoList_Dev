@@ -58,14 +58,14 @@ public:
 	const CTDCAttributeMap& GetVisibleEditFields() const;
 	const CTDCAttributeMap& GetVisibleFilterFields() const;
 
-	FILTER_SHOW GetFilter(FTDCFILTER& filter) const;
-	void SetFilter(const FTDCFILTER& filter);
-	BOOL FilterMatches(const FTDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0, DWORD dwIgnoreFlags = 0) const;
+	FILTER_SHOW GetFilter(TDCFILTER& filter) const;
+	void SetFilter(const TDCFILTER& filter);
+	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0, DWORD dwIgnoreFlags = 0) const;
 
-	BOOL HasCustomFilter() const;
-	BOOL SetCustomFilter(const FTDCCUSTOMFILTER& filter);
-	CString GetCustomFilterName() const;
-	DWORD GetCustomFilterFlags() const;
+	BOOL HasAdvancedFilter() const;
+	BOOL SetAdvancedFilter(const TDCADVANCEDFILTER& filter);
+	CString GetAdvancedFilterName() const;
+	DWORD GetAdvancedFilterFlags() const;
 
 	UINT GetTaskCount(UINT* pVisible = 0) const;
 	int GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
@@ -137,9 +137,9 @@ protected:
 	void RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 	BOOL IsFilterSet(FTC_VIEW nView) const;
-	BOOL IsFilterSet(const FTDCFILTER& filter, FTC_VIEW nView) const;
-	BOOL FiltersMatch(const FTDCFILTER& filter1, const FTDCFILTER& filter2, FTC_VIEW nView) const;
-	BOOL FilterMatches(const FTDCFILTER& filter, FTC_VIEW nView) const;
+	BOOL IsFilterSet(const TDCFILTER& filter, FTC_VIEW nView) const;
+	BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, FTC_VIEW nView) const;
+	BOOL FilterMatches(const TDCFILTER& filter, FTC_VIEW nView) const;
 	void SetExtensionsNeedRefilter(BOOL bRefilter, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListNeedRefilter(BOOL bRefilter);
 
