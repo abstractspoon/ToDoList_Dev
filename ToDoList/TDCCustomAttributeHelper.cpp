@@ -95,7 +95,7 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
 
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			pControl = new CTimeEdit();
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
@@ -280,7 +280,7 @@ BOOL CTDCCustomAttributeHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFI
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
-	case TDCCA_DURATION:
+	case TDCCA_TIMEPERIOD:
 		return FALSE;
 		
 	case TDCCA_DATE:
@@ -307,7 +307,7 @@ CString CTDCCustomAttributeHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFIN
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
 		case TDCCA_FILELINK:
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			return _T("");
 			
 		case TDCCA_DATE:
@@ -968,7 +968,7 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 			data.Set(date);
 			break;
 			
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			{
 				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
 				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
@@ -1103,10 +1103,10 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 				}
 				break;
 
-			case TDCCA_DURATION:
+			case TDCCA_TIMEPERIOD:
 				{
 					TDC_UNITS nUnits = TDCU_HOURS;
-					double dTime = data.AsDuration(nUnits);
+					double dTime = data.AsTimePeriod(nUnits);
 					
 					((CTimeEdit*)pCtrl)->SetTime(dTime, TDC::MapUnitsToTHUnits(nUnits));
 				}

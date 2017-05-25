@@ -853,16 +853,16 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 	return FALSE;
 }
 
-double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, BOOL bDuration, TDC_UNITS nUnits)
+double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, BOOL bTimePeriod, TDC_UNITS nUnits)
 {
 	double dValue = TODOITEM::NULL_VALUE;
 
-	if (bDuration)
+	if (bTimePeriod)
 	{
 		ASSERT(IsValidUnits(nUnits));
 
 		TDC_UNITS nTaskUnits;
-		dValue = data.AsDuration(nTaskUnits);
+		dValue = data.AsTimePeriod(nTaskUnits);
 
 		// Convert to requested units
 		if ((dValue != 0.0) && nTaskUnits != nUnits)
@@ -897,7 +897,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
+		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
 		
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -918,7 +918,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
+			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -942,7 +942,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
+			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -960,7 +960,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_DURATION), nUnits);
+		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
 	}
 
 	if (dCalcValue == TODOITEM::NULL_VALUE)

@@ -639,7 +639,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		case TDCCA_DATE:
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			return TA_RIGHT;
 		}
 
@@ -751,7 +751,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		{
 		case TDCCA_DOUBLE:
 		case TDCCA_INTEGER:
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			return ((dwFeature == TDCCAF_ACCUMULATE) || 
 					(dwFeature == TDCCAF_MAXIMIZE) || 
 					(dwFeature == TDCCAF_MINIMIZE) ||
@@ -863,7 +863,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 			case TDCCA_DOUBLE:	
 			case TDCCA_DATE:	
 			case TDCCA_BOOL:
-			case TDCCA_DURATION:
+			case TDCCA_TIMEPERIOD:
 				nItemLen = pDC->GetTextExtent(sItem).cx;
 				break;
 
@@ -945,7 +945,7 @@ private:
 		switch (dwDataType)
 		{
 		case TDCCA_DATE:
-		case TDCCA_DURATION:
+		case TDCCA_TIMEPERIOD:
 			dwListType = TDCCA_NOTALIST;
 			break;
 
@@ -2391,7 +2391,7 @@ struct TDCCADATA
 	int AsInteger() const { return _ttoi(sData); } 
 	COleDateTime AsDate() const { return _ttof(sData); }
 	bool AsBool() const { return !IsEmpty(); }
-	double AsDuration(TDC_UNITS& nUnits) const
+	double AsTimePeriod(TDC_UNITS& nUnits) const
 	{
 		if (IsEmpty())
 		{

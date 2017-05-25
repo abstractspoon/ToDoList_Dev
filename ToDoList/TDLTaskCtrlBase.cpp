@@ -2971,7 +2971,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		}
 		break;
 
-	case TDCCA_DURATION:
+	case TDCCA_TIMEPERIOD:
 		{
 			double dValue = 0.0;
 			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, m_nDefTimeEstUnits);
