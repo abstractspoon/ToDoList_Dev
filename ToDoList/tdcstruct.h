@@ -452,6 +452,13 @@ class CTDCColumnArray : public CArray<TDCCOLUMN, TDCCOLUMN&> {};
 
 struct CTRLITEM
 {
+	BOOL operator==(const CTRLITEM& other) const
+	{
+		return ((nCtrlID == other.nCtrlID) && 
+				(nLabelID == other.nLabelID) && 
+				(nAttrib == other.nAttrib));
+	}
+
 	UINT nCtrlID;
 	UINT nLabelID;
 	TDC_ATTRIBUTE nAttrib;
@@ -466,6 +473,15 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 		nCtrlID = nLabelID = nBuddyCtrlID = nBuddyLabelID = 0;
 		nAttrib = TDCA_NONE;
 	}
+
+	BOOL operator==(const CUSTOMATTRIBCTRLITEM& other) const
+	{
+		return (CTRLITEM::operator==(other) && 
+				(nBuddyLabelID == other.nBuddyLabelID) && 
+				(nBuddyCtrlID == other.nBuddyCtrlID) &&
+				(sAttribID == other.sAttribID));
+	}
+
 
 	BOOL HasBuddy() const
 	{
@@ -719,11 +735,15 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		if (dwFeature == TDCCAF_SORT)
 			return TRUE;
 
-		// calculations not supported by multi-list types
-		DWORD dwListType = GetListType();
-
-		if (IsMultiList())
+		if (dwFeature == TDCCAF_FILTER)
+		{
+			return IsList();
+		}
+		else if (IsMultiList())
+		{
+			// calculations not supported by multi-list types
 			return FALSE;
+		}
 
 		DWORD dwDataType = GetDataType();
 

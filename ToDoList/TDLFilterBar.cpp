@@ -6,6 +6,7 @@
 #include "TDLFilterBar.h"
 #include "tdcmsg.h"
 #include "filteredtodoctrl.h"
+#include "tdccustomattributeHelper.h"
 
 #include "..\shared\deferwndmove.h"
 #include "..\shared\dlgunits.h"
@@ -15,6 +16,7 @@
 #include "..\shared\winclasses.h"
 #include "..\shared\themed.h"
 #include "..\shared\colordef.h"
+#include "..\shared\holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -53,6 +55,9 @@ static CTRLITEM FILTERCTRLS[] =
 
 const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(CTRLITEM);
 
+const UINT IDC_FIRST_CUSTOMFILTERFIELD = 4000;
+const UINT IDC_LAST_CUSTOMFILTERFIELD = IDC_FIRST_CUSTOMFILTERFIELD + 256;
+
 #define WM_WANTCOMBOPROMPT (WM_APP+1)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,7 +76,8 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	  m_bRefreshBkgndColor(TRUE),
 	  m_crUIBack(CLR_NONE),
 	  m_eStartNextNDays(TRUE, _T("-0123456789")),
-	  m_eDueNextNDays(TRUE, _T("-0123456789"))
+	  m_eDueNextNDays(TRUE, _T("-0123456789")),
+	  m_bMultiSelection(TRUE)
 {
 	//{{AFX_DATA_INIT(CFilterBar)
 	//}}AFX_DATA_INIT
@@ -444,6 +450,8 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	if (tdc.IsDelayLoaded())
 		return;
 
+	CHoldRedraw hr(GetSafeHwnd(), NCR_PAINT | NCR_ERASEBKGND);
+
 	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
 	m_nView = tdc.GetTaskView();
 	
@@ -492,11 +500,13 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	m_cbTagFilter.AddEmptyString(); // add blank item to top
 	
 	// priority
-	m_cbPriorityFilter.SetColors(m_aPriorityColors);
-	m_cbPriorityFilter.InsertColor(0, CLR_NONE, CString((LPCTSTR)IDS_TDC_ANY)); // add a blank item
-	
 	// risk never needs changing
-	
+	m_cbPriorityFilter.SetColors(m_aPriorityColors);
+	m_cbPriorityFilter.InsertColor(0, CLR_NONE, CEnString(IDS_TDC_ANY)); // add a blank item
+
+	// Custom attributes
+	UpdateCustomControls(tdc);
+		
 	// update UI
 	RefreshUIBkgndBrush();
 
@@ -506,6 +516,25 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	// disable controls if a custom filter.
 	// just do a repos because this also handles enabled state
 	ReposControls();
+}
+
+void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
+{
+	if (!CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(tdc.GetCustomAttributeDefs(), 
+																		m_aCustomControls,  
+																		IDC_FIRST_CUSTOMFILTERFIELD))
+	{
+		return;
+	}
+
+	// else
+	CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(tdc.GetCustomAttributeDefs(), 
+																m_aCustomControls, 
+																tdc.GetTaskIconImageList(), 
+																this, 
+																IDC_OPTIONFILTERCOMBO, 
+																IDC_FIRST_CUSTOMFILTERFIELD,
+																m_bMultiSelection);
 }
 
 void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
@@ -574,28 +603,39 @@ void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL b
 	}
 }
 
-BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType)
+BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 {
 	if (nType == TDCA_NONE)
+	{
 		return TRUE;
+	}
+	else if ((nType >= TDCA_CUSTOMATTRIB_FIRST) && (nType <= TDCA_CUSTOMATTRIB_LAST))
+	{
+		return TRUE;
+	}
 
 	return m_mapVisibility.HasAttribute(nType);
 }
 
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 {
-	m_cbCategoryFilter.EnableMultiSelection(bEnable);
-	m_cbAllocToFilter.EnableMultiSelection(bEnable);
-	m_cbStatusFilter.EnableMultiSelection(bEnable);
-	m_cbAllocByFilter.EnableMultiSelection(bEnable);
-	m_cbVersionFilter.EnableMultiSelection(bEnable);
-	m_cbTagFilter.EnableMultiSelection(bEnable);
+	if (bEnable != m_bMultiSelection)
+	{
+		m_bMultiSelection = bEnable;
+
+		m_cbCategoryFilter.EnableMultiSelection(bEnable);
+		m_cbAllocToFilter.EnableMultiSelection(bEnable);
+		m_cbStatusFilter.EnableMultiSelection(bEnable);
+		m_cbAllocByFilter.EnableMultiSelection(bEnable);
+		m_cbVersionFilter.EnableMultiSelection(bEnable);
+		m_cbTagFilter.EnableMultiSelection(bEnable);
+
+		CTDCCustomAttributeHelper::EnableMultiFilterSelection(m_aCustomControls, this, bEnable);
+	}
 }
 
 int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 {
-	CDeferWndMove dwm(bCalcOnly ? 0 : NUMFILTERCTRLS + 1);
-
 	if (nWidth <= 0)
 	{
 		CRect rClient;
@@ -615,10 +655,15 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 	int nXPosDLU = 0, nYPosDLU = 0;
 	int nWidthDLU = dlu.FromPixelsX(nWidth), nCtrlHeightDLU = CTRLHEIGHT;
 
-	for (int nCtrl = 0; nCtrl < NUMFILTERCTRLS; nCtrl++)
+	CTDCControlArray aControls;
+	int nNumCtrls = GetControls(aControls);
+	
+	CDeferWndMove dwm(bCalcOnly ? 0 : nNumCtrls);
+
+	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
 	{
 		CRect rCtrl, rCtrlDLU;
-		const CTRLITEM& fc = FILTERCTRLS[nCtrl];
+		const CTRLITEM& fc = aControls[nCtrl];
 		
 		// display this control only if the corresponding column
 		// is also showing
@@ -733,6 +778,36 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 	nYPosDLU += (2 * nCtrlHeightDLU) + 2;
 
 	return dlu.ToPixelsY(nYPosDLU);
+}
+
+int CTDLFilterBar::GetControls(CTDCControlArray& aControls) const
+{
+	aControls.RemoveAll();
+
+	// standard controls, except for options which is always last
+	int nCtrl;
+	for (nCtrl = 0; nCtrl < NUMFILTERCTRLS - 1; nCtrl++)
+	{
+		aControls.Add(FILTERCTRLS[nCtrl]);
+	}
+
+	// custom attribs
+	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
+	{
+		CUSTOMATTRIBCTRLITEM ctrl = m_aCustomControls[nCtrl];
+		aControls.Add(ctrl);
+
+		// Buddy Control
+		CTRLITEM buddy;
+
+		if (ctrl.GetBuddy(buddy))
+			aControls.Add(buddy);
+	}
+
+	// finally options combo
+	aControls.Add(FILTERCTRLS[NUMFILTERCTRLS - 1]);
+
+	return aControls.GetSize();
 }
 
 BOOL CTDLFilterBar::OnInitDialog() 
@@ -890,6 +965,7 @@ BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC)
 	// clip out all the child controls to reduce flicker
 	if (!m_bRefreshBkgndColor)
 	{
+		// Fixed
 		int nCtrl = NUMFILTERCTRLS;
 
 		while (nCtrl--)
@@ -897,6 +973,16 @@ BOOL CTDLFilterBar::OnEraseBkgnd(CDC* pDC)
 			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, pDC, TRUE);
 			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, pDC, TRUE);
 		}
+
+		// Custom
+		nCtrl = m_aCustomControls.GetSize();
+
+		while (nCtrl--)
+		{
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nLabelID, pDC, TRUE);
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nCtrlID, pDC, TRUE);
+		}
+
 	}
 	m_bRefreshBkgndColor = FALSE;
 

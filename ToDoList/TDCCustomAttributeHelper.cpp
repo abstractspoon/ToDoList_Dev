@@ -20,6 +20,7 @@
 #include "..\shared\timeedit.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\FileComboBox.h"
+#include "..\shared\HoldRedraw.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -32,9 +33,9 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-													   const CTDCImageList& ilImages,
-													   CWnd* pParent, UINT nCtrlID, 
-													   BOOL bVisible, BOOL bBuddy)
+													   const CTDCImageList& ilImages, CWnd* pParent, 
+													   UINT nCtrlID, BOOL bBuddy, 
+													   BOOL bFilter, BOOL bMultiSelectionFilter)
 {
 	// Sanity check
 	if (bBuddy && !AttributeWantsBuddy(attribDef))
@@ -47,151 +48,168 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 	DWORD dwListType = attribDef.GetListType();
 
 	CWnd* pControl = NULL;
-	DWORD dwStyle = (WS_CHILD | WS_TABSTOP | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwStyle = (WS_CHILD | WS_TABSTOP); // Invisible
 	DWORD dwExStyle = WS_EX_CLIENTEDGE;
 	LPCTSTR szClass = NULL;
 
-	switch (dwListType)
+	if (dwListType == TDCCA_NOTALIST)
 	{
-	case TDCCA_NOTALIST:
+		switch (dwDataType)
 		{
-			switch (dwDataType)
-			{
-			case TDCCA_STRING:
-				pControl = new CEdit;
-				szClass = WC_EDIT;
-				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
-				break;
-				
-			case TDCCA_DATE:
-				if (bBuddy)
-				{
-					pControl = new CTimeComboBox(TCB_HALFHOURS | TCB_NOTIME);
-					szClass = WC_COMBOBOX;
-					dwStyle |= CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL;
-				}
-				else
-				{
-					pControl = new CDateTimeCtrlEx;
-					szClass = WC_DATETIMEPICK;
-					dwStyle |= DTS_SHORTDATEFORMAT | DTS_RIGHTALIGN | DTS_SHOWNONE;
-				}
-				break;
-				
-			case TDCCA_INTEGER:
-				pControl = new CMaskEdit(_T("0123456789"));
-				szClass = WC_EDIT;
-				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
-				break;
-				
-			case TDCCA_DOUBLE:
-				pControl = new CMaskEdit(_T(".0123456789"), ME_LOCALIZEDECIMAL);
-				szClass = WC_EDIT;
-				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
-				break;
+		case TDCCA_STRING:
+			pControl = new CEdit;
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
 
-			case TDCCA_FILELINK:
-				pControl = new CFileEdit(FES_GOBUTTON);
-				szClass = WC_EDIT;
-				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
-				break;
-		
-			case TDCCA_DURATION:
-				pControl = new CTimeEdit();
-				szClass = WC_EDIT;
-				dwStyle |= ES_LEFT | ES_AUTOHSCROLL;
-				break;
+		case TDCCA_DATE:
+			if (bBuddy)
+			{
+				pControl = new CTimeComboBox(TCB_HALFHOURS | TCB_NOTIME);
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL);
+			}
+			else
+			{
+				pControl = new CDateTimeCtrlEx;
+				szClass = WC_DATETIMEPICK;
+				dwStyle |= (DTS_SHORTDATEFORMAT | DTS_RIGHTALIGN | DTS_SHOWNONE);
+			}
+			break;
+
+		case TDCCA_INTEGER:
+			pControl = new CMaskEdit(_T("0123456789"));
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
+
+		case TDCCA_DOUBLE:
+			pControl = new CMaskEdit(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
+
+		case TDCCA_FILELINK:
+			pControl = new CFileEdit(FES_GOBUTTON);
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
+
+		case TDCCA_DURATION:
+			pControl = new CTimeEdit();
+			szClass = WC_EDIT;
+			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			break;
 
 			// these don't have controls
-			case TDCCA_BOOL:
-			case TDCCA_ICON:
-				break;
-			}
+		case TDCCA_BOOL:
+		case TDCCA_ICON:
+			break;
 		}
-		break;
-		
-	case TDCCA_AUTOLIST:
-		if (dwDataType == TDCCA_FILELINK)
-		{
-			pControl = new CFileComboBox(FES_GOBUTTON);
-			szClass = WC_COMBOBOX;
-			dwStyle |= CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL;
-		}
-		else
-		{
-			pControl = new CAutoComboBox(ACBS_ALLOWDELETE);
-			szClass = WC_COMBOBOX;
-			dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
+	}
+	else if (bFilter)
+	{
+		szClass = WC_COMBOBOX;
+		dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
 
-			// add number mask as required
-			switch (dwDataType)
-			{
-			case TDCCA_INTEGER:
-				((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
-				break;
-				
-			case TDCCA_DOUBLE:
-				((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
-				break;
-			}
-		}
-		break;
-		
-	case TDCCA_FIXEDLIST:
+		switch (dwDataType)
 		{
-			szClass = WC_COMBOBOX;
-			dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
+		case TDCCA_ICON:
+			pControl = new CTDLIconComboBox(ilImages, bMultiSelectionFilter);
+			break;
 
-			switch (dwDataType)
-			{
-			case TDCCA_ICON:
-				pControl = new CTDLIconComboBox(ilImages, FALSE);
-				break;
-				
-			default:
-				pControl = new COwnerdrawComboBoxBase; // so they render the same
-				break;
-			}
+		default:
+			pControl = new CEnCheckComboBox(bMultiSelectionFilter, IDS_TDC_NONE, IDS_TDC_ANY);
+			break;
 		}
-		break;
-		
-	case TDCCA_AUTOMULTILIST:
+	}
+	else
+	{
+		switch (dwListType)
 		{
-			pControl = new CCheckComboBox(ACBS_ALLOWDELETE);
-			szClass = WC_COMBOBOX;
-			dwStyle |= CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL;
+		case TDCCA_AUTOLIST:
+			if (dwDataType == TDCCA_FILELINK)
+			{
+				pControl = new CFileComboBox(FES_GOBUTTON);
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL);
+			}
+			else
+			{
+				pControl = new CAutoComboBox(ACBS_ALLOWDELETE);
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
 
-			// add number mask as required
-			switch (dwDataType)
-			{
-			case TDCCA_INTEGER:
-				((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
-				break;
+				// add number mask as required
+				switch (dwDataType)
+				{
+				case TDCCA_INTEGER:
+					((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+					break;
 				
-			case TDCCA_DOUBLE:
-				((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
-				break;
+				case TDCCA_DOUBLE:
+					((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+					break;
+				}
 			}
-		}
-		break;
+			break;
 		
-	case TDCCA_FIXEDMULTILIST:
-		{
-			szClass = WC_COMBOBOX;
-			dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
+		case TDCCA_FIXEDLIST:
+			{
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
+
+				switch (dwDataType)
+				{
+				case TDCCA_ICON:
+					pControl = new CTDLIconComboBox(ilImages, FALSE);
+					break;
+				
+				default:
+					pControl = new COwnerdrawComboBoxBase; // so they render the same
+					break;
+				}
+			}
+			break;
+		
+		case TDCCA_AUTOMULTILIST:
+			{
+				pControl = new CCheckComboBox(ACBS_ALLOWDELETE);
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
+
+				// add number mask as required
+				switch (dwDataType)
+				{
+				case TDCCA_INTEGER:
+					((CAutoComboBox*)pControl)->SetEditMask(_T("0123456789"));
+					break;
+				
+				case TDCCA_DOUBLE:
+					((CAutoComboBox*)pControl)->SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+					break;
+				}
+			}
+			break;
+		
+		case TDCCA_FIXEDMULTILIST:
+			{
+				szClass = WC_COMBOBOX;
+				dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
 			
-			switch (dwDataType)
-			{
-			case TDCCA_ICON:
-				pControl = new CTDLIconComboBox(ilImages, TRUE);
-				break;
+				switch (dwDataType)
+				{
+				case TDCCA_ICON:
+					pControl = new CTDLIconComboBox(ilImages, TRUE);
+					break;
 				
-			default:
-				pControl = new CCheckComboBox;
-				break;
+				default:
+					pControl = new CCheckComboBox;
+					break;
+				}
 			}
+			break;
 		}
-		break;
 	}
 
 	ASSERT (pControl);
@@ -229,13 +247,21 @@ CWnd* CTDCCustomAttributeHelper::CreateCustomAttribute(const TDCCUSTOMATTRIBUTED
 				if (attribDef.GetUniqueListData(aListData))
 					CDialogHelper::SetComboBoxItems(*pCB, aListData);
 				
-				// prepend empty item to single item lists
-				switch (attribDef.GetListType())
+				if (bFilter)
 				{
-				case TDCCA_FIXEDLIST:
-				case TDCCA_AUTOLIST:
+					// prepend empty item
 					pCB->InsertString(0, _T(""));
-					break;
+				}
+				else
+				{
+					// prepend empty items to single selection lists
+					switch (attribDef.GetListType())
+					{
+					case TDCCA_FIXEDLIST:
+					case TDCCA_AUTOLIST:
+						pCB->InsertString(0, _T(""));
+						break;
+					}
 				}
 			}
 		}
@@ -294,15 +320,14 @@ CString CTDCCustomAttributeHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFIN
 }
 
 CWnd* CTDCCustomAttributeHelper::CreateCustomAttributeLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-															CWnd* pParent, UINT nCtrlID, 
-															BOOL bVisible, BOOL bBuddy)
+															CWnd* pParent, UINT nCtrlID, BOOL bBuddy)
 {
 	CStatic* pLabel = new CStatic;
 	ASSERT (pLabel);
 
 	if (pLabel)
 	{
-		DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0) | SS_CENTERIMAGE);
+		DWORD dwStyle = (WS_CHILD | SS_CENTERIMAGE); // Invisible
 
 		if (!pLabel->Create(NULL, dwStyle, CRect(0, 0, 0, 0), pParent, nCtrlID))
 		{
@@ -379,34 +404,115 @@ void CTDCCustomAttributeHelper::CleanupCustomAttributeUI(CTDCCustomControlArray&
 	aControls.RemoveAll();
 }
 
+BOOL CTDCCustomAttributeHelper::NeedRebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										const CTDCCustomControlArray& aControls, UINT nCtrlIDStart)
+{
+	return NeedRebuildCustomAttributeUI(aAttribDefs, aControls, nCtrlIDStart, FALSE);
+}
+
+BOOL CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										const CTDCCustomControlArray& aControls, UINT nCtrlIDStart)
+{
+	return NeedRebuildCustomAttributeUI(aAttribDefs, aControls, nCtrlIDStart, TRUE);
+}
+
+BOOL CTDCCustomAttributeHelper::NeedRebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										const CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
+{
+	CTDCCustomControlArray aNewControls;
+	int nNewCtrl = GetCustomAttributeCtrls(aAttribDefs, aNewControls, nCtrlIDStart, FALSE);
+
+	if (nNewCtrl != aControls.GetSize())
+		return TRUE;
+
+	return !Misc::MatchAllT(aNewControls, aControls, bFilter);
+}
+
+int CTDCCustomAttributeHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+													CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
+{
+	aControls.RemoveAll();
+
+	UINT nID = nCtrlIDStart;
+
+	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
+
+		// don't add unwanted controls
+		if (!WantCtrlUI(attribDef, bFilter))
+			continue;
+
+		// NOTE: flag and image types don't need controls because they are 
+		// handled by clicking the tasklist directly
+		switch (attribDef.GetDataType())
+		{
+		case TDCCA_BOOL:
+			break;
+
+		case TDCCA_ICON:
+			if (!attribDef.IsList())
+				break;
+			// else fall thru
+
+		default:
+			{
+				CUSTOMATTRIBCTRLITEM ctrl;
+
+				ctrl.nAttrib = attribDef.GetAttributeID();
+				ctrl.sAttribID = attribDef.sUniqueID;
+
+				// Main control
+				ctrl.nCtrlID = nID++;
+				ctrl.nLabelID = nID++;
+
+				// Buddy control
+				if (AttributeWantsBuddy(attribDef))
+				{
+					ctrl.nBuddyCtrlID = nID++;
+					ctrl.nBuddyLabelID = nID++;
+				}					
+
+				aControls.Add(ctrl);
+			}
+		}
+	}
+
+	return aControls.GetSize();
+}
+
 BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos)
+										CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart)
 {
-	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, RCAUIT_EDIT);
+	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, nCtrlIDStart, FALSE, FALSE);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos)
+										CWnd* pParent, UINT nCtrlIDPos, 
+										UINT nCtrlIDStart, BOOL bMultiSelection)
 {
-	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, RCAUIT_FILTER);
+	return RebuildCustomAttributeUI(aAttribDefs, aControls, ilImages, pParent, nCtrlIDPos, nCtrlIDStart, TRUE, bMultiSelection);
 }
 
 BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 														 CTDCCustomControlArray& aControls, 
 														 const CTDCImageList& ilImages,
-														 CWnd* pParent, UINT nCtrlIDPos, RCAUI_TYPE nType)
+														 CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart, 
+														 BOOL bFilter, BOOL bMultiSelectionFilter)
 {
 	ASSERT_VALID(pParent);
+
+	CHoldRedraw hr(*pParent);
 
 	// remove all existing custom attribute fields
 	CleanupCustomAttributeUI(aControls, pParent);
 
 	// recreate controls and columns
-	UINT nID = IDC_FIRST_CUSTOMDATAFIELD;
+	UINT nID = nCtrlIDStart;
 
 	const CWnd* pInsertAfter = pParent->GetDlgItem(nCtrlIDPos);
 	ASSERT(pInsertAfter);
@@ -416,7 +522,7 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
 
 		// don't add unwanted controls
-		if (!WantCtrlUI(attribDef, nType))
+		if (!WantCtrlUI(attribDef, bFilter))
 			continue;
 		
 		// NOTE: flag and image types don't need controls because they are 
@@ -447,10 +553,10 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 				ctrl.nCtrlID = nID++;
 				ctrl.nLabelID = nID++;
 				
-				pLabel = CreateCustomAttributeLabel(attribDef, pParent, ctrl.nLabelID, FALSE, FALSE);
+				pLabel = CreateCustomAttributeLabel(attribDef, pParent, ctrl.nLabelID, FALSE);
 				ASSERT_VALID(pLabel);
 				
-				pCtrl = CreateCustomAttribute(attribDef, ilImages, pParent, ctrl.nCtrlID, FALSE, FALSE);
+				pCtrl = CreateCustomAttribute(attribDef, ilImages, pParent, ctrl.nCtrlID, FALSE, bFilter, bMultiSelectionFilter);
 				ASSERT_VALID(pCtrl);
 
 				// Buddy control
@@ -461,10 +567,10 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 					ctrl.nBuddyCtrlID = nID++;
 					ctrl.nBuddyLabelID = nID++;
 					
-					pBuddyLabel = CreateCustomAttributeLabel(attribDef, pParent, ctrl.nBuddyLabelID, FALSE, TRUE);
+					pBuddyLabel = CreateCustomAttributeLabel(attribDef, pParent, ctrl.nBuddyLabelID, TRUE);
 					ASSERT_VALID(pLabel);
 					
-					pBuddyCtrl = CreateCustomAttribute(attribDef, ilImages, pParent, ctrl.nBuddyCtrlID, FALSE, TRUE);
+					pBuddyCtrl = CreateCustomAttribute(attribDef, ilImages, pParent, ctrl.nBuddyCtrlID, TRUE, bFilter, bMultiSelectionFilter);
 					ASSERT_VALID(pCtrl);
 				}					
 				
@@ -505,25 +611,10 @@ BOOL CTDCCustomAttributeHelper::RebuildCustomAttributeUI(const CTDCCustomAttribD
 	return TRUE;
 }
 
-BOOL CTDCCustomAttributeHelper::WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, RCAUI_TYPE nType)
+BOOL CTDCCustomAttributeHelper::WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter)
 {
 	if (attribDef.bEnabled)
-	{
-		switch (nType)
-		{
-		case RCAUIT_EDIT:
-			return TRUE;
-
-		case RCAUIT_FILTER:
-			if (attribDef.HasFeature(TDCCAF_FILTER))
-				return TRUE;
-			break;
-
-		default:
-			ASSERT(0);
-			break;
-		}
-	}
+		return (!bFilter || attribDef.HasFeature(TDCCAF_FILTER));
 
 	return FALSE;
 }
@@ -716,7 +807,7 @@ BOOL CTDCCustomAttributeHelper::IsCustomColumnEnabled(TDC_COLUMN nColID,
 
 BOOL CTDCCustomAttributeHelper::IsCustomControl(UINT nCtrlID)
 {
-	return (nCtrlID >= IDC_FIRST_CUSTOMDATAFIELD && nCtrlID <= IDC_LAST_CUSTOMDATAFIELD);
+	return (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && nCtrlID <= IDC_LAST_CUSTOMEDITFIELD);
 }
 
 void CTDCCustomAttributeHelper::SaveAutoListDataToDefs(const CWnd* pParent, 
@@ -1152,3 +1243,23 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	return FT_NONE;
 }
 
+int CTDCCustomAttributeHelper::EnableMultiFilterSelection(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable)
+{
+	int nCtrl = aControls.GetSize(), nNumFound = 0;
+	
+	while (nCtrl--)
+	{
+		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
+		CWnd* pCtrl = pParent->GetDlgItem(ctrl.nCtrlID);
+
+		if (pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
+		{
+			CEnCheckComboBox* pCombo = (CEnCheckComboBox*)pCtrl;
+
+			pCombo->EnableMultiSelection(bEnable);
+			nNumFound++;
+		}
+	}
+
+	return nNumFound;
+}

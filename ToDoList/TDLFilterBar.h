@@ -75,6 +75,8 @@ protected:
 	CDateTimeCtrlEx				m_dtcUserStart, m_dtcUserDue;
 	CEnEdit						m_eStartNextNDays, m_eDueNextNDays;
 
+	CTDCCustomControlArray		m_aCustomControls;
+	
 	FTDCFILTER m_filter;
 	CMap<CString, LPCTSTR, DWORD, DWORD&> m_mapCustomFlags;
 	CDWordArray m_aPriorityColors;
@@ -89,6 +91,7 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	BOOL m_bRefreshBkgndColor;
 	HICON m_hUpdateImage;
+	BOOL m_bMultiSelection;
 
 protected:
 	int DoModal() { return -1; }
@@ -125,9 +128,11 @@ protected:
 
 protected:
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
-	BOOL WantShowFilter(TDC_ATTRIBUTE nType);
+	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
 	void SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL bRepos);
 	void RefreshUIBkgndBrush();
+	int GetControls(CTDCControlArray& aControls) const;
+	void UpdateCustomControls(const CFilteredToDoCtrl& tdc);
 
 };
 

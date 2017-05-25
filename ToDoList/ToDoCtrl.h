@@ -125,7 +125,7 @@ public:
 
 	const CTDCCustomAttribDefinitionArray& GetCustomAttributeDefs() const { return m_aCustomAttribDefs; }
 	int GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) const;
-	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib);
+	BOOL SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib);
 
 	BOOL DeleteAllTasks();
 	void NewList();

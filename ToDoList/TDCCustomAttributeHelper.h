@@ -21,11 +21,19 @@ public:
 	static BOOL RebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos);
+										CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart);
 	static BOOL RebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos);
+										CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart,
+										BOOL bMultiSelection);
+
+	static BOOL NeedRebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+												const CTDCCustomControlArray& aControls, UINT nCtrlIDStart);
+	static BOOL NeedRebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+												const CTDCCustomControlArray& aControls, UINT nCtrlIDStart);
+
+	static int EnableMultiFilterSelection(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
 
 	static void CleanupCustomAttributeUI(CTDCCustomControlArray& aControls, CWnd* pParent);
 	
@@ -113,23 +121,25 @@ public:
 
 protected:
 	static CWnd* CreateCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-										const CTDCImageList& ilImages,
-										CWnd* pParent, UINT nCtrlID, 
-										BOOL bVisible, BOOL bBuddy);
+										const CTDCImageList& ilImages, CWnd* pParent, 
+										UINT nCtrlID, BOOL bBuddy, BOOL bFilter, BOOL bMultiSelectionFilter);
 	
 	static CWnd* CreateCustomAttributeLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-											CWnd* pParent, UINT nCtrlID, 
-											BOOL bVisible, BOOL bBuddy);
+											CWnd* pParent, UINT nCtrlID, BOOL bBuddy);
 	
 	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 	static CString GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy);
 
-	enum RCAUI_TYPE { RCAUIT_EDIT, RCAUIT_FILTER };
 	static BOOL RebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
-										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos, RCAUI_TYPE nType);
-	static BOOL WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, RCAUI_TYPE nType);
+										const CTDCImageList& ilImages, CWnd* pParent, 
+										UINT nCtrlIDPos, UINT nCtrlIDStart, 
+										BOOL bFilter, BOOL bMultiSelectionFilter);
+	static BOOL NeedRebuildCustomAttributeUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+									const CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
+	static int GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+									CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter);
+	static BOOL WantCtrlUI(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

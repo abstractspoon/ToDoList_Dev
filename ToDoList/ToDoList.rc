@@ -5101,6 +5101,7 @@ BEGIN
     IDS_UNLOCKED            "Unlocked"
     IDS_LOCKED              "Locked"
     IDS_CAD_DURATION        "Duration"
+    IDS_CUSTOM_FEATURE_FILTER "Filter"
 END
 
 #endif    // English (Australia) resources

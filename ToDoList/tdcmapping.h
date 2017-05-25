@@ -262,7 +262,7 @@ namespace TDC
 		case IDC_COLOUR:		return TDCA_COLOR;	
 			
 		default:
-			if (nCtrlID >= IDC_FIRST_CUSTOMDATAFIELD && (nCtrlID <= IDC_LAST_CUSTOMDATAFIELD))
+			if (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && (nCtrlID <= IDC_LAST_CUSTOMEDITFIELD))
 				return TDCA_CUSTOMATTRIB;
 			break;
 		}

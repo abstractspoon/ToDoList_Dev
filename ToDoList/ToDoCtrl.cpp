@@ -474,12 +474,12 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
  	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
-	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_EDITCHANGE, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(BN_CLICKED, IDC_FIRST_CUSTOMDATAFIELD, IDC_LAST_CUSTOMDATAFIELD, OnCustomAttributeChange)
+	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(CBN_EDITCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+	ON_CONTROL_RANGE(BN_CLICKED, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -5902,7 +5902,7 @@ int CToDoCtrl::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) 
 	return aAttrib.GetSize();
 }
 
-void CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib)
+BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib)
 {
 	ASSERT(!IsReadOnly());
 
@@ -5914,7 +5914,12 @@ void CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		// update interface
 		SetModified(TRUE, TDCA_CUSTOMATTRIBDEFS, 0);
 		UpdateControls(FALSE); // don't update comments
+
+		return TRUE;
 	}
+
+	// else
+	return FALSE;
 }
 
 void CToDoCtrl::UpdateVisibleColumns()
@@ -6229,7 +6234,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
  	CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(m_aCustomAttribDefs, m_aCustomControls, 
- 														m_ilTaskIcons, this, IDC_VERSION);
+ 														m_ilTaskIcons, this, IDC_VERSION, IDC_FIRST_CUSTOMEDITFIELD);
 	Resize();
 
 	m_taskTree.OnCustomAttributeChange();

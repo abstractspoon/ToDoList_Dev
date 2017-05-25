@@ -12268,9 +12268,12 @@ void CToDoListWnd::OnTasklistCustomColumns()
 		if (dialog.DoModal() == IDOK)
 		{
 			CTDCCustomAttribDefinitionArray aAttrib;
-
 			dialog.GetAttributes(aAttrib);
-			tdc.SetCustomAttributeDefs(aAttrib);
+
+			if (tdc.SetCustomAttributeDefs(aAttrib))
+			{
+				m_filterBar.RefreshFilterControls(tdc);
+			}
 		}
 	}
 }
