@@ -126,6 +126,7 @@ public:
 	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
 		
 	static CString KeyFromFile(LPCTSTR szFilePath, BOOL bFilenameOnly = TRUE);
+	static CString Key(LPCTSTR szKey, LPCTSTR szSubKey);
 	static BOOL Save();
 
 protected:

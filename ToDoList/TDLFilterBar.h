@@ -20,6 +20,7 @@
 #include "..\shared\wndprompt.h"
 #include "..\shared\uithemefile.h"
 #include "..\shared\datetimectrlex.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CFilterBar dialog
@@ -59,38 +60,40 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CFilterBar)
 	//}}AFX_DATA
-	CTDLFilterComboBox			m_cbTaskFilter;
-	CTDLFilterDateComboBox		m_cbStartFilter;
-	CTDLFilterDateComboBox		m_cbDueFilter;
-	CEnEdit						m_eTitleFilter;
-	CEnCheckComboBox			m_cbAllocToFilter;
-	CEnCheckComboBox			m_cbAllocByFilter;
-	CEnCheckComboBox			m_cbCategoryFilter;
-	CEnCheckComboBox			m_cbStatusFilter;
-	CEnCheckComboBox			m_cbVersionFilter;
-	CEnCheckComboBox			m_cbTagFilter;
-	CTDLPriorityComboBox		m_cbPriorityFilter;
-	CTDLRiskComboBox			m_cbRiskFilter;
-	CTDLFilterOptionComboBox	m_cbOptions;
-	CDateTimeCtrlEx				m_dtcUserStart, m_dtcUserDue;
-	CEnEdit						m_eStartNextNDays, m_eDueNextNDays;
-
-	CTDCCustomControlArray		m_aCustomControls;
-	
-	TDCFILTER m_filter;
+	CTDLFilterComboBox m_cbTaskFilter;
+	CTDLFilterDateComboBox m_cbStartFilter;
+	CTDLFilterDateComboBox m_cbDueFilter;
+	CEnEdit m_eTitleFilter;
+	CEnCheckComboBox m_cbAllocToFilter;
+	CEnCheckComboBox m_cbAllocByFilter;
+	CEnCheckComboBox m_cbCategoryFilter;
+	CEnCheckComboBox m_cbStatusFilter;
+	CEnCheckComboBox m_cbVersionFilter;
+	CEnCheckComboBox m_cbTagFilter;
+	CTDLPriorityComboBox m_cbPriorityFilter;
+	CTDLRiskComboBox m_cbRiskFilter;
+	CTDLFilterOptionComboBox m_cbOptions;
+	CDateTimeCtrlEx m_dtcUserStart, m_dtcUserDue;
+	CEnEdit m_eStartNextNDays, m_eDueNextNDays;
+		
 	CMap<CString, LPCTSTR, DWORD, DWORD&> m_mapCustomFlags;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapVisibility;
+	CTDCCustomControlArray m_aCustomControls;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
+
+	TDCFILTER m_filter;
 	FTC_VIEW m_nView;
 	CBrush m_brUIBack;
 	COLORREF m_crUIBack;
 	CUIThemeFile m_theme;
-	BOOL m_bAdvancedFilter;
 	CString m_sAdvancedFilter;
-	BOOL m_bWantHideParents;
 	CWndPromptManager m_mgrPrompts;
+	CIcon m_iconUpdateBtn;
+
+	BOOL m_bAdvancedFilter;
+	BOOL m_bWantHideParents;
 	BOOL m_bRefreshBkgndColor;
-	HICON m_hUpdateImage;
 	BOOL m_bMultiSelection;
 
 protected:
@@ -124,6 +127,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify( UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
+	afx_msg void OnCustomAttributeFilterChange(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
 protected:

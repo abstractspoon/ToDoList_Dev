@@ -21,19 +21,19 @@ public:
 	static BOOL RebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart);
+										CWnd* pParent, UINT nCtrlIDPos);
 	static BOOL RebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 										CTDCCustomControlArray& aControls, 
 										const CTDCImageList& ilImages, 
-										CWnd* pParent, UINT nCtrlIDPos, UINT nCtrlIDStart,
+										CWnd* pParent, UINT nCtrlIDPos,
 										BOOL bMultiSelection);
 
 	static BOOL NeedRebuildCustomAttributeEditUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-												const CTDCCustomControlArray& aControls, UINT nCtrlIDStart);
+												const CTDCCustomControlArray& aControls);
 	static BOOL NeedRebuildCustomAttributeFilterUI(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-												const CTDCCustomControlArray& aControls, UINT nCtrlIDStart);
+												const CTDCCustomControlArray& aControls);
 
-	static int EnableMultiFilterSelection(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
+	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
 
 	static void CleanupCustomAttributeUI(CTDCCustomControlArray& aControls, CWnd* pParent);
 	
@@ -45,7 +45,8 @@ public:
 	static BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
 	static BOOL IsCustomColumnEnabled(TDC_COLUMN nColID, const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	static BOOL IsCustomControl(UINT nCtrlID);
+	static BOOL IsCustomEditControl(UINT nCtrlID);
+	static BOOL IsCustomFilterControl(UINT nCtrlID);
 
 	static BOOL GetAttributeDef(TDC_COLUMN nColID, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,

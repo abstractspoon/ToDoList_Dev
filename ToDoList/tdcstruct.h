@@ -17,6 +17,7 @@
 #include "..\shared\TreeSelectionHelper.h"
 #include "..\shared\TreeCtrlHelper.h"
 #include "..\shared\misc.h"
+#include "..\shared\mapex.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\enstring.h"
@@ -1850,6 +1851,8 @@ struct TDCFILTER
 		aVersions.Copy(filter.aVersions);
 		aTags.Copy(filter.aTags);
 
+		mapCustomAttrib.Copy(filter.mapCustomAttrib);
+
 		return *this;
 	}
 
@@ -2074,6 +2077,10 @@ struct TDCFILTER
 				return FALSE;
 		}
 
+		// Custom attributes
+		if (!filter1.mapCustomAttrib.MatchAll(filter2.mapCustomAttrib))
+			return FALSE;
+
 		return TRUE;
 	}
 	
@@ -2087,6 +2094,8 @@ struct TDCFILTER
 	DWORD dwFlags;
 	COleDateTime dtUserStart, dtUserDue;
 	int nStartNextNDays, nDueNextNDays;
+
+	CMapStringToStringArray mapCustomAttrib;
 };
 
 struct TDCADVANCEDFILTER
@@ -2384,6 +2393,7 @@ struct TDCCADATA
 	BOOL operator!=(const TDCCADATA& data) const { return sData != data.sData; }
 
 	BOOL IsEmpty() const { return sData.IsEmpty(); }
+	void Clear() { sData.Empty(); }
 
 	CString AsString() const { return sData; }
 	double AsDouble() const { return _ttof(sData); }

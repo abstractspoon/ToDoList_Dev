@@ -831,6 +831,8 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 
 	// options
 	filter.dwFlags = LoadFlags(prefs, sKey);
+
+
 }
 
 DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
@@ -864,18 +866,6 @@ DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
 	return dwFlags;
 }
 
-void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey)
-{
-	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"), Misc::HasFlag(dwFlags, FO_ANYALLOCTO));
-	prefs.WriteProfileInt(sKey, _T("AnyCategory"), Misc::HasFlag(dwFlags, FO_ANYCATEGORY));
-	prefs.WriteProfileInt(sKey, _T("AnyTag"), Misc::HasFlag(dwFlags, FO_ANYTAG));
-	prefs.WriteProfileInt(sKey, _T("HideParents"), Misc::HasFlag(dwFlags, FO_HIDEPARENTS));
-	prefs.WriteProfileInt(sKey, _T("HideOverDue"), Misc::HasFlag(dwFlags, FO_HIDEOVERDUE));
-	prefs.WriteProfileInt(sKey, _T("HideDone"), Misc::HasFlag(dwFlags, FO_HIDEDONE));
-	prefs.WriteProfileInt(sKey, _T("HideCollapsed"), Misc::HasFlag(dwFlags, FO_HIDECOLLAPSED));
-	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"), Misc::HasFlag(dwFlags, FO_SHOWALLSUB));
-}
-
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCFILTER& filter)
 {
 	prefs.WriteProfileString(sKey, _T("Title"), filter.sTitle);
@@ -902,6 +892,32 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 
 	// options
 	SaveFlags(filter.dwFlags, prefs, sKey);
+
+	// Custom Attributes
+	POSITION pos = filter.mapCustomAttrib.GetStartPosition();
+	CString sAttribID;
+	CStringArray* pArray = NULL;
+
+	while (pos)
+	{
+		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, pArray);
+		ASSERT(!sAttribID.IsEmpty() && pArray && pArray->GetSize());
+
+		if (pArray)
+			prefs.WriteProfileArray(prefs.Key(sKey, sAttribID), filter.aAllocBy);
+	}	
+}
+
+void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey)
+{
+	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"), Misc::HasFlag(dwFlags, FO_ANYALLOCTO));
+	prefs.WriteProfileInt(sKey, _T("AnyCategory"), Misc::HasFlag(dwFlags, FO_ANYCATEGORY));
+	prefs.WriteProfileInt(sKey, _T("AnyTag"), Misc::HasFlag(dwFlags, FO_ANYTAG));
+	prefs.WriteProfileInt(sKey, _T("HideParents"), Misc::HasFlag(dwFlags, FO_HIDEPARENTS));
+	prefs.WriteProfileInt(sKey, _T("HideOverDue"), Misc::HasFlag(dwFlags, FO_HIDEOVERDUE));
+	prefs.WriteProfileInt(sKey, _T("HideDone"), Misc::HasFlag(dwFlags, FO_HIDEDONE));
+	prefs.WriteProfileInt(sKey, _T("HideCollapsed"), Misc::HasFlag(dwFlags, FO_HIDECOLLAPSED));
+	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"), Misc::HasFlag(dwFlags, FO_SHOWALLSUB));
 }
 
 BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const 

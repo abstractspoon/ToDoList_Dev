@@ -229,7 +229,71 @@ public:
 
 };
 
-typedef CMapStringToContainer<CStringArray> CMapStringToStringArray;
+class CMapStringToStringArray : public CMapStringToContainer<CStringArray>
+{
+public:
+	BOOL Map(const CString& str, const CStringArray& aItems)
+	{
+		CStringArray* pArray = GetAddMapping(str);
+
+		if (!pArray)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		pArray->Copy(aItems);
+		return TRUE;
+	}
+
+	void Copy(const CMapStringToStringArray& other)
+	{
+		RemoveAll();
+
+		POSITION pos = other.GetStartPosition();
+		CString sKey;
+		CStringArray* pOtherArray = NULL;
+
+		while (pos)
+		{
+			other.GetNextAssoc(pos, sKey, pOtherArray);
+			ASSERT(pOtherArray);
+
+			CStringArray* pArray = GetAddMapping(sKey);
+			ASSERT(pArray);
+
+			if (pArray && pOtherArray)
+				pArray->Copy(*pOtherArray);
+		}	
+	}
+
+	BOOL MatchAll(const CMapStringToStringArray& other, 
+				  BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE) const
+	{
+		if (GetCount() != other.GetCount())
+			return FALSE;
+
+		POSITION pos = GetStartPosition();
+		CString sKey;
+		CStringArray* pArray = NULL;
+
+		while (pos)
+		{
+			GetNextAssoc(pos, sKey, pArray);
+			ASSERT(pArray);
+
+			const CStringArray* pOtherArray = other.GetMapping(sKey);
+
+			if (pOtherArray == NULL)
+				return FALSE;
+			
+			if (!Misc::MatchAll(*pArray, *pOtherArray, bOrderSensitive, bCaseSensitive))
+				return FALSE;
+		}	
+
+		return TRUE;
+	}
+};
 
 typedef CMapStringToContainer<CMapStringToStringArray> CMapStringToStringArrayMap;
 

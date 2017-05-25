@@ -1365,7 +1365,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CD
 
 	// handle custom attributes
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomControl(ctrl.nCtrlID))
+		if (CTDCCustomAttributeHelper::IsCustomEditControl(ctrl.nCtrlID))
 		{
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
@@ -1869,7 +1869,7 @@ BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
 		return FALSE;
 
 	// is this a custom control?
-	if (CTDCCustomAttributeHelper::IsCustomControl(ctrl.nCtrlID))
+	if (CTDCCustomAttributeHelper::IsCustomEditControl(ctrl.nCtrlID))
 		return TRUE;
 
 	// other special cases
@@ -2388,7 +2388,7 @@ void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT
 
 void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeHelper::IsCustomControl(nCtrlID));
+	ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
@@ -6234,7 +6234,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
  	CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(m_aCustomAttribDefs, m_aCustomControls, 
- 														m_ilTaskIcons, this, IDC_VERSION, IDC_FIRST_CUSTOMEDITFIELD);
+ 															m_ilTaskIcons, this, IDC_VERSION);
 	Resize();
 
 	m_taskTree.OnCustomAttributeChange();
@@ -7852,7 +7852,7 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 		break;
 
 	default:
-		if (CTDCCustomAttributeHelper::IsCustomControl(nCtrlID))
+		if (CTDCCustomAttributeHelper::IsCustomEditControl(nCtrlID))
 		{
 			GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, TDCA_CUSTOMATTRIB);
 		}
@@ -11083,7 +11083,7 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 			break;
 
 		default:
-			ASSERT(CTDCCustomAttributeHelper::IsCustomControl(wParam));
+			ASSERT(CTDCCustomAttributeHelper::IsCustomEditControl(wParam));
 			break;
 		}
 	}

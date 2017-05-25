@@ -55,9 +55,6 @@ static CTRLITEM FILTERCTRLS[] =
 
 const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(CTRLITEM);
 
-const UINT IDC_FIRST_CUSTOMFILTERFIELD = 4000;
-const UINT IDC_LAST_CUSTOMFILTERFIELD = IDC_FIRST_CUSTOMFILTERFIELD + 256;
-
 #define WM_WANTCOMBOPROMPT (WM_APP+1)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,17 +78,16 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CFilterBar)
 	//}}AFX_DATA_INIT
-	m_hUpdateImage = AfxGetApp()->LoadIcon(IDI_UPDATE_FILTER);
+	m_iconUpdateBtn.LoadIcon(IDI_UPDATE_FILTER);
 
 	// add update button to 'title text' and 'next 'n' days'
-	m_eTitleFilter.AddButton(1, m_hUpdateImage, CEnString(IDS_TDC_UPDATEFILTER_TIP));
-	m_eStartNextNDays.AddButton(1, m_hUpdateImage, CEnString(IDS_TDC_UPDATEFILTER_TIP));
-	m_eDueNextNDays.AddButton(1, m_hUpdateImage, CEnString(IDS_TDC_UPDATEFILTER_TIP));
+	m_eTitleFilter.AddButton(1, m_iconUpdateBtn, CEnString(IDS_TDC_UPDATEFILTER_TIP));
+	m_eStartNextNDays.AddButton(1, m_iconUpdateBtn, CEnString(IDS_TDC_UPDATEFILTER_TIP));
+	m_eDueNextNDays.AddButton(1, m_iconUpdateBtn, CEnString(IDS_TDC_UPDATEFILTER_TIP));
 }
 
 CTDLFilterBar::~CTDLFilterBar()
 {
-	::DestroyIcon(m_hUpdateImage);
 }
 
 void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
@@ -275,13 +271,18 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELENDCANCEL(IDC_PRIORITYFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_SELENDCANCEL(IDC_RISKFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)
+
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnSelchangeFilter)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnSelchangeFilter)
 	ON_NOTIFY(DTN_CLOSEUP, IDC_USERDUEDATE, OnSelchangeFilter)
 	ON_NOTIFY(DTN_CLOSEUP, IDC_USERSTARTDATE, OnSelchangeFilter)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeFilterChange)
+	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeFilterChange)
+
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
-	ON_WM_ERASEBKGND()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
+
+	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -520,20 +521,20 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 
 void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 {
-	if (!CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(tdc.GetCustomAttributeDefs(), 
-																		m_aCustomControls,  
-																		IDC_FIRST_CUSTOMFILTERFIELD))
+	tdc.GetCustomAttributeDefs(m_aCustomAttribDefs);
+
+	if (!CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
+																		m_aCustomControls))
 	{
 		return;
 	}
 
 	// else
-	CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(tdc.GetCustomAttributeDefs(), 
+	CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
 																m_aCustomControls, 
 																tdc.GetTaskIconImageList(), 
 																this, 
 																IDC_OPTIONFILTERCOMBO, 
-																IDC_FIRST_CUSTOMFILTERFIELD,
 																m_bMultiSelection);
 }
 
@@ -630,7 +631,7 @@ void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 		m_cbVersionFilter.EnableMultiSelection(bEnable);
 		m_cbTagFilter.EnableMultiSelection(bEnable);
 
-		CTDCCustomAttributeHelper::EnableMultiFilterSelection(m_aCustomControls, this, bEnable);
+		CTDCCustomAttributeHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
 	}
 }
 
@@ -1031,4 +1032,34 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
+void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
+{
+	ASSERT(CTDCCustomAttributeHelper::IsCustomFilterControl(nCtrlID));
+
+	CUSTOMATTRIBCTRLITEM ctrl;
+
+	if (CTDCCustomAttributeHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	{
+		ASSERT(CTDCCustomAttributeHelper::IsCustomAttribute(ctrl.nAttrib));
+
+		TDCCADATA data(CTDCCustomAttributeHelper::GetControlData(this, ctrl, m_aCustomAttribDefs));
+
+		if (data.IsEmpty())
+		{
+			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
+		}
+		else
+		{
+			CStringArray* pArray = m_filter.mapCustomAttrib.GetAddMapping(ctrl.sAttribID);
+			ASSERT(pArray);
+
+			if (pArray)
+				data.AsArray(*pArray);
+		}
+	}
+	else
+	{
+		ASSERT(0);
+	}
+}
 
