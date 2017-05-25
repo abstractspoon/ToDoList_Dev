@@ -3661,6 +3661,9 @@ BOOL CGanttTreeListCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	else
 		rDate.right = rMonth.right;
 
+	rDate.top = rMonth.top;
+	rDate.bottom = rMonth.bottom;
+
 	return (rDate.right > 0);
 }
 
@@ -4151,15 +4154,10 @@ BOOL CGanttTreeListCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, in
 		rToday.bottom--;
 	}
 
-	// draw border
-	pDC->FillSolidRect(rToday, GetColor(m_crToday, 0.0, bSelected));
+	COLORREF crBorder = GetColor(m_crToday, 0.0, bSelected);
+	COLORREF crFill = GetColor(m_crToday, 0.5, bSelected);
 
-	// fill interior if enough space
-	if (rToday.Width() > 2)
-	{
-		rToday.DeflateRect(1, 0);
-		pDC->FillSolidRect(rToday, GetColor(m_crToday, 0.5, bSelected));
-	}
+	GraphicsMisc::DrawRect(pDC, rToday, crFill, crBorder, 0, GMDR_LEFT | GMDR_RIGHT);
 
 	return TRUE;
 }

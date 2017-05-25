@@ -859,8 +859,22 @@ int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UIN
 
 void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, int nCornerRadius, DWORD dwEdges)
 {
-	if (rect.IsRectEmpty())
-		return;
+	ASSERT((crBorder != CLR_NONE) || (crFill != CLR_NONE));
+
+ 	if (rect.IsRectEmpty())
+	{
+		// draw a line
+		if (rect.Width() > 0)
+		{
+			DrawHorzLine(pDC, rect.left, rect.right, rect.top, ((crBorder != CLR_NONE) ? crBorder : crFill));
+		}
+		else if (rect.Height() > 0)
+		{
+			DrawVertLine(pDC, rect.top, rect.bottom, rect.left, ((crBorder != CLR_NONE) ? crBorder : crFill));
+		}
+
+ 		return;
+	}
 
 	if (nCornerRadius == 0)
 	{
@@ -896,7 +910,8 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 						rFill.bottom--;
 				}
 
-				pDC->FillSolidRect(rFill, crFill);
+				if (!rFill.IsRectEmpty())
+					pDC->FillSolidRect(rFill, crFill);
 			}
 		}
 		else if (crFill != CLR_NONE) // inside of rect
