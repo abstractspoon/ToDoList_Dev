@@ -806,19 +806,6 @@ CString CPreferences::KeyFromFile(LPCTSTR szFilePath, BOOL bFileNameOnly)
 	return sKey;
 }
 
-CString CPreferences::Key(LPCTSTR szKey, LPCTSTR szSubKey)
-{
-	ASSERT(szKey && *szKey);
-
-	if (Misc::IsEmpty(szSubKey))
-		return szKey;
-
-	CString sKey;
-	sKey.Format(_T("%s\\%s"), sKey, szSubKey);
-
-	return sKey;
-}
-
 //////////////////////////////////////////////////////////////////////
 	
 UINT CPreferences::CIPreferencesImpl::GetProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nDefault) const
