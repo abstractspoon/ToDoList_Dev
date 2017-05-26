@@ -523,19 +523,19 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 {
 	tdc.GetCustomAttributeDefs(m_aCustomAttribDefs);
 
-	if (!CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
+	if (CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
 																		m_aCustomControls))
 	{
-		return;
+		CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
+																	m_aCustomControls, 
+																	tdc.GetTaskIconImageList(), 
+																	this, 
+																	IDC_OPTIONFILTERCOMBO, 
+																	m_bMultiSelection);
 	}
 
-	// else
-	CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
-																m_aCustomControls, 
-																tdc.GetTaskIconImageList(), 
-																this, 
-																IDC_OPTIONFILTERCOMBO, 
-																m_bMultiSelection);
+	// Update data
+	CTDCCustomAttributeHelper::UpdateCustomAttributeControls(this, m_aCustomControls, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
 }
 
 void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)
@@ -1045,21 +1045,14 @@ void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
 		TDCCADATA data(CTDCCustomAttributeHelper::GetControlData(this, ctrl, m_aCustomAttribDefs));
 
 		if (data.IsEmpty())
-		{
 			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
-		}
 		else
-		{
-			CStringArray* pArray = m_filter.mapCustomAttrib.GetAddMapping(ctrl.sAttribID);
-			ASSERT(pArray);
+			m_filter.mapCustomAttrib[ctrl.sAttribID] = data.AsString();
 
-			if (pArray)
-				data.AsArray(*pArray);
-		}
+		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
 	}
 	else
 	{
 		ASSERT(0);
 	}
 }
-

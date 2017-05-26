@@ -1851,7 +1851,7 @@ struct TDCFILTER
 		aVersions.Copy(filter.aVersions);
 		aTags.Copy(filter.aTags);
 
-		mapCustomAttrib.Copy(filter.mapCustomAttrib);
+		Misc::Copy(filter.mapCustomAttrib, mapCustomAttrib);
 
 		return *this;
 	}
@@ -2078,12 +2078,13 @@ struct TDCFILTER
 		}
 
 		// Custom attributes
-		if (!filter1.mapCustomAttrib.MatchAll(filter2.mapCustomAttrib))
+		if (!Misc::MatchAll(filter1.mapCustomAttrib, filter2.mapCustomAttrib))
 			return FALSE;
 
 		return TRUE;
 	}
-	
+
+
 	FILTER_SHOW nShow;
 	FILTER_DATE nStartBy, nDueBy;
 	CString sTitle;
@@ -2095,7 +2096,7 @@ struct TDCFILTER
 	COleDateTime dtUserStart, dtUserDue;
 	int nStartNextNDays, nDueNextNDays;
 
-	CMapStringToStringArray mapCustomAttrib;
+	CMapStringToString mapCustomAttrib;
 };
 
 struct TDCADVANCEDFILTER
@@ -2370,7 +2371,7 @@ struct TDCATTRIBUTE
 
 struct TDCCADATA
 {
-	TDCCADATA(const CString& sValue = _T("")) { Set(sValue); }
+	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0) { Set(sValue, cSep); }
 	TDCCADATA(double dValue) { Set(dValue); }
 	TDCCADATA(double dValue, TDC_UNITS nUnits) { Set(dValue, nUnits); }
 	TDCCADATA(const CStringArray& aValues) { Set(aValues); }
@@ -2416,11 +2417,27 @@ struct TDCCADATA
 		return _ttof(sData);
 	}
 
-	void Set(const CString& sValue) { sData = sValue; }
 	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
 	void Set(const CStringArray& aValues) { sData = Misc::FormatArray(aValues, '\n'); }
 	void Set(int nValue) { sData.Format(_T("%d"), nValue); }
 	void Set(const COleDateTime& dtValue) { sData.Format(_T("%lf"), dtValue); }
+
+	void Set(const CString& sValue, TCHAR cSep = 0) 
+	{ 
+		if (cSep != 0)
+		{
+			CStringArray aItems;
+
+			if (Misc::Split(sValue, aItems, cSep, TRUE))
+			{
+				Set(aItems);
+				return;
+			}
+		}
+
+		// all else
+		sData = sValue; 
+	}
 
 	void Set(double dValue, TDC_UNITS nUnits) 
 	{ 

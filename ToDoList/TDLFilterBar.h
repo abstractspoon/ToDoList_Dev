@@ -75,11 +75,11 @@ protected:
 	CTDLFilterOptionComboBox m_cbOptions;
 	CDateTimeCtrlEx m_dtcUserStart, m_dtcUserDue;
 	CEnEdit m_eStartNextNDays, m_eDueNextNDays;
+	CTDCCustomControlArray m_aCustomControls;
 		
 	CMap<CString, LPCTSTR, DWORD, DWORD&> m_mapCustomFlags;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapVisibility;
-	CTDCCustomControlArray m_aCustomControls;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	TDCFILTER m_filter;

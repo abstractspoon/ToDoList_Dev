@@ -832,7 +832,19 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 	// options
 	filter.dwFlags = LoadFlags(prefs, sKey);
 
+	// Custom Attributes
+	int nItem = prefs.GetProfileInt(sKey + _T("\\Custom"), _T("ItemCount"));
 
+	while (nItem--)
+	{
+		CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem, sKey));
+		CStringArray aItems;
+
+		CString sAttribID = prefs.GetProfileString(sItemKey, _T("AttributeID"));
+		CString sAttribValue = prefs.GetProfileString(sItemKey, _T("AttributeValue"));
+
+		filter.mapCustomAttrib[sAttribID] = TDCCADATA(sAttribValue, '|').AsString();
+	}
 }
 
 DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
@@ -895,17 +907,24 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 
 	// Custom Attributes
 	POSITION pos = filter.mapCustomAttrib.GetStartPosition();
-	CString sAttribID;
-	CStringArray* pArray = NULL;
+	CString sAttribID, sAttribValue;
+	int nItem = 0;
 
 	while (pos)
 	{
-		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, pArray);
-		ASSERT(!sAttribID.IsEmpty() && pArray && pArray->GetSize());
+		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, sAttribValue);
+		ASSERT(!sAttribID.IsEmpty());
+		
+		if (!sAttribID.IsEmpty())
+		{
+			CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem++, sKey));
 
-		if (pArray)
-			prefs.WriteProfileArray(prefs.Key(sKey, sAttribID), filter.aAllocBy);
+			prefs.WriteProfileString(sItemKey, _T("AttributeID"), sAttribID);
+			prefs.WriteProfileString(sItemKey, _T("AttributeValue"), TDCCADATA(sAttribValue).FormatAsArray('|'));
+		}
 	}	
+	
+	prefs.WriteProfileInt(sKey + _T("\\Custom"), _T("ItemCount"), nItem);
 }
 
 void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey)

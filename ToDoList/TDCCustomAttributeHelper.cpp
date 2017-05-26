@@ -420,7 +420,7 @@ BOOL CTDCCustomAttributeHelper::NeedRebuildCustomAttributeUI(const CTDCCustomAtt
 										const CTDCCustomControlArray& aControls, UINT nCtrlIDStart, BOOL bFilter)
 {
 	CTDCCustomControlArray aNewControls;
-	int nNewCtrl = GetCustomAttributeCtrls(aAttribDefs, aNewControls, nCtrlIDStart, FALSE);
+	int nNewCtrl = GetCustomAttributeCtrls(aAttribDefs, aNewControls, nCtrlIDStart, bFilter);
 
 	if (nNewCtrl != aControls.GetSize())
 		return TRUE;
@@ -990,6 +990,8 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 	}
 	else if (IsCustomFilterControl(ctrl.nCtrlID))
 	{
+		ASSERT(pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)));
+
 		((CEnCheckComboBox*)pCtrl)->GetChecked(aItems);
 		data.Set(aItems);
 	}
@@ -1074,113 +1076,121 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 	TDCCADATA data(sData);
 	CStringArray aItems;
 
-	switch (dwListType)
+	if (dwListType == TDCCA_NOTALIST)
 	{
-	case TDCCA_NOTALIST:
+		switch (dwDataType)
 		{
-			switch (dwDataType)
+		case TDCCA_STRING:
+		case TDCCA_INTEGER:
+		case TDCCA_DOUBLE:
+		case TDCCA_FILELINK:
+			pCtrl->SetWindowText(data.AsString());
+			break;
+
+		case TDCCA_DATE:
 			{
-			case TDCCA_STRING:
-			case TDCCA_INTEGER:
-			case TDCCA_DOUBLE:
-			case TDCCA_FILELINK:
-				pCtrl->SetWindowText(data.AsString());
-				break;
-				
-			case TDCCA_DATE:
+				CDateTimeCtrlEx* pDTC = (CDateTimeCtrlEx*)pCtrl;
+				COleDateTime date = data.AsDate();
+
+				if (!CDateHelper::IsDateSet(date))
 				{
-					CDateTimeCtrlEx* pDTC = (CDateTimeCtrlEx*)pCtrl;
-					COleDateTime date = data.AsDate();
-
-					if (!CDateHelper::IsDateSet(date))
-					{
-						pDTC->SetTime(COleDateTime::GetCurrentTime());
-						pDTC->SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
-					}
-					else
-					{
-						pDTC->SetTime(date);
-					}
-
-					if (ctrl.HasBuddy() && CDateHelper::DateHasTime(date))
-					{
-						CTimeComboBox* pBuddy = (CTimeComboBox*)pParent->GetDlgItem(ctrl.nBuddyCtrlID);
-						ASSERT_VALID(pBuddy);
-						
-						if (pBuddy == NULL)
-							return;
-						
-						pBuddy->SetOleTime(date);
-					}
+					pDTC->SetTime(COleDateTime::GetCurrentTime());
+					pDTC->SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 				}
-				break;
-
-			case TDCCA_TIMEPERIOD:
+				else
 				{
-					TDC_UNITS nUnits = TDCU_HOURS;
-					double dTime = data.AsTimePeriod(nUnits);
-					
-					((CTimeEdit*)pCtrl)->SetTime(dTime, TDC::MapUnitsToTHUnits(nUnits));
+					pDTC->SetTime(date);
 				}
-				break;
-				
+
+				if (ctrl.HasBuddy() && CDateHelper::DateHasTime(date))
+				{
+					CTimeComboBox* pBuddy = (CTimeComboBox*)pParent->GetDlgItem(ctrl.nBuddyCtrlID);
+					ASSERT_VALID(pBuddy);
+
+					if (pBuddy == NULL)
+						return;
+
+					pBuddy->SetOleTime(date);
+				}
+			}
+			break;
+
+		case TDCCA_TIMEPERIOD:
+			{
+				TDC_UNITS nUnits = TDCU_HOURS;
+				double dTime = data.AsTimePeriod(nUnits);
+
+				((CTimeEdit*)pCtrl)->SetTime(dTime, TDC::MapUnitsToTHUnits(nUnits));
+			}
+			break;
+
 			// these don't have controls
-			case TDCCA_ICON:
-			case TDCCA_BOOL:
-				break;
-			}
+		case TDCCA_ICON:
+		case TDCCA_BOOL:
+			break;
 		}
-		break;
-		
-	case TDCCA_AUTOLIST:
-		if (dwDataType == TDCCA_FILELINK)
-		{
-			data.AsArray(aItems);
-			((CFileComboBox*)pCtrl)->SetFileList(aItems);
-		}
-		else
-		{
-			CAutoComboBox* pACB = (CAutoComboBox*)pCtrl;
+	}
+	else if (IsCustomFilterControl(ctrl.nCtrlID))
+	{
+		ASSERT(pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)));
 
-			if (sData.IsEmpty())
+		data.AsArray(aItems);
+		((CEnCheckComboBox*)pCtrl)->SetChecked(aItems);
+	}
+	else
+	{
+		switch (dwListType)
+		{
+		case TDCCA_AUTOLIST:
+			if (dwDataType == TDCCA_FILELINK)
 			{
-				pACB->SetCurSel(-1);
+				data.AsArray(aItems);
+				((CFileComboBox*)pCtrl)->SetFileList(aItems);
 			}
 			else
 			{
-				int nItem = pACB->AddString(sData);
-				pACB->SetCurSel(nItem);
-			}
-		}
-		break;
-		
-	case TDCCA_FIXEDLIST:
-		{
-			COwnerdrawComboBoxBase* pCB = (COwnerdrawComboBoxBase*)pCtrl;
+				CAutoComboBox* pACB = (CAutoComboBox*)pCtrl;
 
-			if (sData.IsEmpty())
-			{
-				pCB->SetCurSel(-1);
+				if (sData.IsEmpty())
+				{
+					pACB->SetCurSel(-1);
+				}
+				else
+				{
+					int nItem = pACB->AddString(sData);
+					pACB->SetCurSel(nItem);
+				}
 			}
-			else if (dwDataType == TDCCA_ICON)
+			break;
+
+		case TDCCA_FIXEDLIST:
 			{
-				((CTDLIconComboBox*)pCtrl)->SelectImage(sData);
+				COwnerdrawComboBoxBase* pCB = (COwnerdrawComboBoxBase*)pCtrl;
+
+				if (sData.IsEmpty())
+				{
+					pCB->SetCurSel(-1);
+				}
+				else if (dwDataType == TDCCA_ICON)
+				{
+					((CTDLIconComboBox*)pCtrl)->SelectImage(sData);
+				}
+				else
+				{
+					int nItem = pCB->FindStringExact(-1, sData, FALSE);
+					pCB->SetCurSel(nItem);
+				}
 			}
-			else
+			break;
+
+		case TDCCA_AUTOMULTILIST:
+		case TDCCA_FIXEDMULTILIST:
 			{
-				int nItem = pCB->FindStringExact(-1, sData, FALSE);
-				pCB->SetCurSel(nItem);
+				data.AsArray(aItems);
+				((CCheckComboBox*)pCtrl)->SetChecked(aItems);
 			}
+			break;
 		}
-		break;
-		
-	case TDCCA_AUTOMULTILIST:
-	case TDCCA_FIXEDMULTILIST:
-		{
-			data.AsArray(aItems);
-			((CCheckComboBox*)pCtrl)->SetChecked(aItems);
-		}
-		break;
 	}
 }
 
