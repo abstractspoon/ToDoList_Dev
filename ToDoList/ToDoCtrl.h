@@ -251,8 +251,8 @@ public:
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const { return m_taskTree.GetSelectedTaskPath(bIncludeTaskName, nMaxLen); }
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const { return m_taskTree.GetSelectedTaskDate(nDate); }
-	CString GetSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bFormatted) const { return m_taskTree.GetSelectedTaskCustomAttributeData(sAttribID, bFormatted); }
-	int GetSelectedTaskCustomAttributeData(CMapStringToString& mapData, BOOL bFormatted) const;
+	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_taskTree.GetSelectedTaskCustomAttributeData(sAttribID, data, bFormatted); }
+	int GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted = FALSE) const;
 	BOOL IsSelectedTaskReference() const { return m_taskTree.IsSelectedTaskReference(); }
 	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
 
@@ -296,7 +296,7 @@ public:
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments);
 	BOOL SetSelectedTaskIcon(const CString& sIcon); 
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date);
-	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData);
+	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data);
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
@@ -508,7 +508,7 @@ protected:
 	TDCRECURRENCE m_tRecurrence;
 	COLORREF m_crColour;
 	CMapStringToString m_mapMetaData;
-	CMapStringToString m_mapCustomCtrlData;
+	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
 
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	CTDCCustomControlArray m_aCustomControls;
@@ -700,7 +700,7 @@ protected:
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	int CheckWantSubtasksCompleted();
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData, BOOL bCtrlEdited);
+	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
 	int GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) const;
 	CString GetSelectedTaskFileRef(int nFile, BOOL bFullPath) const;
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);

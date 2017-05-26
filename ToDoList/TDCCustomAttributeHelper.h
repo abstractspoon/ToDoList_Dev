@@ -67,8 +67,9 @@ public:
 	static DWORD GetAttributeDataType(const CString& sUniqueID, 
 										const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	static CString FormatData(const CString& sData, const CString& sUniqueID, 
+	static CString FormatData(const TDCCADATA& data, const CString& sUniqueID, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	static CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 	static TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nColID, 
 										const CTDCCustomAttribDefinitionArray& aAttribDefs);
@@ -91,11 +92,11 @@ public:
 
 	static void UpdateCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
-											const CString& sData);
+											const TDCCADATA& data);
 
 	static void UpdateCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
-											const CMapStringToString& mapData);
+											const CTDCCustomAttributeDataMap& mapData);
 
 	static void ClearCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);
@@ -104,12 +105,13 @@ public:
 										const CTDCCustomAttribDefinitionArray& aAttribDefs,
 										DWORD& dwDataType, DWORD& dwListType);
 
-	static CString GetControlData(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
-									const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	static BOOL GetControlData(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+									const CTDCCustomAttribDefinitionArray& aAttribDefs,
+									TDCCADATA& data);
 
 	static BOOL GetControlData(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,
-								CMapStringToString& mapData);
+								CTDCCustomAttributeDataMap& mapData);
 
 	static FIND_ATTRIBTYPE GetAttributeFindType(const CString& sUniqueID, BOOL bRelativeDate,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);

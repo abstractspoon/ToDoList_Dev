@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "TDCToolsCmdlineParser.h"
+#include "TDCcustomattribdata.h"
 
 #include "..\shared\menuiconmgr.h"
 
@@ -32,7 +33,8 @@ struct USERTOOLARGS
 	CString sTaskFileLink;
 	CString sTaskAllocBy;
 	CString sTaskAllocTo;
-	CMapStringToString mapTaskCustData;
+
+	CTDCCustomAttributeDataMap mapTaskCustData;
 };
 
 class CSysImageList;

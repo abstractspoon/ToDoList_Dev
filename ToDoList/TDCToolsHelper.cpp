@@ -293,14 +293,16 @@ BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& a
 	ReplaceToolArgument(tcp, CLAT_SELTASKALLOCTO, args.sTaskAllocTo, bEscapeSpaces);
 
 	CCLArgArray aCustomArgs;
+	TDCCADATA data;
+
 	int nArg = tcp.GetCustomAttributeArguments(aCustomArgs);
 
 	while (nArg--)
 	{
-		CString sAttribID(aCustomArgs[nArg].sName), sValue;
-		args.mapTaskCustData.Lookup(Misc::ToUpper(sAttribID), sValue);
+		CString sAttribID(aCustomArgs[nArg].sName);
+		args.mapTaskCustData.Lookup(sAttribID, data);
 
-		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, sValue, bEscapeSpaces);
+		ReplaceToolArgument(tcp, aCustomArgs[nArg].sPlaceHolder, data.AsString(), bEscapeSpaces);
 	}
 	
 	if (tcp.IsUserInputRequired())

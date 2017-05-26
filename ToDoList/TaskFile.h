@@ -27,7 +27,7 @@
 class CBinaryData;
 class TODOITEM;
 class CTDCCustomAttribDefinitionArray;
-class CTDCCustomAttribDataMap;
+class CTDCCustomAttributeDataMap;
 
 struct TASKFILE_HEADER;
 struct TDCRECURRENCE; 
@@ -194,8 +194,8 @@ public:
 	BOOL GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CString& sType) const;
 	BOOL SetTaskHtmlComments(HTASKITEM hTask, const CString& sContent, BOOL bForTransform);
 
-	int GetTaskCustomAttributeData(HTASKITEM hTask, CMapStringToString& mapData) const;
-	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToString& mapData);
+	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const;
+	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
 	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;

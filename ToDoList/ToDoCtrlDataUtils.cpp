@@ -449,8 +449,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 					
 					if (attribDef.GetDataType() == TDCCA_STRING)
 					{
-						TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
 						DWORD dwAttribType = (attribDef.GetListType() | TDCCA_STRING);
+
+						TDCCADATA data;
+						pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
 						bMatch = ValueMatches(data, dwAttribType, rule, resTask);
 					}
@@ -472,7 +474,9 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				if (CTDCCustomAttributeHelper::GetAttributeDef(sUniqueID, query.aAttribDefs, attribDef))
 				{
-					TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
+					TDCCADATA data;
+					pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
 					bMatch = ValueMatches(data, attribDef.GetAttributeType(), rule, resTask);
 				}
 				else
@@ -1050,8 +1054,11 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 	}
 	else
 	{
-		nCompare = Compare(pTDI1->GetCustomAttribValue(attribDef.sUniqueID), 
-							pTDI2->GetCustomAttribValue(attribDef.sUniqueID));
+		TDCCADATA data1, data2;
+		pTDI1->GetCustomAttributeValue(attribDef.sUniqueID, data1);
+		pTDI2->GetCustomAttributeValue(attribDef.sUniqueID, data2);
+
+		nCompare = Compare(data1.AsString(), data2.AsString());
 	}
 
 	return bAscending ? nCompare : -nCompare;

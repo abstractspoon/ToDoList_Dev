@@ -5,6 +5,8 @@
 
 #include "..\shared\preferences.h"
 
+/////////////////////////////////////////////////////////////////////////
+
 CTDCFilter::CTDCFilter() : m_nState(TDCFS_NONE)
 {
 }
@@ -910,17 +912,18 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 
 	// Custom Attributes
 	POSITION pos = filter.mapCustomAttrib.GetStartPosition();
-	CString sAttribID, sAttribValue;
+	CString sAttribID;
+	TDCCADATA data;
 	int nItem = 0;
 
 	while (pos)
 	{
-		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, sAttribValue);
+		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, data);
 		ASSERT(!sAttribID.IsEmpty());
 
 		CStringArray aItems;
 
-		if (TDCCADATA(sAttribValue).AsArray(aItems))
+		if (data.AsArray(aItems))
 		{
 			CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem++, sKey));
 

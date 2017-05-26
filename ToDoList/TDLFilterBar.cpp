@@ -1042,12 +1042,12 @@ void CTDLFilterBar::OnCustomAttributeFilterChange(UINT nCtrlID)
 	{
 		ASSERT(CTDCCustomAttributeHelper::IsCustomAttribute(ctrl.nAttrib));
 
-		TDCCADATA data(CTDCCustomAttributeHelper::GetControlData(this, ctrl, m_aCustomAttribDefs));
-
-		if (data.IsEmpty())
-			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
+		TDCCADATA data;
+		
+		if (CTDCCustomAttributeHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, data))
+			m_filter.mapCustomAttrib[ctrl.sAttribID] = data;
 		else
-			m_filter.mapCustomAttrib[ctrl.sAttribID] = data.AsString();
+			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
 
 		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
 	}

@@ -1669,7 +1669,8 @@ void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWO
 			// Buddy is time
 			if (bEnable && !bReadOnly)
 			{
-				TDCCADATA data(GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, FALSE));
+				TDCCADATA data;
+				GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data, FALSE);
 				
 				if (!CDateHelper::IsDateSet(data.AsDate()))
 				{
@@ -2320,10 +2321,11 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		// handle custom attributes
 		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 		{
-			CString sData, sAttribID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aCustomAttribDefs);
+			CString sAttribID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aCustomAttribDefs);
+			TDCCADATA data;
 
-			if (m_mapCustomCtrlData.Lookup(sAttribID, sData))
-				SetSelectedTaskCustomAttributeData(sAttribID, sData, TRUE);
+			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
+				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
 		}
 	}
 }
@@ -2401,12 +2403,12 @@ void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID)
 }
 
 // external version
-BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData)
+BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
 {
-	return SetSelectedTaskCustomAttributeData(sAttribID, sData, FALSE);
+	return SetSelectedTaskCustomAttributeData(sAttribID, data, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const CString& sData, BOOL bCtrlEdited)
+BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited)
 {
 	if (!CanEditSelectedTask())
 		return FALSE;
@@ -2425,7 +2427,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskCustomAttributeData(dwTaskID, sAttribID, sData);
+		TDC_SET nItemRes = m_data.SetTaskCustomAttributeData(dwTaskID, sAttribID, data);
 			
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2445,7 +2447,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 		if (CTDCCustomAttributeHelper::GetControl(sAttribID, m_aCustomControls, ctrl))
 		{
 			if (!bCtrlEdited)
-				CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, sData);
+				CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
 
 			if (ctrl.HasBuddy())
 				EnableDisableControls(GetSelectedItem());
@@ -8453,7 +8455,8 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 	VERIFY (CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef));
 	
-	TDCCADATA data(GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, FALSE));
+	TDCCADATA data;
+	GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data);
 	
 	switch (attribDef.GetDataType())
 	{
@@ -9841,7 +9844,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		// custom data 
 		if (filter.WantAttribute(TDCA_CUSTOMATTRIB))
-			tasks.SetTaskCustomAttributeData(hTask, pTDI->mapCustomData);
+			tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
 	}
 	else if (bDone)
 	{
@@ -11263,16 +11266,19 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker)
 	return TRUE;
 }
 
-int CToDoCtrl::GetSelectedTaskCustomAttributeData(CMapStringToString& mapData, BOOL bFormatted) const
+int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted) const
 {
 	mapData.RemoveAll();
 	
 	int nDef = m_aCustomAttribDefs.GetSize();
+	TDCCADATA data;
 	
 	while (nDef--)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& def = m_aCustomAttribDefs.GetData()[nDef];
-		mapData[def.sUniqueID] = GetSelectedTaskCustomAttributeData(def.sUniqueID, bFormatted);
+		GetSelectedTaskCustomAttributeData(def.sUniqueID, data, bFormatted);
+
+		mapData[def.sUniqueID] = data;
 	}
 	
 	return mapData.GetCount();

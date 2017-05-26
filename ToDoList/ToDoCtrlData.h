@@ -127,7 +127,7 @@ public:
 	CString GetTaskVersion(DWORD dwTaskID) const;
 	CString FormatTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
 	CString FormatTaskPosition(DWORD dwTaskID) const; 
-	CString GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const;
+	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
@@ -242,7 +242,7 @@ public:
 	TDC_SET SetTaskLock(DWORD dwTaskID, BOOL bLocked);
 	TDC_SET SetTaskRecurrence(DWORD dwTaskID, const TDCRECURRENCE& tr);
 	TDC_SET SetTaskVersion(DWORD dwTaskID, const CString& sVersion);
-	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const CString& sData);
+	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data);
 
 	TDC_SET SetTaskAllocTo(DWORD dwTaskID, const CStringArray& aAllocTo, BOOL bAppend);
 	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend);

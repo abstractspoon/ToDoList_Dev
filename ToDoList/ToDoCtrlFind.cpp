@@ -6,6 +6,7 @@
 #include "ToDoCtrlFind.h"
 #include "ToDoCtrlData.h"
 #include "ToDoitem.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
@@ -322,7 +323,12 @@ CString CToDoCtrlFind::GetLongestCustomAttribute(HTREEITEM hti, const TODOITEM* 
 	CString sLongest;
 
 	if (pTDI)
-		pTDI->mapCustomData.Lookup(attribDef.sUniqueID, sLongest);
+	{
+		TDCCADATA data;
+		
+		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+			sLongest = CTDCCustomAttributeHelper::FormatData(data, attribDef);
+	}
 
 	// children
 	if (WantSearchChildren(hti, bVisibleOnly))

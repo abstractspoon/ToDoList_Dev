@@ -12,6 +12,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "tdcenum.h"
+#include "tdccustomattribdata.h"
 #include "tdcrecurrence.h"
 
 #include "..\shared\binarydata.h"
@@ -71,9 +72,11 @@ public:
 	COleDateTimeSpan GetRemainingDueTime() const; // in days
 	COleDateTime GetDate(TDC_DATE nDate) const;
 	
-	BOOL HasCustomAttribValue(const CString& sAttribID) const;
-	CString GetCustomAttribValue(const CString& sAttribID) const;
-	void SetCustomAttribValue(const CString& sAttribID, const CString& sValue);
+	BOOL HasCustomAttributeValue(const CString& sAttribID) const;
+	BOOL GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const;
+	void SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data);
+	const CTDCCustomAttributeDataMap& GetCustomAttributeValues() const { return mapCustomData; }
+	void SetCustomAttributeValues(const CTDCCustomAttributeDataMap& data) { return Misc::CopyStrT(data, mapCustomData); }
 
 	TDC_UNITS GetTimeUnits(BOOL bTimeEst) const;
 	TH_UNITS GetTHTimeUnits(BOOL bTimeEst) const;
@@ -132,8 +135,9 @@ public:
 	// meta-data for 3rd-party applications only
 	CMapStringToString mapMetaData; 
 	
+protected:
 	// custom attributes
-	CMapStringToString mapCustomData;
+	CTDCCustomAttributeDataMap mapCustomData;
 	
 private:
 	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;

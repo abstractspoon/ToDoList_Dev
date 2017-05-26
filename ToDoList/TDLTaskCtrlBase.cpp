@@ -2861,7 +2861,9 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	if (!CTDCCustomAttributeHelper::GetAttributeDef(nColID, m_aCustomAttribDefs, attribDef))
 		return TRUE;
 
-	TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
+	TDCCADATA data;
+	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
 	CRect rCol(rSubItem);
 	
 	switch (attribDef.GetDataType())
@@ -5735,32 +5737,37 @@ double CTDLTaskCtrlBase::GetSelectedTaskCost() const
 	return dCost;
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bFormatted) const
+BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const
 {
-	CString sData;
-	
+	data.Clear();
+
 	if (GetSelectedCount())
 	{
 		// get first item's value as initial
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		sData = m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID);
+		
+		m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data);
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
-			CString sTaskData = m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID);
+			
+			TDCCADATA dataNext;
+			m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, dataNext);
 
-			if (sData != sTaskData)
-				return _T("");
+			if (data != dataNext)
+			{
+				data.Clear();
+				return FALSE;
+			}
 		}
 
-		if (bFormatted)
-			sData = CTDCCustomAttributeHelper::FormatData(sData, sAttribID, m_aCustomAttribDefs);
+		if (bFormatted && !data.IsEmpty())
+			data.Set(CTDCCustomAttributeHelper::FormatData(data, sAttribID, m_aCustomAttribDefs));
 	}
 	
-	return sData;
+	return !data.IsEmpty();
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aAllocTo) const

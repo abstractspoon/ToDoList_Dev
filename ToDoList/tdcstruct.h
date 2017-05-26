@@ -1851,7 +1851,7 @@ struct TDCFILTER
 		aVersions.Copy(filter.aVersions);
 		aTags.Copy(filter.aTags);
 
-		Misc::Copy(filter.mapCustomAttrib, mapCustomAttrib);
+		Misc::CopyStrT(filter.mapCustomAttrib, mapCustomAttrib);
 
 		return *this;
 	}
@@ -2078,7 +2078,7 @@ struct TDCFILTER
 		}
 
 		// Custom attributes
-		if (!Misc::MatchAll(filter1.mapCustomAttrib, filter2.mapCustomAttrib))
+		if (!Misc::MatchAllStrT(filter1.mapCustomAttrib, filter2.mapCustomAttrib))
 			return FALSE;
 
 		return TRUE;
@@ -2096,7 +2096,7 @@ struct TDCFILTER
 	COleDateTime dtUserStart, dtUserDue;
 	int nStartNextNDays, nDueNextNDays;
 
-	CMapStringToString mapCustomAttrib;
+	CTDCCustomAttributeDataMap mapCustomAttrib;
 };
 
 struct TDCADVANCEDFILTER
@@ -2365,115 +2365,6 @@ struct TDCATTRIBUTE
 {
 	TDC_ATTRIBUTE attrib;
 	UINT nAttribResID;
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-struct TDCCADATA
-{
-	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0) { Set(sValue, cSep); }
-	TDCCADATA(double dValue) { Set(dValue); }
-	TDCCADATA(double dValue, TDC_UNITS nUnits) { Set(dValue, nUnits); }
-	TDCCADATA(const CStringArray& aValues) { Set(aValues); }
-	TDCCADATA(int nValue) { Set(nValue); }
-	TDCCADATA(const COleDateTime& dtValue) { Set(dtValue); }
-	TDCCADATA(bool bValue) { Set(bValue); }
-
-	TDCCADATA(const TDCCADATA& data)
-	{
-		*this = data;
-	}
-
-	TDCCADATA& operator=(const TDCCADATA& data)
-	{
-		sData = data.sData;
-		return *this;
-	}
-
-	BOOL operator==(const TDCCADATA& data) const { return sData == data.sData; }
-	BOOL operator!=(const TDCCADATA& data) const { return sData != data.sData; }
-
-	BOOL IsEmpty() const { return sData.IsEmpty(); }
-	void Clear() { sData.Empty(); }
-
-	CString AsString() const { return sData; }
-	double AsDouble() const { return _ttof(sData); }
-	int AsArray(CStringArray& aValues) const { return Misc::Split(sData, aValues, '\n', TRUE); }
-	int AsInteger() const { return _ttoi(sData); } 
-	COleDateTime AsDate() const { return _ttof(sData); }
-	bool AsBool() const { return !IsEmpty(); }
-	double AsTimePeriod(TDC_UNITS& nUnits) const
-	{
-		if (IsEmpty())
-		{
-			nUnits = TDCU_HOURS;
-			return 0.0;
-		}
-
-		// else
-		nUnits = (TDC_UNITS)Misc::Last(sData);
-		ASSERT(IsValidUnits(nUnits));
-
-		return _ttof(sData);
-	}
-
-	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
-	void Set(const CStringArray& aValues) { sData = Misc::FormatArray(aValues, '\n'); }
-	void Set(int nValue) { sData.Format(_T("%d"), nValue); }
-	void Set(const COleDateTime& dtValue) { sData.Format(_T("%lf"), dtValue); }
-
-	void Set(const CString& sValue, TCHAR cSep = 0) 
-	{ 
-		if (cSep != 0)
-		{
-			CStringArray aItems;
-
-			if (Misc::Split(sValue, aItems, cSep, TRUE))
-			{
-				Set(aItems);
-				return;
-			}
-		}
-
-		// all else
-		sData = sValue; 
-	}
-
-	void Set(double dValue, TDC_UNITS nUnits) 
-	{ 
-		ASSERT(IsValidUnits(nUnits));
-		sData.Format(_T("%lf:%lc"), dValue, (TCHAR)nUnits); }
-
-	void Set(bool bValue, TCHAR nChar = 0) 
-	{ 
-		if (bValue)
-		{
-			if (nChar > 0)
-				sData.Insert(0, nChar);
-			else
-				sData.Insert(0, '+');
-		}
-		else
-			sData.Empty(); 
-	}
-
-	CString FormatAsArray(TCHAR cSep = 0) const
-	{
-		if (cSep == '\n')
-			return sData;
-
-		CString sArray(sData);
-
-		if (cSep != 0)
-			sArray.Replace('\n', cSep);
-		else
-			sArray.Replace(_T("\n"), Misc::GetListSeparator());
-
-		return sArray;
-	}
-
-protected:
-	CString sData;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

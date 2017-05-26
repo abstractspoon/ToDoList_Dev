@@ -828,12 +828,12 @@ int CToDoCtrlData::GetTaskRisk(DWORD dwTaskID) const
 	return pTDI->nRisk;
 }
 
-CString CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const
+BOOL CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+	GET_TDI(dwTaskID, pTDI, FALSE);
 	
-	return pTDI->GetCustomAttribValue(sAttribID);
+	return pTDI->GetCustomAttributeValue(sAttribID, data);
 }
 
 BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
@@ -885,7 +885,8 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	if (!attribDef.SupportsCalculation())
 		return FALSE;
 
-	TDCCADATA data(pTDI->GetCustomAttribValue(attribDef.sUniqueID));
+	TDCCADATA data;
+	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
 	DWORD dwDataType = attribDef.GetDataType();
 	double dCalcValue = TODOITEM::NULL_VALUE;
@@ -1832,20 +1833,21 @@ TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_LOCK, pTDI->bLocked, bLocked);
 }
 
-TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const CString& sData)
+TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
-	CString sOldData = GetTaskCustomAttributeData(dwTaskID, sAttribID);
+	TDCCADATA dataOld;
+	GetTaskCustomAttributeData(dwTaskID, sAttribID, dataOld);
 	
-	if (sOldData != sData)
+	if (data != dataOld)
 	{
 		// save undo data
 		SaveEditUndo(dwTaskID, pTDI, TDCA_CUSTOMATTRIB);
 		
 		// make changes
-		pTDI->SetCustomAttribValue(sAttribID, sData);
+		pTDI->SetCustomAttributeValue(sAttribID, data);
 		
 		return SET_CHANGE;
 	}

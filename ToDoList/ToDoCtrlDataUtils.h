@@ -17,7 +17,6 @@
 
 class CToDoCtrlData;
 class CBinaryData;
-
 class TODOITEM;
 class TODOSTRUCTURE;
 

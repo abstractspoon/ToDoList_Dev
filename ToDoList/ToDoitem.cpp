@@ -7,7 +7,6 @@
 #include <math.h>
 
 #include "ToDoitem.h"
-#include "tdcenum.h"
 #include "tdcmapping.h"
 
 #include "..\shared\DateHelper.h"
@@ -104,7 +103,7 @@ const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	Misc::Copy(tdi.mapMetaData, mapMetaData);
 	
 	// custom attributes
-	Misc::Copy(tdi.mapCustomData, mapCustomData);
+	Misc::CopyStrT(tdi.mapCustomData, mapCustomData);
 
 	return *this;
 }
@@ -146,7 +145,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			Misc::MatchAll(aDependencies, tdi.aDependencies) &&
 			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
 			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
-			Misc::MatchAll(tdi.mapCustomData, mapCustomData));
+			Misc::MatchAllStrT(tdi.mapCustomData, mapCustomData));
 }
 
 BOOL TODOITEM::operator!=(const TODOITEM& tdi) 
@@ -464,23 +463,21 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	return 0.0;
 }
 
-CString TODOITEM::GetCustomAttribValue(const CString& sAttribID) const
+BOOL TODOITEM::GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const
 {
-	CString sValue;
-	mapCustomData.Lookup(Misc::ToUpper(sAttribID), sValue);
-	return sValue;
+	return (mapCustomData.Lookup(sAttribID, data) && !data.IsEmpty());
 }
 
-void TODOITEM::SetCustomAttribValue(const CString& sAttribID, const CString& sValue)
+void TODOITEM::SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data)
 {
-	mapCustomData.SetAt(Misc::ToUpper(sAttribID), sValue);
+	mapCustomData[sAttribID] = data;
 	SetModified();
 }
 
-BOOL TODOITEM::HasCustomAttribValue(const CString& sAttribID) const
+BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
 {
-	CString sTemp;
-	return mapCustomData.Lookup(Misc::ToUpper(sAttribID), sTemp);
+ 	TDCCADATA unused;
+	return !GetCustomAttributeValue(sAttribID, unused);
 }
 
 COleDateTimeSpan TODOITEM::GetRemainingDueTime(const COleDateTime& date)

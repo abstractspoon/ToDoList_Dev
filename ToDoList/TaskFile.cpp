@@ -8,6 +8,7 @@
 #include "tdcmergetasklist.h"
 #include "tdcstruct.h"
 #include "todoitem.h"
+#include "tdccustomattribdata.h"
 
 #include "..\shared\timeedit.h"
 #include "..\shared\datehelper.h"
@@ -1690,7 +1691,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 		SetTaskMetaData(hTask, tdi.mapMetaData);
 
 		// custom data
-		SetTaskCustomAttributeData(hTask, tdi.mapCustomData);
+		SetTaskCustomAttributeData(hTask, tdi.GetCustomAttributeValues());
 	}
 
 	return TRUE;
@@ -1757,7 +1758,13 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKMETADATA,			GetTaskMetaData(hTask, tdi.mapMetaData));
 
 		// custom data
-		GETATTRIB(TDL_TASKCUSTOMATTRIBDATA, GetTaskCustomAttributeData(hTask, tdi.mapCustomData));
+		if (bOverwrite || TaskHasAttribute(hTask, TDL_TASKCUSTOMATTRIBDATA))
+		{
+			CTDCCustomAttributeDataMap mapData;
+
+			GetTaskCustomAttributeData(hTask, mapData); 
+			tdi.SetCustomAttributeValues(mapData);
+		}
 	}
 
 	return TRUE;
@@ -1925,7 +1932,7 @@ int CTaskFile::GetTaskMetaData(HTASKITEM hTask, CMapStringToString& mapMetaData)
 	return GetMetaData(pXITask, mapMetaData);
 }
 
-int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CMapStringToString& mapData) const
+int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, 0);
@@ -1950,7 +1957,7 @@ int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CMapStringToString& m
 	return mapData.GetCount();
 }
 
-BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToString& mapData)
+BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData)
 {
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
@@ -1961,10 +1968,11 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToSt
 
 	while (pos)
 	{
-		CString sTypeID, sData;
-		mapData.GetNextAssoc(pos, sTypeID, sData);
+		CString sTypeID;
+		TDCCADATA data;
+		mapData.GetNextAssoc(pos, sTypeID, data);
 
-		if (sTypeID.IsEmpty() || sData.IsEmpty())
+		if (sTypeID.IsEmpty() || data.IsEmpty())
 			continue;
 
 		if (!HasCustomAttribute(sTypeID))
@@ -1974,15 +1982,13 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CMapStringToSt
 		ASSERT(pXICustData);
 
 		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::MakeUpper(sTypeID));
-		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, sData);
+		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
 
 		// add human readable date format
 		if (IsCustomDateAttribute(sTypeID))
 		{
-			COleDateTime date(_ttof(sData));
-			DWORD dwFmt = m_bISODates ? DHFD_ISO : 0;
-
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDATESTRING, CDateHelper::FormatDate(date, dwFmt));
+			CString sDate(CDateHelper::FormatDate(data.AsDate(), (m_bISODates ? DHFD_ISO : 0)));
+			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDATESTRING, sDate);
 		}
 	}
 

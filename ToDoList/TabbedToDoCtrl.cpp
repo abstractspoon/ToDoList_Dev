@@ -1288,7 +1288,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 	case IUI_EXTERNALID: 	return SetSelectedTaskExtID(mod.szValue);
 	case IUI_COST:			return SetSelectedTaskCost(mod.dValue);
 	case IUI_VERSION:		return SetSelectedTaskVersion(mod.szValue);
-	case IUI_CUSTOMATTRIB:	return SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
+	case IUI_CUSTOMATTRIB:	return SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, TDCCADATA(mod.szValue), FALSE);
 	case IUI_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, CDateHelper::GetDate(mod.tValue));
 	case IUI_STARTDATE:		return SetSelectedTaskDate(TDCD_START, CDateHelper::GetDate(mod.tValue));
 

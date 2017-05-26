@@ -878,17 +878,17 @@ CString CTDCCustomAttributeHelper::GetAttributeTypeID(UINT nCtrlID, const CTDCCu
 
 void CTDCCustomAttributeHelper::UpdateCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 																const CTDCCustomAttribDefinitionArray& aAttribDefs,
-																const CMapStringToString& mapData)
+																const CTDCCustomAttributeDataMap& mapData)
 {
 	int nCtrl = aControls.GetSize();
-	CString sData;
+	TDCCADATA data;
 
 	while (nCtrl--)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
 		
-		if (mapData.Lookup(ctrl.sAttribID, sData))
-			UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, sData);
+		if (mapData.Lookup(ctrl.sAttribID, data))
+			UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, data);
 	}
 }
 
@@ -900,29 +900,33 @@ void CTDCCustomAttributeHelper::ClearCustomAttributeControls(const CWnd* pParent
 	while (nCtrl--)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-		UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, _T(""));
+		UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, TDCCADATA());
 	}
 }
 
 BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												CMapStringToString& mapData)
+												CTDCCustomAttributeDataMap& mapData)
 {
 	mapData.RemoveAll();
 
 	int nCtrl = aControls.GetSize();
+	TDCCADATA data;
 
 	while (nCtrl--)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-		mapData[ctrl.sAttribID] = GetControlData(pParent, ctrl, aAttribDefs);
+
+		if (GetControlData(pParent, ctrl, aAttribDefs, data))
+			mapData[ctrl.sAttribID] = data;
 	}
 
 	return mapData.GetCount();
 }
 
-CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
-													const CTDCCustomAttribDefinitionArray& aAttribDefs)
+BOOL CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+												const CTDCCustomAttribDefinitionArray& aAttribDefs,
+												TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
 
@@ -933,9 +937,8 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 	ASSERT_VALID(pCtrl);
 
 	if (pCtrl == NULL)
-		return _T("");
+		return FALSE;
 
-	TDCCADATA data;
 	CString sText;
 	CStringArray aItems;
 	COleDateTime date;
@@ -962,7 +965,7 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 				ASSERT_VALID(pBuddy);
 				
 				if (pBuddy == NULL)
-					return _T("");
+					return FALSE;
 
 				double dTime = pBuddy->GetOleTime();
 
@@ -985,7 +988,7 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 		case TDCCA_ICON:
 		case TDCCA_BOOL:
 			ASSERT(0);
-			break;
+			return FALSE;
 		}
 	}
 	else if (IsCustomFilterControl(ctrl.nCtrlID))
@@ -1033,34 +1036,38 @@ CString CTDCCustomAttributeHelper::GetControlData(const CWnd* pParent, const CUS
 		}
 	}
 
-	return data.AsString();
+	return !data.IsEmpty();
 }
 
-CString CTDCCustomAttributeHelper::FormatData(const CString& sData, const CString& sUniqueID, 
+CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const CString& sUniqueID, 
 												const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	if (sData.IsEmpty())
-		return sData;
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-	TDCCUSTOMATTRIBUTEDEFINITION def;
-	VERIFY(GetAttributeDef(sUniqueID, aAttribDefs, def));
+	if (!data.IsEmpty())
+		VERIFY(GetAttributeDef(sUniqueID, aAttribDefs, attribDef));
 
-	if (def.IsList())
+	return FormatData(data, attribDef);
+}
+
+CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+{
+	if (attribDef.IsList())
 	{
-		return TDCCADATA(sData).FormatAsArray('+');
+		return data.FormatAsArray('+');
 	}
-	else if (def.GetDataType() == TDCCA_DATE)
+	else if (attribDef.GetDataType() == TDCCA_DATE)
 	{
-		return TDCCADATA(sData).AsDate().Format(VAR_DATEVALUEONLY);
+		return data.FormatAsDate();
 	}
 
 	// all else
-	return sData;
+	return data.AsString();
 }
 
 void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 															  const CTDCCustomAttribDefinitionArray& aAttribDefs,
-															  const CString& sData)
+															  const TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
 
@@ -1073,7 +1080,6 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 	if (pCtrl == NULL)
 		return;
 
-	TDCCADATA data(sData);
 	CStringArray aItems;
 
 	if (dwListType == TDCCA_NOTALIST)
@@ -1127,6 +1133,7 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 			// these don't have controls
 		case TDCCA_ICON:
 		case TDCCA_BOOL:
+			ASSERT(0);
 			break;
 		}
 	}
@@ -1151,13 +1158,13 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 			{
 				CAutoComboBox* pACB = (CAutoComboBox*)pCtrl;
 
-				if (sData.IsEmpty())
+				if (data.IsEmpty())
 				{
 					pACB->SetCurSel(-1);
 				}
 				else
 				{
-					int nItem = pACB->AddString(sData);
+					int nItem = pACB->AddString(data.AsString());
 					pACB->SetCurSel(nItem);
 				}
 			}
@@ -1167,17 +1174,17 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent
 			{
 				COwnerdrawComboBoxBase* pCB = (COwnerdrawComboBoxBase*)pCtrl;
 
-				if (sData.IsEmpty())
+				if (data.IsEmpty())
 				{
 					pCB->SetCurSel(-1);
 				}
 				else if (dwDataType == TDCCA_ICON)
 				{
-					((CTDLIconComboBox*)pCtrl)->SelectImage(sData);
+					((CTDLIconComboBox*)pCtrl)->SelectImage(data.AsString());
 				}
 				else
 				{
-					int nItem = pCB->FindStringExact(-1, sData, FALSE);
+					int nItem = pCB->FindStringExact(-1, data.AsString(), FALSE);
 					pCB->SetCurSel(nItem);
 				}
 			}
