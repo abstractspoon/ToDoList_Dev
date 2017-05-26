@@ -840,10 +840,13 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 		CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem, sKey));
 		CStringArray aItems;
 
-		CString sAttribID = prefs.GetProfileString(sItemKey, _T("AttributeID"));
-		CString sAttribValue = prefs.GetProfileString(sItemKey, _T("AttributeValue"));
+		if (prefs.GetProfileArray(sItemKey, aItems))
+		{
+			CString sAttribID = prefs.GetProfileString(sItemKey, _T("AttributeID"));
+			ASSERT(!sAttribID.IsEmpty());
 
-		filter.mapCustomAttrib[sAttribID] = TDCCADATA(sAttribValue, '|').AsString();
+			filter.mapCustomAttrib[sAttribID] = TDCCADATA(aItems).AsString();
+		}
 	}
 }
 
@@ -914,13 +917,16 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 	{
 		filter.mapCustomAttrib.GetNextAssoc(pos, sAttribID, sAttribValue);
 		ASSERT(!sAttribID.IsEmpty());
-		
-		if (!sAttribID.IsEmpty())
+
+		CStringArray aItems;
+
+		if (TDCCADATA(sAttribValue).AsArray(aItems))
 		{
 			CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem++, sKey));
 
+			// Write ID after array because array will pre-delete the key
+			prefs.WriteProfileArray(sItemKey, aItems);
 			prefs.WriteProfileString(sItemKey, _T("AttributeID"), sAttribID);
-			prefs.WriteProfileString(sItemKey, _T("AttributeValue"), TDCCADATA(sAttribValue).FormatAsArray('|'));
 		}
 	}	
 	
