@@ -44,10 +44,24 @@ struct TDCCADATA
 
 	const CString& AsString() const { return sData; }
 	double AsDouble() const { return _ttof(sData); }
-	int AsArray(CStringArray& aValues) const { return Misc::Split(sData, aValues, '\n', TRUE); }
 	int AsInteger() const { return _ttoi(sData); } 
 	COleDateTime AsDate() const { return _ttof(sData); }
 	bool AsBool() const { return !IsEmpty(); }
+
+	int AsArray(CStringArray& aValues) const 
+	{ 
+		// Special case: 1 empty value
+		if (sData == _T("\n"))
+		{
+			aValues.RemoveAll();
+			aValues.Add(_T(""));
+			return 1;
+		}
+		
+		// else
+		return Misc::Split(sData, aValues, '\n', TRUE); 
+	}
+
 	double AsTimePeriod(TDC_UNITS& nUnits) const
 	{
 		if (IsEmpty())
@@ -64,7 +78,6 @@ struct TDCCADATA
 	}
 
 	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
-	void Set(const CStringArray& aValues) { sData = Misc::FormatArray(aValues, '\n'); }
 	void Set(int nValue) { sData.Format(_T("%d"), nValue); }
 	void Set(const COleDateTime& dtValue) { sData.Format(_T("%lf"), dtValue); }
 
@@ -92,6 +105,8 @@ struct TDCCADATA
 
 	void Set(bool bValue, TCHAR nChar = 0) 
 	{ 
+		sData.Empty(); 
+
 		if (bValue)
 		{
 			if (nChar > 0)
@@ -99,8 +114,15 @@ struct TDCCADATA
 			else
 				sData.Insert(0, '+');
 		}
+	}
+
+	void Set(const CStringArray& aValues) 
+	{ 
+		// Special case: 1 empty value
+		if ((aValues.GetSize() == 1) && aValues[0].IsEmpty())
+			sData = '\n';
 		else
-			sData.Empty(); 
+			sData = Misc::FormatArray(aValues, '\n'); 
 	}
 
 	CString FormatAsArray(TCHAR cSep = 0) const
