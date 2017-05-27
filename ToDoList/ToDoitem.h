@@ -142,7 +142,6 @@ protected:
 private:
 	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
 	
-	static double NULL_VALUE;
 	static COleDateTimeSpan s_dtsRecentModPeriod;
 };
 

@@ -108,6 +108,8 @@ CString CToDoCtrlData::s_cfDefault;
 //////////////////////////////////////////////////////////////////////
 
 static const CString EMPTY_STR;
+static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -855,7 +857,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 
 double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, BOOL bTimePeriod, TDC_UNITS nUnits)
 {
-	double dValue = TODOITEM::NULL_VALUE;
+	double dValue = DBL_NULL;
 
 	if (bTimePeriod)
 	{
@@ -889,7 +891,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
 	DWORD dwDataType = attribDef.GetDataType();
-	double dCalcValue = TODOITEM::NULL_VALUE;
+	double dCalcValue = DBL_NULL;
 
 	// easier to handle by feature 
 	// -----------------------------------------------------------
@@ -933,7 +935,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		}
 
 		if (dCalcValue <= -DBL_MAX)
-			dCalcValue = TODOITEM::NULL_VALUE;
+			dCalcValue = DBL_NULL;
 	}
 	// -----------------------------------------------------------
 	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
@@ -957,14 +959,14 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		}
 
 		if (dCalcValue >= DBL_MAX)
-			dCalcValue = TODOITEM::NULL_VALUE;
+			dCalcValue = DBL_NULL;
 	}
 	else
 	{
 		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
 	}
 
-	if (dCalcValue == TODOITEM::NULL_VALUE)
+	if (dCalcValue == DBL_NULL)
 		return FALSE;
 
 	dValue = dCalcValue;

@@ -22,7 +22,7 @@ static char THIS_FILE[]=__FILE__;
 
 COleDateTimeSpan TODOITEM::s_dtsRecentModPeriod = (1.0 / 24); // one hour
 
-double TODOITEM::NULL_VALUE = (double)0xFFFFFFFFFFFFFFFF;
+//////////////////////////////////////////////////////////////////////
 
 const CString EMPTY_STR(_T(""));
 
