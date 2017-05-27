@@ -2870,7 +2870,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	{
 	case TDCCA_DATE:
 		{
-			double dDate = data.AsDate();
+			double dDate = 0.0;
 			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dDate);
 
 			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
@@ -2878,6 +2878,32 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		}
 		break;
 		
+	case TDCCA_DOUBLE:
+	case TDCCA_INTEGER:
+		{
+			double dValue = 0.0;
+			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
+			
+			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
+			{
+				CString sText(Misc::Format(dValue, (attribDef.IsDataType(TDCCA_DOUBLE) ? 2 : 0)));
+				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+			}			
+		}
+		break;
+
+	case TDCCA_TIMEPERIOD:
+		{
+			double dValue = 0.0;
+			TDC_UNITS nUnits = data.GetTimeUnits();
+
+			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
+
+			CString sText(FormatTimeValue(dValue, nUnits, TRUE));
+			DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
+		}
+		break;
+
 	case TDCCA_ICON:
 		if (!data.IsEmpty() && (rCol.Width() > 16)) // min width for one icon
 		{
@@ -2959,36 +2985,12 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		DrawColumnCheckBox(pDC, rSubItem, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
 		break;
 
-	case TDCCA_DOUBLE:
-	case TDCCA_INTEGER:
-		{
-			double dValue = 0.0;
-			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue);
-			
-			if ((dValue != 0.0) || !attribDef.HasFeature(TDCCAF_HIDEZERO))
-			{
-				CString sText(Misc::Format(dValue, (attribDef.IsDataType(TDCCA_DOUBLE) ? 2 : 0)));
-				DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
-			}			
-		}
-		break;
-
-	case TDCCA_TIMEPERIOD:
-		{
-			double dValue = 0.0;
-			m_data.CalcTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, m_nDefTimeEstUnits);
-
-			CString sText(FormatTimeValue(dValue, m_nDefTimeEstUnits, TRUE));
-			DrawColumnText(pDC, sText, rCol, attribDef.nTextAlignment, crText);
-		}
-		break;
-
 	case TDCCA_FILELINK:
 		{
 			CStringArray aItems;
-			data.AsArray(aItems);
-
-			DrawColumnFileLinks(pDC, aItems, rSubItem, crText);
+			
+			if (data.AsArray(aItems))
+				DrawColumnFileLinks(pDC, aItems, rSubItem, crText);
 		}
 		break;
 
