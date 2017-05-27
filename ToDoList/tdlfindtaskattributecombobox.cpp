@@ -259,6 +259,19 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsTime(TDC_ATTRIBUTE attrib) const
 	case TDCA_TIMEEST:
 	case TDCA_TIMESPENT:
 		return TRUE;
+
+	default:
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(attrib))
+		{
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+
+			// check for user date attributes
+			if (CTDCCustomAttributeHelper::GetAttributeDef(attrib, m_aAttribDefs, attribDef))
+			{
+				return (attribDef.GetDataType() == TDCCA_TIMEPERIOD);
+			}
+		}
+		break;
 	}
 
 	// all else
