@@ -71,10 +71,21 @@ struct TDCCADATA
 		}
 
 		// else
-		nUnits = (TDC_UNITS)Misc::Last(sData);
-		ASSERT(IsValidUnits(nUnits));
-
+		nUnits = GetTimeUnits();
 		return _ttof(sData);
+	}
+
+	TDC_UNITS GetTimeUnits() const
+	{
+		if (IsEmpty())
+			return TDCU_HOURS;
+
+		TDC_UNITS nUnits = (TDC_UNITS)Misc::Last(sData);
+
+		if (!IsValidUnits(nUnits))
+			nUnits = TDCU_NULL;
+
+		return nUnits;
 	}
 
 	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
