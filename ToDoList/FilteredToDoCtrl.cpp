@@ -817,10 +817,10 @@ HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
 	// build a find query that matches the filter
 	if (HasAnyFilter())
 	{
-		SEARCHPARAMS filter;
-		m_filter.BuildFilterQuery(filter, m_aCustomAttribDefs);
+		SEARCHPARAMS params;
+		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
 
-		return CTabbedToDoCtrl::RebuildTree(&filter);
+		return CTabbedToDoCtrl::RebuildTree(&params);
 	}
 
 	// else
