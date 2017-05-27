@@ -855,14 +855,12 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMA
 	return FALSE;
 }
 
-double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, BOOL bTimePeriod, TDC_UNITS nUnits)
+double CToDoCtrlData::GetCalculationValue(const TDCCADATA& data, TDC_UNITS nUnits)
 {
 	double dValue = DBL_NULL;
 
-	if (bTimePeriod)
+	if (IsValidUnits(nUnits))
 	{
-		ASSERT(IsValidUnits(nUnits));
-
 		TDC_UNITS nTaskUnits;
 		dValue = data.AsTimePeriod(nTaskUnits);
 
@@ -900,7 +898,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
 
 		// our value
-		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
+		dCalcValue = GetCalculationValue(data, nUnits);
 		
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -921,7 +919,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = -DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
+			dCalcValue = GetCalculationValue(data, nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -945,7 +943,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 		if (data.IsEmpty())
 			dCalcValue = DBL_MAX;
 		else
-			dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
+			dCalcValue = GetCalculationValue(data, nUnits);
 
 		// our children's values
 		for (int i = 0; i < pTDS->GetSubTaskCount(); i++)
@@ -963,7 +961,7 @@ BOOL CToDoCtrlData::CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		dCalcValue = GetCalculationValue(data, (dwDataType == TDCCA_TIMEPERIOD), nUnits);
+		dCalcValue = GetCalculationValue(data, nUnits);
 	}
 
 	if (dCalcValue == DBL_NULL)
