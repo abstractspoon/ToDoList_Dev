@@ -1047,8 +1047,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCU
 	int nCompare = 0;
 	double dVal1, dVal2;
 
-	if (m_data.CalcTaskCustomAttributeData(pTDI1, pTDS1, attribDef, dVal1) &&
-		m_data.CalcTaskCustomAttributeData(pTDI2, pTDS2, attribDef, dVal2))
+	if (m_data.CalcTaskCustomAttributeData(pTDI1, pTDS1, attribDef, dVal1, TDCU_HOURS) &&
+		m_data.CalcTaskCustomAttributeData(pTDI2, pTDS2, attribDef, dVal2, TDCU_HOURS))
 	{
 		nCompare = Compare(dVal1, dVal2);
 	}
