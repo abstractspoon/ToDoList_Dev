@@ -54,6 +54,8 @@ static bool IsValidUnits(TDC_UNITS nUnits)
 	switch (nUnits)
 	{
 	case TDCU_NULL:
+		return false;
+
 	case TDCU_MINS:
 	case TDCU_HOURS:
 	case TDCU_DAYS:
@@ -64,6 +66,7 @@ static bool IsValidUnits(TDC_UNITS nUnits)
 		return true;
 	}
 
+	ASSERT(0);
 	return false;
 }
 
