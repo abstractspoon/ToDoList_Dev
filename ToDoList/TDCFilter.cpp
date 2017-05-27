@@ -311,17 +311,12 @@ BOOL CTDCFilter::BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDe
 	switch (m_nState)
 	{
 	case TDCFS_FILTER:
-		BuildFilterQuery(m_filter, params);
-
-		if ((m_filter.nTitleOption == FT_FILTERONANYTEXT) && 
-			!m_filter.sTitle.IsEmpty())
-		{
-			params.aAttribDefs.Copy(aCustomAttribDefs);
-		}
+		BuildFilterQuery(m_filter, aCustomAttribDefs, params);
 		return TRUE;
 
 	case TDCFS_ADVANCED:
 		params = m_advFilter.params;
+
 		params.aAttribDefs.Copy(aCustomAttribDefs);
 		params.bIgnoreDone = m_advFilter.HasFlag(FO_HIDEDONE);
 		params.bIgnoreOverDue = m_advFilter.HasFlag(FO_HIDEOVERDUE);
@@ -338,7 +333,7 @@ BOOL CTDCFilter::BuildFilterQuery(SEARCHPARAMS& params, const CTDCCustomAttribDe
 	return FALSE;
 }
 
-void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, SEARCHPARAMS& params)
+void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, SEARCHPARAMS& params)
 {
 	// reset the search
 	params.aRules.RemoveAll();
@@ -424,11 +419,13 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, SEARCHPARAMS& params)
 	}
 
 	// handle other attributes
-	AddNonDateFilterQueryRules(filter, params);
+	AddNonDateFilterQueryRules(filter, aCustomAttribDefs, params);
 }
 
-void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, SEARCHPARAMS& params)
+void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, SEARCHPARAMS& params)
 {
+	BOOL bWantCustomAttrib = FALSE;
+
 	// title text
 	if (!filter.sTitle.IsEmpty())
 	{
@@ -440,6 +437,7 @@ void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, SEARCHPARAM
 
 		case FT_FILTERONANYTEXT:
 			params.aRules.Add(SEARCHPARAM(TDCA_ANYTEXTATTRIBUTE, FOP_INCLUDES, filter.sTitle));
+			bWantCustomAttrib = TRUE;
 			break;
 
 		case FT_FILTERONTITLEONLY:
@@ -450,135 +448,69 @@ void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, SEARCHPARAM
 	}
 
 	// note: these are all 'AND' 
-	// category
-	if (filter.aCategories.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aCategories);
+	AppendArrayRule(filter.aCategories, TDCA_CATEGORY, params.aRules, filter.dwFlags, FO_ANYCATEGORY);
+	AppendArrayRule(filter.aAllocTo, TDCA_ALLOCTO, params.aRules, filter.dwFlags, FO_ANYALLOCTO);
+	AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules);
+	AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules);
+	AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules);
+	AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules);
 
-		if (filter.aCategories.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_CATEGORY, FOP_NOT_SET));
-		}
-		else if (filter.dwFlags & FO_ANYCATEGORY)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_CATEGORY, FOP_INCLUDES, sMatchBy));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_CATEGORY, FOP_EQUALS, sMatchBy));
-		}
-	}
+	AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
+	AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
 
-	// allocated to
-	if (filter.aAllocTo.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aAllocTo);
+	// Custom Attributes
+	bWantCustomAttrib = CTDCCustomAttributeHelper::AppendFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
 
-		if (filter.aAllocTo.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_ALLOCTO, FOP_NOT_SET));
-		}
-		else if (filter.dwFlags & FO_ANYALLOCTO)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_ALLOCTO, FOP_INCLUDES, sMatchBy));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_ALLOCTO, FOP_EQUALS, sMatchBy));
-		}
-	}
-
-	// allocated by
-	if (filter.aAllocBy.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aAllocBy);
-
-		if (filter.aAllocBy.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_ALLOCBY, FOP_NOT_SET));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_ALLOCBY, FOP_INCLUDES, sMatchBy));
-		}
-	}
-
-	// status
-	if (filter.aStatus.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aStatus);
-
-		if (filter.aStatus.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_STATUS, FOP_NOT_SET));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_STATUS, FOP_INCLUDES, sMatchBy));
-		}
-	}
-
-	// version
-	if (filter.aVersions.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aVersions);
-
-		if (filter.aVersions.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_VERSION, FOP_NOT_SET));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_VERSION, FOP_INCLUDES, sMatchBy));
-		}
-	}
-
-	// tags
-	if (filter.aTags.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(filter.aTags);
-
-		if (filter.aTags.GetSize() == 1 && sMatchBy.IsEmpty())
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_TAGS, FOP_NOT_SET));
-		}
-		else
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_TAGS, FOP_INCLUDES, sMatchBy));
-		}
-	}
-
-	// priority
-	if (filter.nPriority != FM_ANYPRIORITY)
-	{
-		if (filter.nPriority == FM_NOPRIORITY)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_NOT_SET));
-		}
-		else if (filter.nPriority != FM_ANYPRIORITY)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_GREATER_OR_EQUAL, filter.nPriority));
-		}
-	}
-
-	// risk
-	if (filter.nRisk != FM_ANYRISK)
-	{
-		if (filter.nRisk == FM_NORISK)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_NOT_SET));
-		}
-		else if (filter.nRisk != FM_ANYRISK)
-		{
-			params.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_GREATER_OR_EQUAL, filter.nRisk));
-		}
-	}
-
-	// special case: no aRules + ignore completed
-	if ((params.bIgnoreDone) && params.aRules.GetSize() == 0)
+	// special case: no rules + ignore completed
+	if (params.bIgnoreDone && (params.aRules.GetSize() == 0))
 		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
+
+	if (bWantCustomAttrib)
+		params.aAttribDefs.Copy(aCustomAttribDefs);
 }
 
+void CTDCFilter::AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules, 
+								DWORD dwFlags, DWORD dwIncludeMask)
+{
+	if (aValues.GetSize())
+	{
+		CString sMatchBy = Misc::FormatArray(aValues);
+
+		if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
+		}
+		else if (dwFlags && dwIncludeMask)
+		{
+			if (dwFlags & dwIncludeMask)
+				aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
+			else
+				aRules.Add(SEARCHPARAM(nAttrib, FOP_EQUALS, sMatchBy));
+		}
+		else // includes
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
+		}
+	}
+}
+
+void CTDCFilter::AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
+										int nAnyValue, int nNoValue)
+{
+	ASSERT((nAttrib == TDCA_PRIORITY) || (nAttrib == TDCA_RISK));
+
+	if (nValue != nAnyValue)
+	{
+		if (nValue == nNoValue)
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
+		}
+		else if (nValue != nAnyValue)
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_GREATER_OR_EQUAL, nValue));
+		}
+	}
+}
 
 BOOL CTDCFilter::InitFilterDate(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, COleDateTime& date) 
 {
@@ -842,7 +774,7 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 		CString sItemKey(Misc::MakeKey(_T("Custom\\Custom%d"), nItem, sKey));
 		CStringArray aItems;
 
-		if (prefs.GetProfileArray(sItemKey, aItems))
+		if (prefs.GetProfileArray(sItemKey, aItems, TRUE))
 		{
 			CString sAttribID = prefs.GetProfileString(sItemKey, _T("AttributeID"));
 			ASSERT(!sAttribID.IsEmpty());

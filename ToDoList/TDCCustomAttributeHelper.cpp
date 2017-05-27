@@ -1230,7 +1230,6 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(const CString& s
 																const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(sUniqueID, aAttribDefs);
-	//ASSERT(nAttribID != TDCA_NONE);
 
 	if (nAttribID == TDCA_NONE)
 		return FT_NONE;
@@ -1272,7 +1271,8 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	return FT_NONE;
 }
 
-int CTDCCustomAttributeHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable)
+int CTDCCustomAttributeHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
+															CWnd* pParent, BOOL bEnable)
 {
 	int nCtrl = aControls.GetSize(), nNumFound = 0;
 	
@@ -1292,3 +1292,68 @@ int CTDCCustomAttributeHelper::EnableMultiSelectionFilter(const CTDCCustomContro
 
 	return nNumFound;
 }
+
+BOOL CTDCCustomAttributeHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 
+												const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+												CSearchParamArray& aRules)
+{
+	BOOL bRulesAdded = FALSE;
+	POSITION pos = mapData.GetStartPosition();
+
+	while (pos)
+	{
+		CString sAttribID;
+		TDCCADATA data;
+		mapData.GetNextAssoc(pos, sAttribID, data);
+
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(sAttribID, aAttribDefs, attribDef));
+
+		if (attribDef.GetListType() == TDCCA_NOTALIST)
+		{
+			switch (attribDef.GetDataType())
+			{
+			case TDCCA_STRING:
+			case TDCCA_INTEGER:
+			case TDCCA_DOUBLE:
+			case TDCCA_FILELINK:
+			case TDCCA_DATE:
+			case TDCCA_TIMEPERIOD:
+			case TDCCA_ICON:
+			case TDCCA_BOOL:
+				// Not yet supported
+				ASSERT(0);
+				break;
+			}
+		}
+		else // list types
+		{
+			CStringArray aValues;
+
+			if (data.AsArray(aValues))
+			{
+				SEARCHPARAM rule;
+				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
+
+				CString sMatchBy = Misc::FormatArray(aValues);
+
+				// special case: 1 empty value
+				if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+				{
+					rule.SetOperator(FOP_NOT_SET);
+				}
+				else 
+				{
+					rule.SetOperator(FOP_INCLUDES);
+					rule.SetValue(sMatchBy);
+				}
+
+				aRules.Add(rule);
+				bRulesAdded = TRUE;
+			}
+		}
+	}
+
+	return bRulesAdded;
+}
+

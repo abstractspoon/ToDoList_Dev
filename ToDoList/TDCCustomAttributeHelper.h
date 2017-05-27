@@ -122,6 +122,9 @@ public:
 	static void ValidateAttributeFindOperator(const SEARCHPARAM& sp, 
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
+	static BOOL AppendFilterRules(const CTDCCustomAttributeDataMap& mapData, 
+								const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
+
 protected:
 	static CWnd* CreateCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
 										const CTDCImageList& ilImages, CWnd* pParent, 
