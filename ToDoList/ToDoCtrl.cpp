@@ -1780,7 +1780,8 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
 	BOOL bEnable = (hti && !bMaximize);
 	BOOL bIsParent = TSH().ItemsAreAllParents();
-	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
+	BOOL bReadOnly = IsReadOnly();
+	BOOL bReadOnlyCtrls = (bReadOnly || !m_taskTree.SelectionHasUnlocked());
 	BOOL bEditTime = (!bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING));
 
 	// now enable/disable appropriate controls
@@ -1788,14 +1789,14 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 	{
 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnly, bIsParent, bEditTime);
+		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls, bIsParent, bEditTime);
 	}
 
 	// and custom controls
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
-		EnableDisableCustomControl(ctrl, dwTaskID, bEnable, bReadOnly);
+		EnableDisableCustomControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls);
 	}
 
 	// comments
@@ -1805,7 +1806,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	
 	BOOL bCommentsVis = IsCommentsVisible();
 	RT_CTRLSTATE nCtrlState = (!bCommentsVis || !hti) ? RTCS_DISABLED : 
-							((bReadOnly || !bEditComments) ? RTCS_READONLY : RTCS_ENABLED);
+							((bReadOnlyCtrls || !bEditComments) ? RTCS_READONLY : RTCS_ENABLED);
 
 	switch (nCtrlState)
 	{
@@ -1826,8 +1827,8 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 
 	// if bEditComments is FALSE it means we have multiple comments types
 	// selected. So we enable the selected comments type but keep the 
-	// comments control readonly
-	if (nCtrlState == RTCS_READONLY && !bReadOnly)
+	// comments control itself readonly
+	if (nCtrlState == RTCS_READONLY && !bReadOnlyCtrls)
 		SetCtrlState(this, IDC_COMMENTSTYPE, RTCS_ENABLED);
 	else
 		SetCtrlState(this, IDC_COMMENTSTYPE, nCtrlState);

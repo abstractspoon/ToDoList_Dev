@@ -101,7 +101,6 @@ public:
 	void SetModified(BOOL bMod = TRUE) { CToDoCtrl::SetModified(bMod); }
 	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE) { return CToDoCtrl::SetStyle(nStyle, bOn); }
 	void SetMaximizeState(TDC_MAXSTATE nState);
-	BOOL IsReadOnly() const;
 
 	BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelectedTask(TDC_MOVETASK nDirection) const;

@@ -4698,11 +4698,6 @@ void CTabbedToDoCtrl::ResyncExtensionSelection(FTC_VIEW nView)
 	}
 }
 
-BOOL CTabbedToDoCtrl::IsReadOnly() const
-{
-	return (CToDoCtrl::IsReadOnly()  || !ViewSupportsTaskSelection(GetTaskView()));
-}
-
 BOOL CTabbedToDoCtrl::SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
 {
 	ASSERT(pExtWnd);
