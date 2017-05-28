@@ -889,6 +889,8 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControls(const CWnd* pParen
 		
 		if (mapData.Lookup(ctrl.sAttribID, data))
 			UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, data);
+		else
+			ClearCustomAttributeControl(pParent, ctrl, aAttribDefs);
 	}
 }
 
@@ -900,7 +902,7 @@ void CTDCCustomAttributeHelper::ClearCustomAttributeControls(const CWnd* pParent
 	while (nCtrl--)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-		UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, TDCCADATA());
+		ClearCustomAttributeControl(pParent, ctrl, aAttribDefs);
 	}
 }
 
@@ -1063,6 +1065,12 @@ CString CTDCCustomAttributeHelper::FormatData(const TDCCADATA& data, const TDCCU
 
 	// all else
 	return data.AsString();
+}
+
+void CTDCCustomAttributeHelper::ClearCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+															const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	UpdateCustomAttributeControl(pParent, ctrl, aAttribDefs, TDCCADATA());
 }
 
 void CTDCCustomAttributeHelper::UpdateCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,

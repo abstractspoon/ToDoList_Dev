@@ -94,6 +94,9 @@ public:
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
 											const TDCCADATA& data);
 
+	static void ClearCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+											const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
 	static void UpdateCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
 											const CTDCCustomAttributeDataMap& mapData);
