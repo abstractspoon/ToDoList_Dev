@@ -1026,7 +1026,7 @@ public:
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
 
-			if ((nAttrib != nIgnore) && (attribDef.sUniqueID == sAttribID))
+			if ((nAttrib != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
 				return nAttrib;
 		}
 
