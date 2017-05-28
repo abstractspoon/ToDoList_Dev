@@ -122,6 +122,7 @@ protected:
 	afx_msg void OnSelchangeFilter();
 	afx_msg void OnSelcancelFilter();
 	afx_msg void OnCloseUpOptions();
+	afx_msg void OnDestroy();
 	afx_msg void OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDateFilter();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);

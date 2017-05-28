@@ -286,6 +286,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -295,6 +296,13 @@ BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	AfxGetApp()->WinHelp(IDD_FILTER_BAR);
 	return TRUE;
+}
+
+void CTDLFilterBar::OnDestroy()
+{
+	CTDCCustomAttributeHelper::CleanupCustomAttributeUI(m_aCustomControls, this);
+
+	CDialog::OnDestroy();
 }
 
 BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
