@@ -3252,7 +3252,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 		if (lp != (LPARAM)wp)
 		{
 			CFocusWatcher::UpdateFocus();
-			m_filterBar.RefreshFilterControls(GetToDoCtrl());
+			RefreshFilterBarControls();
 		}
 		else
 		{
@@ -4791,7 +4791,7 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		UpdateTimeTrackerPreferences();
 
 		// then refresh filter bar for any new default cats, statuses, etc
-		m_filterBar.RefreshFilterControls(GetToDoCtrl());
+		RefreshFilterBarControls();
 		
 		if (bResizeDlg)
 			Resize();
@@ -5171,7 +5171,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			bRes = tdc.SelectTask(dwSelID);
 			ASSERT(bRes);
 
-			m_filterBar.RefreshFilterControls(tdc);
+			RefreshFilterBarControls();
 		}
 	}
 	else if (!startup.IsEmpty(TRUE))
@@ -7733,28 +7733,23 @@ void CToDoListWnd::RefreshFilterBarControls()
 {
 	if (m_bShowFilterBar)
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		// if this tasklist's filter is an unnamed custom one
 		RefreshFilterBarAdvancedFilters();
 
-		// get existing filter bar size so we can determine if a 
-		// resize if required
-		CRect rFilter;
+		m_filterBar.RefreshFilterControls(GetToDoCtrl());
+		
+		// Determine if a resize if required
+		CRect rFilter, rClient;
 
-		m_filterBar.GetClientRect(rFilter);
-		m_filterBar.RefreshFilterControls(tdc);
-
-		CRect rClient;
+		GetFilterBarRect(rFilter);
 		GetClientRect(rClient);
 
-		if (m_filterBar.CalcHeight(rClient.Width()) != rFilter.Height())
+		int nReqHeight = m_filterBar.CalcHeight(rClient.Width());
+
+		if (rFilter.Height() != nReqHeight)
 		{
-			m_filterBar.Invalidate();
 			Resize();
-		}
-		else if (GetFilterBarRect(rFilter))
-		{
+
+			rFilter.bottom = (rFilter.top + nReqHeight);
 			InvalidateRect(rFilter, TRUE);
 		}
 	}
@@ -10005,8 +10000,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.SetAdvancedFilter(filter);
 	
-	RefreshFilterBarAdvancedFilters();
-	m_filterBar.RefreshFilterControls(tdc);
+	RefreshFilterBarControls();
 
 	tdc.SetFocusToTasks();
 
@@ -10799,7 +10793,7 @@ void CToDoListWnd::OnViewShowfilterbar()
 	m_bShowFilterBar = !m_bShowFilterBar;
 
 	if (m_bShowFilterBar)
-		m_filterBar.RefreshFilterControls(GetToDoCtrl());
+		RefreshFilterBarControls();
 
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
@@ -10822,8 +10816,6 @@ void CToDoListWnd::OnViewClearfilter()
 		tdc.ClearFilter();
 	
 		// re-enable the filter controls
-		m_filterBar.RefreshFilterControls(tdc);
-	
 		RefreshFilterBarControls();
 		UpdateStatusbar();
 	}
@@ -10885,17 +10877,16 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		tdc.SetFilter(filter);
 	}
 
-	m_filterBar.RefreshFilterControls(tdc);
-
+	RefreshFilterBarControls();
 	UpdateStatusbar();
-
-	CRect rFilterBar;
-
-	if (GetFilterBarRect(rFilterBar))
-	{
-		InvalidateRect(rFilterBar);
-		UpdateWindow();
-	}
+// 
+// 	CRect rFilterBar;
+// 
+// 	if (GetFilterBarRect(rFilterBar))
+// 	{
+// 		InvalidateRect(rFilterBar);
+// 		UpdateWindow();
+// 	}
 }
 
 void CToDoListWnd::OnViewFilter() 
@@ -12272,7 +12263,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{
-				m_filterBar.RefreshFilterControls(tdc);
+				RefreshFilterBarControls();
 			}
 		}
 	}

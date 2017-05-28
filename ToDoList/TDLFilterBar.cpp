@@ -14,6 +14,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\winclasses.h"
+#include "..\shared\wclassdefines.h"
 #include "..\shared\themed.h"
 #include "..\shared\colordef.h"
 #include "..\shared\holdredraw.h"
@@ -35,7 +36,7 @@ const int CTRLHEIGHT = 13;
 static CTRLITEM FILTERCTRLS[] = 
 {
 	{ IDC_FILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE },
-	{ IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_NONE },
+	{ IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_TASKNAME },
 	{ IDC_STARTFILTERCOMBO,		IDC_STARTFILTERLABEL,		TDCA_STARTDATE },
 	{ IDC_USERSTARTDATE,		0,							TDCA_STARTDATE },
 	{ IDC_STARTNEXTNDAYS,		0,							TDCA_STARTDATE },
@@ -606,16 +607,21 @@ void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL b
 
 BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 {
-	if (nType == TDCA_NONE)
+	switch (nType)
 	{
+	case TDCA_NONE:
 		return TRUE;
-	}
-	else if ((nType >= TDCA_CUSTOMATTRIB_FIRST) && (nType <= TDCA_CUSTOMATTRIB_LAST))
-	{
-		return TRUE;
+
+	case TDCA_TASKNAME:
+		return !m_bAdvancedFilter;
+
+	default:
+		if ((nType >= TDCA_CUSTOMATTRIB_FIRST) && (nType <= TDCA_CUSTOMATTRIB_LAST))
+			return !m_bAdvancedFilter;
+		break;
 	}
 
-	return m_mapVisibility.HasAttribute(nType);
+	return (!m_bAdvancedFilter && m_mapVisibility.HasAttribute(nType));
 }
 
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
@@ -1008,25 +1014,15 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	// Handle label background and text colors when themed
-	if ((nCtlColor == CTLCOLOR_STATIC) && m_brUIBack.GetSafeHandle())
+	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC) && CWinClasses::IsClass(*pWnd, WC_STATIC))
 	{
-		BOOL bEnabled = FALSE;
+		pDC->SetTextColor(m_theme.crAppText);
 
-		switch (pWnd->GetDlgCtrlID())
+		if (m_brUIBack.GetSafeHandle())
 		{
-		case IDC_FILTERLABEL: // always enabled
-		case IDC_OPTIONFILTERLABEL:
-			bEnabled = TRUE;
-			break;
-			
-		default: // all the rest
-			bEnabled = ((m_filter.nShow != FS_SELECTED) && !m_bAdvancedFilter);
-			break;
+			pDC->SetBkMode(TRANSPARENT);
+			hbr = m_brUIBack;
 		}
-
-		pDC->SetTextColor(bEnabled ? m_theme.crAppText : GetSysColor(COLOR_3DSHADOW));
-		pDC->SetBkMode(TRANSPARENT);
-		hbr = m_brUIBack;
 	}
 	
 	return hbr;
