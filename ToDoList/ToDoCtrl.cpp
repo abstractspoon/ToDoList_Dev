@@ -12103,7 +12103,7 @@ HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC) && (pWnd != &m_eRecurrence))
+	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC) && CWinClasses::IsClass(*pWnd, WC_STATIC))
 	{
 		if (m_theme.crAppText != CLR_NONE)
 			pDC->SetTextColor(m_theme.crAppText);
