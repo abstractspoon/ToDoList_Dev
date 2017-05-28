@@ -68,7 +68,6 @@ static bool IsValidUnits(TDC_UNITS nUnits)
 		return true;
 	}
 
-	ASSERT(0);
 	return false;
 }
 
