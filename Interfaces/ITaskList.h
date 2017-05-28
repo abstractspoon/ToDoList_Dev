@@ -7,6 +7,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+#pragma warning(disable:4505)
+
 // latest interface
 #define ITASKLISTBASE	 ITaskList16 
 #define IID_TASKLISTBASE IID_TASKLIST16
