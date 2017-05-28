@@ -500,6 +500,7 @@ void CTDLCustomAttributeDlg::EnableControls()
 		{
 		case TDCCA_DATE:
 		case TDCCA_BOOL:
+		case TDCCA_TIMEPERIOD:
 			bEnableList = bEnableListData = FALSE;
 			break;
 
@@ -507,8 +508,12 @@ void CTDLCustomAttributeDlg::EnableControls()
 		case TDCCA_INTEGER:
 		case TDCCA_DOUBLE:
 		case TDCCA_ICON:
+		case TDCCA_FILELINK:
 			bEnableListData = (dwListType != TDCCA_NOTALIST);
 			break;
+
+		default:
+			ASSERT(0);
 		}
 
 		GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableListData && (dwDataType == TDCCA_ICON));
@@ -574,6 +579,7 @@ void CTDLCustomAttributeDlg::UpdateListDataMask()
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
+	case TDCCA_TIMEPERIOD:
 		m_eListData.SetMask(_T("")); // clear mask
 		break;
 
@@ -700,11 +706,12 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 		CString sItem(pDispInfo->item.pszText);
 		
 		if (bCancelled)
+		{
 			sItem = m_lcAttributes.GetItemText(nSel, 0);
-
-		// disallow empty strings
+		}
 		else if (sItem.IsEmpty())
 		{
+			// disallow empty strings
 			*pResult = FALSE;
 			return;
 		}
