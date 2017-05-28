@@ -29,6 +29,8 @@ enum CCB_CHECKSTATE
 
 class CCheckComboBox : public CAutoComboBox
 {
+	DECLARE_DYNAMIC(CCheckComboBox);
+
 // Construction
 public:
 	CCheckComboBox(DWORD dwFlags = 0);

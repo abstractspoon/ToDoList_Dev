@@ -15,6 +15,8 @@
 
 class CEnCheckComboBox : public CCheckComboBox
 {
+	DECLARE_DYNAMIC(CEnCheckComboBox);
+
 	// Construction
 public:
 	CEnCheckComboBox(BOOL bMulti = TRUE, UINT nIDNoneString = 0, UINT nIDAnyString = 0);

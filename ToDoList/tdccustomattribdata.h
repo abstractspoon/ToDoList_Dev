@@ -180,6 +180,15 @@ public:
 		(*this)[key] = newValue; 
 	}
 
+	void Copy(const CTDCCustomAttributeDataMap& mapData)
+	{
+		Misc::CopyStrT<TDCCADATA>(mapData, *this);
+	}
+
+	BOOL MatchAll(const CTDCCustomAttributeDataMap& mapData) const
+	{
+		return Misc::MatchAllStrT<TDCCADATA>(*this, mapData);
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////

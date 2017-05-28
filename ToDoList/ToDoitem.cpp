@@ -62,7 +62,7 @@ TODOITEM::TODOITEM(const TODOITEM& tdi)
 		dateDue = CDateHelper::GetDateOnly(dateCreated);
 }
 
-const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi) 
+TODOITEM& TODOITEM::operator=(const TODOITEM& tdi) 
 {
 	sTitle = tdi.sTitle;
 	sComments = tdi.sComments;
@@ -103,7 +103,7 @@ const TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	Misc::Copy(tdi.mapMetaData, mapMetaData);
 	
 	// custom attributes
-	Misc::CopyStrT(tdi.mapCustomData, mapCustomData);
+	mapCustomData.Copy(tdi.mapCustomData);
 
 	return *this;
 }
@@ -145,7 +145,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			Misc::MatchAll(aDependencies, tdi.aDependencies) &&
 			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
 			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
-			Misc::MatchAllStrT(tdi.mapCustomData, mapCustomData));
+			mapCustomData.MatchAll(tdi.mapCustomData));
 }
 
 BOOL TODOITEM::operator!=(const TODOITEM& tdi) 

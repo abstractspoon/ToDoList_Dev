@@ -47,6 +47,8 @@ CCheckComboBox::~CCheckComboBox()
 {
 }
 
+IMPLEMENT_DYNAMIC(CCheckComboBox, CAutoComboBox)
+
 BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
 	//{{AFX_MSG_MAP(CCheckComboBox)
 	ON_WM_KEYDOWN()

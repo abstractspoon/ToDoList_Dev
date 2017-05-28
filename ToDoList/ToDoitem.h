@@ -32,8 +32,8 @@ public:
 	TODOITEM(LPCTSTR szTitle = NULL, LPCTSTR szComments = NULL); 
 	TODOITEM(const TODOITEM& tdi); 
 	
-	const TODOITEM& operator=(const TODOITEM& tdi); 
-
+	TODOITEM& operator=(const TODOITEM& tdi); 
+	
 	BOOL operator==(const TODOITEM& tdi); 
 	BOOL operator!=(const TODOITEM& tdi); 
 	
@@ -76,7 +76,7 @@ public:
 	BOOL GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const;
 	void SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data);
 	const CTDCCustomAttributeDataMap& GetCustomAttributeValues() const { return mapCustomData; }
-	void SetCustomAttributeValues(const CTDCCustomAttributeDataMap& data) { return Misc::CopyStrT(data, mapCustomData); }
+	void SetCustomAttributeValues(const CTDCCustomAttributeDataMap& data) { mapCustomData.Copy(data); }
 
 	TDC_UNITS GetTimeUnits(BOOL bTimeEst) const;
 	TH_UNITS GetTHTimeUnits(BOOL bTimeEst) const;

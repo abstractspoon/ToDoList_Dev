@@ -30,6 +30,7 @@ CEnCheckComboBox::~CEnCheckComboBox()
 {
 }
 
+IMPLEMENT_DYNAMIC(CEnCheckComboBox, CCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
 //{{AFX_MSG_MAP(CEnCheckComboBox)

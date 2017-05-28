@@ -1851,7 +1851,7 @@ struct TDCFILTER
 		aVersions.Copy(filter.aVersions);
 		aTags.Copy(filter.aTags);
 
-		Misc::CopyStrT(filter.mapCustomAttrib, mapCustomAttrib);
+		mapCustomAttrib.Copy(filter.mapCustomAttrib);
 
 		return *this;
 	}
@@ -2078,7 +2078,7 @@ struct TDCFILTER
 		}
 
 		// Custom attributes
-		if (!Misc::MatchAllStrT(filter1.mapCustomAttrib, filter2.mapCustomAttrib))
+		if (!filter1.mapCustomAttrib.MatchAll(filter2.mapCustomAttrib))
 			return FALSE;
 
 		return TRUE;
