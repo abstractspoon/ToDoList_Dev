@@ -22,12 +22,14 @@ public:
 	const CFontCache& Fonts() const { return m_fonts; }
 	
 	bool ProcessMessage(MSG* pMsg);
+	void ShowCheckboxes(BOOL bShow = TRUE);
 
 protected:
 	int m_nTitleColumnWidth;
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
+	CImageList m_ilCheckboxes;
 
 protected:
 	virtual void PreSubclassWindow();

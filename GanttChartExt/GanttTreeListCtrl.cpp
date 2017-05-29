@@ -1006,8 +1006,16 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	m_data[dwTaskID] = pGI;
 	
 	// add item to tree
-	HTREEITEM hti = tree.InsertItem(LPSTR_TEXTCALLBACK, htiParent);
-	tree.SetItemData(hti, dwTaskID);
+// 	HTREEITEM hti = tree.InsertItem(LPSTR_TEXTCALLBACK, htiParent);
+// 	tree.SetItemData(hti, dwTaskID);
+	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
+											I_IMAGECALLBACK, 
+											I_IMAGECALLBACK, 
+											dwTaskID, // lParam
+											htiParent, 
+											TVI_LAST,
+											FALSE,
+											FALSE);
 	
 	// add first child which will add all the rest
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(hTask), tree, hti, TRUE);
@@ -1920,15 +1928,34 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				case TVN_GETDISPINFO:
 					{
 						TV_DISPINFO* pDispInfo = (TV_DISPINFO*)pNMHDR;
+						DWORD dwTaskID = pDispInfo->item.lParam;
+
+						const GANTTITEM* pGI = NULL;
+						GET_GI_RET(dwTaskID, pGI, 0L);
 
 						if (pDispInfo->item.mask & TVIF_TEXT)
 						{
-							DWORD dwTaskID = pDispInfo->item.lParam;
-							const GANTTITEM* pGI = NULL;
-
-							GET_GI_RET(dwTaskID, pGI, 0L);
-
 							pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)pGI->sTitle;
+						}
+						
+						if (pDispInfo->item.mask & (TVIF_SELECTEDIMAGE | TVIF_IMAGE))
+						{
+							// checkbox image
+							pDispInfo->item.mask |= TVIF_STATE;
+							pDispInfo->item.stateMask = TVIS_STATEIMAGEMASK;
+
+							if (pGI->IsDone(FALSE))
+							{
+								pDispInfo->item.state = TCHC_CHECKED;
+							}
+// 							else if (m_data.TaskHasCompletedSubtasks(pTDS))
+// 							{
+// 								pTVDI->item.state = TCHC_MIXED;
+// 							}
+							else 
+							{
+								pDispInfo->item.state = TCHC_UNCHECKED;
+							}
 						}
 					}
 					break;

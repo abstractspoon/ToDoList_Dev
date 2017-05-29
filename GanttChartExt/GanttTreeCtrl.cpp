@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "GanttChartExt.h"
 #include "GanttTreeCtrl.h"
 #include "GanttMsg.h"
@@ -162,4 +163,19 @@ BOOL CGanttTreeCtrl::InitTooltip()
 	}
 
 	return TRUE;
+}
+
+void CGanttTreeCtrl::ShowCheckboxes(BOOL bShow)
+{
+	if (bShow)
+	{
+		if (!m_ilCheckboxes.GetSafeHandle())
+			VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
+
+		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
+	}
+	else
+	{
+		SetImageList(NULL, TVSIL_STATE);
+	}
 }

@@ -333,6 +333,7 @@ END
 
 IDR_TOOLBAR             BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
 IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
+IDB_CHECKBOXES          BITMAP                  "res\\XPcheckboxes.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
