@@ -74,6 +74,7 @@ BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_STARTDATE:		
 	case TDCA_STARTTIME:		
 	case TDCA_STATUS:			
+	case TDCA_SUBTASKDONE:			
 	case TDCA_TAGS:				
 	case TDCA_TASKNAME:			
 	case TDCA_TIMEEST:			

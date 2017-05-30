@@ -959,6 +959,7 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 
 	case TDCA_DONEDATE:
 		mapAttrib.AddAttribute(nAttrib);
+		mapAttrib.AddAttribute(TDCA_SUBTASKDONE);
 
 		if (m_taskTree.SelectionHasDependents() && 
 			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))

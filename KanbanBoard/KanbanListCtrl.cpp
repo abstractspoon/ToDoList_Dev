@@ -696,10 +696,10 @@ void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& r
 			{
 				iImage = KLCC_CHECKED;
 			}
-			// else if (m_data.TaskHasCompletedSubtasks(pTDS))
-			// {
-			//		return KLCC_MIXED;
-			// }
+			else if (pKI->bSomeSubtaskDone)
+			{
+				iImage = KLCC_MIXED;
+			}
 
 			m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
 			rItem.left = (rCheckbox.right + IMAGE_PADDING);

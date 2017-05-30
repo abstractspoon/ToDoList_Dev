@@ -611,6 +611,7 @@ namespace TDC
 		case TDCA_STARTDATE:		return IUI_STARTDATE;
 		case TDCA_STARTTIME:		return IUI_STARTDATE;
 		case TDCA_STATUS:			return IUI_STATUS;
+		case TDCA_SUBTASKDONE:		return IUI_SUBTASKDONE;
 		case TDCA_TAGS:				return IUI_TAGS;
 		case TDCA_TASKNAME:			return IUI_TASKNAME;
 		case TDCA_TIMEEST:			return IUI_TIMEEST;
@@ -680,6 +681,7 @@ namespace TDC
 		case TDCC_STARTDATE:	return IUI_STARTDATE;
 		case TDCC_STARTTIME:	return IUI_STARTDATE;
 		case TDCC_STATUS:		return IUI_STATUS;
+		case TDCC_SUBTASKDONE:	return IUI_SUBTASKDONE;
 		case TDCC_TAGS:			return IUI_TAGS;
 		case TDCC_TIMEEST:		return IUI_TIMEEST;
 		case TDCC_TIMESPENT:	return IUI_TIMESPENT;
@@ -690,7 +692,6 @@ namespace TDC
 		case TDCC_TRACKTIME:	return IUI_NONE;
 		case TDCC_RECENTEDIT:	return IUI_NONE;
 		case TDCC_REMAINING:	return IUI_NONE;
-		case TDCC_SUBTASKDONE:	return IUI_NONE;
 		case TDCC_PATH:			return IUI_NONE;
 
 		default: // handle custom columns
@@ -776,6 +777,7 @@ namespace TDC
 		case IUI_RISK:			return TDCC_RISK;
 		case IUI_STARTDATE:		return TDCC_STARTDATE;
 		case IUI_STATUS:		return TDCC_STATUS;
+		case IUI_SUBTASKDONE:	return TDCC_SUBTASKDONE;
 		case IUI_TAGS:			return TDCC_TAGS;
 		case IUI_TIMEEST:		return TDCC_TIMEEST;
 		case IUI_TIMESPENT:		return TDCC_TIMESPENT;

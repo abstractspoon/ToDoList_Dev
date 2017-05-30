@@ -575,19 +575,18 @@ BOOL CGanttTreeListCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:
-	case IUI_ID:
-	case IUI_DONEDATE:
-	case IUI_DUEDATE:
-	case IUI_STARTDATE:
 	case IUI_ALLOCTO:
 	case IUI_COLOR:
-	case IUI_TAGS:
 	case IUI_DEPENDENCY:
-	case IUI_PERCENT:
+	case IUI_DONEDATE:
+	case IUI_DUEDATE:
+	case IUI_ID:
 	case IUI_NONE:
-		// 	case IUI_TIMEEST:
-		// 	case IUI_TIMESPENT:
+	case IUI_PERCENT:
+	case IUI_STARTDATE:
+	case IUI_SUBTASKDONE:
+	case IUI_TAGS:
+	case IUI_TASKNAME:
 		return TRUE;
 	}
 	
@@ -599,14 +598,14 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:
-	case IUI_ID:
-	case IUI_DUEDATE:
-	case IUI_STARTDATE:
 	case IUI_ALLOCTO:
+	case IUI_DUEDATE:
+	case IUI_ID:
+	case IUI_NONE:
 	case IUI_PERCENT:
 	case IUI_POSITION:
-	case IUI_NONE:
+	case IUI_STARTDATE:
+	case IUI_TASKNAME:
 		return TRUE;
 	}
 	
@@ -619,11 +618,11 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	switch (nCol)
 	{
 	case GTLCC_TITLE:		return IUI_TASKNAME;
-	case GTLCC_TASKID:		return IUI_ID;
 	case GTLCC_ENDDATE:		return IUI_DUEDATE;
 	case GTLCC_STARTDATE:	return IUI_STARTDATE;
 	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
 	case GTLCC_PERCENT:		return IUI_PERCENT;
+	case GTLCC_TASKID:		return IUI_ID;
 	}
 	
 	// all else 
@@ -739,6 +738,12 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			CDateHelper::ClearDate(pGI->dtDone);
 	}
 	
+	if (attrib.HasKey(IUI_SUBTASKDONE))
+	{
+		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+	}
+
 	if (attrib.HasKey(IUI_TAGS))
 	{
 		int nTag = pTasks->GetTaskTagCount(hTask);
@@ -975,6 +980,9 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
+		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+
 		time64_t tDate = 0;
 
 		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
@@ -1006,8 +1014,6 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	m_data[dwTaskID] = pGI;
 	
 	// add item to tree
-// 	HTREEITEM hti = tree.InsertItem(LPSTR_TEXTCALLBACK, htiParent);
-// 	tree.SetItemData(hti, dwTaskID);
 	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
 											I_IMAGECALLBACK, 
 											I_IMAGECALLBACK, 
@@ -1948,10 +1954,10 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							{
 								pDispInfo->item.state = TCHC_CHECKED;
 							}
-// 							else if (m_data.TaskHasCompletedSubtasks(pTDS))
-// 							{
-// 								pTVDI->item.state = TCHC_MIXED;
-// 							}
+							else if (pGI->bSomeSubtaskDone)
+							{
+								pDispInfo->item.state = TCHC_MIXED;
+							}
 							else 
 							{
 								pDispInfo->item.state = TCHC_UNCHECKED;

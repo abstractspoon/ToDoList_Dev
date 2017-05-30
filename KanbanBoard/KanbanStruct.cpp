@@ -75,7 +75,8 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	bParent(FALSE),
 	dwParentID(0),
 	nLevel(0),
-	bLocked(FALSE)
+	bLocked(FALSE),
+	bSomeSubtaskDone(FALSE)
 {
 	CDateHelper::ClearDate(dtCreate);
 	CDateHelper::ClearDate(dtDone);
@@ -103,6 +104,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	dwParentID = ki.dwParentID;
 	nLevel = ki.nLevel;
 	bLocked = ki.bLocked;
+	bSomeSubtaskDone = ki.bSomeSubtaskDone;
 
 	Misc::Copy(ki.mapAttribValues, mapAttribValues);
 	
@@ -122,6 +124,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bParent == ki.bParent) &&
 			(nLevel == ki.nLevel) &&
 			(bLocked == ki.bLocked) &&
+			(bSomeSubtaskDone == ki.bSomeSubtaskDone) &&
 			(dwParentID == ki.dwParentID) &&
 			Misc::MatchAll(mapAttribValues, ki.mapAttribValues));
 }

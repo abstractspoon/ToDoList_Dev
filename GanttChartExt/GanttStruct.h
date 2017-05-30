@@ -35,7 +35,7 @@ struct GANTTITEM
 	CStringArray aDepends;
 	CStringArray aTags;
 	int nPercent;
-	BOOL bGoodAsDone;
+	BOOL bGoodAsDone, bSomeSubtaskDone;
 	int nPosition;
 	BOOL bLocked;
 	

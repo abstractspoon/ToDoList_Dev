@@ -377,6 +377,7 @@ BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_RISK:
 	case IUI_STARTDATE:
 	case IUI_STATUS:
+	case IUI_SUBTASKDONE:
 	case IUI_TAGS:
 	case IUI_TASKNAME:
 	case IUI_TIMEEST:
@@ -433,6 +434,9 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 
 	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
+	LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+	pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+	
 	// Path is parent's path + parent's name
 	if (dwParentID)
 	{
@@ -541,6 +545,12 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 					pKI->bDone = bDone;
 					pKI->bGoodAsDone = bGoodAsDone;
 				}
+			}
+
+			if (attrib.HasKey(IUI_SUBTASKDONE))
+			{
+				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
 			
 			// Trackable attributes
