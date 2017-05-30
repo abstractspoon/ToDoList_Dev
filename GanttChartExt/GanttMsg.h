@@ -17,6 +17,9 @@ const UINT WM_GTLC_DATECHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANG
 // WPARAM = Drag Mode, LPARAM = Task ID
 const UINT WM_GTLC_DRAGCHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
 
+// WPARAM = , LPARAM = TRUE/FALSE
+const UINT WM_GTLC_COMPLETIONCHANGE			= ::RegisterWindowMessage(_T("WM_GTLC_COMPLETIONCHANGE"));
+
 // WPARAM = , LPARAM = 
 const UINT WM_GTLC_NOTIFYZOOM				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYZOOM"));
 

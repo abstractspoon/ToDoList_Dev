@@ -2364,31 +2364,6 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 		case WM_SETFOCUS:
 			m_tree.SetFocus();
 			break;
-
-// 		case WM_HSCROLL:
-// 		case WM_VSCROLL:
-// 			{
-// 				switch (wp)
-// 				{
-// 				case SB_PAGELEFT:  // SB_PAGEUP
-// 				case SB_PAGERIGHT: // SB_PAGEDOWN
-// 					TRACE(_T("GanttTreeListCtrl has started page-scrolling\n"));
-// 					m_bPageScrolling = TRUE;
-// 					break;
-// 					
-// 				default:
-// 					{
-// 						if ((wp == SB_ENDSCROLL) && m_bPageScrolling)
-// 							TRACE(_T("GanttTreeListCtrl has finished page-scrolling\n"));
-// 						
-// 						m_bPageScrolling = FALSE;
-// 						::InvalidateRect(hRealWnd, NULL, FALSE);
-// 						::UpdateWindow(hRealWnd);
-// 					}
-// 					break;
-// 				}
-// 			}
-// 			break;
 		}
 	}
 	else if (hRealWnd == m_tree)
@@ -2405,6 +2380,16 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				{
 					if (hti && (hti != GetTreeSelItem(hRealWnd)))
 						SelectTreeItem(hRealWnd, hti);
+				}
+
+				if (!m_bReadOnly && (tvi.flags & TVHT_ONITEMSTATEICON))
+				{
+					DWORD dwTaskID = GetTaskID(hti);
+					const GANTTITEM* pGI = m_data.GetItem(dwTaskID);
+					ASSERT(pGI);
+
+					if (pGI)
+						return GetCWnd()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
 				}
 			}
 			break;

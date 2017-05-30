@@ -17,6 +17,8 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
 
+#include "..\3rdparty\T64Utils.h"
+
 #include "..\Interfaces\ipreferences.h"
 
 #include <afxpriv.h>
@@ -103,6 +105,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
+	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnGanttNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
 	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
@@ -1277,3 +1280,14 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
+LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
+{
+	IUITASKMOD mod = { IUI_DONEDATE, 0 };
+
+	if (lp) // done/not done
+		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
+	else
+		mod.tValue = T64Utils::T64_NULL;
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+}

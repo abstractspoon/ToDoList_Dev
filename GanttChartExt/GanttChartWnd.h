@@ -124,6 +124,7 @@ protected:
 
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGanttNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp);
