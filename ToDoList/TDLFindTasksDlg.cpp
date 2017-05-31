@@ -591,14 +591,14 @@ int CTDLFindTasksDlg::GetSearchParams(SEARCHPARAMS& params)
 	if (!m_bInitializing && GetSafeHwnd())
 		UpdateData();
 	
-	int nNumParam = m_lcFindSetup.GetSearchParams(params.aRules); 
+	m_lcFindSetup.GetSearchParams(params.aRules); 
 
-	// if the the search params include TDCA_DONE date then 
-	// forcibly remove FT_HIDEDONE flag
 	params.bIgnoreOverDue = FALSE;
 	params.bIgnoreDone = !IncludeOptionIsChecked(FI_COMPLETED);
 	params.bIgnoreFilteredOut = !IncludeOptionIsChecked(FI_FILTEREDOUT);
 
+	// if the the search params include TDCA_DONE date then 
+	// forcibly remove FT_HIDEDONE flag
 	if (params.bIgnoreDone && params.HasAttribute(TDCA_DONEDATE))
 		params.bIgnoreDone = FALSE;
 
