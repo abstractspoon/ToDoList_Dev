@@ -585,7 +585,8 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	return bMatches;
 }
 
-BOOL CTDCTaskMatcher::ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, SEARCHRESULT& result) const
+BOOL CTDCTaskMatcher::ValueMatches(const CString& sComments, const CBinaryData& customComments, 
+									const SEARCHPARAM& rule, SEARCHRESULT& result) const
 {
 	BOOL bMatch = ValueMatches(sComments, rule, result);
 				
@@ -606,10 +607,15 @@ BOOL CTDCTaskMatcher::ValueMatches(const CString& sComments, const CBinaryData& 
 }
 
 BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM& rule, 
-								SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const
+									SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const
 {
 	double dTaskDate = dtTask.m_dt, dSearch = rule.ValueAsDate().m_dt;
 	BOOL bMatch = FALSE;
+
+	// Special case: Rule is a relative date (except for 'Now')
+	// which means that it will have no associated time
+	if (bIncludeTime && rule.IsRelativeDate() && !rule.IsNowRelativeDate())
+		bIncludeTime = FALSE;
 
 	if (!bIncludeTime)
 	{

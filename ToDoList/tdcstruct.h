@@ -1238,19 +1238,20 @@ struct SEARCHPARAM
 	DWORD GetFlags() const { return dwFlags; }
 	BOOL IsCustomAttribute() const { return IsCustomAttribute(attrib); }
 
-	BOOL IsNowRelativeDate() const
+	BOOL IsRelativeDate() const
 	{
-		if ((GetAttribType() != FT_DATE_REL) || sValue.IsEmpty())
+		if (sValue.IsEmpty() || (GetAttribType() != FT_DATE_REL))
 			return FALSE;
 
-		if (((sValue[0] == 'n') || (sValue[0] == 'N')) && 
-			CDateHelper::IsValidRelativeDate(sValue, FALSE))
-		{
-			return TRUE;
-		}
+		return CDateHelper::IsValidRelativeDate(sValue, FALSE);
+	}
 
-		// else
-		return FALSE;
+	BOOL IsNowRelativeDate() const
+	{
+		if (!IsRelativeDate())
+			return FALSE;
+
+		return ((sValue[0] == 'n') || (sValue[0] == 'N'));
 	}
 
 	BOOL SetCustomAttribute(TDC_ATTRIBUTE a, const CString& id, FIND_ATTRIBTYPE t)
