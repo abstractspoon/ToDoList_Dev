@@ -2684,15 +2684,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			
 		case TDCC_DEPENDENCY:
 			if (pTDI->aDependencies.GetSize())
-			{
-				// draw our app icon 
-				if (m_imageIcons.HasIcon(APP_ICON) || 
-					m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
-				{
-					CPoint pt(CalcColumnIconTopLeft(rSubItem));
-					m_imageIcons.Draw(pDC, APP_ICON, pt);
-				}
-			}
+				DrawColumnImage(pDC, nColID, rSubItem);
 			break;
 			
 		case TDCC_FILEREF:
