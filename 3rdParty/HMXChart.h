@@ -176,6 +176,8 @@ protected:
 	CFont			m_fontXScale, m_fontYScale;
 	bool			m_bXLabelsAreTicks;
 
+	CPen			m_penGrid;
+
 	//{{AFX_MSG(CHMXChart)
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);

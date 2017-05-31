@@ -79,6 +79,10 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	if (bPaintBkgnd)
 		PaintBkGnd(dc);
 
+	// Recreate pens, etc
+	if (!m_penGrid.GetSafeHandle())
+		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
+
 	DrawDatasets(dc);
 	DrawGrid(dc);
 	DrawTitle(dc);
@@ -316,9 +320,7 @@ bool CHMXChart::DrawHorzLine(CDC & dc)
 		return false;
 
 	double nY = ((m_nYMax - m_nYMin)/(double)nTicks);
-
-	CPen pen(PS_SOLID, 1, m_clrGrid), *pPenOld;
-	pPenOld = dc.SelectObject(&pen);
+	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	for(int f=0; f<=nTicks; f++) 
 	{
@@ -351,12 +353,9 @@ bool CHMXChart::DrawVertLine(CDC & dc)
 		return false;
 
 	double nX = (double)m_rectData.Width()/(double)m_nXMax;
-	int f;
+	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
-	CPen pen(PS_SOLID, 1, m_clrGrid), *pPenOld;
-	pPenOld = dc.SelectObject(&pen);
-
-	for(f=0; f<m_nXMax; f=f+m_nXLabelStep) 
+	for(int f=0; f<m_nXMax; f=f+m_nXLabelStep) 
 	{
 		dc.MoveTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.top);
 		dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 10);
@@ -383,8 +382,7 @@ bool CHMXChart::DrawVertLine(CDC & dc)
 //
 bool CHMXChart::DrawBaseline(CDC & dc)
 {
-	CPen pen(PS_SOLID, 1, m_clrGrid), *pPenOld;
-	pPenOld = dc.SelectObject(&pen);
+	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	// cannot draw baseline outside the m_rectData
 	if(m_nYMin > 0)
@@ -1271,8 +1269,13 @@ bool CHMXChart::SetBkGnd(COLORREF clr)
 
 bool CHMXChart::SetGridColor(COLORREF clr)
 {
-	m_clrGrid = clr;
-	Redraw();
+	if (clr != m_clrGrid)
+	{
+		m_clrGrid = clr;
+		m_penGrid.DeleteObject();
+
+		Redraw();
+	}
 
 	return true;
 }
