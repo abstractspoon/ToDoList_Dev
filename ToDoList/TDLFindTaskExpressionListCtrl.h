@@ -34,6 +34,7 @@ public:
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
 	int GetSearchParams(CSearchParamArray& params) const;
+	const CSearchParamArray& GetSearchParams() const { return m_aSearchParams; }
 
 	void ClearSearch();
 

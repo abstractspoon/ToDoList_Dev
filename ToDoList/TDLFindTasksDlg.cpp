@@ -514,12 +514,17 @@ void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPC
 	if (GetSafeHwnd())
 	{
 		// Don't add what the user doesn't want to see
-		if ((result.HasFlag(RF_DONE) || result.HasFlag(RF_GOODASDONE)) && 
-			!IncludeOptionIsChecked(FI_COMPLETED))
+		// Unless the current rule set includes TDCA_DONEDATE
+		if (result.HasFlag(RF_DONE) || result.HasFlag(RF_GOODASDONE))
 		{
-			return;
+			if (!m_lcFindSetup.GetSearchParams().HasAttributeRule(TDCA_DONEDATE) &&
+				!IncludeOptionIsChecked(FI_COMPLETED))
+			{
+				return;
+			}
 		}
-		else if (result.HasFlag(RF_PARENT) && !IncludeOptionIsChecked(FI_PARENT))
+
+		if (result.HasFlag(RF_PARENT) && !IncludeOptionIsChecked(FI_PARENT))
 		{
 			return;
 		}
@@ -594,17 +599,8 @@ int CTDLFindTasksDlg::GetSearchParams(SEARCHPARAMS& params)
 	params.bIgnoreDone = !IncludeOptionIsChecked(FI_COMPLETED);
 	params.bIgnoreFilteredOut = !IncludeOptionIsChecked(FI_FILTEREDOUT);
 
-	if (params.bIgnoreDone)
-	{
-		for (int nParam = 0; nParam < nNumParam; nParam++)
-		{
-			if (params.aRules[nParam].AttributeIs(TDCA_DONEDATE))
-			{
-				params.bIgnoreDone = FALSE;
-				break;
-			}
-		}
-	}
+	if (params.bIgnoreDone && params.HasAttribute(TDCA_DONEDATE))
+		params.bIgnoreDone = FALSE;
 
 	// associated custom attribute defs
 	if (m_bAllTasklists)

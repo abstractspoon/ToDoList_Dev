@@ -1661,7 +1661,29 @@ protected:
 	mutable FIND_ATTRIBTYPE nType;
 
 };
-typedef CArray<SEARCHPARAM, SEARCHPARAM> CSearchParamArray;
+
+// ------------------------------------------------------------------------
+
+class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
+{
+public:
+	BOOL HasAttributeRule(TDC_ATTRIBUTE nAttrib) const
+	{
+		int nRule = GetSize();
+
+		while (nRule--)
+		{
+			if (GetAt(nRule).AttributeIs(nAttrib))
+				return TRUE;
+		}
+
+		// not found
+		return FALSE;
+	}
+
+};
+
+// ------------------------------------------------------------------------
 
 struct SEARCHPARAMS
 {
