@@ -8357,7 +8357,23 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_DEPENDENCY:
-		ShowTaskLink(m_data.GetTaskDependency(dwTaskID, 0));
+		{
+			CDWordArray aLocalDepends;
+			CStringArray aOtherDepends;
+
+			if (GetAllSelectedTaskDependencies(aLocalDepends, aOtherDepends))
+			{
+				if (aLocalDepends.GetSize() == 0)
+				{
+					if (aOtherDepends.GetSize() > 0)
+						ShowTaskLink(aOtherDepends[0]);
+				}
+				else
+				{
+					SelectTasks(aLocalDepends, TRUE);
+				}
+			}
+		}
 		break;
 		
 	case TDCC_RECURRENCE:
@@ -8377,6 +8393,39 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 	m_treeDragDrop.EnableDragDrop(!IsReadOnly() && GetSelectedCount());
 
 	return 0L;
+}
+
+int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const
+{
+	CStringSet aOther;
+	CDWordSet aLocal;
+	CDWordArray aTaskIDs;
+
+	int nID = GetSelectedTaskIDs(aTaskIDs, TRUE);
+
+	while (nID--)
+	{
+		CStringArray aDepends;
+		int nDepend = m_data.GetTaskDependencies(aTaskIDs[nID], aDepends);
+
+		while (nDepend--)
+		{
+			if (!aDepends[nDepend].IsEmpty())
+			{
+				DWORD dwDependID = _ttoi(aDepends[nDepend]);
+
+				if (dwDependID)
+					aLocal.AddKey(dwDependID);
+				else
+					aOther.AddKey(aDepends[nDepend]);
+			}
+		}
+	}
+
+	aOther.CopyTo(aOtherDepends);
+	aLocal.CopyTo(aLocalDepends);
+
+	return (aLocalDepends.GetSize() + aOtherDepends.GetSize());
 }
 
 UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const

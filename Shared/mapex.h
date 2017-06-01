@@ -36,7 +36,7 @@ public:
 		CopyFrom(pOther, nNumOther);
 	}
 
-	T GetNextKey(POSITION& pos)
+	T GetNextKey(POSITION& pos) const
 	{
 		char val = 0;
 		T key;
@@ -90,6 +90,19 @@ public:
 
 	int CopyTo(CArray<T, T&>& other) const
 	{
+		CopyToEx(other);
+	}
+
+protected:
+	template <class S>
+	int CopyFromEx(const S& other)
+	{
+		return CopyFrom(other.GetData(), other.GetSize());
+	}
+
+	template <class S>
+	int CopyToEx(S& other) const
+	{
 		other.RemoveAll();
 		POSITION pos = GetStartPosition();
 
@@ -100,8 +113,88 @@ public:
 	}
 };
 
-typedef CSet<DWORD> CDWordSet;
-typedef CSet<UINT> CUintSet;
+class CDWordSet : public CSet<DWORD>
+{
+public:
+	int CopyFrom(const CDWordArray& other) { return CopyFromEx<CDWordArray>(other); }
+	int CopyTo(CDWordArray& other) const { return CopyToEx<CDWordArray>(other); }
+};
+
+class CUintSet : public CSet<UINT>
+{
+public:
+	int CopyFrom(const CUIntArray& other) {	return CopyFromEx<CUIntArray>(other); }
+	int CopyTo(CUIntArray& other) const { return CopyToEx<CUIntArray>(other); }
+};
+
+class CStringSet : public CMap<CString, LPCTSTR, char, char&>
+{
+public:
+	CStringSet() {}
+
+	CStringSet(const CStringSet& other)
+	{
+		Copy(other);
+	}
+
+	CStringSet(const CStringArray& other)
+	{
+		CopyFrom(other);
+	}
+
+	CString GetNextKey(POSITION& pos) const
+	{
+		char val = 0;
+		CString key;
+
+		GetNextAssoc(pos, key, val);
+		return key;
+	}
+
+	BOOL HasKey(LPCTSTR key) const
+	{
+		char val = 0;
+		return Lookup(key, val);
+	}
+
+	void AddKey(LPCTSTR key)
+	{
+		char c = 0;
+		SetAt(CString(key), c);
+	}
+
+	void Copy(const CStringSet& other)
+	{
+		Misc::CopyStrT<char>(other, *this);
+	}
+
+	BOOL MatchAll(const CStringSet& other) const
+	{
+		Misc::MatchAllStrT<char>(other, *this);
+	}
+
+	int CopyFrom(const CStringArray& other)
+	{
+		RemoveAll();
+		int nItem = other.GetSize();
+
+		while (nItem--)
+			AddKey(other[nItem]);
+
+		return GetCount();
+	}
+
+	int CopyTo(CStringArray& other) const
+	{
+		other.RemoveAll();
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+			other.Add(GetNextKey(pos));
+
+		return other.GetSize();
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 
