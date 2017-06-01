@@ -121,6 +121,7 @@ public:
 	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData );
 
 	virtual bool		ClearData( int nDatasetIndex);
+	virtual void		ClearData();
 	CSize				GetDataArea() const { return m_rectData.Size(); }
 	virtual bool		SetDatasetMinToZero(int nDatasetIndex, bool bSet = true);
 

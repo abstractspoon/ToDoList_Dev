@@ -187,9 +187,10 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_BURNDOWN_TITLE      "Burndown"
     IDS_TIME_AXIS           "Time"
-    IDS_TASK_AXIS           "Incomplete Tasks"
+    IDS_DISPLAY_BURNDOWN_YAXIS "Incomplete Tasks"
     IDS_DISPLAY_BURNDOWN    "Burndown"
     IDS_DISPLAY_SPRINT      "Sprint"
+    IDS_DISPLAY_SPRINT_YAXIS "Tasks"
 END
 
 #endif    // English (Australia) resources

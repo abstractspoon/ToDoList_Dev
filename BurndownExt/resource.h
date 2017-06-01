@@ -8,8 +8,10 @@
 #define IDS_BURNDOWN_TITLE              6001
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003
+#define IDS_DISPLAY_BURNDOWN_YAXIS      6003
 #define IDS_DISPLAY_BURNDOWN            6004
 #define IDS_DISPLAY_SPRINT              6005
+#define IDS_DISPLAY_SPRINT_YAXIS        6006
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024
 #define IDD_BURNDOWN_DLG                17000

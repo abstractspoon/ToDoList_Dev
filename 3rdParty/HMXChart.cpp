@@ -1025,6 +1025,12 @@ bool CHMXChart::ClearData( int nDatasetIndex)
 
 }
 
+void CHMXChart::ClearData()
+{
+	for (int f=0; f<HMX_MAX_DATASET; f++) 
+		ClearData(f);
+}
+
 //
 //	SetData
 //	Modify a data into the dataset

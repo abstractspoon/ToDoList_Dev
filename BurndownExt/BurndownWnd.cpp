@@ -62,14 +62,15 @@ enum DISPLAYTYPE
 
 struct DISPLAYITEM
 {
-	UINT nResID;
+	UINT nTitleID;
+	UINT nYAxisID;
 	DISPLAYTYPE nDisplay;
 };
 
 static DISPLAYITEM STATSDISPLAY[] = 
 {
-	{ IDS_DISPLAY_BURNDOWN, SD_BURNDOWN	},
-	{ IDS_DISPLAY_SPRINT,	SD_SPRINT },
+	{ IDS_DISPLAY_BURNDOWN, IDS_DISPLAY_BURNDOWN_YAXIS, SD_BURNDOWN	},
+	{ IDS_DISPLAY_SPRINT, IDS_DISPLAY_SPRINT_YAXIS,	SD_SPRINT },
 };
 static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
 
@@ -144,9 +145,15 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CBurndownWnd)
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
-	DDX_CBIndex(pDX, IDC_DISPLAY, m_nDisplay);
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplay);
 	//}}AFX_DATA_MAP
+
+	if (pDX->m_bSaveAndValidate)
+		m_nDisplay = CDialogHelper::GetSelectedItemData(m_cbDisplay);
+	else
+		CDialogHelper::SelectItemByData(m_cbDisplay, m_nDisplay);
+
+	DDX_CBIndex(pDX, IDC_DISPLAY, m_nDisplay);
 }
 
 
@@ -158,6 +165,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
+	ON_CBN_SELCHANGE(IDC_DISPLAY, &CBurndownWnd::OnSelchangeDisplay)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -208,13 +216,7 @@ BOOL CBurndownWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 
-	// Init combo
-	for (int nDisplay = 0; nDisplay < NUM_DISPLAY; nDisplay++)
-	{
-		const DISPLAYITEM& di = STATSDISPLAY[nDisplay];
-		CDialogHelper::AddString(m_cbDisplay, di.nResID, di.nDisplay);
-	}
-
+	// Initialise graph
 	CRect rFrame;
 	m_stFrame.GetWindowRect(rFrame);
 	ScreenToClient(rFrame);
@@ -225,16 +227,19 @@ BOOL CBurndownWnd::OnInitDialog()
 	m_graph.SetTitle(CEnString(IDS_BURNDOWN_TITLE));
 	m_graph.SetBkGnd(GetSysColor(COLOR_WINDOW));
 
-	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	m_graph.SetDatasetPenColor( 0, RGB( 255, 128, 255) );
-	m_graph.SetDatasetMinToZero(0, true);
-
 	m_graph.SetXText(CEnString(IDS_TIME_AXIS));
-	m_graph.SetXLabelStep(m_nScale);
 	m_graph.SetXLabelsAreTicks(true);
 
-	m_graph.SetYText(CEnString(IDS_TASK_AXIS));
 	m_graph.SetYTicks(10);
+
+	// Init combo
+	for (int nDisplay = 0; nDisplay < NUM_DISPLAY; nDisplay++)
+	{
+		const DISPLAYITEM& di = STATSDISPLAY[nDisplay];
+		CDialogHelper::AddString(m_cbDisplay, di.nTitleID, nDisplay);
+	}
+	m_cbDisplay.SetCurSel(0);
+	RebuildGraph(TRUE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -374,14 +379,9 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks)
 		CDateHelper::ClearDate(m_dtEarliestDone);
 		CDateHelper::ClearDate(m_dtLatestDone);
 
-		// get the info we're interested in
 		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-		// sort by start date
 		SortData();
-
-		// rebuild graph
-		BuildGraph();
+		RebuildGraph();
 	}
 	else if (CDateHelper::IsDateSet(m_dtEarliestDone))
 	{
@@ -480,14 +480,14 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 
 		UpdateDataExtents();
 		SortData();
-		BuildGraph();
+		RebuildGraph();
 		break;
 		
 	case IUI_DELETE:
 		if (RemoveDeletedTasks(pTasks))
 		{
 			UpdateDataExtents();
-			BuildGraph();
+			RebuildGraph();
 		}
 		break;
 		
@@ -712,7 +712,6 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	return false;
 }
 
-
 BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	// then our background
@@ -766,7 +765,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		
 		// handle scale change
 		if (m_nScale != nOldScale)
-			BuildGraph();
+			RebuildGraph();
 	}
 }
 
@@ -849,7 +848,7 @@ BOOL CBurndownWnd::IsDataSorted() const
 	return TRUE;
 }
 
-int CBurndownWnd::CalculateRequiredScale() const
+int CBurndownWnd::CalculateRequiredXScale() const
 {
 	// calculate new x scale
 	int nDataWidth = m_graph.GetDataArea().cx;
@@ -872,7 +871,7 @@ void CBurndownWnd::RebuildXScale()
 	m_graph.ClearXScaleLabels();
 
 	// calc new scale
-	m_nScale = CalculateRequiredScale();
+	m_nScale = CalculateRequiredXScale();
 	m_graph.SetXLabelStep(m_nScale);
 
 	// Get new start and end dates
@@ -1026,12 +1025,17 @@ COleDateTime CBurndownWnd::GetGraphEndDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-void CBurndownWnd::BuildGraph()
+void CBurndownWnd::BuildBurndownGraph(BOOL bStyleChange)
 {
-	m_graph.ClearData(0);
+	if (bStyleChange)
+	{
+		m_graph.SetYText(CEnString(IDS_DISPLAY_BURNDOWN_YAXIS));
 
-	RebuildXScale();
-
+		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_LINE);
+		m_graph.SetDatasetPenColor(0, RGB( 255, 128, 255) );
+		m_graph.SetDatasetMinToZero(0, true);
+	}
+	
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
 	COleDateTime dtEnd = GetGraphEndDate();
@@ -1045,6 +1049,63 @@ void CBurndownWnd::BuildGraph()
 
 		m_graph.AddData(0, nNumNotDone);
 	}
+
+	m_graph.CalcDatas();
+}
+
+void CBurndownWnd::RebuildGraph(BOOL bStyleChange)
+{
+	m_graph.ClearData();
+
+	const DISPLAYITEM& di = STATSDISPLAY[m_nDisplay];
+
+	if (bStyleChange)
+	{
+		m_graph.SetTitle(CEnString(di.nTitleID));
+		m_graph.SetYText(CEnString(di.nYAxisID));
+	}
+	RebuildXScale();
+
+	switch (di.nDisplay)
+	{
+	case SD_BURNDOWN:
+		BuildBurndownGraph(bStyleChange);
+		break;
+
+	case SD_SPRINT:
+		BuildSprintGraph(bStyleChange);
+		break;
+	}
+
+	m_graph.Redraw();
+}
+
+void CBurndownWnd::BuildSprintGraph(BOOL bStyleChange)
+{
+	if (bStyleChange)
+	{
+		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_LINE);
+		m_graph.SetDatasetPenColor(0, RGB( 255, 128, 255) );
+		m_graph.SetDatasetMinToZero(0, true);
+
+		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_LINE);
+		m_graph.SetDatasetPenColor(0, RGB( 128, 255, 255) );
+		m_graph.SetDatasetMinToZero(0, true);
+	}
+
+	// build the graph
+	COleDateTime dtStart = GetGraphStartDate();
+	COleDateTime dtEnd = GetGraphEndDate();
+
+	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+
+// 	for (int nDay = 0; nDay <= nNumDays; nDay++)
+// 	{
+// 		COleDateTime date(dtStart.m_dt + nDay);
+// 		int nNumNotDone = CalculateIncompleteTaskCount(date);
+// 
+// 		m_graph.AddData(0, nNumNotDone);
+// 	}
 
 	m_graph.CalcDatas();
 }
@@ -1086,4 +1147,11 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
 BOOL CBurndownWnd::GetStatsItem(DWORD dwTaskID, STATSITEM& si) const
 {
 	return m_data.Lookup(dwTaskID, si);
+}
+
+void CBurndownWnd::OnSelchangeDisplay()
+{
+	UpdateData();
+
+	RebuildGraph(TRUE);
 }

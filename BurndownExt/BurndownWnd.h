@@ -134,20 +134,24 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void SortData();
 	BOOL IsDataSorted() const;
-	void BuildGraph();
+	void RebuildGraph(BOOL bStyleChange = FALSE);
+	void BuildSprintGraph(BOOL bStyleChange = FALSE);
+	void BuildBurndownGraph(BOOL bStyleChange = FALSE);
 	int CalculateIncompleteTaskCount(const COleDateTime& date);
 	BOOL GetStatsItem(DWORD dwTaskID, STATSITEM& si) const;
 	void RebuildXScale();
 	int GetDataDuration() const;
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
-	int CalculateRequiredScale() const;
+	int CalculateRequiredXScale() const;
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 
 	static int CompareStatItems(const void* pV1, const void* pV2);
 	static COleDateTime GetTaskDate(time64_t tDate);
 
+public:
+	afx_msg void OnSelchangeDisplay();
 };
 
 //{{AFX_INSERT_LOCATION}}
