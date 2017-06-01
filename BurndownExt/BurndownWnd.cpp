@@ -54,6 +54,27 @@ static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum DISPLAYTYPE
+{
+	SD_BURNDOWN,
+	SD_SPRINT,
+};
+
+struct DISPLAYITEM
+{
+	UINT nResID;
+	DISPLAYTYPE nDisplay;
+};
+
+static DISPLAYITEM STATSDISPLAY[] = 
+{
+	{ IDS_DISPLAY_BURNDOWN, SD_BURNDOWN	},
+	{ IDS_DISPLAY_SPRINT,	SD_SPRINT },
+};
+static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
+
+/////////////////////////////////////////////////////////////////////////////
+
 STATSITEM::STATSITEM() : dwTaskID(0) 
 {
 }
@@ -124,6 +145,7 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CBurndownWnd)
 	DDX_Control(pDX, IDC_FRAME, m_stFrame);
 	DDX_CBIndex(pDX, IDC_DISPLAY, m_nDisplay);
+	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplay);
 	//}}AFX_DATA_MAP
 }
 
@@ -167,6 +189,55 @@ BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd,
 	}
 
 	return FALSE;
+}
+
+BOOL CBurndownWnd::OnInitDialog() 
+{
+	CDialog::OnInitDialog();
+
+	// create toolbar
+	if (m_toolbar.CreateEx(this))
+	{
+		const COLORREF MAGENTA = RGB(255, 0, 255);
+
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+
+		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
+		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
+		m_toolbar.RefreshButtonStates(TRUE);
+	}
+
+	// Init combo
+	for (int nDisplay = 0; nDisplay < NUM_DISPLAY; nDisplay++)
+	{
+		const DISPLAYITEM& di = STATSDISPLAY[nDisplay];
+		CDialogHelper::AddString(m_cbDisplay, di.nResID, di.nDisplay);
+	}
+
+	CRect rFrame;
+	m_stFrame.GetWindowRect(rFrame);
+	ScreenToClient(rFrame);
+	rFrame.DeflateRect(1, 1);
+
+	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
+
+	m_graph.SetTitle(CEnString(IDS_BURNDOWN_TITLE));
+	m_graph.SetBkGnd(GetSysColor(COLOR_WINDOW));
+
+	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
+	m_graph.SetDatasetPenColor( 0, RGB( 255, 128, 255) );
+	m_graph.SetDatasetMinToZero(0, true);
+
+	m_graph.SetXText(CEnString(IDS_TIME_AXIS));
+	m_graph.SetXLabelStep(m_nScale);
+	m_graph.SetXLabelsAreTicks(true);
+
+	m_graph.SetYText(CEnString(IDS_TASK_AXIS));
+	m_graph.SetYTicks(10);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CBurndownWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const 
@@ -670,48 +741,6 @@ HBRUSH CBurndownWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	}
 
 	return hbr;
-}
-
-BOOL CBurndownWnd::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-
-	// create toolbar
-	if (m_toolbar.CreateEx(this))
-	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-		
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
-		
-		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
-		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-		m_toolbar.RefreshButtonStates(TRUE);
-	}
-
-	CRect rFrame;
-	m_stFrame.GetWindowRect(rFrame);
-	ScreenToClient(rFrame);
-	rFrame.DeflateRect(1, 1);
-
-	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
-
-	m_graph.SetTitle(CEnString(IDS_BURNDOWN_TITLE));
-	m_graph.SetBkGnd(GetSysColor(COLOR_WINDOW));
-
-	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	m_graph.SetDatasetPenColor( 0, RGB( 255, 128, 255) );
-	m_graph.SetDatasetMinToZero(0, true);
-
-	m_graph.SetXText(CEnString(IDS_TIME_AXIS));
-	m_graph.SetXLabelStep(m_nScale);
-	m_graph.SetXLabelsAreTicks(true);
-
-	m_graph.SetYText(CEnString(IDS_TASK_AXIS));
-	m_graph.SetYTicks(10);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CBurndownWnd::OnSize(UINT nType, int cx, int cy) 

@@ -96,6 +96,7 @@ protected:
 	int m_nScale;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
+	CComboBox m_cbDisplay;
 
 	CMapStatsItems m_data;
 	CDWordArray m_aDateOrdered;

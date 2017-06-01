@@ -38,6 +38,12 @@
     <None Include="res\BurndownExt.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BurndownExt.rc">

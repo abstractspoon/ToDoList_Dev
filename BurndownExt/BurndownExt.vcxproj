@@ -183,6 +183,8 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
     <None Include="BurndownExt.def" />
     <None Include="res\icon1.ico" />
     <None Include="res\BurndownExt.rc2" />
+    <None Include="res\toolbar.bmp" />
+    <None Include="res\toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BurndownExt.rc">
