@@ -56,3 +56,5 @@ Release\*.*
 *.aps
 *.bak
 *.aps
+*.nupkg
+*._
