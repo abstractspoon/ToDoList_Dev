@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms.VisualStyles;
+using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -12,51 +13,29 @@ namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
-		private VisualStyleRenderer m_ExplorerSelection;
-        private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
-
-		private VisualStyleRenderer ExplorerSelection
-		{
-			get 
-			{
-				if (m_ExplorerSelection == null)
-				{
-					const int LVP_LISTITEM = 1;
-					const int LISS_MORESELECTED = 6;
-
-                    VisualStyleElement visElm = VisualStyleElement.CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
-
-                    if (VisualStyleRenderer.IsElementDefined(visElm))
-                    {
-                        m_ExplorerSelection = new VisualStyleRenderer(visElm);
-                    }
-				}
-
-				return m_ExplorerSelection;
-			}
-		}
-
-        private VisualStyleRenderer HeaderNormal
+        public TDLRenderer()
         {
-            get
+            // One time initialisation
+            if (Application.RenderWithVisualStyles)
             {
-                if (m_HeaderNormal == null)
+                const int LVP_LISTITEM = 1;
+                const int LISS_MORESELECTED = 6;
+
+                VisualStyleElement visElm = VisualStyleElement.CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+
+                if ((visElm != null) && VisualStyleRenderer.IsElementDefined(visElm))
+                    m_ExplorerSelection = new VisualStyleRenderer(visElm);
+
+                if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Normal))
                     m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
 
-                return m_HeaderNormal;
-            }
-        }
-        private VisualStyleRenderer HeaderHot
-        {
-            get
-            {
-                if (m_HeaderHot == null)
+                if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Hot))
                     m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
-
-                return m_HeaderHot;
             }
         }
 
+		private VisualStyleRenderer m_ExplorerSelection;
+        private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
         private UITheme m_theme;
 
         public UITheme Theme
@@ -202,12 +181,30 @@ namespace DayViewUIExtension
             if (date.Date.Equals(DateTime.Now.Date))
             {
                 rHeader.Width += 1;
-                HeaderHot.DrawBackground(g, rHeader);
+
+                if (m_HeaderHot != null)
+                {
+                    m_HeaderHot.DrawBackground(g, rHeader);
+                }
+                else
+                {
+                    using (SolidBrush brush = new SolidBrush(SystemColors.ButtonHighlight))
+                        g.FillRectangle(brush, rHeader);
+                }
             }
             else
             {
                 rHeader.X += 1;
-                HeaderNormal.DrawBackground(g, rHeader);
+
+                if (m_HeaderNormal != null)
+                {
+                    m_HeaderNormal.DrawBackground(g, rHeader);
+                }
+                else
+                {
+                    using (SolidBrush brush = new SolidBrush(SystemColors.ButtonFace))
+                        g.FillRectangle(brush, rHeader);
+                }
             }
 
             using (StringFormat format = new StringFormat())
@@ -283,11 +280,11 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-                        if (ExplorerSelection != null)
+                        if (m_ExplorerSelection != null)
                         {
                             g.FillRectangle(System.Drawing.Brushes.White, rect);
-                            ExplorerSelection.DrawBackground(g, rect);
-                            ExplorerSelection.DrawBackground(g, rect);
+                            m_ExplorerSelection.DrawBackground(g, rect);
+                            m_ExplorerSelection.DrawBackground(g, rect);
                         }
                         else
                         {
