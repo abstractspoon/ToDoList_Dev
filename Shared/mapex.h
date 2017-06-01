@@ -116,15 +116,15 @@ protected:
 class CDWordSet : public CSet<DWORD>
 {
 public:
-	int CopyFrom(const CDWordArray& other) { return CopyFromEx<CDWordArray>(other); }
-	int CopyTo(CDWordArray& other) const { return CopyToEx<CDWordArray>(other); }
+	int CopyFrom(const CDWordArray& other) { return CopyFromEx(other); }
+	int CopyTo(CDWordArray& other) const { return CopyToEx(other); }
 };
 
 class CUintSet : public CSet<UINT>
 {
 public:
-	int CopyFrom(const CUIntArray& other) {	return CopyFromEx<CUIntArray>(other); }
-	int CopyTo(CUIntArray& other) const { return CopyToEx<CUIntArray>(other); }
+	int CopyFrom(const CUIntArray& other) {	return CopyFromEx(other); }
+	int CopyTo(CUIntArray& other) const { return CopyToEx(other); }
 };
 
 class CStringSet : public CMap<CString, LPCTSTR, char, char&>

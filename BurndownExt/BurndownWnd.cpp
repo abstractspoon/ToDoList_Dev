@@ -165,7 +165,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
-	ON_CBN_SELCHANGE(IDC_DISPLAY, &CBurndownWnd::OnSelchangeDisplay)
+	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
