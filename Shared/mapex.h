@@ -15,63 +15,64 @@
 
 //////////////////////////////////////////////////////////////////////
 
-template <class T>
-class CSet : public CMap<T, T, char, char>
+template <class KEY, class ARG_KEY>
+class CSetBase : public CMap<KEY, ARG_KEY, char, char&>
 {
 public:
-	CSet() {}
+	CSetBase() {}
 
-	CSet(const CSet& other)
+	CSetBase(const CSetBase& other)
 	{
 		Copy(other);
 	}
 
-	CSet(const CArray<T, T&>& other)
+	CSetBase(const CArray<KEY, KEY&>& other)
 	{
 		CopyFrom(other);
 	}
 
-	CSet(const T* pOther, int nNumOther)
+	CSetBase(const KEY* pOther, int nNumOther)
 	{
 		CopyFrom(pOther, nNumOther);
 	}
 
-	T GetNextKey(POSITION& pos) const
+	KEY GetNextKey(POSITION& pos) const
 	{
 		char val = 0;
-		T key;
+		KEY key;
 
 		GetNextAssoc(pos, key, val);
 		return key;
 	}
 
-	BOOL HasKey(T key) const
+	BOOL HasKey(KEY key) const
 	{
 		char val = 0;
 		return Lookup(key, val);
 	}
 
-	void AddKey(T key)
+	void AddKey(KEY key)
 	{
-		SetAt(key, 0);
+		char val = 0;
+		SetAt(key, val);
 	}
 
-	void Copy(const CSet& other)
+	void Copy(const CSetBase& other)
 	{
 		Misc::CopyT(other, *this);
 	}
 
-	BOOL MatchAll(const CSet& other) const
+	BOOL MatchAll(const CSetBase& other) const
 	{
 		Misc::MatchAllT(other, *this);
 	}
 
-	int CopyFrom(const CArray<T, T&>& other)
+	int CopyFrom(const CArray<KEY, KEY&>& other)
 	{
 		return CopyFrom(other.GetData(), other.GetSize());
 	}
 
-	int CopyFrom(const T* pOther, int nNumOther)
+	int CopyFrom(const KEY* pOther, int nNumOther)
 	{
 		if (!pOther)
 		{
@@ -88,103 +89,20 @@ public:
 		return GetCount();
 	}
 
-	int CopyTo(CArray<T, T&>& other) const
+	int CopyTo(CArray<KEY, KEY&>& other) const
 	{
-		CopyToEx(other);
+		CopyTo(other);
 	}
 
 protected:
-	template <class S>
-	int CopyFromEx(const S& other)
+	template <class ARRAY>
+	int CopyFrom(const ARRAY& other)
 	{
 		return CopyFrom(other.GetData(), other.GetSize());
 	}
 
-	template <class S>
-	int CopyToEx(S& other) const
-	{
-		other.RemoveAll();
-		POSITION pos = GetStartPosition();
-
-		while (pos)
-			other.Add(GetNextKey(pos));
-
-		return other.GetSize();
-	}
-};
-
-class CDWordSet : public CSet<DWORD>
-{
-public:
-	int CopyFrom(const CDWordArray& other) { return CopyFromEx(other); }
-	int CopyTo(CDWordArray& other) const { return CopyToEx(other); }
-};
-
-class CUintSet : public CSet<UINT>
-{
-public:
-	int CopyFrom(const CUIntArray& other) {	return CopyFromEx(other); }
-	int CopyTo(CUIntArray& other) const { return CopyToEx(other); }
-};
-
-class CStringSet : public CMap<CString, LPCTSTR, char, char&>
-{
-public:
-	CStringSet() {}
-
-	CStringSet(const CStringSet& other)
-	{
-		Copy(other);
-	}
-
-	CStringSet(const CStringArray& other)
-	{
-		CopyFrom(other);
-	}
-
-	CString GetNextKey(POSITION& pos) const
-	{
-		char val = 0;
-		CString key;
-
-		GetNextAssoc(pos, key, val);
-		return key;
-	}
-
-	BOOL HasKey(LPCTSTR key) const
-	{
-		char val = 0;
-		return Lookup(key, val);
-	}
-
-	void AddKey(LPCTSTR key)
-	{
-		char c = 0;
-		SetAt(CString(key), c);
-	}
-
-	void Copy(const CStringSet& other)
-	{
-		Misc::CopyStrT<char>(other, *this);
-	}
-
-	BOOL MatchAll(const CStringSet& other) const
-	{
-		Misc::MatchAllStrT<char>(other, *this);
-	}
-
-	int CopyFrom(const CStringArray& other)
-	{
-		RemoveAll();
-		int nItem = other.GetSize();
-
-		while (nItem--)
-			AddKey(other[nItem]);
-
-		return GetCount();
-	}
-
-	int CopyTo(CStringArray& other) const
+	template <class ARRAY>
+	int CopyTo(ARRAY& other) const
 	{
 		other.RemoveAll();
 		POSITION pos = GetStartPosition();
@@ -198,8 +116,62 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
-template <class T>
-class CMapStringToContainer : protected CMap<CString, LPCTSTR, T*, T*&>
+template <class KEY>
+class CSet : public CSetBase<KEY, KEY>
+{
+public:
+	CSet() {}
+	CSet(const CSet& other) : CSetBase(other) {}
+	CSet(const CArray<KEY, KEY&>& other) : CSetBase(other) {}
+	CSet(const KEY* pOther, int nNumOther) : CSetBase(pOther, nNumOther) {}
+
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CDWordSet : public CSet<DWORD>
+{
+public:
+	CDWordSet() {}
+	CDWordSet(const CDWordSet& other) : CSet(other) {}
+	CDWordSet(const CArray<DWORD, DWORD&>& other) : CSet(other) {}
+	CDWordSet(const DWORD* pOther, int nNumOther) : CSet(pOther, nNumOther) {}
+	CDWordSet(const CDWordArray& other) { CopyFrom(other); }
+
+	int CopyFrom(const CDWordArray& other) { return CSet::CopyFrom(other); }
+	int CopyTo(CDWordArray& other) const { return CSet::CopyTo(other); }
+};
+
+class CUintSet : public CSet<UINT>
+{
+public:
+	CUintSet() {}
+	CUintSet(const CUintSet& other) : CSet(other) {}
+	CUintSet(const CArray<UINT, UINT&>& other) : CSet(other) {}
+	CUintSet(const UINT* pOther, int nNumOther) : CSet(pOther, nNumOther) {}
+	CUintSet(const CUIntArray& other) { CopyFrom(other); }
+
+	int CopyFrom(const CUIntArray& other) {	return CSet::CopyFrom(other); }
+	int CopyTo(CUIntArray& other) const { return CSet::CopyTo(other); }
+};
+
+class CStringSet : public CSetBase<CString, LPCTSTR>
+{
+public:
+	CStringSet() {}
+	CStringSet(const CStringSet& other) { Misc::CopyStrT<char>(other, *this); }
+	CStringSet(const CArray<CString, CString&>& other) : CSetBase(other) {}
+	CStringSet(const CString* pOther, int nNumOther) : CSetBase(pOther, nNumOther) {}
+	CStringSet(const CStringArray& other) { CopyFrom(other); }
+
+	int CopyFrom(const CStringArray& other) { return CSetBase::CopyFrom(other); }
+	int CopyTo(CStringArray& other) const { return CSetBase::CopyTo(other); }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template <class VALUE>
+class CMapStringToContainer : protected CMap<CString, LPCTSTR, VALUE*, VALUE*&>
 {
 public:
 	CMapStringToContainer()
@@ -219,15 +191,15 @@ public:
 
 	POSITION GetStartPosition() const
 	{
-		return CMap<CString, LPCTSTR, T*, T*&>::GetStartPosition();
+		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetStartPosition();
 	}
 
-	void GetNextAssoc(POSITION& rNextPosition, CString& rKey, T*& rValue) const
+	void GetNextAssoc(POSITION& rNextPosition, CString& rKey, VALUE*& rValue) const
 	{
-		CMap<CString, LPCTSTR, T*, T*&>::GetNextAssoc(rNextPosition, rKey, rValue);
+		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetNextAssoc(rNextPosition, rKey, rValue);
 	}
 	
-	const T* GetMapping(const CString& str) const
+	const VALUE* GetMapping(const CString& str) const
 	{
 		return const_cast<CMapStringToContainer*>(this)->GetMapping(str);
 	}
@@ -237,9 +209,9 @@ public:
 		return (GetMapping(str) != NULL);
 	}
 	
-	T* GetMapping(const CString& str)
+	VALUE* GetMapping(const CString& str)
 	{
-		T* pMapping = NULL;
+		VALUE* pMapping = NULL;
 		
 		if (!Lookup(str, pMapping))
 			return NULL;
@@ -248,9 +220,9 @@ public:
 		return pMapping;
 	}
 
-	T* GetAddMapping(const CString& str)
+	VALUE* GetAddMapping(const CString& str)
 	{
-		T* pMapping = NULL;
+		VALUE* pMapping = NULL;
 		
 		if (Lookup(str, pMapping))
 		{
@@ -258,7 +230,7 @@ public:
 			return pMapping;
 		}
 
-		pMapping = new T;
+		pMapping = new VALUE;
 		SetAt(str, pMapping);
 
 		return pMapping;
@@ -271,13 +243,13 @@ public:
 
 	int GetCount() const
 	{
-		return CMap<CString, LPCTSTR, T*, T*&>::GetCount();
+		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetCount();
 	}
 
 	void RemoveAll()
 	{
 		CString str;
-		T* pMapping = NULL;
+		VALUE* pMapping = NULL;
 
 		POSITION pos = GetStartPosition();
 
@@ -291,12 +263,12 @@ public:
 			delete pMapping;
 		}
 
-		CMap<CString, LPCTSTR, T*, T*&>::RemoveAll();
+		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::RemoveAll();
 	}
 	
 	void RemoveKey(const CString& str)
 	{
-		T* pMapping = NULL;
+		VALUE* pMapping = NULL;
 		
 		POSITION pos = GetStartPosition();
 		
@@ -305,19 +277,19 @@ public:
 			ASSERT(pMapping);
 			delete pMapping;
 
-			CMap<CString, LPCTSTR, T*, T*&>::RemoveKey(str);
+			CMap<CString, LPCTSTR, VALUE*, VALUE*&>::RemoveKey(str);
 		}
 	}
 
 	// overload new/delete because we've hidden the base class
 	void* operator new (size_t size)
 	{
-		return CMap<CString, LPCTSTR, T*, T*&>::operator new(size);
+		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::operator new(size);
 	}
 
 	void operator delete (void *p)
 	{
-		CMap<CString, LPCTSTR, T*, T*&>::operator delete(p);
+		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::operator delete(p);
 	}
 
 };
