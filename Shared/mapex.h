@@ -122,8 +122,8 @@ class CSet : public CSetBase<KEY, KEY>
 public:
 	CSet() {}
 	CSet(const CSet& other) : CSetBase(other) {}
-	CSet(const CArray<KEY, KEY&>& other) : CSetBase(other) {}
-	CSet(const KEY* pOther, int nNumOther) : CSetBase(pOther, nNumOther) {}
+	CSet(const CArray<KEY, KEY&>& other) : CSetBase<KEY, KEY>(other) {}
+	CSet(const KEY* pOther, int nNumOther) : CSetBase<KEY, KEY>(pOther, nNumOther) {}
 
 };
 
@@ -132,40 +132,22 @@ public:
 class CDWordSet : public CSet<DWORD>
 {
 public:
-	CDWordSet() {}
-	CDWordSet(const CDWordSet& other) : CSet(other) {}
-	CDWordSet(const CArray<DWORD, DWORD&>& other) : CSet(other) {}
-	CDWordSet(const DWORD* pOther, int nNumOther) : CSet(pOther, nNumOther) {}
-	CDWordSet(const CDWordArray& other) { CopyFrom(other); }
-
-	int CopyFrom(const CDWordArray& other) { return CSet::CopyFrom(other); }
-	int CopyTo(CDWordArray& other) const { return CSet::CopyTo(other); }
+	int CopyFrom(const CDWordArray& other) { return CSet<DWORD>::CopyFrom(other); }
+	int CopyTo(CDWordArray& other) const { return CSet<DWORD>::CopyTo(other); }
 };
 
 class CUintSet : public CSet<UINT>
 {
 public:
-	CUintSet() {}
-	CUintSet(const CUintSet& other) : CSet(other) {}
-	CUintSet(const CArray<UINT, UINT&>& other) : CSet(other) {}
-	CUintSet(const UINT* pOther, int nNumOther) : CSet(pOther, nNumOther) {}
-	CUintSet(const CUIntArray& other) { CopyFrom(other); }
-
-	int CopyFrom(const CUIntArray& other) {	return CSet::CopyFrom(other); }
-	int CopyTo(CUIntArray& other) const { return CSet::CopyTo(other); }
+	int CopyFrom(const CUIntArray& other) {	return CSet<UINT>::CopyFrom(other); }
+	int CopyTo(CUIntArray& other) const { return CSet<UINT>::CopyTo(other); }
 };
 
 class CStringSet : public CSetBase<CString, LPCTSTR>
 {
 public:
-	CStringSet() {}
-	CStringSet(const CStringSet& other) { Misc::CopyStrT<char>(other, *this); }
-	CStringSet(const CArray<CString, CString&>& other) : CSetBase(other) {}
-	CStringSet(const CString* pOther, int nNumOther) : CSetBase(pOther, nNumOther) {}
-	CStringSet(const CStringArray& other) { CopyFrom(other); }
-
-	int CopyFrom(const CStringArray& other) { return CSetBase::CopyFrom(other); }
-	int CopyTo(CStringArray& other) const { return CSetBase::CopyTo(other); }
+	int CopyFrom(const CStringArray& other) { return CSetBase<CString, LPCTSTR>::CopyFrom(other); }
+	int CopyTo(CStringArray& other) const { return CSetBase<CString, LPCTSTR>::CopyTo(other); }
 };
 
 //////////////////////////////////////////////////////////////////////
