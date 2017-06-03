@@ -13,6 +13,7 @@
 
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\fontcache.h"
+#include "..\Shared\tooltipctrlex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -78,6 +79,8 @@ public:
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
 
+	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
+
 	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV);
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, BOOL bWithLabel = TRUE);
 
@@ -98,6 +101,7 @@ protected:
 
 	CEnHeaderCtrl m_header;
 	CImageList m_ilHeight, m_ilCheckboxes;
+	CToolTipCtrlEx m_tooltip;
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay;
@@ -114,6 +118,7 @@ public:
 	virtual ~CKanbanListCtrl();
 
 protected:
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 	// Generated message map functions
 protected:
@@ -130,21 +135,24 @@ protected:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	const KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	int CalcRequiredItemHeight(int nNumLines = -1) const;
-	int CalcItemTitleHeight() const;
+	int CalcItemTitleTextHeight() const;
 	int CalcLineHeight() const;
 	BOOL NeedVScrollbar() const;
 	void RefreshBkgndColor();
 	BOOL HandleLButtonClick(CPoint point);
-	BOOL GetItemCheckboxRect(int nItem, CRect& rItem);
-	BOOL GetItemCheckboxRect(CRect& rItem);
+	BOOL GetItemCheckboxRect(int nItem, CRect& rItem) const;
+	BOOL GetItemCheckboxRect(CRect& rItem) const;
+	BOOL GetItemLabelTextRect(int nItem, CRect& rItem) const;
+	BOOL InitTooltip();
+	BOOL GetItemTooltipRect(int nItem, CRect& rItem) const;
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;

@@ -143,6 +143,16 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
 {
+	// List tooltips
+	if (CToolTipCtrlEx::WantMessage(pMsg))
+	{
+		CKanbanListCtrl* pList = HitTestListCtrl(pMsg->pt);
+
+		if (pList)
+			pList->FilterToolTipMessage(pMsg);
+	}
+
+	// Our processing
 	switch (pMsg->message)
 	{
 		// handle 'escape' during dragging

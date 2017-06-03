@@ -23,6 +23,8 @@ public:
 
 	const TOOLINFO& GetLastHitToolInfo() const;
 
+	static BOOL WantMessage(const MSG* pMsg);
+
 protected:
 	BOOL m_bUsingRelayEvent;
 	int m_nLastHit;

@@ -202,6 +202,35 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 	}
 }
 
+BOOL CToolTipCtrlEx::WantMessage(const MSG* pMsg)
+{
+	UINT message = pMsg->message;
+
+	switch (message)
+	{
+	case WM_MOUSELEAVE:
+	case WM_MOUSEMOVE:
+	case WM_NCMOUSEMOVE:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDBLCLK:
+	case WM_NCLBUTTONDBLCLK:
+	case WM_NCRBUTTONDBLCLK:
+	case WM_NCMBUTTONDBLCLK:
+		return TRUE;
+	}
+
+	// all else
+	return (message >= WM_KEYFIRST && message <= WM_KEYLAST) ||
+			(message >= WM_SYSKEYFIRST && message <= WM_SYSKEYLAST);
+}
+
 void CToolTipCtrlEx::Activate(BOOL bActivate)
 {
 	CToolTipCtrl::Activate(bActivate);

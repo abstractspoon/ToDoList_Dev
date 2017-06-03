@@ -63,7 +63,7 @@ const int IMAGE_PADDING			= 1;
 const int ATTRIB_INDENT			= 6;
 const int TIP_PADDING			= 4;
 
-const CRect TEXT_BORDER			= CRect(4, 1, 3, 2);
+const CRect TEXT_BORDER			= CRect(4, 3, 3, 2);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +163,7 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
 	ON_WM_SIZE()
-	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
@@ -172,7 +172,7 @@ END_MESSAGE_MAP()
 
 BOOL CKanbanListCtrl::Create(UINT nID, CWnd* pParentWnd)
 {
-	UINT nFlags = (WS_CHILD | WS_VISIBLE | /*WS_BORDER |*/ LVS_REPORT | WS_TABSTOP | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER);
+	UINT nFlags = (WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_TABSTOP | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER);
 
 	return CListCtrl::Create(nFlags, CRect(0, 0, 0, 0), pParentWnd, nID);
 }
@@ -181,6 +181,8 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CListCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
+
+	VERIFY(InitTooltip());
 
 	CFont* pFont = m_fonts.GetFont();
 	ASSERT(pFont);
@@ -191,7 +193,10 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// the only column
 	InsertColumn(0, _T(""), LVCFMT_RIGHT, 100);
 	
-	SetExtendedStyle(GetExtendedStyle() | (LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP));
+	DWORD dwExStyle = GetExtendedStyle();
+	dwExStyle |= (LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT);
+	dwExStyle &= ~(LVS_EX_LABELTIP | LVS_EX_INFOTIP);
+	SetExtendedStyle(dwExStyle);
 
 	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
 	{
@@ -206,7 +211,7 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	RefreshColumnTitle();
 	OnDisplayAttributeChanged();
 	RefreshBkgndColor();
-	
+
 	return 0;
 }
 
@@ -393,7 +398,7 @@ int CKanbanListCtrl::CalcRequiredItemHeight(int nNumLines) const
 
 	if (nNumLines == -1) // Full height of item
 	{
-		nHeight += CalcItemTitleHeight();
+		nHeight += CalcItemTitleTextHeight();
 		nHeight += (m_aDisplayAttrib.GetSize() * m_nLineHeight);
 	}
 	else
@@ -404,7 +409,7 @@ int CKanbanListCtrl::CalcRequiredItemHeight(int nNumLines) const
 	return nHeight;
 }
 
-int CKanbanListCtrl::CalcItemTitleHeight() const
+int CKanbanListCtrl::CalcItemTitleTextHeight() const
 {
 	ASSERT(m_nLineHeight != -1);
 
@@ -413,10 +418,9 @@ int CKanbanListCtrl::CalcItemTitleHeight() const
 
 int CKanbanListCtrl::CalcLineHeight() const
 {
-	HFONT hFont = (HFONT)::SendMessage(GetSafeHwnd(), WM_GETFONT, 0, 0);
-	int nLineHeight = GraphicsMisc::GetFontPixelSize(hFont);
+	int nLineHeight = GraphicsMisc::GetTextHeight(_T("A"), *this, 0xFFFF);
 
-	return (nLineHeight + 1);
+	return nLineHeight;
 }
 
 int CKanbanListCtrl::AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect)
@@ -640,14 +644,14 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
 				
 				// first 'n' lines is the task title
-				rItem.DeflateRect(4, 3, 3, 2);
+				rItem.DeflateRect(TEXT_BORDER);
 
 				CRect rTitle(rItem);
-				rTitle.bottom = (rTitle.top + CalcItemTitleHeight());
+				rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
 
 				pDC->DrawText(pKI->sTitle, rTitle, nFlags | DT_WORDBREAK);
 
-				// Attribute display
+				// Rest of attributes display
 				CRect rLine(rItem);
 				rLine.top = rTitle.bottom;
 
@@ -707,7 +711,7 @@ void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	}
 }
 
-BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem)
+BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem) const
 {
 	if (m_bShowCompletionCheckboxes)
 	{
@@ -720,7 +724,7 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem)
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem)
+BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
 {
 	if (m_bShowCompletionCheckboxes)
 	{
@@ -733,6 +737,59 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem)
 
 	// else
 	return FALSE;
+}
+
+BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem) const
+{
+	if (!GetItemRect(nItem, rItem, LVIR_BOUNDS))
+		return FALSE;
+
+	rItem.DeflateRect(1, 1);
+
+	CRect rCheckbox(rItem);
+	VERIFY(GetItemCheckboxRect(rCheckbox));
+
+	rItem.left = (rCheckbox.right + IMAGE_PADDING);
+	
+	if (m_bShowTaskColorAsBar)
+		rItem.left += (2 + BAR_WIDTH);
+
+	rItem.DeflateRect(TEXT_BORDER);
+	rItem.bottom = (rItem.top + CalcItemTitleTextHeight());
+	rItem.top--;
+	rItem.right -= 2;
+
+	return TRUE;
+}
+
+BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rItem) const
+{
+	const KANBANITEM* pKI = m_data.GetItem(GetItemData(nItem));
+
+	if (!pKI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!GetItemLabelTextRect(nItem, rItem))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	HFONT hFont = m_fonts.GetHFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0);
+	int nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), rItem.Width(), hFont);
+
+	if (nTextHeight <= (NUM_TEXTLINES * m_nLineHeight))
+		return FALSE;
+
+	rItem.bottom -= (NUM_TEXTLINES * m_nLineHeight);
+	rItem.bottom += nTextHeight;
+
+	ClientToScreen(&rItem);
+
+	return TRUE;
 }
 
 UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib)
@@ -1291,44 +1348,6 @@ void CKanbanListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CListCtrl::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
-void CKanbanListCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	CPoint ptScreen(::GetMessagePos());
-	int nHit = FindTask(ptScreen);
-	ASSERT(nHit != -1);
-
-	DWORD dwTaskID = GetItemData(nHit);
-	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
-
-	if (!pKI)
-	{
-		ASSERT(0);
-		return;
-	}
-
-	// First set up the font for top-level items
-	HFONT hFont = m_fonts.GetHFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0);
-	::SendMessage(pNMHDR->hwndFrom, WM_SETFONT, (WPARAM)hFont, 0L);
-
-	// Always position the tooltip at the top of the item
-	CRect rLabel;
-
-	VERIFY(GetItemRect(nHit, rLabel, LVIR_LABEL));
-	ClientToScreen(rLabel);
-
-	CRect rTip(rLabel);
-	::SendMessage(pNMHDR->hwndFrom, TTM_ADJUSTRECT, TRUE, (LPARAM)&rTip);
-
-	rTip.top = rLabel.top;
-	rTip.bottom = rLabel.bottom;
-
-	rTip.OffsetRect(TIP_PADDING, 2);
-
-	::SetWindowPos(pNMHDR->hwndFrom, NULL, rTip.left, rTip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
-
-	*pResult = TRUE; // we do the positioning
-}
-
 BOOL CKanbanListCtrl::SaveToImage(CBitmap& bmImage, int nColWidth)
 {
 	CLockUpdates lock(*this);
@@ -1403,3 +1422,68 @@ LRESULT CKanbanListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return lr;
 }
 
+BOOL CKanbanListCtrl::InitTooltip()
+{
+	if (!m_tooltip.GetSafeHwnd())
+	{
+		if (!m_tooltip.Create(this))
+			return FALSE;
+
+		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
+		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+		m_tooltip.SetMaxTipWidth((UINT)(WORD)-1);
+
+		HWND hwndTooltips = (HWND)SendMessage(LVM_GETTOOLTIPS);
+		::SendMessage(hwndTooltips, TTM_ACTIVATE, FALSE, 0);
+	}
+
+	return TRUE;
+}
+
+int CKanbanListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	int nItem = HitTest(point);
+
+	if (nItem != -1)
+	{
+		CRect rTip;
+
+		if (GetItemTooltipRect(nItem, rTip))
+		{
+			pTI->hwnd = GetSafeHwnd();
+			pTI->uId = GetItemData(nItem);
+			pTI->uFlags |= TTF_TRANSPARENT;
+			pTI->lpszText = _tcsdup(GetItemText(nItem, 0)); // MFC will free the duplicated string
+
+			GetItemRect(nItem, &pTI->rect, LVIR_BOUNDS);
+			
+			return pTI->uId;
+		}
+	}
+
+	// else
+	return -1;
+}
+
+void CKanbanListCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	DWORD dwTaskID = m_tooltip.GetLastHitToolInfo().uId;
+	ASSERT(dwTaskID);
+
+	int nItem = FindTask(dwTaskID);
+	ASSERT(nItem != -1);
+
+	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+	ASSERT(pKI);
+
+	CRect rTip;
+	VERIFY(GetItemTooltipRect(nItem, rTip));
+
+	m_tooltip.AdjustRect(rTip, TRUE);
+	m_tooltip.SetMaxTipWidth(rTip.Width());
+	m_tooltip.SetFont(m_fonts.GetFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0));
+	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+
+	*pResult = TRUE; // we do the positioning
+}
