@@ -128,13 +128,15 @@ namespace GraphicsMisc
 	int DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UINT nFlags, CFont* pFont = NULL);
 	CFont* PrepareDCFont(CDC* pDC, HWND hwndRef = NULL, CFont* pFont = NULL, int nStockFont = DEFAULT_GUI_FONT); // returns 'old' font
 	
-	int GetTextWidth(const CString& sText, HWND hWnd, HFONT hFontRef = NULL);
+	int GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef = NULL);
 	int GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont = NULL);
+	int GetTextHeight(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef = NULL);
+	int GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont = NULL);
 	int AFX_CDECL GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
 	float GetAverageCharWidth(CDC* pDC, CFont* pFont = NULL);
 	int GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	int GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
-
+	
 	inline BOOL VerifyDeleteObject(HGDIOBJ hObj)
 	{
 		if (hObj == NULL)

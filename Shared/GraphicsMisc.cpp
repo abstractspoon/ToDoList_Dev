@@ -555,15 +555,44 @@ int GraphicsMisc::GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFo
 	return nLength;
 }
 
-int GraphicsMisc::GetTextWidth(const CString& sText, HWND hWnd, HFONT hFontRef)
+int GraphicsMisc::GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef)
 {
-	CWnd* pRefWnd = CWnd::FromHandle(hWnd);
+	CWnd* pRefWnd = CWnd::FromHandle(hWndRef);
 
 	if (!pRefWnd)
 		return -1;
 
 	// else
 	return GetTextWidth(sText, *pRefWnd, CFont::FromHandle(hFontRef));
+}
+
+int GraphicsMisc::GetTextHeight(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef)
+{
+	CWnd* pRefWnd = CWnd::FromHandle(hWndRef);
+
+	if (!pRefWnd)
+		return -1;
+
+	// else
+	return GetTextHeight(sText, *pRefWnd, nWidth, CFont::FromHandle(hFontRef));
+}
+
+int GraphicsMisc::GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont)
+{
+	CClientDC dc(&wndRef);
+	ASSERT_VALID(&dc);
+
+	if (pRefFont == NULL)
+		pRefFont = wndRef.GetFont();
+
+	CFont* pOldFont = dc.SelectObject(pRefFont);
+
+	CRect rText(0, 0, nWidth, 0);
+	VERIFY(dc.DrawText(sText, rText, (DT_CALCRECT | DT_WORDBREAK)) > 0);
+
+	dc.SelectObject(pOldFont);
+
+	return rText.Height();
 }
 
 int AFX_CDECL GraphicsMisc::GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
