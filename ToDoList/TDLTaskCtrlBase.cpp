@@ -240,7 +240,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		HWND hwndTooltips = (HWND)m_lcColumns.SendMessage(LVM_GETTOOLTIPS);
 
 		if (hwndTooltips)
-			::SendMessage(hwndTooltips, TTM_ACTIVATE, TRUE, 0);
+			::SendMessage(hwndTooltips, TTM_ACTIVATE, FALSE, 0);
 	}
 
 	return 0;
