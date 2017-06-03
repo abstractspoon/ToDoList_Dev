@@ -1675,6 +1675,20 @@ int CKanbanCtrl::GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const
 	return aAttrib.GetSize();
 }
 
+// ----------------------------------------------------
+#define APPLYOPTION2LISTS(fn)                         \
+{                                                     \
+	int nList = m_aListCtrls.GetSize();               \
+	while (nList--)                                   \
+	{                                                 \
+		CKanbanListCtrl* pList = m_aListCtrls[nList]; \
+		ASSERT(pList);                                \
+		if (pList)                                    \
+			pList->fn(bSet);                          \
+	}                                                 \
+}
+// ----------------------------------------------------
+
 void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 {
 	if (dwOption)
@@ -1695,49 +1709,9 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				RebuildListCtrls(TRUE);
 				break;
 
-			case KBCF_TASKTEXTCOLORISBKGND:
-				{
-					int nList = m_aListCtrls.GetSize();
-
-					while (nList--)
-					{
-						CKanbanListCtrl* pList = m_aListCtrls[nList];
-						ASSERT(pList);
-
-						if (pList)
-							pList->SetTextColorIsBackground(bSet);
-					}
-				}
-				break;
-
-			case KBCF_COLORBARBYPRIORITY:
-				{
-					int nList = m_aListCtrls.GetSize();
-
-					while (nList--)
-					{
-						CKanbanListCtrl* pList = m_aListCtrls[nList];
-						ASSERT(pList);
-
-						if (pList)
-							pList->SetColorTasksByPriority(bSet);
-					}
-				}
-				break;
-
-			case KBCF_STRIKETHRUDONETASKS:
-				{
-					int nList = m_aListCtrls.GetSize();
-
-					while (nList--)
-					{
-						CKanbanListCtrl* pList = m_aListCtrls[nList];
-						ASSERT(pList);
-
-						if (pList)
-							pList->SetStrikeThruDoneTasks(bSet);
-					}
-				}
+			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
+				if (m_nSortBy != IUI_NONE)
+					Sort(m_nSortBy, FALSE, m_bSortAscending);
 				break;
 
 			case KBCF_SHOWEMPTYCOLUMNS:
@@ -1746,39 +1720,24 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 					RebuildListCtrls(FALSE);
 				break;
 
-			case KBCF_SHOWTASKCOLORASBAR:
-				{
-					int nList = m_aListCtrls.GetSize();
-					
-					while (nList--)
-					{
-						CKanbanListCtrl* pList = m_aListCtrls[nList];
-						ASSERT(pList);
-						
-						if (pList)
-							pList->SetShowTaskColorAsBar(bSet);
-					}
-				}
+			case KBCF_TASKTEXTCOLORISBKGND:
+				APPLYOPTION2LISTS(SetTextColorIsBackground)
 				break;
 
-			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
-				if (m_nSortBy != IUI_NONE)
-					Sort(m_nSortBy, FALSE, m_bSortAscending);
+			case KBCF_COLORBARBYPRIORITY:
+				APPLYOPTION2LISTS(SetColorTasksByPriority)
+				break;
+
+			case KBCF_STRIKETHRUDONETASKS:
+				APPLYOPTION2LISTS(SetStrikeThruDoneTasks)
+				break;
+
+			case KBCF_SHOWTASKCOLORASBAR:
+				APPLYOPTION2LISTS(SetShowTaskColorAsBar)
 				break;
 
 			case KBCF_SHOWCOMPLETIONCHECKBOXES:
-				{
-					int nList = m_aListCtrls.GetSize();
-					
-					while (nList--)
-					{
-						CKanbanListCtrl* pList = m_aListCtrls[nList];
-						ASSERT(pList);
-						
-						if (pList)
-							pList->SetShowCompletionCheckboxes(bSet);
-					}
-				}
+				APPLYOPTION2LISTS(SetShowCompletionCheckboxes)
 				break;
 			}
 		}
