@@ -14,6 +14,7 @@
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
+#include "..\shared\timehelper.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\Itasklist.h"
@@ -32,6 +33,7 @@ struct STATSITEM
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
 	
 	COleDateTime dtStart, dtDone; 
+	double dTimeEstDays, dTimeSpentDays;
 	DWORD dwTaskID;
 
 protected:
@@ -86,21 +88,23 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CBurndownWnd)
 	enum { IDD = IDD_STATISTICS_DLG };
-	CStatic	m_stFrame;
-	int		m_nDisplay;
 	//}}AFX_DATA
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
+
+	CStatic	m_stFrame;
 	CBurndownChart m_graph;
-	int m_nScale;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbDisplay;
 
+	int m_nScale;
+	int		m_nDisplay;
+
 	CMapStatsItems m_data;
 	CDWordArray m_aDateOrdered;
-	COleDateTime m_dtEarliestDone, m_dtLatestDone;
+	COleDateTime m_dtEarliestDate, m_dtLatestDate;
 
 protected:
 // Overrides
@@ -124,6 +128,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnSelchangeDisplay();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -134,10 +139,13 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void SortData();
 	BOOL IsDataSorted() const;
-	void RebuildGraph(BOOL bStyleChange = FALSE);
-	void BuildSprintGraph(BOOL bStyleChange = FALSE);
-	void BuildBurndownGraph(BOOL bStyleChange = FALSE);
+	void RebuildGraph(BOOL bDisplayChange = FALSE);
+	void BuildSprintGraph(BOOL bDisplayChange = FALSE);
+	void BuildBurndownGraph(BOOL bDisplayChange = FALSE);
 	int CalculateIncompleteTaskCount(const COleDateTime& date);
+	double CalculateTimeSpentInDays(const COleDateTime& date);
+	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
+	double CalcTotalTimeEstimateInDays() const;
 	BOOL GetStatsItem(DWORD dwTaskID, STATSITEM& si) const;
 	void RebuildXScale();
 	int GetDataDuration() const;
@@ -150,8 +158,9 @@ protected:
 	static int CompareStatItems(const void* pV1, const void* pV2);
 	static COleDateTime GetTaskDate(time64_t tDate);
 
-public:
-	afx_msg void OnSelchangeDisplay();
+protected:
+	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
+
 };
 
 //{{AFX_INSERT_LOCATION}}
