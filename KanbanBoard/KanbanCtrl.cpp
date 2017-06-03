@@ -1422,6 +1422,7 @@ CKanbanListCtrl* CKanbanCtrl::NewListCtrl(const KANBANCOLUMN& colDef)
 		pList->SetStrikeThruDoneTasks(HasOption(KBCF_STRIKETHRUDONETASKS));
 		pList->SetColorTasksByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
 		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
+		pList->SetShowCompletionCheckboxes(HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES));
 
 		if (pList->Create(IDC_LISTCTRL, this))
 		{
