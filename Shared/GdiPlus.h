@@ -13,6 +13,8 @@
 //////////////////////////////////////////////////////////////////////
 
 /*
+#include <gdiplusflat.h>
+
 //---------------------------------------------------------------------------
 // GDI+ classes for forward reference
 //---------------------------------------------------------------------------
@@ -98,12 +100,14 @@ enum gdix_Status
 
 enum gdix_Unit 
 {
-	gdix_UnitWorld = 0
+	gdix_UnitWorld = 0,
+	gdix_UnitPixel = 2,
 };
 
 enum gdix_SmoothingMode 
 {
-	gdix_SmoothingModeHighQuality = 2
+	gdix_SmoothingModeHighQuality = 2,
+	gdix_SmoothingModeAntiAlias = 4,
 };
 
 enum gdix_StringAlignment 
@@ -155,8 +159,15 @@ public:
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
 	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
-// 	static BOOL CreateBitmapFromFile(const WCHAR* filename, GpBitmap **bitmap);
-// 	static BOOL CreateHBITMAPFromBitmap(GpBitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
+
+	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
+	static BOOL DeletePen(gdix_Pen* pen);
+
+	static BOOL CreateGraphics(HDC hdc, gdix_Graphics**);
+	static BOOL DeleteGraphics(gdix_Graphics* graphics);
+	static BOOL SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode);
+
+	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
 
 protected:
 	static HMODULE s_hGdiPlus;

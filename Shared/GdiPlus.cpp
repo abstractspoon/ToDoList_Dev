@@ -88,16 +88,17 @@ typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMSTREAM)(IStream*, gdix_B
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE)(const WCHAR*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEBITMAP)(gdix_Bitmap*);
-// typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, GpBitmap**);
-// typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(GpBitmap*, HBITMAP*, gdix_ARGB);
+typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdix_Bitmap**);
+typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 HMODULE   CGdiPlus::s_hGdiPlus = HMODULE(-1);
 ULONG_PTR CGdiPlus::s_GdiToken = NULL;
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 BOOL CGdiPlus::Initialize()
 {
@@ -151,6 +152,16 @@ void CGdiPlus::Free()
 	}
 }
 
+//////////////////////////////////////////////////////////////////////
+
+#define GETPROCADD(tdef, fnName)                                \
+	if (!Initialize()) return FALSE;                            \
+	static tdef pFN = (tdef)GetProcAddress(s_hGdiPlus, fnName); \
+	if (!pFN) return FALSE;
+
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL CGdiPlus::CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap)
 {
 	if (!Initialize())
@@ -167,73 +178,91 @@ BOOL CGdiPlus::CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap)
 
 BOOL CGdiPlus::CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap)
 {
-	if (!Initialize())
-		return FALSE;
+	GETPROCADD(PFNCREATEBITMAPFROMFILE, "GdipCreateBitmapFromFile");
+	return (pFN(filename, bitmap) == gdix_Ok);
 
-	static PFNCREATEBITMAPFROMFILE pFN = (PFNCREATEBITMAPFROMFILE)GetProcAddress(s_hGdiPlus, "GdipCreateBitmapFromFile");
-
-	if (pFN)
-		return (pFN(filename, bitmap) == gdix_Ok);
-
-	// else
-	return FALSE;
+// 	if (!Initialize())
+// 		return FALSE;
+// 
+// 	static PFNCREATEBITMAPFROMFILE pFN = (PFNCREATEBITMAPFROMFILE)GetProcAddress(s_hGdiPlus, "GdipCreateBitmapFromFile");
+// 
+// 	if (pFN)
+// 		return (pFN(filename, bitmap) == gdix_Ok);
+// 
+// 	// else
+//	return FALSE;
 }
 
 BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background)
 {
-	if (!Initialize())
-		return FALSE;
-
-	static PFNCREATEHBITMAPFROMBITMAP pFN = (PFNCREATEHBITMAPFROMBITMAP)GetProcAddress(s_hGdiPlus, "GdipCreateHBITMAPFromBitmap");
-
-	if (pFN)
-		return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
-	
-	// else
-	return FALSE;
+	GETPROCADD(PFNCREATEHBITMAPFROMBITMAP, "GdipCreateHBITMAPFromBitmap");
+	return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
+// 	if (!Initialize())
+// 		return FALSE;
+// 
+// 	static PFNCREATEHBITMAPFROMBITMAP pFN = (PFNCREATEHBITMAPFROMBITMAP)GetProcAddress(s_hGdiPlus, "GdipCreateHBITMAPFromBitmap");
+// 
+// 	if (pFN)
+// 		return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
+// 	
+// 	// else
+// 	return FALSE;
 }
 
 BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)
 {
-	if (!Initialize())
-		return FALSE;
-
-	static PFNDELETEBITMAP pFN = (PFNDELETEBITMAP)GetProcAddress(s_hGdiPlus, "GdipDisposeImage");
-
-	if (pFN)
-		return (pFN(bitmap) == gdix_Ok);
-	
-	// else
-	return FALSE;
+	GETPROCADD(PFNDELETEBITMAP, "GdipDisposeImage");
+	return (pFN(bitmap) == gdix_Ok);
+// 	if (!Initialize())
+// 		return FALSE;
+// 
+// 	static PFNDELETEBITMAP pFN = (PFNDELETEBITMAP)GetProcAddress(s_hGdiPlus, "GdipDisposeImage");
+// 
+// 	if (pFN)
+// 		return (pFN(bitmap) == gdix_Ok);
+// 	
+// 	// else
+// 	return FALSE;
 }
 
-/*
-BOOL CGdiPlus::CreateBitmapFromFile(const WCHAR* filename, GpBitmap **bitmap)
+BOOL CGdiPlus::CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen)
 {
-	if (!Initialize())
-		return FALSE;
+	GETPROCADD(PFNCREATEPEN1, "GdipCreatePen1");
 
-	static PFNCREATEBITMAPFROMFILE2 pFN = (PFNCREATEBITMAPFROMFILE2)GetProcAddress(s_hGdiPlus, "GdipCreateBitmapFromFile");
-
-	if (pFN)
-		return (pFN(filename, bitmap) == gdix_Ok);
-
-	// else
-	return FALSE;
+	return (pFN(color, width, gdix_UnitPixel, pen) == gdix_Ok);
 }
 
-BOOL CGdiPlus::CreateHBITMAPFromBitmap(GpBitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background)
+BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
 {
-	if (!Initialize())
-		return FALSE;
+	GETPROCADD(PFNDELETEPEN, "GdipDeletePen");
 
-	static PFNCREATEHBITMAPFROMBITMAP2 pFN = (PFNCREATEHBITMAPFROMBITMAP2)GetProcAddress(s_hGdiPlus, "GdipCreateHBITMAPFromBitmap");
-
-	if (pFN)
-		return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
-	
-	// else
-	return FALSE;
+	return (pFN(pen) == gdix_Ok);
 }
-*/
 
+BOOL CGdiPlus::CreateGraphics(HDC hdc, gdix_Graphics** graphics)
+{
+	GETPROCADD(PFNCREATEFROMHDC, "GdipCreateFromHDC");
+
+	return (pFN(hdc, graphics) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DeleteGraphics(gdix_Graphics* graphics)
+{
+	GETPROCADD(PFNDELETEGRAPHICS, "GdipDeleteGraphics");
+
+	return (pFN(graphics) == gdix_Ok);
+}
+
+BOOL CGdiPlus::SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode)
+{
+	GETPROCADD(PFNSETSMOOTHINGMODE, "GdipSetSmoothingMode");
+
+	return (pFN(graphics, mode) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to)
+{
+	GETPROCADD(PFNDRAWLINE, "GdipDrawLine");
+
+	return (pFN(graphics, pen, from->x, from->y, to->x, to->y) == gdix_Ok);
+}
