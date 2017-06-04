@@ -5,8 +5,9 @@
 #include "resource.h"
 #include "PreferencesUITasklistPage.h"
 
-#include "..\shared\colordef.h"
 #include "..\shared\misc.h"
+
+#include "..\3rdparty\colordef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

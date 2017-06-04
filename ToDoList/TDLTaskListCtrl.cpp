@@ -18,10 +18,11 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
-#include "..\shared\colordef.h"
 #include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\osversion.h"
+
+#include "..\3rdparty\colordef.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

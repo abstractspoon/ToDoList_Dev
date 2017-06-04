@@ -19,13 +19,14 @@
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\colordef.h"
 #include "..\shared\preferences.h"
 #include "..\shared\themed.h"
 #include "..\shared\wndprompt.h"
 #include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\enbitmap.h"
+
+#include "..\3rdparty\colordef.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -16,8 +16,9 @@
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
 #include "..\shared\themed.h"
-#include "..\shared\colordef.h"
 #include "..\shared\holdredraw.h"
+
+#include "..\3rdparty\colordef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

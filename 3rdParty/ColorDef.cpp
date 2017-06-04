@@ -62,6 +62,14 @@ BOOL RGBX::IsGray(int nTolerance) const
 	return (abs(btRed - btGreen) <= nTolerance && abs(btGreen - btBlue) <= nTolerance);
 }
 
+COLORREF RGBX::AdjustLighting(COLORREF color, double dFactor, bool bRGB)
+{
+	RGBX rgb(color);
+	rgb.AdjustLighting(dFactor, bRGB);
+	
+	return rgb;
+}
+
 void RGBX::AdjustLighting(double dFactor, bool bRGB)
 {
 	if (dFactor == 0.0)

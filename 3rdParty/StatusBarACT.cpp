@@ -52,9 +52,9 @@
 
 #include "stdafx.h"
 #include "StatusBarACT.h"
+#include "colordef.h"
 
 #include "..\shared\GraphicsMisc.h"
-#include "..\shared\colordef.h"
 #include "..\shared\enstring.h"
 #include "..\shared\themed.h"
 

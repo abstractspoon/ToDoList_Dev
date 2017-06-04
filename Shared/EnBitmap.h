@@ -9,7 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "colordef.h"
+#include "..\3rdparty\colordef.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////////////

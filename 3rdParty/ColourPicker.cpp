@@ -32,9 +32,9 @@
 #include "stdafx.h"
 #include "ColourPopup.h"
 #include "ColourPicker.h"
+#include "colordef.h"
 
 #include "..\shared\themed.h"
-#include "..\shared\colordef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

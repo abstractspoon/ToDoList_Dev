@@ -6,8 +6,9 @@
 #include "GraphicsMisc.h"
 #include "Misc.h"
 #include "themed.h"
-#include "colordef.h"
 #include "osversion.h"
+
+#include "..\3rdparty\colordef.h"
 
 #include <windef.h>
 #include <afxpriv.h>

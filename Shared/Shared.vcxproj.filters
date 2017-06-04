@@ -34,9 +34,6 @@
     <ClCompile Include="colorcombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ColorDef.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ContentCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -508,9 +505,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="colorcombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ColorDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ContentCtrl.h">

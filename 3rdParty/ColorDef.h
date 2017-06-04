@@ -58,6 +58,7 @@ public:
 	BOOL IsGray(int nTolerance = 0) const;
 	void AdjustLighting(double dFactor, bool bRGB);
 
+	static COLORREF AdjustLighting(COLORREF color, double dFactor, bool bRGB);
 	static COLORREF HLS2RGB(const HLSX& hls, RGBX& rgb);
 	static void RGB2HLS(const RGBX& rgb, HLSX& hls);
 

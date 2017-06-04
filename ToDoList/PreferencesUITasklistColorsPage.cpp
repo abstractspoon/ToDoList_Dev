@@ -5,11 +5,12 @@
 #include "resource.h"
 #include "PreferencesUITasklistColorsPage.h"
 
-#include "..\shared\colordef.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\graphicsmisc.h"
+
+#include "..\3rdparty\colordef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

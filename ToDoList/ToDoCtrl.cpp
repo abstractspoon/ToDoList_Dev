@@ -30,7 +30,6 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\colordef.h"
 #include "..\shared\spellcheckdlg.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\winclasses.h"
@@ -57,6 +56,7 @@
 
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
+#include "..\3rdparty\colordef.h"
 
 #include <Windowsx.h>
 #include <float.h>
