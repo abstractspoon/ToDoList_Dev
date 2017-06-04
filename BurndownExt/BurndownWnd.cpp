@@ -70,9 +70,21 @@ struct DISPLAYITEM
 static DISPLAYITEM STATSDISPLAY[] = 
 {
 	{ IDS_DISPLAY_BURNDOWN, IDS_DISPLAY_BURNDOWN_YAXIS, SD_BURNDOWN	},
-//	{ IDS_DISPLAY_SPRINT, IDS_DISPLAY_SPRINT_YAXIS,	SD_SPRINT },
+	{ IDS_DISPLAY_SPRINT, IDS_DISPLAY_SPRINT_YAXIS,	SD_SPRINT },
 };
 static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
+
+/////////////////////////////////////////////////////////////////////////////
+
+const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
+const COLORREF COLOR_RED	= RGB(204,   0,   0); 
+const COLORREF COLOR_YELLOW = RGB(204, 164,   0); 
+const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
+const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
+const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
+//const COLORREF COLOR_	= RGB(0,   0, 244); 
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -424,7 +436,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			si.dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
 
 			// make sure start is less than done
-			if (si.IsDone())
+			if (si.IsDone() && si.HasStart())
 				si.dtStart = min(si.dtStart, si.dtDone);
 
 			// update data extents as we go
@@ -552,23 +564,23 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (m_data.Lookup(dwTaskID, si))
 		{
-			if (attrib.HasKey(IUI_STARTDATE))
-			{
-				si.dtStart = GetTaskStartDate(pTasks, hTask);
-				
-				// make sure start is less than done
-				if (si.IsDone())
-					si.dtStart = min(si.dtStart, si.dtDone);
-				
-				m_data[dwTaskID] = si;
-			}
-				
 			if (attrib.HasKey(IUI_DONEDATE))
 			{
 				si.dtDone = GetTaskDoneDate(pTasks, hTask);
 				m_data[dwTaskID] = si;
 			}
 
+			if (attrib.HasKey(IUI_STARTDATE))
+			{
+				si.dtStart = GetTaskStartDate(pTasks, hTask);
+				
+				// make sure start is less than done
+				if (si.IsDone() && si.HasStart())
+					si.dtStart = min(si.dtStart, si.dtDone);
+				
+				m_data[dwTaskID] = si;
+			}
+				
 			if (attrib.HasKey(IUI_TIMEEST))
 				si.dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
 
@@ -1088,7 +1100,7 @@ void CBurndownWnd::BuildBurndownGraph(BOOL bDisplayChange)
 		m_graph.SetYText(CEnString(IDS_DISPLAY_BURNDOWN_YAXIS));
 
 		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-		m_graph.SetDatasetPenColor(0, RGB( 255, 128, 255));
+		m_graph.SetDatasetPenColor(0, COLOR_GREEN);
 		m_graph.SetDatasetMinToZero(0, true);
 	}
 	
@@ -1140,15 +1152,21 @@ void CBurndownWnd::RebuildGraph(BOOL bDisplayChange)
 
 void CBurndownWnd::BuildSprintGraph(BOOL bDisplayChange)
 {
+	enum 
+	{ 
+		SPRINT_EST,
+		SPRINT_SPENT
+	};
+
 	if (bDisplayChange)
 	{
-		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_LINE);
-		m_graph.SetDatasetPenColor(0,  RGB( 64, 255, 255));
-		m_graph.SetDatasetMinToZero(0, true);
+		m_graph.SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
+		m_graph.SetDatasetPenColor(SPRINT_EST,  COLOR_RED);
+		m_graph.SetDatasetMinToZero(SPRINT_EST, true);
 
-		m_graph.SetDatasetStyle(1, HMX_DATASET_STYLE_LINE);
-		m_graph.SetDatasetPenColor(1, RGB( 255, 64, 255));
-		m_graph.SetDatasetMinToZero(1, true);
+		m_graph.SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
+		m_graph.SetDatasetPenColor(SPRINT_SPENT, COLOR_YELLOW);
+		m_graph.SetDatasetMinToZero(SPRINT_SPENT, true);
 	}
 
 	// build the graph
@@ -1163,7 +1181,7 @@ void CBurndownWnd::BuildSprintGraph(BOOL bDisplayChange)
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
 		double dEst = ((nDay * dTotalEst) / nNumDays);
-		m_graph.AddData(0, dEst);
+		m_graph.AddData(SPRINT_EST, (dTotalEst - dEst));
 	}
 
 	// Time Spent
@@ -1172,7 +1190,7 @@ void CBurndownWnd::BuildSprintGraph(BOOL bDisplayChange)
 		COleDateTime date(dtStart.m_dt + nDay);
 		double dSpent = CalculateTimeSpentInDays(date);
 
-		m_graph.AddData(1, dSpent);
+		m_graph.AddData(SPRINT_SPENT, (dTotalEst - dSpent));
 	}
 
 	m_graph.CalcDatas();
@@ -1223,26 +1241,28 @@ double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
 		STATSITEM si;
 		VERIFY (GetStatsItem(dwTaskID, si));
 
+		if (si.dTimeSpentDays <= 0)
+			continue;
+		
 		if (si.IsDone())
 		{
-			if (si.dtDone < date)
+			if (date >= si.dtDone)
 			{
 				dDays += si.dTimeSpentDays;
 			}
-		}
-		else if (si.HasStart())
-		{
-			if (si.dtStart > date)
+			else if (si.HasStart() && (date > si.dtStart))
 			{
-				continue;
-			}
-			else if (si.dTimeSpentDays > 0)
-			{
-				COleDateTime dtNow(COleDateTime::GetCurrentTime());
-				double dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);
+				double dProportion = (date.m_dt - si.dtStart.m_dt) / (si.dtDone.m_dt - si.dtStart.m_dt);
 
 				dDays += (si.dTimeSpentDays * min(dProportion, 1.0));
 			}
+		}
+		else if (si.HasStart() && (date > si.dtStart))
+		{
+			COleDateTime dtNow(COleDateTime::GetCurrentTime());
+			double dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);
+
+			dDays += (si.dTimeSpentDays * min(dProportion, 1.0));
 		}
 	}
 

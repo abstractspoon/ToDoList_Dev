@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "HMXChart.h"
+#include "ColorDef.h"
 
 #include <math.h>
 
@@ -614,32 +615,26 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 	{
 	case HMX_DATASET_STYLE_LINE:
 		{
-			// let's rock
+			CArray<POINT, POINT&> points;
+			int nPoints = GetPoints(ds, points, FALSE);
+
+			if (!nPoints)
+				return false;
+
 			CPen pen(PS_SOLID, ds.GetSize(), ds.GetColor()), *pPenOld;
-			CBrush brush(ds.GetColor()), *pBrushOld;
 			pPenOld = dc.SelectObject(&pen);
-			pBrushOld = dc.SelectObject(&brush);
-			
-			// nTemp will contains a parametrized data 
-			nTemp = (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-			dc.MoveTo(m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f), m_rectData.bottom - (int)nTemp);
-			for(; f<ds.GetDatasetSize(); f++) 
-			{
-				ds.GetData(f, nSample);
-				if(nSample != HMX_DATASET_VALUE_INVALID) 
-				{
-					nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-					dc.LineTo(m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f), m_rectData.bottom - (int)(nTemp));
-				}
-			}
+
+			dc.Polyline(points.GetData(), nPoints);
 			
 			nMarkerType = ds.GetMarker();
-			for(f=0; f<ds.GetDatasetSize(); f++) 
+			if(nMarkerType != HMX_DATASET_MARKER_NONE) 
 			{
-				ds.GetData(f, nSample);
-				if(nMarkerType != HMX_DATASET_MARKER_NONE) 
+				CBrush brush(ds.GetColor()), *pBrushOld;
+				pBrushOld = dc.SelectObject(&brush);
+
+				POINT ptMarker[5] = { 0 };
+				for(f=0; f<ds.GetDatasetSize(); f++) 
 				{
-					POINT* pPoint = new POINT[ 5 ];
 					ds.GetData(f, nSample);
 					if(nSample != HMX_DATASET_VALUE_INVALID) 
 					{
@@ -647,57 +642,56 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 						switch(ds.GetMarker()) 
 						{
 						case HMX_DATASET_MARKER_TRI:
-							pPoint[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
-							pPoint[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							pPoint[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
-							pPoint[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							pPoint[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
-							pPoint[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							dc.Polygon(pPoint, 3);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							dc.Polygon(ptMarker, 3);
 							break;
 						case HMX_DATASET_MARKER_BOX:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							pPoint[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
-							pPoint[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							pPoint[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
-							pPoint[ 1 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							pPoint[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
-							pPoint[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							pPoint[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
-							pPoint[ 3 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							dc.Polygon(pPoint, 4);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
+							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							ptMarker[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							dc.Polygon(ptMarker, 4);
 							break;
 						case HMX_DATASET_MARKER_SPH:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							pPoint[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
-							pPoint[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							pPoint[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
-							pPoint[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							dc.Ellipse(pPoint[0].x, pPoint[0].y, pPoint[1].x, pPoint[1].y);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							dc.Ellipse(ptMarker[0].x, ptMarker[0].y, ptMarker[1].x, ptMarker[1].y);
 							break;
 						case HMX_DATASET_MARKER_DIA:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							pPoint[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
-							pPoint[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							pPoint[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
-							pPoint[ 1 ].y = m_rectData.bottom - (int)nTemp;
-							pPoint[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
-							pPoint[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							pPoint[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
-							pPoint[ 3 ].y = m_rectData.bottom - (int)nTemp;
-							dc.Polygon(pPoint, 4);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp;
+							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							ptMarker[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp;
+							dc.Polygon(ptMarker, 4);
 							break;
 						}
 					}
-					delete []pPoint;
 				}
+				dc.SelectObject(pBrushOld);
 			}
 			
 			dc.SelectObject(pPenOld);
-			dc.SelectObject(pBrushOld);
 		}
 		break;
 		
@@ -758,74 +752,18 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 			COLORREF crArea = ds.GetColor();
 
 			if (bAreaLine)
-			{
-				// lighten the colour
-				BYTE bRed = GetRValue(crArea);
-				BYTE bGreen = GetGValue(crArea);
-				BYTE bBlue = GetBValue(crArea);
-
-				bRed = (BYTE)min(255, (bRed * 5)/3);
-				bGreen = (BYTE)min(255, (bGreen * 5)/3);
-				bBlue = (BYTE)min(255, (bBlue * 5)/3);
-
-				crArea = RGB(bRed, bGreen, bBlue);
-			}
+				crArea = RGBX::AdjustLighting(crArea, 0.25, FALSE);
 
 			// let's rock
 			CBrush brush(crArea);
 			CBrush* pBrushOld = dc.SelectObject(&brush);
 			dc.SelectStockObject(NULL_PEN);
 			
-			// let's cale real dataset size (excluding invalid data)
-			int nPoints = 0, g;
-			for(g=0; g<ds.GetDatasetSize(); g++) 
-			{
-				ds.GetData(g, nSample);
-				if(nSample != HMX_DATASET_VALUE_INVALID)
-					nPoints++;
-			}
-			// add two points, for firs and last point 
-			nPoints += 2;
-			
-			// create a dynamic array
-			POINT* pPoint = new POINT[ nPoints ];
-			
-			// the first
-			f=0;
-			do 
-			{
-				ds.GetData(f, nSample);
-				f++;
-			} 
-			while(nSample == HMX_DATASET_VALUE_INVALID);
-			
-			pPoint[0].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(f-1.0));
-			nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-			nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
-			nTemp = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-			pPoint[0].y = m_rectData.bottom - (int)nTemp;
-			
-			g = 1;
-			for(f=0; f<ds.GetDatasetSize(); f++) 
-			{
-				ds.GetData(f, nSample);
-				if(nSample == HMX_DATASET_VALUE_INVALID)
-					continue;
-				// nTemp will contains a parametrized data 
-				nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-				pPoint[g].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
-				pPoint[g].y = m_rectData.bottom - (int) nTemp;
-				g++;
-			}
-			
-			// the last
-			//		pPoint[nPoints-1].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(g-2));
-			pPoint[nPoints-1].x = pPoint[g-1].x;
-			nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-			nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
-			nTemp = (nZeroLine - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-			pPoint[nPoints-1].y = m_rectData.bottom - (int) nTemp;
-			dc.Polygon(pPoint, nPoints);
+			// let's calc real dataset size (excluding invalid data)
+			CArray<POINT, POINT&> points;
+			int nPoints = GetPoints(ds, points, TRUE);
+
+			dc.Polygon(points.GetData(), nPoints);
 
 			// draw line too?
 			if (bAreaLine)
@@ -833,32 +771,84 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 				CPen pen(PS_SOLID, 2, ds.GetColor());
 				CPen* pPenOld = dc.SelectObject(&pen);
 
-				// nTemp will contains a parametrized data 
-				for(f=0; f<ds.GetDatasetSize(); f++) 
-				{
-					ds.GetData(f, nSample);
-					if(nSample != HMX_DATASET_VALUE_INVALID) 
-					{
-						nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-
-						if (f == 0)
-							dc.MoveTo(m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f), m_rectData.bottom - (int)(nTemp));
-						else
-							dc.LineTo(m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f), m_rectData.bottom - (int)(nTemp));
-					}
-				}
-
+				// don't draw the first/last points
+				dc.Polyline(points.GetData() + 1, nPoints - 2);
 				dc.SelectObject(pPenOld);
 			}
 			
 			dc.SelectObject(pBrushOld);
-			
-			delete []pPoint;
 		}
 		break;
 	}
 
 	return true;
+}
+
+int CHMXChart::GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const
+{
+	// let's calc real dataset size (excluding invalid data)
+	int nPoints = 0, g;
+	double nSample;
+
+	for(g=0; g<ds.GetDatasetSize(); g++) 
+	{
+		ds.GetData(g, nSample);
+		if(nSample != HMX_DATASET_VALUE_INVALID)
+			nPoints++;
+	}
+	// add two points, for first and last point 
+	if (bArea)
+		nPoints += 2;
+
+	points.SetSize(nPoints);
+	
+	double nBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
+
+	// the first (area only)
+	g = 0;
+	if (bArea)
+	{
+		int f=0;
+		do 
+		{
+			ds.GetData(f, nSample);
+			f++;
+		} 
+		while(nSample == HMX_DATASET_VALUE_INVALID);
+
+		points[0].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(f-1.0));
+		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
+		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
+		double nTemp = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
+		points[0].y = m_rectData.bottom - (int)nTemp;
+
+		g++;
+	}
+
+	for(int f=0; f<ds.GetDatasetSize(); f++) 
+	{
+		ds.GetData(f, nSample);
+		if(nSample == HMX_DATASET_VALUE_INVALID)
+			continue;
+		// nTemp will contains a parametrized data 
+		double nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
+		points[g].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+		points[g].y = m_rectData.bottom - (int) nTemp;
+
+		g++;
+	}
+	
+	// the last (area only)
+	if (bArea)
+	{
+		points[nPoints-1].x = points[g-1].x;
+		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
+		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
+		double nTemp = (nZeroLine - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
+		points[nPoints-1].y = m_rectData.bottom - (int) nTemp;
+	}
+
+	return points.GetSize();
 }
 
 //

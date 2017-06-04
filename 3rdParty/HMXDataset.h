@@ -67,6 +67,7 @@ protected:
 											// unused if style is area
 	int						m_nStyle;		// data style (see #define section)
 	bool					m_bSetMinToZero;
+
 };
 
 #endif // !defined(AFX_HMXDATASET_H__1921781C_7E9F_11D3_BD1D_0060520365FB__INCLUDED_)

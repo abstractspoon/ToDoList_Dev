@@ -189,6 +189,7 @@ protected:
 protected:
 	int CalcScaleFontSize(CDC& dc) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+	int GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
