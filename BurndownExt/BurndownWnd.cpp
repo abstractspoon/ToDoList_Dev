@@ -1098,29 +1098,6 @@ COleDateTime CBurndownWnd::GetGraphEndDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-void CBurndownWnd::BuildBurndownGraph()
-{
-	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	m_graph.SetDatasetPenColor(0, COLOR_GREEN);
-	m_graph.SetDatasetMinToZero(0, true);
-	
-	// build the graph
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		COleDateTime date(dtStart.m_dt + nDay);
-		int nNumNotDone = CalculateIncompleteTaskCount(date);
-
-		m_graph.AddData(0, nNumNotDone);
-	}
-
-	m_graph.CalcDatas();
-}
-
 void CBurndownWnd::RebuildGraph()
 {
 	if (!IsWindowVisible())
@@ -1153,6 +1130,52 @@ void CBurndownWnd::RebuildGraph()
 	}
 
 	m_graph.Redraw();
+}
+
+void CBurndownWnd::BuildBurndownGraph()
+{
+	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
+	m_graph.SetDatasetPenColor(0, COLOR_GREEN);
+	m_graph.SetDatasetMinToZero(0, true);
+	
+	// build the graph
+	COleDateTime dtStart = GetGraphStartDate();
+	COleDateTime dtEnd = GetGraphEndDate();
+
+	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+
+	for (int nDay = 0; nDay <= nNumDays; nDay++)
+	{
+		COleDateTime date(dtStart.m_dt + nDay);
+		int nNumNotDone = CalculateIncompleteTaskCount(date);
+
+		m_graph.AddData(0, nNumNotDone);
+	}
+
+	m_graph.CalcDatas();
+}
+
+int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
+{
+	// work thru items until we hit the first task whose 
+	// start date > date, counting how many are not complete as we go
+	int nNumItems = m_aDateOrdered.GetSize();
+	int nNumNotDone = 0;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		DWORD dwTaskID = m_aDateOrdered[nItem];
+		STATSITEM si;
+		VERIFY (GetStatsItem(dwTaskID, si));
+
+		if (si.dtStart > date)
+			break;
+
+		if (!si.IsDone() || (si.dtDone > date))
+			nNumNotDone++;
+	}
+
+	return nNumNotDone;
 }
 
 void CBurndownWnd::BuildSprintGraph()
@@ -1196,40 +1219,6 @@ void CBurndownWnd::BuildSprintGraph()
 	}
 
 	m_graph.CalcDatas();
-}
-
-int CBurndownWnd::GetDataDuration() const
-{
-	double dStart = m_dtEarliestDate;
-	ASSERT(dStart > 0.0);
-
-	double dEnd = (m_dtLatestDate.m_dt + 1.0);
-	ASSERT(dEnd >= dStart);
-
-	return ((int)dEnd - (int)dStart);
-}
-
-int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
-{
-	// work thru items until we hit the first task whose 
-	// start date > date, counting how many are not complete as we go
-	int nNumItems = m_aDateOrdered.GetSize();
-	int nNumNotDone = 0;
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
-		STATSITEM si;
-		VERIFY (GetStatsItem(dwTaskID, si));
-
-		if (si.dtStart > date)
-			break;
-
-		if (!si.IsDone() || (si.dtDone > date))
-			nNumNotDone++;
-	}
-
-	return nNumNotDone;
 }
 
 double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
@@ -1292,6 +1281,17 @@ double CBurndownWnd::CalcTotalTimeEstimateInDays() const
 	}
 
 	return dDays;
+}
+
+int CBurndownWnd::GetDataDuration() const
+{
+	double dStart = m_dtEarliestDate;
+	ASSERT(dStart > 0.0);
+
+	double dEnd = (m_dtLatestDate.m_dt + 1.0);
+	ASSERT(dEnd >= dStart);
+
+	return ((int)dEnd - (int)dStart);
 }
 
 BOOL CBurndownWnd::GetStatsItem(DWORD dwTaskID, STATSITEM& si) const
