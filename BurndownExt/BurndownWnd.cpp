@@ -84,7 +84,9 @@ const COLORREF COLOR_PINK	= RGB(234,  28,  74);
 const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
 //const COLORREF COLOR_	= RGB(0,   0, 244); 
 
+/////////////////////////////////////////////////////////////////////////////
 
+const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +144,8 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nDisplay(0),
-	m_nScale(1)
+	m_nScale(1),
+	m_bGraphNeedsRebuildOnShow(FALSE)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -180,6 +183,8 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
+	ON_WM_SHOWWINDOW()
+	ON_MESSAGE(WM_REBUILDGRAPH, OnRebuildGraph)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -253,7 +258,7 @@ BOOL CBurndownWnd::OnInitDialog()
 		CDialogHelper::AddString(m_cbDisplay, di.nTitleID, nDisplay);
 	}
 	m_cbDisplay.SetCurSel(0);
-	RebuildGraph(TRUE);
+	RebuildGraph();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -1093,14 +1098,11 @@ COleDateTime CBurndownWnd::GetGraphEndDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-void CBurndownWnd::BuildBurndownGraph(BOOL bDisplayChange)
+void CBurndownWnd::BuildBurndownGraph()
 {
-	if (bDisplayChange)
-	{
-		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-		m_graph.SetDatasetPenColor(0, COLOR_GREEN);
-		m_graph.SetDatasetMinToZero(0, true);
-	}
+	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
+	m_graph.SetDatasetPenColor(0, COLOR_GREEN);
+	m_graph.SetDatasetMinToZero(0, true);
 	
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
@@ -1119,19 +1121,22 @@ void CBurndownWnd::BuildBurndownGraph(BOOL bDisplayChange)
 	m_graph.CalcDatas();
 }
 
-void CBurndownWnd::RebuildGraph(BOOL bDisplayChange)
+void CBurndownWnd::RebuildGraph()
 {
+	if (!IsWindowVisible())
+	{
+		m_bGraphNeedsRebuildOnShow = TRUE;
+		return;
+	}
+
 	CWaitCursor cursor;
 
 	m_graph.ClearData();
 
 	const DISPLAYITEM& di = STATSDISPLAY[m_nDisplay];
 
-	if (bDisplayChange)
-	{
-		m_graph.SetTitle(CEnString(di.nTitleID));
-		m_graph.SetYText(CEnString(di.nYAxisID));
-	}
+	m_graph.SetTitle(CEnString(di.nTitleID));
+	m_graph.SetYText(CEnString(di.nYAxisID));
 
 	if (m_data.GetCount())
 		RebuildXScale();
@@ -1139,18 +1144,18 @@ void CBurndownWnd::RebuildGraph(BOOL bDisplayChange)
 	switch (di.nDisplay)
 	{
 	case SD_BURNDOWN:
-		BuildBurndownGraph(bDisplayChange);
+		BuildBurndownGraph();
 		break;
 
 	case SD_SPRINT:
-		BuildSprintGraph(bDisplayChange);
+		BuildSprintGraph();
 		break;
 	}
 
 	m_graph.Redraw();
 }
 
-void CBurndownWnd::BuildSprintGraph(BOOL bDisplayChange)
+void CBurndownWnd::BuildSprintGraph()
 {
 	enum 
 	{ 
@@ -1158,16 +1163,13 @@ void CBurndownWnd::BuildSprintGraph(BOOL bDisplayChange)
 		SPRINT_SPENT
 	};
 
-	if (bDisplayChange)
-	{
-		m_graph.SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
-		m_graph.SetDatasetPenColor(SPRINT_EST,  COLOR_RED);
-		m_graph.SetDatasetMinToZero(SPRINT_EST, true);
+	m_graph.SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
+	m_graph.SetDatasetPenColor(SPRINT_EST,  COLOR_RED);
+	m_graph.SetDatasetMinToZero(SPRINT_EST, true);
 
-		m_graph.SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
-		m_graph.SetDatasetPenColor(SPRINT_SPENT, COLOR_YELLOW);
-		m_graph.SetDatasetMinToZero(SPRINT_SPENT, true);
-	}
+	m_graph.SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
+	m_graph.SetDatasetPenColor(SPRINT_SPENT, COLOR_YELLOW);
+	m_graph.SetDatasetMinToZero(SPRINT_SPENT, true);
 
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
@@ -1301,5 +1303,25 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	RebuildGraph(TRUE);
+	RebuildGraph();
 }
+
+void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialog::OnShowWindow(bShow, nStatus);
+
+	if (bShow && m_bGraphNeedsRebuildOnShow)
+		PostMessage(WM_REBUILDGRAPH);
+}
+
+LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	ASSERT(m_bGraphNeedsRebuildOnShow);
+
+	m_bGraphNeedsRebuildOnShow = FALSE;
+	RebuildGraph();
+
+	return 0L;
+}
+
+

@@ -100,7 +100,8 @@ protected:
 	CComboBox m_cbDisplay;
 
 	int m_nScale;
-	int		m_nDisplay;
+	int	m_nDisplay;
+	BOOL m_bGraphNeedsRebuildOnShow;
 
 	CMapStatsItems m_data;
 	CDWordArray m_aDateOrdered;
@@ -129,6 +130,8 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeDisplay();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -139,9 +142,9 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void SortData();
 	BOOL IsDataSorted() const;
-	void RebuildGraph(BOOL bDisplayChange = FALSE);
-	void BuildSprintGraph(BOOL bDisplayChange = FALSE);
-	void BuildBurndownGraph(BOOL bDisplayChange = FALSE);
+	void RebuildGraph();
+	void BuildSprintGraph();
+	void BuildBurndownGraph();
 	int CalculateIncompleteTaskCount(const COleDateTime& date);
 	double CalculateTimeSpentInDays(const COleDateTime& date);
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
