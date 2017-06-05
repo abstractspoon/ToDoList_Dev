@@ -168,6 +168,7 @@ public:
 	static BOOL SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode);
 
 	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
+	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
 
 protected:
 	static HMODULE s_hGdiPlus;

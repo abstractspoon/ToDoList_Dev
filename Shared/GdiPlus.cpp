@@ -70,6 +70,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNADDPATHRECTANGLE)(gdix_Path*,gdix_Real,g
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPIE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPOLYGON)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 
 // Fill methods 
 typedef gdix_Status (STDAPICALLTYPE *PFNFILLRECTANGLE)(gdix_Graphics*,gdix_Brush*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
@@ -265,4 +266,11 @@ BOOL CGdiPlus::DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_Point
 	GETPROCADD(PFNDRAWLINE, "GdipDrawLine");
 
 	return (pFN(graphics, pen, from->x, from->y, to->x, to->y) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count)
+{
+	GETPROCADD(PFNDRAWPOLYGON, "GdipDrawPolygon");
+
+	return (pFN(graphics, pen, points, count) == gdix_Ok);
 }
