@@ -57,6 +57,7 @@ static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
 enum DISPLAYTYPE
 {
 	SD_BURNDOWN,
+	SD_BURNDOWN2,
 	SD_SPRINT,
 };
 
@@ -70,6 +71,9 @@ struct DISPLAYITEM
 static DISPLAYITEM STATSDISPLAY[] = 
 {
 	{ IDS_DISPLAY_BURNDOWN, IDS_DISPLAY_BURNDOWN_YAXIS, SD_BURNDOWN	},
+#ifdef _DEBUG
+	{ IDS_DISPLAY_BURNDOWN2, IDS_DISPLAY_BURNDOWN_YAXIS, SD_BURNDOWN2 },
+#endif
 	{ IDS_DISPLAY_SPRINT, IDS_DISPLAY_SPRINT_YAXIS,	SD_SPRINT },
 };
 static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
@@ -82,7 +86,6 @@ const COLORREF COLOR_YELLOW = RGB(204, 164,   0);
 const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
 const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
 const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
-//const COLORREF COLOR_	= RGB(0,   0, 244); 
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1100,7 +1103,7 @@ COleDateTime CBurndownWnd::GetGraphEndDate() const
 
 void CBurndownWnd::RebuildGraph()
 {
-	if (!IsWindowVisible())
+	if (!m_graph.IsWindowVisible())
 	{
 		m_bGraphNeedsRebuildOnShow = TRUE;
 		return;
@@ -1124,6 +1127,10 @@ void CBurndownWnd::RebuildGraph()
 		BuildBurndownGraph();
 		break;
 
+	case SD_BURNDOWN2:
+		BuildBurndown2Graph();
+		break;
+
 	case SD_SPRINT:
 		BuildSprintGraph();
 		break;
@@ -1137,7 +1144,7 @@ void CBurndownWnd::BuildBurndownGraph()
 	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
 	m_graph.SetDatasetPenColor(0, COLOR_GREEN);
 	m_graph.SetDatasetMinToZero(0, true);
-	
+
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
 	COleDateTime dtEnd = GetGraphEndDate();
@@ -1173,6 +1180,64 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
 
 		if (!si.IsDone() || (si.dtDone > date))
 			nNumNotDone++;
+	}
+
+	return nNumNotDone;
+}
+
+void CBurndownWnd::BuildBurndown2Graph()
+{
+	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
+	m_graph.SetDatasetPenColor(0, COLOR_BLUE);
+	m_graph.SetDatasetMinToZero(0, true);
+	
+	// build the graph
+	COleDateTime dtStart = GetGraphStartDate();
+	COleDateTime dtEnd = GetGraphEndDate();
+
+	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
+	int nLastDoneItem = -1;
+
+	for (int nDay = 0; nDay <= nNumDays; nDay++)
+	{
+		COleDateTime date(dtStart.m_dt + nDay);
+		int nNumNotDone = CalculateIncompleteTaskCount(date, (nLastDoneItem + 1), nLastDoneItem);
+
+		m_graph.AddData(0, nNumNotDone);
+	}
+
+	m_graph.CalcDatas();
+}
+
+int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nLastDone)
+{
+	// work thru items until we hit the first task whose 
+	// start date > date, counting how many are not complete as we go
+	int nNumItems = m_aDateOrdered.GetSize();
+	int nNumNotDone = 0;
+	double dLatestDone = m_dtEarliestDate.m_dt;
+
+	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
+	{
+		DWORD dwTaskID = m_aDateOrdered[nItem];
+		STATSITEM si;
+		VERIFY (GetStatsItem(dwTaskID, si));
+
+		if (si.dtStart > date)
+			break;
+
+		if (si.IsDone() && (si.dtDone <= date))
+		{
+			if (si.dtDone.m_dt > dLatestDone)
+			{
+				nLastDone = nItem;
+				dLatestDone = si.dtDone.m_dt;
+			}
+		}
+		else
+		{
+			nNumNotDone++;
+		}
 	}
 
 	return nNumNotDone;

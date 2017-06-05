@@ -191,6 +191,7 @@ BEGIN
     IDS_DISPLAY_BURNDOWN    "Burndown"
     IDS_DISPLAY_SPRINT      "Sprint"
     IDS_DISPLAY_SPRINT_YAXIS "Days Remaining"
+    IDS_DISPLAY_BURNDOWN2   "Burndown Optimised"
 END
 
 #endif    // English (Australia) resources
