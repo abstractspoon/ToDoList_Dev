@@ -1097,8 +1097,6 @@ void CBurndownWnd::BuildBurndownGraph(BOOL bDisplayChange)
 {
 	if (bDisplayChange)
 	{
-		m_graph.SetYText(CEnString(IDS_DISPLAY_BURNDOWN_YAXIS));
-
 		m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
 		m_graph.SetDatasetPenColor(0, COLOR_GREEN);
 		m_graph.SetDatasetMinToZero(0, true);
@@ -1123,6 +1121,8 @@ void CBurndownWnd::BuildBurndownGraph(BOOL bDisplayChange)
 
 void CBurndownWnd::RebuildGraph(BOOL bDisplayChange)
 {
+	CWaitCursor cursor;
+
 	m_graph.ClearData();
 
 	const DISPLAYITEM& di = STATSDISPLAY[m_nDisplay];
@@ -1241,6 +1241,13 @@ double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
 		STATSITEM si;
 		VERIFY (GetStatsItem(dwTaskID, si));
 
+		// We can stop as soon as we pass a task's start date
+		BOOL bHasStart = si.HasStart();
+
+		if (bHasStart && (si.dtStart >= date))
+			break;
+		
+		// Ignore tasks with no time spent
 		if (si.dTimeSpentDays <= 0)
 			continue;
 		
@@ -1250,14 +1257,14 @@ double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
 			{
 				dDays += si.dTimeSpentDays;
 			}
-			else if (si.HasStart() && (date > si.dtStart))
+			else if (bHasStart && (date > si.dtStart))
 			{
 				double dProportion = (date.m_dt - si.dtStart.m_dt) / (si.dtDone.m_dt - si.dtStart.m_dt);
 
 				dDays += (si.dTimeSpentDays * min(dProportion, 1.0));
 			}
 		}
-		else if (si.HasStart() && (date > si.dtStart))
+		else if (bHasStart && (date > si.dtStart))
 		{
 			COleDateTime dtNow(COleDateTime::GetCurrentTime());
 			double dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);
