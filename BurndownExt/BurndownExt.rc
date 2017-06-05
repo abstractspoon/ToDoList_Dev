@@ -190,7 +190,7 @@ BEGIN
     IDS_DISPLAY_BURNDOWN_YAXIS "Incomplete Tasks"
     IDS_DISPLAY_BURNDOWN    "Burndown"
     IDS_DISPLAY_SPRINT      "Sprint"
-    IDS_DISPLAY_SPRINT_YAXIS "Tasks"
+    IDS_DISPLAY_SPRINT_YAXIS "Days Remaining"
 END
 
 #endif    // English (Australia) resources
