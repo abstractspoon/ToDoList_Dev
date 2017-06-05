@@ -175,7 +175,7 @@ protected:
 	static ULONG_PTR s_GdiToken;
 
 protected:
-	static BOOL Initialize(); // initialize of demand
+	static BOOL Initialize(); // initialize on demand
 	static void Free();
 };
 
