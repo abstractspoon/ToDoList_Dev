@@ -66,6 +66,7 @@ const int TV_TIPPADDING			= 3;
 const int HD_COLPADDING			= 6;
 const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
 const int DRAG_BUFFER			= 50;
+const int DONE_BOX				= 6;
 
 const LONG DEPENDPICKPOS_NONE = 0xFFFFFFFF;
 const double DAY_WEEK_MULTIPLIER = 1.5;
@@ -4062,8 +4063,8 @@ void CGanttTreeListCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth
 	GetGanttBarColors(gi, crBorder, crFill);
 
 	// resize to a square
-	rDone.DeflateRect(0, 6, 0, 6);
-	rDone.right = min(rMonth.right, rDone.left + rDone.Height());
+	rDone.DeflateRect(0, DONE_BOX, 0, DONE_BOX);
+	rDone.right = min(rMonth.right, rDone.left + (DONE_BOX / 2));
 	rDone.left = rDone.right - rDone.Height();
 
 	pDC->FillSolidRect(rDone, crBorder);
@@ -4125,13 +4126,19 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 	if (!CDateHelper::IsDateSet(dtDue))
 		return -1;
 
-	int nPos = GetDrawPosFromDate(gi.IsDone(FALSE) ? gi.dtDone : dtDue);
+	int nPos = GetDrawPosFromDate(dtDue);
 
 	CRect rMilestone;
 
 	if (CalcMilestoneRect(gi, rMonth, rMilestone))
+	{
 		nPos = max(nPos, rMilestone.right);
-	
+	}
+	else if (gi.IsDone(FALSE) && (gi.dtDone > gi.dtDue))
+	{
+		nPos = (GetDrawPosFromDate(gi.dtDone) + (DONE_BOX / 2));
+	}
+
 	return nPos;
 }
 
