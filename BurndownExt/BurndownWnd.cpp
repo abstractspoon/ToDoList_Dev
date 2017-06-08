@@ -142,7 +142,6 @@ static CMapStatsItems* PSORTDATA = NULL;
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
 
-
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
@@ -864,18 +863,19 @@ int CBurndownWnd::CompareStatItems(const void* pV1, const void* pV2)
 	VERIFY (PSORTDATA->Lookup(dwSI1, si1));
 	VERIFY (PSORTDATA->Lookup(dwSI2, si2));
 
-	// incomplete tasks always come last
+	// Sort by start date
+	// Tasks without a start date come last to optimise searching
 	BOOL bStart1 = CDateHelper::IsDateSet(si1.dtStart);
 	BOOL bStart2 = CDateHelper::IsDateSet(si2.dtStart);
 
-	if (!bStart1 && !bStart2)
+	if (bStart1 != bStart2)
+	{
+		return (bStart1 ? -1 : 1);
+	}
+	else if (!bStart1 && !bStart2)
+	{
 		return 0;
-
-	if (!bStart1)
-		return -1; // no date precedes any date
-
-	if (!bStart2)
-		return 1; // no date precedes any date
+	}
 
 	if (si1.dtStart < si2.dtStart)
 		return -1;
@@ -889,10 +889,8 @@ int CBurndownWnd::CompareStatItems(const void* pV1, const void* pV2)
 BOOL CBurndownWnd::IsDataSorted() const
 {
 	int nNumItems = m_aDateOrdered.GetSize();
-	COleDateTime dtLast;
+	COleDateTime dtPrev;
 
-	// look for the first item whose start date
-	// preceeds the start date of the previous task
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		DWORD dwTaskID = m_aDateOrdered[nItem];
@@ -900,12 +898,18 @@ BOOL CBurndownWnd::IsDataSorted() const
 
 		if (m_data.Lookup(dwTaskID, si))
 		{
-			ASSERT (CDateHelper::IsDateSet(si.dtStart));
-
-			if (si.dtStart < dtLast)
-				return FALSE;
-
-			dtLast = si.dtStart;
+			if (nItem > 0)
+			{
+				// Stop if the preceding task has no start date
+				// OR the preceding task has a later date
+				if (si.HasStart() &&
+					(!CDateHelper::IsDateSet(dtPrev) || (si.dtStart < dtPrev)))
+				{
+					return FALSE;
+				}
+			}
+			
+			dtPrev = si.dtStart;
 		}
 		else
 		{
@@ -1120,6 +1124,8 @@ void CBurndownWnd::RebuildGraph()
 
 	if (m_data.GetCount())
 		RebuildXScale();
+
+	DWORD dwTick = GetTickCount();
 	
 	switch (di.nDisplay)
 	{
@@ -1135,6 +1141,8 @@ void CBurndownWnd::RebuildGraph()
 		BuildSprintGraph();
 		break;
 	}
+
+	TRACE(_T("CBurndownWnd::RebuildGraph(%s) took %d ms\n"), CEnString(di.nTitleID), (GetTickCount() - dwTick));
 
 	m_graph.Redraw();
 }
@@ -1196,12 +1204,12 @@ void CBurndownWnd::BuildBurndown2Graph()
 	COleDateTime dtEnd = GetGraphEndDate();
 
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	int nLastDoneItem = -1;
+	int nFirstIncompleteItem = 0;
 
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
 		COleDateTime date(dtStart.m_dt + nDay);
-		int nNumNotDone = CalculateIncompleteTaskCount(date, (nLastDoneItem + 1), nLastDoneItem);
+		int nNumNotDone = CalculateIncompleteTaskCount(date, nFirstIncompleteItem, nFirstIncompleteItem);
 
 		m_graph.AddData(0, nNumNotDone);
 	}
@@ -1209,13 +1217,17 @@ void CBurndownWnd::BuildBurndown2Graph()
 	m_graph.CalcDatas();
 }
 
-int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nLastDone)
+int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nFirstIncompleteItem)
 {
 	// work thru items until we hit the first task whose 
 	// start date > date, counting how many are not complete as we go
+	if (m_dtEarliestDate > date)
+		return 0;
+
+	nFirstIncompleteItem = -1;
+
 	int nNumItems = m_aDateOrdered.GetSize();
 	int nNumNotDone = 0;
-	double dLatestDone = m_dtEarliestDate.m_dt;
 
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
@@ -1226,19 +1238,17 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nIt
 		if (si.dtStart > date)
 			break;
 
-		if (si.IsDone() && (si.dtDone <= date))
-		{
-			if (si.dtDone.m_dt > dLatestDone)
-			{
-				nLastDone = nItem;
-				dLatestDone = si.dtDone.m_dt;
-			}
-		}
-		else
+		if (!si.IsDone() || (si.dtDone > date))
 		{
 			nNumNotDone++;
+
+			if (nFirstIncompleteItem == -1)
+				nFirstIncompleteItem = nItem;
 		}
 	}
+
+	if (nFirstIncompleteItem == -1)
+		nFirstIncompleteItem = nItemFrom;
 
 	return nNumNotDone;
 }

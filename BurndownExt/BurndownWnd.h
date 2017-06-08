@@ -147,7 +147,7 @@ protected:
 	void BuildBurndownGraph();
 	int CalculateIncompleteTaskCount(const COleDateTime& date);
 	void BuildBurndown2Graph();
-	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nLastDone);
+	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nFirstIncompleteItem);
 	double CalculateTimeSpentInDays(const COleDateTime& date);
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
 	double CalcTotalTimeEstimateInDays() const;
