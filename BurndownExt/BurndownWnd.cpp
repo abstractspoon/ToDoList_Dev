@@ -1159,6 +1159,7 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	}
 
 	CWaitCursor cursor;
+	CHoldRedraw hr(m_graph);
 
 	if (bUpdateExtents)
 		UpdateDataExtents();
@@ -1184,8 +1185,6 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		BuildSprintGraph();
 		break;
 	}
-
-	m_graph.Redraw();
 }
 
 void CBurndownWnd::BuildBurndownGraph()
