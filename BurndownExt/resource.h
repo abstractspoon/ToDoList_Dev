@@ -9,9 +9,11 @@
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003
 #define IDS_DISPLAY_BURNDOWN_YAXIS      6003
+#define IDS_DISPLAY_INCOMPLETE          6003
 #define IDS_DISPLAY_BURNDOWN            6004
 #define IDS_DISPLAY_SPRINT              6005
 #define IDS_DISPLAY_SPRINT_YAXIS        6006
+#define IDS_DISPLAY_REMAINING           6006
 #define IDS_DISPLAY_BURNDOWN2           6007
 #define IDR_TOOLBAR                     16006
 #define IDC_TB_PLACEHOLDER              16024

@@ -38,6 +38,7 @@ CHMXChart::CHMXChart()
 	m_nXLabelStep = 1;
 	m_clrGrid = GetSysColor(COLOR_3DSHADOW);
 	m_bXLabelsAreTicks = false;
+	m_nXLabelDegrees = 0;
 }
 
 CHMXChart::~CHMXChart()
@@ -51,6 +52,7 @@ BEGIN_MESSAGE_MAP(CHMXChart, CWnd)
 	ON_MESSAGE(WM_PRINTCLIENT, OnPrintClient)
 	ON_MESSAGE(WM_PRINT, OnPrintClient)
 	ON_WM_SIZE()
+	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -61,8 +63,20 @@ END_MESSAGE_MAP()
 void CHMXChart::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
-	
-	DoPaint(dc);
+
+	CDC             memDC;
+	memDC.CreateCompatibleDC(&dc);
+
+	CBitmap         bitmap;
+	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(),m_rectArea.Height());
+
+	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
+
+	DoPaint(memDC);
+
+	dc.BitBlt(0, 0, m_rectArea.Width(),m_rectArea.Height(), &memDC, 0, 0, SRCCOPY);
+
+	memDC.SelectObject(pOldBitmap);
 }
 
 LRESULT CHMXChart::OnPrintClient(WPARAM wp, LPARAM lp)
@@ -91,6 +105,11 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	DrawAxes(dc);
 	DrawYScale(dc);
 	DrawXScale(dc);
+}
+
+BOOL CHMXChart::OnEraseBkgnd(CDC* /*pDC*/)
+{
+	return TRUE;
 }
 
 void CHMXChart::OnSize(UINT nType, int cx, int cy)
@@ -399,7 +418,7 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 	return true;
 }
 
-int CHMXChart::CalcScaleFontSize(CDC& /*dc*/) const
+int CHMXChart::CalcYScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
 {
 	int nSize = min((m_rectXAxis.Height() / 3), (m_rectYAxis.Width() / 4));
 
@@ -412,6 +431,23 @@ int CHMXChart::CalcScaleFontSize(CDC& /*dc*/) const
 	if (!m_strYText.IsEmpty())
 	{
 		nSize = min(nSize, (m_rectYAxis.Height() / m_strYText.GetLength()));
+	}
+
+	if (bTitle)
+		nSize *= 2;
+	else
+		nSize += 2;
+
+	return nSize;
+}
+
+int CHMXChart::CalcXScaleFontSize(CDC& dc, BOOL bTitle) const
+{
+	int nSize = CalcYScaleFontSize(dc, bTitle);
+
+	if (!bTitle && (m_nXLabelDegrees > 0))
+	{
+		nSize -= 2;
 	}
 
 	return nSize;
@@ -435,13 +471,14 @@ bool CHMXChart::DrawXScale(CDC & dc)
 	if (!m_bShowXScale || (!nCount && m_strXText.IsEmpty()))
 		return false;
 	
-	int nFontSize = CalcScaleFontSize(dc);
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	
 	if (nCount)
 	{
+		int nFontSize = CalcXScaleFontSize(dc, FALSE);
+
 		CFont font;
-		font.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
+		font.CreateFont(nFontSize, 0, (m_nXLabelDegrees * 10), 0, FW_NORMAL,
 						 FALSE, FALSE, FALSE, ANSI_CHARSET,
 						 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
 						 DEFAULT_PITCH, _T("Arial"));
@@ -454,14 +491,23 @@ bool CHMXChart::DrawXScale(CDC & dc)
 		{
 			CRect rText(m_rectXAxis);
 			
-			rText.top += 4;
+			rText.top += 14;
 			rText.left += (int)(dX*(f+0.5)) + 4;
-			rText.right = rText.left + (int)(dX * m_nXLabelStep);
 
-			if (m_bXLabelsAreTicks)
-				dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE);
+			if (m_nXLabelDegrees > 0)
+			{
+				dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+				dc.TextOut(rText.left, rText.top, m_strarrScaleXLabel.GetAt(f));
+			}
 			else
-				dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE);
+			{
+				rText.right = rText.left + (int)(dX * m_nXLabelStep);
+
+				if (m_bXLabelsAreTicks)
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE);
+				else
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE);
+			}
 		}
 	
 		dc.SelectObject(pFontOld);
@@ -471,7 +517,9 @@ bool CHMXChart::DrawXScale(CDC & dc)
 	{
 		if (m_fontXScale.GetSafeHandle() == NULL)
 		{
-			m_fontXScale.CreateFont(nFontSize*2, 0, 0, 0, FW_NORMAL,
+			int nFontSize = CalcXScaleFontSize(dc, TRUE);
+
+			m_fontXScale.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 								  FALSE, FALSE, FALSE, ANSI_CHARSET,
 								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
 								  DEFAULT_PITCH, _T("Arial"));
@@ -506,11 +554,12 @@ bool CHMXChart::DrawYScale(CDC & dc)
 	if (!m_bShowYScale || (!nTicks && m_strYText.IsEmpty()))
 		return false;
 	
-	int nFontSize = CalcScaleFontSize(dc);
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	
 	if (nTicks)
 	{
+		int nFontSize = CalcYScaleFontSize(dc, FALSE);
+
 		// nY is the size of a division
 		double nY = (m_nYMax - m_nYMin)/nTicks, nTemp1, nTemp2;
 		CString sBuffer;
@@ -537,9 +586,11 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	if (!m_strYText.IsEmpty()) 
 	{
+		int nFontSize = CalcYScaleFontSize(dc, TRUE);
+
 		if (m_fontYScale.GetSafeHandle() == NULL)
 		{
-			m_fontYScale.CreateFont(nFontSize*2, 0, 900, 0, FW_NORMAL,
+			m_fontYScale.CreateFont(nFontSize, 0, 900, 0, FW_NORMAL,
 								  FALSE, FALSE, FALSE, ANSI_CHARSET,
 								  OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
 								  DEFAULT_PITCH, _T("Arial"));
@@ -548,7 +599,8 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 		CFont* pFontOld = dc.SelectObject(&m_fontYScale);
 
-		dc.DrawText(m_strYText, m_rectYAxis, DT_BOTTOM | DT_LEFT | DT_SINGLELINE );
+		dc.SetTextAlign(TA_CENTER | TA_BASELINE);
+		dc.TextOut(m_rectYAxis.CenterPoint().x, m_rectYAxis.CenterPoint().y, m_strYText);
 		dc.SelectObject(pFontOld);
 	}
 
@@ -870,27 +922,21 @@ bool CHMXChart::CalcDatas()
 
 	GetClientRect(m_rectArea);
 
-	m_rectUsable.top    = m_rectArea.top    + m_rectArea.Height()/HMX_AREA_MARGINS;
-	m_rectUsable.bottom = m_rectArea.bottom - m_rectArea.Height()/HMX_AREA_MARGINS;
-	m_rectUsable.left   = m_rectArea.left   + m_rectArea.Width() /HMX_AREA_MARGINS;
-	m_rectUsable.right  = m_rectArea.right  - m_rectArea.Width() /HMX_AREA_MARGINS;
+	int nMargin = (max(m_rectArea.Height(), m_rectArea.Width()) / HMX_AREA_MARGINS);
+
+	m_rectUsable = m_rectArea;
+	m_rectUsable.DeflateRect(nMargin, nMargin);
 
 	// let's calc everything
-	if(!m_strTitle.IsEmpty()) 
+	m_rectGraph = m_rectUsable;
+
+	if (!m_strTitle.IsEmpty()) 
 	{
-		m_rectTitle.top    = m_rectUsable.top;
-		m_rectTitle.left   = m_rectUsable.left;
-		m_rectTitle.bottom = m_rectUsable.bottom/HMX_AREA_TITLE;
-		m_rectTitle.right  = m_rectUsable.right;
+		m_rectTitle = m_rectUsable;
+
+		m_rectTitle.bottom = (m_rectUsable.bottom / HMX_AREA_TITLE);
 		m_rectGraph.top    = m_rectTitle.bottom;
-		m_rectGraph.left   = m_rectUsable.left;
-		m_rectGraph.bottom = m_rectUsable.bottom;
-		m_rectGraph.right  = m_rectUsable.right;
 	} 
-	else 
-	{
-		m_rectGraph = m_rectUsable;
-	}
 
 	// make axis width the same for horz and vert
 	int nYAxisWidth = (m_rectGraph.Width()*HMX_AREA_YAXIS)/100;
@@ -1585,6 +1631,17 @@ bool CHMXChart::SetXLabelStep(int nStep)
 void CHMXChart::SetXLabelsAreTicks(bool bTicks)
 {
 	m_bXLabelsAreTicks = bTicks;
+}
+
+void CHMXChart::SetXLabelAngle(int nDegrees)
+{
+	while (nDegrees > 360)
+		nDegrees -= 360;
+
+	while (nDegrees < 0)
+		nDegrees += 360;
+	
+	m_nXLabelDegrees = nDegrees;
 }
 
 //

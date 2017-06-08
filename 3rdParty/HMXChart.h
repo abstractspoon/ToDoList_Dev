@@ -70,6 +70,7 @@ public:
 	virtual bool		SetXLabelStep( int nStep );
 	virtual int			GetXLabelStep();
 	void				SetXLabelsAreTicks(bool bTicks = TRUE);
+	void				SetXLabelAngle(int nDegrees);
 
 	virtual bool		SetXScaleLabel( int nIndex, CString str );
 	virtual bool		GetXScaleLabel( int nIndex, CString& str );
@@ -172,10 +173,11 @@ protected:
 	CRect			m_rectYAxis;							// y axis area
 	CRect			m_rectTitle;							// main title area
 	CRect			m_rectArea;								// entire control area
-	COLORREF		m_clrBkGnd;								// backgroung color
+	COLORREF		m_clrBkGnd;								// background color
 	COLORREF		m_clrGrid;	
 	CFont			m_fontXScale, m_fontYScale;
 	bool			m_bXLabelsAreTicks;
+	int				m_nXLabelDegrees;
 
 	CPen			m_penGrid;
 
@@ -183,11 +185,13 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnPrintClient(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	int CalcScaleFontSize(CDC& dc) const;
+	int CalcXScaleFontSize(CDC& dc, BOOL bTitle) const;
+	int CalcYScaleFontSize(CDC& dc, BOOL bTitle) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	int GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
 };
