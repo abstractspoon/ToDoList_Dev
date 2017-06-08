@@ -40,7 +40,26 @@ protected:
 	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
 
 };
-typedef CMap<DWORD, DWORD, STATSITEM, STATSITEM&> CMapStatsItems;
+
+class CStatsItemArray : public CArray<STATSITEM*, STATSITEM*>
+{
+public:
+	CStatsItemArray();
+	virtual ~CStatsItemArray();
+
+	STATSITEM* GetItem(DWORD dwTaskID) const;
+	BOOL HasItem(DWORD dwTaskID) const;
+
+	void RemoveAll();
+	void RemoveAt(int nIndex, int nCount = 1);
+	void Sort();
+
+protected:
+	BOOL IsSorted();
+	int FindItem(DWORD dwTaskID) const;
+
+	static int CompareItems(const void* pV1, const void* pV2);
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
@@ -103,8 +122,7 @@ protected:
 	int	m_nDisplay;
 	BOOL m_bGraphNeedsRebuildOnShow;
 
-	CMapStatsItems m_data;
-	CDWordArray m_aDateOrdered;
+	CStatsItemArray m_data;
 	COleDateTime m_dtEarliestDate, m_dtLatestDate;
 
 protected:
@@ -139,9 +157,7 @@ protected:
 	void UpdateDataExtents();
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks);
-	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
-	void SortData();
-	BOOL IsDataSorted() const;
+	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 	void RebuildGraph();
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
@@ -151,7 +167,6 @@ protected:
 	double CalculateTimeSpentInDays(const COleDateTime& date);
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
 	double CalcTotalTimeEstimateInDays() const;
-	BOOL GetStatsItem(DWORD dwTaskID, STATSITEM& si) const;
 	void RebuildXScale();
 	int GetDataDuration() const;
 	COleDateTime GetGraphStartDate() const;
@@ -160,7 +175,6 @@ protected:
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 
-	static int CompareStatItems(const void* pV1, const void* pV2);
 	static COleDateTime GetTaskDate(time64_t tDate);
 
 protected:

@@ -137,7 +137,148 @@ void STATSITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTi
 
 /////////////////////////////////////////////////////////////////////////////
 
-static CMapStatsItems* PSORTDATA = NULL;
+CStatsItemArray::CStatsItemArray()
+{
+
+}
+
+CStatsItemArray::~CStatsItemArray()
+{
+	RemoveAll();
+}
+
+BOOL CStatsItemArray::HasItem(DWORD dwTaskID) const
+{
+	return (FindItem(dwTaskID) != -1);
+}
+
+int CStatsItemArray::FindItem(DWORD dwTaskID) const
+{
+	int nIndex = GetSize();
+
+	while (nIndex--)
+	{
+		const STATSITEM* pSI = GetAt(nIndex);
+
+		if (pSI->dwTaskID == dwTaskID)
+			return nIndex;
+	}
+
+	// not found
+	return -1;
+}
+
+STATSITEM* CStatsItemArray::GetItem(DWORD dwTaskID) const
+{
+	int nFind = FindItem(dwTaskID);
+
+	if (nFind == -1)
+		return NULL;
+
+	return GetAt(nFind);
+}
+
+void CStatsItemArray::RemoveAll()
+{
+	int nIndex = GetSize();
+
+	while (nIndex--)
+	{
+		STATSITEM* pSI = GetAt(nIndex);
+		delete pSI;
+	}
+
+	CArray<STATSITEM*, STATSITEM*>::RemoveAll();
+}
+
+void CStatsItemArray::RemoveAt(int nIndex, int nCount)
+{
+	ASSERT(nIndex >= 0 && nIndex < GetSize());
+	ASSERT(nCount > 0);
+
+	nIndex += nCount;
+
+	while (nIndex--)
+	{
+		STATSITEM* pSI = GetAt(nIndex);
+		delete pSI;
+
+		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nIndex);
+	}
+}
+
+void CStatsItemArray::Sort()
+{
+	if (!IsSorted())
+	{
+		qsort(GetData(), GetSize(), sizeof(STATSITEM*), CompareItems);
+	}
+}
+
+BOOL CStatsItemArray::IsSorted()
+{
+	int nNumItems = GetSize();
+
+	if (nNumItems < 2)
+		return TRUE;
+	
+	const STATSITEM* pSI = GetAt(0);
+	ASSERT(pSI);
+
+	COleDateTime dtPrev = pSI->dtStart;
+
+	for (int nItem = 1; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = GetAt(nItem);
+		ASSERT(pSI);
+
+		if (pSI->HasStart())
+		{
+			// Stop if the preceding task has no start date
+			// OR the preceding task has a later date
+			if (!CDateHelper::IsDateSet(dtPrev) || (pSI->dtStart < dtPrev))
+			{
+				return FALSE;
+			}
+		}
+
+		dtPrev = pSI->dtStart;
+	}
+
+	return TRUE;
+}
+
+int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
+{
+	typedef STATSITEM* LPSTATSITEM;
+
+	const STATSITEM* pSI1 = *(static_cast<const LPSTATSITEM*>(pV1));
+	const STATSITEM* pSI2 = *(static_cast<const LPSTATSITEM*>(pV2));
+
+	ASSERT(pSI1 && pSI2 && (pSI1 != pSI2));
+
+	// Sort by start date
+	// Tasks without a start date come last to optimise searching
+	BOOL bStart1 = CDateHelper::IsDateSet(pSI1->dtStart);
+	BOOL bStart2 = CDateHelper::IsDateSet(pSI2->dtStart);
+
+	if (bStart1 != bStart2)
+	{
+		return (bStart1 ? -1 : 1);
+	}
+	else if (!bStart1 && !bStart2)
+	{
+		return 0;
+	}
+
+	if (pSI1->dtStart < pSI2->dtStart)
+		return -1;
+
+	if (pSI1->dtStart > pSI2->dtStart)
+		return 1;
+
+	return 0;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
@@ -395,15 +536,14 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks)
 {
 	// reset data structures
 	m_data.RemoveAll();
-	m_aDateOrdered.RemoveAll();
 
 	if (pTasks->GetTaskCount())
 	{
 		CDateHelper::ClearDate(m_dtEarliestDate);
 		CDateHelper::ClearDate(m_dtLatestDate);
 
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		SortData();
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
+		m_data.Sort();
 		RebuildGraph();
 	}
 	else if (CDateHelper::IsDateSet(m_dtEarliestDate))
@@ -417,7 +557,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks)
 	}
 }
 
-void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist)
 {
 	if (hTask == NULL)
 		return;
@@ -430,32 +570,32 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 	if (!pTasks->IsTaskParent(hTask))
 	{
 		DWORD dwTaskID = pTasks->GetTaskID(hTask);
-		STATSITEM si;
 
 		// check we haven't got this task already
-		if (!m_data.Lookup(dwTaskID, si))
+		if (!bCheckExist || !m_data.HasItem(dwTaskID))
 		{
+			STATSITEM* pSI = new STATSITEM;
+
 			// interested in all tasks
-			si.dwTaskID = dwTaskID;
-			si.dtStart = GetTaskStartDate(pTasks, hTask);
-			si.dtDone = GetTaskDoneDate(pTasks, hTask);
-			si.dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
-			si.dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
+			pSI->dwTaskID = dwTaskID;
+			pSI->dtStart = GetTaskStartDate(pTasks, hTask);
+			pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
+			pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
+			pSI->dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
 
 			// make sure start is less than done
-			if (si.IsDone() && si.HasStart())
-				si.dtStart = min(si.dtStart, si.dtDone);
+			if (pSI->IsDone() && pSI->HasStart())
+				pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 
 			// update data extents as we go
-			si.MinMax(m_dtEarliestDate, m_dtLatestDate);
+			pSI->MinMax(m_dtEarliestDate, m_dtLatestDate);
 			
-			m_data[si.dwTaskID] = si;
-			m_aDateOrdered.Add(si.dwTaskID);
+			m_data.Add(pSI);
 		}
 	}
 	else // Process children
 	{
-		BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE);
+		BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist);
 	}
 
 	// handle siblings WITHOUT RECURSION
@@ -466,7 +606,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildData(pTasks, hSibling, FALSE);
+			BuildData(pTasks, hSibling, FALSE, bCheckExist);
 			
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
@@ -499,12 +639,12 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	case IUI_NEW:
 	case IUI_EDIT:
 		if (nUpdate == IUI_NEW)
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE, TRUE);
 		else
 			UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
 
 		UpdateDataExtents();
-		SortData();
+		m_data.Sort();
 		RebuildGraph();
 		break;
 		
@@ -528,18 +668,10 @@ void CBurndownWnd::UpdateDataExtents()
 		CDateHelper::ClearDate(m_dtEarliestDate);
 		CDateHelper::ClearDate(m_dtLatestDate);
 
-		DWORD dwTaskID;
-		STATSITEM si;
+		int nItem = m_data.GetSize();
 
-		POSITION pos = m_data.GetStartPosition();
-
-		while (pos)
-		{
-			m_data.GetNextAssoc(pos, dwTaskID, si);
-			ASSERT(dwTaskID);
-
-			si.MinMax(m_dtEarliestDate, m_dtLatestDate);
-		}
+		while (nItem--)
+			m_data[nItem]->MinMax(m_dtEarliestDate, m_dtLatestDate);
 	}
 	else
 	{
@@ -567,32 +699,32 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		// if the task we've been given is actually a parent task
 		// then we'll have no record of it, so the following
 		// lookup has a legitimate reason to fail
-		STATSITEM si;
+		STATSITEM* pSI = m_data.GetItem(dwTaskID);
+		ASSERT(pSI);
 		
-		if (m_data.Lookup(dwTaskID, si))
+		if (pSI)
 		{
 			if (attrib.HasKey(IUI_DONEDATE))
-			{
-				si.dtDone = GetTaskDoneDate(pTasks, hTask);
-				m_data[dwTaskID] = si;
-			}
+				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
 
 			if (attrib.HasKey(IUI_STARTDATE))
 			{
-				si.dtStart = GetTaskStartDate(pTasks, hTask);
+				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 				
 				// make sure start is less than done
-				if (si.IsDone() && si.HasStart())
-					si.dtStart = min(si.dtStart, si.dtDone);
-				
-				m_data[dwTaskID] = si;
+				if (pSI->IsDone() && pSI->HasStart())
+					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 			}
 				
 			if (attrib.HasKey(IUI_TIMEEST))
-				si.dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
+				pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
 
 			if (attrib.HasKey(IUI_TIMESPENT))
-				si.dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
+				pSI->dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
+		}
+		else
+		{
+			int breakpoint = 0;
 		}
 	}
 	
@@ -684,21 +816,18 @@ TH_UNITS CBurndownWnd::MapUnitsToTHUnits(TDC_UNITS nUnits)
 BOOL CBurndownWnd::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 {
 	// iterating sorted data is quickest
-	int nOrgCount = m_aDateOrdered.GetSize();
+	int nOrgCount = m_data.GetSize();
 	int nItem = nOrgCount;
 
 	while (nItem--)
 	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
+		const STATSITEM* pSI = m_data[nItem];
 
-		if (!pTasks->FindTask(dwTaskID))
-		{
-			m_aDateOrdered.RemoveAt(nItem);
-			m_data.RemoveKey(dwTaskID);
-		}
+		if (!pTasks->FindTask(pSI->dwTaskID))
+			m_data.RemoveAt(nItem);
 	}
 
-	return (m_aDateOrdered.GetSize() != nOrgCount);
+	return (m_data.GetSize() != nOrgCount);
 }
 
 void CBurndownWnd::Release()
@@ -835,90 +964,6 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		if (m_nScale != nOldScale)
 			RebuildGraph();
 	}
-}
-
-void CBurndownWnd::SortData()
-{
-	if (!IsDataSorted())
-	{
-		ASSERT(PSORTDATA == NULL);
-
-		PSORTDATA = &m_data;
-		qsort(m_aDateOrdered.GetData(), m_aDateOrdered.GetSize(), sizeof(DWORD*), CompareStatItems);
-		PSORTDATA = NULL;
-	}
-}
-
-int CBurndownWnd::CompareStatItems(const void* pV1, const void* pV2)
-{
-	ASSERT(PSORTDATA);
-
-	DWORD dwSI1 = *(static_cast<const DWORD*>(pV1));
-	DWORD dwSI2 = *(static_cast<const DWORD*>(pV2));
-
-	ASSERT(dwSI1 && dwSI2 && (dwSI1 != dwSI2));
-	
-	STATSITEM si1, si2;
-
-	VERIFY (PSORTDATA->Lookup(dwSI1, si1));
-	VERIFY (PSORTDATA->Lookup(dwSI2, si2));
-
-	// Sort by start date
-	// Tasks without a start date come last to optimise searching
-	BOOL bStart1 = CDateHelper::IsDateSet(si1.dtStart);
-	BOOL bStart2 = CDateHelper::IsDateSet(si2.dtStart);
-
-	if (bStart1 != bStart2)
-	{
-		return (bStart1 ? -1 : 1);
-	}
-	else if (!bStart1 && !bStart2)
-	{
-		return 0;
-	}
-
-	if (si1.dtStart < si2.dtStart)
-		return -1;
-
-	if (si1.dtStart > si2.dtStart)
-		return 1;
-
-	return 0;
-}
-
-BOOL CBurndownWnd::IsDataSorted() const
-{
-	int nNumItems = m_aDateOrdered.GetSize();
-	COleDateTime dtPrev;
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
-		STATSITEM si;
-
-		if (m_data.Lookup(dwTaskID, si))
-		{
-			if (nItem > 0)
-			{
-				// Stop if the preceding task has no start date
-				// OR the preceding task has a later date
-				if (si.HasStart() &&
-					(!CDateHelper::IsDateSet(dtPrev) || (si.dtStart < dtPrev)))
-				{
-					return FALSE;
-				}
-			}
-			
-			dtPrev = si.dtStart;
-		}
-		else
-		{
-			// should never get here
-			ASSERT(0);
-		}
-	}
-
-	return TRUE;
 }
 
 int CBurndownWnd::CalculateRequiredXScale() const
@@ -1174,19 +1219,17 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date)
 {
 	// work thru items until we hit the first task whose 
 	// start date > date, counting how many are not complete as we go
-	int nNumItems = m_aDateOrdered.GetSize();
+	int nNumItems = m_data.GetSize();
 	int nNumNotDone = 0;
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
-		STATSITEM si;
-		VERIFY (GetStatsItem(dwTaskID, si));
+		const STATSITEM* pSI = m_data[nItem];
 
-		if (si.dtStart > date)
+		if (pSI->dtStart > date)
 			break;
 
-		if (!si.IsDone() || (si.dtDone > date))
+		if (!pSI->IsDone() || (pSI->dtDone > date))
 			nNumNotDone++;
 	}
 
@@ -1226,19 +1269,17 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nIt
 
 	nFirstIncompleteItem = -1;
 
-	int nNumItems = m_aDateOrdered.GetSize();
+	int nNumItems = m_data.GetSize();
 	int nNumNotDone = 0;
 
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
-		STATSITEM si;
-		VERIFY (GetStatsItem(dwTaskID, si));
+		const STATSITEM* pSI = m_data[nItem];
 
-		if (si.dtStart > date)
+		if (pSI->dtStart > date)
 			break;
 
-		if (!si.IsDone() || (si.dtDone > date))
+		if (!pSI->IsDone() || (pSI->dtDone > date))
 		{
 			nNumNotDone++;
 
@@ -1298,44 +1339,42 @@ void CBurndownWnd::BuildSprintGraph()
 
 double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
 {
-	int nNumItems = m_aDateOrdered.GetSize();
+	int nNumItems = m_data.GetSize();
 	double dDays = 0;
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		DWORD dwTaskID = m_aDateOrdered[nItem];
-		STATSITEM si;
-		VERIFY (GetStatsItem(dwTaskID, si));
+		const STATSITEM* pSI = m_data[nItem];
 
 		// We can stop as soon as we pass a task's start date
-		BOOL bHasStart = si.HasStart();
+		BOOL bHasStart = pSI->HasStart();
 
-		if (bHasStart && (si.dtStart >= date))
+		if (bHasStart && (pSI->dtStart >= date))
 			break;
 		
 		// Ignore tasks with no time spent
-		if (si.dTimeSpentDays <= 0)
+		if (pSI->dTimeSpentDays <= 0)
 			continue;
 		
-		if (si.IsDone())
+		if (pSI->IsDone())
 		{
-			if (date >= si.dtDone)
+			if (date >= pSI->dtDone)
 			{
-				dDays += si.dTimeSpentDays;
+				dDays += pSI->dTimeSpentDays;
 			}
-			else if (bHasStart && (date > si.dtStart))
+			else if (bHasStart && (date > pSI->dtStart))
 			{
-				double dProportion = (date.m_dt - si.dtStart.m_dt) / (si.dtDone.m_dt - si.dtStart.m_dt);
+				double dProportion = (date.m_dt - pSI->dtStart.m_dt) / (pSI->dtDone.m_dt - pSI->dtStart.m_dt);
 
-				dDays += (si.dTimeSpentDays * min(dProportion, 1.0));
+				dDays += (pSI->dTimeSpentDays * min(dProportion, 1.0));
 			}
 		}
-		else if (bHasStart && (date > si.dtStart))
+		else if (bHasStart && (date > pSI->dtStart))
 		{
 			COleDateTime dtNow(COleDateTime::GetCurrentTime());
-			double dProportion = (date.m_dt - si.dtStart.m_dt) / (dtNow.m_dt - si.dtStart.m_dt);
+			double dProportion = (date.m_dt - pSI->dtStart.m_dt) / (dtNow.m_dt - pSI->dtStart.m_dt);
 
-			dDays += (si.dTimeSpentDays * min(dProportion, 1.0));
+			dDays += (pSI->dTimeSpentDays * min(dProportion, 1.0));
 		}
 	}
 
@@ -1345,15 +1384,10 @@ double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
 double CBurndownWnd::CalcTotalTimeEstimateInDays() const
 {
 	double dDays = 0;
-	POSITION pos = m_data.GetStartPosition();
-	STATSITEM si;
-	DWORD dwTaskID = 0;
+	int nItem = m_data.GetSize();
 	
-	while (pos)
-	{
-		m_data.GetNextAssoc(pos, dwTaskID, si);
-		dDays += si.dTimeEstDays;
-	}
+	while (nItem--)
+		dDays += m_data.GetAt(nItem)->dTimeEstDays;
 
 	return dDays;
 }
@@ -1367,11 +1401,6 @@ int CBurndownWnd::GetDataDuration() const
 	ASSERT(dEnd >= dStart);
 
 	return ((int)dEnd - (int)dStart);
-}
-
-BOOL CBurndownWnd::GetStatsItem(DWORD dwTaskID, STATSITEM& si) const
-{
-	return m_data.Lookup(dwTaskID, si);
 }
 
 void CBurndownWnd::OnSelchangeDisplay()
