@@ -101,7 +101,7 @@ protected:
 
 	int m_nScale;
 	int	m_nDisplay;
-	BOOL m_bGraphNeedsRebuildOnShow;
+	DWORD m_dwUpdateGraphOnShow;
 
 	CMapStatsItems m_data;
 	CDWordArray m_aDateOrdered;
@@ -142,7 +142,7 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void SortData();
 	BOOL IsDataSorted() const;
-	void RebuildGraph();
+	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents);
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
 	int CalculateIncompleteTaskCount(const COleDateTime& date);

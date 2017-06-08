@@ -93,6 +93,15 @@ const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum // m_dwUpdateGraphOnShow
+{
+	REBUILD_GRAPH	= 0x01,
+	RESORT_DATA		= 0x02,
+	UPDATE_EXTENTS	= 0x04
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 STATSITEM::STATSITEM() : dwTaskID(0), dTimeEstDays(0.0), dTimeSpentDays(0.0)
 {
 	CDateHelper::ClearDate(dtStart);
@@ -148,7 +157,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nDisplay(0),
 	m_nScale(1),
-	m_bGraphNeedsRebuildOnShow(FALSE)
+	m_dwUpdateGraphOnShow(0)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -261,7 +270,7 @@ BOOL CBurndownWnd::OnInitDialog()
 		CDialogHelper::AddString(m_cbDisplay, di.nTitleID, nDisplay);
 	}
 	m_cbDisplay.SetCurSel(0);
-	RebuildGraph();
+	RebuildGraph(FALSE, FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -404,8 +413,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks)
 		CDateHelper::ClearDate(m_dtLatestDate);
 
 		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		SortData();
-		RebuildGraph();
+		RebuildGraph(TRUE, FALSE);
 	}
 	else if (CDateHelper::IsDateSet(m_dtEarliestDate))
 	{
@@ -504,17 +512,12 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		else
 			UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
 
-		UpdateDataExtents();
-		SortData();
-		RebuildGraph();
+		RebuildGraph(TRUE, TRUE);
 		break;
 		
 	case IUI_DELETE:
 		if (RemoveDeletedTasks(pTasks))
-		{
-			UpdateDataExtents();
-			RebuildGraph();
-		}
+			RebuildGraph(FALSE, TRUE);
 		break;
 		
 	default:
@@ -834,7 +837,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		
 		// handle scale change
 		if (m_nScale != nOldScale)
-			RebuildGraph();
+			RebuildGraph(FALSE, FALSE);
 	}
 }
 
@@ -1101,15 +1104,24 @@ COleDateTime CBurndownWnd::GetGraphEndDate() const
 	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
-void CBurndownWnd::RebuildGraph()
+void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents)
 {
 	if (!m_graph.IsWindowVisible())
 	{
-		m_bGraphNeedsRebuildOnShow = TRUE;
+		m_dwUpdateGraphOnShow = REBUILD_GRAPH;
+		m_dwUpdateGraphOnShow |= (bSortData ? RESORT_DATA : 0);
+		m_dwUpdateGraphOnShow |= (bUpdateExtents ? UPDATE_EXTENTS : 0);
+		
 		return;
 	}
 
 	CWaitCursor cursor;
+
+	if (bUpdateExtents)
+		UpdateDataExtents();
+
+	if (bSortData)
+		SortData();
 
 	m_graph.ClearData();
 
@@ -1368,23 +1380,29 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	RebuildGraph();
+	RebuildGraph(FALSE, FALSE);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
 
-	if (bShow && m_bGraphNeedsRebuildOnShow)
+	if (bShow && m_dwUpdateGraphOnShow)
+	{
+		ASSERT(m_dwUpdateGraphOnShow & REBUILD_GRAPH);
 		PostMessage(WM_REBUILDGRAPH);
+	}
 }
 
 LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	ASSERT(m_bGraphNeedsRebuildOnShow);
+	ASSERT(m_dwUpdateGraphOnShow & REBUILD_GRAPH);
 
-	m_bGraphNeedsRebuildOnShow = FALSE;
-	RebuildGraph();
+	BOOL bSortData = (m_dwUpdateGraphOnShow & RESORT_DATA);
+	BOOL bUpdateExtents = (m_dwUpdateGraphOnShow & UPDATE_EXTENTS);
+	m_dwUpdateGraphOnShow = 0;
+
+	RebuildGraph(bSortData, bUpdateExtents);
 
 	return 0L;
 }
