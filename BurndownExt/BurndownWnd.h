@@ -162,7 +162,7 @@ protected:
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
-	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nFirstIncompleteItem);
+	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom);
 	double CalculateTimeSpentInDays(const COleDateTime& date);
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
 	double CalcTotalTimeEstimateInDays() const;

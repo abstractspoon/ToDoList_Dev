@@ -1198,12 +1198,12 @@ void CBurndownWnd::BuildBurndownGraph()
 	COleDateTime dtEnd = GetGraphEndDate();
 
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	int nFirstIncompleteItem = 0;
+	int nItemFrom = 0;
 
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
 		COleDateTime date(dtStart.m_dt + nDay);
-		int nNumNotDone = CalculateIncompleteTaskCount(date, nFirstIncompleteItem, nFirstIncompleteItem);
+		int nNumNotDone = CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
 
 		m_graph.AddData(0, nNumNotDone);
 	}
@@ -1211,18 +1211,17 @@ void CBurndownWnd::BuildBurndownGraph()
 	m_graph.CalcDatas();
 }
 
-int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nFirstIncompleteItem)
+int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom)
 {
 	// work thru items until we hit the first task whose 
 	// start date > date, counting how many are not complete as we go
 	if (m_dtEarliestDate > date)
 		return 0;
-
-	nFirstIncompleteItem = -1;
-
+	
 	int nNumItems = m_data.GetSize();
 	int nNumNotDone = 0;
-
+	int nEarliestNotDone = -1, nLatestDone = -1;
+	
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
@@ -1234,13 +1233,26 @@ int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nIt
 		{
 			nNumNotDone++;
 
-			if (nFirstIncompleteItem == -1)
-				nFirstIncompleteItem = nItem;
+			if ((nEarliestNotDone == -1) && pSI->HasStart())
+				nEarliestNotDone = nItem;
+		}
+		else if (nLatestDone == -1)
+		{
+			nLatestDone = nItem;
+		}
+		else if (pSI->dtDone > m_data[nLatestDone]->dtDone)
+		{
+			nLatestDone = nItem;
 		}
 	}
 
-	if (nFirstIncompleteItem == -1)
-		nFirstIncompleteItem = nItemFrom;
+	// If the earliest incomplete task in the sequence starts before 
+	// the very last completed task then in the next iteration we need 
+	// only process tasks beginning with the earliest incomplete task
+	// because we have proved that all tasks starting before this
+	// task have also been completed
+	if ((nEarliestNotDone != -1) && (nLatestDone != -1) && (nEarliestNotDone > nLatestDone))
+		nNextItemFrom = nEarliestNotDone;
 
 	return nNumNotDone;
 }
