@@ -1006,7 +1006,10 @@ BOOL CToDoCtrlData::CalcIsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE*
 	// check subtasks
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		if (CalcIsTaskFlagged(pTDS->GetSubTaskID(nSubtask)))
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
+		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
+
+		if (CalcIsTaskFlagged(pTDIChild, pTDSChild))
 			return TRUE;
 	}
 
