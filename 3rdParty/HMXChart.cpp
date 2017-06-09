@@ -555,6 +555,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		return false;
 	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
+	CRect rTitle(m_rectYAxis);
 	
 	if (nTicks)
 	{
@@ -577,8 +578,14 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		{
 			nTemp1 = m_rectYAxis.bottom + nFontSize/2 - (nY*(f)  ) * m_rectData.Height()/(m_nYMax-m_nYMin);
 			nTemp2 = m_rectYAxis.bottom + nFontSize/2 - (nY*(f+1)) * m_rectData.Height()/(m_nYMax-m_nYMin);
+
+			CRect rTemp(m_rectYAxis.left, (int)nTemp2, m_rectYAxis.right - 4, (int)nTemp1);
 			sBuffer.Format(_T("%g"), m_nYMin + nY*f);
-			dc.DrawText(sBuffer, CRect(m_rectYAxis.left,(int)nTemp2, m_rectYAxis.right - 4, (int)nTemp1), DT_RIGHT | DT_BOTTOM | DT_SINGLELINE);
+
+			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE);
+
+			int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sBuffer).cx);
+			rTitle.right = min(rTitle.right, nLabelLeft);
 		}
 
 		dc.SelectObject(pFontOld);
@@ -600,7 +607,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		CFont* pFontOld = dc.SelectObject(&m_fontYScale);
 
 		dc.SetTextAlign(TA_CENTER | TA_BASELINE);
-		dc.TextOut(m_rectYAxis.CenterPoint().x, m_rectYAxis.CenterPoint().y, m_strYText);
+		dc.TextOut(rTitle.CenterPoint().x, rTitle.CenterPoint().y, m_strYText);
 		dc.SelectObject(pFontOld);
 	}
 
