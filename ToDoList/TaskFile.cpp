@@ -1619,7 +1619,10 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 			SetTaskString(hTask, TDL_TASKEXTERNALID, tdi.sExternalID);
 		
 		if (!tdi.sIcon.IsEmpty())
+		{
+			ASSERT(tdi.sIcon != _T("-1")); // Historical bug
 			SetTaskString(hTask, TDL_TASKICONINDEX, tdi.sIcon);
+		}
 		
 		// rest of non-string attributes
 		SetTaskPriority(hTask, tdi.nPriority);
@@ -1729,6 +1732,10 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKVERSION,			tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
 		GETATTRIB(TDL_TASKICONINDEX,		tdi.sIcon = GetTaskString(hTask, TDL_TASKICONINDEX));
 
+		// Historical bug
+		if ((tdi.sIcon.GetLength() == 2) && (tdi.sIcon == _T("-1")))
+			tdi.sIcon.Empty();
+		
 		GETATTRIB(TDL_TASKFLAG,				tdi.bFlagged = IsTaskFlagged(hTask, false));
 		GETATTRIB(TDL_TASKLOCK,				tdi.bLocked = IsTaskLocked(hTask, false));
 
@@ -2180,7 +2187,14 @@ LPCTSTR CTaskFile::GetTaskTitle(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskIcon(HTASKITEM hTask) const
 {
-	return GetTaskString(hTask, TDL_TASKICONINDEX);
+	const CString& sIcon = GetTaskString(hTask, TDL_TASKICONINDEX);
+
+	// Historical bug
+	if ((sIcon.GetLength() == 2) && (sIcon == _T("-1")))
+		return NULLSTRING;
+
+	// else
+	return sIcon;
 }
 
 LPCTSTR CTaskFile::GetTaskSubtaskCompletion(HTASKITEM hTask) const
@@ -3417,6 +3431,7 @@ BOOL CTaskFile::SetTaskTextColor(HTASKITEM hTask, COLORREF color)
 
 bool CTaskFile::SetTaskIcon(HTASKITEM hTask, LPCTSTR szIcon)
 {
+	ASSERT(lstrcmp(szIcon, _T("-1")) != 0); // Historical bug
 	return SetTaskString(hTask, TDL_TASKICONINDEX, szIcon);
 }
 
@@ -3615,7 +3630,7 @@ int CTaskFile::GetTaskInt(HTASKITEM hTask, const CString& sIntItem) const
 	return pXITask->GetItemValueI(sIntItem);
 }
 
-CString CTaskFile::GetTaskString(HTASKITEM hTask, const CString& sStringItem) const
+const CString& CTaskFile::GetTaskString(HTASKITEM hTask, const CString& sStringItem) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULLSTRING);

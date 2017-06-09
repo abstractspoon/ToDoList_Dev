@@ -479,7 +479,7 @@ protected:
 	unsigned char GetTaskUChar(HTASKITEM hTask, const CString& sUCharItem) const;
 	unsigned long GetTaskULong(HTASKITEM hTask, const CString& sULongItem) const;
 	int GetTaskInt(HTASKITEM hTask, const CString& sIntItem) const;
-	CString GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
+	const CString& GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
