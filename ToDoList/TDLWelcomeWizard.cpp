@@ -230,7 +230,7 @@ void CTDLWelcomePage2::GetColumnVisibility(TDCCOLEDITFILTERVISIBILITY& vis) cons
 	CTDCColumnIDMap mapCols;
 	
 	while (nCol--)
-		mapCols.AddColumn(aColumns[nCol]);
+		mapCols.Add(aColumns[nCol]);
 
 	vis.Clear();
 	vis.SetVisibleColumns(mapCols);

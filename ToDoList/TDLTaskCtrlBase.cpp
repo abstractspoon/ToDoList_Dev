@@ -821,7 +821,7 @@ BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
 		return CTDCCustomAttributeHelper::IsCustomColumnEnabled(nColID, m_aCustomAttribDefs);
 	}
 
-	return m_mapVisibleCols.HasColumn(nColID);
+	return m_mapVisibleCols.Has(nColID);
 }
 
 BOOL CTDLTaskCtrlBase::SetColumnOrder(const CDWordArray& aColumns)
@@ -1931,7 +1931,7 @@ BOOL CTDLTaskCtrlBase::SetPriorityColors(const CDWordArray& aColors)
 {
 	ASSERT (aColors.GetSize() == 11);
 	
-	if ((aColors.GetSize() == 11) && !Misc::MatchAllT(aColors, m_aPriorityColors))
+	if ((aColors.GetSize() == 11) && !Misc::MatchAllT(aColors, m_aPriorityColors, FALSE))
 	{
 		m_aPriorityColors.Copy(aColors);
 			

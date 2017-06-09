@@ -849,7 +849,7 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 int CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.CopyAttributes(mapAttrib);
+	filter.mapAttribs.Copy(mapAttrib);
 
 	return GetTasks(tasks, FTCV_TASKTREE, filter);
 }
@@ -914,96 +914,96 @@ void CTabbedToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttr
 		break;
 
 	case TDCA_DEPENDENCY:
-		mapAttrib.AddAttribute(nAttrib);
+		mapAttrib.Add(nAttrib);
 
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			mapAttrib.AddAttribute(TDCA_DUEDATE);
-			mapAttrib.AddAttribute(TDCA_STARTDATE);
+			mapAttrib.Add(TDCA_DUEDATE);
+			mapAttrib.Add(TDCA_STARTDATE);
 		}
 		break;
 
 	case TDCA_DUEDATE:
-		mapAttrib.AddAttribute(nAttrib);
+		mapAttrib.Add(nAttrib);
 
 		// If this extension view wants due or start dates and dependents may
 		// have changed then we send all tasks with dates
 		if (m_taskTree.SelectionHasDependents() && 
 			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			mapAttrib.AddAttribute(TDCA_STARTDATE);
+			mapAttrib.Add(TDCA_STARTDATE);
 		}
 
 		if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && 
 			HasStyle(TDCS_USEHIGHESTPRIORITY))
 		{
-			mapAttrib.AddAttribute(TDCA_PRIORITY);
+			mapAttrib.Add(TDCA_PRIORITY);
 		}
 
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
-			mapAttrib.AddAttribute(TDCA_STARTDATE);
-			mapAttrib.AddAttribute(TDCA_TIMEEST);
+			mapAttrib.Add(TDCA_STARTDATE);
+			mapAttrib.Add(TDCA_TIMEEST);
 		}
 		break;
 
 	case TDCA_STARTDATE:
-		mapAttrib.AddAttribute(nAttrib);
+		mapAttrib.Add(nAttrib);
 
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
-			mapAttrib.AddAttribute(TDCA_DUEDATE);
-			mapAttrib.AddAttribute(TDCA_TIMEEST);
+			mapAttrib.Add(TDCA_DUEDATE);
+			mapAttrib.Add(TDCA_TIMEEST);
 		}
 		break;
 
 	case TDCA_DONEDATE:
-		mapAttrib.AddAttribute(nAttrib);
-		mapAttrib.AddAttribute(TDCA_SUBTASKDONE);
+		mapAttrib.Add(nAttrib);
+		mapAttrib.Add(TDCA_SUBTASKDONE);
 
 		if (m_taskTree.SelectionHasDependents() && 
 			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			mapAttrib.AddAttribute(TDCA_DUEDATE);
-			mapAttrib.AddAttribute(TDCA_STARTDATE);
+			mapAttrib.Add(TDCA_DUEDATE);
+			mapAttrib.Add(TDCA_STARTDATE);
 		}
 		
 		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
 			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
 		{
-			mapAttrib.AddAttribute(TDCA_PERCENT);
+			mapAttrib.Add(TDCA_PERCENT);
 		}
 		
 		if (HasStyle(TDCS_INCLUDEDONEINRISKCALC) && 
 			HasStyle(TDCS_USEHIGHESTRISK))
 		{
-			mapAttrib.AddAttribute(TDCA_RISK);
+			mapAttrib.Add(TDCA_RISK);
 		}
 		
 		if (HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && 
 			HasStyle(TDCS_USEHIGHESTPRIORITY))
 		{
-			mapAttrib.AddAttribute(TDCA_PRIORITY);
+			mapAttrib.Add(TDCA_PRIORITY);
 		}
 
 		if (!m_sCompletionStatus.IsEmpty())
 		{
-			mapAttrib.AddAttribute(TDCA_STATUS);
+			mapAttrib.Add(TDCA_STATUS);
 		}
 		break;
 
 	case TDCA_CUSTOMATTRIBDEFS:
-		mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB);
+		mapAttrib.Add(TDCA_CUSTOMATTRIB);
 		break;
 
 	default: // all else
-		mapAttrib.AddAttribute(nAttrib);
+		mapAttrib.Add(nAttrib);
 		break;
 	}
 
 	// Finally check for colour change
 	if (ModCausesColorChange(mapAttrib))
-		mapAttrib.AddAttribute(TDCA_COLOR);
+		mapAttrib.Add(TDCA_COLOR);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, 
@@ -1011,7 +1011,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks,
 															DWORD dwFlags) const
 {
 	TDCGETTASKS filter;
-	filter.mapAttribs.CopyAttributes(mapAttrib);
+	filter.mapAttribs.Copy(mapAttrib);
 
 	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter, dwFlags));
 
@@ -1984,7 +1984,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 						CWaitCursor cursor;
 
 						CTDCAttributeMap mapAttribs;
-						mapAttribs.AddAttribute(TDCA_COLOR);
+						mapAttribs.Add(TDCA_COLOR);
 						
 						CTaskFile tasks;
 						GetAllTasksForExtensionViewUpdate(tasks, mapAttribs);
@@ -2623,7 +2623,7 @@ BOOL CTabbedToDoCtrl::ModCausesColorChange(const CTDCAttributeMap& mapAttrib) co
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 
 		if (ModCausesColorChange(nAttrib))
 			return TRUE;
@@ -2646,18 +2646,18 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		while (nAttrib--)
 		{
 			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIEdit((TDC_ATTRIBUTE)nAttrib)))
-				mapAttrib.AddAttribute((TDC_ATTRIBUTE)nAttrib);
+				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
 		// Add custom attributes
-		mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB);
+		mapAttrib.Add(TDCA_CUSTOMATTRIB);
 
 		// Always add lock state
-		mapAttrib.AddAttribute(TDCA_LOCK);
+		mapAttrib.Add(TDCA_LOCK);
 
 		// Include 'position' if extension supports 'unsorted'
 		if (pExtWnd->CanDoAppCommand(IUI_SORT, IUI_NONE))
-			mapAttrib.AddAttribute(TDCA_POSITION);
+			mapAttrib.Add(TDCA_POSITION);
 	}
 
 	return mapAttrib.GetCount();
@@ -2678,7 +2678,7 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 			CTDCAttributeMap mapExtAttrib;
 
 			if (GetExtensionViewAttributes(pExtWnd, mapExtAttrib))
-				mapAttrib.AppendAttributes(mapExtAttrib);
+				mapAttrib.Append(mapExtAttrib);
 		}
 	}
 
@@ -2860,7 +2860,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 
 			// Include parents if there is a colour change 
 			// or a calculated attribute change
-			if (mapAttrib.HasAttribute(TDCA_COLOR) || IsCalculatedAttribute(nAttrib))
+			if (mapAttrib.Has(TDCA_COLOR) || IsCalculatedAttribute(nAttrib))
 				dwFlags |= TDCGSTF_ALLPARENTS;
 
 			// DONT include subtasks UNLESS the completion date has changed
@@ -2908,7 +2908,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 			if (pData)
 			{
 				if (nUpdate == IUI_NEW)
-					mapAttrib.CopyAttributes(pData->mapWantedAttrib);
+					mapAttrib.Copy(pData->mapWantedAttrib);
 				
 				pData->bNeedFullTaskUpdate = FALSE;
 			}
@@ -3012,7 +3012,7 @@ void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttribute
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 		GetGlobals(nAttrib, tld);
 	}
 	
@@ -3043,7 +3043,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, const CTDCAttributeMap&
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 
 		if (ExtensionViewWantsChange(nExt, nAttrib))
 			return TRUE;
@@ -3130,7 +3130,7 @@ BOOL CTabbedToDoCtrl::AnyExtensionViewWantsChange(const CTDCAttributeMap& mapAtt
 	
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 
 		// Mandate lock state changes
 		if (nAttrib == TDCA_LOCK)

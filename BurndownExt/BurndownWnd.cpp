@@ -699,10 +699,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (pSI)
 		{
-			if (attrib.HasKey(IUI_DONEDATE))
+			if (attrib.Has(IUI_DONEDATE))
 				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
 
-			if (attrib.HasKey(IUI_STARTDATE))
+			if (attrib.Has(IUI_STARTDATE))
 			{
 				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 				
@@ -711,10 +711,10 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 			}
 				
-			if (attrib.HasKey(IUI_TIMEEST))
+			if (attrib.Has(IUI_TIMEEST))
 				pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
 
-			if (attrib.HasKey(IUI_TIMESPENT))
+			if (attrib.Has(IUI_TIMESPENT))
 				pSI->dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
 		}
 		else

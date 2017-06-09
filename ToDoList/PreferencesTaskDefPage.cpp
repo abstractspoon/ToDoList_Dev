@@ -386,7 +386,7 @@ int CPreferencesTaskDefPage::GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, 
 		while (nIndex--)
 		{
 			if (m_aAttribPrefs[nIndex].bUse)
-				mapAttribs.AddAttribute(m_aAttribPrefs[nIndex].nAttrib);
+				mapAttribs.Add(m_aAttribPrefs[nIndex].nAttrib);
 		}
 	}
 	else

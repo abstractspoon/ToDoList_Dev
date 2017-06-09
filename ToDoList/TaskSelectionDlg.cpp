@@ -51,7 +51,7 @@ CTaskSelectionDlg::CTaskSelectionDlg(LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVis
 		CString sKey = Misc::MakeKey(_T("att%d"), nAttrib);
 		TDC_ATTRIBUTE att = (TDC_ATTRIBUTE)prefs.GetProfileInt(sGroup, sKey, 0);
 
-		mapAttrib.AddAttribute(att);
+		mapAttrib.Add(att);
 	}
 
 	m_lbAttribList.SetVisibleAttributes(mapAttrib);
@@ -152,7 +152,7 @@ void CTaskSelectionDlg::OnDestroy()
 	while (pos)
 	{
 		CString sKey = Misc::MakeKey(_T("att%d"), nItem++);
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 
 		prefs.WriteProfileInt(sGroup, sKey, nAttrib);
 	}

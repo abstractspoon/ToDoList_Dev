@@ -3074,7 +3074,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	{
 		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
-		if (mapProcessed.HasKey(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		int nPriority = (m_data.GetTaskPriority(dwTaskID) + nAmount);
@@ -3096,7 +3096,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 			dwModTaskID = dwTaskID;
 		}
 
-		mapProcessed.AddKey(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3282,7 +3282,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
 
-		if (mapProcessed.HasKey(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		TDC_SET nItemRes = m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE);
@@ -3293,7 +3293,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 			nRes = SET_CHANGE;
 		}
 
-		mapProcessed.AddKey(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -3376,7 +3376,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 {
 	ASSERT(!IsReadOnly());
 
-	if (mapProcessed.HasKey(dwTaskID))
+	if (mapProcessed.Has(dwTaskID))
 		return SET_NOCHANGE;
 
 	if (m_data.IsTaskLocked(dwTaskID))
@@ -3389,7 +3389,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	TDC_SET nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
 
-	mapProcessed.AddKey(dwTaskID);
+	mapProcessed.Add(dwTaskID);
 
 	// subtasks
 	if (bAndSubtasks)
@@ -4108,7 +4108,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	{
 		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
-		if (mapProcessed.HasKey(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		BOOL bDone = m_data.IsTaskDone(dwTaskID);
@@ -4134,7 +4134,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 			dwModTaskID = dwTaskID;
 		}
 
-		mapProcessed.AddKey(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 	
 	if (nRes == SET_CHANGE)
@@ -5909,7 +5909,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 {
 	ASSERT(!IsReadOnly());
 
-	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib))
+	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 		RebuildCustomAttributeUI();
@@ -8415,9 +8415,9 @@ int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStrin
 				DWORD dwDependID = _ttoi(aDepends[nDepend]);
 
 				if (dwDependID)
-					aLocal.AddKey(dwDependID);
+					aLocal.Add(dwDependID);
 				else
-					aOther.AddKey(aDepends[nDepend]);
+					aOther.Add(aDepends[nDepend]);
 			}
 		}
 	}

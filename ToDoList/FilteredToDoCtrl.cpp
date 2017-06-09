@@ -1566,14 +1566,14 @@ void CFilteredToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITFILTERVISIBILITY& vis
 
 const CTDCColumnIDMap& CFilteredToDoCtrl::GetVisibleColumns() const
 {
-	ASSERT(m_visColEditFilter.GetVisibleColumns().MatchAllColumns(m_visColEdit.GetVisibleColumns()));
+	ASSERT(m_visColEditFilter.GetVisibleColumns().MatchAll(m_visColEdit.GetVisibleColumns()));
 
 	return m_visColEditFilter.GetVisibleColumns();
 }
 
 const CTDCAttributeMap& CFilteredToDoCtrl::GetVisibleEditFields() const
 {
-	ASSERT(m_visColEditFilter.GetVisibleEditFields().MatchAllAttributes(m_visColEdit.GetVisibleEditFields()));
+	ASSERT(m_visColEditFilter.GetVisibleEditFields().MatchAll(m_visColEdit.GetVisibleEditFields()));
 
 	return m_visColEditFilter.GetVisibleEditFields();
 }

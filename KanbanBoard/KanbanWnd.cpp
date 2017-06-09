@@ -467,7 +467,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	CStringArray aCustAttribIDs;
 	m_ctrlKanban.GetCustomAttributeIDs(aCustAttribIDs);
 
-	if (attrib.HasKey(IUI_CUSTOMATTRIB))
+	if (attrib.Has(IUI_CUSTOMATTRIB))
 	{
 		CLocalizer::EnableTranslation(m_cbCustomAttributes, FALSE);
 		CDialogHelper::SetComboBoxItems(m_cbCustomAttributes, aCustAttribIDs);

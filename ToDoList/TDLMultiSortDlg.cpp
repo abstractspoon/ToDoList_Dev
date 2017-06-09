@@ -153,7 +153,7 @@ BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
 		return FALSE;
 
 	// else test column
-	return m_mapVisibleColumns.HasColumn(col);
+	return m_mapVisibleColumns.Has(col);
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby1() 

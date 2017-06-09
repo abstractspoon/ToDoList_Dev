@@ -540,12 +540,12 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			KANBANITEM* pKI = NULL;
 			GET_KI_RET(dwTaskID, pKI, FALSE);
 
-			if (attrib.HasKey(IUI_TASKNAME))
+			if (attrib.Has(IUI_TASKNAME))
 			{
 				pKI->sTitle = pTasks->GetTaskTitle(hTask);
 			}
 			
-			if (attrib.HasKey(IUI_DONEDATE))
+			if (attrib.Has(IUI_DONEDATE))
 			{
 				BOOL bDone = pTasks->IsTaskDone(hTask);
 				BOOL bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
@@ -557,38 +557,38 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				}
 			}
 
-			if (attrib.HasKey(IUI_SUBTASKDONE))
+			if (attrib.Has(IUI_SUBTASKDONE))
 			{
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
 			
 			// Trackable attributes
-			if (attrib.HasKey(IUI_ALLOCBY))
+			if (attrib.Has(IUI_ALLOCBY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
-			if (attrib.HasKey(IUI_ALLOCTO))
+			if (attrib.Has(IUI_ALLOCTO))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCTO, pTasks->GetTaskAllocatedTo(hTask, 0));
 
-			if (attrib.HasKey(IUI_STATUS))
+			if (attrib.Has(IUI_STATUS))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_STATUS, pTasks->GetTaskStatus(hTask));
 
-			if (attrib.HasKey(IUI_CATEGORY))
+			if (attrib.Has(IUI_CATEGORY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_CATEGORY, pTasks->GetTaskCategory(hTask, 0));
 
-			if (attrib.HasKey(IUI_VERSION))
+			if (attrib.Has(IUI_VERSION))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_VERSION, pTasks->GetTaskVersion(hTask));
 
-			if (attrib.HasKey(IUI_TAGS))
+			if (attrib.Has(IUI_TAGS))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_TAGS, pTasks->GetTaskTag(hTask, 0));
 
-			if (attrib.HasKey(IUI_PRIORITY))
+			if (attrib.Has(IUI_PRIORITY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
 
-			if (attrib.HasKey(IUI_RISK))
+			if (attrib.Has(IUI_RISK))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_RISK, pTasks->GetTaskRisk(hTask, FALSE));
 
-			if (attrib.HasKey(IUI_CUSTOMATTRIB))
+			if (attrib.Has(IUI_CUSTOMATTRIB))
 			{
 				int nID = m_aCustomAttribIDs.GetSize();
 
@@ -646,43 +646,43 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 {
 	time64_t tDate = 0;
 	
-	if (attrib.HasKey(IUI_TIMEEST))
+	if (attrib.Has(IUI_TIMEEST))
 		pKI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pKI->nTimeEstUnits, FALSE);
 	
-	if (attrib.HasKey(IUI_TIMESPENT))
+	if (attrib.Has(IUI_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, FALSE);
 	
-	if (attrib.HasKey(IUI_COST))
+	if (attrib.Has(IUI_COST))
 		pKI->dCost = pTasks->GetTaskCost(hTask, FALSE);
 	
-	if (attrib.HasKey(IUI_CREATEDBY))
+	if (attrib.Has(IUI_CREATEDBY))
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
 	
-	if (attrib.HasKey(IUI_CREATIONDATE))
+	if (attrib.Has(IUI_CREATIONDATE))
 		pKI->dtCreate = pTasks->GetTaskCreationDate(hTask);
 	
-	if (attrib.HasKey(IUI_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
+	if (attrib.Has(IUI_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
 		pKI->dtDone = CDateHelper::GetDate(tDate);
 	
-	if (attrib.HasKey(IUI_DUEDATE) && pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
+	if (attrib.Has(IUI_DUEDATE) && pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
 		pKI->dtDue = CDateHelper::GetDate(tDate);
 	
-	if (attrib.HasKey(IUI_STARTDATE) && pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+	if (attrib.Has(IUI_STARTDATE) && pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
 		pKI->dtStart = CDateHelper::GetDate(tDate);
 	
-	if (attrib.HasKey(IUI_LASTMOD) && pTasks->GetTaskLastModified64(hTask, tDate))
+	if (attrib.Has(IUI_LASTMOD) && pTasks->GetTaskLastModified64(hTask, tDate))
 		pKI->dtLastMod = CDateHelper::GetDate(tDate);
 	
-	if (attrib.HasKey(IUI_PERCENT))
+	if (attrib.Has(IUI_PERCENT))
 		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, FALSE);
 	
-	if (attrib.HasKey(IUI_EXTERNALID))
+	if (attrib.Has(IUI_EXTERNALID))
 		pKI->sExternalID = pTasks->GetTaskExternalID(hTask);
 	
-	if (attrib.HasKey(IUI_RECURRENCE))
+	if (attrib.Has(IUI_RECURRENCE))
 		pKI->sRecurrence = pTasks->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
 
-	if (attrib.HasKey(IUI_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
+	if (attrib.Has(IUI_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
 	{
 		pKI->sFileRef = pTasks->GetTaskFileLink(hTask, 0);
 
@@ -696,31 +696,31 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, const
 {
 	BOOL bChange = FALSE;
 
-	if (attrib.HasKey(IUI_STATUS))
+	if (attrib.Has(IUI_STATUS))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_STATUS);
 	
-	if (attrib.HasKey(IUI_ALLOCTO))
+	if (attrib.Has(IUI_ALLOCTO))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_ALLOCTO);
 	
-	if (attrib.HasKey(IUI_CATEGORY))
+	if (attrib.Has(IUI_CATEGORY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_CATEGORY);
 	
-	if (attrib.HasKey(IUI_ALLOCBY))
+	if (attrib.Has(IUI_ALLOCBY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_ALLOCBY);
 	
-	if (attrib.HasKey(IUI_TAGS))
+	if (attrib.Has(IUI_TAGS))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_TAGS);
 	
-	if (attrib.HasKey(IUI_VERSION))
+	if (attrib.Has(IUI_VERSION))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_VERSION);
 	
-	if (attrib.HasKey(IUI_PRIORITY))
+	if (attrib.Has(IUI_PRIORITY))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_PRIORITY);
 	
-	if (attrib.HasKey(IUI_RISK))
+	if (attrib.Has(IUI_RISK))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_RISK);
 	
-	if (attrib.HasKey(IUI_CUSTOMATTRIB))
+	if (attrib.Has(IUI_CUSTOMATTRIB))
 		bChange |= UpdateGlobalAttributeValues(pTasks, IUI_CUSTOMATTRIB);
 	
 	return bChange;
@@ -1512,7 +1512,7 @@ void CKanbanCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (hTask == NULL)
 		return;
 	
-	mapIDs.AddKey(pTasks->GetTaskID(hTask));
+	mapIDs.Add(pTasks->GetTaskID(hTask));
 	
 	// children
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
@@ -1548,7 +1548,7 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 		{
 			DWORD dwTaskID = pList->GetItemData(nItem);
 
-			if (!mapIDs.HasKey(dwTaskID))
+			if (!mapIDs.Has(dwTaskID))
 			{
 				pList->DeleteItem(nItem);
 				m_data.RemoveKey(dwTaskID);
@@ -1565,7 +1565,7 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	{
 		m_data.GetNextAssoc(pos, dwTaskID, pKI);
 
-		if (!mapIDs.HasKey(dwTaskID))
+		if (!mapIDs.Has(dwTaskID))
 			m_data.RemoveKey(dwTaskID);
 	}
 }
@@ -1658,7 +1658,7 @@ CKanbanListCtrl* CKanbanCtrl::GetListCtrl(HWND hwnd) const
 
 void CKanbanCtrl::SetDisplayAttributes(const CKanbanAttributeArray& aAttrib)
 {
-	if (!Misc::MatchAllT(m_aDisplayAttrib, aAttrib))
+	if (!Misc::MatchAllT(m_aDisplayAttrib, aAttrib, FALSE))
 	{
 		m_aDisplayAttrib.Copy(aAttrib);
 		

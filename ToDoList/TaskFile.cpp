@@ -966,7 +966,7 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 	
 	while (pos)
 	{
-		TDC_COLUMN nColID = mapCols.GetNextColumn(pos);
+		TDC_COLUMN nColID = mapCols.GetNext(pos);
 		pXIVis->AddItem(TDL_ATTRIBVISCOL, nColID, XIT_ELEMENT);
 	}
 
@@ -981,7 +981,7 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapEdit.GetNextAttribute(pos);
+			TDC_ATTRIBUTE nAttrib = mapEdit.GetNext(pos);
 			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttrib, XIT_ELEMENT);
 		}
 	}
@@ -1005,7 +1005,7 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITVISIBILITY& vis) const
 
 	while (pXICol)
 	{
-		mapCols.AddColumn((TDC_COLUMN)pXICol->GetValueI());
+		mapCols.Add((TDC_COLUMN)pXICol->GetValueI());
 		pXICol = pXICol->GetSibling();
 	}
 
@@ -1020,7 +1020,7 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITVISIBILITY& vis) const
 
 		while (pXIEdit)
 		{
-			mapEdit.AddAttribute((TDC_ATTRIBUTE)pXIEdit->GetValueI());
+			mapEdit.Add((TDC_ATTRIBUTE)pXIEdit->GetValueI());
 			pXIEdit = pXIEdit->GetSibling();
 		}
 		vis.SetVisibleEditFields(mapEdit);
@@ -1045,7 +1045,7 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapFilter.GetNextAttribute(pos);
+			TDC_ATTRIBUTE nAttrib = mapFilter.GetNext(pos);
 			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttrib, XIT_ELEMENT);
 		}
 	}
@@ -1069,7 +1069,7 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 
 		while (pXIFilter)
 		{
-			mapFilter.AddAttribute((TDC_ATTRIBUTE)pXIFilter->GetValueI());
+			mapFilter.Add((TDC_ATTRIBUTE)pXIFilter->GetValueI());
 			pXIFilter = pXIFilter->GetSibling();
 		}
 

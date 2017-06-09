@@ -128,13 +128,13 @@ CToDoCtrlData::~CToDoCtrlData()
 
 void CToDoCtrlData::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib)
 {
-	s_mapParentAttribs.CopyAttributes(mapAttribs);
+	s_mapParentAttribs.Copy(mapAttribs);
 	s_bUpdateInheritAttrib = bUpdateAttrib;
 }
 
 BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib)
 {
-	return (s_bUpdateInheritAttrib && s_mapParentAttribs.HasAttribute(nAttrib));
+	return (s_bUpdateInheritAttrib && s_mapParentAttribs.Has(nAttrib));
 }
 
 int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks)
@@ -1340,7 +1340,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 	// capture all the edits as a single atomic change that can be undone
 	for (int nAttrib = TDCA_FIRSTATTRIBUTE; nAttrib < TDCA_ATTRIBUTECOUNT; nAttrib++)
 	{
-		if (mapAttribs.HasAttribute((TDC_ATTRIBUTE)nAttrib))
+		if (mapAttribs.Has((TDC_ATTRIBUTE)nAttrib))
 		{
 			switch (nAttrib)
 			{
@@ -1591,7 +1591,7 @@ void CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 		while (pos)
 		{
 			// FALSE means do not apply if parent is blank
-			TDC_ATTRIBUTE nAttrib = s_mapParentAttribs.GetNextAttribute(pos);
+			TDC_ATTRIBUTE nAttrib = s_mapParentAttribs.GetNext(pos);
 			ApplyLastChangeToSubtasks(dwTaskID, nAttrib, FALSE);
 		}
 	}
@@ -1610,7 +1610,7 @@ void CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = s_mapParentAttribs.GetNextAttribute(pos);
+			TDC_ATTRIBUTE nAttrib = s_mapParentAttribs.GetNext(pos);
 			ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib);
 		}
 	}

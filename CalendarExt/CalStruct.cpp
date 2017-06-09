@@ -92,8 +92,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 void TASKCALITEM::UpdateTaskDates(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	// check for quick exit
-	BOOL bUpdateStart = attrib.HasKey(IUI_STARTDATE);
-	BOOL bUpdateEnd = (attrib.HasKey(IUI_DUEDATE) || attrib.HasKey(IUI_DONEDATE));
+	BOOL bUpdateStart = attrib.Has(IUI_STARTDATE);
+	BOOL bUpdateEnd = (attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE));
 
 	if (!bUpdateStart && !bUpdateEnd)
 		return;
@@ -219,7 +219,7 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const C
 	// snapshot current state to check for changes
 	TASKCALITEM tciOrg = *this;
 
-	if (attrib.HasKey(IUI_TASKNAME))
+	if (attrib.Has(IUI_TASKNAME))
 		sName = pTasks->GetTaskTitle(hTask);
 
 	UpdateTaskDates(pTasks, hTask, attrib, dwCalcDates);

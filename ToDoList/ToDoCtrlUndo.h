@@ -93,7 +93,7 @@ struct TDCUNDOACTION
 	BOOL operator==(const TDCUNDOACTION& action) const
 	{ 
 		return (nType == action.nType && 
-				Misc::MatchAllT(aElements, action.aElements));
+				Misc::MatchAllT(aElements, action.aElements, FALSE));
 	}
 
 	int GetTaskIDs(CDWordArray& aIDs) const

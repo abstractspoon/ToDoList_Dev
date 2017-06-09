@@ -346,10 +346,10 @@ namespace TDC
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE att = MapColumnToAttribute(mapCols.GetNextColumn(pos));
+			TDC_ATTRIBUTE att = MapColumnToAttribute(mapCols.GetNext(pos));
 			
 			if (att != TDCA_NONE)
-				mapAttrib.AddAttribute(att);
+				mapAttrib.Add(att);
 		}
 
 		return mapAttrib.GetCount();
@@ -641,7 +641,7 @@ namespace TDC
 		
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNextAttribute(pos);
+			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
 			aAttrib.Add(MapAttributeToIUIEdit(nAttrib));
 		}
 		

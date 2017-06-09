@@ -268,7 +268,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 	if (hTask == NULL)
 		return;
 	
-	mapIDs.AddKey(pTasks->GetTaskID(hTask));
+	mapIDs.Add(pTasks->GetTaskID(hTask));
 	
 	// children
 	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
@@ -305,7 +305,7 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 		ASSERT(pTCI);
 		ASSERT(pTCI->GetTaskID() == dwTaskID);
 
-		if (!mapIDs.HasKey(dwTaskID))
+		if (!mapIDs.Has(dwTaskID))
 		{
 			delete pTCI;
 			m_mapData.RemoveKey(dwTaskID);

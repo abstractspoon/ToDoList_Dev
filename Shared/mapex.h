@@ -36,7 +36,12 @@ public:
 		CopyFrom(pOther, nNumOther);
 	}
 
-	KEY GetNextKey(POSITION& pos) const
+	BOOL IsEmpty() const
+	{
+		return (GetCount() == 0);
+	}
+
+	KEY GetNext(POSITION& pos) const
 	{
 		char val = 0;
 		KEY key;
@@ -45,16 +50,21 @@ public:
 		return key;
 	}
 
-	BOOL HasKey(KEY key) const
+	BOOL Has(KEY key) const
 	{
 		char val = 0;
 		return Lookup(key, val);
 	}
 
-	void AddKey(KEY key)
+	void Add(KEY key)
 	{
 		char val = 0;
 		SetAt(key, val);
+	}
+
+	void Remove(KEY key)
+	{
+		CMap<KEY, ARG_KEY, char, char&>::RemoveKey(key);
 	}
 
 	void Copy(const CSetBase& other)
@@ -64,9 +74,17 @@ public:
 
 	BOOL MatchAll(const CSetBase& other) const
 	{
-		Misc::MatchAllT(other, *this);
+		return Misc::MatchAllT(other, *this);
 	}
 
+	void Append(const CSetBase& other)
+	{
+		POSITION pos = other.GetStartPosition();
+
+		while (pos)
+			Add(other.GetNext(pos));
+	}
+	
 	int CopyFrom(const CArray<KEY, KEY&>& other)
 	{
 		return CopyFrom(other.GetData(), other.GetSize());
@@ -84,7 +102,7 @@ public:
 		int nItem = nNumOther;
 
 		while (nItem--)
-			AddKey(pOther[nItem]);
+			Add(pOther[nItem]);
 
 		return GetCount();
 	}
@@ -108,7 +126,7 @@ protected:
 		POSITION pos = GetStartPosition();
 
 		while (pos)
-			other.Add(GetNextKey(pos));
+			other.Add(GetNext(pos));
 
 		return other.GetSize();
 	}

@@ -116,9 +116,9 @@ int CTDLAttributeListBox::GetAllAttributes(CTDCAttributeMap& mapAttrib) const
 	int nIndex = m_aAttribs.GetSize();
 	
 	while (nIndex--)
-		mapAttrib.AddAttribute(m_aAttribs[nIndex].nTDCAttrib);
+		mapAttrib.Add(m_aAttribs[nIndex].nTDCAttrib);
 
-	mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB); // always
+	mapAttrib.Add(TDCA_CUSTOMATTRIB); // always
 
 	return mapAttrib.GetCount();
 }
@@ -167,7 +167,7 @@ void CTDLAttributeListBox::SetVisibleAttributes(const CTDCAttributeMap& mapAttri
 	{
 		ATTRIBVIS& vis = m_aAttribs[nAttrib];
 
-		vis.bVisible = mapAttrib.HasAttribute(vis.nTDCAttrib);
+		vis.bVisible = mapAttrib.Has(vis.nTDCAttrib);
 
 			if (GetSafeHwnd())
 				SetCheck(nAttrib, vis.bVisible);
@@ -186,16 +186,16 @@ int CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) cons
 
 		if (vis.bVisible)
 		{
-			mapAttrib.AddAttribute(vis.nTDCAttrib);
+			mapAttrib.Add(vis.nTDCAttrib);
 
 			// parent ID
 			if (vis.nTDCAttrib == TDCA_ID)
-				mapAttrib.AddAttribute(TDCA_PARENTID);
+				mapAttrib.Add(TDCA_PARENTID);
 		}
 	}
 
 	// custom attributes
-	mapAttrib.AddAttribute(TDCA_CUSTOMATTRIB); // always
+	mapAttrib.Add(TDCA_CUSTOMATTRIB); // always
 
 	return mapAttrib.GetCount();
 

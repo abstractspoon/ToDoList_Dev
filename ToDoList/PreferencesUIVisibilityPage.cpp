@@ -81,21 +81,21 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 		// first time OR backwards compatibility
 		CTDCColumnIDMap mapColumns;
 
-		mapColumns.AddColumn(TDCC_ID);
-		mapColumns.AddColumn(TDCC_PRIORITY);
-		mapColumns.AddColumn(TDCC_PERCENT);
-		mapColumns.AddColumn(TDCC_TIMEEST);
-		mapColumns.AddColumn(TDCC_TIMESPENT);
-		mapColumns.AddColumn(TDCC_TRACKTIME);
-		mapColumns.AddColumn(TDCC_DUEDATE);
-		mapColumns.AddColumn(TDCC_ALLOCTO);
-		mapColumns.AddColumn(TDCC_STATUS);
-		mapColumns.AddColumn(TDCC_CATEGORY);
-		mapColumns.AddColumn(TDCC_FILEREF);
-		mapColumns.AddColumn(TDCC_RECURRENCE);
-		mapColumns.AddColumn(TDCC_REMINDER);
-		mapColumns.AddColumn(TDCC_TAGS);
-		mapColumns.AddColumn(TDCC_LOCK);
+		mapColumns.Add(TDCC_ID);
+		mapColumns.Add(TDCC_PRIORITY);
+		mapColumns.Add(TDCC_PERCENT);
+		mapColumns.Add(TDCC_TIMEEST);
+		mapColumns.Add(TDCC_TIMESPENT);
+		mapColumns.Add(TDCC_TRACKTIME);
+		mapColumns.Add(TDCC_DUEDATE);
+		mapColumns.Add(TDCC_ALLOCTO);
+		mapColumns.Add(TDCC_STATUS);
+		mapColumns.Add(TDCC_CATEGORY);
+		mapColumns.Add(TDCC_FILEREF);
+		mapColumns.Add(TDCC_RECURRENCE);
+		mapColumns.Add(TDCC_REMINDER);
+		mapColumns.Add(TDCC_TAGS);
+		mapColumns.Add(TDCC_LOCK);
 	
 		vis.SetVisibleColumns(mapColumns);
 

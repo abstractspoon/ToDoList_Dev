@@ -13,12 +13,12 @@
 //////////////////////////////////////////////////////////////////////
 
 CTDCAttributeMap::CTDCAttributeMap() 
-	: CTDCBaseEnumMap<TDC_ATTRIBUTE>()
+	: CTDCBaseEnumSet<TDC_ATTRIBUTE>()
 {
 }
 
 CTDCAttributeMap::CTDCAttributeMap(const CTDCAttributeMap& mapOther) 
-	: CTDCBaseEnumMap<TDC_ATTRIBUTE>(mapOther)
+	: CTDCBaseEnumSet<TDC_ATTRIBUTE>(mapOther)
 {
 }
 
@@ -26,21 +26,31 @@ CTDCAttributeMap::~CTDCAttributeMap()
 {
 }
 
-BOOL CTDCAttributeMap::HasAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttrib)
 {
-	return Has(nAttrib);
+	if (!CanAdd(nAttrib))
+		return FALSE;
+
+	CTDCBaseEnumSet<TDC_ATTRIBUTE>::Add(nAttrib);
+	return TRUE;
 }
 
-BOOL CTDCAttributeMap::AddAttribute(TDC_ATTRIBUTE nAttrib)
-{
-	if (CanAddAttribute(nAttrib))
-		return Add(nAttrib);
 
-	// else
-	return FALSE;
+int CTDCAttributeMap::Append(const CTDCAttributeMap& other)
+{
+	POSITION pos = other.GetStartPosition();
+	int nAdded = 0;
+
+	while (pos)
+	{
+		if (Add(other.GetNext(pos)))
+			nAdded++;
+	}
+
+	return nAdded;
 }
 
-BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -92,39 +102,9 @@ BOOL CTDCAttributeMap::CanAddAttribute(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-void CTDCAttributeMap::RemoveAttribute(TDC_ATTRIBUTE nAttrib)
+void CTDCAttributeMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
 {
-	Remove(nAttrib);
-}
-
-TDC_ATTRIBUTE CTDCAttributeMap::GetNextAttribute(POSITION& pos) const
-{
-	return GetNext(pos);
-}
-
-BOOL CTDCAttributeMap::MatchAllAttributes(const CTDCAttributeMap& mapOther) const
-{
-	return CTDCBaseEnumMap<TDC_ATTRIBUTE>::MatchAll(mapOther);
-}
-
-void CTDCAttributeMap::CopyAttributes(const CTDCAttributeMap& mapOther)
-{
-	CTDCBaseEnumMap<TDC_ATTRIBUTE>::Copy(mapOther);
-}
-
-void CTDCAttributeMap::AppendAttributes(const CTDCAttributeMap& mapOther)
-{
-	CTDCBaseEnumMap<TDC_ATTRIBUTE>::Append(mapOther);
-}
-
-void CTDCAttributeMap::SaveAttributes(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
-{
-	Save(pPrefs, szKey, szValueKeyFmt);
-}
-
-void CTDCAttributeMap::LoadAttributes(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
-{
-	Load(pPrefs, szKey, szValueKeyFmt, TDCA_NONE);
+	CTDCBaseEnumSet<TDC_ATTRIBUTE>::Load(pPrefs, szKey, szValueKeyFmt, TDCA_NONE);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -142,12 +122,12 @@ CTDCAttributeArray::~CTDCAttributeArray()
 {
 }
 
-BOOL CTDCAttributeArray::HasAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttrib) const
 {
 	return Misc::HasT(*this, nAttrib);
 }
 
-int CTDCAttributeArray::AddAttribute(TDC_ATTRIBUTE nAttrib)
+int CTDCAttributeArray::Add(TDC_ATTRIBUTE nAttrib)
 {
 	int nFind = Misc::FindT(*this, nAttrib);
 
@@ -158,7 +138,7 @@ int CTDCAttributeArray::AddAttribute(TDC_ATTRIBUTE nAttrib)
 	return Add(nAttrib);
 }
 
-void CTDCAttributeArray::RemoveAttribute(TDC_ATTRIBUTE nAttrib)
+void CTDCAttributeArray::Remove(TDC_ATTRIBUTE nAttrib)
 {
 	int nFind = Misc::FindT(*this, nAttrib);
 
@@ -168,18 +148,18 @@ void CTDCAttributeArray::RemoveAttribute(TDC_ATTRIBUTE nAttrib)
 
 BOOL CTDCAttributeArray::MatchAll(const CTDCAttributeArray& aOther) const
 {
-	return Misc::MatchAllT(*this, aOther);
+	return Misc::MatchAllT(*this, aOther, FALSE);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 CTDCColumnIDMap::CTDCColumnIDMap()
-	: CTDCBaseEnumMap<TDC_COLUMN>()
+	: CTDCBaseEnumSet<TDC_COLUMN>()
 {
 }
 
 CTDCColumnIDMap::CTDCColumnIDMap(const CTDCColumnIDMap& mapOther)
-	: CTDCBaseEnumMap<TDC_COLUMN>(mapOther)
+	: CTDCBaseEnumSet<TDC_COLUMN>(mapOther)
 {
 }
 
@@ -187,49 +167,10 @@ CTDCColumnIDMap::~CTDCColumnIDMap()
 {
 }
 
-BOOL CTDCColumnIDMap::HasColumn(TDC_COLUMN nColID) const
-{
-	return Has(nColID);
-}
 
-void CTDCColumnIDMap::AddColumn(TDC_COLUMN nColID)
+void CTDCColumnIDMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
 {
-	Add(nColID);
-}
-
-void CTDCColumnIDMap::RemoveColumn(TDC_COLUMN nColID)
-{
-	Remove(nColID);
-}
-
-TDC_COLUMN CTDCColumnIDMap::GetNextColumn(POSITION& pos) const
-{
-	return GetNext(pos);
-}
-
-BOOL CTDCColumnIDMap::MatchAllColumns(const CTDCColumnIDMap& mapOther) const
-{
-	return MatchAll(mapOther);
-}
-
-void CTDCColumnIDMap::CopyColumns(const CTDCColumnIDMap& mapOther)
-{
-	Copy(mapOther);
-}
-
-void CTDCColumnIDMap::AppendColumns(const CTDCColumnIDMap& mapOther)
-{
-	Append(mapOther);
-}
-
-void CTDCColumnIDMap::SaveColumns(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
-{
-	Save(pPrefs, szKey, szValueKeyFmt);
-}
-
-void CTDCColumnIDMap::LoadColumns(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
-{
-	Load(pPrefs, szKey, szValueKeyFmt, TDCC_NONE);
+	CTDCBaseEnumSet<TDC_COLUMN>::Load(pPrefs, szKey, szValueKeyFmt, TDCC_NONE);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -247,12 +188,12 @@ CTDCColumnIDArray::~CTDCColumnIDArray()
 {
 }
 
-BOOL CTDCColumnIDArray::HasColumn(TDC_COLUMN nColID) const
+BOOL CTDCColumnIDArray::Has(TDC_COLUMN nColID) const
 {
 	return Misc::HasT(*this, nColID);
 }
 
-int CTDCColumnIDArray::AddColumn(TDC_COLUMN nColID)
+int CTDCColumnIDArray::Add(TDC_COLUMN nColID)
 {
 	int nFind = Misc::FindT(*this, nColID);
 
@@ -263,7 +204,7 @@ int CTDCColumnIDArray::AddColumn(TDC_COLUMN nColID)
 	return Add(nColID);
 }
 
-void CTDCColumnIDArray::RemoveColumn(TDC_COLUMN nColID)
+void CTDCColumnIDArray::Remove(TDC_COLUMN nColID)
 {
 	int nFind = Misc::FindT(*this, nColID);
 
@@ -273,7 +214,7 @@ void CTDCColumnIDArray::RemoveColumn(TDC_COLUMN nColID)
 
 BOOL CTDCColumnIDArray::MatchAll(const CTDCColumnIDArray& aOther) const
 {
-	return Misc::MatchAllT(*this, aOther);
+	return Misc::MatchAllT(*this, aOther, FALSE);
 }
 
 //////////////////////////////////////////////////////////////////////

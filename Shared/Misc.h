@@ -57,7 +57,7 @@ namespace Misc
 	CString NewGuid(GUID* pGuid = NULL);
 
 	template <class T> 
-	BOOL MatchAllT(const T& array1, const T& array2, BOOL bOrderSensitive = FALSE)
+	BOOL MatchAllT(const T& array1, const T& array2, BOOL bOrderSensitive)
 	{
 		int nItem1 = array1.GetSize();
 		int nItem2 = array2.GetSize();

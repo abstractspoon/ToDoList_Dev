@@ -478,7 +478,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
 				// recalc parent dates as required
-				if (attrib.HasKey(IUI_STARTDATE) || attrib.HasKey(IUI_DUEDATE) || attrib.HasKey(IUI_DONEDATE))
+				if (attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE))
 				{
 					RecalcDateRange();
 					RecalcParentDates();
@@ -491,12 +491,12 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 					UpdateListColumns();
 				}
 
-				bResort = ((m_nSortBy != GTLCC_NONE) && attrib.HasKey(MapColumnToAttrib(m_nSortBy)));
+				bResort = ((m_nSortBy != GTLCC_NONE) && attrib.Has(MapColumnToAttrib(m_nSortBy)));
 
 				if (nUpdate == IUI_NEW)
 					bResort = TRUE;
 				else
-					bResort = ((m_nSortBy != GTLCC_NONE) && attrib.HasKey(MapColumnToAttrib(m_nSortBy)));
+					bResort = ((m_nSortBy != GTLCC_NONE) && attrib.Has(MapColumnToAttrib(m_nSortBy)));
 			}
 		}
 		break;
@@ -696,16 +696,16 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
-	if (attrib.HasKey(IUI_TASKNAME))
+	if (attrib.Has(IUI_TASKNAME))
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-	if (attrib.HasKey(IUI_ALLOCTO))
+	if (attrib.Has(IUI_ALLOCTO))
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
-	if (attrib.HasKey(IUI_PERCENT))
+	if (attrib.Has(IUI_PERCENT))
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-	if (attrib.HasKey(IUI_STARTDATE))
+	if (attrib.Has(IUI_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
 		{
@@ -718,7 +718,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		}
 	}
 	
-	if (attrib.HasKey(IUI_DUEDATE))
+	if (attrib.Has(IUI_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, pGI->bParent, tDate))
 		{
@@ -731,7 +731,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		}
 	}
 	
-	if (attrib.HasKey(IUI_DONEDATE))
+	if (attrib.Has(IUI_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
 			pGI->dtDone = GetDate(tDate, TRUE);
@@ -739,13 +739,13 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			CDateHelper::ClearDate(pGI->dtDone);
 	}
 	
-	if (attrib.HasKey(IUI_SUBTASKDONE))
+	if (attrib.Has(IUI_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	}
 
-	if (attrib.HasKey(IUI_TAGS))
+	if (attrib.Has(IUI_TAGS))
 	{
 		int nTag = pTasks->GetTaskTagCount(hTask);
 		pGI->aTags.RemoveAll();
@@ -754,7 +754,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 	}
 	
-	if (attrib.HasKey(IUI_DEPENDENCY))
+	if (attrib.Has(IUI_DEPENDENCY))
 	{
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		pGI->aDepends.RemoveAll();
@@ -806,7 +806,7 @@ void CGanttTreeListCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTa
 	if (hTask == NULL)
 		return;
 
-	mapIDs.AddKey(pTasks->GetTaskID(hTask));
+	mapIDs.Add(pTasks->GetTaskID(hTask));
 
 	// children
 	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
@@ -829,7 +829,7 @@ void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* 
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
-	if (hti && !mapIDs.HasKey(GetTaskID(hti)))
+	if (hti && !mapIDs.Has(GetTaskID(hti)))
 	{
 		DeleteTreeItem(hti);
 		return;

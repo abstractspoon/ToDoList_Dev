@@ -604,9 +604,9 @@ void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters)
 
 void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL bRepos)
 {
-	if (!m_mapVisibility.MatchAllAttributes(mapFilters))
+	if (!m_mapVisibility.MatchAll(mapFilters))
 	{
-		m_mapVisibility.CopyAttributes(mapFilters);
+		m_mapVisibility.Copy(mapFilters);
 
 		// update controls
 		if (bRepos)
@@ -630,7 +630,7 @@ BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 		break;
 	}
 
-	return (!m_bAdvancedFilter && m_mapVisibility.HasAttribute(nType));
+	return (!m_bAdvancedFilter && m_mapVisibility.Has(nType));
 }
 
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)

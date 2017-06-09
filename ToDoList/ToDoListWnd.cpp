@@ -1865,10 +1865,10 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 		if (!userPrefs.GetExportAllAttributes())
 		{
 			// visible attributes
-			filter.mapAttribs.CopyAttributes(tdc.GetVisibleEditFields());
+			filter.mapAttribs.Copy(tdc.GetVisibleEditFields());
 
 			// add comments always
-			filter.mapAttribs.AddAttribute(TDCA_COMMENTS);
+			filter.mapAttribs.Add(TDCA_COMMENTS);
 		}
 
 		// set the html image folder to be the output path with
@@ -9633,7 +9633,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 			TDC::MapColumnsToAttributes(tdc.GetVisibleColumns(), filter.mapAttribs);
 
 			if (taskSel.GetWantCommentsWithVisible())
-				filter.mapAttribs.AddAttribute(TDCA_COMMENTS);
+				filter.mapAttribs.Add(TDCA_COMMENTS);
 		}
 		break;
 
