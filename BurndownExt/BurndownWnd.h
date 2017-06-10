@@ -41,21 +41,30 @@ protected:
 
 };
 
-class CStatsItemArray : public CArray<STATSITEM*, STATSITEM*>
+class CStatsItemArray : protected CArray<STATSITEM*, STATSITEM*>
 {
 public:
 	CStatsItemArray();
 	virtual ~CStatsItemArray();
 
+	STATSITEM* AddItem(DWORD dwTaskID);
 	STATSITEM* GetItem(DWORD dwTaskID) const;
 	BOOL HasItem(DWORD dwTaskID) const;
+	BOOL IsEmpty() const;
+	int GetSize() const;
 
 	void RemoveAll();
 	void RemoveAt(int nIndex, int nCount = 1);
+
 	void Sort();
+	BOOL IsSorted() const;
+
+	STATSITEM* operator[](int nIndex) const;
 
 protected:
-	BOOL IsSorted();
+	CDWordSet m_setTaskIDs;
+	
+protected:
 	int FindItem(DWORD dwTaskID) const;
 
 	static int CompareItems(const void* pV1, const void* pV2);

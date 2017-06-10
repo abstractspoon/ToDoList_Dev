@@ -151,13 +151,38 @@ CStatsItemArray::~CStatsItemArray()
 	RemoveAll();
 }
 
+STATSITEM* CStatsItemArray::AddItem(DWORD dwTaskID)
+{
+	if (HasItem(dwTaskID))
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	STATSITEM* pSI = new STATSITEM();
+	pSI->dwTaskID = dwTaskID;
+
+	Add(pSI);
+	m_setTaskIDs.Add(dwTaskID);
+
+	return pSI;
+}
+
+STATSITEM* CStatsItemArray::operator[](int nIndex) const
+{
+	return CArray<STATSITEM*, STATSITEM*>::operator[](nIndex);
+}
+
 BOOL CStatsItemArray::HasItem(DWORD dwTaskID) const
 {
-	return (FindItem(dwTaskID) != -1);
+	return m_setTaskIDs.Has(dwTaskID);
 }
 
 int CStatsItemArray::FindItem(DWORD dwTaskID) const
 {
+	if (!HasItem(dwTaskID))
+		return -1;
+
 	int nIndex = GetSize();
 
 	while (nIndex--)
@@ -169,6 +194,7 @@ int CStatsItemArray::FindItem(DWORD dwTaskID) const
 	}
 
 	// not found
+	ASSERT(0);
 	return -1;
 }
 
@@ -182,6 +208,16 @@ STATSITEM* CStatsItemArray::GetItem(DWORD dwTaskID) const
 	return GetAt(nFind);
 }
 
+int CStatsItemArray::GetSize() const
+{
+	return CArray<STATSITEM*, STATSITEM*>::GetSize();
+}
+
+BOOL CStatsItemArray::IsEmpty() const
+{
+	return (GetSize() == 0);
+}
+
 void CStatsItemArray::RemoveAll()
 {
 	int nIndex = GetSize();
@@ -193,6 +229,7 @@ void CStatsItemArray::RemoveAll()
 	}
 
 	CArray<STATSITEM*, STATSITEM*>::RemoveAll();
+	m_setTaskIDs.RemoveAll();
 }
 
 void CStatsItemArray::RemoveAt(int nIndex, int nCount)
@@ -205,6 +242,8 @@ void CStatsItemArray::RemoveAt(int nIndex, int nCount)
 	while (nIndex--)
 	{
 		STATSITEM* pSI = GetAt(nIndex);
+
+		m_setTaskIDs.RemoveKey(pSI->dwTaskID);
 		delete pSI;
 
 		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nIndex);
@@ -219,7 +258,7 @@ void CStatsItemArray::Sort()
 	}
 }
 
-BOOL CStatsItemArray::IsSorted()
+BOOL CStatsItemArray::IsSorted() const
 {
 	int nNumItems = GetSize();
 
@@ -569,15 +608,10 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 	// only interested in leaf tasks
 	if (!pTasks->IsTaskParent(hTask))
 	{
-		DWORD dwTaskID = pTasks->GetTaskID(hTask);
+		STATSITEM* pSI = m_data.AddItem(pTasks->GetTaskID(hTask));
 
-		// check we haven't got this task already
-		if (!bCheckExist || !m_data.HasItem(dwTaskID))
+		if (pSI) // means it's new
 		{
-			STATSITEM* pSI = new STATSITEM;
-
-			// interested in all tasks
-			pSI->dwTaskID = dwTaskID;
 			pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 			pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
 			pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
@@ -589,8 +623,6 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 
 			// update data extents as we go
 			pSI->MinMax(m_dtEarliestDate, m_dtLatestDate);
-			
-			m_data.Add(pSI);
 		}
 	}
 	else // Process children
@@ -658,7 +690,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 
 void CBurndownWnd::UpdateDataExtents()
 {
-	if (m_data.GetCount())
+	if (m_data.GetSize())
 	{
 		CDateHelper::ClearDate(m_dtEarliestDate);
 		CDateHelper::ClearDate(m_dtLatestDate);
@@ -842,7 +874,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		if (dwExtra && (m_data.GetCount() > 0))
+		if (dwExtra && !m_data.IsEmpty())
 		{
 			CBitmap bmImage;
 
@@ -882,7 +914,7 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		return (m_data.GetCount() > 0);
+		return !m_data.IsSorted();
 
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:
@@ -1170,7 +1202,7 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	m_graph.ClearData();
 	m_graph.SetYText(CEnString(STATSDISPLAY[m_nDisplay].nYAxisID));
 
-	if (m_data.GetCount())
+	if (!m_data.IsEmpty())
 		RebuildXScale();
 
 	DWORD dwTick = GetTickCount();
@@ -1278,22 +1310,18 @@ void CBurndownWnd::BuildSprintGraph()
 	COleDateTime dtEnd = GetGraphEndDate();
 
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-
-	// Time Estimate
 	double dTotalEst = CalcTotalTimeEstimateInDays();
 
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
+		// Time Estimate
 		double dEst = ((nDay * dTotalEst) / nNumDays);
 		m_graph.AddData(SPRINT_EST, (dTotalEst - dEst));
-	}
 
-	// Time Spent
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
+		// Time Spent
 		COleDateTime date(dtStart.m_dt + nDay);
 		double dSpent = CalculateTimeSpentInDays(date);
-
+		
 		m_graph.AddData(SPRINT_SPENT, (dTotalEst - dSpent));
 	}
 
@@ -1350,7 +1378,7 @@ double CBurndownWnd::CalcTotalTimeEstimateInDays() const
 	int nItem = m_data.GetSize();
 	
 	while (nItem--)
-		dDays += m_data.GetAt(nItem)->dTimeEstDays;
+		dDays += m_data[nItem]->dTimeEstDays;
 
 	return dDays;
 }
