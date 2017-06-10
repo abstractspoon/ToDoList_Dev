@@ -1167,12 +1167,18 @@ DWORD CToDoCtrlData::GetTaskParentID(DWORD dwTaskID) const
 
 DWORD CToDoCtrlData::GetTaskReferenceID(DWORD dwTaskID) const
 {
-	// NOTE: don't use GET_TDI macro here because 
-	// that'll give us the 'true' task
-	const TODOITEM* pTDI = GetTask(dwTaskID, FALSE);
-	ASSERT(pTDI);
+	if (dwTaskID)
+	{
+		// NOTE: don't use GET_TDI macro here because 
+		// that'll give us the 'true' task
+		const TODOITEM* pTDI = GetTask(dwTaskID, FALSE);
+		ASSERT(pTDI);
 
-	return (pTDI ? pTDI->dwTaskRefID : 0);
+		return (pTDI ? pTDI->dwTaskRefID : 0);
+	}
+
+	// else
+	return 0;
 }
 
 BOOL CToDoCtrlData::CanMoveTask(DWORD /*dwTaskID*/, DWORD /*dwDestParentID*/) const

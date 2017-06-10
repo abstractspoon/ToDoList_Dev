@@ -612,23 +612,16 @@ BOOL CToDoCtrlDataItems::AddTask(DWORD dwTaskID, TODOITEM* pTDI)
 TODOITEM* CToDoCtrlDataItems::GetTask(DWORD dwTaskID) const
 {
 	TODOITEM* pTDI = NULL;
-	Lookup(dwTaskID, pTDI);
+	
+	if (Lookup(dwTaskID, pTDI))
+		ASSERT(pTDI);
 
-	ASSERT(pTDI);
 	return pTDI;
 }
 
 BOOL CToDoCtrlDataItems::HasTask(DWORD dwTaskID) const
 {
-	TODOITEM* pTDI = NULL;
-	
-	if (Lookup(dwTaskID, pTDI))
-	{
-		ASSERT(pTDI);
-		return TRUE;
-	}
-
-	return FALSE;
+	return (GetTask(dwTaskID) != NULL);
 }
 
 POSITION CToDoCtrlDataItems::GetStartPosition() const
