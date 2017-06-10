@@ -762,7 +762,7 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem) const
 	return TRUE;
 }
 
-BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rItem) const
+BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip) const
 {
 	const KANBANITEM* pKI = m_data.GetItem(GetItemData(nItem));
 
@@ -772,22 +772,35 @@ BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rItem) const
 		return FALSE;
 	}
 
-	if (!GetItemLabelTextRect(nItem, rItem))
+	if (!GetItemLabelTextRect(nItem, rTip))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	HFONT hFont = m_fonts.GetHFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0);
-	int nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), rItem.Width(), hFont);
 
-	if (nTextHeight <= (NUM_TEXTLINES * m_nLineHeight))
+	int nWidth = rTip.Width();
+	int nAvailHeight = (NUM_TEXTLINES * m_nLineHeight);
+	int nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), nWidth, hFont);
+
+	if (nTextHeight <= nAvailHeight)
 		return FALSE;
 
-	rItem.bottom -= (NUM_TEXTLINES * m_nLineHeight);
-	rItem.bottom += nTextHeight;
+	while (nTextHeight > nAvailHeight)
+	{
+		rTip.right += (nWidth / 2);
+		nTextHeight = GraphicsMisc::GetTextHeight(pKI->sTitle, GetSafeHwnd(), rTip.Width(), hFont);
+	}
 
-	ClientToScreen(&rItem);
+	m_tooltip.AdjustRect(rTip, TRUE);
+
+	CRect rItem;
+	GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+	rTip.bottom = (rItem.bottom - 1);
+
+	ClientToScreen(&rTip);
 
 	return TRUE;
 }
@@ -1480,7 +1493,6 @@ void CKanbanListCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	CRect rTip;
 	VERIFY(GetItemTooltipRect(nItem, rTip));
 
-	m_tooltip.AdjustRect(rTip, TRUE);
 	m_tooltip.SetMaxTipWidth(rTip.Width());
 	m_tooltip.SetFont(m_fonts.GetFont((pKI->dwParentID == 0) ? GMFS_BOLD : 0));
 	m_tooltip.SetWindowPos(NULL, rTip.left, rTip.top, rTip.Width(), rTip.Height(), SWP_NOACTIVATE | SWP_NOZORDER);

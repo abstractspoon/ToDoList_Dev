@@ -18,7 +18,7 @@ public:
 
 	void RelayEvent(LPMSG lpMsg);
 	void FilterToolTipMessage(MSG* pMsg);
-	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/);
+	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
 	void Activate(BOOL bActivate);
 
 	const TOOLINFO& GetLastHitToolInfo() const;

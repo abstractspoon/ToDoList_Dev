@@ -30,7 +30,7 @@ public:
 	void Clear();
 
 	HWND GetHwnd() const { return m_hWnd; }
-	HFONT GetFont() const { return m_hFont; }
+	HFONT GetHFont() const { return m_hFont; }
 
 protected:
 	HWND m_hWnd;

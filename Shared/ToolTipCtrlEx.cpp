@@ -257,7 +257,7 @@ const TOOLINFO& CToolTipCtrlEx::GetLastHitToolInfo() const
 	return m_tiLast; 
 }
 
-BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/)
+BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
 { 
 	ASSERT(::IsWindow(m_hWnd));  
 	
