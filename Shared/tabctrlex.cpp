@@ -56,6 +56,8 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_MOUSEMOVE()
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
 	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_ERASEBKGND()
 	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGING, OnTabSelChange)
@@ -1041,4 +1043,45 @@ BOOL CTabCtrlEx::HasTabMoved() const
 	// else
 	return ((m_nDropTab >= 0) &&
 			((m_nDropTab < m_nDragTab) || (m_nDropTab > (m_nDragTab + 1))));
+}
+
+void CTabCtrlEx::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	
+	CXPTabCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CTabCtrlEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	
+	CXPTabCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// Prevent render artifacts on the tab that was beneath the spin control
+	const CWnd* pSpin = GetDlgItem(1);
+
+	if (pSpin && (pScrollBar == pSpin))
+	{
+		CRect rSpin, rTab;
+
+		pSpin->GetWindowRect(rSpin);
+		ScreenToClient(rSpin);
+		
+		int iTab = GetItemCount();
+
+		while (iTab--)
+		{
+			GetItemRect(iTab, rTab);
+
+			if (CRect().IntersectRect(rSpin, rTab))
+			{
+				//rTab.DeflateRect(2, 2);
+				InvalidateRect(rTab, FALSE);
+			}
+		}
+	}
 }
