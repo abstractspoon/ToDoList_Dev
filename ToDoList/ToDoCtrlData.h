@@ -277,6 +277,7 @@ protected:
 	const CWordArray& m_aStyles; // CToDoCtrl styles
 	CToDoCtrlUndo m_undo;
 	CToDoCtrlDataStructure m_struct;
+	BOOL m_bUndoRedoing;
 
 	static CString s_cfDefault;
 	static TDC_UNITS s_nDefTimeEstUnits, s_nDefTimeSpentUnits;

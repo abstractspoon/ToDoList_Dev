@@ -7,14 +7,12 @@
 #include "TDCCustomAttributeHelper.h"
 #include "resource.h"
 
-#include "..\shared\xmlfile.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
-#include "..\shared\treectrlhelper.h"
-#include "..\shared\treedragdrophelper.h"
+#include "..\shared\autoflag.h"
 
 #include <float.h>
 #include <math.h>
@@ -117,7 +115,8 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 
 CToDoCtrlData::CToDoCtrlData(const CWordArray& aStyles)	
 	: 
-	m_aStyles(aStyles)
+	m_aStyles(aStyles),
+	m_bUndoRedoing(FALSE)
 {
 }
 
@@ -2665,6 +2664,8 @@ BOOL CToDoCtrlData::DeleteLastUndoAction()
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 {
+	CAutoFlag af(m_bUndoRedoing, TRUE);
+
 	aElms.RemoveAll();
 	TDCUNDOACTION* pAction = bUndo ? m_undo.UndoLastAction() : m_undo.RedoLastAction();
 	
@@ -2821,8 +2822,9 @@ int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwS
 		{
 			SetTaskModified(dwDestParentID);
 
-			// And update inherited attributes
-			ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
+			// And update inherited attributes unless we are undoing
+			if (!m_bUndoRedoing)
+				ApplyLastInheritedChangeFromParent(dwTaskID, TDCA_ALL);
 		}
 	}
 	
