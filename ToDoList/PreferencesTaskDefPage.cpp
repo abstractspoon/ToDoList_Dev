@@ -90,7 +90,7 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DEFAULTCOST, m_eCost);
 	DDX_Control(pDX, IDC_SETDEFAULTCOLOR, m_btDefColor);
 	DDX_Control(pDX, IDC_SETDEFAULTICON, m_btDefIcon);
-	DDX_Control(pDX, IDC_INHERITATTRIBUTES, m_lbAttribUse);
+	DDX_Control(pDX, IDC_INHERITATTRIBUTES, m_lbInheritAttrib);
 	DDX_CBPriority(pDX, IDC_DEFAULTPRIORITY, m_nDefPriority);
 	DDX_CBRisk(pDX, IDC_DEFAULTRISK, m_nDefRisk);
 	DDX_Text(pDX, IDC_DEFAULTTIMEEST, m_dDefTimeEst);
@@ -147,14 +147,14 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	int nIcon = m_ilTaskIcons.GetImageIndex(m_sDefIcon);
 	m_btDefIcon.SetIcon((nIcon == -1) ? NULL : m_ilTaskIcons.ExtractIcon(nIcon));
 
-	int nAttrib = m_aAttribPrefs.GetSize();
+	int nItem = m_aAttribPrefs.GetSize();
 	
-	while (nAttrib--)
+	while (nItem--)
 	{
-		int nIndex = m_lbAttribUse.InsertString(0, m_aAttribPrefs[nAttrib].sName);
+		int nIndex = m_lbInheritAttrib.AddString(m_aAttribPrefs[nItem].sName);
 
-		m_lbAttribUse.SetItemData(nIndex, m_aAttribPrefs[nAttrib].nAttrib);
-		m_lbAttribUse.SetCheck(nIndex, m_aAttribPrefs[nAttrib].bUse ? 1 : 0);
+		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttrib);
+		m_lbInheritAttrib.SetCheck(nIndex, m_aAttribPrefs[nItem].bUse ? 1 : 0);
 	}
 
 	// init edit prompts()
@@ -340,7 +340,7 @@ void CPreferencesTaskDefPage::OnAttribUseChange()
 	
 	if (m_nSelAttribUse >= 0)
 	{
-		TDC_ATTRIBUTE nSelAttrib = (TDC_ATTRIBUTE)m_lbAttribUse.GetItemData(m_nSelAttribUse);
+		TDC_ATTRIBUTE nSelAttrib = (TDC_ATTRIBUTE)m_lbInheritAttrib.GetItemData(m_nSelAttribUse);
 
 		// search for this item
 		int nAttrib = m_aAttribPrefs.GetSize();
@@ -349,7 +349,7 @@ void CPreferencesTaskDefPage::OnAttribUseChange()
 		{
 			if (m_aAttribPrefs[nAttrib].nAttrib == nSelAttrib)
 			{
-				m_aAttribPrefs[nAttrib].bUse = m_lbAttribUse.GetCheck(m_nSelAttribUse);
+				m_aAttribPrefs[nAttrib].bUse = m_lbInheritAttrib.GetCheck(m_nSelAttribUse);
 				break;
 			}
 		}

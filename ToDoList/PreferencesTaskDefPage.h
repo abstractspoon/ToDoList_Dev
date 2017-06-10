@@ -81,7 +81,7 @@ protected:
 	CTimeEdit	m_eTimeEst;
 	CTimeEdit	m_eTimeSpent;
 	CMaskEdit m_eCost;
-	CCheckListBoxEx	m_lbAttribUse;
+	CCheckListBoxEx	m_lbInheritAttrib;
 	int		m_nDefPriority;
 	int		m_nDefRisk;
 	double	m_dDefTimeEst, m_dDefTimeSpent;
