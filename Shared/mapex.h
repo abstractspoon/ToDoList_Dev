@@ -69,12 +69,31 @@ public:
 
 	void Copy(const CSetBase& other)
 	{
-		Misc::CopyT(other, *this);
+		RemoveAll();
+		
+		if (other.GetCount())
+		{
+			POSITION pos = other.GetStartPosition();
+			
+			while (pos)
+				Add(other.GetNext(pos));
+		}
 	}
 
 	BOOL MatchAll(const CSetBase& other) const
 	{
-		return Misc::MatchAllT(other, *this);
+		if (GetCount() != other.GetCount())
+			return FALSE;
+
+		POSITION pos = other.GetStartPosition();
+
+		while (pos)
+		{
+			if (!Has(other.GetNext(pos)))
+				return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	void Append(const CSetBase& other)
@@ -139,7 +158,7 @@ class CSet : public CSetBase<KEY, KEY>
 {
 public:
 	CSet() {}
-	CSet(const CSet& other) : CSetBase(other) {}
+	CSet(const CSet& other) : CSetBase<KEY, KEY>(other) {}
 	CSet(const CArray<KEY, KEY&>& other) : CSetBase<KEY, KEY>(other) {}
 	CSet(const KEY* pOther, int nNumOther) : CSetBase<KEY, KEY>(pOther, nNumOther) {}
 
