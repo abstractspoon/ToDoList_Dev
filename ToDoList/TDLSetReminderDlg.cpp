@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_ABSOLUTE, OnChangeRelative)
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnPlaySound)
+	ON_BN_CLICKED(IDC_DISMISS, &CTDLSetReminderDlg::OnDismissReminder)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -208,7 +209,14 @@ BOOL CTDLSetReminderDlg::OnInitDialog()
 	m_stTaskTitle.SetFontStyle(TRUE);
 
 	if (!m_sModifyDlgTitle.IsEmpty())
+	{
 		SetWindowText(m_sModifyDlgTitle);
+	}
+	else
+	{
+		GetDlgItem(IDC_DISMISS)->EnableWindow(FALSE);
+		GetDlgItem(IDC_DISMISS)->ShowWindow(SW_HIDE);
+	}
 
 	return TRUE;
 }
@@ -256,3 +264,7 @@ COleDateTime CTDLSetReminderDlg::GetNextNearestHour()
 	return dtNearest;
 }
 
+void CTDLSetReminderDlg::OnDismissReminder()
+{
+	EndDialog(IDDISMISS);
+}

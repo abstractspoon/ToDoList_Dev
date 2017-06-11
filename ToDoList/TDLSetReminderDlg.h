@@ -21,6 +21,10 @@
 struct TDCREMINDER;
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define IDDISMISS 0xff
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
 class CTDLSetReminderDlg : public CTDLDialog
@@ -70,6 +74,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	static COleDateTime GetNextNearestHour();
+public:
+	afx_msg void OnDismissReminder();
 };
 
 //{{AFX_INSERT_LOCATION}}
