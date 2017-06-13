@@ -1605,15 +1605,19 @@ namespace Calendar
                 foreach (Appointment appointment in longAppointments)
                 {
                     Rectangle appointmenRect = rect;
-                    int spanDays = appointment.EndDate.Subtract(appointment.StartDate).Days;
 
-                    if (appointment.EndDate.Day != appointment.StartDate.Day && appointment.EndDate.TimeOfDay < appointment.StartDate.TimeOfDay)
-                        spanDays += 1;
+                    int startDay = (appointment.StartDate.Date - startDate.Date).Days;
+                    int startPos = (rect.X + (startDay * dayWidth));
 
-                    appointmenRect.Width = dayWidth * spanDays/* - 5*/;
-                    appointmenRect.Height = horizontalAppointmentHeight;
-                    appointmenRect.X += (appointment.StartDate.Subtract(startDate).Days) * dayWidth; // changed by Gimlei
+                    int spanDays = ((appointment.EndDate.Date - appointment.StartDate.Date).Days + 1);
+                    int endDay = (startDay + spanDays);
+                    int endPos = Math.Min((rect.X + (endDay * dayWidth) + appointmentGripWidth), rect.Right);
+
+                    appointmenRect.X = startPos;
+                    appointmenRect.Width = (endPos - startPos);
+
                     appointmenRect.Y = y + appointment.Layer * (horizontalAppointmentHeight + 5) + 5; // changed by Gimlei
+                    appointmenRect.Height = horizontalAppointmentHeight;
 
                     view = new AppointmentView();
                     view.Rectangle = appointmenRect;

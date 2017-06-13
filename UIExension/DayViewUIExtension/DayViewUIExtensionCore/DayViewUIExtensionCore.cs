@@ -527,9 +527,11 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
-			return (item.IsSingleDay() && 
-                    (item.StartDate.Date >= startDate) && 
-                    (item.StartDate.Date <= endDate));
+// 			return (item.IsSingleDay() && 
+//                     (item.StartDate.Date >= startDate) && 
+//                     (item.StartDate.Date <= endDate));
+			return ((item.StartDate.Date >= startDate) && 
+                    (item.EndDate.Date < endDate));
 		}
 
 		// --------------------------------------------------------------------------------------
