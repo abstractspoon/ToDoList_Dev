@@ -21,7 +21,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 TaskList::TaskList(ITaskList* pTaskList) 
 	: 
-m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
+m_pTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 
 	m_pConstTaskList(nullptr) 
 {
 } 
@@ -29,7 +29,7 @@ m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)),
 TaskList::TaskList(const ITaskList* pTaskList) 
 	: 
 m_pTaskList(nullptr), 
-	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)) 
+	m_pConstTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)) 
 {
 } 
 
@@ -168,7 +168,7 @@ m_pTaskList(nullptr),
 
 Task::Task(ITaskList* pTaskList, HTASKITEM hTask) 
 	: 
-m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
+m_pTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 
 	m_pConstTaskList(nullptr), 
 	m_hTask(hTask)
 {
@@ -178,7 +178,7 @@ m_pTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)),
 Task::Task(const ITaskList* pTaskList, HTASKITEM hTask)
 	: 
 m_pTaskList(nullptr), 
-	m_pConstTaskList(GetITLInterface<ITaskList15>(pTaskList, IID_TASKLIST14)), 
+	m_pConstTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 
 	m_hTask(hTask)
 {
 
