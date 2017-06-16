@@ -240,8 +240,9 @@ bool UIExtension::ParentNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
-	return true;
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
+
+	return (bRet != FALSE);
 }
 
 bool UIExtension::ParentNotify::NotifySelChange(UInt32 taskID)
@@ -249,8 +250,9 @@ bool UIExtension::ParentNotify::NotifySelChange(UInt32 taskID)
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, 0, taskID);
-	return true;
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, 0, taskID);
+
+	return (bRet != FALSE);
 }
 
 bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
@@ -259,9 +261,9 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 		return false;
 
 	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
 
-	return true;
+	return (bRet != FALSE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
