@@ -79,6 +79,8 @@ namespace Calendar
         public DayView()
         {
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+			SetStyle(ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.ResizeRedraw, true);
             SetStyle(ControlStyles.Selectable, true);
 
@@ -263,11 +265,6 @@ namespace Calendar
                 FinishEditing(true);
 
             Invalidate();
-        }
-
-        public virtual bool AllowMode(SelectionTool.Mode mode)
-        {
-            return true; // default
         }
 
         private SelectionType selection;
@@ -648,7 +645,7 @@ namespace Calendar
             AdjustScrollbar();
         }
 
-        private void AdjustScrollbar()
+        protected void AdjustScrollbar()
         {
 			if (this.Height < this.HeaderHeight)
 				return;
@@ -848,7 +845,19 @@ namespace Calendar
                 int key;
                 AppointmentList list;
 
-                if (appointment.StartDate.Day == appointment.EndDate.Day && appointment.AllDayEvent == false)
+				bool longAppt = appointment.LongAppt;
+
+				// If a long appointment is being resized and it now fits within a 
+				// single day, still treat it as a long task until the edit finishes
+				if (!longAppt && (appointment == selectedAppointment) && (activeTool != null))
+				{
+					Calendar.SelectionTool selTool = activeTool as Calendar.SelectionTool;
+
+					if (selTool != null)
+						longAppt = selTool.IsResizingLongAppt();
+				}
+				
+				if (!longAppt)
                 {
                     key = appointment.StartDate.Day;
                 }
@@ -1063,19 +1072,40 @@ namespace Calendar
 
         public DateTime GetDateTimeAt(int x, int y)
         {
-            DateTime date = GetDateAt(x);
-            TimeSpan time = GetTimeAt(y);
+			bool longAppt = GetFullDayApptsRectangle().Contains(x, y);
 
-            return date.Add(time);
+			return GetDateTimeAt(x, y, longAppt);
         }
 
-        public virtual DateTime GetDateAt(int x)
+		public DateTime GetDateTimeAt(int x, int y, bool longAppt)
+		{
+			DateTime dateTime = GetDateAt(x, longAppt);
+
+			if (!longAppt)
+			{
+				TimeSpan time = GetTimeAt(y);
+				dateTime = dateTime.Add(time);
+			}
+
+			return dateTime;
+		}
+
+        public virtual DateTime GetDateAt(int x, bool longAppt)
         {
             DateTime date = startDate.Date;
             int dayWidth = (this.Width - (vscroll.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
 
-            date = date.AddDays((x - hourLabelWidth) / dayWidth);
-            return date.Date;
+			if (longAppt)
+			{
+				int hours = ((24 * (x - hourLabelWidth)) / dayWidth);
+				date = date.AddHours(hours);
+			}
+			else
+			{
+				date = date.AddDays((x - hourLabelWidth) / dayWidth).Date;
+			}
+
+            return date;
         }
 
         public virtual TimeSpan GetTimeAt(int y)
@@ -1538,18 +1568,17 @@ namespace Calendar
 
         private void DrawDays(PaintEventArgs e, Rectangle rect)
         {
-            int dayWidth = rect.Width / daysToShow;
-
             AppointmentList longAppointments = (AppointmentList)cachedAppointments[-1];
-
             AppointmentList drawnLongApps = new AppointmentList();
-
             AppointmentView view;
 
             int y = dayHeadersHeight;
             bool intersect = false;
 
             List<int> layers = new List<int>();
+
+			int dayWidth = rect.Width / daysToShow;
+			longappointmentViews.Clear();
 
             if (longAppointments != null)
             {
@@ -1568,14 +1597,19 @@ namespace Calendar
                         {
                             foreach (Appointment app in drawnLongApps)
                             {
-                                if (app.Layer == lay)
-                                    if (appointment.StartDate.Date >= app.EndDate.Date || appointment.EndDate.Date <= app.StartDate.Date)
-                                        intersect = false;
-                                    else
-                                    {
-                                        intersect = true;
-                                        break;
-                                    }
+								if (app.Layer == lay)
+								{
+									if (appointment.StartDate >= app.EndDate || appointment.EndDate <= app.StartDate)
+									{
+										intersect = false;
+									}
+									else
+									{
+										intersect = true;
+										break;
+									}
+								}
+
                                 appointment.Layer = lay;
                             }
 
@@ -1606,12 +1640,17 @@ namespace Calendar
                 {
                     Rectangle appointmenRect = rect;
 
-                    int startDay = (appointment.StartDate.Date - startDate.Date).Days;
-                    int startPos = (rect.X + (startDay * dayWidth));
+                    double startDay = (appointment.StartDate - startDate).TotalDays;
+                    int startPos = (rect.X + (int)(startDay * dayWidth));
 
-                    int spanDays = ((appointment.EndDate.Date - appointment.StartDate.Date).Days + 1);
-                    int endDay = (startDay + spanDays);
-                    int endPos = Math.Min((rect.X + (endDay * dayWidth) + appointmentGripWidth), rect.Right);
+					if (startPos <= rect.Left)
+						startPos = (rect.Left + 2);
+
+					double endDay = (appointment.EndDate - startDate).TotalDays;
+                    int endPos = (rect.X + (int)(endDay * dayWidth));
+					
+					if (endPos >= rect.Right)
+						endPos = (rect.Right - 1);
 
                     appointmenRect.X = startPos;
                     appointmenRect.Width = (endPos - startPos);
@@ -1629,7 +1668,6 @@ namespace Calendar
                     gripRect.Width = appointmentGripWidth;
 
                     renderer.DrawAppointment(e.Graphics, appointmenRect, appointment, appointment == selectedAppointment, gripRect);
-
                 }
             }
 

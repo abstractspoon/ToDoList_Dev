@@ -76,8 +76,7 @@ namespace DayViewUIExtension
             RestoreSelectedItem();
 
             m_DayView.SelectionStart = m_DayView.SelectionEnd;
-			m_DayView.Invalidate();
-            m_DayView.Update();
+			m_DayView.OnUpdateTasks();
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
@@ -470,24 +469,49 @@ namespace DayViewUIExtension
 				case Calendar.SelectionTool.Mode.Move:
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
-						item.OrgStartDate = item.StartDate;
-						notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, item.StartDate);
+						if (notify.NotifyMod(UIExtension.TaskAttribute.OffsetTask, item.StartDate))
+						{
+							item.OrgStartDate = item.StartDate;
+							item.OrgEndDate = item.EndDate;
+						}
+						else
+						{
+							item.StartDate = item.OrgStartDate;
+							item.EndDate = item.OrgEndDate;
+							m_DayView.Invalidate();
+						}
 					}
 					break;
 
+				case Calendar.SelectionTool.Mode.ResizeLeft:
 				case Calendar.SelectionTool.Mode.ResizeTop:
 					if ((item.StartDate - item.OrgStartDate).TotalSeconds != 0.0)
 					{
-						item.OrgStartDate = item.StartDate;
-                        notify.NotifyMod(UIExtension.TaskAttribute.StartDate, item.StartDate);
+						if (notify.NotifyMod(UIExtension.TaskAttribute.StartDate, item.StartDate))
+						{
+							item.OrgStartDate = item.StartDate;
+						}
+						else
+						{
+							item.StartDate = item.OrgStartDate;
+							m_DayView.Invalidate();
+						}
 					}
 					break;
 
+				case Calendar.SelectionTool.Mode.ResizeRight:
 				case Calendar.SelectionTool.Mode.ResizeBottom:
 					if ((item.EndDate - item.OrgEndDate).TotalSeconds != 0.0)
 					{
-						item.OrgEndDate = item.EndDate;
-                        notify.NotifyMod(UIExtension.TaskAttribute.DueDate, item.EndDate);
+						if (notify.NotifyMod(UIExtension.TaskAttribute.DueDate, item.EndDate))
+						{
+							item.OrgEndDate = item.EndDate;
+						}
+						else
+						{
+							item.EndDate = item.OrgEndDate;
+							Invalidate();
+						}
 					}
 					break;
 			}
@@ -545,6 +569,7 @@ namespace DayViewUIExtension
 		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_trans;
 		bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
+		System.Windows.Forms.Timer m_redrawTimer;
 
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;

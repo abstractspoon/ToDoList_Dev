@@ -13,6 +13,7 @@ namespace DayViewUIExtension
     public class TDLDayView : Calendar.DayView
     {
         private TDLRenderer m_Renderer;
+		System.Windows.Forms.Timer m_Timer;
 
         public TDLDayView(System.Drawing.Font font)
         {
@@ -64,20 +65,6 @@ namespace DayViewUIExtension
             Invalidate(true);
 		}
 
-        public override bool AllowMode(Calendar.SelectionTool.Mode mode)
-        {
-            switch (mode)
-            {
-                case Calendar.SelectionTool.Mode.ResizeTop:
-                case Calendar.SelectionTool.Mode.ResizeBottom:
-                case Calendar.SelectionTool.Mode.Move:
-                    return true;
-            }
-
-            // all else
-            return false;
-        }
-
         public override TimeSpan GetTimeAt(int y)
         {
             TimeSpan time = base.GetTimeAt(y);
@@ -87,5 +74,31 @@ namespace DayViewUIExtension
 
             return time;
         }
-    }
+
+		public void OnUpdateTasks()
+		{
+			StartUpdateTimer();
+		}
+
+		protected void StartUpdateTimer()
+		{
+			if (m_Timer == null)
+			{
+				m_Timer = new System.Windows.Forms.Timer();
+			}
+
+			m_Timer.Tick += OnUpdateTimer;
+			m_Timer.Interval = 10;
+			m_Timer.Start();
+		}
+
+		protected void OnUpdateTimer(object sender, EventArgs e)
+		{
+			m_Timer.Stop();
+
+			AdjustScrollbar();
+			Invalidate();
+			Update();
+		}
+	}
 }

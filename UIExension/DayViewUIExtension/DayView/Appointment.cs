@@ -209,24 +209,14 @@ namespace Calendar
         {
         }
 
-        private bool allDayEvent = false;
-
-        public bool AllDayEvent
+        public bool LongAppt
         {
             get
             {
-                return allDayEvent;
-            }
-            set
-            {
-                allDayEvent = value;
-                OnAllDayEventChanged();
+                return (startDate.Day != endDate.Day);
             }
         }
 
-        protected virtual void OnAllDayEventChanged()
-        {
-        }
         internal int conflictCount;
     }
 }
