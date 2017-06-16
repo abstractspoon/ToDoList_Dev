@@ -537,6 +537,39 @@ CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
 	return sText;
 }
 
+CString& Misc::TrimAlpha(CString& sText)
+{
+	int nLen = sText.GetLength();
+
+	if (nLen)
+	{
+		int nStart = 0, nEnd = nLen;
+
+		while (nEnd--)
+		{
+			TCHAR c = sText[nEnd];
+
+			if ((c >= '0') && (c <= '9'))
+				break;
+		}
+
+		while (nStart < nEnd)
+		{
+			TCHAR c = sText[nStart];
+
+			if ((c >= '0') && (c <= '9'))
+				break;
+
+			nStart++;
+		}
+
+		if ((nEnd - nStart) != nLen)
+			sText = sText.Mid(nStart, (nEnd + 1 - nStart));
+	}
+	
+	return sText;
+}
+
 BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 {
 	if (IsEmpty(szPrefix))
