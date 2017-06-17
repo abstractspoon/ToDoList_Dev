@@ -65,6 +65,18 @@ namespace DayViewUIExtension
             Invalidate(true);
 		}
 
+		public override DateTime GetDateAt(int x, bool longAppt)
+		{
+			DateTime date = base.GetDateAt(x, longAppt);
+
+			if (longAppt && (date >= EndDate))
+			{
+				date = EndDate.AddSeconds(-1);
+			}
+
+			return date;
+		}
+
         public override TimeSpan GetTimeAt(int y)
         {
             TimeSpan time = base.GetTimeAt(y);
@@ -99,6 +111,36 @@ namespace DayViewUIExtension
 			AdjustScrollbar();
 			Invalidate();
 			Update();
+		}
+
+		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
+		{
+			// Our custom gripper bar
+			gripRect = rect;
+			gripRect.Inflate(-2, -2);
+			gripRect.Width = 5;
+			gripRect.Height--;
+
+			// If the start date precedes the start of the week then extend the
+			// draw rect to the left so the edge is clipped and likewise for the right.
+			Rectangle clipRect = rect;
+
+			if (appointment.StartDate < StartDate)
+			{
+				// Enough to hide the grip Rect
+				int offset = (gripRect.Right - rect.Left);
+
+				rect.X -= offset;
+				rect.Width += offset;
+
+				gripRect.Width = 0;
+			}
+			else if (appointment.EndDate >= EndDate)
+			{
+				rect.Width += 5;
+			}
+			
+			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
 		}
 	}
 }

@@ -25,6 +25,10 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
+			// Don't select already selected task
+			if (dwTaskID == m_SelectedTaskID)
+				return true;
+
 			CalendarItem item;
 
 			if (m_Items.TryGetValue(dwTaskID, out item) && (item.StartDate != DateTime.MinValue))
@@ -556,6 +560,8 @@ namespace DayViewUIExtension
 //                     (item.StartDate.Date <= endDate));
 			return ((item.StartDate.Date >= startDate) && 
                     (item.EndDate.Date < endDate));
+// 			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
+// 					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
 		}
 
 		// --------------------------------------------------------------------------------------
@@ -625,6 +631,12 @@ namespace DayViewUIExtension
         {
             return (StartDate.Date == EndDate.Date);
         }
+
+		public override bool IsLongAppt()
+		{
+			return (base.IsLongAppt() || (OrgStartDate.Day != OrgEndDate.Day));
+		}
+
     }
 
 }

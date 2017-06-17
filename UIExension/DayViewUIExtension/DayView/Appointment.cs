@@ -209,12 +209,9 @@ namespace Calendar
         {
         }
 
-        public bool LongAppt
+        public virtual bool IsLongAppt()
         {
-            get
-            {
-                return (startDate.Day != endDate.Day);
-            }
+            return (startDate.Day != endDate.Day);
         }
 
         internal int conflictCount;

@@ -253,23 +253,14 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            /*
-             * Logic for drawing the appointment: 
-             * 1) Do something messy with the colours
-             * 
-             * 2) Determine background pattern
-             * 2.1) App is locked -> HatchBrush
-             * 2.2) Normal app -> Nothing
-             * 
-             * 3) Draw the background of appointment
-             * 
-             * 4) Draw the edges of appointment
-             * 4.1) If app is selected -> just draw the selection rectangle
-             * 4.2) If not -> draw the gripper, border (if required) and shadows
-             */
-
             if (rect.Width != 0 && rect.Height != 0)
             {
+				if (!appointment.IsLongAppt() && (appointment.StartDate.TimeOfDay.TotalHours == 0.0))
+				{
+					rect.Y++;
+					rect.Height--;
+				}
+
 				rect.Width--;
 
                 using (StringFormat format = new StringFormat())
@@ -302,17 +293,15 @@ namespace DayViewUIExtension
 					}
 
                     // Draw gripper bar
-					gripRect = rect;
-					gripRect.Inflate(-2, -2);
-					gripRect.Width = 5;
-                    gripRect.Height--;
+					if (gripRect.Width > 0)
+					{
+						using (SolidBrush brush = new SolidBrush(appointment.BarColor))
+							g.FillRectangle(brush, gripRect);
 
-					using (SolidBrush brush = new SolidBrush(appointment.BarColor))
-						g.FillRectangle(brush, gripRect);
-
-					// Draw gripper border
-					using (Pen pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
-						g.DrawRectangle(pen, gripRect);
+						// Draw gripper border
+						using (Pen pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
+							g.DrawRectangle(pen, gripRect);
+					}
 					
 					//  Draw appointment border if needed
 					if (!isSelected && appointment.DrawBorder)

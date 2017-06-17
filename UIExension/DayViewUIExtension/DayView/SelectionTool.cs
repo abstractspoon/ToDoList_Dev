@@ -35,7 +35,7 @@ namespace Calendar
 					return true;
 
 				case Mode.Move:
-					return m_dayView.SelectedAppointment.LongAppt;
+					return m_dayView.SelectedAppointment.IsLongAppt();
 			}
 
 			// all else
@@ -93,14 +93,14 @@ namespace Calendar
             {
 				// Get time at mouse position
 				bool longAppt = IsResizingLongAppt();
-				bool inLongAptRect = fdrect.Contains(e.Location);
+				bool ptInLongAptRect = fdrect.Contains(e.Location);
 
 				DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, longAppt);
 
 				switch (m_mode)
 				{
 					case Mode.Move:
-						if (!selection.LongAppt && !inLongAptRect)
+						if (!selection.IsLongAppt() && !ptInLongAptRect)
 						{
 							if (m_length == TimeSpan.Zero)
 							{
@@ -146,7 +146,7 @@ namespace Calendar
 								}
 							}
 						}
-						else if (selection.LongAppt && inLongAptRect)
+						else if (selection.IsLongAppt() && ptInLongAptRect)
 						{
 							dateAtCursor = dateAtCursor.Add(m_delta);
 
@@ -179,7 +179,7 @@ namespace Calendar
 						break;
 
 					case Mode.ResizeBottom:
-						if (!inLongAptRect && (dateAtCursor > selection.StartDate))
+						if (!ptInLongAptRect && (dateAtCursor > selection.StartDate))
 						{
 							if (SameDay(selection.EndDate, dateAtCursor.Date))
 							{
@@ -192,7 +192,7 @@ namespace Calendar
 						break;
 
 					case Mode.ResizeTop:
-						if (!inLongAptRect && (dateAtCursor < selection.EndDate))
+						if (!ptInLongAptRect && (dateAtCursor < selection.EndDate))
 						{
 							if (selection.StartDate.Day == dateAtCursor.Day)
 							{
@@ -204,7 +204,7 @@ namespace Calendar
 						break;
 
 					case Mode.ResizeLeft:
-						if (inLongAptRect && (dateAtCursor.Date < selection.EndDate.AddHours(-1)))
+						if (ptInLongAptRect && (dateAtCursor.Date < selection.EndDate.AddHours(-1)))
 						{
 							selection.StartDate = dateAtCursor;
 
@@ -214,7 +214,7 @@ namespace Calendar
 						break;
 
 					case Mode.ResizeRight:
-						if (inLongAptRect && (dateAtCursor >= selection.StartDate.AddHours(1)))
+						if (ptInLongAptRect && (dateAtCursor >= selection.StartDate.AddHours(1)))
 						{
 							selection.EndDate = dateAtCursor;
 
@@ -223,9 +223,9 @@ namespace Calendar
 						}
 						break;
 				}
-			}
 
-			m_lastMouseMove = e.Location;
+				m_lastMouseMove = e.Location;
+			}
         }
 
         static private bool SameDay(DateTime startDate, DateTime endDate)

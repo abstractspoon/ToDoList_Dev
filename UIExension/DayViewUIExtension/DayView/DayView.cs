@@ -845,7 +845,7 @@ namespace Calendar
                 int key;
                 AppointmentList list;
 
-				bool longAppt = appointment.LongAppt;
+				bool longAppt = appointment.IsLongAppt();
 
 				// If a long appointment is being resized and it now fits within a 
 				// single day, still treat it as a long task until the edit finishes
@@ -1103,6 +1103,12 @@ namespace Calendar
 			else
 			{
 				date = date.AddDays((x - hourLabelWidth) / dayWidth).Date;
+
+				if (date < startDate)
+					date = startDate;
+
+				if (date >= EndDate)
+					date = EndDate.AddDays(-1);
 			}
 
             return date;
@@ -1493,7 +1499,7 @@ namespace Calendar
                                 Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, appRect);
                                 gripRect.Width = appointmentGripWidth;
 
-                                renderer.DrawAppointment(e.Graphics, appRect, appointment, appointment == selectedAppointment, gripRect);
+                                DrawAppointment(e.Graphics, appRect, appointment, appointment == selectedAppointment, gripRect);
 
                                 e.Graphics.ResetClip();
 
@@ -1582,7 +1588,6 @@ namespace Calendar
 
             if (longAppointments != null)
             {
-
                 foreach (Appointment appointment in longAppointments)
                 {
                     appointment.Layer = 0;
@@ -1635,6 +1640,7 @@ namespace Calendar
                 backRectangle.Height = allDayEventsHeaderHeight;
 
                 renderer.DrawAllDayBackground(e.Graphics, backRectangle);
+				e.Graphics.SetClip(backRectangle);
 
                 foreach (Appointment appointment in longAppointments)
                 {
@@ -1667,8 +1673,10 @@ namespace Calendar
                     Rectangle gripRect = appointmenRect;
                     gripRect.Width = appointmentGripWidth;
 
-                    renderer.DrawAppointment(e.Graphics, appointmenRect, appointment, appointment == selectedAppointment, gripRect);
+                    DrawAppointment(e.Graphics, appointmenRect, appointment, (appointment == selectedAppointment), gripRect);
                 }
+
+				e.Graphics.SetClip(rect);
             }
 
             DateTime time = startDate;
@@ -1694,6 +1702,12 @@ namespace Calendar
             }
         }
 
+		protected virtual void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
+		{
+			// Pass draw rect as the clip rect by default
+			renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
+		}
+		
         #endregion
 
         #region Internal Utility Classes
