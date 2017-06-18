@@ -88,10 +88,6 @@ protected:
 	void RunUninstaller();
 	void RunUpdater(BOOL bPreRelease);
 	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo);
-
-#ifdef _DEBUG
-	void TranslateUIElements();
-#endif
 	
 	TDL_WEBUPDATE_CHECK CheckForUpdates(BOOL bManual);
 
