@@ -1019,7 +1019,9 @@ CString CDialogHelper::GetItem(const CComboBox& combo, int nItem)
 
 int CDialogHelper::GetSelectedItemAsValue(const CComboBox& combo)
 {
-	return _ttoi(GetSelectedItem(combo));
+	CString sValue(GetSelectedItem(combo));
+
+	return _ttoi(Misc::TrimAlpha(sValue));
 }
 
 DWORD CDialogHelper::GetSelectedItemData(const CComboBox& combo)

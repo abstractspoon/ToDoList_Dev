@@ -12139,18 +12139,31 @@ void CToDoListWnd::OnEditSetReminder()
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
 	}
-	
-	if (dialog.DoModal(rem, bNewReminder) == IDOK)
+
+	int nRet = dialog.DoModal(rem, bNewReminder);
+
+	switch (nRet)
 	{
+	case IDOK:
 		// apply reminder to selected tasks
 		for (int nTask = 0; nTask < nNumSel; nTask++)
 		{
 			rem.dwTaskID = aTaskIDs[nTask];
 			m_reminders.SetReminder(rem);
 		}
+		break;
 		
-		tdc.RedrawReminders();
+	case IDDISMISS:
+		// clear reminder for selected tasks
+		for (int nTask = 0; nTask < nNumSel; nTask++)
+			m_reminders.ClearReminder(aTaskIDs[nTask], &tdc);
+		break;
+
+	default:
+		return;
 	}
+	
+	tdc.RedrawReminders();
 }
 
 void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI) 

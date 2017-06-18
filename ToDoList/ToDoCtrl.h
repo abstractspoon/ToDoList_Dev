@@ -801,7 +801,7 @@ protected:
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
-	void TimeTrackTask(HTREEITEM hti);
+	void ToggleTimeTracking(HTREEITEM hti);
 	BOOL AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, const CString& sComment, BOOL bTracked);
 	BOOL DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDialog);
 	BOOL AdjustTaskTimeSpent(DWORD dwTaskID, double dHours);

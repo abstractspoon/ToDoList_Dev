@@ -977,6 +977,9 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 		SetWindowText(m_sTaskTimes);
 
 	UpdateData(FALSE);
+
+	if (IsTrackingSelectedTasklistAndTask())
+		GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
 }
 
 void CTDLTimeTrackerDlg::OnStartStopTracking()

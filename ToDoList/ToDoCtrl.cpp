@@ -628,11 +628,8 @@ BOOL CToDoCtrl::OnInitDialog()
 	if (pParent)
 		pParent->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
 
-	// and start the track timer
+	// Start the timer which checks for midnight (day changeover)
 	// which runs persistently
-	SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
-
-	// and the time which checks for midnight (day changeover)
 	SetTimer(TIMER_MIDNIGHT, MIDNIGHTPERIOD, NULL);
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
@@ -4794,14 +4791,18 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL b
 
 void CToDoCtrl::PauseTimeTracking(BOOL bPause) 
 { 
-	if (bPause && !m_bTimeTrackingPaused)
+	if (bPause)
 	{
+		KillTimer(TIMER_TRACK);
 		m_bTimeTrackingPaused = TRUE;
 	}
-	else if (!bPause && m_bTimeTrackingPaused)
+	else
 	{
 		m_bTimeTrackingPaused = FALSE;
 		ResetTimeTracking();
+
+		// Start the timer
+		SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 	}
 }
 
@@ -4810,7 +4811,7 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 	if (!CanTimeTrackSelectedTask())
 		return FALSE;
 	
-	TimeTrackTask(GetSelectedItem());
+	ToggleTimeTracking(GetSelectedItem());
 	
 	return FALSE;
 }
@@ -8329,7 +8330,7 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 					IsItemSelected(hti) && 
 					m_data.IsTaskTimeTrackable(dwTaskID));
 			
-			TimeTrackTask(hti);
+			ToggleTimeTracking(hti);
 		}
 		break;
 		
@@ -8579,21 +8580,16 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 	return FALSE; // not handled
 }
 
-void CToDoCtrl::TimeTrackTask(HTREEITEM hti)
+void CToDoCtrl::ToggleTimeTracking(HTREEITEM hti)
 {
 	ASSERT (GetSelectedCount() == 1); // sanity check
 	
 	DWORD dwTaskID = GetTrueTaskID(hti);
 
 	if (dwTaskID == m_dwTimeTrackTaskID)
-	{
-		// toggle off
 		EndTimeTracking(TRUE, TRUE); 
-	}
 	else
-	{
 		BeginTimeTracking(dwTaskID, TRUE);
-	}
 }
 
 // External
@@ -8605,34 +8601,41 @@ void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID)
 // Internal
 void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 {
+	KillTimer(TIMER_TRACK);
+
 	if (m_data.IsTaskTimeTrackable(dwTaskID))
 	{
 		// if there's a current task being tracked then end it
 		EndTimeTracking(TRUE, bNotify);
 		
 		const TODOITEM* pTDI = GetTask(dwTaskID);
-		ASSERT (pTDI);
-		
-		if (pTDI)
-		{
-			m_dwTimeTrackTaskID = dwTaskID;
-			ResetTimeTracking();
-			
-			// if the task's start date has not been set then set it now
-			if (!pTDI->HasStart())
-				m_data.SetTaskDate(dwTaskID, TDCD_STARTDATE, COleDateTime::GetCurrentTime());
 
-			m_taskTree.SetTimeTrackTaskID(dwTaskID);
-			
-			// Update Time spent control
-			m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
-			m_eTimeSpent.EnableButton(ID_TIME_TRACK, TRUE);
-			SetCtrlState(m_eTimeSpent, RTCS_READONLY);
-			
-			// notify parent
-			if (bNotify)
-				GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), TRUE);
+		if (!pTDI)
+		{
+			ASSERT (0);
+			return;
 		}
+		
+		m_dwTimeTrackTaskID = dwTaskID;
+		ResetTimeTracking();
+			
+		// if the task's start date has not been set then set it now
+		if (!pTDI->HasStart())
+			m_data.SetTaskDate(dwTaskID, TDCD_STARTDATE, COleDateTime::GetCurrentTime());
+
+		m_taskTree.SetTimeTrackTaskID(dwTaskID);
+			
+		// Update Time spent control
+		m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
+		m_eTimeSpent.EnableButton(ID_TIME_TRACK, TRUE);
+		SetCtrlState(m_eTimeSpent, RTCS_READONLY);
+			
+		// notify parent
+		if (bNotify)
+			GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), TRUE);
+
+		// Start the timer
+		SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 	}
 }
 
@@ -8648,6 +8651,8 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	// if there's a current task being tracked then log it
 	if (m_dwTimeTrackTaskID)
 	{
+		KillTimer(TIMER_TRACK);
+
 		// add whatever time is still waiting
 		IncrementTrackedTime(TRUE);
 
@@ -11358,7 +11363,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 		if ((lParam == ID_TIME_TRACK) && (GetSelectedCount() == 1))
 		{
 			HandleUnsavedComments();
-			TimeTrackTask(GetSelectedItem());
+			ToggleTimeTracking(GetSelectedItem());
 		}
 		break;
 

@@ -330,6 +330,7 @@ namespace Misc
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
+	CString& TrimAlpha(CString& sText);
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
