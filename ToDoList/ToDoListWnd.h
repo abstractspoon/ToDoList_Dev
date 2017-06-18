@@ -74,10 +74,6 @@ public:
 	static CString GetTitle(BOOL bExtended = TRUE);
 
 	BOOL Create(const CTDCStartupOptions& startup);
-
-#ifdef _DEBUG
-	void ShowReminderDlg();
-#endif
 	
 protected:
 	// ClassWizard generated virtual function overrides
@@ -565,6 +561,9 @@ protected:
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();
 	afx_msg void OnDebugShowSetupDlg();
+	afx_msg void OnDebugShowReminderDlg();
+	afx_msg void OnDebugUpdateTranslation();
+	afx_msg void OnDebugCleanDictionaries();
 #endif
 	DECLARE_MESSAGE_MAP()
 		
@@ -766,7 +765,6 @@ protected:
 	static void HandleImportError(IIMPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
 	static BOOL SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath);
 
-	void TranslateUIElements();
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	
 	static int MessageBox(UINT nIDText, UINT nIDCaption = 0, UINT nType = MB_OK, LPCTSTR szData = NULL);

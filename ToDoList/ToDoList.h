@@ -63,7 +63,6 @@ protected:
 	afx_msg void OnDebugShowLanguageDlg();
 	afx_msg void OnDebugTaskDialogWarning();
 	afx_msg void OnDebugTaskDialogError();
-	afx_msg void OnDebugShowReminderDlg();
 #endif
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();
@@ -83,12 +82,16 @@ protected:
 	void DoHelp(UINT nHelpID = 0);
 	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
 	void SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
-	BOOL InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime, BOOL bQuiet);
+	BOOL InitTranslation(/*CEnCommandLineInfo& cmdInfo, */BOOL bFirstTime, BOOL bQuiet);
 	void UpgradePreferences(CPreferences& prefs);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller();
 	void RunUpdater(BOOL bPreRelease);
 	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo);
+
+#ifdef _DEBUG
+	void TranslateUIElements();
+#endif
 	
 	TDL_WEBUPDATE_CHECK CheckForUpdates(BOOL bManual);
 

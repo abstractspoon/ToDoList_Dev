@@ -89,7 +89,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUGSHOWSCRIPTDLG, OnDebugShowScriptDlg)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_WARNING, OnDebugTaskDialogWarning)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_ERROR, OnDebugTaskDialogError)
-	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
 	ON_COMMAND(ID_DEBUGSHOWLANGDLG, OnDebugShowLanguageDlg)
 #endif
 
@@ -936,7 +935,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	{
 		SetPreferences(bUseIni, sIniPath, TRUE);
 
-		if (!InitTranslation(cmdInfo, bFirstTime, bQuiet))
+		if (!InitTranslation(/*cmdInfo, */bFirstTime, bQuiet))
 			return FALSE; // user cancelled -> Quit app
 
 		CPreferences prefs;
@@ -962,7 +961,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	{
 		ASSERT(!bQuiet);
 
-		if (!InitTranslation(cmdInfo, bFirstTime, bQuiet))
+		if (!InitTranslation(/*cmdInfo, */bFirstTime, bQuiet))
 			return FALSE; // user cancelled -> Quit app
 
 		FileMisc::LogText(_T("Neither ini file nor registry settings found -> Showing setup wizard"));
@@ -1068,7 +1067,7 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 	}
 }
 
-BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime, BOOL bQuiet)
+BOOL CToDoListApp::InitTranslation(/*CEnCommandLineInfo& cmdInfo, */BOOL bFirstTime, BOOL bQuiet)
 {
 	CLocalizer::Release();
 
@@ -1110,17 +1109,12 @@ BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime,
 
 	if (FileMisc::FileExists(m_sLanguageFile))
 	{
-		// 'u' indicates uppercase mode
-		if (cmdInfo.HasOption(SWITCH_TRANSUPPER))
-		{
-			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_UPPERCASE);
-		}
-		else if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-		{
-			// 't' indicates 'translation' mode (aka 'Add2Dictionary')
-			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_ADD2DICTIONARY);
-		}
-		else
+// 		if (cmdInfo.HasOption(SWITCH_ADDTODICT))
+// 		{
+// 			// 't' indicates 'translation' mode (aka 'Add2Dictionary')
+// 			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_ADD2DICTIONARY);
+// 		}
+// 		else
 		{
 			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_TRANSLATEONLY);
 		}
@@ -1128,27 +1122,27 @@ BOOL CToDoListApp::InitTranslation(CEnCommandLineInfo& cmdInfo, BOOL bFirstTime,
 
 	// This option can be run without having a translation active
 	// but they still need a valid translator
-	if (cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
-	{
-		if (!bValidLocalizer)
-			CLocalizer::Initialize(NULL, ITTTO_ADD2DICTIONARY);
-
-		CString sDictPath;
-
-		if (cmdInfo.GetOption(SWITCH_CLEANDICTIONARY, sDictPath))
-		{
-			if (sDictPath.IsEmpty())
-				sDictPath = GetResourcePath(_T("Translations"));
-			
-			CString sMasterDict(GetResourcePath(_T("Translations"), _T("YourLanguage.csv")));
-			
-			CLocalizer::CleanupDictionary(sMasterDict, sDictPath);
-		}
-
-		// Cleanup
-		if (!bValidLocalizer)
-			CLocalizer::Release();
-	}
+// 	if (cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
+// 	{
+// 		if (!bValidLocalizer)
+// 			CLocalizer::Initialize(NULL, ITTTO_ADD2DICTIONARY);
+// 
+// 		CString sDictPath;
+// 
+// 		if (cmdInfo.GetOption(SWITCH_CLEANDICTIONARY, sDictPath))
+// 		{
+// 			if (sDictPath.IsEmpty())
+// 				sDictPath = GetResourcePath(_T("Translations"));
+// 			
+// 			CString sMasterDict(GetResourcePath(_T("Translations"), _T("YourLanguage.csv")));
+// 			
+// 			CLocalizer::CleanupDictionary(sMasterDict, sDictPath);
+// 		}
+// 
+// 		// Cleanup
+// 		if (!bValidLocalizer)
+// 			CLocalizer::Release();
+// 	}
 
 	// If there is no need for translation, we initialise it to NULL
 	// so that the dll won't continue to get loaded all the time
@@ -1530,7 +1524,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		
 		if (CLocalizer::GetTranslationOption() == ITTTO_ADD2DICTIONARY)
 		{
-			params.SetOption(SWITCH_ADDTODICT);
+			//params.SetOption(SWITCH_ADDTODICT);
 
 			// make sure all dictionary changes have been written
 			CLocalizer::Release();
@@ -1753,6 +1747,7 @@ TDL_WEBUPDATE_CHECK CToDoListApp::CheckForUpdates(BOOL bManual)
 // DEBUG FUNCTIONS
 
 #ifdef _DEBUG
+
 void CToDoListApp::OnDebugTaskDialogInfo() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1764,9 +1759,7 @@ void CToDoListApp::OnDebugTaskDialogInfo()
 
 	AfxMessageBox(szTestMsg, MB_ICONINFORMATION);
 }
-#endif
 
-#ifdef _DEBUG
 void CToDoListApp::OnDebugTaskDialogWarning() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1778,9 +1771,7 @@ void CToDoListApp::OnDebugTaskDialogWarning()
 
 	AfxMessageBox(szTestMsg, MB_ICONWARNING);
 }
-#endif
 
-#ifdef _DEBUG
 void CToDoListApp::OnDebugTaskDialogError() 
 {
 	LPCTSTR szTestMsg = _T("This the optional caption of the message box|")
@@ -1792,9 +1783,7 @@ void CToDoListApp::OnDebugTaskDialogError()
 	
 	AfxMessageBox(szTestMsg, MB_ICONERROR);
 }
-#endif
 
-#ifdef _DEBUG
 void CToDoListApp::OnDebugShowUpdateDlg() 
 {
 	CString sAppPath = (FileMisc::TerminatePath(FileMisc::GetAppFolder()) + _T("TDLUpdate.exe"));
@@ -1818,31 +1807,19 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 
 	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdLine.GetCommandLine());
 }
-#endif
 
-#ifdef _DEBUG
 void CToDoListApp::OnDebugShowScriptDlg() 
 {
 	CTDLWebUpdatePromptDlg::ShowDialog();
 }
-#endif
 
-#ifdef _DEBUG
-void CToDoListApp::OnDebugShowReminderDlg() 
-{
-	((CToDoListWnd*)m_pMainWnd)->ShowReminderDlg();
-}
-#endif
-
-#ifdef _DEBUG
 void CToDoListApp::OnDebugShowLanguageDlg()
 {
 	CTDLLanguageDlg dialog;
 	dialog.DoModal();
 }
-#endif
 
-// DEBUG FUNCTIONS
+#endif // DEBUG FUNCTIONS
 /////////////////////////////////////////////////////////////////////////////
 
 void CToDoListApp::OnHelpRecordBugReport() 

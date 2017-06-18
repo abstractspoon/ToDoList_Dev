@@ -626,6 +626,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 #ifdef _DEBUG
 	ON_COMMAND(ID_DEBUGENDSESSION, OnDebugEndSession)
 	ON_COMMAND(ID_DEBUGSHOWSETUPDLG, OnDebugShowSetupDlg)
+	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
+	ON_COMMAND(ID_DEBUG_UPDATETRANSLATION, OnDebugUpdateTranslation)
+	ON_COMMAND(ID_DEBUG_CLEANDICTIONARIES, OnDebugCleanDictionaries)
 #endif
 
 END_MESSAGE_MAP()
@@ -2220,32 +2223,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (userPrefs.GetUseStickies(sStickiesPath))
 		VERIFY(m_reminders.UseStickies(TRUE, sStickiesPath));
 	
-	// add outstanding translated items to dictionary
-	if (CLocalizer::GetTranslationOption() == ITTTO_ADD2DICTIONARY)
-	{
-		CDWordArray aDictVersion, aAppVersion;
-		VERIFY (FileMisc::GetAppVersion(aAppVersion));
-
-		BOOL bUpdateDict = !CLocalizer::GetDictionaryVersion(aDictVersion) ||
-							aDictVersion.GetSize() < 2;
-
-		if (!bUpdateDict)
-		{
-			// check if the major or minor version has increased
-			bUpdateDict = (FileMisc::CompareVersions(aAppVersion, aDictVersion, 2) > 0);
-
-			// check for pre-release build then update
-			if (!bUpdateDict && aAppVersion[2] >= 297)
-			{
-				// compare entire version string
-				bUpdateDict = (FileMisc::CompareVersions(aAppVersion, aDictVersion) > 0);
-			}
-		}
-
-		if (bUpdateDict)
-			TranslateUIElements();
-	}
-
 	RestoreVisibility();
 	
 	// load last open tasklists
@@ -3857,7 +3834,11 @@ void CToDoListWnd::Show(BOOL bAllowToggle)
 	GetToDoCtrl().SetFocusToTasks();
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// DEBUG FUNCTIONS
+
 #ifdef _DEBUG
+
 void CToDoListWnd::OnDebugEndSession() 
 { 
 	SendMessage(WM_QUERYENDSESSION); 
@@ -3869,48 +3850,105 @@ void CToDoListWnd::OnDebugShowSetupDlg()
 	CTDLWelcomeWizard dialog(CToDoListWnd::GetVersion(FALSE));
 	dialog.DoModal();
 }
-#endif
 
-void CToDoListWnd::TranslateUIElements() 
-{ 
-	// show progress bar
-	DOPROGRESS(IDS_UPDATINGDICTIONARY);
+void CToDoListWnd::OnDebugShowReminderDlg() 
+{
+	TDCREMINDER rem;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	
+	rem.dwTaskID = tdc.GetSelectedTaskID();
+	rem.pTDC = &tdc;
+	rem.bRelative = TRUE;
+	rem.dRelativeDaysLeadIn = 0;
+	rem.nRelativeFromWhen = TDCR_STARTDATE;
+	rem.bEnabled = TRUE;
+	
+	m_reminders.SetReminder(rem, TRUE);
+}
 
-	// disable translation of top-level menu names in
-	// IDR_MISC, IDR_TASKVIEWVISIBILITY, IDR_TREEDRAGDROP
-	CLocalizer::IgnoreString(_T("TrayIcon"));
-	CLocalizer::IgnoreString(_T("TaskContext"));
-	CLocalizer::IgnoreString(_T("TabCtrl"));
-	CLocalizer::IgnoreString(_T("TasklistHeader"));
-	CLocalizer::IgnoreString(_T("CommentsPopup"));
-	CLocalizer::IgnoreString(_T("ToolsDialog"));
-	CLocalizer::IgnoreString(_T("TreeDragDrop"));
-	CLocalizer::IgnoreString(_T("TaskViews"));
-	CLocalizer::IgnoreString(_T("Debug"));
-	CLocalizer::IgnoreString(_T("Task Dialog"));
-
-	CLocalizer::IgnoreString(IDS_ABOUTCONTRIBUTION);
-
-	// disable translation of debug menu
-	CLocalizer::EnableTranslation(ID_DEBUGENDSESSION, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGSHOWSCRIPTDLG, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGSHOWSETUPDLG, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGSHOWUPDATEDLG, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_INFO, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_WARNING, FALSE);
-	CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_ERROR, FALSE);
-
-	CLocalizer::ForceTranslateAllUIElements(IDS_FIRSTSTRING, IDS_LASTSTRING);
-
-	// force a redraw of whole UI
-	if (IsWindowVisible())
+void CToDoListWnd::OnDebugUpdateTranslation() 
+{
+	if (!CLocalizer::IsInitialized())
 	{
-		ShowWindow(SW_HIDE);
-		ShowWindow(SW_SHOW);
+		ASSERT(0);
+		return;
 	}
 	
-	SetForegroundWindow();
+	// Reinitialise with 'add to dictionary'
+	if (CLocalizer::GetTranslationOption() == ITTTO_TRANSLATEONLY)
+	{
+		CString sDictFile = CLocalizer::GetDictionaryPath();
+		
+		CLocalizer::Release();
+		CLocalizer::Initialize(sDictFile, ITTTO_ADD2DICTIONARY);
+		
+		// disable translation of top-level menu names in
+		// IDR_MISC, IDR_TASKVIEWVISIBILITY, IDR_TREEDRAGDROP
+		CLocalizer::IgnoreString(_T("TrayIcon"));
+		CLocalizer::IgnoreString(_T("TaskContext"));
+		CLocalizer::IgnoreString(_T("TabCtrl"));
+		CLocalizer::IgnoreString(_T("TasklistHeader"));
+		CLocalizer::IgnoreString(_T("CommentsPopup"));
+		CLocalizer::IgnoreString(_T("ToolsDialog"));
+		CLocalizer::IgnoreString(_T("TreeDragDrop"));
+		CLocalizer::IgnoreString(_T("TaskViews"));
+		CLocalizer::IgnoreString(_T("Debug"));
+		CLocalizer::IgnoreString(_T("Task Dialog"));
+		
+		CLocalizer::IgnoreString(IDS_ABOUTCONTRIBUTION);
+		
+		// disable translation of debug menu
+		CLocalizer::EnableTranslation(ID_DEBUGENDSESSION, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGSHOWSCRIPTDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGSHOWSETUPDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGSHOWUPDATEDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_INFO, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_WARNING, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_ERROR, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_UPDATETRANSLATION, FALSE);
+		
+		CLocalizer::ForceTranslateAllUIElements(IDS_FIRSTSTRING, IDS_LASTSTRING);
+		
+		// force a redraw of whole UI
+		if (IsWindowVisible())
+		{
+			ShowWindow(SW_HIDE);
+			ShowWindow(SW_SHOW);
+		}
+			
+		SetForegroundWindow();
+	}
+	
+	// Leave as 'add to dictionary' for duration of session
 }
+
+void CToDoListWnd::OnDebugCleanDictionaries() 
+{
+	DOPROGRESS(IDS_UPDATINGDICTIONARY);
+
+	BOOL bIsInit = (CLocalizer::IsInitialized() && (CLocalizer::GetTranslationOption() == ITTTO_ADD2DICTIONARY));
+	
+	if (!bIsInit)
+	{
+		CString sDictFile = CLocalizer::GetDictionaryPath();
+
+		CLocalizer::Release();
+		CLocalizer::Initialize(sDictFile, ITTTO_ADD2DICTIONARY);
+	}
+	
+	CString sDictPath = CLocalizer::GetDictionaryPath();
+	CString sTransFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
+	
+	if (sDictPath.IsEmpty())
+		sDictPath = sTransFolder;
+	
+	CString sMasterDict = (sTransFolder + _T("\\YourLanguage.csv"));
+	
+	VERIFY(CLocalizer::CleanupDictionary(sMasterDict, sDictPath));
+}
+
+#endif // DEBUG FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CToDoListWnd::OnUpdateRecentFileMenu(CCmdUI* pCmdUI) 
 {
@@ -12419,24 +12457,6 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);
 }
-
-#ifdef _DEBUG
-void CToDoListWnd::ShowReminderDlg()
-{
-	TDCREMINDER rem;
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	rem.dwTaskID = tdc.GetSelectedTaskID();
-	rem.pTDC = &tdc;
-	rem.bRelative = TRUE;
-	rem.dRelativeDaysLeadIn = 0;
-	rem.nRelativeFromWhen = TDCR_STARTDATE;
-	rem.bEnabled = TRUE;
-
-	m_reminders.SetReminder(rem, TRUE);
-}
-#endif
-
 
 void CToDoListWnd::OnViewSaveToImage() 
 {

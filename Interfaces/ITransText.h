@@ -28,7 +28,6 @@ enum ITT_TRANSLATEOPTION
 {
 	ITTTO_TRANSLATEONLY,
 	ITTTO_ADD2DICTIONARY,
-	ITTTO_UPPERCASE
 };
 
 /////////////////////////////////////////////////////////////////////////////////

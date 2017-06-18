@@ -52,7 +52,6 @@ public:
 	static ITT_TRANSLATEOPTION GetTranslationOption() { return s_nTranslationOption; }
 	static BOOL WantAddToDictionary();
 	static BOOL WantTranslateOnly();
-	static BOOL WantUppercase();
 
 protected:
 	CString m_sTextIn;

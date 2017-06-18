@@ -91,12 +91,12 @@ BOOL CTDLUpdateApp::InitInstance()
 				// initialize translator
 				if (!sLangFile.IsEmpty())
 				{
-					if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-					{
-						CLocalizer::Initialize(sLangFile, ITTTO_ADD2DICTIONARY);
-						CLocalizer::ForceTranslateAllUIElements(IDS_WEBUPDATE_SUCCESS, IDS_WEBUPDATE_SUCCESS + 100);
-					}
-					else
+// 					if (cmdInfo.HasOption(SWITCH_ADDTODICT))
+// 					{
+// 						CLocalizer::Initialize(sLangFile, ITTTO_ADD2DICTIONARY);
+// 						CLocalizer::ForceTranslateAllUIElements(IDS_WEBUPDATE_SUCCESS, IDS_WEBUPDATE_SUCCESS + 100);
+// 					}
+// 					else
 						CLocalizer::Initialize(sLangFile, ITTTO_TRANSLATEONLY);
 				}	
 
@@ -135,9 +135,9 @@ BOOL CTDLUpdateApp::InitInstance()
 						if (FileMisc::CopyFile(sTTPath, sTempTTPath, TRUE, TRUE))
 						{
 							params.SetOption(SWITCH_LANG, sLangFile);
-
-							if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-								params.SetOption(SWITCH_ADDTODICT);
+// 
+// 							if (cmdInfo.HasOption(SWITCH_ADDTODICT))
+// 								params.SetOption(SWITCH_ADDTODICT);
 						}
 					}
 

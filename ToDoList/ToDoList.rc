@@ -3302,6 +3302,10 @@ BEGIN
     POPUP "Debug"
     BEGIN
         MENUITEM "&End Session",                ID_DEBUGENDSESSION
+        MENUITEM SEPARATOR
+        MENUITEM "Update &Translation",         ID_DEBUG_UPDATETRANSLATION
+        MENUITEM "&Clean Dictionaries",         ID_DEBUG_CLEANDICTIONARIES
+        MENUITEM SEPARATOR
         MENUITEM "Show Language Dialog",        ID_DEBUGSHOWLANGDLG
         MENUITEM "Show Setup &Wizard...",       ID_DEBUGSHOWSETUPDLG
         MENUITEM "Show &Script Dialog...",      ID_DEBUGSHOWSCRIPTDLG
@@ -4412,7 +4416,7 @@ BEGIN
     IDS_WEEKDAYS_ABBREV     "d"
     IDS_USERTOOL_FOLDERPROMPT "Folder prompt"
     IDS_USERTOOL_TEXTPROMPT "Text prompt"
-    IDS_BADNETWORK          "'%s' could not be loaded because the network location is not currently accessible."
+    IDS_BADNETWORK          "'%s' could not be opened because the network location is not currently accessible."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5079,7 +5083,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_OA_OWNER            "Owner"
-    IDS_OA_PERCENTCOMPLETE  "% Completion"
+    IDS_OA_PERCENTCOMPLETE  "% Complete"
     IDS_OA_SCHEDULEPLUSPRIORITY "Schedule and Priority"
     IDS_OA_STARTDATE        "Start Date"
     IDS_OA_STATUS           "Status"

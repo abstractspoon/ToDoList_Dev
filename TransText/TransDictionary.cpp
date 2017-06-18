@@ -52,11 +52,6 @@ BOOL DICTITEM::WantTranslateOnly()
 	return (s_nTranslationOption == ITTTO_TRANSLATEONLY);
 }
 
-BOOL DICTITEM::WantUppercase()
-{
-	return (s_nTranslationOption == ITTTO_UPPERCASE);
-}
-
 // --------------------------------
 
 DICTITEM::DICTITEM()
@@ -518,21 +513,10 @@ BOOL DICTITEM::Translate(CString& sText)
 	ASSERT (!sText.IsEmpty() && sText == m_sTextIn);
 
 	if (m_sTextOut.IsEmpty())
-	{
-		if (WantUppercase())
-		{
-			sText.MakeUpper();
-			FixupFormatString(sText);
-			return TRUE;
-		}
-
-		// else
 		return FALSE;
-	}
 
 	// else
 	sText = m_sTextOut;
-
 	return TRUE;
 }
 
