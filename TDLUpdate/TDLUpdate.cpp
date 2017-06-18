@@ -90,15 +90,7 @@ BOOL CTDLUpdateApp::InitInstance()
 			{
 				// initialize translator
 				if (!sLangFile.IsEmpty())
-				{
-// 					if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-// 					{
-// 						CLocalizer::Initialize(sLangFile, ITTTO_ADD2DICTIONARY);
-// 						CLocalizer::ForceTranslateAllUIElements(IDS_WEBUPDATE_SUCCESS, IDS_WEBUPDATE_SUCCESS + 100);
-// 					}
-// 					else
-						CLocalizer::Initialize(sLangFile, ITTTO_TRANSLATEONLY);
-				}	
+					CLocalizer::Initialize(sLangFile, ITTTO_TRANSLATEONLY);
 
 				// previous commandline is encoded
 				CString sPrevCmdLine = Base64Coder::Decode(cmdInfo.GetOption(SWITCH_CMDLINE));
@@ -133,12 +125,7 @@ BOOL CTDLUpdateApp::InitInstance()
 
 						// note: failure to copy just means no translation
 						if (FileMisc::CopyFile(sTTPath, sTempTTPath, TRUE, TRUE))
-						{
 							params.SetOption(SWITCH_LANG, sLangFile);
-// 
-// 							if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-// 								params.SetOption(SWITCH_ADDTODICT);
-						}
 					}
 
 					if (bPreRelease)

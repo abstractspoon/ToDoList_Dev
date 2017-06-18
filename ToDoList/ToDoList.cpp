@@ -443,96 +443,6 @@ BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
 	return FALSE;
 }
 
-/*
-BOOL CToDoListApp::GetDefaultIniPath(CString& sIniPath, BOOL bCheckExists)
-{
-	CString sExePath = FileMisc::GetAppFilePath();
-	CString sExeFolder = FileMisc::GetAppFolder();
-	
-	// Preferred default location is app folder for portability
-	CString sExeIniPath = FileMisc::ReplaceExtension(sExePath, _T("ini"));
-	CString sTestIniPath;
-
-	if (FileMisc::IsFolderWritable(sExeFolder))
-	{
-		sTestIniPath = sExeIniPath;
-	}
-	else
-	{
-		FileMisc::LogText(_T("Exe folder '%s' is not writable\n"), sExeFolder);
-
-
-		// May already be in AppData/Roaming which is the fallback
-		CString sAppDataIniPath;
-		VERIFY (FileMisc::GetSpecialFilePath(CSIDL_APPDATA, APPDATAINI, sAppDataIniPath));
-
-		if (!FileMisc::FileExists(sAppDataIniPath))
-		{
-			FileMisc::LogText(_T("AppData ini '%s' does not exist\n"), sExeFolder);
-
-			// If NOT it may already have been virtualised
-			CString sVirtualisedIni, sExistingIni;
-			FileMisc::GetVirtualStorePath(sExeIniPath, sVirtualisedIni);
-
-			BOOL bHasVirtualisedIni = FileMisc::FileExists(sVirtualisedIni);
-			BOOL bHasExeIni = FileMisc::FileExists(sExeIniPath);
-			
-			// Prefer most recently modified file
-			if (bHasExeIni && bHasVirtualisedIni)
-			{
-				if (FileMisc::GetFileLastModified(sExeIniPath) > 
-					FileMisc::GetFileLastModified(sVirtualisedIni))
-				{
-					FileMisc::LogText(_T("Copying existing ini '%s' to '%s'\n"), sExeIniPath, sAppDataIniPath);
-
-					sExistingIni = sExeIniPath;
-				}
-				else
-				{
-					FileMisc::LogText(_T("Copying virtualised ini '%s' to '%s'\n"), sVirtualisedIni, sAppDataIniPath);
-
-					sExistingIni = sVirtualisedIni;
-				}
-			}
-			else if (bHasExeIni)
-			{
-				FileMisc::LogText(_T("Copying existing ini '%s' to '%s'\n"), sExeIniPath, sAppDataIniPath);
-
-				sExistingIni = sExeIniPath;
-			}
-			else if (bHasVirtualisedIni)
-			{
-				FileMisc::LogText(_T("Copying virtualised ini '%s' to '%s'\n"), sVirtualisedIni, sAppDataIniPath);
-
-				sExistingIni = sVirtualisedIni;
-			}
-
-			if (!sExistingIni.IsEmpty())
-			{
-				if (FileMisc::CreateFolderFromFilePath(sAppDataIniPath))
-				{
-					if (FileMisc::CopyFile(sExistingIni, sAppDataIniPath, FALSE, TRUE))
-					{
-						FileMisc::DeleteFile(sExistingIni, TRUE);
-					}
-				}
-			}
-		}
-		
-		sTestIniPath = sAppDataIniPath; // always
-	}
-	
-	if (ValidateIniPath(sTestIniPath, bCheckExists))
-	{
-		sIniPath = sTestIniPath;
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
-}
-*/
-
 BOOL CToDoListApp::ValidateIniPath(CString& sFilePath, BOOL bCheckExists)
 {
 	ASSERT(!::PathIsRelative(sFilePath));
@@ -935,7 +845,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	{
 		SetPreferences(bUseIni, sIniPath, TRUE);
 
-		if (!InitTranslation(/*cmdInfo, */bFirstTime, bQuiet))
+		if (!InitTranslation(bFirstTime, bQuiet))
 			return FALSE; // user cancelled -> Quit app
 
 		CPreferences prefs;
@@ -961,7 +871,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	{
 		ASSERT(!bQuiet);
 
-		if (!InitTranslation(/*cmdInfo, */bFirstTime, bQuiet))
+		if (!InitTranslation(bFirstTime, bQuiet))
 			return FALSE; // user cancelled -> Quit app
 
 		FileMisc::LogText(_T("Neither ini file nor registry settings found -> Showing setup wizard"));
@@ -1067,7 +977,7 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 	}
 }
 
-BOOL CToDoListApp::InitTranslation(/*CEnCommandLineInfo& cmdInfo, */BOOL bFirstTime, BOOL bQuiet)
+BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
 {
 	CLocalizer::Release();
 
@@ -1108,41 +1018,7 @@ BOOL CToDoListApp::InitTranslation(/*CEnCommandLineInfo& cmdInfo, */BOOL bFirstT
 	BOOL bValidLocalizer = FALSE;
 
 	if (FileMisc::FileExists(m_sLanguageFile))
-	{
-// 		if (cmdInfo.HasOption(SWITCH_ADDTODICT))
-// 		{
-// 			// 't' indicates 'translation' mode (aka 'Add2Dictionary')
-// 			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_ADD2DICTIONARY);
-// 		}
-// 		else
-		{
-			bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_TRANSLATEONLY);
-		}
-	}
-
-	// This option can be run without having a translation active
-	// but they still need a valid translator
-// 	if (cmdInfo.HasOption(SWITCH_CLEANDICTIONARY))
-// 	{
-// 		if (!bValidLocalizer)
-// 			CLocalizer::Initialize(NULL, ITTTO_ADD2DICTIONARY);
-// 
-// 		CString sDictPath;
-// 
-// 		if (cmdInfo.GetOption(SWITCH_CLEANDICTIONARY, sDictPath))
-// 		{
-// 			if (sDictPath.IsEmpty())
-// 				sDictPath = GetResourcePath(_T("Translations"));
-// 			
-// 			CString sMasterDict(GetResourcePath(_T("Translations"), _T("YourLanguage.csv")));
-// 			
-// 			CLocalizer::CleanupDictionary(sMasterDict, sDictPath);
-// 		}
-// 
-// 		// Cleanup
-// 		if (!bValidLocalizer)
-// 			CLocalizer::Release();
-// 	}
+		bValidLocalizer = CLocalizer::Initialize(m_sLanguageFile, ITTTO_TRANSLATEONLY);
 
 	// If there is no need for translation, we initialise it to NULL
 	// so that the dll won't continue to get loaded all the time

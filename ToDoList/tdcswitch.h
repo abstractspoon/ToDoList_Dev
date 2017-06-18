@@ -20,10 +20,6 @@ const LPCTSTR SWITCH_RESTART				= _T("rst");
 const LPCTSTR SWITCH_SAVEINTERMEDIATE		= _T("si");
 const LPCTSTR SWITCH_RANDOMISE				= _T("rnd");
 
-// Translations
-// const LPCTSTR SWITCH_ADDTODICT				= _T("t");
-// const LPCTSTR SWITCH_CLEANDICTIONARY		= _T("clean");
-
 // temporary
 const LPCTSTR SWITCH_SAVEUIVISINTASKLIST	= _T("z");
 

@@ -82,7 +82,7 @@ protected:
 	void DoHelp(UINT nHelpID = 0);
 	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
 	void SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
-	BOOL InitTranslation(/*CEnCommandLineInfo& cmdInfo, */BOOL bFirstTime, BOOL bQuiet);
+	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
 	void UpgradePreferences(CPreferences& prefs);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller();
