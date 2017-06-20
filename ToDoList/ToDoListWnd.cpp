@@ -6182,11 +6182,14 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 
 		if (SaveViewToImage(GetToDoCtrl(), sTempImg))
 		{
-			CString sHtmlOutput;
+			CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
 			
 			sHtmlOutput += _T("<html>\n<head>\n");
-			sHtmlOutput += _T("</head>\n<body>\n");
+			sHtmlOutput += _T("</head>\n<style>\n");
 
+			sHtmlOutput += _T("img { max-width: 100%; } \n");
+
+			sHtmlOutput += _T("</style>\n<body>\n");
 			CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
 			if (!sDate.IsEmpty() || !sTitle.IsEmpty())
