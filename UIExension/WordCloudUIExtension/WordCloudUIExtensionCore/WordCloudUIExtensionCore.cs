@@ -214,8 +214,9 @@ namespace WordCloudUIExtension
         public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
         {
 			private System.Windows.Forms.ToolTip m_ToolTip;
+            private Translator m_Trans;
 
-			public TdlCloudControl()
+			public TdlCloudControl(Translator trans)
             {
 				base.MaxFontSize = 30;
 
@@ -224,6 +225,7 @@ namespace WordCloudUIExtension
 				this.Font = new System.Drawing.Font(FontName, 10);
 
 				m_ToolTip = new System.Windows.Forms.ToolTip();
+                m_Trans = trans;
 			}
 
             protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
@@ -237,12 +239,13 @@ namespace WordCloudUIExtension
 
 				if (base.m_ItemUnderMouse != null)
 				{
-					 string tooltip = string.Format("'{0}' appears in {1} task(s)", 
+                    string format = m_Trans.Translate("'{0}' appears in {1} task(s)");
+                    string tooltip = string.Format(format, 
 													base.m_ItemUnderMouse.Word.Text,
 													base.m_ItemUnderMouse.Word.Occurrences);
 
-					 if (m_ToolTip.GetToolTip(this) != tooltip)
-						 m_ToolTip.SetToolTip(this, tooltip);
+					if (m_ToolTip.GetToolTip(this) != tooltip)
+					    m_ToolTip.SetToolTip(this, tooltip);
 				}
 				else
 				{
@@ -265,7 +268,7 @@ namespace WordCloudUIExtension
 
 		private IntPtr m_hwndParent;
         private UIExtension.TaskAttribute m_Attrib;
-		private Translator m_trans;
+		private Translator m_Trans;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -283,7 +286,7 @@ namespace WordCloudUIExtension
 		public WordCloudUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
 			m_hwndParent = hwndParent;
-			m_trans = trans;
+			m_Trans = trans;
 			m_Attrib = UIExtension.TaskAttribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
@@ -495,7 +498,7 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			this.m_WordCloud = new TdlCloudControl();
+			this.m_WordCloud = new TdlCloudControl(m_Trans);
 
 			this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
 			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
@@ -511,7 +514,7 @@ namespace WordCloudUIExtension
             this.m_AttributeLabel.Font = m_ControlsFont;
 			this.m_AttributeLabel.Location = new System.Drawing.Point(-2, LabelTop);
 			this.m_AttributeLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_AttributeLabel.Text = m_trans.Translate("&Attribute to 'track'");
+			this.m_AttributeLabel.Text = m_Trans.Translate("&Attribute to 'track'");
 			this.m_AttributeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
 			this.Controls.Add(m_AttributeLabel);
@@ -523,7 +526,7 @@ namespace WordCloudUIExtension
 			this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
 			this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
 			this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_AttributeCombo.Initialise(m_trans);
+			this.m_AttributeCombo.Initialise(m_Trans);
 
 			this.Controls.Add(m_AttributeCombo);
 
@@ -539,7 +542,7 @@ namespace WordCloudUIExtension
 			this.m_ColorsLabel.Font = m_ControlsFont;
 			this.m_ColorsLabel.Location = new System.Drawing.Point(218, LabelTop);
 			this.m_ColorsLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_ColorsLabel.Text = m_trans.Translate("&Colour Scheme");
+			this.m_ColorsLabel.Text = m_Trans.Translate("&Colour Scheme");
 			this.m_ColorsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
 			this.Controls.Add(m_ColorsLabel);
