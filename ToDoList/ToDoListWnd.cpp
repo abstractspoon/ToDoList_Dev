@@ -12106,12 +12106,29 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyClickReminderCol(WPARAM /*wp*/, LPARAM /*l
 	return 0L;
 }
 
+BOOL CToDoListWnd::GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const
+{
+	int nNumSel = aTaskIDs.GetSize();
+
+	for (int nTask = 0; nTask < nNumSel; nTask++)
+	{
+		DWORD dwTaskID = aTaskIDs[nTask];
+		int nRem = m_reminders.FindReminder(dwTaskID, &tdc);
+
+		if (nRem != -1)
+		{
+			m_reminders.GetReminder(nRem, rem);
+			return TRUE;
+		}
+	}
+
+	// no task has a reminder
+	return FALSE;
+}
+
 void CToDoListWnd::OnEditSetReminder() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CTDLSetReminderDlg dialog;
-	
-	CString sTitle = tdc.GetSelectedTaskTitle();
 	
 	CDWordArray aTaskIDs;
 	int nNumSel = tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
@@ -12120,21 +12137,8 @@ void CToDoListWnd::OnEditSetReminder()
 		return;
 	
 	// get the first reminder as a reference
-	BOOL bNewReminder = TRUE;
 	TDCREMINDER rem;
-	
-	for (int nTask = 0; nTask < nNumSel; nTask++)
-	{
-		DWORD dwTaskID = aTaskIDs[nTask];
-		int nRem = m_reminders.FindReminder(dwTaskID, &tdc);
-		
-		if (nRem != -1)
-		{
-			m_reminders.GetReminder(nRem, rem);
-			bNewReminder = FALSE;
-			break;
-		}
-	}
+	BOOL bNewReminder = !GetFirstTaskReminder(tdc, aTaskIDs, rem);
 	
 	// handle new task
 	if (bNewReminder)
@@ -12143,7 +12147,7 @@ void CToDoListWnd::OnEditSetReminder()
 		rem.pTDC = &tdc;
 	}
 
-	int nRet = dialog.DoModal(rem, bNewReminder);
+	int nRet = CTDLSetReminderDlg().DoModal(rem, bNewReminder);
 
 	switch (nRet)
 	{
@@ -12175,6 +12179,18 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 	
 	BOOL bEnable = (tdc.GetSelectedCount() > 0) && !tdc.SelectedTasksAreAllDone();
 	pCmdUI->Enable(bEnable);
+
+	if (bEnable && pCmdUI->m_pMenu)
+	{
+		CDWordArray aTaskIDs;
+		VERIFY(tdc.GetSelectedTaskIDs(aTaskIDs, TRUE));
+	
+		// get the first reminder as a reference
+		TDCREMINDER rem;
+		BOOL bNewReminder = !GetFirstTaskReminder(tdc, aTaskIDs, rem);
+
+		pCmdUI->SetText(CEnString(bNewReminder ? IDS_SETREMINDER : IDS_MODIFYREMINDER));
+	}
 }
 
 void CToDoListWnd::OnEditClearReminder() 
@@ -12196,24 +12212,13 @@ void CToDoListWnd::OnEditClearReminder()
 void CToDoListWnd::OnUpdateEditClearReminder(CCmdUI* pCmdUI) 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	BOOL bEnable = FALSE;
 	
 	// check at least one selected item has a reminder
 	CDWordArray aTaskIDs;
-	int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
+	tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
 	
-	while (nTask--)
-	{
-		DWORD dwTaskID = aTaskIDs[nTask];
-		
-		if (m_reminders.FindReminder(dwTaskID, &tdc) != -1)
-		{
-			bEnable = TRUE;
-			break;
-		}
-	}
-	
-	pCmdUI->Enable(bEnable);
+	TDCREMINDER rem;
+	pCmdUI->Enable(GetFirstTaskReminder(tdc, aTaskIDs, rem));
 }
 
 void CToDoListWnd::OnEditCleartaskicon() 

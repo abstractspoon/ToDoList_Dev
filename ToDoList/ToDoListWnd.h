@@ -642,6 +642,7 @@ protected:
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
 	void RefreshFindTasksListData();
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
+	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
