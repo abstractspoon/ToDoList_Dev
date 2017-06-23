@@ -164,12 +164,12 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTTAGS, *this, CEnString(IDS_PTDP_TAGSPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCATEGORY, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCREATEDBY, *this, CEnString(IDS_PTDP_NAMEPROMPT));
-	m_mgrPrompts.SetComboEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
-	m_mgrPrompts.SetComboEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
-	m_mgrPrompts.SetComboEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_PTDP_STATUSPROMPT));
-	m_mgrPrompts.SetComboEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
- 	m_mgrPrompts.SetComboEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_PTDP_VERSIONPROMPT));
- 	m_mgrPrompts.SetComboEditPrompt(IDC_TAGLIST, *this, CEnString(IDS_PTDP_TAGSPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_PTDP_STATUSPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
+ 	m_mgrPrompts.SetEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_PTDP_VERSIONPROMPT));
+ 	m_mgrPrompts.SetEditPrompt(IDC_TAGLIST, *this, CEnString(IDS_PTDP_TAGSPROMPT));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
