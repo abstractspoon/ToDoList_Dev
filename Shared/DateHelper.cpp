@@ -21,7 +21,8 @@ static char THIS_FILE[]=__FILE__;
 
 const double ONE_HOUR	= (1.0 / 24.0);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const double END_OF_DAY = ((24 * 60 * 60) - 1) / (24.0 * 60 * 60);
+const double END_OF_DAY = (((24 * 60 * 60) - 1) / (24.0 * 60 * 60));
+const double START_OF_DAY = (1 / (24.0 * 60 * 60));
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1199,12 +1200,17 @@ void CDateHelper::GetMonthNames(BOOL bShort, CStringArray& aMonths)
 
 COleDateTime CDateHelper::GetTimeOnly(const COleDateTime& date)
 {
-	return (date.m_dt - GetDateOnly(date));
+	double dTime = (date.m_dt - GetDateOnly(date));
+
+	if (dTime < START_OF_DAY)
+		return 0.0;
+
+	return dTime;
 }
 
 BOOL CDateHelper::DateHasTime(const COleDateTime& date)
 {
-	return (GetTimeOnly(date) > 0);
+	return (GetTimeOnly(date).m_dt > 0.0);
 }
 
 COleDateTime CDateHelper::GetDateOnly(const COleDateTime& date)
