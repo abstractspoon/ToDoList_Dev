@@ -8471,10 +8471,19 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 		sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
 		VERIFY(FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16));
 	}
-	else
+	else 
 	{
-		sImportPath = sImportFrom;
-		ASSERT(!sImportPath.IsEmpty() || !m_mgrImportExport.ImporterHasFileExtension(nImporter));
+		if (sImportFrom.IsEmpty())
+		{
+			ASSERT(!m_mgrImportExport.ImporterHasFileExtension(nImporter));
+
+			// Use path as placeholder for error handling
+			sImportPath = m_mgrImportExport.GetImporterMenuText(nImporter);
+		}
+		else
+		{
+			sImportPath = sImportFrom;
+		}
 	}
 
 	// load/import tasks
@@ -8596,7 +8605,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 	if (nMessageID)
 	{
-		AfxMessageBox(CEnString(nMessageID, sImportFrom), (MB_OK | nIcon));
+		AfxMessageBox(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
 		return FALSE;
 	}
 

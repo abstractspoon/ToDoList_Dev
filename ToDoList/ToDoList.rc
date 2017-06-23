@@ -4495,7 +4495,7 @@ BEGIN
     IDS_SB_FILEVERSION_TIP  "Tasklist file version"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
     IDS_SB_FILEPATH_TIP     "Active tasklist"
-    IDS_IMPORTFILE_CANTOPEN "The file '%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
+    IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
 END
 
@@ -4658,7 +4658,7 @@ BEGIN
     IDS_FILTER_HIDEDONE     "Hide completed tasks"
     IDS_FILTER_HIDECOLLAPSED "Hide collapsed tasks (List View)"
     IDS_QUICKFIND           "Quick Find"
-    IDS_IMPORTFILE_NOTASKS  "The file '%s' contained no tasks which could be imported."
+    IDS_IMPORTFILE_NOTASKS  "'%s' contained no tasks which could be imported."
 END
 
 STRINGTABLE DISCARDABLE 
