@@ -3017,12 +3017,24 @@ BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CStr
 		if (HasStyle(TDCS_SHOWDATESINISO))
 			dwFmt |= DHFD_ISO;
 		
-		if (WantDrawColumnTime(nDate, bCustomWantsTime) && CDateHelper::DateHasTime(date))
-		{
+		BOOL bWantDrawTime = WantDrawColumnTime(nDate, bCustomWantsTime);
+
+		if (bWantDrawTime)
 			dwFmt |= DHFD_TIME | DHFD_NOSEC;
-		}
 		
-		return CDateHelper::FormatDate(date, dwFmt, sDate, sTime, sDow);
+		if (CDateHelper::FormatDate(date, dwFmt, sDate, sTime, sDow))
+		{
+			// Substitute 'calculated' time if none supplied
+			if (bWantDrawTime && sTime.IsEmpty())
+			{
+				int nHour = ((nDate == TDCD_DUE) ? 23 : 0);
+				int nMin = ((nDate == TDCD_DUE) ? 59 : 0);
+
+				sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, HasStyle(TDCS_SHOWDATESINISO));
+			}
+
+			return TRUE;
+		}
 	}
 	
 	// else
@@ -3049,7 +3061,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	// If there's too little space even for the date then 
 	// switch to left alignment so that the month and day are visible
 	BOOL bWantDrawTime = FALSE, bWantDrawDOW = FALSE;
-	int nMaxTime = 0, nMaxDOW = 0;
+	int nMaxTime = 0;
 	int nDateAlign = DT_RIGHT;
 
 	if (nReqWidth > rect.Width())
@@ -3059,17 +3071,16 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	else
 	{
 		int nSpace = pDC->GetTextExtent(_T(" ")).cx;
-
-		nReqWidth += nSpace;
 		nMaxDate += nSpace;
 
 		// Check for time
-		if (WantDrawColumnTime(nDate, bCustomWantsTime))
+		if (!sTime.IsEmpty())
 		{
-			nMaxTime = (pDC->GetTextExtent(sTimeMax).cx + nSpace);
+			nMaxTime = pDC->GetTextExtent(sTimeMax).cx;
 
-			if ((nReqWidth + nMaxTime) < rect.Width())
+			if ((nReqWidth + nSpace + nMaxTime) < rect.Width())
 			{	
+				nMaxTime += nSpace;
 				nReqWidth += nMaxTime;
 				bWantDrawTime = TRUE;
 			}
@@ -3078,10 +3089,11 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		// Check for day of week
 		if (!sDow.IsEmpty())
 		{
-			nMaxDOW = (CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE) + nSpace);
+			int nMaxDOW = CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE);
 
-			if ((nReqWidth + nMaxDOW) < rect.Width())
+			if ((nReqWidth + nSpace + nMaxDOW) < rect.Width())
 			{
+				nMaxDOW += nSpace;
 				nReqWidth += nMaxDOW;
 				bWantDrawDOW = TRUE;
 			}
@@ -3095,7 +3107,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		crText = GraphicsMisc::Lighter(crText, 0.5);
 	}
 
-	// We always draw from the right and with each component 
+	// We always draw FROM THE RIGHT and with each component 
 	// aligned to the right
 	CRect rDraw(rect);
 
@@ -3120,13 +3132,8 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		// in a lighter colour to indicate it wasn't user-set
 		COLORREF crTime(crText);
 		
-		if (sTime.IsEmpty())
+		if (!CDateHelper::DateHasTime(date))
 		{
-			int nHour = ((nDate == TDCD_DUE) ? 23 : 0);
-			int nMin = ((nDate == TDCD_DUE) ? 59 : 0);
-			
-			sTime = CTimeHelper::FormatClockTime(nHour, nMin, 0, FALSE, HasStyle(TDCS_SHOWDATESINISO));
-
 			// Note: If we've already calculated it above we need not again
 			if (!bCalculated && !Misc::IsHighContrastActive())
 			{
@@ -4713,27 +4720,27 @@ void CTDLTaskCtrlBase::OnEndRebuild()
 
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
 {
-	// basic date string
-	COleDateTime date(2000, 12, 31, 23, 59, 0);
-	DWORD dwFlags = 0;
-	
-	if (HasStyle(TDCS_SHOWDATESINISO))
-		dwFlags |= DHFD_ISO;
-	
-	// time component
-	if (WantDrawColumnTime(nDate, bCustomWantsTime))
-		dwFlags |= DHFD_TIME | DHFD_NOSEC;
-	
-	CString sDate = CDateHelper::FormatDate(date, dwFlags);
-	int nWidth = pDC->GetTextExtent(sDate).cx;
-	
-	// add longest day of week if required
-	if (HasStyle(TDCS_SHOWWEEKDAYINDATES))
+	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);
+	CString sDateMax, sTimeMax, sDow;
+
+	FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDow, bCustomWantsTime);
+
+	// Always want date
+	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+	int nWidth = pDC->GetTextExtent(sDateMax).cx;
+
+	if (!sTimeMax.IsEmpty())
 	{
-		nWidth += pDC->GetTextExtent(" ").cx; // spacer
-		nWidth += CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE); // short day
+		nWidth += nSpace;
+		nWidth += pDC->GetTextExtent(sTimeMax).cx;
 	}
-	
+
+	if (!sDow.IsEmpty())
+	{
+		nWidth += nSpace;
+		nWidth += CDateHelper::CalcLongestDayOfWeekName(pDC, TRUE);
+	}
+
 	return nWidth;
 }
 

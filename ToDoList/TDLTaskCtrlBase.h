@@ -398,7 +398,6 @@ protected:
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
 	int RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) const;
 	CFont* GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns = TRUE);
-	void RecalcColumnWidth(TDC_COLUMN nColID, CDC* pDC);
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	void UpdateHeaderSorting();
