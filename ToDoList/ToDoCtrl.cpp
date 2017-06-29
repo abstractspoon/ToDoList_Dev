@@ -10356,7 +10356,15 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 				IMPLEMENT_UNDO_EDIT(m_data);
 			
 				if (m_data.SetTaskFileRefs(pData->dwTaskID, aFiles, TRUE) == SET_CHANGE)
+				{
 					SetModified(TRUE, TDCA_FILEREF, pData->dwTaskID);
+
+					if (GetSelectedCount() == 1)
+					{
+						GetSelectedTaskFileRefs(m_aFileRefs, FALSE);
+						m_cbFileRef.SetFileList(m_aFileRefs);
+					}
+				}
 			}
 			else
 			{
