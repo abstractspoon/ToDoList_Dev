@@ -424,14 +424,15 @@ BOOL CRulerRichEdit::ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl)
 BOOL CRulerRichEdit::PasteSimple()
 {
 	CStringArray aFiles;
+	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
 
-	switch (CClipboard().GetDropFilePaths(aFiles))
+	if (nNumFiles == -1)
 	{
-	case -1:
 		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
-
-	case 0:
+	}
+	else if (nNumFiles == 0)
+	{
 		return PasteSimpleText(s_bPasteSourceUrls);
 	}
 
@@ -442,19 +443,25 @@ BOOL CRulerRichEdit::PasteSimple()
 BOOL CRulerRichEdit::Paste()
 {
 	CStringArray aFiles;
-	
-	switch (CClipboard().GetDropFilePaths(aFiles))
+	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
+
+	if (nNumFiles == -1)
 	{
-	case -1:
 		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
+	}
+	else if (nNumFiles == 0)
+	{
+		CWaitCursor cursor;
 
-	case 0:
+		// If there isn't Rich Text on the clipboard...
+		if (!CClipboard::HasFormat(CBF_RTF) && 
+			!CClipboard::HasFormat(CBF_RETEXTOBJ) && 
+			!CClipboard::HasFormat(CBF_EMBEDDEDOBJ))
 		{
-			CWaitCursor cursor;
-
-			// If the clipboard contains a bitmap, copy it and reduce its colour depth to 8-bit. 
-			// This also allows us to prevent richedit's default resizing by using paste special
+			// If the clipboard contains a bitmap, copy it and reduce its 
+			// colour depth to 8-bit, and use 'paste special' to prevent 
+			// richedit's default resizing
 			CString sSourceUrl;
 
 			if (CClipboard::HasFormat(CF_BITMAP))
@@ -469,55 +476,52 @@ BOOL CRulerRichEdit::Paste()
 				{
 					CEnBitmap bmp;
 
-					if (!bmp.CopyImage(cb.GetBitmap()))
-						return FALSE;
+					if (bmp.CopyImage(cb.GetBitmap()) && cb.Close())
+					{
+						bClipboardSaved = cbb.Backup();
+						ASSERT(bClipboardSaved);
 
-					bClipboardSaved = cbb.Backup();
-					ASSERT(bClipboardSaved);
-
-					if (!bmp.CopyToClipboard(GetSafeHwnd(), 8))
-						return FALSE;
+						if (!bmp.CopyToClipboard(GetSafeHwnd(), 8))
+						{
+							ASSERT(0);
+							bClipboardSaved = FALSE;
+						}
+					}
 				}
 
 				PasteSpecial(CF_BITMAP);
 
 				// restore the clipboard if necessary
 				if (bClipboardSaved)
-				{
 					VERIFY(cbb.Restore());
 
-					// If we overwrote the clipboard we have to paste source URLs manually
-					AppendSourceUrls(sSourceUrl);
-				}
+				AppendSourceUrls(sSourceUrl);
+				return TRUE;
 			}
-			else
+
+			// if there is HTML convert it to RTF and insert it
+			CString sHtml;
+
+			if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
 			{
-				// if there is HTML convert it to RTF and insert it
-				CString sHtml;
+				// Always set this to make sure it is current
+				m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
 
-				if (GetClipboardHtmlForPasting(sHtml, sSourceUrl))
+				CString sRTF;
+
+				if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
 				{
-					CWaitCursor cursor;
+					VERIFY(SetTextEx(sRTF));
 
-					// Always set this to make sure it is current
-					m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
-
-					CString sRTF;
-
-					if (m_rtfHtml.ConvertHtmlToRtf((LPCSTR)(LPCTSTR)sHtml, NULL, sRTF, NULL))
-					{
-						VERIFY(SetTextEx(sRTF));
-						AppendSourceUrls(sSourceUrl);
-					}
-				}
-				else
-				{
-					// Default paste
-					CUrlRichEditCtrl::Paste(s_bPasteSourceUrls);
+					AppendSourceUrls(sSourceUrl);
+					return TRUE;
 				}
 			}
-
 		}
+
+		// Fallback and all else -> Default paste
+		CUrlRichEditCtrl::Paste(s_bPasteSourceUrls);
+	
 		return TRUE;
 	}
 	
