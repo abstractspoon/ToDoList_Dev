@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,997,6
+ FILEVERSION 7,1,997,7
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 997, 6\0"
+            VALUE "FileVersion", "7, 1, 997, 7\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
             VALUE "LegalTrademarks", "\0"
@@ -1299,16 +1299,22 @@ FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "",IDC_STATIC,7,31,221,52
     GROUPBOX        "",IDC_STATIC,7,91,221,52
-    CONTROL         "&At this date and time",IDC_ABSOLUTE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,10,31,105,10
-    CONTROL         "&Relative to due/start date",IDC_RELATIVE,"Button",BS_AUTORADIOBUTTON,10,91,160,10
+    CONTROL         "&At this date and time",IDC_ABSOLUTE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,10,31,105,10
+    CONTROL         "&Relative to due/start date",IDC_RELATIVE,"Button",
+                    BS_AUTORADIOBUTTON,10,91,160,10
     LTEXT           "&Date",IDC_STATIC,17,48,85,8
-    CONTROL         "DateTimePicker1",IDC_ABSOLUTEDATE,"SysDateTimePick32",DTS_RIGHTALIGN | WS_TABSTOP,17,60,97,13
+    CONTROL         "DateTimePicker1",IDC_ABSOLUTEDATE,"SysDateTimePick32",
+                    DTS_RIGHTALIGN | WS_TABSTOP,17,60,97,13
     LTEXT           "&Time",IDC_STATIC,122,48,87,8
-    COMBOBOX        IDC_ABSOLUTETIME,122,60,97,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_ABSOLUTETIME,122,60,97,30,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "R&emind me ",IDC_STATIC,17,108,84,8
-    COMBOBOX        IDC_RELATIVELEADIN,17,120,97,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_RELATIVELEADIN,17,120,97,30,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Before this task",IDC_STATIC,122,108,84,8
-    COMBOBOX        IDC_RELATIVEFROMWHERE,122,120,97,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_RELATIVEFROMWHERE,122,120,97,30,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,122,195,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,178,195,50,14
     LTEXT           "&Play this sound",IDC_STATIC,7,151,221,8
