@@ -118,11 +118,11 @@ UINT CDragDropMgr::ProcessMessage(const MSG* pMsg, BOOL bAllowNcDrag)
 
 		case WM_CONTEXTMENU:
 		case WM_KILLFOCUS:
-			bAbort = TRUE;
+			bAbort = (m_iState != NONE);
 			break;
 
 		case WM_ENABLE:
-			bAbort = (pMsg->wParam == FALSE);
+			bAbort = ((m_iState != NONE) && (pMsg->wParam == FALSE));
 			break;
 		}
 
