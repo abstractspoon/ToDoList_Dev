@@ -20,7 +20,7 @@ public:
 
 	RE_PASTE GetLinkOption() const { return (RE_PASTE)m_nLinkOption; }
 	BOOL GetMakeLinkOptionDefault() const { return m_bMakeDefault; }
-	BOOL GetReduceImageColors() const { return m_bReduceImageColors; }
+	BOOL GetReduceImageColors() const { return (m_bReduceImageColors && (m_nLinkOption == REP_ASIMAGE)); }
 
 protected:
 // Dialog Data
