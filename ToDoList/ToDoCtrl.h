@@ -701,6 +701,7 @@ protected:
 	int CheckWantSubtasksCompleted();
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
+	BOOL ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited);
 	int GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) const;
 	CString GetSelectedTaskFileRef(int nFile, BOOL bFullPath) const;
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
