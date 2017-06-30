@@ -618,54 +618,43 @@ HRESULT CUrlRichEditCtrl::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWO
 {
 	if (!fDrag) // allowable dest effects 
 	{
-		BOOL bEnable = !(GetStyle() & ES_READONLY) && IsWindowEnabled();
+		BOOL bEnable = (!(GetStyle() & ES_READONLY) && IsWindowEnabled());
 		
 		if (!bEnable)
 		{
 			*pdwEffect = DROPEFFECT_NONE;
 		}
+		else if (CMSOutlookHelper::IsOutlookObject(m_lpDragObject))
+		{
+			*pdwEffect = DROPEFFECT_LINK;
+		}
 		else
 		{
-			DWORD dwEffect = DROPEFFECT_NONE;
+			CLIPFORMAT cf = GetAcceptableClipFormat(m_lpDragObject, 0);
 
-			// test for outlook object first
-			if (CMSOutlookHelper::IsOutlookObject(m_lpDragObject))
+			switch (cf)
 			{
-				dwEffect = DROPEFFECT_LINK;
-			}
-			else
-			{
-				CLIPFORMAT cf = GetAcceptableClipFormat(m_lpDragObject, 0);
-
-				switch (cf)
-				{
-				case CF_HDROP:
-					// can't return DROPEFFECT_LINK else we don't
-					// get notified of the file drop (go figure)
-					dwEffect = DROPEFFECT_MOVE;
-					break;
+			case CF_HDROP:
+				// can't return DROPEFFECT_LINK else we don't
+				// get notified of the file drop (go figure)
+				*pdwEffect = DROPEFFECT_MOVE;
+				break;
 
 #ifndef _UNICODE
-				case CF_TEXT:
+			case CF_TEXT:
 #else
-				case CF_UNICODETEXT:
+			case CF_UNICODETEXT:
 #endif
-					{
-						BOOL bCtrl = Misc::HasFlag(grfKeyState, MK_CONTROL);
-						dwEffect = (bCtrl ? DROPEFFECT_COPY : DROPEFFECT_MOVE);
-					}
-					break;
-
-				default:
-					if (cf != 0)
-						dwEffect = DROPEFFECT_COPY;
-					break;
+				{
+					if (Misc::HasFlag(grfKeyState, MK_CONTROL))
+						*pdwEffect = DROPEFFECT_COPY;
+					else
+						*pdwEffect = DROPEFFECT_MOVE;
 				}
+				break;
 			}
-			
-			*pdwEffect = dwEffect;
 		}
-		
+
 		// keep track of cursor
 		if (*pdwEffect != DROPEFFECT_NONE)
 			TrackDragCursor();
