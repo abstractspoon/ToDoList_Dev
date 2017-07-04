@@ -1175,19 +1175,6 @@ CXmlItem* CTaskFile::GetCustomAttributeDef(const CString& sCustID)
 const CXmlItem* CTaskFile::GetCustomAttributeDef(const CString& sCustID) const
 {
 	return const_cast<CTaskFile*>(this)->GetCustomAttributeDef(sCustID);
-// 	const CXmlItem* pXIAttribDef = GetItem(TDL_CUSTOMATTRIBDEFS);
-// 	
-// 	while (pXIAttribDef)
-// 	{
-// 		if (sCustID == pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID))
-// 			return pXIAttribDef;
-// 		
-// 		// next sibling
-// 		pXIAttribDef = pXIAttribDef->GetSibling();
-// 	}
-// 	
-// 	// not found 
-// 	return NULL;
 }
 
 // native version
@@ -3651,14 +3638,6 @@ double CTaskFile::GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const
 	return GetTaskDouble(hTask, sTimeItem);
 }
 
-// CString CTaskFile::GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey) const
-// {
-// 	const CXmlItem* pXITask = NULL;
-// 	GET_TASK(pXITask, hTask, NULLSTRING);
-// 
-// 	return pXITask->GetItemValue(sAttrib, sKey);
-// }
-
 ////////////////////////////////////////////////////////////////////
 
 bool CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey)
@@ -3668,26 +3647,6 @@ bool CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, con
 
 	return (pXITask->DeleteItem(sAttrib, sKey) != FALSE);
 }
-
-// bool CTaskFile::SetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey, const CString& sValue)
-// {
-// 	ASSERT(!sAttrib.IsEmpty());
-// 
-// 	if (sAttrib.IsEmpty())
-// 		return false;
-// 
-// 	CXmlItem* pXITask = NULL;
-// 	GET_TASK(pXITask, hTask, false);
-// 
-// 	if (sKey.IsEmpty())
-// 		return (NULL != pXITask->SetItemValue(sAttrib, sValue));
-// 
-// 	// else
-// 	CXmlItem* pXItem = pXITask->GetAddItem(sAttrib);
-// 	ASSERT (pXItem);
-// 
-// 	return (NULL != pXItem->SetItemValue(sKey, sValue));
-// }
 
 bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& date, 
 							const CString& sDateStringItem, BOOL bCalculated)
