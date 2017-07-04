@@ -2252,6 +2252,35 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID) con
 	return NULLSTRING;
 }
 
+LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const
+{
+	CString sValue(GetTaskCustomAttributeData(hTask, szID));
+
+	if (sValue && bDisplay)
+	{
+		const CXmlItem* pXIAttribDef = GetCustomAttributeDef(szID);
+		ASSERT(pXIAttribDef);
+
+		if (pXIAttribDef)
+		{
+			DWORD dwAttribType = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
+
+			switch (dwAttribType & TDCCA_DATAMASK)
+			{
+			case TDCCA_DATE:
+				sValue = TDCCADATA(sValue).FormatAsDate();
+				break;
+
+// 			case TDCCA_TIMEPERIOD:
+// 				sValue = TDCCADATA(sValue).FormatAsTimePeriod();
+// 				break;
+			}
+		}
+	}
+
+	return sValue;
+}
+
 LPCTSTR CTaskFile::GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const
 {
 	const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);

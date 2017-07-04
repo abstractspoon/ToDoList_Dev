@@ -206,6 +206,7 @@ public:
 	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
+	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 
