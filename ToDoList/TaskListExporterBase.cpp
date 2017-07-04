@@ -192,7 +192,7 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 				
 				for (int nCust = 0; nCust < nNumCust; nCust++)
 				{
-					if (_ttoi(pTasks->GetCustomAttributeValue(nCust, TDL_CUSTOMATTRIBENABLED)))
+					if (pTasks->IsCustomAttributeEnabled(nCust))
 					{
 						// combine the label and ID so we can import later
 						CString sLabel;
@@ -548,7 +548,7 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 
 	for (int nCust = 0; nCust < nNumCust; nCust++)
 	{
-		if (_ttoi(pTasks->GetCustomAttributeValue(nCust, TDL_CUSTOMATTRIBENABLED)))
+		if (pTasks->IsCustomAttributeEnabled(nCust))
 		{
 			// always export
 			CString sLabel = pTasks->GetCustomAttributeLabel(nCust);
