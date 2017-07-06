@@ -244,7 +244,11 @@ namespace FileMisc
 	CString GetFullPath(const CString& sFilePath, const CString& sRelativeToFolder = GetCwd());
 	CString& MakeFullPath(CString& sFilePath, const CString& sRelativeToFolder = GetCwd());
 
-	CString ResolveShortcut(LPCTSTR szShortcut);
+	BOOL ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath);
+	BOOL CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut, 
+						LPCTSTR szTargetArgs = NULL, LPCTSTR szDescription = NULL,
+						int iShowMode = SW_SHOW, LPCTSTR szCurDir = NULL,
+						LPCTSTR szIconFile = NULL, int iIconIndex = -1);
 	CString GetLongPathName(LPCTSTR szShortPath);
 	BOOL AddToFileName(CString& sFilePath, LPCTSTR szExtra, BOOL bSuffix = TRUE);
 	BOOL AddToFileName(CString& sFilePath, int nSuffix);

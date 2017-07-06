@@ -2130,8 +2130,8 @@ int FileMisc::CompareContents(const CString& sPath1, const CString& sPath2)
 		return 1;
 	}
 
-	DWORD dwLen1 = file1.GetLength();
-	DWORD dwLen2 = file2.GetLength();
+	DWORD dwLen1 = (DWORD)file1.GetLength();
+	DWORD dwLen2 = (DWORD)file2.GetLength();
 
 	if (dwLen1 < dwLen2)
 	{
@@ -2268,26 +2268,120 @@ BOOL FileMisc::AddToFileName(CString& sFilePath, int nSuffix)
 	return AddToFileName(sFilePath, Misc::Format(nSuffix), TRUE);
 }
 
-CString FileMisc::ResolveShortcut(LPCTSTR szShortcut)
+BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut, 
+							  LPCTSTR szTargetArgs, LPCTSTR szDescription,
+							  int iShowMode, LPCTSTR szCurDir,
+							  LPCTSTR szIconFile, int iIconIndex)
 {
+	if (Misc::IsEmpty(szTargetFile) || Misc::IsEmpty(szShortcut))
+		return E_INVALIDARG;
+
+	IShellLink* pShellLink = NULL;
+	HRESULT hr = S_FALSE;
+
+    if (SUCCEEDED(CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, 
+									IID_IShellLink, (LPVOID*)&pShellLink)))
+	{
+		WCHAR wsz[MAX_PATH+1] = { 0 };	// buffer for Unicode string
+
+		while (TRUE)
+		{
+			if (FAILED(pShellLink->SetPath(szTargetFile)))
+				break;
+
+			if (!Misc::IsEmpty(szTargetArgs))
+			{
+#ifndef _UNICODE
+				MultiByteToWideChar(CP_ACP, 0, szTargetArgs, -1, wsz, MAX_PATH);
+#else
+				lstrcpy(wsz, szTargetArgs);
+#endif
+				if (FAILED(pShellLink->SetArguments(wsz)))
+					break;
+			}
+
+			if (!Misc::IsEmpty(szDescription))
+			{
+#ifndef _UNICODE
+				MultiByteToWideChar(CP_ACP, 0, szDescription, -1, wsz, MAX_PATH);
+#else
+				lstrcpy(wsz, szDescription);
+#endif
+				if (FAILED(pShellLink->SetDescription(wsz)))
+					break;
+			}
+
+			if (iShowMode > 0)
+			{
+				if (FAILED(pShellLink->SetShowCmd(iShowMode)))
+					break;
+			}
+
+			if (!Misc::IsEmpty(szCurDir))
+			{
+#ifndef _UNICODE
+				MultiByteToWideChar(CP_ACP, 0, szCurDir, -1, wsz, MAX_PATH);
+#else
+				lstrcpy(wsz, szCurDir);
+#endif
+				if (FAILED(pShellLink->SetWorkingDirectory(wsz)))
+					break;
+			}
+
+			if (!Misc::IsEmpty(szIconFile) && (iIconIndex >= 0))
+			{
+#ifndef _UNICODE
+				MultiByteToWideChar(CP_ACP, 0, szIconFile, -1, wsz, MAX_PATH);
+#else
+				lstrcpy(wsz, szIconFile);
+#endif
+				if (FAILED(pShellLink->SetIconLocation(wsz, iIconIndex)))
+					break;
+			}
+
+			/* Use the IPersistFile object to save the shell link */
+			IPersistFile* pPersistFile = NULL;
+			hr = pShellLink->QueryInterface(IID_IPersistFile, (LPVOID*)&pPersistFile);
+
+			if (SUCCEEDED(hr))
+			{
+#ifndef _UNICODE
+				MultiByteToWideChar(CP_ACP, 0, szShortcut, -1, wsz, MAX_PATH);
+#else
+				lstrcpy(wsz, szShortcut);
+#endif
+
+				hr = pPersistFile->Save(wsz, TRUE);
+				pPersistFile->Release();
+			}
+
+			break; // always
+		}
+
+		pShellLink->Release();
+	}
+
+	return SUCCEEDED(hr);
+}
+
+BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
+{
+	sTargetPath.IsEmpty();
+
 	// start by checking its a valid file
 	if (!FileExists(szShortcut))
-		return "";
+		return FALSE;
 
     CoInitialize(NULL);
 
-	HRESULT hResult;
-	IShellLink*	psl;
-	CString sTarget(szShortcut);
-	
-	hResult = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
-								IID_IShellLink, (LPVOID*)&psl);
+	IShellLink*	pShellLink = NULL;
+	HRESULT hResult = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
+										IID_IShellLink, (LPVOID*)&pShellLink);
 	
 	if (SUCCEEDED(hResult))
 	{
-		LPPERSISTFILE ppf;
-		
-		hResult = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
+		LPPERSISTFILE pPersistFile = NULL;
+		hResult = pShellLink->QueryInterface(IID_IPersistFile, (LPVOID*)&pPersistFile);
 
 		if (SUCCEEDED(hResult))
 		{
@@ -2297,38 +2391,38 @@ CString FileMisc::ResolveShortcut(LPCTSTR szShortcut)
 #else
 			lstrcpy(wsz, szShortcut);
 #endif
-			hResult = ppf->Load(wsz, STGM_READ);
-			
+			hResult = pPersistFile->Load(wsz, STGM_READ);
+
 			if (SUCCEEDED(hResult))
 			{
-				hResult = psl->Resolve(NULL, SLR_ANY_MATCH | SLR_NO_UI);
+				hResult = pShellLink->Resolve(NULL, SLR_ANY_MATCH | SLR_NO_UI);
 
 				if (SUCCEEDED(hResult))
 				{
 					TCHAR szPath[MAX_PATH+1] = { 0 };
 					WIN32_FIND_DATA wfd;
-//fabio_2005
+					//fabio_2005
 #if _MSC_VER >= 1400
 					_tcscpy_s(szPath, szShortcut);
 #else
 					_tcscpy(szPath, szShortcut);
 #endif
-					hResult = psl->GetPath(szPath, MAX_PATH, &wfd, SLGP_SHORTPATH);
+					hResult = pShellLink->GetPath(szPath, MAX_PATH, &wfd, SLGP_SHORTPATH);
 
 					if (SUCCEEDED(hResult))
-						sTarget = CString(szPath);
+						sTargetPath = szPath;
 				}
 			}
-		
-			ppf->Release();
+
+			pPersistFile->Release();
 		}
-		
-		psl->Release();
+
+		pShellLink->Release();
 	}
 
 	CoUninitialize();
 	
-	return sTarget;
+	return !sTargetPath.IsEmpty();
 }
 
 

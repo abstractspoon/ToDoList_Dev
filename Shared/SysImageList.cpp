@@ -134,7 +134,9 @@ int CSysImageList::GetFileImageIndex(LPCTSTR szFilePath, BOOL bFailUnKnown)
 
 			// if no extension assume a folder
 			if (sExt.IsEmpty() || sExt == _T("."))
+			{
 				nIndex = GetRemoteFolderImage();
+			}
 			else 
 			{
 				nIndex = GetImageIndex(sExt);
@@ -154,14 +156,17 @@ int CSysImageList::GetFileImageIndex(LPCTSTR szFilePath, BOOL bFailUnKnown)
 			else if (sExt.CompareNoCase(_T(".lnk")) == 0)
 			{
 				// get icon for item pointed to
-				CString sReferencedFile = FileMisc::ResolveShortcut(szFilePath);
-
-				if (sReferencedFile.IsEmpty()) // not a 'real' file/folder -> let the shell do the work
-					nIndex = GetImageIndex(szFilePath); 
-				else
+				CString sReferencedFile;
+				
+				if (FileMisc::ResolveShortcut(szFilePath, sReferencedFile))
 				{
 					// RECURSIVE call to handle remote paths, etc
 					nIndex = GetFileImageIndex(sReferencedFile); 
+				}
+				else
+				{
+					// not a 'real' file/folder -> let the shell do the work
+					nIndex = GetImageIndex(szFilePath); 
 				}
 			}
 			else
