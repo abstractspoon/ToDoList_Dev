@@ -373,6 +373,9 @@
     <ClCompile Include="ToDoCtrlDataUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PreferencesTaskDef2Page.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -808,6 +811,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tdccustomattribdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesTaskDef2Page.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

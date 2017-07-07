@@ -205,6 +205,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="PreferencesTaskDef2Page.cpp" />
     <ClCompile Include="PreferencesTaskDefPage.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -594,6 +595,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="PreferencesMultiUserPage.h" />
     <ClInclude Include="PreferencesShortcutsPage.h" />
     <ClInclude Include="PreferencesTaskCalcPage.h" />
+    <ClInclude Include="PreferencesTaskDef2Page.h" />
     <ClInclude Include="PreferencesTaskDefPage.h" />
     <ClInclude Include="PreferencesTaskPage.h" />
     <ClInclude Include="PreferencesToolPage.h" />

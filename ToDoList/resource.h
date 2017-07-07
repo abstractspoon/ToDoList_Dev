@@ -51,6 +51,7 @@
 #define IDD_PREFTASKDEF_PAGE            156
 #define IDD_PREFUITASKLISTCOLORS_PAGE   157
 #define IDD_PREFEXPORT_PAGE             158
+#define IDD_PREFTASKDEF2_PAGE           159
 #define IDD_PREFMULTIUSER_PAGE          180
 #define IDD_PRINT_DIALOG                182
 #define IDD_TASKSELECTION_DIALOG        183

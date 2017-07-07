@@ -10,6 +10,7 @@
 #include "preferencesgenpage.h"
 #include "preferencestaskpage.h"
 #include "preferencestaskdefpage.h"
+#include "preferencestaskdef2page.h"
 #include "preferencestoolpage.h"
 #include "preferencesuivisibilitypage.h"
 #include "preferencesuipage.h"
@@ -42,6 +43,7 @@ enum
 	PREFPAGE_TASK, 
 	PREFPAGE_TASKCALC, 
 	PREFPAGE_TASKDEF, 
+	PREFPAGE_TASKDEF2, 
 	PREFPAGE_IMPEXP, 
 	PREFPAGE_TOOL, 
 	PREFPAGE_SHORTCUT 
@@ -144,9 +146,11 @@ public:
 	// CPreferencesTaskDefPage
 	void GetDefaultTaskAttributes(TODOITEM& tdiDefault) const;
 	BOOL GetDefaultReminder(UINT& nMinutes, BOOL& bBeforeDue) const { return m_pageTaskDef.GetReminder(nMinutes, bBeforeDue); }
-	int GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef.GetParentAttribsUsed(mapAttribs, bUpdateAttrib); }
+
+	// CPreferencesTaskDef2Page
+	int GetParentAttribsUsed(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef2.GetParentAttribsUsed(mapAttribs, bUpdateAttrib); }
 	int GetDefaultListItems(TDCAUTOLISTDATA& tld) const;
-	BOOL GetDefaultListIsReadonly(TDC_ATTRIBUTE nList) const { return m_pageTaskDef.GetListIsReadonly(nList); }
+	BOOL GetDefaultListIsReadonly(TDC_ATTRIBUTE nList) const { return m_pageTaskDef2.GetListIsReadonly(nList); }
 
 	// CPreferencesTaskPage
 	BOOL GetTrackNonActiveTasklists() const { return m_pageTask.GetTrackNonActiveTasklists(); }
@@ -296,6 +300,7 @@ protected:
 	CPreferencesTaskPage m_pageTask;
 	CPreferencesTaskCalcPage m_pageTaskCalc;
 	CPreferencesTaskDefPage m_pageTaskDef;
+	CPreferencesTaskDef2Page m_pageTaskDef2;
 	CPreferencesToolPage m_pageTool;
 	CPreferencesShortcutsPage m_pageShortcuts;
 	CPreferencesMultiUserPage m_pageMultiUser;

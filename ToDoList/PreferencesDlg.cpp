@@ -96,6 +96,7 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
 // default priority colors
 const COLORREF PRIORITYLOWCOLOR = RGB(30, 225, 0);
 const COLORREF PRIORITYHIGHCOLOR = RGB(255, 0, 0);
@@ -131,6 +132,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	CPreferencesDlgBase::AddPage(&m_pageTask);
 	CPreferencesDlgBase::AddPage(&m_pageTaskCalc);
 	CPreferencesDlgBase::AddPage(&m_pageTaskDef);
+	CPreferencesDlgBase::AddPage(&m_pageTaskDef2);
 	CPreferencesDlgBase::AddPage(&m_pageExport);
 	CPreferencesDlgBase::AddPage(&m_pageTool);
 	CPreferencesDlgBase::AddPage(&m_pageShortcuts);
@@ -233,10 +235,9 @@ BOOL CPreferencesDlg::OnInitDialog()
 	AddPage(&m_pageTask,				IDS_PREF_TIMETRACK,			IDC_TRACKGROUP);
 	AddPage(&m_pageTask,				IDS_PREF_TASKTIME,			IDC_TIMEGROUP);
 	AddPage(&m_pageTaskCalc,			IDS_PREF_TASKCALCS);
-	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEF,			IDC_TOPOFPAGE);
-	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEFATTRIB,		IDC_DEFGROUP);
-	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEFINHERIT,	IDC_INHERITGROUP);
-	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEFLISTS,		IDC_DROPLISTGROUP);
+	AddPage(&m_pageTaskDef,				IDS_PREF_TASKDEFATTRIB,		IDC_TOPOFPAGE);
+	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFINHERIT,	IDC_TOPOFPAGE);
+	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFLISTS,		IDC_DROPLISTGROUP);
 	AddPage(&m_pageExport,				IDS_PREF_EXPORT);
 	AddPage(&m_pageTool,				IDS_PREF_TOOLS);
 	AddPage(&m_pageShortcuts,			IDS_PREF_SHORTCUT); 
@@ -460,12 +461,12 @@ CString CPreferencesDlg::GetItemPath(HTREEITEM hti) const
 
 int CPreferencesDlg::GetDefaultListItems(TDCAUTOLISTDATA& tld) const 
 { 
-	m_pageTaskDef.GetListItems(TDCA_CATEGORY, tld.aCategory);
-	m_pageTaskDef.GetListItems(TDCA_ALLOCTO, tld.aAllocTo);
-	m_pageTaskDef.GetListItems(TDCA_STATUS, tld.aStatus);
-	m_pageTaskDef.GetListItems(TDCA_ALLOCBY, tld.aAllocBy);
-	m_pageTaskDef.GetListItems(TDCA_VERSION, tld.aVersion);
-	m_pageTaskDef.GetListItems(TDCA_TAGS, tld.aTags);
+	m_pageTaskDef2.GetListItems(TDCA_CATEGORY, tld.aCategory);
+	m_pageTaskDef2.GetListItems(TDCA_ALLOCTO, tld.aAllocTo);
+	m_pageTaskDef2.GetListItems(TDCA_STATUS, tld.aStatus);
+	m_pageTaskDef2.GetListItems(TDCA_ALLOCBY, tld.aAllocBy);
+	m_pageTaskDef2.GetListItems(TDCA_VERSION, tld.aVersion);
+	m_pageTaskDef2.GetListItems(TDCA_TAGS, tld.aTags);
 
 	// add in any 'unknown' default items assigned directly to task
 	TODOITEM tdiDef;
