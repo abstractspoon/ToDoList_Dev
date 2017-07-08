@@ -662,8 +662,7 @@ BOOL CToDoCtrl::CreateContentControl(BOOL bResendComments)
 		m_ctrlComments.LoadPreferences(prefs, sKey);
 
 		// only reset this flag if we have a tasklist attached
-		if (!GetFilePath().IsEmpty())
-			m_bFirstLoadCommentsPrefs = FALSE;
+		m_bFirstLoadCommentsPrefs = m_sLastSavePath.IsEmpty();
 
 		return TRUE;
 	}
