@@ -307,9 +307,6 @@
     <ClCompile Include="TDLWelcomeWizard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="todocommentsctrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ToDoCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -371,6 +368,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ToDoCtrlDataUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDCSimpleTextContent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -741,9 +741,6 @@
     <ClInclude Include="tdstringres.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="todocommentsctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ToDoCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -808,6 +805,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tdccustomattribdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCSimpleTextContent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

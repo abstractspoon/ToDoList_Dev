@@ -318,6 +318,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDCSimpleTextContent.cpp" />
     <ClCompile Include="TDCStartupOptions.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -535,10 +536,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDLWelcomeWizard.cpp" />
-    <ClCompile Include="todocommentsctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="ToDoCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -633,6 +630,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TdcRecurrence.h" />
     <ClInclude Include="tdcreminder.h" />
     <ClInclude Include="TDCSearchParamHelper.h" />
+    <ClInclude Include="TDCSimpleTextContent.h" />
     <ClInclude Include="TDCStartupOptions.h" />
     <ClInclude Include="tdcstatic.h" />
     <ClInclude Include="tdcstruct.h" />
@@ -708,7 +706,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLWebUpdatePromptDlg.h" />
     <ClInclude Include="TDLWelcomeWizard.h" />
     <ClInclude Include="tdstringres.h" />
-    <ClInclude Include="todocommentsctrl.h" />
     <ClInclude Include="ToDoCtrl.h" />
     <ClInclude Include="ToDoCtrlData.h" />
     <ClInclude Include="ToDoCtrlDataUtils.h" />

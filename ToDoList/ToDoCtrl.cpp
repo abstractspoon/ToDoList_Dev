@@ -8,7 +8,6 @@
 #include "taskclipboard.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "todocommentsctrl.h"
 #include "tdstringres.h"
 #include "resource.h"
 #include "tasktimelog.h"
