@@ -62,7 +62,6 @@
 #include "..\shared\passworddialog.h"
 #include "..\shared\sysimagelist.h"
 #include "..\shared\regkey.h"
-#include "..\shared\uiextensionuihelper.h"
 #include "..\shared\remotefile.h"
 #include "..\shared\serverdlg.h"
 #include "..\shared\focuswatcher.h"

@@ -388,12 +388,6 @@
     <ClCompile Include="UIExtensionMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UIExtensionUIHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UIExtensionWnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="UIThemeFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -883,12 +877,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UIExtensionMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIExtensionUIHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIExtensionWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UITHEME.h">
