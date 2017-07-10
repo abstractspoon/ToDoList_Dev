@@ -33,9 +33,6 @@ public:
 	CONTENTFORMAT GetContentFormat(int nContent) const;
 	HICON GetContentIcon(int nContent) const;
 
-	BOOL ContentFormatIsText(int nContent) const;
-	BOOL ContentFormatIsText(const CString& sTypeID) const;
-
 	BOOL CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
 							 DWORD dwExStyle, const CRect& rect, HWND hwndParent);
 	BOOL CreateContentControl(const CONTENTFORMAT& cf, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 

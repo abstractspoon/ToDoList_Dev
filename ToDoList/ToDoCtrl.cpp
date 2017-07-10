@@ -8,7 +8,6 @@
 #include "taskclipboard.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "todocommentsctrl.h"
 #include "tdstringres.h"
 #include "resource.h"
 #include "tasktimelog.h"
@@ -663,15 +662,13 @@ BOOL CToDoCtrl::CreateContentControl(BOOL bResendComments)
 		m_ctrlComments.LoadPreferences(prefs, sKey);
 
 		// only reset this flag if we have a tasklist attached
-		if (!GetFilePath().IsEmpty())
-			m_bFirstLoadCommentsPrefs = FALSE;
+		m_bFirstLoadCommentsPrefs = m_sLastSavePath.IsEmpty();
 
 		return TRUE;
 	}
 
 	// create new content control
-	CRect rect(0, 211, 171, 238); // in DLU
-	CDlgUnits(this).ToPixels(rect);
+	CRect rect(0, 0, 0, 0);
 
 	if (m_ctrlComments.GetSafeHwnd())
 	{
@@ -695,7 +692,9 @@ BOOL CToDoCtrl::CreateContentControl(BOOL bResendComments)
 														IDC_COMMENTS, dwStyle, WS_EX_CLIENTEDGE, rect, *this);
 		}
 		else
+		{
 			bSuccess = TRUE;
+		}
 
 		// update comments type
 		if (bSuccess)

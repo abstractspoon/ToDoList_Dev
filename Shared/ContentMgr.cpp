@@ -169,16 +169,6 @@ HICON CContentMgr::GetContentIcon(int nContent) const
 	return NULL;
 }
 
-BOOL CContentMgr::ContentFormatIsText(int nContent) const
-{
-	return GetContentFormat(nContent).FormatIsText();
-}
-
-BOOL CContentMgr::ContentFormatIsText(const CString& sTypeID) const
-{
-	return ContentFormatIsText(FindContent(sTypeID));
-}
-
 BOOL CContentMgr::CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
 							 DWORD dwExStyle, const CRect& rect, HWND hwndParent)
 {

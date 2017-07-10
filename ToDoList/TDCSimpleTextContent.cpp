@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "todocommentsctrl.h"
+#include "TDCSimpleTextContent.h"
 #include "tdcmsg.h"
 #include "tdlschemadef.h"
 #include "resource.h"
@@ -18,6 +18,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enmenu.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\localizer.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -30,18 +31,84 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+CTDCSimpleTextContent::CTDCSimpleTextContent()
+{
+	m_icon.LoadIcon(IDI_SIMPLETEXT);
+}
+
+CTDCSimpleTextContent::~CTDCSimpleTextContent()
+{
+}
+
+LPCTSTR CTDCSimpleTextContent::GetTypeID() const 
+{ 
+	static LPCTSTR sID = _T("PLAIN_TEXT"); 
+	return sID; 
+}
+
+LPCTSTR CTDCSimpleTextContent::GetTypeDescription() const 
+{ 
+	static LPCTSTR sDesc = _T("Simple Text"); 
+	return sDesc; 
+}
+
+HICON CTDCSimpleTextContent::GetTypeIcon() const 
+{ 
+	return m_icon; 
+}
+
+IContentControl* CTDCSimpleTextContent::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
+													long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
+{
+	CTDLSimpleTextContentCtrl* pComments = new CTDLSimpleTextContentCtrl;
+
+	nStyle |= ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL;
+	CRect rect(nLeft, nTop, nLeft + nWidth, nTop + nHeight);
+
+	if (pComments->Create(nStyle, rect, CWnd::FromHandle(hwndParent), nCtrlID))
+		return pComments;
+
+	// else
+	delete pComments;
+	return NULL;
+}
+
+void CTDCSimpleTextContent::SetLocalizer(ITransText* pTT) { CLocalizer::Initialize(pTT); }
+void CTDCSimpleTextContent::Release() { delete this; }
+
+int CTDCSimpleTextContent::ConvertToHtml(const unsigned char* /*pContent*/, int /*nLength*/, LPCTSTR /*szCharset*/,
+										LPTSTR& /*szHtml*/, LPCTSTR /*szImageDir*/) 
+{ 
+	return 0; // not supported
+}
+void CTDCSimpleTextContent::FreeHtmlBuffer(LPTSTR& /*szHtml*/) {}
+
+void CTDCSimpleTextContent::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const 
+{
+	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), CTDLSimpleTextContentCtrl::IsInlineSpellCheckingEnabled());
+}
+
+void CTDCSimpleTextContent::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) 
+{
+	if (!bAppOnly)
+		CTDLSimpleTextContentCtrl::EnableInlineSpellChecking(pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE));
+
+	CTDLSimpleTextContentCtrl::SetPasteSourceUrls(pPrefs->GetProfileInt(_T("Preferences"), _T("IncludeWebLinksInCommentsPaste"), TRUE));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 const UINT WM_SETWORDWRAP = (WM_USER+1);
 const DWORD SIMPLETEXT_COMMENTS = (DWORD)(LPCTSTR)_T("SIMPLETEXT_COMMENTS");
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL CToDoCommentsCtrl::s_bInlineSpellChecking = TRUE;
-BOOL CToDoCommentsCtrl::s_bPasteSourceUrls = TRUE;
+BOOL CTDLSimpleTextContentCtrl::s_bInlineSpellChecking = TRUE;
+BOOL CTDLSimpleTextContentCtrl::s_bPasteSourceUrls = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoCommentsCtrl
 
-CToDoCommentsCtrl::CToDoCommentsCtrl() 
+CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	m_bAllowNotify(TRUE), 
 	m_bWordWrap(TRUE),
@@ -55,14 +122,14 @@ CToDoCommentsCtrl::CToDoCommentsCtrl()
 	EnableSelectOnFocus(FALSE);
 }
 
-CToDoCommentsCtrl::~CToDoCommentsCtrl()
+CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // IContentCtrl
 
-int CToDoCommentsCtrl::GetTextContent(LPTSTR szContent, int nLength) const
+int CTDLSimpleTextContentCtrl::GetTextContent(LPTSTR szContent, int nLength) const
 {
 	if (!szContent)
 		return GetWindowTextLength();
@@ -71,7 +138,7 @@ int CToDoCommentsCtrl::GetTextContent(LPTSTR szContent, int nLength) const
 	return GetWindowText(szContent, nLength);
 }
 
-bool CToDoCommentsCtrl::SetTextContent(LPCTSTR szContent, bool bResetSelection) 
+bool CTDLSimpleTextContentCtrl::SetTextContent(LPCTSTR szContent, bool bResetSelection) 
 { 
 	CReSaveCaret resc(bResetSelection ? NULL : GetSafeHwnd());
 
@@ -86,8 +153,8 @@ bool CToDoCommentsCtrl::SetTextContent(LPCTSTR szContent, bool bResetSelection)
 
 /////////////////////////////////////////////////////////////////////////////
 
-BEGIN_MESSAGE_MAP(CToDoCommentsCtrl, CUrlRichEditCtrl)
-	//{{AFX_MSG_MAP(CToDoCommentsCtrl)
+BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
+	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_SETCURSOR()
 	ON_WM_DESTROY()
@@ -103,22 +170,22 @@ BEGIN_MESSAGE_MAP(CToDoCommentsCtrl, CUrlRichEditCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoCommentsCtrl message handlers
+// CTDLSimpleTextContentCtrl message handlers
 
-BOOL CToDoCommentsCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
+BOOL CTDLSimpleTextContentCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	GetParent()->SendMessage(WM_ICC_DOHELP, 0, SIMPLETEXT_COMMENTS);
 	return TRUE;
 }
 
-BOOL CToDoCommentsCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
+BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
 	dwStyle |= ES_AUTOHSCROLL | WS_HSCROLL | ES_NOHIDESEL; 
 
  	return CUrlRichEditCtrl::Create(dwStyle, rect, pParentWnd, nID);
 }
 
-LRESULT CToDoCommentsCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+LRESULT CTDLSimpleTextContentCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	// richedit2.0 sends a EN_CHANGE notification if it contains
 	// text when it receives a font change.
@@ -129,7 +196,7 @@ LRESULT CToDoCommentsCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return CUrlRichEditCtrl::OnSetFont(wp, lp);
 }
 
-BOOL CToDoCommentsCtrl::OnChangeText() 
+BOOL CTDLSimpleTextContentCtrl::OnChangeText() 
 {
 	CUrlRichEditCtrl::OnChangeText();
 
@@ -146,7 +213,7 @@ BOOL CToDoCommentsCtrl::OnChangeText()
 	return FALSE;
 }
 
-BOOL CToDoCommentsCtrl::OnKillFocus() 
+BOOL CTDLSimpleTextContentCtrl::OnKillFocus() 
 {
 	if (m_bAllowNotify)
 		GetParent()->SendMessage(WM_ICC_COMMENTSKILLFOCUS);
@@ -154,14 +221,14 @@ BOOL CToDoCommentsCtrl::OnKillFocus()
 	return FALSE;
 }
 
-void CToDoCommentsCtrl::SetReadOnly(bool bReadOnly)
+void CTDLSimpleTextContentCtrl::SetReadOnly(bool bReadOnly)
 {
 	CUrlRichEditCtrl::SetReadOnly(bReadOnly);
 
 	SetBackgroundColor(!bReadOnly, GetSysColor(COLOR_3DFACE));
 }
 
-void CToDoCommentsCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
+void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
 	if (pWnd == this)
 	{
@@ -195,7 +262,7 @@ void CToDoCommentsCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 }
 
-void CToDoCommentsCtrl::OnCommentsMenuCmd(UINT nCmdID) 
+void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID) 
 {
 	switch (nCmdID)
 	{
@@ -347,13 +414,13 @@ void CToDoCommentsCtrl::OnCommentsMenuCmd(UINT nCmdID)
 	}
 }
 
-void CToDoCommentsCtrl::SetWordWrap(BOOL bWrap)
+void CTDLSimpleTextContentCtrl::SetWordWrap(BOOL bWrap)
 {
 	SetTargetDevice(NULL, bWrap ? 0 : 1);
 	m_bWordWrap = bWrap;
 }
 
-void CToDoCommentsCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
+void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 {
 	BOOL bReadOnly = (GetStyle() & ES_READONLY) || !IsWindowEnabled();
 	
@@ -452,7 +519,7 @@ void CToDoCommentsCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 	}
 }
 
-BOOL CToDoCommentsCtrl::Paste()
+BOOL CTDLSimpleTextContentCtrl::Paste()
 {
 	CStringArray aFiles;
 	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
@@ -471,7 +538,7 @@ BOOL CToDoCommentsCtrl::Paste()
 	return CRichEditHelper::PasteFiles(*this, aFiles, REP_ASFILEURL, FALSE);
 }
 
-BOOL CToDoCommentsCtrl::CanPaste()
+BOOL CTDLSimpleTextContentCtrl::CanPaste()
 {
 	// for reasons that I'm not entirely clear on even if we 
 	// return that CF_HDROP is okay, the richedit itself will
@@ -484,7 +551,7 @@ BOOL CToDoCommentsCtrl::CanPaste()
 }
 
 
-BOOL CToDoCommentsCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
+BOOL CTDLSimpleTextContentCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
 	// bit of a hack but this is what we get just before the context
 	// menu appears so we set the cursor back to the arrow
@@ -497,7 +564,7 @@ BOOL CToDoCommentsCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return CUrlRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
 
-BOOL CToDoCommentsCtrl::IsTDLClipboardEmpty() const 
+BOOL CTDLSimpleTextContentCtrl::IsTDLClipboardEmpty() const 
 { 
 	// try for any clipboard first
 	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, FALSE);
@@ -510,7 +577,7 @@ BOOL CToDoCommentsCtrl::IsTDLClipboardEmpty() const
 	return (!GetParent()->SendMessage(WM_TDCM_HASCLIPBOARD, 0, TRUE)); 
 }
 
-LRESULT CToDoCommentsCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
+LRESULT CTDLSimpleTextContentCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 {
 	CString sUrl(szUrl);
 	sUrl.MakeLower();
@@ -523,22 +590,22 @@ LRESULT CToDoCommentsCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 	return 0;
 }
 
-LRESULT CToDoCommentsCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
+LRESULT CTDLSimpleTextContentCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 {
 	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)szUrl);
 }
 
-void CToDoCommentsCtrl::PreSubclassWindow() 
+void CTDLSimpleTextContentCtrl::PreSubclassWindow() 
 {
 	CUrlRichEditCtrl::PreSubclassWindow();
 }
 
-void CToDoCommentsCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
+void CTDLSimpleTextContentCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("WordWrap"), m_bWordWrap);
 }
 
-void CToDoCommentsCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
+void CTDLSimpleTextContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	BOOL bWordWrap = pPrefs->GetProfileInt(szKey, _T("WordWrap"), TRUE);
 
@@ -548,7 +615,7 @@ void CToDoCommentsCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKe
 	PostMessage(WM_SETWORDWRAP, bWordWrap, (LPARAM)GetSafeHwnd());
 }
 
-LRESULT CToDoCommentsCtrl::OnSetWordWrap(WPARAM wp, LPARAM lp)
+LRESULT CTDLSimpleTextContentCtrl::OnSetWordWrap(WPARAM wp, LPARAM lp)
 {
 	UNREFERENCED_PARAMETER (lp);
 	ASSERT (lp == (LPARAM)GetSafeHwnd());
@@ -557,7 +624,7 @@ LRESULT CToDoCommentsCtrl::OnSetWordWrap(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-int CToDoCommentsCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (CUrlRichEditCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -572,7 +639,7 @@ int CToDoCommentsCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-bool CToDoCommentsCtrl::ProcessMessage(MSG* pMsg) 
+bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg) 
 {
 	if (!IsWindowEnabled())
 		return false;
