@@ -146,6 +146,10 @@ SOURCE=.\PreferencesTaskCalcPage.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PreferencesTaskDef2Page.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PreferencesTaskDefPage.cpp
 # End Source File
 # Begin Source File
@@ -652,6 +656,10 @@ SOURCE=.\PreferencesShortcutsPage.h
 # Begin Source File
 
 SOURCE=.\PreferencesTaskCalcPage.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PreferencesTaskDef2Page.h
 # End Source File
 # Begin Source File
 
