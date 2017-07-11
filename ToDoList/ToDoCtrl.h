@@ -72,7 +72,7 @@ class CToDoCtrl : public CRuntimeDlg
 {
 // Construction
 public:
-	CToDoCtrl(CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
+	CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
 	virtual ~CToDoCtrl();
 
 	BOOL Create(const RECT& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible = TRUE, BOOL bEnabled = TRUE);
@@ -466,7 +466,6 @@ protected:
 	CTreeDragDropHelper m_treeDragDrop;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
-	CContentMgr& m_mgrContent;
 	TDCAUTOLISTDATA m_tldDefault;
 	TDC_MAXSTATE m_nMaxState;
 	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;
@@ -476,6 +475,8 @@ protected:
 	TDI_RECURFROMOPTION m_nDefRecurFrom;
 	TDI_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
+
+	const CContentMgr& m_mgrContent;
 
 	enum COMMENTS_STATE
 	{

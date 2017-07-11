@@ -34,11 +34,12 @@ public:
 	HICON GetContentIcon(int nContent) const;
 
 	BOOL CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
-							 DWORD dwExStyle, const CRect& rect, HWND hwndParent);
+							 DWORD dwExStyle, const CRect& rect, HWND hwndParent) const;
 	BOOL CreateContentControl(const CONTENTFORMAT& cf, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
-							 DWORD dwExStyle, const CRect& rect, HWND hwndParent);
+							 DWORD dwExStyle, const CRect& rect, HWND hwndParent) const;
 
-	BOOL ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, LPCTSTR szCharSet, LPCTSTR szImageDir = NULL);
+	BOOL ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, 
+								LPCTSTR szCharSet, LPCTSTR szImageDir = NULL) const;
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);

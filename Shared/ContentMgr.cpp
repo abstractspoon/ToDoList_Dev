@@ -170,7 +170,7 @@ HICON CContentMgr::GetContentIcon(int nContent) const
 }
 
 BOOL CContentMgr::CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
-							 DWORD dwExStyle, const CRect& rect, HWND hwndParent)
+							 DWORD dwExStyle, const CRect& rect, HWND hwndParent) const
 {
 	Initialize(); // initialize on demand
 
@@ -198,7 +198,7 @@ BOOL CContentMgr::CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nC
 }
 
 BOOL CContentMgr::CreateContentControl(const CONTENTFORMAT& cf, CContentCtrl& ctrl, UINT nCtrlID, DWORD nStyle, 
-							 DWORD dwExStyle, const CRect& rect, HWND hwndParent)
+							 DWORD dwExStyle, const CRect& rect, HWND hwndParent) const
 {
 	// check if the CContentCtrl already has a valid control
 	if (ctrl.GetSafeHwnd() && ctrl.IsFormat(cf))
@@ -230,7 +230,7 @@ CONTENTFORMAT CContentMgr::GetContentFormat(int nContent) const
 	return GetContentID(nContent);
 }
 
-BOOL CContentMgr::ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, LPCTSTR szCharSet, LPCTSTR szImageDir)
+BOOL CContentMgr::ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, LPCTSTR szCharSet, LPCTSTR szImageDir) const
 {
 	Initialize(); // initialize on demand
 
