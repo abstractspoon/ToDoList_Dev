@@ -279,6 +279,10 @@ SOURCE=.\TDCSearchParamHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCSimpleTextContent.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
@@ -563,10 +567,6 @@ SOURCE=.\TDLWelcomeWizard.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\todocommentsctrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ToDoCtrl.cpp
 # End Source File
 # Begin Source File
@@ -804,6 +804,10 @@ SOURCE=.\tdcreminder.h
 # Begin Source File
 
 SOURCE=.\TDCSearchParamHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCSimpleTextContent.h
 # End Source File
 # Begin Source File
 
@@ -1108,10 +1112,6 @@ SOURCE=.\TDLWelcomeWizard.h
 # Begin Source File
 
 SOURCE=.\tdstringres.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\todocommentsctrl.h
 # End Source File
 # Begin Source File
 
