@@ -13,9 +13,12 @@
 #include "tdcimagelist.h"
 #include "tdlreminderperiodcombobox.h"
 #include "tdcenumcontainers.h"
+#include "tdlcontenttypecombobox.h"
 
 #include <afxtempl.h>
 
+#include "..\shared\contentctrl.h"
+#include "..\shared\contentMgr.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
 #include "..\shared\timeedit.h"
@@ -24,6 +27,7 @@
 #include "..\shared\groupline.h"
 #include "..\shared\maskedit.h"
 #include "..\Shared\iconbutton.h"
+#include "..\Shared\binarydata.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage dialog
@@ -38,7 +42,7 @@ class CPreferencesTaskDefPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesTaskDefPage();
+	CPreferencesTaskDefPage(const CContentMgr* pMgrContent = NULL);
 	~CPreferencesTaskDefPage();
 
 	void SetPriorityColors(const CDWordArray& aColors);
@@ -82,6 +86,14 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	UINT m_nDefReminderLeadin;
 
+	CTDLContentTypeComboBox	m_cbCommentsFmt;
+	const CContentMgr* m_pMgrContent;
+	CONTENTFORMAT m_cfDefault;
+	int m_nDefaultCommentsFormat;
+	CContentCtrl m_ctrlContent;
+	CBinaryData m_customComments;
+	CString m_sTextComments;
+
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesTaskDefPage)
@@ -99,6 +111,7 @@ protected:
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
 	//}}AFX_MSG
+	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnSetdefaultcolor();
 	DECLARE_MESSAGE_MAP()
 		

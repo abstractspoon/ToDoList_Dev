@@ -116,7 +116,8 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, IDI_PREFERENCES_DIALOG_STD, 0, pParent), 
 	m_pageShortcuts(pShortcutMgr), 
-	m_pageUI(pContentMgr, pMgrUIExt), 
+	m_pageUI(pMgrUIExt), 
+	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
 	m_pageUITasklistColors(m_defaultListData),
 	m_bInitDlg(FALSE)
@@ -555,9 +556,6 @@ BOOL CPreferencesDlg::OnEraseBkgnd(CDC* pDC)
 void CPreferencesDlg::GetDefaultTaskAttributes(TODOITEM& tdiDefault) const
 {
 	m_pageTaskDef.GetTaskAttributes(tdiDefault);
-
-	// extra
-	tdiDefault.sCommentsTypeID = m_pageUI.GetDefaultCommentsFormat();
 }
 
 BOOL CPreferencesDlg::IncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) 

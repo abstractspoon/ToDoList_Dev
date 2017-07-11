@@ -8,10 +8,8 @@
 //
 
 #include "TDLTaskViewListBox.h"
-#include "tdlcontenttypecombobox.h"
 #include "tdlthemecombobox.h"
 
-#include "..\shared\contentMgr.h"
 #include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 
@@ -50,7 +48,7 @@ class CPreferencesUIPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesUIPage(const CContentMgr* pMgrContent = NULL, const CUIExtensionMgr* pMgrUIExt = NULL);
+	CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt = NULL);
 	~CPreferencesUIPage();
 
 	BOOL GetShowEditMenuAsColumns() const { return m_bShowEditMenuAsColumns; }
@@ -69,7 +67,6 @@ public:
 	BOOL GetRTLComments() const { return m_bRTLComments; }
 	PUIP_LOCATION GetCommentsPos() const { return m_nCommentsPos; }
 	PUIP_LOCATION GetControlsPos() const { return m_nCtrlsPos; }
-	CONTENTFORMAT GetDefaultCommentsFormat() const { return m_cfDefault; }
 	BOOL GetMultiSelFilters() const { return m_bMultiSelFilters; }
 	BOOL GetRestoreTasklistFilters() const { return m_bRestoreTasklistFilters; }
 	BOOL GetReFilterOnModify() const { return m_bAutoRefilter; }
@@ -119,13 +116,9 @@ protected:
 	PUIP_MATCHTITLE m_nTitleFilterOption;
 	PUIP_LOCATION	m_nCommentsPos;
 	PUIP_LOCATION	m_nCtrlsPos;
-	CTDLContentTypeComboBox	m_cbCommentsFmt;
 	BOOL	m_bSortDoneTasksAtBottom;
-	const CContentMgr* m_pMgrContent;
 	const CUIExtensionMgr* m_pMgrUIExt;
 	CGroupLineManager m_mgrGroupLines;
-	CONTENTFORMAT m_cfDefault;
-	int m_nDefaultCommentsFormat;
 	CTDLThemeComboBox m_cbThemes;
 
 // Overrides
@@ -134,6 +127,7 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
@@ -141,8 +135,6 @@ protected:
 	//{{AFX_MSG(CPreferencesUIPage)
 	afx_msg void OnUseuitheme();
 	//}}AFX_MSG
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnStackEditFieldsAndComments();
 	DECLARE_MESSAGE_MAP()
 

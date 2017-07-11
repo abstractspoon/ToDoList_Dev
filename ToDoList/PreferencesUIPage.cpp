@@ -23,13 +23,11 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CPreferencesUIPage, CPreferencesPageBase)
 
-CPreferencesUIPage::CPreferencesUIPage(const CContentMgr* pMgrContent, const CUIExtensionMgr* pMgrUIExt) : 
+CPreferencesUIPage::CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt) 
+	: 
 	CPreferencesPageBase(CPreferencesUIPage::IDD), 
-		m_pMgrContent(pMgrContent), 
-		m_pMgrUIExt(pMgrUIExt),
-		m_cbCommentsFmt(pMgrContent),
-		m_nDefaultCommentsFormat(-1),
-		m_lbTaskViews(pMgrUIExt)
+	m_pMgrUIExt(pMgrUIExt),
+	m_lbTaskViews(pMgrUIExt)
 {
 	//{{AFX_DATA_INIT(CPreferencesUIPage)
 	//}}AFX_DATA_INIT
@@ -70,9 +68,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_NEWSUBTASKPOSITION, (int&)m_nNewSubtaskPos);
 	DDX_CBIndex(pDX, IDC_COMMENTPOS, (int&)m_nCommentsPos);
 	DDX_CBIndex(pDX, IDC_CTRLSPOS, (int&)m_nCtrlsPos);
-	DDX_Control(pDX, IDC_COMMENTSFORMAT, m_cbCommentsFmt);
 	DDX_Control(pDX, IDC_TASKVIEWVISIBILITY, m_lbTaskViews);
-	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 	DDX_Check(pDX, IDC_SORTDONETASKSATBOTTOM, m_bSortDoneTasksAtBottom);
 	DDX_Check(pDX, IDC_INCLUDEWEBLINKINCOMMENTSPASTE, m_bIncludeWebLinksInCommentsPaste);
 
@@ -86,7 +82,6 @@ BEGIN_MESSAGE_MAP(CPreferencesUIPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesUIPage)
 	ON_BN_CLICKED(IDC_USEUITHEME, OnUseuitheme)
 	//}}AFX_MSG_MAP
-	ON_CBN_SELCHANGE(IDC_COMMENTSFORMAT, OnSelchangeCommentsformat)
 	ON_BN_CLICKED(IDC_STACKFIELDSANDCOMMENTS, OnStackEditFieldsAndComments)
 END_MESSAGE_MAP()
 
@@ -104,8 +99,6 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_FILTERGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_TASKVIEWSGROUP, *this);
 
-	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
-	GetDlgItem(IDC_COMMENTSFORMAT)->EnableWindow(m_nDefaultCommentsFormat != CB_ERR);
 	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	// theming only available if XP themes are active
@@ -124,13 +117,6 @@ BOOL CPreferencesUIPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPreferencesUIPage::OnSelchangeCommentsformat() 
-{
-	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
-
-	CPreferencesPageBase::OnControlChange();
 }
 
 void CPreferencesUIPage::OnStackEditFieldsAndComments() 
@@ -175,27 +161,6 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), TRUE);
 	m_bIncludeWebLinksInCommentsPaste = pPrefs->GetProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), TRUE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
-
-	// comments format
-	if (m_cbCommentsFmt.IsInitialized())
-	{
-		m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
-		m_nDefaultCommentsFormat = m_cbCommentsFmt.SetSelectedFormat(m_cfDefault);
-
-		// fallback
-		if (m_nDefaultCommentsFormat == CB_ERR)
-			m_nDefaultCommentsFormat = pPrefs->GetProfileInt(szKey, _T("DefaultCommentsFormat"), -1);
-
-		if ((m_nDefaultCommentsFormat == CB_ERR) || (m_nDefaultCommentsFormat >= m_cbCommentsFmt.GetCount()))
-		{
-			ASSERT (m_cbCommentsFmt.GetCount());
-
-			m_nDefaultCommentsFormat = 0;
-		}
-
-		m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
-		m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
-	}
 
 	// task view visibility
 	CStringArray aViews;
@@ -250,13 +215,6 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 
 	pPrefs->WriteProfileString(szKey, _T("UIThemeFile"), m_sUIThemeFile);
-
-	// comments format
-	if (m_pMgrContent)
-	{
-		pPrefs->WriteProfileInt(szKey, _T("DefaultCommentsFormat"), m_nDefaultCommentsFormat);
-		pPrefs->WriteProfileString(szKey, _T("DefaultCommentsFormatID"), m_cfDefault);
-	}
 
 	// task views
 	CStringArray aViews;

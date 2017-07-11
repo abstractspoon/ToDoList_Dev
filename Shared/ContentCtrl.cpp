@@ -278,7 +278,7 @@ int CContentCtrl::GetTextContent(CString& sContent) const
 
 	if (m_pContentCtrl)
 	{
-		int nLen = m_pContentCtrl->GetTextContent(NULL);
+		nLen = m_pContentCtrl->GetTextContent(NULL);
 
 		if (nLen)
 		{
@@ -300,7 +300,7 @@ BOOL CContentCtrl::SetTextContent(LPCTSTR szContent, BOOL bResetSelection)
 		return m_pContentCtrl->SetTextContent(szContent, (bResetSelection != FALSE));
 
 	// else
-	return false;
+	return FALSE;
 }
 
 LPCTSTR CContentCtrl::GetTypeID() const

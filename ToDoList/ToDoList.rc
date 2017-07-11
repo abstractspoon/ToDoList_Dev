@@ -345,10 +345,10 @@ IDD_PREFTASK_PAGE DIALOG DISCARDABLE  0, 0, 400, 334
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Time Tracking",IDC_TRACKGROUP,7,11,386,8
+    LTEXT           "Time Tracking",IDC_TRACKGROUP,7,10,386,8
     CONTROL         "&Show the Time-Tracker window whenever a task's time is tracked",
                     IDC_SHOWTIMETRACKER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,25,392,10
+                    WS_TABSTOP,7,25,389,10
     LTEXT           "Continue time-tracking a task even when:",IDC_STATIC,7,
                     40,386,8
     CONTROL         "&the task is not selected",IDC_TRACKNONSELECTEDTASKS,
@@ -399,14 +399,14 @@ BEGIN
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_PREFTASKDEF_PAGE DIALOGEX 0, 0, 398, 300
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x0
+IDD_PREFTASKDEF_PAGE DIALOG DISCARDABLE  0, 0, 398, 432
+STYLE WS_CHILD
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Default Attributes",IDC_DEFGROUP,7,11,384,8
-    LTEXT           "&Allocated To",IDC_STATIC,7,27,87,8
+    LTEXT           "Default Attributes",IDC_DEFGROUP,7,10,384,8
+    LTEXT           "&Allocated to",IDC_STATIC,7,27,87,8
     EDITTEXT        IDC_DEFAULTALLOCTO,103,24,122,13,ES_AUTOHSCROLL
-    LTEXT           "&Allocated By",IDC_STATIC,7,44,87,8
+    LTEXT           "&Allocated by",IDC_STATIC,7,44,87,8
     EDITTEXT        IDC_DEFAULTALLOCBY,103,41,122,13,ES_AUTOHSCROLL
     LTEXT           "&Status",IDC_STATIC,7,61,87,8
     EDITTEXT        IDC_DEFAULTSTATUS,103,58,122,13,ES_AUTOHSCROLL
@@ -417,62 +417,88 @@ BEGIN
     LTEXT           "C&ost",IDC_STATIC,7,111,87,8
     EDITTEXT        IDC_DEFAULTCOST,103,109,122,13,ES_AUTOHSCROLL
     LTEXT           "&Priority",IDC_STATIC,7,128,87,8
-    COMBOBOX        IDC_DEFAULTPRIORITY,103,126,122,136,CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DEFAULTPRIORITY,103,126,122,136,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "&Risk",IDC_STATIC,7,145,87,8
-    COMBOBOX        IDC_DEFAULTRISK,103,143,122,136,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Time Estimate",IDC_STATIC,7,162,87,8
+    COMBOBOX        IDC_DEFAULTRISK,103,143,122,136,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Time estimate",IDC_STATIC,7,162,87,8
     EDITTEXT        IDC_DEFAULTTIMEEST,103,160,122,13,ES_AUTOHSCROLL
-    LTEXT           "&Time Spent",IDC_STATIC,7,179,87,8
+    LTEXT           "&Time spent",IDC_STATIC,7,179,87,8
     EDITTEXT        IDC_DEFAULTTIMESPENT,103,177,122,13,ES_AUTOHSCROLL
-    LTEXT           "Created B&y",IDC_STATIC,7,196,87,8
+    LTEXT           "Created b&y",IDC_STATIC,7,196,87,8
     EDITTEXT        IDC_DEFAULTCREATEDBY,103,195,122,13,ES_AUTOHSCROLL
     LTEXT           "Ic&on",IDC_STATIC,7,213,87,8
     PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTICON,103,211,54,14,BS_RIGHT
     LTEXT           "&Colour",IDC_STATIC,7,230,87,8
     PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,103,228,54,14,BS_RIGHT
-    LTEXT           "&Start Date",IDC_STATIC,7,246,87,8
+    LTEXT           "&Start date",IDC_STATIC,7,247,87,8
     CONTROL         "&Date of creation",IDC_USECREATIONFORDEFSTARTDATE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,103,247,85,10
-    LTEXT           "&Due Date",IDC_STATIC,7,261,87,8
-    CONTROL         "D&ate of creation",IDC_USECREATIONFORDEFDUEDATE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,103,260,85,10
-    LTEXT           "&Reminder",IDC_STATIC,7,276,87,8
-    COMBOBOX        IDC_DEFREMINDER,103,274,122,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_DEFREMINDERDATE,231,274,122,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Due date",IDC_STATIC,7,264,87,8
+    CONTROL         "D&ate of creation",IDC_USECREATIONFORDEFDUEDATE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,103,263,85,10
+    LTEXT           "&Reminder",IDC_STATIC,7,281,87,8
+    COMBOBOX        IDC_DEFREMINDER,103,278,122,30,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DEFREMINDERDATE,231,278,122,30,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Comments &format",IDC_STATIC,7,298,94,10
+    COMBOBOX        IDC_COMMENTSFORMAT,103,296,122,102,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_COMMENTSCTRLFRAME,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE | WS_DISABLED,103,314,288,109
+    LTEXT           "&Comments",IDC_STATIC,7,315,94,10
 END
 
-IDD_PREFTASKDEF2_PAGE DIALOGEX 0, 0, 398, 334
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x0
+IDD_PREFTASKDEF2_PAGE DIALOG DISCARDABLE  0, 0, 398, 334
+STYLE WS_CHILD
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Attribute Inheritance",IDC_INHERITGROUP,7,11,384,8
-    CONTROL         "&Have subtasks inherit the following attributes from their parent when they are created",IDC_USEPARENTATTRIB,
-                    "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,7,25,390,10
-    LISTBOX         IDC_INHERITATTRIBUTES,18,39,276,66,LBS_SORT | LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
-    CONTROL         "Contin&ue to update subtasks as parent changes",IDC_UPDATEINHERITATTRIB,
-                    "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,18,110,376,10
+    LTEXT           "Attribute Inheritance",IDC_INHERITGROUP,7,10,384,8
+    CONTROL         "&Have subtasks inherit the following attributes from their parent when they are created",
+                    IDC_USEPARENTATTRIB,"Button",BS_AUTOCHECKBOX | BS_TOP | 
+                    WS_TABSTOP,7,25,390,10
+    LISTBOX         IDC_INHERITATTRIBUTES,18,39,276,66,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
+                    WS_HSCROLL | WS_TABSTOP
+    CONTROL         "Contin&ue to update subtasks as parent changes",
+                    IDC_UPDATEINHERITATTRIB,"Button",BS_AUTOCHECKBOX | 
+                    BS_TOP | WS_TABSTOP,18,110,376,10
     LTEXT           "Dynamic Droplists",IDC_DROPLISTGROUP,7,127,384,8
     LTEXT           "Default &Categories",IDC_STATIC,7,141,127,8
-    EDITTEXT        IDC_CATEGORYLIST,7,154,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
-    CONTROL         "&Make this list read-only",IDC_CATLIST_READONLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,220,127,10
+    EDITTEXT        IDC_CATEGORYLIST,7,154,121,62,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    CONTROL         "&Make this list read-only",IDC_CATLIST_READONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,127,10
     LTEXT           "Default &Statuses",IDC_STATIC,138,141,127,8
-    EDITTEXT        IDC_STATUSLIST,138,154,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    EDITTEXT        IDC_STATUSLIST,138,154,121,62,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
     CONTROL         "&Make this list read-only",IDC_STATUSLIST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,220,127,10
     LTEXT           "Default &Versions",IDC_STATIC,269,141,127,8
-    EDITTEXT        IDC_VERSIONLIST,269,154,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    EDITTEXT        IDC_VERSIONLIST,269,154,121,62,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
     CONTROL         "&Make this list read-only",IDC_VERSIONLIST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,269,220,127,10
     LTEXT           "Default Allocated &To",IDC_DEFALLOCTO,7,239,127,8
-    EDITTEXT        IDC_ALLOCTOLIST,7,251,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    EDITTEXT        IDC_ALLOCTOLIST,7,251,121,62,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
     CONTROL         "&Make this list read-only",IDC_ALLOCTOLIST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,317,127,10
     LTEXT           "Default Allocated &By",IDC_STATIC,138,239,127,8
-    EDITTEXT        IDC_ALLOCBYLIST,138,251,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    EDITTEXT        IDC_ALLOCBYLIST,138,251,121,62,ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
     CONTROL         "&Make this list read-only",IDC_ALLOCBYLIST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,317,127,10
     LTEXT           "Default &Tags",IDC_STATIC,269,239,127,8
-    EDITTEXT        IDC_TAGLIST,269,251,121,62,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
-    CONTROL         "&Make this list read-only",IDC_TAGLIST_READONLY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,269,317,127,10
+    EDITTEXT        IDC_TAGLIST,269,251,121,62,ES_MULTILINE | ES_AUTOHSCROLL | 
+                    ES_WANTRETURN | WS_VSCROLL
+    CONTROL         "&Make this list read-only",IDC_TAGLIST_READONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,269,317,127,10
 END
 
 IDD_PREFTOOLS_PAGE DIALOG DISCARDABLE  0, 0, 400, 239
@@ -498,7 +524,7 @@ BEGIN
     PUSHBUTTON      "I&mport...",IDC_IMPORT,326,218,67,14
 END
 
-IDD_PREFUI_PAGE DIALOG DISCARDABLE  0, 0, 395, 728
+IDD_PREFUI_PAGE DIALOG DISCARDABLE  0, 0, 395, 693
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
@@ -565,36 +591,32 @@ BEGIN
     COMBOBOX        IDC_NEWSUBTASKPOSITION,7,427,183,115,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Task Comments",IDC_COMMENTSGROUP,7,450,381,8
-    LTEXT           "&Preferred format:",IDC_STATIC,8,465,380,10
-    COMBOBOX        IDC_COMMENTSFORMAT,7,477,183,102,CBS_DROPDOWNLIST | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
-    LTEXT           "Position co&mments:",IDC_STATIC,7,495,381,10
-    COMBOBOX        IDC_COMMENTPOS,7,507,183,145,CBS_DROPDOWNLIST | 
+    LTEXT           "Position co&mments:",IDC_STATIC,7,462,381,10
+    COMBOBOX        IDC_COMMENTPOS,7,474,183,145,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
     CONTROL         "S&how comments even when tasklist is maximised",
                     IDC_SHOWCOMMENTSALWAYS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,525,381,10
+                    WS_TABSTOP,7,492,381,10
     CONTROL         "&Update all tasklists when the comments field is resized",
                     IDC_SHAREDCOMMENTSHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,540,381,10
+                    BS_TOP | WS_TABSTOP,7,507,381,10
     CONTROL         "In&clude web link when pasting browser content",
                     IDC_INCLUDEWEBLINKINCOMMENTSPASTE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,555,387,10
-    LTEXT           "Tasklist Tab Bar",IDC_TABBARGROUP,7,575,381,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,522,387,10
+    LTEXT           "Tasklist Tab Bar",IDC_TABBARGROUP,7,542,381,8
     CONTROL         "&Hide tab bar when only one tasklist is open",
                     IDC_AUTOHIDETABBAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,590,381,10
+                    7,557,381,10
     CONTROL         "&Stack tab bar items",IDC_STACKTABBARITEMS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,605,381,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,572,381,10
     CONTROL         "Keep tabs or&dered by name",IDC_KEEPTABSORDERED,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,620,381,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,587,381,10
     CONTROL         "&Show close button on each tasklist tab",
                     IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,635,381,10
-    LTEXT           "Default Task View Visibility",IDC_TASKVIEWSGROUP,7,653,
+                    WS_TABSTOP,7,602,381,10
+    LTEXT           "Default Task View Visibility",IDC_TASKVIEWSGROUP,7,620,
                     381,8
-    LISTBOX         IDC_TASKVIEWVISIBILITY,7,667,331,51,LBS_OWNERDRAWFIXED | 
+    LISTBOX         IDC_TASKVIEWVISIBILITY,7,634,331,51,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Right &align attribute labels",IDC_RIGHTALIGNLABELS,
@@ -3688,7 +3710,6 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 394
         TOPMARGIN, 10
-        BOTTOMMARGIN, 431
     END
 
     IDD_PREFMULTIUSER_PAGE, DIALOG
@@ -3699,13 +3720,22 @@ BEGIN
     IDD_PREFTASK_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        TOPMARGIN, 11
-        BOTTOMMARGIN, 332
+        RIGHTMARGIN, 396
+        TOPMARGIN, 10
+        BOTTOMMARGIN, 329
     END
 
     IDD_PREFTASKDEF_PAGE, DIALOG
     BEGIN
-        BOTTOMMARGIN, 615
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 391
+        TOPMARGIN, 10
+        BOTTOMMARGIN, 423
+    END
+
+    IDD_PREFTASKDEF2_PAGE, DIALOG
+    BEGIN
+        TOPMARGIN, 10
     END
 
     IDD_PREFUI_PAGE, DIALOG
@@ -3713,7 +3743,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 394
         TOPMARGIN, 10
-        BOTTOMMARGIN, 724
+        BOTTOMMARGIN, 689
     END
 
     IDD_PRINT_DIALOG, DIALOG
@@ -3809,6 +3839,7 @@ BEGIN
 
     IDD_PREFTASKCALC_PAGE, DIALOG
     BEGIN
+        TOPMARGIN, 10
         BOTTOMMARGIN, 487
     END
 
@@ -3899,7 +3930,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 387
-        TOPMARGIN, 7
+        TOPMARGIN, 10
         BOTTOMMARGIN, 231
     END
 

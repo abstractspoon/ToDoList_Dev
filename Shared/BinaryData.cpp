@@ -4,6 +4,9 @@
 
 #include "stdafx.h"
 #include "BinaryData.h"
+#include "misc.h"
+
+#include "..\3rdParty\Base64Coder.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -129,4 +132,38 @@ void CBinaryData::Set(const unsigned char* pData, int nByteLength)
 CBinaryData::operator const unsigned char*() const
 {
 	return (const unsigned char*)(LPCTSTR)(*this);
+}
+
+BOOL CBinaryData::Base64Encode(CString& sEncoded) const
+{
+	Base64Coder b64;
+	b64.Encode((const PBYTE)Get(), GetLength());
+	
+	sEncoded = b64.EncodedMessage();
+	return !sEncoded.IsEmpty();
+}
+
+BOOL CBinaryData::Base64Decode(const CString& sEncoded)
+{
+	Base64Coder b64;
+	
+#ifdef _UNICODE
+	// if text is unicode then we need to convert it back to multibyte
+	// to read the binary stream as unsigned chars
+	int nLen = sEncoded.GetLength();
+	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sEncoded, nLen);
+	b64.Decode(pBinary, nLen);
+	delete [] pBinary;
+#else
+	b64.Decode(sEncoded);
+#endif
+	
+	unsigned long nLenContent;
+	PBYTE pContent = b64.DecodedMessage(nLenContent);
+	
+	PBYTE szContent = (PBYTE)GetBuffer(nLenContent);
+	CopyMemory(szContent, pContent, nLenContent);
+	ReleaseBuffer(nLenContent);
+	
+	return (nLenContent > 0);
 }

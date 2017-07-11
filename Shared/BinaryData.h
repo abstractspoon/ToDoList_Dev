@@ -34,6 +34,9 @@ public:
 
   int GetLength() const;
 
+  BOOL Base64Encode(CString& sEncoded) const;
+  BOOL Base64Decode(const CString& sEncoded);
+
 protected:
   int GetByteLength() const;
   void Set(const unsigned char* pData, int nByteLength);

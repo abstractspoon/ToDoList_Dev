@@ -12,6 +12,9 @@
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
 #include "..\shared\preferences.h"
+#include "..\shared\uithemefile.h"
+
+#include "..\3rdParty\Base64Coder.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,9 +29,12 @@ const LPCTSTR ENDL = _T("\r\n");
 
 IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
 
-CPreferencesTaskDefPage::CPreferencesTaskDefPage() 
+CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CContentMgr* pMgrContent) 
 	: 
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
+	m_pMgrContent(pMgrContent), 
+	m_cbCommentsFmt(pMgrContent),
+	m_nDefaultCommentsFormat(-1),
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
 	m_nDefReminderLeadin(TDLRPC_NOREMINDER)
 {
@@ -69,6 +75,8 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DEFAULTCATEGORY, m_sDefCategory);
 	DDX_Check(pDX, IDC_USECREATIONFORDEFSTARTDATE, m_bUseCreationForDefStartDate);
 	DDX_Check(pDX, IDC_USECREATIONFORDEFDUEDATE, m_bUseCreationForDefDueDate);
+	DDX_Control(pDX, IDC_COMMENTSFORMAT, m_cbCommentsFmt);
+	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -87,6 +95,7 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SETDEFAULTICON, OnSetdefaulticon)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetdefaultcolor)
+	ON_CBN_SELCHANGE(IDC_COMMENTSFORMAT, OnSelchangeCommentsformat)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -99,6 +108,18 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
+
+	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
+
+	if (m_nDefaultCommentsFormat != CB_ERR)
+	{
+		OnSelchangeCommentsformat();
+
+		if (!m_customComments.IsEmpty())
+			m_ctrlContent.SetContent(m_customComments, TRUE);
+		else
+			m_ctrlContent.SetTextContent(m_sTextComments, TRUE);
+	}
 
 	m_btDefColor.SetColor(m_crDef);
 	m_ilTaskIcons.LoadDefaultImages();
@@ -170,6 +191,41 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
 	m_nDefReminderLeadin = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
+	
+	// comments format
+	if (m_cbCommentsFmt.IsInitialized())
+	{
+		m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
+		m_nDefaultCommentsFormat = m_cbCommentsFmt.SetSelectedFormat(m_cfDefault);
+		
+		// fallback
+		if (m_nDefaultCommentsFormat == CB_ERR)
+			m_nDefaultCommentsFormat = pPrefs->GetProfileInt(szKey, _T("DefaultCommentsFormat"), -1);
+		
+		if ((m_nDefaultCommentsFormat == CB_ERR) || (m_nDefaultCommentsFormat >= m_cbCommentsFmt.GetCount()))
+		{
+			ASSERT (m_cbCommentsFmt.GetCount());
+			
+			m_nDefaultCommentsFormat = 0;
+		}
+		
+		m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
+		m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
+
+		CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
+
+		if (m_customComments.Base64Decode(sB64CustomComments))
+		{
+			m_sTextComments.Empty();
+		}
+		else
+		{
+			CString sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
+			m_sTextComments = Base64Coder::Decode(sB64Comments);
+
+			m_customComments.Empty();
+		}
+	}
 }
 
 void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -195,6 +251,38 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeSpentUnits"), m_eTimeSpent.GetUnits());
 	pPrefs->WriteProfileInt(szKey, _T("DefaultReminderLeadin"), m_nDefReminderLeadin);
 	pPrefs->WriteProfileInt(szKey, _T("ReminderBeforeDue"), m_bReminderBeforeDue);
+	
+	// comments format
+	if (m_pMgrContent)
+	{
+		pPrefs->WriteProfileInt(szKey, _T("DefaultCommentsFormat"), m_nDefaultCommentsFormat);
+		pPrefs->WriteProfileString(szKey, _T("DefaultCommentsFormatID"), m_cfDefault);
+
+		CBinaryData customComments;
+
+		Base64Coder b64;
+		CString sEncoded;
+
+		if (m_ctrlContent.GetContent(customComments) && customComments.Base64Encode(sEncoded))
+		{
+			pPrefs->WriteProfileString(szKey, _T("CustomComments"), sEncoded);
+		}
+		else
+		{
+			CString sComments;
+
+			if (m_ctrlContent.GetTextContent(sComments))
+			{
+				pPrefs->WriteProfileString(szKey, _T("Comments"), Base64Coder::Encode(sComments));
+			}
+			else
+			{
+				pPrefs->DeleteProfileEntry(szKey, _T("Comments"));
+			}
+
+			pPrefs->DeleteProfileEntry(szKey, _T("CustomComments"));
+		}
+	}
 }
 
 void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
@@ -221,6 +309,10 @@ void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 	Misc::Split(m_sDefCategory, tdiDefault.aCategories);
 	Misc::Split(m_sDefAllocTo, tdiDefault.aAllocTo);
 	Misc::Split(m_sDefTags, tdiDefault.aTags);
+
+	tdiDefault.sCommentsTypeID = m_cfDefault;
+	m_ctrlContent.GetTextContent(tdiDefault.sComments);
+	m_ctrlContent.GetContent(tdiDefault.customComments);
 }
 
 
@@ -243,3 +335,27 @@ void CPreferencesTaskDefPage::OnSelchangeReminder()
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
 }
+
+void CPreferencesTaskDefPage::OnSelchangeCommentsformat() 
+{
+	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
+
+	if (m_ctrlContent.GetContentFormat() != m_cfDefault)
+	{
+		CRect rComments = GetCtrlRect(this, IDC_COMMENTSCTRLFRAME);
+		DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
+		
+		if (m_pMgrContent->CreateContentControl(m_cfDefault, m_ctrlContent, 
+												IDC_COMMENTS, dwStyle, WS_EX_CLIENTEDGE, 
+												rComments, *this))
+		{
+			CUIThemeFile theme;
+			theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
+
+			m_ctrlContent.SetUITheme(theme);
+		}
+	}
+	
+	CPreferencesPageBase::OnControlChange();
+}
+
