@@ -34,6 +34,7 @@ protected:
 	const CContentMgr* m_pContentMgr;
 	int m_nInitSel;
 	CImageList m_ilContent;
+	CMap<int, int, int, int> m_mapImages;
 
 // Operations
 public:

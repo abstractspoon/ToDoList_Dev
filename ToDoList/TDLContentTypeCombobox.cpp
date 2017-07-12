@@ -69,8 +69,10 @@ void CTDLContentTypeComboBox::FillCombo()
 			CString sItem = m_pContentMgr->GetContentDescription(nContent);
 			int nItem = AddString(sItem);
 
+			SetItemData(nItem, nContent);
+
 			int nImage = AddItemImage(m_pContentMgr->GetContentIcon(nContent), FALSE);
-			SetItemData(nItem, nImage);
+			m_mapImages[nContent] = nImage;
 		}
 	}
 
@@ -134,8 +136,15 @@ int CTDLContentTypeComboBox::GetCurSel() const
 void CTDLContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 										  DWORD dwItemData, const CString& sItem, BOOL bList)
 {
+	// Draw image
 	if (nItem != CB_ERR)
-		m_ilContent.Draw(&dc, (int)dwItemData, rect.TopLeft(), ILD_TRANSPARENT);
+	{
+		int nImage = -1;
+		m_mapImages.Lookup((int)dwItemData, nImage);
+	
+		if (nImage != -1)
+			m_ilContent.Draw(&dc, nImage, rect.TopLeft(), ILD_TRANSPARENT);
+	}
 
 	CRect rText(rect);
 	rText.left += (IMAGESIZE + 2);
