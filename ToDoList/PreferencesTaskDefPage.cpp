@@ -118,6 +118,7 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
 
+	ASSERT(m_nDefaultCommentsFormat >= 0);
 	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
 
 	// Delay initialisation of comments until after any font changes
