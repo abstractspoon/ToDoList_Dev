@@ -110,8 +110,8 @@ protected:
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
 	//}}AFX_MSG
-	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnSetdefaultcolor();
+	afx_msg void OnSelchangeCommentsformat();
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnInitComments(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()

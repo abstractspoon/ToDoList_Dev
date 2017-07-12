@@ -196,7 +196,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 		m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
 
 		// fallback
-		if (m_pMgrContent->FindContent(m_cfDefault) == -1)
+		if (m_pMgrContent && (m_pMgrContent->FindContent(m_cfDefault) == -1))
 		{
 			ASSERT(m_pMgrContent->GetNumContent());
 			m_cfDefault = m_pMgrContent->GetContentFormat(0);
@@ -310,6 +310,8 @@ void CPreferencesTaskDefPage::OnSelchangeReminder()
 
 void CPreferencesTaskDefPage::OnSelchangeCommentsformat() 
 {
+	ASSERT(m_pMgrContent);
+
 	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
 
 	if (m_ctrlComments.GetContentFormat() != m_cfDefault)
