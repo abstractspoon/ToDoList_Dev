@@ -42,7 +42,6 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CContentMgr* pMgrContent)
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent),
-	m_nDefaultCommentsFormat(-1),
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
 	m_nDefReminderLeadin(TDLRPC_NOREMINDER)
 {
@@ -84,7 +83,6 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USECREATIONFORDEFSTARTDATE, m_bUseCreationForDefStartDate);
 	DDX_Check(pDX, IDC_USECREATIONFORDEFDUEDATE, m_bUseCreationForDefDueDate);
 	DDX_Control(pDX, IDC_COMMENTSFORMAT, m_cbCommentsFmt);
-	DDX_CBIndex(pDX, IDC_COMMENTSFORMAT, m_nDefaultCommentsFormat);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -118,13 +116,6 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
 
-	ASSERT(m_nDefaultCommentsFormat >= 0);
-	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
-
-	// Delay initialisation of comments until after any font changes
-	if (m_nDefaultCommentsFormat != CB_ERR)
-		PostMessage(WM_PTDP_INITCOMMENTS);
-
 	m_btDefColor.SetColor(m_crDef);
 	m_ilTaskIcons.LoadDefaultImages();
 
@@ -138,6 +129,9 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTTAGS, *this, CEnString(IDS_PTDP_TAGSPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCATEGORY, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCREATEDBY, *this, CEnString(IDS_PTDP_NAMEPROMPT));
+
+	// Delay initialisation of comments until after any font changes
+	PostMessage(WM_PTDP_INITCOMMENTS);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -200,21 +194,14 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	if (m_cbCommentsFmt.IsInitialized())
 	{
 		m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
-		m_nDefaultCommentsFormat = m_cbCommentsFmt.SetSelectedFormat(m_cfDefault);
-		
+
 		// fallback
-		if (m_nDefaultCommentsFormat == CB_ERR)
-			m_nDefaultCommentsFormat = pPrefs->GetProfileInt(szKey, _T("DefaultCommentsFormat"), -1);
-		
-		if ((m_nDefaultCommentsFormat == CB_ERR) || (m_nDefaultCommentsFormat >= m_cbCommentsFmt.GetCount()))
+		if (m_pMgrContent->FindContent(m_cfDefault) == -1)
 		{
-			ASSERT (m_cbCommentsFmt.GetCount());
-			
-			m_nDefaultCommentsFormat = 0;
+			ASSERT(m_pMgrContent->GetNumContent());
+			m_cfDefault = m_pMgrContent->GetContentFormat(0);
 		}
-		
-		m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
-		m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
+		m_cbCommentsFmt.SetSelectedFormat(m_cfDefault);
 
 		CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
 		m_defCustomComments.Base64Decode(sB64CustomComments);
@@ -251,7 +238,6 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 	// comments format
 	if (m_pMgrContent)
 	{
-		pPrefs->WriteProfileInt(szKey, _T("DefaultCommentsFormat"), m_nDefaultCommentsFormat);
 		pPrefs->WriteProfileString(szKey, _T("DefaultCommentsFormatID"), m_cfDefault);
 
 		Base64Coder b64;

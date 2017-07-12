@@ -89,7 +89,6 @@ protected:
 	CTDLContentTypeComboBox	m_cbCommentsFmt;
 	const CContentMgr* m_pMgrContent;
 	CONTENTFORMAT m_cfDefault;
-	int m_nDefaultCommentsFormat;
 	CContentCtrl m_ctrlComments;
 	CBinaryData m_defCustomComments;
 	CString m_sDefTextComments;
