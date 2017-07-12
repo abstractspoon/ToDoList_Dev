@@ -90,9 +90,9 @@ protected:
 	const CContentMgr* m_pMgrContent;
 	CONTENTFORMAT m_cfDefault;
 	int m_nDefaultCommentsFormat;
-	CContentCtrl m_ctrlContent;
-	CBinaryData m_customComments;
-	CString m_sTextComments;
+	CContentCtrl m_ctrlComments;
+	CBinaryData m_defCustomComments;
+	CString m_sDefTextComments;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -113,6 +113,8 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnSetdefaultcolor();
+	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnInitComments(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 		
 protected:

@@ -258,6 +258,10 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 
 #ifdef _UNICODE
 	CBinaryData(pContent, nLength).Get(sContent);
+
+#	ifdef _DEBUG
+	LPCSTR szAnsi = (LPCSTR)(LPCTSTR)sContent;
+#	endif
 #else
 	memcpy(sContent.GetBufferSetLength(nLength), pContent, nLength);
 #endif

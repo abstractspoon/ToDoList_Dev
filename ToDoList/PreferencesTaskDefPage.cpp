@@ -16,11 +16,19 @@
 
 #include "..\3rdParty\Base64Coder.h"
 
+#include "..\interfaces\icontentcontrol.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_PTDP_INITCOMMENTS = (WM_APP + 1);
+
+/////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR ENDL = _T("\r\n");
 
@@ -88,7 +96,6 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
-
 BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesTaskDefPage)
 	ON_CBN_SELCHANGE(IDC_DEFREMINDER, OnSelchangeReminder)
@@ -96,12 +103,14 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SETDEFAULTICON, OnSetdefaulticon)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetdefaultcolor)
 	ON_CBN_SELCHANGE(IDC_COMMENTSFORMAT, OnSelchangeCommentsformat)
+	ON_REGISTERED_MESSAGE(WM_ICC_COMMENTSCHANGE, OnCommentsChange)
+	ON_MESSAGE(WM_PTDP_INITCOMMENTS, OnInitComments)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage message handlers
 
-BOOL CPreferencesTaskDefPage::OnInitDialog() 
+BOOL CPreferencesTaskDefPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 	
@@ -111,15 +120,9 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 
 	m_cbCommentsFmt.SetCurSel(m_nDefaultCommentsFormat);
 
+	// Delay initialisation of comments until after any font changes
 	if (m_nDefaultCommentsFormat != CB_ERR)
-	{
-		OnSelchangeCommentsformat();
-
-		if (!m_customComments.IsEmpty())
-			m_ctrlContent.SetContent(m_customComments, TRUE);
-		else
-			m_ctrlContent.SetTextContent(m_sTextComments, TRUE);
-	}
+		PostMessage(WM_PTDP_INITCOMMENTS);
 
 	m_btDefColor.SetColor(m_crDef);
 	m_ilTaskIcons.LoadDefaultImages();
@@ -213,18 +216,10 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 		m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
 
 		CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
+		m_defCustomComments.Base64Decode(sB64CustomComments);
 
-		if (m_customComments.Base64Decode(sB64CustomComments))
-		{
-			m_sTextComments.Empty();
-		}
-		else
-		{
-			CString sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
-			m_sTextComments = Base64Coder::Decode(sB64Comments);
-
-			m_customComments.Empty();
-		}
+		CString sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
+		m_sDefTextComments = Base64Coder::Decode(sB64Comments);
 	}
 }
 
@@ -258,29 +253,20 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 		pPrefs->WriteProfileInt(szKey, _T("DefaultCommentsFormat"), m_nDefaultCommentsFormat);
 		pPrefs->WriteProfileString(szKey, _T("DefaultCommentsFormatID"), m_cfDefault);
 
-		CBinaryData customComments;
-
 		Base64Coder b64;
 		CString sEncoded;
 
-		if (m_ctrlContent.GetContent(customComments) && customComments.Base64Encode(sEncoded))
+		pPrefs->DeleteProfileEntry(szKey, _T("Comments"));
+		pPrefs->DeleteProfileEntry(szKey, _T("CustomComments"));
+
+		if (!m_defCustomComments.IsEmpty() && m_defCustomComments.Base64Encode(sEncoded))
 		{
 			pPrefs->WriteProfileString(szKey, _T("CustomComments"), sEncoded);
 		}
-		else
+
+		if (!m_sDefTextComments.IsEmpty())
 		{
-			CString sComments;
-
-			if (m_ctrlContent.GetTextContent(sComments))
-			{
-				pPrefs->WriteProfileString(szKey, _T("Comments"), Base64Coder::Encode(sComments));
-			}
-			else
-			{
-				pPrefs->DeleteProfileEntry(szKey, _T("Comments"));
-			}
-
-			pPrefs->DeleteProfileEntry(szKey, _T("CustomComments"));
+			pPrefs->WriteProfileString(szKey, _T("Comments"), Base64Coder::Encode(m_sDefTextComments));
 		}
 	}
 }
@@ -311,10 +297,9 @@ void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 	Misc::Split(m_sDefTags, tdiDefault.aTags);
 
 	tdiDefault.sCommentsTypeID = m_cfDefault;
-	m_ctrlContent.GetTextContent(tdiDefault.sComments);
-	m_ctrlContent.GetContent(tdiDefault.customComments);
+	tdiDefault.sComments = m_sDefTextComments;
+	tdiDefault.customComments = m_defCustomComments;
 }
-
 
 void CPreferencesTaskDefPage::OnSetdefaulticon() 
 {
@@ -340,22 +325,48 @@ void CPreferencesTaskDefPage::OnSelchangeCommentsformat()
 {
 	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
 
-	if (m_ctrlContent.GetContentFormat() != m_cfDefault)
+	if (m_ctrlComments.GetContentFormat() != m_cfDefault)
 	{
 		CRect rComments = GetCtrlRect(this, IDC_COMMENTSCTRLFRAME);
 		DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
 		
-		if (m_pMgrContent->CreateContentControl(m_cfDefault, m_ctrlContent, 
+		if (m_pMgrContent->CreateContentControl(m_cfDefault, m_ctrlComments, 
 												IDC_COMMENTS, dwStyle, WS_EX_CLIENTEDGE, 
 												rComments, *this))
 		{
 			CUIThemeFile theme;
 			theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
 
-			m_ctrlContent.SetUITheme(theme);
+			m_ctrlComments.SetUITheme(theme);
+			m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(*this));
 		}
+
+		if (!m_ctrlComments.SetContent(m_defCustomComments, TRUE))
+			m_ctrlComments.SetTextContent(m_sDefTextComments, TRUE);
 	}
 	
 	CPreferencesPageBase::OnControlChange();
 }
 
+LRESULT CPreferencesTaskDefPage::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	if (!m_ctrlComments.IsSettingContent())
+	{
+		m_defCustomComments.Empty();
+		m_sDefTextComments.Empty();
+
+		m_ctrlComments.GetContent(m_defCustomComments);
+		m_ctrlComments.GetTextContent(m_sDefTextComments);
+	}
+
+	return 0L;
+}
+
+LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	ASSERT(!m_ctrlComments.IsSettingContent());
+
+	OnSelchangeCommentsformat();
+
+	return 0L;
+}

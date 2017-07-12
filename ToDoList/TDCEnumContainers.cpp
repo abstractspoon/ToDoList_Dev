@@ -201,7 +201,7 @@ int CTDCColumnIDArray::Add(TDC_COLUMN nColID)
 		return nFind;
 
 	// else
-	return Add(nColID);
+	return CArray<TDC_COLUMN, TDC_COLUMN>::Add(nColID);
 }
 
 void CTDCColumnIDArray::Remove(TDC_COLUMN nColID)

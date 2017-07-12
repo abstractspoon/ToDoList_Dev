@@ -240,7 +240,7 @@ BOOL CContentCtrl::SetContent(const unsigned char* pContent, int nLength, BOOL b
 	CAutoFlag af(m_bSettingContent, TRUE);
 
 	if (m_pContentCtrl)
-		return m_pContentCtrl->SetContent((unsigned char*)pContent, nLength, (bResetSelection != FALSE));
+		return m_pContentCtrl->SetContent(pContent, nLength, (bResetSelection != FALSE));
 
 	// else
 	return false;
