@@ -127,7 +127,7 @@ int CContentMgr::GetNumContent() const
 	return m_aContent.GetSize();
 }
 
-CString CContentMgr::GetContentID(int nContent) const
+CONTENTFORMAT CContentMgr::GetContentFormat(int nContent) const
 {
 	Initialize(); // initialize on demand
 
@@ -207,7 +207,7 @@ BOOL CContentMgr::CreateContentControl(const CONTENTFORMAT& cf, CContentCtrl& ct
 	return CreateContentControl(FindContent(cf), ctrl, nCtrlID, nStyle, dwExStyle, rect, hwndParent);
 }
 
-int CContentMgr::FindContent(LPCTSTR szID) const
+int CContentMgr::FindContent(const CONTENTFORMAT& cf) const
 {
 	Initialize(); // initialize on demand
 
@@ -217,17 +217,12 @@ int CContentMgr::FindContent(LPCTSTR szID) const
 	{
 		ASSERT (m_aContent[nContent] != NULL);
 
-		if (GetContentID(nContent).CompareNoCase(szID) == 0)
+		if (GetContentFormat(nContent).CompareNoCase(cf) == 0)
 			return nContent;
 	}
 
 	// else not found
 	return -1;
-}
-
-CONTENTFORMAT CContentMgr::GetContentFormat(int nContent) const
-{
-	return GetContentID(nContent);
 }
 
 BOOL CContentMgr::ConvertContentToHtml(const CBinaryData& content, CString& sHtml, LPCTSTR szID, LPCTSTR szCharSet, LPCTSTR szImageDir) const

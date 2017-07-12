@@ -22,7 +22,7 @@ public:
 	CTDLContentTypeComboBox(const CContentMgr* pContentMgr);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
-	int SetSelectedFormat(LPCTSTR szTypeID);
+	int SetSelectedFormat(const CONTENTFORMAT& cf);
 	void SetCurSel(int nSel);
 	int GetCurSel() const;	
 

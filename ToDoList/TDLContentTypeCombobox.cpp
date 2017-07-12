@@ -96,9 +96,9 @@ int CTDLContentTypeComboBox::GetSelectedFormat(CONTENTFORMAT& cf) const
 	return nSel;
 }
 
-int CTDLContentTypeComboBox::SetSelectedFormat(LPCTSTR szTypeID)
+int CTDLContentTypeComboBox::SetSelectedFormat(const CONTENTFORMAT& cf)
 {
-	int nSel = m_pContentMgr ? m_pContentMgr->FindContent(szTypeID) : CB_ERR;
+	int nSel = m_pContentMgr ? m_pContentMgr->FindContent(cf) : CB_ERR;
 
 	SetCurSel(nSel);
 

@@ -25,10 +25,9 @@ public:
 	void UpdateLocalizer();
 
 	int GetNumContent() const;
-	int FindContent(LPCTSTR szID) const;
+	int FindContent(const CONTENTFORMAT& cf) const;
 	BOOL SomePluginsHaveBadversions() const;
 	
-	CString GetContentID(int nContent) const;
 	CString GetContentDescription(int nContent) const;
 	CONTENTFORMAT GetContentFormat(int nContent) const;
 	HICON GetContentIcon(int nContent) const;
