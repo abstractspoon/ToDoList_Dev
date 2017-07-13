@@ -184,6 +184,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 		return FALSE;
 	}
 
+	m_ctrlComments.SetUITheme(m_theme);
+	
 	if (m_font.GetSafeHandle())
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_font.GetSafeHandle());
 
