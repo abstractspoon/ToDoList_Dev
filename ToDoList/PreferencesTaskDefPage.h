@@ -13,11 +13,10 @@
 #include "tdcimagelist.h"
 #include "tdlreminderperiodcombobox.h"
 #include "tdcenumcontainers.h"
-#include "tdlcontenttypecombobox.h"
+#include "tdlcommentsctrl.h"
 
 #include <afxtempl.h>
 
-#include "..\shared\contentctrl.h"
 #include "..\shared\contentMgr.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
@@ -86,10 +85,9 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	UINT m_nDefReminderLeadin;
 
-	CTDLContentTypeComboBox	m_cbCommentsFmt;
 	const CContentMgr* m_pMgrContent;
+	CTDLCommentsCtrl m_ctrlComments;
 	CONTENTFORMAT m_cfDefault;
-	CContentCtrl m_ctrlComments;
 	CBinaryData m_defCustomComments;
 	CString m_sDefTextComments;
 

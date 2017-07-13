@@ -24,22 +24,23 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(LPCTSTR szLabel = NULL, const CContentMgr* pMgrContent = NULL);
+	CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent = NULL);
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, const CRect& rPos, UINT nID);
-
 	void SetUITheme(const CUIThemeFile& theme);
+
+	int GetSelectedFormat(CONTENTFORMAT& cf) const;
+	int SetSelectedFormat(const CONTENTFORMAT& cf);
+
+	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
+	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent);
 
 protected:
 	const CContentMgr* m_pMgrContent;
 
 	CTDLContentTypeComboBox	m_cbCommentsFmt;
-	CONTENTFORMAT m_cfDefault;
 	CContentCtrl m_ctrlComments;
-	CBinaryData m_defCustomComments;
-	CString m_sDefTextComments;
-
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
 
@@ -55,8 +56,8 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-
 	afx_msg void OnSelchangeCommentsformat();
+
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
@@ -64,6 +65,7 @@ protected:
 
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
+	BOOL UpdateControlFormat();
 };
 
 #endif // AFX_TDLCOMMENTCTRL_H__852964E3_4ABD_4B66_88BA_F553177616F2__INCLUDED_

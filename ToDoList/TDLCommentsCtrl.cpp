@@ -1,9 +1,3 @@
-left
-bottom
-bottom
-bottom
-bottom
-top
 // TDLCommentsCtrl.cpp : implementation file
 //
 
@@ -21,37 +15,34 @@ top
 
 enum
 {
-	IDC_COMMENTSFORMATCOMBO = 1001,
-	IDC_COMMENTSCTRL,
+	IDC_LABEL = 1001,
+	IDC_COMBO,
+	IDC_CTRL,
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-const UINT WM_TCC_INITCOMMENTS = (WM_APP + 1);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCommentsCtrl dialog
 
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
-CTDLCommentsCtrl::CTDLCommentsCtrl(LPCTSTR szLabel, const CContentMgr* pMgrContent)
+CTDLCommentsCtrl::CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent)
 {
-	int nDLUComboOffset = 0;
+	int nComboOffsetDLU = 0;
 
 	if (!Misc::IsEmpty(szLabel))
 	{
 		AddRCControl(_T("CONTROL"), WC_STATIC, szLabel, 
-					SS_CENTERIMAGE, 0, 0, 0, 40, 12, (UINT)IDC_STATIC);
+					SS_CENTERIMAGE, 0, 0, 0, 40, 12, IDC_LABEL);
 
-		nDLUComboOffset = 43;
+		nComboOffsetDLU = 43;
 	}
 
 	AddRCControl(_T("CONTROL"), WC_COMBOBOX, _T(""), 
 					CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP,
-					0, nDLUComboOffset, 0, 85, 200, IDC_COMMENTSFORMATCOMBO);
+					0, nComboOffsetDLU, 0, nComboLenDLU, 200, IDC_COMBO);
 }
 
 CTDLCommentsCtrl::~CTDLCommentsCtrl()
@@ -62,7 +53,7 @@ void CTDLCommentsCtrl::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_COMMENTSFORMATCOMBO, m_cbCommentsFmt);
+	DDX_Control(pDX, IDC_COMBO, m_cbCommentsFmt);
 }
 
 BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
@@ -79,6 +70,8 @@ END_MESSAGE_MAP()
 
 BOOL CTDLCommentsCtrl::Create(CWnd* pParent, const CRect& rPos, UINT nID)
 {
+	SetBordersDLU(0);
+
 	return CRuntimeDlg::Create(NULL, (WS_CHILD | WS_VISIBLE | WS_TABSTOP), 
 								WS_EX_CONTROLPARENT, rPos, pParent, nID);
 }
@@ -86,9 +79,6 @@ BOOL CTDLCommentsCtrl::Create(CWnd* pParent, const CRect& rPos, UINT nID)
 BOOL CTDLCommentsCtrl::OnInitDialog()
 {
 	CRuntimeDlg::OnInitDialog();
-	
-	// Delay initialisation of comments until after any font changes
-	PostMessage(WM_TCC_INITCOMMENTS);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -98,10 +88,13 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CRuntimeDlg::OnSize(nType, cx, cy);
 
-	CRect rComments;
-	CalcCommentsCtrlRect(rComments, cx, cy);
+	if (m_ctrlComments.GetSafeHwnd())
+	{
+		CRect rComments;
+		CalcCommentsCtrlRect(rComments, cx, cy);
 
-	::MoveWindow(m_ctrlComments, rComments.left, rComments.right, rComments.Width(), rComments.Height(), TRUE);
+		::MoveWindow(m_ctrlComments, rComments.left, rComments.right, rComments.Width(), rComments.Height(), TRUE);
+	}
 }
 
 HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -119,39 +112,58 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	ExcludeCtrl(this, IDC_COMMENTSFORMATCOMBO, pDC);
-	ExcludeCtrl(this, IDC_COMMENTSCTRL, pDC);
+	ExcludeCtrl(this, IDC_LABEL, pDC);
+	ExcludeCtrl(this, IDC_COMBO, pDC);
+	ExcludeCtrl(this, IDC_CTRL, pDC);
 
 	return CRuntimeDlg::OnEraseBkgnd(pDC);
 }
 
 void CTDLCommentsCtrl::OnSelchangeCommentsformat() 
 {
-	ASSERT(m_pMgrContent);
-
-	m_cbCommentsFmt.GetSelectedFormat(m_cfDefault);
-
-	if (m_ctrlComments.GetContentFormat() != m_cfDefault)
+	if (UpdateControlFormat())
 	{
-		CRect rComments;
-		CalcCommentsCtrlRect(rComments);
-
-		DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
-
-		if (m_pMgrContent->CreateContentControl(m_cfDefault, m_ctrlComments, 
-												IDC_COMMENTSCTRL, dwStyle, WS_EX_CLIENTEDGE, 
-												rComments, *this))
-		{
-			CUIThemeFile theme;
-			theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
-
-			m_ctrlComments.SetUITheme(theme);
-			m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(*this));
-		}
-
-		if (!m_ctrlComments.SetContent(m_defCustomComments, TRUE))
-			m_ctrlComments.SetTextContent(m_sDefTextComments, TRUE);
+		// Notify Parent
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
 	}
+}
+
+BOOL CTDLCommentsCtrl::UpdateControlFormat()
+{
+	ASSERT(m_pMgrContent);
+	ASSERT(GetSafeHwnd());
+
+	CONTENTFORMAT cf;
+	m_cbCommentsFmt.GetSelectedFormat(cf);
+
+	if (m_ctrlComments.GetContentFormat() == cf)
+		return FALSE;
+
+	// Cache existing content
+	CString sTextContent;
+	CBinaryData customContent;
+	GetContent(sTextContent, customContent);
+
+	CRect rComments;
+	CalcCommentsCtrlRect(rComments);
+
+	DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
+
+	if (m_pMgrContent->CreateContentControl(cf, m_ctrlComments, 
+		IDC_CTRL, dwStyle, WS_EX_CLIENTEDGE, 
+		rComments, *this))
+	{
+		CUIThemeFile theme;
+		theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
+
+		m_ctrlComments.SetUITheme(theme);
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(*this));
+	}
+
+	// Restore content
+	SetContent(sTextContent, customContent);
+
+	return TRUE;
 }
 
 void CTDLCommentsCtrl::CalcCommentsCtrlRect(CRect& rCtrl, int cx, int cy) const
@@ -163,21 +175,19 @@ void CTDLCommentsCtrl::CalcCommentsCtrlRect(CRect& rCtrl, int cx, int cy) const
 	else
 		rCtrl.SetRect(0, 0, cx, cy);
 
-	CRect rCombo = GetCtrlRect(IDC_COMMENTSFORMATCOMBO);
+	CRect rCombo = GetCtrlRect(IDC_COMBO);
 	rCtrl.top = (rCombo.bottom + CDlgUnits(this).ToPixelsY(4));
 }
 
-LRESULT CTDLCommentsCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CTDLCommentsCtrl::OnCommentsChange(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_ctrlComments.IsSettingContent())
 	{
-		m_defCustomComments.Empty();
-		m_sDefTextComments.Empty();
-
-		m_ctrlComments.GetContent(m_defCustomComments);
-		m_ctrlComments.GetTextContent(m_sDefTextComments);
+		// Forward to parent
+		return GetParent()->SendMessage(WM_ICC_CONTENTCHANGE, wParam, lParam);
 	}
 
+	// else
 	return 0L;
 }
 
@@ -213,4 +223,42 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 	m_ctrlComments.SetUITheme(m_theme);
 
 	Invalidate();
+}
+
+BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customContent) const
+{
+	BOOL bRes = (m_ctrlComments.GetTextContent(sTextContent) > 0);
+	bRes |= (m_ctrlComments.GetContent(customContent) > 0);
+
+	return bRes;
+}
+
+BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent)
+{
+	if (m_ctrlComments.SetContent(customContent, TRUE))
+		return TRUE;
+
+	// else
+	return m_ctrlComments.SetTextContent(sTextContent, TRUE);
+}
+
+BOOL CTDLCommentsCtrl::GetSelectedFormat(CONTENTFORMAT& cf) const
+{
+	return (m_cbCommentsFmt.GetSelectedFormat(cf) != CB_ERR);
+}
+
+BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
+{
+	CONTENTFORMAT cfSel;
+	m_cbCommentsFmt.GetSelectedFormat(cfSel);
+
+	if (m_ctrlComments.GetSafeHwnd() && (cf == cfSel))
+		return TRUE;
+	
+	if (m_cbCommentsFmt.SetSelectedFormat(cf) == CB_ERR)
+		return FALSE;
+
+	// else
+	UpdateControlFormat();
+	return TRUE;
 }
