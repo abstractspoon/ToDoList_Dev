@@ -503,9 +503,23 @@ void CPreferencesDlg::OnApply()
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
 }
 
-LRESULT CPreferencesDlg::OnControlChange(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CPreferencesDlg::OnControlChange(WPARAM wp, LPARAM lp)
 {
 	GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
+
+	// Per-page handling
+	const CPreferencesPageBase* pPage = (const CPreferencesPageBase*)wp;
+
+	if (pPage == &m_pageUITasklistColors)
+	{
+		switch (lp)
+		{
+		case IDC_COMMENTSFONTSIZE:
+		case IDC_COMMENTSFONTLIST:
+			// TODO
+			break;
+		}
+	}
 
 	return 0L;
 }

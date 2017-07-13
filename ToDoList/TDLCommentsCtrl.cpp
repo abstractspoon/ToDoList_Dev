@@ -60,6 +60,7 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 
 	ON_CBN_SELCHANGE(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
@@ -82,6 +83,25 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+LRESULT CTDLCommentsCtrl::OnSetFont(WPARAM wParam, LPARAM /*lParam*/)
+{
+	if (!m_ctrlComments.GetSafeHwnd() && !m_font.GetSafeHandle())
+		GraphicsMisc::CreateFont(m_font, (HFONT)wParam);
+
+	return Default();
+}
+
+void CTDLCommentsCtrl::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)
+{
+	if (!GraphicsMisc::SameFont(m_font, sFaceName, nPointSize))
+	{
+		GraphicsMisc::CreateFont(m_font, sFaceName, nPointSize);
+
+		if (m_ctrlComments.GetSafeHwnd())
+			m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_font.GetSafeHandle());
+	}
 }
 
 void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
@@ -158,16 +178,14 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 
 	DWORD dwStyle = (WS_VISIBLE | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
 
-	if (m_pMgrContent->CreateContentControl(cf, m_ctrlComments, 
-		IDC_CTRL, dwStyle, WS_EX_CLIENTEDGE, 
-		rComments, *this))
+	if (!m_pMgrContent->CreateContentControl(cf, m_ctrlComments, 
+		IDC_CTRL, dwStyle, WS_EX_CLIENTEDGE, rComments, *this))
 	{
-		CUIThemeFile theme;
-		theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
-
-		m_ctrlComments.SetUITheme(theme);
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(*this));
+		return FALSE;
 	}
+
+	if (m_font.GetSafeHandle())
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_font.GetSafeHandle());
 
 	// Restore content
 	SetContent(sTextContent, customContent);

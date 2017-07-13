@@ -108,10 +108,10 @@ HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-void CPreferencesPageBase::OnControlChange(UINT /*nID*/)
+void CPreferencesPageBase::OnControlChange(UINT nID)
 {
 	if (IsWindowVisible())
-		GetParent()->SendMessage(WM_PPB_CTRLCHANGE);
+		GetParent()->SendMessage(WM_PPB_CTRLCHANGE, (WPARAM)this, nID);
 }
 
 void CPreferencesPageBase::SetBackgroundColor(COLORREF color)

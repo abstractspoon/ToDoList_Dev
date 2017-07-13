@@ -135,6 +135,7 @@ protected:
 	//{{AFX_VIRTUAL(CPreferencesUITasklistColorsPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -152,7 +153,8 @@ protected:
 	afx_msg void OnSetAttribValuecolor();
 	afx_msg void OnEditAttribValue();
 	afx_msg void OnSelchangeAttribValue();
-	virtual BOOL OnInitDialog();
+	afx_msg void OnSelchangeCommentsFont();
+	afx_msg void OnSelchangeTreeFont();
 	afx_msg void OnStarttaskcolor();
 	afx_msg void OnSetStarttaskcolor();
 	afx_msg void OnStarttodaytaskcolor();

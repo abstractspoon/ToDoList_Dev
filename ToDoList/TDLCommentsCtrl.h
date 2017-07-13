@@ -29,6 +29,7 @@ public:
 
 	BOOL Create(CWnd* pParent, const CRect& rPos, UINT nID);
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetDefaultCommentsFont(const CString& sFaceName, int nPointSize);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
 	int SetSelectedFormat(const CONTENTFORMAT& cf);
@@ -43,6 +44,7 @@ protected:
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
+	CFont m_font;
 
 protected:
 	int DoModal() { ASSERT(0); return IDCANCEL; }
@@ -58,6 +60,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeCommentsformat();
 
+	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);

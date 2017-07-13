@@ -145,6 +145,10 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SETATTRIBUTECOLOR, OnSetAttribValuecolor)
 	ON_CBN_EDITCHANGE(IDC_ATTRIBUTECOLORS, OnEditAttribValue)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTECOLORS, OnSelchangeAttribValue)
+	ON_CBN_SELCHANGE(IDC_COMMENTSFONTLIST, OnSelchangeCommentsFont)
+	ON_CBN_SELCHANGE(IDC_COMMENTSFONTSIZE, OnSelchangeCommentsFont)
+	ON_CBN_SELCHANGE(IDC_TREEFONTLIST, OnSelchangeTreeFont)
+	ON_CBN_SELCHANGE(IDC_TREEFONTSIZE, OnSelchangeTreeFont)
 	ON_BN_CLICKED(IDC_COLORTASKSBYCOLOR, OnChangeTextColorOption)
 	ON_BN_CLICKED(IDC_COLORTEXTBYPRIORITY, OnChangeTextColorOption)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTETOCOLORBY, OnSelchangeAttributetocolorby)
@@ -743,12 +747,13 @@ void CPreferencesUITasklistColorsPage::OnCommentsusetreefont()
 	UpdateData();
 
 	BOOL bCommentsUseTreeFont = (m_bCommentsUseTreeFont && m_bSpecifyTreeFont);
+
 	GetDlgItem(IDC_SPECIFYCOMMENTSFONT)->EnableWindow(!bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTSIZE)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTSIZELABEL)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTLIST)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
 
-	CPreferencesPageBase::OnControlChange();
+	CPreferencesPageBase::OnControlChange(IDC_COMMENTSFONTLIST);
 }
 
 void CPreferencesUITasklistColorsPage::OnSpecifycommentsfont() 
@@ -759,8 +764,23 @@ void CPreferencesUITasklistColorsPage::OnSpecifycommentsfont()
 	GetDlgItem(IDC_COMMENTSFONTSIZE)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTSIZELABEL)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
 	GetDlgItem(IDC_COMMENTSFONTLIST)->EnableWindow(m_bSpecifyCommentsFont && !bCommentsUseTreeFont);
+	
+	CPreferencesPageBase::OnControlChange(IDC_COMMENTSFONTLIST);
+}
 
-	CPreferencesPageBase::OnControlChange();
+void CPreferencesUITasklistColorsPage::OnSelchangeCommentsFont() 
+{
+	UpdateData();	
+
+	CPreferencesPageBase::OnControlChange(IDC_COMMENTSFONTLIST);
+}
+
+void CPreferencesUITasklistColorsPage::OnSelchangeTreeFont() 
+{
+	UpdateData();	
+	
+	if (m_bCommentsUseTreeFont)
+		CPreferencesPageBase::OnControlChange(IDC_COMMENTSFONTLIST);
 }
 
 void CPreferencesUITasklistColorsPage::OnDuetaskcolor() 
