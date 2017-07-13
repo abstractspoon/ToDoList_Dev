@@ -45,6 +45,7 @@ public:
 	~CPreferencesTaskDefPage();
 
 	void SetPriorityColors(const CDWordArray& aColors);
+	void SetDefaultCommentsFont(const CString& sFaceName, int nPointSize);
 
 	void GetTaskAttributes(TODOITEM& tdiDefault) const;
 	BOOL GetReminder(UINT& nMinutes, BOOL& bBeforeDue) const;

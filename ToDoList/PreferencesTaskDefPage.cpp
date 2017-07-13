@@ -155,6 +155,11 @@ void CPreferencesTaskDefPage::SetPriorityColors(const CDWordArray& aColors)
 	m_cbDefPriority.SetColors(aColors);
 }
 
+void CPreferencesTaskDefPage::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)
+{
+	m_ctrlComments.SetDefaultCommentsFont(sFaceName, nPointSize);
+}
+
 void CPreferencesTaskDefPage::OnOK() 
 {
 	CPreferencesPageBase::OnOK();

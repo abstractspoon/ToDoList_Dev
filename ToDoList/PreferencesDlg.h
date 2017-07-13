@@ -345,6 +345,7 @@ protected:
 	BOOL SetActivePage(int nPage); // override
 	CString GetItemPath(HTREEITEM hti) const;
 	void SynchronizeTree();
+	void UpdateTaskDefaultCommentsFont();
 	
 	virtual void ReposContents(CDeferWndMove& dwm, int nDX, int nDY);
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);

@@ -418,6 +418,8 @@ void CPreferencesDlg::OnSelchangedPages(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 			m_pageUITasklistColors.GetPriorityColors(aColors);
 			m_pageTaskDef.SetPriorityColors(aColors);
+
+			UpdateTaskDefaultCommentsFont();
 		}
 		else if (pPage == &m_pageUITasklistColors)
 		{
@@ -516,12 +518,29 @@ LRESULT CPreferencesDlg::OnControlChange(WPARAM wp, LPARAM lp)
 		{
 		case IDC_COMMENTSFONTSIZE:
 		case IDC_COMMENTSFONTLIST:
-			// TODO
+			UpdateTaskDefaultCommentsFont();
 			break;
 		}
 	}
 
 	return 0L;
+}
+
+void CPreferencesDlg::UpdateTaskDefaultCommentsFont()
+{
+	CString sFaceName;
+	int nPointSize = -1;
+
+	if (!GetCommentsFont(sFaceName, nPointSize))
+	{
+		if (!GetCommentsUseTreeFont() || !GetTreeFont(sFaceName, nPointSize))
+		{
+			nPointSize = GraphicsMisc::GetFontNameAndPointSize(*this, sFaceName);
+		}
+	}
+
+	m_pageTaskDef.SetDefaultCommentsFont(sFaceName, nPointSize);
+
 }
 
 void CPreferencesDlg::ReposContents(CDeferWndMove& dwm, int nDX, int nDY)
