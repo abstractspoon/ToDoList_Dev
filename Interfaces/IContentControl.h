@@ -22,10 +22,10 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT WM_ICC_WANTSPELLCHECK 	= ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
-const UINT WM_ICC_COMMENTSCHANGE	= ::RegisterWindowMessageW(L"WM_ICC_COMMENTSCHANGE");
-const UINT WM_ICC_COMMENTSKILLFOCUS	= ::RegisterWindowMessageW(L"WM_ICC_COMMENTSKILLFOCUS");
-const UINT WM_ICC_DOHELP			= ::RegisterWindowMessageW(L"WM_ICC_DOHELP"); // lParam is literal string
+const UINT WM_ICC_WANTSPELLCHECK= ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
+const UINT WM_ICC_CONTENTCHANGE	= ::RegisterWindowMessageW(L"WM_ICC_CONTENTCHANGE");
+const UINT WM_ICC_KILLFOCUS		= ::RegisterWindowMessageW(L"WM_ICC_KILLFOCUS");
+const UINT WM_ICC_DOHELP		= ::RegisterWindowMessageW(L"WM_ICC_DOHELP"); // lParam is literal string
 
 
 //////////////////////////////////////////////////////////////////////

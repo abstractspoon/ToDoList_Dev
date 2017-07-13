@@ -70,9 +70,8 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
 
-	ON_CBN_SELCHANGE(IDC_COMMENTSFORMATCOMBO, OnSelchangeCommentsformat)
-	ON_REGISTERED_MESSAGE(WM_ICC_COMMENTSCHANGE, OnCommentsChange)
-	ON_MESSAGE(WM_TCC_INITCOMMENTS, OnInitComments)
+	ON_CBN_SELCHANGE(IDC_COMBO, OnSelchangeCommentsformat)
+	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -182,13 +181,22 @@ LRESULT CTDLCommentsCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return 0L;
 }
 
-LRESULT CTDLCommentsCtrl::OnInitComments(WPARAM /*wParam*/, LPARAM /*lParam*/)
+LRESULT CTDLCommentsCtrl::OnCommentsDoHelp(WPARAM wParam, LPARAM lParam)
 {
-	ASSERT(!m_ctrlComments.IsSettingContent());
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_DOHELP, wParam, lParam);
+}
 
-	OnSelchangeCommentsformat();
+LRESULT CTDLCommentsCtrl::OnCommentsKillFocus(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_KILLFOCUS, wParam, lParam);
+}
 
-	return 0L;
+LRESULT CTDLCommentsCtrl::OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_WANTSPELLCHECK, wParam, lParam);
 }
 
 void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)

@@ -58,7 +58,9 @@ protected:
 
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnInitComments(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
 
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;

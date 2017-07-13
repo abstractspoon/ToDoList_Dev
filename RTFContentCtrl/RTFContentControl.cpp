@@ -161,7 +161,7 @@ BOOL CRTFContentControl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 void CRTFContentControl::OnChangeText() 
 {
 	if (m_bAllowNotify && !m_rtf.IsIMEComposing())
-		GetParent()->SendMessage(WM_ICC_COMMENTSCHANGE);
+		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 
 	RE_PASTE nFileLink = m_rtf.GetFileLinkOption();
 	BOOL bDefault = m_rtf.IsFileLinkOptionDefault();
@@ -173,7 +173,7 @@ void CRTFContentControl::OnChangeText()
 void CRTFContentControl::OnKillFocus() 
 {
 	if (m_bAllowNotify)
-		GetParent()->SendMessage(WM_ICC_COMMENTSKILLFOCUS);
+		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 }
 
 LRESULT CRTFContentControl::OnSetFont(WPARAM wp, LPARAM lp)

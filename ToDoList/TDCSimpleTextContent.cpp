@@ -208,7 +208,7 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 
 
 	if (m_bAllowNotify && IsWindowEnabled() && !(GetStyle() & ES_READONLY))
-		GetParent()->SendMessage(WM_ICC_COMMENTSCHANGE);
+		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 	
 	return FALSE;
 }
@@ -216,7 +216,7 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 BOOL CTDLSimpleTextContentCtrl::OnKillFocus() 
 {
 	if (m_bAllowNotify)
-		GetParent()->SendMessage(WM_ICC_COMMENTSKILLFOCUS);
+		GetParent()->SendMessage(WM_ICC_KILLFOCUS);
 	
 	return FALSE;
 }
