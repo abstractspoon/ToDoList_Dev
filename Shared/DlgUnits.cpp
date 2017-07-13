@@ -63,32 +63,32 @@ void CDlgUnits::Initialise(HWND hWnd, BOOL bDlgParent)
 
 int CDlgUnits::ToPixelsX(int x) const
 {
-	int nDummy;
-	ToPixels(x, nDummy);
+	int nUnused;
+	ToPixels(x, nUnused);
 
 	return x;
 }
 
 int CDlgUnits::ToPixelsY(int y) const
 {
-	int nDummy;
-	ToPixels(nDummy, y);
+	int nUnused;
+	ToPixels(nUnused, y);
 
 	return y;
 }
 
 int CDlgUnits::FromPixelsX(int x) const
 {
-	int nDummy;
-	FromPixels(x, nDummy);
+	int nUnused;
+	FromPixels(x, nUnused);
 
 	return x;
 }
 
 int CDlgUnits::FromPixelsY(int y) const
 {
-	int nDummy;
-	FromPixels(nDummy, y);
+	int nUnused;
+	FromPixels(nUnused, y);
 
 	return y;
 }
@@ -112,12 +112,20 @@ void CDlgUnits::ToPixels(long& x, long& y) const
 
 void CDlgUnits::ToPixels(int& x, int& y) const
 {
-	ToPixels((long&)x, (long&)y);
+	long lx(x), ly(y);
+	ToPixels(lx, ly);
+
+	x = (int)lx;
+	y = (int)ly;
 }
 
 void CDlgUnits::ToPixels(short& x, short& y) const
 {
-	ToPixels((long&)x, (long&)y);
+	long lx(x), ly(y);
+	ToPixels(lx, ly);
+
+	x = (short)lx;
+	y = (short)ly;
 }
 
 void CDlgUnits::ToPixels(POINT& point) const
@@ -156,12 +164,20 @@ void CDlgUnits::FromPixels(long& x, long& y) const
 
 void CDlgUnits::FromPixels(int& x, int& y) const
 {
-	FromPixels((long&)x, (long&)y);
+	long lx(x), ly(y);
+	FromPixels(lx, ly);
+
+	x = (int)lx;
+	y = (int)ly;
 }
 
 void CDlgUnits::FromPixels(short& x, short& y) const
 {
-	FromPixels((long&)x, (long&)y);
+	long lx(x), ly(y);
+	FromPixels(lx, ly);
+
+	x = (short)lx;
+	y = (short)ly;
 }
 
 void CDlgUnits::FromPixels(POINT& point) const
