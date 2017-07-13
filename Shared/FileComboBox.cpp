@@ -36,7 +36,7 @@ void CFileComboBox::CMultiFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 			SetWindowText(aPaths[0]);
 			
 			// send parent a change notification
-			GetParent()->SendMessage(WM_COMMAND, MAKELPARAM(EN_CHANGE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
+			GetParent()->SendMessage(WM_COMMAND, MAKELPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
 			
 			// and a browse notification
 			CString sPaths = Misc::FormatArray(aPaths, '|');
