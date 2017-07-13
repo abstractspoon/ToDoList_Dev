@@ -264,11 +264,11 @@ BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customCont
 
 BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent)
 {
-	if (m_ctrlComments.SetContent(customContent, TRUE))
+	if (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, TRUE))
 		return TRUE;
 
 	// else
-	return m_ctrlComments.SetTextContent(sTextContent, TRUE);
+	return (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, TRUE));
 }
 
 BOOL CTDLCommentsCtrl::GetSelectedFormat(CONTENTFORMAT& cf) const
