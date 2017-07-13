@@ -41,7 +41,7 @@ protected:
 
 protected:
 	BOOL ConstructScrollbar();
-	virtual void UpdatePageSize(int nPage);
+	void UpdatePageSize(int nPage, BOOL bPageChange); // virtual
 	BOOL ScrollTo(LONG nPos);
 
 };

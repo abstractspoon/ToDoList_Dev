@@ -216,12 +216,12 @@ BOOL CPropertyPageHost::CreateAllPages()
 			return FALSE;
 	}
 
-	UpdatePageSize(m_nSelIndex);
+	UpdatePageSize(m_nSelIndex, TRUE);
 
 	return TRUE;
 }
 
-void CPropertyPageHost::UpdatePageSize(int nPage)
+void CPropertyPageHost::UpdatePageSize(int nPage, BOOL /*bPageChange*/)
 {
 	if (nPage == -1)
 		return;
@@ -264,7 +264,7 @@ BOOL CPropertyPageHost::SetActivePage(int nIndex, BOOL bAndFocus)
 			}
 		}
 
-		UpdatePageSize(nIndex);
+		UpdatePageSize(nIndex, TRUE);
 		pPage->OnSetActive();
 		pPage->ShowWindow(SW_SHOW);
 
@@ -461,7 +461,7 @@ void CPropertyPageHost::OnSize(UINT nType, int cx, int cy)
 	
 	// resize active page
 	if (m_nSelIndex != -1)
-		UpdatePageSize(m_nSelIndex);
+		UpdatePageSize(m_nSelIndex, FALSE);
 }
 
 BOOL CPropertyPageHost::OnEraseBkgnd(CDC* /*pDC*/) 

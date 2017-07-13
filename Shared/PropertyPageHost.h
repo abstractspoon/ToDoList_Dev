@@ -109,7 +109,7 @@ protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnNotify(WPARAM wp, LPARAM lp, LRESULT* pResult);
 	virtual BOOL OnCommand(WPARAM wp, LPARAM lp);
-	virtual void UpdatePageSize(int nPage);
+	virtual void UpdatePageSize(int nPage, BOOL bPageChange);
 
 };
 

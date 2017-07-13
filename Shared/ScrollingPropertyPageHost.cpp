@@ -68,7 +68,7 @@ BOOL CScrollingPropertyPageHost::ConstructScrollbar()
 	return (m_scroll.GetSafeHwnd() != NULL);
 }
 
-void CScrollingPropertyPageHost::UpdatePageSize(int nPage)
+void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 {
 	// get the page and host sizes
 	CRect rPage, rHost;
@@ -89,7 +89,24 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage)
 	// the scrollbar
 	else if (rPage.Height() > rHost.Height())
 	{
-		VERIFY(ConstructScrollbar());
+		// Try to preserve current scroll pos if the page hasn't changed
+		int nPos = 0;
+		
+		if (m_scroll.GetSafeHwnd())
+		{
+			if (!bPageChange)
+			{
+				nPos = m_scroll.GetScrollPos();
+				nPos = min(nPos, rPage.Height());
+
+				if (nPos > 0)
+					ScrollToTop();
+			}
+		}
+		else
+		{
+			VERIFY(ConstructScrollbar());
+		}
 
 		// set scroll info and show scrollbar
 		SCROLLINFO si = { sizeof(SCROLLINFO), 0 };
@@ -109,6 +126,9 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage)
 		rPage.right -= ::GetSystemMetrics(SM_CXVSCROLL);
 		GetPage(nPage)->MoveWindow(rPage, FALSE);
 
+		if (nPos > 0)
+			ScrollTo(nPos);
+
 		return;
 	}
 	
@@ -117,7 +137,7 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage)
 		m_scroll.ShowWindow(SW_HIDE);
 
 	// default resizing
-	CPropertyPageHost::UpdatePageSize(nPage);
+	CPropertyPageHost::UpdatePageSize(nPage, bPageChange);
 }
 
 void CScrollingPropertyPageHost::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
