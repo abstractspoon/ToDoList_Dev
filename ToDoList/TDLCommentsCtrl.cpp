@@ -112,9 +112,18 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	ExcludeCtrl(this, IDC_LABEL, pDC);
-	ExcludeCtrl(this, IDC_COMBO, pDC);
-	ExcludeCtrl(this, IDC_CTRL, pDC);
+	if (m_theme.crAppBackLight != CLR_NONE)
+	{
+		ExcludeCtrl(this, IDC_LABEL, pDC);
+		ExcludeCtrl(this, IDC_COMBO, pDC);
+		ExcludeCtrl(this, IDC_CTRL, pDC);
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		pDC->FillSolidRect(rClient, m_theme.crAppBackLight);
+		return TRUE;
+	}
 
 	return CRuntimeDlg::OnEraseBkgnd(pDC);
 }

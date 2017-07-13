@@ -329,5 +329,11 @@ LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lPar
 	m_ctrlComments.SetSelectedFormat(m_cfDefault);
 	m_ctrlComments.SetContent(m_sDefTextComments, m_defCustomComments);
 
+	CUIThemeFile theme;
+	theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
+	theme.crAppBackDark = theme.crAppBackLight = RGB(255, 255, 255);
+	
+	m_ctrlComments.SetUITheme(theme);
+
 	return 0L;
 }
