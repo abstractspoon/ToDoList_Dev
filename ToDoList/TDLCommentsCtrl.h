@@ -27,15 +27,27 @@ public:
 	CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent = NULL);
 	virtual ~CTDLCommentsCtrl();
 
-	BOOL Create(CWnd* pParent, const CRect& rPos, UINT nID);
+	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetDefaultCommentsFont(HFONT hFont);
+	void SetReadOnly(BOOL bReadOnly) { m_ctrlComments.SetReadOnly(bReadOnly); }
+	void SetPreferencesFilePath(LPCTSTR szFilePath) { m_sPrefsFilePath = szFilePath; }
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
 	int SetSelectedFormat(const CONTENTFORMAT& cf);
+	BOOL IsFormat(const CONTENTFORMAT& cf) const { return m_ctrlComments.IsFormat(cf); }
 
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
-	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent);
+	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection);
+	
+	BOOL Undo() { return m_ctrlComments.Undo(); }
+	BOOL Redo() { return m_ctrlComments.Redo(); }
+
+
+	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
+
+	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }
 
 protected:
 	const CContentMgr* m_pMgrContent;
@@ -45,6 +57,8 @@ protected:
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
 	HFONT m_hFont;
+	BOOL m_bFirstLoadCommentsPrefs;
+	CString m_sPrefsFilePath;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;
@@ -62,6 +76,7 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeCommentsformat();
+	afx_msg void OnDestroy();
 
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
@@ -72,6 +87,10 @@ protected:
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
 	BOOL UpdateControlFormat();
+	CString GetPreferencesKey() const;
+	void SavePreferences() const;
+	void LoadPreferences();
+
 };
 
 #endif // AFX_TDLCOMMENTCTRL_H__852964E3_4ABD_4B66_88BA_F553177616F2__INCLUDED_

@@ -8,6 +8,8 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\misc.h"
+#include "..\shared\themed.h"
+#include "..\shared\preferences.h"
 
 #include "..\interfaces\icontentcontrol.h"
 
@@ -29,14 +31,14 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CCon
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent),
+	m_bFirstLoadCommentsPrefs(TRUE),
 	m_hFont(NULL)
 {
 	int nComboOffsetDLU = 0;
 
 	if (!Misc::IsEmpty(szLabel))
 	{
-		AddRCControl(_T("CONTROL"), WC_STATIC, szLabel, 
-					SS_CENTERIMAGE, 0, 0, 0, 40, 12, IDC_LABEL);
+		AddRCControl(_T("CONTROL"), WC_STATIC, szLabel, SS_CENTERIMAGE, 0, 0, 0, 40, 12, IDC_LABEL);
 
 		nComboOffsetDLU = 43;
 	}
@@ -63,14 +65,15 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 
-	ON_CBN_SELCHANGE(IDC_COMBO, OnSelchangeCommentsformat)
+	ON_CBN_SELENDOK(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCommentsCtrl message handlers
 
-BOOL CTDLCommentsCtrl::Create(CWnd* pParent, const CRect& rPos, UINT nID)
+BOOL CTDLCommentsCtrl::Create(CWnd* pParent, UINT nID, const CRect& rPos)
 {
 	SetBordersDLU(0);
 
@@ -115,7 +118,7 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rComments;
 		CalcCommentsCtrlRect(rComments, cx, cy);
 
-		::MoveWindow(m_ctrlComments, rComments.left, rComments.right, rComments.Width(), rComments.Height(), TRUE);
+		::MoveWindow(m_ctrlComments, rComments.left, rComments.top, rComments.Width(), rComments.Height(), TRUE);
 	}
 }
 
@@ -123,10 +126,13 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if (pWnd->GetDlgCtrlID() == IDC_STATIC)
+	if (nCtlColor == CTLCOLOR_STATIC)
 	{
 		if (m_brBack.GetSafeHandle())
+		{
+			pDC->SetBkMode(TRANSPARENT);
 			hbr = m_brBack;
+		}
 	}
 
 	return hbr;
@@ -158,9 +164,9 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 	CONTENTFORMAT cfOld = m_ctrlComments.GetContentFormat();
 	BOOL bHadContent = GetContent(sOldTextContent, oldCustomContent);
 
+	// Restore content if there was any
 	if (UpdateControlFormat())
 	{
-		// Restore content if there was any
 		if (bHadContent)
 		{
 			CONTENTFORMAT cfNew = m_ctrlComments.GetContentFormat();
@@ -172,7 +178,7 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 				// back without having made an edit
 				m_cfLastCustom = cfOld;
 				m_LastCustomComments = oldCustomContent;
-				
+
 				m_ctrlComments.SetTextContent(sOldTextContent, TRUE);
 			}
 			else
@@ -195,8 +201,17 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 		}
 
 		// Notify Parent
-		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
 	}
+}
+
+BOOL CTDLCommentsCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	if (m_ctrlComments.PreTranslateMessage(pMsg))
+		return TRUE;
+
+	// else
+	return CDialog::PreTranslateMessage(pMsg);
 }
 
 BOOL CTDLCommentsCtrl::UpdateControlFormat()
@@ -204,11 +219,20 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	ASSERT(m_pMgrContent);
 	ASSERT(GetSafeHwnd());
 
+	// save outgoing content prefs provided they've already been loaded
+	if (!m_bFirstLoadCommentsPrefs)
+		SavePreferences();
+
 	CONTENTFORMAT cf;
 	m_cbCommentsFmt.GetSelectedFormat(cf);
 
 	if (m_ctrlComments.GetContentFormat() == cf)
+	{
+		LoadPreferences();
+		m_bFirstLoadCommentsPrefs = m_sPrefsFilePath.IsEmpty();
+
 		return FALSE;
+	}
 
 	CRect rComments;
 	CalcCommentsCtrlRect(rComments);
@@ -221,10 +245,13 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 		return FALSE;
 	}
 
-	m_ctrlComments.SetUITheme(m_theme);
+	if (CThemed::IsAppThemed())
+		m_ctrlComments.SetUITheme(m_theme);
 	
 	if (m_hFont)
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
+
+	LoadPreferences();
 
 	return TRUE;
 }
@@ -300,12 +327,12 @@ BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customCont
 	return bRes;
 }
 
-BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent)
+BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection)
 {
-	BOOL bSet = (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, TRUE));
+	BOOL bSet = (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, bResetSelection));
 
 	if (!bSet)
-		bSet = (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, TRUE));
+		bSet = (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, bResetSelection));
 
 	if (bSet)
 	{
@@ -331,9 +358,52 @@ BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
 		return TRUE;
 	
 	if (m_cbCommentsFmt.SetSelectedFormat(cf) == CB_ERR)
-		return FALSE;
+	{
+		if (!cf.IsEmpty())
+			return FALSE;
+
+		// else
+		m_ctrlComments.SetReadOnly(TRUE);
+		return TRUE;
+	}
 
 	// else
 	UpdateControlFormat();
 	return TRUE;
+}
+
+void CTDLCommentsCtrl::SavePreferences() const 
+{ 
+	CPreferences prefs;
+	CString sKey = GetPreferencesKey();
+
+	return m_ctrlComments.SavePreferences(prefs, sKey); 
+}
+
+void CTDLCommentsCtrl::LoadPreferences() 
+{ 
+	CPreferences prefs;
+	CString sKey = GetPreferencesKey();
+
+	return m_ctrlComments.LoadPreferences(prefs, sKey); 
+}
+
+CString CTDLCommentsCtrl::GetPreferencesKey() const
+{
+	CString sKey;
+
+	if (!m_sPrefsFilePath.IsEmpty())
+		sKey.Format(_T("FileStates\\%s"), CPreferences::KeyFromFile(m_sPrefsFilePath));
+	else
+		sKey = _T("FileStates\\Default");
+
+	return sKey;
+}
+
+
+void CTDLCommentsCtrl::OnDestroy()
+{
+	CRuntimeDlg::OnDestroy();
+
+	SavePreferences();
 }

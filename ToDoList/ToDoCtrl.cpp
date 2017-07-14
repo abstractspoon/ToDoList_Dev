@@ -194,7 +194,6 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_bDelayLoaded(FALSE),
 	m_bDeletingTasks(FALSE),
 	m_bDragDropSubtasksAtTop(TRUE),
-	m_bFirstLoadCommentsPrefs(TRUE),
 	m_bModified(FALSE), 
 	m_bSourceControlled(FALSE),
 	m_bSplitting(FALSE),
@@ -202,7 +201,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_cbAllocBy(ACBS_ALLOWDELETE),
 	m_cbAllocTo(ACBS_ALLOWDELETE),
 	m_cbCategory(ACBS_ALLOWDELETE),
-	m_cbCommentsType(&mgr),
+	m_ctrlComments(CEnString(IDS_TDC_FIELD_COMMENTS), 85, &mgr),
 	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
 	m_cbStatus(ACBS_ALLOWDELETE),
 	m_cbTags(ACBS_ALLOWDELETE),
@@ -211,7 +210,6 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_cbTimeStart(TCB_NOTIME),
 	m_cbVersion(ACBS_ALLOWDELETE),
 	m_cfDefault(cfDefault),
-	m_ctrlComments(NULL),
 	m_dCost(0),
 	m_dLogTime(0),
 	m_dTimeEstimate(0),
@@ -288,7 +286,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ALLOCTO, m_cbAllocTo);
 	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
 	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
-	DDX_Control(pDX, IDC_COMMENTSTYPE, m_cbCommentsType);
 	DDX_Control(pDX, IDC_COST, m_eCost);
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
@@ -366,17 +363,12 @@ void CToDoCtrl::UpdateComments(BOOL bSaveAndValidate)
 {
 	if (bSaveAndValidate)
 	{
-		m_ctrlComments.GetTextContent(m_sTextComments);
-		m_ctrlComments.GetContent(m_customComments);
+		m_ctrlComments.GetContent(m_sTextComments, m_customComments);
 	}
 	else
 	{
-		// if we can't set the custom comments or
-		// there are no custom comments then try setting the text comments
-		BOOL bCommentsFocused = m_ctrlComments.HasFocus();
-
-		if (m_customComments.IsEmpty() || !m_ctrlComments.SetContent(m_customComments, !bCommentsFocused))
-			m_ctrlComments.SetTextContent(m_sTextComments, !bCommentsFocused);
+ 		BOOL bCommentsFocused = m_ctrlComments.HasFocus();
+		m_ctrlComments.SetContent(m_sTextComments, m_customComments, !bCommentsFocused);
 	}
 }
 
@@ -439,7 +431,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_CBN_SELENDCANCEL(IDC_RISK, OnSelCancelRisk)
 	ON_CBN_SELENDCANCEL(IDC_STATUS, OnSelCancelStatus)
 	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
-	ON_CBN_SELENDOK(IDC_COMMENTSTYPE, OnSelChangeCommentsType)
+	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelChangeCommentsType)
 	ON_EN_CHANGE(IDC_COST, OnChangeCost)
 	ON_EN_CHANGE(IDC_DEPENDS, OnChangeDependency)
 	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
@@ -575,8 +567,8 @@ BOOL CToDoCtrl::OnInitDialog()
 	// create rest of controls
 	CRuntimeDlg::OnInitDialog();
 	
-	// host for comments
-	VERIFY (CreateContentControl(FALSE));
+	// comments
+	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 	
 	// disable translation of auto-combos
 	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
@@ -644,84 +636,6 @@ void CToDoCtrl::LoadTaskIcons()
 	OnTaskIconsChanged();
 }
 
-BOOL CToDoCtrl::CreateContentControl(BOOL bResendComments)
-{
-	CPreferences prefs;
-	CString sKey = GetPreferencesKey(); // no subkey
-
-	// save outgoing content prefs provided they've already been loaded
-	if (!m_bFirstLoadCommentsPrefs)
-	{
-		m_ctrlComments.SavePreferences(prefs, sKey);
-	}
-
-	// check to see if we really need to (re)create the control
-	if (m_ctrlComments.IsFormat(m_cfComments))
-	{
-		// load preferences
-		m_ctrlComments.LoadPreferences(prefs, sKey);
-
-		// only reset this flag if we have a tasklist attached
-		m_bFirstLoadCommentsPrefs = m_sLastSavePath.IsEmpty();
-
-		return TRUE;
-	}
-
-	// create new content control
-	CRect rect(0, 0, 0, 0);
-
-	if (m_ctrlComments.GetSafeHwnd())
-	{
-		::GetWindowRect(m_ctrlComments, &rect);
-		ScreenToClient(rect);
-	}
-
-	DWORD dwVisStyle = (IsCommentsVisible(TRUE) ? WS_VISIBLE : 0);
-	DWORD dwStyle = (dwVisStyle | WS_TABSTOP | WS_CHILD | WS_CLIPSIBLINGS); 
-
-	BOOL bSuccess = m_mgrContent.CreateContentControl(m_cfComments, m_ctrlComments, 
-													IDC_COMMENTS, dwStyle, WS_EX_CLIENTEDGE, rect, *this);
-
-	if (!bSuccess)
-	{
-		// now that we are going to fallback on m_cfDefault
-		// check to see if we really need to (re)create the control
-		if (!m_ctrlComments.IsFormat(m_cfDefault))
-		{
-			bSuccess = m_mgrContent.CreateContentControl(m_cfDefault, m_ctrlComments, 
-														IDC_COMMENTS, dwStyle, WS_EX_CLIENTEDGE, rect, *this);
-		}
-		else
-		{
-			bSuccess = TRUE;
-		}
-
-		// update comments type
-		if (bSuccess)
-			m_cfComments = m_cfDefault;
-	}
-
-	if (bSuccess)
-	{
-		// set the font
-		UpdateCommentsFont(bResendComments);
-
-		// make sure its in the right pos in the tab order
-		::SetWindowPos(m_ctrlComments, ::GetDlgItem(*this, IDC_COMMENTSLABEL), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-
-		// (re)set the edit prompt
-		m_mgrPrompts.SetEditPrompt(m_ctrlComments, IDS_TDC_EDITPROMPT_COMMENTS);
-
-		if (CThemed::IsAppThemed())
-			m_ctrlComments.SetUITheme(m_theme);
-
-		// load preferences
-		m_ctrlComments.LoadPreferences(prefs, sKey);
-	}
-
-	return bSuccess; 
-}
-
 void CToDoCtrl::InitEditPrompts()
 {
 	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
@@ -738,8 +652,6 @@ void CToDoCtrl::InitEditPrompts()
 	
 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
-
-	m_mgrPrompts.SetEditPrompt(m_ctrlComments, IDS_TDC_EDITPROMPT_COMMENTS);
 
 	// tree handles its own
 	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
@@ -799,21 +711,10 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		// we've had some trouble with plugins using the
-		// richedit control so after a font change we always
-		// resend the content
+		// we've had some trouble with plugins using the richedit control 
+		// so after a font change we always resend the content
 		if (bResendComments)
-		{
-			if (m_customComments.GetLength())
-			{
-				if (!m_ctrlComments.SetContent(m_customComments, FALSE))
-					m_ctrlComments.SetTextContent(m_sTextComments, FALSE);
-			}
-			else
-			{
-				m_ctrlComments.SetTextContent(m_sTextComments, FALSE);
-			}
-		}
+			m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
 
 		return TRUE;
 	}
@@ -1538,42 +1439,7 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 	}
 
 	if (!rComments.IsRectEmpty())
-	{
-		CDlgUnits dlu(this);
-
-		// label
-		// NOTE: label can be resized smaller so we must restore 
-		// the actual size each time
-		CRect rLabel = GetCtrlRect(IDC_COMMENTSLABEL);
-		
-		rLabel.right = rLabel.left + dlu.ToPixelsX(CTRLLABELLEN);
-		rLabel.OffsetRect(rComments.left - rLabel.left, rComments.top - rLabel.top);
-		
-		// type combo
-		// NOTE: combo can be resized smaller so we must restore 
-		// the actual size each time
-		CRect rCombo = GetCtrlRect(IDC_COMMENTSTYPE);
-		
-		rCombo.right = rCombo.left + dlu.ToPixelsX(COMMENTSTYPELEN);
-		rCombo.OffsetRect(rLabel.right + 4 - rCombo.left, rComments.top - rCombo.top);
-		
-		if (m_nCommentsPos == TDCUIL_LEFT)
-		{
-			rLabel.right = min(rCombo.left, rComments.right);
-			rCombo.right = min(rCombo.right, rComments.right);
-		}
-		rLabel.bottom = rCombo.bottom;
-	
-		pDWM->MoveWindow(GetDlgItem(IDC_COMMENTSLABEL), rLabel);
-		pDWM->MoveWindow(&m_cbCommentsType, rCombo);
-		
-		// make sure drop list displays correctly
-		CDialogHelper::RefreshMaxDropWidth(m_cbCommentsType);
-		
-		// comments below combo
-		rComments.top = rCombo.bottom + 5;
 		pDWM->MoveWindow(GetDlgItem(IDC_COMMENTS), rComments);
-	}
 }
 
 void CToDoCtrl::ShowHideControl(const CTRLITEM& ctrl)
@@ -1622,13 +1488,9 @@ void CToDoCtrl::ShowHideControls()
 			ShowHideControl(buddy);
 	}
 
-	// hide comments if there is not enough space
+	// Comments as required
 	BOOL bCommentsVis = IsCommentsVisible(TRUE);
-	ShowCtrls(IDC_COMMENTSLABEL, IDC_COMMENTS, bCommentsVis);
-
-	// re-hide the comments type combo if necessary
-	BOOL bHide = (!bCommentsVis || (m_mgrContent.GetNumContent() <= 1));
-	m_cbCommentsType.ShowWindow(bHide ? SW_HIDE : SW_SHOW);
+	m_ctrlComments.ShowWindow(bCommentsVis ? SW_SHOW : SW_HIDE);
 
 	// task tree
 	UpdateTasklistVisibility();
@@ -2028,20 +1890,16 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	// update data controls excluding comments
 	UpdateData(FALSE);
 
-	// recreate comments control if necessary
-	// note: if more than one comments type is selected then sCommentsType
-	// will be empty which will put the comments type combo in an
-	// indeterminate state which is the desired effect since this requires
-	// the user to reset the type before they can edit
 	if (bIncComments)
 	{
+		// if more than one comments type is selected then sCommentsType
+		// will be empty which will put the comments type combo in an
+		// indeterminate state which is the desired effect since this requires
+		// the user to reset the type before they can edit
 		m_cfComments = sCommentsType;
-		m_cbCommentsType.SetSelectedFormat(m_cfComments);
+		m_ctrlComments.SetSelectedFormat(m_cfComments);
 		
-		if (!sCommentsType.IsEmpty())
-			CreateContentControl(FALSE);
-		
-		// update control content
+		// update content
 		UpdateComments(FALSE);
 	}
 
@@ -2821,13 +2679,13 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 		if (!bInternal)
 		{
 			// try custom comments if that's what they are
-			if (!bCanChangeCustom || 
-				!m_ctrlComments.SetContent(customComments, FALSE) || 
-				customComments.IsEmpty())
-			{
-				// else text comments
-				m_ctrlComments.SetTextContent(sComments, FALSE);
-			}
+// 			if (!bCanChangeCustom || 
+// 				!m_ctrlComments.SetContent(customComments, FALSE) || 
+// 				customComments.IsEmpty())
+// 			{
+// 				// else text comments
+// 				m_ctrlComments.SetTextContent(sComments, FALSE);
+// 			}
 
 			// update comments variables
 			UpdateComments(TRUE);
@@ -6102,12 +5960,9 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 		FileMisc::LogTimeElapsed(dwTick, _T("CTaskFile::Save(%s)"), sFileName);
 		///////////////////////////////////////////////////////////////////
 
-		m_sLastSavePath = sSavePath;
+		SetFilePath(sSavePath);
 		m_bModified = FALSE;
 		m_bCheckedOut = tasks.IsCheckedOutTo(GetSourceControlID());
-		
-		// update fileref with the todolist's folder
-		m_cbFileRef.SetCurrentFolder(FileMisc::GetFolderFromFilePath(sSavePath));
 
 		return TDCF_SUCCESS;
 	}
@@ -6388,9 +6243,6 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			LoadTasks(tasks);
 			LoadTaskIcons();
 			
-			// init fileref with the todolist's folder
-			m_cbFileRef.SetCurrentFolder(FileMisc::GetFolderFromFilePath(sFilePath));
-
 			if (m_bSourceControlled && !m_bCheckedOut && 
 				HasStyle(TDCS_CHECKOUTONLOAD) && sCheckedOutTo.IsEmpty())
 			{
@@ -6504,10 +6356,9 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		m_dwNextUniqueID = 1;
 	
 	m_bDelayLoaded = FALSE;
-	m_sLastSavePath = tasks.GetFilePath();
 
-	m_taskTree.SetTasklistFolder(FileMisc::GetFolderFromFilePath(m_sLastSavePath));
-	
+	SetFilePath(tasks.GetFilePath());
+
 	LoadGlobals(tasks);
 	LoadCustomAttributeDefinitions(tasks);
 	LoadSplitPos(prefs);
@@ -6969,9 +6820,6 @@ void CToDoCtrl::OnDestroy()
 		SaveSplitPos(prefs);
 		SaveAttributeVisibility(prefs);
 		SaveDefaultRecurrence(prefs);
-
-		CString sKey = GetPreferencesKey(); // no subkey
-		m_ctrlComments.SavePreferences(prefs, sKey);
 	}
 	
 	// clean up custom controls
@@ -7063,7 +6911,7 @@ BOOL CToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	if (!m_ctrlComments.IsSettingContent())
+//	if (!m_ctrlComments.IsSettingContent())
 		UpdateTask(TDCA_COMMENTS);
 
 	return 0L;
@@ -7790,6 +7638,16 @@ CString CToDoCtrl::GetFriendlyProjectName(int nUntitledIndex) const
 	}
 	
 	return sProjectName;
+}
+
+void CToDoCtrl::SetFilePath(const CString& sPath) 
+{ 
+	m_sLastSavePath = sPath; 
+	m_ctrlComments.SetPreferencesFilePath(sPath);
+	
+	CString sFolder(FileMisc::GetFolderFromFilePath(sPath));
+	m_taskTree.SetTasklistFolder(sFolder);
+	m_cbFileRef.SetCurrentFolder(sFolder);
 }
 
 CString CToDoCtrl::GetStylesheetPath() const
@@ -10237,15 +10095,11 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 		// comments field
 		if (::IsChild(m_ctrlComments, *pCtrl))
 		{
-			sText.LoadString(IDS_TDC_FIELD_COMMENTS);
+			sText.LoadString(IDS_COMMENTSTYPE);
 		}
 		else if (::IsChild(m_taskTree, *pCtrl))
 		{
 			sText.LoadString(IDS_TASKTREE);
-		}
-		else if (pCtrl == &m_cbCommentsType)
-		{
-			sText.LoadString(IDS_COMMENTSTYPE);
 		}
 		else
 		{
@@ -11888,10 +11742,7 @@ void CToDoCtrl::OnSelChangeCommentsType()
 	HandleUnsavedComments();
 
 	BOOL bMixedSelection = (m_cfComments.IsEmpty());
-
-	// recreate comments control if necessary
-	m_cbCommentsType.GetSelectedFormat(m_cfComments);
-	CreateContentControl(TRUE);
+	m_ctrlComments.GetSelectedFormat(m_cfComments);
 
 	IMPLEMENT_UNDO_EDIT(m_data);
 

@@ -18,7 +18,7 @@
 #include "tdlrecurringtaskedit.h"
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
-#include "tdlcontenttypecombobox.h"
+#include "tdlcommentsctrl.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\dialoghelper.h"
@@ -120,7 +120,7 @@ public:
 	CString GetProjectName() const { return m_sProjectName; }
 	void SetProjectName(const CString& sProjectName);
 	CString GetFriendlyProjectName(int nUntitledIndex = -1) const;
-	void SetFilePath(const CString& sPath) { m_sLastSavePath = sPath; }
+	void SetFilePath(const CString& sPath);
 	CString GetStylesheetPath() const;
 
 	const CTDCCustomAttribDefinitionArray& GetCustomAttributeDefs() const { return m_aCustomAttribDefs; }
@@ -433,8 +433,7 @@ protected:
 	CAutoComboBox m_cbVersion;
 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPicker m_cpColour;
-	CContentCtrl m_ctrlComments;
-	CTDLContentTypeComboBox m_cbCommentsType;
+	CTDLCommentsCtrl m_ctrlComments;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	CEnEdit m_eExternalID, m_eDependency;
 	CFileComboBox m_cbFileRef;
@@ -686,7 +685,7 @@ protected:
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
-	BOOL CreateContentControl(BOOL bResendComments);
+//	BOOL CreateContentControl(BOOL bResendComments);
 	int GetMaxTaskCategoryWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
 	int GetMaxTaskTagWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);

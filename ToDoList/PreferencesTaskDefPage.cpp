@@ -130,7 +130,7 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCATEGORY, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCREATEDBY, *this, CEnString(IDS_PTDP_NAMEPROMPT));
 
-	VERIFY(m_ctrlComments.Create(this, CRuntimeDlg::rectAuto, IDC_COMMENTS));
+	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
 	// Delay initialisation of comments until after any font changes
 	PostMessage(WM_PTDP_INITCOMMENTS);
@@ -337,7 +337,7 @@ LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lPar
 {
 	m_ctrlComments.MoveWindow(GetCtrlRect(this, IDC_COMMENTSCTRLFRAME));
 	m_ctrlComments.SetSelectedFormat(m_cfDefault);
-	m_ctrlComments.SetContent(m_sDefTextComments, m_defCustomComments);
+	m_ctrlComments.SetContent(m_sDefTextComments, m_defCustomComments, TRUE);
 
 	CUIThemeFile theme;
 	theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
