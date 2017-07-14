@@ -82,6 +82,9 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 {
 	CRuntimeDlg::OnInitDialog();
 
+	m_cfLastCustom.Empty();
+	m_LastCustomComments.Empty();
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -149,8 +152,48 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CTDLCommentsCtrl::OnSelchangeCommentsformat() 
 {
+	// Cache current content
+	CString sOldTextContent;
+	CBinaryData oldCustomContent;
+	CONTENTFORMAT cfOld = m_ctrlComments.GetContentFormat();
+	BOOL bHadContent = GetContent(sOldTextContent, oldCustomContent);
+
 	if (UpdateControlFormat())
 	{
+		// Restore content if there was any
+		if (bHadContent)
+		{
+			CONTENTFORMAT cfNew = m_ctrlComments.GetContentFormat();
+
+			if (!cfOld.FormatIsText() && cfNew.FormatIsText())
+			{
+				// If switching to a text format from a binary format
+				// we save off the binary in case they decide to switch 
+				// back without having made an edit
+				m_cfLastCustom = cfOld;
+				m_LastCustomComments = oldCustomContent;
+				
+				m_ctrlComments.SetTextContent(sOldTextContent, TRUE);
+			}
+			else
+			{
+				if (m_cfLastCustom == cfNew)
+				{
+					// if the new format is the same as the 'last' one
+					// then restore the 'last' custom comments
+					m_ctrlComments.SetContent(m_LastCustomComments, TRUE);
+				}
+				else
+				{ 
+					// just set the text format content
+					m_ctrlComments.SetTextContent(sOldTextContent, TRUE);
+				}
+
+				m_cfLastCustom.Empty();
+				m_LastCustomComments.Empty();
+			}
+		}
+
 		// Notify Parent
 		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
 	}
@@ -167,11 +210,6 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	if (m_ctrlComments.GetContentFormat() == cf)
 		return FALSE;
 
-	// Cache existing content
-	CString sTextContent;
-	CBinaryData customContent;
-	GetContent(sTextContent, customContent);
-
 	CRect rComments;
 	CalcCommentsCtrlRect(rComments);
 
@@ -187,9 +225,6 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	
 	if (m_hFont)
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
-
-	// Restore content
-	SetContent(sTextContent, customContent);
 
 	return TRUE;
 }
@@ -211,6 +246,10 @@ LRESULT CTDLCommentsCtrl::OnCommentsChange(WPARAM wParam, LPARAM lParam)
 {
 	if (!m_ctrlComments.IsSettingContent())
 	{
+		// An edit means there is no going back
+		m_cfLastCustom.Empty();
+		m_LastCustomComments.Empty();
+
 		// Forward to parent
 		return GetParent()->SendMessage(WM_ICC_CONTENTCHANGE, wParam, lParam);
 	}

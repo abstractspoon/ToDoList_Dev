@@ -46,6 +46,9 @@ protected:
 	CBrush m_brBack;
 	HFONT m_hFont;
 
+	CONTENTFORMAT m_cfLastCustom;
+	CBinaryData m_LastCustomComments;
+
 protected:
 	int DoModal() { ASSERT(0); return IDCANCEL; }
 
