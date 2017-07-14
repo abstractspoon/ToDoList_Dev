@@ -302,11 +302,19 @@ BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customCont
 
 BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent)
 {
-	if (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, TRUE))
-		return TRUE;
+	BOOL bSet = (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, TRUE));
 
-	// else
-	return (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, TRUE));
+	if (!bSet)
+		bSet = (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, TRUE));
+
+	if (bSet)
+	{
+		// An edit means there is no going back
+		m_cfLastCustom.Empty();
+		m_LastCustomComments.Empty();
+	}
+
+	return bSet;
 }
 
 BOOL CTDLCommentsCtrl::GetSelectedFormat(CONTENTFORMAT& cf) const
