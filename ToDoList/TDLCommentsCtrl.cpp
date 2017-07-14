@@ -28,7 +28,8 @@ IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 CTDLCommentsCtrl::CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
-	m_cbCommentsFmt(pMgrContent)
+	m_cbCommentsFmt(pMgrContent),
+	m_hFont(NULL)
 {
 	int nComboOffsetDLU = 0;
 
@@ -87,21 +88,19 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 LRESULT CTDLCommentsCtrl::OnSetFont(WPARAM wParam, LPARAM /*lParam*/)
 {
-	if (!m_ctrlComments.GetSafeHwnd() && !m_font.GetSafeHandle())
-		GraphicsMisc::CreateFont(m_font, (HFONT)wParam);
+	// Once only
+	if (!m_ctrlComments.GetSafeHwnd() && !m_hFont)
+		SetDefaultCommentsFont((HFONT)wParam);
 
 	return Default();
 }
 
-void CTDLCommentsCtrl::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)
+void CTDLCommentsCtrl::SetDefaultCommentsFont(HFONT hFont)
 {
-	if (!GraphicsMisc::SameFont(m_font, sFaceName, nPointSize))
-	{
-		GraphicsMisc::CreateFont(m_font, sFaceName, nPointSize);
+	m_hFont = hFont;
 
-		if (m_ctrlComments.GetSafeHwnd())
-			m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_font.GetSafeHandle());
-	}
+	if (m_ctrlComments.GetSafeHwnd())
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 }
 
 void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
@@ -186,8 +185,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 
 	m_ctrlComments.SetUITheme(m_theme);
 	
-	if (m_font.GetSafeHandle())
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_font.GetSafeHandle());
+	if (m_hFont)
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 
 	// Restore content
 	SetContent(sTextContent, customContent);

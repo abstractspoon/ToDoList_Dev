@@ -91,6 +91,7 @@ protected:
 	CONTENTFORMAT m_cfDefault;
 	CBinaryData m_defCustomComments;
 	CString m_sDefTextComments;
+	CFont m_fontDefComments;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

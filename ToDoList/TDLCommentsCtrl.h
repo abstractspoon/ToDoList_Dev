@@ -29,7 +29,7 @@ public:
 
 	BOOL Create(CWnd* pParent, const CRect& rPos, UINT nID);
 	void SetUITheme(const CUIThemeFile& theme);
-	void SetDefaultCommentsFont(const CString& sFaceName, int nPointSize);
+	void SetDefaultCommentsFont(HFONT hFont);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
 	int SetSelectedFormat(const CONTENTFORMAT& cf);
@@ -44,7 +44,7 @@ protected:
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
-	CFont m_font;
+	HFONT m_hFont;
 
 protected:
 	int DoModal() { ASSERT(0); return IDCANCEL; }

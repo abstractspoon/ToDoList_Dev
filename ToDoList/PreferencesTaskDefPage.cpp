@@ -11,6 +11,7 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\preferences.h"
 #include "..\shared\uithemefile.h"
 
@@ -157,7 +158,11 @@ void CPreferencesTaskDefPage::SetPriorityColors(const CDWordArray& aColors)
 
 void CPreferencesTaskDefPage::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)
 {
-	m_ctrlComments.SetDefaultCommentsFont(sFaceName, nPointSize);
+	if (!GraphicsMisc::SameFont(m_fontDefComments, sFaceName, nPointSize))
+	{
+		VERIFY(GraphicsMisc::CreateFont(m_fontDefComments, sFaceName, nPointSize));
+		m_ctrlComments.SetDefaultCommentsFont(m_fontDefComments);
+	}
 }
 
 void CPreferencesTaskDefPage::OnOK() 
