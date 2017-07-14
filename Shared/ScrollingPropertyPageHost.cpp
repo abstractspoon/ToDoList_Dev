@@ -98,9 +98,6 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 			{
 				nPos = m_scroll.GetScrollPos();
 				nPos = min(nPos, rPage.Height());
-
-				if (nPos > 0)
-					ScrollToTop();
 			}
 		}
 		else
