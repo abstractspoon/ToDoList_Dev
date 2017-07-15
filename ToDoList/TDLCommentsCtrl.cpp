@@ -12,6 +12,7 @@
 #include "..\shared\themed.h"
 #include "..\shared\preferences.h"
 #include "..\shared\enstring.h"
+#include "..\shared\winclasses.h"
 
 #include "..\interfaces\icontentcontrol.h"
 
@@ -95,11 +96,18 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 	m_cfLastCustom.Empty();
 	m_LastCustomComments.Empty();
 
-	m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, CEnString(IDS_PROMPT_MULTIPLEFORMATS));
-	// Edit prompt gets set in UpdateControlFormat
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt)
+{
+	m_sCommentsPrompt = szCommentsPrompt;
+
+	m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, szComboPrompt);
+
+	if (m_ctrlComments.GetSafeHwnd() && CWinClasses::IsEditControl(m_ctrlComments))
+		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt);
 }
 
 LRESULT CTDLCommentsCtrl::OnSetFont(WPARAM wParam, LPARAM /*lParam*/)
@@ -293,7 +301,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	if (m_hFont)
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 
-	m_mgrPrompts.SetEditPrompt(m_ctrlComments, CEnString(IDS_PROMPT_MULTIPLETASKS));
+	if (CWinClasses::IsEditControl(m_ctrlComments))
+		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
 	
 	LoadPreferences();
 

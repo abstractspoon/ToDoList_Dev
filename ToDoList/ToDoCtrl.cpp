@@ -653,8 +653,9 @@ void CToDoCtrl::InitEditPrompts()
 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
 
-	// tree handles its own
+	// tree and comments handles their own
 	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
+	m_ctrlComments.SetWindowPrompts(CEnString(IDS_PROMPT_MULTIPLEFORMATS), CEnString(IDS_PROMPT_MULTIPLETASKS));
 }
 
 BOOL CToDoCtrl::SetTreeFont(HFONT hFont)

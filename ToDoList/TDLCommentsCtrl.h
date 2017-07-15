@@ -33,6 +33,7 @@ public:
 	void SetDefaultCommentsFont(HFONT hFont);
 	void SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState);
 	void SetPreferencesFilePath(LPCTSTR szFilePath) { m_sPrefsFilePath = szFilePath; }
+	void SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
 	int SetSelectedFormat(const CONTENTFORMAT& cf);
@@ -63,6 +64,7 @@ protected:
 	BOOL m_bFirstLoadCommentsPrefs;
 	CString m_sPrefsFilePath;
 	BOOL m_bReadOnly;
+	CString m_sCommentsPrompt;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;
