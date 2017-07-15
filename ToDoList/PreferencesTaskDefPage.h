@@ -110,6 +110,7 @@ protected:
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
 	//}}AFX_MSG
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetdefaultcolor();
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
@@ -120,6 +121,7 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	
+	void UpdateCommentsSize();
 };
 
 //{{AFX_INSERT_LOCATION}}

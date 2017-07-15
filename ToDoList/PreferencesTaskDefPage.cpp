@@ -103,6 +103,7 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 	ON_CBN_SELCHANGE(IDC_COMMENTS, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
 	ON_MESSAGE(WM_PTDP_INITCOMMENTS, OnInitComments)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -335,7 +336,8 @@ LRESULT CPreferencesTaskDefPage::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lP
 
 LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	m_ctrlComments.MoveWindow(GetCtrlRect(this, IDC_COMMENTSCTRLFRAME));
+	UpdateCommentsSize();
+
 	m_ctrlComments.SetSelectedFormat(m_cfDefault);
 	m_ctrlComments.SetContent(m_sDefTextComments, m_defCustomComments, TRUE);
 
@@ -346,4 +348,27 @@ LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lPar
 	m_ctrlComments.SetUITheme(theme);
 
 	return 0L;
+}
+
+
+void CPreferencesTaskDefPage::OnSize(UINT nType, int cx, int cy)
+{
+	CPreferencesPageBase::OnSize(nType, cx, cy);
+
+	UpdateCommentsSize();
+}
+
+void CPreferencesTaskDefPage::UpdateCommentsSize()
+{
+	if (m_ctrlComments.GetSafeHwnd())
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		CRect rCtrl = GetCtrlRect(this, IDC_COMMENTSCTRLFRAME);
+		rCtrl.right = (rClient.Width() - 10);
+		rCtrl.bottom = (rClient.Height() - 10);
+
+		m_ctrlComments.MoveWindow(rCtrl);
+	}
 }
