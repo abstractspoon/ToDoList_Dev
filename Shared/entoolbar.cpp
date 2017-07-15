@@ -255,7 +255,10 @@ void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
     case CDDS_PREPAINT:
  		DrawBkgnd(CDC::FromHandle(lpNMCustomDraw->nmcd.hdc), TRUE);
 
-		*pResult = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
+		if (IsWindowEnabled())
+			*pResult = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
+		else
+			*pResult = (TBCDRF_NOBACKGROUND | TBCDRF_NOEDGES | TBCDRF_NOOFFSET);
 		break;
 		
     case CDDS_POSTPAINT:
