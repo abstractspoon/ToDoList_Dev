@@ -201,7 +201,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_cbAllocBy(ACBS_ALLOWDELETE),
 	m_cbAllocTo(ACBS_ALLOWDELETE),
 	m_cbCategory(ACBS_ALLOWDELETE),
-	m_ctrlComments(CEnString(IDS_TDC_FIELD_COMMENTS), 85, &mgr),
+	m_ctrlComments(TRUE, 85, &mgr),
 	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
 	m_cbStatus(ACBS_ALLOWDELETE),
 	m_cbTags(ACBS_ALLOWDELETE),
@@ -1635,8 +1635,8 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 {
 	DWORD dwTaskID = GetTaskID(hti);
 	
-	BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
-	BOOL bEnable = (hti && !bMaximize);
+	BOOL bMaximized = (m_nMaxState != TDCMS_NORMAL);
+	BOOL bEnable = (hti && !bMaximized);
 	BOOL bIsParent = TSH().ItemsAreAllParents();
 	BOOL bReadOnly = IsReadOnly();
 	BOOL bReadOnlyCtrls = (bReadOnly || !m_taskTree.SelectionHasUnlocked());
@@ -1663,43 +1663,30 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bEditComments = (m_mgrContent.FindContent(sCommentsType) != -1);
 	
 	BOOL bCommentsVis = IsCommentsVisible();
-	RT_CTRLSTATE nCtrlState = (!bCommentsVis || !hti) ? RTCS_DISABLED : 
-							((bReadOnlyCtrls || !bEditComments) ? RTCS_READONLY : RTCS_ENABLED);
-
-	switch (nCtrlState)
+	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
+	
+	if (!bCommentsVis || !hti)
 	{
-	case RTCS_DISABLED:
-		SetCtrlState(this, IDC_COMMENTS, nCtrlState);
-		break;
-
-	case RTCS_ENABLED:
-		SetCtrlState(this, IDC_COMMENTS, nCtrlState);
-		m_ctrlComments.SetReadOnly(FALSE);
-		break;
-
-	case RTCS_READONLY:
-		SetCtrlState(this, IDC_COMMENTS, RTCS_ENABLED);
-		m_ctrlComments.SetReadOnly(TRUE);
-		break;
+		nComboState = nCommentsState = RTCS_DISABLED;
+	}
+	else if (bReadOnlyCtrls)
+	{
+		nComboState = nCommentsState = RTCS_READONLY;
+	}
+	else if (!bEditComments)
+	{
+		nCommentsState = RTCS_READONLY;
 	}
 
-	// if bEditComments is FALSE it means we have multiple comments types
-	// selected. So we enable the selected comments type but keep the 
-	// comments control itself readonly
-	if (nCtrlState == RTCS_READONLY && !bReadOnlyCtrls)
-		SetCtrlState(this, IDC_COMMENTSTYPE, RTCS_ENABLED);
-	else
-		SetCtrlState(this, IDC_COMMENTSTYPE, nCtrlState);
-
-	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() && bCommentsVis) ? RTCS_ENABLED : nCtrlState;
-	SetCtrlState(this, IDC_COMMENTSLABEL, nLabelState);
+	m_ctrlComments.SetCtrlStates(nComboState, nCommentsState);
 
 	// project name
-	BOOL bShowProjectName = !bMaximize && HasStyle(TDCS_SHOWPROJECTNAME);
-	nCtrlState = !bShowProjectName ? RTCS_DISABLED : (bReadOnly ? RTCS_READONLY : RTCS_ENABLED);
+	BOOL bShowProjectName = (!bMaximized && HasStyle(TDCS_SHOWPROJECTNAME));
+	RT_CTRLSTATE nCtrlState =  (!bShowProjectName ? RTCS_DISABLED : 
+								(bReadOnly ? RTCS_READONLY : RTCS_ENABLED));
 	SetCtrlState(this, IDC_PROJECTNAME, nCtrlState);
 
-	nLabelState = (CThemed::IsAppThemed() && bShowProjectName) ? RTCS_ENABLED : nCtrlState;
+	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() ? RTCS_ENABLED : RTCS_DISABLED);
 	SetCtrlState(this, IDC_PROJECTLABEL, nCtrlState);
 }
 
@@ -1764,10 +1751,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 	CString sCommentsType(m_cfDefault);
+	int nSelCount = GetSelectedCount();
 	
 	if (hti)
 	{
-		int nSelCount = GetSelectedCount();
 		DWORD dwTaskID = GetTrueTaskID(hti); 
 
 		BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
@@ -1789,7 +1776,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		if (m_crColour == 0)
 			m_crColour = CLR_DEFAULT;
 
-		// can only edit comments if the comments type for the task is available
 		if (bIncComments)
 		{
 			m_sTextComments = GetSelectedTaskComments();
@@ -1900,7 +1886,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_ctrlComments.SetSelectedFormat(m_cfComments);
 		
 		// update content
-		UpdateComments(FALSE);
+		if ((nSelCount != 1) && m_sTextComments.IsEmpty())
+			m_ctrlComments.ClearContent();
+		else
+			UpdateComments(FALSE);
 	}
 
 	// and task header

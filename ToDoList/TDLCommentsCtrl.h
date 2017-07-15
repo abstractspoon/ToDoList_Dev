@@ -11,6 +11,7 @@
 #include "..\shared\contentctrl.h"
 #include "..\Shared\binarydata.h"
 #include "..\Shared\UIThemeFile.h"
+#include "..\shared\wndPrompt.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // PreferencesTaskDefPage.h : header file
@@ -24,13 +25,13 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent = NULL);
+	CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContentMgr* pMgrContent = NULL);
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetDefaultCommentsFont(HFONT hFont);
-	void SetReadOnly(BOOL bReadOnly) { m_ctrlComments.SetReadOnly(bReadOnly); }
+	void SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState);
 	void SetPreferencesFilePath(LPCTSTR szFilePath) { m_sPrefsFilePath = szFilePath; }
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;
@@ -39,10 +40,10 @@ public:
 
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
 	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection);
+	void ClearContent();
 	
 	BOOL Undo() { return m_ctrlComments.Undo(); }
 	BOOL Redo() { return m_ctrlComments.Redo(); }
-
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
@@ -57,8 +58,11 @@ protected:
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
 	HFONT m_hFont;
+	CWndPromptManager m_mgrPrompts;
+
 	BOOL m_bFirstLoadCommentsPrefs;
 	CString m_sPrefsFilePath;
+	BOOL m_bReadOnly;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;
@@ -91,6 +95,8 @@ protected:
 	void SavePreferences() const;
 	void LoadPreferences();
 
+public:
+	afx_msg void OnEnable(BOOL bEnable);
 };
 
 #endif // AFX_TDLCOMMENTCTRL_H__852964E3_4ABD_4B66_88BA_F553177616F2__INCLUDED_

@@ -20,6 +20,8 @@
 #define IDS_CUSTOM_FEATURE_FILTER       69
 #define IDS_SETREMINDER                 70
 #define IDS_MODIFYREMINDER              71
+#define IDS_PROMPT_MULTIPLEFORMATS      72
+#define IDS_PROMPT_MULTIPLETASKS        73
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102

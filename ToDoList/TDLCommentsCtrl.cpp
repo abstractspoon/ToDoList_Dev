@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLCommentsCtrl.h"
 
 #include "..\shared\contentMgr.h"
@@ -10,6 +11,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
 #include "..\shared\preferences.h"
+#include "..\shared\enstring.h"
 
 #include "..\interfaces\icontentcontrol.h"
 
@@ -17,7 +19,7 @@
 
 enum
 {
-	IDC_LABEL = 1001,
+	IDC_COMBOLABEL = 1001,
 	IDC_COMBO,
 	IDC_CTRL,
 };
@@ -27,20 +29,24 @@ enum
 
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
-CTDLCommentsCtrl::CTDLCommentsCtrl(LPCTSTR szLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
+CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContentMgr* pMgrContent)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent),
 	m_bFirstLoadCommentsPrefs(TRUE),
-	m_hFont(NULL)
+	m_hFont(NULL),
+	m_bReadOnly(FALSE)
 {
 	int nComboOffsetDLU = 0;
 
-	if (!Misc::IsEmpty(szLabel))
+	if (bLabel)
 	{
-		AddRCControl(_T("CONTROL"), WC_STATIC, szLabel, SS_CENTERIMAGE, 0, 0, 0, 40, 12, IDC_LABEL);
+		CEnString sLabel(IDS_TDC_FIELD_COMMENTS);
+		int nLabelLen = 40;
 
-		nComboOffsetDLU = 43;
+		AddRCControl(_T("CONTROL"), WC_STATIC, sLabel, SS_CENTERIMAGE, 0, 0, 1, nLabelLen, 12, IDC_COMBOLABEL);
+
+		nComboOffsetDLU = (nLabelLen + 3);
 	}
 
 	AddRCControl(_T("CONTROL"), WC_COMBOBOX, _T(""), 
@@ -68,6 +74,7 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_CBN_SELENDOK(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
 	ON_WM_DESTROY()
+	ON_WM_ENABLE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -88,6 +95,9 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 	m_cfLastCustom.Empty();
 	m_LastCustomComments.Empty();
 
+	m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, CEnString(IDS_PROMPT_MULTIPLEFORMATS));
+	// Edit prompt gets set in UpdateControlFormat
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -107,6 +117,38 @@ void CTDLCommentsCtrl::SetDefaultCommentsFont(HFONT hFont)
 
 	if (m_ctrlComments.GetSafeHwnd())
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
+}
+
+void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState)
+{
+	switch (nComboState)
+	{
+		case RTCS_ENABLED:
+			m_cbCommentsFmt.EnableWindow(TRUE);
+			break;
+
+		case RTCS_DISABLED:
+		case RTCS_READONLY:
+			m_cbCommentsFmt.EnableWindow(FALSE);
+			break;
+	}
+
+	switch (nCommentsState)
+	{
+		case RTCS_ENABLED:
+			::EnableWindow(m_ctrlComments, TRUE);
+			m_ctrlComments.SetReadOnly(FALSE);
+			break;
+
+		case RTCS_DISABLED:
+			::EnableWindow(m_ctrlComments, FALSE);
+			break;
+
+		case RTCS_READONLY:
+			::EnableWindow(m_ctrlComments, TRUE);
+			m_ctrlComments.SetReadOnly(TRUE);
+			break;
+	}
 }
 
 void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
@@ -142,7 +184,7 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_theme.crAppBackLight != CLR_NONE)
 	{
-		ExcludeCtrl(this, IDC_LABEL, pDC);
+		ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
 		ExcludeCtrl(this, IDC_COMBO, pDC);
 		ExcludeCtrl(this, IDC_CTRL, pDC);
 
@@ -251,6 +293,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	if (m_hFont)
 		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 
+	m_mgrPrompts.SetEditPrompt(m_ctrlComments, CEnString(IDS_PROMPT_MULTIPLETASKS));
+	
 	LoadPreferences();
 
 	return TRUE;
@@ -344,6 +388,11 @@ BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData
 	return bSet;
 }
 
+void CTDLCommentsCtrl::ClearContent()
+{
+	m_ctrlComments.SetTextContent(_T(""), FALSE);
+}
+
 BOOL CTDLCommentsCtrl::GetSelectedFormat(CONTENTFORMAT& cf) const
 {
 	return (m_cbCommentsFmt.GetSelectedFormat(cf) != CB_ERR);
@@ -359,12 +408,9 @@ BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
 	
 	if (m_cbCommentsFmt.SetSelectedFormat(cf) == CB_ERR)
 	{
-		if (!cf.IsEmpty())
-			return FALSE;
-
-		// else
-		m_ctrlComments.SetReadOnly(TRUE);
-		return TRUE;
+		// Setting to an empty format is not an error 
+		// it's just a way to indicate multiple formats
+		return cf.IsEmpty();
 	}
 
 	// else
@@ -400,10 +446,20 @@ CString CTDLCommentsCtrl::GetPreferencesKey() const
 	return sKey;
 }
 
-
 void CTDLCommentsCtrl::OnDestroy()
 {
 	CRuntimeDlg::OnDestroy();
 
 	SavePreferences();
+}
+
+void CTDLCommentsCtrl::OnEnable(BOOL bEnable)
+{
+	CRuntimeDlg::OnEnable(bEnable);
+
+	m_cbCommentsFmt.EnableWindow(bEnable);
+	::EnableWindow(m_ctrlComments, bEnable);
+
+	if (bEnable)
+		m_ctrlComments.SetReadOnly(m_bReadOnly);
 }
