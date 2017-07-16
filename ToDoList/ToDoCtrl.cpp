@@ -367,8 +367,20 @@ void CToDoCtrl::UpdateComments(BOOL bSaveAndValidate)
 	}
 	else
 	{
- 		BOOL bCommentsFocused = m_ctrlComments.HasFocus();
-		m_ctrlComments.SetContent(m_sTextComments, m_customComments, !bCommentsFocused);
+		int nSelCount = GetSelectedCount();
+
+		if (m_sTextComments.IsEmpty() && (nSelCount > 1))
+		{
+			m_ctrlComments.ClearContent();
+		}
+		else
+		{
+			BOOL bCommentsFocused = m_ctrlComments.HasFocus();
+			m_ctrlComments.SetContent(m_sTextComments, m_customComments, !bCommentsFocused);
+		}
+
+		m_ctrlComments.SetWindowPrompts(CEnString(IDS_TDC_EDITPROMPT_MULTIPLEFORMATS), 
+										CEnString((nSelCount > 1) ? IDS_TDC_EDITPROMPT_MULTIPLETASKS : IDS_TDC_EDITPROMPT_COMMENTS));
 	}
 }
 
@@ -653,9 +665,10 @@ void CToDoCtrl::InitEditPrompts()
 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
 
-	// tree and comments handles their own
+	// tree handles their own
 	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
-	m_ctrlComments.SetWindowPrompts(CEnString(IDS_PROMPT_MULTIPLEFORMATS), CEnString(IDS_PROMPT_MULTIPLETASKS));
+
+	// Comments prompts set in UpdateComments()
 }
 
 BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
@@ -1886,11 +1899,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_cfComments = sCommentsType;
 		m_ctrlComments.SetSelectedFormat(m_cfComments);
 		
-		// update content
-		if ((nSelCount != 1) && m_sTextComments.IsEmpty())
-			m_ctrlComments.ClearContent();
-		else
-			UpdateComments(FALSE);
+		UpdateComments(FALSE);
 	}
 
 	// and task header

@@ -71,9 +71,11 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-
 	ON_CBN_SELENDOK(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
+	ON_REGISTERED_MESSAGE(WM_ICC_KILLFOCUS, OnCommentsKillFocus)
+	ON_REGISTERED_MESSAGE(WM_ICC_WANTSPELLCHECK, OnCommentsWantSpellCheck)
+	ON_REGISTERED_MESSAGE(WM_ICC_DOHELP, OnCommentsDoHelp)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 END_MESSAGE_MAP()
@@ -96,15 +98,22 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 	m_cfLastCustom.Empty();
 	m_LastCustomComments.Empty();
 
+	if (!m_sComboPrompt.IsEmpty())
+		m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, m_sComboPrompt);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt)
 {
+	ASSERT(GetSafeHwnd());
+
+	m_sComboPrompt = szComboPrompt;
 	m_sCommentsPrompt = szCommentsPrompt;
 
-	m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, szComboPrompt);
+	if (m_cbCommentsFmt.GetSafeHwnd())
+		m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, szComboPrompt);
 
 	if (m_ctrlComments.GetSafeHwnd() && CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt);
@@ -385,7 +394,7 @@ BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData
 	BOOL bSet = (!customContent.IsEmpty() && m_ctrlComments.SetContent(customContent, bResetSelection));
 
 	if (!bSet)
-		bSet = (!sTextContent.IsEmpty() && m_ctrlComments.SetTextContent(sTextContent, bResetSelection));
+		bSet = m_ctrlComments.SetTextContent(sTextContent, bResetSelection);
 
 	if (bSet)
 	{

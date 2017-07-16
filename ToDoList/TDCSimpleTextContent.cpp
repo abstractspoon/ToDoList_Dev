@@ -73,8 +73,15 @@ IContentControl* CTDCSimpleTextContent::CreateCtrl(unsigned short nCtrlID, unsig
 	return NULL;
 }
 
-void CTDCSimpleTextContent::SetLocalizer(ITransText* pTT) { CLocalizer::Initialize(pTT); }
-void CTDCSimpleTextContent::Release() { delete this; }
+void CTDCSimpleTextContent::SetLocalizer(ITransText* pTT) 
+{ 
+	CLocalizer::Initialize(pTT); 
+}
+
+void CTDCSimpleTextContent::Release() 
+{ 
+	delete this; 
+}
 
 int CTDCSimpleTextContent::ConvertToHtml(const unsigned char* /*pContent*/, int /*nLength*/, LPCTSTR /*szCharset*/,
 										LPTSTR& /*szHtml*/, LPCTSTR /*szImageDir*/) 

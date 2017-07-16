@@ -59,12 +59,13 @@ protected:
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
 	HFONT m_hFont;
+
 	CWndPromptManager m_mgrPrompts;
+	CString m_sCommentsPrompt, m_sComboPrompt;
 
 	BOOL m_bFirstLoadCommentsPrefs;
 	CString m_sPrefsFilePath;
 	BOOL m_bReadOnly;
-	CString m_sCommentsPrompt;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;

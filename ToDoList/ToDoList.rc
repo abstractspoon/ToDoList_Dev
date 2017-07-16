@@ -5123,8 +5123,8 @@ BEGIN
     IDS_CUSTOM_FEATURE_FILTER "Filter"
     IDS_SETREMINDER         "Set &Reminder..."
     IDS_MODIFYREMINDER      "&Modify Reminder..."
-    IDS_PROMPT_MULTIPLEFORMATS "<multiple formats>"
-    IDS_PROMPT_MULTIPLETASKS "<multiple tasks>"
+    IDS_TDC_EDITPROMPT_MULTIPLEFORMATS "<multiple formats>"
+    IDS_TDC_EDITPROMPT_MULTIPLETASKS "<multiple tasks>"
 END
 
 #endif    // English (Australia) resources
