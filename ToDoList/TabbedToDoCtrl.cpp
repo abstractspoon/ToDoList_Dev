@@ -1270,7 +1270,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM 
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
 	CStringArray aValues;
-	CBinaryData bdEmpty;
 	
 	switch (mod.nAttrib)
 	{
@@ -1282,7 +1281,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 	case IUI_PERCENT:		return SetSelectedTaskPercentDone(mod.nValue);
 	case IUI_TIMEEST:		return SetSelectedTaskTimeEstimate(mod.dValue, mod.nTimeUnits);
 	case IUI_TIMESPENT:		return SetSelectedTaskTimeSpent(mod.dValue, mod.nTimeUnits);
-	case IUI_COMMENTS:		return SetSelectedTaskComments(mod.szValue, bdEmpty);
+	case IUI_COMMENTS:		return SetSelectedTaskComments(mod.szValue);
 	case IUI_FLAG:			return SetSelectedTaskFlag(mod.bValue);
 	case IUI_RISK:			return SetSelectedTaskRisk(mod.nValue);
 	case IUI_EXTERNALID: 	return SetSelectedTaskExtID(mod.szValue);

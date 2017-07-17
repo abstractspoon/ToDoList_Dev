@@ -2654,7 +2654,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 
 	IMPLEMENT_UNDO_EDIT(m_data);
 		
-	// do not change the custom comments unless the comments
+	// Don't change the custom comments unless the comments
 	// type matches the current content control type
 	BOOL bCanChangeCustom = (m_mgrContent.FindContent(m_cfComments) != -1);
 	LPCTSTR szFormat = bCanChangeCustom ? m_cfComments : NULL;

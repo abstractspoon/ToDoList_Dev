@@ -5239,7 +5239,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 				sComments += sItem;
 				sItem = sComments;
 			}
-			tdc.SetSelectedTaskComments(sItem, _T(""));
+			tdc.SetSelectedTaskComments(sItem);
 		}
 
 		if (startup.GetExternalID(sItem))

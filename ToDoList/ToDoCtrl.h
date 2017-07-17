@@ -293,7 +293,7 @@ public:
 	BOOL SetSelectedTaskLock(BOOL bLocked);
 	BOOL SetSelectedTaskCost(double dCost);
 	BOOL SetSelectedTaskVersion(const CString& sVersion);
-	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments);
+	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments = _T(""));
 	BOOL SetSelectedTaskIcon(const CString& sIcon); 
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data);
