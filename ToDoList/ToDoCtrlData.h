@@ -226,7 +226,7 @@ public:
 	TDC_SET SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
 	TDC_SET SetTaskColor(DWORD dwTaskID, COLORREF color);
 	TDC_SET SetTaskIcon(DWORD dwTaskID, const CString& sIcon);
-	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""), const CString& sCommentsTypeID = _T(""));
+	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""));
 	TDC_SET SetTaskCommentsType(DWORD dwTaskID, const CString& sCommentsTypeID);
 	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
 	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, double dTime, TDC_UNITS nUnits);

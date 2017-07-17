@@ -258,10 +258,10 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 				m_LastCustomComments.Empty();
 			}
 		}
-
-		// Notify Parent
-		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
 	}
+
+	// Notify Parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
 }
 
 BOOL CTDLCommentsCtrl::PreTranslateMessage(MSG* pMsg)

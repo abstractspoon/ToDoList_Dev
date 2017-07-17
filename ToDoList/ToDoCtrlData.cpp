@@ -1817,13 +1817,13 @@ TDC_SET CToDoCtrlData::SetTaskColor(DWORD dwTaskID, COLORREF color)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_COLOR, pTDI->color, color);
 }
 
-TDC_SET CToDoCtrlData::SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments, const CString& sCommentsTypeID)
+TDC_SET CToDoCtrlData::SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
 	BOOL bCommentsChange = (pTDI->sComments != sComments);
-	BOOL bCustomCommentsChange = (bCommentsChange || (pTDI->sCommentsTypeID != sCommentsTypeID) || (pTDI->customComments != customComments));
+	BOOL bCustomCommentsChange = (bCommentsChange || (pTDI->customComments != customComments));
 	
 	if (bCommentsChange || bCustomCommentsChange)
 	{
@@ -1834,15 +1834,7 @@ TDC_SET CToDoCtrlData::SetTaskComments(DWORD dwTaskID, const CString& sComments,
 			pTDI->sComments = sComments;
 		
 		if (bCustomCommentsChange)
-		{
-			// if we're changing comments type we clear the custom comments
-			if (pTDI->sCommentsTypeID != sCommentsTypeID)
-				pTDI->customComments.Empty();
-			else
-				pTDI->customComments = customComments;
-			
-			pTDI->sCommentsTypeID = sCommentsTypeID;
-		}
+			pTDI->customComments = customComments;
 		
 		pTDI->SetModified();
 		
@@ -1857,8 +1849,17 @@ TDC_SET CToDoCtrlData::SetTaskCommentsType(DWORD dwTaskID, const CString& sComme
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
-	
-	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_COMMENTS, pTDI->sCommentsTypeID, sCommentsTypeID);
+
+	// test for actual change
+	if (pTDI->sCommentsTypeID.CompareNoCase(sCommentsTypeID) == 0)
+		return SET_NOCHANGE;
+
+	TDC_SET nRes = DoEditTaskAttribute(dwTaskID, pTDI, TDCA_COMMENTS, pTDI->sCommentsTypeID, sCommentsTypeID);
+
+	if (nRes == SET_CHANGE)
+		pTDI->customComments.Empty();
+
+	return nRes;
 }
 
 TDC_SET CToDoCtrlData::SetTaskTitle(DWORD dwTaskID, const CString& sTitle)

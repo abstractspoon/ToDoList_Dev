@@ -2654,15 +2654,10 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 
 	IMPLEMENT_UNDO_EDIT(m_data);
 		
-	// Don't change the custom comments unless the comments
-	// type matches the current content control type
-	BOOL bCanChangeCustom = (m_mgrContent.FindContent(m_cfComments) != -1);
-	LPCTSTR szFormat = bCanChangeCustom ? m_cfComments : NULL;
-	
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.SetTaskComments(dwTaskID, sComments, customComments, szFormat);
+		TDC_SET nItemRes = m_data.SetTaskComments(dwTaskID, sComments, customComments);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -2676,19 +2671,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 		// refresh the comments of the active task if we were called externally
 		// note: we don't use SetTextChange because that doesn't handle custom comments
 		if (!bInternal)
-		{
-			// try custom comments if that's what they are
-// 			if (!bCanChangeCustom || 
-// 				!m_ctrlComments.SetContent(customComments, FALSE) || 
-// 				customComments.IsEmpty())
-// 			{
-// 				// else text comments
-// 				m_ctrlComments.SetTextContent(sComments, FALSE);
-// 			}
-
-			// update comments variables
 			UpdateComments(TRUE);
-		}
 
 		TSH().InvalidateAll();
 
