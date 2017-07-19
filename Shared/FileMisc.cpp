@@ -343,6 +343,27 @@ BOOL FileMisc::TouchFile(LPCTSTR szPath)
 	return (_tutime(szPath, NULL) == 0);
 }
 
+BOOL FileMisc::Find(LPCTSTR szSearchSpec)
+{
+	return CFileFind().FindFile(szSearchSpec);
+}
+
+BOOL FileMisc::FindFirst(LPCTSTR szSearchSpec, CString& sPath)
+{
+	CFileFind ff;
+
+	if (ff.FindFile(szSearchSpec))
+	{
+		ff.FindNextFile();
+		sPath = ff.GetFilePath();
+
+		return TRUE;
+	}
+
+	// not found
+	return FALSE;
+}
+
 int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders, LPCTSTR szPattern)
 {
 	CFileFind ff;
@@ -366,7 +387,9 @@ int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bChec
 					FindFiles(sPath, aFiles, TRUE, szPattern);
 			}
 			else
+			{
 				aFiles.Add(sPath);
+			}
 		}
 	}
 
@@ -654,14 +677,19 @@ BOOL FileMisc::FolderExists(LPCTSTR szFolder)
 	// else
 	DWORD dwAttrib = GetFileAttributes(szFolder);
 
-	return ((dwAttrib != 0xffffffff) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	if ((dwAttrib != 0xffffffff) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
+		return TRUE;
+
+#ifdef _DEBUG
+	DWORD dwError = GetLastError();
+#endif
+
+	return FALSE;
 }
 
 BOOL FileMisc::FileExists(LPCTSTR szFile)
 {
-	int nLen = lstrlen(szFile);
-
-	if ((nLen <= 0) || (nLen > _MAX_PATH))
+	if (lstrlen(szFile) > _MAX_PATH)
 		return FALSE;
 
 	// else

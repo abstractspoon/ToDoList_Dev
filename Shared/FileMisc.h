@@ -167,6 +167,8 @@ namespace FileMisc
 	CString GetCwd();
 	void SetCwd(const CString& sCwd);
 
+	BOOL Find(LPCTSTR szSearchSpec);
+	BOOL FindFirst(LPCTSTR szSearchSpec, CString& sPath);
 	int FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders = TRUE, LPCTSTR szPattern = _T("*.*"));
 	BOOL FolderContainsFiles(LPCTSTR szFolder, BOOL bCheckSubFolders = TRUE, LPCTSTR szFilter = _T("*.*"));
 
