@@ -151,8 +151,6 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 		m_size.SetFont(CFont::FromHandle((HFONT) ::GetStockObject(DEFAULT_GUI_FONT)));
 		m_size.FillCombo();
 
-		SetBorders(4, 4, 0, 0);
-
 		return TRUE;
 	}
 	

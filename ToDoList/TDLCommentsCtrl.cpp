@@ -329,7 +329,7 @@ void CTDLCommentsCtrl::CalcCommentsCtrlRect(CRect& rCtrl, int cx, int cy) const
 		rCtrl.SetRect(0, 0, cx, cy);
 
 	CRect rCombo = GetCtrlRect(IDC_COMBO);
-	rCtrl.top = (rCombo.bottom + CDlgUnits(this).ToPixelsY(4));
+	rCtrl.top = (rCombo.bottom + CDlgUnits(this).ToPixelsY(2));
 }
 
 LRESULT CTDLCommentsCtrl::OnCommentsChange(WPARAM wParam, LPARAM lParam)
