@@ -9,6 +9,8 @@
 
 #include "..\shared\ownerdrawcomboboxbase.h"
 
+#include <afxtempl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox window
 

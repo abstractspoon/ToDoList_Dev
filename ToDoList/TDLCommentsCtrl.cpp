@@ -13,6 +13,7 @@
 #include "..\shared\preferences.h"
 #include "..\shared\enstring.h"
 #include "..\shared\winclasses.h"
+#include "..\shared\wclassdefines.h"
 
 #include "..\interfaces\icontentcontrol.h"
 
@@ -441,7 +442,7 @@ void CTDLCommentsCtrl::SavePreferences() const
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey();
 
-	return m_ctrlComments.SavePreferences(prefs, sKey); 
+	m_ctrlComments.SavePreferences(prefs, sKey); 
 }
 
 void CTDLCommentsCtrl::LoadPreferences() 
@@ -449,7 +450,7 @@ void CTDLCommentsCtrl::LoadPreferences()
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey();
 
-	return m_ctrlComments.LoadPreferences(prefs, sKey); 
+	m_ctrlComments.LoadPreferences(prefs, sKey); 
 }
 
 CString CTDLCommentsCtrl::GetPreferencesKey() const
