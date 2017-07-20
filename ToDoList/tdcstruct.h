@@ -1154,7 +1154,7 @@ struct SEARCHPARAM
 
 			case FT_DATE:
 			case FT_DOUBLE:
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				return (dValue == rule.dValue);
 
 			case FT_INTEGER:
@@ -1373,7 +1373,7 @@ struct SEARCHPARAM
 
 		case TDCA_TIMEEST:
 		case TDCA_TIMESPENT:
-			return FT_TIME;
+			return FT_TIMEPERIOD;
 
 		case TDCA_COST:
 		case TDCA_SUBTASKDONE:
@@ -1427,7 +1427,7 @@ struct SEARCHPARAM
 		case FOP_GREATER:
 		case FOP_LESS_OR_EQUAL:
 		case FOP_LESS:
-			return (nType == FT_INTEGER || nType == FT_DOUBLE || nType == FT_TIME);
+			return (nType == FT_INTEGER || nType == FT_DOUBLE || nType == FT_TIMEPERIOD);
 
 		case FOP_SET:
 		case FOP_NOT_SET:
@@ -1495,7 +1495,7 @@ struct SEARCHPARAM
 			
 		case FT_DATE:
 		case FT_DOUBLE:
-		case FT_TIME:
+		case FT_TIMEPERIOD:
 			dValue = _ttof(val);
 			break;
 			
@@ -1512,7 +1512,7 @@ struct SEARCHPARAM
 		{
 		case FT_DATE:
 		case FT_DOUBLE:
-		case FT_TIME:
+		case FT_TIMEPERIOD:
 			dValue = val;
 			break;
 			
@@ -1557,7 +1557,7 @@ struct SEARCHPARAM
 		{
 		case FT_DATE:
 		case FT_DOUBLE:
-		case FT_TIME:
+		case FT_TIMEPERIOD:
 			return Misc::Format(dValue, 3);
 
 		case FT_INTEGER:
@@ -1585,7 +1585,7 @@ struct SEARCHPARAM
 		switch (GetAttribType())
 		{
 		case FT_DATE:
-		case FT_TIME:
+		case FT_TIMEPERIOD:
 		case FT_DOUBLE:
 			return dValue;
 
@@ -1607,7 +1607,7 @@ struct SEARCHPARAM
 		switch (GetAttribType())
 		{
 		case FT_DATE:
-		case FT_TIME:
+		case FT_TIMEPERIOD:
 		case FT_DOUBLE:
 			return (int)dValue;
 		

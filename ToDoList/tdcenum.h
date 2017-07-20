@@ -616,7 +616,7 @@ enum FIND_ATTRIBTYPE
 	FT_DOUBLE,
 	FT_DATE,
 	FT_BOOL,
-	FT_TIME,
+	FT_TIMEPERIOD,
 	FT_DATE_REL, // relative date
 	FT_ICON,
 };

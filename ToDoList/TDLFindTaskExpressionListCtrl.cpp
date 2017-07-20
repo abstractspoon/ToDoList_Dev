@@ -241,7 +241,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 			case FT_DATE:
 				return &m_dtcDate;
 
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				return &m_eTime;
 
 			case FT_BOOL:
@@ -329,7 +329,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol)
 			switch (sp.GetAttribType())
 			{
 			case FT_DATE:
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				ShowControl(*pEdit, nItem, nCol);
 				break;
 
@@ -431,7 +431,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				}
 				break;
 
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				// do nothing.
 				break;
 
@@ -717,7 +717,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			case FT_INTEGER:
 			case FT_DOUBLE:
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				AddOperatorToCombo(FOP_SET);
 				AddOperatorToCombo(FOP_NOT_SET);
 				AddOperatorToCombo(FOP_EQUALS);
@@ -1179,7 +1179,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 				sValue = sp.ValueAsDate().Format(VAR_DATEVALUEONLY);
 				break;
 				
-			case FT_TIME:
+			case FT_TIMEPERIOD:
 				sValue = CTimeHelper().FormatTime(sp.ValueAsDouble(), TDC::MapUnitsToTHUnits((TDC_UNITS)sp.GetFlags()), 2);
 				break;
 				
