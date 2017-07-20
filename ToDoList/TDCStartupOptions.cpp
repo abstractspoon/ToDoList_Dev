@@ -96,15 +96,6 @@ BOOL TDCSTARTUPATTRIB::GetValue(double& dValue, BOOL& bOffset) const
 	return FALSE;
 }
 
-LPCTSTR TDCSTARTUPATTRIB::GetValue() const
-{
-	if (bSet)
-		return szValue;
-
-	// else
-	return NULL;
-}
-
 int TDCSTARTUPATTRIB::GetValues(CStringArray& aItems, BOOL& bAppend) const 
 { 
 	aItems.RemoveAll();
@@ -450,6 +441,9 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	m_dwFlags = startup.m_dwFlags;
 	m_bSaveIntermediateAll = startup.m_bSaveIntermediateAll;
 
+	m_sCopyFrom = startup.m_sCopyFrom;
+	m_sCopyTo = startup.m_sCopyTo;
+
 	return *this;
 }
 
@@ -491,7 +485,10 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_dwSiblingID == startup.m_dwSiblingID) &&
 		(m_dwFlags == startup.m_dwFlags) &&
 		(m_bSaveIntermediateAll == startup.m_bSaveIntermediateAll) &&
-		(m_sCmdIDs == startup.m_sCmdIDs)
+		(m_sCmdIDs == startup.m_sCmdIDs) &&
+
+		(m_sCopyFrom == startup.m_sCopyFrom) && 
+		(m_sCopyTo == startup.m_sCopyTo)
 		);
 }
 
@@ -629,6 +626,9 @@ void CTDCStartupOptions::Reset()
 	m_dwSiblingID = 0; 
 	m_dwFlags = TLD_PASSWORDPROMPTING;
 	m_bSaveIntermediateAll = FALSE;
+
+	m_sCopyFrom.ClearValue();
+	m_sCopyTo.ClearValue();
 }
 
 BOOL CTDCStartupOptions::GetCreationDate(COleDateTime& dtValue) const
@@ -774,6 +774,9 @@ BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, TDC_ATTRIB
 
 BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const
 {
+	if (m_sCopyFrom.IsEmpty() || m_sCopyTo.IsEmpty())
+		return FALSE;
+
 	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
 
 	if (nFrom != TDCA_NONE)
@@ -789,5 +792,4 @@ BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, CString& s
 	sToCustomAttrib = m_sCopyTo.GetValue();
 
 	return TRUE;
-
 }

@@ -4672,11 +4672,33 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
+TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+{
+	TDCCADATA data;
+
+	if (!GetTaskAttributeData(dwTaskID, nFromAttrib, data))
+		return SET_FAILED;
+
+	// else
+	return SetTaskAttributeData(dwTaskID, nToAttrib, data);
+}
+
 TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	TDCCADATA data;
 
-	switch (nFromAttrib)
+	if (!GetTaskAttributeData(dwTaskID, nFromAttrib, data))
+		return SET_FAILED;
+
+	// else
+	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+}
+
+BOOL CToDoCtrlData::GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const
+{
+	data.Clear();
+
+	switch (nAttrib)
 	{
 	case TDCA_VERSION:		data.Set(GetTaskVersion(dwTaskID));			break;
 	case TDCA_ALLOCBY:		data.Set(GetTaskAllocBy(dwTaskID));			break;	
@@ -4701,8 +4723,8 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFrom
 	case TDCA_TAGS:	
 		{
 			CStringArray aValues;
-			GetTaskArray(dwTaskID, nFromAttrib, aValues);
-	
+			GetTaskArray(dwTaskID, nAttrib, aValues);
+
 			data.Set(aValues);
 		}
 		break;
@@ -4716,7 +4738,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFrom
 	case TDCA_DUETIME:			
 	case TDCA_STARTTIME:
 		{
-			TDC_DATE nDate = TDC::MapAttributeToDate(nFromAttrib);
+			TDC_DATE nDate = TDC::MapAttributeToDate(nAttrib);
 			COleDateTime date = GetTaskDate(dwTaskID, nDate);
 
 			data.Set(date);
@@ -4742,7 +4764,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFrom
 		break;
 	}
 
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+	return !data.IsEmpty();
 }
 
 TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
@@ -4755,7 +4777,12 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 	if (!pTDI->GetCustomAttributeValues().Lookup(sFromCustomAttribID, data))
 		return SET_FAILED;
 
-	switch (nToAttrib)
+	return SetTaskAttributeData(dwTaskID, nToAttrib, data);
+}
+
+TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data)
+{
+	switch (nAttrib)
 	{
 	// TDCA_CREATEDBY not supported
 	// TDCA_CREATIONDATE not supported
@@ -4785,7 +4812,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 			CStringArray aValues;
 			data.AsArray(aValues);
 
-			return SetTaskArray(dwTaskID, nToAttrib, aValues, TRUE);
+			return SetTaskArray(dwTaskID, nAttrib, aValues, TRUE);
 		}
 		break;
 
@@ -4798,7 +4825,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 	case TDCA_STARTTIME:
 		{
 			COleDateTime date = data.AsDate();
-			TDC_DATE nDate = TDC::MapAttributeToDate(nToAttrib);
+			TDC_DATE nDate = TDC::MapAttributeToDate(nAttrib);
 
 			return SetTaskDate(nDate, nDate, date);
 		}
@@ -4823,7 +4850,6 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 		break;
 	}
 
-	// all else
 	return SET_FAILED;
 }
 

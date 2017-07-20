@@ -32,7 +32,7 @@ public:
 	BOOL GetValue(CString& sValue) const;
 	BOOL GetValue(int& nValue, BOOL& bOffset) const;
 	BOOL GetValue(double& nValue, BOOL& bOffset) const;
-	LPCTSTR GetValue() const;
+	LPCTSTR GetValue() const { return szValue; }
 	void ClearValue();
 	int GetValues(CStringArray& aItems, BOOL& bAppend) const;
 

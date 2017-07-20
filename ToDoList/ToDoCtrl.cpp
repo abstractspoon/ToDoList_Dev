@@ -12175,7 +12175,33 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 	if (!CanCopyAttributeData(nFromAttrib, nToAttrib))
 		return FALSE;
 
-	// TODO
+	Flush();
+
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwModTaskID = 0;
+
+	IMPLEMENT_UNDO_EDIT(m_data);
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, nFromAttrib, nToAttrib);
+
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+
+	if (nRes == SET_CHANGE)
+	{
+		SetModified(TRUE, nToAttrib, dwModTaskID);
+		UpdateControls(FALSE);
+	}
+
+	return (nRes != SET_FAILED);
 
 	return FALSE;
 }
