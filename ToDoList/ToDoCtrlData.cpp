@@ -4827,7 +4827,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttri
 			COleDateTime date = data.AsDate();
 			TDC_DATE nDate = TDC::MapAttributeToDate(nAttrib);
 
-			return SetTaskDate(nDate, nDate, date);
+			return SetTaskDate(dwTaskID, nDate, date);
 		}
 		break;
 
