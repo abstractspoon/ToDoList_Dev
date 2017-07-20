@@ -259,6 +259,10 @@ public:
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren = FALSE);
 	TDC_SET ClearTaskCustomAttribute(DWORD dwTaskID, const CString& sAttribID, BOOL bAndChildren = FALSE);
 
+	TDC_SET CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
+	TDC_SET CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
+	TDC_SET CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
+
 	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
 	void ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);

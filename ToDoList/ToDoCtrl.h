@@ -298,6 +298,11 @@ public:
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data);
 
+	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
+	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
+	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
+	BOOL CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
+
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const;
@@ -883,6 +888,10 @@ protected:
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
+
+	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
+	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);
+	static BOOL CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib);
 };
 
 //{{AFX_INSERT_LOCATION}}

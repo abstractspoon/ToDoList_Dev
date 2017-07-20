@@ -12169,3 +12169,389 @@ BOOL CToDoCtrl::CanEditSelectedTaskLock() const
 {
 	return (!IsReadOnly() && GetSelectedCount());
 }
+
+BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+{
+	if (!CanCopyAttributeData(nFromAttrib, nToAttrib))
+		return FALSE;
+
+	// TODO
+
+	return FALSE;
+}
+
+BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+{
+	TDCCUSTOMATTRIBUTEDEFINITION attribDefTo;
+
+	if (!CTDCCustomAttributeHelper::GetAttributeDef(sToCustomAttribID, m_aCustomAttribDefs, attribDefTo))
+		return FALSE;
+	
+	if (!CanCopyAttributeData(nFromAttrib, attribDefTo))
+		return FALSE;
+
+	Flush();
+
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwModTaskID = 0;
+
+	IMPLEMENT_UNDO_EDIT(m_data);
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, nFromAttrib, sToCustomAttribID);
+
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+
+	if (nRes == SET_CHANGE)
+	{
+		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
+		SetModified(TRUE, nAttrib, dwModTaskID);
+		
+		// update UI
+// 		CUSTOMATTRIBCTRLITEM ctrl;
+// 		
+// 		if (CTDCCustomAttributeHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
+// 		{
+// 			CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
+// 		
+// 			if (ctrl.HasBuddy())
+// 				EnableDisableControls(GetSelectedItem());
+// 		}
+		UpdateControls(FALSE);
+	}
+
+	return (nRes != SET_FAILED);
+}
+
+BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+{
+	TDCCUSTOMATTRIBUTEDEFINITION attribDefFrom;
+
+	if (!CTDCCustomAttributeHelper::GetAttributeDef(sFromCustomAttribID, m_aCustomAttribDefs, attribDefFrom))
+		return FALSE;
+
+	if (!CanCopyAttributeData(attribDefFrom, nToAttrib))
+		return FALSE;
+
+	Flush();
+
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwModTaskID = 0;
+
+	IMPLEMENT_UNDO_EDIT(m_data);
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+
+		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, sFromCustomAttribID, nToAttrib);
+
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+
+	if (nRes == SET_CHANGE)
+	{
+ 		SetModified(TRUE, nToAttrib, dwModTaskID);
+		UpdateControls(FALSE);
+	}
+
+	return (nRes != SET_FAILED);
+}
+
+BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+{
+	DWORD dwFromType = CTDCCustomAttributeHelper::GetAttributeDataType(sFromCustomAttribID, m_aCustomAttribDefs);
+	DWORD dwToType = CTDCCustomAttributeHelper::GetAttributeDataType(sToCustomAttribID, m_aCustomAttribDefs);
+
+	if (dwFromType != dwToType)
+		return FALSE;
+
+	Flush();
+
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwModTaskID = 0;
+
+	IMPLEMENT_UNDO_EDIT(m_data);
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+
+		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, sFromCustomAttribID, sToCustomAttribID);
+
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+
+	if (nRes == SET_CHANGE)
+	{
+		TDC_ATTRIBUTE nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sToCustomAttribID, m_aCustomAttribDefs);
+		SetModified(TRUE, nAttrib, dwModTaskID);
+
+// 		CUSTOMATTRIBCTRLITEM ctrl;
+// 		
+// 		if (CTDCCustomAttributeHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
+// 		{
+// 			CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
+// 		
+// 			if (ctrl.HasBuddy())
+// 				EnableDisableControls(GetSelectedItem());
+// 		}
+		UpdateControls(FALSE);
+	}
+
+	return (nRes != SET_FAILED);
+}
+
+BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+{
+	switch (nFromAttrib)
+	{
+	case TDCA_ALLOCBY:			
+	case TDCA_ALLOCTO:			
+	case TDCA_CREATEDBY:	
+		switch (nToAttrib)
+		{
+		// Note: TDCA_CREATEDBY cannot be copied to
+		case TDCA_ALLOCBY:			
+		case TDCA_ALLOCTO:			
+			return TRUE;
+		}
+		break;
+
+	case TDCA_CATEGORY:			
+	case TDCA_EXTERNALID:		
+	case TDCA_STATUS:			
+	case TDCA_TAGS:				
+	case TDCA_TASKNAME:			
+	case TDCA_VERSION:			
+	case TDCA_ICON:				
+		switch (nToAttrib)
+		{
+		case TDCA_CATEGORY:			
+		case TDCA_EXTERNALID:		
+		case TDCA_STATUS:			
+		case TDCA_TAGS:				
+		case TDCA_TASKNAME:			
+		case TDCA_VERSION:			
+		case TDCA_ICON:				
+			return TRUE;
+		}
+		break;
+
+	case TDCA_PRIORITY:			
+	case TDCA_RISK:				
+		switch (nToAttrib)
+		{
+		case TDCA_PRIORITY:			
+		case TDCA_RISK:				
+			return TRUE;
+		}
+		break;
+
+	case TDCA_CREATIONDATE:		
+	case TDCA_DONEDATE:			
+	case TDCA_DUEDATE:			
+	case TDCA_LASTMOD:			
+	case TDCA_STARTDATE:		
+		switch (nToAttrib)
+		{
+		// Note: TDCA_CREATIONDATE cannot be copied to
+		case TDCA_DONEDATE:			
+		case TDCA_DUEDATE:			
+		case TDCA_LASTMOD:			
+		case TDCA_STARTDATE:		
+			return TRUE;
+		}
+		break;
+
+	case TDCA_DONETIME:			
+	case TDCA_DUETIME:			
+	case TDCA_STARTTIME:		
+		switch (nToAttrib)
+		{
+		case TDCA_DONETIME:			
+		case TDCA_DUETIME:			
+		case TDCA_STARTTIME:		
+			return TRUE;
+		}
+		break;
+
+	case TDCA_COST:	
+	case TDCA_RECURRENCE:		
+	case TDCA_COLOR:			
+	case TDCA_PERCENT:			
+	case TDCA_COMMENTS:			
+	case TDCA_DEPENDENCY:		
+	case TDCA_FILEREF:			
+		return (nFromAttrib == nToAttrib);
+
+	case TDCA_FLAG:				
+	case TDCA_LOCK:				
+		switch (nToAttrib)
+		{
+		case TDCA_FLAG:				
+		case TDCA_LOCK:				
+			return TRUE;
+		}
+		break;
+
+	case TDCA_TIMEEST:			
+	case TDCA_TIMESPENT:		
+		switch (nToAttrib)
+		{
+		case TDCA_TIMEEST:			
+		case TDCA_TIMESPENT:		
+			return TRUE;
+		}
+		break;
+
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
+{
+	switch (nFromAttrib)
+	{
+	case TDCA_VERSION:			
+	case TDCA_ALLOCBY:			
+	case TDCA_CREATEDBY:	
+	case TDCA_EXTERNALID:		
+	case TDCA_STATUS:			
+	case TDCA_TASKNAME:	
+	case TDCA_COMMENTS:			
+	case TDCA_DEPENDENCY:		
+	case TDCA_FILEREF:			
+	case TDCA_ICON:				
+		return attribDefFrom.IsDataType(TDCCA_STRING);
+
+	case TDCA_ALLOCTO:			
+	case TDCA_CATEGORY:			
+	case TDCA_TAGS:				
+		return (attribDefFrom.IsDataType(TDCCA_STRING) && attribDefFrom.IsMultiList());
+
+	case TDCA_COLOR:			
+	case TDCA_PRIORITY:			
+	case TDCA_RISK:				
+	case TDCA_POSITION:			
+	case TDCA_PERCENT:			
+		return attribDefFrom.IsDataType(TDCCA_INTEGER);
+
+	case TDCA_CREATIONDATE:		
+	case TDCA_DONEDATE:			
+	case TDCA_DUEDATE:			
+	case TDCA_LASTMOD:			
+	case TDCA_STARTDATE:		
+	case TDCA_DONETIME:			
+	case TDCA_DUETIME:			
+	case TDCA_STARTTIME:		
+		return attribDefFrom.IsDataType(TDCCA_DATE);
+
+	case TDCA_COST:	
+		return attribDefFrom.IsDataType(TDCCA_DOUBLE);
+
+	case TDCA_FLAG:				
+	case TDCA_LOCK:				
+		return attribDefFrom.IsDataType(TDCCA_BOOL);
+
+	case TDCA_TIMEEST:			
+	case TDCA_TIMESPENT:		
+		return attribDefFrom.IsDataType(TDCCA_TIMEPERIOD);
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
+{
+	switch (attribDefFrom.GetDataType())
+	{
+	case TDCCA_STRING:
+		switch(nToAttrib)
+		{
+		case TDCA_EXTERNALID:		
+		case TDCA_STATUS:			
+		case TDCA_TASKNAME:			
+		case TDCA_VERSION:			
+		case TDCA_ALLOCBY:			
+		case TDCA_CREATEDBY:	
+		case TDCA_COMMENTS:			
+		case TDCA_DEPENDENCY:		
+		case TDCA_FILEREF:			
+		case TDCA_ALLOCTO:			
+		case TDCA_CATEGORY:			
+		case TDCA_TAGS:				
+		case TDCA_ICON:				
+			return TRUE;
+		}
+		break;
+
+	case TDCCA_INTEGER:
+		switch(nToAttrib)
+		{
+		case TDCA_COLOR:			
+		case TDCA_PRIORITY:			
+		case TDCA_RISK:				
+		case TDCA_PERCENT:			
+			return TRUE;
+		}
+		break;
+
+	case TDCCA_DATE:
+		switch(nToAttrib)
+		{
+		case TDCA_CREATIONDATE:		
+		case TDCA_DONEDATE:			
+		case TDCA_DUEDATE:			
+		case TDCA_LASTMOD:			
+		case TDCA_STARTDATE:		
+		case TDCA_DONETIME:			
+		case TDCA_DUETIME:			
+		case TDCA_STARTTIME:		
+			return TRUE;
+		}
+		break;
+
+	case TDCCA_DOUBLE:
+		return (nToAttrib == TDCA_COST);
+
+	case TDCCA_BOOL:
+		switch(nToAttrib)
+		{
+		case TDCA_FLAG:				
+		case TDCA_LOCK:				
+			return TRUE;
+		}
+		break;
+
+	case TDCCA_TIMEPERIOD:
+		switch(nToAttrib)
+		{
+		case TDCA_TIMEEST:			
+		case TDCA_TIMESPENT:		
+			return TRUE;
+		}
+		break;
+	}
+
+	return FALSE;
+}

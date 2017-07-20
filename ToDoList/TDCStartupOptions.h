@@ -2,6 +2,8 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "tdcenum.h"
+
 #include "..\Interfaces\ITaskList.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +32,7 @@ public:
 	BOOL GetValue(CString& sValue) const;
 	BOOL GetValue(int& nValue, BOOL& bOffset) const;
 	BOOL GetValue(double& nValue, BOOL& bOffset) const;
-	CString GetValue() const;
+	LPCTSTR GetValue() const;
 	void ClearValue();
 	int GetValues(CStringArray& aItems, BOOL& bAppend) const;
 
@@ -72,6 +74,11 @@ public:
 
 	int GetCommandIDs(CUIntArray& aCmdIDs) const;
 	BOOL HasCommandID() const { return !m_sCmdIDs.IsEmpty(); }
+
+	BOOL GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const;
+	BOOL GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const;
+	BOOL GetCopyAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const;
+	BOOL GetCopyAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const;
 
 	BOOL HasFilePath() const { return (lstrlen(m_szFilePaths) > 0); }
 	int GetFilePaths(CStringArray& aFiles) const;
@@ -125,6 +132,8 @@ protected:
 	TDCSTARTUPATTRIB m_dtCreateDate, m_dtStartDate, m_dtDueDate, m_dtDoneDate;
 	TDCSTARTUPATTRIB m_dStartTime, m_dDueTime, m_dDoneTime;
 	TDCSTARTUPATTRIB m_dTimeEst, m_dTimeSpent, m_dCost;
+	
+	TDCSTARTUPATTRIB m_sCopyFrom, m_sCopyTo;
 
 	DWORD m_dwFlags;
 	BOOL m_bSaveIntermediateAll;

@@ -5445,6 +5445,27 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		if (startup.GetCustomAttribute(sAttribID, sItem))
 			tdc.SetSelectedTaskCustomAttributeData(sAttribID, sItem);
+
+		// Copying attributes
+		CString sFrom, sTo;
+		TDC_ATTRIBUTE nFrom, nTo;
+
+		if (startup.GetCopyAttribute(nFrom, nTo))
+		{
+			tdc.CopySelectedTaskAttributeData(nFrom, nTo);
+		}
+		else if (startup.GetCopyAttribute(nFrom, sTo))
+		{
+			tdc.CopySelectedTaskAttributeData(nFrom, sTo);
+		}
+		else if (startup.GetCopyAttribute(sFrom, nTo))
+		{
+			tdc.CopySelectedTaskAttributeData(sFrom, nTo);
+		}
+		else if (startup.GetCopyAttribute(sFrom, sTo))
+		{
+			tdc.CopySelectedTaskAttributeData(sFrom, sTo);
+		}
 	}
 
 	return bRes;

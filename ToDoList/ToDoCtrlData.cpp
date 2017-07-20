@@ -1329,11 +1329,11 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 
 TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, const CTDCAttributeMap& mapAttribs) const
 {
-	if (!pToTDI)
+	if (!pToTDI || pToTDI->bLocked)
 		return SET_FAILED;
 	
 	const TODOITEM* pFromTDI = NULL;
-	EDIT_GET_TDI(dwFromTaskID, pFromTDI);
+	GET_TDI(dwFromTaskID, pFromTDI, SET_FAILED);
 	
 	TDC_SET nRes = SET_NOCHANGE;
 	
@@ -4672,3 +4672,170 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
+TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+{
+	TDCCADATA data;
+
+	switch (nFromAttrib)
+	{
+	case TDCA_VERSION:		data.Set(GetTaskVersion(dwTaskID));			break;
+	case TDCA_ALLOCBY:		data.Set(GetTaskAllocBy(dwTaskID));			break;	
+	case TDCA_CREATEDBY:	data.Set(GetTaskCreatedBy(dwTaskID));		break;
+	case TDCA_EXTERNALID:	data.Set(GetTaskExtID(dwTaskID));			break;	
+	case TDCA_STATUS:		data.Set(GetTaskStatus(dwTaskID));			break;	
+	case TDCA_TASKNAME:		data.Set(GetTaskTitle(dwTaskID));			break;
+	case TDCA_COMMENTS:		data.Set(GetTaskComments(dwTaskID));		break;	
+	case TDCA_COLOR:		data.Set((int)GetTaskColor(dwTaskID));		break;	
+	case TDCA_PRIORITY:		data.Set(GetTaskPriority(dwTaskID));		break;	
+	case TDCA_RISK:			data.Set(GetTaskRisk(dwTaskID));			break;	
+	case TDCA_PERCENT:		data.Set(GetTaskPercent(dwTaskID, FALSE));	break;	
+	case TDCA_COST:			data.Set(GetTaskCost(dwTaskID));			break;	
+	case TDCA_FLAG:			data.Set(IsTaskFlagged(dwTaskID));			break;	
+	case TDCA_ICON:			data.Set(GetTaskIcon(dwTaskID));			break;	
+	case TDCA_LOCK:			data.Set(IsTaskLocked(dwTaskID));			break;	
+
+	case TDCA_FILEREF:	
+	case TDCA_DEPENDENCY:
+	case TDCA_ALLOCTO:			
+	case TDCA_CATEGORY:			
+	case TDCA_TAGS:	
+		{
+			CStringArray aValues;
+			GetTaskArray(dwTaskID, nFromAttrib, aValues);
+	
+			data.Set(aValues);
+		}
+		break;
+
+	case TDCA_CREATIONDATE:		
+	case TDCA_DONEDATE:			
+	case TDCA_DUEDATE:			
+	case TDCA_LASTMOD:			
+	case TDCA_STARTDATE:		
+	case TDCA_DONETIME:			
+	case TDCA_DUETIME:			
+	case TDCA_STARTTIME:
+		{
+			TDC_DATE nDate = TDC::MapAttributeToDate(nFromAttrib);
+			COleDateTime date = GetTaskDate(dwTaskID, nDate);
+
+			data.Set(date);
+		}
+		break;
+
+	case TDCA_TIMEEST:			
+		{
+			TDC_UNITS nUnits;
+			double dTime = GetTaskTimeEstimate(dwTaskID, nUnits);
+
+			data.Set(dTime, nUnits);
+		}
+		break;
+
+	case TDCA_TIMESPENT:	
+		{
+			TDC_UNITS nUnits;
+			double dTime = GetTaskTimeSpent(dwTaskID, nUnits);
+
+			data.Set(dTime, nUnits);
+		}
+		break;
+	}
+
+	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+}
+
+TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	TDCCADATA data;
+
+	if (!pTDI->GetCustomAttributeValues().Lookup(sFromCustomAttribID, data))
+		return SET_FAILED;
+
+	switch (nToAttrib)
+	{
+	// TDCA_CREATEDBY not supported
+	// TDCA_CREATIONDATE not supported
+
+	case TDCA_VERSION:		return SetTaskVersion(dwTaskID, data.AsString());
+	case TDCA_ALLOCBY:		return SetTaskAllocBy(dwTaskID, data.AsString());
+	case TDCA_EXTERNALID:	return SetTaskExtID(dwTaskID, data.AsString());
+	case TDCA_STATUS:		return SetTaskStatus(dwTaskID, data.AsString());
+	case TDCA_TASKNAME:		return SetTaskTitle(dwTaskID, data.AsString());
+	case TDCA_COMMENTS:		return SetTaskComments(dwTaskID, data.AsString());
+	case TDCA_ICON:			return SetTaskIcon(dwTaskID, data.AsString());
+
+	case TDCA_COLOR:		return SetTaskColor(dwTaskID, data.AsInteger());
+	case TDCA_PRIORITY:		return SetTaskPriority(dwTaskID, data.AsInteger());
+	case TDCA_RISK:			return SetTaskRisk(dwTaskID, data.AsInteger());
+	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger());
+	case TDCA_COST:			return SetTaskCost(dwTaskID, data.AsDouble());
+	case TDCA_FLAG:			return SetTaskFlag(dwTaskID, data.AsBool());
+	case TDCA_LOCK:			return SetTaskLock(dwTaskID, data.AsBool());
+
+	case TDCA_FILEREF:	
+	case TDCA_DEPENDENCY:
+	case TDCA_ALLOCTO:			
+	case TDCA_CATEGORY:			
+	case TDCA_TAGS:	
+		{
+			CStringArray aValues;
+			data.AsArray(aValues);
+
+			return SetTaskArray(dwTaskID, nToAttrib, aValues, TRUE);
+		}
+		break;
+
+	case TDCA_DONEDATE:			
+	case TDCA_DUEDATE:			
+	case TDCA_LASTMOD:			
+	case TDCA_STARTDATE:		
+	case TDCA_DONETIME:			
+	case TDCA_DUETIME:			
+	case TDCA_STARTTIME:
+		{
+			COleDateTime date = data.AsDate();
+			TDC_DATE nDate = TDC::MapAttributeToDate(nToAttrib);
+
+			return SetTaskDate(nDate, nDate, date);
+		}
+		break;
+
+	case TDCA_TIMEEST:			
+		{
+			TDC_UNITS nUnits;
+			double dTime = data.AsTimePeriod(nUnits);
+			
+			return SetTaskTimeEstimate(dwTaskID, dTime, nUnits);
+		}
+		break;
+
+	case TDCA_TIMESPENT:	
+		{
+			TDC_UNITS nUnits;
+			double dTime = data.AsTimePeriod(nUnits);
+
+			return SetTaskTimeSpent(dwTaskID, dTime, nUnits);
+		}
+		break;
+	}
+
+	// all else
+	return SET_FAILED;
+}
+
+TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	TDCCADATA data;
+
+	if (!pTDI->GetCustomAttributeValue(sFromCustomAttribID, data))
+		return SET_FAILED;
+
+	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+}

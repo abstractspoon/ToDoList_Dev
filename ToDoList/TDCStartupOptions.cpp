@@ -96,17 +96,13 @@ BOOL TDCSTARTUPATTRIB::GetValue(double& dValue, BOOL& bOffset) const
 	return FALSE;
 }
 
-CString TDCSTARTUPATTRIB::GetValue() const
+LPCTSTR TDCSTARTUPATTRIB::GetValue() const
 {
-	CString sValue;
-
 	if (bSet)
-	{
-		sValue = szValue;
-		Misc::Trim(sValue);
-	}
-	
-	return sValue;
+		return szValue;
+
+	// else
+	return NULL;
 }
 
 int TDCSTARTUPATTRIB::GetValues(CStringArray& aItems, BOOL& bAppend) const 
@@ -355,6 +351,13 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 
 	if (cmdInfo.GetOptions(SWITCH_TASKCUSTOMATTRIB, aValues) && (aValues.GetSize() == 2))
 		m_sCustomAttrib.SetValue(Misc::FormatArray(aValues, '|'));
+
+	// Copying task attributes
+	if (cmdInfo.GetOptions(SWITCH_TASKCOPYATTRIB, aValues) && (aValues.GetSize() == 2))
+	{
+		m_sCopyFrom.SetValue(aValues[0]);
+		m_sCopyTo.SetValue(aValues[1]);
+	}
 
 	// App-level flags
 	if (cmdInfo.HasOption(SWITCH_FORCEVISIBLE))
@@ -710,4 +713,81 @@ int CTDCStartupOptions::GetCommandIDs(CUIntArray& aCmdIDs) const
 	}
 
 	return aCmdIDs.GetSize();
+}
+
+BOOL CTDCStartupOptions::GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const
+{
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+
+	if (nFrom == TDCA_NONE)
+		return FALSE;
+
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+
+	if (nTo == TDCA_NONE)
+		return FALSE;
+
+	// else
+	nFromAttrib = nFrom;
+	nToAttrib = nTo;
+
+	return TRUE;
+}
+
+BOOL CTDCStartupOptions::GetCopyAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const
+{
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+
+	if (nFrom == TDCA_NONE)
+		return FALSE;
+
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+
+	if (nTo != TDCA_NONE)
+		return FALSE;
+
+	// else
+	nFromAttrib = nFrom;
+	sToCustomAttrib = m_sCopyTo.GetValue();
+
+	return TRUE;
+}
+
+BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const
+{
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+
+	if (nFrom != TDCA_NONE)
+		return FALSE;
+
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+
+	if (nTo == TDCA_NONE)
+		return FALSE;
+
+	// else
+	sFromCustomAttrib = m_sCopyFrom.GetValue();
+	nToAttrib = nTo;
+
+	return TRUE;
+}
+
+BOOL CTDCStartupOptions::GetCopyAttribute(CString& sFromCustomAttrib, CString& sToCustomAttrib) const
+{
+	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFrom.GetValue());
+
+	if (nFrom != TDCA_NONE)
+		return FALSE;
+
+	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyTo.GetValue());
+
+	if (nTo != TDCA_NONE)
+		return FALSE;
+
+	// else
+	sFromCustomAttrib = m_sCopyFrom.GetValue();
+	sToCustomAttrib = m_sCopyTo.GetValue();
+
+	return TRUE;
+
 }
