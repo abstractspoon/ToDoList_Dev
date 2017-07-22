@@ -46,7 +46,7 @@ public:
 	BOOL Undo() { return m_ctrlComments.Undo(); }
 	BOOL Redo() { return m_ctrlComments.Redo(); }
 
-	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL ProcessMessage(MSG* pMsg) { return m_ctrlComments.ProcessMessage(pMsg); }
 	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
 
 	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }

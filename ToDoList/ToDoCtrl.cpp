@@ -7443,7 +7443,7 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
 
-	if (m_ctrlComments.PreTranslateMessage(pMsg))
+	if (m_ctrlComments.ProcessMessage(pMsg))
 		return TRUE;
 
 	if (m_treeDragDrop.ProcessMessage(pMsg))

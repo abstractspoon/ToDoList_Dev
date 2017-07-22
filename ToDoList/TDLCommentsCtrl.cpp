@@ -265,15 +265,6 @@ void CTDLCommentsCtrl::OnSelchangeCommentsformat()
 	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
 }
 
-BOOL CTDLCommentsCtrl::PreTranslateMessage(MSG* pMsg)
-{
-	if (m_ctrlComments.PreTranslateMessage(pMsg))
-		return TRUE;
-
-	// else
-	return CDialog::PreTranslateMessage(pMsg);
-}
-
 BOOL CTDLCommentsCtrl::UpdateControlFormat()
 {
 	ASSERT(m_pMgrContent);

@@ -57,7 +57,7 @@ public:
 	LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
 	BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
 
-	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL ProcessMessage(MSG* pMsg);
 	BOOL HasFocus() const;
 	void SetFocus();
 
