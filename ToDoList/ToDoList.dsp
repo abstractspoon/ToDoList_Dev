@@ -343,6 +343,10 @@ SOURCE=.\TDLColumnSelectionDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLCommentsCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLContentMgr.cpp
 # End Source File
 # Begin Source File
@@ -884,6 +888,10 @@ SOURCE=.\TDLColumnListBox.h
 # Begin Source File
 
 SOURCE=.\TDLColumnSelectionDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLCommentsCtrl.h
 # End Source File
 # Begin Source File
 

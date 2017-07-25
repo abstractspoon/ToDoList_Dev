@@ -482,7 +482,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	while (nCust--)
 	{
 		CString sCustID(pTasks->GetCustomAttributeID(nCust));
-		CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID));
+		CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
 
 		pKI->SetAttributeValue(sCustID, sCustValue);
 
@@ -595,7 +595,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				while (nID--)
 				{
 					CString sAttribID(m_aCustomAttribIDs[nID]);
-					CString sValue(pTasks->GetTaskCustomAttributeData(hTask, sAttribID));
+					CString sValue(pTasks->GetTaskCustomAttributeData(hTask, sAttribID, true));
 
 					if (UpdateTrackableTaskAttribute(pKI, sAttribID, sValue))
 					{

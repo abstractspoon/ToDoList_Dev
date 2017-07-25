@@ -556,7 +556,7 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 			CString sValue = pTasks->GetTaskCustomDateString(hTask, sID);
 
 			if (sValue.IsEmpty())
-				sValue = pTasks->GetTaskCustomAttributeData(hTask, sID);
+				sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, false);
 
 			CString sValues = TDCCADATA(sValue).FormatAsArray('+');
 			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValues);

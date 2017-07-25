@@ -418,6 +418,7 @@ public:
 	virtual bool SetTaskLock(HTASKITEM hTask, bool bLocked) = 0;
 
 	virtual bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const = 0;
+	virtual LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_
