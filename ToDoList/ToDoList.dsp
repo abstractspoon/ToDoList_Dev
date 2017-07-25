@@ -243,6 +243,10 @@ SOURCE=.\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCCustomAttribData.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCCustomAttributeHelper.cpp
 # End Source File
 # Begin Source File
