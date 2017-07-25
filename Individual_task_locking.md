@@ -1,36 +1,45 @@
-1. Checking Out Tasks
-	1. Check for existence of 'TaskID.*'
-		1. If exists fail checkout
-	2. Create empty 'TaskID.UserName'
-	3. Store 'TaskID' in list of checked out tasks
-	4. Change task state to 'unlocked'
+## Notes ##
 
-2. Checking In Tasks
-	1. Save current task state to 'TaskID.CompName'
+* I propose to re-purpose the task lock attribute (and column) for checking-in/out tasks when a tasklist has been 'added' to source control (Menu > Source Control > Add Tasklist to Source Control)
+	* I will probably hide 'Menu > Edit > Lock Task Attributes'	and add new menu items for checking-in/out tasks to the Source Control menu
+* Checking-out the entire tasklist will still be required for adding, deleting and moving tasks
+* Files for each checked-out task will be stored in a folder having the same name as the tasklist but with the extension '.SourceControl'
+
+
+
+
+## Processes ##
+
+#### Checking Out Tasks ####
+	1. Create empty '<TaskID>' to prevent anyone else checking-out the task
+		* If that fails then exit the check-out 
+	2. Change task state to 'unlocked'
+	3. Keep track of checked-out task
+
+#### Checking In Tasks ####
+	1. Save current task(s) state to '<TaskID>' file(s)
 	2. Clear tasklist 'Modified' flag
 	3. Check out entire tasklist
-		1. If that fails then exit
-	4. Merge 'TaskID.UserName' into tasklist 
+		* If that fails then exit the check-in
+	4. Merge '<TaskID>' file(s) into tasklist 
 	5. Check in tasklist
-	6. Delete 'TaskID.UserName'
-	7. Remove 'TaskID' from list of checked out tasks
-	8. Change task state to 'locked'
+	6. Delete '<TaskID>'
+	7. Stop tracking checked-in task(s)
+	8. Change task(s) state to 'locked'
 
-3. Loading Tasklists
+#### Loading Tasklists ####
 	1. Load base tasklist 
 	2. Mark all tasks as 'locked'
-	3. Check for '*.UserName' files
-		1. Check in all found tasks
-			1. If that fails then load and merge tasks, and mark tasks as 'unlocked'
+	3. Load any checked out tasks ('<TaskID>' files), merge them into the base tasklist, and mark them as 'unlocked'
 
-4. Saving Tasklists
-	1. Save checked out task to 'TaskID.UserName'  
+#### Saving Tasklists ####
+	1. Save checked-out task(s) to '<TaskID>' file(s)
 	2. If the tasklist is checked out then save the entire tasklist.
 
-5. Checking Out Tasklists (required for adding, deleting, moving tasks)
+#### Checking Out Tasklists ####
 	1. No change
 
-6. Checking In Tasklists
+#### Checking In Tasklists ####
 	1. No change
 
 
