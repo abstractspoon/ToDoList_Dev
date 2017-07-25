@@ -419,6 +419,9 @@ void CFileEdit::OnBtnClick(UINT nID)
 				BOOL bOpenFileDlg = !HasStyle(FES_SAVEAS);
 				DWORD dwFlags = bOpenFileDlg ? EOFN_DEFAULTOPEN : EOFN_DEFAULTSAVE;
 
+				if (!bOpenFileDlg && HasStyle(FES_NOPROMPTOVERWRITE))
+					dwFlags &= ~OFN_OVERWRITEPROMPT;
+
 				// if file not exists revert to current folder
 				if (bOpenFileDlg && !FileMisc::FileExists(sFilename))
 					sFilename.Empty();

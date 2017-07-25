@@ -21,14 +21,15 @@ const UINT WM_FEN_BROWSECHANGE = ::RegisterWindowMessage(_T("WM_FEN_BROWSEFILE")
 
 enum
 {
-	FES_NOBROWSE		= 0x0001,
-	FES_FOLDERS			= 0x0002,
-	FES_COMBOSTYLEBTN	= 0x0004, // draws the browse button like a combo box rather than a button
-	FES_GOBUTTON		= 0x0008,
-	FES_ALLOWURL		= 0x0010, // supports ? in the filename
-	FES_SAVEAS			= 0x0020, // else open file dialog
-	FES_RELATIVEPATHS	= 0x0040,
-	FES_DISPLAYSIMAGES	= 0x0080,
+	FES_NOBROWSE			= 0x0001,
+	FES_FOLDERS				= 0x0002,
+	FES_COMBOSTYLEBTN		= 0x0004, // draws the browse button like a combo box rather than a button
+	FES_GOBUTTON			= 0x0008,
+	FES_ALLOWURL			= 0x0010, // supports ? in the filename
+	FES_SAVEAS				= 0x0020, // else open file dialog
+	FES_RELATIVEPATHS		= 0x0040,
+	FES_DISPLAYSIMAGES		= 0x0080,
+	FES_NOPROMPTOVERWRITE	= 0x0100, // exclude OFN_OVERWRITEPROMPT
 };
 
 /////////////////////////////////////////////////////////////////////////////
