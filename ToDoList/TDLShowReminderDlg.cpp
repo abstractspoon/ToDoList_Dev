@@ -209,6 +209,10 @@ void CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
 
 		m_mapReminders.RemoveKey(dwRemID);
 		m_lcReminders.DeleteItem(nItem);
+
+		// Hide dialog when it becomes empty
+		if (m_lcReminders.GetItemCount() == 0)
+			ShowWindow(SW_HIDE);
 	}
 }
 
@@ -229,6 +233,10 @@ void CTDLShowReminderDlg::RemoveListReminders(const CFilteredToDoCtrl& tdc)
 			m_lcReminders.DeleteItem(nItem);
 		}
 	}
+
+	// Hide dialog when it becomes empty
+	if (m_lcReminders.GetItemCount() == 0)
+		ShowWindow(SW_HIDE);
 }
 
 void CTDLShowReminderDlg::RemoveAllListReminders()
