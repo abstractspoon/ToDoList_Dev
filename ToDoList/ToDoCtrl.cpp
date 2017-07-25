@@ -3225,6 +3225,29 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	if (m_data.IsTaskLocked(dwTaskID))
 		return SET_FAILED;
 
+	const TODOITEM* pTDI = GetTask(dwTaskID);
+
+	if (!pTDI)
+	{
+		ASSERT(0);
+		return SET_FAILED;
+	}
+
+	// Fallback if either start or due date is not set
+	if (!pTDI->HasStart())
+	{
+		if (pTDI->HasDue())
+			return m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, 1, nUnits, bAndSubtasks, FALSE);
+
+		// else both not set
+		return SET_FAILED;
+	}
+	else if (!pTDI->HasDue())
+	{
+		return m_data.OffsetTaskDate(dwTaskID, TDCD_START, 1, nUnits, bAndSubtasks, FALSE);
+	}
+
+	// else both are set
 	COleDateTime dtStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
 	ASSERT(CDateHelper::IsDateSet(dtStart));
 
@@ -7420,7 +7443,7 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
 
-	if (m_ctrlComments.PreTranslateMessage(pMsg))
+	if (m_ctrlComments.ProcessMessage(pMsg))
 		return TRUE;
 
 	if (m_treeDragDrop.ProcessMessage(pMsg))

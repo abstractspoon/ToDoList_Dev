@@ -74,41 +74,47 @@ CString TDCREMINDER::FormatWhenString() const
 		COleDateTime date;
 		double dWhen = 0;
 
+		const double ONE_MINUTE = (1.0 / (24 * 60));
+		const double ONE_HOUR = (1.0 / 24);
+
 		if (nRelativeFromWhen == TDCR_DUEDATE)
 		{
 			date = pTDC->GetTaskDate(dwTaskID, TDCD_DUE);
-			dWhen = date - COleDateTime::GetCurrentTime();
+			dWhen = (date - COleDateTime::GetCurrentTime()); // days
 
-			if (dWhen < 1.0)
+			if (dWhen < ONE_MINUTE) // including negatives
 			{
 				sFormat.LoadString(IDS_DUEWHENREMINDERNOW);
 			}
-			else if (fabs(dWhen) < 1.0)
+			else if (dWhen < ONE_HOUR)
 			{
 				dWhen *= 24 * 60; // convert to minutes
 				sFormat.LoadString(IDS_DUEWHENREMINDERMINS);
 			}
 			else
 			{
+				dWhen *= 24; // convert to hours
 				sFormat.LoadString(IDS_DUEWHENREMINDERHOURS);
 			}
 		}
 		else
 		{
 			date = pTDC->GetTaskDate(dwTaskID, TDCD_START);
-			dWhen = date - COleDateTime::GetCurrentTime();
 
-			if (dWhen < 1.0)
+			dWhen = (date - COleDateTime::GetCurrentTime());
+
+			if (dWhen < ONE_MINUTE) // including negatives
 			{
 				sFormat.LoadString(IDS_BEGINWHENREMINDERNOW);
 			}
-			else if (fabs(dWhen) < 1.0)
+			else if (dWhen < ONE_HOUR)
 			{
 				dWhen *= 24 * 60; // convert to minutes
 				sFormat.LoadString(IDS_BEGINWHENREMINDERMINS);
 			}
 			else
 			{
+				dWhen *= 24; // convert to hours
 				sFormat.LoadString(IDS_BEGINWHENREMINDERHOURS);
 			}
 		}

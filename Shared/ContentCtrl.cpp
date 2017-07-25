@@ -55,7 +55,7 @@ CContentCtrl::operator HWND() const
 	return NULL;
 }
 
-BOOL CContentCtrl::PreTranslateMessage(MSG* pMsg)
+BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 {
 	if (m_pContentCtrl)
 	{
