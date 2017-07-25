@@ -5,156 +5,55 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-// tdlutil.h : header file
-//
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "..\interfaces\ITaskList.h"
 
-#include "..\shared\misc.h"
+#include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TDCCADATA
 {
-	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0) { Set(sValue, cSep); }
-	TDCCADATA(LPCTSTR szValue, TCHAR cSep = 0) { Set(CString(szValue), cSep); }
-	TDCCADATA(double dValue) { Set(dValue); }
-	TDCCADATA(double dValue, TDC_UNITS nUnits) { Set(dValue, nUnits); }
-	TDCCADATA(const CStringArray& aValues) { Set(aValues); }
-	TDCCADATA(int nValue) { Set(nValue); }
-	TDCCADATA(const COleDateTime& dtValue) { Set(dtValue); }
-	TDCCADATA(bool bValue) { Set(bValue); }
+	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0);
+	TDCCADATA(LPCTSTR szValue, TCHAR cSep = 0);
+	TDCCADATA(double dValue);
+	TDCCADATA(double dValue, TDC_UNITS nUnits);
+	TDCCADATA(const CStringArray& aValues);
+	TDCCADATA(int nValue);
+	TDCCADATA(const COleDateTime& dtValue);
+	TDCCADATA(bool bValue);
+	TDCCADATA(const TDCCADATA& data);
 
-	TDCCADATA(const TDCCADATA& data)
-	{
-		*this = data;
-	}
+	TDCCADATA& operator=(const TDCCADATA& data);
 
-	TDCCADATA& operator=(const TDCCADATA& data)
-	{
-		sData = data.sData;
-		return *this;
-	}
+	BOOL operator==(const TDCCADATA& data) const;
+	BOOL operator!=(const TDCCADATA& data) const;
 
-	BOOL operator==(const TDCCADATA& data) const { return sData == data.sData; }
-	BOOL operator!=(const TDCCADATA& data) const { return sData != data.sData; }
+	BOOL IsEmpty() const;
+	void Clear();
 
-	BOOL IsEmpty() const { return sData.IsEmpty(); }
-	void Clear() { sData.Empty(); }
+	const CString& AsString() const;
+	double AsDouble() const;
+	int AsInteger() const;
+	COleDateTime AsDate() const;
+	bool AsBool() const;
+	int AsArray(CStringArray& aValues) const;
+	double AsTimePeriod(TDC_UNITS& nUnits) const;
 
-	const CString& AsString() const { return sData; }
-	double AsDouble() const { return _ttof(sData); }
-	int AsInteger() const { return _ttoi(sData); } 
-	COleDateTime AsDate() const { return _ttof(sData); }
-	bool AsBool() const { return !IsEmpty(); }
+	TDC_UNITS GetTimeUnits() const;
 
-	int AsArray(CStringArray& aValues) const 
-	{ 
-		// Special case: 1 empty value
-		if (sData == _T("\n"))
-		{
-			aValues.RemoveAll();
-			aValues.Add(_T(""));
-			return 1;
-		}
-		
-		// else
-		return Misc::Split(sData, aValues, '\n', TRUE); 
-	}
+	void Set(double dValue);
+	void Set(int nValue);
+	void Set(const COleDateTime& dtValue);
+	void Set(const CString& sValue, TCHAR cSep = 0);
+	void Set(double dValue, TDC_UNITS nUnits);
+	void Set(bool bValue, TCHAR nChar = 0);
+	void Set(const CStringArray& aValues);
 
-	double AsTimePeriod(TDC_UNITS& nUnits) const
-	{
-		if (IsEmpty())
-		{
-			nUnits = TDCU_HOURS;
-			return 0.0;
-		}
-
-		// else
-		nUnits = GetTimeUnits();
-		return _ttof(sData);
-	}
-
-	TDC_UNITS GetTimeUnits() const
-	{
-		if (IsEmpty())
-			return TDCU_HOURS;
-
-		TDC_UNITS nUnits = (TDC_UNITS)Misc::Last(sData);
-
-		if (!IsValidUnits(nUnits))
-			nUnits = TDCU_NULL;
-
-		return nUnits;
-	}
-
-	void Set(double dValue) { sData.Format(_T("%lf"), dValue); }
-	void Set(int nValue) { sData.Format(_T("%d"), nValue); }
-	void Set(const COleDateTime& dtValue) { sData.Format(_T("%lf"), dtValue); }
-
-	void Set(const CString& sValue, TCHAR cSep = 0) 
-	{ 
-		if (cSep != 0)
-		{
-			CStringArray aItems;
-
-			if (Misc::Split(sValue, aItems, cSep, TRUE))
-			{
-				Set(aItems);
-				return;
-			}
-		}
-
-		// all else
-		sData = sValue; 
-	}
-
-	void Set(double dValue, TDC_UNITS nUnits) 
-	{ 
-		ASSERT(IsValidUnits(nUnits));
-		sData.Format(_T("%lf:%lc"), dValue, (TCHAR)nUnits); }
-
-	void Set(bool bValue, TCHAR nChar = 0) 
-	{ 
-		sData.Empty(); 
-
-		if (bValue)
-		{
-			if (nChar > 0)
-				sData.Insert(0, nChar);
-			else
-				sData.Insert(0, '+');
-		}
-	}
-
-	void Set(const CStringArray& aValues) 
-	{ 
-		// Special case: 1 empty value
-		if ((aValues.GetSize() == 1) && aValues[0].IsEmpty())
-			sData = '\n';
-		else
-			sData = Misc::FormatArray(aValues, '\n'); 
-	}
-
-	CString FormatAsArray(TCHAR cSep = 0) const
-	{
-		if (cSep == '\n')
-			return sData;
-
-		CString sArray(sData);
-
-		if (cSep != 0)
-			sArray.Replace('\n', cSep);
-		else
-			sArray.Replace(_T("\n"), Misc::GetListSeparator());
-
-		return sArray;
-	}
-
-	CString FormatAsDate() const
-	{
-		return AsDate().Format(VAR_DATEVALUEONLY);
-	}
+	CString FormatAsArray(TCHAR cSep = 0) const;
+	CString FormatAsDate(BOOL bISO = FALSE) const;
+	CString FormatAsTimePeriod(int nDecimalPlaces = 2) const;
 
 protected:
 	CString sData;
@@ -165,30 +64,12 @@ protected:
 class CTDCCustomAttributeDataMap : public CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>
 {
 public:
-	BOOL Lookup(LPCTSTR key, TDCCADATA& rValue) const
-	{
-		return CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::Lookup(Misc::ToUpper(key), rValue);
-	}
+	BOOL Lookup(LPCTSTR key, TDCCADATA& rValue) const;
+	void SetAt(LPCTSTR key, TDCCADATA& newValue);
+	void Copy(const CTDCCustomAttributeDataMap& mapData);
+	BOOL MatchAll(const CTDCCustomAttributeDataMap& mapData) const;
 
-	TDCCADATA& operator[](LPCTSTR key)
-	{
-		return CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::operator[](Misc::ToUpper(key));
-	}
-
-	void SetAt(LPCTSTR key, TDCCADATA& newValue)
-	{ 
-		(*this)[key] = newValue; 
-	}
-
-	void Copy(const CTDCCustomAttributeDataMap& mapData)
-	{
-		Misc::CopyStrT<TDCCADATA>(mapData, *this);
-	}
-
-	BOOL MatchAll(const CTDCCustomAttributeDataMap& mapData) const
-	{
-		return Misc::MatchAllStrT<TDCCADATA>(*this, mapData);
-	}
+	TDCCADATA& operator[](LPCTSTR key);
 };
 
 /////////////////////////////////////////////////////////////////////////////
