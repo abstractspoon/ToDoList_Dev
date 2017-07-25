@@ -9372,7 +9372,7 @@ void CToDoListWnd::OnExport()
 		if (nTDCCount == 1 || !dialog.GetExportAllTasklists() || dialog.GetExportOneFile())
 		{
 			if (FileMisc::FileExists(sExportPath))
-				bOverWrite = (IDOK == MessageBox(IDS_CONFIRM_EXPORT_OVERWRITE, 0, nMsgFlags, sExportPath));
+				bOverWrite = (IDOK == MessageBox(sExportPath, IDS_CONFIRM_EXPORT_OVERWRITE, nMsgFlags));
 			else
 				bOverWrite = TRUE;
 		}
@@ -9394,7 +9394,7 @@ void CToDoListWnd::OnExport()
 			}
 
 			if (aExistPaths.GetSize())
-				bOverWrite = (IDOK == MessageBox(IDS_CONFIRM_EXPORT_OVERWRITE, 0, nMsgFlags, Misc::FormatArray(aExistPaths, _T("\n\n"))));
+				bOverWrite = (IDOK == MessageBox(Misc::FormatArray(aExistPaths, _T("\n\n")), IDS_CONFIRM_EXPORT_OVERWRITE, nMsgFlags));
 			else
 				bOverWrite = TRUE;
 		}

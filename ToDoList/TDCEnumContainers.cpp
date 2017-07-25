@@ -135,7 +135,7 @@ int CTDCAttributeArray::Add(TDC_ATTRIBUTE nAttrib)
 		return nFind;
 
 	// else
-	return Add(nAttrib);
+	return CArray<TDC_ATTRIBUTE, TDC_ATTRIBUTE>::Add(nAttrib);
 }
 
 void CTDCAttributeArray::Remove(TDC_ATTRIBUTE nAttrib)

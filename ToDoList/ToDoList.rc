@@ -4877,7 +4877,7 @@ BEGIN
     IDS_CUSTOMCOLUMN        "%s (Custom)"
     IDS_TDC_MULTIFILE       "Merge"
     IDS_CONFIRM_EXPORT_OVERWRITE 
-                            "The following files will be be overwritten by the export:\n\n%s"
+                            "The following files will be be overwritten by the export"
     IDS_MULTIPLEUNIQUEIDSEXIST 
                             "Two or more attributes shared the unique ID '%s'.\n\nYou will need to resolve this before closing the dialog."
     IDS_PPREVIEWPROGRESS    "Preparing print preview..."

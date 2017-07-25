@@ -1221,26 +1221,6 @@ const CXmlItem* CTaskFile::GetCustomAttribDefs(int nIndex) const
 	return pXIAttribDef;
 }
 
-BOOL CTaskFile::IsCustomDateAttribute(const CString& sTypeID) const
-{
-	const CXmlItem* pXIAttribDef = GetCustomAttribDefs();
-
-	while (pXIAttribDef)
-	{
-		if (pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID) == sTypeID)
-		{
-			DWORD dwAttribType = (DWORD)pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
-			return ((dwAttribType & TDCCA_DATAMASK) == TDCCA_DATE);
-		}
-
-		// next sibling
-		pXIAttribDef = pXIAttribDef->GetSibling();
-	}
-
-	// not a date
-	return FALSE;
-}
-
 bool CTaskFile::AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList)
 {
 	return (AddCustomAttributeDef(szID, szLabel, szColumn, bList) != NULL);
@@ -1978,11 +1958,25 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::MakeUpper(sTypeID));
 		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
 
-		// add human readable date format
-		if (IsCustomDateAttribute(sTypeID))
+		// add human readable format
+		DWORD dwAttribType = GetCustomAttributeType(sTypeID);
+
+		if (dwAttribType & TDCCA_LISTMASK)
 		{
-			CString sDate(CDateHelper::FormatDate(data.AsDate(), (m_bISODates ? DHFD_ISO : 0)));
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDATESTRING, sDate);
+			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray('+'));
+		}
+		else
+		{
+			switch (dwAttribType & TDCCA_DATAMASK)
+			{
+			case TDCCA_DATE:
+				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates));
+				break;
+				
+			case TDCCA_TIMEPERIOD:
+				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsTimePeriod());
+				break;
+			}
 		}
 	}
 
@@ -2252,43 +2246,43 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID) con
 	return NULLSTRING;
 }
 
+unsigned long CTaskFile::GetCustomAttributeType(LPCTSTR szID) const
+{
+	const CXmlItem* pXIAttribDef = GetCustomAttributeDef(szID);
+	
+	if (pXIAttribDef)
+		return pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
+
+	// else
+	return 0;
+}
+
 LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const
 {
-	CString sValue(GetTaskCustomAttributeData(hTask, szID));
-
-	if (sValue && bDisplay)
+	if (bDisplay)
 	{
-		const CXmlItem* pXIAttribDef = GetCustomAttributeDef(szID);
-		ASSERT(pXIAttribDef);
-
-		if (pXIAttribDef)
+		const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
+	
+		if (pXICustData)
 		{
-			DWORD dwAttribType = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
+			LPCTSTR szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
 
-			switch (dwAttribType & TDCCA_DATAMASK)
-			{
-			case TDCCA_DATE:
-				sValue = TDCCADATA(sValue).FormatAsDate();
-				break;
-
-// 			case TDCCA_TIMEPERIOD:
-// 				sValue = TDCCADATA(sValue).FormatAsTimePeriod();
-// 				break;
-			}
+			if (!Misc::IsEmpty(szValue))
+				return szValue;
 		}
 	}
 
-	return sValue;
+	// all else
+	return GetTaskCustomAttributeData(hTask, szID);
 }
 
+// DEPRECATED
 LPCTSTR CTaskFile::GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const
 {
-	const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
+	if ((GetCustomAttributeType(szID) & TDCCA_DATAMASK) == TDCCA_DATE)
+		return GetTaskCustomAttributeData(hTask, szID, true);
 
-	if (pXICustData)
-		return pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDATESTRING);
-
-	// no match
+	// else
 	return NULLSTRING;
 }
 

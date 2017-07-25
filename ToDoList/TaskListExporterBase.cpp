@@ -550,16 +550,12 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 	{
 		if (pTasks->IsCustomAttributeEnabled(nCust))
 		{
-			// always export
+			// always export 'pretty' data value
 			CString sLabel = pTasks->GetCustomAttributeLabel(nCust);
 			CString sID = pTasks->GetCustomAttributeID(nCust);
-			CString sValue = pTasks->GetTaskCustomDateString(hTask, sID);
+			CString sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, true);
 
-			if (sValue.IsEmpty())
-				sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, false);
-
-			CString sValues = TDCCADATA(sValue).FormatAsArray('+');
-			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValues);
+			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValue);
 		}
 	}
 

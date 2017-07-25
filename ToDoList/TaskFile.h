@@ -208,6 +208,8 @@ public:
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
 	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
 
+	unsigned long GetCustomAttributeType(LPCTSTR szID) const;
+
 	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 
 	bool IsTaskParent(HTASKITEM hTask) const;
@@ -228,7 +230,7 @@ public:
 	bool AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef);
 	LPCTSTR GetTaskFileLink(HTASKITEM hTask, int nIndex) const;
 	bool IsTaskGoodAsDone(HTASKITEM hTask) const;
-	LPCTSTR GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const;
+	LPCTSTR GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const; // DEPRECATED
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList13 implementation 
@@ -255,7 +257,7 @@ public:
 	bool SetTaskDueDate64(HTASKITEM hTask, time64_t tDueDate);
 	bool SetTaskStartDate64(HTASKITEM hTask, time64_t tStartDate);
 
-	COLORREF GetTaskBkgndColor(HTASKITEM hTask) const;
+	unsigned long GetTaskBkgndColor(HTASKITEM hTask) const;
 	bool DeleteTask(HTASKITEM hTask);
 
 	//////////////////////////////////////////////////////////////
@@ -343,7 +345,7 @@ public:
 	// ITaskList3 implementation 
 	time_t GetTaskDueDate(HTASKITEM hTask, bool bCalc) const;
 	LPCTSTR GetTaskDueDateString(HTASKITEM hTask, bool bCalc) const;
-	COLORREF GetTaskTextColor(HTASKITEM hTask) const;
+	unsigned long GetTaskTextColor(HTASKITEM hTask) const;
 	int GetTaskRisk(HTASKITEM hTask, bool bHighest) const;
 	LPCTSTR GetTaskExternalID(HTASKITEM hTask) const;
 
@@ -495,7 +497,6 @@ protected:
 	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;
 
-	BOOL IsCustomDateAttribute(const CString& sTypeID) const;
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
 	CXmlItem* GetCustomAttributeDef(const CString& sCustID);
