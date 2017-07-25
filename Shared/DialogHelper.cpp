@@ -1669,28 +1669,24 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 			
 			int nResult = 0;
 
-			// remove hard returns within a sentence
-			// code based on CString::Replace()
+			// remove single '\r' and '\n' unless they follow a 
+			// punctuation mark or another '\r' or \n'
 			LPTSTR pstrSource = wszText;
 			LPTSTR pstrDest = wszText;
 			LPTSTR pstrEnd = (pstrSource + wcslen(wszText));
-
-			BOOL bKeepNewLine = FALSE;
+			TCHAR cPrev = 0;
 			
 			while (pstrSource < pstrEnd)
 			{
-				// copy characters unless they are '\r' OR '\n' AND 
-				// they DON'T follow a punctuation mark or another line-ending
-				BOOL bLineEnd = ((*pstrSource == '\r') || (*pstrSource == '\n'));
-
-				if (!bLineEnd || bKeepNewLine)
+#define ISLINEEND(c) ((c == '\r') || (c == '\n'))
+				
+				if (!ISLINEEND(*pstrSource) || ISLINEEND(cPrev) || (DELIMS.Find(cPrev) >= 0))
 				{
 					*pstrDest = *pstrSource;
 					pstrDest = _tcsinc(pstrDest);
-
-					bKeepNewLine = (bLineEnd || (DELIMS.Find(*pstrSource) >= 0));
 				}
 
+				cPrev = *pstrSource;
 				pstrSource = _tcsinc(pstrSource);
 			}
 			*pstrDest = '\0';
