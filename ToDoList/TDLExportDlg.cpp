@@ -32,7 +32,7 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 	  m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
 	  m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
 	  m_taskSel(_T("Exporting"), nView, bVisibleColumnsOnly),
-	  m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS),
+	  m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
 	  m_nFormatOption(0),
 	  m_cbFormat(mgr, FALSE)
 {
