@@ -9393,7 +9393,7 @@ void CToDoListWnd::OnExport()
 					aExistPaths.Add(sFilePath);
 			}
 
-			if (!aExistPaths.IsEmpty())
+			if (aExistPaths.GetSize())
 				bOverWrite = (IDOK == MessageBox(IDS_CONFIRM_EXPORT_OVERWRITE, 0, nMsgFlags, Misc::FormatArray(aExistPaths, _T("\n\n"))));
 			else
 				bOverWrite = TRUE;
