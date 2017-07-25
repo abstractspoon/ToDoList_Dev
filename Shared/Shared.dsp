@@ -645,14 +645,6 @@ SOURCE=.\UIExtensionMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\UIExtensionUIHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionWnd.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\UIThemeFile.cpp
 # End Source File
 # Begin Source File
@@ -1306,14 +1298,6 @@ SOURCE=.\TreeSelectionHelper.h
 # Begin Source File
 
 SOURCE=.\UIExtensionMgr.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionUIHelper.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\UIExtensionWnd.h
 # End Source File
 # Begin Source File
 
