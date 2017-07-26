@@ -25,7 +25,6 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR SPACE = _T(" ");
 static LPCTSTR ONEDBLQUOTE = _T("\"");
 static LPCTSTR TWODBLQUOTE = _T("\"\"");
 
@@ -176,7 +175,9 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CStr
 
 CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& /*sAttribLabel*/, const CString& sValue) const
 {
-	// we always export regardless of whether there is a value or not
+	// Note: We always export values even if they are empty
+
+	// Note: We always quote comments to avoid unnecessary search/replace
 	BOOL bNeedQuoting = (nAttrib == TDCA_COMMENTS);
 	CString sAttrib(sValue);
 	
@@ -195,7 +196,7 @@ CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStri
 		sAttrib = ONEDBLQUOTE + sAttrib + ONEDBLQUOTE;
 	
 	// replace carriage returns
-	sAttrib.Replace(ENDL, SPACE);
+	sAttrib.Replace('\n', ' ');
 	sAttrib += DELIM;
 
 	return sAttrib;
