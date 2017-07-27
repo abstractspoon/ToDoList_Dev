@@ -187,6 +187,11 @@ int CEnToolBar::GetButtonCount(BOOL bIgnoreSeparators) const
 	return nCount;
 }
 
+void CEnToolBar::SetBackgroundColor(COLORREF color)
+{
+	SetBackgroundColors(color, CLR_NONE, FALSE, FALSE);
+}
+
 void CEnToolBar::SetBackgroundColors(COLORREF crFrom, COLORREF crTo, BOOL bGradient, BOOL bGlass)
 {
 	m_crFrom = crFrom;

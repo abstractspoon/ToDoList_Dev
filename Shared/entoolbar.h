@@ -26,6 +26,7 @@ public:
 	BOOL SetImage(UINT nIDImage, COLORREF crMask = CLR_NONE);
 
 	void RefreshButtonStates(BOOL bImmediate = TRUE);
+	void SetBackgroundColor(COLORREF color);
 	void SetBackgroundColors(COLORREF crFrom, COLORREF crTo, BOOL bGradient, BOOL bGlass);
 	void SetHotColor(COLORREF crHot) { m_crHot = crHot; }
 
