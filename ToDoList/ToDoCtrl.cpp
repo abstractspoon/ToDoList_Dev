@@ -3237,14 +3237,14 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	if (!pTDI->HasStart())
 	{
 		if (pTDI->HasDue())
-			return m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, 1, nUnits, bAndSubtasks, FALSE);
+			return m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, bAndSubtasks, FALSE);
 
 		// else both not set
 		return SET_FAILED;
 	}
 	else if (!pTDI->HasDue())
 	{
-		return m_data.OffsetTaskDate(dwTaskID, TDCD_START, 1, nUnits, bAndSubtasks, FALSE);
+		return m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, bAndSubtasks, FALSE);
 	}
 
 	// else both are set
