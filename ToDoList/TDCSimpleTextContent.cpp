@@ -311,7 +311,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 	case ID_COMMENTS_PASTEASREF:
 		{
 			// try to get the clipboard for any tasklist
-			ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, FALSE);
+			ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, FALSE);
 
 			// verify that we can get the corresponding filename
 			CString sFileName;
@@ -324,7 +324,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 			}
 			else // get the clipboard for just this tasklist
 			{
-				pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, TRUE);
+				pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, TRUE);
 			}
 
 			if (pClipboard && pClipboard->GetFirstTask())
@@ -574,14 +574,14 @@ BOOL CTDLSimpleTextContentCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 BOOL CTDLSimpleTextContentCtrl::IsTDLClipboardEmpty() const 
 { 
 	// try for any clipboard first
-	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, FALSE);
+	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, FALSE);
 	ITaskList4* pClip4 = GetITLInterface<ITaskList4>(pClipboard, IID_TASKLIST4);
 
 	if (pClip4)
 		return (pClipboard->GetFirstTask() == NULL);
 
 	// else try for 'our' clipboard only
-	return (!GetParent()->SendMessage(WM_TDCM_HASCLIPBOARD, 0, TRUE)); 
+	return (!GetParent()->SendMessage(WM_ICC_HASCLIPBOARD, 0, TRUE)); 
 }
 
 LRESULT CTDLSimpleTextContentCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const

@@ -25,8 +25,11 @@
 const UINT WM_ICC_WANTSPELLCHECK= ::RegisterWindowMessageW(L"WM_ICC_WANTSPELLCHECK");
 const UINT WM_ICC_CONTENTCHANGE	= ::RegisterWindowMessageW(L"WM_ICC_CONTENTCHANGE");
 const UINT WM_ICC_KILLFOCUS		= ::RegisterWindowMessageW(L"WM_ICC_KILLFOCUS");
-const UINT WM_ICC_DOHELP		= ::RegisterWindowMessageW(L"WM_ICC_DOHELP"); // lParam is literal string
-
+const UINT WM_ICC_DOHELP		= ::RegisterWindowMessageW(L"WM_ICC_DOHELP");		// lParam = Help key (LPCWSTR)
+const UINT WM_ICC_GETCLIPBOARD	= ::RegisterWindowMessageW(L"WM_ICC_GETCLIPBOARD");	// lParam = HWND
+const UINT WM_ICC_HASCLIPBOARD	= ::RegisterWindowMessageW(L"WM_ICC_HASCLIPBOARD");	// lParam = HWND
+const UINT WM_ICC_TASKLINK		= ::RegisterWindowMessageW(L"WM_ICC_TASKLINK");		// lParam = URL (LPCWSTR)
+const UINT WM_ICC_FAILEDLINK	= ::RegisterWindowMessageW(L"WM_ICC_FAILEDLINK");	// wParam = HWND, lParam = URL (LPCWSTR)
 
 //////////////////////////////////////////////////////////////////////
 

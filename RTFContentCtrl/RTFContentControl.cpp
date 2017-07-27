@@ -41,6 +41,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+static LPCTSTR TDL_LINK = _T("tdl://");
+
+/////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl
 
 BOOL CRTFContentControl::s_bInlineSpellChecking = TRUE;
@@ -61,7 +65,7 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 	ZeroMemory(&m_lfCurrent, sizeof(LOGFONT));
 
 	// add custom protocol to comments field for linking to task IDs
-	m_rtf.AddProtocol(TDL_PROTOCOL, TRUE);
+	m_rtf.AddProtocol(TDL_LINK, TRUE);
 
 	CString sTooltip;
 	sTooltip.LoadString(ID_HELP);
@@ -485,14 +489,14 @@ void CRTFContentControl::InitMenuIconManager()
 BOOL CRTFContentControl::IsTDLClipboardEmpty() const 
 { 
 	// try for any clipboard first
-	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, FALSE);
+	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, FALSE);
 	ITaskList4* pClip4 = GetITLInterface<ITaskList4>(pClipboard, IID_TASKLIST4);
 
 	if (pClip4)
 		return (pClipboard->GetFirstTask() == NULL);
 
 	// else try for 'our' clipboard only
-	return (!GetParent()->SendMessage(WM_TDCM_HASCLIPBOARD, 0, TRUE)); 
+	return (!GetParent()->SendMessage(WM_ICC_HASCLIPBOARD, 0, TRUE)); 
 }
 
 int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -664,8 +668,8 @@ LRESULT CRTFContentControl::OnCustomUrl(WPARAM wp, LPARAM lp)
 	CString sUrl((LPCTSTR)lp);
 	sUrl.MakeLower();
 
-	if (sUrl.Find(TDL_PROTOCOL) != -1 || sUrl.Find(TDL_EXTENSION) != -1)
-		return GetParent()->SendMessage(WM_TDCM_TASKLINK, 0, lp);
+	if (sUrl.Find(TDL_LINK) != -1 || sUrl.Find(TDL_EXTENSION) != -1)
+		return GetParent()->SendMessage(WM_ICC_TASKLINK, 0, lp);
 
 	return 0;
 }
@@ -673,7 +677,7 @@ LRESULT CRTFContentControl::OnCustomUrl(WPARAM wp, LPARAM lp)
 LRESULT CRTFContentControl::OnFailedUrl(WPARAM wp, LPARAM lp)
 {
 	ASSERT (wp == RTF_CONTROL);
-	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, wp, lp);
+	return GetParent()->SendMessage(WM_ICC_FAILEDLINK, wp, lp);
 }
 
 void CRTFContentControl::OnEditCopy() 
@@ -847,7 +851,7 @@ void CRTFContentControl::OnUpdateEditPaste(CCmdUI* pCmdUI)
 void CRTFContentControl::OnEditPasteasRef() 
 {
 	// try to get the clipboard for any tasklist
-	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, FALSE);
+	ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, FALSE);
 
 	// verify that we can get the corresponding filename
 	CString sFileName;
@@ -859,7 +863,7 @@ void CRTFContentControl::OnEditPasteasRef()
 		sFileName.Replace(_T(" "), _T("%20"));
 	}
 	else // get the clipboard for just this tasklist
-		pClipboard = (ITaskList*)GetParent()->SendMessage(WM_TDCM_GETCLIPBOARD, 0, TRUE);
+		pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, TRUE);
 
 	if (pClipboard && pClipboard->GetFirstTask())
 	{
@@ -870,9 +874,9 @@ void CRTFContentControl::OnEditPasteasRef()
 		while (hClip)
 		{
 			if (sFileName.IsEmpty())
-				sRef.Format(_T(" %s%lu"), TDL_PROTOCOL, pClipboard->GetTaskID(hClip));
+				sRef.Format(_T(" %s%lu"), TDL_LINK, pClipboard->GetTaskID(hClip));
 			else
-				sRef.Format(_T(" %s%s?%lu"), TDL_PROTOCOL, sFileName, pClipboard->GetTaskID(hClip));
+				sRef.Format(_T(" %s%s?%lu"), TDL_LINK, sFileName, pClipboard->GetTaskID(hClip));
 
 			sRefs += sRef;
 			
