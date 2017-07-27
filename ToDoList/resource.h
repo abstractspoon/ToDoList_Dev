@@ -144,7 +144,9 @@
 #define IDD_TIMETRACK_DIALOG            294
 #define IDB_TIMETRACK_BTNS              297
 #define IDR_TIMETRACKER_TOOLBAR         298
+#define IDR_UDTPREFS_TOOLBAR            299
 #define IDB_TIMETRACK_TOOLBAR_STD       300
+#define IDB_UDTPREFS_TOOLBAR_STD        301
 #define IDI_SIMPLETEXT                  302
 #define IDI_RESET                       303
 #define IDI_TIMETRACK_STD               304
@@ -1329,6 +1331,13 @@
 #define ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE 34571
 #define ID_DEBUG_UPDATETRANSLATION      34572
 #define ID_DEBUG_CLEANDICTIONARIES      34573
+#define ID_UDTPREFS_COPY                34574
+#define ID_UDTPREFS_DELETE              34575
+#define ID_CUUDTPREFS_MOVEUP            34576
+#define ID_UDTPREFS_MOVEDOWN            34577
+#define ID_UDTPREFS_EDIT                34578
+#define ID_UDTPREFS_NEW                 34579
+#define ID_UDTPREFS_MOVEUP              34580
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2073,7 +2082,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        306
-#define _APS_NEXT_COMMAND_VALUE         34574
+#define _APS_NEXT_COMMAND_VALUE         34581
 #define _APS_NEXT_CONTROL_VALUE         1499
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

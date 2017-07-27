@@ -13,6 +13,8 @@
 #include "..\shared\sysimagelist.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\menubutton.h"
+#include "..\shared\ToolbarHelper.h"
+#include "..\shared\entoolbar.h"
 
 #include <afxtempl.h>
 
@@ -53,6 +55,8 @@ protected:
 	CSysImageList m_ilSys;
 	int m_nMaxNumTools;
 	CMenuButton	m_btnArgMenu;
+	CEnToolBar m_toolbar;
+	CToolbarHelper m_tbHelper;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -69,8 +73,19 @@ protected:
 	//{{AFX_MSG(CPreferencesToolPage)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
-	afx_msg void OnNewtool();
-	afx_msg void OnDeletetool();
+	afx_msg void OnNewTool();
+	afx_msg void OnDeleteTool();
+	afx_msg void OnEditToolName();
+	afx_msg void OnCopyTool();
+	afx_msg void OnMoveToolUp();
+	afx_msg void OnMoveToolDown();
+	afx_msg void OnUpdateCmdUINewTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUIDeleteTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUIEditToolName(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUICopyTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUIMoveToolUp(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUIMoveToolDown(CCmdUI* pCmdUI);
+
 	afx_msg void OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
@@ -79,9 +94,9 @@ protected:
 	afx_msg void OnChangeCmdline();
 	afx_msg void OnInsertPlaceholder(UINT nCmdID);
 	afx_msg void OnRunminimized();
-	afx_msg void OnTesttool();
+	afx_msg void OnTestTool();
 	afx_msg void OnChangeIconPath();
-	afx_msg void OnImport();
+	afx_msg void OnImportTools();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 		
@@ -90,9 +105,13 @@ protected:
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 	void EnableControls();
-	int GetCurSel();
+	int GetCurSel() const;
+	BOOL SetCurSel(int nTool);
 	void RebuildListCtrlImages();
-	
+	BOOL InitializeToolbar();
+	BOOL GetListTool(int nTool, USERTOOL& tool) const;
+	int AddListTool(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+
 	static CString MapCmdIDToPlaceholder(UINT nCmdID);
 	static CLA_TYPE MapCmdIDToType(UINT nCmdID);
 	
