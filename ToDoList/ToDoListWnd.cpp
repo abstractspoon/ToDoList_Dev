@@ -11351,7 +11351,10 @@ LRESULT CToDoListWnd::OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam)
 	ASSERT(!sPath.IsEmpty());
 
 	if (!ValidateTaskLinkFilePath(sPath))
+	{
+		AfxMessageBox(CEnString(IDS_TASKLISTNOTFOUND, sPath));
 		return FALSE;
+	}
 
 	// can we handle it ?
 	if (DoTaskLink(sPath, dwTaskID, FALSE))
@@ -11399,13 +11402,10 @@ LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 		{
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
-			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath) &&
-				ValidateTaskLinkFilePath(sPath))
-			{
-				if (OnToDoCtrlDoTaskLink(dwTaskID, (LPARAM)(LPCTSTR)sPath))
-					return TRUE; // we handled it
-			}
+			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
+				return OnToDoCtrlDoTaskLink(dwTaskID, (LPARAM)(LPCTSTR)sPath);
 		}
+		// else fall thru for generic error message
 	}
 
 	// all else

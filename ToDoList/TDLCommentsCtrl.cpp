@@ -77,6 +77,10 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_KILLFOCUS, OnCommentsKillFocus)
 	ON_REGISTERED_MESSAGE(WM_ICC_WANTSPELLCHECK, OnCommentsWantSpellCheck)
 	ON_REGISTERED_MESSAGE(WM_ICC_DOHELP, OnCommentsDoHelp)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETCLIPBOARD, OnCommentsGetClipboard)
+	ON_REGISTERED_MESSAGE(WM_ICC_HASCLIPBOARD, OnCommentsHasClipboard)
+	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnCommentsTaskLink)
+	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnCommentsFailedLink)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 END_MESSAGE_MAP()
@@ -355,6 +359,30 @@ LRESULT CTDLCommentsCtrl::OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam)
 {
 	// Forward to parent
 	return GetParent()->SendMessage(WM_ICC_WANTSPELLCHECK, wParam, lParam);
+}
+
+LRESULT CTDLCommentsCtrl::OnCommentsGetClipboard(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, wParam, lParam);
+}
+
+LRESULT CTDLCommentsCtrl::OnCommentsHasClipboard(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_HASCLIPBOARD, wParam, lParam);
+}
+
+LRESULT CTDLCommentsCtrl::OnCommentsTaskLink(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_TASKLINK, wParam, lParam);
+}
+
+LRESULT CTDLCommentsCtrl::OnCommentsFailedLink(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_FAILEDLINK, wParam, lParam);
 }
 
 void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)

@@ -90,6 +90,10 @@ protected:
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsGetClipboard(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsHasClipboard(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsTaskLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsFailedLink(WPARAM wParam, LPARAM lParam);
 
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
