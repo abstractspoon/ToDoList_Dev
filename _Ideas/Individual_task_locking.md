@@ -13,7 +13,7 @@
 	* To prevent race conditions we will need to use the 'CREATE_NEW' file creation flag. This may require a significant re-architecting of CXmlFile and CStdioFileEx because this flag is not supported by MFC
 2. Change task state to 'unlocked'
 3. Keep track of checked-out task
-	* If the file creation fails (because someone got their first) then fail the check-out and notify the user
+	* If the file creation fails (because someone got there first) then fail the check-out and notify the user
 
 #### Checking In Tasks ####
 1. Save current task(s) state to '[TaskID].sc' file(s)
