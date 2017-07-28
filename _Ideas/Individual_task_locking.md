@@ -4,10 +4,7 @@
 	* I will probably hide 'Menu > Edit > Lock Task Attributes'	and add new menu items for checking-in/out tasks to the Source Control menu
 * Checking-out the entire tasklist will still be required for adding, deleting and moving tasks
 * Files for each checked-out task will be stored in a folder having the same name as the tasklist but with the extension '.SourceControl'
-
-## Problems ##
-
-* I can see a possible conflict arising when someone has a task checked out and then someone else checks out the entire tasklist and modifies the same task. In such a case the person with the single task checked out would always 'win' because before they could merge their changes into the tasklist the other would need to have already checked-in the tasklist. Perhaps in fact this could be avoided by ensuring that the individual checked-out tasks would be locked against changes by the person who has checked out the whole tasklist. This would then mean that the user with the checked-out tasklist would need to actively monitor the '.SourceControl' folder (see above) so that the lock states could be kept synchronised.
+* To prevent a possible conflict arising between someone who has a single task checked out and someone who checks out the entire tasklist and tries to modifies the same task, the user with the checked-out tasklist would need to actively monitor the '.SourceControl' folder (see above) so that tasks checked-out to other users could be marked 'locked' to prevent editing.
 
 ## Processes ##
 
