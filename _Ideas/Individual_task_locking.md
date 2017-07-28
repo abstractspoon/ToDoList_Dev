@@ -9,8 +9,9 @@
 ## Processes ##
 
 #### Checking Out Tasks ####
-1. Create empty '<TaskID>' to prevent anyone else checking-out the task
+1. Create empty file named '[TaskID].sc' to prevent anyone else checking-out the task
 	* If that fails then exit the check-out 
+	* To prevent race conditions we will need to use the 'CREATE_NEW' file creation flag. This may require a significant re-architecting of CXmlFile and CStdioFileEx because this flag is not supported by MFC
 2. Change task state to 'unlocked'
 3. Keep track of checked-out task
 
