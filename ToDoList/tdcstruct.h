@@ -284,10 +284,6 @@ struct TDCGETTASKS
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
-		// always want custom attributes
-		if (nAttrib == TDCA_CUSTOMATTRIB)
-			return TRUE;
-
 		// if TDCGTF_CUSTOMCOLUMNS is set then
 		// 'no' attributes really means 'no' attributes
 		// else it means 'all attributes' 

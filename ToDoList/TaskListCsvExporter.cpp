@@ -155,7 +155,7 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CStr
 {
 	CString sHeader;
 	
-	if (nAttrib == TDCA_CUSTOMATTRIB)
+	if (IsCustomAttribute(nAttrib))
 	{
 		sHeader = (sAttribLabel + DELIM);
 	}

@@ -30,7 +30,8 @@ class CTDLPrintDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
+	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet,
+					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
 
 	BOOL GetStylesheet(CString& sStylesheet) const;
 	CString GetTitle() const { return m_sTitle; }

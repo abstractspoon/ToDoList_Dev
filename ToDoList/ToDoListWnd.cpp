@@ -5146,7 +5146,11 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
-			CTDLTransformDialog dialog(_T(""), tdc.GetTaskView(), _T(""));
+			CTDLTransformDialog dialog(_T(""), 
+										tdc.GetTaskView(), 
+										_T(""), 
+										tdc.GetCustomAttributeDefs());
+
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
 			tasks.SetReportAttributes(_T(""), dialog.GetDate());
@@ -6152,7 +6156,10 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	// export to html and then print in IE
-	CTDLPrintDialog dialog(sTitle, bPreview, tdc.GetTaskView(), tdc.GetStylesheetPath());
+	CTDLPrintDialog dialog(sTitle, bPreview, 
+							tdc.GetTaskView(), 
+							tdc.GetStylesheetPath(),
+							tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -9340,24 +9347,25 @@ void CToDoListWnd::OnUpdateToolsCheckin(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnExport() 
 {
-	const CPreferencesDlg& userPrefs = Prefs();
-	
 	int nTDCCount = GetTDCCount(), nSelTDC = GetSelToDoCtrl();
 	ASSERT (nTDCCount >= 1);
+
+	const CPreferencesDlg& userPrefs = Prefs();
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	CTDLExportDlg dialog(m_mgrImportExport, 
 						nTDCCount == 1, 
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
 						m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE), 
-						userPrefs.GetAutoExportFolderPath());
+						userPrefs.GetAutoExportFolderPath(), 
+						tdc.GetCustomAttributeDefs());
 	
 	// keep showing the dialog until the user selects a non-existing 
 	// filename OR they confirm that they want to overwrite the file(s)
 	CString sExportPath;
 	BOOL bOverWrite = FALSE;
 	int nFormat = -1;
-
 	while (!bOverWrite)
 	{
 		if (dialog.DoModal() != IDOK)
@@ -9369,7 +9377,7 @@ void CToDoListWnd::OnExport()
 		UINT nMsgFlags = (MB_OKCANCEL | MB_ICONWARNING);
 
 		// interested in overwriting single files
-		if (nTDCCount == 1 || !dialog.GetExportAllTasklists() || dialog.GetExportOneFile())
+		if ((nTDCCount == 1) || !dialog.GetExportAllTasklists() || dialog.GetExportOneFile())
 		{
 			if (FileMisc::FileExists(sExportPath))
 				bOverWrite = (IDOK == MessageBox(sExportPath, IDS_CONFIRM_EXPORT_OVERWRITE, nMsgFlags));
@@ -9582,7 +9590,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 
 	tasks.Reset();	
 	tasks.SetProjectName(tdc.GetFriendlyProjectName());
-//	tasks.SetCharSet(userPrefs.GetExportEncoding());
 	
 	// export flags
 	filter.dwFlags |= TDCGTF_FILENAME;
@@ -9729,7 +9736,10 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// pass the project name as the title field
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
-	CTDLTransformDialog dialog(sTitle, tdc.GetTaskView(), tdc.GetStylesheetPath());
+	CTDLTransformDialog dialog(sTitle, 
+								tdc.GetTaskView(), 
+								tdc.GetStylesheetPath(),
+								tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -11860,7 +11870,7 @@ void CToDoListWnd::OnUpdateCloseallbutthis(CCmdUI* pCmdUI)
 void CToDoListWnd::DoSendTasks(BOOL bSelected)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CTDLSendTasksDlg dialog(bSelected, tdc.GetTaskView());
+	CTDLSendTasksDlg dialog(bSelected, tdc.GetTaskView(), tdc.GetCustomAttributeDefs());
 
 	if (dialog.DoModal() == IDOK)
 	{

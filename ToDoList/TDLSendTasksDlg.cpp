@@ -17,8 +17,11 @@ static char THIS_FILE[] = __FILE__;
 // CTDLSendTasksDlg dialog
 
 
-CTDLSendTasksDlg::CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLSendTasksDlg::IDD, pParent), m_taskSel(_T("SendTasks"), nView)
+CTDLSendTasksDlg::CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView, 
+									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+	: 
+	CTDLDialog(CTDLSendTasksDlg::IDD, pParent), 
+	m_dlgTaskSel(_T("SendTasks"), nView)
 {
 	//{{AFX_DATA_INIT(CTDLSendTasksDlg)
 	//}}AFX_DATA_INIT
@@ -28,7 +31,9 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView, CWnd* pP
 
 	// bSelected overrides saved state
 	if (bSelectedTasks)
-		m_taskSel.SetWantWhatTasks(TSDT_SELECTED);
+		m_dlgTaskSel.SetWantWhatTasks(TSDT_SELECTED);
+
+	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 }
 
 
@@ -52,7 +57,7 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_taskSel.Create(IDC_FRAME, this));
+    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

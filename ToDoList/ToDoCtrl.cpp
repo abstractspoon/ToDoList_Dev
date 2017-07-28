@@ -6085,13 +6085,33 @@ void CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aIt
 		combo.AddUniqueItems(aItems);
 }
 
-void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks) const
+void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	// save auto combobox contents to definition first
 	// just like we do with standard combos
 	CTDCCustomAttributeHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
-	tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
+	if (filter.HasFlag(TDCGTF_USERCOLUMNS))
+	{
+		// Save only those attributes that exist in the filter 
+		CTDCCustomAttribDefinitionArray aAttribDefs;
+		aAttribDefs.Copy(m_aCustomAttribDefs);
+
+		int nDef = aAttribDefs.GetSize();
+
+		while (nDef--)
+		{
+			if (!filter.WantAttribute(aAttribDefs[nDef].GetAttributeID()))
+				aAttribDefs.RemoveAt(nDef);
+		}
+
+		if (aAttribDefs.GetSize() > 0)
+			tasks.SetCustomAttributeDefs(aAttribDefs);
+	}
+	else // save all
+	{
+		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
+	}
 }
 
 void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
@@ -8839,7 +8859,7 @@ void CToDoCtrl::PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& fil
 	tasks.EnableISODates(HasStyle(TDCS_SHOWDATESINISO));
 	
 	// custom attributes
-	SaveCustomAttributeDefinitions(tasks);
+	SaveCustomAttributeDefinitions(tasks, filter);
 	
 	// filename
 	if (filter.HasFlag(TDCGTF_FILENAME))
@@ -9769,8 +9789,27 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		}
 
 		// custom data 
-		if (filter.WantAttribute(TDCA_CUSTOMATTRIB))
+		if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
+		{
 			tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
+		}
+		else
+		{
+			int nIndex = m_aCustomAttribDefs.GetSize();
+
+			while (nIndex--)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nIndex];
+
+				if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
+				{
+					TDCCADATA data;
+
+					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data.AsString());
+				}
+			}
+		}
 	}
 	else if (bDone)
 	{

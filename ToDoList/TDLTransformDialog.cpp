@@ -20,10 +20,13 @@ static char THIS_FILE[] = __FILE__;
 // CTDLTransformDialog dialog
 
 
-CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_TRANSFORM_DIALOG, pParent), m_taskSel(_T("Transform"), nView),
-		m_sTitle(szTitle), m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
-
+CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, 
+										const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+	: 
+	CTDLDialog(IDD_TRANSFORM_DIALOG, pParent), 
+	m_dlgTaskSel(_T("Transform"), nView),
+	m_sTitle(szTitle), 
+	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 	//{{AFX_DATA_INIT(CTDLTransformDialog)
 	//}}AFX_DATA_INIT
@@ -34,6 +37,7 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTST
 
 	// share same title history as print dialog
 	m_cbTitle.Load(prefs, _T("Print"));
+	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 
 	InitStylesheet(szStylesheet);
 }
@@ -79,7 +83,7 @@ BOOL CTDLTransformDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_taskSel.Create(IDC_FRAME, this));
+    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 
 	OnChangeStylesheet();
 	

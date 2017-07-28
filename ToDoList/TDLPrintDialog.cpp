@@ -21,8 +21,10 @@ static char THIS_FILE[] = __FILE__;
 // CTDLPrintDialog dialog
 
 
-CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_PRINT_DIALOG, pParent), 
+CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, 
+									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+	: 
+	CTDLDialog(IDD_PRINT_DIALOG, pParent), 
 	m_bPreview(bPreview), 
 	m_dlgTaskSel(_T("Print"), nView),
 	m_sTitle(szTitle), 
@@ -34,7 +36,9 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 
 	m_bDate = prefs.GetProfileInt(_T("Print"), _T("WantDate"), TRUE);
 	m_nExportStyle = (TDLPD_STYLE)prefs.GetProfileInt(_T("Print"), _T("ExportStyle"), TDLPDS_WRAP);
+
 	m_cbTitle.Load(prefs, _T("Print"));
+	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 
 	InitStylesheet(szStylesheet);
 }
@@ -52,7 +56,6 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USESTYLESHEET, m_bUseStylesheet);
 	DDX_Control(pDX, IDC_PRINTTITLE, m_cbTitle);
 }
-
 
 BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLPrintDialog)

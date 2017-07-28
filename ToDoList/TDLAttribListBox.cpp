@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLAttribListBox.h"
+#include "TDCCustomAttributeHelper.h"
 
 #include "..\shared\dialoghelper.h"
 
@@ -67,6 +68,47 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAttributeListBox message handlers
 
+BOOL CTDLAttributeListBox::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	if (GetSafeHwnd())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// remove existing custom definitions
+	int nIndex = m_aAttribs.GetSize();
+	
+	while (nIndex--)
+	{
+		TDC_ATTRIBUTE nAttrib = m_aAttribs[nIndex].nTDCAttrib;
+
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+			m_aAttribs.RemoveAt(nIndex);
+	}
+
+	// Append new custom attributes
+	// Note: order doesn't matter because the list will be sorted
+	nIndex = aAttribDefs.GetSize();
+	ATTRIBVIS vis;
+
+	while (nIndex--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nIndex];
+
+		if (attribDef.bEnabled)
+		{
+			vis.sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			vis.nTDCAttrib = attribDef.GetAttributeID();
+			vis.bVisible = TRUE;
+
+			m_aAttribs.Add(vis);
+		}
+	}
+
+	return TRUE;
+}
+
 void CTDLAttributeListBox::PreSubclassWindow() 
 {
 	CCheckListBoxEx::PreSubclassWindow();
@@ -91,10 +133,6 @@ int CTDLAttributeListBox::FindAttribute(TDC_ATTRIBUTE nAttrib) const
 			return nIndex;
 	}
 
-	// custom attributes are always visible
-	if (nAttrib != TDCA_CUSTOMATTRIB)
-		ASSERT(0);
-
 	return -1;
 }
 
@@ -118,7 +156,7 @@ int CTDLAttributeListBox::GetAllAttributes(CTDCAttributeMap& mapAttrib) const
 	while (nIndex--)
 		mapAttrib.Add(m_aAttribs[nIndex].nTDCAttrib);
 
-	mapAttrib.Add(TDCA_CUSTOMATTRIB); // always
+	mapAttrib.Add(TDCA_CUSTOMATTRIB_ALL);
 
 	return mapAttrib.GetCount();
 }
@@ -144,6 +182,8 @@ BOOL CTDLAttributeListBox::OnReflectCheckChange()
 LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	ASSERT (GetCount() == 0);
+
+	ModifyStyle(0, CBS_SORT);
 
 	for (int nIndex = 0; nIndex < (int)m_aAttribs.GetSize(); nIndex++)
 	{
@@ -194,9 +234,5 @@ int CTDLAttributeListBox::GetVisibleAttributes(CTDCAttributeMap& mapAttrib) cons
 		}
 	}
 
-	// custom attributes
-	mapAttrib.Add(TDCA_CUSTOMATTRIB); // always
-
 	return mapAttrib.GetCount();
-
 }

@@ -303,3 +303,8 @@ void CTaskSelectionDlg::OnEnable(BOOL bEnable)
 	if (bEnable)
 		UpdateEnableStates();
 }
+
+BOOL CTaskSelectionDlg::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	return m_lbAttribList.SetCustomAttributeDefinitions(aAttribDefs);
+}

@@ -25,16 +25,18 @@ static char THIS_FILE[] = __FILE__;
 enum { ACTIVETASKLIST, ALLTASKLISTS };
 
 CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
-					   BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(IDD_EXPORT_DIALOG, pParent), 
-	  m_mgrImportExport(mgr),
-	  m_bSingleTaskList(bSingleTaskList), 
-	  m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
-	  m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
-	  m_taskSel(_T("Exporting"), nView, bVisibleColumnsOnly),
-	  m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
-	  m_nFormatOption(0),
-	  m_cbFormat(mgr, FALSE)
+					   BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
+					   const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+	: 
+	CTDLDialog(IDD_EXPORT_DIALOG, pParent), 
+	m_mgrImportExport(mgr),
+	m_bSingleTaskList(bSingleTaskList), 
+	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
+	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
+	m_dlgTaskSel(_T("Exporting"), nView, bVisibleColumnsOnly),
+	m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
+	m_nFormatOption(0),
+	m_cbFormat(mgr, FALSE)
 {
 	//{{AFX_DATA_INIT(CExportDlg)
 	//}}AFX_DATA_INIT
@@ -97,6 +99,8 @@ CTDLExportDlg::CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, 
 		m_sExportPath = m_sFolderPath;
 		m_sPathLabel.LoadString(IDS_ED_FOLDER);
 	}
+
+	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
 }
 
 
@@ -138,7 +142,7 @@ BOOL CTDLExportDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-    VERIFY(m_taskSel.Create(IDC_FRAME, this));
+    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
 	
 	// set initial control states
 	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);

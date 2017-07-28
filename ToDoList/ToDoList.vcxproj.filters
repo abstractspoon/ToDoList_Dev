@@ -1043,6 +1043,15 @@
     <None Include="res\style_image.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\udtprefs_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\udtprefs_toolbar_metro.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\udtprefs_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

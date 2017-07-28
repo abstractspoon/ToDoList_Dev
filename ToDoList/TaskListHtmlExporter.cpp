@@ -305,7 +305,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				switch (EXPORTSTYLE)
 				{
 				case STYLE_WRAP:
-					if (nAttrib == TDCA_COMMENTS)
+					if (IsCustomAttribute(nAttrib))
 					{
 						sFmtAttrib = ENDL + sAttribVal;
 					}
@@ -320,7 +320,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 					
 				case STYLE_TABLE:
 					// special case: custom attrib
-					if (nAttrib == TDCA_CUSTOMATTRIB)
+					if (IsCustomAttribute(nAttrib))
 						sFmtAttrib.Format(_T("<td>%s</td>"), sAttribVal);
 					else
 						sFmtAttrib = sAttribVal;
@@ -493,7 +493,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if (EXPORTSTYLE == STYLE_TABLE && nAttrib != TDCA_CUSTOMATTRIB)
+	if (EXPORTSTYLE == STYLE_TABLE && !IsCustomAttribute(nAttrib))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;

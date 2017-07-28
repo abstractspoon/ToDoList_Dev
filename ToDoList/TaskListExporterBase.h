@@ -52,7 +52,9 @@ protected:
 protected:
 	// helpers
 	int FindAttribute(TDC_ATTRIBUTE attrib) const;
+	
 	static CString GetAttribLabel(TDC_ATTRIBUTE attrib);
+	static BOOL IsCustomAttribute(TDC_ATTRIBUTE attrib);
 
 private:
 	// helpers

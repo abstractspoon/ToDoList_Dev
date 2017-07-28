@@ -730,7 +730,7 @@ protected:
 	void SaveGlobals(CTaskFile& tasks) const;
 	void LoadGlobals(const CTaskFile& tasks);
 
-	void SaveCustomAttributeDefinitions(CTaskFile& tasks) const;
+	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
 	virtual void RebuildCustomAttributeUI();
 

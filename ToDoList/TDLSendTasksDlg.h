@@ -23,13 +23,14 @@ class CTDLSendTasksDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView = FTCV_TASKTREE, CWnd* pParent = NULL);   // standard constructor
+	CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView, 
+					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_taskSel; }
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
-    CTaskSelectionDlg m_taskSel;
+    CTaskSelectionDlg m_dlgTaskSel;
 // Dialog Data
 	//{{AFX_DATA(CTDLSendTasksDlg)
 	enum { IDD = IDD_SENDTASKS_DIALOG };

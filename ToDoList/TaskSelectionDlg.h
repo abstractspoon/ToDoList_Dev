@@ -56,6 +56,7 @@ public:
 	void SetWantWhatTasks(TSD_TASKS nWhat);
 	void SetWantCompletedTasks(BOOL bWant = TRUE);
 	void SetWantInCompleteTasks(BOOL bWant = TRUE);
+	BOOL SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 protected:
 // Dialog Data

@@ -23,16 +23,16 @@ class CTDLExportDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView = FTCV_TASKTREE, 
-				BOOL bVisibleColumnsOnly = TRUE, LPCTSTR szFilePath = NULL, LPCTSTR szFolderPath = NULL, 
-				CWnd* pParent = NULL);
+	CTDLExportDlg(const CImportExportMgr& mgr, BOOL bSingleTaskList, FTC_VIEW nView, 
+				BOOL bVisibleColumnsOnly, LPCTSTR szFilePath, LPCTSTR szFolderPath, 
+				const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
 
 	BOOL GetExportAllTasklists();
 	int GetExportFormat() { return m_nFormatOption; }
 	CString GetExportPath(); // can be folder or path
 	BOOL GetExportOneFile() { return (m_bSingleTaskList || m_bExportOneFile); }
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_taskSel; }
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 // Dialog Data
@@ -44,7 +44,7 @@ protected:
 	BOOL	m_bExportOneFile;
 	CEnString	m_sPathLabel;
 	//}}AFX_DATA
-	CTaskSelectionDlg m_taskSel;
+	CTaskSelectionDlg m_dlgTaskSel;
 	BOOL m_bSingleTaskList; 
 	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
 	const CImportExportMgr& m_mgrImportExport;

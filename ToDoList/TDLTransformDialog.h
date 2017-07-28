@@ -22,20 +22,21 @@ class CTDLTransformDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, CWnd* pParent = NULL);   // standard constructor
+	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, 
+						const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	CString GetStylesheet() const;
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_taskSel; }
+	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTransformDialog)
 	CFileEdit	m_eStylesheet;
 	CString	m_sStylesheet;
-    CTaskSelectionDlg m_taskSel;
+    CTaskSelectionDlg m_dlgTaskSel;
 	//}}AFX_DATA
 	CString	m_sTitle;
 	BOOL	m_bDate;

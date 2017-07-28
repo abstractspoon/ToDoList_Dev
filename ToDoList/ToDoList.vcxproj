@@ -789,6 +789,9 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\timetrack_btns.bmp" />
     <None Include="res\timetrack_toolbar_std.bmp" />
     <None Include="res\ToDoList.rc2" />
+    <None Include="res\udtprefs_toolbar.bmp" />
+    <None Include="res\udtprefs_toolbar_metro.bmp" />
+    <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="res\wiz_header.bmp" />
     <None Include="RES\XPcheckboxes.bmp" />

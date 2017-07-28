@@ -7,12 +7,16 @@
 // TDAttribListBox.h : header file
 //
 
-#include "tdcenumcontainers.h"
+#include "tdcstruct.h"
 
 #include "..\Shared\checklistboxex.h"
 #include "..\Shared\enstring.h"
 
 #include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCCustomAttribDefinitionArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAttribListBox window
@@ -28,6 +32,8 @@ public:
 
 	void SetVisibleAttributes(const CTDCAttributeMap& mapAttrib);
 	int GetVisibleAttributes(CTDCAttributeMap& mapAttrib) const;
+
+	BOOL SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 // Attributes
 protected:

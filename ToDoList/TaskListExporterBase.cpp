@@ -181,12 +181,12 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 	// make sure these are in the order we want
 	for (int nAtt = 0; nAtt < NUMORDER; nAtt++)
 	{
-		TDC_ATTRIBUTE attrib = ATTRIB_ORDER[nAtt];
-		int nFind = FindAttribute(attrib);
+		TDC_ATTRIBUTE nAttrib = ATTRIB_ORDER[nAtt];
+		int nFind = FindAttribute(nAttrib);
 
 		if (nFind != -1) // found
 		{
-			if (attrib == TDCA_CUSTOMATTRIB)
+			if (nAttrib == TDCA_CUSTOMATTRIB)
 			{
 				int nNumCust = pTasks->GetCustomAttributeCount();
 				
@@ -198,7 +198,7 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 						CString sLabel;
 						sLabel.Format(_T("%s (%s)"), pTasks->GetCustomAttributeLabel(nCust), pTasks->GetCustomAttributeID(nCust));
 
-						sHeader += FormatHeaderItem(attrib, sLabel);
+						sHeader += FormatHeaderItem(nAttrib, sLabel);
 					}
 				}
 
@@ -206,7 +206,7 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 			else
 			{
 				CString sLabel = ARRLABELS[nFind];
-				sHeader += FormatHeaderItem(attrib, sLabel);
+				sHeader += FormatHeaderItem(nAttrib, sLabel);
 			}
 			
 		}
@@ -550,10 +550,9 @@ CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTask
 	{
 		if (pTasks->IsCustomAttributeEnabled(nCust))
 		{
-			// always export 'pretty' data value
 			CString sLabel = pTasks->GetCustomAttributeLabel(nCust);
 			CString sID = pTasks->GetCustomAttributeID(nCust);
-			CString sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, true);
+			CString sValue = pTasks->GetTaskCustomAttributeData(hTask, sID, true); // true -> 'For display'
 
 			sCustAttribs += FormatAttribute(TDCA_CUSTOMATTRIB, sLabel, sValue);
 		}
@@ -667,4 +666,9 @@ CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE attrib)
 	}
 
 	return _T("");
+}
+
+BOOL CTaskListExporterBase::IsCustomAttribute(TDC_ATTRIBUTE attrib)
+{
+	return ((attrib >= TDCA_CUSTOMATTRIB_FIRST) && (attrib <= TDCA_CUSTOMATTRIB_LAST));
 }
