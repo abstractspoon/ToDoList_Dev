@@ -35,7 +35,7 @@
 	2. If the tasklist is checked out then save the entire tasklist.
 
 #### Checking Out Tasklists ####
-	1. No change
+	1. To prevent a possible conflict the '.SourceControl' folder (see above) will need to be actively monitored for file creations and deletions so that tasks checked-out to other users can be marked 'locked' to prevent editing.
 
 #### Checking In Tasklists ####
 	1. No change
