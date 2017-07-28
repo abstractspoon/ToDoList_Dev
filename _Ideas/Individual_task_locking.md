@@ -10,30 +10,30 @@
 
 #### Checking Out Tasks ####
 1. Create empty file named '[TaskID].sc' to prevent anyone else checking-out the task
-	* If that fails then exit the check-out 
 	* To prevent race conditions we will need to use the 'CREATE_NEW' file creation flag. This may require a significant re-architecting of CXmlFile and CStdioFileEx because this flag is not supported by MFC
 2. Change task state to 'unlocked'
 3. Keep track of checked-out task
+	* If the file creation fails (because someone got their first) then fail the check-out and notify the user
 
 #### Checking In Tasks ####
-1. Save current task(s) state to '<TaskID>' file(s)
+1. Save current task(s) state to '[TaskID].sc' file(s)
 2. Clear tasklist 'Modified' flag
 3. Check out entire tasklist
-	* If that fails then exit the check-in
-4. Merge '<TaskID>' file(s) into tasklist 
+	* If that fails then fail the check-in and notify the user
+4. Merge '[TaskID].sc' file(s) into tasklist 
 5. Check in tasklist
-6. Delete '<TaskID>'
+6. Delete '[TaskID].sc'
 7. Stop tracking checked-in task(s)
 8. Change task(s) state to 'locked'
 
 #### Loading Tasklists ####
 1. Load base tasklist 
 2. Mark all tasks as 'locked'
-3. Load any checked out tasks ('<TaskID>' files), merge them into the base tasklist, and mark them as 'unlocked'
+3. Load any checked out tasks ('[TaskID].sc' files), merge them into the base tasklist, and mark them as 'unlocked'
 
 #### Saving Tasklists ####
-1. Save checked-out task(s) to '<TaskID>' file(s)
-2. If the tasklist is checked out then save the entire tasklist.
+1. Save checked-out task(s) to '[TaskID].sc' file(s)
+2. If the tasklist is checked-out then save the entire tasklist.
 
 #### Checking Out Tasklists ####
 1. No change
