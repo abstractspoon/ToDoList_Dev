@@ -5145,7 +5145,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_CUUDTPREFS_MOVEUP    "\nMove Tool Up"
-    ID_UDTPREFS_MOVEDOWN    "\nMoveTool Down"
+    ID_UDTPREFS_MOVEDOWN    "\nMove Tool Down"
     ID_UDTPREFS_EDIT        "\nEdit Tool Name"
     ID_UDTPREFS_NEW         "\nNew Tool"
     ID_UDTPREFS_MOVEUP      "\nMove Tool Up"
