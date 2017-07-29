@@ -74,10 +74,7 @@ BOOL CTDCSearchParamHelper::SaveRule(CPreferences& prefs, const CString& sRule, 
 	// handle custom attributes
 	if (rule.IsCustomAttribute())
 	{
-		CString sAttrib;
-		sAttrib.Format(_T("%d.%s"), rule.GetAttribute(), rule.GetCustomAttributeID());
-
-		prefs.WriteProfileString(sRule, _T("Attribute"), sAttrib);
+		prefs.WriteProfileString(sRule, _T("Attribute"), rule.GetCustomAttributeID());
 	}
 	else
 	{
@@ -154,12 +151,12 @@ BOOL CTDCSearchParamHelper::DecodeAttribute(const CString& sAttrib, DWORD dwFlag
 		}
 		break;
 		
-	case 2:
-		nAttrib = (TDC_ATTRIBUTE)_ttoi(aParts[0]);
-		ASSERT(SEARCHPARAM::IsCustomAttribute(nAttrib));
-		
+	case 2: // Backwards compatibility
 		sUniqueID = aParts[1];
 		ASSERT(!sUniqueID.IsEmpty());
+
+		nAttrib = CTDCCustomAttributeHelper::GetAttributeID(sUniqueID, aCustAttribDefs);
+ 		ASSERT(SEARCHPARAM::IsCustomAttribute(nAttrib));
 
 		nFindType = CTDCCustomAttributeHelper::GetAttributeFindType(sUniqueID, dwFlags, aCustAttribDefs);
 		ASSERT(nFindType != FT_NONE);

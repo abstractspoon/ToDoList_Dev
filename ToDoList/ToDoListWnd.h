@@ -152,6 +152,7 @@ protected:
 	BOOL m_bLogging;
 	BOOL m_bSaveUIVisInTaskList;
 	BOOL m_bReshowTimeTrackerOnEnable;
+	BOOL m_bSettingAttribDefs;
 	
 	static BOOL s_bRestoreExportSpaceForNotes;
 

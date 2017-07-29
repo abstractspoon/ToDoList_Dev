@@ -189,6 +189,7 @@ CToDoListWnd::CToDoListWnd()
 	m_bShowTreeListBar(TRUE),
 	m_bEndingSession(FALSE),
 	m_nContextColumnID(TDCC_NONE),
+	m_bSettingAttribDefs(FALSE),
 	m_bReshowTimeTrackerOnEnable(FALSE)
 {
 	// must do this before initializing any controls
@@ -3477,6 +3478,12 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	case TDCA_NEWTASK:
 		UpdateTimeTrackerTasks(tdc, FALSE);
 		break;
+
+	case TDCA_CUSTOMATTRIBDEFS:
+		// Ignore modification callback if it came from us
+		if (m_bSettingAttribDefs)
+			return 0L;
+		break;
 	}
 
 	// Update UI
@@ -4353,7 +4360,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
 {
-	if (pTDC == NULL && GetTDCCount() == 0)
+	if ((pTDC == NULL) && (GetTDCCount() == 0))
 		return; // nothing to do
 
 	CTDCCustomAttribDefinitionArray aTDCAttribDefs, aAllAttribDefs;
@@ -12344,12 +12351,16 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 		if (dialog.DoModal() == IDOK)
 		{
+			// Ignore modification callback if it came from us
+			CAutoFlag af(m_bSettingAttribDefs, TRUE);
+
 			CTDCCustomAttribDefinitionArray aAttrib;
 			dialog.GetAttributes(aAttrib);
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{
 				RefreshFilterBarControls();
+				UpdateFindDialogActiveTasklist();
 			}
 		}
 	}
