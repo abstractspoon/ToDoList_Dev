@@ -101,3 +101,53 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib)
    return FALSE;
 }
 ```
+
+#### Checking-out a Task ####
+```
+BOOL CToDoCtrl::CheckOutTask(DWORD dwTaskID)
+{
+    const TODOITEM* pTDI = NULL;
+    const TODOSTRUCTURE* pTDS = NULL;
+    
+    if (!GetTrueTask(dwTaskID, pTDI, pTDS))
+        return FALSE;
+
+    CString sTaskPath = [taskID];
+
+    HFILE hFile = CreateFile(sTaskPath,              // name of the write
+                             GENERIC_WRITE,          // open for writing
+                             0,                      // do not share
+                             NULL,                   // default security
+                             CREATE_NEW,             // create new file only
+                             FILE_ATTRIBUTE_NORMAL,  // normal file
+                             NULL);                  // no attr. template
+
+    if (hFile == INVALID_HANDLE_VALUE) 
+    { 
+        // ERROR_FILE_EXISTS
+	return FALSE;
+    }
+    
+    ::CloseHandle(hFile);
+
+    // Save minimal tasklist
+    CTaskFile task;
+    HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
+	
+    if (!hTask)
+    {
+        ASSERT(0);
+	return FALSE;
+    }
+    
+    task.SetTaskAttributes(hTask, *pTDI);
+    task.SetCheckedOutTo(GetSourceControlID());
+    task.SetXmlHeader(m_sXmlHeader);
+    task.SetFileFormat(FILEFORMAT_CURRENT);
+
+    if (!task.Save(sTaskPath, SFEF_UTF16))
+        return FALSE;
+    
+    return TRUE;
+}
+```
