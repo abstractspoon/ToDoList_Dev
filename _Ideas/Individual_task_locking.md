@@ -4,35 +4,36 @@
 	* I will probably hide 'Menu > Edit > Lock Task Attributes'	and add new menu items for checking-in/out tasks to the Source Control menu
 * Checking-out the entire tasklist will still be required for adding, deleting and moving tasks
 	* Having the tasklist checked out will still require individual tasks to be checked-out in order to modify their content.
-* Files for each checked-out task will be stored in a folder having the same name as the tasklist but with the extension '.SourceControl'
+* Files for each checked-out task will be stored in a folder having the name '[Tasklist].ssc' (aka 'Simple Source Control').
+* Change CToDoCtrl::CanEditSelectedTask() to take a TDC_ATTRIBUTE argument so we can distinguish between attribute edits and create/move/delete operations
 
 ## Processes ##
 
-#### Checking Out Tasks ####
-1. Create empty file named '[TaskID].sc' to prevent anyone else checking-out the task
-	* To prevent race conditions we will need to use the 'CREATE_NEW' file creation flag. This may require a significant re-architecting of CXmlFile and CStdioFileEx because this flag is not supported by MFC
-2. Change task state to 'unlocked'
-3. Keep track of checked-out task
-	* If the file creation fails (because someone got there first) then fail the check-out and notify the user
+#### Checking Out a Single Task ####
+1. Attempt to create an empty file having the name '[TaskID].tsc' using the 'CREATE_NEW' file creation flag
+	* If this fails it means someone else has checked-out the task so fail the check-out and notify the user
+2. Replace this empty file with the existing task state, saved as as a minimal tasklist ie. Just the task itself and the check-out name
+3. Change task state to 'unlocked' in the UI
+4. Keep a list of checked-out tasks per tasklist
 
-#### Checking In Tasks ####
-1. Save current task(s) state to '[TaskID].sc' file(s)
+#### Checking In a Task ####
+1. Save current task state to '[TaskID].tsc' file(s)
 2. Clear tasklist 'Modified' flag
 3. Check out entire tasklist
 	* If that fails then fail the check-in and notify the user
-4. Merge '[TaskID].sc' file(s) into tasklist 
+4. Merge '[TaskID].tsc' file(s) into tasklist 
 5. Check in tasklist
-6. Delete '[TaskID].sc'
+6. Delete '[TaskID].tsc'
 7. Stop tracking checked-in task(s)
 8. Change task(s) state to 'locked'
 
 #### Loading Tasklists ####
 1. Load base tasklist 
 2. Mark all tasks as 'locked'
-3. Load any checked out tasks ('[TaskID].sc' files), merge them into the base tasklist, and mark them as 'unlocked'
+3. Load any checked out tasks ('[TaskID].tsc' files), merge them into the base tasklist, and mark them as 'unlocked'
 
 #### Saving Tasklists ####
-1. Save checked-out task(s) to '[TaskID].sc' file(s)
+1. Save checked-out task(s) to '[TaskID].tsc' file(s)
 2. If the tasklist is checked-out then save the entire tasklist.
 
 #### Checking Out Tasklists ####
