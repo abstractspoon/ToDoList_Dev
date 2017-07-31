@@ -113,7 +113,7 @@ BOOL CToDoCtrl::IsTaskLocked(DWORD dwTaskID) const
     return m_data.IsTaskLocked(dwTaskID);
 }
 
-CString CToDoCtrl::GetTaskSourceControlFolder() const
+CString CToDoCtrl::GetSourceControlFolder() const
 {
     if (m_sLastSavePath.IsEmpty())
         return _T("");
@@ -126,8 +126,15 @@ CString CToDoCtrl::GetTaskSourceControlFolder() const
 
 CString CToDoCtrl::GetTaskSourceControlPath(DWORD dwTaskID) const
 {
-   // TODO
-}
+   CString sFolder(GetSourceControlFolder());
+   
+   if (sFolder.IsEmpty())
+       return sFolder;
+       
+   CString sPath;
+   sPath.Format(_T("%s\\%ld.tsc"), sFolder, dwTaskID);
+   return sPath;
+)
 
 BOOL CToDoCtrl::ToggleSelectedTaskCheckOut()
 {
@@ -199,13 +206,17 @@ BOOL CToDoCtrl::CheckOutTask(DWORD dwTaskID)
 
 BOOL CToDoCtrl::CheckInTask(DWORD dwTaskID)
 {
-    CString sTaskPath = GetTaskSourceControlPath(dwTaskID);
-
-    ASSERT (FileMisc::FileExists(sTaskPath));
     ASSERT (m_mapCheckedOutIDs.Has(dwTaskID));
     
     TODOITEM tdi;
-    VERIFY(m_data.GetTaskAttributes(dwTaskID, tdi));
+    
+    if (!LoadCheckedOutTask(dwTaskID, tdi))
+    {
+        m_mapCheckedOutTasks.Remove(dwTaskID);
+        // TODO
+	
+	return FALSE;
+    }
     
     if (!IsCheckedOut() && !CheckOut())
     {
@@ -231,27 +242,35 @@ BOOL CToDoCtrl::CheckInTask(DWORD dwTaskID)
 
 int CToDoCtrl::ReloadCheckedOutTasks()
 {
-    
+    // TODO
 }
 
 BOOL CToDoCtrl::LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const
 {
-    if (!m_mapCheckedOutIDs.Has(dwTaskID))
-    {
-        ASSERT(0);
-	return FALSE;
-    }
-
     CString sTaskPath = GetTaskSourceControlPath(dwTaskID);
     CTaskFile task;
     
-    if (!task.Load(sTaskPath) || !task.GetTaskAttributes(task.GetFirstTask(), tdi))
-    {
-        ASSERT(0);
+    if (!task.Load(sTaskPath))
 	return FALSE;
-    }
     
-    return TRUE;    
+    return task.GetTaskAttributes(task.GetFirstTask(), tdi);
+}
+
+BOOL CToDoCtrl::LoadCheckedOutTask(const CString& sPath, DWORD& dwTaskID, TODOITEM& tdi) const
+{
+    CTaskFile task;
+    
+    if (!task.Load(sPath))
+	return FALSE;
+	
+    if (!task.IsCheckedOutTo(GetSourceControlID())) 
+        return FALSE;
+    
+    if (!task.GetTaskAttributes(task.GetFirstTask(), tdi))
+        return FALSE;
+	
+    // dwTaskID = _ttol(FileMisc::GetFilenameFromPath(sPath);
+    return TRUE;
 }
 
 BOOL CToDoCtrl::CheckInAllTasks()
@@ -266,11 +285,11 @@ BOOL CToDoCtrl::CheckInAllTasks()
     }
     
     POSITION pos = m_mapCheckedOutTasks.GetStartPosition();
+    TODOITEM tdi;
     
     while (pos)
     {
         DWORD dwTaskID = m_mapCheckedOutTasks.GetNext(pos);
-        TODOITEM tdi;
         VERIFY(LoadCheckedOutTask(dwTaskID, tdi));
     
         tdi.bLock = TRUE;
