@@ -4724,8 +4724,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_FILTER_FLAGGED      "Flagged Tasks"
-    IDS_BEGINWHENREMINDERHOURS "begins in %.2f hour(s) at %s"
-    IDS_DUEWHENREMINDERHOURS "is due in %.2f hour(s) at %s"
+    IDS_BEGINWHENREMINDERREST "begins in %s at %s"
+    IDS_DUEWHENREMINDERREST "is due in %s at %s"
     IDS_BEGINWHENREMINDERMINS "begins in %.0f minute(s) at %s"
     IDS_DUEWHENREMINDERMINS "is due in %.0f minute(s) at %s"
     IDS_TDC_FIELD_STARTTIME "St&art Time"

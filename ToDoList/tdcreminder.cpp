@@ -17,6 +17,11 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+const double HOURS_IN_DAY = 24;
+const double MINS_IN_DAY = (HOURS_IN_DAY * 60);
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -70,61 +75,32 @@ CString TDCREMINDER::FormatWhenString() const
 
 	if (pTDC && bRelative)
 	{
-		CEnString sFormat;
-		COleDateTime date;
-		double dWhen = 0;
+		const double ONE_MINUTE = (1.0 / MINS_IN_DAY);
+		const double ONE_HOUR = (1.0 / HOURS_IN_DAY);
 
-		const double ONE_MINUTE = (1.0 / (24 * 60));
-		const double ONE_HOUR = (1.0 / 24);
+		BOOL bRelativeFromDue = (nRelativeFromWhen == TDCR_DUEDATE);
 
-		if (nRelativeFromWhen == TDCR_DUEDATE)
-		{
-			date = pTDC->GetTaskDate(dwTaskID, TDCD_DUE);
-			dWhen = (date - COleDateTime::GetCurrentTime()); // days
-
-			if (dWhen < ONE_MINUTE) // including negatives
-			{
-				sFormat.LoadString(IDS_DUEWHENREMINDERNOW);
-			}
-			else if (dWhen < ONE_HOUR)
-			{
-				dWhen *= 24 * 60; // convert to minutes
-				sFormat.LoadString(IDS_DUEWHENREMINDERMINS);
-			}
-			else
-			{
-				dWhen *= 24; // convert to hours
-				sFormat.LoadString(IDS_DUEWHENREMINDERHOURS);
-			}
-		}
-		else
-		{
-			date = pTDC->GetTaskDate(dwTaskID, TDCD_START);
-
-			dWhen = (date - COleDateTime::GetCurrentTime());
-
-			if (dWhen < ONE_MINUTE) // including negatives
-			{
-				sFormat.LoadString(IDS_BEGINWHENREMINDERNOW);
-			}
-			else if (dWhen < ONE_HOUR)
-			{
-				dWhen *= 24 * 60; // convert to minutes
-				sFormat.LoadString(IDS_BEGINWHENREMINDERMINS);
-			}
-			else
-			{
-				dWhen *= 24; // convert to hours
-				sFormat.LoadString(IDS_BEGINWHENREMINDERHOURS);
-			}
-		}
-
+		COleDateTime date = pTDC->GetTaskDate(dwTaskID, (bRelativeFromDue ? TDCD_DUE : TDCD_START));
 		CString sDateTime = CDateHelper::FormatDate(date, DHFD_DOW | DHFD_NOSEC | DHFD_TIME);
 
-		if (dWhen < 1.0)
-			sWhen.Format(sFormat, sDateTime);
+		double dWhen = (date - COleDateTime::GetCurrentTime()); // days
+
+		if (dWhen < ONE_MINUTE) // including negatives
+		{
+			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERNOW : IDS_BEGINWHENREMINDERNOW), sDateTime);
+		}
+		else if (dWhen < ONE_HOUR)
+		{
+			// convert to minutes
+			dWhen *= MINS_IN_DAY;
+			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERMINS : IDS_BEGINWHENREMINDERMINS), dWhen, sDateTime);
+		}
 		else
-			sWhen.Format(sFormat, dWhen, sDateTime);
+		{
+			// Format as HMS
+			CString sHMS = CTimeHelper().FormatTimeHMS(dWhen, THU_DAYS);
+			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERREST : IDS_BEGINWHENREMINDERREST), sHMS, sDateTime);
+		}
 	}
 	else
 	{
@@ -138,8 +114,7 @@ BOOL TDCREMINDER::IsTaskRecurring() const
 {
 	ASSERT(pTDC);
 
-	return (pTDC->IsTaskRecurring(dwTaskID) && 
-			pTDC->CanTaskRecur(dwTaskID));
+	return (pTDC->IsTaskRecurring(dwTaskID) && pTDC->CanTaskRecur(dwTaskID));
 }
 
 BOOL TDCREMINDER::IsTaskDone() const
@@ -165,7 +140,7 @@ void TDCREMINDER::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 	
 	if (bRelative)
 	{
-		pPrefs->WriteProfileDouble(szKey, _T("LeadIn"), dRelativeDaysLeadIn * 24 * 60); // save as minutes
+		pPrefs->WriteProfileDouble(szKey, _T("LeadIn"), dRelativeDaysLeadIn * MINS_IN_DAY);
 		pPrefs->WriteProfileInt(szKey, _T("FromWhen"), nRelativeFromWhen);
 	}
 	else
@@ -184,7 +159,7 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	
 	if (bRelative)
 	{
-		dRelativeDaysLeadIn = pPrefs->GetProfileDouble(szKey, _T("LeadIn")) / (24 * 60);
+		dRelativeDaysLeadIn = (pPrefs->GetProfileDouble(szKey, _T("LeadIn")) / MINS_IN_DAY);
 		nRelativeFromWhen = (TDC_REMINDER)pPrefs->GetProfileInt(szKey, _T("FromWhen"));
 	}
 	else
