@@ -12,15 +12,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 #if _MSC_VER >= 1400                        
-#define COPYTEXT(DEST, SRC, LEN)		\
-	int len = min(LEN, lstrlen(SRC));\
-	_tcsncpy_s(DEST, LEN, SRC, len);	\
-	DEST[len] = 0;
+#define COPYTEXT(DEST, SRC, LEN) _tcsncpy_s(DEST, LEN, SRC, _TRUNCATE);
 #else                                       
-#define COPYTEXT(DEST, SRC, LEN)		\
-	int len = min(LEN, lstrlen(SRC));\
-	_tcsncpy(DEST, SRC, len);			\
-	DEST[len] = 0;
+#define COPYTEXT(DEST, SRC, LEN) _tcsncpy(DEST, SRC, (LEN - 1));
 #endif                                      
 
 /////////////////////////////////////////////////////////////////////////////////////////////

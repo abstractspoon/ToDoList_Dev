@@ -1071,7 +1071,6 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			wp == (UINT)m_hdrColumns.GetDlgCtrlID())
 		{
 			LPNMHDR pNMHDR = (LPNMHDR)lp;
-//			HWND hwnd = pNMHDR->hwndFrom;
 			
 			// our extra handling
 			switch (pNMHDR->code)
@@ -1100,10 +1099,11 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					
 					if (dwTaskID)
 					{
+						CString sInfoTip(FormatInfoTip(dwTaskID, (pTVGIT->cchTextMax - 1)));
 	#if _MSC_VER >= 1400
-						_tcsncpy_s(pTVGIT->pszText, pTVGIT->cchTextMax, FormatInfoTip(dwTaskID), pTVGIT->cchTextMax);
+						_tcsncpy_s(pTVGIT->pszText, pTVGIT->cchTextMax, sInfoTip, _TRUNCATE);
 	#else
-						_tcsncpy(pTVGIT->pszText, FormatInfoTip(dwTaskID), pTVGIT->cchTextMax);
+						_tcsncpy(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
 	#endif
 						return 0L; // eat
 					}

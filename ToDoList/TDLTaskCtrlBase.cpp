@@ -6030,7 +6030,7 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 	return m_data.CalcIsTaskDue(GetSelectedTaskID());
 }
 
-CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
+CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID, int nMaxLen) const
 {
 	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 	ASSERT(pTDI);
@@ -6182,6 +6182,10 @@ CString CTDLTaskCtrlBase::FormatInfoTip(DWORD dwTaskID) const
 			sTip += sItem;
 		}
 	}
+
+	// Truncate to fit with ellipsis
+	if (sTip.GetLength() > nMaxLen)
+		sTip = sTip.Left(nMaxLen - 3) + _T("...");
 	
 	return sTip;
 }

@@ -43,7 +43,7 @@ public:
 	static BOOL IsOffset(LPCTSTR szValue);
 
 protected:
-	TCHAR szValue[ATTRIBLEN+1];
+	TCHAR szValue[ATTRIBLEN];
 	BOOL bSet;
 };
 
@@ -118,7 +118,7 @@ public:
 	BOOL GetCustomAttribute(CString& sCustomID, CString& sValue) const;
 	
 protected:
-	TCHAR m_szFilePaths[FILEPATHSLEN+1]; // tasklists to load/import
+	TCHAR m_szFilePaths[FILEPATHSLEN]; // tasklists to load/import
 	DWORD m_dwIDSel; // task to select
 	DWORD m_dwParentID; // parent task for new subtask
 	DWORD m_dwSiblingID; // sibling task for new subtask

@@ -55,7 +55,9 @@ protected:
 		int nSubMenu;
 		UINT nDefCmdID;
 		TCHAR cHotKey;
-		TCHAR szTip[128];
+
+#define MAX_TIP_LEN 128
+		TCHAR szTip[MAX_TIP_LEN];
 	};
 
 	CMap<UINT, UINT, THButton, THButton&> m_mapTHButtons;

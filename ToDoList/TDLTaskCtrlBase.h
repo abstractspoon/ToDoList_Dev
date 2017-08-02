@@ -401,7 +401,7 @@ protected:
 	BOOL HasThemedState(GM_ITEMSTATE nState) const;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	void UpdateHeaderSorting();
-	CString FormatInfoTip(DWORD dwTaskID) const;
+	CString FormatInfoTip(DWORD dwTaskID, int nMaxLen) const;
 	void RecalcColumnWidths(BOOL bCustom);
 	void ResizeSplitterToFitColumns();
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;

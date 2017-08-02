@@ -243,9 +243,9 @@ BOOL CTrayIcon::AddToTray()
 		nid.uFlags |= NIF_TIP;
 		//fabio_2005
 #if _MSC_VER >= 1400
-		_tcsncpy_s(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, sizeof(nid.szTip)/sizeof(TCHAR));
+		_tcsncpy_s(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, (sizeof(nid.szTip)/sizeof(TCHAR)) - 1);
 #else
-		_tcsncpy(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, sizeof(nid.szTip)/sizeof(TCHAR));
+		_tcsncpy(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, (sizeof(nid.szTip)/sizeof(TCHAR)) - 1);
 #endif
 		
 		nid.szTip[sizeof(nid.szTip)/sizeof(TCHAR)-1] = (TCHAR)0;

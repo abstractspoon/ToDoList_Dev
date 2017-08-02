@@ -95,14 +95,11 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 
 		if (Misc::IsEmpty(tu.szLabel))
 		{
-			//fabio_2005
 #if _MSC_VER >= 1400
-			_tcsncpy_s(tu.szLabel, LABELLEN, UNITLABELS[nUnit], LABELLEN - 1);
+			_tcsncpy_s(tu.szLabel, LABELLEN, UNITLABELS[nUnit], _TRUNCATE);
 #else
-			_tcsncpy(tu.szLabel, UNITLABELS[nUnit], LABELLEN - 1);
+			_tcsncpy(tu.szLabel, UNITLABELS[nUnit], (LABELLEN - 1));
 #endif
-
-			tu.szLabel[LABELLEN - 1] = 0;
 		}
 	}
 

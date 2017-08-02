@@ -478,11 +478,13 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 						
 						if (dwTaskID)
 						{
-	#if _MSC_VER >= 1400
-							_tcsncpy_s(pLVGIT->pszText, pLVGIT->cchTextMax, FormatInfoTip(dwTaskID), pLVGIT->cchTextMax);
-	#else
-							_tcsncpy(pLVGIT->pszText, FormatInfoTip(dwTaskID), pLVGIT->cchTextMax);
-	#endif
+							CString sInfoTip(FormatInfoTip(dwTaskID, (pLVGIT->cchTextMax - 1)));
+#if _MSC_VER >= 1400
+							_tcsncpy_s(pLVGIT->pszText, pLVGIT->cchTextMax, sInfoTip, _TRUNCATE);
+#else
+							_tcsncpy(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
+#endif
+							return 0L; // eat
 						}
 					}
 					break;
@@ -569,19 +571,23 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			case TTN_SHOW:
 				if (hRealWnd == m_lcTasks)
 				{
-					// Set the font to bold for top-level items
-					CPoint pt(GetMessagePos());
-					m_lcTasks.ScreenToClient(&pt);
-					
-					int nItem = m_lcTasks.HitTest(pt);
-					
-					if (nItem != -1)
+					// Set the font to bold for top-level item tooltips
+					// but not for info tips
+					if (!HasStyle(TDCS_SHOWINFOTIPS))
 					{
-						const TODOSTRUCTURE* pTDS = m_data.LocateTask(GetTaskID(nItem));
-						ASSERT(pTDS);
+						CPoint pt(GetMessagePos());
+						m_lcTasks.ScreenToClient(&pt);
+					
+						int nItem = m_lcTasks.HitTest(pt);
+					
+						if (nItem != -1)
+						{
+							const TODOSTRUCTURE* pTDS = m_data.LocateTask(GetTaskID(nItem));
+							ASSERT(pTDS);
 
-						BOOL bTopLevel = (pTDS && pTDS->ParentIsRoot());
-						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(bTopLevel ? GMFS_BOLD : 0), TRUE);
+							BOOL bTopLevel = (pTDS && pTDS->ParentIsRoot());
+							::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(bTopLevel ? GMFS_BOLD : 0), TRUE);
+						}
 					}
 				}
 				break;

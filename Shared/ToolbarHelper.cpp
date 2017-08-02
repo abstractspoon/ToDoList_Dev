@@ -143,9 +143,9 @@ BOOL CToolbarHelper::SetButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT 
 
 	//fabio_2005
 #if _MSC_VER >= 1400
-	_tcsncpy_s(dm.szTip, 128, szTip, (sizeof(dm.szTip) / sizeof(TCHAR)) - 1);
+	_tcsncpy_s(dm.szTip, MAX_TIP_LEN, szTip, _TRUNCATE);
 #else
-	_tcsncpy(dm.szTip, szTip, (sizeof(dm.szTip) / sizeof(TCHAR)) - 1);
+	_tcsncpy(dm.szTip, szTip, MAX_TIP_LEN - 1);
 #endif
 
 	m_mapTHButtons[nBtnCmdID] = dm;
