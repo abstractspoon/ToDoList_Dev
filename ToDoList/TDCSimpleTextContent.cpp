@@ -591,7 +591,7 @@ LRESULT CTDLSimpleTextContentCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 
 	if (sUrl.Find(TDL_PROTOCOL) != -1 || sUrl.Find(TDL_EXTENSION) != -1)
 	{
-		return GetParent()->SendMessage(WM_TDCM_TASKLINK, 0, (LPARAM)(LPCTSTR)sUrl);
+		return GetParent()->SendMessage(WM_ICC_TASKLINK, 0, (LPARAM)(LPCTSTR)sUrl);
 	}
 
 	return 0;
@@ -599,7 +599,7 @@ LRESULT CTDLSimpleTextContentCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 
 LRESULT CTDLSimpleTextContentCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 {
-	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)szUrl);
+	return GetParent()->SendMessage(WM_ICC_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)szUrl);
 }
 
 void CTDLSimpleTextContentCtrl::PreSubclassWindow() 
