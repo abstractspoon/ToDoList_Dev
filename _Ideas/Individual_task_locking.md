@@ -47,21 +47,6 @@
 
 ## Pseudo-Code Fragments ##
 
-#### Merging Task ####
-```
-CTasklist task;
-CString sTaskPath = [taskID];
-
-if (task.Load(sTaskPath))
-{
-   TODOITEM tdi;
-   
-   if (task.GetTaskAttributes(task.GetFirstTask(), tdi))
-   {
-      m_data.SetTaskAttributes([taskID], tdi);
-   }
-}
-```
 #### Checking for Edit Capabilities ####
 
 Note: `CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState()` will have to be modified to only check the read-only status of the file on disk ie. Not include the check-in/out status.
@@ -113,7 +98,7 @@ BOOL CToDoCtrl::IsTaskLocked(DWORD dwTaskID) const
     return m_data.IsTaskLocked(dwTaskID);
 }
 
-CString CToDoCtrl::GetSourceControlFolder() const
+CString CToDoCtrl::GetTaskSourceControlFolder() const
 {
     if (m_sLastSavePath.IsEmpty())
         return _T("");
@@ -126,7 +111,7 @@ CString CToDoCtrl::GetSourceControlFolder() const
 
 CString CToDoCtrl::GetTaskSourceControlPath(DWORD dwTaskID) const
 {
-   CString sFolder(GetSourceControlFolder());
+   CString sFolder(GetTaskSourceControlFolder());
    
    if (sFolder.IsEmpty())
        return sFolder;
@@ -136,9 +121,16 @@ CString CToDoCtrl::GetTaskSourceControlPath(DWORD dwTaskID) const
    return sPath;
 )
 
-BOOL CToDoCtrl::ToggleSelectedTaskCheckOut()
+void CToDoCtrl::ToggleSelectedTaskCheckOut()
 {
-   // TODO
+    BOOL bResult = FALSE;
+    POSITION pos = TSH().GetFirstItemPos();
+		
+    while (pos)
+    {
+        DWORD dwTaskID = TSH().GetNextItemData(pos);
+        VERIFY(ToggleTaskCheckout(dwTaskID));			
+    }
 }
 
 BOOL CToDoCtrl::ToggleTaskCheckOut(DWORD dwTaskID)
@@ -240,20 +232,11 @@ BOOL CToDoCtrl::CheckInTask(DWORD dwTaskID)
     return TRUE;
 }
 
-int CToDoCtrl::ReloadCheckedOutTasks()
-{
-    // TODO
-}
-
 BOOL CToDoCtrl::LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const
 {
     CString sTaskPath = GetTaskSourceControlPath(dwTaskID);
-    CTaskFile task;
     
-    if (!task.Load(sTaskPath))
-	return FALSE;
-    
-    return task.GetTaskAttributes(task.GetFirstTask(), tdi);
+    return LoadCheckedOutTask(sTaskPath, dwTaskID, tdi);
 }
 
 BOOL CToDoCtrl::LoadCheckedOutTask(const CString& sPath, DWORD& dwTaskID, TODOITEM& tdi) const
@@ -269,7 +252,7 @@ BOOL CToDoCtrl::LoadCheckedOutTask(const CString& sPath, DWORD& dwTaskID, TODOIT
     if (!task.GetTaskAttributes(task.GetFirstTask(), tdi))
         return FALSE;
 	
-    // dwTaskID = _ttol(FileMisc::GetFilenameFromPath(sPath);
+    dwTaskID = _ttol(FileMisc::GetFilenameFromPath(sPath);
     return TRUE;
 }
 
@@ -290,13 +273,16 @@ BOOL CToDoCtrl::CheckInAllTasks()
     while (pos)
     {
         DWORD dwTaskID = m_mapCheckedOutTasks.GetNext(pos);
-        VERIFY(LoadCheckedOutTask(dwTaskID, tdi));
-    
-        tdi.bLock = TRUE;
-        m_data.SetTaskAttributes(dwTaskID, tdi);
+	
+        if (LoadCheckedOutTask(dwTaskID, tdi))
+	{
+            tdi.bLock = TRUE;
+            m_data.SetTaskAttributes(dwTaskID, tdi);
         
+     	    VERIFY(FileMisc::DeleteFile(sTaskPath));
+	}
+   
 	m_mapCheckedOutIDs.Remove(dwTaskID);
-    	VERIFY(FileMisc::DeleteFile(sTaskPath));
     }
        
     if (!CheckIn())
@@ -307,4 +293,29 @@ BOOL CToDoCtrl::CheckInAllTasks()
    
     return TRUE;
 }
+```
+
+#### Merging Tasks ####
+```
+int CToDoCtrl::ReloadCheckedOutTasks()
+{
+    CStringArray aTaskFiles;
+    int nFile = FileMisc::FindFiles(GetTaskSourceControlFolder(), aTaskFiles, FALSE, _T("*.tsc"));
+
+    TODOITEM tdi;
+    DWORD dwTaskID;
+    int nLoaded = 0;
+	
+    while (nFile--)
+    {
+        if (LoadCheckedOutTask(aTaskFiles[nFile], dwTaskID, tdi))
+	{
+             m_data.SetTaskAttributes([taskID], tdi);
+	     nLoaded++;
+	}
+    }
+    
+    return nLoaded;
+}
+
 ```
