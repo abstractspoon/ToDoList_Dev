@@ -223,7 +223,8 @@ int CTDLTaskViewListBox::GetViews(CStringArray& aTypeIDs, BOOL bVisible) const
 	}
 	else if (bVisible)
 	{
-		int nItem = m_pMgrUIExt->GetExtensionTypeIDs(aTypeIDs);
+		m_pMgrUIExt->GetExtensionTypeIDs(aTypeIDs);
+		aTypeIDs.Add(LISTVIEW_TYPE);
 
 		// remove hidden views
 		Misc::RemoveItems(m_aHiddenViews, aTypeIDs);

@@ -77,6 +77,8 @@ public:
 	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
 	void SaveAllTaskViewPreferences();
 
+	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
+	
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
 	BOOL SaveTaskViewToImage(CBitmap& bmImage);
 	BOOL CanSaveTaskViewToImage() const;
@@ -164,6 +166,8 @@ protected:
 	// be resorted when we switch to it from another view
 	mutable BOOL m_bTreeNeedResort;
 
+	static CStringArray s_aDefTaskViews;
+
 // Overrides
 protected:
 	// ClassWizard generated virtual function overrides
@@ -238,6 +242,7 @@ protected:
 	void SavePrefs();
 	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
 	void UpdateListView(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
+	int GetVisibleTaskViews(CStringArray& aTypeIDs, BOOL bIncListView) const;
 
 	void ResyncListSelection();
 	void ResyncExtensionSelection(FTC_VIEW nView);

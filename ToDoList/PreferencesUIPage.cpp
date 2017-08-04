@@ -217,6 +217,8 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileString(szKey, _T("UIThemeFile"), m_sUIThemeFile);
 
 	// task views
+	pPrefs->DeleteProfileSection(_T("Preferences\\ViewVisibility"));
+
 	CStringArray aViews;
 	int nView = m_lbTaskViews.GetHiddenViews(aViews);
 
