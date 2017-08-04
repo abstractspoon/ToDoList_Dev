@@ -47,11 +47,19 @@ struct NOTIFYICONDATA_TI
 	UINT uFlags;
 	UINT uCallbackMessage;
 	HICON hIcon;
-	TCHAR szTip[128];
+
+#define MAX_TIP_LEN 128
+	TCHAR szTip[MAX_TIP_LEN];
+
 	DWORD dwState;
 	DWORD dwStateMask;
-	TCHAR szInfo[256];
+
+#define MAX_INFO_LEN 256
+	TCHAR szInfo[MAX_INFO_LEN];
+
 	UINT uTimeout;
+
+#define MAX_INFOTITLE_LEN 256
 	TCHAR szInfoTitle[64];
 	DWORD dwInfoFlags;
 };
