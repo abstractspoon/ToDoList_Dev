@@ -12363,6 +12363,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
 {
+	// Doesn't make sense to copy to self
+	if (sToCustomAttribID == sFromCustomAttribID)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	DWORD dwFromType = CTDCCustomAttributeHelper::GetAttributeDataType(sFromCustomAttribID, m_aCustomAttribDefs);
 	DWORD dwToType = CTDCCustomAttributeHelper::GetAttributeDataType(sToCustomAttribID, m_aCustomAttribDefs);
 
@@ -12412,6 +12419,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
+	// Doesn't make sense to copy to self
+	if (nFromAttrib == nToAttrib)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	switch (nFromAttrib)
 	{
 	case TDCA_ALLOCBY:			
@@ -12484,15 +12498,6 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 		}
 		break;
 
-	case TDCA_COST:	
-	case TDCA_RECURRENCE:		
-	case TDCA_COLOR:			
-	case TDCA_PERCENT:			
-	case TDCA_COMMENTS:			
-	case TDCA_DEPENDENCY:		
-	case TDCA_FILEREF:			
-		return (nFromAttrib == nToAttrib);
-
 	case TDCA_FLAG:				
 	case TDCA_LOCK:				
 		switch (nToAttrib)
@@ -12544,7 +12549,8 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_RISK:				
 	case TDCA_POSITION:			
 	case TDCA_PERCENT:			
-		return attribDefFrom.IsDataType(TDCCA_INTEGER);
+	case TDCA_COST:	
+		return (attribDefFrom.IsDataType(TDCCA_INTEGER) || attribDefFrom.IsDataType(TDCCA_DOUBLE));
 
 	case TDCA_CREATIONDATE:		
 	case TDCA_DONEDATE:			
@@ -12555,9 +12561,6 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_DUETIME:			
 	case TDCA_STARTTIME:		
 		return attribDefFrom.IsDataType(TDCCA_DATE);
-
-	case TDCA_COST:	
-		return attribDefFrom.IsDataType(TDCCA_DOUBLE);
 
 	case TDCA_FLAG:				
 	case TDCA_LOCK:				
