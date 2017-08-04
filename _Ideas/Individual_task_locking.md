@@ -79,6 +79,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib)
 	default:
 		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 			return m_taskTree.SelectionHasUnlocked();
+		break;
 	}
 	
 	// all else
@@ -156,18 +157,18 @@ BOOL CToDoCtrl::CheckOutTask(DWORD dwTaskID)
 
 	CString sTaskPath = GetTaskSourceControlPath(dwTaskID); 
 
-	HFILE hFile = CreateFile(sTaskPath,				// name of the write
-							 GENERIC_WRITE,			// open for writing
-							 0,						// do not share
-							 NULL,					// default security
-							 CREATE_NEW,			// create new file only
-							 FILE_ATTRIBUTE_NORMAL,	// normal file
-							 NULL);					// no attr. template
+	HFILE hFile = CreateFile(sTaskPath,		// name of the write
+				 GENERIC_WRITE,		// open for writing
+				 0,			// do not share
+				 NULL,			// default security
+				 CREATE_NEW,		// create new file only
+				 FILE_ATTRIBUTE_NORMAL,	// normal file
+				 NULL);			// no attr. template
 
 	if (hFile == INVALID_HANDLE_VALUE) 
 	{ 
 		// ERROR_FILE_EXISTS
-	return FALSE;
+		return FALSE;
 	}
 	
 	::CloseHandle(hFile);
@@ -179,7 +180,7 @@ BOOL CToDoCtrl::CheckOutTask(DWORD dwTaskID)
 	if (!hTask)
 	{
 		ASSERT(0);
-	return FALSE;
+		return FALSE;
 	}
 	
 	task.SetTaskAttributes(hTask, *pTDI);
@@ -207,13 +208,13 @@ BOOL CToDoCtrl::CheckInTask(DWORD dwTaskID)
 		m_mapCheckedOutTasks.Remove(dwTaskID);
 		// TODO
 	
-	return FALSE;
+		return FALSE;
 	}
 	
 	if (!IsCheckedOut() && !CheckOut())
 	{
 		// TODO
-	return FALSE;
+		return FALSE;
 	}
 	
 	m_data.SetTaskAttributes(dwTaskID, tdi);
@@ -244,7 +245,7 @@ BOOL CToDoCtrl::LoadCheckedOutTask(const CString& sPath, DWORD& dwTaskID, TODOIT
 	CTaskFile task;
 	
 	if (!task.Load(sPath))
-	return FALSE;
+		return FALSE;
 	
 	if (!task.IsCheckedOutTo(GetSourceControlID())) 
 		return FALSE;
