@@ -41,11 +41,15 @@ COdbcTasklistStorage::~COdbcTasklistStorage()
 
 void COdbcTasklistStorage::SetLocalizer(ITransText* pTT)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CLocalizer::Initialize(pTT);
 }
 
 bool COdbcTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 	
 	if (!pTasks)
@@ -121,6 +125,8 @@ bool COdbcTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList*
 
 bool COdbcTasklistStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
