@@ -253,6 +253,8 @@ BOOL CToDoCtrl::LoadCheckedOutTask(const CString& sPath, DWORD& dwTaskID, TODOIT
         return FALSE;
 	
     dwTaskID = _ttol(FileMisc::GetFilenameFromPath(sPath);
+    tdi.bLocked = FALSE;
+    
     return TRUE;
 }
 
@@ -261,10 +263,25 @@ BOOL CToDoCtrl::CheckInAllTasks()
     if (m_mapCheckedOutTasks.IsEmpty())
         return TRUE;
 	
-    if (!IsCheckedOut() && !CheckOut())
+    BOOL bWasCheckedOut = IsCheckedOut();
+    
+    if (!WasCheckedOut)
     {
-        // TODO
-	return FALSE;
+        if (!SaveAllCheckedOutTasks()) // because check-out will overwrite changes
+        {
+            // TODO
+	    return FALSE;
+        }
+	else
+	{
+            m_bModified = FALSE; // else Check-out will fail
+	    
+	    if (!CheckOut())
+            {
+                // TODO
+	        return FALSE;
+            }
+        }
     }
     
     POSITION pos = m_mapCheckedOutTasks.GetStartPosition();
@@ -274,18 +291,25 @@ BOOL CToDoCtrl::CheckInAllTasks()
     {
         DWORD dwTaskID = m_mapCheckedOutTasks.GetNext(pos);
 	
-        if (LoadCheckedOutTask(dwTaskID, tdi))
+	if (!bWasCheckedOut)
 	{
-            tdi.bLock = TRUE;
-            m_data.SetTaskAttributes(dwTaskID, tdi);
+            if (LoadCheckedOutTask(dwTaskID, tdi))
+	    {
+                tdi.bLock = TRUE;
+                m_data.SetTaskAttributes(dwTaskID, tdi);
         
-     	    VERIFY(FileMisc::DeleteFile(sTaskPath));
+     	        VERIFY(FileMisc::DeleteFile(sTaskPath));
+	    }
+	}
+	else
+	{
+	    m_data.SetTaskLock(dwTaskID, TRUE);
 	}
    
 	m_mapCheckedOutIDs.Remove(dwTaskID);
     }
        
-    if (!CheckIn())
+    if (!bWasCheckedOut && !CheckIn())
     {
         // TODO
         return FALSE;
@@ -319,3 +343,4 @@ int CToDoCtrl::ReloadCheckedOutTasks()
 }
 
 ```
+
