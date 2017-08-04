@@ -3,7 +3,7 @@
 # top-most EditorConfig file
 root = true
 
-[*]
+[*.{md}]
 indent_style = tab
 indent_size = 2
 trim_trailing_whitespace = true
