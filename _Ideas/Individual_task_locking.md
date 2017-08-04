@@ -154,7 +154,7 @@ BOOL CToDoCtrl::CheckOutTask(DWORD dwTaskID)
 	if (!GetTrueTask(dwTaskID, pTDI, pTDS))
 		return FALSE;
 
-	CString sTaskPath = GetTaskSourceControlPath(dwTaskID);
+	CString sTaskPath = GetTaskSourceControlPath(dwTaskID); 
 
 	HFILE hFile = CreateFile(sTaskPath,				// name of the write
 							 GENERIC_WRITE,			// open for writing
