@@ -1499,3 +1499,11 @@ void CKanbanListCtrl::OnTooltipShow(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	*pResult = TRUE; // we do the positioning
 }
+
+BOOL CKanbanListCtrl::AttributeValuesMatch(const CKanbanListCtrl& other) const
+{
+	CStringArray aOtherValues;
+	other.GetAttributeValues(aOtherValues);
+
+	return Misc::MatchAll(m_columnDef.aAttribValues, aOtherValues);
+}

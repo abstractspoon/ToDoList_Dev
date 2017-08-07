@@ -2467,7 +2467,8 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		ClientToScreen(&point);
 		CKanbanListCtrl* pDestList = HitTestListCtrl(point);
 
-		if (pDestList && (pDestList != m_pDragFromList))
+		if (pDestList && (pDestList != m_pDragFromList)  && 
+			!m_pDragFromList->AttributeValuesMatch(*pDestList))
 		{
 			// move the items
 			CString sAttribValue;
@@ -2591,7 +2592,9 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		ClientToScreen(&point);
 		const CKanbanListCtrl* pDestList = HitTestListCtrl(point);
 
-		BOOL bValidDest = (pDestList && (pDestList != m_pDragFromList));
+		BOOL bValidDest = (pDestList && (pDestList != m_pDragFromList) && 
+							!m_pDragFromList->AttributeValuesMatch(*pDestList));
+
 		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? GMOC_MOVE : GMOC_NO));
 	}
 	
