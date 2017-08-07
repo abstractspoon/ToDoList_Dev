@@ -136,7 +136,7 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_bTextColorIsBkgnd(FALSE),
 	m_bSelected(FALSE),
 	m_bShowTaskColorAsBar(FALSE),
-	m_bColorByPriority(FALSE),
+	m_bColorBarByPriority(FALSE),
 	m_dwSelectingTask(0),
 	m_nLineHeight(-1),
 	m_bDrawAttribLabels(TRUE),
@@ -351,7 +351,7 @@ void CKanbanListCtrl::SetStrikeThruDoneTasks(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrl::SetColorTasksByPriority(BOOL bSet)
+void CKanbanListCtrl::SetColorTaskBarByPriority(BOOL bSet)
 {
 	if (bSet && (m_aPriorityColors.GetSize() != 11))
 	{
@@ -360,7 +360,7 @@ void CKanbanListCtrl::SetColorTasksByPriority(BOOL bSet)
 	}
 
 	// else
-	m_bColorByPriority = bSet;
+	m_bColorBarByPriority = bSet;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -601,7 +601,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					if (!pKI->IsDone(TRUE))
 					{
-						if (m_bColorByPriority)
+						if (m_bColorBarByPriority)
 						{
 							int nPriority = pKI->GetPriority();
 

@@ -71,7 +71,7 @@ public:
 	void SetTextColorIsBackground(BOOL bSet = TRUE);
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
-	void SetColorTasksByPriority(BOOL bSet = TRUE);
+	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
 	void SetSelected(BOOL bSelected);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
@@ -89,7 +89,7 @@ protected:
 	BOOL m_bTextColorIsBkgnd;
 	BOOL m_bSelected;
 	BOOL m_bShowTaskColorAsBar;
-	BOOL m_bColorByPriority;
+	BOOL m_bColorBarByPriority;
 	BOOL m_bStrikeThruDoneTasks;
 	BOOL m_bDrawAttribLabels;
 	BOOL m_bSavingToImage;

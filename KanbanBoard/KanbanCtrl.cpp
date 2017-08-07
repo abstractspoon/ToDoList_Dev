@@ -1430,7 +1430,7 @@ CKanbanListCtrl* CKanbanCtrl::NewListCtrl(const KANBANCOLUMN& colDef)
 	{
 		pList->SetTextColorIsBackground(HasOption(KBCF_TASKTEXTCOLORISBKGND));
 		pList->SetStrikeThruDoneTasks(HasOption(KBCF_STRIKETHRUDONETASKS));
-		pList->SetColorTasksByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
+		pList->SetColorTaskBarByPriority(HasOption(KBCF_COLORBARBYPRIORITY));
 		pList->SetShowTaskColorAsBar(HasOption(KBCF_SHOWTASKCOLORASBAR));
 		pList->SetShowCompletionCheckboxes(HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES));
 
@@ -1735,7 +1735,7 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case KBCF_COLORBARBYPRIORITY:
-				APPLYOPTION2LISTS(SetColorTasksByPriority)
+				APPLYOPTION2LISTS(SetColorTaskBarByPriority)
 				break;
 
 			case KBCF_STRIKETHRUDONETASKS:
