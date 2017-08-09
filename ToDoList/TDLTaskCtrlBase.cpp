@@ -5144,7 +5144,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasDates(TDC_DATE nDate, BOOL bAll) const
 		}
 	}
 
-	return bAll; // there were no dissenting tasks
+	return bAll;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasIcons() const
@@ -5159,7 +5159,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasIcons() const
 			return TRUE;
 	}
 
-	return FALSE; // there were no tasks with icons
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
@@ -5174,7 +5174,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasUnlocked() const
 			return TRUE;
 	}
 
-	return FALSE; // All selected tasks were locked
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
@@ -5189,7 +5189,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasLocked() const
 			return TRUE;
 	}
 
-	return FALSE; // All selected tasks were unlocked
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
@@ -5204,7 +5204,7 @@ BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
 			return FALSE;
 	}
 
-	return TRUE; // all tasks were completed
+	return TRUE;
 }
 
 int CTDLTaskCtrlBase::SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const
@@ -5239,7 +5239,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasDependents() const
 			return TRUE;
 	}
 	
-	// no refs
 	return FALSE;
 }
 
@@ -5255,7 +5254,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasReferences() const
 			return TRUE;
 	}
 	
-	// no refs
 	return FALSE;
 }
 
@@ -5271,7 +5269,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
 			return TRUE;
 	}
 	
-	// no non-refs
 	return FALSE;
 }
 
