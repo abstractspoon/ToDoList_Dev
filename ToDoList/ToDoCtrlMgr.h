@@ -17,13 +17,21 @@
 #include "..\shared\browserdlg.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoCtrlMgr dialog
- 
+
 enum TDCM_PATHTYPE { TDCM_UNDEF = -1, TDCM_REMOVABLE, TDCM_FIXED, TDCM_REMOTE, TDCM_OTHER }; // drive types
 enum TDCM_DUESTATUS { TDCM_NONE = -1, TDCM_PAST, TDCM_TODAY, TDCM_FUTURE }; 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef __int64 time64_t;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTabCtrlEx;
 
+/////////////////////////////////////////////////////////////////////////////
+// CToDoCtrlMgr 
+ 
 class CToDoCtrlMgr
 {
 	// Construction
@@ -188,7 +196,7 @@ protected:
 		CFilteredToDoCtrl* pTDC;
 		BOOL bModified;
 		BOOL bLastStatusReadOnly;
-		time_t tLastMod;
+		time64_t tLastMod;
 		BOOL bLastCheckoutSuccess;
         TDCM_PATHTYPE nPathType;
 		TDCM_DUESTATUS nDueStatus;

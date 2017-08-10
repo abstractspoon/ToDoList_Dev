@@ -8,6 +8,7 @@
 
 #include "..\3rdParty\stdiofileex.h"
 #include "..\3rdParty\fileversioninfo.h"
+#include "..\3rdParty\T64Utils.h"
 
 #include <sys/utime.h>
 #include <sys/stat.h>
@@ -262,15 +263,14 @@ CString FileMisc::GetFileNameFromPath(LPCTSTR szFilepath, BOOL bIncExtension)
 	return sFName;
 }
 
-time_t FileMisc::GetFileLastModified(LPCTSTR szPath)
+time64_t FileMisc::GetFileLastModified(LPCTSTR szPath)
 {
-	time_t tTime = 0;
+	time64_t tTime = 0;
 	FILETIME fileTime = { 0 };
 	
 	if (GetFileLastModified(szPath, fileTime))
 	{
-		ULARGE_INTEGER ull = { fileTime.dwLowDateTime, fileTime.dwHighDateTime };
-		tTime = (time_t)((ull.QuadPart / 10000000UI64) - 11644473600UI64);
+		T64Utils::FileTimeToT64(&fileTime, &tTime);
 		
 #ifdef _DEBUG
 		struct _stat st;

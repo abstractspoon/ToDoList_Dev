@@ -333,8 +333,8 @@ BOOL CToDoCtrlMgr::RefreshFileLastModified(int nIndex)
 
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
-	time_t timeNow = FileMisc::GetFileLastModified(tdci.pTDC->GetFilePath());
-	time_t timePrev = tdci.tLastMod;
+	time64_t timeNow = FileMisc::GetFileLastModified(tdci.pTDC->GetFilePath());
+	time64_t timePrev = tdci.tLastMod;
 
 	tdci.tLastMod = timeNow;
 

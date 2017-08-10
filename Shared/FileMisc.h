@@ -5,9 +5,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "..\3rdParty\stdiofileex.h"
 
-#include <time.h>
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef __int64 time64_t;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,7 +144,7 @@ namespace FileMisc
 	CString TerminatePath(LPCTSTR szPath, BOOL bTerminate = TRUE);
 	BOOL IsPathTerminated(const CString& sPath);
 
-	time_t GetFileLastModified(LPCTSTR szPath);
+	time64_t GetFileLastModified(LPCTSTR szPath);
 	BOOL GetFileLastModified(LPCTSTR szPath, FILETIME& fileTime); 
 	BOOL SetFileLastModified(LPCTSTR szPath, const FILETIME& fileTime); 
 	BOOL GetFileLastModified(LPCTSTR szPath, SYSTEMTIME& sysTime, BOOL bLocalTime = TRUE);
