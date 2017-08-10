@@ -279,6 +279,9 @@
     <ClInclude Include="ColorDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="T64Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
