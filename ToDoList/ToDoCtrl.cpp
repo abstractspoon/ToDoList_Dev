@@ -6142,50 +6142,56 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 		double dBackupSize = FileMisc::GetFileSize(sBackup);
 		
 		// Check for valid backup
-		if (dBackupSize == 0.0)
+		if (dBackupSize > 0.0)
+		{
+			double dSize = FileMisc::GetFileSize(sFilePath);
+		
+			if (dSize == 0.0) // definitely a bad save -> copy over backup
+			{
+				FileMisc::DeleteFile(sFilePath, TRUE);
+				FileMisc::MoveFile(sBackup, sFilePath);
+			}
+			else
+			{
+				time64_t tMod = FileMisc::GetFileLastModified(sFilePath);
+				time64_t tBackupMod = FileMisc::GetFileLastModified(sBackup);
+
+				if (tMod >= tBackupMod) // file is newer than backup
+				{
+					::DeleteFile(sBackup);
+				}
+				else // Different sizes and dates -> prompt
+				{
+					CEnString sMessage(IDS_BACKUPFILEFOUND, sFilePath);
+					int nRet = AfxMessageBox(sMessage, MB_YESNOCANCEL);
+			
+					switch (nRet)
+					{
+					case IDYES:
+						FileMisc::DeleteFile(sFilePath, TRUE);
+						FileMisc::MoveFile(sBackup, sFilePath);
+						break;
+				
+					case IDNO: // keep the backup just in case
+						{
+							CString sRename = CFileBackup::BuildBackupPath(sBackup);
+							::MoveFile(sBackup, sRename);
+						}
+						break;
+				
+					case IDCANCEL:
+						return FALSE; // do nothing
+					}
+				}
+			}
+		}
+		else
 		{
 			// Nothing we can do except delete it
 			FileMisc::DeleteFile(sFilePath, TRUE);
-			return TRUE; 
-		}
-		
-		double dSize = FileMisc::GetFileSize(sFilePath);
-		
-		if (dSize == 0.0) // definitely a bad save -> copy over backup
-		{
-			FileMisc::DeleteFile(sFilePath, TRUE);
-			FileMisc::MoveFile(sBackup, sFilePath);
-		}
-		else if (dSize == dBackupSize) // same size == same file
-		{
-			::DeleteFile(sBackup);
-		}
-		else // Different sizes -> prompt
-		{
-			CEnString sMessage(IDS_BACKUPFILEFOUND, sFilePath);
-			int nRet = AfxMessageBox(sMessage, MB_YESNOCANCEL);
-			
-			switch (nRet)
-			{
-			case IDYES:
-				FileMisc::DeleteFile(sFilePath, TRUE);
-				FileMisc::MoveFile(sBackup, sFilePath);
-				break;
-				
-			case IDNO: // keep the backup just in case
-				{
-					CString sRename = CFileBackup::BuildBackupPath(sBackup);
-					::MoveFile(sBackup, sRename);
-				}
-				break;
-				
-			case IDCANCEL:
-				return FALSE; // do nothing
-			}
 		}
 	}
 	
-	// all else
 	return TRUE;
 }
 
@@ -10551,7 +10557,7 @@ TDC_FILE CToDoCtrl::CheckIn()
 		
 		// snap shot mod time so we can restore it
 		FILETIME ftMod = { 0 };
-		FileMisc::GetFileLastModified(m_sLastSavePath, ftMod);
+		VERIFY(FileMisc::GetFileLastModified(m_sLastSavePath, ftMod));
 		
 		// change check-out state before resaving
 		m_bCheckedOut = FALSE;
