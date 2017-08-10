@@ -11495,7 +11495,7 @@ LRESULT CToDoCtrl::OnCustomUrl(WPARAM wParam, LPARAM lParam)
 	UNREFERENCED_PARAMETER(wParam);
 	ASSERT(wParam == (WPARAM)m_ctrlComments.GetDlgCtrlID());
 	
-	// FALSE says only handle "tdc://" links
+	// FALSE says only handle "tdl://" links
 	GotoFile((LPCTSTR)lParam, FALSE);
 	
 	return 0;
