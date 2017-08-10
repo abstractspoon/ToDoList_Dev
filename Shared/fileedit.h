@@ -67,8 +67,8 @@ public:
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);
 	static void SetDefaultButtonImages(HICON hBrowse, HICON hGo);
 
-	static BOOL GotoFile(LPCTSTR szPath, BOOL bHandleError = TRUE);
-	static BOOL GotoFile(LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError = TRUE);
+	static int GotoFile(LPCTSTR szPath, BOOL bHandleError = TRUE);
+	static int GotoFile(LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError = TRUE);
 
 // Attributes
 protected:

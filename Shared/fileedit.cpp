@@ -493,7 +493,7 @@ int CFileEdit::GotoFile(LPCTSTR szPath, BOOL bHandleError)
 	return GotoFile(szPath, FileMisc::GetCwd(), bHandleError);
 }
 
-BOOL CFileEdit::GotoFile(LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError)
+int CFileEdit::GotoFile(LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError)
 {
 	int nRes = FileMisc::Run(*AfxGetMainWnd(), szPath, NULL, SW_SHOWNORMAL, szFolder); 
 	
