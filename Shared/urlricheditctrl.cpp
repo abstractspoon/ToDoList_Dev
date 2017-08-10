@@ -490,11 +490,19 @@ BOOL CUrlRichEditCtrl::GoToUrl(int nUrl) const
 	{
 		CString sUrl = GetUrl(nUrl, TRUE);
 
-		// if it fails to run then forward on to parent
-		if (FileMisc::Run(*this, sUrl) > 32)
+		// Handle Outlook manually because under Windows 10 ShellExecute 
+		// will succeed even if Outlook is not installed
+		if (CMSOutlookHelper::IsOutlookUrl(sUrl))
+		{
+			if (CMSOutlookHelper::HandleUrl(*this, sUrl))
+				return TRUE;
+		}
+		else if (FileMisc::Run(*this, sUrl) > 32)
+		{
 			return TRUE;
+		}
 
-		// else
+		// else forward to parent
 		SendNotifyFailedUrl(sUrl);
 		return FALSE;
 	}
