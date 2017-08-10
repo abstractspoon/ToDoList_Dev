@@ -671,7 +671,7 @@ LRESULT CRTFContentControl::OnCustomUrl(WPARAM wp, LPARAM lp)
 	if (sUrl.Find(TDL_LINK) != -1 || sUrl.Find(TDL_EXTENSION) != -1)
 		return GetParent()->SendMessage(WM_ICC_TASKLINK, 0, lp);
 
-	return 0;
+	return OnFailedUrl(wp, lp);
 }
 
 LRESULT CRTFContentControl::OnFailedUrl(WPARAM wp, LPARAM lp)
