@@ -25,6 +25,7 @@
 #include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\msoutlookhelper.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -4021,8 +4022,17 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 
 void CTDLTaskCtrlBase::ShowFileLink(LPCTSTR szFilePath) const
 {
-	if (FileMisc::Run(GetSafeHwnd(), szFilePath, NULL, SW_SHOWNORMAL, m_sTasklistFolder) > 32)
+	// Handle Outlook manually because under Windows 10 ShellExecute 
+	// will succeed even if Outlook is not installed
+	if (CMSOutlookHelper::IsOutlookUrl(szFilePath))
+	{
+		if (CMSOutlookHelper::HandleUrl(*this, szFilePath))
+			return;
+	}
+	else if (FileMisc::Run(GetSafeHwnd(), szFilePath, NULL, SW_SHOWNORMAL, m_sTasklistFolder) > 32)
+	{
 		return;
+	}
 
 	// else forward to our parent
 	::SendMessage(::GetParent(GetSafeHwnd()), WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)szFilePath);

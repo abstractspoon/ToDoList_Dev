@@ -14,6 +14,7 @@
 #include "wclassdefines.h"
 #include "clipboard.h"
 #include "icon.h"
+#include "msoutlookhelper.h"
 
 #include <shlwapi.h>
 
@@ -459,7 +460,7 @@ void CFileEdit::OnBtnClick(UINT nID)
 				// try our parent first
 				if (!GetParent()->SendMessage(WM_FE_DISPLAYFILE, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sPath))
 				{
-					GotoFile(sPath, m_sCurFolder); 
+					GotoFile(*this, sPath, m_sCurFolder); 
 				}
 			}
 		}
@@ -488,14 +489,20 @@ void CFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 	}
 }
 
-int CFileEdit::GotoFile(LPCTSTR szPath, BOOL bHandleError)
+int CFileEdit::GotoFile(HWND hWnd, LPCTSTR szPath, BOOL bHandleError)
 {
-	return GotoFile(szPath, FileMisc::GetCwd(), bHandleError);
+	return GotoFile(hWnd, szPath, FileMisc::GetCwd(), bHandleError);
 }
 
-int CFileEdit::GotoFile(LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError)
+int CFileEdit::GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError)
 {
-	int nRes = FileMisc::Run(*AfxGetMainWnd(), szPath, NULL, SW_SHOWNORMAL, szFolder); 
+	// Handle Outlook manually because under Windows 10 ShellExecute 
+	// will succeed even if Outlook is not installed
+	if (CMSOutlookHelper::IsOutlookUrl(szPath))
+		return CMSOutlookHelper::HandleUrl(hWnd, szPath);
+
+	// else
+	int nRes = FileMisc::Run(hWnd, szPath, NULL, SW_SHOWNORMAL, szFolder); 
 	
 	if ((nRes < 32) && bHandleError)
 	{
