@@ -85,16 +85,21 @@ CString CTDCSourceControlHelper::GetSourceControlID(BOOL bAlternate) const
 	return Misc::FormatComputerNameAndUser();
 }
 
-BOOL CTDCSourceControlHelper::MatchesSourceControlID(const CString& sID) const
+BOOL CTDCSourceControlHelper::MatchesOurSourceControlID(const CString& sID) const
 {
 	if (sID.IsEmpty())
 		return FALSE;
 
-	return ((GetSourceControlID(FALSE) == sID) ||
-			(GetSourceControlID(TRUE) == sID));
+	return (SourceControlIDsMatch(sID, GetSourceControlID(FALSE)) ||
+			SourceControlIDsMatch(sID, GetSourceControlID(TRUE)));
 }
 
-BOOL CTDCSourceControlHelper::CheckOutTask(DWORD dwTaskID) const
+BOOL CTDCSourceControlHelper::SourceControlIDsMatch(const CString& sID1, const CString& sID2)
+{
+	return (sID1.CompareNoCase(sID2) == 0);
+}
+
+BOOL CTDCSourceControlHelper::CheckOutTask(DWORD dwTaskID, CString& sCheckedOutTo) const
 {
 	const TODOITEM* pTDI = m_tdc.GetTask(dwTaskID);
 
@@ -106,21 +111,13 @@ BOOL CTDCSourceControlHelper::CheckOutTask(DWORD dwTaskID) const
 
 	CString sTaskPath = GetTaskSourceControlPath(dwTaskID); 
 
-	HFILE hFile = CreateFile(sTaskPath,				// name of the write
-							GENERIC_WRITE,			// open for writing
-							0,						// do not share
-							NULL,					// default security
-							CREATE_NEW,				// create new file only
-							FILE_ATTRIBUTE_NORMAL,	// normal file
-							NULL);					// no attr. template
-
-	if (hFile == INVALID_HANDLE_VALUE) 
+	if (!CreateSentinelFile(sTaskPath))
 	{ 
-		// ERROR_FILE_EXISTS
+		sCheckedOutTo = GetCheckedOutTo(sTaskPath);
+		ASSERT(!sCheckedOutTo.IsEmpty());
+
 		return FALSE;
 	}
-
-	::CloseHandle(hFile);
 
 	// Save minimal tasklist
 	CTaskFile task;
@@ -138,7 +135,10 @@ BOOL CTDCSourceControlHelper::CheckOutTask(DWORD dwTaskID) const
 	task.SetFileFormat(FILEFORMAT_CURRENT);
 
 	if (!task.Save(sTaskPath, SFEF_UTF16))
+	{
+		VERIFY(DeleteSentinelFile(sTaskPath));
 		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -210,3 +210,118 @@ DWORD CTDCSourceControlHelper::LoadCheckedOutTask(LPCTSTR szTaskPath, TODOITEM& 
 	return dwTaskID;
 }
 
+BOOL CTDCSourceControlHelper::CheckOutTasklist(CString& sCheckedOutTo) const
+{
+	CString sTasklistPath = GetTasklistSourceControlPath(); 
+
+	if (!CreateSentinelFile(sTasklistPath))
+	{ 
+		sCheckedOutTo = GetCheckedOutTo(sTasklistPath);
+		ASSERT(!sCheckedOutTo.IsEmpty());
+
+		return FALSE;
+	}
+
+	// Save minimal tasklist
+	CTaskFile tasklist;
+
+	tasklist.SetCheckedOutTo(GetSourceControlID());
+	tasklist.SetXmlHeader(m_tdc.m_sXmlHeader);
+	tasklist.SetFileFormat(FILEFORMAT_CURRENT);
+
+	if (!tasklist.Save(sTasklistPath, SFEF_UTF16))
+	{
+		VERIFY(DeleteSentinelFile(sTasklistPath));
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDCSourceControlHelper::CheckInTasklist() const
+{
+	// TODO
+}
+
+CString CTDCSourceControlHelper::GetCheckedOutTo(LPCTSTR szPath)
+{
+	CTaskFile tasklist;
+
+	if (!tasklist.LoadHeader(szPath))
+		return FALSE;
+
+	return tasklist.GetCheckOutTo();
+}
+
+BOOL CTDCSourceControlHelper::IsTasklistCheckedOut() const
+{
+	CString sUnused;
+
+	return IsTasklistCheckedOut(sUnused);
+}
+
+BOOL CTDCSourceControlHelper::IsTasklistCheckedOut(CString& sCheckedOutTo) const
+{
+	CString sCheckedOutTo = GetCheckedOutTo(GetTasklistSourceControlPath());
+
+	return !sCheckedOutTo.IsEmpty();
+}
+
+BOOL CTDCSourceControlHelper::IsTasklistCheckedOutToUs()
+{
+	CString sCheckedOutTo;
+
+	if (!IsTasklistCheckedOut(sCheckedOutTo))
+		return FALSE;
+
+	return MatchesOurSourceControlID(sCheckedOutTo);
+}
+
+BOOL CTDCSourceControlHelper::IsTaskCheckedOut(DWORD dwTaskID)
+{
+	CString sCheckedOutTo = GetCheckedOutTo(GetTaskSourceControlPath(dwTaskID));
+
+	return !sCheckedOutTo.IsEmpty();
+}
+
+BOOL CTDCSourceControlHelper::IsTaskCheckedOut(DWORD dwTaskID, CString& sCheckedOutTo)
+{
+	CString sUnused;
+
+	return IsTaskCheckedOut(dwTaskID, sUnused);
+}
+
+BOOL CTDCSourceControlHelper::IsTaskCheckedOutToUs(DWORD dwTaskID)
+{
+	CString sCheckedOutTo;
+
+	if (!IsTaskCheckedOut(dwTaskID, sCheckedOutTo))
+		return FALSE;
+
+	return MatchesOurSourceControlID(sCheckedOutTo);
+}
+
+BOOL CTDCSourceControlHelper::CreateSentinelFile(LPCTSTR szPath)
+{
+	HFILE hFile = CreateFile(szPath,				// name of the write
+							GENERIC_WRITE,			// open for writing
+							0,						// do not share
+							NULL,					// default security
+							CREATE_NEW,				// create new file only
+							FILE_ATTRIBUTE_NORMAL,	// normal file
+							NULL);					// no attr. template
+
+	if (hFile == INVALID_HANDLE_VALUE) 
+	{ 
+		// ERROR_FILE_EXISTS
+		return FALSE;
+	}
+
+	::CloseHandle(hFile);
+	return TRUE;
+}
+
+BOOL CTDCSourceControlHelper::DeleteSentinelFile(LPCTSTR szPath)
+{
+	return FileMisc::DeleteFile(szPath, TRUE);
+}

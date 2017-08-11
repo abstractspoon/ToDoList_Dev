@@ -35,27 +35,40 @@ public:
 	CTDCSourceControlHelper(const CToDoCtrl& tdc);
 	virtual ~CTDCSourceControlHelper();
 
+	BOOL CheckOutTasklist(CString& sCheckedOutTo) const;
+	BOOL CheckInTasklist() const;
+
+	BOOL CheckOutTask(DWORD dwTaskID, CString& sCheckedOutTo) const;
+	BOOL CheckInTask(DWORD dwTaskID, TODOITEM& tdi) const;
+
+	BOOL LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const;
+	BOOL LoadCheckedOutTask(DWORD& dwTaskID, TODOITEM& tdi) const;
+
+	BOOL IsTasklistCheckedOut();
+	BOOL IsTasklistCheckedOut(CString& sCheckedOutTo);
+	BOOL IsTasklistCheckedOutToUs();
+
 	CString GetTasklistSourceControlPath() const;
 	CString GetTaskSourceControlFolder() const;
 	CString GetTaskSourceControlPath(DWORD dwTaskID) const;
 
 	CString GetSourceControlID(BOOL bAlternate) const;
-	BOOL MatchesSourceControlID(const CString& sID) const;
+	BOOL MatchesOurSourceControlID(const CString& sID) const;
 
-	BOOL CheckOutTasklist() const;
-	BOOL CheckInTasklist() const;
-
-	BOOL CheckOutTask(DWORD dwTaskID) const;
-	BOOL CheckInTask(DWORD dwTaskID, TODOITEM& tdi) const;
-
-	BOOL LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const;
-	BOOL LoadCheckedOutTask(DWORD& dwTaskID, TODOITEM& tdi) const;
+	BOOL IsTaskCheckedOut(DWORD dwTaskID);
+	BOOL IsTaskCheckedOut(DWORD dwTaskID, CString& sCheckedOutTo);
+	BOOL IsTaskCheckedOutToUs(DWORD dwTaskID);
 
 protected:
 	const CToDoCtrl& m_tdc;
 
 protected:
 	CString GetTasklistPath() const;
+
+	static BOOL CreateSentinelFile(LPCTSTR szPath);
+	static BOOL DeleteSentinelFile(LPCTSTR szPath);
+	static BOOL SourceControlIDsMatch(const CString& sID1, const CString& sID2);
+	static CString GetCheckedOutTo(LPCTSTR szPath);
 };
 
 //////////////////////////////////////////////////////////////////////
