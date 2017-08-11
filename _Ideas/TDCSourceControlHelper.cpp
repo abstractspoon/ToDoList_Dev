@@ -4,8 +4,9 @@
 
 #include "StdAfx.h"
 #include "TDCSourceControlHelper.h"
+#include "ToDoCtrl.h"
 
-#include "..\shared\Misc.h"
+#include "..\shared\FileMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,35 +17,38 @@ static char THIS_FILE[] = __FILE__;
 //////////////////////////////////////////////////////////////////////
 // CTDCSourceControlHelper
 
-CString CTDCSourceControlHelper::GetTaskSourceControlFolder(LPCTSTR szTasklistPath) const
+CTDCSourceControlHelper::CTDCSourceControlHelper(const CToDoCtrl& tdc) : m_tdc(tdc)
 {
-	if (Misc::IsEmpty(szTasklistPath))
-	{
-		ASSERT(0);
-		return _T("");
-	}
+}
 
-	CString sPath(szTasklistPath);
+CTDCSourceControlHelper::~CTDCSourceControlHelper()
+{
+}
+
+CString CTDCSourceControlHelper::GetTasklistPath() const
+{
+	ASSERT(!m_tdc.GetFilePath().IsEmpty());
+
+	return m_tdc.GetFilePath();
+}
+
+CString CTDCSourceControlHelper::GetTaskSourceControlFolder() const
+{
+	CString sPath(GetTasklistPath());
 	FileMisc::ReplaceExtension(_T(".ssc"));
 
 	return sPath;
 }
 
-CString CTDCSourceControlHelper::GetTasklistSourceControlPath(LPCTSTR szTasklistPath) const
+CString CTDCSourceControlHelper::GetTasklistSourceControlPath() const
 {
-	if (Misc::IsEmpty(szTasklistPath))
-	{
-		ASSERT(0);
-		return _T("");
-	}
-
-	CString sPath(szTasklistPath);
+	CString sPath(GetTasklistPath());
 	FileMisc::ReplaceExtension(sPath, _T(".tsc"));
 
 	return sPath;
 }
 
-CString CTDCSourceControlHelper::GetTaskSourceControlPath(LPCTSTR szTasklistPath, DWORD dwTaskID) const
+CString CTDCSourceControlHelper::GetTaskSourceControlPath(DWORD dwTaskID) const
 {
 	if (!dwTaskID)
 	{
@@ -52,7 +56,7 @@ CString CTDCSourceControlHelper::GetTaskSourceControlPath(LPCTSTR szTasklistPath
 		return FALSE;
 	}
 
-	CString sFolder(GetTaskSourceControlFolder(szTasklistPath));
+	CString sFolder(GetTaskSourceControlFolder());
 
 	if (sFolder.IsEmpty())
 		return sFolder;
@@ -62,9 +66,9 @@ CString CTDCSourceControlHelper::GetTaskSourceControlPath(LPCTSTR szTasklistPath
 	return sPath;
 }
 
-CString CTDCSourceControlHelper::GetSourceControlID(BOOL bIncludeUser, BOOL bAlternate)
+CString CTDCSourceControlHelper::GetSourceControlID(BOOL bAlternate) const
 {
-	if (bIncludeUser)
+	if (m_tdc.HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
 	{
 		if (!bAlternate)
 			return Misc::FormatComputerNameAndUser();
@@ -81,7 +85,7 @@ CString CTDCSourceControlHelper::GetSourceControlID(BOOL bIncludeUser, BOOL bAlt
 	return Misc::FormatComputerNameAndUser();
 }
 
-BOOL CTDCSourceControlHelper::MatchesSourceControlID(const CString& sID)
+BOOL CTDCSourceControlHelper::MatchesSourceControlID(const CString& sID) const
 {
 	if (sID.IsEmpty())
 		return FALSE;
@@ -90,16 +94,17 @@ BOOL CTDCSourceControlHelper::MatchesSourceControlID(const CString& sID)
 			(GetSourceControlID(TRUE) == sID));
 }
 
-BOOL CTDCSourceControlHelper::CheckOutTask(LPCTSTR szTasklistPath, DWORD dwTaskID, const TODOITEM& tdi, 
-											LPCTSTR szXmlHeader, BOOL bIncludeUserInID)
+BOOL CTDCSourceControlHelper::CheckOutTask(DWORD dwTaskID) const
 {
-	if (!dwTaskID)
+	const TODOITEM* pTDI = m_tdc.GetTask(dwTaskID);
+
+	if (!pTDI || pTDI->IsReference())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	CString sTaskPath = GetTaskSourceControlPath(szTasklistPath, dwTaskID); 
+	CString sTaskPath = GetTaskSourceControlPath(dwTaskID); 
 
 	HFILE hFile = CreateFile(sTaskPath,				// name of the write
 							GENERIC_WRITE,			// open for writing
@@ -119,7 +124,7 @@ BOOL CTDCSourceControlHelper::CheckOutTask(LPCTSTR szTasklistPath, DWORD dwTaskI
 
 	// Save minimal tasklist
 	CTaskFile task;
-	HTASKITEM hTask = task.NewTask(tdi.sTitle, NULL, dwTaskID, 0);
+	HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
 
 	if (!hTask)
 	{
@@ -127,9 +132,9 @@ BOOL CTDCSourceControlHelper::CheckOutTask(LPCTSTR szTasklistPath, DWORD dwTaskI
 		return FALSE;
 	}
 
-	task.SetTaskAttributes(hTask, tdi);
-	task.SetCheckedOutTo(GetSourceControlID(bIncludeUserInID));
-	task.SetXmlHeader(szXmlHeader);
+	task.SetTaskAttributes(hTask, pTDI);
+	task.SetCheckedOutTo(GetSourceControlID());
+	task.SetXmlHeader(m_tdc.m_sXmlHeader);
 	task.SetFileFormat(FILEFORMAT_CURRENT);
 
 	if (!task.Save(sTaskPath, SFEF_UTF16))
@@ -138,7 +143,7 @@ BOOL CTDCSourceControlHelper::CheckOutTask(LPCTSTR szTasklistPath, DWORD dwTaskI
 	return TRUE;
 }
 
-BOOL CTDCSourceControlHelper::CheckInTask(LPCTSTR szTasklistPath, DWORD dwTaskID, TODOITEM& tdi)
+BOOL CTDCSourceControlHelper::CheckInTask(DWORD dwTaskID, TODOITEM& tdi) const
 {
 	if (!dwTaskID)
 	{
@@ -146,7 +151,7 @@ BOOL CTDCSourceControlHelper::CheckInTask(LPCTSTR szTasklistPath, DWORD dwTaskID
 		return FALSE;
 	}
 
-	CString sTaskPath = GetTaskSourceControlPath(szTasklistPath, dwTaskID); 
+	CString sTaskPath = GetTaskSourceControlPath(dwTaskID); 
 
 	if (!FileMisc::FileExists(sTaskPath))
 	{
@@ -163,9 +168,9 @@ BOOL CTDCSourceControlHelper::CheckInTask(LPCTSTR szTasklistPath, DWORD dwTaskID
 	return FileMisc::DeleteFile(sTaskPath);
 }
 
-BOOL CTDCSourceControlHelper::LoadCheckedOutTask(LPCTSTR szTasklistPath, DWORD dwTaskID, TODOITEM& tdi) const
+BOOL CTDCSourceControlHelper::LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const
 {
-	CString sTaskPath = GetTaskSourceControlPath(szTasklistPath, dwTaskID);
+	CString sTaskPath = GetTaskSourceControlPath(dwTaskID);
 
 	return (LoadCheckedOutTask(sTaskPath, dwTaskID, tdi) == dwTaskID);
 }

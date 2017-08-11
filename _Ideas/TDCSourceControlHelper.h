@@ -11,10 +11,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#include "..\Shared\mapex.h"
-
-//////////////////////////////////////////////////////////////////////
-
 class CToDoCtrl;
 class CToDoCtrlData;
 
@@ -22,23 +18,44 @@ struct TODOITEM;
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+
+class CToDoCtrl
+{
+	friend class CTDCSourceControlHelper;
+
+	...
+};
+
+*/
+
 class CTDCSourceControlHelper  
 {
 public:
-	CString GetTasklistSourceControlPath(LPCTSTR szTasklistPath);
-	CString GetTaskSourceControlFolder(LPCTSTR szTasklistPath);
-	CString GetTaskSourceControlPath(LPCTSTR szTasklistPath, DWORD dwTaskID);
+	CTDCSourceControlHelper(const CToDoCtrl& tdc);
+	virtual ~CTDCSourceControlHelper();
 
-	CString GetSourceControlID(BOOL bIncludeUser, BOOL bAlternate);
-	BOOL MatchesSourceControlID(const CString& sID);
+	CString GetTasklistSourceControlPath() const;
+	CString GetTaskSourceControlFolder() const;
+	CString GetTaskSourceControlPath(DWORD dwTaskID) const;
 
-	BOOL CheckOutTask(LPCTSTR szTasklistPath, DWORD dwTaskID, const TODOITEM& tdi, LPCTSTR szXmlHeader, BOOL bIncludeUserInID);
-	BOOL CheckInTask(LPCTSTR szTasklistPath, DWORD dwTaskID, TODOITEM& tdi);
+	CString GetSourceControlID(BOOL bAlternate) const;
+	BOOL MatchesSourceControlID(const CString& sID) const;
 
-	BOOL LoadCheckedOutTask(LPCTSTR szPath, DWORD dwTaskID, TODOITEM& tdi);
-	BOOL LoadCheckedOutTask(LPCTSTR szPath, DWORD& dwTaskID, TODOITEM& tdi);
+	BOOL CheckOutTasklist() const;
+	BOOL CheckInTasklist() const;
+
+	BOOL CheckOutTask(DWORD dwTaskID) const;
+	BOOL CheckInTask(DWORD dwTaskID, TODOITEM& tdi) const;
+
+	BOOL LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const;
+	BOOL LoadCheckedOutTask(DWORD& dwTaskID, TODOITEM& tdi) const;
 
 protected:
+	const CToDoCtrl& m_tdc;
+
+protected:
+	CString GetTasklistPath() const;
 };
 
 //////////////////////////////////////////////////////////////////////
