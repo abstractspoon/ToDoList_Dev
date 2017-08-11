@@ -12,6 +12,18 @@
 
 ## Processes ##
 
+#### Checking Out a Tasklist ####
+1. Attempt to create an empty file having the name '[TaskList].tsc' using the 'CREATE_NEW' file creation flag
+	* If this fails it means someone else has checked-out the tasklist so fail the check-out and notify the user
+2. Replace this empty file with the header of the tasklist updated to include the check-out name
+3. No need to re-save the tasklist with the check-out name
+4. Mark the tasklist as checked-out as before
+
+#### Checking In a Tasklist ####
+1. Check tasklist in as before
+2. No need to re-save the tasklist without the check-out name
+3. Delete '[TaskList].tsc'
+
 #### Checking Out a Single Task ####
 1. Attempt to create an empty file having the name '[TaskID].tsc' using the 'CREATE_NEW' file creation flag
 	* If this fails it means someone else has checked-out the task so fail the check-out and notify the user
@@ -38,12 +50,6 @@
 #### Saving Tasklists ####
 1. Save checked-out task(s) to '[TaskID].tsc' file(s)
 2. If the tasklist is checked-out then save the entire tasklist.
-
-#### Checking Out Tasklists ####
-1. No change
-
-#### Checking In Tasklists ####
-1. No change
 
 ## Pseudo-Code Fragments ##
 
