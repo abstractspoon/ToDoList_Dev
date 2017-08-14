@@ -13,9 +13,7 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(/* ... */) 
-	: 
-	m_bCheckedOut(FALSE)
+CToDoCtrl::CToDoCtrl(/* ... */)
 {
 }
 
@@ -31,6 +29,42 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl message handlers
+
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib)
+{
+	if (IsReadOnly())
+		return FALSE;
+
+	switch (nAttrib)
+	{
+	case TDCA_:
+	case TDCA_:
+	case TDCA_:
+	case TDCA_:
+	case TDCA_:
+	case TDCA_:
+		return m_taskTree.SelectionHasUnlocked();
+
+	case TDCA_NEWTASK:
+		return m_bCheckedOut;
+
+	case TDCA_DELETE:
+	case TDCA_POSITION: // move
+		return (m_bCheckedOut && GetSelectedCount());
+
+	case TDCA_LOCK:
+		return GetSelectedCount();
+
+	default:
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
+			return m_taskTree.SelectionHasUnlocked();
+		break;
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
+}
 
 void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 {

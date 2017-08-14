@@ -126,6 +126,31 @@ BOOL CTDCSourceControl::CheckOutTask(DWORD dwTaskID, const TODOITEM& tdi, CStrin
 		return FALSE;
 	}
 
+	if (!SaveCheckedOutTask(sTaskSCCPath, dwTaskID, tdi))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_mapTasksCheckedOut.Add(dwTaskID);
+
+	return TRUE;
+}
+
+BOOL CTDCSourceControl::SaveCheckedOutTask(DWORD dwTaskID, const TODOITEM& tdi) const
+{
+	CString sTaskSCCPath;
+	VERIFY(GetTaskSourceControlPath(dwTaskID, sTaskSCCPath));
+
+	return SaveCheckedOutTask(sTaskSCCPath, dwTaskID, tdi);
+}
+
+BOOL CTDCSourceControl::SaveCheckedOutTask(const CString& sTaskSCCPath, DWORD dwTaskID, const TODOITEM& tdi) const
+{
+	ASSERT(dwTaskID);
+	ASSERT(!tdi.bLocked);
+	ASSERT(FileMisc::FileExists(sTaskSCCPath));
+
 	// Save minimal tasklist
 	CTaskFile task;
 	HTASKITEM hTask = task.NewTask(tdi.sTitle, NULL, dwTaskID, 0);
@@ -143,11 +168,9 @@ BOOL CTDCSourceControl::CheckOutTask(DWORD dwTaskID, const TODOITEM& tdi, CStrin
 
 	if (!task.Save(sTaskSCCPath, SFEF_UTF16))
 	{
-		VERIFY(DeleteSentinelFile(sTaskSCCPath));
+		ASSERT(0);
 		return FALSE;
 	}
-
-	m_mapTasksCheckedOut.Add(dwTaskID);
 
 	return TRUE;
 }
@@ -218,7 +241,7 @@ BOOL CTDCSourceControl::LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi)
 
 DWORD CTDCSourceControl::LoadCheckedOutTask(LPCTSTR szTaskPath, TODOITEM& tdi)
 {
-	DWORD dwTaskID = _ttol(FileMisc::GetFileNameFromPath(szTaskPath));
+	DWORD dwTaskID = GetTaskIDFromFilePath(szTaskPath);
 
 	if (!dwTaskID)
 	{
@@ -390,7 +413,7 @@ BOOL CTDCSourceControl::DeleteSentinelFile(LPCTSTR szPath)
 	return FileMisc::DeleteFile(szPath, TRUE);
 }
 
-int CTDCSourceControl::ReloadCheckedOutTasks(CToDoCtrlDataItems& tdItems) const
+int CTDCSourceControl::RestoreCheckedOutTasks(CToDoCtrlDataItems& tdItems) const
 {
 	CStringArray aTaskFiles;
 	int nFile = FileMisc::FindFiles(GetTaskSourceControlFolder(), aTaskFiles, FALSE, _T("*.tsc"));
@@ -401,10 +424,21 @@ int CTDCSourceControl::ReloadCheckedOutTasks(CToDoCtrlDataItems& tdItems) const
 
 	while (nFile--)
 	{
-		if (LoadCheckedOutTask(aTaskFiles[nFile], dwTaskID, tdi))
-		{
-			tdItems.AddTask(dwTaskID, new TODOITEM(tdi));
+		const CString sTaskSCCPath = aTaskFiles[nFile];
 
+		if (LoadCheckedOutTask(sTaskSCCPath, dwTaskID, tdi))
+		{
+			// Discard deleted tasks
+			if (m_tdc.GetTask(dwTaskID) == NULL)
+			{
+				DeleteSentinelFile(sTaskSCCPath);
+				continue;
+			}
+
+			TODOITEM* pTDI = new TODOITEM(tdi);
+			pTDI->bLocked = FALSE;
+
+			tdItems.AddTask(dwTaskID, pTDI);
 			m_mapTasksCheckedOut.Add(dwTaskID);
 		}
 	}
@@ -412,8 +446,55 @@ int CTDCSourceControl::ReloadCheckedOutTasks(CToDoCtrlDataItems& tdItems) const
 	return tdItems.GetCount();
 }
 
-BOOL CTDCSourceControl::SaveCheckedOutTasks() const
+BOOL CTDCSourceControl::SaveCheckedOutTasks()
 {
-	// TODO
-	return FALSE;
+	DiscardDeletedCheckedOutTasks();
+
+	POSITION pos = m_mapTasksCheckedOut.GetStartPosition();
+	BOOL bSomeFailed = FALSE;
+
+	while (pos)
+	{
+		DWORD dwTaskID = m_mapTasksCheckedOut.GetNext(pos);
+		const TODOITEM* pTDI = m_tdc.GetTask(dwTaskID);
+		ASSERT(pTDI);
+
+		if (!SaveCheckedOutTask(dwTaskID, *pTDI))
+			bSomeFailed = TRUE;
+	}
+
+	return !bSomeFailed;
+}
+
+int CTDCSourceControl::DiscardDeletedCheckedOutTasks()
+{
+	int nNumDiscarded = 0;
+	POSITION pos = m_mapTasksCheckedOut.GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwTaskID = m_mapTasksCheckedOut.GetNext(pos);
+		const TODOITEM* pTDI = m_tdc.GetTask(dwTaskID);
+
+		if (pTDI == NULL)
+		{
+			CString sTaskSCCPath;
+			VERIFY(GetTaskSourceControlPath(dwTaskID, sTaskSCCPath));
+
+			DeleteSentinelFile(sTaskSCCPath);
+			m_mapTasksCheckedOut.Remove(dwTaskID);
+
+			nNumDiscarded++;
+		}
+	}
+
+	return nNumDiscarded;
+}
+
+DWORD CTDCSourceControl::GetTaskIDFromFilePath(LPCTSTR szPath)
+{
+	DWORD dwTaskID = _ttol(FileMisc::GetFileNameFromPath(szPath));
+	ASSERT(dwTaskID);
+
+	return dwTaskID;
 }

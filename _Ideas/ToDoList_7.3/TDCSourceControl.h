@@ -52,10 +52,10 @@ public:
 	BOOL CheckInAllTasks(CString& sTasklistCheckedOutTo);
 
 	BOOL LoadCheckedOutTask(DWORD dwTaskID, TODOITEM& tdi) const;
-	BOOL LoadCheckedOutTask(DWORD& dwTaskID, TODOITEM& tdi) const;
+	DWORD LoadCheckedOutTask(LPCTSTR szTaskPath, TODOITEM& tdi) const;
 
-	int ReloadCheckedOutTasks(CToDoCtrlDataItems& tdItems);
-	BOOL SaveCheckedOutTasks() const;
+	int RestoreCheckedOutTasks(CToDoCtrlDataItems& tdItems);
+	BOOL SaveCheckedOutTasks();
 	
 	BOOL IsTasklistCheckedOut() const;
 	BOOL IsTasklistCheckedOut(CString& sTasklistCheckedOutTo) const;
@@ -79,11 +79,16 @@ protected:
 	BOOL GetTasklistPath(CString& sTasklistPath) const;
 	CString GetSourceControlID(BOOL bAlternate) const;
 	BOOL MatchesOurSourceControlID(const CString& sID) const;
+	BOOL SaveCheckedOutTask(DWORD dwTaskID, const TODOITEM& tdi) const;
+	BOOL SaveCheckedOutTask(const CString& sTaskSCCPath, DWORD dwTaskID, const TODOITEM& tdi) const;
+
+	int DiscardDeletedCheckedOutTasks();
 
 	static BOOL CreateSentinelFile(LPCTSTR szPath);
 	static BOOL DeleteSentinelFile(LPCTSTR szPath);
 	static BOOL SourceControlIDsMatch(const CString& sID1, const CString& sID2);
 	static CString GetCheckedOutTo(LPCTSTR szPath);
+	static DWORD GetTaskIDFromFilePath(LPCTSTR szPath);
 };
 
 //////////////////////////////////////////////////////////////////////
