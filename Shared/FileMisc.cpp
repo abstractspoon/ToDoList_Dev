@@ -756,6 +756,14 @@ BOOL FileMisc::PathHasWildcard(LPCTSTR szFilePath)
 	return (_tcschr(szFilePath, '?') || _tcschr(szFilePath, '*'));
 }
 
+BOOL FileMisc::IsFileWritable(LPCTSTR szFilePath)
+{
+	if (!FileExists(szFilePath))
+		return FALSE;
+
+	return CFile().Open(szFilePath, CFile::modeWrite);
+}
+
 BOOL FileMisc::IsFolderWritable(LPCTSTR szFolder)
 {
 	if (!FolderExists(szFolder))

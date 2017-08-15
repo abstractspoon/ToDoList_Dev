@@ -165,6 +165,7 @@ namespace FileMisc
 	BOOL PathExists(LPCTSTR szPath); // file or folder
 	BOOL FolderFromFilePathExists(LPCTSTR szFilePath);
 	BOOL PathHasWildcard(LPCTSTR szFilePath);
+	BOOL IsFileWritable(LPCTSTR szFilePath);
 	BOOL IsFolderWritable(LPCTSTR szFolder);
 	BOOL CanonicalizePath(CString& sFilePath);
 
