@@ -22,11 +22,11 @@ public:
 // Attributes
 public:
 	FILTER_SHOW GetSelectedFilter() const;
-	FILTER_SHOW GetSelectedFilter(CString& sCustom) const;
+	FILTER_SHOW GetSelectedFilter(CString& sAdvanced) const;
 	BOOL SelectAdvancedFilter(FILTER_SHOW nFilter);
-	BOOL SelectAdvancedFilter(const CString& sCustom);
+	BOOL SelectAdvancedFilter(const CString& sAdvanced);
 	
-	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szCustomSel = NULL);
+	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
 	int GetAdvancedFilters(CStringArray& aFilters) const;
 	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
@@ -59,12 +59,12 @@ protected:
 
 protected:
 	void FillCombo();
-	void RefillCombo(LPCTSTR szCustomSel = NULL);
-	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szCustom = NULL);
+	void RefillCombo(LPCTSTR szAdvancedSel = NULL);
+	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced = NULL);
 	int AddDefaultFilterItem(int nItem);
 
-	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncCustomLabel = TRUE);
-	static CString ExtractAdvancedFilterName(const CString& sDisplay);
+	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncAdvancedLabel = TRUE);
+	static BOOL ExtractAdvancedFilterName(const CString& sDisplay, CString& sFilter);
 };
 
 /////////////////////////////////////////////////////////////////////////////
