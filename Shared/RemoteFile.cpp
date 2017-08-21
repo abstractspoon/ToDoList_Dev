@@ -253,7 +253,7 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 }
 
 // upload
-RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions)
+RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions, LPCTSTR szFilter)
 {
 	m_pPrefs = pPrefs;
 	m_sPrefKey = szKey;
@@ -297,7 +297,7 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 			// TODO
 		}
 		
-		nRes = GetRemotePaths(aRemoteFiles, aLocalFiles, dwOptions, sRemotePath, sLocalRoot);
+		nRes = GetRemotePaths(aRemoteFiles, aLocalFiles, dwOptions, szFilter, sRemotePath, sLocalRoot);
 	}
 
 	if (nRes == RMERR_SUCCESS && aRemoteFiles.GetSize())
@@ -354,7 +354,7 @@ BOOL CRemoteFile::RemotePathIsFolder(const CString& sPath)
 
 // for upload
 RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aLocalFiles, 
-								  DWORD dwOptions, LPCTSTR szRemoteDir, LPCTSTR szLocalRoot)
+								  DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir, LPCTSTR szLocalRoot)
 {
 	aRemoteFiles.RemoveAll();
 
@@ -381,7 +381,7 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 		// if multiple files are being uploaded then display folder dialog
 		if (nNumLocal > 1)
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter);
 			
 			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath) == IDOK)
 			{
@@ -408,7 +408,7 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 		}
 		else // nNumLocal == 1
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, NULL, sRemotePath);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
 
 			// base remote name on local name
 			TCHAR szFilename[_MAX_FNAME], szExt[_MAX_EXT];

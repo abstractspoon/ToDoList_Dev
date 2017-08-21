@@ -83,7 +83,7 @@ public:
 	// however if it might not exist and you want it created then append a trailing backslash
 
 	RMERR GetFile(CString& sRemotePath, CString& sLocalPath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions = RMO_DEFGETFILE, LPCTSTR szFilter = NULL);
-	RMERR SetFile(CString& sLocalPath, CString& sRemotePath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions = RMO_DEFSETFILE);
+	RMERR SetFile(CString& sLocalPath, CString& sRemotePath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions = RMO_DEFSETFILE, LPCTSTR szFilter = NULL);
 
 	CString GetServer() const { return m_sServer; }
 	CString GetUsername() const { return m_sUsername; }
@@ -125,7 +125,7 @@ protected:
 	DWORD GetRemoteFileSize(LPCTSTR szRemotePath);
 
 	RMERR GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aLocalFiles, 
-						DWORD dwOptions, LPCTSTR szRemoteDir = NULL, LPCTSTR szLocalRoot = NULL); // for upload
+						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL, LPCTSTR szLocalRoot = NULL); // for upload
 	RMERR GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL); // for download
 
 	RMERR GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFRArray& aRemoteFiles, 

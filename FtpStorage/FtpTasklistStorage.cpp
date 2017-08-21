@@ -128,7 +128,7 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		rf.SetPassword(pFInfo->szPassword);
 	}
 
-	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions) == RMERR_SUCCESS)
+	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
 		// return information to caller 
 		_tcsncpy(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
