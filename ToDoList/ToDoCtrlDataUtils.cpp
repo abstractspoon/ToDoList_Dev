@@ -1251,14 +1251,15 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				int nPriority2 = pTDI2->nPriority; // default
 
 				BOOL bUseHighestPriority = m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
+				BOOL bDoneHaveLowestPriority = m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY);
+				BOOL bDueHaveHighestPriority = m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY);
 
 				// item1
-				if (bDone1)
+				if (bDone1 && bDoneHaveLowestPriority)
 				{
 					nPriority1 = -1;
 				}
-				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
-						m_data.CalcIsTaskDue(pTDI1, pTDS1) && 
+				else if (bDueHaveHighestPriority && m_data.CalcIsTaskDue(pTDI1, pTDS1) && 
 						(bSortDueTodayHigh || !m_data.CalcIsTaskDue(pTDI1, pTDS1, TRUE)))
 				{
 					nPriority1 = pTDI1->nPriority + 11;
@@ -1269,11 +1270,11 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 
 				// item2
-				if (bDone2)
+				if (bDone2 && bDoneHaveLowestPriority)
 				{
 					nPriority2 = -1;
 				}
-				else if (m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && m_data.CalcIsTaskDue(pTDI2, pTDS2) && 
+				else if (bDueHaveHighestPriority && m_data.CalcIsTaskDue(pTDI2, pTDS2) && 
 					(bSortDueTodayHigh || !m_data.CalcIsTaskDue(pTDI2, pTDS2, TRUE)))
 				{
 					nPriority2 = pTDI2->nPriority + 11;
@@ -1295,9 +1296,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				int nRisk2 = pTDI2->nRisk; // default
 
 				BOOL bUseHighestRisk = m_data.HasStyle(TDCS_USEHIGHESTRISK);
+				BOOL bDoneHaveLowestRisk = m_data.HasStyle(TDCS_DONEHAVELOWESTRISK);
 
 				// item1
-				if (bDone1)
+				if (bDone1 && bDoneHaveLowestRisk)
 				{
 					nRisk1 = -1;
 				}
@@ -1307,7 +1309,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 				}
 
 				// item2
-				if (bDone2)
+				if (bDone2 && bDoneHaveLowestRisk)
 				{
 					nRisk2 = -1;
 				}
