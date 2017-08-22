@@ -2803,7 +2803,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		}
 		break;	
 		
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
 		// do nothing
 		break;
@@ -2829,7 +2829,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PASTE:
 	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
 		ASSERT(0);
 		return;
@@ -2997,7 +2997,7 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_MERGE:
 	case TDCA_ARCHIVE:
 	case TDCA_CUSTOMATTRIBDEFS:
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
 		return FALSE;
 

@@ -6924,7 +6924,7 @@ void CToDoCtrl::SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD /*dwModTaskI
 		// special cases: 
 		switch (nAttrib)
 		{
-		case TDCA_PROJNAME:
+		case TDCA_PROJECTNAME:
 			// if this was the project name being edited make sure
 			// the focus is set back to the name
 			GetDlgItem(IDC_PROJECTNAME)->SetFocus();
@@ -6971,7 +6971,7 @@ BOOL CToDoCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 void CToDoCtrl::OnChangeProjectName()
 {
 	UpdateData();
-	SetModified(TRUE, TDCA_PROJNAME);
+	SetModified(TRUE, TDCA_PROJECTNAME);
 }
 
 LRESULT CToDoCtrl::OnTreeDragAbort(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -12149,7 +12149,7 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 	return ((nAttrib >= TDCA_FIRSTATTRIBUTE && 
 			 nAttrib < TDCA_ATTRIBUTECOUNT &&
 			 nAttrib != TDCA_TASKNAME && 
-			 nAttrib != TDCA_PROJNAME) ||
+			 nAttrib != TDCA_PROJECTNAME) ||
 			CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib));
 }
 

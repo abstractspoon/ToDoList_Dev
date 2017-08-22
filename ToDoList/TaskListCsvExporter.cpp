@@ -79,8 +79,8 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	// Add project identifier if exporting multiple files
 	if (MULTIFILE)
 	{
-		ARRATTRIBUTES.InsertAt(0, TDCA_PROJNAME);
-		ARRLABELS.Add(GetAttribLabel(TDCA_PROJNAME));
+		ARRATTRIBUTES.InsertAt(0, TDCA_PROJECTNAME);
+		ARRLABELS.Add(GetAttribLabel(TDCA_PROJECTNAME));
 	}
 	
 	// we read direct from app preferences
@@ -116,7 +116,7 @@ void CTaskListCsvExporter::CheckAddIDField(TDC_ATTRIBUTE nAttrib)
 	{
 	case TDCA_PARENTID:
 	case TDCA_ID:
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 		break;
 
 	default:

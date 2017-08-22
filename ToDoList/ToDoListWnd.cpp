@@ -3443,7 +3443,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 	switch (nAttrib)
 	{
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 		if (Prefs().GetKeepTabsOrdered())
 			RefreshTabOrder();
 		break;

@@ -28,7 +28,7 @@ static char THIS_FILE[]=__FILE__;
 
 static TDC_ATTRIBUTE ATTRIB_ORDER[] = 
 {
-	TDCA_PROJNAME,
+	TDCA_PROJECTNAME,
 	TDCA_POSITION,
 	TDCA_TASKNAME,
 	TDCA_ID,
@@ -375,7 +375,7 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKHIGHESTPRIORITY, TDL_TASKPRIORITY);
 		break;
 
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 		sItem = FormatAttribute(pTasks, NULL, nAttrib, sAttribLabel, TDL_PROJECTNAME, TDL_FILENAME);
 		break;
 		

@@ -647,7 +647,6 @@ namespace TDC
 		case TDCA_NEWTASK:			return IUI_NONE;
 		case TDCA_ALL:				return IUI_NONE;
 		case TDCA_NONE:				return IUI_NONE;
-		case TDCA_PROJNAME:			return IUI_NONE;
 			
 		default: // handle custom attrib
 			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))

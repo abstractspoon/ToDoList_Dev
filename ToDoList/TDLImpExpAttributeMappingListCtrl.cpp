@@ -77,7 +77,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
 
 		// ignore special attributes
-		if (att.attrib == TDCA_NONE || att.attrib == TDCA_COLOR || att.attrib == TDCA_PROJNAME ||
+		if (att.attrib == TDCA_NONE || att.attrib == TDCA_COLOR || att.attrib == TDCA_PROJECTNAME ||
 			att.attrib == TDCA_RECURRENCE || att.attrib == TDCA_POSITION||
 			att.attrib == TDCA_TASKNAMEORCOMMENTS || att.attrib == TDCA_ANYTEXTATTRIBUTE)
 			continue;

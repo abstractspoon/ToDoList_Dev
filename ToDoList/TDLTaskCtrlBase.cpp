@@ -4388,7 +4388,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 		bRedrawCols = IsColumnShowing(TDCC_PATH);
 		break;
 		
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_COMMENTS:
 	case TDCA_ENCRYPT:
 		break;
@@ -4600,7 +4600,7 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	case TDCA_ARCHIVE:
 	case TDCA_ENCRYPT:
 	case TDCA_NONE:
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_COMMENTS:
 		ASSERT(nModCol == TDCC_NONE);
 		return FALSE;

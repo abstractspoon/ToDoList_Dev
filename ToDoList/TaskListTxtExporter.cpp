@@ -113,7 +113,7 @@ CString CTaskListTxtExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 		}
 		break;
 
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 		{
 			CString sTitle = pTasks->GetReportTitle();
 			CString sDate = pTasks->GetReportDate();

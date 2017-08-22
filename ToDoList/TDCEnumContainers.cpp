@@ -77,7 +77,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PARENTID:
 	case TDCA_PERCENT:			
 	case TDCA_POSITION:	
-	case TDCA_PROJNAME:
+	case TDCA_PROJECTNAME:
 	case TDCA_PRIORITY:			
 	case TDCA_RECURRENCE:		
 	case TDCA_RISK:				
