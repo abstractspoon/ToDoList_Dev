@@ -311,6 +311,9 @@ BOOL CTDLColumnAttribVisibilityListCtrl::IsButtonEnabled(int nRow, int nCol) con
 	if (!CInputListCtrl::IsButtonEnabled(nRow, nCol))
 		return FALSE;
 
+	if (!IsTimeCellEnabled(nRow, nCol))
+		return FALSE;
+
 	switch (nCol)
 	{
 	case COL_EDITVIS:
