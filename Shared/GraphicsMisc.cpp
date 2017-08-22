@@ -1220,11 +1220,13 @@ BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen)
 	if (rWnd.IsRectEmpty())
 		return FALSE;
 
-	HMONITOR hMon = MonitorFromPoint(rWnd.CenterPoint(), MONITOR_DEFAULTTONULL);
+	// Test for intersection with any monitor
+	HMONITOR hMon = MonitorFromRect(rWnd, MONITOR_DEFAULTTONULL);
 
 	if (hMon == NULL)
 		return FALSE;
 
+	// Find nearest monitor
 	MONITORINFO mi = { sizeof(MONITORINFO), 0 };
 	
 	if (GetMonitorInfo(hMon, &mi))
@@ -1236,7 +1238,6 @@ BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen)
 	// else
 	ASSERT(0);
 	return FALSE;
-
 }
 
 BOOL GraphicsMisc::GetAvailableScreenSpace(HWND hWnd, CRect& rScreen)

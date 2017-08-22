@@ -800,12 +800,6 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 			cx = rClient.right;
 			cy = rClient.bottom;
 		}
-			
-		// don't resize for unexpectedly small rects
-		if ((cx < MINNONCOMMENTWIDTH) || (cy < MINNONCOMMENTHEIGHT))
-		{
-			return;
-		}
 
 		// hide unused controls
 		ShowHideControls();
