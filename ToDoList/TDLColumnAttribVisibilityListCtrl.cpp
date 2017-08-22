@@ -282,24 +282,8 @@ COLORREF CTDLColumnAttribVisibilityListCtrl::GetItemBackColor(int nItem, int nCo
 {
 	if (!bSelected)
 	{
-		if (!IsWindowEnabled())
+		if (!IsWindowEnabled() || !IsButtonEnabled(nItem, nCol))
 			return GetSysColor(COLOR_3DLIGHT);
-
-		if (!IsTimeCellEnabled(nItem, nCol))
-			return GetSysColor(COLOR_3DLIGHT);
-		
-		switch (nCol)
-		{
-		case COL_EDITVIS:
-			if (m_vis.GetShowFields() != TDLSA_ANY)
-				return GetSysColor(COLOR_3DLIGHT);
-			break;
-
-		case COL_FILTERVIS:
-			if (m_vis.GetShowFields() != TDLSA_ANY)
-				return GetSysColor(COLOR_3DLIGHT);
-			break;
-		}
 	}
 	
 	// else
