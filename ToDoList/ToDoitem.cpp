@@ -22,6 +22,8 @@ static char THIS_FILE[]=__FILE__;
 
 COleDateTimeSpan TODOITEM::s_dtsRecentModPeriod = (1.0 / 24); // one hour
 
+CString TODOITEM::s_sModifierName;
+
 //////////////////////////////////////////////////////////////////////
 
 const CString EMPTY_STR(_T(""));
@@ -89,6 +91,7 @@ TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	sExternalID = tdi.sExternalID;
 	trRecurrence = tdi.trRecurrence;
 	dateLastMod = tdi.dateLastMod;
+	sLastModifiedBy = tdi.sLastModifiedBy;
 	sVersion = tdi.sVersion;
 	sIcon = tdi.sIcon;
 	dwTaskRefID = tdi.dwTaskRefID;
@@ -128,6 +131,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			(dateDone == tdi.dateDone) &&
 			(dateCreated == tdi.dateCreated) &&
 			(dateLastMod == tdi.dateLastMod) &&
+			(sLastModifiedBy == tdi.sLastModifiedBy) &&
 			(sTitle = tdi.sTitle) &&
 			(sComments == tdi.sComments) &&
 			(customComments == tdi.customComments) &&
@@ -307,6 +311,7 @@ BOOL TODOITEM::IsReference() const
 void TODOITEM::SetModified() 
 { 
 	dateLastMod = COleDateTime::GetCurrentTime(); 
+	sLastModifiedBy = s_sModifierName;
 }
 
 CString TODOITEM::GetCategory(int nCat) const
@@ -471,7 +476,6 @@ BOOL TODOITEM::GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data
 void TODOITEM::SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data)
 {
 	mapCustomData[sAttribID] = data;
-	SetModified();
 }
 
 BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
@@ -538,6 +542,11 @@ CString TODOITEM::FormatTaskDependency(DWORD dwTaskID, const CString& sFile)
 void TODOITEM::SetRecentlyModifiedPeriod(double dDays)
 {
 	s_dtsRecentModPeriod = max(dDays, 0.0);
+}
+
+void TODOITEM::SetModifierName(const CString sModifier)
+{
+	s_sModifierName = sModifier;
 }
 
 TDC_UNITS TODOITEM::GetTimeUnits(BOOL bTimeEst) const

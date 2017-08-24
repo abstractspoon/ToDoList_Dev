@@ -92,6 +92,7 @@ public:
 	static BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile);
 	static CString FormatTaskDependency(DWORD dwTaskID, const CString& sFile = _T(""));
 	static void SetRecentlyModifiedPeriod(double dDays);
+	static void SetModifierName(const CString sModifier);
 	
 	// Attributes
 	CString sTitle;
@@ -103,6 +104,7 @@ public:
 	CString sExternalID;
 	CString sVersion;
 	CString sIcon;
+	CString sLastModifiedBy;
 	
 	CStringArray aAllocTo;
 	CStringArray aCategories;
@@ -143,6 +145,7 @@ private:
 	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
 	
 	static COleDateTimeSpan s_dtsRecentModPeriod;
+	static CString s_sModifierName;
 };
 
 //////////////////////////////////////////////////////////////////////

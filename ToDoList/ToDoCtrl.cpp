@@ -515,6 +515,11 @@ void CToDoCtrl::SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan)
 	TODOITEM::SetRecentlyModifiedPeriod(dtSpan);
 }
 
+void CToDoCtrl::SetModifierName(const CString& sModifier)
+{
+	TODOITEM::SetModifierName(sModifier);
+}
+
 TDC_FILEFMT CToDoCtrl::CompareFileFormat() const
 {
     if (m_nFileFormat < FILEFORMAT_CURRENT)

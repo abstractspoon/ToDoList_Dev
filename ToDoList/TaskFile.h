@@ -147,7 +147,7 @@ public:
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
 
-	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod);
+	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod, const CString& sModifiedBy);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskDueDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskStartDate(HTASKITEM hTask, const COleDateTime& date);
@@ -206,7 +206,9 @@ public:
 	bool IsTaskLocked(HTASKITEM hTask, bool bCalc) const;
 	bool SetTaskLock(HTASKITEM hTask, bool bLocked);
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
+	
 	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
+	LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
 
 	unsigned long GetCustomAttributeType(LPCTSTR szID) const;
 

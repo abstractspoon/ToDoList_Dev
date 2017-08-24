@@ -1910,6 +1910,7 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 		
 		// make changes
 		pTDI->SetCustomAttributeValue(sAttribID, data);
+		pTDI->SetModified();
 		
 		return SET_CHANGE;
 	}

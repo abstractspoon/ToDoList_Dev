@@ -1634,13 +1634,10 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 			SetTaskDoneDate(hTask, tdi.dateDone);
 			SetTaskPercentDone(hTask, 100);
 		}
-		//////////////////////////////////////////////////////////////////////////
-		// SAVE PERCENT DONE REGARDLESS OF VALUE, ELSE GANTTVIEWER SPITS THE DUMMY
-		else// if (tdi.nPercentDone > 0)
+		else
 		{
 			SetTaskPercentDone(hTask, (unsigned char)min(99, tdi.nPercentDone));
 		}
-		//////////////////////////////////////////////////////////////////////////
 
 		if (tdi.HasDue())
 			SetTaskDueDate(hTask, tdi.dateDue);
@@ -1652,7 +1649,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 			SetTaskCreationDate(hTask, tdi.dateCreated);
 		
 		if (tdi.HasLastMod())
-			SetTaskLastModified(hTask, tdi.dateLastMod);
+			SetTaskLastModified(hTask, tdi.dateLastMod, tdi.sLastModifiedBy);
 		
 		if (tdi.color)
 			SetTaskColor(hTask, tdi.color);
@@ -1698,6 +1695,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKEXTERNALID,		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
 		GETATTRIB(TDL_TASKVERSION,			tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
 		GETATTRIB(TDL_TASKICONINDEX,		tdi.sIcon = GetTaskString(hTask, TDL_TASKICONINDEX));
+		GETATTRIB(TDL_TASKLASTMODBY,		tdi.sLastModifiedBy = GetTaskString(hTask, TDL_TASKLASTMODBY));
 
 		// Historical bug
 		if ((tdi.sIcon.GetLength() == 2) && (tdi.sIcon == _T("-1")))
@@ -2627,6 +2625,11 @@ LPCTSTR CTaskFile::GetTaskVersion(HTASKITEM hTask) const
 	return GetTaskString(hTask, TDL_TASKVERSION);
 }
 
+LPCTSTR CTaskFile::GetTaskLastModifiedBy(HTASKITEM hTask) const
+{
+	return GetTaskString(hTask, TDL_TASKLASTMODBY);
+}
+
 TDC_UNITS CTaskFile::GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const
 {
 	TDC_UNITS nUnits = TDCU_HOURS;
@@ -3310,9 +3313,10 @@ bool CTaskFile::SetTaskStartDate64(HTASKITEM hTask, time64_t tDate)
 	return SetTaskDate(hTask, TDL_TASKSTARTDATE, date);
 }
 
-BOOL CTaskFile::SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod)
+BOOL CTaskFile::SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod, const CString& sModifiedBy)
 {
-	return (BOOL)SetTaskDate(hTask, TDL_TASKLASTMOD, tLastMod, TDL_TASKLASTMODSTRING);
+	return (BOOL)(SetTaskDate(hTask, TDL_TASKLASTMOD, tLastMod, TDL_TASKLASTMODSTRING) &&
+					SetTaskString(hTask, TDL_TASKLASTMODBY, sModifiedBy, XIT_ATTRIB));
 }
 
 BOOL CTaskFile::SetTaskCreationDate(HTASKITEM hTask, const COleDateTime& date)

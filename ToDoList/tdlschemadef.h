@@ -85,6 +85,7 @@ static const CString TDL_TASKMETADATA(_T("METADATA"));
 static const CString TDL_TASKRISK(_T("RISK"));		
 static const CString TDL_TASKCOST(_T("COST"));		
 static const CString TDL_TASKEXTERNALID(_T("EXTERNALID"));
+static const CString TDL_TASKLASTMODBY(_T("LASTMODBY"));
 
 // custom attributes
 static const CString TDL_TASKCUSTOMATTRIBDATA(_T("CUSTOMATTRIB"));	
