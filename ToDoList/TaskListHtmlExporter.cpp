@@ -305,7 +305,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				switch (EXPORTSTYLE)
 				{
 				case STYLE_WRAP:
-					if (IsCustomAttribute(nAttrib))
+					if (nAttrib == TDCA_COMMENTS)
 					{
 						sFmtAttrib = ENDL + sAttribVal;
 					}
@@ -388,7 +388,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				CString sPriorityCol = pTasks->GetTaskPriorityWebColor(hTask);
 				sPriority.Format(_T("<font color='%s'>%d</font>"), sPriorityCol, nPriority);
 
-				sItem = FormatAttribute(nAttrib, sAttribLabel, sPriority, FALSE);
+				sItem = FormatAttribute(nAttrib, sAttribLabel, sPriority, FALSE); // FALSE = Don't encode
 			}
 		}
 		break;
@@ -426,7 +426,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				sFileRefs += sFileRef;
 			} 
 
-			sItem = FormatAttribute(nAttrib, sAttribLabel, sFileRefs, FALSE);
+			sItem = FormatAttribute(nAttrib, sAttribLabel, sFileRefs, FALSE); // FALSE = Don't encode
 			bColor = FALSE;
 		}
 		break;
@@ -448,8 +448,8 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		}
 		else if (!sItem.IsEmpty())
 		{
-			TXT2XML(sItem);
-			
+			// Note: Comments have already been HTML encoded
+
 			// replace carriage returns with <br>
 			sItem.Replace(ENDL, _T("<br>"));
 			
