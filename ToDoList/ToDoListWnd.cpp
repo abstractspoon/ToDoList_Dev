@@ -3632,7 +3632,7 @@ BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath,
 	
 	if (FileMisc::FileExists(sStylesheet))
 	{
-		return tasks.(sStylesheet, sFilePath);
+		return tasks.TransformToFile(sStylesheet, sFilePath);
 	}
 	
 	// else default export
