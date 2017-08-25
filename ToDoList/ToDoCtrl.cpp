@@ -10723,7 +10723,7 @@ BOOL CToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 
 	// build a search query
 	SEARCHPARAMS params;
-	params.aRules.Add(SEARCHPARAM(TDCA_ANYTEXTATTRIBUTE, FOP_INCLUDES, sPart));
+	params.aRules.Add(SEARCHPARAM(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES, sPart));
 
 	switch (nSelect)
 	{
