@@ -1326,6 +1326,67 @@ BOOL CToDoListWnd::InitToolbar()
 	return TRUE;
 }
 
+void CToDoListWnd::OnUpdateQuickFind(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(m_bShowToolbar);
+}
+
+void CToDoListWnd::OnQuickFind() 
+{
+	if (m_bShowToolbar)
+		m_cbQuickFind.SetFocus();
+}
+
+void CToDoListWnd::OnQuickFindNext() 
+{
+	if (!m_sQuickFind.IsEmpty())
+	{
+		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTNEXT))
+		{
+			// return to start
+			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTFIRST))
+				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+		}
+	}
+}
+
+void CToDoListWnd::OnUpdateQuickFindNext(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(!m_sQuickFind.IsEmpty());
+}
+
+LRESULT CToDoListWnd::OnQuickFindItemAdded(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	// keep only the last 20 items
+	int nItem = m_cbQuickFind.GetCount();
+
+	while (nItem > 20)
+	{
+		nItem--;
+		m_cbQuickFind.DeleteString(nItem);
+	}
+
+	return 0L;
+}
+
+void CToDoListWnd::OnQuickFindPrev() 
+{
+	if (!m_sQuickFind.IsEmpty())
+	{
+		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTPREV))
+		{
+			// return to end
+			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTLAST))
+				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+		}
+	}
+}
+
+void CToDoListWnd::OnUpdateQuickFindPrev(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(!m_sQuickFind.IsEmpty());
+}
+
 void CToDoListWnd::OnEditChangeQuickFind()
 {
 	ProcessQuickFindTextChange(FALSE);
@@ -1359,8 +1420,11 @@ void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 	{
 		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTFIRST))
 		{
-			MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
-			m_cbQuickFind.SetFocus();
+			if (bComboSelChange)
+			{
+				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+				m_cbQuickFind.SetFocus();
+			}
 
 			// Remove the just-unfound item
 			m_cbQuickFind.DeleteString(m_sQuickFind);
@@ -12025,59 +12089,6 @@ void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(m_nMaxState == TDCMS_NORMAL || 
 					(m_nMaxState == TDCMS_MAXTASKLIST && Prefs().GetShowCommentsAlways()));
-}
-
-void CToDoListWnd::OnUpdateQuickFind(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(m_bShowToolbar);
-}
-
-void CToDoListWnd::OnQuickFind() 
-{
-	if (m_bShowToolbar)
-		m_cbQuickFind.SetFocus();
-}
-
-void CToDoListWnd::OnQuickFindNext() 
-{
-	if (!m_sQuickFind.IsEmpty())
-	{
-		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTNEXT))
-			GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTFIRST); // return to start
-	}
-}
-
-void CToDoListWnd::OnUpdateQuickFindNext(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(!m_sQuickFind.IsEmpty());
-}
-
-LRESULT CToDoListWnd::OnQuickFindItemAdded(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	// keep only the last 20 items
-	int nItem = m_cbQuickFind.GetCount();
-
-	while (nItem > 20)
-	{
-		nItem--;
-		m_cbQuickFind.DeleteString(nItem);
-	}
-
-	return 0L;
-}
-
-void CToDoListWnd::OnQuickFindPrev() 
-{
-	if (!m_sQuickFind.IsEmpty())
-	{
-		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTPREV))
-			GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTLAST); // return to end
-	}
-}
-
-void CToDoListWnd::OnUpdateQuickFindPrev(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(!m_sQuickFind.IsEmpty());
 }
 
 void CToDoListWnd::OnMove(int x, int y) 
