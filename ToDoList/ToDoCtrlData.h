@@ -20,6 +20,7 @@
 
 class CToDoCtrlData;
 class CBinaryData;
+class CDWordSet;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -296,7 +297,7 @@ protected:
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;
 
-	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CID2IDMap& mapVisited) const;
+	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;
 	void FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDateTime& dtNewStart);

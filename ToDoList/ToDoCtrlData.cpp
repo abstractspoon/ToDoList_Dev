@@ -13,6 +13,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\mapex.h"
 
 #include <float.h>
 #include <math.h>
@@ -739,16 +740,18 @@ BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
 	if (!dwTaskID)
 		return FALSE;
 
-	// trace each of this tasks dependencies to see 
-	// if it ever comes back to itself.
-	CID2IDMap mapVisited;
+	// A circular dependency is where any one of a task's dependencies
+	// ultimately traces a path back to the task
 
-	// we only check 'same file' links
+	// we only check dependencies within the same tasklist
 	CDWordArray aDependIDs;
 	int nDepends = GetTaskLocalDependencies(dwTaskID, aDependIDs);
 	
 	while (nDepends--)
 	{
+		// Keep each path separate
+		CDWordSet mapVisited;
+
 		if (FindTaskLocalDependency(aDependIDs[nDepends], dwTaskID, mapVisited))
 			return TRUE;
 	}
@@ -757,31 +760,42 @@ BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CID2IDMap& mapVisited) const
+BOOL CToDoCtrlData::FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID, CDWordSet& mapVisited) const
 {
 	// simple checks
 	if (!dwTaskID || !HasTask(dwTaskID))
-		return FALSE; // no such task == not found
+	{
+		// no such task == not found
+		return FALSE; 
+	}
 	
-	if (dwTaskID == dwDependsID)
-		return TRUE; // same task == circular
+	if (dwTaskID == dwDependID)
+	{
+		// same task == circular
+		return TRUE; 
+	}
 	
 	// if we have been here before, we can stop
-	DWORD dwDummy;
-	
-	if (mapVisited.Lookup(dwTaskID, dwDummy))
-		return TRUE; // circular
+	if (mapVisited.Has(dwTaskID))
+	{
+		// Means some part of the dependency path is circular 
+		// but not including this task so we just don't continue
+		return FALSE;
+	}
 	
 	// else mark this task as having been visited
-	mapVisited[dwTaskID] = TRUE;
+	mapVisited.Add(dwTaskID);
 	
-	// and process its 'same file' dependencies
+	// and process its 'same file' dependents
 	CDWordArray aDependIDs;
 	int nDepends = GetTaskLocalDependencies(dwTaskID, aDependIDs);
 	
 	while (nDepends--)
 	{
-		if (FindTaskLocalDependency(aDependIDs[nDepends], dwDependsID, mapVisited))
+		// Continue to keep each path separate
+		CDWordSet mapNextVisited(mapVisited);
+
+		if (FindTaskLocalDependency(aDependIDs[nDepends], dwDependID, mapNextVisited))
 			return TRUE;
 	}
 	
@@ -4651,10 +4665,6 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	if (!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		return;
 	
-	// check for circular dependency before continuing
-	if (TaskHasLocalCircularDependencies(dwTaskID))
-		return;
-	
 	// who is dependent on us -> GetTaskDependents
 	CDWordArray aDependents;
 	int nDepend = GetTaskLocalDependents(dwTaskID, aDependents);
@@ -4662,6 +4672,11 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	while (nDepend--)
 	{
 		DWORD dwIDDependent = aDependents[nDepend];
+
+		// check for circular dependency before continuing
+		if (TaskHasLocalCircularDependencies(dwIDDependent))
+			return;
+	
 		UINT nAdjusted = UpdateTaskLocalDependencyDates(dwIDDependent, nDate);
 		
 		// then process this task's dependents
