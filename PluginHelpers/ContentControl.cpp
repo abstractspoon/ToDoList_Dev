@@ -30,7 +30,7 @@ bool ContentControl::ParentNotify::NotifyChange()
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_ICC_COMMENTSCHANGE, 0, (LPARAM)m_hwndFrom);
+	::SendMessage(m_hwndParent, WM_ICC_CONTENTCHANGE, 0, (LPARAM)m_hwndFrom);
 	return true;
 }
 
@@ -39,6 +39,6 @@ bool ContentControl::ParentNotify::NotifyKillFocus()
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_ICC_COMMENTSKILLFOCUS, 0, (LPARAM)m_hwndFrom);
+	::SendMessage(m_hwndParent, WM_ICC_KILLFOCUS, 0, (LPARAM)m_hwndFrom);
 	return true;
 }
