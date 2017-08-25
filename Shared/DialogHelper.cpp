@@ -1662,9 +1662,9 @@ int CDialogHelper::ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR sz
 			// copy because we will modify
 			LPWSTR wszText = _tcsdup(szText);
 #else
-			LPWSTR wszCaption = MultiByteToWide(szCaption);
-			LPWSTR wszText = MultiByteToWide(szText);
-			LPWSTR wszInstruction = MultiByteToWide(szInstruction);
+			LPWSTR wszCaption = Misc::MultiByteToWide(szCaption);
+			LPWSTR wszText = Misc::MultiByteToWide(szText);
+			LPWSTR wszInstruction = Misc::MultiByteToWide(szInstruction);
 #endif
 			
 			int nResult = 0;
