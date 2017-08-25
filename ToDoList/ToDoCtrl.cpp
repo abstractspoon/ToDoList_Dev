@@ -9771,7 +9771,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		
 		// modify date
 		if (pTDI->HasLastMod() && filter.WantAttribute(TDCA_LASTMOD))
-			tasks.SetTaskLastModified(hTask, pTDI->dateLastMod);
+			tasks.SetTaskLastModified(hTask, pTDI->dateLastMod, pTDI->sLastModifiedBy);
 
 		// subtask completion
 		if (pTDS->HasSubTasks() && filter.WantAttribute(TDCA_SUBTASKDONE))
