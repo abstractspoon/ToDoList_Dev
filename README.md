@@ -1,5 +1,7 @@
 # ToDoList_Plugins
 
+Note: These steps have only been tested up to VS2010.
+
 **Steps for building/running ImportExport solution for the first time**
 
 1. Clone the repo cleanly
