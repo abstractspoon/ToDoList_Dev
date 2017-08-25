@@ -1381,7 +1381,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 				return TRUE;
 			}
 		}
-		else if (aColumnDefs.IsEmpty()) // not switching to fixed columns
+		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
 			return TRUE;
 		}
