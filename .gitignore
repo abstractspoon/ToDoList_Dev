@@ -58,3 +58,9 @@ Release\*.*
 *.aps
 *.nupkg
 *._
+*.db
+*.opendb
+*.db-wal
+*.db-shm
+*.ide
+*.CopyComplete
