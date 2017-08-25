@@ -1879,7 +1879,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	const CPreferencesDlg& userPrefs = Prefs();
 	CString sExt;
 
-	if (!userPrefs.GetAutoExport() || !userPrefs.GetAutoExportExtension(sExt))
+	if (!userPrefs.GetSaveExport() || !userPrefs.GetSaveExportExtension(sExt))
 		return NULL;
 
 	if (!tasks.GetTaskCount())
@@ -1893,7 +1893,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 	CString sTDCPath = tdc.GetFilePath();
 
-	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), sTDCPath, userPrefs.GetAutoExporter());
+	TDCEXPORTTASKLIST* pExport = new TDCEXPORTTASKLIST(GetSafeHwnd(), sTDCPath, userPrefs.GetSaveExporter());
 	ASSERT(pExport);
 
 	pExport->nPurpose = TDCTEP_EXPORTAFTERSAVE;
@@ -1904,7 +1904,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 		pExport->sSaveIntermediatePath = GetIntermediateTaskListPath(sTDCPath);
 
 	// construct output path
-	CString sExportFolder = userPrefs.GetAutoExportFolderPath();
+	CString sExportFolder = userPrefs.GetSaveExportFolderPath();
 	CString sDrive, sFolder, sFName;
 
 	FileMisc::SplitPath(sTDCPath, &sDrive, &sFolder, &sFName);
@@ -1918,13 +1918,13 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	// 'All Columns' but NOT 'Html Comments'.
 	// So if user either wants 'Filtered Tasks' or 'Html Comments' or
 	// only 'Visible Columns' we need to grab the tasks again.
-	BOOL bFiltered = (userPrefs.GetExportFilteredOnly() && tdc.HasAnyFilter());
-	BOOL bHtmlComments = userPrefs.GetAutoExporter();
+	BOOL bFiltered = (userPrefs.GetSaveExportFilteredOnly() && tdc.HasAnyFilter());
+	BOOL bHtmlComments = userPrefs.GetSaveExporter();
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
 
-	if (bFiltered || userPrefs.GetAutoExporter() || !userPrefs.GetExportAllAttributes())
+	if (bFiltered || userPrefs.GetSaveExporter() || !userPrefs.GetExportAllAttributes())
 	{
 		TSD_TASKS nWhatTasks = bFiltered ? TSDT_FILTERED : TSDT_ALL;
 		TDCGETTASKS filter;
@@ -3632,7 +3632,7 @@ BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath,
 	
 	if (FileMisc::FileExists(sStylesheet))
 	{
-		return tasks.TransformToFile(sStylesheet, sFilePath, SFEF_UTF8);
+		return tasks.(sStylesheet, sFilePath);
 	}
 	
 	// else default export
@@ -3644,7 +3644,7 @@ void CToDoListWnd::OnSaveas()
 	int nSel = GetSelToDoCtrl();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
 
-	// use tab text as hint to user
+	// use tab text as hint to userTransformToFile
 	CString sFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
 	CPreferences prefs;
 
@@ -9410,7 +9410,7 @@ void CToDoListWnd::OnExport()
 						GetToDoCtrl().GetTaskView(),
 						userPrefs.GetExportVisibleColsOnly(), 
 						m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE), 
-						userPrefs.GetAutoExportFolderPath(), 
+						userPrefs.GetSaveExportFolderPath(), 
 						tdc.GetCustomAttributeDefs());
 	
 	// keep showing the dialog until the user selects a non-existing 
@@ -9799,13 +9799,13 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	CString sStylesheet = dialog.GetStylesheet();
 	sTitle = dialog.GetTitle();
 	
-	CXslFile xsl;
-	VERIFY (xsl.Load(sStylesheet));
-	
 	// output path
 	CString sOutputPath(tdc.GetFilePath()); 
 	{
 		// Output file extension may be specified in the stylesheet
+		CXslFile xsl;
+		VERIFY (xsl.Load(sStylesheet));
+		
 		CString sExtOut = xsl.GetOutputFileExtension();
 
 		if (!sOutputPath.IsEmpty())
@@ -9842,7 +9842,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	// save intermediate tasklist to file as required
 	LogIntermediateTaskList(tasks, tdc.GetFilePath());
 	
-	if (tasks.TransformToFile(sStylesheet, sOutputPath, xsl.GetOutputFileEncoding()))
+	if (tasks.TransformToFile(sStylesheet, sOutputPath))
 	{
 		// preview
 		if (Prefs().GetPreviewExport())

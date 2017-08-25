@@ -37,11 +37,11 @@ public:
 	CString GetSaveExportStylesheet() const;
 	BOOL GetAutoSaveOnSwitchTasklist() const { return m_bAutoSaveOnSwitchTasklist; }
 	BOOL GetAutoSaveOnSwitchApp() const { return m_bAutoSaveOnSwitchApp; }
-	CString GetAutoExportFolderPath() const;
+	CString GetSaveExportFolderPath() const;
 	BOOL GetAutoExport() const { return m_bAutoExport; }
-	BOOL GetAutoExporter() const;
-	BOOL GetAutoExportExtension(CString& sExt) const;
-	BOOL GetExportFilteredOnly() const { return m_bAutoExport && m_bExportFilteredOnly; }
+	int GetSaveExporter() const;
+	BOOL GetSaveExportExtension(CString& sExt) const;
+	BOOL GetSaveExportFilteredOnly() const { return m_bAutoExport && m_bExportFilteredOnly; }
 	BOOL GetAutoSaveOnRunTools() const { return m_bAutoSaveOnRunTools; }
 
 //	BOOL Get() const { return m_b; }

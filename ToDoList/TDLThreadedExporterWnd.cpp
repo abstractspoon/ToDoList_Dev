@@ -180,7 +180,7 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 	
 	if (FileMisc::FileExists(pExport->sStylesheet)) // bTransform
 	{
-		bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath, SFEF_UTF8);
+		bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath);
 	}
 	else if (pExport->nPurpose == TDCTEP_DUETASKNOTIFY)
 	{

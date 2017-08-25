@@ -122,16 +122,16 @@ public:
 	BOOL GetBackupOnSave() const { return m_pageFile2.GetBackupOnSave(); }
 	CString GetBackupLocation(LPCTSTR szFilePath) const { return m_pageFile2.GetBackupLocation(szFilePath); }
 	int GetKeepBackupCount() const { return m_pageFile2.GetKeepBackupCount(); }
-	BOOL GetAutoExport() const { return m_pageFile2.GetAutoExport(); }
-	int GetAutoExporter() const { return m_pageFile2.GetAutoExporter(); }
-	BOOL GetAutoExportExtension(CString& sExt) const { return m_pageFile2.GetAutoExportExtension(sExt); }
 	int GetAutoSaveFrequency() const { return m_pageFile2.GetAutoSaveFrequency(); }
-	CString GetAutoExportFolderPath() const { return m_pageFile2.GetAutoExportFolderPath(); }
-	CString GetSaveExportStylesheet() const { return m_pageFile2.GetSaveExportStylesheet(); }
+	BOOL GetAutoSaveOnRunTools() const { return m_pageFile2.GetAutoSaveOnRunTools(); }
 	BOOL GetAutoSaveOnSwitchTasklist() const { return m_pageFile2.GetAutoSaveOnSwitchTasklist(); }
 	BOOL GetAutoSaveOnSwitchApp() const { return m_pageFile2.GetAutoSaveOnSwitchApp(); }
-	BOOL GetExportFilteredOnly() const { return m_pageFile2.GetExportFilteredOnly(); }
-	BOOL GetAutoSaveOnRunTools() const { return m_pageFile2.GetAutoSaveOnRunTools(); }
+	BOOL GetSaveExport() const { return m_pageFile2.GetAutoExport(); }
+	int GetSaveExporter() const { return m_pageFile2.GetSaveExporter(); }
+	BOOL GetSaveExportExtension(CString& sExt) const { return m_pageFile2.GetSaveExportExtension(sExt); }
+	CString GetSaveExportFolderPath() const { return m_pageFile2.GetSaveExportFolderPath(); }
+	CString GetSaveExportStylesheet() const { return m_pageFile2.GetSaveExportStylesheet(); }
+	BOOL GetSaveExportFilteredOnly() const { return m_pageFile2.GetSaveExportFilteredOnly(); }
 
 	// CPreferencesExportPage
 	CString GetHtmlFont() const { return m_pageExport.GetHtmlFont(); }

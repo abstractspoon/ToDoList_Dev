@@ -16,6 +16,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\binarydata.h"
+#include "..\shared\xslfile.h"
 
 #include "..\3rdparty\Base64Coder.h"
 
@@ -207,7 +208,27 @@ HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObj
 	return (*ppvObject ? S_OK : E_NOTIMPL);
 }
 
-#ifndef NO_TL_ENCRYPTDECRYPT
+
+BOOL CTaskFile::TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat) const
+{
+	if (nFormat == SFEF_AUTODETECT)
+	{
+		CXslFile xsl;
+		
+		if (!xsl.Load(sTransformPath))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		nFormat = xsl.GetOutputFileEncoding();
+	}
+	
+	return CXmlFile::TransformToFile(sTransformPath, sOutputPath, nFormat);
+}
+
+// ---------------------------------------------------------------------------------
+#ifndef NO_TL_ENCRYPTDECRYPT 
 
 BOOL CTaskFile::Decrypt(LPCTSTR szPassword)
 {

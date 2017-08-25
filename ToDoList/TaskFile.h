@@ -51,6 +51,8 @@ public:
 	CTaskFile(const ITaskList* pTasks, LPCTSTR szPassword = NULL);
 	virtual ~CTaskFile();
 
+	BOOL TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat = SFEF_AUTODETECT) const;
+
 	BOOL Load(LPCTSTR szFilePath, IXmlParse* pCallback = NULL, BOOL bDecrypt = TRUE);
 	BOOL LoadContent(const CString& sContent);
 

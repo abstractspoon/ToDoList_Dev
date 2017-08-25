@@ -314,7 +314,7 @@ void CPreferencesFile2Page::OnAutoexport()
 	CPreferencesPageBase::OnControlChange();
 }
 
-CString CPreferencesFile2Page::GetAutoExportFolderPath() const 
+CString CPreferencesFile2Page::GetSaveExportFolderPath() const 
 { 
 	if (m_bAutoExport && m_bExportToFolder && !m_sExportFolderPath.IsEmpty())
 		return FileMisc::GetFullPath(m_sExportFolderPath, FileMisc::GetAppFolder());
@@ -323,7 +323,7 @@ CString CPreferencesFile2Page::GetAutoExportFolderPath() const
 	return _T("");
 }
 
-BOOL CPreferencesFile2Page::GetAutoExporter() const 
+int CPreferencesFile2Page::GetSaveExporter() const 
 { 
 	if (!m_bAutoExport)
 		return -1;
@@ -335,14 +335,26 @@ BOOL CPreferencesFile2Page::GetAutoExporter() const
 	return EXPTOHTML;
 }
 
-BOOL CPreferencesFile2Page::GetAutoExportExtension(CString& sExt) const
+BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 {
 	sExt.Empty();
 
-	int nExporter = GetAutoExporter();
+	if (GetSaveExporter() == EXPTOHTML)
+	{
+		CXslFile xsl;
+		
+		if (xsl.Load(GetSaveExportStylesheet()))
+			sExt = xsl.GetOutputFileExtension();
+		else
+			sExt = _T(".html");
+	}
+	else
+	{
+		int nExporter = GetSaveExporter();
 
-	if (nExporter != -1)
-		sExt = m_pExportMgr->GetExporterFileExtension(nExporter);
+		if (nExporter != -1)
+			sExt = m_pExportMgr->GetExporterFileExtension(nExporter);
+	}
 
 	return !sExt.IsEmpty();
 }
