@@ -811,6 +811,14 @@ CString CToDoCtrlData::GetTaskExtID(DWORD dwTaskID) const
 	return pTDI->sExternalID;
 }
 
+CString CToDoCtrlData::GetTaskLastModifiedBy(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+	
+	return pTDI->sLastModifiedBy;
+}
+
 CString CToDoCtrlData::GetTaskCreatedBy(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -4722,7 +4730,9 @@ BOOL CToDoCtrlData::GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, 
 	case TDCA_EXTERNALID:	data.Set(GetTaskExtID(dwTaskID));			break;	
 	case TDCA_STATUS:		data.Set(GetTaskStatus(dwTaskID));			break;	
 	case TDCA_TASKNAME:		data.Set(GetTaskTitle(dwTaskID));			break;
-	case TDCA_COMMENTS:		data.Set(GetTaskComments(dwTaskID));		break;	
+	case TDCA_COMMENTS:		data.Set(GetTaskComments(dwTaskID));		break;
+	case TDCA_LASTMODBY:	data.Set(GetTaskLastModifiedBy(dwTaskID));	break;
+
 	case TDCA_COLOR:		data.Set((int)GetTaskColor(dwTaskID));		break;	
 	case TDCA_PRIORITY:		data.Set(GetTaskPriority(dwTaskID));		break;	
 	case TDCA_RISK:			data.Set(GetTaskRisk(dwTaskID));			break;	
@@ -4748,7 +4758,7 @@ BOOL CToDoCtrlData::GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, 
 	case TDCA_CREATIONDATE:		
 	case TDCA_DONEDATE:			
 	case TDCA_DUEDATE:			
-	case TDCA_LASTMOD:			
+	case TDCA_LASTMODDATE:			
 	case TDCA_STARTDATE:		
 	case TDCA_DONETIME:			
 	case TDCA_DUETIME:			
@@ -4802,6 +4812,8 @@ TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttri
 	{
 	// TDCA_CREATEDBY not supported
 	// TDCA_CREATIONDATE not supported
+	// TDCA_LASTMOD not supported
+	// TDCA_LASTMODBY not supported
 
 	case TDCA_VERSION:		return SetTaskVersion(dwTaskID, data.AsString());
 	case TDCA_ALLOCBY:		return SetTaskAllocBy(dwTaskID, data.AsString());
@@ -4834,7 +4846,6 @@ TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttri
 
 	case TDCA_DONEDATE:			
 	case TDCA_DUEDATE:			
-	case TDCA_LASTMOD:			
 	case TDCA_STARTDATE:		
 	case TDCA_DONETIME:			
 	case TDCA_DUETIME:			

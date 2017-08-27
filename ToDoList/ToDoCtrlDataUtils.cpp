@@ -323,8 +323,12 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			}
 			break;
 			
-		case TDCA_LASTMOD:
+		case TDCA_LASTMODDATE:
 			bMatch = ValueMatches(pTDI->dateLastMod, rule, resTask, TRUE, TDCD_LASTMOD);
+			break;
+			
+		case TDCA_LASTMODBY:
+			bMatch = ValueMatches(pTDI->sLastModifiedBy, rule, resTask);
 			break;
 			
 		case TDCA_PRIORITY:
@@ -1166,7 +1170,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			nCompare = Compare(pTDI1->dateCreated, pTDI2->dateCreated, bIncTime, TDCD_CREATE);
 			break;
 
-		case TDCC_LASTMOD:
+		case TDCC_LASTMODDATE:
 			nCompare = Compare(pTDI1->dateLastMod, pTDI2->dateLastMod, TRUE, TDCD_LASTMOD);
 			break;
 
@@ -1341,6 +1345,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_STATUS:
 			nCompare = Compare(pTDI1->sStatus, pTDI2->sStatus, TRUE);
+			break;
+
+		case TDCC_LASTMODBY:
+			nCompare = Compare(pTDI1->sLastModifiedBy, pTDI2->sLastModifiedBy, TRUE);
 			break;
 
 		case TDCC_EXTERNALID:

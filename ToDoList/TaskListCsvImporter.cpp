@@ -215,7 +215,8 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 	AddAttributeToTask(pTasks, hTask, TDCA_STARTDATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_DUEDATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_DONEDATE, aValues);
-	AddAttributeToTask(pTasks, hTask, TDCA_LASTMOD, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_LASTMODDATE, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_LASTMODBY, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_CREATIONDATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_TAGS, aValues);
 
@@ -344,6 +345,10 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		pTasks->SetTaskAllocatedBy(hTask, sValue);
 		break;
 
+	case TDCA_LASTMODBY: 
+		pTasks->SetTaskLastModifiedBy(hTask, sValue);
+		break;
+
 	case TDCA_VERSION: 
 		pTasks->SetTaskVersion(hTask, sValue);
 		break;
@@ -367,7 +372,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 			pTasks->SetTaskDoneDate64(hTask, t64);
 		break;
 
-	case TDCA_LASTMOD: 
+	case TDCA_LASTMODDATE: 
 		if (String2Date(sValue, t64, TRUE))
 			pTasks->SetTaskLastModified64(hTask, t64);
 		break;

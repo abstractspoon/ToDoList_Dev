@@ -423,7 +423,6 @@ public:
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
-	static void SetModifierName(const CString& sModifier);
 
 protected:
 	enum  // visible for derived classes

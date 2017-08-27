@@ -463,7 +463,7 @@ protected:
 			case TDCC_DONETIME:
 				return bIncDoneTime;
 
-			case TDCC_LASTMOD:
+			case TDCC_LASTMODDATE:
 				return TRUE;
 			}
 

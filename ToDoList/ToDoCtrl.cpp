@@ -515,11 +515,6 @@ void CToDoCtrl::SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan)
 	TODOITEM::SetRecentlyModifiedPeriod(dtSpan);
 }
 
-void CToDoCtrl::SetModifierName(const CString& sModifier)
-{
-	TODOITEM::SetModifierName(sModifier);
-}
-
 TDC_FILEFMT CToDoCtrl::CompareFileFormat() const
 {
     if (m_nFileFormat < FILEFORMAT_CURRENT)
@@ -9770,8 +9765,11 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			tasks.SetTaskCreationDate(hTask, pTDI->dateCreated);
 		
 		// modify date
-		if (pTDI->HasLastMod() && filter.WantAttribute(TDCA_LASTMOD))
-			tasks.SetTaskLastModified(hTask, pTDI->dateLastMod, pTDI->sLastModifiedBy);
+		if (pTDI->HasLastMod() && filter.WantAttribute(TDCA_LASTMODDATE))
+			tasks.SetTaskLastModified(hTask, pTDI->dateLastMod, _T(""));
+
+		if (!pTDI->sLastModifiedBy.IsEmpty() && filter.WantAttribute(TDCA_LASTMODBY))
+			tasks.SetTaskLastModifiedBy(hTask, pTDI->sLastModifiedBy);
 
 		// subtask completion
 		if (pTDS->HasSubTasks() && filter.WantAttribute(TDCA_SUBTASKDONE))
@@ -11264,6 +11262,8 @@ void CToDoCtrl::SetDefaultTaskAttributes(const TODOITEM& tdi)
 
 	m_cfDefault = m_tdiDefault.sCommentsTypeID;
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
+	
+	TODOITEM::SetModifierName(tdi.sCreatedBy); // 'this' user
 
 	// set default task creation date to zero so that new tasks
 	// always get the current date
@@ -12204,7 +12204,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_POSITION:
 	case TDCA_CREATEDBY:
 	case TDCA_CREATIONDATE:
-	case TDCA_LASTMOD:
+	case TDCA_LASTMODDATE:
+	case TDCA_LASTMODBY:
 	case TDCA_ICON:
 		ASSERT(0);
 		return FALSE;
@@ -12436,9 +12437,11 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 	case TDCA_ALLOCBY:			
 	case TDCA_ALLOCTO:			
 	case TDCA_CREATEDBY:	
+	case TDCA_LASTMODBY:	
 		switch (nToAttrib)
 		{
 		// Note: TDCA_CREATEDBY cannot be copied to
+		// Note: TDCA_LASTMODBY cannot be copied to
 		case TDCA_ALLOCBY:			
 		case TDCA_ALLOCTO:			
 			return TRUE;
@@ -12478,14 +12481,14 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 	case TDCA_CREATIONDATE:		
 	case TDCA_DONEDATE:			
 	case TDCA_DUEDATE:			
-	case TDCA_LASTMOD:			
+	case TDCA_LASTMODDATE:			
 	case TDCA_STARTDATE:		
 		switch (nToAttrib)
 		{
 		// Note: TDCA_CREATIONDATE cannot be copied to
+		// Note: TDCA_LASTMOD cannot be copied to
 		case TDCA_DONEDATE:			
 		case TDCA_DUEDATE:			
-		case TDCA_LASTMOD:			
 		case TDCA_STARTDATE:		
 			return TRUE;
 		}
@@ -12542,6 +12545,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_DEPENDENCY:		
 	case TDCA_FILEREF:			
 	case TDCA_ICON:				
+	case TDCA_LASTMODBY:
 		return attribDefFrom.IsDataType(TDCCA_STRING);
 
 	case TDCA_ALLOCTO:			
@@ -12560,7 +12564,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_CREATIONDATE:		
 	case TDCA_DONEDATE:			
 	case TDCA_DUEDATE:			
-	case TDCA_LASTMOD:			
+	case TDCA_LASTMODDATE:			
 	case TDCA_STARTDATE:		
 	case TDCA_DONETIME:			
 	case TDCA_DUETIME:			
@@ -12617,10 +12621,8 @@ BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribD
 	case TDCCA_DATE:
 		switch(nToAttrib)
 		{
-		case TDCA_CREATIONDATE:		
 		case TDCA_DONEDATE:			
 		case TDCA_DUEDATE:			
-		case TDCA_LASTMOD:			
 		case TDCA_STARTDATE:		
 		case TDCA_DONETIME:			
 		case TDCA_DUETIME:			

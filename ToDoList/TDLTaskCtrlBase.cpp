@@ -628,7 +628,7 @@ void CTDLTaskCtrlBase::OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate
 	case TDCS_SHOWWEEKDAYINDATES:
 		if (bDoUpdate && 
 			(IsColumnShowing(TDCC_STARTDATE) || 
-			IsColumnShowing(TDCC_LASTMOD) ||
+			IsColumnShowing(TDCC_LASTMODDATE) ||
 			IsColumnShowing(TDCC_DUEDATE) || 
 			IsColumnShowing(TDCC_DONEDATE)))
 		{
@@ -2421,6 +2421,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_REMAINING:
 		case TDCC_SUBTASKDONE:
 		case TDCC_TIMEEST:
+		case TDCC_LASTMODBY:
 			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
 			break;
 			
@@ -2665,7 +2666,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			DrawColumnDate(pDC, pTDI->dateCreated, TDCD_CREATE, rSubItem, crText);
 			break;
 			
-		case TDCC_LASTMOD:
+		case TDCC_LASTMODDATE:
 			DrawColumnDate(pDC, pTDI->dateLastMod, TDCD_LASTMOD, rSubItem, crText);
 			break;
 			
@@ -3406,6 +3407,10 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 		sTaskColText = pTDI->sVersion;
 		break;
 
+	case TDCC_LASTMODBY:
+		sTaskColText = pTDI->sLastModifiedBy;
+		break;
+
 	case TDCC_ALLOCTO:
 		sTaskColText = m_data.FormatTaskAllocTo(pTDI);
 		break;
@@ -3532,7 +3537,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID,
 	case TDCC_DUEDATE:
 	case TDCC_DONEDATE:
 	case TDCC_CREATIONDATE:
-	case TDCC_LASTMOD:
+	case TDCC_LASTMODDATE:
 	case TDCC_ICON:
 	case TDCC_DEPENDENCY:
 	case TDCC_DONE:
@@ -4873,6 +4878,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 	case TDCC_ALLOCTO:
 	case TDCC_CATEGORY:
 	case TDCC_TAGS:
+	case TDCC_LASTMODBY:
 		{
 			TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
 			ASSERT(nAttrib != TDCA_NONE);
@@ -4946,7 +4952,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 		nColWidth = pDC->GetTextExtent("100%").cx;
 		break;
 		
-	case TDCC_LASTMOD:
+	case TDCC_LASTMODDATE:
 	case TDCC_DUEDATE:
 	case TDCC_CREATIONDATE:
 	case TDCC_STARTDATE:

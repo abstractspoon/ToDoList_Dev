@@ -340,7 +340,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_SEND_SELTASKS, OnSendSelectedTasks)
 	ON_COMMAND(ID_SHOWTIMELOGFILE, OnShowTimelogfile)
 	ON_COMMAND(ID_SORT, OnSort)
-	ON_COMMAND(ID_SORT_BYMULTI, OnSortMulti)
+	ON_COMMAND(ID_SORTBY_MULTI, OnSortMulti)
 	ON_COMMAND(ID_TABCTRL_PREFERENCES, OnTabctrlPreferences)
 	ON_COMMAND(ID_TASKLIST_CUSTOMCOLUMNS, OnTasklistCustomColumns)
 	ON_COMMAND(ID_TASKLIST_SELECTCOLUMNS, OnTasklistSelectColumns)
@@ -394,7 +394,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnFileSaveToUserStorage)
 	ON_COMMAND_RANGE(ID_NEWTASK_SPLITTASKINTO_TWO, ID_NEWTASK_SPLITTASKINTO_FIVE, OnSplitTaskIntoPieces)
 	ON_COMMAND_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnShowTaskView)
-	ON_COMMAND_RANGE(ID_SORT_BYFIRST, ID_SORT_BYLAST, OnSortBy)
+	ON_COMMAND_RANGE(ID_SORTBY_FIRST, ID_SORTBY_LAST, OnSortBy)
 	ON_COMMAND_RANGE(ID_TOOLS_SHOWTASKS_DUETODAY, ID_TOOLS_SHOWTASKS_DUEENDNEXTMONTH, OnToolsShowtasksDue)
 	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
@@ -592,7 +592,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)	
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_SPLITTASKINTO_TWO, ID_NEWTASK_SPLITTASKINTO_FIVE, OnUpdateSplitTaskIntoPieces)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_SORT_BYFIRST, ID_SORT_BYLAST, OnUpdateSortBy)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_FIRST, ID_SORTBY_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
 	ON_WM_ACTIVATEAPP()
 	ON_WM_CONTEXTMENU()
@@ -2922,7 +2922,7 @@ BOOL CToDoListWnd::GetFilterBarRect(CRect& rect) const
 
 void CToDoListWnd::OnSortBy(UINT nCmdID) 
 {
-	if (nCmdID == ID_SORT_BYMULTI)
+	if (nCmdID == ID_SORTBY_MULTI)
 		return;
 
 	TDC_COLUMN nSortBy = TDC::MapSortIDToColumn(nCmdID);
@@ -2938,19 +2938,19 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 
 	switch (pCmdUI->m_nID)
 	{
-	case ID_SORT_BYMULTI:
+	case ID_SORTBY_MULTI:
 		pCmdUI->Enable(tdc.CanMultiSort());
 		break;
 
-	case ID_SORT_BYNONE:
+	case ID_SORTBY_NONE:
 		pCmdUI->Enable(TRUE);
 		break;
 		
-	case ID_SORT_BYCOLOR:
+	case ID_SORTBY_COLOR:
 		pCmdUI->Enable(Prefs().GetTextColorOption() == COLOROPT_DEFAULT);
 		break;
 		
-	case ID_SORT_BYPATH:
+	case ID_SORTBY_PATH:
 		pCmdUI->Enable(tdc.GetTaskView() == FTCV_TASKLIST);
 		break;
 		
@@ -2964,11 +2964,11 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 	{
 		if (tdc.IsMultiSorting())
 		{
-			pCmdUI->m_pMenu->CheckMenuRadioItem(ID_SORT_BYFIRST, ID_SORT_BYLAST, ID_SORT_BYMULTI, MF_BYCOMMAND);
+			pCmdUI->m_pMenu->CheckMenuRadioItem(ID_SORTBY_FIRST, ID_SORTBY_LAST, ID_SORTBY_MULTI, MF_BYCOMMAND);
 		}
 		else if (tdc.GetSortBy() == nSortBy)
 		{
-			pCmdUI->m_pMenu->CheckMenuRadioItem(ID_SORT_BYFIRST, ID_SORT_BYLAST, pCmdUI->m_nID, MF_BYCOMMAND);
+			pCmdUI->m_pMenu->CheckMenuRadioItem(ID_SORTBY_FIRST, ID_SORTBY_LAST, pCmdUI->m_nID, MF_BYCOMMAND);
 		}
 	}
 }
@@ -8901,7 +8901,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 	{
 		UINT nMenuID = pMenu->GetMenuItemID(nItem);
 
-		if (nMenuID >= ID_SORT_BYCUSTOMCOLUMN_FIRST && nMenuID <= ID_SORT_BYCUSTOMCOLUMN_LAST)
+		if (nMenuID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nMenuID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
 		{
 			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
 			nItem--;
@@ -8909,7 +8909,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 	}
 
 	// separator is just before the separator before 'unsorted entry'
-	int nInsert = CEnMenu::GetMenuItemPos(pMenu->GetSafeHmenu(), ID_SORT_BYNONE) - 1;
+	int nInsert = CEnMenu::GetMenuItemPos(pMenu->GetSafeHmenu(), ID_SORTBY_NONE) - 1;
 	ASSERT(nInsert >= 0);
 
 	// delete separator if exist
@@ -8940,7 +8940,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 					nInsert++;
 				}
 
-				UINT nMenuID = (attribDef.GetColumnID() - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORT_BYCUSTOMCOLUMN_FIRST;
+				UINT nMenuID = (attribDef.GetColumnID() - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST;
 				CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
 				pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);

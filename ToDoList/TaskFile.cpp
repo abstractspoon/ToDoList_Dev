@@ -3113,6 +3113,11 @@ bool CTaskFile::SetTaskDependency(HTASKITEM hTask, LPCTSTR szDepends)
 	return SetTaskString(hTask, TDL_TASKDEPENDENCY, szDepends);
 }
 
+bool CTaskFile::SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy)
+{
+	return SetTaskString(hTask, TDL_TASKLASTMODBY, szModifiedBy);
+}
+
 bool CTaskFile::SetTaskAllocatedBy(HTASKITEM hTask, LPCTSTR szAllocBy)
 {
 	return SetTaskString(hTask, TDL_TASKALLOCBY, szAllocBy);

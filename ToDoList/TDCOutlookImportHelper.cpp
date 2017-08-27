@@ -247,7 +247,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			CDateHelper::DecodeDate(sData, tdi.dateDone);
 			break;
 			
-		case TDCA_LASTMOD: 
+		case TDCA_LASTMODDATE: 
 			CDateHelper::DecodeDate(sData, tdi.dateLastMod);
 			break;
 			

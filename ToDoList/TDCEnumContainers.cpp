@@ -73,7 +73,8 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib)
 	case TDCA_ICON:				
 	case TDCA_LOCK:				
 	case TDCA_ID:				
-	case TDCA_LASTMOD:	
+	case TDCA_LASTMODDATE:	
+	case TDCA_LASTMODBY:	
 	case TDCA_PARENTID:
 	case TDCA_PERCENT:			
 	case TDCA_POSITION:	

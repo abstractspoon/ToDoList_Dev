@@ -41,7 +41,8 @@ static TDC_ATTRIBUTE ATTRIB_ORDER[] =
 	TDCA_TIMESPENT,
 	TDCA_CREATIONDATE,
 	TDCA_CREATEDBY,
-	TDCA_LASTMOD,
+	TDCA_LASTMODDATE,
+	TDCA_LASTMODBY,
 	TDCA_STARTDATE,
 	TDCA_DUEDATE,
 	TDCA_DONEDATE,
@@ -350,10 +351,14 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKID); 
 		break;
 		
-	case TDCA_LASTMOD:
+	case TDCA_LASTMODDATE:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKLASTMODSTRING);
 		break;
 		
+	case TDCA_LASTMODBY:
+		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKLASTMODBY);
+		break;
+
 	case TDCA_PARENTID:
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKPARENTID); 
 		break;
@@ -577,7 +582,8 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks, HTASKIT
 		CheckAddAttribtoList(pTasks, hTask, TDCA_TIMESPENT,		TDL_TASKTIMESPENT);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATIONDATE,	TDL_TASKCREATIONDATESTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_CREATEDBY,		TDL_TASKCREATEDBY);
-		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMOD,		TDL_TASKLASTMODSTRING);
+		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODDATE,		TDL_TASKLASTMODSTRING);
+		CheckAddAttribtoList(pTasks, hTask, TDCA_LASTMODBY,		TDL_TASKLASTMODBY);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_STARTDATE,		TDL_TASKSTARTDATESTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_DUEDATE,		TDL_TASKDUEDATESTRING);
 		CheckAddAttribtoList(pTasks, hTask, TDCA_DONEDATE,		TDL_TASKDONEDATESTRING);

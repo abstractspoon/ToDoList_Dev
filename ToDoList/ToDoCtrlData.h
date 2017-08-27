@@ -116,6 +116,7 @@ public:
 	CString GetTaskDependency(DWORD dwTaskID, int nDepends) const;
 	CString GetTaskFileRef(DWORD dwTaskID, int nFileRef) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
+	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
 	BOOL IsTaskFlagged(DWORD dwTaskID) const;

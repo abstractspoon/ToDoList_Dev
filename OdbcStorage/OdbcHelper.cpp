@@ -309,7 +309,7 @@ CString COdbcHelper::GetAttributeValueAsSQLString(const ODBCTASK& task, TDC_ATTR
 	case TDCA_DUEDATE: 		GET_ATTRIB_DATE(OT_DUEDATE,			task.tDue);
 	case TDCA_STARTDATE:	GET_ATTRIB_DATE(OT_STARTDATE,		task.tStart);
 	case TDCA_CREATIONDATE:	GET_ATTRIB_DATE(OT_CREATIONDATE,	task.tCreation);
-	case TDCA_LASTMOD: 		GET_ATTRIB_DATE(OT_LASTMOD,			task.tModified);
+	case TDCA_LASTMODDATE: 	GET_ATTRIB_DATE(OT_LASTMOD,			task.tModified);
 
 	// ints
 	case TDCA_PRIORITY: 	GET_ATTRIB_VAL(OT_PRIORITY,			task.nPriority);
@@ -404,7 +404,7 @@ CDBVariant* COdbcHelper::GetAttributeValue(const ODBCTASK& task, TDC_ATTRIBUTE n
 	case TDCA_DUEDATE: 		GET_ATTRIB_VAR(OT_DUEDATE,		task.tDue);
 	case TDCA_STARTDATE:	GET_ATTRIB_VAR(OT_STARTDATE,	task.tStart);
 	case TDCA_CREATIONDATE:	GET_ATTRIB_VAR(OT_CREATIONDATE,	task.tCreation);
-	case TDCA_LASTMOD: 		GET_ATTRIB_VAR(OT_LASTMOD,		task.tModified);
+	case TDCA_LASTMODDATE: 	GET_ATTRIB_VAR(OT_LASTMOD,		task.tModified);
 
 	// ints
 	case TDCA_PRIORITY: 	GET_ATTRIB_VAR(OT_PRIORITY,		task.nPriority);

@@ -285,7 +285,7 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE attrib) const
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
 	case TDCA_STARTDATE:
-	case TDCA_LASTMOD:
+	case TDCA_LASTMODDATE:
 	case TDCA_CREATIONDATE:
 		return TRUE;
 		

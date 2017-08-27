@@ -28,50 +28,50 @@ namespace TDC
 	{
 		switch (nSortID)
 		{
-		case ID_SORT_BYALLOCBY:			return TDCC_ALLOCBY;
-		case ID_SORT_BYALLOCTO:			return TDCC_ALLOCTO;
-		case ID_SORT_BYCATEGORY:		return TDCC_CATEGORY;
-		case ID_SORT_BYCOLOR:			return TDCC_COLOR;
-		case ID_SORT_BYCOST:			return TDCC_COST;
-		case ID_SORT_BYCREATEDBY:		return TDCC_CREATEDBY;
-		case ID_SORT_BYCREATIONDATE:	return TDCC_CREATIONDATE;
-		case ID_SORT_BYDEPENDENCY:		return TDCC_DEPENDENCY;
-		case ID_SORT_BYDONE:			return TDCC_DONE;
-		case ID_SORT_BYDONEDATE:		return TDCC_DONEDATE; 
-		case ID_SORT_BYDUEDATE:			return TDCC_DUEDATE;
-		case ID_SORT_BYEXTERNALID:		return TDCC_EXTERNALID;
-		case ID_SORT_BYFILEREF:			return TDCC_FILEREF;
-		case ID_SORT_BYFLAG:			return TDCC_FLAG;
-		case ID_SORT_BYICON:			return TDCC_ICON;
-		case ID_SORT_BYID:				return TDCC_ID;
-		case ID_SORT_BYLOCK:			return TDCC_LOCK;
-		case ID_SORT_BYMODIFYDATE:		return TDCC_LASTMOD;
-		//case ID_SORT_BYMODIFIEDBY:		return TDCC_LASTMODBY;
-		case ID_SORT_BYNAME:			return TDCC_CLIENT;
-		case ID_SORT_BYPATH:			return TDCC_PATH;
-		case ID_SORT_BYPERCENT:			return TDCC_PERCENT;
-		case ID_SORT_BYPOSITION:		return TDCC_POSITION;
-		case ID_SORT_BYPRIORITY:		return TDCC_PRIORITY;
-		case ID_SORT_BYRECENTEDIT:		return TDCC_RECENTEDIT;
-		case ID_SORT_BYRECURRENCE:		return TDCC_RECURRENCE;
-		case ID_SORT_BYREMAINING:		return TDCC_REMAINING;
-		case ID_SORT_BYREMINDER:		return TDCC_REMINDER;
-		case ID_SORT_BYRISK:			return TDCC_RISK;
-		case ID_SORT_BYSTARTDATE:		return TDCC_STARTDATE;
-		case ID_SORT_BYSTATUS:			return TDCC_STATUS;
-		case ID_SORT_BYSUBTASKDONE:		return TDCC_SUBTASKDONE;
-		case ID_SORT_BYTAG:				return TDCC_TAGS;
-		case ID_SORT_BYTIMEEST:			return TDCC_TIMEEST;
-		case ID_SORT_BYTIMESPENT:		return TDCC_TIMESPENT;
-		case ID_SORT_BYTIMETRACKING:	return TDCC_TRACKTIME;
-		case ID_SORT_BYVERSION:			return TDCC_VERSION;
-		case ID_SORT_BYNONE:			return TDCC_NONE;
+		case ID_SORTBY_ALLOCBY:			return TDCC_ALLOCBY;
+		case ID_SORTBY_ALLOCTO:			return TDCC_ALLOCTO;
+		case ID_SORTBY_CATEGORY:		return TDCC_CATEGORY;
+		case ID_SORTBY_COLOR:			return TDCC_COLOR;
+		case ID_SORTBY_COST:			return TDCC_COST;
+		case ID_SORTBY_CREATEDBY:		return TDCC_CREATEDBY;
+		case ID_SORTBY_CREATIONDATE:	return TDCC_CREATIONDATE;
+		case ID_SORTBY_DEPENDENCY:		return TDCC_DEPENDENCY;
+		case ID_SORTBY_DONE:			return TDCC_DONE;
+		case ID_SORTBY_DONEDATE:		return TDCC_DONEDATE; 
+		case ID_SORTBY_DUEDATE:			return TDCC_DUEDATE;
+		case ID_SORTBY_EXTERNALID:		return TDCC_EXTERNALID;
+		case ID_SORTBY_FILEREF:			return TDCC_FILEREF;
+		case ID_SORTBY_FLAG:			return TDCC_FLAG;
+		case ID_SORTBY_ICON:			return TDCC_ICON;
+		case ID_SORTBY_ID:				return TDCC_ID;
+		case ID_SORTBY_LOCK:			return TDCC_LOCK;
+		case ID_SORTBY_LASTMODDATE:		return TDCC_LASTMODDATE;
+		case ID_SORTBY_LASTMODBY:		return TDCC_LASTMODBY;
+		case ID_SORTBY_NAME:			return TDCC_CLIENT;
+		case ID_SORTBY_PATH:			return TDCC_PATH;
+		case ID_SORTBY_PERCENT:			return TDCC_PERCENT;
+		case ID_SORTBY_POSITION:		return TDCC_POSITION;
+		case ID_SORTBY_PRIORITY:		return TDCC_PRIORITY;
+		case ID_SORTBY_RECENTEDIT:		return TDCC_RECENTEDIT;
+		case ID_SORTBY_RECURRENCE:		return TDCC_RECURRENCE;
+		case ID_SORTBY_REMAINING:		return TDCC_REMAINING;
+		case ID_SORTBY_REMINDER:		return TDCC_REMINDER;
+		case ID_SORTBY_RISK:			return TDCC_RISK;
+		case ID_SORTBY_STARTDATE:		return TDCC_STARTDATE;
+		case ID_SORTBY_STATUS:			return TDCC_STATUS;
+		case ID_SORTBY_SUBTASKDONE:		return TDCC_SUBTASKDONE;
+		case ID_SORTBY_TAG:				return TDCC_TAGS;
+		case ID_SORTBY_TIMEEST:			return TDCC_TIMEEST;
+		case ID_SORTBY_TIMESPENT:		return TDCC_TIMESPENT;
+		case ID_SORTBY_TIMETRACKING:	return TDCC_TRACKTIME;
+		case ID_SORTBY_VERSION:			return TDCC_VERSION;
+		case ID_SORTBY_NONE:			return TDCC_NONE;
 		}
 		
 		// handle custom columns
-		if (nSortID >= ID_SORT_BYCUSTOMCOLUMN_FIRST && nSortID <= ID_SORT_BYCUSTOMCOLUMN_LAST)
+		if (nSortID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nSortID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
 		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nSortID - ID_SORT_BYCUSTOMCOLUMN_FIRST));
+			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nSortID - ID_SORTBY_CUSTOMCOLUMN_FIRST));
 		}
 		
 		// all else
@@ -82,51 +82,51 @@ namespace TDC
 	{
 		switch (nColumn)
 		{
-		case TDCC_ALLOCBY:		return ID_SORT_BYALLOCBY;
-		case TDCC_ALLOCTO:		return ID_SORT_BYALLOCTO;
-		case TDCC_CATEGORY:		return ID_SORT_BYCATEGORY;
-		case TDCC_CLIENT:		return ID_SORT_BYNAME;
-		case TDCC_COLOR:		return ID_SORT_BYCOLOR;
-		case TDCC_COST:			return ID_SORT_BYCOST;
-		case TDCC_CREATEDBY:	return ID_SORT_BYCREATEDBY;
-		case TDCC_CREATIONDATE:	return ID_SORT_BYCREATIONDATE;
-		case TDCC_DEPENDENCY:	return ID_SORT_BYDEPENDENCY;
-		case TDCC_DONE:			return ID_SORT_BYDONE;
-		case TDCC_DONEDATE:		return ID_SORT_BYDONEDATE;
-		case TDCC_DUEDATE:		return ID_SORT_BYDUEDATE;
-		case TDCC_EXTERNALID:	return ID_SORT_BYEXTERNALID;
-		case TDCC_FILEREF:		return ID_SORT_BYFILEREF;
-		case TDCC_FLAG:			return ID_SORT_BYFLAG;
-		case TDCC_ICON:			return ID_SORT_BYICON;
-		case TDCC_ID:			return ID_SORT_BYID;
-		case TDCC_LASTMOD:		return ID_SORT_BYMODIFYDATE;
-		//case TDCC_LASTMODBY:	return ID_SORT_BYMODIFIEDBY;
-		case TDCC_LOCK:			return ID_SORT_BYLOCK;
-		case TDCC_NONE:			return ID_SORT_BYNONE;
-		case TDCC_PATH:			return ID_SORT_BYPATH;
-		case TDCC_PERCENT:		return ID_SORT_BYPERCENT;
-		case TDCC_POSITION:		return ID_SORT_BYPOSITION;
-		case TDCC_PRIORITY:		return ID_SORT_BYPRIORITY;
-		case TDCC_RECENTEDIT:	return ID_SORT_BYRECENTEDIT;
-		case TDCC_RECURRENCE:	return ID_SORT_BYRECURRENCE;
-		case TDCC_REMAINING:	return ID_SORT_BYREMAINING;
-		case TDCC_REMINDER:		return ID_SORT_BYREMINDER;
-		case TDCC_RISK:			return ID_SORT_BYRISK;
-		case TDCC_STARTDATE:	return ID_SORT_BYSTARTDATE;
-		case TDCC_STATUS:		return ID_SORT_BYSTATUS;
-		case TDCC_SUBTASKDONE:	return ID_SORT_BYSUBTASKDONE; 
-		case TDCC_TAGS:			return ID_SORT_BYTAG;
-		case TDCC_TIMEEST:		return ID_SORT_BYTIMEEST;
-		case TDCC_TIMESPENT:	return ID_SORT_BYTIMESPENT;
-		case TDCC_TRACKTIME:	return ID_SORT_BYTIMETRACKING;
-		case TDCC_VERSION:		return ID_SORT_BYVERSION;
+		case TDCC_ALLOCBY:		return ID_SORTBY_ALLOCBY;
+		case TDCC_ALLOCTO:		return ID_SORTBY_ALLOCTO;
+		case TDCC_CATEGORY:		return ID_SORTBY_CATEGORY;
+		case TDCC_CLIENT:		return ID_SORTBY_NAME;
+		case TDCC_COLOR:		return ID_SORTBY_COLOR;
+		case TDCC_COST:			return ID_SORTBY_COST;
+		case TDCC_CREATEDBY:	return ID_SORTBY_CREATEDBY;
+		case TDCC_CREATIONDATE:	return ID_SORTBY_CREATIONDATE;
+		case TDCC_DEPENDENCY:	return ID_SORTBY_DEPENDENCY;
+		case TDCC_DONE:			return ID_SORTBY_DONE;
+		case TDCC_DONEDATE:		return ID_SORTBY_DONEDATE;
+		case TDCC_DUEDATE:		return ID_SORTBY_DUEDATE;
+		case TDCC_EXTERNALID:	return ID_SORTBY_EXTERNALID;
+		case TDCC_FILEREF:		return ID_SORTBY_FILEREF;
+		case TDCC_FLAG:			return ID_SORTBY_FLAG;
+		case TDCC_ICON:			return ID_SORTBY_ICON;
+		case TDCC_ID:			return ID_SORTBY_ID;
+		case TDCC_LASTMODDATE:	return ID_SORTBY_LASTMODDATE;
+		case TDCC_LASTMODBY:	return ID_SORTBY_LASTMODBY;
+		case TDCC_LOCK:			return ID_SORTBY_LOCK;
+		case TDCC_NONE:			return ID_SORTBY_NONE;
+		case TDCC_PATH:			return ID_SORTBY_PATH;
+		case TDCC_PERCENT:		return ID_SORTBY_PERCENT;
+		case TDCC_POSITION:		return ID_SORTBY_POSITION;
+		case TDCC_PRIORITY:		return ID_SORTBY_PRIORITY;
+		case TDCC_RECENTEDIT:	return ID_SORTBY_RECENTEDIT;
+		case TDCC_RECURRENCE:	return ID_SORTBY_RECURRENCE;
+		case TDCC_REMAINING:	return ID_SORTBY_REMAINING;
+		case TDCC_REMINDER:		return ID_SORTBY_REMINDER;
+		case TDCC_RISK:			return ID_SORTBY_RISK;
+		case TDCC_STARTDATE:	return ID_SORTBY_STARTDATE;
+		case TDCC_STATUS:		return ID_SORTBY_STATUS;
+		case TDCC_SUBTASKDONE:	return ID_SORTBY_SUBTASKDONE; 
+		case TDCC_TAGS:			return ID_SORTBY_TAG;
+		case TDCC_TIMEEST:		return ID_SORTBY_TIMEEST;
+		case TDCC_TIMESPENT:	return ID_SORTBY_TIMESPENT;
+		case TDCC_TRACKTIME:	return ID_SORTBY_TIMETRACKING;
+		case TDCC_VERSION:		return ID_SORTBY_VERSION;
 
 		}
 		
 		// handle custom columns
 		if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
 		{
-			return (ID_SORT_BYCUSTOMCOLUMN_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
+			return (ID_SORTBY_CUSTOMCOLUMN_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
 		}
 		
 		// all else
@@ -154,7 +154,7 @@ namespace TDC
 		case TDCA_FLAG:				return TDCC_FLAG;
 		case TDCA_ICON:				return TDCC_ICON;
 		case TDCA_ID:				return TDCC_ID;
-		case TDCA_LASTMOD:			return TDCC_LASTMOD;
+		case TDCA_LASTMODDATE:		return TDCC_LASTMODDATE;
 		case TDCA_LASTMODBY:		return TDCC_LASTMODBY;
 		case TDCA_LOCK:				return TDCC_LOCK;
 		case TDCA_NONE:				return TDCC_NONE;
@@ -225,7 +225,8 @@ namespace TDC
 		case TDCA_NONE:
 		case TDCA_FLAG:
 		case TDCA_ID:
-		case TDCA_LASTMOD:
+		case TDCA_LASTMODDATE:
+		case TDCA_LASTMODBY:
 		case TDCA_CREATEDBY:
 		case TDCA_CREATIONDATE:
 		case TDCA_ICON:
@@ -296,7 +297,7 @@ namespace TDC
 		case TDCC_FLAG:			return TDCA_FLAG;
 		case TDCC_ICON:			return TDCA_ICON;
 		case TDCC_ID:			return TDCA_ID;
-		case TDCC_LASTMOD:		return TDCA_LASTMOD;
+		case TDCC_LASTMODDATE:	return TDCA_LASTMODDATE;
 		case TDCC_LASTMODBY:	return TDCA_LASTMODBY;
 		case TDCC_LOCK:			return TDCA_LOCK;
 		case TDCC_NONE:			return TDCA_NONE;
@@ -484,7 +485,7 @@ namespace TDC
 		switch (nDate)
 		{
 		case TDCD_CREATE:	return TDCA_CREATIONDATE;
-		case TDCD_LASTMOD:	return TDCA_LASTMOD;
+		case TDCD_LASTMOD:	return TDCA_LASTMODDATE;
 			
 		case TDCD_START:	
 		case TDCD_STARTDATE:return TDCA_STARTDATE;
@@ -509,7 +510,7 @@ namespace TDC
 		switch (nAttrib)
 		{
 		case TDCA_CREATIONDATE:	return TDCD_CREATE;
-		case TDCA_LASTMOD:		return TDCD_LASTMOD;
+		case TDCA_LASTMODDATE:	return TDCD_LASTMOD;
 			
 		case TDCA_STARTDATE:	return TDCD_STARTDATE;
 		case TDCA_STARTTIME:	return TDCD_STARTTIME;
@@ -530,7 +531,7 @@ namespace TDC
 	{
 		switch (nCol)
 		{
-		case TDCC_LASTMOD:		return TDCD_LASTMOD;
+		case TDCC_LASTMODDATE:		return TDCD_LASTMOD;
 		case TDCC_DUEDATE:		return TDCD_DUE;
 		case TDCC_CREATIONDATE:	return TDCD_CREATE;
 		case TDCC_STARTDATE:	return TDCD_START;
@@ -581,7 +582,7 @@ namespace TDC
 		case TDCA_FLAG:				
 		case TDCA_ICON:				
 		case TDCA_ID:				
-		case TDCA_LASTMOD:			
+		case TDCA_LASTMODDATE:			
 		case TDCA_LASTMODBY:			
 		case TDCA_PERCENT:			
 		case TDCA_PRIORITY:			
@@ -630,7 +631,7 @@ namespace TDC
 		case TDCA_ICON:				return IUI_ICON;
 		case TDCA_LOCK:				return IUI_LOCK;
 		case TDCA_ID:				return IUI_ID;
-		case TDCA_LASTMOD:			return IUI_LASTMOD;
+		case TDCA_LASTMODDATE:		return IUI_LASTMOD;
 		case TDCA_LASTMODBY:		return IUI_LASTMOD;
 		case TDCA_PERCENT:			return IUI_PERCENT;
 		case TDCA_POSITION:			return IUI_POSITION;
@@ -698,7 +699,7 @@ namespace TDC
 		case TDCC_FLAG:			return IUI_FLAG;
 		case TDCC_ICON:			return IUI_ICON;
 		case TDCC_ID:			return IUI_ID;
-		case TDCC_LASTMOD:		return IUI_LASTMOD;
+		case TDCC_LASTMODDATE:		return IUI_LASTMOD;
 		case TDCC_LASTMODBY:	return IUI_LASTMOD;
 		case TDCC_LOCK:			return IUI_LOCK;
 		case TDCC_NONE:			return IUI_NONE;
@@ -753,7 +754,7 @@ namespace TDC
 		case IUI_FLAG:			return TDCA_FLAG;
 		case IUI_ICON:			return TDCA_ICON;
 		case IUI_ID:			return TDCA_ID;
-		case IUI_LASTMOD:		return TDCA_LASTMOD; // TDCA_LASTMODBY
+		case IUI_LASTMOD:		return TDCA_LASTMODDATE; // TDCA_LASTMODBY
 		case IUI_LOCK:			return TDCA_LOCK;
 		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
 		case IUI_PERCENT:		return TDCA_PERCENT;
@@ -796,7 +797,7 @@ namespace TDC
 		case IUI_FLAG:			return TDCC_FLAG;
 		case IUI_ICON:			return TDCC_ICON;
 		case IUI_ID:			return TDCC_ID;
-		case IUI_LASTMOD:		return TDCC_LASTMOD; // TDCC_LASTMODBY
+		case IUI_LASTMOD:		return TDCC_LASTMODDATE; // TDCC_LASTMODBY
 		case IUI_LOCK:			return TDCC_LOCK;
 		case IUI_NONE:			return TDCC_NONE;
 		case IUI_PERCENT:		return TDCC_PERCENT;
@@ -851,7 +852,7 @@ namespace TDC
 			case TDCA_DUEDATE_RELATIVE_DEP:			return TDCA_DUEDATE;
 			case TDCA_STARTDATE_RELATIVE_DEP:		return TDCA_STARTDATE;
 			case TDCA_CREATIONDATE_RELATIVE_DEP:	return TDCA_CREATIONDATE;
-			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMOD;
+			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMODDATE;
 		}
 
 		// All else

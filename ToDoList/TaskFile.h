@@ -211,6 +211,7 @@ public:
 	
 	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
 	LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
+	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy);
 
 	unsigned long GetCustomAttributeType(LPCTSTR szID) const;
 

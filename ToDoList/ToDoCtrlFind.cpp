@@ -124,6 +124,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		case TDCA_VERSION:		sLongest = pTDI->sVersion;								break;		
 		case TDCA_EXTERNALID:	sLongest = pTDI->sExternalID;							break;	
 		case TDCA_CREATEDBY:	sLongest = pTDI->sCreatedBy;							break;
+		case TDCA_LASTMODBY:	sLongest = pTDI->sLastModifiedBy;						break;
 
 		case TDCA_RECURRENCE:	sLongest = pTDI->trRecurrence.GetRegularityText(FALSE);	break;
 

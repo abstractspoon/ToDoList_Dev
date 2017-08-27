@@ -1353,6 +1353,7 @@ struct SEARCHPARAM
 		case TDCA_EXTERNALID: 
 		case TDCA_TAGS: 
 		case TDCA_PATH: 
+		case TDCA_LASTMODBY: 
 			return FT_STRING;
 
 		case TDCA_ICON: 
@@ -1387,7 +1388,7 @@ struct SEARCHPARAM
 		case TDCA_DONEDATE:
 		case TDCA_DUEDATE:
 		case TDCA_DUETIME:
-		case TDCA_LASTMOD:
+		case TDCA_LASTMODDATE:
 			return (bRelativeDate ? FT_DATE_REL : FT_DATE);
 
 	//	case TDCA_RECURRENCE: 
@@ -2832,7 +2833,7 @@ struct TDCCOLEDITVISIBILITY
 		case TDCC_LOCK:
 		case TDCC_CREATIONDATE:
 		case TDCC_CREATEDBY:
-		case TDCC_LASTMOD:
+		case TDCC_LASTMODDATE:
 		case TDCC_LASTMODBY:
 		case TDCC_RISK:
 		case TDCC_EXTERNALID:

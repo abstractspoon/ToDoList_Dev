@@ -1790,7 +1790,7 @@ BOOL CToDoListApp::CommandRequiresUI(UINT nCmdID)
 		switch (nCmdID)
 		{
 			// These items DO require UI
-		case ID_SORT_BYMULTI:
+		case ID_SORTBY_MULTI:
 			return TRUE;
 		}
 		// All the rest DO NOT require UI

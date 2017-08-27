@@ -246,7 +246,7 @@ BOOL COdbcTaskReader::PopulateTask(ODBCTASK& task)
 		case TDCA_FILEREF:		GetFieldValue(nField, attrib, task.sFileRef,		task, OT_FILEREF);		break;
 		case TDCA_FLAG:			GetFieldValue(nField, attrib, task.bFlag,			task, OT_FLAG);			break;
 		case TDCA_ICON:			GetFieldValue(nField, attrib, task.sIcon,			task, OT_ICON);			break;
-		case TDCA_LASTMOD:		GetFieldValue(nField, attrib, task.tModified,		task, OT_LASTMOD);		break;
+		case TDCA_LASTMODDATE:	GetFieldValue(nField, attrib, task.tModified,		task, OT_LASTMOD);		break;
 		case TDCA_PERCENT:		GetFieldValue(nField, attrib, task.nPercent,		task, OT_PERCENT);		break;
 		case TDCA_PRIORITY:		GetFieldValue(nField, attrib, task.nPriority,		task, OT_PRIORITY);		break;
 		case TDCA_RISK:			GetFieldValue(nField, attrib, task.nRisk,			task, OT_RISK);			break;
