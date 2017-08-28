@@ -441,6 +441,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 						ValueMatchesAsArray(pTDI->sStatus, rule, resTask, TRUE) ||  // matches whole statuses only
 						ValueMatchesAsArray(pTDI->sVersion, rule, resTask, TRUE) || // matches whole versions only
 						ValueMatchesAsArray(pTDI->sExternalID, rule, resTask, FALSE) ||
+						ValueMatchesAsArray(pTDI->sLastModifiedBy, rule, resTask, FALSE) ||
 						ValueMatchesAsArray(pTDI->sCreatedBy, rule, resTask, FALSE));
 
 			if (!bMatch)
