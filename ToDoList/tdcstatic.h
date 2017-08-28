@@ -144,7 +144,7 @@ static const TDCCOLUMN COLUMNS[] =
 	// special client column
 	{ TDCC_CLIENT,		IDS_TDC_COLUMN_TASK,		IDS_TDLBC_NAME,			DT_LEFT,	TRUE,	TDCCI_NONE,			TDCCI_NONE },
 };
-static int NUM_COLUMNS = sizeof(COLUMNS) / sizeof(TDCCOLUMN);
+static const int NUM_COLUMNS = sizeof(COLUMNS) / sizeof(TDCCOLUMN);
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -189,7 +189,7 @@ static const UINT FILTER_OPTIONS[][2] =
 	{ IDS_FILTER_HIDECOLLAPSED,	FO_HIDECOLLAPSED },
 	{ IDS_FILTER_SHOWALLSUB,	FO_SHOWALLSUB },
 };
-static int NUM_FILTEROPT = sizeof(FILTER_OPTIONS) / (2 * sizeof(UINT));
+static const int NUM_FILTEROPT = sizeof(FILTER_OPTIONS) / (2 * sizeof(UINT));
 
 /////////////////////////////////////////////////////////////////////////////////////
 
