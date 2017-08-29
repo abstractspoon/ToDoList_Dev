@@ -139,7 +139,7 @@ void CKanbanPreferencesPage::UpdateAttributeValueCombo()
 
 	CStringArray aValues;
 
-	CString sAttribID = ((m_nFixedAttrib == IUI_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttribID(m_nFixedAttrib));
+	CString sAttribID = ((m_nFixedAttrib == IUI_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
 	ASSERT(!sAttribID.IsEmpty());
 
 	const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
@@ -365,7 +365,7 @@ void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI)
 
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
 {
-	return ((m_nFixedAttrib == IUI_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttribID(m_nFixedAttrib));
+	return ((m_nFixedAttrib == IUI_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
 }
 
 void CKanbanPreferencesPage::OnPopulateFixedColumns()

@@ -195,7 +195,9 @@ protected:
 	BOOL WantShowColumn(const CKanbanListCtrl* pList) const;
 
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
-	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
+	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
+	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents);
 	static CString GetXMLTag(IUI_ATTRIBUTE nAttrib);

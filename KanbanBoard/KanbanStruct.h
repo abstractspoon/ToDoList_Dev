@@ -56,22 +56,28 @@ struct KANBANITEM
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
-	void SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
-	void SetAttributeValue(LPCTSTR szAttrib, int nValue);
-	CString GetAttributeValue(LPCTSTR szAttrib) const;
-	CString GetAttributeValue(IUI_ATTRIBUTE nAttrib) const;
-	void SetColor(COLORREF cr);
+	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
+	int GetTrackedAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const;
+	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
+	int GetPriority() const;
+
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
-	int GetPriority() const;
-	
-	static CString GetAttribID(IUI_ATTRIBUTE nAttrib);
+	BOOL AttributeValuesMatch(const KANBANITEM& ki, LPCTSTR szAttrib) const;
+
+	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
+	void SetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues);
+	void SetTrackedAttributeValue(LPCTSTR szAttrib, int nValue);
+	void SetColor(COLORREF cr);
+
+	static CString GetAttributeID(IUI_ATTRIBUTE nAttrib);
+	static BOOL IsTrackableAttribute(IUI_ATTRIBUTE nAttrib);
 
 protected:
-	CMapStringToString mapAttribValues;
+	CMapStringToStringArray mapAttribValues;
 	COLORREF color;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;

@@ -289,8 +289,6 @@ public:
 	{
 		VALUE* pMapping = NULL;
 		
-		POSITION pos = GetStartPosition();
-		
 		if (Lookup(str, pMapping))
 		{
 			ASSERT(pMapping);
@@ -316,9 +314,9 @@ public:
 class CMapStringToStringArray : public CMapStringToContainer<CStringArray>
 {
 public:
-	BOOL Map(const CString& str, const CStringArray& aItems)
+	BOOL Map(const CString& sKey, const CStringArray& aItems)
 	{
-		CStringArray* pArray = GetAddMapping(str);
+		CStringArray* pArray = GetAddMapping(sKey);
 
 		if (!pArray)
 		{
@@ -326,8 +324,33 @@ public:
 			return FALSE;
 		}
 
-		pArray->Copy(aItems);
+		pArray->RemoveAll();
+		Misc::AddUniqueItems(aItems, *pArray);
+
 		return TRUE;
+	}
+
+	BOOL Map(const CString& sKey, const CString& sValue)
+	{
+		CStringArray* pArray = GetAddMapping(sKey);
+
+		if (!pArray)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		return (Misc::AddUniqueItem(sValue, *pArray) != -1);
+	}
+
+	void Remove(const CString& sKey, const CString& sValue)
+	{
+		CStringArray* pArray = GetMapping(sKey);
+
+		if (!pArray == NULL)
+			return; // not an error
+
+		Misc::RemoveItem(sValue, *pArray);
 	}
 
 	void Copy(const CMapStringToStringArray& other)

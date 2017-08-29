@@ -106,7 +106,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	bLocked = ki.bLocked;
 	bSomeSubtaskDone = ki.bSomeSubtaskDone;
 
-	Misc::Copy(ki.mapAttribValues, mapAttribValues);
+	mapAttribValues.Copy(ki.mapAttribValues);
 	
 	return (*this);
 }
@@ -126,7 +126,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bLocked == ki.bLocked) &&
 			(bSomeSubtaskDone == ki.bSomeSubtaskDone) &&
 			(dwParentID == ki.dwParentID) &&
-			Misc::MatchAll(mapAttribValues, ki.mapAttribValues));
+			mapAttribValues.MatchAll(ki.mapAttribValues));
 }
 
 KANBANITEM::~KANBANITEM()
@@ -134,7 +134,22 @@ KANBANITEM::~KANBANITEM()
 	
 }
 
-void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues)
+{
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	// else
+	if (aValues.GetSize() == 0)
+		mapAttribValues.RemoveKey(szAttrib);
+	else
+		mapAttribValues.Map(szAttrib, aValues);
+}
+
+void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 {
 	if (Misc::IsEmpty(szAttrib))
 	{
@@ -146,35 +161,70 @@ void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 	if (Misc::IsEmpty(szValue))
 		mapAttribValues.RemoveKey(szAttrib);
 	else
-		mapAttribValues[szAttrib] = szValue;
+		mapAttribValues.Map(szAttrib, szValue);
 }
 
-void KANBANITEM::SetAttributeValue(LPCTSTR szAttrib, int nValue)
+void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, int nValue)
 {
-	if (Misc::IsEmpty(szAttrib))
-	{
-		ASSERT(0);
-		return;
-	}
-
 	// Less than zero == empty
+	CString sValue;
+
 	if (nValue >= 0)
-		SetAttributeValue(szAttrib, Misc::Format(nValue));
-	else
-		SetAttributeValue(szAttrib, _T(""));
+		sValue = Misc::Format(nValue);
+
+	SetTrackedAttributeValue(szAttrib, sValue);
 }
 
-CString KANBANITEM::GetAttributeValue(LPCTSTR szAttrib) const
+CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
 {
 	CString sValue;
 
 	if (!Misc::IsEmpty(szAttrib))
-		mapAttribValues.Lookup(szAttrib, sValue);
+	{
+		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+
+		if (pArray && pArray->GetSize())
+			sValue = pArray->GetAt(0);
+	}
 		
 	return sValue;
 }
 
-CString KANBANITEM::GetAttributeValue(IUI_ATTRIBUTE nAttrib) const
+int KANBANITEM::GetTrackedAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const
+{
+	aValues.RemoveAll();
+
+	switch (nAttrib)
+	{
+	case IUI_ALLOCTO:	
+	case IUI_CATEGORY:	
+	case IUI_TAGS:		
+		{
+			CString sAttribID(KANBANITEM::GetAttributeID(nAttrib));
+			const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
+
+			if (pArray)
+				aValues.Copy(*pArray);
+		}
+		break;
+	
+	case IUI_ALLOCBY:	
+	case IUI_STATUS:	
+	case IUI_VERSION:	
+	case IUI_PRIORITY:	
+	case IUI_RISK:			
+		aValues.Add(GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib)));
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return aValues.GetSize();
+}
+
+CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
 	{
@@ -186,7 +236,7 @@ CString KANBANITEM::GetAttributeValue(IUI_ATTRIBUTE nAttrib) const
 	case IUI_TAGS:		
 	case IUI_PRIORITY:	
 	case IUI_RISK:			
-		return GetAttributeValue(KANBANITEM::GetAttribID(nAttrib));
+		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib));
 		
 	case IUI_DONEDATE:		
 		if (CDateHelper::IsDateSet(dtDone))
@@ -231,6 +281,24 @@ CString KANBANITEM::GetAttributeValue(IUI_ATTRIBUTE nAttrib) const
 	}
 
 	return _T("");
+}
+
+BOOL KANBANITEM::AttributeValuesMatch(const KANBANITEM& ki, LPCTSTR szAttrib) const
+{
+	const CStringArray* pThisArray = mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pOtherArray = ki.mapAttribValues.GetMapping(szAttrib);
+
+	int nThisCount = (pThisArray ? pThisArray->GetSize() : 0);
+	int nOtherCount = (pOtherArray ? pOtherArray->GetSize() : 0);
+
+	if (nThisCount != nOtherCount)
+		return FALSE;
+
+	if (pThisArray && pOtherArray)
+		return Misc::MatchAll(*pThisArray, *pOtherArray);
+
+	// else both empty or null
+	return TRUE;
 }
 
 void KANBANITEM::SetColor(COLORREF cr)
@@ -307,12 +375,12 @@ BOOL KANBANITEM::IsDone(BOOL bIncludeGoodAs) const
 
 int KANBANITEM::GetPriority() const
 {
-	CString sPriority(GetAttributeValue(_T("PRIORITY")));
+	CString sPriority(GetTrackedAttributeValue(_T("PRIORITY")));
 
 	return (sPriority.IsEmpty() ? -2 : _ttoi(sPriority));
 }
 
-CString KANBANITEM::GetAttribID(IUI_ATTRIBUTE nAttrib)
+CString KANBANITEM::GetAttributeID(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -335,6 +403,28 @@ CString KANBANITEM::GetAttribID(IUI_ATTRIBUTE nAttrib)
 	}
 	
 	return _T("");
+}
+
+BOOL KANBANITEM::IsTrackableAttribute(IUI_ATTRIBUTE nAttrib)
+{
+	switch (nAttrib)
+	{
+	case IUI_ALLOCTO:	
+	case IUI_ALLOCBY:	
+	case IUI_STATUS:	
+	case IUI_CATEGORY:	
+	case IUI_VERSION:	
+	case IUI_TAGS:		
+	case IUI_PRIORITY:	
+	case IUI_RISK:		
+		return TRUE;
+
+	case IUI_CUSTOMATTRIB:
+		// TODO
+		break;
+	}
+
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -435,7 +525,7 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& m
 		GetNextAssoc(pos, dwTaskID, pKI);
 		ASSERT(pKI);
 
-		CString sAttribValue = pKI->GetAttributeValue(szAttribID);
+		CString sAttribValue = pKI->GetTrackedAttributeValue(szAttribID);
 		CString sValueID(Misc::ToUpper(sAttribValue));
 
 		CKanbanItemArray* pKItems = map.GetMapping(sValueID);

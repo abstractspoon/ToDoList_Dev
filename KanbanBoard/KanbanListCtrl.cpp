@@ -674,7 +674,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				{
 					IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
-					DrawAttribute(pDC, rLine, nAttrib, pKI->GetAttributeValue(nAttrib), nFlags);
+					DrawAttribute(pDC, rLine, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
 				}
 
 				if (pOldFont)
@@ -1135,8 +1135,8 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 		{
 				ASSERT(!pSort->sAttribID.IsEmpty());
 
-				CString sValue1 = pKI1->GetAttributeValue(pSort->sAttribID);
-				CString sValue2 = pKI2->GetAttributeValue(pSort->sAttribID);
+				CString sValue1 = pKI1->GetTrackedAttributeValue(pSort->sAttribID);
+				CString sValue2 = pKI2->GetTrackedAttributeValue(pSort->sAttribID);
 
 				nCompare = Misc::NaturalCompare(sValue1, sValue2);
 			}
@@ -1224,7 +1224,7 @@ void CKanbanListCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBel
 	case IUI_RISK:
 	case IUI_PRIORITY:
 	case IUI_VERSION:
-		ks.sAttribID = KANBANITEM::GetAttribID(nBy);
+		ks.sAttribID = KANBANITEM::GetAttributeID(nBy);
 		break;
 	}
 
@@ -1398,7 +1398,7 @@ int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeValue(nAttrib), TRUE);
+				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), TRUE);
 
 				nMaxItemLength = max(nMaxItemLength, sAttrib.GetLength());
 			}
