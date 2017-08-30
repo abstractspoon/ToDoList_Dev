@@ -69,6 +69,7 @@ struct KANBANITEM
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const;
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
 
+	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
 	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);

@@ -159,7 +159,7 @@ void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray&
 	if (aValues.GetSize() == 0)
 		mapAttribValues.RemoveKey(szAttrib);
 	else
-		mapAttribValues.Map(szAttrib, aValues);
+		mapAttribValues.Set(szAttrib, aValues);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
@@ -174,8 +174,21 @@ void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 	if (Misc::IsEmpty(szValue))
 		mapAttribValues.RemoveKey(szAttrib);
 	else
-		mapAttribValues.Map(szAttrib, szValue);
+		mapAttribValues.Set(szAttrib, szValue);
 }
+
+void KANBANITEM::AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+{
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (!Misc::IsEmpty(szValue))
+		mapAttribValues.Add(szAttrib, szValue);
+}
+
 
 void KANBANITEM::SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
@@ -201,8 +214,8 @@ CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
 	{
 		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
 
-		if (pArray && pArray->GetSize())
-			sValue = pArray->GetAt(0);
+		if (pArray)
+			sValue = Misc::FormatArray(*pArray);
 	}
 		
 	return sValue;

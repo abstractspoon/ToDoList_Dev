@@ -314,7 +314,7 @@ public:
 class CMapStringToStringArray : public CMapStringToContainer<CStringArray>
 {
 public:
-	BOOL Map(const CString& sKey, const CStringArray& aItems)
+	BOOL Set(const CString& sKey, const CStringArray& aItems)
 	{
 		CStringArray* pArray = GetAddMapping(sKey);
 
@@ -330,7 +330,23 @@ public:
 		return TRUE;
 	}
 
-	BOOL Map(const CString& sKey, const CString& sValue)
+	BOOL Set(const CString& sKey, const CString& sValue)
+	{
+		CStringArray* pArray = GetAddMapping(sKey);
+
+		if (!pArray)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		pArray->RemoveAll();
+		Misc::AddUniqueItem(sValue, *pArray);
+
+		return TRUE;
+	}
+
+	BOOL Add(const CString& sKey, const CString& sValue)
 	{
 		CStringArray* pArray = GetAddMapping(sKey);
 
