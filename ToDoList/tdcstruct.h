@@ -823,16 +823,13 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	CString GetImageName(const CString& sImage) const
 	{
+		CString sName;
 		int nTag = Misc::Find(aDefaultListData, sImage);
-
-		CString sName, sDummy;
 
 		if (nTag != -1)
 		{
 			CString sTag = aDefaultListData[nTag], sDummy;
-
 			VERIFY(DecodeImageTag(sTag, sDummy, sName));
-			//ASSERT(sImage == sDummy);
 		}
 
 		return sName;

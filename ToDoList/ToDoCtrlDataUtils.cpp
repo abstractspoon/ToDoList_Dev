@@ -823,7 +823,7 @@ BOOL CTDCTaskMatcher::ArrayMatches(const CStringArray& aItems, const SEARCHPARAM
 		else
 		{
 			// special case: task has no item and param.aItems contains an empty item
-			bMatch = (Misc::Find(aSearchItems, EMPTY_STR) != -1);
+			bMatch = Misc::Contains(aSearchItems, EMPTY_STR);
 		}
 	}
 	

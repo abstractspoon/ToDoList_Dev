@@ -462,7 +462,7 @@ void CRemoteFileDialog::FillFileList()
 						CStringArray aFilterExt;
 						Misc::Split(m_sFilterExt, aFilterExt, ';');
 						
-						bMatch = (Misc::Find(aFilterExt, sExt) != -1);
+						bMatch = Misc::Contains(aFilterExt, sExt);
 					}
 					
 					if (bMatch)

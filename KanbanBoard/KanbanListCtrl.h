@@ -45,7 +45,7 @@ public:
 	BOOL AttributeValuesMatch(const CKanbanListCtrl& other) const;
 
 	BOOL Create(UINT nID, CWnd* pParentWnd);
-	int AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect);
+	int AddTask(const KANBANITEM& ki, BOOL bSelect);
 	void RefreshColumnTitle();
 	void SetDoneTaskAttributes(COLORREF color, BOOL bStrikeThru);
 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);

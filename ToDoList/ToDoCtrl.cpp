@@ -10087,7 +10087,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 
 			// then check 'allocated to' if set
 			if (bMatch && !filter.sAllocTo.IsEmpty())
-				bMatch = (Misc::Find(pTDI->aAllocTo, filter.sAllocTo) != -1);
+				bMatch = Misc::Contains(pTDI->aAllocTo, filter.sAllocTo);
 		}
 		
 		// if we don't match, we remove the item

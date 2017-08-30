@@ -180,7 +180,10 @@ namespace Misc
 	}
 	
 	int Find(const CStringArray& array, LPCTSTR szItem, 
-		BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
+			BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
+
+	BOOL Contains(const CStringArray& array, LPCTSTR szItem, 
+			BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
 
 	template <class T> 
 	BOOL RemoveLastT(T& array)

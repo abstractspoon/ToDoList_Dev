@@ -961,6 +961,11 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 	return -1;
 }
 
+BOOL Misc::Contains(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bPartialOK)
+{
+	return (Find(array, szItem, bCaseSensitive, bPartialOK) != -1);
+}
+
 const CString& Misc::GetItem(const CStringArray& array, int nItem)
 {
 	ASSERT(nItem >= 0 && nItem < array.GetSize());

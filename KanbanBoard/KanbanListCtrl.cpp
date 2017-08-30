@@ -423,15 +423,15 @@ int CKanbanListCtrl::CalcLineHeight() const
 	return nLineHeight;
 }
 
-int CKanbanListCtrl::AddTask(LPCTSTR szTitle, DWORD dwTaskID, BOOL bSelect)
+int CKanbanListCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 {
 	int nNewItem = InsertItem(LVIF_TEXT | LVIF_PARAM, 
 								GetItemCount(), 
-								szTitle, 
+								ki.sTitle, 
 								0,
 								0,
 								0, 
-								dwTaskID);
+								ki.dwTaskID);
 	ASSERT(nNewItem != -1);
 
 	if (nNewItem != -1)
@@ -1135,8 +1135,8 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 		{
 				ASSERT(!pSort->sAttribID.IsEmpty());
 
-				CString sValue1 = pKI1->GetTrackedAttributeValue(pSort->sAttribID);
-				CString sValue2 = pKI2->GetTrackedAttributeValue(pSort->sAttribID);
+				CString sValue1 = pKI1->GetAttributeDisplayValue(pSort->nBy);
+				CString sValue2 = pKI2->GetAttributeDisplayValue(pSort->nBy);
 
 				nCompare = Misc::NaturalCompare(sValue1, sValue2);
 			}

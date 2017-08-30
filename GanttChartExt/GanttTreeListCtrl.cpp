@@ -6436,7 +6436,7 @@ BOOL CGanttTreeListCtrl::IsMilestone(const GANTTITEM& gi) const
 		return FALSE;
 	
 	// else
-	return (Misc::Find(gi.aTags, m_sMilestoneTag, FALSE, FALSE) != -1);
+	return Misc::Contains(gi.aTags, m_sMilestoneTag, FALSE, FALSE);
 }
 
 DWORD CGanttTreeListCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const

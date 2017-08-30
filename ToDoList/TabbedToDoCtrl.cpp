@@ -5146,13 +5146,13 @@ void CTabbedToDoCtrl::SetVisibleTaskViews(const CStringArray& aTypeIDs)
 
 		// update tab control
 		CString sTypeID = m_mgrUIExt.GetUIExtensionTypeID(nExt);
-		BOOL bVisible = (Misc::Find(aTypeIDs, sTypeID, FALSE, FALSE) != -1);
+		BOOL bVisible = Misc::Contains(aTypeIDs, sTypeID, FALSE, FALSE);
 
 		m_tabViews.ShowViewTab(nView, bVisible);
 	}
 
 	// Handle list view
-	ShowListViewTab(Misc::Find(aTypeIDs, LISTVIEW_TYPE) != -1);
+	ShowListViewTab(Misc::Contains(aTypeIDs, LISTVIEW_TYPE));
 
 #ifdef _DEBUG
 	int nTabCount = (m_tabViews.GetItemCount() - 1); // -1 for tree

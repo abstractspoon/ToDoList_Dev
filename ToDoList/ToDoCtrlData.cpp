@@ -664,7 +664,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 		m_items.GetNextAssoc(pos, dwDependsID, pTDI);
 		ASSERT (pTDI);
 			
-		if (pTDI && (dwDependsID != dwTaskID) && Misc::Find(pTDI->aDependencies, sTaskID) != -1)
+		if (pTDI && (dwDependsID != dwTaskID) && Misc::Contains(pTDI->aDependencies, sTaskID))
 			return TRUE;
 	}	
 

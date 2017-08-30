@@ -27,6 +27,7 @@ class CKanbanValueMap : public CMapStringToString
 public:
 	BOOL HasValue(const CString& sValue) const;
 	void AddValue(const CString& sValue);
+	void AddValues(const CStringArray& aValues);
 	void GetNextValue(POSITION& pos, CString& sValue) const;
 	int GetValues(CStringArray& aValues) const;
 	void SetValues(const CStringArray& aValues);
@@ -56,8 +57,7 @@ struct KANBANITEM
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
-	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
-	int GetTrackedAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const;
+	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
@@ -66,11 +66,14 @@ struct KANBANITEM
 
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
-	BOOL AttributeValuesMatch(const KANBANITEM& ki, LPCTSTR szAttrib) const;
+	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const;
+	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
 
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
-	void SetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues);
-	void SetTrackedAttributeValue(LPCTSTR szAttrib, int nValue);
+	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
+	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
+	void SetTrackedAttributeValues(IUI_ATTRIBUTE nAttribID, const CStringArray& aValues);
+	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
 
 	static CString GetAttributeID(IUI_ATTRIBUTE nAttrib);
@@ -79,6 +82,9 @@ struct KANBANITEM
 protected:
 	CMapStringToStringArray mapAttribValues;
 	COLORREF color;
+
+protected:
+	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;
 

@@ -504,15 +504,22 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	}
 
 	// trackable attributes
-	pKI->SetTrackedAttributeValue(_T("STATUS"), pTasks->GetTaskStatus(hTask));
-	pKI->SetTrackedAttributeValue(_T("ALLOCBY"), pTasks->GetTaskAllocatedBy(hTask));
-	pKI->SetTrackedAttributeValue(_T("ALLOCTO"), pTasks->GetTaskAllocatedTo(hTask, 0));
-	pKI->SetTrackedAttributeValue(_T("CATEGORY"), pTasks->GetTaskCategory(hTask, 0));
-	pKI->SetTrackedAttributeValue(_T("VERSION"), pTasks->GetTaskVersion(hTask));
-	pKI->SetTrackedAttributeValue(_T("TAGS"), pTasks->GetTaskTag(hTask, 0));
-	pKI->SetTrackedAttributeValue(_T("PRIORITY"), pTasks->GetTaskPriority(hTask, FALSE));
-	pKI->SetTrackedAttributeValue(_T("RISK"), pTasks->GetTaskRisk(hTask, FALSE));
-	// TODO
+	CStringArray aValues;
+
+	if (GetTaskCategories(pTasks, hTask, aValues))
+		pKI->SetTrackedAttributeValues(IUI_CATEGORY, aValues);
+
+	if (GetTaskAllocTo(pTasks, hTask, aValues))
+		pKI->SetTrackedAttributeValues(IUI_ALLOCTO, aValues);
+
+	if (GetTaskTags(pTasks, hTask, aValues))
+		pKI->SetTrackedAttributeValues(IUI_TAGS, aValues);
+	
+	pKI->SetTrackedAttributeValue(IUI_STATUS, pTasks->GetTaskStatus(hTask));
+	pKI->SetTrackedAttributeValue(IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+	pKI->SetTrackedAttributeValue(IUI_VERSION, pTasks->GetTaskVersion(hTask));
+	pKI->SetTrackedAttributeValue(IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
+	pKI->SetTrackedAttributeValue(IUI_RISK, pTasks->GetTaskRisk(hTask, FALSE));
 
 	// custom attributes
 	int nCust = pTasks->GetCustomAttributeCount();
@@ -522,7 +529,10 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		CString sCustID(pTasks->GetCustomAttributeID(nCust));
 		CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
 
-		pKI->SetTrackedAttributeValue(sCustID, sCustValue);
+		CStringArray aCustValues;
+		Misc::Split(sCustValue, aCustValues, '\n');
+
+		pKI->SetTrackedAttributeValues(sCustID, aCustValues);
 
 		// Add to global attribute values
 		CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sCustID);
@@ -602,23 +612,34 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			}
 			
 			// Trackable attributes
-			if (attrib.Has(IUI_ALLOCBY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+			CStringArray aValues;
 
 			if (attrib.Has(IUI_ALLOCTO))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCTO, pTasks->GetTaskAllocatedTo(hTask, 0));
+			{
+				GetTaskAllocTo(pTasks, hTask, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCTO, aValues);
+			}
+
+			if (attrib.Has(IUI_CATEGORY))
+			{
+				GetTaskCategories(pTasks, hTask, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_CATEGORY, aValues);
+			}
+
+			if (attrib.Has(IUI_TAGS))
+			{
+				GetTaskTags(pTasks, hTask, aValues);
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_TAGS, aValues);
+			}
+
+			if (attrib.Has(IUI_ALLOCBY))
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
 			if (attrib.Has(IUI_STATUS))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_STATUS, pTasks->GetTaskStatus(hTask));
 
-			if (attrib.Has(IUI_CATEGORY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_CATEGORY, pTasks->GetTaskCategory(hTask, 0));
-
 			if (attrib.Has(IUI_VERSION))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_VERSION, pTasks->GetTaskVersion(hTask));
-
-			if (attrib.Has(IUI_TAGS))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_TAGS, pTasks->GetTaskTag(hTask, 0));
 
 			if (attrib.Has(IUI_PRIORITY))
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
@@ -634,14 +655,18 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				{
 					CString sAttribID(m_aCustomAttribIDs[nID]);
 					CString sValue(pTasks->GetTaskCustomAttributeData(hTask, sAttribID, true));
+					CStringArray aValues;
 
-					if (UpdateTrackableTaskAttribute(pKI, sAttribID, sValue))
+					if (!sValue.IsEmpty())
+						Misc::Split(sValue, aValues, '\n');
+
+					if (UpdateTrackableTaskAttribute(pKI, sAttribID, aValues))
 					{
 						// Add to global values
 						CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
 						ASSERT(pValues);
 						
-						pValues->AddValue(sValue);
+						pValues->AddValues(aValues);
 						bChange = TRUE;
 					}
 				}
@@ -999,7 +1024,18 @@ CString CKanbanCtrl::GetXMLTag(IUI_ATTRIBUTE nAttrib)
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, int nNewValue)
 {
-	ASSERT(nAttrib == IUI_PRIORITY || nAttrib == IUI_RISK);
+#ifdef _DEBUG
+	switch (nAttrib)
+	{
+	case IUI_PRIORITY:
+	case IUI_RISK:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+#endif
 
 	CString sValue; // empty
 
@@ -1012,42 +1048,101 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nA
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CString& sNewValue)
 {
-	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), sNewValue);
+#ifdef _DEBUG
+	switch (nAttrib)
+	{
+	case IUI_PRIORITY:
+	case IUI_RISK:
+	case IUI_ALLOCBY:
+	case IUI_STATUS:
+	case IUI_VERSION:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+#endif
+
+	CStringArray aNewValues;
+	aNewValues.Add(sNewValue);
+
+	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CString& sNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
+{
+#ifdef _DEBUG
+	switch (nAttrib)
+	{
+	case IUI_ALLOCTO:
+	case IUI_CATEGORY:
+	case IUI_TAGS:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+#endif
+
+	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
+}
+
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
 {
 	BOOL bChange = FALSE;
 	
-	if (pKI->GetTrackedAttributeValue(sAttribID).CompareNoCase(sNewValue) != 0)
+	if (!pKI->AttributeValuesMatch(sAttribID, aNewValues))
 	{
 		if (m_sTrackAttribID == sAttribID)
 		{
-			// remove from it's current list
-			int nCurItem = -1;
-			CKanbanListCtrl* pCurList = LocateTask(pKI->dwTaskID, nCurItem);
-			
-			if (pCurList && (nCurItem != -1))
+			CStringArray aCurValues;
+			pKI->GetTrackedAttributeValues(sAttribID, aCurValues);
+
+			// Remove any list item whose current value is not found in the new values
+			int nVal = aCurValues.GetSize();
+
+			while (nVal--)
 			{
-				pCurList->DeleteItem(nCurItem);
-				bChange = (pCurList->GetItemCount() == 0);
+				if (!Misc::Contains(aNewValues, aCurValues[nVal]))
+				{
+					CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
+					ASSERT(pCurList);
+
+					if (pCurList)
+					{
+						int nCurItem = pCurList->FindTask(pKI->dwTaskID);
+						ASSERT(nCurItem != -1);
+
+						pCurList->DeleteItem(nCurItem);
+						bChange |= (pCurList->GetItemCount() == 0);
+					}
+
+					// Remove from list to speed up later searching
+					aCurValues.RemoveAt(nVal);
+				}
 			}
-			
-			// add at the head of its new list
-			CKanbanListCtrl* pNewList = GetListCtrl(sNewValue);
-			
-			if (pNewList)
+
+			// Add any new items not in the current list
+			nVal = aNewValues.GetSize();
+
+			while (nVal--)
 			{
-				pNewList->AddTask(pKI->sTitle, pKI->dwTaskID, FALSE);
-			}
-			else
-			{
-				bChange = TRUE; // needs new list ctrl
+				if (!Misc::Contains(aCurValues, aNewValues[nVal]))
+				{
+					CKanbanListCtrl* pCurList = GetListCtrl(aNewValues[nVal]);
+
+					if (pCurList)
+						pCurList->AddTask(*pKI, FALSE);
+					else
+						bChange = TRUE; // needs new list ctrl
+				}
 			}
 		}
 		
-		// update status
-		pKI->SetTrackedAttributeValue(sAttribID, sNewValue);
+		// update values
+		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 	}
 	
 	return bChange;
@@ -1531,7 +1626,7 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 				
 				if (!pKI->bParent || bShowParents)
 				{
-					int nItem = pList->AddTask(pKI->sTitle, pKI->dwTaskID, FALSE);
+					int nItem = pList->AddTask(*pKI, FALSE);
 					ASSERT(nItem != -1);
 				}
 			}
@@ -2532,7 +2627,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 					{
 						pKI->SetTrackedAttributeValue(m_sTrackAttribID, sAttribValue);
 						
-						int nTask = pDestList->AddTask(pKI->sTitle, dwDragID, TRUE);
+						int nTask = pDestList->AddTask(*pKI, TRUE);
 						pDestList->SetItemState(nTask, (LVIS_FOCUSED | LVIS_SELECTED), (LVIS_FOCUSED | LVIS_SELECTED));
 					}
 				}

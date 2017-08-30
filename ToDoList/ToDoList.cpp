@@ -1090,7 +1090,7 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 						// ignore 'Default'
 						if (sFilename.CompareNoCase(DEFAULTKEY) != 0)
 						{
-							if (Misc::Find(aMRU, sFilename) == -1)
+							if (!Misc::Has(aMRU, sFilename))
 								prefs.DeleteSection(sSection);
 						}
 					}

@@ -10166,7 +10166,7 @@ void CToDoListWnd::RefreshFilterBarAdvancedFilters()
 	{
 		CEnString sUnNamed(IDS_UNNAMEDFILTER);
 
-		if (m_findDlg.GetActiveSearch().IsEmpty() && Misc::Find(aFilters, sUnNamed, FALSE, FALSE) == -1)
+		if (m_findDlg.GetActiveSearch().IsEmpty() && !Misc::Contains(aFilters, sUnNamed, FALSE, FALSE))
 			aFilters.Add(sUnNamed);
 	}
 
