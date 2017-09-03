@@ -236,7 +236,7 @@ public:
 	TDC_SET SetTaskCost(DWORD dwTaskID, double dCost);
 	TDC_SET SetTaskAllocBy(DWORD dwTaskID, const CString& sAllocBy);
 	TDC_SET SetTaskStatus(DWORD dwTaskID, const CString& sStatus);
-	TDC_SET SetTaskExtID(DWORD dwTaskID, const CString& sID);
+	TDC_SET SetTaskExternalID(DWORD dwTaskID, const CString& sID);
 	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority); // 0-10 (10 is highest)
 	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk); // 0-10 (10 is highest)
 	TDC_SET SetTaskTitle(DWORD dwTaskID, const CString& sTitle);

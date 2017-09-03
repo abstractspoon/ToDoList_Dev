@@ -5299,7 +5299,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 
 		if (startup.GetExternalID(sItem))
-			tdc.SetSelectedTaskExtID(sItem);
+			tdc.SetSelectedTaskExternalID(sItem);
 		
 		if (startup.GetVersion(sItem))
 			tdc.SetSelectedTaskVersion(sItem);

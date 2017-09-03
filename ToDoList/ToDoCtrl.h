@@ -288,7 +288,7 @@ public:
 	BOOL AppendSelectedTaskFileRefs(const CStringArray& aFilePaths);
 	BOOL SetSelectedTaskPriority(int nPriority); // 0-10 (10 is highest)
 	BOOL SetSelectedTaskRisk(int nRisk); // 0-10 (10 is highest)
-	BOOL SetSelectedTaskExtID(const CString& sID);
+	BOOL SetSelectedTaskExternalID(const CString& sID);
 	BOOL SetSelectedTaskFlag(BOOL bFlagged);
 	BOOL SetSelectedTaskLock(BOOL bLocked);
 	BOOL SetSelectedTaskCost(double dCost);
@@ -690,7 +690,6 @@ protected:
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
-//	BOOL CreateContentControl(BOOL bResendComments);
 	int GetMaxTaskCategoryWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
 	int GetMaxTaskTagWidth(CDC* pDC, BOOL bVisibleOnly = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);
@@ -717,7 +716,7 @@ protected:
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 
-	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent); // overridable
+	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent);
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 

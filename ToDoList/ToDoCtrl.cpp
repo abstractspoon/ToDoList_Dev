@@ -2102,7 +2102,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_EXTERNALID:
-		SetSelectedTaskExtID(m_sExternalID);
+		SetSelectedTaskExternalID(m_sExternalID);
 		break;
 		
 	case TDCA_ALLOCTO:
@@ -4726,7 +4726,7 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskExtID(const CString& sID)
+BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sID)
 {
 	if (!CanEditSelectedTask())
 		return FALSE;
@@ -4742,7 +4742,7 @@ BOOL CToDoCtrl::SetSelectedTaskExtID(const CString& sID)
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes =	m_data.SetTaskExtID(dwTaskID, sID);
+		TDC_SET nItemRes =	m_data.SetTaskExternalID(dwTaskID, sID);
 		
 		if (nItemRes == SET_CHANGE)
 		{
@@ -12208,7 +12208,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_ALLOCBY:		return SetSelectedTaskAllocBy(_T(""));
 	case TDCA_STATUS:		return SetSelectedTaskStatus(_T(""));
 	case TDCA_VERSION:		return SetSelectedTaskVersion(_T(""));
-	case TDCA_EXTERNALID:	return SetSelectedTaskExtID(_T(""));
+	case TDCA_EXTERNALID:	return SetSelectedTaskExternalID(_T(""));
 		
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);

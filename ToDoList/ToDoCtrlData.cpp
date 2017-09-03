@@ -1504,7 +1504,7 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		break;
 
 	case TDCA_EXTERNALID:	
-		nRes = SetTaskExtID(dwTaskID, EMPTY_STR);
+		nRes = SetTaskExternalID(dwTaskID, EMPTY_STR);
 		break;
 
 	case TDCA_ICON:			
@@ -2541,7 +2541,7 @@ TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CStringArray& a
 	return nRes;
 }
 
-TDC_SET CToDoCtrlData::SetTaskExtID(DWORD dwTaskID, const CString& sID)
+TDC_SET CToDoCtrlData::SetTaskExternalID(DWORD dwTaskID, const CString& sID)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -4817,7 +4817,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttri
 
 	case TDCA_VERSION:		return SetTaskVersion(dwTaskID, data.AsString());
 	case TDCA_ALLOCBY:		return SetTaskAllocBy(dwTaskID, data.AsString());
-	case TDCA_EXTERNALID:	return SetTaskExtID(dwTaskID, data.AsString());
+	case TDCA_EXTERNALID:	return SetTaskExternalID(dwTaskID, data.AsString());
 	case TDCA_STATUS:		return SetTaskStatus(dwTaskID, data.AsString());
 	case TDCA_TASKNAME:		return SetTaskTitle(dwTaskID, data.AsString());
 	case TDCA_COMMENTS:		return SetTaskComments(dwTaskID, data.AsString());
