@@ -71,6 +71,7 @@ public:
  	int GetColumnOrder(CStringArray& aOrder) const;
  	BOOL SetColumnOrder(const CStringArray& aOrder);
 
+	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
 	int GetAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const;
 	void LoadDefaultAttributeValues(const IPreferences* pPrefs);
 	BOOL TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
@@ -176,7 +177,9 @@ protected:
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
-	BOOL NotifyParentAttibuteChange(LPCTSTR szValue);
+	BOOL EndDragItem(CKanbanListCtrl* pSrcList, int nSrcItem, CKanbanListCtrl* pDestList, const CString& sDestAttribValue);
+
+	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
 	BOOL GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CString& sNewValue);
@@ -206,7 +209,6 @@ protected:
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-
 	static int ListSortProc(const void* pV1, const void* pV2);
 
 };

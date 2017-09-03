@@ -359,14 +359,17 @@ public:
 		return (Misc::AddUniqueItem(sValue, *pArray) != -1);
 	}
 
-	void Remove(const CString& sKey, const CString& sValue)
+	void Remove(const CString& sKey, const CString& sValue, BOOL bRemoveKeyWhenEmpty)
 	{
 		CStringArray* pArray = GetMapping(sKey);
 
-		if (!pArray == NULL)
+		if (pArray == NULL)
 			return; // not an error
 
 		Misc::RemoveItem(sValue, *pArray);
+
+		if (bRemoveKeyWhenEmpty && pArray->IsEmpty())
+			RemoveKey(sKey);
 	}
 
 	void Copy(const CMapStringToStringArray& other)

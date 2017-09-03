@@ -189,6 +189,17 @@ void KANBANITEM::AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 		mapAttribValues.Add(szAttrib, szValue);
 }
 
+void KANBANITEM::RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+{
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (!Misc::IsEmpty(szValue))
+		mapAttribValues.Remove(szAttrib, szValue, TRUE);
+}
 
 void KANBANITEM::SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
@@ -550,28 +561,40 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& m
 	{
 		GetNextAssoc(pos, dwTaskID, pKI);
 		ASSERT(pKI);
+		const KANBANITEM* pCKI = pKI;
 
 		CStringArray aAttribValues;
 		int nVal = pKI->GetTrackedAttributeValues(szAttribID, aAttribValues);
 
-		while (nVal--)
+		if (nVal == 0)
 		{
-			CString sValueID(Misc::ToUpper(aAttribValues[nVal]));
-			CKanbanItemArray* pKItems = map.GetMapping(sValueID);
-			
-			if (!pKItems)
-				pKItems = map.GetAddMapping(sValueID);
-			else
-				ASSERT(pKItems->GetSize());
-
-			const KANBANITEM* pCKI = pKI;
-			pKItems->Add(pCKI);
+			AddItemToMap(pKI, _T(""), map);
+		}
+		else
+		{
+			while (nVal--)
+			{
+				const CString& sValue = aAttribValues[nVal];
+				AddItemToMap(pKI, sValue, map);
+			}
 		}
 	}
 
 	return map.GetCount();
 }
 
+void CKanbanItemMap::AddItemToMap(const KANBANITEM* pKI, const CString& sValue, CKanbanItemArrayMap& map)
+{
+	CString sValueID(sValue.IsEmpty() ? sValue : Misc::ToUpper(sValue));
+	CKanbanItemArray* pKItems = map.GetMapping(sValueID);
+
+	if (!pKItems)
+		pKItems = map.GetAddMapping(sValueID);
+	else
+		ASSERT(pKItems->GetSize());
+
+	pKItems->Add(pKI);
+}
 
 #ifdef _DEBUG
 void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID) const

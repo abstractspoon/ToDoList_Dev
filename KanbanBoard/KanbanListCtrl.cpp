@@ -1507,3 +1507,21 @@ BOOL CKanbanListCtrl::AttributeValuesMatch(const CKanbanListCtrl& other) const
 
 	return Misc::MatchAll(m_columnDef.aAttribValues, aOtherValues);
 }
+
+BOOL CKanbanListCtrl::CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList)
+{
+	if (!pDestList)
+		return FALSE;
+	
+	if (pDestList == pSrcList)
+		return FALSE;
+	
+	if (pSrcList->AttributeValuesMatch(*pDestList))
+		return FALSE;
+
+	// Can't copy to the backlog
+	if (pDestList->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
+		return FALSE;
+
+	return TRUE;
+}

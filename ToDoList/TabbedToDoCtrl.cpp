@@ -1284,94 +1284,285 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM 
 
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
+	DWORD dwTaskID = mod.dwSelectedTaskID;
+
+	if (!CanEditSelectedTask(dwTaskID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (dwTaskID)
+	{
+		if (GetSelectedCount() == 1)
+		{
+			ASSERT(GetSelectedTaskID() == dwTaskID);
+			dwTaskID = 0; // same as 'selected'
+		}
+	}
+	
 	CStringArray aValues;
+	BOOL bChange = FALSE;
 	
 	switch (mod.nAttrib)
 	{
-	case IUI_TASKNAME:		return SetSelectedTaskTitle(mod.szValue);
-	case IUI_PRIORITY:		return SetSelectedTaskPriority(mod.nValue);
-	case IUI_COLOR: 		return SetSelectedTaskColor(mod.crValue);
-	case IUI_ALLOCBY:		return SetSelectedTaskAllocBy(mod.szValue);
-	case IUI_STATUS:		return SetSelectedTaskStatus(mod.szValue);
-	case IUI_PERCENT:		return SetSelectedTaskPercentDone(mod.nValue);
-	case IUI_TIMEEST:		return SetSelectedTaskTimeEstimate(mod.dValue, mod.nTimeUnits);
-	case IUI_TIMESPENT:		return SetSelectedTaskTimeSpent(mod.dValue, mod.nTimeUnits);
-	case IUI_COMMENTS:		return SetSelectedTaskComments(mod.szValue);
-	case IUI_FLAG:			return SetSelectedTaskFlag(mod.bValue);
-	case IUI_RISK:			return SetSelectedTaskRisk(mod.nValue);
-	case IUI_EXTERNALID: 	return SetSelectedTaskExtID(mod.szValue);
-	case IUI_COST:			return SetSelectedTaskCost(mod.dValue);
-	case IUI_VERSION:		return SetSelectedTaskVersion(mod.szValue);
-	case IUI_CUSTOMATTRIB:	return SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
-	case IUI_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, CDateHelper::GetDate(mod.tValue));
-	case IUI_STARTDATE:		return SetSelectedTaskDate(TDCD_START, CDateHelper::GetDate(mod.tValue));
+	case IUI_TASKNAME:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskTitle(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskTitle(mod.szValue);
+		}
+		break;
+
+	case IUI_PRIORITY:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskPriority(dwTaskID, mod.nAttrib));
+			else
+				bChange = SetSelectedTaskPriority(mod.nValue);
+		}
+		break;
+
+	case IUI_COLOR: 		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskColor(dwTaskID, mod.crValue));
+			else
+				bChange = SetSelectedTaskColor(mod.crValue);
+		}
+		break;
+
+	case IUI_ALLOCBY:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskAllocBy(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskAllocBy(mod.szValue);
+		}
+		break;
+
+	case IUI_STATUS:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskStatus(mod.szValue);
+		}
+		break;
+
+	case IUI_PERCENT:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
+			else
+				bChange = SetSelectedTaskPercentDone(mod.nValue);
+		}
+		break;
+
+	case IUI_TIMEEST:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, mod.dValue, mod.nTimeUnits));
+			else
+				bChange = SetSelectedTaskTimeEstimate(mod.dValue, mod.nTimeUnits);
+		}
+		break;
+
+	case IUI_TIMESPENT:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, mod.dValue, mod.nTimeUnits));
+			else
+				bChange = SetSelectedTaskTimeSpent(mod.dValue, mod.nTimeUnits);
+		}
+		break;
+
+	case IUI_COMMENTS:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskComments(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskComments(mod.szValue);
+		}
+		break;
+
+	case IUI_FLAG:			
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskFlag(dwTaskID, mod.bValue));
+			else
+				bChange = SetSelectedTaskFlag(mod.bValue);
+		}
+		break;
+
+	case IUI_RISK:			
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskRisk(dwTaskID, mod.nValue));
+			else
+				bChange = SetSelectedTaskRisk(mod.nValue);
+		}
+		break;
+
+	case IUI_EXTERNALID: 	
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskExternalID(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskExternalID(mod.szValue);
+		}
+		break;
+
+	case IUI_COST:			
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskCost(dwTaskID, mod.dValue));
+			else
+				bChange = SetSelectedTaskCost(mod.dValue);
+		}
+		break;
+
+	case IUI_VERSION:		
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskVersion(dwTaskID, mod.szValue));
+			else
+				bChange = SetSelectedTaskVersion(mod.szValue);
+		}
+		break;
+
+	case IUI_DONEDATE:		
+		{
+			COleDateTime date(CDateHelper::GetDate(mod.tValue));
+
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskDate(dwTaskID, TDCD_DONE, date));
+			else
+				bChange = SetSelectedTaskDate(TDCD_DONE, date);
+		}
+		break;
+
+	case IUI_STARTDATE:		
+		{
+			COleDateTime date(CDateHelper::GetDate(mod.tValue));
+
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskDate(dwTaskID, TDCD_START, date));
+			else
+				bChange = SetSelectedTaskDate(TDCD_START, date);
+		}
+		break;
 
 	case IUI_DUEDATE:		
-		if (SetSelectedTaskDate(TDCD_DUE, CDateHelper::GetDate(mod.tValue)))
 		{
-			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-				bDependChange = TRUE;
-			else
-				bMoveTask = TRUE;
+			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
-			return TRUE;
+			if (dwTaskID)
+				bChange = (m_data.SetTaskDate(dwTaskID, TDCD_DUE, date));
+			else
+				bChange = SetSelectedTaskDate(TDCD_DUE, date);
+
+			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+				bDependChange = bChange;
+			else
+				bMoveTask = bChange;
 		}
-		// else
-		return FALSE;
+		break;
 		
 	case IUI_ALLOCTO:
-		Misc::Split(mod.szValue, aValues);
-		return SetSelectedTaskAllocTo(aValues);
+		{
+			Misc::Split(mod.szValue, aValues, '\n');
+
+			if (dwTaskID)
+				bChange = (m_data.SetTaskAllocTo(dwTaskID, aValues, FALSE));
+			else 
+				bChange = SetSelectedTaskAllocTo(aValues);
+
+		}
+		break;
 		
 	case IUI_CATEGORY:
-		Misc::Split(mod.szValue, aValues);
-		return SetSelectedTaskCategories(aValues);
+		{
+			Misc::Split(mod.szValue, aValues, '\n');
+
+			if (dwTaskID)
+				bChange = (m_data.SetTaskCategories(dwTaskID, aValues, FALSE));
+			else 
+				bChange = SetSelectedTaskCategories(aValues);
+		}
+		break;
 		
 	case IUI_TAGS:
-		Misc::Split(mod.szValue, aValues);
-		return SetSelectedTaskTags(aValues);
+		{
+			Misc::Split(mod.szValue, aValues, '\n');
+
+			if (dwTaskID)
+				bChange = (m_data.SetTaskTags(dwTaskID, aValues, FALSE));
+			else 
+				bChange = SetSelectedTaskTags(aValues);
+		}
+		break;
 		
 	case IUI_FILEREF:
-		Misc::Split(mod.szValue, aValues);
-		return SetSelectedTaskFileRefs(aValues);
+		{
+			Misc::Split(mod.szValue, aValues, '\n');
+
+			if (dwTaskID)
+				bChange = (m_data.SetTaskFileRefs(dwTaskID, aValues, FALSE));
+			else 
+				bChange = SetSelectedTaskFileRefs(aValues);
+		}
+		break;
 		
 	case IUI_DEPENDENCY: 
-		Misc::Split(mod.szValue, aValues);
-		
-		if (SetSelectedTaskDependencies(aValues))
 		{
-			bDependChange = TRUE;
-			return TRUE;
-		}
-		// else
-		return FALSE;
+			Misc::Split(mod.szValue, aValues, '\n');
 
+			if (dwTaskID)
+				bChange = (m_data.SetTaskDependencies(dwTaskID, aValues, FALSE));
+			else 
+				bChange = SetSelectedTaskDependencies(aValues);
+	
+			bDependChange = bChange;
+		}
+		break;
+		
 	case IUI_OFFSETTASK:
 		if (GetSelectedCount() == 1)
 		{
-			if (ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue)))
-			{
-				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-					bDependChange = TRUE;
-				else
-					bMoveTask = TRUE;
-				
-				return TRUE;
-			}
+			ASSERT(dwTaskID == 0);
+
+			bChange = ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue));
+
+			if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+				bDependChange = bChange;
+			else
+				bMoveTask = bChange;
 		}
-		// else
-		return FALSE;
-		
+		break;
+
+	case IUI_CUSTOMATTRIB:	
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskCustomAttributeData(dwTaskID, mod.szCustomAttribID, mod.szValue));
+			else
+				bChange = SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
+		}
+		break;
+
 	// not supported
 	case IUI_RECURRENCE: 
 	case IUI_CREATIONDATE:
 	case IUI_CREATEDBY:
 		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	// all else
-	ASSERT(0);
-	return FALSE;
+	return bChange;
 }
 
 BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
@@ -1418,6 +1609,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	HandleUnsavedComments();
 
+	// Aggregate all mods as a single edit
 	IMPLEMENT_UNDO_EDIT(m_data);
 
 	BOOL bDependChange = FALSE, bMoveTask = FALSE, bSuccess = TRUE;

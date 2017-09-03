@@ -12261,10 +12261,16 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanEditSelectedTask() const 
+BOOL CToDoCtrl::CanEditSelectedTask(DWORD dwTaskID) const 
 { 
-	return (!IsReadOnly() && GetSelectedCount() &&
-			m_taskTree.SelectionHasUnlocked()); 
+	if (IsReadOnly())
+		return FALSE;
+
+	if (dwTaskID)
+		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_data.IsTaskLocked(dwTaskID));
+
+	// else
+	return (GetSelectedCount() && m_taskTree.SelectionHasUnlocked()); 
 }
 
 BOOL CToDoCtrl::CanEditSelectedTaskLock() const

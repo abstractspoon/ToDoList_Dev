@@ -70,6 +70,7 @@ struct KANBANITEM
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
 
 	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
+	void RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
 	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
@@ -117,6 +118,9 @@ public:
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID) const;
 #endif
+
+protected:
+	static void AddItemToMap(const KANBANITEM* pKI, const CString& sValue, CKanbanItemArrayMap& map);
 
 };
 

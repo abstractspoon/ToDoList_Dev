@@ -219,6 +219,7 @@ const CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl() const
 BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	ClearOtherListSelections(NULL);
+
 	if (aTaskIDs.GetSize() == 0)
 	{
 		return FALSE;
@@ -900,6 +901,21 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, LPCTS
 
 	// all else
 	return FALSE;
+}
+
+int CKanbanCtrl::GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const
+{
+	ASSERT(!m_sTrackAttribID.IsEmpty());
+
+	const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+	ASSERT(pKI);
+
+	if (pKI)
+		pKI->GetTrackedAttributeValues(m_sTrackAttribID, aValues);
+	else
+		aValues.RemoveAll();
+	
+	return aValues.GetSize();
 }
 
 int CKanbanCtrl::GetAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const
@@ -2352,18 +2368,22 @@ CKanbanListCtrl* CKanbanCtrl::HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHe
 
 BOOL CKanbanCtrl::IsDragging() const
 {
+	ASSERT(!m_bReadOnly);
 	ASSERT((m_pDragFromList && (m_aDragItems.GetSize() > 0)) ||
 			(!m_pDragFromList && (m_aDragItems.GetSize() == 0)));
 
-	return (m_pDragFromList && (m_aDragItems.GetSize() > 0));
+	return (!m_bReadOnly && m_pDragFromList && (m_aDragItems.GetSize() > 0));
 }
 
-BOOL CKanbanCtrl::NotifyParentAttibuteChange(LPCTSTR szValue)
+BOOL CKanbanCtrl::NotifyParentAttibuteChange(const CDWordArray& aTaskIDs)
 {
 	ASSERT(!m_bReadOnly);
-//	ASSERT(GetSelectedTaskID());
+	ASSERT(aTaskIDs.GetSize());
 
-	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)szValue);
+	SelectTasks(aTaskIDs);
+	NotifyParentSelectionChange();
+	
+	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)&aTaskIDs);
 }
 
 void CKanbanCtrl::NotifyParentSelectionChange()
@@ -2593,76 +2613,50 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if (IsDragging())
 	{
-		ASSERT(!m_bReadOnly);
-
 		// get the list under the mouse
 		ClientToScreen(&point);
 		CKanbanListCtrl* pDestList = HitTestListCtrl(point);
 
-		if (pDestList && (pDestList != m_pDragFromList)  && 
-			!m_pDragFromList->AttributeValuesMatch(*pDestList))
+		if (CKanbanListCtrl::CanDrag(m_pDragFromList, pDestList))
 		{
-			// move the items
-			CString sAttribValue;
+			CString sDestAttribValue;
 			
-			if (GetListCtrlAttributeValue(pDestList, point, sAttribValue))
+			if (GetListCtrlAttributeValue(pDestList, point, sDestAttribValue))
 			{
-				// Deselect existing target selection
 				m_pSelectedList = pDestList;
 				pDestList->SetItemState(-1, 0, (LVIS_FOCUSED | LVIS_SELECTED));
 
-				// 1. Copy the source tasks to the destination
 				int nDrag = m_aDragItems.GetSize();
+				CDWordArray aChangedIDs;
 				
 				while (nDrag--)
 				{
-					int nDragItem = m_aDragItems[nDrag];
-					DWORD dwDragID = m_pDragFromList->GetItemData(nDragItem);
-					ASSERT(dwDragID);
-					
-					KANBANITEM* pKI = GetKanbanItem(dwDragID);
-					ASSERT(pKI);
-					
-					if (pKI)
+					int nItem = m_aDragItems[nDrag];
+					DWORD dwTaskID = m_pDragFromList->GetTaskID(nItem);
+
+					if (EndDragItem(m_pDragFromList, nItem, pDestList, sDestAttribValue))
 					{
-						pKI->SetTrackedAttributeValue(m_sTrackAttribID, sAttribValue);
-						
-						int nTask = pDestList->AddTask(*pKI, TRUE);
-						pDestList->SetItemState(nTask, (LVIS_FOCUSED | LVIS_SELECTED), (LVIS_FOCUSED | LVIS_SELECTED));
+						aChangedIDs.Add(dwTaskID);
 					}
 				}
 
-				// 2. Remove the source tasks
-				nDrag = m_aDragItems.GetSize();
-				
-				while (nDrag--)
+				if (!WantShowColumn(m_pDragFromList) && UsingDynamicColumns())
 				{
-					int nDragItem = m_aDragItems[nDrag];
+					int nList = Misc::FindT(m_aListCtrls, m_pDragFromList);
+					ASSERT(nList != -1);
 
-					// remove from src list
-					m_pDragFromList->DeleteItem(nDragItem);
+					m_aListCtrls.RemoveAt(nList);
+				}
+				else
+				{
 					m_pDragFromList->RefreshColumnTitle();
 				}
+				pDestList->RefreshColumnTitle();
 
-				// Handle 'From' list now being empty
-				if (!WantShowColumn(m_pDragFromList))
-				{
-					if (UsingDynamicColumns())
-					{
-						int nList = Misc::FindT(m_aListCtrls, m_pDragFromList);
-						ASSERT(nList != -1);
-						
-						m_aListCtrls.RemoveAt(nList);
-					}
-					
-					// Fixed columns handled in Resize()
-					Resize();
-				}
-				
-				// Very important to make sure that the correct tasks
-				// are selected before sending the change notification
-				NotifyParentSelectionChange();
-				NotifyParentAttibuteChange(sAttribValue);
+				Resize();
+
+				if (aChangedIDs.GetSize())
+					NotifyParentAttibuteChange(aChangedIDs);
 			}
 		}
 
@@ -2674,6 +2668,70 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	m_pDragFromList = NULL;
 
 	CWnd::OnLButtonUp(nFlags, point);
+}
+
+BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, int nSrcItem, 
+								CKanbanListCtrl* pDestList, const CString& sDestAttribValue)
+{
+	ASSERT(CKanbanListCtrl::CanDrag(pSrcList, pDestList));
+
+	DWORD dwDragID = pSrcList->GetItemData(nSrcItem);
+	ASSERT(dwDragID);
+
+	if (!dwDragID)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	KANBANITEM* pKI = GetKanbanItem(dwDragID);
+
+	if (!pKI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bSrcIsBacklog = pSrcList->IsBacklog();
+	BOOL bDestIsBacklog = pDestList->IsBacklog();
+	BOOL bMove = (bDestIsBacklog || Misc::ModKeysArePressed(MKS_NONE));
+
+	// Remove from the source list(s) if moving
+	if (bMove)
+	{
+		CStringArray aSrcListValues;
+		int nSrc = pSrcList->GetAttributeValues(aSrcListValues);
+
+		while (nSrc--)
+			pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcListValues[nSrc]);
+
+		pSrcList->DeleteItem(nSrcItem);
+
+		// other lists
+		nSrc = m_aListCtrls.GetSize();
+
+		while (nSrc--)
+		{
+			CKanbanListCtrl* pList = m_aListCtrls[nSrc];
+
+			if ((pList != pSrcList) && (pList != pDestList))
+			{
+				int nItem = pList->FindTask(dwDragID);
+
+				if (nItem != -1)
+					pList->DeleteItem(nItem);
+			}
+		}
+	}
+
+	// Append to the destination list
+	if (!bDestIsBacklog)
+		pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
+
+	if (pDestList->FindTask(dwDragID) == -1)
+		pDestList->AddTask(*pKI, TRUE);
+
+	return TRUE;
 }
 
 BOOL CKanbanCtrl::GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue)
@@ -2724,10 +2782,10 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		ClientToScreen(&point);
 		const CKanbanListCtrl* pDestList = HitTestListCtrl(point);
 
-		BOOL bValidDest = (pDestList && (pDestList != m_pDragFromList) && 
-							!m_pDragFromList->AttributeValuesMatch(*pDestList));
+		BOOL bValidDest = CKanbanListCtrl::CanDrag(m_pDragFromList, pDestList);
+		BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
-		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? GMOC_MOVE : GMOC_NO));
+		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? (bCopy ? GMOC_COPY : GMOC_MOVE) : GMOC_NO));
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);

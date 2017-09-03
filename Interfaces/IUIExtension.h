@@ -219,6 +219,8 @@ enum IUI_ATTRIBUTE
 struct IUITASKMOD
 {
 	IUI_ATTRIBUTE nAttrib;
+	DWORD dwSelectedTaskID;		// 'zero' for all selected tasks
+	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
 
 	// The attribute value
 	union
@@ -234,8 +236,7 @@ struct IUITASKMOD
 	// Extra info
 	union
 	{
-		LPCWSTR szCustomAttribID; // IUI_CUSTOMATTRIB
-		TDC_UNITS nTimeUnits;     // IUI_TIMEEST, IUI_TIMESPENT
+		TDC_UNITS nTimeUnits;		// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
 	};
 };
 

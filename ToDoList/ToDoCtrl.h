@@ -266,7 +266,7 @@ public:
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
 	double CalcSelectedTaskCost() const { return m_taskTree.CalcSelectedTaskCost(); }
 
-	BOOL CanEditSelectedTask() const;
+	BOOL CanEditSelectedTask(DWORD dwTaskID = 0) const;
 	BOOL CanEditSelectedTaskLock() const;
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }

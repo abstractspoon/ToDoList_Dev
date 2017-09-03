@@ -55,6 +55,7 @@ public:
 
 	int FindTask(DWORD dwItemID) const;
 	int FindTask(const CPoint& ptScreen) const;
+	DWORD GetTaskID(int nItem) const { return GetItemData(nItem); }
 
 	int GetSelectedTasks(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -84,6 +85,7 @@ public:
 
 	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV);
 	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, BOOL bWithLabel = TRUE);
+	static BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList);
 
 protected:
 	BOOL m_bTextColorIsBkgnd;

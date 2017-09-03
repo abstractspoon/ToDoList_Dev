@@ -754,9 +754,13 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	m_toolbar.RefreshButtonStates();
 }
 
-LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 {
-	CString sNewValue((LPCWSTR)lp), sCustAttribID;
+	ASSERT((HWND)wp == m_ctrlKanban.GetSafeHwnd());
+	ASSERT(lp);
+	const CDWordArray* pChangedIDs = (const CDWordArray*)lp;
+	
+	CString sCustAttribID;
 	IUI_ATTRIBUTE nAttrib = IUI_NONE;
 	
 	if (m_nTrackedAttrib == IUI_FIXEDCOLUMNS)
@@ -768,40 +772,60 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM /*wp*/, LPARAM lp)
 		nAttrib = m_nTrackedAttrib;
 		sCustAttribID = m_sCustomAttribID;
 	}
-	
-	IUITASKMOD mod = { nAttrib, 0 };
-	
-	switch (nAttrib)
+
+	int nNumTasks = pChangedIDs->GetSize();
+	CArray<IUITASKMOD> aMods;
+	CStringArray aModValues; // because we are sending pointers to temp values
+
+	aMods.SetSize(nNumTasks);
+	aModValues.SetSize(nNumTasks);
+
+	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
-	case IUI_STATUS:
-	case IUI_ALLOCTO:
-	case IUI_ALLOCBY:
-	case IUI_CATEGORY:
-	case IUI_VERSION:
-	case IUI_TAGS:
-		mod.szValue = sNewValue;
-		break;
+		IUITASKMOD& mod = aMods[nTask];
+
+		mod.nAttrib = nAttrib;
+		mod.dwSelectedTaskID = pChangedIDs->GetAt(nTask);
+
+		CStringArray aTaskValues;
+		m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
+
+		aModValues[nTask] = Misc::FormatArray(aTaskValues, '\n');
+
+		switch (nAttrib)
+		{
+		case IUI_ALLOCTO:
+		case IUI_CATEGORY:
+		case IUI_TAGS:
+		case IUI_STATUS:
+		case IUI_ALLOCBY:
+		case IUI_VERSION:
+			mod.szValue = aModValues[nTask];
+			break;
 		
-	case IUI_PRIORITY:
-	case IUI_RISK:
-		if (sNewValue.IsEmpty())
-			mod.nValue = -2; // None
-		else
-			mod.nValue = _ttoi(sNewValue);
-		break;
+		case IUI_PRIORITY:
+		case IUI_RISK:
+			if (aTaskValues.IsEmpty())
+				mod.nValue = -2; // None
+			else
+				mod.nValue = _ttoi(aTaskValues[0]);
+			break;
 		
-	case IUI_CUSTOMATTRIB:
-		ASSERT(!sCustAttribID.IsEmpty());
+		case IUI_CUSTOMATTRIB:
+			ASSERT(!sCustAttribID.IsEmpty());
 		
-		mod.szValue = sNewValue;
-		mod.szCustomAttribID = sCustAttribID;
-		break;
+			mod.szValue = aTaskValues[nTask];
+			mod.szCustomAttribID = sCustAttribID;
+
+			// TODO - multi value items and time periods
+			break;
 		
-	default:
-		return FALSE;
+		default:
+			return FALSE;
+		}
 	}
-	
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+		
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)aMods.GetData());
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/) 
