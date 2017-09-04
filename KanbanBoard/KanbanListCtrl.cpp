@@ -9,12 +9,16 @@
 
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enstring.h"
+#include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
+#include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\winclasses.h"
+#include "..\shared\wclassdefines.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -101,7 +105,13 @@ BOOL CKanbanListCtrlArray::RemoveAt(int nList)
 	return TRUE;
 }
 
-int CKanbanListCtrlArray::FindListCtrl(DWORD dwTaskID) const
+int CKanbanListCtrlArray::Find(DWORD dwTaskID) const
+{
+	int nUnused;
+	return Find(dwTaskID, nUnused);
+}
+
+int CKanbanListCtrlArray::Find(DWORD dwTaskID, int& nItem) const
 {
 	if (dwTaskID)
 	{
@@ -109,16 +119,552 @@ int CKanbanListCtrlArray::FindListCtrl(DWORD dwTaskID) const
 		
 		while (nList--)
 		{
-			if (GetAt(nList)->FindTask(dwTaskID) != -1)
+			CKanbanListCtrl* pList = GetAt(nList);
+			ASSERT(pList);
+
+			nItem = pList->FindTask(dwTaskID);
+			
+			if (nItem != -1)
 				return nList;
 		}
 	}
 
-	// else
-	ASSERT(0);
+	// not found
+	nItem = -1;
 	return -1;
 }
 
+int CKanbanListCtrlArray::Find(const CString& sAttribValue) const
+{
+	CString sAttribValueID(Misc::ToUpper(sAttribValue));
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetAttributeValueID() == sAttribValueID)
+			return nList;
+	}
+
+	// not found
+	return -1;
+}
+
+int CKanbanListCtrlArray::Find(HWND hwnd) const
+{
+	ASSERT(hwnd);
+
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetSafeHwnd() == hwnd)
+			return nList;
+	}
+
+	// not found
+	return -1;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::Get(DWORD dwTaskID) const
+{
+	int nUnused;
+	return Get(dwTaskID, nUnused);
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::Get(DWORD dwTaskID, int& nItem) const
+{
+	int nFind = Find(dwTaskID, nItem);
+
+	if (nFind != -1)
+		return GetAt(nFind);
+
+	// not found
+	nItem = -1;
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::Get(const CString& sAttribValue) const
+{
+	int nFind = Find(sAttribValue);
+
+	if (nFind != -1)
+		return GetAt(nFind);
+
+	// not found
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::Get(HWND hwnd) const
+{
+	int nFind = Find(hwnd);
+
+	if (nFind != -1)
+		return GetAt(nFind);
+
+	// not found
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::GetFirstNonEmpty() const
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetItemCount())
+			return pList;
+	}
+
+	// all empty
+	return NULL;
+}
+
+void CKanbanListCtrlArray::OnDisplayAttributeChanged()
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->OnDisplayAttributeChanged();
+	}
+}
+
+void CKanbanListCtrlArray::SetTextColorIsBackground(BOOL bSet)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetTextColorIsBackground(bSet);
+	}
+}
+
+void CKanbanListCtrlArray::SetShowTaskColorAsBar(BOOL bSet)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetShowTaskColorAsBar(bSet);
+	}
+}
+
+void CKanbanListCtrlArray::SetStrikeThruDoneTasks(BOOL bSet)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetStrikeThruDoneTasks(bSet);
+	}
+}
+
+void CKanbanListCtrlArray::SetColorTaskBarByPriority(BOOL bSet)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetColorTaskBarByPriority(bSet);
+	}
+}
+
+void CKanbanListCtrlArray::SetDrawAttributeLabels(BOOL bDraw)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetDrawAttributeLabels(bDraw);
+	}
+}
+
+void CKanbanListCtrlArray::SetShowCompletionCheckboxes(BOOL bShow)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SetShowCompletionCheckboxes(bShow);
+	}
+}
+
+void CKanbanListCtrlArray::Exclude(CDC* pDC)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		CDialogHelper::ExcludeChild(pList, pDC);
+	}
+}
+
+void CKanbanListCtrlArray::SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->Sort(nBy, bAscending, bSubtasksBelowParent);
+	}
+}
+
+void CKanbanListCtrlArray::Sort()
+{
+	if (GetSize() > 1)
+		qsort(GetData(), GetSize(), sizeof(CKanbanListCtrl**), ListSortProc);
+}
+
+int CKanbanListCtrlArray::ListSortProc(const void* pV1, const void* pV2)
+{
+	typedef CKanbanListCtrl* LPCKanbanListCtrl;
+
+	const CKanbanListCtrl* pKLC1 = *(static_cast<const LPCKanbanListCtrl*>(pV1));
+	const CKanbanListCtrl* pKLC2 = *(static_cast<const LPCKanbanListCtrl*>(pV2));
+
+	// backlog always comes first
+	if (!pKLC1->HasAnyValues())
+		return -1;
+
+	if (!pKLC2->HasAnyValues())
+		return 1;
+
+	// Sort by ID
+	return Misc::NaturalCompare(pKLC1->GetAttributeValue(), pKLC2->GetAttributeValue());
+}
+
+int CKanbanListCtrlArray::GetVisibleCount(BOOL bIncBacklog) const
+{
+	int nList = GetSize(), nNumVis = 0;
+
+	while (nList--)
+	{
+		const CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetItemCount() || (bIncBacklog && pList->IsBacklog()))
+			nNumVis++;
+	}
+
+	return nNumVis;
+}
+
+float CKanbanListCtrlArray::GetAverageCharWidth()
+{
+	ASSERT(GetSize());
+
+	if (!GetSize())
+		return 1.0f;
+
+	// else
+	CWnd* pRef = GetAt(0);
+	CClientDC dc(pRef);
+
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
+	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
+
+	dc.SelectObject(pOldFont);
+
+	return fAveCharWidth;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOOL bNext, 
+												BOOL bExcludeEmpty, BOOL bFixedColumns) const
+{
+	ASSERT(pList);
+
+	int nList = Misc::FindT(*this, pList);
+
+	if (nList == -1)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	if (bNext)
+	{
+		for (int nNext = (nList + 1); nNext < GetSize(); nNext++)
+		{
+			CKanbanListCtrl* pNext = GetAt(nNext);
+			ASSERT(pNext);
+
+			if (bExcludeEmpty && !pNext->GetItemCount())
+				continue;
+
+			if (bFixedColumns && !pNext->IsWindowVisible())
+				continue;
+
+			// else
+			return pNext;
+		}
+	}
+	else // prev
+	{
+		int nPrev(nList);
+
+		while (nPrev--)
+		{
+			CKanbanListCtrl* pPrev = GetAt(nPrev);
+			ASSERT(pPrev);
+
+			if (bExcludeEmpty && !pPrev->GetItemCount())
+				continue;
+
+			if (bFixedColumns && !pPrev->IsWindowVisible())
+				continue;
+
+			// else
+			return pPrev;
+		}
+	}
+
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::HitTest(const CPoint& ptScreen, BOOL* pbHeader) const
+{
+	HWND hwnd = ::WindowFromPoint(ptScreen);
+
+	if (hwnd == NULL)
+		return NULL;
+
+	int nFind = Find(hwnd);
+	CKanbanListCtrl* pList = ((nFind == -1) ? NULL : GetAt(nFind));
+
+	// If not a list, try for a list's header
+	if (!pList && pbHeader && CWinClasses::IsClass(hwnd, WC_HEADER))
+	{
+		hwnd = ::GetParent(hwnd);
+		pList = Get(hwnd);
+
+		*pbHeader = (pList != NULL);
+	}
+
+	return pList;
+}
+
+DWORD CKanbanListCtrlArray::HitTestTask(const CPoint& ptScreen) const
+{
+	const CKanbanListCtrl* pList = HitTest(ptScreen);
+
+	if (pList)
+	{
+		int nItem = pList->FindTask(ptScreen);
+
+		if (nItem != -1)
+			return pList->GetTaskID(nItem);
+	}
+
+	// else
+	return 0;
+}
+
+void CKanbanListCtrlArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList != pIgnore)
+			pList->ClearSelection();
+
+		pList->SetSelected(pList == pIgnore);
+	}
+}
+
+int CKanbanListCtrlArray::CalcRequiredColumnWidthForImage() const
+{
+	int nMaxWidth = 0;
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		const CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		int nListWidth = pList->CalcRequiredColumnWidthForImage();
+		nMaxWidth = max(nMaxWidth, nListWidth);
+	}
+
+	return nMaxWidth;
+}
+
+BOOL CKanbanListCtrlArray::CanSaveToImage() const
+{
+	// At least one column must have items
+	// And the item count per page must be 1 or more
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		const CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetCountPerPage() == 0)
+			return FALSE;
+
+		// else
+		if (pList->GetItemCount())
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
+{
+	if (!CanSaveToImage())
+		return FALSE;
+
+	int nNumLists = GetSize();
+
+	CArray<CBitmap, CBitmap&> aListBmps;
+	aListBmps.SetSize(nNumLists, 1);
+
+	int nListWidth = 0, nListHeight = 0;
+	int nReqColWidth = CalcRequiredColumnWidthForImage();
+
+	for (int nList = 0; nList < nNumLists; nList++)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		CEnBitmap bmp;
+
+		if (!pList->SaveToImage(bmp, nReqColWidth))
+			return FALSE;
+
+		CSize size = bmp.GetSize();
+		nListHeight = max(nListHeight, size.cy);
+
+		if (nListWidth == 0)
+			nListWidth = size.cx;
+		else
+			ASSERT(nListWidth == size.cx);
+
+		aListBmps[nList].Attach(bmp.Detach());
+	}
+
+	// Create some memory DCs
+	CClientDC dc(GetAt(0));
+	CDC dcImage, dcList;
+
+	if (dcImage.CreateCompatibleDC(&dc) && dcList.CreateCompatibleDC(&dc))
+	{
+		// Create the image big enough to fit the lists side-by-side
+		int nTotalWidth = (nNumLists * nListWidth);
+
+		if (bmImage.CreateCompatibleBitmap(&dc, nTotalWidth, nListHeight))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+			// Fill with background colour
+			dcImage.FillSolidRect(0, 0, nTotalWidth, nListHeight, GetSysColor(COLOR_WINDOW));
+
+			for (int nList = 0, nPos = 0; nList < nNumLists; nList++)
+			{
+				CBitmap* pOldList = dcList.SelectObject(&(aListBmps[nList]));
+
+				dcImage.BitBlt(nPos, 0, nListWidth, nListHeight, &dcList, 0, 0, SRCCOPY);
+				nPos += nListWidth;
+
+				dcImage.FillSolidRect((nPos - 1) , 0, 1, nListHeight, GetSysColor(COLOR_3DFACE));
+				dcList.SelectObject(pOldList);
+			}
+		}
+	}
+
+	return (bmImage.GetSafeHandle() != NULL);
+}
+
+void CKanbanListCtrlArray::OnSetFont(HFONT hFont)
+{
+	// Update all the lists
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		pList->SendMessage(WM_SETFONT, (WPARAM)hFont);
+	}
+}
+
+void CKanbanListCtrlArray::Redraw(BOOL bErase)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList)
+			pList->Invalidate(bErase);
+	}
+}
+
+void CKanbanListCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
+{
+	// Go thru each list removing deleted items
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		int nItem = pList->GetItemCount();
+
+		while (nItem--)
+		{
+			DWORD dwTaskID = pList->GetItemData(nItem);
+
+			if (!mapCurIDs.Has(dwTaskID))
+				pList->DeleteItem(nItem);
+		}
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrl
@@ -990,13 +1536,15 @@ void CKanbanListCtrl::ScrollToSelection()
 
 BOOL CKanbanListCtrl::SelectItem(int nItem, BOOL bFocus)
 {
-	UINT nMask = (LVIS_SELECTED | (bFocus ? LVIS_FOCUSED : 0));
+	ASSERT(nItem >= 0);
 
-	if (nItem == -1)
-		return SetItemState(-1, 0, nMask); // deselect all
-	
-	// else
+	UINT nMask = (LVIS_SELECTED | (bFocus ? LVIS_FOCUSED : 0));
 	return SetItemState(nItem, nMask, nMask);
+}
+
+void CKanbanListCtrl::ClearSelection()
+{
+	SetItemState(-1, 0, (LVIS_SELECTED | LVIS_FOCUSED));
 }
 
 BOOL CKanbanListCtrl::SelectTask(DWORD dwTaskID)
@@ -1031,7 +1579,7 @@ BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	}
 
 	// deselect all and reselect
-	SelectItem(-1);
+	ClearSelection();
 
 	if (aItems.GetSize())
 	{
@@ -1515,13 +2063,14 @@ BOOL CKanbanListCtrl::CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanList
 	
 	if (pDestList == pSrcList)
 		return FALSE;
-	
+		
 	if (pSrcList->AttributeValuesMatch(*pDestList))
 		return FALSE;
 
-	// Can't copy to the backlog
-	if (pDestList->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
+	// Can't copy FROM the backlog
+	if (pSrcList->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
 
 	return TRUE;
 }
+

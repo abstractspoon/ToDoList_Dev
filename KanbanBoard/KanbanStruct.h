@@ -22,6 +22,27 @@ typedef CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE&> CKanbanAttributeArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct KANBANCUSTOMATTRIBDEF
+{
+	KANBANCUSTOMATTRIBDEF();
+
+	CString sAttribID;
+	BOOL bMultiValue;
+};
+
+class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
+{
+public:
+	int AddDefinition(const CString& sAttribID, BOOL bMultiVal = FALSE);
+	BOOL HasDefinition(const CString& sAttribID) const;
+	int FindDefinition(const CString& sAttribID) const;
+
+	BOOL SetMultiValue(int nDef, BOOL bMultiVal = TRUE);
+	int GetAttributeIDs(CStringArray& aAttribIDs) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CKanbanValueMap : public CMapStringToString
 {
 public:
@@ -71,6 +92,7 @@ struct KANBANITEM
 
 	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
+	void RemoveAllTrackedAttributeValues(LPCTSTR szAttrib);
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
 	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
@@ -111,15 +133,20 @@ public:
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsLocked(DWORD dwTaskID) const;
-	int BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const;
+
 	KANBANITEM* GetItem(DWORD dwTaskID) const;
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
-	
+
+	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
+	int BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const;
+		
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID) const;
 #endif
 
 protected:
+	DWORD GetNextKey(POSITION& pos);
+
 	static void AddItemToMap(const KANBANITEM* pKI, const CString& sValue, CKanbanItemArrayMap& map);
 
 };

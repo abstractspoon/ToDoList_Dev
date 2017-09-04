@@ -73,7 +73,7 @@ public:
 
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
 	int GetAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const;
-	void LoadDefaultAttributeValues(const IPreferences* pPrefs);
+	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 	BOOL TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	IUI_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	IUI_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
@@ -95,20 +95,18 @@ protected:
 	IUI_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
 	CImageList m_ilHeight;
-	CStringArray m_aCustomAttribIDs;
 	CDWordArray m_aPriorityColors;
 	CFontCache m_fonts;
 
-	CArray<int, int> m_aDragItems;
-	CKanbanListCtrl* m_pDragFromList;
 	CKanbanListCtrl* m_pSelectedList;
 	CKanbanListCtrlArray m_aListCtrls;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
-	CKanbanAttributeValueMap m_mapDefAttributeValues;
+	CKanbanAttributeValueMap m_mapGlobalAttributeValues;
 	CKanbanAttributeArray m_aDisplayAttrib;
 	CKanbanColumnArray m_aColumnDefs;
+	CKanbanCustomAttributeDefinitionArray m_aCustomAttribDefs;
 
 protected:
 	// Generated message map functions
@@ -146,6 +144,7 @@ protected:
 	void CheckAddBacklogListCtrl();
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
+
 	BOOL WantDrawListAttributeLabels(int nListWidth);
 	float GetAverageListCharWidth();
 	int CalcRequiredColumnWidthForImage() const;
@@ -164,7 +163,7 @@ protected:
 	const CKanbanListCtrl* GetSelListCtrl() const;
 	const CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const;
 
-	BOOL SelectListCtrl(CKanbanListCtrl* pList);
+	BOOL SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent = TRUE);
 	BOOL IsSelectedListCtrl(HWND hWnd) const;
 	void FixupSelection();
 	BOOL DeleteListCtrl(int nList);
@@ -177,8 +176,9 @@ protected:
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
-	BOOL EndDragItem(CKanbanListCtrl* pSrcList, int nSrcItem, CKanbanListCtrl* pDestList, const CString& sDestAttribValue);
-
+	BOOL EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID, CKanbanListCtrl* pDestList, const CString& sDestAttribValue);
+	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
+	
 	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
 	BOOL GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue);
@@ -186,7 +186,9 @@ protected:
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, int nNewValue);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nAttrib, const CStringArray& aNewValues);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
-	void LoadDefaultAttributeValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
+	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
+	BOOL IsTrackedAttributeMultiValue() const;
+	BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList) const;
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL RebuildData(const ITASKLISTBASE* pTasks, const CSet<IUI_ATTRIBUTE>& attrib);
@@ -203,13 +205,11 @@ protected:
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
-	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents);
 	static CString GetXMLTag(IUI_ATTRIBUTE nAttrib);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib);
-	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static int ListSortProc(const void* pV1, const void* pV2);
+	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 
 };
 

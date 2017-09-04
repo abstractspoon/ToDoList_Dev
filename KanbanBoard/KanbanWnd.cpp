@@ -293,7 +293,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	UpdatePriorityColors(pPrefs);
 	
 	// Default attribute values
-	m_ctrlKanban.LoadDefaultAttributeValues(pPrefs);
+	m_ctrlKanban.LoadDefaultAttributeListValues(pPrefs);
 
 	// Kanban specific options
 	if (!bAppOnly)
@@ -775,10 +775,10 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 
 	int nNumTasks = pChangedIDs->GetSize();
 	CArray<IUITASKMOD> aMods;
-	CStringArray aModValues; // because we are sending pointers to temp values
+	CStringArray aTempModValues; // because we are sending pointers to temp values
 
 	aMods.SetSize(nNumTasks);
-	aModValues.SetSize(nNumTasks);
+	aTempModValues.SetSize(nNumTasks);
 
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
@@ -790,7 +790,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		CStringArray aTaskValues;
 		m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
 
-		aModValues[nTask] = Misc::FormatArray(aTaskValues, '\n');
+		aTempModValues[nTask] = Misc::FormatArray(aTaskValues, '\n');
 
 		switch (nAttrib)
 		{
@@ -800,7 +800,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		case IUI_STATUS:
 		case IUI_ALLOCBY:
 		case IUI_VERSION:
-			mod.szValue = aModValues[nTask];
+			mod.szValue = aTempModValues[nTask];
 			break;
 		
 		case IUI_PRIORITY:
@@ -821,11 +821,11 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 			break;
 		
 		default:
-			return FALSE;
+			ASSERT(0);
 		}
 	}
 		
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)aMods.GetData());
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumTasks, (LPARAM)aMods.GetData());
 }
 
 LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/) 

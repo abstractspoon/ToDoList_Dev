@@ -19,6 +19,74 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() : bMultiValue(FALSE) 
+{
+}
+
+int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, BOOL bMultiVal)
+{
+	ASSERT(!sAttribID.IsEmpty());
+
+	int nFind = FindDefinition(sAttribID);
+
+	if (nFind == -1)
+	{
+		KANBANCUSTOMATTRIBDEF def;
+
+		def.sAttribID = sAttribID;
+		def.bMultiValue = bMultiVal;
+
+		nFind = Add(def);
+	}
+	else
+	{
+		GetAt(nFind).bMultiValue = bMultiVal;
+	}
+
+	return nFind;
+}
+
+BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(const CString& sAttribID) const
+{
+	return (FindDefinition(sAttribID) != -1);
+}
+
+int CKanbanCustomAttributeDefinitionArray::FindDefinition(const CString& sAttribID) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (GetAt(nDef).sAttribID == sAttribID)
+			return nDef;
+	}
+
+	// else
+	return -1;
+}
+
+BOOL CKanbanCustomAttributeDefinitionArray::SetMultiValue(int nDef, BOOL bMultiVal)
+{
+	if (nDef < 0 || nDef >= GetSize())
+		return FALSE;
+
+	GetAt(nDef).bMultiValue = bMultiVal;
+	return TRUE;
+}
+
+int CKanbanCustomAttributeDefinitionArray::GetAttributeIDs(CStringArray& aAttribIDs) const
+{
+	int nDef = GetSize();
+	aAttribIDs.SetSize(nDef);
+
+	while (nDef--)
+		aAttribIDs[nDef] = GetAt(nDef).sAttribID;
+
+	return aAttribIDs.GetSize();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL CKanbanValueMap::HasValue(const CString& sValue) const
 {
 	return Misc::HasKey(*this, Misc::ToUpper(sValue));
@@ -199,6 +267,17 @@ void KANBANITEM::RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 
 	if (!Misc::IsEmpty(szValue))
 		mapAttribValues.Remove(szAttrib, szValue, TRUE);
+}
+
+void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
+{
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	mapAttribValues.RemoveKey(szAttrib);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue)
@@ -546,6 +625,31 @@ KANBANITEM* CKanbanItemMap::NewItem(DWORD dwTaskID, const CString& sTitle)
 	return pKI;
 }
 
+void CKanbanItemMap::RemoveDeletedItems(const CDWordSet& mapCurIDs)
+{
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextKey(pos);
+		ASSERT(dwTaskID);
+
+		if (dwTaskID && !mapCurIDs.Has(dwTaskID))
+			RemoveKey(dwTaskID);
+	}
+}
+
+DWORD CKanbanItemMap::GetNextKey(POSITION& pos)
+{
+	ASSERT(pos);
+
+	DWORD dwTaskID = 0;
+	KANBANITEM* pUnused;
+	GetNextAssoc(pos, dwTaskID, pUnused);
+
+	return dwTaskID;
+}
+
 int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const
 {
 	ASSERT(!Misc::IsEmpty(szAttribID));
@@ -561,7 +665,6 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& m
 	{
 		GetNextAssoc(pos, dwTaskID, pKI);
 		ASSERT(pKI);
-		const KANBANITEM* pCKI = pKI;
 
 		CStringArray aAttribValues;
 		int nVal = pKI->GetTrackedAttributeValues(szAttribID, aAttribValues);

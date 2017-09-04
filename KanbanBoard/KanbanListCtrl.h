@@ -14,6 +14,7 @@
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\fontcache.h"
 #include "..\Shared\tooltipctrlex.h"
+#include "..\Shared\mapex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -62,8 +63,9 @@ public:
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL IsSelectingTask() const { return (m_dwSelectingTask != 0); }
 	void ScrollToSelection();
-	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
 	BOOL GetLabelEditRect(LPRECT pEdit);
+	void ClearSelection();
+	void SetSelected(BOOL bSelected);
 
 	void SetBackgroundColor(COLORREF color);
 	void SetExcessColor(COLORREF color);
@@ -74,7 +76,6 @@ public:
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
 	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
-	void SetSelected(BOOL bSelected);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 
 	void OnDisplayAttributeChanged();
@@ -156,6 +157,7 @@ protected:
 	BOOL GetItemLabelTextRect(int nItem, CRect& rItem) const;
 	BOOL InitTooltip();
 	BOOL GetItemTooltipRect(int nItem, CRect& rItem) const;
+	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
@@ -174,7 +176,50 @@ public:
 	
 	void RemoveAll();
 	BOOL RemoveAt(int nList);
-	int FindListCtrl(DWORD dwTaskID) const;
+
+	int Find(DWORD dwTaskID) const;
+	int Find(DWORD dwTaskID, int& nItem) const;
+	int Find(HWND hWnd) const;
+	int Find(const CString& sAttribValue) const;
+
+	CKanbanListCtrl* Get(DWORD dwTaskID) const;
+	CKanbanListCtrl* Get(DWORD dwTaskID, int& nItem) const;
+	CKanbanListCtrl* Get(HWND hWnd) const;
+	CKanbanListCtrl* Get(const CString& sAttribValue) const;
+	CKanbanListCtrl* GetFirstNonEmpty() const;
+
+	void SetTextColorIsBackground(BOOL bSet = TRUE);
+	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
+	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
+	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
+	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
+	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
+	
+	int GetVisibleCount(BOOL bIncBacklog) const;
+	float GetAverageCharWidth();
+	DWORD HitTestTask(const CPoint& ptScreen) const;
+	
+	int CalcRequiredColumnWidthForImage() const;
+	BOOL CanSaveToImage() const;
+	BOOL SaveToImage(CBitmap& bmImage);
+
+	CKanbanListCtrl* GetNext(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns) const;
+	CKanbanListCtrl* HitTest(const CPoint& ptScreen, BOOL* pbHeader = NULL) const;
+
+	void OnDisplayAttributeChanged();
+	void OnSetFont(HFONT hFont);
+
+	void Sort();
+	void SortItems(IUI_ATTRIBUTE nBy, BOOL bAscending, BOOL bSubtasksBelowParent);
+
+	void Exclude(CDC* pDC);
+	void ClearOtherSelections(const CKanbanListCtrl* pIgnore);
+	void Redraw(BOOL bErase);
+	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
+
+protected:
+	static int ListSortProc(const void* pV1, const void* pV2);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
