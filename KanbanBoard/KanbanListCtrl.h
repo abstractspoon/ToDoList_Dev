@@ -187,6 +187,7 @@ public:
 	CKanbanListCtrl* Get(HWND hWnd) const;
 	CKanbanListCtrl* Get(const CString& sAttribValue) const;
 	CKanbanListCtrl* GetFirstNonEmpty() const;
+	CKanbanListCtrl* GetBacklog() const;
 
 	void SetTextColorIsBackground(BOOL bSet = TRUE);
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);

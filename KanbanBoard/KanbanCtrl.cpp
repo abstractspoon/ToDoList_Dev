@@ -179,15 +179,70 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 {
 	switch (wp)
 	{
-		// handle 'escape' during dragging
 	case VK_ESCAPE:
+		// handle 'escape' during dragging
 		return (CancelOperation() != FALSE);
 
 	case VK_DELETE:
-		// From each of the selected tasks remove the attribute value of the
-		// selected list (column). Tasks having no values remaining are moved 
-		// to the backlog
-		// TODO
+		if (m_pSelectedList && !m_pSelectedList->IsBacklog())
+		{
+			// For each of the selected tasks remove the attribute value(s) of the
+			// selected list (column). Tasks having no values remaining are moved 
+			// to the backlog
+			CDWordArray aTaskIDs;
+			int nTask = GetSelectedTaskIDs(aTaskIDs);
+
+			CStringArray aListValues;
+			VERIFY(m_pSelectedList->GetAttributeValues(aListValues));
+
+			while (nTask--)
+			{
+				DWORD dwTaskID = aTaskIDs[nTask];
+				KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+				ASSERT(pKI);
+
+				if (pKI)
+					pKI->RemoveTrackedAttributeValues(m_sTrackAttribID, aListValues);
+			}
+
+			// Notify parent of changes before altering the lists because we can't
+			// guarantee that all the modified tasks will be in the same list afterwards
+			NotifyParentAttibuteChange(aTaskIDs);
+
+			// Reset selected list before removing items to 
+			// to prevent unwanted selection notifications
+			CKanbanListCtrl* pList = m_pSelectedList;
+			m_pSelectedList = NULL;
+
+			nTask = aTaskIDs.GetSize();
+
+			while (nTask--)
+			{
+				DWORD dwTaskID = aTaskIDs[nTask];
+				KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+				ASSERT(pKI);
+
+				if (pKI)
+				{
+					int nItem = pList->FindTask(dwTaskID);
+					ASSERT(nItem != -1);
+
+					pList->DeleteItem(nItem);
+
+					if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
+					{
+						CKanbanListCtrl* pBacklog = m_aListCtrls.GetBacklog();
+
+						if (pBacklog)
+							pBacklog->AddTask(*pKI, FALSE);
+					}
+				}
+			}
+
+			// try to restore selection
+			SelectTasks(aTaskIDs);
+			return TRUE;
+		}
 		break;
 	}
 

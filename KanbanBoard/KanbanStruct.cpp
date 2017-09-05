@@ -269,6 +269,20 @@ void KANBANITEM::RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 		mapAttribValues.Remove(szAttrib, szValue, TRUE);
 }
 
+void KANBANITEM::RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
+{
+	if (Misc::IsEmpty(szAttrib))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	int nVal = aValues.GetSize();
+
+	while (nVal--)
+		mapAttribValues.Remove(szAttrib, aValues[nVal], TRUE);
+}
+
 void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
 {
 	if (Misc::IsEmpty(szAttrib))
@@ -321,6 +335,13 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValue
 		aValues.Copy(*pArray);
 
 	return aValues.GetSize();
+}
+
+BOOL KANBANITEM::HasTrackedAttributeValues(LPCTSTR szAttrib) const
+{
+	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+
+	return (pArray && pArray->GetSize());
 }
 
 CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const

@@ -228,6 +228,23 @@ CKanbanListCtrl* CKanbanListCtrlArray::GetFirstNonEmpty() const
 	return NULL;
 }
 
+CKanbanListCtrl* CKanbanListCtrlArray::GetBacklog() const
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->IsBacklog())
+			return pList;
+	}
+
+	// no backlog
+	return NULL;
+}
+
 void CKanbanListCtrlArray::OnDisplayAttributeChanged()
 {
 	int nList = GetSize();

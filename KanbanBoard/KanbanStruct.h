@@ -79,6 +79,7 @@ struct KANBANITEM
 	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
+	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
@@ -92,6 +93,7 @@ struct KANBANITEM
 
 	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
+	void RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
 	void RemoveAllTrackedAttributeValues(LPCTSTR szAttrib);
 	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void SetTrackedAttributeValue(IUI_ATTRIBUTE nAttribID, LPCTSTR szValue);
