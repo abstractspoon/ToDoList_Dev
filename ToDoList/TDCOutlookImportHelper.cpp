@@ -338,10 +338,10 @@ BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTaskList, HTASKITEM 
 		pTasks->SetTaskStartDate64(hTask, time);
 
 	if (CDateHelper::GetTimeT64(tdi.dateDue, time))
-		pTasks->SetTaskDueDate(hTask, time);
+		pTasks->SetTaskDueDate64(hTask, time);
 	
 	if (CDateHelper::GetTimeT64(tdi.dateDone, time))
-		pTasks->SetTaskDoneDate(hTask, time);
+		pTasks->SetTaskDoneDate64(hTask, time);
 	
 	if (CDateHelper::GetTimeT64(tdi.dateCreated, time))
 		pTasks->SetTaskCreationDate64(hTask, time);
