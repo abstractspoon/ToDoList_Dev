@@ -24,6 +24,8 @@
 #define IDS_TDC_EDITPROMPT_MULTIPLETASKS 73
 #define IDS_TDC_COLUMN_LASTMODBY        74
 #define IDS_TDLBC_LASTMODBY             75
+#define IDS_OA_DURATION                 76
+#define IDS_OA_ENDDATE                  77
 #define IDD_ABOUTBOX                    100
 #define IDC_TODOLIST                    101
 #define IDC_TRAYICON                    102
@@ -1500,7 +1502,7 @@
 #define IDS_TDC_COLUMN_TASK             57874
 #define IDS_TDC_COLUMN_CREATEDBY        57875
 #define IDS_TDC_COLUMN_CREATEDATE       57876
-#define IDS_TDC_COLUMN_LASTMODDATE       57877
+#define IDS_TDC_COLUMN_LASTMODDATE      57877
 #define IDS_TDC_COLUMN_EXTID            57879
 #define IDS_TDC_SCALE0                  57880
 #define IDS_TDC_SCALE1                  57881

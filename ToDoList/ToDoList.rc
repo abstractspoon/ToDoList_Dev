@@ -2480,7 +2480,7 @@ BEGIN
         MENUITEM "&Flag",                       ID_SORTBY_FLAG
         MENUITEM "Icon",                        ID_SORTBY_ICON
         MENUITEM "&Lock",                       ID_SORTBY_LOCK
-        MENUITEM "Last &Modified Date"          ID_SORTBY_LASTMODDATE
+        MENUITEM "Last &Modified Date",         ID_SORTBY_LASTMODDATE
         MENUITEM "&Last Modified By",           ID_SORTBY_LASTMODBY
         MENUITEM "&Path",                       ID_SORTBY_PATH
         MENUITEM "Percent Co&mplete",           ID_SORTBY_PERCENT
@@ -4414,6 +4414,8 @@ BEGIN
     IDS_TDC_EDITPROMPT_MULTIPLETASKS "<multiple tasks>"
     IDS_TDC_COLUMN_LASTMODBY "Last Mod. By"
     IDS_TDLBC_LASTMODBY     "Last Modified By"
+    IDS_OA_DURATION         "Duration"
+    IDS_OA_ENDDATE          "End Date"
 END
 
 STRINGTABLE
