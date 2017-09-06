@@ -154,8 +154,6 @@ protected:
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
 	
-	static BOOL s_bRestoreExportSpaceForNotes;
-
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
 	afx_msg void OnEditSetTasklistTabColor();

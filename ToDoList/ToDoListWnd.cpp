@@ -121,6 +121,8 @@ enum
 	WM_DOINITIALDUETASKNOTIFY,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum 
 {
 	TIMER_READONLYSTATUS = 1,
@@ -133,31 +135,21 @@ enum
 	TIMER_TIMETRACKREMINDER,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum 
 {
 	INTERVAL_READONLYSTATUS		= 1000,
 	INTERVAL_TIMESTAMPCHANGE	= 10000,
-	//	INTERVAL_AUTOSAVE		= dynamically determined
+	// INTERVAL_AUTOSAVE		= calculated
 	INTERVAL_CHECKOUTSTATUS		= 5000,
 	INTERVAL_DUEITEMS			= ONE_MINUTE,
 	INTERVAL_TIMETRACKING		= 5000,
-	//	INTERVAL_AUTOMINIMIZE	= dynamically determined
+	// INTERVAL_AUTOMINIMIZE	= calculated
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-#ifndef WM_WTSSESSION_CHANGE
-#	define WM_WTSSESSION_CHANGE	0x02B1
-#	define WTS_SESSION_LOCK		0x7
-#	define WTS_SESSION_UNLOCK	0x8
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 
-
-BOOL CToDoListWnd::s_bRestoreExportSpaceForNotes = -1;
-
-/////////////////////////////////////////////////////////////////////////////
 
 CToDoListWnd::CToDoListWnd() 
 	: 
@@ -194,7 +186,7 @@ CToDoListWnd::CToDoListWnd()
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
-
+	
 	// init preferences
 	ResetPrefs();
 
@@ -652,7 +644,6 @@ void CToDoListWnd::SetupUIStrings()
 	CFileEdit::SetDefaultButtonTips(CEnString(IDS_BROWSE), CEnString(IDS_VIEW));
 	CFileEdit::SetDefaultBrowseTitles(CEnString(IDS_BROWSEFILE_TITLE), CEnString(IDS_BROWSEFOLDER_TITLE));
 
-	// misc
 	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
