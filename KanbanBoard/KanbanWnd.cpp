@@ -774,7 +774,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	}
 
 	int nNumTasks = pChangedIDs->GetSize();
-	CArray<IUITASKMOD> aMods;
+	CArray<IUITASKMOD, IUITASKMOD&> aMods;
 	CStringArray aTempModValues; // because we are sending pointers to temp values
 
 	aMods.SetSize(nNumTasks);
@@ -805,7 +805,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		
 		case IUI_PRIORITY:
 		case IUI_RISK:
-			if (aTaskValues.IsEmpty())
+			if (aTaskValues.GetSize() == 0)
 				mod.nValue = -2; // None
 			else
 				mod.nValue = _ttoi(aTaskValues[0]);

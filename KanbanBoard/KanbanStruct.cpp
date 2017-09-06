@@ -40,7 +40,7 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 	}
 	else
 	{
-		GetAt(nFind).bMultiValue = bMultiVal;
+		ElementAt(nFind).bMultiValue = bMultiVal;
 	}
 
 	return nFind;
@@ -70,7 +70,7 @@ BOOL CKanbanCustomAttributeDefinitionArray::SetMultiValue(int nDef, BOOL bMultiV
 	if (nDef < 0 || nDef >= GetSize())
 		return FALSE;
 
-	GetAt(nDef).bMultiValue = bMultiVal;
+	ElementAt(nDef).bMultiValue = bMultiVal;
 	return TRUE;
 }
 

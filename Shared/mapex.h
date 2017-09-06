@@ -368,7 +368,7 @@ public:
 
 		Misc::RemoveItem(sValue, *pArray);
 
-		if (bRemoveKeyWhenEmpty && pArray->IsEmpty())
+		if (bRemoveKeyWhenEmpty && (pArray->GetSize() == 0))
 			RemoveKey(sKey);
 	}
 

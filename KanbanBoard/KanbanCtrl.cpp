@@ -2228,7 +2228,7 @@ BOOL CKanbanCtrl::IsDragging() const
 {
 	ASSERT(!m_bReadOnly);
 
-	return (!m_bReadOnly && (GetCapture() == this));
+	return (!m_bReadOnly && (::GetCapture() == GetSafeHwnd()));
 }
 
 BOOL CKanbanCtrl::NotifyParentAttibuteChange(const CDWordArray& aTaskIDs)
