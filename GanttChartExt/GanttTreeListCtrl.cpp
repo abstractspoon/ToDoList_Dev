@@ -2395,14 +2395,22 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			}
 			break;
 
+		case WM_MOUSEWHEEL:
+			// if we have a horizontal scrollbar but NOT a vertical scrollbar
+			// then we need to redraw the whole tree to prevent artifacts
+			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+			{
+				CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
+
+				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+			}
+			break;
+
 		case WM_HSCROLL:
 			{
-				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+				CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
 
-				::InvalidateRect(hRealWnd, NULL, FALSE);
-				::UpdateWindow(hRealWnd);
-
-				return lr;
+				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 			}
 			break;
 
