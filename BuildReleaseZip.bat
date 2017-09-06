@@ -50,8 +50,8 @@ IF ERRORLEVEL 1 goto CONTINUE
  
 REM Copy latest Resources
 del %1\Unicode_Release\Resources\ /Q /S
-xcopy %RESPATH%\*.* %1\Unicode_Release\Resources\ /Y /D /E /EXCLUDE:D:\_code\ToDoList_Dev\BuildReleaseZip_Exclude.txt
 del %1\Unicode_Release\Resources\Translations\backup\ /Q
+xcopy %RESPATH%\*.* %1\Unicode_Release\Resources\ /Y /D /E /EXCLUDE:D:\_code\ToDoList_Dev\BuildReleaseZip_Exclude.txt
 
 REM Zip Resources
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Resources\ -x!.git*
