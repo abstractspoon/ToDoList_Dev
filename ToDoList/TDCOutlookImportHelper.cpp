@@ -273,11 +273,11 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			break;
 			
 		case TDCA_TIMEEST: 
-			tdi.dTimeEstimate = _ttof(sData);
+			tdi.dTimeEstimate = ImportDuration(sData, tdi.nTimeEstUnits);
 			break;
 			
 		case TDCA_TIMESPENT: 
-			tdi.dTimeSpent = _ttof(sData);
+			tdi.dTimeSpent = ImportDuration(sData, tdi.nTimeSpentUnits);
 			break;
 		}
 	}
@@ -292,6 +292,35 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 // 	}
 
 	return TRUE;
+}
+
+double CTDCOutlookImportHelper::ImportDuration(const CString& sData, TDC_UNITS& nUnits)
+{
+	double dTime = _ttof(sData);
+
+	if (dTime != 0.0)
+	{
+		if (dTime < 60.0)
+		{
+			nUnits = TDCU_MINS;
+		}
+		else
+		{
+			dTime /= 60;
+
+			if (dTime < 24.0)
+			{
+				nUnits = TDCU_HOURS;
+			}
+			else
+			{
+				dTime /= 24;
+				nUnits = TDCU_DAYS;
+			}
+		}
+	}
+
+	return dTime;
 }
 
 BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTaskList, HTASKITEM hTask, const TODOITEM& tdi)

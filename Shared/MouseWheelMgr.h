@@ -11,6 +11,8 @@
 
 #include "HookMgr.h"
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CMouseWheelMgr : public CHookMgr<CMouseWheelMgr>  
 {
    friend class CHookMgr<CMouseWheelMgr>;
@@ -22,13 +24,32 @@ public:
 
 protected:
 	CMouseWheelMgr();
- 	static CMouseWheelMgr& Instance() { return CHookMgr<CMouseWheelMgr>::GetInstance(); }
+ 	static CMouseWheelMgr& Instance();
 
 protected:
 	BOOL m_bShiftHorzScrollingEnabled;
 
 protected:
   	virtual BOOL OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CDisableMouseWheel : public CHookMgr<CDisableMouseWheel>  
+{
+	friend class CHookMgr<CDisableMouseWheel>;
+	
+public:
+	virtual ~CDisableMouseWheel();
+	static BOOL Initialize();
+	static void Release();
+	
+protected:
+	CDisableMouseWheel();
+	static CDisableMouseWheel& Instance();
+	
+protected:
+	virtual BOOL OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info);
 };
 
 #endif // !defined(AFX_MOUSEWHEELMGR_H__6738593F_D10B_45D9_ACA0_335DA7C0F630__INCLUDED_)

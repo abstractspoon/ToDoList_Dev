@@ -34,6 +34,7 @@ public:
 protected:
 	static BOOL ImportTask(const CTDCAttributeMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi);
 	static BOOL SetTaskAttributes(ITaskList* pTasks, HTASKITEM hTask, const TODOITEM& tdi);
+	static double ImportDuration(const CString& sData, TDC_UNITS& nUnits);
 };
 
 #endif // !defined(AFX_TDCOUTLOOKIMPORTHELPER_H__5B04111B_AD60_4EE0_A8B3_7E7D93772BC4__INCLUDED_)

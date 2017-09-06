@@ -50,6 +50,11 @@ void CMouseWheelMgr::Release()
 	GetInstance().ReleaseHooks();
 }
 
+CMouseWheelMgr& CMouseWheelMgr::Instance() 
+{ 
+	return CHookMgr<CMouseWheelMgr>::GetInstance(); 
+}
+
 BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 {
 	if (uMouseMsg == WM_MOUSEWHEEL)
@@ -175,3 +180,38 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 	// all else
 	return FALSE;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+CDisableMouseWheel::CDisableMouseWheel()
+{
+}
+
+CDisableMouseWheel::~CDisableMouseWheel()
+{
+}
+
+BOOL CDisableMouseWheel::Initialize()
+{
+	return GetInstance().InitHooks(HM_MOUSE);
+}
+
+void CDisableMouseWheel::Release()
+{
+	GetInstance().ReleaseHooks();
+}
+
+CDisableMouseWheel& CDisableMouseWheel::Instance() 
+{ 
+	return CHookMgr<CDisableMouseWheel>::GetInstance(); 
+}
+	
+BOOL CDisableMouseWheel::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& /*info*/)
+{
+	if (uMouseMsg == WM_MOUSEWHEEL)
+		return TRUE; // prevents WM_MOUSEWHEEL ever reaching a window within the app
+		
+	return FALSE;
+}
+
+//////////////////////////////////////////////////////////////////////

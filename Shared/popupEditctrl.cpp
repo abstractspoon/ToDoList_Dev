@@ -1,14 +1,3 @@
-//_ **********************************************************
-//_ 
-//_ Name: InputListCtrlEdit.cpp 
-//_ Purpose: 
-//_ Created: 15 September 1998 
-//_ Author: D.R.Godson
-//_ Modified By: 
-//_ 
-//_ Copyright (c) 1998 Brilliant Digital Entertainment Inc. 
-//_ 
-//_ **********************************************************
 
 // InputListCtrlEdit.cpp : implementation file
 //
@@ -16,7 +5,7 @@
 #include "stdafx.h"
 #include "popupEditctrl.h"
 
-#include "..\shared\HookMgr.h"
+#include "..\shared\MouseWheelMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,66 +14,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define WM_PEC_SHOW (WM_APP + 1)
-
-/////////////////////////////////////////////////////////////////////////////
-// Private class for tracking mouse-wheel so we can cancel
-// the edit in the event of the user scrolling
-
-class CPopupEditMouseWheelMgr : public CHookMgr<CPopupEditMouseWheelMgr>  
-{
-	friend class CHookMgr<CPopupEditMouseWheelMgr>;
-
-public:
-	virtual ~CPopupEditMouseWheelMgr()
-	{
-	}
-
-	static BOOL Initialize(HWND hwndNotify, UINT nEditCtrlID)
-	{
-		if (GetInstance().InitHooks(HM_MOUSE))
-		{
-			GetInstance().m_hwndNotify = hwndNotify;
-			GetInstance().m_nEditCtrlID = nEditCtrlID;
-			return TRUE;
-		}
-
-		// else
-		return FALSE;
-	}
-
-	static void Release()
-	{
-		GetInstance().ReleaseHooks();
-	}
-
-protected:
-	CPopupEditMouseWheelMgr()  : m_hwndNotify(NULL), m_nEditCtrlID(0)
-	{
-	}
-
-	static CPopupEditMouseWheelMgr& Instance() 
-	{ 
-		return CHookMgr<CPopupEditMouseWheelMgr>::GetInstance(); 
-	}
-
-protected:
-	HWND m_hwndNotify;
-	UINT m_nEditCtrlID;
-
-protected:
-	virtual BOOL OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& /*info*/)
-	{
-		if (uMouseMsg == WM_MOUSEWHEEL)
-		{
-			::SendMessage(m_hwndNotify, WM_PCANCELEDIT, m_nEditCtrlID, TRUE);
-			Release();
-
-			// fall thru to allow the scroll
-		}
-
-		return FALSE;
-	}
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CPopupEditCtrl
@@ -208,7 +137,8 @@ void CPopupEditCtrl::Show(CRect rPos)
 
 LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	CPopupEditMouseWheelMgr::Initialize(*m_pParent, m_nID);
+	// Prevent underlying window moving during edit
+	CDisableMouseWheel::Initialize();
 
 	// enable and show
 	Reset();
@@ -265,7 +195,7 @@ void CPopupEditCtrl::EndEdit(BOOL bCancel, BOOL bIntentional)
 		return;
 
 	m_bEditEnded = TRUE;
-	CPopupEditMouseWheelMgr::Release();
+	CDisableMouseWheel::Release();
 
 	if (GetSafeHwnd() && IsWindowVisible())
 	{

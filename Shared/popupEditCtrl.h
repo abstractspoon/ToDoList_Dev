@@ -1,14 +1,3 @@
-//_ **********************************************************
-//_ 
-//_ Name: InputListCtrlEdit.h 
-//_ Purpose: 
-//_ Created: 15 September 1998 
-//_ Author: D.R.Godson
-//_ Modified By: 
-//_ 
-//_ Copyright (c) 1998 Brilliant Digital Entertainment Inc. 
-//_ 
-//_ **********************************************************
 
 #if !defined(AFX_POPUPEDITCTRL_H__2E5810B2_D7DF_11D1_AB19_0000E8425C3E__INCLUDED_)
 #define AFX_POPUPEDITCTRL_H__2E5810B2_D7DF_11D1_AB19_0000E8425C3E__INCLUDED_
@@ -43,7 +32,6 @@ public:
 	void Reset() { m_bEditEnded = FALSE; }
 	void Show(CRect rPos = CRect(0, 0, 0, 0)); // screen or client depending on original creation mode
 	void CleanUp();
-	void Hide();
 	void SetCleanUp(PEC_CLEANUP nCleanUp) { m_nCleanUp = nCleanUp; }
 	void EndEdit(BOOL bCancel);
 
@@ -83,6 +71,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void EndEdit(BOOL bCancel, BOOL bIntentional);
+	void Hide();
 };
 
 /////////////////////////////////////////////////////////////////////////////
