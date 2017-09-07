@@ -1358,10 +1358,10 @@ BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip) const
 
 	m_tooltip.AdjustRect(rTip, TRUE);
 
-	CRect rItem;
-	GetItemRect(nItem, rItem, LVIR_BOUNDS);
-
-	rTip.bottom = (rItem.bottom - 1);
+// 	CRect rItem;
+// 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
+// 
+// 	rTip.bottom = (rItem.bottom - 1);
 
 	ClientToScreen(&rTip);
 
@@ -1507,13 +1507,9 @@ BOOL CKanbanListCtrl::GetLabelEditRect(LPRECT pEdit)
 
 	CRect rItem;
 
-	if (GetItemRect(nSelItem, rItem, LVIR_BOUNDS))
+	if (GetItemLabelTextRect(nSelItem, rItem))
 	{
-		// Adjust rect as we do in OnListCustomDraw
-		rItem.DeflateRect(3, 1, 1, 0);
-
-		if (m_bShowTaskColorAsBar)
-			rItem.left += (2 + BAR_WIDTH);
+		m_tooltip.AdjustRect(rItem, TRUE);
 
 		// make width of list column or 200 whichever is larger
 		int nWidth = max(rItem.Width(), MIN_LABEL_EDIT_WIDTH);
