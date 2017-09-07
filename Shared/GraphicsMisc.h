@@ -130,12 +130,14 @@ namespace GraphicsMisc
 	
 	int GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef = NULL);
 	int GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont = NULL);
-	int GetTextHeight(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef = NULL);
-	int GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont = NULL);
-	int AFX_CDECL GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
+	int GetTextWidth(CDC* pDC, const CString& sText);
+	int AFX_CDECL GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
 	float GetAverageCharWidth(CDC* pDC, CFont* pFont = NULL);
 	int GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	int GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
+	
+	int GetTextHeight(const CString& sText, HWND hWndRef, int nWidth, HFONT hFontRef = NULL);
+	int GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, CFont* pRefFont = NULL);
 	
 	inline BOOL VerifyDeleteObject(HGDIOBJ hObj)
 	{

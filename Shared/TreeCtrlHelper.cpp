@@ -1122,7 +1122,7 @@ HTREEITEM CTreeCtrlHelper::FindWidestItem(HTREEITEM htiParent, int& nWidth, BOOL
 			int nTextWidth = 6; // padding
 			
 			if (pDC)
-				nTextWidth += GraphicsMisc::GetTextWidth(pDC, m_tree.GetItemText(htiChild));
+				nTextWidth += pDC->GetTextExtent(m_tree.GetItemText(htiChild)).cx;
 			else			
 				nTextWidth += GraphicsMisc::GetTextWidth(m_tree.GetItemText(htiChild), m_tree);
 

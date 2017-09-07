@@ -4856,14 +4856,14 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 			DWORD dwRefID = m_find.GetLargestReferenceID();
 
 			if (dwRefID)
-				nColWidth = GraphicsMisc::GetTextWidth(pDC, _T("%u (%u)"), m_dwNextUniqueTaskID - 1, dwRefID);
+				nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%u (%u)"), m_dwNextUniqueTaskID - 1, dwRefID);
 			else
-				nColWidth = GraphicsMisc::GetTextWidth(pDC, _T("%u"), m_dwNextUniqueTaskID - 1);
+				nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%u"), m_dwNextUniqueTaskID - 1);
 		}
 		break; 
 
 	case TDCC_PARENTID:
-		nColWidth = GraphicsMisc::GetTextWidth(pDC, _T("%u"), m_dwNextUniqueTaskID - 1);
+		nColWidth = GraphicsMisc::GetFormattedTextWidth(pDC, _T("%u"), m_dwNextUniqueTaskID - 1);
 		break; 
 
 	case TDCC_POSITION:
@@ -5005,7 +5005,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 						}
 						else 
 						{
-							nColWidth = GraphicsMisc::GetTextWidth(pDC, _T("+"));
+							nColWidth = pDC->GetTextExtent(_T("+")).cx;
 						}
 						break;
 
@@ -5014,7 +5014,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 						{
 							// numerals are always the same width so we don't need average width
 							CString sLongest = m_find.GetLongestCustomAttribute(attribDef, bVisibleOnly);
-							nColWidth = GraphicsMisc::GetTextWidth(pDC, sLongest);
+							nColWidth = pDC->GetTextExtent(sLongest).cx;
 						}
 						break;
 

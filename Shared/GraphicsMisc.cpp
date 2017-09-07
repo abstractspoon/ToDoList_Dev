@@ -596,7 +596,12 @@ int GraphicsMisc::GetTextHeight(const CString& sText, CWnd& wndRef, int nWidth, 
 	return rText.Height();
 }
 
-int AFX_CDECL GraphicsMisc::GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
+int GraphicsMisc::GetTextWidth(CDC* pDC, const CString& sText)
+{
+	return pDC->GetTextExtent(sText).cx;
+}
+
+int AFX_CDECL GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 {
 	static TCHAR BUFFER[2048];
 
@@ -604,7 +609,7 @@ int AFX_CDECL GraphicsMisc::GetTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 
 	va_list argList;
 	va_start(argList, lpszFormat);
-//fabio_2005
+
 #if _MSC_VER >= 1400
 	_vstprintf_s(BUFFER, lpszFormat, argList);
 #else
