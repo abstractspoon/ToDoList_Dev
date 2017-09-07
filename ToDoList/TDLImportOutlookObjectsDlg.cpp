@@ -19,10 +19,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int MAPPING_VER = 0;
-
-/////////////////////////////////////////////////////////////////////////////
-
 struct OUTLOOK_FIELD
 {
 	OUTLOOK_FIELD(OUTLOOK_FIELDTYPE field, int obj, UINT nID, TDC_ATTRIBUTE attrib)
@@ -200,19 +196,21 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 	}
 
 	// restore last state from preferences
-	if (prefs.GetProfileInt(sSection, _T("MappingVer")) == MAPPING_VER)
-	{
-		int nNumMap = m_aMasterMapping.GetSize();
+	int nNumMap = m_aMasterMapping.GetSize();
 
-		for (int nField = 0; nField < nNumMap; nField++)
+	for (int nMap = 0; nMap < nNumMap; nMap++)
+	{
+		CString sKey = Misc::MakeKey(_T("Field%d"), nMap);
+		OUTLOOK_FIELDTYPE nFieldType = (OUTLOOK_FIELDTYPE)prefs.GetProfileInt(sSection, sKey, -1);
+
+		sKey = Misc::MakeKey(_T("Attrib%d"), nMap);
+		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(sSection, sKey, TDCA_NONE);
+
+		if (nFieldType != -1)
 		{
-			CString sKey = Misc::MakeKey(_T("Field%d"), nField);
-			OUTLOOK_FIELDTYPE nFieldType = (OUTLOOK_FIELDTYPE)prefs.GetProfileInt(sSection, sKey, -1);
-			
-			sKey = Misc::MakeKey(_T("Attrib%d"), nField);
-			TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)prefs.GetProfileInt(sSection, sKey, TDCA_NONE);
-			
-			if (nFieldType != -1)
+			int nField = m_aMasterMapping.Find((DWORD)nFieldType);
+
+			if (nField != -1)
 				m_aMasterMapping[nField].nTDCAttrib = nAttrib;
 		}
 	}
@@ -248,7 +246,6 @@ void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
 	CPreferences prefs;
 	prefs.WriteProfileInt(sSection, _T("HideUnmapped"), m_bHideUnmapped);
 	prefs.WriteProfileInt(sSection, _T("HideConfidential"), m_bHideConfidential);
-	prefs.WriteProfileInt(sSection, _T("MappingVer"), MAPPING_VER);
 
 	int nField = m_aMasterMapping.GetSize();
 

@@ -3190,6 +3190,20 @@ public:
 		return -1;
 	}
 
+	int Find(DWORD dwData) const
+	{
+		int nMap = GetSize();
+
+		while (nMap--)
+		{
+			if (GetData()[nMap].dwItemData == dwData)
+				return nMap;
+		}
+
+		// not found
+		return -1;
+	}
+
 	int FindMappedAttribute(TDC_ATTRIBUTE nAttrib) const
 	{
 		int nMap = GetSize();
