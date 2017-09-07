@@ -76,9 +76,6 @@ protected:
 	CString FormatFieldAndData(const OUTLOOK_FIELD& oaField) const;
 	void RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const;
 
-	// some mapping helpers
-	static int FindField(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
-	static TDC_ATTRIBUTE GetFieldMapping(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType);
 };
 
 //{{AFX_INSERT_LOCATION}}

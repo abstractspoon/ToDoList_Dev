@@ -208,10 +208,11 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 
 		if (nFieldType != -1)
 		{
-			int nField = m_aMasterMapping.Find((DWORD)nFieldType);
+			// find this field in the master mapping
+			int nMaster = m_aMasterMapping.Find((DWORD)nFieldType);
 
-			if (nField != -1)
-				m_aMasterMapping[nField].nTDCAttrib = nAttrib;
+			if (nMaster != -1)
+				m_aMasterMapping[nMaster].nTDCAttrib = nAttrib;
 		}
 	}
 }
@@ -269,7 +270,7 @@ void CTDLImportOutlookObjectsDlg::UpdateMasterMapping()
 		const TDCATTRIBUTEMAPPING& col = aMapping[nField];
 
 		// find this field in the master mapping
-		int nMaster = FindField(m_aMasterMapping, (OUTLOOK_FIELDTYPE)col.dwItemData);
+		int nMaster = m_aMasterMapping.Find(col.dwItemData);
 		ASSERT(nMaster != -1);
 
 		if (nMaster != -1)
@@ -342,7 +343,7 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 		while (nField--)
 		{
 			const OUTLOOK_FIELD& oaField = FIELDS[nField];
-			int nMaster = FindField(m_aMasterMapping, oaField.nFieldType);
+			int nMaster = m_aMasterMapping.Find((DWORD)oaField.nFieldType);
 
 			if (nMaster != -1)
 			{
@@ -360,29 +361,3 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 
 	m_lcFieldMapping.SetColumnMapping(aMapping);
 }
-
-int CTDLImportOutlookObjectsDlg::FindField(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
-{
-	int nField = aMapping.GetSize();
-
-	while (nField--)
-	{
-		if (aMapping[nField].dwItemData == (DWORD)nFieldType)
-			return nField;
-	}
-
-	// else
-	return -1;
-}
-
-TDC_ATTRIBUTE CTDLImportOutlookObjectsDlg::GetFieldMapping(const CTDCAttributeMapping& aMapping, OUTLOOK_FIELDTYPE nFieldType)
-{
-	int nField = FindField(aMapping, nFieldType);
-
-	if (nField != -1)
-		return aMapping[nField].nTDCAttrib;
-
-	// else
-	return TDCA_NONE;
-}
-
