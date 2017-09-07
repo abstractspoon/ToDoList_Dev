@@ -341,7 +341,7 @@ protected:
 	void SetColor(COLORREF& color, COLORREF crNew);
 
 	void RebuildTree(const ITASKLISTBASE* pTasks);
-	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings);
+	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RecalcParentDates();
 	void RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI);

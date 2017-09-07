@@ -491,10 +491,8 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 					UpdateListColumns();
 				}
 
-				bResort = ((m_nSortBy != GTLCC_NONE) && attrib.Has(MapColumnToAttrib(m_nSortBy)));
-
 				if (nUpdate == IUI_NEW)
-					bResort = TRUE;
+					bResort = FALSE; // else task is not where user placed it
 				else
 					bResort = ((m_nSortBy != GTLCC_NONE) && attrib.Has(MapColumnToAttrib(m_nSortBy)));
 			}
@@ -675,8 +673,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		int nPos = pTasks->GetTaskPosition(hTask);
 		IncrementItemPositions(htiParent, nPos);
 
-		BuildTreeItem(pTasks, hTask, m_tree, htiParent, FALSE);
-
+		BuildTreeItem(pTasks, hTask, htiParent, FALSE, FALSE);
 		return TRUE;
 	}
 	
@@ -910,7 +907,7 @@ void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	GANTTDATERANGE prevRange = m_dateRange;
 	m_dateRange.Clear();
 
-	BuildTreeItem(pTasks, pTasks->GetFirstTask(), m_tree, NULL, TRUE);
+	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
 	// restore previous date range if no data
 	if (m_data.GetCount() == 0)
@@ -954,7 +951,7 @@ COleDateTime CGanttTreeListCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
 }
 
 void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-									   CTreeCtrl& tree, HTREEITEM htiParent, BOOL bAndSiblings)
+										HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
 {
 	if (hTask == NULL)
 		return;
@@ -1015,17 +1012,40 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	m_data[dwTaskID] = pGI;
 	
 	// add item to tree
+	HTREEITEM htiAfter = TVI_LAST; // default
+
+	if (!bInsertAtEnd)
+	{
+		// Find the sibling task whose position is one less
+		HTREEITEM htiSibling = m_tree.GetChildItem(htiParent);
+
+		while (htiSibling)
+		{
+			DWORD dwSiblingID = m_tree.GetItemData(htiSibling);
+			const GANTTITEM* pGISibling = GetGanttItem(dwSiblingID);
+			ASSERT(pGISibling);
+
+			if (pGISibling && (pGISibling->nPosition == (pGI->nPosition - 1)))
+			{
+				htiAfter = htiSibling;
+				break;
+			}
+
+			htiSibling = m_tree.GetNextItem(htiSibling, TVGN_NEXT);
+		}
+	}
+
 	HTREEITEM hti = m_tree.TCH().InsertItem(LPSTR_TEXTCALLBACK, 
 											I_IMAGECALLBACK, 
 											I_IMAGECALLBACK, 
 											dwTaskID, // lParam
 											htiParent, 
-											TVI_LAST,
+											htiAfter,
 											FALSE,
 											FALSE);
 	
 	// add first child which will add all the rest
-	BuildTreeItem(pTasks, pTasks->GetFirstTask(hTask), tree, hti, TRUE);
+	BuildTreeItem(pTasks, pTasks->GetFirstTask(hTask), hti, TRUE);
 	
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -1035,7 +1055,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTreeItem(pTasks, hSibling, tree, htiParent, FALSE);
+			BuildTreeItem(pTasks, hSibling, htiParent, FALSE);
 			
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
