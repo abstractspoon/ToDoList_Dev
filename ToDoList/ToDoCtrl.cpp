@@ -10716,45 +10716,12 @@ BOOL CToDoCtrl::HasLockedTasks() const
 
 BOOL CToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 {
-	SEARCHRESULT result;
-	DWORD dwFoundID = 0;
-
-	// build a search query to match against any visible text attribute
 	SEARCHPARAMS params;
 	params.aRules.Add(SEARCHPARAM(TDCA_ANYTEXTATTRIBUTE, FOP_INCLUDES, sPart));
-/*
-	params.aRules.Add(SEARCHPARAM(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES, sPart, FALSE)); // always
 
-#define ADDRULE(a) \
-	if (m_visColEdit.IsColumnVisible(TDC::MapAttributeToColumn(a))) \
-		params.aRules.Add(SEARCHPARAM(a, FOP_INCLUDES, sPart, FALSE))
-
-	ADDRULE(TDCA_ALLOCTO);
-	ADDRULE(TDCA_ALLOCBY);
-	ADDRULE(TDCA_CATEGORY);
-	ADDRULE(TDCA_FILEREF);
-	ADDRULE(TDCA_TAGS);
-	ADDRULE(TDCA_STATUS);
-	ADDRULE(TDCA_VERSION);
-	ADDRULE(TDCA_EXTERNALID);
-	ADDRULE(TDCA_LASTMODBY);
-	ADDRULE(TDCA_CREATEDBY);
-
-	// custom attributes
-	int nDef = m_aCustomAttribDefs.GetSize();
-	SEARCHPARAM rule(TDCA_CUSTOMATTRIB, FOP_INCLUDES, sPart, FALSE);
-
-	while (nDef--)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nDef];
-
-		if (attribDef.bEnabled && (attribDef.GetDataType() == TDCCA_STRING))
-		{
-			rule.SetCustomAttribute(attribDef.GetAttributeID(), attribDef.sUniqueID, FT_STRING);
-			params.aRules.Add(rule);
-		}
-	}
-*/	
+	SEARCHRESULT result;
+	DWORD dwFoundID = 0;
+	
 	switch (nSelect)
 	{
 	case TDC_SELECTFIRST:
