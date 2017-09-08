@@ -431,15 +431,16 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_ANYTEXTATTRIBUTE:
+			// Much looser search (FALSE -> partial matches okay)
 			bMatch = (ValueMatches(pTDI->sTitle, rule, resTask) ||
 						ValueMatches(pTDI->sComments, rule, resTask) ||
-						ArrayMatches(pTDI->aAllocTo, rule, resTask) ||
-						ArrayMatches(pTDI->aCategories, rule, resTask) ||
-						ArrayMatches(pTDI->aFileLinks, rule, resTask) ||
-						ArrayMatches(pTDI->aTags, rule, resTask) ||
-						ValueMatchesAsArray(pTDI->sAllocBy, rule, resTask, TRUE) || // matches whole names only
-						ValueMatchesAsArray(pTDI->sStatus, rule, resTask, TRUE) ||  // matches whole statuses only
-						ValueMatchesAsArray(pTDI->sVersion, rule, resTask, TRUE) || // matches whole versions only
+						ArrayMatches(pTDI->aAllocTo, rule, resTask, FALSE) ||
+						ArrayMatches(pTDI->aCategories, rule, resTask, FALSE) ||
+						ArrayMatches(pTDI->aFileLinks, rule, resTask, FALSE) ||
+						ArrayMatches(pTDI->aTags, rule, resTask, FALSE) ||
+						ValueMatchesAsArray(pTDI->sAllocBy, rule, resTask, FALSE) || 
+						ValueMatchesAsArray(pTDI->sStatus, rule, resTask, FALSE) || 
+						ValueMatchesAsArray(pTDI->sVersion, rule, resTask, FALSE) || 
 						ValueMatchesAsArray(pTDI->sExternalID, rule, resTask, FALSE) ||
 						ValueMatchesAsArray(pTDI->sLastModifiedBy, rule, resTask, FALSE) ||
 						ValueMatchesAsArray(pTDI->sCreatedBy, rule, resTask, FALSE));
