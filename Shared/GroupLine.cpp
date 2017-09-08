@@ -78,7 +78,7 @@ LRESULT CGroupLine::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			DWORD dwStyle = pWnd->GetStyle();
 			CThemed theme;
 
-			UINT nFlags = DT_TOP;
+			UINT nFlags = (DT_TOP | DT_NOPREFIX);
 			
 			if (dwStyle & SS_RIGHT)
 				nFlags |= DT_RIGHT;

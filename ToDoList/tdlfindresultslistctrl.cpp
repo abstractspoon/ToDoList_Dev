@@ -260,7 +260,9 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (OsIsXP())
 					GetSubItemRect(nItem, nSubItem, LVIR_LABEL, rRow);
 
-				pDC->DrawText(GetItemText(nItem, nSubItem), rRow, (DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS));
+				int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
+
+				pDC->DrawText(GetItemText(nItem, nSubItem), rRow, nFlags);
 
 				// references
 				if ((nSubItem == 0) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())

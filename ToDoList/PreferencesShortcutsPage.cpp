@@ -471,7 +471,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 				CString sText = m_pShortcutMgr->GetShortcutText(dwShortcut);
 
 				if (!sText.IsEmpty())
-					pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT));
+					pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
 
 				rItem.left -= 3;
 			}

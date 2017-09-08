@@ -271,7 +271,7 @@ bool CHMXChart::DrawTitle(CDC & dc)
 	
 	COLORREF clrBkOld = dc.SetBkColor(m_clrBkGnd);
 	pFontOld = dc.SelectObject(&font);
-	dc.DrawText(m_strTitle, m_rectTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	dc.DrawText(m_strTitle, m_rectTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 
 	dc.SetBkColor(clrBkOld);
 	dc.SelectObject(pFontOld);
@@ -504,9 +504,9 @@ bool CHMXChart::DrawXScale(CDC & dc)
 				rText.right = rText.left + (int)(dX * m_nXLabelStep);
 
 				if (m_bXLabelsAreTicks)
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE);
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
 				else
-					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE);
+					dc.DrawText(m_strarrScaleXLabel.GetAt(f), rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
 			}
 		}
 	
@@ -527,7 +527,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 
 		CFont* pFontOld = dc.SelectObject(&m_fontXScale);
 
-		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE);
+		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
 		dc.SelectObject(pFontOld);
 	}
 
@@ -582,7 +582,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 			CRect rTemp(m_rectYAxis.left, (int)nTemp2, m_rectYAxis.right - 4, (int)nTemp1);
 			sBuffer.Format(_T("%g"), m_nYMin + nY*f);
 
-			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE);
+			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
 
 			int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sBuffer).cx);
 			rTitle.right = min(rTitle.right, nLabelLeft);

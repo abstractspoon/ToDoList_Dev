@@ -108,7 +108,7 @@ LRESULT CEditPrompt::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			::SelectObject(hdc, hFont);
 			::SetTextColor(hdc, GetSysColor(COLOR_3DSHADOW));
 			::SetBkMode(hdc, TRANSPARENT);
-			::DrawText(hdc, m_sPrompt, m_sPrompt.GetLength(), rClient, DT_TOP | DT_LEFT);
+			::DrawText(hdc, m_sPrompt, m_sPrompt.GetLength(), rClient, (DT_TOP | DT_LEFT | DT_NOPREFIX));
 
 			::RestoreDC(hdc, nSaveDC);
 			::ReleaseDC(hRealWnd, hdc);

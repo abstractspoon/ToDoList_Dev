@@ -1189,8 +1189,6 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				}
 				
 				// draw text
-				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-
 				pDC->SetBkMode(TRANSPARENT);
 				pDC->SetTextColor(crText);
 
@@ -1212,7 +1210,9 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				CRect rTitle(rItem);
 				rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
 
-				pDC->DrawText(pKI->sTitle, rTitle, nFlags | DT_WORDBREAK);
+				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX | DT_WORDBREAK);
+				
+				pDC->DrawText(pKI->sTitle, rTitle, nFlags);
 
 				// Rest of attributes display
 				CRect rLine(rItem);

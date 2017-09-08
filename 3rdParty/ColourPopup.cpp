@@ -830,7 +830,7 @@ void CColourPopup::DrawCell(CDC* pDC, int nIndex)
         // Draw custom text
         CFont *pOldFont = (CFont*) pDC->SelectObject(&m_Font);
         pDC->SetBkMode(TRANSPARENT);
-        pDC->DrawText(m_strCustomText, TextButtonRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        pDC->DrawText(m_strCustomText, TextButtonRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
         pDC->SelectObject(pOldFont);
 
         return;
@@ -870,7 +870,7 @@ void CColourPopup::DrawCell(CDC* pDC, int nIndex)
         // Draw custom text
         CFont *pOldFont = (CFont*) pDC->SelectObject(&m_Font);
         pDC->SetBkMode(TRANSPARENT);
-        pDC->DrawText(m_strDefaultText, TextButtonRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        pDC->DrawText(m_strDefaultText, TextButtonRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
         pDC->SelectObject(pOldFont);
 
         return;

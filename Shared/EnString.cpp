@@ -237,7 +237,7 @@ int CEnString::GetCharacterCount(LPCTSTR szText, int nLen, TCHAR nChar, BOOL bCa
 CSize CEnString::FormatDC(CDC* pDC, int nWidth, int nStyle)
 {
 	CRect rect(0, 0, nWidth, 20);
-	UINT uFlags = (DT_CALCRECT | DT_SINGLELINE | DT_MODIFYSTRING);
+	UINT uFlags = (DT_CALCRECT | DT_SINGLELINE | DT_MODIFYSTRING | DT_NOPREFIX);
 
 	// special case: ES_START
 	if (nStyle == ES_START)

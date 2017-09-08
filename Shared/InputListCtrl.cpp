@@ -688,8 +688,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 			
 			// draw text
-			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | 
-				GraphicsMisc::GetRTLDrawTextFlags(*this));
+			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
 
 			switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
 			{
