@@ -4594,13 +4594,13 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 		}
 		break;
 
-	case TDCA_NEWTASK:
 	case TDCA_UNDO:
 	case TDCA_PASTE:
 	case TDCA_MERGE:
 		ASSERT(nModCol == TDCC_NONE);
 		return TRUE;
 
+	case TDCA_NEWTASK:
 	case TDCA_DELETE:
 	case TDCA_ARCHIVE:
 	case TDCA_ENCRYPT:
