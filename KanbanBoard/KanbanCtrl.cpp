@@ -224,10 +224,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 
 				if (pKI)
 				{
-					int nItem = pList->FindTask(dwTaskID);
-					ASSERT(nItem != -1);
-
-					pList->DeleteItem(nItem);
+					VERIFY(pList->DeleteTask(dwTaskID));
 
 					if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
 					{
@@ -882,9 +879,9 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, IUI_A
 			// create once only
 			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
 
-			if (!m_mapGlobalAttributeValues.HasMapping(sAttribID))
+			if (!m_mapAttributeValues.HasMapping(sAttribID))
 			{
-				CKanbanValueMap* pValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
+				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
 				ASSERT(pValues);
 
 				for (int nItem = 0; nItem <= 10; nItem++)
@@ -1246,10 +1243,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 
 					if (pCurList)
 					{
-						int nCurItem = pCurList->FindTask(pKI->dwTaskID);
-						ASSERT(nCurItem != -1);
-
-						pCurList->DeleteItem(nCurItem);
+						VERIFY(pCurList->DeleteTask(pKI->dwTaskID));
 						bChange |= (pCurList->GetItemCount() == 0);
 					}
 
@@ -2470,19 +2464,13 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 					m_aListCtrls.RemoveAt(nList);
 				}
-				else
-				{
-					pSrcList->RefreshColumnTitle();
-				}
-	
+
 				Resize();
 
 				if (aChangedIDs.GetSize())
 				{
 					SelectListCtrl(pDestList, FALSE);
-
-					pDestList->SelectTasks(aDragTaskIDs); // all the selected tasks
-					pDestList->RefreshColumnTitle();
+					SelectTasks(aDragTaskIDs); 
 
 					NotifyParentSelectionChange();
 					NotifyParentAttibuteChange(aChangedIDs); // only the changed tasks
@@ -2510,14 +2498,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 								CKanbanListCtrl* pDestList, const CString& sDestAttribValue)
 {
 	ASSERT(CanDrag(pSrcList, pDestList));
-
-	int nSrcItem = pSrcList->FindTask(dwTaskID);
-
-	if (nSrcItem == -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(pSrcList->FindTask(dwTaskID) != -1);
 
 	KANBANITEM* pKI = GetKanbanItem(dwTaskID);
 
@@ -2536,7 +2517,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 	// Remove from the source list(s) if moving
 	if (bSrcIsBacklog)
 	{
-		pSrcList->DeleteItem(nSrcItem);
+		VERIFY(pSrcList->DeleteTask(dwTaskID));
 	}
 	else if (!bCopy) // move
 	{
@@ -2551,15 +2532,10 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 			CKanbanListCtrl* pList = m_aListCtrls[nSrc];
 
 			if (pList != pDestList)
-			{
-				int nItem = pList->FindTask(dwTaskID);
-
-				if (nItem != -1)
-					pList->DeleteItem(nItem);
-			}
+				VERIFY(pList->DeleteTask(dwTaskID));
 		}
 	}
-	else if (bDestIsBacklog)
+	else if (bDestIsBacklog) // and 'copy'
 	{
 		// Just remove the source list's value(s)
 		CStringArray aSrcValues;
@@ -2567,14 +2543,26 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 
 		while (nVal--)
 			pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
+
+		VERIFY(pSrcList->DeleteTask(dwTaskID));
 	}
 
 	// Append to the destination list
-	if (!bDestIsBacklog)
+	if (bDestIsBacklog)
+	{
+		if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
+		{
+			ASSERT(pDestList->FindTask(dwTaskID) == -1);
+			pDestList->AddTask(*pKI, TRUE);
+		}
+	}
+	else
+	{
 		pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
-	if (pDestList->FindTask(dwTaskID) == -1)
-		pDestList->AddTask(*pKI, TRUE);
+		if (pDestList->FindTask(dwTaskID) == -1)
+			pDestList->AddTask(*pKI, TRUE);
+	}
 
 	return TRUE;
 }

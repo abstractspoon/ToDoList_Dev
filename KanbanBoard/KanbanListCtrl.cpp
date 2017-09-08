@@ -635,7 +635,6 @@ BOOL CKanbanListCtrlArray::SaveToImage(CBitmap& bmImage)
 
 void CKanbanListCtrlArray::OnSetFont(HFONT hFont)
 {
-	// Update all the lists
 	int nList = GetSize();
 
 	while (nList--)
@@ -680,6 +679,19 @@ void CKanbanListCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 			if (!mapCurIDs.Has(dwTaskID))
 				pList->DeleteItem(nItem);
 		}
+	}
+}
+
+void CKanbanListCtrlArray::RefreshColumnTitles()
+{
+	int nList = GetSize();
+	
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+		
+		pList->RefreshColumnTitle();
 	}
 }
 
@@ -1602,7 +1614,7 @@ BOOL CKanbanListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		while (nID--)
 			SelectItem(aItems[nID], (nID == 0));
 	}
-	
+
 	return TRUE;
 }
 
@@ -1638,6 +1650,22 @@ int CKanbanListCtrl::FindTask(const CPoint& ptScreen) const
 	ScreenToClient(&ptClient);
 	
 	return CListCtrl::HitTest(ptClient);
+}
+
+BOOL CKanbanListCtrl::DeleteTask(DWORD dwTaskID)
+{
+	int nFind = FindTask(dwTaskID);
+
+	if (nFind == -1)
+		return -1;
+
+	if (DeleteItem(nFind))
+	{
+		RefreshColumnTitle();
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)

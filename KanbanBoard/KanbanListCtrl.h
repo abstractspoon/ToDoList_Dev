@@ -54,9 +54,10 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, int nColWidth);
 	int CalcRequiredColumnWidthForImage() const;
 
-	int FindTask(DWORD dwItemID) const;
+	int FindTask(DWORD dwTaskID) const;
 	int FindTask(const CPoint& ptScreen) const;
 	DWORD GetTaskID(int nItem) const { return GetItemData(nItem); }
+	BOOL DeleteTask(DWORD dwTaskID);
 
 	int GetSelectedTasks(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -217,6 +218,7 @@ public:
 	void ClearOtherSelections(const CKanbanListCtrl* pIgnore);
 	void Redraw(BOOL bErase);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
+	void RefreshColumnTitles();
 
 protected:
 	static int ListSortProc(const void* pV1, const void* pV2);
