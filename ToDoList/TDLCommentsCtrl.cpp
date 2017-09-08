@@ -36,7 +36,7 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContent
 	m_pMgrContent(pMgrContent), 
 	m_cbCommentsFmt(pMgrContent),
 	m_bFirstLoadCommentsPrefs(TRUE),
-	m_hFont(NULL),
+	m_hDefaultFont(NULL),
 	m_bReadOnly(FALSE)
 {
 	int nComboOffsetDLU = 0;
@@ -126,19 +126,20 @@ void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szComment
 
 LRESULT CTDLCommentsCtrl::OnSetFont(WPARAM wParam, LPARAM /*lParam*/)
 {
-	// Once only
-	if (!m_ctrlComments.GetSafeHwnd() && !m_hFont)
-		SetDefaultCommentsFont((HFONT)wParam);
+	// If the default font has not been explicitly set
+	// then use this font once only
+	if (!m_ctrlComments.GetSafeHwnd() && !m_hDefaultFont)
+		m_hDefaultFont = (HFONT)wParam;
 
 	return Default();
 }
 
 void CTDLCommentsCtrl::SetDefaultCommentsFont(HFONT hFont)
 {
-	m_hFont = hFont;
+	m_hDefaultFont = hFont;
 
 	if (m_ctrlComments.GetSafeHwnd())
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hDefaultFont);
 }
 
 void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState)
@@ -303,8 +304,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 	if (CThemed::IsAppThemed())
 		m_ctrlComments.SetUITheme(m_theme);
 	
-	if (m_hFont)
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hFont);
+	if (m_hDefaultFont)
+		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)m_hDefaultFont);
 
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);

@@ -725,7 +725,7 @@ BOOL CToDoCtrl::UpdateCommentsFont(BOOL bResendComments)
 		if (GraphicsMisc::SameFontNameSize(hFont, hCurFont))
 			return FALSE;
 
-		m_ctrlComments.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
+		m_ctrlComments.SetDefaultCommentsFont(hFont);
 
 		// we've had some trouble with plugins using the richedit control 
 		// so after a font change we always resend the content

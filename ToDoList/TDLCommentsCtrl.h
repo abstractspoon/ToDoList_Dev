@@ -58,7 +58,7 @@ protected:
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
-	HFONT m_hFont;
+	HFONT m_hDefaultFont;
 
 	CWndPromptManager m_mgrPrompts;
 	CString m_sCommentsPrompt, m_sComboPrompt;
