@@ -1222,9 +1222,9 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				CRect rTitle(rItem);
 				rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
 
-				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX | DT_WORDBREAK);
+				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 				
-				pDC->DrawText(pKI->sTitle, rTitle, nFlags);
+				pDC->DrawText(pKI->sTitle, rTitle, (nFlags | DT_WORDBREAK)); // multi-line for titles only
 
 				// Rest of attributes display
 				CRect rLine(rItem);
