@@ -11,6 +11,18 @@
 
 #include "XmlFile.h"
 
+//////////////////////////////////////////////////////////////////////
+
+struct XSLPARAM
+{
+	CString sName;
+	CString sTitle;
+	CString sValue;
+};
+typedef CArray<XSLPARAM, XSLPARAM&> CXslParamArray;
+
+//////////////////////////////////////////////////////////////////////
+
 class CXslFile : protected CXmlFile  
 {
 public:
@@ -18,10 +30,14 @@ public:
 	virtual ~CXslFile();
 
 	BOOL Load(const CString& sFilePath);
+	BOOL Save(const CString& sFilePath);
 
 	CString GetOutputMediaType() const;
 	CString GetOutputFileExtension() const;
 	SFE_FORMAT GetOutputFileEncoding() const;
+
+	int GetGlobalParams(CXslParamArray& aParams) const;
+	BOOL SetGlobalParams(const CXslParamArray& aParams);
 
 protected:
 	const CXmlItem* GetOutputItem() const;

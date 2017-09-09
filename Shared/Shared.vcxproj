@@ -560,6 +560,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="StylesheetParamConfigDlg.cpp" />
     <ClCompile Include="Subclass.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -813,6 +814,7 @@
     <ClInclude Include="StickiesAPI.h" />
     <ClInclude Include="StickiesWnd.h" />
     <ClInclude Include="stringres.h" />
+    <ClInclude Include="StylesheetParamConfigDlg.h" />
     <ClInclude Include="Subclass.h" />
     <ClInclude Include="symbolbutton.h" />
     <ClInclude Include="SysColors.h" />

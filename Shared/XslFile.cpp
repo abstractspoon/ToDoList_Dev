@@ -26,6 +26,11 @@ BOOL CXslFile::Load(const CString& sFilePath)
 	return CXmlFile::Load(sFilePath);
 }
 
+BOOL CXslFile::Save(const CString& sFilePath)
+{
+	return CXmlFile::Save(sFilePath, SFEF_AUTODETECT);
+}
+
 CString CXslFile::GetOutputMediaType() const
 {
 	const CXmlItem* pXIOutput = GetOutputItem();
@@ -65,4 +70,37 @@ SFE_FORMAT CXslFile::GetOutputFileEncoding() const
 const CXmlItem* CXslFile::GetOutputItem() const
 {
 	return GetItem(_T("output"));
+}
+
+int CXslFile::GetGlobalParams(CXslParamArray& aParams) const
+{
+	aParams.RemoveAll();
+
+	const CXmlItem* pXIParam = GetItem(_T("param"));
+	XSLPARAM param;
+
+	while (pXIParam)
+	{
+		param.sName = pXIParam->GetItemValue(_T("name"));
+		param.sValue = pXIParam->GetItemValue(_T("select"));
+		param.sTitle = pXIParam->GetItemValue(_T("title"));
+
+		if (param.sTitle.IsEmpty())
+			param.sTitle = pXIParam->GetValue();
+
+		if (param.sTitle.IsEmpty())
+			param.sTitle = param.sName;
+
+		aParams.Add(param);
+
+		pXIParam = pXIParam->GetSibling();
+	}
+	
+	return aParams.GetSize();
+}
+
+BOOL CXslFile::SetGlobalParams(const CXslParamArray& aParams)
+{
+	// TODO 
+	return FALSE;
 }

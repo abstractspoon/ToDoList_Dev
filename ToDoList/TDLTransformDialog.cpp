@@ -59,6 +59,7 @@ void CTDLTransformDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLTransformDialog, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLTransformDialog)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
+	ON_BN_CLICKED(IDC_CONFIGURESTYLESHEET, OnConfigureStylesheet)
 	//}}AFX_MSG_MAP
 	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
@@ -147,4 +148,10 @@ COleDateTime CTDLTransformDialog::GetDate() const
 
 	// else
 	return CDateHelper::NullDate();
+}
+
+void CTDLTransformDialog::OnConfigureStylesheet() 
+{
+	// TODO: Add your control notification handler code here
+	
 }
