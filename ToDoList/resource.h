@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -779,6 +779,7 @@
 #define IDC_SUBTASKSINHERITLOCK         1497
 #define IDC_TASKINHERITSSUBTASKFLAGS    1498
 #define IDC_COMMENTSCTRLFRAME           1498
+#define IDC_CONFIGURESTYLESHEET         1499
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2087,7 +2088,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        306
 #define _APS_NEXT_COMMAND_VALUE         34581
-#define _APS_NEXT_CONTROL_VALUE         1499
+#define _APS_NEXT_CONTROL_VALUE         1500
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
