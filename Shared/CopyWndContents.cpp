@@ -193,6 +193,9 @@ CSize CCopyWndContents::CalcContentsSize() const
 		sizeContents.cy = (siVert.nMax - siVert.nMin + 1);
 	}
 
+	sizeContents.cx = max(1, sizeContents.cx);
+	sizeContents.cy = max(1, sizeContents.cy);
+
 	return sizeContents;
 }
 
@@ -200,6 +203,9 @@ CSize CCopyWndContents::CalcPageSize() const
 {
 	CRect rClient;
 	m_wnd.GetClientRect(rClient);
+
+	rClient.right = max(1, rClient.right);
+	rClient.bottom = max(1, rClient.bottom);
 
 	return rClient.Size();
 }
@@ -211,14 +217,14 @@ int CCopyWndContents::CalcPageCount(BOOL bVert) const
 
 	int nCount = 0;
 
-	if (bVert)
+	if (bVert && (sizePage.cy > 0))
 	{
 		nCount = (sizeContent.cy / sizePage.cy);
 
 		if (sizeContent.cy % sizePage.cy)
 			nCount++;
 	}
-	else
+	else if (!bVert && (sizePage.cx > 0))
 	{
 		nCount = (sizeContent.cx / sizePage.cx);
 
@@ -226,7 +232,7 @@ int CCopyWndContents::CalcPageCount(BOOL bVert) const
 			nCount++;
 	}
 
-	return nCount;
+	return max(nCount, 0);
 }
 
 int CCopyWndContents::GetContentScrollPos(BOOL bVert) const
@@ -257,6 +263,11 @@ CCopyTreeCtrlContents::~CCopyTreeCtrlContents()
 
 }
 
+BOOL CCopyTreeCtrlContents::DoCopy(CBitmap& bmp, const CRect& rFromTo)
+{
+	return CCopyWndContents::DoCopy(bmp, rFromTo);
+}
+
 void CCopyTreeCtrlContents::DoPageDown()
 {
 	int nLine = (GetPageSize().cy / m_nItemHeight);
@@ -267,23 +278,26 @@ void CCopyTreeCtrlContents::DoPageDown()
 
 CSize CCopyTreeCtrlContents::CalcContentsSize() const
 {
-	CSize sizeContent(CCopyWndContents::CalcContentsSize());
+	CSize sizeContents(CCopyWndContents::CalcContentsSize());
 
-	sizeContent.cx++;
+	sizeContents.cx++;
 
 	CTreeCtrlHelper tch(m_tree);
 	int nTotalVisible = tch.BuildVisibleIndexMap();
-	sizeContent.cy = (nTotalVisible * m_nItemHeight);
 
-	return sizeContent;
+	sizeContents.cy = (nTotalVisible * m_nItemHeight);
+	sizeContents.cy = max(1, sizeContents.cy);
+
+	return sizeContents;
 }
 
 CSize CCopyTreeCtrlContents::CalcPageSize() const
 {
 	CSize sizePage(CCopyWndContents::CalcPageSize());
-
 	int nPageVisible = m_tree.GetVisibleCount();
+
 	sizePage.cy = (nPageVisible * m_nItemHeight);
+	sizePage.cy = max(1, sizePage.cy);
 
 	return sizePage;
 }
@@ -338,6 +352,11 @@ CCopyListCtrlContents::~CCopyListCtrlContents()
 
 }
 
+BOOL CCopyListCtrlContents::DoCopy(CBitmap& bmp, const CRect& rFromTo)
+{
+	return CCopyWndContents::DoCopy(bmp, rFromTo);
+}
+
 int CCopyListCtrlContents::PageDown(int nCurVertPos)
 {
 	int nNewVPos = CCopyWndContents::PageDown(nCurVertPos);
@@ -388,14 +407,14 @@ void CCopyListCtrlContents::DoPageRight()
 
 CSize CCopyListCtrlContents::CalcContentsSize() const
 {
-	CSize sizeContent(CCopyWndContents::CalcContentsSize());
+	CSize sizeContents(CCopyWndContents::CalcContentsSize());
 
 	// for whole lines
 	int nTotalVisible = m_list.GetItemCount();
-	sizeContent.cy = (nTotalVisible * m_nItemHeight);
+	sizeContents.cy = (nTotalVisible * m_nItemHeight);
 
 	// add height of header
-	sizeContent.cy += CalcHeaderHeight();
+	sizeContents.cy += CalcHeaderHeight();
 
 	// Restrict width to total width of columns
 	HWND hwndHdr = ListView_GetHeader(m_wnd);
@@ -408,10 +427,13 @@ CSize CCopyListCtrlContents::CalcContentsSize() const
 		while (nCol--)
 			nWidth += m_list.GetColumnWidth(nCol);
 
-		sizeContent.cx = min(sizeContent.cx, nWidth);
+		sizeContents.cx = min(sizeContents.cx, nWidth);
 	}
 
-	return sizeContent;
+	sizeContents.cx = max(1, sizeContents.cx);
+	sizeContents.cy = max(1, sizeContents.cy);
+
+	return sizeContents;
 }
 
 CSize CCopyListCtrlContents::CalcPageSize() const
@@ -429,6 +451,7 @@ CSize CCopyListCtrlContents::CalcPageSize() const
 	{
 		sizePage.cy += nHeaderHeight;
 	}
+	sizePage.cy = max(1, sizePage.cy);
 
 	return sizePage;
 }

@@ -47,6 +47,7 @@ private:
 	CSize m_sizeContent, m_sizePage;
 
 private:
+
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -56,6 +57,8 @@ class CCopyTreeCtrlContents : public CCopyWndContents
 public:
 	CCopyTreeCtrlContents(CTreeCtrl& tree);
 	virtual ~CCopyTreeCtrlContents();
+
+	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
 	int m_nItemHeight;
@@ -75,6 +78,8 @@ class CCopyListCtrlContents : public CCopyWndContents
 public:
 	CCopyListCtrlContents(CListCtrl& list);
 	virtual ~CCopyListCtrlContents();
+
+	BOOL DoCopy(CBitmap& bmp, const CRect& rFromTo = CRect(0, 0, -1, -1));
 
 protected:
 	int m_nItemHeight;
