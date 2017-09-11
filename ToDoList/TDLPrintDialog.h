@@ -81,6 +81,8 @@ protected:
 protected:
 	void InitStylesheet(LPCTSTR szStylesheet);
 	void EnableDisableControls();
+	
+	CString GetBaseStylesheetPath() const;
 };
 
 //{{AFX_INSERT_LOCATION}}

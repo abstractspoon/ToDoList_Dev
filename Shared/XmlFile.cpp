@@ -848,6 +848,11 @@ BOOL CXmlItem::IsCDATA() const
 	return (m_nType == XIT_CDATA); 
 }
 
+BOOL CXmlItem::IsElement() const
+{
+	return (!IsCDATA() && !IsAttribute());
+}
+
 BOOL CXmlItem::IsAttribute(int nMaxAttribLen) const 
 { 
 	return ((m_nType == XIT_ATTRIB) && (GetValueLen() <= nMaxAttribLen) && !m_lstItems.GetCount()); 
@@ -1135,7 +1140,6 @@ void CXmlFile::FixInputString(CString& sXml, const CString& sRootItem)
 			}
 		}
 	}
-	
 }
 
 BOOL CXmlFile::ParseRootItem(CXmlDocumentWrapper* pDoc, const CString& sRootItemName)
@@ -1160,8 +1164,9 @@ BOOL CXmlFile::ParseRootItem(CXmlDocumentWrapper* pDoc, const CString& sRootItem
 			return FALSE;
 	}
 	
-	// save off the header string
+	// save off the header strings
 	m_sXmlHeader = pDoc->GetXmlHeader();
+	m_sXslHeader = pDoc->GetXslHeader();
 	
 	// parse rest of file
 	ParseItem(m_xiRoot, &node);
@@ -1187,12 +1192,12 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 	}
 	
 	CXmlNodeWrapper nodeChild(pNode->GetFirstChildNode());
+	CString sItemVal;
 	
-	//for (int nNode = 0; nNode < nNumNodes; nNode++)
 	while (nodeChild.IsValid())
 	{
-		CString sName(nodeChild.Name());
-		CString sVal(nodeChild.GetText());
+		CString sChildName(nodeChild.Name());
+		CString sChildVal(nodeChild.GetText());
 		
 		XI_TYPE nType = XIT_ELEMENT;
 
@@ -1205,37 +1210,43 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 		case MSXML2::NODE_ATTRIBUTE:
 			nType = XIT_ATTRIB;
 			break;
+
+		case MSXML2::NODE_TEXT:
+			sItemVal += sChildVal;
+			break;
 		}
-		
+
 		// if sName is empty then sVal relates to pNode
-		if (!sName.IsEmpty())
+		if (!sChildName.IsEmpty())
 		{
-			CXmlItem* pXI = xi.AddItem(sName, sVal, nType);
+			CXmlItem* pXI = xi.AddItem(sChildName, sChildVal, nType);
 			
-			if (!ContinueParsing(sName, sVal))
+			if (!ContinueParsing(sChildName, sChildVal))
 				return TRUE;
 			
 			ParseItem(*pXI, &nodeChild);
-		}
-		// need to take care here not to overwrite a node's value by carriage returns
-		// which can result if we load the XML preserving whitespace
-		else
-		{
-			if (nodeChild.IsPreservingWhiteSpace() && xi.HasValue() && (sVal == _T("\n")))
-			{
-				// ignore
-				ASSERT(1); // for debugging
-			}
-			else
-			{
-				xi.SetValue(sVal);
-				xi.SetType(nType);
-			}
 		}
 		
 		nodeChild = nodeChild.GetNextSibling();
 	}
 	
+	// need to take care here not to overwrite a node's value by carriage returns
+	// which can result if we load the XML preserving whitespace
+// 	if (pNode->IsPreservingWhiteSpace() && xi.HasValue() && (sItemVal == _T("\n")))
+// 	{
+// 		// ignore
+// #ifdef _DEBUG
+// 		int breakpoint = 0;
+// #endif
+// 	}
+// 	else
+	//if (!sItemVal.IsEmpty()/* && (sItemVal != _T("\n"))*/)
+	{
+	//	int nLen = sItemVal.GetLength();
+		xi.SetValue(sItemVal);
+		//xi.SetType(nType);
+	}
+
 	return TRUE;
 }
 
@@ -1336,11 +1347,16 @@ BOOL CXmlFile::TransformToFile(const CString& sTransformPath, const CString& sOu
 	return FALSE;
 }
 
-BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode)
+BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode) const
 {
 	// own value
 	if (pItem->HasValue())
-		pNode->SetText(pItem->GetValue());
+	{
+		pNode->SetText(EMPTY_STR);
+
+		MSXML2::IXMLDOMNodePtr pText = pNode->ParentDocument()->createTextNode((LPCTSTR)pItem->GetValue());
+		pNode->AppendChild(pText);
+	}
 	
 	// attributes and items
 	POSITION pos = pItem->GetFirstItemPos();
@@ -1356,26 +1372,29 @@ BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode)
 			ASSERT (!pXIChild->GetSibling());
 			pNode->SetValue(pXIChild->GetName(), pXIChild->GetValue());
 		}
-		else if (pXIChild->IsCDATA())
+		else
 		{
-			// create a named node to wrap the CDATA
-			MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, pXIChild->GetName());
-			MSXML2::IXMLDOMCDATASectionPtr pCData = 
-				pNode->ParentDocument()->createCDATASection((LPCTSTR)pXIChild->GetValue());
-			pChildNode->appendChild(pCData);
-		}
-		else // node
-		{
-			while (pXIChild)
+			if (pXIChild->IsCDATA())
 			{
-				MSXML2::IXMLDOMNodePtr pChildNode = pNode->InsertNode(nNode++, pXIChild->GetName());
-				CXmlNodeWrapper nodeChild(pChildNode);
+				// create a named node to wrap the CDATA
+				CXmlNodeWrapper nodeChild(InsertNode(pNode, nNode++, pXIChild));
 				ASSERT (nodeChild.IsValid());
+
+				MSXML2::IXMLDOMCDATASectionPtr pCData = nodeChild.ParentDocument()->createCDATASection((LPCTSTR)pXIChild->GetValue());
+				nodeChild.AppendChild(pCData);
+			}
+			else // Element
+			{
+				while (pXIChild)
+				{
+					CXmlNodeWrapper nodeChild(InsertNode(pNode, nNode++, pXIChild));
+					ASSERT (nodeChild.IsValid());
+
+					Export(pXIChild, &nodeChild);
 				
-				Export(pXIChild, &nodeChild);
-				
-				// siblings
-				pXIChild = pXIChild->GetSibling();
+					// siblings
+					pXIChild = pXIChild->GetSibling();
+				}
 			}
 		}
 	}
@@ -1383,20 +1402,62 @@ BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode)
 	return TRUE;
 }
 
-void CXmlFile::Trace() const 
+MSXML2::IXMLDOMNodePtr CXmlFile::InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const
+{
+	ASSERT(!pXItem->IsAttribute());
+
+	if (pXItem->IsAttribute())
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	// all else
+	return pNode->InsertNode(nNode, pXItem->GetName());
+}
+
+void CXmlFile::Trace(BOOL bNamesOnly) const 
 { 
 #ifdef _DEBUG
-	CString sXml;
-	Export(sXml);
-	
+	Trace(&m_xiRoot, _T(""), bNamesOnly);
+#endif
+}
+
+void CXmlFile::Trace(const CXmlItem* pItem, const CString& sIndent, BOOL bNamesOnly)
+{
+#ifdef _DEBUG
+	if (!pItem)
+		return;
+
+	CString sItem;
+
+	if (bNamesOnly)
+		sItem.Format(_T("%s%s\n"), sIndent, pItem->GetName());
+	else
+		sItem.Format(_T("%s%s (%s)\n"), sIndent, pItem->GetName(), pItem->GetValue());
+
 	// because the string might be long, output it in chunks of 255 chars
 	int nPos = 0;
-	
-	while (nPos < sXml.GetLength())
+
+	while (nPos < sItem.GetLength())
 	{
-		OutputDebugString(sXml.Mid(nPos, 255));
+		OutputDebugString(sItem.Mid(nPos, 255));
 		nPos += 255;
 	}
+	
+	// children
+	POSITION pos = pItem->GetFirstItemPos();
+
+	while (pos)
+	{
+		const CXmlItem* pXIChild = pItem->GetNextItem(pos);
+		ASSERT (pXIChild);
+
+		Trace(pXIChild, (sIndent + _T("   ")), bNamesOnly);
+	}
+
+	// siblings
+	Trace(pItem->GetSibling(), sIndent, bNamesOnly);
 #endif
 }
 

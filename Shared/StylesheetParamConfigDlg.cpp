@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "StylesheetParamConfigDlg.h"
 #include "misc.h"
+#include "filemisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,9 @@ CStylesheetParamConfigDlg::CStylesheetParamConfigDlg(LPCTSTR szStylesheetPath, U
 	m_sStylesheetPath(szStylesheetPath),
 	m_nIDNoParamsMsg(nIDNoParamsMsg)
 {
+	ASSERT(!::PathIsRelative(szStylesheetPath));
+	ASSERT(FileMisc::HasExtension(szStylesheetPath, _T("xsl")));
+
 	// Load the stylesheet and params
 	CXslFile stylesheet;
 
@@ -80,7 +84,6 @@ int CStylesheetParamConfigDlg::DoModal()
 	
 	return CRuntimeDlg::DoModal(_T("CStylesheetConfigDlg"));
 }
-
 
 BOOL CStylesheetParamConfigDlg::OnInitDialog()
 {
@@ -142,4 +145,45 @@ int CStylesheetParamConfigDlg::GetParams(CXslParamArray& aParams) const
 {
 	aParams.Copy(m_aParams);
 	return aParams.GetSize();
+}
+
+BOOL CStylesheetParamConfigDlg::SaveChanges(LPCTSTR szStylesheetPath)
+{
+	if (m_aParams.GetSize() == 0)
+		return FALSE;
+
+	// Load original stylesheet and check for changes
+	CXslFile stylesheet;
+
+	if (!stylesheet.Load(m_sStylesheetPath))
+		return FALSE;
+
+	CXslParamArray aOrgParams;
+
+	if (!stylesheet.GetGlobalParams(aOrgParams))
+	{
+		AfxMessageBox(m_nIDNoParamsMsg);
+		return FALSE;
+	}
+
+	if (Misc::MatchAllT(m_aParams, aOrgParams, FALSE))
+		return FALSE;
+
+	if (!stylesheet.SetGlobalParams(m_aParams))
+		return FALSE;
+
+	stylesheet.Trace(FALSE);
+
+	if (Misc::IsEmpty(szStylesheetPath))
+		szStylesheetPath = m_sStylesheetPath;
+
+	if (!stylesheet.Save(szStylesheetPath, stylesheet.GetFormat()))
+		return FALSE;
+
+#ifdef _DEBUG
+	CXslFile test;
+	VERIFY(test.Load(szStylesheetPath));
+#endif
+
+	return TRUE;
 }

@@ -13,22 +13,32 @@
 
 CXslFile::CXslFile()
 {
-
 }
 
 CXslFile::~CXslFile()
 {
-
 }
 
 BOOL CXslFile::Load(const CString& sFilePath)
 {
-	return CXmlFile::Load(sFilePath);
+	if (!CXmlFile::Load(sFilePath))
+		return FALSE;
+
+	m_sNamespace = GetItemValue(_T("xmlns:xsl"));
+
+	return TRUE;
 }
 
-BOOL CXslFile::Save(const CString& sFilePath)
+BOOL CXslFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
 {
-	return CXmlFile::Save(sFilePath, SFEF_AUTODETECT);
+	SetXmlHeader(m_sXmlHeader);
+
+	return CXmlFile::Save(sFilePath, nFormat);
+}
+
+void CXslFile::CopyFrom(const CXslFile& file)
+{
+	CXmlFile::CopyFrom(file);
 }
 
 CString CXslFile::GetOutputMediaType() const
@@ -101,6 +111,84 @@ int CXslFile::GetGlobalParams(CXslParamArray& aParams) const
 
 BOOL CXslFile::SetGlobalParams(const CXslParamArray& aParams)
 {
-	// TODO 
-	return FALSE;
+	DeleteItem(_T("param"));
+
+	int nNumParam = aParams.GetSize();
+
+	if (nNumParam)
+	{
+		for (int nParam = 0; nParam < nNumParam; nParam++)
+		{
+			const XSLPARAM& param = aParams[nParam];
+			ASSERT(!param.sName.IsEmpty());
+			
+			CXmlItem* pXIParam = AddItem(_T("param"));
+			ASSERT(pXIParam);
+
+			pXIParam->SetItemValue(_T("name"), param.sName);
+			pXIParam->SetItemValue(_T("select"), param.sValue);
+			pXIParam->GetItemValue(_T("title"), param.sTitle);
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CXslFile::UpdateGlobalParams(const CXslParamArray& aParams)
+{
+	int nNumParam = aParams.GetSize();
+
+	if (!nNumParam)
+		return FALSE;
+
+	CXslParamArray aCurParams;
+
+	int nNumCur = GetGlobalParams(aCurParams);
+
+	if (!nNumCur)
+		return SetGlobalParams(aParams);
+
+	for (int nParam = 0; nParam < nNumParam; nParam++)
+	{
+		const XSLPARAM& param = aParams[nParam];
+		ASSERT(!param.sName.IsEmpty());
+
+		// Find existing parameter of the same name
+		int nCur = nNumCur;
+
+		while (nCur--)
+		{
+			if (aCurParams[nCur].sName == param.sName)
+				break;
+		}
+
+		// Add or update
+		if (nCur == -1)
+		{
+			aCurParams.Add(XSLPARAM(param));
+		}
+		else
+		{
+			aCurParams[nCur].sValue = param.sValue;
+		}
+	}
+
+	return SetGlobalParams(aCurParams);
+}
+
+MSXML2::IXMLDOMNodePtr CXslFile::InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const
+{
+	ASSERT(!m_sNamespace.IsEmpty());
+
+	if (!m_sNamespace.IsEmpty() && pXItem->IsElement())
+	{
+		// Hack (for now)
+		BOOL bLineBreak = ((pXItem->GetName().CollateNoCase(_T("br")) == 0) && !pXItem->HasValue());
+
+		if (!bLineBreak)
+			return pNode->InsertNode(nNode, (_T("xsl:") + pXItem->GetName()), m_sNamespace);
+	}
+
+	// all else
+	return CXmlFile::InsertNode(pNode, nNode, pXItem);
 }

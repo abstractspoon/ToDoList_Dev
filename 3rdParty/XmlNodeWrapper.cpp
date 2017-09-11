@@ -352,7 +352,7 @@ void CXmlDocumentWrapper::Reset()
 		}
 		else
 		{
-			CXmlNodeWrapper(AsNode()).Reset();
+			m_xmldoc->childNodes->reset();
 		}
 		
 		m_bHeaderSet = FALSE;

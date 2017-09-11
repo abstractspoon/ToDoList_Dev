@@ -22,6 +22,7 @@ public:
 
 	int DoModal();
 	int GetParams(CXslParamArray& aParams) const;
+	BOOL SaveChanges(LPCTSTR szStylesheetPath = NULL);
 
 protected:
 	CString m_sStylesheetPath;

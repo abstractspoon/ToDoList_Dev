@@ -113,6 +113,7 @@ public:
 
 	BOOL IsAttribute(int nMaxAttribLen = 8192) const; 
 	BOOL IsCDATA() const;
+	BOOL IsElement() const;
 	BOOL SetType(XI_TYPE nType);
 	XI_TYPE GetType() const { return m_nType; }
 
@@ -200,6 +201,7 @@ public:
 
 	BOOL Load(const CString& sFilePath, const CString& sRootItemName = EMPTY_STR, IXmlParse* pCallback = NULL);
 	BOOL Save(const CString& sFilePath, SFE_FORMAT nFormat);
+	SFE_FORMAT GetFormat() const { return CStdioFileEx::GetFormat(); }
 
 	BOOL LoadContent(const CString& sContent, const CString& sRootItemName = EMPTY_STR);
 
@@ -266,7 +268,7 @@ public:
 	BOOL SetXmlHeader(const CString& sHeader);
 	BOOL SetXslHeader(const CString& sHeader);
 
-	void Trace() const;
+	void Trace(BOOL bNamesOnly) const;
 
 	// sorting
 	void SortItems(const CString& sItemName, const CString& sKeyName, BOOL bAscending = TRUE);
@@ -289,9 +291,12 @@ protected:
 	BOOL ParseRootItem(CXmlDocumentWrapper* pDoc, const CString& sRootItemName);
 	BOOL ContinueParsing(const CString& sItem, const CString& sValue); 
 	BOOL BuildDOM() const;
+	int Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode) const;
 
-	static int Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode);
+	virtual MSXML2::IXMLDOMNodePtr InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const;
+	
 	static void FixInputString(CString& sXml, const CString& sRootItem);
+	static void Trace(const CXmlItem* pItem, const CString& sIndent, BOOL bNamesOnly);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////

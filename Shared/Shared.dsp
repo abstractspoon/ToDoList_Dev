@@ -569,6 +569,10 @@ SOURCE=.\StickiesWnd.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\StylesheetParamConfigDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Subclass.cpp
 # End Source File
 # Begin Source File
@@ -1218,6 +1222,10 @@ SOURCE=.\StickiesWnd.h
 # Begin Source File
 
 SOURCE=.\stringres.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\StylesheetParamConfigDlg.h
 # End Source File
 # Begin Source File
 

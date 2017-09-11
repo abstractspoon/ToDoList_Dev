@@ -4,13 +4,13 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLPrintDialog.h"
+#include "TDLStylesheetParamConfigDlg.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\DateHelper.h"
-#include "..\shared\StylesheetParamConfigDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -181,11 +181,21 @@ void CTDLPrintDialog::OnChangeStylesheet()
 BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const 
 { 
 	if (m_bUseStylesheet)
-		sStylesheet = FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
+	{
+		CTDLStylesheetParamConfigDlg dialog(GetBaseStylesheetPath());
+		sStylesheet = dialog.GetStylesheetPath();
+	}
 	else
+	{
 		sStylesheet.Empty();
+	}
 	
 	return FileMisc::FileExists(sStylesheet); 
+}
+
+CString CTDLPrintDialog::GetBaseStylesheetPath() const
+{
+	return FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
 }
 
 TDLPD_STYLE CTDLPrintDialog::GetExportStyle() const 
@@ -230,15 +240,6 @@ COleDateTime CTDLPrintDialog::GetDate() const
 
 void CTDLPrintDialog::OnConfigureStylesheet() 
 {
-	CString sStylesheet;
-
-	if (GetStylesheet(sStylesheet))
-	{
-		CStylesheetParamConfigDlg dialog(sStylesheet, 0);
-
-		if (dialog.DoModal() == IDOK)
-		{
-			// TODO
-		}
-	}
+	CTDLStylesheetParamConfigDlg dialog(GetBaseStylesheetPath());
+	dialog.DoModal();
 }
