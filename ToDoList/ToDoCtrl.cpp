@@ -11547,7 +11547,7 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 		CString sTasklistFolder = GetLastSaveFolder();
 
 		// try to run it but disable default error handling
-		if (CFileEdit::GotoFile(*this, sFile, sTasklistFolder, FALSE) >= 32)
+		if (CFileEdit::GotoFile(*this, sFile, sTasklistFolder, FALSE) >= SE_ERR_SUCCESS)
 			return TRUE;
 	}
 
@@ -11738,7 +11738,7 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	{
 		CString sLink = FileMisc::GetFullPath(szLink, m_taskTree.GetTasklistFolder());
 		
-		if (FileMisc::Run(*this, sLink) > 32)
+		if (FileMisc::Run(*this, sLink) >= SE_ERR_SUCCESS)
 			return 0L;
 	}
 

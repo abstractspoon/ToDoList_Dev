@@ -8416,7 +8416,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 			CString sParams = AfxGetApp()->m_lpCmdLine;
 			sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
 			
-			if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), sParams) <= 32)
+			if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), sParams) < SE_ERR_SUCCESS)
 			{
 				// TODO
 			}

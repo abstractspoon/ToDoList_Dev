@@ -497,7 +497,7 @@ BOOL CUrlRichEditCtrl::GoToUrl(int nUrl) const
 			if (CMSOutlookHelper::HandleUrl(*this, sUrl))
 				return TRUE;
 		}
-		else if (FileMisc::Run(*this, sUrl) > 32)
+		else if (FileMisc::Run(*this, sUrl) >= SE_ERR_SUCCESS)
 		{
 			return TRUE;
 		}

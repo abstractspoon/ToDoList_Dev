@@ -440,7 +440,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine)
 	CString sParams(sPrevCmdLine);
 	sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_UPGRADED);
 
-	if (FileMisc::Run(NULL, m_sAppPath, sParams) <= 32)
+	if (FileMisc::Run(NULL, m_sAppPath, sParams) < SE_ERR_SUCCESS)
 	{
 		m_nResUpdate = TDLWUR_ERR_RUNUPDATE;
 		return FALSE;
@@ -473,7 +473,7 @@ void CTDLWebUpdater::RestoreBackup()
 				m_nResUpdate = TDLWUR_ERR_RESTOREBACKUP;
 			}
 			// and restart previous install
-			else if (FileMisc::Run(NULL, m_sAppPath) <= 32)
+			else if (FileMisc::Run(NULL, m_sAppPath) < SE_ERR_SUCCESS)
 			{
 				// log the existing error because we overwrite it
 				LogError(m_sAppFolder);

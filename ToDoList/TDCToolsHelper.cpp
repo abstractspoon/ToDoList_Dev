@@ -92,10 +92,10 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 	DWORD dwRes = FileMisc::Run(*pWnd, sToolPath, sCmdline, (tool.bRunMinimized ? SW_MINIMIZE : SW_SHOWNORMAL));
 	
 	// error handling
-	if (dwRes <= 32)
+	if (dwRes < SE_ERR_SUCCESS)
 		pWnd->MessageBox(CEnString(IDS_TH_RUNTOOLERROR, tool.sToolName), CEnString(IDS_TH_RUNTOOLERROR_TITLE), MB_OK | MB_ICONERROR);
 
-	return (dwRes > 32);
+	return (dwRes >= SE_ERR_SUCCESS);
 }
 
 BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath, CWnd* pWnd) const

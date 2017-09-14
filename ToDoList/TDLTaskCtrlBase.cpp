@@ -4034,7 +4034,7 @@ void CTDLTaskCtrlBase::ShowFileLink(LPCTSTR szFilePath) const
 		if (CMSOutlookHelper::HandleUrl(*this, szFilePath))
 			return;
 	}
-	else if (FileMisc::Run(GetSafeHwnd(), szFilePath, NULL, SW_SHOWNORMAL, m_sTasklistFolder) > 32)
+	else if (FileMisc::Run(GetSafeHwnd(), szFilePath, NULL, SW_SHOWNORMAL, m_sTasklistFolder) >= SE_ERR_SUCCESS)
 	{
 		return;
 	}

@@ -139,7 +139,7 @@ HWND CStickiesAPI::GetStickiesWindow(BOOL bAutoStart) const
 		// try (re)starting stickies
 		LRESULT lr = (LRESULT)ShellExecute(NULL, NULL, m_sStickiesPath, NULL, NULL, SW_SHOWMINIMIZED);
 
-		if (lr > 32)
+		if (lr >= SE_ERR_SUCCESS)
 		{
 			int nTry = 10;
 
