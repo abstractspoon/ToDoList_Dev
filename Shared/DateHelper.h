@@ -103,6 +103,7 @@ public:
 	static BOOL DecodeDate(const CString& sDate, time_t& date, BOOL bAndTime = FALSE);
 #endif
 	static BOOL DecodeDate(const CString& sDate, time64_t& date, BOOL bAndTime = FALSE);
+	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime = FALSE);
 
 	static BOOL DecodeOffset(LPCTSTR szDate, double& dAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bForceWeekday, BOOL bMustHaveSign = TRUE);
@@ -195,7 +196,6 @@ protected:
 
 protected:
 	static int GetISODayOfWeek(const COleDateTime& date); // 1-7 Mon-Sun
-	static BOOL DecodeISODate(const CString& sDate, COleDateTime& date, BOOL bAndTime = FALSE);
 	static BOOL DecodeLocalShortDate(const CString& sDate, COleDateTime& date);
 	static BOOL GetTimeT(time64_t date, time_t& timeT);
 	static BOOL IsValidUnit(TCHAR nUnits);

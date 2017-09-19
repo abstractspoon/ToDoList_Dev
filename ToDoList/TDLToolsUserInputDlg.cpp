@@ -9,6 +9,7 @@
 #include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\datetimectrlex.h"
+#include "..\shared\datehelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -242,18 +243,15 @@ BOOL CTDLToolsUserInputDlg::OnInitDialog()
 		case CLAT_USERDATE:
 			if (!tuii.sDefValue.IsEmpty())
 			{
-				// parse the date to ISO standards ie yyyy-mm-dd
-				SYSTEMTIME sysTime;
-				ZeroMemory(&sysTime, sizeof(sysTime));
-//fabio_2005
-#if _MSC_VER >= 1400
-				int nRes = _stscanf_s(tuii.sDefValue, _T("%d-%d-%d"), &sysTime.wYear, &sysTime.wMonth, &sysTime.wDay);
-#else
-				int nRes = _stscanf(tuii.sDefValue, _T("%d-%d-%d"), &sysTime.wYear, &sysTime.wMonth, &sysTime.wDay);
-#endif
+				COleDateTime date;
 
-				if (nRes == 3)
-					tuii.pCtrl->SendMessage(DTM_SETSYSTEMTIME, GDT_VALID, (LPARAM) &sysTime);
+				if (CDateHelper::DecodeISODate(tuii.sDefValue, date))
+				{
+					SYSTEMTIME sysTime = { 0 };
+					
+					if (date.GetAsSystemTime(sysTime))
+						tuii.pCtrl->SendMessage(DTM_SETSYSTEMTIME, GDT_VALID, (LPARAM) &sysTime);
+				}
 			}
 			break;
 		}
