@@ -1554,7 +1554,7 @@ HBITMAP CDibData::LoadDIB(LPCTSTR lpszPathName)
 		}
 
 		// Read DIB from file
-		DWORD dwLen = cf.GetLength() - sizeof(BITMAPFILEHEADER);
+		DWORD dwLen = (DWORD)(cf.GetLength() - sizeof(BITMAPFILEHEADER));
 		hDib = DibAlloc(dwLen);
 		pDib = DibLock(hDib);
 		if( pDib )
@@ -2892,7 +2892,7 @@ void DumpDibFile(LPCTSTR lpszPathName,BOOL bPixels)
 	try
 	{
 		CFile cf(lpszPathName, CFile::modeRead);
-		DWORD dwLen = cf.GetLength();
+		DWORD dwLen = (DWORD)cf.GetLength();
 		pBuffer = new BYTE[dwLen];
 		if( pBuffer )
 			cf.Read((void*)pBuffer, (UINT)dwLen);
