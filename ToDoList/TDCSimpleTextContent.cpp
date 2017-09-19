@@ -755,7 +755,7 @@ BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
 	{
-		::lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
+		lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
 
 		*pResult = TRUE;
 		return TRUE;

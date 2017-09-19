@@ -6965,7 +6965,7 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 			CString sTaskName = m_data.GetTaskTitle(dwTaskID);
 			ASSERT(!sTaskName.IsEmpty());
 
-			::lstrcpyn(pTT->szTooltip, sTaskName, ICCLINKTOOLTIPLEN);
+			lstrcpyn(pTT->szTooltip, sTaskName, ICCLINKTOOLTIPLEN);
 			return TRUE;
 		}
 	}

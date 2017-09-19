@@ -173,10 +173,10 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 			{
 				if (!sLocalPath.IsEmpty() && FileMisc::CreateFolderFromFilePath(sLocalPath))
 				{
-					TCHAR szDrive[_MAX_DRIVE+1] = { 0 }, szPath[MAX_PATH+1] = { 0 };
-					_tsplitpath(sLocalPath, szDrive, szPath, NULL, NULL);
+					CString sDrive, sFolder;
+					FileMisc::SplitPath(sLocalPath, &sDrive, &sFolder);
 
-					sInitialDir.Format(_T("%s%s"), szDrive, szPath);
+					FileMisc::MakePath(sInitialDir, sDrive, sFolder);
 				}
 			}
 			else
@@ -411,11 +411,12 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
 
 			// base remote name on local name
-			TCHAR szFilename[_MAX_FNAME], szExt[_MAX_EXT];
-			_tsplitpath(aLocalFiles[0], NULL, NULL, szFilename, szExt);
-			lstrcat(szFilename, szExt);
+			CString sFilename, sExt;
+			FileMisc::SplitPath(aLocalFiles[0], NULL, NULL, &sFilename, &sExt);
+
+			sFilename += sExt;
 			
-			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD, szFilename) == IDOK)
+			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD, sFilename) == IDOK)
 				dialog.GetPaths(aRemoteFiles);
 			else
 				return RMERR_USERCANCELLED;
@@ -449,22 +450,22 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 
 CString CRemoteFile::MakeRemotePath(const CString& sLocalPath, const CString& sRemoteDir, LPCTSTR szLocalRoot)
 {
-	TCHAR szRemotePath[MAX_PATH+1] = { 0 };
+	CString sRemotePath;
 	int nRootLen = lstrlen(szLocalRoot);
 
 	if (nRootLen) // == 'preserve structure'
 	{
-		_tmakepath(szRemotePath, NULL, sRemoteDir, ((LPCTSTR)sLocalPath) + nRootLen, NULL);
+		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, ((LPCTSTR)sLocalPath) + nRootLen, NULL);
 	}
 	else
 	{
-		TCHAR szFilename[_MAX_FNAME], szExt[_MAX_EXT];
+		CString sFilename, sExt;
+		FileMisc::SplitPath(sLocalPath, NULL, NULL, &sFilename, &sExt);
 
-		_tsplitpath(sLocalPath, NULL, NULL, szFilename, szExt);
-		_tmakepath(szRemotePath, NULL, sRemoteDir, szFilename, szExt);
+		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, sFilename, sExt);
 	}
 	
-	return szRemotePath;				
+	return sRemotePath;				
 }
 
 // for download
@@ -555,13 +556,12 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 
 			if (dialog.DoModal() == IDOK)
 			{
-				CString sFolder = dialog.GetFolderPath();
-				TCHAR szLocalPath[MAX_PATH+1] = { 0 };
+				CString sFolder = dialog.GetFolderPath(), sLocalPath;
 
 				for (int nFile = 0; nFile < aRemoteFiles.GetSize(); nFile++)
 				{
-					_tmakepath(szLocalPath, NULL, sFolder, aRemoteFiles[nFile].sFileName, NULL);
-					aLocalFiles.Add(szLocalPath);
+					FileMisc::MakePath(sLocalPath, NULL, sFolder, aRemoteFiles[nFile].sFileName);
+					aLocalFiles.Add(sLocalPath);
 				}
 
 				// save folder location for next time
@@ -633,10 +633,10 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 		// then sub folders
 		if ((dwOptions & RMO_SUBDIRECTORIES) && sLocalPath.Find(_T("*.")) != -1)
 		{
-			TCHAR szDrive[_MAX_DRIVE], szFolder[_MAX_DIR], szExt[_MAX_EXT];
-			_tsplitpath(sLocalPath, szDrive, szFolder, NULL, szExt);
+			CString sDrive, sFolder, sExt;
+			FileMisc::SplitPath(sLocalPath, &sDrive, &sFolder, NULL, &sExt);
 
-			sLocalPath.Format(_T("%s%s*.*"), szDrive, szFolder);
+			FileMisc::MakePath(sLocalPath, sDrive, sFolder, _T("*"), _T("*"));
 
 			BOOL bContinue = ff.FindFile(sLocalPath);
 			
@@ -648,7 +648,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 				{
 					CString sLocalSubFolder(ff.GetFilePath());
 					sLocalSubFolder += _T("\\*");
-					sLocalSubFolder += szExt;
+					sLocalSubFolder += sExt;
 
 					GetLocalPaths(aLocalFiles, dwOptions, sLocalSubFolder);
 				}
@@ -739,15 +739,16 @@ BOOL CRemoteFile::ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation)
 			sFolder.Replace('/', '\\');
 
 			if (sFolder.GetAt(sFolder.GetLength() - 1) == '\\')
+			{
 				FileMisc::CreateFolder(sFolder);
-
+			}
 			else // split first
 			{
-				TCHAR szDrive[_MAX_DRIVE+1] = { 0 }, szFolder[MAX_PATH+1] = { 0 };
-				_tsplitpath(sFolder, szDrive, szFolder, NULL, NULL);
+				CString sDrive, sFolder;
+				FileMisc::SplitPath(sFolder, &sDrive, &sFolder);
 
 				CString sTemp;
-				sTemp.Format(_T("%s%s"), szDrive, szFolder);
+				FileMisc::MakePath(sTemp, sDrive, sFolder);
 
 				if (FileMisc::CreateFolder(sTemp))
 					sFolder = sTemp;

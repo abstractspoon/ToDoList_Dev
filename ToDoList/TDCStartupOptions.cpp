@@ -11,14 +11,6 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-#if _MSC_VER >= 1400                        
-#define COPYTEXT(DEST, SRC, LEN) _tcsncpy_s(DEST, LEN, SRC, _TRUNCATE);
-#else                                       
-#define COPYTEXT(DEST, SRC, LEN) _tcsncpy(DEST, SRC, (LEN - 1));
-#endif                                      
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 TDCSTARTUPATTRIB::TDCSTARTUPATTRIB() : bSet(FALSE)
 {
 	szValue[0] = 0;
@@ -27,7 +19,7 @@ TDCSTARTUPATTRIB::TDCSTARTUPATTRIB() : bSet(FALSE)
 TDCSTARTUPATTRIB& TDCSTARTUPATTRIB::operator=(const TDCSTARTUPATTRIB& other)
 {
 	bSet = other.bSet;
-	COPYTEXT(szValue, other.szValue, ATTRIBLEN);
+	lstrcpyn(szValue, other.szValue, ATTRIBLEN);
 
 	return *this;
 }
@@ -50,7 +42,7 @@ BOOL TDCSTARTUPATTRIB::IsEmpty() const
 void TDCSTARTUPATTRIB::SetValue(const CString& sValue)
 {
 	bSet = TRUE;
-	COPYTEXT(szValue, sValue, ATTRIBLEN);
+	lstrcpyn(szValue, sValue, ATTRIBLEN);
 }
 
 BOOL TDCSTARTUPATTRIB::GetValue(CString& sValue) const
@@ -205,19 +197,13 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 	Reset();
 
 	// insert default path at front
-	COPYTEXT(m_szFilePaths, cmdInfo.m_strFileName, FILEPATHSLEN);
+	lstrcpyn(m_szFilePaths, cmdInfo.m_strFileName, FILEPATHSLEN);
 
 	// then multiple others
 	if (cmdInfo.HasOption(SWITCH_TASKFILE))
 	{
 		if (!cmdInfo.m_strFileName.IsEmpty())
-		{
-#if _MSC_VER >= 1400                        
-			_tcscat_s(m_szFilePaths, FILEPATHSLEN, _T("|")); // add delimiter
-#else                                       
-			_tcscat(m_szFilePaths, _T("|")); // add delimiter
-#endif                                      
-		}
+			lstrcat(m_szFilePaths, _T("|")); // add delimiter
 
 		int nLen = lstrlen(m_szFilePaths);
 		ExtractAttribute(cmdInfo, SWITCH_TASKFILE, m_szFilePaths + nLen, FILEPATHSLEN - nLen);
@@ -381,7 +367,7 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 		if (!HasFilePath())
 		{
 			CString sLink(cmdInfo.GetOption(SWITCH_TASKLINK));
-			COPYTEXT(m_szFilePaths, sLink, FILEPATHSLEN);
+			lstrcpyn(m_szFilePaths, sLink, FILEPATHSLEN);
 		}
 
 		m_dwFlags |= TLD_TASKLINK;
@@ -395,11 +381,7 @@ BOOL CTDCStartupOptions::GetSaveIntermediateAll() const
 
 CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& startup)
 {
-#if _MSC_VER >= 1400
-	_tcscpy_s(m_szFilePaths, FILEPATHSLEN, startup.m_szFilePaths); 
-#else
-	_tcscpy(m_szFilePaths, startup.m_szFilePaths); 
-#endif
+	lstrcpy(m_szFilePaths, startup.m_szFilePaths); 
 
 	m_sCmdIDs = startup.m_sCmdIDs;
 	m_sNewTask = startup.m_sNewTask; 
@@ -517,7 +499,7 @@ BOOL CTDCStartupOptions::ExtractAttribute(const CEnCommandLineInfo& cmdInfo, LPC
 
 	if (cmdInfo.GetOptions(szSwitch, aSrc))                                
 	{                                                                   
-		COPYTEXT(szAttrib, Misc::FormatArray(aSrc, '|'), nLenAttrib);
+		lstrcpyn(szAttrib, Misc::FormatArray(aSrc, '|'), nLenAttrib);
 		return TRUE;
 	}
 

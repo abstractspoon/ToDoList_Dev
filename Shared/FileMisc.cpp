@@ -2436,13 +2436,9 @@ BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
 				if (SUCCEEDED(hResult))
 				{
 					TCHAR szPath[MAX_PATH+1] = { 0 };
-					WIN32_FIND_DATA wfd;
-					//fabio_2005
-#if _MSC_VER >= 1400
-					_tcscpy_s(szPath, szShortcut);
-#else
-					_tcscpy(szPath, szShortcut);
-#endif
+					lstrcpy(szPath, szShortcut);
+
+					WIN32_FIND_DATA wfd =  { 0 };
 					hResult = pShellLink->GetPath(szPath, MAX_PATH, &wfd, SLGP_SHORTPATH);
 
 					if (SUCCEEDED(hResult))

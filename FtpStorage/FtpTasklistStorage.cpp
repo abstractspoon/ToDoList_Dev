@@ -82,12 +82,12 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
 		// return information to caller 
-		_tcsncpy(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
-		_tcsncpy(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
-		_tcsncpy(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
+		lstrcpyn(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
+		lstrcpyn(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
+		lstrcpyn(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
 
 		CString sTaskID = rf.GetServer() + _T("::") + sRemotePath + _T("::") + rf.GetUsername();
-		_tcsncpy(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
+		lstrcpyn(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
 
 		return true;
 	}
@@ -131,12 +131,12 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
 		// return information to caller 
-		_tcsncpy(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
-		_tcsncpy(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
-		_tcsncpy(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
+		lstrcpyn(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
+		lstrcpyn(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
+		lstrcpyn(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
 		
 		CString sTaskID = rf.GetServer() + _T("::") + sRemotePath + _T("::") + rf.GetUsername();
-		_tcsncpy(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
+		lstrcpyn(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
 		
 		return true;
 	}

@@ -777,7 +777,7 @@ void CXHTMLStatic::Draw(HDC hDC)
 							if (index2 != -1)
 							{
 								memset(lf.lfFaceName, 0, sizeof(lf.lfFaceName));
-								_tcsncpy(lf.lfFaceName, strAttributes, index2);
+								lstrcpyn(lf.lfFaceName, strAttributes, index2);
 
 								m -= index2 + 1;
 								if (m > 0)
@@ -853,7 +853,7 @@ void CXHTMLStatic::Draw(HDC hDC)
 			index = strText.Find(_T('>'));
 			if (index != -1)
 				strText = strText.Mid(index+1);
-			_tcscpy(lf.lfFaceName, _T("Courier New"));
+			lstrcpy(lf.lfFaceName, _T("Courier New"));
 			continue;
 		}
 		///////////////////////////////////////////////////////////////////////
@@ -1427,7 +1427,7 @@ BOOL CXHTMLStatic::GotoURL(LPCTSTR url, int showcmd)
 
 			if (GetRegKey(HKEY_CLASSES_ROOT, _T(".htm"), key) == ERROR_SUCCESS) 
 			{
-				_tcscat(key, _T("\\shell\\open\\command"));
+				lstrcat(key, _T("\\shell\\open\\command"));
 
 				if (GetRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS) 
 				{
@@ -1443,8 +1443,8 @@ BOOL CXHTMLStatic::GotoURL(LPCTSTR url, int showcmd)
 					else
 						*pos = _T('\0');				   // Remove the parameter
 
-					_tcscat(pos, _T(" "));
-					_tcscat(pos, url);
+					lstrcat(pos, _T(" "));
+					lstrcat(pos, url);
 					USES_CONVERSION;
 					result = (HINSTANCE) (UINT_PTR) WinExec(T2A(key),showcmd);
 				}

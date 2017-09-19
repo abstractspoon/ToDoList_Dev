@@ -387,7 +387,7 @@ BOOL CStatusBarACT::SetPaneTooltipIndex(int nIndex, LPCTSTR lpszText/*=NULL*/)
 	if (m_tooltip.GetToolInfo(ti, this, nIndex + 1))
 	{
 		ti.uFlags &= ~TTF_TRACK;
-		_tcsncpy(ti.szText, lpszText, 255);
+		lstrcpyn(ti.szText, lpszText, 255);
 		m_tooltip.SetToolInfo(&ti);
 	}
 

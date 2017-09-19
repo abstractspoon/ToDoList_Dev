@@ -248,15 +248,10 @@ BOOL CTrayIcon::AddToTray()
 
 	if (!m_sTip.IsEmpty())
 	{
-		nid.uFlags |= NIF_TIP;
-		//fabio_2005
-#if _MSC_VER >= 1400
-		_tcsncpy_s(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, (sizeof(nid.szTip)/sizeof(TCHAR)) - 1);
-#else
-		_tcsncpy(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, (sizeof(nid.szTip)/sizeof(TCHAR)) - 1);
-#endif
+		lstrcpyn(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, (sizeof(nid.szTip)/sizeof(TCHAR)) - 1);
 		
 		nid.szTip[sizeof(nid.szTip)/sizeof(TCHAR)-1] = (TCHAR)0;
+		nid.uFlags |= NIF_TIP;
 	}
 
 	// create top level parent hook first time around
@@ -315,14 +310,10 @@ BOOL CTrayIcon::ModifyTip(LPCTSTR sNewTip)
 
 	if (!m_sTip.IsEmpty())
 	{
-		nid.uFlags |= NIF_TIP;
-//fabio_2005
-#if _MSC_VER >= 1300
-		_tcsncpy_s(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, sizeof(nid.szTip)/sizeof(TCHAR));
-#else
-		_tcsncpy(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, sizeof(nid.szTip)/sizeof(TCHAR));
-#endif
+		lstrcpyn(nid.szTip, (LPTSTR)(LPCTSTR)m_sTip, sizeof(nid.szTip)/sizeof(TCHAR));
+
 		nid.szTip[sizeof(nid.szTip)/sizeof(TCHAR)-1] = (TCHAR)0;
+		nid.uFlags |= NIF_TIP;
 	}
 
 	return Shell_NotifyIcon(NIM_MODIFY, (PNOTIFYICONDATA)&nid);
@@ -473,19 +464,10 @@ BOOL CTrayIcon::ShowBalloon(LPCTSTR szText, LPCTSTR szTitle, DWORD dwIcon, UINT 
 	nid.uID = GetDlgCtrlID();
 	nid.uFlags = NIF_INFO;
 
-//fabio_2005
-#if _MSC_VER >= 1300
-    _tcsncpy_s(nid.szInfo, szText, 256);
+    lstrcpyn(nid.szInfo, szText, 256);
 
     if (szTitle)
-        _tcsncpy_s(nid.szInfoTitle, szTitle, 64);
-#else
-    _tcsncpy(nid.szInfo, szText, 256);
-
-    if (szTitle)
-        _tcsncpy(nid.szInfoTitle, szTitle, 64);
-#endif
-
+        lstrcpyn(nid.szInfoTitle, szTitle, 64);
     else
         nid.szInfoTitle[0] = _T('\0');
 
