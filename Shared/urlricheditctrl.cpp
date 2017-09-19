@@ -167,6 +167,7 @@ LRESULT CUrlRichEditCtrl::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 
 void CUrlRichEditCtrl::PreSubclassWindow() 
 {
+	EnableToolTips();
 	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE );
 	DragAcceptFiles();
 	
@@ -528,6 +529,34 @@ LRESULT CUrlRichEditCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 LRESULT CUrlRichEditCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 {
 	return GetParent()->SendMessage(WM_UREN_FAILEDURL, GetDlgCtrlID(), (LPARAM)szUrl);
+}
+
+BOOL CUrlRichEditCtrl::GetUrlTooltip(const CString& sUrl, CString& sTooltip) const
+{
+	TOOLTIPTEXT tip = { 0 };
+
+	tip.hdr.hwndFrom = GetSafeHwnd();
+	tip.hdr.idFrom = GetDlgCtrlID();
+	tip.hdr.code = TTN_NEEDTEXT;
+	tip.lpszText = (LPTSTR)(LPCTSTR)sUrl;
+
+	if (GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&tip))
+	{
+		sTooltip.Empty();
+
+		if (tip.szText[0])
+		{
+			sTooltip = tip.szText;
+		}
+		else if (sUrl != tip.lpszText)
+		{
+			sTooltip = tip.lpszText;
+		}
+
+		return !sTooltip.IsEmpty();
+	}
+
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -933,9 +962,6 @@ void CUrlRichEditCtrl::OnRButtonUp(UINT nHitTest, CPoint point)
 void CUrlRichEditCtrl::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
 	CRichEditBaseCtrl::OnShowWindow(bShow, nStatus);
-	
-	// TODO: Add your message handler code here
-	
 }
 
 int CUrlRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -1071,4 +1097,30 @@ void CUrlRichEditCtrl::OnTimer(UINT nIDEvent)
 		ParseAndFormatText();
 	
 	CRichEditBaseCtrl::OnTimer(nIDEvent);
+}
+
+int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	int nHit = FindUrl(point);
+	
+	if (nHit != -1)
+	{
+		const URLITEM& urli = m_aUrls[nHit];
+		CString sTooltip;
+
+		if (GetUrlTooltip(urli.sUrl, sTooltip))
+		{
+			nHit = MAKELONG(point.x, point.y);
+
+			pTI->hwnd = m_hWnd;
+			pTI->uId  = nHit;
+			pTI->rect = CRect(CPoint(point.x-1,point.y-1),CSize(2,2));
+			pTI->uFlags |= TTF_NOTBUTTON | TTF_ALWAYSTIP;
+			pTI->lpszText = _tcsdup(sTooltip);
+
+			return nHit;
+		}
+	}
+
+	return 0;
 }

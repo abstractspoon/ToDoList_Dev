@@ -578,6 +578,7 @@ protected:
 	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCompletionDatechange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnGotoFileRef();
 
 	afx_msg void OnTreeSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -597,6 +598,7 @@ protected:
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnChangePriority();
 	afx_msg void OnChangePercent();
@@ -627,6 +629,8 @@ protected:
 	afx_msg void OnChangeDependency();
 	afx_msg void OnChangeExternalID();
 	afx_msg void OnChangeRecurrence();
+	afx_msg void OnSelChangeCommentsType();
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
  	afx_msg LRESULT OnGutterNotifyScroll(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
@@ -636,7 +640,6 @@ protected:
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnGotoFileRef();
 	afx_msg LRESULT OnTDCHasClipboard(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetClipboard(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam);
@@ -645,8 +648,6 @@ protected:
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnSelChangeCommentsType();
-	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);

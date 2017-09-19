@@ -174,6 +174,7 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
+	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -739,4 +740,26 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 	}
 
 	return false;
+}
+
+BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	ASSERT(pNMHDR->idFrom == (UINT)GetDlgCtrlID());
+	ASSERT(pNMHDR->hwndFrom == GetSafeHwnd());
+
+	TOOLTIPTEXT* pTTN = (TOOLTIPTEXT*)pNMHDR;
+	*pResult = 0;
+
+	ICCLINKTOOLTIP tooltip = { 0 };
+	tooltip.szLink = pTTN->lpszText;
+
+	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
+	{
+		::lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
+
+		*pResult = TRUE;
+		return TRUE;
+	}
+
+	return FALSE;
 }

@@ -414,6 +414,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETCLIPBOARD, OnTDCGetClipboard)
 	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnTDCFailedLink)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -6942,6 +6943,34 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 		UpdateTask(TDCA_COMMENTS);
 
 	return 0L;
+}
+
+LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
+{
+	ASSERT(lParam);
+
+	ICCLINKTOOLTIP* pTT = (ICCLINKTOOLTIP*)lParam;
+	CString sLink(pTT->szLink);
+
+	if (!sLink.IsEmpty())
+	{
+		CString sFile;
+		DWORD dwTaskID = 0;
+
+		ParseTaskLink(sLink, dwTaskID, sFile);
+
+		// Handle (for now) only local task links
+		if (dwTaskID && sFile.IsEmpty())
+		{
+			CString sTaskName = m_data.GetTaskTitle(dwTaskID);
+			ASSERT(!sTaskName.IsEmpty());
+
+			::lstrcpyn(pTT->szTooltip, sTaskName, ICCLINKTOOLTIPLEN);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 LRESULT CToDoCtrl::OnCommentsKillFocus(WPARAM /*wParam*/, LPARAM /*lParam*/)

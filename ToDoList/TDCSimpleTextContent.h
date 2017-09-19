@@ -111,6 +111,7 @@ protected:
 	afx_msg BOOL OnKillFocus();
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
