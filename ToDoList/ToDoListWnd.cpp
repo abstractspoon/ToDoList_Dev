@@ -426,7 +426,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnToDoCtrlDoTaskLink)
+	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnTodoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
@@ -11398,7 +11398,7 @@ BOOL CToDoListWnd::ValidateTaskLinkFilePath(CString& sPath) const
 	return FileMisc::FileExists(sPath);
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 {
 	DWORD dwTaskID = wParam;
 	CString sPath((LPCTSTR)lParam);
@@ -11461,7 +11461,7 @@ LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
 			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
-				return OnToDoCtrlDoTaskLink(dwTaskID, (LPARAM)(LPCTSTR)sPath);
+				return OnToDoCtrlSelectTask(dwTaskID, (LPARAM)(LPCTSTR)sPath);
 		}
 		// else fall thru for generic error message
 	}

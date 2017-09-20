@@ -590,7 +590,7 @@ void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
 	ASSERT(nRem != -1);
 #endif
 	
-	m_pWndNotify->SendMessage(WM_TDCM_TASKLINK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+	m_pWndNotify->SendMessage(WM_TDCM_SELECTTASK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
 }
 
 

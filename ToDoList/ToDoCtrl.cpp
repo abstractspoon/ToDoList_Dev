@@ -418,7 +418,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnTDCDoTaskLink)
+//	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
@@ -11567,7 +11567,7 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 	
 	if (nFind >= 0)
 	{
-		OnTDCDoTaskLink(0, (LPARAM)(LPCTSTR)sFile);
+		ShowTaskLink(sFile);
 		return TRUE;
 	}
 	else if (bShellExecute)
@@ -11794,7 +11794,7 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink)
 	// if there's a file attached then pass to parent because we can't handle it.
 	if (!sFile.IsEmpty())
 	{
-		return GetParent()->SendMessage(WM_TDCM_TASKLINK, dwTaskID, (LPARAM)(LPCTSTR)sFile);
+		return GetParent()->SendMessage(WM_TDCM_SELECTTASK, dwTaskID, (LPARAM)(LPCTSTR)sFile);
 	}
 	else if (dwTaskID)
 	{
