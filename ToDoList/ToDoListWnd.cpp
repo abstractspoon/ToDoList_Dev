@@ -427,6 +427,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
+	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnTodoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
@@ -11428,6 +11429,43 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 						dwTaskID);
 
 	return FileMisc::Run(*this, sCommandline);
+}
+
+LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
+{
+	LPCTSTR szLink = (LPCTSTR)wParam;
+	TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
+
+	// if it's an Outlook link then run it directly
+	if (CMSOutlookHelper::IsOutlookUrl(szLink))
+	{
+		// TODO
+	}
+	else // see if it's a task link
+	{
+		CString sPath;
+		DWORD dwTaskID = 0;
+
+		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTT->hdr.hwndFrom);
+		ASSERT(nTDC != -1);
+
+		if (nTDC != -1)
+		{
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+
+			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
+			{
+				CString sTooltip = tdc.GetTaskTitle(dwTaskID);
+				ASSERT(!sTooltip.IsEmpty());
+
+				lstrcpyn(pTT->szText, sTooltip, 80);
+				return TRUE;
+			}
+		}
+	}
+
+	// all else
+	return FALSE;
 }
 
 LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)

@@ -1090,9 +1090,27 @@ CPoint CRichEditBaseCtrl::GetCaretPos() const
 
 int CRichEditBaseCtrl::CharFromPoint(const CPoint& point) const
 {
+	// Test if the point is beyond the end of the text
+	int nLastChar = (GetWindowTextLength() - 1);
+
+	CPoint ptLastChar;
+	PointFromChar(nLastChar, ptLastChar);
+
+	if (point.y > (ptLastChar.y + GetLineHeight()))
+		return -1;
+
 	POINTL ptl = { point.x, point.y };
 	
 	return ::SendMessage(GetSafeHwnd(), EM_CHARFROMPOS, 0, (LPARAM)&ptl);
+}
+
+void CRichEditBaseCtrl::PointFromChar(int nCharPos, CPoint& point) const
+{
+	POINTL ptl = { 0 };
+	::SendMessage(GetSafeHwnd(), EM_POSFROMCHAR, (WPARAM)&ptl, nCharPos);
+
+	point.x = ptl.x;
+	point.y = ptl.y;
 }
 
 /////////////////////////////////////////////////////////////////////////////

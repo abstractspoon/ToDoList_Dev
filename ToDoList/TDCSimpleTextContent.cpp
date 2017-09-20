@@ -639,9 +639,9 @@ int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CAutoFlag af(m_bAllowNotify, FALSE); // else we can get a false edit change
 
-	// set max edit length
 	LimitText(1024 * 1024 * 1024); // one gigabyte
-
+	EnableToolTips();
+	
 	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 	
 	return 0;

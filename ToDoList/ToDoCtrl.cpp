@@ -6954,18 +6954,36 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 
 	if (!sLink.IsEmpty())
 	{
+		CString sTooltip;
 		CString sFile;
 		DWORD dwTaskID = 0;
 
-		ParseTaskLink(sLink, dwTaskID, sFile);
-
-		// Handle (for now) only local task links
-		if (dwTaskID && sFile.IsEmpty())
+		// Handle Local task links only
+		if (ParseTaskLink(sLink, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
 		{
-			CString sTaskName = m_data.GetTaskTitle(dwTaskID);
-			ASSERT(!sTaskName.IsEmpty());
+			sTooltip = m_data.GetTaskTitle(dwTaskID);
+			ASSERT(!sTooltip.IsEmpty());
+		}
+		else // forward to parent
+		{
+			TOOLTIPTEXT tip = { 0 };
 
-			lstrcpyn(pTT->szTooltip, sTaskName, ICCLINKTOOLTIPLEN);
+			tip.hdr.hwndFrom = GetSafeHwnd();
+			tip.hdr.idFrom = GetDlgCtrlID();
+			tip.hdr.code = TTN_NEEDTEXT;
+
+			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szLink, (LPARAM)&tip))
+			{
+				sTooltip = tip.szText;
+
+				if (sTooltip.IsEmpty())
+					sTooltip = tip.lpszText;
+			}
+		}
+
+		if (!sTooltip.IsEmpty())
+		{
+			lstrcpyn(pTT->szTooltip, sTooltip, ICCLINKTOOLTIPLEN);
 			return TRUE;
 		}
 	}

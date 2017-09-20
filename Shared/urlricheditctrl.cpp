@@ -167,7 +167,6 @@ LRESULT CUrlRichEditCtrl::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 
 void CUrlRichEditCtrl::PreSubclassWindow() 
 {
-	EnableToolTips();
 	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE );
 	DragAcceptFiles();
 	
@@ -1075,14 +1074,18 @@ int CUrlRichEditCtrl::FindUrl(const CHARRANGE& cr) const
 int CUrlRichEditCtrl::FindUrl(const CPoint& point) const
 {
 	int nPos = CharFromPoint(point);
-	int nUrl = m_aUrls.GetSize();
 
-	while (nUrl--)
+	if (nPos >= 0)
 	{
-		const URLITEM& urli = m_aUrls[nUrl];
+		int nUrl = m_aUrls.GetSize();
 
-		if (ContainsPos(urli.cr, nPos))
-			return nUrl;
+		while (nUrl--)
+		{
+			const URLITEM& urli = m_aUrls[nUrl];
+
+			if (ContainsPos(urli.cr, nPos))
+				return nUrl;
+		}
 	}
 
 	// not found
@@ -1097,6 +1100,26 @@ void CUrlRichEditCtrl::OnTimer(UINT nIDEvent)
 		ParseAndFormatText();
 	
 	CRichEditBaseCtrl::OnTimer(nIDEvent);
+}
+
+BOOL CUrlRichEditCtrl::EnableToolTips(BOOL bEnable)
+{
+	if (bEnable && !m_tooltip.GetSafeHwnd())
+		return m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP));
+
+	// else
+	if (!bEnable && m_tooltip.GetSafeHwnd())
+		return m_tooltip.DestroyToolTipCtrl();
+
+	return TRUE;
+}
+
+BOOL CUrlRichEditCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+
+	return CRichEditBaseCtrl::PreTranslateMessage(pMsg);
 }
 
 int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

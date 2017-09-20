@@ -133,6 +133,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_EN_CHANGE(RTF_CONTROL, OnChangeText)
 	ON_EN_KILLFOCUS(RTF_CONTROL, OnKillFocus)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_NOTIFY(TTN_NEEDTEXT, RTF_CONTROL, OnGetTooltip)
 	ON_WM_STYLECHANGING()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
@@ -508,9 +509,9 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	m_rtf.SetEventMask(m_rtf.GetEventMask() | ENM_CHANGE);
 	
-	// set max edit length
 	m_rtf.LimitText(1024 * 1024 * 1024); // one gigabyte
-	
+	m_rtf.EnableToolTips();
+		
 	InitMenuIconManager();
 	InitShortcutManager();
 
@@ -549,6 +550,8 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 {
 	if (!IsWindowEnabled())
 		return false;
+
+	m_rtf.FilterToolTipMessage(pMsg);
 
 	// process editing shortcuts
 	if (m_mgrShortcuts.ProcessMessage(pMsg))
@@ -1017,4 +1020,22 @@ void CRTFContentControl::OnUpdateEditInlineSpellcheck(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 	pCmdUI->SetCheck(s_bInlineSpellChecking);
 #endif
+}
+
+void CRTFContentControl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	ASSERT(pNMHDR->idFrom == RTF_CONTROL);
+	ASSERT(pNMHDR->hwndFrom == m_rtf.GetSafeHwnd());
+
+	TOOLTIPTEXT* pTTN = (TOOLTIPTEXT*)pNMHDR;
+	*pResult = 0;
+
+	ICCLINKTOOLTIP tooltip = { 0 };
+	tooltip.szLink = pTTN->lpszText;
+
+	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
+	{
+		lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
+		*pResult = TRUE;
+	}
 }

@@ -733,3 +733,12 @@ HRESULT CRulerRichEdit::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lpcf
 	return hr;
 }
 
+void CRulerRichEdit::FilterToolTipMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd() && m_tooltip.WantMessage(pMsg))
+	{
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+		m_tooltip.FilterToolTipMessage(pMsg);
+	}
+}
