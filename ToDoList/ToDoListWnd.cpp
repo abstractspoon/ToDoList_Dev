@@ -11458,7 +11458,7 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 			{
 				int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
 
-				if (nTDC != -1)
+				if ((nTDC != -1) && m_mgrToDoCtrls.IsLoaded(nTDC))
 					sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
 			}
 		}
