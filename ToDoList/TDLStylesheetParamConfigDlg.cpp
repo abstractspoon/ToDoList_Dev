@@ -7,6 +7,8 @@
 
 #include "..\Shared\FileMisc.h"
 
+#include <shlwapi.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE

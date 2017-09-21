@@ -6,6 +6,8 @@
 #include "misc.h"
 #include "filemisc.h"
 
+#include <shlwapi.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -138,7 +140,10 @@ void CStylesheetParamConfigDlg::OnOK()
 		}
 	}
 
-	return (bChange ? CRuntimeDlg::OnOK() : CRuntimeDlg::OnCancel());
+	if (!bChange)
+		CRuntimeDlg::OnCancel();
+	else
+		CRuntimeDlg::OnOK();
 }
 
 int CStylesheetParamConfigDlg::GetParams(CXslParamArray& aParams) const
