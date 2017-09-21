@@ -213,8 +213,7 @@ BOOL CTDLSimpleTextContentCtrl::OnChangeText()
 	// and don't pass it on
 	if ((GetFocus() != this) && IsInlineSpellCheckingEnabled())
 		return TRUE;
-
-
+	
 	if (m_bAllowNotify && IsWindowEnabled() && !(GetStyle() & ES_READONLY))
 		GetParent()->SendMessage(WM_ICC_CONTENTCHANGE);
 	
