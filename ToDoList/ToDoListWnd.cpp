@@ -5095,7 +5095,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			CString sPath;
 			DWORD dwTaskID = 0;
 
-			CFilteredToDoCtrl::ParseTaskLink(aFiles[0], _T(""), dwTaskID, sPath);
+			CFilteredToDoCtrl::ParseTaskLink(aFiles[0], FALSE, _T(""), dwTaskID, sPath);
 	
 			if (sPath.IsEmpty() || ValidateTaskLinkFilePath(sPath))
 			{
@@ -11436,6 +11436,8 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 	LPCTSTR szLink = (LPCTSTR)wParam;
 	TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
 
+	CString sTooltip;
+
 	// if it's an Outlook link then run it directly
 	if (CMSOutlookHelper::IsOutlookUrl(szLink))
 	{
@@ -11443,25 +11445,29 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 	}
 	else // see if it's a task link
 	{
-		CString sPath;
+		CString sPath, sCwd(m_mgrToDoCtrls.GetFolderPath(GetSelToDoCtrl()));
 		DWORD dwTaskID = 0;
 
-		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTT->hdr.hwndFrom);
-		ASSERT(nTDC != -1);
-
-		if (nTDC != -1)
+		if (CFilteredToDoCtrl::ParseTaskLink(szLink, TRUE, sCwd, dwTaskID, sPath))
 		{
-			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-
-			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
+			if (sPath.IsEmpty())
 			{
-				CString sTooltip = tdc.GetTaskTitle(dwTaskID);
-				ASSERT(!sTooltip.IsEmpty());
+				sTooltip = GetToDoCtrl().GetTaskTitle(dwTaskID);
+			}
+			else
+			{
+				int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
 
-				lstrcpyn(pTT->szText, sTooltip, 80);
-				return TRUE;
+				if (nTDC != -1)
+					sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
 			}
 		}
+	}
+
+	if (!sTooltip.IsEmpty())
+	{
+		lstrcpyn(pTT->szText, sTooltip, 80);
+		return TRUE;
 	}
 
 	// all else
@@ -11498,8 +11504,10 @@ LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 		{
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
-			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
+			if (tdc.ParseTaskLink(szLink, TRUE, dwTaskID, sPath))
+			{
 				return OnToDoCtrlSelectTask(dwTaskID, (LPARAM)(LPCTSTR)sPath);
+			}
 		}
 		// else fall thru for generic error message
 	}

@@ -5098,7 +5098,7 @@ BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sI
 		CString sFile;
 		DWORD dwDependID;
 		
-		ParseTaskLink(aDepends[nDepends], dwDependID, sFile);
+		VERIFY(ParseTaskLink(aDepends[nDepends], FALSE, dwDependID, sFile));
 		
 		// see if dependent is one of 'our' tasks
 		if (dwDependID && sFile.IsEmpty())
@@ -5321,13 +5321,13 @@ BOOL CTDLTaskCtrlBase::SelectionHasSubtasks() const
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile) const
+BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const
 {
-	return ParseTaskLink(sLink, m_sTasklistFolder, dwTaskID, sFile);
+	return ParseTaskLink(sLink, bURL, m_sTasklistFolder, dwTaskID, sFile);
 }
 
 // Static
-BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
+BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
 {
 	CString sCleaned(sLink);
 	
@@ -5335,7 +5335,13 @@ BOOL CTDLTaskCtrlBase::ParseTaskLink(const CString& sLink, const CString& sFolde
 	int nProtocol = sCleaned.Find(TDL_PROTOCOL);
 	
 	if (nProtocol != -1)
+	{
 		sCleaned = sCleaned.Mid(nProtocol + lstrlen(TDL_PROTOCOL));
+	}
+	else if (bURL)
+	{
+		return FALSE;
+	}
 	
 	// cleanup
 	sCleaned.Replace(_T("%20"), _T(" "));

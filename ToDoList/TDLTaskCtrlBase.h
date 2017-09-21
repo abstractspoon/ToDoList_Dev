@@ -209,8 +209,8 @@ public:
 	void UpdateSelectedTaskPath();
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
 
-	BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile) const;
-	static BOOL ParseTaskLink(const CString& sLink, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
+	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;

@@ -408,8 +408,8 @@ public:
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
 
-	BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile) const;
-	static BOOL ParseTaskLink(const CString& sLink, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
+	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
 
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
@@ -822,7 +822,7 @@ protected:
 	BOOL CanSpellcheckComments();
 
 	BOOL GotoFile(const CString& sFile, BOOL bShellExecute = TRUE);
-	BOOL ShowTaskLink(const CString& sLink);
+	BOOL ShowTaskLink(const CString& sLink, BOOL bURL);
 	void MakeRelativePaths(CStringArray& aFilePaths) const;
 	void MakeFullPaths(CStringArray& aFilePaths) const;
 	CString GetLastSaveFolder() const;
@@ -888,6 +888,7 @@ protected:
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
+	static BOOL IsTaskLinkURL(const CString& sLink);
 
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);
