@@ -554,7 +554,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 	}
 
 	RemoveListReminder(rem);
-	NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
+	NotifyReminder(rem, WM_TDCN_SNOOZEREMINDER);
 
 	// hide dialog if this is the last
 	if (m_lcReminders.GetItemCount() == 0)

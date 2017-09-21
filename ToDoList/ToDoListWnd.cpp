@@ -12458,11 +12458,8 @@ LRESULT CToDoListWnd::OnDismissReminder(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl* pTDC = (CFilteredToDoCtrl*)lp;
 	ASSERT(pTDC);
 
-	if (pTDC && (*pTDC == GetToDoCtrl()))
-	{
-		Show(FALSE);
+	if (pTDC && (*pTDC == GetToDoCtrl()) && IsWindowVisible() && !IsIconic())
 		pTDC->RedrawReminders();
-	}
 
 	return 0L;
 }
