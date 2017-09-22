@@ -1777,7 +1777,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 						// then bump it to the start of the next day so
 						// that the calculated duration is accurate
 						if (CDateHelper::GetEndOfDay(dtEnd) == dtEnd)
-							dtEnd = (CDateHelper::GetDateOnly(dtEnd).m_dt + 1.0);
+							dtEnd = CDateHelper::GetStartOfNextDay(dtEnd);
 
 						double dDuration = (dtEnd.m_dt - dtStart.m_dt);
 						TRACE(_T("CTaskCalendarCtrl::UpdateDragging(duration = %f)\n"), dDuration);
@@ -1789,7 +1789,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 						dtEnd = (dtDrag.m_dt + dDuration);
 
 						if (!CDateHelper::DateHasTime(dtEnd))
-							dtEnd.m_dt--;
+							dtEnd = CDateHelper::GetEndOfPreviousDay(dtEnd);
 						
 						pTCI->SetEndDate(dtEnd);
 					}
@@ -1810,7 +1810,8 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 
 		// Recalc dates if either start/end is not set
-		pTCI->RecalcDates(m_dwOptions);
+		if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
+			pTCI->RecalcDates(m_dwOptions);
 			
 		Invalidate();
 		UpdateWindow();
