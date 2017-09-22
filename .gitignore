@@ -64,3 +64,4 @@ Release\*.*
 *.db-shm
 *.ide
 *.CopyComplete
+release
