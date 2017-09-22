@@ -11,17 +11,30 @@ namespace SampleImpExp
     {
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
-            int nVal = prefs.GetProfileInt("bob", "dave", 20);
-            int nVal2 = prefs.GetProfileInt("bob", "phil", 20);
+            // Possibly display a dialog to get input on how to 
+            // map ToDoList task attributes to the output format
+            // TODO
 
-            // add some dummy values to prefs
-            prefs.WriteProfileInt("bob", "dave", 10);
-
+            // Process the tasks
             Task task = srcTasks.GetFirstTask();
 
-            String sTitle = task.GetTitle();
+            while (task.IsValid())
+            {
+                if (!ExportTask(task /*, probably with some additional parameters*/ ))
+                {
+                    // Decide whether to stop or not
+                    // TODO
+                }
 
+                task = task.GetNextTask();
+            }
 
+            return true;
+        }
+
+        protected bool ExportTask(Task task /*, probably with some additional parameters*/)
+        {
+            // TODO
             return true;
         }
     }
