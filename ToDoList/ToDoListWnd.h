@@ -190,6 +190,8 @@ protected:
 	afx_msg void OnEditInsertdatetime();
 	afx_msg void OnEditInserttime();
 	afx_msg void OnEditOffsetdates();
+	afx_msg void OnEditOffsetdatesForwards(UINT nCmdID);
+	afx_msg void OnEditOffsetdatesBackwards(UINT nCmdID);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnEditSetReminder();
