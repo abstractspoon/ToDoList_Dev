@@ -499,12 +499,18 @@ int CFileEdit::GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandl
 	// Handle Outlook manually because under Windows 10 ShellExecute 
 	// will succeed even if Outlook is not installed
 	if (CMSOutlookHelper::IsOutlookUrl(szPath))
-		return CMSOutlookHelper::HandleUrl(hWnd, szPath);
+	{
+		if (CMSOutlookHelper::HandleUrl(hWnd, szPath))
+			return SE_ERR_SUCCESS;
+
+		// else
+		return 0;
+	}
 
 	// else
 	int nRes = FileMisc::Run(hWnd, szPath, NULL, SW_SHOWNORMAL, szFolder); 
 	
-	if ((nRes < 32) && bHandleError)
+	if ((nRes < SE_ERR_SUCCESS) && bHandleError)
 	{
 		CEnString sMessage, sFullPath = FileMisc::GetFullPath(szPath, szFolder);
 				

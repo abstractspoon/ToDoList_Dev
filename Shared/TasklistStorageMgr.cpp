@@ -36,10 +36,10 @@ TSM_TASKLISTINFO::TSM_TASKLISTINFO(const TSM_TASKLISTINFO& info)
 const TSM_TASKLISTINFO& TSM_TASKLISTINFO::operator=(const TSM_TASKLISTINFO& info)
 {
 	sStorageID = info.sStorageID;
-	_tcsncpy(szTasklistID, info.szTasklistID, ITS_TASKLISTID_LEN);
-	_tcsncpy(szLocalFileName, info.szLocalFileName, _MAX_PATH);
-	_tcsncpy(szDisplayName, info.szDisplayName, _MAX_PATH);
-	_tcsncpy(szPassword, info.szPassword, ITS_PASSWORD_LEN);
+	lstrcpyn(szTasklistID, info.szTasklistID, ITS_TASKLISTID_LEN);
+	lstrcpyn(szLocalFileName, info.szLocalFileName, _MAX_PATH);
+	lstrcpyn(szDisplayName, info.szDisplayName, _MAX_PATH);
+	lstrcpyn(szPassword, info.szPassword, ITS_PASSWORD_LEN);
 	
 	return *this;
 }
@@ -69,12 +69,12 @@ BOOL TSM_TASKLISTINFO::HasLocalFilePath() const
 // {
 // 	ASSERT(!HasLocalFilePath());
 // 
-// 	_tcscpy(szLocalFileName, FileMisc::GetTempFileName(szFilename, szExt));
+// 	lstrcpy(szLocalFileName, FileMisc::GetTempFileName(szFilename, szExt));
 // }
 
 void TSM_TASKLISTINFO::SetLocalFilePath(LPCTSTR szFilePath)
 {
-	_tcsncpy(szLocalFileName, szFilePath, _MAX_PATH);
+	lstrcpyn(szLocalFileName, szFilePath, _MAX_PATH);
 }
 
 void TSM_TASKLISTINFO::ClearLocalFilePath()
@@ -156,19 +156,19 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 
 		if (sTasklistID.GetLength() <= ITS_TASKLISTID_LEN)
 		{
-			_tcscpy(szTasklistID, sTasklistID);
+			lstrcpy(szTasklistID, sTasklistID);
 
 			CString sLocalFileName = Decode(aParts[2]);
 
 			if (sLocalFileName.GetLength() <= _MAX_PATH)
 			{
-				_tcscpy(szLocalFileName, sLocalFileName);
+				lstrcpy(szLocalFileName, sLocalFileName);
 
 				CString sDisplayName = Decode(aParts[3]);
 
 				if (sDisplayName.GetLength() <= _MAX_PATH)
 				{
-					_tcscpy(szDisplayName, sDisplayName);
+					lstrcpy(szDisplayName, sDisplayName);
 
 					if (bIncPassword)
 					{
@@ -176,7 +176,7 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 
 						if (sPassword.GetLength() <= ITS_PASSWORD_LEN)
 						{
-							_tcscpy(szPassword, sPassword);
+							lstrcpy(szPassword, sPassword);
 							return TRUE;
 						}
 					}

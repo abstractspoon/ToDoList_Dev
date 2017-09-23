@@ -93,7 +93,7 @@ protected:
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPos, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
-	
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskCalendarCtrl)
@@ -169,7 +169,7 @@ protected:
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 
-	void NotifyParentDateChange(TCC_HITTEST nHit);
+	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
 
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
@@ -177,6 +177,7 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void DeleteData();
 	void RecalcDataRange();
+	void RecalcSpecialDates();
 
 	// helpers
 	static int CompareTCItems(const void* pV1, const void* pV2);

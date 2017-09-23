@@ -190,6 +190,8 @@ protected:
 	afx_msg void OnEditInsertdatetime();
 	afx_msg void OnEditInserttime();
 	afx_msg void OnEditOffsetdates();
+	afx_msg void OnEditOffsetdatesForwards(UINT nCmdID);
+	afx_msg void OnEditOffsetdatesBackwards(UINT nCmdID);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnEditSetReminder();
@@ -370,7 +372,8 @@ protected:
 	afx_msg LRESULT OnTimeTrackerStopTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlDoLengthyOperation(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlCanImportDropFiles(WPARAM wParam, LPARAM lParam);

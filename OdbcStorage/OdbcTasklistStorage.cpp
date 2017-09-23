@@ -114,8 +114,8 @@ bool COdbcTasklistStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList*
 	}
 
 	// save connection info into 'pFInfo'
-	_tcsncpy(pFInfo->szTasklistID, dbSetup.sConnect, ITS_TASKLISTID_LEN);
-	_tcsncpy(pFInfo->szDisplayName, COdbcHelper::FormatName(dbSetup), _MAX_PATH);
+	lstrcpyn(pFInfo->szTasklistID, dbSetup.sConnect, ITS_TASKLISTID_LEN);
+	lstrcpyn(pFInfo->szDisplayName, COdbcHelper::FormatName(dbSetup), _MAX_PATH);
 
 	// and save connect string into tasklist 
 	pTasks->SetMetaData(ODBCTASK::GetMetaDataKey(_T("CONNECT")), dbSetup.sConnect);

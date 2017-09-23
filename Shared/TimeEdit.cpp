@@ -94,13 +94,7 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 		TIMEUNIT& tu = TIMEUNITS[nUnit];
 
 		if (Misc::IsEmpty(tu.szLabel))
-		{
-#if _MSC_VER >= 1400
-			_tcsncpy_s(tu.szLabel, LABELLEN, UNITLABELS[nUnit], _TRUNCATE);
-#else
-			_tcsncpy(tu.szLabel, UNITLABELS[nUnit], (LABELLEN - 1));
-#endif
-		}
+			lstrcpyn(tu.szLabel, UNITLABELS[nUnit], (LABELLEN - 1));
 	}
 
 	SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
@@ -375,12 +369,7 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevU
 		{
 			if (!Misc::IsEmpty(szLongUnits))
 			{
-#if _MSC_VER >= 1300
-				_tcsncpy_s(tu.szLabel, LABELLEN, szLongUnits, LABELLEN - 1);
-#else
-				_tcsncpy(tu.szLabel, szLongUnits, LABELLEN - 1);
-#endif
-
+				lstrcpyn(tu.szLabel, szLongUnits, LABELLEN - 1);
 				tu.szLabel[LABELLEN - 1] = 0;
 			}
 

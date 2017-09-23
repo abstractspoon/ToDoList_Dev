@@ -414,10 +414,11 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETCLIPBOARD, OnTDCGetClipboard)
 	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnTDCFailedLink)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnTDCDoTaskLink)
+//	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnTDCDoTaskLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
@@ -490,14 +491,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl message handlers
 
-BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile) const
+BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const
 {
-	return m_taskTree.ParseTaskLink(sLink, dwTaskID, sFile);
+	return m_taskTree.ParseTaskLink(sLink, bURL, dwTaskID, sFile);
 }
 
-BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
+BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
 {
-	return CTDLTaskCtrlBase::ParseTaskLink(sLink, sFolder, dwTaskID, sFile);
+	return CTDLTaskCtrlBase::ParseTaskLink(sLink, bURL, sFolder, dwTaskID, sFile);
 }
 
 BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
@@ -2954,7 +2955,7 @@ void CToDoCtrl::ShowTaskHasIncompleteDependenciesError(const CString& sIncomplet
 		int nRet = AfxMessageBox(CEnString(IDS_TDC_SELTASKHASDEPENDENCY), MB_YESNO | MB_ICONEXCLAMATION);
 		
 		if (nRet == IDYES)
-			ShowTaskLink(sIncomplete);
+			ShowTaskLink(sIncomplete, FALSE);
 	}
 	else
 	{
@@ -6944,6 +6945,52 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return 0L;
 }
 
+LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
+{
+	ASSERT(lParam);
+
+	ICCLINKTOOLTIP* pTT = (ICCLINKTOOLTIP*)lParam;
+	CString sLink(pTT->szLink);
+
+	if (!sLink.IsEmpty())
+	{
+		CString sTooltip;
+		CString sFile;
+		DWORD dwTaskID = 0;
+
+		// Handle Local task links only
+		if (ParseTaskLink(sLink, TRUE, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
+		{
+			sTooltip = m_data.GetTaskTitle(dwTaskID);
+			ASSERT(!sTooltip.IsEmpty());
+		}
+		else // forward to parent
+		{
+			TOOLTIPTEXT tip = { 0 };
+
+			tip.hdr.hwndFrom = GetSafeHwnd();
+			tip.hdr.idFrom = GetDlgCtrlID();
+			tip.hdr.code = TTN_NEEDTEXT;
+
+			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szLink, (LPARAM)&tip))
+			{
+				sTooltip = tip.szText;
+
+				if (sTooltip.IsEmpty())
+					sTooltip = tip.lpszText;
+			}
+		}
+
+		if (!sTooltip.IsEmpty())
+		{
+			lstrcpyn(pTT->szTooltip, sTooltip, ICCLINKTOOLTIPLEN);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 LRESULT CToDoCtrl::OnCommentsKillFocus(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	HandleUnsavedComments();
@@ -7431,7 +7478,7 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) 
 	if (sLink.Find(TDL_PROTOCOL) >= 0)
 		sFilePrefix = TDL_PROTOCOL;
 
-	ParseTaskLink(sLink, dwTaskID, sFile);
+	VERIFY(ParseTaskLink(sLink, !sFilePrefix.IsEmpty(), dwTaskID, sFile));
 	
 	if (!dwTaskID)
 		return FALSE;
@@ -8258,7 +8305,7 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 				if (aLocalDepends.GetSize() == 0)
 				{
 					if (aOtherDepends.GetSize() > 0)
-						ShowTaskLink(aOtherDepends[0]);
+						ShowTaskLink(aOtherDepends[0], FALSE);
 				}
 				else
 				{
@@ -11397,7 +11444,7 @@ BOOL CToDoCtrl::GotoSelectedTaskDependency()
 	GetSelectedTaskDependencies(aDepends);
 	
 	if (aDepends.GetSize())
-		return ShowTaskLink(aDepends[0]);
+		return ShowTaskLink(aDepends[0], FALSE);
 
 	// else
 	return FALSE;
@@ -11533,12 +11580,9 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 	if (sFile.IsEmpty())
 		return FALSE;
 	
-	// see if its a 'tdl://'
-	int nFind = sFile.Find(TDL_PROTOCOL);
-	
-	if (nFind >= 0)
+	if (IsTaskLinkURL(sFile))
 	{
-		OnTDCDoTaskLink(0, (LPARAM)(LPCTSTR)sFile);
+		ShowTaskLink(sFile, TRUE);
 		return TRUE;
 	}
 	else if (bShellExecute)
@@ -11547,7 +11591,7 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 		CString sTasklistFolder = GetLastSaveFolder();
 
 		// try to run it but disable default error handling
-		if (CFileEdit::GotoFile(*this, sFile, sTasklistFolder, FALSE) >= 32)
+		if (CFileEdit::GotoFile(*this, sFile, sTasklistFolder, FALSE) >= SE_ERR_SUCCESS)
 			return TRUE;
 	}
 
@@ -11726,7 +11770,7 @@ LRESULT CToDoCtrl::OnTDCGetClipboard(WPARAM wParam, LPARAM lParam)
 
 LRESULT CToDoCtrl::OnTDCDoTaskLink(WPARAM /*wParam*/, LPARAM lParam)
 {
-	return ShowTaskLink((LPCTSTR)lParam);
+	return ShowTaskLink((LPCTSTR)lParam, TRUE);
 }
 
 LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
@@ -11738,7 +11782,7 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	{
 		CString sLink = FileMisc::GetFullPath(szLink, m_taskTree.GetTasklistFolder());
 		
-		if (FileMisc::Run(*this, sLink) > 32)
+		if (FileMisc::Run(*this, sLink) >= SE_ERR_SUCCESS)
 			return 0L;
 	}
 
@@ -11752,7 +11796,12 @@ LRESULT CToDoCtrl::OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam)
 	return GetParent()->SendMessage(WM_TDCM_ISTASKDONE, wParam, lParam);
 }
 
-BOOL CToDoCtrl::ShowTaskLink(const CString& sLink)
+BOOL CToDoCtrl::IsTaskLinkURL(const CString& sLink)
+{
+	return (sLink.Find(TDL_PROTOCOL) == 0);
+}
+
+BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 {
 	if (sLink.IsEmpty())
 		return FALSE;
@@ -11760,12 +11809,13 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink)
 	CString sFile;
 	DWORD dwTaskID = 0;
 
-	ParseTaskLink(sLink, dwTaskID, sFile);
+	if (!ParseTaskLink(sLink, bURL, dwTaskID, sFile))
+		return FALSE;
 
 	// if there's a file attached then pass to parent because we can't handle it.
 	if (!sFile.IsEmpty())
 	{
-		return GetParent()->SendMessage(WM_TDCM_TASKLINK, dwTaskID, (LPARAM)(LPCTSTR)sFile);
+		return GetParent()->SendMessage(WM_TDCM_SELECTTASK, dwTaskID, (LPARAM)(LPCTSTR)sFile);
 	}
 	else if (dwTaskID)
 	{

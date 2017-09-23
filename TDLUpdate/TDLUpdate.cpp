@@ -131,7 +131,7 @@ BOOL CTDLUpdateApp::InitInstance()
 					if (bPreRelease)
 						params.SetOption(SWITCH_PRERELEASE);
 
-					if (FileMisc::Run(NULL, sTempAppPath, params.GetCommandLine()) <= 32)
+					if (FileMisc::Run(NULL, sTempAppPath, params.GetCommandLine()) < SE_ERR_SUCCESS)
 					{
 						// TODO
 					}

@@ -222,13 +222,13 @@ MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::AppendChild(MSXML2::IXMLDOMNodePtr pNode
 	return m_xmlnode->appendChild(pNode);
 }
 
-MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertNode(int index, const CString& nodeName)
+MSXML2::IXMLDOMNodePtr CXmlNodeWrapper::InsertNode(int index, const CString& nodeName, const CString& nameSpace)
 {
 	MSXML2::IXMLDOMDocumentPtr xmlDocument = m_xmlnode->GetownerDocument();
 
 	if (xmlDocument)
 	{
-		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),STR2BSTR(nodeName),"");
+		MSXML2::IXMLDOMNodePtr newNode = xmlDocument->createNode(_variant_t((short)MSXML2::NODE_ELEMENT),STR2BSTR(nodeName), STR2BSTR(nameSpace));
 		MSXML2::IXMLDOMNodePtr refNode = GetNode(index);
 
 		if (refNode)
@@ -352,7 +352,7 @@ void CXmlDocumentWrapper::Reset()
 		}
 		else
 		{
-			CXmlNodeWrapper(AsNode()).Reset();
+			m_xmldoc->childNodes->reset();
 		}
 		
 		m_bHeaderSet = FALSE;
@@ -483,16 +483,29 @@ BOOL CXmlDocumentWrapper::SetXmlHeader(const CString& sHeader)
 
 	if (IsValid() && !sHeader.IsEmpty() && !m_bHeaderSet)
 	{
-		MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(STR2BSTR(_T("xml")), STR2BSTR(sHeader));
-		
-		// always insert header right at the start
+		// Delete any existing 'xml' processing instructions
 		MSXML2::IXMLDOMNodePtr pNode = m_xmldoc->childNodes->item[0];
+
+		while (pNode)
+		{
+			if ((int)pNode->GetnodeType() != MSXML2::NODE_PROCESSING_INSTRUCTION)
+				break;
+
+			CString sName = (LPCTSTR)pNode->GetnodeName();
+
+			if (sName != _T("xml"))
+				break;
+
+			pNode->GetparentNode()->removeChild(pNode);
+			pNode = m_xmldoc->childNodes->item[0];
+		}
+
+		// always insert header right at the start
+		MSXML2::IXMLDOMProcessingInstructionPtr pHdr = m_xmldoc->createProcessingInstruction(STR2BSTR(_T("xml")), STR2BSTR(sHeader));
 		
 		if (pNode)
 		{
-			CString sXml = (LPCTSTR)pNode->Getxml();
 			_variant_t varFirst(pNode.GetInterfacePtr());
-			
 			m_xmldoc->insertBefore(pHdr, varFirst);
 		}
 		else

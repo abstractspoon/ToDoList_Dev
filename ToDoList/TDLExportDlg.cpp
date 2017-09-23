@@ -244,10 +244,9 @@ void CTDLExportDlg::ReplaceExtension(CString& sPathName, int nFormat)
 	if (!m_mgrImportExport.ExporterHasFileExtension(nFormat))
 		return;
 	
-	CString sDrive, sFolder, sFName, sExt = m_mgrImportExport.GetExporterFileExtension(nFormat);
+	CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat);
 
-		FileMisc::SplitPath(sPathName, &sDrive, &sFolder, &sFName);
-		FileMisc::MakePath(sPathName, sDrive, sFolder, sFName, sExt);
+	FileMisc::ReplaceExtension(sPathName, sExt);
 }
 
 void CTDLExportDlg::OnOK()

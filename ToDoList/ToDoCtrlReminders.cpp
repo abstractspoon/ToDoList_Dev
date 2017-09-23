@@ -554,7 +554,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 	}
 
 	RemoveListReminder(rem);
-	NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
+	NotifyReminder(rem, WM_TDCN_SNOOZEREMINDER);
 
 	// hide dialog if this is the last
 	if (m_lcReminders.GetItemCount() == 0)
@@ -590,7 +590,7 @@ void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
 	ASSERT(nRem != -1);
 #endif
 	
-	m_pWndNotify->SendMessage(WM_TDCM_TASKLINK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+	m_pWndNotify->SendMessage(WM_TDCM_SELECTTASK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
 }
 
 

@@ -508,11 +508,11 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithSautin(LPCTSTR szRtfFile, LPCTSTR /*
 
 	sautin_rtf2html_options opt = { 0 };
 	
-	strcpy(opt.image_folder, (LPCSTR)(LPCTSTR)sOutputDir);
-	strcpy(opt.extension, ".htm");
-	strcpy(opt.font_face, "Verdana");
-	strcpy(opt.font_size, "10");
-	strcpy(opt.title,"My Page");
+	lstrcpyA(opt.image_folder, (LPCSTR)(LPCTSTR)sOutputDir);
+	lstrcpyA(opt.extension, ".htm");
+	lstrcpyA(opt.font_face, "Verdana");
+	lstrcpyA(opt.font_size, "10");
+	lstrcpyA(opt.title,"My Page");
 
 	opt.encoding			= sautin_rtf2html_options::UTF_8;
 	opt.html_type			= 1;

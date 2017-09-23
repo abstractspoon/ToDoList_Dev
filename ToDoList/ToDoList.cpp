@@ -1419,7 +1419,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 								szVerb);
 	
 	// error handling
-	if (dwRes <= 32)
+	if (dwRes < SE_ERR_SUCCESS)
 	{
 		switch (dwRes)
 		{

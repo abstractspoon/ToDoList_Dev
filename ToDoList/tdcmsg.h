@@ -31,15 +31,16 @@ const UINT WM_TDCN_LISTCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_LISTCHANG
 // request messages
 const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIPBOARD"));		// lParam == match hwnd
 const UINT WM_TDCM_HASCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_HASCLIPBOARD"));		// lParam == match hwnd
-const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));		// format as WM_TDCM_TASKLINK
+const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));		// format as WM_TDCM_SELECTTASK
 const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_TASKHASREMINDER"));	// wParam = TaskID, lParam = TDC* 
+const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));	// wParam = url, lParam = TOOLTIPTEXT*
 
 // from CToDoCtrlReminders
 const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));	// wParam = TaskID, lParam = TDC* 
 const UINT WM_TDCN_SNOOZEREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_SNOOZEREMINDER"));	// wParam = TaskID, lParam = TDC* 
 
 // instruction messages
-const UINT WM_TDCM_TASKLINK					= ::RegisterWindowMessage(_T("WM_TDCM_TASKLINK"));			// wParam = taskID, lParam = taskfile path
+const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_TASKLINK"));		// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));		// wParam = hwnd, lParam = url
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));	// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTDROPFILES			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTDROPFILES"));	// wParam = hwnd, lParam = CStringArray*

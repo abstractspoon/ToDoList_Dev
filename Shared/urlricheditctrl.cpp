@@ -497,7 +497,7 @@ BOOL CUrlRichEditCtrl::GoToUrl(int nUrl) const
 			if (CMSOutlookHelper::HandleUrl(*this, sUrl))
 				return TRUE;
 		}
-		else if (FileMisc::Run(*this, sUrl) > 32)
+		else if (FileMisc::Run(*this, sUrl) >= SE_ERR_SUCCESS)
 		{
 			return TRUE;
 		}
@@ -528,6 +528,34 @@ LRESULT CUrlRichEditCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 LRESULT CUrlRichEditCtrl::SendNotifyFailedUrl(LPCTSTR szUrl) const
 {
 	return GetParent()->SendMessage(WM_UREN_FAILEDURL, GetDlgCtrlID(), (LPARAM)szUrl);
+}
+
+BOOL CUrlRichEditCtrl::GetUrlTooltip(const CString& sUrl, CString& sTooltip) const
+{
+	TOOLTIPTEXT tip = { 0 };
+
+	tip.hdr.hwndFrom = GetSafeHwnd();
+	tip.hdr.idFrom = GetDlgCtrlID();
+	tip.hdr.code = TTN_NEEDTEXT;
+	tip.lpszText = (LPTSTR)(LPCTSTR)sUrl;
+
+	if (GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&tip))
+	{
+		sTooltip.Empty();
+
+		if (tip.szText[0])
+		{
+			sTooltip = tip.szText;
+		}
+		else if (sUrl != tip.lpszText)
+		{
+			sTooltip = tip.lpszText;
+		}
+
+		return !sTooltip.IsEmpty();
+	}
+
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -933,9 +961,6 @@ void CUrlRichEditCtrl::OnRButtonUp(UINT nHitTest, CPoint point)
 void CUrlRichEditCtrl::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
 	CRichEditBaseCtrl::OnShowWindow(bShow, nStatus);
-	
-	// TODO: Add your message handler code here
-	
 }
 
 int CUrlRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -1049,14 +1074,18 @@ int CUrlRichEditCtrl::FindUrl(const CHARRANGE& cr) const
 int CUrlRichEditCtrl::FindUrl(const CPoint& point) const
 {
 	int nPos = CharFromPoint(point);
-	int nUrl = m_aUrls.GetSize();
 
-	while (nUrl--)
+	if (nPos >= 0)
 	{
-		const URLITEM& urli = m_aUrls[nUrl];
+		int nUrl = m_aUrls.GetSize();
 
-		if (ContainsPos(urli.cr, nPos))
-			return nUrl;
+		while (nUrl--)
+		{
+			const URLITEM& urli = m_aUrls[nUrl];
+
+			if (ContainsPos(urli.cr, nPos))
+				return nUrl;
+		}
 	}
 
 	// not found
@@ -1071,4 +1100,50 @@ void CUrlRichEditCtrl::OnTimer(UINT nIDEvent)
 		ParseAndFormatText();
 	
 	CRichEditBaseCtrl::OnTimer(nIDEvent);
+}
+
+BOOL CUrlRichEditCtrl::EnableToolTips(BOOL bEnable)
+{
+	if (bEnable && !m_tooltip.GetSafeHwnd())
+		return m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP));
+
+	// else
+	if (!bEnable && m_tooltip.GetSafeHwnd())
+		return m_tooltip.DestroyToolTipCtrl();
+
+	return TRUE;
+}
+
+BOOL CUrlRichEditCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+
+	return CRichEditBaseCtrl::PreTranslateMessage(pMsg);
+}
+
+int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	int nHit = FindUrl(point);
+	
+	if (nHit != -1)
+	{
+		const URLITEM& urli = m_aUrls[nHit];
+		CString sTooltip;
+
+		if (GetUrlTooltip(urli.sUrl, sTooltip))
+		{
+			nHit = MAKELONG(point.x, point.y);
+
+			pTI->hwnd = m_hWnd;
+			pTI->uId  = nHit;
+			pTI->rect = CRect(CPoint(point.x-1,point.y-1),CSize(2,2));
+			pTI->uFlags |= TTF_NOTBUTTON | TTF_ALWAYSTIP;
+			pTI->lpszText = _tcsdup(sTooltip);
+
+			return nHit;
+		}
+	}
+
+	return 0;
 }

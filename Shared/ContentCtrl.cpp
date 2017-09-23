@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "binarydata.h"
 #include "uithemefile.h"
+#include "tooltipctrlex.h"
 
 #include "..\Interfaces\IContentControl.h"
 #include "..\Interfaces\ISpellCheck.h"
@@ -59,20 +60,19 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 {
 	if (m_pContentCtrl)
 	{
-		// allow tooltip handling thru
-		CWnd* pWnd = CWnd::FromHandle(GetSafeHwnd());
-		pWnd->FilterToolTipMessage(pMsg);
-
 		// only process if we have the focus
 		if (HasFocus())
 		{
 			// don't forward tab messages if screen reader is active
-			if ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_TAB) && Misc::IsScreenReaderActive())
-				return FALSE;
-
-			// else
-			return m_pContentCtrl->ProcessMessage(pMsg);
+			BOOL vTabAndScreenReader = ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_TAB) && Misc::IsScreenReaderActive());
+			
+			if (!vTabAndScreenReader)
+				return m_pContentCtrl->ProcessMessage(pMsg);
 		}
+
+		// allow tooltip handling thru
+		if (CToolTipCtrlEx::WantMessage(pMsg))
+			m_pContentCtrl->ProcessMessage(pMsg);
 	}
 
 	return FALSE;

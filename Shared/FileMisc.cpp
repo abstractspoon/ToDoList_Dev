@@ -1432,7 +1432,7 @@ BOOL FileMisc::SelectFileInExplorer(LPCTSTR szFilePath)
 	CString sExplorer;
 	sExplorer.Format(_T("%s\\Explorer.exe"), GetWindowsFolder());
 	
-	return (Run(NULL, sExplorer, sFile) > 32);
+	return (Run(NULL, sExplorer, sFile) >= SE_ERR_SUCCESS);
 }
 
 BOOL FileMisc::ExpandPathEnvironmentVariables(CString& sFilePath)
@@ -1481,7 +1481,7 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 	
 	DWORD dwRes = (DWORD)ShellExecute(hwnd, lpVerb, sFile, sParams, lpDirectory, nShowCmd);
 	
-	if (dwRes <= 32) // failure
+	if (dwRes < SE_ERR_SUCCESS)
 	{
 		if (lpVerb)
 			LogText(_T("ShellExecute(%s: %s) failed. RetCode = %ld"), lpFile, lpVerb, dwRes);
@@ -1511,7 +1511,7 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 							&si,			// Pointer to STARTUPINFO structure.
 							&pi ))			// Pointer to PROCESS_INFORMATION structure.
 		{
-			dwRes = 33; // success
+			dwRes = SE_ERR_SUCCESS;
 		}
 
 		// Close process and thread handles.
@@ -2436,13 +2436,9 @@ BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
 				if (SUCCEEDED(hResult))
 				{
 					TCHAR szPath[MAX_PATH+1] = { 0 };
-					WIN32_FIND_DATA wfd;
-					//fabio_2005
-#if _MSC_VER >= 1400
-					_tcscpy_s(szPath, szShortcut);
-#else
-					_tcscpy(szPath, szShortcut);
-#endif
+					lstrcpy(szPath, szShortcut);
+
+					WIN32_FIND_DATA wfd =  { 0 };
 					hResult = pShellLink->GetPath(szPath, MAX_PATH, &wfd, SLGP_SHORTPATH);
 
 					if (SUCCEEDED(hResult))

@@ -1391,6 +1391,18 @@ COleDateTime CDateHelper::GetEndOfDay(const COleDateTime& date)
 	return (GetDateOnly(date).m_dt + END_OF_DAY);
 }
 
+COleDateTime CDateHelper::GetStartOfNextDay(const COleDateTime& date)
+{
+	return (GetStartOfDay(date).m_dt + 1.0);
+}
+
+COleDateTime CDateHelper::GetStartOfDay(const COleDateTime& date)
+{
+	ASSERT(IsDateSet(date));
+
+	return GetDateOnly(date);
+}
+
 COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
 {
 	COleDateTime dtNearest;

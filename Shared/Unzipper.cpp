@@ -17,6 +17,16 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+#if _MSC_VER >= 1400
+#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath_s(path, drive, _MAX_DRIVE, folder, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT)
+#	define zmakepath(path, drive, folder, fname, ext) _tmakepath_s(path, _MAX_PATH, drive, folder, fname, ext)
+#else
+#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath(path, drive, folder, fname, ext)
+#	define zmakepath(path, drive, folder, fname, ext) _tmakepath(path, drive, folder, fname, ext)
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -118,8 +128,8 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 	{
 		TCHAR szDrive[_MAX_DRIVE], szFolder[MAX_PATH], szFName[_MAX_FNAME];
 		
-		_tsplitpath(szFullPath, szDrive, szFolder, szFName, NULL);
-		_tmakepath(m_szOutputFolder, szDrive, szFolder, szFName, NULL);
+		zsplitpath(szFullPath, szDrive, szFolder, szFName, NULL);
+		zmakepath(m_szOutputFolder, szDrive, szFolder, szFName, NULL);
 	}
 
 	return (m_uzFile != NULL);
@@ -195,7 +205,7 @@ bool CUnzipper::GotoFirstFile(LPCTSTR szExt)
 
 		// test extension
 		TCHAR szFExt[_MAX_EXT];
-		_tsplitpath(info.szFileName, NULL, NULL, NULL, szFExt);
+		zsplitpath(info.szFileName, NULL, NULL, NULL, szFExt);
 
 		if (szFExt[0])
 		{
@@ -227,7 +237,7 @@ bool CUnzipper::GotoNextFile(LPCTSTR szExt)
 
 		// test extension
 		TCHAR szFExt[_MAX_EXT];
-		_tsplitpath(info.szFileName, NULL, NULL, NULL, szFExt);
+		zsplitpath(info.szFileName, NULL, NULL, NULL, szFExt);
 
 		if (szFExt[0])
 		{
@@ -308,7 +318,7 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 	if (info.bFolder)
 	{
 		TCHAR szFolderPath[MAX_PATH];
-		_tmakepath(szFolderPath, NULL, szFolder, info.szFileName, NULL);
+		zmakepath(szFolderPath, NULL, szFolder, info.szFileName, NULL);
 
 		return CreateFolder(szFolderPath);
 	}
@@ -320,11 +330,11 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 	{
 		TCHAR szFName[_MAX_FNAME], szExt[_MAX_EXT];
 
-		_tsplitpath(info.szFileName, NULL, NULL, szFName, szExt);
-		_tmakepath(info.szFileName, NULL, NULL, szFName, szExt);
+		zsplitpath(info.szFileName, NULL, NULL, szFName, szExt);
+		zmakepath(info.szFileName, NULL, NULL, szFName, szExt);
 	}
 
-	_tmakepath(szFilePath, NULL, szFolder, info.szFileName, NULL);
+	zmakepath(szFilePath, NULL, szFolder, info.szFileName, NULL);
 
 	// open the input and output files
 	if (!CreateFilePath(szFilePath))
@@ -432,8 +442,8 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 			// test name
 			TCHAR szFName[_MAX_FNAME], szName[_MAX_FNAME], szExt[_MAX_EXT];
 
-			_tsplitpath(info.szFileName, NULL, NULL, szName, szExt);
-			_tmakepath(szFName, NULL, NULL, szName, szExt);
+			zsplitpath(info.szFileName, NULL, NULL, szName, szExt);
+			zmakepath(szFName, NULL, NULL, szName, szExt);
 
 			if (lstrcmpi(szFileName, szFName) == 0)
 				return TRUE;

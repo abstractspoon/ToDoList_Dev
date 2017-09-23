@@ -138,6 +138,12 @@ void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
 		if (m_dwOptions != dwPrev)
 		{
 			RecalcTaskDates();
+
+			if (dwOption & (TCCO_DISPLAYCONTINUOUS | TCCO_DISPLAYSTART | TCCO_DISPLAYDUE | 
+							TCCO_DISPLAYDONE | TCCO_DISPLAYCALCSTART | TCCO_DISPLAYCALCDUE))
+			{
+				RecalcSpecialDates();
+			}
 		}
 	}
 }
@@ -257,6 +263,7 @@ void CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
+		RecalcSpecialDates();
 		RecalcDataRange();
 		Invalidate(FALSE);
 	}
@@ -374,13 +381,16 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	return bChange;
 }
 
-void CTaskCalendarCtrl::NotifyParentDateChange(TCC_HITTEST nHit)
+BOOL CTaskCalendarCtrl::NotifyParentDateChange(TCC_HITTEST nHit)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(m_dwSelectedTaskID);
 
 	if (nHit != TCCHT_NOWHERE)
-		GetParent()->SendMessage(WM_CALENDAR_DATECHANGE, (WPARAM)nHit, m_dwSelectedTaskID);
+		return GetParent()->SendMessage(WM_CALENDAR_DATECHANGE, (WPARAM)nHit, m_dwSelectedTaskID);
+
+	// else
+	return FALSE;
 }
 
 void CTaskCalendarCtrl::NotifyParentDragChange()
@@ -414,13 +424,6 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
 		m_mapData[dwTaskID] = pTCI;
-
-		// process item for special dates
-		if (pTCI->IsStartDateSet())
-			m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyStartDate())] = TRUE;
-
-		if (pTCI->IsEndDateSet())
-			m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyEndDate())] = TRUE;
 	}
 	else // process children
 	{
@@ -438,6 +441,30 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			BuildData(pTasks, hSibling, attrib, FALSE);
 
 			hSibling = pTasks->GetNextTask(hSibling);
+		}
+	}
+}
+
+void CTaskCalendarCtrl::RecalcSpecialDates()
+{
+	m_mapSpecial.RemoveAll();
+
+	POSITION pos = m_mapData.GetStartPosition();
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
+
+		// process item for special dates
+		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
+		{
+			if (pTCI->IsStartDateSet())
+				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyStartDate())] = TRUE;
+
+			if (pTCI->IsEndDateSet())
+				m_mapSpecial[CDateHelper::GetDateOnly(pTCI->GetAnyEndDate())] = TRUE;
 		}
 	}
 }
@@ -1750,7 +1777,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 						// then bump it to the start of the next day so
 						// that the calculated duration is accurate
 						if (CDateHelper::GetEndOfDay(dtEnd) == dtEnd)
-							dtEnd = (CDateHelper::GetDateOnly(dtEnd).m_dt + 1.0);
+							dtEnd = CDateHelper::GetStartOfNextDay(dtEnd);
 
 						double dDuration = (dtEnd.m_dt - dtStart.m_dt);
 						TRACE(_T("CTaskCalendarCtrl::UpdateDragging(duration = %f)\n"), dDuration);
@@ -1762,7 +1789,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 						dtEnd = (dtDrag.m_dt + dDuration);
 
 						if (!CDateHelper::DateHasTime(dtEnd))
-							dtEnd.m_dt--;
+							dtEnd = CDateHelper::GetEndOfPreviousDay(dtEnd);
 						
 						pTCI->SetEndDate(dtEnd);
 					}
@@ -1783,7 +1810,8 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 
 		// Recalc dates if either start/end is not set
-		pTCI->RecalcDates(m_dwOptions);
+		if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
+			pTCI->RecalcDates(m_dwOptions);
 			
 		Invalidate();
 		UpdateWindow();
@@ -1857,9 +1885,12 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 		Invalidate(FALSE);
 
 		// keep parent informed
-		NotifyParentDateChange(nDragWhat);
-		NotifyParentDragChange();
+		if (NotifyParentDateChange(nDragWhat))
+			RecalcSpecialDates();
+		else
+			*pTCI = m_tciPreDrag;
 
+		NotifyParentDragChange();
 		return TRUE;
 	}
 

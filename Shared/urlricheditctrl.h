@@ -9,12 +9,13 @@
 
 #include "richeditbasectrl.h"
 #include "richeditncborder.h"
+#include "tooltipctrlex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl window
 
-const UINT WM_UREN_CUSTOMURL = ::RegisterWindowMessage(_T("WM_UREN_CUSTOMURL")); // lParam == full url
-const UINT WM_UREN_FAILEDURL = ::RegisterWindowMessage(_T("WM_UREN_FAILEDURL")); // lParam == full url
+const UINT WM_UREN_CUSTOMURL  = ::RegisterWindowMessage(_T("WM_UREN_CUSTOMURL"));  // lParam == full url
+const UINT WM_UREN_FAILEDURL  = ::RegisterWindowMessage(_T("WM_UREN_FAILEDURL"));  // lParam == full url
 
 struct URLITEM
 {
@@ -53,6 +54,7 @@ public:
 	int GetContextUrl() { return m_nContextUrl; }
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
+	BOOL EnableToolTips(BOOL bEnable = TRUE);
 
 	// Attributes
 protected:
@@ -65,6 +67,7 @@ protected:
 	CHARRANGE m_crDropSel;
 	LPDATAOBJECT m_lpDragObject;
 	int m_nFileProtocol, m_nFileProtocol2;
+	CToolTipCtrlEx m_tooltip;
 
 	// Operations
 public:
@@ -74,6 +77,8 @@ public:
 	//{{AFX_VIRTUAL(CUrlRichEditCtrl)
 protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
 	virtual LRESULT SendNotifyCustomUrl(LPCTSTR szUrl) const;
 	virtual LRESULT SendNotifyFailedUrl(LPCTSTR szUrl) const;
@@ -117,6 +122,7 @@ protected:
 	int MatchProtocol(LPCTSTR szText) const;
 	BOOL AppendSourceUrls(LPCTSTR szUrl);
 	BOOL IsFileProtocol(int nProtocol) const;
+	BOOL GetUrlTooltip(const CString& sUrl, CString& sTooltip) const;
 	
 	static BOOL FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile);
 	static BOOL IsBaseDelim(LPCTSTR szText);

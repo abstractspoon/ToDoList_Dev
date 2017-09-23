@@ -150,10 +150,10 @@ void CBaseCloudStorage::UpdateTaskListInfo(ITS_TASKLISTINFO* pFInfo,
 	if (bStoring)
 		ASSERT(FileMisc::FileExists(pFInfo->szLocalFileName));
 	else
-		_tcsncpy(pFInfo->szLocalFileName, sFilePath, _MAX_PATH);
+		lstrcpyn(pFInfo->szLocalFileName, sFilePath, _MAX_PATH);
 	
-	_tcsncpy(pFInfo->szDisplayName, FormatDisplayName(sFilePath), _MAX_PATH);
-	_tcsncpy(pFInfo->szTasklistID, sFilePath, ITS_TASKLISTID_LEN);
+	lstrcpyn(pFInfo->szDisplayName, FormatDisplayName(sFilePath), _MAX_PATH);
+	lstrcpyn(pFInfo->szTasklistID, sFilePath, ITS_TASKLISTID_LEN);
 }
 
 //////////////////////////////////////////////////////////////////////

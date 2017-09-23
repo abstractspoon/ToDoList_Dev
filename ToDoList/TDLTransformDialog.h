@@ -34,6 +34,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTransformDialog)
+	enum { IDD = IDD_TRANSFORM_DIALOG };
 	CFileEdit	m_eStylesheet;
 	CString	m_sStylesheet;
     CTaskSelectionDlg m_dlgTaskSel;
@@ -57,6 +58,7 @@ protected:
 	//{{AFX_MSG(CTDLTransformDialog)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeStylesheet();
+	afx_msg void OnConfigureStylesheet();
 	//}}AFX_MSG
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()

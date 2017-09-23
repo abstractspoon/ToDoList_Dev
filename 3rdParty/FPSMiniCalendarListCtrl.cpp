@@ -74,11 +74,10 @@ END_MESSAGE_MAP()
 // utility function for converting long to CString 
 CString CFPSMiniCalendarListCtrl::CStr(long lValue)
 {
-	char szValue[20];
+	CString sVal;
+	sVal.Format(_T("%ld"), lValue);
 
-	_ltoa(lValue, szValue, 10);
-
-	return szValue;
+	return sVal;
 }
 
 /////////////////////////////////////////////////////////////////////////////

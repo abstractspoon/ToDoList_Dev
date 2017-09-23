@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLPrintDialog.h"
+#include "TDLStylesheetParamConfigDlg.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\preferences.h"
@@ -64,6 +65,7 @@ BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
 	ON_BN_CLICKED(IDC_STYLE_TABLE, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_PARA, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_IMAGE, OnChangeStyle)
+	ON_BN_CLICKED(IDC_CONFIGURESTYLESHEET, OnConfigureStylesheet)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_USESTYLESHEET, OnUsestylesheet)
 	ON_WM_CTLCOLOR()
@@ -130,20 +132,7 @@ BOOL CTDLPrintDialog::OnInitDialog()
 	else
 		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
 
-	if (m_nExportStyle == TDLPDS_IMAGE)
-	{
-		m_dlgTaskSel.EnableWindow(FALSE);
-	}
-	else
-	{
-		GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet);
-		GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
-		GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
-		GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
-		GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet); 
-		
-		OnChangeStylesheet();
-	}
+	EnableDisableControls();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -152,24 +141,29 @@ BOOL CTDLPrintDialog::OnInitDialog()
 void CTDLPrintDialog::OnUsestylesheet() 
 {
 	UpdateData();
+	EnableDisableControls();
+}
 
-	GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet); 
+void CTDLPrintDialog::EnableDisableControls()
+{
+	if (m_nExportStyle == TDLPDS_IMAGE)
+	{
+		m_dlgTaskSel.EnableWindow(FALSE);
+		return;
+	}
+
+	GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet);
 	GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet); 
-
-	OnChangeStylesheet();
-}
-
-void CTDLPrintDialog::OnChangeStylesheet() 
-{
-	UpdateData();
-
+		
+	// Disable OK if stylesheet not valid
 	CString sUnused;
 	BOOL bEnable = (!m_bUseStylesheet || GetStylesheet(sUnused));
 
 	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow(m_bUseStylesheet && bEnable); 
 
 	// Helpful text for why OK button is disabled
 	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
@@ -178,14 +172,30 @@ void CTDLPrintDialog::OnChangeStylesheet()
 	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
 }
 
+void CTDLPrintDialog::OnChangeStylesheet() 
+{
+	UpdateData();
+	EnableDisableControls();
+}
+
 BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const 
 { 
 	if (m_bUseStylesheet)
-		sStylesheet = FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
+	{
+		CTDLStylesheetParamConfigDlg dialog(GetBaseStylesheetPath());
+		sStylesheet = dialog.GetStylesheetPath();
+	}
 	else
+	{
 		sStylesheet.Empty();
+	}
 	
 	return FileMisc::FileExists(sStylesheet); 
+}
+
+CString CTDLPrintDialog::GetBaseStylesheetPath() const
+{
+	return FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
 }
 
 TDLPD_STYLE CTDLPrintDialog::GetExportStyle() const 
@@ -216,8 +226,7 @@ HBRUSH CTDLPrintDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void CTDLPrintDialog::OnChangeStyle() 
 {
 	UpdateData();
-
-	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
+	EnableDisableControls();
 }
 
 COleDateTime CTDLPrintDialog::GetDate() const 
@@ -227,4 +236,10 @@ COleDateTime CTDLPrintDialog::GetDate() const
 
 	// else
 	return CDateHelper::NullDate();
+}
+
+void CTDLPrintDialog::OnConfigureStylesheet() 
+{
+	CTDLStylesheetParamConfigDlg dialog(GetBaseStylesheetPath());
+	dialog.DoModal();
 }

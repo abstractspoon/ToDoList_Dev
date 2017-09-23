@@ -269,6 +269,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_INSERTDATETIME, OnEditInsertdatetime)
 	ON_COMMAND(ID_EDIT_INSERTTIME, OnEditInserttime)
 	ON_COMMAND(ID_EDIT_OFFSETDATES, OnEditOffsetdates)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetdatesForwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetdatesBackwards)
 	ON_COMMAND(ID_EDIT_PASTEAFTER, OnEditPasteAfter)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteAsRef)
 	ON_COMMAND(ID_EDIT_PASTESUB, OnEditPasteSub)
@@ -426,7 +428,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnToDoCtrlDoTaskLink)
+	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
+	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnToDoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
@@ -581,6 +584,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR, OnUpdateViewToolbar)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetdates)	
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)	
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_SPLITTASKINTO_TWO, ID_NEWTASK_SPLITTASKINTO_FIVE, OnUpdateSplitTaskIntoPieces)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
@@ -5093,7 +5097,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			CString sPath;
 			DWORD dwTaskID = 0;
 
-			CFilteredToDoCtrl::ParseTaskLink(aFiles[0], _T(""), dwTaskID, sPath);
+			CFilteredToDoCtrl::ParseTaskLink(aFiles[0], FALSE, _T(""), dwTaskID, sPath);
 	
 			if (sPath.IsEmpty() || ValidateTaskLinkFilePath(sPath))
 			{
@@ -8415,7 +8419,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 			CString sParams = AfxGetApp()->m_lpCmdLine;
 			sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
 			
-			if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), sParams) <= 32)
+			if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), sParams) < SE_ERR_SUCCESS)
 			{
 				// TODO
 			}
@@ -11167,6 +11171,46 @@ void CToDoListWnd::OnEditOffsetdates()
 	}
 }
 
+void CToDoListWnd::OnEditOffsetdatesForwards(UINT nCmdID)
+{
+	TDC_OFFSET nUnits = TDCO_NULL;
+
+	switch (nCmdID)
+	{
+	case ID_OFFSETDATES_FORWARDSBY_ONEDAY:		nUnits = TDCO_DAYS;		break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEWEEKDAY:	nUnits = TDCO_WEEKDAYS; break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEWEEK:		nUnits = TDCO_WEEKS;	break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEMONTH:	nUnits = TDCO_MONTHS;	break;
+	case ID_OFFSETDATES_FORWARDSBY_ONEYEAR:		nUnits = TDCO_YEARS;	break;
+
+	default:
+		ASSERT(0);
+		return;
+	}
+
+	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits, FALSE);
+}
+
+void CToDoListWnd::OnEditOffsetdatesBackwards(UINT nCmdID)
+{
+	TDC_OFFSET nUnits = TDCO_NULL;
+
+	switch (nCmdID)
+	{
+	case ID_OFFSETDATES_BACKWARDSBY_ONEDAY:		nUnits = TDCO_DAYS;		break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY:	nUnits = TDCO_WEEKDAYS; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEK:	nUnits = TDCO_WEEKS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEMONTH:	nUnits = TDCO_MONTHS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEYEAR:	nUnits = TDCO_YEARS;	break;
+
+	default:
+		ASSERT(0);
+		return;
+	}
+
+	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(-1, nUnits, FALSE);
+}
+
 void CToDoListWnd::OnUpdateEditOffsetdates(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask());	
@@ -11397,7 +11441,7 @@ BOOL CToDoListWnd::ValidateTaskLinkFilePath(CString& sPath) const
 	return FileMisc::FileExists(sPath);
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 {
 	DWORD dwTaskID = wParam;
 	CString sPath((LPCTSTR)lParam);
@@ -11427,6 +11471,49 @@ LRESULT CToDoListWnd::OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam)
 						dwTaskID);
 
 	return FileMisc::Run(*this, sCommandline);
+}
+
+LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
+{
+	LPCTSTR szLink = (LPCTSTR)wParam;
+	TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
+
+	CString sTooltip;
+
+	// if it's an Outlook link then run it directly
+	if (CMSOutlookHelper::IsOutlookUrl(szLink))
+	{
+		// TODO
+	}
+	else // see if it's a task link
+	{
+		CString sPath, sCwd(m_mgrToDoCtrls.GetFolderPath(GetSelToDoCtrl()));
+		DWORD dwTaskID = 0;
+
+		if (CFilteredToDoCtrl::ParseTaskLink(szLink, TRUE, sCwd, dwTaskID, sPath))
+		{
+			if (sPath.IsEmpty())
+			{
+				sTooltip = GetToDoCtrl().GetTaskTitle(dwTaskID);
+			}
+			else
+			{
+				int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
+
+				if ((nTDC != -1) && m_mgrToDoCtrls.IsLoaded(nTDC))
+					sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
+			}
+		}
+	}
+
+	if (!sTooltip.IsEmpty())
+	{
+		lstrcpyn(pTT->szText, sTooltip, 80);
+		return TRUE;
+	}
+
+	// all else
+	return FALSE;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
@@ -11459,8 +11546,10 @@ LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 		{
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
-			if (tdc.ParseTaskLink(szLink, dwTaskID, sPath))
-				return OnToDoCtrlDoTaskLink(dwTaskID, (LPARAM)(LPCTSTR)sPath);
+			if (tdc.ParseTaskLink(szLink, TRUE, dwTaskID, sPath))
+			{
+				return OnToDoCtrlSelectTask(dwTaskID, (LPARAM)(LPCTSTR)sPath);
+			}
 		}
 		// else fall thru for generic error message
 	}
@@ -12457,11 +12546,8 @@ LRESULT CToDoListWnd::OnDismissReminder(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl* pTDC = (CFilteredToDoCtrl*)lp;
 	ASSERT(pTDC);
 
-	if (pTDC && (*pTDC == GetToDoCtrl()))
-	{
-		Show(FALSE);
+	if (pTDC && (*pTDC == GetToDoCtrl()) && IsWindowVisible() && !IsIconic())
 		pTDC->RedrawReminders();
-	}
 
 	return 0L;
 }

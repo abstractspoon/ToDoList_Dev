@@ -116,6 +116,7 @@ public:
 	BOOL HasSelection() const;
 
 	int CharFromPoint(const CPoint& point) const; 
+	void PointFromChar(int nCharPos, CPoint& point) const; 
 	int GetLineHeight() const;
 	void SetFirstVisibleLine(int nLine);
 	CPoint GetCaretPos() const;

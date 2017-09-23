@@ -45,7 +45,7 @@ public:
 	MSXML2::IXMLDOMDocumentPtr ParentDocument();
 	CString GetXML();
 	MSXML2::IXMLDOMNodePtr RemoveNode(MSXML2::IXMLDOMNodePtr pNode);
-	MSXML2::IXMLDOMNodePtr InsertNode(int index, const CString& nodeName);
+	MSXML2::IXMLDOMNodePtr InsertNode(int index, const CString& nodeName, const CString& nameSpace = _T(""));
 	MSXML2::IXMLDOMNodePtr InsertNode(int index,MSXML2::IXMLDOMNodePtr pNode);
 	MSXML2::IXMLDOMNodePtr AppendChild(MSXML2::IXMLDOMNodePtr pNode);
 	long NumNodes();

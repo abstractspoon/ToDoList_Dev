@@ -72,6 +72,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeStylesheet();
 	afx_msg void OnChangeStyle();
+	afx_msg void OnConfigureStylesheet();
 	//}}AFX_MSG
     afx_msg void OnUsestylesheet();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
@@ -79,6 +80,9 @@ protected:
 
 protected:
 	void InitStylesheet(LPCTSTR szStylesheet);
+	void EnableDisableControls();
+	
+	CString GetBaseStylesheetPath() const;
 };
 
 //{{AFX_INSERT_LOCATION}}

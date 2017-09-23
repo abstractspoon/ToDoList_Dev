@@ -4120,10 +4120,30 @@ void CGanttTreeListCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /
 		{ ptMid.x, rMilestone.bottom }, 
 		{ rMilestone.left, ptMid.y }
 	};
+
+	CBrush brFill;
+	CPen penBorder;
+	CGdiObject* pOldBrush = NULL;
+	CGdiObject* poldPen = NULL;
 	
-	pDC->SelectStockObject(BLACK_BRUSH);
-	pDC->SelectStockObject(NULL_PEN);
+	if (gi.HasColor())
+	{
+		VERIFY(brFill.CreateSolidBrush(gi.GetFillColor()));
+		pOldBrush = pDC->SelectObject(&brFill);
+
+		VERIFY(penBorder.CreatePen(PS_SOLID, 1, gi.GetBorderColor()));
+		poldPen = pDC->SelectObject(&penBorder);
+
+	}
+	else
+	{
+		pOldBrush = pDC->SelectStockObject(BLACK_BRUSH);
+		poldPen = pDC->SelectStockObject(NULL_PEN);
+	}
+		
 	pDC->Polygon(pt, 5);
+	pDC->SelectObject(pOldBrush);
+	pDC->SelectObject(poldPen);
 }
 
 BOOL CGanttTreeListCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const

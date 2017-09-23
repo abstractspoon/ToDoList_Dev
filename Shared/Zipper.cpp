@@ -10,6 +10,16 @@
 #include "..\3rdparty\zlib\iowin32.h"
 
 //////////////////////////////////////////////////////////////////////
+
+#if _MSC_VER >= 1400
+#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath_s(path, drive, _MAX_DRIVE, folder, _MAX_DIR, fname, _MAX_FNAME, ext, _MAX_EXT)
+#	define zmakepath(path, drive, folder, fname, ext) _tmakepath_s(path, _MAX_PATH, drive, folder, fname, ext)
+#else
+#	define zsplitpath(path, drive, folder, fname, ext) _tsplitpath(path, drive, folder, fname, ext)
+#	define zmakepath(path, drive, folder, fname, ext) _tmakepath(path, drive, folder, fname, ext)
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -50,10 +60,10 @@ bool CZipper::ZipFile(LPCTSTR szFilePath)
 {
 	// make zip path
 	TCHAR szDrive[_MAX_DRIVE], szFolder[MAX_PATH], szName[_MAX_FNAME];
-	_tsplitpath(szFilePath, szDrive, szFolder, szName, NULL);
+	zsplitpath(szFilePath, szDrive, szFolder, szName, NULL);
 
 	TCHAR szZipPath[MAX_PATH];
-	_tmakepath(szZipPath, szDrive, szFolder, szName, _T("zip"));
+	zmakepath(szZipPath, szDrive, szFolder, szName, _T("zip"));
 
 	CZipper zip;
 
@@ -67,16 +77,16 @@ bool CZipper::ZipFolder(LPCTSTR szFilePath, bool bIgnoreFilePath)
 {
 	// make zip path
 	TCHAR szDrive[_MAX_DRIVE], szFolder[MAX_PATH], szName[_MAX_FNAME], szExt[_MAX_EXT];
-	_tsplitpath(szFilePath, szDrive, szFolder, szName, szExt);
+	zsplitpath(szFilePath, szDrive, szFolder, szName, szExt);
 
 	lstrcat(szName, szExt); // save extension if any
 
 	// set root path to include the folder name
 	TCHAR szRootPath[MAX_PATH];
-	_tmakepath(szRootPath, szDrive, szFolder, szName, NULL);
+	zmakepath(szRootPath, szDrive, szFolder, szName, NULL);
 
 	TCHAR szZipPath[MAX_PATH];
-	_tmakepath(szZipPath, szDrive, szFolder, szName, _T("zip"));
+	zmakepath(szZipPath, szDrive, szFolder, szName, _T("zip"));
 
 	CZipper zip;
 
@@ -111,9 +121,9 @@ bool CZipper::AddFileToZip(LPCTSTR szFilePath, bool bIgnoreFilePath)
 	if (bIgnoreFilePath)
 	{
 		TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
-		_tsplitpath(szFilePath, NULL, NULL, szName, szExt);
+		zsplitpath(szFilePath, NULL, NULL, szName, szExt);
 
-		_tmakepath(szFileName, NULL, NULL, szName, szExt);
+		zmakepath(szFileName, NULL, NULL, szName, szExt);
 	}
 	else if (bFullPath)
 	{
@@ -262,11 +272,11 @@ bool CZipper::AddFileToZip(LPCTSTR szFilePath, LPCTSTR szRelFolderPath)
 
 	// strip drive info off filepath
 	TCHAR szName[_MAX_FNAME], szExt[_MAX_EXT];
-	_tsplitpath(szFilePath, NULL, NULL, szName, szExt);
+	zsplitpath(szFilePath, NULL, NULL, szName, szExt);
 
 	// prepend new folder path 
 	TCHAR szFileName[MAX_PATH];
-	_tmakepath(szFileName, NULL, szRelFolderPath, szName, szExt);
+	zmakepath(szFileName, NULL, szRelFolderPath, szName, szExt);
 
 	PrepareZipPath(szFileName);
 	// convert unicode to ansi as required
@@ -436,7 +446,7 @@ bool CZipper::AddFolderToZip(LPCTSTR szFolderPath, bool bIgnoreFilePath)
 	if (bIgnoreFilePath)
 	{
 		TCHAR szExt[_MAX_EXT];
-		_tsplitpath(szFullPath, NULL, NULL, szFolderName, szExt);
+		zsplitpath(szFullPath, NULL, NULL, szFolderName, szExt);
 
 		lstrcat(szFolderName, szExt);
 	}
@@ -483,13 +493,13 @@ bool CZipper::AddFolderToZip(LPCTSTR szFolderPath, bool bIgnoreFilePath)
 
 	// build searchspec
 	TCHAR szDrive[_MAX_DRIVE], szFolder[MAX_PATH], szName[_MAX_FNAME], szExt[_MAX_EXT];
-	_tsplitpath(szFullPath, szDrive, szFolder, szName, szExt);
+	zsplitpath(szFullPath, szDrive, szFolder, szName, szExt);
 
 	lstrcat(szFolder, szName);
 	lstrcat(szFolder, szExt);
 
 	TCHAR szSearchSpec[MAX_PATH];
-	_tmakepath(szSearchSpec, szDrive, szFolder, _T("*"), _T("*"));
+	zmakepath(szSearchSpec, szDrive, szFolder, _T("*"), _T("*"));
 
 	WIN32_FIND_DATA finfo;
 	HANDLE hSearch = FindFirstFile(szSearchSpec, &finfo);
@@ -501,7 +511,7 @@ bool CZipper::AddFolderToZip(LPCTSTR szFolderPath, bool bIgnoreFilePath)
 			if (finfo.cFileName[0] != '.') 
 			{
 				TCHAR szItem[MAX_PATH];
-				_tmakepath(szItem, szDrive, szFolder, finfo.cFileName, NULL);
+				zmakepath(szItem, szDrive, szFolder, finfo.cFileName, NULL);
 				
 				if (finfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -555,13 +565,13 @@ bool CZipper::OpenZip(LPCTSTR szFilePath, LPCTSTR szRootFolder, bool bAppend)
 		if (!szRootFolder)
 		{
 			TCHAR szDrive[_MAX_DRIVE], szFolder[MAX_PATH];
-			_tsplitpath(szFullPath, szDrive, szFolder, NULL, NULL);
+			zsplitpath(szFullPath, szDrive, szFolder, NULL, NULL);
 
-			_tmakepath(m_szRootFolder, szDrive, szFolder, NULL, NULL);
+			zmakepath(m_szRootFolder, szDrive, szFolder, NULL, NULL);
 		}
 		else if (lstrlen(szRootFolder))
 		{
-			_tmakepath(m_szRootFolder, NULL, szRootFolder, NULL, NULL);
+			zmakepath(m_szRootFolder, NULL, szRootFolder, NULL, NULL);
 		}
 
 		// remove any trailing whitespace and '\'
@@ -614,7 +624,7 @@ void CZipper::PrepareSourcePath(LPTSTR szPath)
 		TCHAR szTemp[MAX_PATH];
 		lstrcpy(szTemp, szPath);
 
-		_tmakepath(szPath, NULL, m_szRootFolder, szTemp, NULL);
+		zmakepath(szPath, NULL, m_szRootFolder, szTemp, NULL);
 	}
 }
 

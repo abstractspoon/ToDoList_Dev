@@ -1100,11 +1100,8 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					if (dwTaskID)
 					{
 						CString sInfoTip(FormatInfoTip(dwTaskID, (pTVGIT->cchTextMax - 1)));
-	#if _MSC_VER >= 1400
-						_tcsncpy_s(pTVGIT->pszText, pTVGIT->cchTextMax, sInfoTip, _TRUNCATE);
-	#else
-						_tcsncpy(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
-	#endif
+						lstrcpyn(pTVGIT->pszText, sInfoTip, (pTVGIT->cchTextMax - 1));
+
 						return 0L; // eat
 					}
 				}
@@ -1206,6 +1203,22 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		
 		switch (msg)
 		{
+		case WM_NOTIFY:
+			{
+				LPNMHDR pNMHDR = (LPNMHDR)lp;
+				HWND hwnd = pNMHDR->hwndFrom;
+
+				switch (pNMHDR->code)
+				{
+				case TTN_SHOW:
+					// Set the font to non-bold for info tips
+					if (HasStyle(TDCS_SHOWINFOTIPS))
+						::SendMessage(hwnd, WM_SETFONT, (WPARAM)m_fonts.GetHFont(), TRUE);
+					break;
+				}
+			}
+			break;
+
 		case WM_ERASEBKGND:
 			if (m_bMovingItem)
 				return TRUE;

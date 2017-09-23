@@ -152,6 +152,8 @@ copy unicode_debug\ToDoList.pdb ..\..\todolist_Plugins\debug /y
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -506,6 +508,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDLStylesheetParamConfigDlg.cpp" />
     <ClCompile Include="TDLTaskCtrlBase.cpp" />
     <ClCompile Include="TDLTaskIconDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -695,6 +698,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLSendTasksDlg.h" />
     <ClInclude Include="TDLSetReminderDlg.h" />
     <ClInclude Include="TDLShowReminderDlg.h" />
+    <ClInclude Include="TDLStylesheetParamConfigDlg.h" />
     <ClInclude Include="TDLTaskCtrlBase.h" />
     <ClInclude Include="TDLTaskIconDlg.h" />
     <ClInclude Include="TDLTaskListCtrl.h" />

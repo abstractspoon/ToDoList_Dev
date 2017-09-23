@@ -27,8 +27,10 @@ struct LVGROUPITEM
     PUINT puColumns;
 };
 
-#define LVIF_GROUPID            0x0100
-#define LVIF_COLUMNS            0x0200
+#ifndef LVIF_GROUPID
+#	define LVIF_GROUPID     0x0100
+#	define LVIF_COLUMNS     0x0200
+#endif
 
 #ifndef LVGF_NONE
 

@@ -136,6 +136,7 @@ protected:
 	afx_msg LRESULT OnPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 

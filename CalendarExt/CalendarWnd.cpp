@@ -689,7 +689,13 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		}
 		
 		if (mod.nAttrib != IUI_NONE)
-			GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+		{
+			if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
+			{
+				m_MiniCalendar.Invalidate(); // special dates may have changed
+				return TRUE;
+			}
+		}
 	}
 
 	return 0L;

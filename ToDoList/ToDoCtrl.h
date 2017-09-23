@@ -408,8 +408,8 @@ public:
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
 
-	BOOL ParseTaskLink(const CString& sLink, DWORD& dwTaskID, CString& sFile) const;
-	static BOOL ParseTaskLink(const CString& sLink, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
+	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
 
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
@@ -578,6 +578,7 @@ protected:
 	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCompletionDatechange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnGotoFileRef();
 
 	afx_msg void OnTreeSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -597,6 +598,7 @@ protected:
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnChangePriority();
 	afx_msg void OnChangePercent();
@@ -627,6 +629,8 @@ protected:
 	afx_msg void OnChangeDependency();
 	afx_msg void OnChangeExternalID();
 	afx_msg void OnChangeRecurrence();
+	afx_msg void OnSelChangeCommentsType();
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
  	afx_msg LRESULT OnGutterNotifyScroll(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
@@ -636,7 +640,6 @@ protected:
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnGotoFileRef();
 	afx_msg LRESULT OnTDCHasClipboard(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetClipboard(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam);
@@ -645,8 +648,6 @@ protected:
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnSelChangeCommentsType();
-	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
@@ -821,7 +822,7 @@ protected:
 	BOOL CanSpellcheckComments();
 
 	BOOL GotoFile(const CString& sFile, BOOL bShellExecute = TRUE);
-	BOOL ShowTaskLink(const CString& sLink);
+	BOOL ShowTaskLink(const CString& sLink, BOOL bURL);
 	void MakeRelativePaths(CStringArray& aFilePaths) const;
 	void MakeFullPaths(CStringArray& aFilePaths) const;
 	CString GetLastSaveFolder() const;
@@ -887,6 +888,7 @@ protected:
 	static void AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
+	static BOOL IsTaskLinkURL(const CString& sLink);
 
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);

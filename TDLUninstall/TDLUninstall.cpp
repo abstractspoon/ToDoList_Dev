@@ -84,7 +84,7 @@ BOOL CTDLUninstallApp::InitInstance()
 				if (CRTLStyleMgr::IsRTL())
 					params.SetOption(SWITCH_RTL);
 
-				if (FileMisc::Run(NULL, sTempPath, params.GetCommandLine()) <= 32)
+				if (FileMisc::Run(NULL, sTempPath, params.GetCommandLine()) < SE_ERR_SUCCESS)
 				{
 					// TODO
 				}

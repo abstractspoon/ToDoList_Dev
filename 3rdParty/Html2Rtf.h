@@ -486,8 +486,8 @@ public:
 				   }; 
 				   LPCTSTR* ppstrPseudo = szPseudo; 
 				   while(*ppstrPseudo) { 
-					   if (_tcsnicmp(pszHTML, *ppstrPseudo, ::lstrlen(*ppstrPseudo)) == 0) { 
-						   pszHTML += ::lstrlen(*ppstrPseudo); 
+					   if (_tcsnicmp(pszHTML, *ppstrPseudo, lstrlen(*ppstrPseudo)) == 0) { 
+						   pszHTML += lstrlen(*ppstrPseudo); 
 						   AddOutput(pstrDest, *(ppstrPseudo + 1)); 
 						   m_nCharPos++; 
 						   m_bWasSpace = false; 
@@ -640,7 +640,7 @@ public:
 		   if (_tcsicmp(m_aFonts[i].lfFaceName, pszValue) == 0) return i; 
 	   } 
 	   LOGFONT lf = { 0 }; 
-	   _tcscpy(lf.lfFaceName, pszValue); 
+	   lstrcpy(lf.lfFaceName, pszValue); 
 	   m_aFonts.Add(lf); 
 	   return m_aColors.GetSize() - 1; 
    } 

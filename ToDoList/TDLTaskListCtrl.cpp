@@ -479,11 +479,8 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 						if (dwTaskID)
 						{
 							CString sInfoTip(FormatInfoTip(dwTaskID, (pLVGIT->cchTextMax - 1)));
-#if _MSC_VER >= 1400
-							_tcsncpy_s(pLVGIT->pszText, pLVGIT->cchTextMax, sInfoTip, _TRUNCATE);
-#else
-							_tcsncpy(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
-#endif
+							lstrcpyn(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
+
 							return 0L; // eat
 						}
 					}

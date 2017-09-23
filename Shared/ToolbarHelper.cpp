@@ -141,13 +141,7 @@ BOOL CToolbarHelper::SetButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT 
 
 	THButton dm = { nMenuID, nSubMenu, nDefCmdID, cHotkey, 0 };
 
-	//fabio_2005
-#if _MSC_VER >= 1400
-	_tcsncpy_s(dm.szTip, MAX_TIP_LEN, szTip, _TRUNCATE);
-#else
-	_tcsncpy(dm.szTip, szTip, MAX_TIP_LEN - 1);
-#endif
-
+	lstrcpyn(dm.szTip, szTip, MAX_TIP_LEN - 1);
 	m_mapTHButtons[nBtnCmdID] = dm;
 
 	m_pToolbar->RedrawWindow();
@@ -426,7 +420,7 @@ void CToolbarHelper::InitTooltips()
 	// and activate it
 	m_tt.Activate(TRUE);
 
-	// set up tools for each of the toolar buttons
+	// set up tools for each of the toolbar buttons
 	int nBtnCount = m_pToolbar->GetToolBarCtrl().GetButtonCount();
 
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)

@@ -133,12 +133,7 @@ void DH_DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UIN
 
 // *******************************************************************
 		if (*szBuffer == 0)
-			//fabio_2005
-#if _MSC_VER >= 1400
-			_tcscpy_s(szBuffer, _T("0"));
-#else
-			_tcscpy(szBuffer, _T("0"));
-#endif
+			lstrcpy(szBuffer, _T("0"));
 
 // *******************************************************************
 
@@ -180,12 +175,7 @@ void DH_TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value,
 
 		// *******************************************************************
 		if (*szBuffer == 0)
-			//fabio_2005
-#if _MSC_VER >= 1400
-			_tcscpy_s(szBuffer, BUFLEN, _T("0"));
-#else
-			_tcscpy(szBuffer, _T("0"));
-#endif
+			lstrcpy(szBuffer, _T("0"));
 
 		// *******************************************************************
 

@@ -272,7 +272,7 @@ BOOL CMSOutlookHelper::HandleUrl(HWND hWnd, LPCTSTR szURL)
 
 	FileMisc::LogText(_T("CMSOutlookHelper::HandleUrl(\"%s\", %s)"), sOutlookPath, sArguments);
 
-	return (FileMisc::Run(hWnd, sOutlookPath, sArguments) > 32);
+	return (FileMisc::Run(hWnd, sOutlookPath, sArguments) >= SE_ERR_SUCCESS);
 }
 
 /*
