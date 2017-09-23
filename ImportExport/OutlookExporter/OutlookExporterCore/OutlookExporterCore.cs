@@ -5,9 +5,9 @@ using System.Text;
 using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace SampleImpExp
+namespace OutlookExporter
 {
-    public class SampleImpExpCore
+    public class OutlookExporterCore
     {
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {

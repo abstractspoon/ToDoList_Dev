@@ -118,8 +118,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OutlookExporter", "OutlookExporter", "{9AE05D75-D889-4AE7-BD19-23612BBAB2C5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OutlookExporterBridge", "ImportExport\OutlookExporter\OutlookExporterBridge\OutlookExporterBridge.vcxproj", "{7B12BBC1-1C0B-4CED-A7BD-19C4B4B66424}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B2901A7A-7FE0-4E7A-82D3-2024589C0672} = {B2901A7A-7FE0-4E7A-82D3-2024589C0672}
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookExporterCore", "ImportExport\OutlookExporter\OutlookExporterCore\OutlookExporterCore.csproj", "{B2901A7A-7FE0-4E7A-82D3-2024589C0672}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -114,6 +114,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
   <ItemGroup>
     <None Include="res\outlook_16.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OutlookExporterCore\OutlookExporterCore.csproj">
+      <Project>{b2901a7a-7fe0-4e7a-82d3-2024589c0672}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

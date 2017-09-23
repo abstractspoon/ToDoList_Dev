@@ -8,10 +8,10 @@
 #include "..\..\..\..\ToDoList_Dev\Interfaces\IImportExport.h"
 
 // This class is exported from ExporterBridge.dll
-class OutlookExporterCore : public IExportTasklist
+class COutlookExporterBridge : public IExportTasklist
 {
 public:
-	OutlookExporterCore();
+	COutlookExporterBridge();
 
    void Release(); // releases the interface
 
@@ -36,7 +36,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 {
-   return new OutlookExporterCore();
+   return new COutlookExporterBridge();
 }
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
