@@ -422,12 +422,12 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnPreferencesClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnPreferencesTestTool)
-	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTodoCtrlFailedLink)
+	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnToDoCtrlFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TASKLINK, OnToDoCtrlDoTaskLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnTodoCtrlImportDropFiles)
+	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTDROPFILES, OnToDoCtrlImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTDROPFILES, OnToDoCtrlCanImportDropFiles)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
@@ -3900,9 +3900,8 @@ void CToDoListWnd::OnDebugShowReminderDlg()
 	
 	rem.dwTaskID = tdc.GetSelectedTaskID();
 	rem.pTDC = &tdc;
-	rem.bRelative = TRUE;
-	rem.dRelativeDaysLeadIn = 0;
-	rem.nRelativeFromWhen = TDCR_STARTDATE;
+	rem.bRelative = FALSE;
+	rem.dtAbsolute = COleDateTime::GetCurrentTime();
 	rem.bEnabled = TRUE;
 	
 	m_reminders.SetReminder(rem, TRUE);
@@ -8450,7 +8449,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	return FALSE;
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnToDoCtrlImportDropFiles(WPARAM wp, LPARAM lp)
 {
 	ASSERT(lp);
 	ASSERT((HWND)wp == GetToDoCtrl().GetSafeHwnd());
@@ -11430,7 +11429,7 @@ LRESULT CToDoListWnd::OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam)
 	return FileMisc::Run(*this, sCommandline);
 }
 
-LRESULT CToDoListWnd::OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 {
 	LPCTSTR szLink = (LPCTSTR)lParam;
 

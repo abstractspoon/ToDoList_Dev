@@ -371,8 +371,8 @@ protected:
 	afx_msg LRESULT OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlDoLengthyOperation(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlDoTaskLink(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTodoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTodoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToDoCtrlImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlCanImportDropFiles(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyListChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMinWidthChange(WPARAM wp, LPARAM lp);
