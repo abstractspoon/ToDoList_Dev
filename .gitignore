@@ -65,3 +65,4 @@ Release\*.*
 *.ide
 *.CopyComplete
 release
+*.aps
