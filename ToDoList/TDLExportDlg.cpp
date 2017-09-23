@@ -122,7 +122,9 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
 	}
 	else
+	{
 		CDialogHelper::SelectItemByData(m_cbFormat, m_nFormatOption);
+	}
 }
 
 
@@ -381,8 +383,12 @@ void CTDLExportDlg::OnExportonefile()
 void CTDLExportDlg::EnableOK()
 {
 	Misc::Trim(m_sExportPath);
-	
-	GetDlgItem(IDOK)->EnableWindow(!m_sExportPath.IsEmpty());
+	BOOL bEnable = FALSE;
+
+	if (m_nFormatOption != -1)
+		bEnable = (!m_sExportPath.IsEmpty() || !m_mgrImportExport.ExporterHasFileExtension(m_nFormatOption));
+
+	GetDlgItem(IDOK)->EnableWindow(bEnable);
 }
 
 void CTDLExportDlg::OnChangeExportpath() 
