@@ -34,7 +34,23 @@ namespace SampleImpExp
 
         protected bool ExportTask(Task task /*, probably with some additional parameters*/)
         {
+            // Process task's own attributes
             // TODO
+
+            // Export task's children
+            Task subtask = task.GetFirstSubtask();
+
+            while (subtask.IsValid())
+            {
+                if (!ExportTask(subtask /*, probably with some additional parameters*/ ))
+                {
+                    // Decide whether to stop or not
+                    // TODO
+                }
+
+                subtask = subtask.GetNextTask();
+            }
+
             return true;
         }
     }
