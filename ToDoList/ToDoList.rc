@@ -2932,23 +2932,33 @@ BEGIN
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
-            POPUP "O&ffset Task Dates", INACTIVE
+            POPUP "O&ffset Task Dates"
             BEGIN
                 POPUP "&Forwards By"
                 BEGIN
                     MENUITEM "One Day",                     ID_OFFSETDATES_FORWARDSBY_ONEDAY
+
                     MENUITEM "One Weekday",                 ID_OFFSETDATES_FORWARDSBY_ONEWEEKDAY
+
                     MENUITEM "One Week",                    ID_OFFSETDATES_FORWARDSBY_ONEWEEK
+
                     MENUITEM "One Month",                   ID_OFFSETDATES_FORWARDSBY_ONEMONTH
+
                     MENUITEM "One Year",                    ID_OFFSETDATES_FORWARDSBY_ONEYEAR
+
                 END
                 POPUP "&Backwards By"
                 BEGIN
                     MENUITEM "One Day",                     ID_OFFSETDATES_BACKWARDSBY_ONEDAY
+
                     MENUITEM "One Weekday",                 ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY
+
                     MENUITEM "One Week",                    ID_OFFSETDATES_BACKWARDSBY_ONEWEEK
+
                     MENUITEM "One Month",                   ID_OFFSETDATES_BACKWARDSBY_ONEMONTH
+
                     MENUITEM "One Year",                    ID_OFFSETDATES_BACKWARDSBY_ONEYEAR
+
                 END
             END
             MENUITEM SEPARATOR
@@ -3511,18 +3521,28 @@ BEGIN
                 POPUP "&Forwards By"
                 BEGIN
                     MENUITEM "One Day",                     ID_OFFSETDATES_FORWARDSBY_ONEDAY
+
                     MENUITEM "One Weekday",                 ID_OFFSETDATES_FORWARDSBY_ONEWEEKDAY
+
                     MENUITEM "One Week",                    ID_OFFSETDATES_FORWARDSBY_ONEWEEK
+
                     MENUITEM "One Month",                   ID_OFFSETDATES_FORWARDSBY_ONEMONTH
+
                     MENUITEM "One Year",                    ID_OFFSETDATES_FORWARDSBY_ONEYEAR
+
                 END
                 POPUP "&Backwards By"
                 BEGIN
                     MENUITEM "One Day",                     ID_OFFSETDATES_BACKWARDSBY_ONEDAY
+
                     MENUITEM "One Weekday",                 ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY
+
                     MENUITEM "One Week",                    ID_OFFSETDATES_BACKWARDSBY_ONEWEEK
+
                     MENUITEM "One Month",                   ID_OFFSETDATES_BACKWARDSBY_ONEMONTH
+
                     MENUITEM "One Year",                    ID_OFFSETDATES_BACKWARDSBY_ONEYEAR
+
                 END
             END
             MENUITEM SEPARATOR
