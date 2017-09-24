@@ -35,7 +35,7 @@ TASKCALITEM::TASKCALITEM()
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
+TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
 	bDone(FALSE),
@@ -89,7 +89,7 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dtEndCalc == tci.dtEndCalc));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
+void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	// check for quick exit
 	BOOL bUpdateStart = attrib.Has(IUI_STARTDATE);
@@ -221,6 +221,9 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const C
 
 	if (attrib.Has(IUI_TASKNAME))
 		sName = pTasks->GetTaskTitle(hTask);
+
+	if (attrib.Has(IUI_DEPENDENCY))
+		bHasDepends = !Misc::IsEmpty(pTasks->GetTaskDependency(hTask, 0));
 
 	UpdateTaskDates(pTasks, hTask, attrib, dwCalcDates);
 

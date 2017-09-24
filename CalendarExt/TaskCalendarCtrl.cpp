@@ -200,6 +200,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(IUI_ATTRIBUTE nEditAttrib)
 	case IUI_DUEDATE:
 	case IUI_STARTDATE:
 	case IUI_COLOR:
+	case IUI_DEPENDENCY:
 		return true;
 	}
 	
@@ -1433,6 +1434,13 @@ BOOL CTaskCalendarCtrl::IsTaskCalItemLocked(DWORD dwTaskID) const
 	return (pTCI && pTCI->bLocked);
 }
 
+BOOL CTaskCalendarCtrl::TaskCalItemHasDependencies(DWORD dwTaskID) const
+{
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	
+	return (pTCI && pTCI->bHasDepends);
+}
+
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID) const
 {
 	if (dwTaskID == 0)
@@ -1530,13 +1538,10 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTest(ptCursor, nHit);
+	
+	BOOL bCanDrag = CanDragTask(dwTaskID, nHit);
 
-	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
-
-	if (nHit == TCCHT_NOWHERE)
-		return FALSE;
-
-	if (IsTaskCalItemLocked(dwTaskID))
+	if (bCanDrag <= 0)
 		return FALSE;
 
 	// when not drawing tasks continuously, it's possible
@@ -1944,6 +1949,35 @@ BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& d
 	return FALSE;
 }
 
+BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
+{
+	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
+	
+	if (dwTaskID)
+	{
+		if (IsTaskCalItemLocked(dwTaskID))
+			return FALSE;
+
+		BOOL bCanDrag = !HasOption(TCCO_DISABLEDEPENDENTDRAGGING) ||
+						!TaskCalItemHasDependencies(dwTaskID);
+			
+		switch (nHit)
+		{
+		case TCCHT_BEGIN:
+			return bCanDrag;
+			
+		case TCCHT_END:
+			return TRUE; // always
+			
+		case TCCHT_MIDDLE:
+			return bCanDrag;
+		}
+	}
+
+	// all else
+	return -1;
+}
+
 BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
 	// this is only for when we are NOT yet dragging
@@ -1962,24 +1996,19 @@ BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		TCC_HITTEST nHit = TCCHT_NOWHERE;
 		DWORD dwHitID = HitTest(ptCursor, nHit);
 
-		if (dwHitID && IsTaskCalItemLocked(dwHitID))
+		if (!CanDragTask(dwHitID, nHit))
 		{
 			SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
 			return TRUE;
 		}
-		else
+		
+		// else
+		switch (nHit)
 		{
-			switch (nHit)
-			{
 			case TCCHT_BEGIN:
 			case TCCHT_END:
 				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
 				return TRUE;
-
-			case TCCHT_MIDDLE:
-				//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
-				break;
-			}
 		}
 	}
 	

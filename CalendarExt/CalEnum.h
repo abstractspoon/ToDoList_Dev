@@ -24,6 +24,7 @@ enum // options
 	TCCO_DISPLAYDONE							= 0x0800,
 	TCCO_TASKTEXTCOLORISBKGND					= 0x1000,
 	TCCO_STRIKETHRUDONETASKS					= 0x2000,
+	TCCO_DISABLEDEPENDENTDRAGGING				= 0x4000,
 };
 
 /////////////////////////////////////////////////////////////////////////////
