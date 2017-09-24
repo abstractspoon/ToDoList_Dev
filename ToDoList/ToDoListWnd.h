@@ -189,9 +189,9 @@ protected:
 	afx_msg void OnEditInsertdate();
 	afx_msg void OnEditInsertdatetime();
 	afx_msg void OnEditInserttime();
-	afx_msg void OnEditOffsetdates();
-	afx_msg void OnEditOffsetdatesForwards(UINT nCmdID);
-	afx_msg void OnEditOffsetdatesBackwards(UINT nCmdID);
+	afx_msg void OnEditOffsetDates();
+	afx_msg void OnEditOffsetDatesForwards(UINT nCmdID);
+	afx_msg void OnEditOffsetDatesBackwards(UINT nCmdID);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnEditSetReminder();
@@ -242,7 +242,9 @@ protected:
 	afx_msg void OnUpdateEditInsertdate(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInsertdatetime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInserttime(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditOffsetdates(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetDates(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetDatesForwards(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetDatesBackwards(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditRedo(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditSelectall(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditSetReminder(CCmdUI* pCmdUI);

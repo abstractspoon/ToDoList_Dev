@@ -3167,6 +3167,18 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET n
 	return (nRes != SET_FAILED);
 }
 
+BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
+{
+	if (!CanEditSelectedTask())
+		return FALSE;
+	
+	if (m_taskTree.SelectionHasDependencies() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		return FALSE;
+
+	// else
+	return TRUE;
+}
+
 BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nOffset, BOOL bAndSubtasks)
 {
 	if (!CanEditSelectedTask())

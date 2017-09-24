@@ -219,6 +219,7 @@ public:
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
+	BOOL CanOffsetSelectedTaskStartAndDueDates() const;
 	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
 	COleDateTime GetEarliestDueDate() const { return m_data.GetEarliestDueDate(); } // entire tasklist
 

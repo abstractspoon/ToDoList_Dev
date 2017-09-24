@@ -268,9 +268,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_INSERTDATE, OnEditInsertdate)
 	ON_COMMAND(ID_EDIT_INSERTDATETIME, OnEditInsertdatetime)
 	ON_COMMAND(ID_EDIT_INSERTTIME, OnEditInserttime)
-	ON_COMMAND(ID_EDIT_OFFSETDATES, OnEditOffsetdates)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetdatesForwards)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetdatesBackwards)
+	ON_COMMAND(ID_EDIT_OFFSETDATES, OnEditOffsetDates)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetDatesForwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetDatesBackwards)
 	ON_COMMAND(ID_EDIT_PASTEAFTER, OnEditPasteAfter)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteAsRef)
 	ON_COMMAND(ID_EDIT_PASTESUB, OnEditPasteSub)
@@ -483,7 +483,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTTIME, OnUpdateEditInserttime)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_OFFSETDATES, OnUpdateEditOffsetdates)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_OFFSETDATES, OnUpdateEditOffsetDates)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OPENFILEREF1, OnUpdateEditOpenfileref)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEAFTER, OnUpdateEditPasteAfter)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEASREF, OnUpdateEditPasteAsRef)
@@ -584,7 +584,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOOLBAR, OnUpdateViewToolbar)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetdates)	
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDatesBackwards)	
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDatesForwards)	
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)	
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_SPLITTASKINTO_TWO, ID_NEWTASK_SPLITTASKINTO_FIVE, OnUpdateSplitTaskIntoPieces)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
@@ -11135,7 +11136,7 @@ void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_bShowProjectName ? 1 : 0);
 }
 
-void CToDoListWnd::OnEditOffsetdates() 
+void CToDoListWnd::OnEditOffsetDates() 
 {
 	CTDLOffsetDatesDlg dialog;
 	
@@ -11171,7 +11172,7 @@ void CToDoListWnd::OnEditOffsetdates()
 	}
 }
 
-void CToDoListWnd::OnEditOffsetdatesForwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
 {
 	TDC_OFFSET nUnits = TDCO_NULL;
 
@@ -11191,7 +11192,7 @@ void CToDoListWnd::OnEditOffsetdatesForwards(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits, FALSE);
 }
 
-void CToDoListWnd::OnEditOffsetdatesBackwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetDatesBackwards(UINT nCmdID)
 {
 	TDC_OFFSET nUnits = TDCO_NULL;
 
@@ -11211,9 +11212,19 @@ void CToDoListWnd::OnEditOffsetdatesBackwards(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(-1, nUnits, FALSE);
 }
 
-void CToDoListWnd::OnUpdateEditOffsetdates(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask());	
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDatesForwards(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanOffsetSelectedTaskStartAndDueDates());	
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDatesBackwards(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().CanOffsetSelectedTaskStartAndDueDates());	
 }
 
 void CToDoListWnd::OnPrintpreview() 
