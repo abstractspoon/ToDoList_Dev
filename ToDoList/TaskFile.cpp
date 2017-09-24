@@ -1745,7 +1745,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKRECURRENCE,		GetTaskRecurrence(hTask, tdi.trRecurrence));
 		GETATTRIB(TDL_TASKDEPENDENCY,		GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,		GetTaskFileLinks(hTask, tdi.aFileLinks));
-		GETATTRIB(TDL_TASKCUSTOMCOMMENTS,	GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID));
+		GETATTRIB(TDL_TASKCOMMENTSTYPE,		GetTaskCustomComments(hTask, tdi.customComments, tdi.sCommentsTypeID));
 
 		// meta data
 		GETATTRIB(TDL_TASKMETADATA,			GetTaskMetaData(hTask, tdi.mapMetaData));
@@ -1859,7 +1859,7 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 	CString sTemp = GetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS);
 
 	if (sTemp.IsEmpty())
-		return FALSE;
+		return TRUE; // not an error
 
 	Base64Coder b64;
 
