@@ -7,8 +7,14 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace OutlookExporter
 {
+	[System.ComponentModel.DesignerCategory("")]
     public class OutlookExporterCore
     {
+        public OutlookExporterCore(Translator trans)
+        {
+            m_trans = trans;
+        }
+
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
             // Possibly display a dialog to get input on how to 
@@ -53,5 +59,8 @@ namespace OutlookExporter
 
             return true;
         }
+	
+        // --------------------------------------------------------------------------------------
+	    private Translator m_trans;
     }
 }

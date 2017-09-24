@@ -7,8 +7,14 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace SampleImpExp
 {
+    [System.ComponentModel.DesignerCategory("")]
     public class SampleImpExpCore
     {
+        public SampleImpExpCore(Translator trans)
+        {
+            m_trans = trans;
+        }
+
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
             // Possibly display a dialog to get input on how to 
@@ -53,5 +59,8 @@ namespace SampleImpExp
 
             return true;
         }
+
+        // --------------------------------------------------------------------------------------
+        private Translator m_trans;
     }
 }

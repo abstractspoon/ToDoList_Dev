@@ -45,9 +45,10 @@ void COutlookExporterBridge::Release()
 	delete this;
 }
 
-void COutlookExporterBridge::SetLocalizer(ITransText* /*pTT*/)
+void COutlookExporterBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 HICON COutlookExporterBridge::GetIcon(void) const
@@ -75,9 +76,10 @@ LPCWSTR COutlookExporterBridge::GetFileExtension() const
 bool COutlookExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<OutlookExporterCore^> expCore = gcnew OutlookExporterCore();
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<OutlookExporterCore^> expCore = gcnew OutlookExporterCore(trans.get());
 	
 	// do the export
 	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));

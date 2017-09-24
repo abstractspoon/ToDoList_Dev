@@ -8,7 +8,7 @@
 #include "..\..\..\..\ToDoList_Dev\Interfaces\IImportExport.h"
 
 // This class is exported from ExporterBridge.dll
-class CSampleImpExpBridge : public IExportTasklist
+class CSampleImpExpBridge : public IExportTasklist //, IImportTaskList
 {
 public:
 	CSampleImpExpBridge();
@@ -24,6 +24,10 @@ public:
 
    bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
    bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
+
+protected:
+	HICON m_hIcon;
+	ITransText* m_pTT;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
@@ -38,5 +42,5 @@ DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
 {
-   return NULL;
+   return NULL; // new CSampleImpExpBridge()
 }
