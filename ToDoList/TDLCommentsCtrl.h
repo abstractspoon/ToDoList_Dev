@@ -84,6 +84,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeCommentsformat();
 	afx_msg void OnDestroy();
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
 
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);

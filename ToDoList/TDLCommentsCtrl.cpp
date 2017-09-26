@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
+	ON_WM_SETFOCUS()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_CBN_SELENDOK(IDC_COMBO, OnSelchangeCommentsformat)
 	ON_REGISTERED_MESSAGE(WM_ICC_CONTENTCHANGE, OnCommentsChange)
@@ -516,4 +517,11 @@ void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath)
 
 	if (!m_sPrefsFilePath.IsEmpty())
 		LoadPreferences();
+}
+
+void CTDLCommentsCtrl::OnSetFocus(CWnd* pOldWnd)
+{
+	CRuntimeDlg::OnSetFocus(pOldWnd);
+
+	m_ctrlComments.SetFocus();
 }
