@@ -509,3 +509,11 @@ void CTDLCommentsCtrl::OnEnable(BOOL bEnable)
 	if (bEnable)
 		m_ctrlComments.SetReadOnly(m_bReadOnly);
 }
+
+void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath) 
+{ 
+	m_sPrefsFilePath = szFilePath; 
+
+	if (!m_sPrefsFilePath.IsEmpty())
+		LoadPreferences();
+}

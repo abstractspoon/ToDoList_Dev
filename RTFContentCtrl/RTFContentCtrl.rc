@@ -179,6 +179,9 @@ BEGIN
     SEPARATOR
     BUTTON      ID_EDIT_TEXTCOLOR
     BUTTON      ID_EDIT_BACKCOLOR
+    BUTTON      ID_EDIT_LOCKCOLORS
+    SEPARATOR
+    BUTTON      ID_EDIT_PASTEFORMATTING
     SEPARATOR
     BUTTON      ID_EDIT_WORDWRAP
     BUTTON      ID_EDIT_INLINESPELLCHECK
@@ -551,6 +554,7 @@ BEGIN
     ID_EDIT_JUSTIFY         "\nJustify"
     ID_EDIT_SHRINKFONT      "\nDecrease Font Size"
     ID_EDIT_GROWFONT        "\nIncrease Font Size"
+    ID_EDIT_PASTEFORMATTING "\nPaste Formatting"
     ID_EDIT_PREFS           "\nRich Text Preferences"
 END
 
@@ -562,6 +566,11 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INLINESPELLCHECK "\nInline Spell Checking"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_LOCKCOLORS      "\nLock Colour Selection"
 END
 
 #endif    // English (Australia) resources

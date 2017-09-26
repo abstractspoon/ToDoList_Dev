@@ -45,6 +45,9 @@ public:
 	void SetReadOnly(BOOL readOnly);
 	BOOL GetReadOnly() const;
 
+	void SetLockColours(BOOL bLock = TRUE);
+	BOOL HasLockedColours() const { return m_bLockedColours; }
+
 protected:
 // Formatting
 	void DoFont();
@@ -110,6 +113,7 @@ protected:
 	afx_msg void OnEditItalic();
 	afx_msg void OnEditJustify();
 	afx_msg void OnEditLeftAlign();
+	afx_msg void OnEditLockColours();
 	afx_msg void OnEditNumberList();
 	afx_msg void OnEditOutdent();
 	afx_msg void OnEditRightAlign();
@@ -129,6 +133,7 @@ protected:
 	afx_msg void OnUpdateEditItalic(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditJustify(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditLeftAlign(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditLockColours(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditNumberList(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOutdent(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditRightAlign(CCmdUI* pCmdUI);
@@ -165,7 +170,8 @@ protected:
 	BOOL			m_showRuler;
 	BOOL			m_readOnly;
 	BOOL			m_bWordWrap;
-	
+	BOOL			m_bLockedColours;
+
 	// Sub-controls
 	CRulerRichEdit	m_rtf;
 	CRRECToolBar	m_toolbar;
@@ -186,6 +192,7 @@ protected:
 	void CreateMargins();
 
 	void UpdateToolbarButtons();
+	void UpdateToolbarColourButtons();
 	void UpdateEditRect();
 
 	void SetEffect(int mask, int effect);

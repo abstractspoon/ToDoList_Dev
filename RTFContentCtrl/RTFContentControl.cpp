@@ -98,6 +98,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_COMMAND(ID_EDIT_COPYURL, OnEditCopyUrl)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteasRef)
+	ON_COMMAND(ID_EDIT_LOCKCOLORS, OnEditLockColours)
 	ON_COMMAND(ID_EDIT_PASTEFORMATTING, OnEditPasteFormatting)
 	ON_COMMAND(ID_EDIT_PASTESIMPLE, OnEditPasteSimple)
 	ON_COMMAND(ID_EDIT_RIGHTALIGN, OnEditRightAlign)
@@ -121,6 +122,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPYURL, OnUpdateEditOpenCopyUrl)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEASREF, OnUpdateEditPasteasRef)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_LOCKCOLORS, OnUpdateEditLockColours)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEFORMATTING, OnUpdateEditPasteFormatting)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTESIMPLE, OnUpdateEditPasteSimple)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ALL, OnUpdateEditSelectAll)
@@ -441,6 +443,7 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_BOLD,			'B',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_ITALIC,			'I',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_UNDERLINE,		'U',		HOTKEYF_CONTROL); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_LOCKCOLORS,		'K',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_LEFTALIGN,		'L',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_CENTERALIGN,		'E',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_RIGHTALIGN,		'R',		HOTKEYF_CONTROL); 
@@ -619,8 +622,13 @@ void CRTFContentControl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(sKey, _T("ShowToolbar"), IsToolbarVisible());
 	pPrefs->WriteProfileInt(sKey, _T("ShowRuler"), IsRulerVisible());
 	pPrefs->WriteProfileInt(sKey, _T("WordWrap"), HasWordWrap());
-	pPrefs->WriteProfileInt(sKey, _T("ForegroundColour"), m_toolbar.GetFontColor(TRUE));
-	pPrefs->WriteProfileInt(sKey, _T("BackgroundColour"), m_toolbar.GetFontColor(FALSE));
+	pPrefs->WriteProfileInt(sKey, _T("LockColours"), HasLockedColours());
+
+	if (HasLockedColours())
+	{
+		pPrefs->WriteProfileInt(sKey, _T("ForegroundColour"), m_toolbar.GetFontColor(TRUE));
+		pPrefs->WriteProfileInt(sKey, _T("BackgroundColour"), m_toolbar.GetFontColor(FALSE));
+	}
 
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
@@ -631,16 +639,20 @@ void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 
 	CString sKey(szKey);
 	
-	BOOL bShowToolbar = pPrefs->GetProfileInt(sKey, _T("ShowToolbar"), m_showToolbar);
-	BOOL bShowRuler = pPrefs->GetProfileInt(sKey, _T("ShowRuler"), m_showRuler);
-	BOOL bWordWrap = pPrefs->GetProfileInt(sKey, _T("WordWrap"), TRUE);
-	
-	ShowToolbar(bShowToolbar);
-	ShowRuler(bShowRuler);
-	SetWordWrap(bWordWrap);
-	
-	m_toolbar.SetFontColor((COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT), TRUE);
-	m_toolbar.SetFontColor((COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT), FALSE);
+	ShowToolbar(pPrefs->GetProfileInt(sKey, _T("ShowToolbar"), m_showToolbar));
+	ShowRuler(pPrefs->GetProfileInt(sKey, _T("ShowRuler"), m_showRuler));
+	SetWordWrap(pPrefs->GetProfileInt(sKey, _T("WordWrap"), TRUE));
+	SetLockColours(pPrefs->GetProfileInt(sKey, _T("LockColours"), TRUE));
+
+	COLORREF crText = CLR_DEFAULT, crBack = CLR_DEFAULT;
+
+	if (HasLockedColours())
+	{
+		crText = (COLORREF)pPrefs->GetProfileInt(sKey, _T("ForegroundColour"), CLR_DEFAULT);
+		crBack = (COLORREF)pPrefs->GetProfileInt(sKey, _T("BackgroundColour"), CLR_DEFAULT);
+	}
+	m_toolbar.SetFontColor(crText, TRUE);
+	m_toolbar.SetFontColor(crBack, FALSE);
 
 	m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 

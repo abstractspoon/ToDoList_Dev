@@ -32,7 +32,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetDefaultCommentsFont(HFONT hFont);
 	void SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCommentsState);
-	void SetPreferencesFilePath(LPCTSTR szFilePath) { m_sPrefsFilePath = szFilePath; }
+	void SetPreferencesFilePath(LPCTSTR szFilePath);
 	void SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szCommentsPrompt);
 
 	int GetSelectedFormat(CONTENTFORMAT& cf) const;

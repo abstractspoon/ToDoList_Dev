@@ -88,7 +88,11 @@ UINT urm_SETCURRENTFONTCOLOR = ::RegisterWindowMessage(_T("_RULERRICHEDITCTRL_SE
 /////////////////////////////////////////////////////////////////////////////
 // CRulerRichEditCtrl
 
-CRulerRichEditCtrl::CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml) : m_pen(PS_DOT, 0, RGB(0, 0, 0)), m_rtf(rtfHtml)
+CRulerRichEditCtrl::CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml) 
+	: 
+	m_pen(PS_DOT, 0, RGB(0, 0, 0)), 
+	m_rtf(rtfHtml),
+	m_bLockedColours(TRUE)
 {
 	m_rulerPosition = 0;
 	m_margin = 0;
@@ -949,6 +953,25 @@ void CRulerRichEditCtrl::UpdateTabStops()
 	SetTabStops((LPLONG)(para.rgxTabs), MAX_TAB_STOPS);
 }
 
+void CRulerRichEditCtrl::UpdateToolbarColourButtons()
+{
+	if (!m_bLockedColours && m_showToolbar && m_toolbar.GetSafeHwnd())
+	{
+		CharFormat cf(CFM_COLOR | CFM_BACKCOLOR);
+		m_rtf.GetSelectionCharFormat(cf);
+
+		if (cf.dwEffects & CFE_AUTOCOLOR)
+			m_toolbar.SetFontColor(CLR_DEFAULT, TRUE);
+		else
+			m_toolbar.SetFontColor(cf.crTextColor, TRUE);
+
+		if (cf.dwEffects & CFE_AUTOBACKCOLOR)
+			m_toolbar.SetFontColor(CLR_DEFAULT, FALSE);
+		else
+			m_toolbar.SetFontColor(cf.crBackColor, FALSE);
+	}
+}
+
 void CRulerRichEditCtrl::UpdateToolbarButtons()
 {
 	if (m_showToolbar && m_toolbar.GetSafeHwnd())
@@ -965,6 +988,19 @@ void CRulerRichEditCtrl::UpdateToolbarButtons()
 		m_toolbar.SetFontSize(bConsistentSize ? cf.yHeight / 20 : -1);
 
 		m_toolbar.RefreshButtonStates(FALSE);
+
+		UpdateToolbarColourButtons();
+	}
+}
+
+void CRulerRichEditCtrl::SetLockColours(BOOL bLock)
+{
+	if (bLock != m_bLockedColours)
+	{
+		m_bLockedColours = bLock;
+
+		if (GetSafeHwnd())
+			UpdateToolbarColourButtons();
 	}
 }
 
@@ -1498,4 +1534,14 @@ BOOL CRulerRichEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 	// else
 	return FALSE;
+}
+
+void CRulerRichEditCtrl::OnEditLockColours()
+{
+	SetLockColours(!m_bLockedColours);
+}
+
+void CRulerRichEditCtrl::OnUpdateEditLockColours(CCmdUI* pCmdUI) 
+{
+	pCmdUI->SetCheck(m_bLockedColours ? 1 : 0);
 }
