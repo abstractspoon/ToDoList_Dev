@@ -49,6 +49,7 @@ protected:
 	void FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, BOOL bAndSiblings);
 	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITASKLISTBASE* pDestTaskFile);
 	bool InitConsts(bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
+	void InitWeekends(const CXmlItem* pXISrcPrj);
 
 	static DWORD GetTDLTaskID(int nGPTaskID);
 };

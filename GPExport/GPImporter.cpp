@@ -86,6 +86,8 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 		return IIR_BADFILE;
 	}
 
+	InitWeekends(fileSrc.Root());
+
 	const CXmlItem* pXISrcTasks = fileSrc.GetItem(_T("tasks"));
 
 	if (!pXISrcTasks) // must exist
@@ -148,14 +150,20 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTas
 			}
 			else if (nDuration > 0)
 			{
+				COleDateTime dtEnd(tStart);
+				CDateHelper::OffsetDate(dtEnd, (nDuration - 1), DHU_WEEKDAYS); // gp dates are inclusive
+
+				time_t tEnd = 0;
+				VERIFY(CDateHelper::GetTimeT(dtEnd, tEnd));
+
 				if (nPercentDone == 100)
 				{
-					pDestTaskFile->SetTaskDoneDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
+					pDestTaskFile->SetTaskDoneDate(hTask, tEnd);
 					pDestTaskFile->SetTaskTimeSpent(hTask, nDuration, TDCU_WEEKDAYS);
 				}
 				else
 				{
-					pDestTaskFile->SetTaskDueDate(hTask, tStart + (nDuration - 1) * ONEDAY); // gp dates are inclusive
+					pDestTaskFile->SetTaskDueDate(hTask, tEnd); // gp dates are inclusive
 					pDestTaskFile->SetTaskTimeEstimate(hTask, nDuration, TDCU_WEEKDAYS);
 				}
 			}
@@ -293,6 +301,48 @@ void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* p
 			pXISrcTask = pXISrcTask->GetSibling();
 		}
 	}
+}
+
+void CGPImporter::InitWeekends(const CXmlItem* pXISrcPrj)
+{
+	const CXmlItem* pXIDayTypes = pXISrcPrj->GetItem(_T("calendars"), _T("day-types"));
+	DWORD dwWeekends = (DHW_SATURDAY | DHW_SUNDAY);
+
+	if (pXIDayTypes)
+	{
+		const CXmlItem* pXIWeek = pXIDayTypes->GetItem(_T("default-week"));
+
+		if (pXIWeek == NULL)
+			pXIWeek = pXIDayTypes->GetItem(_T("calendar"), _T("default-week"));
+
+		if (pXIWeek)
+		{
+			dwWeekends = 0;
+
+			if (pXIWeek->GetItemValueI(_T("sun")) != 0)
+				dwWeekends |= DHW_SUNDAY;
+
+			if (pXIWeek->GetItemValueI(_T("mon")) != 0)
+				dwWeekends |= DHW_MONDAY;
+
+			if (pXIWeek->GetItemValueI(_T("tue")) != 0)
+				dwWeekends |= DHW_TUESDAY;
+
+			if (pXIWeek->GetItemValueI(_T("wed")) != 0)
+				dwWeekends |= DHW_WEDNESDAY;
+
+			if (pXIWeek->GetItemValueI(_T("thu")) != 0)
+				dwWeekends |= DHW_THURSDAY;
+
+			if (pXIWeek->GetItemValueI(_T("fri")) != 0)
+				dwWeekends |= DHW_FRIDAY;
+
+			if (pXIWeek->GetItemValueI(_T("sat")) != 0)
+				dwWeekends |= DHW_SATURDAY;
+		}
+	}
+
+	CDateHelper::SetWeekendDays(dwWeekends);
 }
 
 void CGPImporter::BuildResourceMap(const CXmlItem* pXISrcPrj)
