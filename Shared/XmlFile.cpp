@@ -1204,19 +1204,20 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 		switch (nodeChild.NodeTypeVal())
 		{
 		case MSXML2::NODE_CDATA_SECTION:
+			ASSERT(sChildName.IsEmpty());
 			nType = XIT_CDATA;
 			break;
 			
 		case MSXML2::NODE_ATTRIBUTE:
+			ASSERT(!sChildName.IsEmpty());
 			nType = XIT_ATTRIB;
 			break;
 
 		case MSXML2::NODE_TEXT:
-			sItemVal += sChildVal;
+			ASSERT(sChildName.IsEmpty());
 			break;
 		}
 
-		// if sName is empty then sVal relates to pNode
 		if (!sChildName.IsEmpty())
 		{
 			CXmlItem* pXI = xi.AddItem(sChildName, sChildVal, nType);
@@ -1225,6 +1226,10 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 				return TRUE;
 			
 			ParseItem(*pXI, &nodeChild);
+		}
+		else // sChildVal relates to pNode
+		{
+			sItemVal += sChildVal;
 		}
 		
 		nodeChild = nodeChild.GetNextSibling();
