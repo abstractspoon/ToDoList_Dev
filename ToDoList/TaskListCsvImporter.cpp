@@ -107,7 +107,7 @@ IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pD
 	{
 	    CString sLine = GetLine(aLines, nLine);
 
-		if (!ImportTask(pTasks, sLine))
+		if (!sLine.IsEmpty() && !ImportTask(pTasks, sLine))
 			bSomeFailed = TRUE;
 	}
 
