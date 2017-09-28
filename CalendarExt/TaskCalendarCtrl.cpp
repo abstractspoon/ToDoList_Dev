@@ -167,7 +167,7 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTask) const
 {
 	// give the task a date that will make it appear in the calendar
-	time_t tDate = DateToSeconds((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
+	COleDateTime date = ((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
 
 	int nRow, nCol;
 
@@ -176,10 +176,12 @@ bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTask) const
 		const CCalendarCell* pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);
 
-		tDate = DateToSeconds(pCell->date);
+		date = pCell->date;
 	}
 
-	if (tDate <= 0)
+	time64_t tDate;
+	
+	if (!CDateHelper::GetTimeT64(date, tDate))
 		return false;
 
 	HTASKITEM hNewTask = pTask->GetFirstTask();

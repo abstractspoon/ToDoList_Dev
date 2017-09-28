@@ -130,9 +130,9 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskComments(hTask, GetTaskComments(pFMTask));
 
 	// dates
-	pDestTaskFile->SetTaskDoneDate(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDONEDATE));
-	pDestTaskFile->SetTaskDueDate(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDUEDATE));
-	pDestTaskFile->SetTaskStartDate(hTask, GetAttribValueT(pFMTask, FM_CUSTOMSTARTDATE));
+	pDestTaskFile->SetTaskDoneDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDONEDATE));
+	pDestTaskFile->SetTaskDueDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMDUEDATE));
+	pDestTaskFile->SetTaskStartDate64(hTask, GetAttribValueT(pFMTask, FM_CUSTOMSTARTDATE));
 
 	// times
 	TDC_UNITS cUnits = (TDC_UNITS)GetAttribValueI(pFMTask, FM_CUSTOMTIMEESTUNITS);
@@ -336,9 +336,9 @@ COLORREF CFMindImporter::GetFMColor(const CXmlItem* pFMTask, LPCTSTR szColorFiel
 	return 0;
 }
 
-time_t CFMindImporter::GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName)
+time64_t CFMindImporter::GetAttribValueT(const CXmlItem* pFMTask, LPCTSTR szAttribName)
 {
-	time_t tDate = 0;
+	time64_t tDate = 0;
 
 	if (CDateHelper::DecodeDate(GetAttribValueS(pFMTask, szAttribName), tDate, TRUE))
 		return tDate;
