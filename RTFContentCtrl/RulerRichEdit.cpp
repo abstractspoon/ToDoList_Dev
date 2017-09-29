@@ -385,6 +385,7 @@ BOOL CRulerRichEdit::GetClipboardHtmlForPasting(CString& sHtml, CString& sSource
 		!cb.HasFormat(CBF_EMBEDDEDOBJ) &&
 		!cb.HasFormat(CF_DIB) &&
 		!cb.HasFormat(CF_BITMAP) &&
+		!cb.HasFormat(CBF_ONENOTELINK) &&
 		cb.GetText(sHtml, CBF_HTML))
 	{
 		return ProcessHtmlForPasting(sHtml, sSourceUrl);
@@ -496,6 +497,16 @@ BOOL CRulerRichEdit::Paste()
 					VERIFY(cbb.Restore());
 
 				AppendSourceUrls(sSourceUrl);
+				return TRUE;
+			}
+
+			// If there is a OneNote link on the clipboard
+			// paste the raw text instead
+			if (CClipboard::HasFormat(CBF_ONENOTELINK))
+			{
+				ASSERT(CClipboard::HasText());
+
+				CUrlRichEditCtrl::PasteSimpleText(FALSE);
 				return TRUE;
 			}
 
