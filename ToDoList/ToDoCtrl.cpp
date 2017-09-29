@@ -5360,12 +5360,21 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 			m_taskTree.InvalidateSelection(TRUE);
 			SetModified(TRUE, TDCA_TASKNAME, m_dwEditTitleTaskID);
 
-			// If this was a new task and the parent was marked as done, 
-			// now mark it as incomplete
-			DWORD dwParentID = m_data.GetTaskParentID(m_dwEditTitleTaskID);
+			if (bNewTask)
+			{
+				// If this was a new task and the parent was marked as done, 
+				// now mark it as incomplete
+				DWORD dwParentID = m_data.GetTaskParentID(m_dwEditTitleTaskID);
+				
+				if (dwParentID && m_data.IsTaskDone(dwParentID))
+					m_data.FixupParentCompletion(dwParentID);
 
-			if (bNewTask && dwParentID && m_data.IsTaskDone(dwParentID))
-				m_data.FixupParentCompletion(dwParentID);
+				// For new tasks we did not sort so we may need to do so
+				// now if sorting by anything other than 'title' because 
+				// will already have been handled by SetModified
+				if (m_taskTree.IsMultiSorting() || (m_taskTree.IsSorting() && !m_taskTree.IsSortingBy(TDCC_CLIENT)))
+					m_taskTree.Resort();
+			}
 		}
 	}
 
