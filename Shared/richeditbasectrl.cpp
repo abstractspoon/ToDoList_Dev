@@ -189,13 +189,7 @@ BOOL CRichEditBaseCtrl::PasteSimpleText()
 
 BOOL CRichEditBaseCtrl::CanPasteSimpleText() const
 {
-	CClipboard cb;
-
-#ifndef _UNICODE
-	return cb.HasFormat(CF_TEXT);
-#else
-	return cb.HasFormat(CF_UNICODETEXT);
-#endif
+	return CClipboard().HasText();
 }
 
 BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCodePage)

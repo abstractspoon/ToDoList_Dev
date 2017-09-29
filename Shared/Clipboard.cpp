@@ -181,7 +181,7 @@ CString CClipboard::GetFormatName(UINT nFormat)
 
 BOOL CClipboard::HasText()
 {
-	return HasFormat(GetFormat(0));
+	return HasFormat(CB_TEXTFORMAT);
 }
 
 CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSourceUrl)
@@ -280,13 +280,7 @@ void CClipboard::FormatAndReplace(int nVal, int nWidth, const CString& sKey, CSt
 UINT CClipboard::GetFormat(UINT nFormat)
 {
 	if (nFormat == 0)
-	{
-#ifndef _UNICODE
-		nFormat = CF_TEXT;
-#else
-		nFormat = CF_UNICODETEXT;
-#endif
-	}
+		nFormat = CB_TEXTFORMAT;
 
 	return nFormat;
 }

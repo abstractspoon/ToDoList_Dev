@@ -13,6 +13,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\clipboard.h"
 
 #include "..\3rdparty\msoutl.h"
 
@@ -343,17 +344,10 @@ int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray&
 	aFiles.RemoveAll();
 	bFromText = FALSE;
 
-	CLIPFORMAT nTextFmt =
-#ifndef _UNICODE
-	CF_TEXT;
-#else
-	CF_UNICODETEXT;
-#endif
-
-	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && pObject->IsDataAvailable(nTextFmt))
+	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && pObject->IsDataAvailable(CB_TEXTFORMAT))
 	{
 		// look for files and URLs in text
-		HGLOBAL hGlobal = pObject->GetGlobalData(nTextFmt);
+		HGLOBAL hGlobal = pObject->GetGlobalData(CB_TEXTFORMAT);
 
 		if (hGlobal)
 		{

@@ -56,12 +56,7 @@ static const CLIPFORMAT CF_PREFERRED[] =
 	(CLIPFORMAT)CBF_RETEXTOBJ, 
 	CF_BITMAP,
 	(CLIPFORMAT)CBF_HTML,
-
-#ifndef _UNICODE
-	CF_TEXT,
-#else
-	CF_UNICODETEXT,
-#endif
+	CB_TEXTFORMAT,
 	CF_METAFILEPICT,    
 	CF_SYLK,            
 	CF_DIF,             

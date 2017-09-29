@@ -31,6 +31,8 @@ static char THIS_FILE[]=__FILE__;
 #	define RPC_TSTR RPC_CSTR
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 #define DBL_QUOTE _T("\"")
 
 //////////////////////////////////////////////////////////////////////
@@ -116,13 +118,7 @@ BOOL Misc::CopyTexttoClipboard(const CString& sText, HWND hwnd, UINT nFormat, BO
 		
 		// Place the handle on the clipboard. 
 		if (nFormat == 0)
-		{
-#ifndef _UNICODE
-			nFormat = CF_TEXT;
-#else
-			nFormat = CF_UNICODETEXT;
-#endif
-		}
+			nFormat = CB_TEXTFORMAT;
 		
 		if (::SetClipboardData(nFormat, hglbCopy) == NULL)
 			::GlobalFree(hglbCopy);			
@@ -144,13 +140,7 @@ CString Misc::GetClipboardText(UINT nFormat)
 	CString sText;
 
 	if (nFormat == 0)
-	{
-#ifndef _UNICODE
-		nFormat = CF_TEXT;
-#else
-		nFormat = CF_UNICODETEXT;
-#endif
-	}
+		nFormat = CB_TEXTFORMAT;
 	
 	HANDLE hData = ::GetClipboardData(nFormat);
 	sText = (LPCTSTR)GlobalLock(hData);
@@ -163,13 +153,7 @@ CString Misc::GetClipboardText(UINT nFormat)
 
 BOOL Misc::ClipboardHasText()
 {
-#ifndef _UNICODE
-	int nFormat = CF_TEXT;
-#else
-	int	nFormat = CF_UNICODETEXT;
-#endif
-
-	return ClipboardHasFormat(nFormat);
+	return ClipboardHasFormat(CB_TEXTFORMAT);
 }
 
 BOOL Misc::ClipboardHasFormat(UINT nFormat)
