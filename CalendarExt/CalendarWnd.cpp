@@ -247,18 +247,28 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 void CCalendarWnd::UpdateCalendarCtrlPreferences()
 {
-	m_BigCalendar.SetOption(TCCO_CALCMISSINGSTARTASCREATION, m_dlgPrefs.GetCalcMissingStartAsCreation());
-	m_BigCalendar.SetOption(TCCO_CALCMISSINGSTARTASDUE, m_dlgPrefs.GetCalcMissingStartAsDue());
-	m_BigCalendar.SetOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY, m_dlgPrefs.GetCalcMissingStartAsEarliestDueAndToday());
-	m_BigCalendar.SetOption(TCCO_CALCMISSINGDUEASSTART, m_dlgPrefs.GetCalcMissingDueAsStart());
-	m_BigCalendar.SetOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY, m_dlgPrefs.GetCalcMissingDueAsLatestStartAndToday());
-	m_BigCalendar.SetOption(TCCO_DISPLAYCONTINUOUS, m_dlgPrefs.GetDisplayAsContinuous());
-	m_BigCalendar.SetOption(TCCO_DISPLAYSTART, m_dlgPrefs.GetDisplayStart());
-	m_BigCalendar.SetOption(TCCO_DISPLAYDUE, m_dlgPrefs.GetDisplayDue());
-	m_BigCalendar.SetOption(TCCO_DISPLAYDONE, m_dlgPrefs.GetDisplayDone());
-	m_BigCalendar.SetOption(TCCO_DISPLAYCALCSTART, m_dlgPrefs.GetDisplayCalcStart());
-	m_BigCalendar.SetOption(TCCO_DISPLAYCALCDUE, m_dlgPrefs.GetDisplayCalcDue());
-	m_BigCalendar.SetOption(TCCO_ADJUSTTASKHEIGHTS, m_dlgPrefs.GetAdjustTaskHeights());
+	DWORD dwOptions = 0;
+
+	Misc::SetFlag(dwOptions, TCCO_CALCMISSINGSTARTASCREATION,		m_dlgPrefs.GetCalcMissingStartAsCreation());
+	Misc::SetFlag(dwOptions, TCCO_CALCMISSINGSTARTASDUE,			m_dlgPrefs.GetCalcMissingStartAsDue());
+	Misc::SetFlag(dwOptions, TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY, m_dlgPrefs.GetCalcMissingStartAsEarliestDueAndToday());
+	Misc::SetFlag(dwOptions, TCCO_CALCMISSINGDUEASSTART,			m_dlgPrefs.GetCalcMissingDueAsStart());
+	Misc::SetFlag(dwOptions, TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY, m_dlgPrefs.GetCalcMissingDueAsLatestStartAndToday());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYCONTINUOUS,				m_dlgPrefs.GetDisplayAsContinuous());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYSTART,						m_dlgPrefs.GetDisplayStart());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYDUE,						m_dlgPrefs.GetDisplayDue());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYDONE,						m_dlgPrefs.GetDisplayDone());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCSTART,					m_dlgPrefs.GetDisplayCalcStart());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCDUE,					m_dlgPrefs.GetDisplayCalcDue());
+	Misc::SetFlag(dwOptions, TCCO_ADJUSTTASKHEIGHTS,				m_dlgPrefs.GetAdjustTaskHeights());
+	Misc::SetFlag(dwOptions, TCCO_TREATOVERDUEASDUETODAY,			m_dlgPrefs.GetTreatOverdueAsDueToday());
+
+	// Preserve app preferences
+	Misc::SetFlag(dwOptions, TCCO_TASKTEXTCOLORISBKGND,				m_BigCalendar.HasOption(TCCO_TASKTEXTCOLORISBKGND));
+	Misc::SetFlag(dwOptions, TCCO_STRIKETHRUDONETASKS,				m_BigCalendar.HasOption(TCCO_STRIKETHRUDONETASKS));
+	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
+
+	m_BigCalendar.SetOptions(dwOptions); 
 }
 
 void CCalendarWnd::SetUITheme(const UITHEME* pTheme)

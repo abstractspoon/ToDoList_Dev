@@ -58,7 +58,8 @@ public:
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 
-	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
+	void SetOptions(DWORD dwOption);
+	void SetOption(DWORD dwOption, BOOL bSet);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
 	bool ProcessMessage(MSG* pMsg);

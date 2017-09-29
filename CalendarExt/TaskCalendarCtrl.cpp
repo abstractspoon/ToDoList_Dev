@@ -148,6 +148,17 @@ void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
+void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
+{
+	if (m_dwOptions != dwOptions)
+	{
+		m_dwOptions = dwOptions;
+
+		RecalcTaskDates();
+		RecalcSpecialDates();
+	}
+}
+
 void CTaskCalendarCtrl::RecalcTaskDates()
 {
 	POSITION pos = m_mapData.GetStartPosition();

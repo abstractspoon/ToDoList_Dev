@@ -25,6 +25,7 @@ enum // options
 	TCCO_TASKTEXTCOLORISBKGND					= 0x1000,
 	TCCO_STRIKETHRUDONETASKS					= 0x2000,
 	TCCO_PREVENTDEPENDENTDRAGGING				= 0x4000,
+	TCCO_TREATOVERDUEASDUETODAY					= 0x8000,
 };
 
 /////////////////////////////////////////////////////////////////////////////

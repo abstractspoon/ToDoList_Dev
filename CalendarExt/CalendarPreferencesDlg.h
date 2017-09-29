@@ -25,6 +25,7 @@ public:
 
 	BOOL GetShowMiniCalendar() const { return m_bShowMiniCalendar; }
 	BOOL GetAdjustTaskHeights() const { return m_bAdjustTaskHeights; }
+	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
 
 	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
@@ -55,6 +56,7 @@ protected:
 	BOOL	m_bShowCalcDueDates;
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
+	BOOL	m_bTreatOverdueAsDueToday;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
@@ -91,6 +93,7 @@ public:
 
 	BOOL GetShowMiniCalendar() const { return m_page.GetShowMiniCalendar(); }
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
+	BOOL GetTreatOverdueAsDueToday() const { return m_page.GetTreatOverdueAsDueToday(); }
 
 	BOOL GetDisplayAsContinuous() const { return m_page.GetDisplayAsContinuous(); }
 	BOOL GetDisplayStart() const { return m_page.GetDisplayStart(); }
