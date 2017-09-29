@@ -175,7 +175,7 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 	}
 }
 
-bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTask) const
+bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
 	// give the task a date that will make it appear in the calendar
 	COleDateTime date = ((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
@@ -195,11 +195,19 @@ bool CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTask) const
 	if (!CDateHelper::GetTimeT64(date, tDate))
 		return false;
 
-	HTASKITEM hNewTask = pTask->GetFirstTask();
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+	
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
-	pTask->SetTaskStartDate(hNewTask, tDate);
-	pTask->SetTaskDueDate(hNewTask, tDate);
+	pTasks->SetTaskStartDate64(hNewTask, tDate);
+	pTasks->SetTaskDueDate64(hNewTask, tDate);
 
 	return true;
 }
