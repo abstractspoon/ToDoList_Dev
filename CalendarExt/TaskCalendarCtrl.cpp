@@ -682,6 +682,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	int nTaskHeight = GetTaskHeight();
 	int nStart = (bVScrolled ? m_nCellVScrollPos : 0);
 	
+	int nSaveDC = pDC->SaveDC();
+	
 	for (int nTask = nStart; nTask < nNumTasks; nTask++)
 	{
 		const TASKCALITEM* pTCI = (*pTasks)[nTask];
@@ -691,8 +693,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		
 		if (!CalcTaskCellRect(pTCI->GetTaskID(), pCell, rCellTrue, rTask))
 			continue;
-
-		int nSaveDC = pDC->SaveDC();
 
 		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (pTCI->GetTaskID() == m_dwSelectedTaskID));
@@ -767,9 +767,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (rTask.bottom >= rCellTrue.bottom)
 				break;
 		}
-
-		pDC->RestoreDC(nSaveDC);
 	}
+	
+	pDC->RestoreDC(nSaveDC);
 }
 
 CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
