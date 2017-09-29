@@ -624,9 +624,18 @@ void CCalendarWnd::ResizeControls(int cx, int cy)
 void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
 {
 	if (bScroll)
+	{
 		m_MiniCalendar.SetCurrentMonthAndYear(m_BigCalendar.GetMinDate());
+	}
 	else
-		m_MiniCalendar.SetCurrentMonthAndYear(m_BigCalendar.GetFirstSelectedItem());
+	{
+		time_t tSel =  m_BigCalendar.GetFirstSelectedItem();
+		COleDateTime dtSel(tSel);
+		
+		m_MiniCalendar.SetDateSel(dtSel, dtSel);
+		m_MiniCalendar.SetCurrentMonthAndYear(dtSel);
+	}
+
 }
 
 void CCalendarWnd::SyncBigCalendar(BOOL bScroll)
