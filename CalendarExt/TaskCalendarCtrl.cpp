@@ -1960,7 +1960,7 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 		if (IsTaskCalItemLocked(dwTaskID))
 			return FALSE;
 
-		BOOL bCanDrag = !HasOption(TCCO_DISABLEDEPENDENTDRAGGING) ||
+		BOOL bCanDrag = !HasOption(TCCO_PREVENTDEPENDENTDRAGGING) ||
 						!TaskCalItemHasDependencies(dwTaskID);
 			
 		switch (nHit)
