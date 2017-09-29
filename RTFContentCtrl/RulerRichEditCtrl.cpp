@@ -1447,7 +1447,6 @@ void CRulerRichEditCtrl::SetWordWrap(BOOL bWrap)
 		m_rtf.SetTargetDevice(NULL, bWrap ? 0 : 1);
 
 	m_bWordWrap = bWrap;
-	m_toolbar.CheckButton(ID_EDIT_WORDWRAP, m_bWordWrap ? 1 : 0);
 }
 
 void CRulerRichEditCtrl::ShowRuler(BOOL show)
