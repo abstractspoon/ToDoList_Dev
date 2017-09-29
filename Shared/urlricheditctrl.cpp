@@ -31,20 +31,6 @@ const UINT TIMER_REPARSE = 1;
 const UINT PAUSE = 1000; // 1 second
 
 /////////////////////////////////////////////////////////////////////////////
-
-static const CLIPFORMAT CF_PREFERRED[] = 
-{ 
-	CF_HDROP,
-
-#ifndef _UNICODE
-	CF_TEXT,
-#else
-	CF_UNICODETEXT,
-#endif
-};
-const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
-
-/////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl
 
 CUrlRichEditCtrl::CUrlRichEditCtrl() 
@@ -575,6 +561,9 @@ HRESULT CUrlRichEditCtrl::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lp
 
    		*lpcfFormat = GetAcceptableClipFormat(lpdataobj, *lpcfFormat);
 
+		if (*lpcfFormat == 0)
+			return E_FAIL;
+
 		// is this an outlook drop actually happening?
 		if (fReally && (*lpcfFormat == CMSOutlookHelper::CF_OUTLOOK))
 		{
@@ -647,7 +636,8 @@ CLIPFORMAT CUrlRichEditCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIP
 	if (CMSOutlookHelper::IsOutlookObject(lpDataOb))
 		return CMSOutlookHelper::CF_OUTLOOK;
 
-	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF);
+	// else
+	return format;
 }
 
 HRESULT CUrlRichEditCtrl::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWORD pdwEffect)
@@ -670,17 +660,17 @@ HRESULT CUrlRichEditCtrl::GetDragDropEffect(BOOL fDrag, DWORD grfKeyState, LPDWO
 
 			switch (cf)
 			{
+			case 0:
+				*pdwEffect = DROPEFFECT_NONE;
+				break;
+
 			case CF_HDROP:
 				// can't return DROPEFFECT_LINK else we don't
 				// get notified of the file drop (go figure)
 				*pdwEffect = DROPEFFECT_MOVE;
 				break;
 
-#ifndef _UNICODE
-			case CF_TEXT:
-#else
-			case CF_UNICODETEXT:
-#endif
+			case CB_TEXTFORMAT:
 				{
 					if (Misc::HasFlag(grfKeyState, MK_CONTROL))
 						*pdwEffect = DROPEFFECT_COPY;

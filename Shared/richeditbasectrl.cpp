@@ -1268,7 +1268,8 @@ BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking()
 	return (COSVersion() >= OSV_WIN8);
 }
 
-CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, const CLIPFORMAT fmtPreferred[], int nNumFmts)
+CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, 
+														const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback)
 {
 	CDWordArray aFormatIDs;
 	
@@ -1278,8 +1279,8 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 	
 	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
 	{
-		sFormatNames = Misc::FormatArray(aFormatNames);
-		sFormatIDs = Misc::FormatArray(aFormatIDs);
+		sFormatNames = Misc::FormatArray(aFormatNames, ',');
+		sFormatIDs = Misc::FormatArray(aFormatIDs, ',');
 	}
 #else
 	CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs);
@@ -1295,18 +1296,17 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 		if (Misc::FindT(aFormatIDs, (DWORD)nFormat) != -1)
 			return nFormat;
 	}
-	
-	if (format)
-		return format;
-	
-	// Fallback
-#ifndef _UNICODE
-	if (Misc::FindT(aFormatIDs, (DWORD)CF_TEXT) != -1)
-		return CF_TEXT;
-#else
-	if (Misc::FindT(aFormatIDs, (DWORD)CF_UNICODETEXT) != -1)
-		return CF_UNICODETEXT;
-#endif
+
+	if (bAllowFallback)
+	{
+		// If a format was passed in then use that
+		if (format)
+			return format;
+
+		// else try for plain text
+		if (Misc::FindT(aFormatIDs, (DWORD)CB_TEXTFORMAT) != -1)
+			return CB_TEXTFORMAT;
+	}
 
 	return 0;
 }

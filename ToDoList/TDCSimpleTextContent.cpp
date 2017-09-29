@@ -115,6 +115,15 @@ BOOL CTDLSimpleTextContentCtrl::s_bPasteSourceUrls = TRUE;
 
 /////////////////////////////////////////////////////////////////////////////
 
+static const CLIPFORMAT CF_PREFERRED[] = 
+{ 
+	CF_HDROP,
+	CB_TEXTFORMAT,
+};
+const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
+
+/////////////////////////////////////////////////////////////////////////////
+
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	m_bAllowNotify(TRUE), 
@@ -761,4 +770,10 @@ BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	return FALSE;
+}
+
+CLIPFORMAT CTDLSimpleTextContentCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format)
+{ 
+	// FALSE ensures we only get what we allow
+	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
 }
