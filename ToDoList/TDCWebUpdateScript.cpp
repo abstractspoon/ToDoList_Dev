@@ -212,7 +212,7 @@ int CTDCWebUpdateScript::GetUpdateDescription(CStringArray& aDesc) const
 	CString sDesc;
 
 	if (m_mapScript.Lookup(DESCRIPTION_KEY, sDesc) && !sDesc.IsEmpty())
-		return Misc::Split(sDesc, aDesc, '|');
+		return Misc::Split(sDesc, aDesc, '|', TRUE);
 
 	// else
 	 return FALSE;

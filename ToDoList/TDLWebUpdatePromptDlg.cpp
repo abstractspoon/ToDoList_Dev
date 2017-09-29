@@ -100,7 +100,7 @@ TDL_WEBUPDATE_CHECK CTDLWebUpdatePromptDlg::CheckForUpdates()
 void CTDLWebUpdatePromptDlg::ShowDialog()
 {
 	CTDCWebUpdateScript script;
-	script.CheckForUpdates();
+	script.CheckForPreReleaseUpdates();
 
 	CString sNewExeVer, sNewDisplayVer;
 	CStringArray aUpdates;

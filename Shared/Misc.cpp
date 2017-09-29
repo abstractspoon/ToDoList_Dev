@@ -407,18 +407,24 @@ CString Misc::FormatArray(const CDWordArray& array, TCHAR cSep)
 	return FormatArray(array, szSep);
 }
 
-CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim, int nStart)
+CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim, int nStart, BOOL bNumberBlankLines)
 {
 	ASSERT(szDelim);
 
 	int nCount = array.GetSize();
-	CString sList, sItem;
+	CString sList, sItem, sNumbered;
 
-	for (int nItem = 0; nItem < nCount; nItem++)
+	for (int nItem = 0, nLine = nStart; nItem < nCount; nItem++)
 	{
-		sItem.Format(_T("%d%s%s\n"), (nItem + nStart), szDelim, GetItem(array, nItem));
+		sItem = GetItem(array, nItem);
 
-		sList += sItem;
+		if (bNumberBlankLines || !sItem.IsEmpty())
+		{
+			sNumbered.Format(_T("%d%s%s"), nLine++, szDelim, sItem);
+			sList += sNumbered;
+		}
+
+		sList += '\n';
 	}
 
 	return sList;
