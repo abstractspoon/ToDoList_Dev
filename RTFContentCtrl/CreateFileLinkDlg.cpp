@@ -70,6 +70,7 @@ BOOL CCreateFileLinkDlg::OnInitDialog()
 		}
 
 		GetDlgItem(IDC_FILEIMAGE)->EnableWindow(FALSE);
+		GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(FALSE);
 	}
 
 	// use the actual filename to format the first item
