@@ -1524,8 +1524,15 @@ int CTDCTaskComparer::Compare(const COleDateTime& date1, const COleDateTime& dat
 				break;
 
 			case TDCD_CREATE:
+				// Should never end up here but once upon a time
+				// we didn't store the creation time for tasks...
+				break;
+
 			case TDCD_LASTMOD:
 				// Should never end up here
+				ASSERT(0);
+				break;
+
 			default: 
 				// No other values permissible
 				ASSERT(0);
