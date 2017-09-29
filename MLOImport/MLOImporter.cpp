@@ -107,10 +107,10 @@ bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTa
 	pDestTaskFile->SetTaskTimeEstimate(hTask, dTimeEst, TDCU_DAYS);
 
 	// due date (== DueDateTime)
-	pDestTaskFile->SetTaskDueDate(hTask, GetDate(pXIMLOTask, _T("DueDateTime")));
+	pDestTaskFile->SetTaskDueDate64(hTask, GetDate(pXIMLOTask, _T("DueDateTime")));
 
 	// completion (== CompletionDateTime)
-	pDestTaskFile->SetTaskDoneDate(hTask, GetDate(pXIMLOTask, _T("CompletionDateTime")));
+	pDestTaskFile->SetTaskDoneDate64(hTask, GetDate(pXIMLOTask, _T("CompletionDateTime")));
 
 	// comments (== Note)
 	CString sComments = pXIMLOTask->GetItemValue(_T("Note"));
@@ -144,10 +144,10 @@ bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTa
 	return true;
 }
 
-time_t CMLOImporter::GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) const
+time64_t CMLOImporter::GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) const
 {
 	CString sDate = pXIMLOTask->GetItemValue(szDateField);
-	time_t date = 0;
+	time64_t date = 0;
 	
 	if (!CDateHelper::DecodeDate(sDate, date))
 		date = 0;

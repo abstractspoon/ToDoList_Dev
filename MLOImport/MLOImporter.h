@@ -38,7 +38,7 @@ protected:
 
 protected:
 	bool ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const;
-	time_t GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) const;
+	time64_t GetDate(const CXmlItem* pXIMLOTask, LPCTSTR szDateField) const;
 
 };
 

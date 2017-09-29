@@ -227,11 +227,6 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 	return TRUE;
 }
 
-BOOL CTaskListCsvImporter::String2Date(const CString& sDate, time64_t& t64, BOOL bAndTime)
-{
-	return (CDateHelper::DecodeDate(sDate, t64, bAndTime));
-}
-
 BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sCustID, CString& sCustLabel)
 {
 	if (((col.nTDCAttrib == TDCA_CUSTOMATTRIB_FIRST) || (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST)) && !col.sColumnName.IsEmpty())
@@ -358,27 +353,27 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		break;
 
 	case TDCA_STARTDATE: 
-		if (String2Date(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
 			pTasks->SetTaskStartDate64(hTask, t64);
 		break;
 
 	case TDCA_DUEDATE: 
-		if (String2Date(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
 			pTasks->SetTaskDueDate64(hTask, t64);
 		break;
 
 	case TDCA_DONEDATE: 
-		if (String2Date(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
 			pTasks->SetTaskDoneDate64(hTask, t64);
 		break;
 
 	case TDCA_LASTMODDATE: 
-		if (String2Date(sValue, t64, TRUE))
+		if (CDateHelper::DecodeDate(sValue, t64, TRUE))
 			pTasks->SetTaskLastModified64(hTask, t64);
 		break;
 
 	case TDCA_CREATIONDATE: 
-		if (String2Date(sValue, t64, FALSE))
+		if (CDateHelper::DecodeDate(sValue, t64, FALSE))
 			pTasks->SetTaskCreationDate64(hTask, t64);
 		break;
 

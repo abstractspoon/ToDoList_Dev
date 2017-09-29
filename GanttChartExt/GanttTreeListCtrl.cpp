@@ -5395,19 +5395,27 @@ int CGanttTreeListCtrl::FindColumn(int nScrollPos) const
 	return -1;
 }
 
-bool CGanttTreeListCtrl::PrepareNewTask(ITaskList* pTask) const
+bool CGanttTreeListCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
 	// Set the start date to today and of duration 1 day
-	HTASKITEM hNewTask = pTask->GetFirstTask();
+	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
 	COleDateTime dt = CDateHelper::GetDate(DHD_TODAY);
-	time_t tDate = 0;
+	time64_t tDate = 0;
 
-	if (CDateHelper::GetTimeT(dt, tDate))
+	if (CDateHelper::GetTimeT64(dt, tDate))
 	{
-		pTask->SetTaskStartDate(hNewTask, tDate);
-		pTask->SetTaskDueDate(hNewTask, tDate);
+		pTasks->SetTaskStartDate64(hNewTask, tDate);
+		pTasks->SetTaskDueDate64(hNewTask, tDate);
 	}
 
 	return true;
