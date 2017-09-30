@@ -37,6 +37,7 @@
 #include "TDCWebUpdateScript.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
 #include "TaskClipboard.h"
+#include "TDLGoToTaskDlg.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -223,6 +224,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnUpdateViewDecrementTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnViewRestoreDefaultTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
+	ON_COMMAND(ID_MOVE_GOTOTASK, OnMoveGoToTask)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -1579,20 +1582,22 @@ BOOL CToDoListWnd::AppOverridesToDoCtrlProcessing(UINT nCmdID, DWORD dwShortcut)
 
 BOOL CToDoListWnd::ProcessShortcut(MSG* pMsg)
 {
+	ASSERT(IsWindowEnabled());
+
 	DWORD dwShortcut = 0;
 	UINT nCmdID = m_mgrShortcuts.ProcessMessage(pMsg, &dwShortcut);
-	
+
 	// if it's a reserved shortcut let's notify the user to change it
 	if (HandleReservedShortcut(dwShortcut))
 		return TRUE;
-	
+
 	// Try active ToDoCtrl unless App overrides depending on context
 	if (!AppOverridesToDoCtrlProcessing(nCmdID, dwShortcut))
 	{
 		if (GetToDoCtrl().PreTranslateMessage(pMsg))
 			return TRUE;
 	}
-	
+
 	// Send the command to ourselves
 	if (SendShortcutCommand(nCmdID))
 		return TRUE;
@@ -1611,19 +1616,22 @@ BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 	
-	// Control accelerators
-	if (ProcessDialogCtrlShortcut(pMsg))
-		return TRUE;
+	if (IsWindowEnabled())
+	{
+		// Control accelerators
+		if (ProcessDialogCtrlShortcut(pMsg))
+			return TRUE;
 
-	if (IsDroppedComboBox(pMsg->hwnd))
-		return FALSE;
+		if (IsDroppedComboBox(pMsg->hwnd))
+			return FALSE;
 
-	// Keyboard shortcuts
-	if (ProcessShortcut(pMsg))
-		return TRUE;
+		// Keyboard shortcuts
+		if (ProcessShortcut(pMsg))
+			return TRUE;
 
-	if (HandleEscapeTabReturn(pMsg))
-		return TRUE;
+		if (HandleEscapeTabReturn(pMsg))
+			return TRUE;
+	}
 	
 	return CFrameWnd::PreTranslateMessage(pMsg);
 }
@@ -12791,4 +12799,18 @@ void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI)
 	int nUnused;
 
 	pCmdUI->Enable(Prefs().GetTreeFont(sUnused, nUnused));
+}
+
+void CToDoListWnd::OnMoveGoToTask() 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLGoToTaskDlg dialog(tdc);
+
+	if (dialog.DoModal() == IDOK)
+		tdc.SelectTask(dialog.GetTaskID());
+}
+
+void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }

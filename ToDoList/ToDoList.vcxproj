@@ -373,6 +373,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDLContentTypeCombobox.cpp" />
+    <ClCompile Include="TDLGoToTaskDlg.cpp" />
     <ClCompile Include="TDLImpExpAttributeMappingListCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -658,6 +659,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLCommentsCtrl.h" />
     <ClInclude Include="TDLContentMgr.h" />
     <ClInclude Include="TDLContentTypeCombobox.h" />
+    <ClInclude Include="TDLGoToTaskDlg.h" />
     <ClInclude Include="TDLImpExpAttributeMappingListCtrl.h" />
     <ClInclude Include="TDLCsvImportExportDlg.h" />
     <ClInclude Include="TDLCustomAttribFeatureComboBox.h" />
