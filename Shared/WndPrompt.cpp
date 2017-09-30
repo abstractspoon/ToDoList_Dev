@@ -29,7 +29,8 @@ CWndPrompt::~CWndPrompt()
 
 }
 
-BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred)
+BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, 
+							LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
 	ASSERT (hWnd);
 	ASSERT (!IsHooked());
@@ -44,6 +45,7 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT
 			m_lCheckResult = lCheckRes;
 			m_sClass = CWinClasses::GetClass(hWnd);
 			m_bCentred = bCentred;
+			m_bIncReadonlyEdit = bIncReadonlyEdit;
 			
 			if (WantPrompt())
 				Invalidate();
@@ -116,7 +118,7 @@ BOOL CWndPrompt::WantPrompt(BOOL bCheckFocus)
 				bWantPrompt = (GetFocus() != hWnd);
 
 			if (bWantPrompt)
-				bWantPrompt = (IsWindowEnabled() && !(GetStyle() & ES_READONLY));
+				bWantPrompt = (IsWindowEnabled() && (m_bIncReadonlyEdit || !(GetStyle() & ES_READONLY)));
 		}
 		else if (CWinClasses::IsComboBox(m_sClass))
 		{
@@ -164,6 +166,7 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	rClient.DeflateRect(2, 1, 2, 0);
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
+	COLORREF crText = GetSysColor(COLOR_3DSHADOW);
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
@@ -175,16 +178,20 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 		HBRUSH hbrBkgnd = NULL;
 
 		if (!::IsWindowEnabled(hWnd) || (::GetWindowLong(hWnd, GWL_STYLE) & ES_READONLY))
+		{
 			hbrBkgnd = GetSysColorBrush(COLOR_3DFACE);
+			crText = GetSysColor(COLOR_3DDKSHADOW);
+		}
 		else
+		{
 			hbrBkgnd = (HBRUSH)::SendMessage(::GetParent(hWnd), WM_CTLCOLOREDIT, (WPARAM)hdc, (LPARAM)hWnd);
+		}
 		
 		::FillRect(hdc, rClient, hbrBkgnd);
 	}
 
-	// background colour
 	::SetBkMode(hdc, TRANSPARENT);
-	::SetTextColor(hdc, GetSysColor(COLOR_3DSHADOW));
+	::SetTextColor(hdc, crText);
 	
 	// draw prompt
 	::DrawText(hdc, szPrompt, -1, rClient, nFlags);
@@ -222,8 +229,8 @@ CWndPromptManager::~CWndPromptManager()
 	}
 }
 
-BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt, 
-								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred)
+BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, 
+									LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
 	// have we already got it?
 	CWndPrompt* pWnd = NULL;
@@ -258,7 +265,7 @@ BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt,
 	// create new wnd prompt
 	pWnd = new CWndPrompt;
 
-	if (pWnd && pWnd->Initialize(hWnd, szPrompt, nCheckMsg, lCheckRes, bCentred))
+	if (pWnd && pWnd->Initialize(hWnd, szPrompt, nCheckMsg, lCheckRes, bCentred, bIncReadonlyEdit))
 	{
 		m_mapWnds[hWnd] = pWnd;
 		return TRUE;
@@ -269,85 +276,87 @@ BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt,
 	return FALSE;
 }
 
-BOOL CWndPromptManager::SetPrompt(HWND hWnd, UINT nIDPrompt, 
-								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred)
+BOOL CWndPromptManager::SetPrompt(HWND hWnd, UINT nIDPrompt, UINT nCheckMsg, 
+									LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
-	return SetPrompt(hWnd, CEnString(nIDPrompt), nCheckMsg, lCheckRes, bCentred);
+	return SetPrompt(hWnd, CEnString(nIDPrompt), nCheckMsg, lCheckRes, bCentred, bIncReadonlyEdit);
 }
 
 BOOL CWndPromptManager::SetPrompt(UINT nIDCtrl, HWND hwndParent, LPCTSTR szPrompt, 
-								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred)
+								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
-	return SetPrompt(GetDlgItem(hwndParent, nIDCtrl), szPrompt, nCheckMsg, lCheckRes, bCentred);
+	return SetPrompt(GetDlgItem(hwndParent, nIDCtrl), szPrompt, nCheckMsg, lCheckRes, bCentred, bIncReadonlyEdit);
 }
 
 BOOL CWndPromptManager::SetPrompt(UINT nIDCtrl, HWND hwndParent, UINT nIDPrompt, 
-								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred)
+								  UINT nCheckMsg, LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
-	return SetPrompt(nIDCtrl, hwndParent, CEnString(nIDPrompt), nCheckMsg, lCheckRes, bCentred);
+	return SetPrompt(nIDCtrl, hwndParent, CEnString(nIDPrompt), nCheckMsg, lCheckRes, bCentred, bIncReadonlyEdit);
 }
 
 // -------------------------------------------------------------------------------
 
-BOOL CWndPromptManager::SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly)
 {
-	return SetEditPrompt(GetDlgItem(hwndParent, nIDEdit), szPrompt);
+	return SetEditPrompt(GetDlgItem(hwndParent, nIDEdit), szPrompt, bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetEditPrompt(UINT nIDEdit, HWND hwndParent, UINT nIDPrompt)
+BOOL CWndPromptManager::SetEditPrompt(UINT nIDEdit, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonly)
 {
-	return SetEditPrompt(nIDEdit, hwndParent, CEnString(nIDPrompt));
+	return SetEditPrompt(nIDEdit, hwndParent, CEnString(nIDPrompt), bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetEditPrompt(HWND hwndEdit, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetEditPrompt(HWND hwndEdit, LPCTSTR szPrompt, BOOL bIncReadonly)
 {
 	if (!CWinClasses::IsEditControl(hwndEdit))
 		return FALSE;
 
-	return SetPrompt(hwndEdit, szPrompt, WM_GETTEXTLENGTH);
+	return SetPrompt(hwndEdit, szPrompt, WM_GETTEXTLENGTH, 0L, FALSE, bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetEditPrompt(HWND hwndEdit, UINT nIDPrompt)
+BOOL CWndPromptManager::SetEditPrompt(HWND hwndEdit, UINT nIDPrompt, BOOL bIncReadonly)
 {
-	return SetEditPrompt(hwndEdit, CEnString(nIDPrompt));
+	return SetEditPrompt(hwndEdit, CEnString(nIDPrompt), bIncReadonly);
 }
 
 // -------------------------------------------------------------------------------
 
-BOOL CWndPromptManager::SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly)
 {
-	return SetComboEditPrompt(GetDlgItem(hwndParent, nIDCombo), szPrompt);
+	return SetComboEditPrompt(GetDlgItem(hwndParent, nIDCombo), szPrompt, bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt)
+BOOL CWndPromptManager::SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonly)
 {
-	return SetComboEditPrompt(nIDCombo, hwndParent, CEnString(nIDPrompt));
+	return SetComboEditPrompt(nIDCombo, hwndParent, CEnString(nIDPrompt), bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetComboEditPrompt(HWND hwndCombo, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetComboEditPrompt(HWND hwndCombo, LPCTSTR szPrompt, BOOL bIncReadonly)
 {
 	CString sClass = CWinClasses::GetClass(hwndCombo);
 
 	if (!CWinClasses::IsClass(sClass, WC_COMBOBOX) && 
 		!CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
+	{
 		return FALSE;
+	}
 
-	return SetPrompt(1001, hwndCombo, szPrompt, WM_GETTEXTLENGTH);
+	return SetPrompt(1001, hwndCombo, szPrompt, WM_GETTEXTLENGTH, 0L, FALSE, bIncReadonly);
 }
 
-BOOL CWndPromptManager::SetComboEditPrompt(HWND hwndCombo, UINT nIDPrompt)
+BOOL CWndPromptManager::SetComboEditPrompt(HWND hwndCombo, UINT nIDPrompt, BOOL bIncReadonly)
 {
-	return SetComboEditPrompt(hwndCombo, CEnString(nIDPrompt));
+	return SetComboEditPrompt(hwndCombo, CEnString(nIDPrompt), bIncReadonly);
 }
 
 // -------------------------------------------------------------------------------
 
-BOOL CWndPromptManager::SetComboPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetComboPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonlyEdit)
 {
-	return SetComboPrompt(GetDlgItem(hwndParent, nIDCombo), szPrompt);
+	return SetComboPrompt(GetDlgItem(hwndParent, nIDCombo), szPrompt, bIncReadonlyEdit);
 }
 
-BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt)
+BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt, BOOL bIncReadonlyEdit)
 {
 	CString sClass = CWinClasses::GetClass(hwndCombo);
 
@@ -360,20 +369,20 @@ BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt)
 	UINT nStyle = GetWindowLong(hwndCombo, GWL_STYLE);
 
 	if ((nStyle & 0xf) != CBS_DROPDOWNLIST)
-		return SetComboEditPrompt(hwndCombo, szPrompt);
+		return SetComboEditPrompt(hwndCombo, szPrompt, bIncReadonlyEdit);
 	
 	// else
 	return SetPrompt(hwndCombo, szPrompt, WM_GETTEXTLENGTH);
 }
 
-BOOL CWndPromptManager::SetComboPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt)
+BOOL CWndPromptManager::SetComboPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonlyEdit)
 {
-	return SetComboPrompt(GetDlgItem(hwndParent, nIDCombo), CEnString(nIDPrompt));
+	return SetComboPrompt(GetDlgItem(hwndParent, nIDCombo), CEnString(nIDPrompt), bIncReadonlyEdit);
 }
 
-BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, UINT nIDPrompt)
+BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, UINT nIDPrompt, BOOL bIncReadonlyEdit)
 {
-	return SetComboPrompt(hwndCombo, CEnString(nIDPrompt));
+	return SetComboPrompt(hwndCombo, CEnString(nIDPrompt), bIncReadonlyEdit);
 }
 
 // -------------------------------------------------------------------------------

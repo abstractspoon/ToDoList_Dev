@@ -18,7 +18,7 @@ public:
 	CWndPrompt();
 	virtual ~CWndPrompt();
 
-	BOOL Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE);
+	BOOL Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 	void SetPrompt(LPCTSTR szPrompt, BOOL bCentred = -1);
 
 	static void DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc = NULL, BOOL bCentred = FALSE, LPCTSTR szClass = NULL);
@@ -28,6 +28,7 @@ protected:
 	UINT m_nCheckMsg;
 	LRESULT m_lCheckResult;
 	int m_bCentred;
+	BOOL m_bIncReadonlyEdit;
 	CString m_sClass; // for some tweaking
 
 protected:
@@ -43,29 +44,29 @@ public:
 	virtual ~CWndPromptManager();
 
 	BOOL SetPrompt(UINT nIDCtrl, HWND hwndParent, LPCTSTR szPrompt, 
-					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE);
+					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 	BOOL SetPrompt(HWND hWnd, LPCTSTR szPrompt, 
-					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE);
+					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 
 	BOOL SetPrompt(UINT nIDCtrl, HWND hwndParent, UINT nIDPrompt, 
-					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE);
+					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 	BOOL SetPrompt(HWND hWnd, UINT nIDPrompt, 
-					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE);
+					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 
 	// special cases
-	BOOL SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt);
-	BOOL SetEditPrompt(HWND hwndEdit, LPCTSTR szPrompt);
-	BOOL SetComboPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt);
-	BOOL SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt);
-	BOOL SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt);
-	BOOL SetComboEditPrompt(HWND hwndCombo, LPCTSTR szPrompt);
+	BOOL SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetEditPrompt(HWND hwndEdit, LPCTSTR szPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetComboPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonlyEdit = FALSE);
+	BOOL SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt, BOOL bIncReadonlyEdit = FALSE);
+	BOOL SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetComboEditPrompt(HWND hwndCombo, LPCTSTR szPrompt, BOOL bIncReadonly = FALSE);
 
-	BOOL SetEditPrompt(UINT nIDEdit, HWND hwndParent, UINT nIDPrompt);
-	BOOL SetEditPrompt(HWND hwndEdit, UINT nIDPrompt);
-	BOOL SetComboPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt);
-	BOOL SetComboPrompt(HWND hwndCombo, UINT nIDPrompt);
-	BOOL SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt);
-	BOOL SetComboEditPrompt(HWND hwndCombo, UINT nIDPrompt);
+	BOOL SetEditPrompt(UINT nIDEdit, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetEditPrompt(HWND hwndEdit, UINT nIDPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetComboPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonlyEdit = FALSE);
+	BOOL SetComboPrompt(HWND hwndCombo, UINT nIDPrompt, BOOL bIncReadonly = FALSE);
+	BOOL SetComboEditPrompt(UINT nIDCombo, HWND hwndParent, UINT nIDPrompt, BOOL bIncReadonlyEdit = FALSE);
+	BOOL SetComboEditPrompt(HWND hwndCombo, UINT nIDPrompt, BOOL bIncReadonly = FALSE);
 
 protected:
 	CMap<HWND, HWND, CWndPrompt*, CWndPrompt*&> m_mapWnds;
