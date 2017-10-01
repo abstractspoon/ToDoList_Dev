@@ -19,6 +19,9 @@ public:
 	void SetAllChecked(BOOL bChecked = TRUE);
 	int GetNumChecked() const;
 
+	BOOL GetCheckByData(DWORD dwItemData) const;
+	int SetCheckByData(DWORD dwItemData, BOOL bChecked = TRUE);
+
 // Attributes
 protected:
 	CImageList m_ilCheck;

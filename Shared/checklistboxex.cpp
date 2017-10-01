@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "checklistboxex.h"
 #include "themed.h"
-#include "themed.h"
+#include "dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -56,6 +56,27 @@ int CCheckListBoxEx::GetNumChecked() const
 	}
 
 	return nNumChecked;
+}
+
+BOOL CCheckListBoxEx::GetCheckByData(DWORD dwItemData) const
+{
+	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+
+	if (nIndex == CB_ERR)
+		return FALSE;
+
+	return const_cast<CCheckListBoxEx*>(this)->GetCheck(nIndex);
+}
+
+int CCheckListBoxEx::SetCheckByData(DWORD dwItemData, BOOL bChecked)
+{
+	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+
+	if (nIndex == CB_ERR)
+		return FALSE;
+
+	SetCheck(nIndex, (bChecked ? 1 : 0));
+	return nIndex;
 }
 
 BOOL CCheckListBoxEx::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult) 
