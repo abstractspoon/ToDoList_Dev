@@ -1393,11 +1393,11 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	m_treeHeader.InsertItem(GTLCC_TITLE, 0, _T("Task"), (HDF_LEFT | HDF_STRING));
 	m_treeHeader.EnableItemDragging(GTLCC_TITLE, FALSE);
 
-	m_treeHeader.InsertItem(GTLCC_STARTDATE, 0, _T("Start"), (HDF_RIGHT | HDF_STRING));
-	m_treeHeader.InsertItem(GTLCC_ENDDATE,	0, _T("Due"), (HDF_RIGHT | HDF_STRING));
-	m_treeHeader.InsertItem(GTLCC_ALLOCTO, 0, _T("Alloc To"), (HDF_LEFT | HDF_STRING));
-	m_treeHeader.InsertItem(GTLCC_PERCENT, 0, _T("%"), (HDF_CENTER | HDF_STRING));
-	m_treeHeader.InsertItem(GTLCC_TASKID, 0, _T("ID"), (HDF_RIGHT | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_STARTDATE, 0, CEnString(IDS_COL_STARTDATE), (HDF_RIGHT | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_ENDDATE,	0, CEnString(IDS_COL_DUEDATE), (HDF_RIGHT | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_ALLOCTO, 0, CEnString(IDS_COL_ALLOCTO), (HDF_LEFT | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_PERCENT, 0, CEnString(IDS_COL_PERCENTDONE), (HDF_CENTER | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_TASKID, 0, CEnString(IDS_COL_TASKID), (HDF_RIGHT | HDF_STRING));
 }
 
 BOOL CGanttTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
