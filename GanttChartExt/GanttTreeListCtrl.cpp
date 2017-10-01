@@ -1141,7 +1141,7 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				if ((m_nMonthDisplay == GTLC_DISPLAY_QUARTERCENTURIES) || 
 					(m_nMonthDisplay == GTLC_DISPLAY_DECADES))
 				{
-					UpdateColumnsWidthAndText();
+					UpdateListColumnsWidthAndText();
 				}
 				break;
 
@@ -1155,7 +1155,7 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-CString CGanttTreeListCtrl::FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
+CString CGanttTreeListCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
 {
 	if (nMonth == 0)
 		return _T("");
@@ -1266,12 +1266,12 @@ double CGanttTreeListCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWi
 	return 0.0;
 }
 
-int CGanttTreeListCtrl::GetRequiredColumnCount() const
+int CGanttTreeListCtrl::GetRequiredListColumnCount() const
 {
-	return GetRequiredColumnCount(m_nMonthDisplay);
+	return GetRequiredListColumnCount(m_nMonthDisplay);
 }
 
-int CGanttTreeListCtrl::GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttTreeListCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
 {
 	int nNumMonths = GetNumMonths(nDisplay);
 	int nNumCols = 0;
@@ -1671,7 +1671,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
 
 			// draw row
-			int nNumCol = GetRequiredColumnCount();
+			int nNumCol = GetRequiredListColumnCount();
 			BOOL bSelected = IsListItemSelected(m_list, nItem);
 
 			for (int nCol = 1; nCol <= nNumCol; nCol++)
@@ -4357,7 +4357,7 @@ BOOL CGanttTreeListCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMo
 		return FALSE;
 	}
 
-	int nNumReqColumns = (GetRequiredColumnCount(nDisplay) + 1);
+	int nNumReqColumns = (GetRequiredListColumnCount(nDisplay) + 1);
 	int nColWidth = GetColumnWidth(nDisplay, nMonthWidth);
 	int nTotalReqdWidth = (nNumReqColumns * nColWidth);
 	
@@ -4559,7 +4559,7 @@ BOOL CGanttTreeListCtrl::ZoomBy(int nAmount)
 void CGanttTreeListCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 {
 	// resize the required number of columns
-	int nNumReqColumns = GetRequiredColumnCount(), i;
+	int nNumReqColumns = GetRequiredListColumnCount(), i;
 
 	for (i = 1; i <= nNumReqColumns; i++)
 	{
@@ -4595,7 +4595,7 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 		RecalcTreeColumnWidth((GTLC_COLUMN)nCol, &dc);
 	
 	// list columns (except first dummy column)
-	nCol = GetRequiredColumnCount();
+	nCol = GetRequiredListColumnCount();
 	
 	while (--nCol > 0)
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
@@ -4727,7 +4727,7 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 	return nWidest;
 }
 
-void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
+void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
 {
 	// first column is always zero width and not trackable
 	m_listHeader.SetItemWidth(0, 0);
@@ -4736,7 +4736,7 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
 
-	int nNumReqColumns = (GetRequiredColumnCount() + 1);
+	int nNumReqColumns = (GetRequiredListColumnCount() + 1);
 	BOOL bUsePrevWidth = (m_aPrevColWidths.GetSize() == nNumReqColumns);
 	int nTotalReqdWidth = 0;
 
@@ -4749,7 +4749,7 @@ void CGanttTreeListCtrl::UpdateColumnsWidthAndText(int nWidth)
 	{
 		if (nMonth && nYear)
 		{
-			CString sTitle = FormatColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
+			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
 			DWORD dwData = MAKELONG(nMonth, nYear);
 
 			if (bUsePrevWidth)
@@ -4844,7 +4844,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 	m_list.InsertColumn(0, &lvc);
 	
 	// add other columns
-	int nNumCols = GetRequiredColumnCount(m_nMonthDisplay);
+	int nNumCols = GetRequiredListColumnCount(m_nMonthDisplay);
 
 	for (int i = 0; i < nNumCols; i++)
 	{
@@ -4857,7 +4857,7 @@ void CGanttTreeListCtrl::BuildListColumns()
 		m_list.InsertColumn(nCol, &lvc);
 	}
 
-	UpdateColumnsWidthAndText();
+	UpdateListColumnsWidthAndText();
 }
 
 void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
@@ -4872,7 +4872,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 		nWidth = GetColumnWidth();
 
 	int nNumCols = m_listHeader.GetItemCount();
-	int nReqCols = (GetRequiredColumnCount(m_nMonthDisplay) + 1);
+	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
 	int nDiffCols = (nReqCols - nNumCols);
 
 	if (nDiffCols > 0)
@@ -4904,7 +4904,7 @@ void CGanttTreeListCtrl::UpdateListColumns(int nWidth)
 	if (nDiffCols != 0)
 		PostResize();
 
-	UpdateColumnsWidthAndText(nWidth);
+	UpdateListColumnsWidthAndText(nWidth);
 
 	// restore scroll-pos
 	if (bRestorePos)
@@ -4940,7 +4940,7 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
 			{
-				CString sText = FormatColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2013);
+				CString sText = FormatListColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2013);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
@@ -4960,7 +4960,7 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 			{
-				CString sText = FormatColumnHeaderText(nDisplay, 1, 2013);
+				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2013);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
@@ -4974,7 +4974,7 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
+					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4992,7 +4992,7 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatColumnHeaderText(nDisplay, nMonth, 2013);
+					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -5344,7 +5344,7 @@ int CGanttTreeListCtrl::GetDateInMonths(int nMonth, int nYear) const
 int CGanttTreeListCtrl::FindColumn(int nMonth, int nYear) const
 {	
 	int nMonths = GetDateInMonths(nMonth, nYear);
-	int nNumReqColumns = GetRequiredColumnCount();
+	int nNumReqColumns = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumReqColumns; i++)
 	{
@@ -5380,7 +5380,7 @@ int CGanttTreeListCtrl::FindColumn(const COleDateTime& date) const
 
 int CGanttTreeListCtrl::FindColumn(int nScrollPos) const
 {
-	int nNumReqColumns = GetRequiredColumnCount();
+	int nNumReqColumns = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumReqColumns; i++)
 	{
@@ -6221,12 +6221,12 @@ void CGanttTreeListCtrl::CancelDrag(BOOL bReleaseCapture)
 	NotifyParentDragChange();
 }
 
-int CGanttTreeListCtrl::GetColumnOrder(CIntArray& aTreeOrder) const
+int CGanttTreeListCtrl::GetTreeColumnOrder(CIntArray& aTreeOrder) const
 {
 	return m_treeHeader.GetItemOrder(aTreeOrder);
 }
 
-BOOL CGanttTreeListCtrl::SetColumnOrder(const CIntArray& aTreeOrder)
+BOOL CGanttTreeListCtrl::SetTreeColumnOrder(const CIntArray& aTreeOrder)
 {
 	ASSERT(aTreeOrder.GetSize() && (aTreeOrder[0] == GTLCC_TITLE));
 
@@ -6243,7 +6243,7 @@ void CGanttTreeListCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aLis
 
 	// trim the list columns to what's currently visible
 	// remember to include hidden dummy first column
-	int nNumMonths = (GetRequiredColumnCount() + 1);
+	int nNumMonths = (GetRequiredListColumnCount() + 1);
 	int nItem = aListWidths.GetSize();
 
 	while (nItem-- > nNumMonths)
@@ -6259,7 +6259,7 @@ BOOL CGanttTreeListCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIn
 
 	// save list column widths for when we've initialised our columns
 	// remember to include hidden dummy first column
-	if (aListWidths.GetSize() == (GetRequiredColumnCount() + 1))
+	if (aListWidths.GetSize() == (GetRequiredListColumnCount() + 1))
 		m_listHeader.SetItemWidths(aListWidths);
 	else
 		m_aPrevColWidths.Copy(aListWidths);
@@ -6274,7 +6274,7 @@ void CGanttTreeListCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& a
 
 	// trim the list columns to what's currently visible
 	// remember to include hidden dummy first column
-	int nNumMonths = (GetRequiredColumnCount() + 1);
+	int nNumMonths = (GetRequiredListColumnCount() + 1);
 	int nItem = aListTracked.GetSize();
 
 	while (nItem-- > nNumMonths)
@@ -6290,7 +6290,7 @@ BOOL CGanttTreeListCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const 
 
 	// save list column tracking for when we've initialised our columns
 	// remember to include hidden dummy first column
-	if (aListTracked.GetSize() == (GetRequiredColumnCount() + 1))
+	if (aListTracked.GetSize() == (GetRequiredListColumnCount() + 1))
 		m_listHeader.SetTrackedItems(aListTracked);
 	else
 		m_aPrevTrackedCols.Copy(aListTracked);

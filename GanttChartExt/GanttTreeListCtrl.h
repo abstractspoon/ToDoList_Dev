@@ -141,12 +141,13 @@ public:
 	BOOL BeginDependencyEdit(CGanttDependencyEditor* pDependEdit);
 	void OnEndDepedencyEdit();
 
-	int GetColumnOrder(CIntArray& aTreeOrder) const;
-	BOOL SetColumnOrder(const CIntArray& aTreeOrder);
+	int GetTreeColumnOrder(CIntArray& aTreeOrder) const;
+	BOOL SetTreeColumnOrder(const CIntArray& aTreeOrder);
 	void GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const;
 	BOOL SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths);
 	BOOL SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked);
 	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
+	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute);
@@ -241,8 +242,8 @@ protected:
 	void BuildListColumns();
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
-	void UpdateColumnsWidthAndText(int nWidth = -1);
-	CString FormatColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
+	void UpdateListColumnsWidthAndText(int nWidth = -1);
+	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
 
 	int GetListItem(HTREEITEM hti) const;
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
@@ -260,8 +261,8 @@ protected:
 	int GetColumnWidth() const;
 	int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	double GetMonthWidth(int nColWidth) const;
-	int GetRequiredColumnCount() const;
-	int GetRequiredColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetRequiredListColumnCount() const;
+	int GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
 	BOOL ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
 	void DeleteTreeItem(HTREEITEM hti);
 	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
