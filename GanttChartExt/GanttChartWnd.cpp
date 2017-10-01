@@ -920,6 +920,10 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 	GTLC_PARENTCOLORING nOption = (GTLC_PARENTCOLORING)m_dlgPrefs.GetParentColoring(crParent);
 
 	m_ctrlGantt.SetParentColoring(nOption, crParent);
+
+	CDWordArray aColumnVis;
+	m_dlgPrefs.GetColumnVisibility(aColumnVis);
+	m_ctrlGantt.SetTreeColumnVisibility(aColumnVis);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)

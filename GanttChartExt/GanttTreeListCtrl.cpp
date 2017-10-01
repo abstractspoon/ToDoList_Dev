@@ -1528,7 +1528,7 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
-			
+		
 			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 		}
 		break;
@@ -1920,8 +1920,11 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 								case GTLCC_ALLOCTO:
 								case GTLCC_PERCENT:
 								case GTLCC_TASKID:
-									if (pHDN->pitem->cxy < MIN_COL_WIDTH)
-										pHDN->pitem->cxy = MIN_COL_WIDTH;
+									if (m_treeHeader.IsItemVisible(pHDN->iItem))
+									{
+										if (pHDN->pitem->cxy < MIN_COL_WIDTH)
+											pHDN->pitem->cxy = MIN_COL_WIDTH;
+									}
 									break;
 								}
 
@@ -6224,6 +6227,15 @@ void CGanttTreeListCtrl::CancelDrag(BOOL bReleaseCapture)
 int CGanttTreeListCtrl::GetTreeColumnOrder(CIntArray& aTreeOrder) const
 {
 	return m_treeHeader.GetItemOrder(aTreeOrder);
+}
+
+void CGanttTreeListCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
+{
+	int nNumCols = aColumnVis.GetSize();
+	ASSERT(nNumCols == GTLCC_NUMCOLUMNS);
+
+	for (int nColID = 1; nColID < nNumCols; nColID++)
+		m_treeHeader.ShowItem(nColID, aColumnVis[nColID]);
 }
 
 BOOL CGanttTreeListCtrl::SetTreeColumnOrder(const CIntArray& aTreeOrder)
