@@ -266,6 +266,10 @@ void CEnHeaderCtrl::ShowItem(int nItem, BOOL bShow)
 			SetItemWidth(nItem, 0);
 		}
 	}
+	else if (!bShow)
+	{
+		SetItemWidth(nItem, 0);
+	}
 }
 
 BOOL CEnHeaderCtrl::IsItemVisible(int nItem) const
@@ -614,15 +618,22 @@ BOOL CEnHeaderCtrl::SetItemWidth(int nItem, int nWidth)
 	if (nWidth == GetItemWidth(nItem))
 		return TRUE;
 
-	HD_ITEM hdi = { 0 };
-
-	hdi.mask = HDI_WIDTH;
-	hdi.cxy = nWidth;
-
-	if (SetItem(nItem, &hdi))
+	if (IsItemVisible(nItem) || (nWidth == 0))
 	{
-		SetItemTracked(nItem, FALSE);
-		return TRUE;
+		HD_ITEM hdi = { 0 };
+
+		hdi.mask = HDI_WIDTH;
+		hdi.cxy = nWidth;
+
+		if (SetItem(nItem, &hdi))
+		{
+			SetItemTracked(nItem, FALSE);
+			return TRUE;
+		}
+	}
+	else
+	{
+		GetItemExtra(nItem).nWidth = nWidth;
 	}
 
 	// else
