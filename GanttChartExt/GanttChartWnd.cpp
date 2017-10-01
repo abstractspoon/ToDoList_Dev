@@ -192,7 +192,7 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// column widths
 	CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
 
-	m_ctrlGantt.GetColumnOrder(aTreeOrder);
+	m_ctrlGantt.GetTreeColumnOrder(aTreeOrder);
 	m_ctrlGantt.GetColumnWidths(aTreeWidths, aListWidths);
 	m_ctrlGantt.GetTrackedColumns(aTreeTracked, aListTracked);
 
@@ -312,7 +312,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 
 		if (LoadColumnState(pPrefs, (sKey + _T("\\TreeOrder")), aTreeOrder))
 		{
-			m_ctrlGantt.SetColumnOrder(aTreeOrder);
+			m_ctrlGantt.SetTreeColumnOrder(aTreeOrder);
 		}
 		
 		// column widths
