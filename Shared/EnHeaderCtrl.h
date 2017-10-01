@@ -97,7 +97,8 @@ public:
 	int GetItemPosition(int nItem) const;
 
 #ifdef _DEBUG
-	void TraceVisibleItemWidths(LPCTSTR szKey = NULL) const;
+	void TraceItemWidths(BOOL bVisibleOnly, LPCTSTR szKey = NULL) const;
+	void TraceItemStates(LPCTSTR szKey = NULL) const;
 #endif
 
 	BOOL EnableToolTips(BOOL bEnable = TRUE);

@@ -646,7 +646,7 @@ BOOL CEnHeaderCtrl::SetItemTracked(int nItem, BOOL bTracked)
 }
 
 #ifdef _DEBUG
-void CEnHeaderCtrl::TraceVisibleItemWidths(LPCTSTR szKey) const
+void CEnHeaderCtrl::TraceItemWidths(BOOL bVisibleOnly, LPCTSTR szKey) const
 {
 	TRACE(_T("CEnHeaderCtrl::TraceVisibleItemWidths(%s "), szKey);
 
@@ -657,7 +657,7 @@ void CEnHeaderCtrl::TraceVisibleItemWidths(LPCTSTR szKey) const
 	{
 		for (int nItem = 0; nItem < nNumItem; nItem++)
 		{
-			if (IsItemVisible(aItems[nItem]))
+			if (!bVisibleOnly || IsItemVisible(aItems[nItem]))
 				TRACE(_T("%d "), GetItemWidth(aItems[nItem]));
 		}
 	}
@@ -668,6 +668,46 @@ void CEnHeaderCtrl::TraceVisibleItemWidths(LPCTSTR szKey) const
 
 	TRACE(_T(")\n"));
 }
+
+void CEnHeaderCtrl::TraceItemStates(LPCTSTR szKey) const
+{
+	TRACE(_T("CEnHeaderCtrl::TraceItemFlags(%s)\n"), szKey);
+
+	CIntArray aItems;
+	int nNumItem = GetItemOrder(aItems);
+
+	if (nNumItem)
+	{
+		for (int nItem = 0; nItem < nNumItem; nItem++)
+		{
+			int nCol = aItems[nItem];
+			TRACE(_T("\t%s: "), GetItemText(nCol));
+
+			if (IsItemVisible(nCol))
+				TRACE(_T("Visible, "));
+
+			if (IsItemTrackable(nCol))
+				TRACE(_T("Trackable, "));
+
+			if (IsItemTracked(nCol))
+				TRACE(_T("Tracked, "));
+
+			if (IsItemDraggable(nCol))
+				TRACE(_T("Draggable, "));
+
+			TRACE(_T("Width = %d\n"), GetItemWidth(nItem));
+		}
+	}
+	else
+	{
+		TRACE(_T("empty"));
+	}
+
+	TRACE(_T("\n"));
+}
+
+
+
 #endif // _DEBUG
 
 int CEnHeaderCtrl::GetItemWidths(CIntArray& aWidths) const
