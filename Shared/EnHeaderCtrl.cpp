@@ -564,19 +564,20 @@ BOOL CEnHeaderCtrl::IsItemDraggable(int nItem) const
 	return ((GetStyle() & HDS_DRAGDROP) && !ItemHasFlag(nItem, EHCF_NODRAG));
 }
 
-int CEnHeaderCtrl::AppendItem(int nWidth, LPCTSTR szText, int nFormat, UINT uIDBitmap)
+int CEnHeaderCtrl::AppendItem(int nWidth, LPCTSTR szText, int nFormat, UINT uIDBitmap, DWORD dwItemData)
 {
-	return InsertItem(GetItemCount(), nWidth, szText, nFormat, uIDBitmap);
+	return InsertItem(GetItemCount(), nWidth, szText, nFormat, uIDBitmap, dwItemData);
 }
 
-int CEnHeaderCtrl::InsertItem(int nItem, int nWidth, LPCTSTR szText, int nFormat, UINT uIDBitmap)
+int CEnHeaderCtrl::InsertItem(int nItem, int nWidth, LPCTSTR szText, int nFormat, UINT uIDBitmap, DWORD dwItemData)
 {
 	HD_ITEM hdi = { 0 };
 
-	hdi.mask = HDI_WIDTH | HDI_FORMAT | HDI_TEXT | (uIDBitmap ? HDI_BITMAP : 0);
+	hdi.mask = HDI_WIDTH | HDI_FORMAT | HDI_TEXT | HDI_LPARAM;
 	hdi.fmt = nFormat;
 	hdi.cxy = nWidth;
 	hdi.pszText = (LPTSTR)szText;
+	hdi.lParam = dwItemData;
 
 	// bitmap
 	if (uIDBitmap)
@@ -584,6 +585,7 @@ int CEnHeaderCtrl::InsertItem(int nItem, int nWidth, LPCTSTR szText, int nFormat
 		CBitmap bm;
 		bm.LoadBitmap(uIDBitmap);
 		hdi.hbm = (HBITMAP)bm.Detach();
+		hdi.mask |= HDI_BITMAP;
 	}
 
 	return CHeaderCtrl::InsertItem(nItem, &hdi);
