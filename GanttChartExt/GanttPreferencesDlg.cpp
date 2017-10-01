@@ -5,9 +5,11 @@
 #include "resource.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttMsg.h"
+#include "Ganttenum.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,10 +17,30 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 const COLORREF DEF_TODAYCOLOR		= RGB(255, 0, 0);
 const COLORREF DEF_WEEKENDCOLOR		= RGB(224, 224, 224);
 const COLORREF DEF_PARENTCOLOR		= RGB(0, 0, 0);
 const COLORREF DEF_DEFAULTCOLOR		= RGB(70, 135, 245);
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTCOLUMNVIS
+{
+	UINT nIDAttribName;
+	GTLC_COLUMN nColID;
+};
+
+const GANTTCOLUMNVIS GANTTCOLUMNS[] = 
+{
+	{ IDS_ATTRIB_STARTDATE,		GTLCC_STARTDATE },
+	{ IDS_ATTRIB_DUEDATE,		GTLCC_ENDDATE},
+	{ IDS_ATTRIB_ALLOCTO,		GTLCC_ALLOCTO},
+	{ IDS_ATTRIB_PERCENTDONE,	GTLCC_PERCENT},
+	{ IDS_ATTRIB_TASKID,		GTLCC_TASKID},
+};
+const int NUM_COLUMNS = (sizeof(GANTTCOLUMNS) / sizeof(GANTTCOLUMNVIS));
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesPage dialog
@@ -45,6 +67,8 @@ CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_crToday = DEF_TODAYCOLOR;
 	m_crWeekend = DEF_WEEKENDCOLOR;
 	m_crDefault = DEF_DEFAULTCOLOR;
+
+	m_aColumnVis.SetSize(GTLCC_NUMCOLUMNS);
 }
 
 void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
@@ -70,6 +94,7 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SETWEEKENDCOLOR, m_btWeekendColor);
 	DDX_Control(pDX, IDC_SETPARENTCOLOR, m_btParentColor);
 	DDX_Control(pDX, IDC_SETDEFAULTCOLOR, m_btDefaultColor);
+	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
 }
 
 
@@ -160,6 +185,14 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 	m_btDefaultColor.SetColor(m_crDefault);
 	m_btParentColor.SetColor(m_crParent);
 
+	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	{
+		const GANTTCOLUMNVIS& colVis = GANTTCOLUMNS[nCol];
+		
+		int nItem = CDialogHelper::AddString(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColID);
+		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColID]);
+	}
+
 	GetDlgItem(IDC_MILESTONETAG)->EnableWindow(m_bUseTagForMilestone);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -203,6 +236,17 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("ParentColor"), (int)m_crParent);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayProgressInBar"), m_bDisplayProgressInBar);
 	pPrefs->WriteProfileInt(szKey, _T("DecadesAreOneBased"), m_bDecadesAreOneBased);
+
+	CString sColVis(szKey);
+	sColVis += _T("\\ColumnVisibility");
+
+	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	{
+		GTLC_COLUMN nColID = GANTTCOLUMNS[nCol].nColID;
+		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
+
+		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
+	}
 }
 
 void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
@@ -224,6 +268,34 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
 	m_bDisplayProgressInBar = pPrefs->GetProfileInt(szKey, _T("DisplayProgressInBar"), FALSE);
 	m_bDecadesAreOneBased = pPrefs->GetProfileInt(szKey, _T("DecadesAreOneBased"), FALSE);
+
+	CString sColVis(szKey);
+	sColVis += _T("\\ColumnVisibility");
+
+	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	{
+		GTLC_COLUMN nColID = GANTTCOLUMNS[nCol].nColID;
+		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
+
+		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, TRUE);
+	}
+}
+
+void CGanttPreferencesPage::OnOK()
+{
+	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	{
+		GTLC_COLUMN nColID = GANTTCOLUMNS[nCol].nColID;
+		m_aColumnVis[nColID] = m_lbColumnVisibility.GetCheckByData(nColID);
+	}
+
+	CPreferencesPageBase::OnOK();
+}
+
+void CGanttPreferencesPage::GetColumnVisibility(CDWordArray& aColumnVis) const
+{
+	aColumnVis.Copy(m_aColumnVis);
+	aColumnVis[GTLCC_TITLE] = TRUE; // for completeness
 }
 
 void CGanttPreferencesPage::OnUseTagForMilestone() 

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by GanttChartExt.rc
 //
 #define IDD_GANTTTREE_DIALOG            103
@@ -61,6 +61,7 @@
 #define IDC_SNAPMODES_LABEL             16027
 #define IDC_SELECTEDTASKDATES_LABEL     16028
 #define IDC_DECADESAREONEBASED          16029
+#define IDC_COLUMNVISIBILITY            16032
 #define ID_GANTT_GOTOTODAY              32774
 #define ID_GANTT_PREFS                  32775
 #define ID_GANTT_NEWDEPENDS             32776
@@ -93,6 +94,16 @@
 #define IDS_SNAP_NEARESTQUARTERCENTURY  57673
 #define IDS_SNAP_NEARESTDECADE          57674
 #define IDS_SNAP_NEARESTHALFHOUR        57675
+#define IDS_COL_STARTDATE               57676
+#define IDS_COL_DUEDATE                 57677
+#define IDS_COL_ALLOCTO                 57678
+#define IDS_COL_PERCENTDONE             57679
+#define IDS_COL_TASKID                  57680
+#define IDS_ATTRIB_STARTDATE            57681
+#define IDS_ATTRIB_DUEDATE              57682
+#define IDS_ATTRIB_ALLOCTO              57683
+#define IDS_ATTRIB_PERCENTDONE          57684
+#define IDS_ATTRIB_TASKID               57685
 
 // Next default values for new objects
 // 
@@ -100,7 +111,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16011
 #define _APS_NEXT_COMMAND_VALUE         32781
-#define _APS_NEXT_CONTROL_VALUE         16032
+#define _APS_NEXT_CONTROL_VALUE         16033
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

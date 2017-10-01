@@ -10,6 +10,7 @@
 #include "..\shared\colorbutton.h"
 #include "..\shared\groupline.h"
 #include "..\Shared\preferencesbase.h"
+#include "..\Shared\checklistboxex.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -34,6 +35,7 @@ public:
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
 	BOOL GetDecadesAreOneBased() const { return m_bDecadesAreOneBased; }
+	void GetColumnVisibility(CDWordArray& aColumnVis) const;
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -55,9 +57,12 @@ protected:
 	BOOL	m_bDisplayProgressInBar;
 	BOOL	m_bDecadesAreOneBased;
 	//}}AFX_DATA
+
 	CColorButton m_btWeekendColor, m_btTodayColor, m_btParentColor, m_btDefaultColor;
 	COLORREF m_crWeekend, m_crToday, m_crParent, m_crDefault;
 	CGroupLineManager m_mgrGroupLines;
+	CCheckListBoxEx m_lbColumnVisibility;
+	CDWordArray m_aColumnVis;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -83,6 +88,8 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSetParentColor();
 	DECLARE_MESSAGE_MAP()
+public:
+	virtual void OnOK();
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -106,6 +113,7 @@ public:
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
 	BOOL GetDecadesAreOneBased() const { return m_page.GetDecadesAreOneBased(); }
+	void GetColumnVisibility(CDWordArray& aColumnVis) const { m_page.GetColumnVisibility(aColumnVis); }
 
 protected:
 	CGanttPreferencesPage m_page;

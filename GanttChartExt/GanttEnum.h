@@ -101,9 +101,9 @@ enum GTLC_COLUMN
 	GTLCC_ALLOCTO,
 	GTLCC_PERCENT,
 	GTLCC_TASKID,
+	// NEW ITEMS HERE 
 
-	// Always the last item
-	GTLCC_NUMCOLUMNS
+	GTLCC_NUMCOLUMNS // Always the last item
 };
 
 //////////////////////////////////////////////////////////////////////
