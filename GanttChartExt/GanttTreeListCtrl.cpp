@@ -6236,6 +6236,8 @@ void CGanttTreeListCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
 
 	for (int nColID = 1; nColID < nNumCols; nColID++)
 		m_treeHeader.ShowItem(nColID, aColumnVis[nColID]);
+
+	Resize();
 }
 
 BOOL CGanttTreeListCtrl::SetTreeColumnOrder(const CIntArray& aTreeOrder)
