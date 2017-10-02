@@ -1876,7 +1876,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 
 		if (GetItemCheckboxRect(nHit, rCheckbox) && rCheckbox.PtInRect(point))
 		{
-			SelectItem(-1);
+			ClearSelection();
 			SelectItem(nHit);
 
 			// Post message to let mouse-click time to process
