@@ -165,8 +165,8 @@ namespace Misc
 
 	CString FormatArray(const CDWordArray& array, LPCTSTR szSep = NULL);
 	CString FormatArray(const CDWordArray& array, TCHAR cSep);
-	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL);
-	CString FormatArray(const CStringArray& array, TCHAR cSep);
+	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	CString FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
 	CString FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim = _T(". "), int nStart = 1, BOOL bNumberBlankLines = FALSE);
 
 	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);

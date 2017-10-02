@@ -356,19 +356,19 @@ CString Misc::GetListSeparator()
 		// If none found, use a comma
 		if (!sSep.GetLength())
 			sSep = ',';
-	}
+	} 
 
 	return sSep;
 }
 
-CString Misc::FormatArray(const CStringArray& array, TCHAR cSep)
+CString Misc::FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
 
-	return FormatArray(array, szSep);
+	return FormatArray(array, szSep, bIncEmpty);
 }
 
-CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep)
+CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
 {
 	int nCount = array.GetSize();
 
@@ -391,10 +391,13 @@ CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep)
 	{
 		const CString& sItem = GetItem(array, nItem);
 
-		if (nItem > 0 && !sItem.IsEmpty())
-			sText += sSep;
-
-		sText += sItem;
+		if (bIncEmpty || !sItem.IsEmpty())
+		{
+			if (nItem > 0)
+				sText += sSep;
+			
+			sText += sItem;
+		}
 	}
 
 	return sText;

@@ -1279,7 +1279,7 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 	
 	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
 	{
-		sFormatNames = Misc::FormatArray(aFormatNames, ',');
+		sFormatNames = Misc::FormatArray(aFormatNames, ',', TRUE);
 		sFormatIDs = Misc::FormatArray(aFormatIDs, ',');
 	}
 #else
