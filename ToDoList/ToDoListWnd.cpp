@@ -8575,19 +8575,33 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 	// do the import
 	CTaskFile tasks;
 	UINT nIcon = 0, nMessageID = 0;
+	IIMPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter);
 
-	switch (m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter))
+	switch (nRes)
 	{
 	case IIR_CANCELLED:
 		break;
 
 	case IIR_SOMEFAILED:
-		if (bFromClipboard)
-			nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFROMCB_SOMETASKSFAILED : IDS_IMPORTFROMCB_NOTASKS);
-		else
-			nMessageID = (tasks.GetTaskCount() ? IDS_IMPORTFILE_SOMETASKSFAILED : IDS_IMPORTFILE_NOTASKS);
+		if (tasks.GetTaskCount() == 0)
+		{
+			// All failed
+			if (bFromClipboard)
+				nMessageID = IDS_IMPORTFROMCB_NOTASKS;
+			else
+				nMessageID = IDS_IMPORTFILE_NOTASKS;
 
-		nIcon = MB_ICONWARNING;
+			nIcon = MB_ICONERROR;
+			break;
+		}
+
+		// else some succeeded
+		if (bFromClipboard)
+			nMessageID = IDS_IMPORTFROMCB_SOMETASKSFAILED;
+		else
+			nMessageID = IDS_IMPORTFILE_SOMETASKSFAILED;
+
+		nIcon = MB_ICONERROR;
 		// fall thru for processing 
 
 	case IIR_SUCCESS:
