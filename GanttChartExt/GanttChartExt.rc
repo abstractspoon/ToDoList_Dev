@@ -208,7 +208,7 @@ BEGIN
                     WS_TABSTOP,7,308,333,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,324,333,10
+                    WS_TABSTOP,7,323,333,10
     CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,338,333,10
