@@ -44,21 +44,26 @@ CTDLTransEditApp theApp;
 BOOL CTDLTransEditApp::InitInstance()
 {
 	// 'ToDoList.exe' must also exist in the same folder
-	CString sTDLPath(FileMisc::GetAppFilePath());
+	CString sTDLPath(FileMisc::GetAppFilePath()), sTDLVer;
 	sTDLPath.Replace(FileMisc::GetFileNameFromPath(sTDLPath), _T("ToDoList.exe"));
 
+#ifndef _DEBUG
 	if (!FileMisc::FileExists(sTDLPath))
 	{
 		AfxMessageBox(_T("This application can only be run if ToDoList.exe is present in the same folder."), MB_OK | MB_ICONEXCLAMATION);
 		return FALSE;
 	}
+	sTDLVer = FileMisc::GetModuleVersion(sTDLPath);
+#else
+	sTDLVer = _T("999.0.0.0");
+#endif
 	
 	CString sIniPath(FileMisc::GetAppFilePath());
 	FileMisc::ReplaceExtension(sIniPath, _T(".ini"));
 
 	m_pszProfileName = _tcsdup(sIniPath);
 	
-	CTDLTransEditDlg dlg(FileMisc::GetModuleVersion(sTDLPath));
+	CTDLTransEditDlg dlg(sTDLVer);
 	m_pMainWnd = &dlg;
 
 	int nResponse = dlg.DoModal();
