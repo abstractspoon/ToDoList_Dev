@@ -2712,94 +2712,94 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "Open &From"
         BEGIN
-            MENUITEM "Open from 3rd Party Storage 1", 
-                                                    ID_FILE_OPEN_USERSTORAGE1
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 2", 
-                                                    ID_FILE_OPEN_USERSTORAGE2
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 3", 
-                                                    ID_FILE_OPEN_USERSTORAGE3
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 4", 
-                                                    ID_FILE_OPEN_USERSTORAGE4
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 5", 
-                                                    ID_FILE_OPEN_USERSTORAGE5
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 6", 
-                                                    ID_FILE_OPEN_USERSTORAGE6
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 7", 
-                                                    ID_FILE_OPEN_USERSTORAGE7
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 8", 
-                                                    ID_FILE_OPEN_USERSTORAGE8
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 9", 
-                                                    ID_FILE_OPEN_USERSTORAGE9
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 10", 
-                                                    ID_FILE_OPEN_USERSTORAGE10
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 11", 
-                                                    ID_FILE_OPEN_USERSTORAGE11
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 12", 
-                                                    ID_FILE_OPEN_USERSTORAGE12
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 13", 
-                                                    ID_FILE_OPEN_USERSTORAGE13
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 14", 
-                                                    ID_FILE_OPEN_USERSTORAGE14
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 15", 
-                                                    ID_FILE_OPEN_USERSTORAGE15
-            , GRAYED
-            MENUITEM "Open from 3rd Party Storage 16", 
+            MENUITEM "3rd Party Storage 1", 
+                                          ID_FILE_OPEN_USERSTORAGE1
+            , GRAYED   
+            MENUITEM "3rd Party Storage 2", 
+                                          ID_FILE_OPEN_USERSTORAGE2
+            , GRAYED   
+            MENUITEM "3rd Party Storage 3", 
+                                          ID_FILE_OPEN_USERSTORAGE3
+            , GRAYED   
+            MENUITEM "3rd Party Storage 4", 
+                                          ID_FILE_OPEN_USERSTORAGE4
+            , GRAYED   
+            MENUITEM "3rd Party Storage 5", 
+                                          ID_FILE_OPEN_USERSTORAGE5
+            , GRAYED   
+            MENUITEM "3rd Party Storage 6", 
+                                          ID_FILE_OPEN_USERSTORAGE6
+            , GRAYED   
+            MENUITEM "3rd Party Storage 7", 
+                                          ID_FILE_OPEN_USERSTORAGE7
+            , GRAYED   
+            MENUITEM "3rd Party Storage 8", 
+                                          ID_FILE_OPEN_USERSTORAGE8
+            , GRAYED   
+            MENUITEM "3rd Party Storage 9", 
+                                          ID_FILE_OPEN_USERSTORAGE9
+            , GRAYED   
+            MENUITEM "3rd Party Storage 10", 
+                                          ID_FILE_OPEN_USERSTORAGE10
+            , GRAYED   
+            MENUITEM "3rd Party Storage 11", 
+                                          ID_FILE_OPEN_USERSTORAGE11
+            , GRAYED   
+            MENUITEM "3rd Party Storage 12", 
+                                          ID_FILE_OPEN_USERSTORAGE12
+            , GRAYED   
+            MENUITEM "3rd Party Storage 13", 
+                                          ID_FILE_OPEN_USERSTORAGE13
+            , GRAYED   
+            MENUITEM "3rd Party Storage 14", 
+                                          ID_FILE_OPEN_USERSTORAGE14
+            , GRAYED   
+            MENUITEM "3rd Party Storage 15", 
+                                          ID_FILE_OPEN_USERSTORAGE15
+            , GRAYED   
+            MENUITEM "3rd Party Storage 16", 
                                                     ID_FILE_OPEN_USERSTORAGE16
             , GRAYED
         END
         POPUP "Sa&ve To"
         BEGIN
-            MENUITEM "Save to 3rd Party Storage 1", ID_FILE_SAVE_USERSTORAGE1
+            MENUITEM "3rd Party Storage 1", ID_FILE_SAVE_USERSTORAGE1
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 2", ID_FILE_SAVE_USERSTORAGE2
+            MENUITEM "3rd Party Storage 2", ID_FILE_SAVE_USERSTORAGE2
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 3", ID_FILE_SAVE_USERSTORAGE3
+            MENUITEM "3rd Party Storage 3", ID_FILE_SAVE_USERSTORAGE3
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 4", ID_FILE_SAVE_USERSTORAGE4
+            MENUITEM "3rd Party Storage 4", ID_FILE_SAVE_USERSTORAGE4
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 5", ID_FILE_SAVE_USERSTORAGE5
+            MENUITEM "3rd Party Storage 5", ID_FILE_SAVE_USERSTORAGE5
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 6", ID_FILE_SAVE_USERSTORAGE6
+            MENUITEM "3rd Party Storage 6", ID_FILE_SAVE_USERSTORAGE6
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 7", ID_FILE_SAVE_USERSTORAGE7
+            MENUITEM "3rd Party Storage 7", ID_FILE_SAVE_USERSTORAGE7
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 8", ID_FILE_SAVE_USERSTORAGE8
+            MENUITEM "3rd Party Storage 8", ID_FILE_SAVE_USERSTORAGE8
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 9", ID_FILE_SAVE_USERSTORAGE9
+            MENUITEM "3rd Party Storage 9", ID_FILE_SAVE_USERSTORAGE9
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 10", 
-                                                    ID_FILE_SAVE_USERSTORAGE10
+            MENUITEM "3rd Party Storage 10", 
+                                            ID_FILE_SAVE_USERSTORAGE10
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 11", 
+            MENUITEM "3rd Party Storage 11", 
                                                     ID_FILE_SAVE_USERSTORAGE11
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 12", 
-                                                    ID_FILE_SAVE_USERSTORAGE12
+            MENUITEM "3rd Party Storage 12", 
+                                            ID_FILE_SAVE_USERSTORAGE12
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 13", 
-                                                    ID_FILE_SAVE_USERSTORAGE13
+            MENUITEM "3rd Party Storage 13", 
+                                            ID_FILE_SAVE_USERSTORAGE13
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 14", 
-                                                    ID_FILE_SAVE_USERSTORAGE14
+            MENUITEM "3rd Party Storage 14", 
+                                            ID_FILE_SAVE_USERSTORAGE14
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 15", 
-                                                    ID_FILE_SAVE_USERSTORAGE15
+            MENUITEM "3rd Party Storage 15", 
+                                            ID_FILE_SAVE_USERSTORAGE15
             , GRAYED
-            MENUITEM "Save to 3rd Party Storage 16", 
+            MENUITEM "3rd Party Storage 16", 
                                                     ID_FILE_SAVE_USERSTORAGE16
             , GRAYED
         END
