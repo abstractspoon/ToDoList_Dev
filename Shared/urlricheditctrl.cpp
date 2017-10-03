@@ -48,7 +48,7 @@ CUrlRichEditCtrl::CUrlRichEditCtrl()
 	AddProtocol(_T("mailto:"), FALSE);
 	AddProtocol(_T("Notes://"), FALSE);
 	AddProtocol(_T("evernote://"), FALSE);
-	AddProtocol(_T("onenote:///"), FALSE);
+	AddProtocol(_T("onenote:"), FALSE);
 	AddProtocol(_T("excel:"), FALSE);
 	AddProtocol(_T("winword:"), FALSE);
 	AddProtocol(_T("thunderlink://"), FALSE);
