@@ -5244,7 +5244,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_UDTPREFS_COPY        "\nMake Copy of Tool"
-    ID_UDTPREFS_DELETE      "\nDeleteTool"
+    ID_UDTPREFS_DELETE      "\nDelete Tool"
 END
 
 #endif    // English (Australia) resources
