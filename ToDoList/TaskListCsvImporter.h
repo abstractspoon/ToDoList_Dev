@@ -42,15 +42,15 @@ protected:
 	bool InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	int GetDepth(const CString& sLine);
 
-	void GetTaskAndParentIDs(const CStringArray& sValues, DWORD& dwTaskID, DWORD& dwParentID) const;
-	CString GetTaskTitle(const CStringArray& sValues) const;
-
-	static CString GetLine(const CStringArray& aLines, int& nLine);
+	void GetTaskAndParentIDs(const CStringArray& aValues, DWORD& dwTaskID, DWORD& dwParentID) const;
+	CString GetTaskTitle(const CStringArray& aValues) const;
+	CString GetValue(const CStringArray& aValues, int nCol) const;
 
 	void AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aValues) const;
 	void AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const;
 	void AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const;
 
+	static CString GetLine(const CStringArray& aLines, int& nLine);
 	static TDC_UNITS GetTimeUnits(const CStringArray& aValues, int nCol);
 	static BOOL GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sID, CString& sLabel);
 

@@ -139,27 +139,28 @@ CString CTaskListCsvImporter::GetLine(const CStringArray& aLines, int& nLine)
     return sLine;
 }
 
-void CTaskListCsvImporter::GetTaskAndParentIDs(const CStringArray& sValues, DWORD& dwTaskID, DWORD& dwParentID) const
+void CTaskListCsvImporter::GetTaskAndParentIDs(const CStringArray& aValues, DWORD& dwTaskID, DWORD& dwParentID) const
 {
 	dwTaskID = dwParentID = 0;
 
 	int nCol = m_aColumnMapping.FindMappedAttribute(TDCA_ID);
-
-	if (nCol != -1)
-		dwTaskID = _ttoi(sValues[nCol]);
+	dwTaskID = _ttoi(GetValue(aValues, nCol));
 
 	nCol = m_aColumnMapping.FindMappedAttribute(TDCA_PARENTID);
-
-	if (nCol != -1)
-		dwParentID = _ttoi(sValues[nCol]);
+	dwParentID = _ttoi(GetValue(aValues, nCol));
 }
 
-CString CTaskListCsvImporter::GetTaskTitle(const CStringArray& sValues) const
+CString CTaskListCsvImporter::GetTaskTitle(const CStringArray& aValues) const
 {
 	int nCol = m_aColumnMapping.FindMappedAttribute(TDCA_TASKNAME);
 
-	if (nCol != -1)
-		return sValues[nCol];
+	return GetValue(aValues, nCol);
+}
+
+CString CTaskListCsvImporter::GetValue(const CStringArray& aValues, int nCol) const
+{
+	if ((nCol >= 0) && (nCol < aValues.GetSize()))
+		return aValues[nCol];
 
 	// else
 	static CString sEmpty;
@@ -292,7 +293,7 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTAS
 		{
 			// The CSV exporter formats multiple items with '+'
 			// so we need to decode this and recode with '\n'
-			const CString& sValue = aValues[nAttrib];
+			const CString& sValue = GetValue(aValues, nAttrib);
 
 			if (sValue.Find('+') != -1)
 			{
