@@ -63,7 +63,6 @@ protected:
 	CMenuIconMgr m_mgrMenuIcons;
 	CharFormat m_cfCopiedFormat;
 	CShortcutManager m_mgrShortcuts;
-	LOGFONT m_lfCurrent;
 	CRTFPreferencesDlg m_dlgPrefs;
 
 	static BOOL s_bInlineSpellChecking;

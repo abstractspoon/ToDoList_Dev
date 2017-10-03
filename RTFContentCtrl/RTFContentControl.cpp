@@ -62,8 +62,6 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	ZeroMemory(&m_lfCurrent, sizeof(LOGFONT));
-
 	// add custom protocol to comments field for linking to task IDs
 	m_rtf.AddProtocol(TDL_LINK, TRUE);
 
@@ -190,12 +188,6 @@ LRESULT CRTFContentControl::OnSetFont(WPARAM wp, LPARAM lp)
 	// to us though this is a bogus change so we prevent a notification
 	// being sent
 	CAutoFlag af(m_bAllowNotify, FALSE);
-
-	// save off font info
-	if (wp)
-		::GetObject((HFONT)wp, sizeof(LOGFONT), &m_lfCurrent);
-	else
-		ZeroMemory(&m_lfCurrent, sizeof(LOGFONT));
 
 	return CRulerRichEditCtrl::OnSetFont(wp, lp);
 }
