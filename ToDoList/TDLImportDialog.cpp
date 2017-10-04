@@ -160,14 +160,18 @@ BOOL CTDLImportDialog::OnInitDialog()
 
 	if (m_bFileOnly)
 	{
+		GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
 		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(FALSE);
 		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(FALSE);
 		GetDlgItem(IDC_FROMCLIPBOARDTEXT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+
+		GetDlgItem(IDC_CREATENEWTASKLIST)->SetFocus();
 	}
 	else
 	{
+		GetDlgItem(IDC_FORMATOPTIONS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
 		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(!m_bFromClipboard && bHasFilter);
 		GetDlgItem(IDC_FROMCLIPBOARD)->EnableWindow(bHasFilter);
@@ -179,6 +183,8 @@ BOOL CTDLImportDialog::OnInitDialog()
 			GetDlgItem(IDC_FROMCLIPBOARDTEXT)->SetFont(&m_fontMonospace, FALSE);
 	
 		OnRefreshclipboard();
+
+		GetDlgItem(IDC_FORMATOPTIONS)->SetFocus();
 	}
 
 	if (m_bReadonlyTasklist)
@@ -199,7 +205,7 @@ BOOL CTDLImportDialog::OnInitDialog()
 	// want. This call gets rid of the icon.
 	ModifyStyleEx(0, WS_EX_DLGMODALFRAME);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
+	return FALSE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
