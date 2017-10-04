@@ -69,7 +69,7 @@ protected:
 	//{{AFX_MSG(CTDLCsvImportExportDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeCsvdelimiter();
-	afx_msg void OnExportTaskids();
+	afx_msg void OnExportTaskIds();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 	virtual void OnOK();

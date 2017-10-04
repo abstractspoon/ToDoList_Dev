@@ -9,6 +9,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\fileregister.h"
+#include "..\shared\dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,7 +91,7 @@ void CTDLCsvImportExportDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLCsvImportExportDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLCsvImportExportDlg)
 	ON_EN_CHANGE(IDC_CSVDELIMITER, OnChangeCsvdelimiter)
-	ON_BN_CLICKED(IDC_EXPORTTASKIDS, OnExportTaskids)
+	ON_BN_CLICKED(IDC_EXPORTTASKIDS, OnExportTaskIds)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -101,16 +102,32 @@ BOOL CTDLCsvImportExportDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	SetWindowText(CEnString(m_bImporting ? IDS_CSV_IMPORTDLG : IDS_CSV_EXPORTDLG));
-
-	GetDlgItem(IDC_EXPORTTASKIDS)->EnableWindow(!m_bImporting);
-	GetDlgItem(IDC_EXPORTTASKIDS)->ShowWindow(m_bImporting ? SW_HIDE : SW_SHOW);
-
 	m_lcColumnSetup.SetFirstColumnStretchy(TRUE);
 
-	if (!m_bImporting)
-		OnExportTaskids();
-	
+	if (m_bImporting)
+	{
+		SetWindowText(CEnString(IDS_CSV_IMPORTDLG));
+
+		GetDlgItem(IDC_EXPORTTASKIDS)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EXPORTTASKIDS)->ShowWindow(SW_HIDE);
+
+		GetDlgItem(IDC_DIVIDER)->EnableWindow(FALSE);
+		GetDlgItem(IDC_DIVIDER)->ShowWindow(SW_HIDE);
+
+		// Resize the list to take up the space
+		CRect rList = CDialogHelper::GetChildRect(&m_lcColumnSetup);
+		CRect rDivider = CDialogHelper::GetCtrlRect(this, IDC_DIVIDER);
+
+		rList.bottom = rDivider.bottom;
+
+		m_lcColumnSetup.MoveWindow(rList);
+	}
+	else
+	{
+		SetWindowText(CEnString(IDS_CSV_EXPORTDLG));
+		OnExportTaskIds();
+	}
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -471,7 +488,7 @@ int CTDLCsvImportExportDlg::FindMasterColumn(LPCTSTR szColumn) const
 	return -1;
 }
 
-void CTDLCsvImportExportDlg::OnExportTaskids() 
+void CTDLCsvImportExportDlg::OnExportTaskIds() 
 {
 	ASSERT(!m_bImporting);
 

@@ -1564,7 +1564,7 @@ BEGIN
     CONTROL         "&Always export task ID and Parent task ID",
                     IDC_EXPORTTASKIDS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,226,174,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,242,386,1
+    CONTROL         "",IDC_DIVIDER,"Static",SS_ETCHEDHORZ,7,242,386,1
 END
 
 IDD_LANGUAGE_DIALOG DIALOG DISCARDABLE  0, 0, 188, 62
