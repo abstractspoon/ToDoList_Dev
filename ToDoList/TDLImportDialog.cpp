@@ -43,7 +43,7 @@ CTDLImportDialog::CTDLImportDialog(const CImportExportMgr& mgr, BOOL bReadonlyTa
 	  m_mgrImportExport(mgr),
 	  m_sizeMin(0, 0),
 	  m_cbFormat(mgr, TRUE),
-	  m_bFixedFile(FALSE),
+	  m_bFileOnly(FALSE),
 	  m_bReadonlyTasklist(bReadonlyTasklist)
 {
 	//{{AFX_DATA_INIT(CTDLImportDialog)
@@ -110,11 +110,11 @@ END_MESSAGE_MAP()
 
 int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
 {
-	m_sFromFilePath = szFilePath;
-	m_bFixedFile = !m_sFromFilePath.IsEmpty();
-
-	if (m_bFixedFile)
+	if (!Misc::IsEmpty(szFilePath))
 	{
+		m_sFromFilePath = szFilePath;
+		m_bFileOnly = TRUE;
+
 		m_nFormatOption = m_mgrImportExport.FindImporter(szFilePath);
 
 		if (m_nFormatOption == -1)
@@ -124,13 +124,17 @@ int CTDLImportDialog::DoModal(LPCTSTR szFilePath)
 		m_sClipboardText.Empty();
 		m_cbFormat.SetFileBasedOnly(TRUE);
 	}
+	else
+	{
+		m_bFileOnly = FALSE;
+	}
 
 	return CTDLDialog::DoModal();
 }
 
 void CTDLImportDialog::OnChangeImportFrom() 
 {
-	ASSERT(!m_bFixedFile);
+	ASSERT(!m_bFileOnly);
 
 	UpdateData();
 
@@ -147,15 +151,14 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	ASSERT(!m_bFixedFile || !m_bFromClipboard);
+	ASSERT(!m_bFileOnly || !m_bFromClipboard);
 
 	BOOL bHasFilter = CurImporterHasFilter();
-	ASSERT(!m_bFixedFile || bHasFilter);
+	ASSERT(!m_bFileOnly || bHasFilter);
 
-	m_cbFormat.EnableWindow(!m_bFixedFile);
 	m_eFilePath.SetFilter(GetCurImporterFilter());
 
-	if (m_bFixedFile)
+	if (m_bFileOnly)
 	{
 		GetDlgItem(IDC_FROMFILE)->EnableWindow(TRUE);
 		GetDlgItem(IDC_FROMFILEPATH)->EnableWindow(FALSE);
@@ -326,7 +329,7 @@ void CTDLImportDialog::OnChangeFilepath()
 
 void CTDLImportDialog::OnRefreshclipboard() 
 {
-	if (!m_bFixedFile)
+	if (!m_bFileOnly)
 	{
 		m_sClipboardText = CClipboard().GetText();
 
