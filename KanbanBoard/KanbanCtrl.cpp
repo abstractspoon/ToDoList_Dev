@@ -2551,10 +2551,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 	if (bDestIsBacklog)
 	{
 		if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-		{
-			ASSERT(pDestList->FindTask(dwTaskID) == -1);
 			pDestList->AddTask(*pKI, TRUE);
-		}
 	}
 	else
 	{
