@@ -242,7 +242,9 @@ BOOL CWndPromptManager::SetPrompt(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg,
 			// empty prompt => remove
 			if (Misc::IsEmpty(szPrompt))
 			{
+				pWnd->Invalidate();
 				pWnd->HookWindow(NULL);
+
 				delete pWnd;
 				m_mapWnds.RemoveKey(hWnd);
 			}

@@ -59,11 +59,17 @@ BOOL CTDLGoToTaskDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_wndPrompts.SetEditPrompt(m_eTaskID, IDS_GOTOTASK_NOSUCHTASK, TRUE);
-	m_wndPrompts.SetEditPrompt(m_eTaskTitle, IDS_GOTOTASK_NOSUCHTASK, TRUE);
+	UpdateEditPrompts();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLGoToTaskDlg::UpdateEditPrompts()
+{
+	// Hide the prompts when the 'other's' text is empty
+	m_wndPrompts.SetEditPrompt(m_eTaskID, (m_sTaskTitle.IsEmpty() ? 0 : IDS_GOTOTASK_NOSUCHTASK), TRUE);
+	m_wndPrompts.SetEditPrompt(m_eTaskTitle, (m_sTaskID.IsEmpty() ? 0 : IDS_GOTOTASK_NOSUCHTASK), TRUE);
 }
 
 void CTDLGoToTaskDlg::OnEditFocusChange() 
@@ -150,6 +156,7 @@ void CTDLGoToTaskDlg::UpdateTaskID()
 	}
 
 	UpdateData(FALSE);
+	UpdateEditPrompts();
 }
 
 void CTDLGoToTaskDlg::UpdateTaskTitle()
@@ -166,5 +173,6 @@ void CTDLGoToTaskDlg::UpdateTaskTitle()
 			m_sTaskTitle.Empty();
 
 		UpdateData(FALSE);
+		UpdateEditPrompts();
 	}
 }

@@ -57,6 +57,7 @@ protected:
 	DWORD FindTask(const CString& sText, CString& sTitle) const;
 	void UpdateTaskID();
 	void UpdateTaskTitle();
+	void UpdateEditPrompts();
 };
 
 //{{AFX_INSERT_LOCATION}}
