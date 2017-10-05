@@ -5188,7 +5188,7 @@ BEGIN
     IDS_SETUP_TITLE         "ToDoList Setup"
     IDS_CAD_FILELINK        "File Link"
     IDS_NOTASKSDEPENDENTONSELECTION "The selected tasks have no dependents."
-    IDS_GOTOTASK_NOSUCHTASK "<no such task>"
+    IDS_GOTOTASK_NOSUCHTASK "Task Not Found"
 END
 
 STRINGTABLE DISCARDABLE 
