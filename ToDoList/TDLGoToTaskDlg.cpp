@@ -67,9 +67,15 @@ BOOL CTDLGoToTaskDlg::OnInitDialog()
 
 void CTDLGoToTaskDlg::UpdateEditPrompts()
 {
+	// One time initialisation
+	static CString sPrompt;
+
+	if (sPrompt.IsEmpty())
+		sPrompt.Format(_T("<%s>"), CEnString(IDS_GOTOTASK_NOSUCHTASK));
+
 	// Hide the prompts when the 'other's' text is empty
-	m_wndPrompts.SetEditPrompt(m_eTaskID, (m_sTaskTitle.IsEmpty() ? 0 : IDS_GOTOTASK_NOSUCHTASK), TRUE);
-	m_wndPrompts.SetEditPrompt(m_eTaskTitle, (m_sTaskID.IsEmpty() ? 0 : IDS_GOTOTASK_NOSUCHTASK), TRUE);
+	m_wndPrompts.SetEditPrompt(m_eTaskID, (m_sTaskTitle.IsEmpty() ? _T("") : sPrompt), TRUE);
+	m_wndPrompts.SetEditPrompt(m_eTaskTitle, (m_sTaskID.IsEmpty() ? _T("") : sPrompt), TRUE);
 }
 
 void CTDLGoToTaskDlg::OnEditFocusChange() 
