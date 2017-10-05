@@ -212,10 +212,20 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 		m_cfDefault = m_pMgrContent->GetContentFormat(0);
 	}
 
-	CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
+	CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("DefaultCustomComments"));
+
+	// Backwards compatibility until 7.2.B1 is released
+	if (sB64CustomComments.IsEmpty())
+		sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
+
 	m_defCustomComments.Base64Decode(sB64CustomComments);
 
-	CString sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
+	CString sB64Comments = pPrefs->GetProfileString(szKey, _T("DefaultComments"));
+
+	// Backwards compatibility until 7.2.B1 is released
+	if (sB64Comments.IsEmpty())
+		sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
+
 	m_sDefTextComments = Base64Coder::Decode(sB64Comments);
 }
 
@@ -251,17 +261,21 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 		Base64Coder b64;
 		CString sEncoded;
 
+		pPrefs->DeleteProfileEntry(szKey, _T("DefaultComments"));
+		pPrefs->DeleteProfileEntry(szKey, _T("DefaultCustomComments"));
+
+		// Backwards compatibility until 7.2.B1 is released
 		pPrefs->DeleteProfileEntry(szKey, _T("Comments"));
 		pPrefs->DeleteProfileEntry(szKey, _T("CustomComments"));
 
 		if (!m_defCustomComments.IsEmpty() && m_defCustomComments.Base64Encode(sEncoded))
 		{
-			pPrefs->WriteProfileString(szKey, _T("CustomComments"), sEncoded);
+			pPrefs->WriteProfileString(szKey, _T("DefaultCustomComments"), sEncoded);
 		}
 
 		if (!m_sDefTextComments.IsEmpty())
 		{
-			pPrefs->WriteProfileString(szKey, _T("Comments"), Base64Coder::Encode(m_sDefTextComments));
+			pPrefs->WriteProfileString(szKey, _T("DefaultComments"), Base64Coder::Encode(m_sDefTextComments));
 		}
 	}
 }
