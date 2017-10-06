@@ -418,6 +418,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 
 int CKanbanCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues)
 {
+	aValues.RemoveAll();
 	int nItem = pTasks->GetTaskAllocatedToCount(hTask);
 	
 	if (nItem > 0)
@@ -438,6 +439,7 @@ int CKanbanCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CS
 
 int CKanbanCtrl::GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues)
 {
+	aValues.RemoveAll();
 	int nItem = pTasks->GetTaskCategoryCount(hTask);
 
 	if (nItem > 0)
@@ -458,6 +460,7 @@ int CKanbanCtrl::GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 int CKanbanCtrl::GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues)
 {
+	aValues.RemoveAll();
 	int nItem = pTasks->GetTaskTagCount(hTask);
 
 	if (nItem > 0)
