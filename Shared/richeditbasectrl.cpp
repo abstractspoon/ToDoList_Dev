@@ -118,6 +118,9 @@ int CRichEditBaseCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	SetOLECallback(&m_callback);
 	EnableInlineSpellChecking(TRUE);
+
+	DWORD dwLangOpt = (SendMessage(EM_GETLANGOPTIONS) & ~IMF_AUTOFONT);
+	SendMessage(EM_SETLANGOPTIONS, 0, dwLangOpt);
 		
 	return 0;
 }
@@ -1224,27 +1227,51 @@ BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 
 	ASSERT(GetSafeHwnd());
 
-	DWORD dwLangOpt = SendMessage(EM_GETLANGOPTIONS);
-	DWORD dwLangFlags = IMF_SPELLCHECKING;
+	EnableLanguageOptions(IMF_SPELLCHECKING, bEnable);
+	EnableEditStyles((SES_USECTF | SES_CTFALLOWEMBED | SES_CTFALLOWSMARTTAG | SES_CTFALLOWPROOFING), bEnable);
 
-	if (Misc::ModifyFlags(dwLangOpt, 
-						(bEnable ? 0 : dwLangFlags),  // remove
-						(bEnable ? dwLangFlags : 0))) // add
-	{
-		SendMessage(EM_SETLANGOPTIONS, 0, dwLangOpt);
-	}
-		
-	DWORD dwEditStyle = SendMessage(EM_GETEDITSTYLE);
-	DWORD dwEditFlags = (SES_USECTF | SES_CTFALLOWEMBED | SES_CTFALLOWSMARTTAG | SES_CTFALLOWPROOFING);
+	return TRUE;
+}
 
-	if (Misc::ModifyFlags(dwLangOpt, 
-						(bEnable ? 0 : dwEditFlags),  // remove
-						(bEnable ? dwEditFlags : 0))) // add
+BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)
+{
+	return EnableLanguageOptions(IMF_AUTOFONT, bEnable);
+}
+
+BOOL CRichEditBaseCtrl::EnableLanguageOptions(DWORD dwOptions, BOOL bEnable)
+{
+	return EnableStateFlags(GetSafeHwnd(), 
+							EM_GETLANGOPTIONS, 
+							EM_SETLANGOPTIONS, 
+							dwOptions, 
+							bEnable);
+}
+
+BOOL CRichEditBaseCtrl::EnableEditStyles(DWORD dwStyles, BOOL bEnable)
+{
+	return EnableStateFlags(GetSafeHwnd(), 
+							EM_GETEDITSTYLE, 
+							EM_SETEDITSTYLE, 
+							dwStyles, 
+							bEnable);
+}
+
+BOOL CRichEditBaseCtrl::EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable)
+{
+	ASSERT(::IsWindow(hWnd));
+	ASSERT(dwFlags);
+
+	DWORD dwCurFlags = ::SendMessage(hWnd, nGetMsg, 0, 0), dwNewFlags(dwCurFlags);
+
+	if (Misc::ModifyFlags(dwNewFlags, 
+						(bEnable ? 0 : dwFlags),  // remove
+						(bEnable ? dwFlags : 0))) // add
 	{
-		SendMessage(EM_SETEDITSTYLE, 0, dwEditStyle);
+		::SendMessage(hWnd, nSetMsg, 0, dwNewFlags);
 	}
 
 	return TRUE;
+
 }
 
 BOOL CRichEditBaseCtrl::IsInlineSpellCheckingEnabled() const
