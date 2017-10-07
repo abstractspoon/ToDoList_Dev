@@ -691,10 +691,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 				
 			case 'x':
 			case 'X':
-				CopySimpleText();
-				
-				if (bEnabled)
-					Clear();
+				CutSimpleText();
 				return TRUE;
 				
 			case 'a':
