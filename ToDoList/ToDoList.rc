@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,998,1
+ FILEVERSION 7,1,998,2
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 998, 1\0"
+            VALUE "FileVersion", "7, 1, 998, 2\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "7.2 Development Preview\0"
+            VALUE "SpecialBuild", "7.2 Alpha Release\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -206,11 +206,11 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,7,22,194,158
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,7,22,194,359
     CONTROL         "Enable support for Right-to-Left (RTL) user input",
                     IDC_ENABLERTLINPUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     18,40,369,10
@@ -1990,10 +1990,10 @@ BEGIN
     PUSHBUTTON      "&Refresh",2007,343,7,50,14
 END
 
-IDD_GOTOTASK_DIALOG DIALOG DISCARDABLE  0, 0, 174, 104
+IDD_GOTOTASK_DIALOG DIALOG DISCARDABLE  0, 0, 174, 102
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Go To Task"
-FONT 8, "MS Sans Serif"
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Task I&D",IDC_STATIC,7,7,159,8
     EDITTEXT        IDC_TASKID,7,17,160,14,ES_AUTOHSCROLL
@@ -4036,7 +4036,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 167
         TOPMARGIN, 7
-        BOTTOMMARGIN, 97
+        BOTTOMMARGIN, 95
     END
 END
 #endif    // APSTUDIO_INVOKED
