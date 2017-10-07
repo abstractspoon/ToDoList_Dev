@@ -3546,7 +3546,7 @@ BOOL CTaskFile::SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc)
 		return SetTaskUChar(hTask, TDL_TASKCALCLOCK, (unsigned char)(bLock ? 1 : 0));
 
 	// else
-	return SetTaskUChar(hTask, TDL_TASKCALCFLAG, (unsigned char)(bLock ? 1 : 0));
+	return SetTaskUChar(hTask, TDL_TASKLOCK, (unsigned char)(bLock ? 1 : 0));
 }
 
 BOOL CTaskFile::SetTaskHighestPriority(HTASKITEM hTask, int nPriority)

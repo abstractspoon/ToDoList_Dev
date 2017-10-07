@@ -4564,6 +4564,7 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	case TDCA_COST:
 	case TDCA_FILEREF:
 	case TDCA_POSITION:
+	case TDCA_LOCK:			
 		{
 			ASSERT(nModCol != TDCC_NONE);
 
