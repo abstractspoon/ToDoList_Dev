@@ -118,9 +118,7 @@ int CRichEditBaseCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	SetOLECallback(&m_callback);
 	EnableInlineSpellChecking(TRUE);
-
-	DWORD dwLangOpt = (SendMessage(EM_GETLANGOPTIONS) & ~IMF_AUTOFONT);
-	SendMessage(EM_SETLANGOPTIONS, 0, dwLangOpt);
+	EnableAutoFontChanging(FALSE);
 		
 	return 0;
 }
