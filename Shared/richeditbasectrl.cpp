@@ -202,9 +202,29 @@ BOOL CRichEditBaseCtrl::CopySimpleText()
 	return CClipboard(*this).SetText(sSelText);
 }
 
+BOOL CRichEditBaseCtrl::CutSimpleText()
+{
+	// Allow copying even if we cannot edit
+	if (!CopySimpleText() || !CanEdit())
+		return FALSE;
+
+	Clear();
+	return TRUE;
+}
+
 BOOL CRichEditBaseCtrl::CanPasteSimpleText() const
 {
-	return CClipboard().HasText();
+	return (CanEdit() && CClipboard().HasText());
+}
+
+BOOL CRichEditBaseCtrl::CanCopySelectedText() const
+{
+	return HasSelection();
+}
+
+BOOL CRichEditBaseCtrl::CanCutSelectedText() const
+{
+	return (CanEdit() && HasSelection());
 }
 
 BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCodePage)
@@ -242,7 +262,7 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	return bResult;
 }
 
-CString CRichEditBaseCtrl::GetSelText()
+CString CRichEditBaseCtrl::GetSelText() const
 {
 	CHARRANGE cr;
 	GetSel(cr);
@@ -250,7 +270,7 @@ CString CRichEditBaseCtrl::GetSelText()
 	return GetTextRange(cr);
 }
 
-CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr)
+CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 {
 	int nLength = int(cr.cpMax - cr.cpMin + 1);
 
@@ -267,7 +287,7 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr)
 		TEXTRANGEW tr;
 		tr.chrg = cr;
 		tr.lpstrText = lpszWChar;
-		SendMessage(EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
 		// Convert the Unicode text to ANSI.
 		WideCharToMultiByte(CP_ACP, 0, lpszWChar, -1, szChar, nLength, NULL, NULL);
@@ -279,7 +299,7 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr)
 		TEXTRANGE tr;
 		tr.chrg = cr;
 		tr.lpstrText = szChar;
-		SendMessage(EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 	}
 #else
 	if (CWinClasses::IsClass(*this, WC_RICHEDIT50)) 
@@ -287,7 +307,7 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr)
 		TEXTRANGE tr;
 		tr.chrg = cr;
 		tr.lpstrText = szChar;
-		SendMessage(EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 	}
 	else // must handle ansi
 	{
@@ -297,7 +317,7 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr)
 		TEXTRANGEA tr;
 		tr.chrg = cr;
 		tr.lpstrText = lpszChar;
-		SendMessage(EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
 		// Convert the Ansi text to Unicode.
 		MultiByteToWideChar(CP_ACP, 0, lpszChar, -1, szChar, nLength);
@@ -607,7 +627,9 @@ void CRichEditBaseCtrl::DoEditFind(UINT nIDTitle)
 void CRichEditBaseCtrl::DoEditReplace(UINT nIDTitle)
 {
 	ASSERT_VALID(this);
-	DoEditFindReplace(FALSE, nIDTitle);
+
+	if (CanEdit())
+		DoEditFindReplace(FALSE, nIDTitle);
 }
 
 void CRichEditBaseCtrl::AdjustDialogPosition(CDialog* pDlg)

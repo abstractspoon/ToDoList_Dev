@@ -88,8 +88,8 @@ public:
 	BOOL Undo();
 	BOOL Redo();
 
-	CString GetTextRange(const CHARRANGE& cr);
-	CString GetSelText();
+	CString GetTextRange(const CHARRANGE& cr) const;
+	CString GetSelText() const;
 	BOOL SetTextEx(const CString& sText, DWORD dwFlags = ST_KEEPUNDO | ST_SELECTION, UINT nCodePage = CP_ACP); 
 
 	void EnableSelectOnFocus(BOOL bEnable) { m_bEnableSelectOnFocus = bEnable; }
@@ -100,6 +100,9 @@ public:
 	BOOL PasteSimpleText();
 	BOOL CanPasteSimpleText() const;
 	BOOL CopySimpleText();
+	BOOL CanCopySelectedText() const;
+	BOOL CutSimpleText();
+	BOOL CanCutSelectedText() const;
 
 	void GetMargins(CRect& rMargins) const { rMargins = m_rMargins; }
 	void SetMargins(LPCRECT pMargins);

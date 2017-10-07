@@ -283,19 +283,22 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 	switch (nCmdID)
 	{
 	case ID_COMMENTS_UNDO:
-		CTextDocument(GetSafeHwnd()).Undo();
+		if (CanEdit())
+			CTextDocument(GetSafeHwnd()).Undo();
 		break;
 
 	case ID_COMMENTS_REDO:
-		CTextDocument(GetSafeHwnd()).Redo();
+		if (CanEdit())
+			CTextDocument(GetSafeHwnd()).Redo();
 		break;
 
 	case ID_COMMENTS_CUT:
-		Cut();
+		CutSimpleText();
 		break;
 
 	case ID_COMMENTS_DELETE:
-		ReplaceSel(_T(""));
+		if (CanEdit())
+			ReplaceSel(_T(""));
 		break;
 
 	case ID_COMMENTS_FIND:
@@ -315,6 +318,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 		break;
 		
 	case ID_COMMENTS_PASTEASREF:
+		if (CanEdit())
 		{
 			// try to get the clipboard for any tasklist
 			ITaskList* pClipboard = (ITaskList*)GetParent()->SendMessage(WM_ICC_GETCLIPBOARD, 0, FALSE);
@@ -378,6 +382,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 		break;
 		
 	case ID_COMMENTS_FILEBROWSE:
+		if (CanEdit())
 		{
 			CString sFile;
 			
@@ -408,7 +413,8 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 		break;
 		
 	case ID_COMMENTS_SPELLCHECK:
-		GetParent()->PostMessage(WM_ICC_WANTSPELLCHECK);
+		if (CanEdit())
+			GetParent()->PostMessage(WM_ICC_WANTSPELLCHECK);
 		break;
 
 	case ID_COMMENTS_WORDWRAP:
@@ -435,43 +441,42 @@ void CTDLSimpleTextContentCtrl::SetWordWrap(BOOL bWrap)
 
 void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 {
-	BOOL bReadOnly = (GetStyle() & ES_READONLY) || !IsWindowEnabled();
-	
 	switch (pCmdUI->m_nID)
 	{
 	case ID_COMMENTS_UNDO:
-		pCmdUI->Enable(CanUndo());
+		pCmdUI->Enable(CanEdit() && CanUndo());
 		break;
 					
 	case ID_COMMENTS_REDO:
-		pCmdUI->Enable(SendMessage(EM_CANREDO));
+		pCmdUI->Enable(CanEdit() && SendMessage(EM_CANREDO));
 		break;
 					
 	case ID_COMMENTS_CUT:
-		if (!bReadOnly)
-		{
-			CHARRANGE crSel;
-			GetSel(crSel);
-			pCmdUI->Enable(crSel.cpMin != crSel.cpMax);
-		}
-		else
-			pCmdUI->Enable(FALSE);
+		pCmdUI->Enable(CanCutSelectedText());
 		break;
 		
 	case ID_COMMENTS_COPY:
-		{
-			CHARRANGE crSel;
-			GetSel(crSel);
-			pCmdUI->Enable(crSel.cpMin != crSel.cpMax);
-		}
+		pCmdUI->Enable(CanCopySelectedText());
 		break;
 		
 	case ID_COMMENTS_PASTE:
-		pCmdUI->Enable(!bReadOnly && CanPaste());
+		pCmdUI->Enable(CanPaste());
+		break;
+		
+	case ID_COMMENTS_DELETE:
+		pCmdUI->Enable(CanEdit());
 		break;
 		
 	case ID_COMMENTS_PASTEASREF:
-		pCmdUI->Enable(!bReadOnly && !IsTDLClipboardEmpty());
+		pCmdUI->Enable(CanEdit() && !IsTDLClipboardEmpty());
+		break;
+
+	case ID_COMMENTS_FIND:
+		pCmdUI->Enable(TRUE);
+		break;
+		
+	case ID_COMMENTS_FINDREPLACE:
+		pCmdUI->Enable(CanEdit());
 		break;
 		
 	case ID_COMMENTS_SELECTALL:
@@ -479,7 +484,7 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_COMMENTS_SPELLCHECK:
-		pCmdUI->Enable(GetTextLength() && !bReadOnly);
+		pCmdUI->Enable(GetTextLength() && CanEdit());
 		break;
 		
 	case ID_COMMENTS_OPENURL:
@@ -505,7 +510,7 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_COMMENTS_FILEBROWSE:
-		pCmdUI->Enable(!bReadOnly);
+		pCmdUI->Enable(CanEdit());
 		break;
 		
 	case ID_COMMENTS_WORDWRAP:
@@ -534,6 +539,9 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 
 BOOL CTDLSimpleTextContentCtrl::Paste()
 {
+	if (!CanEdit())
+		return FALSE;
+	
 	CStringArray aFiles;
 	int nNumFiles = CClipboard().GetDropFilePaths(aFiles);
 
@@ -553,6 +561,9 @@ BOOL CTDLSimpleTextContentCtrl::Paste()
 
 BOOL CTDLSimpleTextContentCtrl::CanPaste()
 {
+	if (!CanEdit())
+		return FALSE;
+
 	// for reasons that I'm not entirely clear on even if we 
 	// return that CF_HDROP is okay, the richedit itself will
 	// veto the drop. So I'm experimenting with handling this ourselves
