@@ -140,18 +140,17 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
+void CKanbanCtrl::FilterTooltipMessage(MSG* pMsg) 
 {
 	// List tooltips
-	if (CToolTipCtrlEx::WantMessage(pMsg))
-	{
-		CKanbanListCtrl* pList = HitTestListCtrl(pMsg->pt);
+	CKanbanListCtrl* pList = HitTestListCtrl(pMsg->pt);
 
-		if (pList)
-			pList->FilterToolTipMessage(pMsg);
-	}
+	if (pList)
+		pList->FilterToolTipMessage(pMsg);
+}
 
-	// Our processing
+bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
+{
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:

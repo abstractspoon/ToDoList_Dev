@@ -276,6 +276,8 @@ public:
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
+	virtual void FilterTooltipMessage(MSG* pMsg) = 0;
+
 	virtual bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra = 0) = 0;
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra = 0) const = 0;
 

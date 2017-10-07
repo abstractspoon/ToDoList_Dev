@@ -365,6 +365,11 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 	}
 }
 
+void CGanttChartWnd::FilterTooltipMessage(MSG* pMsg) 
+{
+	m_tree.ProcessMessage(pMsg);
+}
+
 bool CGanttChartWnd::ProcessMessage(MSG* pMsg) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -372,8 +377,6 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 	if (!IsWindowEnabled())
 		return false;
 
-	m_tree.ProcessMessage(pMsg);
-	
 	switch (pMsg->message)
 	{
 	// handle 'escape' during dependency editing

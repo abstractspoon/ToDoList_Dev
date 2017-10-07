@@ -40,6 +40,7 @@ public:
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	void Release();
 	bool ProcessMessage(MSG* pMsg);
+	void FilterTooltipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
 	bool Undo();
 	bool Redo();

@@ -248,7 +248,12 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd);
 
-			if (pExtWnd->ProcessMessage(pMsg))
+			if (CToolTipCtrlEx::WantMessage(pMsg))
+				pExtWnd->FilterTooltipMessage(pMsg);
+
+			BOOL bHasFocus = CDialogHelper::IsChildOrSame(pExtWnd->GetHwnd(), ::GetFocus());
+
+			if (bHasFocus && pExtWnd->ProcessMessage(pMsg))
 				return TRUE;
 		}
 		break;

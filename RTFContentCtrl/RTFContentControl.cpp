@@ -541,12 +541,15 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CRTFContentControl::FilterTooltipMessage(MSG* pMsg)
+{
+	m_rtf.FilterToolTipMessage(pMsg);
+}
+
 bool CRTFContentControl::ProcessMessage(MSG* pMsg) 
 {
 	if (!IsWindowEnabled())
 		return false;
-
-	m_rtf.FilterToolTipMessage(pMsg);
 
 	// process editing shortcuts
 	if (m_mgrShortcuts.ProcessMessage(pMsg))

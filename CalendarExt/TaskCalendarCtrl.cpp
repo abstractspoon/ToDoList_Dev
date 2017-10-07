@@ -2203,11 +2203,14 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-bool CTaskCalendarCtrl::ProcessMessage(MSG* pMsg) 
+bool CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
+{
+	return false;
+}
+
+void CTaskCalendarCtrl::FilterTooltipMessage(MSG* pMsg) 
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
-
-	return false;
 }
 
 int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

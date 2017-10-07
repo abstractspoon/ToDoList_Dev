@@ -92,11 +92,14 @@ int CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CTreeCtrl::OnToolHitTest(point, pTI);
 }
 
-bool CGanttTreeCtrl::ProcessMessage(MSG* pMsg) 
+bool CGanttTreeCtrl::ProcessMessage(MSG* /*pMsg*/) 
+{
+	return false;
+}
+
+void CGanttTreeCtrl::FilterTooltipMessage(MSG* pMsg) 
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
-
-	return false;
 }
 
 void CGanttTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)

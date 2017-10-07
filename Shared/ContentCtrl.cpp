@@ -9,6 +9,7 @@
 #include "binarydata.h"
 #include "uithemefile.h"
 #include "tooltipctrlex.h"
+#include "dialoghelper.h"
 
 #include "..\Interfaces\IContentControl.h"
 #include "..\Interfaces\ISpellCheck.h"
@@ -60,19 +61,18 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 {
 	if (m_pContentCtrl)
 	{
+		// Always allow tooltip handling thru
+		m_pContentCtrl->FilterTooltipMessage(pMsg);
+
 		// only process if we have the focus
 		if (HasFocus())
 		{
 			// don't forward tab messages if screen reader is active
-			BOOL vTabAndScreenReader = ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_TAB) && Misc::IsScreenReaderActive());
+			BOOL bTabAndScreenReader = ((pMsg->message == WM_KEYDOWN) && (pMsg->wParam == VK_TAB) && Misc::IsScreenReaderActive());
 			
-			if (!vTabAndScreenReader)
+			if (!bTabAndScreenReader)
 				return m_pContentCtrl->ProcessMessage(pMsg);
 		}
-
-		// allow tooltip handling thru
-		if (CToolTipCtrlEx::WantMessage(pMsg))
-			m_pContentCtrl->ProcessMessage(pMsg);
 	}
 
 	return FALSE;
@@ -135,12 +135,7 @@ void CContentCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 BOOL CContentCtrl::HasFocus() const
 {
 	if (m_pContentCtrl)
-	{
-		HWND hFocus = ::GetFocus();
-		HWND hThis = GetSafeHwnd();
-
-		return (hFocus == hThis) || ::IsChild(hThis, hFocus);
-	}
+		return CDialogHelper::IsChildOrSame(GetSafeHwnd(), ::GetFocus());
 
 	// else
 	return FALSE;

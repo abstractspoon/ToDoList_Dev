@@ -53,6 +53,7 @@ public:
 	BOOL CanSaveToImage() const;
 
 	bool ProcessMessage(MSG* pMsg);
+	void FilterTooltipMessage(MSG* pMsg);
 
  	void Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending = -1);
  	BOOL IsSorted() const;
