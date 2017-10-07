@@ -190,6 +190,20 @@ BOOL CRichEditBaseCtrl::PasteSimpleText()
 	return TRUE;
 }
 
+BOOL CRichEditBaseCtrl::CopySimpleText()
+{
+	CString sSelText(GetSelText());
+
+	if (sSelText.IsEmpty())
+		return FALSE;
+	
+	// Replace 'CR' with 'CRLF"
+	if ((sSelText.Find('\r') != -1) && (sSelText.Find('\n') == -1))
+		sSelText.Replace(_T("\r"), _T("\r\n"));
+	
+	return CClipboard(*this).SetText(sSelText);
+}
+
 BOOL CRichEditBaseCtrl::CanPasteSimpleText() const
 {
 	return CClipboard().HasText();

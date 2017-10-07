@@ -99,6 +99,7 @@ public:
 	BOOL PasteSpecial(CLIPFORMAT nFormat); // EM_PASTESPECIAL
 	BOOL PasteSimpleText();
 	BOOL CanPasteSimpleText() const;
+	BOOL CopySimpleText();
 
 	void GetMargins(CRect& rMargins) const { rMargins = m_rMargins; }
 	void SetMargins(LPCRECT pMargins);

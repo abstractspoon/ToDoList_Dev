@@ -307,10 +307,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 		break;
 		
 	case ID_COMMENTS_COPY:
-		{
-			// copy text ourselves to prevent font attributes being copied as well
-			CClipboard(*this).SetText(GetSelText());
-		}
+		CopySimpleText();
 		break;
 		
 	case ID_COMMENTS_PASTE:
@@ -673,7 +670,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 			{
 			case 'c': 
 			case 'C':
-				Copy();
+				CopySimpleText();
 				return TRUE;
 				
 			case 'v':
@@ -683,10 +680,10 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 				
 			case 'x':
 			case 'X':
-				Copy();
+				CopySimpleText();
 				
 				if (bEnabled)
-				Clear();
+					Clear();
 				return TRUE;
 				
 			case 'a':
