@@ -121,8 +121,6 @@ public:
 	BOOL CopyToClipboardAsHtml();
 	BOOL Cut();
 
-	void FilterToolTipMessage(MSG* pMsg);
-
 	static void SetPasteSourceUrls(BOOL bPasteUrls) { s_bPasteSourceUrls = bPasteUrls; }
 	static void SetConvertWithMSWord(BOOL bUseMSWord) { s_bConvertWithMSWord = bUseMSWord; }
 	static BOOL GetConvertWithMSWord() { return s_bConvertWithMSWord; }
