@@ -63,6 +63,7 @@ public:
 
    void Release();
    bool ProcessMessage(MSG* pMsg);
+   void FilterTooltipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
 
    ISpellCheck* GetSpellCheckInterface();
 
