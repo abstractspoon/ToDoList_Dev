@@ -8,6 +8,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+// For MFC non-extension Dlls using FilterToolTipMessage
+const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")); // WPARAM = Point, LPARAM = LPTOOLINFO
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CToolTipCtrlEx : public CToolTipCtrl
 {
 	DECLARE_DYNAMIC(CToolTipCtrlEx)
@@ -34,6 +39,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
+	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti);
+	static BOOL IsTopParentActive(CWnd* pOwner);
+	static HWND GetParentOwner(HWND hWnd);
+
 };
 
 #endif // AFX_TOOLTIPCTRLEX_H__09FB7C3D_BBA8_43B3_A7B3_1D95C946892B__INCLUDED_

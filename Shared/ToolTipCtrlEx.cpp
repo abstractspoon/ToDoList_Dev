@@ -105,7 +105,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		TOOLINFO tiHit;
 		InitToolInfo(tiHit, TRUE);
 
-		int nHit = pOwner->OnToolHitTest(point, &tiHit);
+		int nHit = DoToolHitTest(pOwner, point, tiHit);
 		
 		if (m_nLastHit != nHit)
 		{
@@ -130,7 +130,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 
 				VERIFY(SendMessage(TTM_ADDTOOL, 0, (LPARAM)&ti));
 
-				if ((tiHit.uFlags & TTF_ALWAYSTIP) || IsTopParentActive())
+				if ((tiHit.uFlags & TTF_ALWAYSTIP) || IsTopParentActive(pOwner))
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
@@ -200,6 +200,43 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 			Activate(FALSE);
 		}
 	}
+}
+
+int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
+{
+	ASSERT(pOwner);
+
+	if (CWnd::FromHandlePermanent(*pOwner) != NULL)
+		return pOwner->OnToolHitTest(point, &ti);
+
+	// Send message
+	return pOwner->SendMessage(WM_TTC_TOOLHITTEST, MAKEWPARAM(point.x, point.y), (LPARAM)&ti);
+}
+
+BOOL CToolTipCtrlEx::IsTopParentActive(CWnd* pOwner)
+{
+	ASSERT(pOwner);
+	
+	if (CWnd::FromHandlePermanent(*pOwner) != NULL)
+		return pOwner->IsTopParentActive();
+	
+	// From CWnd::GetTopLevelParent
+	HWND hWndParent = *pOwner;
+	HWND hWndT;
+	while ((hWndT = GetParentOwner(hWndParent)) != NULL)
+		hWndParent = hWndT;
+
+	return (::GetForegroundWindow() == ::GetLastActivePopup(hWndParent));
+}
+
+HWND CToolTipCtrlEx::GetParentOwner(HWND hWnd)
+{
+	// From AfxGetParentOwner
+	if (::GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD)
+		return ::GetParent(hWnd);
+	
+	// else
+	return ::GetWindow(hWnd, GW_OWNER);
 }
 
 BOOL CToolTipCtrlEx::WantMessage(const MSG* pMsg)
