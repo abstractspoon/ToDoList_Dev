@@ -500,6 +500,11 @@ bool CBurndownWnd::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
+void CBurndownWnd::FilterToolTipMessage(MSG* /*pMsg*/)
+{
+	// Not yet needed
+}
+
 bool CBurndownWnd::GetLabelEditRect(LPRECT /*pEdit*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());

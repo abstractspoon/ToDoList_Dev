@@ -372,8 +372,6 @@ void CGanttChartWnd::FilterToolTipMessage(MSG* pMsg)
 
 bool CGanttChartWnd::ProcessMessage(MSG* pMsg) 
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	if (!IsWindowEnabled())
 		return false;
 
@@ -382,6 +380,8 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 	// handle 'escape' during dependency editing
 	case WM_KEYDOWN:
 		{
+			AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 			switch (pMsg->wParam)
 			{
 			case VK_ESCAPE:
