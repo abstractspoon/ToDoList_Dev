@@ -133,7 +133,7 @@ public:
 	CPoint GetCaretPos() const;
 
 	BOOL EnableToolTips(BOOL bEnable = TRUE);
-	void FilterToolTipMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg); // for MFC non-extension Dlls
 
 	// Windows 8.1 and up only
 	BOOL EnableAutoFontChanging(BOOL bEnable = TRUE);
