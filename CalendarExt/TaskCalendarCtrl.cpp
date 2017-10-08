@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrl)
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 
 END_MESSAGE_MAP()
 
@@ -112,6 +113,7 @@ LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 
 	// Recalc the task height
 	m_nTaskHeight = (GraphicsMisc::GetFontPixelSize((HFONT)wp) + 6);
+
 	SetHeaderHeight(m_nTaskHeight + 2);
 	SetDayHeaderHeight(m_nTaskHeight);
 
@@ -2213,8 +2215,11 @@ void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg)
 	m_tooltip.FilterToolTipMessage(pMsg);
 }
 
-int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+LRESULT CTaskCalendarCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 {
+	CPoint point(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+	
 	// perform a hit-test
 	DWORD dwTaskID = HitTest(point);
 

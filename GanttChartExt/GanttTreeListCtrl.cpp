@@ -6634,3 +6634,10 @@ BOOL CGanttTreeListCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 
 	return TRUE;
 }
+
+void CGanttTreeListCtrl::FilterToolTipMessage(MSG* pMsg)
+{
+	m_tree.FilterToolTipMessage(pMsg);
+	m_treeHeader.FilterToolTipMessage(pMsg);
+	m_listHeader.FilterToolTipMessage(pMsg);
+}

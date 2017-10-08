@@ -122,9 +122,6 @@ protected:
 public:
 	virtual ~CKanbanListCtrl();
 
-protected:
-	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
-
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CKanbanListCtrl)
@@ -142,6 +139,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 

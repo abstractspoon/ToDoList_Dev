@@ -357,11 +357,9 @@ void CKanbanWnd::SetUITheme(const UITHEME* pTheme)
 
 bool CKanbanWnd::ProcessMessage(MSG* pMsg) 
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	if (IsWindowEnabled())
 	{
-		m_tooltips.RelayEvent(pMsg);
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 		
 		if (m_ctrlKanban.ProcessMessage(pMsg))
 			return true;
@@ -369,6 +367,15 @@ bool CKanbanWnd::ProcessMessage(MSG* pMsg)
 
 	// all else
 	return false;
+}
+
+void CKanbanWnd::FilterToolTipMessage(MSG* pMsg)
+{
+	// Our tooltips
+	m_tooltips.RelayEvent(pMsg);
+
+	// CKanbanCtrl tooltips
+	m_ctrlKanban.FilterToolTipMessage(pMsg);
 }
 
 bool CKanbanWnd::PrepareNewTask(ITaskList* pTask) const

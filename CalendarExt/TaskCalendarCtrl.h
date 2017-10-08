@@ -114,6 +114,7 @@ protected:
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 
 #if _MSC_VER >= 1400
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -127,8 +128,6 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTaskCalendarCtrl)
 	//}}AFX_VIRTUAL
-	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
-
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawGrid(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);

@@ -740,6 +740,7 @@ BEGIN_MESSAGE_MAP(CKanbanListCtrl, CListCtrl)
 	ON_WM_SIZE()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2045,8 +2046,11 @@ BOOL CKanbanListCtrl::InitTooltip()
 	return TRUE;
 }
 
-int CKanbanListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+LRESULT CKanbanListCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 {
+	CPoint point(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+	
 	int nItem = HitTest(point);
 
 	if (nItem != -1)

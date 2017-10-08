@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CGanttTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_REGISTERED_MESSAGE(WM_GTCN_TITLECOLUMNWIDTHCHANGE, OnTitleColumnWidthChange)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
@@ -66,8 +67,11 @@ int CGanttTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-int CGanttTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+LRESULT CGanttTreeCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 {
+	CPoint point(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+	
 	UINT nFlags = 0;
 	HTREEITEM hti = HitTest(point, &nFlags);
 
