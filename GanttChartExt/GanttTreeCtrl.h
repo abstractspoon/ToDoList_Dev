@@ -22,7 +22,7 @@ public:
 	const CFontCache& Fonts() const { return m_fonts; }
 	
 	bool ProcessMessage(MSG* pMsg);
-	void FilterTooltipMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg);
 
 	void ShowCheckboxes(BOOL bShow = TRUE);
 

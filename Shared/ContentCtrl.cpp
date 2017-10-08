@@ -62,7 +62,7 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 	if (m_pContentCtrl)
 	{
 		// Always allow tooltip handling thru
-		m_pContentCtrl->FilterTooltipMessage(pMsg);
+		m_pContentCtrl->FilterToolTipMessage(pMsg);
 
 		// only process if we have the focus
 		if (HasFocus())

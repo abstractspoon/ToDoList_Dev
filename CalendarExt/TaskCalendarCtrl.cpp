@@ -2208,7 +2208,7 @@ bool CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
-void CTaskCalendarCtrl::FilterTooltipMessage(MSG* pMsg) 
+void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
 }

@@ -65,7 +65,7 @@ public:
 	LPCTSTR GetTypeID() const { return _T("PLAIN_TEXT"); }
 	void Release() { DestroyWindow(); delete this; }
 	bool ProcessMessage(MSG* pMsg);
-	void FilterTooltipMessage(MSG* /*pMsg*/) {}
+	void FilterToolTipMessage(MSG* /*pMsg*/) {}
 	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
 	bool Undo() { return CUrlRichEditCtrl::Undo() != 0; }
 	bool Redo() { return CUrlRichEditCtrl::Redo() != 0; }

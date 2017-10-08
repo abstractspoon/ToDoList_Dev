@@ -140,7 +140,7 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CKanbanCtrl::FilterTooltipMessage(MSG* pMsg) 
+void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	// List tooltips
 	CKanbanListCtrl* pList = HitTestListCtrl(pMsg->pt);

@@ -160,7 +160,7 @@ public:
 
 	virtual void Release() = 0;
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
-	virtual void FilterTooltipMessage(MSG* pMsg) = 0;
+	virtual void FilterToolTipMessage(MSG* pMsg) = 0;
 
 	virtual ISpellCheck* GetSpellCheckInterface() = 0;
 	

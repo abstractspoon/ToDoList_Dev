@@ -543,7 +543,7 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CRTFContentControl::FilterTooltipMessage(MSG* pMsg)
+void CRTFContentControl::FilterToolTipMessage(MSG* pMsg)
 {
 	m_rtf.FilterToolTipMessage(pMsg);
 }

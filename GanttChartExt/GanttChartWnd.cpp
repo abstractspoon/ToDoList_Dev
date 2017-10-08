@@ -365,7 +365,7 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 	}
 }
 
-void CGanttChartWnd::FilterTooltipMessage(MSG* pMsg) 
+void CGanttChartWnd::FilterToolTipMessage(MSG* pMsg) 
 {
 	m_tree.ProcessMessage(pMsg);
 }

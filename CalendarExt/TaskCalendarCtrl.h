@@ -63,7 +63,7 @@ public:
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
 	bool ProcessMessage(MSG* pMsg);
-	void FilterTooltipMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg);
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nEditAttribute);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nEditAttribute);

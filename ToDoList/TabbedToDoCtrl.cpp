@@ -249,7 +249,7 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 			ASSERT(pExtWnd);
 
 			if (CToolTipCtrlEx::WantMessage(pMsg))
-				pExtWnd->FilterTooltipMessage(pMsg);
+				pExtWnd->FilterToolTipMessage(pMsg);
 
 			BOOL bHasFocus = CDialogHelper::IsChildOrSame(pExtWnd->GetHwnd(), ::GetFocus());
 

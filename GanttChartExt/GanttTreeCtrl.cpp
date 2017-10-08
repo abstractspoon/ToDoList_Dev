@@ -97,7 +97,7 @@ bool CGanttTreeCtrl::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
-void CGanttTreeCtrl::FilterTooltipMessage(MSG* pMsg) 
+void CGanttTreeCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
 }

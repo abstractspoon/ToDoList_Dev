@@ -296,9 +296,9 @@ LPCTSTR CCalendarWnd::GetMenuText() const
 	return _T("Calendar");
 }
 
-void CCalendarWnd::FilterTooltipMessage(MSG* pMsg)
+void CCalendarWnd::FilterToolTipMessage(MSG* pMsg)
 {
-	m_BigCalendar.FilterTooltipMessage(pMsg);
+	m_BigCalendar.FilterToolTipMessage(pMsg);
 }
 
 bool CCalendarWnd::ProcessMessage(MSG* pMsg) 
