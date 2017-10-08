@@ -48,6 +48,9 @@ BEGIN_MESSAGE_MAP(CEnHeaderCtrl, CHeaderCtrl)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 	ON_MESSAGE(HDM_INSERTITEM, OnInsertItem)
 	ON_MESSAGE(HDM_DELETEITEM, OnDeleteItem)
+
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -874,10 +877,46 @@ void CEnHeaderCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 
 BOOL CEnHeaderCtrl::PreTranslateMessage(MSG* pMsg)
 {
+	FilterToolTipMessage(pMsg);
+	
+	return CHeaderCtrl::PreTranslateMessage(pMsg);
+}
+
+void CEnHeaderCtrl::FilterToolTipMessage(MSG* pMsg)
+{
 	if (m_tooltips.GetSafeHwnd())
 		m_tooltips.FilterToolTipMessage(pMsg);
+}
 
-	return CHeaderCtrl::PreTranslateMessage(pMsg);
+LRESULT CEnHeaderCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
+{
+	CPoint pt(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+	
+	return OnToolHitTest(pt, pTI);
+}
+
+int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	int nItem = HitTest(point);
+	
+	if ((nItem != -1) && IsItemVisible(nItem))
+	{
+#ifdef _DEBUG
+		if (m_tooltips.GetLastHitToolInfo().uId != (UINT)nItem)
+			TRACE(_T("CEnHeaderCtrl::OnToolHitTest(%d, %s)\n"), nItem, GetItemToolTip(nItem));
+#endif
+
+		pTI->hwnd = GetSafeHwnd();
+		pTI->uId = nItem;
+		pTI->lpszText = _tcsdup(GetItemToolTip(nItem)); // MFC will free the duplicated string
+
+		GetItemRect(nItem, &pTI->rect);
+
+		return nItem;
+	}
+
+	return -1;
 }
 
 BOOL CEnHeaderCtrl::EnableToolTips(BOOL bEnable)
@@ -950,27 +989,4 @@ BOOL CEnHeaderCtrl::ModifyItemFormat(int nItem, int nRemove, int nAdd)
 	nFormat |= nAdd;
 
 	return SetItemFormat(nItem, nFormat);
-}
-
-int CEnHeaderCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
-{
-	int nItem = HitTest(point);
-	
-	if ((nItem != -1) && IsItemVisible(nItem))
-	{
-#ifdef _DEBUG
-		if (m_tooltips.GetLastHitToolInfo().uId != (UINT)nItem)
-			TRACE(_T("CEnHeaderCtrl::OnToolHitTest(%d, %s)\n"), nItem, GetItemToolTip(nItem));
-#endif
-
-		pTI->hwnd = GetSafeHwnd();
-		pTI->uId = nItem;
-		pTI->lpszText = _tcsdup(GetItemToolTip(nItem)); // MFC will free the duplicated string
-
-		GetItemRect(nItem, &pTI->rect);
-
-		return nItem;
-	}
-
-	return -1;
 }

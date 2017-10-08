@@ -104,6 +104,7 @@ public:
 	BOOL EnableToolTips(BOOL bEnable = TRUE);
 	BOOL SetItemToolTip(int nItem, LPCTSTR szTip);
 	CString GetItemToolTip(int nItem) const;
+	void FilterToolTipMessage(MSG* pMsg);
 
 // Attributes
 private:
@@ -146,6 +147,7 @@ protected:
 	afx_msg LRESULT OnLayout(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnInsertItem(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDeleteItem(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
