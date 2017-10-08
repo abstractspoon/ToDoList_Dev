@@ -5,6 +5,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "tooltipctrlex.h"
 #include <richole.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,9 @@ public:
 	void SetFirstVisibleLine(int nLine);
 	CPoint GetCaretPos() const;
 
+	BOOL EnableToolTips(BOOL bEnable = TRUE);
+	void FilterToolTipMessage(MSG* pMsg);
+
 	// Windows 8.1 and up only
 	BOOL EnableAutoFontChanging(BOOL bEnable = TRUE);
 	BOOL EnableInlineSpellChecking(BOOL bEnable = TRUE);
@@ -143,7 +147,8 @@ protected:
 	BOOL m_bInOnFocus;
 	CRect m_rMargins;
 	BOOL m_bAutoRTL;
-	
+	CToolTipCtrlEx m_tooltip;
+
 #undef FINDTEXTEX
 #undef TEXTRANGE
 #ifdef _UNICODE
@@ -176,6 +181,8 @@ public:
 	//{{AFX_VIRTUAL(CRichEditBaseCtrl)
 protected:
 	virtual void PreSubclassWindow();
+	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 	
 	// Implementation
@@ -249,6 +256,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	
 	DECLARE_MESSAGE_MAP()
 		

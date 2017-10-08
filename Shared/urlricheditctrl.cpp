@@ -1092,26 +1092,6 @@ void CUrlRichEditCtrl::OnTimer(UINT nIDEvent)
 	CRichEditBaseCtrl::OnTimer(nIDEvent);
 }
 
-BOOL CUrlRichEditCtrl::EnableToolTips(BOOL bEnable)
-{
-	if (bEnable && !m_tooltip.GetSafeHwnd())
-		return m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP));
-
-	// else
-	if (!bEnable && m_tooltip.GetSafeHwnd())
-		return m_tooltip.DestroyToolTipCtrl();
-
-	return TRUE;
-}
-
-BOOL CUrlRichEditCtrl::PreTranslateMessage(MSG* pMsg)
-{
-	if (m_tooltip.GetSafeHwnd())
-		m_tooltip.FilterToolTipMessage(pMsg);
-
-	return CRichEditBaseCtrl::PreTranslateMessage(pMsg);
-}
-
 int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	int nHit = FindUrl(point);

@@ -95,6 +95,8 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceCmd)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
+
 	ON_WM_SETFOCUS()
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_WM_SIZE()
@@ -1370,4 +1372,42 @@ CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLI
 	}
 
 	return 0;
+}
+
+BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)
+{
+	if (bEnable && !m_tooltip.GetSafeHwnd())
+		return m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP));
+	
+	// else
+	if (!bEnable && m_tooltip.GetSafeHwnd())
+		return m_tooltip.DestroyToolTipCtrl();
+	
+	return TRUE;
+}
+
+BOOL CRichEditBaseCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	FilterToolTipMessage(pMsg);
+	
+	return CRichEditCtrl::PreTranslateMessage(pMsg);
+}
+
+void CRichEditBaseCtrl::FilterToolTipMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+LRESULT CRichEditBaseCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
+{
+	CPoint pt(wp);
+	TOOLINFO* pTI = (TOOLINFO*)lp;
+	
+	return OnToolHitTest(pt, pTI);
+}
+
+int CRichEditBaseCtrl::OnToolHitTest(CPoint pt, TOOLINFO* pTI) const
+{
+	return CRichEditCtrl::OnToolHitTest(pt, pTI);
 }
