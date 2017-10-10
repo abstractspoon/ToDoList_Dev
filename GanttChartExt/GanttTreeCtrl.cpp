@@ -186,3 +186,24 @@ void CGanttTreeCtrl::ShowCheckboxes(BOOL bShow)
 		SetImageList(NULL, TVSIL_STATE);
 	}
 }
+
+void CGanttTreeCtrl::ShowTaskIcons(BOOL bShow)
+{
+	if (bShow)
+	{
+		if (!m_ilTaskIcons.GetSafeHandle())
+			VERIFY(m_ilTaskIcons.Create(16, 16, 0, 1, 0));
+
+		SetImageList(&m_ilTaskIcons, TVSIL_NORMAL);
+	}
+	else
+	{
+		SetImageList(NULL, TVSIL_NORMAL);
+	}
+}
+
+HIMAGELIST CGanttTreeCtrl::GetTaskIcon(LPCTSTR szIcon, int& iImageIndex) const
+{
+	HWND hwndParent = ::GetParent(GetSafeHwnd());
+	return (HIMAGELIST)::SendMessage(hwndParent, WM_GTLC_GETTASKICON, (WPARAM)szIcon, (LPARAM)&iImageIndex);
+}

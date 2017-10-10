@@ -3192,6 +3192,7 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_FILEREF:
 	case TDCA_COMMENTS:
 	case TDCA_FLAG:
+	case TDCA_ICON:
 	case TDCA_CREATIONDATE:
 	case TDCA_CREATEDBY:
 	case TDCA_EXTERNALID: 

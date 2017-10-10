@@ -25,13 +25,16 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
 	void ShowCheckboxes(BOOL bShow = TRUE);
+	void ShowTaskIcons(BOOL bShow = TRUE);
 
+	HIMAGELIST GetTaskIcon(LPCTSTR szIcon, int& iImageIndex) const;
+	
 protected:
 	int m_nTitleColumnWidth;
 	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
-	CImageList m_ilCheckboxes;
+	CImageList m_ilCheckboxes, m_ilTaskIcons;
 
 protected:
 	virtual void PreSubclassWindow();

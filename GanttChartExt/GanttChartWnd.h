@@ -130,6 +130,7 @@ protected:
 	afx_msg LRESULT OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttPrefsHelp(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGanttGetTaskIcon(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo handlers

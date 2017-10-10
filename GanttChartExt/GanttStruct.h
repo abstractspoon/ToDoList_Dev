@@ -29,7 +29,7 @@ struct GANTTITEM
 	COleDateTime dtDue, dtMaxDue; 
 	COleDateTime dtDone; 
 	COLORREF color;
-	CString sAllocTo;
+	CString sAllocTo, sIcon;
 	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	CStringArray aDepends;

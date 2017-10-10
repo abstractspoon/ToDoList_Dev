@@ -2674,7 +2674,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			{
 				int nIcon = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
 									
-				if (nIcon == -1 && pTDS->HasSubTasks() && HasStyle(TDCS_SHOWPARENTSASFOLDERS))
+				if ((nIcon == -1) && pTDS->HasSubTasks() && HasStyle(TDCS_SHOWPARENTSASFOLDERS))
 					nIcon = 0;
 												
 				if (nIcon >= 0)

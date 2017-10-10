@@ -29,6 +29,9 @@ const UINT WM_GTLC_NOTIFYSORT				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYSOR
 // WPARAM = , LPARAM = 
 const UINT WM_GTLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"));
 
+// WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_GTLC_GETTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_GETTASKICON"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = GCDD_MODE, LPARAM = HWND

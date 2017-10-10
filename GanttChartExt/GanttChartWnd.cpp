@@ -110,6 +110,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
 	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
 	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnGanttPrefsHelp)
+	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnGanttGetTaskIcon)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -710,6 +711,8 @@ BOOL CGanttChartWnd::OnInitDialog()
 	
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
+	
+	m_tree.ShowTaskIcons();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -1297,4 +1300,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 		mod.tValue = T64Utils::T64_NULL;
 
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+}
+
+LRESULT CGanttChartWnd::OnGanttGetTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
 }
