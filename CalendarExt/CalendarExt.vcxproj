@@ -213,6 +213,7 @@ copy unicode_release\CalendarExt.dll ..\todolist\unicode_release /y
     <ClInclude Include="CalendarPreferencesDlg.h" />
     <ClInclude Include="CalendarWnd.h" />
     <ClInclude Include="CalEnum.h" />
+    <ClInclude Include="CalMsg.h" />
     <ClInclude Include="CalStruct.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
