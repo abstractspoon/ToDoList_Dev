@@ -20,6 +20,9 @@ const UINT WM_CALENDAR_DRAGCHANGE	= ::RegisterWindowMessage(_T("WM_CALENDAR_DRAG
 // WPARAM = , LPARAM = 
 const UINT WM_CALENDAR_PREFSHELP	= ::RegisterWindowMessage(_T("WM_CALENDAR_PREFSHELP"));
 
+// WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_CALENDAR_GETTASKICON	= ::RegisterWindowMessage(_T("WM_CALENDAR_GETTASKICON"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_CALENDARMSG_H__09FB7C3D_BBA8_43B3_A7B3_1D95C946892B__INCLUDED_)

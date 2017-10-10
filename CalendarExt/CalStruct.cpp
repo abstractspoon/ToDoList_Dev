@@ -70,6 +70,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	dtEnd = tci.dtEnd;
 	dtStartCalc = tci.dtStartCalc;
 	dtEndCalc = tci.dtEndCalc;
+	sIcon = tci.sIcon;
 	
 	return (*this);
 }
@@ -86,7 +87,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dtStart == tci.dtStart) &&
 		(dtEnd == tci.dtEnd) &&
 		(dtStartCalc == tci.dtStartCalc) &&
-		(dtEndCalc == tci.dtEndCalc));
+		(dtEndCalc == tci.dtEndCalc) &&
+		(sIcon == tci.sIcon));
 }
 
 void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
@@ -230,6 +232,9 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const C
 
 	if (attrib.Has(IUI_TASKNAME))
 		sName = pTasks->GetTaskTitle(hTask);
+
+	if (attrib.Has(IUI_ICON))
+		sIcon = pTasks->GetTaskIcon(hTask);
 
 	if (attrib.Has(IUI_DEPENDENCY))
 		bHasDepends = !Misc::IsEmpty(pTasks->GetTaskDependency(hTask, 0));

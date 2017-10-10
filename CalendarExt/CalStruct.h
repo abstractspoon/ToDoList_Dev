@@ -60,6 +60,7 @@ public:
 	COLORREF color;
 	BOOL bDone, bGoodAsDone, bTopLevel;
 	BOOL bLocked, bHasDepends;
+	CString sIcon;
 
 protected:
 	COleDateTime dtCreation, dtStart, dtEnd;

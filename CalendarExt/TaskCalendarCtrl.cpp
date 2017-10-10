@@ -114,6 +114,9 @@ LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 	// Recalc the task height
 	m_nTaskHeight = (GraphicsMisc::GetFontPixelSize((HFONT)wp) + 6);
 
+	if (!HasOption(TCCO_ADJUSTTASKHEIGHTS))
+		m_nTaskHeight = max(m_nTaskHeight, DEF_TASK_HEIGHT);
+
 	SetHeaderHeight(m_nTaskHeight + 2);
 	SetDayHeaderHeight(m_nTaskHeight);
 
@@ -224,6 +227,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(IUI_ATTRIBUTE nEditAttrib)
 	case IUI_STARTDATE:
 	case IUI_COLOR:
 	case IUI_DEPENDENCY:
+	case IUI_ICON:
 		return true;
 	}
 	
@@ -696,7 +700,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	
 	for (int nTask = nStart; nTask < nNumTasks; nTask++)
 	{
-		const TASKCALITEM* pTCI = (*pTasks)[nTask];
+		const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 		ASSERT(pTCI);
 		
 		CRect rTask;
@@ -743,6 +747,23 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
 		}
 		
+		// draw icon if there is enough space
+		if (!pTCI->sIcon.IsEmpty() && (nTaskHeight >= DEF_TASK_HEIGHT))
+		{
+			// draw at the start only
+			if (GetTaskTextOffset(pTCI->GetTaskID()) == 0)
+			{
+				int iImageIndex = -1;
+				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, pTCI->GetTaskID(), (LPARAM)&iImageIndex);
+
+				if (hilTask && (iImageIndex != -1))
+				{
+					ImageList_Draw(hilTask, iImageIndex, *pDC, (rTask.left + 1), (rTask.top + 1), ILD_TRANSPARENT);
+					rTask.left += 18;
+				}
+			}
+		}
+
 		// draw text if there is enough space
 		if (nTaskHeight >= MIN_TASK_HEIGHT)
 		{
