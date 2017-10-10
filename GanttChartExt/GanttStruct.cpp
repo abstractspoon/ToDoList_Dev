@@ -243,6 +243,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	bGoodAsDone = gi.bGoodAsDone;
 	nPosition = gi.nPosition;
 	bLocked = gi.bLocked;
+	sIcon = gi.sIcon;
 	bSomeSubtaskDone = gi.bSomeSubtaskDone;
 	
 	aTags.Copy(gi.aTags);
@@ -268,6 +269,7 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi)
 			(nPosition == gi.nPosition) &&
 			(bGoodAsDone == gi.bGoodAsDone) &&
 			(bLocked == gi.bLocked) &&
+			(sIcon == gi.sIcon) &&
 			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
 			Misc::MatchAll(aTags, gi.aTags) &&
 			Misc::MatchAll(aDepends, gi.aDepends));
