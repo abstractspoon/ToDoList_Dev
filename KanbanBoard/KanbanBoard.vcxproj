@@ -218,6 +218,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     <ClInclude Include="KanbanEnum.h" />
     <ClInclude Include="KanbanFixedColumnListCtrl.h" />
     <ClInclude Include="KanbanListCtrl.h" />
+    <ClInclude Include="Kanbanmsg.h" />
     <ClInclude Include="KanbanPreferencesDlg.h" />
     <ClInclude Include="KanbanStruct.h" />
     <ClInclude Include="KanbanWnd.h" />
