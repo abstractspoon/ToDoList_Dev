@@ -108,7 +108,7 @@ public:
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
 	bool ProcessMessage(MSG* pMsg);
-	void FilterToolTipMessage(MSG* pMsg) {}
+	void FilterToolTipMessage(MSG* pMsg);
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
