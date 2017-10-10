@@ -19,6 +19,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_KLCN_CHECKCHANGE = (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_GETTASKICON = (WM_APP+2); // WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrl window
@@ -158,8 +159,13 @@ protected:
 	BOOL GetItemTooltipRect(int nItem, CRect& rItem) const;
 	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
 
-	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
+	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
+	BOOL DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
+	BOOL DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
+	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
+	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
+	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(IUI_ATTRIBUTE nAttrib);

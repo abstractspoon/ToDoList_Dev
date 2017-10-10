@@ -99,7 +99,8 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 {
 	int nIndex = -1;
 
-	m_mapNameToIndex.Lookup(sImageName, nIndex);
+	if (!sImageName.IsEmpty())
+		m_mapNameToIndex.Lookup(sImageName, nIndex);
 
 	return nIndex;
 }

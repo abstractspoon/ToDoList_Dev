@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_CHECKCHANGE, OnListCheckChange)
+	ON_MESSAGE(WM_KLCN_GETTASKICON, OnListGetTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
@@ -496,6 +497,7 @@ BOOL CKanbanCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_EXTERNALID:
 	case IUI_FILEREF:
 	case IUI_FLAG:
+	case IUI_ICON:
 	case IUI_LASTMOD:
 	case IUI_PERCENT:
 	case IUI_PRIORITY:
@@ -557,6 +559,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	pKI->bParent = pTasks->IsTaskParent(hTask);
 	pKI->dwParentID = dwParentID;
 	pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
+	pKI->sIcon = pTasks->GetTaskIcon(hTask);
 
 	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
@@ -667,9 +670,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			GET_KI_RET(dwTaskID, pKI, FALSE);
 
 			if (attrib.Has(IUI_TASKNAME))
-			{
 				pKI->sTitle = pTasks->GetTaskTitle(hTask);
-			}
 			
 			if (attrib.Has(IUI_DONEDATE))
 			{
@@ -688,6 +689,9 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
+
+			if (attrib.Has(IUI_ICON))
+				pKI->sIcon = pTasks->GetTaskIcon(hTask);
 			
 			// Trackable attributes
 			CStringArray aValues;
@@ -2670,4 +2674,9 @@ LRESULT CKanbanCtrl::OnListCheckChange(WPARAM /*wp*/, LPARAM lp)
 LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 {
 	return SelectTask(lp);
+}
+
+LRESULT CKanbanCtrl::OnListGetTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_KBC_GETTASKICON, wp, lp);
 }

@@ -118,6 +118,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_IUI_SELECTTASK, OnUIExtSelectTask)
 	ON_REGISTERED_MESSAGE(WM_IUI_SORTCOLUMNCHANGE, OnUIExtSortColumnChange)
 	ON_REGISTERED_MESSAGE(WM_IUI_DOHELP, OnUIExtDoHelp)
+	ON_REGISTERED_MESSAGE(WM_IUI_GETTASKICON, OnUIExtGetTaskIcon)
 
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
@@ -1273,6 +1274,51 @@ LRESULT CTabbedToDoCtrl::OnUIExtDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		AfxGetApp()->WinHelp(lParam);
+		break;
+	}
+
+	return 0L;
+}
+
+LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
+{
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+	default:
+		ASSERT(0);
+		break;
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		if (wParam && lParam)
+		{
+			LPCTSTR szIcon = (LPCTSTR)wParam;
+			int* pImageIndex = (int*)lParam;
+
+			*pImageIndex = m_ilTaskIcons.GetImageIndex(szIcon);
+
+			if (*pImageIndex != -1)
+				return (LRESULT)m_ilTaskIcons.GetSafeHandle();
+		}
 		break;
 	}
 

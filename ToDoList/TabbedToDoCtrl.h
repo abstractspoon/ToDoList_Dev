@@ -203,6 +203,7 @@ protected:
 	afx_msg LRESULT OnUIExtEditSelectedTaskTitle(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtSortColumnChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtDoHelp(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

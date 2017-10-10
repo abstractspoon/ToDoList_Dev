@@ -26,6 +26,9 @@ const UINT WM_KBC_NOTIFYSORT		= ::RegisterWindowMessage(_T("WM_KBC_NOTIFYSORT"))
 // WPARAM = , LPARAM = 
 const UINT WM_KBC_PREFSHELP			= ::RegisterWindowMessage(_T("WM_KBC_PREFSHELP"));
 
+// WPARAM = int* (imageIndex), LPARAM = Task ID, return HIMAGELIST
+const UINT WM_KBC_GETTASKICON 		= ::RegisterWindowMessage(_T("WM_KBC_GETTASKICON"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_KANBANMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

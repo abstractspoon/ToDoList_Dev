@@ -246,17 +246,20 @@ struct IUITASKMOD
 // else wParam = LPDWORD,	lParam = ID count
 const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK"); 
 
-// wParam = Number of Mods, lParam == &IUITASKMOD[0]
+// wParam = Number of Mods, lParam = &IUITASKMOD[0]
 const UINT WM_IUI_MODIFYSELECTEDTASK	= ::RegisterWindowMessageW(L"WM_IUI_MODIFYSELECTEDTASK"); 
 
-// wParam = lParam == 0
+// wParam = lParam = 0
 const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
 
-// wParam = 0, lParam == Column ID
+// wParam = 0, lParam = Column ID
 const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
 
-// wParam = 0, lParam == identifying string (LPCTSTR)
+// wParam = 0, lParam = identifying string (LPCTSTR)
 const UINT WM_IUI_DOHELP				= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
+
+// WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_IUI_GETTASKICON			= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON"); 
 
 //////////////////////////////////////////////////////////////////////
 

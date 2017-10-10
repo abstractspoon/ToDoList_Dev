@@ -76,7 +76,7 @@ struct KANBANITEM
 	double dTimeEst, dTimeSpent, dCost;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
-	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
+	CString sExternalID, sRecurrence, sCreatedBy, sFileRef, sIcon;
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;

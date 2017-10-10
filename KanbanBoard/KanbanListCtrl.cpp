@@ -63,7 +63,8 @@ const int BAR_WIDTH				= 6;
 const int NUM_TEXTLINES			= 2;
 const int TITLE_VPADDING		= 8;
 const int LV_PADDING			= 3;
-const int IMAGE_PADDING			= 1;
+const int CHECKBOX_PADDING		= 1;
+const int ICON_OFFSET			= 2;
 const int ATTRIB_INDENT			= 6;
 const int TIP_PADDING			= 4;
 
@@ -1115,6 +1116,33 @@ void CKanbanListCtrl::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
+void CKanbanListCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const
+{
+	if (bSelected)
+	{
+		BOOL bFocused = (bSelected && (GetFocus() == this));
+
+		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+		crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
+
+		GraphicsMisc::DrawExplorerItemBkgnd(pDC, GetSafeHwnd(), nState, rItem, GMIB_THEMECLASSIC);
+	}
+	else if (m_bShowTaskColorAsBar)
+	{
+		COLORREF crFill = GetSysColor(COLOR_WINDOW);
+		COLORREF crBorder = GetSysColor(COLOR_WINDOWFRAME);
+
+		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
+	}
+	else // use task's own colour
+	{
+		COLORREF crFill = pKI->GetFillColor(m_bTextColorIsBkgnd);
+		COLORREF crBorder = pKI->GetBorderColor(m_bTextColorIsBkgnd);
+
+		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
+	}
+}
+
 void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
@@ -1135,128 +1163,41 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				int nItem = (int)pLVCD->nmcd.dwItemSpec;
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 		
-				// draw checkbox, background and bar
 				CRect rItem;
 				GetItemRect(nItem, rItem, LVIR_BOUNDS);
 				rItem.DeflateRect(1, 1);
 
+				// Checkbox
 				DrawItemCheckbox(pDC, pKI, rItem);
 				
 				BOOL bSelected = (!m_bSavingToImage && (GetItemState(nItem, LVIS_SELECTED) == LVIS_SELECTED));
-				BOOL bFocused = (bSelected && (::GetFocus() == pNMHDR->hwndFrom));
 				COLORREF crText = pKI->GetTextColor(bSelected, (m_bTextColorIsBkgnd && !m_bShowTaskColorAsBar));
 
-				if (bSelected)
-				{
-					GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-					crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
+				// Background
+				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
 
-					GraphicsMisc::DrawExplorerItemBkgnd(pDC, pNMHDR->hwndFrom, nState, rItem, GMIB_THEMECLASSIC);
-				}
-				else if (m_bShowTaskColorAsBar)
-				{
-					COLORREF crFill = GetSysColor(COLOR_WINDOW);
-					COLORREF crBorder = GetSysColor(COLOR_WINDOWFRAME);
-					
-					GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
-				}
-				else // use task's own colour
-				{
-					COLORREF crFill = pKI->GetFillColor(m_bTextColorIsBkgnd);
-					COLORREF crBorder = pKI->GetBorderColor(m_bTextColorIsBkgnd);
+				// Icon
+				BOOL bHasIcon = DrawItemIcon(pDC, pKI, rItem);
 
-					GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
-				}
+				// Bar as required
+				CRect rAttributes(rItem), rTitle(rItem);
 
-				// Draw bar as required
-				if (m_bShowTaskColorAsBar)
-				{
-					// Don't draw for completed items but ensure same indentation
-					CRect rBar(rItem);
-					
-					rBar.DeflateRect(2, 2);
-					rBar.right = (rBar.left + BAR_WIDTH);
+				if (DrawItemBar(pDC, pKI, bHasIcon, rAttributes))
+					rTitle = rAttributes;
 
-					if (!pKI->IsDone(TRUE))
-					{
-						if (m_bColorBarByPriority)
-						{
-							int nPriority = pKI->GetPriority();
-
-							if (nPriority != -2)
-							{
-								COLORREF crFill = m_aPriorityColors[nPriority];
-								COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.4);
-
-								GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder);
-							}
-						}
-						else if (pKI->HasColor())
-						{
-							COLORREF crFill = pKI->GetFillColor(TRUE);
-							COLORREF crBorder = pKI->GetBorderColor(TRUE);
-
-							GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder);
-						}
-					}
-
-					rItem.left = rBar.right;
-				}
+				// Attributes are not affected by the icon
+				if (bHasIcon)
+					rTitle.left = max(rAttributes.left, (rItem.left + 16 + ICON_OFFSET));
 				
-				// draw text
-				pDC->SetBkMode(TRANSPARENT);
-				pDC->SetTextColor(crText);
+				// Text
+				DrawItemTitle(pDC, pKI, rTitle, crText);
 
-				CFont* pOldFont = NULL;
-				DWORD dwFontFlags = 0;
-
-				if (m_bStrikeThruDoneTasks && pKI->IsDone(FALSE))
-					dwFontFlags |= GMFS_STRIKETHRU;
-
-				if (pKI->dwParentID == 0)
-					dwFontFlags |= GMFS_BOLD;
-
-				if (dwFontFlags)
-					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
-				
-				// first 'n' lines is the task title
-				rItem.DeflateRect(TEXT_BORDER);
-
-				CRect rTitle(rItem);
-				rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
-
-				int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-				
-				pDC->DrawText(pKI->sTitle, rTitle, (nFlags | DT_WORDBREAK)); // multi-line for titles only
-
-				// Rest of attributes display
-				CRect rLine(rItem);
-				rLine.top = rTitle.bottom;
-
-				// Remove boldness for attributes
-				if (dwFontFlags & GMFS_BOLD)
-				{
-					pDC->SelectObject(pOldFont);
-
-					dwFontFlags &= ~GMFS_BOLD;
-					pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
-				}
-
-				// Attribute display
 				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
 					crText = pDC->SetTextColor(GraphicsMisc::Lighter(crText, 0.3));
-				
-				rLine.left += ATTRIB_INDENT;
 
-				for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
-				{
-					IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+				rAttributes.top += CalcItemTitleTextHeight();
 
-					DrawAttribute(pDC, rLine, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
-				}
-
-				if (pOldFont)
-					pDC->SelectObject(pOldFont);
+				DrawItemAttributes(pDC, pKI, rAttributes, crText);
 			}
 			
 			*pResult |= CDRF_SKIPDEFAULT;
@@ -1264,7 +1205,127 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
+void CKanbanListCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
+{
+	CRect rTitle(rItem);
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
+	CFont* pOldFont = NULL;
+	DWORD dwFontFlags = 0;
+
+	if (m_bStrikeThruDoneTasks && pKI->IsDone(FALSE))
+		dwFontFlags |= GMFS_STRIKETHRU;
+
+	if (pKI->dwParentID == 0)
+		dwFontFlags |= GMFS_BOLD;
+
+	if (dwFontFlags)
+		pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
+
+	// first 'n' lines is the task title
+	rTitle.DeflateRect(TEXT_BORDER);
+	rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
+
+	int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX | DT_WORDBREAK); // multi-line for titles only
+
+	pDC->DrawText(pKI->sTitle, rTitle, nFlags);
+
+	if (pOldFont)
+		pDC->SelectObject(pOldFont);
+}
+
+void CKanbanListCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
+{
+	pDC->SetBkMode(TRANSPARENT);
+
+	CFont* pOldFont = NULL;
+	DWORD dwFontFlags = 0;
+
+	if (m_bStrikeThruDoneTasks && pKI->IsDone(FALSE))
+		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_STRIKETHRU));
+
+	CRect rAttrib(rItem);
+	rAttrib.DeflateRect(TEXT_BORDER);
+
+	int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+
+	// Attribute display
+	//rAttrib.left += ATTRIB_INDENT;
+
+	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
+	{
+		IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+
+		DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags);
+	}
+
+	if (pOldFont)
+		pDC->SelectObject(pOldFont);
+}
+
+BOOL CKanbanListCtrl::DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
+{
+	if (!pKI->sIcon.IsEmpty())
+	{
+		int iImageIndex = -1;
+		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, (WPARAM)(LPCTSTR)pKI->sIcon, (LPARAM)&iImageIndex);
+
+		if (hilTask && (iImageIndex != -1))
+		{
+			ImageList_Draw(hilTask, iImageIndex, *pDC, (rItem.left + ICON_OFFSET), (rItem.top + ICON_OFFSET), ILD_TRANSPARENT);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const
+{
+	if (m_bShowTaskColorAsBar)
+	{
+		// Don't draw for completed items but ensure same indentation
+		CRect rBar(rItem);
+
+		rBar.DeflateRect(2, 2);
+		rBar.right = (rBar.left + BAR_WIDTH);
+
+		if (bHasIcon)
+			rBar.top += (16 + ICON_OFFSET);
+
+		if (!pKI->IsDone(TRUE))
+		{
+			if (m_bColorBarByPriority)
+			{
+				int nPriority = pKI->GetPriority();
+
+				if (nPriority != -2)
+				{
+					COLORREF crFill = m_aPriorityColors[nPriority];
+					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.4);
+
+					GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder);
+				}
+			}
+			else if (pKI->HasColor())
+			{
+				COLORREF crFill = pKI->GetFillColor(TRUE);
+				COLORREF crBorder = pKI->GetBorderColor(TRUE);
+
+				GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder);
+			}
+		}
+
+		rItem.left = rBar.right;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
 {
 	if (m_bShowCompletionCheckboxes)
 	{
@@ -1284,9 +1345,13 @@ void CKanbanListCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& r
 			}
 
 			m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
-			rItem.left = (rCheckbox.right + IMAGE_PADDING);
+			rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
+
+			return TRUE;
 		}
 	}
+
+	return FALSE;
 }
 
 BOOL CKanbanListCtrl::GetItemCheckboxRect(int nItem, CRect& rItem) const
@@ -1327,7 +1392,7 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem) const
 	CRect rCheckbox(rItem);
 	VERIFY(GetItemCheckboxRect(rCheckbox));
 
-	rItem.left = (rCheckbox.right + IMAGE_PADDING);
+	rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 	
 	if (m_bShowTaskColorAsBar)
 		rItem.left += (2 + BAR_WIDTH);
