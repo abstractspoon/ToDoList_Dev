@@ -1565,10 +1565,10 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
-				if (!pGI->sIcon.IsEmpty())
+				if (!pGI->sIcon.IsEmpty() || pGI->bParent)
 				{
 					int iImageIndex = -1;
-					HIMAGELIST hilTask = m_tree.GetTaskIcon(pGI->sIcon, iImageIndex);
+					HIMAGELIST hilTask = m_tree.GetTaskIcon(pGI->dwTaskID, iImageIndex);
 
 					if (hilTask && (iImageIndex != -1))
 					{

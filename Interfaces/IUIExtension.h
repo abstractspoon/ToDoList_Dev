@@ -258,7 +258,7 @@ const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLU
 // wParam = 0, lParam = identifying string (LPCTSTR)
 const UINT WM_IUI_DOHELP				= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
 
-// WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
+// WPARAM = Task ID, LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_IUI_GETTASKICON			= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON"); 
 
 //////////////////////////////////////////////////////////////////////

@@ -27,7 +27,7 @@ public:
 	void ShowCheckboxes(BOOL bShow = TRUE);
 	void ShowTaskIcons(BOOL bShow = TRUE);
 
-	HIMAGELIST GetTaskIcon(LPCTSTR szIcon, int& iImageIndex) const;
+	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	
 protected:
 	int m_nTitleColumnWidth;

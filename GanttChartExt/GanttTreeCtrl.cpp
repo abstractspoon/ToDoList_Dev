@@ -202,8 +202,8 @@ void CGanttTreeCtrl::ShowTaskIcons(BOOL bShow)
 	}
 }
 
-HIMAGELIST CGanttTreeCtrl::GetTaskIcon(LPCTSTR szIcon, int& iImageIndex) const
+HIMAGELIST CGanttTreeCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 {
 	HWND hwndParent = ::GetParent(GetSafeHwnd());
-	return (HIMAGELIST)::SendMessage(hwndParent, WM_GTLC_GETTASKICON, (WPARAM)szIcon, (LPARAM)&iImageIndex);
+	return (HIMAGELIST)::SendMessage(hwndParent, WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }

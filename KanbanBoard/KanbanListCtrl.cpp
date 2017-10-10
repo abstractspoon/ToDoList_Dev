@@ -1267,10 +1267,10 @@ void CKanbanListCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const 
 
 BOOL CKanbanListCtrl::DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
 {
-	if (!pKI->sIcon.IsEmpty())
+	if (!pKI->sIcon.IsEmpty() || pKI->bParent)
 	{
 		int iImageIndex = -1;
-		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, (WPARAM)(LPCTSTR)pKI->sIcon, (LPARAM)&iImageIndex);
+		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
 
 		if (hilTask && (iImageIndex != -1))
 		{

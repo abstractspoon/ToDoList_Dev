@@ -1311,10 +1311,10 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 	case FTCV_UIEXTENSION16:
 		if (wParam && lParam)
 		{
-			LPCTSTR szIcon = (LPCTSTR)wParam;
+			DWORD dwTaskID = wParam;
 			int* pImageIndex = (int*)lParam;
 
-			*pImageIndex = m_ilTaskIcons.GetImageIndex(szIcon);
+			*pImageIndex = m_taskTree.GetTaskIconIndex(dwTaskID);
 
 			if (*pImageIndex != -1)
 				return (LRESULT)m_ilTaskIcons.GetSafeHandle();

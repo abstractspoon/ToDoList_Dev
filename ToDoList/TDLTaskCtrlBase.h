@@ -201,10 +201,13 @@ public:
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
+	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
+
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef = -1) const;
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
-	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
+	int GetTaskIconIndex(DWORD dwTaskID) const;
+	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	void UpdateSelectedTaskPath();
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off

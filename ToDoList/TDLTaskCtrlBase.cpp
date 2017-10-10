@@ -2672,10 +2672,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			
 		case TDCC_ICON:
 			{
-				int nIcon = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
-									
-				if ((nIcon == -1) && pTDS->HasSubTasks() && HasStyle(TDCS_SHOWPARENTSASFOLDERS))
-					nIcon = 0;
+				int nIcon = GetTaskIconIndex(pTDI, pTDS);
 												
 				if (nIcon >= 0)
 				{
@@ -2711,6 +2708,27 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 		}
 	}
+}
+
+int CTDLTaskCtrlBase::GetTaskIconIndex(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+		return -1;
+
+	return GetTaskIconIndex(pTDI, pTDS);
+}
+
+int CTDLTaskCtrlBase::GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	int nIcon = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
+
+	if ((nIcon == -1) && pTDS->HasSubTasks() && HasStyle(TDCS_SHOWPARENTSASFOLDERS))
+		nIcon = 0;
+
+	return nIcon;
 }
 
 void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect, COLORREF crText)
