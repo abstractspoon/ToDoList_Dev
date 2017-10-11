@@ -418,11 +418,11 @@ public:
 	virtual bool SetTaskLock(HTASKITEM hTask, bool bLocked) = 0;
 	virtual bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const = 0;
 	
-	virtual LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const = 0;
+	virtual LPCWSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCWSTR szID, bool bDisplay) const = 0;
 	virtual LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const = 0;
 	virtual bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy) = 0;
 
-	virtual DWORD GetCustomAttributeType(LPCTSTR szID) const = 0;
+	virtual unsigned long GetCustomAttributeTypeByID(LPCWSTR szID) const = 0;
 
 };
 

@@ -2265,7 +2265,7 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID) con
 	return NULLSTRING;
 }
 
-unsigned long CTaskFile::GetCustomAttributeType(LPCTSTR szID) const
+unsigned long CTaskFile::GetCustomAttributeTypeByID(LPCTSTR szID) const
 {
 	const CXmlItem* pXIAttribDef = GetCustomAttributeDef(szID);
 	

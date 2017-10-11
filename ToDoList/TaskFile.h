@@ -213,7 +213,7 @@ public:
 	LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
 	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy);
 
-	unsigned long GetCustomAttributeType(LPCTSTR szID) const;
+	unsigned long GetCustomAttributeTypeByID(LPCTSTR szID) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 
