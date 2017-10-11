@@ -21,14 +21,14 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 TaskList::TaskList(ITaskList* pTaskList) 
 	: 
-m_pTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 
+	m_pTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 
 	m_pConstTaskList(nullptr) 
 {
 } 
 
 TaskList::TaskList(const ITaskList* pTaskList) 
 	: 
-m_pTaskList(nullptr), 
+	m_pTaskList(nullptr), 
 	m_pConstTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)) 
 {
 } 
@@ -480,7 +480,7 @@ Boolean Task::IsGoodAsDone()
 
 Boolean Task::IsFlagged()
 {
-	return GETTASKVAL(IsTaskFlagged, false);
+	return GETTASKVAL_ARG(IsTaskFlagged, FALSE, false);
 }
 
 Boolean Task::IsParent()
@@ -534,10 +534,10 @@ return gcnew String(szValue);
 
 String^ Task::GetCustomAttributeData(String^ sID)
 {
-	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : 
-		(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID)) : L""));
+	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : 
+						(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), false) : L""));
 
-return gcnew String(szValue);
+	return gcnew String(szValue);
 }
 
 String^ Task::GetMetaData(String^ sKey)

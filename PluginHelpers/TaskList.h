@@ -4,8 +4,9 @@
 
 class IPreferences;
 class ITaskList;
-class ITaskList15;
+class ITaskList16;
 class ITransText;
+
 enum TDC_UNITS;
 
 struct UITHEME;
@@ -164,8 +165,8 @@ namespace Abstractspoon
 				static Int64 Map(DateTime^ date);
 
 			private: // -------------------------------------------------------
-				ITaskList15* m_pTaskList;
-				const ITaskList15* m_pConstTaskList;
+				ITaskList16* m_pTaskList;
+				const ITaskList16* m_pConstTaskList;
 				HTASKITEM m_hTask;
 
 			private: // -------------------------------------------------------
@@ -205,8 +206,8 @@ namespace Abstractspoon
 				Boolean ClearMetaData(String^ sKey);
 
 			private: // -------------------------------------------------------
-				ITaskList15* m_pTaskList;
-				const ITaskList15* m_pConstTaskList;
+				ITaskList16* m_pTaskList;
+				const ITaskList16* m_pConstTaskList;
 
 			private: // -------------------------------------------------------
 				TaskList();
