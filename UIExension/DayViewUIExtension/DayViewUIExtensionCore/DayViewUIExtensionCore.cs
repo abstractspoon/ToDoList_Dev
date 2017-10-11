@@ -11,12 +11,17 @@ namespace DayViewUIExtension
 	{
 		private Boolean m_taskColorIsBkgnd = false;
 		private IntPtr m_hwndParent = IntPtr.Zero;
+		private TDLDayView m_DayView;
+		private UInt32 m_SelectedTaskID = 0;
+		private Translator m_trans;
+		private UIExtension.TaskIcon m_TaskIcons;
 
 		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
 			m_hwndParent = hwndParent;
 			m_trans = trans;
 
+			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 
@@ -292,7 +297,7 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			this.m_DayView = new TDLDayView(m_ControlsFont);
+			this.m_DayView = new TDLDayView(m_ControlsFont, m_TaskIcons);
 
 			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
 			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
@@ -571,11 +576,9 @@ namespace DayViewUIExtension
 		private const string FontName = "Tahoma";
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-        private TDLDayView m_DayView;
-		private UInt32 m_SelectedTaskID = 0;
-		private Translator m_trans;
-		bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
-		System.Windows.Forms.Timer m_redrawTimer;
+		private System.Windows.Forms.Timer m_redrawTimer;
+
+		private bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
 
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;

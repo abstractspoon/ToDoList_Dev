@@ -13,7 +13,7 @@ namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
-        public TDLRenderer()
+        public TDLRenderer(UIExtension.TaskIcon taskIcons)
         {
             // One time initialisation
             if (Application.RenderWithVisualStyles)
@@ -32,11 +32,14 @@ namespace DayViewUIExtension
                 if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Hot))
                     m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
             }
+
+			m_TaskIcons = taskIcons;
         }
 
 		private VisualStyleRenderer m_ExplorerSelection;
         private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
         private UITheme m_theme;
+		private UIExtension.TaskIcon m_TaskIcons;
 
         public UITheme Theme
         {
@@ -255,7 +258,9 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
-				if (!appointment.IsLongAppt() && (appointment.StartDate.TimeOfDay.TotalHours == 0.0))
+				bool longAppt = appointment.IsLongAppt();
+
+				if (!longAppt && (appointment.StartDate.TimeOfDay.TotalHours == 0.0))
 				{
 					rect.Y++;
 					rect.Height--;
@@ -292,6 +297,42 @@ namespace DayViewUIExtension
 							g.FillRectangle(brush, rect);
 					}
 
+					//  Draw appointment border if needed
+					if (!isSelected && appointment.DrawBorder)
+					{
+						using (Pen pen = new Pen(appointment.BorderColor, 1))
+                            g.DrawRectangle(pen, rect.Left, rect.Top, rect.Width, rect.Height);
+					}
+
+					// Draw appointment icon
+					bool hasIcon = false;
+
+					if (m_TaskIcons != null)
+					{
+						CalendarItem item = appointment as CalendarItem;
+
+						if ((item != null) && m_TaskIcons.Get(item.Id))
+						{
+							Point ptIcon = new Point(rect.Left + 2, rect.Top + 2);
+
+							if (longAppt)
+							{
+								ptIcon.X = gripRect.Right;
+							}
+							else
+							{
+								gripRect.Y += 18;
+								gripRect.Height -= 18;
+							}
+
+							m_TaskIcons.Draw(g, ptIcon.X, ptIcon.Y);
+							hasIcon = true;
+
+							rect.Width -= (ptIcon.X + 16 - rect.Left);
+							rect.X = (ptIcon.X + 16);
+						}
+					}
+
                     // Draw gripper bar
 					if (gripRect.Width > 0)
 					{
@@ -301,20 +342,21 @@ namespace DayViewUIExtension
 						// Draw gripper border
 						using (Pen pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
 							g.DrawRectangle(pen, gripRect);
+
+						if (!hasIcon)
+						{
+							rect.X = gripRect.Right;
+							rect.Width -= (gripRect.Width + 4);
+						}
 					}
 					
-					//  Draw appointment border if needed
-					if (!isSelected && appointment.DrawBorder)
-					{
-						using (Pen pen = new Pen(appointment.BorderColor, 1))
-                            g.DrawRectangle(pen, rect.Left, rect.Top, rect.Width - 1, rect.Height - 1);
-					}
-
 					// draw appointment text
-                    rect.X = gripRect.Right;
-                    rect.Y += 2;
-                    rect.Width -= (gripRect.Width + 4);
-                    rect.Height -= 4;
+                    rect.Y += 3;
+
+					if (longAppt)
+						rect.Height = baseFont.Height;
+					else
+						rect.Height -= 3;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 

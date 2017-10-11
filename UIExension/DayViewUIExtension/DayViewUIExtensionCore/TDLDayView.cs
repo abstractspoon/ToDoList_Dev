@@ -13,11 +13,12 @@ namespace DayViewUIExtension
     public class TDLDayView : Calendar.DayView
     {
         private TDLRenderer m_Renderer;
+
 		System.Windows.Forms.Timer m_Timer;
 
-        public TDLDayView(System.Drawing.Font font)
+        public TDLDayView(System.Drawing.Font font, UIExtension.TaskIcon taskIcons)
         {
-            m_Renderer = new TDLRenderer();
+            m_Renderer = new TDLRenderer(taskIcons);
 
             InitializeComponent(font);
         }

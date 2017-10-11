@@ -156,15 +156,9 @@ IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL), m_hwndFrom(NULL)
+UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL)
 {
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
-}
-
-UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent, IntPtr hwndFrom) : m_hwndParent(NULL), m_hwndFrom(NULL)
-{
-	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
-	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
 bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime date)
@@ -264,6 +258,44 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
 
 	return (bRet != FALSE);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+UIExtension::TaskIcon::TaskIcon(IntPtr hwndParent) : m_hwndParent(NULL), m_hilTaskImages(NULL), m_iImage(-1)
+{
+	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
+}
+
+bool UIExtension::TaskIcon::Get(UInt32 dwTaskID)
+{
+	pin_ptr<int> p = &m_iImage;
+	m_hilTaskImages = (HIMAGELIST)::SendMessage(m_hwndParent, WM_IUI_GETTASKICON, dwTaskID, (LPARAM)p);
+
+	if ((m_hilTaskImages != NULL) && (m_iImage != -1))
+		return true;
+
+	m_hilTaskImages = NULL;
+	m_iImage = -1;
+
+	return false;
+}
+
+bool UIExtension::TaskIcon::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y)
+{
+	if ((m_hilTaskImages == NULL) || (m_iImage == -1))
+		return false;
+
+	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+
+	if (hDC == NULL)
+		return false;
+
+	bool bRes = (ImageList_Draw(m_hilTaskImages, m_iImage, hDC, x, y, ILD_TRANSPARENT) != FALSE);
+
+	dc->ReleaseHdc();
+
+	return bRes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

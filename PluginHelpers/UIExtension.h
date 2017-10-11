@@ -2,6 +2,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <CommCtrl.h>
+
 #include "PluginHelpers.h"
 #include "TaskList.h"
 #include "Preferences.h"
@@ -110,7 +112,6 @@ namespace Abstractspoon
 				{
 				public:
 					ParentNotify(IntPtr hwndParent);
-					ParentNotify(IntPtr hwndParent, IntPtr hwndFrom);
 
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime value);
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, double value);
@@ -126,10 +127,23 @@ namespace Abstractspoon
 
 				private:
 					HWND m_hwndParent;
-					HWND m_hwndFrom;
 
 				private:
 					bool DoNotify(const IUITASKMOD* pMod, int numMod);
+				};
+
+				ref class TaskIcon
+				{
+				public:
+					TaskIcon(IntPtr hwndParent);
+
+					bool Get(UInt32 dwTaskID);
+					bool Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y);
+					
+				private:
+					HWND m_hwndParent;
+					HIMAGELIST m_hilTaskImages;
+					int m_iImage;
 				};
 
 			};
