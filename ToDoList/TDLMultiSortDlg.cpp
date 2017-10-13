@@ -7,6 +7,7 @@
 #include "tdcstatic.h"
 
 #include "..\shared\enstring.h"
+#include "..\shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -57,7 +58,7 @@ END_MESSAGE_MAP()
 BOOL CTDLMultiSortDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
-	
+
 	BuildCombos();
 	EnableControls();
 
@@ -74,65 +75,47 @@ void CTDLMultiSortDlg::BuildCombos()
 		&m_cbSortBy3 
 	};
 
-	const TDC_COLUMN* SORTBY[3] = 
+	const TDC_COLUMN SORTBY[3] = 
 	{ 
-		&m_sort.col1.nBy, 
-		&m_sort.col2.nBy, 
-		&m_sort.col3.nBy 
+		m_sort.col1.nBy, 
+		m_sort.col2.nBy, 
+		m_sort.col3.nBy 
 	};
 
-	int nCol;
-
-	// regular columns
-	for (nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	for (int nSort = 0; nSort < 3; nSort++)
 	{
-		const TDCCOLUMN& col = COLUMNS[nCol];
-		TDC_COLUMN nColID = col.nColID;
+		CComboBox& combo = *COMBOS[nSort];
+		int nCol;
 
-		if (IsColumnVisible(nColID))
+		// regular columns
+		for (nCol = 0; nCol < NUM_COLUMNS; nCol++)
 		{
-			CEnString sColumn(col.nIDLongName);
-			
-			for (int nSort = 0; nSort < 3; nSort++)
+			const TDCCOLUMN& col = COLUMNS[nCol];
+			TDC_COLUMN nColID = col.nColID;
+
+			if (IsColumnVisible(nColID))
+				CDialogHelper::AddString(combo, col.nIDLongName, nColID);
+		}
+	
+		// custom columns
+		for (nCol = 0; nCol < m_aAttribDefs.GetSize(); nCol++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs.GetData()[nCol];
+
+			if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
 			{
-				int nIndex = COMBOS[nSort]->AddString(sColumn);
-				COMBOS[nSort]->SetItemData(nIndex, nColID);
-				
-				if (*(SORTBY[nSort]) == nColID)
-					COMBOS[nSort]->SetCurSel(nIndex);
+				TDC_COLUMN nColID = attribDef.GetColumnID();
+				CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+				CDialogHelper::AddString(combo, sColumn, nColID);
 			}
 		}
-	}
 
-	// custom columns
-	for (nCol = 0; nCol < m_aAttribDefs.GetSize(); nCol++)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs.GetData()[nCol];
+		// add blank item at top of 2nd and 3rd combo
+		if (nSort > 0)
+			CDialogHelper::AddString(combo, _T(""), TDCC_NONE);
 
-		if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
-		{
-			TDC_COLUMN nColID = attribDef.GetColumnID();
-			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-			for (int nSort = 0; nSort < 3; nSort++)
-			{
-				int nIndex = COMBOS[nSort]->AddString(sColumn);
-				COMBOS[nSort]->SetItemData(nIndex, nColID);
-				
-				if (*(SORTBY[nSort]) == nColID)
-					COMBOS[nSort]->SetCurSel(nIndex);
-			}
-		}
-	}
-
-	// add blank item at top of 2nd and 3rd combo
-	for (int nSort = 1; nSort < 3; nSort++)
-	{
-		int nIndex = COMBOS[nSort]->InsertString(0, _T(""));
-		COMBOS[nSort]->SetItemData(nIndex, TDCC_NONE);
-		
-		if (*(SORTBY[nSort]) == TDCC_NONE)
-			COMBOS[nSort]->SetCurSel(nIndex);
+		CDialogHelper::SelectItemByData(combo, SORTBY[nSort]);
 	}
 
 	// set selection to first item if first combo selection is not set
@@ -147,10 +130,13 @@ BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
 {
 	// special cases:
 	if (col == TDCC_CLIENT)
+	{
 		return TRUE;
-
+	}
 	else if (col == TDCC_NONE)
+	{
 		return FALSE;
+	}
 
 	// else test column
 	return m_mapVisibleColumns.Has(col);
@@ -158,30 +144,21 @@ BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
 
 void CTDLMultiSortDlg::OnSelchangeSortby1() 
 {
-	UpdateData();
-	
-	int nSel = m_cbSortBy1.GetCurSel();
-	m_sort.col1.nBy = (TDC_COLUMN)m_cbSortBy1.GetItemData(nSel);
+	m_sort.col1.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy1);
 
 	EnableControls();
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby2() 
 {
-	UpdateData();
-		
-	int nSel = m_cbSortBy2.GetCurSel();
-	m_sort.col2.nBy = (TDC_COLUMN)m_cbSortBy2.GetItemData(nSel);
+	m_sort.col2.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy2);
 
 	EnableControls();
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby3() 
 {
-	UpdateData();
-		
-	int nSel = m_cbSortBy3.GetCurSel();
-	m_sort.col3.nBy = (TDC_COLUMN)m_cbSortBy3.GetItemData(nSel);
+	m_sort.col3.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy3);
 
 	EnableControls();
 }
