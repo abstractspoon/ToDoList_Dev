@@ -1816,10 +1816,10 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, BOOL bAuto)
 
 					// use 'friendly' name as user for user
 					CFileSaveDialog dialog(IDS_SAVETASKLIST_TITLE, 
-											GetDefaultFileExt(), 
+											GetDefaultFileExt(FALSE), 
 											m_mgrToDoCtrls.GetFileName(nTDC, FALSE), 
 											EOFN_DEFAULTSAVE, 
-											GetFileFilter(), 
+											GetFileFilter(FALSE), 
 											this);
 					
 					dialog.m_ofn.nFilterIndex = 1; // .tdl
@@ -1963,33 +1963,45 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	return pExport;
 }
 
-LPCTSTR CToDoListWnd::GetFileFilter()
+BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bLoad) const
 {
-// 	static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
-// 	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
-// 	
-// 	if (Prefs().GetEnableTDLExtension() ||
-// 		CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
-// 	{
-// 		return TDLFILEFILTER;
-// 	}
+	if (bLoad)
+		return TRUE; // always
+
+	// Save
+	if (Prefs().GetEnableTDLExtension())
+		return TRUE;
+
+	// else
+	if 	(CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
+		return TRUE;
+
+	return FALSE;
+}
+
+LPCTSTR CToDoListWnd::GetFileFilter(BOOL bLoad) const
+{
+	if (WantTDLExtensionSupport(bLoad))
+	{
+		static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
+		return TDLFILEFILTER;
+	}
 	
 	// else
+	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
 	return XMLFILEFILTER;
 }
 
-LPCTSTR CToDoListWnd::GetDefaultFileExt()
+LPCTSTR CToDoListWnd::GetDefaultFileExt(BOOL bLoad) const
 {
-	static LPCTSTR TDLEXT = _T("tdl");
-	static LPCTSTR XMLEXT = _T("xml");
-	
-	if (Prefs().GetEnableTDLExtension() ||
-		CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
+	if (WantTDLExtensionSupport(bLoad))
 	{
+		static LPCTSTR TDLEXT = _T("tdl");
 		return TDLEXT;
 	}
 
 	// else
+	static LPCTSTR XMLEXT = _T("xml");
 	return XMLEXT;
 }
 
@@ -2018,10 +2030,10 @@ void CToDoListWnd::OnLoad()
 {
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_OPENTASKLIST_TITLE, 
-							GetDefaultFileExt(), 
+							GetDefaultFileExt(TRUE), 
 							NULL, 
 							EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT,
-							GetFileFilter(), 
+							GetFileFilter(TRUE), 
 							this);
 	
 	const UINT BUFSIZE = 1024 * 5;
@@ -3654,11 +3666,13 @@ void CToDoListWnd::OnSaveas()
 	CPreferences prefs;
 
 	// display the dialog
+	FileMisc::ReplaceExtension(sFilePath, GetDefaultFileExt(FALSE));
+
 	CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
-							GetDefaultFileExt(), 
+							GetDefaultFileExt(FALSE), 
 							sFilePath, 
 							EOFN_DEFAULTSAVE,
-							GetFileFilter(), 
+							GetFileFilter(FALSE), 
 							this);
 	
 	// always use .tdl for initializing the file dialog
