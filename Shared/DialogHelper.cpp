@@ -887,6 +887,24 @@ int CDialogHelper::AddString(CListBox& list, LPCTSTR szItem, DWORD dwItemData)
 	return nIndex;
 }
 
+int CDialogHelper::SelectItemByData(CListBox& list, DWORD dwItemData)
+{
+	int nItem = FindItemByData(list, dwItemData);
+	list.SetCurSel(nItem);
+
+	return nItem;
+}
+
+CString CDialogHelper::GetItem(const CListBox& list, int nItem)
+{
+	CString sItem;
+
+	if ((nItem >= 0) && (nItem < list.GetCount()))
+		list.GetText(nItem, sItem);
+
+	return sItem;
+}
+
 int CDialogHelper::FindItemByData(const CListBox& list, DWORD dwItemData)
 {
 	int nItem = list.GetCount();

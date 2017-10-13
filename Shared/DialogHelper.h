@@ -85,6 +85,8 @@ public:
 	static int FindItemByData(const CListBox& list, DWORD dwItemData);
 	static int AddString(CListBox& list, LPCTSTR szItem, DWORD dwItemData);
 	static int AddString(CListBox& list, UINT nIDItem, DWORD dwItemData);
+	static CString GetItem(const CListBox& list, int nItem);
+	static int SelectItemByData(CListBox& list, DWORD dwItemData);
 
 	// better dialog control shortcut handling
 	static BOOL ProcessDialogCtrlShortcut(const MSG* pMsg);
