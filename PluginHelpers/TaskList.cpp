@@ -278,6 +278,12 @@ String^ Task::GetIcon()
 	return GETTASKSTR(GetTaskIcon);
 }
 
+Boolean Task::HasIcon()
+{
+	LPCWSTR szIcon = GETTASKVAL(GetTaskIcon, NULL);
+	return (szIcon && *szIcon);
+}
+
 UInt32 Task::GetID()
 {
 	return GETTASKVAL(GetTaskID, 0);

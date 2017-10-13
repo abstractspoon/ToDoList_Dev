@@ -311,7 +311,7 @@ namespace DayViewUIExtension
 					{
 						CalendarItem item = appointment as CalendarItem;
 
-						if ((item != null) && m_TaskIcons.Get(item.Id))
+						if ((item != null) && (item.IsParent || item.HasIcon) && m_TaskIcons.Get(item.Id))
 						{
 							Point ptIcon = new Point(rect.Left + 2, rect.Top + 2);
 

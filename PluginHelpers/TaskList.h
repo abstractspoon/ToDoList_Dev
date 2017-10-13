@@ -69,7 +69,9 @@ namespace Abstractspoon
 				String^ GetExternalID();
 				String^ GetCreatedBy();
 				String^ GetPositionString();
+
 				String^ GetIcon();
+				Boolean HasIcon();
 
 				UInt32 GetID();
 				UInt32 GetColor();

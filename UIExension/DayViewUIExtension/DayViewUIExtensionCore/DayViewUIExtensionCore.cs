@@ -118,6 +118,9 @@ namespace DayViewUIExtension
                 if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
                     item.AllocTo = String.Join(", ", task.GetAllocatedTo());
 
+				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+					item.HasIcon = task.HasIcon();
+
                 item.TaskTextColor = task.GetTextDrawingColor();
 			}
 			else
@@ -128,6 +131,7 @@ namespace DayViewUIExtension
 				item.EndDate = item.OrgEndDate = GetEditableDueDate(task.GetDueDate());
 				item.StartDate = item.OrgStartDate = task.GetStartDate();
 				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+				item.HasIcon = task.HasIcon();
                 item.Id = taskID;
 				item.IsParent = task.IsParent();
 				item.TaskTextColor = task.GetTextDrawingColor();
@@ -167,6 +171,7 @@ namespace DayViewUIExtension
 				case UIExtension.TaskAttribute.DueDate:
 				case UIExtension.TaskAttribute.StartDate:
 				case UIExtension.TaskAttribute.AllocTo:
+				case UIExtension.TaskAttribute.Icon:
 					return true;
 			}
 
@@ -596,6 +601,7 @@ namespace DayViewUIExtension
 
 		public String AllocTo { get; set; }
 		public Boolean IsParent { get; set; }
+		public Boolean HasIcon { get; set; }
 
         public override DateTime EndDate
         {
