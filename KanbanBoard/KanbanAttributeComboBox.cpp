@@ -74,7 +74,7 @@ IUI_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(IUI_ATTRIBUTE nAttrib)
 {
-	return CDialogHelper::SelectItemByData(*this, (DWORD)nAttrib);
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nAttrib));
 }
 
 void CKanbanAttributeComboBox::ShowCustomAttribute(BOOL bShow)

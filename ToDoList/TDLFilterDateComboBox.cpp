@@ -139,5 +139,5 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
-	return CDialogHelper::SelectItemByData(*this, (DWORD)nFilter);
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nFilter));
 }

@@ -483,7 +483,7 @@ BOOL CTDLTimeTrackerDlg::Recreate()
 	if (!SelectTaskList(pTDC))
 		return FALSE;
 	
-	if (!SelectItemByData(m_cbTasks, dwTaskID))
+	if (CB_ERR == SelectItemByData(m_cbTasks, dwTaskID))
 		return FALSE;
 	
 	// restore position
@@ -741,7 +741,7 @@ void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRe
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CFilteredToDoCtrl* pTDC)
 {
 	// Select the tasklist
-	if (!SelectItemByData(m_cbTasklists, (DWORD)pTDC))
+	if (CB_ERR == SelectItemByData(m_cbTasklists, (DWORD)pTDC))
 		return FALSE;
 
 	// Update UI
@@ -830,7 +830,7 @@ void CTDLTimeTrackerDlg::RebuildTaskCombo()
 	
 		RefreshMaxDropWidth(m_cbTasks);
 
-		if (!SelectItemByData(m_cbTasks, dwSelID))
+		if (CB_ERR == SelectItemByData(m_cbTasks, dwSelID))
 			m_cbTasks.SetCurSel(0);
 	}
 }

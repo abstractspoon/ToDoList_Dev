@@ -955,12 +955,12 @@ BOOL CDialogHelper::IsChildOrSame(const CWnd* pWnd, const CWnd* pChild)
 	return IsChildOrSame(*pWnd, *pChild);
 }
 
-BOOL CDialogHelper::SelectItemByValue(CComboBox& combo, int nValue)
+int CDialogHelper::SelectItemByValue(CComboBox& combo, int nValue)
 {
 	CString sNum;
 	sNum.Format(_T("%d"), nValue);
 
-	return (CB_ERR != combo.SelectString(-1, sNum));
+	return combo.SelectString(-1, sNum);
 }
 
 int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
@@ -971,12 +971,12 @@ int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
 	return combo.FindString(-1, sNum);
 }
 
-BOOL CDialogHelper::SelectItemByData(CComboBox& combo, DWORD dwItemData)
+int CDialogHelper::SelectItemByData(CComboBox& combo, DWORD dwItemData)
 {
 	int nItem = FindItemByData(combo, dwItemData);
 	combo.SetCurSel(nItem);
 
-	return (nItem != CB_ERR);
+	return nItem;
 }
 
 int CDialogHelper::FindItemByData(const CComboBox& combo, DWORD dwItemData)

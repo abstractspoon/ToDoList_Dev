@@ -277,7 +277,7 @@ BOOL CTDLLanguageComboBox::SelectUserLanguage()
 		if (CDialogHelper::FindItemByData(*this, nLangID) == CB_ERR)
 			nLangID = LANG_ENGLISH;
 		
-		return CDialogHelper::SelectItemByData(*this, nLangID);
+		return (CB_ERR != CDialogHelper::SelectItemByData(*this, nLangID));
 	}
 
 	// else
