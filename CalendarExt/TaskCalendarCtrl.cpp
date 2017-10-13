@@ -748,7 +748,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		}
 		
 		// draw icon if there is enough space
-		if (!pTCI->sIcon.IsEmpty() && (nTaskHeight >= DEF_TASK_HEIGHT))
+		if (pTCI->bHasIcon && (nTaskHeight >= DEF_TASK_HEIGHT))
 		{
 			// draw at the start only
 			if (GetTaskTextOffset(pTCI->GetTaskID()) == 0)

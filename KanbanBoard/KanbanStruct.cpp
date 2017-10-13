@@ -180,7 +180,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	dwParentID = ki.dwParentID;
 	nLevel = ki.nLevel;
 	bLocked = ki.bLocked;
-	sIcon = ki.sIcon;
+	bHasIcon = ki.bHasIcon;
 	bSomeSubtaskDone = ki.bSomeSubtaskDone;
 
 	mapAttribValues.Copy(ki.mapAttribValues);
@@ -201,7 +201,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(bParent == ki.bParent) &&
 			(nLevel == ki.nLevel) &&
 			(bLocked == ki.bLocked) &&
-			(sIcon == ki.sIcon) &&
+			(bHasIcon == ki.bHasIcon) &&
 			(bSomeSubtaskDone == ki.bSomeSubtaskDone) &&
 			(dwParentID == ki.dwParentID) &&
 			mapAttribValues.MatchAll(ki.mapAttribValues));

@@ -29,7 +29,7 @@ struct GANTTITEM
 	COleDateTime dtDue, dtMaxDue; 
 	COleDateTime dtDone; 
 	COLORREF color;
-	CString sAllocTo, sIcon;
+	CString sAllocTo;
 	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	CStringArray aDepends;
@@ -37,7 +37,7 @@ struct GANTTITEM
 	int nPercent;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
 	int nPosition;
-	BOOL bLocked;
+	BOOL bLocked, bHasIcon;
 	
 	void MinMaxDates(const GANTTITEM& giOther);
 	BOOL IsDone(BOOL bIncGoodAs) const;

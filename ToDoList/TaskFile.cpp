@@ -1978,7 +1978,7 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
 
 		// add human readable format
-		DWORD dwAttribType = GetCustomAttributeType(sTypeID);
+		DWORD dwAttribType = GetCustomAttributeTypeByID(sTypeID);
 
 		if (dwAttribType & TDCCA_LISTMASK)
 		{
@@ -2298,7 +2298,7 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, boo
 // DEPRECATED
 LPCTSTR CTaskFile::GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const
 {
-	if ((GetCustomAttributeType(szID) & TDCCA_DATAMASK) == TDCCA_DATE)
+	if ((GetCustomAttributeTypeByID(szID) & TDCCA_DATAMASK) == TDCCA_DATE)
 		return GetTaskCustomAttributeData(hTask, szID, true);
 
 	// else

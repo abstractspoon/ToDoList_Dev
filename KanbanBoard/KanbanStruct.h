@@ -70,13 +70,13 @@ struct KANBANITEM
 	BOOL bDone, bGoodAsDone, bSomeSubtaskDone;
 	BOOL bParent, bFlag;
 	int nPercent, nLevel;
-	BOOL bLocked;
+	BOOL bLocked, bHasIcon;
 
 	CString sTitle, sPath;
 	double dTimeEst, dTimeSpent, dCost;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
-	CString sExternalID, sRecurrence, sCreatedBy, sFileRef, sIcon;
+	CString sExternalID, sRecurrence, sCreatedBy, sFileRef;
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;

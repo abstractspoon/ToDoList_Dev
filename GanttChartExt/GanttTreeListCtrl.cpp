@@ -701,7 +701,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
 	if (attrib.Has(IUI_ICON))
-		pGI->sIcon = pTasks->GetTaskIcon(hTask);
+		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 	if (attrib.Has(IUI_PERCENT))
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
@@ -981,7 +981,7 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 		pGI->bParent = pTasks->IsTaskParent(hTask);
 		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
-		pGI->sIcon = pTasks->GetTaskIcon(hTask);
+		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
@@ -1565,7 +1565,7 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
-				if (!pGI->sIcon.IsEmpty() || pGI->bParent)
+				if (pGI->bHasIcon || pGI->bParent)
 				{
 					int iImageIndex = -1;
 					HIMAGELIST hilTask = m_tree.GetTaskIcon(pGI->dwTaskID, iImageIndex);

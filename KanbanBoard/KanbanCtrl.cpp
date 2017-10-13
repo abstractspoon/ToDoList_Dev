@@ -559,7 +559,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	pKI->bParent = pTasks->IsTaskParent(hTask);
 	pKI->dwParentID = dwParentID;
 	pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
-	pKI->sIcon = pTasks->GetTaskIcon(hTask);
+	pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
@@ -691,7 +691,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			}
 
 			if (attrib.Has(IUI_ICON))
-				pKI->sIcon = pTasks->GetTaskIcon(hTask);
+				pKI->bHasIcon = Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 			
 			// Trackable attributes
 			CStringArray aValues;
