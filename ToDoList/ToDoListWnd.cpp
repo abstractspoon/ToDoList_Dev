@@ -1965,14 +1965,14 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 
 LPCTSTR CToDoListWnd::GetFileFilter()
 {
-	static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
-	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
-	
-	if (Prefs().GetEnableTDLExtension() ||
-		CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
-	{
-		return TDLFILEFILTER;
-	}
+// 	static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
+// 	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
+// 	
+// 	if (Prefs().GetEnableTDLExtension() ||
+// 		CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
+// 	{
+// 		return TDLFILEFILTER;
+// 	}
 	
 	// else
 	return XMLFILEFILTER;
