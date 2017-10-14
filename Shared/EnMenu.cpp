@@ -579,13 +579,31 @@ CString CEnMenu::GetMenuString(HMENU hMenu, UINT nIDItem, UINT nFlags)
 
 BOOL CEnMenu::SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags)
 {
-	ASSERT(nIDItem || (nFlags & MF_BYPOSITION));
-	ASSERT(!sItem.IsEmpty());
+	BOOL bByPosition = (nFlags & MF_BYPOSITION);
+	ASSERT(nIDItem || bByPosition);
 
+	if (sItem.IsEmpty())
+	{
+		if (bByPosition && (::GetMenuItemID(hMenu, nIDItem) == 0))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (!bByPosition && (nIDItem == 0))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		// else
+		return TRUE;
+	}
+	
 	MENUITEMINFO minfo;
 	minfo.cbSize = sizeof(minfo);
 	minfo.fMask = MIIM_STRING;
 	minfo.dwTypeData = (LPTSTR)(LPCTSTR)sItem;
 
-	return ::SetMenuItemInfo(hMenu, nIDItem, (nFlags & MF_BYPOSITION), &minfo);
+	return ::SetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo);
 }
