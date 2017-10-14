@@ -31,7 +31,7 @@ CEnString::CEnString(LPCTSTR lpszFormat, ... )
 		
 	if (!strFormat.IsEmpty())
 	{
-		TranslateString(strFormat, NULL);
+		TranslateString(strFormat);
 
 		va_list argList;
 		va_start(argList, lpszFormat);
@@ -80,6 +80,11 @@ CEnString::CEnString(UINT nID, HWND hwndRef)
 	LoadString(nID, hwndRef);
 }
 
+CEnString::CEnString(UINT nID, HMENU hMenu)
+{
+	LoadString(nID, hMenu);
+}
+
 CEnString::CEnString(const CString& str) : CString(str)
 {
 
@@ -103,7 +108,7 @@ void CEnString::Format(LPCTSTR lpszFormat, ...)
 		
 	if (!strFormat.IsEmpty())
 	{
-		TranslateString(strFormat, NULL);
+		TranslateString(strFormat);
 
 		va_list argList;
 		va_start(argList, lpszFormat);
@@ -141,14 +146,34 @@ BOOL CEnString::LoadString(UINT nID, HWND hwndRef, CString& sText)
 	return FALSE;
 }
 
-BOOL CEnString::LoadString(UINT nFormatID, HWND hwndRef)
+BOOL CEnString::LoadString(UINT nID, HWND hwndRef)
 {
-	return LoadString(nFormatID, hwndRef, *this);
+	return LoadString(nID, hwndRef, *this);
+}
+
+BOOL CEnString::LoadString(UINT nID, HMENU hMenu)
+{
+	CString sText;
+
+	if (sText.LoadString(nID))
+	{
+		if (TranslateString(sText, hMenu))
+			*this = sText;
+
+		return !IsEmpty();
+	}
+
+	return FALSE;
 }
 
 BOOL CEnString::Translate(HWND hwndRef)
 {
 	return TranslateString(*this, hwndRef);
+}
+
+BOOL CEnString::Translate(HMENU hMenu)
+{
+	return TranslateString(*this, hMenu);
 }
 
 void CEnString::DoNotTranslate() const
@@ -181,6 +206,27 @@ BOOL CEnString::TranslateString(CString& sText, HWND hwndRef)
 		LPTSTR szTranslated = NULL;
 
 		if (s_pTT->TranslateText(sText, hwndRef, szTranslated))
+		{
+			sText = szTranslated;
+
+			// cleanup
+			s_pTT->FreeTextBuffer(szTranslated);
+
+			return TRUE;
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL CEnString::TranslateString(CString& sText, HMENU /*hMenu*/)
+{
+	if (s_pTT && !sText.IsEmpty())
+	{
+		LPTSTR szTranslated = NULL;
+
+		if (s_pTT->TranslateMenu(sText, szTranslated))
 		{
 			sText = szTranslated;
 

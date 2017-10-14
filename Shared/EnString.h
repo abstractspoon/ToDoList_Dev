@@ -21,6 +21,7 @@ public:
 	CEnString(UINT nFormatID, LPCTSTR szText = NULL);
 	CEnString(UINT nFormatID, int nData);
 	CEnString(UINT nID, HWND hwndRef);
+	CEnString(UINT nID, HMENU hMenu);
 	CEnString(const CString& str);
 
 	~CEnString(); // non-virtual else it messes up LPCTSTR operator
@@ -29,16 +30,19 @@ public:
 	void Format(LPCTSTR lpszFormat, ...);
 
 	BOOL LoadString(UINT nFormatID, HWND hwndRef = NULL);
+	BOOL LoadString(UINT nFormatID, HMENU hMenu);
 	CSize FormatDC(CDC* pDC, int nWidth, int nStyle = ES_END);
 	CSize Draw(CDC* pDC, LPRECT lpRect, int nStyle = ES_END);
 	int GetCharacterCount(TCHAR nChar, BOOL bCaseSensitive = TRUE) const;
 	int Allocate(int nMinLen);
 
 	BOOL Translate(HWND hwndRef = NULL);
+	BOOL Translate(HMENU hMenu);
 	void DoNotTranslate() const;
 
 	static void SetLocalizer(ITransText* pTT);
-	static BOOL TranslateString(CString& sText, HWND hwndRef);
+	static BOOL TranslateString(CString& sText, HWND hwndRef = NULL);
+	static BOOL TranslateString(CString& sText, HMENU hMenu);
 	static BOOL TranslateStrings(CStringArray& aText, HWND hwndRef);
 	static void DoNotTranslateString(const CString& sText);
 	static int Allocate(CString& str, int nMinLen);
