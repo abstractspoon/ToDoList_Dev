@@ -2310,7 +2310,7 @@ BOOL Misc::EnsureUniqueAccelerators(CStringArray& aText)
 		else
 		{
 			// Use the next duplicate accelerator
-			cAccel = sText[nDupePos];
+			cAccel = sAccelerators[nDupePos];
 			Misc::SetAcceleratorPos(sText, nDupePos);
 
 			nDupePos++;
