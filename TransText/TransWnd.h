@@ -33,7 +33,7 @@ class CTransWnd : public CSubclassWnd
 public:
 	static CTransWnd* NewTransWnd(const CString& sClass, DWORD dwStyle);
 
-	CTransWnd(DWORD dwOptions = TWS_HANDLEALL);
+	CTransWnd(const CString& sClass, DWORD dwOptions = TWS_HANDLEALL);
 	virtual ~CTransWnd();
 	
 	void UpdateMenu() { TranslateMenu(::GetMenu(GetHwnd()), FALSE); }
@@ -44,6 +44,7 @@ protected:
 	DWORD m_dwOptions;
 	BOOL m_bInit;
 	BOOL m_bAllowTranslate;
+	CString m_sClassID;
 
 protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -60,7 +61,7 @@ protected:
 class CTransComboBox : public CTransWnd
 {
 public:
-	CTransComboBox() : CTransWnd(TWS_HANDLENONE) {}
+	CTransComboBox(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -80,7 +81,7 @@ protected:
 class CTransComboBoxEx : public CTransWnd
 {
 public:
-	CTransComboBoxEx() : CTransWnd(TWS_HANDLENONE) {}
+	CTransComboBoxEx(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -92,7 +93,7 @@ protected:
 class CTransListBox : public CTransWnd
 {
 public:
-	CTransListBox(BOOL bCheckListBox = FALSE) : CTransWnd(TWS_HANDLENONE), m_bCheckLB(bCheckListBox) { }
+	CTransListBox(const CString& sClass, BOOL bCheckListBox = FALSE);
 
 protected:
 	virtual void Initialize();
@@ -116,7 +117,7 @@ protected:
 class CTransTabCtrl : public CTransWnd
 {
 public:
-	CTransTabCtrl() : CTransWnd(TWS_HANDLENONE) {}
+	CTransTabCtrl(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -128,7 +129,7 @@ protected:
 class CTransHeaderCtrl : public CTransWnd
 {
 public:
-	CTransHeaderCtrl() : CTransWnd(TWS_HANDLENONE) {}
+	CTransHeaderCtrl(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -140,7 +141,7 @@ protected:
 class CTransListCtrl : public CTransWnd
 {
 public:
-	CTransListCtrl() : CTransWnd(TWS_HANDLENONE) {}
+	CTransListCtrl(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -152,7 +153,7 @@ protected:
 class CTransTooltips : public CTransWnd
 {
 public:
-	CTransTooltips() : CTransWnd(TWS_HANDLENONE) {}
+	CTransTooltips(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -164,7 +165,7 @@ protected:
 class CTransToolBar : public CTransWnd
 {
 public:
-	CTransToolBar() : CTransWnd(TWS_HANDLETOOLTIPS) {}
+	CTransToolBar(const CString& sClass);
 
 protected:
 	virtual void Initialize();
@@ -176,7 +177,7 @@ protected:
 class CTransStatusBar : public CTransWnd
 {
 public:
-	CTransStatusBar() : CTransWnd(TWS_HANDLETOOLTIPS) {}
+	CTransStatusBar(const CString& sClass);
 
 protected:
 	virtual void Initialize();

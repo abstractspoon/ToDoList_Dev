@@ -120,18 +120,7 @@ public:
 
 	BOOL TranslateText(LPCTSTR szText, HWND hWndRef, LPTSTR& szTranslated)
 	{
-		CString sText(szText);
-
-		if (CTransTextMgr::TranslateText(sText, hWndRef))
-		{
-			szTranslated = new TCHAR[sText.GetLength() + 1];
-			lstrcpy(szTranslated, sText);
-
-			return TRUE;
-		}
-
-		// else
-		return FALSE;
+		return TranslateText(szText, hWndRef, NULL, szTranslated);
 	}
 
 	void CTransText::FreeTextBuffer(LPTSTR& szTranslated)
@@ -145,6 +134,27 @@ public:
 		return CTransTextMgr::TranslateMenu(hMenu, hWndRef, bRecursive);
 	}
 	
+	BOOL TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated)
+	{
+		return TranslateText(szText, NULL, WC_MENU, szTranslated);
+	}
+	
+	BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPCWSTR szClassID, LPWSTR& szTranslated)
+	{
+		CString sText(szText);
+
+		if (CTransTextMgr::TranslateText(sText, hWndRef, szClassID))
+		{
+			szTranslated = new TCHAR[sText.GetLength() + 1];
+			lstrcpy(szTranslated, sText);
+
+			return TRUE;
+		}
+
+		// else
+		return FALSE;
+	}
+
 	void UpdateMenu(HWND hWnd)
 	{
 		CTransTextMgr::UpdateMenu(hWnd);

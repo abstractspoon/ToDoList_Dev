@@ -836,7 +836,7 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 		{
 			CEnString sMenu;
 			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
-			sMenu.Translate();
+			sMenu.Translate(pCmdUI->m_pMenu->GetSafeHmenu());
 			
 			// restrict url length to 250 pixels
 			CEnString sUrl(m_rtf.GetUrl(nUrl, TRUE));

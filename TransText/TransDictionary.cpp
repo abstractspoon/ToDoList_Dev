@@ -520,22 +520,44 @@ BOOL DICTITEM::Translate(CString& sText)
 	return TRUE;
 }
 
-BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID)
+BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, const CString& sClassID)
 {
-	if (!Misc::IsEmpty(szClassID))
-		return Translate(sText, szClassID);
-	 
-	// else
-	return Translate(sText, TransText::GetClassIDName(hWndRef));
+	ASSERT((hWndRef == NULL) || !sClassID.IsEmpty());
+
+	BOOL bTrans = FALSE;
+	BOOL bWantAccel = TransText::ClassWantsAccelerator(sClassID);
+
+	if (sClassID.IsEmpty())
+		bTrans = Translate(sText, TransText::GetTextClassIDName());
+	else
+		bTrans = Translate(sText, sClassID);
+
+	if (bTrans)
+	{
+		if (bWantAccel)
+			TransText::EnsureAccelerator(sText);
+		else
+			TransText::RemoveAccelerator(sText);
+	}
+
+	return bTrans;
 }
 
 BOOL DICTITEM::Translate(CString& sText, HMENU /*hMenu*/)
 {
-	return Translate(sText, TransText::GetMenuClassIDName()); 
+	if (Translate(sText, TransText::GetMenuClassIDName()))
+	{
+		TransText::EnsureAccelerator(sText); // always
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
 {
+	BOOL bTrans = FALSE;
+
 	// 1. check for an 'alternative' entry
 	if (!sClassID.IsEmpty() && !m_mapAlternatives.IsEmpty())
 	{
@@ -544,27 +566,33 @@ BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
 		if (m_mapAlternatives.Lookup(sClassID, sTextOut) && !sTextOut.IsEmpty())
 		{
 			sText = sTextOut;
-			return TRUE;
+			bTrans = TRUE;
 		}
 	}
 
-	// 2. check root item
-	if (sClassID.IsEmpty() || m_sClassID.IsEmpty() || sClassID == m_sClassID)
+	if (!bTrans)
 	{
-		BOOL bTrans = Translate(sText);
+		// 2. check root item
+		if (sClassID.IsEmpty() || m_sClassID.IsEmpty() || (sClassID == m_sClassID))
+		{
+			bTrans = Translate(sText);
 
-		// if the root item has no class ID then use this one
-		if (WantAddToDictionary() && m_sClassID.IsEmpty() && !sClassID.IsEmpty())
-			m_sClassID = sClassID;
+			// if the root item has no class ID then use this one
+			if (WantAddToDictionary() && m_sClassID.IsEmpty() && !sClassID.IsEmpty())
+				m_sClassID = sClassID;
+		}
 
-		return bTrans;
+		if (!bTrans)
+		{
+			// 3. No translation so add as an alternative and use the root translation
+			if (WantAddToDictionary())
+				m_mapAlternatives[sClassID] = _T("");
+
+			bTrans = Translate(sText);
+		}
 	}
 
-	// 3. No translation so add as an alternative and use the root translation
-	if (WantAddToDictionary())
-		m_mapAlternatives[sClassID] = _T("");
-
-	return Translate(sText);
+	return bTrans;
 }
 
 BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
@@ -901,12 +929,12 @@ void CTransDictionary::IgnoreString(const CString& sText, BOOL bPrepare)
 	if (sText.IsEmpty())
 		return;
 	
-	CString sTemp(sText);
+	CString sLookup(sText);
 	
-	if (bPrepare && !TransText::PrepareLookupText(sTemp))
+	if (bPrepare && !TransText::PrepareLookupText(sLookup))
 		return;
 	
-	m_mapStringIgnore[sTemp] = NULL;
+	m_mapStringIgnore[sLookup] = NULL;
 }
 
 BOOL CTransDictionary::WantIgnore(const CString& sText) const
@@ -1043,6 +1071,8 @@ int CTransDictionary::CompareProc(const void* pFirst, const void* pSecond)
 
 BOOL CTransDictionary::HasDictItem(CString& sText) const
 {
+	CString sOrgText(sText);
+
 	if (TransText::PrepareLookupText(sText) && !WantIgnore(sText))
 	{
 		DICTITEM* pDI = NULL;
@@ -1050,19 +1080,27 @@ BOOL CTransDictionary::HasDictItem(CString& sText) const
 	}	
 
 	// all else
+	sText = sOrgText;
 	return FALSE;
 }
 
 DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 {
-	// check for invalid text or if we're ignoring this item
+	CString sOrgText(sText);
+
+	// check for invalid text
 	if (!TransText::PrepareLookupText(sText))
 	{
 		IgnoreString(sText, FALSE);
+
+		sText = sOrgText;
 		return NULL;
 	}
-	else if (WantIgnore(sText))
+
+	// check if we're ignoring this item
+	if (WantIgnore(sText))
 	{
+		sText = sOrgText;
 		return NULL;
 	}
 
@@ -1089,13 +1127,12 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 
 const DICTITEM* CTransDictionary::GetDictItem(CString& sText) const
 {
+	CString sOrgText(sText);
+
 	// check for invalid text or if we're ignoring this item
-	if (!TransText::PrepareLookupText(sText))
+	if (!TransText::PrepareLookupText(sText) || WantIgnore(sText))
 	{
-		return NULL;
-	}
-	else if (WantIgnore(sText))
-	{
+		sText = sOrgText;
 		return NULL;
 	}
 

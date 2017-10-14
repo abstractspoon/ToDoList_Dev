@@ -116,6 +116,7 @@ public:
 	virtual BOOL TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 	virtual BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;
 	virtual BOOL TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive = TRUE) = 0;
+	virtual BOOL TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 
 	virtual void UpdateMenu(HWND hWnd) = 0;
 

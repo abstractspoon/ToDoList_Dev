@@ -103,7 +103,7 @@ CString TransText::GetFriendlyClass(const CString& sClass, HWND hWndRef)
 CString TransText::GetClassIDName(HWND hWnd)
 {
 	if (hWnd == NULL)
-		return _T("text");
+		return GetTextClassIDName();
 	
 	return GetFriendlyClass(CWinClasses::GetClassEx(hWnd), hWnd);
 }
@@ -111,6 +111,11 @@ CString TransText::GetClassIDName(HWND hWnd)
 CString TransText::GetMenuClassIDName()
 {
 	return GetFriendlyClass(WC_MENU);
+}
+
+CString TransText::GetTextClassIDName()
+{
+	return _T("text");
 }
 
 BOOL TransText::PrepareLookupText(CString& sText, BOOL bDecodeChars)
@@ -198,4 +203,60 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 	}
 	
 	return (nRes == TDCLEAN_CHANGE);
+}
+
+BOOL TransText::RemoveAccelerator(CString& sText)
+{
+	ASSERT (!sText.IsEmpty());
+
+	int nAccel = sText.Find('&'); 
+
+	if (nAccel == -1)
+		return FALSE;
+
+	BOOL bDoublesReplaced = sText.Replace(_T("&&"), _T("``"));
+	BOOL bSinglesReplaced = sText.Replace(_T("&"), _T(""));
+
+	if (bDoublesReplaced)
+		sText.Replace(_T("``"), _T("&&"));
+
+	return bSinglesReplaced;
+}
+
+BOOL TransText::EnsureAccelerator(CString& sText)
+{
+	if (sText.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Look for existing accelerator (single &)
+	int nAccel = sText.Find('&'), nLast = (sText.GetLength() - 1); 
+
+	while ((nAccel != -1) && (nAccel < nLast))
+	{
+		if (sText[nAccel + 1] != '&')
+			return TRUE;
+
+		nAccel = sText.Find('&', (nAccel + 1)); 
+	}
+
+	sText = ('&' + sText);
+	return TRUE;
+}
+
+BOOL TransText::ClassWantsAccelerator(const CString& sClass)
+{
+	if (sClass.IsEmpty())
+		return FALSE;
+
+	if (CWinClasses::IsClass(sClass, WC_BUTTON) ||
+		CWinClasses::IsClass(sClass, WC_STATIC) ||
+		CWinClasses::IsClass(sClass, WC_MENU))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
 }

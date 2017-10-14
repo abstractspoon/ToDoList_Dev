@@ -38,8 +38,9 @@ public:
 	static void SetTranslationOption(ITT_TRANSLATEOPTION nOption);
 	static ITT_TRANSLATEOPTION GetTranslationOption();
 	
-	static BOOL TranslateText(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
+	static BOOL TranslateText(CString& sText, HWND hWndRef, LPCTSTR szClassID);
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = FALSE);
+	static BOOL TranslateMenu(CString& sText);
 
 	static void UpdateMenu(HWND hWnd);
 	static void UpdateMenu(HMENU hMenu);

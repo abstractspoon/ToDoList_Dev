@@ -173,7 +173,7 @@ BOOL CTransTextMgr::WantTranslation(HWND hWnd, UINT nMsg) const
 	{
 	case WM_SETTEXT:
 		{
-			CString sClass = CWinClasses::GetClass(hWnd);
+			CString sClass = CWinClasses::GetClassEx(hWnd);
 
 			if (CWinClasses::IsEditControl(sClass))
 			{

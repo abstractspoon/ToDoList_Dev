@@ -26,7 +26,7 @@ public:
 	DICTITEM& operator= (const DICTITEM& di);
 
 	BOOL Translate(CString& sText);
-	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
+	BOOL Translate(CString& sText, HWND hWndRef, const CString& sClassID);
 	BOOL Translate(CString& sText, HMENU hMenu);
 	BOOL IsTranslated() const;
 

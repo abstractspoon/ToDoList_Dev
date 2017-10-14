@@ -43,7 +43,8 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bLabel, int nComboLenDLU, const CContent
 
 	if (bLabel)
 	{
-		CEnString sLabel(IDS_TDC_FIELD_COMMENTS);
+		CString sLabel;
+		sLabel.LoadString(IDS_TDC_FIELD_COMMENTS);
 		int nLabelLen = 40;
 
 		AddRCControl(_T("CONTROL"), WC_STATIC, sLabel, SS_CENTERIMAGE, 0, 0, 1, nLabelLen, 12, IDC_COMBOLABEL);

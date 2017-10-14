@@ -20,7 +20,12 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // CTransWnd implementation
 
-CTransWnd::CTransWnd(DWORD dwOptions) : m_bInit(FALSE), m_bAllowTranslate(TRUE), m_dwOptions(dwOptions)
+CTransWnd::CTransWnd(const CString& sClass, DWORD dwOptions) 
+	: 
+	m_bInit(FALSE), 
+	m_bAllowTranslate(TRUE), 
+	m_dwOptions(dwOptions),
+	m_sClassID(sClass)
 {
 }
 
@@ -55,15 +60,15 @@ BOOL CTransWnd::HasFlag(DWORD dwFlag)
 void CTransWnd::Initialize()
 {
 	CWnd* pThis = GetCWnd();
-	
-	// caption
+
+	// translate caption
 	CString sText;
 	pThis->GetWindowText(sText);
 
 	if (TranslateText(sText))
 		pThis->SetWindowText(sText);
 
-	// menu - captioned windows only
+	// translate menu - captioned windows only
 	if (GetStyle() & WS_CAPTION)
 	{
 		HMENU hMenu = ::GetMenu(*pThis);
@@ -78,7 +83,7 @@ BOOL CTransWnd::TranslateText(CString& sText)
 	if (!m_bAllowTranslate)
 		return FALSE;
 
-	return CTransTextMgr::TranslateText(sText, GetHwnd());
+	return CTransTextMgr::TranslateText(sText, GetHwnd(), m_sClassID);
 }
 
 LRESULT CTransWnd::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -119,11 +124,11 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 {
 	if (CWinClasses::IsClass(sClass, WC_STATIC))
 	{
-		return new CTransWnd; // standard
+		return new CTransWnd(sClass); // standard
 	}
 	else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 	{
-		return new CTransWnd; // standard
+		return new CTransWnd(sClass); // standard
 	}
 	else if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
 	{
@@ -132,8 +137,9 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 		BOOL bHasStrings = (dwStyle & CBS_HASSTRINGS);
 
 		UINT nStyle = (dwStyle & 0xf);
+
 		if ((nStyle == CBS_DROPDOWNLIST) && (!bOwnerDraw || bHasStrings))
-			return new CTransComboBox;
+			return new CTransComboBox(sClass);
 	}
 	else if (CWinClasses::IsClass(sClass, WC_LISTBOX) || 
 			CWinClasses::IsClass(sClass, WC_CHECKLISTBOX))
@@ -145,51 +151,51 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 		if (!bOwnerDraw || bHasStrings)
 		{
 			BOOL bCheckLB = CWinClasses::IsClass(sClass, WC_CHECKLISTBOX);
-			return new CTransListBox(bCheckLB);
+			return new CTransListBox(sClass, bCheckLB);
 		}
 	}
 	else if (CWinClasses::IsClass(sClass, WC_TOOLBAR))
 	{
-		return new CTransWnd;//ToolBar;
+		return new CTransWnd(sClass);//ToolBar;
 	}
 	else if (CWinClasses::IsClass(sClass, WC_STATUSBAR))
 	{
-		return new CTransStatusBar;
+		return new CTransStatusBar(sClass);
 	}
 	else if (CWinClasses::IsClass(sClass, WC_TABCONTROL))
 	{
-		return new CTransTabCtrl; 
+		return new CTransTabCtrl(sClass); 
 	}
 	else if (CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
 	{
 		// we do not translate dropdown
 		if (dwStyle & CBS_SIMPLE) // this will also catch CBS_DROPDOWNLIST
-			return new CTransComboBoxEx;
+			return new CTransComboBoxEx(sClass);
 	}
 	else if (CWinClasses::IsClass(sClass, WC_HEADER))
 	{
-		return new CTransHeaderCtrl; // we translate the item text
+		return new CTransHeaderCtrl(sClass); // we translate the item text
 	}
 	else if (CWinClasses::IsClass(sClass, WC_LISTVIEW))
 	{
-		return new CTransListCtrl; // we translate the header item text
+		return new CTransListCtrl(sClass); // we translate the header item text
 	}
 	else if (CWinClasses::IsClass(sClass, WC_DIALOGBOX))
 	{
-		return new CTransWnd; // standard
+		return new CTransWnd(sClass); // standard
 	}
 	else if (CWinClasses::IsClass(sClass, WC_TOOLTIPS))
 	{
-		return new CTransTooltips; 
+		return new CTransTooltips(sClass); 
 	}
 	else if (CWinClasses::IsClassEx(sClass, WC_MFCMDIFRAME))
 	{
-		return new CTransWnd; 
+		return new CTransWnd(sClass); 
 	}
 	else if (CWinClasses::IsClassEx(sClass, WC_MFCFRAME))
 	{
 		// don't translated application title because it's dynamic
-		return new CTransWnd/*(TWS_NOHANDLESETTEXT)*/; 
+		return new CTransWnd(sClass/*, (TWS_NOHANDLESETTEXT*/); 
 	}
 
 	// everything else
@@ -198,6 +204,12 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 
 //////////////////////////////////////////////////////////////////////
 // CTransWnd derived classes
+
+CTransComboBox::CTransComboBox(const CString& sClass) 
+	: CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_COMBOBOX));
+}
 
 void CTransComboBox::Initialize() 
 {
@@ -276,6 +288,13 @@ LRESULT CTransComboBox::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 //////////////////////////////////////////////////////////////////////
 
+CTransComboBoxEx::CTransComboBoxEx(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_COMBOBOXEX));
+}
+
 void CTransComboBoxEx::Initialize() 
 {
 	if (!m_bAllowTranslate)
@@ -334,6 +353,14 @@ LRESULT CTransComboBoxEx::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTransListBox::CTransListBox(const CString& sClass, BOOL bCheckListBox) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE), m_bCheckLB(bCheckListBox) 
+{
+	ASSERT((!bCheckListBox && CWinClasses::IsClass(sClass, WC_LISTBOX)) || 
+		(bCheckListBox && CWinClasses::IsClass(sClass, WC_CHECKLISTBOX)));
+}
 
 void CTransListBox::Initialize()
 {
@@ -417,6 +444,12 @@ LRESULT CTransListBox::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 //////////////////////////////////////////////////////////////////////
 
+CTransTabCtrl::CTransTabCtrl(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_TABCONTROL));
+}
 void CTransTabCtrl::Initialize() 
 {
 	if (m_bAllowTranslate)
@@ -472,6 +505,13 @@ LRESULT CTransTabCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTransHeaderCtrl::CTransHeaderCtrl(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_HEADER));
+}
 
 void CTransHeaderCtrl::Initialize() 
 {
@@ -529,6 +569,13 @@ LRESULT CTransHeaderCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 
 //////////////////////////////////////////////////////////////////////
 
+CTransListCtrl::CTransListCtrl(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_LISTVIEW));
+}
+
 void CTransListCtrl::Initialize() 
 {
 	// do nothing. header control will handle itself
@@ -567,6 +614,13 @@ LRESULT CTransListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTransTooltips::CTransTooltips(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLENONE) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_TOOLTIPS));
+}
 
 void CTransTooltips::Initialize()
 {
@@ -614,6 +668,13 @@ LRESULT CTransTooltips::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 //////////////////////////////////////////////////////////////////////
 
+CTransToolBar::CTransToolBar(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLETOOLTIPS) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_TOOLBAR));
+}
+
 void CTransToolBar::Initialize()
 {
 	// handle tooltips too
@@ -634,6 +695,13 @@ LRESULT CTransToolBar::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTransStatusBar::CTransStatusBar(const CString& sClass) 
+	: 
+	CTransWnd(sClass, TWS_HANDLETOOLTIPS) 
+{
+	ASSERT(CWinClasses::IsClass(sClass, WC_STATUSBAR));
+}
 
 void CTransStatusBar::Initialize()
 {
