@@ -1060,6 +1060,7 @@ int CDialogHelper::AddString(CComboBox& combo, LPCTSTR szItem, DWORD dwItemData)
 
 CString CDialogHelper::GetCtrlText(const CWnd* pWnd)
 {
+	ASSERT_VALID(pWnd);
 	CString sText;
 
 	if (pWnd)
@@ -1068,7 +1069,147 @@ CString CDialogHelper::GetCtrlText(const CWnd* pWnd)
 	return sText;
 }
 
-CString CDialogHelper::GetCtrlLabel(const CWnd* pWnd)
+BOOL CDialogHelper::CtrlMatchesClassFilter(const CWnd* pCtrl, LPCTSTR szClassFilter)
+{
+	ASSERT_VALID(pCtrl);
+
+	if (Misc::IsEmpty(szClassFilter))
+		return TRUE;
+	
+	// else
+	return CWinClasses::IsClass(pCtrl->GetSafeHwnd(), szClassFilter);
+}
+
+BOOL CDialogHelper::CtrlMatchesClassFilters(const CWnd* pCtrl, const LPCTSTR szClassFilters[], int nNumFilters)
+{
+	ASSERT_VALID(pCtrl);
+	ASSERT(nNumFilters);
+
+	int nFilter = nNumFilters;
+
+	while (nFilter--)
+	{
+		LPCTSTR szClassFilter = szClassFilters[nFilter];
+		ASSERT_POINTER(szClassFilter, LPCTSTR);
+
+		if (CWinClasses::IsClass(pCtrl->GetSafeHwnd(), szClassFilter))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CDialogHelper::SetCtrlsText(CWnd* pParent, const CStringArray& aItems)
+{
+	ASSERT_VALID(pParent);
+	
+	if (!aItems.GetSize() == GetCtrlsCount(pParent))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	// else
+	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+	int nChild = 0;
+
+	while (pChild)
+	{
+		pChild->SetWindowText(aItems[nChild]);
+		nChild++;
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return TRUE;
+}
+
+BOOL CDialogHelper::SetCtrlsText(CWnd* pParent, const CStringArray& aItems, LPCTSTR szClass)
+{
+	if (Misc::IsEmpty(szClass))
+		return SetCtrlsText(pParent, aItems);
+
+	// else
+	LPCTSTR szClasses[] = { szClass };
+
+	return SetCtrlsText(pParent, aItems, szClasses, 1);
+}
+
+BOOL CDialogHelper::SetCtrlsText(CWnd* pParent, const CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses)
+{
+	ASSERT_VALID(pParent);
+	
+	if (!aItems.GetSize() == GetCtrlsCount(pParent))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	// else
+	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+	int nChild = 0;
+
+	while (pChild)
+	{
+		if (CtrlMatchesClassFilters(pChild, szClasses, nNumClasses))
+		{
+			pChild->SetWindowTextW(aItems[nChild]);
+			nChild++;
+		}
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return TRUE;
+}
+
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems)
+{
+	ASSERT_VALID(pParent);
+
+	aItems.RemoveAll();
+
+	const CWnd* pChild = pParent->GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		aItems.Add(GetCtrlText(pChild));
+		pChild = pChild->GetNextWindow();
+	}
+
+	return aItems.GetSize();
+}
+
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass)
+{
+	if (Misc::IsEmpty(szClass))
+		return GetCtrlsText(pParent, aItems);
+
+	// else
+	LPCTSTR szClasses[] = { szClass };
+
+	return GetCtrlsText(pParent, aItems, szClasses, 1);
+}
+
+int CDialogHelper::GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses)
+{
+	ASSERT_VALID(pParent);
+	ASSERT(nNumClasses);
+
+	const CWnd* pChild = pParent->GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		if (CtrlMatchesClassFilters(pChild, szClasses, nNumClasses))
+			aItems.Add(GetCtrlText(pChild));
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return aItems.GetSize();
+}
+
+CString CDialogHelper::GetCtrlLabel(const CWnd* pWnd, BOOL bStripAccelerator)
 {
 	if (!pWnd)
 		return "";
@@ -1083,10 +1224,13 @@ CString CDialogHelper::GetCtrlLabel(const CWnd* pWnd)
 			
 	while (pPrev)
 	{
-		if (CWinClasses::IsClass(*pPrev, WC_STATIC))
+		if (CtrlMatchesClassFilter(pPrev, WC_STATIC))
 		{
 			pPrev->GetWindowText(sText);
-			sText.Replace(_T("&"), _T(""));
+
+			if (bStripAccelerator)
+				Misc::RemoveAccelerator(sText);
+
 			break;
 		}
 
@@ -1343,15 +1487,35 @@ void CDialogHelper::SetCtrlState(HWND hCtrl, RT_CTRLSTATE nState)
 	}
 }
 
-int CDialogHelper::GetChildCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass)
+int CDialogHelper::GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass)
 {
-	aCtrlIDs.RemoveAll();
+	ASSERT((szClass == NULL) || !Misc::IsEmpty(szClass));
 
-	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+	int nCount = 0;
+	const CWnd* pChild = pParent->GetWindow(GW_CHILD);
 
 	while (pChild)
 	{
 		if (!szClass || CWinClasses::IsClass(*pChild, szClass))
+			nCount++;
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return nCount;
+}
+
+int CDialogHelper::GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass)
+{
+	ASSERT((szClass == NULL) || !Misc::IsEmpty(szClass));
+
+	aCtrlIDs.RemoveAll();
+
+	const CWnd* pChild = pParent->GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		if (CtrlMatchesClassFilter(pChild, szClass))
 		{
 			aCtrlIDs.Add(pChild->GetDlgCtrlID());
 		}
@@ -1360,6 +1524,133 @@ int CDialogHelper::GetChildCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LP
 	}
 
 	return aCtrlIDs.GetSize();
+}
+
+int CDialogHelper::GetCtrlAccelerators(const CWnd* pParent, CString& sAccelerators)
+{
+	sAccelerators.Empty();
+
+	CWnd* pChild = pParent->GetWindow(GW_CHILD);
+
+	while (pChild)
+	{
+		TCHAR cAccel = GetChildAccelerator(pChild);
+
+		if (cAccel && (sAccelerators.Find(cAccel) == -1))
+			sAccelerators += cAccel;
+
+		pChild = pChild->GetNextWindow();
+	}
+
+	return sAccelerators.GetLength();
+}
+
+TCHAR CDialogHelper::GetChildAccelerator(const CWnd* pCtrl)
+{
+	CString sClassID = CWinClasses::GetClass(*pCtrl);
+
+	if (CWinClasses::IsClass(sClassID, WC_STATIC) ||
+		CWinClasses::IsClass(sClassID, WC_BUTTON))
+	{
+		if (pCtrl->GetWindowTextLength())
+		{
+			CString sText;
+			pCtrl->GetWindowText(sText);
+
+			return Misc::GetAccelerator(sText);
+		}
+	}
+	else // look for previous static label
+	{
+		const CWnd* pPrev = pCtrl->GetNextWindow(GW_HWNDPREV);
+
+		if (pPrev && CWinClasses::IsClass(*pPrev, WC_STATIC))
+			return GetChildAccelerator(pPrev);
+	}
+
+	// all else 
+	return 0;
+}
+
+TCHAR CDialogHelper::EnsureUniqueAccelerator(CWnd* pCtrl, const CString& sExclude)
+{
+	CString sClassID = CWinClasses::GetClass(*pCtrl);
+
+	if (CWinClasses::IsClass(sClassID, WC_STATIC) ||
+		CWinClasses::IsClass(sClassID, WC_BUTTON))
+	{
+		if (pCtrl->GetWindowTextLength())
+		{
+			CString sText;
+			pCtrl->GetWindowText(sText);
+
+			TCHAR cAccel = Misc::GetAccelerator(sText);
+
+			if (sExclude.Find(cAccel) != -1)
+			{
+				cAccel = Misc::EnsureUniqueAccelerator(sText, sExclude);
+
+				if (cAccel)
+					pCtrl->SetWindowText(sText);
+			}
+
+			return cAccel;
+		}
+	}
+
+	// all else 
+	return 0;
+}
+
+TCHAR CDialogHelper::EnsureUniqueAccelerator(CString& sText, HWND hWndRef)
+{
+	int nTextLen = sText.GetLength();
+
+	if (nTextLen == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Look for existing accelerator (single &)
+	if (Misc::HasAccelerator(sText)) 
+		return TRUE;
+
+	// Find a unique accelerator
+	if (::IsWindow(hWndRef))
+	{
+		const CWnd* pParent = CWnd::FromHandle(::GetParent(hWndRef));
+		CString sAccelerators;
+
+		if (CDialogHelper::GetCtrlAccelerators(pParent, sAccelerators))
+		{
+			if (Misc::EnsureUniqueAccelerator(sText, sAccelerators))
+				return TRUE;
+		}
+	}
+
+	// else Make the first letter an accelerator
+	sText = ('&' + sText);
+	return TRUE;
+}
+
+BOOL CDialogHelper::EnsureUniqueAccelerators(CWnd* pParent)
+{
+	ASSERT_VALID(pParent);
+
+	CStringArray aItems;
+	
+	LPCTSTR szClasses[] = { WC_BUTTON, WC_STATIC };
+	int NUM_CLASSES = (sizeof(szClasses) / sizeof(LPCTSTR));
+
+	if (GetCtrlsText(pParent, aItems, szClasses, NUM_CLASSES))
+	{
+		Misc::EnsureUniqueAccelerators(aItems);
+
+		return SetCtrlsText(pParent, aItems, szClasses, NUM_CLASSES);
+	}
+
+	return TRUE;
 }
 
 void CDialogHelper::EnableAllCtrls(const CWnd* pParent, BOOL bEnable)

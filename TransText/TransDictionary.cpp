@@ -520,22 +520,23 @@ BOOL DICTITEM::Translate(CString& sText)
 	return TRUE;
 }
 
-BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, const CString& sClassID)
+BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, const CString& sClassID, BOOL bValidateAccelerator)
 {
 	ASSERT((hWndRef == NULL) || !sClassID.IsEmpty());
 
 	BOOL bTrans = FALSE;
-	BOOL bWantAccel = TransText::ClassWantsAccelerator(sClassID);
 
 	if (sClassID.IsEmpty())
 		bTrans = Translate(sText, TransText::GetTextClassIDName());
 	else
 		bTrans = Translate(sText, sClassID);
 
-	if (bTrans)
+	if (bTrans && bValidateAccelerator)
 	{
+		BOOL bWantAccel = TransText::ClassWantsAccelerator(sClassID);
+
 		if (bWantAccel)
-			TransText::EnsureAccelerator(sText);
+			TransText::EnsureAccelerator(sText, hWndRef);
 		else
 			TransText::RemoveAccelerator(sText);
 	}
@@ -543,11 +544,13 @@ BOOL DICTITEM::Translate(CString& sText, HWND hWndRef, const CString& sClassID)
 	return bTrans;
 }
 
-BOOL DICTITEM::Translate(CString& sText, HMENU /*hMenu*/)
+BOOL DICTITEM::Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator)
 {
 	if (Translate(sText, TransText::GetMenuClassIDName()))
 	{
-		TransText::EnsureAccelerator(sText); // always
+		if (bValidateAccelerator)
+			TransText::EnsureAccelerator(sText, hMenu);
+
 		return TRUE;
 	}
 
@@ -1166,11 +1169,11 @@ BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 	return FALSE;
 }
 
-BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID)
+BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID, BOOL bValidateAccelerator)
 {
 	DICTITEM* pDI = GetDictItem(sText, TRUE); 
 
-	if (pDI && pDI->Translate(sText, hWndRef, szClassID))
+	if (pDI && pDI->Translate(sText, hWndRef, szClassID, bValidateAccelerator))
 	{
 		ASSERT(!sText.IsEmpty());
 
@@ -1255,7 +1258,7 @@ BOOL CTransDictionary::TranslateMenuShortcut(CString& sShortcut)
 	return (!sShortcut.IsEmpty());
 }
 			
-BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu)
+BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, BOOL bValidateAccelerator)
 {
 	// trim off trailing shortcut
 	CString sShortcut;
@@ -1270,7 +1273,7 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu)
 
 	DICTITEM* pDI = GetDictItem(sItem, TRUE);
 	
-	if (pDI && pDI->Translate(sItem, hMenu))
+	if (pDI && pDI->Translate(sItem, hMenu, bValidateAccelerator))
 	{
 		// translate and reattach any shortcut
 		if (TranslateMenuShortcut(sShortcut))

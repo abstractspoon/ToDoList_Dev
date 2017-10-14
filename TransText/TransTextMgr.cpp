@@ -9,6 +9,7 @@
 
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\enmenu.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -461,8 +462,8 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 	if (!hMenu || !::IsMenu(hMenu))
 		return FALSE;
 
-	int nCount = (int)::GetMenuItemCount(hMenu);
 	CTransTextMgr& ttm = CTransTextMgr::GetInstance();
+	int nCount = (int)::GetMenuItemCount(hMenu);
 
 	for (int nPos = 0; nPos < nCount; nPos++)
 	{
@@ -472,25 +473,12 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 		if (!nCmdID || TransText::IsOwnerDraw(nCmdID, hMenu) || !ttm.WantTranslation(nCmdID))
 			continue;
 
-		CString sItem;
-		int nLen = ::GetMenuString(hMenu, nPos, NULL, 0, MF_BYPOSITION);
-
-		::GetMenuString(hMenu, nPos, sItem.GetBuffer(nLen + 1), nLen + 1, MF_BYPOSITION);
-		sItem.ReleaseBuffer();
+		CString sItem = CEnMenu::GetMenuString(hMenu, nPos, MF_BYPOSITION);
 
 		if (!sItem.IsEmpty())
 		{
-			if (ttm.m_dictionary.Translate(sItem, hMenu))
-			{
-				ASSERT (!sItem.IsEmpty());
-			
-				MENUITEMINFO minfo;
-				minfo.cbSize = sizeof(minfo);
-				minfo.fMask = MIIM_STRING;
-				minfo.dwTypeData = (LPTSTR)(LPCTSTR)sItem;
-				
-				SetMenuItemInfo(hMenu, nPos, TRUE, &minfo);
-			}
+			if (ttm.m_dictionary.Translate(sItem, hMenu, FALSE))
+				VERIFY(CEnMenu::SetMenuString(hMenu, nPos, sItem, MF_BYPOSITION));
 		
 			// submenus?
 			if (bRecursive && (nCmdID == -1))
@@ -502,6 +490,8 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 			}
 		}
 	}
+
+	VERIFY(CEnMenu::EnsureUniqueAccelerators(hMenu));
 
 	return TRUE;
 }

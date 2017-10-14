@@ -41,6 +41,11 @@ public:
 	int GetMenuItemPos(UINT nCmdID) const;
 	int GetMenuItemPos(HMENU hSubMenu) const;
 
+	int GetMenuString(UINT nIDItem,	CString& sItem, UINT nFlags) const;
+	CString GetMenuString(UINT nIDItem,	UINT nFlags) const;
+	BOOL SetMenuString(UINT nIDItem, const CString& sItem, UINT nFlags);
+	int GetMenuStrings(CStringArray& aItems) const;
+
 	// have to copy base class because we provide a static overload
 	CMenu* GetSubMenu(int nPos) const { return CMenu::GetSubMenu(nPos); }
 	HMENU GetParentMenu(HMENU hMenu) const;
@@ -49,8 +54,13 @@ public:
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
 
 	BOOL TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat);
+	BOOL EnsureUniqueAccelerators();
 
 	static void SetLocalizer(ITransText* pTT);
+
+	static int GetMenuAccelerators(HMENU hMenu, CString& sAccelerators);
+	static TCHAR EnsureUniqueAccelerator(CString& sText, HMENU hMenu);
+	static BOOL EnsureUniqueAccelerators(HMENU hMenu);
 
 	static int GetMenuItemPos(HMENU hMenu, UINT nCmdID);
 	static int GetMenuItemPos(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu);
@@ -62,6 +72,11 @@ public:
 
 	static BOOL DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp);
 	static BOOL DeleteMenu(HMENU hMenu, UINT nPosition, UINT nFlags, BOOL bAutoCleanUp);
+
+	static CString GetMenuString(HMENU hMenu, UINT nIDItem,	UINT nFlags);
+	static BOOL SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags);
+	static int GetMenuStrings(HMENU hMenu, CStringArray& aItems);
+	static BOOL SetMenuStrings(HMENU hMenu, const CStringArray& aItems);
 
 protected:
 	static ITransText* s_pTT;

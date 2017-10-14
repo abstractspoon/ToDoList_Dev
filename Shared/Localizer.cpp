@@ -410,3 +410,16 @@ void CLocalizer::IgnoreString(UINT nIDText)
 {
 	IgnoreString(CString(MAKEINTRESOURCE(nIDText)));
 }
+
+void CLocalizer::IgnoreStrings(const CStringArray& aText)
+{
+	VERIFY (Initialize());
+
+	if (s_pTransText)
+	{
+		int nItem = aText.GetSize();
+
+		while (nItem--)
+			s_pTransText->IgnoreString(aText[nItem]);
+	}
+}

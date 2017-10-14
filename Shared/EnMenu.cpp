@@ -8,6 +8,7 @@
 #include "osversion.h"
 #include "graphicsmisc.h"
 #include "enstring.h"
+#include "misc.h"
 
 #include "..\Interfaces\itranstext.h"
 
@@ -228,6 +229,34 @@ BOOL CEnMenu::DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp)
 	return DeleteMenu(m_hMenu, nPosition, nFlags, bAutoCleanUp);
 }
 
+BOOL CEnMenu::EnsureUniqueAccelerators()
+{
+	return EnsureUniqueAccelerators(GetSafeHmenu());
+}
+
+int CEnMenu::GetMenuString(UINT nIDItem, CString& sItem, UINT nFlags) const
+{
+	return CMenu::GetMenuString(nIDItem, sItem, nFlags);
+}
+
+CString CEnMenu::GetMenuString(UINT nIDItem, UINT nFlags) const
+{
+	CString sItem;
+	CMenu::GetMenuString(nIDItem, sItem, nFlags);
+
+	return sItem;
+}
+
+BOOL CEnMenu::SetMenuString(UINT nIDItem, const CString& sItem, UINT nFlags)
+{
+	return SetMenuString(GetSafeHmenu(), nIDItem, sItem, nFlags);
+}
+
+int CEnMenu::GetMenuStrings(CStringArray& aItems) const
+{
+	return GetMenuStrings(GetSafeHmenu(), aItems);
+}
+
 // static helpers -------------------------------------------------------
 
 void CEnMenu::SetLocalizer(ITransText* pTT)
@@ -416,7 +445,6 @@ HMENU CEnMenu::GetParentMenu(HMENU hMenu, HMENU hSubMenu)
 		GetMenuItemPos(hMenu, hSubMenu, hParentMenu);
 
 	return hParentMenu;
-
 }
 
 BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat)
@@ -444,4 +472,120 @@ BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTST
 	}
 
 	return TRUE;
+}
+
+int CEnMenu::GetMenuAccelerators(HMENU hMenu, CString& sAccelerators)
+{
+	ASSERT(::IsMenu(hMenu));
+
+	sAccelerators.Empty();
+
+	// search recursively
+	int nNumItems = ::GetMenuItemCount(hMenu);
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		CString sItem = GetMenuString(hMenu, nItem, MF_BYPOSITION);
+		TCHAR cAccel = Misc::GetAccelerator(sItem);
+
+		if (cAccel && (sAccelerators.Find(cAccel) == -1))
+			sAccelerators += cAccel;
+	}
+
+	return sAccelerators.GetLength();
+}
+
+TCHAR CEnMenu::EnsureUniqueAccelerator(CString& sText, HMENU hMenu)
+{
+	ASSERT(::IsMenu(hMenu));
+
+	CString sAccelerators;
+	GetMenuAccelerators(hMenu, sAccelerators);
+
+	return Misc::EnsureUniqueAccelerator(sText, sAccelerators);
+}
+
+int CEnMenu::GetMenuStrings(HMENU hMenu, CStringArray& aItems)
+{
+	ASSERT(::IsMenu(hMenu));
+
+	aItems.RemoveAll();
+
+	int nNumItems = ::GetMenuItemCount(hMenu);
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+		aItems.Add(GetMenuString(hMenu, nItem, MF_BYPOSITION));
+
+	return aItems.GetSize();
+}
+
+BOOL CEnMenu::SetMenuStrings(HMENU hMenu, const CStringArray& aItems)
+{
+	ASSERT(::IsMenu(hMenu));
+
+	int nNumItems = ::GetMenuItemCount(hMenu);
+
+	if (aItems.GetSize() != nNumItems)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const CString& sItem = aItems[nItem];
+
+		if (::GetMenuItemID(hMenu, nItem) == 0)
+		{
+			ASSERT(sItem.IsEmpty());
+			continue;
+		}
+
+		VERIFY(SetMenuString(hMenu, nItem, sItem, MF_BYPOSITION));
+	}
+
+	return TRUE;
+}
+
+BOOL CEnMenu::EnsureUniqueAccelerators(HMENU hMenu)
+{
+	ASSERT(::IsMenu(hMenu));
+
+	CStringArray aItems;
+
+	if (GetMenuStrings(hMenu, aItems))
+	{
+		Misc::EnsureUniqueAccelerators(aItems);
+
+		return SetMenuStrings(hMenu, aItems);
+	}
+
+	return TRUE;
+}
+
+CString CEnMenu::GetMenuString(HMENU hMenu, UINT nIDItem, UINT nFlags)
+{
+	CString sItem;
+	int nLen = ::GetMenuString(hMenu, nIDItem, NULL, 0, nFlags);
+
+	if (nLen)
+	{
+		::GetMenuString(hMenu, nIDItem, sItem.GetBuffer(nLen + 1), (nLen + 1), nFlags);
+		sItem.ReleaseBuffer();
+	}
+
+	return sItem;
+}
+
+BOOL CEnMenu::SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags)
+{
+	ASSERT(nIDItem || (nFlags & MF_BYPOSITION));
+	ASSERT(!sItem.IsEmpty());
+
+	MENUITEMINFO minfo;
+	minfo.cbSize = sizeof(minfo);
+	minfo.fMask = MIIM_STRING;
+	minfo.dwTypeData = (LPTSTR)(LPCTSTR)sItem;
+
+	return ::SetMenuItemInfo(hMenu, nIDItem, (nFlags & MF_BYPOSITION), &minfo);
 }

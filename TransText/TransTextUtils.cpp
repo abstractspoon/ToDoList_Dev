@@ -10,6 +10,8 @@
 #include "..\shared\winclasses.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\dialogHelper.h"
+#include "..\shared\enmenu.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -207,43 +209,17 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 
 BOOL TransText::RemoveAccelerator(CString& sText)
 {
-	ASSERT (!sText.IsEmpty());
-
-	int nAccel = sText.Find('&'); 
-
-	if (nAccel == -1)
-		return FALSE;
-
-	BOOL bDoublesReplaced = sText.Replace(_T("&&"), _T("``"));
-	BOOL bSinglesReplaced = sText.Replace(_T("&"), _T(""));
-
-	if (bDoublesReplaced)
-		sText.Replace(_T("``"), _T("&&"));
-
-	return bSinglesReplaced;
+	return Misc::RemoveAccelerator(sText);
 }
 
-BOOL TransText::EnsureAccelerator(CString& sText)
+BOOL TransText::EnsureAccelerator(CString& sText, HWND hWndRef)
 {
-	if (sText.IsEmpty())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	return CDialogHelper::EnsureUniqueAccelerator(sText, hWndRef);
+}
 
-	// Look for existing accelerator (single &)
-	int nAccel = sText.Find('&'), nLast = (sText.GetLength() - 1); 
-
-	while ((nAccel != -1) && (nAccel < nLast))
-	{
-		if (sText[nAccel + 1] != '&')
-			return TRUE;
-
-		nAccel = sText.Find('&', (nAccel + 1)); 
-	}
-
-	sText = ('&' + sText);
-	return TRUE;
+BOOL TransText::EnsureAccelerator(CString& sText, HMENU hMenu)
+{
+	return CEnMenu::EnsureUniqueAccelerator(sText, hMenu);
 }
 
 BOOL TransText::ClassWantsAccelerator(const CString& sClass)

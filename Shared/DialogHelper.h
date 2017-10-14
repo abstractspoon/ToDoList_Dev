@@ -36,13 +36,25 @@ public:
 	static BOOL IsChildOrSame(HWND hWnd, HWND hwndChild);
 	static BOOL IsChildOrSame(const CWnd* pWnd, const CWnd* pChild);
 	static BOOL CtrlWantsEnter(HWND hwnd);
-	static CString GetCtrlLabel(const CWnd* pWnd);
+	static CString GetCtrlLabel(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static CString GetCtrlText(const CWnd* pWnd);
 	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
 
-	static int GetChildCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
+	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
+	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
 	static void RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, LPCTSTR szClass);
+	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems);
+	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems, LPCTSTR szClass);
+	static int GetCtrlsText(const CWnd* pParent, CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses);
+	static BOOL SetCtrlsText(CWnd* pParent, const CStringArray& aItems, const LPCTSTR szClasses[], int nNumClasses);
 
+	static int GetCtrlAccelerators(const CWnd* pParent, CString& sAccelerators);
+	static TCHAR GetChildAccelerator(const CWnd* pCtrl);
+	static TCHAR EnsureUniqueAccelerator(CString& sText, HWND hWndRef);
+	static BOOL EnsureUniqueAccelerators(CWnd* pParent);
+	
 	// font helper
 	static void SetFont(CWnd* pWnd, HFONT hFont, BOOL bRedraw = TRUE);
     static HFONT GetFont(const CWnd* pWnd);
@@ -145,6 +157,9 @@ protected:
 	BOOL UpdateDataExact(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate = TRUE);
 
 	static CWnd* FindNextMatch(CWnd* pCurrent, UINT nShortcut);
+	static TCHAR EnsureUniqueAccelerator(CWnd* pCtrl, const CString& sExclude);
+	static BOOL CtrlMatchesClassFilter(const CWnd* pCtrl, LPCTSTR szClassFilter);
+	static BOOL CtrlMatchesClassFilters(const CWnd* pCtrl, const LPCTSTR szClassFilters[], int nNumFilters);
 
 private:
 	BOOL m_bInUpdateEx;

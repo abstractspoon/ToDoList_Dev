@@ -49,7 +49,7 @@ void CTransWnd::PostHookWindow()
 
 void CTransWnd::TranslateMenu(HMENU hMenu, BOOL bToplevelOnly)
 {
-	CTransTextMgr::TranslateMenu(hMenu, GetHwnd(), bToplevelOnly);
+	CTransTextMgr::TranslateMenu(hMenu, GetHwnd(), (bToplevelOnly == FALSE));
 }
 
 BOOL CTransWnd::HasFlag(DWORD dwFlag) 

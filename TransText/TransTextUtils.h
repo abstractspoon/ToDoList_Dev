@@ -26,7 +26,8 @@ namespace TransText
 	BOOL CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath);
 
 	BOOL RemoveAccelerator(CString& sText);
-	BOOL EnsureAccelerator(CString& sText);
+	BOOL EnsureAccelerator(CString& sText, HWND hWndRef = NULL);
+	BOOL EnsureAccelerator(CString& sText, HMENU hMenu);
 	BOOL ClassWantsAccelerator(const CString& sClass);
 
 }

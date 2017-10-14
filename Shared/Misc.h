@@ -338,6 +338,16 @@ namespace Misc
 	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
 
+	TCHAR GetAccelerator(const CString& sText);
+	BOOL RemoveAccelerator(CString& sText);
+	int FindAccelerator(const CString& sText);
+	BOOL HasAccelerator(const CString& sText);
+	TCHAR EnsureUniqueAccelerator(CString& sText, const CString& sExclude);
+	BOOL IsValidAccelerator(TCHAR cAccel, const CString& sExclude);
+	BOOL IsValidAccelerator(TCHAR cAccel);
+	BOOL SetAcceleratorPos(CString& sText, int nPos);
+	BOOL EnsureUniqueAccelerators(CStringArray& aText);
+
 	void MakeQuoted(CString& sText);
 	void MakeUnquoted(CString& sText);
 	CString GetQuoted(LPCTSTR szText);
@@ -356,6 +366,7 @@ namespace Misc
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
 	BOOL IsEmpty(LPCTSTR szText);
 	BOOL IsEmpty(LPCSTR szText);
+	BOOL HasEmpty(const CStringArray& aItems);
 
 	double Round(double dValue);
 	float Round(float fValue);

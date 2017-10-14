@@ -42,6 +42,7 @@ public:
 	static void EnableTranslation(UINT nMenuID, BOOL bEnable = TRUE);
 	static void EnableTranslation(UINT nMenuIDFirst, UINT nMenuIDLast, BOOL bEnable = TRUE);
 
+	static void IgnoreStrings(const CStringArray& aText);
 	static void IgnoreString(const CString& sText);
 	static void IgnoreString(UINT nIDText);
 

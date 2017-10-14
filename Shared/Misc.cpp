@@ -642,6 +642,19 @@ BOOL Misc::IsEmpty(LPCSTR szText)
 	return (!szText || !szText[0]); 
 }
 
+BOOL Misc::HasEmpty(const CStringArray& aItems)
+{
+	int nItem = aItems.GetSize();
+
+	while (nItem--)
+	{
+		if (aItems[nItem].IsEmpty())
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 TCHAR Misc::First(const CString& sText)
 {
 	if (sText.IsEmpty())
@@ -2171,3 +2184,174 @@ BOOL Misc::IsQuoted(LPCTSTR szText)
 }
 
 //////////////////////////////////////////////////////////////
+
+int Misc::FindAccelerator(const CString& sText)
+{
+	if (!sText.IsEmpty())
+	{
+		// Look for first single '&'
+		int nAccel = sText.Find('&'), nLast = (sText.GetLength() - 1); 
+
+		while ((nAccel != -1) && (nAccel < nLast))
+		{
+			int nNext = (nAccel + 1);
+			TCHAR cNext = sText[nNext];
+
+			if (cNext != '&')
+				return nNext;
+
+			nAccel = sText.Find('&', (nNext + 1)); 
+		}
+	}
+
+	// no accelerator
+	return -1;
+}
+
+BOOL Misc::HasAccelerator(const CString& sText)
+{
+	return (FindAccelerator(sText) != -1);
+}
+
+TCHAR Misc::GetAccelerator(const CString& sText)
+{
+	int nAccel = FindAccelerator(sText);
+
+	if (nAccel != -1)
+	{
+		ASSERT(nAccel < sText.GetLength());
+		return _totlower(sText[nAccel]);
+	}
+
+	// else
+	return 0;
+}
+
+BOOL Misc::RemoveAccelerator(CString& sText)
+{
+	int nAccel = FindAccelerator(sText);
+
+	if (nAccel != -1)
+	{
+		ASSERT(nAccel < sText.GetLength());
+
+		// Remove preceding '&'
+		sText = (sText.Left(nAccel - 1) + sText.Mid(nAccel));
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+TCHAR Misc::EnsureUniqueAccelerator(CString& sText, const CString& sExclude)
+{
+	// First remove duplicates
+	int nAccel = FindAccelerator(sText);
+
+	if (nAccel != -1)
+	{
+		TCHAR cChar = sText[nAccel];
+
+		if (IsValidAccelerator(cChar, sExclude))
+			return _totlower(cChar);
+
+		// else remove preceding '&'
+		sText = (sText.Left(nAccel - 1) + sText.Mid(nAccel));
+	}
+
+	// Find a unique character
+	int nTextLen = sText.GetLength();
+
+	for (int nChar = 0; nChar < nTextLen; nChar++)
+	{
+		TCHAR cChar = sText[nChar];
+
+		if (IsValidAccelerator(cChar, sExclude) && SetAcceleratorPos(sText, nChar))
+			return _totlower(cChar);
+	}
+
+	// No unique character found
+	return 0;
+}
+
+BOOL Misc::EnsureUniqueAccelerators(CStringArray& aText)
+{
+	int nNumItems = aText.GetSize(), nDupePos = 0; // if we have to double up;
+
+	if (!nNumItems)
+		return FALSE;
+
+	CString sAccelerators;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		CString& sText = aText[nItem];
+
+		if (sText.IsEmpty())
+			continue;
+
+		// See if the existing accelerator is unique
+		TCHAR cAccel = Misc::GetAccelerator(sText);
+
+		if (cAccel && (sAccelerators.Find(cAccel) == -1))
+		{
+			sAccelerators += cAccel;
+			continue;
+		}
+
+		// Find a unique accelerator
+		cAccel = Misc::EnsureUniqueAccelerator(sText, sAccelerators);
+
+		if (cAccel)
+		{
+			sAccelerators += cAccel;
+		}
+		else
+		{
+			// Use the next duplicate accelerator
+			cAccel = sText[nDupePos];
+			Misc::SetAcceleratorPos(sText, nDupePos);
+
+			nDupePos++;
+
+			if (nDupePos >= sAccelerators.GetLength())
+				nDupePos = 0;
+		}
+
+		ASSERT(cAccel);
+	}
+
+	return TRUE;
+}
+
+BOOL Misc::IsValidAccelerator(TCHAR cChar)
+{
+	return isalnum(cChar);
+}
+
+BOOL Misc::IsValidAccelerator(TCHAR cChar, const CString& sExclude)
+{
+	if (!IsValidAccelerator(cChar))
+		return FALSE;
+	
+	if (sExclude.Find(_totlower(cChar)) != -1)
+		return FALSE;
+	
+	return (sExclude.Find(_totupper(cChar)) == -1);
+}
+
+BOOL Misc::SetAcceleratorPos(CString& sText, int nPos)
+{
+	if (nPos < 0 || nPos >= sText.GetLength())
+		return FALSE;
+
+	if (!IsValidAccelerator(sText[nPos]))
+		return FALSE;
+
+	sText = (sText.Left(nPos) + '&' + sText.Mid(nPos));
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////
+

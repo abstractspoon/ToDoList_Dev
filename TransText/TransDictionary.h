@@ -26,8 +26,8 @@ public:
 	DICTITEM& operator= (const DICTITEM& di);
 
 	BOOL Translate(CString& sText);
-	BOOL Translate(CString& sText, HWND hWndRef, const CString& sClassID);
-	BOOL Translate(CString& sText, HMENU hMenu);
+	BOOL Translate(CString& sText, HWND hWndRef, const CString& sClassID, BOOL bValidateAccelerator);
+	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator);
 	BOOL IsTranslated() const;
 
 	BOOL ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const;
@@ -107,8 +107,8 @@ public:
 	BOOL IsReadOnly() const;
 
 	BOOL Translate(CString& sText);
-	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL);
-	BOOL Translate(CString& sText, HMENU hMenu);
+	BOOL Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID = NULL, BOOL bValidateAccelerator = TRUE);
+	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator = TRUE);
 
 	BOOL ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut);
 
