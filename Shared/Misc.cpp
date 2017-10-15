@@ -2213,18 +2213,35 @@ BOOL Misc::HasAccelerator(const CString& sText)
 	return (FindAccelerator(sText) != -1);
 }
 
-TCHAR Misc::GetAccelerator(const CString& sText)
+TCHAR Misc::GetAccelerator(const CString& sText, BOOL bMakeLowercase)
 {
 	int nAccel = FindAccelerator(sText);
+	TCHAR cAccel = 0;
 
 	if (nAccel != -1)
 	{
 		ASSERT(nAccel < sText.GetLength());
-		return _totlower(sText[nAccel]);
+		cAccel = sText[nAccel];
+
+		if (bMakeLowercase)
+			cAccel = _totlower(cAccel);
 	}
 
-	// else
-	return 0;
+	return cAccel;
+}
+
+CString Misc::GetAccelerators(const CStringArray& aText, BOOL bMakeLowercase)
+{
+	int nNumItems = aText.GetSize();
+	CString sAccelerators(' ', nNumItems);
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const CString& sText = aText[nItem];
+		sAccelerators.SetAt(nItem, GetAccelerator(sText, bMakeLowercase));
+	}
+
+	return sAccelerators;
 }
 
 BOOL Misc::RemoveAccelerator(CString& sText)
@@ -2246,6 +2263,9 @@ BOOL Misc::RemoveAccelerator(CString& sText)
 
 TCHAR Misc::EnsureUniqueAccelerator(CString& sText, const CString& sExclude)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	// First remove duplicates
 	int nAccel = FindAccelerator(sText);
 
@@ -2263,6 +2283,19 @@ TCHAR Misc::EnsureUniqueAccelerator(CString& sText, const CString& sExclude)
 	// Find a unique character
 	int nTextLen = sText.GetLength();
 
+	// Prefer the start of words
+	for (int nChar = 0; nChar < nTextLen; nChar++)
+	{
+		if ((nChar == 0) || (isspace(sText[nChar - 1])))
+		{
+			TCHAR cChar = sText[nChar];
+
+			if (IsValidAccelerator(cChar, sExclude) && SetAcceleratorPos(sText, nChar))
+				return _totlower(cChar);
+		}
+	}
+
+	// else anything will do
 	for (int nChar = 0; nChar < nTextLen; nChar++)
 	{
 		TCHAR cChar = sText[nChar];
@@ -2277,49 +2310,109 @@ TCHAR Misc::EnsureUniqueAccelerator(CString& sText, const CString& sExclude)
 
 BOOL Misc::EnsureUniqueAccelerators(CStringArray& aText)
 {
-	int nNumItems = aText.GetSize(), nDupePos = 0; // if we have to double up;
+	int nNumItems = aText.GetSize();
 
 	if (!nNumItems)
-		return FALSE;
+		return TRUE;
 
-	CString sAccelerators;
+	CString sAccelerators = GetAccelerators(aText, FALSE);
+	ASSERT(sAccelerators.GetLength() == nNumItems);
+
+	// Replace missing accelerators with spaces for easier debugging
+#ifdef _DEBUG
+	const TCHAR NULLCHAR = ' ';
+	sAccelerators.Replace('\0', NULLCHAR);
+#else
+	const TCHAR NULLCHAR = '\0';
+#endif
+	
+	// First loop: Process all empty items and those with valid accelerators.
+	// Where duplicates arise, prefer uppercase accelerators
+	CUIntArray aProcessed;
+	aProcessed.SetSize(nNumItems);
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		CString& sText = aText[nItem];
+		const CString& sText = aText[nItem];
+		TCHAR cAccel = sAccelerators[nItem];
 
 		if (sText.IsEmpty())
-			continue;
-
-		// See if the existing accelerator is unique
-		TCHAR cAccel = Misc::GetAccelerator(sText);
-
-		if (cAccel && (sAccelerators.Find(cAccel) == -1))
 		{
-			sAccelerators += cAccel;
+			ASSERT(sAccelerators[nItem] == NULLCHAR);
+
+			aProcessed[nItem] = TRUE;
 			continue;
 		}
 
-		// Find a unique accelerator
-		cAccel = Misc::EnsureUniqueAccelerator(sText, sAccelerators);
-
-		if (cAccel)
+		if (cAccel == NULLCHAR) // no accelerator
 		{
+			// process after
+			continue;
+		}
+
+		// else has accelerator
+		BOOL bIsUppercase = _istupper(cAccel);
+
+		if (bIsUppercase)
+		{
+			// See if the existing accelerator has already appeared
+			if (sAccelerators.Find(cAccel) <= nItem)
+			{
+				aProcessed[nItem] = TRUE;
+				continue;
+			}
+
+			// Process after
+			sAccelerators.SetAt(nItem, NULLCHAR);
+			continue;
+		}
+
+		// See if the uppercase accelerator appears ahead
+		int nFindUpper = sAccelerators.Find(_totupper(cAccel), nItem);
+
+		if (nFindUpper != -1)
+		{
+			// Remove the uppercase item
+			aProcessed[nFindUpper] = TRUE;
+			continue;
+		}
+
+		// See if the existing accelerator has already appeared
+		int nFindLower = sAccelerators.Find(cAccel);
+
+		if ((nFindLower == -1) || (nFindLower >= nItem))
+		{
+			aProcessed[nItem] = TRUE;
+			continue;
+		}
+
+		// Process after
+		sAccelerators.SetAt(nItem, NULLCHAR);
+	}
+
+	// Loop 2: Give any remaining items unique accelerators
+	int nDupePos = 0; // if we have to double up
+	sAccelerators.Remove(NULLCHAR);
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		if (!aProcessed[nItem])
+		{
+			CString& sText = aText[nItem];
+
+			TCHAR cAccel = Misc::EnsureUniqueAccelerator(sText, sAccelerators);
+
+			if (cAccel == 0)
+			{
+				cAccel = sAccelerators[nDupePos++];
+
+				if (nDupePos >= sAccelerators.GetLength())
+					nDupePos = 0;
+			}
+
+			ASSERT(cAccel);
 			sAccelerators += cAccel;
 		}
-		else
-		{
-			// Use the next duplicate accelerator
-			cAccel = sAccelerators[nDupePos];
-			Misc::SetAcceleratorPos(sText, nDupePos);
-
-			nDupePos++;
-
-			if (nDupePos >= sAccelerators.GetLength())
-				nDupePos = 0;
-		}
-
-		ASSERT(cAccel);
 	}
 
 	return TRUE;
@@ -2343,13 +2436,13 @@ BOOL Misc::IsValidAccelerator(TCHAR cChar, const CString& sExclude)
 
 BOOL Misc::SetAcceleratorPos(CString& sText, int nPos)
 {
-	if (nPos < 0 || nPos >= sText.GetLength())
+	if ((nPos < 0) || (nPos >= sText.GetLength()))
 		return FALSE;
 
 	if (!IsValidAccelerator(sText[nPos]))
 		return FALSE;
 
-	sText = (sText.Left(nPos) + '&' + sText.Mid(nPos));
+	sText.Insert(nPos, '&');
 	return TRUE;
 }
 

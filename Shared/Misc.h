@@ -338,7 +338,7 @@ namespace Misc
 	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
 
-	TCHAR GetAccelerator(const CString& sText);
+	TCHAR GetAccelerator(const CString& sText, BOOL bMakeLowercase = TRUE);
 	BOOL RemoveAccelerator(CString& sText);
 	int FindAccelerator(const CString& sText);
 	BOOL HasAccelerator(const CString& sText);
@@ -347,6 +347,7 @@ namespace Misc
 	BOOL IsValidAccelerator(TCHAR cAccel);
 	BOOL SetAcceleratorPos(CString& sText, int nPos);
 	BOOL EnsureUniqueAccelerators(CStringArray& aText);
+	CString GetAccelerators(const CStringArray& aText, BOOL bMakeLowercase = TRUE);
 
 	void MakeQuoted(CString& sText);
 	void MakeUnquoted(CString& sText);
