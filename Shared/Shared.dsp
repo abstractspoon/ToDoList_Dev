@@ -89,6 +89,10 @@ SOURCE=.\AboutDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\AcceleratorString.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\autocombobox.cpp
 # End Source File
 # Begin Source File
@@ -714,6 +718,10 @@ SOURCE=.\Zipper.cpp
 # Begin Source File
 
 SOURCE=.\AboutDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\AcceleratorString.h
 # End Source File
 # Begin Source File
 

@@ -8,7 +8,7 @@
 #include "osversion.h"
 #include "graphicsmisc.h"
 #include "enstring.h"
-#include "misc.h"
+#include "AcceleratorString.h"
 
 #include "..\Interfaces\itranstext.h"
 
@@ -17,6 +17,8 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
 
 #ifndef HBMMENU_MBAR_CLOSE
 #	define HBMMENU_CALLBACK            ((HBITMAP) -1)
@@ -32,10 +34,14 @@ static char THIS_FILE[]=__FILE__;
 #	define HBMMENU_POPUP_MINIMIZE      ((HBITMAP) 11)
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 #ifndef ODS_HOTLIGHT
 #	define ODS_HOTLIGHT        0x0040
 #	define ODS_INACTIVE        0x0080
 #endif
+
+//////////////////////////////////////////////////////////////////////
 
 #define BTNBORDER 0
 #define FUDGE 8
@@ -485,8 +491,8 @@ int CEnMenu::GetMenuAccelerators(HMENU hMenu, CString& sAccelerators)
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		CString sItem = GetMenuString(hMenu, nItem, MF_BYPOSITION);
-		TCHAR cAccel = Misc::GetAccelerator(sItem);
+		CAcceleratorString sItem = GetMenuString(hMenu, nItem, MF_BYPOSITION);
+		TCHAR cAccel = sItem.GetAccelerator();
 
 		if (cAccel && (sAccelerators.Find(cAccel) == -1))
 			sAccelerators += cAccel;
@@ -502,7 +508,7 @@ TCHAR CEnMenu::EnsureUniqueAccelerator(CString& sText, HMENU hMenu)
 	CString sAccelerators;
 	GetMenuAccelerators(hMenu, sAccelerators);
 
-	return Misc::EnsureUniqueAccelerator(sText, sAccelerators);
+	return CAcceleratorString::EnsureUniqueAccelerator(sText, sAccelerators);
 }
 
 int CEnMenu::GetMenuStrings(HMENU hMenu, CStringArray& aItems)
@@ -555,7 +561,7 @@ BOOL CEnMenu::EnsureUniqueAccelerators(HMENU hMenu)
 
 	if (GetMenuStrings(hMenu, aItems))
 	{
-		Misc::EnsureUniqueAccelerators(aItems);
+		CAcceleratorString::EnsureUniqueAccelerators(aItems);
 
 		return SetMenuStrings(hMenu, aItems);
 	}

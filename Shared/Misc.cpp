@@ -532,6 +532,7 @@ CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
 
 CString& Misc::TrimAlpha(CString& sText)
 {
+	// Trim anything that's not a number
 	int nLen = sText.GetLength();
 
 	if (nLen)
@@ -540,17 +541,13 @@ CString& Misc::TrimAlpha(CString& sText)
 
 		while (nEnd--)
 		{
-			TCHAR c = sText[nEnd];
-
-			if ((c >= '0') && (c <= '9'))
+			if (_istdigit(sText[nStart]))
 				break;
 		}
 
 		while (nStart < nEnd)
 		{
-			TCHAR c = sText[nStart];
-
-			if ((c >= '0') && (c <= '9'))
+			if (_istdigit(sText[nStart]))
 				break;
 
 			nStart++;
@@ -561,6 +558,37 @@ CString& Misc::TrimAlpha(CString& sText)
 	}
 	
 	return sText;
+}
+
+int Misc::FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL bCaseSensitive)
+{
+	if (bCaseSensitive)
+		return sSearchIn.FindOneOf(sSearchFor);
+
+	// Case-insensitive
+	CString sSearchInUpper(sSearchIn);
+	CString sSearchForUpper(sSearchFor);
+	
+	MakeUpper(sSearchForUpper);
+	MakeUpper(sSearchInUpper);
+
+	int nFind = sSearchInUpper.FindOneOf(sSearchForUpper);
+	ASSERT(nFind < sSearchInUpper.GetLength());
+
+	return nFind;
+}
+
+int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
+{
+	int nFind = sSearchIn.Find(cSearchFor);
+
+	if (bCaseSensitive || (nFind != -1))
+		return nFind;
+
+	// Case-sensitive
+	nFind = sSearchIn.Find(ToggleCase(cSearchFor));
+
+	return nFind;
 }
 
 BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
@@ -1647,18 +1675,39 @@ CString Misc::ToLower(LPCTSTR szText)
 	return sText;
 }
 
-CString Misc::ToUpper(TCHAR cText)
-{
-	TCHAR szText[] = { cText, 0 };
+// CString Misc::ToUpper(TCHAR cText)
+// {
+// 	TCHAR szText[] = { cText, 0 };
+// 
+// 	return ToUpper(szText);
+// }
+// 
+// CString Misc::ToLower(TCHAR cText)
+// {
+// 	TCHAR szText[] = { cText, 0 };
+// 	
+// 	return ToLower(szText);
+// }
 
-	return ToUpper(szText);
+TCHAR Misc::ToUpper(TCHAR cText)
+{
+	return _totupper(cText);
 }
 
-CString Misc::ToLower(TCHAR cText)
+TCHAR Misc::ToLower(TCHAR cText)
 {
-	TCHAR szText[] = { cText, 0 };
-	
-	return ToLower(szText);
+	return _totlower(cText);
+}
+
+TCHAR Misc::ToggleCase(TCHAR cText)
+{
+	if (_istlower(cText))
+		return _totupper(cText);
+
+	if (_istupper(cText))
+		return _totlower(cText);
+
+	return cText;
 }
 
 void Misc::MakeUpper(CStringArray& aText)
@@ -2181,269 +2230,6 @@ BOOL Misc::IsQuoted(LPCTSTR szText)
 	// Don't use First()/Last() because they also use lstrlen
 	return ((szText[0] == '\"') &&
 			(szText[nLen - 1] == '\"'));
-}
-
-//////////////////////////////////////////////////////////////
-
-int Misc::FindAccelerator(const CString& sText)
-{
-	if (!sText.IsEmpty())
-	{
-		// Look for first single '&'
-		int nAccel = sText.Find('&'), nLast = (sText.GetLength() - 1); 
-
-		while ((nAccel != -1) && (nAccel < nLast))
-		{
-			int nNext = (nAccel + 1);
-			TCHAR cNext = sText[nNext];
-
-			if (cNext != '&')
-				return nNext;
-
-			nAccel = sText.Find('&', (nNext + 1)); 
-		}
-	}
-
-	// no accelerator
-	return -1;
-}
-
-BOOL Misc::HasAccelerator(const CString& sText)
-{
-	return (FindAccelerator(sText) != -1);
-}
-
-TCHAR Misc::GetAccelerator(const CString& sText, BOOL bMakeLowercase)
-{
-	int nAccel = FindAccelerator(sText);
-	TCHAR cAccel = 0;
-
-	if (nAccel != -1)
-	{
-		ASSERT(nAccel < sText.GetLength());
-		cAccel = sText[nAccel];
-
-		if (bMakeLowercase)
-			cAccel = _totlower(cAccel);
-	}
-
-	return cAccel;
-}
-
-CString Misc::GetAccelerators(const CStringArray& aText, BOOL bMakeLowercase)
-{
-	int nNumItems = aText.GetSize();
-	CString sAccelerators(' ', nNumItems);
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const CString& sText = aText[nItem];
-		sAccelerators.SetAt(nItem, GetAccelerator(sText, bMakeLowercase));
-	}
-
-	return sAccelerators;
-}
-
-BOOL Misc::RemoveAccelerator(CString& sText)
-{
-	int nAccel = FindAccelerator(sText);
-
-	if (nAccel != -1)
-	{
-		ASSERT(nAccel < sText.GetLength());
-
-		// Remove preceding '&'
-		sText = (sText.Left(nAccel - 1) + sText.Mid(nAccel));
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-TCHAR Misc::EnsureUniqueAccelerator(CString& sText, const CString& sExclude)
-{
-	if (sText.IsEmpty())
-		return 0;
-
-	// First remove duplicates
-	int nAccel = FindAccelerator(sText);
-
-	if (nAccel != -1)
-	{
-		TCHAR cChar = sText[nAccel];
-
-		if (IsValidAccelerator(cChar, sExclude))
-			return _totlower(cChar);
-
-		// else remove preceding '&'
-		sText = (sText.Left(nAccel - 1) + sText.Mid(nAccel));
-	}
-
-	// Find a unique character
-	int nTextLen = sText.GetLength();
-
-	// Prefer the start of words
-	for (int nChar = 0; nChar < nTextLen; nChar++)
-	{
-		if ((nChar == 0) || (isspace(sText[nChar - 1])))
-		{
-			TCHAR cChar = sText[nChar];
-
-			if (IsValidAccelerator(cChar, sExclude) && SetAcceleratorPos(sText, nChar))
-				return _totlower(cChar);
-		}
-	}
-
-	// else anything will do
-	for (int nChar = 0; nChar < nTextLen; nChar++)
-	{
-		TCHAR cChar = sText[nChar];
-
-		if (IsValidAccelerator(cChar, sExclude) && SetAcceleratorPos(sText, nChar))
-			return _totlower(cChar);
-	}
-
-	// No unique character found
-	return 0;
-}
-
-BOOL Misc::EnsureUniqueAccelerators(CStringArray& aText)
-{
-	int nNumItems = aText.GetSize();
-
-	if (!nNumItems)
-		return TRUE;
-
-	CString sAccelerators = GetAccelerators(aText, FALSE);
-	ASSERT(sAccelerators.GetLength() == nNumItems);
-
-	// Replace missing accelerators with spaces for easier debugging
-#ifdef _DEBUG
-	const TCHAR NULLCHAR = ' ';
-	sAccelerators.Replace('\0', NULLCHAR);
-#else
-	const TCHAR NULLCHAR = '\0';
-#endif
-	
-	// First loop: Process all empty items and those with valid accelerators.
-	// Where duplicates arise, prefer uppercase accelerators
-	CUIntArray aProcessed;
-	aProcessed.SetSize(nNumItems);
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const CString& sText = aText[nItem];
-		TCHAR cAccel = sAccelerators[nItem];
-
-		if (sText.IsEmpty())
-		{
-			ASSERT(sAccelerators[nItem] == NULLCHAR);
-
-			aProcessed[nItem] = TRUE;
-			continue;
-		}
-
-		if (cAccel == NULLCHAR) // no accelerator
-		{
-			// process after
-			continue;
-		}
-
-		// else has accelerator
-		BOOL bIsUppercase = _istupper(cAccel);
-
-		if (bIsUppercase)
-		{
-			// See if the existing accelerator has already appeared
-			if (sAccelerators.Find(cAccel) <= nItem)
-			{
-				aProcessed[nItem] = TRUE;
-				continue;
-			}
-
-			// Process after
-			sAccelerators.SetAt(nItem, NULLCHAR);
-			continue;
-		}
-
-		// See if the uppercase accelerator appears ahead
-		int nFindUpper = sAccelerators.Find(_totupper(cAccel), nItem);
-
-		if (nFindUpper != -1)
-		{
-			// Remove the uppercase item
-			aProcessed[nFindUpper] = TRUE;
-			continue;
-		}
-
-		// See if the existing accelerator has already appeared
-		int nFindLower = sAccelerators.Find(cAccel);
-
-		if ((nFindLower == -1) || (nFindLower >= nItem))
-		{
-			aProcessed[nItem] = TRUE;
-			continue;
-		}
-
-		// Process after
-		sAccelerators.SetAt(nItem, NULLCHAR);
-	}
-
-	// Loop 2: Give any remaining items unique accelerators
-	int nDupePos = 0; // if we have to double up
-	sAccelerators.Remove(NULLCHAR);
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		if (!aProcessed[nItem])
-		{
-			CString& sText = aText[nItem];
-
-			TCHAR cAccel = Misc::EnsureUniqueAccelerator(sText, sAccelerators);
-
-			if (cAccel == 0)
-			{
-				cAccel = sAccelerators[nDupePos++];
-
-				if (nDupePos >= sAccelerators.GetLength())
-					nDupePos = 0;
-			}
-
-			ASSERT(cAccel);
-			sAccelerators += cAccel;
-		}
-	}
-
-	return TRUE;
-}
-
-BOOL Misc::IsValidAccelerator(TCHAR cChar)
-{
-	return isalnum(cChar);
-}
-
-BOOL Misc::IsValidAccelerator(TCHAR cChar, const CString& sExclude)
-{
-	if (!IsValidAccelerator(cChar))
-		return FALSE;
-	
-	if (sExclude.Find(_totlower(cChar)) != -1)
-		return FALSE;
-	
-	return (sExclude.Find(_totupper(cChar)) == -1);
-}
-
-BOOL Misc::SetAcceleratorPos(CString& sText, int nPos)
-{
-	if ((nPos < 0) || (nPos >= sText.GetLength()))
-		return FALSE;
-
-	if (!IsValidAccelerator(sText[nPos]))
-		return FALSE;
-
-	sText.Insert(nPos, '&');
-	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////

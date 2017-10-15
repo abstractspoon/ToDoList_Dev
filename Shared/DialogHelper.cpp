@@ -10,6 +10,7 @@
 #include "misc.h"
 #include "runtimedlg.h"
 #include "enstring.h"
+#include "AcceleratorString.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -1229,7 +1230,7 @@ CString CDialogHelper::GetCtrlLabel(const CWnd* pWnd, BOOL bStripAccelerator)
 			pPrev->GetWindowText(sText);
 
 			if (bStripAccelerator)
-				Misc::RemoveAccelerator(sText);
+				CAcceleratorString::RemoveAccelerator(sText);
 
 			break;
 		}
@@ -1554,10 +1555,10 @@ TCHAR CDialogHelper::GetChildAccelerator(const CWnd* pCtrl)
 	{
 		if (pCtrl->GetWindowTextLength())
 		{
-			CString sText;
+			CAcceleratorString sText;
 			pCtrl->GetWindowText(sText);
 
-			return Misc::GetAccelerator(sText);
+			return sText.GetAccelerator();
 		}
 	}
 	else // look for previous static label
@@ -1581,14 +1582,14 @@ TCHAR CDialogHelper::EnsureUniqueAccelerator(CWnd* pCtrl, const CString& sExclud
 	{
 		if (pCtrl->GetWindowTextLength())
 		{
-			CString sText;
+			CAcceleratorString sText;
 			pCtrl->GetWindowText(sText);
 
-			TCHAR cAccel = Misc::GetAccelerator(sText);
+			TCHAR cAccel = sText.GetAccelerator();
 
 			if (sExclude.Find(cAccel) != -1)
 			{
-				cAccel = Misc::EnsureUniqueAccelerator(sText, sExclude);
+				cAccel = sText.EnsureUniqueAccelerator(sExclude);
 
 				if (cAccel)
 					pCtrl->SetWindowText(sText);
@@ -1612,9 +1613,11 @@ TCHAR CDialogHelper::EnsureUniqueAccelerator(CString& sText, HWND hWndRef)
 		return FALSE;
 	}
 
-	// Look for existing accelerator (single &)
-	if (Misc::HasAccelerator(sText)) 
-		return TRUE;
+	// Look for existing accelerator
+	TCHAR cAccel = CAcceleratorString::GetAccelerator(sText);
+
+	if (cAccel) 
+		return cAccel;
 
 	// Find a unique accelerator
 	if (::IsWindow(hWndRef))
@@ -1624,14 +1627,15 @@ TCHAR CDialogHelper::EnsureUniqueAccelerator(CString& sText, HWND hWndRef)
 
 		if (CDialogHelper::GetCtrlAccelerators(pParent, sAccelerators))
 		{
-			if (Misc::EnsureUniqueAccelerator(sText, sAccelerators))
-				return TRUE;
+			cAccel = CAcceleratorString::EnsureUniqueAccelerator(sText, sAccelerators);
+
+			if (cAccel) 
+				return cAccel;
 		}
 	}
 
 	// else Make the first letter an accelerator
-	sText = ('&' + sText);
-	return TRUE;
+	return CAcceleratorString::SetAcceleratorPos(sText, 0);
 }
 
 BOOL CDialogHelper::EnsureUniqueAccelerators(CWnd* pParent)
@@ -1645,7 +1649,7 @@ BOOL CDialogHelper::EnsureUniqueAccelerators(CWnd* pParent)
 
 	if (GetCtrlsText(pParent, aItems, szClasses, NUM_CLASSES))
 	{
-		Misc::EnsureUniqueAccelerators(aItems);
+		CAcceleratorString::EnsureUniqueAccelerators(aItems);
 
 		return SetCtrlsText(pParent, aItems, szClasses, NUM_CLASSES);
 	}

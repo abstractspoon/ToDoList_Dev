@@ -12,6 +12,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\dialogHelper.h"
 #include "..\shared\enmenu.h"
+#include "..\shared\AcceleratorString.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -209,17 +210,17 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 
 BOOL TransText::RemoveAccelerator(CString& sText)
 {
-	return Misc::RemoveAccelerator(sText);
+	return CAcceleratorString::RemoveAccelerator(sText);
 }
 
 BOOL TransText::EnsureAccelerator(CString& sText, HWND hWndRef)
 {
-	return CDialogHelper::EnsureUniqueAccelerator(sText, hWndRef);
+	return (CDialogHelper::EnsureUniqueAccelerator(sText, hWndRef) != 0);
 }
 
 BOOL TransText::EnsureAccelerator(CString& sText, HMENU hMenu)
 {
-	return CEnMenu::EnsureUniqueAccelerator(sText, hMenu);
+	return (CEnMenu::EnsureUniqueAccelerator(sText, hMenu) != 0);
 }
 
 BOOL TransText::ClassWantsAccelerator(const CString& sClass)

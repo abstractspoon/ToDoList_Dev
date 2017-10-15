@@ -333,21 +333,13 @@ namespace Misc
 	void MakeLower(CStringArray& aText);
 	CString ToUpper(LPCTSTR szText);
 	CString ToLower(LPCTSTR szText);
-	CString ToUpper(TCHAR cText);
-	CString ToLower(TCHAR cText);
+	// 	CString ToUpper(TCHAR cText);
+	// 	CString ToLower(TCHAR cText);
+ 	TCHAR ToUpper(TCHAR cText);
+ 	TCHAR ToLower(TCHAR cText);
+	TCHAR ToggleCase(TCHAR cText);
 	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
-
-	TCHAR GetAccelerator(const CString& sText, BOOL bMakeLowercase = TRUE);
-	BOOL RemoveAccelerator(CString& sText);
-	int FindAccelerator(const CString& sText);
-	BOOL HasAccelerator(const CString& sText);
-	TCHAR EnsureUniqueAccelerator(CString& sText, const CString& sExclude);
-	BOOL IsValidAccelerator(TCHAR cAccel, const CString& sExclude);
-	BOOL IsValidAccelerator(TCHAR cAccel);
-	BOOL SetAcceleratorPos(CString& sText, int nPos);
-	BOOL EnsureUniqueAccelerators(CStringArray& aText);
-	CString GetAccelerators(const CStringArray& aText, BOOL bMakeLowercase = TRUE);
 
 	void MakeQuoted(CString& sText);
 	void MakeUnquoted(CString& sText);
@@ -368,6 +360,9 @@ namespace Misc
 	BOOL IsEmpty(LPCTSTR szText);
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);
+
+	int FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL bCaseSensitive);
+	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 
 	double Round(double dValue);
 	float Round(float fValue);
