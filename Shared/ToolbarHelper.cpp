@@ -584,21 +584,21 @@ BOOL CToolbarHelper::ProcessMessage(MSG* pMsg)
 		Misc::IsKeyPressed(VK_MENU))
 	{
 		int nKey = (int)pMsg->wParam;
-		char cLower = 0, cUpper = 0;
+		TCHAR cLower = 0, cUpper = 0;
 
-		if (islower(nKey))
+		if (_istlower(nKey))
 		{
-			cLower = (char)nKey;
-			cUpper = (char)toupper(nKey);
+			cLower = nKey;
+			cUpper = _totupper(nKey);
 		}
-		else if (isupper(nKey))
+		else if (_istupper(nKey))
 		{
-			cUpper = (char)nKey;
-			cLower = (char)tolower(nKey);
+			cUpper = nKey;
+			cLower = _totlower(nKey);
 		}
 		else
 		{
-			cUpper = cLower = (char)nKey;
+			cUpper = cLower = nKey;
 		}
 
 		// iterate the buttons the hard way
