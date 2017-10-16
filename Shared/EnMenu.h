@@ -53,6 +53,7 @@ public:
 	BOOL DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp = FALSE);
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
 
+	BOOL SortMenuStrings(UINT nCmdIDStart, UINT nCmdIDEnd);
 	BOOL TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat);
 	BOOL EnsureUniqueAccelerators();
 
@@ -77,6 +78,7 @@ public:
 	static BOOL SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags);
 	static int GetMenuStrings(HMENU hMenu, CStringArray& aItems);
 	static BOOL SetMenuStrings(HMENU hMenu, const CStringArray& aItems);
+	static BOOL SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd);
 
 protected:
 	static ITransText* s_pTT;

@@ -42,6 +42,8 @@ public:
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = FALSE);
 	static BOOL TranslateMenu(CString& sText);
 
+	static void SetMenuPostTranslationCallback(HWND hwndCallback);
+
 	static void EnableTranslation(HWND hWnd, BOOL bEnable);
 	static void EnableTranslation(HMENU hMenu, BOOL bEnable);
 	static void EnableTranslation(UINT nMenuID, BOOL bEnable);
@@ -52,6 +54,8 @@ protected:
 	CTransDictionary m_dictionary;
 	CMap<HWND, HWND&, void*, void*&> m_mapWndIgnore;
 	CMap<UINT, UINT&, void*, void*&> m_mapMenuIgnore;
+
+	HWND m_hwndMenuCallback;
 
 protected:
 	CTransTextMgr();

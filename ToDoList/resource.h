@@ -1024,8 +1024,6 @@
 #define ID_SORTBY_ICON                  33148
 #define ID_SORTBY_TIMETRACKING          33149
 #define ID_SORTBY_FILEREF               33150
-#define ID_SORTBY_NONE                  33151
-#define ID_SORTBY_MULTI                 33152
 #define ID_SORTBY_TAG                   33153
 #define ID_SORTBY_PATH                  33154
 #define ID_SORTBY_DEPENDENCY            33155
@@ -1099,6 +1097,9 @@
 #define ID_SORTBY_CUSTOMCOLUMN63        33263
 #define ID_SORTBY_CUSTOMCOLUMN64        33264
 #define ID_SORTBY_CUSTOMCOLUMN_LAST     33264
+#define ID_SORTBY_COLUMN_LAST           33900
+#define ID_SORTBY_MULTI                 33901
+#define ID_SORTBY_NONE                  33902
 #define ID_SORTBY_LAST                  33999
 #define ID_COMMENTS_CUT                 34150
 #define ID_COMMENTS_COPY                34151

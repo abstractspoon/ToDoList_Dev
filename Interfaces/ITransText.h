@@ -30,6 +30,10 @@ enum ITT_TRANSLATEOPTION
 	ITTTO_ADD2DICTIONARY,
 };
 
+//////////////////////////////////////////////////////////////////////
+
+const UINT WM_ITT_POSTTRANSLATEMENU	= ::RegisterWindowMessageW(L"WM_ITT_POSTTRANSLATEMENU");
+
 /////////////////////////////////////////////////////////////////////////////////
 
 class ITransText;
@@ -118,6 +122,7 @@ public:
 	virtual bool TranslateMenu(HMENU hMenu, HWND hWndRef, bool bRecursive = true) = 0;
 	virtual bool TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 
+	virtual void SetMenuPostTranslationCallback(HWND hwndCallback) = 0;
 
 	virtual void EnableTranslation(HWND hWnd, bool bEnable = true) = 0;
 	virtual void EnableTranslation(HMENU hMenu, bool bEnable = true) = 0;

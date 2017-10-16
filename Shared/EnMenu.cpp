@@ -7,6 +7,7 @@
 #include "Themed.h"
 #include "osversion.h"
 #include "graphicsmisc.h"
+#include "misc.h"
 #include "enstring.h"
 #include "AcceleratorString.h"
 
@@ -45,6 +46,22 @@ static char THIS_FILE[]=__FILE__;
 
 #define BTNBORDER 0
 #define FUDGE 8
+
+//////////////////////////////////////////////////////////////////////
+
+struct MENUSORTITEM
+{
+	MENUSORTITEM()
+	{
+		ZeroMemory(&mii, sizeof(mii));
+
+		mii.cbSize = sizeof(mii);
+		mii.fMask = (MIIM_BITMAP | MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID);
+	}
+
+	CString sMenuString;
+ 	MENUITEMINFO mii;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -205,8 +222,8 @@ BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate)
 {
 	if (CMenu::LoadMenu(nMenuResID))
 	{
-		if (s_pTT)
-			s_pTT->TranslateMenu(*this, hWndRef, bTranslate);
+		if (bTranslate && s_pTT)
+			s_pTT->TranslateMenu(*this, hWndRef, true);
 
 		return TRUE;
 	}
@@ -261,6 +278,46 @@ BOOL CEnMenu::SetMenuString(UINT nIDItem, const CString& sItem, UINT nFlags)
 int CEnMenu::GetMenuStrings(CStringArray& aItems) const
 {
 	return GetMenuStrings(GetSafeHmenu(), aItems);
+}
+
+BOOL CEnMenu::SortMenuStrings(UINT nCmdIDStart, UINT nCmdIDEnd)
+{
+	HMENU hSubMenu = GetSubMenu(*this, nCmdIDStart);
+
+	return SortMenuStrings(hSubMenu, nCmdIDStart, nCmdIDEnd);
+}
+
+BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat)
+{
+	if (nCmdIDEnd <= nCmdIDStart)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	HMENU hSubMenu = GetSubMenu(*this, nCmdIDStart);
+
+	if (!hSubMenu)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nPos = 0;
+
+	for (UINT nCmdID = nCmdIDStart; nCmdID <= nCmdIDEnd; nCmdID++)
+	{
+		UINT nState = GetMenuState(nCmdID, MF_BYCOMMAND);
+		nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
+
+		// set menu text
+		UINT nFlags = (MF_BYCOMMAND | MF_STRING | nState);
+		CEnString sCmdText(szFormat, ++nPos);
+
+		::ModifyMenu(hSubMenu, nCmdID, nFlags, nCmdID, sCmdText);
+	}
+
+	return TRUE;
 }
 
 // static helpers -------------------------------------------------------
@@ -453,33 +510,6 @@ HMENU CEnMenu::GetParentMenu(HMENU hMenu, HMENU hSubMenu)
 	return hParentMenu;
 }
 
-BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat)
-{
-	HMENU hSubMenu = GetSubMenu(*this, nCmdIDStart);
-
-	if (!hSubMenu)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nPos = 0;
-
-	for (UINT nCmdID = nCmdIDStart; nCmdID <= nCmdIDEnd; nCmdID++)
-	{
-		UINT nState = GetMenuState(nCmdID, MF_BYCOMMAND);
-		nState &= ~(MF_BITMAP|MF_OWNERDRAW|MF_SEPARATOR);
-
-		// set menu text
-		UINT nFlags = (MF_BYCOMMAND | MF_STRING | nState);
-		CEnString sCmdText(szFormat, ++nPos);
-
-		::ModifyMenu(hSubMenu, nCmdID, nFlags, nCmdID, sCmdText);
-	}
-
-	return TRUE;
-}
-
 int CEnMenu::GetMenuAccelerators(HMENU hMenu, CString& sAccelerators)
 {
 	ASSERT(::IsMenu(hMenu));
@@ -612,4 +642,78 @@ BOOL CEnMenu::SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UIN
 	minfo.dwTypeData = (LPTSTR)(LPCTSTR)sItem;
 
 	return ::SetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo);
+}
+
+BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
+{
+	int nNumCmdItems = (nCmdIDEnd - nCmdIDStart + 1);
+
+	if (!hMenu || (nNumCmdItems < 2))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	// Update the menu
+	int nNumMenuItems = ::GetMenuItemCount(hMenu);
+
+	// Copy the menu items to be sorted
+	CMap<CString, LPCTSTR, MENUSORTITEM, MENUSORTITEM> mapTextToItem;
+	MENUSORTITEM msi;
+
+ 	CStringArray aSortStrings;
+
+	int nItem = 0;
+	int nStartPos = -1;
+
+	for (UINT nCmdID = nCmdIDStart; nCmdID <= nCmdIDEnd; nCmdID++)
+	{
+		msi.sMenuString = GetMenuString(hMenu, nCmdID, MF_BYCOMMAND);
+
+		// skip over missing items
+		if (msi.sMenuString.IsEmpty())
+			continue;
+
+		// Get the rest of the item data
+		VERIFY(::GetMenuItemInfo(hMenu, nCmdID, FALSE, &msi.mii));
+
+		// Remove any accelerator because that interferes
+		// with the sorting
+		CString sSortString(msi.sMenuString);
+		CAcceleratorString::RemoveAccelerator(sSortString);
+		
+ 		aSortStrings.Add(sSortString);
+		mapTextToItem[sSortString] = msi;
+
+		// Find the start position
+		int nItemPos = GetMenuItemPos(hMenu, nCmdID);
+		
+		if (nStartPos == -1)
+			nStartPos = nItemPos;
+		else
+			nStartPos = min(nStartPos, nItemPos);
+	}
+
+	if (nStartPos == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Sort the items by name
+ 	Misc::SortArray(aSortStrings);
+
+	// Update the menu
+	for (int nItem = 0; nItem < aSortStrings.GetSize(); nItem++)
+	{
+		CString sSortString = aSortStrings[nItem];
+		mapTextToItem.Lookup(sSortString, msi);
+
+		msi.mii.fMask |= MIIM_STRING;
+		msi.mii.dwTypeData = (LPTSTR)(LPCTSTR)msi.sMenuString;
+
+		::SetMenuItemInfo(hMenu, (nStartPos + nItem), TRUE, &msi.mii);
+	}
+
+	return TRUE;
 }

@@ -31,6 +31,7 @@ public:
 	static BOOL TranslateText(CString& sText, HWND hWndRef = NULL);
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = TRUE);
 
+	static void SetMenuPostTranslationCallback(HWND hwndCallback);
 
 	static void EnableTranslation(const CWnd& hWnd, BOOL bEnable = TRUE);
 	static void EnableTranslation(HWND hWnd, BOOL bEnable = TRUE);

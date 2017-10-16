@@ -370,6 +370,7 @@ protected:
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPostTranslateMenu(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnQuickFindItemAdded(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam);

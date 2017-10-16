@@ -180,6 +180,12 @@ public:
 		return (CTransTextMgr::CleanupDictionary(szMasterDictPath, szDictPath) != FALSE);
 	}
 
+	void SetMenuPostTranslationCallback(HWND hwndCallback)
+	{
+		CTransTextMgr::SetMenuPostTranslationCallback(hwndCallback);
+	}
+
+
 };
 
 DLL_DECLSPEC ITransText* CreateTransTextInterface(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)

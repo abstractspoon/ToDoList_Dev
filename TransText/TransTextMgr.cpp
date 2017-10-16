@@ -27,7 +27,7 @@ const UINT POPUPMENU_ID = 0xFFFFFFFF;
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-CTransTextMgr::CTransTextMgr()
+CTransTextMgr::CTransTextMgr() : m_hwndMenuCallback(NULL) 
 {
 	CTransDictionary::SetAppVersion(FileMisc::GetAppVersion());
 }
@@ -135,6 +135,11 @@ void CTransTextMgr::IgnoreString(const CString& sText, BOOL bPrepare)
 BOOL CTransTextMgr::TranslateText(CString& sText, HWND hWndRef, LPCTSTR szClassID)
 {
 	return GetInstance().m_dictionary.Translate(sText, hWndRef, szClassID);
+}
+
+void CTransTextMgr::SetMenuPostTranslationCallback(HWND hwndCallback)
+{
+	GetInstance().m_hwndMenuCallback = hwndCallback;
 }
 
 void CTransTextMgr::EnableTranslation(HWND hWnd, BOOL bEnable)
@@ -484,8 +489,11 @@ BOOL CTransTextMgr::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 
 	VERIFY(CEnMenu::EnsureUniqueAccelerators(hMenu));
 
+	if (ttm.m_hwndMenuCallback)
+	{
+		ASSERT(::IsWindow(ttm.m_hwndMenuCallback));
+		::SendMessage(ttm.m_hwndMenuCallback, WM_ITT_POSTTRANSLATEMENU, 0, (LPARAM)hMenu);
+	}
+
 	return TRUE;
 }
-
-
-

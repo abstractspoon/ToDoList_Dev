@@ -427,6 +427,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnPreferencesClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnPreferencesTestTool)
+	ON_REGISTERED_MESSAGE(WM_ITT_POSTTRANSLATEMENU, OnPostTranslateMenu)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnToDoCtrlFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
@@ -2283,6 +2284,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
 	CFocusWatcher::Initialize(this);
+	CLocalizer::SetMenuPostTranslationCallback(*this);
 
 	InitShortcutManager();
 	InitMenuIconManager();
@@ -7330,6 +7332,21 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 	}
 
 	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+}
+
+LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
+{
+	HMENU hMenu = (HMENU)lp;
+	ASSERT(::IsMenu(hMenu));
+
+	CMenu* pSortMenu = m_menubar.GetSubMenu(AM_SORT);
+
+	if (pSortMenu && (hMenu == pSortMenu->GetSafeHmenu()))
+	{
+		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_FIRST, ID_SORTBY_COLUMN_LAST);
+	}
+
+	return 0L;
 }
 
 void CToDoListWnd::OnViewToolbar() 
