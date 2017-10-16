@@ -14,8 +14,6 @@
 class CLocalizer  
 {
 public:
-	CLocalizer() {}
-
 	static BOOL Initialize(LPCTSTR szTransFile = _T(""), ITT_TRANSLATEOPTION nOption = ITTTO_TRANSLATEONLY);
 	static BOOL Initialize(ITransText* pTT);
 	static BOOL IsInitialized();
@@ -33,8 +31,6 @@ public:
 	static BOOL TranslateText(CString& sText, HWND hWndRef = NULL);
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = TRUE);
 
-	static void UpdateMenu(HWND hWnd);
-	static void UpdateMenu(HMENU hMenu);
 
 	static void EnableTranslation(const CWnd& hWnd, BOOL bEnable = TRUE);
 	static void EnableTranslation(HWND hWnd, BOOL bEnable = TRUE);

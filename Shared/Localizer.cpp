@@ -353,12 +353,10 @@ BOOL CLocalizer::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 	return FALSE;
 }
 
-void CLocalizer::UpdateMenu(HWND hWnd)
 {
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		s_pTransText->UpdateMenu(hWnd);
 }
 
 void CLocalizer::EnableTranslation(HWND hWnd, BOOL bEnable)

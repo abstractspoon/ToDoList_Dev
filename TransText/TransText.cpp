@@ -155,11 +155,6 @@ public:
 		return false;
 	}
 
-	void UpdateMenu(HWND hWnd)
-	{
-		CTransTextMgr::UpdateMenu(hWnd);
-	}
-
 	void EnableTranslation(HWND hWnd, bool bEnable)
 	{
 		CTransTextMgr::EnableTranslation(hWnd, bEnable);

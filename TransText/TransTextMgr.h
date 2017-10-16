@@ -42,9 +42,6 @@ public:
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = FALSE);
 	static BOOL TranslateMenu(CString& sText);
 
-	static void UpdateMenu(HWND hWnd);
-	static void UpdateMenu(HMENU hMenu);
-	
 	static void EnableTranslation(HWND hWnd, BOOL bEnable);
 	static void EnableTranslation(HMENU hMenu, BOOL bEnable);
 	static void EnableTranslation(UINT nMenuID, BOOL bEnable);

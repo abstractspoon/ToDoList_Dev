@@ -118,7 +118,6 @@ public:
 	virtual bool TranslateMenu(HMENU hMenu, HWND hWndRef, bool bRecursive = true) = 0;
 	virtual bool TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 
-	virtual void UpdateMenu(HWND hWnd) = 0;
 
 	virtual void EnableTranslation(HWND hWnd, bool bEnable = true) = 0;
 	virtual void EnableTranslation(HMENU hMenu, bool bEnable = true) = 0;

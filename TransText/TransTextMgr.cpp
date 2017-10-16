@@ -257,15 +257,6 @@ CSubclassWnd* CTransTextMgr::NewHookWnd(HWND hWnd, const CString& sClass, DWORD 
 	return CTransWnd::NewTransWnd(sClass, dwStyle);
 }
 
-void CTransTextMgr::UpdateMenu(HWND hWnd)
-{
-	CTransTextMgr& ttm = GetInstance();
-	CTransWnd* pTWnd = (CTransWnd*)ttm.GetHookWnd(hWnd);
-
-	if (pTWnd)
-		pTWnd->UpdateMenu();
-}
-
 BOOL CTransTextMgr::HandleInitMenuPopup(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM /*lp*/)
 {
 	if (nMsg != WM_INITMENUPOPUP)
