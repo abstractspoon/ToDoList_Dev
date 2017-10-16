@@ -71,7 +71,7 @@ public:
 	}
 
 	// interface implementation
-	BOOL Initialize(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
+	bool Initialize(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
 	{
 		Release();
 
@@ -83,7 +83,7 @@ public:
 			CEnMenu::SetLocalizer(this);
 		}
 
-		return bRes;
+		return (bRes != FALSE);
 	}
 
 	void Release()
@@ -113,12 +113,12 @@ public:
 		return CTransTextMgr::GetTranslationOption();
 	}
 	
-	BOOL TranslateText(LPCTSTR szText, LPTSTR& szTranslated)
+	bool TranslateText(LPCTSTR szText, LPTSTR& szTranslated)
 	{
 		return TranslateText(szText, NULL, szTranslated);
 	}
 
-	BOOL TranslateText(LPCTSTR szText, HWND hWndRef, LPTSTR& szTranslated)
+	bool TranslateText(LPCTSTR szText, HWND hWndRef, LPTSTR& szTranslated)
 	{
 		return TranslateText(szText, hWndRef, NULL, szTranslated);
 	}
@@ -129,17 +129,17 @@ public:
 		szTranslated = NULL;
 	}
 
-	BOOL TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
+	bool TranslateMenu(HMENU hMenu, HWND hWndRef, bool bRecursive)
 	{
-		return CTransTextMgr::TranslateMenu(hMenu, hWndRef, bRecursive);
+		return (CTransTextMgr::TranslateMenu(hMenu, hWndRef, bRecursive) != FALSE);
 	}
 	
-	BOOL TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated)
+	bool TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated)
 	{
 		return TranslateText(szText, NULL, WC_MENU, szTranslated);
 	}
 	
-	BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPCWSTR szClassID, LPWSTR& szTranslated)
+	bool TranslateText(LPCWSTR szText, HWND hWndRef, LPCWSTR szClassID, LPWSTR& szTranslated)
 	{
 		CString sText(szText);
 
@@ -148,11 +148,11 @@ public:
 			szTranslated = new TCHAR[sText.GetLength() + 1];
 			lstrcpy(szTranslated, sText);
 
-			return TRUE;
+			return true;
 		}
 
 		// else
-		return FALSE;
+		return false;
 	}
 
 	void UpdateMenu(HWND hWnd)
@@ -160,17 +160,17 @@ public:
 		CTransTextMgr::UpdateMenu(hWnd);
 	}
 
-	void EnableTranslation(HWND hWnd, BOOL bEnable)
+	void EnableTranslation(HWND hWnd, bool bEnable)
 	{
 		CTransTextMgr::EnableTranslation(hWnd, bEnable);
 	}
 
-	void EnableTranslation(HMENU hMenu, BOOL bEnable)
+	void EnableTranslation(HMENU hMenu, bool bEnable)
 	{
 		CTransTextMgr::EnableTranslation(hMenu, bEnable);
 	}
 
-	void EnableTranslation(UINT nMenuID, BOOL bEnable)
+	void EnableTranslation(UINT nMenuID, bool bEnable)
 	{
 		CTransTextMgr::EnableTranslation(nMenuID, bEnable);
 	}
@@ -180,9 +180,9 @@ public:
 		CTransTextMgr::IgnoreString(szText, TRUE);
 	}
 
-	BOOL CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
+	bool CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 	{
-		return CTransTextMgr::CleanupDictionary(szMasterDictPath, szDictPath);
+		return (CTransTextMgr::CleanupDictionary(szMasterDictPath, szDictPath) != FALSE);
 	}
 
 };

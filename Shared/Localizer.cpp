@@ -52,13 +52,20 @@ BEGIN_MESSAGE_MAP(CLocDialog, CDialog)
 END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 #define NEEDSINIT ((ITransText*)-1)
 
 ITransText* CLocalizer::s_pTransText = NEEDSINIT; // we only initialize once even if it fails
 BOOL CLocalizer::s_bOwner = FALSE; // did we create or was it attached
+
+//////////////////////////////////////////////////////////////////////
+
+#define BOOL2bool(b) (b != FALSE)
+#define bool2BOOL(b) (b ? TRUE : FALSE)
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 BOOL CLocalizer::Initialize(LPCTSTR szDictFile, ITT_TRANSLATEOPTION nOption)
 {
@@ -341,7 +348,7 @@ BOOL CLocalizer::TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive)
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		return s_pTransText->TranslateMenu(hMenu, hWndRef, bRecursive);
+		return bool2BOOL(s_pTransText->TranslateMenu(hMenu, hWndRef, BOOL2bool(bRecursive)));
 
 	return FALSE;
 }
@@ -359,7 +366,7 @@ void CLocalizer::EnableTranslation(HWND hWnd, BOOL bEnable)
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		s_pTransText->EnableTranslation(hWnd, bEnable);
+		s_pTransText->EnableTranslation(hWnd, BOOL2bool(bEnable));
 }
 
 void CLocalizer::EnableTranslation(const CWnd& hWnd, BOOL bEnable)
@@ -367,7 +374,7 @@ void CLocalizer::EnableTranslation(const CWnd& hWnd, BOOL bEnable)
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		s_pTransText->EnableTranslation(hWnd.GetSafeHwnd(), bEnable);
+		s_pTransText->EnableTranslation(hWnd.GetSafeHwnd(), BOOL2bool(bEnable));
 }
 
 void CLocalizer::EnableTranslation(HMENU hMenu, BOOL bEnable)
@@ -375,7 +382,7 @@ void CLocalizer::EnableTranslation(HMENU hMenu, BOOL bEnable)
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		s_pTransText->EnableTranslation(hMenu, bEnable);
+		s_pTransText->EnableTranslation(hMenu, BOOL2bool(bEnable));
 }
 
 void CLocalizer::EnableTranslation(UINT nMenuID, BOOL bEnable)
@@ -383,7 +390,7 @@ void CLocalizer::EnableTranslation(UINT nMenuID, BOOL bEnable)
 	VERIFY (Initialize());
 
 	if (s_pTransText)
-		s_pTransText->EnableTranslation(nMenuID, bEnable);
+		s_pTransText->EnableTranslation(nMenuID, BOOL2bool(bEnable));
 }
 
 void CLocalizer::EnableTranslation(UINT nMenuIDFirst, UINT nMenuIDLast, BOOL bEnable)
@@ -393,7 +400,7 @@ void CLocalizer::EnableTranslation(UINT nMenuIDFirst, UINT nMenuIDLast, BOOL bEn
 	if (s_pTransText)
 	{
 		for (UINT nMenuID = nMenuIDFirst; nMenuID <= nMenuIDLast; nMenuID++)
-			s_pTransText->EnableTranslation(nMenuID, bEnable);
+			s_pTransText->EnableTranslation(nMenuID, BOOL2bool(bEnable));
 	}
 }
 

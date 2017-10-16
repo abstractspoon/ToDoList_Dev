@@ -103,26 +103,26 @@ static BOOL IsTransTextDll(LPCWSTR szDllPath)
 class ITransText
 {
 public:
-	virtual BOOL Initialize(LPCWSTR szDictPath, ITT_TRANSLATEOPTION nOption = ITTTO_TRANSLATEONLY) = 0;
+	virtual bool Initialize(LPCWSTR szDictPath, ITT_TRANSLATEOPTION nOption = ITTTO_TRANSLATEONLY) = 0;
     virtual void Release() = 0; // releases the interface
 	
 	virtual LPCWSTR GetDictionaryFile() const = 0;
 	virtual LPCWSTR GetDictionaryVersion() const = 0;
-	virtual BOOL CleanupDictionary(LPCWSTR szMasterDictPath, LPCWSTR szDictPath) = 0;
+	virtual bool CleanupDictionary(LPCWSTR szMasterDictPath, LPCWSTR szDictPath) = 0;
 
 	virtual void SetTranslationOption(ITT_TRANSLATEOPTION nOption) = 0;
 	virtual ITT_TRANSLATEOPTION GetTranslationOption() const = 0;
 
-	virtual BOOL TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
-	virtual BOOL TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;
-	virtual BOOL TranslateMenu(HMENU hMenu, HWND hWndRef, BOOL bRecursive = TRUE) = 0;
-	virtual BOOL TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
+	virtual bool TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
+	virtual bool TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;
+	virtual bool TranslateMenu(HMENU hMenu, HWND hWndRef, bool bRecursive = true) = 0;
+	virtual bool TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 
 	virtual void UpdateMenu(HWND hWnd) = 0;
 
-	virtual void EnableTranslation(HWND hWnd, BOOL bEnable = TRUE) = 0;
-	virtual void EnableTranslation(HMENU hMenu, BOOL bEnable = TRUE) = 0;
-	virtual void EnableTranslation(UINT nMenuID, BOOL bEnable = TRUE) = 0;
+	virtual void EnableTranslation(HWND hWnd, bool bEnable = true) = 0;
+	virtual void EnableTranslation(HMENU hMenu, bool bEnable = true) = 0;
+	virtual void EnableTranslation(UINT nMenuID, bool bEnable = true) = 0;
 
 	virtual void IgnoreString(LPCWSTR szText) = 0;
 	virtual void FreeTextBuffer(LPWSTR& szTranslated) = 0;
