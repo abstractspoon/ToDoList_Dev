@@ -3808,17 +3808,20 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 			{
 				DWORD dwToTaskID = _ttoi(pGIFrom->aDepends[nDepend]);
 				
-				if (dwToTaskID == 0)
+				if (!m_data.HasItem(dwToTaskID))
 					continue;
 
 				int nTo = FindListItem(dwToTaskID, mapItems);
 
-				// and both items may be above or below the visible range
-				if ((nFrom < nFirstVis) && (nTo < nFirstVis) && (nTo != -1))
-					continue;
+				if (nTo != -1)
+				{
+					// Check if both items are above or below the visible range
+					if ((nFrom < nFirstVis) && (nTo < nFirstVis))
+						continue;
 
-				if ((nFrom >= nLastVis) && (nTo >= nLastVis) && (nTo != -1))
-					continue;
+					if ((nFrom >= nLastVis) && (nTo >= nLastVis))
+						continue;
+				}
 				
 				// else
 				GANTTDEPENDENCY depend;
@@ -3834,6 +3837,12 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 
 BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, const CHTIMap& mapItems, GANTTDEPENDENCY& depend) const
 {
+	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	if (CalcDependencyEndPos(dwFromTaskID, mapItems, depend, TRUE) && 
 		CalcDependencyEndPos(dwToTaskID, mapItems, depend, FALSE))
 	{
@@ -3846,9 +3855,11 @@ BOOL CGanttTreeListCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, c
 
 BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, const CHTIMap& mapItems, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
-	int nItem = FindListItem(dwTaskID, mapItems)/*, nPos = GCDR_NOTDRAWN*/;
+	ASSERT(m_data.HasItem(dwTaskID));
 
-	if (nItem == -1) // == Collapsed
+	int nItem = FindListItem(dwTaskID, mapItems);
+
+	if (nItem == -1) // Collapsed 
 	{
 		// Use first visible parent as surrogate
 		HTREEITEM hti = mapItems.GetItem(dwTaskID);
@@ -3868,6 +3879,8 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, const CHTIMap& map
 
 BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
+	ASSERT(m_data.HasItem(dwTaskID));
+
 	int nItem = FindListItem(dwTaskID);
 
 	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);

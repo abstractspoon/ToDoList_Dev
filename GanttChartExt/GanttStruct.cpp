@@ -431,11 +431,17 @@ BOOL CGanttItemMap::RemoveKey(DWORD dwKey)
 
 BOOL CGanttItemMap::HasItem(DWORD dwKey) const
 {
+	if (dwKey == 0)
+		return FALSE;
+
 	return (GetItem(dwKey) != NULL);
 }
 
 GANTTITEM* CGanttItemMap::GetItem(DWORD dwKey) const
 {
+	if (dwKey == 0)
+		return NULL;
+
 	GANTTITEM* pGI = NULL;
 	
 	if (Lookup(dwKey, pGI))
