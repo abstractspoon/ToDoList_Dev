@@ -27,7 +27,7 @@ public:
 	CEnMenu();
 	virtual ~CEnMenu();
 
-	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE);
+	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE, BOOL bRecursiveTranslate = FALSE);
 	void SetBackgroundColor(COLORREF color);
 	
 	// pass -1 as nThemeBMID is you want ownerdraw
@@ -91,6 +91,7 @@ protected:
 	static BOOL IsThemed();
 	static int GetMenuItemPos(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
 	static void DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos);
+	static int MenuSortProc(const void* v1, const void* v2);
 };
 
 #endif // !defined(AFX_ENMENU_H__5AB11CC8_CCF5_4D52_ADC7_27FDC151F3FE__INCLUDED_)

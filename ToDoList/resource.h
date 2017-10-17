@@ -993,7 +993,8 @@
 #define ID_HELP_WIKI                    33106
 #define ID_HELP_LICENSE                 33107
 #define ID_EDIT_INSERTDATETIME          33108
-#define ID_SORTBY_FIRST                 33120
+#define ID_SORTBY_ALLCOLUMNS_FIRST      33120
+#define ID_SORTBY_DEFAULTCOLUMNS_FIRST  33120
 #define ID_SORTBY_COST                  33120
 #define ID_SORTBY_FLAG                  33121
 #define ID_SORTBY_DONEDATE              33122
@@ -1031,6 +1032,7 @@
 #define ID_SORTBY_SUBTASKDONE           33157
 #define ID_SORTBY_REMINDER              33158
 #define ID_SORTBY_LOCK                  33159
+#define ID_SORTBY_DEFAULTCOLUMNS_LAST   33199
 #define ID_SORTBY_CUSTOMCOLUMN_FIRST    33201
 #define ID_SORTBY_CUSTOMCOLUMN1         33201
 #define ID_SORTBY_CUSTOMCOLUMN2         33202
@@ -1097,10 +1099,9 @@
 #define ID_SORTBY_CUSTOMCOLUMN63        33263
 #define ID_SORTBY_CUSTOMCOLUMN64        33264
 #define ID_SORTBY_CUSTOMCOLUMN_LAST     33264
-#define ID_SORTBY_COLUMN_LAST           33900
 #define ID_SORTBY_MULTI                 33901
 #define ID_SORTBY_NONE                  33902
-#define ID_SORTBY_LAST                  33999
+#define ID_SORTBY_ALLCOLUMNS_LAST       33999
 #define ID_COMMENTS_CUT                 34150
 #define ID_COMMENTS_COPY                34151
 #define ID_COMMENTS_PASTE               34152

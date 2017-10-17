@@ -56,7 +56,7 @@ struct MENUSORTITEM
 		ZeroMemory(&mii, sizeof(mii));
 
 		mii.cbSize = sizeof(mii);
-		mii.fMask = (MIIM_BITMAP | MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID);
+		mii.fMask = (MIIM_BITMAP | MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_FTYPE);
 	}
 
 	CString sMenuString;
@@ -218,12 +218,12 @@ void CEnMenu::SetBackgroundColor(COLORREF color)
 	::SetMenuInfo(GetSafeHmenu(), &MenuInfo);
 }
 
-BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate)
+BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate, BOOL bRecursiveTranslate)
 {
 	if (CMenu::LoadMenu(nMenuResID))
 	{
 		if (bTranslate && s_pTT)
-			s_pTT->TranslateMenu(*this, hWndRef, true);
+			s_pTT->TranslateMenu(*this, hWndRef, (bRecursiveTranslate != FALSE));
 
 		return TRUE;
 	}
@@ -701,7 +701,7 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 	}
 
 	// Sort the items by name
- 	Misc::SortArray(aSortStrings);
+ 	Misc::SortArray(aSortStrings, &MenuSortProc);
 
 	// Update the menu
 	for (int nItem = 0; nItem < aSortStrings.GetSize(); nItem++)
@@ -717,3 +717,12 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 
 	return TRUE;
 }
+
+int CEnMenu::MenuSortProc(const void* v1, const void* v2)
+{
+	MENUSORTITEM* pItem1 = (MENUSORTITEM*)v1;
+	MENUSORTITEM* pItem2 = (MENUSORTITEM*)v2;
+
+	return pItem1->sMenuString.CompareNoCase(pItem2->sMenuString);
+}
+
