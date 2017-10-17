@@ -147,7 +147,7 @@ void CTDLTasklistImportDlg::OnOK()
 		m_tdc.GetSelectedTasks(m_tasksSelected, TDCGT_ALL, (m_bImportSubtasks ? 0 : TDCGSTF_NOTSUBTASKS));
 }
 
-IIMPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList8* pTasks)
+IIMPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)
 {
 	ASSERT(pTasks);
 	

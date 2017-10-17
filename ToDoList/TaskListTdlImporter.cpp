@@ -29,13 +29,8 @@ CTaskListTdlImporter::~CTaskListTdlImporter()
 
 IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	ITaskList8* pTasks8 = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
-
-	if (!pTasks8)
-	{
-		ASSERT(0);
+	if (!pDestTaskFile)
 		return IIR_BADINTERFACE;
-	}
 	
 	if (!bSilent)
 	{
@@ -45,7 +40,7 @@ IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pD
 			return IIR_CANCELLED;
 
 		// else
-		return dialog.GetSelectedTasks(pTasks8);
+		return dialog.GetSelectedTasks(pDestTaskFile);
 	}
 
 	// else 
@@ -66,7 +61,7 @@ IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pD
 		return IIR_OTHER;
 	}
 
-	VERIFY(tasks.CopyTasksTo(pTasks8));
+	VERIFY(tasks.CopyTasksTo(pDestTaskFile));
 	return IIR_SUCCESS;
 }
 

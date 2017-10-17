@@ -9651,10 +9651,20 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		}
 		
 		if (pTDI->bFlagged && filter.WantAttribute(TDCA_FLAG))
-			tasks.SetTaskFlag(hTask, m_data.CalcIsTaskFlagged(pTDI, pTDS), TRUE);
-		
+		{
+			tasks.SetTaskFlag(hTask, (pTDI->bFlagged != FALSE));
+
+			if (!pTDI->bFlagged)
+				tasks.SetTaskFlag(hTask, (m_data.CalcIsTaskFlagged(pTDI, pTDS) != FALSE), TRUE);
+		}
+
 		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
-			tasks.SetTaskLock(hTask, m_data.CalcIsTaskLocked(pTDI, pTDS), TRUE);
+		{
+			tasks.SetTaskLock(hTask, (pTDI->bLocked != FALSE));
+
+			if (!pTDI->bLocked)
+				tasks.SetTaskLock(hTask, (m_data.CalcIsTaskLocked(pTDI, pTDS) != FALSE), TRUE);
+		}
 
 		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
 			tasks.SetTaskRecurrence(hTask, pTDI->trRecurrence);
