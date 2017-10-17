@@ -188,25 +188,14 @@ int CPlainTextImporter::GetDepth(const CString& sLine)
 BOOL CPlainTextImporter::GetTitleComments(const CString& sLine, 
 										  CString& sTitle, CString& sComments)
 {
-	int nDelim = sLine.Find(_T("|")); 
+	sTitle = sLine;
+	Misc::Split(sTitle, sComments, '|');
 	
-	if (nDelim != -1)
+	if (!sComments.IsEmpty())
 	{
-		sTitle = sLine.Left(nDelim);
-		sComments = sLine.Mid(nDelim + 1);
-
 		// comments replace [\][n] with [\n]
 		sComments.Replace(_T("\\n"), _T("\n"));
 	}
-	else
-	{
-		sTitle = sLine;
-		sComments.Empty();
-	}
 
-	// cleanup
-	Misc::Trim(sTitle);
-	Misc::Trim(sComments);
-
-	return sTitle.GetLength();
+	return !sTitle.IsEmpty();
 }
