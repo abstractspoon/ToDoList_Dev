@@ -9887,7 +9887,7 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 					TDCCADATA data;
 
 					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data.AsString());
+						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data);
 				}
 			}
 		}

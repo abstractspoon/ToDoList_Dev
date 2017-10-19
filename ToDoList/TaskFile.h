@@ -34,6 +34,7 @@ struct TDCRECURRENCE;
 struct TDCCOLEDITVISIBILITY;
 struct TDCCOLEDITFILTERVISIBILITY;
 struct TDCAUTOLISTDATA;
+struct TDCCADATA;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -198,6 +199,7 @@ public:
 
 	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const;
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData);
+	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
 	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;
@@ -507,6 +509,7 @@ protected:
 	CXmlItem* GetCustomAttributeDef(const CString& sCustID);
 	const CXmlItem* GetCustomAttributeDef(const CString& sCustID) const;
 	CXmlItem* AddCustomAttributeDef(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, BOOL bList);
+	BOOL SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data);
 
 	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, time_t tVal);
 	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& tVal, const CString& sDateStringItem = EMPTY_STR, BOOL bCalculated = FALSE);

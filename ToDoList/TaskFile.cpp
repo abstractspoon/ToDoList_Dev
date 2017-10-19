@@ -1986,37 +1986,52 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sTypeID, data);
 
-		if (sTypeID.IsEmpty() || data.IsEmpty())
-			continue;
+		VERIFY(SetTaskCustomAttributeData(hTask, sTypeID, data));
+	}
 
-		if (!HasCustomAttribute(sTypeID))
-			continue;
+	return TRUE;
+}
 
-		CXmlItem* pXICustData = pXITask->AddItem(TDL_TASKCUSTOMATTRIBDATA);
-		ASSERT(pXICustData);
+BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data)
+{
+	CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, FALSE);
 
-		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::MakeUpper(sTypeID));
-		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
+	return SetTaskCustomAttributeData(pXITask, sCustAttribID, data);
+}
 
-		// add human readable format
-		DWORD dwAttribType = GetCustomAttributeTypeByID(sTypeID);
+BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data)
+{
+	if (sCustAttribID.IsEmpty() || data.IsEmpty())
+		return FALSE;
 
-		if (dwAttribType & TDCCA_LISTMASK)
+	if (!HasCustomAttribute(sCustAttribID))
+		return FALSE;
+
+	CXmlItem* pXICustData = pXITask->AddItem(TDL_TASKCUSTOMATTRIBDATA);
+	ASSERT(pXICustData);
+
+	pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::ToUpper(sCustAttribID));
+	pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
+
+	// add human readable format
+	DWORD dwAttribType = GetCustomAttributeTypeByID(sCustAttribID);
+
+	if (dwAttribType & TDCCA_LISTMASK)
+	{
+		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray('+'));
+	}
+	else
+	{
+		switch (dwAttribType & TDCCA_DATAMASK)
 		{
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray('+'));
-		}
-		else
-		{
-			switch (dwAttribType & TDCCA_DATAMASK)
-			{
-			case TDCCA_DATE:
-				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates));
-				break;
-				
-			case TDCCA_TIMEPERIOD:
-				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsTimePeriod());
-				break;
-			}
+		case TDCCA_DATE:
+			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates));
+			break;
+
+		case TDCCA_TIMEPERIOD:
+			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsTimePeriod());
+			break;
 		}
 	}
 
