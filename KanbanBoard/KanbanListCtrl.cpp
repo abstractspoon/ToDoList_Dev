@@ -311,7 +311,7 @@ void CKanbanListCtrlArray::SetColorTaskBarByPriority(BOOL bSet)
 	}
 }
 
-void CKanbanListCtrlArray::SetDrawAttributeLabels(BOOL bDraw)
+void CKanbanListCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
 	int nList = GetSize();
 
@@ -320,7 +320,7 @@ void CKanbanListCtrlArray::SetDrawAttributeLabels(BOOL bDraw)
 		CKanbanListCtrl* pList = GetAt(nList);
 		ASSERT(pList);
 
-		pList->SetDrawAttributeLabels(bDraw);
+		pList->SetAttributeLabelVisibility(nLabelVis);
 	}
 }
 
@@ -715,7 +715,7 @@ CKanbanListCtrl::CKanbanListCtrl(const CKanbanItemMap& data, const KANBANCOLUMN&
 	m_bColorBarByPriority(FALSE),
 	m_dwSelectingTask(0),
 	m_nLineHeight(-1),
-	m_bDrawAttribLabels(TRUE),
+	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE)
 {
 }
@@ -943,9 +943,9 @@ void CKanbanListCtrl::SetColorTaskBarByPriority(BOOL bSet)
 		Invalidate(TRUE);
 }
 
-void CKanbanListCtrl::SetDrawAttributeLabels(BOOL bDraw)
+void CKanbanListCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
-	m_bDrawAttribLabels = bDraw;
+	m_nAttribLabelVisiability = nLabelVis;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -1448,34 +1448,34 @@ BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip) const
 	return TRUE;
 }
 
-UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib)
+UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib, BOOL bLong)
 {
 	switch (nAttrib)
 	{
-	case IUI_ALLOCBY:		return IDS_DISPLAY_ALLOCBY;
-	case IUI_ALLOCTO:		return IDS_DISPLAY_ALLOCTO;
-	case IUI_CATEGORY:		return IDS_DISPLAY_CATEGORY;
-	case IUI_COST:			return IDS_DISPLAY_COST;
-	case IUI_CREATEDBY:		return IDS_DISPLAY_CREATEDBY;
-	case IUI_CREATIONDATE:	return IDS_DISPLAY_CREATEDATE;
-	case IUI_DONEDATE:		return IDS_DISPLAY_DONEDATE;
-	case IUI_DUEDATE:		return IDS_DISPLAY_DUEDATE;
-	case IUI_EXTERNALID:	return IDS_DISPLAY_EXTERNALID;
-	case IUI_FLAG:			return IDS_DISPLAY_FLAG;
-	case IUI_FILEREF:		return IDS_DISPLAY_FILEREF;
-	case IUI_ID:			return IDS_DISPLAY_TASKID;
-	case IUI_LASTMOD:		return IDS_DISPLAY_LASTMOD;
-	case IUI_PARENT:		return IDS_DISPLAY_PARENT;
-	case IUI_PERCENT:		return IDS_DISPLAY_PERCENT;
-	case IUI_PRIORITY:		return IDS_DISPLAY_PRIORITY;
-	case IUI_RECURRENCE:	return IDS_DISPLAY_RECURRENCE;
-	case IUI_RISK:			return IDS_DISPLAY_RISK;
-	case IUI_STARTDATE:		return IDS_DISPLAY_STARTDATE;
-	case IUI_STATUS:		return IDS_DISPLAY_STATUS;
-	case IUI_TAGS:			return IDS_DISPLAY_TAGS;
-	case IUI_TIMEEST:		return IDS_DISPLAY_TIMEEST;
-	case IUI_TIMESPENT:		return IDS_DISPLAY_TIMESPENT;
-	case IUI_VERSION:		return IDS_DISPLAY_VERSION;
+	case IUI_ALLOCBY:		return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
+	case IUI_ALLOCTO:		return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
+	case IUI_CATEGORY:		return (bLong ? IDS_DISPLAY_CATEGORY : IDS_DISPLAY_CATEGORY_SHORT);
+	case IUI_COST:			return (bLong ? IDS_DISPLAY_COST : IDS_DISPLAY_COST_SHORT);
+	case IUI_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY : IDS_DISPLAY_CREATEDBY_SHORT);
+	case IUI_CREATIONDATE:	return (bLong ? IDS_DISPLAY_CREATEDATE : IDS_DISPLAY_CREATEDATE_SHORT);
+	case IUI_DONEDATE:		return (bLong ? IDS_DISPLAY_DONEDATE : IDS_DISPLAY_DONEDATE_SHORT);
+	case IUI_DUEDATE:		return (bLong ? IDS_DISPLAY_DUEDATE : IDS_DISPLAY_DUEDATE_SHORT);
+	case IUI_EXTERNALID:	return (bLong ? IDS_DISPLAY_EXTERNALID : IDS_DISPLAY_EXTERNALID_SHORT);
+	case IUI_FLAG:			return (bLong ? IDS_DISPLAY_FLAG : IDS_DISPLAY_FLAG_SHORT);
+	case IUI_FILEREF:		return (bLong ? IDS_DISPLAY_FILEREF : IDS_DISPLAY_FILEREF_SHORT);
+	case IUI_ID:			return (bLong ? IDS_DISPLAY_TASKID : IDS_DISPLAY_TASKID_SHORT);
+	case IUI_LASTMOD:		return (bLong ? IDS_DISPLAY_LASTMOD : IDS_DISPLAY_LASTMOD_SHORT);
+	case IUI_PARENT:		return (bLong ? IDS_DISPLAY_PARENT : IDS_DISPLAY_PARENT_SHORT);
+	case IUI_PERCENT:		return (bLong ? IDS_DISPLAY_PERCENT : IDS_DISPLAY_PERCENT_SHORT);
+	case IUI_PRIORITY:		return (bLong ? IDS_DISPLAY_PRIORITY : IDS_DISPLAY_PRIORITY_SHORT);
+	case IUI_RECURRENCE:	return (bLong ? IDS_DISPLAY_RECURRENCE : IDS_DISPLAY_RECURRENCE_SHORT);
+	case IUI_RISK:			return (bLong ? IDS_DISPLAY_RISK : IDS_DISPLAY_RISK_SHORT);
+	case IUI_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE : IDS_DISPLAY_STARTDATE_SHORT);
+	case IUI_STATUS:		return (bLong ? IDS_DISPLAY_STATUS : IDS_DISPLAY_STATUS_SHORT);
+	case IUI_TAGS:			return (bLong ? IDS_DISPLAY_TAGS : IDS_DISPLAY_TAGS_SHORT);
+	case IUI_TIMEEST:		return (bLong ? IDS_DISPLAY_TIMEEST : IDS_DISPLAY_TIMEEST_SHORT);
+	case IUI_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT : IDS_DISPLAY_TIMESPENT_SHORT);
+	case IUI_VERSION:		return (bLong ? IDS_DISPLAY_VERSION : IDS_DISPLAY_VERSION_SHORT);
 	}
 
 	ASSERT(0);
@@ -1484,19 +1484,25 @@ UINT CKanbanListCtrl::GetDisplayFormat(IUI_ATTRIBUTE nAttrib)
 
 void CKanbanListCtrl::DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const
 {
-	BOOL bDrawLabels = (m_bSavingToImage ? TRUE : m_bDrawAttribLabels);
+	KBC_ATTRIBLABELS nLabelVis = m_nAttribLabelVisiability;
+	
+	if (m_bSavingToImage)
+		nLabelVis = KBCAL_LONG;
 
-	CString sAttrib = FormatAttribute(nAttrib, sValue, bDrawLabels);
+	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
 	pDC->DrawText(sAttrib, rLine, nFlags);
 
 	rLine.top += m_nLineHeight;
 }
 
-CString CKanbanListCtrl::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, BOOL bWithLabel)
+CString CKanbanListCtrl::FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
 {
-	UINT nFormatID = (bWithLabel ? GetDisplayFormat(nAttrib) : 0);
+	UINT nFormatID = 0;
+	
+	if (nLabelVis != KBCAL_NONE)
+		nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
 
-	if (!bWithLabel || (nFormatID == 0))
+	if (nFormatID == 0)
 		return sValue;
 
 	CEnString sAttrib(nFormatID);
@@ -2055,7 +2061,7 @@ int CKanbanListCtrl::CalcRequiredColumnWidthForImage() const
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				IUI_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
-				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), TRUE);
+				CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
 
 				nMaxItemLength = max(nMaxItemLength, sAttrib.GetLength());
 			}

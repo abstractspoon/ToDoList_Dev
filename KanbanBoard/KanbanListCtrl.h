@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "Kanbanstruct.h"
+#include "Kanbanenum.h"
 
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\fontcache.h"
@@ -77,17 +78,17 @@ public:
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
-	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nListWidth = -1) const;
 	BOOL SelectionHasLockedTasks() const;
+	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 
 	bool FilterToolTipMessage(MSG* pMsg) { m_tooltip.FilterToolTipMessage(pMsg); return false; }
 
 	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV);
-	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, BOOL bWithLabel = TRUE);
+	static CString FormatAttribute(IUI_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList);
 
 protected:
@@ -96,7 +97,6 @@ protected:
 	BOOL m_bShowTaskColorAsBar;
 	BOOL m_bColorBarByPriority;
 	BOOL m_bStrikeThruDoneTasks;
-	BOOL m_bDrawAttribLabels;
 	BOOL m_bSavingToImage;
 	BOOL m_bShowCompletionCheckboxes;
 
@@ -113,6 +113,7 @@ protected:
 	DWORD m_dwDisplay;
 	int m_nLineHeight;
 	DWORD m_dwSelectingTask;
+	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -168,7 +169,7 @@ protected:
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static UINT GetDisplayFormat(IUI_ATTRIBUTE nAttrib);
+	static UINT GetDisplayFormat(IUI_ATTRIBUTE nAttrib, BOOL bLong);
 
 };
 
@@ -198,12 +199,12 @@ public:
 	void SetShowTaskColorAsBar(BOOL bSet = TRUE);
 	void SetStrikeThruDoneTasks(BOOL bSet = TRUE);
 	void SetColorTaskBarByPriority(BOOL bSet = TRUE);
-	void SetDrawAttributeLabels(BOOL bDraw = TRUE);
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 	
 	int GetVisibleCount(BOOL bIncBacklog) const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;
+	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	
 	int CalcRequiredColumnWidthForImage() const;
 	BOOL CanSaveToImage() const;

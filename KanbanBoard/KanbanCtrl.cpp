@@ -1951,7 +1951,7 @@ void CKanbanCtrl::Resize(const CRect& rect)
 		int nListWidth = (rAvail.Width() / nNumVisibleLists);
 
 		// Check whether the lists are wide enough to show attribute labels
-		BOOL bDrawAttribLabels = WantDrawListAttributeLabels(nListWidth);
+		KBC_ATTRIBLABELS nLabelVis = GetListAttributeLabelVisibility(nListWidth);
 
 		// Also update tab order as we go
 		int nNumLists = m_aListCtrls.GetSize();
@@ -1989,7 +1989,7 @@ void CKanbanCtrl::Resize(const CRect& rect)
 				rList.right = (rList.left + nListWidth);
 
 			pList->SetWindowPos(pPrev, rList.left, rList.top, rList.Width(), rList.Height(), 0);
-			pList->SetDrawAttributeLabels(bDrawAttribLabels);
+			pList->SetAttributeLabelVisibility(nLabelVis);
 
 			pPrev = pList;
 			nVis++;
@@ -2002,10 +2002,75 @@ float CKanbanCtrl::GetAverageListCharWidth()
 	return m_aListCtrls.GetAverageCharWidth();
 }
 
-BOOL CKanbanCtrl::WantDrawListAttributeLabels(int nListWidth)
+BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KBC_ATTRIBLABELS nLabelVis) const
+{
+	switch (nLabelVis)
+	{
+	case KBCAL_NONE:
+		return TRUE;
+
+	case KBCAL_LONG:
+	case KBCAL_SHORT:
+		{
+			int nAtt = m_aDisplayAttrib.GetSize();
+			CUIntArray aLabelLen;
+
+			aLabelLen.SetSize(nAtt);
+
+			while (nAtt--)
+			{
+				IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+				CString sLabel = CKanbanListCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis);
+
+				aLabelLen[nAtt] = sLabel.GetLength();
+
+				if ((int)(aLabelLen[nAtt] * fAveCharWidth) > nAvailWidth)
+					return FALSE;
+			}
+
+			// Look for the first 'Label: Value' item which exceeds the list width
+			POSITION pos = m_data.GetStartPosition();
+
+			while (pos)
+			{
+				KANBANITEM* pKI = NULL;
+				DWORD dwTaskID = 0;
+
+				m_data.GetNextAssoc(pos, dwTaskID, pKI);
+
+				int nAtt = m_aDisplayAttrib.GetSize();
+
+				while (nAtt--)
+				{
+					IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
+
+					// Exclude 'File Link' and 'Parent' because these will 
+					// almost always push things over the limit
+					if ((nAttribID != IUI_FILEREF) && (nAttribID != IUI_PARENT))
+					{
+						int nValueLen = pKI->GetAttributeDisplayValue(nAttribID).GetLength();
+
+						if ((int)((aLabelLen[nAtt] + nValueLen) * fAveCharWidth) > nAvailWidth)
+							return FALSE;
+					}
+				}
+			}
+
+			// else
+			return TRUE;
+		}
+		break;
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
+}
+
+KBC_ATTRIBLABELS CKanbanCtrl::GetListAttributeLabelVisibility(int nListWidth)
 {
 	if (!m_aDisplayAttrib.GetSize() || !m_aListCtrls.GetSize())
-		return FALSE;
+		return KBCAL_NONE;
 
 	// Calculate the available width for attributes
 	int nAvailWidth = m_aListCtrls[0]->CalcAvailableAttributeWidth(nListWidth);
@@ -2013,44 +2078,15 @@ BOOL CKanbanCtrl::WantDrawListAttributeLabels(int nListWidth)
 	// Calculate the fixed attribute label lengths and check if any
 	// of them exceed the list width
 	float fAveCharWidth = GetAverageListCharWidth();
-	CUIntArray aLabelLen;
+	KBC_ATTRIBLABELS nLabelVis[2] = { KBCAL_LONG, KBCAL_SHORT };
 
-	int nAtt = m_aDisplayAttrib.GetSize();
-	aLabelLen.SetSize(nAtt);
-
-	while (nAtt--)
+	for (int nPass = 0; nPass < 2; nPass++)
 	{
-		IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-		aLabelLen[nAtt] = CKanbanListCtrl::FormatAttribute(nAttribID, _T("")).GetLength();
-
-		if ((int)(aLabelLen[nAtt] * fAveCharWidth) > nAvailWidth)
-			return FALSE;
+		if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, nLabelVis[nPass]))
+			return nLabelVis[nPass];
 	}
 
-	// Look for the first 'Label: Value' item which exceeds the list width
-	POSITION pos = m_data.GetStartPosition();
-
-	while (pos)
-	{
-		KANBANITEM* pKI = NULL;
-		DWORD dwTaskID = 0;
-
-		m_data.GetNextAssoc(pos, dwTaskID, pKI);
-
-		int nAtt = m_aDisplayAttrib.GetSize();
-
-		while (nAtt--)
-		{
-			IUI_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-			int nValueLen = pKI->GetAttributeDisplayValue(nAttribID).GetLength();
-
-			if ((int)((aLabelLen[nAtt] + nValueLen) * fAveCharWidth) > nAvailWidth)
-				return FALSE;
-		}
-	}
-
-	// all else
-	return TRUE;
+	return KBCAL_NONE;
 }
 
 void CKanbanCtrl::Resize()

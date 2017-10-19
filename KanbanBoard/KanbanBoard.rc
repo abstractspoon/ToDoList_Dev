@@ -145,7 +145,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 IDD_PREFERENCES_DIALOG DIALOGEX 0, 0, 373, 223
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Kanban Preferences"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,262,202,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,316,202,50,14
@@ -273,7 +273,7 @@ IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
 IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
-IDB_CHECKBOXES          BITMAP                  "res\\XPcheckboxes.bmp"
+IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -353,7 +353,10 @@ BEGIN
     IDS_DISPLAY_STATUS      "Status"
     IDS_DISPLAY_CREATEDATE  "Creation Date"
     IDS_DISPLAY_CREATEDBY   "Created By"
-    IDS_DISPLAY_PERCENT     "Percent Complete"
+    IDS_DISPLAY_PRIORITY_SHORT "Priority"
+    IDS_DISPLAY_ALLOCTO_SHORT "Alloc.To"
+    IDS_DISPLAY_PERCENT     "Percent Done"
+    IDS_DISPLAY_ALLOCBY_SHORT "Alloc.By"
     IDS_DISPLAY_FLAG        "Flag"
     IDS_DISPLAY_TAGS        "Tags"
     IDS_DISPLAY_VERSION     "Version"
@@ -370,12 +373,37 @@ BEGIN
     IDS_FIXEDCOLUMNS        "- Fixed Columns -"
     IDS_DELETEALLROWS       "Do you want to delete the existing column definitions?"
     IDS_BKGNDCOLOR          "Colour"
-    IDS_DISPLAY_TASKID      "Task ID"
+    IDS_DISPLAY_TASKID      "ID"
+    IDS_DISPLAY_DONEDATE_SHORT "Compl."
+    IDS_DISPLAY_DUEDATE_SHORT "Due"
+    IDS_DISPLAY_STARTDATE_SHORT "Start"
+    IDS_DISPLAY_TIMEEST_SHORT "Est."
+    IDS_DISPLAY_TIMESPENT_SHORT "Spent"
+    IDS_DISPLAY_CATEGORY_SHORT "Cat."
+    IDS_DISPLAY_STATUS_SHORT "Status"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_DISPLAY_FILEREF     "File Link"
+    IDS_DISPLAY_FILEREF_SHORT "File"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_CREATEDATE_SHORT "Created"
+    IDS_DISPLAY_CREATEDBY_SHORT "Creator"
+    IDS_DISPLAY_PERCENT_SHORT "%"
+    IDS_DISPLAY_FLAG_SHORT  "Flag"
+    IDS_DISPLAY_TAGS_SHORT  "Tags"
+    IDS_DISPLAY_VERSION_SHORT "Ver."
+    IDS_DISPLAY_RISK_SHORT  "Risk"
+    IDS_DISPLAY_LASTMOD_SHORT "Mod."
+    IDS_DISPLAY_COST_SHORT  "Cost"
+    IDS_DISPLAY_EXTERNALID_SHORT "Ext.ID"
+    IDS_DISPLAY_RECURRENCE_SHORT "Recurs"
+    IDS_DISPLAY_PARENT_SHORT "Parent"
+    IDS_DISPLAY_TASKID_SHORT "ID"
 END
 
 #endif    // English (Australia) resources

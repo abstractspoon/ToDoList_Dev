@@ -387,7 +387,7 @@ CString KANBANITEM::GetAttributeDisplayValue(IUI_ATTRIBUTE nAttrib) const
 
 	case IUI_FILEREF:		return sFileRef;
 	case IUI_ID:			return Misc::Format(dwTaskID);
-	case IUI_PERCENT:		return Misc::Format(nPercent);
+	case IUI_PERCENT:		return Misc::Format(nPercent, _T("%"));
 	case IUI_PARENT:		return sPath;
 	case IUI_FLAG:			return _T(""); // TODO
 	case IUI_CREATEDBY:		return sCreatedBy;

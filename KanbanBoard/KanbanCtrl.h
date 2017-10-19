@@ -147,9 +147,10 @@ protected:
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
 
-	BOOL WantDrawListAttributeLabels(int nListWidth);
+	KBC_ATTRIBLABELS GetListAttributeLabelVisibility(int nListWidth);
 	float GetAverageListCharWidth();
 	int CalcRequiredColumnWidthForImage() const;
+	BOOL CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KBC_ATTRIBLABELS nLabelVis) const;
 
 	KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	BOOL HasKanbanItem(DWORD dwTaskID) const;
