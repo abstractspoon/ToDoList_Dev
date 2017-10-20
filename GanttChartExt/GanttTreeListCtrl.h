@@ -198,32 +198,35 @@ protected:
 	// pseudo-message handler
 	void OnHeaderDividerDblClk(NMHEADER* HDN);
 
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD dwTaskID, BOOL bSelected);
-	void PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID);
+	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
 	GM_ITEMSTATE GetItemState(int nItem) const;
 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
-	
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
+	
+	void DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected);
+	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
+	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
+	void DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected);
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
 	void DrawListItemWeeks(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL& bToday, BOOL bDrawHours);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday, BOOL bDrawHours);
 
-	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
+	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bRollup);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 
@@ -254,6 +257,7 @@ protected:
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	HFONT GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, int nCol);
+	BOOL IsTreeItemCollapsed(int nListItem) const;
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;

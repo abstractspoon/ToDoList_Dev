@@ -50,6 +50,7 @@ enum // options
 	GTLCF_SHOWPROGRESSONBAR			= 0x0200,
 	GTLCF_DECADESAREONEBASED		= 0x0400,
 	GTLCF_DISABLEDEPENDENTDRAGGING	= 0x0800,
+	GTLCF_DISPLAYPARENTROLLUPS		= 0x1000,
 };
 
 /////////////////////////////////////////////////////////////////////////////

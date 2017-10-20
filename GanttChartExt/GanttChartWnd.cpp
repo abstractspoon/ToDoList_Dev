@@ -916,6 +916,7 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 	m_ctrlGantt.SetOption(GTLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYPROGRESSINBAR, m_dlgPrefs.GetDisplayProgressInBar());
 	m_ctrlGantt.SetOption(GTLCF_DECADESAREONEBASED, m_dlgPrefs.GetDecadesAreOneBased());
+	m_ctrlGantt.SetOption(GTLCF_DISPLAYPARENTROLLUPS, TRUE/*m_dlgPrefs.GetDisplayParentRollups()*/);
 
 	m_ctrlGantt.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlGantt.SetWeekendColor(m_dlgPrefs.GetWeekendColor());

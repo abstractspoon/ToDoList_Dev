@@ -1405,6 +1405,19 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	m_treeHeader.InsertItem(GTLCC_TASKID, 0, CEnString(IDS_COL_TASKID), (HDF_RIGHT | HDF_STRING));
 }
 
+BOOL CGanttTreeListCtrl::IsTreeItemCollapsed(int nListItem) const
+{
+	ASSERT(nListItem != -1);
+
+	HTREEITEM hti = GetTreeItem(m_tree, m_list, nListItem);
+	ASSERT(hti);
+
+	if (!hti)
+		return FALSE;
+
+	return TCH().IsItemExpanded(hti);
+}
+
 BOOL CGanttTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
 {
 	int nItem = CTreeListSyncer::FindListItem(m_list, (DWORD)hti);
@@ -1528,10 +1541,6 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			CRect rItem(pTVCD->nmcd.rc);
 
 			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rItem, FALSE);
-// 			BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
-// 			COLORREF crBack = GetTreeTextBkColor(*pGI, FALSE, bAlternate);
-// 
-// 			GraphicsMisc::FillItemRect(pDC, &pTVCD->nmcd.rc, crBack, m_tree);
 				
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
@@ -1551,16 +1560,16 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			
 			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
 			{
-				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-
-				GM_ITEMSTATE nState = GetItemState(hti);
-				BOOL bSelected = (nState != GMIS_NONE);
-
 				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 				GANTTITEM* pGI = NULL;
 
 				GET_GI_RET(dwTaskID, pGI, 0L);
 				
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+
+				GM_ITEMSTATE nState = GetItemState(hti);
+				BOOL bSelected = (nState != GMIS_NONE);
+
 				// draw horz gridline before selection
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
@@ -1583,12 +1592,8 @@ LRESULT CGanttTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				// draw background
 				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected);
 				
-				// draw gantt item attributes
-				CIntArray aOrder;
-				int nNumCol = m_treeHeader.GetItemOrder(aOrder);
-
-				for (int nCol = 0; nCol < nNumCol; nCol++)
-					DrawTreeItemText(pDC, hti, nCol, *pGI, bSelected, crBack);
+				// draw gantt item attribute columns
+				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -1676,8 +1681,12 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 								
 	case CDDS_ITEMPREPAINT:
 		{
-			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			DWORD dwTaskID = GetTaskID(nItem);
+
+			GANTTITEM* pGI = NULL;
+			GET_GI_RET(dwTaskID, pGI, 0L);
+
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
 			// draw item bkgnd and gridlines full width of list
 			BOOL bAlternate = (!IsListItemLineOdd(nItem) && (m_crAltLine != CLR_NONE));
@@ -1701,19 +1710,9 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
 
 			// draw row
-			int nNumCol = GetRequiredListColumnCount();
 			BOOL bSelected = IsListItemSelected(m_list, nItem);
 
-			for (int nCol = 1; nCol <= nNumCol; nCol++)
-			{
-				if (m_listHeader.GetItemWidth(nCol) > 0)
-				{
-					if (!DrawListItemColumn(pDC, nItem, nCol, dwTaskID, bSelected))
-						break;
-				}
-			}
-
-			PostDrawListItem(pDC, nItem, dwTaskID);
+			DrawListItem(pDC, nItem, *pGI, bSelected);
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -2695,6 +2694,14 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 	return sItem;
 }
 
+void CGanttTreeListCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
+{
+	int nNumCol = m_treeHeader.GetItemCount();
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+		DrawTreeItemText(pDC, hti, nCol, gi, bSelected, crBack);
+}
+
 void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
 {
 	CRect rItem;
@@ -3026,42 +3033,9 @@ void CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CGanttTreeListCtrl::PostDrawListItem(CDC* pDC, int nItem, DWORD dwTaskID)
-{
-	// draw alloc-to name after bar
-	if (HasOption(GTLCF_DISPLAYALLOCTOAFTERITEM))
-	{
-		CRect rItem;
-		VERIFY(GetListItemRect(nItem, rItem));
-		
-		// get the data for this item
-		GANTTITEM* pGI = NULL;
-		GET_GI(dwTaskID, pGI);
-
-		if (!pGI->sAllocTo.IsEmpty())
-		{
-			// get the end pos for this item relative to start of window
-			int nTextPos = GetBestTextPos(*pGI, rItem);
-
-			if (nTextPos >= 0)
-			{
-				rItem.left = (nTextPos + 3);
-				rItem.top += 2;
-
-				COLORREF crFill, crBorder;
-				GetGanttBarColors(*pGI, crBorder, crFill);
-
-				pDC->SetBkMode(TRANSPARENT);
-				pDC->SetTextColor(crBorder);
-				pDC->DrawText(pGI->sAllocTo, rItem, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
-			}
-		}
-	}
-}
-
 void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
 											int nYear, int nNumYears, const GANTTITEM& gi,
-											BOOL bSelected, BOOL& bToday)
+											BOOL bSelected, BOOL bRollup, BOOL& bToday)
 {
 	double dYearWidth = (rItem.Width() / (double)nNumYears);
 	CRect rYear(rItem);
@@ -3073,7 +3047,7 @@ void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 		else
 			rYear.right = (rItem.left + (int)(dYearWidth * (j + 1)));
 
-		DrawListItemYear(pDC, rYear, (nYear + j), gi, bSelected, bToday);
+		DrawListItemYear(pDC, rYear, (nYear + j), gi, bSelected, bRollup, bToday);
 
 		// next year
 		rYear.left = rYear.right; 
@@ -3081,14 +3055,16 @@ void CGanttTreeListCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 }
 
 void CGanttTreeListCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, BOOL& bToday)
+											const GANTTITEM& gi, BOOL bSelected, 
+											BOOL bRollup, BOOL& bToday)
 {
-	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, /*gd, */bSelected, bToday);
+	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected, bRollup, bToday);
 }
 
 void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
 											int nMonth, int nNumMonths, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, BOOL& bToday)
+											const GANTTITEM& gi, BOOL bSelected, 
+											BOOL bRollup, BOOL& bToday)
 {
 	double dMonthWidth = (rItem.Width() / (double)nNumMonths);
 	CRect rMonth(rItem);
@@ -3100,7 +3076,7 @@ void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 		else
 			rMonth.right = (rItem.left + (int)(dMonthWidth * (i + 1)));
 
-		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, bSelected, bToday);
+		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, bSelected, bRollup, bToday);
 
 		// next item
 		rMonth.left = rMonth.right; 
@@ -3109,21 +3085,26 @@ void CGanttTreeListCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 
 void CGanttTreeListCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, BOOL& bToday)
+											const GANTTITEM& gi, BOOL bSelected, 
+											BOOL bRollup, BOOL& bToday)
 {
-	DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-	DrawItemDivider(pDC, rMonth, nDiv, bSelected);
+	if (!bRollup)
+	{
+		DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
+		DrawItemDivider(pDC, rMonth, nDiv, bSelected);
 
-	if (!bToday)
-		bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
+		if (!bToday)
+			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
+	}
 
-	DrawGanttBar(pDC, rMonth, nMonth, nYear, gi);
+	DrawGanttBar(pDC, rMonth, nMonth, nYear, gi, bRollup);
 	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi);
 }
 
 void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, BOOL& bToday)
+											const GANTTITEM& gi, BOOL bSelected, 
+											BOOL bRollup, BOOL& bToday)
 {
 	// draw vertical week dividers
 	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3139,22 +3120,25 @@ void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 		rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
 		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
 
-		// fill weekends if not selected
-		if (!bSelected)
-			DrawWeekend(pDC, dtDay, rDay);
-
 		// draw divider
-		if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
+		if (!bRollup)
 		{
-			rDay.right = rDay.left; // draw at start of day
-			DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+			// fill weekends if not selected
+			if (!bSelected)
+				DrawWeekend(pDC, dtDay, rDay);
+
+			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
+			{
+				rDay.right = rDay.left; // draw at start of day
+				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+			}
 		}
 
 		// next day
 		dtDay += 1;
 	}
 
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bToday);
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
 void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
@@ -3173,55 +3157,153 @@ void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const 
 
 void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, const GANTTITEM& gi, 
-											BOOL bSelected, BOOL& bToday, BOOL bDrawHours)
+											BOOL bSelected, BOOL bRollup, 
+											BOOL& bToday, BOOL bDrawHours)
 {
 	// draw vertical day dividers
-	CRect rDay(rMonth);
-	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-
-	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	double dDayWidth = (rMonth.Width() / (double)nNumDays);
-
-	for (int nDay = 1; nDay <= nNumDays; nDay++)
+	if (!bRollup)
 	{
-		rDay.right = (rMonth.left + (int)(nDay * dDayWidth));
+		CRect rDay(rMonth);
+		COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
 
-		// only draw visible days
-		if (rDay.right > 0)
+		int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+		double dDayWidth = (rMonth.Width() / (double)nNumDays);
+
+		for (int nDay = 1; nDay <= nNumDays; nDay++)
 		{
-			// fill weekends if not selected
-			if (!bSelected)
-				DrawWeekend(pDC, dtDay, rDay);
+			rDay.right = (rMonth.left + (int)(nDay * dDayWidth));
 
-			if (bDrawHours)
+			// only draw visible days
+			if (rDay.right > 0)
 			{
-				// draw all but the first and last hours dividers
-				CRect rHour(rMonth);
-				double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
+				// fill weekends if not selected
+				if (!bSelected)
+					DrawWeekend(pDC, dtDay, rDay);
 
-				for (int nHour = 1; nHour < 24; nHour++)
+				if (bDrawHours)
 				{
-					rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
-					DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+					// draw all but the first and last hours dividers
+					CRect rHour(rMonth);
+					double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
+
+					for (int nHour = 1; nHour < 24; nHour++)
+					{
+						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
+						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+					}
 				}
+
+				// draw all but the last day divider
+				if (nDay < nNumDays)
+					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
 			}
 
-			// draw all but the last day divider
-			if (nDay < nNumDays)
-				DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
+			// next day
+			dtDay.m_dt += 1;
+			rDay.left = rDay.right;
 		}
-
-		// next day
-		dtDay.m_dt += 1;
-		rDay.left = rDay.right;
 	}
 
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bToday);
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD dwTaskID, BOOL bSelected)
+void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
+{
+	ASSERT(nItem != -1);
+	int nNumCol = GetRequiredListColumnCount();
+
+	// Rollups for collapsed parents
+	HTREEITEM htiRollUp = NULL;
+	CRect rClip;
+
+	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && gi.bParent)
+	{
+		HTREEITEM htiParent = GetTreeItem(m_tree, m_list, nItem);
+		ASSERT(htiParent);
+
+		if (htiParent && !TCH().IsItemExpanded(htiParent))
+		{
+			htiRollUp = htiParent;
+			pDC->GetClipBox(rClip);
+		}
+	}
+
+	BOOL bContinue = TRUE;
+
+	for (int nCol = 1; ((nCol <= nNumCol) && bContinue); nCol++)
+	{
+		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected, FALSE);
+
+		if (htiRollUp)
+		{
+			CRect rColumn;
+			VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
+
+			if (rColumn.right < rClip.left)
+				continue;
+
+			if (rColumn.left > rClip.right)
+				break; // we can stop
+
+			DrawListItemRollup(pDC, htiRollUp, nCol, rColumn, bSelected);
+		}
+	}
+
+	// draw alloc-to name after bar
+	if (HasOption(GTLCF_DISPLAYALLOCTOAFTERITEM) && !gi.sAllocTo.IsEmpty())
+	{
+		CRect rItem;
+		VERIFY(GetListItemRect(nItem, rItem));
+
+		// get the end pos for this item relative to start of window
+		int nTextPos = GetBestTextPos(gi, rItem);
+
+		if (nTextPos >= 0)
+		{
+			rItem.left = (nTextPos + 3);
+			rItem.top += 2;
+
+			COLORREF crFill, crBorder;
+			GetGanttBarColors(gi, crBorder, crFill);
+
+			pDC->SetBkMode(TRANSPARENT);
+			pDC->SetTextColor(crBorder);
+			pDC->DrawText(gi.sAllocTo, rItem, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
+		}
+	}
+}
+
+void CGanttTreeListCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected)
+{
+	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
+
+	while (htiChild)
+	{
+		if (m_tree.GetChildItem(htiChild))
+		{
+			DrawListItemRollup(pDC, htiChild, nCol, rColumn, bSelected); // RECURSIVE CALL
+		}
+		else
+		{
+			DWORD dwTaskID = GetTaskID(htiChild);
+
+			GANTTITEM* pGIChild = NULL;
+			GET_GI(dwTaskID, pGIChild);
+
+			DrawListItemColumnRect(pDC, nCol, rColumn, *pGIChild, bSelected, TRUE);
+		}
+
+		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+	}
+}
+
+BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
+											BOOL bSelected, BOOL bRollup)
 {
 	if (nCol == 0)
+		return TRUE;
+
+	if (m_listHeader.GetItemWidth(nCol) == 0)
 		return TRUE;
 
 	// see if we can avoid drawing this sub-item at all
@@ -3237,15 +3319,17 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	if (rColumn.left > rClip.right)
 		return FALSE; // we can stop
 
+	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
+}
+
+BOOL CGanttTreeListCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
+												BOOL bSelected, BOOL bRollup)
+{
 	// get the date range for this column
 	int nMonth = 0, nYear = 0;
 	
 	if (!GetListColumnDate(nCol, nMonth, nYear))
 		return FALSE;
-
-	// get the data and display for this item
-	GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
 
 	int nSaveDC = pDC->SaveDC();
 
@@ -3259,49 +3343,49 @@ BOOL CGanttTreeListCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, DWORD
 	switch (m_nMonthDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
-		DrawListItemYears(pDC, rColumn, nYear, 25, *pGI, bSelected, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 25, gi, bSelected, bRollup, bToday);
 		break;
 		
 	case GTLC_DISPLAY_DECADES:
-		DrawListItemYears(pDC, rColumn, nYear, 10, *pGI, bSelected, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 10, gi, bSelected, bRollup, bToday);
 		break;
 		
 	case GTLC_DISPLAY_YEARS:
-		DrawListItemYear(pDC, rColumn, nYear, *pGI, bSelected, bToday);
+		DrawListItemYear(pDC, rColumn, nYear, gi, bSelected, bRollup, bToday);
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, *pGI, bSelected, bToday);
+		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, gi, bSelected, bRollup, bToday);
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
 		if (bUseHigherRes)
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
 		else
-			DrawListItemMonth(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemMonth(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
 		break;
 		
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
 		if (bUseHigherRes)
-			DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, FALSE);
+			DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, FALSE);
 		else
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, bUseHigherRes);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, bUseHigherRes);
 		break;
 
 	case GTLC_DISPLAY_HOURS:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, *pGI, bSelected, bToday, TRUE);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, TRUE);
 		break;
 	
 	default:
@@ -3922,7 +4006,7 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 	return TRUE;
 }
 
-void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
+void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bRollup)
 {
 	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
@@ -3952,13 +4036,13 @@ void CGanttTreeListCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth,
 	if (!CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtStart, dtDue, rBar))
 		return;
 
-	COLORREF crBorder, crFill;
+	COLORREF crBorder = RGB(0, 0, 0), crFill = CLR_NONE;
 	GetGanttBarColors(gi, crBorder, crFill);
 	
 	// adjust bar height
 	rBar.DeflateRect(0, 2, 0, 3);
 
-	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
+	if ((gi.bParent && HasOption(GTLCF_CALCPARENTDATES)) || bRollup)
 		rBar.DeflateRect(0, 0, 0, 5);
 	
 	// Determine what borders to draw
