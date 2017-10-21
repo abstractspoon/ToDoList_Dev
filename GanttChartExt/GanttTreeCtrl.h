@@ -40,6 +40,7 @@ protected:
 	virtual void PreSubclassWindow();
 	
 protected:
+	afx_msg void OnDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnTitleColumnWidthChange(WPARAM wp, LPARAM lp);

@@ -164,6 +164,7 @@ void CGanttChartWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
+	// NOTE: sort is handled by the app
 	CString sKey(szKey);
 
 	pPrefs->WriteProfileInt(sKey, _T("MonthDisplay"), m_ctrlGantt.GetMonthDisplay());
@@ -272,6 +273,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	// gantt specific options
 	if (!bAppOnly)
 	{
+		// NOTE: sort is handled by the app
 		CString sKey(szKey);
 		
 		// snap modes
@@ -301,12 +303,6 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateGanttCtrlPreferences();
 
-		// sort
-		GTLC_COLUMN nCol = (GTLC_COLUMN)pPrefs->GetProfileInt(sKey, _T("SortColumn"), GTLCC_NONE);
-		BOOL bAscending = pPrefs->GetProfileInt(sKey, _T("SortAscending"), TRUE);
-
-		if (nCol != GTLCC_NONE)
-			m_ctrlGantt.Sort(nCol, FALSE, bAscending);
 
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
@@ -534,13 +530,41 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		return true;
 
 	case IUI_TOGGLABLESORT:
-	case IUI_SORT:
 		if (WantSortUpdate((IUI_ATTRIBUTE)dwExtra))
 		{
-			m_ctrlGantt.Sort(MapColumn(dwExtra), (nCmd == IUI_TOGGLABLESORT));
+			m_ctrlGantt.Sort(MapColumn(dwExtra), TRUE);
 			return true;
 		}
 		break;
+
+	case IUI_SORT:
+		if (WantSortUpdate((IUI_ATTRIBUTE)dwExtra))
+		{
+			m_ctrlGantt.Sort(MapColumn(dwExtra), FALSE);
+			return true;
+		}
+		break;
+
+	case IUI_MULTISORT:
+		if (dwExtra)
+		{
+			const IUIMULTISORT* pSort = (const IUIMULTISORT*)dwExtra;
+			GANTTSORTCOLUMNS sort;
+
+			sort.cols[0].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib1);
+			sort.cols[0].bAscending = (pSort->bAscending1 ? TRUE : FALSE);
+
+			sort.cols[1].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib2);
+			sort.cols[1].bAscending = (pSort->bAscending2 ? TRUE : FALSE);
+
+			sort.cols[2].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib3);
+			sort.cols[2].bAscending = (pSort->bAscending3 ? TRUE : FALSE);
+			
+			m_ctrlGantt.Sort(sort);
+		}
+
+		// TODO
+		return true;
 
 	case IUI_SETFOCUS:
 		m_ctrlGantt.SetFocus();
@@ -630,6 +654,9 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_SORT:
 		return WantSortUpdate((IUI_ATTRIBUTE)dwExtra);
 
+	case IUI_MULTISORT:
+		return true;
+
 	case IUI_SETFOCUS:
 		return (m_ctrlGantt.HasFocus() != FALSE);
 		
@@ -668,7 +695,7 @@ GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 
 DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
 {
-	return (DWORD)CGanttTreeListCtrl::MapColumnToAttrib(nColumn);
+	return (DWORD)CGanttTreeListCtrl::MapColumnToAttribute(nColumn);
 }
 
 void CGanttChartWnd::OnSize(UINT nType, int cx, int cy) 

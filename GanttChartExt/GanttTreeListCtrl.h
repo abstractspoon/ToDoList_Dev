@@ -105,8 +105,9 @@ public:
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
-	GTLC_COLUMN GetSortColumn() const { return m_nSortBy; }
-	BOOL GetSortAscending() const { return m_bSortAscending; }
+	void Sort(const GANTTSORTCOLUMNS multi);
+	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
+	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
 	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay);
@@ -150,26 +151,27 @@ public:
 	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
-	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttribute);
-	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttribute);
-	static IUI_ATTRIBUTE MapColumnToAttrib(GTLC_COLUMN nCol);
+	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttrib);
+	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttrib);
+	static IUI_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
+	static GTLC_COLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
 
 protected:
 	BOOL m_bReadOnly;
-	BOOL m_bSortAscending;
 
-	CEnHeaderCtrl m_treeHeader, m_listHeader;
+	GANTTDATERANGE m_dateRange;
+	GANTTITEM m_giPreDrag;
+	GANTTSORT m_sort;
+
 	CGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
+
 	COLORREF m_crAltLine, m_crGridLine, m_crToday, m_crWeekend, m_crParent, m_crDefault;
 	COleDateTime m_dtDragMin;
-	GANTTDATERANGE m_dateRange;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
-	GANTTITEM m_giPreDrag;
-	GTLC_COLUMN m_nSortBy;
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
 	GTLC_PARENTCOLORING m_nParentColoring;
 	int m_nMonthWidth;
@@ -178,6 +180,7 @@ protected:
 
 	CGanttTreeCtrl& m_tree;
 	CListCtrl& m_list;
+	CEnHeaderCtrl m_treeHeader, m_listHeader;
 
 	CGanttItemMap m_data;
 
@@ -357,6 +360,10 @@ protected:
 	BOOL HasDisplayDates(const GANTTITEM& gi) const;
 	BOOL HasDoneDate(const GANTTITEM& gi) const;
 
+	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
+	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
+	int CompareItems(DWORD dwTaskID1, DWORD dwTaskID2, GTLC_COLUMN nBy, BOOL bAscending) const;
+
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);
 
@@ -377,7 +384,9 @@ protected:
 	BOOL IsDependencyEditingCancelled() const;
 	BOOL IsDependencyEditingComplete() const;
 
+	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);

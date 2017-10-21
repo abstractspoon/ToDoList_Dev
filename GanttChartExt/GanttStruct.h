@@ -132,4 +132,48 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct GANTTSORTCOLUMN
+{
+	GANTTSORTCOLUMN();
+
+	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Matches(GTLC_COLUMN nBy, BOOL bAscending) const;
+	BOOL Matches(const GANTTSORTCOLUMN& col) const;
+
+	GTLC_COLUMN nBy;
+	BOOL bAscending;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTSORTCOLUMNS
+{
+	GANTTSORTCOLUMNS();
+
+	BOOL Sort(const GANTTSORTCOLUMNS& sort);
+	BOOL Matches(const GANTTSORTCOLUMNS& sort) const;
+
+	GANTTSORTCOLUMN cols[3];
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTSORT
+{
+	GANTTSORT();
+
+	BOOL IsSorting() const;
+	BOOL IsSortingBy(GTLC_COLUMN nColID) const;
+	BOOL IsSingleSortingBy(GTLC_COLUMN nColID) const;
+	BOOL IsMultiSortingBy(GTLC_COLUMN nColID) const;
+	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Sort(const GANTTSORTCOLUMNS& sort);
+
+	GANTTSORTCOLUMN single;
+	GANTTSORTCOLUMNS multi;
+	BOOL bMultiSort;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // !defined(AFX_GANTTSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

@@ -135,8 +135,6 @@ CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list)
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA),
 	m_tree(tree),
 	m_list(list),
-	m_bSortAscending(-1), 
-	m_nSortBy(GTLCC_NONE),
 	m_pTCH(NULL),
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
@@ -411,6 +409,44 @@ void CGanttTreeListCtrl::SetExpandedState(const CDWordArray& aExpanded)
 	}
 }
 
+BOOL CGanttTreeListCtrl::EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const
+{
+	switch (nUpdate)
+	{
+	case IUI_ALL:
+		// Note: Tasks should arrive 'unsorted' so we only need to
+		// resort if an attribute is set
+		return m_sort.IsSorting();
+
+	case IUI_NEW:
+		// Don't sort new tasks because it's confusing
+		return FALSE;
+
+	case IUI_EDIT:
+		if (m_sort.IsSorting())
+		{
+			if (!m_sort.bMultiSort)
+				return attrib.Has(MapColumnToAttribute(m_sort.single.nBy));
+
+			// else
+			for (int nCol = 0; nCol < 3; nCol++)
+			{
+				if (attrib.Has(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
+					return TRUE;
+			}
+		}
+		break;
+
+	case IUI_DELETE:
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
 void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	// we must have been initialized already
@@ -427,8 +463,6 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 		return;
 	}
 
-	BOOL bResort = FALSE;
-	
 	switch (nUpdate)
 	{
 	case IUI_ALL:
@@ -458,10 +492,6 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 				ScrollToSelectedTask();
 			else
 				ScrollToToday();
-
-			// Note: Tasks should arrive 'unsorted' so we only need to
-			// resort if an attribute is set
-			bResort = (m_nSortBy != GTLCC_NONE);
 		}
 		break;
 		
@@ -490,11 +520,6 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 					ValidateMonthDisplay();
 					UpdateListColumns();
 				}
-
-				if (nUpdate == IUI_NEW)
-					bResort = FALSE; // else task is not where user placed it
-				else
-					bResort = ((m_nSortBy != GTLCC_NONE) && attrib.Has(MapColumnToAttrib(m_nSortBy)));
 			}
 		}
 		break;
@@ -531,8 +556,17 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 	InitItemHeights();
 	RecalcTreeColumns(TRUE);
 
-	if (bResort)
-		Sort(m_nSortBy, FALSE);
+	if (EditWantsResort(nUpdate, attrib))
+	{
+		ASSERT(m_sort.IsSorting());
+
+		CHoldRedraw hr(m_tree);
+
+		if (m_sort.bMultiSort)
+			CTreeListSyncer::Sort(MultiSortProc, (DWORD)this);
+		else
+			CTreeListSyncer::Sort(SortProc, (DWORD)this);
+	}
 }
 
 void CGanttTreeListCtrl::PreFixVScrollSyncBug()
@@ -606,14 +640,14 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_POSITION:
 	case IUI_STARTDATE:
 	case IUI_TASKNAME:
-		return TRUE;
+		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
 	}
 	
 	// all else 
 	return FALSE;
 }
 
-IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
+IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 {
 	switch (nCol)
 	{
@@ -627,6 +661,22 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttrib(GTLC_COLUMN nCol)
 	
 	// all else 
 	return IUI_NONE;
+}
+
+GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
+{
+	switch (nAttrib)
+	{
+	case IUI_TASKNAME:	return GTLCC_TITLE;		
+	case IUI_DUEDATE:	return GTLCC_ENDDATE;		
+	case IUI_STARTDATE:	return GTLCC_STARTDATE;	
+	case IUI_ALLOCTO:	return GTLCC_ALLOCTO;		
+	case IUI_PERCENT:	return GTLCC_PERCENT;		
+	case IUI_ID:		return GTLCC_TASKID;		
+	}
+	
+	// all else 
+	return GTLCC_NONE;
 }
 
 BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -1803,11 +1853,11 @@ LRESULT CGanttTreeListCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		case CDDS_ITEMPOSTPAINT:
 			{
 				// draw sort direction
-				int nCol = (int)pNMCD->dwItemSpec;
+				GTLC_COLUMN nCol = (GTLC_COLUMN)pNMCD->dwItemSpec;
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				
-				if (nCol == m_nSortBy)
-					m_treeHeader.DrawItemSortArrow(pDC, nCol, m_bSortAscending);
+				if (m_sort.IsSingleSortingBy(nCol))
+					m_treeHeader.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
 			}
 			break;
 		}
@@ -1837,50 +1887,42 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 	}
 }
 
+// Called by parent
 void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+{
+	Sort(nBy, bAllowToggle, bAscending, FALSE);
+}
+
+void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
 {
 	// clear pick line first
 	ClearDependencyPickLine();
-		
-	GTLC_COLUMN nOldSort = m_nSortBy;
-	m_nSortBy = nBy;
 
-	if (nBy != GTLCC_NONE)
-	{
-		// if it's the first time or we are changing columns 
-		// we always reset the direction
-		if ((m_bSortAscending == -1) || (nBy != nOldSort))
-		{
-			if (bAscending != -1)
-			{
-				m_bSortAscending = bAscending;
-			}
-			else
-			{
-				m_bSortAscending = 1;
-			}
-		}
-		else if (bAllowToggle)
-		{
-			ASSERT(m_bSortAscending != -1);
-
-			m_bSortAscending = !m_bSortAscending;
-		}
-	}
-	else
-	{
-		// Always ascending for 'unsorted' to match app
-		m_bSortAscending = 1;
-	}
+	m_sort.Sort(nBy, bAllowToggle, bAscending);
 
 	// do the sort
 	CHoldRedraw hr(m_tree);
 	CTreeListSyncer::Sort(SortProc, (DWORD)this);
 
-	// tell parent
-	GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, 0, m_nSortBy);
-
 	// update sort arrow
+	m_treeHeader.Invalidate(FALSE);
+
+	if (bNotifyParent)
+		GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, 0, m_sort.single.nBy);
+}
+
+void CGanttTreeListCtrl::Sort(const GANTTSORTCOLUMNS multi)
+{
+	// clear pick line first
+	ClearDependencyPickLine();
+
+	m_sort.Sort(multi);
+
+	// do the sort
+	CHoldRedraw hr(m_tree);
+	CTreeListSyncer::Sort(MultiSortProc, (DWORD)this);
+
+	// hide sort arrow
 	m_treeHeader.Invalidate(FALSE);
 }
 
@@ -1922,7 +1964,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 						if (pHDN->iButton == 0) // left button
 						{
-							Sort((GTLC_COLUMN)pHDN->iItem, TRUE);
+							Sort((GTLC_COLUMN)pHDN->iItem, TRUE, -1, TRUE);
 						}
 					}
 					break;
@@ -5191,58 +5233,84 @@ GTLC_MONTH_DISPLAY CGanttTreeListCtrl::GetColumnDisplay(int nMonthWidth)
 	return GetLastDisplay();
 }
 
+int CALLBACK CGanttTreeListCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
+	const GANTTSORTCOLUMNS& sort = pThis->m_sort.multi;
+
+	int nCompare = 0;
+
+	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
+	{
+		if (sort.cols[nCol].nBy == IUI_NONE)
+			break;
+
+		nCompare = pThis->CompareItems(lParam1, lParam2, sort.cols[nCol].nBy, sort.cols[nCol].bAscending);
+	}
+
+	return nCompare;
+}
+
 int CALLBACK CGanttTreeListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	int nCompare = 0;
 	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
 	
+	return pThis->CompareItems(lParam1, lParam2, pThis->m_sort.single.nBy, pThis->m_sort.single.bAscending);
+}
+
+int CGanttTreeListCtrl::CompareItems(DWORD dwTaskID1, DWORD dwTaskID2, GTLC_COLUMN nBy, BOOL bAscending) const
+{
+	int nCompare = 0;
+
 	// Optimise for task ID
-	if (pThis->m_nSortBy == GTLCC_TASKID)
+	if (nBy == GTLCC_TASKID)
 	{
-		nCompare = (lParam1 - lParam2);
+		nCompare = (dwTaskID1 - dwTaskID2);
 	}
 	else
 	{
-		const GANTTITEM* pGI1 = pThis->GetGanttItem(lParam1);
-		const GANTTITEM* pGI2 = pThis->GetGanttItem(lParam2);
-		
-		if (pGI1 && pGI2)
-		{
-			switch (pThis->m_nSortBy)
-			{
-			case GTLCC_TITLE:
-				nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
-				break;
-				
-			case GTLCC_STARTDATE:
-				nCompare = (int)(pGI1->dtStart - pGI2->dtStart);
-				break;
-				
-			case GTLCC_ENDDATE:
-				nCompare = (int)(pGI1->dtDue - pGI2->dtDue);
-				break;
-				
-			case GTLCC_ALLOCTO:
-				nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
-				break;
-				
-			case GTLCC_PERCENT:
-				nCompare = (pGI1->nPercent - pGI2->nPercent);
-				break;
-				
-			case GTLCC_NONE:
-				nCompare = (pGI1->nPosition - pGI2->nPosition);
-				break;
+		const GANTTITEM* pGI1 = GetGanttItem(dwTaskID1);
+		const GANTTITEM* pGI2 = GetGanttItem(dwTaskID2);
 
-			default:
-				ASSERT(0);
-				break;
-			}
+		if (!pGI1 || !pGI2)
+		{
+			ASSERT(0);
+			return 0;
 		}
 
+		switch (nBy)
+		{
+		case GTLCC_TITLE:
+			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
+			break;
+
+		case GTLCC_STARTDATE:
+			nCompare = (int)(pGI1->dtStart - pGI2->dtStart);
+			break;
+
+		case GTLCC_ENDDATE:
+			nCompare = (int)(pGI1->dtDue - pGI2->dtDue);
+			break;
+
+		case GTLCC_ALLOCTO:
+			nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
+			break;
+
+		case GTLCC_PERCENT:
+			nCompare = (pGI1->nPercent - pGI2->nPercent);
+			break;
+
+		case GTLCC_NONE:
+			nCompare = (pGI1->nPosition - pGI2->nPosition);
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
 	}
 
-	return (pThis->m_bSortAscending ? nCompare : -nCompare);
+	return (bAscending ? nCompare : -nCompare);
 }
 
 int CGanttTreeListCtrl::Compare(const CString& sText1, const CString& sText2)

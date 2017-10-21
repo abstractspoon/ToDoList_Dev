@@ -38,6 +38,7 @@ CGanttTreeCtrl::~CGanttTreeCtrl()
 
 BEGIN_MESSAGE_MAP(CGanttTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_REGISTERED_MESSAGE(WM_GTCN_TITLECOLUMNWIDTHCHANGE, OnTitleColumnWidthChange)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -191,6 +192,7 @@ void CGanttTreeCtrl::ShowTaskIcons(BOOL bShow)
 {
 	if (bShow)
 	{
+		// Create dummy image to make a space for drawing in
 		if (!m_ilTaskIcons.GetSafeHandle())
 			VERIFY(m_ilTaskIcons.Create(16, 16, 0, 1, 0));
 
@@ -204,6 +206,17 @@ void CGanttTreeCtrl::ShowTaskIcons(BOOL bShow)
 
 HIMAGELIST CGanttTreeCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 {
+	if (TreeView_GetImageList(m_hWnd, TVSIL_NORMAL) == NULL)
+		return NULL;
+
 	HWND hwndParent = ::GetParent(GetSafeHwnd());
 	return (HIMAGELIST)::SendMessage(hwndParent, WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+}
+
+void CGanttTreeCtrl::OnDestroy()
+{
+	// Prevent icon requests during destruction
+	ShowTaskIcons(FALSE);
+
+	CTreeCtrl::OnDestroy();
 }

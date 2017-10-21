@@ -604,4 +604,148 @@ BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi)
 
 //////////////////////////////////////////////////////////////////////
 
+GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nBy(GTLCC_NONE), bAscending(-1)
+{
+
+}
+
+BOOL GANTTSORTCOLUMN::Matches(GTLC_COLUMN nSortBy, BOOL bSortAscending) const
+{
+	return ((nBy == nSortBy) && (bAscending == bSortAscending));
+}
+
+BOOL GANTTSORTCOLUMN::Matches(const GANTTSORTCOLUMN& col) const
+{
+	return Matches(col.nBy, col.bAscending);
+}
+
+BOOL GANTTSORTCOLUMN::Sort(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
+{
+	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
+		return FALSE;
+
+	GTLC_COLUMN nOldSort = nBy;
+	nBy = nSortBy;
+
+	if (nSortBy != GTLCC_NONE)
+	{
+		// if it's the first time or we are changing columns 
+		// we always reset the direction
+		if ((bAscending == -1) || (nSortBy != nOldSort))
+		{
+			if (bSortAscending != -1)
+			{
+				bAscending = bSortAscending;
+			}
+			else
+			{
+				bAscending = 1;
+			}
+		}
+		else if (bAllowToggle)
+		{
+			ASSERT(bAscending != -1);
+			bAscending = !bAscending;
+		}
+	}
+	else
+	{
+		// Always ascending for 'unsorted' to match app
+		bAscending = 1;
+	}
+
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+GANTTSORTCOLUMNS::GANTTSORTCOLUMNS()
+{
+
+}
+
+BOOL GANTTSORTCOLUMNS::Sort(const GANTTSORTCOLUMNS& sort)
+{
+	if (Matches(sort))
+		return FALSE;
+
+	for (int nCol = 0; nCol < 3; nCol++)
+		cols[nCol] = sort.cols[nCol];
+
+	return TRUE;
+}
+
+BOOL GANTTSORTCOLUMNS::Matches(const GANTTSORTCOLUMNS& sort) const
+{
+	for (int nCol = 0; nCol < 3; nCol++)
+	{
+		if (!cols[nCol].Matches(sort.cols[nCol]))
+			return FALSE;
+	}
+
+	// else
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+GANTTSORT::GANTTSORT() : bMultiSort(FALSE)
+{
+
+}
+
+BOOL GANTTSORT::IsSorting() const
+{
+	if (!bMultiSort)
+		return (single.nBy != GTLCC_NONE);
+
+	// else
+	return (multi.cols[0].nBy != GTLCC_NONE);
+}
+
+BOOL GANTTSORT::IsSortingBy(GTLC_COLUMN nColID) const
+{
+	if (!bMultiSort)
+		return IsSingleSortingBy(nColID);
+
+	return IsMultiSortingBy(nColID);
+}
+
+BOOL GANTTSORT::IsSingleSortingBy(GTLC_COLUMN nColID) const
+{
+	return (!bMultiSort && (single.nBy == nColID));
+}
+
+BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
+{
+	if (bMultiSort)
+	{
+		for (int nCol = 0; nCol < 3; nCol++)
+		{
+			if (multi.cols[nCol].nBy == nColID)
+				return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL GANTTSORT::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+{
+	if (bMultiSort)
+	{
+		bMultiSort = FALSE;
+		return single.Sort(nBy, FALSE, bAscending);
+	}
+
+	return single.Sort(nBy, bAllowToggle, bAscending);
+}
+
+BOOL GANTTSORT::Sort(const GANTTSORTCOLUMNS& sort)
+{
+	bMultiSort = TRUE;
+	return multi.Sort(sort);
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
