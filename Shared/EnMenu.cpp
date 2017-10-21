@@ -704,7 +704,7 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
  	Misc::SortArray(aSortStrings, &MenuSortProc);
 
 	// Update the menu
-	for (int nItem = 0; nItem < aSortStrings.GetSize(); nItem++)
+	for (nItem = 0; nItem < aSortStrings.GetSize(); nItem++)
 	{
 		CString sSortString = aSortStrings[nItem];
 		mapTextToItem.Lookup(sSortString, msi);

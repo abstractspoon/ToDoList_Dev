@@ -1120,7 +1120,7 @@ void CKanbanListCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const 
 {
 	if (bSelected)
 	{
-		BOOL bFocused = (bSelected && (GetFocus() == this));
+		BOOL bFocused = (bSelected && (::GetFocus() == GetSafeHwnd()));
 
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 		crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
