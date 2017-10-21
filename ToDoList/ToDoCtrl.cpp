@@ -5865,6 +5865,13 @@ const CTDCAttributeMap& CToDoCtrl::GetVisibleEditFields() const
 	return m_visColEdit.GetVisibleEditFields();
 }
 
+int CToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
+{
+	mapColIDs.Copy(m_visColEdit.GetVisibleColumns());
+
+	return mapColIDs.GetCount();
+}
+
 BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 {
 	if (nColumn == TDCC_CLIENT || CTDCCustomAttributeHelper::IsCustomColumn(nColumn))

@@ -12440,7 +12440,10 @@ void CToDoListWnd::OnSortMulti()
 			sort.col1.bAscending = TRUE;
 	}
 
-	CTDLMultiSortDlg dialog(sort, tdc.GetVisibleColumns(), aAttribDefs);
+	CTDCColumnIDMap mapColIDs;
+	VERIFY(tdc.GetSortableColumns(mapColIDs));
+
+	CTDLMultiSortDlg dialog(sort, mapColIDs, aAttribDefs);
 
 	if (dialog.DoModal() == IDOK)
 	{

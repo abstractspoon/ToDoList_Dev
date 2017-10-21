@@ -99,6 +99,7 @@ public:
 	virtual BOOL CanMultiSort() const;
 	virtual HTREEITEM GetUpdateControlsItem() const;
 
+	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
 	void SetModified(BOOL bMod = TRUE) { CToDoCtrl::SetModified(bMod); }
 	BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn = TRUE) { return CToDoCtrl::SetStyle(nStyle, bOn); }
@@ -311,6 +312,7 @@ protected:
 	BOOL IsExtensionView(HWND hWnd) const;
 	BOOL SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTasks, DWORD dwFocusedTask);
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
+	void RefreshExtensionViewSort(FTC_VIEW nView);
 
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib, DWORD dwFlags) const;

@@ -145,17 +145,18 @@ enum IUI_APPCOMMAND
 	IUI_COLLAPSEALL,
 	IUI_EXPANDSELECTED,
 	IUI_COLLAPSESELECTED,
-	IUI_SORT,					// dwExtra is column ID [in]
-	IUI_TOGGLABLESORT,			// dwExtra is column ID [in]
+	IUI_SORT,					// dwExtra is column ID		[in]
+	IUI_TOGGLABLESORT,			// dwExtra is column ID		[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,				// dwExtra is task ID   [in]
+	IUI_SELECTTASK,				// dwExtra is task ID		[in]
 	IUI_RESIZEATTRIBCOLUMNS,
-	IUI_GETNEXTTASK,			// dwExtra is DWORD*    [out]
-	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*    [out]
-	IUI_GETPREVTASK,			// dwExtra is DWORD*    [out]
-	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*    [out]
-	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*  [out]
-	IUI_SETTASKFONT,		// dwExtra is HFONT     [in]
+	IUI_GETNEXTTASK,			// dwExtra is DWORD*		[out]
+	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*		[out]
+	IUI_GETPREVTASK,			// dwExtra is DWORD*		[out]
+	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*		[out]
+	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*		[out]
+	IUI_SETTASKFONT,			// dwExtra is HFONT			[in]
+	IUI_MULTISORT,				// dwExtra is IUIMULTISORT	[in]
 
 	// new values here
 //  IUI_
@@ -212,6 +213,10 @@ enum IUI_ATTRIBUTE
 	IUI_SUBTASKDONE,
 
 	// new values here
+	// IUI_
+
+	// ALWAYS THE LAST VALUE
+	IUI_NUMATTRIBUTES
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -219,7 +224,7 @@ enum IUI_ATTRIBUTE
 struct IUITASKMOD
 {
 	IUI_ATTRIBUTE nAttrib;
-	DWORD dwSelectedTaskID;		// 'zero' for all selected tasks
+	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
 	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
 
 	// The attribute value
@@ -238,6 +243,20 @@ struct IUITASKMOD
 	{
 		TDC_UNITS nTimeUnits;		// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
 	};
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct IUIMULTISORT
+{
+	IUI_ATTRIBUTE nAttrib1;
+	bool bAscending1;
+
+	IUI_ATTRIBUTE nAttrib2;
+	bool bAscending2;
+
+	IUI_ATTRIBUTE nAttrib3;
+	bool bAscending3;
 };
 
 //////////////////////////////////////////////////////////////////////

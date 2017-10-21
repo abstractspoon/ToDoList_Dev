@@ -438,6 +438,15 @@ void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 		{
 			CString sKey = GetPreferencesKey(GetExtensionPrefsSubKey(pExtWnd));
 			pExtWnd->SavePreferences(prefs, sKey);
+
+			// Save sort state
+			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+
+			const VIEWDATA* pVData = GetViewData(nExtView);
+			ASSERT(pVData);
+
+			if (pVData)
+				pVData->sort.SaveState(prefs, sKey);
 		}
 	}
 }
@@ -571,7 +580,11 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	CString sKey = GetPreferencesKey(GetExtensionPrefsSubKey(pExtWnd));
 	
 	pExtWnd->LoadPreferences(prefs, sKey, false);
-	
+
+	// sort state
+	if (pVData->sort.LoadState(prefs, sKey))
+		RefreshExtensionViewSort(nView);
+		
 	// and update tab control with our new HWND
 	m_tabViews.SetViewHwnd((FTC_VIEW)nView, hWnd);
 	
@@ -3889,6 +3902,58 @@ TDC_COLUMN CTabbedToDoCtrl::ColumnHitTest(const CPoint& ptScreen) const
 	return CToDoCtrl::ColumnHitTest(ptScreen);
 }
 
+int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
+{
+	mapColIDs.RemoveAll();
+
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		return CToDoCtrl::GetSortableColumns(mapColIDs);
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			int nAttribID = IUI_NUMATTRIBUTES;
+
+			while (nAttribID--)
+			{
+				if (ExtensionCanDoAppCommand(nView, IUI_SORT, nAttribID))
+				{
+					TDC_COLUMN nColID = TDC::MapIUIAttributeToColumn((IUI_ATTRIBUTE)nAttribID);
+
+					if (nColID != TDCC_NONE)
+						mapColIDs.Add(nColID);
+				}
+			}
+		}
+		break;
+		
+	default:
+		ASSERT(0);
+	}
+
+	return mapColIDs.GetCount();
+}
+
 void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 {
 	FTC_VIEW nView = GetTaskView();
@@ -3984,10 +4049,11 @@ BOOL CTabbedToDoCtrl::IsMultiSorting() const
 
 void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)
 {
-	ASSERT (sort.IsSorting());
-
-	if (!sort.IsSorting())
+	if (!sort.IsSorting() || !CanMultiSort())
+	{
+		ASSERT(0);
 		return;
+	}
 
 	FTC_VIEW nView = GetTaskView();
 
@@ -4018,10 +4084,57 @@ void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			VIEWDATA* pVData = GetViewData(nView);
+
+			if (pVData)
+			{
+				pVData->sort.SetSortBy(sort);
+				RefreshExtensionViewSort(nView);
+			}
+		}
 		break;
 
 	default:
 		ASSERT(0);
+	}
+}
+
+void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
+{
+	VIEWDATA* pVData = GetViewData(nView);
+
+	if (!pVData)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (pVData->sort.IsSorting())
+	{
+		if (pVData->sort.bMulti)
+		{
+			IUIMULTISORT ms;
+
+			ms.nAttrib1 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col1.nBy);
+			ms.bAscending1 = (pVData->sort.multi.col1.bAscending != FALSE);
+
+			ms.nAttrib2 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col2.nBy);
+			ms.bAscending2 = (pVData->sort.multi.col2.bAscending != FALSE);
+
+			ms.nAttrib3 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col3.nBy);
+			ms.bAscending3 = (pVData->sort.multi.col3.bAscending != FALSE);
+
+			ExtensionDoAppCommand(nView, IUI_MULTISORT, (DWORD)&ms);
+		}
+		else
+		{
+			ExtensionDoAppCommand(nView, IUI_SORT, pVData->sort.single.nBy);
+		}
+	}
+	else
+	{
+		ExtensionDoAppCommand(nView, IUI_SORT, IUI_NONE);
 	}
 }
 
@@ -4052,7 +4165,7 @@ BOOL CTabbedToDoCtrl::CanMultiSort() const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		return FALSE;
+		return ExtensionCanDoAppCommand(nView, IUI_MULTISORT);
 	}
 	
 	// all else

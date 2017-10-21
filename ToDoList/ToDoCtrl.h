@@ -150,6 +150,7 @@ public:
 	void GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const;
 	const CTDCColumnIDMap& GetVisibleColumns() const;
 	const CTDCAttributeMap& GetVisibleEditFields() const;
+	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
