@@ -2505,6 +2505,11 @@ void CToDoListWnd::LoadSettings()
 	// user preferences
 	const CPreferencesDlg& userPrefs = Prefs();
 	
+	if (userPrefs.GetShowTasklistTabCloseButton())
+		m_tabCtrl.ModifyFlags(0, TCE_CLOSEBUTTON);
+	else
+		m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);
+	
 	// MRU
 	if (userPrefs.GetAddFilesToMRU())
 		m_mruList.ReadList(prefs);
