@@ -711,7 +711,6 @@ void CPreferencesShortcutsPage::OnShowCmdIDs()
 	GetDlgItem(IDC_COPYALL)->ShowWindow(m_bShowCommandIDs ? SW_SHOW : SW_HIDE);
 	GetDlgItem(IDC_COPYALL)->EnableWindow(m_bShowCommandIDs);
 
-//	CHoldRedraw hr(m_tcCommands);
 	AddCommandIDsToTree(TVI_ROOT, m_bShowCommandIDs);
 }
 
