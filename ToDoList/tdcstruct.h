@@ -2262,7 +2262,7 @@ struct TDSORTCOLUMNS
 
 	{
 	}
-	
+
 	BOOL IsSorting() const
 	{
 		return col1.IsSorting();
@@ -2363,10 +2363,48 @@ struct TDSORT
 		return (single.Verify() && multi.Verify());
 	}
 
-	void Validate()
+	BOOL Validate()
 	{
 		single.Validate();
 		multi.Validate();
+
+		return IsSorting();
+	}
+
+	void SaveState(IPreferences* pPrefs, const CString& sKey) const
+	{
+		CString sSortKey = (sKey + _T("\\SortColState"));
+
+		pPrefs->WriteProfileInt(sSortKey, _T("Multi"), bMulti);
+
+		pPrefs->WriteProfileInt(sSortKey, _T("Column"), single.nBy);
+		pPrefs->WriteProfileInt(sSortKey, _T("Ascending"), single.bAscending);
+
+		pPrefs->WriteProfileInt(sSortKey, _T("Column1"), multi.col1.nBy);
+		pPrefs->WriteProfileInt(sSortKey, _T("Column2"), multi.col2.nBy);
+		pPrefs->WriteProfileInt(sSortKey, _T("Column3"), multi.col3.nBy);
+		pPrefs->WriteProfileInt(sSortKey, _T("Ascending1"), multi.col1.bAscending);
+		pPrefs->WriteProfileInt(sSortKey, _T("Ascending2"), multi.col2.bAscending);
+		pPrefs->WriteProfileInt(sSortKey, _T("Ascending3"), multi.col3.bAscending);
+	}
+
+	BOOL LoadState(const IPreferences* pPrefs, const CString& sKey)
+	{
+		CString sSortKey = (sKey + _T("\\SortColState"));
+
+		single.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column"), TDCC_NONE);
+		single.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending"), TRUE);
+
+		bMulti = pPrefs->GetProfileInt(sSortKey, _T("Multi"), FALSE);
+
+		multi.col1.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column1"), TDCC_NONE);
+		multi.col1.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending1"), TRUE);
+		multi.col2.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column2"), TDCC_NONE);
+		multi.col3.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column3"), TDCC_NONE);
+		multi.col2.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending2"), TRUE);
+		multi.col3.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending3"), TRUE);
+
+		return Validate();
 	}
 
 	TDSORTCOLUMN single;

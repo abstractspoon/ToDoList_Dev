@@ -1095,7 +1095,7 @@ void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
 
 	prefs.WriteProfileInt(sKey, _T("SplitPos"), GetSplitPos());
 	
-	SaveSortState(prefs, sKey);
+	m_sort.SaveState(prefs, sKey);
 }
 
 void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
@@ -1125,52 +1125,7 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 
 	RefreshSize();
 
-	LoadSortState(prefs, sKey);
-}
-
-void CTDLTaskCtrlBase::SaveSortState(CPreferences& prefs, const CString& sKey) const
-{
-	// ignore this if we have no tasks
-	if (GetTaskCount() == 0)
-		return;
-	
-	CString sSortKey = sKey + (_T("\\SortColState"));
-	
-	if (!sSortKey.IsEmpty())
-	{
-		prefs.WriteProfileInt(sSortKey, _T("Multi"), m_sort.bMulti);
-		
-		prefs.WriteProfileInt(sSortKey, _T("Column"), m_sort.single.nBy);
-		prefs.WriteProfileInt(sSortKey, _T("Ascending"), m_sort.single.bAscending);
-		
-		prefs.WriteProfileInt(sSortKey, _T("Column1"), m_sort.multi.col1.nBy);
-		prefs.WriteProfileInt(sSortKey, _T("Column2"), m_sort.multi.col2.nBy);
-		prefs.WriteProfileInt(sSortKey, _T("Column3"), m_sort.multi.col3.nBy);
-		prefs.WriteProfileInt(sSortKey, _T("Ascending1"), m_sort.multi.col1.bAscending);
-		prefs.WriteProfileInt(sSortKey, _T("Ascending2"), m_sort.multi.col2.bAscending);
-		prefs.WriteProfileInt(sSortKey, _T("Ascending3"), m_sort.multi.col3.bAscending);
-	}
-}
-
-void CTDLTaskCtrlBase::LoadSortState(const CPreferences& prefs, const CString& sKey)
-{
-	CString sSortKey = sKey + (_T("\\SortColState"));
-	
-	// single sort
-	m_sort.single.nBy = (TDC_COLUMN)prefs.GetProfileInt(sSortKey, _T("Column"), TDCC_NONE);
-	m_sort.single.bAscending = prefs.GetProfileInt(sSortKey, _T("Ascending"), TRUE);
-	
-	// multi sort
-	m_sort.bMulti = prefs.GetProfileInt(sSortKey, _T("Multi"), FALSE);
-	
-	m_sort.multi.col1.nBy = (TDC_COLUMN)prefs.GetProfileInt(sSortKey, _T("Column1"), TDCC_NONE);
-	m_sort.multi.col1.bAscending = prefs.GetProfileInt(sSortKey, _T("Ascending1"), TRUE);
-	m_sort.multi.col2.nBy = (TDC_COLUMN)prefs.GetProfileInt(sSortKey, _T("Column2"), TDCC_NONE);
-	m_sort.multi.col3.nBy = (TDC_COLUMN)prefs.GetProfileInt(sSortKey, _T("Column3"), TDCC_NONE);
-	m_sort.multi.col2.bAscending = prefs.GetProfileInt(sSortKey, _T("Ascending2"), TRUE);
-	m_sort.multi.col3.bAscending = prefs.GetProfileInt(sSortKey, _T("Ascending3"), TRUE);
-	
-	m_sort.Validate();
+	m_sort.LoadState(prefs, sKey);
 }
 
 int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)

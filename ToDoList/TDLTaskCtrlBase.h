@@ -422,8 +422,6 @@ protected:
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
-	void SaveSortState(CPreferences& prefs, const CString& sKey) const; 
-	void LoadSortState(const CPreferences& prefs, const CString& sKey);
 	void ClearSortColumn();
 	void SetSortColumn(TDC_COLUMN nColID, TDC_SORTDIR nSortDir);
 	TDC_COLUMN GetSortColumn(TDC_SORTDIR& nSortDir) const;
