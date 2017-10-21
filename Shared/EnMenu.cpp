@@ -668,23 +668,24 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 
 	for (UINT nCmdID = nCmdIDStart; nCmdID <= nCmdIDEnd; nCmdID++)
 	{
-		msi.sMenuString = GetMenuString(hMenu, nCmdID, MF_BYCOMMAND);
-
-		// skip over missing items
-		if (msi.sMenuString.IsEmpty())
+		// Skip over items not actually in the menu
+		if (!::GetMenuItemInfo(hMenu, nCmdID, FALSE, &msi.mii))
 			continue;
 
-		// Get the rest of the item data
-		VERIFY(::GetMenuItemInfo(hMenu, nCmdID, FALSE, &msi.mii));
+		// Skip over separators
+		if (Misc::HasFlag(msi.mii.fType, MFT_SEPARATOR))
+			continue;
 
-		// Remove any accelerator because that interferes
-		// with the sorting
+		msi.sMenuString = GetMenuString(hMenu, nCmdID, MF_BYCOMMAND);
+		ASSERT(!msi.sMenuString.IsEmpty());
+		
+		// Remove any accelerator because that interferes with the sorting
 		CString sSortString(msi.sMenuString);
 		CAcceleratorString::RemoveAccelerator(sSortString);
 		
- 		aSortStrings.Add(sSortString);
+		aSortStrings.Add(sSortString);
 		mapTextToItem[sSortString] = msi;
-
+		
 		// Find the start position
 		int nItemPos = GetMenuItemPos(hMenu, nCmdID);
 		
