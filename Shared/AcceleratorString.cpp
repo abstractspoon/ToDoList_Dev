@@ -166,7 +166,9 @@ TCHAR CAcceleratorString::EnsureUniqueAccelerator(CString& sText, const CString&
 	int nTextLen = sText.GetLength();
 
 	// Prefer the start of words
-	for (int nChar = 0; nChar < nTextLen; nChar++)
+	int nChar;
+
+	for (nChar = 0; nChar < nTextLen; nChar++)
 	{
 		if ((nChar == 0) || (isspace(sText[nChar - 1])))
 		{
@@ -178,7 +180,7 @@ TCHAR CAcceleratorString::EnsureUniqueAccelerator(CString& sText, const CString&
 	}
 
 	// else anything will do
-	for (int nChar = 0; nChar < nTextLen; nChar++)
+	for (nChar = 0; nChar < nTextLen; nChar++)
 	{
 		TCHAR cChar = sText[nChar];
 

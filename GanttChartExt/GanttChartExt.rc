@@ -162,7 +162,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 361
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 396
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -182,6 +182,11 @@ BEGIN
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,67,333,10
     EDITTEXT        IDC_MILESTONETAG,18,79,211,13,ES_AUTOHSCROLL
+    LTEXT           "&Column Visibility",IDC_STATIC,7,98,333,8
+    LISTBOX         IDC_COLUMNVISIBILITY,7,110,222,44,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "Colours",IDC_COLORSGROUP,7,159,333,8
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,175,137,10
@@ -206,17 +211,15 @@ BEGIN
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
                     IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,308,333,10
+    CONTROL         "Display collapsed parent tasks as 'Rollups'",
+                    IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,323,323,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,323,333,10
+                    WS_TABSTOP,7,338,333,10
     CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,338,333,10
-    LTEXT           "&Column Visibility",IDC_STATIC,7,98,333,8
-    LISTBOX         IDC_COLUMNVISIBILITY,7,110,222,44,LBS_SORT | 
-                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
-                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
-                    WS_TABSTOP
+                    WS_TABSTOP,7,353,333,10
 END
 
 IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
@@ -251,7 +254,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 354
+        BOTTOMMARGIN, 389
     END
 
     IDD_CREATEDEPENDS_DIALOG, DIALOG

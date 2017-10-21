@@ -1049,9 +1049,6 @@ void CToDoListWnd::InitMenuIconManager()
 	aCmdIDs.Add(ID_HELP_WIKI);
 	aCmdIDs.Add(ID_HELP_GOOGLEGROUP);
 	aCmdIDs.Add(ID_HELP_FACEBOOK);
-	aCmdIDs.Add(ID_HELP_TWITTER);
-	aCmdIDs.Add(ID_HELP_GOOGLEPLUS);
-	aCmdIDs.Add(ID_HELP_LINKEDIN);
 
 	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, RGB(255, 0, 255));
 }
@@ -2489,7 +2486,7 @@ void CToDoListWnd::LoadSettings()
 	
 	m_bShowStatusBar = prefs.GetProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	m_statusBar.ShowWindow(m_bShowStatusBar ? SW_SHOW : SW_HIDE);
-	
+
 	// toolbar
 	m_bShowToolbar = prefs.GetProfileInt(SETTINGS_KEY, _T("ToolbarOption"), TRUE);
 	m_toolbar.ShowWindow(m_bShowToolbar ? SW_SHOW : SW_HIDE);
@@ -2504,6 +2501,11 @@ void CToDoListWnd::LoadSettings()
 
 	// user preferences
 	const CPreferencesDlg& userPrefs = Prefs();
+	
+	if (userPrefs.GetShowTasklistTabCloseButton())
+		m_tabCtrl.ModifyFlags(0, TCE_CLOSEBUTTON);
+	else
+		m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);
 	
 	// MRU
 	if (userPrefs.GetAddFilesToMRU())
@@ -8936,6 +8938,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 			// delete the item else increment the count since the last separator
 			if (bDelete)
 			{
+				ASSERT(TDC::MapSortIDToColumn(nMenuID) != TDCC_NONE);
 				pMenu->DeleteMenu(nItem, MF_BYPOSITION);
 				nItem--;
 			}

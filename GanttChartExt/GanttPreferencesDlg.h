@@ -35,6 +35,7 @@ public:
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
 	BOOL GetDecadesAreOneBased() const { return m_bDecadesAreOneBased; }
+	BOOL GetDisplayParentsAsRollups() const { return m_bDisplayParentsAsRollups; }
 	void GetColumnVisibility(CDWordArray& aColumnVis) const;
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
@@ -56,6 +57,7 @@ protected:
 	CString	m_sMilestoneTag;
 	BOOL	m_bDisplayProgressInBar;
 	BOOL	m_bDecadesAreOneBased;
+	BOOL	m_bDisplayParentsAsRollups;
 	//}}AFX_DATA
 
 	CColorButton m_btWeekendColor, m_btTodayColor, m_btParentColor, m_btDefaultColor;
@@ -85,6 +87,7 @@ protected:
 	afx_msg void OnDefaultcolor();
 	afx_msg void OnChangeParentColoring();
 	afx_msg void OnUseTagForMilestone();
+	afx_msg void OnCalculateParentDates();
 	//}}AFX_MSG
 	afx_msg void OnSetParentColor();
 	DECLARE_MESSAGE_MAP()
@@ -113,6 +116,7 @@ public:
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
 	BOOL GetDecadesAreOneBased() const { return m_page.GetDecadesAreOneBased(); }
+	BOOL GetDisplayParentsAsRollups() const { return m_page.GetDisplayParentsAsRollups(); }
 	void GetColumnVisibility(CDWordArray& aColumnVis) const { m_page.GetColumnVisibility(aColumnVis); }
 
 protected:

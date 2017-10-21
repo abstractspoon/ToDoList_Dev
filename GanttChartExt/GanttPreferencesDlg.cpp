@@ -49,19 +49,6 @@ CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
 	//{{AFX_DATA_INIT(CGanttPreferencesPage)
-	m_bDisplayAllocTo = TRUE;
-	m_bAutoScrollSelection = TRUE;
-	m_bSpecifyWeekendColor = TRUE;
-	m_bSpecifyTodayColor = TRUE;
-	m_bSpecifyDefaultColor = FALSE;
-	m_bAutoCalcParentDates = TRUE;
-	m_bCalculateMissingStartDates = TRUE;
-	m_bCalculateMissingDueDates = TRUE;
-	m_nParentColoring = 0;
-	m_bUseTagForMilestone = FALSE;
-	m_sMilestoneTag = _T("");
-	m_bDisplayProgressInBar = FALSE;
-	m_bDecadesAreOneBased = FALSE;
 	//}}AFX_DATA_INIT
 	m_crParent = DEF_PARENTCOLOR;
 	m_crToday = DEF_TODAYCOLOR;
@@ -89,6 +76,7 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_MILESTONETAG, m_sMilestoneTag);
 	DDX_Check(pDX, IDC_DISPLAYPROGRESS, m_bDisplayProgressInBar);
 	DDX_Check(pDX, IDC_DECADESAREONEBASED, m_bDecadesAreOneBased);
+	DDX_Check(pDX, IDC_DISPLAYPARENTSASROLLUPS, m_bDisplayParentsAsRollups);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btTodayColor);
 	DDX_Control(pDX, IDC_SETWEEKENDCOLOR, m_btWeekendColor);
@@ -111,6 +99,7 @@ BEGIN_MESSAGE_MAP(CGanttPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_NOPARENTCOLOR, OnChangeParentColoring)
 	ON_BN_CLICKED(IDC_SETPARENTCOLOR, OnSetParentColor)
 	ON_BN_CLICKED(IDC_SPECIFYPARENTCOLOR, OnChangeParentColoring)
+	ON_BN_CLICKED(IDC_CALCULATEPARENTDATES, OnCalculateParentDates)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -194,6 +183,7 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 	}
 
 	GetDlgItem(IDC_MILESTONETAG)->EnableWindow(m_bUseTagForMilestone);
+	GetDlgItem(IDC_DISPLAYPARENTSASROLLUPS)->EnableWindow(m_bAutoCalcParentDates);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -203,6 +193,13 @@ void CGanttPreferencesPage::OnChangeParentColoring()
 {
 	UpdateData();
 	m_btParentColor.EnableWindow(m_nParentColoring == 2);
+}
+
+void CGanttPreferencesPage::OnCalculateParentDates() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_DISPLAYPARENTSASROLLUPS)->EnableWindow(m_bAutoCalcParentDates);
 }
 
 void CGanttPreferencesPage::OnSetParentColor() 
@@ -236,6 +233,7 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("ParentColor"), (int)m_crParent);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayProgressInBar"), m_bDisplayProgressInBar);
 	pPrefs->WriteProfileInt(szKey, _T("DecadesAreOneBased"), m_bDecadesAreOneBased);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayParentsAsRollups"), m_bDisplayParentsAsRollups);
 
 	CString sColVis(szKey);
 	sColVis += _T("\\ColumnVisibility");
@@ -268,6 +266,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
 	m_bDisplayProgressInBar = pPrefs->GetProfileInt(szKey, _T("DisplayProgressInBar"), FALSE);
 	m_bDecadesAreOneBased = pPrefs->GetProfileInt(szKey, _T("DecadesAreOneBased"), FALSE);
+	m_bDisplayParentsAsRollups = pPrefs->GetProfileInt(szKey, _T("DisplayParentsAsRollups"), TRUE);
 
 	CString sColVis(szKey);
 	sColVis += _T("\\ColumnVisibility");

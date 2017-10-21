@@ -61,6 +61,19 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CHoldListVScroll
+{
+public:
+	CHoldListVScroll(HWND hwndList);
+	~CHoldListVScroll();
+	
+protected:
+	HWND m_hwndList;
+	int m_nOrgVScrollPos;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeListSyncer : protected CSubclassWnd, protected CSubclasser 
 {
 	friend class CTLSHoldResync;

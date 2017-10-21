@@ -63,13 +63,11 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	CTDCStylesMap styles;
 
 	styles[TDCS_ALLOWCOMMENTSSTACKING] = prefs.GetStackEditFieldsAndComments();
-	styles[TDCS_STACKCOMMENTSABOVEEDITS] = prefs.GetStackCommentsAboveEditFields();
 	styles[TDCS_ALLOWPARENTTIMETRACKING] = prefs.GetAllowParentTimeTracking();
 	styles[TDCS_ALLOWTREEITEMCHECKBOX] = prefs.GetAllowCheckboxAgainstTreeItem();
 	styles[TDCS_ALWAYSHIDELISTPARENTS] = prefs.GetAlwaysHideListParents();
 	styles[TDCS_AUTOADJUSTDEPENDENCYDATES] = prefs.GetAutoAdjustDependentsDates();
 	styles[TDCS_AUTOCALCPERCENTDONE] = prefs.GetAutoCalcPercentDone();
-	styles[TDCS_SYNCTIMEESTIMATESANDDATES] = prefs.GetSyncTimeEstimatesAndDates();
 	styles[TDCS_AUTOREPOSCTRLS] = prefs.GetAutoReposCtrls();
 	styles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = prefs.GetAveragePercentSubCompletion();
 	styles[TDCS_CALCREMAININGTIMEBYDUEDATE] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISDUEDATE);
@@ -118,11 +116,15 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	styles[TDCS_SHOWPATHINHEADER] = prefs.GetShowPathInHeader();
 	styles[TDCS_SHOWPERCENTASPROGRESSBAR] = prefs.GetShowPercentAsProgressbar();
 	styles[TDCS_SHOWPROJECTNAME] = bShowProjectName;
+	styles[TDCS_SHOWREMINDERSASDATEANDTIME] = prefs.GetShowRemindersAsDateAndTime();
 	styles[TDCS_SHOWTREELISTBAR] = bShowTreeListBar;
 	styles[TDCS_SHOWWEEKDAYINDATES] = prefs.GetShowWeekdayInDates();
 	styles[TDCS_SORTDONETASKSATBOTTOM] = prefs.GetSortDoneTasksAtBottom();
+	styles[TDCS_STACKCOMMENTSABOVEEDITS] = prefs.GetStackCommentsAboveEditFields();
 	styles[TDCS_STRIKETHOUGHDONETASKS] = prefs.GetStrikethroughDone();
 	styles[TDCS_SUBTASKSINHERITLOCK] = prefs.GetSubtasksInheritLockStatus();
+	styles[TDCS_SYNCCOMPLETIONTOSTATUS] = prefs.GetSyncCompletionToStatus();
+	styles[TDCS_SYNCTIMEESTIMATESANDDATES] = prefs.GetSyncTimeEstimatesAndDates();
 	styles[TDCS_TASKCOLORISBACKGROUND] = prefs.GetColorTaskBackground();
 	styles[TDCS_TASKINHERITSSUBTASKFLAGS] = prefs.GetTaskInheritsSubtaskFlags();
 	styles[TDCS_TRACKSELECTEDTASKONLY] = !prefs.GetTrackNonSelectedTasks();
@@ -137,8 +139,6 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	styles[TDCS_USES3RDPARTYSOURCECONTROL] = prefs.GetUsing3rdPartySourceControl();
 	styles[TDCS_WARNADDDELETEARCHIVE] = prefs.GetWarnAddDeleteArchive();
 	styles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = prefs.GetWeightPercentCompletionByNumSubtasks();
-	styles[TDCS_SHOWREMINDERSASDATEANDTIME] = prefs.GetShowRemindersAsDateAndTime();
-	styles[TDCS_SYNCCOMPLETIONTOSTATUS] = prefs.GetSyncCompletionToStatus();
 	
 	tdc.SetStyles(styles);
 

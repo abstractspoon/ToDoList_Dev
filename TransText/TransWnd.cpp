@@ -241,7 +241,7 @@ void CTransComboBox::Initialize()
 
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
-		CBITEMDATA& cbid = aItems.GetAt(nItem);
+		CBITEMDATA& cbid = aItems[nItem];
 		TranslateText(cbid.sText);
 
 		if (nItem == nCurSel)
@@ -394,7 +394,7 @@ void CTransListBox::Initialize()
 
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
-		LBITEMDATA& lbid = aItems.GetAt(nItem);
+		LBITEMDATA& lbid = aItems[nItem];
 		TranslateText(lbid.sText);
 
 		int nIndex = CDialogHelper::AddString(*pLB, lbid.sText, lbid.dwData);

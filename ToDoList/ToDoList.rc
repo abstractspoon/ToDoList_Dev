@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,998,2
+ FILEVERSION 7,1,998,3
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 998, 2\0"
+            VALUE "FileVersion", "7, 1, 998, 3\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
             VALUE "LegalTrademarks", "\0"
@@ -206,7 +206,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -2661,11 +2661,7 @@ IDR_SOCIAL_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
     BUTTON      ID_HELP_WIKI
     BUTTON      ID_HELP_GOOGLEGROUP
-    SEPARATOR
     BUTTON      ID_HELP_FACEBOOK
-    BUTTON      ID_HELP_TWITTER
-    BUTTON      ID_HELP_GOOGLEPLUS
-    BUTTON      ID_HELP_LINKEDIN
 END
 
 IDR_TIMETRACKER_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
@@ -3325,11 +3321,6 @@ BEGIN
     BEGIN
         MENUITEM "&Online Help",                ID_HELP_WIKI
         MENUITEM "&Feedback and Support",       ID_HELP_GOOGLEGROUP
-        MENUITEM SEPARATOR
-        MENUITEM "Fac&ebook",                   ID_HELP_FACEBOOK
-        MENUITEM "&Twitter",                    ID_HELP_TWITTER
-        MENUITEM "&Google Plus",                ID_HELP_GOOGLEPLUS
-        MENUITEM "&LinkedIn",                   ID_HELP_LINKEDIN
         MENUITEM SEPARATOR
         MENUITEM "&Record Bug Report...",       ID_HELP_RECORDBUGREPORT
         MENUITEM SEPARATOR
@@ -5121,10 +5112,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_HELP_FACEBOOK        "\nFacebook"
-    ID_HELP_TWITTER         "\nTwitter"
     ID_HELP_GOOGLEGROUP     "\nFeedback and Support"
-    ID_HELP_GOOGLEPLUS      "\nGoogle Plus"
-    ID_HELP_LINKEDIN        "\nLinkedIn"
 END
 
 STRINGTABLE DISCARDABLE 

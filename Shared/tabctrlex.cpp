@@ -104,7 +104,7 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 		if ((dwPrevFlags & (TCE_CLOSEBUTTON | TCE_BOLDSELTEXT)) !=
 			(m_dwFlags & (TCE_CLOSEBUTTON | TCE_BOLDSELTEXT)))
 		{
-			Invalidate();
+			UpdateTabItemWidths(FALSE); // All
 		}
 
 		return TRUE;
