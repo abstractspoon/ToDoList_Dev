@@ -87,18 +87,6 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, CContentMgr& mgrCont
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
 {
-	// cleanup extension views
-	int nView = m_aExtViews.GetSize();
-
-	while (nView--)
-	{
-		IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
-
-		if (pExtWnd)
-			pExtWnd->Release();
-	}
-
-	m_aExtViews.RemoveAll();
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -457,7 +445,19 @@ void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 void CTabbedToDoCtrl::OnDestroy() 
 {
 	SavePrefs();
-		
+
+	// Destroy the extensions
+	int nExt = m_aExtViews.GetSize();
+
+	while (nExt--)
+	{
+		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
+
+		if (pExtWnd)
+			pExtWnd->Release();
+	}
+	m_aExtViews.RemoveAll();
+			
 	CToDoCtrl::OnDestroy();
 }
 
