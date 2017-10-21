@@ -608,7 +608,7 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
-	static IUI_ATTRIBUTE MapAttributeToIUIEdit(TDC_ATTRIBUTE nAttrib)
+	static IUI_ATTRIBUTE MapAttributeToIUIAttribute(TDC_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
 		{
@@ -665,19 +665,26 @@ namespace TDC
 		return IUI_NONE;
 	}
 
-	static int MapAttributesToIUIAttrib(const CTDCAttributeMap& mapAttrib, CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE>& aAttrib)
+	static int MapAttributesToIUIAttributes(const CTDCAttributeMap& mapAttrib, CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE>& aAttrib)
 	{
 		POSITION pos = mapAttrib.GetStartPosition();
 		
 		while (pos)
 		{
 			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-			aAttrib.Add(MapAttributeToIUIEdit(nAttrib));
+			aAttrib.Add(MapAttributeToIUIAttribute(nAttrib));
 		}
 		
 		return aAttrib.GetSize();
 	}
-	
+
+	static IUI_ATTRIBUTE MapColumnToIUIAttribute(TDC_COLUMN nColumn) 
+	{
+		TDC_ATTRIBUTE nAttrib = MapColumnToAttribute(nColumn);
+
+		return MapAttributeToIUIAttribute(nAttrib);
+	}
+
 	static IUI_ATTRIBUTE MapColumnToIUIEdit(TDC_COLUMN nCol)
 	{
 		switch (nCol)
@@ -735,7 +742,7 @@ namespace TDC
 		return IUI_NONE;
 	}
 
-	static TDC_ATTRIBUTE MapIUIEditToAttribute(IUI_ATTRIBUTE nAttrib)
+	static TDC_ATTRIBUTE MapIUIAttributeToAttribute(IUI_ATTRIBUTE nAttrib)
 	{
 		switch (nAttrib)
 		{
@@ -778,7 +785,7 @@ namespace TDC
 
 	}
 
-	static TDC_COLUMN MapIUIEditToColumn(IUI_ATTRIBUTE nCol)
+	static TDC_COLUMN MapIUIAttributeToColumn(IUI_ATTRIBUTE nCol)
 	{
 		switch (nCol)
 		{
@@ -829,7 +836,7 @@ namespace TDC
 			return FALSE;
 		}
 		
-		TDC_ATTRIBUTE nMapEdit = MapIUIEditToAttribute(nIUIAttrib);
+		TDC_ATTRIBUTE nMapEdit = MapIUIAttributeToAttribute(nIUIAttrib);
 		
 		if (nAttrib == nMapEdit)
 			return TRUE;

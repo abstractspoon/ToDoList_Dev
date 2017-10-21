@@ -336,13 +336,13 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 			{
 				CWaitCursor cursor;
 				
-				VIEWDATA* pData = NULL;
+				VIEWDATA* pVData = NULL;
 				IUIExtensionWindow* pExtWnd = NULL;
 				
-				if (!GetExtensionWnd(nView, pExtWnd, pData))
+				if (!GetExtensionWnd(nView, pExtWnd, pVData))
 					return FALSE;
 				
-				UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib);
+				UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pVData->mapWantedAttrib);
 				ResyncExtensionSelection(nView);
 
 				// mark rest of extensions needing update
@@ -440,11 +440,11 @@ void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 	CString sKey = GetPreferencesKey(); // no subkey
 
 	// save view
-	int nView = m_aExtViews.GetSize();
+	int nExt = m_aExtViews.GetSize();
 
-	while (nView--)
+	while (nExt--)
 	{
-		IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
+		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 
 		if (pExtWnd)
 		{
@@ -485,16 +485,16 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView) const
 	return pExtWnd;
 }
 
-BOOL CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const
+BOOL CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pVData) const
 {
 	pExtWnd = GetExtensionWnd(nView);
 
 	if (!pExtWnd)
 		return FALSE;
 
-	pData = GetViewData(nView);
+	pVData = GetViewData(nView);
 
-	if (!pData)
+	if (!pVData)
 	{
 		pExtWnd = NULL;
 		return FALSE;
@@ -520,9 +520,9 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	// sanity checks
 	ASSERT(m_tabViews.GetViewHwnd(nView) == NULL);
 
-	VIEWDATA* pData = GetViewData(nView);
+	VIEWDATA* pVData = GetViewData(nView);
 
-	if (!pData)
+	if (!pVData)
 		return NULL;
 	
 	// Create the extension window
@@ -531,7 +531,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 
 	try
 	{
-		pExtWnd = pData->pExtension->CreateExtWindow(nCtrlID, WS_CHILD, 0, 0, 0, 0, GetSafeHwnd());
+		pExtWnd = pVData->pExtension->CreateExtWindow(nCtrlID, WS_CHILD, 0, 0, 0, 0, GetSafeHwnd());
 	}
 	catch (...)
 	{
@@ -564,7 +564,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 
 	// Set font before loading preferences
 	pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskTree.GetFont());
-	pData->bNeedFontUpdate = FALSE;
+	pVData->bNeedFontUpdate = FALSE;
 		
 	// restore state
 	CPreferences prefs;
@@ -576,18 +576,18 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	m_tabViews.SetViewHwnd((FTC_VIEW)nView, hWnd);
 	
 	// initialize update state
-	pData->bNeedFullTaskUpdate = TRUE;
+	pVData->bNeedFullTaskUpdate = TRUE;
 
 	// and capabilities
-	if (pData->bCanPrepareNewTask == -1)
+	if (pVData->bCanPrepareNewTask == -1)
 	{
 		CTaskFile task;
 		task.NewTask(_T("Test Task"), NULL, 0, 0);
 
-		pData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
+		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
 	}
 	
-	GetExtensionViewAttributes(pExtWnd, pData->mapWantedAttrib);
+	GetExtensionViewAttributes(pExtWnd, pVData->mapWantedAttrib);
 
 	// insert the view after the list in z-order
 	::SetWindowPos(pExtWnd->GetHwnd(), m_taskList, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
@@ -688,9 +688,9 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			VIEWDATA* pData = GetViewData(nNewView);
+			VIEWDATA* pVData = GetViewData(nNewView);
 
-			if (!pData)
+			if (!pVData)
 				return 1L; // prevent tab change
 
 			// start progress if initializing from another view, 
@@ -703,13 +703,13 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				{
 					nProgressMsg = IDS_INITIALISINGTABBEDVIEW;
 				}
-				else if (pData->bNeedFullTaskUpdate)
+				else if (pVData->bNeedFullTaskUpdate)
 				{
 					nProgressMsg = IDS_UPDATINGTABBEDVIEW;
 				}
 
 				if (nProgressMsg)
-					BeginExtensionProgress(pData, nProgressMsg);
+					BeginExtensionProgress(pVData, nProgressMsg);
 			}
 
 			CWaitCursor cursor;
@@ -728,24 +728,24 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				return 1L; // prevent tab change
 			}
 			
-			if (pData->bNeedFullTaskUpdate)
+			if (pVData->bNeedFullTaskUpdate)
 			{
-				pData->bNeedFullTaskUpdate = FALSE;
+				pVData->bNeedFullTaskUpdate = FALSE;
 
 				// start progress if not already
 				// will be cleaned up in OnPostTabViewChange
 				if (nProgressMsg == 0)
-					BeginExtensionProgress(pData);
+					BeginExtensionProgress(pVData);
 
 				CTaskFile tasks;
 
-				if (GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib))
-					UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pData->mapWantedAttrib);
+				if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
+					UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pVData->mapWantedAttrib);
 			}
 
-			if (pData->bNeedFontUpdate)
+			if (pVData->bNeedFontUpdate)
 			{
-				pData->bNeedFontUpdate = FALSE;
+				pVData->bNeedFontUpdate = FALSE;
 				pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)m_taskTree.GetFont());
 			}
 				
@@ -1058,7 +1058,7 @@ void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTa
 
 	CArray<IUI_ATTRIBUTE, IUI_ATTRIBUTE> aAttrib;
 	
-	if (TDC::MapAttributesToIUIAttrib(mapAttrib, aAttrib))
+	if (TDC::MapAttributesToIUIAttributes(mapAttrib, aAttrib))
 		pExtWnd->UpdateTasks(&tasks, nType, aAttrib.GetData(), aAttrib.GetSize());
 }
 
@@ -1087,17 +1087,17 @@ BOOL CTabbedToDoCtrl::HasSingleSelectionChanged(DWORD dwSelID) const
 
 VIEWDATA* CTabbedToDoCtrl::GetViewData(FTC_VIEW nView) const
 {
-	VIEWDATA* pData = (VIEWDATA*)m_tabViews.GetViewData(nView);
+	VIEWDATA* pVData = (VIEWDATA*)m_tabViews.GetViewData(nView);
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		ASSERT(pData == NULL);
+		ASSERT(pVData == NULL);
 		break;
 		
 	case FTCV_TASKLIST:
-		ASSERT(pData && !pData->pExtension);
+		ASSERT(pVData && !pVData->pExtension);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -1116,7 +1116,7 @@ VIEWDATA* CTabbedToDoCtrl::GetViewData(FTC_VIEW nView) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		ASSERT(pData && pData->pExtension);
+		ASSERT(pVData && pVData->pExtension);
 		break;
 
 	// all else
@@ -1124,7 +1124,7 @@ VIEWDATA* CTabbedToDoCtrl::GetViewData(FTC_VIEW nView) const
 		ASSERT(0);
 	}
 
-	return pData;
+	return pVData;
 }
 
 VIEWDATA* CTabbedToDoCtrl::GetActiveViewData() const
@@ -1232,11 +1232,11 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM /*wParam*/, LPARAM lPara
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			VIEWDATA* pData = GetViewData(nView);
-			ASSERT(pData);
+			VIEWDATA* pVData = GetViewData(nView);
+			ASSERT(pVData);
 
-			if (pData)
-				pData->sort.single.nBy = TDC::MapIUIEditToColumn((IUI_ATTRIBUTE)lParam);
+			if (pVData)
+				pVData->sort.single.nBy = TDC::MapIUIAttributeToColumn((IUI_ATTRIBUTE)lParam);
 		}
 		break;
 	}
@@ -1702,18 +1702,18 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		// of dependency changes or task moves
 		if (bDependChange)
 		{
-			VIEWDATA* pData = NULL;
+			VIEWDATA* pVData = NULL;
 			IUIExtensionWindow* pExtWnd = NULL;
 
-			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pData))
+			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
 				return FALSE;
 
 			// update all tasks
 			CWaitCursor cursor;
 			CTaskFile tasks;
 
-			if (GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib))
-				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, pData->mapWantedAttrib);
+			if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
+				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, pVData->mapWantedAttrib);
 		}
 		else if (bMoveTask)
 		{
@@ -2217,9 +2217,9 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 			
 			if (pExtWnd)
 			{
-				VIEWDATA* pData = GetViewData(nExtView);
+				VIEWDATA* pVData = GetViewData(nExtView);
 
-				if (!pData)
+				if (!pVData)
 					continue;
 
 				// if this extension is active and wants a 
@@ -2227,7 +2227,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 				BOOL bWantColorUpdate = (m_bTaskColorChange && pExtWnd->WantEditUpdate(IUI_COLOR));
 
 				if (bWantColorUpdate && nExtView == nCurView)
-					BeginExtensionProgress(pData);
+					BeginExtensionProgress(pVData);
 
 				// notify all extensions of prefs change
 				pExtWnd->LoadPreferences(prefs, sKey, true);
@@ -2246,11 +2246,11 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 						GetAllTasksForExtensionViewUpdate(tasks, mapAttribs);
 						
 						UpdateExtensionView(pExtWnd, tasks, IUI_EDIT, mapAttribs);
-						pData->bNeedFullTaskUpdate = FALSE;
+						pVData->bNeedFullTaskUpdate = FALSE;
 					}
 					else // mark for update
 					{
-						pData->bNeedFullTaskUpdate = TRUE;
+						pVData->bNeedFullTaskUpdate = TRUE;
 					}
 				}
 
@@ -2264,14 +2264,14 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 	m_bTaskColorChange = FALSE; // always
 }
 
-void CTabbedToDoCtrl::BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg)
+void CTabbedToDoCtrl::BeginExtensionProgress(const VIEWDATA* pVData, UINT nMsg)
 {
-	ASSERT(pData);
+	ASSERT(pVData);
 
 	if (nMsg == 0)
 		nMsg = IDS_UPDATINGTABBEDVIEW;
 
-	CEnString sMsg(nMsg, pData->pExtension->GetMenuText());
+	CEnString sMsg(nMsg, pVData->pExtension->GetMenuText());
 	GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, TRUE, (LPARAM)(LPCTSTR)sMsg);
 }
 
@@ -2618,10 +2618,10 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			const VIEWDATA* pData = GetViewData(nView);
+			const VIEWDATA* pVData = GetViewData(nView);
 
-			if (pData)
-				bCanCreate &= pData->bCanPrepareNewTask;
+			if (pVData)
+				bCanCreate &= pVData->bCanPrepareNewTask;
 		}
 		break;
 
@@ -2722,10 +2722,10 @@ void CTabbedToDoCtrl::SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore
 			continue;
 
 		// else
-		VIEWDATA* pData = GetViewData(nView);
+		VIEWDATA* pVData = GetViewData(nView);
 		
-		if (pData)
-			pData->bNeedFullTaskUpdate = bUpdate;
+		if (pVData)
+			pVData->bNeedFullTaskUpdate = bUpdate;
 	}
 }
 
@@ -2739,20 +2739,20 @@ void CTabbedToDoCtrl::SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore
 			continue;
 
 		// else
-		VIEWDATA* pData = GetViewData(nView);
+		VIEWDATA* pVData = GetViewData(nView);
 		
-		if (pData)
-			pData->bNeedFontUpdate = bUpdate;
+		if (pVData)
+			pVData->bNeedFontUpdate = bUpdate;
 	}
 }
 
 void CTabbedToDoCtrl::SetListViewNeedFontUpdate(BOOL bUpdate)
 {
-	VIEWDATA* pData = GetViewData(FTCV_TASKLIST);
-	ASSERT(pData);
+	VIEWDATA* pVData = GetViewData(FTCV_TASKLIST);
+	ASSERT(pVData);
 
-	if (pData)
-		pData->bNeedFontUpdate = bUpdate;
+	if (pVData)
+		pVData->bNeedFontUpdate = bUpdate;
 }
 
 
@@ -2901,7 +2901,7 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 		
 		while (nAttrib--)
 		{
-			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIEdit((TDC_ATTRIBUTE)nAttrib)))
+			if (pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttribute((TDC_ATTRIBUTE)nAttrib)))
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
@@ -3008,9 +3008,9 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 			while (nExt--)
 			{
 				FTC_VIEW nView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
-				VIEWDATA* pData = GetViewData(nView);
+				VIEWDATA* pVData = GetViewData(nView);
 
-				if (pData)
+				if (pVData)
 				{
 					IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 
@@ -3019,16 +3019,16 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 						IUI_UPDATETYPE nUpdate = TDC::MapAttributeToIUIUpdateType(nAttrib);
 
 						CTaskFile tasks;
-						int nNumTasks = GetAllTasksForExtensionViewUpdate(tasks, pData->mapWantedAttrib);
+						int nNumTasks = GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib);
 
 						ASSERT(nNumTasks || (nUpdate == IUI_DELETE));
 
 						CWaitCursor cursor;
-						BeginExtensionProgress(pData);
+						BeginExtensionProgress(pVData);
 
 						// update all tasks
-						UpdateExtensionView(pExtWnd, tasks, nUpdate, pData->mapWantedAttrib);
-						pData->bNeedFullTaskUpdate = FALSE;
+						UpdateExtensionView(pExtWnd, tasks, nUpdate, pVData->mapWantedAttrib);
+						pVData->bNeedFullTaskUpdate = FALSE;
 
 						if ((nAttrib == TDCA_NEWTASK) && dwTaskID)
 							pExtWnd->SelectTask(dwTaskID);
@@ -3039,7 +3039,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 					}
 					else
 					{
-						pData->bNeedFullTaskUpdate = TRUE;
+						pVData->bNeedFullTaskUpdate = TRUE;
 					}
 				}
 			}
@@ -3154,26 +3154,26 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib)
 	while (nExt--)
 	{
 		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
-		VIEWDATA* pData = GetViewData(nExtView);
-		ASSERT(pData);
+		VIEWDATA* pVData = GetViewData(nExtView);
+		ASSERT(pVData);
 		
 		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 		
 		if (pExtWnd)
 		{
-			if (pData)
+			if (pVData)
 			{
 				if (nUpdate == IUI_NEW)
-					mapAttrib.Copy(pData->mapWantedAttrib);
+					mapAttrib.Copy(pVData->mapWantedAttrib);
 				
-				pData->bNeedFullTaskUpdate = FALSE;
+				pVData->bNeedFullTaskUpdate = FALSE;
 			}
 			
 			UpdateExtensionView(pExtWnd, tasks, nUpdate, mapAttrib);
 		}
-		else if (pData)
+		else if (pVData)
 		{
-			pData->bNeedFullTaskUpdate = TRUE;
+			pVData->bNeedFullTaskUpdate = TRUE;
 		}
 	}
 }
@@ -3321,9 +3321,9 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	// it is next activated
 	if (nExtView != nCurView)
 	{
-		const VIEWDATA* pData = GetViewData(nExtView);
+		const VIEWDATA* pVData = GetViewData(nExtView);
 
-		if (!pData || pData->bNeedFullTaskUpdate)
+		if (!pVData || pVData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
 	else if (m_nExtModifyingAttrib != IUI_NONE) // active view
@@ -3342,7 +3342,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 	ASSERT(pExtWnd);
 	
-	return (pExtWnd && pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIEdit(nAttrib)));
+	return (pExtWnd && pExtWnd->WantEditUpdate(TDC::MapAttributeToIUIAttribute(nAttrib)));
 }
 
 BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
@@ -3353,9 +3353,9 @@ BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
 	while (nExt--)
 	{
 		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
-		const VIEWDATA* pData = GetViewData(nExtView);
+		const VIEWDATA* pVData = GetViewData(nExtView);
 
-		if (pData && !pData->bNeedFullTaskUpdate)
+		if (pVData && !pVData->bNeedFullTaskUpdate)
 			return FALSE;
 	}
 
@@ -3521,7 +3521,7 @@ const TDSORT& CTabbedToDoCtrl::GetSort() const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			VIEWDATA* pVData = GetActiveViewData();
+			VIEWDATA* pVData = GetViewData(nView);
 			ASSERT(pVData);
 			
 			if (pVData)
@@ -3655,13 +3655,13 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 		case FTCV_UIEXTENSION15:
 		case FTCV_UIEXTENSION16:
 			{
-				VIEWDATA* pData = NULL;
+				VIEWDATA* pVData = NULL;
 				IUIExtensionWindow* pExtWnd = NULL;
 
-				if (!GetExtensionWnd(nView, pExtWnd, pData))
+				if (!GetExtensionWnd(nView, pExtWnd, pVData))
 					return FALSE;
 
-				pData->bNeedFontUpdate = FALSE;
+				pVData->bNeedFontUpdate = FALSE;
 				pExtWnd->DoAppCommand(IUI_SETTASKFONT, (DWORD)hFont);
 
 				// mark rest of extensions needing update
@@ -3693,14 +3693,14 @@ BOOL CTabbedToDoCtrl::AddView(IUIExtension* pExtension)
 	int nIndex = m_aExtViews.GetSize();
 	FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nIndex);
 
-	VIEWDATA* pData = NewViewData();
-	ASSERT(pData);
+	VIEWDATA* pVData = NewViewData();
+	ASSERT(pVData);
 
-	pData->pExtension = pExtension;
+	pVData->pExtension = pExtension;
 
 	// we pass NULL for the hWnd because we are going to load
 	// only on demand
-	if (m_tabViews.AttachView(NULL, nView, sName, hIcon, pData))
+	if (m_tabViews.AttachView(NULL, nView, sName, hIcon, pVData))
 	{
 		m_aExtViews.Add(NULL); // placeholder
 		return TRUE;
@@ -3921,11 +3921,11 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			VIEWDATA* pData = GetViewData(nView);
-			ASSERT(pData);
+			VIEWDATA* pVData = GetViewData(nView);
+			ASSERT(pVData);
 
-			if (pData)
-				Sort(pData->sort.single.nBy, bAllowToggle);
+			if (pVData)
+				Sort(pVData->sort.single.nBy, bAllowToggle);
 		}
 		break;
 		
@@ -4098,11 +4098,11 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 			{
 				ExtensionDoAppCommand(nView, (bAllowToggle ? IUI_TOGGLABLESORT : IUI_SORT), nCol);
 
-				VIEWDATA* pData = GetViewData(nView);
-				ASSERT(pData);
+				VIEWDATA* pVData = GetViewData(nView);
+				ASSERT(pVData);
 			
-				if (pData)
-					pData->sort.single.nBy = nBy;
+				if (pVData)
+					pVData->sort.single.nBy = nBy;
 			}
 		}
 		break;
@@ -5300,10 +5300,10 @@ HTREEITEM CTabbedToDoCtrl::LoadTasksState(const CPreferences& prefs, BOOL bRebui
 		
 		if (m_taskList.IsSorting())
 		{
-			VIEWDATA* pData = GetViewData(FTCV_TASKLIST);
-			ASSERT(pData);
+			VIEWDATA* pVData = GetViewData(FTCV_TASKLIST);
+			ASSERT(pVData);
 			
-			pData->bNeedResort = TRUE;
+			pVData->bNeedResort = TRUE;
 		}
 	}
 
@@ -5386,8 +5386,8 @@ void CTabbedToDoCtrl::SetVisibleTaskViews(const CStringArray& aTypeIDs)
 	{
 		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
 
-		VIEWDATA* pData = GetViewData(nView);
-		ASSERT(pData);
+		VIEWDATA* pVData = GetViewData(nView);
+		ASSERT(pVData);
 
 		// update tab control
 		CString sTypeID = m_mgrUIExt.GetUIExtensionTypeID(nExt);
