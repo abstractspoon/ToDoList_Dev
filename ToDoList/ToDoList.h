@@ -68,9 +68,6 @@ protected:
 	afx_msg void OnHelpRecordBugReport();
 	afx_msg void OnHelpWiki();
 	afx_msg void OnHelpFacebook();
-	afx_msg void OnHelpTwitter();
-	afx_msg void OnHelpGooglePlus();
-	afx_msg void OnHelpLinkedIn();
 	afx_msg void OnImportPrefs();
 	afx_msg void OnUpdateImportPrefs(CCmdUI* pCmdUI);
 	afx_msg void OnExportPrefs();

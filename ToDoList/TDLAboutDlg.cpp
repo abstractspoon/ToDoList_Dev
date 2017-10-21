@@ -193,10 +193,7 @@ BOOL CTDLAboutDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		return TRUE;
 		
 	case ID_HELP_FACEBOOK:
-	case ID_HELP_TWITTER:
-	case ID_HELP_GOOGLEPLUS:
 	case ID_HELP_GOOGLEGROUP:
-	case ID_HELP_LINKEDIN:
 		return AfxGetMainWnd()->SendMessage(WM_COMMAND, wParam, lParam);
 	}
 	
