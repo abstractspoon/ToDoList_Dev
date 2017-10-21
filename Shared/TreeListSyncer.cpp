@@ -56,6 +56,32 @@ CTLSHoldResync::~CTLSHoldResync()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
+CHoldListVScroll::CHoldListVScroll(HWND hwndList) : m_hwndList(hwndList), m_nOrgVScrollPos(0)
+{
+	// it's acceptable to pass no HWND -> nothing happens
+	if (m_hwndList)
+		m_nOrgVScrollPos = ::GetScrollPos(hwndList, SB_VERT);
+}
+
+CHoldListVScroll::~CHoldListVScroll()
+{
+	if (m_hwndList)
+	{
+		int nPos = ListView_GetTopIndex(m_hwndList);
+		
+		if ((nPos != -1) && (nPos != m_nOrgVScrollPos))
+		{
+			CRect rItem;
+			ListView_GetItemRect(m_hwndList, 0, rItem, LVIR_BOUNDS);
+			
+			int nVOffset = ((m_nOrgVScrollPos - nPos) * rItem.Height());
+			ListView_Scroll(m_hwndList, 0, nVOffset);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 static CMap<HWND, HWND, TLS_TYPE, TLS_TYPE&> s_mapTypes;
 
 //////////////////////////////////////////////////////////////////////////////////////////
