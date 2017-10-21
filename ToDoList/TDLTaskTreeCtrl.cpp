@@ -528,7 +528,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			GraphicsMisc::FillItemRect(pDC, &pTVCD->nmcd.rc, crBack, m_tcTasks);
 
 			// hide text because we will draw it later
-			pTVCD->clrTextBk = pTVCD->clrText = crBack;//GetSysColor(COLOR_WINDOW);
+			pTVCD->clrTextBk = pTVCD->clrText = crBack;
 
 			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 		}
