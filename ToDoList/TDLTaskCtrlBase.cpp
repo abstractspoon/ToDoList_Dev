@@ -1647,8 +1647,7 @@ PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 
 void CTDLTaskCtrlBase::DoSort()
 {
-// 	CHoldRedraw hr(*this, NCR_PAINT | NCR_NCPAINT | NCR_UPDATE);
-// 	CHoldRedraw hr2(m_lcColumns, NCR_PAINT | NCR_NCPAINT | NCR_UPDATE);
+	// Scope the hold to have finished before resyncing
 	{
 		CHoldListVScroll hold(m_lcColumns);
 
