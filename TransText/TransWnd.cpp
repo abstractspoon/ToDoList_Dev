@@ -218,42 +218,40 @@ void CTransComboBox::Initialize()
 
 	CComboBox* pCombo = (CComboBox*)GetCWnd();
 
+	// Build an array of existing items
 	int nNumItem = pCombo->GetCount();
-	int nSel = pCombo->GetCurSel();
-	DWORD dwSelItemData = pCombo->GetItemData(nSel);
+	int nCurSel = pCombo->GetCurSel();
 
-	// Build an array of items
 	CCbItemArray aItems;
 	aItems.SetSize(nNumItem);
 
 	int nItem;
-	BOOL bHasItemData = FALSE;
 
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
 		aItems[nItem].sText = CDialogHelper::GetItem(*pCombo, nItem);
 		aItems[nItem].dwData = pCombo->GetItemData(nItem);
-
-		bHasItemData |= aItems[nItem].dwData;
 	};
 
 	// delete existing content
 	pCombo->ResetContent();
 
 	// re-add, translating as we go
+	CString sCurSel;
+
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
 		CBITEMDATA& cbid = aItems.GetAt(nItem);
 		TranslateText(cbid.sText);
 
+		if (nItem == nCurSel)
+			sCurSel = aItems[nItem].sText;
+
 		CDialogHelper::AddString(*pCombo, cbid.sText, cbid.dwData);
 	}
 
 	// Restore selection
-	if (bHasItemData)
-		CDialogHelper::SelectItemByData(*pCombo, dwSelItemData);
-	else
-		pCombo->SetCurSel(nSel);
+	pCombo->SelectString(-1, sCurSel);
 
 	// update combo drop width
 	CDialogHelper::RefreshMaxDropWidth(*pCombo, NULL, 20);
@@ -359,7 +357,7 @@ CTransListBox::CTransListBox(const CString& sClass, BOOL bCheckListBox)
 	CTransWnd(sClass, TWS_HANDLENONE), m_bCheckLB(bCheckListBox) 
 {
 	ASSERT((!bCheckListBox && CWinClasses::IsClass(sClass, WC_LISTBOX)) || 
-		(bCheckListBox && CWinClasses::IsClass(sClass, WC_CHECKLISTBOX)));
+			(bCheckListBox && CWinClasses::IsClass(sClass, WC_CHECKLISTBOX)));
 }
 
 void CTransListBox::Initialize()
@@ -368,18 +366,16 @@ void CTransListBox::Initialize()
 		return;
 
 	CListBox* pLB = (CListBox*)GetCWnd();
-	CCheckListBox* pCLB = m_bCheckLB ? (CCheckListBox*)pLB : NULL;
+	CCheckListBox* pCLB = (m_bCheckLB ? (CCheckListBox*)pLB : NULL);
 
-	int nNumItem = SendMessage(LB_GETCOUNT);
-	int nSel = SendMessage(LB_GETCURSEL);
-	DWORD dwSelItemData = pLB->GetItemData(nSel);
+	int nNumItem = pLB->GetCount();
+	int nCurSel = pLB->GetCurSel();
 	
 	// Build an array of items
 	CLbItemArray aItems;
 	aItems.SetSize(nNumItem);
 
 	int nItem;
-	BOOL bHasItemData = FALSE;
 
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
@@ -388,31 +384,30 @@ void CTransListBox::Initialize()
 
 		if (pCLB)
 			aItems[nItem].nCheck = pCLB->GetCheck(nItem);
-
-		bHasItemData |= aItems[nItem].dwData;
 	};
 
 	// delete existing content
 	pLB->ResetContent();
 
 	// re-add, translating as we go
+	CString sCurSel;
+
 	for (nItem = 0; nItem < nNumItem; nItem++)
 	{
 		LBITEMDATA& lbid = aItems.GetAt(nItem);
-
 		TranslateText(lbid.sText);
 
 		int nIndex = CDialogHelper::AddString(*pLB, lbid.sText, lbid.dwData);
 
 		if (pCLB)
 			pCLB->SetCheck(nIndex, lbid.nCheck);
+
+		if (nItem == nCurSel)
+			sCurSel = lbid.sText;
 	}
 
 	// Restore selection
-	if (bHasItemData)
-		CDialogHelper::SelectItemByData(*pLB, dwSelItemData);
-	else
-		pLB->SetCurSel(nSel);
+	pLB->SelectString(-1, sCurSel);
 	
 	// update column width
 	CListBox* pList = (CListBox*)GetCWnd();
