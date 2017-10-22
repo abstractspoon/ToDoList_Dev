@@ -132,6 +132,7 @@ void CTDLTasklistImportDlg::OnSelectall()
 void CTDLTasklistImportDlg::OnSelectnone() 
 {
 	m_tdc.DeselectAll();
+	m_tdc.Invalidate();
 }
 
 LRESULT CTDLTasklistImportDlg::OnTDCNotifySelectionChange(WPARAM, LPARAM)
