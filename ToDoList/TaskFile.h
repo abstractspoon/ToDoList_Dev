@@ -217,6 +217,13 @@ public:
 
 	unsigned long GetCustomAttributeTypeByID(LPCTSTR szID) const;
 
+	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
+							DWORD& dwSpecific2, int& bRecalcFrom, int& nReuse, 
+							int& nNumOccur, int& nRemainingOccur, bool& bPreserveComments) const;
+	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
+							DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
+							int nNumOccur, int nRemainingOccur, bool bPreserveComments);
+
 	//////////////////////////////////////////////////////////////
 	// ITaskList15 implementation 
 	bool IsTaskParent(HTASKITEM hTask) const;
@@ -493,13 +500,6 @@ protected:
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
-
-	bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-							DWORD& dwSpecific2, BOOL& bRecalcFrom, int& nReuse, 
-							int& nNumOccur, int& nRemainingOccur) const;
-	bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-							DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
-							int nNumOccur, int nRemainingOccur);
 		
 	bool DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	bool TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHidden) const;

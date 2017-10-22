@@ -148,8 +148,11 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	int nRecalcFrom = GetAttribValueI(pFMTask, FM_CUSTOMRECURRECALCFROM);
 	int nReuse = GetAttribValueI(pFMTask, FM_CUSTOMRECURREUSE);
 	int nNumOccur = GetAttribValueI(pFMTask, FM_CUSTOMNUMOCCUR);
+	int nRemainingOccurs = GetAttribValueI(pFMTask, FM_CUSTOMREMAININGOCCUR);
+	bool bPreserveComments = (GetAttribValueI(pFMTask, FM_CUSTOMPRESERVECOMMENTS) != FALSE);
 
-	pDestTaskFile->SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse, nNumOccur);
+	pDestTaskFile->SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+									nRecalcFrom, nReuse, nNumOccur, nRemainingOccurs, bPreserveComments);
 
 	// then overwrite with FreeMind native attributes
 	pDestTaskFile->SetTaskCreationDate(hTask, GetFMDate(pFMTask, _T("CREATED")));

@@ -285,9 +285,11 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	// recurrence
 	int nRegularity = 0, nReuse = 0;
 	DWORD dwSpecific1 = 0, dwSpecific2 = 0;
-	int nRecalcFrom = 0, nNumOccur = 0;
+	int nRecalcFrom = 0, nNumOccur = -1, nRemainingOccur = -1;
+	bool bPreserveComments = false;
 
-	if (pSrcTaskFile->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom, nReuse, nNumOccur))
+	if (pSrcTaskFile->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+										nRecalcFrom, nReuse, nNumOccur, nRemainingOccur, bPreserveComments))
 	{
 		ADDCUSTOMATTRIB(FM_CUSTOMREGULARITY, nRegularity)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURSPEC1, (int)dwSpecific1)
@@ -295,6 +297,8 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURRECALCFROM, nRecalcFrom)
 		ADDCUSTOMATTRIB(FM_CUSTOMRECURREUSE, nReuse)
 		ADDCUSTOMATTRIB(FM_CUSTOMNUMOCCUR, nNumOccur)
+		ADDCUSTOMATTRIB(FM_CUSTOMREMAININGOCCUR, nRemainingOccur)
+		ADDCUSTOMATTRIB(FM_CUSTOMPRESERVECOMMENTS, bPreserveComments)
 	}
 	
 	// End of Attrib List not Supported by FreeMind

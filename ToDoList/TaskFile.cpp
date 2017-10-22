@@ -630,6 +630,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 	do 
 	{
 	// ---------------------------------------------------------------------------
+
 		const ITaskList2* pTL2Src = GetITLInterface<ITaskList2>(pTasksSrc, IID_TASKLIST2);
 		ITaskList2* pTL2Dest = GetITLInterface<ITaskList2>(pTasksDest, IID_TASKLIST2);
 		
@@ -640,6 +641,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		pTL2Dest->SetTaskCreationDate(hTaskDest, pTL2Src->GetTaskCreationDate(hTaskSrc));
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList3* pTL3Src = GetITLInterface<ITaskList3>(pTasksSrc, IID_TASKLIST3);
 		ITaskList3* pTL3Dest = GetITLInterface<ITaskList3>(pTasksDest, IID_TASKLIST3);
 		
@@ -650,6 +652,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		pTL3Dest->SetTaskRisk(hTaskDest, pTL3Src->GetTaskRisk(hTaskSrc, FALSE));
 	
 		// ---------------------------------------------------------------------------
+
 		const ITaskList4* pTL4Src = GetITLInterface<ITaskList4>(pTasksSrc, IID_TASKLIST4);
 		ITaskList4* pTL4Dest = GetITLInterface<ITaskList4>(pTasksDest, IID_TASKLIST4);
 		
@@ -660,6 +663,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		pTL4Dest->SetTaskCost(hTaskDest, pTL4Src->GetTaskCost(hTaskSrc, FALSE));
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList5* pTL5Src = GetITLInterface<ITaskList5>(pTasksSrc, IID_TASKLIST5);
 		ITaskList5* pTL5Dest = GetITLInterface<ITaskList5>(pTasksDest, IID_TASKLIST5);
 		
@@ -672,6 +676,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			pTL5Dest->AddTaskCategory(hTaskDest, pTL5Src->GetTaskCategory(hTaskSrc, nCat));
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList6* pTL6Src = GetITLInterface<ITaskList6>(pTasksSrc, IID_TASKLIST6);
 		ITaskList6* pTL6Dest = GetITLInterface<ITaskList6>(pTasksDest, IID_TASKLIST6);
 		
@@ -681,6 +686,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		COPYSTRATTRIB(pTL6Src, hTaskSrc, GetTaskVersion, pTL6Dest, hTaskDest, SetTaskVersion);
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList7* pTL7Src = GetITLInterface<ITaskList7>(pTasksSrc, IID_TASKLIST7);
 		ITaskList7* pTL7Dest = GetITLInterface<ITaskList7>(pTasksDest, IID_TASKLIST7);
 		
@@ -698,6 +704,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			pTL7Dest->AddTaskAllocatedTo(hTaskDest, pTL7Src->GetTaskAllocatedTo(hTaskSrc, nAlloc));
 		
 		// ---------------------------------------------------------------------------
+
 		if (!(pTL8Src && pTL8Dest)) // already got these earlier
 			break;
 		
@@ -706,6 +713,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		pTL8Dest->SetTaskAttribute(hTaskDest, TDL_TASKCOMMENTSTYPE, pTL8Src->GetTaskAttribute(hTaskSrc, TDL_TASKCOMMENTSTYPE));
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList9* pTL9Src = GetITLInterface<ITaskList9>(pTasksSrc, IID_TASKLIST9);
 		ITaskList9* pTL9Dest = GetITLInterface<ITaskList9>(pTasksDest, IID_TASKLIST9);
 		
@@ -720,6 +728,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		pTL9Dest->SetTaskPosition(hTaskDest, pTL9Src->GetTaskPositionString(hTaskSrc));
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList10* pTL10Src = GetITLInterface<ITaskList10>(pTasksSrc, IID_TASKLIST10);
 		ITaskList10* pTL10Dest = GetITLInterface<ITaskList10>(pTasksDest, IID_TASKLIST10);
 		
@@ -737,6 +746,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		}
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList11* pTL11Src = GetITLInterface<ITaskList11>(pTasksSrc, IID_TASKLIST11);
 		ITaskList11* pTL11Dest = GetITLInterface<ITaskList11>(pTasksDest, IID_TASKLIST11);
 		
@@ -746,6 +756,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		COPYSTRATTRIB(pTL11Src, hTaskSrc, GetTaskIcon, pTL11Dest, hTaskDest, SetTaskIcon);
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList12* pTL12Src = GetITLInterface<ITaskList12>(pTasksSrc, IID_TASKLIST12);
 		ITaskList12* pTL12Dest = GetITLInterface<ITaskList12>(pTasksDest, IID_TASKLIST12);
 		
@@ -770,6 +781,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			pTL12Dest->SetTaskLastModified64(hTaskDest, tDate);
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList13* pTL13Src = GetITLInterface<ITaskList13>(pTasksSrc, IID_TASKLIST13);
 		ITaskList13* pTL13Dest = GetITLInterface<ITaskList13>(pTasksDest, IID_TASKLIST13);
 		
@@ -784,6 +796,7 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			pTL13Dest->SetTaskRecurrence(hTaskDest, nRegularity, dwSpecific1, dwSpecific2, bRecalcFromDue, nReuse, nNumOccur);
 		
 		// ---------------------------------------------------------------------------
+
 		const ITaskList14* pTL14Src = GetITLInterface<ITaskList14>(pTasksSrc, IID_TASKLIST14);
 		ITaskList14* pTL14Dest = GetITLInterface<ITaskList14>(pTasksDest, IID_TASKLIST14);
 		
@@ -794,7 +807,9 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 		
 		for (int nFile = 0; nFile < nNumFile; nFile++)
 			pTL14Dest->AddTaskFileLink(hTaskDest, pTL14Src->GetTaskFileLink(hTaskSrc, nFile));
+
 		// ---------------------------------------------------------------------------
+
 		const ITaskList15* pTL15Src = GetITLInterface<ITaskList15>(pTasksSrc, IID_TASKLIST15);
 		ITaskList15* pTL15Dest = GetITLInterface<ITaskList15>(pTasksDest, IID_TASKLIST15);
 		
@@ -806,7 +821,9 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 
 		if (dwRefID)
 			pTL15Dest->SetTaskAttribute(hTaskDest, TDL_TASKREFID, Misc::Format(dwRefID));
+
 		// ---------------------------------------------------------------------------
+
 		const ITaskList16* pTL16Src = GetITLInterface<ITaskList16>(pTasksSrc, IID_TASKLIST16);
 		ITaskList16* pTL16Dest = GetITLInterface<ITaskList16>(pTasksDest, IID_TASKLIST16);
 		
@@ -814,6 +831,22 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 			break;
 
 		pTL16Dest->SetTaskLock(hTaskDest, pTL16Src->IsTaskLocked(hTaskSrc, false));
+
+		if (pTL16Src->GetTaskLastModified64(hTaskSrc, tDate))
+			pTL16Dest->SetTaskLastModified64(hTaskDest, tDate);
+		
+		pTL16Dest->SetTaskLastModifiedBy(hTaskDest, pTL16Src->GetTaskLastModifiedBy(hTaskSrc));
+		
+		int nRecalcFrom, nRemainingOccur;
+		bool bPreserveComments;
+
+		if (pTL16Src->GetTaskRecurrence(hTaskSrc, nRegularity, dwSpecific1, dwSpecific2, 
+										nRecalcFrom, nReuse, nNumOccur, nRemainingOccur, bPreserveComments))
+		{
+			pTL16Dest->SetTaskRecurrence(hTaskDest, nRegularity, dwSpecific1, dwSpecific2, 
+										nRecalcFrom, nReuse, nNumOccur, nRemainingOccur, bPreserveComments);
+		}
+
 		// ---------------------------------------------------------------------------
 	} 
 	while (0);
@@ -2536,6 +2569,7 @@ BOOL CTaskFile::GetTaskRecurrence(HTASKITEM hTask, TDCRECURRENCE& tr) const
 	TDI_RECURREUSEOPTION nReuse;
 	int nNumOccur;
 	int nRemainingOccur;
+	bool bPreserveComments;
 
 	if (!GetTaskRecurrence(hTask, 
 							(int&)nRegularity, 
@@ -2544,7 +2578,8 @@ BOOL CTaskFile::GetTaskRecurrence(HTASKITEM hTask, TDCRECURRENCE& tr) const
 							(int&)nRecalcFrom, 
 							(int&)nReuse,
 							nNumOccur,
-							nRemainingOccur))
+							nRemainingOccur,
+							bPreserveComments))
 	{
 		return FALSE;
 	}
@@ -2557,14 +2592,47 @@ BOOL CTaskFile::GetTaskRecurrence(HTASKITEM hTask, TDCRECURRENCE& tr) const
 
 	tr.nRecalcFrom = nRecalcFrom;
 	tr.nReuse = nReuse;
+	tr.bPreserveComments = (bPreserveComments ? TRUE : FALSE);
 
 	return TRUE;
 }
 
-// // Internal
+// ITaskList6 interface
+bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
+									DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const
+{
+	int nDummy1, nDummy2;
+	int nRecalcFrom;
+	bool bDummy;
+
+	if (GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+							nRecalcFrom, nReuse, nDummy1, nDummy2, bDummy))
+	{
+		bRecalcFromDue = (nRecalcFrom == TDIRO_DUEDATE);
+		return true;
+	}
+
+	return false;
+}
+
+// ITaskList13 interface
+bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
+									DWORD& dwSpecific2, int& nRecalcFrom, 
+									int& nReuse, int& nNumOccur) const
+{
+	int nDummy;
+	bool bDummy;
+
+	// Note: for backwards compatibility nNumOccur maps to the remaining occurrences
+	return GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+							nRecalcFrom, nReuse, nDummy, nNumOccur, bDummy);
+}
+
+// ITaskList16 interface
 bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
 								  DWORD& dwSpecific2, int& nRecalcFrom, 
-								  int& nReuse, int& nNumOccur, int& nRemainingOccur) const
+								  int& nReuse, int& nNumOccur, int& nRemainingOccur,
+								  bool& bPreserveComments) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
@@ -2641,40 +2709,21 @@ bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSp
 			nRecalcFrom = TDIRO_DONEDATE;
 			break;
 		}
-		
+
+		if (pXIRecur->HasItem(TDL_TASKRECURRENCEPRESERVECOMMENTS))
+		{
+			bPreserveComments = (pXIRecur->GetItemValueI(TDL_TASKRECURRENCEPRESERVECOMMENTS) != FALSE);
+		}
+		else
+		{
+			// Backward compatibility
+			bPreserveComments = (nReuse == TDIRO_REUSE);
+		}
+	
 		return true;
 	}
 	
 	return false;
-}
-
-// ITaskList6 interface
-bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, bool& bRecalcFromDue, int& nReuse) const
-{
-	int nDummy1, nDummy2;
-	int nRecalcFrom;
-
-	if (GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-							nRecalcFrom, nReuse, nDummy1, nDummy2))
-	{
-		bRecalcFromDue = (nRecalcFrom == TDIRO_DUEDATE);
-		return true;
-	}
-
-	return false;
-}
-
-// ITaskList13 interface
-bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
-									DWORD& dwSpecific2, int& nRecalcFrom, 
-									int& nReuse, int& nNumOccur) const
-{
-	int nDummy;
-
-	// Note: for backwards compatibility nNumOccur maps to the remaining occurrences
-	return GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-							nRecalcFrom, nReuse, nDummy, nNumOccur);
 }
 
 LPCTSTR CTaskFile::GetTaskVersion(HTASKITEM hTask) const
@@ -2932,6 +2981,10 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib, BOOL bOmitHi
 		else if (pXIAttrib && STR_MATCH(szAttrib, TDL_TASKCUSTOMATTRIBDATA))
 		{
 			return (pXIAttrib->HasItem(TDL_TASKCUSTOMATTRIBID) != FALSE);
+		}
+		else if (pXIAttrib && STR_MATCH(szAttrib, TDL_TASKRECURRENCE))
+		{
+			return (pXIAttrib->HasItem(TDL_TASKRECURRENCEFREQ) != FALSE);
 		}
 
 		// else
@@ -3416,7 +3469,8 @@ BOOL CTaskFile::SetTaskRecurrence(HTASKITEM hTask, const TDCRECURRENCE& tr)
 							tr.nRecalcFrom, 
 							tr.nReuse, 
 							nNumOccur,
-							nRemainingOccur))
+							nRemainingOccur,
+							(tr.bPreserveComments != FALSE)))
 	{
 		SetTaskString(hTask, TDL_TASKRECURRENCE, tr.GetRegularityText(), XIT_ELEMENT); // human readable
 		return true;
@@ -3425,10 +3479,26 @@ BOOL CTaskFile::SetTaskRecurrence(HTASKITEM hTask, const TDCRECURRENCE& tr)
 	return false;
 }
 
-// Internal version
+// ITaskList6 interface
+bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
+									DWORD dwSpecific2, bool bRecalcFromDue, int nReuse)
+{
+	return SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+							(bRecalcFromDue ? TDIRO_DUEDATE : TDIRO_DONEDATE), nReuse, -1);
+}
+
+// ITaskList13 interface
+bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
+									DWORD dwSpecific2, int nRecalcFrom, int nReuse, int nNumOccur)
+{
+	return SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+							nRecalcFrom, nReuse, nNumOccur, nNumOccur, (nReuse == TDIRO_REUSE));
+}
+
+// ITaskList16 interface
 bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
 									DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
-									int nNumOccur, int nRemainingOccur)
+									int nNumOccur, int nRemainingOccur, bool bPreserveComments)
 {
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
@@ -3457,27 +3527,12 @@ bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpec
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCEFROM, nRecalcFrom);
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCENUM, nNumOccur);
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCEREMAINING, nRemainingOccur);
+		pXIRecur->SetItemValue(TDL_TASKRECURRENCEPRESERVECOMMENTS, bPreserveComments);
 		
 		return true;
 	}
 	
 	return false;
-}
-
-// ITaskList6 interface
-bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, bool bRecalcFromDue, int nReuse)
-{
-	return SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-							(bRecalcFromDue ? TDIRO_DUEDATE : TDIRO_DONEDATE), nReuse, -1);
-}
-
-// ITaskList13 interface
-bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
-									DWORD dwSpecific2, int nRecalcFrom, int nReuse, int nNumOccur)
-{
-	return SetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
-							nRecalcFrom, nReuse, nNumOccur, nNumOccur);
 }
 
 bool CTaskFile::SetTaskAttribute(HTASKITEM hTask, LPCTSTR szAttrib, LPCTSTR szValue)

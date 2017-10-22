@@ -774,6 +774,7 @@
 #define IDC_SNOOZEUNTILTIME             1490
 #define IDC_INCLUDEWEBLINKINCOMMENTSPASTE 1492
 #define IDC_TODIVIDER                   1493
+#define IDC_PRESERVECOMMENTS            1494
 #define IDC_MERGEBYTITLE                1494
 #define IDC_MERGEBYTASKID               1495
 #define IDC_MERGEBYTASKIDWARNING        1496

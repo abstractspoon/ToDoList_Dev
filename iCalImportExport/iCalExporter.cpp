@@ -264,9 +264,13 @@ void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		// recurrence
 		int nRegularity, nUnused;
 		DWORD dwSpecific1, dwSpecific2;
+		bool bUnused;
 
-		if (pTasks->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, nUnused, nUnused, nUnused))
+		if (pTasks->GetTaskRecurrence(hTask, nRegularity, dwSpecific1, dwSpecific2, 
+										nUnused, nUnused, nUnused, nUnused, bUnused))
+		{
 			WriteString(fileOut, FormatRecurrence(nRegularity, dwSpecific1, dwSpecific2));
+		}
 
 		// parent child relationship
 		WriteString(fileOut, _T("RELATED-TO;RELTYPE=PARENT:%s"), sParentUID);

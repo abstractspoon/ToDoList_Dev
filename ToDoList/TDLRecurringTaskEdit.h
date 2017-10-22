@@ -272,6 +272,7 @@ protected:
 	//}}AFX_DATA
 	int		m_nNumRecur;
 	BOOL	m_bEndAfterNumRecur;
+	BOOL	m_bPreserveComments;
 	
 	CTDLRecurringTaskOnceOptionPage m_pageOnce;
 	CTDLRecurringTaskDailyOptionPage m_pageDaily;

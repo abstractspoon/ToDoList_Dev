@@ -245,6 +245,7 @@ CTDLRecurringTaskOptionDlg::CTDLRecurringTaskOptionDlg(const TDCRECURRENCE& tr, 
 
 	m_bEndAfterNumRecur = (tr.GetOccurrenceCount() >= 0);
 	m_nNumRecur = (m_bEndAfterNumRecur ? tr.GetRemainingOccurrenceCount() : 1);
+	m_bPreserveComments = tr.bPreserveComments;
 
 	m_ppHost.AddPage(&m_pageOnce);
 	m_ppHost.AddPage(&m_pageDaily);
@@ -263,6 +264,7 @@ void CTDLRecurringTaskOptionDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_OCCUR_ONCE, (int&)m_nFrequency);
 	DDX_Check(pDX, IDC_ENDAFTERNUMRECUR, m_bEndAfterNumRecur);
+	DDX_Check(pDX, IDC_PRESERVECOMMENTS, m_bPreserveComments);
 		
 	CDialogHelper::DDX_Text(pDX, IDC_NUMRECUR, m_nNumRecur);
 }
@@ -286,6 +288,7 @@ TDI_REGULARITY CTDLRecurringTaskOptionDlg::GetRecurrenceOptions(TDCRECURRENCE& t
 {
 	tr.nRecalcFrom = (TDI_RECURFROMOPTION)m_nRecalcFrom;
 	tr.nReuse = (TDI_RECURREUSEOPTION)m_nReuse;
+	tr.bPreserveComments = m_bPreserveComments;
 
 	switch (m_nFrequency)
 	{
@@ -355,6 +358,8 @@ void CTDLRecurringTaskOptionDlg::OnChangeFrequency()
 	GetDlgItem(IDC_ENDAFTERNUMRECUR)->ShowWindow(bOnce ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_NUMRECUR)->ShowWindow(bOnce ? SW_HIDE : SW_SHOW);
 	GetDlgItem(IDC_NUMRECURTRAIL)->ShowWindow(bOnce ? SW_HIDE : SW_SHOW);
+
+	GetDlgItem(IDC_PRESERVECOMMENTS)->ShowWindow(bOnce ? SW_HIDE : SW_SHOW);
 
 	m_ppHost.SetActivePage(m_nFrequency, FALSE);
 }

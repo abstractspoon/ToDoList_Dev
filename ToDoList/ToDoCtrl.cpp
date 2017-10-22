@@ -3516,12 +3516,17 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 
 				case TDIRO_ASK:
 					{
-						CTDLReuseRecurringTaskDlg dialog;
+						CTDLReuseRecurringTaskDlg dialog(tr.bPreserveComments);
 
 						if (dialog.DoModal() == IDCANCEL)
 							return FALSE;
 
 						bReuseTask = dialog.GetWantReuseTask();
+
+						// Update the task's 'preserve comments' flag
+						// for later initialisation
+						tr.bPreserveComments = dialog.GetWantPreserveComments();
+						m_data.SetTaskRecurrence(dwTaskID, tr);
 					}
 					break;
 				}
@@ -3738,8 +3743,24 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 		// tasks that previously had a dependency
 		m_data.FixupTaskLocalDependentsIDs(dwNewTaskID, dwPrevTaskID);
 
-		// Clear the comments
+		// Restore previous comments format
+		CString sCommentsTypeID;
+		const CBinaryData& customComments = m_data.GetTaskCustomComments(dwPrevTaskID, sCommentsTypeID);
+
+		m_data.SetTaskCommentsType(dwNewTaskID, sCommentsTypeID);
+	}
+
+	// optionally clear the comments
+	TDCRECURRENCE tr;
+
+	if (!m_data.GetTaskRecurrence(dwNewTaskID, tr) || !tr.bPreserveComments)
+	{
 		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_COMMENTS, TRUE);
+
+		m_sTextComments.Empty();
+		m_customComments.Empty();
+
+		UpdateComments(FALSE);
 	}
 }
 

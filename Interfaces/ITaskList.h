@@ -424,6 +424,12 @@ public:
 
 	virtual unsigned long GetCustomAttributeTypeByID(LPCWSTR szID) const = 0;
 
+	virtual bool SetTaskRecurrence(HTASKITEM hTask, int nRegularity, DWORD dwSpecific1, 
+									DWORD dwSpecific2, int nRecalcFrom, int nReuse, 
+									int nNumOccur, int nRemainingOccur, bool bPreserveComments) = 0;
+	virtual bool GetTaskRecurrence(HTASKITEM hTask, int& nRegularity, DWORD& dwSpecific1, 
+									DWORD& dwSpecific2, int& nRecalcFrom, int& nReuse, 
+									int& nNumOccur, int& nRemainingOccur, bool& bPreserveComments) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

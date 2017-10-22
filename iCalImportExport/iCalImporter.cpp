@@ -374,7 +374,8 @@ bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITASKLISTBASE* pT
 		// recurrence
 		if (pEvent->nRegularity != TDIR_ONCE)
 		{
-			pTasks->SetTaskRecurrence(hTask, pEvent->nRegularity, pEvent->dwRegSpecific1, pEvent->dwRegSpecific2, TDIRO_DUEDATE, TDIRO_REUSE, -1);
+			pTasks->SetTaskRecurrence(hTask, pEvent->nRegularity, pEvent->dwRegSpecific1, pEvent->dwRegSpecific2, 
+										TDIRO_DUEDATE, TDIRO_REUSE, -1, -1, false);
 		}
 		
 		CStringArray aCats;

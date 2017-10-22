@@ -66,6 +66,7 @@ struct TDCRECURRENCE
 
 	TDI_RECURFROMOPTION nRecalcFrom; 
 	TDI_RECURREUSEOPTION nReuse;
+	BOOL bPreserveComments;
 
 protected:
 	int nNumOccur, nRemainingOccur;

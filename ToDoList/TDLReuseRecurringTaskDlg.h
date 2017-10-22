@@ -14,9 +14,10 @@ class CTDLReuseRecurringTaskDlg : public CDialog
 {
 // Construction
 public:
-	CTDLReuseRecurringTaskDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLReuseRecurringTaskDlg(BOOL bPreserveComments, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantReuseTask() const { return m_bReuseTask; }
+	BOOL GetWantPreserveComments() const { return m_bPreserveComments; }
 
 protected:
 // Dialog Data
@@ -24,6 +25,7 @@ protected:
 	enum { IDD = IDD_REUSERECURRINGTASK_DIALOG };
 	int		m_bReuseTask;
 	//}}AFX_DATA
+	BOOL m_bPreserveComments;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -57,7 +57,8 @@ TDCRECURRENCE::TDCRECURRENCE()
 	nRecalcFrom(TDIRO_DUEDATE), 
 	nReuse(TDIRO_REUSE),
 	nNumOccur(OCCURS_INFINITELY), 
-	nRemainingOccur(OCCURS_INFINITELY)
+	nRemainingOccur(OCCURS_INFINITELY),
+	bPreserveComments(TRUE)
 {
 }
 
@@ -73,12 +74,13 @@ BOOL TDCRECURRENCE::operator!=(const TDCRECURRENCE& tr) const
 
 BOOL TDCRECURRENCE::Matches(const TDCRECURRENCE& tr, BOOL bIncludeRemainingOccurrences) const
 {
-	BOOL bMatch = ((tr.nRegularity	== nRegularity) && 
-					(tr.dwSpecific1	== dwSpecific1) &&
-					(tr.dwSpecific2	== dwSpecific2) && 
-					(tr.nRecalcFrom	== nRecalcFrom) &&
-					(tr.nReuse		== nReuse) && 
-					(tr.nNumOccur	== nNumOccur));
+	BOOL bMatch = ((tr.nRegularity			== nRegularity) && 
+					(tr.dwSpecific1			== dwSpecific1) &&
+					(tr.dwSpecific2			== dwSpecific2) && 
+					(tr.nRecalcFrom			== nRecalcFrom) &&
+					(tr.nReuse				== nReuse) && 
+					(tr.bPreserveComments	== bPreserveComments) && 
+					(tr.nNumOccur			== nNumOccur));
 
 	if (bMatch && bIncludeRemainingOccurrences)
 	{

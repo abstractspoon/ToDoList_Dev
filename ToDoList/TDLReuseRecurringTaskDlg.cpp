@@ -15,12 +15,13 @@ static char THIS_FILE[] = __FILE__;
 // CTDLReuseRecurringTaskDlg dialog
 
 
-CTDLReuseRecurringTaskDlg::CTDLReuseRecurringTaskDlg(CWnd* pParent /*=NULL*/)
+CTDLReuseRecurringTaskDlg::CTDLReuseRecurringTaskDlg(BOOL bPreserveComments, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(CTDLReuseRecurringTaskDlg::IDD, pParent)
+	CDialog(CTDLReuseRecurringTaskDlg::IDD, pParent), 
+	m_bReuseTask(0), 
+	m_bPreserveComments(bPreserveComments)
 {
 	//{{AFX_DATA_INIT(CTDLReuseRecurringTaskDlg)
-	m_bReuseTask = 0;
 	//}}AFX_DATA_INIT
 }
 
@@ -31,6 +32,7 @@ void CTDLReuseRecurringTaskDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLReuseRecurringTaskDlg)
 	DDX_Radio(pDX, IDC_CREATETASK, m_bReuseTask);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_PRESERVECOMMENTS, m_bPreserveComments);
 }
 
 
