@@ -3670,6 +3670,8 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 			continue;
 
 		CTaskFile task;
+		PrepareTaskfileForTasks(task, TDCGT_ALL);
+
 		VERIFY(AddTaskToTaskFile(dwTaskID, task, NULL, FALSE));
 
 		DWORD dwNewTaskID = RecreateRecurringTaskInTree(task, dtNext, bDueDate);
