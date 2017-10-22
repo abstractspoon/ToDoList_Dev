@@ -884,6 +884,10 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				if (m_tcTasks.ItemHasChildren(htiHit))
 				{
 					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit));
+
+					// save item handle so we don't re-handle in LButtonUp handler
+					m_htiLastHandledLBtnDown = htiHit;
+
 					return TRUE;
 				}
 				else
@@ -1585,7 +1589,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		}
 		else if (bColDblClk)
 		{
-			if (HandleClientColumnClick(lp, FALSE))
+			if (HandleClientColumnClick(lp, TRUE))
 				return 0L; // eat
 		}
 	}
