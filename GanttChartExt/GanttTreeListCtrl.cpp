@@ -5245,7 +5245,7 @@ int CALLBACK CGanttTreeListCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, L
 		if (sort.cols[nCol].nBy == IUI_NONE)
 			break;
 
-		nCompare = pThis->CompareItems(lParam1, lParam2, sort.cols[nCol].nBy, sort.cols[nCol].bAscending);
+		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);
 	}
 
 	return nCompare;
@@ -5255,15 +5255,15 @@ int CALLBACK CGanttTreeListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM
 {
 	const CGanttTreeListCtrl* pThis = (CGanttTreeListCtrl*)lParamSort;
 	
-	return pThis->CompareItems(lParam1, lParam2, pThis->m_sort.single.nBy, pThis->m_sort.single.bAscending);
+	return pThis->CompareTasks(lParam1, lParam2, pThis->m_sort.single);
 }
 
-int CGanttTreeListCtrl::CompareItems(DWORD dwTaskID1, DWORD dwTaskID2, GTLC_COLUMN nBy, BOOL bAscending) const
+int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const
 {
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (nBy == GTLCC_TASKID)
+	if (col.nBy == GTLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -5278,7 +5278,7 @@ int CGanttTreeListCtrl::CompareItems(DWORD dwTaskID1, DWORD dwTaskID2, GTLC_COLU
 			return 0;
 		}
 
-		switch (nBy)
+		switch (col.nBy)
 		{
 		case GTLCC_TITLE:
 			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
@@ -5310,7 +5310,7 @@ int CGanttTreeListCtrl::CompareItems(DWORD dwTaskID1, DWORD dwTaskID2, GTLC_COLU
 		}
 	}
 
-	return (bAscending ? nCompare : -nCompare);
+	return (col.bAscending ? nCompare : -nCompare);
 }
 
 int CGanttTreeListCtrl::Compare(const CString& sText1, const CString& sText2)
