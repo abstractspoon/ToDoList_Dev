@@ -36,6 +36,9 @@ void CTDLTasklistImportCtrl::ShowAllColumns()
 	TDCCOLEDITFILTERVISIBILITY vis;
 	vis.SetAllColumnsVisible(TRUE);
 
+	// Remove non-attribute columns
+	vis.SetColumnVisible(TDCC_TRACKTIME, FALSE);
+
 	SetColumnFieldVisibility(vis);
 }
 
