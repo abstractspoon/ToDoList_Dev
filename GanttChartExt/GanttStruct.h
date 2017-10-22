@@ -138,7 +138,7 @@ struct GANTTSORTCOLUMN
 
 	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Matches(GTLC_COLUMN nBy, BOOL bAscending) const;
-	BOOL Matches(const GANTTSORTCOLUMN& col) const;
+	BOOL operator==(const GANTTSORTCOLUMN& col) const;
 
 	GTLC_COLUMN nBy;
 	BOOL bAscending;
@@ -151,7 +151,7 @@ struct GANTTSORTCOLUMNS
 	GANTTSORTCOLUMNS();
 
 	BOOL Sort(const GANTTSORTCOLUMNS& sort);
-	BOOL Matches(const GANTTSORTCOLUMNS& sort) const;
+	BOOL operator==(const GANTTSORTCOLUMNS& sort) const;
 
 	GANTTSORTCOLUMN cols[3];
 };

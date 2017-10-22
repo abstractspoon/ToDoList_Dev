@@ -614,7 +614,7 @@ BOOL GANTTSORTCOLUMN::Matches(GTLC_COLUMN nSortBy, BOOL bSortAscending) const
 	return ((nBy == nSortBy) && (bAscending == bSortAscending));
 }
 
-BOOL GANTTSORTCOLUMN::Matches(const GANTTSORTCOLUMN& col) const
+BOOL GANTTSORTCOLUMN::operator==(const GANTTSORTCOLUMN& col) const
 {
 	return Matches(col.nBy, col.bAscending);
 }
@@ -666,7 +666,7 @@ GANTTSORTCOLUMNS::GANTTSORTCOLUMNS()
 
 BOOL GANTTSORTCOLUMNS::Sort(const GANTTSORTCOLUMNS& sort)
 {
-	if (Matches(sort))
+	if (*this == sort)
 		return FALSE;
 
 	for (int nCol = 0; nCol < 3; nCol++)
@@ -675,11 +675,11 @@ BOOL GANTTSORTCOLUMNS::Sort(const GANTTSORTCOLUMNS& sort)
 	return TRUE;
 }
 
-BOOL GANTTSORTCOLUMNS::Matches(const GANTTSORTCOLUMNS& sort) const
+BOOL GANTTSORTCOLUMNS::operator==(const GANTTSORTCOLUMNS& sort) const
 {
 	for (int nCol = 0; nCol < 3; nCol++)
 	{
-		if (!cols[nCol].Matches(sort.cols[nCol]))
+		if (!(cols[nCol] == sort.cols[nCol]))
 			return FALSE;
 	}
 
