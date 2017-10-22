@@ -16,6 +16,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+static const UINT IDC_SORTBY[3] = { IDC_SORTBY1, IDC_SORTBY2, IDC_SORTBY3 };
+static const UINT IDC_ASCENDING[3] = { IDC_ASCENDING1, IDC_ASCENDING2, IDC_ASCENDING3 };
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLMultiSortDlg dialog
 
 CTDLMultiSortDlg::CTDLMultiSortDlg(const TDSORTCOLUMNS& sort, const CTDCColumnIDMap& mapVisibleColumns, 
@@ -27,28 +32,33 @@ CTDLMultiSortDlg::CTDLMultiSortDlg(const TDSORTCOLUMNS& sort, const CTDCColumnID
 {
 	//{{AFX_DATA_INIT(CTDLMultiSortDlg)
 	//}}AFX_DATA_INIT
-}
 
+	for (int nSort = 0; nSort < 3; nSort++)
+		m_bSortAscending[nSort] = sort.Cols()[nSort].bAscending;
+}
 
 void CTDLMultiSortDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLMultiSortDlg)
-	DDX_Control(pDX, IDC_SORTBY3, m_cbSortBy3);
-	DDX_Control(pDX, IDC_SORTBY2, m_cbSortBy2);
-	DDX_Control(pDX, IDC_SORTBY1, m_cbSortBy1);
 	//}}AFX_DATA_MAP
-	DDX_Check(pDX, IDC_ASCENDING1, m_sort.col1.bAscending);
-	DDX_Check(pDX, IDC_ASCENDING2, m_sort.col2.bAscending);
-	DDX_Check(pDX, IDC_ASCENDING3, m_sort.col3.bAscending);
+	DDX_Control(pDX, IDC_SORTBY[0], m_cbSortBy[0]);
+	DDX_Control(pDX, IDC_SORTBY[1], m_cbSortBy[1]);
+	DDX_Control(pDX, IDC_SORTBY[2], m_cbSortBy[2]);
+	DDX_Check(pDX, IDC_ASCENDING[0], m_bSortAscending[0]);
+	DDX_Check(pDX, IDC_ASCENDING[1], m_bSortAscending[1]);
+	DDX_Check(pDX, IDC_ASCENDING[2], m_bSortAscending[2]);
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLMultiSortDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLMultiSortDlg)
-	ON_CBN_SELCHANGE(IDC_SORTBY1, OnSelchangeSortby1)
-	ON_CBN_SELCHANGE(IDC_SORTBY2, OnSelchangeSortby2)
-	ON_CBN_SELCHANGE(IDC_SORTBY3, OnSelchangeSortby3)
+	ON_CBN_SELCHANGE(IDC_SORTBY[0], OnSelchangeSortby1)
+	ON_CBN_SELCHANGE(IDC_SORTBY[1], OnSelchangeSortby2)
+	ON_CBN_SELCHANGE(IDC_SORTBY[2], OnSelchangeSortby3)
+	ON_BN_CLICKED(IDC_ASCENDING[0], OnClickSortAscending1)
+	ON_BN_CLICKED(IDC_ASCENDING[1], OnClickSortAscending2)
+	ON_BN_CLICKED(IDC_ASCENDING[2], OnClickSortAscending3)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -68,23 +78,9 @@ BOOL CTDLMultiSortDlg::OnInitDialog()
 
 void CTDLMultiSortDlg::BuildCombos()
 {
-	CComboBox* COMBOS[3] = 
-	{ 
-		&m_cbSortBy1, 
-		&m_cbSortBy2, 
-		&m_cbSortBy3 
-	};
-
-	const TDC_COLUMN SORTBY[3] = 
-	{ 
-		m_sort.col1.nBy, 
-		m_sort.col2.nBy, 
-		m_sort.col3.nBy 
-	};
-
 	for (int nSort = 0; nSort < 3; nSort++)
 	{
-		CComboBox& combo = *COMBOS[nSort];
+		CComboBox& combo = m_cbSortBy[nSort];
 		int nCol;
 
 		// regular columns
@@ -115,14 +111,16 @@ void CTDLMultiSortDlg::BuildCombos()
 		if (nSort > 0)
 			CDialogHelper::AddString(combo, _T(""), TDCC_NONE);
 
-		CDialogHelper::SelectItemByData(combo, SORTBY[nSort]);
+		CDialogHelper::SelectItemByData(combo, m_sort.GetSortBy(nSort));
 	}
 
 	// set selection to first item if first combo selection is not set
-	if (m_cbSortBy1.GetCurSel() == -1)
+	if (m_cbSortBy[0].GetCurSel() == -1)
 	{
-		m_cbSortBy1.SetCurSel(0);
-		m_sort.col1.nBy = (TDC_COLUMN)m_cbSortBy1.GetItemData(0);
+		m_cbSortBy[0].SetCurSel(0);
+
+		TDC_COLUMN nColID = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy[0]);
+		m_sort.SetSortBy(0, nColID);
 	}
 }
 
@@ -144,57 +142,71 @@ BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
 
 void CTDLMultiSortDlg::OnSelchangeSortby1() 
 {
-	m_sort.col1.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy1);
-
-	EnableControls();
+	OnSelchangeSortby(0);
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby2() 
 {
-	m_sort.col2.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy2);
-
-	EnableControls();
+	OnSelchangeSortby(1);
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby3() 
 {
-	m_sort.col3.nBy = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy3);
+	OnSelchangeSortby(2);
+}
+
+void CTDLMultiSortDlg::OnSelchangeSortby(int nCol)
+{
+	TDC_COLUMN nColID = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy[nCol]);
+	m_sort.SetSortBy(nCol, nColID);
 
 	EnableControls();
 }
 
+void CTDLMultiSortDlg::OnClickSortAscending1() 
+{
+	OnClickSortAscending(0);
+}
+
+void CTDLMultiSortDlg::OnClickSortAscending2() 
+{
+	OnClickSortAscending(1);
+}
+
+void CTDLMultiSortDlg::OnClickSortAscending3() 
+{
+	OnClickSortAscending(2);
+}
+
+void CTDLMultiSortDlg::OnClickSortAscending(int nCol)
+{
+	ASSERT((nCol >= 0) && (nCol < 3));
+
+	UpdateData();
+
+	m_sort.SetSortBy(nCol, m_sort.GetSortBy(nCol), m_bSortAscending[nCol]);
+}
+
 void CTDLMultiSortDlg::GetSortBy(TDSORTCOLUMNS& sort) const
 {
-	sort.col1.nBy = m_sort.col1.nBy;
-	sort.col1.bAscending = m_sort.col1.bAscending;
-
-	sort.col2.nBy = m_sort.col2.nBy;
-
-	// if nBy2 is not set then make sure nBy3 isn't set
-	if (sort.col2.IsSorting())
-	{
-		sort.col2.bAscending = m_sort.col2.bAscending;
-
-		sort.col3.nBy = m_sort.col3.nBy;
-		sort.col3.bAscending = m_sort.col3.bAscending;
-	}
-	else
-	{
-		sort.col3.nBy = TDCC_NONE;
-	}
+	sort.SetSortBy(m_sort);
 }
 
 void CTDLMultiSortDlg::EnableControls()
 {
-	BOOL bSort1 = m_sort.col1.IsSorting();
-	BOOL bSort2 = (bSort1 && m_sort.col2.IsSorting());
-	BOOL bSort3 = (bSort2 && m_sort.col3.IsSorting());
+	BOOL bPrevSort = TRUE;
 
-	// disable 3rd combo if 2nd combo not set
-	m_cbSortBy2.EnableWindow(bSort1);
-	m_cbSortBy3.EnableWindow(bSort2);
-	
-	GetDlgItem(IDC_ASCENDING1)->EnableWindow(bSort1);
-	GetDlgItem(IDC_ASCENDING2)->EnableWindow(bSort2);
-	GetDlgItem(IDC_ASCENDING3)->EnableWindow(bSort3);
+	for (int nCol = 0; nCol < 3; nCol++)
+	{
+		// Combo's enable state is defined by whether the previous
+		// column has a valid sort
+		m_cbSortBy[nCol].EnableWindow(bPrevSort);
+
+		// Checkbox's enable state is additionally defined by whether 
+		// this column has a valid sort
+		BOOL bSort = (bPrevSort & m_sort.IsSorting(nCol));
+
+		GetDlgItem(IDC_ASCENDING[nCol])->EnableWindow(bSort);
+		bPrevSort = bSort;
+	}
 }

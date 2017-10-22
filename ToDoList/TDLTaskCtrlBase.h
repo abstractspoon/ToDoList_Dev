@@ -512,7 +512,7 @@ protected:
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
-	static int SortTasks(LPARAM lParam1, 
+	static int CompareTasks(LPARAM lParam1, 
 						LPARAM lParam2, 
 						const CTDLTaskCtrlBase& base, 
 						const TDSORTCOLUMN& sort, 

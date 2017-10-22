@@ -27,10 +27,9 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLMultiSortDlg)
 	enum { IDD = IDD_MULTISORT_DIALOG };
-	CComboBox	m_cbSortBy3;
-	CComboBox	m_cbSortBy2;
-	CComboBox	m_cbSortBy1;
 	//}}AFX_DATA
+	CComboBox	m_cbSortBy[3];
+	BOOL		m_bSortAscending[3];
 	TDSORTCOLUMNS m_sort;
 	const CTDCColumnIDMap& m_mapVisibleColumns;
 	const CTDCCustomAttribDefinitionArray& m_aAttribDefs;
@@ -51,8 +50,15 @@ protected:
 	afx_msg void OnSelchangeSortby1();
 	afx_msg void OnSelchangeSortby2();
 	afx_msg void OnSelchangeSortby3();
+	afx_msg void OnClickSortAscending1();
+	afx_msg void OnClickSortAscending2();
+	afx_msg void OnClickSortAscending3();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	// Pseudo-handlers
+	afx_msg void OnSelchangeSortby(int nCol);
+	afx_msg void OnClickSortAscending(int nCol);
 
 protected:
 	void BuildCombos();

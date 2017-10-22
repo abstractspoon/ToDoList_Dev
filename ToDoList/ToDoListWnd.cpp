@@ -12434,15 +12434,6 @@ void CToDoListWnd::OnSortMulti()
 	tdc.GetSortBy(sort);
 	tdc.GetCustomAttributeDefs(aAttribDefs);
 
-	// initialise multisort if first time
-	if (!sort.IsSorting())
-	{
-		sort.col1 = tdc.GetSortBy();
-
-		if (sort.col1.bAscending == -1)
-			sort.col1.bAscending = TRUE;
-	}
-
 	CTDCColumnIDMap mapColIDs;
 	VERIFY(tdc.GetSortableColumns(mapColIDs));
 

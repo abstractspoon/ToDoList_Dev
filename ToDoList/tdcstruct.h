@@ -2213,6 +2213,7 @@ struct TDSORTCOLUMN
 	TDSORTCOLUMN(TDC_COLUMN nSortBy = TDCC_NONE, BOOL bSortAscending = -1) 
 		: nBy(nSortBy), bAscending(bSortAscending)
 	{
+		Validate();
 	}
 
 	BOOL IsSorting() const
@@ -2230,15 +2231,36 @@ struct TDSORTCOLUMN
 		return ((nBy >= TDCC_CUSTOMCOLUMN_FIRST) && (nBy <= TDCC_CUSTOMCOLUMN_LAST));
 	}
 
+	BOOL SetSortBy(TDC_COLUMN nSortBy, BOOL bSortAscending = -1) 
+	{
+		nBy = nSortBy;
+
+		if (bSortAscending != -1)
+			bAscending = bSortAscending;
+
+		return Validate();
+	}
+
 	BOOL Verify() const
 	{
 		return Verify(nBy);
 	}
 
-	void Validate()
+	void Clear()
+	{
+		nBy = TDCC_NONE;
+		bAscending = -1;
+	}
+
+	BOOL Validate()
 	{
 		if (!Verify())
-			nBy = TDCC_NONE;
+		{
+			Clear();
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	static BOOL Verify(TDC_COLUMN nSortBy) 
@@ -2253,54 +2275,119 @@ struct TDSORTCOLUMN
 
 struct TDSORTCOLUMNS
 {
-	TDSORTCOLUMNS() : col1(TDCC_NONE), col2(TDCC_NONE), col3(TDCC_NONE)
+	TDSORTCOLUMNS()
 	{
 	}
 	
-	TDSORTCOLUMNS(TDC_COLUMN nBy, BOOL bAscending = -1) 
-		:  col1(nBy, bAscending), col2(TDCC_NONE), col3(TDCC_NONE)
-
+	TDSORTCOLUMNS(TDC_COLUMN nBy, BOOL bAscending = -1)
 	{
+		SetSortBy(0, nBy, bAscending);
+
+		Validate();
 	}
 
 	BOOL IsSorting() const
 	{
-		return col1.IsSorting();
+		return IsSorting(0);
+	}
+
+	BOOL IsSorting(int nCol) const
+	{
+		if ((nCol < 0) || (nCol >= 3))
+			return FALSE;
+
+		return cols[nCol].IsSorting();
 	}
 	
 	BOOL IsSortingBy(TDC_COLUMN nSortBy) const
 	{
-		if (col1.IsSortingBy(nSortBy))
-			return TRUE;
+		if (nSortBy == TDCC_NONE)
+			return !IsSorting();
 
-		if (col1.IsSorting())
+		for (int nCol = 0; nCol < 3; nCol++)
 		{
-			if (col2.IsSortingBy(nSortBy))
+			if (!cols[nCol].IsSorting())
+				break;
+
+			if (cols[nCol].IsSortingBy(nSortBy))
 				return TRUE;
-			
-			if (col2.IsSorting())
-			{
-				return col3.IsSortingBy(nSortBy);
-			}
 		}
 
 		// else
 		return FALSE;
 	}
 
+	TDC_COLUMN GetSortBy(int nCol) const
+	{
+		if ((nCol < 0) || (nCol >= 3))
+			return TDCC_NONE;
+
+		return cols[nCol].nBy;
+	}
+
+	BOOL SetSortBy(const TDSORTCOLUMNS& cols)
+	{
+		*this = cols;
+
+		return Validate();
+	}
+
+	BOOL SetSortBy(int nCol, const TDSORTCOLUMN& col)
+	{
+		return SetSortBy(nCol, col.nBy, col.bAscending);
+	}
+
+	BOOL SetSortBy(int nCol, TDC_COLUMN nBy, BOOL bAscending = -1) 
+	{
+		if ((nCol < 0) || (nCol >= 3))
+			return FALSE;
+
+		cols[nCol].SetSortBy(nBy, bAscending);
+
+		return Validate();
+	}
+
+	const TDSORTCOLUMN* Cols() const
+	{
+		return &cols[0];
+	}
+
 	BOOL Verify() const
 	{
-		return (col1.Verify() && col2.Verify() && col3.Verify());
+		for (int nCol = 0; nCol < 3; nCol++)
+		{
+			if (!cols[nCol].Verify())
+				return FALSE;
+		}
+
+		// else
+		return TRUE;
 	}
 
-	void Validate()
+	void Clear()
 	{
-		col1.Validate();
-		col2.Validate();
-		col3.Validate();
+		for (int nCol = 0; nCol < 3; nCol++)
+			cols[nCol].Clear();
 	}
 
-	TDSORTCOLUMN col1, col2, col3;
+	BOOL Validate()
+	{
+		BOOL bPrevSort = TRUE;
+
+		for (int nCol = 0; nCol < 3; nCol++)
+		{
+			// Clear 'this' column if previous column is cleared
+			if (!bPrevSort)
+				cols[nCol].Clear();
+			else
+				bPrevSort = cols[nCol].Validate();
+		}
+
+		return IsSorting();
+	}
+
+protected:
+	TDSORTCOLUMN cols[3];
 };
 
 struct TDSORT
@@ -2338,11 +2425,10 @@ struct TDSORT
 
 	BOOL SetSortBy(TDC_COLUMN nBy, BOOL bAscending)
 	{
-		single.nBy = nBy;
-		single.bAscending = bAscending;
+		single.SetSortBy(nBy, bAscending);
 		bMulti = FALSE;
 
-		return TRUE;
+		return IsSorting();
 	}
 
 	BOOL SetSortBy(const TDSORTCOLUMN& col)
@@ -2352,15 +2438,15 @@ struct TDSORT
 
 	BOOL SetSortBy(const TDSORTCOLUMNS& cols)
 	{
-		multi = cols;
+		multi.SetSortBy(cols);
 		bMulti = TRUE;
 		
-		return TRUE;
+		return IsSorting();
 	}
 
 	BOOL Verify() const
 	{
-		return (single.Verify() && multi.Verify());
+		return (bMulti ? multi.Verify() : single.Verify());
 	}
 
 	BOOL Validate()
@@ -2380,12 +2466,17 @@ struct TDSORT
 		pPrefs->WriteProfileInt(sSortKey, _T("Column"), single.nBy);
 		pPrefs->WriteProfileInt(sSortKey, _T("Ascending"), single.bAscending);
 
-		pPrefs->WriteProfileInt(sSortKey, _T("Column1"), multi.col1.nBy);
-		pPrefs->WriteProfileInt(sSortKey, _T("Column2"), multi.col2.nBy);
-		pPrefs->WriteProfileInt(sSortKey, _T("Column3"), multi.col3.nBy);
-		pPrefs->WriteProfileInt(sSortKey, _T("Ascending1"), multi.col1.bAscending);
-		pPrefs->WriteProfileInt(sSortKey, _T("Ascending2"), multi.col2.bAscending);
-		pPrefs->WriteProfileInt(sSortKey, _T("Ascending3"), multi.col3.bAscending);
+		for (int nCol = 0; nCol < 3; nCol++)
+		{
+			CString sColKey;
+			sColKey.Format(_T("Column%d"), (nCol + 1));
+
+			CString sAscendKey;
+			sAscendKey.Format(_T("Ascending%d"), (nCol + 1));
+
+			pPrefs->WriteProfileInt(sSortKey, sColKey, multi.Cols()[0].nBy);
+			pPrefs->WriteProfileInt(sSortKey, sAscendKey, multi.Cols()[0].bAscending);
+		}
 	}
 
 	BOOL LoadState(const IPreferences* pPrefs, const CString& sKey)
@@ -2397,12 +2488,18 @@ struct TDSORT
 
 		bMulti = pPrefs->GetProfileInt(sSortKey, _T("Multi"), FALSE);
 
-		multi.col1.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column1"), TDCC_NONE);
-		multi.col1.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending1"), TRUE);
-		multi.col2.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column2"), TDCC_NONE);
-		multi.col3.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column3"), TDCC_NONE);
-		multi.col2.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending2"), TRUE);
-		multi.col3.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending3"), TRUE);
+		for (int nCol = 0; nCol < 3; nCol++)
+		{
+			CString sColKey;
+			sColKey.Format(_T("Column%d"), (nCol + 1));
+
+			CString sAscendKey;
+			sAscendKey.Format(_T("Ascending%d"), (nCol + 1));
+
+			multi.SetSortBy(nCol,
+							(TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, sColKey, TDCC_NONE),
+							pPrefs->GetProfileInt(sSortKey, sAscendKey, TRUE));
+		}
 
 		return Validate();
 	}

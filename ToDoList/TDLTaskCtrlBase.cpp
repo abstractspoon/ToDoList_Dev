@@ -1131,30 +1131,22 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	TDSORTPARAMS* pSS = (TDSORTPARAMS*)lParamSort;
+	ASSERT (pSS && pSS->sort.bMulti && pSS->sort.multi.IsSorting());
+
+	int nCompare = 0;
+	const TDSORTCOLUMN* pCols = pSS->sort.multi.Cols();
 	
-	ASSERT (pSS->sort.bMulti && pSS->sort.multi.IsSorting());
-	
-	int nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							pSS->sort.multi.col1, 
-							pSS->flags);
-	
-	if ((nCompare == 0) && pSS->sort.multi.col2.IsSorting())
+	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							pSS->sort.multi.col2, 
-							pSS->flags);
-		
-		if ((nCompare == 0) && pSS->sort.multi.col3.IsSorting())
-		{
-			nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							pSS->sort.multi.col3, 
-							pSS->flags);
-		}
+		if (!pCols[nCol].IsSorting())
+			break;
+
+		nCompare = CompareTasks(lParam1, lParam2, 
+								pSS->base, 
+								pCols[nCol], 
+								pSS->flags);
 	}
-	
+
 	// finally, if the items are equal we sort by raw
 	// position so that the sort is stable
 	if (nCompare == 0)
@@ -1162,7 +1154,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPA
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
+		nCompare = CompareTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -1174,10 +1166,10 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 	
 	ASSERT (!pSS->sort.bMulti);
 	
-	int nCompare = SortTasks(lParam1, lParam2, 
-							pSS->base, 
-							pSS->sort.single, 
-							pSS->flags);
+	int nCompare = CompareTasks(lParam1, lParam2, 
+								pSS->base, 
+								pSS->sort.single, 
+								pSS->flags);
 	
 	// finally, if the items are equal we sort by raw
 	// position so that the sort is stable
@@ -1186,17 +1178,17 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = SortTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
+		nCompare = CompareTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
 	}
 	
 	return nCompare;
 }
 
-int CTDLTaskCtrlBase::SortTasks(LPARAM lParam1, 
-								LPARAM lParam2, 
-								 const CTDLTaskCtrlBase& base, 
-								 const TDSORTCOLUMN& sort, 
-								 const TDSORTFLAGS& flags)
+int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1, 
+									LPARAM lParam2, 
+									const CTDLTaskCtrlBase& base, 
+									const TDSORTCOLUMN& sort, 
+									const TDSORTFLAGS& flags)
 {
 	ASSERT(sort.bAscending != -1);
 
@@ -1619,14 +1611,19 @@ void CTDLTaskCtrlBase::DoSort()
 void CTDLTaskCtrlBase::GetSortBy(TDSORTCOLUMNS& sort) const
 {
 	sort = m_sort.multi;
+
+	// initialise multisort if first time
+	if (!sort.IsSorting())
+		sort.SetSortBy(0, m_sort.single.nBy, (m_sort.single.bAscending ? TRUE : FALSE));
 }
 
 void CTDLTaskCtrlBase::MultiSort(const TDSORTCOLUMNS& sort)
 {
-	ASSERT (sort.col1.IsSorting());
-
-	if (!sort.col1.IsSorting())
+	if (!sort.IsSorting())
+	{
+		ASSERT(0);
 		return;
+	}
 
 	m_sort.SetSortBy(sort);
 	m_sort.bModSinceLastSort = FALSE;
@@ -4492,9 +4489,13 @@ BOOL CTDLTaskCtrlBase::AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const
 	
 	if (m_sort.bMulti)
 	{
-		bNeedSort = (ModNeedsResort(nAttrib, m_sort.multi.col1.nBy) ||
-					ModNeedsResort(nAttrib, m_sort.multi.col2.nBy) ||
-					ModNeedsResort(nAttrib, m_sort.multi.col3.nBy));
+		for (int nCol = 0; ((nCol < 3) && !bNeedSort); nCol++)
+		{
+			if (!m_sort.multi.IsSorting(nCol))
+				break;
+
+			bNeedSort = ModNeedsResort(nAttrib, m_sort.multi.GetSortBy(nCol));
+		}
 	}
 	else
 	{

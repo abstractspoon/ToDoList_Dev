@@ -4114,16 +4114,17 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 	{
 		if (pVData->sort.bMulti)
 		{
+			const TDSORTCOLUMN* pCols = pVData->sort.multi.Cols();
 			IUIMULTISORT ms;
 
-			ms.nAttrib1 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col1.nBy);
-			ms.bAscending1 = (pVData->sort.multi.col1.bAscending != FALSE);
+			ms.nAttrib1 = TDC::MapColumnToIUIAttribute(pCols[0].nBy);
+			ms.bAscending1 = (pCols[0].bAscending != FALSE);
 
-			ms.nAttrib2 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col2.nBy);
-			ms.bAscending2 = (pVData->sort.multi.col2.bAscending != FALSE);
+			ms.nAttrib2 = TDC::MapColumnToIUIAttribute(pCols[1].nBy);
+			ms.bAscending2 = (pCols[1].bAscending != FALSE);
 
-			ms.nAttrib3 = TDC::MapColumnToIUIAttribute(pVData->sort.multi.col3.nBy);
-			ms.bAscending3 = (pVData->sort.multi.col3.bAscending != FALSE);
+			ms.nAttrib3 = TDC::MapColumnToIUIAttribute(pCols[2].nBy);
+			ms.bAscending3 = (pCols[2].bAscending != FALSE);
 
 			ExtensionDoAppCommand(nView, IUI_MULTISORT, (DWORD)&ms);
 		}
