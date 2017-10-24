@@ -691,7 +691,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 			}
 
 			if (attrib.Has(IUI_ICON))
-				pKI->bHasIcon = Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+				pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 			
 			// Trackable attributes
 			CStringArray aValues;
