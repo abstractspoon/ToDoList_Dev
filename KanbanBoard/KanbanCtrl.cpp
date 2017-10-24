@@ -1509,8 +1509,6 @@ void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
 void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
 {
 	BOOL bShowParents = HasOption(KBCF_SHOWPARENTTASKS);
-	BOOL bHideEmpty = !HasOption(KBCF_SHOWEMPTYCOLUMNS);
-
 	int nList = m_aListCtrls.GetSize();
 	
 	while (nList--)
@@ -1522,9 +1520,12 @@ void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
 		
 		// The list can still end up empty if parent tasks are 
 		// omitted in Dynamic columns so we recheck and delete if required
-		if (!bShowParents && bHideEmpty && UsingDynamicColumns() && !pList->GetItemCount())
+		if (UsingDynamicColumns())
 		{
-			DeleteListCtrl(nList);
+			if (!bShowParents && !WantShowColumn(pList))
+			{
+				DeleteListCtrl(nList);
+			}
 		}
 	}
 		
