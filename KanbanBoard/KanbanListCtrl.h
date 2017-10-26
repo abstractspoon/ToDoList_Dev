@@ -224,6 +224,7 @@ public:
 	void Redraw(BOOL bErase);
 	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 	void RefreshColumnTitles();
+	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore);
 
 protected:
 	static int ListSortProc(const void* pV1, const void* pV2);

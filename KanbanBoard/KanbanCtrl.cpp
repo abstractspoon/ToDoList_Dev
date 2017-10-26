@@ -2568,15 +2568,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 		pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
 
 		// Remove from all src lists
-		int nSrc = m_aListCtrls.GetSize();
-
-		while (nSrc--)
-		{
-			CKanbanListCtrl* pList = m_aListCtrls[nSrc];
-
-			if (pList != pDestList)
-				VERIFY(pList->DeleteTask(dwTaskID));
-		}
+		m_aListCtrls.DeleteTaskFromOthers(dwTaskID, pDestList);
 	}
 	else if (bDestIsBacklog) // and 'copy'
 	{

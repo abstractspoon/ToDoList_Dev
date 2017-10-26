@@ -529,6 +529,20 @@ void CKanbanListCtrlArray::ClearOtherSelections(const CKanbanListCtrl* pIgnore)
 	}
 }
 
+void CKanbanListCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanListCtrl* pIgnore)
+{
+	int nList = GetSize();
+
+	while (nList--)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList != pIgnore)
+			pList->DeleteTask(dwTaskID);
+	}
+}
+
 int CKanbanListCtrlArray::CalcRequiredColumnWidthForImage() const
 {
 	int nMaxWidth = 0;
