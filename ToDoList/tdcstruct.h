@@ -1890,6 +1890,46 @@ struct TDCFILTER
 		return !FiltersMatch(*this, filterEmpty, dwIgnore);
 	}
 
+	BOOL WantHideCompletedTasks() const
+	{
+		switch (nShow)
+		{
+		case FS_DONE:
+			return FALSE; // Definitely
+
+		case FS_NOTDONE:
+			return TRUE; // Definitely
+
+		case FS_ALL:
+		case FS_FLAGGED:
+		case FS_SELECTED:
+		case FS_RECENTMOD:
+		case FS_LOCKED:
+			{
+				if (HasFlag(FO_HIDEDONE))
+					return TRUE; // Definitely
+
+				// If the user is filtering by start date and is NOT
+				// explicitly showing or hiding completed tasks then 
+				// assume they probably don't want them
+				if (nStartBy != FD_ANY)
+					return TRUE;
+
+				// Likewise for due tasks
+				if (nDueBy != FD_ANY)
+					return TRUE;
+			}
+			break;
+
+		default:
+			// catch unimplemented filters
+			ASSERT(0);
+			break;
+		}
+
+		return FALSE;
+	}
+
 	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
 	{
 		if (nDueBy == FD_NOW)

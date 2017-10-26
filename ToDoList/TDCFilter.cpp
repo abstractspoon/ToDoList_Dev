@@ -337,7 +337,7 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 {
 	// reset the search
 	params.aRules.RemoveAll();
-	params.bIgnoreDone = filter.HasFlag(FO_HIDEDONE);
+	params.bIgnoreDone = filter.WantHideCompletedTasks();
 	params.bWantAllSubtasks = filter.HasFlag(FO_SHOWALLSUB);
 
 	// handle principle filter
@@ -347,13 +347,12 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 		break;
 
 	case FS_DONE:
+		ASSERT(!params.bIgnoreDone);
 		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_SET));
-		params.bIgnoreDone = FALSE;
 		break;
 
 	case FS_NOTDONE:
-		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
-		params.bIgnoreDone = TRUE;
+		ASSERT(params.bIgnoreDone);
 		break;
 
 	case FS_FLAGGED:
@@ -387,13 +386,10 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 			params.aRules.Add(SEARCHPARAM(TDCA_STARTTIME, FOP_ON_OR_BEFORE, dateStart));
 		else
 			params.aRules.Add(SEARCHPARAM(TDCA_STARTDATE, FOP_ON_OR_BEFORE, dateStart));
-
-		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
 	}
 	else if (filter.nStartBy == FD_NONE)
 	{
 		params.aRules.Add(SEARCHPARAM(TDCA_STARTDATE, FOP_NOT_SET));
-		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
 	}
 
 	// handle due date filters
@@ -407,15 +403,12 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 		else
 			params.aRules.Add(SEARCHPARAM(TDCA_DUEDATE, FOP_ON_OR_BEFORE, dateDue));
 
-		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
-
 		// this flag only applies to due filters
 		params.bIgnoreOverDue = filter.HasFlag(FO_HIDEOVERDUE);
 	}
 	else if (filter.nDueBy == FD_NONE)
 	{
 		params.aRules.Add(SEARCHPARAM(TDCA_DUEDATE, FOP_NOT_SET));
-		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
 	}
 
 	// handle other attributes
