@@ -1961,9 +1961,9 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	return pExport;
 }
 
-BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bLoad) const
+BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bForLoading) const
 {
-	if (bLoad)
+	if (bForLoading)
 		return TRUE; // always
 
 	// Save
@@ -1977,9 +1977,9 @@ BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bLoad) const
 	return FALSE;
 }
 
-LPCTSTR CToDoListWnd::GetFileFilter(BOOL bLoad) const
+LPCTSTR CToDoListWnd::GetFileFilter(BOOL bForLoading) const
 {
-	if (WantTDLExtensionSupport(bLoad))
+	if (WantTDLExtensionSupport(bForLoading))
 	{
 		static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
 		return TDLFILEFILTER;
@@ -1990,9 +1990,9 @@ LPCTSTR CToDoListWnd::GetFileFilter(BOOL bLoad) const
 	return XMLFILEFILTER;
 }
 
-LPCTSTR CToDoListWnd::GetDefaultFileExt(BOOL bLoad) const
+LPCTSTR CToDoListWnd::GetDefaultFileExt(BOOL bForLoading) const
 {
-	if (WantTDLExtensionSupport(bLoad))
+	if (WantTDLExtensionSupport(bForLoading))
 	{
 		static LPCTSTR TDLEXT = _T("tdl");
 		return TDLEXT;
