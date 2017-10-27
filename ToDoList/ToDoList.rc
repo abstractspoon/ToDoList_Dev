@@ -5227,7 +5227,7 @@ BEGIN
     IDS_UNLOCKED            "Unlocked"
     IDS_LOCKED              "Locked"
     IDS_CAD_TIMEPERIOD      "Time Period"
-    IDS_CUSTOM_FEATURE_FILTER "Filter"
+    IDS_CUSTOM_FEATURE_FILTER "Filterable"
     IDS_SETREMINDER         "Set &Reminder..."
     IDS_MODIFYREMINDER      "&Modify Reminder..."
     IDS_TDC_EDITPROMPT_MULTIPLEFORMATS "<multiple formats>"

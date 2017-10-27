@@ -69,6 +69,18 @@ public:
 #define GET_TASK(t, h, r) { t = TaskFromHandle(h); if (!t) return r; }
 
 //////////////////////////////////////////////////////////////////////
+
+TASKFILE_HEADER::TASKFILE_HEADER() 
+	: 
+	bArchive(-1), 
+	bUnicode(-1), 
+	dwNextID(0), 
+	nFileFormat(-1), 
+	nFileVersion(TDL_FILEFORMAT_CURRENT) 
+{
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -315,6 +327,9 @@ BOOL CTaskFile::LoadHeader(LPCTSTR szFilePath, TASKFILE_HEADER* pHeader)
 
 void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 {
+	// Note: TASKFILE_HEADER::nFileFormat is always set to 
+	// TDL_FILEFORMAT_CURRENT when saving so we ignore it here
+
 	if (!header.sXmlHeader.IsEmpty())
 		VERIFY(SetXmlHeader(header.sXmlHeader));
 
@@ -327,9 +342,6 @@ void CTaskFile::SetHeader(const TASKFILE_HEADER& header)
 
 	if (header.bArchive != -1)
 		VERIFY(SetArchive(header.bArchive));
-
-	if (header.nFileFormat != -1)
-		VERIFY(SetFileFormat(header.nFileFormat));
 
 	if (header.dtEarliestDue != 0)
 		VERIFY(SetEarliestDueDate(header.dtEarliestDue));
@@ -498,8 +510,9 @@ void CTaskFile::UpgradeArrays(HTASKITEM hTask)
 
 BOOL CTaskFile::SaveEx()
 {
-	// insert application version
 	SetItemValue(TDL_APPVER, FileMisc::GetAppVersion());
+	SetItemValue(TDL_FILEFORMAT, TDL_FILEFORMAT_CURRENT);
+
 
 	return XMLBASE::SaveEx();
 }
@@ -1544,11 +1557,6 @@ int CTaskFile::GetAutoListData(TDCAUTOLISTDATA& tld) const
 			GetArray(TDL_TASKALLOCTO, tld.aAllocTo) +
 			GetArray(TDL_TASKALLOCBY, tld.aAllocBy) +
 			GetArray(TDL_TASKVERSION, tld.aVersion));
-}
-
-BOOL CTaskFile::SetFileFormat(unsigned long lFormat)
-{
-	return (NULL != SetItemValue(TDL_FILEFORMAT, (int)lFormat));
 }
 
 BOOL CTaskFile::SetNextUniqueID(DWORD dwNextID)

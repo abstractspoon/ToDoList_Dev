@@ -131,20 +131,6 @@ enum
 	ID_DEPENDS_LINK,
 };
 
-// file formats changes
-// as changes are made, insert a new value *BEFORE* FILEFORMAT_CURRENT
-// which will effectively increment FILEFORMAT_CURRENT and be useful
-// for conditional code
-enum 
-{
-	FILEFORMAT_SORTBYID = 8,
-	FILEFORMAT_CUSTATTRIB,
-	FILEFORMAT_RECUR_MOD,
-	// insert here when format changes
- 
-	FILEFORMAT_CURRENT
-};
-
 enum // flags for UpdateTask
 {
 	UTF_TIMEUNITSONLY	= 0x01,
@@ -230,7 +216,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_nControlsPos(TDCUIL_BOTTOM),
 	m_nDefRecurFrom(TDIRO_DUEDATE),
 	m_nDefRecurReuse(TDIRO_REUSE),
-	m_nFileFormat(FILEFORMAT_CURRENT),
+	m_nFileFormat(TDL_FILEFORMAT_CURRENT),
 	m_nFileVersion(0),
 	m_nMaxState(TDCMS_NORMAL),
 	m_nPriority(-1), 
@@ -518,11 +504,11 @@ void CToDoCtrl::SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan)
 
 TDC_FILEFMT CToDoCtrl::CompareFileFormat() const
 {
-    if (m_nFileFormat < FILEFORMAT_CURRENT)
+    if (m_nFileFormat < TDL_FILEFORMAT_CURRENT)
 	{
 		return TDCFF_OLDER;
 	}
-    else if (m_nFileFormat > FILEFORMAT_CURRENT)
+    else if (m_nFileFormat > TDL_FILEFORMAT_CURRENT)
 	{
         return TDCFF_NEWER;
 	}
@@ -6741,14 +6727,13 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 		// increment file version if not 3rd party source controlled
 		if (!HasStyle(TDCS_USES3RDPARTYSOURCECONTROL))
 		{
-			int nFileVer = file.GetFileVersion() + 1;
+			int nFileVer = (file.GetFileVersion() + 1);
 			tfh.nFileVersion = max(nFileVer, 1);
 		}
 	}
 	else // or initialize first time
 	{
 		tfh.bArchive = TRUE;
-		tfh.nFileFormat = FILEFORMAT_CURRENT;
 		tfh.sProjectName.Format(_T("%s (%s)"), m_sProjectName, CEnString(IDS_TDC_ARCHIVEPROJECT));
 		tfh.nFileVersion = 1;
 		tfh.sXmlHeader = m_sXmlHeader;
@@ -8986,7 +8971,6 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 	tasks.SetXslHeader(m_sXslHeader);
 	tasks.SetProjectName(m_sProjectName);
 	tasks.SetArchive(m_bArchive);
-	tasks.SetFileFormat(FILEFORMAT_CURRENT);
 	tasks.SetEarliestDueDate(m_data.GetEarliestDueDate());
 	tasks.SetLastModified(m_dtLastTaskMod);
 

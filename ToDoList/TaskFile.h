@@ -29,7 +29,6 @@ class TODOITEM;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
 
-struct TASKFILE_HEADER;
 struct TDCRECURRENCE; 
 struct TDCCOLEDITVISIBILITY;
 struct TDCCOLEDITFILTERVISIBILITY;
@@ -41,6 +40,42 @@ struct TDCCADATA;
 typedef CMap<DWORD, DWORD, DWORD, DWORD> CID2IDMap;
 
 //////////////////////////////////////////////////////////////////////
+
+// file formats changes
+// as changes are made, insert a new value *BEFORE* FILEFORMAT_CURRENT
+// which will effectively increment FILEFORMAT_CURRENT and be useful
+// for conditional code
+enum 
+{
+	TDL_FILEFORMAT_SORTBYID = 8,
+	TDL_FILEFORMAT_CUSTATTRIB,
+	TDL_FILEFORMAT_RECUR_MOD,
+	//TDL_FILEFORMAT_LOCKING,
+	// insert here when format changes
+
+	TDL_FILEFORMAT_CURRENT
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TASKFILE_HEADER
+{
+	TASKFILE_HEADER();
+
+	CString sXmlHeader;
+	CString sXslHeader;
+	CString sProjectName;
+	CString sFileName;
+	CString sCheckedOutTo;
+	BOOL bArchive;
+	BOOL bUnicode;
+	COleDateTime dtEarliestDue;
+	DWORD dwNextID;
+	int nFileFormat; // not settable
+	int nFileVersion;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 class CTaskFile : public ITASKLISTBASE, public XMLBASE
 {
@@ -103,7 +138,6 @@ public:
 	BOOL IsCheckedOutTo(const CString& sCheckedOutTo) const;
 
 	BOOL SetArchive(BOOL bArchive = TRUE);
-	BOOL SetFileFormat(unsigned long lFormat);
 	BOOL SetFileName(LPCTSTR szFilename);
 
 	BOOL SetLastModified(const COleDateTime& tLastMod);
