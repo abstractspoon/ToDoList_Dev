@@ -3779,7 +3779,10 @@ TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 	BOOL bDone = CDateHelper::IsDateSet(date);
 	BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
 	BOOL bStateChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
-	BOOL bDateChange = (date != m_data.GetTaskDate(dwTaskID, TDCD_DONE));
+	BOOL bDateChange = bStateChange;
+	
+	if (!bDateChange && bDone && bWasDone)
+		bDateChange = (date != m_data.GetTaskDate(dwTaskID, TDCD_DONE));
 	
 	if (bDateChange && (!bIsSubtask || bUpdateAllSubtaskDates || bStateChange))
 	{
