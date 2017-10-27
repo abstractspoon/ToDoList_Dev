@@ -191,6 +191,7 @@ protected:
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 	BOOL IsTrackedAttributeMultiValue() const;
+	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanListCtrl* pSrcList, const CKanbanListCtrl* pDestList) const;
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);

@@ -1202,7 +1202,9 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nA
 #endif
 
 	CStringArray aNewValues;
-	aNewValues.Add(sNewValue);
+
+	if (!sNewValue.IsEmpty())
+		aNewValues.Add(sNewValue);
 
 	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
@@ -1228,58 +1230,68 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, IUI_ATTRIBUTE nA
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
 {
+	// Check if we need to update listctrls or not
+	if (!IsTracking(sAttribID) || (pKI->bParent && !HasOption(KBCF_SHOWPARENTTASKS)))
+	{
+		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
+		return FALSE; // no effect on list items
+	}
+
+	// else
 	BOOL bChange = FALSE;
 	
 	if (!pKI->AttributeValuesMatch(sAttribID, aNewValues))
 	{
-		if (m_sTrackAttribID == sAttribID)
+		CStringArray aCurValues;
+		pKI->GetTrackedAttributeValues(sAttribID, aCurValues);
+		
+		// Remove any list item whose current value is not found in the new values
+		int nVal = aCurValues.GetSize();
+		
+		while (nVal--)
 		{
-			CStringArray aCurValues;
-			pKI->GetTrackedAttributeValues(sAttribID, aCurValues);
-
-			// Remove any list item whose current value is not found in the new values
-			int nVal = aCurValues.GetSize();
-
-			while (nVal--)
+			if (!Misc::Contains(aNewValues, aCurValues[nVal]))
 			{
-				if (!Misc::Contains(aNewValues, aCurValues[nVal]))
+				CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
+				ASSERT(pCurList);
+				
+				if (pCurList)
 				{
-					CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
-					ASSERT(pCurList);
-
-					if (pCurList)
-					{
-						VERIFY(pCurList->DeleteTask(pKI->dwTaskID));
-						bChange |= (pCurList->GetItemCount() == 0);
-					}
-
-					// Remove from list to speed up later searching
-					aCurValues.RemoveAt(nVal);
+					VERIFY(pCurList->DeleteTask(pKI->dwTaskID));
+					bChange |= (pCurList->GetItemCount() == 0);
 				}
-			}
-
-			// Add any new items not in the current list
-			nVal = aNewValues.GetSize();
-
-			while (nVal--)
-			{
-				if (!Misc::Contains(aCurValues, aNewValues[nVal]))
-				{
-					CKanbanListCtrl* pCurList = GetListCtrl(aNewValues[nVal]);
-
-					if (pCurList)
-						pCurList->AddTask(*pKI, FALSE);
-					else
-						bChange = TRUE; // needs new list ctrl
-				}
+				
+				// Remove from list to speed up later searching
+				aCurValues.RemoveAt(nVal);
 			}
 		}
 		
+		// Add any new items not in the current list
+		nVal = aNewValues.GetSize();
+		
+		while (nVal--)
+		{
+			if (!Misc::Contains(aCurValues, aNewValues[nVal]))
+			{
+				CKanbanListCtrl* pCurList = GetListCtrl(aNewValues[nVal]);
+				
+				if (pCurList)
+					pCurList->AddTask(*pKI, FALSE);
+				else
+					bChange = TRUE; // needs new list ctrl
+			}
+		}
+	
 		// update values
 		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 	}
 	
 	return bChange;
+}
+
+BOOL CKanbanCtrl::IsTracking(const CString& sAttribID) const
+{
+	return (m_sTrackAttribID.CompareNoCase(sAttribID) == 0);
 }
 
 BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& mapKIArray) const
