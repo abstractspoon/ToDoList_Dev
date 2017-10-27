@@ -185,6 +185,38 @@ class CStringSet : public CSetBase<CString, LPCTSTR>
 public:
 	int CopyFrom(const CStringArray& other) { return CSetBase<CString, LPCTSTR>::CopyFrom(other); }
 	int CopyTo(CStringArray& other) const { return CSetBase<CString, LPCTSTR>::CopyTo(other); }
+
+	BOOL MatchAll(const CStringSet& other, BOOL bCaseSensitive = FALSE) const
+	{
+		// Try case sensitive
+		BOOL bMatch = CSetBase<CString, LPCTSTR>::MatchAll(other);
+
+		if (bMatch || bCaseSensitive)
+			return bMatch;
+
+		// Compare item by item case-insensitively
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+		{
+			CString sItem = GetNext(pos);
+
+			// Compare item by item case sensitively
+			BOOL bFound = FALSE;
+			POSITION posOther = other.GetStartPosition();
+
+			while (posOther && !bFound)
+			{
+				CString sOtherItem = other.GetNext(posOther);
+				bFound = (sItem.CompareNoCase(sOtherItem) == 0);
+			}
+
+			if (!bFound)
+				return FALSE;
+		}
+
+		return TRUE;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -311,6 +343,8 @@ public:
 
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class CMapStringToStringArray : public CMapStringToContainer<CStringArray>
 {
 public:
@@ -421,8 +455,142 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+
 typedef CMapStringToContainer<CMapStringToStringArray> CMapStringToStringArrayMap;
 
 typedef CMapStringToContainer<CMapStringToString> CMapStringToStringMap;
+
+//////////////////////////////////////////////////////////////////////
+
+class CMapStringToStringSet : public CMapStringToContainer<CStringSet>
+{
+public:
+	BOOL Set(const CString& sKey, const CStringSet& set)
+	{
+		CStringSet* pSet = GetAddMapping(sKey);
+
+		if (!pSet)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		pSet->RemoveAll();
+		pSet->Append(set);
+
+		return TRUE;
+	}
+
+	BOOL Set(const CString& sKey, const CString& sValue)
+	{
+		CStringSet* pSet = GetAddMapping(sKey);
+
+		if (!pSet)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		pSet->RemoveAll();
+		pSet->Add(sValue);
+
+		return TRUE;
+	}
+	
+	BOOL Set(const CString& sKey, const CStringArray& aValues)
+	{
+		CStringSet* pSet = GetAddMapping(sKey);
+		
+		if (!pSet)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+		
+		pSet->RemoveAll();
+		pSet->CopyFrom(aValues);
+		
+		return TRUE;
+	}
+
+	BOOL Add(const CString& sKey, const CString& sValue)
+	{
+		CStringSet* pSet = GetAddMapping(sKey);
+
+		if (!pSet)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (pSet->Has(sValue))
+			return FALSE;
+
+		pSet->Add(sValue);
+		return TRUE;
+	}
+
+	void Remove(const CString& sKey, const CString& sValue, BOOL bRemoveKeyWhenEmpty)
+	{
+		CStringSet* pSet = GetMapping(sKey);
+
+		if (pSet == NULL)
+			return; // not an error
+
+		pSet->Remove(sValue);
+
+		if (bRemoveKeyWhenEmpty && (pSet->GetCount() == 0))
+			RemoveKey(sKey);
+	}
+
+	void Copy(const CMapStringToStringSet& other)
+	{
+		RemoveAll();
+
+		POSITION pos = other.GetStartPosition();
+		CString sKey;
+		CStringSet* pOtherSet = NULL;
+
+		while (pos)
+		{
+			other.GetNextAssoc(pos, sKey, pOtherSet);
+			ASSERT(pOtherSet);
+
+			CStringSet* pSet = GetAddMapping(sKey);
+			ASSERT(pSet);
+
+			if (pSet && pOtherSet)
+				pSet->Copy(*pOtherSet);
+		}	
+	}
+
+	BOOL MatchAll(const CMapStringToStringSet& other, BOOL bCaseSensitive = FALSE) const
+	{
+		if (GetCount() != other.GetCount())
+			return FALSE;
+
+		POSITION pos = GetStartPosition();
+		CString sKey;
+		CStringSet* pSet = NULL;
+
+		while (pos)
+		{
+			GetNextAssoc(pos, sKey, pSet);
+			ASSERT(pSet);
+
+			const CStringSet* pOtherSet = other.GetMapping(sKey);
+
+			if (pOtherSet == NULL)
+				return FALSE;
+			
+			if (!pSet->MatchAll(*pOtherSet, bCaseSensitive))
+				return FALSE;
+		}	
+
+		return TRUE;
+	}
+};
+
 
 #endif // !defined(AFX_MAPEX_H__44E4FC2A_83C2_49EE_A784_4D1584CD5339__INCLUDED_)
