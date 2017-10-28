@@ -17,7 +17,9 @@ public:
 	CCheckListBoxEx();
 
 	void SetAllChecked(BOOL bChecked = TRUE);
+
 	int GetNumChecked() const;
+	int GetCheckedItems(CStringArray& aChecked) const;
 
 	BOOL GetCheckByData(DWORD dwItemData) const;
 	int SetCheckByData(DWORD dwItemData, BOOL bChecked = TRUE);

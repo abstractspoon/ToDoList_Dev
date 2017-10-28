@@ -58,6 +58,27 @@ int CCheckListBoxEx::GetNumChecked() const
 	return nNumChecked;
 }
 
+int CCheckListBoxEx::GetCheckedItems(CStringArray& aChecked) const
+{
+	aChecked.RemoveAll();
+	CCheckListBoxEx* pCLB = const_cast<CCheckListBoxEx*>(this);
+	
+	int nNumItems = GetCount();
+	CString sItem;
+	
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		if (pCLB->GetCheck(nItem))
+		{
+			pCLB->GetText(nItem, sItem);
+			aChecked.Add(sItem);
+		}
+	}
+	
+	return aChecked.GetSize();
+
+}
+
 BOOL CCheckListBoxEx::GetCheckByData(DWORD dwItemData) const
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
