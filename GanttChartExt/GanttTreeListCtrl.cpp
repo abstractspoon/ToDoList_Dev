@@ -1501,13 +1501,7 @@ void CGanttTreeListCtrl::Resize(const CRect& rect)
 {
 	if (m_treeHeader.GetItemCount())
 	{
-		int nLastCol = m_treeHeader.GetLastVisibleItem();
-		
-		CRect rItem;
-		m_treeHeader.GetItemRect(nLastCol, rItem);
-
-		int nTreeWidth = (rItem.right/* + 4*/);
-		CTreeListSyncer::Resize(rect, nTreeWidth);
+		CTreeListSyncer::Resize(rect, GetSplitPos());
 
 		m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_treeHeader.GetItemWidth(0), (LPARAM)m_tree.GetSafeHwnd());
 	}
@@ -1885,8 +1879,10 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 	if (hwnd == m_treeHeader)
 	{
 		CClientDC dc(&m_tree);
-		
 		RecalcTreeColumnWidth((GTLC_COLUMN)nCol, &dc);
+
+		SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
+		
 		Resize();
 	}
 	else if (hwnd == m_listHeader)
@@ -2007,11 +2003,19 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 									}
 									break;
 								}
-
-								// else
-								Resize();
 							}
 						}
+					}
+					break;
+
+				case HDN_ITEMCHANGED:
+					if (hwnd == m_treeHeader)
+					{
+						SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
+						Resize();
+						
+						m_tree.UpdateWindow();
+						m_list.UpdateWindow();
 					}
 					break;
 					
@@ -2706,7 +2710,7 @@ void CGanttTreeListCtrl::SetColor(COLORREF& color, COLORREF crNew)
 	color = crNew;
 }
 
-CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
+CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol) const
 {
 	CString sItem;
 
@@ -3004,7 +3008,7 @@ void CGanttTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE 
 	pDC->SetBkColor(crOld);
 }
 
-CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti)
+CString CGanttTreeListCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
 {
 	CString sLongest;
 
@@ -4775,10 +4779,12 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 {
 	// tree columns
 	CClientDC dc(&m_tree);
-	int nCol = m_treeHeader.GetItemCount();
+	int nCol = m_treeHeader.GetItemCount(), nTotalColWidth = 0;
 
 	while (nCol--)
-		RecalcTreeColumnWidth((GTLC_COLUMN)nCol, &dc);
+		nTotalColWidth += RecalcTreeColumnWidth((GTLC_COLUMN)nCol, &dc);
+
+	SetSplitPos(nTotalColWidth);
 	
 	// list columns (except first dummy column)
 	nCol = GetRequiredListColumnCount();
@@ -4794,13 +4800,12 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
 
 	// Adjust 'Title' column to suit
-	int nRestOfColsWidth = 0;
-	int nCol = m_treeHeader.GetItemCount();
-	
-	while (--nCol > 0)
-		nRestOfColsWidth += m_treeHeader.GetItemWidth(nCol);
+	int nRestOfColsWidth = m_treeHeader.CalcTotalItemsWidth(0);
 
-	int nTitleColWidth = max(150, (nSplitPos - nRestOfColsWidth));
+	CClientDC dc(&m_tree);
+	int nMinColWidth = CalcTreeColumnWidth(0, &dc);
+
+	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
 	
 	m_treeHeader.SetItemWidth(0, nTitleColWidth);
 	m_treeHeader.UpdateWindow();
@@ -4833,7 +4838,16 @@ BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 	return FALSE;
 }
 
-void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
+int CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
+{
+	int nColWidth = CalcTreeColumnWidth(nCol, pDC);
+
+	m_treeHeader.SetItemWidth(nCol, nColWidth);
+
+	return nColWidth;
+}
+
+int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 {
 	ASSERT(pDC);
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tree);
@@ -4880,10 +4894,10 @@ void CGanttTreeListCtrl::RecalcTreeColumnWidth(int nCol, CDC* pDC)
 	// take max of this and column title
 	int nTitleWidth = (m_treeHeader.GetItemTextWidth(nCol, pDC) + (2 * HD_COLPADDING));
 	ASSERT(nTitleWidth);
-	
-	m_treeHeader.SetItemWidth(nCol, max(nTitleWidth, nColWidth));
 
 	pDC->SelectObject(pOldFont);
+
+	return max(nTitleWidth, nColWidth);
 }
 
 int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const

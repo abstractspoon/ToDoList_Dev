@@ -340,10 +340,12 @@ protected:
 	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();
 
+	int GetTotalTreeColumnsWidth() const;
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
-	void RecalcTreeColumnWidth(int nCol, CDC* pDC = NULL);
-	CString GetLongestVisibleAllocTo(HTREEITEM hti);
-	CString GetTreeItemColumnText(const GANTTITEM& gi, int nCol);
+	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
+	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
+	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
+	CString GetTreeItemColumnText(const GANTTITEM& gi, int nCol) const;
 	BOOL IsMilestone(const GANTTITEM& gi) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
