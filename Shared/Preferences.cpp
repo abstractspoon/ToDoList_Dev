@@ -134,11 +134,11 @@ CPreferences::~CPreferences()
 	if ((s_nRef == 0) && s_bIni)
 	{
 		SaveInternal();
-		CleanupIni();
+		DeleteIni();
 	}
 }
 
-void CPreferences::CleanupIni()
+void CPreferences::DeleteIni()
 {
 	int nSection = s_aIni.GetSize();
 		
@@ -162,7 +162,7 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 			Save();
 
 		if (!bIni)
-			CleanupIni();
+			DeleteIni();
 	}
 
 	s_sPrefsPath = szPrefsPath;
