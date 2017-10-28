@@ -175,6 +175,15 @@ BOOL CPreferences::IsInitialised()
 	return !s_sPrefsPath.IsEmpty();
 }
 
+CString CPreferences::GetPath(BOOL bFriendly)
+{
+	if (UsesIni() || !bFriendly)
+		return s_sPrefsPath;
+
+	// else friendly registry path
+	return (_T("HKEY_CURRENT_USER\\") + s_sPrefsPath);
+}
+
 BOOL CPreferences::Save()
 {
 	if (!s_bIni)

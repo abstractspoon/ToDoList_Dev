@@ -98,6 +98,8 @@ public:
 	static BOOL IsInitialised();
 	static BOOL UsesIni() { return s_bIni; }
 
+	static CString GetPath(BOOL bFriendly = FALSE);
+
 	// directly from CWinApp
 	UINT GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault = 0) const;
 	BOOL WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue);

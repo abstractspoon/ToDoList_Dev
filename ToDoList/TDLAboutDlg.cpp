@@ -72,11 +72,7 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	m_sLicense.Format(CEnString(IDS_LICENSE), _T("\"https://github.com/abstractspoon/ToDoList_Wiki/wiki/Free-Open-Source-Software\""));
 	m_sAppFolder = FileMisc::GetAppFilePath();
-
-	if (CPreferences().UsesIni())
-		m_sPrefsFile = AfxGetApp()->m_pszProfileName;
-	else
-		m_sPrefsFile = _T("HKEY_CURRENT_USER\\Software\\AbstractSpoon\\ToDoList");
+	m_sPrefsFile = CPreferences::GetPath(TRUE);
 	
 	CLocalizer::IgnoreString(m_sAppTitle);
 	CLocalizer::IgnoreString(m_sLicense);
