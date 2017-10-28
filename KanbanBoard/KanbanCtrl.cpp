@@ -261,7 +261,7 @@ int CKanbanCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
 
 CKanbanListCtrl* CKanbanCtrl::GetSelListCtrl()
 {
-	ASSERT((m_pSelectedList == NULL) || (Misc::FindT(m_aListCtrls, m_pSelectedList) != -1));
+	ASSERT((m_pSelectedList == NULL) || Misc::HasT(m_aListCtrls, m_pSelectedList));
 
 	if (!m_pSelectedList && m_aListCtrls.GetSize())
 		m_pSelectedList = m_aListCtrls[0];
@@ -1554,7 +1554,7 @@ void CKanbanCtrl::FixupSelection()
 	ASSERT(m_aListCtrls.GetSize());
 
 	// Make sure selected list is valid
-	if (!m_pSelectedList || (Misc::FindT(m_aListCtrls, m_pSelectedList) == -1))
+	if (!m_pSelectedList || !Misc::HasT(m_aListCtrls, m_pSelectedList))
 	{
 		// Find the first list with some items
 		m_pSelectedList = m_aListCtrls.GetFirstNonEmpty();
