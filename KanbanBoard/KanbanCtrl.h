@@ -141,9 +141,9 @@ protected:
 	void RebuildListCtrls(BOOL bRebuildData);
 	void RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
 	void RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray);
-	void RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
-	void AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
-	void CheckAddBacklogListCtrl();
+	int RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
+	int AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray);
+	BOOL CheckAddBacklogListCtrl();
 	void RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray);
 	int GetVisibleListCtrlCount() const;
 
@@ -161,7 +161,7 @@ protected:
 	CKanbanListCtrl* GetListCtrl(HWND hwnd) const;
 	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader = NULL) const;
 
-	CKanbanListCtrl* NewListCtrl(const KANBANCOLUMN& colDef);
+	CKanbanListCtrl* AddNewListCtrl(const KANBANCOLUMN& colDef);
 	CKanbanListCtrl* GetSelListCtrl();
 	const CKanbanListCtrl* GetSelListCtrl() const;
 	const CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const;

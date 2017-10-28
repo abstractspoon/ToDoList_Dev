@@ -1359,18 +1359,18 @@ BOOL CKanbanCtrl::HasNonParentTasks(const CKanbanItemArray* pItems)
 	return FALSE;
 }
 
-void CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
+int CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingDynamicColumns())
 	{
 		ASSERT(0);
-		return;
+		return 0;
 	}
 
 	// remove any lists whose values are no longer used
 	// or which Optionally have no items 
 	const CKanbanValueMap* pGlobals = m_mapAttributeValues.GetMapping(m_sTrackAttribID);
-	int nList = m_aListCtrls.GetSize();
+	int nList = m_aListCtrls.GetSize(), nNumRemoved = 0;
 	
 	while (nList--)
 	{
@@ -1380,6 +1380,7 @@ void CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 		if ((pGlobals == NULL) || !WantShowColumn(pList))
 		{
 			DeleteListCtrl(nList);
+			nNumRemoved++;
 		}
 		else
 		{
@@ -1389,21 +1390,25 @@ void CKanbanCtrl::RemoveOldDynamicListCtrls(const CKanbanItemArrayMap& mapKIArra
 				!WantShowColumn(sAttribValueID, mapKIArray))
 			{
 				DeleteListCtrl(nList);
+				nNumRemoved++;
 			}
 		}
 	}
+
+	return nNumRemoved;
 }
 
-void CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
+int CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
 {
 	if (!UsingDynamicColumns())
 	{
 		ASSERT(0);
-		return;
+		return 0;
 	}
 	
 	// Add any new status lists not yet existing
 	const CKanbanValueMap* pGlobals = m_mapAttributeValues.GetMapping(m_sTrackAttribID);
+	int nNumAdded = 0;
 
 	if (pGlobals)
 	{
@@ -1425,13 +1430,17 @@ void CKanbanCtrl::AddMissingDynamicListCtrls(const CKanbanItemArrayMap& mapKIArr
 				colDef.aAttribValues.Add(sAttribValue);
 				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
 				
-				VERIFY (NewListCtrl(colDef) != NULL);
+				VERIFY (AddNewListCtrl(colDef) != NULL);
+				nNumAdded++;
 			}
 		}
+
 		ASSERT(!HasOption(KBCF_SHOWEMPTYCOLUMNS) || 
 				(m_nTrackAttribute == IUI_CUSTOMATTRIB) ||
 				(m_aListCtrls.GetSize() == pGlobals->GetCount()));
 	}
+
+	return nNumAdded;
 }
 
 void CKanbanCtrl::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
@@ -1442,14 +1451,17 @@ void CKanbanCtrl::RebuildDynamicListCtrls(const CKanbanItemArrayMap& mapKIArray)
 		return;
 	}
 	
-	RemoveOldDynamicListCtrls(mapKIArray);
-	AddMissingDynamicListCtrls(mapKIArray);
+	BOOL bNeedResize = RemoveOldDynamicListCtrls(mapKIArray);
+	bNeedResize |= AddMissingDynamicListCtrls(mapKIArray);
 
 	// If no columns created, create empty Backlog column
-	CheckAddBacklogListCtrl();
+	bNeedResize |= CheckAddBacklogListCtrl();
 	
 	// (Re)sort
 	m_aListCtrls.Sort();
+
+	if (bNeedResize)
+		Resize();
 }
 
 void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
@@ -1465,12 +1477,14 @@ void CKanbanCtrl::RebuildFixedListCtrls(const CKanbanItemArrayMap& mapKIArray)
 		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
 		{
 			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
-			VERIFY(NewListCtrl(colDef) != NULL);
+			VERIFY(AddNewListCtrl(colDef) != NULL);
 		}
+
+		Resize(); // always
 	}
 }
 
-void CKanbanCtrl::CheckAddBacklogListCtrl()
+BOOL CKanbanCtrl::CheckAddBacklogListCtrl()
 {
 	if (m_aListCtrls.GetSize() == 0) 
 	{
@@ -1479,8 +1493,11 @@ void CKanbanCtrl::CheckAddBacklogListCtrl()
 		colDef.sAttribID = m_sTrackAttribID;
 		colDef.aAttribValues.Add(_T(""));
 		
-		VERIFY (NewListCtrl(colDef) != NULL);
+		VERIFY (AddNewListCtrl(colDef) != NULL);
+		return TRUE;
 	}
+
+	return FALSE;
 }
 
 void CKanbanCtrl::RebuildListCtrls(BOOL bRebuildData)
@@ -1682,7 +1699,7 @@ BOOL CKanbanCtrl::TrackAttribute(IUI_ATTRIBUTE nAttrib, const CString& sCustomAt
 	return TRUE;
 }
 
-CKanbanListCtrl* CKanbanCtrl::NewListCtrl(const KANBANCOLUMN& colDef)
+CKanbanListCtrl* CKanbanCtrl::AddNewListCtrl(const KANBANCOLUMN& colDef)
 {
 	CKanbanListCtrl* pList = new CKanbanListCtrl(m_data, colDef, m_fonts, m_aPriorityColors, m_aDisplayAttrib);
 	ASSERT(pList);
