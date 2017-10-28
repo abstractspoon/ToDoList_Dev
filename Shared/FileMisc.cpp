@@ -41,8 +41,8 @@ static CString EMPTYSTRING;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTempFileBackup::CTempFileBackup(const CString& sFile, const CString& sFolder, DWORD dwFlags, const CString& sExt)
-	: CFileBackup(sFile, sFolder, dwFlags, sExt)
+CTempFileBackup::CTempFileBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
+	: CFileBackup(sFile, dwFlags, sFolder, sExt)
 {
 }
 
@@ -57,16 +57,16 @@ CTempFileBackup::~CTempFileBackup()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-CFileBackup::CFileBackup(const CString& sFile, const CString& sFolder, DWORD dwFlags, const CString& sExt)
+CFileBackup::CFileBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
-	MakeBackup(sFile, sFolder, dwFlags, sExt);
+	MakeBackup(sFile, dwFlags, sFolder, sExt);
 }
 
 CFileBackup::~CFileBackup()
 {
 }
 
-BOOL CFileBackup::MakeBackup(const CString& sFile, const CString& sFolder, DWORD dwFlags, const CString& sExt)
+BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
 	ASSERT (m_sFile.IsEmpty() && m_sBackup.IsEmpty());
 
@@ -77,7 +77,8 @@ BOOL CFileBackup::MakeBackup(const CString& sFile, const CString& sFolder, DWORD
 		return FALSE;
 
 	m_sFile = sFile;
-	m_sBackup = BuildBackupPath(sFile, sFolder, dwFlags, sExt);
+	m_sBackup = BuildBackupPath(sFile, dwFlags, sFolder, sExt);
+
 	FileMisc::CreateFolderFromFilePath(m_sBackup);
 
 	if (!FileMisc::CopyFile(m_sFile, m_sBackup, TRUE))
@@ -85,7 +86,7 @@ BOOL CFileBackup::MakeBackup(const CString& sFile, const CString& sFolder, DWORD
 		TRACE(Misc::FormatGetLastError() + '\n');
 
 		// try again in temp folder
-		m_sBackup = BuildBackupPath(sFile, FileMisc::GetTempFolder(), dwFlags, sExt);
+		m_sBackup = BuildBackupPath(sFile, dwFlags, FileMisc::GetTempFolder(), sExt);
 		FileMisc::CreateFolderFromFilePath(m_sBackup);
 
 		if (!FileMisc::CopyFile(m_sFile, m_sBackup, TRUE))
@@ -106,28 +107,31 @@ BOOL CFileBackup::RestoreBackup()
 	return FileMisc::CopyFile(m_sBackup, m_sFile, TRUE);
 }
 
-CString CFileBackup::BuildBackupPath(const CString& sFile, const CString& sFolder, DWORD dwFlags, const CString& sExt)
+CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
 	CString sBackup(sFile);
 	sBackup.TrimRight();
 
 	// handle folder
+	CString sFExt;
+
 	if (!sFolder.IsEmpty())
 	{
-		CString sDrive, sPath, sFName, sExt;
-		FileMisc::SplitPath(sFile, &sDrive, &sPath, &sFName, &sExt);
+		CString sDrive, sPath, sFName;
+		FileMisc::SplitPath(sFile, &sDrive, &sPath, &sFName, &sFExt);
 
 		if (::PathIsRelative(sFolder))
 		{
 			sPath += sFolder;
-			FileMisc::MakePath(sBackup, sDrive, sPath, sFName, sExt);
+			FileMisc::MakePath(sBackup, sDrive, sPath, sFName, sFExt);
 		}
 		else
-			FileMisc::MakePath(sBackup, NULL, sFolder, sFName, sExt);
+		{
+			FileMisc::MakePath(sBackup, NULL, sFolder, sFName, sFExt);
+		}
 	}
 
 	// add timestamp before existing file extension
-	CString sFExt;
 	FileMisc::SplitPath(sBackup, NULL, NULL, NULL, &sFExt);
 
 	if (dwFlags & FBS_TIMESTAMP)
@@ -146,22 +150,38 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, const CString& sFolde
 	}
 
 	// add extension before existing file extension
+	CString sBackupExt(sExt);
+	sBackupExt.TrimLeft();
+
 	if (sExt.IsEmpty())
-	{
-		// only add a default extension if not copying to another folder or not adding timestamp
-		// or versioninfo else we'd overwrite the existing file which wouldn't achieve much
+	{ 
+		// only add a default extension if not copying to another folder 
+		// or not adding timestamp or versioninfo else we'd overwrite 
+		// the existing file which wouldn't achieve much
 		if (sFolder.IsEmpty() && (dwFlags == 0))
-			sFExt = _T(".bak") + sFExt;
+			sBackupExt = _T(".bak");
 	}
-	else
+	else if (sBackupExt.Find('.') != 0)
 	{
-		if (sExt.Find('.') == -1)
-			sFExt = '.' + sExt + sFExt;
-		else
-			sFExt = sExt + sFExt;
+		sBackupExt = '.' + sBackupExt;
 	}
 
-	FileMisc::ReplaceExtension(sBackup, sFExt);
+	FileMisc::ReplaceExtension(sBackup, (sBackupExt + sFExt));
+
+	// Make sure we're not overwriting an existing backup
+	if (!(dwFlags & FBS_OVERWRITE) && FileMisc::FileExists(sBackup))
+	{
+		int nTry = 2;
+
+		do 
+		{
+			FileMisc::RemoveExtension(sBackup);
+
+			sBackup += Misc::Format(nTry++);
+			sBackup += sFExt;
+		} 
+		while (FileMisc::FileExists(sBackup));
+	}
 
 	return sBackup;
 }

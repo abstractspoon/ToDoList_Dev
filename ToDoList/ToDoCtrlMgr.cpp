@@ -1297,7 +1297,7 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	// previous version's backups to a MINIMUM OF ONE.
 	if (nKeepBackups)
 	{
-		CString sBackupPath = CFileBackup::BuildBackupPath(sPath, sBackupFolder, FBS_APPVERSION, _T(""));
+		CString sBackupPath = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
 		CString sDrive, sFolder, sFName, sExt;
 		
 		FileMisc::SplitPath(sBackupPath, &sDrive, &sFolder, &sFName, &sExt);
@@ -1364,5 +1364,5 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	}
 	
 	CFileBackup backup;
-	return backup.MakeBackup(sPath, sBackupFolder, FBS_APPVERSION | FBS_TIMESTAMP, _T(""));
+	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_TIMESTAMP, sBackupFolder, _T(""));
 }

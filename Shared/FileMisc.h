@@ -23,6 +23,7 @@ enum
 {
 	FBS_TIMESTAMP	= 0x01,
 	FBS_APPVERSION	= 0x02,
+	FBS_OVERWRITE	= 0x04,
 };
 
 enum FB_MODULE_SORT
@@ -94,24 +95,25 @@ class CFileBackup
 {
 public:
 	CFileBackup(const CString& sFile = _T(""), 
-				const CString& sFolder = _T(""), 
 				DWORD dwFlags = 0, 
+				const CString& sFolder = _T(""), 
 				const CString& sExt = _T(".bak"));
 	~CFileBackup();
 
 	BOOL MakeBackup(const CString& sFile, 
-					const CString& sFolder = _T(""), 
 					DWORD dwFlags = 0, 
+					const CString& sFolder = _T(""), 
 					const CString& sExt = _T(".bak"));
 	BOOL RestoreBackup();
 
 	static CString BuildBackupPath(const CString& sFile, 
-									const CString& sFolder = _T(""), 
 									DWORD dwFlags = 0, 
+									const CString& sFolder = _T(""), 
 									const CString& sExt = _T(".bak"));
 
 protected:
 	CString m_sFile, m_sBackup;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,8 +122,8 @@ class CTempFileBackup : public CFileBackup
 {
 public:
 	CTempFileBackup(const CString& sFile = _T(""), 
-					const CString& sFolder = _T(""), 
 					DWORD dwFlags = 0, 
+					const CString& sFolder = _T(""), 
 					const CString& sExt = _T(".bak"));	
 	~CTempFileBackup(); // auto deletes backup file
 

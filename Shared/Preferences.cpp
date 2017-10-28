@@ -70,9 +70,7 @@ CPreferences::CPreferences()
 		if (s_bIni)
 		{
 			// check for existing backup file first
-			CString sBackupPath(s_sPrefsPath);
-			
-			FileMisc::ReplaceExtension(sBackupPath, _T("bak.ini"));
+			CString sBackupPath = CFileBackup::BuildBackupPath(s_sPrefsPath, FBS_OVERWRITE);
 			
 			if (FileMisc::FileExists(sBackupPath))
 				::CopyFile(sBackupPath, s_sPrefsPath, FALSE);			
@@ -208,10 +206,7 @@ BOOL CPreferences::SaveInternal()
 		return TRUE; // nothing to do
 
 	// backup file first
-	CString sBackupPath(s_sPrefsPath);
-	
-	FileMisc::ReplaceExtension(sBackupPath, _T("bak.ini"));
-	FileMisc::CopyFile(s_sPrefsPath, sBackupPath, TRUE, TRUE);
+	CTempFileBackup backup(s_sPrefsPath);
 	
 	// write prefs
 	CStdioFileEx file;
@@ -268,7 +263,6 @@ BOOL CPreferences::SaveInternal()
 	
 	// Close/Flush the file BEFORE deleting the backup
 	file.Close();
-	::DeleteFile(sBackupPath);
 	
 	s_bDirty = FALSE;
 

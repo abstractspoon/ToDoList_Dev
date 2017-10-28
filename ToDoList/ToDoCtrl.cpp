@@ -6184,7 +6184,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 {
 	// check for the existence of a backup file
-	CString sBackup = CFileBackup::BuildBackupPath(sFilePath);
+	CString sBackup = CFileBackup::BuildBackupPath(sFilePath, FBS_OVERWRITE);
 	
 	if (FileMisc::FileExists(sBackup))
 	{
