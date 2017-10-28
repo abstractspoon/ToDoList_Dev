@@ -86,6 +86,7 @@ public:
 	BOOL IsSyncing() const;
 	void Unsync();
 	HWND GetHwnd() const { return CSubclassWnd::GetHwnd(); }
+	BOOL SwapSides();
 
 	inline TLS_LINKAGE GetLinkage() const { return m_nLinkage; }
 	
@@ -98,7 +99,7 @@ public:
 	void SetSplitPos(int nPos);
 	int GetSplitBarWidth() const { return m_nSplitWidth; }
 	void SetSplitBarWidth(int nWidth);
-	BOOL SwapSides();
+	void SetSplitBarColor(COLORREF crSplitBar);
 
 	BOOL SetHidden(TLS_HIDE nHide);
 	TLS_HIDE GetHidden() const { return m_nHidden; }
@@ -111,7 +112,6 @@ public:
 	void SetFocus();
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void Show(BOOL bShow = TRUE);
-	void SetSplitBarColor(COLORREF crSplitBar);
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
 	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);
 
@@ -257,7 +257,7 @@ protected:
 	// callbacks for derived classes
 	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	virtual BOOL IsListItemSelected(HWND hwnd, int nItem) const;
-	virtual void OnNotifySplitterChange(int /*nSplitPos*/) {}
+	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	virtual void HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExpand);
 

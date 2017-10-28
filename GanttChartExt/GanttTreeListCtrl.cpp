@@ -132,7 +132,7 @@ private:
 
 CGanttTreeListCtrl::CGanttTreeListCtrl(CGanttTreeCtrl& tree, CListCtrl& list) 
 	:
-	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA),
+	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_tree(tree),
 	m_list(list),
 	m_pTCH(NULL),
@@ -1202,6 +1202,10 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 			case GTLCF_DISABLEDEPENDENTDRAGGING:
 				return;
+
+			case GTLCF_SHOWSPLITTERBAR:
+				CTreeListSyncer::SetSplitBarWidth(bSet ? 10 : 0);
+				break;
 			}
 
 			if (IsSyncing())
@@ -1502,7 +1506,7 @@ void CGanttTreeListCtrl::Resize(const CRect& rect)
 		CRect rItem;
 		m_treeHeader.GetItemRect(nLastCol, rItem);
 
-		int nTreeWidth = (rItem.right + 4);
+		int nTreeWidth = (rItem.right/* + 4*/);
 		CTreeListSyncer::Resize(rect, nTreeWidth);
 
 		m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_treeHeader.GetItemWidth(0), (LPARAM)m_tree.GetSafeHwnd());
@@ -1864,6 +1868,11 @@ LRESULT CGanttTreeListCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 	}
 	
 	return CDRF_DODEFAULT;
+}
+
+void CGanttTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar)
+{
+	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
 void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
@@ -2661,6 +2670,11 @@ void CGanttTreeListCtrl::SetWeekendColor(COLORREF crWeekend)
 void CGanttTreeListCtrl::SetDefaultColor(COLORREF crDefault)
 {
 	SetColor(m_crDefault, crDefault);
+}
+
+void CGanttTreeListCtrl::SetSplitBarColor(COLORREF crSplitBar) 
+{ 
+	CTreeListSyncer::SetSplitBarColor(crSplitBar); 
 }
 
 void CGanttTreeListCtrl::SetMilestoneTag(const CString& sTag)
@@ -4773,6 +4787,25 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
 
 	Resize();
+}
+
+void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
+{
+	CTreeListSyncer::OnNotifySplitterChange(nSplitPos);
+
+	// Adjust 'Title' column to suit
+	int nRestOfColsWidth = 0;
+	int nCol = m_treeHeader.GetItemCount();
+	
+	while (--nCol > 0)
+		nRestOfColsWidth += m_treeHeader.GetItemWidth(nCol);
+
+	int nTitleColWidth = max(150, (nSplitPos - nRestOfColsWidth));
+	
+	m_treeHeader.SetItemWidth(0, nTitleColWidth);
+	m_treeHeader.UpdateWindow();
+	
+	m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tree.GetSafeHwnd());
 }
 
 BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)

@@ -1903,6 +1903,11 @@ BOOL CTreeListSyncer::IsListItemSelected(HWND hwnd, int nItem) const
 	return ListItemHasState(hwnd, nItem, LVIS_SELECTED);
 }
 
+void CTreeListSyncer::OnNotifySplitterChange(int /*nSplitPos*/) 
+{
+	// Do nothing
+}
+
 BOOL CTreeListSyncer::IsTreeFullRowSelect(HWND hwnd)
 {
 	ASSERT(IsTree(hwnd));

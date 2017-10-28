@@ -130,6 +130,7 @@ public:
 	void SetDefaultColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
+	void SetSplitBarColor(COLORREF crSplitBar);
 
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
@@ -197,6 +198,10 @@ protected:
 	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
+				
+	// derived class callback
+	void OnNotifySplitterChange(int nSplitPos);
+	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 
 	// pseudo-message handler
 	void OnHeaderDividerDblClk(NMHEADER* HDN);
