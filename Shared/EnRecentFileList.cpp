@@ -102,13 +102,44 @@ void CEnRecentFileList::WriteList(CPreferences& prefs, BOOL bRelativeToExe) cons
 
 void CEnRecentFileList::ReadList(const CPreferences& prefs)
 {
+	RemoveAll(FALSE);
+
 	for (int nFile = 0; nFile < GetSize(); nFile++)
 	{
 		CString sItem, sFile;
 		sItem.Format(m_strEntryFormat, nFile + 1);
+		
 		sFile = prefs.GetProfileString(_T("MRU"), sItem);
 
-		if (!sFile.IsEmpty())
-			m_arrNames[nFile] = FileMisc::GetFullPath(sFile, FileMisc::GetAppFolder());
+		if (sFile.IsEmpty())
+			break;
+
+		sFile = FileMisc::GetFullPath(sFile, FileMisc::GetAppFolder());
+		Add(sFile);
 	}
+}
+
+int CEnRecentFileList::GetFilePaths(CStringArray& aFilePaths) const
+{
+	aFilePaths.RemoveAll();
+
+	for (int nFile = 0; nFile < m_nSize; nFile++)
+	{
+		if (m_arrNames[nFile].IsEmpty())
+			break;
+
+		aFilePaths.Add(m_arrNames[nFile]);
+	}
+
+	return aFilePaths.GetSize();
+}
+
+int CEnRecentFileList::GetFileNames(CStringArray& aFileNames) const
+{
+	int nFile = GetFilePaths(aFileNames);
+
+	while (nFile--)
+		aFileNames[nFile] = FileMisc::GetFileNameFromPath(aFileNames[nFile]);
+
+	return aFileNames.GetSize();
 }

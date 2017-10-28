@@ -28,6 +28,9 @@ public:
 	void ReadList(const CPreferences& prefs);
 	void WriteList(CPreferences& prefs, BOOL bRelativeToExe = FALSE) const;
 
+	int GetFilePaths(CStringArray& aFilePaths) const;
+	int GetFileNames(CStringArray& aFileNames) const;
+
 };
 
 #endif // !defined(AFX_ENRECENTFILELIST_H__AA4B1746_135C_4E81_96E1_DE6CE758EFDC__INCLUDED_)
