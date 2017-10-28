@@ -156,6 +156,7 @@
 #define IDI_TIMETRACK_STD               304
 #define IDI_STYLE_IMAGE                 305
 #define IDD_GOTOTASK_DIALOG             306
+#define IDD_CLEANUPINIPREFERENCES_DIALOG 307
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -782,6 +783,7 @@
 #define IDC_TASKINHERITSSUBTASKFLAGS    1498
 #define IDC_COMMENTSCTRLFRAME           1498
 #define IDC_CONFIGURESTYLESHEET         1499
+#define IDC_PREFSLOCATION               1503
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -1355,6 +1357,7 @@
 #define ID_OFFSETDATES_FORWARDSBY_ONEMONTH 34589
 #define ID_OFFSETDATES_FORWARDSBY_ONEYEAR 34590
 #define ID_MOVE_GOTOTASK                34591
+#define ID_TOOLS_CLEANUPINIPREFERENCES  34592
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2093,15 +2096,17 @@
 #define IDS_CAD_FILELINK                58460
 #define IDS_NOTASKSDEPENDENTONSELECTION 58461
 #define IDS_GOTOTASK_NOSUCHTASK         58462
+#define IDS_CONFIRM_CLEANUPPREFS        58463
+#define IDS_CLEANUPPREFS_NOTASLISTS     58464
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        307
-#define _APS_NEXT_COMMAND_VALUE         34592
-#define _APS_NEXT_CONTROL_VALUE         1502
+#define _APS_NEXT_RESOURCE_VALUE        308
+#define _APS_NEXT_COMMAND_VALUE         34593
+#define _APS_NEXT_CONTROL_VALUE         1504
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

@@ -168,6 +168,8 @@ protected:
 	afx_msg void OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI);
 	afx_msg void OnMoveGoToTask();
 	afx_msg void OnUpdateMoveGoToTask(CCmdUI* pCmdUI);
+	afx_msg void OnToolsCleanupIniPreferences();
+	afx_msg void OnUpdateToolsCleanupIniPreferences(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

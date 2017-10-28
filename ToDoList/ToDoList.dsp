@@ -331,6 +331,10 @@ SOURCE=.\TDLAttribListBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLCleanupIniPreferencesDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLCmdlineOptionsDlg.cpp
 # End Source File
 # Begin Source File
@@ -884,6 +888,10 @@ SOURCE=.\TDLAnalyseLoggedTimeDlg.h
 # Begin Source File
 
 SOURCE=.\TDLAttribListBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLCleanupIniPreferencesDlg.h
 # End Source File
 # Begin Source File
 
@@ -1552,12 +1560,12 @@ SOURCE=.\ToDoList_All.sln
 # End Source File
 # End Target
 # End Project
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
+# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
-# End Section
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section

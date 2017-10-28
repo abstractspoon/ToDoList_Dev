@@ -38,6 +38,7 @@
 #include "TDCToDoCtrlPreferenceHelper.h"
 #include "TaskClipboard.h"
 #include "TDLGoToTaskDlg.h"
+#include "TDLCleanupIniPreferencesDlg.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -226,6 +227,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
 	ON_COMMAND(ID_MOVE_GOTOTASK, OnMoveGoToTask)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
+	ON_COMMAND(ID_TOOLS_CLEANUPINIPREFERENCES, OnToolsCleanupIniPreferences)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -12861,4 +12864,31 @@ void CToDoListWnd::OnMoveGoToTask()
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+}
+
+void CToDoListWnd::OnToolsCleanupIniPreferences() 
+{
+	if (!CPreferences::UsesIni())
+	{
+		ASSERT(0);
+		return;
+	}
+
+	// Exclude open tasklists because they'll just resave their
+	// preferences when we close
+	CStringArray aExclusions;
+	m_mgrToDoCtrls.GetFileNames(aExclusions, TRUE);
+
+	CTDLCleanupIniPreferencesDlg dialog(aExclusions);
+		
+	if (dialog.DoModal() == IDOK)
+	{
+		m_mruList.ReadList(CPreferences());
+		ResetPrefs();
+	}
+}
+
+void CToDoListWnd::OnUpdateToolsCleanupIniPreferences(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(CPreferences::UsesIni());
 }

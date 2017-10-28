@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,998,3
+ FILEVERSION 7,1,998,4
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 998, 3\0"
+            VALUE "FileVersion", "7, 1, 998, 4\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
             VALUE "LegalTrademarks", "\0"
@@ -2008,6 +2008,23 @@ BEGIN
     LTEXT           "or",IDC_STATIC,7,36,40,8
 END
 
+IDD_CLEANUPINIPREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 300, 225
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Cleanup Ini Preferences"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,188,204,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,243,204,50,14
+    LTEXT           "Tick the boxes of the tasklists you want to delete from your ini file:",
+                    IDC_STATIC,7,41,286,17
+    LISTBOX         IDC_TASKLISTS,7,61,286,137,LBS_SORT | LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_PREFSLOCATION,7,18,286,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Preferences location:",IDC_STATIC,7,7,286,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3240,9 +3257,12 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Show Tasklist in E&xplorer",  ID_TOOLS_SELECTINEXPLORER
-        MENUITEM "Copy Tasklist Path",          ID_TOOLS_COPYTASKLISTPATH
+        MENUITEM "&Copy Tasklist Path",         ID_TOOLS_COPYTASKLISTPATH
         MENUITEM SEPARATOR
         MENUITEM "&Preferences...",             ID_PREFERENCES
+        MENUITEM SEPARATOR
+        MENUITEM "Cleanup Ini &Preferences...", ID_TOOLS_CLEANUPINIPREFERENCES
+
         MENUITEM SEPARATOR
         MENUITEM "&Import Preferences into Registry...", 
                                                 ID_TOOLS_IMPORTPREFS
@@ -4032,6 +4052,14 @@ BEGIN
         RIGHTMARGIN, 167
         TOPMARGIN, 7
         BOTTOMMARGIN, 95
+    END
+
+    IDD_CLEANUPINIPREFERENCES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 218
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -5181,6 +5209,8 @@ BEGIN
     IDS_CAD_FILELINK        "File Link"
     IDS_NOTASKSDEPENDENTONSELECTION "The selected tasks have no dependents."
     IDS_GOTOTASK_NOSUCHTASK "Task Not Found"
+    IDS_CONFIRM_CLEANUPPREFS 
+                            "Remove the following tasklist information from your ini file?"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5214,6 +5244,12 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_UDTPREFS_COPY        "\nMake Copy of Tool"
     ID_UDTPREFS_DELETE      "\nDelete Tool"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CLEANUPPREFS_NOTASLISTS 
+                            "There is currently no tasklist information which can be removed from your ini file."
 END
 
 #endif    // English (Australia) resources

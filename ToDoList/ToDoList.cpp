@@ -58,10 +58,6 @@ LPCTSTR LICENSE_URL			= _T("http://www.abstractspoon.com/wiki/doku.php?id=free-o
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name=Software"); 
 LPCTSTR FACEBOOK_URL		= _T("https://www.facebook.com/abstr.todolist/"); 
 
-LPCTSTR FILESTATEKEY		= _T("FileStates");
-LPCTSTR REMINDERKEY			= _T("Reminders");
-LPCTSTR DEFAULTKEY			= _T("Default");
-
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp
 
@@ -1029,72 +1025,8 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs)
 	// we don't handle the registry because it's too hard (for now)
 	if (!CPreferences::UsesIni())
 		return;
-	
-	// remove preferences for all files _not_ in the MRU list
-	// provided there's at least one file in the MRU list
-	//
-	// NEEDS WORK
-/*
-	BOOL bUseMRU = prefs.GetProfileInt(_T("Preferences"), _T("AddFilesToMRU"), FALSE);
 
-	if (!bUseMRU)
-		return;
-
-	CStringArray aMRU;
-	
-	for (int nFile = 0; nFile < 16; nFile++)
-	{
-		CString sItem, sFile;
-		
-		sItem.Format(_T("TaskList%d"), nFile + 1);
-		sFile = prefs.GetProfileString(_T("MRU"), sItem);
-		
-		if (sFile.IsEmpty())
-			break;
-		
-		// else
-		sFile = FileMisc::GetFileNameFromPath(sFile);
-		Misc::AddUniqueItem(sFile, aMRU);
-	}
-	
-	if (aMRU.GetSize())
-	{
-		CStringArray aSections;
-		int nSection = prefs.GetSectionNames(aSections);
-		
-		while (nSection--)
-		{
-			const CString& sSection = aSections[nSection];
-			
-			// does it start with "FileStates\\" 
-			if (sSection.Find(FILESTATEKEY) == 0 || sSection.Find(REMINDERKEY) == 0)
-			{
-				// split the section name into its parts
-				CStringArray aSubSections;
-				int nSubSections = Misc::Split(sSection, aSubSections, '\\');
-				
-				if (nSubSections > 1)
-				{
-					// the file name is the second item
-					const CString& sFilename = aSubSections[1];
-
-					// make sure it's an actual filepath
-					if (FileMisc::IsPath(sFilename))
-					{
-						// ignore 'Default'
-						if (sFilename.CompareNoCase(DEFAULTKEY) != 0)
-						{
-							if (!Misc::Has(aMRU, sFilename))
-								prefs.DeleteSection(sSection);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	prefs.Save();
-*/
+	// TODO
 }
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
