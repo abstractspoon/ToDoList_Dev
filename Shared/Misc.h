@@ -363,6 +363,7 @@ namespace Misc
 
 	int FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL bCaseSensitive);
 	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
+	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 
 	double Round(double dValue);
 	float Round(float fValue);

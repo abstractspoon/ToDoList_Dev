@@ -566,14 +566,8 @@ int Misc::FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL 
 		return sSearchIn.FindOneOf(sSearchFor);
 
 	// Case-insensitive
-	CString sSearchInUpper(sSearchIn);
-	CString sSearchForUpper(sSearchFor);
-	
-	MakeUpper(sSearchForUpper);
-	MakeUpper(sSearchInUpper);
-
-	int nFind = sSearchInUpper.FindOneOf(sSearchForUpper);
-	ASSERT(nFind < sSearchInUpper.GetLength());
+	int nFind = ToUpper(sSearchIn).FindOneOf(ToUpper(sSearchFor));
+	ASSERT(nFind < sSearchIn.GetLength());
 
 	return nFind;
 }
@@ -587,6 +581,19 @@ int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
 
 	// Case-sensitive
 	nFind = sSearchIn.Find(ToggleCase(cSearchFor));
+
+	return nFind;
+}
+
+int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
+{
+	int nFind = sSearchIn.Find(sSearchFor);
+
+	if (bCaseSensitive || (nFind != -1))
+		return nFind;
+
+	// Case-sensitive
+	nFind = ToUpper(sSearchIn).Find(ToUpper(sSearchFor));
 
 	return nFind;
 }
@@ -1735,19 +1742,22 @@ BOOL Misc::FindWord(LPCTSTR szWord, LPCTSTR szText, BOOL bCaseSensitive, BOOL bM
 	
 	Trim(sWord);
 	
-	if (!bCaseSensitive)
-	{
-		MakeUpper(sWord);
-		MakeUpper(sText);
-	}
-	
 	int nFind = sText.Find(sWord);
 	
-	if (nFind == -1)
+	if (bCaseSensitive || (nFind != -1))
+		return (nFind != -1);
+
+	// else
+	MakeUpper(sWord);
+	MakeUpper(sText);
+	
+	if (sText.Find(sWord) == -1)
 	{
 		return FALSE;
 	}
-	else if (bMatchWholeWord) // test whole word
+
+	// else
+	if (bMatchWholeWord) // test whole word
 	{
 		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
 		
