@@ -75,6 +75,9 @@ public:
 	BOOL GetFileNameAndExt(int nIndex, CString& sFileName, CString& sExt, BOOL bStrict = TRUE) const;
 	CString FormatProjectNameWithFileName(int nIndex) const;
 
+	int GetFileNames(CStringArray& sFileNames, BOOL bStrict = TRUE) const;
+	int GetFilePaths(CStringArray& sFilePaths, BOOL bStrict = TRUE) const;
+
 	BOOL UsesStorage(int nIndex) const;
 	BOOL GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const;
 	BOOL SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info);

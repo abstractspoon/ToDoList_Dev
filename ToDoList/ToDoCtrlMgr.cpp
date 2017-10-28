@@ -160,6 +160,31 @@ CString CToDoCtrlMgr::GetFilePath(int nIndex, BOOL bStrict) const
 	return sPath;
 }
 
+int CToDoCtrlMgr::GetFileNames(CStringArray& aFileNames, BOOL bStrict) const
+{
+	int nPath = GetFilePaths(aFileNames, bStrict);
+	
+	while (nPath--)
+		aFileNames[nPath] = FileMisc::GetFileNameFromPath(aFileNames[nPath]);
+	
+	return aFileNames.GetSize();
+}
+
+int CToDoCtrlMgr::GetFilePaths(CStringArray& aFilePaths, BOOL bStrict) const
+{
+	aFilePaths.RemoveAll();
+
+	for (int nTDC = 0; nTDC < GetCount(); nTDC++)
+	{
+		CString sPath = GetFilePath(nTDC, bStrict);
+
+		if (!sPath.IsEmpty())
+			aFilePaths.Add(sPath);
+	}
+
+	return aFilePaths.GetSize();
+}
+
 CString CToDoCtrlMgr::GetFolderPath(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));
