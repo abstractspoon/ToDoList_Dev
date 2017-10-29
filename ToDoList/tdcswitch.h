@@ -77,5 +77,6 @@ const LPCTSTR SWITCH_LANG					= _T("lang");
 const LPCTSTR SWITCH_CMDLINE				= _T("cmd");
 const LPCTSTR SWITCH_RTL					= _T("rtl");
 const LPCTSTR SWITCH_POSITION				= _T("pos");
+const LPCTSTR SWITCH_TESTDOWNLOAD			= _T("test");
 
 #endif // AFX_TDCSWITCH_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

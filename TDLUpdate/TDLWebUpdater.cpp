@@ -39,10 +39,20 @@ CTDLWebUpdater::~CTDLWebUpdater()
 
 }
 
-TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine)
+TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bDownloadOnly)
 {
 	if (WebMisc::IsOnline())
 	{
+#ifdef _DEBUG
+		if (bDownloadOnly)
+		{
+			m_sDownloadFile = FileMisc::GetTempFilePath();
+
+			DoProgressDialog(_T(""), bDownloadOnly);
+
+			return TDLWUR_SUCCESS;
+		}
+#endif
 		// reset result
 		m_nResUpdate = TDLWUR_SUCCESS;
 		
@@ -293,13 +303,18 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::LogError(const CString& sAppFolder) const
 	return m_nResUpdate;
 }
 
-BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine)
+BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloadOnly)
 {
-	// sanity checks
-	ASSERT(m_nResUpdate == TDLWUR_SUCCESS);
+#ifdef _DEBUG
+	if (!bDownloadOnly)
+#endif
+	{
+		// sanity checks
+		ASSERT(m_nResUpdate == TDLWUR_SUCCESS);
 
-	if (m_nResUpdate != TDLWUR_SUCCESS)
-		return FALSE;
+		if (m_nResUpdate != TDLWUR_SUCCESS)
+			return FALSE;
+	}
 
 	// sanity checks
 	ASSERT(m_dlgProgress.GetSafeHwnd() == NULL);
@@ -334,6 +349,11 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine)
 
 	// else
 	FileMisc::LogText(_T("The update '%s' was successfully downloaded to '%s'."), m_sDownloadUri, m_sDownloadFile);
+
+#ifdef _DEBUG
+	if (bDownloadOnly)
+		return TRUE;
+#endif
 
 	if (CheckUpdateCancelled())
 		return FALSE;

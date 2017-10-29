@@ -3373,6 +3373,13 @@ BEGIN
         MENUITEM "Show &Updater Dialog...",     ID_DEBUGSHOWUPDATEDLG
         MENUITEM "Show Reminder Dialog...",     ID_DEBUGSHOWREMINDERDLG
         MENUITEM SEPARATOR
+        POPUP "&Test Download Link"
+        BEGIN
+            MENUITEM "&Stable Release",             ID_DEBUGTESTSTABLEDOWNLOAD
+
+            MENUITEM "&Pre Release",                ID_DEBUGTESTPREDOWNLOAD
+        END
+        MENUITEM SEPARATOR
         POPUP "Task &Dialog"
         BEGIN
             MENUITEM "I&nfo",                       ID_DEBUGTASKDIALOG_INFO

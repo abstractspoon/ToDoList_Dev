@@ -80,6 +80,8 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_WARNING, OnDebugTaskDialogWarning)
 	ON_COMMAND(ID_DEBUGTASKDIALOG_ERROR, OnDebugTaskDialogError)
 	ON_COMMAND(ID_DEBUGSHOWLANGDLG, OnDebugShowLanguageDlg)
+	ON_COMMAND(ID_DEBUGTESTSTABLEDOWNLOAD, OnDebugTestStableReleaseDownload)
+	ON_COMMAND(ID_DEBUGTESTPREDOWNLOAD, OnDebugTestPreReleaseDownload)
 #endif
 
 	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
@@ -1243,9 +1245,15 @@ void CToDoListApp::OnHelpUninstall()
 	}
 }
 
-DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, BOOL bPreRelease)
+DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, BOOL bPreRelease, BOOL bTestDownload)
 {
 	CEnCommandLineInfo params;
+
+	// pass our app id to app 
+	params.SetOption(SWITCH_APPID, TDLAPPID);
+
+	// to handle UAC on Vista and above we use the "RunAs" verb
+	LPCTSTR szVerb = ((COSVersion() >= OSV_VISTA) ? _T("runas") : NULL);
 
 	// Pass the centroid of the main wnd so that the
 	// updater appears in that same location
@@ -1263,6 +1271,27 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 
 #ifdef _DEBUG // -----------------------------------------------------------------------
 
+	if (bTestDownload)
+	{
+		params.SetOption(SWITCH_TESTDOWNLOAD);
+
+		if (bPreRelease)
+			params.SetOption(SWITCH_PRERELEASE);
+		
+		CString sAppPath;
+		FileMisc::MakePath(sAppPath, NULL, sAppFolder, sAppName, _T("exe"));
+		
+		DWORD dwRes = FileMisc::Run(NULL, 
+									sAppPath, 
+									params.GetCommandLine(), 
+									SW_SHOWNORMAL,
+									NULL, 
+									szVerb);
+		
+		return dwRes;
+	}
+
+	
 	// Copy ourselves to a temp location
 	CString sTempFolder = (FileMisc::TerminatePath(sAppFolder) + _T("Debug") + sAppName);
 	
@@ -1289,12 +1318,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	CString sAppPath;
 	FileMisc::MakePath(sAppPath, NULL, sAppFolder, sAppName, _T("exe"));
 	
-	// to handle UAC on Vista and above we use the "RunAs" verb
-	LPCTSTR szVerb = ((COSVersion() >= OSV_VISTA) ? _T("runas") : NULL);
-
-	// pass our app id to app 
-	params.SetOption(SWITCH_APPID, TDLAPPID);
-
 	// and the commandline we were started with
 	// use base64 encoding to mangle it so that the update
 	// doesn't try to interpret the commandline itself
@@ -1358,9 +1381,9 @@ void CToDoListApp::RunUninstaller()
 	RunHelperApp(_T("TDLUninstall"), IDS_UNINSTALLER_RUNFAILURE, IDS_UNINSTALLER_SMARTSCREENBLOCK);
 }
 
-void CToDoListApp::RunUpdater(BOOL bPreRelease)
+void CToDoListApp::RunUpdater(BOOL bPreRelease, BOOL bTestDownload)
 {
-	RunHelperApp(_T("TDLUpdate"), IDS_UPDATER_RUNFAILURE, IDS_UPDATER_SMARTSCREENBLOCK, bPreRelease);
+	RunHelperApp(_T("TDLUpdate"), IDS_UPDATER_RUNFAILURE, IDS_UPDATER_SMARTSCREENBLOCK, bPreRelease, bTestDownload);
 }
 
 BOOL CToDoListApp::CloseAllToDoListWnds()
@@ -1604,6 +1627,17 @@ void CToDoListApp::OnDebugShowLanguageDlg()
 {
 	CTDLLanguageDlg dialog;
 	dialog.DoModal();
+}
+
+
+void CToDoListApp::OnDebugTestStableReleaseDownload() 
+{
+	RunUpdater(FALSE, TRUE);
+}
+
+void CToDoListApp::OnDebugTestPreReleaseDownload() 
+{
+	RunUpdater(TRUE, TRUE);
 }
 
 #endif // DEBUG FUNCTIONS

@@ -58,7 +58,7 @@ BOOL CTDLUpdateApp::InitInstance()
 
 	CEnCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
-	
+
 	// must have App ID
 	if (cmdInfo.GetOption(SWITCH_APPID) == TDLAPPID)
 	{
@@ -68,6 +68,7 @@ BOOL CTDLUpdateApp::InitInstance()
 
 		// position for more than one screen
 		CPoint ptPos(_ttol(cmdInfo.GetOption(SWITCH_POSITION)));
+		BOOL bPreRelease = cmdInfo.HasOption(SWITCH_PRERELEASE);
 
 #ifdef _DEBUG
 		// check if TDL just wants to see the ui
@@ -75,66 +76,74 @@ BOOL CTDLUpdateApp::InitInstance()
 		{
 			CTDLWebUpdateProgressDlg dialog(ptPos);
 			dialog.DoModal();
+
+			return FALSE;
+		}
+		
+		// Or just wants to test the download link
+		if (cmdInfo.HasOption(SWITCH_TESTDOWNLOAD))
+		{
+			CTDLWebUpdater wu(ptPos, bPreRelease);
+			wu.DoUpdate(_T(""), _T(""), TRUE);
+			
+			return FALSE;
+		}
+#endif
+
+		CString sLangFile = cmdInfo.GetOption(SWITCH_LANG);
+		
+		// if the app folder is not specified then we copy ourselves
+		// to the temp directory and run from there
+		CString sAppFolder;
+		
+		if (cmdInfo.GetOption(SWITCH_APPFOLDER, sAppFolder) && !sAppFolder.IsEmpty())
+		{
+			// initialize translator
+			if (!sLangFile.IsEmpty())
+				CLocalizer::Initialize(sLangFile, ITTTO_TRANSLATEONLY);
+			
+			// previous commandline is encoded
+			CString sPrevCmdLine = Base64Coder::Decode(cmdInfo.GetOption(SWITCH_CMDLINE));
+			
+			// do the update
+			DoUpdate(sAppFolder, sPrevCmdLine, bPreRelease, ptPos);
+			
+			CLocalizer::Release();
 		}
 		else
-#endif
 		{
-			BOOL bPreRelease = cmdInfo.HasOption(SWITCH_PRERELEASE);
-			CString sLangFile = cmdInfo.GetOption(SWITCH_LANG);
+			CString sAppPath = FileMisc::GetAppFilePath();
+			CString sTempAppPath = FileMisc::GetTempFilePath(_T("TDLUpdate"), _T("exe"));
 			
-			// if the app folder is not specified then we copy ourselves
-			// to the temp directory and run from there
-			CString sAppFolder;
-			
-			if (cmdInfo.GetOption(SWITCH_APPFOLDER, sAppFolder) && !sAppFolder.IsEmpty())
+			if (FileMisc::CopyFile(sAppPath, sTempAppPath, TRUE, TRUE))
 			{
-				// initialize translator
-				if (!sLangFile.IsEmpty())
-					CLocalizer::Initialize(sLangFile, ITTTO_TRANSLATEONLY);
-
-				// previous commandline is encoded
-				CString sPrevCmdLine = Base64Coder::Decode(cmdInfo.GetOption(SWITCH_CMDLINE));
-
-				// do the update
-				DoUpdate(sAppFolder, sPrevCmdLine, bPreRelease, ptPos);
-
-				CLocalizer::Release();
-			}
-			else
-			{
-				CString sAppPath = FileMisc::GetAppFilePath();
-				CString sTempAppPath = FileMisc::GetTempFilePath(_T("TDLUpdate"), _T("exe"));
+				CEnCommandLineInfo params;
 				
-				if (FileMisc::CopyFile(sAppPath, sTempAppPath, TRUE, TRUE))
+				params.SetOption(SWITCH_APPID, TDLAPPID);
+				params.SetOption(SWITCH_APPFOLDER, FileMisc::GetAppFolder());
+				params.SetOption(SWITCH_CMDLINE, cmdInfo.GetOption(SWITCH_CMDLINE));
+				params.SetOption(SWITCH_POSITION, cmdInfo.GetOption(SWITCH_POSITION));
+				
+				if (CRTLStyleMgr::IsRTL())
+					params.SetOption(SWITCH_RTL);
+				
+				if (!sLangFile.IsEmpty())
 				{
-					CEnCommandLineInfo params;
+					// copy TransText.dll also
+					CString sTTPath = FileMisc::GetAppFolder() + _T("\\TransText.dll");
+					CString sTempTTPath = FileMisc::GetTempFilePath(_T("TransText"), _T("dll"));
 					
-					params.SetOption(SWITCH_APPID, TDLAPPID);
-					params.SetOption(SWITCH_APPFOLDER, FileMisc::GetAppFolder());
-					params.SetOption(SWITCH_CMDLINE, cmdInfo.GetOption(SWITCH_CMDLINE));
-					params.SetOption(SWITCH_POSITION, cmdInfo.GetOption(SWITCH_POSITION));
-					
-					if (CRTLStyleMgr::IsRTL())
-						params.SetOption(SWITCH_RTL);
-					
-					if (!sLangFile.IsEmpty())
-					{
-						// copy TransText.dll also
-						CString sTTPath = FileMisc::GetAppFolder() + _T("\\TransText.dll");
-						CString sTempTTPath = FileMisc::GetTempFilePath(_T("TransText"), _T("dll"));
-
-						// note: failure to copy just means no translation
-						if (FileMisc::CopyFile(sTTPath, sTempTTPath, TRUE, TRUE))
-							params.SetOption(SWITCH_LANG, sLangFile);
-					}
-
-					if (bPreRelease)
-						params.SetOption(SWITCH_PRERELEASE);
-
-					if (FileMisc::Run(NULL, sTempAppPath, params.GetCommandLine()) < SE_ERR_SUCCESS)
-					{
-						// TODO
-					}
+					// note: failure to copy just means no translation
+					if (FileMisc::CopyFile(sTTPath, sTempTTPath, TRUE, TRUE))
+						params.SetOption(SWITCH_LANG, sLangFile);
+				}
+				
+				if (bPreRelease)
+					params.SetOption(SWITCH_PRERELEASE);
+				
+				if (FileMisc::Run(NULL, sTempAppPath, params.GetCommandLine()) < SE_ERR_SUCCESS)
+				{
+					// TODO
 				}
 			}
 		}
@@ -220,3 +229,4 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		break;
 	}
 }
+

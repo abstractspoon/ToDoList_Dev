@@ -63,6 +63,8 @@ protected:
 	afx_msg void OnDebugShowLanguageDlg();
 	afx_msg void OnDebugTaskDialogWarning();
 	afx_msg void OnDebugTaskDialogError();
+	afx_msg void OnDebugTestStableReleaseDownload();
+	afx_msg void OnDebugTestPreReleaseDownload();
 #endif
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();
@@ -83,12 +85,13 @@ protected:
 	void UpgradePreferences(CPreferences& prefs);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller();
-	void RunUpdater(BOOL bPreRelease);
+	void RunUpdater(BOOL bPreRelease, BOOL bTestDownload = FALSE);
 	BOOL ProcessStartupOptions(CTDCStartupOptions& startup, const CEnCommandLineInfo& cmdInfo);
 	
 	TDL_WEBUPDATE_CHECK CheckForUpdates(BOOL bManual);
 
-	DWORD RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, BOOL bPreRelease = FALSE);
+	DWORD RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, UINT nIDSmartScreenErrorMsg, 
+						BOOL bPreRelease = FALSE, BOOL bTestDownload = FALSE);
 
 	// our own local version
 	CString AfxGetAppName();
