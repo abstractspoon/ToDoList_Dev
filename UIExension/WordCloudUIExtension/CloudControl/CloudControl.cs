@@ -29,14 +29,14 @@ namespace Gma.CodeCloud.Controls
             m_MaxWordWeight = 0;
 
             MaxFontSize = 68;
-            MinFontSize = 6;
+            MinFontSize = 8;
            
             this.BorderStyle = BorderStyle.FixedSingle;
             this.ResizeRedraw = true;
             
             m_Palette = m_DefaultPalette;
             m_BackColor = Color.White;
-            m_LayoutType = LayoutType.Spiral;
+            m_LayoutType = LayoutType.Typewriter;
         }
 
 
@@ -80,7 +80,7 @@ namespace Gma.CodeCloud.Controls
             {
                 IGraphicEngine graphicEngine =
                     new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight);
-                m_Layout = LayoutFactory.CrateLayout(m_LayoutType, this.Size);
+                m_Layout = LayoutFactory.CreateLayout(m_LayoutType, this.Size);
                 m_Layout.Arrange(m_Words, graphicEngine);
             }
         }
@@ -207,8 +207,8 @@ namespace Gma.CodeCloud.Controls
 
 					if (first!=null)
 					{
-						m_MaxWordWeight = first.Occurrences;
-						m_MinWordWeight = m_Words.Last().Occurrences;
+						m_MaxWordWeight = m_Words.MaxOcurrences();
+						m_MinWordWeight = m_Words.MinOcurrences();
 					}
 
 					BuildLayout();

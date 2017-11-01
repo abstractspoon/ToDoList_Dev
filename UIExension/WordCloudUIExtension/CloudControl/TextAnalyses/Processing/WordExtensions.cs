@@ -13,7 +13,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
             return
                 words.GroupBy(
                     word => stemmer.GetStem(word.Text), 
-                    (stam, sameStamWords) => new WordGroup(stam, sameStamWords));
+                    (stem, sameStemWords) => new WordGroup(stem, sameStemWords));
             
         }
 
@@ -24,6 +24,37 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
                     word => word.Occurrences);
         }
 
+		public static IOrderedEnumerable<T> SortByText<T>(this IEnumerable<T> words) where T : IWord
+		{
+			return
+				words.OrderBy(
+					word => word.Text);
+		}
+
+		public static int MaxOcurrences<T>(this IEnumerable<T> words) where T : IWord
+		{
+			int max = 0;
+
+			foreach (var word in words)
+			{
+				max = System.Math.Max(max, word.Occurrences);
+			}
+
+			return max;
+		}
+
+		public static int MinOcurrences<T>(this IEnumerable<T> words) where T : IWord
+		{
+			int min = System.Int32.MaxValue;
+
+			foreach (var word in words)
+			{
+				min = System.Math.Min(min, word.Occurrences);
+			}
+
+			return min;
+		}
+
         public static IEnumerable<IWord> CountOccurences(this IEnumerable<string> terms)
         {
             return 
@@ -33,6 +64,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
                     StringComparer.InvariantCultureIgnoreCase)
                     .Cast<IWord>();
         }
+
 
         public static IEnumerable<string> Filter(this IEnumerable<string> terms, IBlacklist blacklist)
         {

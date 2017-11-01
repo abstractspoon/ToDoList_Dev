@@ -26,13 +26,53 @@ namespace WordCloudUIExtension
 	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
         // Helper classes
+		private class StyleComboItem
+		{
+			public StyleComboItem(String text, Gma.CodeCloud.Controls.LayoutType type, bool sorted)
+			{
+				m_Text = text;
+				m_Type = type;
+				m_Sorted = sorted;
+			}
+
+			public String Text 
+			{ 
+				get { return m_Text; } 
+			}
+			
+			public Gma.CodeCloud.Controls.LayoutType Type
+			{
+				get { return m_Type; }
+			}
+
+			public bool Sorted
+			{
+				get { return m_Sorted; }
+			}
+			
+			public override String ToString()
+			{
+				return Text;
+			}
+			
+			private String m_Text;
+			private Gma.CodeCloud.Controls.LayoutType m_Type;
+			private bool m_Sorted;
+		}
+
         public class CloudTaskItem
         {
 			public CloudTaskItem(UInt32 id)
 			{
 				Id = id;
+				m_WordAttribute = UIExtension.TaskAttribute.Unknown;
 			}
 	
+			public override String ToString()
+			{
+				return Title;
+			}
+			
 			public readonly UInt32 Id;
             public string Title;
             public string DoneDate;
@@ -47,7 +87,12 @@ namespace WordCloudUIExtension
 			public List<string> AllocTo;
 			public List<string> Category;
 			public List<string> Tags;
+			public bool HasIcon;
+			public bool IsParent;
 
+			private List<string> m_Words;
+			private UIExtension.TaskAttribute m_WordAttribute;
+			
 			public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
 										  HashSet<UIExtension.TaskAttribute> attribs, bool newTask)
 			{
@@ -66,6 +111,8 @@ namespace WordCloudUIExtension
 					CreatedBy = task.GetCreatedBy();
 					Version = task.GetVersion();
 					Tags = task.GetTag();
+					HasIcon = (task.GetIcon().Length > 0);
+					IsParent = (task.GetFirstSubtask() != null);
 				}
 				else
 				{
@@ -107,6 +154,9 @@ namespace WordCloudUIExtension
 
 					if (attribs.Contains(UIExtension.TaskAttribute.Tag))
 						Tags = task.GetTag();
+
+					if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+						HasIcon = (task.GetIcon().Length > 0);
 				}
 			}
 
@@ -123,22 +173,27 @@ namespace WordCloudUIExtension
 
             public IEnumerable<string> GetWords(UIExtension.TaskAttribute attrib)
             {
-				var values = GetAttributeValues(attrib);
-
-				// Split title and comments only into individual words removing duplicates
-				if ((attrib == UIExtension.TaskAttribute.Title) ||
-					(attrib == UIExtension.TaskAttribute.Comments))
+				if (attrib != m_WordAttribute)
 				{
-					if (values.Count > 0)
-					{
-						List<string> parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim(WordTrim)).ToList();
+					var values = GetAttributeValues(attrib);
 
-						values = parts.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+					// Split title and comments only into individual words removing duplicates
+					if ((attrib == UIExtension.TaskAttribute.Title) ||
+						(attrib == UIExtension.TaskAttribute.Comments))
+					{
+						if (values.Count > 0)
+						{
+							List<string> parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim(WordTrim)).ToList();
+
+							values = parts.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+						}
 					}
+
+					values.RemoveAll(p => (p.Length < 2));
+					m_Words = values;
 				}
 
-				values.RemoveAll(p => (p.Length < 2));
-				return values;
+				return m_Words;
             }
 
             public List<string> GetAttributeValues(UIExtension.TaskAttribute attrib)
@@ -147,118 +202,41 @@ namespace WordCloudUIExtension
 
                 switch (attrib)
                 {
-					case UIExtension.TaskAttribute.Title:		values.Add(Title);			break;
-					case UIExtension.TaskAttribute.DoneDate:	values.Add(DoneDate);		break;
-					case UIExtension.TaskAttribute.DueDate:		values.Add(DueDate);		break;
-					case UIExtension.TaskAttribute.StartDate:	values.Add(StartDate);		break;
-					case UIExtension.TaskAttribute.AllocBy:		values.Add(AllocBy);		break;
-					case UIExtension.TaskAttribute.Status:		values.Add(Status);			break;
-					case UIExtension.TaskAttribute.Comments:	values.Add(Comments);		break;
-					case UIExtension.TaskAttribute.CreationDate: values.Add(CreationDate);	break;
-					case UIExtension.TaskAttribute.CreatedBy:	values.Add(CreatedBy);		break;
-					case UIExtension.TaskAttribute.Version:		values.Add(Version);		break;
+					case UIExtension.TaskAttribute.Title:			values.Add(Title);			break;
+					case UIExtension.TaskAttribute.DoneDate:		values.Add(DoneDate);		break;
+					case UIExtension.TaskAttribute.DueDate:			values.Add(DueDate);		break;
+					case UIExtension.TaskAttribute.StartDate:		values.Add(StartDate);		break;
+					case UIExtension.TaskAttribute.AllocBy:			values.Add(AllocBy);		break;
+					case UIExtension.TaskAttribute.Status:			values.Add(Status);			break;
+					case UIExtension.TaskAttribute.Comments:		values.Add(Comments);		break;
+					case UIExtension.TaskAttribute.CreationDate:	values.Add(CreationDate);	break;
+					case UIExtension.TaskAttribute.CreatedBy:		values.Add(CreatedBy);		break;
+					case UIExtension.TaskAttribute.Version:			values.Add(Version);		break;
 
-					case UIExtension.TaskAttribute.AllocTo:		values = AllocTo;			break;
-					case UIExtension.TaskAttribute.Category:	values = Category;			break;
-					case UIExtension.TaskAttribute.Tag:			values = Tags;				break;
+					case UIExtension.TaskAttribute.AllocTo:			values = AllocTo;			break;
+					case UIExtension.TaskAttribute.Category:		values = Category;			break;
+					case UIExtension.TaskAttribute.Tag:				values = Tags;				break;
 				}
 
                 return values;
             }
-        }
 
-        public class TdlGraphicEngine : Gma.CodeCloud.Controls.GdiGraphicEngine
-        {
-            public TdlGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
-                : base(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight)
-            {
-
-		    }
-
-			private void AdjustTextRenderHint(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+			public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value)
 			{
-				// Add anti-aliasing for larger font sizes
-				if (GetFontSize(layoutItem.Word) > 10)
-					m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-				else
-					m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
-			}
+				GetWords(attrib);
 
-			public override void Draw(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
-			{
-				AdjustTextRenderHint(layoutItem);
-
-				base.Draw(layoutItem);
-			}
-
-			public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
-            {
-				AdjustTextRenderHint(layoutItem);
-
-				Font font = GetFont(layoutItem.Word);
-				Color color = GetPresudoRandomColorFromPalette(layoutItem);
-
-				Color backColor = ColorUtil.LighterDrawing(color, 0.7f);
-				Color textColor = ColorUtil.DarkerDrawing(color, 0.2f);
-
- 				using (Brush brush = new SolidBrush(backColor))
- 				{
-					m_Graphics.FillRectangle(brush, Rectangle.Ceiling(layoutItem.Rectangle));
- 				}
-
-				Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-				TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);
+ 				return (m_Words.Find(x => x.Equals(value, StringComparison.CurrentCultureIgnoreCase)) != null);
 			}
         }
 
-        public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
-        {
-			private System.Windows.Forms.ToolTip m_ToolTip;
-            private Translator m_Trans;
-
-			public TdlCloudControl(Translator trans)
-            {
-				base.MaxFontSize = 30;
-
-				this.BorderStyle = BorderStyle.None;
-				this.DoubleBuffered = true;
-				this.Font = new System.Drawing.Font(FontName, 10);
-
-				m_ToolTip = new System.Windows.Forms.ToolTip();
-                m_Trans = trans;
-			}
-
-            protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
-            {
-                return new TdlGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1/*minWordWeight*/, maxWordWeight);
-            }
-
-			protected override void OnMouseMove(MouseEventArgs e)
-			{
-				base.OnMouseMove(e);
-
-				if (base.m_ItemUnderMouse != null)
-				{
-                    string format = m_Trans.Translate("'{0}' appears in {1} task(s)");
-                    string tooltip = string.Format(format, 
-													base.m_ItemUnderMouse.Word.Text,
-													base.m_ItemUnderMouse.Word.Occurrences);
-
-					if (m_ToolTip.GetToolTip(this) != tooltip)
-					    m_ToolTip.SetToolTip(this, tooltip);
-				}
-				else
-				{
-					m_ToolTip.SetToolTip(this, "");
-				}
-			}
-		}
-        
         // -------------------------------------------------------------
 
         private const int LabelTop = 2;
 		private const int ComboTop = 20;
+        private const int LabelHeight = (ComboTop - LabelTop);
+        private const int ComboHeight = 20;
         private const int ControlTop = 49;
+		private const int MatchesWidth = 200;
         private const string FontName = "Tahoma";
 
 		private static readonly char[] WordDelims = { ',', ' ', '\t', '\r', '\n' };
@@ -274,12 +252,19 @@ namespace WordCloudUIExtension
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
 
-        private AttributeComboBox m_AttributeCombo;
+        private ComboBox m_StylesCombo;
+		private System.Windows.Forms.Label m_StylesLabel;
+		private AttributeComboBox m_AttributeCombo;
         private System.Windows.Forms.Label m_AttributeLabel;
         private ColorSchemeComboBox m_ColorsCombo;
         private System.Windows.Forms.Label m_ColorsLabel;
 
+		private System.Windows.Forms.Label m_TaskMatchesLabel;
+		private ListBox m_TaskMatchesList;
+		private bool m_TaskMatchesHaveIcons;
+		
 		private System.Drawing.Font m_ControlsFont;
+		private UIExtension.TaskIcon m_TaskIcons;
 
         // -------------------------------------------------------------
 
@@ -291,6 +276,7 @@ namespace WordCloudUIExtension
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			InitializeComponent();
 		}
@@ -371,12 +357,24 @@ namespace WordCloudUIExtension
 				words.AddRange(taskWords);
 			}
 
-			this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
+			StyleComboItem selItem = (StyleComboItem)m_StylesCombo.SelectedItem;
+
+			if (selItem != null)
+			{
+				if (selItem.Sorted)
+					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByText();
+				else
+					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
+			}
 		}
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
-            return AttributeComboBox.IsSupportedAttribute(attrib);
+			if (AttributeComboBox.IsSupportedAttribute(attrib))
+				return true;
+
+			// else
+			return (attrib == UIExtension.TaskAttribute.Icon);
 		}
 	   
 		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
@@ -491,6 +489,8 @@ namespace WordCloudUIExtension
 			CreateWordCloud();
             CreateAttributeCombo();
 			CreateColorSchemeCombo();
+			CreateStyleCombo();
+			CreateTaskMatchesListbox();
 
 			Invalidate(true);
 		}
@@ -498,12 +498,48 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			this.m_WordCloud = new TdlCloudControl(m_Trans);
+			this.m_WordCloud = new TdlCloudControl(m_Trans, FontName);
 
 			this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
 			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
+			this.m_WordCloud.BorderStyle = BorderStyle.None;
 
 			this.Controls.Add(m_WordCloud);
+
+			this.m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
+
+		}
+
+		private void CreateTaskMatchesListbox()
+		{
+			// Label
+			this.m_TaskMatchesLabel = new System.Windows.Forms.Label();
+
+			this.m_TaskMatchesLabel.Font = m_ControlsFont;
+			this.m_TaskMatchesLabel.Location = new System.Drawing.Point(-2, LabelTop);
+			this.m_TaskMatchesLabel.Size = new System.Drawing.Size(200, 16);
+			this.m_TaskMatchesLabel.Text = m_Trans.Translate("&Task Matches");
+			this.m_TaskMatchesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			//this.m_TaskMatchesLabel.FlatStyle = FlatStyle.Standard;
+
+			this.Controls.Add(m_TaskMatchesLabel);
+
+			// Combo
+			this.m_TaskMatchesList = new ListBox();
+
+			this.m_TaskMatchesList.DrawMode = DrawMode.OwnerDrawFixed;
+			this.m_TaskMatchesList.Font = m_ControlsFont;
+			this.m_TaskMatchesList.Location = new System.Drawing.Point(0, ComboTop);
+			this.m_TaskMatchesList.Size = new System.Drawing.Size(200, 500);
+			this.m_TaskMatchesList.ItemHeight = m_ControlsFont.Height + 5;
+			this.m_TaskMatchesList.IntegralHeight = false;
+			this.m_TaskMatchesList.Sorted = true;
+			
+			this.Controls.Add(m_TaskMatchesList);
+
+			// Add message handlers
+			this.m_TaskMatchesList.DrawItem += new DrawItemEventHandler(OnDrawTaskMatchesItem);
+			this.m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
 		}
 
 		private void CreateAttributeCombo()
@@ -561,13 +597,48 @@ namespace WordCloudUIExtension
 			this.m_ColorsCombo.SelectedIndexChanged += new EventHandler(OnColorSchemeSelChanged);
 		}
 
+		private void CreateStyleCombo()
+		{
+			// Label
+			this.m_StylesLabel = new System.Windows.Forms.Label();
+
+			this.m_StylesLabel.Font = m_ControlsFont;
+			this.m_StylesLabel.Location = new System.Drawing.Point(438, LabelTop);
+			this.m_StylesLabel.Size = new System.Drawing.Size(200, 16);
+			this.m_StylesLabel.Text = m_Trans.Translate("&Style");
+			this.m_StylesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+			this.Controls.Add(m_StylesLabel);
+
+			// Combo
+			this.m_StylesCombo = new ComboBox();
+
+			this.m_StylesCombo.Font = m_ControlsFont;
+			this.m_StylesCombo.Location = new System.Drawing.Point(440, ComboTop);
+			this.m_StylesCombo.Size = new System.Drawing.Size(200, 16);
+			this.m_StylesCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
+			this.m_StylesCombo.Items.Add(new StyleComboItem(m_Trans.Translate("Spiral"), Gma.CodeCloud.Controls.LayoutType.Spiral, false));
+			this.m_StylesCombo.Items.Add(new StyleComboItem(m_Trans.Translate("Typewriter"), Gma.CodeCloud.Controls.LayoutType.Typewriter, true));
+
+			this.m_StylesCombo.SelectedIndex = 0;
+			this.m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
+
+			this.Controls.Add(m_StylesCombo);
+
+			// Add selection change handler
+			this.m_StylesCombo.SelectedIndexChanged += new EventHandler(OnStyleComboSelChanged);
+		}
+
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
-            System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-            Border.Y = ControlTop;
-            Border.Height -= ControlTop;
+            System.Drawing.Rectangle border = new System.Drawing.Rectangle(m_WordCloud.Location, m_WordCloud.Size);
+			border.Inflate(1, 1);
 
-            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
+//             border.Y = ControlTop;
+//             border.Height -= ControlTop;
+
+            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -575,10 +646,29 @@ namespace WordCloudUIExtension
             base.OnSizeChanged(e);
 
             System.Drawing.Rectangle WordCloud = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			System.Drawing.Rectangle TaskMatchesLabel = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			System.Drawing.Rectangle TaskMatchesListbox = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
+			TaskMatchesLabel.X = (TaskMatchesLabel.Right - MatchesWidth);
+			TaskMatchesLabel.Y = (ControlTop - LabelHeight - LabelTop);
+			TaskMatchesLabel.Width = MatchesWidth;
+			TaskMatchesLabel.Height = LabelHeight;
+
+			m_TaskMatchesLabel.Location = TaskMatchesLabel.Location;
+			m_TaskMatchesLabel.Size = TaskMatchesLabel.Size;
+			
+			TaskMatchesListbox.X = TaskMatchesLabel.X;
+			TaskMatchesListbox.Width = TaskMatchesLabel.Width;
+			TaskMatchesListbox.Y = ControlTop;
+			TaskMatchesListbox.Height -= ControlTop;
+
+			m_TaskMatchesList.Location = TaskMatchesListbox.Location;
+			m_TaskMatchesList.Size = TaskMatchesListbox.Size;
+			
+			WordCloud.Width -= (MatchesWidth + 3);
             WordCloud.Y = ControlTop;
             WordCloud.Height -= ControlTop;
-            WordCloud.Inflate(-1, -1);
+			WordCloud.Inflate(-1, -1); // for border
 
             m_WordCloud.Location = WordCloud.Location;
             m_WordCloud.Size = WordCloud.Size;
@@ -600,5 +690,123 @@ namespace WordCloudUIExtension
 		{
 			m_WordCloud.Palette = m_ColorsCombo.GetSelectedScheme();
 		}
+
+		private void OnStyleComboSelChanged(object sender, EventArgs args)
+		{
+            StyleComboItem selItem = (StyleComboItem)m_StylesCombo.SelectedItem;
+
+			if (selItem != null)
+			{
+				m_WordCloud.LayoutType = selItem.Type;
+				UpdateWeightedWords();
+			}
+        }
+
+		private void OnWordSelectionChanged(object sender, EventArgs args)
+		{
+            string selItem = m_WordCloud.SelectedItem;
+
+			if (selItem != null)
+			{
+				// Build a list of task items containing this value
+				m_TaskMatchesList.Items.Clear();
+				m_TaskMatchesHaveIcons = false;
+
+				foreach (var item in m_Items)
+				{
+					if (item.Value.AttributeHasValue(m_Attrib, selItem))
+					{
+						m_TaskMatchesList.Items.Add(item.Value);
+
+						if (m_TaskIcons != null)
+							m_TaskMatchesHaveIcons |= item.Value.HasIcon;
+					}
+				}
+
+				if (m_TaskMatchesList.Items.Count > 0)
+				{
+					m_TaskMatchesList.SelectedIndex = 0;
+					m_TaskMatchesLabel.Text = String.Format(m_Trans.Translate("&Task Matches ({0})"), m_TaskMatchesList.Items.Count);
+				}
+				else
+				{
+					m_TaskMatchesLabel.Text = m_Trans.Translate("&Task Matches");
+				}
+			}
+        }
+
+		private void OnDrawTaskMatchesItem(object sender, DrawItemEventArgs e)
+		{
+			// Get the ListBox and the item.
+			if ((e.Index < 0) || (e.Index >= m_TaskMatchesList.Items.Count))
+				return;
+
+			var item = (m_TaskMatchesList.Items[e.Index] as CloudTaskItem);
+
+			if (item == null)
+				return;
+
+			// Draw the background.
+			e.DrawBackground();
+
+			// Draw the icon
+			if (m_TaskMatchesHaveIcons && item.HasIcon)
+			{
+				if ((item.IsParent || item.HasIcon) && m_TaskIcons.Get(item.Id))
+				{
+					Point ptIcon = new Point(e.Bounds.Left + 2, e.Bounds.Top/* + 2*/);
+					m_TaskIcons.Draw(e.Graphics, ptIcon.X, ptIcon.Y);
+				}
+			}
+
+			// Draw the text
+			string text = item.ToString();
+			StringFormat stringFormat = new StringFormat();
+			stringFormat.Alignment = StringAlignment.Near;
+			stringFormat.LineAlignment = StringAlignment.Center;
+			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+			stringFormat.Trimming = StringTrimming.EllipsisCharacter;
+
+			// Adjust for icon
+			Rectangle textRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
+
+			if (m_TaskMatchesHaveIcons)
+			{
+				textRect.X += 18;
+				textRect.Width -= 18;
+			}
+
+			// See if the item is selected.
+			if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+			{
+				// Selected. Draw with the system highlight color.
+				e.Graphics.DrawString(text, 
+					                  this.Font, 
+									  SystemBrushes.HighlightText, 
+									  textRect,
+									  stringFormat);
+			}
+			else
+			{
+				// Not selected. Draw with ListBox's foreground color.
+				using (SolidBrush br = new SolidBrush(e.ForeColor))
+				{
+					e.Graphics.DrawString(text, 
+											this.Font, 
+											br,
+											textRect,
+											stringFormat);
+				}
+			}
+
+			// Draw the focus rectangle if appropriate.
+			e.DrawFocusRectangle();
+		}
+
+		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
+		{
+
+		}
+
     }
 }

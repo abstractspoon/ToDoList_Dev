@@ -6,7 +6,7 @@ namespace Gma.CodeCloud.Controls
 {
     public static class LayoutFactory
     {
-        public static ILayout CrateLayout(LayoutType layoutType, SizeF size)
+        public static ILayout CreateLayout(LayoutType layoutType, SizeF size)
         {
             switch (layoutType)
             {

@@ -3,6 +3,6 @@
     public enum LayoutType
     {
         Typewriter,
-        Spiral
+        Spiral,
     }
 }

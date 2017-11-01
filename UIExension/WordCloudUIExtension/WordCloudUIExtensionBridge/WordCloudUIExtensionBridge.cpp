@@ -108,7 +108,9 @@ CWordCloudUIExtensionBridgeWindow::CWordCloudUIExtensionBridgeWindow(ITransText*
 
 void CWordCloudUIExtensionBridgeWindow::Release()
 {
-	::DestroyWindow(GetHwnd());
+	// Detach from our parent to prevent it trying to clean us up
+	::SetParent(GetHwnd(), NULL);
+
 	delete this;
 }
 
