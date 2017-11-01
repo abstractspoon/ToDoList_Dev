@@ -146,6 +146,18 @@ namespace Abstractspoon
 					int m_iImage;
 				};
 
+				ref class SelectionRect
+				{
+				public:
+					SelectionRect();
+
+					bool Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused);
+
+				private:
+					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
+					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
+				};
+
 			};
 
 			public interface class IUIExtension

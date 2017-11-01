@@ -300,3 +300,50 @@ bool UIExtension::TaskIcon::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+UIExtension::SelectionRect::SelectionRect()
+{
+	const int LVP_LISTITEM = 1;
+	const int LISS_MORESELECTED = 6;
+
+	auto visElm = System::Windows::Forms::VisualStyles::VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+
+	if (visElm && System::Windows::Forms::VisualStyles::VisualStyleRenderer::IsElementDefined(visElm))
+		m_visExplorerSelected = gcnew System::Windows::Forms::VisualStyles::VisualStyleRenderer(visElm);
+}
+
+bool UIExtension::SelectionRect::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
+{
+	if (m_visExplorerSelected)
+	{
+		dc->FillRectangle(System::Drawing::Brushes::White, x, y, cx, cy);
+
+		auto rect = gcnew System::Drawing::Rectangle(x, y, cx, cy);
+
+		m_visExplorerSelected->DrawBackground(dc, *rect);
+
+		if (focused)
+			m_visExplorerSelected->DrawBackground(dc, *rect);
+	}
+	else
+	{
+		auto fillColour = System::Drawing::Color::FromArgb(255, 175, 195, 240);
+		auto textColour = System::Drawing::Color::FromArgb(255, 50, 105, 200);
+
+		if (!focused)
+		{
+			fillColour = System::Drawing::Color::FromArgb(GetSysColor(COLOR_3DFACE));
+			textColour = System::Drawing::Color::FromArgb(GetSysColor(COLOR_3DSHADOW));
+		}
+
+		auto brush = gcnew System::Drawing::SolidBrush(fillColour);
+		auto pen = gcnew System::Drawing::Pen(textColour);
+
+		dc->FillRectangle(brush, x, y, cx, cy);
+		dc->DrawRectangle(pen, x, y, cx, cy);
+	}
+
+	return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////

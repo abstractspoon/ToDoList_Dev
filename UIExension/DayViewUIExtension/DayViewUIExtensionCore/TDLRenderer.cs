@@ -18,13 +18,7 @@ namespace DayViewUIExtension
             // One time initialisation
             if (Application.RenderWithVisualStyles)
             {
-                const int LVP_LISTITEM = 1;
-                const int LISS_MORESELECTED = 6;
-
-                VisualStyleElement visElm = VisualStyleElement.CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
-
-                if ((visElm != null) && VisualStyleRenderer.IsElementDefined(visElm))
-                    m_ExplorerSelection = new VisualStyleRenderer(visElm);
+                m_SelectionRect = new UIExtension.SelectionRect();
 
                 if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Normal))
                     m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
@@ -36,7 +30,7 @@ namespace DayViewUIExtension
 			m_TaskIcons = taskIcons;
         }
 
-		private VisualStyleRenderer m_ExplorerSelection;
+		private UIExtension.SelectionRect m_SelectionRect;
         private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
         private UITheme m_theme;
 		private UIExtension.TaskIcon m_TaskIcons;
@@ -276,20 +270,7 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-                        if (m_ExplorerSelection != null)
-                        {
-                            g.FillRectangle(System.Drawing.Brushes.White, rect);
-                            m_ExplorerSelection.DrawBackground(g, rect);
-                            m_ExplorerSelection.DrawBackground(g, rect);
-                        }
-                        else
-                        {
-						    using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 175, 195, 240)))
-							    g.FillRectangle(brush, rect);
-       
-                            using (Pen pen = new Pen(Color.FromArgb(255, 50, 105, 200)))
-                                g.DrawRectangle(pen, rect);
-                        }
+						m_SelectionRect.Draw(g, rect.Left, rect.Top, rect.Width, rect.Height, true);
 					}
 					else
 					{
