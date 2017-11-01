@@ -4803,13 +4803,14 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	int nRestOfColsWidth = m_treeHeader.CalcTotalItemsWidth(0);
 
 	CClientDC dc(&m_tree);
-	int nMinColWidth = CalcTreeColumnWidth(0, &dc);
+	int nMinColWidth = CalcWidestItemTitle(NULL, &dc, FALSE);
 
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
-	
-	m_treeHeader.SetItemWidth(0, nTitleColWidth);
+
+	m_treeHeader.SetItemWidth(GTLCC_TITLE, nTitleColWidth);
+	m_treeHeader.SetItemTracked(GTLCC_TITLE, TRUE);
 	m_treeHeader.UpdateWindow();
-	
+
 	m_tree.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tree.GetSafeHwnd());
 }
 
@@ -4857,7 +4858,7 @@ int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	switch (nCol)
 	{
 	case GTLCC_TITLE:
-		nColWidth = CalcWidestItemTitle(NULL, pDC);
+		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
 		nColWidth = max(nColWidth, TREE_TITLE_MIN_WIDTH);
 		break;
 
@@ -4900,9 +4901,9 @@ int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	return max(nTitleWidth, nColWidth);
 }
 
-int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
+int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const
 {
-	// if this task has no children then return itself
+	// we only want parents
 	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
 	
 	if (htiChild == NULL)
@@ -4913,8 +4914,13 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 		return 0;
 	
 	// Prepare font
-	HFONT hFont = m_tree.Fonts().GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
-	HGDIOBJ hOldFont = pDC->SelectObject(hFont);
+	HFONT hFont = NULL, hOldFont = NULL;
+	
+	if (bEnd)
+	{
+		hFont = m_tree.Fonts().GetHFont((htiParent == NULL) ? GMFS_BOLD : 0);
+		hOldFont = (HFONT)pDC->SelectObject(hFont);
+	}
 	
 	// else try children
 	int nWidest = 0;
@@ -4925,16 +4931,24 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const
 		
 		if (m_tree.GetItemRect(htiChild, rChild, TRUE)) // text rect only
 		{
-			DWORD dwTaskID = GetTaskID(htiChild);
-			const GANTTITEM* pGI = NULL;
+			int nWidth = 0;
+
+			if (bEnd)
+			{
+				DWORD dwTaskID = GetTaskID(htiChild);
+				const GANTTITEM* pGI = NULL;
 			
-			GET_GI_RET(dwTaskID, pGI, 0);
+				GET_GI_RET(dwTaskID, pGI, 0);
 			
-			int nTextWidth = pDC->GetTextExtent(pGI->sTitle).cx;
-			int nWidth = max(nTextWidth, (rChild.left + nTextWidth));
+				int nTextWidth = pDC->GetTextExtent(pGI->sTitle).cx;
+				nWidth = max(nTextWidth, (rChild.left + nTextWidth));
+			}
+			else
+			{
+				nWidth = (rChild.left + TREE_TITLE_MIN_WIDTH);
+			}
 			
-			int nWidestChild = CalcWidestItemTitle(htiChild, pDC); // RECURSIVE CALL
-			
+			int nWidestChild = CalcWidestItemTitle(htiChild, pDC, bEnd); // RECURSIVE CALL
 			nWidest = max(max(nWidest, nWidth), nWidestChild);
 		}
 		
@@ -6832,8 +6846,8 @@ BOOL CGanttTreeListCtrl::SaveToImage(CBitmap& bmImage)
 	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
 	
 	// Restore title column width
-	m_treeHeader.SetItemWidth(0, nColWidth);
-	m_treeHeader.SetItemTracked(0, bTracked);
+	m_treeHeader.SetItemWidth(GTLCC_TITLE, nColWidth);
+	m_treeHeader.SetItemTracked(GTLCC_TITLE, bTracked);
 
 	Resize();
 	

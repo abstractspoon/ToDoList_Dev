@@ -347,7 +347,7 @@ protected:
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const GANTTITEM& gi, int nCol) const;
 	BOOL IsMilestone(const GANTTITEM& gi) const;
-	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC) const;
+	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
 	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
