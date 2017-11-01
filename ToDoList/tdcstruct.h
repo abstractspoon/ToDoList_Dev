@@ -550,7 +550,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 		: 
 	dwAttribType(TDCCA_STRING), 
 	nTextAlignment(DT_LEFT), 
-	dwFeatures(0),
+	dwFeatures(TDCCAF_FILTER),
 	nColID(TDCC_NONE),
 	nAttribID(TDCA_NONE),
 	bEnabled(TRUE)

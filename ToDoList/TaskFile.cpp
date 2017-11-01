@@ -1265,7 +1265,13 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 
 		// list data can contain default-data and/or auto-data
 		if (attribDef.IsList())
+		{
 			attribDef.DecodeListData(pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBLISTDATA));
+
+			// Add 'Filterable' feature first time only
+//			if (GetFileFormat() < TDL_FILEFORMAT_LOCKING)
+				attribDef.dwFeatures |= TDCCAF_FILTER;
+		}
 
 		// good to go
 		aAttribs.Add(attribDef);
