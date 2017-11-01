@@ -351,6 +351,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDLCleanupIniPreferencesDlg.cpp" />
     <ClCompile Include="TDLCmdlineOptionsDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -652,6 +653,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLAddLoggedTimeDlg.h" />
     <ClInclude Include="TDLAnalyseLoggedTimeDlg.h" />
     <ClInclude Include="TDLAttribListBox.h" />
+    <ClInclude Include="TDLCleanupIniPreferencesDlg.h" />
     <ClInclude Include="TDLCmdlineOptionsDlg.h" />
     <ClInclude Include="TDLColumnAttribVisibilityListCtrl.h" />
     <ClInclude Include="TDLColumnListBox.h" />

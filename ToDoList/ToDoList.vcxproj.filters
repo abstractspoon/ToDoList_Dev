@@ -388,6 +388,9 @@
     <ClCompile Include="TDLGoToTaskDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLCleanupIniPreferencesDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -835,6 +838,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLGoToTaskDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCleanupIniPreferencesDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
