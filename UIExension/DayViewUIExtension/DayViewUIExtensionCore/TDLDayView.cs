@@ -18,7 +18,7 @@ namespace DayViewUIExtension
 
         public TDLDayView(System.Drawing.Font font, UIExtension.TaskIcon taskIcons)
         {
-            m_Renderer = new TDLRenderer(taskIcons);
+            m_Renderer = new TDLRenderer(Handle, taskIcons);
 
             InitializeComponent(font);
         }

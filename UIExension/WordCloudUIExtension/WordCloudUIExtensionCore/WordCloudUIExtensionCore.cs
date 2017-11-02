@@ -171,7 +171,7 @@ namespace WordCloudUIExtension
 				return "";
 			}
 
-            public IEnumerable<string> GetWords(UIExtension.TaskAttribute attrib)
+            public List<string> GetWords(UIExtension.TaskAttribute attrib)
             {
 				if (attrib != m_WordAttribute)
 				{
@@ -251,6 +251,7 @@ namespace WordCloudUIExtension
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
+		private bool m_WordSelChanging;
 
         private ComboBox m_StylesCombo;
 		private System.Windows.Forms.Label m_StylesLabel;
@@ -265,6 +266,7 @@ namespace WordCloudUIExtension
 		
 		private System.Drawing.Font m_ControlsFont;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private UIExtension.SelectionRect m_SelectionRect;
 
         // -------------------------------------------------------------
 
@@ -277,6 +279,9 @@ namespace WordCloudUIExtension
 
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
+			m_SelectionRect = new UIExtension.SelectionRect();
+
+			m_WordSelChanging = false;
 
 			InitializeComponent();
 		}
@@ -285,6 +290,34 @@ namespace WordCloudUIExtension
 
 		public bool SelectTask(UInt32 dwTaskID)
 		{
+			if (m_Attrib == UIExtension.TaskAttribute.Unknown)
+				return false;
+
+			CloudTaskItem item;
+
+			if (!m_Items.TryGetValue(dwTaskID, out item))
+				return false;
+
+			var words = item.GetWords(m_Attrib);
+
+			if (!words.Any())
+				return false;
+
+			if (!words.Exists(x => x.Equals(m_WordCloud.SelectedItem, StringComparison.CurrentCultureIgnoreCase)))
+			{
+				var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+
+				if (!matches.Any())
+					return false;
+
+				var bestMatch = matches.First();
+
+				m_WordCloud.SelectedItem = bestMatch.Text;
+			}
+
+			// Our task should be in the list...
+			m_TaskMatchesList.SelectedItem = item;
+			
 			return true;
 		}
 
@@ -394,11 +427,25 @@ namespace WordCloudUIExtension
 	   
 		public bool DoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+			switch (cmd)
+			{
+				case UIExtension.AppCommand.SelectTask:
+					return SelectTask(dwExtra);
+			}
+
+			// else
 			return false;
 		}
 
 		public bool CanDoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
 		{
+			switch (cmd)
+			{
+				case UIExtension.AppCommand.SelectTask:
+					return true;
+			}
+
+			// else
 			return false;
 		}
 
@@ -498,11 +545,11 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			this.m_WordCloud = new TdlCloudControl(m_Trans, FontName);
+			this.m_WordCloud = new TdlCloudControl(this.Handle, m_Trans, FontName);
 
 			this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
 			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
-			this.m_WordCloud.BorderStyle = BorderStyle.None;
+		//	this.m_WordCloud.BorderStyle = BorderStyle.None;
 
 			this.Controls.Add(m_WordCloud);
 
@@ -635,9 +682,6 @@ namespace WordCloudUIExtension
             System.Drawing.Rectangle border = new System.Drawing.Rectangle(m_WordCloud.Location, m_WordCloud.Size);
 			border.Inflate(1, 1);
 
-//             border.Y = ControlTop;
-//             border.Height -= ControlTop;
-
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
@@ -702,8 +746,10 @@ namespace WordCloudUIExtension
 			}
         }
 
-		private void OnWordSelectionChanged(object sender, EventArgs args)
+		private void OnWordSelectionChanged(object sender)
 		{
+			m_WordSelChanging = true;
+
             string selItem = m_WordCloud.SelectedItem;
 
 			if (selItem != null)
@@ -733,7 +779,9 @@ namespace WordCloudUIExtension
 					m_TaskMatchesLabel.Text = m_Trans.Translate("&Task Matches");
 				}
 			}
-        }
+
+			m_WordSelChanging = false;
+		}
 
 		private void OnDrawTaskMatchesItem(object sender, DrawItemEventArgs e)
 		{
@@ -747,7 +795,12 @@ namespace WordCloudUIExtension
 				return;
 
 			// Draw the background.
-			e.DrawBackground();
+			bool selected = ((e.State & DrawItemState.Selected) == DrawItemState.Selected);
+
+			if (selected)
+				m_SelectionRect.Draw(m_TaskMatchesList.Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
+			else
+				e.DrawBackground();
 
 			// Draw the icon
 			if (m_TaskMatchesHaveIcons && item.HasIcon)
@@ -775,38 +828,28 @@ namespace WordCloudUIExtension
 				textRect.X += 18;
 				textRect.Width -= 18;
 			}
+			textRect.Y++;
 
-			// See if the item is selected.
-			if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
-			{
-				// Selected. Draw with the system highlight color.
-				e.Graphics.DrawString(text, 
-					                  this.Font, 
-									  SystemBrushes.HighlightText, 
-									  textRect,
-									  stringFormat);
-			}
-			else
-			{
-				// Not selected. Draw with ListBox's foreground color.
-				using (SolidBrush br = new SolidBrush(e.ForeColor))
-				{
-					e.Graphics.DrawString(text, 
-											this.Font, 
-											br,
-											textRect,
-											stringFormat);
-				}
-			}
-
-			// Draw the focus rectangle if appropriate.
-			e.DrawFocusRectangle();
+			e.Graphics.DrawString(text, 
+				                  this.Font, 
+								  SystemBrushes.WindowText, 
+								  textRect,
+								  stringFormat);
 		}
 
 		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
 		{
+			if (!m_WordSelChanging)
+			{
+				var selItem = m_TaskMatchesList.SelectedItem as CloudTaskItem;
 
+				if (selItem != null)
+				{
+					var parent = new UIExtension.ParentNotify(m_hwndParent);
+
+					parent.NotifySelChange(selItem.Id);
+				}
+			}
 		}
-
     }
 }

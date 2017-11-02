@@ -13,7 +13,7 @@ namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
-        public TDLRenderer(UIExtension.TaskIcon taskIcons)
+        public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
         {
             // One time initialisation
             if (Application.RenderWithVisualStyles)
@@ -28,12 +28,14 @@ namespace DayViewUIExtension
             }
 
 			m_TaskIcons = taskIcons;
+			m_hWnd = hWnd;
         }
 
 		private UIExtension.SelectionRect m_SelectionRect;
         private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
         private UITheme m_theme;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private IntPtr m_hWnd;
 
         public UITheme Theme
         {
@@ -270,7 +272,7 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-						m_SelectionRect.Draw(g, rect.Left, rect.Top, rect.Width, rect.Height, true);
+						m_SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height);
 					}
 					else
 					{

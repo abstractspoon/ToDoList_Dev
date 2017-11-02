@@ -311,6 +311,14 @@ UIExtension::SelectionRect::SelectionRect()
 		m_visExplorerSelected = gcnew System::Windows::Forms::VisualStyles::VisualStyleRenderer(visElm);
 }
 
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
+{
+	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
+	bool focused = (::GetFocus() == hWndRef);
+
+	return Draw(dc, x, y, cx, cy, focused);
+}
+
 bool UIExtension::SelectionRect::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
 {
 	if (m_visExplorerSelected)

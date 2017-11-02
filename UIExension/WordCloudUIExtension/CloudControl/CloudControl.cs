@@ -8,7 +8,7 @@ using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 
 namespace Gma.CodeCloud.Controls
 {
-    public class CloudControl : Panel
+    public class CloudControl : Control
     {
         private IEnumerable<IWord> m_Words;
         private readonly Color[] m_DefaultPalette = new[] { Color.DarkRed, Color.DarkBlue, Color.DarkGreen, Color.Navy, Color.DarkCyan, Color.DarkOrange, Color.DarkGoldenrod, Color.DarkKhaki, Color.Blue, Color.Red, Color.Green };
@@ -31,7 +31,7 @@ namespace Gma.CodeCloud.Controls
             MaxFontSize = 68;
             MinFontSize = 8;
            
-            this.BorderStyle = BorderStyle.FixedSingle;
+  //          this.BorderStyle = BorderStyle.FixedSingle;
             this.ResizeRedraw = true;
             
             m_Palette = m_DefaultPalette;

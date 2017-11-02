@@ -25,8 +25,9 @@ namespace WordCloudUIExtension
 		private System.Windows.Forms.ToolTip m_ToolTip;
 		private Translator m_Trans;
 		private string m_SelectedItem;
+		private IntPtr m_hWnd;
 
-		public TdlCloudControl(Translator trans, String fontName)
+		public TdlCloudControl(IntPtr hWnd, Translator trans, String fontName)
 		{
 			base.MaxFontSize = 30;
 
@@ -35,16 +36,29 @@ namespace WordCloudUIExtension
 
 			m_ToolTip = new System.Windows.Forms.ToolTip();
 			m_Trans = trans;
+			m_hWnd = hWnd;
 		}
 
 		public string SelectedItem
 		{
 			get { return m_SelectedItem; }
+			set 
+			{
+				if ((m_SelectedItem == null) || !m_SelectedItem.Equals(value))
+				{
+					m_SelectedItem = value;
+
+					Invalidate();
+
+					if (SelectionChange != null)
+						SelectionChange(this);
+				}
+			}
 		}
 
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
 		{
-			return new TdlGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedItem);
+			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedItem);
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -71,30 +85,34 @@ namespace WordCloudUIExtension
 		{
 			base.OnMouseClick(e);
 
+			bool focused = Focus();
+
 			if (base.m_ItemUnderMouse != null)
 			{
-				if ((m_SelectedItem == null) || !m_SelectedItem.Equals(base.m_ItemUnderMouse.ToString()))
+				if ((m_SelectedItem == null) || !m_SelectedItem.Equals(base.m_ItemUnderMouse.Word.Text))
 				{
-					m_SelectedItem = base.m_ItemUnderMouse.Word.Text;
-					Invalidate();
-
-					if (SelectionChange != null)
-						SelectionChange(this, e);
+					SelectedItem = base.m_ItemUnderMouse.Word.Text;
 				}
 			}
 		}
 
+		protected override void OnLostFocus(EventArgs e)
+		{
+			base.OnLostFocus(e);
+		}
+		
 		public event SelectionChangeEventHandler SelectionChange;
 
 	}
-	public delegate void SelectionChangeEventHandler(object sender, EventArgs args);
+	public delegate void SelectionChangeEventHandler(object sender);
 
 	public class TdlGraphicEngine : Gma.CodeCloud.Controls.GdiGraphicEngine
 	{
 		private string m_SelectedItem;
 		private UIExtension.SelectionRect m_SelectionRect;
+		private Control m_Ctrl;
 
-		public TdlGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, 
+		public TdlGraphicEngine(Control ctrl, Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, 
 								float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight,
 								string selectedItem)
 			: 
@@ -102,6 +120,7 @@ namespace WordCloudUIExtension
 		{
 			m_SelectedItem = selectedItem;
 			m_SelectionRect = new UIExtension.SelectionRect();
+			m_Ctrl = ctrl;
 		}
 
 		private void AdjustTextRenderHint(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
@@ -126,7 +145,7 @@ namespace WordCloudUIExtension
 		private void DrawSelected(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			Rectangle rect = Rectangle.Round(layoutItem.Rectangle);
-			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, true);
+			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
 
 			DrawEmphasizedText(layoutItem);
 		}
