@@ -8947,7 +8947,8 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 			// delete the item else increment the count since the last separator
 			if (bDelete)
 			{
-				ASSERT(TDC::MapSortIDToColumn(nMenuID) != TDCC_NONE);
+				ASSERT((nMenuID == ID_SEPARATOR) || (TDC::MapSortIDToColumn(nMenuID) != TDCC_NONE));
+
 				pMenu->DeleteMenu(nItem, MF_BYPOSITION);
 				nItem--;
 			}
