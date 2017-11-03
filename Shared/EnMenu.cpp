@@ -252,6 +252,11 @@ BOOL CEnMenu::DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp)
 	return DeleteMenu(m_hMenu, nPosition, nFlags, bAutoCleanUp);
 }
 
+BOOL CEnMenu::DeleteMenuContents()
+{
+	return DeleteMenuContents(GetSafeHmenu());
+}
+
 BOOL CEnMenu::EnsureUniqueAccelerators()
 {
 	return EnsureUniqueAccelerators(GetSafeHmenu());
@@ -318,6 +323,14 @@ BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTST
 	}
 
 	return TRUE;
+}
+
+BOOL CEnMenu::CopyMenuContents(const CMenu* pMenu)
+{
+	if (!pMenu)
+		return FALSE;
+
+	return CopyMenuContents(*pMenu, *this);
 }
 
 // static helpers -------------------------------------------------------
@@ -719,6 +732,36 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 	return TRUE;
 }
 
+int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems)
+{
+	if (!::IsMenu(hMenu))
+		return 0;
+
+	int nNumItems = ::GetMenuItemCount(hMenu);
+	aMenuItems.SetSize(nNumItems);
+
+	for (int nPos = 0; nPos < nNumItems; nPos++)
+	{
+		MENUITEMINFO& mii = aMenuItems[nPos];
+		mii.cbSize = sizeof(mii);
+		mii.fMask = (MIIM_BITMAP | MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_FTYPE);
+
+		VERIFY(::GetMenuItemInfo(hMenu, nPos, TRUE, &mii));
+	}
+
+	return nNumItems;
+}
+
+int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems, CStringArray& aItemText)
+{
+	if (!::IsMenu(hMenu))
+		return 0;
+
+	int nNumItems = GetMenuItemInfo(hMenu, aMenuItems);
+
+	return (GetMenuStrings(hMenu, aItemText) == nNumItems); // can be zero
+}
+
 int CEnMenu::MenuSortProc(const void* v1, const void* v2)
 {
 	MENUSORTITEM* pItem1 = (MENUSORTITEM*)v1;
@@ -727,3 +770,41 @@ int CEnMenu::MenuSortProc(const void* v1, const void* v2)
 	return pItem1->sMenuString.CompareNoCase(pItem2->sMenuString);
 }
 
+BOOL CEnMenu::CopyMenuContents(HMENU hMenuFrom, HMENU hMenuTo)
+{
+	if (!::IsMenu(hMenuFrom) || !IsMenu(hMenuTo))
+		return FALSE;
+
+	CArray<MENUITEMINFO> aMenuItems;
+	CStringArray aItemText;
+
+	if (!GetMenuItemInfo(hMenuFrom, aMenuItems, aItemText))
+		return FALSE;
+
+	// Delete existing menu contents
+	VERIFY(DeleteMenuContents(hMenuTo));
+	
+	for (int nItem = 0; nItem < aMenuItems.GetSize(); nItem++)
+	{
+		MENUITEMINFO& mii = aMenuItems[nItem];
+
+		VERIFY(::AppendMenu(hMenuTo, MF_STRING, 1, aItemText[nItem]));
+
+		mii.fMask |= MIIM_STRING;
+		mii.dwTypeData = (LPTSTR)(LPCTSTR)aItemText[nItem];
+
+		VERIFY(::SetMenuItemInfo(hMenuTo, nItem, TRUE, &mii));
+	}
+	
+	return TRUE;
+}
+
+BOOL CEnMenu::DeleteMenuContents(HMENU hMenu)
+{
+	if (!::IsMenu(hMenu))
+		return FALSE;
+
+	while (::DeleteMenu(hMenu, 0, MF_BYPOSITION));
+
+	return TRUE;
+}

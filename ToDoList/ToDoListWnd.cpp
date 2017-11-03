@@ -8915,6 +8915,12 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 		
 	if (Prefs().GetShowEditMenuAsColumns())
 	{
+		// Always rebuild from scratch
+		CEnMenu menuBar;
+		VERIFY(menuBar.LoadMenu(IDR_MAINFRAME, *this, TRUE));
+
+		VERIFY(CEnMenu::CopyMenuContents(::GetSubMenu(menuBar, AM_SORT), *pMenu));
+		
 		int nCountLastSep = 0;
 		
 		for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
@@ -8935,7 +8941,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 				TDC_COLUMN nColID = TDC::MapSortIDToColumn(nMenuID);
 
 				if (nColID != TDCC_NONE)
-					bDelete = !tdc.IsColumnShowing(nColID);
+					bDelete = !tdc.CanSortBy(nColID);
 			}
 
 			// delete the item else increment the count since the last separator

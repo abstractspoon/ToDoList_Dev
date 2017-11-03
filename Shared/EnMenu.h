@@ -50,8 +50,11 @@ public:
 	CMenu* GetSubMenu(int nPos) const { return CMenu::GetSubMenu(nPos); }
 	HMENU GetParentMenu(HMENU hMenu) const;
 
+	BOOL CopyMenuContents(const CMenu* pMenu);
+
 	BOOL DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp = FALSE);
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
+	BOOL DeleteMenuContents();
 
 	BOOL SortMenuStrings(UINT nCmdIDStart, UINT nCmdIDEnd);
 	BOOL TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat);
@@ -71,14 +74,19 @@ public:
 	static HMENU GetSubMenu(HMENU hMenu, UINT nCmdID);
 	static HMENU GetParentMenu(HMENU hMenu, HMENU hSubMenu);
 
+	static BOOL CopyMenuContents(HMENU hMenuFrom, HMENU hMenuTo);
+
 	static BOOL DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp);
 	static BOOL DeleteMenu(HMENU hMenu, UINT nPosition, UINT nFlags, BOOL bAutoCleanUp);
+	static BOOL DeleteMenuContents(HMENU hMenu);
 
 	static CString GetMenuString(HMENU hMenu, UINT nIDItem,	UINT nFlags);
 	static BOOL SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags);
 	static int GetMenuStrings(HMENU hMenu, CStringArray& aItems);
 	static BOOL SetMenuStrings(HMENU hMenu, const CStringArray& aItems);
 	static BOOL SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd);
+	static int GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems);
+	static BOOL GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems, CStringArray& aItemText);
 
 protected:
 	static ITransText* s_pTT;
@@ -92,6 +100,7 @@ protected:
 	static int GetMenuItemPos(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
 	static void DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos);
 	static int MenuSortProc(const void* v1, const void* v2);
+
 };
 
 #endif // !defined(AFX_ENMENU_H__5AB11CC8_CCF5_4D52_ADC7_27FDC151F3FE__INCLUDED_)
