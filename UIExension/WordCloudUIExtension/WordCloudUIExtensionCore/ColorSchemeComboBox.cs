@@ -10,21 +10,22 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
+
 	class ColorSchemeComboBox : ComboBox
 	{
 		protected class ColorScheme
 		{
 			public ColorScheme(Color[] colors)
 			{
-				Colors = new List<Color>();
+				m_Colors = new List<Color>();
 
 				foreach (Color color in colors)
-					Colors.Add(color);
+					m_Colors.Add(color);
 			}
 
 			public ColorScheme(String[] hexColors)
 			{
-				Colors = new List<Color>();
+				m_Colors = new List<Color>();
 
 				FromHexColors(hexColors);
 			}
@@ -33,7 +34,7 @@ namespace WordCloudUIExtension
 			{
 				StringBuilder hex = new StringBuilder();
 
-				foreach (Color color in Colors)
+				foreach (Color color in m_Colors)
 				{
 					hex.Append(ColorTranslator.ToHtml(color));
 					hex.Append(',');
@@ -44,7 +45,7 @@ namespace WordCloudUIExtension
 
 			private bool FromHexColors(String[] hexColors)
 			{
-				Colors.Clear();
+				m_Colors.Clear();
 
 				foreach (String color in hexColors)
 				{
@@ -53,14 +54,14 @@ namespace WordCloudUIExtension
 						Color c = ColorTranslator.FromHtml(color);
 
 						if (c != null)
-							Colors.Add(c);
+							m_Colors.Add(c);
 					}
 				}
 
-				return (Colors.Count > 0);
+				return (m_Colors.Count > 0);
 			}
 
-			public List<Color> Colors { private set; get; }
+			public List<Color> m_Colors { private set; get; }
 		}
 
 		public ColorSchemeComboBox()
@@ -116,7 +117,7 @@ namespace WordCloudUIExtension
 					rect.Inflate(-2, -2);
 					rect.Width = rect.Height;
 
-					foreach (Color color in scheme.Colors)
+					foreach (Color color in scheme.m_Colors)
 					{
 						using (Brush fill = new SolidBrush(color))
 						{
@@ -153,7 +154,7 @@ namespace WordCloudUIExtension
 			if (selItem == null)
 				return new Color[] { Color.Black };
 
-			return selItem.Colors.ToArray();
+			return selItem.m_Colors.ToArray();
 		}
 
 		public bool SetSelectedScheme(Color[] colors)
@@ -177,10 +178,10 @@ namespace WordCloudUIExtension
 
 			ColorScheme scheme = new ColorScheme(hexColors);
 
-			if (scheme.Colors.Count == 0)
+			if (scheme.m_Colors.Count == 0)
 				return false;
 
-			return SetSelectedScheme(scheme.Colors.ToArray());
+			return SetSelectedScheme(scheme.m_Colors.ToArray());
 		}
 
 		protected ColorScheme FindScheme(Color[] colors)
@@ -189,13 +190,13 @@ namespace WordCloudUIExtension
 			{
 				foreach (ColorScheme scheme in Items)
 				{
-					if (colors.Length == scheme.Colors.Count)
+					if (colors.Length == scheme.m_Colors.Count)
 					{
 						int numMatches = 0;
 
 						foreach (Color color in colors)
 						{
-							if (!scheme.Colors.Contains(color))
+							if (!scheme.m_Colors.Contains(color))
 								break;
 
 							// else

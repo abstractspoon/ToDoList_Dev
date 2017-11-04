@@ -10,6 +10,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
+
 	class TaskMatchesListView : ListView
     {
 		private const int MinTaskMatchesWidth = 100;
@@ -35,7 +36,7 @@ namespace WordCloudUIExtension
 				this.Columns.Add(trans.Translate("Task Matches"));
 				this.Columns.Add(trans.Translate("ID"));
 
-				Columns[1].Width = -1; // Header width
+				Columns[1].Width = -2; // Header width
 
 				this.View = View.Details;
 				this.MultiSelect = false;

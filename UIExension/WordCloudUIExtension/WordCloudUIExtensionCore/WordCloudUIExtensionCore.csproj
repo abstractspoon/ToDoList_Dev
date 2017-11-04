@@ -60,9 +60,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="StyleComboBox.cs" />
-    <Compile Include="TdlCloudControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="TdlCloudControl.cs" />
     <Compile Include="WordCloudUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

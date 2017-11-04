@@ -9,6 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
+
 	class AttributeComboBox : ComboBox
     {
         protected class AttributeItem

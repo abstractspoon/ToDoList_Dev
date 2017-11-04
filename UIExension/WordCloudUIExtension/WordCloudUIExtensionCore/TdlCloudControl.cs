@@ -19,6 +19,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace WordCloudUIExtension
 {
+	[System.ComponentModel.DesignerCategory("")]
 
 	public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
 	{

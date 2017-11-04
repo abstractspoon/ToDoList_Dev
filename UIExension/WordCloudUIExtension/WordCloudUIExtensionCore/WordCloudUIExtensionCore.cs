@@ -21,6 +21,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
+
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
         private const int LabelTop = 2;
