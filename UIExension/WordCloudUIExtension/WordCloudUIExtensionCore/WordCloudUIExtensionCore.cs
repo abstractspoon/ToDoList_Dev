@@ -25,212 +25,6 @@ namespace WordCloudUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
 	{
-        // Helper classes
-		private class StyleComboItem
-		{
-			public StyleComboItem(String text, Gma.CodeCloud.Controls.LayoutType type, bool sorted)
-			{
-				m_Text = text;
-				m_Type = type;
-				m_Sorted = sorted;
-			}
-
-			public String Text 
-			{ 
-				get { return m_Text; } 
-			}
-			
-			public Gma.CodeCloud.Controls.LayoutType Type
-			{
-				get { return m_Type; }
-			}
-
-			public bool Sorted
-			{
-				get { return m_Sorted; }
-			}
-			
-			public override String ToString()
-			{
-				return Text;
-			}
-			
-			private String m_Text;
-			private Gma.CodeCloud.Controls.LayoutType m_Type;
-			private bool m_Sorted;
-		}
-
-        public class CloudTaskItem
-        {
-			public CloudTaskItem(UInt32 id)
-			{
-				Id = id;
-				m_WordAttribute = UIExtension.TaskAttribute.Unknown;
-			}
-	
-			public override String ToString()
-			{
-				return Title;
-			}
-			
-			public readonly UInt32 Id;
-            public string Title;
-            public string DoneDate;
-            public string DueDate;
-            public string StartDate;
-            public string AllocBy;
-            public string Status;
-            public string Comments;
-            public string CreationDate;
-            public string CreatedBy;
-            public string Version;
-			public List<string> AllocTo;
-			public List<string> Category;
-			public List<string> Tags;
-			public bool HasIcon;
-			public bool IsParent;
-
-			private List<string> m_Words;
-			private UIExtension.TaskAttribute m_WordAttribute;
-			
-			public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
-										  HashSet<UIExtension.TaskAttribute> attribs, bool newTask)
-			{
-				if (newTask)
-				{
-					Title = task.GetTitle();
-					DoneDate = SplitDate(task.GetDoneDateString());
-					DueDate = SplitDate(task.GetDueDateString());
-					StartDate = SplitDate(task.GetStartDateString());
-					AllocTo = task.GetAllocatedTo();
-					AllocBy = task.GetAllocatedBy();
-					Status = task.GetStatus();
-					Category = task.GetCategory();
-					Comments = task.GetComments();
-					CreationDate = SplitDate(task.GetCreationDateString());
-					CreatedBy = task.GetCreatedBy();
-					Version = task.GetVersion();
-					Tags = task.GetTag();
-					HasIcon = (task.GetIcon().Length > 0);
-					IsParent = (task.GetFirstSubtask() != null);
-				}
-				else
-				{
-					if (attribs.Contains(UIExtension.TaskAttribute.Title))
-						Title = task.GetTitle();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-						DoneDate = SplitDate(task.GetDoneDateString());
-
-					if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-						DueDate = SplitDate(task.GetDueDateString());
-
-					if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-						StartDate = SplitDate(task.GetStartDateString());
-
-					if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
-						AllocTo = task.GetAllocatedTo();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
-						AllocBy = task.GetAllocatedBy();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Status))
-						Status = task.GetStatus();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Category))
-						Category = task.GetCategory();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Comments))
-						Comments = task.GetComments();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
-						CreationDate = SplitDate(task.GetCreationDateString());
-
-					if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
-						CreatedBy = task.GetCreatedBy();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Version))
-						Version = task.GetVersion();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Tag))
-						Tags = task.GetTag();
-
-					if (attribs.Contains(UIExtension.TaskAttribute.Icon))
-						HasIcon = (task.GetIcon().Length > 0);
-				}
-			}
-
-			static string SplitDate(string date) 
-			{
-				string[] parts = date.Split(new char[] {' '}, 2);
-
-				if (parts.Length > 0)
-					return parts[0];
-
-				// else
-				return "";
-			}
-
-            public List<string> GetWords(UIExtension.TaskAttribute attrib)
-            {
-				if (attrib != m_WordAttribute)
-				{
-					var values = GetAttributeValues(attrib);
-
-					// Split title and comments only into individual words removing duplicates
-					if ((attrib == UIExtension.TaskAttribute.Title) ||
-						(attrib == UIExtension.TaskAttribute.Comments))
-					{
-						if (values.Count > 0)
-						{
-							List<string> parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim(WordTrim)).ToList();
-
-							values = parts.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
-						}
-					}
-
-					values.RemoveAll(p => (p.Length < 2));
-					m_Words = values;
-				}
-
-				return m_Words;
-            }
-
-            public List<string> GetAttributeValues(UIExtension.TaskAttribute attrib)
-            {
-                var values = new List<string>();
-
-                switch (attrib)
-                {
-					case UIExtension.TaskAttribute.Title:			values.Add(Title);			break;
-					case UIExtension.TaskAttribute.DoneDate:		values.Add(DoneDate);		break;
-					case UIExtension.TaskAttribute.DueDate:			values.Add(DueDate);		break;
-					case UIExtension.TaskAttribute.StartDate:		values.Add(StartDate);		break;
-					case UIExtension.TaskAttribute.AllocBy:			values.Add(AllocBy);		break;
-					case UIExtension.TaskAttribute.Status:			values.Add(Status);			break;
-					case UIExtension.TaskAttribute.Comments:		values.Add(Comments);		break;
-					case UIExtension.TaskAttribute.CreationDate:	values.Add(CreationDate);	break;
-					case UIExtension.TaskAttribute.CreatedBy:		values.Add(CreatedBy);		break;
-					case UIExtension.TaskAttribute.Version:			values.Add(Version);		break;
-
-					case UIExtension.TaskAttribute.AllocTo:			values = AllocTo;			break;
-					case UIExtension.TaskAttribute.Category:		values = Category;			break;
-					case UIExtension.TaskAttribute.Tag:				values = Tags;				break;
-				}
-
-                return values;
-            }
-
-			public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value)
-			{
-				GetWords(attrib);
-
- 				return (m_Words.Find(x => x.Equals(value, StringComparison.CurrentCultureIgnoreCase)) != null);
-			}
-        }
-
-        // -------------------------------------------------------------
-
         private const int LabelTop = 2;
 		private const int ComboTop = 20;
         private const int LabelHeight = (ComboTop - LabelTop);
@@ -239,49 +33,54 @@ namespace WordCloudUIExtension
 		private const int MatchesWidth = 200;
         private const string FontName = "Tahoma";
 
-		private static readonly char[] WordDelims = { ',', ' ', '\t', '\r', '\n' };
-		private static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.' };
+        // -------------------------------------------------------------
+
+		[FlagsAttribute]
+		private enum IgnoreSelChanges
+		{
+			None		= 0x0,
+			WordChange	= 0x1,
+			MatchChange	= 0x2,
+			All			= 0xf,
+		}
+
+		private bool WantIgnoreSelChange(IgnoreSelChanges change)
+		{
+			return ((m_IgnoreSelChanges & change) == change);
+		}
 
         // -------------------------------------------------------------
 
-		private IntPtr m_hwndParent;
+		private IntPtr m_HwndParent;
         private UIExtension.TaskAttribute m_Attrib;
 		private Translator m_Trans;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
-		private bool m_WordSelChanging;
+		private IgnoreSelChanges m_IgnoreSelChanges;
 
-        private ComboBox m_StylesCombo;
+        private StyleComboBox m_StylesCombo;
 		private System.Windows.Forms.Label m_StylesLabel;
 		private AttributeComboBox m_AttributeCombo;
         private System.Windows.Forms.Label m_AttributeLabel;
         private ColorSchemeComboBox m_ColorsCombo;
         private System.Windows.Forms.Label m_ColorsLabel;
+		private TaskMatchesListView m_TaskMatchesList;
 
-		private System.Windows.Forms.Label m_TaskMatchesLabel;
-		private ListBox m_TaskMatchesList;
-		private bool m_TaskMatchesHaveIcons;
-		
 		private System.Drawing.Font m_ControlsFont;
-		private UIExtension.TaskIcon m_TaskIcons;
-		private UIExtension.SelectionRect m_SelectionRect;
 
         // -------------------------------------------------------------
 
 		public WordCloudUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
-			m_hwndParent = hwndParent;
+			m_HwndParent = hwndParent;
 			m_Trans = trans;
 			m_Attrib = UIExtension.TaskAttribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
-			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-			m_SelectionRect = new UIExtension.SelectionRect();
-
-			m_WordSelChanging = false;
+			m_IgnoreSelChanges = IgnoreSelChanges.None;
 
 			InitializeComponent();
 		}
@@ -303,7 +102,10 @@ namespace WordCloudUIExtension
 			if (!words.Any())
 				return false;
 
-			if (!words.Exists(x => x.Equals(m_WordCloud.SelectedItem, StringComparison.CurrentCultureIgnoreCase)))
+			m_IgnoreSelChanges = IgnoreSelChanges.MatchChange;
+
+			if ((m_WordCloud.SelectedItem == null) ||
+				!words.Exists(x => x.Equals(m_WordCloud.SelectedItem, StringComparison.CurrentCultureIgnoreCase)))
 			{
 				var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
 
@@ -314,10 +116,10 @@ namespace WordCloudUIExtension
 
 				m_WordCloud.SelectedItem = bestMatch.Text;
 			}
+			m_IgnoreSelChanges = IgnoreSelChanges.None;
 
-			// Our task should be in the list...
-			m_TaskMatchesList.SelectedItem = item;
-			
+ 			m_TaskMatchesList.SetSelectedMatchId(item.Id);
+
 			return true;
 		}
 
@@ -390,11 +192,11 @@ namespace WordCloudUIExtension
 				words.AddRange(taskWords);
 			}
 
-			StyleComboItem selItem = (StyleComboItem)m_StylesCombo.SelectedItem;
+			var selStyle = m_StylesCombo.SelectedItem as StyleComboBox.StyleItem;
 
-			if (selItem != null)
+			if (selStyle != null)
 			{
-				if (selItem.Sorted)
+				if (selStyle.Sorted)
 					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByText();
 				else
 					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
@@ -456,11 +258,11 @@ namespace WordCloudUIExtension
 
 		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
-            System.Drawing.Point pt = m_WordCloud.PointToClient(new System.Drawing.Point(xPos, yPos));
-            Gma.CodeCloud.Controls.Geometry.LayoutItem foundItem;
+			System.Drawing.Point ptClient = m_TaskMatchesList.PointToClient(new System.Drawing.Point(xPos, yPos));
+			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
 
-            if (m_WordCloud.TryGetItemAtLocation(pt, out foundItem))
-                return UIExtension.HitResult.Task;
+			if (lvHit.Item != null)
+				return UIExtension.HitResult.Task;
 
             // else
 			return UIExtension.HitResult.Nowhere;
@@ -537,7 +339,7 @@ namespace WordCloudUIExtension
             CreateAttributeCombo();
 			CreateColorSchemeCombo();
 			CreateStyleCombo();
-			CreateTaskMatchesListbox();
+			CreateTaskMatchesListView();
 
 			Invalidate(true);
 		}
@@ -549,7 +351,6 @@ namespace WordCloudUIExtension
 
 			this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
 			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
-		//	this.m_WordCloud.BorderStyle = BorderStyle.None;
 
 			this.Controls.Add(m_WordCloud);
 
@@ -557,35 +358,18 @@ namespace WordCloudUIExtension
 
 		}
 
-		private void CreateTaskMatchesListbox()
+		private void CreateTaskMatchesListView()
 		{
-			// Label
-			this.m_TaskMatchesLabel = new System.Windows.Forms.Label();
+			this.m_TaskMatchesList = new TaskMatchesListView(m_HwndParent);
+			this.m_TaskMatchesList.Initialise(m_Trans);
 
-			this.m_TaskMatchesLabel.Font = m_ControlsFont;
-			this.m_TaskMatchesLabel.Location = new System.Drawing.Point(-2, LabelTop);
-			this.m_TaskMatchesLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_TaskMatchesLabel.Text = m_Trans.Translate("&Task Matches");
-			this.m_TaskMatchesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			//this.m_TaskMatchesLabel.FlatStyle = FlatStyle.Standard;
-
-			this.Controls.Add(m_TaskMatchesLabel);
-
-			// Combo
-			this.m_TaskMatchesList = new ListBox();
-
-			this.m_TaskMatchesList.DrawMode = DrawMode.OwnerDrawFixed;
 			this.m_TaskMatchesList.Font = m_ControlsFont;
 			this.m_TaskMatchesList.Location = new System.Drawing.Point(0, ComboTop);
 			this.m_TaskMatchesList.Size = new System.Drawing.Size(200, 500);
-			this.m_TaskMatchesList.ItemHeight = m_ControlsFont.Height + 5;
-			this.m_TaskMatchesList.IntegralHeight = false;
-			this.m_TaskMatchesList.Sorted = true;
-			
+
 			this.Controls.Add(m_TaskMatchesList);
 
 			// Add message handlers
-			this.m_TaskMatchesList.DrawItem += new DrawItemEventHandler(OnDrawTaskMatchesItem);
 			this.m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
 		}
 
@@ -658,17 +442,15 @@ namespace WordCloudUIExtension
 			this.Controls.Add(m_StylesLabel);
 
 			// Combo
-			this.m_StylesCombo = new ComboBox();
+			this.m_StylesCombo = new StyleComboBox();
+			this.m_StylesCombo.Initialise(m_Trans);
 
 			this.m_StylesCombo.Font = m_ControlsFont;
 			this.m_StylesCombo.Location = new System.Drawing.Point(440, ComboTop);
 			this.m_StylesCombo.Size = new System.Drawing.Size(200, 16);
 			this.m_StylesCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 
-			this.m_StylesCombo.Items.Add(new StyleComboItem(m_Trans.Translate("Spiral"), Gma.CodeCloud.Controls.LayoutType.Spiral, false));
-			this.m_StylesCombo.Items.Add(new StyleComboItem(m_Trans.Translate("Typewriter"), Gma.CodeCloud.Controls.LayoutType.Typewriter, true));
-
-			this.m_StylesCombo.SelectedIndex = 0;
+			this.m_StylesCombo.SetSelectedStyle(Gma.CodeCloud.Controls.LayoutType.Spiral);
 			this.m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
 
 			this.Controls.Add(m_StylesCombo);
@@ -689,33 +471,24 @@ namespace WordCloudUIExtension
         {
             base.OnSizeChanged(e);
 
-            System.Drawing.Rectangle WordCloud = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-			System.Drawing.Rectangle TaskMatchesLabel = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-			System.Drawing.Rectangle TaskMatchesListbox = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            System.Drawing.Rectangle wordCloudRect = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			System.Drawing.Rectangle taskMatchesRect = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
-			TaskMatchesLabel.X = (TaskMatchesLabel.Right - MatchesWidth);
-			TaskMatchesLabel.Y = (ControlTop - LabelHeight - LabelTop);
-			TaskMatchesLabel.Width = MatchesWidth;
-			TaskMatchesLabel.Height = LabelHeight;
+			taskMatchesRect.X = (taskMatchesRect.Right - MatchesWidth);
+			taskMatchesRect.Y = ControlTop;
+			taskMatchesRect.Width = MatchesWidth;
+			taskMatchesRect.Height -= ControlTop;
 
-			m_TaskMatchesLabel.Location = TaskMatchesLabel.Location;
-			m_TaskMatchesLabel.Size = TaskMatchesLabel.Size;
+			m_TaskMatchesList.Location = taskMatchesRect.Location;
+			m_TaskMatchesList.Size = taskMatchesRect.Size;
 			
-			TaskMatchesListbox.X = TaskMatchesLabel.X;
-			TaskMatchesListbox.Width = TaskMatchesLabel.Width;
-			TaskMatchesListbox.Y = ControlTop;
-			TaskMatchesListbox.Height -= ControlTop;
+			wordCloudRect.Width -= (MatchesWidth + 3);
+            wordCloudRect.Y = ControlTop;
+            wordCloudRect.Height -= ControlTop;
+			wordCloudRect.Inflate(-1, -1); // for border
 
-			m_TaskMatchesList.Location = TaskMatchesListbox.Location;
-			m_TaskMatchesList.Size = TaskMatchesListbox.Size;
-			
-			WordCloud.Width -= (MatchesWidth + 3);
-            WordCloud.Y = ControlTop;
-            WordCloud.Height -= ControlTop;
-			WordCloud.Inflate(-1, -1); // for border
-
-            m_WordCloud.Location = WordCloud.Location;
-            m_WordCloud.Size = WordCloud.Size;
+            m_WordCloud.Location = wordCloudRect.Location;
+            m_WordCloud.Size = wordCloudRect.Size;
 
             Win32.RemoveBorder(m_WordCloud.Handle);
             Win32.RemoveClientEdge(m_WordCloud.Handle);
@@ -737,119 +510,84 @@ namespace WordCloudUIExtension
 
 		private void OnStyleComboSelChanged(object sender, EventArgs args)
 		{
-            StyleComboItem selItem = (StyleComboItem)m_StylesCombo.SelectedItem;
+            var selStyle = m_StylesCombo.GetSelectedStyle();
 
-			if (selItem != null)
-			{
-				m_WordCloud.LayoutType = selItem.Type;
-				UpdateWeightedWords();
-			}
+			m_WordCloud.LayoutType = selStyle;
+			UpdateWeightedWords();
         }
 
 		private void OnWordSelectionChanged(object sender)
 		{
-			m_WordSelChanging = true;
+			if (WantIgnoreSelChange(IgnoreSelChanges.WordChange))
+				return;
 
-            string selItem = m_WordCloud.SelectedItem;
+			// else
+			m_IgnoreSelChanges |= IgnoreSelChanges.MatchChange;
 
-			if (selItem != null)
+            string selWord = m_WordCloud.SelectedItem;
+
+			if (selWord != null)
 			{
+				CloudTaskItem selItem = null;
+				UInt32 selItemId = m_TaskMatchesList.GetSelectedMatchId();
+
 				// Build a list of task items containing this value
-				m_TaskMatchesList.Items.Clear();
-				m_TaskMatchesHaveIcons = false;
+				m_TaskMatchesList.ClearMatches();
 
 				foreach (var item in m_Items)
 				{
-					if (item.Value.AttributeHasValue(m_Attrib, selItem))
+					if (item.Value.AttributeHasValue(m_Attrib, selWord))
 					{
-						m_TaskMatchesList.Items.Add(item.Value);
+						m_TaskMatchesList.AddMatch(item.Value);
 
-						if (m_TaskIcons != null)
-							m_TaskMatchesHaveIcons |= item.Value.HasIcon;
+						if (item.Value.Id == selItemId)
+							selItem = item.Value;
 					}
 				}
 
+				string headerText = m_Trans.Translate("Task Matches");
+
 				if (m_TaskMatchesList.Items.Count > 0)
 				{
-					m_TaskMatchesList.SelectedIndex = 0;
-					m_TaskMatchesLabel.Text = String.Format(m_Trans.Translate("&Task Matches ({0})"), m_TaskMatchesList.Items.Count);
+					// See if our currently selected task is in the new match list
+					selItemId = m_TaskMatchesList.SetSelectedMatchId(selItemId);
+
+					if ((selItem == null) || (selItemId != selItem.Id))
+						NotifyParentSelChange(selItemId);
+
+					m_TaskMatchesList.Columns[0].Text = String.Format("{0} ({1})", headerText, m_TaskMatchesList.Items.Count);
+					m_TaskMatchesList.Invalidate();
 				}
 				else
 				{
-					m_TaskMatchesLabel.Text = m_Trans.Translate("&Task Matches");
+					m_TaskMatchesList.Columns[0].Text = headerText;
 				}
 			}
 
-			m_WordSelChanging = false;
-		}
-
-		private void OnDrawTaskMatchesItem(object sender, DrawItemEventArgs e)
-		{
-			// Get the ListBox and the item.
-			if ((e.Index < 0) || (e.Index >= m_TaskMatchesList.Items.Count))
-				return;
-
-			var item = (m_TaskMatchesList.Items[e.Index] as CloudTaskItem);
-
-			if (item == null)
-				return;
-
-			// Draw the background.
-			bool selected = ((e.State & DrawItemState.Selected) == DrawItemState.Selected);
-
-			if (selected)
-				m_SelectionRect.Draw(m_TaskMatchesList.Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
-			else
-				e.DrawBackground();
-
-			// Draw the icon
-			if (m_TaskMatchesHaveIcons && item.HasIcon)
-			{
-				if ((item.IsParent || item.HasIcon) && m_TaskIcons.Get(item.Id))
-				{
-					Point ptIcon = new Point(e.Bounds.Left + 2, e.Bounds.Top/* + 2*/);
-					m_TaskIcons.Draw(e.Graphics, ptIcon.X, ptIcon.Y);
-				}
-			}
-
-			// Draw the text
-			string text = item.ToString();
-			StringFormat stringFormat = new StringFormat();
-			stringFormat.Alignment = StringAlignment.Near;
-			stringFormat.LineAlignment = StringAlignment.Center;
-			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-			stringFormat.Trimming = StringTrimming.EllipsisCharacter;
-
-			// Adjust for icon
-			Rectangle textRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
-
-			if (m_TaskMatchesHaveIcons)
-			{
-				textRect.X += 18;
-				textRect.Width -= 18;
-			}
-			textRect.Y++;
-
-			e.Graphics.DrawString(text, 
-				                  this.Font, 
-								  SystemBrushes.WindowText, 
-								  textRect,
-								  stringFormat);
+			m_IgnoreSelChanges &= ~IgnoreSelChanges.MatchChange;
 		}
 
 		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
 		{
-			if (!m_WordSelChanging)
-			{
-				var selItem = m_TaskMatchesList.SelectedItem as CloudTaskItem;
+			if (WantIgnoreSelChange(IgnoreSelChanges.MatchChange))
+				return;
 
-				if (selItem != null)
-				{
-					var parent = new UIExtension.ParentNotify(m_hwndParent);
+			// else
+			m_IgnoreSelChanges |= IgnoreSelChanges.WordChange;
 
-					parent.NotifySelChange(selItem.Id);
-				}
-			}
+			UInt32 selTaskId = m_TaskMatchesList.GetSelectedMatchId();
+
+			if (selTaskId != 0)
+				NotifyParentSelChange(selTaskId);
+
+			m_IgnoreSelChanges &= ~IgnoreSelChanges.WordChange;
 		}
-    }
+
+		private void NotifyParentSelChange(UInt32 taskId)
+		{
+			var parent = new UIExtension.ParentNotify(m_HwndParent);
+
+			parent.NotifySelChange(taskId);
+		}
+	}
 }

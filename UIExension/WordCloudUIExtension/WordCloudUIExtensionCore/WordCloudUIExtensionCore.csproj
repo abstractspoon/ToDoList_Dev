@@ -48,13 +48,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributeComboBox.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ColorSchemeComboBox.cs" />
+    <Compile Include="TaskCloudItem.cs" />
+    <Compile Include="TaskMatchesListView.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="AttributeComboBox.cs" />
+    <Compile Include="StyleComboBox.cs" />
     <Compile Include="TdlCloudControl.cs">
       <SubType>Component</SubType>
     </Compile>
