@@ -31,7 +31,6 @@ namespace Gma.CodeCloud.Controls
             MaxFontSize = 68;
             MinFontSize = 8;
            
-  //          this.BorderStyle = BorderStyle.FixedSingle;
             this.ResizeRedraw = true;
             
             m_Palette = m_DefaultPalette;

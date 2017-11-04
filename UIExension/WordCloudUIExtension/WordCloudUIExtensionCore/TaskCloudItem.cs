@@ -36,6 +36,7 @@ namespace WordCloudUIExtension
 		public List<string> Tags;
 		public bool HasIcon;
 		public bool IsParent;
+		public System.Drawing.Color TextColor;
 
 		private List<string> m_Words;
 		private UIExtension.TaskAttribute m_WordAttribute;
@@ -62,8 +63,10 @@ namespace WordCloudUIExtension
 				CreatedBy = task.GetCreatedBy();
 				Version = task.GetVersion();
 				Tags = task.GetTag();
+				TextColor = task.GetTextDrawingColor();
+
 				HasIcon = (task.GetIcon().Length > 0);
-				IsParent = (task.GetFirstSubtask() != null);
+				IsParent = task.GetFirstSubtask().IsValid();
 			}
 			else
 			{
@@ -108,6 +111,9 @@ namespace WordCloudUIExtension
 
 				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
 					HasIcon = (task.GetIcon().Length > 0);
+
+				if (attribs.Contains(UIExtension.TaskAttribute.Color))
+					TextColor = task.GetTextDrawingColor();
 			}
 		}
 

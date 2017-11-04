@@ -12,6 +12,9 @@ namespace WordCloudUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	class TaskMatchesListView : ListView
     {
+		private const int MinTaskMatchesWidth = 100;
+
+        // -------------------------------------------------------------
 
 		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
@@ -28,10 +31,11 @@ namespace WordCloudUIExtension
         {
 			if (this.Columns.Count == 0) // once only
 			{
+
 				this.Columns.Add(trans.Translate("Task Matches"));
 				this.Columns.Add(trans.Translate("ID"));
 
-				Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.HeaderSize);
+				Columns[1].Width = -1; // Header width
 
 				this.View = View.Details;
 				this.MultiSelect = false;
@@ -41,10 +45,17 @@ namespace WordCloudUIExtension
 				this.Sorting = SortOrder.Ascending;
 				this.HeaderStyle = ColumnHeaderStyle.Clickable;
 				this.DoubleBuffered = true;
+				this.HotTracking = false;
 			}
 
             return true;
         }
+
+		protected override void OnColumnWidthChanging(ColumnWidthChangingEventArgs e)
+		{
+			e.Cancel = true;
+			e.NewWidth = Columns[e.ColumnIndex].Width;
+		}
 
 		public bool AddMatch(CloudTaskItem item)
 		{
@@ -62,8 +73,6 @@ namespace WordCloudUIExtension
 
 			if (this.Items.Add(lvItem) == null)
 				return false;
-
-			this.Columns[0].Width = -1; // widest item text
 
 			return true;
 		}
@@ -153,61 +162,61 @@ namespace WordCloudUIExtension
 			if (e.Item == null)
 				return;
 
-			// Draw the background only
-			if (Items[e.ItemIndex].Selected)
+			// Draw the background
+			if (e.Item.Selected)
 				m_SelectionRect.Draw(Handle, e.Graphics, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height);
 			else
 				e.DrawBackground();
 
-			// Draw the icon in the first column
-			if (m_TaskMatchesHaveIcons)
-			{
-				var item = (e.Item.Tag as CloudTaskItem);
-
-				if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
-					m_TaskIcons.Draw(e.Graphics, e.Bounds.Left, e.Bounds.Top);
-			}
-		}
-
-		protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
-		{
-			Rectangle textRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
-
-			// Adjust for icon in the first column
-			if ((e.ColumnIndex == 0) && m_TaskMatchesHaveIcons)
-			{
-				textRect.X += 18;
-				textRect.Width -= 18;
-			}
-
-			// Draw the text
+			// Draw subitems
 			StringFormat stringFormat = new StringFormat();
 			stringFormat.Alignment = StringAlignment.Near;
 			stringFormat.LineAlignment = StringAlignment.Center;
 			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
-			// Adjust for icon
-			e.Graphics.DrawString(e.SubItem.Text,
-								  this.Font,
-								  SystemBrushes.WindowText,
-								  textRect,
-								  stringFormat);
+			var item = (e.Item.Tag as CloudTaskItem);
+			var brush = new SolidBrush(item.TextColor);
+			Rectangle itemRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
 
+			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
+			{
+				itemRect.X += 2;
+				itemRect.Width = (Columns[colIndex].Width - 2);
+
+				if ((colIndex == 0) && m_TaskMatchesHaveIcons)
+				{
+					if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
+						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top);
+
+					itemRect.X += 18;
+					itemRect.Width -= 18;
+				}
+
+				itemRect.Y++;
+				itemRect.Height--;
+
+				DrawText(e.Graphics, 
+						e.Item.SubItems[colIndex].Text, 
+						itemRect, 
+						brush, 
+						StringAlignment.Near,
+						(colIndex == 0));
+
+				// next subitem
+				itemRect.X += itemRect.Width;
+			}
 		}
 
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{
 			e.DrawBackground();
 
-			StringFormat stringFormat = new StringFormat();
-			stringFormat.Alignment = StringAlignment.Near;
-			stringFormat.LineAlignment = StringAlignment.Center;
-
-			e.Graphics.DrawString(Columns[e.ColumnIndex].Text,
-									this.Font,
-									SystemBrushes.WindowText,
-									e.Bounds,
-									stringFormat);
+			DrawText(e.Graphics, 
+					Columns[e.ColumnIndex].Text, 
+					e.Bounds, 
+					SystemBrushes.WindowText, 
+					StringAlignment.Center, 
+					false);
 		}
 
 		protected override void OnColumnClick(ColumnClickEventArgs e)
@@ -217,6 +226,31 @@ namespace WordCloudUIExtension
 			Sort();
 		}
 
+		protected void DrawText(Graphics graphics, String text, Rectangle rect, Brush brush, StringAlignment horzAlign, bool endEllipsis)
+		{
+			StringFormat format = new StringFormat();
+
+			format.Alignment = horzAlign;
+			format.LineAlignment = StringAlignment.Center;
+			format.FormatFlags = StringFormatFlags.NoWrap;
+
+			if (endEllipsis)
+				format.Trimming = StringTrimming.EllipsisCharacter;
+
+			graphics.DrawString(text, this.Font, brush, rect, format);
+		}
+
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+
+			if (ClientRectangle.Width <= MinTaskMatchesWidth)
+				return;
+			
+			// Resize first column to fill remaining width
+			Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
+			Update();
+		}
 	}
 }
 

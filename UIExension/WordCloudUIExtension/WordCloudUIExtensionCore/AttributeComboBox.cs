@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	class AttributeComboBox : System.Windows.Forms.ComboBox
+	class AttributeComboBox : ComboBox
     {
         protected class AttributeItem
         {

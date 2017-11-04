@@ -16,22 +16,22 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-// PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
-
 ///////////////////////////////////////////////////////////////////////////
 
 namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class WordCloudUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
+	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
         private const int LabelTop = 2;
 		private const int ComboTop = 20;
         private const int LabelHeight = (ComboTop - LabelTop);
-        private const int ComboHeight = 20;
+        private const int ComboHeight = 16;
         private const int ControlTop = 49;
-		private const int MatchesWidth = 200;
+		private const int ComboWidth = 200;
+		private const int ComboSpacing = 6;
 		private const int SplitterWidth = 6;
+		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
 
         // -------------------------------------------------------------
@@ -52,10 +52,15 @@ namespace WordCloudUIExtension
 
         // -------------------------------------------------------------
 
+        // -------------------------------------------------------------
+
 		private IntPtr m_HwndParent;
         private UIExtension.TaskAttribute m_Attrib;
 		private Translator m_Trans;
+
 		private bool m_Splitting;
+		private Color m_SplitterColor;
+		private int m_InitialSplitPos;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -63,14 +68,14 @@ namespace WordCloudUIExtension
 		private IgnoreSelChanges m_IgnoreSelChanges;
 
         private StyleComboBox m_StylesCombo;
-		private System.Windows.Forms.Label m_StylesLabel;
+		private Label m_StylesLabel;
 		private AttributeComboBox m_AttributeCombo;
-        private System.Windows.Forms.Label m_AttributeLabel;
+        private Label m_AttributeLabel;
         private ColorSchemeComboBox m_ColorsCombo;
-        private System.Windows.Forms.Label m_ColorsLabel;
+        private Label m_ColorsLabel;
 		private TaskMatchesListView m_TaskMatchesList;
 
-		private System.Drawing.Font m_ControlsFont;
+		private Font m_ControlsFont;
 
         // -------------------------------------------------------------
 
@@ -81,8 +86,12 @@ namespace WordCloudUIExtension
 			m_Attrib = UIExtension.TaskAttribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
-			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8);
 			m_IgnoreSelChanges = IgnoreSelChanges.None;
+
+			m_Splitting = false;
+			m_InitialSplitPos = -1;
+			m_SplitterColor = Color.Gray;
 
 			InitializeComponent();
 		}
@@ -199,19 +208,23 @@ namespace WordCloudUIExtension
 			if (selStyle != null)
 			{
 				if (selStyle.Sorted)
-					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByText();
+					m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByText();
 				else
-					this.m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
+					m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
 			}
 		}
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
 		{
-			if (AttributeComboBox.IsSupportedAttribute(attrib))
-				return true;
+			switch (attrib)
+			{
+				case UIExtension.TaskAttribute.Icon:
+				case UIExtension.TaskAttribute.Color:
+					return true;
+			}
 
-			// else
-			return (attrib == UIExtension.TaskAttribute.Icon);
+			// all else
+			return AttributeComboBox.IsSupportedAttribute(attrib);
 		}
 	   
 		public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
@@ -260,7 +273,7 @@ namespace WordCloudUIExtension
 
 		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
 		{
-			System.Drawing.Point ptClient = m_TaskMatchesList.PointToClient(new System.Drawing.Point(xPos, yPos));
+			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
 			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
 
 			if (lvHit.Item != null)
@@ -273,6 +286,7 @@ namespace WordCloudUIExtension
 		public void SetUITheme(UITheme theme)
 		{
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_SplitterColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 
 			m_AttributeLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_ColorsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
@@ -286,6 +300,7 @@ namespace WordCloudUIExtension
 		{
 			prefs.WriteProfileInt(key, "AttribToTrack", (int)m_Attrib);
 			prefs.WriteProfileString(key, "ColorScheme", m_ColorsCombo.GetSelectedSchemeAsString());
+			prefs.WriteProfileInt(key, "SplitterPosFromRight", (ClientRectangle.Right - SplitterCentre().X));
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -327,6 +342,8 @@ namespace WordCloudUIExtension
 
 				if (!m_ColorsCombo.SetSelectedScheme(scheme))
 					m_ColorsCombo.SelectedIndex = 0;
+
+				m_InitialSplitPos = prefs.GetProfileInt(key, "SplitterPosFromRight", MatchListDefaultWidth);
 			}
 		}
 		
@@ -334,14 +351,14 @@ namespace WordCloudUIExtension
 
 		private void InitializeComponent()
 		{
-			this.BackColor = System.Drawing.Color.White;
-			this.m_Items = new Dictionary<UInt32, CloudTaskItem>();
+			this.BackColor = Color.White;
+			m_Items = new Dictionary<UInt32, CloudTaskItem>();
 
 			CreateWordCloud();
+			CreateTaskMatchesListView();
             CreateAttributeCombo();
 			CreateColorSchemeCombo();
 			CreateStyleCombo();
-			CreateTaskMatchesListView();
 
 			Invalidate(true);
 		}
@@ -349,151 +366,169 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			this.m_WordCloud = new TdlCloudControl(this.Handle, m_Trans, FontName);
+			m_WordCloud = new TdlCloudControl(this.Handle, m_Trans, FontName);
 
-			this.m_WordCloud.Location = new System.Drawing.Point(0, ControlTop);
-			this.m_WordCloud.Size = new System.Drawing.Size(798, 328);
+			m_WordCloud.Location = new Point(0, ControlTop);
+			m_WordCloud.Size = new Size(100, 100);
+			m_WordCloud.Cursor = Cursors.Default;
+			m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
 
 			this.Controls.Add(m_WordCloud);
 
-			this.m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
+			m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
 
 		}
 
 		private void CreateTaskMatchesListView()
 		{
-			this.m_TaskMatchesList = new TaskMatchesListView(m_HwndParent);
-			this.m_TaskMatchesList.Initialise(m_Trans);
+			m_TaskMatchesList = new TaskMatchesListView(m_HwndParent);
+			m_TaskMatchesList.Initialise(m_Trans);
 
-			this.m_TaskMatchesList.Font = m_ControlsFont;
-			this.m_TaskMatchesList.Location = new System.Drawing.Point(0, ComboTop);
-			this.m_TaskMatchesList.Size = new System.Drawing.Size(200, 500);
+			m_TaskMatchesList.Font = m_ControlsFont;
+			m_TaskMatchesList.Location = new Point(0, ComboTop);
+			m_TaskMatchesList.Size = new Size(MatchListDefaultWidth, 100);
+			m_TaskMatchesList.Cursor = Cursors.Default;
+			m_TaskMatchesList.BorderStyle = BorderStyle.None;
 
 			this.Controls.Add(m_TaskMatchesList);
 
 			// Add message handlers
-			this.m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
+			m_TaskMatchesList.SelectedIndexChanged += new EventHandler(OnTaskMatchesSelChanged);
 		}
 
 		private void CreateAttributeCombo()
 		{
 			// Label
-			this.m_AttributeLabel = new System.Windows.Forms.Label();
-
-            this.m_AttributeLabel.Font = m_ControlsFont;
-			this.m_AttributeLabel.Location = new System.Drawing.Point(-2, LabelTop);
-			this.m_AttributeLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_AttributeLabel.Text = m_Trans.Translate("&Attribute to 'track'");
-			this.m_AttributeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-
-			this.Controls.Add(m_AttributeLabel);
+			m_AttributeLabel = InitialiseLabel(new Label(), "&Attribute to 'track'", null);
 
 			// Combo
-			this.m_AttributeCombo = new AttributeComboBox();
-
-            this.m_AttributeCombo.Font = m_ControlsFont;
-			this.m_AttributeCombo.Location = new System.Drawing.Point(0, ComboTop);
-			this.m_AttributeCombo.Size = new System.Drawing.Size(200, 16);
-			this.m_AttributeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_AttributeCombo.Initialise(m_Trans);
-
-			this.Controls.Add(m_AttributeCombo);
+			m_AttributeCombo = (AttributeComboBox)InitialiseCombo(new AttributeComboBox(), null);
+			m_AttributeCombo.Initialise(m_Trans);
 
 			// Add selection change handler
-			this.m_AttributeCombo.SelectedIndexChanged += new EventHandler(OnAttributeSelChanged);
+			m_AttributeCombo.SelectedIndexChanged += new EventHandler(OnAttributeSelChanged);
 		}
 
 		private void CreateColorSchemeCombo()
 		{
 			// Label
-			this.m_ColorsLabel = new System.Windows.Forms.Label();
-
-			this.m_ColorsLabel.Font = m_ControlsFont;
-			this.m_ColorsLabel.Location = new System.Drawing.Point(218, LabelTop);
-			this.m_ColorsLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_ColorsLabel.Text = m_Trans.Translate("&Colour Scheme");
-			this.m_ColorsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-
-			this.Controls.Add(m_ColorsLabel);
+			m_ColorsLabel = InitialiseLabel(new Label(), "&Colour Scheme", m_AttributeLabel);
 
 			// Combo
-			this.m_ColorsCombo = new ColorSchemeComboBox();
-
-            this.m_ColorsCombo.Font = m_ControlsFont;
-			this.m_ColorsCombo.Location = new System.Drawing.Point(220, ComboTop);
-			this.m_ColorsCombo.Size = new System.Drawing.Size(200, 16);
-			this.m_ColorsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-
-			this.Controls.Add(m_ColorsCombo);
+			m_ColorsCombo = (ColorSchemeComboBox)InitialiseCombo(new ColorSchemeComboBox(), m_AttributeCombo);
 
 			// Add selection change handler
-			this.m_ColorsCombo.SelectedIndexChanged += new EventHandler(OnColorSchemeSelChanged);
+			m_ColorsCombo.SelectedIndexChanged += new EventHandler(OnColorSchemeSelChanged);
 		}
 
 		private void CreateStyleCombo()
 		{
 			// Label
-			this.m_StylesLabel = new System.Windows.Forms.Label();
-
-			this.m_StylesLabel.Font = m_ControlsFont;
-			this.m_StylesLabel.Location = new System.Drawing.Point(438, LabelTop);
-			this.m_StylesLabel.Size = new System.Drawing.Size(200, 16);
-			this.m_StylesLabel.Text = m_Trans.Translate("&Style");
-			this.m_StylesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-
-			this.Controls.Add(m_StylesLabel);
+			m_StylesLabel = InitialiseLabel(new Label(), "&Style", m_ColorsLabel);
 
 			// Combo
-			this.m_StylesCombo = new StyleComboBox();
-			this.m_StylesCombo.Initialise(m_Trans);
+			m_StylesCombo = (StyleComboBox)InitialiseCombo(new StyleComboBox(), m_ColorsCombo);
 
-			this.m_StylesCombo.Font = m_ControlsFont;
-			this.m_StylesCombo.Location = new System.Drawing.Point(440, ComboTop);
-			this.m_StylesCombo.Size = new System.Drawing.Size(200, 16);
-			this.m_StylesCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-
-			this.m_StylesCombo.SetSelectedStyle(Gma.CodeCloud.Controls.LayoutType.Spiral);
-			this.m_WordCloud.LayoutType = Gma.CodeCloud.Controls.LayoutType.Spiral;
-
-			this.Controls.Add(m_StylesCombo);
+			m_StylesCombo.Initialise(m_Trans);
+			m_StylesCombo.SetSelectedStyle(Gma.CodeCloud.Controls.LayoutType.Spiral);
 
 			// Add selection change handler
-			this.m_StylesCombo.SelectedIndexChanged += new EventHandler(OnStyleComboSelChanged);
+			m_StylesCombo.SelectedIndexChanged += new EventHandler(OnStyleComboSelChanged);
 		}
 
-		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
-        {
-            System.Drawing.Rectangle border = new System.Drawing.Rectangle(m_WordCloud.Location, m_WordCloud.Size);
-			border.Inflate(1, 1);
+		protected Label InitialiseLabel(Label label, String labelText, Label prevLabel)
+		{
+			if (prevLabel == null)
+				label.Location = new Point(-2, LabelTop);
+			else
+				label.Location = new Point(prevLabel.Right + ComboSpacing, LabelTop);
 
-            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
+			label.Size = new Size(ComboWidth, LabelHeight);
+			label.Text = m_Trans.Translate(labelText);
+			label.TextAlign = ContentAlignment.MiddleLeft;
+			label.Font = m_ControlsFont;
+
+			this.Controls.Add(label);
+			return label;
+		}
+
+		protected ComboBox InitialiseCombo(ComboBox combo, ComboBox prevCombo)
+		{
+			if (prevCombo == null)
+				combo.Location = new Point(0, ComboTop);
+			else
+				combo.Location = new Point(prevCombo.Right + ComboSpacing, ComboTop);
+			
+			combo.Size = new Size(ComboWidth, ComboHeight);
+			combo.DropDownStyle = ComboBoxStyle.DropDownList;
+			combo.Font = m_ControlsFont;
+
+			this.Controls.Add(combo);
+			return combo;
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+        {
+			// border around Word cloud and Task match list
+            Rectangle border = new Rectangle(Location.X, ControlTop, Size.Width, (Size.Height - ControlTop));
+
+            ControlPaint.DrawBorder(e.Graphics, border, Color.DarkGray, ButtonBorderStyle.Solid);
+
+			// Splitter bar
+			Rectangle splitterRect = SplitterRect();
+
+			using (var brush = new SolidBrush(m_SplitterColor))
+				e.Graphics.FillRectangle(brush, splitterRect);
+
+			ControlPaint.DrawBorder(e.Graphics, splitterRect, Color.DarkGray, ButtonBorderStyle.Solid);
+
+			// draw drag marker (2 x 20)
+			Point splitCentre = SplitterCentre();
+			Rectangle markerRect = new Rectangle((splitCentre.X - 1), (splitCentre.Y - 10), 2, 20);
+
+			// use the splitter colour luminance to decide whether
+			// to draw the marker lighter or darker
+			Color markerColor;
+
+			if (m_SplitterColor.GetBrightness() > 0.5f)
+				markerColor = ColorUtil.DarkerDrawing(m_SplitterColor, 0.3f);
+			else
+				markerColor = ColorUtil.LighterDrawing(m_SplitterColor, 0.3f);
+
+			using (var brush = new SolidBrush(markerColor))
+				e.Graphics.FillRectangle(brush, markerRect);
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
 
-            System.Drawing.Rectangle wordCloudRect = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-			System.Drawing.Rectangle taskMatchesRect = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			if (ClientRectangle.IsEmpty)
+				return;
 
-			taskMatchesRect.X = (taskMatchesRect.Right - MatchesWidth);
-			taskMatchesRect.Y = ControlTop;
-			taskMatchesRect.Width = MatchesWidth;
-			taskMatchesRect.Height -= ControlTop;
+			Rectangle baseRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+
+			// Adjust for border
+			baseRect.Inflate(-1, -1);
+			baseRect.Y = (ControlTop + 1);
+			baseRect.Height -= (ControlTop + 1);
+
+			Rectangle wordCloudRect = new Rectangle(baseRect.Location, baseRect.Size);
+			Rectangle taskMatchesRect = new Rectangle(baseRect.Location, baseRect.Size);
+			Rectangle splitterRect = SplitterRect();
+
+			taskMatchesRect.X = splitterRect.Right;
+			taskMatchesRect.Width = (baseRect.Right - splitterRect.Right);
 
 			m_TaskMatchesList.Location = taskMatchesRect.Location;
 			m_TaskMatchesList.Size = taskMatchesRect.Size;
-			
-			wordCloudRect.Width -= (MatchesWidth + 3);
-            wordCloudRect.Y = ControlTop;
-            wordCloudRect.Height -= ControlTop;
-			wordCloudRect.Inflate(-1, -1); // for border
+
+			wordCloudRect.Width = (splitterRect.Left - baseRect.Left);
 
             m_WordCloud.Location = wordCloudRect.Location;
             m_WordCloud.Size = wordCloudRect.Size;
 
-            Win32.RemoveBorder(m_WordCloud.Handle);
-            Win32.RemoveClientEdge(m_WordCloud.Handle);
+
 
 			Invalidate(true);
         }
@@ -594,7 +629,7 @@ namespace WordCloudUIExtension
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			if (IsPtInSplitter(e.Location))
+			if (PtInSplitter(e.Location))
 			{
 				m_Splitting = true;
 				Capture = true;
@@ -620,18 +655,9 @@ namespace WordCloudUIExtension
 		{
 			if (m_Splitting)
 			{
-				int newSplitLeft = (e.Location.X - (SplitterWidth / 2));
-				int newSplitRight = (newSplitLeft + SplitterWidth);
-
-				m_WordCloud.Width = newSplitLeft;
-
-				m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
-				m_TaskMatchesList.Left = newSplitRight;
-
-				Invalidate(false);
-				Update();
+				UpdateSplitPos(e.X);
 			}
-			else if (IsPtInSplitter(e.Location))
+			else if (PtInSplitter(e.Location))
 			{
 				Cursor = Cursors.VSplit;
 			}
@@ -643,14 +669,59 @@ namespace WordCloudUIExtension
 			base.OnMouseMove(e);
 		}
 
-		protected bool IsPtInSplitter(Point pt)
+		protected void UpdateSplitPos(int horzSplitCentre)
 		{
-			Rectangle splitRect = new Rectangle(m_WordCloud.Width, 
-												m_WordCloud.Top, 
-												SplitterWidth, 
-												m_WordCloud.Height);
+			int newSplitLeft = (horzSplitCentre - (SplitterWidth / 2));
+			int newSplitRight = (newSplitLeft + SplitterWidth);
 
-			return splitRect.Contains(pt);
+			m_WordCloud.Width = (newSplitLeft - 1); // account for border
+
+			m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
+			m_TaskMatchesList.Left = newSplitRight;
+
+			Invalidate(false);
+			Update();
+		}
+
+		protected Rectangle SplitterRect()
+		{
+			// Splitter pos measured from RHS
+			Rectangle splitterRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			splitterRect.Inflate(-1, 0);
+
+			// Initialise split pos first time only
+			if (!ClientRectangle.IsEmpty && (m_InitialSplitPos > 0))
+			{
+				splitterRect.X = (ClientRectangle.Right - m_InitialSplitPos - (SplitterWidth / 2));
+				splitterRect.Width = SplitterWidth;
+
+				m_InitialSplitPos = -1;
+			}
+			else
+			{
+				splitterRect.X = (splitterRect.Right - m_TaskMatchesList.Width - SplitterWidth);
+				splitterRect.Width = SplitterWidth;
+			}
+
+			splitterRect.Y = ControlTop;
+			splitterRect.Height = (splitterRect.Height - ControlTop);
+
+			return splitterRect;
+		}
+
+		protected Point SplitterCentre()
+		{
+			// Splitter pos measured from RHS
+			Rectangle splitterRect = SplitterRect();
+			Point centrePt = new Point(splitterRect.Left + (SplitterWidth / 2),
+										splitterRect.Top + (splitterRect.Height / 2));
+
+			return centrePt;
+		}
+
+		protected bool PtInSplitter(Point pt)
+		{
+			return SplitterRect().Contains(pt);
 		}
 
 	}
