@@ -15,6 +15,7 @@ namespace WordCloudUIExtension
 
 		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
+
 		private bool m_TaskMatchesHaveIcons;
 
 		public TaskMatchesListView(IntPtr hwndParent)
@@ -39,6 +40,7 @@ namespace WordCloudUIExtension
 				this.OwnerDraw = true;
 				this.Sorting = SortOrder.Ascending;
 				this.HeaderStyle = ColumnHeaderStyle.Clickable;
+				this.DoubleBuffered = true;
 			}
 
             return true;
@@ -214,12 +216,6 @@ namespace WordCloudUIExtension
 			this.Sorting = (this.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending);
 			Sort();
 		}
-
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-		}
-
 
 	}
 }

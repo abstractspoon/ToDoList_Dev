@@ -31,6 +31,7 @@ namespace WordCloudUIExtension
         private const int ComboHeight = 20;
         private const int ControlTop = 49;
 		private const int MatchesWidth = 200;
+		private const int SplitterWidth = 6;
         private const string FontName = "Tahoma";
 
         // -------------------------------------------------------------
@@ -54,6 +55,7 @@ namespace WordCloudUIExtension
 		private IntPtr m_HwndParent;
         private UIExtension.TaskAttribute m_Attrib;
 		private Translator m_Trans;
+		private bool m_Splitting;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -589,5 +591,67 @@ namespace WordCloudUIExtension
 
 			parent.NotifySelChange(taskId);
 		}
+
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+			if (IsPtInSplitter(e.Location))
+			{
+				m_Splitting = true;
+				Capture = true;
+
+				return;
+			}
+
+			base.OnMouseDown(e);
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			if (m_Splitting)
+			{
+				m_Splitting = false;
+				Capture = false;
+			}
+
+			base.OnMouseUp(e);
+		}
+
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			if (m_Splitting)
+			{
+				int newSplitLeft = (e.Location.X - (SplitterWidth / 2));
+				int newSplitRight = (newSplitLeft + SplitterWidth);
+
+				m_WordCloud.Width = newSplitLeft;
+
+				m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
+				m_TaskMatchesList.Left = newSplitRight;
+
+				Invalidate(false);
+				Update();
+			}
+			else if (IsPtInSplitter(e.Location))
+			{
+				Cursor = Cursors.VSplit;
+			}
+			else
+			{
+				Cursor = Cursors.Default;
+			}
+
+			base.OnMouseMove(e);
+		}
+
+		protected bool IsPtInSplitter(Point pt)
+		{
+			Rectangle splitRect = new Rectangle(m_WordCloud.Width, 
+												m_WordCloud.Top, 
+												SplitterWidth, 
+												m_WordCloud.Height);
+
+			return splitRect.Contains(pt);
+		}
+
 	}
 }
