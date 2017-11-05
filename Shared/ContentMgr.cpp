@@ -176,9 +176,10 @@ BOOL CContentMgr::CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nC
 
 	if (nContent >= 0 && nContent < m_aContent.GetSize())
 	{
-		ASSERT (m_aContent[nContent] != NULL);
+		IContent* pContent = m_aContent[nContent];
+		ASSERT (pContent != NULL);
 
-		IContentControl* pControl = m_aContent[nContent]->CreateCtrl((WORD)nCtrlID, nStyle, rect.left, 
+		IContentControl* pControl = pContent->CreateCtrl((WORD)nCtrlID, nStyle, rect.left, 
 															rect.top, rect.Width(), rect.Height(), hwndParent);
 
 		if (pControl && pControl->GetHwnd())
