@@ -12,6 +12,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace System;
+using namespace Windows::Forms;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -281,7 +283,7 @@ bool UIExtension::TaskIcon::Get(UInt32 dwTaskID)
 	return false;
 }
 
-bool UIExtension::TaskIcon::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y)
+bool UIExtension::TaskIcon::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
 {
 	if ((m_hilTaskImages == NULL) || (m_iImage == -1))
 		return false;
@@ -305,13 +307,16 @@ UIExtension::SelectionRect::SelectionRect()
 	const int LVP_LISTITEM = 1;
 	const int LISS_MORESELECTED = 6;
 
-	auto visElm = System::Windows::Forms::VisualStyles::VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
+	if (VisualStyles::VisualStyleRenderer::IsSupported)
+	{
+		auto visElm = VisualStyles::VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
 
-	if (visElm && System::Windows::Forms::VisualStyles::VisualStyleRenderer::IsElementDefined(visElm))
-		m_visExplorerSelected = gcnew System::Windows::Forms::VisualStyles::VisualStyleRenderer(visElm);
+		if (visElm && VisualStyles::VisualStyleRenderer::IsElementDefined(visElm))
+			m_visExplorerSelected = gcnew VisualStyles::VisualStyleRenderer(visElm);
+	}
 }
 
-bool UIExtension::SelectionRect::Draw(IntPtr hwnd, System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
 	bool focused = (::GetFocus() == hWndRef);
@@ -319,13 +324,13 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, System::Drawing::Graphics^ dc
 	return Draw(dc, x, y, cx, cy, focused);
 }
 
-bool UIExtension::SelectionRect::Draw(System::Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
+bool UIExtension::SelectionRect::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
 {
 	if (m_visExplorerSelected)
 	{
-		dc->FillRectangle(System::Drawing::Brushes::White, x, y, cx, cy);
+		dc->FillRectangle(Drawing::Brushes::White, x, y, cx, cy);
 
-		auto rect = gcnew System::Drawing::Rectangle(x, y, cx, cy);
+		auto rect = gcnew Drawing::Rectangle(x, y, cx, cy);
 
 		m_visExplorerSelected->DrawBackground(dc, *rect);
 
@@ -334,17 +339,17 @@ bool UIExtension::SelectionRect::Draw(System::Drawing::Graphics^ dc, Int32 x, In
 	}
 	else
 	{
-		auto fillColour = System::Drawing::Color::FromArgb(255, 175, 195, 240);
-		auto textColour = System::Drawing::Color::FromArgb(255, 50, 105, 200);
+		auto fillColour = Drawing::Color::FromArgb(255, 175, 195, 240);
+		auto textColour = Drawing::Color::FromArgb(255, 50, 105, 200);
 
 		if (!focused)
 		{
-			fillColour = System::Drawing::Color::FromArgb(GetSysColor(COLOR_3DFACE));
-			textColour = System::Drawing::Color::FromArgb(GetSysColor(COLOR_3DSHADOW));
+			fillColour = Drawing::Color::FromArgb(GetSysColor(COLOR_3DFACE));
+			textColour = Drawing::Color::FromArgb(GetSysColor(COLOR_3DSHADOW));
 		}
 
-		auto brush = gcnew System::Drawing::SolidBrush(fillColour);
-		auto pen = gcnew System::Drawing::Pen(textColour);
+		auto brush = gcnew Drawing::SolidBrush(fillColour);
+		auto pen = gcnew Drawing::Pen(textColour);
 
 		dc->FillRectangle(brush, x, y, cx, cy);
 		dc->DrawRectangle(pen, x, y, cx, cy);

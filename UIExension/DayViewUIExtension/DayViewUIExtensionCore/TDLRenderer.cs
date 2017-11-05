@@ -16,15 +16,18 @@ namespace DayViewUIExtension
         public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
         {
             // One time initialisation
-            if (Application.RenderWithVisualStyles)
+            if (m_SelectionRect == null)
             {
                 m_SelectionRect = new UIExtension.SelectionRect();
 
-                if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Normal))
-                    m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
+                if (VisualStyleRenderer.IsSupported)
+                {
+                    if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Normal))
+                        m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
 
-                if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Hot))
-                    m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
+                    if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Hot))
+                        m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
+                }
             }
 
 			m_TaskIcons = taskIcons;
