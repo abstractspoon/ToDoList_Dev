@@ -710,7 +710,7 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 
 	if (nStartPos == -1)
 	{
-		ASSERT(0);
+		ASSERT(aSortStrings.GetSize() == 0);
 		return FALSE;
 	}
 
