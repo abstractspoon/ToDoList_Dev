@@ -63,7 +63,6 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const { return GetSafeHwnd(); }
 	LPCTSTR GetTypeID() const { return _T("PLAIN_TEXT"); }
-	void Release() { DestroyWindow(); delete this; }
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* /*pMsg*/) {}
 	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
@@ -113,6 +112,7 @@ protected:
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNcDestroy();
 
 	DECLARE_MESSAGE_MAP()
 

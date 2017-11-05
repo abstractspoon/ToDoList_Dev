@@ -184,6 +184,8 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
+	ON_WM_NCDESTROY()
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -193,6 +195,13 @@ BOOL CTDLSimpleTextContentCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	GetParent()->SendMessage(WM_ICC_DOHELP, 0, SIMPLETEXT_COMMENTS);
 	return TRUE;
+}
+
+void CTDLSimpleTextContentCtrl::OnNcDestroy()
+{
+	CUrlRichEditCtrl::OnNcDestroy();
+
+	delete this;
 }
 
 BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
