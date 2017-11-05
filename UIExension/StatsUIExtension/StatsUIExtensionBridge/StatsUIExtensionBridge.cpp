@@ -84,7 +84,7 @@ IUIExtensionWindow* CStatsUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
    if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
    {
-      pExtWnd->Release();
+      delete pExtWnd;
       pExtWnd = NULL;
    }
 
@@ -106,12 +106,6 @@ void CStatsUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWST
 CStatsUIExtensionBridgeWindow::CStatsUIExtensionBridgeWindow()
 {
 
-}
-
-void CStatsUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CStatsUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 

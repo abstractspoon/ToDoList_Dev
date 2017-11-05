@@ -81,7 +81,7 @@ IUIExtensionWindow* CWordCloudUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -104,14 +104,6 @@ CWordCloudUIExtensionBridgeWindow::CWordCloudUIExtensionBridgeWindow(ITransText*
 	: m_pTT(pTT)
 {
 
-}
-
-void CWordCloudUIExtensionBridgeWindow::Release()
-{
-	// Detach from our parent to prevent it trying to clean us up
-	::SetParent(GetHwnd(), NULL);
-
-	delete this;
 }
 
 BOOL CWordCloudUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 

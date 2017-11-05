@@ -36,9 +36,7 @@ class CSampleUIExtensionBridgeWindow : public IUIExtensionWindow
 public:
 	CSampleUIExtensionBridgeWindow();
 
-   void Release(); // releases the interface
-   BOOL Create(UINT nCtrlID, DWORD nStyle, 
-      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+   BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    HICON GetIcon() const;
    LPCWSTR GetMenuText() const; // caller must copy result only

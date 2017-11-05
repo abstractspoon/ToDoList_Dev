@@ -39,9 +39,7 @@ class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
 public:
 	CDayViewUIExtensionBridgeWindow(ITransText* pTT);
 
-   void Release(); // releases the interface
-   BOOL Create(UINT nCtrlID, DWORD nStyle, 
-      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+   BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    HICON GetIcon() const;
    LPCWSTR GetMenuText() const; // caller must copy result only

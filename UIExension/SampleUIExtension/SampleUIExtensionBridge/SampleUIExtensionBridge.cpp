@@ -75,7 +75,7 @@ IUIExtensionWindow* CSampleUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -97,12 +97,6 @@ void CSampleUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWS
 CSampleUIExtensionBridgeWindow::CSampleUIExtensionBridgeWindow()
 {
 
-}
-
-void CSampleUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CSampleUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 

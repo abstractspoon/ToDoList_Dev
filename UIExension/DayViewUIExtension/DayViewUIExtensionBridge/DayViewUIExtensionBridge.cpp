@@ -81,7 +81,7 @@ IUIExtensionWindow* CDayViewUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -104,12 +104,6 @@ CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow(ITransText* pTT
 	: m_pTT(pTT)
 {
 
-}
-
-void CDayViewUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
