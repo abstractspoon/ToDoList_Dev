@@ -4127,7 +4127,8 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 		}
 		else
 		{
-			ExtensionDoAppCommand(nView, IUI_SORT, pVData->sort.single.nBy);
+			IUI_ATTRIBUTE nSort = TDC::MapColumnToIUIAttribute(pVData->sort.single.nBy);
+			ExtensionDoAppCommand(nView, IUI_SORT, nSort);
 		}
 	}
 	else
