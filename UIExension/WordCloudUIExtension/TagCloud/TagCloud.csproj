@@ -81,9 +81,7 @@
       <DependentUpon>RenameItem.cs</DependentUpon>
     </Compile>
     <Compile Include="Statistics.cs" />
-    <Compile Include="TagCloudControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="TagCloudControl.cs" />
     <Compile Include="TagCloudControl.Designer.cs">
       <DependentUpon>TagCloudControl.cs</DependentUpon>
     </Compile>

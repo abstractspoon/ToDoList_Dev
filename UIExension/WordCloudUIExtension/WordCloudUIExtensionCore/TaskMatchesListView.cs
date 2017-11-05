@@ -32,7 +32,6 @@ namespace WordCloudUIExtension
         {
 			if (this.Columns.Count == 0) // once only
 			{
-
 				this.Columns.Add(trans.Translate("Task Matches"));
 				this.Columns.Add(trans.Translate("ID"));
 

@@ -11,6 +11,8 @@ using System.Globalization;
 
 namespace TagCloud
 {
+  [System.ComponentModel.DesignerCategory("")]
+
   public partial class TagCloudControl : UserControl
   {
     #region Class CloudItem
