@@ -178,21 +178,24 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 		hwndOld = oldView.hwndView;
 	}
 
+	if (!rView.IsRectEmpty())
+		::MoveWindow(hwndNew, rView.left, rView.top, rView.Width(), rView.Height(), FALSE);
+
+	{
+		CHoldRedraw hr(hwndNew, NCR_ALL);
+
+		if (hwndOld)
+			::ShowWindow(hwndOld, SW_HIDE);
+		
+		::ShowWindow(hwndNew, SW_SHOW);
+	}
+		
 	m_nSelTab = nTab;
 	SetCurSel(nTab);
 	UpdateTabItemWidths(FALSE);
 
-	// Resize and show the new view
-	if (!rView.IsRectEmpty())
-		::MoveWindow(hwndNew, rView.left, rView.top, rView.Width(), rView.Height(), FALSE);
+	// Make sure the spin control is always drawn
 
-	CHoldRedraw hr(hwndNew, NCR_ALL);
-
-	if (hwndOld)
-		::ShowWindow(hwndOld, SW_HIDE);
-		
-	::ShowWindow(hwndNew, SW_SHOW);
-		
 	return TRUE;
 }
 
