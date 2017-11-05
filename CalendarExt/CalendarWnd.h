@@ -35,7 +35,6 @@ public:
 	virtual ~CCalendarWnd();
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
-	void Release();
 
 	// IUIExtensionWindow
 	LPCTSTR GetTypeID() const { return CAL_TYPEID; }
@@ -114,7 +113,8 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	
+	afx_msg void OnNcDestroy();
+
 	afx_msg LRESULT OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarNotifyDragChange(WPARAM wp, LPARAM lp);

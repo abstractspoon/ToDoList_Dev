@@ -32,7 +32,6 @@ public:
 
 	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
-	void Release();
 
 	LPCTSTR GetMenuText() const { return _T("Gantt Chart"); }
 	HICON GetIcon() const { return m_icon; }
@@ -122,6 +121,7 @@ protected:
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnNcDestroy();
 
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);

@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_WM_SETFOCUS()
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_GANTTTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
+	ON_WM_NCDESTROY()
 
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
@@ -116,6 +117,13 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd message handlers
+
+void CGanttChartWnd::OnNcDestroy()
+{
+	CDialog::OnNcDestroy();
+	
+	delete this;
+}
 
 void CGanttChartWnd::OnHelp()
 {
@@ -498,16 +506,6 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	BuildDisplayCombo();
 
 	UpdateSelectedTaskDates();
-}
-
-void CGanttChartWnd::Release()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (GetSafeHwnd())
-		DestroyWindow();
-	
-	delete this;
 }
 
 bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 

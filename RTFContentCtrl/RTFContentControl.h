@@ -38,7 +38,6 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const;
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
-	void Release();
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
@@ -137,6 +136,7 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNcDestroy();
 
 	DECLARE_MESSAGE_MAP()
 

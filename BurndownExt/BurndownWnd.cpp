@@ -371,10 +371,18 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_REBUILDGRAPH, OnRebuildGraph)
+	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd message handlers
+
+void CBurndownWnd::OnNcDestroy()
+{
+	CDialog::OnNcDestroy();
+	
+	delete this;
+}
 
 void CBurndownWnd::OnHelp()
 {
@@ -860,16 +868,6 @@ BOOL CBurndownWnd::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	}
 
 	return (m_data.GetSize() != nOrgCount);
-}
-
-void CBurndownWnd::Release()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (GetSafeHwnd())
-		DestroyWindow();
-	
-	delete this;
 }
 
 bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 

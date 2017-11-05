@@ -312,8 +312,6 @@ public:
 
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly) = 0;
-
-	virtual void Release() = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

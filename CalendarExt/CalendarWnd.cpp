@@ -88,10 +88,18 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_VISIBLEWEEKCHANGE, OnBigCalendarNotifyVisibleWeekChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_PREFSHELP, OnBigCalendarPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKICON, OnBigCalendarGetTaskIcon)
+	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarWnd message handlers
+
+void CCalendarWnd::OnNcDestroy()
+{
+	CDialog::OnNcDestroy();
+	
+	delete this;
+}
 
 void CCalendarWnd::OnHelp()
 {
@@ -504,16 +512,6 @@ void CCalendarWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	m_BigCalendar.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
 
 	UpdateSelectedTaskDates();
-}
-
-void CCalendarWnd::Release()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (GetSafeHwnd())
-		DestroyWindow();
-	
-	delete this;
 }
 
 void CCalendarWnd::OnSetFocus(CWnd* /*pOldWnd*/)

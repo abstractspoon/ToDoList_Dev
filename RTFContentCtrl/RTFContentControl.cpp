@@ -138,10 +138,18 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
 	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
+	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
+
+void CRTFContentControl::OnNcDestroy()
+{
+	CRulerRichEditCtrl::OnNcDestroy();
+	
+	delete this;
+}
 
 LRESULT CRTFContentControl::OnPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 {
@@ -341,14 +349,6 @@ void CRTFContentControl::SetReadOnly(bool bReadOnly)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	CRulerRichEditCtrl::SetReadOnly((BOOL)bReadOnly);
-}
-
-void CRTFContentControl::Release()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	DestroyWindow();
-	delete this;
 }
 
 void CRTFContentControl::EnableMenuItem(CMenu* pMenu, UINT nCmdID, BOOL bEnable)

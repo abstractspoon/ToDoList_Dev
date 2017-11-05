@@ -102,10 +102,18 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanGetTaskIcon)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
+	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanWnd message handlers
+
+void CKanbanWnd::OnNcDestroy()
+{
+	CDialog::OnNcDestroy();
+
+	delete this;
+}
 
 LRESULT CKanbanWnd::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
@@ -499,16 +507,6 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 
 		EnableDisableCtrls();
 	}
-}
-
-void CKanbanWnd::Release()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (GetSafeHwnd())
-		DestroyWindow();
-	
-	delete this;
 }
 
 bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 

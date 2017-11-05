@@ -188,9 +188,6 @@ BOOL CContentMgr::CreateContentControl(int nContent, CContentCtrl& ctrl, UINT nC
 
 			return ctrl.Attach(pControl);
 		}
-
-		if (pControl)
-			pControl->Release();
 	}
 
 	// else

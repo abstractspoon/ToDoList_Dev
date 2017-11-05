@@ -463,7 +463,7 @@ void CTabbedToDoCtrl::OnDestroy()
 		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 
 		if (pExtWnd)
-			pExtWnd->Release();
+			::DestroyWindow(pExtWnd->GetHwnd());
 	}
 	m_aExtViews.RemoveAll();
 			
@@ -554,10 +554,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	ASSERT (hWnd);
 	
 	if (!hWnd)
-	{
-		pExtWnd->Release();
 		return NULL;
-	}
 	
 	pExtWnd->SetUITheme(&m_theme);
 	pExtWnd->SetReadOnly(HasStyle(TDCS_READONLY) != FALSE);
@@ -3739,7 +3736,7 @@ BOOL CTabbedToDoCtrl::RemoveView(IUIExtension* pExtension)
 			if (sExtType == sExtWndType)
 			{
 				VERIFY (m_tabViews.DetachView(pExtWnd->GetHwnd()));
-				pExtWnd->Release();
+				::DestroyWindow(pExtWnd->GetHwnd());
 
 				m_aExtViews.RemoveAt(nView);
 

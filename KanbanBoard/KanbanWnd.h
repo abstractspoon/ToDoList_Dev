@@ -31,7 +31,6 @@ public:
 
 	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
-	void Release();
 
 	LPCTSTR GetMenuText() const { return _T("Kanban"); } 
 	HICON GetIcon() const { return m_icon; }
@@ -110,6 +109,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
+	afx_msg void OnNcDestroy();
 
 	afx_msg LRESULT OnKanbanNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp);

@@ -85,8 +85,8 @@ public:
 	static int GetMenuStrings(HMENU hMenu, CStringArray& aItems);
 	static BOOL SetMenuStrings(HMENU hMenu, const CStringArray& aItems);
 	static BOOL SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd);
-	static int GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems);
-	static BOOL GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems, CStringArray& aItemText);
+	static int GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems);
+	static BOOL GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems, CStringArray& aItemText);
 
 protected:
 	static ITransText* s_pTT;

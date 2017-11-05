@@ -732,7 +732,7 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 	return TRUE;
 }
 
-int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems)
+int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems)
 {
 	if (!::IsMenu(hMenu))
 		return 0;
@@ -752,7 +752,7 @@ int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems)
 	return nNumItems;
 }
 
-int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO>& aMenuItems, CStringArray& aItemText)
+int CEnMenu::GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems, CStringArray& aItemText)
 {
 	if (!::IsMenu(hMenu))
 		return 0;
@@ -775,7 +775,7 @@ BOOL CEnMenu::CopyMenuContents(HMENU hMenuFrom, HMENU hMenuTo)
 	if (!::IsMenu(hMenuFrom) || !IsMenu(hMenuTo))
 		return FALSE;
 
-	CArray<MENUITEMINFO> aMenuItems;
+	CArray<MENUITEMINFO, MENUITEMINFO&> aMenuItems;
 	CStringArray aItemText;
 
 	if (!GetMenuItemInfo(hMenuFrom, aMenuItems, aItemText))

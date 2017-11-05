@@ -158,7 +158,6 @@ public:
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;
 
-	virtual void Release() = 0;
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
 	virtual void FilterToolTipMessage(MSG* pMsg) = 0;
 

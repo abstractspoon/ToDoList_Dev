@@ -43,7 +43,7 @@ CContentCtrl::~CContentCtrl()
 {
 	if (m_pContentCtrl)
 	{
-		m_pContentCtrl->Release();
+		::DestroyWindow(m_pContentCtrl->GetHwnd());
 		m_pContentCtrl = NULL;
 	}
 }
@@ -86,7 +86,7 @@ BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 	{
 		// release existing control
 		if (m_pContentCtrl)
-			m_pContentCtrl->Release();
+			::DestroyWindow(m_pContentCtrl->GetHwnd());
 
 		m_pContentCtrl = pContentCtrl;
 		m_sTypeID = m_pContentCtrl->GetTypeID();

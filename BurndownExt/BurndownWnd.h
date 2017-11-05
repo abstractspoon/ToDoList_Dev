@@ -82,7 +82,6 @@ public:
 
 	// IUIExtensionWindow
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
-	void Release();
 
 	// IUIExtensionWindow
 	LPCTSTR GetMenuText() const { return _T("Burndown"); }
@@ -160,6 +159,7 @@ protected:
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
+	afx_msg void OnNcDestroy();
 	DECLARE_MESSAGE_MAP()
 
 protected:
