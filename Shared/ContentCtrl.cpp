@@ -41,11 +41,6 @@ CContentCtrl::CContentCtrl(IContentControl* pContentCtrl) :
 
 CContentCtrl::~CContentCtrl()
 {
-	if (m_pContentCtrl)
-	{
-		::DestroyWindow(m_pContentCtrl->GetHwnd());
-		m_pContentCtrl = NULL;
-	}
 }
 
 CContentCtrl::operator HWND() const
