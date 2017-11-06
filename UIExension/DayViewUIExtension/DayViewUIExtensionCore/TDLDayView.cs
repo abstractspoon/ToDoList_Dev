@@ -14,7 +14,7 @@ namespace DayViewUIExtension
     {
         private TDLRenderer m_Renderer;
 
-		System.Windows.Forms.Timer m_Timer;
+		System.Windows.Forms.Timer m_RedrawTimer;
 
         public TDLDayView(System.Drawing.Font font, UIExtension.TaskIcon taskIcons)
         {
@@ -95,19 +95,19 @@ namespace DayViewUIExtension
 
 		protected void StartUpdateTimer()
 		{
-			if (m_Timer == null)
+			if (m_RedrawTimer == null)
 			{
-				m_Timer = new System.Windows.Forms.Timer();
+				m_RedrawTimer = new System.Windows.Forms.Timer();
 			}
 
-			m_Timer.Tick += OnUpdateTimer;
-			m_Timer.Interval = 10;
-			m_Timer.Start();
+			m_RedrawTimer.Tick += OnUpdateTimer;
+			m_RedrawTimer.Interval = 10;
+			m_RedrawTimer.Start();
 		}
 
 		protected void OnUpdateTimer(object sender, EventArgs e)
 		{
-			m_Timer.Stop();
+			m_RedrawTimer.Stop();
 
 			AdjustScrollbar();
 			Invalidate();
