@@ -1300,7 +1300,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 	case FTCV_UNSET:
 	case FTCV_TASKLIST:
 	default:
-		ASSERT(0);
+		//ASSERT(0);
 		break;
 		
 	case FTCV_UIEXTENSION1:
