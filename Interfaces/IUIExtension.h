@@ -129,10 +129,10 @@ public:
 enum IUI_UPDATETYPE
 { 
 	// NEVER CHANGE THE ORDER OF THIS LIST
-	IUI_EDIT,	// pTasks contains selected tasks only
-	IUI_NEW,	// pTasks contains new task(s) and their parents
-	IUI_DELETE, // pTasks contains ALL tasks
-	IUI_MOVE,	// pTasks contains ALL tasks
+	IUI_EDIT		= 0,			// pTasks contains selected tasks only
+	IUI_NEW,						// pTasks contains new task(s) and their parents
+	IUI_DELETE,						// pTasks contains ALL tasks
+	IUI_MOVE,						// pTasks contains ALL tasks
 //  IUI_
 
 	IUI_ALL = 0xffff
@@ -141,22 +141,28 @@ enum IUI_UPDATETYPE
 enum IUI_APPCOMMAND
 { 
 	// NEVER CHANGE THE ORDER OF THIS LIST
-	IUI_EXPANDALL,
+	IUI_NOCOMMAND	= -1,
+	IUI_EXPANDALL	= 0,
 	IUI_COLLAPSEALL,
 	IUI_EXPANDSELECTED,
 	IUI_COLLAPSESELECTED,
-	IUI_SORT,					// dwExtra is column ID		[in]
-	IUI_TOGGLABLESORT,			// dwExtra is column ID		[in]
+	IUI_SORT,						// dwExtra is column ID		[in]
+	IUI_TOGGLABLESORT,				// dwExtra is column ID		[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,				// dwExtra is task ID		[in]
+	IUI_SELECTTASK,					// dwExtra is task ID		[in]
 	IUI_RESIZEATTRIBCOLUMNS,
-	IUI_GETNEXTTASK,			// dwExtra is DWORD*		[out]
-	IUI_GETNEXTTOPLEVELTASK,	// dwExtra is DWORD*		[out]
-	IUI_GETPREVTASK,			// dwExtra is DWORD*		[out]
-	IUI_GETPREVTOPLEVELTASK,	// dwExtra is DWORD*		[out]
-	IUI_SAVETOIMAGE,			// dwExtra is HBITMAP*		[out]
-	IUI_SETTASKFONT,			// dwExtra is HFONT			[in]
-	IUI_MULTISORT,				// dwExtra is IUIMULTISORT	[in]
+	IUI_GETNEXTTASK,				// dwExtra is DWORD*		[out]
+	IUI_GETNEXTTOPLEVELTASK,		// dwExtra is DWORD*		[out]
+	IUI_GETPREVTASK,				// dwExtra is DWORD*		[out]
+	IUI_GETPREVTOPLEVELTASK,		// dwExtra is DWORD*		[out]
+	IUI_SAVETOIMAGE,				// dwExtra is HBITMAP*		[out]
+	IUI_SETTASKFONT,				// dwExtra is HFONT			[in]
+	IUI_MULTISORT,					// dwExtra is IUIMULTISORT	[in]
+	IUI_SELECTFIRSTTASK,			// dwExtra is LPCTSTR		[in]
+	IUI_SELECTNEXTTASK,				// dwExtra is LPCTSTR		[in]
+	IUI_SELECTNEXTTASKINCLCURRENT,	// dwExtra is LPCTSTR		[in]
+	IUI_SELECTPREVTASK,				// dwExtra is LPCTSTR		[in]
+	IUI_SELECTLASTTASK,				// dwExtra is LPCTSTR		[in]
 
 	// new values here
 //  IUI_
@@ -166,7 +172,7 @@ enum IUI_APPCOMMAND
 enum IUI_HITTEST
 {
 	// NEVER CHANGE THE ORDER OF THIS LIST
-	IUI_NOWHERE,
+	IUI_NOWHERE		= 0,
 	IUI_TASKLIST,
 	IUI_COLUMNHEADER,
 	IUI_TASK,

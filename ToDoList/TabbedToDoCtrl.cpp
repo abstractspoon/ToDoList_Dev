@@ -4815,7 +4815,6 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 
 BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 {
-	int nFind = -1;
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
@@ -4825,27 +4824,34 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 		return CToDoCtrl::SelectTask(sPart, nSelect);
 
 	case FTCV_TASKLIST:
-		switch (nSelect)
 		{
-		case TDC_SELECTFIRST:
-			nFind = FindListTask(sPart);
-			break;
+			int nFind = -1;
+
+			switch (nSelect)
+			{
+			case TDC_SELECTFIRST:
+				nFind = FindListTask(sPart);
+				break;
 			
-		case TDC_SELECTNEXT:
-			nFind = FindListTask(sPart, m_taskList.GetSelectedItem() + 1);
-			break;
+			case TDC_SELECTNEXT:
+				nFind = FindListTask(sPart, m_taskList.GetSelectedItem() + 1);
+				break;
 			
-		case TDC_SELECTNEXTINCLCURRENT:
-			nFind = FindListTask(sPart, m_taskList.GetSelectedItem());
-			break;
+			case TDC_SELECTNEXTINCLCURRENT:
+				nFind = FindListTask(sPart, m_taskList.GetSelectedItem());
+				break;
 			
-		case TDC_SELECTPREV:
-			nFind = FindListTask(sPart, m_taskList.GetSelectedItem() - 1, FALSE);
-			break;
+			case TDC_SELECTPREV:
+				nFind = FindListTask(sPart, m_taskList.GetSelectedItem() - 1, FALSE);
+				break;
 			
-		case TDC_SELECTLAST:
-			nFind = FindListTask(sPart, m_taskList.GetItemCount() - 1, FALSE);
-			break;
+			case TDC_SELECTLAST:
+				nFind = FindListTask(sPart, m_taskList.GetItemCount() - 1, FALSE);
+				break;
+			}
+
+			if (nFind != -1)
+				return SelectTask(GetTaskID(nFind));
 		}
 		break;
 
@@ -4865,6 +4871,22 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			IUI_APPCOMMAND nCmdID = TDC::MapSelectTaskToIUICommand(nSelect);
+			ASSERT(nCmdID != IUI_NOCOMMAND);
+
+			if (pExtWnd && pExtWnd->CanDoAppCommand(nCmdID))
+			{
+				pExtWnd->DoAppCommand(nCmdID, (DWORD)(LPCTSTR)sPart);
+			}
+			else // fallback
+			{
+				return CToDoCtrl::SelectTask(sPart, nSelect);
+			}
+		}
 		break;
 
 	default:
@@ -4872,9 +4894,6 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	}
 
 	// else
-	if (nFind != -1)
-		return SelectTask(GetTaskID(nFind));
-
 	return FALSE;
 }
 

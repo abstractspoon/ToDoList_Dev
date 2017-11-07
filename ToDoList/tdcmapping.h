@@ -782,7 +782,6 @@ namespace TDC
 
 		ASSERT(0);
 		return TDCA_NONE;
-
 	}
 
 	static TDC_COLUMN MapIUIAttributeToColumn(IUI_ATTRIBUTE nCol)
@@ -912,6 +911,20 @@ namespace TDC
 		return TDCA_NONE;
 	}
 
+	static IUI_APPCOMMAND MapSelectTaskToIUICommand(TDC_SELECTTASK nSelect)
+	{
+		switch (nSelect)
+		{
+		case TDC_SELECTFIRST:			return IUI_SELECTFIRSTTASK;
+		case TDC_SELECTNEXT:			return IUI_SELECTNEXTTASK;
+		case TDC_SELECTNEXTINCLCURRENT:	return IUI_SELECTNEXTTASKINCLCURRENT;
+		case TDC_SELECTPREV:			return IUI_SELECTPREVTASK;
+		case TDC_SELECTLAST:			return IUI_SELECTLASTTASK;
+		}
+
+		// else
+		return IUI_NOCOMMAND;
+	}
 }
 
 #endif // AFX_TDCMAP_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_
