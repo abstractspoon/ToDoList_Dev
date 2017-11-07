@@ -247,7 +247,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	bSomeSubtaskDone = gi.bSomeSubtaskDone;
 	
 	aTags.Copy(gi.aTags);
-	aDepends.Copy(gi.aDepends);
+	aDependIDs.Copy(gi.aDependIDs);
 	
 	return (*this);
 }
@@ -272,7 +272,7 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi)
 			(bHasIcon == gi.bHasIcon) &&
 			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
 			Misc::MatchAll(aTags, gi.aTags) &&
-			Misc::MatchAll(aDepends, gi.aDepends));
+			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }
 
 GANTTITEM::~GANTTITEM()
@@ -314,7 +314,7 @@ BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID);
 	
-	return (pGI && pGI->aDepends.GetSize());
+	return (pGI && pGI->aDependIDs.GetSize());
 }
 
 BOOL GANTTITEM::HasStart() const
@@ -461,6 +461,33 @@ BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
 	}
 
 	ASSERT(0);
+	return FALSE;
+}
+
+BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM* pGI, DWORD dwOtherID) const
+{
+	if (!pGI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nDepend = pGI->aDependIDs.GetSize();
+
+	while (nDepend--)
+	{
+		DWORD dwDependID = pGI->aDependIDs[nDepend];
+		ASSERT(dwDependID);
+
+		if (dwDependID == dwOtherID)
+			return TRUE;
+
+		// else check dependents of dwDependID
+		if (IsItemDependentOn(GetItem(dwDependID), dwOtherID)) // RECURSIVE
+			return TRUE;
+	}
+	
+	// all else
 	return FALSE;
 }
 

@@ -84,8 +84,8 @@ public:
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
-	BOOL GetSelectedTaskDependencies(CStringArray& aDepends) const;
-	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends);
+	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
+	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
 
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	BOOL PointInHeader(const CPoint& ptScreen) const;

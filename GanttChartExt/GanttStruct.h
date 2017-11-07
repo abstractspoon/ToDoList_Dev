@@ -32,7 +32,7 @@ struct GANTTITEM
 	CString sAllocTo;
 	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
-	CStringArray aDepends;
+	CDWordArray aDependIDs;
 	CStringArray aTags;
 	int nPercent;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
@@ -65,6 +65,7 @@ public:
 	BOOL RestoreItem(const GANTTITEM& giPrev);
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
+	BOOL IsItemDependentOn(const GANTTITEM* pGI, DWORD dwOtherID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

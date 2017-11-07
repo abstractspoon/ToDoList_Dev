@@ -238,25 +238,25 @@ DWORD CGanttTreeListCtrl::GetSelectedTaskID() const
 	return (hti ? GetTaskID(hti) : 0);
 }
 
-BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CStringArray& aDepends) const
+BOOL CGanttTreeListCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const GANTTITEM* pGI = NULL;
 	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
-	aDepends.Copy(pGI->aDepends);
+	aDepends.Copy(pGI->aDependIDs);
 	return TRUE;
 }
 
-BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends)
+BOOL CGanttTreeListCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	GANTTITEM* pGI = NULL;
 	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
-	pGI->aDepends.Copy(aDepends);
+	pGI->aDependIDs.Copy(aDepends);
 	RedrawList();
 	
 	return TRUE;
@@ -637,9 +637,11 @@ BOOL CGanttTreeListCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_ID:
 	case IUI_NONE:
 	case IUI_PERCENT:
-	case IUI_POSITION:
 	case IUI_STARTDATE:
 	case IUI_TASKNAME:
+	case IUI_TAGS:
+	case IUI_DONEDATE:
+	case IUI_DEPENDENCY:
 		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
 	}
 	
@@ -652,11 +654,14 @@ IUI_ATTRIBUTE CGanttTreeListCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 	switch (nCol)
 	{
 	case GTLCC_TITLE:		return IUI_TASKNAME;
-	case GTLCC_ENDDATE:		return IUI_DUEDATE;
+	case GTLCC_DUEDATE:		return IUI_DUEDATE;
 	case GTLCC_STARTDATE:	return IUI_STARTDATE;
 	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
 	case GTLCC_PERCENT:		return IUI_PERCENT;
 	case GTLCC_TASKID:		return IUI_ID;
+	case GTLCC_DONEDATE:	return IUI_DONEDATE;
+	case GTLCC_TAGS:		return IUI_TAGS;
+	case GTLCC_DEPENDENCY:	return IUI_DEPENDENCY;
 	}
 	
 	// all else 
@@ -667,12 +672,15 @@ GTLC_COLUMN CGanttTreeListCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:	return GTLCC_TITLE;		
-	case IUI_DUEDATE:	return GTLCC_ENDDATE;		
-	case IUI_STARTDATE:	return GTLCC_STARTDATE;	
-	case IUI_ALLOCTO:	return GTLCC_ALLOCTO;		
-	case IUI_PERCENT:	return GTLCC_PERCENT;		
-	case IUI_ID:		return GTLCC_TASKID;		
+	case IUI_TASKNAME:		return GTLCC_TITLE;		
+	case IUI_DUEDATE:		return GTLCC_DUEDATE;		
+	case IUI_STARTDATE:		return GTLCC_STARTDATE;	
+	case IUI_ALLOCTO:		return GTLCC_ALLOCTO;		
+	case IUI_PERCENT:		return GTLCC_PERCENT;		
+	case IUI_ID:			return GTLCC_TASKID;		
+	case IUI_DONEDATE:		return GTLCC_DONEDATE;
+	case IUI_TAGS:			return GTLCC_TAGS;
+	case IUI_DEPENDENCY:	return GTLCC_DEPENDENCY;
 	}
 	
 	// all else 
@@ -808,10 +816,16 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	if (attrib.Has(IUI_DEPENDENCY))
 	{
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
-		pGI->aDepends.RemoveAll();
+		pGI->aDependIDs.RemoveAll();
 		
 		while (nDepend--)
-			pGI->aDepends.Add(pTasks->GetTaskDependency(hTask, nDepend));
+		{
+			// Local dependencies only
+			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+			if (dwTaskID)
+				pGI->aDependIDs.Add(dwTaskID);
+		}
 	}
 
 	// update date range
@@ -1052,10 +1066,16 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 		while (nTag--)
 			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 
+		// Local dependencies only
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		
 		while (nDepend--)
-			pGI->aDepends.Add(pTasks->GetTaskDependency(hTask, nDepend));
+		{	
+			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+			if (dwTaskID)
+				pGI->aDependIDs.Add(dwTaskID);
+		}
 		
 		// track earliest and latest dates
 		m_dateRange.MinMax(*pGI);
@@ -1453,7 +1473,7 @@ void CGanttTreeListCtrl::BuildTreeColumns()
 	m_treeHeader.EnableItemDragging(GTLCC_TITLE, FALSE);
 
 	m_treeHeader.InsertItem(GTLCC_STARTDATE, 0, CEnString(IDS_COL_STARTDATE), (HDF_RIGHT | HDF_STRING));
-	m_treeHeader.InsertItem(GTLCC_ENDDATE,	0, CEnString(IDS_COL_DUEDATE), (HDF_RIGHT | HDF_STRING));
+	m_treeHeader.InsertItem(GTLCC_DUEDATE,	0, CEnString(IDS_COL_DUEDATE), (HDF_RIGHT | HDF_STRING));
 	m_treeHeader.InsertItem(GTLCC_ALLOCTO, 0, CEnString(IDS_COL_ALLOCTO), (HDF_LEFT | HDF_STRING));
 	m_treeHeader.InsertItem(GTLCC_PERCENT, 0, CEnString(IDS_COL_PERCENTDONE), (HDF_CENTER | HDF_STRING));
 	m_treeHeader.InsertItem(GTLCC_TASKID, 0, CEnString(IDS_COL_TASKID), (HDF_RIGHT | HDF_STRING));
@@ -1992,7 +2012,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 									break;
 
 								case GTLCC_STARTDATE:
-								case GTLCC_ENDDATE:
+								case GTLCC_DUEDATE:
 								case GTLCC_ALLOCTO:
 								case GTLCC_PERCENT:
 								case GTLCC_TASKID:
@@ -2733,7 +2753,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 			}
 			break;
 
-		case GTLCC_ENDDATE:
+		case GTLCC_DUEDATE:
 			{
 				COleDateTime dtDue, dtDummy;
 				GetTaskStartDueDates(gi, dtDummy, dtDue);
@@ -2827,7 +2847,7 @@ void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, con
 			}
 			break;
 			
-		case GTLCC_ENDDATE:
+		case GTLCC_DUEDATE:
 			{
 				// draw non-selected calculated dates lighter
 				bLighter = (!bSelected && !gi.IsDone(TRUE) &&
@@ -3070,7 +3090,7 @@ void CGanttTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, 
 
 		case GTLCC_TASKID:
 		case GTLCC_STARTDATE:
-		case GTLCC_ENDDATE:
+		case GTLCC_DUEDATE:
 		case GTLCC_ALLOCTO:
 		case GTLCC_PERCENT:
 			{
@@ -3944,13 +3964,13 @@ int CGanttTreeListCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) 
 		const GANTTITEM* pGIFrom = GetGanttItem(dwFromTaskID);
 		ASSERT(pGIFrom);
 		
-		if (pGIFrom && pGIFrom->aDepends.GetSize())
+		if (pGIFrom && pGIFrom->aDependIDs.GetSize())
 		{
-			int nDepend = pGIFrom->aDepends.GetSize();
+			int nDepend = pGIFrom->aDependIDs.GetSize();
 			
 			while (nDepend--)
 			{
-				DWORD dwToTaskID = _ttoi(pGIFrom->aDepends[nDepend]);
+				DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
 				
 				if (!m_data.HasItem(dwToTaskID))
 					continue;
@@ -4872,7 +4892,7 @@ int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		
 	// rest of attributes are fixed width
 	case GTLCC_STARTDATE:
-	case GTLCC_ENDDATE: 
+	case GTLCC_DUEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(CDateHelper::FormatDate(date), pDC);
@@ -5346,11 +5366,15 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 			break;
 
 		case GTLCC_STARTDATE:
-			nCompare = (int)(pGI1->dtStart - pGI2->dtStart);
+			nCompare = CDateHelper::Compare(pGI1->dtStart, pGI2->dtStart, TRUE, FALSE);
 			break;
 
-		case GTLCC_ENDDATE:
-			nCompare = (int)(pGI1->dtDue - pGI2->dtDue);
+		case GTLCC_DUEDATE:
+			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
+			break;
+
+		case GTLCC_DONEDATE:
+			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
 			break;
 
 		case GTLCC_ALLOCTO:
@@ -5363,6 +5387,32 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 
 		case GTLCC_NONE:
 			nCompare = (pGI1->nPosition - pGI2->nPosition);
+			break;
+
+		case GTLCC_TAGS:
+			{
+				CString sTags1 = Misc::FormatArray(pGI1->aTags);
+				CString sTags2 = Misc::FormatArray(pGI2->aTags);
+		
+				nCompare = Misc::NaturalCompare(sTags1, sTags2, TRUE);
+			}
+			break;
+
+		case GTLCC_DEPENDENCY:
+			{
+				// If Task2 is dependent on Task1 then Task1 comes first
+				if (m_data.IsItemDependentOn(pGI2, dwTaskID1))
+				{
+					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID2, dwTaskID1, dwTaskID1);
+					nCompare = -1;
+				}
+				// else if Task1 is dependent on Task2 then Task2 comes first
+				else if (m_data.IsItemDependentOn(pGI1, dwTaskID2))
+				{
+					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID1, dwTaskID2, dwTaskID2);
+					nCompare = 1;
+				}
+			}
 			break;
 
 		default:
@@ -6068,14 +6118,12 @@ COleDateTime CGanttTreeListCtrl::CalcMinDragDate(const GANTTITEM& gi) const
 	COleDateTime dtMin;
 	CDateHelper::ClearDate(dtMin);
 
-	int nDepend = gi.aDepends.GetSize();
+	int nDepend = gi.aDependIDs.GetSize();
 
 	while (nDepend--)
 	{
-		DWORD dwDependID = _ttoi(gi.aDepends[nDepend]);
-
-		if (dwDependID == 0)
-			continue;
+		DWORD dwDependID = gi.aDependIDs[nDepend];
+		ASSERT(dwDependID);
 
 		GANTTITEM* pGI = NULL;
 		GET_GI_RET(dwDependID, pGI, dtMin);
@@ -6488,7 +6536,7 @@ int CGanttTreeListCtrl::GetTreeColumnOrder(CIntArray& aTreeOrder) const
 void CGanttTreeListCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
 {
 	int nNumCols = aColumnVis.GetSize();
-	ASSERT(nNumCols == GTLCC_NUMCOLUMNS);
+	//ASSERT(nNumCols == GTLCC_NUMCOLUMNS);
 
 	for (int nColID = 1; nColID < nNumCols; nColID++)
 		m_treeHeader.ShowItem(nColID, aColumnVis[nColID]);
