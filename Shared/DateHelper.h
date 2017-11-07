@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 enum DH_DATE
 {
 	DHD_BEGINTHISWEEK, // DHD_ENDTHIDWEEK - 6
@@ -71,7 +73,11 @@ enum // OLE Days of week
 // 1 <= nDay <= 31
 // 1 <= nDOW <= 7
 
+//////////////////////////////////////////////////////////////////////
+
 typedef __int64 time64_t;
+
+//////////////////////////////////////////////////////////////////////
 
 class CDateHelper  
 {
@@ -192,6 +198,8 @@ public:
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
 
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2);
+	static int Compare(const COleDateTime& date1, const COleDateTime& date2, 
+						BOOL bIncTime, BOOL bNoTimeMeansEndOfDay);
 
 protected:
 	static DWORD s_dwWeekend; 

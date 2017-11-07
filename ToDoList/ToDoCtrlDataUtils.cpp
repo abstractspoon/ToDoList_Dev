@@ -1485,83 +1485,35 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 int CTDCTaskComparer::Compare(const COleDateTime& date1, const COleDateTime& date2, BOOL bIncTime, TDC_DATE nDate)
 {
-	// Sort Non-dates below others
-	BOOL bHas1 = CDateHelper::IsDateSet(date1);
-	BOOL bHas2 = CDateHelper::IsDateSet(date2);
-
-	if (bHas1 != bHas2)
+	switch (nDate)
 	{
-		return (bHas1 ? -1 : 1);
+	case TDCD_START:
+		// Default to the beginning of the day
+		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
+
+	case TDCD_DUE:
+	case TDCD_DONE:
+		// Default to the end of the day
+		return CDateHelper::Compare(date1, date2, bIncTime, TRUE);
+
+	case TDCD_CREATE:
+		// Should never end up here but once upon a time
+		// we didn't store the creation time for tasks...
+		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
+
+	case TDCD_LASTMOD:
+		// Should never end up here
+		return CDateHelper::Compare(date1, date2, bIncTime, FALSE);
 	}
-	else if (!bHas1 && !bHas2)
-	{
-		return 0;
-	}
-
-	// Both dates are valid
-	COleDateTime dateTime1(date1), dateTime2(date2);
-
-	if (bIncTime)
-	{
-		BOOL bHasTime1 = CDateHelper::DateHasTime(date1);
-		BOOL bHasTime2 = CDateHelper::DateHasTime(date2);
-
-		if (bHasTime1 != bHasTime2)
-		{
-			switch (nDate)
-			{
-			case TDCD_START:
-				// Start dates default to the beginning of the day,
-				// so nothing to do because it's already zero
-				break;
-
-			case TDCD_DUE:
-			case TDCD_DONE:
-				if (!bHasTime1)
-					dateTime1 = CDateHelper::GetEndOfDay(dateTime1);
-				else
-					dateTime2 = CDateHelper::GetEndOfDay(dateTime2);
-				break;
-
-			case TDCD_CREATE:
-				// Should never end up here but once upon a time
-				// we didn't store the creation time for tasks...
-				break;
-
-			case TDCD_LASTMOD:
-				// Should never end up here
-				ASSERT(0);
-				break;
-
-			default: 
-				// No other values permissible
-				ASSERT(0);
-				return 0;
-			}
-		}
-	}
-	else
-	{
-		dateTime1 = CDateHelper::GetDateOnly(date1);
-		dateTime2 = CDateHelper::GetDateOnly(date2);
-	}
-
-
-	return ((dateTime1 < dateTime2) ? -1 : (dateTime1 > dateTime2) ? 1 : 0);
+	
+	// No other values permissible
+	ASSERT(0);
+	return 0;
 }
 
 int CTDCTaskComparer::Compare(const CString& sText1, const CString& sText2, BOOL bCheckEmpty)
 {
-	if (bCheckEmpty)
-	{
-		BOOL bEmpty1 = sText1.IsEmpty();
-		BOOL bEmpty2 = sText2.IsEmpty();
-
-		if (bEmpty1 != bEmpty2)
-			return (bEmpty1 ? 1 : -1);
-	}
-
-	return Misc::NaturalCompare(sText1, sText2);
+	return Misc::NaturalCompare(sText1, sText2, bCheckEmpty);
 }
 
 int CTDCTaskComparer::Compare(int nNum1, int nNum2)

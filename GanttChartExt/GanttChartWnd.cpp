@@ -680,18 +680,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 
 GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
 {
-	switch ((int)dwColumn)
-	{
-	case IUI_ID:			return GTLCC_TASKID;
-	case IUI_ALLOCTO:		return GTLCC_ALLOCTO;
-	case IUI_TASKNAME:		return GTLCC_TITLE;
-	case IUI_DUEDATE:		return GTLCC_ENDDATE;
-	case IUI_STARTDATE:		return GTLCC_STARTDATE;
-	case IUI_PERCENT:		return GTLCC_PERCENT;
-	case IUI_POSITION:		break; // same as 'none'
-	}
-
-	return GTLCC_NONE;
+	return CGanttTreeListCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
 }
 
 DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
@@ -1264,32 +1253,24 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 			SendParentSelectionUpdate();
 		}
 
-		CStringArray aDepends;
+		CDWordArray aDepends;
 		m_ctrlGantt.GetSelectedTaskDependencies(aDepends);
 		
 		switch (wp)
 		{
 		case GCDDM_ADD:
-			{
-				DWORD dwToTaskID = m_dlgDepends.GetToTask();
-				aDepends.Add(Misc::Format(dwToTaskID));
-			}
+			aDepends.Add(m_dlgDepends.GetToTask());
 			break;
 			
 		case GCDDM_EDIT:
-			{
-				DWORD dwToTaskID = m_dlgDepends.GetToTask();
-				aDepends.Add(Misc::Format(dwToTaskID));
-			}
+			aDepends.Add(m_dlgDepends.GetToTask());
 			 //fall thru to delete prev dependency
 			
 		case GCDDM_DELETE:
 			{
 				DWORD dwPrevToTask;
 				VERIFY(m_dlgDepends.GetFromDependency(dwPrevToTask));
-
-				CString sDepend = Misc::Format(dwPrevToTask);
-				VERIFY(Misc::RemoveItem(sDepend, aDepends));
+				VERIFY(Misc::RemoveItem(dwPrevToTask, aDepends));
 			}
 			break;
 			

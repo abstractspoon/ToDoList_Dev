@@ -534,21 +534,56 @@ BOOL CDateHelper::Max(COleDateTime& date, const COleDateTime& dtOther)
 
 int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2)
 {
-	int nCompare = 0;
+	// Sort Non-dates below others
+	BOOL bHas1 = IsDateSet(date1);
+	BOOL bHas2 = IsDateSet(date2);
 
-	if (IsDateSet(date1))
+	if (bHas1 != bHas2)
 	{
-		if (IsDateSet(date2))
-			nCompare = ((date1 > date2) ? 1 : ((date1 < date2) ? -1 : 0));
-		else
-			nCompare = 1;
+		return (bHas1 ? -1 : 1);
 	}
-	else if (IsDateSet(date2))
+	else if (!bHas1 && !bHas2)
 	{
-		nCompare = -1;
+		return 0;
 	}
 
-	return nCompare;
+	return ((date1 < date2) ? -1 : (date1 > date2) ? 1 : 0);
+}
+
+int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, 
+			BOOL bIncTime, BOOL bNoTimeMeansEndOfDay)
+{
+	// Sort Non-dates below others
+	BOOL bHas1 = IsDateSet(date1);
+	BOOL bHas2 = IsDateSet(date2);
+
+	if (bHas1 != bHas2)
+	{
+		return (bHas1 ? -1 : 1);
+	}
+	else if (!bHas1 && !bHas2)
+	{
+		return 0;
+	}
+
+	// Both dates are valid
+	COleDateTime dateTime1(date1), dateTime2(date2);
+
+	if (bIncTime)
+	{
+		if (bNoTimeMeansEndOfDay && !CDateHelper::DateHasTime(date1))
+			dateTime1 = CDateHelper::GetEndOfDay(date1);
+
+		if (bNoTimeMeansEndOfDay && !CDateHelper::DateHasTime(date2))
+			dateTime2 = CDateHelper::GetEndOfDay(date2);
+	}
+	else
+	{
+		dateTime1 = CDateHelper::GetDateOnly(date1);
+		dateTime2 = CDateHelper::GetDateOnly(date2);
+	}
+
+	return ((dateTime1 < dateTime2) ? -1 : (dateTime1 > dateTime2) ? 1 : 0);
 }
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)

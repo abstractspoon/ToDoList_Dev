@@ -136,6 +136,8 @@ namespace Misc
 		BOOL bOrderSensitive = FALSE);
 	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
 	
+	BOOL RemoveItem(DWORD dwItem, CDWordArray& aFrom);
+
 #ifdef _DEBUG
 	void Trace(const CStringArray& array);
 #endif
@@ -196,6 +198,7 @@ namespace Misc
 		return (FindT<T, S>(array, toFind) != -1);
 	}
 	
+	int Find(const CDWordArray& array, DWORD dwItem);
 	int Find(const CStringArray& array, LPCTSTR szItem, 
 			BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
 
@@ -333,12 +336,10 @@ namespace Misc
 	void MakeLower(CStringArray& aText);
 	CString ToUpper(LPCTSTR szText);
 	CString ToLower(LPCTSTR szText);
-	// 	CString ToUpper(TCHAR cText);
-	// 	CString ToLower(TCHAR cText);
  	TCHAR ToUpper(TCHAR cText);
  	TCHAR ToLower(TCHAR cText);
 	TCHAR ToggleCase(TCHAR cText);
-	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2);
+	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow = FALSE);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
 
 	void MakeQuoted(CString& sText);

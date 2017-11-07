@@ -99,10 +99,14 @@ enum GTLC_COLUMN
 	GTLCC_NONE = -1,
 	GTLCC_TITLE,
 	GTLCC_STARTDATE,
-	GTLCC_ENDDATE,
+	GTLCC_DUEDATE,
 	GTLCC_ALLOCTO,
 	GTLCC_PERCENT,
 	GTLCC_TASKID,
+
+	GTLCC_DONEDATE,		// pseudo for sorting
+	GTLCC_TAGS,			// pseudo for sorting
+	GTLCC_DEPENDENCY,	// pseudo for sorting
 	// NEW ITEMS HERE 
 
 	GTLCC_NUMCOLUMNS // Always the last item

@@ -669,12 +669,12 @@ BOOL Misc::RemoveAt(CString& sText, int nPos)
 
 BOOL Misc::IsEmpty(LPCTSTR szText) 
 { 
-	return (!szText || !szText[0]); 
+	return ((!szText || !szText[0]) ? TRUE : FALSE); 
 }
 
 BOOL Misc::IsEmpty(LPCSTR szText) 
 { 
-	return (!szText || !szText[0]); 
+	return ((!szText || !szText[0]) ? TRUE : FALSE); 
 }
 
 BOOL Misc::HasEmpty(const CStringArray& aItems)
@@ -1060,10 +1060,38 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 {
 	int nFind = Find(aFrom, szItem, bCaseSensitive, FALSE);
 	
-	if (nFind != -1)
-		aFrom.RemoveAt(nFind);
+	if (nFind == -1)
+		return -1;
+
+	aFrom.RemoveAt(nFind);
+	return TRUE;
 
 	return (nFind != -1);
+}
+
+BOOL Misc::RemoveItem(DWORD dwItem, CDWordArray& aFrom)
+{
+	int nFind = Find(aFrom, dwItem);
+
+	if (nFind == -1)
+		return -1;
+
+	aFrom.RemoveAt(nFind);
+	return TRUE;
+}
+
+int Misc::Find(const CDWordArray& array, DWORD dwItem)
+{
+	int nItem = array.GetSize();
+
+	while (nItem--)
+	{
+		if (array[nItem] == dwItem)
+			return nItem;
+	}
+
+	// not found
+	return -1;
 }
 
 int Misc::AddUniqueItems(const CStringArray& array, CStringArray& aTo, BOOL bCaseSensitive)
@@ -1682,20 +1710,6 @@ CString Misc::ToLower(LPCTSTR szText)
 	return sText;
 }
 
-// CString Misc::ToUpper(TCHAR cText)
-// {
-// 	TCHAR szText[] = { cText, 0 };
-// 
-// 	return ToUpper(szText);
-// }
-// 
-// CString Misc::ToLower(TCHAR cText)
-// {
-// 	TCHAR szText[] = { cText, 0 };
-// 	
-// 	return ToLower(szText);
-// }
-
 TCHAR Misc::ToUpper(TCHAR cText)
 {
 	return _totupper(cText);
@@ -2061,8 +2075,20 @@ CString Misc::MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParent
 	return MakeKey(sKey, 0, szParentKey);
 }
 
-int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2)
+int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow)
 {
+	if (bSortEmptyBelow)
+	{
+		BOOL bEmpty1 = IsEmpty(szString1);
+		BOOL bEmpty2 = IsEmpty(szString2);
+
+		if (bEmpty1 && bEmpty2)
+			return 0;
+
+		if (bEmpty1 != bEmpty2)
+			return (bEmpty1 ? 1 : -1);
+	}
+
 #ifdef _UNICODE
 	// initialize once only per session
 	static HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
