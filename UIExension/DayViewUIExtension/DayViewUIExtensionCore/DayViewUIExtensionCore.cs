@@ -200,29 +200,6 @@ namespace DayViewUIExtension
 		{
 			return false;
 		}
-	   
-		public bool DoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
-		{
-			switch (cmd)
-			{
-				case UIExtension.AppCommand.SelectTask:
-					return SelectTask(dwExtra);
-			}
-
-			return false;
-		}
-
-		public bool CanDoAppCommand(UIExtension.AppCommand cmd, UInt32 dwExtra)
-		{
-			switch (cmd)
-			{
-				case UIExtension.AppCommand.SelectTask:
-					return true;
-			}
-
-			// else
-			return false;
-		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{

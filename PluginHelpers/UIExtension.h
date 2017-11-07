@@ -38,21 +38,6 @@ namespace Abstractspoon
 					All = 0xffff
 				};
 
-				enum class AppCommand
-				{ 
-					Unknown = -1,
-
-					ExpandAll,
-					CollapseAll,
-					ExpandSelected,
-					CollapseSelected,
-					Sort,			// dwExtra is column ID
-					ToggleSort,		// dwExtra is column ID
-					SetFocus,
-					ResizeAttributeColumns,
-					SelectTask,
-				};
-
 				enum class HitResult
 				{
 					Nowhere,
@@ -104,7 +89,6 @@ namespace Abstractspoon
 				static TaskAttribute Map(IUI_ATTRIBUTE attrib);
 				static Collections::Generic::HashSet<TaskAttribute>^ Map(const IUI_ATTRIBUTE* pAttrib, int numAttrib);
 				static UpdateType Map(IUI_UPDATETYPE type);
-				static AppCommand Map(IUI_APPCOMMAND cmd);
 				static IUI_HITTEST Map(HitResult test);
 				static IUI_ATTRIBUTE Map(TaskAttribute attrib);
 
@@ -162,17 +146,15 @@ namespace Abstractspoon
 
 			public interface class IUIExtension
 			{
-				bool SelectTask(UInt32 dwTaskID);
-				bool SelectTasks(cli::array<UInt32>^ pdwTaskIDs);
+				bool SelectTask(UInt32 taskID);
+				bool SelectTasks(cli::array<UInt32>^ taskIDs);
 
-				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType nUpdate, Collections::Generic::HashSet<UIExtension::TaskAttribute>^ attribs);
-				bool WantEditUpdate(UIExtension::TaskAttribute nAttribute);
-				bool WantSortUpdate(UIExtension::TaskAttribute nAttribute);
+				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update, Collections::Generic::HashSet<UIExtension::TaskAttribute>^ attribs);
+				bool WantEditUpdate(UIExtension::TaskAttribute attribute);
+				bool WantSortUpdate(UIExtension::TaskAttribute attribute);
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
-				bool DoAppCommand(UIExtension::AppCommand nCmd, DWORD dwExtra);
-				bool CanDoAppCommand(UIExtension::AppCommand nCmd, DWORD dwExtra);
 
 				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
 				UIExtension::HitResult HitTest(Int32 xPos, Int32 yPos);

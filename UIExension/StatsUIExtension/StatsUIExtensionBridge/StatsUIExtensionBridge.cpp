@@ -198,14 +198,30 @@ bool CStatsUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 								 pMsg->pt.y);
 }
 
-bool CStatsUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CStatsUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, DWORD /*dwExtra*/)
 {
-	return m_wnd->DoAppCommand(UIExtension::Map(nCmd), dwExtra);
+// 	switch (nCmd)
+// 	{
+// 	case IUI_SELECTTASK:
+// 		return m_wnd->SelectTask(dwExtra);
+// 
+// 	}
+
+	// all else
+	return false;
 }
 
-bool CStatsUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
+bool CStatsUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND /*nCmd*/, DWORD /*dwExtra*/) const
 {
-	return m_wnd->CanDoAppCommand(UIExtension::Map(nCmd), dwExtra);
+// 	switch (nCmd)
+// 	{
+// 	case IUI_SELECTTASK:
+// 		return true;
+// 
+// 	}
+
+	// all else
+	return false;
 }
 
 bool CStatsUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

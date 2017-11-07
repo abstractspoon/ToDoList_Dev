@@ -194,12 +194,28 @@ bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 
 bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-	return m_wnd->DoAppCommand(UIExtension::Map(nCmd), dwExtra);
+	switch (nCmd)
+	{
+	case IUI_SELECTTASK:
+		return m_wnd->SelectTask(dwExtra);
+
+	}
+
+	// all else
+	return false;
 }
 
 bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 {
-	return m_wnd->CanDoAppCommand(UIExtension::Map(nCmd), dwExtra);
+	switch (nCmd)
+	{
+	case IUI_SELECTTASK:
+		return true;
+
+	}
+
+	// all else
+	return false;
 }
 
 bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

@@ -124,25 +124,6 @@ UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
 	return UIExtension::UpdateType::Unknown;
 }
 
-UIExtension::AppCommand UIExtension::Map(IUI_APPCOMMAND cmd)
-{
-	switch (cmd)
-	{
-	case IUI_EXPANDALL:				return UIExtension::AppCommand::ExpandAll;
-	case IUI_COLLAPSEALL:			return UIExtension::AppCommand::CollapseAll;
-	case IUI_EXPANDSELECTED:		return UIExtension::AppCommand::ExpandSelected;
-	case IUI_COLLAPSESELECTED:		return UIExtension::AppCommand::CollapseSelected;
-	case IUI_SORT:					return UIExtension::AppCommand::Sort;
-	case IUI_TOGGLABLESORT:			return UIExtension::AppCommand::ToggleSort;
-	case IUI_SETFOCUS:				return UIExtension::AppCommand::SetFocus;
-	case IUI_RESIZEATTRIBCOLUMNS:	return UIExtension::AppCommand::ResizeAttributeColumns;
-	case IUI_SELECTTASK:			return UIExtension::AppCommand::SelectTask;
-	//  case IUI_
-	}
-
-	return UIExtension::AppCommand::Unknown;
-}
-
 IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
 {
 	switch (test)
