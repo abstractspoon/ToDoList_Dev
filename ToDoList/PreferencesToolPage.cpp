@@ -825,6 +825,9 @@ void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy)
 
 		// Update positions and sizes
 		CDialogHelper::OffsetCtrl(this, IDC_IMPORT, nXOffset, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_PATHLABEL, 0, nYOffset);
+		CDialogHelper::OffsetCtrl(this, IDC_ARGLABEL, 0, nYOffset);
+		CDialogHelper::OffsetCtrl(this, IDC_ICONLABEL, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_TOOLPATH, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_CMDLINE, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_ICONPATH, 0, nYOffset);
