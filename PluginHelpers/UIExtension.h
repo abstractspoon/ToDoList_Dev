@@ -119,7 +119,6 @@ namespace Abstractspoon
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, int value);
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, bool value);
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, String^ value);
-					bool NotifyMod(UIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
 
 					bool NotifySelChange(UInt32 taskID);

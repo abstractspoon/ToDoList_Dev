@@ -223,14 +223,6 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return DoNotify(&mod, 1);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, cli::array<String^>^ aValues)
-{
-	IUITASKMOD mod = { UIExtension::Map(nAttribute), 0 };
-	//mod.szValue = MS(value);
-
-	return DoNotify(&mod, 1);
-}
-
 bool UIExtension::ParentNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 {
 	if (!IsWindow(m_hwndParent))
