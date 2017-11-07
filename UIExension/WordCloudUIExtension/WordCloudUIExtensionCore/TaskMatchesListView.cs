@@ -14,6 +14,7 @@ namespace WordCloudUIExtension
 	class TaskMatchesListView : ListView
     {
 		private const int MinTaskMatchesWidth = 100;
+		private const int TextIconOffset = 18;
 
         // -------------------------------------------------------------
 
@@ -85,6 +86,32 @@ namespace WordCloudUIExtension
 			m_TaskMatchesHaveIcons = false;
 		}
 
+		public bool HasMatchId(UInt32 matchId)
+		{
+			return (FindItem(matchId) != null);
+		}
+
+		public bool UpdateMatchItemsText(HashSet<UInt32> matchIds)
+		{
+			bool someUpdated = false;
+
+			foreach (ListViewItem lvItem in Items)
+			{
+				var item = (lvItem.Tag as CloudTaskItem);
+
+				if ((item != null) && (matchIds.Contains(item.Id)))
+				{
+					if (someUpdated || !lvItem.Text.Equals(item.Title))
+					{
+						lvItem.Text = item.Title;
+						someUpdated = true;
+					}
+				}
+			}
+
+			return someUpdated;
+		}
+
         public UInt32 SetSelectedMatchId(UInt32 matchId)
         {
 			SelectedItems.Clear();
@@ -109,6 +136,33 @@ namespace WordCloudUIExtension
 				return 0;
 
 			return (SelectedItems[0].Tag as CloudTaskItem).Id;
+		}
+
+		public CloudTaskItem GetSelectedMatch()
+		{
+			if (SelectedItems.Count == 0)
+				return null;
+
+			return (SelectedItems[0].Tag as CloudTaskItem);
+		}
+
+		public Rectangle GetSelectedMatchEditRect()
+		{
+			Rectangle editRect = new Rectangle(0, 0, 0, 0);
+
+			if (SelectedItems.Count > 0)
+			{
+				editRect = SelectedItems[0].GetBounds(ItemBoundsPortion.Label);
+
+				// adjust for icon
+				if (m_TaskMatchesHaveIcons)
+				{
+					editRect.X += TextIconOffset;
+					editRect.Width -= TextIconOffset;
+				}
+			}
+
+			return editRect;
 		}
 
 		protected ListViewItem FindItem(UInt32 matchId)
@@ -147,6 +201,7 @@ namespace WordCloudUIExtension
 						case ListViewHitTestLocations.LeftOfClientArea:
 						case ListViewHitTestLocations.RightOfClientArea:
 						case ListViewHitTestLocations.None:
+							Focus();
 							return; // eat
 					}
 				}
@@ -188,8 +243,8 @@ namespace WordCloudUIExtension
 					if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
 						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top);
 
-					itemRect.X += 18;
-					itemRect.Width -= 18;
+					itemRect.X += TextIconOffset;
+					itemRect.Width -= TextIconOffset;
 				}
 
 				itemRect.Y++;

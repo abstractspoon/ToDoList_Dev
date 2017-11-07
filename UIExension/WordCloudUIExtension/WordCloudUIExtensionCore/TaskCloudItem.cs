@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 
 namespace WordCloudUIExtension
 {
@@ -128,7 +129,7 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
-		public List<string> GetWords(UIExtension.TaskAttribute attrib)
+		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions)
 		{
 			if (attrib != m_WordAttribute)
 			{
@@ -147,7 +148,12 @@ namespace WordCloudUIExtension
 				}
 
 				values.RemoveAll(p => (p.Length < 2));
+
+				if (exclusions != null)
+					values.RemoveAll(p => (exclusions.Countains(p)));
+
 				m_Words = values;
+				m_WordAttribute = attrib;
 			}
 
 			return m_Words;
@@ -178,11 +184,11 @@ namespace WordCloudUIExtension
 			return values;
 		}
 
-		public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value)
+		public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value, IBlacklist exclusions)
 		{
-			GetWords(attrib);
+			var words = GetWords(attrib, exclusions);
 
-			return (m_Words.Find(x => x.Equals(value, StringComparison.CurrentCultureIgnoreCase)) != null);
+			return (words.Find(x => x.Equals(value, StringComparison.CurrentCultureIgnoreCase)) != null);
 		}
 	}
 }

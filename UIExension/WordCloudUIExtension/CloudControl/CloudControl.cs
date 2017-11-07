@@ -190,6 +190,24 @@ namespace Gma.CodeCloud.Controls
             }
         }
 
+		public bool Match(string word)
+		{
+			if (word == null)
+				return false;
+
+			if (WeightedWords.Count() == 0)
+				return false;
+
+			var matches = WeightedWords.Where(x => word.Equals(x.Text, StringComparison.CurrentCultureIgnoreCase));
+
+			return (matches != null);
+		}
+
+		public IEnumerable<IWord> Match(IEnumerable<string> words)
+		{
+			return WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+		}
+
         public IEnumerable<IWord> WeightedWords
         {
             get { return m_Words; }

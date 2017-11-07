@@ -25,7 +25,7 @@ namespace WordCloudUIExtension
 	{
 		private System.Windows.Forms.ToolTip m_ToolTip;
 		private Translator m_Trans;
-		private string m_SelectedItem;
+		private string m_SelectedWord;
 		private IntPtr m_hWnd;
 
 		public TdlCloudControl(IntPtr hWnd, Translator trans, String fontName)
@@ -40,14 +40,21 @@ namespace WordCloudUIExtension
 			m_hWnd = hWnd;
 		}
 
-		public string SelectedItem
+		public string SelectedWord
 		{
-			get { return m_SelectedItem; }
+			get 
+			{ 
+				if ((m_SelectedWord != null) && !m_SelectedWord.Equals(""))
+					return m_SelectedWord; 
+
+				// else
+				return null;
+			}
 			set 
 			{
-				if ((m_SelectedItem == null) || !m_SelectedItem.Equals(value))
+				if ((m_SelectedWord == null) || m_SelectedWord.Equals("") || !m_SelectedWord.Equals(value))
 				{
-					m_SelectedItem = value;
+					m_SelectedWord = value;
 
 					Invalidate();
 
@@ -59,7 +66,7 @@ namespace WordCloudUIExtension
 
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
 		{
-			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedItem);
+			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedWord);
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -90,9 +97,9 @@ namespace WordCloudUIExtension
 
 			if (base.m_ItemUnderMouse != null)
 			{
-				if ((m_SelectedItem == null) || !m_SelectedItem.Equals(base.m_ItemUnderMouse.Word.Text))
+				if ((m_SelectedWord == null) || !m_SelectedWord.Equals(base.m_ItemUnderMouse.Word.Text))
 				{
-					SelectedItem = base.m_ItemUnderMouse.Word.Text;
+					SelectedWord = base.m_ItemUnderMouse.Word.Text;
 				}
 			}
 		}
@@ -137,7 +144,7 @@ namespace WordCloudUIExtension
 		{
 			AdjustTextRenderHint(layoutItem);
 
-			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem))
+			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem, StringComparison.CurrentCultureIgnoreCase))
 				DrawSelected(layoutItem);
 			else
 				base.Draw(layoutItem);
@@ -146,14 +153,14 @@ namespace WordCloudUIExtension
 		private void DrawSelected(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			Rectangle rect = Rectangle.Round(layoutItem.Rectangle);
-			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
+			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, true/*m_Ctrl.Focused*/);
 
 			DrawEmphasizedText(layoutItem);
 		}
 
 		public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
-			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem))
+			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem, StringComparison.CurrentCultureIgnoreCase))
 				DrawSelected(layoutItem);
 			else
 				DrawEmphasizedBackground(layoutItem);

@@ -37,24 +37,6 @@ namespace WordCloudUIExtension
 
         // -------------------------------------------------------------
 
-		[FlagsAttribute]
-		private enum IgnoreSelChanges
-		{
-			None		= 0x0,
-			WordChange	= 0x1,
-			MatchChange	= 0x2,
-			All			= 0xf,
-		}
-
-		private bool WantIgnoreSelChange(IgnoreSelChanges change)
-		{
-			return ((m_IgnoreSelChanges & change) == change);
-		}
-
-        // -------------------------------------------------------------
-
-        // -------------------------------------------------------------
-
 		private IntPtr m_HwndParent;
         private UIExtension.TaskAttribute m_Attrib;
 		private Translator m_Trans;
@@ -66,7 +48,6 @@ namespace WordCloudUIExtension
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
         private IBlacklist m_ExcludedWords;
-		private IgnoreSelChanges m_IgnoreSelChanges;
 
         private StyleComboBox m_StylesCombo;
 		private Label m_StylesLabel;
@@ -77,6 +58,7 @@ namespace WordCloudUIExtension
 		private TaskMatchesListView m_TaskMatchesList;
 
 		private Font m_ControlsFont;
+		private Timer m_RedrawTimer;
 
         // -------------------------------------------------------------
 
@@ -88,7 +70,6 @@ namespace WordCloudUIExtension
             m_ExcludedWords = new CommonWords(); // English by default
 
 			m_ControlsFont = new Font(FontName, 8);
-			m_IgnoreSelChanges = IgnoreSelChanges.None;
 
 			m_Splitting = false;
 			m_InitialSplitPos = -1;
@@ -99,39 +80,45 @@ namespace WordCloudUIExtension
 
 		// IUIExtension ------------------------------------------------------------------
 
-		public bool SelectTask(UInt32 dwTaskID)
+		public bool SelectTask(UInt32 taskId)
 		{
 			if (m_Attrib == UIExtension.TaskAttribute.Unknown)
 				return false;
 
-			CloudTaskItem item;
-
-			if (!m_Items.TryGetValue(dwTaskID, out item))
-				return false;
-
-			var words = item.GetWords(m_Attrib);
-
-			if (!words.Any())
-				return false;
-
-			m_IgnoreSelChanges = IgnoreSelChanges.MatchChange;
-
-			if ((m_WordCloud.SelectedItem == null) ||
-				!words.Exists(x => x.Equals(m_WordCloud.SelectedItem, StringComparison.CurrentCultureIgnoreCase)))
+			if (!m_TaskMatchesList.HasMatchId(taskId))
 			{
-				var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+				// Get the Cloud items having this id
+				CloudTaskItem item;
 
-				if (!matches.Any())
+				if (!m_Items.TryGetValue(taskId, out item))
+					return false; // ??
+
+				// Get the item's words
+				var words = item.GetWords(m_Attrib, m_ExcludedWords);
+
+				if (!words.Any())
 					return false;
 
-				var bestMatch = matches.First();
+				// See if the currently selected word is in the item's words
+				String selWord = m_WordCloud.SelectedWord;
 
-				m_WordCloud.SelectedItem = bestMatch.Text;
+				if ((selWord == null) ||
+					!words.Exists(x => x.Equals(selWord, StringComparison.CurrentCultureIgnoreCase)))
+				{
+					// If not,  find the item's word with the most occurrence
+					var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+
+					if (!matches.Any())
+						return false; // ??
+
+					// This should update the match list
+					m_WordCloud.SelectedWord = matches.First().Text;
+				}
+
+				RebuldMatchList();
 			}
-			m_IgnoreSelChanges = IgnoreSelChanges.None;
 
- 			m_TaskMatchesList.SetSelectedMatchId(item.Id);
-
+			m_TaskMatchesList.SetSelectedMatchId(taskId);
 			return true;
 		}
 
@@ -144,6 +131,8 @@ namespace WordCloudUIExtension
 								UIExtension.UpdateType type, 
 								System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
 		{
+			HashSet<UInt32> changedTaskIds = null;
+
 			switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
@@ -155,21 +144,58 @@ namespace WordCloudUIExtension
 				case UIExtension.UpdateType.New:
 				case UIExtension.UpdateType.Edit:
 					// In-place update
+					changedTaskIds = new HashSet<UInt32>();
 					break;
 			}
 
+
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs, changedTaskIds))
 				task = task.GetNextTask();
 
-            // Update
+			// Update the list of weighted words 
 			UpdateWeightedWords();
+
+			// Update Match list maintaining its current selection
+			UpdateMatchList(changedTaskIds);
+
+			OnUpdateTasks();
+		}
+
+		void UpdateMatchList(HashSet<UInt32> changedTaskIds = null)
+		{
+			if (m_WordCloud.WeightedWords.Count() == 0)
+			{
+				m_TaskMatchesList.ClearMatches();
+			}
+			else if (changedTaskIds != null)
+			{
+				m_TaskMatchesList.UpdateMatchItemsText(changedTaskIds);
+
+				// If the selected match also changed then we may
+				// may need to change the currently selected word
+				if (changedTaskIds.Contains(m_TaskMatchesList.GetSelectedMatchId()))
+					FixupWordCloudSelection();
+			}
+			else
+			{
+				// Pick a word that ensures the currently selected
+				// item in the match list will be preserved
+				var selMatch = m_TaskMatchesList.GetSelectedMatch();
+				var selWord = FixupWordCloudSelection(selMatch);
+				
+				RebuldMatchList();
+
+				if (selMatch != null)
+					m_TaskMatchesList.SetSelectedMatchId(selMatch.Id);
+			}
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
 									   UIExtension.UpdateType type,
-                                       HashSet<UIExtension.TaskAttribute> attribs)
+                                       HashSet<UIExtension.TaskAttribute> attribs,
+									   HashSet<UInt32> taskIds)
 		{
 			if (!task.IsValid())
 				return false;
@@ -185,10 +211,13 @@ namespace WordCloudUIExtension
 
 			item.ProcessTaskUpdate(task, type, attribs, newTask);
 
+			if (taskIds != null)
+				taskIds.Add(item.Id);
+
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs, taskIds))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -200,7 +229,7 @@ namespace WordCloudUIExtension
 
 			foreach (var item in m_Items)
 			{
-				var taskWords = item.Value.GetWords(m_Attrib);
+				var taskWords = item.Value.GetWords(m_Attrib, m_ExcludedWords);
 				words.AddRange(taskWords);
 			}
 
@@ -209,10 +238,35 @@ namespace WordCloudUIExtension
 			if (selStyle != null)
 			{
 				if (selStyle.Sorted)
-					m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByText();
+					m_WordCloud.WeightedWords = words.CountOccurences().SortByText();
 				else
-					m_WordCloud.WeightedWords = words.Filter(m_ExcludedWords).CountOccurences().SortByOccurences();
+					m_WordCloud.WeightedWords = words.CountOccurences().SortByOccurences();
 			}
+		}
+
+		public void OnUpdateTasks()
+		{
+			StartRedrawTimer();
+		}
+
+		protected void StartRedrawTimer()
+		{
+			if (m_RedrawTimer == null)
+			{
+				m_RedrawTimer = new System.Windows.Forms.Timer();
+			}
+
+			m_RedrawTimer.Tick += OnRedrawTimer;
+			m_RedrawTimer.Interval = 10;
+			m_RedrawTimer.Start();
+		}
+
+		protected void OnRedrawTimer(object sender, EventArgs e)
+		{
+			m_RedrawTimer.Stop();
+
+			m_WordCloud.Invalidate();
+			m_TaskMatchesList.Invalidate();
 		}
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
@@ -269,7 +323,23 @@ namespace WordCloudUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-            return false;
+			Rectangle editRect = m_TaskMatchesList.GetSelectedMatchEditRect();
+
+			if (!editRect.IsEmpty)
+			{
+				// Convert to screen coords
+				editRect = m_TaskMatchesList.RectangleToScreen(editRect);
+
+				left = editRect.Left;
+				top = editRect.Top;
+				right = editRect.Right;
+				bottom = editRect.Bottom;
+
+				return true;
+			}
+
+			// else
+			return false;
 		}
 
 		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
@@ -526,19 +596,18 @@ namespace WordCloudUIExtension
 
 			wordCloudRect.Width = (splitterRect.Left - baseRect.Left);
 
-            m_WordCloud.Location = wordCloudRect.Location;
-            m_WordCloud.Size = wordCloudRect.Size;
-
-
+			m_WordCloud.Location = wordCloudRect.Location;
+			m_WordCloud.Size = wordCloudRect.Size;
 
 			Invalidate(true);
-        }
+		}
 
         private void OnAttributeSelChanged(object sender, EventArgs args)
         {
             m_Attrib = m_AttributeCombo.GetSelectedAttribute();
 
             UpdateWeightedWords();
+			UpdateMatchList();
         }
 
 		private void OnColorSchemeSelChanged(object sender, EventArgs args)
@@ -548,21 +617,14 @@ namespace WordCloudUIExtension
 
 		private void OnStyleComboSelChanged(object sender, EventArgs args)
 		{
-            var selStyle = m_StylesCombo.GetSelectedStyle();
+			m_WordCloud.LayoutType = m_StylesCombo.GetSelectedStyle();
 
-			m_WordCloud.LayoutType = selStyle;
 			UpdateWeightedWords();
         }
 
-		private void OnWordSelectionChanged(object sender)
+		private void RebuldMatchList()
 		{
-			if (WantIgnoreSelChange(IgnoreSelChanges.WordChange))
-				return;
-
-			// else
-			m_IgnoreSelChanges |= IgnoreSelChanges.MatchChange;
-
-            string selWord = m_WordCloud.SelectedItem;
+            string selWord = m_WordCloud.SelectedWord;
 
 			if (selWord != null)
 			{
@@ -574,7 +636,7 @@ namespace WordCloudUIExtension
 
 				foreach (var item in m_Items)
 				{
-					if (item.Value.AttributeHasValue(m_Attrib, selWord))
+					if (item.Value.AttributeHasValue(m_Attrib, selWord, m_ExcludedWords))
 					{
 						m_TaskMatchesList.AddMatch(item.Value);
 
@@ -594,31 +656,53 @@ namespace WordCloudUIExtension
 						NotifyParentSelChange(selItemId);
 
 					m_TaskMatchesList.Columns[0].Text = String.Format("{0} ({1})", headerText, m_TaskMatchesList.Items.Count);
-					m_TaskMatchesList.Invalidate();
 				}
 				else
 				{
 					m_TaskMatchesList.Columns[0].Text = headerText;
 				}
 			}
+		}
 
-			m_IgnoreSelChanges &= ~IgnoreSelChanges.MatchChange;
+		private void OnWordSelectionChanged(object sender)
+		{
+			RebuldMatchList();
+		}
+
+		private String FixupWordCloudSelection(CloudTaskItem selMatch = null)
+		{
+			String selWord = m_WordCloud.SelectedWord;
+
+			if (selMatch == null)
+				selMatch = m_TaskMatchesList.GetSelectedMatch();
+
+			if (selMatch != null)
+			{
+				var words = selMatch.GetWords(m_Attrib, m_ExcludedWords);
+
+				if (words.Any())
+				{
+					var matches = m_WordCloud.Match(words);
+
+					if (matches.Any())
+						selWord = matches.First().Text;
+				}
+			}
+
+			if (selWord == null)
+				selWord = m_WordCloud.WeightedWords.SortByOccurences().First().Text;
+
+			m_WordCloud.SelectedWord = selWord;
+
+			return selWord;
 		}
 
 		private void OnTaskMatchesSelChanged(object sender, EventArgs args)
 		{
-			if (WantIgnoreSelChange(IgnoreSelChanges.MatchChange))
-				return;
-
-			// else
-			m_IgnoreSelChanges |= IgnoreSelChanges.WordChange;
-
 			UInt32 selTaskId = m_TaskMatchesList.GetSelectedMatchId();
 
 			if (selTaskId != 0)
 				NotifyParentSelChange(selTaskId);
-
-			m_IgnoreSelChanges &= ~IgnoreSelChanges.WordChange;
 		}
 
 		private void NotifyParentSelChange(UInt32 taskId)
