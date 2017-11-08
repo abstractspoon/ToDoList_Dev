@@ -2426,19 +2426,19 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 					
 					for (int nItem = (nSel + 1); nItem < nNumItems; nItem++)
 					{
-						HTREEITEM htiNext = GetTreeItem(nItem);
+						DWORD dwNextID = m_taskList.GetTaskID(nItem);
 
-						if (bTopLevelOnly && m_taskTree.GetParentItem(htiNext))
+						if (bTopLevelOnly && m_data.GetTaskParentID(dwNextID))
 						{
 							continue;
 						}
-						else if (bExcludeSelected && TSH().IsItemSelected(htiNext, TRUE))
+						else if (bExcludeSelected && m_taskList.IsItemSelected(nItem))
 						{
 							continue;
 						}
 						
 						// else
-						return m_taskList.GetTaskID(nItem);
+						return dwNextID;
 					}
 				}
 				break;
@@ -2451,19 +2451,19 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 					
 					while (nItem--)
 					{
-						HTREEITEM htiPrev = GetTreeItem(nItem);
-						
-						if (bTopLevelOnly && m_taskTree.GetParentItem(htiPrev))
+						DWORD dwPrevID = m_taskList.GetTaskID(nItem);
+
+						if (bTopLevelOnly && m_data.GetTaskParentID(dwPrevID))
 						{
 							continue;
 						}
-						else if (bExcludeSelected && TSH().IsItemSelected(htiPrev, TRUE))
+						else if (bExcludeSelected && m_taskList.IsItemSelected(nItem))
 						{
 							continue;
 						}
-						
+
 						// else
-						return m_taskList.GetTaskID(nItem);
+						return dwPrevID;
 					}
 				}
 				break;
