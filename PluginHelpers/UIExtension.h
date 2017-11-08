@@ -38,6 +38,31 @@ namespace Abstractspoon
 					All = 0xffff
 				};
 
+				enum class ExpandTask
+				{ 
+					ExpandAllTasks,
+					CollapseAllTasks,
+					ExpandSelectedTasks,
+					CollapseSelectedTasks,
+				};
+
+				enum class GetTask
+				{ 
+					GetNextTask,		
+					GetNextTopLevelTask,
+					GetPrevTask,		
+					GetPrevTopLevelTask,
+				};
+
+				enum class SelectTask
+				{ 
+					SelectFirstTask,			
+					SelectNextTask,				
+					SelectNextTaskInclCurrent,	
+					SelectPrevTask,				
+					SelectLastTask,				
+				};
+
 				enum class HitResult
 				{
 					Nowhere,

@@ -154,10 +154,7 @@ namespace WordCloudUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs, changedTaskIds))
 				task = task.GetNextTask();
 
-			// Update the list of weighted words 
 			UpdateWeightedWords();
-
-			// Update Match list maintaining its current selection
 			UpdateMatchList(changedTaskIds);
 
 			OnUpdateTasks();
@@ -221,6 +218,45 @@ namespace WordCloudUIExtension
 				subtask = subtask.GetNextTask();
 
 			return true;
+		}
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		{
+			switch (getTask)
+			{
+				case UIExtension.GetTask.GetNextTask:
+					break;
+
+				case UIExtension.GetTask.GetPrevTask:
+					break;
+			}
+
+			// all else
+			return false;
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask)
+		{
+			switch (selectTask)
+			{
+				case UIExtension.SelectTask.SelectFirstTask:
+					break;
+
+				case UIExtension.SelectTask.SelectNextTask:
+					break;
+
+				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+					break;
+
+				case UIExtension.SelectTask.SelectPrevTask:
+					break;
+
+				case UIExtension.SelectTask.SelectLastTask:
+					break;
+			}
+	
+			// all else
+			return false;
 		}
 
 		protected void UpdateWeightedWords()

@@ -267,7 +267,46 @@ namespace DayViewUIExtension
 				}
 			}
 		}
-		
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		{
+			switch (getTask)
+			{
+				case UIExtension.GetTask.GetNextTask:
+					break;
+
+				case UIExtension.GetTask.GetPrevTask:
+					break;
+			}
+
+			// all else
+			return false;
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask)
+		{
+			switch (selectTask)
+			{
+				case UIExtension.SelectTask.SelectFirstTask:
+					break;
+
+				case UIExtension.SelectTask.SelectNextTask:
+					break;
+
+				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+					break;
+
+				case UIExtension.SelectTask.SelectPrevTask:
+					break;
+
+				case UIExtension.SelectTask.SelectLastTask:
+					break;
+			}
+
+			// all else
+			return false;
+		}
+	
 		// PRIVATE ------------------------------------------------------------------------------
 
 		private void InitializeComponent()

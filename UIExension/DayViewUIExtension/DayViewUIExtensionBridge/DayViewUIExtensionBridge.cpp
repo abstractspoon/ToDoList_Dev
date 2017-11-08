@@ -199,6 +199,46 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	case IUI_SELECTTASK:
 		return m_wnd->SelectTask(dwExtra);
 
+	case IUI_GETNEXTTASK:
+		{
+			UInt32 taskID = 0;
+			DWORD* pTaskID = (DWORD*)dwExtra;
+
+			if (m_wnd->GetTask(UIExtension::GetTask::GetNextTask, taskID))
+			{
+				*pTaskID = taskID;
+				return true;
+			}
+		}
+		break;
+
+	case IUI_GETPREVTASK:
+		{
+			UInt32 taskID = 0;
+			DWORD* pTaskID = (DWORD*)dwExtra;
+
+			if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
+			{
+				*pTaskID = taskID;
+				return true;
+			}
+		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectFirstTask);
+
+	case IUI_SELECTNEXTTASK:
+		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectNextTask);
+
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectNextTaskInclCurrent);
+
+	case IUI_SELECTPREVTASK:
+		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectPrevTask);
+
+	case IUI_SELECTLASTTASK:
+		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectLastTask);
 	}
 
 	// all else
@@ -210,6 +250,13 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
+	case IUI_GETNEXTTASK:
+	case IUI_GETPREVTASK:
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
 		return true;
 
 	}
