@@ -138,6 +138,34 @@ namespace WordCloudUIExtension
 			return (SelectedItems[0].Tag as CloudTaskItem).Id;
 		}
 
+		public UInt32 GetNextSelectedMatchId()
+		{
+			if (Items.Count > 1)
+			{
+				var nextIndex = (SelectedItems[0].Index + 1);
+
+				if (nextIndex < Items.Count)
+					return (Items[nextIndex].Tag as CloudTaskItem).Id;
+			}
+
+			// all else 
+			return 0;
+		}
+
+		public UInt32 GetPrevSelectedMatchId()
+		{
+			if (Items.Count > 1)
+			{
+				var prevIndex = (SelectedItems[0].Index - 1);
+
+				if (prevIndex >= 0)
+					return (Items[prevIndex].Tag as CloudTaskItem).Id;
+			}
+
+			// all else 
+			return 0;
+		}
+
 		public CloudTaskItem GetSelectedMatch()
 		{
 			if (SelectedItems.Count == 0)

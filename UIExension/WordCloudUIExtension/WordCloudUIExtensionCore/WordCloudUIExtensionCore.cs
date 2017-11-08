@@ -220,19 +220,22 @@ namespace WordCloudUIExtension
 			return true;
 		}
 
-		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{
+			taskId = 0;
+
 			switch (getTask)
 			{
 				case UIExtension.GetTask.GetNextTask:
+					taskId = m_TaskMatchesList.GetNextSelectedMatchId();
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
+					taskId = m_TaskMatchesList.GetPrevSelectedMatchId();
 					break;
 			}
 
-			// all else
-			return false;
+			return (taskId != 0);
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask)
