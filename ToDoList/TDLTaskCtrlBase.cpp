@@ -441,6 +441,9 @@ void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
 	if (m_dwNextUniqueTaskID != dwTaskID)
 	{
 		m_dwNextUniqueTaskID = dwTaskID;
+
+		if (GetSafeHwnd() && IsColumnShowing(TDCC_ID))
+			RecalcColumnWidth(TDCC_ID);
 	}
 }
 
