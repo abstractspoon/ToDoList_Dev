@@ -1743,6 +1743,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (m_bDeletingTasks)
 		return;
 
+#ifdef _DEBUG
+	DWORD dwTick = GetTickCount();
+#endif
+
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
@@ -1892,6 +1896,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	EnableDisableControls(hti);
 	
 	m_treeDragDrop.EnableDragDrop(!bReadOnly);
+
+#ifdef _DEBUG
+	TRACE(_T("CToDoCtrl::UpdateControls(took %d ms)\n"), (GetTickCount() - dwTick));
+#endif
 }
 
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)

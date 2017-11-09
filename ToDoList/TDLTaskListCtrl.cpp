@@ -511,6 +511,25 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	
 	switch (msg)
 	{
+#ifdef _DEBUG
+	case WM_PAINT:
+		if (hRealWnd == m_lcTasks)
+		{
+			DWORD dwTick = GetTickCount();
+			LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+			TRACE(_T("WM_PAINT(ListView - Client Column) took %d ms)\n"), (GetTickCount() - dwTick));
+			return lr;
+		}
+		else if (hRealWnd == m_lcColumns)
+		{
+			DWORD dwTick = GetTickCount();
+			LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+			TRACE(_T("WM_PAINT(ListView - Attribute Columns) took %d ms)\n"), (GetTickCount() - dwTick));
+			return lr;
+		}
+		break;
+#endif
+
 	case WM_NOTIFY:
 		{
 			LPNMHDR pNMHDR = (LPNMHDR)lp;
@@ -1225,39 +1244,54 @@ BOOL CTDLTaskListCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 	return TRUE;
 }
 
+BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
+{
+	if (dwTaskID == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CDWordArray aTaskIDs;
+	aTaskIDs.Add(dwTaskID);
+
+	SetSelectedTasks(aTaskIDs, bTrue);
+	return TRUE;
+}
+
 void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
 {
+	CHoldRedraw hr2(m_lcTasks, 0); 
+	CHoldRedraw hr3(m_lcColumns, 0);
+
 	DeselectAll();
 
 	int nID = aTaskIDs.GetSize();
 
-	if (nID)
+	while (nID--)
 	{
-		CTLSHoldResync hr(*this);
-				
-		while (nID--)
-		{
-			DWORD dwTaskID = aTaskIDs[nID];
-			int nItem = FindTaskItem(dwTaskID);
-			
-			if (nItem != -1)
-			{
-				BOOL bAnchor = (dwTaskID == dwFocusedTaskID);
-				DWORD dwState = LVIS_SELECTED;
-				
-				if (bAnchor)
-				{
-					dwState |= LVIS_FOCUSED;
+		DWORD dwTaskID = aTaskIDs[nID];
+		int nItem = FindTaskItem(dwTaskID);
 
-					m_lcTasks.SetSelectionMark(nItem);
-					m_lcColumns.SetSelectionMark(nItem);
-				}
-				
-				m_lcTasks.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
-				m_lcColumns.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
+		if (nItem != -1)
+		{
+			BOOL bAnchor = (dwTaskID == dwFocusedTaskID);
+			DWORD dwState = LVIS_SELECTED;
+
+			if (bAnchor)
+			{
+				dwState |= LVIS_FOCUSED;
+
+				m_lcTasks.SetSelectionMark(nItem);
+				m_lcColumns.SetSelectionMark(nItem);
 			}
+
+			m_lcTasks.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
+			m_lcColumns.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
 		}
 	}
+
+	EnsureSelectionVisible();
 }
 
 int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const

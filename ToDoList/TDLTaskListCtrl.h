@@ -67,6 +67,7 @@ public:
 	const TODOITEM* GetSelectedTask() const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
+	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
 	BOOL SelectTasks(const CDWordArray& aTasks, BOOL bTrue = FALSE);
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	void RestoreSelection(const TDCSELECTIONCACHE& cache);

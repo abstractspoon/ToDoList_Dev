@@ -3558,7 +3558,7 @@ void CTabbedToDoCtrl::GetSortBy(TDSORTCOLUMNS& sort) const
 }
 
 BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
-{
+{	
 	BOOL bRes = CToDoCtrl::SelectTask(dwTaskID, bTrue);
 
 	// check task has not been filtered out
@@ -3572,13 +3572,7 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 		break;
 
 	case FTCV_TASKLIST:
-		{
-			CDWordArray aTaskIDs;
-			aTaskIDs.Add(GetSelectedTaskID());
-
-			m_taskList.SelectTasks(aTaskIDs, TRUE);
-			m_taskList.EnsureSelectionVisible();
-		}
+		m_taskList.SelectTask(dwTaskID, bTrue);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -4322,7 +4316,16 @@ BOOL CTabbedToDoCtrl::GotoNextTask(TDC_GOTO nDirection)
 			DWORD dwNextID = GetNextTaskID(dwTaskID, MapGotoToGetNext(nDirection, FALSE), FALSE);
 
 			if (dwNextID != dwTaskID)
-				return SelectTask(dwNextID);
+			{
+				DWORD dwTick = GetTickCount();
+			
+				TRACE(_T("CTabbedTooDoCtrl::GotoNextTask(before SelectTask()\n"));
+				BOOL bRes = SelectTask(dwNextID);
+
+				TRACE(_T("CTabbedTooDoCtrl::GotoNextTask(after SelectTask(): %d ms\n"), GetTickCount() - dwTick);
+
+				return bRes;
+			}
 		}
 		break;
 

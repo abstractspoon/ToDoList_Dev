@@ -2324,9 +2324,15 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 	// draw each column separately
 	int nNumCol = m_hdrColumns.GetItemCount();
 	int nLastCol = m_hdrColumns.GetLastVisibleItem();
-	CRect rSubItem, rClient;
 
+	CRect rSubItem, rClient, rClip;
 	m_lcColumns.GetClientRect(rClient);
+
+	pDC->GetClipBox(rClip);
+	rClient.IntersectRect(rClient, rClip);
+
+	if (rClient.IsRectEmpty())
+		return;
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
@@ -2334,8 +2340,11 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			continue;
 
 		// don't draw columns outside of client rect
-		if (!CRect().IntersectRect(rClient, rSubItem))
+		if (rSubItem.IsRectEmpty() || (rSubItem.right <= rClient.left))
 			continue;
+
+		if (rSubItem.left >= rClient.right)
+			break;
 
 		// draw vertical gridlines for all but the
 		// last item if the row is selected
