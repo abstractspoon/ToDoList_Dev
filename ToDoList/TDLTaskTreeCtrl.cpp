@@ -1207,6 +1207,17 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		
 		switch (msg)
 		{
+#ifdef _DEBUG
+		case WM_PAINT:
+			{
+				DWORD dwTick = GetTickCount();
+				LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+				TRACE(_T("WM_PAINT(TaskTree - Client Column) took %d ms)\n"), (GetTickCount() - dwTick));
+				return lr;
+			}
+			break;
+#endif
+
 		case WM_NOTIFY:
 			{
 				LPNMHDR pNMHDR = (LPNMHDR)lp;
@@ -1565,8 +1576,9 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 			}
 			break;
-		} // -----------------------------------------------------------------------------------------------
-		
+		} 
+		// -----------------------------------------------------------------------------------------------
+
 		// Handle selection change before column click/dblclk
 		if (bSelChange)
 		{
@@ -1597,6 +1609,17 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	{
 		switch (msg)
 		{
+#ifdef _DEBUG
+		case WM_PAINT:
+			{
+				DWORD dwTick = GetTickCount();
+				LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+				TRACE(_T("WM_PAINT(TaskTree - Attribute Columns) took %d ms)\n"), (GetTickCount() - dwTick));
+				return lr;
+			}
+			break;
+#endif
+
 		case WM_LBUTTONDOWN:
 			// Selecting or de-selecting a lot of items can be slow
 			// because OnListSelectionChange is called once for each.
