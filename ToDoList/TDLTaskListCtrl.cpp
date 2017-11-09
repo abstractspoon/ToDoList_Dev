@@ -1370,8 +1370,8 @@ void CTDLTaskListCtrl::DeselectAll()
 	// prevent resyncing
 	CTLSHoldResync hr(*this);
 
-	m_lcTasks.SetItemState(-1, 0, LVIS_SELECTED);
-	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED);
+	m_lcTasks.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 }
 
 BOOL CTDLTaskListCtrl::SelectAll() 
