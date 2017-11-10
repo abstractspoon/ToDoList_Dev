@@ -154,14 +154,20 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 		bOffset = TRUE;
 		nUnits = TDC::MapDHUnitsToUnits(nDHUnits);
 	}
-	else if (CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, FALSE))
-	{
-		bOffset = FALSE;
-	}
 	else
 	{
-		bOffset = -1; // error
-		return FALSE;
+		nUnits = TDCU_DAYS;
+		bOffset = FALSE;
+		
+		if (Misc::IsEmpty(szValue))
+		{
+			dValue = 0;
+		}
+		else if (!CDateHelper::DecodeDate(szValue, dValue))
+		{
+			bOffset = -1; // error
+			return FALSE;
+		}
 	}
 
 	return TRUE;
@@ -530,8 +536,13 @@ void CTDCStartupOptions::ParseDate(const CEnCommandLineInfo& cmdInfo,
 		{
 			dtDate.SetValue(sValue);
 		}
+		else if (sValue.IsEmpty())
+		{
+			// Clear date
+			dtDate.SetValue(sValue);
+		}
 		else // actual date
-		{ 
+		{
 			COleDateTime date;
 
 			if (CDateHelper::DecodeRelativeDate(sValue, date, FALSE) ||
