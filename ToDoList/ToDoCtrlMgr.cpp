@@ -969,11 +969,19 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 	UpdateToDoCtrlReadOnlyUIState(nIndex);
 	UpdateTabItemText(nIndex);
 	UpdateTabItemImage(nIndex);
+
 	RefreshFileLastModified(nIndex);
 	RefreshReadOnlyStatus(nIndex);
 	RefreshPathType(nIndex);
 
 	return TRUE;
+}
+
+BOOL CToDoCtrlMgr::CanAddToSourceControl(int nIndex, BOOL bAdd) const
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	return GetToDoCtrl(nIndex).CanAddToSourceControl(bAdd);
 }
 
 CString CToDoCtrlMgr::GetTabItemText(int nIndex) const

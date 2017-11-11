@@ -110,6 +110,7 @@ public:
 	BOOL IsCheckedOut() const;
 	BOOL IsSourceControlled() const;
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);
+	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
 
 	void Flush(BOOL bEndTimeTracking = FALSE); // called to end current editing actions
 	BOOL IsModified() const;

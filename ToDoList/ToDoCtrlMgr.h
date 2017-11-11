@@ -107,6 +107,7 @@ public:
 	BOOL CanCheckInOut(int nIndex) const;
 	BOOL IsSourceControlled(int nIndex) const;
 	BOOL AddToSourceControl(int nIndex, BOOL bAdd = TRUE);
+	BOOL CanAddToSourceControl(int nIndex, BOOL bAdd = TRUE) const;
 	BOOL IsCheckedOut(int nIndex) const;
 	TDC_FILE CheckOut(int nIndex);
 	TDC_FILE CheckOut(int nIndex, CString& sCheckedOutTo);

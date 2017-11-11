@@ -12600,7 +12600,7 @@ void CToDoListWnd::OnToolsRemovefromsourcecontrol()
 
 void CToDoListWnd::OnUpdateToolsRemovefromsourcecontrol(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_mgrToDoCtrls.IsSourceControlled(GetSelToDoCtrl()));
+	pCmdUI->Enable(m_mgrToDoCtrls.CanAddToSourceControl(GetSelToDoCtrl(), FALSE));
 }
 
 void CToDoListWnd::OnToolsAddtoSourceControl() 
@@ -12613,7 +12613,7 @@ void CToDoListWnd::OnToolsAddtoSourceControl()
 
 void CToDoListWnd::OnUpdateToolsAddtoSourceControl(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(!m_mgrToDoCtrls.IsSourceControlled(GetSelToDoCtrl()));
+	pCmdUI->Enable(m_mgrToDoCtrls.CanAddToSourceControl(GetSelToDoCtrl()));
 }
 
 void CToDoListWnd::OnViewResizeColsToFit() 

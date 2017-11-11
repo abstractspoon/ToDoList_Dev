@@ -6708,8 +6708,11 @@ BOOL CToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 
 BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks)
 {
+	// Can't archive if not checked out
+	ASSERT(!IsReadOnly());
+
 	// can't archive archives
-	ASSERT (!m_bArchive);
+	ASSERT(!m_bArchive);
 	
 	// must be something to archive
 	ASSERT(tasks.GetTaskCount());
@@ -10698,8 +10701,25 @@ BOOL CToDoCtrl::IsSourceControlled() const
 	return m_bSourceControlled; 
 }
 
+BOOL CToDoCtrl::CanAddToSourceControl(BOOL bAdd) const
+{
+	if (m_bArchive)
+		return FALSE;
+
+	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
+		return FALSE;
+	
+	if (!bAdd && !m_bCheckedOut)
+		return FALSE;
+	
+	return TRUE;
+}
+
 BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 {
+	if (m_bArchive)
+		return FALSE;
+
 	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
 		return TRUE;
 	

@@ -1497,6 +1497,11 @@ BOOL CTaskFile::SetCheckedOutTo(const CString& sCheckedOutTo)
 	return (NULL != SetItemValue(TDL_CHECKEDOUTTO, sCheckedOutTo));
 }
 
+BOOL CTaskFile::RemoveFromSourceControl()
+{
+	return DeleteItem(TDL_CHECKEDOUTTO);
+}
+
 bool CTaskFile::ClearMetaData(LPCTSTR szKey)
 {
 	if (Misc::IsEmpty(szKey))

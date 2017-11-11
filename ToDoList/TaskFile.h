@@ -136,6 +136,7 @@ public:
 
 	BOOL SetCheckedOutTo(const CString& sCheckedOutTo);
 	BOOL IsCheckedOutTo(const CString& sCheckedOutTo) const;
+	BOOL RemoveFromSourceControl();
 
 	BOOL SetArchive(BOOL bArchive = TRUE);
 	BOOL SetFileName(LPCTSTR szFilename);
