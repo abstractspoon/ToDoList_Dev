@@ -8216,11 +8216,11 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
    return FALSE;
 }
 
-BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, 
+BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter, 
 							   TDC_RESETIDS nResetIDs, BOOL bSelectAll)
 {
-	if (!htiDest)
-		htiDest = TVI_ROOT;
+	if (!htiDestParent)
+		htiDestParent = TVI_ROOT;
 	
 	HTASKITEM hTask = tasks.GetFirstTask();
 	
@@ -8233,24 +8233,20 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTRE
 	TCH().SelectItem(NULL);
 	TSH().RemoveAll();
 
-	CDWordArray aTaskIDs;
-
 	while (hTask)
 	{
-		htiDestAfter = PasteTaskToTree(tasks, hTask, htiDest, htiDestAfter, nResetIDs, TRUE);
+		htiDestAfter = PasteTaskToTree(tasks, hTask, htiDestParent, htiDestAfter, nResetIDs, TRUE);
 
-		// cache items for selection
-		if (bSelectAll)
-			aTaskIDs.Add(GetTaskID(htiDestAfter));
-		
 		// next task
 		hTask = tasks.GetNextTask(hTask);
 	}
-	
-	m_taskTree.ExpandItem(htiDest, TRUE);
+
+	m_taskTree.ExpandItem(htiDestParent);
 	
 	// restore selection
-	if (bSelectAll && aTaskIDs.GetSize())
+	CDWordArray aTaskIDs;
+
+	if (bSelectAll && tasks.GetTaskIDs(aTaskIDs))
 	{
 		m_taskTree.SelectTasks(aTaskIDs);
 	}

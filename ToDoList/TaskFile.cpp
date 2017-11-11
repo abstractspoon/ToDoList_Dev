@@ -3274,6 +3274,31 @@ BOOL CTaskFile::SetTaskID(HTASKITEM hTask, unsigned long nID, BOOL bVisible)
 	return FALSE;
 }
 
+int CTaskFile::GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents) const
+{
+	aTaskIDs.RemoveAll();
+	AddTaskIDs(GetFirstTask(), bIncParents, aTaskIDs);
+
+	return aTaskIDs.GetSize();
+}
+
+void CTaskFile::AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTaskIDs) const
+{
+	if (!hTask)
+		return;
+
+	HTASKITEM hSubtask = GetFirstTask(hTask);
+
+	if (bIncParents || (hSubtask == NULL))
+		aTaskIDs.Add(GetTaskID(hTask));
+
+	// subtasks
+	AddTaskIDs(hSubtask, bIncParents, aTaskIDs);
+
+	// siblings
+	AddTaskIDs(GetNextTask(hTask), bIncParents, aTaskIDs);
+}
+
 BOOL CTaskFile::SetTaskReferenceID(HTASKITEM hTask, unsigned long nRefID, BOOL bVisible)
 {
 	if (SetTaskULong(hTask, TDL_TASKREFID, nRefID))
