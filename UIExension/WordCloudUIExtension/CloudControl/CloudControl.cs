@@ -203,9 +203,16 @@ namespace Gma.CodeCloud.Controls
 			return (matches != null);
 		}
 
-		public IEnumerable<IWord> Match(IEnumerable<string> words)
+		public IEnumerable<IWord> Match(IEnumerable<string> words, bool partialOK = false)
 		{
-			return WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+			IEnumerable<IWord> matches;
+
+			if (partialOK)
+				matches = WeightedWords.Where(a => words.Any(x => (a.Text.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0)));
+			else
+				matches = WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase)));
+
+			return matches.SortByOccurences();
 		}
 
         public IEnumerable<IWord> WeightedWords

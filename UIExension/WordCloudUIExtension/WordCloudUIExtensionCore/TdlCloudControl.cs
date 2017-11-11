@@ -52,7 +52,7 @@ namespace WordCloudUIExtension
 			}
 			set 
 			{
-				if ((m_SelectedWord == null) || m_SelectedWord.Equals("") || !m_SelectedWord.Equals(value))
+				if ((m_SelectedWord == null) || m_SelectedWord.Equals("") || !m_SelectedWord.Equals(value, StringComparison.CurrentCultureIgnoreCase))
 				{
 					m_SelectedWord = value;
 
@@ -62,6 +62,18 @@ namespace WordCloudUIExtension
 						SelectionChange(this);
 				}
 			}
+		}
+
+		public bool SelectedWordMatches(IEnumerable<String> words, bool partialOK)
+		{
+			if (SelectedWord == null)
+				return false;
+
+			if (partialOK)
+				return words.Any(x => m_SelectedWord.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0);
+			
+			// else
+			return words.Any(x => m_SelectedWord.Equals(x, StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)

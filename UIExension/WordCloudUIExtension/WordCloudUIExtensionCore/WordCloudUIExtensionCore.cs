@@ -240,22 +240,28 @@ namespace WordCloudUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask)
 		{
-			switch (selectTask)
+			var words = CloudTaskItem.ToWords(text);
+
+			if (!words.Any())
+				return false;
+
+			if (!m_WordCloud.SelectedWordMatches(words, true))
 			{
-				case UIExtension.SelectTask.SelectFirstTask:
-					break;
+				var matches = m_WordCloud.Match(words, true); 
 
-				case UIExtension.SelectTask.SelectNextTask:
-					break;
+				if (matches.Any())
+				{
+					m_WordCloud.SelectedWord = matches.First().Text;
+					return true;
+				}
 
-				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-					break;
+				return false;
+			}
 
-				case UIExtension.SelectTask.SelectPrevTask:
-					break;
-
-				case UIExtension.SelectTask.SelectLastTask:
-					break;
+			// Then on the match list
+			if (m_TaskMatchesList.SelectMatch(words, selectTask, true))
+			{
+				return true;
 			}
 	
 			// all else

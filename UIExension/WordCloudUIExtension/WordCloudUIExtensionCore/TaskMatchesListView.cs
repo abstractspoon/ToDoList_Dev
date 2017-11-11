@@ -130,6 +130,68 @@ namespace WordCloudUIExtension
 			return (selLVItem.Tag as CloudTaskItem).Id;
 		}
 
+		public bool SelectMatch(IEnumerable<String> words, UIExtension.SelectTask selectTask, bool partialOK)
+		{
+			if (Items.Count == 0)
+				return false;
+
+			if (SelectedIndices.Count == 0)
+				SelectedIndices.Add(0);
+
+			int selIndex = SelectedIndices[0];
+			int matchIndex = -1;
+
+			switch (selectTask)
+			{
+				case UIExtension.SelectTask.SelectFirstTask:
+					matchIndex = FindTask(words, 0, true, partialOK);
+					break;
+
+				case UIExtension.SelectTask.SelectNextTask:
+					matchIndex = FindTask(words, (selIndex + 1), true, partialOK);
+					break;
+
+				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+					matchIndex = FindTask(words, selIndex, true, partialOK);
+					break;
+
+				case UIExtension.SelectTask.SelectPrevTask:
+					matchIndex = FindTask(words, (selIndex - 1), false, partialOK);
+					break;
+
+				case UIExtension.SelectTask.SelectLastTask:
+					matchIndex = FindTask(words, (Items.Count - 1), false, partialOK);
+					break;
+			}
+
+			if (matchIndex != -1)
+			{
+				SelectedIndices.Clear();
+				SelectedIndices.Add(matchIndex);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private int FindTask(IEnumerable<String> words, int startIndex, bool forward, bool partialOK)
+		{
+			int fromIndex = startIndex;
+			int toIndex = forward ? Items.Count : -1;
+			int increment = forward ? 1 : -1;
+
+			for (int i = fromIndex; i != toIndex; i += increment)
+			{
+				var item = (Items[i].Tag as CloudTaskItem);
+
+				if (item.Matches(words, true))
+					return i;
+			}
+
+			return -1; // no match
+		}
+		
 		public UInt32 GetSelectedMatchId()
 		{
 			if (SelectedItems.Count == 0)

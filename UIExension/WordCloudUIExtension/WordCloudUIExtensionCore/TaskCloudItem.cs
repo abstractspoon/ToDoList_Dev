@@ -21,6 +21,7 @@ namespace WordCloudUIExtension
 			return Title;
 		}
 
+
 		public readonly UInt32 Id;
 		public string Title;
 		public string DoneDate;
@@ -129,58 +130,96 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
+		public bool Matches(IEnumerable<String> words, bool partialOK)
+		{
+			var attribs = new List<UIExtension.TaskAttribute>();
+
+			attribs.Add(UIExtension.TaskAttribute.Title);
+			attribs.Add(UIExtension.TaskAttribute.Comments);	
+
+			foreach (var attrib in attribs)
+			{
+				var attribWords = GetAttributeValues(attrib, null);
+
+				foreach (var word in words)
+				{
+					if (partialOK)
+					{
+						if (attribWords.Any(x => x.IndexOf(word, StringComparison.CurrentCultureIgnoreCase) >= 0))
+							return true;
+					}
+					else
+					{
+						if (attribWords.Any(x => x.Equals(word, StringComparison.CurrentCultureIgnoreCase)))
+							return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public static List<string> ToWords(String text, IBlacklist exclusions)
+		{
+			var words = ToWords(text, 2);
+
+			if (exclusions != null)
+				words.RemoveAll(p => (exclusions.Countains(p)));
+
+			return words;
+		}
+
+		public static List<string> ToWords(String text, int minWordLength = 0)
+		{
+			List<string> words = text.Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+			words = words.Select(p => p.Trim(WordTrim)).ToList();
+			words = words.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+
+			words.RemoveAll(p => (p.Length < minWordLength));
+
+			return words;
+		}
+
 		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions)
 		{
 			if (attrib != m_WordAttribute)
 			{
-				var values = GetAttributeValues(attrib);
-
-				// Split title and comments only into individual words removing duplicates
-				if ((attrib == UIExtension.TaskAttribute.Title) ||
-					(attrib == UIExtension.TaskAttribute.Comments))
-				{
-					if (values.Count > 0)
-					{
-						List<string> parts = values[0].Split(WordDelims, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim(WordTrim)).ToList();
-
-						values = parts.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
-					}
-				}
-
-				values.RemoveAll(p => (p.Length < 2));
-
-				if (exclusions != null)
-					values.RemoveAll(p => (exclusions.Countains(p)));
-
-				m_Words = values;
+				m_Words = GetAttributeValues(attrib, exclusions);
 				m_WordAttribute = attrib;
 			}
 
 			return m_Words;
 		}
 
-		public List<string> GetAttributeValues(UIExtension.TaskAttribute attrib)
+		public List<string> GetAttributeValues(UIExtension.TaskAttribute attrib, IBlacklist exclusions)
 		{
 			var values = new List<string>();
 
 			switch (attrib)
 			{
-				case UIExtension.TaskAttribute.Title: values.Add(Title); break;
-				case UIExtension.TaskAttribute.DoneDate: values.Add(DoneDate); break;
-				case UIExtension.TaskAttribute.DueDate: values.Add(DueDate); break;
-				case UIExtension.TaskAttribute.StartDate: values.Add(StartDate); break;
-				case UIExtension.TaskAttribute.AllocBy: values.Add(AllocBy); break;
-				case UIExtension.TaskAttribute.Status: values.Add(Status); break;
-				case UIExtension.TaskAttribute.Comments: values.Add(Comments); break;
-				case UIExtension.TaskAttribute.CreationDate: values.Add(CreationDate); break;
-				case UIExtension.TaskAttribute.CreatedBy: values.Add(CreatedBy); break;
-				case UIExtension.TaskAttribute.Version: values.Add(Version); break;
+				case UIExtension.TaskAttribute.Title:			values = ToWords(Title);	break;
+				case UIExtension.TaskAttribute.Comments:		values = ToWords(Comments); break;
 
-				case UIExtension.TaskAttribute.AllocTo: values = AllocTo; break;
-				case UIExtension.TaskAttribute.Category: values = Category; break;
-				case UIExtension.TaskAttribute.Tag: values = Tags; break;
+				case UIExtension.TaskAttribute.AllocTo:			values = AllocTo;			break;
+				case UIExtension.TaskAttribute.Category:		values = Category;			break;
+				case UIExtension.TaskAttribute.Tag:				values = Tags;				break;
+
+				case UIExtension.TaskAttribute.DoneDate:		values.Add(DoneDate);		break;
+				case UIExtension.TaskAttribute.DueDate:			values.Add(DueDate);		break;
+				case UIExtension.TaskAttribute.StartDate:		values.Add(StartDate);		break;
+				case UIExtension.TaskAttribute.AllocBy:			values.Add(AllocBy);		break;
+				case UIExtension.TaskAttribute.Status:			values.Add(Status);			break;
+				case UIExtension.TaskAttribute.CreationDate:	values.Add(CreationDate);	break;
+				case UIExtension.TaskAttribute.CreatedBy:		values.Add(CreatedBy);		break;
+				case UIExtension.TaskAttribute.Version:			values.Add(Version);		break;
 			}
 
+			values.RemoveAll(p => (p.Length < 2));
+
+			if (exclusions != null)
+				values.RemoveAll(p => (exclusions.Countains(p)));
+			
 			return values;
 		}
 
