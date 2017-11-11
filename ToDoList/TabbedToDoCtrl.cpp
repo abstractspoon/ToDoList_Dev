@@ -4883,7 +4883,7 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 
 			if (pExtWnd && pExtWnd->CanDoAppCommand(nCmdID))
 			{
-				pExtWnd->DoAppCommand(nCmdID, (DWORD)(LPCTSTR)sPart);
+				return (pExtWnd->DoAppCommand(nCmdID, (DWORD)(LPCTSTR)sPart) ? TRUE : FALSE);
 			}
 			else // fallback
 			{
