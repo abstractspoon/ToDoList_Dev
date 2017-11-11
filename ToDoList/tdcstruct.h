@@ -2514,8 +2514,8 @@ struct TDSORT
 			CString sAscendKey;
 			sAscendKey.Format(_T("Ascending%d"), (nCol + 1));
 
-			pPrefs->WriteProfileInt(sSortKey, sColKey, multi.Cols()[0].nBy);
-			pPrefs->WriteProfileInt(sSortKey, sAscendKey, multi.Cols()[0].bAscending);
+			pPrefs->WriteProfileInt(sSortKey, sColKey, multi.Cols()[nCol].nBy);
+			pPrefs->WriteProfileInt(sSortKey, sAscendKey, multi.Cols()[nCol].bAscending);
 		}
 	}
 
