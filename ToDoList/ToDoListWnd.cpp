@@ -3384,6 +3384,13 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 	// Update Time track widget OR todoctrl depending on who notified
 	int nSel = GetSelToDoCtrl();
 	
+	// Must update TDC before the time-tracker
+	if (nFrom != FROM_TASKLIST)
+	{
+		if ((nTDC == nSel) || SelectToDoCtrl(nTDC, TRUE))
+			GetToDoCtrl().BeginTimeTracking(dwTaskID);
+	}
+
 	if (nFrom != FROM_TRACKER)
 	{
 		ASSERT(nTDC == nSel);
@@ -3391,12 +3398,6 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 		m_dlgTimeTracker.UpdateTracking(&GetToDoCtrl());
 	}
 	
-	if (nFrom != FROM_TASKLIST)
-	{
-		if ((nTDC == nSel) || SelectToDoCtrl(nTDC, TRUE))
-			GetToDoCtrl().BeginTimeTracking(dwTaskID);
-	}
-
 	// always refresh the notifier tasklist
 	m_mgrToDoCtrls.RefreshTimeTracking(nTDC);
 
