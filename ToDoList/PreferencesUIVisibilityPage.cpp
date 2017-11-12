@@ -57,6 +57,7 @@ BOOL CPreferencesUIVisibilityPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
+	m_groupLineList.Initialize(::GetDlgItem(*this, IDC_LISTLABEL));
 	m_lcVisibility.SetCurSel(0, 0);
 
 	return TRUE;
