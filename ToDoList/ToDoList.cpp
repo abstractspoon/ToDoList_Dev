@@ -1306,6 +1306,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	sAppFolder = sTempFolder;
 
 #else // Release -----------------------------------------------------------------------
+	UNREFERENCED_PARAMETER(bTestDownload);
 
 	// try to close all open instances of TDL
 	if (!CloseAllToDoListWnds())
