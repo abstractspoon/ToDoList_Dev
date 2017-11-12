@@ -93,6 +93,7 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	{
 		m_tcCommands.SendMessage(WM_NULL);
 
+		CWaitCursor cursor;
 		HTREEITEM htiFirst = NULL;
 
 		{
