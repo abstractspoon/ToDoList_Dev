@@ -411,6 +411,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
 	ON_NOTIFY(NM_RCLICK, IDC_TRAYICON, OnTrayIconRClick)
 	ON_NOTIFY(TCN_CLOSETAB, IDC_TABCONTROL, OnTabCtrlCloseTab)
+	ON_NOTIFY(TCN_POSTDRAW, IDC_TABCONTROL, OnTabCtrlPostDrawTab)
 	ON_NOTIFY(TCN_GETBACKCOLOR, IDC_TABCONTROL, OnTabCtrlGetBackColor)
 	ON_NOTIFY(TCN_ENDDRAG, IDC_TABCONTROL, OnTabCtrlEndDrag)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCONTROL, OnTabCtrlSelchange)
@@ -10512,7 +10513,7 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 
 void CToDoListWnd::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	if (nIDCtl == 0 && lpDrawItemStruct->itemID == ID_CLOSE)
+	if ((nIDCtl == 0) && (lpDrawItemStruct->itemID == ID_CLOSE))
 	{
 		if (m_menubar.DrawMDIButton(lpDrawItemStruct))
 			return;
@@ -11071,14 +11072,6 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 
 	RefreshFilterBarControls();
 	UpdateStatusbar();
-// 
-// 	CRect rFilterBar;
-// 
-// 	if (GetFilterBarRect(rFilterBar))
-// 	{
-// 		InvalidateRect(rFilterBar);
-// 		UpdateWindow();
-// 	}
 }
 
 void CToDoListWnd::OnViewFilter() 
