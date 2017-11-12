@@ -147,8 +147,7 @@ namespace WordCloudUIExtension
 					changedTaskIds = new HashSet<UInt32>();
 					break;
 			}
-
-
+            
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs, changedTaskIds))
@@ -311,7 +310,8 @@ namespace WordCloudUIExtension
 			m_RedrawTimer.Stop();
 
 			m_WordCloud.Invalidate();
-			m_TaskMatchesList.Invalidate();
+            m_TaskMatchesList.Invalidate();
+            m_TaskMatchesList.EnsureSelectionVisible();
 		}
 
 		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)

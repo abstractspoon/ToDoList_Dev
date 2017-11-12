@@ -112,6 +112,25 @@ namespace WordCloudUIExtension
 			return someUpdated;
 		}
 
+        public void EnsureSelectionVisible()
+        {
+            if ((SelectedIndices.Count == 0) || (Items.Count == 0))
+                return;
+
+            int itemIndex = SelectedItems.Count;
+
+            while (itemIndex-- > 0)
+            {
+                Rectangle itemRect = SelectedItems[itemIndex].Bounds;
+
+                if (Rectangle.Intersect(ClientRectangle, itemRect) == itemRect)
+                    return;
+            }
+
+            // else
+            EnsureVisible(SelectedIndices[0]);
+        }
+
         public UInt32 SetSelectedMatchId(UInt32 matchId)
         {
 			SelectedItems.Clear();
@@ -126,6 +145,7 @@ namespace WordCloudUIExtension
 				selLVItem = Items[0];
 
 			selLVItem.Selected = true;
+            EnsureSelectionVisible();
 
 			return (selLVItem.Tag as CloudTaskItem).Id;
 		}
@@ -169,6 +189,7 @@ namespace WordCloudUIExtension
 				SelectedIndices.Clear();
 				SelectedIndices.Add(matchIndex);
 
+                EnsureSelectionVisible();
 				return true;
 			}
 
