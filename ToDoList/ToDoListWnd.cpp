@@ -3382,7 +3382,7 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 		}
 	}
 
-	// Update Time track widget OR todoctrl depending on who notified
+	// Update Time track widget AND/OR todoctrl depending on who notified
 	int nSel = GetSelToDoCtrl();
 	
 	// Must update TDC before the time-tracker
@@ -3416,18 +3416,18 @@ void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
 		ASSERT(nTDC != -1);
 		ASSERT((nFrom == FROM_TRACKER) || (nTDC == GetSelToDoCtrl()));
 
+		// Update Time track widget AND/OR todoctrl depending on who notified
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 		
-		// Update Time track widget
-		if (nFrom != FROM_TRACKER)
-		{
-			m_dlgTimeTracker.UpdateTracking(&tdc);
-		}
-
-		// Update todoctrl
+		// Must update TDC before the time-tracker
 		if (nFrom != FROM_TASKLIST)
 		{
 			tdc.EndTimeTracking(TRUE);
+		}
+
+		if (nFrom != FROM_TRACKER)
+		{
+			m_dlgTimeTracker.UpdateTracking(&tdc);
 		}
 
 		// update tab image
