@@ -349,6 +349,52 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	return (pList != NULL);
 }
 
+BOOL CKanbanCtrl::SelectTask(const CString& sPart, IUI_APPCOMMAND nCmd)
+{
+	ASSERT(!sPart.IsEmpty());
+
+	const CKanbanListCtrl* pList = NULL;
+	int nStartItem = -1;
+	BOOL bForward = TRUE;
+
+	switch (nCmd)
+	{
+	case IUI_SELECTFIRSTTASK:
+		pList = m_aListCtrls.GetFirstNonEmpty();
+		nStartItem = 0;
+		break;
+
+	case IUI_SELECTNEXTTASK:
+		pList = m_pSelectedList;
+		nStartItem = (pList->GetLastSelectedItem() + 1);
+		break;
+
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+		pList = m_pSelectedList;
+		nStartItem = pList->GetLastSelectedItem();
+		break;
+
+	case IUI_SELECTPREVTASK:
+		pList = m_pSelectedList;
+		nStartItem = (pList->GetFirstSelectedItem() - 1);
+		bForward = FALSE;
+		break;
+
+	case IUI_SELECTLASTTASK:
+		pList = m_aListCtrls.GetLastNonEmpty();
+		nStartItem = (pList->GetItemCount() - 1);
+		bForward = FALSE;
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return false;
+
+}
+
 void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
 {
 	ASSERT(GetSafeHwnd());

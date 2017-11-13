@@ -4828,7 +4828,7 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 
 	case FTCV_TASKLIST:
 		{
-			int nFind = -1;
+			int nFind = -1, nSelItem = m_taskList.GetSelectedItem();
 
 			switch (nSelect)
 			{
@@ -4837,15 +4837,15 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 				break;
 			
 			case TDC_SELECTNEXT:
-				nFind = FindListTask(sPart, m_taskList.GetSelectedItem() + 1);
+				nFind = FindListTask(sPart, (nSelItem + 1));
 				break;
 			
 			case TDC_SELECTNEXTINCLCURRENT:
-				nFind = FindListTask(sPart, m_taskList.GetSelectedItem());
+				nFind = FindListTask(sPart, nSelItem);
 				break;
 			
 			case TDC_SELECTPREV:
-				nFind = FindListTask(sPart, m_taskList.GetSelectedItem() - 1, FALSE);
+				nFind = FindListTask(sPart, (nSelItem - 1), FALSE);
 				break;
 			
 			case TDC_SELECTLAST:
@@ -4904,7 +4904,7 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext)
 {
 	// build a search query
 	SEARCHPARAMS params;
-	params.aRules.Add(SEARCHPARAM(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES, sPart));
+	params.aRules.Add(SEARCHPARAM(TDCA_ANYTEXTATTRIBUTE, FOP_INCLUDES, sPart));
 
 	// we need to do this manually because CListCtrl::FindItem 
 	// only looks at the start of the string

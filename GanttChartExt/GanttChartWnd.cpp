@@ -612,9 +612,21 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		break;
 
 	case IUI_SETTASKFONT:
+		if (dwExtra)
 		{
 			CHoldRedraw hr(*this);
 			m_ctrlGantt.SetFont((HFONT)dwExtra, TRUE);
+		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (dwExtra)
+		{
+			LPCTSTR szText = (LPCTSTR)dwExtra;
 		}
 		break;
 	}
@@ -665,12 +677,20 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
+		if (dwExtra)
 		{
 			DWORD* pTaskID = (DWORD*)dwExtra;
 			DWORD dwNextID = m_ctrlGantt.GetNextTask(*pTaskID, nCmd);
 			
 			return (dwNextID && (dwNextID != *pTaskID));
 		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
 		return true;
 	}
 

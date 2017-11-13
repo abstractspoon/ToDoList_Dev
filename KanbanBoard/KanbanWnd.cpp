@@ -573,6 +573,18 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_SETTASKFONT:
 		m_ctrlKanban.SendMessage(WM_SETFONT, dwExtra, TRUE);
 		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (dwExtra)
+		{
+			LPCTSTR szText = (LPCTSTR)dwExtra;
+			return (m_ctrlKanban.SelectTask(szText, nCmd) != FALSE);
+		}
+		break;
 	}
 
 	return false;
@@ -612,6 +624,17 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 			DWORD dwNextID = m_ctrlKanban.GetNextTask(*pTaskID, nCmd);
 
 			return (dwNextID && (dwNextID != *pTaskID));
+		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (dwExtra)
+		{
+			return true;
 		}
 		break;
 	}

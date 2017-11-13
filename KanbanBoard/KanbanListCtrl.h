@@ -69,6 +69,8 @@ public:
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
+	int GetFirstSelectedItem() const;
+	int GetLastSelectedItem() const;
 
 	void SetBackgroundColor(COLORREF color);
 	void SetExcessColor(COLORREF color);
@@ -193,6 +195,7 @@ public:
 	CKanbanListCtrl* Get(HWND hWnd) const;
 	CKanbanListCtrl* Get(const CString& sAttribValue) const;
 	CKanbanListCtrl* GetFirstNonEmpty() const;
+	CKanbanListCtrl* GetLastNonEmpty() const;
 	CKanbanListCtrl* GetBacklog() const;
 
 	void SetTextColorIsBackground(BOOL bSet = TRUE);

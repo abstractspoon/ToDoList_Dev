@@ -214,6 +214,23 @@ CKanbanListCtrl* CKanbanListCtrlArray::Get(HWND hwnd) const
 
 CKanbanListCtrl* CKanbanListCtrlArray::GetFirstNonEmpty() const
 {
+	int nNumList = GetSize();
+
+	for (int nList = 0; nList < nNumList; nList++)
+	{
+		CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		if (pList->GetItemCount())
+			return pList;
+	}
+
+	// all empty
+	return NULL;
+}
+
+CKanbanListCtrl* CKanbanListCtrlArray::GetLastNonEmpty() const
+{
 	int nList = GetSize();
 
 	while (nList--)
@@ -451,6 +468,9 @@ CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOO
 			// else
 			return pNext;
 		}
+
+		// return to start
+		return GetFirstNonEmpty();
 	}
 	else // prev
 	{
@@ -470,6 +490,9 @@ CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOO
 			// else
 			return pPrev;
 		}
+
+		// return to end
+		return GetLastNonEmpty();
 	}
 
 	return NULL;
@@ -1637,6 +1660,34 @@ int CKanbanListCtrl::GetSelectedTasks(CDWordArray& aItemIDs) const
 		aItemIDs.Add(m_dwSelectingTask);
 
 	return aItemIDs.GetSize();
+}
+
+int CKanbanListCtrl::GetFirstSelectedItem() const
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+
+	if (pos)
+		return GetNextSelectedItem(pos);
+
+	// else
+	return -1;
+
+}
+
+int CKanbanListCtrl::GetLastSelectedItem() const
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+
+	while (pos)
+	{
+		int nSel = GetNextSelectedItem(pos);
+
+		if (pos == NULL)
+			return nSel;
+	}
+
+	// else
+	return -1;
 }
 
 void CKanbanListCtrl::ScrollToSelection()
