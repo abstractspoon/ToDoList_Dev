@@ -128,8 +128,14 @@ BOOL TDCSTARTUPATTRIB::GetTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 	{
 		bOffset = TRUE;
 	}
-	else if (CTimeHelper::DecodeOffset(szValue, dValue, nTHUnits, FALSE))
+	else if (CTimeHelper::DecodeOffset(szValue, dValue, nTHUnits, FALSE)) // Decode as plain number
 	{
+		bOffset = FALSE;
+	}
+	else if (Misc::IsEmpty(szValue))
+	{
+		dValue = 0;
+		nTHUnits = THU_HOURS;
 		bOffset = FALSE;
 	}
 	else
@@ -152,10 +158,15 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 	if (IsOffset(szValue) && CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, TRUE))
 	{
 		bOffset = TRUE;
-		nUnits = TDC::MapDHUnitsToUnits(nDHUnits);
 	}
-	else if (CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, FALSE))
+	else if (CDateHelper::DecodeOffset(szValue, dValue, nDHUnits, FALSE)) // Decode as plain number
 	{
+		bOffset = FALSE;
+	}
+	else if (Misc::IsEmpty(szValue))
+	{
+		dValue = 0;
+		nDHUnits = DHU_DAYS;
 		bOffset = FALSE;
 	}
 	else
@@ -164,6 +175,7 @@ BOOL TDCSTARTUPATTRIB::GetDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset)
 		return FALSE;
 	}
 
+	nUnits = TDC::MapDHUnitsToUnits(nDHUnits);
 	return TRUE;
 }
 
@@ -530,6 +542,11 @@ void CTDCStartupOptions::ParseDate(const CEnCommandLineInfo& cmdInfo,
 		{
 			dtDate.SetValue(sValue);
 		}
+		else if (sValue.IsEmpty())
+		{
+			// Clear date
+			dtDate.SetValue(sValue);
+		}
 		else // actual date
 		{ 
 			COleDateTime date;
@@ -553,6 +570,11 @@ void CTDCStartupOptions::ParseTime(const CEnCommandLineInfo& cmdInfo,
 		if (TDCSTARTUPATTRIB::IsOffset(sValue))
 		{
 			dTime.SetValue(sValue); // in hours
+		}
+		else if (sValue.IsEmpty())
+		{
+			// Clear time
+			dTime.SetValue(sValue);
 		}
 		else // actual time
 		{ 
