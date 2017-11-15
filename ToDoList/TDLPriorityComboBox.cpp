@@ -186,3 +186,20 @@ void CTDLPriorityComboBox::BuildCombo()
 	SetCurSel(nSel);
 }
 
+void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
+										DWORD dwItemData, const CString& sItem, BOOL bList)
+{
+	if (nItem == -1)
+		return;
+
+	// Don't indent 'non-color' items
+	if ((dwItemData == CLR_NONE) && !Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))
+	{
+		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList);
+		return;
+	}
+
+	// all else
+	CColorComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList);
+}	
+
