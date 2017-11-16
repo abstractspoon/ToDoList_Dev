@@ -26,7 +26,6 @@ static char THIS_FILE[] = __FILE__;
 TASKCALITEM::TASKCALITEM()
 	: 
 	color(CLR_NONE), 
-	bDone(FALSE),
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
 	bTopLevel(FALSE),
@@ -38,7 +37,6 @@ TASKCALITEM::TASKCALITEM()
 TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
-	bDone(FALSE),
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
 	bTopLevel(FALSE),
@@ -62,12 +60,12 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	sFormattedName = tci.sFormattedName;
 	color = tci.color;
 	dwTaskID = tci.dwTaskID;
-	bDone = tci.bDone;
 	bGoodAsDone = tci.bGoodAsDone;
 	bLocked = tci.bLocked;
 	dtCreation = tci.dtCreation;
 	dtStart = tci.dtStart;
-	dtEnd = tci.dtEnd;
+	dtDue = tci.dtDue;
+	dtDone = tci.dtDone;
 	dtStartCalc = tci.dtStartCalc;
 	dtEndCalc = tci.dtEndCalc;
 	bHasIcon = tci.bHasIcon;
@@ -80,12 +78,12 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 	return ((sName == tci.sName) &&
 		(color == tci.color) &&
 		(dwTaskID == tci.dwTaskID) &&
-		(bDone == tci.bDone) &&
 		(bGoodAsDone == tci.bGoodAsDone) &&
 		(bLocked == tci.bLocked) &&
 		(dtCreation == tci.dtCreation) &&
 		(dtStart == tci.dtStart) &&
-		(dtEnd == tci.dtEnd) &&
+		(dtDue == tci.dtDue) &&
+		(dtDone == tci.dtDone) &&
 		(dtStartCalc == tci.dtStartCalc) &&
 		(dtEndCalc == tci.dtEndCalc) &&
 		(bHasIcon == tci.bHasIcon));
@@ -94,20 +92,17 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
 {
 	// check for quick exit
-	BOOL bUpdateStart = attrib.Has(IUI_STARTDATE);
-	BOOL bUpdateEnd = (attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE));
-
-	if (!bUpdateStart && !bUpdateEnd)
+	if (!(attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE)))
 		return;
 
+	// get creation date once only
 	time64_t tDate = 0;
 
-	// get creation date once only
 	if (!CDateHelper::IsDateSet(dtCreation) && pTasks->GetTaskCreationDate64(hTask, tDate))
 		dtCreation = GetDate(tDate);
 
 	// retrieve new dates
-	if (bUpdateStart)
+	if (attrib.Has(IUI_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
 			dtStart = GetDate(tDate);
@@ -116,24 +111,21 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 		ReformatName();
 	}
+	
+	if (attrib.Has(IUI_DUEDATE))
+	{
+		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
+			dtDue = GetDate(tDate);
+		else
+			CDateHelper::ClearDate(dtDue);
+	}
 
-	if (bUpdateEnd)
+	if (attrib.Has(IUI_DONEDATE))
 	{
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
-		{
-			dtEnd = GetDate(tDate);
-			bDone = TRUE;
-		}
-		else if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
-		{
-			dtEnd = GetDate(tDate);
-			bDone = FALSE;
-		}
+			dtDone = GetDate(tDate);
 		else
-		{
-			CDateHelper::ClearDate(dtEnd);
-			bDone = FALSE;
-		}
+			CDateHelper::ClearDate(dtDone);
 	}
 
 	RecalcDates(dwCalcDates);
@@ -155,19 +147,19 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 		if (Misc::HasFlag(dwCalcDates, TCCO_CALCMISSINGSTARTASCREATION))
 		{
 			if (bHasEndDate)
-				dtStartCalc = min(dtEnd, dtCreation);
+				dtStartCalc = min(dtDue, dtCreation);
 			else
 				dtStartCalc = dtCreation;
 		}
 		else if (Misc::HasFlag(dwCalcDates, TCCO_CALCMISSINGSTARTASDUE))
 		{
 			if (bHasEndDate)
-				dtStartCalc = dtEnd;
+				dtStartCalc = dtDue;
 		}
 		else //if (Misc::HasFlag(dwCalcDates, TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY))
 		{
 			if (bHasEndDate)
-				dtStartCalc = min(dtEnd, dtNow);
+				dtStartCalc = min(dtDue, dtNow);
 			else 
 				dtStartCalc = dtNow;
 		}
@@ -198,7 +190,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	if (IsEndDateSet())
 	{
 		// Special case: treat overdue tasks as due today
-		if ((dtEnd < dtNow) && Misc::HasFlag(dwCalcDates, TCCO_TREATOVERDUEASDUETODAY))
+		if (CDateHelper::IsDateSet(dtDue) && (dtDue < dtNow) && Misc::HasFlag(dwCalcDates, TCCO_TREATOVERDUEASDUETODAY))
 		{
 			dtEndCalc = dtNow;
 			
@@ -206,8 +198,8 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 				dtEndCalc = CDateHelper::GetEndOfDay(dtEndCalc);
 		}
 
-		if (!CDateHelper::DateHasTime(dtEnd))
-			dtEnd = CDateHelper::GetEndOfDay(dtEnd);
+		if (!CDateHelper::DateHasTime(dtDue))
+			dtDue = CDateHelper::GetEndOfDay(dtDue);
 	}
 	else if (HasAnyEndDate())
 	{
@@ -216,8 +208,8 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 
 	// Finally ensure start date precedes end date
-	if (bHasStartDate && bHasEndDate && (dtStart > dtEnd))
-		dtStartCalc = CDateHelper::GetDateOnly(dtEnd);
+	if (bHasStartDate && bHasEndDate && (dtStart > dtDue))
+		dtStartCalc = CDateHelper::GetDateOnly(dtDue);
 }
 
 BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
@@ -260,7 +252,7 @@ BOOL TASKCALITEM::IsValid() const
 
 BOOL TASKCALITEM::IsDone(BOOL bIncGoodAs) const
 {
-	if (bDone)
+	if (CDateHelper::IsDateSet(dtDone))
 		return TRUE;
 	
 	// else
@@ -287,7 +279,7 @@ BOOL TASKCALITEM::IsStartDateSet() const
 
 BOOL TASKCALITEM::IsEndDateSet() const
 {
-	return (CDateHelper::IsDateSet(dtEnd) && !CDateHelper::IsDateSet(dtEndCalc));
+	return ((CDateHelper::IsDateSet(dtDue) || CDateHelper::IsDateSet(dtDone)) && !CDateHelper::IsDateSet(dtEndCalc));
 }
 
 BOOL TASKCALITEM::HasAnyStartDate() const
@@ -305,17 +297,25 @@ COleDateTime TASKCALITEM::GetAnyStartDate() const
 	// take calculated value in preference
 	if (CDateHelper::IsDateSet(dtStartCalc))
 		return dtStartCalc;
-	else
-		return dtStart;
+	
+	// else
+	return dtStart;
 }
 
 COleDateTime TASKCALITEM::GetAnyEndDate() const
 {
 	// take calculated value in preference
 	if (CDateHelper::IsDateSet(dtEndCalc))
+	{
 		return dtEndCalc;
-	else
-		return dtEnd;
+	}
+	else if (CDateHelper::IsDateSet(dtDone))
+	{
+		return dtDone;
+	}
+	
+	// else
+	return dtDue;
 }
 
 void TASKCALITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
@@ -350,11 +350,11 @@ void TASKCALITEM::SetStartDate(const COleDateTime& date)
 	ReformatName();
 }
 
-void TASKCALITEM::SetEndDate(const COleDateTime& date)
+void TASKCALITEM::SetDueDate(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
 
-	dtEnd = date;
+	dtDue = date;
 	CDateHelper::ClearDate(dtEndCalc);
 }
 

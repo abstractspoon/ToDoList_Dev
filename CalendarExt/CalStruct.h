@@ -42,7 +42,7 @@ public:
 	BOOL HasAnyStartDate() const;
 
 	BOOL IsEndDateSet() const;
-	void SetEndDate(const COleDateTime& date);
+	void SetDueDate(const COleDateTime& date);
 
 	COleDateTime GetAnyEndDate() const;
 	BOOL HasAnyEndDate() const;
@@ -58,11 +58,11 @@ public:
 
 public:
 	COLORREF color;
-	BOOL bDone, bGoodAsDone, bTopLevel;
+	BOOL bGoodAsDone, bTopLevel;
 	BOOL bLocked, bHasDepends, bHasIcon;
 
 protected:
-	COleDateTime dtCreation, dtStart, dtEnd;
+	COleDateTime dtCreation, dtStart, dtDue, dtDone;
 	COleDateTime dtStartCalc, dtEndCalc;
 	CString sName, sFormattedName;
 	DWORD dwTaskID;

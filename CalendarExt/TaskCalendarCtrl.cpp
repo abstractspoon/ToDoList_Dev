@@ -1478,6 +1478,13 @@ BOOL CTaskCalendarCtrl::IsTaskCalItemLocked(DWORD dwTaskID) const
 	return (pTCI && pTCI->bLocked);
 }
 
+BOOL CTaskCalendarCtrl::IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const
+{
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	
+	return (pTCI && pTCI->IsDone(bIncGoodAs));
+}
+
 BOOL CTaskCalendarCtrl::TaskCalItemHasDependencies(DWORD dwTaskID) const
 {
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
@@ -1811,9 +1818,9 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 				{
 					// but only if the start date is set
 					if (pTCI->IsStartDateSet())
-						pTCI->SetEndDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
+						pTCI->SetDueDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
 					else
-						pTCI->SetEndDate(dtDrag);
+						pTCI->SetDueDate(dtDrag);
 				}
 				else // m_bDragging
 				{
@@ -1840,7 +1847,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 						if (!CDateHelper::DateHasTime(dtEnd))
 							dtEnd = CDateHelper::GetEndOfPreviousDay(dtEnd);
 						
-						pTCI->SetEndDate(dtEnd);
+						pTCI->SetDueDate(dtEnd);
 					}
 					else if (pTCI->IsStartDateSet())
 					{
@@ -1848,7 +1855,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 					}
 					else if (pTCI->IsEndDateSet())
 					{
-						pTCI->SetEndDate(dtDrag);
+						pTCI->SetDueDate(dtDrag);
 					}
 				}
 			}
@@ -2002,6 +2009,9 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 		if (IsTaskCalItemLocked(dwTaskID))
 			return FALSE;
 
+		if (IsTaskCalItemDone(dwTaskID, FALSE))
+			return FALSE;
+		
 		BOOL bCanDrag = !HasOption(TCCO_PREVENTDEPENDENTDRAGGING) ||
 						!TaskCalItemHasDependencies(dwTaskID);
 			

@@ -145,6 +145,7 @@ protected:
 	int GetTaskTextOffset(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
+	BOOL IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskCalItemHasDependencies(DWORD dwTaskID) const;
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 	int GetGridRowFromPoint(const CPoint& point) const;
