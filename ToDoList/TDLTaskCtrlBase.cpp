@@ -2344,7 +2344,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			continue;
 
 		if (rSubItem.left >= rClient.right)
-			break;
+			continue;
 
 		// draw vertical gridlines for all but the
 		// last item if the row is selected
