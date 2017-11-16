@@ -848,8 +848,6 @@ protected:
 	void PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bResetCreation, const CMapID2ID& mapID, BOOL bAndSiblings) const;
 	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
 	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
-	void RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask) const;
-
 	virtual int GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly = FALSE) const;
 	void RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
@@ -893,6 +891,11 @@ protected:
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static BOOL IsTaskLinkURL(const CString& sLink);
 
+	static void RemoveNonSelectedTasks(CTaskFile& tasks);
+	static void RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask);
+	static int GetSelectedTaskIDs(const CTaskFile& tasks, CDWordArray& aTaskIDs);
+	static int GetSelectedTaskIDs(const CTaskFile& tasks, HTASKITEM hTask, CDWordArray& aTaskIDs);
+	
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);
 	static BOOL CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib);
