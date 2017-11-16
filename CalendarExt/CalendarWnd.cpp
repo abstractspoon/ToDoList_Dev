@@ -396,6 +396,8 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 		break;
 
 	case IUI_SETFOCUS:
+		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+
 	case IUI_SELECTTASK:
 		return true;
 

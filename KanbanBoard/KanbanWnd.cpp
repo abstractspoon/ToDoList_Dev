@@ -612,6 +612,8 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 		return (CKanbanCtrl::WantEditUpdate((IUI_ATTRIBUTE)dwExtra) != FALSE);
 
 	case IUI_SETFOCUS:
+		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+
 	case IUI_SELECTTASK:
 		return true;
 		
