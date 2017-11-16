@@ -1208,6 +1208,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 #ifdef _DEBUG
+/*
 		case WM_PAINT:
 			{
 				DWORD dwTick = GetTickCount();
@@ -1216,6 +1217,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				return lr;
 			}
 			break;
+*/
 #endif
 
 		case WM_NOTIFY:
@@ -1610,6 +1612,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 #ifdef _DEBUG
+/*
 		case WM_PAINT:
 			{
 				DWORD dwTick = GetTickCount();
@@ -1618,6 +1621,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				return lr;
 			}
 			break;
+*/
 #endif
 
 		case WM_LBUTTONDOWN:

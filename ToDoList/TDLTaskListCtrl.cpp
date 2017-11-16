@@ -512,6 +512,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	switch (msg)
 	{
 #ifdef _DEBUG
+/*
 	case WM_PAINT:
 		if (hRealWnd == m_lcTasks)
 		{
@@ -528,6 +529,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			return lr;
 		}
 		break;
+*/
 #endif
 
 	case WM_NOTIFY:
