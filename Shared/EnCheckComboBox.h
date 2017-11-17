@@ -48,6 +48,7 @@ protected:
 	//{{AFX_MSG(CEnCheckComboBox)
 	//}}AFX_MSG
 	afx_msg void OnLBSelChange();
+	afx_msg BOOL OnSelEndOK();
 	
 	DECLARE_MESSAGE_MAP()
 	

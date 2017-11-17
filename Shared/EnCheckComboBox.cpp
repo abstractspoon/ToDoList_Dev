@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
 //{{AFX_MSG_MAP(CEnCheckComboBox)
 //}}AFX_MSG_MAP
 ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
+ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -195,6 +196,16 @@ void CEnCheckComboBox::OnLBSelChange()
 	
 	// else
 	CComboBox::Default();
+}
+
+BOOL CEnCheckComboBox::OnSelEndOK()
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::OnSelEndOK();
+	
+	// else
+	m_bEditChange = TRUE;
+	return FALSE; // Route to parent
 }
 
 void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
