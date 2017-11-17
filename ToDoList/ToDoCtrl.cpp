@@ -10399,12 +10399,9 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 					}
 				}
 			}
-			else if (pData->pOutlookSelection && pData->pOutlookSelection->GetCount())
+			else if (CreateTasksFromOutlookObjects(pData) != 0)
 			{
-				if (CreateTasksFromOutlookObjects(pData) != 0)
-				{
-					// nothing else to do
-				}
+				// nothing else to do
 			}
 			else
 			{
