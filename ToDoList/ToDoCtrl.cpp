@@ -10399,6 +10399,13 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 					}
 				}
 			}
+			else if (pData->pOutlookSelection && pData->pOutlookSelection->GetCount())
+			{
+				if (CreateTasksFromOutlookObjects(pData) != 0)
+				{
+					// nothing else to do
+				}
+			}
 			else
 			{
 				return GetParent()->SendMessage(WM_TDCM_IMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)&aFiles);
