@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CFilterOptionComboBox window
 
-class CTDLFilterOptionComboBox : public CEnCheckComboBox
+class CTDLFilterOptionComboBox : public CCheckComboBox
 {
 // Construction
 public:

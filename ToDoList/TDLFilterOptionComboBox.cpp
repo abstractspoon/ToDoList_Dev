@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CFilterOptionComboBox
 
-CTDLFilterOptionComboBox::CTDLFilterOptionComboBox() : CEnCheckComboBox(TRUE, 0, IDS_TDC_NONE), m_dwOptions((DWORD)-1)
+CTDLFilterOptionComboBox::CTDLFilterOptionComboBox() : CCheckComboBox(), m_dwOptions((DWORD)-1)
 {
 }
 
@@ -28,7 +28,7 @@ CTDLFilterOptionComboBox::~CTDLFilterOptionComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLFilterOptionComboBox, CEnCheckComboBox)
+BEGIN_MESSAGE_MAP(CTDLFilterOptionComboBox, CCheckComboBox)
 	//{{AFX_MSG_MAP(CFilterOptionComboBox)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
