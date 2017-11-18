@@ -1397,7 +1397,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			{
 				::ClientToScreen(hRealWnd, &ptCursor);
 				
-				if (DragDetect(hRealWnd, ptCursor))
+				if (::DragDetect(hRealWnd, ptCursor))
 				{
 					::SetCapture(hRealWnd);
 					m_bSplitting = TRUE;
