@@ -13,6 +13,7 @@
 #include "..\shared\dockmanager.h"
 #include "..\shared\entoolbar.h"
 #include "..\shared\toolbarhelper.h"
+#include "..\shared\dialoghelper.h"
 #include "..\shared\wndprompt.h"
 #include "..\shared\uithemefile.h"
 #include "..\shared\icon.h"
@@ -24,7 +25,7 @@ class CPreferences;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
-class CTDLFindTasksDlg : public CDialog
+class CTDLFindTasksDlg : public CDialog, protected CDialogHelper
 {
 // Construction
 public:
@@ -155,10 +156,11 @@ protected:
 	afx_msg void OnUpdateMoveRuleUp(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveSearch(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUndock(CCmdUI* pCmdUI);
+	afx_msg LRESULT OnNotifyDockChange(WPARAM wp, LPARAM lp);
 
 protected:
 	void SaveSettings();
-	void ResizeDlg(int cx = 0, int cy = 0);
+	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
 	void LoadSettings();
 	CSize GetMinDockedSize(DM_POS nPos);
 	int GetNextResult(int nItem, BOOL bDown);
@@ -184,6 +186,8 @@ protected:
 	int LoadSearches();
 	int SaveSearches();
 	int GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) const;
+	void GetSplitterRect(CRect& rSplitter) const;
+	BOOL IsSplitterVertical() const;
 
 	BOOL LoadRule(const CPreferences& prefs, const CString& sRule, 
 					TDC_ATTRIBUTE& attrib, FIND_ATTRIBTYPE& nFindType, FIND_OPERATOR& op, 

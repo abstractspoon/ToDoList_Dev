@@ -32,7 +32,8 @@ CDockManager::CDockManager() :
 	m_bResizeUpdate(TRUE),
 	m_bSizeUpdate(TRUE),
 	m_sizeMainMin(-1, -1),
-	m_sizeDockMin(-1, -1)
+	m_sizeDockMin(-1, -1),
+	m_rOSBorders(0, 0, 0, 0)
 {
 
 }
@@ -162,6 +163,9 @@ BOOL CDockManager::Dock(DM_POS nPos)
 		UpdateDockWindowPos();
 		FitDockWindowToWorkArea(); // make sure it's visible
 	}
+	
+	// Notify main and docked windows
+	NotifyDockChange();
 
 	return TRUE;
 }
@@ -183,7 +187,16 @@ BOOL CDockManager::UnDock()
 	else
 		FitDockWindowToWorkArea(); // make sure it's visible
 
+	// Notify main and docked windows
+	NotifyDockChange();
+
 	return TRUE;
+}
+
+void CDockManager::NotifyDockChange() const
+{
+	SendMessage(WM_DM_DOCKCHANGE, m_nLastDockPos, m_nDockPos);
+	m_scDockWnd.SendMessage(WM_DM_DOCKCHANGE, m_nLastDockPos, m_nDockPos);
 }
 
 LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM lp)

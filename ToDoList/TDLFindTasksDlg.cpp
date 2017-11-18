@@ -33,9 +33,11 @@ static SEARCHPARAM DEFAULTSEARCH(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int TABSTOPS = 20;
-const int MATCH_COLWIDTH = 50;
-const int TB_VOFFSET = 2;//4;
+const int TABSTOPS			= 20;
+const int MATCH_COLWIDTH	= 50;
+const int TB_VOFFSET		= 2;
+const int SPLITTER_WIDTH	= 6;
+const int DIALOG_BORDER		= 6;
 
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
@@ -115,6 +117,7 @@ BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CDialog)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_SIZE()
 	ON_WM_HELPINFO()
+	ON_REGISTERED_MESSAGE(WM_DM_DOCKCHANGE, OnNotifyDockChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -149,7 +152,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	
     m_toolbar.RefreshButtonStates();
 	
-	ResizeDlg();
+	ResizeDlg(TRUE);
 	EnableToolTips();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
@@ -203,8 +206,8 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 	{
 		// cache current theme
 		CUIThemeFile themeCur = m_theme;
-
 		m_theme = theme;
+
 		GraphicsMisc::VerifyDeleteObject(m_brBkgnd);
 		m_brBkgnd.CreateSolidBrush(theme.crAppBackLight);
 
@@ -226,8 +229,9 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 									theme.nRenderStyle != UIRS_GLASS, 
 									theme.nRenderStyle != UIRS_GRADIENT);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+		m_toolbar.RefreshButtonStates(TRUE);
 
-		ResizeDlg();
+		ResizeDlg(FALSE);
 		Invalidate();
 	}
 }
@@ -406,32 +410,25 @@ void CTDLFindTasksDlg::LoadSettings()
 
 CSize CTDLFindTasksDlg::GetMinDockedSize(DM_POS nPos)
 {
-	CRect rMin(0, 0, 0, 0);
+	CRect rMin(0, 0, 0, 0), rCtrl;
 
 	if (nPos == DMP_BELOW)
 	{
 		// we need enough height to show a few results and enough width
 		// to display the results list
-		CRect rCtrl;
-		GetDlgItem(IDC_TASKLISTOPTIONS)->GetWindowRect(rCtrl);
-		ScreenToClient(rCtrl);
-
+		rCtrl = CDialogHelper::GetCtrlRect(this, IDC_TASKLISTOPTIONS);
 		rMin.bottom = rCtrl.bottom + CDlgUnits(this).ToPixelsY(60);
 
-		GetDlgItem(IDC_VDIVIDER)->GetWindowRect(rCtrl);
-		ScreenToClient(rCtrl);
-		
+		rCtrl = CDialogHelper::GetChildRect(&m_lcFindSetup);
 		rMin.right = rCtrl.right + CDlgUnits(this).ToPixelsX(60);
 	}
 	else
 	{
 		// we need enough width to show the toolbar and enough height
 		// to display a few results
-		CRect rCtrl;
-		GetDlgItem(IDC_HDIVIDER)->GetWindowRect(rCtrl);
-		ScreenToClient(rCtrl);
-
+		rCtrl = CDialogHelper::GetChildRect(&m_lcFindSetup);
 		rMin.bottom = rCtrl.bottom + CDlgUnits(this).ToPixelsY(90);
+
 		rMin.right = m_toolbar.GetMinReqLength();
 	}
 
@@ -702,13 +699,20 @@ void CTDLFindTasksDlg::OnSize(UINT nType, int cx, int cy)
 	if (m_lcFindSetup.GetSafeHwnd())
 		m_lcFindSetup.EndEdit();
 	
-	ResizeDlg(cx, cy);
+	ResizeDlg(FALSE, cx, cy);
 
 	if (m_toolbar.GetSafeHwnd())
 		m_toolbar.RefreshButtonStates();
 }
 
-void CTDLFindTasksDlg::ResizeDlg(int cx, int cy)
+LRESULT CTDLFindTasksDlg::OnNotifyDockChange(WPARAM wp, LPARAM lp)
+{
+	ResizeDlg((wp == DMP_BELOW) || (lp == DMP_BELOW));
+
+	return 0L;
+}
+
+void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 {
 	if (m_lcResults.GetSafeHwnd())
 	{
@@ -724,85 +728,83 @@ void CTDLFindTasksDlg::ResizeDlg(int cx, int cy)
 			if (!cx && !cy)
 				return;
 		}
-		
-		// we compare the new size with the lower right hand corner
-		// of the results list
-		CRect rect;
-		m_lcResults.GetWindowRect(rect);
-		ScreenToClient(rect);
-		
-		int nXOffset = cx - rect.right;
-		int nYOffset = cy - rect.bottom;
-		
+
 		BOOL bDockedBelow = (m_dockMgr.GetDockPos() == DMP_BELOW);
+
+		CRect rRules = GetCtrlRect(this, IDC_FINDLIST);
+		CRect rResults = GetCtrlRect(this, IDC_RESULTS);
+
+		CRect rSplitter;
+
+		if (bOrientationChange)
+		{
+			// Place the splitter at about the halfway point
+			if (bDockedBelow)
+			{
+				rSplitter.top = rRules.top;
+				rSplitter.bottom = (cx - DIALOG_BORDER);
+				rSplitter.left = (cx / 2);
+				rSplitter.right = (rSplitter.left + SPLITTER_WIDTH);
+			}
+			else
+			{
+				rSplitter.top = (cy / 2);
+				rSplitter.bottom = (rSplitter.top + SPLITTER_WIDTH);
+				rSplitter.left = rRules.left;
+				rSplitter.right = (cx - DIALOG_BORDER);
+			}
+		}
+		else
+		{
+			GetSplitterRect(rSplitter);
+		}
 		
 		{
 			CDeferWndMove dwm(10);
-			
-			// dividers
-			CRect rHDiv, rVDiv, rTBDiv;
-			
-			rHDiv = dwm.ResizeCtrl(this, IDC_HDIVIDER);
-			dwm.ResizeCtrl(this, IDC_HDIVIDER, cx - rHDiv.right - 8);
 
-			rVDiv = dwm.ResizeCtrl(this, IDC_VDIVIDER);
-			rVDiv = dwm.ResizeCtrl(this, IDC_VDIVIDER, 0, cy - rVDiv.bottom - 8);
-
-			// resize aRules
-			CRect rRules = dwm.ResizeCtrl(this, IDC_FINDLIST);
-
+			// Rules list
 			if (bDockedBelow)
 			{
-				rRules.right = rVDiv.left - 8;
-				rRules.bottom = cy - 8;
+				rRules.right = rSplitter.left;	
+				rRules.bottom = (cy - DIALOG_BORDER);	
 			}
 			else
 			{
-				rRules.right = cx - 8;
-				rRules.bottom = rHDiv.top - 8;
+				rRules.right = (cx - DIALOG_BORDER);	
+				rRules.bottom = rSplitter.top;	
 			}
-
+			
 			dwm.MoveWindow(&m_lcFindSetup, rRules);
 
-			// resize the toolbar
-			int nTBWidth = cx;
+			// Results controls
+			CRect rApply = GetCtrlRect(this, IDC_APPLYASFILTER);
 
-			if (bDockedBelow)
-				nTBWidth = rVDiv.right;
-
-			m_toolbar.Resize(nTBWidth);
-			
-			// move 'select all', results and other assorted items
-			// depending on where we are docked
-			CRect rApply = dwm.ResizeCtrl(this, IDC_APPLYASFILTER);
+			int nXOffset = 0, nYOffset = 0;
 			
 			if (bDockedBelow)
 			{
-				nXOffset = rVDiv.right - rApply.left + 8;
-				nYOffset = rVDiv.top - rApply.top;
+				nXOffset = (rSplitter.right - rResults.left);
+				nYOffset = (rSplitter.top - rResults.top);
 			}
 			else
 			{
-				nXOffset = rHDiv.left - rApply.left;
-				nYOffset = rHDiv.top - rApply.top + 8;
+				nXOffset = (rSplitter.left - rApply.left);
+				nYOffset = (rSplitter.bottom + SPLITTER_WIDTH - rApply.top);
 			}
 			
 			dwm.OffsetCtrl(this, IDC_APPLYASFILTER, nXOffset, nYOffset);
 			dwm.OffsetCtrl(this, IDC_SELECTALL, nXOffset, nYOffset);
 			dwm.OffsetCtrl(this, IDC_RESULTSLABEL, nXOffset, nYOffset);
 			
-			CRect rResults = dwm.OffsetCtrl(this, IDC_RESULTS, nXOffset, nYOffset);
-			
-			rResults.right = cx - 8;
-			rResults.bottom = cy - 8;
-			
+			rResults = dwm.OffsetCtrl(this, IDC_RESULTS, nXOffset, nYOffset);
+			rResults.right = (cx - DIALOG_BORDER);	
+			rResults.bottom = (cy - DIALOG_BORDER);	
+
 			dwm.MoveWindow(&m_lcResults, rResults);
-			
 		}
 		
-		// hide appropriate divider
-		GetDlgItem(IDC_HDIVIDER)->ShowWindow(bDockedBelow ? SW_HIDE : SW_SHOW);
-		GetDlgItem(IDC_VDIVIDER)->ShowWindow(bDockedBelow ? SW_SHOW : SW_HIDE);
+		m_toolbar.Resize(cx);
+		Invalidate();
 	}	
 }
 
@@ -926,9 +928,6 @@ void CTDLFindTasksDlg::OnDockright()
 	else
 		m_dockMgr.Dock(DMP_RIGHT);
 
-	ResizeDlg();
-	Invalidate(TRUE);
-
     m_toolbar.RefreshButtonStates();
 }
 
@@ -945,9 +944,6 @@ void CTDLFindTasksDlg::OnDockleft()
 	else
 		m_dockMgr.Dock(DMP_LEFT);
 
-	ResizeDlg();
-	Invalidate(TRUE);
-	
     m_toolbar.RefreshButtonStates();
 }
 
@@ -959,10 +955,6 @@ void CTDLFindTasksDlg::OnUpdateDockleft(CCmdUI* pCmdUI)
 void CTDLFindTasksDlg::OnUndock() 
 {
 	m_dockMgr.UnDock();
-
-	ResizeDlg();
-	Invalidate(TRUE);
-	
     m_toolbar.RefreshButtonStates();
 }
 
@@ -979,9 +971,6 @@ void CTDLFindTasksDlg::OnDockbelow()
 	else
 		m_dockMgr.Dock(DMP_BELOW);
 
-	ResizeDlg();
-	Invalidate(TRUE);
-	
     m_toolbar.RefreshButtonStates();
 }
 
@@ -1510,6 +1499,8 @@ HBRUSH CTDLFindTasksDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC) 
 {
+	BOOL bRes = FALSE;
+
 	if (CThemed::IsAppThemed())
 	{
 		if (COSVersion() >= OSV_VISTA)
@@ -1527,11 +1518,18 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 		pDC->FillSolidRect(0, rToolbar.bottom, rToolbar.Width(), 1, m_theme.crAppLinesDark);
 		pDC->FillSolidRect(0, rToolbar.bottom + 1, rToolbar.Width(), 1, m_theme.crAppLinesLight);
 
-		return TRUE;
+		bRes = TRUE;
+	}
+	else
+	{
+		bRes = CDialog::OnEraseBkgnd(pDC);
 	}
 	
-	// else
-	return CDialog::OnEraseBkgnd(pDC);
+	CRect rSplitBar;
+	GetSplitterRect(rSplitBar);
+	GraphicsMisc::DrawSplitBar(pDC, rSplitBar, m_theme.crAppBackDark, FALSE);
+
+	return bRes;
 }
 
 void CTDLFindTasksDlg::OnApplyasfilter() 
@@ -1580,4 +1578,25 @@ BOOL CTDLFindTasksDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnFindHelp();
 	return TRUE;
+}
+
+void CTDLFindTasksDlg::GetSplitterRect(CRect& rSplitter) const
+{
+	rSplitter = CDialogHelper::GetChildRect(&m_lcFindSetup);
+
+	if (IsSplitterVertical())
+	{
+		rSplitter.left = rSplitter.right;
+		rSplitter.right += SPLITTER_WIDTH;
+	}
+	else
+	{
+		rSplitter.top = rSplitter.bottom;
+		rSplitter.bottom += SPLITTER_WIDTH;
+	}
+}
+
+BOOL CTDLFindTasksDlg::IsSplitterVertical() const
+{
+	return (m_dockMgr.GetDockPos() == DMP_BELOW);
 }

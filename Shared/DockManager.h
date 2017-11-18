@@ -11,6 +11,8 @@
 
 #include "Subclass.h"
 
+//////////////////////////////////////////////////////////////////////
+
 enum DM_POS
 {
 	DMP_UNDOCKED = -1,
@@ -18,6 +20,12 @@ enum DM_POS
 	DMP_RIGHT,
 	DMP_BELOW,
 };
+
+//////////////////////////////////////////////////////////////////////
+
+const UINT WM_DM_DOCKCHANGE	= ::RegisterWindowMessage(_T("WM_DM_DOCKCHANGE"));		// wparam = Old 'DM_POS', lParam = New 'DM_POS'
+
+//////////////////////////////////////////////////////////////////////
 
 class CDockManager : public CSubclassWnd, public CSubclasser  
 {
@@ -66,7 +74,8 @@ protected:
 	CSize GetMinMaximizedSize();
 	void FitDockWindowToWorkArea();
 	void InitializeOSBorders();
-	
+	void NotifyDockChange() const;
+
 	// pseudo message handlers
 	void OnMaximize();
 	void OnRestore();
