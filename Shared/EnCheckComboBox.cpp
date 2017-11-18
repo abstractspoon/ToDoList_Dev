@@ -51,6 +51,8 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 
 	if (GetSafeHwnd())
 	{
+		FixupEmptyStringsAtStart();
+
 		// if changing from multi selection and only one item was 
 		// selected then set that as the single selection else clear all
 		if (!m_bMultiSel)
@@ -89,6 +91,52 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 	}
 	
 	return TRUE;
+}
+
+int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
+{
+	int nRes = CCheckComboBox::SetStrings(aItems);
+
+	FixupEmptyStringsAtStart();
+
+	return nRes;
+}
+
+void CEnCheckComboBox::FixupEmptyStringsAtStart()
+{
+	while (GetCount() && GetItemText(0).IsEmpty())
+		CComboBox::DeleteString(0);
+	
+	int nEmpty = CalcNumRequiredEmptyStrings();
+
+	while (nEmpty--)
+		int nItem = CComboBox::InsertString(0, _T("")); // bypass checks for uniqueness
+}
+
+int CEnCheckComboBox::CalcNumRequiredEmptyStrings() const
+{
+	int nNumReqd = 1; // None
+
+	if (m_bMultiSel)
+		nNumReqd++; // Any
+
+	return nNumReqd;
+}
+
+int CEnCheckComboBox::GetNoneIndex() const
+{
+	if (m_sNone.IsEmpty())
+		return -1;
+
+	return (CalcNumRequiredEmptyStrings() - 1);
+}
+
+void CEnCheckComboBox::OnCheckChange(int nIndex)
+{
+	if (m_bMultiSel && (nIndex == 0))
+	{
+		CheckAll(CCBC_UNCHECKED);
+	}
 }
 
 void CEnCheckComboBox::PreSubclassWindow() 
@@ -212,34 +260,59 @@ void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 									DWORD dwItemData, const CString& sItem, BOOL bList)
 {
 	CString sEnText(sItem);
+	BOOL bCheckComboDraw = TRUE;
 	
 	if (m_bMultiSel)
 	{
 		// if drawing the comma-delimited list and it includes a blank
-		// item, prepend <none> to the text
+		// item, prefix the text with <none>
 		if (nItem == -1)
 		{
 			sEnText = m_sText;
 
-			int nBlank = FindStringExact(0, _T(""));
+			int nNone = GetNoneIndex();
 
-			if (nBlank != -1 && GetCheck(nBlank))
-				sEnText = sEnText.Left(nBlank) + m_sNone + sEnText.Mid(nBlank);
-
+			if ((nNone != -1) && GetCheck(nNone))
+			{
+				sEnText = (m_sNone + sEnText);
+			}
 			else if (sEnText.IsEmpty())
+			{
 				sEnText = m_sAny;
+			}
 		}
-		else if (nItem != -1 && sEnText.IsEmpty()) 
-			sEnText = m_sNone;
-		
-		CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList);
+		else if (sEnText.IsEmpty()) 
+		{
+			switch (nItem)
+			{
+			case 0:
+				sEnText = m_sAny;
+				bCheckComboDraw = FALSE;
+				break;
+
+			case 1:
+				sEnText = m_sNone;
+				break;
+
+			default:
+				ASSERT(0);
+				return;
+			}
+		}
 	}
 	else
 	{
 		if (nItem == -1 || sEnText.IsEmpty())
-			sEnText = m_sAny;//None;
-		
-		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList);
+		{
+			sEnText = m_sAny;
+		}
+
+		bCheckComboDraw = FALSE;
 	}
+
+	if (bCheckComboDraw)
+		CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList);
+	else
+		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList);
 }
 

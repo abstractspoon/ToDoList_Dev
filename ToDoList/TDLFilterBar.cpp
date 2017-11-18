@@ -483,32 +483,16 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 		m_sAdvancedFilter.Empty();
 	}
 	
-	// alloc to filter
+	// auto droplist filters
 	TDCAUTOLISTDATA tld;
 	tdc.GetAutoListData(tld);
 
 	m_cbAllocToFilter.SetStrings(tld.aAllocTo);
-	m_cbAllocToFilter.AddEmptyString(); // add blank item to top
-	
-	// alloc by filter
 	m_cbAllocByFilter.SetStrings(tld.aAllocBy);
-	m_cbAllocByFilter.AddEmptyString(); // add blank item to top
-	
-	// category filter
 	m_cbCategoryFilter.SetStrings(tld.aCategory);
-	m_cbCategoryFilter.AddEmptyString(); // add blank item to top
-	
-	// status filter
 	m_cbStatusFilter.SetStrings(tld.aStatus);
-	m_cbStatusFilter.AddEmptyString(); // add blank item to top
-	
-	// version filter
 	m_cbVersionFilter.SetStrings(tld.aVersion);
-	m_cbVersionFilter.AddEmptyString(); // add blank item to top
-	
-	// tag filter
 	m_cbTagFilter.SetStrings(tld.aTags);
-	m_cbTagFilter.AddEmptyString(); // add blank item to top
 	
 	// priority
 	// risk never needs changing

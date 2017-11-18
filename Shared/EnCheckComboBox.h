@@ -22,6 +22,8 @@ public:
 	CEnCheckComboBox(BOOL bMulti = TRUE, UINT nIDNoneString = 0, UINT nIDAnyString = 0);
 	
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
+	int SetStrings(const CStringArray& aItems);
+
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	BOOL SetChecked(const CStringArray& aChecked);
@@ -56,8 +58,14 @@ protected:
 	virtual LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
+	virtual void OnCheckChange(int nIndex);
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList);	
+
+	void FixupEmptyStringsAtStart();
+	int CalcNumRequiredEmptyStrings() const;
+	int GetNoneIndex() const;
+	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
 
 };
 

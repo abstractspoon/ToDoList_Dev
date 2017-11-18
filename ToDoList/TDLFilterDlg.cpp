@@ -256,27 +256,11 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 	// auto droplist filters
 	m_cbAllocToFilter.SetStrings(m_tldListData.aAllocTo);
-	m_cbAllocToFilter.AddEmptyString(); // add blank item to top
-
-	// alloc by filter
 	m_cbAllocByFilter.SetStrings(m_tldListData.aAllocBy);
-	m_cbAllocByFilter.AddEmptyString(); // add blank item to top
-
-	// category filter
 	m_cbCategoryFilter.SetStrings(m_tldListData.aCategory);
-	m_cbCategoryFilter.AddEmptyString(); // add blank item to top
-
-	// status filter
 	m_cbStatusFilter.SetStrings(m_tldListData.aStatus);
-	m_cbStatusFilter.AddEmptyString(); // add blank item to top
-
-	// version filter
 	m_cbVersionFilter.SetStrings(m_tldListData.aVersion);
-	m_cbVersionFilter.AddEmptyString(); // add blank item to top
-
-	// tag filter
 	m_cbTagFilter.SetStrings(m_tldListData.aTags);
-	m_cbTagFilter.AddEmptyString(); // add blank item to top
 
 	// priority
 	CEnString sAny(IDS_TDC_ANY);

@@ -408,6 +408,9 @@ LRESULT CCheckComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 			return 0;
 		}
 		break;
+
+	case WM_LBUTTONDBLCLK:
+		return 0L; // eat
 	
 	case WM_LBUTTONDOWN:
 		m_nClickedItem = LB_ERR;
