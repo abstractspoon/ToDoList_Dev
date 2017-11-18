@@ -82,16 +82,20 @@ protected:
 	CToolbarHelper m_tbHelper;
 
 	BOOL m_bDockable;
+	BOOL m_bInitializing;
+	BOOL m_bSplitting;
 	int m_nCurSel;
 	int	m_bAllTasklists;
+
 	CEnString m_sResultsLabel;
 	CString m_sActiveSearch;
+
+	CStringArray m_aSavedSearches;
+	CTDCCustomAttribDefinitionArray m_aActiveTDCAttribDefs, m_aAllTDCAttribDefs;
+	TDCAUTOLISTDATA m_tldActive, m_tldAll;
+
 	CUIThemeFile m_theme;
 	CBrush m_brBkgnd;
-	BOOL m_bInitializing;
-	CTDCCustomAttribDefinitionArray m_aActiveTDCAttribDefs, m_aAllTDCAttribDefs;
-	CStringArray m_aSavedSearches;
-	TDCAUTOLISTDATA m_tldActive, m_tldAll;
 	CIcon m_icon;
 
 // Overrides
@@ -157,6 +161,12 @@ protected:
 	afx_msg void OnUpdateSaveSearch(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUndock(CCmdUI* pCmdUI);
 	afx_msg LRESULT OnNotifyDockChange(WPARAM wp, LPARAM lp);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 protected:
 	void SaveSettings();
@@ -186,14 +196,15 @@ protected:
 	int LoadSearches();
 	int SaveSearches();
 	int GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) const;
-	void GetSplitterRect(CRect& rSplitter) const;
-	BOOL IsSplitterVertical() const;
-
 	BOOL LoadRule(const CPreferences& prefs, const CString& sRule, 
 					TDC_ATTRIBUTE& attrib, FIND_ATTRIBTYPE& nFindType, FIND_OPERATOR& op, 
 					BOOL& bAnd, DWORD& dwFlags, CString& sValue) const;
 	BOOL SaveRule(CPreferences& prefs, const CString& sRule, const SEARCHPARAM& rule) const;
 
+	CRect GetSplitterRect() const;
+	BOOL GetSplitterRect(CRect& rSplitter, int nSplitPos) const;
+	BOOL IsSplitterVertical() const;
+	BOOL SetSplitterPos(int nSplitPos);
 };
 
 //{{AFX_INSERT_LOCATION}}

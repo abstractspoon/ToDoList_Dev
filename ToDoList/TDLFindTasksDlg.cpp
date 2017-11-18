@@ -38,6 +38,7 @@ const int MATCH_COLWIDTH	= 50;
 const int TB_VOFFSET		= 2;
 const int SPLITTER_WIDTH	= 6;
 const int DIALOG_BORDER		= 6;
+const int MIN_LIST_SIZE		= 100;
 
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
@@ -45,14 +46,17 @@ const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 // CTDLFindTasksDlg dialog
 
 CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CTDLFindTasksDlg::IDD, pParent), m_bDockable(FALSE)
+	: 
+	CDialog(CTDLFindTasksDlg::IDD, pParent), 
+	m_bDockable(FALSE),
+	m_bSplitting(FALSE),
+	m_bInitializing(FALSE),
+	m_bAllTasklists(FALSE)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
 	//{{AFX_DATA_INIT(CTDLFindTasksDlg)
 	//}}AFX_DATA_INIT
-	m_bInitializing = FALSE;
-
 	CUIThemeFile::Reset(m_theme);
 }
 
@@ -118,6 +122,12 @@ BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CDialog)
 	ON_WM_SIZE()
 	ON_WM_HELPINFO()
 	ON_REGISTERED_MESSAGE(WM_DM_DOCKCHANGE, OnNotifyDockChange)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_SETCURSOR()
+	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -152,7 +162,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	
     m_toolbar.RefreshButtonStates();
 	
-	ResizeDlg(TRUE);
+	ResizeDlg(FALSE);
 	EnableToolTips();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
@@ -181,7 +191,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
 	{
-		int nItem = CDialogHelper::FindItemByData(m_cbInclude, nOption);
+		int nItem = FindItemByData(m_cbInclude, nOption);
 		
 		if (nItem != CB_ERR)
 			return m_cbInclude.GetCheck(nItem);
@@ -192,7 +202,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 
 void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 {
-	int nItem = CDialogHelper::FindItemByData(m_cbInclude, nOption);
+	int nItem = FindItemByData(m_cbInclude, nOption);
 
 	if (nItem != CB_ERR)
 		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));
@@ -401,6 +411,12 @@ void CTDLFindTasksDlg::LoadSettings()
 		
 		m_dockMgr.Initialize(GetParent(), this, nPos, nLastPos,
 							nWidthDocked, nWidthDockedMax, nHeightDocked, nHeightDockedMax);
+
+		// Splitter
+		int nSplitPos = prefs.GetProfileInt(_T("FindTasks"), _T("SplitterPos"), -1);
+
+		if (nSplitPos != -1)
+			SetSplitterPos(nSplitPos);
 	}
 
 	LoadSearches();
@@ -416,17 +432,17 @@ CSize CTDLFindTasksDlg::GetMinDockedSize(DM_POS nPos)
 	{
 		// we need enough height to show a few results and enough width
 		// to display the results list
-		rCtrl = CDialogHelper::GetCtrlRect(this, IDC_TASKLISTOPTIONS);
+		rCtrl = GetCtrlRect(this, IDC_TASKLISTOPTIONS);
 		rMin.bottom = rCtrl.bottom + CDlgUnits(this).ToPixelsY(60);
 
-		rCtrl = CDialogHelper::GetChildRect(&m_lcFindSetup);
+		rCtrl = GetChildRect(&m_lcFindSetup);
 		rMin.right = rCtrl.right + CDlgUnits(this).ToPixelsX(60);
 	}
 	else
 	{
 		// we need enough width to show the toolbar and enough height
 		// to display a few results
-		rCtrl = CDialogHelper::GetChildRect(&m_lcFindSetup);
+		rCtrl = GetChildRect(&m_lcFindSetup);
 		rMin.bottom = rCtrl.bottom + CDlgUnits(this).ToPixelsY(90);
 
 		rMin.right = m_toolbar.GetMinReqLength();
@@ -729,41 +745,31 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 				return;
 		}
 
-		BOOL bDockedBelow = (m_dockMgr.GetDockPos() == DMP_BELOW);
+		BOOL bVertSplitter = IsSplitterVertical();
+		CRect rSplitter = GetSplitterRect();
 
 		CRect rRules = GetCtrlRect(this, IDC_FINDLIST);
 		CRect rResults = GetCtrlRect(this, IDC_RESULTS);
-
-		CRect rSplitter;
+		CRect rApply = GetCtrlRect(this, IDC_APPLYASFILTER);
 
 		if (bOrientationChange)
 		{
-			// Place the splitter at about the halfway point
-			if (bDockedBelow)
-			{
-				rSplitter.top = rRules.top;
-				rSplitter.bottom = (cx - DIALOG_BORDER);
-				rSplitter.left = (cx / 2);
-				rSplitter.right = (rSplitter.left + SPLITTER_WIDTH);
-			}
+			// Place the splitter so that the two lists have equal height/width
+			int nSplitPos = 0;
+
+			if (bVertSplitter)
+				nSplitPos = (cx / 2);
 			else
-			{
-				rSplitter.top = (cy / 2);
-				rSplitter.bottom = (rSplitter.top + SPLITTER_WIDTH);
-				rSplitter.left = rRules.left;
-				rSplitter.right = (cx - DIALOG_BORDER);
-			}
-		}
-		else
-		{
-			GetSplitterRect(rSplitter);
+				nSplitPos = ((cy - DIALOG_BORDER + rRules.top - (rResults.top - rApply.top)) / 2);
+
+			VERIFY(GetSplitterRect(rSplitter, nSplitPos));
 		}
 		
 		{
 			CDeferWndMove dwm(10);
 
 			// Rules list
-			if (bDockedBelow)
+			if (bVertSplitter)
 			{
 				rRules.right = rSplitter.left;	
 				rRules.bottom = (cy - DIALOG_BORDER);	
@@ -777,11 +783,9 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.MoveWindow(&m_lcFindSetup, rRules);
 
 			// Results controls
-			CRect rApply = GetCtrlRect(this, IDC_APPLYASFILTER);
-
 			int nXOffset = 0, nYOffset = 0;
 			
-			if (bDockedBelow)
+			if (bVertSplitter)
 			{
 				nXOffset = (rSplitter.right - rResults.left);
 				nYOffset = (rSplitter.top - rResults.top);
@@ -868,6 +872,10 @@ void CTDLFindTasksDlg::SaveSettings()
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_dockMgr.GetDockedWidth(TRUE));
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_dockMgr.GetDockedHeight(FALSE));
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeightMax"), m_dockMgr.GetDockedHeight(TRUE));
+
+	// Splitter
+	CPoint ptSplitter = GetSplitterRect().CenterPoint();
+	prefs.WriteProfileInt(_T("FindTasks"), _T("SplitterPos"), (IsSplitterVertical() ? ptSplitter.x : ptSplitter.y));
 
 	// results column widths
 	CIntArray aWidths;
@@ -1504,7 +1512,7 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 	if (CThemed::IsAppThemed())
 	{
 		if (COSVersion() >= OSV_VISTA)
-			CDialogHelper::ExcludeCtrls(this, pDC);
+			ExcludeCtrls(this, pDC);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -1525,9 +1533,7 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 		bRes = CDialog::OnEraseBkgnd(pDC);
 	}
 	
-	CRect rSplitBar;
-	GetSplitterRect(rSplitBar);
-	GraphicsMisc::DrawSplitBar(pDC, rSplitBar, m_theme.crAppBackDark, FALSE);
+	GraphicsMisc::DrawSplitBar(pDC, GetSplitterRect(), m_theme.crAppBackDark, FALSE);
 
 	return bRes;
 }
@@ -1580,23 +1586,138 @@ BOOL CTDLFindTasksDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	return TRUE;
 }
 
-void CTDLFindTasksDlg::GetSplitterRect(CRect& rSplitter) const
+CRect CTDLFindTasksDlg::GetSplitterRect() const
 {
-	rSplitter = CDialogHelper::GetChildRect(&m_lcFindSetup);
-
+	CRect rRules = GetChildRect(&m_lcFindSetup), rSplitter(rRules);
+	
 	if (IsSplitterVertical())
 	{
-		rSplitter.left = rSplitter.right;
-		rSplitter.right += SPLITTER_WIDTH;
+		rSplitter.left = rRules.right;
+		rSplitter.right = (rSplitter.left + SPLITTER_WIDTH - 2);
 	}
 	else
 	{
-		rSplitter.top = rSplitter.bottom;
-		rSplitter.bottom += SPLITTER_WIDTH;
+		rSplitter.top = rRules.bottom;
+		rSplitter.bottom = (rSplitter.top + SPLITTER_WIDTH);
 	}
+
+	return rSplitter;
+}
+
+BOOL CTDLFindTasksDlg::GetSplitterRect(CRect& rSplitter, int nSplitPos) const
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	rSplitter = GetSplitterRect();
+
+	if (IsSplitterVertical())
+	{
+		// Check for available size
+		if ((nSplitPos < MIN_LIST_SIZE) || (nSplitPos > (rClient.right - MIN_LIST_SIZE)))
+			return FALSE;
+
+		rSplitter.OffsetRect((nSplitPos - rSplitter.CenterPoint().x), 0);
+	}
+	else
+	{
+		// Check for available size
+		CRect rRules = GetChildRect(&m_lcFindSetup);
+		CRect rResults = GetChildRect(&m_lcResults);
+
+		if (nSplitPos < (rRules.top + MIN_LIST_SIZE))
+			return FALSE;
+
+		if (nSplitPos > (rClient.bottom - MIN_LIST_SIZE - (rResults.top - rSplitter.bottom)))
+			return FALSE;
+
+		rSplitter.OffsetRect(0, (nSplitPos - rSplitter.CenterPoint().y));
+	}
+	
+	return TRUE;
 }
 
 BOOL CTDLFindTasksDlg::IsSplitterVertical() const
 {
 	return (m_dockMgr.GetDockPos() == DMP_BELOW);
+}
+
+void CTDLFindTasksDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	if (GetSplitterRect().PtInRect(point))
+	{
+		m_bSplitting = TRUE;
+		SetCapture();
+	}
+
+	CDialog::OnLButtonDown(nFlags, point);
+}
+
+void CTDLFindTasksDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	ResizeDlg(TRUE);
+
+	CDialog::OnLButtonDown(nFlags, point);
+}
+
+void CTDLFindTasksDlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	ReleaseCapture();
+
+	CDialog::OnLButtonUp(nFlags, point);
+}
+
+void CTDLFindTasksDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_bSplitting)
+		SetSplitterPos(IsSplitterVertical() ? point.x : point.y);
+	
+	CDialog::OnMouseMove(nFlags, point);
+}
+
+BOOL CTDLFindTasksDlg::SetSplitterPos(int nSplitPos)
+{
+	CRect rSplitter;
+
+	if (!GetSplitterRect(rSplitter, nSplitPos))
+		return FALSE;
+
+	CRect rClient, rRules = GetChildRect(&m_lcFindSetup);
+	GetClientRect(rClient);
+
+	nSplitPos = (nSplitPos - (SPLITTER_WIDTH / 2));
+
+	if (IsSplitterVertical())
+		ResizeChild(&m_lcFindSetup, (nSplitPos - rRules.right), 0);
+	else
+		ResizeChild(&m_lcFindSetup, 0, (nSplitPos - rRules.bottom));
+
+	ResizeDlg(FALSE);
+	UpdateWindow();
+
+	return TRUE;
+}
+
+BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CPoint ptCursor(GetCurrentMessage()->pt);
+	ScreenToClient(&ptCursor);
+
+	if (GetSplitterRect().PtInRect(ptCursor))
+	{ 
+		UINT nIDCursor = ((m_dockMgr.GetDockPos() == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
+		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+
+		return TRUE;
+	}
+	
+	// else
+	return CDialog::OnSetCursor(pWnd, nHitTest, message);
+}
+
+void CTDLFindTasksDlg::OnCaptureChanged(CWnd* pWnd)
+{
+	m_bSplitting = FALSE;
+
+	CDialog::OnCaptureChanged(pWnd);
 }
