@@ -707,7 +707,7 @@ namespace TDC
 		case TDCC_FLAG:			return IUI_FLAG;
 		case TDCC_ICON:			return IUI_ICON;
 		case TDCC_ID:			return IUI_ID;
-		case TDCC_LASTMODDATE:		return IUI_LASTMOD;
+		case TDCC_LASTMODDATE:	return IUI_LASTMOD;
 		case TDCC_LASTMODBY:	return IUI_LASTMOD;
 		case TDCC_LOCK:			return IUI_LOCK;
 		case TDCC_NONE:			return IUI_NONE;

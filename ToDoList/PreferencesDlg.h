@@ -196,6 +196,7 @@ public:
 
 	// CPreferencesUIPage
 	BOOL GetShowEditMenuAsColumns() const { return m_pageUI.GetShowEditMenuAsColumns(); }
+	BOOL GetShowSortMenuAsColumns() const { return m_pageUI.GetShowSortMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_pageUI.GetShowCommentsAlways(); }
 	BOOL GetAutoReposCtrls() const { return m_pageUI.GetAutoReposCtrls(); }
 	BOOL GetSharedCommentsHeight() const { return m_pageUI.GetSharedCommentsHeight(); }

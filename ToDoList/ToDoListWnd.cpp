@@ -8916,13 +8916,20 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
-	if (Prefs().GetShowEditMenuAsColumns())
+	CTDCColumnIDMap mapColIDs;
+	tdc.GetSortableColumns(mapColIDs);
+
+	BOOL bVisibleColumnsOnly = Prefs().GetShowSortMenuAsColumns();
+
+	if (bVisibleColumnsOnly)
 	{
 		// Always rebuild from scratch
-		CEnMenu menuBar;
-		VERIFY(menuBar.LoadMenu(IDR_MAINFRAME, *this, TRUE));
+		{
+			CEnMenu menuBar;
+			VERIFY(menuBar.LoadMenu(IDR_MAINFRAME, *this, TRUE));
 
-		VERIFY(CEnMenu::CopyMenuContents(::GetSubMenu(menuBar, AM_SORT), *pMenu));
+			VERIFY(CEnMenu::CopyMenuContents(::GetSubMenu(menuBar, AM_SORT), *pMenu));
+		}
 		
 		int nCountLastSep = 0;
 		
@@ -8944,7 +8951,7 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 				TDC_COLUMN nColID = TDC::MapSortIDToColumn(nMenuID);
 
 				if (nColID != TDCC_NONE)
-					bDelete = !tdc.CanSortBy(nColID);
+					bDelete = !mapColIDs.Has(nColID);
 			}
 
 			// delete the item else increment the count since the last separator
@@ -8965,25 +8972,22 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 	// custom sort columns
 
 	// first delete all custom columns and the related separator
-	int nPosUnsorted = -1;
+	int nItem = (int)pMenu->GetMenuItemCount();
 
-	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
+	while (nItem--)
 	{
 		UINT nMenuID = pMenu->GetMenuItemID(nItem);
 
 		if (nMenuID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nMenuID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
-		{
 			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
-			nItem--;
-		}
 	}
 
 	// separator is just before the separator before 'unsorted entry'
-	int nInsert = CEnMenu::GetMenuItemPos(pMenu->GetSafeHmenu(), ID_SORTBY_NONE) - 1;
+	int nInsert = CEnMenu::GetMenuItemPos(*pMenu, ID_SORTBY_NONE) - 1;
 	ASSERT(nInsert >= 0);
 
 	// delete separator if exist
-	if (nInsert > 0 && pMenu->GetMenuItemID(nInsert - 1) == 0)
+	if ((nInsert > 0) && CEnMenu::IsSeparator(*pMenu, (nInsert - 1)))
 	{
 		nInsert--;
 		pMenu->DeleteMenu(nInsert, MF_BYPOSITION);
@@ -9000,22 +9004,25 @@ void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 		for (int nCol = 0; nCol < aAttribDefs.GetSize(); nCol++)
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nCol];
+			TDC_COLUMN nColID = attribDef.GetColumnID();
 
-			if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
+			if (bVisibleColumnsOnly && !mapColIDs.Has(nColID))
+				continue;
+
+			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
+
+			if (bWantSep)
 			{
-				if (bWantSep)
-				{
-					bWantSep = FALSE;
-					pMenu->InsertMenu(nInsert, MF_BYPOSITION);
-					nInsert++;
-				}
-
-				UINT nMenuID = (attribDef.GetColumnID() - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST;
-				CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-				pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);
+				bWantSep = FALSE;
+				pMenu->InsertMenu(nInsert, MF_BYPOSITION);
 				nInsert++;
 			}
+
+			UINT nMenuID = ((nColID - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST);
+			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+			pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);
+			nInsert++;
 		}
 	}
 }

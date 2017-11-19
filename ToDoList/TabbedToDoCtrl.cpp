@@ -3923,13 +3923,15 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			int nAttribID = IUI_NUMATTRIBUTES;
+			int nCol = IUI_NUMATTRIBUTES;
 
-			while (nAttribID--)
+			while (nCol--)
 			{
-				if (ExtensionCanDoAppCommand(nView, IUI_SORT, nAttribID))
+				IUI_ATTRIBUTE nBy = (IUI_ATTRIBUTE)nCol;
+
+				if (ExtensionCanSortBy(nView, nBy))
 				{
-					TDC_COLUMN nColID = TDC::MapIUIAttributeToColumn((IUI_ATTRIBUTE)nAttribID);
+					TDC_COLUMN nColID = TDC::MapIUIAttributeToColumn(nBy);
 
 					if (nColID != TDCC_NONE)
 						mapColIDs.Add(nColID);
@@ -4247,26 +4249,41 @@ BOOL CTabbedToDoCtrl::CanSortBy(TDC_COLUMN nBy) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		{
-			IUI_ATTRIBUTE nCol = TDC::MapColumnToIUIEdit(nBy);
-
-			if ((nCol != IUI_NONE) || (nBy == TDCC_NONE))
-			{
-				const IUIExtensionWindow* pExt = GetExtensionWnd(nView);
-				ASSERT(pExt);
-
-				return (pExt && pExt->WantSortUpdate(nCol));
-			}
-			
-			// else
-			return FALSE;
-		}
-		break;
+		return ExtensionCanSortBy(nView, nBy);
 	}
 	
 	// else
 	ASSERT(0);
 	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, TDC_COLUMN nBy) const
+{
+	IUI_ATTRIBUTE nColID = TDC::MapColumnToIUIEdit(nBy);
+
+	if ((nColID == IUI_NONE) && (nBy != TDCC_NONE))
+		return FALSE;
+
+	return ExtensionCanSortBy(nView, nColID);
+}
+
+BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) const
+{
+	if (!IsExtensionView(nView))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Custom attributes not currently supported
+	if (nBy == IUI_CUSTOMATTRIB)
+		return FALSE;
+
+	// all else
+	const IUIExtensionWindow* pExt = GetExtensionWnd(nView);
+	ASSERT(pExt);
+
+	return (pExt && pExt->WantSortUpdate(nBy));
 }
 
 BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection) 

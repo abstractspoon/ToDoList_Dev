@@ -52,6 +52,7 @@ public:
 	~CPreferencesUIPage();
 
 	BOOL GetShowEditMenuAsColumns() const { return m_bShowEditMenuAsColumns; }
+	BOOL GetShowSortMenuAsColumns() const { return GetShowEditMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_bShowCommentsAlways; }
 	BOOL GetAutoReposCtrls() const { return m_bAutoReposCtrls; }
 	BOOL GetSharedCommentsHeight() const { return m_bSharedCommentsHeight; }

@@ -333,6 +333,16 @@ BOOL CEnMenu::CopyMenuContents(const CMenu* pMenu)
 	return CopyMenuContents(*pMenu, *this);
 }
 
+BOOL CEnMenu::IsSeparator(int nPos) const
+{
+	return IsSeparator(GetSafeHmenu(), nPos);
+}
+
+BOOL CEnMenu::IsPopop(int nPos) const
+{
+	return IsPopop(GetSafeHmenu(), nPos);
+}
+
 // static helpers -------------------------------------------------------
 
 void CEnMenu::SetLocalizer(ITransText* pTT)
@@ -807,4 +817,14 @@ BOOL CEnMenu::DeleteMenuContents(HMENU hMenu)
 	while (::DeleteMenu(hMenu, 0, MF_BYPOSITION));
 
 	return TRUE;
+}
+
+BOOL CEnMenu::IsSeparator(HMENU hMenu, int nPos)
+{
+	return (::GetMenuItemID(hMenu, nPos) == ID_SEPARATOR);
+}
+
+BOOL CEnMenu::IsPopop(HMENU hMenu, int nPos)
+{
+	return (::GetMenuItemID(hMenu, nPos) == (UINT)-1);
 }

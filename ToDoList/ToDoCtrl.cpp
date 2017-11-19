@@ -5889,6 +5889,14 @@ int CToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 {
 	mapColIDs.Copy(m_visColEdit.GetVisibleColumns());
 
+	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+
+		if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
+			mapColIDs.Add(attribDef.GetColumnID());
+	}
+
 	return mapColIDs.GetCount();
 }
 

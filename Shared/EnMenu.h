@@ -52,6 +52,9 @@ public:
 
 	BOOL CopyMenuContents(const CMenu* pMenu);
 
+	BOOL IsSeparator(int nPos) const;
+	BOOL IsPopop(int nPos) const;
+
 	BOOL DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp = FALSE);
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
 	BOOL DeleteMenuContents();
@@ -75,6 +78,9 @@ public:
 	static HMENU GetParentMenu(HMENU hMenu, HMENU hSubMenu);
 
 	static BOOL CopyMenuContents(HMENU hMenuFrom, HMENU hMenuTo);
+
+	static BOOL IsSeparator(HMENU hMenu, int nPos);
+	static BOOL IsPopop(HMENU hMenu, int nPos);
 
 	static BOOL DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp);
 	static BOOL DeleteMenu(HMENU hMenu, UINT nPosition, UINT nFlags, BOOL bAutoCleanUp);

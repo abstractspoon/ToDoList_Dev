@@ -313,6 +313,8 @@ protected:
 	BOOL SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTasks, DWORD dwFocusedTask);
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);
+	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_COLUMN nBy) const;
+	BOOL ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) const;
 
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib, DWORD dwFlags) const;

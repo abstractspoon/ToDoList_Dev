@@ -89,22 +89,25 @@ void CTDLMultiSortDlg::BuildCombos()
 			const TDCCOLUMN& col = COLUMNS[nCol];
 			TDC_COLUMN nColID = col.nColID;
 
-			if (IsColumnVisible(nColID))
-				CDialogHelper::AddString(combo, col.nIDLongName, nColID);
+			if (!IsColumnVisible(nColID))
+				continue;
+				
+			CDialogHelper::AddString(combo, col.nIDLongName, nColID);
 		}
 	
 		// custom columns
 		for (nCol = 0; nCol < m_aAttribDefs.GetSize(); nCol++)
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs.GetData()[nCol];
+			TDC_COLUMN nColID = attribDef.GetColumnID();
 
-			if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
-			{
-				TDC_COLUMN nColID = attribDef.GetColumnID();
-				CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			if (!IsColumnVisible(nColID))
+				continue;
 
-				CDialogHelper::AddString(combo, sColumn, nColID);
-			}
+			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
+
+			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			CDialogHelper::AddString(combo, sColumn, nColID);
 		}
 
 		// add blank item at top of 2nd and 3rd combo
