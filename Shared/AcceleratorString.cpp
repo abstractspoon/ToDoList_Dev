@@ -300,7 +300,7 @@ BOOL CAcceleratorString::EnsureUniqueAccelerators(CStringArray& aText)
 
 			// This means that every char in 'sText' appears in 'sAccelerators'
 			// Use the next char 'sAccelerators' appearing in 'sText'
-			int nAccel = Misc::FindFirstOf(sAccelerators, sText, FALSE);
+			int nAccel = Misc::FindFirstOf(sText, sAccelerators, FALSE);
 			ASSERT(nAccel != -1);
 
 			cAccel = sAccelerators[nAccel];

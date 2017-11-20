@@ -560,7 +560,7 @@ CString& Misc::TrimAlpha(CString& sText)
 	return sText;
 }
 
-int Misc::FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL bCaseSensitive)
+int Misc::FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
 {
 	if (bCaseSensitive)
 		return sSearchIn.FindOneOf(sSearchFor);

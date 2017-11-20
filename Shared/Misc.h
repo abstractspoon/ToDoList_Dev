@@ -362,7 +362,7 @@ namespace Misc
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);
 
-	int FindFirstOf(const CString& sSearchIn, const CString& sSearchFor, BOOL bCaseSensitive);
+	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
 
