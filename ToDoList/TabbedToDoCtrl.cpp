@@ -4917,7 +4917,7 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	return FALSE;
 }
 
-int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext)
+int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext) const
 {
 	// build a search query
 	SEARCHPARAMS params;

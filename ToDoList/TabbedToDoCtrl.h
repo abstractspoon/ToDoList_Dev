@@ -237,7 +237,7 @@ protected:
 	void UpdateTreeSelection();
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
-	int FindListTask(const CString& sPart, int nStart = 0, BOOL bNext = TRUE);
+	int FindListTask(const CString& sPart, int nStart = 0, BOOL bNext = TRUE) const;
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void ResortSelectedTaskParents();
 	void LoadPrefs();
