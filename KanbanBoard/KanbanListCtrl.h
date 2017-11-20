@@ -58,6 +58,8 @@ public:
 
 	int FindTask(DWORD dwTaskID) const;
 	int FindTask(const CPoint& ptScreen) const;
+	int FindTask(const CString& sPart, int nStart, BOOL bNext) const;
+
 	DWORD GetTaskID(int nItem) const { return GetItemData(nItem); }
 	BOOL DeleteTask(DWORD dwTaskID);
 
@@ -189,6 +191,7 @@ public:
 	int Find(DWORD dwTaskID, int& nItem) const;
 	int Find(HWND hWnd) const;
 	int Find(const CString& sAttribValue) const;
+	int Find(const CKanbanListCtrl* pList) const;
 
 	CKanbanListCtrl* Get(DWORD dwTaskID) const;
 	CKanbanListCtrl* Get(DWORD dwTaskID, int& nItem) const;
@@ -205,6 +208,7 @@ public:
 	void SetShowCompletionCheckboxes(BOOL bShow = TRUE);
 	
 	int GetVisibleCount(BOOL bIncBacklog) const;
+	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);

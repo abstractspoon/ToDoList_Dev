@@ -90,6 +90,7 @@ struct KANBANITEM
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const;
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
+	BOOL MatchesAttribute(const CString& sText, IUI_ATTRIBUTE nAttrib) const;
 
 	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
 	void RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);

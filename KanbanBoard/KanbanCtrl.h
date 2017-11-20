@@ -46,8 +46,6 @@ public:
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	DWORD HitTestTask(const CPoint& ptScreen) const;
-
-	void ResizeColumnsToFit();
 	void ScrollToSelectedTask();
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -70,8 +68,8 @@ public:
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	void SetPriorityColors(const CDWordArray& aColors);
 
- 	int GetColumnOrder(CStringArray& aOrder) const;
- 	BOOL SetColumnOrder(const CStringArray& aOrder);
+	int GetVisibleColumnCount() const { return GetVisibleListCtrlCount(); }
+	int GetVisibleTaskCount() const { return m_aListCtrls.GetVisibleTaskCount(); }
 
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
 	int GetAttributeValues(IUI_ATTRIBUTE nAttrib, CStringArray& aValues) const;
@@ -156,21 +154,24 @@ protected:
 	KANBANITEM* GetKanbanItem(DWORD dwTaskID) const;
 	BOOL HasKanbanItem(DWORD dwTaskID) const;
 
-	CKanbanListCtrl* LocateTask(DWORD dwTaskID) const;
-	CKanbanListCtrl* LocateTask(DWORD dwTaskID, int& nItem) const;
+	CKanbanListCtrl* LocateTask(DWORD dwTaskID, int& nItem, BOOL bForward) const;
 	CKanbanListCtrl* GetListCtrl(const CString& sAttribValue) const;
 	CKanbanListCtrl* GetListCtrl(HWND hwnd) const;
 	CKanbanListCtrl* HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader = NULL) const;
 
 	CKanbanListCtrl* AddNewListCtrl(const KANBANCOLUMN& colDef);
 	CKanbanListCtrl* GetSelListCtrl();
+	CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty);
+
 	const CKanbanListCtrl* GetSelListCtrl() const;
 	const CKanbanListCtrl* GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty) const;
 
 	BOOL SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent = TRUE);
 	BOOL IsSelectedListCtrl(HWND hWnd) const;
 	void FixupSelection();
+	void FixupFocus();
 	BOOL DeleteListCtrl(int nList);
+	BOOL HasFocus() const;
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;

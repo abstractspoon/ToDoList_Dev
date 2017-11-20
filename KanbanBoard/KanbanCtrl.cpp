@@ -303,7 +303,7 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	// find the list containing the first item and then
 	// check that all the other items belong to the same list
 	int nItem = -1;
-	CKanbanListCtrl* pList = LocateTask(aTaskIDs[0], nItem);
+	CKanbanListCtrl* pList = LocateTask(aTaskIDs[0], nItem, TRUE);
 
 	if (pList && (nItem != -1))
 	{
@@ -316,9 +316,7 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	if (pList)
 	{
 		m_pSelectedList = pList;
-
-		if (IsWindowVisible())
-			pList->SetFocus();
+		FixupFocus();
 
 		ScrollToSelectedTask();
 	}
@@ -329,7 +327,7 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 {
 	int nItem = -1;
-	CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem);
+	CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem, TRUE);
 
 	if (pList && (nItem != -1))
 	{
@@ -337,10 +335,9 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 		aItemIDs.Add(dwTaskID);
 
 		m_pSelectedList = pList;
-		pList->SelectTasks(aItemIDs);
+		FixupFocus();
 
-		if (IsWindowVisible())
-			pList->SetFocus();
+		pList->SelectTasks(aItemIDs);
 
 		ScrollToSelectedTask();
 		ClearOtherListSelections(pList);
@@ -353,7 +350,7 @@ BOOL CKanbanCtrl::SelectTask(const CString& sPart, IUI_APPCOMMAND nCmd)
 {
 	ASSERT(!sPart.IsEmpty());
 
-	const CKanbanListCtrl* pList = NULL;
+	CKanbanListCtrl* pList = NULL;
 	int nStartItem = -1;
 	BOOL bForward = TRUE;
 
@@ -391,8 +388,42 @@ BOOL CKanbanCtrl::SelectTask(const CString& sPart, IUI_APPCOMMAND nCmd)
 		break;
 	}
 
-	return false;
+	if (pList)
+	{
+		const CKanbanListCtrl* pStartList = pList;
+		int nItem = nStartItem;
+		
+		if (bForward)
+			nItem = max(0, nItem);
+		else
+			nItem = min(nItem, (pList->GetItemCount() - 1));
 
+		do
+		{
+			nItem = pList->FindTask(sPart, nItem, bForward);
+
+			if (nItem != -1)
+			{
+				SelectListCtrl(pList, FALSE);
+				pList->ClearSelection();
+
+				return pList->SelectTask(pList->GetTaskID(nItem));
+			}
+
+			// else
+			pList = GetNextListCtrl(pList, bForward, TRUE);
+			nItem = (bForward ? 0 : (pList->GetItemCount() - 1));
+		}
+		while (pList != pStartList);
+	}
+
+	// all else
+	return false;
+}
+
+BOOL CKanbanCtrl::HasFocus() const
+{
+	return CDialogHelper::IsChildOrSame(GetSafeHwnd(), ::GetFocus());
 }
 
 void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib)
@@ -1626,8 +1657,13 @@ void CKanbanCtrl::FixupSelection()
 		if (!m_pSelectedList)
 			m_pSelectedList = m_aListCtrls[0];
 	}
-	
-	if (IsWindowVisible())
+
+	FixupFocus();
+}
+
+void CKanbanCtrl::FixupFocus()
+{
+	if (IsWindowVisible() && HasFocus())
 	{
 		m_pSelectedList->SetFocus();
 		m_pSelectedList->Invalidate(TRUE);
@@ -1855,13 +1891,7 @@ BOOL CKanbanCtrl::HasKanbanItem(DWORD dwTaskID) const
 	return m_data.HasItem(dwTaskID);
 }
 
-CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID) const
-{
-	int nUnused = -1;
-	return LocateTask(dwTaskID, nUnused);
-}
-
-CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, int& nItem) const
+CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, int& nItem, BOOL bForward) const
 {
 	// First try selected list
 	if (m_pSelectedList)
@@ -1872,8 +1902,27 @@ CKanbanListCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, int& nItem) const
 			return m_pSelectedList;
 	}
 
-	// try any other list
-	return m_aListCtrls.Get(dwTaskID, nItem);
+	// try any other list in the specified direction
+	const CKanbanListCtrl* pList = GetNextListCtrl(m_pSelectedList, bForward, TRUE);
+
+	if (!pList)
+		return NULL;
+
+	const CKanbanListCtrl* pStartList = pList;
+
+	do
+	{
+		nItem = pList->FindTask(dwTaskID);
+
+		if (nItem != -1)
+			return const_cast<CKanbanListCtrl*>(pList);
+
+		// else
+		pList = GetNextListCtrl(pList, bForward, TRUE);
+	}
+	while (pList != pStartList);
+
+	return NULL;
 }
 
 CKanbanListCtrl* CKanbanCtrl::GetListCtrl(const CString& sAttribValue) const
@@ -2274,8 +2323,10 @@ DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
+	BOOL bForward = ((nCmd == IUI_GETPREVTASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
+
 	int nItem = -1;
-	const CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem);
+	const CKanbanListCtrl* pList = LocateTask(dwTaskID, nItem, bForward);
 	
 	if (!pList || (UsingFixedColumns() && !pList->IsWindowVisible()))
 	{
@@ -2331,6 +2382,11 @@ const CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList
 	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
 }
 
+CKanbanListCtrl* CKanbanCtrl::GetNextListCtrl(const CKanbanListCtrl* pList, BOOL bNext, BOOL bExcludeEmpty)
+{
+	return m_aListCtrls.GetNext(pList, bNext, bExcludeEmpty, UsingFixedColumns());
+}
+
 CKanbanListCtrl* CKanbanCtrl::HitTestListCtrl(const CPoint& ptScreen, BOOL* pbHeader) const
 {
 	return m_aListCtrls.HitTest(ptScreen, pbHeader);
@@ -2369,47 +2425,6 @@ BOOL CKanbanCtrl::CancelOperation()
 	return FALSE;
 }
 
-
-int CKanbanCtrl::GetColumnOrder(CStringArray& aOrder) const
-{
-	// TODO
-	return 0;
-}
-
-BOOL CKanbanCtrl::SetColumnOrder(const CStringArray& aTreeOrder)
-{
-	// TODO
-	return FALSE;
-}
-
-/*
-void CKanbanCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
-{
-	m_treeHeader.GetItemWidths(aTreeWidths);
-	m_listHeader.GetItemWidths(aListWidths);
-
-	// trim the list columns to what's currently visible
-	// remember to include hidden dummy first column
-	int nNumMonths = (GetRequiredColumnCount() + 1);
-	int nItem = aListWidths.GetSize();
-
-	while (nItem-- > nNumMonths)
-		aListWidths.RemoveAt(nItem);
-}
-
-void CKanbanCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
-{
-	m_treeHeader.SetItemWidths(aTreeWidths);
-
-	// save list column widths for when we've initialised our columns
-	// remember to include hidden dummy first column
-	if (aListWidths.GetSize() == (GetRequiredColumnCount() + 1))
-		m_listHeader.SetItemWidths(aListWidths);
-	else
-		m_aPrevColWidths.Copy(aListWidths);
-}
-*/
-
 void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = 0;
@@ -2431,7 +2446,7 @@ BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 	if (pList && (pList != m_pSelectedList) && pList->GetItemCount())
 	{
 		m_pSelectedList = pList;
-		m_pSelectedList->SetFocus();
+		FixupFocus();
 
 		ClearOtherListSelections(m_pSelectedList);
 

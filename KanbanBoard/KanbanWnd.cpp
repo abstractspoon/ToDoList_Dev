@@ -621,24 +621,14 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			DWORD dwNextID = m_ctrlKanban.GetNextTask(*pTaskID, nCmd);
-
-			return (dwNextID && (dwNextID != *pTaskID));
-		}
-		break;
+		return (m_ctrlKanban.GetVisibleTaskCount() > 0);
 
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		if (dwExtra)
-		{
-			return true;
-		}
-		break;
+		return (m_ctrlKanban.GetVisibleTaskCount() > 0);
 	}
 
 	// all else

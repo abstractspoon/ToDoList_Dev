@@ -420,6 +420,21 @@ int CKanbanListCtrlArray::GetVisibleCount(BOOL bIncBacklog) const
 	return nNumVis;
 }
 
+int CKanbanListCtrlArray::GetVisibleTaskCount() const
+{
+	int nList = GetSize(), nNumVis = 0;
+
+	while (nList--)
+	{
+		const CKanbanListCtrl* pList = GetAt(nList);
+		ASSERT(pList);
+
+		nNumVis += pList->GetItemCount();
+	}
+
+	return nNumVis;
+}
+
 float CKanbanListCtrlArray::GetAverageCharWidth()
 {
 	ASSERT(GetSize());
@@ -442,14 +457,25 @@ float CKanbanListCtrlArray::GetAverageCharWidth()
 CKanbanListCtrl* CKanbanListCtrlArray::GetNext(const CKanbanListCtrl* pList, BOOL bNext, 
 												BOOL bExcludeEmpty, BOOL bFixedColumns) const
 {
-	ASSERT(pList);
+	int nList = -1;
 
-	int nList = Misc::FindT(*this, pList);
-
-	if (nList == -1)
+	if (pList)
 	{
-		ASSERT(0);
-		return NULL;
+		nList = Misc::FindT(*this, pList);
+
+		if (nList == -1)
+		{
+			ASSERT(0);
+			return NULL;
+		}
+	}
+	else if (bNext)
+	{
+		nList = -1;
+	}
+	else
+	{
+		nList = GetSize();
 	}
 
 	if (bNext)
@@ -1789,6 +1815,26 @@ int CKanbanListCtrl::FindTask(const CPoint& ptScreen) const
 	ScreenToClient(&ptClient);
 	
 	return CListCtrl::HitTest(ptClient);
+}
+
+int CKanbanListCtrl::FindTask(const CString& sPart, int nStart, BOOL bNext) const
+{
+	int nFrom = nStart;
+	int nTo = (bNext ? GetItemCount() : -1);
+	int nInc = (bNext ? 1 : -1);
+
+	for (int nItem = nFrom; nItem != nTo; nItem += nInc)
+	{
+		DWORD dwTaskID = GetTaskID(nItem);
+		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+
+		if (pKI->MatchesAttribute(sPart, IUI_TASKNAME))
+		{
+			return nItem;
+		}
+	}
+
+	return -1; // no match
 }
 
 BOOL CKanbanListCtrl::DeleteTask(DWORD dwTaskID)
