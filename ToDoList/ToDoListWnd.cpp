@@ -72,7 +72,6 @@
 #include "..\shared\clipboard.h"
 #include "..\shared\rtlstylemgr.h"
 #include "..\shared\xslfile.h"
-#include "..\shared\savefocus.h"
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\sendfileto.h"
@@ -1345,9 +1344,6 @@ void CToDoListWnd::OnQuickFindNext()
 {
 	if (!m_sQuickFind.IsEmpty())
 	{
-		// Prevent anyone stealing the focus
-		CSaveFocus sf;
-
 		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTNEXT))
 		{
 			// return to start
@@ -1380,9 +1376,6 @@ void CToDoListWnd::OnQuickFindPrev()
 {
 	if (!m_sQuickFind.IsEmpty())
 	{
-		// Prevent anyone stealing the focus
-		CSaveFocus sf;
-
 		if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTPREV))
 		{
 			// return to end
@@ -1411,9 +1404,6 @@ void CToDoListWnd::OnSelChangeQuickFind()
 
 void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 {
-	// Prevent anyone stealing the focus
-	CSaveFocus sf;
-
 	if (bComboSelChange)
 		m_sQuickFind = CDialogHelper::GetSelectedItem(m_cbQuickFind);
 	else
