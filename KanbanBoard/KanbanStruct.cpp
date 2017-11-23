@@ -147,6 +147,7 @@ KANBANITEM::KANBANITEM(DWORD dwID)
 	color(CLR_NONE), 
 	dwTaskID(dwID), 
 	bDone(FALSE), 
+	bFlag(FALSE), 
 	bGoodAsDone(FALSE),
 	bParent(FALSE),
 	dwParentID(0),
@@ -175,6 +176,7 @@ KANBANITEM& KANBANITEM::operator=(const KANBANITEM& ki)
 	dTimeEst = ki.dTimeEst;
 	dTimeSpent = ki.dTimeSpent;
 	bDone = ki.bDone;
+	bFlag = ki.bFlag;
 	bGoodAsDone = ki.bGoodAsDone;
 	bParent = ki.bParent;
 	dwParentID = ki.dwParentID;
@@ -197,6 +199,7 @@ BOOL KANBANITEM::operator==(const KANBANITEM& ki) const
 			(dTimeEst == ki.dTimeEst) &&
 			(dTimeSpent == ki.dTimeSpent) &&
 			(bDone == ki.bDone) &&
+			(bFlag == ki.bFlag) &&
 			(bGoodAsDone == ki.bGoodAsDone) &&
 			(bParent == ki.bParent) &&
 			(nLevel == ki.nLevel) &&

@@ -110,7 +110,7 @@ protected:
 	const CKanbanAttributeArray& m_aDisplayAttrib;
 
 	CEnHeaderCtrl m_header;
-	CImageList m_ilHeight, m_ilCheckboxes;
+	CImageList m_ilHeight, m_ilCheckboxes, m_ilFlags;
 	CToolTipCtrlEx m_tooltip;
 
 	KANBANCOLUMN m_columnDef;
@@ -165,7 +165,7 @@ protected:
 	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
 
 	BOOL DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
-	BOOL DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
+	BOOL DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const;
 	BOOL DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, IUI_ATTRIBUTE nAttrib, const CString& sValue, int nFlags) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;

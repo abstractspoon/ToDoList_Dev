@@ -98,6 +98,9 @@
     <None Include="res\XPcheckboxes.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\flag.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

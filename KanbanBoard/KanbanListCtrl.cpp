@@ -848,6 +848,8 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_header.EnableTracking(FALSE);
 	m_header.ModifyStyle(HDS_FULLDRAG | HDS_DRAGDROP, 0, 0);
 
+	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
+
 	RefreshColumnTitle();
 	OnDisplayAttributeChanged();
 	RefreshBkgndColor();
@@ -1240,7 +1242,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
 
 				// Icon
-				BOOL bHasIcon = DrawItemIcon(pDC, pKI, rItem);
+				BOOL bHasIcon = DrawItemIcons(pDC, pKI, rItem);
 
 				// Bar as required
 				CRect rAttributes(rItem), rTitle(rItem);
@@ -1328,8 +1330,14 @@ void CKanbanListCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const 
 		pDC->SelectObject(pOldFont);
 }
 
-BOOL CKanbanListCtrl::DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
+BOOL CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
 {
+	BOOL bHasIcons = FALSE;
+	CRect rIcon(rItem);
+
+	rIcon.left += ICON_OFFSET;
+	rIcon.top += ICON_OFFSET;
+
 	if (pKI->bHasIcon || pKI->bParent)
 	{
 		int iImageIndex = -1;
@@ -1337,12 +1345,20 @@ BOOL CKanbanListCtrl::DrawItemIcon(CDC* pDC, const KANBANITEM* pKI, const CRect&
 
 		if (hilTask && (iImageIndex != -1))
 		{
-			ImageList_Draw(hilTask, iImageIndex, *pDC, (rItem.left + ICON_OFFSET), (rItem.top + ICON_OFFSET), ILD_TRANSPARENT);
-			return TRUE;
+			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			bHasIcons = TRUE;
+
+			rIcon.top += (16 + ICON_OFFSET);
 		}
 	}
 
-	return FALSE;
+	if (pKI->bFlag)
+	{
+		ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		bHasIcons = TRUE;
+	}
+
+	return bHasIcons;
 }
 
 BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon, CRect& rItem) const
@@ -1946,7 +1962,18 @@ int CALLBACK CKanbanListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 			break;
 			
 		case IUI_FLAG:
-			//nCompare = Misc::NaturalCompare(pKI1->sFTitle, pKI2->sTitle);
+			if (pKI1->bFlag && pKI2->bFlag)
+			{
+				nCompare = 0;
+			}
+			else if (pKI1->bFlag)
+			{
+				nCompare = -1;
+			}
+			else if (pKI2->bFlag)
+			{
+				nCompare = 1;
+			}
 			break;
 			
 		case IUI_LASTMOD:
