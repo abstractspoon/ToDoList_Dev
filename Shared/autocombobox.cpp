@@ -345,9 +345,9 @@ BOOL CAutoComboBox::GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) con
 }
 
 void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList)
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList);
+	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 
 	// draw 'delete' mark for non-empty deletable list items
 	// but not if we are a disabled simple combo

@@ -36,7 +36,7 @@ END_MESSAGE_MAP()
 // CColorComboBox message handlers
 
 void CColorComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
-								  DWORD dwItemData, const CString& sItem, BOOL bList)
+								  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	if (nItem == -1)
 		return;
@@ -50,7 +50,7 @@ void CColorComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 		rColor.right = (rColor.left + rColor.Height());
 		rText.left = rColor.right + 2;
 
-		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList);
+		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 	}
 
 	// draw color

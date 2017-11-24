@@ -325,13 +325,17 @@ BOOL CTDLFilterBar::Create(CWnd* pParentWnd, UINT nID, BOOL bVisible)
 void CTDLFilterBar::OnSelchangeFilter() 
 {
 	BOOL bWasCustom = m_bAdvancedFilter;
+	TDCFILTER prevFilter = m_filter;
+
 	UpdateData();
 
 	// Refresh the labels if switching from custom to not, or vice versa
 	if ((bWasCustom && !m_bAdvancedFilter) || (!bWasCustom && m_bAdvancedFilter))
 		Invalidate(FALSE);
 
-	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+	// Only notify the parent if something actually changed
+	if (m_filter != prevFilter)
+		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
 }
 
 void CTDLFilterBar::OnSelcancelFilter() 

@@ -67,20 +67,20 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	int nDC = dc.SaveDC();
 
-	// initialise colours and fill bkgnd
-	BOOL bSelected = (lpDrawItemStruct->itemState & ODS_SELECTED);
+	// initialise colours and fill background
+	BOOL bItemSelected = (lpDrawItemStruct->itemState & ODS_SELECTED);
+	BOOL bDisabled = !IsWindowEnabled();
+	BOOL bItemDisabled = (bDisabled || (lpDrawItemStruct->itemState & (ODS_GRAYED | ODS_DISABLED)));
 
-	COLORREF crBack = GetSysColor(IsWindowEnabled() ? (bSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW) : COLOR_3DFACE);
-	COLORREF crText = GetSysColor(IsWindowEnabled() ? (bSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT) : COLOR_GRAYTEXT);
+	COLORREF crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
+	COLORREF crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
 
 	// Special case
 	if (IsType(CBS_SIMPLE) && !IsWindowEnabled())
 		crBack = GetSysColor(COLOR_WINDOW);
 
 	CRect rItem(lpDrawItemStruct->rcItem);
-
 	dc.FillSolidRect(rItem, crBack);
-	dc.SetTextColor(crText);
 
 	// draw the item
 	rItem.DeflateRect(2, 1);
@@ -101,14 +101,15 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					lpDrawItemStruct->itemState,
 					lpDrawItemStruct->itemData, 
 					sText, 
-					TRUE);
+					TRUE,
+					crText);
 	}
 	else
 	{
 		CString sText;
 		GetWindowText(sText);
 
-		DrawItemText(dc, rItem, -1, 0, 0, sText, FALSE);
+		DrawItemText(dc, rItem, -1, 0, 0, sText, FALSE, crText);
 	}
 
 	// Restore the DC state before focus rect
@@ -131,10 +132,13 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 }
 
 void COwnerdrawComboBoxBase::DrawItemText(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/,
-										  DWORD /*dwItemData*/, const CString& sItem, BOOL /*bList*/)
+										  DWORD /*dwItemData*/, const CString& sItem, BOOL /*bList*/, COLORREF crText)
 {
 	if (!sItem.IsEmpty())
 	{
+		if (crText != CLR_NONE)
+			dc.SetTextColor(crText);
+
 		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GetDrawEllipsis() | GraphicsMisc::GetRTLDrawTextFlags(*this));
 
 		dc.DrawText(sItem, (LPRECT)(LPCRECT)rect, nFlags);

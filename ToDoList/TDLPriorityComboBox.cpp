@@ -187,7 +187,7 @@ void CTDLPriorityComboBox::BuildCombo()
 }
 
 void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
-										DWORD dwItemData, const CString& sItem, BOOL bList)
+										DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	if (nItem == -1)
 		return;
@@ -195,11 +195,11 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	// Don't indent 'non-color' items
 	if ((dwItemData == CLR_NONE) && !Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))
 	{
-		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList);
+		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 		return;
 	}
 
 	// all else
-	CColorComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList);
+	CColorComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }	
 

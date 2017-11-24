@@ -246,7 +246,7 @@ int CFileComboBox::AddFiles(const CStringArray& aFiles)
 }
 
 void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList)
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	CRect rText(rect);
 
@@ -272,7 +272,7 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 		rText.left += 20;
 	}
 
-	CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList);
+	CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
 BOOL CFileComboBox::DeleteLBItem(int nItem)

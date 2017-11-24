@@ -65,7 +65,7 @@ int CTDLImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 
 void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
-								DWORD dwItemData, const CString& sItem, BOOL bList)
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	int nImpExp = (int)dwItemData;
 
@@ -104,7 +104,7 @@ void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nIte
 	CRect rText(rect);
 	rText.left += 20; // for icon always
 
-	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList);
+	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
 void CTDLImportExportComboBox::BuildCombo()

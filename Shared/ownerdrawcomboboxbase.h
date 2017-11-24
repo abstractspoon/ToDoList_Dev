@@ -63,7 +63,7 @@ protected:
 
 protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList);	
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual BOOL HasIcon() const { return FALSE; }
 	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit

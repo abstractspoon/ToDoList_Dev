@@ -59,7 +59,7 @@ protected:
 	void ResizeEdit();
 	BOOL InitFileEdit();
 	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-						DWORD dwItemData, const CString& sItem, BOOL bList);	
+						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	BOOL HasIcon() const { return TRUE; }
 	int GetMaxDropWidth() const { return 400; }
 	UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }

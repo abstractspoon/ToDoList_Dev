@@ -42,6 +42,7 @@ public:
 	void CheckAll(CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	int GetCheckedCount(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	BOOL IsAnyChecked(CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	int GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE> aStates) const;
 
 	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
 	virtual BOOL SetChecked(const CStringArray& aItems);
@@ -95,7 +96,9 @@ protected:
 	virtual void OnCheckChange(int /*nIndex*/) {}
 	
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList);	
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
+
 	virtual BOOL DeleteLBItem(int nItem);
 	virtual int GetExtraListboxWidth() const;
 	virtual void HandleReturnKey();
@@ -107,7 +110,6 @@ protected:
 
 	static int CalcCheckBoxWidth(HDC hdc = NULL, HWND hwndRef = NULL);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate);
-	BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD dwItemData) const;
 	void CheckAll(CCB_CHECKSTATE nCheck, BOOL bUpdate);
 	BOOL ToggleCheck(int nItem);
 	BOOL ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate);

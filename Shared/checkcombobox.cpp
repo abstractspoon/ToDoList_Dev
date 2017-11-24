@@ -76,14 +76,14 @@ void CCheckComboBox::OnDestroy()
 }
 
 void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL /*bList*/)
+								DWORD dwItemData, const CString& sItem, BOOL /*bList*/, COLORREF crText)
 {
-	if (DrawCheckBox(dc, rect, nItem, dwItemData))
+	if (DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE))
 	{
 		CRect rText(rect);
 		rText.left += CalcCheckBoxWidth(dc);
 		
-		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, TRUE);
+		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, TRUE, crText);
 	}
 	else // static portion
 	{
@@ -91,7 +91,7 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 
 		if (!sText.IsEmpty())
 		{
-			CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sText, FALSE);
+			CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sText, FALSE, crText);
 
 			CSize sizeText = dc.GetTextExtent(sText);
 			m_bTextFits = (sizeText.cx <= rect.Width());
@@ -99,13 +99,13 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 	}
 }
 
-BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, DWORD dwItemData) const
+BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*nItemState*/, DWORD dwItemData, BOOL bDisabled) const
 {
 	if (nItem < 0) 	// Don't draw a checkbox on the static portion of the combobox
 		return FALSE;
 
 	// Otherwise it is one of the items
-	UINT nCheckState = DFCS_BUTTONCHECK;
+	UINT nCheckState = (DFCS_BUTTONCHECK | (bDisabled ? DFCS_INACTIVE : 0));
 
 	switch (GetCheck(nItem))
 	{
@@ -217,6 +217,17 @@ BOOL CCheckComboBox::IsAnyChecked(CCB_CHECKSTATE nCheck) const
 	return FALSE;
 }
 
+int CCheckComboBox::GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE> aStates) const
+{
+	int nItem = GetCount();
+	aStates.SetSize(nItem);
+
+	while (nItem--)
+		aStates[nItem] = GetCheck(nItem);
+
+	return aStates.GetSize();
+}
+
 void CCheckComboBox::RecalcText(BOOL bUpdate, BOOL bNotify)
 {
 	CStringArray aItems;
@@ -261,10 +272,6 @@ int CCheckComboBox::SetCheckByData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
 
-	if (nIndex == CB_ERR)
-		return CB_ERR;
-
-	// else
 	return SetCheck(nIndex, nCheck, TRUE);
 }
 
@@ -275,6 +282,9 @@ int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
 
 int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 {
+	if ((nIndex == -1) || (nIndex >= GetCount()))
+		return CB_ERR;
+
 	CCB_CHECK_DATA* pState = GetAddItemCheckData(nIndex);
 	ASSERT(pState);
 
@@ -302,6 +312,9 @@ int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 
 CCB_CHECKSTATE CCheckComboBox::GetCheck(int nIndex) const
 {
+	if ((nIndex == -1) || !GetCount())
+		return CCBC_UNCHECKED;
+
 	CCB_CHECK_DATA* pState = GetItemCheckData(nIndex);
 
 	if (pState == NULL)
@@ -314,9 +327,6 @@ CCB_CHECKSTATE CCheckComboBox::GetCheckByData(DWORD dwItemData) const
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
 	
-	if (nIndex == CB_ERR)
-		return CCBC_UNCHECKED;
-
 	return GetCheck(nIndex);
 }
 

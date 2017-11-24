@@ -60,13 +60,21 @@ protected:
 
 	virtual void OnCheckChange(int nIndex);
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList);	
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
 	int GetNoneIndex() const;
+	int GetAnyIndex() const;
+	BOOL IsAnyChecked() const;
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
+	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
+	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
 
+#ifdef _DEBUG
+	void TraceCheckStates() const;
+#endif
 };
 
 /////////////////////////////////////////////////////////////////////////////

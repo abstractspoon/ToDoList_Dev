@@ -55,7 +55,7 @@ protected:
 
 protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
-								DWORD dwItemData, const CString& sItem, BOOL bList);	
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual DWORD GetNewItemData() const { return CLR_NONE; }
 
 };

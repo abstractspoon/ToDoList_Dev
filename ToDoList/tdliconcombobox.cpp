@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 // CTDLIconComboBox message handlers
 
 void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-									DWORD dwItemData, const CString& sItem, BOOL bList)
+									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	CRect rImage(rect);
 	const int nImgSpace = 18;
@@ -52,7 +52,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		if (m_bMultiSel)
 		{
 			// draw checkbox with no text
-			DrawCheckBox(dc, rect, nItem, dwItemData);
+			DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE);
 
 			// update image rect
 			rImage.left += nImgSpace;
@@ -92,7 +92,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 			// draw optional text
 			if (bList && !sName.IsEmpty())
-				COwnerdrawComboBoxBase::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList);
+				COwnerdrawComboBoxBase::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList, crText);
 		}
 	}
 }

@@ -134,7 +134,7 @@ int CTDLContentTypeComboBox::GetCurSel() const
 }
 
 void CTDLContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-										  DWORD dwItemData, const CString& sItem, BOOL bList)
+										  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	// Draw image
 	if (nItem != CB_ERR)
@@ -149,7 +149,7 @@ void CTDLContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem
 	CRect rText(rect);
 	rText.left += (IMAGESIZE + 2);
 
-	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList);
+	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
 int CTDLContentTypeComboBox::AddItemImage(HICON hIcon, BOOL bDeleteIcon)
