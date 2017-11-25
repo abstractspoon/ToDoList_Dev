@@ -294,7 +294,7 @@ BOOL CTDLFilterComboBox::ExtractAdvancedFilterName(const CString& sDisplay, CStr
 }
 
 void CTDLFilterComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-										DWORD dwItemData, const CString& sItem, BOOL bList)
+										DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	CString sText(sItem);
 
@@ -316,5 +316,5 @@ void CTDLFilterComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UIN
 	}
 
 	// default drawing
-	CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sText, bList);
+	CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sText, bList, crText);
 }

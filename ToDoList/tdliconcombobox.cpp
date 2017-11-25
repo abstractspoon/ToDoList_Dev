@@ -20,8 +20,6 @@ CTDLIconComboBox::CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel
 	CEnCheckComboBox(bMultiSel),
 	m_ilImages(ilImages)
 {
-	m_sNone.Empty();
-	m_sAny.Empty();
 }
 
 CTDLIconComboBox::~CTDLIconComboBox()

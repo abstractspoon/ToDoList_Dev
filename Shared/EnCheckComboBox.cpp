@@ -17,13 +17,10 @@ static char THIS_FILE[] = __FILE__;
 // CEnCheckComboBox
 
 CEnCheckComboBox::CEnCheckComboBox(BOOL bMulti, UINT nIDNoneString, UINT nIDAnyString) : 
-	CCheckComboBox(ACBS_ALLOWDELETE), m_bMultiSel(bMulti), m_sNone("<none>"), m_sAny("<any>")
+	CCheckComboBox(ACBS_ALLOWDELETE), m_bMultiSel(bMulti)
 {
-	if (nIDNoneString)
-		m_sNone.LoadString(nIDNoneString);
-
-	if (nIDAnyString)
-		m_sAny.LoadString(nIDAnyString);
+	m_sNone.LoadString(nIDNoneString);
+	m_sAny.LoadString(nIDAnyString);
 }
 
 CEnCheckComboBox::~CEnCheckComboBox()
@@ -340,23 +337,21 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 {
 	if (m_bMultiSel)
 	{
-		BOOL bRes = FALSE;
+		CStringArray aCurChecked, aCurMixed;
+		GetChecked(aCurChecked, aCurMixed);
 
-// #ifdef _DEBUG
-// 		TraceCheckStates();
-// #endif
+		if (Misc::MatchAll(aChecked, aCurChecked) && 
+			Misc::MatchAll(aMixed, aCurMixed))
+		{
+			return TRUE;
+		}
+
 		int nAny = GetAnyIndex();
 
 		if (!aChecked.GetSize() || GetCheck(nAny))
-			bRes = (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) != CB_ERR);
-		else
-			bRes = CCheckComboBox::SetChecked(aChecked, aMixed);
+			return (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) != CB_ERR);
 
-// #ifdef _DEBUG
-// 		TraceCheckStates();
-// #endif
-
-		return bRes;
+		return CCheckComboBox::SetChecked(aChecked, aMixed);
 	}
 
 	ASSERT(aMixed.GetSize() == 0);

@@ -32,8 +32,11 @@ END_MESSAGE_MAP()
 // CTabbedComboBox message handlers
 
 void CTabbedComboBox::DrawItemText(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/,
-									DWORD /*dwItemData*/, const CString& sItem, BOOL /*bList*/)
+									DWORD /*dwItemData*/, const CString& sItem, BOOL /*bList*/, COLORREF crText)
 {
+	if (crText != CLR_NONE)
+		dc.SetTextColor(crText);
+
 	// replace [\][t] with [\t]
 	CString sText(sItem);
 	sText.Replace(_T("\\t"), _T("\t"));

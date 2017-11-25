@@ -44,7 +44,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList);	
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 
 // Implementation
 public:
