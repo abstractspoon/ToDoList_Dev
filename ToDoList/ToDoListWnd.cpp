@@ -118,7 +118,7 @@ enum
 {
 	WM_POSTONCREATE = (WM_APP+1),
 	WM_WEBUPDATEWIZARD,
-	WM_ADDTOOLBARTOOLS,
+	WM_UPDATEUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
 };
@@ -400,7 +400,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL16, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
 	ON_COMMAND_RANGE(ID_WINDOW1, ID_WINDOW16, OnWindow)
-	ON_MESSAGE(WM_ADDTOOLBARTOOLS, OnAddToolbarTools)
+	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
 	ON_MESSAGE(WM_APPRESTOREFOCUS, OnAppRestoreFocus)
 	ON_MESSAGE(WM_CLOSE, OnClose)
 	ON_MESSAGE(WM_DOINITIALDUETASKNOTIFY, OnDoInitialDueTaskNotify)
@@ -2221,10 +2221,10 @@ void CToDoListWnd::SaveSettings()
 	m_mgrContent.SavePreferences(prefs, _T("ContentControls"));
 }
 
-LRESULT CToDoListWnd::OnAddToolbarTools(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnUpdateUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	Misc::ProcessMsgLoop();
-	AppendTools2Toolbar();
+	UpdateUDTsInToolbar();
 	return 0L;
 }
 
@@ -2448,8 +2448,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// refresh toolbar 'tools' buttons unless minimized because
 	// we must handle it when we're first shown
-	if (m_bShowToolbar && AfxGetApp()->m_nCmdShow != SW_SHOWMINIMIZED)
-		AppendTools2Toolbar();
+	if (m_bShowToolbar && (AfxGetApp()->m_nCmdShow != SW_SHOWMINIMIZED))
+		UpdateUDTsInToolbar();
 
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
@@ -2917,15 +2917,14 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), (nVPos + 1), m_theme.crAppLinesLight);
 	}
 
-	// this is definitely amongst the worst hacks I've ever had to implement.
-	// It occurs because the CSysImageList class seems to not initialize 
-	// properly unless the main window is visible. so in the case of starting hidden
+	// The CSysImageList class seems to not initialize properly unless the 
+	// main window is visible. so in the case of starting hidden
 	// or starting minimized we must wait until we become visible before
 	// adding the tools to the toolbar.
 	if (m_bStartHidden)
 	{
 		m_bStartHidden = FALSE;
-		PostMessage(WM_ADDTOOLBARTOOLS);
+		PostMessage(WM_UPDATEUDTSINTOOLBAR);
 	}
 
 	return TRUE;
@@ -4939,7 +4938,7 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		// message before we can switch image sizes so we put it
 		// right at the end after everything is done.
 		Misc::ProcessMsgLoop();
-		AppendTools2Toolbar(TRUE);
+		UpdateUDTsInToolbar();
 	}
 	
 	// finally set or terminate the various status check timers
@@ -7382,6 +7381,7 @@ LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
 void CToDoListWnd::OnViewToolbar() 
 {
 	m_bShowToolbar = !m_bShowToolbar;
+
 	m_toolbar.ShowWindow(m_bShowToolbar ? SW_SHOW : SW_HIDE);
 	m_toolbar.EnableWindow(m_bShowToolbar);
 
@@ -7394,11 +7394,11 @@ void CToDoListWnd::OnUpdateViewToolbar(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_bShowToolbar ? 1 : 0);
 }
 
-void CToDoListWnd::AppendTools2Toolbar(BOOL bAppend)
+void CToDoListWnd::UpdateUDTsInToolbar()
 {
 	CTDCToolsHelper th(Prefs().GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
 	
-	if (bAppend)
+	if (Prefs().GetDisplayUDTsInToolbar())
 	{
 		// then re-add
 		CUserToolArray aTools;

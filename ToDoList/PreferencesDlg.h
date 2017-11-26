@@ -225,6 +225,7 @@ public:
 	BOOL GetStackEditFieldsAndComments() const { return m_pageUI.GetStackEditFieldsAndComments(); }
 	BOOL GetStackCommentsAboveEditFields() const { return m_pageUI.GetStackCommentsAboveEditFields(); }
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_pageUI.GetIncludeWebLinksInCommentsPaste(); }
+	BOOL GetDisplayUDTsInToolbar() const { return m_pageUI.GetDisplayUDTsInToolbar(); }
 
 	// CPreferencesUIVisibilityPage
 	void GetDefaultColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const { m_pageUIVisibility.GetColumnAttributeVisibility(vis); }

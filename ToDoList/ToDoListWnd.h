@@ -348,7 +348,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg BOOL OnOpenRecentFile(UINT nID);
 	afx_msg void OnEndSession(BOOL bEnding);
-	afx_msg LRESULT OnAddToolbarTools(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnUpdateUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
@@ -692,7 +692,7 @@ protected:
 	
 	void PrepareToolbar(int nOption);
 	void SetToolbarOption(int nOption);
-	void AppendTools2Toolbar(BOOL bAppend = TRUE);
+	void UpdateUDTsInToolbar();
 	void PopulateToolArgs(USERTOOLARGS& args) const;
 
 	CFilteredToDoCtrl& GetToDoCtrl();

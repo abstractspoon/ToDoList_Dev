@@ -520,7 +520,7 @@ BEGIN
                     WS_DISABLED,7,3,123,16
 END
 
-IDD_PREFUI_PAGE DIALOG DISCARDABLE  0, 0, 395, 693
+IDD_PREFUI_PAGE DIALOG DISCARDABLE  0, 0, 395, 707
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
@@ -579,40 +579,42 @@ BEGIN
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,350,387,10
     LTEXT           "Toolbar",IDC_TOOLBARGROUP,7,370,381,8
-    LTEXT           "'New Task' &button places task:",IDC_STATIC,8,385,380,8
-    COMBOBOX        IDC_NEWTASKPOSITION,7,397,183,121,CBS_DROPDOWNLIST | 
+    CONTROL         "Display 'User Defined Tools'",IDC_DISPLAYUDTSINTOOLBAR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,385,387,10
+    LTEXT           "'New Task' &button places task:",IDC_STATIC,8,400,380,8
+    COMBOBOX        IDC_NEWTASKPOSITION,7,412,183,121,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "'New Subtas&k' button places subtask:",IDC_STATIC,7,415,
+    LTEXT           "'New Subtas&k' button places subtask:",IDC_STATIC,7,430,
                     381,8
-    COMBOBOX        IDC_NEWSUBTASKPOSITION,7,427,183,115,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_NEWSUBTASKPOSITION,7,442,183,115,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Task Comments",IDC_COMMENTSGROUP,7,450,381,8
-    LTEXT           "Position co&mments:",IDC_STATIC,7,462,381,10
-    COMBOBOX        IDC_COMMENTPOS,7,474,183,145,CBS_DROPDOWNLIST | 
+    LTEXT           "Task Comments",IDC_COMMENTSGROUP,7,465,381,8
+    LTEXT           "Position co&mments:",IDC_STATIC,7,477,381,10
+    COMBOBOX        IDC_COMMENTPOS,7,489,183,145,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
     CONTROL         "S&how comments even when tasklist is maximised",
                     IDC_SHOWCOMMENTSALWAYS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,492,381,10
+                    WS_TABSTOP,7,507,381,10
     CONTROL         "&Update all tasklists when the comments field is resized",
                     IDC_SHAREDCOMMENTSHEIGHT,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,507,381,10
+                    BS_TOP | WS_TABSTOP,7,522,381,10
     CONTROL         "In&clude web link when pasting browser content",
                     IDC_INCLUDEWEBLINKINCOMMENTSPASTE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,522,387,10
-    LTEXT           "Tasklist Tab Bar",IDC_TABBARGROUP,7,542,381,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,537,387,10
+    LTEXT           "Tasklist Tab Bar",IDC_TABBARGROUP,7,557,381,8
     CONTROL         "&Hide tab bar when only one tasklist is open",
                     IDC_AUTOHIDETABBAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,557,381,10
+                    7,572,381,10
     CONTROL         "&Stack tab bar items",IDC_STACKTABBARITEMS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,572,381,10
-    CONTROL         "Keep tabs or&dered by name",IDC_KEEPTABSORDERED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,587,381,10
+    CONTROL         "Keep tabs or&dered by name",IDC_KEEPTABSORDERED,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,602,381,10
     CONTROL         "&Show close button on each tasklist tab",
                     IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,602,381,10
-    LTEXT           "Default Task View Visibility",IDC_TASKVIEWSGROUP,7,620,
+                    WS_TABSTOP,7,617,381,10
+    LTEXT           "Default Task View Visibility",IDC_TASKVIEWSGROUP,7,635,
                     381,8
-    LISTBOX         IDC_TASKVIEWVISIBILITY,7,634,331,51,LBS_OWNERDRAWFIXED | 
+    LISTBOX         IDC_TASKVIEWVISIBILITY,7,649,331,51,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Right &align attribute labels",IDC_RIGHTALIGNLABELS,
@@ -3832,7 +3834,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 394
         TOPMARGIN, 10
-        BOTTOMMARGIN, 689
+        BOTTOMMARGIN, 703
     END
 
     IDD_PRINT_DIALOG, DIALOG
