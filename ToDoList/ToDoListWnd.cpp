@@ -12677,6 +12677,8 @@ void CToDoListWnd::OnViewShowTimeTracker()
 
 void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
+	FileMisc::LogText(_T("WM_SETTINGCHANGE(%04x, %s)"), uFlags, lpszSection);
+
 	// Prompt to restart app whenever Regional settings change
 	if (StrCmp(lpszSection, _T("intl")) == 0)
 	{
