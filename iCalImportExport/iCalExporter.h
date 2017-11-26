@@ -37,12 +37,14 @@ public:
 
 protected:
 	CIcon m_icon;
-	BOOL EXPORTASVTASK;
+	BOOL EXPORTASTODO, NODUEDATEISTODAYORSTART;
 
 protected:
 	void ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
 							CStdioFile& fileOut, BOOL bAndSiblings);
 	bool InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+
+	BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COleDateTime& dtStart, COleDateTime& dtEnd, COleDateTime& dtDue) const;
 
 	static void __cdecl WriteString(CStdioFile& fileOut, LPCTSTR lpszFormat, ...);
 	static CString FormatDateTime(LPCTSTR szType, const COleDateTime& date, BOOL bStartOfDay);
@@ -50,7 +52,6 @@ protected:
 	static CString FormatDayOfMonth(DWORD dwDOM);
 	static void WriteHeader(CStdioFileEx& fileOut);
 	static CString FormatUID(LPCTSTR szFileName, DWORD dwTaskID);
-	static BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, time64_t& tStart, time64_t& tEnd, COleDateTime& dtDue);
 };
 
 #endif // !defined(AFX_ICALEXPORTER_H__5CDCA505_6C5C_4342_8F80_67368C7EE6A5__INCLUDED_)

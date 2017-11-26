@@ -26,7 +26,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CiCalExporter::CiCalExporter() : EXPORTASVTASK(TRUE)
+CiCalExporter::CiCalExporter() : EXPORTASTODO(TRUE), NODUEDATEISTODAYORSTART(FALSE)
 {
 	m_icon.LoadIcon(IDI_ICALENDAR);
 }
@@ -113,21 +113,23 @@ bool CiCalExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	NODUEDATEISTODAYORSTART = pPrefs->GetProfileInt(_T("Preferences"), _T("NoDueDateIsDueToday"), FALSE);
+
 	CString sKey(szKey);
 	sKey += _T("\\iCalExporter");
 
-	EXPORTASVTASK = pPrefs->GetProfileInt(szKey, _T("ExportAsTodos"), FALSE);
+	EXPORTASTODO = pPrefs->GetProfileInt(szKey, _T("ExportAsTodos"), FALSE);
 
 	if (!bSilent)
 	{
-		CiCalExporterOptionsDlg dlg(EXPORTASVTASK);
+		CiCalExporterOptionsDlg dlg(EXPORTASTODO);
 
 		if (dlg.DoModal() != IDOK)
 			return false;
 
-		EXPORTASVTASK = dlg.GetWantExportTasksAsTodos();
+		EXPORTASTODO = dlg.GetWantExportTasksAsTodos();
 
-		pPrefs->WriteProfileInt(szKey, _T("ExportAsTodos"), EXPORTASVTASK);
+		pPrefs->WriteProfileInt(szKey, _T("ExportAsTodos"), EXPORTASTODO);
 	}
 
 	return true;
@@ -147,47 +149,56 @@ CString CiCalExporter::FormatUID(LPCTSTR szFileName, DWORD dwTaskID)
 }
 
 BOOL CiCalExporter::GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-	time64_t& tStart, time64_t& tEnd, COleDateTime& dtDue)
+								COleDateTime& dtStart, COleDateTime& dtEnd, COleDateTime& dtDue) const
 {
 	// Neither Google Calendar not Outlook pay any attention to the 'DUE',
 	// so we have to be a bit clever in using the 'END' tag both for 
 	// due date and completion.
-	time64_t tDue = 0, tDone = 0;
+	time64_t tStart = 0, tDue = 0, tDone = 0;
 
-	BOOL bStartDate = pTasks->GetTaskStartDate64(hTask, FALSE, tStart);
-	BOOL bDueDate = pTasks->GetTaskDueDate64(hTask, FALSE, tDue);
-	BOOL bDoneDate = pTasks->GetTaskDoneDate64(hTask, tDone);
-
-	BOOL bEndDate = FALSE;
-	tEnd = 0;
-
-	if (pTasks->GetTaskPercentDone(hTask, FALSE) < 100)
-	{
-		tEnd = tDue;
-		bEndDate = bDueDate;
-	}
+	if (pTasks->GetTaskStartDate64(hTask, FALSE, tStart))
+		dtStart = CDateHelper::GetDate(tStart);
 	else
-	{
-		tEnd = tDone;
-		bEndDate = bDoneDate;
-	}
+		CDateHelper::ClearDate(dtStart);
 
-	// if task only has a start date then make the end date the same as the start and vice versa
-	if (!bEndDate && bStartDate)
-	{
-		tEnd = tStart;
-	}
-	else if (!bStartDate && bEndDate)
-	{
-		tStart = tEnd;
-	}
-
-	if (bDueDate)
+	if (pTasks->GetTaskDueDate64(hTask, FALSE, tDue))
 		dtDue = CDateHelper::GetDate(tDue);
 	else
 		CDateHelper::ClearDate(dtDue);
 
-	return (bStartDate || bEndDate);
+	COleDateTime dtDone;
+
+	if (pTasks->GetTaskDoneDate64(hTask, tDone))
+		dtDone = CDateHelper::GetDate(tDone);
+	else
+		CDateHelper::ClearDate(dtDone);
+
+	if (pTasks->GetTaskPercentDone(hTask, FALSE) < 100)
+		dtEnd = dtDue;
+	else
+		dtEnd = dtDone;
+
+	// if task only has a start date then make the end date the same as the start and vice versa
+	BOOL bHasStart = CDateHelper::IsDateSet(dtStart), bHasEnd = CDateHelper::IsDateSet(dtEnd);
+
+	if (bHasStart && !bHasEnd)
+	{
+		if (NODUEDATEISTODAYORSTART)
+		{
+			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+
+			if (dtToday > dtStart)
+				dtEnd = dtStart;
+			else
+				dtEnd = dtToday;
+		}
+	}
+	else if (!bHasStart && bHasEnd)
+	{
+		dtStart = dtEnd;
+	}
+
+	return (bHasStart || bHasEnd);
 }
 
 void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -200,42 +211,51 @@ void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	CString sUID = FormatUID(fileOut.GetFilePath(), pTasks->GetTaskID(hTask));
 		
 	// tasks must have a start date or a due date or both
-	time64_t tStart = 0, tEnd = 0;
-	COleDateTime dtDue;
+	COleDateTime dtStart, dtDue, dtEnd;
 
-	if (GetTaskDates(pTasks, hTask, tStart, tEnd, dtDue))
+	if (GetTaskDates(pTasks, hTask, dtStart, dtEnd, dtDue))
 	{
 		// header
-		if (EXPORTASVTASK)
+		if (EXPORTASTODO)
 			WriteString(fileOut, _T("BEGIN:VTODO"));
 		else
 			WriteString(fileOut, _T("BEGIN:VEVENT"));
 		
-		WriteString(fileOut, FormatDateTime(_T("DTSTART"), CDateHelper::GetDate(tStart), TRUE));
-		WriteString(fileOut, FormatDateTime(_T("DTEND"), CDateHelper::GetDate(tEnd), FALSE));
+		WriteString(fileOut, FormatDateTime(_T("DTSTART"), dtStart, TRUE));
 
-		// write the due date anyway for later importing
+		if (CDateHelper::IsDateSet(dtEnd))
+			WriteString(fileOut, FormatDateTime(_T("DTEND"), dtEnd, FALSE));
+
+		// write the due date always for later importing
 		if (CDateHelper::IsDateSet(dtDue))
 			WriteString(fileOut, FormatDateTime(_T("DUE"), dtDue, FALSE));
 		
 		WriteString(fileOut, _T("SUMMARY:%s"), pTasks->GetTaskTitle(hTask));
 		WriteString(fileOut, _T("STATUS:%s"), pTasks->GetTaskStatus(hTask));
-		WriteString(fileOut, _T("ATTENDEE:%s"), pTasks->GetTaskAllocatedTo(hTask, 0));
 		WriteString(fileOut, _T("UID:%s"), sUID);
 		WriteString(fileOut, _T("PERCENT:%lu"), pTasks->GetTaskPercentDone(hTask, FALSE));
 
-		// encode file link into ORGANIZER if it is an email address
-		CString sUrl(pTasks->GetTaskFileLinkPath(hTask));
-		sUrl.MakeLower();
-
-		if (sUrl.Find(_T("mailto:")) != 0)
+		if (EXPORTASTODO)
 		{
-			WriteString(fileOut, _T("ORGANIZER;CN=%s:%s"), pTasks->GetTaskAllocatedBy(hTask), sUrl);
+			WriteString(fileOut, _T("DELEGATED-TO:%s"), pTasks->GetTaskAllocatedTo(hTask, 0));
+			WriteString(fileOut, _T("DELEGATED-FROM:%s"), pTasks->GetTaskAllocatedBy(hTask));
 		}
 		else
 		{
-			WriteString(fileOut, _T("URL:%s"), sUrl);
-			WriteString(fileOut, _T("ORGANIZER:%s"), pTasks->GetTaskAllocatedBy(hTask));
+			WriteString(fileOut, _T("ATTENDEE:%s"), pTasks->GetTaskAllocatedTo(hTask, 0));
+		}
+
+		// encode file link into ORGANIZER if it is an email address
+		CString sUrl(pTasks->GetTaskFileLinkPath(hTask));
+
+		if (!sUrl.IsEmpty())
+		{
+			sUrl.MakeLower();
+
+			if (!EXPORTASTODO && (sUrl.Find(_T("mailto:")) == 0))
+				WriteString(fileOut, _T("ORGANIZER;CN=%s:%s"), pTasks->GetTaskAllocatedBy(hTask), sUrl);
+			else
+				WriteString(fileOut, _T("URL:%s"), sUrl);
 		}
 
 		// don't export our 'special' priorities
@@ -276,7 +296,7 @@ void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		WriteString(fileOut, _T("RELATED-TO;RELTYPE=PARENT:%s"), sParentUID);
 		
 		// footer
-		if (EXPORTASVTASK)
+		if (EXPORTASTODO)
 			WriteString(fileOut, _T("END:VTODO"));
 		else
 			WriteString(fileOut, _T("END:VEVENT"));
