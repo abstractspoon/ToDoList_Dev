@@ -12680,7 +12680,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	FileMisc::LogText(_T("WM_SETTINGCHANGE(%04x, %s)"), uFlags, lpszSection);
 
 	// Prompt to restart app whenever Regional settings change
-	if (StrCmp(lpszSection, _T("intl")) == 0)
+	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))
 	{
 		if (MessageBox(IDS_RESTARTTOUPDATESETTINGS, 0, MB_YESNO) == IDYES)
 		{
