@@ -2022,25 +2022,39 @@ BOOL FileMisc::ExtractResource(LPCTSTR szModulePath, UINT nID, LPCTSTR szType, c
 
 BOOL FileMisc::HasExtension(LPCTSTR szFilePath, LPCTSTR szExt)
 {
-	if (!szExt || !szFilePath)
+	if (Misc::IsEmpty(szExt) || Misc::IsEmpty(szFilePath))
 		return FALSE;
+	
+	CString sExt = FormatExtension(szExt, FALSE);
+	CString sFileExt = GetExtension(szFilePath, FALSE);
 
-	if (szExt[0] == '.')
-		szExt++;
-
-	CString sExt = GetExtension(szFilePath);
-
-	if (sExt.GetLength() && sExt[0] == '.')
-		sExt = sExt.Mid(1);
-
-	return (sExt.CompareNoCase(szExt) == 0);
+	return (sFileExt.CompareNoCase(sExt) == 0);
 }
 
-CString FileMisc::GetExtension(LPCTSTR szFilePath)
+CString FileMisc::GetExtension(LPCTSTR szFilePath, BOOL bWithDot)
 {
 	CString sExt;
 	SplitPath(szFilePath, NULL, NULL, NULL, &sExt);
 	
+	return FormatExtension(sExt, bWithDot);
+}
+
+CString FileMisc::FormatExtension(LPCTSTR szExt, BOOL bWithDot)
+{
+	CString sExt(szExt);
+
+	if (!sExt.IsEmpty())
+	{
+		if (!bWithDot)
+		{
+			sExt.TrimLeft('.');
+		}
+		else if (sExt[0] != '.')
+		{
+			sExt = ('.' + sExt);
+		}
+	}
+
 	return sExt;
 }
 

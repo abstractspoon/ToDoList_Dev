@@ -784,6 +784,7 @@
 #define IDC_COMMENTSCTRLFRAME           1498
 #define IDC_CONFIGURESTYLESHEET         1499
 #define IDC_PREFSLOCATION               1503
+#define IDC_FORMATS                     1504
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2108,7 +2109,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        308
 #define _APS_NEXT_COMMAND_VALUE         34596
-#define _APS_NEXT_CONTROL_VALUE         1504
+#define _APS_NEXT_CONTROL_VALUE         1505
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

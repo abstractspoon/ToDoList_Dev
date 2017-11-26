@@ -9,6 +9,11 @@
 
 #include "TaskSelectionDlg.h"
 #include "TDLDialog.h"
+#include "tdlimportexportcombobox.h"
+
+#include "..\shared\importexportmgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum TD_SENDAS
 {
@@ -23,10 +28,12 @@ class CTDLSendTasksDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSendTasksDlg(BOOL bSelectedTasks, FTC_VIEW nView, 
+	CTDLSendTasksDlg(const CImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
+	int GetExportFormat() { return m_nFormatOption; }
+
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
@@ -35,7 +42,9 @@ protected:
 	//{{AFX_DATA(CTDLSendTasksDlg)
 	enum { IDD = IDD_SENDTASKS_DIALOG };
 	int		m_nSendTasksAsOption;
+	int		m_nFormatOption;
 	//}}AFX_DATA
+	CTDLImportExportComboBox m_cbFormat;
 
 // Overrides
 	virtual void OnOK();

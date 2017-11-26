@@ -187,7 +187,8 @@ namespace FileMisc
 	CString& ValidateFilePath(CString& sFilepath, LPCTSTR szReplace = _T(""));
 
 	BOOL HasExtension(LPCTSTR szFilePath, LPCTSTR szExt);
-	CString GetExtension(LPCTSTR szFilePath);
+	CString GetExtension(LPCTSTR szFilePath, BOOL bWithDot = TRUE);
+	CString FormatExtension(LPCTSTR szExt, BOOL bWithDot = TRUE);
 	CString& ReplaceExtension(CString& sFilePath, LPCTSTR szExt);
 	CString& RemoveExtension(CString& sFilePath);
 	

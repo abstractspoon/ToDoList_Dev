@@ -108,12 +108,12 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CExportDlg)
-	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Control(pDX, IDC_EXPORTPATH, m_eExportPath);
 	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_nExportOption);
 	DDX_Text(pDX, IDC_EXPORTPATH, m_sExportPath);
 	DDX_Check(pDX, IDC_EXPORTONEFILE, m_bExportOneFile);
 	DDX_Text(pDX, IDC_PATHLABEL, m_sPathLabel);
+	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
@@ -246,7 +246,7 @@ void CTDLExportDlg::ReplaceExtension(CString& sPathName, int nFormat)
 	if (!m_mgrImportExport.ExporterHasFileExtension(nFormat))
 		return;
 	
-	CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat);
+	CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 
 	FileMisc::ReplaceExtension(sPathName, sExt);
 }

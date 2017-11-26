@@ -157,7 +157,7 @@ CString CImportExportMgr::GetImporterMenuText(int nImporter) const
 	return Misc::Trim(sText);
 }
 
-CString CImportExportMgr::GetImporterFileExtension(int nImporter) const
+CString CImportExportMgr::GetImporterFileExtension(int nImporter, BOOL bWithDot) const
 {
 	Initialize(); // initialize on demand
 
@@ -168,13 +168,13 @@ CString CImportExportMgr::GetImporterFileExtension(int nImporter) const
 		ASSERT (m_aImporters[nImporter] != NULL);
 		sExt = m_aImporters[nImporter]->GetFileExtension();
 	}
-	
-	return Misc::Trim(sExt);
+
+	return FileMisc::FormatExtension(sExt, bWithDot);
 }
 
 BOOL CImportExportMgr::ImporterHasFileExtension(int nImporter) const
 {
-	return !GetImporterFileExtension(nImporter).IsEmpty();
+	return !GetImporterFileExtension(nImporter, TRUE).IsEmpty();
 }
 
 CString CImportExportMgr::GetImporterFileFilter(int nImporter) const
@@ -220,7 +220,7 @@ CString CImportExportMgr::GetExporterMenuText(int nExporter) const
 	return Misc::Trim(sText);
 }
 
-CString CImportExportMgr::GetExporterFileExtension(int nExporter) const
+CString CImportExportMgr::GetExporterFileExtension(int nExporter, BOOL bWithDot) const
 {
 	Initialize(); // initialize on demand
 
@@ -232,12 +232,12 @@ CString CImportExportMgr::GetExporterFileExtension(int nExporter) const
 		sExt = m_aExporters[nExporter]->GetFileExtension();
 	}
 
-	return Misc::Trim(sExt);
+	return FileMisc::FormatExtension(sExt, bWithDot);
 }
 
 BOOL CImportExportMgr::ExporterHasFileExtension(int nExporter) const
 {
-	return !GetExporterFileExtension(nExporter).IsEmpty();
+	return !GetExporterFileExtension(nExporter, FALSE).IsEmpty();
 }
 
 CString CImportExportMgr::GetExporterFileFilter(int nExporter) const
@@ -313,22 +313,30 @@ int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
 {
 	Initialize(); // initialize on demand
 
-	CString sExt;
-	FileMisc::SplitPath(szFilePath, NULL, NULL, NULL, &sExt);
-
-	if (sExt.IsEmpty()) // no extension
-		return -1;
-
-	else if (sExt[0] == '.')
-		sExt = sExt.Mid(1);
-
+	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
 	int nImporter = m_aImporters.GetSize();
 
 	while (nImporter--)
 	{
-		if (GetImporterFileExtension(nImporter).CompareNoCase(sExt) == 0) // match
+		if (GetImporterFileExtension(nImporter, FALSE).CompareNoCase(sExt) == 0) // match
 			break;
 	}
 	
 	return nImporter; // match or -1
+}
+
+int CImportExportMgr::FindExporter(LPCTSTR szFilePath) const
+{
+	Initialize(); // initialize on demand
+
+	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
+	int nExporter = m_aExporters.GetSize();
+
+	while (nExporter--)
+	{
+		if (GetExporterFileExtension(nExporter, FALSE).CompareNoCase(sExt) == 0) // match
+			break;
+	}
+	
+	return nExporter; // match or -1
 }

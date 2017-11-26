@@ -209,8 +209,9 @@ CToDoListWnd::~CToDoListWnd()
 
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("ToDoList.print"), _T("html")), TRUE);
-	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt")), TRUE);
+	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.print"), _T("html")), TRUE);
+	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.import"), _T("txt")), TRUE);
+	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp")), TRUE);
 	FileMisc::DeleteFile(FileMisc::GetTempFilePath(_T("tdt")), TRUE);
 }
 
@@ -4609,7 +4610,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewDueTaskNotification(int nTDC, int nDu
 	pExport->nPurpose = TDCTEP_DUETASKNOTIFY;
 	
 	// different file for each
-	pExport->sExportPath.Format(_T("ToDoList.due.%d"), nTDC);
+	pExport->sExportPath.Format(_T("tdl.due.%d"), nTDC);
 	pExport->sExportPath = FileMisc::GetTempFilePath(pExport->sExportPath, sFileExt);
 
 	if (FileMisc::IsLoggingEnabled())
@@ -6255,7 +6256,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
 	
 	// always use the same file
-	CString sTempFile = FileMisc::GetTempFilePath(_T("ToDoList.print"), _T("html"));
+	CString sTempFile = FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
 
 	if (!CreateTempPrintFile(dialog, sTempFile))
 	{
@@ -6291,7 +6292,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 
 	if (nStyle == TDLPDS_IMAGE)
 	{
-		CString sTempImg = FileMisc::GetTempFilePath(_T("ToDoList.view"), _T("bmp"));
+		CString sTempImg = FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
 
 		if (SaveViewToImage(GetToDoCtrl(), sTempImg))
 		{
@@ -7306,6 +7307,21 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 		else if (bHasMinToTray) // then remove
 		{
 			pPopupMenu->DeleteMenu(ID_MINIMIZETOTRAY, MF_BYCOMMAND);
+		}
+
+		// Remove 'Email Tasks' if Outlook is not installed
+		if (!CMSOutlookHelper::IsOutlookInstalled())
+		{
+			int nPos = CEnMenu::GetMenuItemPos(*pPopupMenu, ID_SENDTASKS);
+
+			if (nPos != -1)
+			{
+				// Delete menu item
+				pPopupMenu->DeleteMenu(nPos, MF_BYPOSITION);
+
+				// And then delete separator
+				pPopupMenu->DeleteMenu(nPos, MF_BYPOSITION);
+			}
 		}
 	}
 	else if (m_menubar.GetSubMenu(AM_EDIT) == pPopupMenu)
@@ -8596,7 +8612,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 	if (bFromClipboard)
 	{
-		sImportPath = FileMisc::GetTempFilePath(_T("ToDoList.import"), _T("txt"));
+		sImportPath = FileMisc::GetTempFilePath(_T("tdl.import"), _T("txt"));
 		VERIFY(FileMisc::SaveFile(sImportPath, sImportFrom, SFEF_UTF16));
 	}
 	else 
@@ -9516,7 +9532,7 @@ void CToDoListWnd::OnExport()
 		}
 		else // check all open tasklists
 		{
-			CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nFormat);
+			CString sFilePath, sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 			CStringArray aExistPaths;
 		
 			for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
@@ -9633,7 +9649,7 @@ void CToDoListWnd::OnExport()
 	}
 	else // separate files
 	{
-		CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat);
+		CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 		
 		for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
 		{
@@ -12100,7 +12116,7 @@ void CToDoListWnd::OnUpdateCloseallbutthis(CCmdUI* pCmdUI)
 void CToDoListWnd::DoSendTasks(BOOL bSelected)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CTDLSendTasksDlg dialog(bSelected, tdc.GetTaskView(), tdc.GetCustomAttributeDefs());
+	CTDLSendTasksDlg dialog(m_mgrImportExport, bSelected, tdc.GetTaskView(), tdc.GetCustomAttributeDefs());
 
 	if (dialog.DoModal() == IDOK)
 	{
@@ -12108,36 +12124,37 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CTaskFile tasks;
 		GetTasks(tdc, FALSE, FALSE, dialog.GetTaskSelection(), tasks, NULL);
 
-		// package them up
-		CString sAttachment, sBody;
-		TD_SENDAS nSendAs = dialog.GetSendAs();
+		// Export them
+		int nFormat = dialog.GetExportFormat();
+		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
 
-		switch (nSendAs)
+		if (!m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE))
+		{
+			// Display error message
+			// TODO
+			return;
+		}
+
+		// package them up
+		CString sSubject = tdc.GetFriendlyProjectName();
+		CString sAttachment, sBody;
+
+		switch (dialog.GetSendAs())
 		{
 		case TDSA_TASKLIST:
-			{
-				CString sFileName, sExt;
-				FileMisc::SplitPath(tdc.GetFilePath(), NULL, NULL, &sFileName, &sExt);
-				
-				sAttachment = FileMisc::GetTempFilePath(sFileName, sExt);
-				
-				if (!tasks.Save(sAttachment, SFEF_UTF16))
-				{
-					// TODO
-					return;
-				}
-				
-				sBody.LoadString(IDS_TASKLISTATTACHED);
-			}
+			sAttachment = sFilePath;
+			sBody.LoadString(IDS_TASKLISTATTACHED);
 			break;
 			
 		case TDSA_BODYTEXT:
-			sBody = m_mgrImportExport.ExportTaskListToText(&tasks);
+			if (!FileMisc::LoadFile(sFilePath, sBody))
+			{
+				// Display error message
+				// TODO
+				return;
+			}
 			break;
 		}
-		
-		// form subject
-		CString sSubject = tdc.GetFriendlyProjectName();
 		
 		// recipients
 		CStringArray aTo;
@@ -12152,6 +12169,8 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		}
 
 		CSendFileTo().SendMail(*this, sTo, sSubject, sBody, sAttachment);
+
+		FileMisc::DeleteFile(sFilePath, TRUE);
 	}
 }
 

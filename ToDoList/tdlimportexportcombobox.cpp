@@ -146,10 +146,10 @@ CString CTDLImportExportComboBox::GetImpExpMenuText(int nImpExp) const
 CString CTDLImportExportComboBox::GetImpExpFileExtension(int nImpExp) const
 {
 	if (m_bImporting)
-		return m_mgrImpExp.GetImporterFileExtension(nImpExp);
+		return m_mgrImpExp.GetImporterFileExtension(nImpExp, FALSE);
 
 	// else
-	return m_mgrImpExp.GetExporterFileExtension(nImpExp);
+	return m_mgrImpExp.GetExporterFileExtension(nImpExp, FALSE);
 }
 
 HICON CTDLImportExportComboBox::GetImpExpIcon(int nImpExp) const

@@ -354,7 +354,7 @@ BOOL CPreferencesFile2Page::GetSaveExportExtension(CString& sExt) const
 		int nExporter = GetSaveExporter();
 
 		if (nExporter != -1)
-			sExt = m_pExportMgr->GetExporterFileExtension(nExporter);
+			sExt = m_pExportMgr->GetExporterFileExtension(nExporter, TRUE);
 	}
 
 	return !sExt.IsEmpty();

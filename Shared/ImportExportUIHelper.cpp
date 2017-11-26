@@ -66,8 +66,7 @@ void CImportExportUIHelper::UpdateExportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 											nStartID + nTool, sMenuItem);
 
 				// icon
-				CString sExt('.');
-				sExt += m_mgrImpExp.GetExporterFileExtension(nTool);
+				CString sExt = m_mgrImpExp.GetExporterFileExtension(nTool, TRUE);
 
 				HICON hIcon = sil.ExtractFileIcon(sExt);
 				m_mgrIcon.SetImage(nStartID + nTool, hIcon);
@@ -123,8 +122,7 @@ void CImportExportUIHelper::UpdateImportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 											nStartID + nTool, sMenuItem);
 				
 				// icon
-				CString sExt('.');
-				sExt += m_mgrImpExp.GetImporterFileExtension(nTool);
+				CString sExt = m_mgrImpExp.GetImporterFileExtension(nTool, TRUE);
 
 				nPos++;
 			}

@@ -32,13 +32,13 @@ public:
 	int GetNumExporters() const;
 	
 	CString GetImporterMenuText(int nImporter) const;
-	CString GetImporterFileExtension(int nImporter) const;
+	CString GetImporterFileExtension(int nImporter, BOOL bWithDot) const;
 	BOOL ImporterHasFileExtension(int nImporter) const;
 	CString GetImporterFileFilter(int nImporter) const;
 	HICON GetImporterIcon(int nImporter) const;
 	
 	CString GetExporterMenuText(int nExporter) const;
-	CString GetExporterFileExtension(int nExporter) const;
+	CString GetExporterFileExtension(int nExporter, BOOL bWithDot) const;
 	BOOL ExporterHasFileExtension(int nExporter) const;
 	CString GetExporterFileFilter(int nExporter) const;
 	HICON GetExporterIcon(int nExporter) const;
@@ -48,6 +48,7 @@ public:
 	BOOL ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;
 	
 	int FindImporter(LPCTSTR szFilePath) const;
+	int FindExporter(LPCTSTR szFilePath) const;
 	
 protected:
 	BOOL m_bInitialized;
@@ -56,6 +57,8 @@ protected:
 	
 protected:
 	virtual void Initialize() const;
+
+	static CString& FormatExtension(CString& sExt, BOOL bWithDot);
 
 };
 
