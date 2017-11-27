@@ -188,38 +188,42 @@ BEGIN
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Colours",IDC_COLORSGROUP,7,159,333,8
+    CONTROL         "'&Non-working hours' colour",IDC_NONWORKINGHOURSCOLOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,175,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,172,52,13,
+                    BS_RIGHT
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,175,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,172,52,13,BS_RIGHT
-    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,186,52,13,BS_RIGHT
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,187,52,13,BS_RIGHT
+    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,201,52,13,BS_RIGHT
     CONTROL         "'Bar' colour for tasks having no colour",
                     IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    204,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,201,52,13,BS_RIGHT
-    GROUPBOX        "Parent Tasks",IDC_STATIC,7,220,333,63
+                    219,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,216,52,13,BS_RIGHT
+    GROUPBOX        "Parent Tasks",IDC_STATIC,7,235,333,63
     CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,234,320,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,249,320,10
     CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,249,320,10
+                    BS_AUTORADIOBUTTON,16,264,320,10
     CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,265,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,263,52,13,BS_RIGHT | 
+                    BS_AUTORADIOBUTTON,16,280,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,278,52,13,BS_RIGHT | 
                     WS_GROUP
-    LTEXT           "Dates",IDC_DATESGROUP,7,292,333,8
+    LTEXT           "Dates",IDC_DATESGROUP,7,307,333,8
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
                     IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,308,333,10
+                    WS_TABSTOP,7,323,333,10
     CONTROL         "Display collapsed parent tasks as 'Rollups'",
                     IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,323,323,10
+                    WS_TABSTOP,17,338,323,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,338,333,10
+                    WS_TABSTOP,7,353,333,10
     CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,353,333,10
+                    WS_TABSTOP,7,368,333,10
 END
 
 IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113

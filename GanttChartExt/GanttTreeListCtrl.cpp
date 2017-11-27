@@ -10,6 +10,7 @@
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\DateHelper.h"
+#include "..\shared\timeHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\TreeCtrlHelper.h"
@@ -2691,6 +2692,11 @@ void CGanttTreeListCtrl::SetWeekendColor(COLORREF crWeekend)
 	SetColor(m_crWeekend, crWeekend);
 }
 
+void CGanttTreeListCtrl::SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor)
+{
+	SetColor(m_crNonWorkingHoursColor, crNonWorkingHoursColor);
+}
+
 void CGanttTreeListCtrl::SetDefaultColor(COLORREF crDefault)
 {
 	SetColor(m_crDefault, crDefault);
@@ -3221,9 +3227,11 @@ void CGanttTreeListCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
+BOOL CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
 {
-	if ((m_crWeekend != CLR_NONE) && CDateHelper::IsWeekend(dtDay))
+	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
+
+	if ((color != CLR_NONE) && CDateHelper::IsWeekend(dtDay))
 	{
 		// don't overdraw gridlines
 		CRect rWeekend(rDay);
@@ -3231,8 +3239,11 @@ void CGanttTreeListCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const 
 		if (HasGridlines())
 			rWeekend.bottom--;
 
-		pDC->FillSolidRect(rWeekend, m_crWeekend);
+		pDC->FillSolidRect(rWeekend, color);
+		return TRUE;
 	}
+
+	return FALSE;
 }
 
 void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
@@ -3256,20 +3267,45 @@ void CGanttTreeListCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 			// only draw visible days
 			if (rDay.right > 0)
 			{
+				BOOL bDrawNonWorkingHours = (!bSelected && (m_crNonWorkingHoursColor != CLR_NONE));
+
 				// fill weekends if not selected
 				if (!bSelected)
-					DrawWeekend(pDC, dtDay, rDay);
+					bDrawNonWorkingHours &= ~DrawWeekend(pDC, dtDay, rDay);
 
 				if (bDrawHours)
 				{
-					// draw all but the first and last hours dividers
-					CRect rHour(rMonth);
+					CRect rHour(rDay);
 					double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
 
-					for (int nHour = 1; nHour < 24; nHour++)
+					int nStartHour = -1, nEndHour = -1;
+
+					if (bDrawNonWorkingHours)
+					{
+						CTimeHelper th;
+
+						nStartHour = (int)th.GetStartOfWorkday(FALSE);
+						nEndHour = (int)(th.GetEndOfWorkday(FALSE) + 0.5);
+
+						if (m_crGridLine != CLR_NONE)
+							rHour.bottom--;
+					}
+					
+					// draw all but the first and last hours dividers
+					for (int nHour = 1; nHour <= 24; nHour++)
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+
+						if (bDrawNonWorkingHours)
+						{
+							if ((nHour < (nStartHour + 1)) || (nHour > nEndHour))
+								pDC->FillSolidRect(rHour, m_crNonWorkingHoursColor);
+						}
+
+						if (nHour != 24)
+							DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+						
+						rHour.left = rHour.right;
 					}
 				}
 
@@ -3498,6 +3534,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	
 	CThemed th;
 	BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+	CThemed* pThemed = (bThemed ? &th :NULL);
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -3523,7 +3560,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw range header
 			rRange.bottom = rYear.top;
-			DrawListHeaderRect(pDC, rRange, m_listHeader.GetItemText(nCol), bThemed ? &th :NULL);
+			DrawListHeaderRect(pDC, rRange, m_listHeader.GetItemText(nCol), pThemed);
 
 			// draw year elements
 			int nNumYears = ((m_nMonthDisplay == GTLC_DISPLAY_DECADES) ? 10 : 25);
@@ -3542,7 +3579,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
-					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), bThemed ? &th :NULL);
+					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), pThemed);
 			}
 		}
 		break;
@@ -3556,7 +3593,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rWeek.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), bThemed ? &th :NULL);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
 
 			// draw week elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3571,7 +3608,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			if ((nCol == 1) && (nDay != -1))
 			{
 				rWeek.right = (rWeek.left + (int)((nDay - 1) * dDayWidth));
-				DrawListHeaderRect(pDC, rWeek, _T(""), bThemed ? &th :NULL);
+				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed);
 			}
 
 			// calc number of first week
@@ -3629,7 +3666,7 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
-					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), bThemed ? &th :NULL);
+					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed);
 
 				// next week
 				nDay += 7;
@@ -3651,12 +3688,13 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rDay.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), bThemed ? &th :NULL);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
 
 			// draw day elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
+			COleDateTime dtStart(nYear, nMonth, 1, 0, 0, 0);
 			rDay.right = rDay.left;
 			
 			for (int nDay = 0; nDay < nNumDays; nDay++)
@@ -3670,7 +3708,23 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rDay.right >= rClip.left)
-					DrawListHeaderRect(pDC, rDay, Misc::Format(nDay+1), bThemed ? &th :NULL);
+				{
+					CString sHeader;
+
+					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
+					{
+						COleDateTime dtDay(dtStart.m_dt + nDay);
+						int nDOW = dtDay.GetDayOfWeek();
+
+						sHeader.Format(_T("%d (%s)"), (nDay + 1), CDateHelper::GetDayOfWeekName(nDOW));
+					}
+					else
+					{
+						sHeader.Format(_T("%d"), (nDay + 1));
+					}
+
+					DrawListHeaderRect(pDC, rDay, sHeader, pThemed);
+				}
 			}
 		}
 		break;

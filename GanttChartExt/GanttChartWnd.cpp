@@ -13,6 +13,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
+#include "..\shared\timehelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
@@ -278,6 +279,9 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CDateHelper::SetWeekendDays(dwWeekends);
+
+	double dHoursInDay = pPrefs->GetProfileDouble(_T("Preferences"), _T("HoursInDay"), 8.0);
+	CTimeHelper::SetHoursInWorkday(dHoursInDay);
 
 	// gantt specific options
 	if (!bAppOnly)
@@ -957,6 +961,7 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 
 	m_ctrlGantt.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlGantt.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
+	m_ctrlGantt.SetNonWorkingHoursColor(m_dlgPrefs.GetNonWorkingHoursColor());
 	m_ctrlGantt.SetDefaultColor(m_dlgPrefs.GetDefaultColor());
 	m_ctrlGantt.SetMilestoneTag(m_dlgPrefs.GetMilestoneTag());
 

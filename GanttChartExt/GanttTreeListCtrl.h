@@ -127,6 +127,7 @@ public:
 	void SetGridLineColor(COLORREF crGridLine);
 	void SetTodayColor(COLORREF crToday);
 	void SetWeekendColor(COLORREF crWeekend);
+	void SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor);
 	void SetDefaultColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
@@ -168,7 +169,8 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 
-	COLORREF m_crAltLine, m_crGridLine, m_crToday, m_crWeekend, m_crParent, m_crDefault;
+	COLORREF m_crAltLine, m_crGridLine, m_crParent, m_crDefault;
+	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
 	COleDateTime m_dtDragMin;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
@@ -238,7 +240,7 @@ protected:
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 
-	void DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
+	BOOL DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd);

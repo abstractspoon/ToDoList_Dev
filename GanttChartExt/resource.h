@@ -19,6 +19,7 @@
 #define IDC_SETTODAYCOLOR               1073
 #define IDC_SETPARENTCOLOR              1074
 #define IDC_SETDEFAULTCOLOR             1075
+#define IDC_SETNONWORKINGHOURSCOLOR     1076
 #define IDS_GANTT_DAYS                  2001
 #define IDS_GANTT_WEEKS                 2002
 #define IDS_SNAP_FREE                   2003
@@ -43,6 +44,7 @@
 #define IDC_DATESGROUP                  16007
 #define IDC_COLORSGROUP                 16008
 #define IDD_CREATEDEPENDS_DIALOG        16008
+#define IDC_NONWORKINGHOURSCOLOR        16009
 #define IDB_CHECKBOXES                  16010
 #define IDC_CALCULATEMISSINGSTARTDATE   16012
 #define IDC_CALCULATEMISSINGDUEDATE     16013
