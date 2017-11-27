@@ -1424,7 +1424,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 				// don't change selection if user is expanding an item
 				UINT nHitFlags = 0;
-				HTREEITEM htiHit = m_tcTasks.HitTest(lp, &nHitFlags);
+				CPoint pt(lp);
+				HTREEITEM htiHit = m_tcTasks.HitTest(pt, &nHitFlags);
 
 				if (nHitFlags & TVHT_ONITEMBUTTON)
 					break;
@@ -1448,17 +1449,12 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						
 						bSelChange = TRUE;
 					}
-					else
+					else if (!::DragDetect(hRealWnd, pt))
 					{
-						// if the item clicked is already selected and there are no
-						// other selected items then assume (for now) that the user
-						// is going to perform a drag rather than a toggle
-						if ((TSH().GetCount() != 1) || (!TSH().HasItem(htiHit)))
-						{
-							TSH().SetItem(htiHit, TSHS_TOGGLE);
+						// if this is not the beginning of a drag then toggle selection
+						TSH().SetItem(htiHit, TSHS_TOGGLE);
 							
-							bSelChange = TRUE;
-						}
+						bSelChange = TRUE;
 					}
 					
 					// save item handle so we don't rehandle in LButtonUp handler
