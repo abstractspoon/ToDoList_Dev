@@ -1227,6 +1227,11 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 			case GTLCF_SHOWSPLITTERBAR:
 				CTreeListSyncer::SetSplitBarWidth(bSet ? 10 : 0);
 				break;
+
+			case GTLCF_DISPLAYISODATES:
+				UpdateListColumnsWidthAndText();
+				Invalidate(FALSE);
+				break;
 			}
 
 			if (IsSyncing())
@@ -1264,17 +1269,21 @@ CString CGanttTreeListCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDispl
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_MID:
-		sHeader.Format(_T("%s-%s %d"), CDateHelper::GetMonthName(nMonth, TRUE),
-			CDateHelper::GetMonthName(nMonth+2, TRUE), nYear);
+		sHeader.Format(_T("%s-%s %d"), 
+			CDateHelper::GetMonthName(nMonth, TRUE),
+			CDateHelper::GetMonthName(nMonth+2, TRUE), 
+			nYear);
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		sHeader.Format(_T("%s-%s %d"), CDateHelper::GetMonthName(nMonth, FALSE),
-			CDateHelper::GetMonthName(nMonth+2, FALSE), nYear);
+		sHeader.Format(_T("%s-%s %d"), 
+			CDateHelper::GetMonthName(nMonth, FALSE),
+			CDateHelper::GetMonthName(nMonth+2, FALSE), 
+			nYear);
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
-		sHeader.Format(_T("%02d/%d"), nMonth, (nYear%100));
+		sHeader = FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), (DHFD_NODAY | DHFD_NOCENTURY));
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_MID:
@@ -2736,6 +2745,14 @@ void CGanttTreeListCtrl::SetColor(COLORREF& color, COLORREF crNew)
 	color = crNew;
 }
 
+CString CGanttTreeListCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
+{
+	dwFlags &= ~DHFD_ISO;
+	dwFlags |= (HasOption(GTLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+
+	return CDateHelper::FormatDate(date, dwFlags);
+}
+
 CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol) const
 {
 	CString sItem;
@@ -2755,7 +2772,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 				COleDateTime dtStart, dtDummy;
 				GetTaskStartDueDates(gi, dtStart, dtDummy);
 
-				sItem = CDateHelper::FormatDate(dtStart);
+				sItem = FormatDate(dtStart);
 			}
 			break;
 
@@ -2764,7 +2781,7 @@ CString CGanttTreeListCtrl::GetTreeItemColumnText(const GANTTITEM& gi, int nCol)
 				COleDateTime dtDue, dtDummy;
 				GetTaskStartDueDates(gi, dtDummy, dtDue);
 
-				sItem = CDateHelper::FormatDate(dtDue);
+				sItem = FormatDate(dtDue);
 			}
 			break;
 
@@ -3713,12 +3730,12 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						sHeader = CDateHelper::FormatDate(dtDay, DHFD_DOW);
+						sHeader = FormatDate(dtDay, DHFD_DOW);
 					}
 					else if (m_nMonthDisplay == GTLC_DISPLAY_DAYS_LONG)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						sHeader = CDateHelper::FormatDate(dtDay, DHFD_NOYEAR);
+						sHeader = FormatDate(dtDay, DHFD_NOYEAR);
 					}
 					else
 					{
@@ -4951,7 +4968,7 @@ int CGanttTreeListCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	case GTLCC_DUEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
-			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(CDateHelper::FormatDate(date), pDC);
+			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
 		

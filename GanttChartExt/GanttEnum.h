@@ -52,6 +52,7 @@ enum // options
 	GTLCF_DISABLEDEPENDENTDRAGGING	= 0x0800,
 	GTLCF_DISPLAYPARENTROLLUPS		= 0x1000,
 	GTLCF_SHOWSPLITTERBAR			= 0x2000,
+	GTLCF_DISPLAYISODATES			= 0x4000,
 };
 
 /////////////////////////////////////////////////////////////////////////////

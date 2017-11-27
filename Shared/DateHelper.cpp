@@ -958,7 +958,27 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 
 	if (dwFlags & DHFD_ISO)
 	{
-		sFormat = "yyyy-MM-dd";
+		if (dwFlags & DHFD_NOYEAR)
+		{
+			if (dwFlags & DHFD_NODAY)
+				sFormat = _T("MM");
+			else
+				sFormat = _T("MM-dd");
+		}
+		else if (dwFlags & DHFD_NODAY)
+		{
+			if (dwFlags & DHFD_NOCENTURY)
+				sFormat = _T("yy-MM");
+			else
+				sFormat = _T("yyyy-MM");
+		}
+		else
+		{
+			if (dwFlags & DHFD_NOCENTURY)
+				sFormat = _T("yy-MM-dd");
+			else
+				sFormat = _T("yyyy-MM-dd");
+		}
 	}
 	else
 	{
@@ -966,8 +986,24 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 
 		if (dwFlags & DHFD_NOYEAR)
 		{
-			Misc::Trim(sFormat, _T("y"));
-			Misc::Trim(sFormat, Misc::GetDateSeparator());
+			sFormat.Replace(_T("y"), _T(""));
+		}
+		else if (dwFlags & DHFD_NOCENTURY)
+		{
+			sFormat.Replace(_T("yyyy"), _T("yy"));
+		}
+
+		if (dwFlags & DHFD_NODAY)
+		{
+			sFormat.Replace(_T("d"), _T(""));
+		}
+		
+		// Handle doubled-up and/or trailing date separators
+		if (dwFlags & (DHFD_NOYEAR | DHFD_NODAY))
+		{
+			CString sSep = Misc::GetDateSeparator();
+			Misc::Trim(sFormat, sSep);
+			sFormat.Replace((sSep + sSep), sSep);
 		}
 	}
 

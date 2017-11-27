@@ -353,6 +353,7 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
 	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
+	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	void GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;

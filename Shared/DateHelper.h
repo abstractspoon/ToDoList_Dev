@@ -38,11 +38,13 @@ enum DH_UNITS
 
 enum
 {
-	DHFD_ISO	= 0x0001,
-	DHFD_DOW	= 0x0002,
-	DHFD_TIME	= 0x0004,
-	DHFD_NOSEC	= 0x0008,
-	DHFD_NOYEAR	= 0x0010,
+	DHFD_ISO		= 0x0001,
+	DHFD_DOW		= 0x0002,
+	DHFD_TIME		= 0x0004,
+	DHFD_NOSEC		= 0x0008,
+	DHFD_NOYEAR		= 0x0010,
+	DHFD_NODAY		= 0x0020,
+	DHFD_NOCENTURY	= 0x0040,
 };
 
 enum // Days of week bit flags
