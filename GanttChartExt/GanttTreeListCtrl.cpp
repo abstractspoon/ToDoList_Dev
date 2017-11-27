@@ -3694,13 +3694,12 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
-			COleDateTime dtStart(nYear, nMonth, 1, 0, 0, 0);
 			rDay.right = rDay.left;
 			
-			for (int nDay = 0; nDay < nNumDays; nDay++)
+			for (int nDay = 1; nDay <= nNumDays; nDay++)
 			{
 				rDay.left = rDay.right;
-				rDay.right = rMonth.left + (int)((nDay + 1) * dDayWidth);
+				rDay.right = rMonth.left + (int)(nDay * dDayWidth);
 
 				// check if we can stop
 				if (rDay.left > rClip.right)
@@ -3713,14 +3712,14 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
-						COleDateTime dtDay(dtStart.m_dt + nDay);
+						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 						int nDOW = dtDay.GetDayOfWeek();
 
-						sHeader.Format(_T("%d (%s)"), (nDay + 1), CDateHelper::GetDayOfWeekName(nDOW));
+						sHeader.Format(_T("%d (%s)"), nDay, CDateHelper::GetDayOfWeekName(nDOW));
 					}
 					else
 					{
-						sHeader.Format(_T("%d"), (nDay + 1));
+						sHeader.Format(_T("%d"), nDay);
 					}
 
 					DrawListHeaderRect(pDC, rDay, sHeader, pThemed);
