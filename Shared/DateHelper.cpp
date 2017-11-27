@@ -1013,6 +1013,8 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 	// Day of week
 	if (dwFlags & DHFD_DOW)
 		sDow = GetDayOfWeekName((st.wDayOfWeek + 1), TRUE);
+	else
+		sDow.Empty();
 
 	// Time
 	if (dwFlags & DHFD_TIME)
