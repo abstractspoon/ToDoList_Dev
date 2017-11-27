@@ -58,10 +58,10 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	CTDLImportOutlookObjectsDlg dialog(*pItem);
 	CTDCAttributeMapping aMapping;
 	
-	while (true)
+	while (TRUE)
 	{
 		if (dialog.DoModal() != IDOK)
-			return false;
+			return -1;
 		
 		// valid mapping must include title
 		if (!dialog.GetColumnMapping(aMapping) || !aMapping.IsAttributeMapped(TDCA_TASKNAME))

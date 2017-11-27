@@ -10407,22 +10407,35 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 					}
 				}
 			}
-			else if (CreateTasksFromOutlookObjects(pData) != 0)
-			{
-				// nothing else to do
-			}
 			else
 			{
-				return GetParent()->SendMessage(WM_TDCM_IMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)&aFiles);
+				switch (CreateTasksFromOutlookObjects(pData))
+				{
+				case -1: // user cancelled
+					return 0L;
+
+				case 0:  // failed => not an outlook object
+					return GetParent()->SendMessage(WM_TDCM_IMPORTDROPFILES, (WPARAM)GetSafeHwnd(), (LPARAM)&aFiles);
+
+				default:
+					break; // all good
+				}
 			}
 		}
-		else if (CreateTasksFromOutlookObjects(pData) != 0)
+		else
 		{
-			// nothing else to do
-		}
-		else if (pData->pObject)
-		{
-			// TODO
+			switch (CreateTasksFromOutlookObjects(pData))
+			{
+				case -1: // user cancelled
+					return 0L;
+
+				case 0:  // failed => not an outlook object
+					// TODO
+					return 0L;
+
+				default:
+					break; // all good
+			}
 		}
 
 		SetFocusToTasks();
@@ -10442,23 +10455,29 @@ int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)
 {
 	CTaskFile tasks;
 
-	if (CTDCOutlookImportHelper::ImportTasks(pData, IDS_CSV_MUSTMAPTASKTITLE, &tasks))
+	int nRet = CTDCOutlookImportHelper::ImportTasks(pData, IDS_CSV_MUSTMAPTASKTITLE, &tasks);
+
+	switch (nRet)
 	{
-		// add to current tasklist
-		HTREEITEM htiInsert = m_taskTree.GetItem(pData->dwTaskID);
-		
-		if (!htiInsert)
-			htiInsert = m_taskTree.HitTestItem(CPoint(1, pData->ptClient.y));
-		
-		if (htiInsert)
-		{
-			SelectItem(htiInsert);
-			VERIFY(PasteTasks(tasks, TDC_INSERTATBOTTOMOFSELTASK));
-		}
-		else
-		{
-			VERIFY(PasteTasks(tasks, TDC_INSERTATBOTTOM));
-		}
+	case -1: // cancelled
+	case  0: // failed ??
+		return nRet;
+	}
+
+	// add to current tasklist
+	HTREEITEM htiInsert = m_taskTree.GetItem(pData->dwTaskID);
+	
+	if (!htiInsert)
+		htiInsert = m_taskTree.HitTestItem(CPoint(1, pData->ptClient.y));
+	
+	if (htiInsert)
+	{
+		SelectItem(htiInsert);
+		VERIFY(PasteTasks(tasks, TDC_INSERTATBOTTOMOFSELTASK));
+	}
+	else
+	{
+		VERIFY(PasteTasks(tasks, TDC_INSERTATBOTTOM));
 	}
 
 	return tasks.GetTaskCount();
