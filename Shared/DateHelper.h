@@ -42,6 +42,7 @@ enum
 	DHFD_DOW	= 0x0002,
 	DHFD_TIME	= 0x0004,
 	DHFD_NOSEC	= 0x0008,
+	DHFD_NOYEAR	= 0x0010,
 };
 
 enum // Days of week bit flags

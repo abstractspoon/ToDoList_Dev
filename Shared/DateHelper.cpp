@@ -957,9 +957,19 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 	CString sFormat;
 
 	if (dwFlags & DHFD_ISO)
+	{
 		sFormat = "yyyy-MM-dd";
+	}
 	else
+	{
 		sFormat = Misc::GetShortDateFormat();
+
+		if (dwFlags & DHFD_NOYEAR)
+		{
+			Misc::Trim(sFormat, _T("y"));
+			Misc::Trim(sFormat, Misc::GetDateSeparator());
+		}
+	}
 
 	::GetDateFormat(0, 0, &st, sFormat, sDate.GetBuffer(50), 49);
 	sDate.ReleaseBuffer();

@@ -3713,9 +3713,12 @@ void CGanttTreeListCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						int nDOW = dtDay.GetDayOfWeek();
-
-						sHeader.Format(_T("%d (%s)"), nDay, CDateHelper::GetDayOfWeekName(nDOW));
+						sHeader = CDateHelper::FormatDate(dtDay, DHFD_DOW);
+					}
+					else if (m_nMonthDisplay == GTLC_DISPLAY_DAYS_LONG)
+					{
+						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
+						sHeader = CDateHelper::FormatDate(dtDay, DHFD_NOYEAR);
 					}
 					else
 					{
@@ -5313,13 +5316,25 @@ void CGanttTreeListCtrl::CalcMinMonthWidths()
 		case GTLC_DISPLAY_WEEKS_LONG:
 		case GTLC_DISPLAY_DAYS_SHORT:
 		case GTLC_DISPLAY_DAYS_MID:
-		case GTLC_DISPLAY_DAYS_LONG:
 			{
 				// just increase the width of the preceding display
 				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
+			}
+			break;
+
+		case GTLC_DISPLAY_DAYS_LONG:
+			{
+				// increase the width of the preceding display
+				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+
+				nMinMonthWidth = GetMinMonthWidth(nPrev);
+				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
+
+				int nWidth = dcClient.GetTextExtent(_T(" 31/12 ")).cx;
+				nMinMonthWidth = max((nWidth * 31), nMinMonthWidth);
 			}
 			break;
 			

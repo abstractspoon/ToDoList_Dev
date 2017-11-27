@@ -1223,10 +1223,11 @@ CString Misc::GetDateSeparator()
 CString Misc::GetShortDateFormat(BOOL bIncDOW)
 {
 	static CString sFormat;
-	const int BUFLEN = 100;
 
 	if (sFormat.IsEmpty()) // init first time only
 	{
+		const int BUFLEN = 100;
+
 		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
 		sFormat.ReleaseBuffer();
 	}
