@@ -23,12 +23,12 @@ public:
 	void Release();
 	BOOL IsValid() const { return m_stickies.IsValid(); }
 
-	BOOL CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent = _T(""), time_t tAlarm = 0, COLORREF color = 0); // returns sticky ID
+	BOOL CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent = _T(""), BOOL bRTF = FALSE, time_t tAlarm = 0, COLORREF color = 0); // returns sticky ID
 	BOOL DeleteSticky(const CString& sStickyID); 
 	BOOL HasSticky(const CString& sStickyID);
 
 	BOOL SetStickyTitle(const CString& sStickyID, const CString& sTitle);
-	BOOL SetStickyContent(const CString& sStickyID, const CString& sContent);
+	BOOL SetStickyContent(const CString& sStickyID, const CString& sContent, BOOL bRTF = FALSE);
 	BOOL SetStickyAttribute(const CString& sStickyID, const CString& sAttribute, const CString& sValue);
 
 	LRESULT SendMessage(const CString& sCommand, CString& sReply, const CString& sStickyID = _T(""), const CString& sExtra = _T(""));

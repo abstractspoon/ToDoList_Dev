@@ -95,7 +95,7 @@ BOOL CStickiesWnd::InitStickiesAPI(const CString& sStickiesPath)
 /////////////////////////////////////////////////////////////////////////////
 // CStickiesWnd message handlers
 
-BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent, time_t tAlarm, COLORREF color)
+BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent, BOOL bRTF, time_t tAlarm, COLORREF color)
 {
 	CString sReply, sCommand, sExtra;
 
@@ -128,7 +128,7 @@ BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const
 				}
 
 				if (!sContent.IsEmpty())
-					VERIFY(SetStickyContent(sStickyID, sContent));
+					VERIFY(SetStickyContent(sStickyID, sContent, bRTF));
 			}
 
 			return !sStickyID.IsEmpty();
@@ -230,10 +230,16 @@ BOOL CStickiesWnd::SetStickyTitle(const CString& sStickyID, const CString& sTitl
 	return SetStickyAttribute(sStickyID, _T("title"), sTitle);
 }
 
-BOOL CStickiesWnd::SetStickyContent(const CString& sStickyID, const CString& sContent)
+BOOL CStickiesWnd::SetStickyContent(const CString& sStickyID, const CString& sContent, BOOL bRTF)
 {
-	if (m_stickies.GetMajorVersion() >= 8)
+	if (bRTF)
+	{
+		return SetStickyAttribute(sStickyID, _T("rtf"), sContent);
+	}
+	else if (m_stickies.GetMajorVersion() >= 8)
+	{
 		return SetStickyAttribute(sStickyID, _T("utext"), EncodeString(sContent));
+	}
 
 	// else
 	return SetStickyAttribute(sStickyID, _T("text"), sContent);

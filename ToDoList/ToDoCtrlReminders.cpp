@@ -20,6 +20,22 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const BOOL USE_RTF = TRUE;
+
+LPCTSTR RTF_HEADER = _T("{\\rtf1\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang3081")\
+					_T("{\\fonttbl{\\f0\\fnil\\fcharset0 Tahoma;}}")\
+					_T("{\\colortbl ;\\red0\\green0\\blue255;}")\
+					_T("{\\*\\generator Riched20 10.0.16299}{\\*\\mmathPr\\mnaryLim0")
+					_T("\\mdispDef1\\mwrapIndent1440}\\viewkind4\\uc1");
+
+LPCTSTR RTF_CONTENT = _T("\\pard\\nowidctlpar {\\b\\f0\\fs22\\lang9{\\field")\
+					_T("{\\*\\fldinst{HYPERLINK \"tdl://%s?%ld\" }}")\
+					_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}\\b\\f0\\fs22\\par")\
+					_T("\\b0\\par")\
+					_T("\\fs16 %s\\par}");
+
+/////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders
 
 CToDoCtrlReminders::CToDoCtrlReminders() : m_pWndNotify(NULL), m_bUseStickies(FALSE)
@@ -452,24 +468,41 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	{
 		if (m_stickies.IsValid() || m_stickies.Initialize(m_pWndNotify, m_sStickiesPath))
 		{
-			CString sContent(rem.GetTaskTitle()), 
-					sWhen(rem.FormatWhenString()), 
+			CString sWhen(rem.FormatWhenString()), 
 					sComments(rem.GetTaskComments()), 
-					sDummy;
+					sUnused, sContent;
 
-			if (!sComments.IsEmpty())
+			if (USE_RTF)
 			{
-				sContent += _T("\n\n");
-				sContent += sComments;
+				CString sFilePath(rem.pTDC->GetFilePath());
+				sFilePath.Replace('\\', '/');
+
+				sContent.Format(RTF_CONTENT, 
+								sFilePath, 
+								rem.dwTaskID,
+								rem.GetTaskTitle(), 
+								rem.GetTaskComments());
+
+				sContent = (RTF_HEADER + sContent);
 			}
-
-			if (!sWhen.IsEmpty())
+			else
 			{
-				sContent += _T("\n\n");
-				sContent += sWhen;
+				sContent = rem.GetTaskTitle();
+		
+				if (!sComments.IsEmpty())
+				{
+					sContent += _T("\n\n");
+					sContent += sComments;
+				}
+
+				if (!sWhen.IsEmpty())
+				{
+					sContent += _T("\n\n");
+					sContent += sWhen;
+				}
 			}
 			
-			if (m_stickies.CreateSticky(CEnString(IDS_STICKIES_TITLE), sDummy, sContent))
+			if (m_stickies.CreateSticky(CEnString(IDS_STICKIES_TITLE), sUnused, sContent, USE_RTF))
 			{
 				return FALSE; // delete reminder as Stickies takes over
 			}
