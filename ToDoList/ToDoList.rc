@@ -3323,6 +3323,8 @@ BEGIN
         MENUITEM "User Defined Tool 48",        ID_TOOLS_USERTOOL48, GRAYED
         MENUITEM "User Defined Tool 49",        ID_TOOLS_USERTOOL49, GRAYED
         MENUITEM "User Defined Tool 50",        ID_TOOLS_USERTOOL50, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Enable Lo&gging",             ID_TOOLS_TOGGLE_LOGGING
     END
     POPUP "&Window"
     BEGIN

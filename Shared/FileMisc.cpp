@@ -1205,22 +1205,23 @@ CString FileMisc::GetLogFilePath()
 
 BOOL FileMisc::EnableLogging(BOOL bEnable, LPCTSTR szAppDataKey, DWORD dwFlags)
 {
-	if (IsLoggingEnabled())
-		return TRUE;
-
-	// these flags are mutually exclusive
-	// better to fail because user (me) must be confused!
-	ASSERT (!(Misc::HasFlag(dwFlags, FMLF_NOAPPDIR) && Misc::HasFlag(dwFlags, FMLF_TEMPDIR)));
-
-	if (Misc::HasFlag(dwFlags, FMLF_NOAPPDIR) && Misc::HasFlag(dwFlags, FMLF_TEMPDIR))
-		return FALSE;
-
-	s_sLogAppDataKey = szAppDataKey;
-	s_bLogging = bEnable;
-	s_dwLogFlags = dwFlags;
-
 	if (bEnable)
 	{
+		if (IsLoggingEnabled())
+			return TRUE;
+
+		// these flags are mutually exclusive
+		// better to fail because user (me) must be confused!
+		if (Misc::HasFlag(dwFlags, FMLF_NOAPPDIR) && Misc::HasFlag(dwFlags, FMLF_TEMPDIR))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		s_sLogAppDataKey = szAppDataKey;
+		s_bLogging = bEnable;
+		s_dwLogFlags = dwFlags;
+
 		if (!Misc::HasFlag(s_dwLogFlags, FMLF_NORESET))
 			DeleteFile(GetLogFilePath(), TRUE);
 
@@ -1229,6 +1230,12 @@ BOOL FileMisc::EnableLogging(BOOL bEnable, LPCTSTR szAppDataKey, DWORD dwFlags)
 		LogText(_T("Windows Version: %s"), COSVersion().FormatOSVersion());
 		LogText(_T("App Version: %s"), GetModuleVersion());
 		LogTextRaw(_T("-------------------------------------------------"));
+	}
+	else
+	{
+		s_sLogAppDataKey.Empty();
+		s_bLogging = FALSE;
+		s_dwLogFlags = 0;
 	}
 
 	return TRUE;

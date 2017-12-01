@@ -155,7 +155,7 @@ BOOL CToDoListApp::InitInstance()
 		cmdInfo.DeleteOption(SWITCH_RESTART);
 
 		// and turn on logging to capture the first run
-		FileMisc::EnableLogging(TRUE, _T("Abstractspoon"));
+		CToDoListWnd::EnableLogging();
 	}
 
 	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
@@ -534,7 +534,7 @@ void CToDoListApp::ParseCommandLine(CEnCommandLineInfo& cmdInfo)
 
 	// turn on logging if requested
     if (cmdInfo.HasOption(SWITCH_LOGGING))
-		FileMisc::EnableLogging(TRUE, _T("Abstractspoon"));
+		CToDoListWnd::EnableLogging();
 
 	// validate ini path if present
     if (cmdInfo.HasOption(SWITCH_INIFILE))

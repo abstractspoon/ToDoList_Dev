@@ -230,6 +230,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	ON_COMMAND(ID_TOOLS_CLEANUPINIPREFERENCES, OnToolsCleanupIniPreferences)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
+	ON_COMMAND(ID_TOOLS_TOGGLE_LOGGING, OnToolsToggleLogging)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLE_LOGGING, OnUpdateToolsToggleLogging)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -753,10 +755,15 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 	m_bPasswordPrompting = startup.HasFlag(TLD_PASSWORDPROMPTING);
 #endif
 
-	if (startup.HasFlag(TLD_LOGGING) && !FileMisc::IsLoggingEnabled())
-		FileMisc::EnableLogging(TRUE, _T("Abstractspoon"));
+	if (startup.HasFlag(TLD_LOGGING))
+		EnableLogging();
 	
 	return CFrameWnd::LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, NULL, NULL);
+}
+
+BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
+{
+	return FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
 }
 
 int CToDoListWnd::MessageBox(UINT nIDText, UINT nIDCaption, UINT nType, LPCTSTR szData)
@@ -12922,4 +12929,14 @@ void CToDoListWnd::OnToolsCleanupIniPreferences()
 void CToDoListWnd::OnUpdateToolsCleanupIniPreferences(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(CPreferences::UsesIni());
+}
+
+void CToDoListWnd::OnToolsToggleLogging() 
+{
+	EnableLogging(!FileMisc::IsLoggingEnabled());
+}
+
+void CToDoListWnd::OnUpdateToolsToggleLogging(CCmdUI* pCmdUI) 
+{
+	pCmdUI->SetCheck(FileMisc::IsLoggingEnabled());
 }
