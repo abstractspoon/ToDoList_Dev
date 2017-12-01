@@ -5590,7 +5590,20 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 				// we only support finding a single filename
 				if (pStartup->GetFilePaths(aFiles) == 1)
 				{
-					bRes = (m_mgrToDoCtrls.FindToDoCtrl(aFiles[0]) != -1);
+					CString sFile(aFiles[0]);
+
+					if (pStartup->HasFlag(TLD_TASKLINK))
+					{
+						CString sPath;
+						DWORD dwTaskID = 0;
+
+						if (!CFilteredToDoCtrl::ParseTaskLink(sFile, FALSE, _T(""), dwTaskID, sPath))
+							return FALSE;
+
+						sFile = sPath;
+					}
+
+					bRes = (m_mgrToDoCtrls.FindToDoCtrl(sFile) != -1);
 				}
 			}
 		}
