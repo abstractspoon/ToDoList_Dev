@@ -788,7 +788,7 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		SetFocusToTasks();
 		
 		// grab the selected items for the filtering
-		m_taskTree.GetSelectedTaskIDs(m_aFilterSelectedTaskIDs, FALSE);
+		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
 		
 		// rebuild the tree
 		RebuildTree();
@@ -830,8 +830,13 @@ HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
 BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const
 {
 	BOOL bWantTask = CTabbedToDoCtrl::WantAddTask(pTDI, pTDS, pContext);
+
+#ifdef _DEBUG
+	DWORD dwTaskID = pTDS->GetTaskID();
+	DWORD dwParentID = pTDS->GetParentTaskID();
+#endif
 	
-	if (bWantTask && pContext != NULL) // it's a filter
+	if (bWantTask && (pContext != NULL)) // it's a filter
 	{
 		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
 		SEARCHRESULT result;
@@ -846,20 +851,37 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 			}
 			else
 			{
-				bWantTask = Misc::HasT(m_aFilterSelectedTaskIDs, pTDS->GetTaskID());
+				bWantTask = Misc::HasT(m_aSelectedTaskIDsForFiltering, pTDS->GetTaskID());
 
 				// check parents
 				if (!bWantTask && pFilter->bWantAllSubtasks)
 				{
 					TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
 
-					while (pTDSParent && !bWantTask)
+					while (pTDSParent && !pTDSParent->IsRoot() && !bWantTask)
 					{
-						bWantTask = Misc::HasT(m_aFilterSelectedTaskIDs, pTDSParent->GetTaskID());
+						bWantTask = Misc::HasT(m_aSelectedTaskIDsForFiltering, pTDSParent->GetTaskID());
 						pTDSParent = pTDSParent->GetParentTask();
 					}
 				}
 			}
+		}
+		// special case: want all subtasks
+		else if (pFilter->bWantAllSubtasks && !pTDS->ParentIsRoot())
+		{
+			TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
+			BOOL bWantParent = FALSE;
+
+			while (pTDSParent && !pTDSParent->IsRoot() && !bWantParent)
+			{
+				const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent->GetTaskID());
+				ASSERT(pTDSParent);
+
+				bWantParent = m_matcher.TaskMatches(pTDIParent, pTDSParent, *pFilter, result);
+				pTDSParent = pTDSParent->GetParentTask();
+			}
+			
+			bWantTask = bWantParent;
 		}
 		else // rest of attributes
 		{
@@ -1024,7 +1046,7 @@ void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
 		CacheListSelection(cache);
 
 		// grab the selected items for the filtering
-		m_aFilterSelectedTaskIDs.Copy(cache.aSelTaskIDs);
+		m_aSelectedTaskIDsForFiltering.Copy(cache.aSelTaskIDs);
 
 		// remove all existing items
 		m_taskList.DeleteAll();

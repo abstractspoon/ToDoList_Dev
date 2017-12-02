@@ -88,7 +88,7 @@ protected:
 	
 	CTDCFilter m_filter;
 	TDCCOLEDITFILTERVISIBILITY m_visColEditFilter;
-	CDWordArray m_aFilterSelectedTaskIDs; // for FT_SELECTED filter
+	CDWordArray m_aSelectedTaskIDsForFiltering; // for FT_SELECTED filter
 	BOOL m_bIgnoreListRebuild;
 	BOOL m_bIgnoreExtensionUpdate;
 

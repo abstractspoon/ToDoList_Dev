@@ -9285,7 +9285,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 			// and its children
 			if (bHasChildren)
 			{
-				BuildTreeItem(htiChild, pTDSChild, pContext);
+				BuildTreeItem(htiChild, pTDSChild, pContext); // RECURSIVE call
 
 				// if no subtasks got added to the tree then we may need to remove the parent too
 				if (!m_taskTree.ItemHasChildren(htiChild))
