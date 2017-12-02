@@ -28,11 +28,12 @@ class CTDLFilterDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLFilterDlg(BOOL bMultiSelFilters, CWnd* pParent = NULL);   // standard constructor
-
-	int DoModal(const CStringArray& aAdvancedFilterNames, 
+	CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
+				BOOL bMultiSelFilters, 
+				const CStringArray& aAdvancedFilterNames, 
 				const CFilteredToDoCtrl& tdc, 
-				const CDWordArray& aPriorityColors);
+				const CDWordArray& aPriorityColors,
+				CWnd* pParent = NULL);
 
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 
@@ -57,6 +58,7 @@ protected:
 	CTDLFilterOptionComboBox	m_cbOptions;
 
 	TDCFILTER m_filter;
+	FILTER_TITLE m_nTitleFilter;
 	TDCAUTOLISTDATA m_tldListData;
 	CDWordArray m_aPriorityColors;
 	FTC_VIEW m_nView;

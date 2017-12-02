@@ -76,7 +76,8 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	  m_crUIBack(CLR_NONE),
 	  m_eStartNextNDays(TRUE, _T("-0123456789")),
 	  m_eDueNextNDays(TRUE, _T("-0123456789")),
-	  m_bMultiSelection(TRUE)
+	  m_bMultiSelection(TRUE),
+	  m_nTitleFilter(FT_FILTERONTITLEONLY)
 {
 	//{{AFX_DATA_INIT(CFilterBar)
 	//}}AFX_DATA_INIT
@@ -177,6 +178,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 			m_mapCustomFlags[m_sAdvancedFilter] = m_cbOptions.GetSelectedOptions();
 		else
 			m_filter.dwFlags = m_cbOptions.GetSelectedOptions();
+
+		m_filter.nTitleOption = m_nTitleFilter;
 	}
 	else
 	{
@@ -421,13 +424,15 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	if (m_bAdvancedFilter)
 	{
 		filter.Reset();
-		sCustom = m_sAdvancedFilter;
 
+		sCustom = m_sAdvancedFilter;
 		m_mapCustomFlags.Lookup(sCustom, dwCustomFlags);
 	}
 	else
 	{
 		filter = m_filter;
+		filter.nTitleOption = m_nTitleFilter;
+
 		sCustom.Empty();
 		dwCustomFlags = 0;
 	}
@@ -483,6 +488,8 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	}
 	else
 	{
+		m_filter.nTitleOption = m_nTitleFilter;
+
 		m_bAdvancedFilter = FALSE;
 		m_sAdvancedFilter.Empty();
 	}
@@ -515,6 +522,19 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc)
 	// disable controls if a custom filter.
 	// just do a repos because this also handles enabled state
 	ReposControls();
+}
+
+BOOL CTDLFilterBar::SetTitleFilterOption(FILTER_TITLE nOption) 
+{ 
+	if (m_nTitleFilter != nOption)
+	{
+		m_nTitleFilter = m_filter.nTitleOption = nOption; 
+		GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
+
+		return TRUE;
+	}
+
+	return FALSE; // no change
 }
 
 void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
@@ -832,7 +852,8 @@ BOOL CTDLFilterBar::OnInitDialog()
 
 	m_eTitleFilter.ModifyStyle(0, ES_WANTRETURN, 0);
 	m_mgrPrompts.SetEditPrompt(m_eTitleFilter, sAny);
-
+	GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
+	
 	EnableToolTips();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control

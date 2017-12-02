@@ -1190,6 +1190,7 @@ BOOL CToDoListWnd::InitFilterbar()
 
 	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
 	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFilters());
+	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 
 	RefreshFilterBarAdvancedFilters();
 
@@ -2520,7 +2521,7 @@ void CToDoListWnd::LoadSettings()
 		m_tabCtrl.ModifyFlags(0, TCE_CLOSEBUTTON);
 	else
 		m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);
-	
+
 	// MRU
 	if (userPrefs.GetAddFilesToMRU())
 		m_mruList.ReadList(prefs);
@@ -4887,10 +4888,7 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFilters());
 
 		// title filter option
-		PUIP_MATCHTITLE nTitleOption = newPrefs.GetTitleFilterOption();
-		PUIP_MATCHTITLE nPrevTitleOption = oldPrefs.GetTitleFilterOption();
-
-		if (nPrevTitleOption != nTitleOption)
+		if (m_filterBar.SetTitleFilterOption(newPrefs.GetTitleFilterOption()))
 			OnViewRefreshfilter();
 
 		// inherited parent task attributes for new tasks
@@ -7940,6 +7938,7 @@ void CToDoListWnd::RefreshFilterBarControls()
 	{
 		RefreshFilterBarAdvancedFilters();
 
+		m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 		m_filterBar.RefreshFilterControls(GetToDoCtrl());
 		
 		// Determine if a resize if required
@@ -11065,29 +11064,6 @@ void CToDoListWnd::OnUpdateFileOpenarchive(CCmdUI* pCmdUI)
 	pCmdUI->Enable(bArchiveExists);
 }
 
-void CToDoListWnd::PrepareFilter(TDCFILTER& filter) const
-{
-	if (filter.nShow != FS_ADVANCED)
-	{
-		// handle title filter option
-		switch (Prefs().GetTitleFilterOption())
-		{
-		case PUIP_MATCHONTITLECOMMENTS:
-			filter.nTitleOption = FT_FILTERONTITLECOMMENTS;
-			break;
-
-		case PUIP_MATCHONANYTEXT:
-			filter.nTitleOption = FT_FILTERONANYTEXT;
-			break;
-
-		case PUIP_MATCHONTITLE:
-		default:
-			filter.nTitleOption = FT_FILTERONTITLEONLY;
-			break;
-		}
-	}
-}
-
 void CToDoListWnd::OnViewShowfilterbar() 
 {
 	m_bShowFilterBar = !m_bShowFilterBar;
@@ -11173,7 +11149,6 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 	}
 	else
 	{
-		PrepareFilter(filter);
 		tdc.SetFilter(filter);
 	}
 
@@ -11186,12 +11161,18 @@ void CToDoListWnd::OnViewFilter()
 	CStringArray aCustom;
 	m_filterBar.GetAdvancedFilterNames(aCustom);
 	
-	CDWordArray aPriorityColors;
-	Prefs().GetPriorityColors(aPriorityColors);
-	
-	CTDLFilterDlg dialog(Prefs().GetMultiSelFilters());
+	const CPreferencesDlg& prefs = Prefs();
 
-	if (dialog.DoModal(aCustom, GetToDoCtrl(), aPriorityColors) == IDOK)
+	CDWordArray aPriorityColors;
+	prefs.GetPriorityColors(aPriorityColors);
+	
+	CTDLFilterDlg dialog(prefs.GetTitleFilterOption(), 
+						prefs.GetMultiSelFilters(),
+						aCustom, 
+						GetToDoCtrl(), 
+						aPriorityColors);
+
+	if (dialog.DoModal() == IDOK)
 	{
 		TDCFILTER filter;
 		CString sCustom;

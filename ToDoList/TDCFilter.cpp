@@ -1010,5 +1010,6 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 			break;
 		}
 	}
+
 	return bNeedRefilter;
 }

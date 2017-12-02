@@ -20,20 +20,53 @@ static char THIS_FILE[] = __FILE__;
 // CTDLFilterDlg dialog
 
 
-CTDLFilterDlg::CTDLFilterDlg(BOOL bMultiSelFilters, CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLFilterDlg::IDD, pParent), 
-	  m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
-	  m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
-	  m_cbStatusFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbVersionFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_cbTagFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
-	  m_eStartNextNDays(TRUE, _T("-0123456789")),
-	  m_eDueNextNDays(TRUE, _T("-0123456789")),
-	  m_nView(FTCV_UNSET)
+CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
+							BOOL bMultiSelFilters, 
+							const CStringArray& aAdvFilterNames,
+							const CFilteredToDoCtrl& tdc, 
+							const CDWordArray& aPriorityColors,
+							CWnd* pParent /*=NULL*/)
+	: 
+	CTDLDialog(CTDLFilterDlg::IDD, pParent), 
+	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbStatusFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbVersionFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_cbTagFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
+	m_eStartNextNDays(TRUE, _T("-0123456789")),
+	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_nView(FTCV_UNSET),
+	m_nTitleFilter(nTitleFilter)
 {
-	//{{AFX_DATA_INIT(CTDLFilterDlg)
-	//}}AFX_DATA_INIT
+	// main filter
+	tdc.GetFilter(m_filter);
+
+	m_filter.nTitleOption = m_nTitleFilter;
+
+	// get custom filter
+	m_aAdvancedFilterNames.Copy(aAdvFilterNames);
+
+	if (tdc.HasAdvancedFilter())
+	{
+		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
+		m_dwCustomFlags = tdc.GetAdvancedFilterFlags();
+
+		m_filter.nShow = FS_ADVANCED;
+	}
+	else
+	{
+		m_sAdvancedFilter.Empty();
+		m_dwCustomFlags = 0;
+	}
+
+	// auto-droplists
+	tdc.GetAutoListData(m_tldListData);
+
+	m_aPriorityColors.Copy(aPriorityColors);
+	m_nView = tdc.GetTaskView();
+
+	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
 }
 
 
@@ -199,40 +232,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDlg message handlers
 
-int CTDLFilterDlg::DoModal(const CStringArray& aAdvFilterNames,
-						   const CFilteredToDoCtrl& tdc, 
-						   const CDWordArray& aPriorityColors)
-{
-	// main filter
-	tdc.GetFilter(m_filter);
-
-	// get custom filter
-	m_aAdvancedFilterNames.Copy(aAdvFilterNames);
-	
-	if (tdc.HasAdvancedFilter())
-	{
-		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
-		m_dwCustomFlags = tdc.GetAdvancedFilterFlags();
-
-		m_filter.nShow = FS_ADVANCED;
-	}
-	else
-	{
-		m_sAdvancedFilter.Empty();
-		m_dwCustomFlags = 0;
-	}
-
-	// auto-droplists
-	tdc.GetAutoListData(m_tldListData);
-	
-	m_aPriorityColors.Copy(aPriorityColors);
-	m_nView = tdc.GetTaskView();
-
-	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
-
-	return CTDLDialog::DoModal();
-}
-
 FILTER_SHOW CTDLFilterDlg::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
 	filter = m_filter;
@@ -273,6 +272,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 	// title
 	m_mgrPrompts.SetEditPrompt(IDC_TITLEFILTERTEXT, *this, sAny);
+	GetDlgItem(IDC_TITLEFILTERLABEL)->SetWindowText(m_filter.GetTitleFilterLabel());
 
 	// custom filters
 	m_cbTaskFilter.AddAdvancedFilters(m_aAdvancedFilterNames, m_sAdvancedFilter);

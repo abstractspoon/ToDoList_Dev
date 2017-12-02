@@ -676,7 +676,6 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void PrepareFilter(TDCFILTER& filter) const;
 	void RefreshFilterBarControls();
 	void RefreshFilterBarAdvancedFilters();
 

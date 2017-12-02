@@ -217,7 +217,7 @@ public:
 	BOOL GetReFilterOnModify() const { return m_pageUI.GetReFilterOnModify(); }
 	BOOL GetReSortOnModify() const { return m_pageUI.GetReSortOnModify(); }
 	CString GetUITheme() const { return m_pageUI.GetUITheme(); }
-	PUIP_MATCHTITLE GetTitleFilterOption() const { return m_pageUI.GetTitleFilterOption(); }
+	FILTER_TITLE GetTitleFilterOption() const;
 	BOOL GetShowDefaultTaskIcons() const { return m_pageUI.GetShowDefaultTaskIcons(); }
 	BOOL GetShowDefaultFilters() const { return m_pageUI.GetShowDefaultFilters(); }
 	BOOL GetEnableColumnHeaderSorting() const { return m_pageUI.GetEnableColumnHeaderSorting(); }

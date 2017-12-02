@@ -51,6 +51,7 @@ public:
 	int CalcHeight(int nWidth);
 	void SetVisibleFilters(const CTDCAttributeMap& mapFilters);
 	BOOL FilterMatches(const TDCFILTER& filter) { return (filter == m_filter); }
+	BOOL SetTitleFilterOption(FILTER_TITLE nOption);
 
 	void EnableMultiSelection(BOOL bEnable);
 	void SetUITheme(const CUIThemeFile& theme);
@@ -83,6 +84,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	TDCFILTER m_filter;
+	FILTER_TITLE m_nTitleFilter;
 	FTC_VIEW m_nView;
 	CBrush m_brUIBack;
 	COLORREF m_crUIBack;

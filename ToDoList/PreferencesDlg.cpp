@@ -632,3 +632,17 @@ BOOL CPreferencesDlg::SetAutoHideTabbar(BOOL bAutoHide)
 	// else
 	return FALSE;
 }
+
+FILTER_TITLE CPreferencesDlg::GetTitleFilterOption() const
+{
+	switch (m_pageUI.GetTitleFilterOption())
+	{
+	case PUIP_MATCHONTITLECOMMENTS:	return FT_FILTERONTITLECOMMENTS;
+	case PUIP_MATCHONANYTEXT:		return FT_FILTERONANYTEXT;
+	case PUIP_MATCHONTITLE:			return FT_FILTERONTITLEONLY;
+	}
+
+	ASSERT(0);
+	return FT_FILTERONTITLEONLY;
+}
+

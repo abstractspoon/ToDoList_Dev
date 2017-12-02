@@ -2141,6 +2141,32 @@ struct TDCFILTER
 		return TRUE;
 	}
 
+	CString GetTitleFilterLabel() const
+	{
+		CEnString sLabel; 
+
+		switch (nTitleOption)
+		{
+		case FT_FILTERONANYTEXT: 
+			sLabel.LoadString(IDS_TDLBC_ANYTEXTATTRIB); 
+			break;
+
+		case FT_FILTERONTITLECOMMENTS: 
+			sLabel.LoadString(IDS_TDLBC_TITLEORCOMMENTS); 	
+			break;
+
+		case FT_FILTERONTITLEONLY:
+		default:
+			sLabel.LoadString(IDS_TDLBC_TITLE);
+			break;
+		}
+
+		// Add an accelerator
+		if (sLabel.Find('&') == -1)
+			sLabel.Insert(0, '&');
+
+		return sLabel;
+	}
 
 	FILTER_SHOW nShow;
 	FILTER_DATE nStartBy, nDueBy;
