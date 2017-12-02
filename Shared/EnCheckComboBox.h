@@ -65,12 +65,17 @@ protected:
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
-	int GetNoneIndex() const;
-	int GetAnyIndex() const;
-	BOOL IsAnyChecked() const;
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
 	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
+
+	int GetNoneIndex() const;
+	BOOL IsNoneIndex(int nItem) const;
+	BOOL IsNoneChecked() const;
+
+	int GetAnyIndex() const;
+	BOOL IsAnyIndex(int nItem) const;
+	BOOL IsAnyChecked() const;
 
 #ifdef _DEBUG
 	void TraceCheckStates() const;

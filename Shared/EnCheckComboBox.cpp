@@ -6,6 +6,7 @@
 #include "enCheckComboBox.h"
 #include "misc.h"
 #include "enstring.h"
+#include "holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,7 +78,7 @@ BOOL CEnCheckComboBox::EnableMultiSelection(BOOL bEnable)
 
 			if (nSel != CB_ERR)
 			{
-				CString sItem = GetItemText(nSel);
+				CString sItem = CCheckComboBox::GetItemText(nSel);
 
 				if (!sItem.IsEmpty())
 					SetCheck(nSel, CCBC_CHECKED);
@@ -110,7 +111,9 @@ int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
 
 void CEnCheckComboBox::FixupEmptyStringsAtStart()
 {
-	while (GetCount() && GetItemText(0).IsEmpty())
+	CHoldRedraw hr(*this);
+
+	while (GetCount() && CAutoComboBox::GetItemText(0).IsEmpty())
 		CComboBox::DeleteString(0);
 	
 	int nEmpty = CalcNumRequiredEmptyStrings();
@@ -121,10 +124,10 @@ void CEnCheckComboBox::FixupEmptyStringsAtStart()
 
 int CEnCheckComboBox::CalcNumRequiredEmptyStrings() const
 {
-	int nNumReqd = 1; // None
+	int nNumReqd = 0;
 
-	if (m_bMultiSel)
-		nNumReqd++; // Any
+	nNumReqd += (m_sAny.IsEmpty() ? 0 : 1);
+	nNumReqd += (m_sNone.IsEmpty() ? 0 : 1);
 
 	return nNumReqd;
 }
@@ -139,17 +142,40 @@ int CEnCheckComboBox::GetNoneIndex() const
 
 int CEnCheckComboBox::GetAnyIndex() const
 {
-	if (!m_bMultiSel || m_sAny.IsEmpty())
+	if (m_sAny.IsEmpty())
 		return -1;
 
 	return 0;
+}
+
+BOOL CEnCheckComboBox::IsNoneIndex(int nItem) const
+{
+	if (nItem == -1)
+		return FALSE;
+
+	return (nItem == GetNoneIndex());
+}
+
+BOOL CEnCheckComboBox::IsAnyIndex(int nItem) const
+{
+	if (nItem == -1)
+		return FALSE;
+
+	return (nItem == GetAnyIndex());
 }
 
 BOOL CEnCheckComboBox::IsAnyChecked() const
 {
 	int nAny = GetAnyIndex();
 
-	return GetCheck(nAny);
+	return ((nAny == -1) ? FALSE : GetCheck(nAny));
+}
+
+BOOL CEnCheckComboBox::IsNoneChecked() const
+{
+	int nNone = GetNoneIndex();
+
+	return ((nNone == -1) ? FALSE : GetCheck(nNone));
 }
 
 void CEnCheckComboBox::OnCheckChange(int nIndex)
@@ -207,11 +233,10 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) co
 
 	if (nCheck == CCBC_CHECKED)
 	{
-		CString sSelItem = GetItemText(CComboBox::GetCurSel());
+		int nSel = GetCurSel();
 
-		// we don't add the blank item
-		if (!sSelItem.IsEmpty())
-			aItems.Add(sSelItem);
+		if ((nSel != -1) && !IsAnyIndex(nSel))
+			aItems.Add(CCheckComboBox::GetItemText(nSel));
 	}
 	
 	return aItems.GetSize();
@@ -281,13 +306,11 @@ CString CEnCheckComboBox::GetItemText(int nItem, const CString& sHint) const
 	{
 		if (nItem == -1)
 		{
-			int nNone = GetNoneIndex();
-
 			if (IsAnyChecked())
 			{
 				sItem = m_sAny;
 			}
-			else if (GetCheck(nNone))
+			else if (IsNoneChecked())
 			{
 				// if drawing the comma-delimited list and it includes
 				// a blank item, prefix the text with <none>
@@ -298,29 +321,39 @@ CString CEnCheckComboBox::GetItemText(int nItem, const CString& sHint) const
 				sItem = m_sAny;
 			}
 		}
-		else
+		else if (sItem.IsEmpty()) 
 		{
-			if (sItem.IsEmpty()) 
+			if (IsAnyIndex(nItem))
 			{
-				switch (nItem)
-				{
-				case 0:
-					sItem = m_sAny;
-					break;
-
-				case 1:
-					sItem = m_sNone;
-					break;
-
-				default:
-					ASSERT(0);
-				}
+				sItem = m_sAny;
+			}
+			else if (IsNoneIndex(nItem))
+			{
+				sItem = m_sNone;
+			}
+			else
+			{
+				ASSERT(0);
 			}
 		}
 	}
-	else if (nItem == -1 || sItem.IsEmpty())
+	else // single sel
 	{
-		sItem = m_sAny;
+		if (nItem == -1)
+			nItem = GetCurSel();
+
+		if (IsAnyIndex(nItem))
+		{
+			sItem = m_sAny;
+		}
+		else if (IsNoneIndex(nItem))
+		{
+			sItem = m_sNone;
+		}
+		else if (sItem.IsEmpty())
+		{
+			sItem = m_sAny;
+		}
 	}
 
 	return sItem;
@@ -354,11 +387,18 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 		return CCheckComboBox::SetChecked(aChecked, aMixed);
 	}
 
+	// single selection
 	ASSERT(aMixed.GetSize() == 0);
+	ASSERT(aChecked.GetSize() <= 1);
 
 	if (aChecked.GetSize() == 0)
 	{
-		SetCurSel(-1);
+		SetCurSel(GetAnyIndex());
+		return TRUE;
+	}
+	else if (aChecked[0].IsEmpty())
+	{
+		SetCurSel(GetNoneIndex());
 		return TRUE;
 	}
 
@@ -412,7 +452,7 @@ void CEnCheckComboBox::OnLBSelChange()
 		CCheckComboBox::OnLBSelChange();
 	
 	// else
-	CComboBox::Default();
+	CAutoComboBox::Default();
 }
 
 BOOL CEnCheckComboBox::OnSelEndOK()
@@ -430,22 +470,26 @@ void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 {
 	CString sEnText = GetItemText(nItem, sItem);
 
-	if (m_bMultiSel)
+	if (m_bMultiSel && (nItem != -1))
 	{
-		if (!(nItemState & ODS_SELECTED) && (nItem != -1) && (nItem != GetAnyIndex()) && IsAnyChecked())
+		if (!(nItemState & ODS_SELECTED) && !IsAnyIndex(nItem) && IsAnyChecked())
 		{
 			crText = GetSysColor(COLOR_GRAYTEXT);
 		}
-	}
 
-	CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList, crText);
+		CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList, crText);
+	}
+	else
+	{
+		CAutoComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sEnText, bList, crText);
+	}
 }
 
 BOOL CEnCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const
 {
 	ASSERT(m_bMultiSel);
 
-	if (!(nItemState & ODS_SELECTED) && (nItem != -1) && (nItem != GetAnyIndex()) && IsAnyChecked())
+	if (!(nItemState & ODS_SELECTED) && !IsAnyIndex(nItem) && IsAnyChecked())
 	{
 		bDisabled = TRUE;
 	}
