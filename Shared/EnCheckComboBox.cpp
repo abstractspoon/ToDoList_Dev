@@ -248,7 +248,7 @@ void CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) 
 	CCheckComboBox::GetChecked(aMixed, CCBC_MIXED);
 
 	// Remove 'Any'
-	if (IsAnyChecked())
+	if (m_bMultiSel && IsAnyChecked())
 	{
 		ASSERT(aChecked.GetSize());
 		aChecked.RemoveAt(0);
