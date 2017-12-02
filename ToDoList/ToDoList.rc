@@ -5269,6 +5269,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CLEANUPPREFS_NOTASLISTS 
                             "There is currently no tasklist information which can be removed from your ini file."
+    IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
+    IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
 END
 
 #endif    // English (Australia) resources

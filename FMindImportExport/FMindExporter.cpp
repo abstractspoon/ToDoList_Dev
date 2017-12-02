@@ -61,14 +61,14 @@ void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
 
 	CXmlFile fileDest(_T("map"));
@@ -91,10 +91,13 @@ bool CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePat
 	// save output manually to restore non-escaping of & and <>
 	CString sOutput = Export(fileDest);
 
-	return (FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
-bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CXmlFile fileDest(_T("map"));
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
@@ -103,28 +106,34 @@ bool CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFi
 	{
 		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 		
-		if (pTasks)
+		if (pTasks == NULL)
 		{
-			CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
-			firstItem->AddItem(_T("TEXT"), pTasks->GetProjectName());	
-
-			CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
-			hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
-
-			//Attrib Manager settings
-			//This will make the attribs not to be shown as a list view at every node;	
-			CXmlItem *attribManItem = firstItem->AddItem(_T("attribute_registry"),_T(""));	
-			attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
-
-			// export first task
-			ExportTask(pTasks, pTasks->GetFirstTask(), firstItem, 0, TRUE);
+			ASSERT(0);
+			return IIER_BADINTERFACE;
 		}
+
+		CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
+		firstItem->AddItem(_T("TEXT"), pTasks->GetProjectName());	
+
+		CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
+		hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
+
+		//Attrib Manager settings
+		//This will make the attribs not to be shown as a list view at every node;	
+		CXmlItem *attribManItem = firstItem->AddItem(_T("attribute_registry"),_T(""));	
+		attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
+
+		// export first task
+		ExportTask(pTasks, pTasks->GetFirstTask(), firstItem, 0, TRUE);
 	}
 
 	// save output manually to restore non-escaping of & and <>
 	CString sOutput = Export(fileDest);
 
-	return (FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
 CString CFMindExporter::Export(const CXmlFile& file)

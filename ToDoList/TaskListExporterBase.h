@@ -14,6 +14,7 @@
 
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\Ipreferences.h"
+#include "..\Interfaces\IImportExport.h"
 
 class CTaskListExporterBase
 {
@@ -22,8 +23,8 @@ public:
 
 	void Release() { delete this; }
 
-	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-   	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+   	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected: // this is a base class only
 	CTaskListExporterBase();
@@ -37,7 +38,7 @@ protected:
 
 protected:
 	// overridables
-	virtual bool ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const;
+	virtual IIMPORTEXPORT_RESULT ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const;
 	virtual CString ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return _T(""); }

@@ -32,14 +32,14 @@ void CMLOImporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-IIMPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 	
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 	
 	CXmlFile file;
@@ -50,22 +50,22 @@ IIMPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskF
 		{
 		case XFL_BADMSXML:
 		case XFL_MISSINGROOT:
-			return IIR_BADFORMAT;
+			return IIER_BADFORMAT;
 		}
 
 		// else
-		return IIR_BADFILE;
+		return IIER_BADFILE;
 	}
 
 	const CXmlItem* pXIMLOTree = file.GetItem(_T("TaskTree"));
 
 	if (!pXIMLOTree)
-		return IIR_BADFORMAT;
+		return IIER_BADFORMAT;
 
 	const CXmlItem* pXIMLOTask = pXIMLOTree->GetItem(_T("TaskNode"));
 
 	if (!pXIMLOTask)
-		return IIR_BADFORMAT;
+		return IIER_BADFORMAT;
 
 	// this first node always seems to be untitled 
 	// so we get the first subnode
@@ -75,7 +75,7 @@ IIMPORT_RESULT CMLOImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskF
 	if (pXIMLOTask)
 		ImportTask(pXIMLOTask, pTasks, NULL, TRUE); // NULL ==  root
 
-	return IIR_SUCCESS;
+	return IIER_SUCCESS;
 }
 
 bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM hParent, BOOL bAndSiblings) const

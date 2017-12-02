@@ -79,18 +79,18 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPref
 	return true;
 }
 
-IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 	
 	if (!InitConsts(szSrcFilePath, bSilent, pPrefs, szKey))
-		return IIR_CANCELLED;
+		return IIER_CANCELLED;
 
 	// Load csv
 	CStringArray aLines;
@@ -112,9 +112,9 @@ IIMPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pD
 	}
 
 	if (bSomeFailed)
-		return IIR_SOMEFAILED;
+		return IIER_SOMEFAILED;
 
-	return IIR_SUCCESS;
+	return IIER_SUCCESS;
 }
 
 CString CTaskListCsvImporter::GetLine(const CStringArray& aLines, int& nLine)

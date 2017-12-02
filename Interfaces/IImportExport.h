@@ -145,16 +145,18 @@ static BOOL IsImportExportDll(LPCWSTR szDllPath)
 
 //////////////////////////////////////////////////////////////////////
 
-enum IIMPORT_RESULT 
+enum IIMPORTEXPORT_RESULT 
 {
-	IIR_CANCELLED	= -1,
-	IIR_SUCCESS		= 0,
-	IIR_BADFILE,
-	IIR_BADFORMAT,
-	IIR_BADINTERFACE,
-	IIR_SOMEFAILED,
-	IIR_OTHER,
+	IIER_CANCELLED	= -1,
+	IIER_SUCCESS		= 0,
+	IIER_BADFILE,
+	IIER_BADFORMAT,
+	IIER_BADINTERFACE,
+	IIER_SOMEFAILED,
+	IIER_OTHER,
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class IImportTasklist
 {
@@ -168,7 +170,7 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual HICON GetIcon() const = 0;
 
-	virtual IIMPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -185,8 +187,8 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual HICON GetIcon() const = 0;
 
-	virtual bool Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
-	virtual bool Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

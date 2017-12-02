@@ -5636,7 +5636,7 @@ BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 
 	CTaskFile tasks;
 
-	if (m_mgrImportExport.ImportTaskList(szFilePath, &tasks, nImporter, bSilent) != IIR_SUCCESS)
+	if (m_mgrImportExport.ImportTaskList(szFilePath, &tasks, nImporter, bSilent) != IIER_SUCCESS)
 		return FALSE;
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -8655,114 +8655,131 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 
 	// do the import
 	CTaskFile tasks;
-	UINT nIcon = 0, nMessageID = 0;
-	IIMPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter);
+	IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter);
+	BOOL bSomeSuceeded = FALSE;
 
-	switch (nRes)
+	if (tasks.GetTaskCount())
 	{
-	case IIR_CANCELLED:
+		switch (nRes)
+		{
+		case IIER_SOMEFAILED:
+		case IIER_SUCCESS:
+			{
+				bSomeSuceeded = TRUE;
+
+				if (nImportTo == TDIT_CREATENEWTASKLIST)
+				{
+					// If the imported tasks contain any custom attributes
+					// and those custom attributes match those of any open 
+					// tasklist then overwrite the imported custom attributes 
+					// with those from the matching tasklist
+					CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
+
+					if (tasks.GetCustomAttributeDefs(aImportedDefs))
+					{
+						int nTDC = GetTDCCount();
+
+						while (nTDC--)
+						{
+							if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
+								aImportedDefs.MatchAny(aTDCAttribDefs))
+							{
+								aTDCAttribDefs.Append(aImportedDefs);
+
+								tasks.SetCustomAttributeDefs(aTDCAttribDefs);
+								break;
+							}
+						}
+					}
+
+					VERIFY(CreateNewTaskList(FALSE));
+				}
+
+				CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
+				TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
+				BOOL bSelectAll = TRUE;
+
+				if (nImportTo == TDIT_MERGETOTASKLISTBYID)
+				{
+					VERIFY(tdc.MergeTasks(tasks, TRUE));
+				}
+				else if (nImportTo == TDIT_MERGETOTASKLISTBYTITLE)
+				{
+					VERIFY(tdc.MergeTasks(tasks, FALSE));
+				}
+				else // Paste
+				{
+					switch (nImportTo)
+					{
+					case TDIT_ADDTOSELECTEDTASK:
+						{
+							if (Prefs().GetNewSubtaskPos() == PUIP_TOP)
+								nWhere = TDC_INSERTATTOPOFSELTASK;
+							else
+								nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+						}
+						break;
+
+					case TDIT_ADDBELOWSELECTEDTASK:
+						nWhere = TDC_INSERTAFTERSELTASK;
+						break;
+
+					case TDIT_CREATENEWTASKLIST:
+						bSelectAll = FALSE;
+						tdc.SetProjectName(tasks.GetProjectName());
+						break;
+
+					case TDIT_ADDTOTOPOFTASKLIST:
+						break;
+					}
+
+					VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
+				}
+
+				UpdateCaption();
+			}
+		}
+	}
+
+	HandleImportTasklistError(nRes, sImportPath, bFromClipboard, bSomeSuceeded);
+
+	return bSomeSuceeded;
+}
+
+void CToDoListWnd::HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded)
+{
+	UINT nIcon = 0, nMessageID = 0;
+
+	switch (nErr)
+	{
+	case IIER_CANCELLED:
 		break;
 
-	case IIR_SOMEFAILED:
-		if (tasks.GetTaskCount() == 0)
+	case IIER_SOMEFAILED:
+		if (bAnyTasksSucceeded)
 		{
-			// All failed
+			if (bFromClipboard)
+				nMessageID = IDS_IMPORTFROMCB_SOMETASKSFAILED;
+			else
+				nMessageID = IDS_IMPORTFILE_SOMETASKSFAILED;
+			
+			nIcon = MB_ICONWARNING;
+		}
+		else // All failed
+		{
 			if (bFromClipboard)
 				nMessageID = IDS_IMPORTFROMCB_NOTASKS;
 			else
 				nMessageID = IDS_IMPORTFILE_NOTASKS;
 
 			nIcon = MB_ICONERROR;
-			break;
 		}
+		break;
 
-		// else some succeeded
-		if (bFromClipboard)
-			nMessageID = IDS_IMPORTFROMCB_SOMETASKSFAILED;
-		else
-			nMessageID = IDS_IMPORTFILE_SOMETASKSFAILED;
+	case IIER_SUCCESS:
+		break;
 
-		nIcon = MB_ICONERROR;
-		// fall thru for processing 
-
-	case IIR_SUCCESS:
-		if (tasks.GetTaskCount())
-		{
-			if (nImportTo == TDIT_CREATENEWTASKLIST)
-			{
-				// If the imported tasks contain any custom attributes
-				// and those custom attributes match those of any open 
-				// tasklist then overwrite the imported custom attributes 
-				// with those from the matching tasklist
-				CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
-
-				if (tasks.GetCustomAttributeDefs(aImportedDefs))
-				{
-					int nTDC = GetTDCCount();
-
-					while (nTDC--)
-					{
-						if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
-							aImportedDefs.MatchAny(aTDCAttribDefs))
-						{
-							aTDCAttribDefs.Append(aImportedDefs);
-
-							tasks.SetCustomAttributeDefs(aTDCAttribDefs);
-							break;
-						}
-					}
-				}
-
-				VERIFY(CreateNewTaskList(FALSE));
-			}
-
-			CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
-			TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
-			BOOL bSelectAll = TRUE;
-
-			if (nImportTo == TDIT_MERGETOTASKLISTBYID)
-			{
-				VERIFY(tdc.MergeTasks(tasks, TRUE));
-			}
-			else if (nImportTo == TDIT_MERGETOTASKLISTBYTITLE)
-			{
-				VERIFY(tdc.MergeTasks(tasks, FALSE));
-			}
-			else // Paste
-			{
-				switch (nImportTo)
-				{
-				case TDIT_ADDTOSELECTEDTASK:
-					{
-						if (Prefs().GetNewSubtaskPos() == PUIP_TOP)
-							nWhere = TDC_INSERTATTOPOFSELTASK;
-						else
-							nWhere = TDC_INSERTATBOTTOMOFSELTASK;
-					}
-					break;
-					
-					case TDIT_ADDBELOWSELECTEDTASK:
-						nWhere = TDC_INSERTAFTERSELTASK;
-						break;
-						
-					case TDIT_CREATENEWTASKLIST:
-						bSelectAll = FALSE;
-						tdc.SetProjectName(tasks.GetProjectName());
-						break;
-						
-					case TDIT_ADDTOTOPOFTASKLIST:
-						break;
-				}
-				
-				VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
-			}
-
-			UpdateCaption();
-			break;
-		}
-		// else fall thru
-
-	case IIR_BADFILE:
+	case IIER_BADFILE:
 		if (!bFromClipboard)
 		{
 			nMessageID = IDS_IMPORTFILE_CANTOPEN;
@@ -8771,23 +8788,56 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromClipboard, const CString& sImportFrom,
 		}
 		// else fall thru
 
-	case IIR_BADFORMAT:
-		nMessageID = (bFromClipboard ? IDS_IMPORTFROMCB_BADFORMAT : IDS_IMPORTFILE_BADFORMAT);
+	case IIER_BADFORMAT:
+		if (bFromClipboard)
+			nMessageID = IDS_IMPORTFROMCB_BADFORMAT;
+		else
+			nMessageID = IDS_IMPORTFILE_BADFORMAT;
+
 		nIcon = MB_ICONERROR;
 		break;
 
-	case IIR_BADINTERFACE:
+	case IIER_BADINTERFACE:
 		// TODO
 		break;
 	}
 
 	if (nMessageID)
-	{
 		AfxMessageBox(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
-		return (nIcon != MB_ICONERROR); // don't fail on warnings
+}
+
+void CToDoListWnd::HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr)
+{
+	UINT nIcon = 0, nMessageID = 0;
+
+	switch (nErr)
+	{
+	case IIER_CANCELLED:
+	case IIER_SUCCESS:
+		break;
+
+	case IIER_SOMEFAILED:
+		nMessageID = IDS_EXPORT_SOMEFAILED;
+		nIcon = MB_ICONERROR;
+		break;
+
+	case IIER_BADFILE:
+		nMessageID = IDS_EXPORT_CANTSAVE;
+		nIcon = MB_ICONERROR;
+		break;
+
+// 	case IIER_BADFORMAT:
+// 		nMessageID = IDS_EXPORTFILE_BADFORMAT;
+// 		nIcon = MB_ICONERROR;
+// 		break;
+
+	case IIER_BADINTERFACE:
+		// TODO
+		break;
 	}
 
-	return TRUE;
+	if (nMessageID)
+		AfxMessageBox(CEnString(nMessageID), (MB_OK | nIcon));
 }
 
 void CToDoListWnd::OnSetPriority(UINT nCmdID) 
@@ -9532,6 +9582,7 @@ void CToDoListWnd::OnExport()
 	CString sExportPath;
 	BOOL bOverWrite = FALSE;
 	int nFormat = -1;
+
 	while (!bOverWrite)
 	{
 		if (dialog.DoModal() != IDOK)
@@ -9581,7 +9632,7 @@ void CToDoListWnd::OnExport()
 	
 	BOOL bHtmlComments = (nFormat == EXPTOHTML);
 
-	if (nTDCCount == 1 || !dialog.GetExportAllTasklists())
+	if ((nTDCCount == 1) || !dialog.GetExportAllTasklists())
 	{
 		// set the html image folder to be the output path with
 		// an different extension
@@ -9608,12 +9659,18 @@ void CToDoListWnd::OnExport()
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks, tdc.GetFilePath());
 
-		if (m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nFormat, FALSE))
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nFormat, FALSE);
+
+		switch (nRes)
 		{
-			// and preview
+		case IIER_SOMEFAILED:
+		case IIER_SUCCESS:
 			if (userPrefs.GetPreviewExport())
 				FileMisc::Run(*this, sExportPath);
+			break;
 		}
+
+		HandleExportTasklistError(nRes);
 	} 
 	// multiple tasklists
 	else if (dialog.GetExportOneFile())
@@ -9659,13 +9716,19 @@ void CToDoListWnd::OnExport()
 		}
 		
 		Resize();
-		
-		if (m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nFormat, FALSE))
+
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nFormat, FALSE);
+
+		switch (nRes)
 		{
-			// and preview
+		case IIER_SOMEFAILED:
+		case IIER_SUCCESS:
 			if (userPrefs.GetPreviewExport())
 				FileMisc::Run(*this, sExportPath);
+			break;
 		}
+
+		HandleExportTasklistError(nRes);
 	}
 	else // separate files
 	{

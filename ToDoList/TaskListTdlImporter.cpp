@@ -27,17 +27,20 @@ CTaskListTdlImporter::~CTaskListTdlImporter()
 
 }
 
-IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	if (!pDestTaskFile)
-		return IIR_BADINTERFACE;
+	if (pDestTaskFile == NULL)
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
 	
 	if (!bSilent)
 	{
 		CTDLTasklistImportDlg dialog(szSrcFilePath);
 		
 		if (dialog.DoModal() != IDOK)
-			return IIR_CANCELLED;
+			return IIER_CANCELLED;
 
 		// else
 		return dialog.GetSelectedTasks(pDestTaskFile);
@@ -51,17 +54,19 @@ IIMPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pD
 		switch (tasks.GetLastFileError())
 		{
 		case XFL_CANCELLED: 
-			return IIR_CANCELLED;
+			return IIER_CANCELLED;
 
 		case XFL_BADMSXML:
 		case XFL_MISSINGROOT: 
-			return IIR_BADFORMAT;
+			return IIER_BADFORMAT;
 		}
 
-		return IIR_OTHER;
+		return IIER_OTHER;
 	}
 
-	VERIFY(tasks.CopyTasksTo(pDestTaskFile));
-	return IIR_SUCCESS;
+	if (!tasks.CopyTasksTo(pDestTaskFile))
+		return IIER_SOMEFAILED;
+
+	return IIER_SUCCESS;
 }
 

@@ -125,20 +125,20 @@ void CiCalImporter::SetLocalizer(ITransText* /*pTT*/)
 
 #define CHECK_STATE(cur_state, new_state) {	if (nState == cur_state	nState = new_state;	else nState = ICIS_ERROR; }
 
-IIMPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 		
 	CStringArray aLines;
 
 	if (!FileMisc::LoadFile(szSrcFilePath, aLines))
-		return IIR_BADFILE;
+		return IIER_BADFILE;
 
 	if (PreProcessFileLines(aLines))
 	{
@@ -150,13 +150,13 @@ IIMPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTask
 		CiCalEventArray aTasks;
 		
 		if (!ImportTasks(aLines, aTasks))
-			return IIR_BADFORMAT;
+			return IIER_BADFORMAT;
 		
 		// import temp array to tasklist
 		ImportTasks(aTasks, pTasks);
 	}
 
-	return IIR_SUCCESS;
+	return IIER_SUCCESS;
 }
 
 int CiCalImporter::ImportTasks(const CStringArray& aLines, CiCalEventArray& aTasks)

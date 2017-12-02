@@ -93,7 +93,7 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
 	HICON GetIcon() const { return m_icon; }
 
-	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;

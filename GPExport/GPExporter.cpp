@@ -60,7 +60,7 @@ LPCTSTR CGPExporter::GetFileExtension() const
 	return GP_FILEEXT;
 }
 
-bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -69,11 +69,11 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
 
 	if (!InitConsts(pTasks, bSilent, pPrefs, szKey))
-		return false;
+		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
@@ -89,7 +89,7 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
 
 	if (!ExportTask(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
-		return false;
+		return IIER_SOMEFAILED;
 
 	ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 
@@ -98,20 +98,26 @@ bool CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
 	SetupCalendar(fileDest.Root());
 
 	// save result
-	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
-bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
 
-	if ((pTasks == NULL) || !InitConsts(pTasks, bSilent, pPrefs, szKey))
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
+
+	if (!InitConsts(pTasks, bSilent, pPrefs, szKey))
+		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(UTF8_HEADER);
@@ -134,7 +140,7 @@ bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFileP
 
 			// export tasks
 			if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
-				return false;
+				return IIER_SOMEFAILED;
 
 			ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 		}
@@ -145,7 +151,10 @@ bool CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFileP
 	SetupCalendar(fileDest.Root());
 
 	// save result
-	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
 void CGPExporter::SetupDisplay(CXmlItem* pDestPrj)

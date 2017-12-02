@@ -34,10 +34,10 @@ void CTaskListOutlookImporter::SetLocalizer(ITransText* pTT)
 	CLocalizer::Initialize(pTT);
 }
 
-IIMPORT_RESULT CTaskListOutlookImporter::Import(LPCTSTR /*szSrcFilePath*/, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListOutlookImporter::Import(LPCTSTR /*szSrcFilePath*/, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (bSilent)
-		return IIR_OTHER;
+		return IIER_OTHER;
 	
 	CTDLImportOutlookDlg dlg;
 

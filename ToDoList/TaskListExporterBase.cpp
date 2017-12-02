@@ -78,12 +78,15 @@ CTaskListExporterBase::~CTaskListExporterBase()
 	
 }
 
-bool CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
+IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
 {
 	if (sOutput.IsEmpty())
-		return false;
+		return IIER_SOMEFAILED;
 
-	return (FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
 bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, bool /*bSilent*/, 
@@ -106,7 +109,7 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 	return true;
 }
 
-bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
 								   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
@@ -114,7 +117,7 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
 
 	// else
@@ -123,7 +126,7 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
 	{
 		ASSERT(0);
-		return false;
+		return IIER_CANCELLED;
 	}
 
 	CString sOutput;
@@ -131,37 +134,42 @@ bool CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR s
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
 		pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
-		ASSERT(pTasks);
 		
-		if (pTasks)
+		if (pTasks == NULL)
 		{
-			// add title block
-			sOutput += FormatTitle(pTasks);
-		
-			// then header
-			sOutput += FormatHeader(pTasks);
-		
-			// then tasks
-			sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
-
-			sOutput += ENDL;
+			ASSERT(0);
+			return IIER_BADINTERFACE;
 		}
+
+		// add title block
+		sOutput += FormatTitle(pTasks);
+		
+		// then header
+		sOutput += FormatHeader(pTasks);
+		
+		// then tasks
+		sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
+
+		sOutput += ENDL;
 	}
 	
 	return ExportOutput(szDestFilePath, sOutput);
 }
 
-bool CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
 								   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 	ASSERT(pTasks);
 	
 	if (pTasks == NULL)
-		return false;
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
 
 	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
-		return false;
+		return IIER_CANCELLED;
 
 	// add title block
 	CString sOutput = FormatTitle(pTasks);

@@ -25,7 +25,7 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
 	HICON GetIcon() const { return NULL; }
 	
-	IIMPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CString INDENT;

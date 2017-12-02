@@ -30,7 +30,7 @@ CTaskListTdlExporter::~CTaskListTdlExporter()
 
 }
 
-bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (pSrcTaskFile->GetTaskListCount() == 1)
 		return Export(pSrcTaskFile->GetTaskList(0), szDestFilePath, bSilent, pPrefs, szKey);
@@ -93,14 +93,20 @@ bool CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR sz
 	// inject custom attribute defs in one hit
 	tasks.SetCustomAttributeDefs(aAttribDefs);
 
-	return (tasks.Save(szDestFilePath, SFEF_UTF16) != FALSE);
+	if (!tasks.Save(szDestFilePath, SFEF_UTF16))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
-bool CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CTaskFile tasks(pSrcTaskFile);
 
-	return (tasks.Save(szDestFilePath, SFEF_UTF16) != FALSE);
+	if (!tasks.Save(szDestFilePath, SFEF_UTF16))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
 void CTaskListTdlExporter::CreateReverseFileLinks(CTaskFile& tasks, HTASKITEM hTask, const CID2IDMap& mapIDs, const CString& sFileName, BOOL bAndSiblings)

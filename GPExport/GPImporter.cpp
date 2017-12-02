@@ -56,20 +56,20 @@ LPCTSTR CGPImporter::GetFileExtension() const
 	return GP_FILEEXT;
 }
 
-IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 
 	if (!InitConsts(bSilent, pPrefs, szKey))
-		return IIR_CANCELLED;
+		return IIER_CANCELLED;
 	
 	CXmlFile fileSrc;
 
@@ -79,11 +79,11 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 		{
 		case XFL_BADMSXML:
 		case XFL_MISSINGROOT:
-			return IIR_BADFORMAT;
+			return IIER_BADFORMAT;
 		}
 		
 		// else
-		return IIR_BADFILE;
+		return IIER_BADFILE;
 	}
 
 	InitWeekends(fileSrc.Root());
@@ -91,12 +91,12 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 	const CXmlItem* pXISrcTasks = fileSrc.GetItem(_T("tasks"));
 
 	if (!pXISrcTasks) // must exist
-		return IIR_BADFORMAT;
+		return IIER_BADFORMAT;
 
 	const CXmlItem* pXISrcTask = pXISrcTasks->GetItem(_T("task"));
 
 	if (!pXISrcTask) // must exist
-		return IIR_BADFORMAT;
+		return IIER_BADFORMAT;
 
 	if (ImportTask(pXISrcTask, pTasks, NULL, TRUE))
 	{
@@ -107,7 +107,7 @@ IIMPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFi
 		FixupDependencies(pXISrcTask, pTasks, TRUE);
 	}
 
-	return IIR_SUCCESS; 
+	return IIER_SUCCESS; 
 }
 
 bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, HTASKITEM htDestParent, BOOL bAndSiblings)

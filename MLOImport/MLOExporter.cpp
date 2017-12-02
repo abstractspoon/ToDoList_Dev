@@ -35,14 +35,14 @@ void CMLOExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
 	
 	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
@@ -51,16 +51,19 @@ bool CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath,
 	CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
 	
 	if (!ExportTask(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, TRUE))
-		return false;
+		return IIER_SOMEFAILED;
 	
 	// export resource allocations
 	ExportPlaces(pTasks, fileDest.Root());
 	
 	// save result
-	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
-bool CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	// export tasks
 	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
@@ -70,19 +73,25 @@ bool CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFile
 	{
 		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
 		
-		if (pTasks)
+		if (pTasks == NULL)
 		{
-			// export tasks
-			if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
-				return false;
-			
-			// export resource allocations
-			ExportPlaces(pTasks, fileDest.Root());
+			ASSERT(0);
+			return IIER_BADINTERFACE;
 		}
+
+		// export tasks
+		if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
+			return IIER_SOMEFAILED;
+			
+		// export resource allocations
+		ExportPlaces(pTasks, fileDest.Root());
 	}
 	
 	// save result
-	return (fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM) != FALSE);
+	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
 }
 
 bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 

@@ -2103,6 +2103,8 @@
 #define IDS_GOTOTASK_NOSUCHTASK         58462
 #define IDS_CONFIRM_CLEANUPPREFS        58463
 #define IDS_CLEANUPPREFS_NOTASLISTS     58464
+#define IDS_EXPORT_SOMEFAILED           58465
+#define IDS_EXPORT_CANTSAVE             58466
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

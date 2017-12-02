@@ -70,10 +70,11 @@ public:
 	CToDoListWnd(); 
 	~CToDoListWnd();
 	
+	BOOL Create(const CTDCStartupOptions& startup);
+
+	static BOOL EnableLogging(BOOL bEnable = TRUE);
 	static CString GetVersion(BOOL bExtended = TRUE);
 	static CString GetTitle(BOOL bExtended = TRUE);
-
-	BOOL Create(const CTDCStartupOptions& startup);
 	
 protected:
 	// ClassWizard generated virtual function overrides
@@ -763,19 +764,21 @@ protected:
 					const CString& sStylesheet) const;
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 
+	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
+	static void HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr);
+	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);
+	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
+
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
 	static void SetupUIStrings();
 	static void EnableDynamicMenuTranslation(BOOL bEnable);
-	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);
-	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
 	static CString GetEndSessionFilePath();
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
-	static void HandleImportError(IIMPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
 	static BOOL SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath);
 
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);

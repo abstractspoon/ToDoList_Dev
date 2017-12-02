@@ -151,24 +151,28 @@ void CTDLTasklistImportDlg::OnOK()
 		m_tdc.GetSelectedTasks(m_tasksSelected, TDCGT_ALL, (m_bImportSubtasks ? 0 : TDCGSTF_NOTSUBTASKS));
 }
 
-IIMPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)
+IIMPORTEXPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)
 {
-	ASSERT(pTasks);
-	
-	if (!pTasks)
-		return IIR_BADINTERFACE;
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
 
 	switch (m_nLoadRes)
 	{
 	case TDCF_SUCCESS:
-		ResetSelectedTaskCreationDate(m_tasksSelected.GetFirstTask(), TRUE);
-		
-		m_tasksSelected.CopyTasksTo(pTasks);
-		return IIR_SUCCESS;
+		{
+			ResetSelectedTaskCreationDate(m_tasksSelected.GetFirstTask(), TRUE);
+
+			if (!m_tasksSelected.CopyTasksTo(pTasks))
+				return IIER_SOMEFAILED;
+		}
+		return IIER_SUCCESS;
 
 	case TDCF_BADMSXML:
 	case TDCF_NOTTASKLIST:
-		return IIR_BADFORMAT;
+		return IIER_BADFORMAT;
 
 	case TDCF_INUSE:
 	case TDCF_NOTALLOWED:
@@ -176,11 +180,11 @@ IIMPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)
 	case TDCF_NOTEXIST:
 	case TDCF_NOENCRYPTIONDLL:
 	case TDCF_UNKNOWNENCRYPTION:
-		return IIR_BADFILE;
+		return IIER_BADFILE;
 	}
 
 	// all else
-	return IIR_OTHER;
+	return IIER_OTHER;
 }
 
 void CTDLTasklistImportDlg::ResetSelectedTaskCreationDate(HTASKITEM hTask, BOOL bAndSiblings)

@@ -268,12 +268,12 @@ HICON CImportExportMgr::GetExporterIcon(int nExporter) const
 	return NULL;
 }
 
-IIMPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
 	if ((nByImporter < 0) || (nByImporter >= m_aImporters.GetSize()))
-		return IIR_OTHER;
+		return IIER_OTHER;
 
 	CWaitCursor cursor;
 
@@ -281,7 +281,7 @@ IIMPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pD
 	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, (bSilent != FALSE), pPrefs, IMPORTER_KEY);
 }
 
-BOOL CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
@@ -292,10 +292,10 @@ BOOL CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDest
 	}
 
 	// else
-	return FALSE;
+	return IIER_OTHER;
 }
 
-BOOL CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
@@ -306,7 +306,7 @@ BOOL CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR 
 	}
 
 	// else
-	return FALSE;
+	return IIER_BADFORMAT;
 }
 
 int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const

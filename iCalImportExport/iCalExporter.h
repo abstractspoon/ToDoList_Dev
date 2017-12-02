@@ -32,16 +32,16 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
 	HICON GetIcon() const { return m_icon; }
 
-	bool Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-	bool Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;
 	BOOL EXPORTASTODO, NODUEDATEISTODAYORSTART;
 
 protected:
-	void ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
-							CStdioFile& fileOut, BOOL bAndSiblings);
+	int ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
+					CStdioFile& fileOut, BOOL bAndSiblings);
 	bool InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 	BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COleDateTime& dtStart, COleDateTime& dtEnd, COleDateTime& dtDue) const;

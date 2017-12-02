@@ -37,7 +37,7 @@ const LPCTSTR PREF_KEY = _T("Preferences");
 																			\
 	CString sFile;															\
 																			\
-	if (FUNCTION(pSrcTasks, szTempFile, bSilent))							\
+	if (FUNCTION(pSrcTasks, szTempFile, bSilent) == IIER_SUCCESS)			\
 		FileMisc::LoadFile(szTempFile, sFile);								\
 																			\
 	FileMisc::DeleteFile(szTempFile, TRUE);									
@@ -81,7 +81,7 @@ void CTDCImportExportMgr::Initialize() const
 
 BOOL CTDCImportExportMgr::ExportTaskListToHtml(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskList(pSrcTasks, szDestFile, EXPTOHTML, bSilent);
+	return (ExportTaskList(pSrcTasks, szDestFile, EXPTOHTML, bSilent == IIER_SUCCESS));
 }
 
 CString CTDCImportExportMgr::ExportTaskListToHtml(const ITaskList* pSrcTasks, BOOL bSilent) const
@@ -92,7 +92,7 @@ CString CTDCImportExportMgr::ExportTaskListToHtml(const ITaskList* pSrcTasks, BO
 
 BOOL CTDCImportExportMgr::ExportTaskListsToHtml(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskLists(pSrcTasks, szDestFile, EXPTOHTML, bSilent);
+	return (ExportTaskLists(pSrcTasks, szDestFile, EXPTOHTML, bSilent == IIER_SUCCESS));
 }
 
 CString CTDCImportExportMgr::ExportTaskListsToHtml(const IMultiTaskList* pSrcTasks, BOOL bSilent) const
@@ -103,7 +103,7 @@ CString CTDCImportExportMgr::ExportTaskListsToHtml(const IMultiTaskList* pSrcTas
 
 BOOL CTDCImportExportMgr::ExportTaskListToText(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskList(pSrcTasks, szDestFile, EXPTOTXT, bSilent);
+	return (ExportTaskList(pSrcTasks, szDestFile, EXPTOTXT, bSilent == IIER_SUCCESS));
 }
 
 CString CTDCImportExportMgr::ExportTaskListToText(const ITaskList* pSrcTasks, BOOL bSilent) const
@@ -114,7 +114,7 @@ CString CTDCImportExportMgr::ExportTaskListToText(const ITaskList* pSrcTasks, BO
 
 BOOL CTDCImportExportMgr::ExportTaskListsToText(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskLists(pSrcTasks, szDestFile, EXPTOTXT, bSilent);
+	return (ExportTaskLists(pSrcTasks, szDestFile, EXPTOTXT, bSilent) == IIER_SUCCESS);
 }
 
 CString CTDCImportExportMgr::ExportTaskListsToText(const IMultiTaskList* pSrcTasks, BOOL bSilent) const
@@ -125,7 +125,7 @@ CString CTDCImportExportMgr::ExportTaskListsToText(const IMultiTaskList* pSrcTas
 
 BOOL CTDCImportExportMgr::ExportTaskListToCsv(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskList(pSrcTasks, szDestFile, EXPTOCSV, bSilent);
+	return (ExportTaskList(pSrcTasks, szDestFile, EXPTOCSV, bSilent) == IIER_SUCCESS);
 }
 
 CString CTDCImportExportMgr::ExportTaskListToCsv(const ITaskList* pSrcTasks, BOOL bSilent) const
@@ -136,7 +136,7 @@ CString CTDCImportExportMgr::ExportTaskListToCsv(const ITaskList* pSrcTasks, BOO
 
 BOOL CTDCImportExportMgr::ExportTaskListsToCsv(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskLists(pSrcTasks, szDestFile, EXPTOCSV, bSilent);
+	return (ExportTaskLists(pSrcTasks, szDestFile, EXPTOCSV, bSilent) == IIER_SUCCESS);
 }
 
 CString CTDCImportExportMgr::ExportTaskListsToCsv(const IMultiTaskList* pSrcTasks, BOOL bSilent) const
@@ -147,12 +147,12 @@ CString CTDCImportExportMgr::ExportTaskListsToCsv(const IMultiTaskList* pSrcTask
 
 BOOL CTDCImportExportMgr::ImportTaskListFromCsv(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent) const
 {
-	return ImportTaskList(szSrcFile, pDestTasks, IMPFROMCSV, bSilent);
+	return (ImportTaskList(szSrcFile, pDestTasks, IMPFROMCSV, bSilent) == IIER_SUCCESS);
 }
 
 BOOL CTDCImportExportMgr::ExportTaskListToTdl(const ITaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskList(pSrcTasks, szDestFile, EXPTOTDL, bSilent);
+	return (ExportTaskList(pSrcTasks, szDestFile, EXPTOTDL, bSilent) == IIER_SUCCESS);
 }
 
 CString CTDCImportExportMgr::ExportTaskListToTdl(const ITaskList* pSrcTasks, BOOL bSilent) const
@@ -163,7 +163,7 @@ CString CTDCImportExportMgr::ExportTaskListToTdl(const ITaskList* pSrcTasks, BOO
 
 BOOL CTDCImportExportMgr::ExportTaskListsToTdl(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, BOOL bSilent) const
 {
-	return ExportTaskLists(pSrcTasks, szDestFile, EXPTOTDL, bSilent);
+	return (ExportTaskLists(pSrcTasks, szDestFile, EXPTOTDL, bSilent) == IIER_SUCCESS);
 }
 
 CString CTDCImportExportMgr::ExportTaskListsToTdl(const IMultiTaskList* pSrcTasks, BOOL bSilent) const
@@ -174,15 +174,15 @@ CString CTDCImportExportMgr::ExportTaskListsToTdl(const IMultiTaskList* pSrcTask
 
 BOOL CTDCImportExportMgr::ImportTaskListFromTdl(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent) const
 {
-	return ImportTaskList(szSrcFile, pDestTasks, IMPFROMTDL, bSilent);
+	return (ImportTaskList(szSrcFile, pDestTasks, IMPFROMTDL, bSilent) == IIER_SUCCESS);
 }
 
 BOOL CTDCImportExportMgr::ImportTaskListFromOutlook(LPCTSTR szSrcFile, ITaskList* pDestTasks, BOOL bSilent) const
 {
-	return ImportTaskList(szSrcFile, pDestTasks, IMPFROMOUTLOOK, bSilent);
+	return (ImportTaskList(szSrcFile, pDestTasks, IMPFROMOUTLOOK, bSilent) == IIER_SUCCESS);
 }
 
-BOOL CTDCImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CTDCImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	CPreferences prefs;
 
@@ -192,7 +192,7 @@ BOOL CTDCImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szD
 	return CImportExportMgr::ExportTaskList(pSrcTasks, szDestFile, nByExporter, bSilent, pPrefs);
 }
 
-BOOL CTDCImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CTDCImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	CPreferences prefs;
 
@@ -202,7 +202,7 @@ BOOL CTDCImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTS
 	return CImportExportMgr::ExportTaskLists(pSrcTasks, szDestFile, nByExporter, bSilent, pPrefs);
 }
 
-IIMPORT_RESULT CTDCImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent) const
+IIMPORTEXPORT_RESULT CTDCImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent) const
 {
 	CPreferences prefs;
 

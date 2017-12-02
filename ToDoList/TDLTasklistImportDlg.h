@@ -33,7 +33,7 @@ class CTDLTasklistImportDlg : public CDialog
 public:
 	CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pParent = NULL);   // standard constructor
 
-	IIMPORT_RESULT GetSelectedTasks(ITaskList* pTasks);
+	IIMPORTEXPORT_RESULT GetSelectedTasks(ITaskList* pTasks);
 
 protected:
 // Dialog Data

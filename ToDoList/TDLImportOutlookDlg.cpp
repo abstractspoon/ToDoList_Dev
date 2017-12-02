@@ -85,14 +85,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg message handlers
 
-IIMPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_pDestTaskFile = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
-	if (!m_pDestTaskFile)
+	if (m_pDestTaskFile == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 
 	CString sKey(szKey);
@@ -102,13 +102,13 @@ IIMPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile, IPref
 	m_bRemoveOutlookTasks = pPrefs->GetProfileInt(sKey, _T("RemoveOutlookTasks"), FALSE);
 
 	if (DoModal() != IDOK)
-		return IIR_CANCELLED;
+		return IIER_CANCELLED;
 
 	// else
 	pPrefs->WriteProfileInt(sKey, _T("HideUnflaggedEmails"), m_bHideUnflaggedEmails);
 	pPrefs->WriteProfileInt(sKey, _T("RemoveOutlookTasks"), m_bRemoveOutlookTasks);
 
-	return IIR_SUCCESS;
+	return IIER_SUCCESS;
 }
 
 BOOL CTDLImportOutlookDlg::OnInitDialog() 

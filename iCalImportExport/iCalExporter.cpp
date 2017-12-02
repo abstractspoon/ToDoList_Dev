@@ -47,66 +47,76 @@ void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 	WriteString(fileOut, _T("VERSION:2.0"));
 }
 
-bool CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return false;
+		return IIER_BADINTERFACE;
 	}
 
 	if (!InitConsts(bSilent, pPrefs, szKey))
-		return false;
+		return IIER_CANCELLED;
 
 	CStdioFileEx fileOut;
 	
-	if (fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
-	{
-		// header
-		WriteHeader(fileOut);
-		
-		// export first task only and the rest will follow
-		ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
+	if (!fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
 
-		// footer
-		WriteString(fileOut, _T("END:VCALENDAR"));
+	// header
+	WriteHeader(fileOut);
 		
-		return true;
-	}
-	
-	return false;
+	// export first task only and the rest will follow
+	int nNumExported = ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
+
+	// footer
+	WriteString(fileOut, _T("END:VCALENDAR"));
+
+	if (nNumExported != pTasks->GetTaskCount())
+		return IIER_SOMEFAILED;
+		
+	return IIER_SUCCESS;
 }
 
-bool CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (!InitConsts(bSilent, pPrefs, szKey))
-		return false;
+		return IIER_CANCELLED;
 	
 	CStdioFileEx fileOut;
 	
-	if (fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
-	{
-		// header
-		WriteHeader(fileOut);
-		
-		for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
-		{
-			const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+	if (!fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
 
-			// export first task only and the rest will follow
-			if (pTasks)
-				ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
+	// header
+	WriteHeader(fileOut);
+
+	int nNumTasks = 0, nNumExported = 0;
+
+	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+	{
+		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+
+		// export first task only and the rest will follow
+		if (pTasks == NULL)
+		{
+			ASSERT(0);
+			return IIER_BADINTERFACE;
 		}
 
-		// footer
-		WriteString(fileOut, _T("END:VCALENDAR"));
-		
-		return true;
+		nNumTasks += pTasks->GetTaskCount();
+		nNumExported += ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
 	}
-	
-	return false;
+
+	// footer
+	WriteString(fileOut, _T("END:VCALENDAR"));
+
+	if (nNumExported != nNumTasks)
+		return IIER_SOMEFAILED;
+
+	return IIER_SUCCESS;
 }
 
 bool CiCalExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
@@ -201,12 +211,14 @@ BOOL CiCalExporter::GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	return (bHasStart || bHasEnd);
 }
 
-void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
-	const CString& sParentUID, CStdioFile& fileOut, BOOL bAndSiblings)
+int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
+								CStdioFile& fileOut, BOOL bAndSiblings)
 {
 	if (!hTask)
-		return;
-	
+		return 0;
+
+	int nNumExported = 0;
+
 	// construct a unique ID
 	CString sUID = FormatUID(fileOut.GetFilePath(), pTasks->GetTaskID(hTask));
 		
@@ -300,10 +312,12 @@ void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 			WriteString(fileOut, _T("END:VTODO"));
 		else
 			WriteString(fileOut, _T("END:VEVENT"));
+
+		nNumExported++;
 	}
 	
 	// copy across first child
-	ExportTask(pTasks, pTasks->GetFirstTask(hTask), sUID, fileOut, TRUE);
+	nNumExported += ExportTask(pTasks, pTasks->GetFirstTask(hTask), sUID, fileOut, TRUE);
 	
 	// copy sibling tasks WITHOUT RECURSION
 	if (bAndSiblings)
@@ -313,10 +327,12 @@ void CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == don't recurse on siblings
-			ExportTask(pTasks, hSibling, sParentUID, fileOut, FALSE);
+			nNumExported += ExportTask(pTasks, hSibling, sParentUID, fileOut, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
+
+	return nNumExported;
 }
 
 CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWORD dwSpecific2)

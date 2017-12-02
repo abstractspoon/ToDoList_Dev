@@ -37,24 +37,29 @@ CTaskListCsvExporter::~CTaskListCsvExporter()
 	
 }
 
-bool CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
 
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
 }
 
-bool CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
 
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
 }
 
-bool CTaskListCsvExporter::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
+IIMPORTEXPORT_RESULT CTaskListCsvExporter::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
 {
 	if (!sOutput.IsEmpty() && m_bExportingForExcel)
-		return (FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF16) != FALSE);
+	{
+		if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF16))
+			return IIER_BADFILE;
+
+		return IIER_SUCCESS;
+	}
 
 	// else default handling
 	return CTaskListExporterBase::ExportOutput(szDestFilePath, sOutput);

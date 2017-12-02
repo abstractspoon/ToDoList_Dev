@@ -62,23 +62,23 @@ bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 	return true;
 }
 
-IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITaskList8* pTasks = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
 	
-	if (!pTasks)
+	if (pTasks == NULL)
 	{
 		ASSERT(0);
-		return IIR_BADINTERFACE;
+		return IIER_BADINTERFACE;
 	}
 	
 	if (!InitConsts(bSilent, pPrefs, szKey))
-		return IIR_CANCELLED;
+		return IIER_CANCELLED;
 
 	CStdioFileEx file;
 
 	if (!file.Open(szSrcFilePath, CFile::modeRead))
-		return IIR_BADFILE;
+		return IIER_BADFILE;
 
 	// the first line can be the project name
 	if (WANTPROJECT)
@@ -138,7 +138,7 @@ IIMPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDes
 		nLastDepth = nDepth;
 	}
 
-	return IIR_SUCCESS;
+	return IIER_SUCCESS;
 }
 
 int CPlainTextImporter::GetDepth(const CString& sLine)

@@ -772,7 +772,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 			if (attrib.Has(IUI_FLAG))
-				pKI->bFlag = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
+				pKI->bFlag = (pTasks->IsTaskFlagged(hTask, true) ? TRUE : FALSE);
 			
 			// Trackable attributes
 			CStringArray aValues;
@@ -805,10 +805,10 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_VERSION, pTasks->GetTaskVersion(hTask));
 
 			if (attrib.Has(IUI_PRIORITY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_PRIORITY, pTasks->GetTaskPriority(hTask, true));
 
 			if (attrib.Has(IUI_RISK))
-				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_RISK, pTasks->GetTaskRisk(hTask, FALSE));
+				bChange |= UpdateTrackableTaskAttribute(pKI, IUI_RISK, pTasks->GetTaskRisk(hTask, true));
 
 			if (attrib.Has(IUI_CUSTOMATTRIB))
 			{
@@ -877,13 +877,13 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	time64_t tDate = 0;
 	
 	if (attrib.Has(IUI_TIMEEST))
-		pKI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pKI->nTimeEstUnits, FALSE);
+		pKI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pKI->nTimeEstUnits, true);
 	
 	if (attrib.Has(IUI_TIMESPENT))
-		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, FALSE);
+		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true);
 	
 	if (attrib.Has(IUI_COST))
-		pKI->dCost = pTasks->GetTaskCost(hTask, FALSE);
+		pKI->dCost = pTasks->GetTaskCost(hTask, true);
 	
 	if (attrib.Has(IUI_CREATEDBY))
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
@@ -894,17 +894,17 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	if (attrib.Has(IUI_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
 		pKI->dtDone = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IUI_DUEDATE) && pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
+	if (attrib.Has(IUI_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
 		pKI->dtDue = CDateHelper::GetDate(tDate);
 	
-	if (attrib.Has(IUI_STARTDATE) && pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+	if (attrib.Has(IUI_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
 		pKI->dtStart = CDateHelper::GetDate(tDate);
 	
 	if (attrib.Has(IUI_LASTMOD) && pTasks->GetTaskLastModified64(hTask, tDate))
 		pKI->dtLastMod = CDateHelper::GetDate(tDate);
 	
 	if (attrib.Has(IUI_PERCENT))
-		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, FALSE);
+		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, true);
 	
 	if (attrib.Has(IUI_EXTERNALID))
 		pKI->sExternalID = pTasks->GetTaskExternalID(hTask);

@@ -37,7 +37,7 @@ class CTDLImportOutlookDlg : public CDialog
 public:
 	CTDLImportOutlookDlg(CWnd* pParent = NULL);   // standard constructor
 
-	IIMPORT_RESULT ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey);
 
 // Dialog Data
 	//{{AFX_DATA(COutlookImportDlg)
