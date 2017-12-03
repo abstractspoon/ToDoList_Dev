@@ -108,13 +108,16 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	if (!pTDI || !pTDS)
 		return 0;
 
-	SEARCHRESULT result;
-	int nResults = aResults.GetSize();
-	
 	// if the item is done and we're ignoring completed tasks 
 	// (and by corollary their children) then we can stop right-away
-	if (query.bIgnoreDone && m_data.CalcIsTaskDone(pTDI, pTDS))
+	BOOL bIsDone = m_data.CalcIsTaskDone(pTDI, pTDS);
+
+	if (query.bIgnoreDone && bIsDone)
 		return 0;
+	
+	// else
+	SEARCHRESULT result;
+	int nResults = aResults.GetSize();
 	
 	if (TaskMatches(pTDI, pTDS, query, result))
 	{
@@ -167,24 +170,59 @@ BOOL CTDCTaskMatcher::TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEA
 	return FALSE;
 }
 
+BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+											const SEARCHPARAMS& query, SEARCHRESULT& result) const
+{
+	// sanity check
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
+
+	while (pTDSParent && !pTDSParent->IsRoot())
+	{
+		DWORD dwParentID = pTDSParent->GetTaskID();
+		const TODOITEM* pTDIParent = m_data.GetTrueTask(dwParentID);
+
+		if (!pTDIParent)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (TaskMatches(pTDIParent, pTDSParent, query, result))
+			return TRUE;
+
+		pTDSParent = pTDSParent->GetParentTask();
+	}
+
+	return FALSE;
+}
+
 BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 									const SEARCHPARAMS& query, SEARCHRESULT& result) const
 {
 	// sanity check
-	ASSERT(pTDI && pTDS);
-	
 	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
+	// special case: want all subtasks
+	if (query.bWantAllSubtasks && AnyTaskParentMatches(pTDI, pTDS, query, result))
+		return TRUE;
+
+	// Special case: The item is done and we're ignoring completed tasks 
 	BOOL bIsDone = m_data.CalcIsTaskDone(pTDI, pTDS);
 	
-	// if the item is done and we're ignoring completed tasks 
-	// (and by corollary their children) then we can stop right-away
 	if (bIsDone && query.bIgnoreDone)
 		return FALSE;
 	
 	BOOL bMatches = TRUE;
-	
 	int nNumRules = query.aRules.GetSize();
 	
 	for (int nRule = 0; nRule < nNumRules && bMatches; nRule++)
@@ -269,7 +307,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				// CalcStartDate will ignore completed tasks so we have
 				// to handle that specific situation
-				if (bIsDone && !query.bIgnoreDone)
+				if (bIsDone)
 				{
 					bMatch = ValueMatches(pTDI->dateStart, rule, resTask, bIncTime, TDCD_START);
 				}
@@ -288,7 +326,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				// CalcDueDate will ignore completed tasks so we have
 				// to handle that specific situation
-				if (bIsDone && !query.bIgnoreDone)
+				if (bIsDone)
 				{
 					bMatch = ValueMatches(pTDI->dateDue, rule, resTask, bIncTime, TDCD_DUE);
 				}
@@ -543,28 +581,28 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	}
 
 	// check for parent match if user wants all subtasks
-	if (!bMatches && query.bWantAllSubtasks)
-	{
-		const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-
-		while (pTDSParent)
-		{
-			const TODOITEM* pTDIParent = m_data.GetTrueTask(pTDSParent);
-
-			if (!pTDIParent)
-				break;
-
-			// else
-			if (TaskMatches(pTDIParent, pTDSParent, query, result))
-			{
-				bMatches = TRUE;
-				break;
-			}
-				
-			// next parent
-			pTDSParent = pTDSParent->GetParentTask();
-		}
-	}
+// 	if (!bMatches && query.bWantAllSubtasks)
+// 	{
+// 		const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
+// 
+// 		while (pTDSParent && !pTDSParent->IsRoot())
+// 		{
+// 			const TODOITEM* pTDIParent = m_data.GetTrueTask(pTDSParent);
+// 
+// 			if (!pTDIParent)
+// 				break;
+// 
+// 			// else
+// 			if (TaskMatches(pTDIParent, pTDSParent, query, result))
+// 			{
+// 				bMatches = TRUE;
+// 				break;
+// 			}
+// 				
+// 			// next parent
+// 			pTDSParent = pTDSParent->GetParentTask();
+// 		}
+// 	}
 	
 	if (bMatches)
 	{

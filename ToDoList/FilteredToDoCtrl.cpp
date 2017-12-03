@@ -866,23 +866,6 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 				}
 			}
 		}
-		// special case: want all subtasks
-		else if (pFilter->bWantAllSubtasks && !pTDS->ParentIsRoot())
-		{
-			TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-			BOOL bWantParent = FALSE;
-
-			while (pTDSParent && !pTDSParent->IsRoot() && !bWantParent)
-			{
-				const TODOITEM* pTDIParent = m_data.GetTask(pTDSParent->GetTaskID());
-				ASSERT(pTDSParent);
-
-				bWantParent = m_matcher.TaskMatches(pTDIParent, pTDSParent, *pFilter, result);
-				pTDSParent = pTDSParent->GetParentTask();
-			}
-			
-			bWantTask = bWantParent;
-		}
 		else // rest of attributes
 		{
 			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result);

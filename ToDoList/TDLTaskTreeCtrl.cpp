@@ -2043,9 +2043,11 @@ BOOL CTDLTaskTreeCtrl::InvalidateTask(DWORD dwTaskID, BOOL bUpdate)
 		return TRUE; // nothing to do
 	
 	HTREEITEM hti = FindTreeItem(m_tcTasks, NULL, dwTaskID);
-	ASSERT(hti);
 
-	return InvalidateItem(hti, bUpdate);
+	if (hti)
+		return InvalidateItem(hti, bUpdate);
+
+	return FALSE;
 }
 
 BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
