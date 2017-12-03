@@ -242,17 +242,17 @@ BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& 
 
 	case TTLP_THISWEEK:
 		dtFrom = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
-		dtTo = (dtNow.m_dt + 1.0);
+		dtTo = (dtNow.m_dt + 7.0);
 		break;
 
 	case TTLP_THISMONTH:
 		dtFrom.SetDate(dtNow.GetYear(), dtNow.GetMonth(), 1);
-		dtTo = (dtNow.m_dt + 1.0);
+		dtTo = (CDateHelper::GetEndOfMonth(dtNow).m_dt + 1.0);
 		break;
 
 	case TTLP_THISYEAR:
 		dtFrom.SetDate(dtNow.GetYear(), 1, 1);
-		dtTo = (dtNow.m_dt + 1.0);
+		dtTo = (CDateHelper::GetEndOfYear(dtNow).m_dt + 1.0);
 		break;
 
 	default:
