@@ -389,7 +389,7 @@ void CTDLFilterBar::OnSelchangeFilter(NMHDR* pNMHDR, LRESULT* pResult)
 
 LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 {
-	UpdateData();
+	OnSelchangeFilter();
 	
 	switch (wp)
 	{
@@ -402,7 +402,6 @@ LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 		break;
 	}
 
-	OnSelchangeFilter();
 	return 0L;
 }
 
