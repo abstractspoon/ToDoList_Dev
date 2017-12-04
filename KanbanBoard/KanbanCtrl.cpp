@@ -2312,10 +2312,67 @@ void CKanbanCtrl::ScrollToSelectedTask()
 		pList->ScrollToSelection();
 }
 
-bool CKanbanCtrl::PrepareNewTask(ITaskList* /*pTask*/) const
+bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 {
-// 	HTASKITEM hNewTask = pTask->GetFirstTask();
-// 	ASSERT(hNewTask);
+	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTask, IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	HTASKITEM hNewTask = pTasks->GetFirstTask();
+	ASSERT(hNewTask);
+
+	const CKanbanListCtrl* pList = GetSelListCtrl();
+	CString sValue;
+
+	CRect rListCtrl;
+	pList->GetWindowRect(rListCtrl);
+
+	if (!GetListCtrlAttributeValue(pList, rListCtrl.CenterPoint(), sValue))
+		return false;
+
+	switch (m_nTrackAttribute)
+	{
+	case IUI_STATUS:
+		pTasks->SetTaskStatus(hNewTask, sValue);
+		break;
+
+	case IUI_ALLOCTO:
+		pTasks->AddTaskAllocatedTo(hNewTask, sValue);
+		break;
+
+	case IUI_ALLOCBY:
+		pTasks->SetTaskAllocatedBy(hNewTask, sValue);
+		break;
+
+	case IUI_CATEGORY:
+		pTasks->AddTaskCategory(hNewTask, sValue);
+		break;
+
+	case IUI_PRIORITY:
+		pTasks->SetTaskPriority(hNewTask, _ttoi(sValue));
+		break;
+
+	case IUI_RISK:
+		pTasks->SetTaskRisk(hNewTask, _ttoi(sValue));
+		break;
+
+	case IUI_VERSION:
+		pTasks->SetTaskVersion(hNewTask, sValue);
+		break;
+
+	case IUI_TAGS:
+		pTasks->AddTaskTag(hNewTask, sValue);
+		break;
+
+	case IUI_CUSTOMATTRIB:
+		ASSERT(!m_sTrackAttribID.IsEmpty());
+		pTasks->SetTaskCustomAttributeData(hNewTask, m_sTrackAttribID, sValue);
+		break;
+	}
 
 	return true;
 }
@@ -2693,7 +2750,7 @@ BOOL CKanbanCtrl::EndDragItem(CKanbanListCtrl* pSrcList, DWORD dwTaskID,
 	return TRUE;
 }
 
-BOOL CKanbanCtrl::GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue)
+BOOL CKanbanCtrl::GetListCtrlAttributeValue(const CKanbanListCtrl* pDestList, const CPoint& ptScreen, CString& sValue) const
 {
 	CStringArray aListValues;
 	int nNumValues = pDestList->GetAttributeValues(aListValues);
@@ -2719,7 +2776,7 @@ BOOL CKanbanCtrl::GetListCtrlAttributeValue(CKanbanListCtrl* pDestList, const CP
 	}
 
 	UINT nValID = menu.TrackPopupMenu((TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD), 
-										ptScreen.x, ptScreen.y, pDestList);
+										ptScreen.x, ptScreen.y, CWnd::FromHandle(*pDestList));
 
 	if (nValID > 0)
 	{
