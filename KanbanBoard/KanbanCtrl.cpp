@@ -165,7 +165,7 @@ bool CKanbanCtrl::ProcessMessage(MSG* pMsg)
 			BOOL bHeader = FALSE;
 			CKanbanListCtrl* pList = HitTestListCtrl(ptScreen, &bHeader);
 
-			if (bHeader && pList && pList->GetItemCount())
+			if (bHeader && pList/* && pList->GetItemCount()*/)
 				pList->SetFocus();
 		}
 		break;
@@ -2502,35 +2502,43 @@ void CKanbanCtrl::OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult)
 
 BOOL CKanbanCtrl::SelectListCtrl(CKanbanListCtrl* pList, BOOL bNotifyParent)
 {
-	//TRACE(_T("CKanbanCtrl::SelectListCtrl(%s)\n"), pList->GetAttributeValue());
-
-	if (pList && (pList != m_pSelectedList) && pList->GetItemCount())
+	if (pList && (pList != m_pSelectedList))
 	{
+		CKanbanListCtrl* pPrevSelList = m_pSelectedList;
 		m_pSelectedList = pList;
+
 		FixupFocus();
 
-		ClearOtherListSelections(m_pSelectedList);
-
-		if (m_pSelectedList->GetSelectedCount() == 0)
+		if (pList->GetItemCount() > 0)
 		{
-			// Select the first visible item
-			int nFirstVis = m_pSelectedList->GetTopIndex();
-			ASSERT(nFirstVis != -1);
-		
-			m_pSelectedList->SelectTask(m_pSelectedList->GetTaskID(nFirstVis));
-			m_pSelectedList->Invalidate(TRUE);
+			ClearOtherListSelections(m_pSelectedList);
+
+			if (m_pSelectedList->GetSelectedCount() == 0)
+			{
+				// Select the first visible item
+				int nFirstVis = m_pSelectedList->GetTopIndex();
+				ASSERT(nFirstVis != -1);
+				
+				m_pSelectedList->SelectTask(m_pSelectedList->GetTaskID(nFirstVis));
+				m_pSelectedList->Invalidate(TRUE);
+			}
+			else
+			{
+				// Scroll to the current selection
+				POSITION pos = m_pSelectedList->GetFirstSelectedItemPosition();
+				int nFirstSel = m_pSelectedList->GetNextSelectedItem(pos);
+			
+				m_pSelectedList->EnsureVisible(nFirstSel, FALSE);
+			}
+
+			if (bNotifyParent)
+				NotifyParentSelectionChange();
 		}
 		else
 		{
-			// Scroll to the current selection
-			POSITION pos = m_pSelectedList->GetFirstSelectedItemPosition();
-			int nFirstSel = m_pSelectedList->GetNextSelectedItem(pos);
-		
-			m_pSelectedList->EnsureVisible(nFirstSel, FALSE);
+			pPrevSelList->SetSelected(FALSE);
+			m_pSelectedList->SetSelected(TRUE);
 		}
-
-		if (bNotifyParent)
-			NotifyParentSelectionChange();
 
 		return TRUE;
 	}
