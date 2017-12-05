@@ -245,9 +245,9 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		{
 			HWND hWnd = find.aResults[nWnd];
 
-			if (SendStartupOptions(hWnd, startup, TDLCD_FINDFILE))
+			if (SendStartupOptions(hWnd, startup, TDLCD_HASTASKFILE))
 			{
-				SendStartupOptions(hWnd, startup, TDLCD_STARTUP);
+				SendStartupOptions(hWnd, startup, TDLCD_PROCESSSTARTUP);
 
 				// We don't worry if this fails because:
 				// 1. Either this is the only instance that can handle 
@@ -269,7 +269,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		{
 			HWND hWnd = find.aResults[nWnd];
 
-			if (SendStartupOptions(hWnd, startup, TDLCD_STARTUP))
+			if (SendStartupOptions(hWnd, startup, TDLCD_PROCESSSTARTUP))
 			{
 				hwndOtherInst = hWnd;
 				bTasklistOpened = startup.HasFilePath();

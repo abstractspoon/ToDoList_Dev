@@ -5572,7 +5572,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 
 	switch (pCopyDataStruct->dwData)
 	{
-	case TDLCD_FINDFILE:
+	case TDLCD_HASTASKFILE:
 		if (pCopyDataStruct->cbData != sizeof(CTDCStartupOptions))
 		{
 			ASSERT(0);
@@ -5607,7 +5607,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 
-	case TDLCD_STARTUP:
+	case TDLCD_PROCESSSTARTUP:
 		if (pCopyDataStruct->cbData != sizeof(CTDCStartupOptions))
 		{
 			ASSERT(0);
@@ -5620,6 +5620,26 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 				bRes = ProcessStartupOptions(*pStartup, FALSE);
 		}
 		break;
+
+	case TDLCD_LANGFILECHANGE:
+		{
+			LPCTSTR szLangFile = (LPCTSTR)(pCopyDataStruct->lpData);
+
+			if (!AfxIsValidString(szLangFile, pCopyDataStruct->cbData) || Misc::IsEmpty(szLangFile))
+			{
+				ASSERT(0);
+			}
+			else if (CLocalizer::GetDictionaryPath().CompareNoCase(szLangFile) == 0)
+			{
+				//if (MessageBox(IDS_RESTARTTOUPDATELANGUAGE, 0, MB_YESNO) == IDYES)
+				if (MessageBox(IDS_RESTARTTOCHANGELANGUAGE, 0, MB_YESNO) == IDYES)
+				{
+					bRes = DoExit(TRUE);
+				}
+			}
+		}
+		break;
+
 	}
 
 	return bRes; 

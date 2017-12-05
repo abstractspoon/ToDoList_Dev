@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "TDLTransEdit.vcxproj", "{6040BB52-2CA0-B789-CB3D-D4511C68F1AE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTransEdit", "TDLTransEdit.vcxproj", "{0FEAFC4E-5946-538A-1D54-2EAFB9461394}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1AC5867E-0688-4C2E-8F23-E488F6594948} = {1AC5867E-0688-4C2E-8F23-E488F6594948}
 		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
@@ -20,10 +20,10 @@ Global
 		Unicode Release|Win32 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6040BB52-2CA0-B789-CB3D-D4511C68F1AE}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{6040BB52-2CA0-B789-CB3D-D4511C68F1AE}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{6040BB52-2CA0-B789-CB3D-D4511C68F1AE}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{6040BB52-2CA0-B789-CB3D-D4511C68F1AE}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{0FEAFC4E-5946-538A-1D54-2EAFB9461394}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{0FEAFC4E-5946-538A-1D54-2EAFB9461394}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{0FEAFC4E-5946-538A-1D54-2EAFB9461394}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{0FEAFC4E-5946-538A-1D54-2EAFB9461394}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
 		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
