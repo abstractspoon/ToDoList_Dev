@@ -13,8 +13,9 @@
 // WM_COPYDATA options
 enum TDL_COPYDATA
 {
-	TDLCD_STARTUP,
-	TDLCD_FINDFILE,
+	TDLCD_PROCESSSTARTUP,	// cbData = sizeof(CTDCStartupOptions)
+	TDLCD_HASTASKFILE,		// cbData = sizeof(CTDCStartupOptions)
+	TDLCD_LANGFILECHANGE,	// cbData = sizeof(TCHAR[])
 };
 
 // CToDoListWnd creation flags

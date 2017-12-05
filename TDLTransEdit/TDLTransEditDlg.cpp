@@ -5,11 +5,14 @@
 #include "TDLTransEdit.h"
 #include "TDLTransEditDlg.h"
 
+#include "..\todolist\tdcenum.h"
+
 #include "..\transtext\transtextutils.h"
 
 #include "..\shared\enfiledialog.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\mousewheelmgr.h"
@@ -152,13 +155,40 @@ void CTDLTransEditDlg::OnFileSaveTranslation()
 {
 	ASSERT(!IsReadOnly());
 
-	if (!IsReadOnly())
+	if (!IsReadOnly() && m_dictionary.SaveDictionary())
 	{
-		m_dictionary.SaveDictionary();
 		m_bEdited = FALSE;
 
 		UpdateCaption();
+
+		// Notify all instances of ToDoList.exe
+		EnumWindows(NotifyLangFileChange, (LPARAM)(LPCTSTR)m_dictionary.GetDictionaryPath());
 	}
+}
+
+BOOL CALLBACK CTDLTransEditDlg::NotifyLangFileChange(HWND hWnd, LPARAM lParam)
+{
+	static CString COPYRIGHT(_T("ToDoList (c) AbstractSpoon"));
+
+	CString sCaption;
+	CWnd::FromHandle(hWnd)->GetWindowText(sCaption);
+
+	if (Misc::RemoveSuffix(sCaption, COPYRIGHT))
+	{
+		TCHAR szLangFilePath[_MAX_PATH + 1] = { 0 };
+		StrCpyN(szLangFilePath, (LPCTSTR)lParam, _MAX_PATH);
+
+		COPYDATASTRUCT cds = 
+		{ 
+			TDLCD_LANGFILECHANGE, 
+			sizeof(szLangFilePath), 
+			(void*)szLangFilePath 
+		};
+
+		::SendMessage(hWnd, WM_COPYDATA, NULL, (LPARAM)&cds);
+	}
+
+	return TRUE; // to continue
 }
 
 void CTDLTransEditDlg::OnSize(UINT nType, int cx, int cy) 
@@ -303,8 +333,13 @@ BOOL CTDLTransEditDlg::PromptAndSave()
 		switch (nRet)
 		{
 		case IDYES:
-			m_dictionary.SaveDictionary();
-			return TRUE;
+			if (m_dictionary.SaveDictionary())
+			{
+				// Notify all instances of ToDoList.exe
+				EnumWindows(NotifyLangFileChange, (LPARAM)(LPCTSTR)m_dictionary.GetDictionaryPath());
+				return TRUE;
+			}
+			break;
 
 		case IDNO:
 			return TRUE;

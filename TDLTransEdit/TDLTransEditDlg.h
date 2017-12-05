@@ -94,6 +94,7 @@ protected:
 	CString GetTranslationVersion(const CString& sTransPath) const;
 	BOOL IsReadOnly() const;
 
+	static BOOL CALLBACK NotifyLangFileChange(HWND hwnd, LPARAM lParam);
 };
 
 //{{AFX_INSERT_LOCATION}}
