@@ -1461,7 +1461,7 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
 	return FALSE;
 }
 
-BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem) const
+BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit) const
 {
 	if (!GetItemRect(nItem, rItem, LVIR_BOUNDS))
 		return FALSE;
@@ -1476,10 +1476,21 @@ BOOL CKanbanListCtrl::GetItemLabelTextRect(int nItem, CRect& rItem) const
 	if (m_bShowTaskColorAsBar)
 		rItem.left += (2 + BAR_WIDTH);
 
-	rItem.DeflateRect(TEXT_BORDER);
-	rItem.bottom = (rItem.top + CalcItemTitleTextHeight());
-	rItem.top--;
-	rItem.right -= 2;
+	if (!bEdit)
+	{
+		rItem.DeflateRect(TEXT_BORDER);
+		rItem.bottom = (rItem.top + CalcItemTitleTextHeight());
+		rItem.top--;
+		rItem.right -= 2;
+	}
+	else
+	{
+		// make width of list column or 200 whichever is larger
+		int nWidth = max(rItem.Width(), MIN_LABEL_EDIT_WIDTH);
+			
+		rItem.right = rItem.left + nWidth;
+		rItem.bottom = (rItem.top + (CalcRequiredItemHeight(2) / 2));
+	}
 
 	return TRUE;
 }
@@ -1516,12 +1527,6 @@ BOOL CKanbanListCtrl::GetItemTooltipRect(int nItem, CRect& rTip) const
 	}
 
 	m_tooltip.AdjustRect(rTip, TRUE);
-
-// 	CRect rItem;
-// 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
-// 
-// 	rTip.bottom = (rItem.bottom - 1);
-
 	ClientToScreen(&rTip);
 
 	return TRUE;
@@ -1672,18 +1677,9 @@ BOOL CKanbanListCtrl::GetLabelEditRect(LPRECT pEdit)
 
 	CRect rItem;
 
-	if (GetItemLabelTextRect(nSelItem, rItem))
+	if (GetItemLabelTextRect(nSelItem, rItem, TRUE))
 	{
-		m_tooltip.AdjustRect(rItem, TRUE);
-
-		// make width of list column or 200 whichever is larger
-		int nWidth = max(rItem.Width(), MIN_LABEL_EDIT_WIDTH);
-
-		rItem.right = rItem.left + nWidth;
-		rItem.bottom = (rItem.top + CalcRequiredItemHeight(1));
-
 		*pEdit = rItem;
-
 		return TRUE;
 	}
 

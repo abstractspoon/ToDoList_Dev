@@ -159,7 +159,7 @@ protected:
 	BOOL HandleLButtonClick(CPoint point);
 	BOOL GetItemCheckboxRect(int nItem, CRect& rItem) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
-	BOOL GetItemLabelTextRect(int nItem, CRect& rItem) const;
+	BOOL GetItemLabelTextRect(int nItem, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL InitTooltip();
 	BOOL GetItemTooltipRect(int nItem, CRect& rItem) const;
 	BOOL SelectItem(int nItem, BOOL bFocus = FALSE);
