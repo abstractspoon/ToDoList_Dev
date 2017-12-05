@@ -1819,6 +1819,9 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 	if (!pList || !pList->GetSafeHwnd())
 		return FALSE;
 
+	CDWordArray aSelTaskIDs;
+
+	pList->GetSelectedTasks(aSelTaskIDs);
 	pList->SetRedraw(FALSE);
 	pList->DeleteAllItems();
 
@@ -1840,8 +1843,9 @@ BOOL CKanbanCtrl::RebuildListContents(CKanbanListCtrl* pList, const CKanbanItemA
 				
 				if (!pKI->bParent || bShowParents)
 				{
-					int nItem = pList->AddTask(*pKI, FALSE);
-					ASSERT(nItem != -1);
+					BOOL bSelected = Misc::HasT(aSelTaskIDs, pKI->dwTaskID);
+
+					VERIFY(pList->AddTask(*pKI, bSelected) != -1);
 				}
 			}
 		}
