@@ -109,6 +109,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnBuildOptionsCombo(WPARAM wp, LPARAM lp);
 	afx_msg void OnNcDestroy();
 
 	afx_msg LRESULT OnKanbanNotifySelectionChange(WPARAM wp, LPARAM lp);
@@ -124,7 +125,7 @@ protected:
 	void UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled);
 	void SendParentSelectionUpdate();
 	void EnableDisableCtrls();
-	void BuildOptionsCombo();
+	void BuildOptionsCombo(DWORD dwOptions);
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange(); 
 };
