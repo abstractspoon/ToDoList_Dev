@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TransTextMgr.h"
+#include "TransTextUtils.h"
 #include "TransWnd.h"
 
 #include "..\shared\misc.h"
@@ -35,7 +36,11 @@ CTransWnd::~CTransWnd()
 	
 BOOL CTransWnd::HookWindow(HWND hRealWnd, CSubclasser* pSubclasser)
 {
-	return CSubclassWnd::HookWindow(hRealWnd, pSubclasser);
+	if (!CSubclassWnd::HookWindow(hRealWnd, pSubclasser))
+		return FALSE;
+
+	m_sClassID = TransText::GetFriendlyClass(m_sClass, hRealWnd);
+	return TRUE;
 }
 
 void CTransWnd::PostHookWindow()

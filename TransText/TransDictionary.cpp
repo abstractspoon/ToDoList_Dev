@@ -559,8 +559,6 @@ BOOL DICTITEM::Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator)
 
 BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
 {
-	BOOL bTrans = FALSE;
-
 	// 1. check for an 'alternative' entry
 	if (!sClassID.IsEmpty() && !m_mapAlternatives.IsEmpty())
 	{
@@ -569,33 +567,27 @@ BOOL DICTITEM::Translate(CString& sText, const CString& sClassID)
 		if (m_mapAlternatives.Lookup(sClassID, sTextOut) && !sTextOut.IsEmpty())
 		{
 			sText = sTextOut;
-			bTrans = TRUE;
+			return TRUE;
 		}
 	}
 
-	if (!bTrans)
+	// 2. check root item
+	if (sClassID.IsEmpty() || m_sClassID.IsEmpty() || sClassID == m_sClassID)
 	{
-		// 2. check root item
-		if (sClassID.IsEmpty() || m_sClassID.IsEmpty() || (sClassID == m_sClassID))
-		{
-			bTrans = Translate(sText);
+		BOOL bTrans = Translate(sText);
 
-			// if the root item has no class ID then use this one
-			if (WantAddToDictionary() && m_sClassID.IsEmpty() && !sClassID.IsEmpty())
-				m_sClassID = sClassID;
-		}
+		// if the root item has no class ID then use this one
+		if (WantAddToDictionary() && m_sClassID.IsEmpty() && !sClassID.IsEmpty())
+			m_sClassID = sClassID;
 
-		if (!bTrans)
-		{
-			// 3. No translation so add as an alternative and use the root translation
-			if (WantAddToDictionary())
-				m_mapAlternatives[sClassID] = _T("");
-
-			bTrans = Translate(sText);
-		}
+		return bTrans;
 	}
 
-	return bTrans;
+	// 3. No translation so add as an alternative and use the root translation
+	if (WantAddToDictionary())
+		m_mapAlternatives[sClassID] = _T("");
+
+	return Translate(sText);
 }
 
 BOOL DICTITEM::ModifyItem(const CString& sClassID, const CString& sTextOut)
