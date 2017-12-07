@@ -120,7 +120,7 @@ public:
 
 	bool TranslateText(LPCTSTR szText, HWND hWndRef, LPTSTR& szTranslated)
 	{
-		return TranslateText(szText, hWndRef, NULL, szTranslated);
+		return TranslateText(szText, hWndRef, CWinClasses::GetClass(hWndRef), szTranslated);
 	}
 
 	void CTransText::FreeTextBuffer(LPTSTR& szTranslated)
