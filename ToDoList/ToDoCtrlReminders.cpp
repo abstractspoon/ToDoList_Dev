@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const BOOL USE_RTF = TRUE;
+const BOOL USE_RTF = FALSE/*TRUE*/;
 
 LPCTSTR RTF_HEADER = _T("{\\rtf1\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang3081")\
 					_T("{\\fonttbl{\\f0\\fnil\\fcharset0 Tahoma;}}")\
