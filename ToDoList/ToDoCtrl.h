@@ -460,7 +460,7 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
-	CIcon m_iconClock, m_iconLink;
+	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
 
 	CWordArray m_aStyles;
 	CString m_sXmlHeader, m_sXslHeader;

@@ -127,6 +127,7 @@ const int DECIMALS		 = 4;
 enum 
 {
 	ID_TIME_TRACK = 0xfff0,
+	ID_ADD_TIME,
 	ID_EXTERNALID_LINK,
 	ID_DEPENDS_LINK,
 };
@@ -248,8 +249,11 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_eCost.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add chess clock button to 'time spent'
-	m_iconClock.LoadIcon(IDI_TIME_TRACK);
-	m_eTimeSpent.InsertButton(0, ID_TIME_TRACK, m_iconClock, CEnString(IDS_TDC_STARTSTOPCLOCK));
+	m_iconTrackTime.LoadIcon(IDI_TIME_TRACK);
+	m_eTimeSpent.InsertButton(0, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
+
+	m_iconAddTime.LoadIcon(IDI_TIME_TRACK/*IDI_ADD_TIME*/);
+	m_eTimeSpent.InsertButton(0, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_STARTSTOPCLOCK/*IDS_TDC_ADDTIMESPENT*/), 15);
 
 	// add link button to dependency
 	m_iconLink.LoadIcon(IDI_DEPENDS_LINK);
@@ -1824,6 +1828,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, (dwTaskID == m_dwTimeTrackTaskID));
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, bCanTimeTrack);
 
 		// dependency link button
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && !m_sDepends.IsEmpty());
@@ -1867,6 +1872,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_aFileRefs.RemoveAll();
 
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
@@ -8642,6 +8648,8 @@ void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 		// Update Time spent control
 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, TRUE);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
+
 		SetCtrlState(m_eTimeSpent, RTCS_READONLY);
 			
 		// notify parent
@@ -8690,8 +8698,12 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 		m_taskTree.SetTimeTrackTaskID(0);
 
  		// Update Time spent control
+		BOOL bCanTimeTrack = m_data.IsTaskTimeTrackable(dwTaskID);
+
 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, FALSE);
-		m_eTimeSpent.EnableButton(ID_TIME_TRACK, m_data.IsTaskTimeTrackable(dwTaskID));
+		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, bCanTimeTrack);
+
 		SetCtrlState(m_eTimeSpent, RTCS_ENABLED);
 
 		// notify parent
@@ -11450,10 +11462,20 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case IDC_TIMESPENT:
-		if ((lParam == ID_TIME_TRACK) && (GetSelectedCount() == 1))
+		if (GetSelectedCount() == 1)
 		{
 			HandleUnsavedComments();
-			ToggleTimeTracking(GetSelectedItem());
+
+			switch (lParam)
+			{
+			case ID_TIME_TRACK:
+				ToggleTimeTracking(GetSelectedItem());
+				break;
+
+			case ID_ADD_TIME:
+				DoAddTimeToLogFile();
+				break;
+			}
 		}
 		break;
 

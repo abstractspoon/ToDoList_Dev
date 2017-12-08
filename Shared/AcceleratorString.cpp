@@ -14,9 +14,11 @@ CAcceleratorString::CAcceleratorString()
 {
 }
 
-CAcceleratorString::CAcceleratorString(const CString& sOther)
+CAcceleratorString::CAcceleratorString(const CString& sOther, BOOL bRemoveAccelerator)
 	: CString(sOther)
 {
+	if (bRemoveAccelerator)
+		RemoveAccelerator();
 }
 
 CAcceleratorString::~CAcceleratorString()

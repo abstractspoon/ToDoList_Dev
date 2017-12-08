@@ -7,6 +7,7 @@
 #include "dlgunits.h"
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
+#include "AcceleratorString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -147,7 +148,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip,
 	return TRUE;
 }
 
-BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip)
+BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth)
 {
 	if (!nID || !hIcon)
 		return FALSE;
@@ -166,7 +167,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip)
 	
 	eb.nID = nID;
 	eb.sTip = szTip;
-	eb.nWidth = 20; // 2 px padding
+	eb.nWidth = ((nWidth != DEF_BTNWIDTH) ? nWidth : 20); // 2 px padding
 	eb.iImage = m_ilBtns.Add(hIcon);
 
 	HICON hDisabled = CEnBitmapEx::CreateDisabledIcon(hIcon);
@@ -577,10 +578,11 @@ BOOL CEnEdit::SetButtonCaption(UINT nID, LPCTSTR szCaption)
 		return FALSE;
 
 	EDITBTN& eb = m_aButtons[nBtn];
+	CAcceleratorString sCaption(szCaption, TRUE); // Remove accelerator
 
-	if (eb.sCaption.Compare(szCaption) != 0)
+	if (eb.sCaption.Compare(sCaption) != 0)
 	{
-		eb.sCaption = szCaption;
+		eb.sCaption = sCaption;
 
 		// recalc width?
 		if (eb.nWidth == CALC_BTNWIDTH)

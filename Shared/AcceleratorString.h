@@ -13,7 +13,7 @@ class CAcceleratorString : public CString
 {
 public:
 	CAcceleratorString();
-	CAcceleratorString(const CString& sOther);
+	CAcceleratorString(const CString& sOther, BOOL bRemoveAccelerator = FALSE);
 	virtual ~CAcceleratorString();
 
 	TCHAR GetAccelerator(BOOL bMakeLowercase = TRUE) const;
