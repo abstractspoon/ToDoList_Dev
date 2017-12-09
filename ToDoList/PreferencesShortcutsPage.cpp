@@ -100,7 +100,7 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 			CHoldRedraw hr(m_tcCommands);
 			CEnMenu menu;
 			
-			if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE))
+			if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE, TRUE))
 			{
 				menu.TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
 				menu.TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));

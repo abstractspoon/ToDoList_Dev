@@ -137,7 +137,7 @@ BOOL CTDLCleanupIniPreferencesDlg::OnInitDialog()
 		}
 		else
 		{
-			AfxMessageBox(IDS_CLEANUPPREFS_NOTASLISTS);
+			AfxMessageBox(CEnString(IDS_CLEANUPPREFS_NOTASLISTS));
 			EndDialog(IDCANCEL);
 		}
 	}

@@ -174,8 +174,8 @@ TCHAR CAcceleratorString::EnsureUniqueAccelerator(CString& sText, const CString&
 	for (nChar = 0; nChar < nTextLen; nChar++)
 	{
 		TCHAR cChar = sText[nChar];
-		BOOL bCharIsWhiteSpace = ((cChar < 256) && isspace((char)cChar));
-		BOOL bPrevCharIsWhiteSpace = ((cPrevChar < 256) && isspace((char)cPrevChar));
+		BOOL bCharIsWhiteSpace = ((cChar < 256) && isspace(cChar));
+		BOOL bPrevCharIsWhiteSpace = ((cPrevChar < 256) && isspace(cPrevChar));
 		
 		if ((nChar == 0) || (!bCharIsWhiteSpace && bPrevCharIsWhiteSpace))
 		{
