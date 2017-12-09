@@ -140,6 +140,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 
 	ForwardMessage(WM_PTP_TESTTOOL);
 	ForwardMessage(WM_PGP_CLEARMRU);
+	ForwardMessage(WM_PGP_EDITLANGFILE);
 	ForwardMessage(WM_PPB_CTRLCHANGE);
 	
 	LoadPreferences(m_prefs, PREFSKEY);
@@ -169,6 +170,7 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_WM_DESTROY()
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnToolPageTestTool)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
+	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnGenPageEditLangFile)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
 	ON_MESSAGE(WM_COPY, OnCopy)
 END_MESSAGE_MAP()
@@ -496,6 +498,14 @@ LRESULT CPreferencesDlg::OnGenPageClearMRU(WPARAM wp, LPARAM lp)
 {
 	// forward on to main app
 	return AfxGetMainWnd()->SendMessage(WM_PGP_CLEARMRU, wp, lp);
+}
+
+LRESULT CPreferencesDlg::OnGenPageEditLangFile(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	EndDialog(IDOK);
+
+	// forward on to main app
+	return AfxGetMainWnd()->PostMessage(WM_PGP_EDITLANGFILE);
 }
 
 void CPreferencesDlg::OnApply() 

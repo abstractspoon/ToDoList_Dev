@@ -25,7 +25,7 @@ class CTDLTransEditDlg : public CDialog, public CDialogHelper
 {
 // Construction
 public:
-	CTDLTransEditDlg(LPCTSTR szAppVer, CWnd* pParent = NULL);	// standard constructor
+	CTDLTransEditDlg(LPCTSTR szAppVer, LPCTSTR szLangFilePath = NULL, CWnd* pParent = NULL);	// standard constructor
 
 protected:
 // Dialog Data
@@ -38,13 +38,15 @@ protected:
 	CWindowIcons m_icons;
 	CShortcutManager m_mgrShortcuts;
 
-	BOOL m_bEdited;
 	CString m_sBaseTitle;
 	CString m_sEnglish;
 	CString m_sTranslation;
 	CString m_sYourLanguagePath;
 	CString m_sLastBrowsePath;
 	CString m_sAppVer;
+	CString m_sInitialDictionary;
+
+	BOOL m_bEdited;
 	BOOL m_bShowAlternatives;
 	BOOL m_bShowTooltips;
 	BOOL m_bSortUntranslatedAtTop;

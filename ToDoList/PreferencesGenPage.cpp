@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CPreferencesGenPage, CPreferencesPageBase)
 	ON_CBN_SELCHANGE(IDC_LANGUAGE, OnSelchangeLanguage)
 	ON_BN_CLICKED(IDC_MINIMIZEONNOEDIT, OnMinimizeonnoedit)
 	ON_BN_CLICKED(IDC_USESTICKIES, OnUseStickies)
+	ON_BN_CLICKED(IDC_EDIT_DISPLAYLANGUAGE, OnEditDisplayLanguage)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_USESYSTRAY, OnUseSystray)
 END_MESSAGE_MAP()
@@ -130,6 +131,13 @@ BOOL CPreferencesGenPage::OnInitDialog()
 	}
 
 	EnableDisableLanguageOptions();
+
+	// Show/Enable 'Edit' button only if the initial language is set
+	if (m_cbLanguages.IsDefaultLanguageSelected())
+	{
+		GetDlgItem(IDC_EDIT_DISPLAYLANGUAGE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_EDIT_DISPLAYLANGUAGE)->EnableWindow(FALSE);
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -299,4 +307,9 @@ BOOL CPreferencesGenPage::GetUseStickies(CString& sStickiesPath) const
 	
 	// else
 	return FALSE; 
+}
+
+void CPreferencesGenPage::OnEditDisplayLanguage() 
+{
+	GetParent()->SendMessage(WM_PGP_EDITLANGFILE);
 }

@@ -62,8 +62,11 @@ BOOL CTDLTransEditApp::InitInstance()
 	FileMisc::ReplaceExtension(sIniPath, _T(".ini"));
 
 	m_pszProfileName = _tcsdup(sIniPath);
+
+	CCommandLineInfo cmdInfo;
+	ParseCommandLine(cmdInfo);
 	
-	CTDLTransEditDlg dlg(sTDLVer);
+	CTDLTransEditDlg dlg(sTDLVer, cmdInfo.m_strFileName);
 	m_pMainWnd = &dlg;
 
 	int nResponse = dlg.DoModal();

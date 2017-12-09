@@ -116,7 +116,7 @@ const LPCTSTR ENDL			= _T("\n");
 
 enum
 {
-	WM_POSTONCREATE = (WM_APP+1),
+	WM_POSTONCREATE				= (WM_APP+1),
 	WM_WEBUPDATEWIZARD,
 	WM_UPDATEUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
@@ -184,7 +184,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bEndingSession(FALSE),
 	m_nContextColumnID(TDCC_NONE),
 	m_bSettingAttribDefs(FALSE),
-	m_bReshowTimeTrackerOnEnable(FALSE)
+	m_bReshowTimeTrackerOnEnable(FALSE),
+	m_bPromptLanguageChangeRestartOnActivate(FALSE)
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
@@ -433,6 +434,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTRESULT, OnFindSelectResult)
 	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnPreferencesClearMRU)
+	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnPreferencesEditLanguageFile)
 	ON_REGISTERED_MESSAGE(WM_PTP_TESTTOOL, OnPreferencesTestTool)
 	ON_REGISTERED_MESSAGE(WM_ITT_POSTTRANSLATEMENU, OnPostTranslateMenu)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnToDoCtrlFailedLink)
@@ -5631,11 +5633,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 			}
 			else if (CLocalizer::GetDictionaryPath().CompareNoCase(szLangFile) == 0)
 			{
-				//if (MessageBox(IDS_RESTARTTOUPDATELANGUAGE, 0, MB_YESNO) == IDYES)
-				if (MessageBox(IDS_RESTARTTOCHANGELANGUAGE, 0, MB_YESNO) == IDYES)
-				{
-					bRes = DoExit(TRUE);
-				}
+				m_bPromptLanguageChangeRestartOnActivate = TRUE;
 			}
 		}
 		break;
@@ -9018,6 +9016,11 @@ LRESULT CToDoListWnd::OnPreferencesClearMRU(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0;
 }
 
+LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), Prefs().GetLanguageFile(), SW_SHOWNORMAL, FileMisc::GetModuleFolder());
+}
+
 void CToDoListWnd::PrepareSortMenu(CMenu* pMenu)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -10872,6 +10875,17 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	}
 	else
 	{
+		if (m_bPromptLanguageChangeRestartOnActivate)
+		{
+			m_bPromptLanguageChangeRestartOnActivate = FALSE;
+
+			if (MessageBox(IDS_RESTARTTOCHANGELANGUAGE, 0, MB_YESNO) == IDYES)
+			{
+				DoExit(TRUE);
+				return;
+			}
+		}
+
 		if (GetTDCCount() && (!m_hwndLastFocus || Prefs().GetAutoFocusTasklist()))
 		{
 			PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)GetToDoCtrl().GetSafeHwnd());

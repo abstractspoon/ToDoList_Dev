@@ -26,14 +26,15 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransEditDlg dialog
 
-CTDLTransEditDlg::CTDLTransEditDlg(LPCTSTR szAppVer, CWnd* pParent /*=NULL*/)
+CTDLTransEditDlg::CTDLTransEditDlg(LPCTSTR szAppVer, LPCTSTR szLangFilePath, CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(CTDLTransEditDlg::IDD, pParent), 
 	m_sAppVer(szAppVer),
 	m_bEdited(FALSE), 
 	m_bShowAlternatives(TRUE),
 	m_bShowTooltips(TRUE),
-	m_bSortUntranslatedAtTop(TRUE)
+	m_bSortUntranslatedAtTop(TRUE),
+	m_sInitialDictionary(szLangFilePath)
 {
 	//{{AFX_DATA_INIT(CTDLTransEditDlg)
 	m_sFilter = _T("");
@@ -175,13 +176,12 @@ BOOL CALLBACK CTDLTransEditDlg::NotifyLangFileChange(HWND hWnd, LPARAM lParam)
 
 	if (Misc::RemoveSuffix(sCaption, COPYRIGHT))
 	{
-		TCHAR szLangFilePath[_MAX_PATH + 1] = { 0 };
-		StrCpyN(szLangFilePath, (LPCTSTR)lParam, _MAX_PATH);
+		LPCTSTR szLangFilePath = (LPCTSTR)lParam;
 
 		COPYDATASTRUCT cds = 
 		{ 
 			TDLCD_LANGFILECHANGE, 
-			sizeof(szLangFilePath), 
+			((lstrlen(szLangFilePath) + 1) * sizeof(TCHAR)), // include null
 			(void*)szLangFilePath 
 		};
 
@@ -438,10 +438,11 @@ void CTDLTransEditDlg::LoadState()
 	if (bFirstTime)
 		m_lcDictItems.RecalcColumnWidths();
 	
-	CString sDictPath = AfxGetApp()->GetProfileString(_T("State"), _T("LastDictionary"));
-	
-	if (!sDictPath.IsEmpty())
-		LoadDictionary(sDictPath, FALSE);
+	if (m_sInitialDictionary.IsEmpty())
+		m_sInitialDictionary = AfxGetApp()->GetProfileString(_T("State"), _T("LastDictionary"));
+
+	if (!m_sInitialDictionary.IsEmpty())
+		LoadDictionary(m_sInitialDictionary, FALSE);
 }
 
 void CTDLTransEditDlg::SaveState()

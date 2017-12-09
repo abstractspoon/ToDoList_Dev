@@ -336,6 +336,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg LRESULT OnToolPageTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGenPageClearMRU(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGenPageEditLangFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnControlChange(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDestroy();

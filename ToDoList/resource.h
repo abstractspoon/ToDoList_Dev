@@ -786,6 +786,7 @@
 #define IDC_PREFSLOCATION               1503
 #define IDC_FORMATS                     1504
 #define IDC_DISPLAYUDTSINTOOLBAR        1505
+#define IDC_EDIT_DISPLAYLANGUAGE        1507
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2113,7 +2114,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        308
 #define _APS_NEXT_COMMAND_VALUE         34597
-#define _APS_NEXT_CONTROL_VALUE         1507
+#define _APS_NEXT_CONTROL_VALUE         1508
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

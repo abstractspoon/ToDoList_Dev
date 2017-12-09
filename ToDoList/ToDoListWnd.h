@@ -154,6 +154,7 @@ protected:
 	BOOL m_bSaveUIVisInTaskList;
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
+	BOOL m_bPromptLanguageChangeRestartOnActivate;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
@@ -374,6 +375,7 @@ protected:
 	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPreferencesEditLanguageFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPostTranslateMenu(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnQuickFindItemAdded(WPARAM wp, LPARAM lp);

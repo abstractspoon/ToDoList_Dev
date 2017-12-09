@@ -15,7 +15,8 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_PGP_CLEARMRU			= ::RegisterWindowMessage(_T("WM_PGP_CLEARMRU"));
+const UINT WM_PGP_CLEARMRU		= ::RegisterWindowMessage(_T("WM_PGP_CLEARMRU"));
+const UINT WM_PGP_EDITLANGFILE	= ::RegisterWindowMessage(_T("WM_PGP_EDITLANGFILE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -114,6 +115,7 @@ protected:
 	afx_msg void OnSelchangeLanguage();
 	afx_msg void OnMinimizeonnoedit();
 	afx_msg void OnUseStickies();
+	afx_msg void OnEditDisplayLanguage();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 		
