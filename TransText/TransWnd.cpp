@@ -39,7 +39,7 @@ BOOL CTransWnd::HookWindow(HWND hRealWnd, CSubclasser* pSubclasser)
 	if (!CSubclassWnd::HookWindow(hRealWnd, pSubclasser))
 		return FALSE;
 
-	m_sClassID = TransText::GetFriendlyClass(m_sClass, hRealWnd);
+	m_sClassID = TransText::GetFriendlyClass(m_sClassID, hRealWnd);
 	return TRUE;
 }
 
