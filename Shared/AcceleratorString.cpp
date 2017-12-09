@@ -169,16 +169,21 @@ TCHAR CAcceleratorString::EnsureUniqueAccelerator(CString& sText, const CString&
 
 	// Prefer the start of words
 	int nChar;
+	TCHAR cPrevChar = 0;
 
 	for (nChar = 0; nChar < nTextLen; nChar++)
 	{
-		if ((nChar == 0) || (isspace(sText[nChar - 1])))
+		TCHAR cChar = sText[nChar];
+		BOOL bCharIsWhiteSpace = ((cChar < 256) && isspace((char)cChar));
+		BOOL bPrevCharIsWhiteSpace = ((cPrevChar < 256) && isspace((char)cPrevChar));
+		
+		if ((nChar == 0) || (!bCharIsWhiteSpace && bPrevCharIsWhiteSpace))
 		{
-			TCHAR cChar = sText[nChar];
-
 			if (IsValidAccelerator(cChar, sExclude) && SetAcceleratorPos(sText, nChar))
 				return _totlower(cChar);
 		}
+
+		cPrevChar = cChar;
 	}
 
 	// else anything will do
@@ -203,6 +208,9 @@ BOOL CAcceleratorString::EnsureUniqueAccelerators(CStringArray& aText)
 
 	CString sAccelerators = GetAccelerators(aText, FALSE);
 	ASSERT(sAccelerators.GetLength() == nNumItems);
+
+	if (Misc::IsEmpty(sAccelerators))
+		return FALSE;
 
 	// Replace missing accelerators with spaces for easier debugging
 #ifdef _DEBUG
@@ -333,6 +341,9 @@ BOOL CAcceleratorString::EnsureUniqueAccelerators(CStringArray& aText)
 
 BOOL CAcceleratorString::IsValidAccelerator(TCHAR cChar)
 {
+	if (cChar >= 256)
+		return FALSE;
+
 	return isalnum(cChar);
 }
 

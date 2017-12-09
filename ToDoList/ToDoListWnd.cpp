@@ -10939,12 +10939,15 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 			m_hwndLastFocus = hFocus;
 
 		// Save and hide time tracker if it is top-most
-		ASSERT(!m_bReshowTimeTrackerOnEnable);
-
-		if (m_dlgTimeTracker.IsWindowVisible() && m_dlgTimeTracker.IsAlwaysOnTop())
+		if (m_dlgTimeTracker.GetSafeHwnd())
 		{
-			m_bReshowTimeTrackerOnEnable = TRUE;
-			m_dlgTimeTracker.ShowWindow(SW_HIDE);
+			ASSERT(!m_bReshowTimeTrackerOnEnable);
+
+			if (m_dlgTimeTracker.IsWindowVisible() && m_dlgTimeTracker.IsAlwaysOnTop())
+			{
+				m_bReshowTimeTrackerOnEnable = TRUE;
+				m_dlgTimeTracker.ShowWindow(SW_HIDE);
+			}
 		}
 	}
 	else
