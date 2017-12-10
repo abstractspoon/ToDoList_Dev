@@ -434,3 +434,78 @@ BOOL CReFileObject::Insert(LPCTSTR szFilePath, BOOL bLink)
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CharFormat::CharFormat(DWORD mask)
+{
+	Reset(mask);
+};
+
+void CharFormat::Reset(DWORD mask)
+{
+	memset(this, 0, sizeof (CharFormat));
+	cbSize = sizeof(CharFormat);
+	dwMask = mask;
+};
+
+BOOL CharFormat::operator==(const CharFormat& cf)
+{
+	return (memcmp(this, &cf, sizeof(cf)) == 0);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ParaFormat2::ParaFormat2(DWORD mask)
+{
+	Reset(mask);
+}
+
+void ParaFormat2::Reset(DWORD mask)
+{
+	memset(this, 0, sizeof (ParaFormat2));
+	cbSize = sizeof(ParaFormat2);
+	dwMask = mask;
+}
+
+BOOL ParaFormat2::HasTabs() const
+{
+	// find the first non-zero tabstop
+	int t = MAX_TAB_STOPS;
+	
+	while (t--)
+	{
+		if (rgxTabs[t] != 0)
+			return TRUE;
+	}
+	
+	return FALSE; // all zeroes
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ParaFormat::ParaFormat(DWORD mask)
+{
+	Reset(mask);
+}
+
+void ParaFormat::Reset(DWORD mask)
+{
+	memset(this, 0, sizeof (ParaFormat));
+	cbSize = sizeof(ParaFormat);
+	dwMask = mask;
+}
+
+BOOL ParaFormat::HasTabs() const
+{
+	// find the first non-zero tabstop
+	int t = MAX_TAB_STOPS;
+	
+	while (t--)
+	{
+		if (rgxTabs[t] != 0)
+			return TRUE;
+	}
+	
+	return FALSE; // all zeroes
+}
+
+//////////////////////////////////////////////////////////////////////

@@ -47,6 +47,8 @@ const LPCTSTR RTF_HORZ_LINE				= _T("{\\rtf1{\\pict\\wmetafile8\\picw26\\pich26\
 											_T("010001000000000001000100000000002800000001000000010000000100010000000000000000")
 											_T("000000000000000000000000000000000000000000ffffff00000000ff040000002701ffff0300")
 											_T("00000000}}");
+const LPCTSTR RTF_LINK					= _T("{\\rtf1{\\colortbl;\\red0\\green0\\blue255;}{\\field{\\*\\fldinst{HYPERLINK\"%s\"}}")
+											_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1039,7 +1041,7 @@ BOOL CRichEditBaseCtrl::SelectionHasEffect(DWORD dwMask, DWORD dwEffect) const
 	CHARFORMAT2 cf;
 	ZeroMemory(&cf, sizeof(cf));
 	
-	cf.cbSize = sizeof(CHARFORMAT);
+	cf.cbSize = sizeof(CHARFORMAT2);
 	cf.dwMask = dwMask;
 
 	if (GetSelectionCharFormat(cf))
@@ -1047,6 +1049,20 @@ BOOL CRichEditBaseCtrl::SelectionHasEffect(DWORD dwMask, DWORD dwEffect) const
 
 	// else
 	return FALSE;
+}
+
+BOOL CRichEditBaseCtrl::SetSelectedEffect(DWORD dwMask, DWORD dwEffect)
+{
+	CharFormat cf;
+	cf.dwMask = dwMask;
+	cf.dwEffects = dwEffect;
+	
+	return SetSelectedEffect(cf);
+}
+
+BOOL CRichEditBaseCtrl::SetSelectedEffect(const CHARFORMAT2& cf)
+{
+	return SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
 }
 
 BOOL CRichEditBaseCtrl::CanEdit() const
@@ -1119,6 +1135,16 @@ CPoint CRichEditBaseCtrl::GetCaretPos() const
 	ptCaret.x += 4; // estaimate 1/2 char width
 	
 	return ptCaret;
+}
+
+void CRichEditBaseCtrl::MoveCaretToEnd()
+{
+	SetCaretPos(GetWindowTextLength());
+}
+
+void CRichEditBaseCtrl::SetCaretPos(int nPos)
+{
+	SetSel(nPos, nPos);
 }
 
 int CRichEditBaseCtrl::CharFromPoint(const CPoint& point) const
@@ -1410,4 +1436,36 @@ LRESULT CRichEditBaseCtrl::OnToolHitTest(WPARAM wp, LPARAM lp)
 int CRichEditBaseCtrl::OnToolHitTest(CPoint pt, TOOLINFO* pTI) const
 {
 	return CRichEditCtrl::OnToolHitTest(pt, pTI);
+}
+
+void CRichEditBaseCtrl::SetParaAlignment(int alignment)
+{
+	ParaFormat2	para(PFM_ALIGNMENT);
+	para.wAlignment = (WORD) alignment;
+	
+	SetParaFormat(para);
+}
+
+int CRichEditBaseCtrl::GetParaAlignment() const
+{
+	ParaFormat pf(PFM_ALIGNMENT);
+	GetParaFormat(pf);
+				
+	return (int)pf.wAlignment;
+}
+
+BOOL CRichEditBaseCtrl::SetSelectedWebLink(const CString& sWebLink, const CString& sText)
+{
+	CHARRANGE cr;
+	GetSel(cr);
+
+	CString sLinkText = (sText.IsEmpty() ? GetTextRange(cr) : sText);
+	
+	if (sLinkText.IsEmpty())
+		return FALSE;
+
+	CString sRTFLink;
+	sRTFLink.Format(RTF_LINK, sWebLink, sLinkText);
+
+	return SetTextEx(sRTFLink);
 }

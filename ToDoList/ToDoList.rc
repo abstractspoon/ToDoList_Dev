@@ -5273,6 +5273,7 @@ BEGIN
     IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
     IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
     IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
+    IDS_STICKIES_LINK       "link"
 END
 
 #endif    // English (Australia) resources

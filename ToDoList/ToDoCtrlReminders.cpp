@@ -8,8 +8,10 @@
 
 #include "..\shared\preferences.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\scopedtimer.h"
+#include "..\shared\richedithelper.h"
 
 #include <math.h>
 
@@ -18,22 +20,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-const BOOL USE_RTF = FALSE/*TRUE*/;
-
-LPCTSTR RTF_HEADER = _T("{\\rtf1\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang3081")\
-					_T("{\\fonttbl{\\f0\\fnil\\fcharset0 Tahoma;}}")\
-					_T("{\\colortbl ;\\red0\\green0\\blue255;}")\
-					_T("{\\*\\generator Riched20 10.0.16299}{\\*\\mmathPr\\mnaryLim0")
-					_T("\\mdispDef1\\mwrapIndent1440}\\viewkind4\\uc1");
-
-LPCTSTR RTF_CONTENT = _T("\\pard\\nowidctlpar {\\b\\f0\\fs22\\lang9{\\field")\
-					_T("{\\*\\fldinst{HYPERLINK \"tdl://%s?%ld\" }}")\
-					_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}\\b\\f0\\fs22\\par")\
-					_T("\\b0\\par")\
-					_T("\\fs16 %s\\par}");
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders
@@ -290,10 +276,6 @@ BOOL CToDoCtrlReminders::RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* 
 					bRemove = TRUE;
 				}
 			}
-			// else if ()
-			// {
-			//    bRemove = TRUE;
-			// }
 
 			if (bRemove)
 				DeleteReminder(nRem);
@@ -329,7 +311,6 @@ int CToDoCtrlReminders::FindReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pT
 void CToDoCtrlReminders::SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC)
 {
 	ASSERT(pTDC);
-
 
 	// nRem is the total number of reminders for all tasklists
 	// nRemCount is the number of reminders for 'tdc'
@@ -460,6 +441,54 @@ void CToDoCtrlReminders::OnTimer(UINT nIDEvent)
 	CTDLShowReminderDlg::OnTimer(nIDEvent);
 }
 
+BOOL CToDoCtrlReminders::InitialiseRTFFormatter()
+{
+	if (m_rtfFormatter.GetSafeHwnd())
+		return TRUE;
+	
+	if (m_rtfFormatter.Create(WS_CHILD | ES_MULTILINE, CRect(0, 0, 100, 100), this, 10001))
+	{
+		m_rtfFormatter.SendMessage(WM_SETFONT, (WPARAM)GraphicsMisc::GetFont(*this));
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sContent)
+{
+	if (!InitialiseRTFFormatter())
+		return FALSE;
+
+	CString sText = rem.GetTaskTitle();
+	int nTitleLen = sText.GetLength();
+
+	sText += _T(" () "); // Placeholder for trailing task link
+	sText += _T("\n");
+	sText += rem.FormatWhenString();
+	sText += _T("\n\n");
+	sText += rem.GetTaskComments();
+
+	m_rtfFormatter.SetWindowText(sText);
+
+	// Make title bold and with bigger text
+	m_rtfFormatter.SetSel(0, nTitleLen);
+	CharFormat cf(CFM_BOLD | CFM_SIZE);
+
+	cf.dwEffects = CFM_BOLD;
+	cf.yHeight = ((GraphicsMisc::GetFontPointSize(*this) + 2) * 20); // twips
+
+	m_rtfFormatter.SetSelectedEffect(cf);
+	
+	// Inject a task link inside the brackets after the tak title
+	m_rtfFormatter.SetCaretPos(nTitleLen + 2);
+	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
+
+	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());
+	return !sContent.IsEmpty();
+}
+
 BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 {
 	ASSERT(rem.TaskExists() && !rem.IsTaskDone());
@@ -468,25 +497,13 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	{
 		if (m_stickies.IsValid() || m_stickies.Initialize(m_pWndNotify, m_sStickiesPath))
 		{
-			CString sWhen(rem.FormatWhenString()), 
-					sComments(rem.GetTaskComments()), 
-					sUnused, sContent;
+			CString sContent;
+			BOOL bUseRTF = BuildRTFContent(rem, sContent);
 
-			if (USE_RTF)
+			if (!bUseRTF)
 			{
-				CString sFilePath(rem.pTDC->GetFilePath());
-				sFilePath.Replace('\\', '/');
-
-				sContent.Format(RTF_CONTENT, 
-								sFilePath, 
-								rem.dwTaskID,
-								rem.GetTaskTitle(), 
-								rem.GetTaskComments());
-
-				sContent = (RTF_HEADER + sContent);
-			}
-			else
-			{
+				CString sWhen(rem.FormatWhenString()), sComments(rem.GetTaskComments());
+				
 				sContent = rem.GetTaskTitle();
 		
 				if (!sComments.IsEmpty())
@@ -501,9 +518,14 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 					sContent += sWhen;
 				}
 			}
+
+			CString sStickyID;
 			
-			if (m_stickies.CreateSticky(CEnString(IDS_STICKIES_TITLE), sUnused, sContent, USE_RTF))
+			if (m_stickies.CreateSticky(CEnString(IDS_STICKIES_TITLE), sStickyID, sContent, bUseRTF))
 			{
+				if (bUseRTF)
+					m_stickies.SetStickyAttribute(sStickyID, _T("HEIGHT"), _T("1000"));
+
 				return FALSE; // delete reminder as Stickies takes over
 			}
 		}

@@ -124,6 +124,8 @@ public:
 	BOOL SetSelectionCharFormat(CHARFORMAT &cf);
 
 	BOOL SelectionHasEffect(DWORD dwMask, DWORD dwEffect) const;
+	BOOL SetSelectedEffect(DWORD dwMask, DWORD dwEffect);
+	BOOL SetSelectedEffect(const CHARFORMAT2& cf);
 	BOOL HasSelection() const;
 
 	int CharFromPoint(const CPoint& point) const; 
@@ -131,6 +133,8 @@ public:
 	int GetLineHeight() const;
 	void SetFirstVisibleLine(int nLine);
 	CPoint GetCaretPos() const;
+	void MoveCaretToEnd();
+	void SetCaretPos(int nPos);
 
 	BOOL EnableToolTips(BOOL bEnable = TRUE);
 	void FilterToolTipMessage(MSG* pMsg); // for MFC non-extension Dlls
@@ -140,6 +144,10 @@ public:
 	BOOL EnableInlineSpellChecking(BOOL bEnable = TRUE);
 	BOOL IsInlineSpellCheckingEnabled() const;
 	static BOOL SupportsInlineSpellChecking();
+
+	void SetParaAlignment(int alignment);
+	BOOL GetParaAlignment() const;
+	BOOL SetSelectedWebLink(const CString& sWebLink, const CString& sText);
 
 	// Attributes
 protected:

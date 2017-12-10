@@ -2108,6 +2108,7 @@
 #define IDS_EXPORT_SOMEFAILED           58465
 #define IDS_EXPORT_CANTSAVE             58466
 #define IDS_TDC_ADDLOGGEDTIME           58467
+#define IDS_STICKIES_LINK               58468
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

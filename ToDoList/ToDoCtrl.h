@@ -412,8 +412,11 @@ public:
 	void SetCompletionStatus(const CString& sStatus);
 
 	BOOL ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const;
-	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
+	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;
 
+	static BOOL ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile);
+	
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
 

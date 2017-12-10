@@ -5829,24 +5829,19 @@ void CToDoListWnd::CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat)
 		break;
 		
 	case TDCTC_ASLINK:
-		sTasks.Format(_T("tdl://%lu"), tdc.GetSelectedTaskID());
+		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), FALSE);
 		break;
 		
 	case TDCTC_ASDEPENDS:
-		sTasks.Format(_T("%lu"), tdc.GetSelectedTaskID());
+		sTasks = tdc.FormatTaskDependency(tdc.GetSelectedTaskID(), FALSE);
 		break;
 		
 	case TDCTC_ASLINKFULL:
-		sTasks.Format(_T("tdl://%s?%lu"), 
-						tdc.GetFilePath(),
-						tdc.GetSelectedTaskID());
-		sTasks.Replace(_T(" "), _T("%20"));
+		sTasks = tdc.FormatTaskLink(tdc.GetSelectedTaskID(), TRUE);
 		break;
 		
 	case TDCTC_ASDEPENDSFULL:
-		sTasks.Format(_T("%s?%lu"), 
-						tdc.GetFilePath(),
-						tdc.GetSelectedTaskID());
+		sTasks = tdc.FormatTaskDependency(tdc.GetSelectedTaskID(), TRUE);
 		break;
 
 	case TDCTC_ASPATH:

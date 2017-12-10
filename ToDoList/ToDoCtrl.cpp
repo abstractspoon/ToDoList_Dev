@@ -491,6 +491,40 @@ BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sF
 	return CTDLTaskCtrlBase::ParseTaskLink(sLink, bURL, sFolder, dwTaskID, sFile);
 }
 
+CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull) const
+{
+	CString sDepends = FormatTaskDependency(dwTaskID, bFull);
+
+	if (!sDepends.IsEmpty())
+	{
+		CString sTaskLink = (TDL_PROTOCOL + sDepends);
+		sTaskLink.Replace(_T(" "), _T("%20"));
+		sTaskLink.Replace('\\', '/');
+		
+		return sTaskLink;
+	}
+
+	return _T("");
+}
+
+CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const
+{
+	if (!dwTaskID || (bFull && m_sLastSavePath.IsEmpty()))
+	{
+		ASSERT(0);
+		return _T("");
+	}
+	
+	CString sTaskDepends;
+	
+	if (bFull)
+		sTaskDepends.Format(_T("%s?%lu"), m_sLastSavePath, dwTaskID);
+	else
+		sTaskDepends.Format(_T("%lu"), dwTaskID);
+	
+	return sTaskDepends;
+}
+
 BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 {
 	return CTDLTaskCtrlBase::IsReservedShortcut(dwShortcut);

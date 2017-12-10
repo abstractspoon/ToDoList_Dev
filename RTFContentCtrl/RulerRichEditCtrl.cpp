@@ -301,12 +301,14 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 
 		cr.cpMax = cr.cpMin + sUrl.GetLength();
 		m_rtf.SetSel(cr);
-		SetEffect(CFM_PROTECTED | CFM_LINK | CFM_HIDDEN, CFE_PROTECTED | CFE_LINK);
+		m_rtf.SetSelectedEffect(CFM_PROTECTED | CFM_LINK | CFM_HIDDEN, CFE_PROTECTED | CFE_LINK);
 
 		// hide all but the text
 		cr.cpMax -= sText.GetLength();
 		m_rtf.SetSel(cr);
-		SetEffect(CFM_PROTECTED | CFM_LINK | CFM_HIDDEN, CFE_PROTECTED | CFE_LINK | CFE_HIDDEN);
+		m_rtf.SetSelectedEffect(CFM_PROTECTED | CFM_LINK | CFM_HIDDEN, CFE_PROTECTED | CFE_LINK | CFE_HIDDEN);
+
+		m_rtf.SetFocus();
 	}
 }
 
@@ -1004,16 +1006,6 @@ void CRulerRichEditCtrl::SetLockColours(BOOL bLock)
 	}
 }
 
-void CRulerRichEditCtrl::SetEffect(int mask, int effect)
-{
-	CharFormat cf;
-	cf.dwMask = mask;
-	cf.dwEffects = effect;
-
-	m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
-	m_rtf.SetFocus();
-}
-
 void CRulerRichEditCtrl::IncrementFontSize(BOOL bIncrement)
 {
 	if (m_toolbar.IncrementFontSize(bIncrement ? 1 : -1))
@@ -1058,23 +1050,6 @@ void CRulerRichEditCtrl::InsertHorizontalRule()
 	m_rtf.GetParaFormat(para);
 }
 */
-
-void CRulerRichEditCtrl::SetParaAlignment(int alignment)
-{
-	ParaFormat2	para(PFM_ALIGNMENT);
-	para.wAlignment = (WORD) alignment;
-
-	m_rtf.SetParaFormat(para);
-	m_rtf.SetFocus();
-}
-
-int CRulerRichEditCtrl::GetParaAlignment() const
-{
-	ParaFormat pf(PFM_ALIGNMENT);
-	m_rtf.GetParaFormat(pf);
-				
-	return (int)pf.wAlignment;
-}
 
 void CRulerRichEditCtrl::DoFont()
 {
@@ -1226,69 +1201,69 @@ void CRulerRichEditCtrl::DoBold()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_BOLD, CFE_BOLD);
-	SetEffect(CFM_BOLD, (bNewState ? CFE_BOLD : 0));
+	m_rtf.SetSelectedEffect(CFM_BOLD, (bNewState ? CFE_BOLD : 0));
 }
 
 void CRulerRichEditCtrl::DoStrikethrough()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_STRIKEOUT, CFE_STRIKEOUT);
-	SetEffect(CFM_STRIKEOUT, (bNewState ? CFE_STRIKEOUT : 0));
+	m_rtf.SetSelectedEffect(CFM_STRIKEOUT, (bNewState ? CFE_STRIKEOUT : 0));
 }
 
 void CRulerRichEditCtrl::DoSuperscript()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_SUPERSCRIPT, CFE_SUPERSCRIPT);
-	SetEffect(CFM_SUPERSCRIPT, (bNewState ? CFE_SUPERSCRIPT : 0));
+	m_rtf.SetSelectedEffect(CFM_SUPERSCRIPT, (bNewState ? CFE_SUPERSCRIPT : 0));
 }
 
 void CRulerRichEditCtrl::DoSubscript()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_SUBSCRIPT, CFE_SUBSCRIPT);
-	SetEffect(CFM_SUBSCRIPT, (bNewState ? CFE_SUBSCRIPT : 0));
+	m_rtf.SetSelectedEffect(CFM_SUBSCRIPT, (bNewState ? CFE_SUBSCRIPT : 0));
 }
 
 void CRulerRichEditCtrl::DoItalic()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_ITALIC, CFE_ITALIC);
-	SetEffect(CFM_ITALIC, (bNewState ? CFE_ITALIC : 0));
+	m_rtf.SetSelectedEffect(CFM_ITALIC, (bNewState ? CFE_ITALIC : 0));
 }
 
 void CRulerRichEditCtrl::DoUnderline()
 {
 	// toggle current state
 	BOOL bNewState = !m_rtf.SelectionHasEffect(CFM_UNDERLINE, CFE_UNDERLINE);
-	SetEffect(CFM_UNDERLINE, (bNewState ? CFE_UNDERLINE : 0));
+	m_rtf.SetSelectedEffect(CFM_UNDERLINE, (bNewState ? CFE_UNDERLINE : 0));
 }
 
 void CRulerRichEditCtrl::DoLeftAlign()
 {
-	if (GetParaAlignment() != PFA_LEFT)
-		SetParaAlignment(PFA_LEFT);
+	if (m_rtf.GetParaAlignment() != PFA_LEFT)
+		m_rtf.SetParaAlignment(PFA_LEFT);
 }
 
 void CRulerRichEditCtrl::DoCenterAlign()
 {
-	if (GetParaAlignment() != PFA_CENTER)
-		SetParaAlignment(PFA_CENTER);
+	if (m_rtf.GetParaAlignment() != PFA_CENTER)
+		m_rtf.SetParaAlignment(PFA_CENTER);
 }
 
 void CRulerRichEditCtrl::DoJustify()
 {
-	if (GetParaAlignment() != PFA_JUSTIFY)
+	if (m_rtf.GetParaAlignment() != PFA_JUSTIFY)
 	{
 		if (m_rtf.SendMessage(EM_SETTYPOGRAPHYOPTIONS, TO_ADVANCEDTYPOGRAPHY, TO_ADVANCEDTYPOGRAPHY))
-			SetParaAlignment(PFA_JUSTIFY);
+			m_rtf.SetParaAlignment(PFA_JUSTIFY);
 	}
 }
 
 void CRulerRichEditCtrl::DoRightAlign()
 {
-	if (GetParaAlignment() != PFA_RIGHT)
-		SetParaAlignment(PFA_RIGHT);
+	if (m_rtf.GetParaAlignment() != PFA_RIGHT)
+		m_rtf.SetParaAlignment(PFA_RIGHT);
 }
 
 BOOL CRulerRichEditCtrl::FixupTabStops(ParaFormat& para)

@@ -203,7 +203,7 @@ BOOL CStickiesWnd::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 CString CStickiesWnd::FormatStickyCreationString(const CString& sTitle, time_t tAlarm, COLORREF color)
 {
-	const LPCTSTR HEADERFORMAT  = _T("<TITLE>%s<X>0625<Y>0505<WIDTH>281<HEIGHT>-1");
+	const LPCTSTR HEADERFORMAT  = _T("<TITLE>%s<X>0625<Y>0505<WIDTH>281<HEIGHT>1000");
 	const LPCTSTR COLORFORMAT   = _T("<COLR>%d<COLG>%d<COLB>%d");
 	const LPCTSTR ALARMFORMAT   = _T("<SLEEPING>%d<SLEEPNEXTWAKE>%ld<SLEEPALARM>%d");
 	

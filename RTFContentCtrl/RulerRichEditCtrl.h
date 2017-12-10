@@ -195,10 +195,6 @@ protected:
 	void UpdateToolbarColourButtons();
 	void UpdateEditRect();
 
-	void SetEffect(int mask, int effect);
-	void SetParaAlignment(int alignment);
-	BOOL GetParaAlignment() const;
-
 	void LayoutControls(int width, int height);
 
 };

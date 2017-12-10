@@ -12,6 +12,8 @@
 #include <richedit.h>
 #include <richole.h>
 
+/////////////////////////////////////////////////////////////////////////////
+
 #if !defined EM_SETTYPOGRAPHYOPTIONS
 #	define EM_SETTYPOGRAPHYOPTIONS (WM_USER + 202)
 #	define EM_GETTYPOGRAPHYOPTIONS (WM_USER + 203)
@@ -20,6 +22,8 @@
 #endif
 struct ITextDocument;
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum RE_PASTE
 {
 	REP_ASFILEURL,
@@ -27,6 +31,8 @@ enum RE_PASTE
 	REP_ASICONLINK,
 	REP_ASIMAGE,
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CReBase
 {
@@ -37,6 +43,8 @@ public:
 protected:
 	HWND m_hwndRichedit;
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CTextDocument : public CReBase
 {
@@ -55,12 +63,16 @@ protected:
 	LPRICHEDITOLE m_pRichEditOle;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CRePauseUndo : public CTextDocument
 {
 public:
 	CRePauseUndo(HWND hwndRichEdit);
 	virtual ~CRePauseUndo();
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CReSaveCaret : public CReBase
 {
@@ -71,6 +83,8 @@ public:
 protected:
 	long m_lCaret;
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CReFileObject : public CReBase
 {
@@ -94,6 +108,8 @@ protected:
 	
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CRichEditHelper
 {
 public:
@@ -110,5 +126,37 @@ protected:
 	static BOOL CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, BOOL bAutoRTL);
 
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct CharFormat : public CHARFORMAT2
+{
+	CharFormat(DWORD mask = 0);
+	
+	void Reset(DWORD mask = 0);;
+	BOOL operator==(const CharFormat& cf);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct ParaFormat2 : public PARAFORMAT2
+{
+	ParaFormat2(DWORD mask = 0);
+	
+	void Reset(DWORD mask = 0);
+	BOOL HasTabs() const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct ParaFormat : public PARAFORMAT
+{
+	ParaFormat(DWORD mask = 0);
+	
+	void Reset(DWORD mask = 0);
+	BOOL HasTabs() const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_RICHEDITHELPER_H__C498C86D_613F_42AD_9C93_6C773E6368E8__INCLUDED_)

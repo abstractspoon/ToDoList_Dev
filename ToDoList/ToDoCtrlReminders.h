@@ -12,6 +12,7 @@
 #include "tdlshowreminderdlg.h"
 
 #include "..\shared\StickiesWnd.h"
+#include "..\shared\RichEditBaseCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +56,7 @@ protected:
 	BOOL m_bUseStickies;
 	CString m_sStickiesPath;
 	CStickiesWnd m_stickies;
+	CRichEditBaseCtrl m_rtfFormatter; // For 'Stickies'
 
 // Operations
 public:
@@ -95,7 +97,8 @@ protected:
 	};
 
 	BOOL RemoveTasks(DWORD dwToRemove, const CFilteredToDoCtrl* pTDC = NULL);
-
+	BOOL InitialiseRTFFormatter();
+	BOOL BuildRTFContent(const TDCREMINDER& rem, CString& sContent);
 };
 
 /////////////////////////////////////////////////////////////////////////////
