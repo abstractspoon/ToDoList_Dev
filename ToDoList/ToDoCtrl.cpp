@@ -252,8 +252,8 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_iconTrackTime.LoadIcon(IDI_TIME_TRACK);
 	m_eTimeSpent.InsertButton(0, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 
-	m_iconAddTime.LoadIcon(IDI_TIME_TRACK/*IDI_ADD_TIME*/);
-	m_eTimeSpent.InsertButton(0, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_STARTSTOPCLOCK/*IDS_TDC_ADDTIMESPENT*/), 15);
+	m_iconAddTime.LoadIcon(IDI_ADD_LOGGED_TIME);
+	m_eTimeSpent.InsertButton(0, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
 	// add link button to dependency
 	m_iconLink.LoadIcon(IDI_DEPENDS_LINK);

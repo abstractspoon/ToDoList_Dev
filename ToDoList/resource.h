@@ -157,6 +157,7 @@
 #define IDI_STYLE_IMAGE                 305
 #define IDD_GOTOTASK_DIALOG             306
 #define IDD_CLEANUPINIPREFERENCES_DIALOG 307
+#define IDI_ADD_LOGGED_TIME             308
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2106,13 +2107,14 @@
 #define IDS_CLEANUPPREFS_NOTASLISTS     58464
 #define IDS_EXPORT_SOMEFAILED           58465
 #define IDS_EXPORT_CANTSAVE             58466
+#define IDS_TDC_ADDLOGGEDTIME           58467
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        308
+#define _APS_NEXT_RESOURCE_VALUE        309
 #define _APS_NEXT_COMMAND_VALUE         34597
 #define _APS_NEXT_CONTROL_VALUE         1508
 #define _APS_NEXT_SYMED_VALUE           108

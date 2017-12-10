@@ -206,7 +206,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -2580,6 +2580,7 @@ IDI_TASK                ICON    DISCARDABLE     "res\\task.ico"
 IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
 IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
 IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
+IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -5271,6 +5272,7 @@ BEGIN
                             "There is currently no tasklist information which can be removed from your ini file."
     IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
     IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
+    IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
 END
 
 #endif    // English (Australia) resources
