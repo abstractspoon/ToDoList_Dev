@@ -153,7 +153,6 @@ protected:
 			break;
 			
 		case WM_WINDOWPOSCHANGED: // alternative to WM_SHOWWINDOW
-			if (wp)
 			{
 				WINDOWPOS* pWPos = (WINDOWPOS*)lp;
 
