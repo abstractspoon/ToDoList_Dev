@@ -13,25 +13,25 @@ static inline BOOL ClassMatches(HWND hwnd, LPCTSTR szClassType)
 {
 	if (!szClassType || !lstrlen(szClassType))
 		return TRUE;
-	
+
 	// else
 	static TCHAR szClassName[40];
 	::GetClassName(hwnd, szClassName, 40);
-	
+
 	return (lstrcmpi(szClassType, szClassName) == 0);
 }
 
 #define INITHOOK(hook, flag, type, function) \
 { \
 	if ((dwOptions & flag) && (hook == NULL)) \
-		hook = SetWindowsHookEx(type, function, NULL, GetCurrentThreadId()); \
+	hook = SetWindowsHookEx(type, function, NULL, GetCurrentThreadId()); \
 }
 
 #define RELEASEHOOK(hook) \
 { \
 	if (hook) \
-		UnhookWindowsHookEx(hook); \
-\
+	UnhookWindowsHookEx(hook); \
+	\
 	hook = NULL; \
 }
 
@@ -55,7 +55,7 @@ enum
 #else
 struct MOUSEHOOKSTRUCTEX : MOUSEHOOKSTRUCT
 {
-    DWORD mouseData;
+	DWORD mouseData;
 };
 #endif
 
@@ -89,13 +89,13 @@ protected:
 
 		// detect whether on 2000 or later
 		OSVERSIONINFO OS;
-		
+
 		OS.dwOSVersionInfoSize=sizeof(OS);
 		::GetVersionEx(&OS);
-		
+
 		m_b2000orLater = (OS.dwPlatformId == VER_PLATFORM_WIN32_NT &&
 			OS.dwMajorVersion >= 5);
-            
+
 		return TRUE;
 	}
 
@@ -125,7 +125,7 @@ protected:
 	HHOOK m_hShellHook;
 	HHOOK m_hSysMsgFilterHook;
 	CString m_sClassFilter;
-   BOOL m_b2000orLater;
+	BOOL m_b2000orLater;
 
 protected:
 	static MGRTYPE& GetInstance()
@@ -174,7 +174,7 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
 		{
 			CWPSTRUCT* pwp = (CWPSTRUCT*)lParam;
@@ -182,12 +182,12 @@ protected:
 			if (GetInstance().ClassMatches(pwp->hwnd))
 			{
 				MSG msg = { pwp->hwnd, pwp->message, pwp->wParam, pwp->lParam, 0, { 0, 0 } };
-				
-            if (GetInstance().OnCallWndProc(msg))
-               return TRUE;
+
+				if (GetInstance().OnCallWndProc(msg))
+					return TRUE;
 			}
 		}
-		
+
 		return CallNextHookEx(GetInstance().m_hCallWndHook, nCode, wParam, lParam);
 	}
 
@@ -198,7 +198,7 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
 		{
 			CWPRETSTRUCT* pwp = (CWPRETSTRUCT*)lParam;
@@ -206,12 +206,12 @@ protected:
 			if (GetInstance().ClassMatches(pwp->hwnd))
 			{
 				MSG msg = { pwp->hwnd, pwp->message, pwp->wParam, pwp->lParam, 0, { 0, 0 } };
-				
-            if (GetInstance().OnCallWndRetProc(msg, pwp->lResult))
-               return TRUE;
+
+				if (GetInstance().OnCallWndRetProc(msg, pwp->lResult))
+					return TRUE;
 			}
 		}
-		
+
 		return CallNextHookEx(GetInstance().m_hCallWndHook, nCode, wParam, lParam);
 	}
 
@@ -222,13 +222,13 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		//if (nCode == HC_ACTION)
 		{
 			if (GetInstance().OnCbt(nCode, wParam, lParam))
 				return TRUE;
 		}
-		
+
 		// else
 		return CallNextHookEx(GetInstance().m_hCbtHook, nCode, wParam, lParam);
 	}
@@ -240,13 +240,13 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
-      {
-         if (GetInstance().OnForegroundIdle())
-            return TRUE;
-      }
-		
+		{
+			if (GetInstance().OnForegroundIdle())
+				return TRUE;
+		}
+
 		return CallNextHookEx(GetInstance().m_hForegroundIdleHook, nCode, wParam, lParam);
 	}
 
@@ -265,10 +265,10 @@ protected:
 			if (GetInstance().ClassMatches(pMsg->hwnd))
 			{
 				if (GetInstance().OnGetMessage(*pMsg))
-               return TRUE;
+					return TRUE;
 			}
 		}
-		
+
 		return CallNextHookEx(GetInstance().m_hGetMessageHook, nCode, wParam, lParam);
 	}
 
@@ -279,13 +279,13 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
 		{
 			if (GetInstance().OnKeyboard(wParam, lParam))
-            return TRUE;
+				return TRUE;
 		}
-		
+
 		return CallNextHookEx(GetInstance().m_hKeyboardHook, nCode, wParam, lParam);
 	}
 
@@ -296,7 +296,7 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		MGRTYPE& mgr = GetInstance();
 
 		if (nCode == HC_ACTION)
@@ -318,7 +318,7 @@ protected:
 				if (mgr.m_b2000orLater)
 				{
 					MOUSEHOOKSTRUCTEX* pInfoEx = (MOUSEHOOKSTRUCTEX*)pInfo;
-					
+
 					if (mgr.OnMouseEx(wParam, *pInfoEx))
 						return TRUE;
 				}
@@ -327,14 +327,14 @@ protected:
 					MOUSEHOOKSTRUCTEX infoEx;
 					infoEx = *((MOUSEHOOKSTRUCTEX*)pInfo);
 					infoEx.mouseData = 0;
-					
+
 					if (mgr.OnMouseEx(wParam, infoEx))
 						return TRUE;
 				}
 #endif
 			}
 		}
-		
+
 		return CallNextHookEx(mgr.m_hMouseHook, nCode, wParam, lParam);
 	}
 
@@ -345,16 +345,16 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
 		{
 			MSG* pMsg = (MSG*)lParam;
 
 			if (GetInstance().ClassMatches(pMsg->hwnd))
-         {
-            if (GetInstance().OnMsgFilter(*pMsg, nCode))
-               return TRUE;
-         }
+			{
+				if (GetInstance().OnMsgFilter(*pMsg, nCode))
+					return TRUE;
+			}
 		}
 
 		return CallNextHookEx(GetInstance().m_hMsgFilterHook, nCode, wParam, lParam);
@@ -367,13 +367,13 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (GetInstance().OnShell(nCode, wParam, lParam))
 		{
 			if (nCode == HSHELL_APPCOMMAND)
 				return TRUE;
 		}
-		
+
 		// else
 		return 0;//CallNextHookEx(GetInstance().m_hShellHook, nCode, wParam, lParam);
 	}
@@ -385,18 +385,18 @@ protected:
 		// If this is a DLL, need to set up MFC state
 		AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
-		
+
 		if (nCode == HC_ACTION)
 		{
 			MSG* pMsg = (MSG*)lParam;
 
 			if (GetInstance().ClassMatches(pMsg->hwnd))
-         {
-            if (GetInstance().OnSysMsgFilter(*pMsg, nCode))
-               return TRUE;
-         }
+			{
+				if (GetInstance().OnSysMsgFilter(*pMsg, nCode))
+					return TRUE;
+			}
 		}
-		
+
 		return CallNextHookEx(GetInstance().m_hSysMsgFilterHook, nCode, wParam, lParam);
 	}
 
