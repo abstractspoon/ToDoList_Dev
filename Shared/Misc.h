@@ -353,6 +353,7 @@ namespace Misc
 	TCHAR Last(LPCTSTR szText);
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
+	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	CString& TrimAlpha(CString& sText);
 	BOOL RemoveAt(CString& sText, int nPos);

@@ -22,10 +22,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-static const CString SPACECHAR			= _T(" ");
-
-//////////////////////////////////////////////////////////////////////
-
 CString& TransText::DecodeChars(CString& sText)
 {
 	if (!sText.IsEmpty())
@@ -124,7 +120,7 @@ CString TransText::GetTextClassIDName()
 BOOL TransText::PrepareLookupText(CString& sText, BOOL bDecodeChars)
 {
 	// remove trailing/leading spaces and delimiters
-	Misc::Trim(sText, SPACECHAR).TrimRight(':');
+	Misc::Trim(sText, ' ').TrimRight(':');
 	
 	// remove accelerators
 	if (sText.Find('&') >= 0)

@@ -514,6 +514,17 @@ BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim)
 	return TRUE;
 }
 
+CString& Misc::Trim(CString& sText, TCHAR cChar)
+{
+	if (cChar)
+	{
+		sText.TrimLeft(cChar);
+		sText.TrimRight(cChar);
+	}
+
+	return sText;
+}
+
 CString& Misc::Trim(CString& sText, LPCTSTR lpszTargets)
 {
 	if (lpszTargets)

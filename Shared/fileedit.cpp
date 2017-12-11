@@ -172,13 +172,10 @@ LRESULT CFileEdit::OnPaste(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (!m_sMask.IsEmpty() && CClipboard().GetText(sText))
 	{
 		Misc::Trim(sText);
+		Misc::Trim(sText, '\"');
 
-		if (!sText.IsEmpty() && (sText[0] == '\"'))
-		{
-			Misc::Trim(sText, _T("\""));
-
+		if (!sText.IsEmpty())
 			CClipboard(*this).SetText(sText);
-		}
 	}
 
 	return Default();
