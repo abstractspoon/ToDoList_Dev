@@ -15,7 +15,7 @@ static inline BOOL ClassMatches(HWND hwnd, LPCTSTR szClassType)
 		return TRUE;
 
 	// else
-	static TCHAR szClassName[40];
+	static TCHAR szClassName[80] = { 0 };
 	::GetClassName(hwnd, szClassName, 40);
 
 	return (lstrcmpi(szClassType, szClassName) == 0);
@@ -46,7 +46,7 @@ enum
 	HM_MOUSE 			= 0x0040,
 	HM_MSGFILTER		= 0x0100,
 	HM_SHELL	   		= 0x0200,
-	HM_SYSMSGFILTER	= 0x0400,
+	HM_SYSMSGFILTER		= 0x0400,
 };
 
 //

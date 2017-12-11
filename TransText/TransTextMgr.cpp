@@ -378,19 +378,15 @@ BOOL CTransTextMgr::OnCallWndProc(const MSG& msg)
 	switch (msg.message)
 	{
 	case WM_INITMENUPOPUP:
-		// let hook wnd override
+		// We only handle this for unhooked windows
 		if (!IsHooked(msg.hwnd))
 			bRes = HandleInitMenuPopup(msg.hwnd, msg.message, msg.wParam, msg.lParam);
 		break;
 
 	case WM_NOTIFY:
-		// let hook wnd override
+		// We only handle this for unhooked windows
 		if (!IsHooked(msg.hwnd))
 			bRes = HandleTootipNeedText(msg.hwnd, msg.message, msg.wParam, msg.lParam);
-		break;
-
-	case WM_CONTEXTMENU:
-		// we handle this directly
 		break;
 
 	default:
@@ -413,38 +409,24 @@ BOOL CTransTextMgr::WantHookWnd(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) cons
 	{
 		// we hook dialog/popup only when then are about to be shown.
 		// as a byproduct their children will be hooked also at that point
-		if (nMsg != WM_PARENTNOTIFY)
+		if (nMsg == WM_PARENTNOTIFY)
+		{
+			// We're interested the sender's parent
+			if (GetHookWnd(::GetParent(hWnd)))
+				return TRUE;
+		}
+		else
 		{
 			if (CWinClasses::IsDialog(hWnd))
 			{
-				// only translate common dialogs if our dictionary
-				// differs from the users GUI language
-				if (CWinClasses::IsCommonDialog(hWnd))
-				{
-					//static LANGID nUILangID = Misc::GetUserDefaultUILanguage();
-					
-					//if (PRIMARYLANGID(nUILangID) == m_wDictLanguageID)
-						return FALSE;
-				}
-#ifdef _DEBUG	// don't translate debug windows
-				else
-				{
-					CString sDlgTitle;
-					CWnd::FromHandle(hWnd)->GetWindowText(sDlgTitle);
-					
-					if (sDlgTitle.Find(_T("Microsoft Visual C++ Debug Library")) == 0)
-						return FALSE;
-				}
-#endif
-				return TRUE; 
+				// Don't translate common dialogs for now
+				return !CWinClasses::IsCommonDialog(hWnd);
 			}
 			else if (TransText::IsPopup(hWnd))
 			{
 				return TRUE; 
 			}
 		}
-		else if (GetHookWnd(::GetParent(hWnd)))
-			return TRUE;
 
 		// else 
 		return FALSE;
