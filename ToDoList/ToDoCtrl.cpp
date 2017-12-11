@@ -75,8 +75,8 @@ static char THIS_FILE[] = __FILE__;
 const int CTRLHEIGHT		= 13; // dlu
 const int CTRLVSPACING		= 5;  // dlu
 const int CTRLHSPACING		= 4;  // dlu
-const int CTRLLABELLEN		= 45; // dlu
-const int CTRLCTRLLEN		= 65; // dlu
+const int CTRLLABELLEN		= 70; // dlu
+const int CTRLCTRLLEN		= 70; // dlu
 const int COMMENTSTYPELEN	= 85; // dlu
 
 /////////////////////////////////////////////////////////////////////////////
