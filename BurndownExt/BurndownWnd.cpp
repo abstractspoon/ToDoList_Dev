@@ -27,6 +27,11 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int    DEF_DAYSINWEEK = 5;
+const double DEF_HOURSINDAY = 8.0;
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int MIN_XSCALE_SPACING = 50; // pixels
 
 enum
@@ -58,6 +63,8 @@ enum DISPLAYTYPE
 {
 	SD_INCOMPLETE,
 	SD_REMAINING,
+
+	NUM_DISPLAYTYPES
 };
 
 struct DISPLAYITEM
@@ -96,240 +103,12 @@ enum // m_dwUpdateGraphOnShow
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-STATSITEM::STATSITEM() : dwTaskID(0), dTimeEstDays(0.0), dTimeSpentDays(0.0)
-{
-	CDateHelper::ClearDate(dtStart);
-	CDateHelper::ClearDate(dtDone);
-}
-
-STATSITEM::~STATSITEM() 
-{
-}
-
-BOOL STATSITEM::HasStart() const
-{
-	return CDateHelper::IsDateSet(dtStart);
-}
-
-BOOL STATSITEM::IsDone() const
-{
-	return CDateHelper::IsDateSet(dtDone);
-}
-
-void STATSITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
-{
-	MinMax(dtStart, dtMin, dtMax);
-	MinMax(dtDone, dtMin, dtMax);
-}
-
-void STATSITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax)
-{
-	if (CDateHelper::IsDateSet(date))
-	{
-		if (CDateHelper::IsDateSet(dtMin))
-			dtMin = min(dtMin, date);
-		else
-			dtMin = date;
-		
-		if (CDateHelper::IsDateSet(dtMax))
-			dtMax = max(dtMax, date);
-		else
-			dtMax = date;
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-CStatsItemArray::CStatsItemArray()
-{
-
-}
-
-CStatsItemArray::~CStatsItemArray()
-{
-	RemoveAll();
-}
-
-STATSITEM* CStatsItemArray::AddItem(DWORD dwTaskID)
-{
-	if (HasItem(dwTaskID))
-	{
-		ASSERT(0);
-		return NULL;
-	}
-
-	STATSITEM* pSI = new STATSITEM();
-	pSI->dwTaskID = dwTaskID;
-
-	Add(pSI);
-	m_setTaskIDs.Add(dwTaskID);
-
-	return pSI;
-}
-
-STATSITEM* CStatsItemArray::operator[](int nIndex) const
-{
-	return CArray<STATSITEM*, STATSITEM*>::operator[](nIndex);
-}
-
-BOOL CStatsItemArray::HasItem(DWORD dwTaskID) const
-{
-	return m_setTaskIDs.Has(dwTaskID);
-}
-
-int CStatsItemArray::FindItem(DWORD dwTaskID) const
-{
-	if (!HasItem(dwTaskID))
-		return -1;
-
-	int nIndex = GetSize();
-
-	while (nIndex--)
-	{
-		const STATSITEM* pSI = GetAt(nIndex);
-
-		if (pSI->dwTaskID == dwTaskID)
-			return nIndex;
-	}
-
-	// not found
-	ASSERT(0);
-	return -1;
-}
-
-STATSITEM* CStatsItemArray::GetItem(DWORD dwTaskID) const
-{
-	int nFind = FindItem(dwTaskID);
-
-	if (nFind == -1)
-		return NULL;
-
-	return GetAt(nFind);
-}
-
-int CStatsItemArray::GetSize() const
-{
-	return CArray<STATSITEM*, STATSITEM*>::GetSize();
-}
-
-BOOL CStatsItemArray::IsEmpty() const
-{
-	return (GetSize() == 0);
-}
-
-void CStatsItemArray::RemoveAll()
-{
-	int nIndex = GetSize();
-
-	while (nIndex--)
-	{
-		STATSITEM* pSI = GetAt(nIndex);
-		delete pSI;
-	}
-
-	CArray<STATSITEM*, STATSITEM*>::RemoveAll();
-	m_setTaskIDs.RemoveAll();
-}
-
-void CStatsItemArray::RemoveAt(int nIndex, int nCount)
-{
-	ASSERT(nIndex >= 0 && nIndex < GetSize());
-	ASSERT(nCount > 0);
-
-	nIndex += nCount;
-
-	while (nIndex--)
-	{
-		STATSITEM* pSI = GetAt(nIndex);
-
-		m_setTaskIDs.RemoveKey(pSI->dwTaskID);
-		delete pSI;
-
-		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nIndex);
-	}
-}
-
-void CStatsItemArray::Sort()
-{
-	if (!IsSorted())
-	{
-		qsort(GetData(), GetSize(), sizeof(STATSITEM*), CompareItems);
-	}
-}
-
-BOOL CStatsItemArray::IsSorted() const
-{
-	int nNumItems = GetSize();
-
-	if (nNumItems < 2)
-		return TRUE;
-	
-	const STATSITEM* pSI = GetAt(0);
-	ASSERT(pSI);
-
-	COleDateTime dtPrev = pSI->dtStart;
-
-	for (int nItem = 1; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = GetAt(nItem);
-		ASSERT(pSI);
-
-		if (pSI->HasStart())
-		{
-			// Stop if the preceding task has no start date
-			// OR the preceding task has a later date
-			if (!CDateHelper::IsDateSet(dtPrev) || (pSI->dtStart < dtPrev))
-			{
-				return FALSE;
-			}
-		}
-
-		dtPrev = pSI->dtStart;
-	}
-
-	return TRUE;
-}
-
-int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
-{
-	typedef STATSITEM* LPSTATSITEM;
-
-	const STATSITEM* pSI1 = *(static_cast<const LPSTATSITEM*>(pV1));
-	const STATSITEM* pSI2 = *(static_cast<const LPSTATSITEM*>(pV2));
-
-	ASSERT(pSI1 && pSI2 && (pSI1 != pSI2));
-
-	// Sort by start date
-	// Tasks without a start date come last to optimise searching
-	BOOL bStart1 = CDateHelper::IsDateSet(pSI1->dtStart);
-	BOOL bStart2 = CDateHelper::IsDateSet(pSI2->dtStart);
-
-	if (bStart1 != bStart2)
-	{
-		return (bStart1 ? -1 : 1);
-	}
-	else if (!bStart1 && !bStart2)
-	{
-		return 0;
-	}
-
-	if (pSI1->dtStart < pSI2->dtStart)
-		return -1;
-
-	if (pSI1->dtStart > pSI2->dtStart)
-		return 1;
-
-	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
 
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
-	m_nDisplay(0),
+	m_nDisplay(SD_INCOMPLETE),
 	m_nScale(1),
 	m_dwUpdateGraphOnShow(0),
 	m_dHoursInDay(8.0),
@@ -450,37 +229,50 @@ BOOL CBurndownWnd::OnInitDialog()
 		const DISPLAYITEM& di = STATSDISPLAY[nDisplay];
 		CDialogHelper::AddString(m_cbDisplay, di.nYAxisID, nDisplay);
 	}
-	m_cbDisplay.SetCurSel(0);
+
 	RebuildGraph(FALSE, FALSE, FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CBurndownWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const 
+void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
 {
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-// 	CString sKey(szKey);
+	//CString sKey(szKey);
 
+	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nDisplay);
 }
 
-void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/, bool /*bAppOnly*/) 
+void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// application preferences
-	m_dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
-	m_nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
+	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
+	int nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
 
+	if ((dHoursInDay != m_dHoursInDay) || (nDaysInWeek != m_nDaysInWeek))
+	{
+		m_dHoursInDay = dHoursInDay;
+		m_nDaysInWeek = nDaysInWeek;
+		
+		RebuildGraph(FALSE, FALSE, TRUE);
+	}
 	
 	// burn down specific options
-// 	if (!bAppOnly)
-// 	{
-//		CString sKey(szKey);
+	if (!bAppOnly)
+	{
+		//CString sKey(szKey);
 
-// 
-// 	}
+		m_nDisplay = pPrefs->GetProfileInt(szKey, _T("GraphType"), SD_INCOMPLETE);
+
+		if (m_nDisplay > NUM_DISPLAYTYPES)
+			m_nDisplay = SD_INCOMPLETE;
+
+		CDialogHelper::SelectItemByData(m_cbDisplay, m_nDisplay);
+	}
 }
 
 void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
@@ -708,20 +500,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 
 void CBurndownWnd::UpdateDataExtents()
 {
-	if (m_data.GetSize())
-	{
-		CDateHelper::ClearDate(m_dtEarliestDate);
-		CDateHelper::ClearDate(m_dtLatestDate);
-
-		int nItem = m_data.GetSize();
-
-		while (nItem--)
-			m_data[nItem]->MinMax(m_dtEarliestDate, m_dtLatestDate);
-	}
-	else
-	{
-		m_dtEarliestDate = m_dtLatestDate = COleDateTime::GetCurrentTime();
-	}
+	m_data.GetDataExtents(m_dtEarliestDate, m_dtLatestDate);
 }
 
 void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
@@ -836,7 +615,7 @@ double CBurndownWnd::GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hT
 
 	// all the rest
 	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-	CTimeHelper th(m_dHoursInDay, m_nDaysInWeek);
+	CTimeHelper th(DEF_HOURSINDAY, DEF_DAYSINWEEK);
 
 	return th.GetTime(dTime, nTHUnits, THU_WEEKDAYS);
 }
@@ -1245,58 +1024,19 @@ void CBurndownWnd::BuildBurndownGraph()
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
 		COleDateTime date(dtStart.m_dt + nDay);
-		int nNumNotDone = CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
 
-		m_graph.AddData(0, nNumNotDone);
+		if (m_dtEarliestDate > date)
+		{
+			m_graph.AddData(0, 0);
+		}
+		else
+		{
+			int nNumNotDone = m_data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
+			m_graph.AddData(0, nNumNotDone);
+		}
 	}
 
 	m_graph.CalcDatas();
-}
-
-int CBurndownWnd::CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom)
-{
-	// work thru items until we hit the first task whose 
-	// start date > date, counting how many are not complete as we go
-	if (m_dtEarliestDate > date)
-		return 0;
-	
-	int nNumItems = m_data.GetSize();
-	int nNumNotDone = 0;
-	int nEarliestNotDone = -1, nLatestDone = -1;
-	
-	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = m_data[nItem];
-
-		if (pSI->dtStart > date)
-			break;
-
-		if (!pSI->IsDone() || (pSI->dtDone > date))
-		{
-			nNumNotDone++;
-
-			if ((nEarliestNotDone == -1) && pSI->HasStart())
-				nEarliestNotDone = nItem;
-		}
-		else if (nLatestDone == -1)
-		{
-			nLatestDone = nItem;
-		}
-		else if (pSI->dtDone > m_data[nLatestDone]->dtDone)
-		{
-			nLatestDone = nItem;
-		}
-	}
-
-	// If the earliest incomplete task in the sequence starts before 
-	// the very last completed task then in the next iteration we need 
-	// only process tasks beginning with the earliest incomplete task
-	// because we have proved that all tasks starting before this
-	// task have also been completed
-	if ((nEarliestNotDone != -1) && (nLatestDone != -1) && (nEarliestNotDone > nLatestDone))
-		nNextItemFrom = nEarliestNotDone;
-
-	return nNumNotDone;
 }
 
 void CBurndownWnd::BuildSprintGraph()
@@ -1319,8 +1059,10 @@ void CBurndownWnd::BuildSprintGraph()
 	COleDateTime dtStart = GetGraphStartDate();
 	COleDateTime dtEnd = GetGraphEndDate();
 
+	double dMultiplier = GetSprintDaysMultiplier();
+	double dTotalEst = m_data.CalcTotalTimeEstimateInDays(dMultiplier);
+
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	double dTotalEst = CalcTotalTimeEstimateInDays();
 
 	for (int nDay = 0; nDay <= nNumDays; nDay++)
 	{
@@ -1330,7 +1072,7 @@ void CBurndownWnd::BuildSprintGraph()
 
 		// Time Spent
 		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = CalculateTimeSpentInDays(date);
+		double dSpent = m_data.CalcTimeSpentInDays(date, dMultiplier);
 		
 		m_graph.AddData(SPRINT_SPENT, (dTotalEst - dSpent));
 	}
@@ -1338,59 +1080,9 @@ void CBurndownWnd::BuildSprintGraph()
 	m_graph.CalcDatas();
 }
 
-double CBurndownWnd::CalculateTimeSpentInDays(const COleDateTime& date)
+double CBurndownWnd::GetSprintDaysMultiplier() const
 {
-	int nNumItems = m_data.GetSize();
-	double dDays = 0;
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const STATSITEM* pSI = m_data[nItem];
-
-		// We can stop as soon as we pass a task's start date
-		BOOL bHasStart = pSI->HasStart();
-
-		if (bHasStart && (pSI->dtStart >= date))
-			break;
-		
-		// Ignore tasks with no time spent
-		if (pSI->dTimeSpentDays <= 0)
-			continue;
-		
-		if (pSI->IsDone())
-		{
-			if (date >= pSI->dtDone)
-			{
-				dDays += pSI->dTimeSpentDays;
-			}
-			else if (bHasStart && (date > pSI->dtStart))
-			{
-				double dProportion = (date.m_dt - pSI->dtStart.m_dt) / (pSI->dtDone.m_dt - pSI->dtStart.m_dt);
-
-				dDays += (pSI->dTimeSpentDays * min(dProportion, 1.0));
-			}
-		}
-		else if (bHasStart && (date > pSI->dtStart))
-		{
-			COleDateTime dtNow(COleDateTime::GetCurrentTime());
-			double dProportion = (date.m_dt - pSI->dtStart.m_dt) / (dtNow.m_dt - pSI->dtStart.m_dt);
-
-			dDays += (pSI->dTimeSpentDays * min(dProportion, 1.0));
-		}
-	}
-
-	return dDays;
-}
-
-double CBurndownWnd::CalcTotalTimeEstimateInDays() const
-{
-	double dDays = 0;
-	int nItem = m_data.GetSize();
-	
-	while (nItem--)
-		dDays += m_data[nItem]->dTimeEstDays;
-
-	return dDays;
+	return ((m_dHoursInDay * m_nDaysInWeek) / (DEF_HOURSINDAY * DEF_DAYSINWEEK));
 }
 
 int CBurndownWnd::GetDataDuration() const

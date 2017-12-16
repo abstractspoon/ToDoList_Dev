@@ -1,5 +1,5 @@
 #if !defined(AFX_BurndownWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_)
-#define AFX_BurndownWND_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_
+#define AFX_BurndownSTRUCT_H__F2F5ABDC_CDB2_4197_A8E1_6FE134F95A20__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -10,6 +10,7 @@
 #include <afxtempl.h>
 
 #include "BurndownChart.h"
+#include "BurndownStruct.h"
 
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
@@ -19,56 +20,6 @@
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IUIExtension.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct STATSITEM 
-{ 
-	STATSITEM();
-	virtual ~STATSITEM();
-
-	BOOL HasStart() const;
-	BOOL IsDone() const;
-	
-	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
-	
-	COleDateTime dtStart, dtDone; 
-	double dTimeEstDays, dTimeSpentDays;
-	DWORD dwTaskID;
-
-protected:
-	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
-
-};
-
-class CStatsItemArray : protected CArray<STATSITEM*, STATSITEM*>
-{
-public:
-	CStatsItemArray();
-	virtual ~CStatsItemArray();
-
-	STATSITEM* AddItem(DWORD dwTaskID);
-	STATSITEM* GetItem(DWORD dwTaskID) const;
-	BOOL HasItem(DWORD dwTaskID) const;
-	BOOL IsEmpty() const;
-	int GetSize() const;
-
-	void RemoveAll();
-	void RemoveAt(int nIndex, int nCount = 1);
-
-	void Sort();
-	BOOL IsSorted() const;
-
-	STATSITEM* operator[](int nIndex) const;
-
-protected:
-	CDWordSet m_setTaskIDs;
-	
-protected:
-	int FindItem(DWORD dwTaskID) const;
-
-	static int CompareItems(const void* pV1, const void* pV2);
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownWnd dialog
@@ -174,10 +125,7 @@ protected:
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
-	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom);
-	double CalculateTimeSpentInDays(const COleDateTime& date);
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
-	double CalcTotalTimeEstimateInDays() const;
 	void RebuildXScale();
 	int GetDataDuration() const;
 	COleDateTime GetGraphStartDate() const;
@@ -185,10 +133,9 @@ protected:
 	int CalculateRequiredXScale() const;
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	double GetSprintDaysMultiplier() const;
 
 	static COleDateTime GetTaskDate(time64_t tDate);
-
-protected:
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
 };
