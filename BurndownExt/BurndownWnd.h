@@ -130,6 +130,8 @@ protected:
 	int m_nScale;
 	int	m_nDisplay;
 	DWORD m_dwUpdateGraphOnShow;
+	int m_nDaysInWeek;
+	double m_dHoursInDay;
 
 	CStatsItemArray m_data;
 	COleDateTime m_dtEarliestDate, m_dtLatestDate;

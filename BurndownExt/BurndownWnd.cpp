@@ -331,7 +331,9 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nDisplay(0),
 	m_nScale(1),
-	m_dwUpdateGraphOnShow(0)
+	m_dwUpdateGraphOnShow(0),
+	m_dHoursInDay(8.0),
+	m_nDaysInWeek(5)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -463,17 +465,20 @@ void CBurndownWnd::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) 
 
 }
 
-void CBurndownWnd::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/, bool /*bAppOnly*/) 
+void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/, bool /*bAppOnly*/) 
 {
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-// 	CString sKey(szKey);
-
 	// application preferences
+	m_dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
+	m_nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
 
+	
 	// burn down specific options
 // 	if (!bAppOnly)
 // 	{
+//		CString sKey(szKey);
+
 // 
 // 	}
 }
@@ -819,7 +824,8 @@ COleDateTime CBurndownWnd::GetTaskDate(time64_t tDate)
 double CBurndownWnd::GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
-	double dTime = (bEstimate ? pTasks->GetTaskTimeEstimate(hTask, nUnits, false) : pTasks->GetTaskTimeSpent(hTask, nUnits, false));
+	double dTime = (bEstimate ? pTasks->GetTaskTimeEstimate(hTask, nUnits, false) : 
+								pTasks->GetTaskTimeSpent(hTask, nUnits, false));
 
 	switch (nUnits)
 	{
@@ -830,8 +836,9 @@ double CBurndownWnd::GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hT
 
 	// all the rest
 	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
+	CTimeHelper th(m_dHoursInDay, m_nDaysInWeek);
 
-	return CTimeHelper(8, 5).GetTime(dTime, nTHUnits, THU_WEEKDAYS);
+	return th.GetTime(dTime, nTHUnits, THU_WEEKDAYS);
 }
 
 TH_UNITS CBurndownWnd::MapUnitsToTHUnits(TDC_UNITS nUnits)
