@@ -70,7 +70,7 @@ CTDLAboutDlg::CTDLAboutDlg(const CString& sAppTitle, CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CTDLAboutDlg)
 	//}}AFX_DATA_INIT
-	m_sLicense.Format(CEnString(IDS_LICENSE), _T("\"https://github.com/abstractspoon/ToDoList_Wiki/wiki/Free-Open-Source-Software\""));
+	m_sLicense.Format(CEnString(IDS_LICENSE), _T("\"http://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software\""));
 	m_sAppFolder = FileMisc::GetAppFilePath();
 	m_sPrefsFile = CPreferences::GetPath(TRUE);
 	
