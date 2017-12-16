@@ -3088,7 +3088,11 @@ BEGIN
             MENUITEM "&Due Tasks",                  ID_VIEW_COLLAPSEDUE
             MENUITEM "S&tarted Tasks",              ID_VIEW_COLLAPSESTARTED
         END
+        MENUITEM SEPARATOR
         MENUITEM "&Toggle Task Expanded State", ID_VIEW_TOGGLETASKEXPANDED
+        MENUITEM "Toggle &All Tasks Expanded State", 
+                                                ID_VIEW_TOGGLEALLTASKEXPANDED
+
         MENUITEM SEPARATOR
         MENUITEM "Task Attribute Visibilit&y...", ID_TASKLIST_SELECTCOLUMNS
         MENUITEM "C&ustom Task Attributes...",  ID_TASKLIST_CUSTOMCOLUMNS

@@ -233,6 +233,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
 	ON_COMMAND(ID_TOOLS_TOGGLE_LOGGING, OnToolsToggleLogging)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLE_LOGGING, OnUpdateToolsToggleLogging)
+	ON_COMMAND(ID_VIEW_TOGGLEALLTASKEXPANDED, OnViewToggleAllTaskExpanded)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewToggleAllTaskExpanded)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -955,6 +957,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_VIEW_RESIZECOLSTOFIT,				VK_ADD,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEFILTER,				VK_F12,			0);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETASKEXPANDED,			VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEALLTASKEXPANDED,		VK_SPACE,		HOTKEYF_SHIFT | HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETASKSANDCOMMENTS,		VK_F11,			0);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETREEANDLIST,			VK_F10,			0);
 	m_mgrShortcuts.AddShortcut(ID_WINDOW1,							'1',			HOTKEYF_ALT);
@@ -10769,20 +10772,6 @@ void CToDoListWnd::OnUpdateViewCollapseStartedtasks(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().CanExpandTasks(TDCEC_STARTED, FALSE));
 }
 
-void CToDoListWnd::OnViewToggletaskexpanded() 
-{
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	tdc.ExpandTasks(TDCEC_SELECTED, tdc.CanExpandTasks(TDCEC_SELECTED, TRUE));
-}
-
-void CToDoListWnd::OnUpdateViewToggletaskexpanded(CCmdUI* pCmdUI) 
-{
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_SELECTED, TRUE) || tdc.CanExpandTasks(TDCEC_SELECTED, FALSE));
-}
-
 void CToDoListWnd::OnWindow(UINT nCmdID) 
 {
 	int nTDC = (int)(nCmdID - ID_WINDOW1);
@@ -13028,4 +13017,34 @@ void CToDoListWnd::OnToolsToggleLogging()
 void CToDoListWnd::OnUpdateToolsToggleLogging(CCmdUI* pCmdUI) 
 {
 	pCmdUI->SetCheck(FileMisc::IsLoggingEnabled());
+}
+
+void CToDoListWnd::OnViewToggletaskexpanded() 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	
+	tdc.ExpandTasks(TDCEC_SELECTED, tdc.CanExpandTasks(TDCEC_SELECTED, TRUE));
+}
+
+void CToDoListWnd::OnUpdateViewToggletaskexpanded(CCmdUI* pCmdUI) 
+{
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	
+	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_SELECTED, TRUE) || 
+					tdc.CanExpandTasks(TDCEC_SELECTED, FALSE));
+}
+
+void CToDoListWnd::OnViewToggleAllTaskExpanded() 
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	
+	tdc.ExpandTasks(TDCEC_ALL, tdc.CanExpandTasks(TDCEC_ALL, TRUE));
+}
+
+void CToDoListWnd::OnUpdateViewToggleAllTaskExpanded(CCmdUI* pCmdUI) 
+{
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	
+	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_ALL, TRUE) || 
+					tdc.CanExpandTasks(TDCEC_ALL, FALSE));
 }
