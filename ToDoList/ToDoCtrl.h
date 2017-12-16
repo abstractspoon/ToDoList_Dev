@@ -666,6 +666,8 @@ protected:
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
+	// -------------------------------------------------------------------------------
+
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_taskTree.GetTask(dwTaskID); }
 	inline DWORD GetTaskID(HTREEITEM hti) const { return m_taskTree.GetTaskID(hti); }
 	inline DWORD GetTrueTaskID(HTREEITEM hti) const { return m_taskTree.GetTrueTaskID(hti); }
@@ -673,7 +675,6 @@ protected:
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_taskTree.ItemHasChildren(hti); }
 	inline BOOL ItemHasParent(HTREEITEM hti) const { return (NULL != m_taskTree.ItemHasParent(hti)); }
 	inline BOOL IsItemSelected(HTREEITEM hti) const { return m_taskTree.IsItemSelected(hti); }
-	virtual DWORD GetNextNonSelectedTaskID() const;
 
 	inline const CToDoCtrlFind& TCF() const { return m_taskTree.Find(); }
 	
@@ -683,6 +684,8 @@ protected:
 	inline CTreeSelectionHelper& TSH() { return m_taskTree.TSH(); }
 	inline const CTreeSelectionHelper& TSH() const { return m_taskTree.TSH(); }
 
+	// -------------------------------------------------------------------------------
+
 	virtual void InvalidateItem(HTREEITEM hti, BOOL bUpdate = FALSE) { m_taskTree.InvalidateItem(hti, bUpdate); }
 	virtual void UpdateSelectedTaskPath();
 	virtual BOOL SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate);
@@ -691,7 +694,47 @@ protected:
 	virtual void SetEditTitleTaskID(DWORD dwTaskID);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual void BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
+	virtual DWORD GetNextNonSelectedTaskID() const;
 
+	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent);
+	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
+	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
+	
+	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID = 0);
+	
+	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
+	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
+	
+	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
+	virtual void UpdateTasklistVisibility();
+	virtual void OnStylesUpdated() { m_taskTree.OnStylesUpdated(); }
+	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
+	
+	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
+
+	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
+	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
+
+	virtual void RebuildCustomAttributeUI();
+	virtual BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
+
+	virtual BOOL CopyCurrentSelection() const;
+	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
+
+	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
+	
+	virtual BOOL LoadTasks(const CTaskFile& tasks);
+
+	virtual int GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly = FALSE) const;
+	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
+	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTrue);
+	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
+	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
+	virtual BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
+
+	// -------------------------------------------------------------------------------
+	
 	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
@@ -723,24 +766,10 @@ protected:
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 
-	virtual TODOITEM* CreateNewTask(HTREEITEM htiParent);
-	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
-	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
-
-	virtual void SetModified(BOOL bMod, TDC_ATTRIBUTE nAttrib, DWORD dwModTaskID = 0);
-
-	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
-	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
-	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
-
 	void SaveGlobals(CTaskFile& tasks) const;
 	void LoadGlobals(const CTaskFile& tasks);
-
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
-	virtual void RebuildCustomAttributeUI();
-
-	virtual BOOL ModNeedsResort(TDC_ATTRIBUTE nModType) const;
 
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
@@ -748,15 +777,9 @@ protected:
 	CString GetSourceControlID(BOOL bAlternate = FALSE) const;
 	BOOL MatchesSourceControlID(const CString& sID) const;
 
-	virtual BOOL CopyCurrentSelection() const;
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
-
-	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
-	virtual void UpdateTasklistVisibility();
-	virtual void OnStylesUpdated() { m_taskTree.OnStylesUpdated(); }
-	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 
 	int GetControls(CTDCControlArray& aControls, BOOL bVisible) const;
 	BOOL IsCtrlShowing(const CTRLITEM& ctrl) const;
@@ -768,15 +791,12 @@ protected:
 	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
 
-	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
-
 	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CDlgUnits* pDLU, 
 						const CRect& rItem, int nClientRight);
 	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
 	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
 	void ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
-	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
 	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
 	BOOL GetStackCommentsAndControls() const;
 	int CalcMinCommentSize() const;
@@ -798,20 +818,13 @@ protected:
 
 	HTREEITEM PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HTREEITEM htiParent, HTREEITEM htiAfter, TDC_RESETIDS nResetID, BOOL bAndSubtasks);
 	BOOL PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDest, HTREEITEM htiDestAfter, TDC_RESETIDS nResetID, BOOL bSelectAll);
-
 	BOOL MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bMergeByID, CDWordArray& aNewTaskIDs);
-	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
-
-	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 
 	void SaveSplitPos(CPreferences& prefs) const;
 	void LoadSplitPos(const CPreferences& prefs);
 	void SaveDefaultRecurrence(CPreferences& prefs) const;
 	void LoadDefaultRecurrence(const CPreferences& prefs);
-
-	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
-	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
 	void ToggleTimeTracking(HTREEITEM hti);
 	BOOL AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDateTime& dtWhen, const CString& sComment, BOOL bTracked);
@@ -851,10 +864,8 @@ protected:
 	void PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bResetCreation, const CMapID2ID& mapID, BOOL bAndSiblings) const;
 	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
 	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
-	virtual int GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly = FALSE) const;
 	void RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
-	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe
 	void PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const;
 
@@ -868,12 +879,7 @@ protected:
 	int GetAllTasks(CTaskFile& tasks) const;
 	HTREEITEM SetAllTasks(const CTaskFile& tasks);
 
-	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTrue);
-	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	void SelectItem(HTREEITEM hti);
-
-	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
-	virtual BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
 	BOOL BuildTreeItem(HTREEITEM hti, const TODOSTRUCTURE* pTDS, const void* pContext);
 	HTREEITEM InsertTreeItem(const TODOITEM* pTDI, DWORD dwID, HTREEITEM htiParent, HTREEITEM htiAfter);
 
