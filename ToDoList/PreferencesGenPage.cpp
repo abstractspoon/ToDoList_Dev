@@ -17,9 +17,16 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef BCM_SETSHIELD
 #	define BCM_SETSHIELD 0x0000160C
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\stickies.exe");
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGenPage property page
 
@@ -208,6 +215,9 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 
 	m_bUseStickies = pPrefs->GetProfileInt(szKey, _T("UseStickies"), FALSE);
 	m_sStickiesPath = pPrefs->GetProfileString(szKey, _T("PathToStickies"));
+
+	if (m_sStickiesPath.IsEmpty() && FileMisc::FileExists(DEFAULT_STICKIES_PATH))
+		m_sStickiesPath = DEFAULT_STICKIES_PATH;
 
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), TRUE);
 }
