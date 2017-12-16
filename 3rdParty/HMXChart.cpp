@@ -30,7 +30,6 @@ CHMXChart::CHMXChart()
 	m_strXText = _T("");
 	m_strYText = _T("");
 	m_nYTicks = 0;
-	m_bShowYScale = true;
 	m_nRoundY = 10;
 	m_nXMax = 0;
 	m_nYMin = 0;
@@ -420,14 +419,9 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 
 int CHMXChart::CalcYScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
 {
-	int nSize = min((m_rectXAxis.Height() / 3), (m_rectYAxis.Width() / 4));
+	int nSize = (m_rectYAxis.Width() / 4);
 
 	// also check length of scale text
-	if (!m_strXText.IsEmpty())
-	{
-		nSize = min(nSize, (m_rectXAxis.Width() / m_strXText.GetLength()));
-	}
-
 	if (!m_strYText.IsEmpty())
 	{
 		nSize = min(nSize, (m_rectYAxis.Height() / m_strYText.GetLength()));
@@ -441,15 +435,26 @@ int CHMXChart::CalcYScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
 	return nSize;
 }
 
-int CHMXChart::CalcXScaleFontSize(CDC& dc, BOOL bTitle) const
+int CHMXChart::CalcXScaleFontSize(CDC& /*dc*/, BOOL bTitle) const
 {
-	int nSize = CalcYScaleFontSize(dc, bTitle);
-
-	if (!bTitle && (m_nXLabelDegrees > 0))
+	int nSize = (m_rectXAxis.Height() / 4);
+	
+	// also check length of scale text
+	if (!m_strXText.IsEmpty())
 	{
-		nSize -= 2;
+		nSize = min(nSize, (m_rectXAxis.Width() / m_strXText.GetLength()));
 	}
-
+	
+	if (bTitle)
+	{
+		nSize *= 2;
+	}
+	else
+	{
+		if (m_nXLabelDegrees == 0)
+			nSize += 2;
+	}
+	
 	return nSize;
 }
 
@@ -468,7 +473,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 {
 	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
 
-	if (!m_bShowXScale || (!nCount && m_strXText.IsEmpty()))
+	if (!nCount && m_strXText.IsEmpty())
 		return false;
 	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
@@ -551,7 +556,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 {
 	int nTicks = GetYTicks();
 
-	if (!m_bShowYScale || (!nTicks && m_strYText.IsEmpty()))
+	if (!nTicks && m_strYText.IsEmpty())
 		return false;
 	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
@@ -1436,24 +1441,6 @@ bool CHMXChart::SetYTicks(int nTicks)
 int CHMXChart::GetYTicks()
 {
 	return m_nYTicks;
-}
-
-//
-//	ShowYScale
-//
-//	arguments
-//
-//		bShow = show scale if true
-//
-//	return
-//
-//		true if ok, else false
-//
-bool CHMXChart::ShowYScale(bool bShow)
-{
-	m_bShowYScale = bShow;
-
-	return true;
 }
 
 //

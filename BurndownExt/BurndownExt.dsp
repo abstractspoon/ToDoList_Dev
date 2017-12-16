@@ -120,6 +120,10 @@ SOURCE=.\BurndownExt.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownStruct.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownWnd.cpp
 # End Source File
 # Begin Source File
@@ -139,6 +143,10 @@ SOURCE=.\BurndownChart.h
 # Begin Source File
 
 SOURCE=.\BurndownExt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BurndownStruct.h
 # End Source File
 # Begin Source File
 

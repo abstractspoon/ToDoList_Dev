@@ -88,8 +88,6 @@ public:
 	virtual bool		SetRoundY( double nRound );
 	virtual double		GetRoundY();
 
-	virtual bool		ShowYScale( bool bShow );
-
 	virtual bool		SetYTicks( int nTicks );
 	virtual int			GetYTicks();
 
@@ -155,8 +153,6 @@ protected:
 	CStringArray	m_strarrScaleXLabel;					// x labels
 	int				m_nXLabelStep;							// x label step
 	double			m_nRoundY;								// y scale rounding
-	bool			m_bShowXScale;							// show x scale
-	bool			m_bShowYScale;							// show y scale
 	int				m_nYTicks;								// y ticks
 	int				m_nXMax;								// max x value
 	double			m_nYMax;								// max y value
