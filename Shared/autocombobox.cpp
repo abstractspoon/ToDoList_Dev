@@ -119,16 +119,19 @@ int CAutoComboBox::SetStrings(const CStringArray& aItems)
 
 BOOL CAutoComboBox::OnCloseUp()
 {
-	// Clear edit change flag to protect against
-	// re-entrancy during parent notifications
-	BOOL bEditChange = m_bEditChange;
-	m_bEditChange = FALSE;
-
 	// notify parent of (possible) selection change
-	if (bEditChange && GetCount())
+	if (m_bEditChange)
+	{
+		// Clear edit change flag to protect against
+		// re-entrancy during parent notifications
+		m_bEditChange = FALSE;
+
 		ParentCBNotify(CBN_SELCHANGE);
+	}
 	else
+	{
 		ParentCBNotify(CBN_SELENDCANCEL);
+	}
 	
 	return FALSE; // pass to parent
 }
@@ -765,20 +768,13 @@ BOOL CAutoComboBox::DeleteLBItem(int nItem)
 		ParentACNotify(WM_ACBN_ITEMDELETED, nItem, sItem);
 
 		// resize our window
-		if (!IsType(CBS_SIMPLE))
+		if (!IsType(CBS_SIMPLE) && GetCount())
 		{
-			if (GetCount())
-			{
-				CRect rList;
-				m_scList.GetWindowRect(rList);
-				rList.bottom -= GetItemHeight(0);
-				
-				m_scList.GetCWnd()->MoveWindow(rList, TRUE);
-			}
-			else
-			{
-				ShowDropDown(FALSE);
-			}
+			CRect rList;
+			m_scList.GetWindowRect(rList);
+
+			rList.bottom -= GetItemHeight(0);
+			m_scList.GetCWnd()->MoveWindow(rList, TRUE);
 		}
 
 		return TRUE;

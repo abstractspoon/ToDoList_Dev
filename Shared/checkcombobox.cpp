@@ -621,6 +621,9 @@ BOOL CCheckComboBox::DeleteLBItem(int nItem)
 {
 	if (CAutoComboBox::DeleteLBItem(nItem))
 	{
+		if (GetCount() == 0)
+			m_sText.Empty();
+
 		RecalcText();
 		return TRUE;
 	}
