@@ -873,6 +873,7 @@ protected:
 	void AppendTaskFileHeader(CTaskFile& tasks) const;
 
 	void DrawSplitter(CDC* pDC);
+	void FixupParentCompletion(DWORD dwParentID);
 
 	// used for building/creating the tree for saving/loading
 	// not for overriding

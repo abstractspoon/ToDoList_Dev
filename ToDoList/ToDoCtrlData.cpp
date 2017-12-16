@@ -2858,31 +2858,33 @@ int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwS
 	return nPos;
 }
 
-BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID)
+BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus)
 {
 	if (!dwParentID) // top level item 
 		return TRUE;
 		
 	// if the parent was marked as done and it has any incomplete
 	// subtasks then mark the parent as incomplete too
-	const TODOITEM* pTDI = GetTrueTask(dwParentID);
-	ASSERT(pTDI);
-	
-	if (pTDI && pTDI->IsDone())
-	{
-		if (TaskHasIncompleteSubtasks(dwParentID, FALSE))
-		{
-			// work our way up the chain setting parent to incomplete
-			const TODOSTRUCTURE* pTDS = NULL;
-			GET_TDS(dwParentID, pTDS, FALSE);
+	TODOITEM* pTDIParent = NULL;
+	TODOSTRUCTURE* pTDSParent = NULL;
+	GET_TDI_TDS(dwParentID, pTDIParent, pTDSParent, FALSE);
 
-			do 
-			{
-				SetTaskDate(pTDS->GetTaskID(), TDCD_DONE, 0.0);
-				pTDS = pTDS->GetParentTask();
-			} 
-			while(pTDS);
+	if (pTDIParent->IsDone() && TaskHasIncompleteSubtasks(pTDSParent, FALSE))
+	{
+		SetTaskDate(dwParentID, pTDIParent, TDCD_DONE, 0.0);
+
+		if (bClearStatus)
+			pTDIParent->sStatus.Empty();
+
+		// work our way up the parent chain
+		do
+		{
+			if (!FixupParentCompletion(pTDSParent->GetParentTaskID(), bClearStatus))
+				break;
+
+			pTDSParent = pTDSParent->GetParentTask();
 		}
+		while (pTDSParent);
 	}
 
 	return TRUE;

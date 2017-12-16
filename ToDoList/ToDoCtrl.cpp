@@ -5045,7 +5045,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 			// if the parent was marked as done and the new task 
 			// is NOT cancellable, we mark the parent as incomplete.
 			if (!bEdit && m_data.IsTaskDone(dwParentID))
-				m_data.FixupParentCompletion(dwParentID);
+				FixupParentCompletion(dwParentID);
 		}
 		
 		m_dwNextUniqueID++;
@@ -5428,7 +5428,7 @@ LRESULT CToDoCtrl::OnEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 				DWORD dwParentID = m_data.GetTaskParentID(m_dwEditTitleTaskID);
 				
 				if (dwParentID && m_data.IsTaskDone(dwParentID))
-					m_data.FixupParentCompletion(dwParentID);
+					FixupParentCompletion(dwParentID);
 
 				// For new tasks we did not sort so we may need to do so
 				// now if sorting by anything other than 'title' because 
@@ -7343,7 +7343,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
-				m_data.FixupParentCompletion(dwTargetID);
+				FixupParentCompletion(dwTargetID);
 			}
 		}
 		else if (bMove)
@@ -7364,7 +7364,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
-				m_data.FixupParentCompletion(dwDestParentID);
+				FixupParentCompletion(dwDestParentID);
 
 				SetModified(TRUE, TDCA_POSITION);
 			}
@@ -7372,6 +7372,11 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 	}
 
 	return bDropped;
+}
+
+void CToDoCtrl::FixupParentCompletion(DWORD dwParentID)
+{
+	VERIFY(m_data.FixupParentCompletion(dwParentID, !m_sCompletionStatus.IsEmpty()));
 }
 
 void CToDoCtrl::RemoveNonSelectedTasks(CTaskFile& tasks)
@@ -7723,9 +7728,7 @@ BOOL CToDoCtrl::MoveSelection(TDC_MOVETASK nDirection)
 				
 			// refresh parent states if moving to the right (adding subtasks)
 			if (nDirection == TDCM_RIGHT)
-			{
-				m_data.FixupParentCompletion(dwDestParentID);
-			}
+				FixupParentCompletion(dwDestParentID);
 
 			return TRUE;
 		}
@@ -8277,8 +8280,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		// no need to re-check IDs as we've already done it
 		if (PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
 		{
-			m_data.FixupParentCompletion(GetTaskID(htiDest));
-
+			FixupParentCompletion(GetTaskID(htiDest));
 			return TRUE;
 		}
 	}

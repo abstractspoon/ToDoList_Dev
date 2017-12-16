@@ -83,7 +83,7 @@ public:
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
-	BOOL FixupParentCompletion(DWORD dwParentID);
+	BOOL FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus);
 
 	// undo/redo
 	BOOL BeginNewUndoAction(TDCUNDOACTIONTYPE nType);
