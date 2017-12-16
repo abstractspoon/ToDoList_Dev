@@ -189,6 +189,10 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 		
 		::FillRect(hdc, rClient, hbrBkgnd);
 	}
+	else
+	{
+		nFlags |= DT_WORDBREAK; // wrap
+	}
 
 	::SetBkMode(hdc, TRANSPARENT);
 	::SetTextColor(hdc, crText);
