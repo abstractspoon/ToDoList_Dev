@@ -59,6 +59,7 @@ namespace WordCloudUIExtension
 
 		private Font m_ControlsFont;
 		private Timer m_RedrawTimer;
+		private String m_UserIgnoreFilePath, m_LangIgnoreFilePath;
 
         // -------------------------------------------------------------
 
@@ -94,7 +95,7 @@ namespace WordCloudUIExtension
 					return false; // ??
 
 				// Get the item's words
-				var words = item.GetWords(m_Attrib, m_ExcludedWords);
+				var words = item.GetWords(m_Attrib, m_ExcludedWords, false);
 
 				if (!words.Any())
 					return false;
@@ -153,7 +154,7 @@ namespace WordCloudUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs, changedTaskIds))
 				task = task.GetNextTask();
 
-			UpdateWeightedWords();
+			UpdateWeightedWords(true);
 			UpdateMatchList(changedTaskIds);
 
 			OnUpdateTasks();
@@ -267,13 +268,13 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		protected void UpdateWeightedWords()
+		protected void UpdateWeightedWords(bool force)
 		{
 			var words = new List<string>();
 
 			foreach (var item in m_Items)
 			{
-				var taskWords = item.Value.GetWords(m_Attrib, m_ExcludedWords);
+				var taskWords = item.Value.GetWords(m_Attrib, m_ExcludedWords, force);
 				words.AddRange(taskWords);
 			}
 
@@ -399,27 +400,15 @@ namespace WordCloudUIExtension
 		{
             if (appOnly)
             {
-				CommonBlacklist blacklist = new CommonBlacklist();
+				string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+				string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
 
-                // Look for user-defined 'Ignore' file
-                string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string ignoreFile = Path.Combine(appPath, "WordCloud.Ignore.txt");
+				m_UserIgnoreFilePath = Path.Combine(appPath, "WordCloud.Ignore.txt");
 
-				int numWords = blacklist.Append(ignoreFile);
+				m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
+				m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
-                // Also look for localised ignore file
-                string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
-                    
-                ignoreFile = Path.Combine(appPath, language);
-                ignoreFile = Path.ChangeExtension(ignoreFile, "WordCloud.Ignore.txt");
-
-				numWords += blacklist.Append(ignoreFile);
-
-				if (numWords > 0)
-				{
-                    m_ExcludedWords = blacklist;
-                    UpdateWeightedWords();
-                }
+				UpdateBlacklist();
             }
             else // private settings
 			{
@@ -455,6 +444,16 @@ namespace WordCloudUIExtension
 			Invalidate(true);
 		}
 
+		private void UpdateBlacklist()
+		{
+			CommonBlacklist blacklist = new CommonBlacklist();
+
+			int numWords = blacklist.Append(m_UserIgnoreFilePath);
+			numWords += blacklist.Append(m_LangIgnoreFilePath);
+
+			m_ExcludedWords = blacklist;
+			UpdateWeightedWords(true);
+		}
 
 		private void CreateWordCloud()
 		{
@@ -468,7 +467,7 @@ namespace WordCloudUIExtension
 			this.Controls.Add(m_WordCloud);
 
 			m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
-
+			m_WordCloud.MouseClick += new MouseEventHandler(OnWordCloudMouseClick);
 		}
 
 		private void CreateTaskMatchesListView()
@@ -627,7 +626,7 @@ namespace WordCloudUIExtension
         {
             m_Attrib = m_AttributeCombo.GetSelectedAttribute();
 
-            UpdateWeightedWords();
+            UpdateWeightedWords(false);
 			UpdateMatchList();
         }
 
@@ -640,7 +639,7 @@ namespace WordCloudUIExtension
 		{
 			m_WordCloud.LayoutType = m_StylesCombo.GetSelectedStyle();
 
-			UpdateWeightedWords();
+			UpdateWeightedWords(false);
         }
 
 		private void RebuldMatchList()
@@ -653,6 +652,7 @@ namespace WordCloudUIExtension
 				UInt32 selItemId = m_TaskMatchesList.GetSelectedMatchId();
 
 				// Build a list of task items containing this value
+				m_TaskMatchesList.BeginUpdate();
 				m_TaskMatchesList.ClearMatches();
 
 				foreach (var item in m_Items)
@@ -665,6 +665,7 @@ namespace WordCloudUIExtension
 							selItem = item.Value;
 					}
 				}
+				m_TaskMatchesList.EndUpdate();
 
 				string headerText = m_Trans.Translate("Task Matches");
 
@@ -685,6 +686,38 @@ namespace WordCloudUIExtension
 			}
 		}
 
+		private void OnWordCloudMouseClick(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				var menu = new ContextMenuStrip();
+
+				string format = m_Trans.Translate("&Ignore '{0}'");
+				string menuText = string.Format(format, m_WordCloud.SelectedWord);
+				var item = menu.Items.Add(menuText);
+
+				item.Click += OnWordCloudIgnoreWord;
+				item.Tag = m_WordCloud.SelectedWord;
+				
+				menu.Show(m_WordCloud, e.Location);
+			}
+		}
+
+		private void OnWordCloudIgnoreWord(object sender, EventArgs e)
+		{
+			var item = sender as ToolStripItem;
+
+			if (item != null)
+			{
+				// Look for user-defined 'Ignore' file
+				string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+				string ignoreFile = Path.Combine(appPath, "WordCloud.Ignore.txt");
+
+				File.AppendAllText(ignoreFile, item.Tag.ToString() + Environment.NewLine);
+				UpdateBlacklist();
+			}
+		}
+
 		private void OnWordSelectionChanged(object sender)
 		{
 			RebuldMatchList();
@@ -699,7 +732,7 @@ namespace WordCloudUIExtension
 
 			if (selMatch != null)
 			{
-				var words = selMatch.GetWords(m_Attrib, m_ExcludedWords);
+				var words = selMatch.GetWords(m_Attrib, m_ExcludedWords, false);
 
 				if (words.Any())
 				{

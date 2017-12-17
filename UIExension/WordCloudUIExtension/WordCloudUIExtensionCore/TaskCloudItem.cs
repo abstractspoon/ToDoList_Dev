@@ -181,9 +181,9 @@ namespace WordCloudUIExtension
 			return words;
 		}
 
-		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions)
+		public List<string> GetWords(UIExtension.TaskAttribute attrib, IBlacklist exclusions, bool force)
 		{
-			if (attrib != m_WordAttribute)
+			if (force || (attrib != m_WordAttribute))
 			{
 				m_Words = GetAttributeValues(attrib, exclusions);
 				m_WordAttribute = attrib;
@@ -225,7 +225,7 @@ namespace WordCloudUIExtension
 
 		public bool AttributeHasValue(UIExtension.TaskAttribute attrib, String value, IBlacklist exclusions)
 		{
-			var words = GetWords(attrib, exclusions);
+			var words = GetWords(attrib, exclusions, false);
 
 			return (words.Find(x => x.Equals(value, StringComparison.CurrentCultureIgnoreCase)) != null);
 		}

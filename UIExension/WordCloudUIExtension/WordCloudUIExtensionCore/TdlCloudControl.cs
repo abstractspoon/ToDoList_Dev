@@ -57,6 +57,7 @@ namespace WordCloudUIExtension
 					m_SelectedWord = value;
 
 					Invalidate();
+					Update();
 
 					if (SelectionChange != null)
 						SelectionChange(this);
@@ -103,9 +104,9 @@ namespace WordCloudUIExtension
 
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
-			base.OnMouseClick(e);
-
 			bool focused = Focus();
+
+			m_ToolTip.SetToolTip(this, "");
 
 			if (base.m_ItemUnderMouse != null)
 			{
@@ -114,6 +115,8 @@ namespace WordCloudUIExtension
 					SelectedWord = base.m_ItemUnderMouse.Word.Text;
 				}
 			}
+
+			base.OnMouseClick(e);
 		}
 
 		protected override void OnLostFocus(EventArgs e)

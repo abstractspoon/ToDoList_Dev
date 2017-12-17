@@ -597,7 +597,7 @@ namespace DayViewUIExtension
 		private const string FontName = "Tahoma";
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-		private System.Windows.Forms.Timer m_redrawTimer;
+//		private System.Windows.Forms.Timer m_redrawTimer;
 
 		private bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
 
