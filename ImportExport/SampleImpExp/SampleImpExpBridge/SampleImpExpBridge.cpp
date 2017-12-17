@@ -72,7 +72,7 @@ LPCWSTR CSampleImpExpBridge::GetFileExtension() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
@@ -81,11 +81,15 @@ bool CSampleImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFi
 	msclr::auto_gcroot<SampleImpExpCore^> expCore = gcnew SampleImpExpCore(trans.get());
 	
 	// do the export
-	return expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey));
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), (bSilent != FALSE), prefs.get(), gcnew String(szKey)))
+		return IIER_SUCCESS;
+
+	// else
+	return IIER_OTHER;
 }
 
-bool CSampleImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CSampleImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
-	return false;
+	return IIER_OTHER;
 }
