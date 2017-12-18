@@ -2865,27 +2865,20 @@ BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus)
 		
 	// if the parent was marked as done and it has any incomplete
 	// subtasks then mark the parent as incomplete too
-	TODOITEM* pTDIParent = NULL;
-	TODOSTRUCTURE* pTDSParent = NULL;
+	const TODOITEM* pTDIParent = NULL;
+	const TODOSTRUCTURE* pTDSParent = NULL;
 	GET_TDI_TDS(dwParentID, pTDIParent, pTDSParent, FALSE);
 
 	if (pTDIParent->IsDone() && TaskHasIncompleteSubtasks(pTDSParent, FALSE))
 	{
-		SetTaskDate(dwParentID, pTDIParent, TDCD_DONE, 0.0);
+		SetTaskDate(dwParentID, TDCD_DONE, 0.0);
 
 		if (bClearStatus)
-			pTDIParent->sStatus.Empty();
-
-		// work our way up the parent chain
-		do
-		{
-			if (!FixupParentCompletion(pTDSParent->GetParentTaskID(), bClearStatus))
-				break;
-
-			pTDSParent = pTDSParent->GetParentTask();
-		}
-		while (pTDSParent);
+			ClearTaskAttribute(dwParentID, TDCA_STATUS);
 	}
+
+	// and this parent's immediate parent
+	FixupParentCompletion(pTDSParent->GetParentTaskID(), bClearStatus); // RECURSIVE call
 
 	return TRUE;
 }
