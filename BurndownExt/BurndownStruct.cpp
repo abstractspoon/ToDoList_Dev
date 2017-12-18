@@ -27,7 +27,13 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-STATSITEM::STATSITEM() : dwTaskID(0), dTimeEstDays(0.0), dTimeSpentDays(0.0)
+STATSITEM::STATSITEM() 
+	: 
+	dwTaskID(0), 
+	dTimeEst(0.0), 
+	nTimeEstUnits(TDCU_DAYS),
+	dTimeSpent(0.0),
+	nTimeSpentUnits(TDCU_DAYS)
 {
 	CDateHelper::ClearDate(dtStart);
 	CDateHelper::ClearDate(dtDone);
@@ -69,14 +75,16 @@ void STATSITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTi
 	}
 }
 
-double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, double dMultiplier) const
+double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const
 {
 	// Ignore tasks with no time spent
-	if (dTimeSpentDays == 0.0)
+	if (dTimeSpent == 0.0)
 		return 0.0;
 
-	double dDays = 0.0;
+	double dTimeSpentDays = CalcTimeInDays(dTimeSpent, nTimeSpentUnits, nDaysInWeek, dHoursInDay);
+
 	BOOL bHasStart = HasStart();
+	double dDays = 0.0;
 
 	if (IsDone())
 	{
@@ -99,12 +107,47 @@ double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, double dMultipli
 		dDays += (dTimeSpentDays * min(dProportion, 1.0));
 	}
 	
-	return (dDays * dMultiplier);
+	return dDays;
 }
 
-double STATSITEM::CalcTimeEstimateInDays(double dMultiplier) const
+double STATSITEM::CalcTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const
 {
-	return (dTimeEstDays * dMultiplier);
+	return CalcTimeInDays(dTimeEst, nTimeEstUnits, nDaysInWeek, dHoursInDay);
+}
+
+double STATSITEM::CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek, double dHoursInDay)
+{
+	switch (nUnits)
+	{
+	case TDCU_WEEKDAYS:
+	case TDCU_DAYS:
+		return dTime;
+	}
+
+	// all the rest
+	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
+	CTimeHelper th(dHoursInDay, nDaysInWeek);
+
+	return th.GetTime(dTime, nTHUnits, THU_WEEKDAYS);
+}
+
+TH_UNITS STATSITEM::MapUnitsToTHUnits(TDC_UNITS nUnits)
+{
+	switch (nUnits)
+	{
+	case TDCU_NULL:		return THU_NULL;
+	case TDCU_MINS:		return THU_MINS;
+	case TDCU_HOURS:	return THU_HOURS;
+	case TDCU_DAYS:		return THU_DAYS;
+	case TDCU_WEEKDAYS:	return THU_WEEKDAYS;
+	case TDCU_WEEKS:	return THU_WEEKS;
+	case TDCU_MONTHS:	return THU_MONTHS;
+	case TDCU_YEARS:	return THU_YEARS;
+	}
+
+	// all else
+	ASSERT(0);
+	return THU_NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -291,7 +334,7 @@ int CStatsItemArray::CompareItems(const void* pV1, const void* pV2)
 	return 0;
 }
 
-double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date, double dMultiplier) const
+double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const
 {
 	int nNumItems = GetSize();
 	double dDays = 0;
@@ -304,20 +347,20 @@ double CStatsItemArray::CalcTimeSpentInDays(const COleDateTime& date, double dMu
 		if (pSI->HasStart() && (pSI->dtStart >= date))
 			break;
 
-		dDays += pSI->CalcTimeSpentInDays(date, dMultiplier);
+		dDays += pSI->CalcTimeSpentInDays(date, nDaysInWeek, dHoursInDay);
 	}
 	
 	return dDays;
 }
 
-double CStatsItemArray::CalcTotalTimeEstimateInDays(double dMultiplier) const
+double CStatsItemArray::CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const
 {
 	double dDays = 0;
 	int nItem = GetSize();
 	
 	while (nItem--)
 	{
-		dDays += GetAt(nItem)->CalcTimeEstimateInDays(dMultiplier);
+		dDays += GetAt(nItem)->CalcTimeEstimateInDays(nDaysInWeek, dHoursInDay);
 	}
 	
 	return dDays;

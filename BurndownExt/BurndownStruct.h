@@ -8,6 +8,7 @@
 #include <afxtempl.h>
 
 #include "..\Shared\mapex.h"
+#include "..\shared\timehelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -21,15 +22,18 @@ struct STATSITEM
 	
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date, double dMultiplier) const;
-	double CalcTimeEstimateInDays(double dMultiplier) const;
+	double CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const;
+	double CalcTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
 	
 	COleDateTime dtStart, dtDone; 
-	double dTimeEstDays, dTimeSpentDays;
+	double dTimeEst, dTimeSpent;
+	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	DWORD dwTaskID;
 
 protected:
 	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
+	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek, double dHoursInDay);
+	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
 };
 
@@ -51,8 +55,8 @@ public:
 	void Sort();
 	BOOL IsSorted() const;
 
-	double CalcTimeSpentInDays(const COleDateTime& date, double dMultiplier) const;
-	double CalcTotalTimeEstimateInDays(double dMultiplier) const;
+	double CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const;
+	double CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
 	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 
 	void GetDataExtents(COleDateTime& dtEarliestDate, COleDateTime& dtLatestDate) const;

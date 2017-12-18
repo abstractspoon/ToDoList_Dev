@@ -111,8 +111,8 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_nDisplay(SD_INCOMPLETE),
 	m_nScale(1),
 	m_dwUpdateGraphOnShow(0),
-	m_dHoursInDay(8.0),
-	m_nDaysInWeek(5)
+	m_dHoursInDay(DEF_HOURSINDAY),
+	m_nDaysInWeek(DEF_DAYSINWEEK)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -424,8 +424,8 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		{
 			pSI->dtStart = GetTaskStartDate(pTasks, hTask);
 			pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
-			pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
-			pSI->dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
+			pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
+			pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
 
 			// make sure start is less than done
 			if (pSI->IsDone() && pSI->HasStart())
@@ -539,12 +539,12 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 				if (pSI->IsDone() && pSI->HasStart())
 					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
 			}
-				
+
 			if (attrib.Has(IUI_TIMEEST))
-				pSI->dTimeEstDays = GetTaskTimeInDays(pTasks, hTask, TRUE);
+				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
 
 			if (attrib.Has(IUI_TIMESPENT))
-				pSI->dTimeSpentDays = GetTaskTimeInDays(pTasks, hTask, FALSE);
+				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
 		}
 		else
 		{
@@ -598,45 +598,6 @@ COleDateTime CBurndownWnd::GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITE
 COleDateTime CBurndownWnd::GetTaskDate(time64_t tDate)
 {
 	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
-}
-
-double CBurndownWnd::GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate)
-{
-	TDC_UNITS nUnits = TDCU_NULL;
-	double dTime = (bEstimate ? pTasks->GetTaskTimeEstimate(hTask, nUnits, false) : 
-								pTasks->GetTaskTimeSpent(hTask, nUnits, false));
-
-	switch (nUnits)
-	{
-	case TDCU_WEEKDAYS:
-	case TDCU_DAYS:
-		return dTime;
-	}
-
-	// all the rest
-	TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
-	CTimeHelper th(DEF_HOURSINDAY, DEF_DAYSINWEEK);
-
-	return th.GetTime(dTime, nTHUnits, THU_WEEKDAYS);
-}
-
-TH_UNITS CBurndownWnd::MapUnitsToTHUnits(TDC_UNITS nUnits)
-{
-	switch (nUnits)
-	{
-	case TDCU_NULL:		return THU_NULL;
-	case TDCU_MINS:		return THU_MINS;
-	case TDCU_HOURS:	return THU_HOURS;
-	case TDCU_DAYS:		return THU_DAYS;
-	case TDCU_WEEKDAYS:	return THU_WEEKDAYS;
-	case TDCU_WEEKS:	return THU_WEEKS;
-	case TDCU_MONTHS:	return THU_MONTHS;
-	case TDCU_YEARS:	return THU_YEARS;
-	}
-
-	// all else
-	ASSERT(0);
-	return THU_NULL;
 }
 
 BOOL CBurndownWnd::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
@@ -1059,8 +1020,7 @@ void CBurndownWnd::BuildSprintGraph()
 	COleDateTime dtStart = GetGraphStartDate();
 	COleDateTime dtEnd = GetGraphEndDate();
 
-	double dMultiplier = GetSprintDaysMultiplier();
-	double dTotalEst = m_data.CalcTotalTimeEstimateInDays(dMultiplier);
+	double dTotalEst = m_data.CalcTotalTimeEstimateInDays(m_nDaysInWeek, m_dHoursInDay);
 
 	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
 
@@ -1072,17 +1032,12 @@ void CBurndownWnd::BuildSprintGraph()
 
 		// Time Spent
 		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = m_data.CalcTimeSpentInDays(date, dMultiplier);
+		double dSpent = m_data.CalcTimeSpentInDays(date, m_nDaysInWeek, m_dHoursInDay);
 		
 		m_graph.AddData(SPRINT_SPENT, (dTotalEst - dSpent));
 	}
 
 	m_graph.CalcDatas();
-}
-
-double CBurndownWnd::GetSprintDaysMultiplier() const
-{
-	return ((m_dHoursInDay * m_nDaysInWeek) / (DEF_HOURSINDAY * DEF_DAYSINWEEK));
 }
 
 int CBurndownWnd::GetDataDuration() const

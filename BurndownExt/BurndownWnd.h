@@ -15,7 +15,6 @@
 #include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
-#include "..\shared\timehelper.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\Itasklist.h"
@@ -133,10 +132,8 @@ protected:
 	int CalculateRequiredXScale() const;
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	double GetSprintDaysMultiplier() const;
 
 	static COleDateTime GetTaskDate(time64_t tDate);
-	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
 };
 
