@@ -94,7 +94,7 @@ int CTDLAddLoggedTimeDlg::DoModal(BOOL bShowAddTimeToTimeSpent)
 	if (bShowAddTimeToTimeSpent)
 	{
 		m_bShowAddTimeToTimeSpent = TRUE;
-		m_bAddTimeToTimeSpent = AfxGetApp()->GetProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), TRUE);
+		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(_T("Preferences"), _T("AddLoggedTimeToTimeSpent"), TRUE);
 	}
 	else
 	{
