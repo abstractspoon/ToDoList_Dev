@@ -22,7 +22,7 @@ enum GCDD_MODE
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGanttCreateDependsDlg : public CDialog, public CGanttDependencyEditor
+class CGanttCreateDependsDlg : public CDialog, public IGanttDependencyEditor
 {
 // Construction
 public:

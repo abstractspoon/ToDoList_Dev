@@ -177,4 +177,31 @@ struct GANTTSORT
 
 /////////////////////////////////////////////////////////////////////////////
 
+class IGanttDependencyEditor
+{
+public:
+	virtual BOOL SetFromTask(DWORD dwFromTaskID) = 0;
+	virtual BOOL SetFromDependency(DWORD dwFromTaskID, DWORD dwCurToTaskID) = 0;
+	virtual BOOL SetToTask(DWORD dwToTaskID) = 0;
+
+	virtual DWORD GetFromTask() const = 0;
+	virtual DWORD GetFromDependency(DWORD& dwCurToTaskID) const = 0;
+	virtual DWORD GetToTask() const = 0;
+
+	virtual BOOL IsPicking() const = 0;
+	virtual BOOL IsPickingFromTask() const = 0;
+	virtual BOOL IsPickingFromDependency() const = 0;
+	virtual BOOL IsPickingToTask() const = 0;
+	virtual BOOL IsPickingCancelled() const = 0;
+	virtual BOOL IsPickingCompleted() const = 0;
+
+	virtual BOOL IsAdding() const = 0;
+	virtual BOOL IsEditing() const = 0;
+	virtual BOOL IsDeleting() const = 0;
+
+	virtual void Cancel() = 0;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // !defined(AFX_GANTTSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

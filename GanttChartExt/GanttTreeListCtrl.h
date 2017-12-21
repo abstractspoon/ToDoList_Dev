@@ -28,35 +28,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGanttDependencyEditor
-{
-public:
-	virtual BOOL SetFromTask(DWORD dwFromTaskID) = 0;
-	virtual BOOL SetFromDependency(DWORD dwFromTaskID, DWORD dwCurToTaskID) = 0;
-	virtual BOOL SetToTask(DWORD dwToTaskID) = 0;
-	
-	virtual DWORD GetFromTask() const = 0;
-	virtual DWORD GetFromDependency(DWORD& dwCurToTaskID) const = 0;
-	virtual DWORD GetToTask() const = 0;
-	
-	virtual BOOL IsPicking() const = 0;
-	virtual BOOL IsPickingFromTask() const = 0;
-	virtual BOOL IsPickingFromDependency() const = 0;
-	virtual BOOL IsPickingToTask() const = 0;
-	virtual BOOL IsPickingCancelled() const = 0;
-	virtual BOOL IsPickingCompleted() const = 0;
-
-	virtual BOOL IsAdding() const = 0;
-	virtual BOOL IsEditing() const = 0;
-	virtual BOOL IsDeleting() const = 0;
-
-	virtual void Cancel() = 0;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CThemed;
-class CGanttCreateDependsDlg;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -142,7 +114,7 @@ public:
 	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 	GTLC_SNAPMODE GetSnapMode() const;
 
-	BOOL BeginDependencyEdit(CGanttDependencyEditor* pDependEdit);
+	BOOL BeginDependencyEdit(IGanttDependencyEditor* pDependEdit);
 	void OnEndDepedencyEdit();
 
 	int GetTreeColumnOrder(CIntArray& aTreeOrder) const;
@@ -165,7 +137,7 @@ protected:
 	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;
 
-	CGanttDependencyEditor* m_pDependEdit;
+	IGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 
@@ -180,6 +152,7 @@ protected:
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
 	GTLC_DRAG m_nDragging;
+	int m_nPrevDropHilitedItem;
 
 	CGanttTreeCtrl& m_tree;
 	CListCtrl& m_list;
@@ -205,8 +178,12 @@ protected:
 	void OnNotifySplitterChange(int nSplitPos);
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 
-	// pseudo-message handler
+	// pseudo-message handlers
 	void OnHeaderDividerDblClk(NMHEADER* HDN);
+	BOOL OnLButtonDown(BOOL bTree, UINT nFlags, CPoint point);
+	BOOL OnLButtonUp(BOOL bTree, UINT nFlags, CPoint point);
+	BOOL OnLButtonDblClk(BOOL bTree, UINT nFlags, CPoint point);
+	BOOL OnMouseMove(BOOL bTree, UINT nFlags, CPoint point);
 
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
@@ -267,6 +244,7 @@ protected:
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	HFONT GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, int nCol);
+	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemCollapsed(int nListItem) const;
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
