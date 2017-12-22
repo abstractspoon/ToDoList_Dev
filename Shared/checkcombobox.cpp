@@ -666,7 +666,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aItems)
 BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aMixed)
 {
 	// Array should be mutually exclusive
-	ASSERT(Misc::MatchAny(aChecked, aMixed, FALSE, FALSE) == FALSE);
+	ASSERT(Misc::MatchAny(aChecked, aMixed, FALSE, TRUE) == FALSE);
 
 	// make sure the items exist in the list
 	int nAdded = CAutoComboBox::AddUniqueItems(aChecked);

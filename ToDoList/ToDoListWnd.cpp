@@ -235,6 +235,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLE_LOGGING, OnUpdateToolsToggleLogging)
 	ON_COMMAND(ID_VIEW_TOGGLEALLTASKEXPANDED, OnViewToggleAllTaskExpanded)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewToggleAllTaskExpanded)
+	ON_COMMAND(ID_EDIT_FINDREPLACEINTASKTITLES, OnEditFindReplaceInTaskTitles)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_FINDREPLACEINTASKTITLES, OnUpdateEditFindReplaceInTaskTitles)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -911,6 +913,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_CUT,							'X',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_DECTASKPERCENTDONE,			VK_SUBTRACT,	HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_FINDTASKS,					'F',			HOTKEYF_CONTROL);
+	m_mgrShortcuts.AddShortcut(ID_EDIT_FINDREPLACEINTASKTITLES,		'H',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_INCTASKPERCENTDONE,			VK_ADD,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_INSERTDATETIME,				'D',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_LOCKTASK,					'K',			HOTKEYF_CONTROL);
@@ -13047,4 +13050,14 @@ void CToDoListWnd::OnUpdateViewToggleAllTaskExpanded(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanExpandTasks(TDCEC_ALL, TRUE) || 
 					tdc.CanExpandTasks(TDCEC_ALL, FALSE));
+}
+
+void CToDoListWnd::OnEditFindReplaceInTaskTitles() 
+{
+	GetToDoCtrl().DoFindReplaceOnTitles();
+}
+
+void CToDoListWnd::OnUpdateEditFindReplaceInTaskTitles(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount() > 0);
 }

@@ -130,7 +130,7 @@ namespace Misc
 	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, 
 					 BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);
 	BOOL MatchAny(const CStringArray& array1, const CStringArray& array2, 
-					BOOL bCaseSensitive = FALSE, BOOL bPartialOK = TRUE);
+					BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 
 	BOOL MatchAll(const CDWordArray& array1, const CDWordArray& array2, 
 		BOOL bOrderSensitive = FALSE);
@@ -364,8 +364,9 @@ namespace Misc
 	BOOL HasEmpty(const CStringArray& aItems);
 
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
-	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
-	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
+	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
+	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);
+	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	double Round(double dValue);
 	float Round(float fValue);
@@ -402,8 +403,7 @@ namespace Misc
 	DWORD GetLastUserInputTick();
 	DWORD GetTicksSinceLastUserInput();
 
-	int ParseSearchString(LPCTSTR szLookFor, CStringArray& aWords);
-	BOOL FindWord(LPCTSTR szWord, LPCTSTR szText, BOOL bCaseSensitive, BOOL bMatchWholeWord);
+	int ParseSearchString(LPCTSTR szSearch, CStringArray& aWords);
 	int FilterString(CString& sText, const CString& sFilter);
 
 	BOOL ModKeysArePressed(DWORD dwKeys); 

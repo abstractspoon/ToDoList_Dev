@@ -539,7 +539,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 		m_editBox.SetMask(_T("1234567890"));
 		break;
 		
-	case FT_DATE_REL:
+	case FT_DATERELATIVE:
 		m_editBox.SetMask(_T("nNtTdDWMY+-1234567890"));
 		break;
 		
@@ -732,7 +732,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				AddOperatorToCombo(FOP_SET);
 				AddOperatorToCombo(FOP_NOT_SET);
 				// fall thru
-			case FT_DATE_REL:
+			case FT_DATERELATIVE:
 				AddOperatorToCombo(FOP_EQUALS);
 				AddOperatorToCombo(FOP_NOT_EQUALS);
 				AddOperatorToCombo(FOP_AFTER);
@@ -940,7 +940,7 @@ void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResu
 	switch (sp.GetAttribType())
 	{
 	case FT_STRING:
-	case FT_DATE_REL:
+	case FT_DATERELATIVE:
 	case FT_INTEGER:
 	case FT_DOUBLE:
 		sp.SetValue(pDispInfo->item.pszText);
@@ -1168,7 +1168,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 			switch (sp.GetAttribType())
 			{
 			case FT_STRING:
-			case FT_DATE_REL:
+			case FT_DATERELATIVE:
 			case FT_INTEGER:
 			case FT_DOUBLE:
 			case FT_ICON:

@@ -3034,6 +3034,9 @@ BEGIN
         MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
         MENUITEM "&Find Tasks...",              ID_EDIT_FINDTASKS
+        MENUITEM "Find/&Replace in Task Titles...", 
+                                                ID_EDIT_FINDREPLACEINTASKTITLES
+
         MENUITEM SEPARATOR
         MENUITEM "&Quick Find",                 ID_EDIT_QUICKFIND
         MENUITEM "Find Ne&xt",                  ID_EDIT_QUICKFINDNEXT
@@ -5278,6 +5281,8 @@ BEGIN
     IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
     IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
     IDS_STICKIES_LINK       "link"
+    IDS_REPLACEINTASKTITLES "Replace in Task Titles"
+    IDS_FINDINTASKTITLES    "Find in Task Titles"
 END
 
 #endif    // English (Australia) resources

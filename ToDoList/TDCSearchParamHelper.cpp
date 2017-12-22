@@ -45,7 +45,7 @@ BOOL CTDCSearchParamHelper::LoadRule(const CPreferences& prefs, const CString& s
 			sValue.Replace(SAFEQUOTE, REALQUOTE);
 			break;
 			
-		case FT_DATE_REL:
+		case FT_DATERELATIVE:
 			// Backwards compatibility
 			sValue.Replace('w', 'W'); // weeks
 			sValue.Replace('m', 'M'); // months

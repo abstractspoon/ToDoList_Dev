@@ -257,6 +257,28 @@ BOOL CToDoCtrlData::HasTask(DWORD dwTaskID) const
 	return m_items.HasTask(dwTaskID);
 }
 
+POSITION CToDoCtrlData::GetFirstTaskPosition() const
+{
+	return m_items.GetStartPosition();
+}
+
+DWORD CToDoCtrlData::GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const
+{
+	DWORD dwTaskID = 0;
+	TODOITEM* pTemp = NULL;
+
+	m_items.GetNextAssoc(pos, dwTaskID, pTemp);
+
+	pTDI = pTemp;
+	return dwTaskID;
+}
+
+DWORD CToDoCtrlData::GetNextTaskID(POSITION& pos) const
+{
+	const TODOITEM* pUnused;
+	return GetNextTask(pos, pUnused);
+}
+
 // external version returning const
 const TODOITEM* CToDoCtrlData::GetTask(DWORD dwTaskID) const
 {

@@ -5,6 +5,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "findreplace.h"
 #include "tooltipctrlex.h"
 #include <richole.h>
 
@@ -54,6 +55,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef FINDTEXTEX
+#	ifdef _UNICODE
+#		define FINDTEXTEX	FINDTEXTEXW
+#	else
+#		define FINDTEXTEX	FINDTEXTEXA
+#	endif
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum // REBC_BORDERS
 {
 	REBCB_NONE		= 0x00,
@@ -67,7 +78,7 @@ enum // REBC_BORDERS
 /////////////////////////////////////////////////////////////////////////////
 // CRichEditBaseCtrl window
 
-class CRichEditBaseCtrl : public CRichEditCtrl
+class CRichEditBaseCtrl : public CRichEditCtrl, protected IFindReplaceCmdHandler
 {
 // Construction
 public:
@@ -155,34 +166,9 @@ protected:
 	BOOL m_bInOnFocus;
 	CRect m_rMargins;
 	BOOL m_bAutoRTL;
-	CToolTipCtrlEx m_tooltip;
 
-#undef FINDTEXTEX
-#undef TEXTRANGE
-#ifdef _UNICODE
-#define TEXTRANGE	TEXTRANGEW
-#define FINDTEXTEX	FINDTEXTEXW
-#else
-#define TEXTRANGE	TEXTRANGEA
-#define FINDTEXTEX	FINDTEXTEXA
-#endif /* UNICODE */
-
-	struct FIND_STATE
-	{
-		FIND_STATE() : pFindReplaceDlg(NULL), bFindOnly(FALSE), bCase(FALSE), bNext(TRUE), bWord(FALSE) { }
-
-		CFindReplaceDialog* pFindReplaceDlg; // find or replace dialog
-		BOOL bFindOnly; // Is pFindReplace the find or replace?
-		CString strFind;    // last find string
-		CString strReplace; // last replace string
-		BOOL bCase; // TRUE==case sensitive, FALSE==not
-		int bNext;  // TRUE==search down, FALSE== search up
-		BOOL bWord; // TRUE==match whole word, FALSE==not
-	};
 	FIND_STATE m_findState;
-	
-	// Operations
-public:
+	CToolTipCtrlEx m_tooltip;
 	
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -249,17 +235,16 @@ protected:
 	virtual HRESULT GetContextMenu(WORD /*seltyp*/, LPOLEOBJECT /*lpoleobj*/, CHARRANGE FAR* /*lpchrg*/,
 		HMENU FAR* /*lphmenu*/) { return S_OK; }
 	
-	virtual void OnFindNext(LPCTSTR lpszFind, BOOL bNext, BOOL bCase, BOOL bWord);
-	virtual void OnReplaceSel(LPCTSTR lpszFind, BOOL bNext, BOOL bCase,
-		BOOL bWord, LPCTSTR lpszReplace);
-	virtual void OnReplaceAll(LPCTSTR lpszFind, LPCTSTR lpszReplace,
-		BOOL bCase, BOOL bWord);
-	virtual CFindReplaceDialog* NewFindReplaceDlg() { return new CFindReplaceDialog; }
+	virtual void OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord);
+	virtual void OnReplaceSel(const CString& sFind, const CString& sReplace, 
+								BOOL bNext, BOOL bCase,	BOOL bWord);
+	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace,
+								BOOL bCase, BOOL bWord);
 	
 	//{{AFX_MSG(CRichEditBaseCtrl)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
-	afx_msg LRESULT OnFindReplaceCmd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
@@ -268,7 +253,7 @@ protected:
 	
 	DECLARE_MESSAGE_MAP()
 		
-	void AdjustDialogPosition(CDialog* pDlg);
+	void AdjustFindDialogPosition();
 	BOOL FindText(LPCTSTR lpszFind, BOOL bCase = TRUE, BOOL bWord = TRUE, BOOL bWrap = TRUE);
 	void TextNotFound(LPCTSTR lpszFind);
 	BOOL FindText(BOOL bWrap = TRUE);

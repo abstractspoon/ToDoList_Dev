@@ -1154,7 +1154,7 @@ struct SEARCHPARAM
 				return (nValue == rule.nValue);
 
 			case FT_STRING:
-			case FT_DATE_REL:
+			case FT_DATERELATIVE:
 			case FT_ICON:
 				return (sValue == rule.sValue);
 			}
@@ -1205,7 +1205,7 @@ struct SEARCHPARAM
 		case TDCA_CREATIONDATE_RELATIVE_DEP:
 		case TDCA_LASTMOD_RELATIVE_DEP:
 			a = TDC::MapDeprecatedAttribute(attrib);
-			t = FT_DATE_REL;
+			t = FT_DATERELATIVE;
 			break;
 		}
 
@@ -1216,9 +1216,9 @@ struct SEARCHPARAM
 		GetAttribType();
 
 		// handle relative dates
-		if (nType == FT_DATE || nType == FT_DATE_REL) 
+		if (nType == FT_DATE || nType == FT_DATERELATIVE) 
 		{
-			dwFlags = (nType == FT_DATE_REL);
+			dwFlags = (nType == FT_DATERELATIVE);
 		}
 
 		ValidateOperator();
@@ -1233,7 +1233,7 @@ struct SEARCHPARAM
 
 	BOOL IsRelativeDate() const
 	{
-		if (sValue.IsEmpty() || (GetAttribType() != FT_DATE_REL))
+		if (sValue.IsEmpty() || (GetAttribType() != FT_DATERELATIVE))
 			return FALSE;
 
 		return CDateHelper::IsValidRelativeDate(sValue, FALSE);
@@ -1261,9 +1261,9 @@ struct SEARCHPARAM
 		sCustAttribID = id;
 
 		// handle relative dates
-		if ((nType == FT_DATE) || (nType == FT_DATE_REL)) 
+		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
 		{
-			dwFlags = (nType == FT_DATE_REL);
+			dwFlags = (nType == FT_DATERELATIVE);
 		}
 
 		ValidateOperator();
@@ -1312,9 +1312,9 @@ struct SEARCHPARAM
 			nType = nAttribType;
 
 			// handle relative dates
-			if ((nType == FT_DATE) || (nType == FT_DATE_REL)) 
+			if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
 			{
-				dwFlags = (nType == FT_DATE_REL);
+				dwFlags = (nType == FT_DATERELATIVE);
 			}
 		}
 	}
@@ -1386,7 +1386,7 @@ struct SEARCHPARAM
 		case TDCA_DUEDATE:
 		case TDCA_DUETIME:
 		case TDCA_LASTMODDATE:
-			return (bRelativeDate ? FT_DATE_REL : FT_DATE);
+			return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
 
 	//	case TDCA_RECURRENCE: 
 		}
@@ -1415,7 +1415,7 @@ struct SEARCHPARAM
 		case FOP_BEFORE:
 		case FOP_ON_OR_AFTER:
 		case FOP_AFTER:
-			return (nType == FT_DATE || nType == FT_DATE_REL);
+			return (nType == FT_DATE || nType == FT_DATERELATIVE);
 
 		case FOP_GREATER_OR_EQUAL:
 		case FOP_GREATER:
@@ -1482,7 +1482,7 @@ struct SEARCHPARAM
 		switch (GetAttribType())
 		{
 		case FT_STRING:
-		case FT_DATE_REL:
+		case FT_DATERELATIVE:
 		case FT_ICON:
 			sValue = val;
 			break;
@@ -1583,7 +1583,7 @@ struct SEARCHPARAM
 		case FT_DOUBLE:
 			return dValue;
 
-		case FT_DATE_REL:
+		case FT_DATERELATIVE:
 			return ValueAsDate().m_dt;
 
 		case FT_INTEGER:
@@ -1605,7 +1605,7 @@ struct SEARCHPARAM
 		case FT_DOUBLE:
 			return (int)dValue;
 		
-		case FT_DATE_REL:
+		case FT_DATERELATIVE:
 			return (int)ValueAsDouble();
 
 		case FT_INTEGER:
@@ -1628,7 +1628,7 @@ struct SEARCHPARAM
 			date = dValue;
 			break;
 
-		case FT_DATE_REL:
+		case FT_DATERELATIVE:
 			if (!CDateHelper::DecodeRelativeDate(sValue, date, FALSE, FALSE))
 				CDateHelper::ClearDate(date);
 			break;
@@ -1681,7 +1681,11 @@ public:
 
 struct SEARCHPARAMS
 {
-	SEARCHPARAMS() : bIgnoreDone(FALSE), bIgnoreOverDue(FALSE), bWantAllSubtasks(FALSE), bIgnoreFilteredOut(TRUE) {}
+	SEARCHPARAMS()
+	{
+		Clear();
+	}
+
 	SEARCHPARAMS(const SEARCHPARAMS& params)
 	{
 		*this = params;
@@ -1693,6 +1697,8 @@ struct SEARCHPARAMS
 		bIgnoreOverDue = params.bIgnoreOverDue;
 		bWantAllSubtasks = params.bWantAllSubtasks;
 		bIgnoreFilteredOut = params.bIgnoreFilteredOut;
+		bCaseSensitive = params.bCaseSensitive;
+		bMatchWholeWord = params.bMatchWholeWord;
 
 		aRules.Copy(params.aRules);
 		aAttribDefs.Copy(params.aAttribDefs);
@@ -1707,12 +1713,14 @@ struct SEARCHPARAMS
 
 	BOOL operator==(const SEARCHPARAMS& params) const
 	{
-		return Misc::MatchAllT(aRules, params.aRules, TRUE) && 
+		return (Misc::MatchAllT(aRules, params.aRules, TRUE) && 
 				Misc::MatchAllT(aAttribDefs, params.aAttribDefs, FALSE) &&
 				(bIgnoreDone == params.bIgnoreDone) && 
 				(bIgnoreOverDue == params.bIgnoreOverDue) && 
 				(bIgnoreFilteredOut == params.bIgnoreFilteredOut) && 
-				(bWantAllSubtasks == params.bWantAllSubtasks);
+				(bWantAllSubtasks == params.bWantAllSubtasks) &&
+				(bCaseSensitive == params.bCaseSensitive) &&
+				(bMatchWholeWord == params.bMatchWholeWord));
 	}
 
 	void Clear()
@@ -1721,7 +1729,9 @@ struct SEARCHPARAMS
 		bIgnoreOverDue = FALSE;
 		bWantAllSubtasks = FALSE;
 		bIgnoreFilteredOut = TRUE;
-
+		bCaseSensitive = FALSE;
+		bMatchWholeWord = FALSE;
+		
 		aRules.RemoveAll();
 		aAttribDefs.RemoveAll();
 	}
@@ -1763,7 +1773,13 @@ struct SEARCHPARAMS
 
 	CSearchParamArray aRules;
 	CTDCCustomAttribDefinitionArray aAttribDefs;
-	BOOL bIgnoreDone, bIgnoreOverDue, bWantAllSubtasks, bIgnoreFilteredOut;
+
+	BOOL bIgnoreDone;
+	BOOL bIgnoreOverDue;
+	BOOL bWantAllSubtasks;
+	BOOL bIgnoreFilteredOut;
+	BOOL bCaseSensitive;
+	BOOL bMatchWholeWord;
 };
 
 struct SEARCHRESULT

@@ -39,6 +39,7 @@
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\mapex.h"
 #include "..\shared\icon.h"
+#include "..\shared\FindReplace.h"
 
 #include "..\3rdparty\colourpicker.h"
 
@@ -68,7 +69,7 @@ namespace OutlookAPI
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl dialog
 
-class CToDoCtrl : public CRuntimeDlg
+class CToDoCtrl : public CRuntimeDlg, protected IFindReplaceCmdHandler
 {
 // Construction
 public:
@@ -190,7 +191,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID) { return SelectTask(dwTaskID, TRUE); }
 	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return SelectTasks(aTaskIDs, TRUE); }
 	void SelectAll();
-	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect);
+	BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect);
 	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
@@ -204,6 +205,7 @@ public:
 	BOOL EditSelectedTask(BOOL bTaskIsNew = FALSE); 
 	void SpellcheckSelectedTask(BOOL bTitle); // else comments
 	BOOL CanSpellcheckSelectedTaskComments();
+	void DoFindReplaceOnTitles();
 	
 	BOOL GotoSelectedTaskDependency(); 
 	BOOL GotoSelectedReferenceTaskTarget();
@@ -485,6 +487,7 @@ protected:
 	TDI_RECURFROMOPTION m_nDefRecurFrom;
 	TDI_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
+	FIND_STATE m_findState;
 
 	const CContentMgr& m_mgrContent;
 
@@ -660,6 +663,7 @@ protected:
 	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 
 	// custom data notifications
 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
@@ -732,7 +736,15 @@ protected:
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
+	virtual void AdjustFindReplaceDialogPosition(BOOL bFirstTime);
 
+	// IFindReplace
+	virtual void OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord);
+	virtual void OnReplaceSel(const CString& sFind, const CString& szReplace, 
+								BOOL bNext, BOOL bCase, BOOL bWord);
+	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace,
+								BOOL bCase, BOOL bWord);
+	
 	// -------------------------------------------------------------------------------
 	
 	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
@@ -856,7 +868,8 @@ protected:
 	void ShowTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const;
 
 	BOOL MoveSelection(TDC_MOVETASK nDirection);
-
+	BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord);
+	
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
 	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const;
 	void BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD& dwNextID, 

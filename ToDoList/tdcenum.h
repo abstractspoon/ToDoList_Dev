@@ -621,7 +621,7 @@ enum FIND_ATTRIBTYPE
 	FT_DATE,
 	FT_BOOL,
 	FT_TIMEPERIOD,
-	FT_DATE_REL, // relative date
+	FT_DATERELATIVE, // relative date
 	FT_ICON,
 };
 

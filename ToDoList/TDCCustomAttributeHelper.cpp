@@ -1271,9 +1271,10 @@ FIND_ATTRIBTYPE CTDCCustomAttributeHelper::GetAttributeFindType(TDC_ATTRIBUTE nA
 	case TDCCA_STRING:		return FT_STRING;
 	case TDCCA_INTEGER:		return FT_INTEGER;
 	case TDCCA_DOUBLE:		return FT_DOUBLE;
-	case TDCCA_DATE:		return (bRelativeDate ? FT_DATE_REL : FT_DATE);
+	case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
 	case TDCCA_BOOL:		return FT_BOOL;
 	case TDCCA_ICON:		return FT_ICON;
+	case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
 	}
 
 	return FT_NONE;

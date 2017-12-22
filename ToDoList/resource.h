@@ -1366,6 +1366,7 @@
 #define ID_DEBUGTESTPREDOWNLOAD         34595
 #define ID_TOOLS_TOGGLE_LOGGING         34596
 #define ID_VIEW_TOGGLEALLTASKEXPANDED   34597
+#define ID_EDIT_FINDREPLACEINTASKTITLES 34598
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2110,6 +2111,8 @@
 #define IDS_EXPORT_CANTSAVE             58466
 #define IDS_TDC_ADDLOGGEDTIME           58467
 #define IDS_STICKIES_LINK               58468
+#define IDS_REPLACEINTASKTITLES         58469
+#define IDS_FINDINTASKTITLES            58470
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
@@ -2117,7 +2120,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        309
-#define _APS_NEXT_COMMAND_VALUE         34598
+#define _APS_NEXT_COMMAND_VALUE         34599
 #define _APS_NEXT_CONTROL_VALUE         1508
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

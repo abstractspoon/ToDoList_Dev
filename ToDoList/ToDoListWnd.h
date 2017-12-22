@@ -176,6 +176,8 @@ protected:
 	afx_msg void OnUpdateToolsToggleLogging(CCmdUI* pCmdUI);
 	afx_msg void OnViewToggleAllTaskExpanded();
 	afx_msg void OnUpdateViewToggleAllTaskExpanded(CCmdUI* pCmdUI);
+	afx_msg void OnEditFindReplaceInTaskTitles();
+	afx_msg void OnUpdateEditFindReplaceInTaskTitles(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

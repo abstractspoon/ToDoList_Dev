@@ -583,9 +583,9 @@ int Misc::FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL 
 	return nFind;
 }
 
-int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
+int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, int iStart)
 {
-	int nFind = sSearchIn.Find(cSearchFor);
+	int nFind = sSearchIn.Find(cSearchFor, iStart);
 
 	if (bCaseSensitive || (nFind != -1))
 		return nFind;
@@ -596,17 +596,77 @@ int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
 	return nFind;
 }
 
-int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive)
+int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, BOOL bWholeWord, int iStart)
 {
-	int nFind = sSearchIn.Find(sSearchFor);
+	if (sSearchFor.GetLength() > sSearchIn.GetLength())
+		return FALSE;
 
-	if (bCaseSensitive || (nFind != -1))
-		return nFind;
+	CString sWord(sSearchFor), sText(sSearchIn);
+	Trim(sWord);
 
-	// Case-sensitive
-	nFind = ToUpper(sSearchIn).Find(ToUpper(sSearchFor));
+	// Case sensitive search first
+	int nFind = sText.Find(sWord, iStart);
+
+	if (nFind == -1)
+	{
+		if (!bCaseSensitive)
+		{
+			MakeUpper(sWord);
+			MakeUpper(sText);
+
+			nFind = sText.Find(sWord, iStart);
+		}
+
+		if (nFind == -1)
+			return -1;
+	}
+
+	if (bWholeWord) // test whole word
+	{
+		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
+
+		// prior and next chars must be delimeters
+		TCHAR cPrevChar = 0, cNextChar = 0;
+
+		// prev
+		if (nFind == 0) // word starts at start
+			cPrevChar = ' '; // known delim
+		else
+			cPrevChar = sText[nFind - 1];
+
+		// next
+		if ((nFind + sWord.GetLength()) < sText.GetLength())
+			cNextChar = sText[nFind + sWord.GetLength()];
+		else
+			cNextChar = ' '; // known delim
+
+		if ((DELIMS.Find(cPrevChar) == -1) || (DELIMS.Find(cNextChar) == -1))
+			nFind = -1;
+	}
 
 	return nFind;
+}
+
+int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sSearchIn, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	if (sSearchFor.IsEmpty() || sSearchIn.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nNumReplaced = 0;
+	int nFind = Find(sSearchFor, sSearchIn, bCaseSensitive, bWholeWord);
+
+	while (nFind != -1)
+	{
+		sSearchIn = (sSearchIn.Left(nFind) + sReplaceWith + sSearchIn.Mid(nFind + sSearchFor.GetLength()));
+		nNumReplaced++;
+
+		nFind = Find(sSearchFor, sSearchIn, bCaseSensitive, bWholeWord, (nFind + sReplaceWith.GetLength()));
+	}
+
+	return nNumReplaced;
 }
 
 BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
@@ -898,7 +958,7 @@ BOOL Misc::MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL
 	return TRUE;
 }
 
-BOOL Misc::MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL bCaseSensitive, BOOL bPartialOK) 
+BOOL Misc::MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL bCaseSensitive, BOOL bWholeWord) 
 {
 	int nSize1 = array1.GetSize();
 
@@ -907,7 +967,7 @@ BOOL Misc::MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL
 		const CString& sItem1 = GetItem(array1, nItem1);
 
 		// look for matching item
-		if (Find(array2, sItem1, bCaseSensitive, bPartialOK) != -1)
+		if (Find(array2, sItem1, bCaseSensitive, bWholeWord) != -1)
 			return TRUE;
 	}
 	
@@ -962,7 +1022,7 @@ BOOL Misc::MatchAny(const CDWordArray& array1, const CDWordArray& array2)
 	return FALSE;
 }
 
-int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bPartialOK)
+int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	ASSERT (szItem);
 
@@ -984,7 +1044,7 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 		}
 		else if (bCaseSensitive)
 		{
-			if (bPartialOK)
+			if (bWholeWord)
 			{
 				if (sArrItem.Find(szItem) != -1)
 					return nItem;
@@ -997,9 +1057,9 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 		}
 		else // case insensitive
 		{
-			if (bPartialOK)
+			if (bWholeWord)
 			{
-				if (FindWord(szItem, sArrItem, FALSE, FALSE))
+				if (Find(szItem, sArrItem, FALSE, FALSE))
 					return nItem;
 			}
 			else
@@ -1013,9 +1073,9 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 	return -1;
 }
 
-BOOL Misc::Contains(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bPartialOK)
+BOOL Misc::Contains(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bWholeWord)
 {
-	return (Find(array, szItem, bCaseSensitive, bPartialOK) != -1);
+	return (Find(array, szItem, bCaseSensitive, bWholeWord) != -1);
 }
 
 const CString& Misc::GetItem(const CStringArray& array, int nItem)
@@ -1759,72 +1819,22 @@ void Misc::MakeLower(CStringArray& aText)
 		MakeLower(aText[nItem]);
 }
 
-BOOL Misc::FindWord(LPCTSTR szWord, LPCTSTR szText, BOOL bCaseSensitive, BOOL bMatchWholeWord)
-{
-	CString sWord(szWord), sText(szText);
-	
-	if (sWord.GetLength() > sText.GetLength())
-		return FALSE;
-	
-	Trim(sWord);
-	
-	int nFind = sText.Find(sWord);
-	
-	if (bCaseSensitive || (nFind != -1))
-		return (nFind != -1);
-
-	// else
-	MakeUpper(sWord);
-	MakeUpper(sText);
-	
-	if (sText.Find(sWord) == -1)
-	{
-		return FALSE;
-	}
-
-	// else
-	if (bMatchWholeWord) // test whole word
-	{
-		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
-		
-		// prior and next chars must be delimeters
-		TCHAR cPrevChar = 0, cNextChar = 0;
-		
-		// prev
-		if (nFind == 0) // word starts at start
-			cPrevChar = ' '; // known delim
-		else
-			cPrevChar = sText[nFind - 1];
-		
-		// next
-		if ((nFind + sWord.GetLength()) < sText.GetLength())
-			cNextChar = sText[nFind + sWord.GetLength()];
-		else
-			cNextChar = ' '; // known delim
-		
-		if (DELIMS.Find(cPrevChar) == -1 || DELIMS.Find(cNextChar) == -1)
-			return FALSE;
-	}
-	
-	return TRUE;
-}
-
-int Misc::ParseSearchString(LPCTSTR szLookFor, CStringArray& aWords)
+int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
 {
 	aWords.RemoveAll();
 	
 	// parse on spaces unless enclosed in double-quotes
-	int nLen = lstrlen(szLookFor);
+	int nLen = lstrlen(szSearch);
 	BOOL bInQuotes = FALSE, bAddWord = FALSE;
 	CString sWord;
 	
 	for (int nPos = 0; nPos < nLen; nPos++)
 	{
-		switch (szLookFor[nPos])
+		switch (szSearch[nPos])
 		{
 		case ' ': // word break
 			if (bInQuotes)
-				sWord += szLookFor[nPos];
+				sWord += szSearch[nPos];
 			else
 				bAddWord = TRUE;
 			break;
@@ -1837,7 +1847,7 @@ int Misc::ParseSearchString(LPCTSTR szLookFor, CStringArray& aWords)
 			break;
 			
 		default: // everything else
-			sWord += szLookFor[nPos];
+			sWord += szSearch[nPos];
 			
 			// also if its the last char then add it
 			bAddWord = (nPos == nLen - 1);
