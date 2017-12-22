@@ -203,14 +203,14 @@ namespace Gma.CodeCloud.Controls
 			return (matches != null);
 		}
 
-		public IEnumerable<IWord> Match(IEnumerable<string> words, bool partialOK = false)
+		public IEnumerable<IWord> Match(IEnumerable<string> words, bool caseSensitive, bool wholeWord)
 		{
 			IEnumerable<IWord> matches;
 
-			if (partialOK)
-				matches = WeightedWords.Where(a => words.Any(x => (a.Text.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0)));
-			else
+			if (wholeWord)
 				matches = WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase)));
+			else
+				matches = WeightedWords.Where(a => words.Any(x => (a.Text.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0)));
 
 			return matches.SortByOccurences();
 		}

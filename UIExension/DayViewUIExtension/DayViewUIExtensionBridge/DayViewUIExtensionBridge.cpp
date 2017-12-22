@@ -226,19 +226,14 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 		break;
 
 	case IUI_SELECTFIRSTTASK:
-		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectFirstTask);
-
 	case IUI_SELECTNEXTTASK:
-		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectNextTask);
-
 	case IUI_SELECTNEXTTASKINCLCURRENT:
-		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectNextTaskInclCurrent);
-
 	case IUI_SELECTPREVTASK:
-		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectPrevTask);
-
 	case IUI_SELECTLASTTASK:
-		return m_wnd->SelectTask(gcnew String((LPCWSTR)dwExtra), UIExtension::SelectTask::SelectLastTask);
+		return DoAppSelectCommand(nCmd, (const IUISELECTTASK*)dwExtra);
+
+	case IUI_FINDREPLACE:
+		return false;
 	}
 
 	// all else
@@ -259,10 +254,54 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	case IUI_SELECTLASTTASK:
 		return true;
 
+	case IUI_FINDREPLACE:
+		return false;
 	}
 
 	// all else
 	return false;
+}
+
+bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect)
+{
+	// Sanity check
+	if (!pSelect)
+	{
+		//ASSERT(0);
+		return false;
+	}
+
+	UIExtension::SelectTask selectWhat;
+
+	switch (nCmd)
+	{
+	case IUI_SELECTFIRSTTASK:
+		selectWhat = UIExtension::SelectTask::SelectFirstTask;
+		break;
+
+	case IUI_SELECTNEXTTASK:
+		selectWhat = UIExtension::SelectTask::SelectNextTask;
+		break;
+
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+		selectWhat = UIExtension::SelectTask::SelectNextTaskInclCurrent;
+		break;
+
+	case IUI_SELECTPREVTASK:
+		selectWhat = UIExtension::SelectTask::SelectPrevTask;
+		break;
+
+	case IUI_SELECTLASTTASK:
+		selectWhat = UIExtension::SelectTask::SelectLastTask;
+		break;
+
+	default:
+		return false;
+	}
+
+	String^ sWords = gcnew String(pSelect->szWords);
+
+	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord);
 }
 
 bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

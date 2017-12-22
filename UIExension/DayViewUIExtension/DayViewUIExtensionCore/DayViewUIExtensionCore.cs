@@ -283,7 +283,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool SelectTask(String text, UIExtension.SelectTask selectTask)
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord)
 		{
 			switch (selectTask)
 			{

@@ -69,6 +69,10 @@ public:
 protected:
 	gcroot<WordCloudUIExtension::WordCloudUIExtensionCore^> m_wnd;
 	ITransText* m_pTT;
+
+protected:
+	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect);
+
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

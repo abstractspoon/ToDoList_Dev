@@ -73,6 +73,9 @@ public:
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
+
+protected:
+	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

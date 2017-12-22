@@ -65,16 +65,16 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		public bool SelectedWordMatches(IEnumerable<String> words, bool partialOK)
+		public bool SelectedWordMatches(IEnumerable<String> words, bool caseSensitive, bool wholeWord)
 		{
 			if (SelectedWord == null)
 				return false;
 
-			if (partialOK)
-				return words.Any(x => m_SelectedWord.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0);
+			if (wholeWord)
+				return words.Any(x => m_SelectedWord.Equals(x, StringComparison.CurrentCultureIgnoreCase));
 			
 			// else
-			return words.Any(x => m_SelectedWord.Equals(x, StringComparison.CurrentCultureIgnoreCase));
+			return words.Any(x => m_SelectedWord.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0);
 		}
 
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
