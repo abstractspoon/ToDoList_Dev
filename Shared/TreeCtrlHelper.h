@@ -183,6 +183,8 @@ public:
 	HTREEITEM GetLastVisibleChildItem(HTREEITEM hti) const;
 	HTREEITEM GetLastChildItem(HTREEITEM hti) const;
 	HTREEITEM GetLastItem() const;
+	HTREEITEM GetFirstItem() const;
+	HTREEITEM GetFirstChildItem(HTREEITEM hti) const;
 
 	void SetItemStateEx(HTREEITEM hti, UINT nState, UINT nMask, BOOL bChildren = FALSE);
 

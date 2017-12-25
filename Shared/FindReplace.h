@@ -11,24 +11,6 @@ const UINT WM_FINDREPLACE = ::RegisterWindowMessage(FINDMSGSTRING);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct FIND_STATE
-{
-	FIND_STATE();
-
-	void UpdateState(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord);
-	void UpdateState(const CString& sFind, const CString& sReplace, BOOL bNext, BOOL bCase, BOOL bWord);
-
-	CFindReplaceDialog* pFindReplaceDlg;	// find or replace dialog
-	BOOL bFindOnly;							// Is pFindReplaceDlg the find or replace?
-	CString strFind;						// last find string
-	CString strReplace;						// last replace string
-	BOOL bFindNext;							// TRUE==search down, FALSE== search up
-	BOOL bCaseSensitive;					// TRUE==case sensitive, FALSE==not
-	BOOL bWholeWord;						// TRUE==match whole word, FALSE==not
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
 class IFindReplaceCmdHandler
 {
 public:
@@ -53,28 +35,29 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace FindReplace
+struct FIND_STATE
 {
-	BOOL Initialise(CWnd* pParent, 
-					IFindReplaceCmdHandler* pCmdHandler, 
-					FIND_STATE* pState, 
-					BOOL bFindOnly, 
-					LPCTSTR szTitle,
-					LPCTSTR szFind = NULL);
+	FIND_STATE();
 
-	void HandleCmd(IFindReplaceCmdHandler* pCmdHandler, 
-					FIND_STATE* pState, 
-					WPARAM wParam, 
-					LPARAM lParam);
+	void UpdateState(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord);
+	void UpdateState(const CString& sFind, const CString& sReplace, BOOL bNext, BOOL bCase, BOOL bWord);
 
-	void AdjustDialogPosition(FIND_STATE* pState, 
-								const CPoint& ptScreen,
-								BOOL bUpDown = TRUE);
+	BOOL Initialise(CWnd* pParent, IFindReplaceCmdHandler* pCmdHandler, BOOL bFindOnly, LPCTSTR szTitle, LPCTSTR szFind = NULL);
+	void DestroyDialog();
 
-	void AdjustDialogPosition(FIND_STATE* pState, 
-								const CRect& rScreen,
-								BOOL bUpDown = TRUE);
-}
+	void AdjustDialogPosition(const CPoint& ptScreen, BOOL bUpDown = TRUE);
+	void AdjustDialogPosition(const CRect& rScreen, BOOL bUpDown = TRUE);
+
+	void HandleCmd(IFindReplaceCmdHandler* pCmdHandler, WPARAM wParam, LPARAM lParam);
+
+	CFindReplaceDialog* pFindReplaceDlg;	// find or replace dialog
+	BOOL bFindOnly;							// Is pFindReplaceDlg the find or replace?
+	CString strFind;						// last find string
+	CString strReplace;						// last replace string
+	BOOL bFindNext;							// TRUE==search down, FALSE== search up
+	BOOL bCaseSensitive;					// TRUE==case sensitive, FALSE==not
+	BOOL bWholeWord;						// TRUE==match whole word, FALSE==not
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 

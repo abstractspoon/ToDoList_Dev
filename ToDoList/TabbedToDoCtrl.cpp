@@ -3452,7 +3452,7 @@ void CTabbedToDoCtrl::ResortSelectedTaskParents()
 
 BOOL CTabbedToDoCtrl::ModNeedsResort(TDC_ATTRIBUTE nModType) const
 {
-	if (!HasStyle(TDCS_RESORTONMODIFY))
+	if (!HasStyle(TDCS_RESORTONMODIFY) || m_bFindReplacing)
 		return FALSE;
 
 	VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
@@ -4832,8 +4832,52 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 	return aResults.GetSize();
 }
 
-
 BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
+{
+	return CToDoCtrl::SelectTask(sPart, nSelect);
+}
+
+BOOL CTabbedToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
+{
+	if (!CToDoCtrl::CanDoFindReplace(nAttrib))
+		return FALSE;
+
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		return TRUE; // checked above
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		return ExtensionCanDoAppCommand(nView, IUI_SELECTNEXTTASK);
+
+	default:
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+									BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace)
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -4841,34 +4885,39 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::SelectTask(sPart, nSelect);
+		return CToDoCtrl::SelectTask(sPart, nSelect, nAttrib, bCaseSensitive, bWholeWord, bFindReplace);
 
 	case FTCV_TASKLIST:
 		{
-			int nFind = -1, nSelItem = m_taskList.GetSelectedItem();
+			int nStart = -1;
+			BOOL bForwards = TRUE;
 
 			switch (nSelect)
 			{
 			case TDC_SELECTFIRST:
-				nFind = FindListTask(sPart);
+				nStart = 0;
 				break;
 			
 			case TDC_SELECTNEXT:
-				nFind = FindListTask(sPart, (nSelItem + 1));
+				nStart = (m_taskList.GetSelectedItem() + 1);
 				break;
 			
 			case TDC_SELECTNEXTINCLCURRENT:
-				nFind = FindListTask(sPart, nSelItem);
+				nStart = m_taskList.GetSelectedItem();
 				break;
 			
 			case TDC_SELECTPREV:
-				nFind = FindListTask(sPart, (nSelItem - 1), FALSE);
+				nStart = (m_taskList.GetSelectedItem() - 1);
+				bForwards = FALSE;
 				break;
 			
 			case TDC_SELECTLAST:
-				nFind = FindListTask(sPart, m_taskList.GetItemCount() - 1, FALSE);
+				nStart = (m_taskList.GetItemCount() - 1);
+				bForwards = FALSE;
 				break;
 			}
+
+			int nFind = FindListTask(sPart, nAttrib, nStart, bForwards, bCaseSensitive, bWholeWord);
 
 			if (nFind != -1)
 				return SelectTask(GetTaskID(nFind));
@@ -4900,11 +4949,15 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 
 			if (pExtWnd && pExtWnd->CanDoAppCommand(nCmdID))
 			{
-				return (pExtWnd->DoAppCommand(nCmdID, (DWORD)(LPCTSTR)sPart) ? TRUE : FALSE);
-			}
-			else // fallback
-			{
-				return CToDoCtrl::SelectTask(sPart, nSelect);
+				IUISELECTTASK select;
+
+				select.bFindReplace = (bFindReplace != FALSE);
+				select.nAttrib = IUI_TASKNAME;//TDC::MapAttributeToIUIAttribute(nAttrib);
+				select.szWords = sPart;
+				select.bCaseSensitive = (bCaseSensitive != FALSE);
+				select.bWholeWord = (bWholeWord != FALSE);
+
+				return (pExtWnd->DoAppCommand(nCmdID, (DWORD)&select) ? TRUE : FALSE);
 			}
 		}
 		break;
@@ -4917,11 +4970,16 @@ BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	return FALSE;
 }
 
-int CTabbedToDoCtrl::FindListTask(const CString& sPart, int nStart, BOOL bNext) const
+int CTabbedToDoCtrl::FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, 
+									BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const
 {
 	// build a search query
 	SEARCHPARAMS params;
-	params.aRules.Add(SEARCHPARAM(TDCA_ANYTEXTATTRIBUTE, FOP_INCLUDES, sPart));
+	SEARCHPARAM rule(nAttrib, FOP_INCLUDES, sPart);
+
+	params.aRules.Add(rule);
+	params.bCaseSensitive = bCaseSensitive;
+	params.bMatchWholeWord = bWholeWord;
 
 	// we need to do this manually because CListCtrl::FindItem 
 	// only looks at the start of the string

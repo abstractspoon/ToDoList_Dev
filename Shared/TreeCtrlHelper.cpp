@@ -1000,6 +1000,16 @@ void CTreeCtrlHelper::UpdateHTIMapEntry(CHTIMap& mapHTI, HTREEITEM hti, BOOL bVi
 	}
 }
 
+HTREEITEM CTreeCtrlHelper::GetFirstItem() const
+{
+	return GetFirstChildItem(NULL);
+}
+
+HTREEITEM CTreeCtrlHelper::GetFirstChildItem(HTREEITEM hti) const
+{
+	return m_tree.GetChildItem(hti);
+}
+
 HTREEITEM CTreeCtrlHelper::GetLastChildItem(HTREEITEM hti) const
 {
 	HTREEITEM htiLast = NULL, htiChild = m_tree.GetChildItem(hti);

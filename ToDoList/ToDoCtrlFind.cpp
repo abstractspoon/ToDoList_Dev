@@ -740,58 +740,35 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 }
 
 
-DWORD CToDoCtrlFind::FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result) const
+HTREEITEM CToDoCtrlFind::FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards) const
 {
 	if (!m_data.GetTaskCount())
 		return 0;
 
-	return FindFirstTask(m_tree.GetChildItem(NULL), params, result);
+	CTreeCtrlHelper tch(m_tree);
+	HTREEITEM htiStart = (bForwards ? tch.GetFirstItem() : tch.GetLastItem());
+
+	return FindNextTask(htiStart, params, result, bForwards);
 }
 
-DWORD CToDoCtrlFind::FindNextTask(DWORD dwStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bNext) const
+HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards) const
 {
-	HTREEITEM htiNext = GetItem(dwStart);
 	CTreeCtrlHelper tch(m_tree);
+	HTREEITEM hti = htiStart;
 
-	while (htiNext)
+	while (hti)
 	{
-		DWORD dwNextID = GetTaskID(htiNext);
+		DWORD dwNextID = GetTaskID(hti);
 
 		if (m_matcher.TaskMatches(dwNextID, params, result))
-			return dwNextID;
+			return hti;
 
 		// next item
-		htiNext = (bNext ? tch.GetNextItem(htiNext) : tch.GetPrevItem(htiNext));
+		hti = (bForwards ? tch.GetNextItem(hti) : tch.GetPrevItem(hti));
 	}
 
 	// else
-	return 0; // not found
+	return NULL; // not found
 }
 
-DWORD CToDoCtrlFind::FindFirstTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result) const
-{
-	DWORD dwTaskID = GetTaskID(htiStart);
-
-	if (!m_matcher.TaskMatches(dwTaskID, params, result))
-	{
-		// also check first child (other children are handled by sibling check below)
-		HTREEITEM htiChild = m_tree.GetChildItem(htiStart);
-
-		if (htiChild)
-			dwTaskID = FindFirstTask(htiChild, params, result);
-		else
-			dwTaskID = 0;
-
-		// and first sibling
-		if (!dwTaskID)
-		{
-			HTREEITEM htiNext = m_tree.GetNextItem(htiStart, TVGN_NEXT);
-
-			if (htiNext)
-				dwTaskID = FindFirstTask(htiNext, params, result);
-		}
-	}
-	
-	return dwTaskID;
-}
 

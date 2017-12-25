@@ -65,8 +65,8 @@ public:
 
 	// Finds tasks only in the tree
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
-	DWORD FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result) const;
-	DWORD FindNextTask(DWORD dwStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bNext = TRUE) const;
+	HTREEITEM FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
+	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards = TRUE) const;
 
 protected:
 	CTreeCtrl& m_tree; 
@@ -75,7 +75,6 @@ protected:
 
 protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults) const;
-	DWORD FindFirstTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result) const;
 
 	BOOL FindVisibleTaskWithDueTime(HTREEITEM hti) const;
 	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;

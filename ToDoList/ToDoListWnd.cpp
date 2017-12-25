@@ -13054,10 +13054,10 @@ void CToDoListWnd::OnUpdateViewToggleAllTaskExpanded(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditFindReplaceInTaskTitles() 
 {
-	GetToDoCtrl().DoFindReplaceOnTitles();
+	GetToDoCtrl().DoFindReplace(TDCA_TASKNAME);
 }
 
 void CToDoListWnd::OnUpdateEditFindReplaceInTaskTitles(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount() > 0);
+	pCmdUI->Enable(GetToDoCtrl().CanDoFindReplace(TDCA_TASKNAME));
 }

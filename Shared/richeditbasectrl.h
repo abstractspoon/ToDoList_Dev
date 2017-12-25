@@ -11,6 +11,26 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Override afxwin.h definitions
+
+#undef TEXTRANGE
+
+#ifdef _UNICODE
+#	define TEXTRANGE	TEXTRANGEW
+#else
+#	define TEXTRANGE	TEXTRANGEA
+#endif
+
+#undef FINDTEXTEX
+
+#ifdef _UNICODE
+#	define FINDTEXTEX	FINDTEXTEXW
+#else
+#	define FINDTEXTEX	FINDTEXTEXA
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef IMF_SPELLCHECKING
 #	define IMF_SPELLCHECKING 0x0800
 #endif
@@ -51,16 +71,6 @@
 		DWORD flags; 
 		UINT  codepage; 
 	};
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-#ifndef FINDTEXTEX
-#	ifdef _UNICODE
-#		define FINDTEXTEX	FINDTEXTEXW
-#	else
-#		define FINDTEXTEX	FINDTEXTEXA
-#	endif
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

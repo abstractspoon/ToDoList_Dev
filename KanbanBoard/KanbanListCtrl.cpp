@@ -1736,27 +1736,26 @@ void CKanbanListCtrl::ScrollToSelection()
 		EnsureVisible(GetNextSelectedItem(pos), FALSE);
 }
 
-BOOL CKanbanListCtrl::SelectItem(int nItem, BOOL bFocus)
-{
-	ASSERT(nItem >= 0);
-
-	UINT nMask = (LVIS_SELECTED | (bFocus ? LVIS_FOCUSED : 0));
-	return SetItemState(nItem, nMask, nMask);
-}
-
 void CKanbanListCtrl::ClearSelection()
 {
 	SetItemState(-1, 0, (LVIS_SELECTED | LVIS_FOCUSED));
 }
 
-BOOL CKanbanListCtrl::SelectTask(DWORD dwTaskID)
+BOOL CKanbanListCtrl::SelectTask(DWORD dwTaskID, BOOL bAppend)
 {
-	int nItem = FindTask(dwTaskID);
+	return SelectItem(FindTask(dwTaskID), TRUE, bAppend);
+}
+
+BOOL CKanbanListCtrl::SelectItem(int nItem, BOOL bFocus, BOOL bAppend)
+{
+	if (!bAppend)
+		ClearSelection();
 
 	if (nItem != -1)
 	{
-		SelectItem(nItem, TRUE);
-		return TRUE;
+		UINT nMask = (LVIS_SELECTED | (bFocus ? LVIS_FOCUSED : 0));
+
+		return SetItemState(nItem, nMask, nMask);
 	}
 
 	// not found
@@ -1829,7 +1828,7 @@ int CKanbanListCtrl::FindTask(const CPoint& ptScreen) const
 	return CListCtrl::HitTest(ptClient);
 }
 
-int CKanbanListCtrl::FindTask(const CString& sPart, int nStart, BOOL bNext) const
+int CKanbanListCtrl::FindTask(const IUISELECTTASK& select, BOOL bNext, int nStart) const
 {
 	int nFrom = nStart;
 	int nTo = (bNext ? GetItemCount() : -1);
@@ -1840,7 +1839,7 @@ int CKanbanListCtrl::FindTask(const CString& sPart, int nStart, BOOL bNext) cons
 		DWORD dwTaskID = GetTaskID(nItem);
 		const KANBANITEM* pKI = GetKanbanItem(dwTaskID);
 
-		if (pKI->MatchesAttribute(sPart, IUI_TASKNAME))
+		if (pKI->MatchesAttribute(select))
 		{
 			return nItem;
 		}
@@ -2085,7 +2084,7 @@ BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 		if (GetItemCheckboxRect(nHit, rCheckbox) && rCheckbox.PtInRect(point))
 		{
 			ClearSelection();
-			SelectItem(nHit);
+			SelectItem(nHit, FALSE);
 
 			// Post message to let mouse-click time to process
 			GetParent()->PostMessage(WM_KLCN_CHECKCHANGE, (WPARAM)GetSafeHwnd(), m_dwSelectingTask);

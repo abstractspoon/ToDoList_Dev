@@ -12,6 +12,13 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+CFindReplaceDialog* IFindReplaceCmdHandler::NewFindReplaceDlg()
+{
+	return new CFindReplaceDialog;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 FIND_STATE::FIND_STATE() : pFindReplaceDlg(NULL), bFindOnly(FALSE), bCaseSensitive(FALSE), bFindNext(TRUE), bWholeWord(FALSE) 
 {
 }
@@ -31,101 +38,92 @@ void FIND_STATE::UpdateState(const CString& sFind, const CString& sReplace, BOOL
 	strReplace = sReplace;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-CFindReplaceDialog* IFindReplaceCmdHandler::NewFindReplaceDlg()
-{
-	return new CFindReplaceDialog;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-BOOL FindReplace::Initialise(CWnd* pParent, 
+BOOL FIND_STATE::Initialise(CWnd* pParent, 
 							IFindReplaceCmdHandler* pCmdHandler, 
-							FIND_STATE* pState, 
-							BOOL bFindOnly, 
+							BOOL bFind, 
 							LPCTSTR szTitle,
 							LPCTSTR szFind)
 {
 	ASSERT(pParent);
 	ASSERT(pCmdHandler);
-	ASSERT(pState);
 
-	if (pState->pFindReplaceDlg != NULL)
+	if (pFindReplaceDlg != NULL)
 	{
-		if (pState->bFindOnly == bFindOnly)
+		if (bFindOnly == bFind)
 		{
-			pState->pFindReplaceDlg->SetActiveWindow();
-			pState->pFindReplaceDlg->ShowWindow(SW_SHOW);
+			pFindReplaceDlg->SetActiveWindow();
+			pFindReplaceDlg->ShowWindow(SW_SHOW);
 
 			return TRUE;
 		}
 
 		// else
-		pState->pFindReplaceDlg->SendMessage(WM_CLOSE); // deletes as well
-		ASSERT(pState->pFindReplaceDlg == NULL);
+		DestroyDialog();
 	}
 
 	CString strFind(szFind);
 
 	// if selection is empty or spans multiple lines use old find text
 	if (strFind.IsEmpty() || (strFind.FindOneOf(_T("\n\r")) != -1))
-		strFind = pState->strFind;
+		strFind = strFind;
 
-	CString strReplace = pState->strReplace;
-	pState->pFindReplaceDlg = pCmdHandler->NewFindReplaceDlg();
-	ASSERT(pState->pFindReplaceDlg != NULL);
+	pFindReplaceDlg = pCmdHandler->NewFindReplaceDlg();
+	ASSERT(pFindReplaceDlg != NULL);
 
 	DWORD dwFlags = 0;
 
-	if (pState->bFindNext)
+	if (bFindNext)
 		dwFlags |= FR_DOWN;
 
-	if (pState->bCaseSensitive)
+	if (bCaseSensitive)
 		dwFlags |= FR_MATCHCASE;
 
-	if (pState->bWholeWord)
+	if (bWholeWord)
 		dwFlags |= FR_WHOLEWORD;
 
-	if (!pState->pFindReplaceDlg->Create(bFindOnly, strFind, strReplace, dwFlags, pParent))
+	if (!pFindReplaceDlg->Create(bFind, strFind, strReplace, dwFlags, pParent))
 	{
-		pState->pFindReplaceDlg = NULL;
+		delete pFindReplaceDlg;
+		pFindReplaceDlg = NULL;
+
 		return FALSE;
 	}
 
-	ASSERT(pState->pFindReplaceDlg != NULL);
-
 	// set the title
 	if (szTitle && *szTitle)
-		pState->pFindReplaceDlg->SetWindowText(szTitle);
+		pFindReplaceDlg->SetWindowText(szTitle);
 
-	pState->bFindOnly = bFindOnly;
-	pState->pFindReplaceDlg->SetActiveWindow();
-	pState->pFindReplaceDlg->ShowWindow(SW_SHOW);
+	bFindOnly = bFind;
+
+	pFindReplaceDlg->SetActiveWindow();
+	pFindReplaceDlg->ShowWindow(SW_SHOW);
 
 	return TRUE;
 }
 
-/////////////////////////////////////////////////////////////////////////////
+void FIND_STATE::DestroyDialog()
+{
+	if (pFindReplaceDlg)
+	{
+		pFindReplaceDlg->DestroyWindow();
+		pFindReplaceDlg = NULL;
+	}
+}
 
-void FindReplace::HandleCmd(IFindReplaceCmdHandler* pCmdHandler, 
-							FIND_STATE* pState, 
-							WPARAM /*wParam*/, 
-							LPARAM lParam)
+void FIND_STATE::HandleCmd(IFindReplaceCmdHandler* pCmdHandler, WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(lParam);
 	ASSERT(pCmdHandler);
-	ASSERT(lParam);
 
 	CFindReplaceDialog* pDialog = CFindReplaceDialog::GetNotifier(lParam);
 
 	ASSERT(pDialog != NULL);
-	ASSERT(pDialog == pState->pFindReplaceDlg);
+	ASSERT(pDialog == pFindReplaceDlg);
 
 	if (pDialog->IsTerminating())
 	{
 		::SetFocus(pDialog->m_fr.hwndOwner);
-		pState->pFindReplaceDlg = NULL;
+		pFindReplaceDlg = NULL;
 	}
 	else if (pDialog->FindNext())
 	{
@@ -136,7 +134,7 @@ void FindReplace::HandleCmd(IFindReplaceCmdHandler* pCmdHandler,
 	}
 	else if (pDialog->ReplaceCurrent())
 	{
-		ASSERT(!pState->bFindOnly);
+		ASSERT(!bFindOnly);
 
 		pCmdHandler->OnReplaceSel(pDialog->GetFindString(),
 									pDialog->GetReplaceString(),
@@ -146,7 +144,7 @@ void FindReplace::HandleCmd(IFindReplaceCmdHandler* pCmdHandler,
 	}
 	else if (pDialog->ReplaceAll())
 	{
-		ASSERT(!pState->bFindOnly);
+		ASSERT(!bFindOnly);
 
 		pCmdHandler->OnReplaceAll(pDialog->GetFindString(), 
 									pDialog->GetReplaceString(),
@@ -155,21 +153,18 @@ void FindReplace::HandleCmd(IFindReplaceCmdHandler* pCmdHandler,
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-void FindReplace::AdjustDialogPosition(FIND_STATE* pState, const CPoint& ptScreen, BOOL bUpDown)
+void FIND_STATE::AdjustDialogPosition(const CPoint& ptScreen, BOOL bUpDown)
 {
-	ASSERT(pState);
-	ASSERT(pState->pFindReplaceDlg != NULL);
+	ASSERT(pFindReplaceDlg != NULL);
 
 	CRect rExclude(ptScreen.x - 1, ptScreen.y - 1, ptScreen.x + 1, ptScreen.y + 1);
-	AdjustDialogPosition(pState, rExclude);
+	AdjustDialogPosition(rExclude);
 }
 
-void FindReplace::AdjustDialogPosition(FIND_STATE* pState, const CRect& rExcludeScreen, BOOL bUpDown)
+void FIND_STATE::AdjustDialogPosition(const CRect& rExcludeScreen, BOOL bUpDown)
 {
 	CRect rDlg;
-	pState->pFindReplaceDlg->GetWindowRect(&rDlg);
+	pFindReplaceDlg->GetWindowRect(&rDlg);
 
 	if (CRect().IntersectRect(rDlg, rExcludeScreen))
 	{
@@ -215,8 +210,7 @@ void FindReplace::AdjustDialogPosition(FIND_STATE* pState, const CRect& rExclude
 				rDlg.OffsetRect(rExcludeScreen.right - rDlg.left + PADDING, 0);
 		}
 
-		pState->pFindReplaceDlg->MoveWindow(&rDlg);
+		pFindReplaceDlg->MoveWindow(&rDlg);
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////

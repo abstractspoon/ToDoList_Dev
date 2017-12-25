@@ -74,7 +74,7 @@ protected:
 	CToolTipCtrl m_tooltips;
 
 	BOOL m_bReadOnly;
-	BOOL m_bInSelectTask;
+//	BOOL m_bInSelectTask;
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;

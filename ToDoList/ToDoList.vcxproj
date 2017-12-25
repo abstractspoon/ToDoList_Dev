@@ -779,6 +779,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\note.ico" />
     <None Include="res\null.ico" />
     <None Include="res\outlook_16.ico" />
+    <None Include="res\plus.ico" />
     <None Include="res\prefs_dlg_std.ico" />
     <None Include="res\reset.ico" />
     <None Include="res\shield.ico" />

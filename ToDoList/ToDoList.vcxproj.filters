@@ -1070,6 +1070,9 @@
     <None Include="res\udtprefs_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\plus.ico">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

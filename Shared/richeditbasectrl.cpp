@@ -25,16 +25,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef TEXTRANGE
-#	ifdef _UNICODE
-#		define TEXTRANGE	TEXTRANGEW
-#	else
-#		define TEXTRANGE	TEXTRANGEA
-#	endif
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-
 const CRect DEFMARGINS					= CRect(8, 4, 8, 0);
 
 const LPCSTR  DEFAULTRTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
@@ -155,11 +145,7 @@ LRESULT CRichEditBaseCtrl::OnEditSetSelection(WPARAM /*wParam*/, LPARAM /*lParam
 void CRichEditBaseCtrl::OnDestroy()
 {
 	// destroy the find dialog. it will delete itself
-	if (m_findState.pFindReplaceDlg)
-	{
-		m_findState.pFindReplaceDlg->DestroyWindow();
-		m_findState.pFindReplaceDlg = NULL;
-	}
+	m_findState.DestroyDialog();
 
 	CRichEditCtrl::OnDestroy();
 }
@@ -653,13 +639,13 @@ void CRichEditBaseCtrl::AdjustFindDialogPosition()
 	CPoint point = GetCharPos(lStart);
 	ClientToScreen(&point);
 
-	FindReplace::AdjustDialogPosition(&m_findState, point);
+	m_findState.AdjustDialogPosition(point);
 }
 
 void CRichEditBaseCtrl::DoEditFindReplace(BOOL bFindOnly, UINT nIDTitle)
 {
 	CEnString sTitle(nIDTitle), sSelText(GetSelText());
-	VERIFY(FindReplace::Initialise(this, this, &m_findState, bFindOnly, sTitle, sSelText));
+	VERIFY(m_findState.Initialise(this, this, bFindOnly, sTitle, sSelText));
 }
 
 void CRichEditBaseCtrl::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord)
@@ -718,11 +704,7 @@ void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sRepla
 
 LRESULT CRichEditBaseCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)
 {
-	ASSERT_VALID(this);
-
-	FindReplace::HandleCmd(this, &m_findState, wParam, lParam);
-
-	ASSERT_VALID(this);
+	m_findState.HandleCmd(this, wParam, lParam);
 	return 0;
 }
 

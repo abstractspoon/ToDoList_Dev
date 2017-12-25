@@ -42,7 +42,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
-	BOOL SelectTask(const CString& sPart, IUI_APPCOMMAND nCmd);
+	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	DWORD HitTestTask(const CPoint& ptScreen) const;

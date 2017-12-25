@@ -599,7 +599,7 @@ int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, 
 int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, BOOL bWholeWord, int iStart)
 {
 	if (sSearchFor.GetLength() > sSearchIn.GetLength())
-		return FALSE;
+		return -1;
 
 	CString sWord(sSearchFor), sText(sSearchIn);
 	Trim(sWord);
@@ -626,19 +626,15 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 		const CString DELIMS("()-\\/{}[]:;,. ?\"'");
 
 		// prior and next chars must be delimeters
-		TCHAR cPrevChar = 0, cNextChar = 0;
+		TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 		// prev
-		if (nFind == 0) // word starts at start
-			cPrevChar = ' '; // known delim
-		else
+		if (nFind > 0)
 			cPrevChar = sText[nFind - 1];
 
 		// next
 		if ((nFind + sWord.GetLength()) < sText.GetLength())
 			cNextChar = sText[nFind + sWord.GetLength()];
-		else
-			cNextChar = ' '; // known delim
 
 		if ((DELIMS.Find(cPrevChar) == -1) || (DELIMS.Find(cNextChar) == -1))
 			nFind = -1;

@@ -146,23 +146,23 @@ enum IUI_APPCOMMAND
 	IUI_COLLAPSEALL,
 	IUI_EXPANDSELECTED,
 	IUI_COLLAPSESELECTED,
-	IUI_SORT,						// dwExtra is column ID		[in]
-	IUI_TOGGLABLESORT,				// dwExtra is column ID		[in]
+	IUI_SORT,						// dwExtra is column ID			[in]
+	IUI_TOGGLABLESORT,				// dwExtra is column ID			[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,					// dwExtra is task ID		[in]
+	IUI_SELECTTASK,					// dwExtra is task ID			[in]
 	IUI_RESIZEATTRIBCOLUMNS,
-	IUI_GETNEXTTASK,				// dwExtra is DWORD*		[out]
-	IUI_GETNEXTTOPLEVELTASK,		// dwExtra is DWORD*		[out]
-	IUI_GETPREVTASK,				// dwExtra is DWORD*		[out]
-	IUI_GETPREVTOPLEVELTASK,		// dwExtra is DWORD*		[out]
-	IUI_SAVETOIMAGE,				// dwExtra is HBITMAP*		[out]
-	IUI_SETTASKFONT,				// dwExtra is HFONT			[in]
-	IUI_MULTISORT,					// dwExtra is IUIMULTISORT	[in]
-	IUI_SELECTFIRSTTASK,			// dwExtra is LPCTSTR		[in]
-	IUI_SELECTNEXTTASK,				// dwExtra is LPCTSTR		[in]
-	IUI_SELECTNEXTTASKINCLCURRENT,	// dwExtra is LPCTSTR		[in]
-	IUI_SELECTPREVTASK,				// dwExtra is LPCTSTR		[in]
-	IUI_SELECTLASTTASK,				// dwExtra is LPCTSTR		[in]
+	IUI_GETNEXTTASK,				// dwExtra is DWORD*			[out]
+	IUI_GETNEXTTOPLEVELTASK,		// dwExtra is DWORD*			[out]
+	IUI_GETPREVTASK,				// dwExtra is DWORD*			[out]
+	IUI_GETPREVTOPLEVELTASK,		// dwExtra is DWORD*			[out]
+	IUI_SAVETOIMAGE,				// dwExtra is HBITMAP*			[out]
+	IUI_SETTASKFONT,				// dwExtra is HFONT				[in]
+	IUI_MULTISORT,					// dwExtra is IUIMULTISORT		[in]
+	IUI_SELECTFIRSTTASK,			// dwExtra is IUISELECTTASK*	[in]
+	IUI_SELECTNEXTTASK,				// dwExtra is IUISELECTTASK*	[in]
+	IUI_SELECTNEXTTASKINCLCURRENT,	// dwExtra is IUISELECTTASK*	[in]
+	IUI_SELECTPREVTASK,				// dwExtra is IUISELECTTASK*	[in]
+	IUI_SELECTLASTTASK,				// dwExtra is IUISELECTTASK*	[in]
 
 	// new values here
 //  IUI_
@@ -217,6 +217,8 @@ enum IUI_ATTRIBUTE
 	IUI_OFFSETTASK,		
 	IUI_LOCK,
 	IUI_SUBTASKDONE,
+	IUI_TASKNAMEORCOMMENTS,
+	IUI_ANYTEXTATTRIBUTE,
 
 	// new values here
 	// IUI_
@@ -247,7 +249,7 @@ struct IUITASKMOD
 	// Extra info
 	union
 	{
-		TDC_UNITS nTimeUnits;		// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
+		TDC_UNITS nTimeUnits;	// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
 	};
 };
 
@@ -263,6 +265,18 @@ struct IUIMULTISORT
 
 	IUI_ATTRIBUTE nAttrib3;
 	bool bAscending3;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct IUISELECTTASK
+{
+	IUI_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
+	bool bFindReplace;
+
+	LPCWSTR szWords;	
+	bool bCaseSensitive;
+	bool bWholeWord;	
 };
 
 //////////////////////////////////////////////////////////////////////

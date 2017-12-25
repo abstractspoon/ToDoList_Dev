@@ -281,6 +281,10 @@ SOURCE=.\FileRegister.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\FindReplace.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\FocusWatcher.cpp
 # End Source File
 # Begin Source File
@@ -910,6 +914,10 @@ SOURCE=.\FILEMISC.H
 # Begin Source File
 
 SOURCE=.\FileRegister.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FindReplace.h
 # End Source File
 # Begin Source File
 
