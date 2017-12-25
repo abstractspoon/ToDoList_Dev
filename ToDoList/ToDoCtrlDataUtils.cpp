@@ -107,21 +107,19 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 
 	if (!pTDI || !pTDS)
 		return 0;
-
-	// if the item is done and we're ignoring completed tasks 
-	// (and by corollary their children) then we can stop right-away
-	BOOL bIsDone = m_data.CalcIsTaskDone(pTDI, pTDS);
-
-	if (query.bIgnoreDone && bIsDone)
-		return 0;
 	
-	// else
 	SEARCHRESULT result;
 	int nResults = aResults.GetSize();
 	
 	if (TaskMatches(pTDI, pTDS, query, result))
 	{
 		aResults.Add(result);
+	}
+	else if (query.bIgnoreDone && m_data.CalcIsTaskDone(pTDI, pTDS))
+	{
+		// if the item is done and we're ignoring completed tasks 
+		// (and by corollary their children) then we can stop right-away
+		return 0;
 	}
 	
 	// process children
@@ -214,7 +212,11 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	
 	// special case: want all subtasks
 	if (query.bWantAllSubtasks && AnyTaskParentMatches(pTDI, pTDS, query, result))
+	{
+		// Result will point to parent which we don't want
+		result.dwTaskID = pTDS->GetTaskID();
 		return TRUE;
+	}
 
 	// Special case: The item is done and we're ignoring completed tasks 
 	BOOL bIsDone = m_data.CalcIsTaskDone(pTDI, pTDS);
