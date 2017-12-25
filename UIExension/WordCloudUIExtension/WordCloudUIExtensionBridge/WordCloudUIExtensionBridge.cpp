@@ -298,7 +298,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, 
 
 	String^ sWords = gcnew String(pSelect->szWords);
 
-	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord);
+	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord, pSelect->bFindReplace);
 }
 
 bool CWordCloudUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

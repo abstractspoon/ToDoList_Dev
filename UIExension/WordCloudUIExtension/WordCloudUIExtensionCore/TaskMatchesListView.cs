@@ -22,11 +22,15 @@ namespace WordCloudUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		private bool m_TaskMatchesHaveIcons;
+        private ImageList m_ilItemHeight;
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
 			m_SelectionRect = new UIExtension.SelectionRect();
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
+
+            m_ilItemHeight = new ImageList();
+            m_ilItemHeight.ImageSize = new Size(1, 18);
 		}
 
 		public bool Initialise(Translator trans)
@@ -47,6 +51,7 @@ namespace WordCloudUIExtension
 				this.HeaderStyle = ColumnHeaderStyle.Clickable;
 				this.DoubleBuffered = true;
 				this.HotTracking = false;
+                this.StateImageList = m_ilItemHeight;
 			}
 
             return true;
@@ -150,7 +155,7 @@ namespace WordCloudUIExtension
 			return (selLVItem.Tag as CloudTaskItem).Id;
 		}
 
-		public bool SelectMatch(IEnumerable<String> words, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord)
+		public bool SelectMatch(String words, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			if (Items.Count == 0)
 				return false;
@@ -164,23 +169,23 @@ namespace WordCloudUIExtension
 			switch (selectTask)
 			{
 				case UIExtension.SelectTask.SelectFirstTask:
-					matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord);
+					matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord, findReplace);
 					break;
 
 				case UIExtension.SelectTask.SelectNextTask:
-                    matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord);
+                    matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord, findReplace);
 					break;
 
 				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-                    matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord);
+                    matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord, findReplace);
 					break;
 
 				case UIExtension.SelectTask.SelectPrevTask:
-                    matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord);
+                    matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord, findReplace);
 					break;
 
 				case UIExtension.SelectTask.SelectLastTask:
-                    matchIndex = FindTask(words, (Items.Count - 1), false, caseSensitive, wholeWord);
+                    matchIndex = FindTask(words, (Items.Count - 1), false, caseSensitive, wholeWord, findReplace);
 					break;
 			}
 
@@ -196,7 +201,7 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		private int FindTask(IEnumerable<String> words, int startIndex, bool forward, bool caseSensitive, bool wholeWord)
+		private int FindTask(String words, int startIndex, bool forward, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 			int fromIndex = startIndex;
 			int toIndex = forward ? Items.Count : -1;
@@ -206,7 +211,7 @@ namespace WordCloudUIExtension
 			{
 				var item = (Items[i].Tag as CloudTaskItem);
 
-				if (item.Matches(words, caseSensitive, wholeWord))
+                if (item.Matches(words, caseSensitive, wholeWord, findReplace))
 					return i;
 			}
 
@@ -352,7 +357,7 @@ namespace WordCloudUIExtension
 				if ((colIndex == 0) && m_TaskMatchesHaveIcons)
 				{
 					if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
-						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top);
+						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top + 2);
 
 					itemRect.X += TextIconOffset;
 					itemRect.Width -= TextIconOffset;

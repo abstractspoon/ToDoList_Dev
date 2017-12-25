@@ -20,8 +20,7 @@ namespace WordCloudUIExtension
 		{
 			return Title;
 		}
-
-
+        
 		public readonly UInt32 Id;
 		public string Title;
 		public string DoneDate;
@@ -44,8 +43,7 @@ namespace WordCloudUIExtension
 		private UIExtension.TaskAttribute m_WordAttribute;
 
 		static readonly char[] WordDelims = { ',', ' ', '\t', '\r', '\n' };
-		static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.' };
-
+		static readonly char[] WordTrim = { '\'', '\"', '{', '}', '(', ')', ':', ';', '.', '[', ']' };
 
 		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
 									  HashSet<UIExtension.TaskAttribute> attribs, bool newTask)
@@ -130,31 +128,43 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
-		public bool Matches(IEnumerable<String> words, bool caseSensitive, bool wholeWord)
+		public bool Matches(String words, bool caseSensitive, bool wholeWord, bool titleOnly)
 		{
-			var attribs = new List<UIExtension.TaskAttribute>();
+			var searchIn = new List<String> { Title };
 
-			attribs.Add(UIExtension.TaskAttribute.Title);
-			attribs.Add(UIExtension.TaskAttribute.Comments);	
+            if (!titleOnly)
+			    searchIn.Add(Comments);	
 
             StringComparison compare = (caseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase);
 
-			foreach (var attrib in attribs)
+			foreach (var search in searchIn)
 			{
-				var attribWords = GetAttributeValues(attrib, null);
+				int find = search.IndexOf(words, compare);
 
-				foreach (var word in words)
-				{
-					if (wholeWord)
-					{
-						if (attribWords.Any(x => x.Equals(word, compare)))
-							return true;
+                while (find >= 0)
+                {
+                    bool match = true;
+
+                    if (wholeWord)
+                    {
+                        char prevChar = ' ', nextChar = ' '; // know delimiters
+
+                        // check for leading trailing delimiters
+                        if (find > 0)
+                            prevChar = search[find - 1];
+
+                        if ((find + words.Length) < search.Length)
+                            nextChar = search[find + words.Length];
+                        
+                        match = (WordDelims.Contains(prevChar) || WordTrim.Contains(prevChar) ||
+                                 WordDelims.Contains(nextChar) || WordTrim.Contains(nextChar));
 					}
-					else
-					{
-						if (attribWords.Any(x => x.IndexOf(word, compare) >= 0))
-							return true;
-					}
+
+                    if (match)
+                        return true;
+
+                    // else
+                    find = search.IndexOf(words, find + 1, compare);
 				}
 			}
 

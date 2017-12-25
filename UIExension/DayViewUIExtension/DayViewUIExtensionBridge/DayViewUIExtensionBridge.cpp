@@ -249,7 +249,7 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return true;
+		return /*true*/false;
 	}
 
 	// all else
@@ -295,7 +295,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 
 	String^ sWords = gcnew String(pSelect->szWords);
 
-	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord);
+	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord, pSelect->bFindReplace);
 }
 
 bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

@@ -238,28 +238,34 @@ namespace WordCloudUIExtension
 			return (taskId != 0);
 		}
 
-		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord)
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			var words = CloudTaskItem.ToWords(text);
+            if (text == String.Empty)
+                return false;
 
-			if (!words.Any())
-				return false;
+            if (!findReplace)
+            {
+                var words = CloudTaskItem.ToWords(text);
 
-			if (!m_WordCloud.SelectedWordMatches(words, caseSensitive, wholeWord))
-			{
-				var matches = m_WordCloud.Match(words, false); 
+                if (!words.Any())
+                    return false;
 
-				if (matches.Any())
-				{
-					m_WordCloud.SelectedWord = matches.First().Text;
-					return true;
-				}
+                if (!m_WordCloud.SelectedWordMatches(words, caseSensitive, wholeWord))
+                {
+                    var matches = m_WordCloud.Match(words, false);
 
-				return false;
-			}
+                    if (matches.Any())
+                    {
+                        m_WordCloud.SelectedWord = matches.First().Text;
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
 
 			// Then on the match list
-			if (m_TaskMatchesList.SelectMatch(words, selectTask, caseSensitive, wholeWord))
+			if (m_TaskMatchesList.SelectMatch(text, selectTask, caseSensitive, wholeWord, findReplace))
 			{
 				return true;
 			}
