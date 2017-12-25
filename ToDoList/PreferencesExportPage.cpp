@@ -63,14 +63,14 @@ void CPreferencesExportPage::DoDataExchange(CDataExchange* pDX)
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nHtmlFontSize = CDialogHelper::GetSelectedItemAsValue(m_cbFontSize);
+		m_nHtmlFontSize = GetSelectedItemAsValue(m_cbFontSize);
 	}
 	else
 	{
-		if (!CDialogHelper::SelectItemByValue(m_cbFontSize, m_nHtmlFontSize))
+		if (CB_ERR == SelectItemByValue(m_cbFontSize, m_nHtmlFontSize))
 		{
 			m_nHtmlFontSize = 3;
-			CDialogHelper::SelectItemByValue(m_cbFontSize, m_nHtmlFontSize);
+			SelectItemByValue(m_cbFontSize, m_nHtmlFontSize);
 		}
 	}
 }

@@ -15,7 +15,6 @@
 #include "..\shared\Timecombobox.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\enstatic.h"
-#include "..\Shared\dialoghelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +23,7 @@ const UINT WM_TDL_APPLYADDLOGGEDTIME = ::RegisterWindowMessage(_T("WM_TDL_APPLYA
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg dialog
 
-class CTDLAddLoggedTimeDlg : public CTDLDialog, protected CDialogHelper
+class CTDLAddLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:

@@ -93,12 +93,12 @@ void CPreferencesFile2Page::DoDataExchange(CDataExchange* pDX)
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nOtherExporter = (int)CDialogHelper::GetSelectedItemData(m_cbOtherExporters);
-		m_nKeepBackups = CDialogHelper::GetSelectedItemAsValue(m_cbKeepBackups);
+		m_nOtherExporter = (int)GetSelectedItemData(m_cbOtherExporters);
+		m_nKeepBackups = GetSelectedItemAsValue(m_cbKeepBackups);
 	}
-	else if (!CDialogHelper::SelectItemByValue(m_cbKeepBackups, m_nKeepBackups))
+	else if (CB_ERR == SelectItemByValue(m_cbKeepBackups, m_nKeepBackups))
 	{
-		CDialogHelper::SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
+		SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
 
 		if (m_nKeepBackups == 0) // all
 		{
@@ -160,7 +160,7 @@ BOOL CPreferencesFile2Page::OnInitDialog()
 	GetDlgItem(IDC_OTHEREXPORTERS)->EnableWindow(m_bAutoExport && m_bOtherExport);
 	GetDlgItem(IDC_EXPORTFILTERED)->EnableWindow(m_bAutoExport);
 
-	CDialogHelper::SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
+	SelectItemByData(m_cbOtherExporters, m_nOtherExporter);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

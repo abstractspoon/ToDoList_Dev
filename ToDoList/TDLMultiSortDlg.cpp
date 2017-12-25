@@ -92,7 +92,7 @@ void CTDLMultiSortDlg::BuildCombos()
 			if (!IsColumnVisible(nColID))
 				continue;
 				
-			CDialogHelper::AddString(combo, col.nIDLongName, nColID);
+			AddString(combo, col.nIDLongName, nColID);
 		}
 	
 		// custom columns
@@ -107,14 +107,14 @@ void CTDLMultiSortDlg::BuildCombos()
 			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
 
 			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			CDialogHelper::AddString(combo, sColumn, nColID);
+			AddString(combo, sColumn, nColID);
 		}
 
 		// add blank item at top of 2nd and 3rd combo
 		if (nSort > 0)
-			CDialogHelper::AddString(combo, _T(""), TDCC_NONE);
+			AddString(combo, _T(""), TDCC_NONE);
 
-		CDialogHelper::SelectItemByData(combo, m_sort.GetSortBy(nSort));
+		SelectItemByData(combo, m_sort.GetSortBy(nSort));
 	}
 
 	// set selection to first item if first combo selection is not set
@@ -122,7 +122,7 @@ void CTDLMultiSortDlg::BuildCombos()
 	{
 		m_cbSortBy[0].SetCurSel(0);
 
-		TDC_COLUMN nColID = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy[0]);
+		TDC_COLUMN nColID = (TDC_COLUMN)GetSelectedItemData(m_cbSortBy[0]);
 		m_sort.SetSortBy(0, nColID);
 	}
 }
@@ -160,7 +160,7 @@ void CTDLMultiSortDlg::OnSelchangeSortby3()
 
 void CTDLMultiSortDlg::OnSelchangeSortby(int nCol)
 {
-	TDC_COLUMN nColID = (TDC_COLUMN)CDialogHelper::GetSelectedItemData(m_cbSortBy[nCol]);
+	TDC_COLUMN nColID = (TDC_COLUMN)GetSelectedItemData(m_cbSortBy[nCol]);
 	m_sort.SetSortBy(nCol, nColID);
 
 	EnableControls();

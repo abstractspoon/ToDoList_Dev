@@ -53,7 +53,7 @@ int CTDLFileEncodingComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CTDLFileEncodingComboBox::SetSelectedEncoding(SFE_FORMAT nFormat)
 {
-	return CDialogHelper::SelectItemByData(*this, nFormat);
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nFormat));
 }
 
 SFE_FORMAT CTDLFileEncodingComboBox::GetSelectedEncoding() const

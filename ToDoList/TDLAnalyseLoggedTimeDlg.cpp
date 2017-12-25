@@ -99,9 +99,9 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_OUTPUTFILEPATH, m_eOutputFile);
 
 	if (pDX->m_bSaveAndValidate)
-		m_nOutputFormat = (TDCTTL_FORMAT)CDialogHelper::GetSelectedItemData(m_cbOutputFormat);
+		m_nOutputFormat = (TDCTTL_FORMAT)GetSelectedItemData(m_cbOutputFormat);
 	else
-		CDialogHelper::SelectItemByData(m_cbOutputFormat, m_nOutputFormat);
+		SelectItemByData(m_cbOutputFormat, m_nOutputFormat);
 }
 
 BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)

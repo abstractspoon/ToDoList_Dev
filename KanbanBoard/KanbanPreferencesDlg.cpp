@@ -48,12 +48,12 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nFixedAttrib = (IUI_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbAttributes);
-		m_sFixedCustomAttribID = CDialogHelper::GetSelectedItem(m_cbCustomAttributes);
+		m_nFixedAttrib = (IUI_ATTRIBUTE)GetSelectedItemData(m_cbAttributes);
+		m_sFixedCustomAttribID = GetSelectedItem(m_cbCustomAttributes);
 	}
 	else
 	{
-		CDialogHelper::SelectItemByData(m_cbAttributes, m_nFixedAttrib);
+		SelectItemByData(m_cbAttributes, m_nFixedAttrib);
 		m_cbCustomAttributes.SelectString(-1, m_sFixedCustomAttribID);
 	}
 }

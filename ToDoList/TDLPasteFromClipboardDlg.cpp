@@ -48,7 +48,9 @@ void CTDLPasteFromClipboardDlg::DoDataExchange(CDataExchange* pDX)
 		m_nFormatOption = m_cbFormat.GetItemData(nIndex);
 	}
 	else
-		CDialogHelper::SelectItemByData(m_cbFormat, m_nFormatOption);
+	{
+		SelectItemByData(m_cbFormat, m_nFormatOption);
+	}
 }
 
 

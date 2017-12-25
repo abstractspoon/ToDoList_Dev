@@ -86,17 +86,17 @@ void CPreferencesGenPage::DoDataExchange(CDataExchange* pDX)
 		m_hkGlobal.GetHotKey(wVKeyCode, wModifiers);
 		m_dwGlobalHotkey = MAKELONG(wVKeyCode, wModifiers);
 
-		m_nMinimizeNoEditTime = CDialogHelper::GetSelectedItemAsValue(m_cbNoEditTime);
+		m_nMinimizeNoEditTime = GetSelectedItemAsValue(m_cbNoEditTime);
 	}
 	else
 	{
 		if (m_bSpecifyGlobalHotkey)
 			m_hkGlobal.SetHotKey(m_dwGlobalHotkey);
 
-		if (!CDialogHelper::SelectItemByValue(m_cbNoEditTime, m_nMinimizeNoEditTime))
+		if (CB_ERR == SelectItemByValue(m_cbNoEditTime, m_nMinimizeNoEditTime))
 		{
 			m_nMinimizeNoEditTime = 10;
-			CDialogHelper::SelectItemByValue(m_cbNoEditTime, m_nMinimizeNoEditTime);
+			SelectItemByValue(m_cbNoEditTime, m_nMinimizeNoEditTime);
 		}
 	}
 }

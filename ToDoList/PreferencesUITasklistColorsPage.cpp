@@ -111,25 +111,25 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	// font sizes
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nTreeFontSize = CDialogHelper::GetSelectedItemAsValue(m_cbTreeFontSize);
-		m_nCommentsFontSize = CDialogHelper::GetSelectedItemAsValue(m_cbCommentsFontSize);
-		m_nColorAttribute = (TDC_ATTRIBUTE)CDialogHelper::GetSelectedItemData(m_cbColorByAttribute);
+		m_nTreeFontSize = GetSelectedItemAsValue(m_cbTreeFontSize);
+		m_nCommentsFontSize = GetSelectedItemAsValue(m_cbCommentsFontSize);
+		m_nColorAttribute = (TDC_ATTRIBUTE)GetSelectedItemData(m_cbColorByAttribute);
 	}
 	else
 	{
-		if (!CDialogHelper::SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize))
+		if (CB_ERR == SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize))
 		{
 			m_nTreeFontSize = 9;
-			CDialogHelper::SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize);
+			SelectItemByValue(m_cbTreeFontSize, m_nTreeFontSize);
 		}
 
-		if (!CDialogHelper::SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize))
+		if (CB_ERR == SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize))
 		{
 			m_nCommentsFontSize = 9;
-			CDialogHelper::SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize);
+			SelectItemByValue(m_cbCommentsFontSize, m_nCommentsFontSize);
 		}
 
-		CDialogHelper::SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
+		SelectItemByData(m_cbColorByAttribute, m_nColorAttribute);
 	}
 }
 
@@ -245,13 +245,13 @@ BOOL CPreferencesUITasklistColorsPage::OnInitDialog()
 		m_cbPriorityColors.SetColor(nPriority, (COLORREF)m_aPriorityColors[nPriority]);
 
 	// attribute colors
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),	TDCA_CATEGORY);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),		TDCA_STATUS);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),	TDCA_ALLOCTO);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),	TDCA_ALLOCBY);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),	TDCA_VERSION);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),	TDCA_EXTERNALID);
-	CDialogHelper::AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),		TDCA_TAGS);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),	TDCA_CATEGORY);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),		TDCA_STATUS);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),	TDCA_ALLOCTO);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),	TDCA_ALLOCBY);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),	TDCA_VERSION);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),	TDCA_EXTERNALID);
+	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),		TDCA_TAGS);
 
 	int nColor = m_aAttribColors.GetSize();
 	

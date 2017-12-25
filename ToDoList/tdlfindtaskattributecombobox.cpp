@@ -50,7 +50,7 @@ BOOL CTDLFindTaskAttributeComboBox::SelectAttribute(const SEARCHPARAM& sp)
 {
 	DWORD dwItemData = EncodeItemData(sp.GetAttribute(), sp.GetFlags());
 
-	return CDialogHelper::SelectItemByData(*this, dwItemData);
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, dwItemData));
 }
 
 BOOL CTDLFindTaskAttributeComboBox::SelectedAttributeIsDate() const

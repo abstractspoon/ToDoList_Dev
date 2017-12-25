@@ -60,7 +60,9 @@ void COptionsDlg::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 	else if (m_nIndent == -1)
+	{
 		CDialogHelper::SelectItemByValue(m_cbIndent, m_sIndent.GetLength());
+	}
 }
 
 

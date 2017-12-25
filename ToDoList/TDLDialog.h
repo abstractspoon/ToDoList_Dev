@@ -8,11 +8,12 @@
 //
 
 #include "..\shared\winhelpbutton.h"
+#include "..\shared\dialoghelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLDialog dialog
 
-class CTDLDialog : public CDialog
+class CTDLDialog : public CDialog, protected CDialogHelper
 {
 // Construction
 protected:

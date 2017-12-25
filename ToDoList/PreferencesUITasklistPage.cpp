@@ -67,9 +67,9 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HIDEPANESPLITBAR, m_bHidePaneSplitBar);
 
 	if (pDX->m_bSaveAndValidate)
-		m_nPercentIncrement = CDialogHelper::GetSelectedItemAsValue(m_cbPercentIncrement);
+		m_nPercentIncrement = GetSelectedItemAsValue(m_cbPercentIncrement);
 	else
-		CDialogHelper::SelectItemByValue(m_cbPercentIncrement, m_nPercentIncrement);
+		SelectItemByValue(m_cbPercentIncrement, m_nPercentIncrement);
 }
 
 

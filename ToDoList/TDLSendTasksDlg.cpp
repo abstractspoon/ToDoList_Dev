@@ -54,11 +54,11 @@ void CTDLSendTasksDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_nFormatOption = CDialogHelper::GetSelectedItemData(m_cbFormat);
+		m_nFormatOption = GetSelectedItemData(m_cbFormat);
 	}
 	else
 	{
-		CDialogHelper::SelectItemByData(m_cbFormat, m_nFormatOption);
+		SelectItemByData(m_cbFormat, m_nFormatOption);
 	}
 }
 

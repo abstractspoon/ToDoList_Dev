@@ -149,8 +149,8 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		CDialogHelper::SelectItemByData(m_cbDataType, m_dwDataType);
-		CDialogHelper::SelectItemByData(m_cbListType, m_dwListType);
+		SelectItemByData(m_cbDataType, m_dwDataType);
+		SelectItemByData(m_cbListType, m_dwListType);
 	}
 }
 
@@ -420,7 +420,7 @@ void CTDLCustomAttributeDlg::BuildListTypeCombo(DWORD dwDataType)
 	}
 
 	// restore selection
-	CDialogHelper::SelectItemByData(m_cbListType, m_dwListType);
+	SelectItemByData(m_cbListType, m_dwListType);
 }
 
 void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 

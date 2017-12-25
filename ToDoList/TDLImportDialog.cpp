@@ -83,7 +83,7 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		CDialogHelper::SelectItemByData(m_cbFormat, m_nFormatOption);
+		SelectItemByData(m_cbFormat, m_nFormatOption);
 	}
 }
 
