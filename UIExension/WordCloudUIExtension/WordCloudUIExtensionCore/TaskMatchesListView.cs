@@ -150,7 +150,7 @@ namespace WordCloudUIExtension
 			return (selLVItem.Tag as CloudTaskItem).Id;
 		}
 
-		public bool SelectMatch(IEnumerable<String> words, UIExtension.SelectTask selectTask, bool partialOK)
+		public bool SelectMatch(IEnumerable<String> words, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord)
 		{
 			if (Items.Count == 0)
 				return false;
@@ -164,23 +164,23 @@ namespace WordCloudUIExtension
 			switch (selectTask)
 			{
 				case UIExtension.SelectTask.SelectFirstTask:
-					matchIndex = FindTask(words, 0, true, partialOK);
+					matchIndex = FindTask(words, 0, true, caseSensitive, wholeWord);
 					break;
 
 				case UIExtension.SelectTask.SelectNextTask:
-					matchIndex = FindTask(words, (selIndex + 1), true, partialOK);
+                    matchIndex = FindTask(words, (selIndex + 1), true, caseSensitive, wholeWord);
 					break;
 
 				case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-					matchIndex = FindTask(words, selIndex, true, partialOK);
+                    matchIndex = FindTask(words, selIndex, true, caseSensitive, wholeWord);
 					break;
 
 				case UIExtension.SelectTask.SelectPrevTask:
-					matchIndex = FindTask(words, (selIndex - 1), false, partialOK);
+                    matchIndex = FindTask(words, (selIndex - 1), false, caseSensitive, wholeWord);
 					break;
 
 				case UIExtension.SelectTask.SelectLastTask:
-					matchIndex = FindTask(words, (Items.Count - 1), false, partialOK);
+                    matchIndex = FindTask(words, (Items.Count - 1), false, caseSensitive, wholeWord);
 					break;
 			}
 
@@ -196,7 +196,7 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		private int FindTask(IEnumerable<String> words, int startIndex, bool forward, bool partialOK)
+		private int FindTask(IEnumerable<String> words, int startIndex, bool forward, bool caseSensitive, bool wholeWord)
 		{
 			int fromIndex = startIndex;
 			int toIndex = forward ? Items.Count : -1;
@@ -206,7 +206,7 @@ namespace WordCloudUIExtension
 			{
 				var item = (Items[i].Tag as CloudTaskItem);
 
-				if (item.Matches(words, true))
+				if (item.Matches(words, caseSensitive, wholeWord))
 					return i;
 			}
 

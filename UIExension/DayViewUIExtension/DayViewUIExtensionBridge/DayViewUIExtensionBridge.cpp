@@ -231,9 +231,6 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return DoAppSelectCommand(nCmd, (const IUISELECTTASK*)dwExtra);
-
-	case IUI_FINDREPLACE:
-		return false;
 	}
 
 	// all else
@@ -253,9 +250,6 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return true;
-
-	case IUI_FINDREPLACE:
-		return false;
 	}
 
 	// all else

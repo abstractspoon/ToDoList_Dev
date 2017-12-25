@@ -234,9 +234,6 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD 
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return DoAppSelectCommand(nCmd, (IUISELECTTASK*)dwExtra);
-
-	case IUI_FINDREPLACE:
-		return false;
 	}
 
 	// all else
@@ -256,9 +253,6 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWO
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return true;
-
-	case IUI_FINDREPLACE:
-		return false;
 	}
 
 	// all else

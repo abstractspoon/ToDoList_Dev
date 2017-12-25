@@ -203,7 +203,7 @@ namespace Gma.CodeCloud.Controls
 			return (matches != null);
 		}
 
-		public IEnumerable<IWord> Match(IEnumerable<string> words, bool caseSensitive, bool wholeWord)
+		public IEnumerable<IWord> Match(IEnumerable<string> words, bool wholeWord)
 		{
 			IEnumerable<IWord> matches;
 

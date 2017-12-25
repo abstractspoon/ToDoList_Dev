@@ -130,12 +130,14 @@ namespace WordCloudUIExtension
 			return "";
 		}
 
-		public bool Matches(IEnumerable<String> words, bool partialOK)
+		public bool Matches(IEnumerable<String> words, bool caseSensitive, bool wholeWord)
 		{
 			var attribs = new List<UIExtension.TaskAttribute>();
 
 			attribs.Add(UIExtension.TaskAttribute.Title);
 			attribs.Add(UIExtension.TaskAttribute.Comments);	
+
+            StringComparison compare = (caseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase);
 
 			foreach (var attrib in attribs)
 			{
@@ -143,14 +145,14 @@ namespace WordCloudUIExtension
 
 				foreach (var word in words)
 				{
-					if (partialOK)
+					if (wholeWord)
 					{
-						if (attribWords.Any(x => x.IndexOf(word, StringComparison.CurrentCultureIgnoreCase) >= 0))
+						if (attribWords.Any(x => x.Equals(word, compare)))
 							return true;
 					}
 					else
 					{
-						if (attribWords.Any(x => x.Equals(word, StringComparison.CurrentCultureIgnoreCase)))
+						if (attribWords.Any(x => x.IndexOf(word, compare) >= 0))
 							return true;
 					}
 				}

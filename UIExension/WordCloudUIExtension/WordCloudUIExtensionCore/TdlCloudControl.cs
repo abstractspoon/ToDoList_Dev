@@ -70,11 +70,13 @@ namespace WordCloudUIExtension
 			if (SelectedWord == null)
 				return false;
 
+            StringComparison compare = (caseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase);
+
 			if (wholeWord)
-				return words.Any(x => m_SelectedWord.Equals(x, StringComparison.CurrentCultureIgnoreCase));
+				return words.Any(x => m_SelectedWord.Equals(x, compare));
 			
 			// else
-			return words.Any(x => m_SelectedWord.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0);
+			return words.Any(x => m_SelectedWord.IndexOf(x, compare) == 0);
 		}
 
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)

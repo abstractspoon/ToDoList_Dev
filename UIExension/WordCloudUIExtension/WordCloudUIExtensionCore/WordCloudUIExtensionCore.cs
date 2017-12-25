@@ -247,7 +247,7 @@ namespace WordCloudUIExtension
 
 			if (!m_WordCloud.SelectedWordMatches(words, caseSensitive, wholeWord))
 			{
-				var matches = m_WordCloud.Match(words, caseSensitive, wholeWord); 
+				var matches = m_WordCloud.Match(words, false); 
 
 				if (matches.Any())
 				{
@@ -259,7 +259,7 @@ namespace WordCloudUIExtension
 			}
 
 			// Then on the match list
-			if (m_TaskMatchesList.SelectMatch(words, selectTask, true))
+			if (m_TaskMatchesList.SelectMatch(words, selectTask, caseSensitive, wholeWord))
 			{
 				return true;
 			}
@@ -736,7 +736,7 @@ namespace WordCloudUIExtension
 
 				if (words.Any())
 				{
-					var matches = m_WordCloud.Match(words, false, false);
+					var matches = m_WordCloud.Match(words, false);
 
 					if (matches.Any())
 						selWord = matches.First().Text;
