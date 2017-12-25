@@ -34,10 +34,10 @@ REM Handle dlls explicitly to maintain control over .NET plugins
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\MySpellCheck.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\OdbcStorage.dll
 
-REM .Net Plugins - Dev only for now
-echo.%1 | findstr /C:"_Dev" 1>nul
+REM .Net Plugins
+REM echo.%1 | findstr /C:"_Dev" 1>nul
 
-IF ERRORLEVEL 1 goto CONTINUE
+REM IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionBridge.dll
@@ -46,7 +46,7 @@ IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\WordCloudUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TagCloud.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Gma.CodeCloud.Controls.dll
-:CONTINUE
+REM :CONTINUE
  
 REM Copy latest Resources
 del %1\Unicode_Release\Resources\ /Q /S
