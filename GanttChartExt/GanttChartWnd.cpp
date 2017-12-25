@@ -631,7 +631,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_SELECTLASTTASK:
 		if (dwExtra)
 		{
-			LPCTSTR szText = (LPCTSTR)dwExtra;
+			const IUISELECTTASK* pSelect = (IUISELECTTASK*)dwExtra;
+			
+			return (m_ctrlGantt.SelectTask(nCmd, *pSelect) != FALSE);
 		}
 		break;
 	}

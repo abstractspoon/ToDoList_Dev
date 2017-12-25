@@ -52,6 +52,7 @@ public:
 
 	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
+	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	HTREEITEM GetSelectedItem() const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
@@ -180,10 +181,14 @@ protected:
 
 	// pseudo-message handlers
 	void OnHeaderDividerDblClk(NMHEADER* HDN);
-	BOOL OnLButtonDown(BOOL bTree, UINT nFlags, CPoint point);
-	BOOL OnLButtonUp(BOOL bTree, UINT nFlags, CPoint point);
-	BOOL OnLButtonDblClk(BOOL bTree, UINT nFlags, CPoint point);
-	BOOL OnMouseMove(BOOL bTree, UINT nFlags, CPoint point);
+	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
+	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
+	BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
+	BOOL OnTreeMouseMove(UINT nFlags, CPoint point);
+	BOOL OnListLButtonDown(UINT nFlags, CPoint point);
+	BOOL OnListLButtonUp(UINT nFlags, CPoint point);
+	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
+	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
@@ -297,6 +302,8 @@ protected:
 	DWORD HitTestTask(const CPoint& point, BOOL bScreen, int& nItem) const;
 	int FindListItem(DWORD dwTaskID, const CHTIMap& mapItems) const;
 	int FindListItem(DWORD dwTaskID) const;
+	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
+	BOOL SelectItem(HTREEITEM hti);
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
