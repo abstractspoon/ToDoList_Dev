@@ -554,15 +554,20 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 					GM_ITEMSTATE nState = GetTreeItemState(hti);
 
-					BOOL bSelected = (nState != GMIS_NONE);
-					BOOL bAlternate = (!IsTreeItemLineOdd(hti) && HasColor(m_crAltLine));
-					
 					COLORREF crText, crBack;
-					GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), bSelected);
+					GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE));
 				
+					if (!HasColor(crBack))
+					{
+						if (!IsTreeItemLineOdd(hti) && HasColor(m_crAltLine))
+							crBack = m_crAltLine;
+						else
+							crBack = GetSysColor(COLOR_WINDOW);
+					}
+					
 					// draw label background only
 					GetItemTitleRect(hti, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
-					DrawTasksRowBackground(pDC, pTVCD->nmcd.rc, rItem, nState, bAlternate, crBack);
+					DrawTasksRowBackground(pDC, pTVCD->nmcd.rc, rItem, nState, crBack);
 
 					// draw text
 					DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);

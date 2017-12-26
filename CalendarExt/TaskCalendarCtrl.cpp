@@ -1570,6 +1570,8 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
+		m_tooltip.Pop();
+
 		SetFocus();
 		SelectTask(dwSelID, TRUE);
 

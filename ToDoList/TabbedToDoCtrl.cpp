@@ -677,7 +677,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 			}
 			
 			ResyncListSelection();
-			m_taskList.EnsureSelectionVisible();
 		}
 		break;
 
@@ -776,7 +775,10 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	switch (nNewView)
 	{
 	case FTCV_TASKTREE:
+		break;
+
 	case FTCV_TASKLIST:
+		m_taskList.EnsureSelectionVisible();
 		break;
 		
 	case FTCV_UIEXTENSION1:
@@ -1199,12 +1201,16 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 			}
 			else if (HasSingleSelectionChanged(dwTaskID))
 			{
-				return SelectTask(dwTaskID);	
+				// Call base class directly so that we don't end
+				// up calling back into extension this came from
+				return CToDoCtrl::SelectTask(dwTaskID, FALSE);	
 			}
 		}
 		else
 		{
-			return SelectTasks(aTaskIDs, FALSE);
+			// Call base class directly so that we don't end
+			// up calling back into extension this came from
+			return CToDoCtrl::SelectTasks(aTaskIDs, FALSE);
 		}
 	}
 
@@ -5567,7 +5573,7 @@ BOOL CTabbedToDoCtrl::IsExtensionView(HWND hWnd) const
 	{
 		const IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
 
-		if ((pExtWnd != NULL) && (pExtWnd->GetHwnd() == hWnd))
+		if ((pExtWnd != NULL) && (CDialogHelper::IsChildOrSame(pExtWnd->GetHwnd(), hWnd)))
 			return TRUE;
 	}
 

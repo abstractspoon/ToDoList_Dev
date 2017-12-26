@@ -2275,7 +2275,7 @@ BOOL CTDLTaskCtrlBase::HasThemedState(GM_ITEMSTATE nState) const
 	return ((nState != GMIS_NONE) && CThemed::AreControlsThemed()); 
 }
 
-void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, BOOL bAlternate, COLORREF crBack)
+void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, COLORREF crBack)
 {
 	ASSERT(!m_bSavingToImage || (nState == GMIS_NONE));
 
@@ -2283,18 +2283,15 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 
 	if (!bSelected)
 	{
+		ASSERT(HasColor(crBack));
+
+		CRect rBack(rLabel);
+		rBack.right = rRow.right; // else overwriting with comments produces artifacts
+
 		// if we have gridlines we don't fill the bottom line so 
 		// as to avoid overwriting gridlines previously drawn
-		CRect rBack(rLabel);
-
-		if (m_bSavingToImage)
-			rBack.right = rRow.right;
-
 		if (HasColor(m_crGridLine))
 			rBack.bottom--;
-		
-		if (!HasColor(crBack))
-			crBack = ((bAlternate && HasColor(m_crAltLine)) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 		
 		pDC->FillSolidRect(rBack, crBack);
 	}

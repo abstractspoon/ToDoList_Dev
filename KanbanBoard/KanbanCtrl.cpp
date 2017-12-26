@@ -326,6 +326,11 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 
 BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 {
+	CDWordArray aTaskIDs;
+	aTaskIDs.Add(dwTaskID);
+
+	return SelectTasks(aTaskIDs);
+/*
 	// Check for 'no change'
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs);
@@ -348,6 +353,7 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	}
 
 	return (pList != NULL);
+*/
 }
 
 BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)

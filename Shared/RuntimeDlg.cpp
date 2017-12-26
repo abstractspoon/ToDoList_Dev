@@ -83,7 +83,6 @@ CRuntimeDlg::~CRuntimeDlg()
 
 BEGIN_MESSAGE_MAP(CRuntimeDlg, CDialog)
 //{{AFX_MSG_MAP(CRuntimeDlg)
-ON_WM_SETFOCUS()
 ON_WM_DESTROY()
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -724,16 +723,6 @@ BOOL CRuntimeDlg::PreTranslateMessage(MSG* pMsg)
 void CRuntimeDlg::ExcludeCtrls(CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners)
 {
 	CDialogHelper::ExcludeCtrls(this, pDC, nCtrlIDFrom, nCtrlIDTo, bIgnoreCorners);
-}
-
-void CRuntimeDlg::OnSetFocus(CWnd* pOldWnd) 
-{
-	CDialog::OnSetFocus(pOldWnd);
-	
-	CWnd* pChild = GetWindow(GW_CHILD);
-	
-	if (pChild)
-		pChild->SetFocus();
 }
 
 void CRuntimeDlg::SetFont(CFont* pFont, BOOL bRedraw)

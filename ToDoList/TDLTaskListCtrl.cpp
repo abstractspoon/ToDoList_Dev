@@ -248,6 +248,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 								
 	case CDDS_ITEMPREPAINT:
 		{
+			// Fill the item background with the 'unselected' colour.
+			// Although we fill fill the entire row, we are really only
+			// interested in the bit to left of the task title where the
+			// completion checkbox and task icon will be drawn by Windows
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			BOOL bAlternate = (!IsColumnLineOdd(nItem) && HasColor(m_crAltLine));
 
@@ -283,23 +287,30 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			{
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
-
+	
+				// Draw background again but this time allowing for the task's 
+				// selection status, and making sure we don't overdraw any icons
+				// already drawn by Windows in the pre-paint
 				GM_ITEMSTATE nState = GetListItemState(nItem);
-
-				BOOL bSelected = (nState != GMIS_NONE);
-				BOOL bAlternate = (!IsColumnLineOdd(nItem) && HasColor(m_crAltLine));
 				
-				COLORREF crBack, crText;
-				VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), bSelected));
-
-				// draw background
 				CRect rRow;
 				m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 		
 				CRect rItem;
 				GetItemTitleRect(nItem, TDCTR_LABEL, rItem, pDC, pTDI->sTitle);
 				
-				DrawTasksRowBackground(pDC, rRow, rItem, nState, bAlternate, crBack);
+				COLORREF crBack, crText;
+				VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
+
+				if (!HasColor(crBack))
+				{
+					if (!IsColumnLineOdd(nItem) && HasColor(m_crAltLine))
+						crBack = m_crAltLine;
+					else
+						crBack = GetSysColor(COLOR_WINDOW);
+				}
+				
+				DrawTasksRowBackground(pDC, rRow, rItem, nState, crBack);
 				
 				// draw text
 				DrawColumnText(pDC, pTDI->sTitle, rItem, DT_LEFT, crText, TRUE);

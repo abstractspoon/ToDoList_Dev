@@ -108,6 +108,7 @@ protected:
 	virtual void OnCancel();
 	virtual void OnOK();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnInitDialog();
 
 // Implementation
 public:
@@ -116,8 +117,6 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CRuntimeDlg)
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
