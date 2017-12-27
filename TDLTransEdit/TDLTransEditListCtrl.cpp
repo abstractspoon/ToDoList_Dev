@@ -144,13 +144,13 @@ BOOL CTDLTransEditListCtrl::MatchesFilter(const DICTITEM* pDI, const CString& sF
 	if (sFilter.IsEmpty())
 		return TRUE;
 		
-	if (Misc::Find(sFilter, pDI->GetTextIn(), FALSE, FALSE))
+	if (Misc::Find(sFilter, pDI->GetTextIn(), FALSE, FALSE) != -1)
 		return TRUE;
 
-	if (Misc::Find(sFilter, pDI->GetTextOut(), FALSE, FALSE))
+	if (Misc::Find(sFilter, pDI->GetTextOut(), FALSE, FALSE) != -1)
 		return TRUE;
 	
-	if (Misc::Find(sFilter, pDI->GetClassID(), FALSE, FALSE))
+	if (Misc::Find(sFilter, pDI->GetClassID(), FALSE, FALSE) != -1)
 		return TRUE;
 
 	return FALSE;
