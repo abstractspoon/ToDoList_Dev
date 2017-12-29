@@ -38,6 +38,10 @@ namespace Gma.CodeCloud.Controls
             m_LayoutType = LayoutType.Typewriter;
         }
 
+        public bool HasItemUnderMouse()
+        {
+            return (m_ItemUnderMouse != null);
+        }
 
         protected override void OnPaint(PaintEventArgs e)
         {

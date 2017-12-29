@@ -242,6 +242,8 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
+		return true;
+
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:
 	case IUI_SELECTFIRSTTASK:

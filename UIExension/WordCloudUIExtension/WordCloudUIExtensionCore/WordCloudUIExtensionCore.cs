@@ -694,7 +694,7 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudMouseClick(object sender, MouseEventArgs e)
 		{
-			if (e.Button == MouseButtons.Right)
+			if ((e.Button == MouseButtons.Right) && m_WordCloud.HasItemUnderMouse())
 			{
 				var menu = new ContextMenuStrip();
 
