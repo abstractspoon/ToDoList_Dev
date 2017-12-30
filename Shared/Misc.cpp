@@ -1055,7 +1055,7 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 		{
 			if (bWholeWord)
 			{
-				if (Find(szItem, sArrItem, FALSE, FALSE))
+				if (Find(szItem, sArrItem, FALSE, FALSE) != -1)
 					return nItem;
 			}
 			else
