@@ -1339,7 +1339,7 @@ int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 
 void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 {
-	if (cache.aSelTaskIDs.GetSize() == 0)
+	if ((GetItemCount() == 0) || (cache.aSelTaskIDs.GetSize() == 0))
 	{
 		DeselectAll();
 		return;
@@ -1365,17 +1365,24 @@ void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 	}
 	
 	// add focused task if it isn't already
-	CDWordArray aTaskIDs;
-	aTaskIDs.Copy(cache.aSelTaskIDs);
-
-	if (!Misc::HasT(aTaskIDs, dwFocusedTaskID))
-		aTaskIDs.Add(dwFocusedTaskID);
-
-	SetSelectedTasks(aTaskIDs, dwFocusedTaskID);
-	
-	// restore pos
-	if (cache.dwFirstVisibleTaskID)
-		SetTopIndex(FindTaskItem(cache.dwFirstVisibleTaskID));
+	if (dwFocusedTaskID)
+	{
+		CDWordArray aTaskIDs;
+		aTaskIDs.Copy(cache.aSelTaskIDs);
+		
+		if (!Misc::HasT(aTaskIDs, dwFocusedTaskID))
+			aTaskIDs.Add(dwFocusedTaskID);
+			
+		SetSelectedTasks(aTaskIDs, dwFocusedTaskID);
+		
+		// restore pos
+		if (cache.dwFirstVisibleTaskID)
+			SetTopIndex(FindTaskItem(cache.dwFirstVisibleTaskID));
+	}
+	else
+	{
+		SelectItem(0);
+	}
 }
 
 void CTDLTaskListCtrl::DeselectAll() 
