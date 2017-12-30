@@ -219,20 +219,6 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-#if _MSC_VER <= 1200
-			// Special case: If this came from a plugin and we ARE compiled 
-			// with VC6 then MFC will not generate a WM_CONTEXTMENU msg 
-			// from a right-button click, so we handle that.
-			if ((pMsg->message == WM_RBUTTONUP) && IsExtensionView(pMsg->hwnd))
-			{
-				CPoint ptScreen(pMsg->lParam);
-				::ClientToScreen(pMsg->hwnd, &ptScreen);
-				
-				SendMessage(WM_CONTEXTMENU, pMsg->wParam, MAKELPARAM(ptScreen.x, ptScreen.y));
-				return TRUE;
-			}
-#endif
-			
 			// Default processing
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd);
@@ -244,6 +230,23 @@ BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg)
 
 			if (bHasFocus && pExtWnd->ProcessMessage(pMsg))
 				return TRUE;
+
+#if _MSC_VER <= 1200
+			// Special case: If this came from a plugin and we ARE compiled 
+			// with VC6 then MFC will not generate a WM_CONTEXTMENU msg 
+			// from a right-button click, so we handle that.
+			if ((pMsg->message == WM_RBUTTONUP) && IsExtensionView(pMsg->hwnd))
+			{
+				CPoint ptScreen(pMsg->lParam);
+				::ClientToScreen(pMsg->hwnd, &ptScreen);
+
+				if (pExtWnd->HitTest(ptScreen) != IUI_NOWHERE)
+				{
+					SendMessage(WM_CONTEXTMENU, pMsg->wParam, MAKELPARAM(ptScreen.x, ptScreen.y));
+					return TRUE;
+				}
+			}
+#endif
 		}
 		break;
 		
