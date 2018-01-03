@@ -76,7 +76,7 @@ LPCWSTR CMindMapUIExtensionBridge::GetTypeID() const
 IUIExtensionWindow* CMindMapUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CMindMapUIExtensionBridgeWindow* pExtWnd = new CMindMapUIExtensionBridgeWindow;
+	CMindMapUIExtensionBridgeWindow* pExtWnd = new CMindMapUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -99,7 +99,7 @@ void CMindMapUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMindMapUIExtensionBridgeWindow::CMindMapUIExtensionBridgeWindow()
+CMindMapUIExtensionBridgeWindow::CMindMapUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
 
 }
@@ -113,21 +113,17 @@ void CMindMapUIExtensionBridgeWindow::Release()
 BOOL CMindMapUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_source = gcnew System::Windows::Interop::HwndSource(
-		CS_VREDRAW | CS_HREDRAW,
-		nStyle,
-		0,
-		nLeft,
-		nTop,
-		nWidth,
-		nHeight,
-		"",
-		System::IntPtr(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 
-	if (m_source->Handle != IntPtr::Zero)
+	m_wnd = gcnew MindMapUIExtension::MindMapUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get());
+
+	HWND hWnd = GetHwnd();
+
+	if (hWnd)
 	{
-		m_wnd = gcnew MindMapUIExtension::MindMapUIExtensionCore();
-		m_source->RootVisual = m_wnd;
+		::SetParent(hWnd, hwndParent);
+		::SetWindowLong(hWnd, GWL_ID, nCtrlID);
+		::MoveWindow(hWnd, nLeft, nTop, nWidth, nHeight, FALSE);
 
 		return true;
 	}
@@ -244,7 +240,7 @@ void CMindMapUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 
 HWND CMindMapUIExtensionBridgeWindow::GetHwnd() const
 {
-	return static_cast<HWND>(m_source->Handle.ToPointer());
+	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
 void CMindMapUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

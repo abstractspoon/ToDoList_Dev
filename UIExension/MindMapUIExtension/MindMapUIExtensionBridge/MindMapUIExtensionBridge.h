@@ -37,7 +37,7 @@ protected:
 class CMindMapUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CMindMapUIExtensionBridgeWindow();
+	CMindMapUIExtensionBridgeWindow(ITransText* pTT);
 
    void Release(); // releases the interface
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
@@ -74,7 +74,7 @@ public:
    
 protected:
    gcroot<MindMapUIExtensionCore^> m_wnd;
-   gcroot<System::Windows::Interop::HwndSource^> m_source;
+   ITransText* m_pTT;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

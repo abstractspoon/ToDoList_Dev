@@ -1,37 +1,108 @@
 ﻿
 using System;
+using System.Drawing;
+using System.Windows.Forms;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace MindMapUIExtension
 {
-    public class SampleListItem
+    public class TaskDataItem
     {
-        public String Type { get; set; }
-        public String Attrib { get; set; }
-        public String Value { get; set; }
-        public String Tasks { get; set; }
+		public TaskDataItem(String title, UInt32 taskID)
+		{
+			m_Title = title;
+			m_TaskID = taskID;
+		}
+
+		public String Title { get { return m_Title; } }
+		public UInt32 ID { get { return m_TaskID; } }
+
+		private String m_Title;
+		private UInt32 m_TaskID;
     }
 
-    public class MindMapUIExtensionCore : System.Windows.Controls.Grid, IUIExtension
+	public class MindMapItem
+	{
+		public MindMapItem(String title, UInt32 taskID)
+		{
+			m_Task = new TaskDataItem(title, taskID);
+			m_ItemBounds = Rectangle.Empty;
+			m_ChildBounds = Rectangle.Empty;
+		}
+
+		public TaskDataItem Task { get { return m_Task; } }
+
+		public Rectangle ItemBounds
+		{
+			get { return m_ItemBounds; }
+			set { m_ItemBounds = value; }
+		}
+
+		public Rectangle ChildBounds
+		{
+			get { return m_ChildBounds; }
+			set { m_ChildBounds = value; }
+		}
+
+		public Rectangle TotalBounds
+		{
+			get 
+			{
+				if (ChildBounds.IsEmpty)
+					return ItemBounds;
+
+				// else
+				return Rectangle.Union(ItemBounds, ChildBounds); 
+			}
+		}
+
+		private TaskDataItem m_Task;
+		private Rectangle m_ItemBounds, m_ChildBounds;
+	}
+
+	// ----------------------------------------------------------------------------
+
+	public class MindMapUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
     {
-        public MindMapUIExtensionCore()
+		private const string FontName = "Tahoma";
+	
+		// ----------------------------------------------------------------------------
+
+		private Boolean m_taskColorIsBkgnd = false;
+		private IntPtr m_hwndParent = IntPtr.Zero;
+		private UInt32 m_SelectedTaskID = 0;
+		private Translator m_trans;
+		private UIExtension.TaskIcon m_TaskIcons;
+		private System.Collections.Generic.Dictionary<UInt32, TaskDataItem> m_Items;
+		private System.Windows.Forms.TreeView m_TreeView;
+		private System.Drawing.Font m_ControlsFont;
+
+		public MindMapUIExtensionCore(IntPtr hwndParent, Translator trans)
         {
-            InitializeComponent();
+			m_hwndParent = hwndParent;
+			m_trans = trans;
+
+			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
+			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_Items = new System.Collections.Generic.Dictionary<UInt32, TaskDataItem>();
+			
+			InitializeComponent();
         }
 
         // IUIExtension ------------------------------------------------------------------
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-            SampleListItem item = new SampleListItem();
-
-            item.Value = dwTaskID.ToString();
-            item.Type = "Selection";
-
-            m_Items.Add(item);
-            m_ListView.Items.Refresh();
+//             TaskDataItem item = new TaskDataItem();
+// 
+//             item.Value = dwTaskID.ToString();
+//             item.Type = "Selection";
+// 
+//             m_Items.Add(item);
+//             m_ListView.Items.Refresh();
 
             return true;
         }
@@ -45,213 +116,23 @@ namespace MindMapUIExtension
                                 UIExtension.UpdateType type,
                                 System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
         {
-            Task task = tasks.GetFirstTask();
-            SampleListItem item = new SampleListItem();
+			switch (type)
+			{
+				case UIExtension.UpdateType.Edit: 
+					break;
 
-            System.Collections.Generic.List<String> attrib = new System.Collections.Generic.List<String>();
-            System.Collections.Generic.List<String> value = new System.Collections.Generic.List<String>();
-            
-            if (attribs.Contains(UIExtension.TaskAttribute.Title))
-            {
-                attrib.Add("Title");
-                value.Add(task.GetTitle());
-            }
+				case UIExtension.UpdateType.New: 
+					break;
 
-            if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-            {
-                attrib.Add("Done Date");
-                value.Add(task.GetDoneDateString());
-            }
+				case UIExtension.UpdateType.Delete:
+				case UIExtension.UpdateType.Move: 
+				case UIExtension.UpdateType.All:
+					RebuildTreeView(tasks);
+					break;
 
-            if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
-            {
-                attrib.Add("Due Date");
-                value.Add(task.GetDueDateString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
-            {
-                attrib.Add("Start Date");
-                value.Add(task.GetStartDateString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Priority))
-            {
-                attrib.Add("Priority");
-                value.Add(task.GetPriority().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Color))
-            {
-                attrib.Add("Color");
-                value.Add(task.GetColor().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
-            {
-                attrib.Add("Alloc To");
-                value.Add(String.Join(", ", task.GetAllocatedTo()));
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.AllocBy))
-            {
-                attrib.Add("Alloc By");
-                value.Add(task.GetAllocatedBy());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Status))
-            {
-                attrib.Add("Status");
-                value.Add(task.GetStatus());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Category))
-            {
-                attrib.Add("Category");
-                value.Add(String.Join(", ", task.GetCategory()));
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Percent))
-            {
-                attrib.Add("Percent");
-                value.Add(task.GetPercentDone().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.TimeEstimate))
-            {
-                attrib.Add("Time Estimate");
-
-                Task.TimeUnits units = Task.TimeUnits.Hours;
-                value.Add(task.GetTimeEstimate(ref units).ToString() + units);
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.TimeSpent))
-            {
-                attrib.Add("Time Spent");
-
-                Task.TimeUnits units = Task.TimeUnits.Hours;
-                value.Add(task.GetTimeSpent(ref units).ToString() + units);
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.FileReference))
-            {
-                attrib.Add("File Reference");
-                value.Add(String.Join(", ", task.GetFileReference()));
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Comments))
-            {
-                attrib.Add("Comments");
-                value.Add(task.GetComments());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Flag))
-            {
-                attrib.Add("Flag");
-                value.Add(task.IsFlagged().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.CreationDate))
-            {
-                attrib.Add("Creation Date");
-                value.Add(task.GetCreationDateString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.CreatedBy))
-            {
-                attrib.Add("Created By");
-                value.Add(task.GetCreatedBy());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Risk))
-            {
-                attrib.Add("Risk");
-                value.Add(task.GetRisk().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.ExternalId))
-            {
-                attrib.Add("External ID");
-                value.Add(task.GetExternalID());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Cost))
-            {
-                attrib.Add("Cost");
-                value.Add(task.GetCost().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Dependency))
-            {
-                attrib.Add("Dependency");
-                value.Add(String.Join(", ", task.GetDependency()));
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Recurrence))
-            {
-                attrib.Add("Recurrence");
-                //value.Add(task.GetRecurrence());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Version))
-            {
-                attrib.Add("Version");
-                value.Add(task.GetVersion());
-            }
-
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Position))
-            {
-                attrib.Add("Position");
-                value.Add(task.GetPositionString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Id))
-            {
-                attrib.Add("ID");
-                value.Add(task.GetID().ToString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.LastModified))
-            {
-                attrib.Add("Last Modified");
-                //value.Add(task.GetLastModifiedString());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Icon))
-            {
-                attrib.Add("Icon");
-                value.Add(task.GetIcon());
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.Tag))
-            {
-                attrib.Add("Tag");
-                value.Add(String.Join(", ", task.GetTag()));
-            }
-
-            if (attribs.Contains(UIExtension.TaskAttribute.CustomAttribute))
-            {
-                attrib.Add("Custom Attribute");
-                //value.Add(task.GetCustomAttributeData());
-            }
-
-            item.Attrib = String.Join(",", attrib.ToArray());
-            item.Value = String.Join(",", value.ToArray());
-            item.Tasks = task.GetID().ToString();
-
-            switch (type)
-            {
-                case UIExtension.UpdateType.Edit: item.Type = "Edit"; break;
-                case UIExtension.UpdateType.New: item.Type = "Add Task"; break;
-                case UIExtension.UpdateType.Delete: item.Type = "Move Task(s)"; break;
-                case UIExtension.UpdateType.Move: item.Type = "Delete Task(s)"; break;
-                case UIExtension.UpdateType.All: item.Type = "All"; break;
-                case UIExtension.UpdateType.Unknown: item.Type = "Unknown"; break;
-            }
-
-            m_Items.Add(item);
-            m_ListView.Items.Refresh();
+				case UIExtension.UpdateType.Unknown: 
+					return;
+			}
         }
 
         public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
@@ -261,7 +142,7 @@ namespace MindMapUIExtension
 
         public bool WantSortUpdate(UIExtension.TaskAttribute attrib)
         {
-			return true; // all updates
+			return false;
         }
 	   
         public bool PrepareNewTask(ref Task task)
@@ -286,9 +167,9 @@ namespace MindMapUIExtension
 
         public void SetUITheme(UITheme theme)
         {
-            System.Windows.Media.Color bkColor = theme.GetAppMediaColor(UITheme.AppColor.AppBackDark);
+            //System.Windows.Media.Color bkColor = theme.GetAppMediaColor(UITheme.AppColor.AppBackDark);
 
-            this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+            //this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -307,59 +188,160 @@ namespace MindMapUIExtension
 
         private void InitializeComponent()
         {
-            this.Background = System.Windows.Media.Brushes.White;
+            //this.Background = System.Windows.Media.Brushes.White;
 
-            CreateListView();
-            PopulateListView();
+            CreateTreeView();
         }
 
-        private void CreateListView()
+        private void CreateTreeView()
         {
-            m_ListView = new System.Windows.Controls.ListView();
-            m_GridView = new System.Windows.Controls.GridView();
+            m_TreeView = new System.Windows.Forms.TreeView();
+			m_TreeView.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
+			m_TreeView.Width = 300;
+			m_TreeView.Font = m_ControlsFont;
 
-            m_TypeCol = new System.Windows.Controls.GridViewColumn();
-            m_TypeCol.DisplayMemberBinding = new System.Windows.Data.Binding("Type");
-            m_TypeCol.Header = "Change Type";
-            m_TypeCol.Width = 200;
-            m_GridView.Columns.Add(m_TypeCol);
+            this.Controls.Add(m_TreeView);
 
-            m_AttribCol = new System.Windows.Controls.GridViewColumn();
-            m_AttribCol.DisplayMemberBinding = new System.Windows.Data.Binding("Attrib");
-            m_AttribCol.Header = "Attribute Changed";
-            m_AttribCol.Width = 200;
-            m_GridView.Columns.Add(m_AttribCol);
-
-            m_ValueCol = new System.Windows.Controls.GridViewColumn();
-            m_ValueCol.DisplayMemberBinding = new System.Windows.Data.Binding("Value");
-            m_ValueCol.Header = "New Value";
-            m_ValueCol.Width = 200;
-            m_GridView.Columns.Add(m_ValueCol);
-
-            m_TasksCol = new System.Windows.Controls.GridViewColumn();
-            m_TasksCol.DisplayMemberBinding = new System.Windows.Data.Binding("Tasks");
-            m_TasksCol.Header = "Tasks Changed";
-            m_TasksCol.Width = 200;
-            m_GridView.Columns.Add(m_TasksCol);
-
-            m_ListView.View = m_GridView;
-
-            this.Children.Add(m_ListView);
+			m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+			m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
         }
 
-        private void PopulateListView()
+		protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
+		{
+			RecalculatePositions();
+		}
+
+		private void RebuildTreeView(TaskList tasks)
         {
-            m_Items = new System.Collections.Generic.List<SampleListItem>();
-            m_ListView.ItemsSource = m_Items;
-        }
+			m_Items.Clear();
+			m_TreeView.Nodes.Clear();
+
+			AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
+
+			m_TreeView.ExpandAll();
+			m_TreeView.Nodes[0].EnsureVisible();
+
+			RecalculatePositions();
+		}
+
+		private void AddTaskToTree(Task task, TreeNodeCollection parent)
+		{
+			if (!task.IsValid())
+				return;
+
+			var nodeData = new MindMapItem(task.GetTitle(), task.GetID());
+
+			TreeNode node = new TreeNode(nodeData.Task.Title);
+			node.Tag = nodeData;
+			
+			parent.Add(node);
+
+			// First Child
+			AddTaskToTree(task.GetFirstSubtask(), node.Nodes);
+
+			// First Sibling
+			AddTaskToTree(task.GetNextTask(), parent);
+		}
+
+		private void RecalculatePositions()
+		{
+			RecalculatePositions(m_TreeView.Nodes);
+			Invalidate(true);
+		}
+
+		private void RecalculatePositions(TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				// Children First
+				RecalculatePositions(node.Nodes);
+
+				// Build Child bounding rectangle
+				Rectangle childBounds = Rectangle.Empty;
+
+				if (node.IsExpanded)
+				{
+					bool first = true;
+
+					foreach (TreeNode child in node.Nodes)
+					{
+						MindMapItem childItem = (child.Tag as MindMapItem);
+
+						if (first)
+						{
+							first = false;
+							childBounds = childItem.TotalBounds;
+						}
+						else
+						{
+							childBounds = Rectangle.Union(childBounds, childItem.TotalBounds);
+						}
+					}
+				}
+
+				Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
+
+				if (!itemBounds.IsEmpty)
+				{
+					itemBounds.Offset(node.Level * 50, 0);
+					itemBounds.Width += 10;
+
+					if (!childBounds.IsEmpty)
+					{
+						int offset = (childBounds.Top - itemBounds.Bottom);
+						offset += ((childBounds.Height + itemBounds.Height) / 2);
+
+						itemBounds.Offset(0, offset);
+					}
+				}
+				
+				MindMapItem item = (node.Tag as MindMapItem);
+
+				item.ItemBounds = itemBounds;
+				item.ChildBounds = childBounds;
+			}
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+
+			DrawPositions(e.Graphics, m_TreeView.Nodes);
+		}
+
+		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				MindMapItem item = (node.Tag as MindMapItem);
+				Rectangle drawPos = GetItemDrawPos(item.ItemBounds);
+
+				graphics.FillRectangle(Brushes.Yellow, drawPos);
+				graphics.DrawString(item.Task.Title, m_ControlsFont, Brushes.Blue, drawPos);
+
+				// Children
+				if (node.IsExpanded)
+				{
+					DrawPositions(graphics, node.Nodes);
+
+					drawPos = GetItemDrawPos(item.ChildBounds);
+					drawPos.Inflate(-1, -1);
+					graphics.DrawRectangle(new Pen(Color.Black), drawPos);
+	
+					drawPos = GetItemDrawPos(item.TotalBounds);
+					graphics.DrawRectangle(new Pen(Color.Red), drawPos);
+				}
+			}
+		}
+
+		private Rectangle GetItemDrawPos(Rectangle itemRect)
+		{
+			Rectangle drawPos = new Rectangle(itemRect.Location, itemRect.Size);
+			drawPos.Offset(350, 0);
+
+			return drawPos;
+		}
 
         // --------------------------------------------------------------------------------------
-        private System.Collections.Generic.List<SampleListItem> m_Items;
-        private System.Windows.Controls.ListView m_ListView;
-        private System.Windows.Controls.GridView m_GridView;
-        private System.Windows.Controls.GridViewColumn m_TypeCol;
-        private System.Windows.Controls.GridViewColumn m_AttribCol;
-        private System.Windows.Controls.GridViewColumn m_ValueCol;
-        private System.Windows.Controls.GridViewColumn m_TasksCol;
     }
 }
