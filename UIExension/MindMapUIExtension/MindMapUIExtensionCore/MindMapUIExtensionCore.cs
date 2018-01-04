@@ -59,10 +59,10 @@ namespace MindMapUIExtension
 			}
 		}
 
-        public void OffsetPositionsVertically(int vertOffset)
+        public void OffsetPositions(int horzOffset, int vertOffset)
         {
-            m_ItemBounds.Offset(0, vertOffset);
-            m_ChildBounds.Offset(0, vertOffset);
+            m_ItemBounds.Offset(horzOffset, vertOffset);
+            m_ChildBounds.Offset(horzOffset, vertOffset);
         }
         
 		private TaskDataItem m_Task;
@@ -233,21 +233,20 @@ namespace MindMapUIExtension
 			m_Items.Clear();
 			m_TreeView.Nodes.Clear();
 
-            // If there is more than one 'root' task then give them
-            // all a real root parent
-            if (tasks.GetTaskCount() > 0)
+            if (tasks.GetTaskCount() == 1)
             {
-			    var nodeData = new MindMapItem("Root", 0);
-                var node = new TreeNode(nodeData.Task.Title);
-                node.Tag = nodeData;
-
-                m_TreeView.Nodes.Add(node);
- 
-                AddTaskToTree(tasks.GetFirstTask(), node.Nodes);
+			    AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
             }
             else
             {
-			    AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
+                // There is more than one 'root' task so create a real root parent
+                var nodeData = new MindMapItem("Root", 0);
+                var node = new TreeNode(nodeData.Task.Title);
+
+                node.Tag = nodeData;
+                m_TreeView.Nodes.Add(node);
+
+                AddTaskToTree(tasks.GetFirstTask(), node.Nodes);
             }
             
 			m_TreeView.ExpandAll();
@@ -276,50 +275,85 @@ namespace MindMapUIExtension
 
 		private void RecalculatePositions()
 		{
-			RecalculatePositions(m_TreeView.Nodes, 0, 0, false);
+            // There must be a single root task to proceed
+            if (m_TreeView.Nodes.Count != 1)
+                return;
+
+            TreeNode rootNode = m_TreeView.Nodes[0];
+            MindMapItem rootItem = (rootNode.Tag as MindMapItem);
+
+            if (rootNode.Nodes.Count < 2)
+            {
+                // One-sided graph
+                RecalculatePositions(m_TreeView.Nodes, 0, 0);
+            }
+            else
+            {
+                // Double-sided graph
+                TreeNode fromNode = rootNode.Nodes[0];
+                TreeNode toNode = rootNode.Nodes[rootNode.Nodes.Count / 2];
+
+                int horzOffset = (rootNode.Bounds.Width + ItemHorzSeparation), vertOffset = 0;
+
+                RecalculatePositions(fromNode, toNode, horzOffset, vertOffset);
+
+                fromNode = toNode.NextNode;
+                toNode = rootNode.Nodes[rootNode.Nodes.Count - 1];
+
+                vertOffset = -GetLogicalTreeNodePosition(fromNode).Top;
+
+                RecalculatePositions(fromNode, toNode, horzOffset, vertOffset);
+
+                // Fixup Root node position
+                Rectangle childBounds = CalculateChildBoundingBox(rootNode);
+                Rectangle itemBounds = CalculateItemBounds(rootNode, childBounds, 0, 0);
+                
+                rootItem.ItemBounds = itemBounds;
+                rootItem.ChildBounds = childBounds;
+            }
+
+            // Reposition root node in the centre of the available space
+            Rectangle availSpace = Rectangle.FromLTRB(m_TreeView.Width, ClientRectangle.Top, ClientRectangle.Right, ClientRectangle.Bottom);
+
+            Point ptFrom = new Point((rootItem.ItemBounds.Left + rootItem.ItemBounds.Right) / 2, 
+                                     (rootItem.ItemBounds.Top + rootItem.ItemBounds.Bottom) / 2);
+            Point ptTo = new Point((availSpace.Left + availSpace.Right) / 2, 
+                                     (availSpace.Top + availSpace.Bottom) / 2);
+
+            OffsetPositions(rootNode, (ptTo.X - ptFrom.X), (ptTo.Y - ptFrom.Y));
+            
 			Invalidate(true);
 		}
 
-		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset, bool rightToLeft)
+		private void RecalculatePositions(TreeNode fromNode, TreeNode toNode, int horzOffset, int vertOffset)
 		{
             Rectangle prevItemBounds = Rectangle.Empty;
+            TreeNode node = fromNode;
 
-			foreach (TreeNode node in nodes)
+            while (node != null)
 			{
 				// Children First
-                RecalculatePositions(node.Nodes, (horzOffset + node.Bounds.Width + ItemHorzSeparation), vertOffset, rightToLeft);
+                RecalculatePositions(node.Nodes, (horzOffset + node.Bounds.Width + ItemHorzSeparation), vertOffset);
 
-				// Build Child bounding rectangle
-				Rectangle childBounds = Rectangle.Empty;
+				// Build the items' child bounding rectangle
+                Rectangle childBounds = CalculateChildBoundingBox(node);
 
-				if (node.IsExpanded)
-				{
-					foreach (TreeNode child in node.Nodes)
-					{
-						MindMapItem childItem = (child.Tag as MindMapItem);
+                // Centre the item vertically within the bounds of its children
+                Rectangle itemBounds = CalculateItemBounds(node, childBounds, horzOffset, vertOffset);
 
-						if (childBounds.IsEmpty)
-                            childBounds = childItem.TotalBounds;
-						else
-							childBounds = Rectangle.Union(childBounds, childItem.TotalBounds);
-					}
-				}
-
-                Rectangle itemBounds = GetLogicalTreeNodePosition(node);
-
-				if (!itemBounds.IsEmpty)
-				{
-                    itemBounds.Offset(horzOffset - itemBounds.Left, vertOffset);
-					itemBounds.Width += 10;
-
-					if (!childBounds.IsEmpty)
-					{
-						int offset = (childBounds.Top - itemBounds.Bottom);
-						offset += ((childBounds.Height + itemBounds.Height) / 2);
-
-						itemBounds.Offset(0, offset);
-					}
-				}
+// 				if (!itemBounds.IsEmpty)
+// 				{
+//                     itemBounds.Offset(horzOffset - itemBounds.Left, vertOffset);
+// 					itemBounds.Width += 10;
+// 
+// 					if (!childBounds.IsEmpty)
+// 					{
+// 						int offset = (childBounds.Top - itemBounds.Bottom);
+// 						offset += ((childBounds.Height + itemBounds.Height) / 2);
+// 
+// 						itemBounds.Offset(0, offset);
+// 					}
+// 				}
 				
                 MindMapItem item = (node.Tag as MindMapItem);
 
@@ -331,14 +365,68 @@ namespace MindMapUIExtension
                 if (!prevItemBounds.IsEmpty)
                 {
                     int offsetAll = (prevItemBounds.Bottom - item.TotalBounds.Top);
-                    OffsetPositionsVertically(node, offsetAll);
+                    OffsetPositions(node, 0, offsetAll);
 
                     vertOffset += offsetAll;
                 }
 
                 prevItemBounds = item.TotalBounds;
+
+                if (node == toNode)
+                    break;
+
+                node = node.NextNode;
 			}
 		}
+
+        private Rectangle CalculateItemBounds(TreeNode node, Rectangle childBounds, int horzOffset, int vertOffset)
+        {
+            Rectangle itemBounds = GetLogicalTreeNodePosition(node);
+
+            if (!itemBounds.IsEmpty)
+            {
+                itemBounds.Offset(horzOffset - itemBounds.Left, vertOffset);
+                itemBounds.Width += 10;
+
+                if (!childBounds.IsEmpty)
+                {
+                    int offset = (childBounds.Top - itemBounds.Bottom);
+                    offset += ((childBounds.Height + itemBounds.Height) / 2);
+
+                    itemBounds.Offset(0, offset);
+                }
+            }
+
+            return itemBounds;
+        }
+
+		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset)
+		{
+            if (nodes.Count == 0)
+                return;
+
+            RecalculatePositions(nodes[0], nodes[nodes.Count - 1], horzOffset, vertOffset);
+		}
+
+        private Rectangle CalculateChildBoundingBox(TreeNode node)
+        {
+            Rectangle childBounds = Rectangle.Empty;
+
+            if (node.IsExpanded)
+            {
+                foreach (TreeNode child in node.Nodes)
+                {
+                    MindMapItem childItem = (child.Tag as MindMapItem);
+
+                    if (childBounds.IsEmpty)
+                        childBounds = childItem.TotalBounds;
+                    else
+                        childBounds = Rectangle.Union(childBounds, childItem.TotalBounds);
+                }
+            }
+
+            return childBounds;
+        }
 
         private Rectangle GetLogicalTreeNodePosition(TreeNode node)
         {
@@ -352,18 +440,18 @@ namespace MindMapUIExtension
             return itemBounds;
         }
 
-        private void OffsetPositionsVertically(TreeNode node, int vertOffset)
+        private void OffsetPositions(TreeNode node, int horzOffset, int vertOffset)
         {
-            if ((node == null) || (vertOffset == 0))
+            if (node == null)
                 return;
 
             MindMapItem item = (node.Tag as MindMapItem);
 
-            item.OffsetPositionsVertically(vertOffset);
+            item.OffsetPositions(horzOffset, vertOffset);
 
             foreach (TreeNode child in node.Nodes)
             {
-                OffsetPositionsVertically(child, vertOffset);
+                OffsetPositions(child, horzOffset, vertOffset);
             }
         }
 
