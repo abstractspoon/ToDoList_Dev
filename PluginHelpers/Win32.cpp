@@ -71,4 +71,14 @@ void Win32::AddBorder(IntPtr hWnd)
 	}
 }
 
+int Win32::GetVScrollPos(IntPtr hWnd)
+{
+	return ::GetScrollPos(GetHwnd(hWnd), SB_VERT);
+}
+
+int Win32::GetHScrollPos(IntPtr hWnd)
+{
+	return ::GetScrollPos(GetHwnd(hWnd), SB_HORZ);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////

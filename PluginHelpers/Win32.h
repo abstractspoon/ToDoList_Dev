@@ -24,7 +24,11 @@ namespace Abstractspoon
 				static void AddBorder(IntPtr hWnd);
 				static void RemoveClientEdge(IntPtr hWnd);
 				static void AddClientEdge(IntPtr hWnd);
+
 				static HWND GetHwnd(IntPtr hWnd);
+
+				static int GetHScrollPos(IntPtr hWnd);
+				static int GetVScrollPos(IntPtr hWnd);
 			};
 		}
 	}

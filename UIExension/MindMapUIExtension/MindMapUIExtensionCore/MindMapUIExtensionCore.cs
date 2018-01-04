@@ -17,7 +17,7 @@ namespace MindMapUIExtension
 			m_TaskID = taskID;
 		}
 
-		public String Title { get { return m_Title; } }
+		public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
 		public UInt32 ID { get { return m_TaskID; } }
 
 		private String m_Title;
@@ -59,6 +59,12 @@ namespace MindMapUIExtension
 			}
 		}
 
+        public void OffsetPositionsVertically(int vertOffset)
+        {
+            m_ItemBounds.Offset(0, vertOffset);
+            m_ChildBounds.Offset(0, vertOffset);
+        }
+        
 		private TaskDataItem m_Task;
 		private Rectangle m_ItemBounds, m_ChildBounds;
 	}
@@ -68,6 +74,9 @@ namespace MindMapUIExtension
 	public class MindMapUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
     {
 		private const string FontName = "Tahoma";
+
+        private const int ItemHorzSeparation = 50;
+        private const int ItemVertSeparation = 4;
 	
 		// ----------------------------------------------------------------------------
 
@@ -189,6 +198,7 @@ namespace MindMapUIExtension
         private void InitializeComponent()
         {
             //this.Background = System.Windows.Media.Brushes.White;
+            this.DoubleBuffered = true;
 
             CreateTreeView();
         }
@@ -199,17 +209,24 @@ namespace MindMapUIExtension
 			m_TreeView.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
 			m_TreeView.Width = 300;
 			m_TreeView.Font = m_ControlsFont;
+            m_TreeView.ItemHeight += ItemVertSeparation;
 
             this.Controls.Add(m_TreeView);
 
 			m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 			m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+            m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
         }
 
 		protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
 		{
 			RecalculatePositions();
 		}
+
+        protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
+        {
+            Invalidate();
+        }
 
 		private void RebuildTreeView(TaskList tasks)
         {
@@ -245,16 +262,18 @@ namespace MindMapUIExtension
 
 		private void RecalculatePositions()
 		{
-			RecalculatePositions(m_TreeView.Nodes);
+			RecalculatePositions(m_TreeView.Nodes, 0, 0);
 			Invalidate(true);
 		}
 
-		private void RecalculatePositions(TreeNodeCollection nodes)
+		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset)
 		{
+            Rectangle prevItemBounds = Rectangle.Empty;
+
 			foreach (TreeNode node in nodes)
 			{
 				// Children First
-				RecalculatePositions(node.Nodes);
+                RecalculatePositions(node.Nodes, (horzOffset + node.Bounds.Width + ItemHorzSeparation), vertOffset);
 
 				// Build Child bounding rectangle
 				Rectangle childBounds = Rectangle.Empty;
@@ -279,11 +298,11 @@ namespace MindMapUIExtension
 					}
 				}
 
-				Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
+                Rectangle itemBounds = GetLogicalTreeNodePosition(node);
 
 				if (!itemBounds.IsEmpty)
 				{
-					itemBounds.Offset(node.Level * 50, 0);
+                    itemBounds.Offset(horzOffset - itemBounds.Left, vertOffset);
 					itemBounds.Width += 10;
 
 					if (!childBounds.IsEmpty)
@@ -295,52 +314,194 @@ namespace MindMapUIExtension
 					}
 				}
 				
-				MindMapItem item = (node.Tag as MindMapItem);
+                MindMapItem item = (node.Tag as MindMapItem);
 
 				item.ItemBounds = itemBounds;
 				item.ChildBounds = childBounds;
+
+                // Offset this node and its children so they fit snugly below the item above
+                // Note: Offset is always negative
+                if (!prevItemBounds.IsEmpty)
+                {
+                    int offsetAll = (prevItemBounds.Bottom - item.TotalBounds.Top);
+                    OffsetPositionsVertically(node, offsetAll);
+
+                    vertOffset += offsetAll;
+                }
+
+                prevItemBounds = item.TotalBounds;
 			}
 		}
+
+        private Rectangle GetLogicalTreeNodePosition(TreeNode node)
+        {
+            Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
+            Point offset = new Point(Win32.GetHScrollPos(m_TreeView.Handle), 
+                                     Win32.GetVScrollPos(m_TreeView.Handle));
+
+            itemBounds.Offset(offset);
+            return itemBounds;
+        }
+
+        private void OffsetPositionsVertically(TreeNode node, int vertOffset)
+        {
+            if ((node == null) || (vertOffset == 0))
+                return;
+
+            MindMapItem item = (node.Tag as MindMapItem);
+
+            item.OffsetPositionsVertically(vertOffset);
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                OffsetPositionsVertically(child, vertOffset);
+            }
+        }
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
 
 			DrawPositions(e.Graphics, m_TreeView.Nodes);
-		}
+
+            foreach (TreeNode node in m_TreeView.Nodes)
+                DrawConnections(e.Graphics, node);
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            TreeNode hit = HitTestItemPositions(e.Location);
+
+            if ((hit != null) && (hit.FirstNode != null))
+            {
+                if (hit.IsExpanded)
+                    hit.Collapse();
+                else
+                    hit.Expand();
+            }
+        }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            TreeNode hit = HitTestItemPositions(e.Location);
+
+            if (hit != null)
+                m_TreeView.SelectedNode = hit;
+        }
 
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
 			{
 				MindMapItem item = (node.Tag as MindMapItem);
-				Rectangle drawPos = GetItemDrawPos(item.ItemBounds);
+				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
-				graphics.FillRectangle(Brushes.Yellow, drawPos);
-				graphics.DrawString(item.Task.Title, m_ControlsFont, Brushes.Blue, drawPos);
+                if (node.IsSelected)
+                    graphics.FillRectangle(Brushes.Yellow, drawPos);
+
+                graphics.DrawRectangle(new Pen(Color.Green), drawPos);
+
+                var format = new StringFormat();
+                format.LineAlignment = StringAlignment.Center;
+                
+				graphics.DrawString(item.Task.Title, m_ControlsFont, Brushes.Blue, drawPos, format);
 
 				// Children
 				if (node.IsExpanded)
 				{
 					DrawPositions(graphics, node.Nodes);
 
-					drawPos = GetItemDrawPos(item.ChildBounds);
+					drawPos = GetItemDrawRect(item.ChildBounds);
 					drawPos.Inflate(-1, -1);
 					graphics.DrawRectangle(new Pen(Color.Black), drawPos);
 	
-					drawPos = GetItemDrawPos(item.TotalBounds);
+					drawPos = GetItemDrawRect(item.TotalBounds);
 					graphics.DrawRectangle(new Pen(Color.Red), drawPos);
 				}
 			}
 		}
 
-		private Rectangle GetItemDrawPos(Rectangle itemRect)
+		private void DrawConnections(Graphics graphics, TreeNode node)
+		{
+    		if (node.IsExpanded)
+			{
+                MindMapItem item = (node.Tag as MindMapItem);
+
+                foreach (TreeNode child in node.Nodes)
+                {
+                    MindMapItem childItem = (child.Tag as MindMapItem);
+
+                    DrawConnection(graphics, item, childItem);
+
+                    // Then children to grandchildren
+                    DrawConnections(graphics, child);
+                }
+			}
+		}
+
+		private void DrawConnection(Graphics graphics, MindMapItem itemFrom, MindMapItem itemTo)
+		{
+            if ((itemFrom == null) || (itemTo == null))
+                return;
+
+            Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
+            Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
+            bool rightToLeft = (rectFrom.X > rectTo.X);
+
+            Point ptFrom = new Point((rightToLeft ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
+            Point ptTo = new Point((rightToLeft ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
+
+            graphics.DrawLine(new Pen(Color.Magenta), ptFrom, ptTo);
+		}
+
+		private Rectangle GetItemDrawRect(Rectangle itemRect)
 		{
 			Rectangle drawPos = new Rectangle(itemRect.Location, itemRect.Size);
 			drawPos.Offset(350, 0);
 
 			return drawPos;
 		}
+
+        private TreeNode HitTestItemPositions(Point point)
+        {
+            foreach (TreeNode node in m_TreeView.Nodes)
+            {
+                TreeNode hit = HitTestItemPositions(node, point);
+
+                if (hit != null)
+                    return hit;
+            }
+
+            return null;
+        }
+
+        private TreeNode HitTestItemPositions(TreeNode node, Point point)
+        {
+            if (node == null)
+                return null;
+
+            MindMapItem item = (node.Tag as MindMapItem);
+
+            if (GetItemDrawRect(item.TotalBounds).Contains(point))
+            {
+                if (GetItemDrawRect(item.ItemBounds).Contains(point))
+                    return node;
+
+                if (GetItemDrawRect(item.ChildBounds).Contains(point))
+                {
+                    foreach (TreeNode child in node.Nodes)
+                    {
+                        TreeNode hit = HitTestItemPositions(child, point);
+
+                        if (hit != null)
+                            return hit;
+                    }
+                }
+            }
+
+            // all else
+            return null;
+        }
 
         // --------------------------------------------------------------------------------------
     }
