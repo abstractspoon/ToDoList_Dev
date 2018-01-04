@@ -239,7 +239,7 @@ namespace MindMapUIExtension
 			m_DebugCheckBox.Text = "Debug Mode";
 			m_DebugCheckBox.Width = 200;
 			m_DebugCheckBox.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-			m_DebugCheckBox.Checked = true;
+			m_DebugCheckBox.Checked = false;
 
 			this.Controls.Add(m_DebugCheckBox);
 
@@ -275,18 +275,14 @@ namespace MindMapUIExtension
 			m_TreeView.Width = 300;
 			m_TreeView.Font = m_ControlsFont;
             m_TreeView.ItemHeight += ItemVertSeparation;
+  
+            this.Controls.Add(m_TreeView);
 
-			if (DebugMode())
-			{
-				m_TreeView.Top = 24;
-				m_TreeView.Height -= 24;
+            m_TreeView.Top = 24;
+            m_TreeView.Height -= 24;
 
-				this.Controls.Add(m_TreeView);
-			}
-			else
-			{
+			if (!DebugMode())
 				m_TreeView.Visible = false;
-			}
 
 			m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 			m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
@@ -332,7 +328,10 @@ namespace MindMapUIExtension
 			else
 				rootNode.Expand();
 
-			m_TreeView.SelectedNode = rootNode;
+            m_TreeView.SelectedNode = rootNode;
+
+            // This ensures that the initial graph displays correctly 
+            rootNode.EnsureVisible();
 
 			RecalculatePositions();
 		}
