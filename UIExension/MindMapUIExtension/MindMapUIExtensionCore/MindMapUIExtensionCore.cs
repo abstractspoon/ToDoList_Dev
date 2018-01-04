@@ -98,7 +98,7 @@ namespace MindMapUIExtension
     {
 		private const string FontName = "Tahoma";
 
-        private const int ItemHorzSeparation = 20;
+        private const int ItemHorzSeparation = 40;
         private const int ItemVertSeparation = 4;
 	
 		// ----------------------------------------------------------------------------
@@ -114,6 +114,7 @@ namespace MindMapUIExtension
 
 		private Translator m_trans;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private UIExtension.SelectionRect m_SelectionRect;
 
 		private System.Collections.Generic.Dictionary<UInt32, TaskDataItem> m_Items;
 		private System.Windows.Forms.TreeView m_TreeView;
@@ -125,6 +126,8 @@ namespace MindMapUIExtension
 			m_trans = trans;
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
+			m_SelectionRect = new UIExtension.SelectionRect();
+
 			m_ControlsFont = new System.Drawing.Font(FontName, 8);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, TaskDataItem>();
 
@@ -328,6 +331,8 @@ namespace MindMapUIExtension
 				m_TreeView.ExpandAll();
 			else
 				rootNode.Expand();
+
+			m_TreeView.SelectedNode = rootNode;
 
 			RecalculatePositions();
 		}
@@ -655,16 +660,15 @@ namespace MindMapUIExtension
 				MindMapItem item = (node.Tag as MindMapItem);
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
-				if (DebugMode())
+				if (node.IsSelected)
 				{
-					if (node.IsSelected)
-						graphics.FillRectangle(Brushes.Yellow, drawPos);
+					Rectangle selRect = Rectangle.Inflate(drawPos, -2, 0);
 
-					graphics.DrawRectangle(new Pen(Color.Green), drawPos);
+					m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, true);
 				}
-				else
+				else if (DebugMode())
 				{
-					// todo
+					graphics.DrawRectangle(new Pen(Color.Green), drawPos);
 				}
 
                 var format = new StringFormat();
