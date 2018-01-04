@@ -294,21 +294,14 @@ namespace MindMapUIExtension
 
 				if (node.IsExpanded)
 				{
-					bool first = true;
-
 					foreach (TreeNode child in node.Nodes)
 					{
 						MindMapItem childItem = (child.Tag as MindMapItem);
 
-						if (first)
-						{
-							first = false;
-							childBounds = childItem.TotalBounds;
-						}
+						if (childBounds.IsEmpty)
+                            childBounds = childItem.TotalBounds;
 						else
-						{
 							childBounds = Rectangle.Union(childBounds, childItem.TotalBounds);
-						}
 					}
 				}
 
@@ -350,10 +343,12 @@ namespace MindMapUIExtension
         private Rectangle GetLogicalTreeNodePosition(TreeNode node)
         {
             Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
-            Point offset = new Point(Win32.GetHScrollPos(m_TreeView.Handle), 
-                                     Win32.GetVScrollPos(m_TreeView.Handle));
 
-            itemBounds.Offset(offset);
+            int horzOffset = Win32.GetHScrollPos(m_TreeView.Handle);
+            int vertOffset = (Win32.GetVScrollPos(m_TreeView.Handle) * node.Bounds.Height);
+
+            itemBounds.Offset(horzOffset, vertOffset);
+
             return itemBounds;
         }
 
@@ -517,6 +512,5 @@ namespace MindMapUIExtension
             return null;
         }
 
-        // --------------------------------------------------------------------------------------
     }
 }
