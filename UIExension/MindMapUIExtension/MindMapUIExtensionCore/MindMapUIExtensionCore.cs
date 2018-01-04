@@ -233,8 +233,23 @@ namespace MindMapUIExtension
 			m_Items.Clear();
 			m_TreeView.Nodes.Clear();
 
-			AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
+            // If there is more than one 'root' task then give them
+            // all a real root parent
+            if (tasks.GetTaskCount() > 0)
+            {
+			    var nodeData = new MindMapItem("Root", 0);
+                var node = new TreeNode(nodeData.Task.Title);
+                node.Tag = nodeData;
 
+                m_TreeView.Nodes.Add(node);
+ 
+                AddTaskToTree(tasks.GetFirstTask(), node.Nodes);
+            }
+            else
+            {
+			    AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
+            }
+            
 			m_TreeView.ExpandAll();
 			m_TreeView.Nodes[0].EnsureVisible();
 
@@ -247,9 +262,8 @@ namespace MindMapUIExtension
 				return;
 
 			var nodeData = new MindMapItem(task.GetTitle(), task.GetID());
-
-			TreeNode node = new TreeNode(nodeData.Task.Title);
-			node.Tag = nodeData;
+            var node = new TreeNode(nodeData.Task.Title);
+            node.Tag = nodeData;
 			
 			parent.Add(node);
 
@@ -262,18 +276,18 @@ namespace MindMapUIExtension
 
 		private void RecalculatePositions()
 		{
-			RecalculatePositions(m_TreeView.Nodes, 0, 0);
+			RecalculatePositions(m_TreeView.Nodes, 0, 0, false);
 			Invalidate(true);
 		}
 
-		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset)
+		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset, bool rightToLeft)
 		{
             Rectangle prevItemBounds = Rectangle.Empty;
 
 			foreach (TreeNode node in nodes)
 			{
 				// Children First
-                RecalculatePositions(node.Nodes, (horzOffset + node.Bounds.Width + ItemHorzSeparation), vertOffset);
+                RecalculatePositions(node.Nodes, (horzOffset + node.Bounds.Width + ItemHorzSeparation), vertOffset, rightToLeft);
 
 				// Build Child bounding rectangle
 				Rectangle childBounds = Rectangle.Empty;
