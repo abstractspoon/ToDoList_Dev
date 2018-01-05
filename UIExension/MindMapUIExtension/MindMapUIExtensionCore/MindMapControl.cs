@@ -47,6 +47,9 @@ namespace MindMapUIExtension
             m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
             m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
             m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
+
+            this.AutoScroll = true;
+            this.DoubleBuffered = true;
         }
  
         public TreeNode AddRootNode(String label, Object userData = null)
@@ -98,6 +101,13 @@ namespace MindMapUIExtension
        }
 
         // Message Handlers -----------------------------------------------------------
+
+        protected override void OnScroll(ScrollEventArgs se)
+        {
+            base.OnScroll(se);
+
+            Invalidate();
+        }
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
@@ -223,6 +233,8 @@ namespace MindMapUIExtension
 
 			RecalculateDrawOffset();
 			Invalidate(true);
+
+            this.AutoScrollMinSize = rootItem.TotalBounds.Size;
 		}
 
 		private Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
@@ -405,6 +417,8 @@ namespace MindMapUIExtension
 
 		private void RecalculateDrawOffset()
 		{
+            m_DrawOffset.X = m_DrawOffset.Y = 0;
+
 			if (m_TreeView.Nodes.Count > 0)
 			{
 				TreeNode rootNode = m_TreeView.Nodes[0];
@@ -414,15 +428,19 @@ namespace MindMapUIExtension
                     availSpace = Rectangle.FromLTRB(m_TreeView.Width, ClientRectangle.Top, ClientRectangle.Right, ClientRectangle.Bottom);
 
 				Rectangle graphRect = (rootNode.Tag as MindMapItem).TotalBounds;
-
 				Point ptOffset = CalculateCentreToCentreOffset(graphRect, availSpace);
 
-				OffsetPositions(rootNode, ptOffset.X, ptOffset.Y);
-				Invalidate();
-			}
-			else
-			{
-				m_DrawOffset = new Point(0, 0);
+                if (availSpace.Height < graphRect.Height)
+                    ptOffset.Y = -graphRect.Top;
+
+                if (availSpace.Width < graphRect.Width)
+                    ptOffset.X = -graphRect.Left;
+
+                if (m_DrawOffset != ptOffset)
+                {
+                    m_DrawOffset = ptOffset;
+                    Invalidate();
+                }
 			}
 		}
 
@@ -437,6 +455,7 @@ namespace MindMapUIExtension
 				{
 					Rectangle selRect = Rectangle.Inflate(drawPos, -2, 0);
 
+                    graphics.FillRectangle(new SolidBrush(Color.LightBlue), drawPos);
 					//m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, true);
 				}
 				else if (DebugMode())
@@ -516,6 +535,7 @@ namespace MindMapUIExtension
 			Rectangle drawPos = new Rectangle(itemRect.Location, itemRect.Size);
 
 			drawPos.Offset(m_DrawOffset);
+            drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
 			
 			return drawPos;
 		}
