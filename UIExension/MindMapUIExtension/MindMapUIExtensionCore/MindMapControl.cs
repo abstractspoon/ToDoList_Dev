@@ -17,15 +17,24 @@ namespace MindMapUIExtension
 
 	public partial class MindMapControl : UserControl
     {
-        // Data -------------------------------------------------------------------------
-        
-        private const int ItemHorzSeparation = 40;
+		// Win32 Imports -----------------------------------------------------------------
+
+		[DllImport("User32.dll")]
+		public static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
+
+		static int SB_HORZ = 0;
+		static int SB_VERT = 1;
+
+		// Data --------------------------------------------------------------------------
+
+		private const int ItemHorzSeparation = 40;
         private const int ItemVertSeparation = 4;
 
         private Point m_DrawOffset;
         private Boolean m_RootAdded;
 
-        // Public -------------------------------------------------------------------------
+        // Public ------------------------------------------------------------------------
+
 		public event SelectionChangeEventHandler SelectionChange;
 
         public MindMapControl()
@@ -40,8 +49,6 @@ namespace MindMapUIExtension
 #endif
             if (!DebugMode())
                 m_TreeView.Visible = false;
-
-            m_TreeView.Font = this.Font;
 
             m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
             m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
@@ -205,6 +212,13 @@ namespace MindMapUIExtension
 			Invalidate(GetSelectedItemPosition());
 		}
 
+		protected override void OnFontChanged(EventArgs e)
+		{
+			base.OnFontChanged(e);
+
+			m_TreeView.Font = this.Font;
+		}
+
         // Private Internals -----------------------------------------------------------
 
         protected TreeNode AddNode(Object userData, TreeNodeCollection nodes, UInt32 uniqueID)
@@ -366,7 +380,6 @@ namespace MindMapUIExtension
             if (!itemBounds.IsEmpty)
             {
                 itemBounds.Offset(horzOffset - itemBounds.Left, vertOffset);
-                itemBounds.Width += 10;
 
                 if (!childBounds.IsEmpty)
                 {
@@ -425,15 +438,10 @@ namespace MindMapUIExtension
 			return totalBounds;
 		}
 
-		[DllImport("User32.dll")]
-		public static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
-
-		static int SB_HORZ = 0;
-		static int SB_VERT = 1;
-
         private Rectangle GetLogicalTreeNodePosition(TreeNode node)
         {
             Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
+			itemBounds.Width += 4;
 
             int horzOffset = GetScrollPos(m_TreeView.Handle, SB_HORZ);
             int vertOffset = (GetScrollPos(m_TreeView.Handle, SB_VERT) * node.Bounds.Height);
@@ -502,7 +510,8 @@ namespace MindMapUIExtension
 			}
 		}
 
-		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, bool isSelected, Object itemData)
+		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, 
+											 bool isSelected, bool leftOfRoot, Object itemData)
 		{
 			if (isSelected)
 			{
@@ -519,6 +528,8 @@ namespace MindMapUIExtension
 
 			format.LineAlignment = StringAlignment.Center;
 			format.Alignment = StringAlignment.Center;
+			format.Trimming = StringTrimming.None;
+			format.FormatFlags = StringFormatFlags.FitBlackBox;
 
 			Brush textColor = (isSelected ? SystemBrushes.HighlightText : SystemBrushes.WindowText);
 
@@ -532,7 +543,7 @@ namespace MindMapUIExtension
 				MindMapItem item = (node.Tag as MindMapItem);
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
-				DrawNodeLabel(graphics, node.Text, drawPos, node.IsSelected, item.ItemData);
+				DrawNodeLabel(graphics, node.Text, drawPos, node.IsSelected, item.Flipped, item.ItemData);
 
 				// Children
 				if (node.IsExpanded)

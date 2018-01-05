@@ -89,25 +89,34 @@ namespace MindMapUIExtension
 			RecalculatePositions();
 		}
 
-		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, bool isSelected, Object itemData)
+		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
+												bool isSelected, bool leftOfRoot, Object itemData)
 		{
 			var taskItem = (itemData as TaskDataItem);
 
 			if (isSelected)
 			{
-				Rectangle selRect = Rectangle.Inflate(rect, -2, 0);
-				m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, this.Focused);
-
+				m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
 			}
 			else if (DebugMode())
 			{
 				graphics.DrawRectangle(new Pen(Color.Green), rect);
 			}
 
-			var format = new StringFormat();
+			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
+
+			format.Alignment = StringAlignment.Center; // Root
+			
+			if (taskItem.ID != 0)
+			{
+				if (leftOfRoot)
+					format.Alignment = StringAlignment.Far;
+				else
+					format.Alignment = StringAlignment.Near;
+			}
 
 			format.LineAlignment = StringAlignment.Center;
-			format.Alignment = StringAlignment.Center;
+			format.Trimming = StringTrimming.None;
 
 			Brush textColor = SystemBrushes.WindowText;
 
@@ -116,7 +125,13 @@ namespace MindMapUIExtension
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
 		{
-			base.DrawNodeConnection(graphics, ptFrom, ptTo);
+			int midX = ((ptFrom.X + ptTo.X) / 2);
+																		
+			graphics.DrawBezier(new Pen(Color.Magenta), 
+								ptFrom,
+								new Point(midX, ptFrom.Y),
+								new Point(midX, ptTo.Y),
+								ptTo);
 		}
 
 		private new void Clear()
