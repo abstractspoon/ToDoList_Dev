@@ -145,7 +145,6 @@ namespace MindMapUIExtension
 
             this.Controls.Add(m_MindMap);
         }
-
     }
 
     public class TaskDataItem
@@ -178,11 +177,15 @@ namespace MindMapUIExtension
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
 
+        private System.Collections.Generic.Dictionary<UInt32, TaskDataItem> m_Items;
+
         public TdlMindMapControl(Translator trans, UIExtension.TaskIcon icons)
         {
             m_Trans = trans;
             m_TaskIcons = icons;
+
             m_SelectionRect = new UIExtension.SelectionRect();
+            m_Items = new System.Collections.Generic.Dictionary<UInt32, TaskDataItem>();
         }
 
         public void RebuildTreeView(TaskList tasks)
@@ -221,12 +224,22 @@ namespace MindMapUIExtension
             RecalculatePositions();
         }
 
+        private void Clear()
+        {
+            m_Items.Clear();
+
+            base.Clear();
+        }
+        
         private bool AddTaskToTree(Task task, TreeNode parent)
         {
             if (!task.IsValid())
                 return true; // not an error
 
-            var node = AddNode(new TaskDataItem(task), parent, task.GetID());
+            var taskID = task.GetID();
+            var taskItem = new TaskDataItem(task);
+
+            var node = AddNode(taskItem, parent, taskID);
 
             if (node == null)
                 return false;
@@ -238,6 +251,8 @@ namespace MindMapUIExtension
             // First Sibling
             if (!AddTaskToTree(task.GetNextTask(), parent))
                 return false;
+
+            m_Items.Add(taskID, taskItem);
 
             return true;
         }

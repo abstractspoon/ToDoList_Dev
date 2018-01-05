@@ -22,15 +22,12 @@ namespace MindMapUIExtension
         private Point m_DrawOffset;
         private Boolean m_RootAdded;
 
-        private System.Collections.Generic.Dictionary<UInt32, MindMapItem> m_Items;
-
         // Public -------------------------------------------------------------------------
         
         public MindMapControl()
         {
             m_RootAdded = false;
             m_DrawOffset = new Point(0, 0);
-            m_Items = new System.Collections.Generic.Dictionary<UInt32, MindMapItem>();
 
             InitializeComponent();
 #if DEBUG
@@ -76,7 +73,6 @@ namespace MindMapUIExtension
 
         public void Clear()
         {
-            m_Items.Clear();
             m_TreeView.Nodes.Clear();
         }
 
