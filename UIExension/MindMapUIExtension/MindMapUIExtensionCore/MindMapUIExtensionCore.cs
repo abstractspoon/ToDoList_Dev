@@ -150,11 +150,19 @@ namespace MindMapUIExtension
 
     public class TaskDataItem
     {
-        public TaskDataItem(String title, UInt32 taskID)
+        public TaskDataItem(String label)
         {
-            m_Title = title;
-            m_TaskID = taskID;
+            m_Title = label;
+            m_TaskID = 0;
         }
+
+        public TaskDataItem(Task task)
+        {
+            m_Title = task.GetTitle();
+            m_TaskID = task.GetID();
+        }
+
+        public override string ToString() { return m_Title; }  
 
         public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
         public UInt32 ID { get { return m_TaskID; } }
@@ -185,15 +193,13 @@ namespace MindMapUIExtension
                 return;
 
             var task = tasks.GetFirstTask();
-            bool taskIsRoot = !task.GetNextTask().IsValid();
+            bool taskIsRoot = !task.GetNextTask().IsValid(); // no siblings
 
             TreeNode rootNode = null;
 
             if (taskIsRoot)
             {
-                var nodeData = new TaskDataItem(task.GetTitle(), task.GetID());
-
-                rootNode = AddRootNode(nodeData.Title, nodeData);
+                rootNode = AddRootNode(new TaskDataItem(task), task.GetID());
 
                 // First Child
                 AddTaskToTree(task.GetFirstSubtask(), rootNode);
@@ -211,24 +217,29 @@ namespace MindMapUIExtension
             else
                 rootNode.Expand();
 
-            SetSelectedNode(rootNode);
+            SetSelectedNode(0); // root
             RecalculatePositions();
         }
 
-        private void AddTaskToTree(Task task, TreeNode parent)
+        private bool AddTaskToTree(Task task, TreeNode parent)
         {
             if (!task.IsValid())
-                return;
+                return true; // not an error
 
-            var nodeData = new TaskDataItem(task.GetTitle(), task.GetID());
-            var node = AddNode(nodeData.Title, parent, nodeData);
+            var node = AddNode(new TaskDataItem(task), parent, task.GetID());
+
+            if (node == null)
+                return false;
 
             // First Child
-            AddTaskToTree(task.GetFirstSubtask(), node);
+            if (!AddTaskToTree(task.GetFirstSubtask(), node))
+                return false;
 
             // First Sibling
-            AddTaskToTree(task.GetNextTask(), parent);
-        }
+            if (!AddTaskToTree(task.GetNextTask(), parent))
+                return false;
 
+            return true;
+        }
     }
 }

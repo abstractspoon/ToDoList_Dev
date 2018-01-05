@@ -33,12 +33,10 @@ namespace MindMapUIExtension
             m_Items = new System.Collections.Generic.Dictionary<UInt32, MindMapItem>();
 
             InitializeComponent();
-
 #if DEBUG
    			m_DebugMode.CheckedChanged += new EventHandler(OnDebugModeChanged);
             m_DebugMode.Font = this.Font;
 #endif
-
             if (!DebugMode())
                 m_TreeView.Visible = false;
 
@@ -51,35 +49,29 @@ namespace MindMapUIExtension
             this.AutoScroll = true;
             this.DoubleBuffered = true;
         }
- 
-        public TreeNode AddRootNode(String label, Object userData = null)
+
+        public TreeNode AddRootNode(Object userData, UInt32 uniqueID = 0)
         {
             if (!m_RootAdded)
             {
-                TreeNode newNode = new TreeNode(label);
-                newNode.Tag = new MindMapItem(userData);
+                var rootNode = AddNode(userData, m_TreeView.Nodes, uniqueID);
 
-                m_TreeView.Nodes.Add(newNode);
-                m_RootAdded = true;
+                if (rootNode != null)
+                    m_RootAdded = true;
+
+                return rootNode;
             }
 
+            // else
             return m_TreeView.Nodes[0];
         }
 
-        public TreeNode AddNode(String label, TreeNode parent, Object userData = null)
+        public TreeNode AddNode(Object userData, TreeNode parent, UInt32 uniqueID = 0)
         {
             if (!m_RootAdded)
                 return null;
 
-            if ((label == null) || (label == "") || (parent == null))
-                return null;
-
-            TreeNode newNode = new TreeNode(label);
-            newNode.Tag = new MindMapItem(userData);
-
-            parent.Nodes.Add(newNode);
-
-            return newNode;
+            return AddNode(userData, parent.Nodes, uniqueID);
         }
 
         public void Clear()
@@ -93,12 +85,35 @@ namespace MindMapUIExtension
             m_TreeView.ExpandAll();
         }
 
-        public void SetSelectedNode(TreeNode node)
+        public bool SetSelectedNode(UInt32 uniqueID)
         {
+            var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
+
+            if (found.Count() != 1)
+                return false;
+
+            TreeNode node = found[0];
+
             m_TreeView.SelectedNode = node;
- 
             node.EnsureVisible();
-       }
+
+            return true;
+        }
+
+        public bool RefreshNodeLabel(UInt32 uniqueID)
+        {
+            var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
+
+            if (found.Count() != 1)
+                return false;
+
+            TreeNode node = found[0];
+
+            node.Text = node.Tag.ToString();
+            Invalidate();
+
+            return true;
+        }
 
         // Message Handlers -----------------------------------------------------------
 
@@ -170,6 +185,22 @@ namespace MindMapUIExtension
 #endif
 
         // Private Internals -----------------------------------------------------------
+
+        protected TreeNode AddNode(Object userData, TreeNodeCollection nodes, UInt32 uniqueID)
+        {
+            if ((userData == null) || (userData.ToString() == "") || (nodes == null))
+                return null;
+
+            TreeNode newNode = new TreeNode(userData.ToString());
+            
+            newNode.Tag = new MindMapItem(userData);
+            newNode.Name = uniqueID.ToString();
+
+            nodes.Add(newNode);
+
+            return newNode;
+        }
+
         protected bool DebugMode()
         {
 #if DEBUG
