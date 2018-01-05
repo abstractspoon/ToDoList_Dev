@@ -12,92 +12,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MindMapUIExtension
 {
-    public class TaskDataItem
-    {
-        public TaskDataItem(String title, UInt32 taskID)
-        {
-            m_Title = title;
-            m_TaskID = taskID;
-        }
-
-        public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
-        public UInt32 ID { get { return m_TaskID; } }
-
-        private String m_Title;
-        private UInt32 m_TaskID;
-    }
-
-    // ----------------------------------------------------------------------------
-
-    public class MindMapItem
-    {
-        public MindMapItem(String title, UInt32 taskID)
-        {
-            m_Task = new TaskDataItem(title, taskID);
-            m_ItemBounds = Rectangle.Empty;
-            m_ChildBounds = Rectangle.Empty;
-            m_Flipped = false;
-        }
-
-        public TaskDataItem Task { get { return m_Task; } }
-        public bool Flipped { get { return m_Flipped; } }
-
-        public Rectangle ItemBounds
-        {
-            get { return m_ItemBounds; }
-            set { m_ItemBounds = value; }
-        }
-
-        public Rectangle ChildBounds
-        {
-            get { return m_ChildBounds; }
-            set { m_ChildBounds = value; }
-        }
-
-        public Rectangle TotalBounds
-        {
-            get { return Union(m_ChildBounds, m_ItemBounds); }
-        }
-
-        public void OffsetPositions(int horzOffset, int vertOffset)
-        {
-            m_ItemBounds.Offset(horzOffset, vertOffset);
-
-            if (!m_ChildBounds.IsEmpty)
-                m_ChildBounds.Offset(horzOffset, vertOffset);
-        }
-
-        public void FlipPositionsHorizontally()
-        {
-            m_Flipped = !m_Flipped;
-
-            m_ItemBounds = FlipHorizontally(m_ItemBounds);
-            m_ChildBounds = FlipHorizontally(m_ChildBounds);
-        }
-
-        public static Rectangle Union(Rectangle rect1, Rectangle rect2)
-        {
-            if (rect1.IsEmpty)
-                return rect2;
-
-            if (rect2.IsEmpty)
-                return rect1;
-
-            return Rectangle.Union(rect1, rect2);
-        }
-
-        private TaskDataItem m_Task;
-        private Rectangle m_ItemBounds, m_ChildBounds;
-        private bool m_Flipped;
-
-        private Rectangle FlipHorizontally(Rectangle rect)
-        {
-            return Rectangle.FromLTRB(-rect.Right, rect.Top, -rect.Left, rect.Bottom);
-        }
-    }
-
-    // ----------------------------------------------------------------------------
-
     public partial class MindMapControl : UserControl
     {
         // Data -------------------------------------------------------------------------
@@ -106,24 +20,17 @@ namespace MindMapUIExtension
         private const int ItemVertSeparation = 4;
 
         private Point m_DrawOffset;
-        private UIExtension.SelectionRect m_SelectionRect;
+        private Boolean m_RootAdded;
 
-        private System.Collections.Generic.Dictionary<UInt32, TaskDataItem> m_Items;
-
-        // From Parent
-        private Translator m_Trans;
-        private UIExtension.TaskIcon m_TaskIcons;
+        private System.Collections.Generic.Dictionary<UInt32, MindMapItem> m_Items;
 
         // Public -------------------------------------------------------------------------
         
-        public MindMapControl(Translator trans, UIExtension.TaskIcon icons)
+        public MindMapControl()
         {
-            m_Trans = trans;
-            m_TaskIcons = icons;
-
+            m_RootAdded = false;
             m_DrawOffset = new Point(0, 0);
-            m_SelectionRect = new UIExtension.SelectionRect();
-            m_Items = new System.Collections.Generic.Dictionary<UInt32, TaskDataItem>();
+            m_Items = new System.Collections.Generic.Dictionary<UInt32, MindMapItem>();
 
             InitializeComponent();
 
@@ -141,43 +48,54 @@ namespace MindMapUIExtension
             m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
             m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
         }
-
-		public void RebuildTreeView(TaskList tasks)
+ 
+        public TreeNode AddRootNode(String label, Object userData = null)
         {
-			m_Items.Clear();
-			m_TreeView.Nodes.Clear();
-
-			TreeNode rootNode = null;
-
-            if (tasks.GetTaskCount() == 1)
+            if (!m_RootAdded)
             {
-			    AddTaskToTree(tasks.GetFirstTask(), m_TreeView.Nodes);
-				rootNode = m_TreeView.Nodes[0];
-            }
-            else
-            {
-                // There is more than one 'root' task so create a real root parent
-                var nodeData = new MindMapItem("Root", 0);
-                rootNode = new TreeNode(nodeData.Task.Title);
+                TreeNode newNode = new TreeNode(label);
+                newNode.Tag = new MindMapItem(userData);
 
-                rootNode.Tag = nodeData;
-                m_TreeView.Nodes.Add(rootNode);
-
-                AddTaskToTree(tasks.GetFirstTask(), rootNode.Nodes);
+                m_TreeView.Nodes.Add(newNode);
+                m_RootAdded = true;
             }
 
-			if (DebugMode())
-				m_TreeView.ExpandAll();
-			else
-				rootNode.Expand();
+            return m_TreeView.Nodes[0];
+        }
 
-            m_TreeView.SelectedNode = rootNode;
+        public TreeNode AddNode(String label, TreeNode parent, Object userData = null)
+        {
+            if (!m_RootAdded)
+                return null;
 
-            // This ensures that the initial graph displays correctly 
-            rootNode.EnsureVisible();
+            if ((label == null) || (label == "") || (parent == null))
+                return null;
 
-			RecalculatePositions();
-		}
+            TreeNode newNode = new TreeNode(label);
+            newNode.Tag = new MindMapItem(userData);
+
+            parent.Nodes.Add(newNode);
+
+            return newNode;
+        }
+
+        public void Clear()
+        {
+            m_Items.Clear();
+            m_TreeView.Nodes.Clear();
+        }
+
+        public void ExpandAll()
+        {
+            m_TreeView.ExpandAll();
+        }
+
+        public void SetSelectedNode(TreeNode node)
+        {
+            m_TreeView.SelectedNode = node;
+ 
+            node.EnsureVisible();
+       }
 
         // Message Handlers -----------------------------------------------------------
 
@@ -242,7 +160,7 @@ namespace MindMapUIExtension
 #endif
 
         // Private Internals -----------------------------------------------------------
-        private bool DebugMode()
+        protected bool DebugMode()
         {
 #if DEBUG
             return m_DebugMode.Checked;
@@ -251,25 +169,7 @@ namespace MindMapUIExtension
 #endif
         }
 
-		private void AddTaskToTree(Task task, TreeNodeCollection parent)
-		{
-			if (!task.IsValid())
-				return;
-
-			var nodeData = new MindMapItem(task.GetTitle(), task.GetID());
-            var node = new TreeNode(nodeData.Task.Title);
-            node.Tag = nodeData;
-			
-			parent.Add(node);
-
-			// First Child
-			AddTaskToTree(task.GetFirstSubtask(), node.Nodes);
-
-			// First Sibling
-			AddTaskToTree(task.GetNextTask(), parent);
-		}
-
-		private void RecalculatePositions()
+		protected void RecalculatePositions()
 		{
             // There must be a single root task to proceed
             if (m_TreeView.Nodes.Count != 1)
@@ -325,7 +225,7 @@ namespace MindMapUIExtension
 			Invalidate(true);
 		}
 
-		Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
+		private Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
 		{
 			Point fromCentre = new Point(((fromRect.Left + fromRect.Right) / 2), ((fromRect.Top + fromRect.Bottom) / 2));
 			Point toCentre = new Point(((toRect.Left + toRect.Right) / 2), ((toRect.Top + toRect.Bottom) / 2));
@@ -537,7 +437,7 @@ namespace MindMapUIExtension
 				{
 					Rectangle selRect = Rectangle.Inflate(drawPos, -2, 0);
 
-					m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, true);
+					//m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, true);
 				}
 				else if (DebugMode())
 				{
@@ -549,7 +449,7 @@ namespace MindMapUIExtension
                 format.LineAlignment = StringAlignment.Center;
 				format.Alignment = StringAlignment.Center;
                 
-				graphics.DrawString(item.Task.Title, this.Font, SystemBrushes.WindowText, drawPos, format);
+				graphics.DrawString(node.Text, this.Font, SystemBrushes.WindowText, drawPos, format);
 
 				// Children
 				if (node.IsExpanded)
@@ -662,4 +562,80 @@ namespace MindMapUIExtension
         }
 
     }
+    // ----------------------------------------------------------------------------
+
+    public class MindMapItem
+    {
+        public MindMapItem(Object userData)
+        {
+            m_UserData = userData;
+            m_ItemBounds = Rectangle.Empty;
+            m_ChildBounds = Rectangle.Empty;
+            m_Flipped = false;
+        }
+
+        public bool Flipped { get { return m_Flipped; } }
+
+        public Object UserData
+        {
+            get { return m_UserData; }
+            set { m_UserData = value; }
+        }
+
+        public Rectangle ItemBounds
+        {
+            get { return m_ItemBounds; }
+            set { m_ItemBounds = value; }
+        }
+
+        public Rectangle ChildBounds
+        {
+            get { return m_ChildBounds; }
+            set { m_ChildBounds = value; }
+        }
+
+        public Rectangle TotalBounds
+        {
+            get { return Union(m_ChildBounds, m_ItemBounds); }
+        }
+
+        public void OffsetPositions(int horzOffset, int vertOffset)
+        {
+            m_ItemBounds.Offset(horzOffset, vertOffset);
+
+            if (!m_ChildBounds.IsEmpty)
+                m_ChildBounds.Offset(horzOffset, vertOffset);
+        }
+
+        public void FlipPositionsHorizontally()
+        {
+            m_Flipped = !m_Flipped;
+
+            m_ItemBounds = FlipHorizontally(m_ItemBounds);
+            m_ChildBounds = FlipHorizontally(m_ChildBounds);
+        }
+
+        public static Rectangle Union(Rectangle rect1, Rectangle rect2)
+        {
+            if (rect1.IsEmpty)
+                return rect2;
+
+            if (rect2.IsEmpty)
+                return rect1;
+
+            return Rectangle.Union(rect1, rect2);
+        }
+
+        private Object m_UserData;
+        private Rectangle m_ItemBounds, m_ChildBounds;
+        private bool m_Flipped;
+
+        private Rectangle FlipHorizontally(Rectangle rect)
+        {
+            return Rectangle.FromLTRB(-rect.Right, rect.Top, -rect.Left, rect.Bottom);
+        }
+    }
+
+    // ----------------------------------------------------------------------------
+
 }
