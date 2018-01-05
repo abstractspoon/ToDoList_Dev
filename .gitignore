@@ -66,3 +66,4 @@ Release\*.*
 *.CopyComplete
 release
 *.aps
+UIExension/MindMapUIExtension/MindMapUIExtensionCore/obj/Debug/MindMapUIExtension.TaskDataItem.resources
