@@ -100,6 +100,8 @@ namespace MindMapUIExtension
 
     public partial class MindMapControl : UserControl
     {
+        // Data -------------------------------------------------------------------------
+        
         private const int ItemHorzSeparation = 40;
         private const int ItemVertSeparation = 4;
 
@@ -111,6 +113,8 @@ namespace MindMapUIExtension
         // From Parent
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
+
+        // Public -------------------------------------------------------------------------
         
         public MindMapControl(Translator trans, UIExtension.TaskIcon icons)
         {
@@ -175,6 +179,58 @@ namespace MindMapUIExtension
 			RecalculatePositions();
 		}
 
+        // Message Handlers -----------------------------------------------------------
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+
+			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+			DrawPositions(e.Graphics, m_TreeView.Nodes);
+
+            foreach (TreeNode node in m_TreeView.Nodes)
+                DrawConnections(e.Graphics, node);
+        }
+
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
+        {
+            TreeNode hit = HitTestPositions(e.Location);
+
+            if ((hit != null) && (hit.FirstNode != null))
+            {
+                if (hit.IsExpanded)
+                    hit.Collapse();
+                else
+                    hit.Expand();
+            }
+        }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            TreeNode hit = HitTestPositions(e.Location);
+
+            if (hit != null)
+                m_TreeView.SelectedNode = hit;
+        }
+
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+
+			RecalculateDrawOffset();
+		}
+
+    	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
+		{
+			RecalculatePositions();
+		}
+
+        protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
+        {
+            Invalidate();
+        }
+
 #if DEBUG
         void OnDebugModeChanged(object sender, EventArgs e)
         {
@@ -185,6 +241,7 @@ namespace MindMapUIExtension
         }
 #endif
 
+        // Private Internals -----------------------------------------------------------
         private bool DebugMode()
         {
 #if DEBUG
@@ -192,16 +249,6 @@ namespace MindMapUIExtension
 #else
 			return false;
 #endif
-        }
-
-    	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
-		{
-			RecalculatePositions();
-		}
-
-        protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
-        {
-            Invalidate();
         }
 
 		private void AddTaskToTree(Task task, TreeNodeCollection parent)
@@ -456,25 +503,6 @@ namespace MindMapUIExtension
 			}
 		}
 
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			base.OnPaint(e);
-
-			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-			DrawPositions(e.Graphics, m_TreeView.Nodes);
-
-            foreach (TreeNode node in m_TreeView.Nodes)
-                DrawConnections(e.Graphics, node);
-        }
-
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-
-			RecalculateDrawOffset();
-		}
-
 		private void RecalculateDrawOffset()
 		{
 			if (m_TreeView.Nodes.Count > 0)
@@ -497,27 +525,6 @@ namespace MindMapUIExtension
 				m_DrawOffset = new Point(0, 0);
 			}
 		}
-
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
-            TreeNode hit = HitTestItemPositions(e.Location);
-
-            if ((hit != null) && (hit.FirstNode != null))
-            {
-                if (hit.IsExpanded)
-                    hit.Collapse();
-                else
-                    hit.Expand();
-            }
-        }
-
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            TreeNode hit = HitTestItemPositions(e.Location);
-
-            if (hit != null)
-                m_TreeView.SelectedNode = hit;
-        }
 
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
 		{
@@ -613,11 +620,11 @@ namespace MindMapUIExtension
 			return drawPos;
 		}
 
-        private TreeNode HitTestItemPositions(Point point)
+        private TreeNode HitTestPositions(Point point)
         {
             foreach (TreeNode node in m_TreeView.Nodes)
             {
-                TreeNode hit = HitTestItemPositions(node, point);
+                TreeNode hit = HitTestPositions(node, point);
 
                 if (hit != null)
                     return hit;
@@ -626,7 +633,7 @@ namespace MindMapUIExtension
             return null;
         }
 
-        private TreeNode HitTestItemPositions(TreeNode node, Point point)
+        private TreeNode HitTestPositions(TreeNode node, Point point)
         {
             if (node == null)
                 return null;
@@ -642,7 +649,7 @@ namespace MindMapUIExtension
                 {
                     foreach (TreeNode child in node.Nodes)
                     {
-                        TreeNode hit = HitTestItemPositions(child, point);
+                        TreeNode hit = HitTestPositions(child, point);
 
                         if (hit != null)
                             return hit;
