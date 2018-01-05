@@ -198,20 +198,41 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 
 bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 {
-// 	switch (nCmd)
-// 	{
-// 		// TODO
-// 	}
+	switch (nCmd)
+	{
+	case IUI_COLLAPSEALL:
+	case IUI_COLLAPSESELECTED:
+	case IUI_EXPANDALL:
+	case IUI_EXPANDSELECTED:
+		return true;
+
+	case IUI_SELECTTASK:
+		return m_wnd->SelectTask(dwExtra);
+
+	case IUI_SETFOCUS:
+		return true;
+
+	}
 
 	return false;
 }
 
 bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 {
-// 	switch (nCmd)
-// 	{
-// 		// TODO
-// 	}
+	switch (nCmd)
+	{
+	case IUI_COLLAPSEALL:
+	case IUI_COLLAPSESELECTED:
+	case IUI_EXPANDALL:
+	case IUI_EXPANDSELECTED:
+		return true;
+
+	case IUI_SELECTTASK:
+		return true;
+
+	case IUI_SETFOCUS:
+		return true;
+ 	}
 
 	return false;
 }

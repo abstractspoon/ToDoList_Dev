@@ -7,12 +7,15 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
-using Abstractspoon.Tdl.PluginHelpers;
+using System.Runtime.InteropServices;
 
 namespace MindMapUIExtension
 {
-    public partial class MindMapControl : UserControl
+	public delegate void SelectionChangeEventHandler(object sender, object itemData);
+
+	[System.ComponentModel.DesignerCategory("")]
+
+	public partial class MindMapControl : UserControl
     {
         // Data -------------------------------------------------------------------------
         
@@ -23,7 +26,8 @@ namespace MindMapUIExtension
         private Boolean m_RootAdded;
 
         // Public -------------------------------------------------------------------------
-        
+		public event SelectionChangeEventHandler SelectionChange;
+
         public MindMapControl()
         {
             m_RootAdded = false;
@@ -47,11 +51,11 @@ namespace MindMapUIExtension
             this.DoubleBuffered = true;
         }
 
-        public TreeNode AddRootNode(Object userData, UInt32 uniqueID = 0)
+        public TreeNode AddRootNode(Object itemData, UInt32 uniqueID = 0)
         {
             if (!m_RootAdded)
             {
-                var rootNode = AddNode(userData, m_TreeView.Nodes, uniqueID);
+                var rootNode = AddNode(itemData, m_TreeView.Nodes, uniqueID);
 
                 if (rootNode != null)
                     m_RootAdded = true;
@@ -63,12 +67,12 @@ namespace MindMapUIExtension
             return m_TreeView.Nodes[0];
         }
 
-        public TreeNode AddNode(Object userData, TreeNode parent, UInt32 uniqueID = 0)
+        public TreeNode AddNode(Object itemData, TreeNode parent, UInt32 uniqueID = 0)
         {
             if (!m_RootAdded)
                 return null;
 
-            return AddNode(userData, parent.Nodes, uniqueID);
+            return AddNode(itemData, parent.Nodes, uniqueID);
         }
 
         public void Clear()
@@ -168,6 +172,13 @@ namespace MindMapUIExtension
         protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
         {
             Invalidate();
+			Update();
+
+			if (SelectionChange != null)
+			{
+				MindMapItem item = (e.Node.Tag as MindMapItem);
+				SelectionChange(this, item.ItemData);
+			}
         }
 
 #if DEBUG
@@ -179,6 +190,20 @@ namespace MindMapUIExtension
             Invalidate();
         }
 #endif
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			Invalidate(GetSelectedItemPosition());
+		}
+
+		protected override void OnLostFocus(EventArgs e)
+		{
+			base.OnLostFocus(e);
+
+			Invalidate(GetSelectedItemPosition());
+		}
 
         // Private Internals -----------------------------------------------------------
 
@@ -400,12 +425,18 @@ namespace MindMapUIExtension
 			return totalBounds;
 		}
 
+		[DllImport("User32.dll")]
+		public static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
+
+		static int SB_HORZ = 0;
+		static int SB_VERT = 1;
+
         private Rectangle GetLogicalTreeNodePosition(TreeNode node)
         {
             Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
 
-            int horzOffset = Win32.GetHScrollPos(m_TreeView.Handle);
-            int vertOffset = (Win32.GetVScrollPos(m_TreeView.Handle) * node.Bounds.Height);
+            int horzOffset = GetScrollPos(m_TreeView.Handle, SB_HORZ);
+            int vertOffset = (GetScrollPos(m_TreeView.Handle, SB_VERT) * node.Bounds.Height);
 
             itemBounds.Offset(horzOffset, vertOffset);
 
@@ -471,6 +502,29 @@ namespace MindMapUIExtension
 			}
 		}
 
+		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, bool isSelected, Object itemData)
+		{
+			if (isSelected)
+			{
+				Rectangle selRect = Rectangle.Inflate(rect, -2, 0);
+
+				graphics.FillRectangle(SystemBrushes.Highlight, selRect);
+			}
+			else if (DebugMode())
+			{
+				graphics.DrawRectangle(new Pen(Color.Green), rect);
+			}
+
+			var format = new StringFormat();
+
+			format.LineAlignment = StringAlignment.Center;
+			format.Alignment = StringAlignment.Center;
+
+			Brush textColor = (isSelected ? SystemBrushes.HighlightText : SystemBrushes.WindowText);
+
+			graphics.DrawString(label, this.Font, textColor, rect, format);
+		}
+
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
@@ -478,24 +532,7 @@ namespace MindMapUIExtension
 				MindMapItem item = (node.Tag as MindMapItem);
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
-				if (node.IsSelected)
-				{
-					Rectangle selRect = Rectangle.Inflate(drawPos, -2, 0);
-
-                    graphics.FillRectangle(new SolidBrush(Color.LightBlue), drawPos);
-					//m_SelectionRect.Draw(graphics, selRect.X, selRect.Y, selRect.Width, selRect.Height, true);
-				}
-				else if (DebugMode())
-				{
-					graphics.DrawRectangle(new Pen(Color.Green), drawPos);
-				}
-
-                var format = new StringFormat();
-
-                format.LineAlignment = StringAlignment.Center;
-				format.Alignment = StringAlignment.Center;
-                
-				graphics.DrawString(node.Text, this.Font, SystemBrushes.WindowText, drawPos, format);
+				DrawNodeLabel(graphics, node.Text, drawPos, node.IsSelected, item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -533,18 +570,8 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private void DrawConnection(Graphics graphics, MindMapItem itemFrom, MindMapItem itemTo)
+		virtual protected void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
 		{
-            if ((itemFrom == null) || (itemTo == null))
-                return;
-
-            Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
-            Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
-            bool rightToLeft = (rectFrom.X > rectTo.X);
-
-            Point ptFrom = new Point((rightToLeft ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
-            Point ptTo = new Point((rightToLeft ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
-
 			using (var pen = new Pen(Color.Magenta))
 			{
 				graphics.DrawLine(pen, ptFrom, ptTo);
@@ -556,6 +583,22 @@ namespace MindMapUIExtension
 				graphics.DrawEllipse(pen, endTo);
 			}
 		}
+		
+		private void DrawConnection(Graphics graphics, MindMapItem itemFrom, MindMapItem itemTo)
+		{
+            if ((itemFrom == null) || (itemTo == null))
+                return;
+
+            Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
+            Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
+
+            bool rightToLeft = (rectFrom.X > rectTo.X);
+
+            Point ptFrom = new Point((rightToLeft ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
+            Point ptTo = new Point((rightToLeft ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
+
+			DrawNodeConnection(graphics, ptFrom, ptTo);
+		}
 
 		private Rectangle GetItemDrawRect(Rectangle itemRect)
 		{
@@ -565,6 +608,19 @@ namespace MindMapUIExtension
             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
 			
 			return drawPos;
+		}
+
+		private Rectangle GetSelectedItemPosition()
+		{
+			Rectangle rect = Rectangle.Empty;
+
+			if (m_TreeView.SelectedNode != null)
+			{
+				MindMapItem item = (m_TreeView.SelectedNode.Tag as MindMapItem);
+				rect = GetItemDrawRect(item.ItemBounds);
+			}
+
+			return rect;
 		}
 
         private TreeNode HitTestPositions(Point point)
@@ -609,80 +665,5 @@ namespace MindMapUIExtension
         }
 
     }
-    // ----------------------------------------------------------------------------
-
-    public class MindMapItem
-    {
-        public MindMapItem(Object userData)
-        {
-            m_UserData = userData;
-            m_ItemBounds = Rectangle.Empty;
-            m_ChildBounds = Rectangle.Empty;
-            m_Flipped = false;
-        }
-
-        public bool Flipped { get { return m_Flipped; } }
-
-        public Object UserData
-        {
-            get { return m_UserData; }
-            set { m_UserData = value; }
-        }
-
-        public Rectangle ItemBounds
-        {
-            get { return m_ItemBounds; }
-            set { m_ItemBounds = value; }
-        }
-
-        public Rectangle ChildBounds
-        {
-            get { return m_ChildBounds; }
-            set { m_ChildBounds = value; }
-        }
-
-        public Rectangle TotalBounds
-        {
-            get { return Union(m_ChildBounds, m_ItemBounds); }
-        }
-
-        public void OffsetPositions(int horzOffset, int vertOffset)
-        {
-            m_ItemBounds.Offset(horzOffset, vertOffset);
-
-            if (!m_ChildBounds.IsEmpty)
-                m_ChildBounds.Offset(horzOffset, vertOffset);
-        }
-
-        public void FlipPositionsHorizontally()
-        {
-            m_Flipped = !m_Flipped;
-
-            m_ItemBounds = FlipHorizontally(m_ItemBounds);
-            m_ChildBounds = FlipHorizontally(m_ChildBounds);
-        }
-
-        public static Rectangle Union(Rectangle rect1, Rectangle rect2)
-        {
-            if (rect1.IsEmpty)
-                return rect2;
-
-            if (rect2.IsEmpty)
-                return rect1;
-
-            return Rectangle.Union(rect1, rect2);
-        }
-
-        private Object m_UserData;
-        private Rectangle m_ItemBounds, m_ChildBounds;
-        private bool m_Flipped;
-
-        private Rectangle FlipHorizontally(Rectangle rect)
-        {
-            return Rectangle.FromLTRB(-rect.Right, rect.Top, -rect.Left, rect.Bottom);
-        }
-    }
-
-    // ----------------------------------------------------------------------------
 
 }
