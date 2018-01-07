@@ -245,7 +245,6 @@ namespace SampleUIExtension
                 case UIExtension.UpdateType.Edit: item.Type = "Edit"; break;
                 case UIExtension.UpdateType.New: item.Type = "Add Task"; break;
                 case UIExtension.UpdateType.Delete: item.Type = "Move Task(s)"; break;
-                case UIExtension.UpdateType.Move: item.Type = "Delete Task(s)"; break;
                 case UIExtension.UpdateType.All: item.Type = "All"; break;
                 case UIExtension.UpdateType.Unknown: item.Type = "Unknown"; break;
             }
