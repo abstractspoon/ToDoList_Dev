@@ -100,7 +100,7 @@ namespace MindMapUIExtension
 					break;
 
 				case ExpandNode.ExpandSelection:
-					m_TreeView.SelectedNode.Expand();
+					SelectedNode.Expand();
 					break;
 
 				case ExpandNode.CollapseAll:
@@ -112,7 +112,8 @@ namespace MindMapUIExtension
 					break;
 
 				case ExpandNode.CollapseSelection:
-					m_TreeView.SelectedNode.Collapse();
+					if (!IsRoot(SelectedNode))
+						SelectedNode.Collapse();
 					break;
 			}
 
@@ -130,13 +131,13 @@ namespace MindMapUIExtension
 					return IsAnyNodeCollapsed(m_TreeView.Nodes[0].Nodes);
 
 				case ExpandNode.ExpandSelection:
-					return !m_TreeView.SelectedNode.IsExpanded;
+					return !SelectedNode.IsExpanded;
 
 				case ExpandNode.CollapseAll:
 					return IsAnyNodeExpanded(m_TreeView.Nodes[0].Nodes);
 
 				case ExpandNode.CollapseSelection:
-					return m_TreeView.SelectedNode.IsExpanded;
+					return (!IsRoot(SelectedNode) && SelectedNode.IsExpanded);
 			}
 
 			return false;
@@ -151,7 +152,7 @@ namespace MindMapUIExtension
 
             TreeNode node = found[0];
 
-            m_TreeView.SelectedNode = node;
+            SelectedNode = node;
             node.EnsureVisible();
 
             return true;
@@ -199,7 +200,7 @@ namespace MindMapUIExtension
 
             TreeNode hit = HitTestPositions(e.Location);
 
-            if (IsParent(hit))
+            if (IsParent(hit) && !IsRoot(hit))
             {
                 if (hit.IsExpanded)
                     hit.Collapse();
@@ -228,7 +229,7 @@ namespace MindMapUIExtension
 				}
 				else
 				{
-					m_TreeView.SelectedNode = hit;
+					SelectedNode = hit;
 				}
 			}
         }
@@ -790,7 +791,7 @@ namespace MindMapUIExtension
             Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
 			itemBounds.Width += 4;
 
-			if (IsParent(node))
+			if (IsParent(node) && !IsRoot(node))
 				itemBounds.Width += ExpansionButtonSize;
 
             int horzOffset = GetScrollPos(m_TreeView.Handle, SB_HORZ);
@@ -902,7 +903,7 @@ namespace MindMapUIExtension
 				MindMapItem item = Item(node);
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
-				if (IsParent(node))
+				if (IsParent(node) && !IsRoot(node))
 				{
 					int offset = (ExpansionButtonSize + 2); // leave a pixel gap
 
@@ -940,7 +941,7 @@ namespace MindMapUIExtension
 		private Rectangle CalculateExpansionButtonRect(TreeNode node)
 		{
 			// Only for parent nodes
-			if (!IsParent(node))
+			if (!IsParent(node) || IsRoot(node))
 				return Rectangle.Empty;
 
 			MindMapItem item = Item(node);
@@ -956,7 +957,7 @@ namespace MindMapUIExtension
 			else
 			{
 				// Place the button to the right of the label
-				buttonLeft = (labelRect.Right - ExpansionButtonSize);
+				buttonLeft = (labelRect.Right - ExpansionButtonSize) - 1;
 			}
 
 			return Rectangle.FromLTRB(buttonLeft, 
@@ -967,8 +968,8 @@ namespace MindMapUIExtension
 
 		private void DrawExpansionButton(Graphics graphics, TreeNode node)
 		{
-			// Only for parent nodes
-			if (!IsParent(node))
+			// Only for parent nodes and Root is always expanded
+			if (!IsParent(node) || IsRoot(node))
 				return;
 
 			MindMapItem item = Item(node);
