@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -35,7 +36,7 @@ namespace MindMapUIExtension
             m_Trans = trans;
 
             m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-            m_ControlsFont = new System.Drawing.Font(FontName, 8);
+            m_ControlsFont = new Font(FontName, 8);
 
             InitializeComponent();
         }
@@ -54,25 +55,9 @@ namespace MindMapUIExtension
 
         public void UpdateTasks(TaskList tasks,
                                 UIExtension.UpdateType type,
-                                System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+                                HashSet<UIExtension.TaskAttribute> attribs)
         {
-            switch (type)
-            {
-                case UIExtension.UpdateType.Edit:
-                    break;
-
-                case UIExtension.UpdateType.New:
-                    break;
-
-                case UIExtension.UpdateType.Delete:
-                case UIExtension.UpdateType.Move:
-                case UIExtension.UpdateType.All:
-                    m_MindMap.RebuildTreeView(tasks);
-                    break;
-
-                case UIExtension.UpdateType.Unknown:
-                    return;
-            }
+			m_MindMap.UpdateTasks(tasks, type, attribs);
         }
 
         public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
@@ -97,7 +82,21 @@ namespace MindMapUIExtension
 
         public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
-            return false;
+			Rectangle labelRect = m_MindMap.GetSelectedItemRect();
+
+			if (labelRect.IsEmpty)
+				return false;
+
+			labelRect = m_MindMap.RectangleToScreen(labelRect);
+
+			labelRect.Inflate(0, -1);
+
+			left = labelRect.Left;
+			top = labelRect.Top;
+			right = labelRect.Right;
+			bottom = labelRect.Bottom;
+
+            return true;
         }
 
         public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
@@ -123,6 +122,30 @@ namespace MindMapUIExtension
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
         }
+
+		public new Boolean Focus()
+		{
+			if (Focused)
+				return false;
+
+			// else
+			return m_MindMap.Focus();
+		}
+
+		public new Boolean Focused
+		{
+			get { return m_MindMap.Focused; }
+		}
+
+		public Boolean Expand(MindMapControl.ExpandNode expand)
+		{
+			return m_MindMap.Expand(expand);
+		}
+
+		public Boolean CanExpand(MindMapControl.ExpandNode expand)
+		{
+			return m_MindMap.CanExpand(expand);
+		}
 
         // PRIVATE ------------------------------------------------------------------------------
 

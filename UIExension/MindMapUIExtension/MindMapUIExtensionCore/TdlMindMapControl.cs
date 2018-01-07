@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -24,6 +25,11 @@ namespace MindMapUIExtension
 
 		public override string ToString() { return m_Title; }
 
+		public void Update(Task task, HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			// TODO
+		}
+
 		public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
 		public UInt32 ID { get { return m_TaskID; } }
 
@@ -38,11 +44,13 @@ namespace MindMapUIExtension
 	public class TdlMindMapControl : MindMapControl
 	{
 		// From Parent
-		private UIExtension.SelectionRect m_SelectionRect;
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
 
-		private System.Collections.Generic.Dictionary<UInt32, TaskDataItem> m_Items;
+		private UIExtension.SelectionRect m_SelectionRect;
+		private Dictionary<UInt32, TaskDataItem> m_Items;
+
+		// -------------------------------------------------------------------------
 
 		public TdlMindMapControl(Translator trans, UIExtension.TaskIcon icons)
 		{
@@ -50,10 +58,47 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_SelectionRect = new UIExtension.SelectionRect();
-			m_Items = new System.Collections.Generic.Dictionary<UInt32, TaskDataItem>();
+			m_Items = new Dictionary<UInt32, TaskDataItem>();
 		}
 
-		public void RebuildTreeView(TaskList tasks)
+		public void UpdateTasks(TaskList tasks,
+								UIExtension.UpdateType type,
+								HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			switch (type)
+			{
+				case UIExtension.UpdateType.Edit:
+					UpdateTaskAttributes(tasks, attribs);
+					break;
+
+				case UIExtension.UpdateType.New:
+					break;
+
+				case UIExtension.UpdateType.Delete:
+				case UIExtension.UpdateType.Move:
+				case UIExtension.UpdateType.All:
+					RebuildTreeView(tasks);
+					break;
+
+				case UIExtension.UpdateType.Unknown:
+					return;
+			}
+		}
+
+		public Rectangle GetSelectedItemRect()
+		{
+			return GetSelectedItemPosition();
+		}
+
+		// Internal ------------------------------------------------------------
+
+		protected void UpdateTaskAttributes(TaskList tasks,
+								HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			// TODO
+		}
+
+		protected void RebuildTreeView(TaskList tasks)
 		{
 			Clear();
 
@@ -81,7 +126,7 @@ namespace MindMapUIExtension
 			}
 
 			if (DebugMode())
-				ExpandAll();
+				Expand(ExpandNode.ExpandAll);
 			else
 				rootNode.Expand();
 
@@ -93,34 +138,22 @@ namespace MindMapUIExtension
 												bool isSelected, bool leftOfRoot, Object itemData)
 		{
 			var taskItem = (itemData as TaskDataItem);
+			Brush textColor = SystemBrushes.WindowText;
 
 			if (isSelected)
 			{
 				m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
 			}
-			else if (DebugMode())
+			else
 			{
-				graphics.DrawRectangle(new Pen(Color.Green), rect);
+				// Use task colours
+				// TODO
+				
+				if (DebugMode())
+					graphics.DrawRectangle(new Pen(Color.Green), rect);
 			}
 
-			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
-
-			format.Alignment = StringAlignment.Center; // Root
-			
-			if (taskItem.ID != 0)
-			{
-				if (leftOfRoot)
-					format.Alignment = StringAlignment.Far;
-				else
-					format.Alignment = StringAlignment.Near;
-			}
-
-			format.LineAlignment = StringAlignment.Center;
-			format.Trimming = StringTrimming.None;
-
-			Brush textColor = SystemBrushes.WindowText;
-
-			graphics.DrawString(label, this.Font, textColor, rect, format);
+			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat());
 		}
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)

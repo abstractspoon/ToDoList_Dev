@@ -201,17 +201,22 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
+		return m_wnd->Expand(MindMapControl::ExpandNode::CollapseAll);
+
 	case IUI_COLLAPSESELECTED:
+		return m_wnd->Expand(MindMapControl::ExpandNode::CollapseSelection);
+
 	case IUI_EXPANDALL:
+		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandAll);
+
 	case IUI_EXPANDSELECTED:
-		return true;
+		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandSelection);
 
 	case IUI_SELECTTASK:
 		return m_wnd->SelectTask(dwExtra);
 
 	case IUI_SETFOCUS:
-		return true;
-
+		return m_wnd->Focus();
 	}
 
 	return false;
@@ -222,16 +227,22 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
+		return m_wnd->CanExpand(MindMapControl::ExpandNode::CollapseAll);
+
 	case IUI_COLLAPSESELECTED:
+		return m_wnd->CanExpand(MindMapControl::ExpandNode::CollapseSelection);
+
 	case IUI_EXPANDALL:
+		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandAll);
+
 	case IUI_EXPANDSELECTED:
-		return true;
+		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandSelection);
 
 	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SETFOCUS:
-		return true;
+		return m_wnd->Focused;
  	}
 
 	return false;

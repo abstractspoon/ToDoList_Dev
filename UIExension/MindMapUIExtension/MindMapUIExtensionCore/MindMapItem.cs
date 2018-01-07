@@ -10,6 +10,12 @@ namespace MindMapUIExtension
 		public MindMapItem(Object itemData)
 		{
 			m_ItemData = itemData;
+
+			ResetPositions();
+		}
+
+		public void ResetPositions()
+		{
 			m_ItemBounds = Rectangle.Empty;
 			m_ChildBounds = Rectangle.Empty;
 			m_Flipped = false;
