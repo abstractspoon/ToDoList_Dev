@@ -116,7 +116,6 @@ UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
 	case IUI_EDIT:		return UIExtension::UpdateType::Edit;
 	case IUI_NEW:		return UIExtension::UpdateType::New;
 	case IUI_DELETE:	return UIExtension::UpdateType::Delete;
-	case IUI_MOVE:		return UIExtension::UpdateType::Move;
 	case IUI_ALL:		return UIExtension::UpdateType::All;
 	//  case IUI_
 	}

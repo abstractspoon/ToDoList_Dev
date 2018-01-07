@@ -64,7 +64,6 @@ namespace DayViewUIExtension
 			switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
-				case UIExtension.UpdateType.Move:
 				case UIExtension.UpdateType.All:
 					// Rebuild
 					m_Items.Clear();

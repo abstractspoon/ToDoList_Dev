@@ -75,7 +75,6 @@ namespace MindMapUIExtension
 					break;
 
 				case UIExtension.UpdateType.Delete:
-				case UIExtension.UpdateType.Move:
 				case UIExtension.UpdateType.All:
 					RebuildTreeView(tasks);
 					break;

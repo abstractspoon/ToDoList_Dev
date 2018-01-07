@@ -33,7 +33,6 @@ namespace Abstractspoon
 					Edit,
 					New,
 					Delete,
-					Move,
 
 					All = 0xffff
 				};
