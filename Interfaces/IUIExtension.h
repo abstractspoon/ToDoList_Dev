@@ -132,7 +132,6 @@ enum IUI_UPDATETYPE
 	IUI_EDIT		= 0,			// pTasks contains selected tasks only
 	IUI_NEW,						// pTasks contains new task(s) and their parents
 	IUI_DELETE,						// pTasks contains ALL tasks
-	IUI_MOVE,						// pTasks contains ALL tasks
 //  IUI_
 
 	IUI_ALL = 0xffff
