@@ -960,6 +960,11 @@ namespace MindMapUIExtension
 			foreach (TreeNode node in nodes)
 			{
 				MindMapItem item = Item(node);
+
+				// Don't draw items falling wholly outside the client rectangle
+				if (!GetItemDrawRect(item.TotalBounds).IntersectsWith(ClientRectangle))
+					continue;
+
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
 
 				if (IsParent(node) && !IsRoot(node))
@@ -1114,7 +1119,19 @@ namespace MindMapUIExtension
             Point ptFrom = new Point((flipped ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
 			Point ptTo = new Point((flipped ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
 
+			// Don't draw connections falling wholly outside the client rectangle
+			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(ClientRectangle))
+				return;
+
 			DrawNodeConnection(graphics, ptFrom, ptTo);
+		}
+
+		private Rectangle RectFromPoints(Point pt1, Point pt2)
+		{
+			return Rectangle.FromLTRB(Math.Min(pt1.X, pt2.X),
+										Math.Min(pt1.Y, pt2.Y),
+										Math.Max(pt1.X, pt2.X),
+										Math.Max(pt1.Y, pt2.Y));
 		}
 
 		private Rectangle GetItemDrawRect(Rectangle itemRect)
