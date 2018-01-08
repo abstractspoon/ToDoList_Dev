@@ -201,7 +201,14 @@ namespace MindMapUIExtension
 
             TreeNode hit = HitTestPositions(e.Location);
 
-            if (IsParent(hit) && !IsRoot(hit))
+            if (IsRoot(hit))
+            {
+                if (IsAnyNodeExpanded(RootNode.Nodes))
+                    Expand(ExpandNode.CollapseAll);
+                else
+                    Expand(ExpandNode.ExpandAll);
+            }
+            else if (IsParent(hit))
             {
                 if (hit.IsExpanded)
                     hit.Collapse();
