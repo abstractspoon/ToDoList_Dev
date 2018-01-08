@@ -94,6 +94,11 @@ namespace MindMapUIExtension
 			if (!CanExpand(expand))
 				return false;
 
+			// Because we will/may receive multiple expansion
+			// notifications and we want our animation to occur
+			// just at the end we ignore notifications until the end
+			EnableExpandNotifications(false);
+
 			switch (expand)
 			{
 				case ExpandNode.ExpandAll:
@@ -117,6 +122,9 @@ namespace MindMapUIExtension
 						SelectedNode.Collapse();
 					break;
 			}
+
+			EnableExpandNotifications(true);
+			RecalculatePositions();
 
 			return true;
 		}
@@ -246,7 +254,7 @@ namespace MindMapUIExtension
 		{
 			base.OnSizeChanged(e);
 
-			RecalculateDrawOffset();
+			RecalculateDrawOffset(false);
 		}
 
     	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
@@ -271,8 +279,8 @@ namespace MindMapUIExtension
         {
             m_TreeView.Visible = DebugMode();
 
-            RecalculateDrawOffset();
-            Invalidate();
+            if (!RecalculateDrawOffset(false))
+				Invalidate();
         }
 #endif
 
@@ -308,6 +316,20 @@ namespace MindMapUIExtension
 		}
 
         // Private Internals -----------------------------------------------------------
+
+		private void EnableExpandNotifications(bool enable)
+		{
+			if (enable)
+			{
+				m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+				m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+			}
+			else
+			{
+				m_TreeView.AfterExpand -= new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+				m_TreeView.AfterCollapse -= new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
+			}
+		}
 
 		protected bool HandleCursorKey(Keys key)
 		{
@@ -657,8 +679,8 @@ namespace MindMapUIExtension
             Point centre = CentrePoint(rootItem.ItemBounds);
             OffsetPositions(rootNode, -centre.X, -centre.Y);
             
-			RecalculateDrawOffset();
-			Invalidate(true);
+			RecalculateDrawOffset(true);
+			Invalidate();
 
             this.AutoScrollMinSize = rootItem.TotalBounds.Size;
 		}
@@ -846,7 +868,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private void RecalculateDrawOffset()
+		private bool RecalculateDrawOffset(bool animate)
 		{
 			if (m_TreeView.Nodes.Count > 0)
 			{
@@ -872,14 +894,35 @@ namespace MindMapUIExtension
 
                 if (m_DrawOffset != ptOffset)
                 {
-                    m_DrawOffset = ptOffset;
-                    Invalidate();
+					if (!animate || ((m_DrawOffset.X == 0) && (m_DrawOffset.Y == 0)))
+					{
+						m_DrawOffset = ptOffset;
+						Invalidate();
+					}
+					else
+					{
+						int xDiff = (ptOffset.X - m_DrawOffset.X);
+						int yDiff = (ptOffset.Y - m_DrawOffset.Y);
+
+						Point prevPt = m_DrawOffset;
+
+						for (int i = 1; i <= 10; i++)
+						{
+							m_DrawOffset.X = prevPt.X + ((i * xDiff) / 10);
+							m_DrawOffset.Y = prevPt.Y + ((i * yDiff) / 10);
+
+							Invalidate();
+							Update();
+						}
+					}
+
+					return true;
                 }
+
+				return false; // no change
 			}
-			else
-			{
-				m_DrawOffset.X = m_DrawOffset.Y = 0;
-			}
+
+			return false;
 		}
 
 		static public StringFormat DefaultLabelFormat()
