@@ -653,16 +653,25 @@ namespace MindMapUIExtension
                 rootItem.ChildBounds = childBounds;
             }
 
+            // Move the whole graph so that the Root is centred on (0,0)
+            Point centre = CentrePoint(rootItem.ItemBounds);
+            OffsetPositions(rootNode, -centre.X, -centre.Y);
+            
 			RecalculateDrawOffset();
 			Invalidate(true);
 
             this.AutoScrollMinSize = rootItem.TotalBounds.Size;
 		}
 
+        private Point CentrePoint(Rectangle rect)
+        {
+            return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
+        }
+
 		private Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
 		{
-			Point fromCentre = new Point(((fromRect.Left + fromRect.Right) / 2), ((fromRect.Top + fromRect.Bottom) / 2));
-			Point toCentre = new Point(((toRect.Left + toRect.Right) / 2), ((toRect.Top + toRect.Bottom) / 2));
+			Point fromCentre = CentrePoint(fromRect);
+			Point toCentre = CentrePoint(toRect);
 
 			return new Point((toCentre.X - fromCentre.X), (toCentre.Y - fromCentre.Y));
 		}
