@@ -270,6 +270,9 @@ namespace WordCloudUIExtension
 			{
 				editRect = SelectedItems[0].GetBounds(ItemBoundsPortion.Label);
 
+				editRect.Width += (editRect.X - 2);
+				editRect.X = 2;
+
 				// adjust for icon
 				if (m_TaskMatchesHaveIcons)
 				{

@@ -568,6 +568,7 @@ namespace WordCloudUIExtension
 			
 			combo.Size = new Size(ComboWidth, ComboHeight);
 			combo.DropDownStyle = ComboBoxStyle.DropDownList;
+			combo.DropDownHeight = 400;
 			combo.Font = m_ControlsFont;
 
 			this.Controls.Add(combo);
