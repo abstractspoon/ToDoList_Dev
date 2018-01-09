@@ -33,6 +33,7 @@ namespace MindMapUIExtension
 		private const int ExpansionButtonSeparation = 2;
 
         private Point m_DrawOffset;
+        private Boolean m_HoldRedraw;
 
         // Public ------------------------------------------------------------------------
 
@@ -41,6 +42,7 @@ namespace MindMapUIExtension
         public MindMapControl()
         {
             m_DrawOffset = new Point(0, 0);
+            m_HoldRedraw = false;
 
             InitializeComponent();
 #if DEBUG
@@ -98,6 +100,7 @@ namespace MindMapUIExtension
 			// notifications and we want our animation to occur
 			// just at the end we ignore notifications until the end
 			EnableExpandNotifications(false);
+            m_HoldRedraw = true;
 
 			switch (expand)
 			{
@@ -125,6 +128,7 @@ namespace MindMapUIExtension
 
 			EnableExpandNotifications(true);
 			RecalculatePositions();
+            m_HoldRedraw = false;
 
 			return true;
 		}
@@ -195,12 +199,15 @@ namespace MindMapUIExtension
 		{
 			base.OnPaint(e);
 
-			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            if (!m_HoldRedraw)
+            {
+			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			DrawPositions(e.Graphics, m_TreeView.Nodes);
+			    DrawPositions(e.Graphics, m_TreeView.Nodes);
 
-            foreach (TreeNode node in m_TreeView.Nodes)
-                DrawConnections(e.Graphics, node);
+                foreach (TreeNode node in m_TreeView.Nodes)
+                    DrawConnections(e.Graphics, node);
+            }
         }
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
@@ -316,6 +323,31 @@ namespace MindMapUIExtension
 		}
 
         // Private Internals -----------------------------------------------------------
+
+        protected void EnsureSelectionVisible()
+        {
+            if (SelectedNode == null)
+                return;
+
+            Rectangle selRect = GetItemDrawRect(SelectedItem.ItemBounds);
+
+            if (ClientRectangle.Contains(selRect))
+                return;
+
+            // Scroll the item into view
+            Point centre = CentrePoint(SelectedItem.ItemBounds);
+
+            int scrollX = (centre.X - (ClientRectangle.Width / 2));
+            int scrollY = (centre.Y - (ClientRectangle.Height / 2));
+
+            scrollX = Math.Min(Math.Max(HorizontalScroll.Minimum, scrollX), HorizontalScroll.Maximum);
+            scrollY = Math.Min(Math.Max(VerticalScroll.Minimum, scrollY), VerticalScroll.Maximum);
+
+            HorizontalScroll.Value = scrollX;
+            VerticalScroll.Value = scrollY;
+
+            PerformLayout();
+        }
 
 		private void EnableExpandNotifications(bool enable)
 		{
@@ -675,14 +707,15 @@ namespace MindMapUIExtension
                 rootItem.ChildBounds = childBounds;
             }
 
-            // Move the whole graph so that the Root is centred on (0,0)
-            Point centre = CentrePoint(rootItem.ItemBounds);
-            OffsetPositions(rootNode, -centre.X, -centre.Y);
+            // Move the whole graph so that the top-left is (0,0)
+            Rectangle graphRect = rootItem.TotalBounds;
+            OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
             
 			RecalculateDrawOffset(true);
 			Invalidate();
 
-            this.AutoScrollMinSize = rootItem.TotalBounds.Size;
+            this.AutoScrollMinSize = graphRect.Size;
+            EnsureSelectionVisible();
 		}
 
         private Point CentrePoint(Rectangle rect)
@@ -879,11 +912,6 @@ namespace MindMapUIExtension
                     availSpace = Rectangle.FromLTRB(m_TreeView.Width, ClientRectangle.Top, ClientRectangle.Right, ClientRectangle.Bottom);
 
 				Rectangle graphRect = RootItem.TotalBounds;
-
-				// If the entire graph is contained within the available area
-				// then don't move it so that the Root node doesn't jump about
-				// TODO
-
 				Point ptOffset = CalculateCentreToCentreOffset(graphRect, availSpace);
 
                 if (availSpace.Height < graphRect.Height)
@@ -894,16 +922,27 @@ namespace MindMapUIExtension
 
                 if (m_DrawOffset != ptOffset)
                 {
-					if (!animate || ((m_DrawOffset.X == 0) && (m_DrawOffset.Y == 0)))
+					int xDiff = (ptOffset.X - m_DrawOffset.X);
+					int yDiff = (ptOffset.Y - m_DrawOffset.Y);
+
+                    // Don't animate first time or if the offset 
+                    // is greater than the Client area
+                    if ((m_DrawOffset.X == 0) && (m_DrawOffset.Y == 0))
+                    {
+                        animate = false;
+                    }
+                    else if ((xDiff > ClientRectangle.Width) || (yDiff > ClientRectangle.Height))
+                    {
+                        animate = false;
+                    }
+
+                    if (!animate)
 					{
 						m_DrawOffset = ptOffset;
 						Invalidate();
 					}
 					else
 					{
-						int xDiff = (ptOffset.X - m_DrawOffset.X);
-						int yDiff = (ptOffset.Y - m_DrawOffset.Y);
-
 						Point prevPt = m_DrawOffset;
 
 						for (int i = 1; i <= 10; i++)
