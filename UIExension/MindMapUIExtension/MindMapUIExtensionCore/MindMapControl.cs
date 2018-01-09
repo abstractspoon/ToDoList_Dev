@@ -60,6 +60,14 @@ namespace MindMapUIExtension
             this.DoubleBuffered = true;
         }
 
+        public void SetFont(String fontName, int fontSize)
+        {
+            if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
+                return;
+
+            this.Font = new Font(fontName, fontSize, FontStyle.Regular);
+        }
+
         public TreeNode AddRootNode(Object itemData, UInt32 uniqueID = 0)
         {
             if (IsEmpty())
@@ -314,6 +322,8 @@ namespace MindMapUIExtension
 
 			m_TreeView.Font = this.Font;
 			m_TreeView.ItemHeight += ItemVertSeparation;
+
+            RecalculatePositions();
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)

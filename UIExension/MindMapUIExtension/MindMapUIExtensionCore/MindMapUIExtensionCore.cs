@@ -121,6 +121,28 @@ namespace MindMapUIExtension
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
+            if (!appOnly)
+            {
+                // private settings
+            }
+
+//             bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+// 
+//             if (taskColorIsBkgnd != m_taskColorIsBkgnd)
+//             {
+//                 m_taskColorIsBkgnd = taskColorIsBkgnd;
+//                 Invalidate();
+//             }
+
+            if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
+            {
+                m_MindMap.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
+                                  prefs.GetProfileInt("Preferences", "FontSize", 8));
+            }
+            else
+            {
+                m_MindMap.SetFont(FontName, 8);
+            }
         }
 
 		public new Boolean Focus()
