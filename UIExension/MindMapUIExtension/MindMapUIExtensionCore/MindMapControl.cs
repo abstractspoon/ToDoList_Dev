@@ -128,6 +128,8 @@ namespace MindMapUIExtension
 
 			EnableExpandNotifications(true);
 			RecalculatePositions();
+            EnsureItemVisible(SelectedItem);
+
             m_HoldRedraw = false;
 
 			return true;
@@ -267,6 +269,7 @@ namespace MindMapUIExtension
     	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
 		{
 			RecalculatePositions();
+            EnsureItemVisible(Item(e.Node));
 		}
 
         protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
@@ -324,18 +327,16 @@ namespace MindMapUIExtension
 
         // Private Internals -----------------------------------------------------------
 
-        protected void EnsureSelectionVisible()
+        protected void EnsureItemVisible(MindMapItem item)
         {
-            if (SelectedNode == null)
+            if (item == null)
                 return;
 
-            Rectangle selRect = GetItemDrawRect(SelectedItem.ItemBounds);
-
-            if (ClientRectangle.Contains(selRect))
+            if (ClientRectangle.Contains(GetItemDrawRect(item.ItemBounds)))
                 return;
 
             // Scroll the item into view
-            Point centre = CentrePoint(SelectedItem.ItemBounds);
+            Point centre = CentrePoint(item.ItemBounds);
 
             int scrollX = (centre.X - (ClientRectangle.Width / 2));
             int scrollY = (centre.Y - (ClientRectangle.Height / 2));
@@ -715,7 +716,6 @@ namespace MindMapUIExtension
 			Invalidate();
 
             this.AutoScrollMinSize = graphRect.Size;
-            EnsureSelectionVisible();
 		}
 
         private Point CentrePoint(Rectangle rect)
