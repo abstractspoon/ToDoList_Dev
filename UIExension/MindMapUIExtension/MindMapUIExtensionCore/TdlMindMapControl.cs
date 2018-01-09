@@ -198,6 +198,11 @@ namespace MindMapUIExtension
 
 			return true;
 		}
+
+		protected override int GetMinItemHeight()
+		{
+			return 18;
+		}
 	}
 }
 

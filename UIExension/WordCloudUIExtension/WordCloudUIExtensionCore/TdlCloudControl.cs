@@ -137,6 +137,15 @@ namespace WordCloudUIExtension
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
+
+			Invalidate();
+		}
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			Invalidate();
 		}
 		
 		public event SelectionChangeEventHandler SelectionChange;
@@ -183,7 +192,7 @@ namespace WordCloudUIExtension
 		private void DrawSelected(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			Rectangle rect = Rectangle.Round(layoutItem.Rectangle);
-			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, true/*m_Ctrl.Focused*/);
+			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
 
 			DrawEmphasizedText(layoutItem);
 		}

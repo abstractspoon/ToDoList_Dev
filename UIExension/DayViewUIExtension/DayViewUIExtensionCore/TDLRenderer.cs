@@ -237,7 +237,7 @@ namespace DayViewUIExtension
 
                     rect.Offset(2, 1);
 
-                    using (Font fntDay = new Font("Tahoma", 8))
+					using (Font fntDay = new Font("Tahoma", 8, FontStyle.Regular))
                         g.DrawString(sTodaysName, fntDay, SystemBrushes.WindowText, rect, format);
 
                     rect.Offset(-2, -1);

@@ -25,6 +25,12 @@ namespace MindMapUIExtension
 		static int SB_HORZ = 0;
 		static int SB_VERT = 1;
 
+		[DllImport("User32.dll")]
+		public static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+
+		static int TVM_SETITEMHEIGHT = (0x1100 + 27);
+		static int TVM_GETITEMHEIGHT = (0x1100 + 28);
+
 		// Data --------------------------------------------------------------------------
 
 		private const int ItemHorzSeparation = 40;
@@ -321,7 +327,15 @@ namespace MindMapUIExtension
 			base.OnFontChanged(e);
 
 			m_TreeView.Font = this.Font;
-			m_TreeView.ItemHeight += ItemVertSeparation;
+			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
+
+			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
+			itemHeight = Math.Max(itemHeight, GetMinItemHeight());
+
+			// Make even height
+			itemHeight += (itemHeight % 2);
+
+			m_TreeView.ItemHeight = (itemHeight + ItemVertSeparation);
 
             RecalculatePositions();
 		}
@@ -476,6 +490,11 @@ namespace MindMapUIExtension
 
 			SelectedNode = selNode;
 			return true;
+		}
+
+		protected virtual int GetMinItemHeight()
+		{
+			return 10;
 		}
 
 		protected Boolean IsEmpty()

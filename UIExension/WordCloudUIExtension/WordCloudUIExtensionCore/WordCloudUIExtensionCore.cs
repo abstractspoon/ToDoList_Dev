@@ -70,7 +70,7 @@ namespace WordCloudUIExtension
 			m_Attrib = UIExtension.TaskAttribute.Title;
             m_ExcludedWords = new CommonWords(); // English by default
 
-			m_ControlsFont = new Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
 			m_Splitting = false;
 			m_InitialSplitPos = -1;
@@ -572,6 +572,13 @@ namespace WordCloudUIExtension
 
 			this.Controls.Add(combo);
 			return combo;
+		}
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			m_TaskMatchesList.Focus();
 		}
 
 		protected override void OnPaint(PaintEventArgs e)

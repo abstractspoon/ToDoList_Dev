@@ -390,6 +390,13 @@ namespace DayViewUIExtension
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			m_DayView.Focus();
+		}
+
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);

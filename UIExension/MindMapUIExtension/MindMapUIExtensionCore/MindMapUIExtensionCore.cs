@@ -36,7 +36,7 @@ namespace MindMapUIExtension
             m_Trans = trans;
 
             m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-            m_ControlsFont = new Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
             InitializeComponent();
         }
@@ -167,6 +167,15 @@ namespace MindMapUIExtension
 		public Boolean CanExpand(MindMapControl.ExpandNode expand)
 		{
 			return m_MindMap.CanExpand(expand);
+		}
+
+        // Message handlers ---------------------------------------------------------------------
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			m_MindMap.Focus();
 		}
 
         // PRIVATE ------------------------------------------------------------------------------
