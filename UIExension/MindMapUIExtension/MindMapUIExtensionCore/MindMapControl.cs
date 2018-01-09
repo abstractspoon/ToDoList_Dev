@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace MindMapUIExtension
 {
@@ -28,15 +29,15 @@ namespace MindMapUIExtension
 		[DllImport("User32.dll")]
 		public static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
-		static int TVM_SETITEMHEIGHT = (0x1100 + 27);
-		static int TVM_GETITEMHEIGHT = (0x1100 + 28);
+		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
+		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
+
+		const int ItemHorzSeparation = 40;
+		const int ItemVertSeparation = 4;
+		const int ExpansionButtonSize = 8;
+		const int ExpansionButtonSeparation = 2;
 
 		// Data --------------------------------------------------------------------------
-
-		private const int ItemHorzSeparation = 40;
-        private const int ItemVertSeparation = 4;
-		private const int ExpansionButtonSize = 8;
-		private const int ExpansionButtonSeparation = 2;
 
         private Point m_DrawOffset;
         private Boolean m_HoldRedraw;
@@ -228,16 +229,19 @@ namespace MindMapUIExtension
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
-			base.OnMouseDoubleClick(e);
-
             TreeNode hit = HitTestPositions(e.Location);
+
+			if ((hit != null) && HitTestExpansionButton(hit, e.Location))
+				return;
+
+			base.OnMouseDoubleClick(e);
 
             if (IsRoot(hit))
             {
-                if (IsAnyNodeExpanded(RootNode.Nodes))
-                    Expand(ExpandNode.CollapseAll);
-                else
+                if (IsAnyNodeCollapsed(RootNode.Nodes))
                     Expand(ExpandNode.ExpandAll);
+                else
+                    Expand(ExpandNode.CollapseAll);
             }
             else if (IsParent(hit))
             {
@@ -256,11 +260,10 @@ namespace MindMapUIExtension
 
 			if (hit != null)
 			{
-				Rectangle button = CalculateExpansionButtonRect(hit);
-				button.Inflate(1, 1);
-
-				if (button.Contains(e.Location))
+				if (HitTestExpansionButton(hit, e.Location))
 				{
+					RedrawExpansionButton(hit);
+
 					if (hit.IsExpanded)
 						hit.Collapse();
 					else
@@ -273,11 +276,24 @@ namespace MindMapUIExtension
 			}
         }
 
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			base.OnMouseUp(e);
+
+			TreeNode hit = HitTestPositions(e.Location);
+
+			if (hit != null)
+			{
+				if (HitTestExpansionButton(hit, e.Location))
+					RedrawExpansionButton(hit, false);
+			}
+		}
+
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
 
-			RecalculateDrawOffset(false);
+			RecalculateDrawOffset();
 		}
 
     	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
@@ -288,6 +304,7 @@ namespace MindMapUIExtension
 
         protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
         {
+			EnsureItemVisible(Item(e.Node));
             Invalidate();
 			Update();
 
@@ -303,7 +320,7 @@ namespace MindMapUIExtension
         {
             m_TreeView.Visible = DebugMode();
 
-            if (!RecalculateDrawOffset(false))
+            if (!RecalculateDrawOffset())
 				Invalidate();
         }
 #endif
@@ -691,7 +708,7 @@ namespace MindMapUIExtension
             // There must be a single root task to proceed
             if (IsEmpty())
                 return;
-
+			
             TreeNode rootNode = RootNode;
             MindMapItem rootItem = RootItem;
 
@@ -740,17 +757,22 @@ namespace MindMapUIExtension
             // Move the whole graph so that the top-left is (0,0)
             Rectangle graphRect = rootItem.TotalBounds;
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
-            
-			RecalculateDrawOffset(true);
-			Invalidate();
 
-            this.AutoScrollMinSize = graphRect.Size;
+			this.AutoScrollMinSize = graphRect.Size;
+            
+			RecalculateDrawOffset();
+			Invalidate();
 		}
 
         private Point CentrePoint(Rectangle rect)
         {
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
+
+		private Rectangle Copy(Rectangle rect)
+		{
+			return new Rectangle(rect.Location, rect.Size);
+		}
 
 		private Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
 		{
@@ -888,7 +910,7 @@ namespace MindMapUIExtension
 
         private Rectangle GetLogicalTreeNodePosition(TreeNode node)
         {
-            Rectangle itemBounds = new Rectangle(node.Bounds.Location, node.Bounds.Size);
+            Rectangle itemBounds = Copy(node.Bounds);
 			itemBounds.Width += 6;
 
 			if (IsParent(node) && !IsRoot(node))
@@ -930,11 +952,10 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private bool RecalculateDrawOffset(bool animate)
+		private bool RecalculateDrawOffset()
 		{
 			if (m_TreeView.Nodes.Count > 0)
 			{
-				TreeNode rootNode = m_TreeView.Nodes[0];
 				Rectangle availSpace = ClientRectangle;
 
                 if (DebugMode())
@@ -951,38 +972,8 @@ namespace MindMapUIExtension
 
                 if (m_DrawOffset != ptOffset)
                 {
-					int xDiff = (ptOffset.X - m_DrawOffset.X);
-					int yDiff = (ptOffset.Y - m_DrawOffset.Y);
-
-                    // Don't animate first time or if the offset 
-                    // is greater than the Client area
-                    if ((m_DrawOffset.X == 0) && (m_DrawOffset.Y == 0))
-                    {
-                        animate = false;
-                    }
-                    else if ((xDiff > ClientRectangle.Width) || (yDiff > ClientRectangle.Height))
-                    {
-                        animate = false;
-                    }
-
-                    if (!animate)
-					{
-						m_DrawOffset = ptOffset;
-						Invalidate();
-					}
-					else
-					{
-						Point prevPt = m_DrawOffset;
-
-						for (int i = 1; i <= 10; i++)
-						{
-							m_DrawOffset.X = prevPt.X + ((i * xDiff) / 10);
-							m_DrawOffset.Y = prevPt.Y + ((i * yDiff) / 10);
-
-							Invalidate();
-							Update();
-						}
-					}
+					m_DrawOffset = ptOffset;
+					Invalidate();
 
 					return true;
                 }
@@ -990,16 +981,16 @@ namespace MindMapUIExtension
 				return false; // no change
 			}
 
-			return false;
+			return false; // no change
 		}
 
-		static public StringFormat DefaultLabelFormat()
+		static public StringFormat DefaultLabelFormat(bool leftOfRoot)
 		{
 			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
 
 			format.LineAlignment = StringAlignment.Center;
-			format.Alignment = StringAlignment.Center;
 			format.Trimming = StringTrimming.None;
+			format.Alignment = (leftOfRoot ? StringAlignment.Far : StringAlignment.Near);
 
 			return format;
 		}
@@ -1020,7 +1011,7 @@ namespace MindMapUIExtension
 
 			Brush textColor = (isSelected ? SystemBrushes.HighlightText : SystemBrushes.WindowText);
 
-			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat());
+			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
 		}
 
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
@@ -1028,9 +1019,10 @@ namespace MindMapUIExtension
 			foreach (TreeNode node in nodes)
 			{
 				MindMapItem item = Item(node);
+				Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
 
 				// Don't draw items falling wholly outside the client rectangle
-				if (!GetItemDrawRect(item.TotalBounds).IntersectsWith(ClientRectangle))
+				if (!GetItemDrawRect(item.TotalBounds).IntersectsWith(clipRect))
 					continue;
 
 				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
@@ -1098,6 +1090,21 @@ namespace MindMapUIExtension
 										buttonTop + ExpansionButtonSize);
 		}
 
+		private void RedrawExpansionButton(TreeNode node, bool update = true)
+		{
+			Invalidate(CalculateExpansionButtonRect(node));
+
+			if (update)
+				Update();
+		}
+
+		private bool HitTestExpansionButton(TreeNode node, Point point)
+		{
+			Rectangle button = Rectangle.Inflate(CalculateExpansionButtonRect(node), 2, 4);
+
+			return button.Contains(point);
+		}
+
 		private void DrawExpansionButton(Graphics graphics, TreeNode node)
 		{
 			// Only for parent nodes and Root is always expanded
@@ -1124,7 +1131,15 @@ namespace MindMapUIExtension
 
 			if (!button.IsEmpty)
 			{
-				graphics.FillRectangle(SystemBrushes.Window, button);
+				Color backColor = Color.White;
+
+				if ((MouseButtons == MouseButtons.Left) &&
+					Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)))
+				{
+					backColor = Color.LightGray;
+				}
+
+				graphics.FillRectangle(new SolidBrush(backColor), button);
                 graphics.DrawRectangle(new Pen(Color.DarkGray), button);
 
                 using (var pen = new Pen(Color.Black))
@@ -1188,7 +1203,9 @@ namespace MindMapUIExtension
 			Point ptTo = new Point((flipped ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
 
 			// Don't draw connections falling wholly outside the client rectangle
-			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(ClientRectangle))
+			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
+
+			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
 				return;
 
 			DrawNodeConnection(graphics, ptFrom, ptTo);
@@ -1204,7 +1221,7 @@ namespace MindMapUIExtension
 
 		private Rectangle GetItemDrawRect(Rectangle itemRect)
 		{
-			Rectangle drawPos = new Rectangle(itemRect.Location, itemRect.Size);
+			Rectangle drawPos = Copy(itemRect);
 
 			drawPos.Offset(m_DrawOffset);
             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
@@ -1240,12 +1257,12 @@ namespace MindMapUIExtension
 
             MindMapItem item = Item(node);
 
-            if (GetItemDrawRect(item.TotalBounds).Contains(point))
+            if (GetItemDrawRect(Rectangle.Inflate(item.TotalBounds, 2, 2)).Contains(point))
             {
-                if (GetItemDrawRect(item.ItemBounds).Contains(point))
+                if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 2)).Contains(point))
                     return node;
 
-                if (GetItemDrawRect(item.ChildBounds).Contains(point))
+                if (GetItemDrawRect(Rectangle.Inflate(item.ChildBounds, 2, 2)).Contains(point))
                 {
                     foreach (TreeNode child in node.Nodes)
                     {

@@ -152,7 +152,7 @@ namespace MindMapUIExtension
 					graphics.DrawRectangle(new Pen(Color.Green), rect);
 			}
 
-			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat());
+			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
 		}
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
