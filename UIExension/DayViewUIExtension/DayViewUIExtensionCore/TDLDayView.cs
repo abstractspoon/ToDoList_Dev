@@ -16,14 +16,14 @@ namespace DayViewUIExtension
 
 		System.Windows.Forms.Timer m_RedrawTimer;
 
-        public TDLDayView(System.Drawing.Font font, UIExtension.TaskIcon taskIcons)
+        public TDLDayView(UIExtension.TaskIcon taskIcons)
         {
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 
-            InitializeComponent(font);
+            InitializeComponent();
         }
 
-        protected void InitializeComponent(System.Drawing.Font font)
+        protected void InitializeComponent()
         {
             Calendar.DrawTool drawTool = new Calendar.DrawTool();
             drawTool.DayView = this;
@@ -38,7 +38,6 @@ namespace DayViewUIExtension
             this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
             this.DaysToShow = 7;
             this.DrawAllAppBorder = false;
-            this.Font = font;
             this.Location = new System.Drawing.Point(0, 0);
             this.MinHalfHourApp = false;
             this.Name = "m_dayView";
@@ -55,6 +54,12 @@ namespace DayViewUIExtension
             this.WorkingMinuteStart = 0;
         }
 
+        public void SetFont(String fontName, int fontSize)
+        {
+            m_Renderer.SetFont(fontName, fontSize);
+            Invalidate(true);
+        }
+        
         public int GetFontHeight()
         {
             return m_Renderer.GetFontHeight();

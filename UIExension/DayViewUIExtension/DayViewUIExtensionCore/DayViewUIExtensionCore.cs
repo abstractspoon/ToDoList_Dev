@@ -255,16 +255,28 @@ namespace DayViewUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-			if (appOnly)
-			{
-				bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+            if (!appOnly)
+            {
+                // private settings
+            }
 
-				if (taskColorIsBkgnd != m_taskColorIsBkgnd)
-				{
-					m_taskColorIsBkgnd = taskColorIsBkgnd;
-					Invalidate();
-				}
+			bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+
+			if (taskColorIsBkgnd != m_taskColorIsBkgnd)
+			{
+				m_taskColorIsBkgnd = taskColorIsBkgnd;
+				Invalidate();
 			}
+
+            if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
+            {
+                m_DayView.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
+                                  prefs.GetProfileInt("Preferences", "FontSize", 8));
+            }
+            else
+            {
+                m_DayView.SetFont(FontName, 8);
+            }
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
@@ -317,7 +329,7 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			this.m_DayView = new TDLDayView(m_ControlsFont, m_TaskIcons);
+			this.m_DayView = new TDLDayView(m_TaskIcons);
 
 			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
 			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
@@ -325,6 +337,8 @@ namespace DayViewUIExtension
 			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
 			this.m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(this.OnDayViewWeekChanged);
 			this.m_DayView.StartDate = DateTime.Now;
+
+            this.m_DayView.SetFont(FontName, 8);
 
 			this.Controls.Add(m_DayView);
 		}

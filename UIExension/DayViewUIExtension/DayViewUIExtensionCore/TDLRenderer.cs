@@ -39,7 +39,8 @@ namespace DayViewUIExtension
         private UITheme m_theme;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
-
+        private Font m_BaseFont;
+        
         public UITheme Theme
         {
             set { m_theme = value; }
@@ -49,25 +50,31 @@ namespace DayViewUIExtension
         {
             base.Dispose(mainThread);
 
-            if (baseFont != null)
-                baseFont.Dispose();
+            if (m_BaseFont != null)
+                m_BaseFont.Dispose();
         }
-
-        Font baseFont;
 
         public override Font BaseFont
         {
             get
             {
-                if (baseFont == null)
+                if (m_BaseFont == null)
                 {
-                    baseFont = new Font("Tahoma", 8, FontStyle.Regular);
+                    m_BaseFont = new Font("Tahoma", 8, FontStyle.Regular);
                 }
 
-                return baseFont;
+                return m_BaseFont;
             }
         }
 
+        public void SetFont(String fontName, int fontSize)
+        {
+            if ((m_BaseFont.Name == fontName) && (m_BaseFont.Size == fontSize))
+                return;
+
+            m_BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
+        }
+        
         public int GetFontHeight()
         {
             return BaseFont.Height;
@@ -340,7 +347,7 @@ namespace DayViewUIExtension
                     rect.Y += 3;
 
 					if (longAppt)
-						rect.Height = baseFont.Height;
+						rect.Height = m_BaseFont.Height;
 					else
 						rect.Height -= 3;
 

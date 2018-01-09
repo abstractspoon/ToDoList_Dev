@@ -431,12 +431,12 @@ namespace WordCloudUIExtension
 
             if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
             {
-                m_WordCloud.SetFont(prefs.GetProfileString("Preferences", "TreeFont", "Tahoma"),
+                m_WordCloud.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
                                     prefs.GetProfileInt("Preferences", "FontSize", 10));
             }
             else
             {
-                m_WordCloud.SetFont("Tahoma", 10);
+                m_WordCloud.SetFont(FontName, 10);
             }
 
             UpdateBlacklist();
