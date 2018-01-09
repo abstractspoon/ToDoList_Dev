@@ -403,20 +403,9 @@ namespace WordCloudUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
-            if (appOnly)
-            {
-				string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-				string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
-
-				m_UserIgnoreFilePath = Path.Combine(appPath, "WordCloud.Ignore.txt");
-
-				m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
-				m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
-
-				UpdateBlacklist();
-            }
-            else // private settings
-			{
+            if (!appOnly)
+            { 
+                // private settings
 				var attrib = (UIExtension.TaskAttribute)prefs.GetProfileInt(key, "AttribToTrack", (int)UIExtension.TaskAttribute.Title);
 
 				if (!AttributeComboBox.IsSupportedAttribute(attrib))
@@ -430,8 +419,28 @@ namespace WordCloudUIExtension
 					m_ColorsCombo.SelectedIndex = 0;
 
 				m_InitialSplitPos = prefs.GetProfileInt(key, "SplitterPosFromRight", MatchListDefaultWidth);
-			}
-		}
+            }
+
+            string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
+
+            m_UserIgnoreFilePath = Path.Combine(appPath, "WordCloud.Ignore.txt");
+
+            m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
+            m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
+
+            if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
+            {
+                m_WordCloud.SetFont(prefs.GetProfileString("Preferences", "TreeFont", "Tahoma"),
+                                    prefs.GetProfileInt("Preferences", "FontSize", 10));
+            }
+            else
+            {
+                m_WordCloud.SetFont("Tahoma", 10);
+            }
+
+            UpdateBlacklist();
+        }
 		
 		// PRIVATE ------------------------------------------------------------------------------
 
@@ -462,7 +471,7 @@ namespace WordCloudUIExtension
 
 		private void CreateWordCloud()
 		{
-			m_WordCloud = new TdlCloudControl(this.Handle, m_Trans, FontName);
+			m_WordCloud = new TdlCloudControl(this.Handle, m_Trans);
 
 			m_WordCloud.Location = new Point(0, ControlTop);
 			m_WordCloud.Size = new Size(100, 100);
@@ -473,6 +482,8 @@ namespace WordCloudUIExtension
 
 			m_WordCloud.SelectionChange += new SelectionChangeEventHandler(OnWordSelectionChanged);
 			m_WordCloud.MouseClick += new MouseEventHandler(OnWordCloudMouseClick);
+
+            m_WordCloud.SetFont(FontName, 10); // default
 		}
 
 		private void CreateTaskMatchesListView()

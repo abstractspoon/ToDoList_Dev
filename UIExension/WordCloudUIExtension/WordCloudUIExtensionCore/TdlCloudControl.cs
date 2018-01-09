@@ -28,17 +28,30 @@ namespace WordCloudUIExtension
 		private string m_SelectedWord;
 		private IntPtr m_hWnd;
 
-		public TdlCloudControl(IntPtr hWnd, Translator trans, String fontName)
+		public TdlCloudControl(IntPtr hWnd, Translator trans)
 		{
+            base.MinFontSize = 10;
 			base.MaxFontSize = 30;
 
 			this.DoubleBuffered = true;
-			this.Font = new System.Drawing.Font(fontName, 10);
 
 			m_ToolTip = new System.Windows.Forms.ToolTip();
 			m_Trans = trans;
 			m_hWnd = hWnd;
 		}
+
+        public void SetFont(String fontName, int fontSize)
+        {
+            if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
+                return;
+
+            base.MinFontSize = fontSize;
+            base.MaxFontSize = Math.Max(30, (fontSize + 20));
+
+            this.Font = new System.Drawing.Font(fontName, fontSize);
+
+            BuildLayout();
+        }
 
 		public string SelectedWord
 		{

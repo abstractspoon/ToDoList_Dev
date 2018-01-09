@@ -74,7 +74,7 @@ namespace Gma.CodeCloud.Controls
             return new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
         }
 
-        private void BuildLayout()
+        protected void BuildLayout()
         {
             if (m_Words == null || !m_Words.Any())
 				return;
