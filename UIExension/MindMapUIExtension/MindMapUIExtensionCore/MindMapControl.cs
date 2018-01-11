@@ -13,6 +13,7 @@ using System.Diagnostics;
 namespace MindMapUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, object itemData);
+	public delegate Boolean DragDropChangeEventHandler(object sender, object draggedItemData, object dropTargetItemData, Boolean copy);
 
 	[System.ComponentModel.DesignerCategory("")]
 
@@ -41,15 +42,18 @@ namespace MindMapUIExtension
 
         private Point m_DrawOffset;
         private Boolean m_HoldRedraw;
+		private TreeNode m_DropTarget;
 
         // Public ------------------------------------------------------------------------
 
 		public event SelectionChangeEventHandler SelectionChange;
+		public event DragDropChangeEventHandler DragDropChange;
 
         public MindMapControl()
         {
             m_DrawOffset = new Point(0, 0);
             m_HoldRedraw = false;
+			m_DropTarget = null;
 
             InitializeComponent();
 #if DEBUG
@@ -65,12 +69,17 @@ namespace MindMapUIExtension
 
             this.AutoScroll = true;
             this.DoubleBuffered = true;
+			this.AllowDrop = true;
         }
 
         public void SetFont(String fontName, int fontSize)
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
                 return;
+
+			// The Tree collapses when the font is changed so we
+			// cache the selected item for restoration after
+			UInt32 selID = (IsEmpty() ? 0 : Convert.ToUInt32(SelectedNode.Name, 10));
 
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
         }
@@ -272,9 +281,125 @@ namespace MindMapUIExtension
 				else
 				{
 					SelectedNode = hit;
+
+					if (hit != RootNode)
+						DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
 				}
 			}
         }
+
+		protected override void OnDragOver(DragEventArgs e)
+		{
+			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+
+			if (draggedNode == null)
+			{
+				e.Effect = DragDropEffects.None;
+			}
+			else
+			{
+				Point dragPt = PointToClient(new Point(e.X, e.Y));
+				TreeNode dropTarget = HitTestPositions(dragPt);
+
+				if (!IsAcceptableDropTarget(draggedNode, dropTarget))
+				{
+					e.Effect = DragDropEffects.None;
+				}
+				else
+				{
+					if ((e.KeyState & 8) == 8)
+						e.Effect = DragDropEffects.Copy;
+					else
+						e.Effect = DragDropEffects.Move;
+				}
+
+				// Update drop target
+				if (dropTarget != m_DropTarget)
+				{
+					if (m_DropTarget != null)
+						RedrawNode(m_DropTarget, false);
+
+					if (dropTarget != null)
+						RedrawNode(dropTarget, false);
+				
+					m_DropTarget = dropTarget;
+					Update();
+				}
+			}
+		}
+
+		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
+		{
+			if ((dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
+				return false;
+
+			// else
+			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget));
+		}
+
+		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
+		{
+			return true;
+		}
+
+		protected override void OnDragDrop(DragEventArgs e)
+		{
+			RedrawNode(m_DropTarget, false);
+			m_DropTarget = null;
+
+			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+
+			Point dropPt = PointToClient(new Point(e.X, e.Y));
+			TreeNode dropTarget = HitTestPositions(dropPt);
+
+			DoDrop(draggedNode, dropTarget, ((e.KeyState & 8) == 8));
+		}
+
+		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, bool copy)
+		{
+			if (IsAcceptableDropTarget(draggedNode, dropTarget))
+			{
+				// Let derived class have first go
+				if (DoDrop(ItemData(draggedNode), ItemData(dropTarget), copy))
+				{
+					// they handled it
+					return;
+				}
+
+				// Remove the node from its current 
+				// location and add it to the node at the drop location.
+				draggedNode.Remove();
+				dropTarget.Nodes.Add(draggedNode);
+
+				// Expand the node at the location 
+				// to show the dropped node.
+				dropTarget.Expand();
+
+				SelectedNode = draggedNode;
+			}
+		}
+
+		virtual protected Boolean DoDrop(Object draggedItemData, Object dropTargetItemData, Boolean copy)
+		{
+			if (DragDropChange != null)
+				return DragDropChange(this, draggedItemData, dropTargetItemData, copy);
+
+			// else
+			return false;
+		}
+
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+		{
+			base.OnQueryContinueDrag(e);
+
+			if (e.EscapePressed)
+			{
+				RedrawNode(m_DropTarget, false);
+				m_DropTarget = null;
+
+				e.Action = DragAction.Cancel;
+			}
+		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
@@ -343,6 +468,10 @@ namespace MindMapUIExtension
 		{
 			base.OnFontChanged(e);
 
+			// The Tree collapses when the font is changed so we
+			// cache the selected item for restoration after
+			//UInt32 selID = (IsEmpty() ? 0 : Convert.ToUInt32(SelectedNode.Name, 10));
+
 			m_TreeView.Font = this.Font;
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
@@ -350,9 +479,10 @@ namespace MindMapUIExtension
 			itemHeight = Math.Max(itemHeight, GetMinItemHeight());
 
 			// Make even height
-			itemHeight += (itemHeight % 2);
+			m_TreeView.ItemHeight = (itemHeight + (itemHeight % 2) + ItemVertSeparation);
 
-			m_TreeView.ItemHeight = (itemHeight + ItemVertSeparation);
+			//if (selID != 0)
+			//	SetSelectedNode(selID);
 
             RecalculatePositions();
 		}
@@ -390,6 +520,23 @@ namespace MindMapUIExtension
 
             PerformLayout();
         }
+
+		private bool IsChildNode(TreeNode parent, TreeNode child)
+		{
+			if ((parent == null) || (child == null))
+				return false;
+
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (child == node)
+					return true;
+
+				if (IsChildNode(node, child)) // RECURSIVE call
+					return true;
+			}
+
+			return false;
+		}
 
 		private void EnableExpandNotifications(bool enable)
 		{
@@ -995,23 +1142,48 @@ namespace MindMapUIExtension
 			return format;
 		}
 
-		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, 
-											 bool isSelected, bool leftOfRoot, Object itemData)
+		protected enum NodeDrawState
 		{
-			if (isSelected)
-			{
-				Rectangle selRect = Rectangle.Inflate(rect, -2, 0);
+			None,
+			Selected,
+			DropTarget,
+		}
 
-				graphics.FillRectangle(SystemBrushes.Highlight, selRect);
-			}
-			else if (DebugMode())
-			{
-				graphics.DrawRectangle(new Pen(Color.Green), rect);
-			}
+		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, 
+											 NodeDrawState nodeState, bool leftOfRoot, Object itemData)
+		{
+			Brush textColor = SystemBrushes.WindowText;
 
-			Brush textColor = (isSelected ? SystemBrushes.HighlightText : SystemBrushes.WindowText);
+			switch (nodeState)
+			{
+				case NodeDrawState.Selected:
+					graphics.FillRectangle(SystemBrushes.Highlight, Rectangle.Inflate(rect, -2, 0));
+					textColor = SystemBrushes.HighlightText;
+					break;
+
+				case NodeDrawState.DropTarget:
+					graphics.FillRectangle(SystemBrushes.ControlLight, Rectangle.Inflate(rect, -2, 0));
+					break;
+
+				case NodeDrawState.None:
+					if (DebugMode())
+						graphics.DrawRectangle(new Pen(Color.Green), rect);
+					break;
+	
+			}
 
 			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
+		}
+
+		private NodeDrawState DrawState(TreeNode node)
+		{
+			if (node.IsSelected)
+				return NodeDrawState.Selected;
+
+			if (node == m_DropTarget)
+				return NodeDrawState.DropTarget;
+
+			return NodeDrawState.None;
 		}
 
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
@@ -1037,12 +1209,12 @@ namespace MindMapUIExtension
 					drawPos.Width -= offset;
 				}
 
-				if (node.IsSelected)
-				{
-					drawPos.Inflate(0, -(ItemVertSeparation / 2));
-				}
+				NodeDrawState drawState = DrawState(node);
 
-				DrawNodeLabel(graphics, node.Text, drawPos, node.IsSelected, item.Flipped, item.ItemData);
+				if (drawState != NodeDrawState.None)
+					drawPos.Inflate(0, -(ItemVertSeparation / 2));
+
+				DrawNodeLabel(graphics, node.Text, drawPos, drawState, item.Flipped, item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1093,6 +1265,14 @@ namespace MindMapUIExtension
 		private void RedrawExpansionButton(TreeNode node, bool update = true)
 		{
 			Invalidate(CalculateExpansionButtonRect(node));
+
+			if (update)
+				Update();
+		}
+
+		private void RedrawNode(TreeNode node, bool update = true)
+		{
+			Invalidate(GetItemDrawRect(Item(node).ItemBounds));
 
 			if (update)
 				Update();

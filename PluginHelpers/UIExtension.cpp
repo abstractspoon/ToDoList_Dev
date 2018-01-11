@@ -203,12 +203,44 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return DoNotify(&mod, 1);
 }
 
+bool UIExtension::ParentNotify::NotifyMove(UInt32 parentTaskID, UInt32 afterSiblingID)
+{
+	IUITASKMOVE move = { 0 };
+
+	move.dwParentID = parentTaskID;
+	move.dwAfterSiblingID = afterSiblingID;
+	move.bCopy = false;
+
+	return DoNotify(&move);
+}
+
+bool UIExtension::ParentNotify::NotifyCopy(UInt32 parentTaskID, UInt32 afterSiblingID)
+{
+	IUITASKMOVE copy = { 0 };
+
+	copy.dwParentID = parentTaskID;
+	copy.dwAfterSiblingID = afterSiblingID;
+	copy.bCopy = true;
+
+	return DoNotify(&copy);
+}
+
 bool UIExtension::ParentNotify::DoNotify(const IUITASKMOD* pMod, int numMod)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
 
 	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_MODIFYSELECTEDTASK, numMod, (LPARAM)pMod);
+
+	return (bRet != FALSE);
+}
+
+bool UIExtension::ParentNotify::DoNotify(const IUITASKMOVE* pMove)
+{
+	if (!IsWindow(m_hwndParent))
+		return false;
+
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_MOVESELECTEDTASK, 0, (LPARAM)pMove);
 
 	return (bRet != FALSE);
 }

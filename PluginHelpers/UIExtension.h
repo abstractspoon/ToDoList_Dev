@@ -129,6 +129,9 @@ namespace Abstractspoon
 					bool NotifyMod(UIExtension::TaskAttribute nAttribute, String^ value);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
 
+					bool NotifyMove(UInt32 parentTaskID, UInt32 afterSiblingID);
+					bool NotifyCopy(UInt32 parentTaskID, UInt32 afterSiblingID);
+
 					bool NotifySelChange(UInt32 taskID);
 					bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
 
@@ -137,6 +140,7 @@ namespace Abstractspoon
 
 				private:
 					bool DoNotify(const IUITASKMOD* pMod, int numMod);
+					bool DoNotify(const IUITASKMOVE* pMove);
 				};
 
 				ref class TaskIcon

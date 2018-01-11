@@ -190,6 +190,7 @@ namespace MindMapUIExtension
             m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
+			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
 
             this.Controls.Add(m_MindMap);
         }
@@ -200,6 +201,20 @@ namespace MindMapUIExtension
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
 			notify.NotifySelChange(taskItem.ID);
+		}
+
+		Boolean OnMindMapDragDrop(object sender, Object draggedItemData, Object dropTargetItemData, bool copy)
+		{
+			//var draggedTaskItem = (draggedItemData as TaskDataItem);
+			var dropTargetTaskItem = (dropTargetItemData as TaskDataItem);
+
+			var notify = new UIExtension.ParentNotify(m_hwndParent);
+
+			if (copy)
+				return notify.NotifyCopy(dropTargetTaskItem.ID, 0);
+
+			// else
+			return notify.NotifyMove(dropTargetTaskItem.ID, 0);
 		}
     }
 

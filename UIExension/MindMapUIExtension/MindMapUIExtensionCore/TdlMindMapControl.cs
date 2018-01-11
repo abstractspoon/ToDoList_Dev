@@ -133,23 +133,42 @@ namespace MindMapUIExtension
 			RecalculatePositions();
 		}
 
-		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-												bool isSelected, bool leftOfRoot, Object itemData)
+		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
 		{
-			var taskItem = (itemData as TaskDataItem);
+			// TODO
+			return true;
+		}
+
+		protected override Boolean DoDrop(Object draggedItemData, Object dropTargetItemData, Boolean copy)
+		{
+			base.DoDrop(draggedItemData, dropTargetItemData, copy);
+
+			return true; // We handled it
+		}
+		
+		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
+												NodeDrawState nodeState, bool leftOfRoot, Object itemData)
+		{
 			Brush textColor = SystemBrushes.WindowText;
 
-			if (isSelected)
-			{
-				m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
-			}
-			else
-			{
-				// Use task colours
-				// TODO
+			// Use task colours
+			// TODO
+			var taskItem = (itemData as TaskDataItem);
 				
-				if (DebugMode())
-					graphics.DrawRectangle(new Pen(Color.Green), rect);
+			switch (nodeState)
+			{
+				case NodeDrawState.Selected:
+					m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
+					break;
+
+				case NodeDrawState.DropTarget:
+					m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, false);
+					break;
+
+				case NodeDrawState.None:
+					if (DebugMode())
+						graphics.DrawRectangle(new Pen(Color.Green), rect);
+					break;
 			}
 
 			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
