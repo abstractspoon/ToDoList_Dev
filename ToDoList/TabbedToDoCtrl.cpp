@@ -103,6 +103,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 
 	ON_REGISTERED_MESSAGE(WM_IUI_EDITSELECTEDTASKTITLE, OnUIExtEditSelectedTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_IUI_MODIFYSELECTEDTASK, OnUIExtModifySelectedTask)
+	ON_REGISTERED_MESSAGE(WM_IUI_MOVESELECTEDTASK, OnUIExtMoveSelectedTask)
 	ON_REGISTERED_MESSAGE(WM_IUI_SELECTTASK, OnUIExtSelectTask)
 	ON_REGISTERED_MESSAGE(WM_IUI_SORTCOLUMNCHANGE, OnUIExtSortColumnChange)
 	ON_REGISTERED_MESSAGE(WM_IUI_DOHELP, OnUIExtDoHelp)
@@ -1625,6 +1626,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 	case IUI_RECURRENCE: 
 	case IUI_CREATIONDATE:
 	case IUI_CREATEDBY:
+	case IUI_POSITION:
 		break;
 
 	default:
@@ -1739,6 +1741,59 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			UpdateExtensionViewsSelection(TDCA_DUEDATE);
 		}
 	}
+	
+	return bSuccess;
+}
+
+LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lParam)
+{
+	// Prevent possibility of infinite recursion caused by an extension 
+	// responding to being updated by posting another change ad infinitum
+	AF_NOREENTRANT_RET(FALSE);
+
+	ASSERT(lParam);
+	ASSERT(!IsReadOnly());
+
+	if (IsReadOnly())
+		return FALSE;
+
+	HandleUnsavedComments();
+
+	IMPLEMENT_UNDO(m_data, TDCUAT_MOVE);
+	BOOL bSuccess = TRUE;
+
+	try
+	{
+		const IUITASKMOVE* pMove = (const IUITASKMOVE*)lParam;
+
+		HTREEITEM htiDropItem = TCH().FindItem(pMove->dwSelectedTaskID);
+		ASSERT(htiDropItem == GetSelectedItem());
+
+		HTREEITEM htiDropTarget = TCH().FindItem(pMove->dwParentID);
+		HTREEITEM htiDropAfter = TCH().FindItem(pMove->dwAfterSiblingID);
+
+		TDC_DROPOPERATION nDrop = (pMove->bCopy ? TDC_DROPCOPY : TDC_DROPMOVE);
+
+		VERIFY(DropSelectedTasks(nDrop, htiDropTarget, htiDropAfter));
+	}
+	catch (...)
+	{
+		ASSERT(0);
+		bSuccess = FALSE;
+	}
+
+	// update all tasks
+	VIEWDATA* pVData = NULL;
+	IUIExtensionWindow* pExtWnd = NULL;
+
+	if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
+		return FALSE;
+
+	CWaitCursor cursor;
+	CTaskFile tasks;
+
+	if (GetAllTasksForExtensionViewUpdate(tasks, pVData->mapWantedAttrib))
+		UpdateExtensionView(pExtWnd, tasks, IUI_ALL, pVData->mapWantedAttrib);
 	
 	return bSuccess;
 }

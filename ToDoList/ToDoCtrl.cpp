@@ -7207,14 +7207,11 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 		if (bTargetIsRef)
 			dwTargetID = m_data.GetTrueTaskID(dwTargetID);
 
-		BOOL bCopy = FALSE;
-		BOOL bMove = FALSE;
-		BOOL bRef = FALSE;
-
 		m_taskTree.RedrawColumns();
 
 		// if htiAfter is NULL then we are dropping 'on' an item
 		// so we need to decide where
+		TDC_DROPOPERATION nDrop = TDC_DROPNONE;
 		BOOL bDropOn = (htiAfter == NULL);
 
 		if (bDropOn)
@@ -7231,14 +7228,18 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			// as references
 			if (bTargetIsRef && m_taskTree.SelectionHasNonReferences())
 			{
-				bRef = TRUE;
+				nDrop = TDC_DROPREFERENCE;
 			}
 			else
 			{
-				bMove  = Misc::ModKeysArePressed(MKS_NONE);
-				bCopy = Misc::ModKeysArePressed(MKS_CTRL);
-				bRef = (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) ||
-					Misc::ModKeysArePressed(MKS_ALT));
+				if (Misc::ModKeysArePressed(MKS_NONE))
+					nDrop = TDC_DROPMOVE;
+
+				if (Misc::ModKeysArePressed(MKS_CTRL))
+					nDrop = TDC_DROPCOPY;
+
+				if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT) || Misc::ModKeysArePressed(MKS_ALT))
+					nDrop = TDC_DROPREFERENCE;
 			}
 		}
 		else // right drag
@@ -7284,16 +7285,16 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 				switch (nCmdID)
 				{
-				case ID_TDD_REFTASK:
-					bRef = TRUE;
+				case ID_TDD_REFTASK: 
+					nDrop = TDC_DROPREFERENCE;
 					break;
 
 				case ID_TDD_COPYTASK:
-					bCopy = TRUE;
+					nDrop = TDC_DROPCOPY;
 					break;
 
 				case ID_TDD_MOVETASK:
-					bMove = TRUE;
+					nDrop = TDC_DROPMOVE;
 					break;
 
 				case ID_TDD_SETTASKDEPENDENCY:
@@ -7335,7 +7336,21 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 			}
 		}
 
-		if (bCopy || bRef)
+		if (nDrop != TDC_DROPNONE)
+		{
+			VERIFY(DropSelectedTasks(nDrop, htiDrop, htiAfter));
+		}
+	}
+
+	return bDropped;
+}
+
+BOOL CToDoCtrl::DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
+{
+	switch (nDrop)
+	{
+	case TDC_DROPCOPY:
+	case TDC_DROPREFERENCE:
 		{
 			// copy selection as xml
 			CTaskFile tasks;
@@ -7343,31 +7358,39 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			// if pasting references then we don't want all subtasks just 
 			// the ones actually selected
-			if (GetSelectedTasks(tasks, filter, (bRef ? TDCGSTF_NOTSUBTASKS : 0)))
+			DWORD dwFlags = 0;
+
+			if (nDrop == TDC_DROPREFERENCE)
+				dwFlags = TDCGSTF_NOTSUBTASKS;
+
+			if (GetSelectedTasks(tasks, filter, dwFlags))
 			{
 				IMPLEMENT_UNDO(m_data, TDCUAT_COPY);
 				HOLD_REDRAW(*this, m_taskTree);
 
 				// fix up the dependencies of the copied tasks
-				if (bCopy)
-					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
-				else
+				if (nDrop == TDC_DROPREFERENCE)
 					PrepareTaskIDsForPasteAsRef(tasks);
+				else
+					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
 
 				// then add them with impunity!
-				PasteTasksToTree(tasks, htiDrop, htiAfter, TDCR_NO, TRUE);
+				PasteTasksToTree(tasks, htiDropTarget, htiDropAfter, TDCR_NO, TRUE);
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
-				FixupParentCompletion(dwTargetID);
+				DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
+				FixupParentCompletion(dwDestParentID);
 			}
 		}
-		else if (bMove)
+		break;
+
+	case TDC_DROPMOVE:
 		{
 			IMPLEMENT_UNDO(m_data, TDCUAT_MOVE);
 
-			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDrop);
-			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiAfter);
+			DWORD dwDestParentID = m_taskTree.GetTaskID(htiDropTarget);
+			DWORD dwDestPrevSiblingID = m_taskTree.GetTaskID(htiDropAfter);
 
 			CDWordArray aSelTaskIDs;
 			DWORD dwUnused = 0;
@@ -7376,7 +7399,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 
 			if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 			{
-				m_taskTree.MoveSelection(htiDrop, htiAfter);
+				m_taskTree.MoveSelection(htiDropTarget, htiDropAfter);
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
@@ -7385,9 +7408,15 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 				SetModified(TRUE, TDCA_POSITION);
 			}
 		}
+		break;
+
+	case TDC_DROPNONE:
+	default:
+		ASSERT(0);
+		return FALSE;
 	}
 
-	return bDropped;
+	return TRUE;
 }
 
 void CToDoCtrl::FixupParentCompletion(DWORD dwParentID)

@@ -885,6 +885,7 @@ protected:
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe
 	void PrepareTaskfileForTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const;
+	BOOL DropSelectedTasks(TDC_DROPOPERATION nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter);
 
 	void SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand);
 	void AppendTaskFileHeader(CTaskFile& tasks) const;

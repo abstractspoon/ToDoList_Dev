@@ -241,7 +241,7 @@ struct IUITASKMOD
 		double dValue;
 		LPCWSTR szValue;
 		__int64 tValue;
-		BOOL bValue;
+		bool bValue;
 		COLORREF crValue;
 	};
 
@@ -250,6 +250,18 @@ struct IUITASKMOD
 	{
 		TDC_UNITS nTimeUnits;	// IUI_TIMEEST, IUI_TIMESPENT, IUI_CUSTOMATTRIB
 	};
+};
+
+//////////////////////////////////////////////////////////////////////
+
+struct IUITASKMOVE
+{
+	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
+	
+	DWORD dwParentID;
+	DWORD dwAfterSiblingID;
+
+	bool bCopy;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -286,6 +298,9 @@ const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK");
 
 // wParam = Number of Mods, lParam = &IUITASKMOD[0]
 const UINT WM_IUI_MODIFYSELECTEDTASK	= ::RegisterWindowMessageW(L"WM_IUI_MODIFYSELECTEDTASK"); 
+
+// wParam = 0, lParam = IUITASKMOVE*
+const UINT WM_IUI_MOVESELECTEDTASK		= ::RegisterWindowMessageW(L"WM_IUI_MOVESELECTEDTASK"); 
 
 // wParam = lParam = 0
 const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
