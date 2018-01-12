@@ -203,18 +203,15 @@ namespace MindMapUIExtension
 			notify.NotifySelChange(taskItem.ID);
 		}
 
-		Boolean OnMindMapDragDrop(object sender, Object draggedItemData, Object dropTargetItemData, bool copy)
+		Boolean OnMindMapDragDrop(object sender, MindMapDragEventArgs e)
 		{
-			//var draggedTaskItem = (draggedItemData as TaskDataItem);
-			var dropTargetTaskItem = (dropTargetItemData as TaskDataItem);
-
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-			if (copy)
-				return notify.NotifyCopy(dropTargetTaskItem.ID, 0);
+			if (e.copyItem)
+				return notify.NotifyCopy(e.selectedUniqueID, e.targetParentUniqueID, e.afterSiblingUniqueID);
 
 			// else
-			return notify.NotifyMove(dropTargetTaskItem.ID, 0);
+			return notify.NotifyMove(e.selectedUniqueID, e.targetParentUniqueID, e.afterSiblingUniqueID);
 		}
     }
 

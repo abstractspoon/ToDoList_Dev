@@ -203,10 +203,11 @@ bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute,
 	return DoNotify(&mod, 1);
 }
 
-bool UIExtension::ParentNotify::NotifyMove(UInt32 parentTaskID, UInt32 afterSiblingID)
+bool UIExtension::ParentNotify::NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID)
 {
 	IUITASKMOVE move = { 0 };
 
+	move.dwSelectedTaskID = taskID;
 	move.dwParentID = parentTaskID;
 	move.dwAfterSiblingID = afterSiblingID;
 	move.bCopy = false;
@@ -214,10 +215,11 @@ bool UIExtension::ParentNotify::NotifyMove(UInt32 parentTaskID, UInt32 afterSibl
 	return DoNotify(&move);
 }
 
-bool UIExtension::ParentNotify::NotifyCopy(UInt32 parentTaskID, UInt32 afterSiblingID)
+bool UIExtension::ParentNotify::NotifyCopy(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID)
 {
 	IUITASKMOVE copy = { 0 };
 
+	copy.dwSelectedTaskID = taskID;
 	copy.dwParentID = parentTaskID;
 	copy.dwAfterSiblingID = afterSiblingID;
 	copy.bCopy = true;

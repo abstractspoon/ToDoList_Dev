@@ -13,9 +13,22 @@ using System.Diagnostics;
 namespace MindMapUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, object itemData);
-	public delegate Boolean DragDropChangeEventHandler(object sender, object draggedItemData, object dropTargetItemData, Boolean copy);
+	public delegate Boolean DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
 
 	[System.ComponentModel.DesignerCategory("")]
+
+	public class MindMapDragEventArgs : EventArgs
+	{
+		public UInt32 selectedUniqueID = 0;	
+		public UInt32 targetParentUniqueID = 0;
+		public UInt32 afterSiblingUniqueID = 0;
+
+		public Object selectedItemData = null;
+		public Object targetParentItemData = null;
+		public Object afterSiblingItemData = null;
+	
+		public bool copyItem = false;
+	}
 
 	public partial class MindMapControl : UserControl
     {
@@ -27,11 +40,28 @@ namespace MindMapUIExtension
 		static int SB_HORZ = 0;
 		static int SB_VERT = 1;
 
+		// --------------------------
+
 		[DllImport("User32.dll")]
 		public static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
 		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
 		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
+
+		// --------------------------
+
+		[DllImport("User32.dll")]
+		public static extern UInt32 GetDoubleClickTime();
+		
+		// --------------------------
+
+		[DllImport("User32.dll")]
+		public static extern int GetSystemMetrics(int index);
+		
+		const int SM_CXDOUBLECLK = 36;
+		const int SM_CYDOUBLECLK = 37;
+
+		// Constants ---------------------------------------------------------------------
 
 		const int ItemHorzSeparation = 40;
 		const int ItemVertSeparation = 4;
@@ -43,6 +73,7 @@ namespace MindMapUIExtension
         private Point m_DrawOffset;
         private Boolean m_HoldRedraw;
 		private TreeNode m_DropTarget;
+		private Timer m_DragTimer;
 
         // Public ------------------------------------------------------------------------
 
@@ -54,6 +85,10 @@ namespace MindMapUIExtension
             m_DrawOffset = new Point(0, 0);
             m_HoldRedraw = false;
 			m_DropTarget = null;
+
+			m_DragTimer = new Timer();
+			m_DragTimer.Interval = (int)GetDoubleClickTime();
+			m_DragTimer.Tick += new EventHandler(OnDragTimer);
 
             InitializeComponent();
 #if DEBUG
@@ -76,10 +111,6 @@ namespace MindMapUIExtension
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
                 return;
-
-			// The Tree collapses when the font is changed so we
-			// cache the selected item for restoration after
-			UInt32 selID = (IsEmpty() ? 0 : Convert.ToUInt32(SelectedNode.Name, 10));
 
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
         }
@@ -238,12 +269,14 @@ namespace MindMapUIExtension
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
+			m_DragTimer.Stop();
+
+			base.OnMouseDoubleClick(e);
+
             TreeNode hit = HitTestPositions(e.Location);
 
 			if ((hit != null) && HitTestExpansionButton(hit, e.Location))
 				return;
-
-			base.OnMouseDoubleClick(e);
 
             if (IsRoot(hit))
             {
@@ -283,11 +316,47 @@ namespace MindMapUIExtension
 					SelectedNode = hit;
 
 					if (hit != RootNode)
-						DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+					{
+						m_DragTimer.Tag = e;
+						m_DragTimer.Start();
+					}
 				}
 			}
         }
 
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			m_DragTimer.Stop();
+
+			base.OnMouseUp(e);
+
+			TreeNode hit = HitTestPositions(e.Location);
+
+			if (hit != null)
+			{
+				if (HitTestExpansionButton(hit, e.Location))
+					RedrawExpansionButton(hit, false);
+			}
+		}
+
+		void OnDragTimer(object sender, EventArgs e)
+		{
+			m_DragTimer.Stop();
+
+			// Check for drag movement
+			Point ptOrg = ((sender as Timer).Tag as MouseEventArgs).Location;
+
+			if (Math.Abs(ptOrg.X - MousePosition.X) < GetSystemMetrics(SM_CXDOUBLECLK))
+				return;
+
+			if (Math.Abs(ptOrg.Y - MousePosition.Y) < GetSystemMetrics(SM_CYDOUBLECLK))
+				return;
+
+			TreeNode hit = HitTestPositions(ptOrg);
+			
+			DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+		}
+	
 		protected override void OnDragOver(DragEventArgs e)
 		{
 			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
@@ -360,7 +429,17 @@ namespace MindMapUIExtension
 			if (IsAcceptableDropTarget(draggedNode, dropTarget))
 			{
 				// Let derived class have first go
-				if (DoDrop(ItemData(draggedNode), ItemData(dropTarget), copy))
+				var args = new MindMapDragEventArgs();
+
+				args.selectedUniqueID = UniqueID(draggedNode);	
+				args.targetParentUniqueID = UniqueID(dropTarget);
+				args.afterSiblingUniqueID = 0;
+
+				args.selectedItemData = draggedNode.Tag;
+				args.targetParentItemData = dropTarget.Tag;
+				args.afterSiblingItemData = null;
+
+				if (DoDrop(args))
 				{
 					// they handled it
 					return;
@@ -379,10 +458,10 @@ namespace MindMapUIExtension
 			}
 		}
 
-		virtual protected Boolean DoDrop(Object draggedItemData, Object dropTargetItemData, Boolean copy)
+		virtual protected Boolean DoDrop(MindMapDragEventArgs e)
 		{
 			if (DragDropChange != null)
-				return DragDropChange(this, draggedItemData, dropTargetItemData, copy);
+				return DragDropChange(this, e);
 
 			// else
 			return false;
@@ -398,19 +477,6 @@ namespace MindMapUIExtension
 				m_DropTarget = null;
 
 				e.Action = DragAction.Cancel;
-			}
-		}
-
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			base.OnMouseUp(e);
-
-			TreeNode hit = HitTestPositions(e.Location);
-
-			if (hit != null)
-			{
-				if (HitTestExpansionButton(hit, e.Location))
-					RedrawExpansionButton(hit, false);
 			}
 		}
 
@@ -760,6 +826,14 @@ namespace MindMapUIExtension
 			return Item(node).ItemData;
 		}
 
+		protected UInt32 UniqueID(TreeNode node)
+		{
+			if (node == null)
+				return 0;
+
+			return Convert.ToUInt32(node.Name);
+		}
+
 		protected MindMapItem RootItem
 		{
 			get
@@ -872,14 +946,16 @@ namespace MindMapUIExtension
                 int horzOffset = (rootNode.Bounds.Width + ItemHorzSeparation);
 
                 TreeNode rightFrom = rootNode.Nodes[0];
-                TreeNode rightTo = rootNode.Nodes[rootNode.Nodes.Count / 2];
+
+				int iToNode = ((rootNode.Nodes.Count - 1) / 2);
+                TreeNode rightTo = rootNode.Nodes[iToNode];
 
                 RecalculatePositions(rightFrom, rightTo, horzOffset, 0);
 
 				// Left side
                 horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
 
-                TreeNode leftFrom = rightTo.NextNode;
+				TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
                 TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
 
                 RecalculatePositions(leftFrom, leftTo, horzOffset, 0);

@@ -139,9 +139,9 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-		protected override Boolean DoDrop(Object draggedItemData, Object dropTargetItemData, Boolean copy)
+		protected override Boolean DoDrop(MindMapDragEventArgs e)
 		{
-			base.DoDrop(draggedItemData, dropTargetItemData, copy);
+			base.DoDrop(e);
 
 			return true; // We handled it
 		}
