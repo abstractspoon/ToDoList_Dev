@@ -21,7 +21,7 @@ namespace MindMapUIExtension
 			m_Flipped = false;
 		}
 
-		public bool Flipped { get { return m_Flipped; } }
+		public bool IsFlipped { get { return m_Flipped; } }
 
 		public Object ItemData
 		{

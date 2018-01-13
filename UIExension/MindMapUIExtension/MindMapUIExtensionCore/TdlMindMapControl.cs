@@ -99,6 +99,12 @@ namespace MindMapUIExtension
 
 		protected void RebuildTreeView(TaskList tasks)
 		{
+			// Snapshot the expanded tasks so we can restore them afterwards
+			var expandedIDs = GetExpandedItems(RootNode);
+
+			// And the selection
+			var selID = UniqueID(SelectedNode);
+			
 			Clear();
 
 			if (tasks.GetTaskCount() == 0)
@@ -129,8 +135,49 @@ namespace MindMapUIExtension
 			else
 				rootNode.Expand();
 
-			SetSelectedNode(0); // root
+			// Restore expanded state
+			SetExpandedItems(expandedIDs);
+
+			// then Rebuild
 			RecalculatePositions();
+
+			// lastly restore selection
+			SetSelectedNode(selID);
+		}
+
+		protected List<UInt32> GetExpandedItems(TreeNode node)
+		{
+			List<UInt32> expandedIDs = null;
+
+			if ((node != null) && node.IsExpanded)
+			{
+				expandedIDs = new List<UInt32>();
+				expandedIDs.Add(UniqueID(node));
+
+				foreach (TreeNode child in node.Nodes)
+				{
+					var childIDs = GetExpandedItems(child);
+
+					if (childIDs != null)
+						expandedIDs.AddRange(childIDs);
+				}
+			}
+
+			return expandedIDs;
+		}
+
+		protected void SetExpandedItems(List<UInt32> expandedNodes)
+		{
+			if (expandedNodes != null)
+			{
+				foreach (var id in expandedNodes)
+				{
+					var node = FindNode(id);
+
+					if (node != null)
+						node.Expand();
+				}
+			}
 		}
 
 		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
@@ -147,7 +194,7 @@ namespace MindMapUIExtension
 		}
 		
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-												NodeDrawState nodeState, bool leftOfRoot, Object itemData)
+												NodeDrawState nodeState, bool isLeftOfRoot, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
 
@@ -171,7 +218,9 @@ namespace MindMapUIExtension
 					break;
 			}
 
-			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
+			var format = DefaultLabelFormat(isLeftOfRoot, (nodeState != NodeDrawState.None));
+
+			graphics.DrawString(label, this.Font, textColor, rect, format);
 		}
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)

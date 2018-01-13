@@ -67,6 +67,14 @@ namespace MindMapUIExtension
 		const int ItemVertSeparation = 4;
 		const int ExpansionButtonSize = 8;
 		const int ExpansionButtonSeparation = 2;
+		const int LabelPadding = 2;
+
+		protected enum NodeDrawState
+		{
+			None,
+			Selected,
+			DropTarget,
+		}
 
 		// Data --------------------------------------------------------------------------
 
@@ -215,12 +223,10 @@ namespace MindMapUIExtension
 
         public bool SetSelectedNode(UInt32 uniqueID)
         {
-            var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
+            var node = FindNode(uniqueID);
 
-            if (found.Count() != 1)
-                return false;
-
-            TreeNode node = found[0];
+			if (node == null)
+				return false;
 
             SelectedNode = node;
             node.EnsureVisible();
@@ -564,7 +570,17 @@ namespace MindMapUIExtension
 
         // Private Internals -----------------------------------------------------------
 
-        protected void EnsureItemVisible(MindMapItem item)
+		protected TreeNode FindNode(UInt32 uniqueID)
+		{
+			var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
+
+			if (found.Count() != 1)
+				return null;
+
+			return found[0];
+		}
+
+		protected void EnsureItemVisible(MindMapItem item)
         {
             if (item == null)
                 return;
@@ -637,7 +653,7 @@ namespace MindMapUIExtension
 
 				case Keys.PageDown:
 					{
-						bool flipped = selItem.Flipped;
+						bool flipped = selItem.IsFlipped;
 						int pageCount = ((ClientRectangle.Height / m_TreeView.ItemHeight) - 1);
 
 						while (pageCount-- != 0)
@@ -645,7 +661,7 @@ namespace MindMapUIExtension
 							if (selNode.NextNode == null)
 								break;
 
-							if (Item(selNode.NextNode).Flipped != flipped)
+							if (Item(selNode.NextNode).IsFlipped != flipped)
 								break;
 
 							selNode = selNode.NextNode;
@@ -660,7 +676,7 @@ namespace MindMapUIExtension
 
 				case Keys.PageUp:
 					{
-						bool flipped = selItem.Flipped;
+						bool flipped = selItem.IsFlipped;
 						int pageCount = ((ClientRectangle.Height / m_TreeView.ItemHeight) - 1);
 
 						while (pageCount-- != 0)
@@ -668,7 +684,7 @@ namespace MindMapUIExtension
 							if (selNode.PrevNode == null)
 								break;
 
-							if (Item(selNode.PrevNode).Flipped != flipped)
+							if (Item(selNode.PrevNode).IsFlipped != flipped)
 								break;
 
 							selNode = selNode.PrevNode;
@@ -789,7 +805,7 @@ namespace MindMapUIExtension
 			if ((node == null) || (node == RootNode))
 				return false;
 
-			return Item(node).Flipped;
+			return Item(node).IsFlipped;
 		}
 
 		protected Boolean IsRightOfRoot(TreeNode node)
@@ -797,7 +813,7 @@ namespace MindMapUIExtension
 			if ((node == null) || (node == RootNode))
 				return false;
 
-			return !Item(node).Flipped;
+			return !Item(node).IsFlipped;
 		}
 
 		protected Boolean IsRoot(TreeNode node)
@@ -1207,61 +1223,6 @@ namespace MindMapUIExtension
 			return false; // no change
 		}
 
-		static public StringFormat DefaultLabelFormat(bool leftOfRoot)
-		{
-			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
-
-			format.LineAlignment = StringAlignment.Center;
-			format.Trimming = StringTrimming.None;
-			format.Alignment = (leftOfRoot ? StringAlignment.Far : StringAlignment.Near);
-
-			return format;
-		}
-
-		protected enum NodeDrawState
-		{
-			None,
-			Selected,
-			DropTarget,
-		}
-
-		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect, 
-											 NodeDrawState nodeState, bool leftOfRoot, Object itemData)
-		{
-			Brush textColor = SystemBrushes.WindowText;
-
-			switch (nodeState)
-			{
-				case NodeDrawState.Selected:
-					graphics.FillRectangle(SystemBrushes.Highlight, Rectangle.Inflate(rect, -2, 0));
-					textColor = SystemBrushes.HighlightText;
-					break;
-
-				case NodeDrawState.DropTarget:
-					graphics.FillRectangle(SystemBrushes.ControlLight, Rectangle.Inflate(rect, -2, 0));
-					break;
-
-				case NodeDrawState.None:
-					if (DebugMode())
-						graphics.DrawRectangle(new Pen(Color.Green), rect);
-					break;
-	
-			}
-
-			graphics.DrawString(label, this.Font, textColor, rect, DefaultLabelFormat(leftOfRoot));
-		}
-
-		private NodeDrawState DrawState(TreeNode node)
-		{
-			if (node.IsSelected)
-				return NodeDrawState.Selected;
-
-			if (node == m_DropTarget)
-				return NodeDrawState.DropTarget;
-
-			return NodeDrawState.None;
-		}
-
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
@@ -1279,7 +1240,7 @@ namespace MindMapUIExtension
 				{
                     int offset = (ExpansionButtonSize + ExpansionButtonSeparation);
 
-					if (item.Flipped)
+					if (!item.IsFlipped)
 						drawPos.X += offset;
 
 					drawPos.Width -= offset;
@@ -1288,9 +1249,21 @@ namespace MindMapUIExtension
 				NodeDrawState drawState = DrawState(node);
 
 				if (drawState != NodeDrawState.None)
+				{
+					// subtract the vertical separation from selected items
 					drawPos.Inflate(0, -(ItemVertSeparation / 2));
 
-				DrawNodeLabel(graphics, node.Text, drawPos, drawState, item.Flipped, item.ItemData);
+					// Adjust rect to the exact length of the string
+					int textWidth = ((int)graphics.MeasureString(node.Text, m_TreeView.Font).Width);
+					int xOffset = (drawPos.Width - textWidth - (2 * LabelPadding));
+
+					if (item.IsFlipped)
+						drawPos.X += xOffset;
+
+					drawPos.Width -= xOffset;
+				}
+
+				DrawNodeLabel(graphics, node.Text, drawPos, drawState, item.IsFlipped, item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1310,6 +1283,68 @@ namespace MindMapUIExtension
 			}
 		}
 
+		static public StringFormat DefaultLabelFormat(bool isLeftOfRoot, bool isSelected)
+		{
+			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
+
+			format.LineAlignment = StringAlignment.Center;
+			format.Trimming = StringTrimming.None;
+
+			if (isSelected)
+			{
+				format.Alignment = StringAlignment.Center;
+			}
+			else if (isLeftOfRoot)
+			{
+				format.Alignment = StringAlignment.Far;
+			}
+			else
+			{
+				format.Alignment = StringAlignment.Near;
+			}
+
+			return format;
+		}
+
+		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
+											 NodeDrawState nodeState, bool isLeftOfRoot, Object itemData)
+		{
+			Brush textColor = SystemBrushes.WindowText;
+
+			switch (nodeState)
+			{
+				case NodeDrawState.Selected:
+					graphics.FillRectangle(SystemBrushes.Highlight, Rectangle.Inflate(rect, -2, 0));
+					textColor = SystemBrushes.HighlightText;
+					break;
+
+				case NodeDrawState.DropTarget:
+					graphics.FillRectangle(SystemBrushes.ControlLight, Rectangle.Inflate(rect, -2, 0));
+					break;
+
+				case NodeDrawState.None:
+					if (DebugMode())
+						graphics.DrawRectangle(new Pen(Color.Green), rect);
+					break;
+
+			}
+
+			var format = DefaultLabelFormat(isLeftOfRoot, (nodeState != NodeDrawState.None));
+
+			graphics.DrawString(label, m_TreeView.Font, textColor, rect, format);
+		}
+
+		private NodeDrawState DrawState(TreeNode node)
+		{
+			if (node.IsSelected)
+				return NodeDrawState.Selected;
+
+			if (node == m_DropTarget)
+				return NodeDrawState.DropTarget;
+
+			return NodeDrawState.None;
+		}
+
 		private Rectangle CalculateExpansionButtonRect(TreeNode node)
 		{
 			// Only for parent nodes
@@ -1321,15 +1356,15 @@ namespace MindMapUIExtension
 
 			int buttonLeft = 0, buttonTop = (labelRect.Top + ((labelRect.Height - ExpansionButtonSize) / 2));
 
-			if (item.Flipped)
-			{
-				// Place the button to the left of the label
-				buttonLeft = labelRect.Left;
-			}
-			else
+			if (item.IsFlipped)
 			{
 				// Place the button to the right of the label
 				buttonLeft = (labelRect.Right - ExpansionButtonSize) - 1;
+			}
+			else
+			{
+				// Place the button to the left of the label
+				buttonLeft = labelRect.Left;
 			}
 
 			return Rectangle.FromLTRB(buttonLeft, 
@@ -1366,22 +1401,6 @@ namespace MindMapUIExtension
 			// Only for parent nodes and Root is always expanded
 			if (!IsParent(node) || IsRoot(node))
 				return;
-
-			MindMapItem item = Item(node);
-			Rectangle labelRect = GetItemDrawRect(item.ItemBounds);
-
-			Point topLeft = new Point(0, (labelRect.Top + ((labelRect.Height - ExpansionButtonSize) / 2)));
-
-			if (item.Flipped)
-			{
-				// Place the button to the left of the label
-				topLeft.X = labelRect.Left;
-			}
-			else
-			{
-				// Place the button to the right of the label
-				topLeft.X = (labelRect.Right - ExpansionButtonSize);
-			}
 
 			Rectangle button = CalculateExpansionButtonRect(node);
 
@@ -1453,7 +1472,7 @@ namespace MindMapUIExtension
             Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
             Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
 
-			bool flipped = itemTo.Flipped;
+			bool flipped = itemTo.IsFlipped;
 
             Point ptFrom = new Point((flipped ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
 			Point ptTo = new Point((flipped ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
