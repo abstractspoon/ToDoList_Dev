@@ -53,12 +53,33 @@ Windows::Media::Color ColorUtil::GetMediaColor(UInt32 rgbColor)
 	return *color;
 }
 
-System::Drawing::Color ColorUtil::GetDrawingColor(UInt32 rgbColor)
+Drawing::Color ColorUtil::GetDrawingColor(UInt32 rgbColor)
 {
 	System::Drawing::Color^ color = 
 		System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
 
 	return *color;
+}
+
+Windows::Media::Color ColorUtil::GetBestTextMediaColor(Windows::Media::Color^ backColor)
+{
+	// WPF doesn't have a brightness function!
+	double brightness = ((backColor->R * 0.299) + (backColor->G * 0.587) + (backColor->B * 0.114));
+
+	if (brightness > 0.5)
+		return Windows::Media::Colors::Black;
+
+	// else
+	return Windows::Media::Colors::White;
+}
+
+Drawing::Color ColorUtil::GetBestTextDrawingColor(Drawing::Color^ backColor)
+{
+	if (backColor->GetBrightness() > 0.5)
+		return Drawing::Color::Black;
+
+	// else
+	return Drawing::Color::White;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

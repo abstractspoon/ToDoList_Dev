@@ -135,6 +135,8 @@ namespace Abstractspoon
 					bool NotifySelChange(UInt32 taskID);
 					bool NotifySelChange(cli::array<UInt32>^ pdwTaskIDs);
 
+					bool NotifyEditTaskLabel();
+
 				private:
 					HWND m_hwndParent;
 

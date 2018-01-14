@@ -296,22 +296,43 @@ UInt32 Task::GetColor()
 
 System::Drawing::Color Task::GetTextDrawingColor()
 {
-	return ColorUtil::GetDrawingColor(GETTASKVAL(GetTaskTextColor, 0));
+	UInt32 color = GetColor();
+
+	if (color == 0)
+		return System::Drawing::Color::Empty;
+
+	// else
+	return ColorUtil::GetDrawingColor(color);
 }
 
 System::Windows::Media::Color Task::GetTextMediaColor()
 {
-	return ColorUtil::GetMediaColor(GETTASKVAL(GetTaskTextColor, 0));
+	UInt32 color = GetColor();
+
+	if (color == 0)
+		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
+
+	return ColorUtil::GetMediaColor(color);
 }
 
 System::Drawing::Color Task::GetPriorityDrawingColor()
 {
-	return ColorUtil::GetDrawingColor(GETTASKVAL(GetTaskPriorityColor, 0));
+	UInt32 color = GETTASKVAL(GetTaskPriorityColor, 0);
+
+	if (color == 0)
+		return System::Drawing::Color::Empty;
+
+	return ColorUtil::GetDrawingColor(color);
 }
 
 System::Windows::Media::Color Task::GetPriorityMediaColor()
 {
-	return ColorUtil::GetMediaColor(GETTASKVAL(GetTaskPriorityColor, 0));
+	UInt32 color = GETTASKVAL(GetTaskPriorityColor, 0);
+
+	if (color == 0)
+		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
+
+	return ColorUtil::GetMediaColor(color);
 }
 
 UInt32 Task::GetPosition()

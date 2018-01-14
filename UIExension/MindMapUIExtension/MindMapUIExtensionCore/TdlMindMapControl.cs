@@ -8,19 +8,23 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MindMapUIExtension
 {
+	public delegate void EditTaskLabelEventHandler(object sender, UInt32 taskId);
 
-	public class TaskDataItem
+	public class MindMapTaskItem
 	{
-		public TaskDataItem(String label)
+		public MindMapTaskItem(String label)
 		{
 			m_Title = label;
 			m_TaskID = 0;
 		}
 
-		public TaskDataItem(Task task)
+		public MindMapTaskItem(Task task)
 		{
 			m_Title = task.GetTitle();
 			m_TaskID = task.GetID();
+			m_TextColor = task.GetTextDrawingColor();
+			m_HasIcon = (task.GetIcon().Length > 0);
+			m_IsFlagged = task.IsFlagged();
 		}
 
 		public override string ToString() { return m_Title; }
@@ -32,9 +36,36 @@ namespace MindMapUIExtension
 
 		public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
 		public UInt32 ID { get { return m_TaskID; } }
+		public Color TextColor { get { return m_TextColor; } }
+		public Boolean HasIcon { get { return m_HasIcon; } }
+		public Boolean IsFlagged { get { return m_IsFlagged; } }
 
+		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			if (task.GetID() != m_TaskID)
+				return false;
+
+			if (attribs.Contains(UIExtension.TaskAttribute.Title))
+				m_Title = task.GetTitle();
+
+			if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+				m_HasIcon = (task.GetIcon().Length > 0);
+
+			if (attribs.Contains(UIExtension.TaskAttribute.Flag))
+				m_IsFlagged = task.IsFlagged();
+
+			if (attribs.Contains(UIExtension.TaskAttribute.Color))
+				m_TextColor = task.GetTextDrawingColor();
+
+			return true;
+		}
+
+		// Data
 		private String m_Title;
 		private UInt32 m_TaskID;
+		private Color m_TextColor;
+		private Boolean m_HasIcon;
+		private Boolean m_IsFlagged;
 	}
 
 	// ------------------------------------------------------------
@@ -43,12 +74,19 @@ namespace MindMapUIExtension
 
 	public class TdlMindMapControl : MindMapControl
 	{
+		public event EditTaskLabelEventHandler EditTaskLabel;
+
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		private UIExtension.SelectionRect m_SelectionRect;
-		private Dictionary<UInt32, TaskDataItem> m_Items;
+		private Dictionary<UInt32, MindMapTaskItem> m_Items;
+		
+		private Boolean m_TaskColorIsBkgnd;
+		private Boolean m_IgnoreMouseClick;
+		private TreeNode m_PreviouslySelectedNode;
+		private Timer m_EditTimer;
 
 		// -------------------------------------------------------------------------
 
@@ -58,7 +96,15 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_SelectionRect = new UIExtension.SelectionRect();
-			m_Items = new Dictionary<UInt32, TaskDataItem>();
+			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
+
+			m_TaskColorIsBkgnd = false;
+			m_IgnoreMouseClick = false;
+
+			m_EditTimer = new Timer();
+			m_EditTimer.Interval = 500;
+			m_EditTimer.Tick += new EventHandler(OnEditLabelTimer);
+
 		}
 
 		public void UpdateTasks(TaskList tasks,
@@ -68,10 +114,8 @@ namespace MindMapUIExtension
 			switch (type)
 			{
 				case UIExtension.UpdateType.Edit:
-					UpdateTaskAttributes(tasks, attribs);
-					break;
-
 				case UIExtension.UpdateType.New:
+					UpdateTaskAttributes(tasks, attribs);
 					break;
 
 				case UIExtension.UpdateType.Delete:
@@ -84,9 +128,22 @@ namespace MindMapUIExtension
 			}
 		}
 
-		public Rectangle GetSelectedItemRect()
+		public Boolean SelectNodeWasPreviouslySelected
 		{
-			return GetSelectedItemPosition();
+			get { return (SelectedNode == m_PreviouslySelectedNode); }
+		}
+
+		public Boolean TaskColorIsBackground
+		{
+			get { return m_TaskColorIsBkgnd; }
+			set
+			{
+				if (m_TaskColorIsBkgnd != value)
+				{
+					m_TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
 		}
 
 		// Internal ------------------------------------------------------------
@@ -94,7 +151,51 @@ namespace MindMapUIExtension
 		protected void UpdateTaskAttributes(TaskList tasks,
 								HashSet<UIExtension.TaskAttribute> attribs)
 		{
-			// TODO
+			var changedTaskIds = new HashSet<UInt32>();
+            
+			Task task = tasks.GetFirstTask();
+
+			while (task.IsValid() && ProcessTaskUpdate(task, attribs, changedTaskIds))
+				task = task.GetNextTask();
+
+			if (attribs.Contains(UIExtension.TaskAttribute.Title))
+			{
+				foreach (var id in changedTaskIds)
+					RefreshNodeLabel(id, false);
+			}
+
+			RecalculatePositions();
+		}
+
+		private bool ProcessTaskUpdate(Task task,
+									   HashSet<UIExtension.TaskAttribute> attribs,
+									   HashSet<UInt32> taskIds)
+		{
+			if (!task.IsValid())
+				return false;
+
+			MindMapTaskItem item;
+			bool newTask = !m_Items.TryGetValue(task.GetID(), out item);
+
+			if (newTask)
+			{
+				item = new MindMapTaskItem(task);
+				m_Items[item.ID] = item;
+			}
+			else if (!item.ProcessTaskUpdate(task, attribs))
+			{
+				return false;
+			}
+
+			taskIds.Add(item.ID);
+
+			// Process children
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, attribs, taskIds))
+				subtask = subtask.GetNextTask();
+
+			return true;
 		}
 
 		protected void RebuildTreeView(TaskList tasks)
@@ -110,6 +211,9 @@ namespace MindMapUIExtension
 			if (tasks.GetTaskCount() == 0)
 				return;
 
+			base.HoldRedraw = true;
+			EnableExpandNotifications(false);
+
 			var task = tasks.GetFirstTask();
 			bool taskIsRoot = !task.GetNextTask().IsValid(); // no siblings
 
@@ -117,7 +221,7 @@ namespace MindMapUIExtension
 
 			if (taskIsRoot)
 			{
-				rootNode = AddRootNode(new TaskDataItem(task), task.GetID());
+				rootNode = AddRootNode(new MindMapTaskItem(task), task.GetID());
 
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
@@ -125,19 +229,20 @@ namespace MindMapUIExtension
 			else
 			{
 				// There is more than one 'root' task so create a real root parent
-				rootNode = AddRootNode(new TaskDataItem("Root"));
+				rootNode = AddRootNode(new MindMapTaskItem("Root"));
 
 				AddTaskToTree(task, rootNode);
 			}
 
-			if (DebugMode())
-				Expand(ExpandNode.ExpandAll);
+			// Restore expanded state
+			if (expandedIDs != null)
+				SetExpandedItems(expandedIDs);
 			else
 				rootNode.Expand();
 
-			// Restore expanded state
-			SetExpandedItems(expandedIDs);
-
+			EnableExpandNotifications(true);
+			base.HoldRedraw = false;
+			
 			// then Rebuild
 			RecalculatePositions();
 
@@ -168,15 +273,12 @@ namespace MindMapUIExtension
 
 		protected void SetExpandedItems(List<UInt32> expandedNodes)
 		{
-			if (expandedNodes != null)
+			foreach (var id in expandedNodes)
 			{
-				foreach (var id in expandedNodes)
-				{
-					var node = FindNode(id);
+				var node = FindNode(id);
 
-					if (node != null)
-						node.Expand();
-				}
+				if (node != null)
+					node.Expand();
 			}
 		}
 
@@ -194,14 +296,31 @@ namespace MindMapUIExtension
 		}
 		
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-												NodeDrawState nodeState, bool isLeftOfRoot, Object itemData)
+												NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
+			Brush backColor = null;
 
 			// Use task colours
-			// TODO
-			var taskItem = (itemData as TaskDataItem);
-				
+			Color taskColor = (itemData as MindMapTaskItem).TextColor;
+			bool isSelected = (nodeState != NodeDrawState.None);
+
+			if (!taskColor.IsEmpty)
+			{
+				if (m_TaskColorIsBkgnd && !isSelected)
+				{
+					backColor = new SolidBrush(taskColor);
+					textColor = new SolidBrush(ColorUtil.GetBestTextDrawingColor(taskColor));
+				}
+				else
+				{
+					if (nodeState != MindMapControl.NodeDrawState.None)
+						taskColor = ColorUtil.DarkerDrawing(taskColor, 0.3f);
+
+					textColor = new SolidBrush(taskColor);
+				}
+			}
+
 			switch (nodeState)
 			{
 				case NodeDrawState.Selected:
@@ -213,12 +332,15 @@ namespace MindMapUIExtension
 					break;
 
 				case NodeDrawState.None:
+					if (backColor != null)
+						graphics.FillRectangle(backColor, rect);
+
 					if (DebugMode())
 						graphics.DrawRectangle(new Pen(Color.Green), rect);
 					break;
 			}
 
-			var format = DefaultLabelFormat(isLeftOfRoot, (nodeState != NodeDrawState.None));
+			var format = DefaultLabelFormat(nodePos, isSelected);
 
 			graphics.DrawString(label, this.Font, textColor, rect, format);
 		}
@@ -226,8 +348,8 @@ namespace MindMapUIExtension
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
 		{
 			int midX = ((ptFrom.X + ptTo.X) / 2);
-																		
-			graphics.DrawBezier(new Pen(Color.Magenta), 
+
+			graphics.DrawBezier(new Pen(base.ConnectionColor), 
 								ptFrom,
 								new Point(midX, ptFrom.Y),
 								new Point(midX, ptTo.Y),
@@ -247,7 +369,7 @@ namespace MindMapUIExtension
 				return true; // not an error
 
 			var taskID = task.GetID();
-			var taskItem = new TaskDataItem(task);
+			var taskItem = new MindMapTaskItem(task);
 
 			var node = AddNode(taskItem, parent, taskID);
 
@@ -270,6 +392,51 @@ namespace MindMapUIExtension
 		protected override int GetMinItemHeight()
 		{
 			return 18;
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			if (m_IgnoreMouseClick)
+				return;
+
+			TreeNode node = HitTestPositions(e.Location);
+
+			if (node != SelectedNode)
+				return;
+
+			if (HitTestExpansionButton(node, e.Location))
+				return;
+
+			if (SelectNodeWasPreviouslySelected)
+			{
+				if (EditTaskLabel != null)
+					m_EditTimer.Start();
+			}
+		}
+
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+			m_EditTimer.Stop();
+
+			// Cache the previous selected item
+			m_PreviouslySelectedNode = SelectedNode;
+
+			TreeNode hit = HitTestPositions(e.Location);
+
+			if (hit != null)
+				m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
+			else
+				m_IgnoreMouseClick = false;
+
+			base.OnMouseDown(e);
+		}
+
+		protected void OnEditLabelTimer(object sender, EventArgs e)
+		{
+			m_EditTimer.Stop();
+
+			if (EditTaskLabel != null)
+				EditTaskLabel(this, UniqueID(SelectedNode));
 		}
 	}
 }

@@ -7,6 +7,12 @@ namespace MindMapUIExtension
 
 	public class MindMapItem
 	{
+		private Object m_ItemData;
+		private Rectangle m_ItemBounds, m_ChildBounds;
+		private bool m_Flipped;
+
+		// -------------------------------------------------------------
+
 		public MindMapItem(Object itemData)
 		{
 			m_ItemData = itemData;
@@ -72,10 +78,6 @@ namespace MindMapUIExtension
 
 			return Rectangle.Union(rect1, rect2);
 		}
-
-		private Object m_ItemData;
-		private Rectangle m_ItemBounds, m_ChildBounds;
-		private bool m_Flipped;
 
 		private Rectangle FlipHorizontally(Rectangle rect)
 		{

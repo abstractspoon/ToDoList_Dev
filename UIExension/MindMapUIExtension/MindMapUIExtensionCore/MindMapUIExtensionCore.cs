@@ -18,9 +18,7 @@ namespace MindMapUIExtension
 
         // ----------------------------------------------------------------------------
 
-        //private Boolean m_taskColorIsBkgnd = false;
         private IntPtr m_hwndParent = IntPtr.Zero;
-        //private UInt32 m_SelectedTaskID = 0;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
@@ -82,14 +80,12 @@ namespace MindMapUIExtension
 
         public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
-			Rectangle labelRect = m_MindMap.GetSelectedItemRect();
+			Rectangle labelRect = m_MindMap.GetSelectedItemLabelRect();
 
 			if (labelRect.IsEmpty)
 				return false;
 
 			labelRect = m_MindMap.RectangleToScreen(labelRect);
-
-			labelRect.Inflate(0, -1);
 
 			left = labelRect.Left;
 			top = labelRect.Top;
@@ -106,9 +102,7 @@ namespace MindMapUIExtension
 
         public void SetUITheme(UITheme theme)
         {
-            //System.Windows.Media.Color bkColor = theme.GetAppMediaColor(UITheme.AppColor.AppBackDark);
-
-            //this.Background = new System.Windows.Media.SolidColorBrush(bkColor);
+			m_MindMap.ConnectionColor = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -126,13 +120,9 @@ namespace MindMapUIExtension
                 // private settings
             }
 
-//             bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
-// 
-//             if (taskColorIsBkgnd != m_taskColorIsBkgnd)
-//             {
-//                 m_taskColorIsBkgnd = taskColorIsBkgnd;
-//                 Invalidate();
-//             }
+            bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
+
+			m_MindMap.TaskColorIsBackground = taskColorIsBkgnd;
 
             if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
             {
@@ -191,13 +181,21 @@ namespace MindMapUIExtension
 
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
 			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
+			m_MindMap.EditTaskLabel += new EditTaskLabelEventHandler(OnMindMapEditTaskLabel);
 
             this.Controls.Add(m_MindMap);
         }
 
+		void OnMindMapEditTaskLabel(object sender, UInt32 taskId)
+		{
+			var notify = new UIExtension.ParentNotify(m_hwndParent);
+
+			notify.NotifyEditTaskLabel();
+		}
+
 		void OnMindMapSelectionChange(object sender, object itemData)
 		{
-			var taskItem = (itemData as TaskDataItem);
+			var taskItem = (itemData as MindMapTaskItem);
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
 			notify.NotifySelChange(taskItem.ID);

@@ -60,6 +60,8 @@ namespace MindMapUIExtension
 		
 		const int SM_CXDOUBLECLK = 36;
 		const int SM_CYDOUBLECLK = 37;
+		const int SM_CXDRAG = 68;
+		const int SM_CYDRAG = 69;
 
 		// Constants ---------------------------------------------------------------------
 
@@ -76,12 +78,20 @@ namespace MindMapUIExtension
 			DropTarget,
 		}
 
+		protected enum NodeDrawPos
+		{
+			Left,
+			Root,
+			Right,
+		}
+
 		// Data --------------------------------------------------------------------------
 
         private Point m_DrawOffset;
         private Boolean m_HoldRedraw;
 		private TreeNode m_DropTarget;
 		private Timer m_DragTimer;
+		private Color m_ConnectionColor = Color.Magenta;
 
         // Public ------------------------------------------------------------------------
 
@@ -114,6 +124,21 @@ namespace MindMapUIExtension
             this.DoubleBuffered = true;
 			this.AllowDrop = true;
         }
+
+		public Boolean HoldRedraw
+		{
+			get { return m_HoldRedraw; }
+			set 
+			{
+				if (m_HoldRedraw != value)
+				{
+					if (!value) // release redraw
+						Invalidate();
+				}
+
+				m_HoldRedraw = value; 
+			}
+		}
 
         public void SetFont(String fontName, int fontSize)
         {
@@ -163,7 +188,7 @@ namespace MindMapUIExtension
 			// notifications and we want our animation to occur
 			// just at the end we ignore notifications until the end
 			EnableExpandNotifications(false);
-            m_HoldRedraw = true;
+            HoldRedraw = true;
 
 			switch (expand)
 			{
@@ -193,7 +218,7 @@ namespace MindMapUIExtension
 			RecalculatePositions();
             EnsureItemVisible(SelectedItem);
 
-            m_HoldRedraw = false;
+            HoldRedraw = false;
 
 			return true;
 		}
@@ -221,6 +246,19 @@ namespace MindMapUIExtension
 			return false;
 		}
 
+		public Color ConnectionColor
+		{
+			get { return m_ConnectionColor; }
+			set 
+			{
+				if (value != SystemColors.Window)
+				{
+					m_ConnectionColor = value;
+					Invalidate();
+				}
+			}
+		}
+		
         public bool SetSelectedNode(UInt32 uniqueID)
         {
             var node = FindNode(uniqueID);
@@ -229,27 +267,32 @@ namespace MindMapUIExtension
 				return false;
 
             SelectedNode = node;
-            node.EnsureVisible();
+			EnsureItemVisible(Item(node));
 
             return true;
         }
 
-        public bool RefreshNodeLabel(UInt32 uniqueID)
+        public bool RefreshNodeLabel(UInt32 uniqueID, bool invalidate)
         {
-            var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
+            TreeNode node = FindNode(uniqueID);
 
-            if (found.Count() != 1)
-                return false;
+			if (node == null)
+				return false;
 
-            TreeNode node = found[0];
+            node.Text = ItemData(node).ToString();
 
-            node.Text = node.Tag.ToString();
-            Invalidate();
+			if (invalidate)
+				Invalidate();
 
             return true;
         }
 
-        // Message Handlers -----------------------------------------------------------
+		public Rectangle GetSelectedItemLabelRect()
+		{
+			return GetItemLabelRect(SelectedNode);
+		}
+
+		// Message Handlers -----------------------------------------------------------
 
         protected override void OnScroll(ScrollEventArgs se)
         {
@@ -329,6 +372,16 @@ namespace MindMapUIExtension
 				}
 			}
         }
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			base.OnMouseMove(e);
+
+			if (m_DragTimer.Enabled)
+			{
+				if (CheckStartDragging(e.Location))
+					m_DragTimer.Stop();
+			}
+		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
@@ -345,22 +398,25 @@ namespace MindMapUIExtension
 			}
 		}
 
-		void OnDragTimer(object sender, EventArgs e)
+		protected void OnDragTimer(object sender, EventArgs e)
 		{
 			m_DragTimer.Stop();
 
+			CheckStartDragging(MousePosition);
+		}
+
+		private bool CheckStartDragging(Point cursor)
+		{
 			// Check for drag movement
-			Point ptOrg = ((sender as Timer).Tag as MouseEventArgs).Location;
+			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
-			if (Math.Abs(ptOrg.X - MousePosition.X) < GetSystemMetrics(SM_CXDOUBLECLK))
-				return;
-
-			if (Math.Abs(ptOrg.Y - MousePosition.Y) < GetSystemMetrics(SM_CYDOUBLECLK))
-				return;
+			if (GetDragRect(ptOrg).Contains(cursor))
+				return false;
 
 			TreeNode hit = HitTestPositions(ptOrg);
 			
 			DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+			return true;
 		}
 	
 		protected override void OnDragOver(DragEventArgs e)
@@ -403,20 +459,6 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
-		{
-			if ((dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
-				return false;
-
-			// else
-			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget));
-		}
-
-		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
-		{
-			return true;
-		}
-
 		protected override void OnDragDrop(DragEventArgs e)
 		{
 			RedrawNode(m_DropTarget, false);
@@ -428,49 +470,6 @@ namespace MindMapUIExtension
 			TreeNode dropTarget = HitTestPositions(dropPt);
 
 			DoDrop(draggedNode, dropTarget, ((e.KeyState & 8) == 8));
-		}
-
-		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, bool copy)
-		{
-			if (IsAcceptableDropTarget(draggedNode, dropTarget))
-			{
-				// Let derived class have first go
-				var args = new MindMapDragEventArgs();
-
-				args.selectedUniqueID = UniqueID(draggedNode);	
-				args.targetParentUniqueID = UniqueID(dropTarget);
-				args.afterSiblingUniqueID = 0;
-
-				args.selectedItemData = draggedNode.Tag;
-				args.targetParentItemData = dropTarget.Tag;
-				args.afterSiblingItemData = null;
-
-				if (DoDrop(args))
-				{
-					// they handled it
-					return;
-				}
-
-				// Remove the node from its current 
-				// location and add it to the node at the drop location.
-				draggedNode.Remove();
-				dropTarget.Nodes.Add(draggedNode);
-
-				// Expand the node at the location 
-				// to show the dropped node.
-				dropTarget.Expand();
-
-				SelectedNode = draggedNode;
-			}
-		}
-
-		virtual protected Boolean DoDrop(MindMapDragEventArgs e)
-		{
-			if (DragDropChange != null)
-				return DragDropChange(this, e);
-
-			// else
-			return false;
 		}
 
 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
@@ -526,14 +525,14 @@ namespace MindMapUIExtension
 		{
 			base.OnGotFocus(e);
 
-			Invalidate(GetSelectedItemPosition());
+			Invalidate(GetSelectedItemLabelRect());
 		}
 
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
 
-			Invalidate(GetSelectedItemPosition());
+			Invalidate(GetSelectedItemLabelRect());
 		}
 
 		protected override void OnFontChanged(EventArgs e)
@@ -569,6 +568,79 @@ namespace MindMapUIExtension
 		}
 
         // Private Internals -----------------------------------------------------------
+
+		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
+		{
+			if ((dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
+				return false;
+
+			// else
+			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget));
+		}
+
+		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
+		{
+			return true;
+		}
+
+		private Rectangle GetDoubleClickRect(Point cursor)
+		{
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			rect.Inflate(GetSystemMetrics(SM_CXDOUBLECLK) / 2, GetSystemMetrics(SM_CYDOUBLECLK) / 2);
+
+			return rect;
+		}
+
+		private Rectangle GetDragRect(Point cursor)
+		{
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
+
+			return rect;
+		}
+
+		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, bool copy)
+		{
+			if (IsAcceptableDropTarget(draggedNode, dropTarget))
+			{
+				// Let derived class have first go
+				var args = new MindMapDragEventArgs();
+
+				args.selectedUniqueID = UniqueID(draggedNode);	
+				args.targetParentUniqueID = UniqueID(dropTarget);
+				args.afterSiblingUniqueID = 0;
+
+				args.selectedItemData = draggedNode.Tag;
+				args.targetParentItemData = dropTarget.Tag;
+				args.afterSiblingItemData = null;
+
+				if (DoDrop(args))
+				{
+					// they handled it
+					return;
+				}
+
+				// Remove the node from its current 
+				// location and add it to the node at the drop location.
+				draggedNode.Remove();
+				dropTarget.Nodes.Add(draggedNode);
+
+				// Expand the node at the location 
+				// to show the dropped node.
+				dropTarget.Expand();
+
+				SelectedNode = draggedNode;
+			}
+		}
+
+		virtual protected Boolean DoDrop(MindMapDragEventArgs e)
+		{
+			if (DragDropChange != null)
+				return DragDropChange(this, e);
+
+			// else
+			return false;
+		}
 
 		protected TreeNode FindNode(UInt32 uniqueID)
 		{
@@ -620,7 +692,7 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-		private void EnableExpandNotifications(bool enable)
+		protected void EnableExpandNotifications(bool enable)
 		{
 			if (enable)
 			{
@@ -1227,43 +1299,29 @@ namespace MindMapUIExtension
 		{
 			foreach (TreeNode node in nodes)
 			{
+				// Don't draw items falling wholly outside the client rectangle
 				MindMapItem item = Item(node);
 				Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
 
-				// Don't draw items falling wholly outside the client rectangle
 				if (!GetItemDrawRect(item.TotalBounds).IntersectsWith(clipRect))
 					continue;
 
-				Rectangle drawPos = GetItemDrawRect(item.ItemBounds);
-
-				if (IsParent(node) && !IsRoot(node))
-				{
-                    int offset = (ExpansionButtonSize + ExpansionButtonSeparation);
-
-					if (!item.IsFlipped)
-						drawPos.X += offset;
-
-					drawPos.Width -= offset;
-				}
-
+				Rectangle drawRect = GetItemLabelRect(node);
 				NodeDrawState drawState = DrawState(node);
 
-				if (drawState != NodeDrawState.None)
+				// If selected adjust rect to the exact length of the string
+				if ((drawState != NodeDrawState.None) && !IsRoot(node))
 				{
-					// subtract the vertical separation from selected items
-					drawPos.Inflate(0, -(ItemVertSeparation / 2));
-
-					// Adjust rect to the exact length of the string
 					int textWidth = ((int)graphics.MeasureString(node.Text, m_TreeView.Font).Width);
-					int xOffset = (drawPos.Width - textWidth - (2 * LabelPadding));
+					int xOffset = (drawRect.Width - textWidth - (2 * LabelPadding));
 
 					if (item.IsFlipped)
-						drawPos.X += xOffset;
+						drawRect.X += xOffset;
 
-					drawPos.Width -= xOffset;
+					drawRect.Width -= xOffset;
 				}
 
-				DrawNodeLabel(graphics, node.Text, drawPos, drawState, item.IsFlipped, item.ItemData);
+				DrawNodeLabel(graphics, node.Text, drawRect, drawState, DrawPos(node), item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1272,42 +1330,42 @@ namespace MindMapUIExtension
 
 					if (DebugMode())
 					{
-						drawPos = GetItemDrawRect(item.ChildBounds);
-						drawPos.Inflate(-1, -1);
-						graphics.DrawRectangle(new Pen(Color.Black), drawPos);
+						drawRect = GetItemDrawRect(item.ChildBounds);
+						drawRect.Inflate(-1, -1);
+						graphics.DrawRectangle(new Pen(Color.Black), drawRect);
 	
-						drawPos = GetItemDrawRect(item.TotalBounds);
-						graphics.DrawRectangle(new Pen(Color.Red), drawPos);
+						drawRect = GetItemDrawRect(item.TotalBounds);
+						graphics.DrawRectangle(new Pen(Color.Red), drawRect);
 					}
 				}
 			}
 		}
 
-		static public StringFormat DefaultLabelFormat(bool isLeftOfRoot, bool isSelected)
+		static protected StringFormat DefaultLabelFormat(NodeDrawPos nodePos, bool isSelected)
 		{
 			var format = new StringFormat(StringFormatFlags.NoClip | StringFormatFlags.FitBlackBox | StringFormatFlags.NoWrap);
 
 			format.LineAlignment = StringAlignment.Center;
 			format.Trimming = StringTrimming.None;
 
-			if (isSelected)
+			if (isSelected || (nodePos == NodeDrawPos.Root))
 			{
 				format.Alignment = StringAlignment.Center;
 			}
-			else if (isLeftOfRoot)
+			else if (nodePos == NodeDrawPos.Right)
 			{
-				format.Alignment = StringAlignment.Far;
+				format.Alignment = StringAlignment.Near;
 			}
 			else
 			{
-				format.Alignment = StringAlignment.Near;
+				format.Alignment = StringAlignment.Far;
 			}
 
 			return format;
 		}
 
 		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-											 NodeDrawState nodeState, bool isLeftOfRoot, Object itemData)
+											 NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
 
@@ -1329,7 +1387,7 @@ namespace MindMapUIExtension
 
 			}
 
-			var format = DefaultLabelFormat(isLeftOfRoot, (nodeState != NodeDrawState.None));
+			var format = DefaultLabelFormat(nodePos, (nodeState != NodeDrawState.None));
 
 			graphics.DrawString(label, m_TreeView.Font, textColor, rect, format);
 		}
@@ -1343,6 +1401,18 @@ namespace MindMapUIExtension
 				return NodeDrawState.DropTarget;
 
 			return NodeDrawState.None;
+		}
+
+		private NodeDrawPos DrawPos(TreeNode node)
+		{
+			if (IsRoot(node))
+				return NodeDrawPos.Root;
+
+			if (Item(node).IsFlipped)
+				return NodeDrawPos.Left;
+
+			// else
+			return NodeDrawPos.Right;
 		}
 
 		private Rectangle CalculateExpansionButtonRect(TreeNode node)
@@ -1389,7 +1459,7 @@ namespace MindMapUIExtension
 				Update();
 		}
 
-		private bool HitTestExpansionButton(TreeNode node, Point point)
+		protected bool HitTestExpansionButton(TreeNode node, Point point)
 		{
 			Rectangle button = Rectangle.Inflate(CalculateExpansionButtonRect(node), 2, 4);
 
@@ -1449,7 +1519,7 @@ namespace MindMapUIExtension
 
 		virtual protected void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
 		{
-			using (var pen = new Pen(Color.Magenta))
+			using (var pen = new Pen(m_ConnectionColor))
 			{
 				graphics.DrawLine(pen, ptFrom, ptTo);
 
@@ -1504,22 +1574,41 @@ namespace MindMapUIExtension
 			return drawPos;
 		}
 
-		protected Rectangle GetSelectedItemPosition()
+		protected Rectangle GetItemLabelRect(TreeNode node)
 		{
-			if (SelectedItem != null)
-				return GetItemDrawRect(SelectedItem.ItemBounds);
+			Rectangle itemRect = Rectangle.Empty;
 
-			return Rectangle.Empty;
+			var item = Item(node);
+
+			if (item != null)
+			{
+				itemRect = GetItemDrawRect(item.ItemBounds);
+
+				// subtract the vertical separation from selected items
+				itemRect.Inflate(0, -(ItemVertSeparation / 2));
+
+				if (IsParent(node) && !IsRoot(node))
+				{
+					int offset = (ExpansionButtonSize + ExpansionButtonSeparation);
+
+					if (!item.IsFlipped)
+						itemRect.X += offset;
+
+					itemRect.Width -= offset;
+				}
+			}
+
+			return itemRect;
 		}
 
-        private TreeNode HitTestPositions(Point point)
+        protected TreeNode HitTestPositions(Point point)
         {
             foreach (TreeNode node in m_TreeView.Nodes)
             {
                 TreeNode hit = HitTestPositions(node, point);
 
-                if (hit != null)
-                    return hit;
+				if (hit != null)
+					return hit;
             }
 
             return null;

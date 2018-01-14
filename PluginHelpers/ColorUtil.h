@@ -23,6 +23,9 @@ namespace Abstractspoon
 
 				static Windows::Media::Color GetMediaColor(UInt32 rgbColor);
 				static Drawing::Color GetDrawingColor(UInt32 rgbColor);
+
+				static Windows::Media::Color GetBestTextMediaColor(Windows::Media::Color^ backColor);
+				static Drawing::Color GetBestTextDrawingColor(Drawing::Color^ backColor);
 			};
 		}
 	}

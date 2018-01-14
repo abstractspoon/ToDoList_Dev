@@ -268,6 +268,11 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 	return (bRet != FALSE);
 }
 
+bool UIExtension::ParentNotify::NotifyEditTaskLabel()
+{
+	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_EDITSELECTEDTASKTITLE, 0, 0));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::TaskIcon::TaskIcon(IntPtr hwndParent) : m_hwndParent(NULL), m_hilTaskImages(NULL), m_iImage(-1)
