@@ -7,6 +7,8 @@
 
 #include "..\shared\MouseWheelMgr.h"
 
+#include <afxpriv.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -39,6 +41,7 @@ BEGIN_MESSAGE_MAP(CPopupEditCtrl, CMaskEdit)
 	ON_WM_KEYDOWN()
 	ON_WM_CHAR()
 	ON_MESSAGE(WM_PEC_SHOW, OnPECShow)
+	ON_MESSAGE(WM_FLOATSTATUS, OnFloatStatus)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -137,25 +140,24 @@ void CPopupEditCtrl::Show(CRect rPos)
 
 LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
 {
+	Reset();
+
 	// Prevent underlying window moving during edit
 	CDisableMouseWheel::Initialize();
 
 	// enable and show
-	Reset();
-	ShowWindow(SW_SHOW);
-	EnableWindow(TRUE);
-	SetFocus();
 	SetSel(0, -1);
+	SetWindowPos(NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+	EnableWindow(TRUE);
 
-	SetWindowPos(&wndTop, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	return 0L;
+}
 
-	// do this to prevent the main wnd title bar changing to inactivate
-	// when the focus moves to us
+LRESULT CPopupEditCtrl::OnFloatStatus(WPARAM wParam, LPARAM lParam)
+{
+	// Prevent top-level parent losing activation when we are shown
 	if (GetStyle() & WS_POPUP)
-	{
-		CWnd* pTopParent = m_pParent->GetParentOwner();
-		pTopParent->SendMessage(WM_NCACTIVATE, (WPARAM)TRUE);
-	}
+		return 1L;
 
 	return 0L;
 }

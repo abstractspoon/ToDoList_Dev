@@ -66,8 +66,9 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	
 	afx_msg LRESULT OnPECShow(WPARAM wp, LPARAM lp);
-
+	afx_msg LRESULT OnFloatStatus(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 	void EndEdit(BOOL bCancel, BOOL bIntentional);
