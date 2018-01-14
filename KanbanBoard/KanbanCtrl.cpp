@@ -111,6 +111,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_LBUTTONUP()
 	ON_NOTIFY(LVN_BEGINDRAG, IDC_LISTCTRL, OnBeginDragListItem)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LISTCTRL, OnListItemChange)
+	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_LISTCTRL, OnListEditLabel)
 	ON_NOTIFY(NM_SETFOCUS, IDC_LISTCTRL, OnListSetFocus)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
@@ -2584,6 +2585,16 @@ void CKanbanCtrl::OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult)
 		int breakpoint = 0;
 	}
 #endif
+}
+
+void CKanbanCtrl::OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = TRUE; // cancel our edit
+
+	NMLVDISPINFO* pNMLV = (NMLVDISPINFO*)pNMHDR;
+	ASSERT(pNMLV->item.lParam);
+
+	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMLV->item.lParam);
 }
 
 void CKanbanCtrl::ClearOtherListSelections(const CKanbanListCtrl* pIgnore)

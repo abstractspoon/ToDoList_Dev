@@ -812,7 +812,7 @@ END_MESSAGE_MAP()
 
 BOOL CKanbanListCtrl::Create(UINT nID, CWnd* pParentWnd)
 {
-	UINT nFlags = (WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_TABSTOP | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER);
+	UINT nFlags = (WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_TABSTOP | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_EDITLABELS);
 
 	return CListCtrl::Create(nFlags, CRect(0, 0, 0, 0), pParentWnd, nID);
 }
@@ -2054,6 +2054,8 @@ void CKanbanListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CKanbanListCtrl::HandleLButtonClick(CPoint point)
 {
+	m_tooltip.Pop();
+
 	m_dwSelectingTask = 0;
 
 	// don't let the selection to be set to -1

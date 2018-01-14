@@ -115,6 +115,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListItemChange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnListEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragListItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnListCheckChange(WPARAM wp, LPARAM lp);
