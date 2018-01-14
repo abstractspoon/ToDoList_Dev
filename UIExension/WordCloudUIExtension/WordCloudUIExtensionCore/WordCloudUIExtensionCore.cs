@@ -324,6 +324,7 @@ namespace WordCloudUIExtension
 		{
 			switch (attrib)
 			{
+				case UIExtension.TaskAttribute.Title:
 				case UIExtension.TaskAttribute.Icon:
 				case UIExtension.TaskAttribute.Color:
 					return true;
