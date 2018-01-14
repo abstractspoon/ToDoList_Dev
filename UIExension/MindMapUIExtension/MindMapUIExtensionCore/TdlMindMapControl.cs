@@ -146,6 +146,18 @@ namespace MindMapUIExtension
 			}
 		}
 
+		public UInt32 HitTest(Point screenPos)
+		{
+			var clientPos = PointToClient(screenPos);
+			var node = HitTestPositions(clientPos);
+
+			if (node != null)
+				return UniqueID(node);
+			
+			// else
+			return 0;
+		}
+
 		// Internal ------------------------------------------------------------
 
 		protected void UpdateTaskAttributes(TaskList tasks,
@@ -179,21 +191,25 @@ namespace MindMapUIExtension
 
 			if (newTask)
 			{
-				item = new MindMapTaskItem(task);
-				m_Items[item.ID] = item;
+				var parentId = task.GetParentTask().GetID();
+				var parentNode = FindNode(parentId);
+
+				AddTaskToTree(task, parentNode, true);
 			}
-			else if (!item.ProcessTaskUpdate(task, attribs))
+			else if (item.ProcessTaskUpdate(task, attribs))
+			{
+				// Process children
+				Task subtask = task.GetFirstSubtask();
+
+				while (subtask.IsValid() && ProcessTaskUpdate(subtask, attribs, taskIds))
+					subtask = subtask.GetNextTask();
+			}
+			else
 			{
 				return false;
 			}
 
-			taskIds.Add(item.ID);
-
-			// Process children
-			Task subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, attribs, taskIds))
-				subtask = subtask.GetNextTask();
+			taskIds.Add(task.GetID());
 
 			return true;
 		}
@@ -229,7 +245,7 @@ namespace MindMapUIExtension
 			else
 			{
 				// There is more than one 'root' task so create a real root parent
-				rootNode = AddRootNode(new MindMapTaskItem("Root"));
+				rootNode = AddRootNode(new MindMapTaskItem(m_Trans.Translate("Root")));
 
 				AddTaskToTree(task, rootNode);
 			}
@@ -363,7 +379,7 @@ namespace MindMapUIExtension
 			base.Clear();
 		}
 
-		private bool AddTaskToTree(Task task, TreeNode parent)
+		private bool AddTaskToTree(Task task, TreeNode parent, bool select = false)
 		{
 			if (!task.IsValid())
 				return true; // not an error
@@ -386,6 +402,9 @@ namespace MindMapUIExtension
 
 			m_Items.Add(taskID, taskItem);
 
+			if (select)
+				SelectedNode = node;
+
 			return true;
 		}
 
@@ -396,12 +415,20 @@ namespace MindMapUIExtension
 
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
-			if (m_IgnoreMouseClick)
+			base.OnMouseClick(e);
+
+			if (e.Button != MouseButtons.Left)
 				return;
+
+			if (m_IgnoreMouseClick)
+			{
+				m_IgnoreMouseClick = false;
+				return;
+			}
 
 			TreeNode node = HitTestPositions(e.Location);
 
-			if (node != SelectedNode)
+			if ((node != SelectedNode) || IsRoot(node))
 				return;
 
 			if (HitTestExpansionButton(node, e.Location))
@@ -418,15 +445,31 @@ namespace MindMapUIExtension
 		{
 			m_EditTimer.Stop();
 
-			// Cache the previous selected item
-			m_PreviouslySelectedNode = SelectedNode;
+			switch (e.Button)
+			{
+				case MouseButtons.Left:
+					{
+						// Cache the previous selected item
+						m_PreviouslySelectedNode = SelectedNode;
 
-			TreeNode hit = HitTestPositions(e.Location);
+						TreeNode hit = HitTestPositions(e.Location);
 
-			if (hit != null)
-				m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
-			else
-				m_IgnoreMouseClick = false;
+						if (hit != null)
+							m_IgnoreMouseClick = HitTestExpansionButton(hit, e.Location);
+						else
+							m_IgnoreMouseClick = false;
+					}
+					break;
+
+				case MouseButtons.Right:
+					{
+						TreeNode hit = HitTestPositions(e.Location);
+
+						if (hit != null)
+							SelectedNode = hit;
+					}
+					break;
+			}
 
 			base.OnMouseDown(e);
 		}

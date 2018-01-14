@@ -322,61 +322,68 @@ namespace MindMapUIExtension
 
 			base.OnMouseDoubleClick(e);
 
-            TreeNode hit = HitTestPositions(e.Location);
+			if (e.Button == MouseButtons.Left)
+			{
+				TreeNode hit = HitTestPositions(e.Location);
 
-			if ((hit != null) && HitTestExpansionButton(hit, e.Location))
-				return;
+				if ((hit != null) && HitTestExpansionButton(hit, e.Location))
+					return;
 
-            if (IsRoot(hit))
-            {
-                if (IsAnyNodeCollapsed(RootNode.Nodes))
-                    Expand(ExpandNode.ExpandAll);
-                else
-                    Expand(ExpandNode.CollapseAll);
-            }
-            else if (IsParent(hit))
-            {
-                if (hit.IsExpanded)
-                    hit.Collapse();
-                else
-                    hit.Expand();
-            }
+				if (IsRoot(hit))
+				{
+					if (IsAnyNodeCollapsed(RootNode.Nodes))
+						Expand(ExpandNode.ExpandAll);
+					else
+						Expand(ExpandNode.CollapseAll);
+				}
+				else if (IsParent(hit))
+				{
+					if (hit.IsExpanded)
+						hit.Collapse();
+					else
+						hit.Expand();
+				}
+			}
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
 			base.OnMouseDown(e);
 
-            TreeNode hit = HitTestPositions(e.Location);
-
-			if (hit != null)
+			if (e.Button == MouseButtons.Left)
 			{
-				if (HitTestExpansionButton(hit, e.Location))
-				{
-					RedrawExpansionButton(hit);
+				TreeNode hit = HitTestPositions(e.Location);
 
-					if (hit.IsExpanded)
-						hit.Collapse();
-					else
-						hit.Expand();
-				}
-				else
+				if (hit != null)
 				{
-					SelectedNode = hit;
-
-					if (hit != RootNode)
+					if (HitTestExpansionButton(hit, e.Location))
 					{
-						m_DragTimer.Tag = e;
-						m_DragTimer.Start();
+						RedrawExpansionButton(hit);
+
+						if (hit.IsExpanded)
+							hit.Collapse();
+						else
+							hit.Expand();
+					}
+					else
+					{
+						SelectedNode = hit;
+
+						if (hit != RootNode)
+						{
+							m_DragTimer.Tag = e;
+							m_DragTimer.Start();
+						}
 					}
 				}
 			}
         }
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
 
-			if (m_DragTimer.Enabled)
+			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
 			{
 				if (CheckStartDragging(e.Location))
 					m_DragTimer.Stop();
@@ -389,12 +396,15 @@ namespace MindMapUIExtension
 
 			base.OnMouseUp(e);
 
-			TreeNode hit = HitTestPositions(e.Location);
-
-			if (hit != null)
+			if (e.Button == MouseButtons.Left)
 			{
-				if (HitTestExpansionButton(hit, e.Location))
-					RedrawExpansionButton(hit, false);
+				TreeNode hit = HitTestPositions(e.Location);
+
+				if (hit != null)
+				{
+					if (HitTestExpansionButton(hit, e.Location))
+						RedrawExpansionButton(hit, false);
+				}
 			}
 		}
 
@@ -402,7 +412,10 @@ namespace MindMapUIExtension
 		{
 			m_DragTimer.Stop();
 
-			CheckStartDragging(MousePosition);
+			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
+
+			if (mouseDown)
+				CheckStartDragging(MousePosition);
 		}
 
 		private bool CheckStartDragging(Point cursor)

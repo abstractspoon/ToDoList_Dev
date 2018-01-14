@@ -70,7 +70,7 @@ namespace MindMapUIExtension
 
         public bool PrepareNewTask(ref Task task)
         {
-            return false;
+            return true;
         }
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -97,7 +97,13 @@ namespace MindMapUIExtension
 
         public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
         {
-            return UIExtension.HitResult.Nowhere;
+			UInt32 taskId = m_MindMap.HitTest(new Point(xPos, yPos));
+
+			if (taskId != 0)
+				return UIExtension.HitResult.Task;
+
+			// else
+            return UIExtension.HitResult.Tasklist;
         }
 
         public void SetUITheme(UITheme theme)
