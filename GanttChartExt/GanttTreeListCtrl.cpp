@@ -1093,12 +1093,15 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	if (hTask == NULL)
 		return;
 
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+	ASSERT(!m_data.HasItem(dwTaskID));
+
+	m_dwMaxTaskID = max(m_dwMaxTaskID, dwTaskID);
+
 	// map the data
 	GANTTITEM* pGI = new GANTTITEM;
+	m_data[dwTaskID] = pGI;
 	
-	pGI->dwTaskID = pTasks->GetTaskID(hTask);
-	m_dwMaxTaskID = max(m_dwMaxTaskID, pGI->dwTaskID);
-
 	// Only save data for non-references
 	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 
@@ -1149,11 +1152,6 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 		// track earliest and latest dates
 		m_dateRange.MinMax(*pGI);
 	}
-	
-	DWORD dwTaskID = pTasks->GetTaskID(hTask);
-	ASSERT(!m_data.HasItem(dwTaskID));
-
-	m_data[dwTaskID] = pGI;
 	
 	// add item to tree
 	HTREEITEM htiAfter = TVI_LAST; // default
