@@ -338,10 +338,12 @@ namespace MindMapUIExtension
 				}
 				else if (IsParent(hit))
 				{
-					if (IsAnyNodeCollapsed(hit.Nodes))
+					if (!hit.IsExpanded || IsAnyNodeCollapsed(hit.Nodes))
 						hit.ExpandAll();
 					else
 						hit.Collapse();
+
+					RecalculatePositions();
 				}
 			}
         }
