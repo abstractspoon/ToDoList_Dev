@@ -665,10 +665,10 @@ namespace DayViewUIExtension
 // 			return (item.IsSingleDay() && 
 //                     (item.StartDate.Date >= startDate) && 
 //                     (item.StartDate.Date <= endDate));
-			return ((item.StartDate.Date >= startDate) && 
-                    (item.EndDate.Date < endDate));
-// 			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
-// 					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
+// 			return ((item.StartDate.Date >= startDate) && 
+//                     (item.EndDate.Date < endDate));
+			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
+					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
 		}
 
 		// --------------------------------------------------------------------------------------
@@ -678,9 +678,9 @@ namespace DayViewUIExtension
 		private const string FontName = "Tahoma";
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-//		private System.Windows.Forms.Timer m_redrawTimer;
 
-		private bool m_SettingMonthYear = false, m_SettingDayViewStartDate = false;
+		private bool m_SettingMonthYear = false;
+        private bool m_SettingDayViewStartDate = false;
 
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;
