@@ -92,7 +92,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return System.Drawing.Color.FromArgb(213, 215, 241);
+                return InterpolateColors(this.HourSeperatorColor, m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight), 0.5f);
             }
         }
 
@@ -100,7 +100,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return System.Drawing.Color.FromArgb(165, 191, 225);
+                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
             }
         }
 
@@ -174,7 +174,7 @@ namespace DayViewUIExtension
 
             if (hour)
             {
-                using (Pen pen = new Pen(InterpolateColors(this.TextColor, System.Drawing.Color.White, 0.5f)))
+                using (Pen pen = new Pen(m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark)))
                     g.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
             }
         }
@@ -250,7 +250,7 @@ namespace DayViewUIExtension
 
         public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
-            using (SolidBrush backBrush = new SolidBrush(System.Drawing.Color.FromArgb(0xe6, 0xed, 0xf7)))
+            using (SolidBrush backBrush = new SolidBrush(m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
                 g.FillRectangle(backBrush, rect);
         }
 

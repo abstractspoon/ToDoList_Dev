@@ -386,6 +386,18 @@ namespace Calendar
 			}
         }
 
+        private List<System.DayOfWeek> weekendDays = new List<System.DayOfWeek> { System.DayOfWeek.Saturday, System.DayOfWeek.Sunday };
+
+        public List<System.DayOfWeek> WeekendDays
+        {
+            get { return weekendDays; }
+            set 
+            { 
+                weekendDays = value;
+                Invalidate();
+            }
+        }
+
         private DateTime selectionStart;
 
         public DateTime SelectionStart
@@ -1290,7 +1302,7 @@ namespace Calendar
                 workingHoursRectangle.Y = this.HeaderHeight;
             }
 
-            if (!((time.DayOfWeek == DayOfWeek.Saturday) || (time.DayOfWeek == DayOfWeek.Sunday))) //weekends off -> no working hours
+            if (!weekendDays.Contains(time.DayOfWeek))
                 renderer.DrawHourRange(e.Graphics, workingHoursRectangle, false, false);
 
             if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))

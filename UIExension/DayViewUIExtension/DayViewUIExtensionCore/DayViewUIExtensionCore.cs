@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using Abstractspoon.Tdl.PluginHelpers;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
@@ -15,6 +16,17 @@ namespace DayViewUIExtension
 		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_trans;
 		private UIExtension.TaskIcon m_TaskIcons;
+
+        [Flags] private enum WeekendDays
+        {
+	        SUNDAY		= 0X01,
+	        MONDAY		= 0X02,
+	        TUESDAY		= 0X04,
+	        WEDNESDAY	= 0X08,
+	        THURSDAY	= 0X10,
+	        FRIDAY		= 0X20,
+	        SATURDAY	= 0X40,
+        }
 
 		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
@@ -277,6 +289,55 @@ namespace DayViewUIExtension
             {
                 m_DayView.SetFont(FontName, 8);
             }
+
+            // Weekends
+            WeekendDays dwWeekends = (WeekendDays)prefs.GetProfileInt("Preferences", "Weekends", 0);
+
+            List<System.DayOfWeek> weekendDays = new List<System.DayOfWeek>();
+
+            if ((dwWeekends & WeekendDays.SUNDAY) == WeekendDays.SUNDAY)
+                weekendDays.Add(System.DayOfWeek.Sunday);
+
+            if ((dwWeekends & WeekendDays.SATURDAY) == WeekendDays.SATURDAY)
+                weekendDays.Add(System.DayOfWeek.Saturday);
+
+            if ((dwWeekends & WeekendDays.MONDAY) == WeekendDays.MONDAY)
+                weekendDays.Add(System.DayOfWeek.Monday);
+
+            if ((dwWeekends & WeekendDays.TUESDAY) == WeekendDays.TUESDAY)
+                weekendDays.Add(System.DayOfWeek.Tuesday);
+
+            if ((dwWeekends & WeekendDays.WEDNESDAY) == WeekendDays.WEDNESDAY)
+                weekendDays.Add(System.DayOfWeek.Wednesday);
+
+            if ((dwWeekends & WeekendDays.THURSDAY) == WeekendDays.THURSDAY)
+                weekendDays.Add(System.DayOfWeek.Thursday);
+
+            if ((dwWeekends & WeekendDays.FRIDAY) == WeekendDays.FRIDAY)
+                weekendDays.Add(System.DayOfWeek.Friday);
+
+            m_DayView.WeekendDays = weekendDays;
+
+            // Working hours
+            double hoursInDay = prefs.GetProfileDouble("Preferences", "HoursInDay", 8.0);
+
+            // assume working days pivot about 1.30pm
+            // eg. a standard working day of 8 hours (+1 for lunch)
+            // starts at 9am (13.50 - 4.5) and 
+            // ends at 6pm (13.30 + 4.5)
+            const double MIDDAY = 13.5;
+            const double LUNCHSTARTTIME = (MIDDAY - 0.5);
+            const double LUNCHENDTIME = (MIDDAY + 0.5);
+
+            double StartOfDay = LUNCHSTARTTIME - (hoursInDay / 2);
+            double EndOfDay = LUNCHENDTIME + (hoursInDay / 2);
+
+            m_DayView.WorkingHourStart = (int)StartOfDay;
+            m_DayView.WorkingMinuteStart = (int)((StartOfDay - m_DayView.WorkingHourStart) * 60);
+
+            m_DayView.WorkingHourEnd = (int)EndOfDay;
+            m_DayView.WorkingMinuteEnd = (int)((EndOfDay - m_DayView.WorkingHourEnd) * 60);
+            
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
