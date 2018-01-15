@@ -173,8 +173,10 @@ namespace MindMapUIExtension
 
 		public enum ExpandNode
 		{
+			ExpandNone = -1,
 			ExpandAll,
 			ExpandSelection,
+			ExpandSelectionAll,
 			CollapseAll,
 			CollapseSelection
 		}
@@ -184,11 +186,7 @@ namespace MindMapUIExtension
 			if (!CanExpand(expand))
 				return false;
 
-			// Because we will/may receive multiple expansion
-			// notifications and we want our animation to occur
-			// just at the end we ignore notifications until the end
-			EnableExpandNotifications(false);
-            HoldRedraw = true;
+			BeginUpdate();
 
 			switch (expand)
 			{
@@ -198,6 +196,10 @@ namespace MindMapUIExtension
 
 				case ExpandNode.ExpandSelection:
 					SelectedNode.Expand();
+					break;
+
+				case ExpandNode.ExpandSelectionAll:
+					SelectedNode.ExpandAll();
 					break;
 
 				case ExpandNode.CollapseAll:
@@ -214,11 +216,8 @@ namespace MindMapUIExtension
 					break;
 			}
 
-			EnableExpandNotifications(true);
-			RecalculatePositions();
+			EndUpdate();
             EnsureItemVisible(SelectedItem);
-
-            HoldRedraw = false;
 
 			return true;
 		}
@@ -231,13 +230,16 @@ namespace MindMapUIExtension
 			switch (expand)
 			{
 				case ExpandNode.ExpandAll:
-					return IsAnyNodeCollapsed(m_TreeView.Nodes[0].Nodes);
+					return IsAnyNodeCollapsed(RootNode.Nodes);
 
 				case ExpandNode.ExpandSelection:
 					return !SelectedNode.IsExpanded;
 
+				case ExpandNode.ExpandSelectionAll:
+					return !SelectedNode.IsExpanded || IsAnyNodeCollapsed(SelectedNode.Nodes);
+					
 				case ExpandNode.CollapseAll:
-					return IsAnyNodeExpanded(m_TreeView.Nodes[0].Nodes);
+					return IsAnyNodeExpanded(RootNode.Nodes);
 
 				case ExpandNode.CollapseSelection:
 					return (!IsRoot(SelectedNode) && SelectedNode.IsExpanded);
@@ -294,6 +296,20 @@ namespace MindMapUIExtension
 
 		// Message Handlers -----------------------------------------------------------
 
+		protected void BeginUpdate()
+		{
+			EnableExpandNotifications(false);
+			HoldRedraw = true;
+		}
+
+		protected void EndUpdate()
+		{
+			HoldRedraw = false;
+
+			EnableExpandNotifications(true);
+			RecalculatePositions();
+		}
+
         protected override void OnScroll(ScrollEventArgs se)
         {
             base.OnScroll(se);
@@ -329,22 +345,25 @@ namespace MindMapUIExtension
 				if ((hit != null) && HitTestExpansionButton(hit, e.Location))
 					return;
 
+				ExpandNode expand = ExpandNode.ExpandNone;
+
 				if (IsRoot(hit))
 				{
 					if (IsAnyNodeCollapsed(RootNode.Nodes))
-						Expand(ExpandNode.ExpandAll);
+						expand = ExpandNode.ExpandAll;
 					else
-						Expand(ExpandNode.CollapseAll);
+						expand = ExpandNode.CollapseAll;
 				}
 				else if (IsParent(hit))
 				{
 					if (!hit.IsExpanded || IsAnyNodeCollapsed(hit.Nodes))
-						hit.ExpandAll();
+						expand = ExpandNode.ExpandSelectionAll;
 					else
-						hit.Collapse();
-
-					RecalculatePositions();
+						expand = ExpandNode.CollapseSelection;
 				}
+
+				if (expand != ExpandNode.ExpandNone)
+					Expand(expand);
 			}
         }
 
@@ -361,11 +380,15 @@ namespace MindMapUIExtension
 					if (HitTestExpansionButton(hit, e.Location))
 					{
 						RedrawExpansionButton(hit);
+						BeginUpdate();
 
 						if (hit.IsExpanded)
 							hit.Collapse();
 						else
 							hit.Expand();
+
+						EndUpdate();
+						EnsureItemVisible(Item(hit));
 					}
 					else
 					{
