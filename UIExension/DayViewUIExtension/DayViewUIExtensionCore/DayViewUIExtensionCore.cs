@@ -662,11 +662,16 @@ namespace DayViewUIExtension
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
+            if (!item.HasValidDates())
+                return false;
+
 // 			return (item.IsSingleDay() && 
 //                     (item.StartDate.Date >= startDate) && 
 //                     (item.StartDate.Date <= endDate));
 // 			return ((item.StartDate.Date >= startDate) && 
 //                     (item.EndDate.Date < endDate));
+
+            // Start or end date must be 'visible'
 			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
 					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
 		}
@@ -691,6 +696,10 @@ namespace DayViewUIExtension
 
 	public class CalendarItem : Calendar.Appointment
 	{
+        static DateTime NullDate = new DateTime();
+
+        // --------------------
+
 		public DateTime OrgStartDate { get; set; }
 		public DateTime OrgEndDate { get; set; }
 
@@ -755,6 +764,11 @@ namespace DayViewUIExtension
 			return (base.IsLongAppt() || (OrgStartDate.Day != OrgEndDate.Day) ||
                     ((OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(OrgEndDate)));
 		}
+
+        public bool HasValidDates()
+        {
+            return ((StartDate != NullDate) && (EndDate != NullDate));
+        }
 
     }
 
