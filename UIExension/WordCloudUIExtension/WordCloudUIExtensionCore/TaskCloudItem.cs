@@ -37,7 +37,20 @@ namespace WordCloudUIExtension
 		public List<string> Tags;
 		public bool HasIcon;
 		public bool IsParent;
-		public System.Drawing.Color TextColor;
+
+        private System.Drawing.Color taskTextColor = new System.Drawing.Color();
+
+        public System.Drawing.Color TextColor
+        {
+            get
+            {
+                if (taskTextColor.IsEmpty)
+                    return System.Drawing.SystemColors.WindowText;
+
+                return taskTextColor;
+            }
+            set { taskTextColor = value; }
+        }
 
 		private List<string> m_Words;
 		private UIExtension.TaskAttribute m_WordAttribute;

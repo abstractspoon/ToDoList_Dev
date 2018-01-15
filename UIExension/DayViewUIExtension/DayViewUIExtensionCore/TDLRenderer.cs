@@ -294,7 +294,7 @@ namespace DayViewUIExtension
 					if (!isSelected && appointment.DrawBorder)
 					{
 						using (Pen pen = new Pen(appointment.BorderColor, 1))
-                            g.DrawRectangle(pen, rect.Left, rect.Top, rect.Width, rect.Height);
+                            g.DrawRectangle(pen, rect);
 					}
 
 					// Draw appointment icon

@@ -296,7 +296,7 @@ UInt32 Task::GetColor()
 
 System::Drawing::Color Task::GetTextDrawingColor()
 {
-	UInt32 color = GetColor();
+	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
 	if (color == 0)
 		return System::Drawing::Color::Empty;
@@ -307,7 +307,7 @@ System::Drawing::Color Task::GetTextDrawingColor()
 
 System::Windows::Media::Color Task::GetTextMediaColor()
 {
-	UInt32 color = GetColor();
+	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
 	if (color == 0)
 		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);

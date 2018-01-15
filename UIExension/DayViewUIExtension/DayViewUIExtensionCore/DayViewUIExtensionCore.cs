@@ -694,7 +694,19 @@ namespace DayViewUIExtension
 		public DateTime OrgStartDate { get; set; }
 		public DateTime OrgEndDate { get; set; }
 
-		public System.Drawing.Color TaskTextColor { get; set; }
+        private System.Drawing.Color taskTextColor;
+
+        public System.Drawing.Color TaskTextColor
+        {
+            get
+            {
+                if (taskTextColor.IsEmpty)
+                    return base.TextColor;
+
+                return taskTextColor;
+            }
+            set { taskTextColor = value; }
+        }
 
 		public String AllocTo { get; set; }
 		public Boolean IsParent { get; set; }

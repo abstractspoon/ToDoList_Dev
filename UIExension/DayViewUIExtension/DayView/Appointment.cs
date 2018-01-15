@@ -107,6 +107,9 @@ namespace Calendar
         {
             get
             {
+                if (barColor.IsEmpty)
+                    return SystemColors.Window;
+
                 return barColor;
             }
             set
@@ -122,6 +125,9 @@ namespace Calendar
 		{
 			get
 			{
+                if (fillColor.IsEmpty)
+                    return SystemColors.Window;
+
 				return fillColor;
 			}
 			set
@@ -141,6 +147,9 @@ namespace Calendar
         {
             get
             {
+                if (textColor.IsEmpty)
+                    return SystemColors.WindowText;
+
                 return textColor;
             }
             set
@@ -176,6 +185,9 @@ namespace Calendar
         {
             get
             {
+                if (textColor.IsEmpty)
+                    return SystemColors.ControlDark;
+
                 return borderColor;
             }
             set
