@@ -37,7 +37,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // REPLACE THIS WITH NEW GUID!
 
 const LPCWSTR DAYVIEW_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
-const LPCWSTR DAYVIEW_NAME = L"Day View";
+const LPCWSTR DAYVIEW_NAME = L"Week Planner";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
