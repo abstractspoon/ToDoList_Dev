@@ -115,7 +115,10 @@ namespace DayViewUIExtension
                     item.Title = task.GetTitle();
 
                 if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+                {
                     item.EndDate = item.OrgEndDate = task.GetDoneDate();
+                    item.IsDone = (task.IsDone() || task.IsGoodAsDone());
+                }
 
                 if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
                 {
@@ -147,6 +150,7 @@ namespace DayViewUIExtension
 				item.IsParent = task.IsParent();
 				item.TaskTextColor = task.GetTextDrawingColor();
 				item.DrawBorder = true;
+                item.IsDone = (task.IsDone() || task.IsGoodAsDone());
 			}
 
             m_Items[taskID] = item;
@@ -638,7 +642,7 @@ namespace DayViewUIExtension
 				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
 				{
 					// Recalculate colours
-					if (m_taskColorIsBkgnd)
+					if (m_taskColorIsBkgnd && item.Value.HasTaskTextColor && !item.Value.IsDone)
 					{
 						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
 						item.Value.BorderColor = ColorUtil.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
@@ -705,6 +709,11 @@ namespace DayViewUIExtension
 
         private System.Drawing.Color taskTextColor;
 
+        public Boolean HasTaskTextColor
+        {
+            get { return !taskTextColor.IsEmpty;  }
+        }
+
         public System.Drawing.Color TaskTextColor
         {
             get
@@ -720,6 +729,7 @@ namespace DayViewUIExtension
 		public String AllocTo { get; set; }
 		public Boolean IsParent { get; set; }
 		public Boolean HasIcon { get; set; }
+        public Boolean IsDone { get; set; }
 
         public override DateTime EndDate
         {
