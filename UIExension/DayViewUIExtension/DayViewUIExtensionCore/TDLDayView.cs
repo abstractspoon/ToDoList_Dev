@@ -57,7 +57,10 @@ namespace DayViewUIExtension
         public void SetFont(String fontName, int fontSize)
         {
             m_Renderer.SetFont(fontName, fontSize);
-            Invalidate(true);
+
+            LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 18);
+
+//             Invalidate(true);
         }
         
         public int GetFontHeight()
@@ -136,8 +139,8 @@ namespace DayViewUIExtension
 				// Enough to hide the grip Rect
 				int offset = (gripRect.Right - rect.Left);
 
-				rect.X -= offset;
-				rect.Width += offset;
+                rect.X -= 4;// offset;
+                rect.Width += 4;// offset;
 
 				gripRect.Width = 0;
 			}

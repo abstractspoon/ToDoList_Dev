@@ -277,7 +277,7 @@ namespace DayViewUIExtension
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = StringAlignment.Near;
+                    format.LineAlignment = (longAppt ? StringAlignment.Center : StringAlignment.Near);
 
                     // Draw the background of the appointment
 					if (isSelected)
@@ -299,18 +299,17 @@ namespace DayViewUIExtension
 
 					// Draw appointment icon
 					bool hasIcon = false;
+                    CalendarItem item = appointment as CalendarItem;
 
-					if (m_TaskIcons != null)
-					{
-						CalendarItem item = appointment as CalendarItem;
+                    if ((item != null) && (m_TaskIcons != null) && (item.IsParent || item.HasIcon))
+                    {
+                        Rectangle rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, 16, 16);
 
-						if ((item != null) && (item.IsParent || item.HasIcon) && m_TaskIcons.Get(item.Id))
-						{
-							Point ptIcon = new Point(rect.Left + 2, rect.Top + 2);
-
+                        if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(item.Id))
+                        {
 							if (longAppt)
 							{
-								ptIcon.X = gripRect.Right;
+								rectIcon.X = (gripRect.Right + 2);
 							}
 							else
 							{
@@ -318,13 +317,13 @@ namespace DayViewUIExtension
 								gripRect.Height -= 18;
 							}
 
-							m_TaskIcons.Draw(g, ptIcon.X, ptIcon.Y);
+							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
 							hasIcon = true;
 
-							rect.Width -= (ptIcon.X + 16 - rect.Left);
-							rect.X = (ptIcon.X + 16);
+							rect.Width -= (rectIcon.Right - rect.Left);
+							rect.X = rectIcon.Right;
 						}
-					}
+                    }
 
                     // Draw gripper bar
 					if (gripRect.Width > 0)
