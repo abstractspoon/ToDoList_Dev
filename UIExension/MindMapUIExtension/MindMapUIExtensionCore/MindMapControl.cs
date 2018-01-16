@@ -349,17 +349,17 @@ namespace MindMapUIExtension
 
 				if (IsRoot(hit))
 				{
-					if (IsAnyNodeCollapsed(RootNode.Nodes))
-						expand = ExpandNode.ExpandAll;
-					else
+					if (IsAnyNodeExpanded(RootNode.Nodes))
 						expand = ExpandNode.CollapseAll;
+					else
+						expand = ExpandNode.ExpandAll;
 				}
 				else if (IsParent(hit))
 				{
-					if (!hit.IsExpanded || IsAnyNodeCollapsed(hit.Nodes))
-						expand = ExpandNode.ExpandSelectionAll;
-					else
+					if (IsAnyNodeExpanded(hit.Nodes))
 						expand = ExpandNode.CollapseSelection;
+					else
+						expand = ExpandNode.ExpandSelectionAll;
 				}
 
 				if (expand != ExpandNode.ExpandNone)
