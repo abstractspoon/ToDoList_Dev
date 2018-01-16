@@ -131,8 +131,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MindMapUIExtension", "MindMapUIExtension", "{E2E4B548-D88C-47D2-A9A3-DD66A98C050E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MindMapUIExtensionBridge", "UIExension\MindMapUIExtension\MindMapUIExtensionBridge\MindMapUIExtensionBridge.vcxproj", "{0B0D4095-C793-4B6E-82BA-E865423BBAED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{828B1DA8-D72C-446B-ABCD-5117985691AD} = {828B1DA8-D72C-446B-ABCD-5117985691AD}
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MindMapUIExtensionCore", "UIExension\MindMapUIExtension\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj", "{828B1DA8-D72C-446B-ABCD-5117985691AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
