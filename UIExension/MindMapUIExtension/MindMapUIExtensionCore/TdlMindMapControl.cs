@@ -12,6 +12,16 @@ namespace MindMapUIExtension
 
 	public class MindMapTaskItem
 	{
+		// Data
+		private String m_Title;
+		private UInt32 m_TaskID;
+		private Color m_TextColor;
+		private Boolean m_HasIcon;
+		private Boolean m_IsFlagged;
+        private Boolean m_IsDone;
+
+	    // ------------------------------------------------------------
+
 		public MindMapTaskItem(String label)
 		{
 			m_Title = label;
@@ -25,6 +35,7 @@ namespace MindMapUIExtension
 			m_TextColor = task.GetTextDrawingColor();
 			m_HasIcon = (task.GetIcon().Length > 0);
 			m_IsFlagged = task.IsFlagged();
+            m_IsDone = (task.IsDone() || task.IsGoodAsDone());
 		}
 
 		public override string ToString() { return m_Title; }
@@ -39,6 +50,7 @@ namespace MindMapUIExtension
 		public Color TextColor { get { return m_TextColor; } }
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
+		public Boolean IsDone { get { return m_IsDone; } }
 
 		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
@@ -57,15 +69,12 @@ namespace MindMapUIExtension
 			if (attribs.Contains(UIExtension.TaskAttribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
 
+            if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+                m_IsDone = (task.IsDone() || task.IsGoodAsDone());
+
 			return true;
 		}
 
-		// Data
-		private String m_Title;
-		private UInt32 m_TaskID;
-		private Color m_TextColor;
-		private Boolean m_HasIcon;
-		private Boolean m_IsFlagged;
 	}
 
 	// ------------------------------------------------------------
@@ -318,12 +327,13 @@ namespace MindMapUIExtension
 			Brush backColor = null;
 
 			// Use task colours
-			Color taskColor = (itemData as MindMapTaskItem).TextColor;
+            var taskItem = (itemData as MindMapTaskItem);
+			Color taskColor = taskItem.TextColor;
 			bool isSelected = (nodeState != NodeDrawState.None);
 
 			if (!taskColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected)
+				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone)
 				{
 					backColor = new SolidBrush(taskColor);
 					textColor = new SolidBrush(ColorUtil.GetBestTextDrawingColor(taskColor));
