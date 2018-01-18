@@ -41,6 +41,8 @@ REM IF ERRORLEVEL 1 goto CONTINUE
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\DayViewUIExtensionBridge.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\MindMapUIExtensionCore.dll
+%PATH7ZIP% a %OUTZIP% %1\Unicode_Release\MindMapUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\WordCloudUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\WordCloudUIExtensionBridge.dll
