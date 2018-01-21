@@ -59,8 +59,6 @@ namespace DayViewUIExtension
             m_Renderer.SetFont(fontName, fontSize);
 
             LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 18);
-
-//             Invalidate(true);
         }
         
         public int GetFontHeight()

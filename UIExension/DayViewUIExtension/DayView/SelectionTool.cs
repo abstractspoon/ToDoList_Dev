@@ -256,9 +256,9 @@ namespace Calendar
                 view = m_dayView.appointmentViews[m_dayView.SelectedAppointment];
                 gotview = true;
             }
-            else if (m_dayView.longappointmentViews.ContainsKey(m_dayView.SelectedAppointment))
+            else if (m_dayView.longAppointmentViews.ContainsKey(m_dayView.SelectedAppointment))
             {
-                view = m_dayView.longappointmentViews[m_dayView.SelectedAppointment];
+                view = m_dayView.longAppointmentViews[m_dayView.SelectedAppointment];
                 gotview = true;
             }
 

@@ -1165,7 +1165,7 @@ namespace Calendar
                 if (view.Rectangle.Contains(x, y))
                     return view.Appointment;
 
-            foreach (AppointmentView view in longappointmentViews.Values)
+            foreach (AppointmentView view in longAppointmentViews.Values)
                 if (view.Rectangle.Contains(x, y))
                     return view.Appointment;
 
@@ -1374,7 +1374,7 @@ namespace Calendar
         }
 
         internal Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
-        internal Dictionary<Appointment, AppointmentView> longappointmentViews = new Dictionary<Appointment, AppointmentView>();
+        internal Dictionary<Appointment, AppointmentView> longAppointmentViews = new Dictionary<Appointment, AppointmentView>();
 
         public bool GetAppointmentRect(Appointment appointment, ref Rectangle rect)
         {
@@ -1383,11 +1383,19 @@ namespace Calendar
 
             AppointmentView view;
 
+			// Short appointments
             if (appointmentViews.TryGetValue(appointment, out view))
             {
                 rect = view.Rectangle;
                 return true;
             }
+
+			// Long appointments
+			if (longAppointmentViews.TryGetValue(appointment, out view))
+			{
+				rect = view.Rectangle;
+				return true;
+			}
 
             return false;
         }
@@ -1607,7 +1615,7 @@ namespace Calendar
             List<int> layers = new List<int>();
 
 			int dayWidth = rect.Width / daysToShow;
-			longappointmentViews.Clear();
+			longAppointmentViews.Clear();
 
             if (longAppointments != null)
             {
@@ -1691,7 +1699,7 @@ namespace Calendar
                     view.Rectangle = appointmenRect;
                     view.Appointment = appointment;
 
-                    longappointmentViews[appointment] = view;
+                    longAppointmentViews[appointment] = view;
 
                     Rectangle gripRect = appointmenRect;
                     gripRect.Width = appointmentGripWidth;
