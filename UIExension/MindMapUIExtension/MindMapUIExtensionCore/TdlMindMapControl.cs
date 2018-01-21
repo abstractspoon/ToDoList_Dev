@@ -19,6 +19,7 @@ namespace MindMapUIExtension
 		private Boolean m_HasIcon;
 		private Boolean m_IsFlagged;
 		private Boolean m_IsParent;
+        private Boolean m_IsDone;
 
 		// -----------------------------------------------------------------
 
@@ -40,6 +41,7 @@ namespace MindMapUIExtension
 			m_HasIcon = (task.GetIcon().Length > 0);
 			m_IsFlagged = task.IsFlagged();
 			m_IsParent = task.IsParent();
+            m_IsDone = (task.IsDone() || task.IsGoodAsDone());
 		}
 
 		public override string ToString() { return m_Title; }
@@ -55,6 +57,7 @@ namespace MindMapUIExtension
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
 		public Boolean IsParent { get { return m_IsParent; } }
+		public Boolean IsDone { get { return m_IsDone; } }
 
 		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
@@ -72,6 +75,11 @@ namespace MindMapUIExtension
 
 			if (attribs.Contains(UIExtension.TaskAttribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
+
+            if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+                m_IsDone = (task.IsDone() || task.IsGoodAsDone());
+
+			m_IsParent = task.IsParent();
 
 			return true;
 		}
@@ -115,7 +123,6 @@ namespace MindMapUIExtension
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
 			m_EditTimer.Tick += new EventHandler(OnEditLabelTimer);
-
 		}
 
 		public void UpdateTasks(TaskList tasks,
@@ -341,13 +348,14 @@ namespace MindMapUIExtension
 			Brush textColor = SystemBrushes.WindowText;
 			Brush backColor = null;
 
-			// Use task colours
-			Color taskColor = (itemData as MindMapTaskItem).TextColor;
+            var taskItem = (itemData as MindMapTaskItem);
+			Color taskColor = taskItem.TextColor;
 			bool isSelected = (nodeState != NodeDrawState.None);
 
+			// Draw Background
 			if (!taskColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected)
+				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone)
 				{
 					backColor = new SolidBrush(taskColor);
 					textColor = new SolidBrush(ColorUtil.GetBestTextDrawingColor(taskColor));
@@ -380,9 +388,31 @@ namespace MindMapUIExtension
 					break;
 			}
 
+			// Draw icon
+			if (ItemHasIcon(taskItem))
+			{
+				Rectangle iconRect = CalcIconRect(rect);
+
+				if (m_TaskIcons.Get(taskItem.ID))
+					m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+
+				int xOffset = (iconRect.Right - rect.Left);
+
+				rect.X += xOffset;
+				rect.Width -= xOffset;
+			}
+			
+			// Draw Text
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
 			graphics.DrawString(label, this.Font, textColor, rect, format);
+		}
+
+		protected Boolean ItemHasIcon(MindMapTaskItem taskItem)
+		{
+			return ((m_TaskIcons != null) && 
+					(taskItem != null) && 
+					(taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent)));
 		}
 
 		protected override void DrawNodeConnection(Graphics graphics, Point ptFrom, Point ptTo)
@@ -394,6 +424,11 @@ namespace MindMapUIExtension
 								new Point(midX, ptFrom.Y),
 								new Point(midX, ptTo.Y),
 								ptTo);
+		}
+
+		private Rectangle CalcIconRect(Rectangle labelRect)
+		{
+			return new Rectangle((labelRect.X + 2), (CentrePoint(labelRect).Y) - 8, 16, 16);
 		}
 
 		private new void Clear()
@@ -434,13 +469,8 @@ namespace MindMapUIExtension
 
 		protected override int GetExtraWidth(TreeNode node)
 		{
-			var taskItem = (ItemData(node) as MindMapTaskItem);
-
-			if (taskItem != null)
-			{
-				if (taskItem.HasIcon || (taskItem.IsParent && m_ShowParentAsFolder))
-					return 18;
-			}
+			if (ItemHasIcon(ItemData(node) as MindMapTaskItem))
+				return 16;
 
 			// else
 			return 0;
