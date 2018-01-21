@@ -189,6 +189,15 @@ namespace MindMapUIExtension
 			return 0;
 		}
 
+		public Rectangle GetSelectedItemLabelRect()
+		{
+			var labelRect = base.GetSelectedItemLabelRect();
+
+			labelRect.X += (GetExtraWidth(SelectedNode) + 2);
+
+			return labelRect;
+		}
+
 		// Internal ------------------------------------------------------------
 
 		protected void UpdateTaskAttributes(TaskList tasks,
@@ -389,7 +398,7 @@ namespace MindMapUIExtension
 			}
 
 			// Draw icon
-			if (ItemHasIcon(taskItem))
+			if (TaskHasIcon(taskItem))
 			{
 				Rectangle iconRect = CalcIconRect(rect);
 
@@ -408,10 +417,15 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, this.Font, textColor, rect, format);
 		}
 
-		protected Boolean ItemHasIcon(MindMapTaskItem taskItem)
+		protected Boolean NodeHasIcon(TreeNode node)
 		{
-			return ((m_TaskIcons != null) && 
-					(taskItem != null) && 
+			return TaskHasIcon(ItemData(node) as MindMapTaskItem);
+		}
+
+		protected Boolean TaskHasIcon(MindMapTaskItem taskItem)
+		{
+			return ((m_TaskIcons != null) &&
+					(taskItem != null) &&
 					(taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent)));
 		}
 
@@ -469,7 +483,7 @@ namespace MindMapUIExtension
 
 		protected override int GetExtraWidth(TreeNode node)
 		{
-			if (ItemHasIcon(ItemData(node) as MindMapTaskItem))
+			if (NodeHasIcon(node))
 				return 16;
 
 			// else
