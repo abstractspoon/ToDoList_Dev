@@ -20,6 +20,7 @@ namespace DayViewUIExtension
 		private IntPtr m_hWnd;
 		private Font m_BaseFont;
 		private Boolean m_ShowParentsAsFolder;
+		private Boolean m_TaskColorIsBkgnd;
 
 		// ------------------------------------------------------------------------
 
@@ -49,6 +50,12 @@ namespace DayViewUIExtension
 		{
 			get { return m_ShowParentsAsFolder; }
 			set { m_ShowParentsAsFolder = value; }
+		}
+
+		public Boolean TaskColorIsBackground
+		{
+			get { return m_TaskColorIsBkgnd; }
+			set { m_TaskColorIsBkgnd = value; }
 		}
 
 		public UITheme Theme
@@ -264,7 +271,7 @@ namespace DayViewUIExtension
                 g.FillRectangle(backBrush, rect);
         }
 
-		protected Boolean TaskHasIcon(CalendarItem taskItem)
+		public Boolean TaskHasIcon(CalendarItem taskItem)
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
@@ -281,15 +288,37 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
-				bool longAppt = appointment.IsLongAppt();
+				CalendarItem taskItem = (appointment as CalendarItem);
+				bool longAppt = taskItem.IsLongAppt();
 
-				if (!longAppt && (appointment.StartDate.TimeOfDay.TotalHours == 0.0))
+				if (!longAppt && (taskItem.StartDate.TimeOfDay.TotalHours == 0.0))
 				{
 					rect.Y++;
 					rect.Height--;
 				}
 
 				rect.Width--;
+
+				// Recalculate colours
+				Color textColor = taskItem.TaskTextColor;
+				Color borderColor = taskItem.TaskTextColor;
+				Color fillColor = ColorUtil.LighterDrawing(taskItem.TaskTextColor, 0.9f);
+				Color barColor = taskItem.TaskTextColor;
+
+				if (taskItem.HasTaskTextColor)
+				{
+					if (isSelected)
+					{
+						textColor = ColorUtil.DarkerDrawing(taskItem.TaskTextColor, 0.5f);
+					}
+					else if (m_TaskColorIsBkgnd && !taskItem.IsDone)
+					{
+						textColor = ((taskItem.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
+						borderColor = ColorUtil.DarkerDrawing(taskItem.TaskTextColor, 0.5f);
+						barColor = taskItem.TaskTextColor;
+						fillColor = taskItem.TaskTextColor;
+					}
+				}
 
                 using (StringFormat format = new StringFormat())
                 {
@@ -303,26 +332,35 @@ namespace DayViewUIExtension
 					}
 					else
 					{
-						using (SolidBrush brush = new SolidBrush(appointment.FillColor))
+						using (SolidBrush brush = new SolidBrush(fillColor))
 							g.FillRectangle(brush, rect);
 					}
 
 					//  Draw appointment border if needed
-					if (!isSelected && appointment.DrawBorder)
+					if (!isSelected && taskItem.DrawBorder)
 					{
-						using (Pen pen = new Pen(appointment.BorderColor, 1))
+						using (Pen pen = new Pen(borderColor, 1))
                             g.DrawRectangle(pen, rect);
 					}
 
 					// Draw appointment icon
 					bool hasIcon = false;
-                    CalendarItem item = appointment as CalendarItem;
 
-                    if ((item != null) && (m_TaskIcons != null) && (item.IsParent || item.HasIcon))
+                    if (TaskHasIcon(taskItem))
                     {
-                        Rectangle rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, 16, 16);
+						Rectangle rectIcon;
 
-                        if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(item.Id))
+						if (taskItem.IsLongAppt())
+						{
+							int yCentre = ((rect.Top + rect.Bottom) / 2);
+							rectIcon = new Rectangle((rect.Left + 2), (yCentre - 8), 16, 16);
+						}
+						else
+						{
+							rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, 16, 16);
+						}
+
+                        if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(taskItem.Id))
                         {
 							if (longAppt)
 							{
@@ -345,11 +383,11 @@ namespace DayViewUIExtension
                     // Draw gripper bar
 					if (gripRect.Width > 0)
 					{
-						using (SolidBrush brush = new SolidBrush(appointment.BarColor))
+						using (SolidBrush brush = new SolidBrush(barColor))
 							g.FillRectangle(brush, gripRect);
 
 						// Draw gripper border
-						using (Pen pen = new Pen(ColorUtil.DarkerDrawing(appointment.BarColor, 0.5f), 1))
+						using (Pen pen = new Pen(ColorUtil.DarkerDrawing(barColor, 0.5f), 1))
 							g.DrawRectangle(pen, gripRect);
 
 						if (!hasIcon)
@@ -368,8 +406,6 @@ namespace DayViewUIExtension
 						rect.Height -= 3;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-					Color textColor = (isSelected ? ColorUtil.DarkerDrawing(appointment.TextColor, 0.5f) : appointment.TextColor);
 
 					using (SolidBrush brush = new SolidBrush(textColor))
 						g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);

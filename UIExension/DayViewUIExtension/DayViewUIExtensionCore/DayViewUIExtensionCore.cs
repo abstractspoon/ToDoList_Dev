@@ -131,14 +131,14 @@ namespace DayViewUIExtension
 		{
             System.Drawing.Rectangle rect = new System.Drawing.Rectangle();
 
-            if (m_DayView.GetAppointmentRect(m_DayView.SelectedAppointment, ref rect))
+            if (m_DayView.GetSelectedItemLabelRect(ref rect))
             {
                 rect = m_DayView.RectangleToScreen(rect);
 
                 left = rect.Left;
                 top = rect.Top;
                 right = rect.Right;
-                bottom = (rect.Top + m_DayView.GetFontHeight() + 4); // 4 = border
+				bottom = rect.Bottom;
 
                 return true;
             }
@@ -147,22 +147,9 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
-            System.Drawing.Point pt = m_DayView.PointToClient(new System.Drawing.Point(xPos, yPos));
-            Calendar.Appointment appointment = m_DayView.GetAppointmentAt(pt.X, pt.Y);
-
-            if (appointment != null)
-            {
-                return UIExtension.HitResult.Task;
-            }
-            else if (m_DayView.GetTrueRectangle().Contains(pt))
-            {
-                return UIExtension.HitResult.Tasklist;
-            }
-
-            // else
-			return UIExtension.HitResult.Nowhere;
+			return m_DayView.HitTest(xScreen, yScreen);
 		}
 
 		public void SetUITheme(UITheme theme)

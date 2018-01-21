@@ -100,7 +100,6 @@ namespace DayViewUIExtension
     public class TDLDayView : Calendar.DayView
     {
         private TDLRenderer m_Renderer;
-		private Boolean m_TaskColorIsBkgnd;
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
 		private System.Windows.Forms.Timer m_RedrawTimer;
@@ -175,6 +174,69 @@ namespace DayViewUIExtension
 
 			// all else 
 			SelectedAppointment = null;
+			return false;
+		}
+
+		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
+		{
+			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+
+			if (appointment != null)
+			{
+				return UIExtension.HitResult.Task;
+			}
+			else if (GetTrueRectangle().Contains(pt))
+			{
+				return UIExtension.HitResult.Tasklist;
+			}
+
+			// else
+			return UIExtension.HitResult.Nowhere;
+		}
+
+		public bool GetSelectedItemLabelRect(ref Rectangle rect)
+		{
+			if (GetAppointmentRect(SelectedAppointment, ref rect))
+			{
+				CalendarItem selItem = (SelectedAppointment as CalendarItem);
+
+				bool hasIcon = m_Renderer.TaskHasIcon(selItem);
+
+				if (SelectedAppointment.IsLongAppt())
+				{
+					// Gripper
+					if (SelectedAppointment.StartDate >= StartDate)
+						rect.X += 8;
+
+					if (hasIcon)
+						rect.X += 16;
+
+					rect.X += 1;
+					rect.Height += 1;
+				}
+				else
+				{
+					if (hasIcon)
+					{
+						rect.X += 18;
+					}
+					else
+					{
+						// Gripper
+						rect.X += 8;
+					}
+
+					rect.X += 1;
+					rect.Y += 1;
+
+					rect.Height = (GetFontHeight() + 4); // 4 = border
+				}
+				
+				return true;
+			}
+
+			// else
 			return false;
 		}
 
@@ -295,12 +357,12 @@ namespace DayViewUIExtension
 
 		public Boolean TaskColorIsBackground
 		{
-			get { return m_TaskColorIsBkgnd; }
+			get { return m_Renderer.TaskColorIsBackground; }
 			set
 			{
-				if (m_TaskColorIsBkgnd != value)
+				if (m_Renderer.TaskColorIsBackground != value)
 				{
-					m_TaskColorIsBkgnd = value;
+					m_Renderer.TaskColorIsBackground = value;
 					Invalidate();
 				}
 			}
@@ -413,25 +475,7 @@ namespace DayViewUIExtension
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
 			{
 				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
-				{
-					// Recalculate colours
-					if (m_TaskColorIsBkgnd && item.Value.HasTaskTextColor && !item.Value.IsDone)
-					{
-						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
-						item.Value.BorderColor = ColorUtil.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
-						item.Value.BarColor = item.Value.TaskTextColor;
-						item.Value.FillColor = item.Value.TaskTextColor;
-					}
-					else
-					{
-						item.Value.TextColor = item.Value.TaskTextColor;
-						item.Value.BorderColor = item.Value.TaskTextColor;
-						item.Value.FillColor = ColorUtil.LighterDrawing(item.Value.TaskTextColor, 0.9f);
-						item.Value.BarColor = item.Value.TaskTextColor;
-					}
-
 					appts.Add(item.Value);
-				}
 			}
 
 			args.Appointments = appts;
