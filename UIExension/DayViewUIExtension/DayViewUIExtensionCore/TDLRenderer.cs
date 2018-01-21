@@ -13,8 +13,18 @@ namespace DayViewUIExtension
 {
     public class TDLRenderer : Calendar.AbstractRenderer
     {
-        public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
-        {
+		private UIExtension.SelectionRect m_SelectionRect;
+		private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
+		private UITheme m_theme;
+		private UIExtension.TaskIcon m_TaskIcons;
+		private IntPtr m_hWnd;
+		private Font m_BaseFont;
+		private Boolean m_ShowParentsAsFolder;
+
+		// ------------------------------------------------------------------------
+
+		public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
+		{
             // One time initialisation
             if (m_SelectionRect == null)
             {
@@ -32,16 +42,16 @@ namespace DayViewUIExtension
 
 			m_TaskIcons = taskIcons;
 			m_hWnd = hWnd;
+			m_ShowParentsAsFolder = false;
         }
 
-		private UIExtension.SelectionRect m_SelectionRect;
-        private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
-        private UITheme m_theme;
-		private UIExtension.TaskIcon m_TaskIcons;
-		private IntPtr m_hWnd;
-        private Font m_BaseFont;
-        
-        public UITheme Theme
+		public Boolean ShowParentsAsFolder
+		{
+			get { return m_ShowParentsAsFolder; }
+			set { m_ShowParentsAsFolder = value; }
+		}
+
+		public UITheme Theme
         {
             set { m_theme = value; }
         }
@@ -253,6 +263,13 @@ namespace DayViewUIExtension
             using (SolidBrush backBrush = new SolidBrush(m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
                 g.FillRectangle(backBrush, rect);
         }
+
+		protected Boolean TaskHasIcon(CalendarItem taskItem)
+		{
+			return ((m_TaskIcons != null) &&
+					(taskItem != null) &&
+					(taskItem.HasIcon || (m_ShowParentsAsFolder && taskItem.IsParent)));
+		}
 
         public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Calendar.Appointment appointment, bool isSelected, System.Drawing.Rectangle gripRect)
         {

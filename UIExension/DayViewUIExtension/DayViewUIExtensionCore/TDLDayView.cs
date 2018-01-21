@@ -10,15 +10,108 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	public class CalendarItem : Calendar.Appointment
+	{
+		static DateTime NullDate = new DateTime();
+
+		// --------------------
+
+		public DateTime OrgStartDate { get; set; }
+		public DateTime OrgEndDate { get; set; }
+
+		private System.Drawing.Color taskTextColor;
+
+		public Boolean HasTaskTextColor
+		{
+			get { return !taskTextColor.IsEmpty; }
+		}
+
+		public System.Drawing.Color TaskTextColor
+		{
+			get
+			{
+				if (taskTextColor.IsEmpty)
+					return base.TextColor;
+
+				return taskTextColor;
+			}
+			set { taskTextColor = value; }
+		}
+
+		public String AllocTo { get; set; }
+		public Boolean IsParent { get; set; }
+		public Boolean HasIcon { get; set; }
+		public Boolean IsDone { get; set; }
+
+		public override DateTime EndDate
+		{
+			get
+			{
+				return base.EndDate;
+			}
+			set
+			{
+				// Handle 'end of day'
+				if ((value != DateTime.MinValue) && (value.Date == value))
+					base.EndDate = value.AddSeconds(-1);
+				else
+					base.EndDate = value;
+			}
+		}
+
+		public override TimeSpan Length
+		{
+			get
+			{
+				// Handle 'end of day'
+				if (IsEndOfDay(EndDate))
+					return (EndDate.Date.AddDays(1) - StartDate);
+
+				return base.Length;
+			}
+		}
+
+		public static bool IsEndOfDay(DateTime date)
+		{
+			return (date == date.Date.AddDays(1).AddSeconds(-1));
+		}
+
+		public bool IsSingleDay()
+		{
+			return (StartDate.Date == EndDate.Date);
+		}
+
+		public override bool IsLongAppt()
+		{
+			return (base.IsLongAppt() || (OrgStartDate.Day != OrgEndDate.Day) ||
+					((OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(OrgEndDate)));
+		}
+
+		public bool HasValidDates()
+		{
+			return ((StartDate != NullDate) &&
+					(EndDate != NullDate) &&
+					(EndDate > StartDate));
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////
+	
     public class TDLDayView : Calendar.DayView
     {
         private TDLRenderer m_Renderer;
+		private Boolean m_TaskColorIsBkgnd;
 
-		System.Windows.Forms.Timer m_RedrawTimer;
+		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
+		private System.Windows.Forms.Timer m_RedrawTimer;
+
+		// ----------------------------------------------------------------
 
         public TDLDayView(UIExtension.TaskIcon taskIcons)
         {
             m_Renderer = new TDLRenderer(Handle, taskIcons);
+			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
+			m_RedrawTimer = new System.Windows.Forms.Timer();
 
             InitializeComponent();
         }
@@ -52,7 +145,179 @@ namespace DayViewUIExtension
             this.WorkingHourStart = 9;
             this.WorkingMinuteEnd = 0;
             this.WorkingMinuteStart = 0;
+
+			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnDayViewResolveAppointments);
         }
+
+		public bool SelectTask(UInt32 dwTaskID, bool ifInRange)
+		{
+			if ((SelectedAppointment != null) && (SelectedAppointment.Id == dwTaskID))
+				return true;
+
+			CalendarItem item;
+
+			if (m_Items.TryGetValue(dwTaskID, out item))
+			{
+                if (IsItemWithinRange(item, StartDate, EndDate))
+                {
+                    SelectedAppointment = item;
+                    return true;
+                }
+				else if (item.StartDate != DateTime.MinValue)
+				{
+					StartDate = item.StartDate;
+					SelectedAppointment = item;
+					ScrollToTop();
+
+					return true;
+				}
+			}
+
+			// all else 
+			SelectedAppointment = null;
+			return false;
+		}
+
+		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
+		{
+			if (!item.HasValidDates())
+				return false;
+
+			// Start or end date must be 'visible'
+			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
+					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
+		}
+
+		public void UpdateTasks(TaskList tasks,
+						UIExtension.UpdateType type,
+						System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			switch (type)
+			{
+				case UIExtension.UpdateType.Delete:
+				case UIExtension.UpdateType.All:
+					// Rebuild
+					m_Items.Clear();
+					break;
+
+				case UIExtension.UpdateType.New:
+				case UIExtension.UpdateType.Edit:
+					// In-place update
+					break;
+			}
+
+			Task task = tasks.GetFirstTask();
+
+			while (task.IsValid() && ProcessTaskUpdate(task, type, attribs))
+				task = task.GetNextTask();
+
+			SelectionStart = SelectionEnd;
+			StartUpdateTimer();
+		}
+
+		private bool ProcessTaskUpdate(Task task,
+									   UIExtension.UpdateType type,
+									   System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+		{
+			if (!task.IsValid())
+				return false;
+
+			CalendarItem item;
+			UInt32 taskID = task.GetID();
+
+			if (m_Items.TryGetValue(taskID, out item))
+			{
+				if (attribs.Contains(UIExtension.TaskAttribute.Title))
+					item.Title = task.GetTitle();
+
+				if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
+				{
+					item.EndDate = item.OrgEndDate = task.GetDoneDate();
+					item.IsDone = (task.IsDone() || task.IsGoodAsDone());
+				}
+
+				if (attribs.Contains(UIExtension.TaskAttribute.DueDate))
+				{
+					DateTime dueDate = GetEditableDueDate(task.GetDueDate());
+					item.EndDate = item.OrgEndDate = dueDate;
+				}
+
+				if (attribs.Contains(UIExtension.TaskAttribute.StartDate))
+					item.StartDate = item.OrgStartDate = task.GetStartDate();
+
+				if (attribs.Contains(UIExtension.TaskAttribute.AllocTo))
+					item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+
+				if (attribs.Contains(UIExtension.TaskAttribute.Icon))
+					item.HasIcon = task.HasIcon();
+
+				item.TaskTextColor = task.GetTextDrawingColor();
+			}
+			else
+			{
+				item = new CalendarItem();
+
+				item.Title = task.GetTitle();
+				item.EndDate = item.OrgEndDate = GetEditableDueDate(task.GetDueDate());
+				item.StartDate = item.OrgStartDate = task.GetStartDate();
+				item.AllocTo = String.Join(", ", task.GetAllocatedTo());
+				item.HasIcon = task.HasIcon();
+				item.Id = taskID;
+				item.IsParent = task.IsParent();
+				item.TaskTextColor = task.GetTextDrawingColor();
+				item.DrawBorder = true;
+				item.IsDone = (task.IsDone() || task.IsGoodAsDone());
+			}
+
+			m_Items[taskID] = item;
+
+			// Process children
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, attribs))
+				subtask = subtask.GetNextTask();
+
+			return true;
+		}
+
+		private DateTime GetEditableDueDate(DateTime dueDate)
+		{
+			// Whole days
+			if ((dueDate != DateTime.MinValue) && (dueDate.Date == dueDate))
+			{
+				// return end-of-day
+				return dueDate.AddDays(1).AddSeconds(-1);
+			}
+
+			// else
+			return dueDate;
+		}
+
+		public Boolean TaskColorIsBackground
+		{
+			get { return m_TaskColorIsBkgnd; }
+			set
+			{
+				if (m_TaskColorIsBkgnd != value)
+				{
+					m_TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public Boolean ShowParentsAsFolder
+		{
+			get { return m_Renderer.ShowParentsAsFolder; }
+			set
+			{
+				if (m_Renderer.ShowParentsAsFolder != value)
+				{
+					m_Renderer.ShowParentsAsFolder = value;
+					Invalidate();
+				}
+			}
+		}
 
         public void SetFont(String fontName, int fontSize)
         {
@@ -94,18 +359,8 @@ namespace DayViewUIExtension
             return time;
         }
 
-		public void OnUpdateTasks()
-		{
-			StartUpdateTimer();
-		}
-
 		protected void StartUpdateTimer()
 		{
-			if (m_RedrawTimer == null)
-			{
-				m_RedrawTimer = new System.Windows.Forms.Timer();
-			}
-
 			m_RedrawTimer.Tick += OnUpdateTimer;
 			m_RedrawTimer.Interval = 10;
 			m_RedrawTimer.Start();
@@ -148,6 +403,38 @@ namespace DayViewUIExtension
 			}
 			
 			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
+		}
+
+		private void OnDayViewResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
+		{
+			System.Collections.Generic.List<Calendar.Appointment> appts =
+				new System.Collections.Generic.List<Calendar.Appointment>();
+
+			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
+			{
+				if (IsItemWithinRange(item.Value, args.StartDate, args.EndDate))
+				{
+					// Recalculate colours
+					if (m_TaskColorIsBkgnd && item.Value.HasTaskTextColor && !item.Value.IsDone)
+					{
+						item.Value.TextColor = ((item.Value.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
+						item.Value.BorderColor = ColorUtil.DarkerDrawing(item.Value.TaskTextColor, 0.5f);
+						item.Value.BarColor = item.Value.TaskTextColor;
+						item.Value.FillColor = item.Value.TaskTextColor;
+					}
+					else
+					{
+						item.Value.TextColor = item.Value.TaskTextColor;
+						item.Value.BorderColor = item.Value.TaskTextColor;
+						item.Value.FillColor = ColorUtil.LighterDrawing(item.Value.TaskTextColor, 0.9f);
+						item.Value.BarColor = item.Value.TaskTextColor;
+					}
+
+					appts.Add(item.Value);
+				}
+			}
+
+			args.Appointments = appts;
 		}
 	}
 }
