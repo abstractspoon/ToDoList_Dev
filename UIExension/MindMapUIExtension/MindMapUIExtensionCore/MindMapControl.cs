@@ -349,17 +349,17 @@ namespace MindMapUIExtension
 
 				if (IsRoot(hit))
 				{
-					if (IsAnyNodeCollapsed(RootNode.Nodes))
-						expand = ExpandNode.ExpandAll;
-					else
+					if (IsAnyNodeExpanded(RootNode.Nodes))
 						expand = ExpandNode.CollapseAll;
+					else
+						expand = ExpandNode.ExpandAll;
 				}
 				else if (IsParent(hit))
 				{
-					if (!hit.IsExpanded || IsAnyNodeCollapsed(hit.Nodes))
-						expand = ExpandNode.ExpandSelectionAll;
-					else
+					if (IsAnyNodeExpanded(hit.Nodes))
 						expand = ExpandNode.CollapseSelection;
+					else
+						expand = ExpandNode.ExpandSelectionAll;
 				}
 
 				if (expand != ExpandNode.ExpandNone)
@@ -1118,7 +1118,7 @@ namespace MindMapUIExtension
 			Invalidate();
 		}
 
-        private Point CentrePoint(Rectangle rect)
+        protected Point CentrePoint(Rectangle rect)
         {
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
@@ -1354,16 +1354,21 @@ namespace MindMapUIExtension
 				Rectangle drawRect = GetItemLabelRect(node);
 				NodeDrawState drawState = GetDrawState(node);
 
-				// If selected adjust rect to the exact length of the string
-				if ((drawState != NodeDrawState.None) && !IsRoot(node))
+				// Make sure selection rect is long enough
+				if (drawState != NodeDrawState.None)
 				{
 					int textWidth = ((int)graphics.MeasureString(node.Text, m_TreeView.Font).Width);
+					textWidth += GetExtraWidth(node);
+
 					int xOffset = (drawRect.Width - textWidth - (2 * LabelPadding));
 
-					if (item.IsFlipped)
-						drawRect.X += xOffset;
+					if (xOffset < 0)
+					{
+						if (item.IsFlipped)
+							drawRect.X += xOffset;
 
-					drawRect.Width -= xOffset;
+						drawRect.Width -= xOffset;
+					}
 				}
 
 				DrawNodeLabel(graphics, node.Text, drawRect, drawState, GetDrawPos(node), item.ItemData);
@@ -1393,18 +1398,10 @@ namespace MindMapUIExtension
 			format.LineAlignment = StringAlignment.Center;
 			format.Trimming = StringTrimming.None;
 
-			if (isSelected || (nodePos == NodeDrawPos.Root))
-			{
+			if (nodePos == NodeDrawPos.Root)
 				format.Alignment = StringAlignment.Center;
-			}
-			else if (nodePos == NodeDrawPos.Right)
-			{
-				format.Alignment = StringAlignment.Near;
-			}
 			else
-			{
-				format.Alignment = StringAlignment.Far;
-			}
+				format.Alignment = StringAlignment.Near;
 
 			return format;
 		}

@@ -57,7 +57,6 @@ namespace Calendar
         private int hourLabelIndent = 2;
         private int dayHeadersHeight = 20;
         private int appointmentGripWidth = 5;
-        private int horizontalAppointmentHeight = 20;
         private int allDayEventsHeaderHeight = 0;
         private int headerBorder = 2;
 
@@ -590,6 +589,18 @@ namespace Calendar
             set
             {
                 allowNew = value;
+            }
+        }
+
+        private int horizontalAppointmentHeight = 20;
+
+        public int LongAppointmentHeight
+        {
+            get { return horizontalAppointmentHeight; }
+            set 
+            { 
+                horizontalAppointmentHeight = value;
+                Invalidate();
             }
         }
 
