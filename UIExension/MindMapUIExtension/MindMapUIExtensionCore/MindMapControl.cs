@@ -848,6 +848,11 @@ namespace MindMapUIExtension
 			return true;
 		}
 
+		protected virtual int GetExtraWidth(TreeNode node)
+		{
+			return 0;
+		}
+
 		protected virtual int GetMinItemHeight()
 		{
 			return 10;
@@ -1265,6 +1270,8 @@ namespace MindMapUIExtension
 			if (IsParent(node) && !IsRoot(node))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
 
+			itemBounds.Width += GetExtraWidth(node);
+
             int horzOffset = GetScrollPos(m_TreeView.Handle, SB_HORZ);
             int vertOffset = (GetScrollPos(m_TreeView.Handle, SB_VERT) * node.Bounds.Height);
 
@@ -1345,7 +1352,7 @@ namespace MindMapUIExtension
 					continue;
 
 				Rectangle drawRect = GetItemLabelRect(node);
-				NodeDrawState drawState = DrawState(node);
+				NodeDrawState drawState = GetDrawState(node);
 
 				// If selected adjust rect to the exact length of the string
 				if ((drawState != NodeDrawState.None) && !IsRoot(node))
@@ -1359,7 +1366,7 @@ namespace MindMapUIExtension
 					drawRect.Width -= xOffset;
 				}
 
-				DrawNodeLabel(graphics, node.Text, drawRect, drawState, DrawPos(node), item.ItemData);
+				DrawNodeLabel(graphics, node.Text, drawRect, drawState, GetDrawPos(node), item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1430,7 +1437,7 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, m_TreeView.Font, textColor, rect, format);
 		}
 
-		private NodeDrawState DrawState(TreeNode node)
+		private NodeDrawState GetDrawState(TreeNode node)
 		{
 			if (node.IsSelected)
 				return NodeDrawState.Selected;
@@ -1441,7 +1448,7 @@ namespace MindMapUIExtension
 			return NodeDrawState.None;
 		}
 
-		private NodeDrawPos DrawPos(TreeNode node)
+		private NodeDrawPos GetDrawPos(TreeNode node)
 		{
 			if (IsRoot(node))
 				return NodeDrawPos.Root;

@@ -127,8 +127,10 @@ namespace MindMapUIExtension
             }
 
             bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
-
 			m_MindMap.TaskColorIsBackground = taskColorIsBkgnd;
+
+			bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
+			m_MindMap.ShowParentsAsFolders = showParentsAsFolders;
 
             if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
             {

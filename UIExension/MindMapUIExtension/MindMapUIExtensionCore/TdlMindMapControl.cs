@@ -12,10 +12,24 @@ namespace MindMapUIExtension
 
 	public class MindMapTaskItem
 	{
+		// Data
+		private String m_Title;
+		private UInt32 m_TaskID;
+		private Color m_TextColor;
+		private Boolean m_HasIcon;
+		private Boolean m_IsFlagged;
+		private Boolean m_IsParent;
+
+		// -----------------------------------------------------------------
+
 		public MindMapTaskItem(String label)
 		{
 			m_Title = label;
 			m_TaskID = 0;
+			m_TextColor = new Color();
+			m_HasIcon = false;
+			m_IsFlagged = false;
+			m_IsParent = false;
 		}
 
 		public MindMapTaskItem(Task task)
@@ -25,6 +39,7 @@ namespace MindMapUIExtension
 			m_TextColor = task.GetTextDrawingColor();
 			m_HasIcon = (task.GetIcon().Length > 0);
 			m_IsFlagged = task.IsFlagged();
+			m_IsParent = task.IsParent();
 		}
 
 		public override string ToString() { return m_Title; }
@@ -39,6 +54,7 @@ namespace MindMapUIExtension
 		public Color TextColor { get { return m_TextColor; } }
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
+		public Boolean IsParent { get { return m_IsParent; } }
 
 		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
@@ -59,13 +75,6 @@ namespace MindMapUIExtension
 
 			return true;
 		}
-
-		// Data
-		private String m_Title;
-		private UInt32 m_TaskID;
-		private Color m_TextColor;
-		private Boolean m_HasIcon;
-		private Boolean m_IsFlagged;
 	}
 
 	// ------------------------------------------------------------
@@ -82,7 +91,8 @@ namespace MindMapUIExtension
 
 		private UIExtension.SelectionRect m_SelectionRect;
 		private Dictionary<UInt32, MindMapTaskItem> m_Items;
-		
+
+		private Boolean m_ShowParentAsFolder;
 		private Boolean m_TaskColorIsBkgnd;
 		private Boolean m_IgnoreMouseClick;
 		private TreeNode m_PreviouslySelectedNode;
@@ -100,6 +110,7 @@ namespace MindMapUIExtension
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
+			m_ShowParentAsFolder = false;
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -146,6 +157,19 @@ namespace MindMapUIExtension
 			}
 		}
 
+		public Boolean ShowParentsAsFolders
+		{
+			get { return m_ShowParentAsFolder; }
+			set
+			{
+				if (m_ShowParentAsFolder != value)
+				{
+					m_ShowParentAsFolder = value;
+					Invalidate();
+				}
+			}
+		}
+		
 		public UInt32 HitTest(Point screenPos)
 		{
 			var clientPos = PointToClient(screenPos);
@@ -406,6 +430,20 @@ namespace MindMapUIExtension
 				SelectedNode = node;
 
 			return true;
+		}
+
+		protected override int GetExtraWidth(TreeNode node)
+		{
+			var taskItem = (ItemData(node) as MindMapTaskItem);
+
+			if (taskItem != null)
+			{
+				if (taskItem.HasIcon || (taskItem.IsParent && m_ShowParentAsFolder))
+					return 18;
+			}
+
+			// else
+			return 0;
 		}
 
 		protected override int GetMinItemHeight()
