@@ -4,6 +4,8 @@
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
+using namespace System::Windows::Forms;
+using namespace System::Drawing;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,6 +30,7 @@ namespace Abstractspoon
 					Glass, 
 					GlassWithGradient 
 				};
+
 				RenderStyle GetRenderStyle();
 
 				enum class AppColor 
@@ -40,10 +43,12 @@ namespace Abstractspoon
 					MenuBack,
 					ToolbarDark,
 					ToolbarLight,
+					ToolbarHot,
 					StatusBarDark,
 					StatusBarLight,
 					StatusBarText,
 				};
+
 				Windows::Media::Color GetAppMediaColor(AppColor color);
 				Drawing::Color GetAppDrawingColor(AppColor color);
 
@@ -59,6 +64,27 @@ namespace Abstractspoon
 
 				UInt32 GetColor(AppColor color);
 			};
+
+			// --------------------------------------------------------------
+
+			public ref class UIThemeToolbarRenderer : ToolStripProfessionalRenderer
+			{
+			public:
+				UIThemeToolbarRenderer();
+
+				void SetUITheme(UITheme^ theme);
+
+			protected:
+				virtual void OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e) override;
+
+			private:
+				Color^ m_HotFillColor;
+				Color^ m_HotBorderColor;
+				Color^ m_PressedFillColor;
+
+				bool ValidColours();
+			};
+
 		}
 	}
 }

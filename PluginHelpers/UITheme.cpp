@@ -7,6 +7,8 @@
 
 #include "..\..\ToDoList_Dev\Interfaces\UITheme.h"
 
+#using "System.dll"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -77,8 +79,9 @@ UInt32 UITheme::GetColor(AppColor color)
 	case UITheme::AppColor::MenuBack:			return m_pTheme->crMenuBack;
 	case UITheme::AppColor::ToolbarDark:		return m_pTheme->crToolbarDark;
 	case UITheme::AppColor::ToolbarLight:		return m_pTheme->crToolbarLight;
+	case UITheme::AppColor::ToolbarHot:			return m_pTheme->crToolbarHot;
 	case UITheme::AppColor::StatusBarDark:		return m_pTheme->crStatusBarDark;
-	case UITheme::AppColor::StatusBarLight:	return m_pTheme->crStatusBarLight;
+	case UITheme::AppColor::StatusBarLight:		return m_pTheme->crStatusBarLight;
 	case UITheme::AppColor::StatusBarText:		return m_pTheme->crStatusBarText;
 	}
 
@@ -86,3 +89,54 @@ UInt32 UITheme::GetColor(AppColor color)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+UIThemeToolbarRenderer::UIThemeToolbarRenderer()
+{
+	m_HotFillColor = nullptr;
+	m_HotBorderColor = nullptr;
+	m_PressedFillColor = nullptr;
+}
+
+void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
+{
+	m_HotFillColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarHot);
+	m_HotBorderColor = ColorUtil::DarkerDrawing(m_HotFillColor, 0.2f);
+	m_PressedFillColor = ColorUtil::DarkerDrawing(m_HotFillColor, 0.1f);
+}
+
+void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	if (ValidColours() && (e->Item->Selected || e->Item->Pressed))
+	{
+		System::Drawing::Rectangle^ rect = gcnew System::Drawing::Rectangle(Point::Empty, e->Item->Size);
+
+		rect->Width--;
+		rect->Height--;
+	
+		if (e->Item->Pressed)
+		{
+			Brush^ brush = gcnew SolidBrush(*m_PressedFillColor);
+			e->Graphics->FillRectangle(brush, *rect);
+		}
+		else if (e->Item->Selected)
+		{
+			Brush^ brush = gcnew SolidBrush(*m_HotFillColor);
+			e->Graphics->FillRectangle(brush, *rect);
+		}
+
+		Pen^ pen = gcnew Pen(*m_HotBorderColor);
+		e->Graphics->DrawRectangle(pen, *rect);
+	}
+	else
+	{
+		ToolStripProfessionalRenderer::OnRenderButtonBackground(e);
+	}
+}
+
+bool UIThemeToolbarRenderer::ValidColours()
+{
+	return ((m_HotFillColor != nullptr) && 
+			(m_HotBorderColor != nullptr) && 
+			(m_PressedFillColor != nullptr));
+}
+

@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -14,7 +16,7 @@ namespace DayViewUIExtension
 		private IntPtr m_hwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView;
 		private UInt32 m_SelectedTaskID = 0;
-		private Translator m_trans;
+		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
 
         [Flags] private enum WeekendDays
@@ -31,8 +33,8 @@ namespace DayViewUIExtension
 		// --------------------------------------------------------------------------------------
 
 		private const int LabelTop = 2;
-		private const int ComboTop = 0;
-		private const int ControlTop = 25;
+		private const int ComboTop = 2;
+		private const int ControlTop = 28;
 		private const string FontName = "Tahoma";
 
 		private bool m_SettingMonthYear = false;
@@ -41,7 +43,10 @@ namespace DayViewUIExtension
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;
 		private DayViewYearComboBox m_YearCombo;
-        private ToolBar m_Toolbar;
+
+        private ToolStrip m_Toolbar;
+		private ImageList m_TBImageList;
+		private UIThemeToolbarRenderer m_TBRenderer;
 
 		private Font m_ControlsFont;
 
@@ -50,7 +55,7 @@ namespace DayViewUIExtension
 		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
 		{
 			m_hwndParent = hwndParent;
-			m_trans = trans;
+			m_Trans = trans;
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new Font(FontName, 8);
@@ -158,8 +163,10 @@ namespace DayViewUIExtension
 		public void SetUITheme(UITheme theme)
 		{
             m_DayView.SetUITheme(theme);
+			m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_TBRenderer.SetUITheme(theme);
 
-            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
@@ -286,6 +293,7 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
+			CreateToolbar();
 			CreateWeekLabel(); // create before day view
 			CreateMonthYearCombos();
 			CreateDayView();
@@ -293,47 +301,89 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			this.m_DayView = new TDLDayView(m_TaskIcons);
+			m_DayView = new TDLDayView(m_TaskIcons);
 
-			this.m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(this.OnDayViewNewAppointment);
-			this.m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnDayViewSelectionChanged);
-			this.m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(this.OnDayViewAppointmentChanged);
-			this.m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(this.OnDayViewWeekChanged);
-			this.m_DayView.StartDate = DateTime.Now;
+			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
+			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
+			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
+			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
+			m_DayView.StartDate = DateTime.Now;
 
-            this.m_DayView.SetFont(FontName, 8);
+            m_DayView.SetFont(FontName, 8);
 
-			this.Controls.Add(m_DayView);
+			Controls.Add(m_DayView);
 		}
 
 		private void CreateWeekLabel()
 		{
-			this.m_WeekLabel = new DayViewWeekLabel();
+			m_WeekLabel = new DayViewWeekLabel();
 
-			this.m_WeekLabel.Font = new Font(FontName, 14);
-			this.m_WeekLabel.Location = new Point(240, LabelTop);
-			this.m_WeekLabel.Size = new Size(350, 20);
-			this.m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
+			m_WeekLabel.Font = new Font(FontName, 14);
+			m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
+			m_WeekLabel.Size = new Size(350, 20);
+			m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
 
-			this.Controls.Add(m_WeekLabel);
+			Controls.Add(m_WeekLabel);
 		}
 
 		private void CreateToolbar()
 		{
-			this.m_Toolbar = new ToolBar();
+			var assembly = Assembly.GetExecutingAssembly();
+			var imageStream = assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp");
 
-            //this.m_Toolbar.Font = new Font(FontName, 14);
-            this.m_Toolbar.Location = new Point(215, LabelTop);
-            this.m_Toolbar.Size = new Size(20, 20);
-            this.m_Toolbar.Visible = true;
+			m_TBImageList = new ImageList();
+			m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
+			m_TBImageList.TransparentColor = Color.Magenta;
+			m_TBImageList.Images.AddStrip(new Bitmap(imageStream));
 
-            var prefsBtn = new ToolBarButton();
-            prefsBtn.Text = "P";
-            prefsBtn.Visible = true;
+			m_Toolbar = new ToolStrip();
+			m_Toolbar.ImageList = m_TBImageList;
+			m_Toolbar.Anchor = AnchorStyles.None;
+			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
 
-            this.m_Toolbar.Buttons.Add(prefsBtn);
+			m_TBRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_TBRenderer;
+	
+			var btn1 = new ToolStripButton();
+			btn1.ImageIndex = 0;
+			btn1.Click += new EventHandler(OnGoToToday);
+			btn1.ToolTipText = m_Trans.Translate("Go To Today");
+			m_Toolbar.Items.Add(btn1);
 
-			this.Controls.Add(m_Toolbar);
+			var btn2 = new ToolStripButton();
+			btn2.ImageIndex = 1;
+			btn2.Click += new EventHandler(OnPreferences);
+			btn2.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn2);
+
+			var btn3 = new ToolStripButton();
+			btn3.ImageIndex = 2;
+			btn3.Click += new EventHandler(OnHelp);
+			btn3.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn3);
+
+			m_Toolbar.Size = new Size(72, 24);
+			
+			Controls.Add(m_Toolbar);
+		}
+
+		protected void OnGoToToday(object sender, EventArgs e)
+		{
+
+		}
+
+		protected void OnPreferences(object sender, EventArgs e)
+		{
+			using (var dialog = new DayViewPreferencesDlg())
+			{
+				dialog.StartPosition = FormStartPosition.CenterParent;
+				dialog.ShowDialog(Control.FromHandle(m_hwndParent));
+			}
+		}
+
+		protected void OnHelp(object sender, EventArgs e)
+		{
+
 		}
 
 		private void CreateMonthYearCombos()
@@ -347,7 +397,7 @@ namespace DayViewUIExtension
 			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 			
-			this.Controls.Add(m_MonthCombo);
+			Controls.Add(m_MonthCombo);
 
 			m_YearCombo = new DayViewYearComboBox();
 
@@ -358,7 +408,7 @@ namespace DayViewUIExtension
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 			
-			this.Controls.Add(m_YearCombo);
+			Controls.Add(m_YearCombo);
 		}
 
 		// IUIExtension ------------------------------------------------------------------
@@ -382,6 +432,10 @@ namespace DayViewUIExtension
         {
             base.OnSizeChanged(e);
 
+			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
+			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top - 2);
+			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
+			
             Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
 			dayViewRect.Y = ControlTop;
@@ -402,7 +456,7 @@ namespace DayViewUIExtension
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
 
-			switch (this.m_DayView.Selection)
+			switch (m_DayView.Selection)
 			{
 				case Calendar.SelectionType.DateRange:
 					break;

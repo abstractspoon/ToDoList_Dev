@@ -15,5 +15,6 @@ namespace DayViewUIExtension
         {
             InitializeComponent();
         }
+
     }
 }
