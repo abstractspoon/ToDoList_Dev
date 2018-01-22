@@ -1,14 +1,15 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using Abstractspoon.Tdl.PluginHelpers;
+using System.Drawing;
+using System.Windows.Forms;
 
-// PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
+using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayViewUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
+	public class DayViewUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_hwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView;
@@ -40,7 +41,9 @@ namespace DayViewUIExtension
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;
 		private DayViewYearComboBox m_YearCombo;
-		private System.Drawing.Font m_ControlsFont;
+        private ToolBar m_Toolbar;
+
+		private Font m_ControlsFont;
 
 		// --------------------------------------------------------------------------------------
 
@@ -50,7 +53,7 @@ namespace DayViewUIExtension
 			m_trans = trans;
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
-			m_ControlsFont = new System.Drawing.Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8);
 
 			InitializeComponent();
 		}
@@ -80,7 +83,7 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, 
 								UIExtension.UpdateType type, 
-								System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
+								HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			m_DayView.UpdateTasks(tasks, type, attribs);
 
@@ -129,7 +132,7 @@ namespace DayViewUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-            System.Drawing.Rectangle rect = new System.Drawing.Rectangle();
+            Rectangle rect = new Rectangle();
 
             if (m_DayView.GetSelectedItemLabelRect(ref rect))
             {
@@ -307,12 +310,30 @@ namespace DayViewUIExtension
 		{
 			this.m_WeekLabel = new DayViewWeekLabel();
 
-			this.m_WeekLabel.Font = new System.Drawing.Font(FontName, 14);
-			this.m_WeekLabel.Location = new System.Drawing.Point(210, LabelTop);
-			this.m_WeekLabel.Size = new System.Drawing.Size(350, 20);
-			this.m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_WeekLabel.Font = new Font(FontName, 14);
+			this.m_WeekLabel.Location = new Point(240, LabelTop);
+			this.m_WeekLabel.Size = new Size(350, 20);
+			this.m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
 
 			this.Controls.Add(m_WeekLabel);
+		}
+
+		private void CreateToolbar()
+		{
+			this.m_Toolbar = new ToolBar();
+
+            //this.m_Toolbar.Font = new Font(FontName, 14);
+            this.m_Toolbar.Location = new Point(215, LabelTop);
+            this.m_Toolbar.Size = new Size(20, 20);
+            this.m_Toolbar.Visible = true;
+
+            var prefsBtn = new ToolBarButton();
+            prefsBtn.Text = "P";
+            prefsBtn.Visible = true;
+
+            this.m_Toolbar.Buttons.Add(prefsBtn);
+
+			this.Controls.Add(m_Toolbar);
 		}
 
 		private void CreateMonthYearCombos()
@@ -320,8 +341,8 @@ namespace DayViewUIExtension
 			m_MonthCombo = new DayViewMonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
-			m_MonthCombo.Location = new System.Drawing.Point(0, ComboTop);
-			m_MonthCombo.Size = new System.Drawing.Size(100, 16);
+			m_MonthCombo.Location = new Point(0, ComboTop);
+			m_MonthCombo.Size = new Size(100, 16);
 			
 			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -331,8 +352,8 @@ namespace DayViewUIExtension
 			m_YearCombo = new DayViewYearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
-			m_YearCombo.Location = new System.Drawing.Point(105, ComboTop);
-			m_YearCombo.Size = new System.Drawing.Size(100, 16);
+			m_YearCombo.Location = new Point(105, ComboTop);
+			m_YearCombo.Size = new Size(100, 16);
 
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -343,11 +364,11 @@ namespace DayViewUIExtension
 		// IUIExtension ------------------------------------------------------------------
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
-            System.Drawing.Rectangle Border = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            Rectangle Border = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 			Border.Y = ControlTop;
 			Border.Height -= ControlTop;
 
-            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, System.Drawing.Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
+            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
 		protected override void OnGotFocus(EventArgs e)
@@ -361,7 +382,7 @@ namespace DayViewUIExtension
         {
             base.OnSizeChanged(e);
 
-            System.Drawing.Rectangle dayViewRect = new System.Drawing.Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 
 			dayViewRect.Y = ControlTop;
 			dayViewRect.Height -= ControlTop;
