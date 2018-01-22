@@ -52,11 +52,11 @@
     <Compile Include="DayViewMonthComboBox.cs" />
     <Compile Include="DayViewWeekLabel.cs" />
     <Compile Include="DayViewYearComboBox.cs" />
-    <Compile Include="DayViewPreferences.cs">
+    <Compile Include="DayViewPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DayViewPreferences.Designer.cs">
-      <DependentUpon>DayViewPreferences.cs</DependentUpon>
+    <Compile Include="DayViewPreferencesDlg.Designer.cs">
+      <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="TDLDayView.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -71,8 +71,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DayViewPreferences.resx">
-      <DependentUpon>DayViewPreferences.cs</DependentUpon>
+    <EmbeddedResource Include="DayViewPreferencesDlg.resx">
+      <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

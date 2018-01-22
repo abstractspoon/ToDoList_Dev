@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace DayViewUIExtension
 {
-    public partial class DayViewPreferences : Form
+    public partial class DayViewPreferencesDlg : Form
     {
-        public DayViewPreferences()
+        public DayViewPreferencesDlg()
         {
             InitializeComponent();
         }
