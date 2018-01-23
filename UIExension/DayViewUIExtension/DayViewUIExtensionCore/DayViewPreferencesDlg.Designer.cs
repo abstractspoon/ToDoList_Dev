@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
-			this.HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
-			this.HideTasksWithoutTimes = new System.Windows.Forms.CheckBox();
+			this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
+			this.m_HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
+			this.m_HideTasksWithoutTimes = new System.Windows.Forms.CheckBox();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.panel1.SuspendLayout();
@@ -45,9 +45,9 @@
 			this.panel1.AutoScroll = true;
 			this.panel1.BackColor = System.Drawing.Color.White;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel1.Controls.Add(this.HideTasksSpanningDays);
-			this.panel1.Controls.Add(this.HideTasksSpanningWeekends);
-			this.panel1.Controls.Add(this.HideTasksWithoutTimes);
+			this.panel1.Controls.Add(this.m_HideTasksSpanningDays);
+			this.panel1.Controls.Add(this.m_HideTasksSpanningWeekends);
+			this.panel1.Controls.Add(this.m_HideTasksWithoutTimes);
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
@@ -56,35 +56,35 @@
 			// 
 			// HideTasksSpanningDays
 			// 
-			this.HideTasksSpanningDays.AutoSize = true;
-			this.HideTasksSpanningDays.Location = new System.Drawing.Point(13, 59);
-			this.HideTasksSpanningDays.Name = "HideTasksSpanningDays";
-			this.HideTasksSpanningDays.Size = new System.Drawing.Size(334, 17);
-			this.HideTasksSpanningDays.TabIndex = 1;
-			this.HideTasksSpanningDays.Text = "Hide tasks where Start or Due dates do not fall on the same day";
-			this.HideTasksSpanningDays.UseVisualStyleBackColor = true;
+			this.m_HideTasksSpanningDays.AutoSize = true;
+			this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(13, 59);
+			this.m_HideTasksSpanningDays.Name = "HideTasksSpanningDays";
+			this.m_HideTasksSpanningDays.Size = new System.Drawing.Size(334, 17);
+			this.m_HideTasksSpanningDays.TabIndex = 1;
+			this.m_HideTasksSpanningDays.Text = "Hide tasks where Start or Due dates do not fall on the same day";
+			this.m_HideTasksSpanningDays.UseVisualStyleBackColor = true;
 			// 
 			// HideTasksSpanningWeekends
 			// 
-			this.HideTasksSpanningWeekends.AutoSize = true;
-			this.HideTasksSpanningWeekends.Location = new System.Drawing.Point(13, 36);
-			this.HideTasksSpanningWeekends.Name = "HideTasksSpanningWeekends";
-			this.HideTasksSpanningWeekends.Size = new System.Drawing.Size(384, 17);
-			this.HideTasksSpanningWeekends.TabIndex = 1;
-			this.HideTasksSpanningWeekends.Text = "Hide tasks where either Start or Due date does not fall in the current week";
-			this.HideTasksSpanningWeekends.UseVisualStyleBackColor = true;
+			this.m_HideTasksSpanningWeekends.AutoSize = true;
+			this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(13, 36);
+			this.m_HideTasksSpanningWeekends.Name = "HideTasksSpanningWeekends";
+			this.m_HideTasksSpanningWeekends.Size = new System.Drawing.Size(384, 17);
+			this.m_HideTasksSpanningWeekends.TabIndex = 1;
+			this.m_HideTasksSpanningWeekends.Text = "Hide tasks where either Start or Due date does not fall in the current week";
+			this.m_HideTasksSpanningWeekends.UseVisualStyleBackColor = true;
 			// 
 			// HideTasksWithoutTimes
 			// 
-			this.HideTasksWithoutTimes.AutoSize = true;
-			this.HideTasksWithoutTimes.Checked = true;
-			this.HideTasksWithoutTimes.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.HideTasksWithoutTimes.Location = new System.Drawing.Point(13, 13);
-			this.HideTasksWithoutTimes.Name = "HideTasksWithoutTimes";
-			this.HideTasksWithoutTimes.Size = new System.Drawing.Size(276, 17);
-			this.HideTasksWithoutTimes.TabIndex = 0;
-			this.HideTasksWithoutTimes.Text = "Hide all tasks whose Start and Due times are not set";
-			this.HideTasksWithoutTimes.UseVisualStyleBackColor = true;
+			this.m_HideTasksWithoutTimes.AutoSize = true;
+			this.m_HideTasksWithoutTimes.Checked = true;
+			this.m_HideTasksWithoutTimes.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_HideTasksWithoutTimes.Location = new System.Drawing.Point(13, 13);
+			this.m_HideTasksWithoutTimes.Name = "HideTasksWithoutTimes";
+			this.m_HideTasksWithoutTimes.Size = new System.Drawing.Size(276, 17);
+			this.m_HideTasksWithoutTimes.TabIndex = 0;
+			this.m_HideTasksWithoutTimes.Text = "Hide all tasks whose Start and Due times are not set";
+			this.m_HideTasksWithoutTimes.UseVisualStyleBackColor = true;
 			// 
 			// BtnCancel
 			// 
@@ -135,8 +135,8 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
-        private System.Windows.Forms.CheckBox HideTasksWithoutTimes;
-		private System.Windows.Forms.CheckBox HideTasksSpanningWeekends;
-		private System.Windows.Forms.CheckBox HideTasksSpanningDays;
+        private System.Windows.Forms.CheckBox m_HideTasksWithoutTimes;
+		private System.Windows.Forms.CheckBox m_HideTasksSpanningWeekends;
+		private System.Windows.Forms.CheckBox m_HideTasksSpanningDays;
     }
 }

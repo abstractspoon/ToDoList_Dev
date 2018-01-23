@@ -43,6 +43,7 @@ namespace DayViewUIExtension
 		private DayViewWeekLabel m_WeekLabel;
 		private DayViewMonthComboBox m_MonthCombo;
 		private DayViewYearComboBox m_YearCombo;
+        private DayViewPreferencesDlg m_PrefsDlg;
 
         private ToolStrip m_Toolbar;
 		private ImageList m_TBImageList;
@@ -59,6 +60,7 @@ namespace DayViewUIExtension
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new Font(FontName, 8);
+            m_PrefsDlg = new DayViewPreferencesDlg();
 
 			InitializeComponent();
 		}
@@ -175,6 +177,7 @@ namespace DayViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+            m_PrefsDlg.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -182,6 +185,7 @@ namespace DayViewUIExtension
             if (!appOnly)
             {
                 // private settings
+                m_PrefsDlg.LoadPreferences(prefs, key);
             }
 
 			bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
@@ -247,8 +251,7 @@ namespace DayViewUIExtension
 
             m_DayView.WorkingHourEnd = (int)EndOfDay;
             m_DayView.WorkingMinuteEnd = (int)((EndOfDay - m_DayView.WorkingHourEnd) * 60);
-            
-		}
+ 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
@@ -290,6 +293,13 @@ namespace DayViewUIExtension
 		}
 	
 		// PRIVATE ------------------------------------------------------------------------------
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            m_PrefsDlg.Dispose();
+        }
 
 		private void InitializeComponent()
 		{
@@ -374,11 +384,12 @@ namespace DayViewUIExtension
 
 		protected void OnPreferences(object sender, EventArgs e)
 		{
-			using (var dialog = new DayViewPreferencesDlg())
-			{
-				dialog.StartPosition = FormStartPosition.CenterParent;
-				dialog.ShowDialog(Control.FromHandle(m_hwndParent));
-			}
+			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
+
+            if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_hwndParent)) == DialogResult.OK)
+            {
+                // TODO
+            }
 		}
 
 		protected void OnHelp(object sender, EventArgs e)
