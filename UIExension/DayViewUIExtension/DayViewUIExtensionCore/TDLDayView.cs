@@ -76,6 +76,11 @@ namespace DayViewUIExtension
 			return (date == date.Date.AddDays(1).AddSeconds(-1));
 		}
 
+		public static bool IsStartOfDay(DateTime date)
+		{
+			return (date == date.Date);
+		}
+
 		public bool IsSingleDay()
 		{
 			return (StartDate.Date == EndDate.Date);
@@ -157,18 +162,24 @@ namespace DayViewUIExtension
 
 			if (m_Items.TryGetValue(dwTaskID, out item))
 			{
-                if (IsItemWithinRange(item, StartDate, EndDate))
-                {
-                    SelectedAppointment = item;
-                    return true;
-                }
-				else if (item.StartDate != DateTime.MinValue)
+				if (ifInRange)
 				{
-					StartDate = item.StartDate;
-					SelectedAppointment = item;
-					ScrollToTop();
+					if (IsItemWithinRange(item, StartDate, EndDate))
+					{
+						SelectedAppointment = item;
+						return true;
+					}
+				}
+				else // change the week to show the task
+				{
+					if (item.StartDate != DateTime.MinValue)
+					{
+						StartDate = item.StartDate;
+						SelectedAppointment = item;
+						ScrollToTop();
 
-					return true;
+						return true;
+					}
 				}
 			}
 
@@ -249,22 +260,17 @@ namespace DayViewUIExtension
 			if (!item.HasValidDates())
 				return false;
 
-            if (HideTasksWithoutTimes)
-            {
-                if ((item.StartDate == item.StartDate.Date) &&
-                    (item.EndDate == item.EndDate.Date))
-                {
-                    return false;
-                }
-            }
+			bool startDateInRange = IsDateWithinRange(item.StartDate, startDate, endDate);
+			bool endDateInRange = IsDateWithinRange(item.EndDate, startDate, endDate);
+
+			// As a bare minimum, at least one of the task's dates must fall in the week
+			if (!startDateInRange && !endDateInRange)
+				return false;
 
             if (HideTasksSpanningWeekends)
             {
-                if (((item.StartDate.Date < startDate) || (item.StartDate.Date > endDate)) &&
-                    ((item.EndDate.Date < startDate) || (item.EndDate.Date > endDate)))
-                {
+				if (!startDateInRange || !endDateInRange)
                     return false;
-                }
             }
 
             if (HideTasksSpanningDays)
@@ -273,7 +279,18 @@ namespace DayViewUIExtension
                     return false;
             }
 
+			if (HideTasksWithoutTimes)
+			{
+				if (CalendarItem.IsStartOfDay(item.StartDate) && CalendarItem.IsEndOfDay(item.EndDate))
+					return false;
+			}
+
             return true;
+		}
+
+		private bool IsDateWithinRange(DateTime date, DateTime startDate, DateTime endDate)
+		{
+			return ((date.Date >= startDate) && (date.Date < endDate));
 		}
 
 		public void UpdateTasks(TaskList tasks,

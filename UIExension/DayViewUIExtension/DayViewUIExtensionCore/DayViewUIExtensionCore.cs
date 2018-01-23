@@ -186,6 +186,7 @@ namespace DayViewUIExtension
             {
                 // private settings
                 m_PrefsDlg.LoadPreferences(prefs, key);
+				UpdateDayViewPreferences();
             }
 
 			bool taskColorIsBkgnd = (prefs.GetProfileInt("Preferences", "ColorTaskBackground", 0) != 0);
@@ -388,12 +389,17 @@ namespace DayViewUIExtension
 
             if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_hwndParent)) == DialogResult.OK)
             {
-                m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
-                m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
-                m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
-
-                m_DayView.Invalidate();
+				UpdateDayViewPreferences();
             }
+		}
+
+		private void UpdateDayViewPreferences()
+		{
+			m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
+			m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
+			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
+
+			m_DayView.Invalidate();
 		}
 
 		protected void OnHelp(object sender, EventArgs e)

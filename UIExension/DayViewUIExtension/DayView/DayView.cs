@@ -658,6 +658,7 @@ namespace Calendar
                 StartDate = StartDate.AddDays(-7);
             }
 
+			AdjustScrollbar();
             Invalidate();
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
@@ -1230,6 +1231,8 @@ namespace Calendar
                 using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
                     e.Graphics.FillRectangle(backBrush, scrollrect);
             }
+
+			AdjustScrollbar();
         }
 
         private void DrawHourLabels(PaintEventArgs e, Rectangle rect)
