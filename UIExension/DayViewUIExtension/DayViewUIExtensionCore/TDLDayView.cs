@@ -240,14 +240,40 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+        public Boolean HideTasksWithoutTimes { get; set; }
+        public Boolean HideTasksSpanningWeekends { get; set; }
+        public Boolean HideTasksSpanningDays { get; set; }
+        
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
 			if (!item.HasValidDates())
 				return false;
 
-			// Start or end date must be 'visible'
-			return (((item.StartDate.Date >= startDate) && (item.StartDate.Date < endDate)) ||
-					((item.EndDate.Date > startDate) && (item.EndDate.Date < endDate)));
+            if (HideTasksWithoutTimes)
+            {
+                if ((item.StartDate == item.StartDate.Date) &&
+                    (item.EndDate == item.EndDate.Date))
+                {
+                    return false;
+                }
+            }
+
+            if (HideTasksSpanningWeekends)
+            {
+                if (((item.StartDate.Date < startDate) || (item.StartDate.Date > endDate)) &&
+                    ((item.EndDate.Date < startDate) || (item.EndDate.Date > endDate)))
+                {
+                    return false;
+                }
+            }
+
+            if (HideTasksSpanningDays)
+            {
+                if (item.StartDate.Date != item.EndDate.Date)
+                    return false;
+            }
+
+            return true;
 		}
 
 		public void UpdateTasks(TaskList tasks,

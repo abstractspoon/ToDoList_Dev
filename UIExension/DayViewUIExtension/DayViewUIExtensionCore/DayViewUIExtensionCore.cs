@@ -388,7 +388,11 @@ namespace DayViewUIExtension
 
             if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_hwndParent)) == DialogResult.OK)
             {
-                // TODO
+                m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
+                m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
+                m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
+
+                m_DayView.Invalidate();
             }
 		}
 
