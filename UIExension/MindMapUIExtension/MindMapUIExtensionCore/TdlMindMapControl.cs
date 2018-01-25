@@ -198,7 +198,119 @@ namespace MindMapUIExtension
 			return labelRect;
 		}
 
+		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		{
+			if (FindNode(taskId) == null)
+				return false;
+
+			if (FindNode(destParentId) == null)
+				return false;
+
+			if ((destPrevSiblingId != 0) && (FindNode(destPrevSiblingId) == null))
+				return false;
+
+			return true;
+		}
+
+		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		{
+			BeginUpdate();
+
+			var node = FindNode(taskId);
+			var destParentNode = FindNode(destParentId);
+			var destPrevSiblingNode = FindNode(destPrevSiblingId);
+
+			if ((node == null) || (destParentNode == null))
+				return false;
+
+			var srcParentNode = node.Parent;
+			int srcPos = srcParentNode.Nodes.IndexOf(node);
+
+			srcParentNode.Nodes.RemoveAt(srcPos);
+
+			int destPos = 0;
+			
+			if (destPrevSiblingNode != null)
+				destPos = (destParentNode.Nodes.IndexOf(destPrevSiblingNode) + 1);
+
+			destParentNode.Nodes.Insert(destPos, node);
+			SelectedNode = node;
+
+			RecalculatePositions();
+			EndUpdate();
+
+			return true;
+		}
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		{
+			TreeNode node = FindNode(taskID);
+
+			switch (getTask)
+			{
+				case UIExtension.GetTask.GetNextTask:
+					if (node.NextNode != null)
+					{
+						taskID = UniqueID(node.NextNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevTask:
+					if (node.PrevNode != null)
+					{
+						taskID = UniqueID(node.PrevNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetNextTopLevelTask:
+					{
+						var topLevelParent = TopLevelParent(node);
+
+						if ((topLevelParent != null) && (topLevelParent.NextNode != null))
+						{
+							taskID = UniqueID(topLevelParent.NextNode);
+							return true;
+						}
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevTopLevelTask:
+					{
+						var topLevelParent = TopLevelParent(node);
+
+						if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
+						{
+							taskID = UniqueID(topLevelParent.PrevNode);
+							return true;
+						}
+					}
+					break;
+			}
+
+			// all else
+			return false;
+		}
+		
+		
 		// Internal ------------------------------------------------------------
+
+		protected TreeNode TopLevelParent(TreeNode node)
+		{
+			while ((node != null) && !IsRoot(node))
+			{
+				var parentNode = node.Parent;
+
+				if (IsRoot(parentNode))
+					return node;
+
+				node = parentNode;
+			}
+
+			// else node was already null or root
+			return null;
+		}
 
 		protected void UpdateTaskAttributes(TaskList tasks,
 								HashSet<UIExtension.TaskAttribute> attribs)

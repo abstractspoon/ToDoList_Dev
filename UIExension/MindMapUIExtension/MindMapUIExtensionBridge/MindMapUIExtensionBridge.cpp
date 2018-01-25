@@ -217,9 +217,69 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
+
+	case IUI_MOVETASK:
+		if (dwExtra)
+		{
+			const IUITASKMOVE* pMove = (const IUITASKMOVE*)dwExtra;
+			return m_wnd->MoveTask(pMove->dwSelectedTaskID, pMove->dwParentID, pMove->dwAfterSiblingID);
+		}
+		return true;
+
+	case IUI_GETNEXTTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (dwExtra)
+		{
+			DWORD* pTaskID = (DWORD*)dwExtra;
+			UInt32 taskID = GetNextTask(nCmd, *pTaskID);
+
+			if (taskID != 0)
+			{
+				*pTaskID = taskID;
+
+				return true;
+			}
+		}
+		break;
 	}
 
 	return false;
+}
+
+DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+{
+	UIExtension::GetTask getNext;
+
+	switch (nCmd)
+	{
+		case IUI_GETNEXTTASK:
+			getNext = UIExtension::GetTask::GetNextTask;
+			break;
+
+		case IUI_GETPREVTASK:
+			getNext = UIExtension::GetTask::GetPrevTask;
+			break;
+
+		case IUI_GETNEXTTOPLEVELTASK:
+			getNext = UIExtension::GetTask::GetNextTopLevelTask;
+			break;
+
+		case IUI_GETPREVTOPLEVELTASK:
+			getNext = UIExtension::GetTask::GetPrevTopLevelTask;
+			break;
+
+		default:
+			return 0;
+	}
+
+	UInt32 taskID = dwFromTaskID;
+
+	if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
+		return taskID;
+
+	return 0;
 }
 
 bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
@@ -243,6 +303,25 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 
 	case IUI_SETFOCUS:
 		return m_wnd->Focused;
+
+	case IUI_MOVETASK:
+		if (dwExtra)
+		{
+			const IUITASKMOVE* pMove = (const IUITASKMOVE*)dwExtra;
+			return m_wnd->CanMoveTask(pMove->dwSelectedTaskID, pMove->dwParentID, pMove->dwAfterSiblingID);
+		}
+
+	case IUI_GETNEXTTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (dwExtra)
+		{
+			DWORD* pTaskID = (DWORD*)dwExtra;
+			return (GetNextTask(nCmd, *pTaskID) != 0);
+		}
+		break;
+
  	}
 
 	return false;

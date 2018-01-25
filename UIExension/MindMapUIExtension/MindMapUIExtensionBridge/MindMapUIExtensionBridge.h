@@ -75,6 +75,10 @@ public:
 protected:
    gcroot<MindMapUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
+
+protected:
+	DWORD GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwTaskID) const;
+
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

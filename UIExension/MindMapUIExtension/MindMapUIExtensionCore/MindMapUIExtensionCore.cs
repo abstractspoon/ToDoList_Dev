@@ -167,6 +167,21 @@ namespace MindMapUIExtension
 			return m_MindMap.CanExpand(expand);
 		}
 
+		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		{
+			return m_MindMap.CanMoveTask(taskId, destParentId, destPrevSiblingId);
+		}
+
+		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		{
+			return m_MindMap.MoveTask(taskId, destParentId, destPrevSiblingId);
+		}
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+		{
+			return m_MindMap.GetTask(getTask, ref taskID);
+		}
+		
         // Message handlers ---------------------------------------------------------------------
 
 		protected override void OnGotFocus(EventArgs e)
