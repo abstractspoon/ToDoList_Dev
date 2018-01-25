@@ -162,6 +162,7 @@ enum IUI_APPCOMMAND
 	IUI_SELECTNEXTTASKINCLCURRENT,	// dwExtra is IUISELECTTASK*	[in]
 	IUI_SELECTPREVTASK,				// dwExtra is IUISELECTTASK*	[in]
 	IUI_SELECTLASTTASK,				// dwExtra is IUISELECTTASK*	[in]
+	IUI_MOVETASK,					// dwExtra is IUITASKMOVE*		[in]
 
 	// new values here
 //  IUI_
