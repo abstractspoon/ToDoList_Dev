@@ -121,9 +121,12 @@ namespace MindMapUIExtension
             m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
 
             this.AutoScroll = true;
-            this.DoubleBuffered = true;
 			this.AllowDrop = true;
-        }
+
+			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+			this.SetStyle(ControlStyles.UserPaint, true);
+			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+		}
 
 		public Boolean HoldRedraw
 		{
@@ -299,6 +302,7 @@ namespace MindMapUIExtension
 		protected void BeginUpdate()
 		{
 			EnableExpandNotifications(false);
+			EnableSelectionNotifications(false);
 			HoldRedraw = true;
 		}
 
@@ -307,6 +311,7 @@ namespace MindMapUIExtension
 			HoldRedraw = false;
 
 			EnableExpandNotifications(true);
+			EnableSelectionNotifications(true);
 			RecalculatePositions();
 		}
 
@@ -317,12 +322,14 @@ namespace MindMapUIExtension
             Invalidate();
         }
 
+		static int paintCount = 0;
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			base.OnPaint(e);
+			Trace.TraceInformation("MindMapControl.OnPaint({0})", paintCount++);
 
             if (!m_HoldRedraw)
             {
+				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 			    DrawPositions(e.Graphics, m_TreeView.Nodes);
@@ -331,6 +338,11 @@ namespace MindMapUIExtension
                     DrawConnections(e.Graphics, node);
             }
         }
+
+		protected override void OnPaintBackground(PaintEventArgs e)
+		{
+			//base.OnPaintBackground(e);
+		}
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
@@ -538,15 +550,16 @@ namespace MindMapUIExtension
 
         protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
         {
-			EnsureItemVisible(Item(e.Node));
-            Invalidate();
-			Update();
+			var item = Item(e.Node);
+
+			if (!ClientRectangle.Contains(GetItemDrawRect(item.ItemBounds)))
+				EnsureItemVisible(item);
+			else
+				Invalidate();
+			//Update();
 
 			if (SelectionChange != null)
-			{
-				MindMapItem item = (e.Node.Tag as MindMapItem);
 				SelectionChange(this, item.ItemData);
-			}
         }
 
 #if DEBUG
@@ -742,6 +755,14 @@ namespace MindMapUIExtension
 				m_TreeView.AfterExpand -= new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 				m_TreeView.AfterCollapse -= new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 			}
+		}
+
+		protected void EnableSelectionNotifications(bool enable)
+		{
+			if (enable)
+				m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
+			else
+				m_TreeView.AfterSelect -= new TreeViewEventHandler(OnTreeViewAfterSelect);
 		}
 
 		protected bool HandleCursorKey(Keys key)

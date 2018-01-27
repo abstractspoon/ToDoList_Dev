@@ -250,24 +250,24 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 
 DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
 {
-	UIExtension::GetTask getNext;
+	UIExtension::GetTask getTask;
 
 	switch (nCmd)
 	{
 		case IUI_GETNEXTTASK:
-			getNext = UIExtension::GetTask::GetNextTask;
+			getTask = UIExtension::GetTask::GetNextTask;
 			break;
 
 		case IUI_GETPREVTASK:
-			getNext = UIExtension::GetTask::GetPrevTask;
+			getTask = UIExtension::GetTask::GetPrevTask;
 			break;
 
 		case IUI_GETNEXTTOPLEVELTASK:
-			getNext = UIExtension::GetTask::GetNextTopLevelTask;
+			getTask = UIExtension::GetTask::GetNextTopLevelTask;
 			break;
 
 		case IUI_GETPREVTOPLEVELTASK:
-			getNext = UIExtension::GetTask::GetPrevTopLevelTask;
+			getTask = UIExtension::GetTask::GetPrevTopLevelTask;
 			break;
 
 		default:
@@ -276,7 +276,7 @@ DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 
 	UInt32 taskID = dwFromTaskID;
 
-	if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
+	if (m_wnd->GetTask(getTask, taskID))
 		return taskID;
 
 	return 0;

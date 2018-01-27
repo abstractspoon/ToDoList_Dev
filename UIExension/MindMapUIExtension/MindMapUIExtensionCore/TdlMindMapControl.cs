@@ -44,14 +44,28 @@ namespace MindMapUIExtension
             m_IsDone = (task.IsDone() || task.IsGoodAsDone());
 		}
 
-		public override string ToString() { return m_Title; }
+		public override string ToString() 
+		{
+			return Title;
+		}
 
 		public void Update(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
 			// TODO
 		}
 
-		public String Title { get { return String.Format("{0} ({1})", m_Title, m_TaskID); } }
+		public String Title 
+		{ 
+			get 
+			{ 
+#if DEBUG
+				return String.Format("{0} ({1})", m_Title, m_TaskID); 
+#else
+				return m_Title;
+#endif
+			} 
+		}
+		
 		public UInt32 ID { get { return m_TaskID; } }
 		public Color TextColor { get { return m_TextColor; } }
 		public Boolean HasIcon { get { return m_HasIcon; } }
@@ -228,7 +242,7 @@ namespace MindMapUIExtension
 
 			srcParentNode.Nodes.RemoveAt(srcPos);
 
-			int destPos = 0;
+			int destPos = 0; // insert at top
 			
 			if (destPrevSiblingNode != null)
 				destPos = (destParentNode.Nodes.IndexOf(destPrevSiblingNode) + 1);
@@ -236,8 +250,8 @@ namespace MindMapUIExtension
 			destParentNode.Nodes.Insert(destPos, node);
 			SelectedNode = node;
 
-			RecalculatePositions();
 			EndUpdate();
+			EnsureItemVisible(Item(node));
 
 			return true;
 		}
@@ -379,8 +393,7 @@ namespace MindMapUIExtension
 			if (tasks.GetTaskCount() == 0)
 				return;
 
-			base.HoldRedraw = true;
-			EnableExpandNotifications(false);
+			BeginUpdate();
 
 			var task = tasks.GetFirstTask();
 			bool taskIsRoot = !task.GetNextTask().IsValid(); // no siblings
@@ -408,13 +421,7 @@ namespace MindMapUIExtension
 			else
 				rootNode.Expand();
 
-			EnableExpandNotifications(true);
-			base.HoldRedraw = false;
-			
-			// then Rebuild
-			RecalculatePositions();
-
-			// lastly restore selection
+			EndUpdate();
 			SetSelectedNode(selID);
 		}
 
