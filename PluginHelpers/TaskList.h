@@ -109,6 +109,7 @@ namespace Abstractspoon
 				Boolean IsGoodAsDone();
 				Boolean IsFlagged();
 				Boolean IsParent();
+				Boolean IsLocked();
 
 				double GetTimeEstimate(TimeUnits% cUnits);
 				double GetTimeSpent(TimeUnits% cUnits);

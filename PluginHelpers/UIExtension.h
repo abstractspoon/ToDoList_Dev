@@ -172,6 +172,19 @@ namespace Abstractspoon
 					System::Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerFocused;
 				};
 
+				ref class AppCursor
+				{
+				public:
+					enum class CursorType
+					{
+						LockedTask,
+						NoDrag,
+					};
+					
+				public:
+					static Windows::Forms::Cursor^ Load(CursorType cursor);
+				};
+
 			};
 
 			public interface class IUIExtension

@@ -515,6 +515,11 @@ Boolean Task::IsParent()
 	return GETTASKVAL(IsTaskParent, false);
 }
 
+Boolean Task::IsLocked()
+{
+	return GETTASKVAL_ARG(IsTaskLocked, FALSE, false);
+}
+
 // ---------------------------------------------------------
 
 double Task::GetTimeEstimate(TimeUnits% cUnits)

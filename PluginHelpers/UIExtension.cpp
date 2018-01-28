@@ -369,5 +369,29 @@ bool UIExtension::SelectionRect::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, I
 	return false;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+Windows::Forms::Cursor^ UIExtension::AppCursor::Load(AppCursor::CursorType cursorType)
+{
+	String^ appFolder = System::IO::Path::GetDirectoryName(System::Reflection::Assembly::GetExecutingAssembly()->Location);
+	String^ cursorFolder = System::IO::Path::Combine(appFolder, "Resources\\Cursors");
+	String^ cursorFile = nullptr;
+
+	switch (cursorType)
+	{
+	case UIExtension::AppCursor::CursorType::LockedTask:
+		cursorFile = System::IO::Path::Combine(cursorFolder, "Locked.cur");
+		break;
+
+	case UIExtension::AppCursor::CursorType::NoDrag:
+		cursorFile = System::IO::Path::Combine(cursorFolder, "NoDrag.cur");
+		break;
+	}
+
+	if ((cursorFile != nullptr) && System::IO::File::Exists(cursorFile))
+		return gcnew Windows::Forms::Cursor(cursorFile);
+	
+	return nullptr;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

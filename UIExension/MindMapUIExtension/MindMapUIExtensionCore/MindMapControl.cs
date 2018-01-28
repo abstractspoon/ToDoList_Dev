@@ -464,9 +464,14 @@ namespace MindMapUIExtension
 				return false;
 
 			TreeNode hit = HitTestPositions(ptOrg);
-			
-			DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
-			return true;
+
+			if (IsAcceptableDragSource(hit))
+			{
+				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+				return true;
+			}
+
+			return false;
 		}
 	
 		protected override void OnDragOver(DragEventArgs e)
@@ -620,6 +625,15 @@ namespace MindMapUIExtension
 
         // Private Internals -----------------------------------------------------------
 
+		private Boolean IsAcceptableDragSource(TreeNode node)
+		{
+			if ((node == null) || IsRoot(node))
+				return false;
+
+			// else
+			return IsAcceptableDragSource(ItemData(node));
+		}
+
 		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
 		{
 			if ((dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
@@ -632,6 +646,11 @@ namespace MindMapUIExtension
 		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
 		{
 			return true;
+		}
+
+		virtual protected Boolean IsAcceptableDragSource(Object itemData)
+		{
+			return (itemData != null);
 		}
 
 		private Rectangle GetDoubleClickRect(Point cursor)

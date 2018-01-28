@@ -20,6 +20,7 @@ namespace MindMapUIExtension
 		private Boolean m_IsFlagged;
 		private Boolean m_IsParent;
         private Boolean m_IsDone;
+		private Boolean m_IsLocked;
 
 		// -----------------------------------------------------------------
 
@@ -31,6 +32,8 @@ namespace MindMapUIExtension
 			m_HasIcon = false;
 			m_IsFlagged = false;
 			m_IsParent = false;
+			m_IsDone = false;
+			m_IsLocked = false;
 		}
 
 		public MindMapTaskItem(Task task)
@@ -42,6 +45,7 @@ namespace MindMapUIExtension
 			m_IsFlagged = task.IsFlagged();
 			m_IsParent = task.IsParent();
             m_IsDone = (task.IsDone() || task.IsGoodAsDone());
+			m_IsLocked = task.IsLocked();
 		}
 
 		public override string ToString() 
@@ -72,6 +76,7 @@ namespace MindMapUIExtension
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
 		public Boolean IsParent { get { return m_IsParent; } }
 		public Boolean IsDone { get { return m_IsDone; } }
+		public Boolean IsLocked { get { return m_IsLocked; } }
 
 		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
@@ -94,6 +99,7 @@ namespace MindMapUIExtension
                 m_IsDone = (task.IsDone() || task.IsGoodAsDone());
 
 			m_IsParent = task.IsParent();
+			m_IsLocked = task.IsLocked();
 
 			return true;
 		}
@@ -314,6 +320,22 @@ namespace MindMapUIExtension
 		
 		// Internal ------------------------------------------------------------
 
+		protected MindMapTaskItem TaskItem(TreeNode node)
+		{
+			if (node == null)
+				return null;
+
+			return (ItemData(node) as MindMapTaskItem);
+		}
+
+		protected MindMapTaskItem TaskItem(Object itemData)
+		{
+			if (itemData == null)
+				return null;
+
+			return (itemData as MindMapTaskItem);
+		}
+
 		protected TreeNode TopLevelParent(TreeNode node)
 		{
 			while ((node != null) && !IsRoot(node))
@@ -463,8 +485,12 @@ namespace MindMapUIExtension
 
 		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
 		{
-			// TODO
-			return true;
+			return !TaskItem(dropTargetItemData).IsLocked;
+		}
+
+		protected override Boolean IsAcceptableDragSource(Object itemData)
+		{
+			return !TaskItem(itemData).IsLocked;
 		}
 
 		protected override Boolean DoDrop(MindMapDragEventArgs e)
@@ -542,7 +568,7 @@ namespace MindMapUIExtension
 
 		protected Boolean NodeHasIcon(TreeNode node)
 		{
-			return TaskHasIcon(ItemData(node) as MindMapTaskItem);
+			return TaskHasIcon(TaskItem(node));
 		}
 
 		protected Boolean TaskHasIcon(MindMapTaskItem taskItem)
@@ -639,7 +665,9 @@ namespace MindMapUIExtension
 			if (HitTestExpansionButton(node, e.Location))
 				return;
 
-			if (SelectNodeWasPreviouslySelected)
+			var taskItem = TaskItem(node);
+
+			if (!taskItem.IsLocked && SelectNodeWasPreviouslySelected)
 			{
 				if (EditTaskLabel != null)
 					m_EditTimer.Start();
@@ -685,6 +713,32 @@ namespace MindMapUIExtension
 
 			if (EditTaskLabel != null)
 				EditTaskLabel(this, UniqueID(SelectedNode));
+		}
+
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+ 			base.OnMouseMove(e);
+
+			var node = HitTestPositions(e.Location);
+
+			if ((node != null) && !HitTestExpansionButton(node, e.Location))
+			{
+				var taskItem = TaskItem(node);
+
+				if ((taskItem != null) && taskItem.IsLocked)
+				{
+					var cursor = UIExtension.AppCursor.Load(UIExtension.AppCursor.CursorType.LockedTask);
+
+					if (cursor == null)
+						cursor = Cursors.No;
+					
+					Cursor = cursor;
+					return;
+				}
+			}
+
+			// all else
+			Cursor = Cursors.Arrow;
 		}
 	}
 }

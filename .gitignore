@@ -67,3 +67,5 @@ Release\*.*
 release
 *.aps
 UIExension/MindMapUIExtension/MindMapUIExtensionCore/obj/Debug/MindMapUIExtension.TaskDataItem.resources
+Debug/Resources/Cursors/Locked.cur
+Debug/Resources/Cursors/NoDrag.cur
