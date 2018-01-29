@@ -209,7 +209,7 @@ namespace MindMapUIExtension
 			return 0;
 		}
 
-		public Rectangle GetSelectedItemLabelRect()
+		public new Rectangle GetSelectedItemLabelRect()
 		{
 			var labelRect = base.GetSelectedItemLabelRect();
 

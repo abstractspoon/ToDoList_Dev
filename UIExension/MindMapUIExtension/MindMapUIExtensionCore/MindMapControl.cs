@@ -67,6 +67,7 @@ namespace MindMapUIExtension
 
 		const int ItemHorzSeparation = 40;
 		const int ItemVertSeparation = 4;
+        const int InsertionMarkerHeight = 6;
 		const int ExpansionButtonSize = 8;
 		const int ExpansionButtonSeparation = 2;
 		const int LabelPadding = 2;
@@ -85,11 +86,20 @@ namespace MindMapUIExtension
 			Right,
 		}
 
+        protected enum DropPos
+        {
+            None,
+            On,
+            Above,
+            Below,
+        }
+
 		// Data --------------------------------------------------------------------------
 
         private Point m_DrawOffset;
         private Boolean m_HoldRedraw;
 		private TreeNode m_DropTarget;
+        private DropPos m_DropPos;
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor = Color.Magenta;
 
@@ -103,6 +113,7 @@ namespace MindMapUIExtension
             m_DrawOffset = new Point(0, 0);
             m_HoldRedraw = false;
 			m_DropTarget = null;
+            m_DropPos = DropPos.None;
 
 			m_DragTimer = new Timer();
 			m_DragTimer.Interval = (int)GetDoubleClickTime();
@@ -322,11 +333,8 @@ namespace MindMapUIExtension
             Invalidate();
         }
 
-		static int paintCount = 0;
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			Trace.TraceInformation("MindMapControl.OnPaint({0})", paintCount++);
-
             if (!m_HoldRedraw)
             {
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
@@ -336,6 +344,9 @@ namespace MindMapUIExtension
 
                 foreach (TreeNode node in m_TreeView.Nodes)
                     DrawConnections(e.Graphics, node);
+
+                if (m_DropTarget != null)
+                    DrawInsertionMarker(e.Graphics, m_DropTarget);
             }
         }
 
@@ -484,12 +495,16 @@ namespace MindMapUIExtension
 			}
 			else
 			{
+                // Work out drop target (if any)
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
 				TreeNode dropTarget = HitTestPositions(dragPt);
+                DropPos dropPos = DropPos.None;
 
 				if (!IsAcceptableDropTarget(draggedNode, dropTarget))
 				{
 					e.Effect = DragDropEffects.None;
+
+                    dropTarget = null;
 				}
 				else
 				{
@@ -497,22 +512,60 @@ namespace MindMapUIExtension
 						e.Effect = DragDropEffects.Copy;
 					else
 						e.Effect = DragDropEffects.Move;
-				}
 
+                    dropPos = GetDropPos(dropTarget, dragPt);
+				}
+                
 				// Update drop target
-				if (dropTarget != m_DropTarget)
+				if ((dropTarget != m_DropTarget) || (dropPos != m_DropPos))
 				{
 					if (m_DropTarget != null)
+                    {
 						RedrawNode(m_DropTarget, false);
 
+                        if (dropPos != m_DropPos)
+                            Invalidate(CalculateInsertionMarkerRect(m_DropTarget, m_DropPos));
+                    }
+
 					if (dropTarget != null)
+                    {
 						RedrawNode(dropTarget, false);
+
+                        if (dropPos != m_DropPos)
+                            Invalidate(CalculateInsertionMarkerRect(dropTarget, dropPos));
+                    }
 				
 					m_DropTarget = dropTarget;
+                    m_DropPos = dropPos;
+
+                    //Invalidate();
 					Update();
 				}
 			}
 		}
+
+        private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
+        {
+            var item = Item(dropTarget);
+            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
+
+            if (!itemRect.Contains(cursorPos))
+                return DropPos.None;
+
+            int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
+
+            itemRect.Y += oneSixthHeight;
+            itemRect.Height -= (2 * oneSixthHeight);
+
+            if (cursorPos.Y <= itemRect.Top)
+                return DropPos.Above;
+
+            if (cursorPos.Y >= itemRect.Bottom)
+                return DropPos.Below;
+
+            // else
+            return DropPos.On;
+        }
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
@@ -533,10 +586,12 @@ namespace MindMapUIExtension
 
 			if (e.EscapePressed)
 			{
-				RedrawNode(m_DropTarget, false);
-				m_DropTarget = null;
+                e.Action = DragAction.Cancel;
 
-				e.Action = DragAction.Cancel;
+				m_DropTarget = null;
+                m_DropPos = DropPos.None;
+
+                Invalidate();
 			}
 		}
 
@@ -561,7 +616,6 @@ namespace MindMapUIExtension
 				EnsureItemVisible(item);
 			else
 				Invalidate();
-			//Update();
 
 			if (SelectionChange != null)
 				SelectionChange(this, item.ItemData);
@@ -636,7 +690,7 @@ namespace MindMapUIExtension
 
 		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
 		{
-			if ((dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
+			if ((dropTarget == null) || (dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
 				return false;
 
 			// else
@@ -1450,16 +1504,17 @@ namespace MindMapUIExtension
 											 NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
+            graphics.FillRectangle(SystemBrushes.Window, rect);
 
 			switch (nodeState)
 			{
 				case NodeDrawState.Selected:
-					graphics.FillRectangle(SystemBrushes.Highlight, Rectangle.Inflate(rect, -2, 0));
+                    graphics.FillRectangle(SystemBrushes.Highlight, rect);
 					textColor = SystemBrushes.HighlightText;
 					break;
 
 				case NodeDrawState.DropTarget:
-					graphics.FillRectangle(SystemBrushes.ControlLight, Rectangle.Inflate(rect, -2, 0));
+					graphics.FillRectangle(SystemBrushes.ControlLight, rect);
 					break;
 
 				case NodeDrawState.None:
@@ -1474,13 +1529,99 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, m_TreeView.Font, textColor, rect, format);
 		}
 
+        private Rectangle CalculateInsertionMarkerRect(TreeNode node, DropPos dropPos)
+        {
+            if ((dropPos == DropPos.On) || (m_DropPos == DropPos.None))
+                return Rectangle.Empty;
+
+            MindMapItem item = Item(node);
+            Rectangle insertionMark = GetItemDrawRect(item.ItemBounds);
+
+            switch (m_DropPos)
+            {
+                case DropPos.Above:
+                    insertionMark.Y = (insertionMark.Top - (InsertionMarkerHeight / 2));
+
+                    if (node.PrevNode != null)
+                    {
+                        MindMapItem prevItem = Item(node.PrevNode);
+
+                        if (item.IsFlipped == prevItem.IsFlipped)
+                        {
+                            Rectangle prevRect = GetItemDrawRect(prevItem.ItemBounds);
+
+                            insertionMark.Y = (prevRect.Bottom - (InsertionMarkerHeight / 2));
+                            insertionMark.X = Math.Min(insertionMark.X, prevRect.X);
+                            insertionMark.Width = Math.Max(insertionMark.Width, prevRect.Width);
+                        }
+                    }
+                    break;
+
+                case DropPos.Below:
+                    insertionMark.Y = (insertionMark.Bottom - (InsertionMarkerHeight / 2));
+
+                    if (node.NextNode != null)
+                    {
+                        MindMapItem nextItem = Item(node.NextNode);
+
+                        if (item.IsFlipped == nextItem.IsFlipped)
+                        {
+                            Rectangle nextRect = GetItemDrawRect(nextItem.ItemBounds);
+
+                            insertionMark.X = Math.Min(insertionMark.X, nextRect.X);
+                            insertionMark.Y = (nextRect.Top - (InsertionMarkerHeight / 2));
+                            insertionMark.Width = Math.Max(insertionMark.Width, nextRect.Width);
+                        }
+                    }
+                    break;
+            }
+
+            insertionMark.Height = InsertionMarkerHeight;
+
+            return insertionMark;
+        }
+
+        private void DrawInsertionMarker(Graphics graphics, TreeNode node)
+        {
+            if (node == m_DropTarget)
+            {
+                var insertionMark = CalculateInsertionMarkerRect(node, m_DropPos);
+
+                if (!insertionMark.IsEmpty)
+                {
+                    // Mimic the insertion marker of Win32 TreeView
+                    SmoothingMode prevMode = graphics.SmoothingMode;
+                    graphics.SmoothingMode = SmoothingMode.None;
+
+                    int offset = (InsertionMarkerHeight / 2);
+
+                    var leftEnd = new Point[3] { new Point(insertionMark.Left, insertionMark.Top - 1),
+                                                 new Point(insertionMark.Left + offset, insertionMark.Top + offset),
+                                                 new Point(insertionMark.Left, insertionMark.Bottom) };
+
+                    graphics.FillPolygon(Brushes.Black, leftEnd);
+
+                    var rightEnd = new Point[3] { new Point(insertionMark.Right, insertionMark.Top - 1),
+                                                 new Point(insertionMark.Right - offset - 1, insertionMark.Top + offset),
+                                                 new Point(insertionMark.Right, insertionMark.Bottom) };
+
+                    graphics.FillPolygon(Brushes.Black, rightEnd);
+
+                    insertionMark = Rectangle.Inflate(insertionMark, 0, -2);
+                    graphics.FillRectangle(Brushes.Black, insertionMark);
+
+                    graphics.SmoothingMode = prevMode;
+                }
+            }
+        }
+
 		private NodeDrawState GetDrawState(TreeNode node)
 		{
 			if (node.IsSelected)
 				return NodeDrawState.Selected;
 
-			if (node == m_DropTarget)
-				return NodeDrawState.DropTarget;
+			if ((node == m_DropTarget) && (m_DropPos == DropPos.On))
+                return NodeDrawState.DropTarget;
 
 			return NodeDrawState.None;
 		}
@@ -1703,12 +1844,12 @@ namespace MindMapUIExtension
 
             MindMapItem item = Item(node);
 
-            if (GetItemDrawRect(Rectangle.Inflate(item.TotalBounds, 2, 2)).Contains(point))
+            if (GetItemDrawRect(Rectangle.Inflate(item.TotalBounds, 2, 0)).Contains(point))
             {
-                if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 2)).Contains(point))
+                if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 0)).Contains(point))
                     return node;
 
-                if (GetItemDrawRect(Rectangle.Inflate(item.ChildBounds, 2, 2)).Contains(point))
+                if (GetItemDrawRect(Rectangle.Inflate(item.ChildBounds, 2, 0)).Contains(point))
                 {
                     foreach (TreeNode child in node.Nodes)
                     {
