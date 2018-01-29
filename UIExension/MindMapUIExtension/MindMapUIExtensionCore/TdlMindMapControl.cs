@@ -483,9 +483,13 @@ namespace MindMapUIExtension
 			}
 		}
 
-		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
+		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
-			return !TaskItem(dropTargetItemData).IsLocked;
+			if (dropPos == MindMapControl.DropPos.On)
+				return !TaskItem(dropTargetItemData).IsLocked;
+
+			// else
+			return true;
 		}
 
 		protected override Boolean IsAcceptableDragSource(Object itemData)
@@ -495,7 +499,8 @@ namespace MindMapUIExtension
 
 		protected override Boolean DoDrop(MindMapDragEventArgs e)
 		{
-			base.DoDrop(e);
+			if (!base.DoDrop(e) || e.copyItem)
+				return false;
 
 			return true; // We handled it
 		}

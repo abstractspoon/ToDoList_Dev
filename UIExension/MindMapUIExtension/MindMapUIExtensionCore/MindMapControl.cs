@@ -498,22 +498,22 @@ namespace MindMapUIExtension
                 // Work out drop target (if any)
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
 				TreeNode dropTarget = HitTestPositions(dragPt);
-                DropPos dropPos = DropPos.None;
+				DropPos dropPos = GetDropPos(dropTarget, dragPt);
+				bool copy = ((e.KeyState & 8) == 8);
 
-				if (!IsAcceptableDropTarget(draggedNode, dropTarget))
+				if (!IsAcceptableDropTarget(draggedNode, dropTarget, dropPos, copy))
 				{
 					e.Effect = DragDropEffects.None;
 
                     dropTarget = null;
+					dropPos = DropPos.None;
 				}
 				else
 				{
-					if ((e.KeyState & 8) == 8)
+					if (copy)
 						e.Effect = DragDropEffects.Copy;
 					else
 						e.Effect = DragDropEffects.Move;
-
-                    dropPos = GetDropPos(dropTarget, dragPt);
 				}
                 
 				// Update drop target
@@ -546,11 +546,14 @@ namespace MindMapUIExtension
 
         private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
         {
-            var item = Item(dropTarget);
+			var item = Item(dropTarget);
             Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
 
             if (!itemRect.Contains(cursorPos))
                 return DropPos.None;
+
+			if (IsRoot(dropTarget))
+				return DropPos.On;
 
             int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
 
@@ -692,16 +695,28 @@ namespace MindMapUIExtension
 			return IsAcceptableDragSource(ItemData(node));
 		}
 
-		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget)
+		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
-			if ((dropTarget == null) || (dropTarget == draggedNode) || IsChildNode(draggedNode, dropTarget))
+			if ((dropTarget == null) || (dropTarget == draggedNode))
 				return false;
 
+			if (IsChildNode(draggedNode, dropTarget))
+				return false;
+
+			if (!copy)
+			{
+				if ((dropTarget == draggedNode.PrevNode) && (dropPos == DropPos.Below))
+					return false;
+
+				if ((dropTarget == draggedNode.NextNode) && (dropPos == DropPos.Above))
+					return false;
+			}
+			
 			// else
-			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget));
+			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget), dropPos, copy);
 		}
 
-		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData)
+		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
 			return true;
 		}
@@ -729,7 +744,7 @@ namespace MindMapUIExtension
 
 		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
-			if (IsAcceptableDropTarget(draggedNode, dropTarget))
+			if (IsAcceptableDropTarget(draggedNode, dropTarget, dropPos, copy))
 			{
                 TreeNode parentNode = null, afterSiblingNode = null;
 
@@ -763,12 +778,11 @@ namespace MindMapUIExtension
                 if (afterSiblingNode != null)
 				    args.afterSiblingItemData = afterSiblingNode.Tag;
 
-				// Let derived class have first go
-				if (DoDrop(args))
-				{
-					// they handled it
+				args.copyItem = copy;
+
+				// See if anyone wants to veto this move
+				if (!DoDrop(args))
 					return;
-				}
 
 				// Remove the node from its current 
 				// location and add it to the node at the drop location.
@@ -794,7 +808,7 @@ namespace MindMapUIExtension
 				return DragDropChange(this, e);
 
 			// else
-			return false;
+			return true;
 		}
 
 		protected TreeNode FindNode(UInt32 uniqueID)
