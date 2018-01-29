@@ -570,14 +570,18 @@ namespace MindMapUIExtension
 		protected override void OnDragDrop(DragEventArgs e)
 		{
 			RedrawNode(m_DropTarget, false);
+            Invalidate(CalculateInsertionMarkerRect(m_DropTarget, m_DropPos));
+
 			m_DropTarget = null;
+            m_DropPos = DropPos.None;
 
 			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
 
 			Point dropPt = PointToClient(new Point(e.X, e.Y));
 			TreeNode dropTarget = HitTestPositions(dropPt);
+            DropPos dropPos = GetDropPos(dropTarget, dropPt);
 
-			DoDrop(draggedNode, dropTarget, ((e.KeyState & 8) == 8));
+			DoDrop(draggedNode, dropTarget, dropPos, ((e.KeyState & 8) == 8));
 		}
 
 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
@@ -723,21 +727,43 @@ namespace MindMapUIExtension
 			return rect;
 		}
 
-		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, bool copy)
+		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
 			if (IsAcceptableDropTarget(draggedNode, dropTarget))
 			{
-				// Let derived class have first go
-				var args = new MindMapDragEventArgs();
+                TreeNode parentNode = null, afterSiblingNode = null;
 
+                switch (dropPos)
+                {
+                    case DropPos.On:
+                        parentNode = dropTarget;
+                        afterSiblingNode = null;
+                        break;
+
+                    case DropPos.Above:
+                        parentNode = dropTarget.Parent;
+                        afterSiblingNode = dropTarget.PrevNode;
+                        break;
+
+                    case DropPos.Below:
+                        parentNode = dropTarget.Parent;
+                        afterSiblingNode = dropTarget;
+                        break;
+                }
+                
+                var args = new MindMapDragEventArgs();
+                
 				args.selectedUniqueID = UniqueID(draggedNode);	
-				args.targetParentUniqueID = UniqueID(dropTarget);
-				args.afterSiblingUniqueID = 0;
+				args.targetParentUniqueID = UniqueID(parentNode);
+				args.afterSiblingUniqueID = UniqueID(afterSiblingNode);
 
 				args.selectedItemData = draggedNode.Tag;
-				args.targetParentItemData = dropTarget.Tag;
-				args.afterSiblingItemData = null;
+                args.targetParentItemData = parentNode.Tag;
 
+                if (afterSiblingNode != null)
+				    args.afterSiblingItemData = afterSiblingNode.Tag;
+
+				// Let derived class have first go
 				if (DoDrop(args))
 				{
 					// they handled it
@@ -747,13 +773,18 @@ namespace MindMapUIExtension
 				// Remove the node from its current 
 				// location and add it to the node at the drop location.
 				draggedNode.Remove();
-				dropTarget.Nodes.Add(draggedNode);
 
-				// Expand the node at the location 
-				// to show the dropped node.
-				dropTarget.Expand();
+                int insertionPos = 0;
+                
+                if (afterSiblingNode != null)
+                    insertionPos = (parentNode.Nodes.IndexOf(afterSiblingNode) + 1);
+
+				parentNode.Nodes.Insert(insertionPos, draggedNode);
+                parentNode.Expand();
 
 				SelectedNode = draggedNode;
+
+                RecalculatePositions();
 			}
 		}
 
@@ -1531,6 +1562,9 @@ namespace MindMapUIExtension
 
         private Rectangle CalculateInsertionMarkerRect(TreeNode node, DropPos dropPos)
         {
+            if (node == null)
+                return Rectangle.Empty;
+
             if ((dropPos == DropPos.On) || (m_DropPos == DropPos.None))
                 return Rectangle.Empty;
 
