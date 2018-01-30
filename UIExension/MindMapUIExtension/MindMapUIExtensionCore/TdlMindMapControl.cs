@@ -379,7 +379,8 @@ namespace MindMapUIExtension
 				return false;
 
 			MindMapTaskItem item;
-			bool newTask = !m_Items.TryGetValue(task.GetID(), out item);
+            UInt32 taskId = task.GetID();
+			bool newTask = !m_Items.TryGetValue(taskId, out item);
 
 			if (newTask)
 			{
@@ -428,7 +429,10 @@ namespace MindMapUIExtension
 
 			if (taskIsRoot)
 			{
-				rootNode = AddRootNode(new MindMapTaskItem(task), task.GetID());
+                var taskItem = new MindMapTaskItem(task);
+
+                m_Items.Add(taskItem.ID, taskItem);
+				rootNode = AddRootNode(taskItem, taskItem.ID);
 
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
