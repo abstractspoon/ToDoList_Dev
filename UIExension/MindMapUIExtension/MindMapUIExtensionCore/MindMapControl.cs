@@ -177,6 +177,10 @@ namespace MindMapUIExtension
             if (IsEmpty())
                 return null;
 
+            // Must have a parent
+            if (parent == null)
+                return null;
+
             return AddNode(itemData, parent.Nodes, uniqueID);
         }
 
@@ -1194,6 +1198,16 @@ namespace MindMapUIExtension
 			}
 		}
 
+        private int CalculateHorizontalChildOffset(TreeNode node)
+        {
+            int horzOffset = (node.Bounds.Width + ItemHorzSeparation + GetExtraWidth(node));
+
+            if (!IsRoot(node))
+                horzOffset += ExpansionButtonSize;
+
+            return horzOffset;
+        }
+
 		protected void RecalculatePositions()
 		{
             // There must be a single root task to proceed
@@ -1213,7 +1227,7 @@ namespace MindMapUIExtension
             else // Double-sided graph
             {
                 // Right side
-                int horzOffset = (rootNode.Bounds.Width + ItemHorzSeparation);
+                int horzOffset = CalculateHorizontalChildOffset(rootNode);
 
                 TreeNode rightFrom = rootNode.Nodes[0];
 
@@ -1302,8 +1316,8 @@ namespace MindMapUIExtension
 
             while (node != null)
 			{
-				// Children First
-                int childOffset = (horzOffset + node.Bounds.Width + ItemHorzSeparation + ExpansionButtonSize);
+				// Children of this node First
+                int childOffset = (horzOffset + CalculateHorizontalChildOffset(node));
 
                 RecalculatePositions(node.Nodes, childOffset, vertOffset);
 
