@@ -229,10 +229,14 @@ namespace MindMapUIExtension
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
 			if (e.copyItem)
-				return notify.NotifyCopy(e.selectedUniqueID, e.targetParentUniqueID, e.afterSiblingUniqueID);
+				return notify.NotifyCopy(e.dragged.uniqueID, 
+										 e.targetParent.uniqueID, 
+										 e.afterSibling.uniqueID);
 
 			// else
-			return notify.NotifyMove(e.selectedUniqueID, e.targetParentUniqueID, e.afterSiblingUniqueID);
+			return notify.NotifyMove(e.dragged.uniqueID,
+									 e.targetParent.uniqueID,
+									 e.afterSibling.uniqueID);
 		}
     }
 

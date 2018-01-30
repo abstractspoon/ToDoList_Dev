@@ -48,6 +48,21 @@ namespace MindMapUIExtension
 			m_IsLocked = task.IsLocked();
 		}
 
+		public void FixupParentStatus(TreeNode node, UIExtension.TaskIcon taskIcons)
+		{
+			if (node.Nodes.Count == 0)
+			{
+				UInt32 taskId = Convert.ToUInt32(node.Name);
+
+				if (!m_HasIcon && taskIcons.Get(taskId))
+					m_IsParent = true;
+			}
+			else
+			{
+				m_IsParent = true;
+			}
+		}
+
 		public override string ToString() 
 		{
 			return Title;
@@ -292,10 +307,6 @@ namespace MindMapUIExtension
 						taskID = UniqueID(node.NextVisibleNode);
 						return true;
 					}
-					else
-					{
-
-					}
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
@@ -521,10 +532,24 @@ namespace MindMapUIExtension
 
 		protected override Boolean DoDrop(MindMapDragEventArgs e)
 		{
+			TreeNode prevParentNode = e.dragged.node.Parent;
+
 			if (!base.DoDrop(e) || e.copyItem)
 				return false;
 
+			if (e.targetParent.node != prevParentNode)
+			{
+				FixupParentStatus(e.targetParent.node);
+				FixupParentStatus(prevParentNode);
+			}
+
 			return true; // We handled it
+		}
+
+		private void FixupParentStatus(TreeNode node)
+		{
+			if (node != null)
+				TaskItem(node).FixupParentStatus(node, m_TaskIcons);
 		}
 		
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,

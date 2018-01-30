@@ -17,15 +17,41 @@ namespace MindMapUIExtension
 
 	[System.ComponentModel.DesignerCategory("")]
 
+	public class MindMapDragEventItem
+	{
+		public MindMapDragEventItem(TreeNode n)
+		{
+			if (n == null)
+				return;
+
+			var item = (node.Tag as MindMapItem);
+
+			if (item == null)
+				return;
+
+			node = n;
+			uniqueID = Convert.ToUInt32(node.Name);
+			itemData = item.ItemData;			
+		}
+
+		public TreeNode node = null;
+		public UInt32 uniqueID = 0;
+		public Object itemData = null;
+	}
+
 	public class MindMapDragEventArgs : EventArgs
 	{
-		public UInt32 selectedUniqueID = 0;	
-		public UInt32 targetParentUniqueID = 0;
-		public UInt32 afterSiblingUniqueID = 0;
+		public MindMapDragEventArgs(TreeNode node, TreeNode parent, TreeNode sibling, bool copy)
+		{
+			dragged = new MindMapDragEventItem(node);
+			targetParent = new MindMapDragEventItem(parent);
+			afterSibling = new MindMapDragEventItem(sibling);
+			copyItem = copy;
+		}
 
-		public Object selectedItemData = null;
-		public Object targetParentItemData = null;
-		public Object afterSiblingItemData = null;
+		public MindMapDragEventItem dragged = null;
+		public MindMapDragEventItem targetParent = null;
+		public MindMapDragEventItem afterSibling = null;
 	
 		public bool copyItem = false;
 	}
@@ -770,20 +796,8 @@ namespace MindMapUIExtension
                         break;
                 }
                 
-                var args = new MindMapDragEventArgs();
+                var args = new MindMapDragEventArgs(draggedNode, parentNode, afterSiblingNode, copy);
                 
-				args.selectedUniqueID = UniqueID(draggedNode);	
-				args.targetParentUniqueID = UniqueID(parentNode);
-				args.afterSiblingUniqueID = UniqueID(afterSiblingNode);
-
-				args.selectedItemData = draggedNode.Tag;
-                args.targetParentItemData = parentNode.Tag;
-
-                if (afterSiblingNode != null)
-				    args.afterSiblingItemData = afterSiblingNode.Tag;
-
-				args.copyItem = copy;
-
 				// See if anyone wants to veto this move
 				if (!DoDrop(args))
 					return;
