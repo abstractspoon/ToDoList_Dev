@@ -60,7 +60,7 @@ namespace MindMapUIExtension
 
         public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
         {
-            return true; // all updates
+            return m_MindMap.WantEditUpdate(attrib);
         }
 
         public bool WantSortUpdate(UIExtension.TaskAttribute attrib)

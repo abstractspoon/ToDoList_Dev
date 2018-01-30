@@ -196,7 +196,25 @@ namespace MindMapUIExtension
 				}
 			}
 		}
-		
+
+        public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
+        {
+            switch (attrib)
+            {
+                // Note: lock state is always provided
+                case UIExtension.TaskAttribute.Title:
+                case UIExtension.TaskAttribute.Icon:
+                case UIExtension.TaskAttribute.Flag:
+                case UIExtension.TaskAttribute.Color:
+                case UIExtension.TaskAttribute.DoneDate:
+			    case UIExtension.TaskAttribute.Position:
+                    return true;
+            }
+
+            // all else
+            return false;
+        }
+        		
 		public UInt32 HitTest(Point screenPos)
 		{
 			var clientPos = PointToClient(screenPos);
