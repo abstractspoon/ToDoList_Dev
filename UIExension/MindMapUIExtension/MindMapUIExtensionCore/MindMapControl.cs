@@ -24,7 +24,7 @@ namespace MindMapUIExtension
 			if (n == null)
 				return;
 
-			var item = (node.Tag as MindMapItem);
+			var item = (n.Tag as MindMapItem);
 
 			if (item == null)
 				return;
@@ -802,19 +802,25 @@ namespace MindMapUIExtension
 				if (!DoDrop(args))
 					return;
 
-				// Remove the node from its current 
-				// location and add it to the node at the drop location.
-				draggedNode.Remove();
-
+				// Remove the node from its current location and 
+                // re-add it to the node at the drop location
                 int insertionPos = 0;
                 
                 if (afterSiblingNode != null)
                     insertionPos = (parentNode.Nodes.IndexOf(afterSiblingNode) + 1);
 
-				parentNode.Nodes.Insert(insertionPos, draggedNode);
-                parentNode.Expand();
+                {
+                    BeginUpdate();
 
-				SelectedNode = draggedNode;
+                    draggedNode.Remove();
+
+                    parentNode.Nodes.Insert(insertionPos, draggedNode);
+                    parentNode.Expand();
+
+                    SelectedNode = draggedNode;
+
+                    EndUpdate();
+                }
 
                 RecalculatePositions();
 			}
