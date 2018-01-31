@@ -48,16 +48,13 @@ namespace MindMapUIExtension
 			m_IsLocked = task.IsLocked();
 		}
 
-		public Boolean FixupParentStatus(TreeNode node, UIExtension.TaskIcon taskIcons)
+		public Boolean FixupParentalStatus(int nodeCount, UIExtension.TaskIcon taskIcons)
 		{
             bool wasParent = m_IsParent;
 
-			if (node.Nodes.Count == 0)
+			if (nodeCount == 0)
 			{
-				UInt32 taskId = Convert.ToUInt32(node.Name);
-
-				if (!m_HasIcon && taskIcons.Get(taskId))
-					m_IsParent = true;
+                m_IsParent = (!m_HasIcon && taskIcons.Get(m_TaskID));
 			}
 			else
 			{
@@ -545,25 +542,24 @@ namespace MindMapUIExtension
 
 			if (e.targetParent.node != prevParentNode)
 			{
-                if (FixupParentStatus(e.targetParent.node))
-                    RedrawNode(e.targetParent.node, false);
+                // Fixup parent states
+                // Note: our tree nodes haven't been moved yet but 
+                // the application will have updated it's data structures
+                // so we have to account for this in the node count passed
+                var targetParentItem = TaskItem(e.targetParent.node);
 
-                if (FixupParentStatus(prevParentNode))
-                    RedrawNode(prevParentNode, false);
+                if (targetParentItem != null)
+                    targetParentItem.FixupParentalStatus((e.targetParent.node.Nodes.Count + 1), m_TaskIcons);
+                
+                var prevParentItem = TaskItem(prevParentNode);
+
+                if (prevParentItem != null)
+                    prevParentItem.FixupParentalStatus((prevParentNode.Nodes.Count - 1), m_TaskIcons);
 			}
 
 			return true; // We handled it
 		}
 
-		private Boolean FixupParentStatus(TreeNode node)
-		{
-            if (node == null)
-                return false;
-
-			// else
-            return TaskItem(node).FixupParentStatus(node, m_TaskIcons);
-		}
-		
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 												NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
 		{
