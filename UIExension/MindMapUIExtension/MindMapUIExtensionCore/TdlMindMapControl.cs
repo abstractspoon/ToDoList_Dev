@@ -475,7 +475,7 @@ namespace MindMapUIExtension
 			}
 
 			// Restore expanded state
-			if (expandedIDs != null)
+			if ((expandedIDs != null) && (expandedIDs.Count != 0))
 				SetExpandedItems(expandedIDs);
 			else
 				rootNode.Expand();
@@ -491,7 +491,9 @@ namespace MindMapUIExtension
 			if ((node != null) && node.IsExpanded)
 			{
 				expandedIDs = new List<UInt32>();
-				expandedIDs.Add(UniqueID(node));
+    
+                if (!IsRoot(node))
+    				expandedIDs.Add(UniqueID(node));
 
 				foreach (TreeNode child in node.Nodes)
 				{
@@ -711,7 +713,7 @@ namespace MindMapUIExtension
 
 			TreeNode node = HitTestPositions(e.Location);
 
-			if ((node != SelectedNode) || IsRoot(node))
+			if ((node == null) || (node != SelectedNode) || IsRoot(node))
 				return;
 
 			if (HitTestExpansionButton(node, e.Location))
