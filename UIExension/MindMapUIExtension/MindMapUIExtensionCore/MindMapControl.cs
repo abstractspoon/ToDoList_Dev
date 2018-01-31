@@ -1750,7 +1750,7 @@ namespace MindMapUIExtension
 				Update();
 		}
 
-		private void RedrawNode(TreeNode node, bool update = true)
+		protected void RedrawNode(TreeNode node, bool update = true)
 		{
 			Invalidate(GetItemDrawRect(Item(node).ItemBounds));
 
