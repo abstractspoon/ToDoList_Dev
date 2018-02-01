@@ -109,9 +109,9 @@ Boolean TaskList::IsCustomAttributeEnabled(int nIndex)
 String^ TaskList::GetCustomAttributeValue(int nIndex, String^ sItem)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : 
-		(m_pTaskList ? m_pTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : L""));
+						(m_pTaskList ? m_pTaskList->GetCustomAttributeValue(nIndex, MS(sItem)) : L""));
 
-return gcnew String(szValue);
+	return gcnew String(szValue);
 }
 
 UInt32 TaskList::GetTaskCount()
@@ -553,15 +553,15 @@ Boolean Task::GetRecurrence()
 Boolean Task::HasAttribute(String^ sAttrib)
 {
 	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : 
-		(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : false));
+			(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, MS(sAttrib)) : false));
 }
 
 String^ Task::GetAttribute(String^ sAttrib)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : 
-		(m_pTaskList ? m_pTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : L""));
+			(m_pTaskList ? m_pTaskList->GetTaskAttribute(m_hTask, MS(sAttrib)) : L""));
 
-return gcnew String(szValue);
+	return gcnew String(szValue);
 }
 
 String^ Task::GetCustomAttributeData(String^ sID)
@@ -575,9 +575,9 @@ String^ Task::GetCustomAttributeData(String^ sID)
 String^ Task::GetMetaData(String^ sKey)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : 
-		(m_pTaskList ? m_pTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : L""));
+						(m_pTaskList ? m_pTaskList->GetTaskMetaData(m_hTask, MS(sKey)) : L""));
 
-return gcnew String(szValue);
+	return gcnew String(szValue);
 }
 
 // TODO
