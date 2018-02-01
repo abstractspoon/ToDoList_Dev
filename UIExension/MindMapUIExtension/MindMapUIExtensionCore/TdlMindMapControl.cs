@@ -476,9 +476,7 @@ namespace MindMapUIExtension
 			}
 
 			// Restore expanded state
-			if ((expandedIDs != null) && (expandedIDs.Count != 0))
-				SetExpandedItems(expandedIDs);
-			else
+			if (!SetExpandedItems(expandedIDs))
 				rootNode.Expand();
 
 			EndUpdate();
@@ -508,15 +506,28 @@ namespace MindMapUIExtension
 			return expandedIDs;
 		}
 
-		protected void SetExpandedItems(List<UInt32> expandedNodes)
+		protected Boolean SetExpandedItems(List<UInt32> expandedNodes)
 		{
+            if (expandedNodes == null)
+                return false;
+
+            if (expandedNodes.Count == 0)
+                return false;
+
+            bool someSucceeded = false;
+
 			foreach (var id in expandedNodes)
 			{
 				var node = FindNode(id);
 
-				if (node != null)
-					node.Expand();
+                if (node != null)
+                {
+                    node.Expand();
+                    someSucceeded = true;
+                }
 			}
+
+            return someSucceeded;
 		}
 
 		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
