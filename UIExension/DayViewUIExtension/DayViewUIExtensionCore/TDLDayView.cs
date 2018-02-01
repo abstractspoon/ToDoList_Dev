@@ -188,6 +188,11 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+        public void GoToToday()
+        {
+            StartDate = DateTime.Now;
+        }
+
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));

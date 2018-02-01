@@ -380,7 +380,7 @@ namespace DayViewUIExtension
 
 		protected void OnGoToToday(object sender, EventArgs e)
 		{
-
+            m_DayView.GoToToday();
 		}
 
 		protected void OnPreferences(object sender, EventArgs e)
