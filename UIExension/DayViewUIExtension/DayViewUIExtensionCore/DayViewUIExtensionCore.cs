@@ -18,6 +18,7 @@ namespace DayViewUIExtension
 		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
+        private String m_HelpID;
 
         [Flags] private enum WeekendDays
         {
@@ -53,10 +54,11 @@ namespace DayViewUIExtension
 
 		// --------------------------------------------------------------------------------------
 
-		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans)
+		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans, String helpID)
 		{
 			m_hwndParent = hwndParent;
 			m_Trans = trans;
+            m_HelpID = helpID;
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new Font(FontName, 8);
@@ -404,7 +406,9 @@ namespace DayViewUIExtension
 
 		protected void OnHelp(object sender, EventArgs e)
 		{
+            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
 
+            notify.NotifyDoHelp(m_HelpID);
 		}
 
 		private void CreateMonthYearCombos()

@@ -110,8 +110,9 @@ BOOL CDayViewUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> helpID = gcnew String(DAYVIEW_GUID);
 
-	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew DayViewUIExtension::DayViewUIExtensionCore(static_cast<IntPtr>(hwndParent), trans.get(), helpID.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -295,7 +296,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 		return false;
 	}
 
-	String^ sWords = gcnew String(pSelect->szWords);
+	msclr::auto_gcroot<String^> sWords = gcnew String(pSelect->szWords);
 
 	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord, pSelect->bFindReplace);
 }

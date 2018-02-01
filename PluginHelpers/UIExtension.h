@@ -137,6 +137,8 @@ namespace Abstractspoon
 
 					bool NotifyEditTaskLabel();
 
+					bool NotifyDoHelp(String^ helpID);
+
 				private:
 					HWND m_hwndParent;
 

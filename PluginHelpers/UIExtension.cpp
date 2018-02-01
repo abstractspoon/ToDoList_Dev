@@ -278,6 +278,11 @@ bool UIExtension::ParentNotify::NotifyEditTaskLabel()
 	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_EDITSELECTEDTASKTITLE, 0, 0));
 }
 
+bool UIExtension::ParentNotify::NotifyDoHelp(String^ helpID)
+{
+	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_DOHELP, 0, (LPARAM)(LPCWSTR)MS(helpID)));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::TaskIcon::TaskIcon(IntPtr hwndParent) : m_hwndParent(NULL), m_hilTaskImages(NULL), m_iImage(-1)
