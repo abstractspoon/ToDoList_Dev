@@ -843,20 +843,54 @@ namespace MindMapUIExtension
             if (item == null)
                 return;
 
-            if (ClientRectangle.Contains(GetItemDrawRect(item.ItemBounds)))
+            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
+
+            if (ClientRectangle.Contains(itemRect))
                 return;
 
-            // Scroll the item into view
-            Point centre = CentrePoint(item.ItemBounds);
+            if (HorizontalScroll.Visible)
+            {
+                int xOffset = 0;
 
-            int scrollX = (centre.X - (ClientRectangle.Width / 2));
-            int scrollY = (centre.Y - (ClientRectangle.Height / 2));
+                if (itemRect.Left < ClientRectangle.Left)
+                {
+                    xOffset = (itemRect.Left - ClientRectangle.Left);
+                }
+                else if (itemRect.Right > ClientRectangle.Right)
+                {
+                    xOffset = (itemRect.Right - ClientRectangle.Right);
+                }
 
-            scrollX = Math.Min(Math.Max(HorizontalScroll.Minimum, scrollX), HorizontalScroll.Maximum);
-            scrollY = Math.Min(Math.Max(VerticalScroll.Minimum, scrollY), VerticalScroll.Maximum);
+                if (xOffset != 0)
+                {
+                    int scrollX = (HorizontalScroll.Value + xOffset);
+                    scrollX = Math.Min(Math.Max(HorizontalScroll.Minimum, scrollX), HorizontalScroll.Maximum);
+  
+                    HorizontalScroll.Value = scrollX;
+                }
+            }
 
-            HorizontalScroll.Value = scrollX;
-            VerticalScroll.Value = scrollY;
+            if (VerticalScroll.Visible)
+            {
+                int yOffset = 0;
+
+                if (itemRect.Top < ClientRectangle.Top)
+                {
+                    yOffset = (itemRect.Top - ClientRectangle.Top);
+                }
+                else if (itemRect.Bottom > ClientRectangle.Bottom)
+                {
+                    yOffset = (itemRect.Bottom - ClientRectangle.Bottom);
+                }
+
+                if (yOffset != 0)
+                {
+                    int scrollY = (VerticalScroll.Value + yOffset);
+                    scrollY = Math.Min(Math.Max(VerticalScroll.Minimum, scrollY), VerticalScroll.Maximum);
+  
+                    VerticalScroll.Value = scrollY;
+                }
+            }
 
             PerformLayout();
             Invalidate();
