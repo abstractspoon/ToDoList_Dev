@@ -342,9 +342,10 @@ namespace MindMapUIExtension
 
 		protected void BeginUpdate()
 		{
-			EnableExpandNotifications(false);
-			EnableSelectionNotifications(false);
 			HoldRedraw = true;
+
+            EnableExpandNotifications(false);
+			EnableSelectionNotifications(false);
 		}
 
 		protected void EndUpdate()
@@ -802,20 +803,16 @@ namespace MindMapUIExtension
                 if (afterSiblingNode != null)
                     insertionPos = (parentNode.Nodes.IndexOf(afterSiblingNode) + 1);
 
-                {
-                    BeginUpdate();
+                BeginUpdate();
 
-                    draggedNode.Remove();
+                draggedNode.Remove();
 
-                    parentNode.Nodes.Insert(insertionPos, draggedNode);
-                    parentNode.Expand();
+                parentNode.Nodes.Insert(insertionPos, draggedNode);
+                parentNode.Expand();
 
-                    SelectedNode = draggedNode;
+                SelectedNode = draggedNode;
 
-                    EndUpdate();
-                }
-
-                RecalculatePositions();
+                EndUpdate();
 			}
 		}
 
@@ -1314,8 +1311,8 @@ namespace MindMapUIExtension
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
 
 			this.AutoScrollMinSize = graphRect.Size;
-            
-			RecalculateDrawOffset();
+
+            RecalculateDrawOffset();
 			Invalidate();
 		}
 
