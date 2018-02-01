@@ -108,7 +108,13 @@ namespace MindMapUIExtension
 
         public void SetUITheme(UITheme theme)
         {
-			m_MindMap.ConnectionColor = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+            var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+
+            // Make sure it's dark enough
+            if (color.GetBrightness() > 0.5)
+                color = ColorUtil.DarkerDrawing(color, (float)(color.GetBrightness() - 0.5));
+
+            m_MindMap.ConnectionColor = color;
         }
 
         public void SetReadOnly(bool bReadOnly)
