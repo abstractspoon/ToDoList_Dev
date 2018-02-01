@@ -173,11 +173,11 @@ namespace MindMapUIExtension
         
         public new void SetFont(String fontName, int fontSize)
         {
-            if ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize))
-            {
-                m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
-                RefreshItemBoldState(RootNode, true);
-            }
+//             if ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize))
+//             {
+//                 m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+//                 RefreshItemBoldState(RootNode, true);
+//             }
             
             base.SetFont(fontName, fontSize);
         }
