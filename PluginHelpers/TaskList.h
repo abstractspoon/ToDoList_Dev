@@ -74,6 +74,7 @@ namespace Abstractspoon
 				Boolean HasIcon();
 
 				UInt32 GetID();
+				UInt32 GetParentID();
 				UInt32 GetColor();
 				UInt32 GetPosition();
 				UInt32 GetPriority();

@@ -686,10 +686,6 @@ namespace MindMapUIExtension
 		{
 			base.OnFontChanged(e);
 
-			// The Tree collapses when the font is changed so we
-			// cache the selected item for restoration after
-			//UInt32 selID = (IsEmpty() ? 0 : Convert.ToUInt32(SelectedNode.Name, 10));
-
 			m_TreeView.Font = this.Font;
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
@@ -698,9 +694,6 @@ namespace MindMapUIExtension
 
 			// Make even height
 			m_TreeView.ItemHeight = (itemHeight + (itemHeight % 2) + ItemVertSeparation);
-
-			//if (selID != 0)
-			//	SetSelectedNode(selID);
 
             RecalculatePositions();
 		}
@@ -866,6 +859,7 @@ namespace MindMapUIExtension
             VerticalScroll.Value = scrollY;
 
             PerformLayout();
+            Invalidate();
         }
 
 		private bool IsChildNode(TreeNode parent, TreeNode child)
@@ -1530,7 +1524,7 @@ namespace MindMapUIExtension
 				// Make sure selection rect is long enough
 				if (drawState != NodeDrawState.None)
 				{
-					int textWidth = ((int)graphics.MeasureString(node.Text, m_TreeView.Font).Width);
+					int textWidth = ((int)graphics.MeasureString(node.Text, GetNodeFont(node)).Width);
 					textWidth += GetExtraWidth(node);
 
 					int xOffset = (drawRect.Width - textWidth - (2 * LabelPadding));
@@ -1544,7 +1538,7 @@ namespace MindMapUIExtension
 					}
 				}
 
-				DrawNodeLabel(graphics, node.Text, drawRect, drawState, GetDrawPos(node), item.ItemData);
+				DrawNodeLabel(graphics, node.Text, drawRect, drawState, GetDrawPos(node), GetNodeFont(node), item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1580,7 +1574,8 @@ namespace MindMapUIExtension
 		}
 
 		virtual protected void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-											 NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
+											 NodeDrawState nodeState, NodeDrawPos nodePos, 
+                                             Font nodeFont, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
             graphics.FillRectangle(SystemBrushes.Window, rect);
@@ -1605,8 +1600,16 @@ namespace MindMapUIExtension
 
 			var format = DefaultLabelFormat(nodePos, (nodeState != NodeDrawState.None));
 
-			graphics.DrawString(label, m_TreeView.Font, textColor, rect, format);
+			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
+
+        protected Font GetNodeFont(TreeNode node)
+        {
+            if (node.NodeFont != null)
+                return node.NodeFont;
+
+            return m_TreeView.Font;
+        }
 
         private Rectangle CalculateInsertionMarkerRect(TreeNode node, DropPos dropPos)
         {

@@ -15,6 +15,7 @@ namespace MindMapUIExtension
 		// Data
 		private String m_Title;
 		private UInt32 m_TaskID;
+        private UInt32 m_ParentID;
 		private Color m_TextColor;
 		private Boolean m_HasIcon;
 		private Boolean m_IsFlagged;
@@ -28,6 +29,7 @@ namespace MindMapUIExtension
 		{
 			m_Title = label;
 			m_TaskID = 0;
+            m_ParentID = 0;
 			m_TextColor = new Color();
 			m_HasIcon = false;
 			m_IsFlagged = false;
@@ -40,6 +42,7 @@ namespace MindMapUIExtension
 		{
 			m_Title = task.GetTitle();
 			m_TaskID = task.GetID();
+			m_ParentID = task.GetParentID();
 			m_TextColor = task.GetTextDrawingColor();
 			m_HasIcon = (task.GetIcon().Length > 0);
 			m_IsFlagged = task.IsFlagged();
@@ -47,22 +50,27 @@ namespace MindMapUIExtension
             m_IsDone = (task.IsDone() || task.IsGoodAsDone());
 			m_IsLocked = task.IsLocked();
 		}
-
-		public Boolean FixupParentalStatus(int nodeCount, UIExtension.TaskIcon taskIcons)
+        
+		public void FixupParentID(MindMapTaskItem parent)
 		{
+            m_ParentID = parent.ID;
+		}
+
+        public Boolean FixupParentalStatus(int nodeCount, UIExtension.TaskIcon taskIcons)
+        {
             bool wasParent = m_IsParent;
 
-			if (nodeCount == 0)
-			{
+            if (nodeCount == 0)
+            {
                 m_IsParent = (!m_HasIcon && taskIcons.Get(m_TaskID));
-			}
-			else
-			{
-				m_IsParent = true;
-			}
+            }
+            else
+            {
+                m_IsParent = true;
+            }
 
             return (m_IsParent != wasParent);
-		}
+        }
 
 		public override string ToString() 
 		{
@@ -87,6 +95,7 @@ namespace MindMapUIExtension
 		}
 		
 		public UInt32 ID { get { return m_TaskID; } }
+        public UInt32 ParentID { get { return m_ParentID; } }
 		public Color TextColor { get { return m_TextColor; } }
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
@@ -141,6 +150,7 @@ namespace MindMapUIExtension
 		private Boolean m_IgnoreMouseClick;
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
+        private Font m_BoldLabelFont;
 
 		// -------------------------------------------------------------------------
 
@@ -270,7 +280,9 @@ namespace MindMapUIExtension
 		{
 			BeginUpdate();
 
-			var node = FindNode(taskId);
+            var node = FindNode(taskId);
+   			var prevParentNode = node.Parent;
+
 			var destParentNode = FindNode(destParentId);
 			var destPrevSiblingNode = FindNode(destPrevSiblingId);
 
@@ -288,6 +300,12 @@ namespace MindMapUIExtension
 				destPos = (destParentNode.Nodes.IndexOf(destPrevSiblingNode) + 1);
 
 			destParentNode.Nodes.Insert(destPos, node);
+
+            FixupParentalStatus(destParentNode, 1);
+            FixupParentalStatus(prevParentNode, -1);
+
+            FixupParentID(node, destParentNode);
+
 			SelectedNode = node;
 
 			EndUpdate();
@@ -349,6 +367,35 @@ namespace MindMapUIExtension
 		
 		
 		// Internal ------------------------------------------------------------
+
+        protected override void OnFontChanged(EventArgs e)
+        {
+            m_BoldLabelFont = new Font(this.Font, FontStyle.Bold);
+
+	        RefreshItemBoldState(RootNode, true);
+
+            base.OnFontChanged(e);
+        }
+
+        void RefreshItemBoldState(TreeNode node, Boolean andChildren)
+        {
+            var taskItem = TaskItem(node);
+
+            if (taskItem == null)
+                return;
+
+            if ((taskItem.ID != 0) && (taskItem.ParentID == 0))
+                node.NodeFont = m_BoldLabelFont;
+            else
+                node.NodeFont = null;
+
+            // children
+            if (andChildren)
+            {
+                foreach (TreeNode childNode in node.Nodes)
+                    RefreshItemBoldState(childNode, true);
+            }
+        }
 
 		protected MindMapTaskItem TaskItem(TreeNode node)
 		{
@@ -475,6 +522,8 @@ namespace MindMapUIExtension
 				AddTaskToTree(task, rootNode);
 			}
 
+            RefreshItemBoldState(RootNode, true);
+
 			// Restore expanded state
 			if (!SetExpandedItems(expandedIDs))
 				rootNode.Expand();
@@ -557,22 +606,37 @@ namespace MindMapUIExtension
                 // Note: our tree nodes haven't been moved yet but 
                 // the application will have updated it's data structures
                 // so we have to account for this in the node count passed
-                var targetParentItem = TaskItem(e.targetParent.node);
+                FixupParentalStatus(e.targetParent.node, 1);
+                FixupParentalStatus(prevParentNode, -1);
 
-                if (targetParentItem != null)
-                    targetParentItem.FixupParentalStatus((e.targetParent.node.Nodes.Count + 1), m_TaskIcons);
-                
-                var prevParentItem = TaskItem(prevParentNode);
-
-                if (prevParentItem != null)
-                    prevParentItem.FixupParentalStatus((prevParentNode.Nodes.Count - 1), m_TaskIcons);
+                FixupParentID(e.dragged.node, e.targetParent.node);
 			}
 
-			return true; // We handled it
+			return true;
 		}
 
+        void FixupParentalStatus(TreeNode parentNode, int nodeCountOffset)
+        {
+            var parentItem = TaskItem(parentNode);
+
+            if (parentItem != null)
+                parentItem.FixupParentalStatus((parentNode.Nodes.Count + nodeCountOffset), m_TaskIcons);
+        }
+
+        void FixupParentID(TreeNode node, TreeNode parent)
+        {
+            var taskItem = TaskItem(node);
+
+            if (taskItem != null)
+            {
+                taskItem.FixupParentID(TaskItem(parent));
+                RefreshItemBoldState(node, false);
+            }
+        }
+
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
-												NodeDrawState nodeState, NodeDrawPos nodePos, Object itemData)
+											  NodeDrawState nodeState, NodeDrawPos nodePos,
+                                              Font nodeFont, Object itemData)
 		{
 			Brush textColor = SystemBrushes.WindowText;
 			Brush backColor = null;
@@ -634,7 +698,7 @@ namespace MindMapUIExtension
 			// Draw Text
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
-			graphics.DrawString(label, this.Font, textColor, rect, format);
+			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
 
 		protected Boolean NodeHasIcon(TreeNode node)

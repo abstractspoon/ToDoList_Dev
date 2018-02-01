@@ -289,6 +289,11 @@ UInt32 Task::GetID()
 	return GETTASKVAL(GetTaskID, 0);
 }
 
+UInt32 Task::GetParentID()
+{
+	return GETTASKVAL(GetTaskParentID, 0);
+}
+
 UInt32 Task::GetColor()
 {
 	return GETTASKVAL(GetTaskColor, 0);
