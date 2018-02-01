@@ -139,6 +139,7 @@ namespace WordCloudUIExtension
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
 					// Rebuild
+                    m_Items.Clear();
 					break;
 					
 				case UIExtension.UpdateType.New:
