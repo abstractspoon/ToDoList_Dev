@@ -189,8 +189,11 @@ bool UIExtension::ParentNotify::NotifyMod(String^ sCustAttribID, String^ value)
 {
 	IUITASKMOD mod = { IUI_CUSTOMATTRIB, 0 };
 
-	mod.szValue = MS(value);
-	mod.szCustomAttribID = MS(sCustAttribID);
+	MarshalledString msValue(value);
+	mod.szValue = msValue;
+
+	MarshalledString msCustID(sCustAttribID);
+	mod.szCustomAttribID = msCustID;
 
 	return DoNotify(&mod, 1);
 }
@@ -198,7 +201,9 @@ bool UIExtension::ParentNotify::NotifyMod(String^ sCustAttribID, String^ value)
 bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, String^ value)
 {
 	IUITASKMOD mod = { UIExtension::Map(nAttribute), 0 };
-	mod.szValue = MS(value);
+
+	MarshalledString msValue(value);
+	mod.szValue = msValue;
 
 	return DoNotify(&mod, 1);
 }

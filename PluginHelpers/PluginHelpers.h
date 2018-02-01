@@ -31,12 +31,10 @@ namespace Abstractspoon
 				LPCWSTR m_wszGlobal;
 			};
 
-
+			typedef MarshalledString MS;
 		}
 	}
 }
-
-#define MS(str) Abstractspoon::Tdl::PluginHelpers::MarshalledString(str)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
