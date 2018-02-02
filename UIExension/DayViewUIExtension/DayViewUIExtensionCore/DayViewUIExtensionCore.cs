@@ -306,10 +306,11 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
+            // Day view always comes last
 			CreateToolbar();
-			CreateWeekLabel(); // create before day view
+			CreateWeekLabel();
 			CreateMonthYearCombos();
-			CreateDayView();
+            CreateDayView();
 		}
 
 		private void CreateDayView()
@@ -325,8 +326,6 @@ namespace DayViewUIExtension
             m_DayView.SetFont(FontName, 8);
 
 			Controls.Add(m_DayView);
-
-            m_DayView.Focus();
 		}
 
 		private void CreateWeekLabel()
@@ -450,10 +449,13 @@ namespace DayViewUIExtension
 
         public new Boolean Focus()
         {
-            if (Focused)
+            if (m_DayView.Focused)
                 return false;
 
             // else
+            if (!m_DayView.CanFocus)
+                return false;
+
             return m_DayView.Focus();
         }
 

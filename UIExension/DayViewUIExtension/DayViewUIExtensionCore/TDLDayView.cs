@@ -522,6 +522,18 @@ namespace DayViewUIExtension
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
+
+            Invalidate();
+            Update();
         }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+
+            Invalidate();
+            Update();
+        }
+
 	}
 }

@@ -35,7 +35,7 @@ namespace Calendar
     }
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayView : UserControl
+	public class DayView : Control
     {
         #region Variables
 
