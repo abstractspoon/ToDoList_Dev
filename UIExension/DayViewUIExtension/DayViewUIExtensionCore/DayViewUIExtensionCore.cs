@@ -294,8 +294,30 @@ namespace DayViewUIExtension
 			// all else
 			return false;
 		}
-	
-		// PRIVATE ------------------------------------------------------------------------------
+
+        public new Boolean Focus()
+        {
+            if (Focused)
+                return false;
+
+            return m_DayView.Focus();
+        }
+
+        public new Boolean Focused
+        {
+            get
+            {
+                foreach (Control ctrl in Controls)
+                {
+                    if (ctrl.CanFocus && ctrl.Focused)
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
+		// Internal ------------------------------------------------------------------------------
 
         protected override void Dispose(bool disposing)
         {
@@ -437,7 +459,13 @@ namespace DayViewUIExtension
 			Controls.Add(m_YearCombo);
 		}
 
-		// IUIExtension ------------------------------------------------------------------
+        private void RestoreSelectedItem()
+        {
+            // Restore the selection if it is present in this week
+			m_DayView.SelectTask(m_SelectedTaskID, true);
+        }
+
+		// Message handlers ------------------------------------------------------------------
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
             Rectangle Border = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
@@ -447,26 +475,11 @@ namespace DayViewUIExtension
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
-        public new Boolean Focus()
+        protected override void OnGotFocus(EventArgs e)
         {
-            if (m_DayView.Focused)
-                return false;
+            base.OnGotFocus(e);
 
-            return m_DayView.Focus();
-        }
-
-        public new Boolean Focused
-        {
-            get 
-            {
-                foreach (Control ctrl in Controls)
-                {
-                    if (ctrl.CanFocus && ctrl.Focused)
-                        return true;
-                }
-
-                return false; 
-            }
+            m_DayView.Focus();
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -517,12 +530,6 @@ namespace DayViewUIExtension
 					break;
 			}
 		}
-
-        private void RestoreSelectedItem()
-        {
-            // Restore the selection if it is present in this week
-			m_DayView.SelectTask(m_SelectedTaskID, true);
-        }
 
 		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
