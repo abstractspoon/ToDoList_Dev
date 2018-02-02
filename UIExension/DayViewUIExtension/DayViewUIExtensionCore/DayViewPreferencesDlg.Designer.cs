@@ -52,28 +52,8 @@
             this.panel1.Location = new System.Drawing.Point(9, 10);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(432, 214);
+            this.panel1.Size = new System.Drawing.Size(501, 214);
             this.panel1.TabIndex = 0;
-            // 
-            // m_HideTasksSpanningDays
-            // 
-            this.m_HideTasksSpanningDays.AutoSize = true;
-            this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(13, 59);
-            this.m_HideTasksSpanningDays.Name = "m_HideTasksSpanningDays";
-            this.m_HideTasksSpanningDays.Size = new System.Drawing.Size(334, 17);
-            this.m_HideTasksSpanningDays.TabIndex = 1;
-            this.m_HideTasksSpanningDays.Text = "Hide tasks where Start or Due dates do not fall on the same day";
-            this.m_HideTasksSpanningDays.UseVisualStyleBackColor = true;
-            // 
-            // m_HideTasksSpanningWeekends
-            // 
-            this.m_HideTasksSpanningWeekends.AutoSize = true;
-            this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(13, 36);
-            this.m_HideTasksSpanningWeekends.Name = "m_HideTasksSpanningWeekends";
-            this.m_HideTasksSpanningWeekends.Size = new System.Drawing.Size(384, 17);
-            this.m_HideTasksSpanningWeekends.TabIndex = 1;
-            this.m_HideTasksSpanningWeekends.Text = "Hide tasks where either Start or Due date does not fall in the current week";
-            this.m_HideTasksSpanningWeekends.UseVisualStyleBackColor = true;
             // 
             // m_HideTasksWithoutTimes
             // 
@@ -82,16 +62,36 @@
             this.m_HideTasksWithoutTimes.CheckState = System.Windows.Forms.CheckState.Checked;
             this.m_HideTasksWithoutTimes.Location = new System.Drawing.Point(13, 13);
             this.m_HideTasksWithoutTimes.Name = "m_HideTasksWithoutTimes";
-            this.m_HideTasksWithoutTimes.Size = new System.Drawing.Size(276, 17);
+            this.m_HideTasksWithoutTimes.Size = new System.Drawing.Size(490, 17);
             this.m_HideTasksWithoutTimes.TabIndex = 0;
-            this.m_HideTasksWithoutTimes.Text = "Hide all tasks whose Start and Due times are not set";
+            this.m_HideTasksWithoutTimes.Text = "Hid&e tasks whose Start and Due times are not set";
             this.m_HideTasksWithoutTimes.UseVisualStyleBackColor = true;
+            // 
+            // m_HideTasksSpanningWeekends
+            // 
+            this.m_HideTasksSpanningWeekends.AutoSize = true;
+            this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(13, 36);
+            this.m_HideTasksSpanningWeekends.Name = "m_HideTasksSpanningWeekends";
+            this.m_HideTasksSpanningWeekends.Size = new System.Drawing.Size(490, 17);
+            this.m_HideTasksSpanningWeekends.TabIndex = 1;
+            this.m_HideTasksSpanningWeekends.Text = "Hi&de tasks whose Start or Due date does not fall in the current week";
+            this.m_HideTasksSpanningWeekends.UseVisualStyleBackColor = true;
+            // 
+            // m_HideTasksSpanningDays
+            // 
+            this.m_HideTasksSpanningDays.AutoSize = true;
+            this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(13, 59);
+            this.m_HideTasksSpanningDays.Name = "m_HideTasksSpanningDays";
+            this.m_HideTasksSpanningDays.Size = new System.Drawing.Size(490, 17);
+            this.m_HideTasksSpanningDays.TabIndex = 1;
+            this.m_HideTasksSpanningDays.Text = "&Hide tasks whose Start and Due dates do not fall on the same day";
+            this.m_HideTasksSpanningDays.UseVisualStyleBackColor = true;
             // 
             // BtnCancel
             // 
             this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.BtnCancel.Location = new System.Drawing.Point(366, 231);
+            this.BtnCancel.Location = new System.Drawing.Point(435, 231);
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(75, 23);
             this.BtnCancel.TabIndex = 1;
@@ -102,7 +102,7 @@
             // 
             this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.BtnOK.Location = new System.Drawing.Point(284, 231);
+            this.BtnOK.Location = new System.Drawing.Point(353, 231);
             this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
             this.BtnOK.Name = "BtnOK";
             this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -115,7 +115,7 @@
             this.AcceptButton = this.BtnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(451, 261);
+            this.ClientSize = new System.Drawing.Size(520, 261);
             this.Controls.Add(this.BtnOK);
             this.Controls.Add(this.BtnCancel);
             this.Controls.Add(this.panel1);
