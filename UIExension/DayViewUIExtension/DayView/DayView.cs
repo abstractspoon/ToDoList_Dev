@@ -35,7 +35,7 @@ namespace Calendar
     }
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class DayView : Control
+	public class DayView : UserControl
     {
         #region Variables
 
@@ -383,6 +383,11 @@ namespace Calendar
 
 				Refresh();
 			}
+        }
+
+        public UInt32 SelectedAppointmentId
+        {
+            get { return ((selectedAppointment == null) ? 0 : selectedAppointment.Id); }
         }
 
         private List<System.DayOfWeek> weekendDays = new List<System.DayOfWeek> { System.DayOfWeek.Saturday, System.DayOfWeek.Sunday };

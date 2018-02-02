@@ -325,6 +325,8 @@ namespace DayViewUIExtension
             m_DayView.SetFont(FontName, 8);
 
 			Controls.Add(m_DayView);
+
+            m_DayView.Focus();
 		}
 
 		private void CreateWeekLabel()
@@ -446,12 +448,14 @@ namespace DayViewUIExtension
             System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
         }
 
-		protected override void OnGotFocus(EventArgs e)
-		{
-			base.OnGotFocus(e);
+        public new Boolean Focus()
+        {
+            if (Focused)
+                return false;
 
-			m_DayView.Focus();
-		}
+            // else
+            return m_DayView.Focus();
+        }
 
         protected override void OnSizeChanged(EventArgs e)
         {

@@ -107,7 +107,6 @@ namespace DayViewUIExtension
         private TDLRenderer m_Renderer;
 
 		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
-		private System.Windows.Forms.Timer m_RedrawTimer;
 
 		// ----------------------------------------------------------------
 
@@ -115,7 +114,6 @@ namespace DayViewUIExtension
         {
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
-			m_RedrawTimer = new System.Windows.Forms.Timer();
 
             InitializeComponent();
         }
@@ -302,12 +300,15 @@ namespace DayViewUIExtension
 						UIExtension.UpdateType type,
 						System.Collections.Generic.HashSet<UIExtension.TaskAttribute> attribs)
 		{
+            UInt32 selTaskId = SelectedAppointmentId;
+
 			switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
 					// Rebuild
 					m_Items.Clear();
+                    SelectedAppointment = null;
 					break;
 
 				case UIExtension.UpdateType.New:
@@ -322,8 +323,13 @@ namespace DayViewUIExtension
 				task = task.GetNextTask();
 
 			SelectionStart = SelectionEnd;
-			StartUpdateTimer();
-		}
+
+            if ((selTaskId != 0) && (SelectedAppointment != null))
+                SelectTask(selTaskId, false);
+
+            AdjustScrollbar();
+            Invalidate();
+        }
 
 		private bool ProcessTaskUpdate(Task task,
 									   UIExtension.UpdateType type,
@@ -469,22 +475,6 @@ namespace DayViewUIExtension
             return time;
         }
 
-		protected void StartUpdateTimer()
-		{
-			m_RedrawTimer.Tick += OnUpdateTimer;
-			m_RedrawTimer.Interval = 10;
-			m_RedrawTimer.Start();
-		}
-
-		protected void OnUpdateTimer(object sender, EventArgs e)
-		{
-			m_RedrawTimer.Stop();
-
-			AdjustScrollbar();
-			Invalidate();
-			Update();
-		}
-
 		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
 		{
 			// Our custom gripper bar
@@ -528,5 +518,10 @@ namespace DayViewUIExtension
 
 			args.Appointments = appts;
 		}
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+        }
 	}
 }
