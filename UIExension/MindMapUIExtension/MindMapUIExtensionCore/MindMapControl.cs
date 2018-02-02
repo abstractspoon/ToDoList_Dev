@@ -128,6 +128,7 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor = Color.Magenta;
+        private Boolean m_FirstPaint;
 
         // Public ------------------------------------------------------------------------
 
@@ -138,6 +139,7 @@ namespace MindMapUIExtension
         {
             m_DrawOffset = new Point(0, 0);
             m_HoldRedraw = false;
+            m_FirstPaint = true;
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
 
@@ -366,6 +368,12 @@ namespace MindMapUIExtension
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+            if (m_FirstPaint && (m_TreeView.Nodes.Count != 0) && !IsRoot(SelectedNode))
+            {
+                m_FirstPaint = false;
+                EnsureItemVisible(SelectedItem);
+            }
+
             if (!m_HoldRedraw)
             {
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
