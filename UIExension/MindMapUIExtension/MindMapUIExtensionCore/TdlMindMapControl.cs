@@ -173,11 +173,11 @@ namespace MindMapUIExtension
         
         public new void SetFont(String fontName, int fontSize)
         {
-//             if ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize))
-//             {
-//                 m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
-//                 RefreshItemBoldState(RootNode, true);
-//             }
+            if ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize))
+            {
+                m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+                RefreshItemBoldState(RootNode, true);
+            }
             
             base.SetFont(fontName, fontSize);
         }
@@ -394,6 +394,16 @@ namespace MindMapUIExtension
                 newFont = null;
 
             bool fontChange = (newFont != curFont);
+
+            if (fontChange)
+            {
+                node.NodeFont = newFont;
+
+                // Need to re-set text for the tree to properly
+                // recalculate bold item lengths
+                if (newFont == m_BoldLabelFont)
+                    node.Text = taskItem.ToString();
+            }
             
             // children
             if (andChildren)

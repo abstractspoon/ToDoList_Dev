@@ -165,6 +165,7 @@ namespace MindMapUIExtension
 			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 			this.SetStyle(ControlStyles.UserPaint, true);
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.ResizeRedraw, true);
 		}
 
 		public Boolean HoldRedraw
@@ -279,16 +280,22 @@ namespace MindMapUIExtension
 					return IsAnyNodeCollapsed(RootNode.Nodes);
 
 				case ExpandNode.ExpandSelection:
-					return !SelectedNode.IsExpanded;
+                    if (SelectedNode != null)
+					    return !SelectedNode.IsExpanded;
+                    break;
 
 				case ExpandNode.ExpandSelectionAll:
-					return !SelectedNode.IsExpanded || IsAnyNodeCollapsed(SelectedNode.Nodes);
+                    if (SelectedNode != null)
+					    return (!SelectedNode.IsExpanded || IsAnyNodeCollapsed(SelectedNode.Nodes));
+                    break;
 					
 				case ExpandNode.CollapseAll:
 					return IsAnyNodeExpanded(RootNode.Nodes);
 
 				case ExpandNode.CollapseSelection:
-					return (!IsRoot(SelectedNode) && SelectedNode.IsExpanded);
+                    if (SelectedNode != null)
+					    return (!IsRoot(SelectedNode) && SelectedNode.IsExpanded);
+                    break;
 			}
 
 			return false;
@@ -356,6 +363,7 @@ namespace MindMapUIExtension
 
 			EnableExpandNotifications(true);
 			EnableSelectionNotifications(true);
+
 			RecalculatePositions();
 		}
 
@@ -1559,25 +1567,23 @@ namespace MindMapUIExtension
 
 				Rectangle drawRect = GetItemLabelRect(node);
 				NodeDrawState drawState = GetDrawState(node);
+                NodeDrawPos drawPos = GetDrawPos(node);
 
 				// Make sure selection rect is long enough
-				if (drawState != NodeDrawState.None)
+				if ((drawPos != NodeDrawPos.Root) && (drawState != NodeDrawState.None))
 				{
 					int textWidth = ((int)graphics.MeasureString(node.Text, GetNodeFont(node)).Width);
 					textWidth += GetExtraWidth(node);
 
 					int xOffset = (drawRect.Width - textWidth - (2 * LabelPadding));
 
-					if (xOffset < 0)
-					{
-						if (item.IsFlipped)
-							drawRect.X += xOffset;
+					if (item.IsFlipped)
+						drawRect.X += xOffset;
 
-						drawRect.Width -= xOffset;
-					}
+					drawRect.Width -= xOffset;
 				}
 
-				DrawNodeLabel(graphics, node.Text, drawRect, drawState, GetDrawPos(node), GetNodeFont(node), item.ItemData);
+				DrawNodeLabel(graphics, node.Text, drawRect, drawState, drawPos, GetNodeFont(node), item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -1604,10 +1610,20 @@ namespace MindMapUIExtension
 			format.LineAlignment = StringAlignment.Center;
 			format.Trimming = StringTrimming.None;
 
-			if (nodePos == NodeDrawPos.Root)
-				format.Alignment = StringAlignment.Center;
-			else
-				format.Alignment = StringAlignment.Near;
+            switch (nodePos)
+            {
+                case NodeDrawPos.Root:
+                    format.Alignment = StringAlignment.Center;
+                    break;
+
+                case NodeDrawPos.Right:
+                    format.Alignment = StringAlignment.Near;
+                    break;
+
+                case NodeDrawPos.Left:
+                    format.Alignment = StringAlignment.Far;
+                    break;
+            }
 
 			return format;
 		}
