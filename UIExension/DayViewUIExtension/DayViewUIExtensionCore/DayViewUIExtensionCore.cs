@@ -452,11 +452,21 @@ namespace DayViewUIExtension
             if (m_DayView.Focused)
                 return false;
 
-            // else
-            if (!m_DayView.CanFocus)
-                return false;
-
             return m_DayView.Focus();
+        }
+
+        public new Boolean Focused
+        {
+            get 
+            {
+                foreach (Control ctrl in Controls)
+                {
+                    if (ctrl.CanFocus && ctrl.Focused)
+                        return true;
+                }
+
+                return false; 
+            }
         }
 
         protected override void OnSizeChanged(EventArgs e)

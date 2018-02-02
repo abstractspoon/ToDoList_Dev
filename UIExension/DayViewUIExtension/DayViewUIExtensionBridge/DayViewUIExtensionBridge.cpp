@@ -246,8 +246,10 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
-	case IUI_SETFOCUS:
 		return true;
+
+	case IUI_SETFOCUS:
+		return !m_wnd->Focused;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:
