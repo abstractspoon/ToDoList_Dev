@@ -826,9 +826,10 @@ namespace MindMapUIExtension
                 parentNode.Nodes.Insert(insertionPos, draggedNode);
                 parentNode.Expand();
 
-                SelectedNode = draggedNode;
-
                 EndUpdate();
+
+                // Must come after EndUpdate
+                SelectedNode = draggedNode;
 			}
 		}
 
