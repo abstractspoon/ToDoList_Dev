@@ -12,21 +12,36 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public ref class ColorUtil
+			namespace ColorUtil
 			{
-			public:
-				static Windows::Media::Color LighterMedia(Windows::Media::Color^ color, float amount);
-				static Windows::Media::Color DarkerMedia(Windows::Media::Color^ color, float amount);
 
-				static Drawing::Color LighterDrawing(Drawing::Color^ color, float amount);
-				static Drawing::Color DarkerDrawing(Drawing::Color^ color, float amount);
+				public ref class MediaColor
+				{
+				public:
+					static Windows::Media::Color GetColor(UInt32 rgbColor);
+					static Windows::Media::Color GetBestTextColor(Windows::Media::Color^ backColor);
+					
+					static Windows::Media::Color SetLuminance(Windows::Media::Color^ color, float luminance);
+					static Windows::Media::Color AdjustLuminance(Windows::Media::Color^ color, float amount);
 
-				static Windows::Media::Color GetMediaColor(UInt32 rgbColor);
-				static Drawing::Color GetDrawingColor(UInt32 rgbColor);
+					static float GetLuminance(Windows::Media::Color^ color);
+				};
 
-				static Windows::Media::Color GetBestTextMediaColor(Windows::Media::Color^ backColor);
-				static Drawing::Color GetBestTextDrawingColor(Drawing::Color^ backColor);
-			};
+				public ref class DrawingColor
+				{
+				public:
+					static Drawing::Color GetColor(UInt32 rgbColor);
+					static Drawing::Color GetBestTextColor(Drawing::Color^ backColor);
+
+					static Drawing::Color AdjustLuminance(Drawing::Color^ color, float amount);
+					static Drawing::Color SetLuminance(Drawing::Color^ color, float luminance);
+
+					static float GetLuminance(Drawing::Color^ color);
+				};
+
+				float GetLuminance(UInt32 rgbColor);
+				UInt32 SetLuminance(UInt32 rgbColor, float luminance);
+			}
 		}
 	}
 }

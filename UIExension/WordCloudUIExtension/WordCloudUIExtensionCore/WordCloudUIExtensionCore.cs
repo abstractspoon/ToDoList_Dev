@@ -15,6 +15,7 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -608,9 +609,9 @@ namespace WordCloudUIExtension
 			Color markerColor;
 
 			if (m_SplitterColor.GetBrightness() > 0.5f)
-				markerColor = ColorUtil.DarkerDrawing(m_SplitterColor, 0.3f);
+				markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.3f);
 			else
-				markerColor = ColorUtil.LighterDrawing(m_SplitterColor, 0.3f);
+				markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, 0.3f);
 
 			using (var brush = new SolidBrush(markerColor))
 				e.Graphics.FillRectangle(brush, markerRect);

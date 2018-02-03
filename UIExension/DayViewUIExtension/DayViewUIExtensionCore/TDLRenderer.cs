@@ -8,6 +8,7 @@ using System.Windows.Forms.VisualStyles;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
@@ -302,19 +303,19 @@ namespace DayViewUIExtension
 				// Recalculate colours
 				Color textColor = taskItem.TaskTextColor;
 				Color borderColor = taskItem.TaskTextColor;
-				Color fillColor = ColorUtil.LighterDrawing(taskItem.TaskTextColor, 0.9f);
+				Color fillColor = DrawingColor.SetLuminance(taskItem.TaskTextColor, 0.95f);
 				Color barColor = taskItem.TaskTextColor;
 
 				if (taskItem.HasTaskTextColor)
 				{
 					if (isSelected)
 					{
-						textColor = ColorUtil.DarkerDrawing(taskItem.TaskTextColor, 0.5f);
+						textColor = DrawingColor.SetLuminance(taskItem.TaskTextColor, 0.3f);
 					}
 					else if (m_TaskColorIsBkgnd && !taskItem.IsDone)
 					{
-						textColor = ((taskItem.TaskTextColor.GetBrightness() > 0.5) ? System.Drawing.Color.Black : System.Drawing.Color.White);
-						borderColor = ColorUtil.DarkerDrawing(taskItem.TaskTextColor, 0.5f);
+						textColor = DrawingColor.GetBestTextColor(taskItem.TaskTextColor);
+						borderColor = DrawingColor.AdjustLuminance(taskItem.TaskTextColor, -0.5f);
 						barColor = taskItem.TaskTextColor;
 						fillColor = taskItem.TaskTextColor;
 					}
@@ -352,7 +353,7 @@ namespace DayViewUIExtension
 
 						if (taskItem.IsLongAppt())
 						{
-							int yCentre = ((rect.Top + rect.Bottom) / 2);
+							int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
 							rectIcon = new Rectangle((rect.Left + 2), (yCentre - 8), 16, 16);
 						}
 						else
@@ -387,7 +388,7 @@ namespace DayViewUIExtension
 							g.FillRectangle(brush, gripRect);
 
 						// Draw gripper border
-						using (Pen pen = new Pen(ColorUtil.DarkerDrawing(barColor, 0.5f), 1))
+						using (Pen pen = new Pen(DrawingColor.AdjustLuminance(barColor, -0.5f), 1))
 							g.DrawRectangle(pen, gripRect);
 
 						if (!hasIcon)

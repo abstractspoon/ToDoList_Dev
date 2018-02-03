@@ -12,6 +12,7 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 // PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
@@ -194,23 +195,26 @@ namespace WordCloudUIExtension
 			Rectangle rect = Rectangle.Round(layoutItem.Rectangle);
 			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
 
-			DrawEmphasizedText(layoutItem);
+			DrawEmphasizedText(layoutItem, true);
 		}
 
 		public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem, StringComparison.CurrentCultureIgnoreCase))
+			{
 				DrawSelected(layoutItem);
+			}
 			else
+			{
 				DrawEmphasizedBackground(layoutItem);
-
-			DrawEmphasizedText(layoutItem);
+				DrawEmphasizedText(layoutItem, false);
+			}
 		}
 
 		private void DrawEmphasizedBackground(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			Color color = GetPresudoRandomColorFromPalette(layoutItem);
-			Color backColor = ColorUtil.LighterDrawing(color, 0.7f);
+			Color backColor = DrawingColor.SetLuminance(color, 0.8f);
 
 			using (Brush brush = new SolidBrush(backColor))
 			{
@@ -218,13 +222,17 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		private void DrawEmphasizedText(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		private void DrawEmphasizedText(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem, bool selected)
 		{
 			AdjustTextRenderHint(layoutItem);
 
 			Font font = GetFont(layoutItem.Word);
-			Color color = GetPresudoRandomColorFromPalette(layoutItem);
-			Color textColor = ColorUtil.DarkerDrawing(color, 0.2f);
+			Color color = GetPresudoRandomColorFromPalette(layoutItem), textColor;
+
+			if (selected)
+				textColor = DrawingColor.SetLuminance(color, 0.3f);
+			else
+				textColor = DrawingColor.AdjustLuminance(color, -0.2f);
 
 			Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
 			TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);

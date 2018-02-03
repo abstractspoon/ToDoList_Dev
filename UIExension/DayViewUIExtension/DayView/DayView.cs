@@ -55,10 +55,11 @@ namespace Calendar
 
         private int hourLabelWidth = 50;
         private int hourLabelIndent = 2;
-        private int dayHeadersHeight = 20;
+        private int dayHeadersHeight = 19;
         private int appointmentGripWidth = 5;
         private int allDayEventsHeaderHeight = 0;
         private int headerBorder = 2;
+		private int longAppointmentSpacing = 2;
 
 		static private int minSlotHeight = 5;
 
@@ -597,14 +598,14 @@ namespace Calendar
             }
         }
 
-        private int horizontalAppointmentHeight = 20;
+        private int longAppointmentHeight = 20;
 
         public int LongAppointmentHeight
         {
-            get { return horizontalAppointmentHeight; }
+            get { return longAppointmentHeight; }
             set 
             { 
-                horizontalAppointmentHeight = value;
+                longAppointmentHeight = value;
                 Invalidate();
             }
         }
@@ -1672,7 +1673,7 @@ namespace Calendar
                     if (!layers.Contains(app.Layer))
                         layers.Add(app.Layer);
 
-                allDayEventsHeaderHeight = layers.Count * (horizontalAppointmentHeight + 5) + 5;
+				allDayEventsHeaderHeight = ((layers.Count * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
 
                 Rectangle backRectangle = rect;
                 backRectangle.Y = y;
@@ -1700,8 +1701,8 @@ namespace Calendar
                     appointmenRect.X = startPos;
                     appointmenRect.Width = (endPos - startPos);
 
-                    appointmenRect.Y = y + appointment.Layer * (horizontalAppointmentHeight + 5) + 5; // changed by Gimlei
-                    appointmenRect.Height = horizontalAppointmentHeight;
+					appointmenRect.Y = y + (appointment.Layer * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing; // changed by Gimlei
+                    appointmenRect.Height = longAppointmentHeight;
 
                     view = new AppointmentView();
                     view.Rectangle = appointmenRect;

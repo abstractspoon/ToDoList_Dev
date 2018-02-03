@@ -6,8 +6,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
-
-// PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
@@ -111,8 +110,7 @@ namespace MindMapUIExtension
             var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
             // Make sure it's dark enough
-            if (color.GetBrightness() > 0.5)
-                color = ColorUtil.DarkerDrawing(color, (float)(color.GetBrightness() - 0.5));
+            color = DrawingColor.SetLuminance(color, 0.6f);
 
             m_MindMap.ConnectionColor = color;
         }

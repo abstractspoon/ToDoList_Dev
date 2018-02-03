@@ -439,7 +439,7 @@ namespace DayViewUIExtension
         {
             m_Renderer.SetFont(fontName, fontSize);
 
-            LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 18);
+            LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 17);
         }
         
         public int GetFontHeight()
@@ -481,7 +481,6 @@ namespace DayViewUIExtension
 			gripRect = rect;
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
-			gripRect.Height--;
 
 			// If the start date precedes the start of the week then extend the
 			// draw rect to the left so the edge is clipped and likewise for the right.

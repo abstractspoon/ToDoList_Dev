@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
@@ -30,7 +31,7 @@ namespace WordCloudUIExtension
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
             m_ilItemHeight = new ImageList();
-            m_ilItemHeight.ImageSize = new Size(1, 18);
+            m_ilItemHeight.ImageSize = new Size(1, 17); // minimum height
 		}
 
 		public bool Initialise(Translator trans)
@@ -349,7 +350,14 @@ namespace WordCloudUIExtension
 			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
 			var item = (e.Item.Tag as CloudTaskItem);
-			var brush = new SolidBrush(item.TextColor);
+			
+			Brush brush;
+
+			if (e.Item.Selected)
+				brush = new SolidBrush(DrawingColor.SetLuminance(item.TextColor, 0.3f));
+			else
+				brush = new SolidBrush(item.TextColor);
+
 			Rectangle itemRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
 
 			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
@@ -360,7 +368,7 @@ namespace WordCloudUIExtension
 				if ((colIndex == 0) && m_TaskMatchesHaveIcons)
 				{
 					if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
-						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top + 2);
+						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top + 1);
 
 					itemRect.X += TextIconOffset;
 					itemRect.Width -= TextIconOffset;

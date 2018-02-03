@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
@@ -669,12 +670,12 @@ namespace MindMapUIExtension
 				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone)
 				{
 					backColor = new SolidBrush(taskColor);
-					textColor = new SolidBrush(ColorUtil.GetBestTextDrawingColor(taskColor));
+					textColor = new SolidBrush(DrawingColor.GetBestTextColor(taskColor));
 				}
 				else
 				{
 					if (nodeState != MindMapControl.NodeDrawState.None)
-						taskColor = ColorUtil.DarkerDrawing(taskColor, 0.3f);
+						taskColor = DrawingColor.SetLuminance(taskColor, 0.3f);
 
 					textColor = new SolidBrush(taskColor);
 				}

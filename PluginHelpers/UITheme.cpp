@@ -44,12 +44,12 @@ UITheme::RenderStyle UITheme::GetRenderStyle()
 
 Windows::Media::Color UITheme::GetAppMediaColor(AppColor color)
 {
-	return ColorUtil::GetMediaColor(GetColor(color));
+	return ColorUtil::MediaColor::GetColor(GetColor(color));
 }
 
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 {
-	return ColorUtil::GetDrawingColor(GetColor(color));
+	return ColorUtil::DrawingColor::GetColor(GetColor(color));
 }
 
 String^ UITheme::GetToolBarImagePath()
@@ -59,12 +59,12 @@ String^ UITheme::GetToolBarImagePath()
 
 Windows::Media::Color UITheme::GetToolbarTransparencyMediaColor()
 {
-	return ColorUtil::GetMediaColor(m_pTheme->crToolbarTransparency);
+	return ColorUtil::MediaColor::GetColor(m_pTheme->crToolbarTransparency);
 }
 
 Drawing::Color UITheme::GetToolbarTransparencyDrawingColor()
 {
-	return ColorUtil::GetDrawingColor(m_pTheme->crToolbarTransparency);
+	return ColorUtil::DrawingColor::GetColor(m_pTheme->crToolbarTransparency);
 }
 
 UInt32 UITheme::GetColor(AppColor color)
@@ -100,8 +100,8 @@ UIThemeToolbarRenderer::UIThemeToolbarRenderer()
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 {
 	m_HotFillColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarHot);
-	m_HotBorderColor = ColorUtil::DarkerDrawing(m_HotFillColor, 0.2f);
-	m_PressedFillColor = ColorUtil::DarkerDrawing(m_HotFillColor, 0.1f);
+	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLuminance(m_HotFillColor, -0.2f);
+	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLuminance(m_HotFillColor, -0.1f);
 }
 
 void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)

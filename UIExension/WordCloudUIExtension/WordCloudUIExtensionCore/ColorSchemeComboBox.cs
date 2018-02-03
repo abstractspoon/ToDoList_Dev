@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
@@ -124,7 +125,7 @@ namespace WordCloudUIExtension
 							e.Graphics.FillRectangle(fill, rect);
 						}
 
-						using (Pen border = new Pen(ColorUtil.DarkerDrawing(color, 0.2f)))
+						using (Pen border = new Pen(DrawingColor.AdjustLuminance(color, -0.2f)))
 						{
 							e.Graphics.DrawRectangle(border, rect);
 						}
