@@ -32,7 +32,6 @@ namespace WordCloudUIExtension
         private const int ControlTop = 49;
 		private const int ComboWidth = 200;
 		private const int ComboSpacing = 6;
-		private const int SplitterWidth = 6;
 		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
 
@@ -45,6 +44,7 @@ namespace WordCloudUIExtension
 		private bool m_Splitting;
 		private Color m_SplitterColor;
 		private int m_InitialSplitPos;
+		private int m_SplitterWidth;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -76,6 +76,7 @@ namespace WordCloudUIExtension
 			m_Splitting = false;
 			m_InitialSplitPos = -1;
 			m_SplitterColor = Color.Gray;
+			m_SplitterWidth = 6;
 
 			InitializeComponent();
 		}
@@ -424,6 +425,8 @@ namespace WordCloudUIExtension
 				m_InitialSplitPos = prefs.GetProfileInt(key, "SplitterPosFromRight", MatchListDefaultWidth);
             }
 
+			ShowSplitterBar(prefs.GetProfileInt("Preferences", "HidePaneSplitBar", 0) == 0);
+
             string appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string language = prefs.GetProfileString("Preferences", "LanguageFile", "");
 
@@ -444,6 +447,17 @@ namespace WordCloudUIExtension
 
             UpdateBlacklist();
         }
+
+		void ShowSplitterBar(bool show = true)
+		{
+			int newSplitterWidth = (show ? 6 : 1);
+
+			if (newSplitterWidth != m_SplitterWidth)
+			{
+				m_SplitterWidth = newSplitterWidth;
+				OnSizeChanged(new EventArgs());
+			}
+		}
 		
 		// PRIVATE ------------------------------------------------------------------------------
 
@@ -594,27 +608,35 @@ namespace WordCloudUIExtension
 
 			// Splitter bar
 			Rectangle splitterRect = SplitterRect();
+			Color fillColor = m_SplitterColor;
+			Color borderColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.2f);
 
-			using (var brush = new SolidBrush(m_SplitterColor))
+			if (m_SplitterWidth == 1)
+				fillColor = borderColor;
+
+			using (var brush = new SolidBrush(fillColor))
 				e.Graphics.FillRectangle(brush, splitterRect);
 
-			ControlPaint.DrawBorder(e.Graphics, splitterRect, Color.DarkGray, ButtonBorderStyle.Solid);
-
 			// draw drag marker (2 x 20)
-			Point splitCentre = SplitterCentre();
-			Rectangle markerRect = new Rectangle((splitCentre.X - 1), (splitCentre.Y - 10), 2, 20);
+			if (m_SplitterWidth > 2)
+			{
+				ControlPaint.DrawBorder(e.Graphics, splitterRect, borderColor, ButtonBorderStyle.Solid);
 
-			// use the splitter colour luminance to decide whether
-			// to draw the marker lighter or darker
-			Color markerColor;
+				Point splitCentre = SplitterCentre();
+				Rectangle markerRect = new Rectangle((splitCentre.X - 1), (splitCentre.Y - 10), 2, 20);
 
-			if (m_SplitterColor.GetBrightness() > 0.5f)
-				markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.3f);
-			else
-				markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, 0.3f);
+				// use the splitter colour luminance to decide whether
+				// to draw the marker lighter or darker
+				Color markerColor;
 
-			using (var brush = new SolidBrush(markerColor))
-				e.Graphics.FillRectangle(brush, markerRect);
+				if (m_SplitterColor.GetBrightness() > 0.5f)
+					markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.3f);
+				else
+					markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, 0.3f);
+
+				using (var brush = new SolidBrush(markerColor))
+					e.Graphics.FillRectangle(brush, markerRect);
+			}
         }
 
         protected override void OnSizeChanged(EventArgs e)
@@ -837,8 +859,8 @@ namespace WordCloudUIExtension
 
 		protected void UpdateSplitPos(int horzSplitCentre)
 		{
-			int newSplitLeft = (horzSplitCentre - (SplitterWidth / 2));
-			int newSplitRight = (newSplitLeft + SplitterWidth);
+			int newSplitLeft = (horzSplitCentre - (m_SplitterWidth / 2));
+			int newSplitRight = (newSplitLeft + m_SplitterWidth);
 
 			m_WordCloud.Width = (newSplitLeft - 1); // account for border
 
@@ -858,15 +880,15 @@ namespace WordCloudUIExtension
 			// Initialise split pos first time only
 			if (!ClientRectangle.IsEmpty && (m_InitialSplitPos > 0))
 			{
-				splitterRect.X = (ClientRectangle.Right - m_InitialSplitPos - (SplitterWidth / 2));
-				splitterRect.Width = SplitterWidth;
+				splitterRect.X = (ClientRectangle.Right - m_InitialSplitPos - (m_SplitterWidth / 2));
+				splitterRect.Width = m_SplitterWidth;
 
 				m_InitialSplitPos = -1;
 			}
 			else
 			{
-				splitterRect.X = (splitterRect.Right - m_TaskMatchesList.Width - SplitterWidth);
-				splitterRect.Width = SplitterWidth;
+				splitterRect.X = (splitterRect.Right - m_TaskMatchesList.Width - m_SplitterWidth);
+				splitterRect.Width = m_SplitterWidth;
 			}
 
 			splitterRect.Y = ControlTop;
@@ -879,7 +901,7 @@ namespace WordCloudUIExtension
 		{
 			// Splitter pos measured from RHS
 			Rectangle splitterRect = SplitterRect();
-			Point centrePt = new Point(splitterRect.Left + (SplitterWidth / 2),
+			Point centrePt = new Point(splitterRect.Left + (m_SplitterWidth / 2),
 										splitterRect.Top + (splitterRect.Height / 2));
 
 			return centrePt;
