@@ -1682,6 +1682,8 @@ namespace Calendar
                 renderer.DrawAllDayBackground(e.Graphics, backRectangle);
 				e.Graphics.SetClip(backRectangle);
 
+				var endOfLastDay = EndDate.AddSeconds(-1);
+
                 foreach (Appointment appointment in longAppointments)
                 {
                     Rectangle appointmenRect = rect;
@@ -1695,7 +1697,7 @@ namespace Calendar
 					double endDay = (appointment.EndDate - startDate).TotalDays;
                     int endPos = (rect.X + (int)(endDay * dayWidth));
 					
-					if (endPos >= rect.Right)
+					if ((endPos >= rect.Right) || (appointment.EndDate >= endOfLastDay))
 						endPos = (rect.Right - 1);
 
                     appointmenRect.X = startPos;
