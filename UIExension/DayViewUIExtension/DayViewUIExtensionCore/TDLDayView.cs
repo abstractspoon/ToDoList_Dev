@@ -484,16 +484,12 @@ namespace DayViewUIExtension
 
 			// If the start date precedes the start of the week then extend the
 			// draw rect to the left so the edge is clipped and likewise for the right.
-			Rectangle clipRect = rect;
-
 			if (appointment.StartDate < StartDate)
 			{
-				// Enough to hide the grip Rect
-				int offset = (gripRect.Right - rect.Left);
+                rect.X -= 4;
+                rect.Width += 4;
 
-                rect.X -= 4;// offset;
-                rect.Width += 4;// offset;
-
+				gripRect.X = rect.X;
 				gripRect.Width = 0;
 			}
 			else if (appointment.EndDate >= EndDate)
