@@ -62,7 +62,7 @@ namespace DayViewUIExtension
 
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 			m_ControlsFont = new Font(FontName, 8);
-            m_PrefsDlg = new DayViewPreferencesDlg();
+            m_PrefsDlg = new DayViewPreferencesDlg(trans);
 
 			InitializeComponent();
 		}
@@ -420,9 +420,10 @@ namespace DayViewUIExtension
 
 		private void UpdateDayViewPreferences()
 		{
-			m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
-			m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
+            m_DayView.HideParentTasks = m_PrefsDlg.HideParentTasks;
 			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
+            m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
+            m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
 
 			m_DayView.Invalidate();
 		}

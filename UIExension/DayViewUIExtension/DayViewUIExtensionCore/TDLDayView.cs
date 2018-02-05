@@ -254,12 +254,16 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+        public Boolean HideParentTasks { get; set; }
         public Boolean HideTasksWithoutTimes { get; set; }
         public Boolean HideTasksSpanningWeekends { get; set; }
         public Boolean HideTasksSpanningDays { get; set; }
         
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
 		{
+            if (HideParentTasks && item.IsParent)
+                return false;
+
 			if (!item.HasValidDates())
 				return false;
 
