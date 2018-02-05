@@ -9,9 +9,28 @@ namespace DayViewUIExtension
 	{
 		public DayViewWeekLabel()
 		{
+			m_NumWeeks = 1;
 		}
 
 		private DateTime m_StartDate;
+		private int m_NumWeeks;
+
+		public int NumWeeks
+		{
+			set
+			{
+				if ((value >= 1) && (value <= 3) && (value != m_NumWeeks))
+				{
+					m_NumWeeks = value;
+					StartDate = m_StartDate;
+				}
+			}
+		}
+
+		protected int NumDays
+		{
+			get { return (m_NumWeeks * 7); }
+		}
 
 		public DateTime StartDate
 		{
@@ -19,7 +38,7 @@ namespace DayViewUIExtension
 			{
 				m_StartDate = value;
 
-				DateTime endDate = m_StartDate.AddDays(7);
+				DateTime endDate = m_StartDate.AddDays(this.NumDays);
 
 				if (endDate.Year == m_StartDate.Year)
 				{
