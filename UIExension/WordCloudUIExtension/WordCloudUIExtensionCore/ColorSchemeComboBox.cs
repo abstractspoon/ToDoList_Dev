@@ -125,7 +125,7 @@ namespace WordCloudUIExtension
 							e.Graphics.FillRectangle(fill, rect);
 						}
 
-						using (Pen border = new Pen(DrawingColor.AdjustLuminance(color, -0.2f)))
+						using (Pen border = new Pen(DrawingColor.AdjustLighting(color, -0.2f, true)))
 						{
 							e.Graphics.DrawRectangle(border, rect);
 						}

@@ -609,7 +609,7 @@ namespace WordCloudUIExtension
 			// Splitter bar
 			Rectangle splitterRect = SplitterRect();
 			Color fillColor = m_SplitterColor;
-			Color borderColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.2f);
+			Color borderColor = DrawingColor.AdjustLighting(m_SplitterColor, -0.2f, true);
 
 			if (m_SplitterWidth == 1)
 				fillColor = borderColor;
@@ -630,9 +630,9 @@ namespace WordCloudUIExtension
 				Color markerColor;
 
 				if (m_SplitterColor.GetBrightness() > 0.5f)
-					markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, -0.3f);
+					markerColor = DrawingColor.AdjustLighting(m_SplitterColor, -0.3f, true);
 				else
-					markerColor = DrawingColor.AdjustLuminance(m_SplitterColor, 0.3f);
+					markerColor = DrawingColor.AdjustLighting(m_SplitterColor, 0.3f, true);
 
 				using (var brush = new SolidBrush(markerColor))
 					e.Graphics.FillRectangle(brush, markerRect);

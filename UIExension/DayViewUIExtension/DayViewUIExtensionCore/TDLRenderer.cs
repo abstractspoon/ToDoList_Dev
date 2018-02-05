@@ -315,7 +315,7 @@ namespace DayViewUIExtension
 					else if (m_TaskColorIsBkgnd && !taskItem.IsDone)
 					{
 						textColor = DrawingColor.GetBestTextColor(taskItem.TaskTextColor);
-						borderColor = DrawingColor.AdjustLuminance(taskItem.TaskTextColor, -0.5f);
+						borderColor = DrawingColor.AdjustLighting(taskItem.TaskTextColor, -0.5f, true);
 						barColor = taskItem.TaskTextColor;
 						fillColor = taskItem.TaskTextColor;
 					}
@@ -388,7 +388,7 @@ namespace DayViewUIExtension
 							g.FillRectangle(brush, gripRect);
 
 						// Draw gripper border
-						using (Pen pen = new Pen(DrawingColor.AdjustLuminance(barColor, -0.5f), 1))
+						using (Pen pen = new Pen(DrawingColor.AdjustLighting(barColor, -0.5f, true), 1))
 							g.DrawRectangle(pen, gripRect);
 
 						if (!hasIcon)

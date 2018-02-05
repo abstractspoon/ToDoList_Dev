@@ -100,8 +100,8 @@ UIThemeToolbarRenderer::UIThemeToolbarRenderer()
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 {
 	m_HotFillColor = theme->GetAppDrawingColor(UITheme::AppColor::ToolbarHot);
-	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLuminance(m_HotFillColor, -0.2f);
-	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLuminance(m_HotFillColor, -0.1f);
+	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.2f, false);
+	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.1f, false);
 }
 
 void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)

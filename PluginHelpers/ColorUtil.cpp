@@ -15,10 +15,10 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-Windows::Media::Color ColorUtil::MediaColor::AdjustLuminance(Windows::Media::Color^ color, float amount)
+Windows::Media::Color ColorUtil::MediaColor::AdjustLighting(Windows::Media::Color^ color, float amount, bool rgbMethod)
 {
-	UInt32 rgbIn = RGB(color->R, color->G, color->B);
-	COLORREF rgbOut = ColorUtil::SetLuminance(rgbIn, (ColorUtil::GetLuminance(rgbIn) + amount));
+	COLORREF rgbIn = RGB(color->R, color->G, color->B);
+	COLORREF rgbOut = (COLORREF)ColorUtil::AdjustLighting(rgbIn, amount, rgbMethod);
 
 	return Windows::Media::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
@@ -54,10 +54,10 @@ float ColorUtil::MediaColor::GetLuminance(Windows::Media::Color^ color)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-Drawing::Color ColorUtil::DrawingColor::AdjustLuminance(Drawing::Color^ color, float amount)
+Drawing::Color ColorUtil::DrawingColor::AdjustLighting(Drawing::Color^ color, float amount, bool rgbMethod)
 {
 	COLORREF rgbIn = RGB(color->R, color->G, color->B);
-	COLORREF rgbOut = (COLORREF)ColorUtil::SetLuminance(rgbIn, (ColorUtil::GetLuminance(rgbIn) + amount));
+	COLORREF rgbOut = ColorUtil::AdjustLighting(rgbIn, amount, rgbMethod);
 
 	return Drawing::Color::FromArgb(color->A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
@@ -109,4 +109,32 @@ UInt32 ColorUtil::SetLuminance(UInt32 rgbColor, float luminance)
 	ColorRGBToHLS((COLORREF)rgbColor, &wHue, &wLuminance, &wSaturation);
 
 	return ColorHLSToRGB(wHue, (WORD)(luminance * 240), wSaturation);
+}
+
+UInt32 ColorUtil::AdjustLighting(UInt32 rgbColor, float amount, bool rgbMethod)
+{
+	if (rgbMethod)
+	{
+		BYTE btRed = GetRValue(rgbColor);
+		BYTE btGreen = GetGValue(rgbColor);
+		BYTE btBlue = GetBValue(rgbColor);
+		
+		if (amount > 0.0) // Lighter
+		{
+			btRed = (BYTE)min(255, (btRed + ((255 - btRed) * amount)));
+			btGreen = (BYTE)min(255, (btGreen + ((255 - btGreen) * amount)));
+			btBlue = (BYTE)min(255, (btBlue + ((255 - btBlue) * amount)));
+		}
+		else // < 0.0 - Darker
+		{
+			btRed = (BYTE)max(0, (btRed + (btRed * amount)));
+			btGreen = (BYTE)max(0, (btGreen + (btGreen * amount)));
+			btBlue = (BYTE)max(0, (btBlue + (btBlue * amount)));
+		}
+
+		return RGB(btRed, btGreen, btBlue);
+	}
+
+	// else
+	return ColorUtil::SetLuminance(rgbColor, (ColorUtil::GetLuminance(rgbColor) + amount));
 }
