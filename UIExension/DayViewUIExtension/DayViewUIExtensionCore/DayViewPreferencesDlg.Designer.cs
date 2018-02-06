@@ -139,6 +139,7 @@
             this.MinimizeBox = false;
             this.Name = "DayViewPreferencesDlg";
             this.Padding = new System.Windows.Forms.Padding(10);
+			this.ShowInTaskbar = false;
             this.Text = "Week Planner Preferences";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
