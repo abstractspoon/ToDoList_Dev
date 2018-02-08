@@ -332,6 +332,32 @@ namespace WordCloudUIExtension
 			base.WndProc(ref m);
 		}
 
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            var hit = HitTest(e.Location);
+
+            if (hit.Item != null)
+            {
+                var item = (hit.Item.Tag as CloudTaskItem);
+
+                if ((item != null) && item.IsLocked)
+                {
+                    var cursor = UIExtension.AppCursor.Load(UIExtension.AppCursor.CursorType.LockedTask);
+
+                    if (cursor != null)
+                    {
+                        Cursor = cursor;
+                        return;
+                    }
+                }
+            }
+
+            // all else
+            Cursor = Cursors.Arrow;
+        }
+
 		protected override void OnDrawItem(DrawListViewItemEventArgs e)
 		{
 			if (e.Item == null)

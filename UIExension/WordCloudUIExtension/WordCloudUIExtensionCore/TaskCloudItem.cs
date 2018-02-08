@@ -37,6 +37,7 @@ namespace WordCloudUIExtension
 		public List<string> Tags;
 		public bool HasIcon;
 		public bool IsParent;
+        public bool IsLocked;
 
         private System.Drawing.Color taskTextColor = new System.Drawing.Color();
 
@@ -61,6 +62,9 @@ namespace WordCloudUIExtension
 		public void ProcessTaskUpdate(Task task, UIExtension.UpdateType type,
 									  HashSet<UIExtension.TaskAttribute> attribs, bool newTask)
 		{
+            IsParent = task.IsParent();
+            IsLocked = task.IsLocked();
+
 			if (newTask)
 			{
 				Title = task.GetTitle();
@@ -79,7 +83,6 @@ namespace WordCloudUIExtension
 				TextColor = task.GetTextDrawingColor();
 
 				HasIcon = (task.GetIcon().Length > 0);
-				IsParent = task.GetFirstSubtask().IsValid();
 			}
 			else
 			{
