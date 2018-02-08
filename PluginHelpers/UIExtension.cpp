@@ -399,7 +399,16 @@ Windows::Forms::Cursor^ UIExtension::AppCursor::Load(AppCursor::CursorType curso
 	}
 
 	if ((cursorFile != nullptr) && System::IO::File::Exists(cursorFile))
-		return gcnew Windows::Forms::Cursor(cursorFile);
+	{
+		HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
+											MS(cursorFile), 
+											IMAGE_CURSOR, 
+											32, 
+											32, 
+											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
+		
+		return gcnew Windows::Forms::Cursor(static_cast<IntPtr>(hCursor));
+	}
 	
 	return nullptr;
 }
