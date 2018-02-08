@@ -885,11 +885,11 @@ namespace MindMapUIExtension
 				{
 					var cursor = UIExtension.AppCursor.Load(UIExtension.AppCursor.CursorType.LockedTask);
 
-					if (cursor == null)
-						cursor = Cursors.No;
-					
-					Cursor = cursor;
-					return;
+                    if (cursor != null)
+                    {
+                        Cursor = cursor;
+                        return;
+                    }
 				}
 			}
 
