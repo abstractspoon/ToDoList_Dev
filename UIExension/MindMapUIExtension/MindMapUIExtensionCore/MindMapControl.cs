@@ -1019,7 +1019,10 @@ namespace MindMapUIExtension
 					}
 					else if (IsRightOfRoot(selNode))
 					{
-						selNode = selNode.Parent;
+                        if (selNode.IsExpanded)
+                            selNode.Collapse(); // same as tree-view
+                        else
+    						selNode = selNode.Parent;
 					}
 					break;
 
@@ -1030,7 +1033,10 @@ namespace MindMapUIExtension
 					}
 					else if (IsleftOfRoot(selNode))
 					{
-						selNode = selNode.Parent;
+                        if (selNode.IsExpanded)
+                            selNode.Collapse(); // same as tree-view
+                        else
+    						selNode = selNode.Parent;
 					}
 					else if (IsRightOfRoot(selNode))
 					{
