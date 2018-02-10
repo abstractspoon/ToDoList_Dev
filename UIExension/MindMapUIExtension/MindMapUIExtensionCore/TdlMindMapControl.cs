@@ -729,6 +729,7 @@ namespace MindMapUIExtension
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
+					(taskItem.ID != 0) &&
 					(taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.IsParent)));
 		}
 
