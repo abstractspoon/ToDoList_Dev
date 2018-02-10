@@ -566,26 +566,10 @@ namespace MindMapUIExtension
 				// Update drop target
 				if ((dropTarget != m_DropTarget) || (dropPos != m_DropPos))
 				{
-					if (m_DropTarget != null)
-                    {
-						RedrawNode(m_DropTarget, false);
-
-                        if (dropPos != m_DropPos)
-                            Invalidate(CalculateInsertionMarkerRect(m_DropTarget, m_DropPos));
-                    }
-
-					if (dropTarget != null)
-                    {
-						RedrawNode(dropTarget, false);
-
-                        if (dropPos != m_DropPos)
-                            Invalidate(CalculateInsertionMarkerRect(dropTarget, dropPos));
-                    }
-				
 					m_DropTarget = dropTarget;
                     m_DropPos = dropPos;
 
-                    //Invalidate();
+                    Invalidate();
 					Update();
 				}
 			}
@@ -594,14 +578,21 @@ namespace MindMapUIExtension
         private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
         {
 			var item = Item(dropTarget);
+
+			if (!GetItemDrawRect(item.TotalBounds).Contains(cursorPos))
+				return DropPos.None;
+
             Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
 
-            if (!itemRect.Contains(cursorPos))
-                return DropPos.None;
-
 			if (IsRoot(dropTarget))
-				return DropPos.On;
+			{
+				if (itemRect.Contains(cursorPos))
+					return DropPos.On;
 
+				// else
+				return DropPos.None;
+			}
+			
             int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
 
             itemRect.Y += oneSixthHeight;
@@ -649,6 +640,16 @@ namespace MindMapUIExtension
 			}
 		}
 
+		protected override void OnDragLeave(EventArgs e)
+		{
+			base.OnDragLeave(e);
+
+			m_DropTarget = null;
+			m_DropPos = DropPos.None;
+
+			Invalidate();
+		}
+		
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
@@ -1686,41 +1687,63 @@ namespace MindMapUIExtension
 
             switch (m_DropPos)
             {
-                case DropPos.Above:
-                    insertionMark.Y = (insertionMark.Top - (InsertionMarkerHeight / 2));
+				case DropPos.Above:
+					{
+						int defaultYPos = (insertionMark.Top - (InsertionMarkerHeight / 2));
 
-                    if (node.PrevNode != null)
-                    {
-                        MindMapItem prevItem = Item(node.PrevNode);
+						if (node.PrevNode != null)
+						{
+							MindMapItem prevItem = Item(node.PrevNode);
 
-                        if (item.IsFlipped == prevItem.IsFlipped)
-                        {
-                            Rectangle prevRect = GetItemDrawRect(prevItem.ItemBounds);
+							if (item.IsFlipped == prevItem.IsFlipped)
+							{
+								// Place halfway between
+								Rectangle prevRect = GetItemDrawRect(prevItem.ItemBounds);
 
-                            insertionMark.Y = (prevRect.Bottom - (InsertionMarkerHeight / 2));
-                            insertionMark.X = Math.Min(insertionMark.X, prevRect.X);
-                            insertionMark.Width = Math.Max(insertionMark.Width, prevRect.Width);
-                        }
-                    }
+								insertionMark.Y = ((insertionMark.Top + prevRect.Bottom - InsertionMarkerHeight) / 2);
+								insertionMark.X = Math.Min(insertionMark.X, prevRect.X);
+								insertionMark.Width = Math.Max(insertionMark.Width, prevRect.Width);
+							}
+							else
+							{
+								insertionMark.Y = defaultYPos;
+							}
+						}
+						else
+						{
+							insertionMark.Y = defaultYPos;
+						}
+					}
+
                     break;
 
-                case DropPos.Below:
-                    insertionMark.Y = (insertionMark.Bottom - (InsertionMarkerHeight / 2));
+				case DropPos.Below:
+					{
+						int defaultYPos = (insertionMark.Bottom - (InsertionMarkerHeight / 2));
 
-                    if (node.NextNode != null)
-                    {
-                        MindMapItem nextItem = Item(node.NextNode);
+						if (node.NextNode != null)
+						{
+							MindMapItem nextItem = Item(node.NextNode);
 
-                        if (item.IsFlipped == nextItem.IsFlipped)
-                        {
-                            Rectangle nextRect = GetItemDrawRect(nextItem.ItemBounds);
+							if (item.IsFlipped == nextItem.IsFlipped)
+							{
+								Rectangle nextRect = GetItemDrawRect(nextItem.ItemBounds);
 
-                            insertionMark.X = Math.Min(insertionMark.X, nextRect.X);
-                            insertionMark.Y = (nextRect.Top - (InsertionMarkerHeight / 2));
-                            insertionMark.Width = Math.Max(insertionMark.Width, nextRect.Width);
-                        }
-                    }
-                    break;
+								insertionMark.X = Math.Min(insertionMark.X, nextRect.X);
+								insertionMark.Y = ((insertionMark.Bottom + nextRect.Top - InsertionMarkerHeight) / 2);
+								insertionMark.Width = Math.Max(insertionMark.Width, nextRect.Width);
+							}
+							else
+							{
+								insertionMark.Y = defaultYPos;
+							}
+						}
+						else
+						{
+							insertionMark.Y = defaultYPos;
+						}
+					}
+					break;
             }
 
             insertionMark.Height = InsertionMarkerHeight;
@@ -1993,9 +2016,7 @@ namespace MindMapUIExtension
 
             if (GetItemDrawRect(Rectangle.Inflate(item.TotalBounds, 2, 0)).Contains(point))
             {
-                if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 0)).Contains(point))
-                    return node;
-
+				// Check child nodes first for exact hit
                 if (GetItemDrawRect(Rectangle.Inflate(item.ChildBounds, 2, 0)).Contains(point))
                 {
                     foreach (TreeNode child in node.Nodes)
@@ -2006,6 +2027,11 @@ namespace MindMapUIExtension
                             return hit;
                     }
                 }
+
+
+                //if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 0)).Contains(point))
+                    return node;
+
             }
 
             // all else
