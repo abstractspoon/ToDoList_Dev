@@ -21,6 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Drawing;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
@@ -238,6 +239,20 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 			}
 		}
 		break;
+
+	case IUI_SAVETOIMAGE:
+		if (dwExtra)
+		{
+			Bitmap^ image = m_wnd->SaveToImage();
+
+			if (image == nullptr)
+				return false;
+
+			HBITMAP* pHBM = (HBITMAP*)dwExtra;
+			*pHBM = static_cast<HBITMAP>(image->GetHbitmap().ToPointer());
+
+			return (*pHBM != NULL);
+		}
 	}
 
 	return false;
@@ -317,6 +332,8 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 		}
 		break;
 
+	case IUI_SAVETOIMAGE:
+		return m_wnd->CanSaveToImage();
  	}
 
 	return false;

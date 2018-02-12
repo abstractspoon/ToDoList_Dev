@@ -185,7 +185,17 @@ namespace MindMapUIExtension
 		{
 			return m_MindMap.GetTask(getTask, ref taskID);
 		}
-		
+
+        public Bitmap SaveToImage()
+        {
+            return null;
+        }
+
+        public Boolean CanSaveToImage()
+        {
+            return false;
+        }
+        		
         // Message handlers ---------------------------------------------------------------------
 
 		protected override void OnGotFocus(EventArgs e)
