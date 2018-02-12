@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -188,12 +189,16 @@ namespace MindMapUIExtension
 
         public Bitmap SaveToImage()
         {
-            return null;
+            Bitmap bmp = new Bitmap(m_MindMap.Width, m_MindMap.Height, PixelFormat.Format32bppRgb);
+
+            m_MindMap.DrawToBitmap(bmp, m_MindMap.ClientRectangle);
+
+            return bmp;
         }
 
         public Boolean CanSaveToImage()
         {
-            return false;
+            return true;
         }
         		
         // Message handlers ---------------------------------------------------------------------
