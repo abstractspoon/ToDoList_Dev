@@ -48,6 +48,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
+      <AdditionalUsingDirectories>..\..\..\Debug</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -71,6 +72,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
       <ExceptionHandling>Async</ExceptionHandling>
+      <AdditionalUsingDirectories>..\..\..\Release</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

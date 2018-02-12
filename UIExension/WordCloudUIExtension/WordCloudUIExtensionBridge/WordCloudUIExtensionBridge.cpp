@@ -16,13 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#	using <..\..\..\Debug\WordCloudUIExtensionCore.dll>
-#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
-#else
-#	using <..\..\..\Release\WordCloudUIExtensionCore.dll>
-#	using <..\..\..\Release\PluginHelpers.dll> as_friend
-#endif
+#using <PluginHelpers.dll> as_friend
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

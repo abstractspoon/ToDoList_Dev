@@ -16,13 +16,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#	using <..\..\..\Debug\MDContentControlCore.dll>
-#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
-#else
-#	using <..\..\..\Release\MDContentControlCore.dll>
-#	using <..\..\..\Release\PluginHelpers.dll> as_friend
-#endif
+#using <PluginHelpers.dll> as_friend
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace MDContentControl;
 using namespace System;

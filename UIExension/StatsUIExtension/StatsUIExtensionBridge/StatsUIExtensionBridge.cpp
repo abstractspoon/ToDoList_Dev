@@ -16,13 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#	using <..\..\..\Debug\StatsUIExtensionCore.dll>
-#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
-#else
-#	using <..\..\..\Release\StatsUIExtensionCore.dll>
-#	using <..\..\..\Release\PluginHelpers.dll> as_friend
-#endif
+#using <PluginHelpers.dll> as_friend
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

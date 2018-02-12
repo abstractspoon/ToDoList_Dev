@@ -14,13 +14,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#	using <..\..\..\Debug\MarkdownImpExpCore.dll>
-#	using <..\..\..\Debug\PluginHelpers.dll> as_friend
-#else
-#	using <..\..\..\Release\MarkdownImpExpCore.dll>
-#	using <..\..\..\Release\PluginHelpers.dll> as_friend
-#endif
+#using <PluginHelpers.dll> as_friend
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace MarkdownImpExp;
 using namespace System;

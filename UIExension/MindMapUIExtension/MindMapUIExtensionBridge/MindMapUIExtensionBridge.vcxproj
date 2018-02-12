@@ -48,6 +48,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
+      <AdditionalUsingDirectories>..\..\..\Debug</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -77,6 +78,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
       <ExceptionHandling>Async</ExceptionHandling>
+      <AdditionalUsingDirectories>..\..\..\Release</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -122,13 +124,9 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj">
-      <Project>{828b1da8-d72c-446b-b601-5117985691ad}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MindMapUIExtensionBridge.rc" />
@@ -136,6 +134,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_7.2\ToDoList\unico
   <ItemGroup>
     <None Include="icon1.ico" />
     <None Include="res\MindMap.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj">
+      <Project>{828b1da8-d72c-446b-abcd-5117985691ad}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

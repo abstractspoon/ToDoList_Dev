@@ -48,6 +48,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
+      <AdditionalUsingDirectories>..\..\..\Debug</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -71,6 +72,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_EXPORTING;_UNICODE;UNICODE</PreprocessorDefinitions>
       <CompileAsManaged>true</CompileAsManaged>
       <ExceptionHandling>Async</ExceptionHandling>
+      <AdditionalUsingDirectories>..\..\..\Release</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -113,6 +115,11 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\ToDoList_Dev\ToDoList\unico
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MarkdownImpExpCore\MarkdownImpExpCore.csproj">
+      <Project>{fa1f07f6-7653-4fb8-8bec-91c5b381c0dd}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
