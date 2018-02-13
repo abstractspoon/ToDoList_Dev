@@ -145,24 +145,24 @@ enum IUI_APPCOMMAND
 	IUI_COLLAPSEALL,
 	IUI_EXPANDSELECTED,
 	IUI_COLLAPSESELECTED,
-	IUI_SORT,						// dwExtra is column ID			[in]
-	IUI_TOGGLABLESORT,				// dwExtra is column ID			[in]
+	IUI_SORT,						// IUIAPPCOMMANDDATA::nSortBy		[in]
+	IUI_TOGGLABLESORT,				// IUIAPPCOMMANDDATA::nSortBy		[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,					// dwExtra is task ID			[in]
-	IUI_RESIZEATTRIBCOLUMNS,
-	IUI_GETNEXTTASK,				// dwExtra is DWORD*			[out]
-	IUI_GETNEXTTOPLEVELTASK,		// dwExtra is DWORD*			[out]
-	IUI_GETPREVTASK,				// dwExtra is DWORD*			[out]
-	IUI_GETPREVTOPLEVELTASK,		// dwExtra is DWORD*			[out]
-	IUI_SAVETOIMAGE,				// dwExtra is HBITMAP*			[out]
-	IUI_SETTASKFONT,				// dwExtra is HFONT				[in]
-	IUI_MULTISORT,					// dwExtra is IUIMULTISORT		[in]
-	IUI_SELECTFIRSTTASK,			// dwExtra is IUISELECTTASK*	[in]
-	IUI_SELECTNEXTTASK,				// dwExtra is IUISELECTTASK*	[in]
-	IUI_SELECTNEXTTASKINCLCURRENT,	// dwExtra is IUISELECTTASK*	[in]
-	IUI_SELECTPREVTASK,				// dwExtra is IUISELECTTASK*	[in]
-	IUI_SELECTLASTTASK,				// dwExtra is IUISELECTTASK*	[in]
-	IUI_MOVETASK,					// dwExtra is IUITASKMOVE*		[in]
+	IUI_SELECTTASK,					// IUIAPPCOMMANDDATA::dwTaskID		[in]
+	IUI_RESIZEATTRIBCOLUMNS,		   
+	IUI_GETNEXTTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
+	IUI_GETNEXTTOPLEVELTASK,		// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
+	IUI_GETPREVTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
+	IUI_GETPREVTOPLEVELTASK,		// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
+	IUI_SAVETOIMAGE,				// IUIAPPCOMMANDDATA::szFilePath	[in/out]
+	IUI_SETTASKFONT,				// IUIAPPCOMMANDDATA::hFont			[in]
+	IUI_MULTISORT,					// IUIAPPCOMMANDDATA::sort			[in]
+	IUI_SELECTFIRSTTASK,			// IUIAPPCOMMANDDATA::select		[in]
+	IUI_SELECTNEXTTASK,				// IUIAPPCOMMANDDATA::select		[in]
+	IUI_SELECTNEXTTASKINCLCURRENT,	// IUIAPPCOMMANDDATA::select		[in]
+	IUI_SELECTPREVTASK,				// IUIAPPCOMMANDDATA::select		[in]
+	IUI_SELECTLASTTASK,				// IUIAPPCOMMANDDATA::select		[in]
+	IUI_MOVETASK,					// IUIAPPCOMMANDDATA::move			[in]
 
 	// new values here
 //  IUI_
@@ -293,6 +293,22 @@ struct IUISELECTTASK
 
 //////////////////////////////////////////////////////////////////////
 
+struct IUIAPPCOMMANDDATA
+{
+	union
+	{
+		IUI_ATTRIBUTE nSortBy;
+		DWORD dwTaskID;
+		WCHAR szFilePath[MAX_PATH + 1];
+		HFONT hFont;			
+		IUIMULTISORT sort;
+		IUISELECTTASK select;
+		IUITASKMOVE move;	
+	};
+};
+
+//////////////////////////////////////////////////////////////////////
+
 // if   wParam == 0,		lParam = Task ID
 // else wParam = LPDWORD,	lParam = ID count
 const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK"); 
@@ -328,15 +344,14 @@ public:
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
 	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes) = 0;
-	virtual bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const = 0;
-	virtual bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const = 0;
+	virtual bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const = 0;
 	virtual bool PrepareNewTask(ITaskList* pTask) const = 0;
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
 	virtual void FilterToolTipMessage(MSG* pMsg) = 0;
 
-	virtual bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra = 0) = 0;
-	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra = 0) const = 0;
+	virtual bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData = NULL) = 0;
+	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
 	virtual IUI_HITTEST HitTest(const POINT& ptScreen) const = 0;
