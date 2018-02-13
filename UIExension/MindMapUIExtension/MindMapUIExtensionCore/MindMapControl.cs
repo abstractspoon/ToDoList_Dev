@@ -1345,7 +1345,7 @@ namespace MindMapUIExtension
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
 
-		private Rectangle Copy(Rectangle rect)
+		protected Rectangle Copy(Rectangle rect)
 		{
 			return new Rectangle(rect.Location, rect.Size);
 		}

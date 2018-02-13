@@ -189,16 +189,12 @@ namespace MindMapUIExtension
 
         public Bitmap SaveToImage()
         {
-            Bitmap bmp = new Bitmap(m_MindMap.Width, m_MindMap.Height, PixelFormat.Format32bppRgb);
-
-            m_MindMap.DrawToBitmap(bmp, m_MindMap.ClientRectangle);
-
-            return bmp;
+            return m_MindMap.SaveToImage();
         }
 
         public Boolean CanSaveToImage()
         {
-            return true;
+            return m_MindMap.CanSaveToImage();
         }
         		
         // Message handlers ---------------------------------------------------------------------
