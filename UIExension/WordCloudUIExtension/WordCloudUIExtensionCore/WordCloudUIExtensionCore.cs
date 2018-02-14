@@ -323,7 +323,7 @@ namespace WordCloudUIExtension
             m_TaskMatchesList.EnsureSelectionVisible();
 		}
 
-		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
 		{
 			switch (attrib)
 			{

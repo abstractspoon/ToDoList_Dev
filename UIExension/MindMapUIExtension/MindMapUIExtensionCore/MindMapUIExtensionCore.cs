@@ -58,9 +58,9 @@ namespace MindMapUIExtension
 			m_MindMap.UpdateTasks(tasks, type, attribs);
         }
 
-        public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
         {
-            return m_MindMap.WantEditUpdate(attrib);
+            return m_MindMap.WantTaskUpdate(attrib);
         }
 
         public bool WantSortUpdate(UIExtension.TaskAttribute attrib)

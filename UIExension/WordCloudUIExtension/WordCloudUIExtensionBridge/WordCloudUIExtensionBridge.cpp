@@ -158,14 +158,9 @@ void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
 }
 
-bool CWordCloudUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantEditUpdate(UIExtension::Map(nAttribute));
-}
-
-bool CWordCloudUIExtensionBridgeWindow::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	return m_wnd->WantSortUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -186,24 +181,23 @@ bool CWordCloudUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
-bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
-	if (!dwExtra)
+	if (!pData)
 		return false;
 
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
-		return m_wnd->SelectTask(dwExtra);
+		return m_wnd->SelectTask(pData->dwTaskID);
 
 	case IUI_GETNEXTTASK:
 		{
 			UInt32 taskID = 0;
-			DWORD* pTaskID = (DWORD*)dwExtra;
 
 			if (m_wnd->GetTask(UIExtension::GetTask::GetNextTask, taskID))
 			{
-				*pTaskID = taskID;
+				pData->dwTaskID = taskID;
 				return true;
 			}
 		}
@@ -212,11 +206,10 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD 
 	case IUI_GETPREVTASK:
 		{
 			UInt32 taskID = 0;
-			DWORD* pTaskID = (DWORD*)dwExtra;
 
 			if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
 			{
-				*pTaskID = taskID;
+				pData->dwTaskID = taskID;
 				return true;
 			}
 		}
@@ -227,14 +220,14 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD 
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return DoAppSelectCommand(nCmd, (IUISELECTTASK*)dwExtra);
+		return DoAppSelectCommand(nCmd, pData->select);
 	}
 
 	// all else
 	return false;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
+bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -253,15 +246,8 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWO
 	return false;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect)
+bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
-	// Sanity check
-	if (!pSelect)
-	{
-		//ASSERT(0);
-		return false;
-	}
-
 	UIExtension::SelectTask selectWhat;
 
 	switch (nCmd)
@@ -290,9 +276,9 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, 
 		return false;
 	}
 
-	String^ sWords = gcnew String(pSelect->szWords);
+	String^ sWords = gcnew String(select.szWords);
 
-	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord, pSelect->bFindReplace);
+	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
 bool CWordCloudUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

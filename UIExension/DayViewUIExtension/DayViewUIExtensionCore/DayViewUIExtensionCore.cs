@@ -100,7 +100,7 @@ namespace DayViewUIExtension
             RestoreSelectedItem();
 		}
 
-		public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
+		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
 		{
 			switch (attrib)
 			{

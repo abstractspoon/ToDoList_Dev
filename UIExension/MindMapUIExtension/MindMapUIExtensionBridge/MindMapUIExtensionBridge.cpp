@@ -164,14 +164,9 @@ void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
 }
 
-bool CMindMapUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantEditUpdate(UIExtension::Map(nAttribute));
-}
-
-bool CMindMapUIExtensionBridgeWindow::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	return m_wnd->WantSortUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CMindMapUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -192,7 +187,7 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
-bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
@@ -209,16 +204,17 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandSelection);
 
 	case IUI_SELECTTASK:
-		return m_wnd->SelectTask(dwExtra);
+		if (pData)
+			return m_wnd->SelectTask(pData->dwTaskID);
+		break;
 
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
 
 	case IUI_MOVETASK:
-		if (dwExtra)
+		if (pData)
 		{
-			const IUITASKMOVE* pMove = (const IUITASKMOVE*)dwExtra;
-			return m_wnd->MoveTask(pMove->dwSelectedTaskID, pMove->dwParentID, pMove->dwAfterSiblingID);
+			return m_wnd->MoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
 		}
 		return true;
 
@@ -226,32 +222,36 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	case IUI_GETPREVTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		if (dwExtra)
+		if (pData)
 		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			UInt32 taskID = GetNextTask(nCmd, *pTaskID);
+			UInt32 taskID = GetNextTask(nCmd, pData->dwTaskID);
 
-			if (taskID != 0)
+			if ((taskID != 0) && (taskID != pData->dwTaskID))
 			{
-				*pTaskID = taskID;
-
+				pData->dwTaskID = taskID;
 				return true;
 			}
 		}
 		break;
 
 	case IUI_SAVETOIMAGE:
-		if (dwExtra)
+		if (pData)
 		{
 			Bitmap^ image = m_wnd->SaveToImage();
 
-			if (image == nullptr)
-				return false;
+			if (image != nullptr)
+			{
+				// Always save as png
+				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
+				sImagePath = System::IO::Path::ChangeExtension(sImagePath.get(), ".png");
 
-			HBITMAP* pHBM = (HBITMAP*)dwExtra;
-			*pHBM = static_cast<HBITMAP>(image->GetHbitmap().ToPointer());
+				image->Save(sImagePath.get(), System::Drawing::Imaging::ImageFormat::Png);
 
-			return (*pHBM != NULL);
+				MarshalledString temp(sImagePath.get());
+				lstrcpyn(pData->szFilePath, temp, MAX_PATH);
+
+				return true;
+			}
 		}
 	}
 
@@ -292,7 +292,7 @@ DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 	return 0;
 }
 
-bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
+bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -315,20 +315,18 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 		return m_wnd->Focused;
 
 	case IUI_MOVETASK:
-		if (dwExtra)
-		{
-			const IUITASKMOVE* pMove = (const IUITASKMOVE*)dwExtra;
-			return m_wnd->CanMoveTask(pMove->dwSelectedTaskID, pMove->dwParentID, pMove->dwAfterSiblingID);
-		}
+		if (pData)
+			return m_wnd->CanMoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
+		break;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		if (dwExtra)
+		if (pData)
 		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			return (GetNextTask(nCmd, *pTaskID) != 0);
+			DWORD dwTaskID = GetNextTask(nCmd, pData->dwTaskID);
+			return ((dwTaskID != 0) && (dwTaskID != pData->dwTaskID));
 		}
 		break;
 

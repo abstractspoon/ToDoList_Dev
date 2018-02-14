@@ -10,7 +10,9 @@
 #include <vcclr.h>
 using namespace StatsUIExtension;
 
+/////////////////////////////////////////////////////////////////////////////////
 // This class is exported from StatsUIExtensionBridge.dll
+
 class CStatsUIExtensionBridge : public IUIExtension
 {
 public:
@@ -36,45 +38,47 @@ protected:
    virtual ~CStatsUIExtensionBridge();
 };
 
+/////////////////////////////////////////////////////////////////////////////////
+// This class is exported from StatsUIExtensionBridge.dll
+
 class CStatsUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
 	CStatsUIExtensionBridgeWindow();
 
-   BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+	BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
-   HICON GetIcon() const;
-   LPCWSTR GetMenuText() const; // caller must copy result only
-   LPCWSTR GetTypeID() const; // caller must copy result only
+	HICON GetIcon() const;
+	LPCWSTR GetMenuText() const; // caller must copy result only
+	LPCWSTR GetTypeID() const; // caller must copy result only
 
-   bool SelectTask(DWORD dwTaskID);
-   bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
-   bool SupportsTaskSelection() const { return false; }
+	bool SelectTask(DWORD dwTaskID);
+	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
+	bool SupportsTaskSelection() const { return false; }
 
-   void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
-   bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
-   bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
-   bool PrepareNewTask(ITaskList* pTask) const;
+	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
+	bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const;
+	bool PrepareNewTask(ITaskList* pTask) const;
 
-   bool ProcessMessage(MSG* pMsg);
-   void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+	bool ProcessMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
 
-   bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
-   bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
+	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
+	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
-   bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
-   IUI_HITTEST HitTest(const POINT& ptScreen) const;
+	bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
+	IUI_HITTEST HitTest(const POINT& ptScreen) const;
 
-   void SetUITheme(const UITHEME* pTheme);
-   void SetReadOnly(bool bReadOnly);
-   HWND GetHwnd() const;
+	void SetUITheme(const UITHEME* pTheme);
+	void SetReadOnly(bool bReadOnly);
+	HWND GetHwnd() const;
 
-   void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
-   void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
-   
+	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
+	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
+
 protected:
-   gcroot<StatsUIExtensionCore^> m_wnd;
-   gcroot<System::Windows::Interop::HwndSource^> m_source;
+	gcroot<StatsUIExtensionCore^> m_wnd;
+	gcroot<System::Windows::Interop::HwndSource^> m_source;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

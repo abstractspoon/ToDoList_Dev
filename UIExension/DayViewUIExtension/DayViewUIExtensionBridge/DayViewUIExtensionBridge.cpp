@@ -159,14 +159,9 @@ void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
 }
 
-bool CDayViewUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantEditUpdate(UIExtension::Map(nAttribute));
-}
-
-bool CDayViewUIExtensionBridgeWindow::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	return m_wnd->WantSortUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -187,35 +182,43 @@ bool CDayViewUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
-bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
+bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
-		return m_wnd->SelectTask(dwExtra);
+		if (pData)
+			return m_wnd->SelectTask(pData->dwTaskID);
+		break;
 
 	case IUI_GETNEXTTASK:
+		if (pData)
 		{
-			UInt32 taskID = 0;
-			DWORD* pTaskID = (DWORD*)dwExtra;
+			UInt32 taskID = pData->dwTaskID;
 
 			if (m_wnd->GetTask(UIExtension::GetTask::GetNextTask, taskID))
 			{
-				*pTaskID = taskID;
-				return true;
+				if ((taskID != 0) && (taskID != pData->dwTaskID))
+				{
+					pData->dwTaskID = taskID;
+					return true;
+				}
 			}
 		}
 		break;
 
 	case IUI_GETPREVTASK:
+		if (pData)
 		{
-			UInt32 taskID = 0;
-			DWORD* pTaskID = (DWORD*)dwExtra;
+			UInt32 taskID = pData->dwTaskID;
 
 			if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
 			{
-				*pTaskID = taskID;
-				return true;
+				if ((taskID != 0) && (taskID != pData->dwTaskID))
+				{
+					pData->dwTaskID = taskID;
+					return true;
+				}
 			}
 		}
 		break;
@@ -225,7 +228,9 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return DoAppSelectCommand(nCmd, (const IUISELECTTASK*)dwExtra);
+		if (pData)
+			return DoAppSelectCommand(nCmd, pData->select);
+		break;
 
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
@@ -235,7 +240,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dw
 	return false;
 }
 
-bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
+bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -252,22 +257,15 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return /*true*/false;
+		return /*true*/false; // TODO
 	}
 
 	// all else
 	return false;
 }
 
-bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect)
+bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
-	// Sanity check
-	if (!pSelect)
-	{
-		//ASSERT(0);
-		return false;
-	}
-
 	UIExtension::SelectTask selectWhat;
 
 	switch (nCmd)
@@ -296,9 +294,9 @@ bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 		return false;
 	}
 
-	msclr::auto_gcroot<String^> sWords = gcnew String(pSelect->szWords);
+	msclr::auto_gcroot<String^> sWords = gcnew String(select.szWords);
 
-	return m_wnd->SelectTask(sWords, selectWhat, pSelect->bCaseSensitive, pSelect->bWholeWord, pSelect->bFindReplace);
+	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
 bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)

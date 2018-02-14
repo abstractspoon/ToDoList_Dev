@@ -155,14 +155,9 @@ void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UP
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate), UIExtension::Map(pAttributes, nNumAttributes));
 }
 
-bool CSampleUIExtensionBridgeWindow::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
-	return m_wnd->WantEditUpdate(UIExtension::Map(nAttribute));
-}
-
-bool CSampleUIExtensionBridgeWindow::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	return m_wnd->WantSortUpdate(UIExtension::Map(nAttribute));
+	return m_wnd->WantTaskUpdate(UIExtension::Map(nAttribute));
 }
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -183,7 +178,7 @@ bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
-bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, DWORD /*dwExtra*/)
+bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, IUIAPPCOMMANDDATA* /*pData*/)
 {
 // 	switch (nCmd)
 // 	{
@@ -196,7 +191,7 @@ bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, DWORD
 	return false;
 }
 
-bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND /*nCmd*/, DWORD /*dwExtra*/) const
+bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND /*nCmd*/, const IUIAPPCOMMANDDATA* /*pData*/) const
 {
 // 	switch (nCmd)
 // 	{

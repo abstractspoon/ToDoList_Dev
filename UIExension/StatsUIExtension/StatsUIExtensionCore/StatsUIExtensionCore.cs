@@ -246,7 +246,7 @@ namespace StatsUIExtension
 */
         }
 
-        public bool WantEditUpdate(UIExtension.TaskAttribute attrib)
+        public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
 	    {
 			return true; // all updates
 	    }

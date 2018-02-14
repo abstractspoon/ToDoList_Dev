@@ -195,7 +195,7 @@ namespace Abstractspoon
 				bool SelectTasks(cli::array<UInt32>^ taskIDs);
 
 				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update, Collections::Generic::HashSet<UIExtension::TaskAttribute>^ attribs);
-				bool WantEditUpdate(UIExtension::TaskAttribute attribute);
+				bool WantTaskUpdate(UIExtension::TaskAttribute attribute);
 				bool WantSortUpdate(UIExtension::TaskAttribute attribute);
 				bool PrepareNewTask(Task^% task);
 

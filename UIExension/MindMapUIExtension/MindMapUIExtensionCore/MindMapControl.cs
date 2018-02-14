@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Data;
 using System.Linq;
@@ -346,6 +347,79 @@ namespace MindMapUIExtension
 		{
 			return GetItemLabelRect(SelectedNode);
 		}
+
+
+        public Bitmap SaveToImage()
+        {
+            // Cache scroll pos and border(!)
+            int horzScrollPos = HorizontalScroll.Value;
+            int vertScrollPos = VerticalScroll.Value;
+            BorderStyle borderStyle = BorderStyle;
+
+            // And reset them
+            VerticalScroll.Value = 0;
+            HorizontalScroll.Value = 0;
+            BorderStyle = BorderStyle.None;
+            PerformLayout();
+
+            Rectangle graphRect = Copy(RootItem.TotalBounds);
+
+            graphRect.Width = Math.Max(ClientRectangle.Width, graphRect.Width);
+            graphRect.Height = Math.Max(ClientRectangle.Height, graphRect.Height);
+
+            Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
+            Bitmap tempImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
+
+            Rectangle drawRect = Copy(ClientRectangle);
+
+            int numHorzPages = ((graphRect.Width / ClientRectangle.Width) + 1);
+            int numVertPages = ((graphRect.Height / ClientRectangle.Height) + 1);
+
+            using (Graphics graphics = Graphics.FromImage(finalImage))
+            {
+                for (int vertPage = 0; vertPage < numVertPages; vertPage++)
+                {
+                    for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
+                    {
+                        DrawToBitmap(tempImage, ClientRectangle);
+                        graphics.DrawImage(tempImage, drawRect.X, drawRect.Y);
+
+                        int xOffset = Math.Min(ClientRectangle.Width, (graphRect.Width - drawRect.Right));
+
+                        if (xOffset > 0)
+                        {
+                            HorizontalScroll.Value += xOffset;
+                            drawRect.X += xOffset;
+
+                            PerformLayout();
+                        }
+                    }
+
+                    HorizontalScroll.Value = 0;
+                    drawRect.X = 0;
+
+                    int yOffset = Math.Min(ClientRectangle.Height, (graphRect.Height - drawRect.Bottom));
+
+                    if (yOffset > 0)
+                    {
+                        VerticalScroll.Value += yOffset;
+                        drawRect.Y += yOffset;
+
+                        PerformLayout();
+                    }
+                }
+            }
+
+
+            // Restore scroll pos and border (!)
+            HorizontalScroll.Value = horzScrollPos;
+            VerticalScroll.Value = vertScrollPos;
+            BorderStyle = borderStyle;
+
+            PerformLayout();
+
+            return finalImage;
+        }
 
 		// Message Handlers -----------------------------------------------------------
 

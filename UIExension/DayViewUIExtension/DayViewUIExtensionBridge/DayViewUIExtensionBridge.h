@@ -10,7 +10,9 @@
 #include <vcclr.h>
 using namespace DayViewUIExtension;
 
+///////////////////////////////////////////////////////////////////////////////
 // This class is exported from DayViewUIExtensionBridge.dll
+
 class CDayViewUIExtensionBridge : public IUIExtension
 {
 public:
@@ -34,6 +36,9 @@ protected:
 	ITransText* m_pTT;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// This class is exported from DayViewUIExtensionBridge.dll
+
 class CDayViewUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
@@ -50,15 +55,14 @@ public:
    bool SupportsTaskSelection() const { return true; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
-   bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
-   bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
+   bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
 
-   bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
-   bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
+   bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
+   bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
    bool GetLabelEditRect(LPRECT pEdit); // screen coordinates
    IUI_HITTEST HitTest(const POINT& ptScreen) const;
@@ -75,7 +79,7 @@ protected:
    ITransText* m_pTT;
 
 protected:
-	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK* pSelect);
+	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
