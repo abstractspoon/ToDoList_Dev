@@ -98,7 +98,6 @@ namespace MindMapUIExtension
 		const int ExpansionButtonSize = 8;
 		const int ExpansionButtonSeparation = 2;
 		const int LabelPadding = 2;
-        const int ImageBorder = 10;
 
 		protected enum NodeDrawState
 		{
@@ -346,7 +345,7 @@ namespace MindMapUIExtension
 
             // And reset
             m_IsSavingToImage = true;
-            m_DrawOffset = new Point(ImageBorder, ImageBorder);
+            m_DrawOffset = new Point(0, 0);
             BorderStyle = BorderStyle.None;
 
             if (!scrollPos.IsEmpty)
@@ -360,16 +359,14 @@ namespace MindMapUIExtension
 #endif
 
             Rectangle graphRect = Copy(RootItem.TotalBounds);
-            graphRect.Width += (ImageBorder * 2);
-            graphRect.Height += (ImageBorder * 2);
-
+	
             Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
             Bitmap tempImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
 
             Rectangle drawRect = Copy(ClientRectangle);
 
-            int numHorzPages = ((graphRect.Width / ClientRectangle.Width) + 1);
-            int numVertPages = ((graphRect.Height / ClientRectangle.Height) + 1);
+			int numHorzPages = ((graphRect.Width / ClientRectangle.Width) + 1);
+			int numVertPages = ((graphRect.Height / ClientRectangle.Height) + 1);
 
             using (Graphics graphics = Graphics.FromImage(finalImage))
             {
@@ -389,8 +386,8 @@ namespace MindMapUIExtension
                         }
                     }
 
-                    m_DrawOffset.X = ImageBorder;
-                    drawRect.X = 0;
+					m_DrawOffset.X = 0;
+					drawRect.X = 0;
 
                     int yOffset = Math.Min(ClientRectangle.Height, (graphRect.Height - drawRect.Bottom));
 
@@ -401,8 +398,7 @@ namespace MindMapUIExtension
                     }
                 }
             }
-
-
+			
             // Restore state
             m_IsSavingToImage = false;
             m_DrawOffset = drawOffset;
