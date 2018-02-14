@@ -335,38 +335,48 @@ namespace MindMapUIExtension
 			return GetItemLabelRect(SelectedNode);
 		}
 
-
         public Bitmap SaveToImage()
         {
             // Cache state
             Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
             Point drawOffset = new Point(m_DrawOffset.X, m_DrawOffset.Y);
-            BorderStyle border = BorderStyle;
 
             // And reset
             m_IsSavingToImage = true;
             m_DrawOffset = new Point(0, 0);
-            BorderStyle = BorderStyle.None;
 
-            if (!scrollPos.IsEmpty)
-            {
-                HorizontalScroll.Value = 0;
-                VerticalScroll.Value = 0;
-                PerformLayout();
-            }
+            HorizontalScroll.Value = 0;
+            VerticalScroll.Value = 0;
 #if DEBUG
             m_DebugMode.Visible = false;
 #endif
 
+            int border = BorderWidth;
+
+            // Total size of the graph
             Rectangle graphRect = Copy(RootItem.TotalBounds);
+
+            // The portion of the client rect we are interested in 
+            // (excluding the top and left borders)
+            Rectangle srcRect = Rectangle.FromLTRB(border, 
+                                                   border, 
+                                                   ClientRectangle.Width - border, 
+                                                   ClientRectangle.Height - border);
 	
+            // The output image
             Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
-            Bitmap tempImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
 
-            Rectangle drawRect = Copy(ClientRectangle);
+            // The temporary image allowing us to clip out the top and left borders
+            Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
 
-			int numHorzPages = ((graphRect.Width / ClientRectangle.Width) + 1);
-			int numVertPages = ((graphRect.Height / ClientRectangle.Height) + 1);
+            // The current position in the output image for rendering the temporary image
+            Rectangle drawRect = Copy(srcRect);
+            drawRect.Offset(-border, -border);
+
+            // Note: If the last horz or vert page is empty because of an 
+            // exact division then it will get handled within the loop
+            int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
+            int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
 
             using (Graphics graphics = Graphics.FromImage(finalImage))
             {
@@ -374,46 +384,40 @@ namespace MindMapUIExtension
                 {
                     for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
                     {
-                        DrawToBitmap(tempImage, ClientRectangle);
-                        graphics.DrawImage(tempImage, drawRect.X, drawRect.Y);
+                        DrawToBitmap(srcImage, ClientRectangle);
+                        graphics.DrawImage(srcImage, drawRect.X, drawRect.Y, srcRect, GraphicsUnit.Pixel);
 
-                        int xOffset = Math.Min(ClientRectangle.Width, (graphRect.Width - drawRect.Right));
+                        int xOffset = Math.Min(srcRect.Width, (graphRect.Width - drawRect.Right));
 
-                        if (xOffset > 0)
-                        {
-                            m_DrawOffset.X -= xOffset;
-                            drawRect.X += xOffset;
-                        }
+                        if (xOffset == 0)
+                            break;
+
+                        m_DrawOffset.X -= xOffset;
+                        drawRect.X += xOffset;
                     }
 
 					m_DrawOffset.X = 0;
 					drawRect.X = 0;
 
-                    int yOffset = Math.Min(ClientRectangle.Height, (graphRect.Height - drawRect.Bottom));
+                    int yOffset = Math.Min(srcRect.Height, (graphRect.Height - drawRect.Bottom));
 
-                    if (yOffset > 0)
-                    {
-                        m_DrawOffset.Y -= yOffset;
-                        drawRect.Y += yOffset;
-                    }
+                    if (yOffset == 0)
+                        break;
+
+                    m_DrawOffset.Y -= yOffset;
+                    drawRect.Y += yOffset;
                 }
             }
 			
             // Restore state
             m_IsSavingToImage = false;
             m_DrawOffset = drawOffset;
-            BorderStyle = border;
 
-            if (!scrollPos.IsEmpty)
-            {
-                HorizontalScroll.Value = scrollPos.X;
-                VerticalScroll.Value = scrollPos.Y;
-                PerformLayout();
-            }
+            HorizontalScroll.Value = scrollPos.X;
+            VerticalScroll.Value = scrollPos.Y;
 #if DEBUG
             m_DebugMode.Visible = true;
 #endif
-
             return finalImage;
         }
 
@@ -744,6 +748,23 @@ namespace MindMapUIExtension
 		}
 
         // Internals -----------------------------------------------------------
+
+        private int BorderWidth
+        {
+            get
+            {
+                switch (BorderStyle)
+                {
+                    case BorderStyle.FixedSingle:
+                        return 1;
+
+                    case BorderStyle.Fixed3D:
+                        return 2;
+                }
+
+                return 0;
+            }
+        }
 
 		protected Boolean HoldRedraw
 		{
