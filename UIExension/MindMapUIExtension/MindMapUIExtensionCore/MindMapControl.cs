@@ -98,6 +98,7 @@ namespace MindMapUIExtension
 		const int ExpansionButtonSize = 8;
 		const int ExpansionButtonSeparation = 2;
 		const int LabelPadding = 2;
+        const int ImageBorder = 10;
 
 		protected enum NodeDrawState
 		{
@@ -124,12 +125,14 @@ namespace MindMapUIExtension
 		// Data --------------------------------------------------------------------------
 
         private Point m_DrawOffset;
-        private Boolean m_HoldRedraw;
 		private TreeNode m_DropTarget;
-        private DropPos m_DropPos;
+        private DropPos m_DropPos = DropPos.None;
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor = Color.Magenta;
-        private Boolean m_FirstPaint;
+
+        private Boolean m_FirstPaint = true;
+        private Boolean m_HoldRedraw = false;
+        private Boolean m_IsSavingToImage = false;
 
         // Public ------------------------------------------------------------------------
 
@@ -139,8 +142,6 @@ namespace MindMapUIExtension
         public MindMapControl()
         {
             m_DrawOffset = new Point(0, 0);
-            m_HoldRedraw = false;
-            m_FirstPaint = true;
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
 
@@ -167,21 +168,8 @@ namespace MindMapUIExtension
 			this.SetStyle(ControlStyles.UserPaint, true);
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             this.SetStyle(ControlStyles.ResizeRedraw, true);
-		}
-
-		public Boolean HoldRedraw
-		{
-			get { return m_HoldRedraw; }
-			set 
-			{
-				if (m_HoldRedraw != value)
-				{
-					if (!value) // release redraw
-						Invalidate();
-				}
-
-				m_HoldRedraw = value; 
-			}
+            
+            base.BorderStyle = BorderStyle.None;
 		}
 
         public void SetFont(String fontName, int fontSize)
@@ -351,21 +339,29 @@ namespace MindMapUIExtension
 
         public Bitmap SaveToImage()
         {
-            // Cache scroll pos and border(!)
-            int horzScrollPos = HorizontalScroll.Value;
-            int vertScrollPos = VerticalScroll.Value;
-            BorderStyle borderStyle = BorderStyle;
+            // Cache state
+            Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
+            Point drawOffset = new Point(m_DrawOffset.X, m_DrawOffset.Y);
+            BorderStyle border = BorderStyle;
 
-            // And reset them
-            VerticalScroll.Value = 0;
-            HorizontalScroll.Value = 0;
+            // And reset
+            m_IsSavingToImage = true;
+            m_DrawOffset = new Point(ImageBorder, ImageBorder);
             BorderStyle = BorderStyle.None;
-            PerformLayout();
+
+            if (!scrollPos.IsEmpty)
+            {
+                HorizontalScroll.Value = 0;
+                VerticalScroll.Value = 0;
+                PerformLayout();
+            }
+#if DEBUG
+            m_DebugMode.Visible = false;
+#endif
 
             Rectangle graphRect = Copy(RootItem.TotalBounds);
-
-            graphRect.Width = Math.Max(ClientRectangle.Width, graphRect.Width);
-            graphRect.Height = Math.Max(ClientRectangle.Height, graphRect.Height);
+            graphRect.Width += (ImageBorder * 2);
+            graphRect.Height += (ImageBorder * 2);
 
             Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
             Bitmap tempImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
@@ -388,35 +384,39 @@ namespace MindMapUIExtension
 
                         if (xOffset > 0)
                         {
-                            HorizontalScroll.Value += xOffset;
+                            m_DrawOffset.X -= xOffset;
                             drawRect.X += xOffset;
-
-                            PerformLayout();
                         }
                     }
 
-                    HorizontalScroll.Value = 0;
+                    m_DrawOffset.X = ImageBorder;
                     drawRect.X = 0;
 
                     int yOffset = Math.Min(ClientRectangle.Height, (graphRect.Height - drawRect.Bottom));
 
                     if (yOffset > 0)
                     {
-                        VerticalScroll.Value += yOffset;
+                        m_DrawOffset.Y -= yOffset;
                         drawRect.Y += yOffset;
-
-                        PerformLayout();
                     }
                 }
             }
 
 
-            // Restore scroll pos and border (!)
-            HorizontalScroll.Value = horzScrollPos;
-            VerticalScroll.Value = vertScrollPos;
-            BorderStyle = borderStyle;
+            // Restore state
+            m_IsSavingToImage = false;
+            m_DrawOffset = drawOffset;
+            BorderStyle = border;
 
-            PerformLayout();
+            if (!scrollPos.IsEmpty)
+            {
+                HorizontalScroll.Value = scrollPos.X;
+                VerticalScroll.Value = scrollPos.Y;
+                PerformLayout();
+            }
+#if DEBUG
+            m_DebugMode.Visible = true;
+#endif
 
             return finalImage;
         }
@@ -586,25 +586,6 @@ namespace MindMapUIExtension
 			if (mouseDown)
 				CheckStartDragging(MousePosition);
 		}
-
-		private bool CheckStartDragging(Point cursor)
-		{
-			// Check for drag movement
-			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
-
-			if (GetDragRect(ptOrg).Contains(cursor))
-				return false;
-
-			TreeNode hit = HitTestPositions(ptOrg);
-
-			if (IsAcceptableDragSource(hit))
-			{
-				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
-				return true;
-			}
-
-			return false;
-		}
 	
 		protected override void OnDragOver(DragEventArgs e)
 		{
@@ -648,39 +629,6 @@ namespace MindMapUIExtension
 				}
 			}
 		}
-
-        private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
-        {
-			var item = Item(dropTarget);
-
-			if (!GetItemDrawRect(item.TotalBounds).Contains(cursorPos))
-				return DropPos.None;
-
-            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
-
-			if (IsRoot(dropTarget))
-			{
-				if (itemRect.Contains(cursorPos))
-					return DropPos.On;
-
-				// else
-				return DropPos.None;
-			}
-			
-            int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
-
-            itemRect.Y += oneSixthHeight;
-            itemRect.Height -= (2 * oneSixthHeight);
-
-            if (cursorPos.Y <= itemRect.Top)
-                return DropPos.Above;
-
-            if (cursorPos.Y >= itemRect.Bottom)
-                return DropPos.Below;
-
-            // else
-            return DropPos.On;
-        }
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
@@ -799,7 +747,74 @@ namespace MindMapUIExtension
 			base.OnKeyDown(e);
 		}
 
-        // Private Internals -----------------------------------------------------------
+        // Internals -----------------------------------------------------------
+
+		protected Boolean HoldRedraw
+		{
+			get { return m_HoldRedraw; }
+			set 
+			{
+				if (m_HoldRedraw != value)
+				{
+					if (!value) // release redraw
+						Invalidate();
+				}
+
+				m_HoldRedraw = value; 
+			}
+		}
+
+		private bool CheckStartDragging(Point cursor)
+		{
+			// Check for drag movement
+			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
+
+			if (GetDragRect(ptOrg).Contains(cursor))
+				return false;
+
+			TreeNode hit = HitTestPositions(ptOrg);
+
+			if (IsAcceptableDragSource(hit))
+			{
+				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+				return true;
+			}
+
+			return false;
+		}
+
+        private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
+        {
+			var item = Item(dropTarget);
+
+			if (!GetItemDrawRect(item.TotalBounds).Contains(cursorPos))
+				return DropPos.None;
+
+            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
+
+			if (IsRoot(dropTarget))
+			{
+				if (itemRect.Contains(cursorPos))
+					return DropPos.On;
+
+				// else
+				return DropPos.None;
+			}
+			
+            int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
+
+            itemRect.Y += oneSixthHeight;
+            itemRect.Height -= (2 * oneSixthHeight);
+
+            if (cursorPos.Y <= itemRect.Top)
+                return DropPos.Above;
+
+            if (cursorPos.Y >= itemRect.Bottom)
+                return DropPos.Below;
+
+            // else
+            return DropPos.On;
+        }
 
 		private Boolean IsAcceptableDragSource(TreeNode node)
 		{
@@ -1861,11 +1876,14 @@ namespace MindMapUIExtension
 
 		private NodeDrawState GetDrawState(TreeNode node)
 		{
-			if (node.IsSelected)
-				return NodeDrawState.Selected;
+            if (!m_IsSavingToImage)
+            {
+                if (node.IsSelected)
+                    return NodeDrawState.Selected;
 
-			if ((node == m_DropTarget) && (m_DropPos == DropPos.On))
-                return NodeDrawState.DropTarget;
+                if ((node == m_DropTarget) && (m_DropPos == DropPos.On))
+                    return NodeDrawState.DropTarget;
+            }
 
 			return NodeDrawState.None;
 		}
