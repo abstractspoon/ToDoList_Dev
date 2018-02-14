@@ -801,10 +801,10 @@ namespace MindMapUIExtension
 				return DropPos.None;
 			}
 			
-            int oneSixthHeight = Math.Max((itemRect.Height / 6), (2 + (ItemVertSeparation / 2)));
+            int oneQuarterHeight = Math.Max((itemRect.Height / 4), (2 + (ItemVertSeparation / 2)));
 
-            itemRect.Y += oneSixthHeight;
-            itemRect.Height -= (2 * oneSixthHeight);
+            itemRect.Y += oneQuarterHeight;
+            itemRect.Height -= (2 * oneQuarterHeight);
 
             if (cursorPos.Y <= itemRect.Top)
                 return DropPos.Above;
