@@ -110,52 +110,38 @@ namespace WordCloudUIExtension
 				int numAllWords = allWords.Count();
 
                 var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
-				var nextSize = new SizeF(10000, 10000);
+				var trySize = new SizeF(640, 480);
+                float xInc = (trySize.Width / 4), yInc = (trySize.Height / 4);
 				 
 				do 
 				{
-					var nextLayout = LayoutFactory.CreateLayout(LayoutType, nextSize);
-					nextLayout.Arrange(allWords, engine);
+					layout = LayoutFactory.CreateLayout(LayoutType, trySize);
+					layout.Arrange(allWords, engine);
 
-					var nextWords = nextLayout.GetWordsInArea(new RectangleF(new PointF(0, 0), nextSize));
+                    wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
 
-					if (nextWords.Count() < numAllWords)
-					{
-						if (layout == null)
-							layout = nextLayout;
-
-						requiredSize = Size.Ceiling(layout.GetSize()); // previous good size
-						break;
-					}
-
-					// else
-					wordsToDraw = nextWords;
-					layout = nextLayout;
-					nextSize = layout.GetUsedSize();
+                    if (wordsToDraw.Count() == numAllWords)
+						requiredSize = Size.Ceiling(trySize);
+					else
+                        trySize = new SizeF(trySize.Width + xInc, trySize.Height + yInc);
 				} 
 				while (requiredSize.IsEmpty);
 			}
 
-			if (!requiredSize.IsEmpty)
-			{
-				Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, PixelFormat.Format32bppRgb);
+            Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, PixelFormat.Format32bppRgb);
 
-				using (Graphics graphics = Graphics.FromImage(finalImage))
-				{
-					var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
-					var rect = new Rectangle(new Point(0, 0), requiredSize);
+            using (Graphics graphics = Graphics.FromImage(finalImage))
+            {
+                var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
+                var rect = new Rectangle(new Point(0, 0), requiredSize);
 
-					graphics.FillRectangle(SystemBrushes.Window, rect);
+                graphics.FillRectangle(SystemBrushes.Window, rect);
 
-					foreach (LayoutItem word in wordsToDraw)
-						engine.Draw(word);
-				}
+                foreach (LayoutItem word in wordsToDraw)
+                    engine.Draw(word);
+            }
 
-				return finalImage;
-			}
-            
-            // else
-            return null;
+            return finalImage;
         }
 
         // ------------------------------------------------------------------------------------------
