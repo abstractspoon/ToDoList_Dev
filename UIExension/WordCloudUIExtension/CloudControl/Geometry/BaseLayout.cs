@@ -46,9 +46,14 @@ namespace Gma.CodeCloud.Controls.Geometry
             return QuadTree.Query(area);
         }
 
-        public RectangleF GetTotalArea()
+        public SizeF GetUsedSize()
         {
-            return QuadTree.GetLayoutArea();
+            return QuadTree.GetSize();
+        }
+        
+        public SizeF GetSize()
+        {
+            return new SizeF(Surface.Width, Surface.Height);
         }
         
         protected bool IsInsideSurface(RectangleF targetRectangle)

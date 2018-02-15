@@ -10,6 +10,7 @@ namespace Gma.CodeCloud.Controls.Geometry
         void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine);
 
         IEnumerable<LayoutItem> GetWordsInArea(RectangleF area);
-        RectangleF GetTotalArea();
+        SizeF GetUsedSize();
+		SizeF GetSize();
     }
 }

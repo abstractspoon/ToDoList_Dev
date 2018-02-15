@@ -56,7 +56,7 @@ namespace Gma.CodeCloud.Controls.Geometry.DataStructures
             return result;
         }
 
-        public RectangleF GetLayoutArea()
+        public SizeF GetSize()
         {
             var contents = m_Root.SubTreeContents;
 
@@ -70,7 +70,7 @@ namespace Gma.CodeCloud.Controls.Geometry.DataStructures
                     totalArea = RectangleF.Union(totalArea, item.Rectangle);
             }
 
-            return totalArea;
+            return new SizeF(totalArea.Width, totalArea.Height);
         }
 
         #endregion

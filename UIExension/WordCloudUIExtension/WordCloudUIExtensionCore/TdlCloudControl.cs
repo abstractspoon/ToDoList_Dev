@@ -100,41 +100,59 @@ namespace WordCloudUIExtension
         public Bitmap SaveToImage()
         {
             // Work out how much area we are going to need
-            Size requiredSize;
+            Size requiredSize = Size.Empty;
+			IEnumerable<LayoutItem> wordsToDraw = null;
+			ILayout layout = null;
 
             using (Graphics graphics = this.CreateGraphics())
             {
-                var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
-                var layout = LayoutFactory.CreateLayout(LayoutType, new Size(10000, 10000));
+				var allWords = WeightedWords;
+				int numAllWords = allWords.Count();
 
-                layout.Arrange(WeightedWords, engine);
-                var usedRect = Rectangle.Round(layout.GetTotalArea());
+                var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
+				var nextSize = new SizeF(10000, 10000);
+				 
+				do 
+				{
+					var nextLayout = LayoutFactory.CreateLayout(LayoutType, nextSize);
+					nextLayout.Arrange(allWords, engine);
 
-                requiredSize = new Size(usedRect.Width + 1, usedRect.Height + 1);
+					var nextWords = nextLayout.GetWordsInArea(new RectangleF(new PointF(0, 0), nextSize));
 
-                if (!requiredSize.IsEmpty)
-                {
-                    Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, graphics);
+					if (nextWords.Count() < numAllWords)
+					{
+						if (layout == null)
+							layout = nextLayout;
 
-                    using (Graphics graphics2 = Graphics.FromImage(finalImage))
-                    {
-                        var engine2 = new TdlGraphicEngine(this, graphics2, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
-                        var layout2 = LayoutFactory.CreateLayout(LayoutType, requiredSize);
+						requiredSize = Size.Ceiling(layout.GetSize()); // previous good size
+						break;
+					}
 
-                        layout2.Arrange(WeightedWords, engine2);
+					// else
+					wordsToDraw = nextWords;
+					layout = nextLayout;
+					nextSize = layout.GetUsedSize();
+				} 
+				while (requiredSize.IsEmpty);
+			}
 
-                        var rect = new Rectangle(new Point(0, 0), requiredSize);
-                        graphics2.FillRectangle(SystemBrushes.Window, rect);
+			if (!requiredSize.IsEmpty)
+			{
+				Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, PixelFormat.Format32bppRgb);
 
-                        IEnumerable<LayoutItem> wordsToDraw = layout2.GetWordsInArea(rect);
+				using (Graphics graphics = Graphics.FromImage(finalImage))
+				{
+					var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
+					var rect = new Rectangle(new Point(0, 0), requiredSize);
 
-                        foreach (LayoutItem word in wordsToDraw)
-                            engine2.Draw(word);
-                    }
+					graphics.FillRectangle(SystemBrushes.Window, rect);
 
-                    return finalImage;
-                }
-            }
+					foreach (LayoutItem word in wordsToDraw)
+						engine.Draw(word);
+				}
+
+				return finalImage;
+			}
             
             // else
             return null;
