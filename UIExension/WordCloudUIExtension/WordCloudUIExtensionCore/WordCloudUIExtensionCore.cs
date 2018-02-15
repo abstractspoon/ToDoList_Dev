@@ -838,15 +838,22 @@ namespace WordCloudUIExtension
 		protected void UpdateSplitPos(int horzSplitCentre)
 		{
 			int newSplitLeft = (horzSplitCentre - (m_SplitterWidth / 2));
-			int newSplitRight = (newSplitLeft + m_SplitterWidth);
 
-			m_WordCloud.Width = (newSplitLeft - 1); // account for border
+			newSplitLeft = Math.Max(1, newSplitLeft);
+			newSplitLeft = Math.Min(ClientRectangle.Width - m_SplitterWidth - 1, newSplitLeft);
 
-			m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
-			m_TaskMatchesList.Left = newSplitRight;
+			if ((newSplitLeft - 1) != m_WordCloud.Width)
+			{
+				m_WordCloud.Width = (newSplitLeft - 1); // account for border
 
-			Invalidate(false);
-			Update();
+				int newSplitRight = (newSplitLeft + m_SplitterWidth);
+
+				m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
+				m_TaskMatchesList.Left = newSplitRight;
+
+				Invalidate(false);
+				Update();
+			}
 		}
 
 		protected Rectangle SplitterRect()
