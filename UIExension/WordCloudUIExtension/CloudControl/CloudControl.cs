@@ -60,15 +60,10 @@ namespace Gma.CodeCloud.Controls
             if (m_Words == null || !m_Words.Any()) { return; }
             if (m_Layout == null) { return; }
 
-            DrawWords(e.Graphics, m_Layout, e.ClipRectangle);
-        }
-
-        protected void DrawWords(Graphics graphics, ILayout layout, Rectangle rect)
-        {
-            IEnumerable<LayoutItem> wordsToRedraw = layout.GetWordsInArea(rect);
+            IEnumerable<LayoutItem> wordsToRedraw = m_Layout.GetWordsInArea(e.ClipRectangle);
 
             using (IGraphicEngine graphicEngine =
-                    NewGraphicEngine(graphics, Font.FontFamily, FontStyle.Regular, m_Palette, m_MinFontSize, m_MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
+                    NewGraphicEngine(e.Graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
             {
                 foreach (LayoutItem currentItem in wordsToRedraw)
                 {
@@ -97,7 +92,8 @@ namespace Gma.CodeCloud.Controls
             using (Graphics graphics = this.CreateGraphics())
             {
                 IGraphicEngine graphicEngine =
-                    new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight);
+                    NewGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight);
+
                 m_Layout = LayoutFactory.CreateLayout(m_LayoutType, this.Size);
                 m_Layout.Arrange(m_Words, graphicEngine);
             }

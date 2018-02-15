@@ -8,6 +8,8 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 
+using Gma.CodeCloud.Controls;
+using Gma.CodeCloud.Controls.Geometry;
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
@@ -24,7 +26,7 @@ namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
 
-	public class TdlCloudControl : Gma.CodeCloud.Controls.CloudControl
+	public class TdlCloudControl : CloudControl
 	{
 		private System.Windows.Forms.ToolTip m_ToolTip;
 		private Translator m_Trans;
@@ -103,7 +105,7 @@ namespace WordCloudUIExtension
             using (Graphics graphics = this.CreateGraphics())
             {
                 var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
-                var layout = Gma.CodeCloud.Controls.LayoutFactory.CreateLayout(LayoutType, new Size(10000, 10000));
+                var layout = LayoutFactory.CreateLayout(LayoutType, new Size(10000, 10000));
 
                 layout.Arrange(WeightedWords, engine);
                 var usedRect = Rectangle.Round(layout.GetTotalArea());
@@ -116,15 +118,18 @@ namespace WordCloudUIExtension
 
                     using (Graphics graphics2 = Graphics.FromImage(finalImage))
                     {
-                        var engine2 = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
-                        var layout2 = Gma.CodeCloud.Controls.LayoutFactory.CreateLayout(LayoutType, requiredSize);
+                        var engine2 = new TdlGraphicEngine(this, graphics2, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
+                        var layout2 = LayoutFactory.CreateLayout(LayoutType, requiredSize);
 
                         layout2.Arrange(WeightedWords, engine2);
 
                         var rect = new Rectangle(new Point(0, 0), requiredSize);
                         graphics2.FillRectangle(SystemBrushes.Window, rect);
 
-                        DrawWords(graphics2, layout2, rect);
+                        IEnumerable<LayoutItem> wordsToDraw = layout2.GetWordsInArea(rect);
+
+                        foreach (LayoutItem word in wordsToDraw)
+                            engine2.Draw(word);
                     }
 
                     return finalImage;
@@ -137,7 +142,7 @@ namespace WordCloudUIExtension
 
         // ------------------------------------------------------------------------------------------
 
-		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
+		protected override IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
 		{
 			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedWord);
 		}
@@ -198,7 +203,7 @@ namespace WordCloudUIExtension
 	}
 	public delegate void SelectionChangeEventHandler(object sender);
 
-	public class TdlGraphicEngine : Gma.CodeCloud.Controls.GdiGraphicEngine
+	public class TdlGraphicEngine : GdiGraphicEngine
 	{
 		private string m_SelectedItem;
 		private UIExtension.SelectionRect m_SelectionRect;
@@ -215,17 +220,12 @@ namespace WordCloudUIExtension
 			m_Ctrl = ctrl;
 		}
 
-		private void AdjustTextRenderHint(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		private void AdjustTextRenderHint(LayoutItem layoutItem)
 		{
-			// Add anti-aliasing for larger font sizes
-// 			if (GetFontSize(layoutItem.Word) > 10)
-// 				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-// 			else
-// 				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
 			m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 		}
 
-		public override void Draw(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		public override void Draw(LayoutItem layoutItem)
 		{
 			AdjustTextRenderHint(layoutItem);
 
@@ -235,15 +235,15 @@ namespace WordCloudUIExtension
 				base.Draw(layoutItem);
 		}
 
-		private void DrawSelected(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		private void DrawSelected(LayoutItem layoutItem)
 		{
-			Rectangle rect = Rectangle.Round(layoutItem.Rectangle);
+			Rectangle rect = Rectangle.Inflate(Rectangle.Round(layoutItem.Rectangle), -1, -1);
 			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
 
 			DrawEmphasizedText(layoutItem, true);
 		}
 
-		public override void DrawEmphasized(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		public override void DrawEmphasized(LayoutItem layoutItem)
 		{
 			if ((m_SelectedItem != null) && layoutItem.Word.Text.Equals(m_SelectedItem, StringComparison.CurrentCultureIgnoreCase))
 			{
@@ -256,28 +256,26 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		private void DrawEmphasizedBackground(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
+		private void DrawEmphasizedBackground(LayoutItem layoutItem)
 		{
 			Color color = GetPresudoRandomColorFromPalette(layoutItem);
 			Color backColor = DrawingColor.SetLuminance(color, 0.8f);
-
+            
 			using (Brush brush = new SolidBrush(backColor))
 			{
-				m_Graphics.FillRectangle(brush, Rectangle.Ceiling(layoutItem.Rectangle));
+                Rectangle rect = Rectangle.Inflate(Rectangle.Round(layoutItem.Rectangle), -1, -1);
+				m_Graphics.FillRectangle(brush, rect);
 			}
 		}
 
-		private void DrawEmphasizedText(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem, bool selected)
+		private void DrawEmphasizedText(LayoutItem layoutItem, bool selected)
 		{
 			AdjustTextRenderHint(layoutItem);
 
 			Color color = GetPresudoRandomColorFromPalette(layoutItem);
 			Color textColor = DrawingColor.SetLuminance(color, 0.3f);
-
-			Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
 			Font font = GetFont(layoutItem.Word);
 
-			//TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);
             m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
 		}
 

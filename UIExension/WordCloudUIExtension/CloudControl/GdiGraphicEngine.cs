@@ -40,7 +40,6 @@ namespace Gma.CodeCloud.Controls
         {
             Font font = GetFont(word);
 
-            //return TextRenderer.MeasureText(m_Graphics, word.Text, font);
             return m_Graphics.MeasureString(word.Text, font);
         }
 
@@ -48,9 +47,6 @@ namespace Gma.CodeCloud.Controls
         {
             Font font = GetFont(layoutItem.Word);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
-
-//             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-//             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
 
             m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
         }
@@ -60,11 +56,10 @@ namespace Gma.CodeCloud.Controls
             Font font = GetFont(layoutItem.Word);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
 
-            Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-            TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, Color.LightGray);
+            m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
+
             int offset = (int)(5 *font.Size / MaxFontSize)+1;
-            point.Offset(-offset, -offset);
-            TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
+            m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X - offset, layoutItem.Rectangle.Y - offset);
         }
 
 		protected Font GetFont(IWord word)
