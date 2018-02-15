@@ -59,7 +59,6 @@ namespace WordCloudUIExtension
 		private TaskMatchesListView m_TaskMatchesList;
 
 		private Font m_ControlsFont;
-		private Timer m_RedrawTimer;
 		private String m_UserIgnoreFilePath, m_LangIgnoreFilePath;
 
         // -------------------------------------------------------------
@@ -158,9 +157,7 @@ namespace WordCloudUIExtension
 
 			UpdateWeightedWords(true);
 			UpdateMatchList(changedTaskIds);
-
-			OnUpdateTasks();
-		}
+        }
 
 		void UpdateMatchList(HashSet<UInt32> changedTaskIds = null)
 		{
@@ -189,6 +186,8 @@ namespace WordCloudUIExtension
 				if (selMatch != null)
 					m_TaskMatchesList.SetSelectedMatchId(selMatch.Id);
 			}
+
+            m_TaskMatchesList.EnsureSelectionVisible();
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
@@ -297,31 +296,10 @@ namespace WordCloudUIExtension
 			}
 		}
 
-		public void OnUpdateTasks()
-		{
-			StartRedrawTimer();
-		}
-
-		protected void StartRedrawTimer()
-		{
-			if (m_RedrawTimer == null)
-			{
-				m_RedrawTimer = new System.Windows.Forms.Timer();
-			}
-
-			m_RedrawTimer.Tick += OnRedrawTimer;
-			m_RedrawTimer.Interval = 10;
-			m_RedrawTimer.Start();
-		}
-
-		protected void OnRedrawTimer(object sender, EventArgs e)
-		{
-			m_RedrawTimer.Stop();
-
-			m_WordCloud.Invalidate();
-            m_TaskMatchesList.Invalidate();
-            m_TaskMatchesList.EnsureSelectionVisible();
-		}
+        public Bitmap SaveToImage()
+        {
+            return m_WordCloud.SaveToImage();
+        }
 
 		public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
 		{

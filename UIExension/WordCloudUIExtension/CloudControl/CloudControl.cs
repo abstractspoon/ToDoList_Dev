@@ -38,6 +38,16 @@ namespace Gma.CodeCloud.Controls
             m_LayoutType = LayoutType.Typewriter;
         }
 
+        public int MinWordWeight
+        {
+            get { return m_MinWordWeight; }
+        }
+
+        public int MaxWordWeight
+        {
+            get { return m_MaxWordWeight; }
+        }
+
         public bool HasItemUnderMouse()
         {
             return (m_ItemUnderMouse != null);
@@ -50,10 +60,15 @@ namespace Gma.CodeCloud.Controls
             if (m_Words == null || !m_Words.Any()) { return; }
             if (m_Layout == null) { return; }
 
-            IEnumerable<LayoutItem> wordsToRedraw = m_Layout.GetWordsInArea(e.ClipRectangle);
+            DrawWords(e.Graphics, m_Layout, e.ClipRectangle);
+        }
+
+        protected void DrawWords(Graphics graphics, ILayout layout, Rectangle rect)
+        {
+            IEnumerable<LayoutItem> wordsToRedraw = layout.GetWordsInArea(rect);
 
             using (IGraphicEngine graphicEngine =
-                    NewGraphicEngine(e.Graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
+                    NewGraphicEngine(graphics, Font.FontFamily, FontStyle.Regular, m_Palette, m_MinFontSize, m_MaxFontSize, m_MinWordWeight, m_MaxWordWeight))
             {
                 foreach (LayoutItem currentItem in wordsToRedraw)
                 {

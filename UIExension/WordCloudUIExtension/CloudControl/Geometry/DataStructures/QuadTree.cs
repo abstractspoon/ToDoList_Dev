@@ -56,6 +56,23 @@ namespace Gma.CodeCloud.Controls.Geometry.DataStructures
             return result;
         }
 
+        public RectangleF GetLayoutArea()
+        {
+            var contents = m_Root.SubTreeContents;
+
+            RectangleF totalArea = RectangleF.Empty;
+
+            foreach (LayoutItem item in contents)
+            {
+                if (totalArea.IsEmpty)
+                    totalArea = item.Rectangle;
+                else
+                    totalArea = RectangleF.Union(totalArea, item.Rectangle);
+            }
+
+            return totalArea;
+        }
+
         #endregion
 
         public void ForEach(QuadTreeAction action)

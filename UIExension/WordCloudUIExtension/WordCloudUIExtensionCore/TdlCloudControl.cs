@@ -1,5 +1,7 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Linq;
@@ -93,6 +95,48 @@ namespace WordCloudUIExtension
 			return words.Any(x => m_SelectedWord.IndexOf(x, compare) == 0);
 		}
 
+        public Bitmap SaveToImage()
+        {
+            // Work out how much area we are going to need
+            Size requiredSize;
+
+            using (Graphics graphics = this.CreateGraphics())
+            {
+                var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
+                var layout = Gma.CodeCloud.Controls.LayoutFactory.CreateLayout(LayoutType, new Size(10000, 10000));
+
+                layout.Arrange(WeightedWords, engine);
+                var usedRect = Rectangle.Round(layout.GetTotalArea());
+
+                requiredSize = new Size(usedRect.Width + 1, usedRect.Height + 1);
+
+                if (!requiredSize.IsEmpty)
+                {
+                    Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, graphics);
+
+                    using (Graphics graphics2 = Graphics.FromImage(finalImage))
+                    {
+                        var engine2 = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, 1, 68, "");
+                        var layout2 = Gma.CodeCloud.Controls.LayoutFactory.CreateLayout(LayoutType, requiredSize);
+
+                        layout2.Arrange(WeightedWords, engine2);
+
+                        var rect = new Rectangle(new Point(0, 0), requiredSize);
+                        graphics2.FillRectangle(SystemBrushes.Window, rect);
+
+                        DrawWords(graphics2, layout2, rect);
+                    }
+
+                    return finalImage;
+                }
+            }
+            
+            // else
+            return null;
+        }
+
+        // ------------------------------------------------------------------------------------------
+
 		protected override Gma.CodeCloud.Controls.Geometry.IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
 		{
 			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedWord);
@@ -174,10 +218,11 @@ namespace WordCloudUIExtension
 		private void AdjustTextRenderHint(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
 		{
 			// Add anti-aliasing for larger font sizes
-			if (GetFontSize(layoutItem.Word) > 10)
-				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-			else
-				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+// 			if (GetFontSize(layoutItem.Word) > 10)
+// 				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+// 			else
+// 				m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+			m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 		}
 
 		public override void Draw(Gma.CodeCloud.Controls.Geometry.LayoutItem layoutItem)
@@ -232,7 +277,8 @@ namespace WordCloudUIExtension
 			Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
 			Font font = GetFont(layoutItem.Word);
 
-			TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);
+			//TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, textColor, Color.Transparent);
+            m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
 		}
 
 	}

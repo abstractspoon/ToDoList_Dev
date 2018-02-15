@@ -20,10 +20,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace WordCloudUIExtension;
 using namespace System;
+using namespace System::Drawing;
+using namespace System::Drawing::Imaging;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+
+using namespace WordCloudUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +224,26 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return DoAppSelectCommand(nCmd, pData->select);
+
+	case IUI_SAVETOIMAGE:
+		if (pData)
+		{
+			Bitmap^ image = m_wnd->SaveToImage();
+
+			if (image != nullptr)
+			{
+				// Always save as png
+				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
+				sImagePath = System::IO::Path::ChangeExtension(sImagePath.get(), ".png");
+
+				image->Save(sImagePath.get(), System::Drawing::Imaging::ImageFormat::Png);
+
+				MarshalledString temp(sImagePath.get());
+				lstrcpyn(pData->szFilePath, temp, MAX_PATH);
+
+				return true;
+			}
+		}
 	}
 
 	// all else
@@ -239,6 +262,7 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
+	case IUI_SAVETOIMAGE:
 		return true;
 	}
 

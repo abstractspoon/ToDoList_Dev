@@ -8,6 +8,8 @@ namespace Gma.CodeCloud.Controls.Geometry
     public interface ILayout
     {
         void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine);
+
         IEnumerable<LayoutItem> GetWordsInArea(RectangleF area);
+        RectangleF GetTotalArea();
     }
 }

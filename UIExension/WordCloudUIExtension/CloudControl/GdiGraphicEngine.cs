@@ -33,14 +33,15 @@ namespace Gma.CodeCloud.Controls
             MinFontSize = minFontSize;
             MaxFontSize = maxFontSize;
             m_LastUsedFont = new Font(this.FontFamily, maxFontSize, this.FontStyle);
-            m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+            m_Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
 		}
 
 		public virtual SizeF Measure(IWord word)
         {
             Font font = GetFont(word);
 
-            return TextRenderer.MeasureText(m_Graphics, word.Text, font);
+            //return TextRenderer.MeasureText(m_Graphics, word.Text, font);
+            return m_Graphics.MeasureString(word.Text, font);
         }
 
         public virtual void Draw(LayoutItem layoutItem)
@@ -48,8 +49,10 @@ namespace Gma.CodeCloud.Controls
             Font font = GetFont(layoutItem.Word);
             Color color = GetPresudoRandomColorFromPalette(layoutItem);
 
-            Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
-            TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
+//             Point point = new Point((int)layoutItem.Rectangle.X, (int)layoutItem.Rectangle.Y);
+//             TextRenderer.DrawText(m_Graphics, layoutItem.Word.Text, font, point, color);
+
+            m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
         }
 
         public virtual void DrawEmphasized(LayoutItem layoutItem)
