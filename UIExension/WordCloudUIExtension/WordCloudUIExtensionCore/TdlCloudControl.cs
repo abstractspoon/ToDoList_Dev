@@ -99,34 +99,9 @@ namespace WordCloudUIExtension
 
         public Bitmap SaveToImage()
         {
-            // Work out how much area we are going to need
-            Size requiredSize = Size.Empty;
 			IEnumerable<LayoutItem> wordsToDraw = null;
 			ILayout layout = null;
-
-            using (Graphics graphics = this.CreateGraphics())
-            {
-				var allWords = WeightedWords;
-				int numAllWords = allWords.Count();
-
-                var engine = new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, Palette, MinFontSize, MaxFontSize, MinWordWeight, MaxWordWeight, "");
-				var trySize = new SizeF(640, 480);
-                float xInc = (trySize.Width / 4), yInc = (trySize.Height / 4);
-				 
-				do 
-				{
-					layout = LayoutFactory.CreateLayout(LayoutType, trySize);
-					layout.Arrange(allWords, engine);
-
-                    wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
-
-                    if (wordsToDraw.Count() == numAllWords)
-						requiredSize = Size.Ceiling(trySize);
-					else
-                        trySize = new SizeF(trySize.Width + xInc, trySize.Height + yInc);
-				} 
-				while (requiredSize.IsEmpty);
-			}
+            Size requiredSize = CalculateMinimumRequiredTotalSize(out layout, out wordsToDraw);
 
             Bitmap finalImage = new Bitmap(requiredSize.Width, requiredSize.Height, PixelFormat.Format32bppRgb);
 

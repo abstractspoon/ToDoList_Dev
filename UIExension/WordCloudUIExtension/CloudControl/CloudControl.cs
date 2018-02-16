@@ -81,9 +81,48 @@ namespace Gma.CodeCloud.Controls
 
         protected virtual IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
         {
-            return new GdiGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
+            return new GdiGraphicEngine(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
         }
+        
+        public Size CalculateMinimumRequiredTotalSize(out ILayout layout, out IEnumerable<LayoutItem> wordsToDraw, int minWordWeight = 1)
+        {
+            Size requiredSize = Size.Empty;
 
+            using (Graphics graphics = this.CreateGraphics())
+            {
+                var engine = NewGraphicEngine(graphics, 
+                                              this.Font.FontFamily, 
+                                              FontStyle.Regular, 
+                                              m_Palette, 
+                                              m_MinFontSize, 
+                                              m_MaxFontSize, 
+                                              minWordWeight,    // overridden
+                                              m_MaxWordWeight);
+
+                var allWords = WeightedWords;
+                int numAllWords = allWords.Count();
+
+                var trySize = new SizeF(640, 480);
+                float xInc = (trySize.Width / 4), yInc = (trySize.Height / 4);
+
+                do
+                {
+                    layout = LayoutFactory.CreateLayout(m_LayoutType, trySize);
+                    layout.Arrange(allWords, engine);
+
+                    wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
+
+                    if (wordsToDraw.Count() == numAllWords)
+                        requiredSize = Size.Ceiling(trySize);
+                    else
+                        trySize = new SizeF(trySize.Width + xInc, trySize.Height + yInc);
+                }
+                while (requiredSize.IsEmpty);
+            }
+
+            return requiredSize;
+        }
+        
         protected void BuildLayout()
         {
             if (m_Words == null || !m_Words.Any())
@@ -91,11 +130,17 @@ namespace Gma.CodeCloud.Controls
 
             using (Graphics graphics = this.CreateGraphics())
             {
-                IGraphicEngine graphicEngine =
-                    NewGraphicEngine(graphics, this.Font.FontFamily, FontStyle.Regular, m_Palette, MinFontSize, MaxFontSize, m_MinWordWeight, m_MaxWordWeight);
+                var engine = NewGraphicEngine(graphics, 
+                                              Font.FontFamily, 
+                                              FontStyle.Regular, 
+                                              m_Palette, 
+                                              m_MinFontSize, 
+                                              m_MaxFontSize, 
+                                              m_MinWordWeight, 
+                                              m_MaxWordWeight);
 
                 m_Layout = LayoutFactory.CreateLayout(m_LayoutType, this.Size);
-                m_Layout.Arrange(m_Words, graphicEngine);
+                m_Layout.Arrange(m_Words, engine);
             }
         }
 
