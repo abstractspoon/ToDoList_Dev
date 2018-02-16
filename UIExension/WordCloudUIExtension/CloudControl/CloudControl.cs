@@ -83,6 +83,16 @@ namespace Gma.CodeCloud.Controls
         {
             return new GdiGraphicEngine(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight);
         }
+
+        public IEnumerable<int> GetUniqueWeightings()
+        {
+            var weightings = new SortedSet<int>();
+
+            foreach (var word in m_Words)
+                weightings.Add(word.Occurrences);
+
+            return weightings;
+        }
         
         public Size CalculateMinimumRequiredTotalSize(out ILayout layout, out IEnumerable<LayoutItem> wordsToDraw, int minWordWeight = 1)
         {
@@ -99,8 +109,7 @@ namespace Gma.CodeCloud.Controls
                                               minWordWeight,    // overridden
                                               m_MaxWordWeight);
 
-                var allWords = WeightedWords;
-                int numAllWords = allWords.Count();
+                int numAllWords = m_Words.Count();
 
                 var trySize = new SizeF(640, 480);
                 float xInc = (trySize.Width / 4), yInc = (trySize.Height / 4);
@@ -108,7 +117,7 @@ namespace Gma.CodeCloud.Controls
                 do
                 {
                     layout = LayoutFactory.CreateLayout(m_LayoutType, trySize);
-                    layout.Arrange(allWords, engine);
+                    layout.Arrange(m_Words, engine);
 
                     wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
 

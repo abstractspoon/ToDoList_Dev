@@ -55,6 +55,16 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
 			return min;
 		}
 
+        public static IEnumerable<T> UniqueOcurrences<T>(this IEnumerable<T> words) where T : IWord
+        {
+            var occurrences = new SortedSet<int>();
+
+            foreach (var word in words)
+                occurrences.Add(word.Occurrences);
+
+            return (IEnumerable<T>)occurrences;
+        }
+
         public static IEnumerable<IWord> CountOccurences(this IEnumerable<string> terms)
         {
             return 
