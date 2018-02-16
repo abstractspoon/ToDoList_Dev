@@ -19,7 +19,7 @@ namespace Gma.CodeCloud.Controls.Geometry
             Center = new PointF(Surface.X + size.Width / 2, Surface.Y + size.Height / 2);
         }
 
-        public void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
+        virtual public void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {
             if (words == null)
             {

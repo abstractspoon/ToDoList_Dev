@@ -285,15 +285,7 @@ namespace WordCloudUIExtension
 				words.AddRange(taskWords);
 			}
 
-			var selStyle = m_StylesCombo.SelectedItem as StyleComboBox.StyleItem;
-
-			if (selStyle != null)
-			{
-				if (selStyle.Sorted)
-					m_WordCloud.WeightedWords = words.CountOccurences().SortByText();
-				else
-					m_WordCloud.WeightedWords = words.CountOccurences().SortByOccurences();
-			}
+            m_WordCloud.WeightedWords = words.CountOccurences();
 		}
 
         public Bitmap SaveToImage()

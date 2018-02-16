@@ -18,8 +18,6 @@ using Gma.CodeCloud.Controls.TextAnalyses.Blacklist.En;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-// PLS DON'T ADD 'USING' STATEMENTS WHILE I AM STILL LEARNING!
-
 ///////////////////////////////////////////////////////////////////////////
 
 namespace WordCloudUIExtension
@@ -121,6 +119,18 @@ namespace WordCloudUIExtension
 
         // ------------------------------------------------------------------------------------------
 
+        protected override ILayout CreateLayout(LayoutType layoutType, SizeF size)
+        {
+            switch (layoutType)
+            {
+                case LayoutType.Typewriter:
+                    return new TdlTypewriterLayout(size);
+            }
+
+            return base.CreateLayout(layoutType, size);
+        }
+        
+
 		protected override IGraphicEngine NewGraphicEngine(Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, float minFontSize, float maxFontSize, int minWordWeight, int maxWordWeight)
 		{
 			return new TdlGraphicEngine(this, graphics, this.Font.FontFamily, FontStyle.Regular, palette, minFontSize, maxFontSize, 1, maxWordWeight, m_SelectedWord);
@@ -181,6 +191,8 @@ namespace WordCloudUIExtension
 
 	}
 	public delegate void SelectionChangeEventHandler(object sender);
+
+    ///////////////////////////////////////////////////////////////////////////
 
 	public class TdlGraphicEngine : GdiGraphicEngine
 	{
@@ -260,4 +272,18 @@ namespace WordCloudUIExtension
 
 	}
 
+    ///////////////////////////////////////////////////////////////////////////
+
+    public class TdlTypewriterLayout : TypewriterLayout
+    {
+        public TdlTypewriterLayout(SizeF size) : base(size)
+        {
+        }
+
+        public override void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
+        {
+            if (words != null)
+                base.Arrange(words.SortByText(), graphicEngine);
+        }
+    }
 }

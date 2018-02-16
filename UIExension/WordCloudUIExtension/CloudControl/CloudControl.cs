@@ -116,7 +116,7 @@ namespace Gma.CodeCloud.Controls
 
                 do
                 {
-                    layout = LayoutFactory.CreateLayout(m_LayoutType, trySize);
+                    layout = CreateLayout(m_LayoutType, trySize);
                     layout.Arrange(m_Words, engine);
 
                     wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
@@ -148,7 +148,7 @@ namespace Gma.CodeCloud.Controls
                                               m_MinWordWeight, 
                                               m_MaxWordWeight);
 
-                m_Layout = LayoutFactory.CreateLayout(m_LayoutType, this.Size);
+                m_Layout = CreateLayout(m_LayoutType, this.Size);
                 m_Layout.Arrange(m_Words, engine);
             }
         }
@@ -169,6 +169,11 @@ namespace Gma.CodeCloud.Controls
             }
         }
 
+        protected virtual ILayout CreateLayout(LayoutType layoutType, SizeF size)
+        {
+            return LayoutFactory.CreateLayout(layoutType, size);
+        }
+        
         protected override void OnMouseMove(MouseEventArgs e)
         {
             LayoutItem nextItemUnderMouse;
@@ -292,7 +297,7 @@ namespace Gma.CodeCloud.Controls
 				if (value == null)
 					return;
 
-                m_Words = value;
+                m_Words = value.SortByOccurences();
 
 				if (m_Words.Any())
 				{
