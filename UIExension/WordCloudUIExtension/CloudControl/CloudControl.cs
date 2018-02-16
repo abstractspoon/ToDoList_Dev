@@ -94,7 +94,7 @@ namespace Gma.CodeCloud.Controls
             return weightings;
         }
         
-        public Size CalculateMinimumRequiredTotalSize(out ILayout layout, out IEnumerable<LayoutItem> wordsToDraw, int minWordWeight = 1)
+        public Size CalculateMinimumRequiredTotalSize(out ILayout layout, out IEnumerable<LayoutItem> wordsToDraw)
         {
             Size requiredSize = Size.Empty;
 
@@ -106,7 +106,7 @@ namespace Gma.CodeCloud.Controls
                                               m_Palette, 
                                               m_MinFontSize, 
                                               m_MaxFontSize, 
-                                              minWordWeight,    // overridden
+                                              m_MinWordWeight,
                                               m_MaxWordWeight);
 
                 int numAllWords = m_Words.Count();
