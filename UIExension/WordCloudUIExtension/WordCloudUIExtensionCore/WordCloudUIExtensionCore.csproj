@@ -81,10 +81,6 @@
       <Project>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</Project>
       <Name>Controls</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TagCloud\TagCloud.csproj">
-      <Project>{81217F5E-7E7E-4163-9358-F92A88F9588C}</Project>
-      <Name>TagCloud</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
