@@ -31,7 +31,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
 					word => word.Text);
 		}
 
-		public static int MaxOcurrences<T>(this IEnumerable<T> words) where T : IWord
+		public static int MaxOccurrences<T>(this IEnumerable<T> words) where T : IWord
 		{
 			int max = 0;
 
@@ -43,7 +43,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
 			return max;
 		}
 
-		public static int MinOcurrences<T>(this IEnumerable<T> words) where T : IWord
+		public static int MinOccurrences<T>(this IEnumerable<T> words) where T : IWord
 		{
 			int min = System.Int32.MaxValue;
 
@@ -75,12 +75,18 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
                     .Cast<IWord>();
         }
 
-
-        public static IEnumerable<string> Filter(this IEnumerable<string> terms, IBlacklist blacklist)
+        public static IEnumerable<string> FilterTerms(this IEnumerable<string> terms, IBlacklist blacklist)
         {
             return
                 terms.Where(
                     term => !blacklist.Countains(term));
         }
+
+		public static IEnumerable<T> Filter<T>(this IEnumerable<T> words, int minOccurrences) where T : IWord
+		{
+			return
+				words.Where(
+					word => (word.Occurrences >= minOccurrences));
+		}
     }
 }

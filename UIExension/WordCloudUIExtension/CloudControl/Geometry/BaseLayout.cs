@@ -14,10 +14,15 @@ namespace Gma.CodeCloud.Controls.Geometry
 
         protected BaseLayout(SizeF size)
         {
-            Surface = new RectangleF(new PointF(0, 0), size);
-            QuadTree = new QuadTree<LayoutItem>(Surface);
-            Center = new PointF(Surface.X + size.Width / 2, Surface.Y + size.Height / 2);
+			Reset(size);
         }
+
+		protected void Reset(SizeF size)
+		{
+			Surface = new RectangleF(new PointF(0, 0), size);
+			QuadTree = new QuadTree<LayoutItem>(Surface);
+			Center = new PointF(Surface.X + size.Width / 2, Surface.Y + size.Height / 2);
+		}
 
         virtual public int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {

@@ -6,9 +6,18 @@ namespace Gma.CodeCloud.Controls.Geometry
     {
         public TypewriterLayout(SizeF size) : base(size)
         {
-            m_Caret = new PointF(size.Width, 0);
+			m_Caret = new PointF(size.Width, 0);
+			m_LineHeight = 0;
         }
 
+		public void Reset(SizeF size)
+		{
+			base.Reset(size);
+
+            m_Caret = new PointF(size.Width, 0);
+			m_LineHeight = 0;
+		}
+		
         private PointF m_Caret;
         private float m_LineHeight;
  

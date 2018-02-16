@@ -10,6 +10,7 @@ using System.Reflection;
 
 using Gma.CodeCloud.Controls;
 using Gma.CodeCloud.Controls.Geometry;
+using Gma.CodeCloud.Controls.Geometry.DataStructures;
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
@@ -280,13 +281,109 @@ namespace WordCloudUIExtension
         {
         }
 
+/*
         public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {
-            if (words != null)
-                return base.Arrange(words.SortByText(), graphicEngine);
+			if (words == null)
+			{
+				throw new ArgumentNullException("words");
+			}
 
-            // else
-            return 0;
+			// Cull the word list until it fits
+			words = words.SortByText();
+
+			var weightings = words.UniqueOccurrences();
+
+			foreach (var weighting in weightings) // low to high
+			{
+				var found = true;
+				int numWords = words.Count();
+
+				foreach (IWord word in words)
+				{
+					SizeF size = graphicEngine.Measure(word);
+					RectangleF freeRectangle;
+
+					if (!TryFindFreeRectangle(size, out freeRectangle))
+					{
+						found = false;
+						words = words.Filter(weighting + 1);
+						break;
+					}
+
+					// else
+					LayoutItem item = new LayoutItem(freeRectangle, word);
+					QuadTree.Insert(item);
+				}
+
+				if (found)
+					break;
+
+				// else
+				Reset(new SizeF(Surface.Width, Surface.Height));
+			}
+
+			return words.Count();
+        }
+*/
+
+        public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
+        {
+			if (words == null)
+			{
+				throw new ArgumentNullException("words");
+			}
+
+			words = words.SortByText();
+
+			// Cull the word list until it fits
+			var weightings = new List<int>(words.UniqueOccurrences());
+
+			int min = 0;
+			int max = (weightings.Count - 1);
+			int weighting = 1;
+
+			while (min < max)
+			{
+				int mid = ((min + max) / 2);
+				weighting = weightings[mid];
+
+				var fits = true;
+				int numWords = words.Count();
+
+				foreach (IWord word in words)
+				{
+					SizeF size = graphicEngine.Measure(word);
+					RectangleF freeRectangle;
+
+					if (word.Occurrences >= weighting)
+					{
+						if (!TryFindFreeRectangle(size, out freeRectangle))
+						{
+							// Too many words, cull words and look forwards
+							fits = false;
+							break;
+						}
+
+						// else
+						LayoutItem item = new LayoutItem(freeRectangle, word);
+						QuadTree.Insert(item);
+					}
+				}
+
+				if (fits)
+					max = (mid - 1);
+				else
+					min = (mid + 1);
+
+				// Go again
+				if (min != max)
+					Reset(new SizeF(Surface.Width, Surface.Height));
+			}
+			
+			words = words.Filter(weighting + 1);
+
+			return words.Count();
         }
     }
 }

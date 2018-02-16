@@ -308,8 +308,8 @@ namespace Gma.CodeCloud.Controls
 
 					if (first!=null)
 					{
-						m_MaxWordWeight = m_Words.MaxOcurrences();
-						m_MinWordWeight = m_Words.MinOcurrences();
+						m_MaxWordWeight = m_Words.MaxOccurrences();
+						m_MinWordWeight = m_Words.MinOccurrences();
 					}
 
 					BuildLayout();
