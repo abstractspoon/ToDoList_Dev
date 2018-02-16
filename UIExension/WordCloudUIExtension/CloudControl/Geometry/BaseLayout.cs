@@ -19,24 +19,30 @@ namespace Gma.CodeCloud.Controls.Geometry
             Center = new PointF(Surface.X + size.Width / 2, Surface.Y + size.Height / 2);
         }
 
-        virtual public void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
+        virtual public int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {
             if (words == null)
             {
                 throw new ArgumentNullException("words");
             }
 
+            int numWords = 0;
+
             foreach (IWord word in words)
             {
                 SizeF size = graphicEngine.Measure(word);
                 RectangleF freeRectangle;
+
                 if (!TryFindFreeRectangle(size, out freeRectangle))
-                {
-                    return;
-                }
+                    break;
+
+                // else
                 LayoutItem item = new LayoutItem(freeRectangle, word);
                 QuadTree.Insert(item);
+                numWords++;
             }
+
+            return numWords;
         }
 
         public abstract bool TryFindFreeRectangle(SizeF size, out RectangleF foundRectangle);

@@ -110,6 +110,7 @@ namespace Gma.CodeCloud.Controls
                                               m_MaxWordWeight);
 
                 int numAllWords = m_Words.Count();
+                wordsToDraw = null;
 
                 var trySize = new SizeF(640, 480);
                 float xInc = (trySize.Width / 4), yInc = (trySize.Height / 4);
@@ -117,14 +118,16 @@ namespace Gma.CodeCloud.Controls
                 do
                 {
                     layout = CreateLayout(m_LayoutType, trySize);
-                    layout.Arrange(m_Words, engine);
-
-                    wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
-
-                    if (wordsToDraw.Count() == numAllWords)
+                    
+                    if (layout.Arrange(m_Words, engine) == numAllWords)
+                    {
+                        wordsToDraw = layout.GetWordsInArea(new RectangleF(new PointF(0, 0), trySize));
                         requiredSize = Size.Ceiling(trySize);
+                    }
                     else
+                    {
                         trySize = new SizeF(trySize.Width + xInc, trySize.Height + yInc);
+                    }
                 }
                 while (requiredSize.IsEmpty);
             }

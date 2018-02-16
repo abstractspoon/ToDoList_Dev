@@ -280,10 +280,13 @@ namespace WordCloudUIExtension
         {
         }
 
-        public override void Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
+        public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {
             if (words != null)
-                base.Arrange(words.SortByText(), graphicEngine);
+                return base.Arrange(words.SortByText(), graphicEngine);
+
+            // else
+            return 0;
         }
     }
 }
