@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using Gma.CodeCloud.Controls;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace WordCloudUIExtension
@@ -14,7 +16,7 @@ namespace WordCloudUIExtension
     {
 		public class StyleItem
 		{
-			public StyleItem(String text, Gma.CodeCloud.Controls.LayoutType type, bool sorted)
+			public StyleItem(String text, LayoutType type, bool sorted)
 			{
 				m_Text = text;
 				m_Type = type;
@@ -26,7 +28,7 @@ namespace WordCloudUIExtension
 				get { return m_Text; }
 			}
 
-			public Gma.CodeCloud.Controls.LayoutType Type
+			public LayoutType Type
 			{
 				get { return m_Type; }
 			}
@@ -52,15 +54,14 @@ namespace WordCloudUIExtension
         {
 			if (Items.Count == 0) // once only
 			{
-				Items.Add(new StyleItem(trans.Translate("Spiral"), Gma.CodeCloud.Controls.LayoutType.Spiral, false));
-				Items.Add(new StyleItem(trans.Translate("Typewriter"), Gma.CodeCloud.Controls.LayoutType.Typewriter, true));
-
+				Items.Add(new StyleItem(trans.Translate("Spiral"), LayoutType.Spiral, false));
+				Items.Add(new StyleItem(trans.Translate("Typewriter"), LayoutType.Typewriter, true));
 			}
 
             return true;
         }
 
-		public Gma.CodeCloud.Controls.LayoutType GetSelectedStyle()
+		public LayoutType GetSelectedStyle()
         {
             var selItem = SelectedItem as StyleItem;
 
@@ -70,7 +71,7 @@ namespace WordCloudUIExtension
             return selItem.Type;
         }
 
-        public bool SetSelectedStyle(Gma.CodeCloud.Controls.LayoutType style)
+        public bool SetSelectedStyle(LayoutType style)
         {
             var item = FindStyle(style);
 
@@ -82,7 +83,7 @@ namespace WordCloudUIExtension
             return true;
         }
 
-		protected StyleItem FindStyle(Gma.CodeCloud.Controls.LayoutType style)
+		protected StyleItem FindStyle(LayoutType style)
         {
             foreach (StyleItem item in Items)
             {

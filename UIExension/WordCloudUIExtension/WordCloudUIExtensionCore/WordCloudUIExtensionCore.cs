@@ -9,6 +9,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 
+using Gma.CodeCloud.Controls;
 using Gma.CodeCloud.Controls.TextAnalyses;
 using Gma.CodeCloud.Controls.TextAnalyses.Processing;
 using Gma.CodeCloud.Controls.TextAnalyses.Blacklist;
@@ -373,6 +374,7 @@ namespace WordCloudUIExtension
 			prefs.WriteProfileInt(key, "AttribToTrack", (int)m_Attrib);
 			prefs.WriteProfileString(key, "ColorScheme", m_ColorsCombo.GetSelectedSchemeAsString());
 			prefs.WriteProfileInt(key, "SplitterPosFromRight", (ClientRectangle.Right - SplitterCentre().X));
+			prefs.WriteProfileInt(key, "LayoutStyle", (int)m_StylesCombo.GetSelectedStyle());
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -393,6 +395,11 @@ namespace WordCloudUIExtension
 					m_ColorsCombo.SelectedIndex = 0;
 
 				m_InitialSplitPos = prefs.GetProfileInt(key, "SplitterPosFromRight", MatchListDefaultWidth);
+
+				var style = (LayoutType)prefs.GetProfileInt(key, "LayoutStyle", (int)LayoutType.Spiral);
+
+				if (!m_StylesCombo.SetSelectedStyle(style))
+					m_StylesCombo.SelectedIndex = 0;
             }
 
 			ShowSplitterBar(prefs.GetProfileInt("Preferences", "HidePaneSplitBar", 0) == 0);
@@ -627,6 +634,10 @@ namespace WordCloudUIExtension
 			Rectangle taskMatchesRect = new Rectangle(baseRect.Location, baseRect.Size);
 			Rectangle splitterRect = SplitterRect();
 
+			// Always make sure the splitter is visible
+			splitterRect.X = Math.Max(splitterRect.X, 0);
+			splitterRect.X = Math.Min(splitterRect.X, ClientRectangle.Right - splitterRect.Width);
+			
 			taskMatchesRect.X = splitterRect.Right;
 			taskMatchesRect.Width = (baseRect.Right - splitterRect.Right);
 
@@ -850,7 +861,7 @@ namespace WordCloudUIExtension
 
 		protected Rectangle SplitterRect()
 		{
-			// Splitter pos measured from RHS
+			// Note: Splitter pos is measured from RHS
 			Rectangle splitterRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 			splitterRect.Inflate(-1, 0);
 
