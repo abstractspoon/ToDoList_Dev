@@ -289,7 +289,7 @@ namespace Gma.CodeCloud.Controls
 			else
 				matches = WeightedWords.Where(a => words.Any(x => (a.Text.IndexOf(x, StringComparison.CurrentCultureIgnoreCase) == 0)));
 
-			return matches.SortByOccurences();
+			return matches.SortByOccurrences();
 		}
 
         public IEnumerable<IWord> WeightedWords
@@ -300,7 +300,7 @@ namespace Gma.CodeCloud.Controls
 				if (value == null)
 					return;
 
-                m_Words = value.SortByOccurences();
+                m_Words = value.SortByOccurrences();
 
 				if (m_Words.Any())
 				{

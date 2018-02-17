@@ -281,7 +281,6 @@ namespace WordCloudUIExtension
         {
         }
 
-/*
         public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
         {
 			if (words == null)
@@ -289,101 +288,35 @@ namespace WordCloudUIExtension
 				throw new ArgumentNullException("words");
 			}
 
-			// Cull the word list until it fits
-			words = words.SortByText();
+			// The default 'sort by occurrences' will tell us the very 
+			// maximum number of words that will fit on the page
+			int maxWords = words.Count();
+			int numWords = base.Arrange(words, graphicEngine);
 
-			var weightings = words.UniqueOccurrences();
-
-			foreach (var weighting in weightings) // low to high
+			while (numWords < maxWords)
 			{
-				var found = true;
-				int numWords = words.Count();
+				// Remove the 'extra' tasks and see if what's left fits
+				var temp = new List<IWord>(words.SortByOccurrences());
+				temp.RemoveRange(numWords, (maxWords - numWords));
 
-				foreach (IWord word in words)
-				{
-					SizeF size = graphicEngine.Measure(word);
-					RectangleF freeRectangle;
+				Reset();
 
-					if (!TryFindFreeRectangle(size, out freeRectangle))
-					{
-						found = false;
-						words = words.Filter(weighting + 1);
-						break;
-					}
+				words = temp.SortByText();
 
-					// else
-					LayoutItem item = new LayoutItem(freeRectangle, word);
-					QuadTree.Insert(item);
-				}
-
-				if (found)
-					break;
-
-				// else
-				Reset(new SizeF(Surface.Width, Surface.Height));
+				maxWords = numWords;
+				numWords = base.Arrange(words, graphicEngine);
 			}
 
-			return words.Count();
+			return numWords;
         }
-*/
 
-        public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
-        {
-			if (words == null)
-			{
-				throw new ArgumentNullException("words");
-			}
+		public void Reset()
+		{
+			if (Surface.IsEmpty)
+				return;
 
-			words = words.SortByText();
+			base.Reset(new SizeF(Surface.Width, Surface.Height));
+		}
 
-			// Cull the word list until it fits
-			var weightings = new List<int>(words.UniqueOccurrences());
-
-			int min = 0;
-			int max = (weightings.Count - 1);
-			int weighting = 1;
-
-			while (min < max)
-			{
-				int mid = ((min + max) / 2);
-				weighting = weightings[mid];
-
-				var fits = true;
-				int numWords = words.Count();
-
-				foreach (IWord word in words)
-				{
-					SizeF size = graphicEngine.Measure(word);
-					RectangleF freeRectangle;
-
-					if (word.Occurrences >= weighting)
-					{
-						if (!TryFindFreeRectangle(size, out freeRectangle))
-						{
-							// Too many words, cull words and look forwards
-							fits = false;
-							break;
-						}
-
-						// else
-						LayoutItem item = new LayoutItem(freeRectangle, word);
-						QuadTree.Insert(item);
-					}
-				}
-
-				if (fits)
-					max = (mid - 1);
-				else
-					min = (mid + 1);
-
-				// Go again
-				if (min != max)
-					Reset(new SizeF(Surface.Width, Surface.Height));
-			}
-			
-			words = words.Filter(weighting + 1);
-
-			return words.Count();
-        }
     }
 }

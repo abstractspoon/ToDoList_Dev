@@ -17,7 +17,7 @@ namespace Gma.CodeCloud.Controls.TextAnalyses.Processing
             
         }
 
-        public static IOrderedEnumerable<T> SortByOccurences<T>(this IEnumerable<T> words) where T : IWord
+        public static IOrderedEnumerable<T> SortByOccurrences<T>(this IEnumerable<T> words) where T : IWord
         {
             return 
                 words.OrderByDescending(

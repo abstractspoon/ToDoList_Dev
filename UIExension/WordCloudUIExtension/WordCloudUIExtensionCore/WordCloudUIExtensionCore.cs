@@ -108,7 +108,7 @@ namespace WordCloudUIExtension
 					!words.Exists(x => x.Equals(selWord, StringComparison.CurrentCultureIgnoreCase)))
 				{
 					// If not,  find the item's word with the most occurrence
-					var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurences();
+					var matches = m_WordCloud.WeightedWords.Where(a => words.Any(x => x.Equals(a.Text, StringComparison.CurrentCultureIgnoreCase))).SortByOccurrences();
 
 					if (!matches.Any())
 						return false; // ??
@@ -763,7 +763,7 @@ namespace WordCloudUIExtension
 			}
 
 			if (selWord == null)
-				selWord = m_WordCloud.WeightedWords.SortByOccurences().First().Text;
+				selWord = m_WordCloud.WeightedWords.SortByOccurrences().First().Text;
 
 			m_WordCloud.SelectedWord = selWord;
 
