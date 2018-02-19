@@ -31,6 +31,7 @@ namespace WordCloudUIExtension
 		private Translator m_Trans;
 		private string m_SelectedWord;
 		private IntPtr m_hWnd;
+		private Boolean m_SavingToImage = false;
 
 		public TdlCloudControl(IntPtr hWnd, Translator trans)
 		{
@@ -98,6 +99,8 @@ namespace WordCloudUIExtension
 
         public Bitmap SaveToImage()
         {
+			m_SavingToImage = true;
+
 			IEnumerable<LayoutItem> wordsToDraw = null;
 			ILayout layout = null;
             Size requiredSize = CalculateMinimumRequiredTotalSize(out layout, out wordsToDraw);
@@ -115,6 +118,8 @@ namespace WordCloudUIExtension
                     engine.Draw(word);
             }
 
+			m_SavingToImage = false;
+
             return finalImage;
         }
 
@@ -125,7 +130,7 @@ namespace WordCloudUIExtension
             switch (layoutType)
             {
                 case LayoutType.Typewriter:
-                    return new TdlTypewriterLayout(size);
+					return new TdlTypewriterLayout(size, m_SavingToImage);
             }
 
             return base.CreateLayout(layoutType, size);
@@ -277,8 +282,11 @@ namespace WordCloudUIExtension
 
     public class TdlTypewriterLayout : TypewriterLayout
     {
-        public TdlTypewriterLayout(SizeF size) : base(size)
+		private Boolean m_SavingToImage = false;
+
+        public TdlTypewriterLayout(SizeF size, Boolean savingToImage) : base(size)
         {
+			m_SavingToImage = savingToImage;
         }
 
         public override int Arrange(IEnumerable<IWord> words, IGraphicEngine graphicEngine)
@@ -288,10 +296,13 @@ namespace WordCloudUIExtension
 				throw new ArgumentNullException("words");
 			}
 
+			if (m_SavingToImage)
+				return base.Arrange(words.SortByText(), graphicEngine);
+
 			// The default 'sort by occurrences' will tell us the very 
 			// maximum number of words that will fit on the page
-			int maxWords = words.Count();
 			int numWords = base.Arrange(words, graphicEngine);
+			int maxWords = words.Count();
 
 			while (numWords < maxWords)
 			{
@@ -306,7 +317,7 @@ namespace WordCloudUIExtension
 				maxWords = numWords;
 				numWords = base.Arrange(words, graphicEngine);
 			}
-
+			
 			return numWords;
         }
 
