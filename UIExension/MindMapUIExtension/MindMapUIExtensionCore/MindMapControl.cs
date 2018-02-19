@@ -415,9 +415,13 @@ namespace MindMapUIExtension
 
             HorizontalScroll.Value = scrollPos.X;
             VerticalScroll.Value = scrollPos.Y;
+
+            if (!scrollPos.IsEmpty)
+                PerformLayout();
 #if DEBUG
             m_DebugMode.Visible = true;
 #endif
+
             return finalImage;
         }
 
@@ -1394,48 +1398,50 @@ namespace MindMapUIExtension
 
 			ResetPositions(rootNode);
 
-            if (rootNode.Nodes.Count < 2)
+            using (Graphics graphics = m_TreeView.CreateGraphics())
             {
-                // One-sided graph
-                RecalculatePositions(m_TreeView.Nodes, 0, 0);
-            }
-            else // Double-sided graph
-            {
-                // Right side
-                int horzOffset = CalculateHorizontalChildOffset(rootNode);
+                if (rootNode.Nodes.Count < 2)
+                {
+                    // One-sided graph
+                    RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
+                }
+                else // Double-sided graph
+                {
+                    // Right side
+                    int horzOffset = CalculateHorizontalChildOffset(rootNode);
 
-                TreeNode rightFrom = rootNode.Nodes[0];
+                    TreeNode rightFrom = rootNode.Nodes[0];
 
-				int iToNode = ((rootNode.Nodes.Count - 1) / 2);
-                TreeNode rightTo = rootNode.Nodes[iToNode];
+				    int iToNode = ((rootNode.Nodes.Count - 1) / 2);
+                    TreeNode rightTo = rootNode.Nodes[iToNode];
 
-                RecalculatePositions(rightFrom, rightTo, horzOffset, 0);
+                    RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
-				// Left side
-                horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
+				    // Left side
+                    horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
 
-				TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
-                TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
+				    TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
+                    TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
 
-                RecalculatePositions(leftFrom, leftTo, horzOffset, 0);
-				FlipPositionsHorizontally(leftFrom, leftTo);
+                    RecalculatePositions(graphics, leftFrom, leftTo, horzOffset, 0);
+				    FlipPositionsHorizontally(leftFrom, leftTo);
 
-				// Align the centres of the two halves vertically
-				Rectangle leftBounds = CalculateTotalBoundingBox(leftFrom, leftTo);
-				Rectangle rightBounds = CalculateTotalBoundingBox(rightFrom, rightTo);
+				    // Align the centres of the two halves vertically
+				    Rectangle leftBounds = CalculateTotalBoundingBox(leftFrom, leftTo);
+				    Rectangle rightBounds = CalculateTotalBoundingBox(rightFrom, rightTo);
 
-				Point offset = CalculateCentreToCentreOffset(leftBounds, rightBounds);
+				    Point offset = CalculateCentreToCentreOffset(leftBounds, rightBounds);
 
-				OffsetPositions(leftFrom, leftTo, 0, offset.Y);
+				    OffsetPositions(leftFrom, leftTo, 0, offset.Y);
 				
-                // Then align the root with the two halves
-                Rectangle childBounds = CalculateChildBoundingBox(rootNode);
-                Rectangle itemBounds = CalculateItemBounds(rootNode, childBounds, 0, 0);
+                    // Then align the root with the two halves
+                    Rectangle childBounds = CalculateChildBoundingBox(rootNode);
+                    Rectangle itemBounds = CalculateItemBounds(graphics, rootNode, childBounds, 0, 0);
                 
-                rootItem.ItemBounds = itemBounds;
-                rootItem.ChildBounds = childBounds;
+                    rootItem.ItemBounds = itemBounds;
+                    rootItem.ChildBounds = childBounds;
+                }
             }
-
             // Move the whole graph so that the top-left is (0,0)
             Rectangle graphRect = rootItem.TotalBounds;
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
@@ -1484,7 +1490,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private void RecalculatePositions(TreeNode fromNode, TreeNode toNode, int horzOffset, int vertOffset)
+		private void RecalculatePositions(Graphics graphics, TreeNode fromNode, TreeNode toNode, int horzOffset, int vertOffset)
 		{
             Rectangle prevItemBounds = Rectangle.Empty;
             TreeNode node = fromNode;
@@ -1494,13 +1500,13 @@ namespace MindMapUIExtension
 				// Children of this node First
                 int childOffset = (horzOffset + CalculateHorizontalChildOffset(node));
 
-                RecalculatePositions(node.Nodes, childOffset, vertOffset);
+                RecalculatePositions(graphics, node.Nodes, childOffset, vertOffset);
 
 				// Build the items' child bounding rectangle
                 Rectangle childBounds = CalculateChildBoundingBox(node);
 
                 // Centre the item vertically within the bounds of its children
-                Rectangle itemBounds = CalculateItemBounds(node, childBounds, horzOffset, vertOffset);
+                Rectangle itemBounds = CalculateItemBounds(graphics, node, childBounds, horzOffset, vertOffset);
 				
 				// Update data
                 MindMapItem item = Item(node);
@@ -1527,9 +1533,9 @@ namespace MindMapUIExtension
 			}
 		}
 
-        private Rectangle CalculateItemBounds(TreeNode node, Rectangle childBounds, int horzOffset, int vertOffset)
+        private Rectangle CalculateItemBounds(Graphics graphics, TreeNode node, Rectangle childBounds, int horzOffset, int vertOffset)
         {
-            Rectangle itemBounds = GetLogicalTreeNodePosition(node);
+            Rectangle itemBounds = GetLogicalTreeNodePosition(graphics, node);
 
             if (!itemBounds.IsEmpty)
             {
@@ -1547,12 +1553,12 @@ namespace MindMapUIExtension
             return itemBounds;
         }
 
-		private void RecalculatePositions(TreeNodeCollection nodes, int horzOffset, int vertOffset)
+		private void RecalculatePositions(Graphics graphics, TreeNodeCollection nodes, int horzOffset, int vertOffset)
 		{
             if (nodes.Count == 0)
                 return;
 
-            RecalculatePositions(nodes[0], nodes[nodes.Count - 1], horzOffset, vertOffset);
+            RecalculatePositions(graphics, nodes[0], nodes[nodes.Count - 1], horzOffset, vertOffset);
 		}
 
         private Rectangle CalculateChildBoundingBox(TreeNode node)
@@ -1590,10 +1596,12 @@ namespace MindMapUIExtension
 			return totalBounds;
 		}
 
-        private Rectangle GetLogicalTreeNodePosition(TreeNode node)
+        private Rectangle GetLogicalTreeNodePosition(Graphics graphics, TreeNode node)
         {
             Rectangle itemBounds = Copy(node.Bounds);
-			itemBounds.Width += 6;
+
+            if (!node.IsExpanded)
+                itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
 
 			if (IsParent(node) && !IsRoot(node))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
