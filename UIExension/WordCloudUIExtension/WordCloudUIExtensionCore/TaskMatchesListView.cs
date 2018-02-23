@@ -380,7 +380,7 @@ namespace WordCloudUIExtension
 			Brush brush;
 
 			if (e.Item.Selected)
-				brush = new SolidBrush(DrawingColor.SetLuminance(item.TextColor, 0.3f));
+				brush = new SolidBrush(DrawingColor.AdjustLighting(item.TextColor, -0.3f, true));
 			else
 				brush = new SolidBrush(item.TextColor);
 

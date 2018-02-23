@@ -273,7 +273,10 @@ namespace WordCloudUIExtension
 			Color textColor = DrawingColor.SetLuminance(color, 0.3f);
 			Font font = GetFont(layoutItem.Word);
 
-            m_Graphics.DrawString(layoutItem.Word.Text, font, new SolidBrush(color), layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
+            using (Brush brush = new SolidBrush(textColor))
+            {
+                m_Graphics.DrawString(layoutItem.Word.Text, font, brush, layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
+            }
 		}
 
 	}
