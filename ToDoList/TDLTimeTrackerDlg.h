@@ -135,6 +135,7 @@ protected:
 	BOOL m_bAlwaysOnTop;
 	BOOL m_bCollapsed;
 	BOOL m_bRecreating;
+	BOOL m_bCentreOnShow;
 
 	CComboBox m_cbTasklists;
 	CComboBox m_cbTasks;

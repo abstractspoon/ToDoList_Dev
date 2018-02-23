@@ -22,7 +22,7 @@ enum DDWHERE
 class CTreeDragDropHelper
 {
 public:
-	CTreeDragDropHelper(CTreeSelectionHelper& selection, CTreeCtrl& tree);
+	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree);
 	virtual ~CTreeDragDropHelper();
 
 	BOOL Initialize(CWnd* pOwner, BOOL bEnabled = TRUE, BOOL bAllowNcDrag = TRUE);
@@ -36,7 +36,7 @@ public:
 	void CancelDrag() { m_ddMgr.CancelDrag(); }
 
 protected:
-	CTreeSelectionHelper& m_selection;
+	const CTreeSelectionHelper& m_selection;
 	CTreeCtrl& m_tree;
 	CDragDropMgr m_ddMgr;
 	BOOL m_bEnabled;

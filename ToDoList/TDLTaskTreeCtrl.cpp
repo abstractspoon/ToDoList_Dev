@@ -745,6 +745,9 @@ void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 {
+	if (m_bMovingItem)
+		return;
+
 	NMTREEVIEW nmtv = { 0 };
 
 	nmtv.hdr.code = TVN_SELCHANGED;
@@ -888,7 +891,7 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			{
 				if (m_tcTasks.ItemHasChildren(htiHit))
 				{
-					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit));
+					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit), TRUE);
 
 					// save item handle so we don't re-handle in LButtonUp handler
 					m_htiLastHandledLBtnDown = htiHit;
@@ -926,10 +929,15 @@ BOOL CTDLTaskTreeCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		CPoint ptClient(::GetMessagePos());
 		m_tcTasks.ScreenToClient(&ptClient);
 
-		if (m_tcTasks.HitTest(ptClient, &nHitFlags) && (nHitFlags & TVHT_ONITEMICON))
+		HTREEITEM htiHit = m_tcTasks.HitTest(ptClient, &nHitFlags);
+		
+		if (m_calculator.IsTaskLocked(GetTaskID(htiHit)))
 		{
-			::SetCursor(GraphicsMisc::HandCursor());
-			return TRUE;
+			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+		}
+		else if (nHitFlags & TVHT_ONITEMICON)
+		{
+			return GraphicsMisc::SetHandCursor();
 		}
 	}
 	
@@ -1794,27 +1802,7 @@ BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
 
 HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling)
 {
-	TCH_WHERE nWhere = TCHW_BELOW; // most likely
-	HTREEITEM htiTarget = htiDestPrevSibling;
-	
-	// validate htiTarget
-	if (htiTarget == TVI_FIRST)
-	{
-		htiTarget = m_tcTasks.GetChildItem(htiDestParent);
-		nWhere = TCHW_ABOVE;
-	}
-	else if (htiTarget == TVI_LAST)
-	{
-		htiTarget = TCH().GetLastChildItem(htiDestParent);
-	}
-	
-	// if htiTarget is NULL then the target parent has no children at present
-	// so we just move directly on to it
-	if (htiTarget == NULL)
-	{
-		htiTarget = htiDestParent;
-		nWhere = TCHW_ON;
-	}
+	ASSERT(hti);
 
 	// prevent list updating until we have finished
 	CWaitCursor wait;
@@ -1827,7 +1815,7 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItem(HTREEITEM hti, HTREEITEM htiDestParent, HTR
 			m_tcTasks.SetItemState(htiDestParent, TVIS_EXPANDED, TVIS_EXPANDED);
 		
 		// do the move and return the new tree item
-		hti = TCH().MoveTree(htiTarget, hti, nWhere, TRUE, TRUE);
+		hti = TCH().MoveTree(hti, htiDestParent, htiDestPrevSibling, TRUE, TRUE);
 	}
 
 	return hti;
@@ -1837,6 +1825,8 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 {
 	if (!CanMoveSelection(nDirection))
 		return FALSE;
+
+	CAutoFlag af(m_bMovingItem, TRUE);
 
 	HTREEITEM htiDestParent = NULL, htiDestAfter = NULL;
 	VERIFY(GetInsertLocation(nDirection, htiDestParent, htiDestAfter));
@@ -1864,6 +1854,8 @@ void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 	ExpandList(htiDestParent);
 
 	{
+		CAutoFlag af(m_bMovingItem, TRUE);
+
 		CLockUpdates lu(m_tcTasks);
 		CHoldRedraw hr1(m_tcTasks), hr2(m_lcColumns);
 		
@@ -1880,6 +1872,9 @@ void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 		// move the tree items
 		POSITION pos = selection.GetHeadPosition();
 		HTREEITEM htiAfter = htiDestPrevSibling;
+
+		if (htiAfter == NULL)
+			htiAfter = TVI_FIRST;
 		
 		while (pos)
 		{
@@ -2097,7 +2092,7 @@ int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 
 BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 {
-	if (cache.aSelTaskIDs.GetSize())
+	if (!cache.IsEmpty())
 	{
 		CHTIMap mapHTI;
 		TCH().BuildHTIMap(mapHTI, TRUE);
@@ -2553,7 +2548,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits) const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dTime += m_data.CalcTaskTimeEstimate(dwTaskID, nUnits);
+		dTime += m_calculator.GetTaskTimeEstimate(dwTaskID, nUnits);
 	}
 	
 	return dTime;
@@ -2574,7 +2569,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskTimeSpent(TDC_UNITS nUnits) const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dTime += m_data.CalcTaskTimeSpent(dwTaskID, nUnits);
+		dTime += m_calculator.GetTaskTimeSpent(dwTaskID, nUnits);
 	}
 	
 	return dTime;
@@ -2595,7 +2590,7 @@ double CTDLTaskTreeCtrl::CalcSelectedTaskCost() const
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		
-		dCost += m_data.CalcTaskCost(dwTaskID);
+		dCost += m_calculator.GetTaskCost(dwTaskID);
 	}
 	
 	return dCost;

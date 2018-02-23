@@ -17,6 +17,8 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\localizer.h"
 
+#include "..\3rdparty\dibdata.h"
+
 #include "..\Interfaces\UITheme.h"
 #include "..\Interfaces\IPreferences.h"
 
@@ -227,6 +229,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_BigCalendar.SetOption(TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	m_BigCalendar.SetOption(TCCO_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
 	m_BigCalendar.SetOption(TCCO_PREVENTDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
+	m_BigCalendar.SetOption(TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
 
 	// calendar specific preferences
 	if (!bAppOnly)
@@ -271,11 +274,13 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCDUE,					m_dlgPrefs.GetDisplayCalcDue());
 	Misc::SetFlag(dwOptions, TCCO_ADJUSTTASKHEIGHTS,				m_dlgPrefs.GetAdjustTaskHeights());
 	Misc::SetFlag(dwOptions, TCCO_TREATOVERDUEASDUETODAY,			m_dlgPrefs.GetTreatOverdueAsDueToday());
+	Misc::SetFlag(dwOptions, TCCO_HIDEPARENTTASKS,					m_dlgPrefs.GetHideParentTasks());
 
 	// Preserve app preferences
 	Misc::SetFlag(dwOptions, TCCO_TASKTEXTCOLORISBKGND,				m_BigCalendar.HasOption(TCCO_TASKTEXTCOLORISBKGND));
 	Misc::SetFlag(dwOptions, TCCO_STRIKETHRUDONETASKS,				m_BigCalendar.HasOption(TCCO_STRIKETHRUDONETASKS));
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
+	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 
 	m_BigCalendar.SetOptions(dwOptions); 
 }
@@ -326,7 +331,7 @@ bool CCalendarWnd::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
+bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -345,39 +350,47 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		break;
 
 	case IUI_TOGGLABLESORT:
+		if (pData)
+			return (m_BigCalendar.SortBy(pData->nSortBy, TRUE) != FALSE);
+		break;
+
 	case IUI_SORT:
-		return (m_BigCalendar.SortBy((IUI_ATTRIBUTE)dwExtra, (nCmd == IUI_TOGGLABLESORT)) != FALSE);
+		if (pData)
+			return (m_BigCalendar.SortBy(pData->nSortBy, FALSE) != FALSE);
+		break;
 		
 	case IUI_SELECTTASK:
-		return SelectTask(dwExtra);
+		if (pData)
+			return SelectTask(pData->dwTaskID);
+		break;
 		
 	case IUI_SETFOCUS:
 		m_BigCalendar.SetFocus();
 		return true;
 
 	case IUI_SAVETOIMAGE:
-		if (dwExtra)
+		if (pData)
 		{
 			CBitmap bmImage;
 
 			if (m_BigCalendar.SaveToImage(bmImage))
 			{
-				HBITMAP* pHBM = (HBITMAP*)dwExtra;
-				*pHBM = (HBITMAP)bmImage.Detach();
+				CDibData dib;
 
-				return true;
+				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
+					return true;
 			}
 		}
 
 	case IUI_SETTASKFONT:
-		m_BigCalendar.SendMessage(WM_SETFONT, dwExtra, TRUE);
+		m_BigCalendar.SendMessage(WM_SETFONT, (WPARAM)pData->hFont, TRUE);
 		break;
 	}
 
 	return false;
 }
 
-bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const 
+bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -403,7 +416,9 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
-		return WantSortUpdate((IUI_ATTRIBUTE)dwExtra);
+		if (pData)
+			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+		break;
 
 	case IUI_SAVETOIMAGE:
 		return (m_BigCalendar.CanSaveToImage() != FALSE);
@@ -486,18 +501,11 @@ bool CCalendarWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return false; // only support single selection
 }
 
-bool CCalendarWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CCalendarWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return (CTaskCalendarCtrl::WantEditUpdate(nAttribute) != FALSE);
-}
-
-bool CCalendarWnd::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return (CTaskCalendarCtrl::WantSortUpdate(nAttribute) != FALSE);
 }
 
 bool CCalendarWnd::PrepareNewTask(ITaskList* pTask) const

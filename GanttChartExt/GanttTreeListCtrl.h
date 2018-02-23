@@ -18,6 +18,8 @@
 #include "..\shared\treectrlhelper.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\mapex.h"
+#include "..\shared\TreeDragDropHelper.h"
+#include "..\shared\TreeSelectionHelper.h"
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
@@ -45,6 +47,8 @@ public:
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
+
+	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
@@ -56,6 +60,10 @@ public:
 	HTREEITEM GetSelectedItem() const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+
+	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
+	BOOL MoveSelectedItem(const IUITASKMOVE& move);
+	BOOL IsMovingTask() const { return m_bMovingTask; }
 
 	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
 	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
@@ -107,7 +115,7 @@ public:
 	void SetSplitBarColor(COLORREF crSplitBar);
 
 	BOOL CancelOperation();
-	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
+	void SetReadOnly(bool bReadOnly);
 	BOOL GetLabelEditRect(LPRECT pEdit) const;
 	CString GetItemTip(CPoint ptScreen) const;
 	HTREEITEM GetItem(CPoint ptScreen) const;
@@ -133,6 +141,7 @@ public:
 
 protected:
 	BOOL m_bReadOnly;
+	BOOL m_bMovingTask;
 
 	GANTTDATERANGE m_dateRange;
 	GANTTITEM m_giPreDrag;
@@ -154,6 +163,8 @@ protected:
 	CString m_sMilestoneTag;
 	GTLC_DRAG m_nDragging;
 	int m_nPrevDropHilitedItem;
+	CTreeDragDropHelper m_treeDragDrop;
+	CTreeSelectionHelper m_tshDragDrop;
 
 	CGanttTreeCtrl& m_tree;
 	CListCtrl& m_list;
@@ -323,6 +334,7 @@ protected:
 	COleDateTime CalcMinDragDate(const GANTTITEM& gi) const;
 	double CalcMinDragDuration() const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
+	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
 
 	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
 	void NotifyParentDragChange();

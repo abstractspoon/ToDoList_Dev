@@ -18,50 +18,11 @@
 
 struct INIENTRY
 {
-	INIENTRY(LPCTSTR szName = NULL, LPCTSTR szValue = NULL, BOOL bQuote = FALSE) 
-		: sName(szName), sValue(szValue), bQuoted(bQuote) 
-	{
-	}
+	INIENTRY(LPCTSTR szName = NULL, LPCTSTR szValue = NULL, BOOL bQuote = FALSE);
 
-	CString Format() const
-	{
-		CString sEntry;
-
-		if (bQuoted)
-			sEntry.Format(_T("%s=\"%s\""), sName, sValue);
-		else
-			sEntry.Format(_T("%s=%s"), sName, sValue);
-
-		return sEntry;
-	}
-
-	BOOL Parse(const CString& sEntry)
-	{
-		int nEquals = sEntry.Find('=');
-		
-		if (nEquals != -1)
-		{
-			sName = sEntry.Left(nEquals);
-			sName.TrimRight();
-			
-			sValue = sEntry.Mid(nEquals + 1);
-			sValue.TrimLeft();
-			
-			// remove quotes
-			bQuoted = sValue.Replace(_T("\""), _T(""));
-
-			return !sName.IsEmpty();
-		}
-
-		return FALSE;
-	}
-
-	BOOL operator==(const INIENTRY& ie) const
-	{
-		return ((sName == ie.sName) && 
-				(sValue == ie.sValue) && 
-				(bQuoted == ie.bQuoted));
-	}
+	CString Format() const;
+	BOOL Parse(const CString& sEntry);
+	BOOL operator==(const INIENTRY& ie) const;
 	
 	CString sName;
 	CString sValue;
@@ -73,10 +34,8 @@ typedef CMap<CString, LPCTSTR, INIENTRY, INIENTRY&> CIniEntryMap;
 
 struct INISECTION
 {
-	INISECTION(LPCTSTR szName = NULL) : sSection(szName) 
-	{
-		aEntries.InitHashTable(199); // prime number closest to 200
-	}
+	INISECTION(LPCTSTR szName = NULL);
+	INISECTION(const INISECTION& other);
 	
 	CString sSection;
 	CIniEntryMap aEntries;
@@ -95,8 +54,12 @@ public:
 	operator const IPreferences*() const { return &m_iPrefs; }
  
 	static BOOL Initialise(LPCTSTR szPrefsPath, BOOL bIni);
+	static BOOL Save();
+	static void Release();
+
 	static BOOL IsInitialised();
 	static BOOL UsesIni() { return s_bIni; }
+	static BOOL IsEmpty();
 
 	static CString GetPath(BOOL bFriendly = FALSE);
 
@@ -122,13 +85,13 @@ public:
 	int GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) const;
 	void WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
 
+
 	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty = FALSE);
 	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection = TRUE);
 	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CDWordArray& aItems);
 	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
 		
 	static CString KeyFromFile(LPCTSTR szFilePath, BOOL bFilenameOnly = TRUE);
-	static BOOL Save();
 
 protected:
 	static CIniSectionArray s_aIni;
@@ -145,7 +108,7 @@ protected:
 protected:
 	// internal helpers that require pre-locking
 	static BOOL SaveInternal();
-	static void DeleteIni();
+	static void Release(CIniSectionArray& aSections);
 
 	static CString GetIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault);
 	static BOOL WriteIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue, BOOL bQuoted);
@@ -158,6 +121,8 @@ protected:
 	static void SetEntryValue(INISECTION& section, LPCTSTR lpszEntry, LPCTSTR szValue, BOOL bQuoted);
 	static void SetEntryValue(INISECTION& section, const INIENTRY& ie);
 
+	static void Copy(const CIniSectionArray& aSrc, CIniSectionArray& aDest);
+	static BOOL Load(LPCTSTR szFilePath, CIniSectionArray& aSections);
 
 private:
 	class CIPreferencesImpl : public IPreferences

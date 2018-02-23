@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_WM_MOUSEMOVE()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_WM_SIZE()
 	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_ERASEBKGND()
 	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGING, OnTabSelChange)
@@ -1062,7 +1063,7 @@ void CTabCtrlEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// Prevent render artifacts on the tab that was beneath the spin control
-	const CWnd* pSpin = GetDlgItem(1);
+	const CWnd* pSpin = GetSpinButtonCtrl();
 
 	if (pSpin && (pScrollBar == pSpin))
 	{
@@ -1078,10 +1079,94 @@ void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			GetItemRect(iTab, rTab);
 
 			if (CRect().IntersectRect(rSpin, rTab))
-			{
-				//rTab.DeflateRect(2, 2);
 				InvalidateRect(rTab, FALSE);
-			}
 		}
 	}
 }
+
+CSpinButtonCtrl* CTabCtrlEx::GetSpinButtonCtrl() const
+{
+	return (CSpinButtonCtrl*)GetDlgItem(1);
+}
+
+BOOL CTabCtrlEx::HasSpinButtonCtrl() const
+{
+	return (GetSpinButtonCtrl() != NULL);
+}
+
+int CTabCtrlEx::GetScrollPos() const
+{
+	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
+
+	if (pSpin == NULL)
+		return 0;
+
+	// else
+	return (int)LOWORD(pSpin->GetPos());
+}
+
+BOOL CTabCtrlEx::SetScrollPos(int nPos)
+{
+	if ((nPos < 0) || (nPos >= GetItemCount()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	SendMessage(WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nPos), 0L);
+	return TRUE;
+}
+
+void CTabCtrlEx::EnsureSelVisible()
+{
+	CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
+
+	if (pSpin == NULL)
+		return;
+
+	CRect rSpin;
+	pSpin->GetWindowRect(rSpin);
+	ScreenToClient(rSpin);
+
+	CRect rActiveTab;
+	int nSelTab = GetCurSel();
+	GetItemRect(nSelTab, rActiveTab);
+
+	if ((rActiveTab.left >= 0) && (rActiveTab.right <= rSpin.left))
+		return;
+
+	int nScrollPos = GetScrollPos();
+
+	if (rActiveTab.left < 0)
+	{
+		// Scroll left
+		while (nScrollPos--)
+		{
+			SetScrollPos(nScrollPos);
+			GetItemRect(nSelTab, rActiveTab);
+
+			if (rActiveTab.left >= 0)
+				break;
+		}
+	}
+	else
+	{
+		// Scroll right
+		for (int nPos = (nScrollPos + 1); nPos < GetItemCount(); nPos++)
+		{
+			SetScrollPos(nPos);
+			GetItemRect(nSelTab, rActiveTab);
+
+			if (rActiveTab.right <= rSpin.left)
+				break;
+		}
+	}
+}
+
+void CTabCtrlEx::OnSize(UINT nType, int cx, int cy)
+{
+	CXPTabCtrl::OnSize(nType, cx, cy);
+
+	EnsureSelVisible();
+}
+

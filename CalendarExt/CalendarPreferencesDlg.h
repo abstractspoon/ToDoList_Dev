@@ -26,6 +26,7 @@ public:
 	BOOL GetShowMiniCalendar() const { return m_bShowMiniCalendar; }
 	BOOL GetAdjustTaskHeights() const { return m_bAdjustTaskHeights; }
 	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
+	BOOL GetHideParentTasks() const { return m_bHideParentTasks; }
 
 	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
@@ -60,6 +61,7 @@ protected:
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
+	BOOL	m_bHideParentTasks;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -94,6 +96,7 @@ public:
 	BOOL GetShowMiniCalendar() const { return m_page.GetShowMiniCalendar(); }
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
 	BOOL GetTreatOverdueAsDueToday() const { return m_page.GetTreatOverdueAsDueToday(); }
+	BOOL GetHideParentTasks() const { return m_page.GetHideParentTasks(); }
 
 	BOOL GetDisplayAsContinuous() const { return m_page.GetDisplayAsContinuous(); }
 	BOOL GetDisplayStart() const { return m_page.GetDisplayStart(); }

@@ -225,9 +225,11 @@ public:
 
 	void EnsureVisibleEx(HTREEITEM hti, BOOL bVPartialOK = TRUE, BOOL bHPartialOK = TRUE);
 	int BuildHTIMap(CHTIMap& mapHTI, BOOL bVisibleOnly = FALSE) const;
-	
-	HTREEITEM CopyTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
-	HTREEITEM MoveTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
+
+	HTREEITEM MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
+						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
+	HTREEITEM CopyTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
+						BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
 
 protected:
 	CTreeCtrl& m_tree;
@@ -239,10 +241,12 @@ protected:
 	HTREEITEM FindDeepestItem(HTREEITEM htiParent, int& nDepth, BOOL bExpandedOnly) const;
 	HTREEITEM FindWidestItem(HTREEITEM htiParent, int& nWidth, BOOL bExpandedOnly, CDC* pDC) const;
 
+	TCH_WHERE GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, HTREEITEM& htiTarget) const;
+	HTREEITEM CopyTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
+
 	void BuildCopy(const HTREEITEM hti, TCHHCOPY* pCopy) const;
 	HTREEITEM CopyTree(HTREEITEM hDest, const TCHHCOPY* pSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback, BOOL bUsesImageCallback);
 	void ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BOOL bParents);
-
 };
 
 #endif // !defined(AFX_TREECTRLHELPER_H__F6652DBE_3770_4E1C_A246_057AD6AD16B7__INCLUDED_)

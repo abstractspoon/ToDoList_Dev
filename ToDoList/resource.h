@@ -788,6 +788,8 @@
 #define IDC_FORMATS                     1504
 #define IDC_DISPLAYUDTSINTOOLBAR        1505
 #define IDC_EDIT_DISPLAYLANGUAGE        1507
+#define IDC_USELATESTLASTMODIFIED       1508
+#define IDC_ENDTRACKINGONREMINDER       1510
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -1446,6 +1448,7 @@
 #define IDS_PRINTFAILED                 57763
 #define IDS_SAVEBEFORECLOSE             57764
 #define IDS_TABSWITCHTOOLTIP            57765
+#define IDS_PREF_TASKVIEWVISIBILITY     57766
 #define IDS_READONLYTOWRITABLE          57768
 #define IDS_WRITABLETOREADONLY          57769
 #define IDS_TASKLISTSRELOADED           57770
@@ -2113,6 +2116,8 @@
 #define IDS_STICKIES_LINK               58468
 #define IDS_REPLACEINTASKTITLES         58469
 #define IDS_FINDINTASKTITLES            58470
+#define IDS_SAVETOIMAGEPROGRESS         58471
+#define IDS_INIFILELOCKED               58472
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
@@ -2121,7 +2126,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        309
 #define _APS_NEXT_COMMAND_VALUE         34599
-#define _APS_NEXT_CONTROL_VALUE         1508
+#define _APS_NEXT_CONTROL_VALUE         1511
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

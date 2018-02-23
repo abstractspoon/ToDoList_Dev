@@ -76,6 +76,11 @@ public:
 	int HitTest(const CPoint& point) const;
 	int HitTest(TCHITTESTINFO* pHitTestInfo) const;
 	
+	int GetScrollPos() const;
+	BOOL SetScrollPos(int nPos);
+
+	void EnsureSelVisible();
+
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	
 	static BOOL IsSupportedFlag(DWORD dwFlag);
@@ -125,6 +130,7 @@ protected:
 	afx_msg LRESULT OnUpdateTabItemWidth(WPARAM wp, LPARAM lp);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -149,6 +155,8 @@ protected:
 	CString GetRequiredTabText(int nTab);
 	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
 	COLORREF GetItemBkColor(int nTab);
+	CSpinButtonCtrl* GetSpinButtonCtrl() const;
+	BOOL HasSpinButtonCtrl() const;
 
 	// pseudo message handler
 	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

@@ -749,7 +749,7 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 	{
 		// Load the Help.ini file to find the URL for this topic
 		CIni ini(GetResourcePath(_T("Misc"), _T("Help.ini")));
-		sHelpPage = ini.GetString(_T("Help Urls"), sHelpID);
+		sHelpPage = ini.GetString(_T("Help IDs"), sHelpID);
 	}
 	else
 	{
@@ -772,6 +772,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	BOOL bUseIni = FALSE;
 	BOOL bSetMultiInstance = FALSE;
 	BOOL bRegKeyExists = CRegKey2::KeyExists(HKEY_CURRENT_USER, APPREGKEY);
+	BOOL bUpgraded = cmdInfo.HasOption(SWITCH_UPGRADED);
 
 #ifdef _DEBUG
 	BOOL bQuiet = cmdInfo.HasOption(SWITCH_QUIET);
@@ -835,10 +836,18 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	// check existing prefs
 	if (!bFirstTime)
 	{
-		SetPreferences(bUseIni, sIniPath, TRUE);
+		if (!SetPreferences(bUseIni, sIniPath, TRUE))
+		{
+			// Notify user and quit app to avoid overwriting the ini file
+			AfxMessageBox(CEnString(IDS_INIFILELOCKED), MB_OK);
+			return FALSE; 
+		}
 
 		if (!InitTranslation(bFirstTime, bQuiet))
-			return FALSE; // user cancelled -> Quit app
+		{ 
+			// user cancelled -> Quit app
+			return FALSE;
+		}
 
 		CPreferences prefs;
 		
@@ -940,7 +949,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 	return TRUE;
 }
 
-void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
+BOOL CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 {
 	CString sExisting(bExisting ? _T("existing ") : _T(""));
 	
@@ -953,20 +962,30 @@ void CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 
 		free((void*)m_pszRegistryKey);
 		m_pszRegistryKey = NULL;
-				
-		VERIFY(CPreferences::Initialise(szPrefs, TRUE));
-	}
-	else
-	{
-		FileMisc::LogText(_T("Using %sregistry settings for preferences"), sExisting);
-		
-		SetRegistryKey(REGKEY);
 
-		free((void*)m_pszProfileName);
-		m_pszProfileName = NULL;
-		
-		VERIFY(CPreferences::Initialise(APPREGKEY, FALSE));
+		// Try up the 10 times
+		int nTry = 10;
+
+		while (nTry--)
+		{
+			if (CPreferences::Initialise(szPrefs, TRUE))
+				return TRUE;
+
+			FileMisc::LogText(_T("Existing ini file is not readable (%d)"), (10 - nTry));
+			Sleep(100);
+		}
+
+		return FALSE;
 	}
+
+	// else use Registry
+	FileMisc::LogText(_T("Using %sregistry settings for preferences"), sExisting);
+	SetRegistryKey(REGKEY);
+
+	free((void*)m_pszProfileName);
+	m_pszProfileName = NULL;
+		
+	return CPreferences::Initialise(APPREGKEY, FALSE);
 }
 
 BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
@@ -1114,7 +1133,7 @@ void CToDoListApp::OnImportPrefs()
 		{
 			if (AfxMessageBox(CEnString(IDS_POSTIMPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 			{
-				SetPreferences(FALSE, APPREGKEY, FALSE);
+				VERIFY(SetPreferences(FALSE, APPREGKEY, FALSE));
 				
 				// reset prefs
 				m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
@@ -1186,10 +1205,15 @@ void CToDoListApp::OnExportPrefs()
 			{
 				if (AfxMessageBox(CEnString(IDS_POSTEXPORTPREFS), MB_YESNO | MB_ICONQUESTION) == IDYES)
 				{
-					SetPreferences(TRUE, sIniPath, FALSE);
-					
-					// reset prefs
-					m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
+					if (SetPreferences(TRUE, sIniPath, FALSE))
+					{
+						// reset prefs
+						m_pMainWnd->SendMessage(WM_TDL_REFRESHPREFS);
+					}
+					else
+					{
+						// Notify the user
+					}
 				}
 			}
 		}
@@ -1230,8 +1254,8 @@ void CToDoListApp::OnHelpDonate()
 
 int CToDoListApp::ExitInstance() 
 {
-	// TODO: Add your specialized code here and/or call the base class
 	CLocalizer::Release();
+	CPreferences::Release();
 
 	return CWinApp::ExitInstance();
 }

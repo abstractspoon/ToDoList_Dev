@@ -430,16 +430,21 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return FALSE;
 }
 
-BOOL TODOITEM::IsRecentlyEdited() const
+BOOL TODOITEM::IsRecentlyModified() const
 {
-	if (!HasLastMod())
+	return IsRecentlyModified(dateLastMod);
+}
+
+BOOL TODOITEM::IsRecentlyModified(const COleDateTime& date)
+{
+	if (!CDateHelper::IsDateSet(date))
 		return FALSE; // never
 
 	if (s_dtsRecentModPeriod.m_span == 0.0)
 		return TRUE; // always
 	
 	// else
-	return ((COleDateTime::GetCurrentTime() - dateLastMod) < s_dtsRecentModPeriod);
+	return ((COleDateTime::GetCurrentTime() - date) < s_dtsRecentModPeriod);
 }
 
 COleDateTimeSpan TODOITEM::GetRemainingDueTime() const
@@ -720,6 +725,24 @@ DWORD TODOSTRUCTURE::GetSubTaskID(int nPos) const
 {
 	const TODOSTRUCTURE* pTDS = GetSubTask(nPos);
 	return pTDS ? pTDS->GetTaskID() : 0;
+}
+
+BOOL TODOSTRUCTURE::HasSubTask(DWORD dwSubtaskID, BOOL bImmediate) const
+{
+	int nPos = GetSubTaskPosition(dwSubtaskID);
+
+	if ((nPos != -1) || bImmediate)
+		return (nPos != -1);
+
+	// check subtasks
+	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
+	{
+		if (GetSubTask(nPos)->HasSubTask(dwSubtaskID, FALSE))
+			return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 int TODOSTRUCTURE::GetSubTaskPosition(DWORD dwID) const

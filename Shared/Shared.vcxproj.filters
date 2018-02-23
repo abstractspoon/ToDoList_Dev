@@ -472,6 +472,9 @@
     <ClCompile Include="FindReplace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SoundEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -979,6 +982,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FindReplace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundEdit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

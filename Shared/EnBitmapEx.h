@@ -31,7 +31,7 @@ public:
 	BOOL FlipImage(BOOL bHorz, BOOL bVert = 0);
 	BOOL NegateImage();
 	BOOL ReplaceColor(COLORREF crFrom, COLORREF crTo);
-	BOOL LightenImage(double dAmount, COLORREF crMask = -1);
+	BOOL LightenImage(double dAmount, BOOL bRGB, COLORREF crMask = -1);
 	BOOL ColorizeImage(COLORREF color); // converts to grayscale first
 	BOOL ContrastImage(int nAmount);
 	BOOL TintImage(COLORREF color, int nAmount, COLORREF crMask = -1);

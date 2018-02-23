@@ -39,16 +39,12 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-#define IMPLEMENT_UNDO(data, type)					CUndoAction ua(m_data, type, FALSE)
-#define IMPLEMENT_UNDO_EDIT(data)					CUndoAction ua(m_data, TDCUAT_EDIT, FALSE)
-#define IMPLEMENT_UNDO_EXTEND(data, type, extend)	CUndoAction ua(m_data, type, extend)
-
-//////////////////////////////////////////////////////////////////////
-
 class CToDoCtrlData  
 {
 	friend class CTDCTaskMatcher;
 	friend class CTDCTaskComparer;
+	friend class CTDCTaskCalculator;
+	friend class CTDCTaskFormatter;
 
 public:
 	CToDoCtrlData(const CWordArray& aStyles);
@@ -68,7 +64,10 @@ public:
 
 	const TODOSTRUCTURE* LocateTask(DWORD dwTaskID) const;
 	const TODOSTRUCTURE* GetStructure() const { return &m_struct; }
+	
 	BOOL HasTask(DWORD dwTaskID) const;
+	BOOL TaskHasSubtask(DWORD dwTaskID, DWORD dwSubtaskID, BOOL bImmediate = TRUE) const;
+	BOOL TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImmediate = TRUE) const;
 
 	const TODOITEM* GetTask(DWORD dwTaskID) const;
 	const TODOITEM* GetTrueTask(DWORD& dwTaskID) const;
@@ -78,11 +77,6 @@ public:
 	POSITION GetFirstTaskPosition() const;
 	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
 	DWORD GetNextTaskID(POSITION& pos) const;
-
-	BOOL HasOverdueTasks() const;
-	BOOL HasDueTodayTasks() const;
-	double GetEarliestDueDate() const;
-	BOOL HasLockedTasks() const;
 
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
@@ -131,8 +125,6 @@ public:
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
 	CString GetTaskVersion(DWORD dwTaskID) const;
-	CString FormatTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
-	CString FormatTaskPosition(DWORD dwTaskID) const; 
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
@@ -151,7 +143,6 @@ public:
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
-	BOOL IsParentTaskDone(DWORD dwTaskID) const;
 
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL TaskHasDependents(DWORD dwTaskID) const;
@@ -163,65 +154,10 @@ public:
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
 	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
-	BOOL CalcIsTaskRecurring(DWORD dwTaskID) const;
-	BOOL CalcIsTaskFlagged(DWORD dwTaskID) const;
-	BOOL CalcIsTaskLocked(DWORD dwTaskID) const;
-	BOOL CalcIsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck = TDCCHECKALL) const;
-	BOOL CalcIsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
-	BOOL CalcIsTaskDue(DWORD dwTaskID, BOOL bToday = FALSE) const;
-	BOOL CalcIsTaskOverDue(DWORD dwTaskID) const;
-	double CalcTaskDueDate(DWORD dwTaskID) const;
-	double CalcTaskStartDate(DWORD dwTaskID) const;
-	int CalcTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
-	int CalcTaskHighestRisk(DWORD dwTaskID) const;
-	int CalcTaskPercentDone(DWORD dwTaskID) const;
-	double CalcTaskCost(DWORD dwTaskID) const;
-	double CalcTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double CalcTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double CalcTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
-	BOOL CalcTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
-	BOOL CalcTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
-	double CalcTaskSubtaskCompletion(DWORD dwTaskID) const;
-
-	CString FormatTaskAllocTo(DWORD dwTaskID) const;
-	CString FormatTaskCategories(DWORD dwTaskID) const;
-	CString FormatTaskTags(DWORD dwTaskID) const;
-	CString FormatTaskSubtaskCompletion(DWORD dwTaskID) const;
-
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasFileRef(DWORD dwTaskID) const;
-
-	BOOL CalcIsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL CalcIsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL CalcIsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
-	BOOL CalcIsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck = TDCCHECKALL) const;
-	BOOL CalcIsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday = FALSE) const;
-	BOOL CalcIsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int CalcTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
-	int CalcTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	double CalcTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
-	TDC_UNITS CalcBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	TDC_UNITS CalcBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int CalcTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int CalcPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const; // spent / estimate
-	BOOL CalcTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-							int& nSubtasksTotal, int& nSubtasksDone) const;
-	double CalcTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	BOOL CalcTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
-
-	CString FormatTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString FormatTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString FormatTaskPosition(const TODOSTRUCTURE* pTDS) const;
-	CString FormatTaskAllocTo(const TODOITEM* pTDI) const;
-	CString FormatTaskCategories(const TODOITEM* pTDI) const;
-	CString FormatTaskTags(const TODOITEM* pTDI) const;
 
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
@@ -311,18 +247,12 @@ protected:
 	BOOL RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, DWORD dwDependID);
 	TDC_SET RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate);
 	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate = TRUE);
+	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
+	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
 
 	BOOL AddUndoElement(TDCUNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
 						DWORD dwPrevSiblingID = 0, WORD wFlags = 0);
 	BOOL SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib);
-
-	double CalcPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcWeightedPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double CalcTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
-	double CalcStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
-	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
-	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
-	int CalcTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const;
 
 	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 
@@ -369,9 +299,6 @@ protected:
 		return SET_CHANGE;
 	}
 
-	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
-	BOOL HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const;
-	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
 							 TODOSTRUCTURE* pTDSDestParent, int nDestPos);
@@ -381,12 +308,10 @@ protected:
 	BOOL GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	TDC_SET SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 
-	static double GetBestDate(double dBest, double dDate, BOOL bEarliest);
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits);
 	static BOOL IsEndOfDay(const COleDateTime& date);
 	static BOOL IsValidDateRange(const COleDateTime& dateStart, const COleDateTime& dateDue);
-	static double GetCalculationValue(const TDCCADATA& data, TDC_UNITS nUnits);
 
 };
 

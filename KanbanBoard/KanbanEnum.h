@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\Interfaces\IUIExtension.h" // for IUI_POSITION
+
 /////////////////////////////////////////////////////////////////////////////
 
 // Pseudo Attributes

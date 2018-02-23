@@ -20,6 +20,7 @@
 #include "..\shared\holdredraw.h"
 
 #include "..\3rdparty\T64Utils.h"
+#include "..\3rdparty\dibdata.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -37,17 +38,12 @@ static char THIS_FILE[] = __FILE__;
 const COLORREF DEF_DONECOLOR	= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
-
-const UINT WM_BUILDOPTIONSCOMBO	= (WM_APP + 1);
-
-/////////////////////////////////////////////////////////////////////////////
 // CKanbanWnd
 
 CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
-//	m_bInSelectTask(FALSE),
 	m_nTrackedAttrib(IUI_NONE),
 	m_ctrlKanban(),
 #pragma warning(disable:4355)
@@ -99,7 +95,6 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_WM_HELPINFO()
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
-	ON_MESSAGE(WM_BUILDOPTIONSCOMBO, OnBuildOptionsCombo)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_COMPLETIONCHANGE, OnKanbanNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
@@ -124,13 +119,6 @@ void CKanbanWnd::OnNcDestroy()
 LRESULT CKanbanWnd::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	return m_ctrlKanban.SendMessage(WM_GETFONT);
-}
-
-LRESULT CKanbanWnd::OnBuildOptionsCombo(WPARAM /*wp*/, LPARAM lp)
-{
-	BuildOptionsCombo(lp);
-
-	return 0L;
 }
 
 void CKanbanWnd::OnHelp()
@@ -331,28 +319,16 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		CString sKey(szKey);
 		
 		// Options
-		if (m_cbOptions.GetCount())
-		{
-			BOOL bChecked = pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE);
-			m_cbOptions.SetCheckByData(KBCF_SHOWPARENTTASKS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
-			
-			bChecked = pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"),TRUE);
-			m_cbOptions.SetCheckByData(KBCF_SHOWEMPTYCOLUMNS, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
+		DWORD dwComboOptions = 0;
 
-			OnSelchangeOptions();
-		}
-		else
-		{
-			DWORD dwComboOptions = 0;
-			
-			if (pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE))
-				dwComboOptions |= KBCF_SHOWPARENTTASKS;
-			
-			if (pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"),TRUE))
-				dwComboOptions |= KBCF_SHOWEMPTYCOLUMNS;
-			
-			PostMessage(WM_BUILDOPTIONSCOMBO, 0, dwComboOptions);
-		}
+		if (pPrefs->GetProfileInt(sKey, _T("ShowParents"), TRUE))
+			dwComboOptions |= KBCF_SHOWPARENTTASKS;
+
+		if (pPrefs->GetProfileInt(sKey, _T("ShowEmptyColumns"),TRUE))
+			dwComboOptions |= KBCF_SHOWEMPTYCOLUMNS;
+
+		m_cbOptions.SetSelectedOptions(dwComboOptions);
+		OnSelchangeOptions();
 		
 		// Last tracked attribute
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
@@ -470,8 +446,6 @@ bool CKanbanWnd::SelectTask(DWORD dwTaskID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-//	CAutoFlag af(m_bInSelectTask, TRUE);
-
 	return (m_ctrlKanban.SelectTask(dwTaskID) != FALSE);
 }
 
@@ -479,7 +453,6 @@ bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-//	CAutoFlag af(m_bInSelectTask, TRUE);
 	CDWordArray aTaskIDs;
 
 	if (nTaskCount)
@@ -493,18 +466,11 @@ bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 	return (m_ctrlKanban.SelectTasks(aTaskIDs) != FALSE);
 }
 
-bool CKanbanWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CKanbanWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	return (CKanbanCtrl::WantEditUpdate(nAttribute) != FALSE);
-}
-
-bool CKanbanWnd::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return (CKanbanCtrl::WantSortUpdate(nAttribute) != FALSE);
 }
 
 void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
@@ -540,7 +506,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, co
 	}
 }
 
-bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
+bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -555,54 +521,68 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		break;
 
 	case IUI_SAVETOIMAGE:
-		if (dwExtra)
+		if (pData)
 		{
 			CLockUpdates lock(GetSafeHwnd());
 			CBitmap bmImage;
 
 			if (m_ctrlKanban.SaveToImage(bmImage))
 			{
-				HBITMAP* pHBM = (HBITMAP*)dwExtra;
-				*pHBM = (HBITMAP)bmImage.Detach();
+				CDibData dib;
 
-				return true;
+				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
+					return true;
 			}
 		}
 		break;
 
 	case IUI_TOGGLABLESORT:
-		m_ctrlKanban.Sort((IUI_ATTRIBUTE)dwExtra, TRUE);
-		return true;
+		if (pData)
+		{
+			m_ctrlKanban.Sort(pData->nSortBy, TRUE);
+			return true;
+		}
+		break;
 				
 	case IUI_SORT:
-		m_ctrlKanban.Sort((IUI_ATTRIBUTE)dwExtra, FALSE);
-		return true;
+		if (pData)
+		{
+			m_ctrlKanban.Sort(pData->nSortBy, FALSE);
+			return true;
+		}
+		break;
 
 	case IUI_SETFOCUS:
 		m_ctrlKanban.SetFocus();
 		return true;
 		
 	case IUI_SELECTTASK:
-		return SelectTask(dwExtra);
+		if (pData)
+			return SelectTask(pData->dwTaskID);
+		break;
 		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
+		if (pData)
 		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			DWORD dwNextID =  m_ctrlKanban.GetNextTask(*pTaskID, nCmd);
+			DWORD dwNextID =  m_ctrlKanban.GetNextTask(pData->dwTaskID, nCmd);
 			
-			if (dwNextID && (dwNextID != *pTaskID))
+			if (dwNextID && (dwNextID != pData->dwTaskID))
 			{
-				*pTaskID = dwNextID;
+				pData->dwTaskID = dwNextID;
 				return true;
 			}
 		}
 		break;
 
 	case IUI_SETTASKFONT:
-		m_ctrlKanban.SendMessage(WM_SETFONT, dwExtra, TRUE);
+		if (pData)
+		{
+			m_ctrlKanban.SendMessage(WM_SETFONT, (WPARAM)pData->hFont, TRUE);
+			return false;
+		}
 		break;
 
 	case IUI_SELECTFIRSTTASK:
@@ -610,18 +590,15 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		if (dwExtra)
-		{
-			const IUISELECTTASK* pSelect = (IUISELECTTASK*)dwExtra;
-			return (m_ctrlKanban.SelectTask(nCmd, *pSelect) != FALSE);
-		}
+		if (pData)
+			return (m_ctrlKanban.SelectTask(nCmd, pData->select) != FALSE);
 		break;
 	}
 
 	return false;
 }
 
-bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const 
+bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -640,7 +617,9 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
-		return (CKanbanCtrl::WantEditUpdate((IUI_ATTRIBUTE)dwExtra) != FALSE);
+		if (pData)
+			return (CKanbanCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+		break;
 
 	case IUI_SETFOCUS:
 		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
@@ -749,9 +728,6 @@ BOOL CKanbanWnd::OnEraseBkgnd(CDC* pDC)
 
 void CKanbanWnd::SendParentSelectionUpdate()
 {
-// 	if (m_bInSelectTask)
-// 		return;
-
 	CDWordArray aSelIDs;
 	m_ctrlKanban.GetSelectedTaskIDs(aSelIDs);
 
@@ -1002,26 +978,6 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 	// Track the new attribute
 	m_ctrlKanban.TrackAttribute(nTrackAttrib, sCustomAttrib, aColDefs);
-}
-
-void CKanbanWnd::BuildOptionsCombo(DWORD dwOptions)
-{
-	ASSERT(m_cbOptions.GetCount() == 0);
-
-	AddString(m_cbOptions, IDS_OPTIONS_SHOWPARENTS, KBCF_SHOWPARENTTASKS);
-	AddString(m_cbOptions, IDS_OPTIONS_SHOWEMPTYCOLS, KBCF_SHOWEMPTYCOLUMNS);
-
-	if (dwOptions & KBCF_SHOWPARENTTASKS)
-	{
-		m_cbOptions.SetCheckByData(KBCF_SHOWPARENTTASKS, CCBC_CHECKED);
-		m_ctrlKanban.SetOption(KBCF_SHOWPARENTTASKS);
-	}
-				
-	if (dwOptions & KBCF_SHOWEMPTYCOLUMNS)
-	{
-		m_cbOptions.SetCheckByData(KBCF_SHOWEMPTYCOLUMNS, CCBC_CHECKED);
-		m_ctrlKanban.SetOption(KBCF_SHOWEMPTYCOLUMNS);
-	}
 }
 
 void CKanbanWnd::OnSelchangeOptions() 

@@ -76,12 +76,12 @@ public:
 	CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
 	virtual ~CToDoCtrl();
 
-	BOOL Create(const RECT& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible = TRUE, BOOL bEnabled = TRUE);
+	BOOL Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible = TRUE, BOOL bEnabled = TRUE);
 
 	TDC_FILE Save(const CString& sFilePath = _T(""));
 	TDC_FILE Save(CTaskFile& tasks/*out*/, const CString& sFilePath = _T(""));
 
-	BOOL SaveTaskViewToImage(CBitmap& bmImage) { return m_taskTree.SaveToImage(bmImage); }
+	BOOL SaveTaskViewToImage(CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const { return m_taskTree.CanSaveToImage(); }
 
 	TDC_FILE Load(const CString& sFilePath);
@@ -197,7 +197,7 @@ public:
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
 
 	BOOL IsTaskDone(DWORD dwTaskID) const { return m_data.IsTaskDone(dwTaskID); }
-	BOOL IsTaskGoodAsDone(DWORD dwTaskID) const { return m_data.CalcIsTaskDone(dwTaskID); }
+	BOOL IsTaskGoodAsDone(DWORD dwTaskID) const { return m_calculator.IsTaskDone(dwTaskID); }
 	BOOL IsTaskRecurring(DWORD dwTaskID) const { return m_data.IsTaskRecurring(dwTaskID); }
 	BOOL CanTaskRecur(DWORD dwTaskID) const { return m_data.CanTaskRecur(dwTaskID); }
 
@@ -226,7 +226,7 @@ public:
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
 	BOOL CanOffsetSelectedTaskStartAndDueDates() const;
 	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_OFFSET nUnits, BOOL bAndSubtasks);
-	COleDateTime GetEarliestDueDate() const { return m_data.GetEarliestDueDate(); } // entire tasklist
+	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
@@ -262,7 +262,7 @@ public:
 	BOOL IsSelectedTaskReference() const { return m_taskTree.IsSelectedTaskReference(); }
 	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
 
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_data.FormatTaskPath(dwTaskID, nMaxLen); }
+	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
 	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
@@ -329,6 +329,7 @@ public:
 	void EndTimeTracking(BOOL bAllowConfirm);
 	void BeginTimeTracking(DWORD dwTaskID);
 	BOOL DoAddTimeToLogFile();
+	void SetTimeTrackingReminderInterval(int nMinutes);
 
 	static void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	void SetDefaultTaskAttributes(const TODOITEM& tdi);
@@ -502,6 +503,8 @@ protected:
 
 	CToDoCtrlData m_data;
 	CTDCTaskMatcher m_matcher;
+	CTDCTaskCalculator m_calculator;
+	CTDCTaskFormatter m_formatter;
 
 	CStringArray m_aFileRefs;
 	CString m_sTextComments;
@@ -514,10 +517,14 @@ protected:
 	CBinaryData m_customComments;
 	double m_dTimeEstimate, m_dTimeSpent;
 	double m_dCost;
-	double m_dLogTime; // in hours
 	int m_nPriority;
 	int m_nRisk;
 	int m_nPercentDone;
+
+	double m_dTrackedTimeElapsedHours;
+	DWORD m_dwTimeTrackReminderIntervalTicks;
+	DWORD m_dwTimeTrackReminderElapsedTicks;
+
 	TDC_UNITS m_nTimeEstUnits, m_nTimeSpentUnits;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;
@@ -532,7 +539,7 @@ protected:
 	DWORD m_nFileVersion;
 	DWORD m_nFileFormat;
 	DWORD m_dwTimeTrackTaskID;
-	DWORD m_dwTickLast; // time tracking
+	DWORD m_dwTimeTrackTickLast;
 	DWORD m_dwLastAddedID;
 	DWORD m_dwEditTitleTaskID;
 
@@ -597,13 +604,13 @@ protected:
 	afx_msg void OnTreeChangeFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeGetInfoTip(NMHDR* pNMHDR, LRESULT* pResult);
 
-	afx_msg LRESULT OnColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragAbort(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragPreMove(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragOver(WPARAM wParam, LPARAM lParam);
 
+	afx_msg LRESULT OnColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
@@ -749,7 +756,6 @@ protected:
 	
 	// -------------------------------------------------------------------------------
 	
-	void ResetTimeTracking() { m_dwTickLast = GetTickCount(); }
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void UpdateDateTimeControls(BOOL bHasSelection);
@@ -872,8 +878,6 @@ protected:
 	void ShowTaskHasIncompleteDependenciesError(const CString& sIncomplete);
 	void ShowTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const;
 
-	BOOL MoveSelection(TDC_MOVETASK nDirection);
-	
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
 	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const;
 	void BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD& dwNextID, 

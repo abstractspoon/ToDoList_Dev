@@ -55,16 +55,15 @@ public:
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
 	inline const TODOITEM* GetTask(int nItem) const { return GetTask(GetTaskID(nItem)); }
 	inline const BOOL HasTask(int nItem) const { return m_data.HasTask(GetTaskID(nItem)); }
-	inline DWORD GetTaskID(int nItem) const { return m_lcTasks.GetItemData(nItem); }
-	inline DWORD GetTrueTaskID(int nItem) const { return m_data.GetTrueTaskID(GetTaskID(nItem)); }
 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
-	inline DWORD GetSelectedTaskID() const { return GetTaskID(GetSelectedItem()); }
 	inline int GetSelectedCount() const { return m_lcTasks.GetSelectedCount(); }
 	inline int GetItemCount() const { return m_lcTasks.GetItemCount(); }
 	inline int GetVisibleItemCount() const { return m_lcTasks.GetItemCount(); }
 	inline int HitTestItem(POINT point, UINT* pFlags = NULL) const { return m_lcTasks.HitTest(point, pFlags); }
 
-	const TODOITEM* GetSelectedTask() const;
+	DWORD GetTaskID(int nItem) const;
+	DWORD GetSelectedTaskID() const;
+	DWORD GetTrueTaskID(int nItem) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);

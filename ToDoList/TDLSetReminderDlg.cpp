@@ -24,14 +24,10 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-// for PlaySound
-#pragma comment(lib, "winmm.lib")
+#define NO_SOUND _T("None")
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
-
-#define ID_PLAYSOUNDBTN 0xfff0
-#define NO_SOUND _T("None")
 
 CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
@@ -48,10 +44,6 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	m_sTaskTitle = _T("");
 	//}}AFX_DATA_INIT
 	m_dAbsoluteTime = CDateHelper::GetTimeOnly(m_dtAbsoluteDate);
-
-	m_ePlaySound.SetFilter(CEnString(IDS_SOUNDFILEFILTER));
-	m_ePlaySound.AddButton(ID_PLAYSOUNDBTN, 0x38, CEnString(IDS_PLAYSOUNDBTNTIP), CALC_BTNWIDTH, _T("Marlett"));
-	m_ePlaySound.SetButtonTip(FEBTN_BROWSE, CEnString(IDS_BROWSE));
 }
 
 
@@ -89,7 +81,6 @@ BEGIN_MESSAGE_MAP(CTDLSetReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_RELATIVE, OnChangeRelative)
 	ON_BN_CLICKED(IDC_ABSOLUTE, OnChangeRelative)
 	//}}AFX_MSG_MAP
-	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnPlaySound)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismissReminder)
 END_MESSAGE_MAP()
 
@@ -226,21 +217,6 @@ void CTDLSetReminderDlg::OnSelchangeLeadin()
 	UpdateData();
 
 	m_dRelativeLeadIn = (m_cbLeadIn.GetSelectedPeriod() / 60.0); // in hours
-}
-
-LRESULT CTDLSetReminderDlg::OnPlaySound(WPARAM wParam, LPARAM lParam)
-{
-	if (wParam == IDC_PLAYSOUND && lParam == ID_PLAYSOUNDBTN)
-	{
-		UpdateData();
-
-		if (!m_sSoundFile.IsEmpty())
-			PlaySound(m_sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
-
-		return TRUE;
-	}
-	
-	return 0;
 }
 
 void CTDLSetReminderDlg::OnChangeRelative() 

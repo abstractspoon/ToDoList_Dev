@@ -37,6 +37,7 @@ public:
 
 	BOOL Create(CWnd* pParentWnd, UINT nID = 0, BOOL bVisible = TRUE);
 
+	FILTER_SHOW GetFilter() const;
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 	FILTER_SHOW GetFilter(CString& sCustom) const;
 

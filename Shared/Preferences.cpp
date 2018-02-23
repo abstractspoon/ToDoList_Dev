@@ -20,6 +20,65 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote) 
+	: sName(szName), sValue(szValue), bQuoted(bQuote) 
+{
+}
+
+CString INIENTRY::Format() const
+{
+	CString sEntry;
+
+	if (bQuoted)
+		sEntry.Format(_T("%s=\"%s\""), sName, sValue);
+	else
+		sEntry.Format(_T("%s=%s"), sName, sValue);
+
+	return sEntry;
+}
+
+BOOL INIENTRY::Parse(const CString& sEntry)
+{
+	int nEquals = sEntry.Find('=');
+
+	if (nEquals != -1)
+	{
+		sName = sEntry.Left(nEquals);
+		sName.TrimRight();
+
+		sValue = sEntry.Mid(nEquals + 1);
+		sValue.TrimLeft();
+
+		// remove quotes
+		bQuoted = sValue.Replace(_T("\""), _T(""));
+
+		return !sName.IsEmpty();
+	}
+
+	return FALSE;
+}
+
+BOOL INIENTRY::operator==(const INIENTRY& ie) const
+{
+	return ((sName == ie.sName) && 
+		(sValue == ie.sValue) && 
+		(bQuoted == ie.bQuoted));
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+INISECTION::INISECTION(LPCTSTR szName) : sSection(szName) 
+{
+	aEntries.InitHashTable(199); // prime number closest to 200
+}
+
+INISECTION::INISECTION(const INISECTION& other) : sSection(other.sSection)
+{
+	Misc::CopyStrT<INIENTRY>(other.aEntries, aEntries);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 static LPCTSTR ENDL = _T("\r\n");
 static CString NULLSTR;
 
@@ -73,47 +132,24 @@ CPreferences::CPreferences()
 			CString sBackupPath = CFileBackup::BuildBackupPath(s_sPrefsPath, FBS_OVERWRITE);
 			
 			if (FileMisc::FileExists(sBackupPath))
-				::CopyFile(sBackupPath, s_sPrefsPath, FALSE);			
-			
-			// read the ini file
-			CStdioFileEx file;
-			
-			if (file.Open(s_sPrefsPath, CFile::modeRead))
 			{
-				CString sLine;
-				INISECTION* pCurSection = NULL;
-				
-				while (file.ReadString(sLine))
-				{
-					if (sLine.IsEmpty())
-						continue;
-					
-					// is it a section ?
-					else if (sLine[0] == '[')
-					{
-						CString sSection = sLine.Mid(1, sLine.GetLength() - 2);
-
-						// assume (for speed) that the section is already unique
-						pCurSection = new INISECTION(sSection);
-						s_aIni.Add(pCurSection);
-
-						ASSERT (pCurSection != NULL);
-					}
-					// else an entry
-					else if (pCurSection)
-					{
-						INIENTRY ie;
-
-						if (ie.Parse(sLine))
-							SetEntryValue(*pCurSection, ie);
-					}
-				}
+				FileMisc::CopyFile(sBackupPath, s_sPrefsPath, TRUE, TRUE);
+				FileMisc::DeleteFile(sBackupPath, TRUE);
 			}
 
-			s_bDirty = FALSE;
+			CIniSectionArray aItems;
 
-			// delete backup
-			::DeleteFile(sBackupPath);
+			if (!Load(s_sPrefsPath, aItems))
+			{
+				ASSERT(0);
+				return;
+			}
+
+			Release(s_aIni);
+			Copy(aItems, s_aIni);
+			Release(aItems);
+
+			s_bDirty = FALSE;
 		}
 	}
 				
@@ -131,19 +167,34 @@ CPreferences::~CPreferences()
 	// save ini?
 	if ((s_nRef == 0) && s_bIni)
 	{
-		SaveInternal();
-		DeleteIni();
+		// Note: We no longer release the current data
+		// until the next load
+		if (!SaveInternal())
+			s_nRef++;
 	}
 }
 
-void CPreferences::DeleteIni()
+void CPreferences::Release()
 {
-	int nSection = s_aIni.GetSize();
-		
+	// prevent anyone else changing the shared resources
+	// for the duration of this function
+	LOCKPREFS();
+			
+	if (s_bIni)
+		Release(s_aIni);
+}
+
+void CPreferences::Release(CIniSectionArray& aSections)
+{
+	ASSERT(s_nRef == 0);
+	ASSERT(s_bLocked);
+
+	int nSection = aSections.GetSize();
+
 	while (nSection--)
-		delete s_aIni[nSection];
-		
-	s_aIni.RemoveAll();
+		delete aSections[nSection];
+
+	aSections.RemoveAll();
 }
 
 BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
@@ -154,13 +205,37 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 		return FALSE;
 	}
 
+	LOCKPREFSRET(FALSE);
+
+	// Must be able to save existing ini file
 	if (s_bIni)
 	{
-		if (!s_sPrefsPath.IsEmpty())
-			Save();
+		if (!s_sPrefsPath.IsEmpty() && !Save())
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 
 		if (!bIni)
-			DeleteIni();
+			Release(s_aIni);
+	}
+
+	// Must be able to load the 'new' prefs
+	if (bIni && FileMisc::FileExists(szPrefsPath))
+	{
+		CIniSectionArray aItems;
+
+		if (!Load(szPrefsPath, aItems))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+		else
+		{
+			// Take a copy in case next time we can't load the file
+			Copy(aItems, s_aIni);
+			Release(aItems);
+		}
 	}
 
 	s_sPrefsPath = szPrefsPath;
@@ -173,6 +248,11 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 BOOL CPreferences::IsInitialised()
 {
 	return !s_sPrefsPath.IsEmpty();
+}
+
+BOOL CPreferences::IsEmpty()
+{
+	return (s_aIni.GetSize() == 0);
 }
 
 CString CPreferences::GetPath(BOOL bFriendly)
@@ -807,6 +887,56 @@ CString CPreferences::KeyFromFile(LPCTSTR szFilePath, BOOL bFileNameOnly)
 	}
 
 	return sKey;
+}
+
+void CPreferences::Copy(const CIniSectionArray& aSrc, CIniSectionArray& aDest)
+{
+	ASSERT(aDest.GetSize() == 0);
+
+	int nSection = aSrc.GetSize();
+
+	while (nSection--)
+		aDest.Add(new INISECTION(*aSrc[nSection]));
+}
+
+BOOL CPreferences::Load(LPCTSTR szFilePath, CIniSectionArray& aSections)
+{
+	// read the ini file
+	CStdioFileEx file;
+
+	if (!file.Open(szFilePath, CFile::modeRead))
+		return FALSE;
+
+	CString sLine;
+	INISECTION* pCurSection = NULL;
+
+	while (file.ReadString(sLine))
+	{
+		if (!sLine.IsEmpty())
+		{
+			// is it a section ?
+			if (sLine[0] == '[')
+			{
+				CString sSection = sLine.Mid(1, sLine.GetLength() - 2);
+
+				// assume (for speed) that the section is already unique
+				pCurSection = new INISECTION(sSection);
+				aSections.Add(pCurSection);
+
+				ASSERT (pCurSection != NULL);
+			}
+			// else an entry
+			else if (pCurSection)
+			{
+				INIENTRY ie;
+
+				if (ie.Parse(sLine))
+					pCurSection->aEntries[Misc::ToUpper(ie.sName)] = ie;
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////

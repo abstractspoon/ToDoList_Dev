@@ -294,7 +294,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
 	m_bDisplayProgressInBar = pPrefs->GetProfileInt(szKey, _T("DisplayProgressInBar"), FALSE);
 	m_bDecadesAreOneBased = pPrefs->GetProfileInt(szKey, _T("DecadesAreOneBased"), FALSE);
-	m_bDisplayParentsAsRollups = pPrefs->GetProfileInt(szKey, _T("DisplayParentsAsRollups"), TRUE);
+	m_bDisplayParentsAsRollups = pPrefs->GetProfileInt(szKey, _T("DisplayParentsAsRollups"), FALSE);
 
 	CString sColVis(szKey);
 	sColVis += _T("\\ColumnVisibility");

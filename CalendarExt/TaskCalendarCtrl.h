@@ -150,6 +150,7 @@ protected:
 	bool GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 	int GetGridRowFromPoint(const CPoint& point) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
+	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

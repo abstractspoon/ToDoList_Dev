@@ -68,7 +68,7 @@ public:
 	BOOL CanRecur() const;
 	BOOL RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccurrences) const;
 	
-	BOOL IsRecentlyEdited() const; // 1 hour default
+	BOOL IsRecentlyModified() const; // 1 hour default
 	COleDateTimeSpan GetRemainingDueTime() const; // in days
 	COleDateTime GetDate(TDC_DATE nDate) const;
 	
@@ -93,6 +93,7 @@ public:
 	static CString FormatTaskDependency(DWORD dwTaskID, const CString& sFile = _T(""));
 	static void SetRecentlyModifiedPeriod(double dDays);
 	static void SetModifierName(const CString sModifier);
+	static BOOL IsRecentlyModified(const COleDateTime& date);
 	
 	// Attributes
 	CString sTitle;
@@ -183,6 +184,7 @@ public:
 	
 	DWORD GetTaskID() const { return m_dwID; }
 	DWORD GetSubTaskID(int nPos) const;
+	BOOL HasSubTask(DWORD dwSubtaskID, BOOL bImmediate = TRUE) const;
 	
 	int GetSubTaskPosition(DWORD dwID) const;
 	int GetPosition() const;

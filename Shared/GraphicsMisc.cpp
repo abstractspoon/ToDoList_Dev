@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "GraphicsMisc.h"
 #include "Misc.h"
+#include "FileMisc.h"
 #include "themed.h"
 #include "osversion.h"
 
@@ -476,20 +477,49 @@ BOOL GraphicsMisc::SameFontNameSize(HFONT hFont1, HFONT hFont2)
 
 HICON GraphicsMisc::LoadIcon(UINT nIDIcon, int nSize)
 {
-	HICON hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), MAKEINTRESOURCE(nIDIcon), 
-									IMAGE_ICON, nSize, nSize, LR_LOADMAP3DCOLORS);
+	HICON hIcon = (HICON)::LoadImage(AfxGetResourceHandle(), 
+									MAKEINTRESOURCE(nIDIcon), 
+									IMAGE_ICON, 
+									nSize, 
+									nSize, 
+									LR_LOADMAP3DCOLORS);
 
 	return hIcon;
 }
 
-HCURSOR GraphicsMisc::HandCursor()
+HCURSOR GraphicsMisc::LoadStandardCursor(LPCTSTR szCursorID)
+{
+	return ::LoadCursor(NULL, szCursorID); 
+}
+
+BOOL GraphicsMisc::SetStandardCursor(LPCTSTR szCursorID)
+{
+	HCURSOR hCursor = LoadStandardCursor(szCursorID);
+
+	if (hCursor)
+		::SetCursor(hCursor);
+
+	return (hCursor != NULL);
+}
+
+HCURSOR GraphicsMisc::LoadHandCursor()
 {
 	static HCURSOR cursor = ::LoadCursor(NULL, IDC_HAND);
 
 	return cursor;
 }
 
-HCURSOR GraphicsMisc::OleDragDropCursor(GM_OLECURSOR nCursor)
+BOOL GraphicsMisc::SetHandCursor()
+{
+	HCURSOR hCursor = LoadHandCursor();
+
+	if (hCursor)
+		::SetCursor(hCursor);
+
+	return (hCursor != NULL);
+}
+
+HCURSOR GraphicsMisc::LoadDragDropCursor(GM_OLECURSOR nCursor)
 {
 	static HCURSOR cursors[GMOC_COUNT] = { 0 };
 
@@ -518,6 +548,41 @@ HCURSOR GraphicsMisc::OleDragDropCursor(GM_OLECURSOR nCursor)
 	}
 
 	return cursors[nCursor];
+}
+
+BOOL GraphicsMisc::SetDragDropCursor(GM_OLECURSOR nCursor)
+{
+	HCURSOR hCursor = LoadDragDropCursor(nCursor);
+
+	if (hCursor)
+		::SetCursor(hCursor);
+
+	return (hCursor != NULL);
+}
+
+HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
+{
+	CString sCursorPath = FileMisc::TerminatePath(FileMisc::GetAppFolder(szSubFolder));
+	sCursorPath += szName;
+	FileMisc::ReplaceExtension(sCursorPath, _T("cur"));
+
+	HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
+											sCursorPath, 
+											IMAGE_CURSOR, 
+											32, 
+											32, 
+											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
+	return hCursor;
+}
+
+BOOL GraphicsMisc::SetAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
+{
+	HCURSOR hCursor = LoadAppCursor(szName, szSubFolder);
+
+	if (hCursor)
+		::SetCursor(hCursor);
+
+	return (hCursor != NULL);
 }
 
 CFont& GraphicsMisc::WingDings()
@@ -1045,13 +1110,13 @@ COLORREF GraphicsMisc::GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nS
 			case GMIS_SELECTED:
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				// darken the base color to have a luminance <= 20%
+				// darken the base color to have a luminance <= 30%
 				{
 					HLSX hlsText(crBase);
 
-					if (hlsText.fLuminosity > 0.2f)
+					if (hlsText.fLuminosity > 0.3f)
 					{
-						hlsText.fLuminosity = 0.2f;
+						hlsText.fLuminosity = 0.3f;
 						return hlsText;
 					}
 					

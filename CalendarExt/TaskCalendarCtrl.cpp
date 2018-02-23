@@ -443,20 +443,15 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	if (pTasks->IsTaskReference(hTask))
 		return;
 
-	// We are only interested in leaf (non-parent) tasks
-	if (!pTasks->IsTaskParent(hTask))
-	{
-		// sanity check
-		DWORD dwTaskID = pTasks->GetTaskID(hTask);
-		ASSERT(!HasTask(dwTaskID));
+	// sanity check
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+	ASSERT(!HasTask(dwTaskID));
 
-		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
-		m_mapData[dwTaskID] = pTCI;
-	}
-	else // process children
-	{
-		BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
-	}
+	TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, attrib, m_dwOptions);
+	m_mapData[dwTaskID] = pTCI;
+
+	// process children
+	BuildData(pTasks, pTasks->GetFirstTask(hTask), attrib, TRUE);
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -748,7 +743,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		}
 		
 		// draw icon if there is enough space
-		if (pTCI->bHasIcon && (nTaskHeight >= DEF_TASK_HEIGHT))
+		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		{
 			// draw at the start only
 			if (GetTaskTextOffset(pTCI->GetTaskID()) == 0)
@@ -1070,6 +1065,9 @@ int CTaskCalendarCtrl::GetCellTasks(const COleDateTime& dtCell, CTaskCalItemArra
 
 		// ignore tasks with both start and end dates calculated
 		if (!pTCI->IsValid())
+			continue;
+
+		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
 			continue;
 
 		// ignore completed tasks as required
@@ -1648,7 +1646,7 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 
 	if (!ValidateDragPoint(ptDrag) || !GetDateFromPoint(ptDrag, dtDrag))
 	{
-		SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
+		GraphicsMisc::SetDragDropCursor(GMOC_NO);
 		return FALSE;
 	}
 
@@ -2052,24 +2050,38 @@ BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		TCC_HITTEST nHit = TCCHT_NOWHERE;
 		DWORD dwHitID = HitTest(ptCursor, nHit);
 
-		if (!CanDragTask(dwHitID, nHit))
-		{
-			SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
+		if (SetTaskCursor(dwHitID, nHit))
 			return TRUE;
-		}
-		
-		// else
-		switch (nHit)
-		{
-			case TCCHT_BEGIN:
-			case TCCHT_END:
-				SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
-				return TRUE;
-		}
 	}
 	
 	// else
 	return CCalendarCtrl::OnSetCursor(pWnd, nHitTest, message);
+}
+
+BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
+{
+	if ((dwTaskID != 0) && (nHit != TCCHT_NOWHERE))
+	{
+		if (!CanDragTask(dwTaskID, nHit))
+		{
+			if (IsTaskCalItemLocked(dwTaskID))
+				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+			// else
+			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+		}
+		else
+		{
+			switch (nHit)
+			{
+			case TCCHT_BEGIN:
+			case TCCHT_END:
+				return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
+			}
+		}
+	}
+
+	return FALSE;
 }
 
 BOOL CTaskCalendarCtrl::IsDragging() const

@@ -2643,10 +2643,7 @@ BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	DWORD dwTaskID = HitTestTask(ptCursor);
 
 	if (m_data.IsLocked(dwTaskID))
-	{
-		SetCursor(GraphicsMisc::OleDragDropCursor(GMOC_NO));
-		return TRUE;
-	}
+		return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 	// else
 	return CWnd::OnSetCursor(pWnd, nHitTest, message);
@@ -2833,7 +2830,7 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		BOOL bValidDest = CanDrag(m_pSelectedList, pDestList);
 		BOOL bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
-		SetCursor(GraphicsMisc::OleDragDropCursor(bValidDest ? (bCopy ? GMOC_COPY : GMOC_MOVE) : GMOC_NO));
+		GraphicsMisc::SetDragDropCursor(bValidDest ? (bCopy ? GMOC_COPY : GMOC_MOVE) : GMOC_NO);
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);

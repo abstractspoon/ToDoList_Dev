@@ -189,11 +189,18 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 		CPreferences prefs;
 		CTEWPreferencesWrap prefsWrap(prefs);
 
-		bSuccess = pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, pExport->sExportPath, pExport->nExporter, TRUE, &prefsWrap);
+		bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
+																		pExport->sExportPath, 
+																		pExport->nExporter, 
+																		TRUE, 
+																		&prefsWrap));
 	}
 	else
 	{
-		bSuccess = pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, pExport->sExportPath, pExport->nExporter, TRUE);
+		bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
+																		pExport->sExportPath, 
+																		pExport->nExporter, 
+																		TRUE));
 	}
 
 	// notify ourselves

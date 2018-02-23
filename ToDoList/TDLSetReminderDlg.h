@@ -13,7 +13,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\timecombobox.h"
-#include "..\shared\fileedit.h"
+#include "..\shared\soundedit.h"
 #include "..\shared\enstatic.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ protected:
 	enum { IDD = IDD_SETREMINDER_DIALOG };
 	//}}AFX_DATA
 	CTimeComboBox	m_cbAbsoluteTime;
-	CFileEdit	m_ePlaySound;
+	CSoundEdit	m_ePlaySound;
 	CTDLReminderPeriodComboBox m_cbLeadIn;
 	CEnStatic m_stTaskTitle;
 
@@ -70,7 +70,6 @@ protected:
 	afx_msg void OnSelchangeLeadin();
 	afx_msg void OnChangeRelative();
 	//}}AFX_MSG
-	LRESULT OnPlaySound(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 	static COleDateTime GetNextNearestHour();

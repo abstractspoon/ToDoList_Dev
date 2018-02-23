@@ -377,6 +377,7 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_sizeLast(-1, -1),
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
+	m_bCentreOnShow(FALSE),
 	m_dwOptions(0)
 {
 }
@@ -1225,13 +1226,10 @@ void CTDLTimeTrackerDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
 
-	// Centre window first time we are shown each session
-	static BOOL bFirstTime = TRUE;
-
-	if (bShow && bFirstTime)
+	if (m_bCentreOnShow)
 	{
 		CenterWindow(m_pWndNotify);
-		bFirstTime = FALSE;
+		m_bCentreOnShow = FALSE;
 	}
 }
 
@@ -1251,6 +1249,7 @@ void CTDLTimeTrackerDlg::LoadSettings()
 		CPreferences prefs;
 		
 		m_bCollapsed = FALSE; // always
+		m_bCentreOnShow = TRUE; // fallback
 
 		int nWidth = prefs.GetProfileInt(_T("TimeTracker"), _T("Width"), 0);
 		int nHeight = prefs.GetProfileInt(_T("TimeTracker"), _T("Height"), 0);
@@ -1260,10 +1259,26 @@ void CTDLTimeTrackerDlg::LoadSettings()
 			CRect rWindow;
 			GetWindowRect(rWindow);
 
+			int nPos = prefs.GetProfileInt(_T("TimeTracker"), _T("Position"), -1);
+
+			if (nPos != -1)
+			{
+				CRect rTemp(rWindow), rScreen;
+
+				rTemp.OffsetRect((GET_X_LPARAM(nPos) - rTemp.left),
+								(GET_Y_LPARAM(nPos) - rTemp.top));
+
+				if (GraphicsMisc::GetAvailableScreenSpace(rTemp, rScreen))
+				{
+					rWindow = rTemp;
+					m_bCentreOnShow = FALSE;
+				}
+			}
+
 			rWindow.right = (rWindow.left + nWidth);
 			rWindow.bottom = (rWindow.top + nHeight);
-			MoveWindow(rWindow);
 
+			MoveWindow(rWindow);
 			Resize();
 		}
 	}
@@ -1275,6 +1290,9 @@ void CTDLTimeTrackerDlg::SaveSettings() const
 	// so that the tracker always starts uncollapsed
 	CPreferences prefs;
 	
+	CRect rWindow;
+	GetWindowRect(rWindow);
+
 	if (m_bCollapsed)
 	{
 		prefs.WriteProfileInt(_T("TimeTracker"), _T("Width"), m_sizeLast.cx);
@@ -1282,13 +1300,11 @@ void CTDLTimeTrackerDlg::SaveSettings() const
 	}
 	else
 	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-		
 		prefs.WriteProfileInt(_T("TimeTracker"), _T("Width"), rWindow.Width());
 		prefs.WriteProfileInt(_T("TimeTracker"), _T("Height"), rWindow.Height());
 	}
 
+	prefs.WriteProfileInt(_T("TimeTracker"), _T("Position"), MAKELPARAM(rWindow.left, rWindow.top));
 	prefs.WriteProfileInt(_T("TimeTracker"), _T("AlwaysOnTop"), m_bAlwaysOnTop);
 }
 

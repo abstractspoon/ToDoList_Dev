@@ -29,7 +29,8 @@ TASKCALITEM::TASKCALITEM()
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
 	bTopLevel(FALSE),
-	bLocked(FALSE)
+	bLocked(FALSE),
+	bIsParent(FALSE)
 {
 
 }
@@ -40,7 +41,8 @@ TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSe
 	bGoodAsDone(FALSE),
 	dwTaskID(0),
 	bTopLevel(FALSE),
-	bLocked(FALSE)
+	bLocked(FALSE),
+	bIsParent(FALSE)
 {
 	UpdateTask(pTasks, hTask, attrib, dwCalcDates);
 
@@ -69,6 +71,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	dtStartCalc = tci.dtStartCalc;
 	dtEndCalc = tci.dtEndCalc;
 	bHasIcon = tci.bHasIcon;
+	bIsParent = tci.bIsParent;
 	
 	return (*this);
 }
@@ -86,7 +89,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dtDone == tci.dtDone) &&
 		(dtStartCalc == tci.dtStartCalc) &&
 		(dtEndCalc == tci.dtEndCalc) &&
-		(bHasIcon == tci.bHasIcon));
+		(bHasIcon == tci.bHasIcon) &&
+		(bIsParent == tci.bIsParent));
 }
 
 void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates)
@@ -242,12 +246,25 @@ BOOL TASKCALITEM::UpdateTask(const ITaskList16* pTasks, HTASKITEM hTask, const C
 	// and 'Good as Done'
 	bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 
+	// and Parent
+	bIsParent = pTasks->IsTaskParent(hTask);
+	
 	return !(*this == tciOrg);
 }
 
 BOOL TASKCALITEM::IsValid() const
 {
 	return (IsStartDateSet() || IsEndDateSet());
+}
+
+BOOL TASKCALITEM::IsParent() const
+{
+	return bIsParent;
+}
+
+BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
+{
+	return (bHasIcon || (bIsParent && bShowParentsAsFolder));
 }
 
 BOOL TASKCALITEM::IsDone(BOOL bIncGoodAs) const

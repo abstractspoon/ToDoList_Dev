@@ -990,11 +990,19 @@ BOOL CTDLTaskListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		UINT nHitFlags = 0;
 		CPoint ptClient(::GetMessagePos());
 		m_lcTasks.ScreenToClient(&ptClient);
+
+		int nHit = m_lcTasks.HitTest(ptClient, &nHitFlags);
 	
-		if ((m_lcTasks.HitTest(ptClient, &nHitFlags) != -1) && HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
+		if (nHit != -1)
 		{
-			::SetCursor(GraphicsMisc::HandCursor());
-			return TRUE;
+			if (m_calculator.IsTaskLocked(GetTaskID(nHit)))
+			{
+				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+			}
+			else if (HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
+			{
+				return GraphicsMisc::SetHandCursor();
+			}
 		}
 	}
 	
@@ -1194,6 +1202,29 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID) const
 	return FALSE;
 }
 
+DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const 
+{ 
+	if ((nItem == -1) || (m_lcTasks.GetItemCount() == 0))
+		return 0;
+
+	return m_lcTasks.GetItemData(nItem); 
+}
+
+DWORD CTDLTaskListCtrl::GetSelectedTaskID() const 
+{ 
+	return GetTaskID(GetSelectedItem()); 
+}
+
+DWORD CTDLTaskListCtrl::GetTrueTaskID(int nItem) const 
+{ 
+	DWORD dwTaskID = GetTaskID(nItem);
+
+	if (dwTaskID == 0)
+		return 0;
+
+	return m_data.GetTrueTaskID(dwTaskID); 
+}
+
 int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
 {
 	DWORD dwFocusID;
@@ -1339,7 +1370,7 @@ int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 
 void CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 {
-	if ((GetItemCount() == 0) || (cache.aSelTaskIDs.GetSize() == 0))
+	if ((GetItemCount() == 0) || cache.IsEmpty())
 	{
 		DeselectAll();
 		return;

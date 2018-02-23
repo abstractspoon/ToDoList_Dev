@@ -101,7 +101,7 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_bSplitting(FALSE),
 	m_nSplitPos(INITIAL_SPLIT_POS),
 	m_nSplitWidth(MAX_SPLITBAR_WIDTH),
-	m_crSplitBar(GetSysColor(COLOR_3DSHADOW)),
+	m_crSplitBar(GetSysColor(COLOR_3DFACE)),
 	m_nHidden(TLSH_NONE),
 	m_bSavingToImage(FALSE)
 {

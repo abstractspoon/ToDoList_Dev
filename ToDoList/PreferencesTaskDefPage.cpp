@@ -213,20 +213,13 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	}
 
 	CString sB64CustomComments = pPrefs->GetProfileString(szKey, _T("DefaultCustomComments"));
-
-	// Backwards compatibility until 7.2.B1 is released
-	if (sB64CustomComments.IsEmpty())
-		sB64CustomComments = pPrefs->GetProfileString(szKey, _T("CustomComments"));
-
 	m_defCustomComments.Base64Decode(sB64CustomComments);
 
 	CString sB64Comments = pPrefs->GetProfileString(szKey, _T("DefaultComments"));
-
-	// Backwards compatibility until 7.2.B1 is released
-	if (sB64Comments.IsEmpty())
-		sB64Comments = pPrefs->GetProfileString(szKey, _T("Comments"));
-
 	m_sDefTextComments = Base64Coder::Decode(sB64Comments);
+
+	if (m_sDefTextComments.IsEmpty())
+		m_defCustomComments.Empty();
 }
 
 void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -264,18 +257,14 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 		pPrefs->DeleteProfileEntry(szKey, _T("DefaultComments"));
 		pPrefs->DeleteProfileEntry(szKey, _T("DefaultCustomComments"));
 
-		// Backwards compatibility until 7.2.B1 is released
-		pPrefs->DeleteProfileEntry(szKey, _T("Comments"));
-		pPrefs->DeleteProfileEntry(szKey, _T("CustomComments"));
-
-		if (!m_defCustomComments.IsEmpty() && m_defCustomComments.Base64Encode(sEncoded))
-		{
-			pPrefs->WriteProfileString(szKey, _T("DefaultCustomComments"), sEncoded);
-		}
-
 		if (!m_sDefTextComments.IsEmpty())
 		{
 			pPrefs->WriteProfileString(szKey, _T("DefaultComments"), Base64Coder::Encode(m_sDefTextComments));
+
+			if (!m_defCustomComments.IsEmpty() && m_defCustomComments.Base64Encode(sEncoded))
+			{
+				pPrefs->WriteProfileString(szKey, _T("DefaultCustomComments"), sEncoded);
+			}
 		}
 	}
 }
@@ -344,6 +333,9 @@ LRESULT CPreferencesTaskDefPage::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lP
 	m_sDefTextComments.Empty();
 
 	m_ctrlComments.GetContent(m_sDefTextComments, m_defCustomComments);
+
+	if (m_sDefTextComments.IsEmpty())
+		m_defCustomComments.Empty();
 
 	return 0L;
 }

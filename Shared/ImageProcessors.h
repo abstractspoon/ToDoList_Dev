@@ -57,7 +57,7 @@ protected:
 class CImageLightener : public C32BitImageProcessor
 {
 public:
-	CImageLightener(double dAmount); 
+	CImageLightener(double dAmount, BOOL bRGB); 
 	virtual ~CImageLightener();
 
 	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
@@ -65,6 +65,7 @@ public:
 
 protected:
 	double m_dAmount;
+	BOOL m_bRGB;
 };
 
 class CImageBlurrer : public C32BitImageProcessor

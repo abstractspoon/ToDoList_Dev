@@ -85,27 +85,27 @@ double STATSITEM::CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek,
 
 	BOOL bHasStart = HasStart();
 	double dDays = 0.0;
+	double dProportion = 0.0;
 
 	if (IsDone())
 	{
 		if (date >= dtDone)
 		{
-			dDays += dTimeSpentDays;
+			dProportion = 1.0;
 		}
 		else if (bHasStart && (date > dtStart))
 		{
-			double dProportion = (date.m_dt - dtStart.m_dt) / (dtDone.m_dt - dtStart.m_dt);
-			
-			dDays += (dTimeSpentDays * min(dProportion, 1.0));
+			dProportion = (date.m_dt - dtStart.m_dt) / (dtDone.m_dt - dtStart.m_dt);
 		}
 	}
 	else if (bHasStart && (date > dtStart))
 	{
 		COleDateTime dtNow(COleDateTime::GetCurrentTime());
-		double dProportion = (date.m_dt - dtStart.m_dt) / (dtNow.m_dt - dtStart.m_dt);
-		
-		dDays += (dTimeSpentDays * min(dProportion, 1.0));
+		dProportion = (date.m_dt - dtStart.m_dt) / (dtNow.m_dt - dtStart.m_dt);
 	}
+
+	dProportion = max(0.0, min(dProportion, 1.0));
+	dDays += (dTimeSpentDays * dProportion);
 	
 	return dDays;
 }

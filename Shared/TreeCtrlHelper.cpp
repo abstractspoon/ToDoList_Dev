@@ -1154,12 +1154,54 @@ HTREEITEM CTreeCtrlHelper::FindWidestItem(HTREEITEM htiParent, int& nWidth, BOOL
 	return htiWidest;
 }
 
-HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback, BOOL bUsesImageCallback)
+TCH_WHERE CTreeCtrlHelper::GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, HTREEITEM& htiTarget) const
 {
-	HTREEITEM htiNew = CopyTree(hDest, hSrc, nWhere, bUsesTextCallback, bUsesImageCallback);
-	m_tree.DeleteItem(hSrc);
-	
-	return htiNew;
+	TCH_WHERE nWhere = TCHW_BELOW; // most likely
+	htiTarget = htiDestPrevSibling;
+
+	// validate htiTarget
+	if (htiTarget == TVI_FIRST)
+	{
+		htiTarget = m_tree.GetChildItem(htiDestParent);
+		nWhere = TCHW_ABOVE;
+	}
+	else if (htiTarget == TVI_LAST)
+	{
+		htiTarget = GetLastChildItem(htiDestParent);
+	}
+
+	// if htiTarget is NULL then the target parent has no children at present
+	// so we just move directly on to it
+	if (htiTarget == NULL)
+	{
+		htiTarget = htiDestParent;
+		nWhere = TCHW_ON;
+	}
+
+	return nWhere;
+}
+
+HTREEITEM CTreeCtrlHelper::MoveTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
+									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
+{
+	HTREEITEM htiCopy = CopyTree(hti, htiDestParent, htiDestPrevSibling, bUsesTextCallback, bUsesImageCallback);
+
+	if (htiCopy)
+	{
+		m_tree.DeleteItem(hti);
+		return htiCopy;
+	}
+
+	return NULL;
+}
+
+HTREEITEM CTreeCtrlHelper::CopyTree(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, 
+									BOOL bUsesTextCallback, BOOL bUsesImageCallback)
+{
+	HTREEITEM htiTarget = NULL;
+	TCH_WHERE nWhere = GetMoveTarget(htiDestParent, htiDestPrevSibling, htiTarget);
+
+	return CopyTree(htiTarget, hti, nWhere, bUsesTextCallback, bUsesImageCallback);
 }
 
 void CTreeCtrlHelper::BuildCopy(const HTREEITEM hti, TCHHCOPY* pCopy) const

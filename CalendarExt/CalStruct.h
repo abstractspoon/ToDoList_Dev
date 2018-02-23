@@ -34,6 +34,8 @@ public:
 
 	BOOL IsValid() const;
 	BOOL IsDone(BOOL bIncGoodAs) const;
+	BOOL IsParent() const;
+	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
 	
 	BOOL IsStartDateSet() const;
 	void SetStartDate(const COleDateTime& date);
@@ -59,13 +61,14 @@ public:
 public:
 	COLORREF color;
 	BOOL bGoodAsDone, bTopLevel;
-	BOOL bLocked, bHasDepends, bHasIcon;
+	BOOL bLocked, bHasDepends;
 
 protected:
 	COleDateTime dtCreation, dtStart, dtDue, dtDone;
 	COleDateTime dtStartCalc, dtEndCalc;
 	CString sName, sFormattedName;
 	DWORD dwTaskID;
+	BOOL bHasIcon, bIsParent;
 
 protected:
 	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CSet<IUI_ATTRIBUTE>& attrib, DWORD dwCalcDates);

@@ -101,13 +101,20 @@ namespace GraphicsMisc
 	UINT GetRTLDrawTextFlags(HWND hwnd);
 	UINT GetRTLDrawTextFlags(CDC* pDC);
 	
-	HCURSOR HandCursor();
 	HICON LoadIcon(UINT nIDIcon, int nSize = 16);
 	HBITMAP IconToPARGB32Bitmap(HICON hIcon);
 	CSize GetIconSize(HICON hIcon);
 	CSize GetBitmapSize(HBITMAP hBmp);
-	HCURSOR OleDragDropCursor(GM_OLECURSOR nCursor);
 	HICON GetAppWindowIcon(BOOL bLarge);
+
+	HCURSOR LoadHandCursor();
+	HCURSOR LoadDragDropCursor(GM_OLECURSOR nCursor);
+	HCURSOR LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder = NULL);
+	HCURSOR LoadStandardCursor(LPCTSTR szCursorID);
+	BOOL SetHandCursor();
+	BOOL SetDragDropCursor(GM_OLECURSOR nCursor);
+	BOOL SetAppCursor(LPCTSTR szName, LPCTSTR szSubFolder = NULL);
+	BOOL SetStandardCursor(LPCTSTR szCursorID);
 
 	int PointToPixel(int nPoints);
 	int PixelToPoint(int nPixels);

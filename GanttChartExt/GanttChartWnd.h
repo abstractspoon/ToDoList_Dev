@@ -48,8 +48,7 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes);
-	bool WantEditUpdate(IUI_ATTRIBUTE nAttribute) const;
-	bool WantSortUpdate(IUI_ATTRIBUTE nAttribute) const;
+	bool WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
 	bool SelectTask(DWORD dwTaskID);
@@ -58,8 +57,8 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
-	bool DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra);
-	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const;
+	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
+	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
 protected:
 // Dialog Data
@@ -131,6 +130,7 @@ protected:
 	afx_msg LRESULT OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttGetTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGanttMoveTask(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo handlers

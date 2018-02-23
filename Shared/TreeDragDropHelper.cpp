@@ -104,7 +104,7 @@ enum
 
 const CPoint OUTERSPACE(-10000, -10000);
 
-CTreeDragDropHelper::CTreeDragDropHelper(CTreeSelectionHelper& selection, CTreeCtrl& tree)
+CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree)
 	: 
 	m_selection(selection), 
 	m_tree(tree), 
@@ -530,9 +530,13 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 		DDWHERE nWhere;
 		HTREEITEM hItem = HitTest(point, nWhere);
 		
-		if (hItem != NULL && nWhere == DD_ON && m_tree.ItemHasChildren(hItem) &&
-			!(m_tree.GetItemState(hItem, TVIS_EXPANDED) & TVIS_EXPANDED)) 
+		if ((hItem != NULL) && 
+			(nWhere == DD_ON) && 
+			(m_tree.ItemHasChildren(hItem)) &&
+			(m_tree.GetItemState(hItem, TVIS_EXPANDED) == 0)) 
 		{
+			SetTimer(TIMER_EXPAND, 0); // kill the timer
+
 			m_ddMgr.DragShowNolock(FALSE);
 
 			m_tree.SelectDropTarget(NULL);
@@ -542,7 +546,19 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 			m_ddMgr.DragShowNolock(TRUE);
 			HighlightDropTarget();
 
-			SetTimer(TIMER_EXPAND, 0); // kill the timer
+			// For now, notify parent because sometimes Windows doesn't
+			// do so and I don't yet understand the circumstances
+			NMTREEVIEW nmtv = { 0 };
+
+			nmtv.hdr.code = TVN_ITEMEXPANDED;
+			nmtv.hdr.hwndFrom = m_tree;
+			nmtv.hdr.idFrom = m_tree.GetDlgCtrlID();
+
+			nmtv.ptDrag = point;
+			nmtv.action = TVE_EXPAND;
+			nmtv.itemNew.hItem = hItem;
+
+			m_tree.GetParent()->SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
 			return;
 		}
 	}

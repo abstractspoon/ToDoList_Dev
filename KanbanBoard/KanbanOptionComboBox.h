@@ -7,20 +7,21 @@
 // FilterOptionComboBox.h : header file
 //
 
-#include "tdcstruct.h"
-
 #include "..\shared\checkcombobox.h"
-
-#include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CFilterOptionComboBox window
 
-class CTDLFilterOptionComboBox : public CCheckComboBox
+class CKanbanOptionComboBox : public CCheckComboBox
 {
 // Construction
 public:
-	CTDLFilterOptionComboBox();
+	CKanbanOptionComboBox();
+	virtual ~CKanbanOptionComboBox();
+
+	BOOL Initialise(DWORD dwOptions);
+	DWORD GetSelectedOptions() const;
+	void SetSelectedOptions(DWORD dwOptions);
 
 // Attributes
 protected:
@@ -28,20 +29,10 @@ protected:
 
 // Operations
 public:
-	void Initialize(const TDCFILTER& filter, FTC_VIEW nView, BOOL bWantHideParents = TRUE);
-	void Initialize(DWORD dwFlags, DWORD dwOptions = 0);
-
-	DWORD GetSelectedOptions() const;
-	void SetSelectedOptions(DWORD dwOptions);
-
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFilterOptionComboBox)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLFilterOptionComboBox();
 
 	// Generated message map functions
 protected:
@@ -53,7 +44,7 @@ protected:
 
 	void OnCheckChange(int nIndex);
 	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+					  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 
 };
 

@@ -806,8 +806,10 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 	}
 	
 	// modify the tree prompt depending on whether there is a filter set
-	UINT nPromptID = (IsFilterSet(FTCV_TASKTREE) ? IDS_TDC_FILTEREDTASKLISTPROMPT : IDS_TDC_TASKLISTPROMPT);
-	m_taskTree.SetWindowPrompt(CEnString(nPromptID));
+	if (IsFilterSet(FTCV_TASKTREE))
+		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
+	else
+		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -845,7 +847,7 @@ BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		if (pFilter->HasAttribute(TDCA_SELECTION))
 		{
 			// check completion
-			if (pFilter->bIgnoreDone && m_data.CalcIsTaskDone(pTDI, pTDS))
+			if (pFilter->bIgnoreDone && m_calculator.IsTaskDone(pTDI, pTDS))
 			{
 				bWantTask = FALSE;
 			}
@@ -1001,8 +1003,10 @@ void CFilteredToDoCtrl::RefreshListFilter()
 	RebuildList(filter);
 
 	// modify the list prompt depending on whether there is a filter set
-	UINT nPromptID = (IsFilterSet(FTCV_TASKLIST) ? IDS_TDC_FILTEREDTASKLISTPROMPT : IDS_TDC_TASKLISTPROMPT);
-	m_taskList.SetWindowPrompt(CEnString(nPromptID));
+	if (IsFilterSet(FTCV_TASKLIST))
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
+	else
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 }
 
 void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)

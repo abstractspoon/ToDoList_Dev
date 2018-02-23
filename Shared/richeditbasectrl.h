@@ -264,7 +264,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	void AdjustFindDialogPosition();
-	BOOL FindText(LPCTSTR lpszFind, BOOL bCase = TRUE, BOOL bWord = TRUE, BOOL bWrap = TRUE);
+	BOOL FindText(LPCTSTR lpszFind, BOOL bNext = TRUE, BOOL bCase = TRUE, BOOL bWord = TRUE, BOOL bWrap = TRUE);
 	void TextNotFound(LPCTSTR lpszFind);
 	BOOL FindText(BOOL bWrap = TRUE);
 	long FindAndSelect(DWORD dwFlags, FINDTEXTEX& ft);

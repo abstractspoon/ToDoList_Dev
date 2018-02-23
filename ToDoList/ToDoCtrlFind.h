@@ -72,6 +72,8 @@ protected:
 	CTreeCtrl& m_tree; 
 	const CToDoCtrlData& m_data;
 	CTDCTaskMatcher m_matcher;
+	CTDCTaskCalculator m_calculator;
+	CTDCTaskFormatter m_formatter;
 
 protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults) const;

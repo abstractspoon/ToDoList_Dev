@@ -19,6 +19,7 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\localizer.h"
+#include "..\shared\msoutlookhelper.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -788,6 +789,10 @@ BOOL CTDLSimpleTextContentCtrl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 CLIPFORMAT CTDLSimpleTextContentCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format)
 { 
+	// check for outlook first
+	if (CMSOutlookHelper::IsOutlookObject(lpDataOb))
+		return CMSOutlookHelper::CF_OUTLOOK;
+
 	// FALSE ensures we only get what we allow
 	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
 }

@@ -651,7 +651,7 @@ void CRichEditBaseCtrl::DoEditFindReplace(BOOL bFindOnly, UINT nIDTitle)
 void CRichEditBaseCtrl::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, BOOL bWord)
 {
 	// Update state information for next time
-	m_findState.UpdateState(sFind, bCase, bWord, bNext);
+	m_findState.UpdateState(sFind, bNext, bCase, bWord);
 
 	if (!FindText())
 		TextNotFound(m_findState.strFind);
@@ -663,7 +663,7 @@ void CRichEditBaseCtrl::OnReplaceSel(const CString& sFind, const CString& sRepla
 									BOOL bNext, BOOL bCase, BOOL bWord)
 {
 	// Update state information for next time
-	m_findState.UpdateState(sFind, sReplace, bCase, bWord, bNext);
+	m_findState.UpdateState(sFind, sReplace, bNext, bCase, bWord);
 
 	if (!SameAsSelected(m_findState.strFind, m_findState.bCaseSensitive, m_findState.bWholeWord))
 	{
@@ -688,7 +688,7 @@ void CRichEditBaseCtrl::OnReplaceSel(const CString& sFind, const CString& sRepla
 void CRichEditBaseCtrl::OnReplaceAll(const CString& sFind, const CString& sReplace, BOOL bCase, BOOL bWord)
 {
 	// Update state information for next time
-	m_findState.UpdateState(sFind, sReplace, bCase, bWord, TRUE);
+	m_findState.UpdateState(sFind, sReplace, TRUE, bCase, bWord);
 
 	// start searching at the beginning of the text so that we know to stop at the end
 	SetSel(0, 0);
@@ -725,10 +725,14 @@ BOOL CRichEditBaseCtrl::SameAsSelected(LPCTSTR lpszCompare, BOOL bCase, BOOL /*b
 
 BOOL CRichEditBaseCtrl::FindText(BOOL bWrap)
 {
-	return FindText(m_findState.strFind, m_findState.bCaseSensitive, m_findState.bWholeWord, bWrap);
+	return FindText(m_findState.strFind, 
+					m_findState.bFindNext, 
+					m_findState.bCaseSensitive, 
+					m_findState.bWholeWord, 
+					bWrap);
 }
 
-BOOL CRichEditBaseCtrl::FindText(LPCTSTR lpszFind, BOOL bCase, BOOL bWord, BOOL bWrap)
+BOOL CRichEditBaseCtrl::FindText(LPCTSTR lpszFind, BOOL bNext, BOOL bCase, BOOL bWord, BOOL bWrap)
 {
 	CWaitCursor wait;
 
@@ -771,7 +775,8 @@ BOOL CRichEditBaseCtrl::FindText(LPCTSTR lpszFind, BOOL bCase, BOOL bWord, BOOL 
 	// always search to the end of the text
 	ft.chrg.cpMax = GetTextLength();
 
-	DWORD dwFlags = FR_DOWN;
+	DWORD dwFlags = 0;
+	dwFlags |= bNext ? FR_DOWN : 0;
 	dwFlags |= bCase ? FR_MATCHCASE : 0;
 	dwFlags |= bWord ? FR_WHOLEWORD : 0;
 
@@ -782,8 +787,16 @@ BOOL CRichEditBaseCtrl::FindText(LPCTSTR lpszFind, BOOL bCase, BOOL bWord, BOOL 
 	// else we need to restart the search from the beginning
 	if (bWrap)
 	{
-		ft.chrg.cpMin = 0;
-		ft.chrg.cpMax = GetTextLength();
+		if (bNext)
+		{
+			ft.chrg.cpMin = 0;
+			ft.chrg.cpMax = -1; // the end
+		}
+		else
+		{
+			ft.chrg.cpMin = GetTextLength() - 1;
+			ft.chrg.cpMax = 0;
+		}
 
 		return (FindAndSelect(dwFlags, ft) != -1);
 	}

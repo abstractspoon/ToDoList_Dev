@@ -63,6 +63,7 @@ public:
 	BOOL GetSyncCompletionToStatus() const;
 	BOOL GetSubtasksInheritLockStatus() const { return m_bSubtasksInheritLockStatus; }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_bTaskInheritsSubtaskFlags; }
+	BOOL GetUseLatestLastModifiedDate() const { return m_bUseLatestLastModifiedDate; }
 
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const;
 
@@ -103,6 +104,7 @@ protected:
 	BOOL	m_bIncludeDoneInAverageCalc;
 	BOOL	m_bSubtasksInheritLockStatus;
 	BOOL	m_bTaskInheritsSubtaskFlags;
+	BOOL	m_bUseLatestLastModifiedDate;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

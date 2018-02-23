@@ -444,6 +444,11 @@ FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
 	return m_cbTaskFilter.GetSelectedFilter(sCustom);
 }
 
+FILTER_SHOW CTDLFilterBar::GetFilter() const
+{
+	return m_cbTaskFilter.GetSelectedFilter();
+}
+
 void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 {
 	m_cbTaskFilter.AddAdvancedFilters(aFilters); 

@@ -154,9 +154,9 @@ public:
 protected:
 	CTreeCtrl m_tcTasks;
 	CToDoCtrlFind m_find;
-
 	CTreeSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
+
 	HTREEITEM m_htiLastHandledLBtnDown;
 	WORD m_wKeyPress;
 	BOOL m_bMovingItem;

@@ -87,6 +87,7 @@ public:
 	void RedrawColumns(BOOL bErase = TRUE) const;
 	void RedrawColumn(TDC_COLUMN nColID) const;
 	void RecalcColumnWidth(TDC_COLUMN nColID);
+	void RecalcColumnWidths(const CSet<TDC_COLUMN>& aColIDs);
 	void RecalcColumnWidths();
 	void RecalcAllColumnWidths();
 	
@@ -272,7 +273,10 @@ protected:
 	int m_nMaxInfotipCommentsLength;
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CString m_sTasklistFolder;
+
 	CTDCTaskComparer m_comparer;
+	CTDCTaskCalculator m_calculator;
+	CTDCTaskFormatter m_formatter;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;
@@ -472,8 +476,9 @@ protected:
 	void HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt);
 	void ShowFileLink(LPCTSTR szFilePath) const;
 	BOOL HandleListLBtnDown(CListCtrl& lc, CPoint pt);
+	BOOL ColumnItemIsLocked(int nItem) const;
 	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
-	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, TDC_COLUMN& nRecalcColID) const;
+	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN>& aColIDs) const;
 	CString FormatTimeValue(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 

@@ -553,6 +553,10 @@ SOURCE=.\SizeGrip.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\soundedit.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SpellCheckDlg.cpp
 # End Source File
 # Begin Source File
@@ -1210,6 +1214,10 @@ SOURCE=.\ShortcutManager.h
 # Begin Source File
 
 SOURCE=.\SizeGrip.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\soundedit.h
 # End Source File
 # Begin Source File
 

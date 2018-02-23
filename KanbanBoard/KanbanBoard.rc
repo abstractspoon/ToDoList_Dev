@@ -405,6 +405,7 @@ BEGIN
     IDS_DISPLAY_RECURRENCE_SHORT "Recurs"
     IDS_DISPLAY_PARENT_SHORT "Parent"
     IDS_DISPLAY_TASKID_SHORT "ID"
+    IDS_OPTIONS_NONE "<none>"
 END
 
 #endif    // English (Australia) resources

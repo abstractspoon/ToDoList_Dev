@@ -322,24 +322,23 @@ BOOL CDragDropMgr::OnMouseMove(const MSG& msg)
 
 UINT CDragDropMgr::SendDragMessage(UINT nMessage)
 {
-	if (nMessage == WM_DD_DRAGABORT)
-		return m_pMainWnd->SendMessage(nMessage, 0, 0);
+	UINT nCtrlID = ::GetDlgCtrlID(m_ddi.hwndTarget);
 
-	else if (nMessage == WM_DD_DRAGOVER)
+	if (nMessage == WM_DD_DRAGABORT)
+		return m_pMainWnd->SendMessage(nMessage, nCtrlID, 0);
+
+	if (nMessage == WM_DD_DRAGOVER)
 	{
 		DragShowNolock(FALSE);
 
-		UINT nRes = m_pMainWnd->SendMessage(nMessage, 
-										   ::GetDlgCtrlID(m_ddi.hwndTarget), 
-										   (LPARAM)(void*)&m_ddi);
+		UINT nRes = m_pMainWnd->SendMessage(nMessage, nCtrlID, (LPARAM)&m_ddi);
+
 		DragShowNolock(TRUE);
 		return nRes;
 	}
 
-	// else
-	return m_pMainWnd->SendMessage(nMessage, 
-								   ::GetDlgCtrlID(m_ddi.hwndTarget), 
-								   (LPARAM)(void*)&m_ddi);
+	// all else
+	return m_pMainWnd->SendMessage(nMessage, nCtrlID, (LPARAM)&m_ddi);
 }
 
 void CDragDropMgr::DragShowNolock(BOOL bShow)

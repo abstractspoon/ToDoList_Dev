@@ -15,6 +15,8 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 
+#include "..\3rdparty\dibdata.h"
+
 #include "..\Interfaces\ipreferences.h"
 
 #include <float.h>
@@ -349,7 +351,7 @@ bool CBurndownWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
 	return true;
 }
 
-bool CBurndownWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CBurndownWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -362,21 +364,6 @@ bool CBurndownWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
 	case IUI_TIMESPENT:
 		return true;
 	}
-
-	// all else 
-	return false;
-}
-
-bool CBurndownWnd::WantSortUpdate(IUI_ATTRIBUTE /*nAttribute*/) const
-{
-// 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-// 	
-// 	switch (nAttribute)
-// 	{
-// 	case IUI_DONEDATE:
-// 	case IUI_STARTDATE:
-// 		return true;
-// 	}
 
 	// all else 
 	return false;
@@ -617,23 +604,23 @@ BOOL CBurndownWnd::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	return (m_data.GetSize() != nOrgCount);
 }
 
-bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
+bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		if (dwExtra && !m_data.IsEmpty())
+		if (pData && !m_data.IsEmpty())
 		{
 			CBitmap bmImage;
 
 			if (m_graph.SaveToImage(bmImage))
 			{
-				HBITMAP* pHBM = (HBITMAP*)dwExtra;
-				*pHBM = (HBITMAP)bmImage.Detach();
+				CDibData dib;
 
-				return true;
+				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
+					return true;
 			}
 		}
 		break;
@@ -657,7 +644,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	return false;
 }
 
-bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD /*dwExtra*/) const 
+bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* /*pData*/) const 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

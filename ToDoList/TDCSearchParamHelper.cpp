@@ -58,6 +58,8 @@ BOOL CTDCSearchParamHelper::LoadRule(const CPreferences& prefs, const CString& s
 		else
 			VERIFY(rule.Set(attrib, op, sValue, bAnd, nAttribType));
 
+		rule.SetFlags(dwFlags);
+
 		return TRUE;
 	}
 

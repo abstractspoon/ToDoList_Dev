@@ -80,7 +80,7 @@ public:
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
-	BOOL SaveTaskViewToImage(CBitmap& bmImage);
+	BOOL SaveTaskViewToImage(CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const;
 
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
@@ -107,7 +107,6 @@ public:
 
 	BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelectedTask(TDC_MOVETASK nDirection) const;
-
 	BOOL GotoNextTask(TDC_GOTO nDirection); 
 	BOOL CanGotoNextTask(TDC_GOTO nDirection) const;
 	BOOL GotoNextTopLevelTask(TDC_GOTO nDirection); 
@@ -292,8 +291,10 @@ protected:
 	BOOL ViewSupportsTaskSelection(FTC_VIEW nView) const;
 
 	void UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0);
-	void ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, DWORD dwExtra = 0);
-	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, DWORD dwExtra = 0) const;
+	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd);
+	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd) const;
+	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA& data);
+	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA& data) const;
 	IUIExtensionWindow* GetCreateExtensionWnd(FTC_VIEW nView);
 	IUIExtensionWindow* GetExtensionWnd(FTC_VIEW nView) const;
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
@@ -313,12 +314,14 @@ protected:
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttrib) const;
 	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);
 	void UpdateExtensionViewsSelection(TDC_ATTRIBUTE nAttrib);
+	void UpdateExtensionViewsTasks(TDC_ATTRIBUTE nAttrib);
 	BOOL IsExtensionView(HWND hWnd) const;
 	BOOL SelectExtensionTasks(IUIExtensionWindow* pExtWnd, const CDWordArray& aTasks, DWORD dwFocusedTask);
 	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);
-	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_COLUMN nBy) const;
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, IUI_ATTRIBUTE nBy) const;
+	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
+	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 
 	virtual BOOL GetAllTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib, DWORD dwFlags) const;

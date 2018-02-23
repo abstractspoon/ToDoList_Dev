@@ -259,7 +259,7 @@ BOOL CImageGrayer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPix
 
 ///////
 
-CImageLightener::CImageLightener(double dAmount) : m_dAmount(dAmount)
+CImageLightener::CImageLightener(double dAmount, BOOL bRGB) : m_dAmount(dAmount), m_bRGB(bRGB)
 {
 }
 
@@ -284,18 +284,10 @@ BOOL CImageLightener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDest
 				RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
 				RGBX* pRGBDest = &pDestPixels[nY * sizeSrc.cx + nX];
 
-				if (crMask == -1 || !(crMask == *pRGBSrc))
-				{
-					// convert to HLS
-					HLSX hls;
-					RGBX::RGB2HLS(*pRGBSrc, hls);
+				*pRGBDest = *pRGBSrc;
 
-					// then tweak the luminosity
-					hls.fLuminosity = min(max(0.0f, hls.fLuminosity + (float)m_dAmount), 1.0f);
-					RGBX::HLS2RGB(hls, *pRGBDest);
-				}
-				else
-					*pRGBDest = *pRGBSrc;
+				if (crMask == -1 || !(crMask == *pRGBSrc))
+					pRGBDest->AdjustLighting(m_dAmount, (m_bRGB != FALSE));
 			}
 		}
 	}

@@ -34,7 +34,9 @@ const static CString EMPTY_STR;
 CToDoCtrlFind::CToDoCtrlFind(CTreeCtrl& tree, const CToDoCtrlData& data) : 
 	m_tree(tree), 
 	m_data(data),
-	m_matcher(data)
+	m_matcher(data),
+	m_calculator(data),
+	m_formatter(data)
 {
 	
 }
@@ -115,9 +117,9 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 	{
 		switch (nAttrib)
 		{
-		case TDCA_ALLOCTO:		sLongest = m_data.FormatTaskAllocTo(pTDI);				break;
-		case TDCA_CATEGORY:		sLongest = m_data.FormatTaskCategories(pTDI);			break;	
-		case TDCA_TAGS:			sLongest = m_data.FormatTaskTags(pTDI);					break;	
+		case TDCA_ALLOCTO:		sLongest = m_formatter.GetTaskAllocTo(pTDI);			break;
+		case TDCA_CATEGORY:		sLongest = m_formatter.GetTaskCategories(pTDI);			break;	
+		case TDCA_TAGS:			sLongest = m_formatter.GetTaskTags(pTDI);				break;	
 			
 		case TDCA_ALLOCBY:		sLongest = pTDI->sAllocBy;								break;
 		case TDCA_STATUS:		sLongest = pTDI->sStatus;								break;		
@@ -179,7 +181,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 		case TDCA_COST:	
 			{
 				// get cost
-				double dCost = m_data.CalcTaskCost(pTDI, pTDS);
+				double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
 				
 				if ((dCost != 0) || !m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
 					sLongest = Misc::Format(dCost, 2);
@@ -187,15 +189,15 @@ CString CToDoCtrlFind::GetLongestValue(TDC_ATTRIBUTE nAttrib, HTREEITEM hti, con
 			break;
 
 		case TDCA_SUBTASKDONE:	
-			sLongest = m_data.FormatTaskSubtaskCompletion(pTDI, pTDS);
+			sLongest = m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 			break;
 
 		case TDCA_POSITION:
-			sLongest = m_data.FormatTaskPosition(pTDS);
+			sLongest = m_formatter.GetTaskPosition(pTDS);
 			break;
 
 		case TDCA_PATH:
-			sLongest = m_data.FormatTaskPath(pTDI, pTDS);
+			sLongest = m_formatter.GetTaskPath(pTDI, pTDS);
 			break;
 
 		case TDCA_ALLOCTO:		
@@ -395,18 +397,18 @@ CString CToDoCtrlFind::GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const
 	 		if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 				nUnits = pTDI->nTimeEstUnits;
 
-			dTime = m_data.CalcTaskTimeEstimate(pTDI, pTDS, nUnits);
+			dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, nUnits);
 			break;
 
 		case TDCC_TIMESPENT:
 			if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 				nUnits = pTDI->nTimeSpentUnits;
 			
-			dTime = m_data.CalcTaskTimeSpent(pTDI, pTDS, nUnits);
+			dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, nUnits);
 			break;
 
 		case TDCC_REMAINING:
-			dTime = m_data.CalcTaskRemainingTime(pTDI, pTDS, nUnits);
+			dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
 			nDecPlaces = 1;
 			break;
 
@@ -715,7 +717,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 
 	// if the item is done and we're ignoring completed tasks 
 	// (and by corollary their children) then we can stop right-away
-	if (params.bIgnoreDone && m_data.CalcIsTaskDone(dwID))
+	if (params.bIgnoreDone && m_calculator.IsTaskDone(dwID))
 		return;
 
 	// also we can ignore parent tasks if required but we still need 
@@ -723,7 +725,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 	if (m_matcher.TaskMatches(dwID, params, result))
 	{
 		// check for overdue tasks
-		if (!params.bIgnoreOverDue || !m_data.CalcIsTaskOverDue(dwID))
+		if (!params.bIgnoreOverDue || !m_calculator.IsTaskOverDue(dwID))
 			aResults.Add(result);
 	}
 	

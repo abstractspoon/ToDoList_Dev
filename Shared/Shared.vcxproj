@@ -538,6 +538,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="SoundEdit.cpp" />
     <ClCompile Include="SpellCheckDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -811,6 +812,7 @@
     <ClInclude Include="SessionStatusWnd.h" />
     <ClInclude Include="ShortcutManager.h" />
     <ClInclude Include="SizeGrip.h" />
+    <ClInclude Include="SoundEdit.h" />
     <ClInclude Include="SpellCheckDlg.h" />
     <ClInclude Include="SpellChecker.h" />
     <ClInclude Include="StatusBarProgress.h" />

@@ -106,7 +106,6 @@
 mkdir ..\ToDoList\unicode_Release
 copy unicode_release\transtext.dll ..\todolist\unicode_release /y
 copy unicode_release\transtext.dll ..\..\todolist_Plugins\release /y
-copy unicode_release\transtext.pdb ..\..\todolist_Plugins\release /y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

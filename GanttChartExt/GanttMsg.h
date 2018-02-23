@@ -32,6 +32,9 @@ const UINT WM_GTLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"
 // WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_GTLC_GETTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_GETTASKICON"));
 
+// WPARAM = 0, LPARAM = IUITASKMOVE*
+const UINT WM_GTLC_MOVETASK					= ::RegisterWindowMessage(_T("WM_GTLC_MOVETASK"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = GCDD_MODE, LPARAM = HWND

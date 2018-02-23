@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDCUIExtensionHelper.h"
+#include "TDCStruct.h"
+#include "TDCMapping.h"
 
 #include "..\Shared\UIExtensionMgr.h"
 #include "..\Shared\misc.h"
@@ -17,6 +19,80 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+// IUI_SAVETOIMAGE
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(LPCWSTR szImagePath)
+{
+	lstrcpyn(szFilePath, szImagePath, MAX_PATH);
+}
+
+// IUI_SORT
+// IUI_TOGGLABLESORT
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol)
+{
+	nSortBy = nSortCol;
+}
+
+// IUI_SELECTTASK
+// IUI_GETNEXTTASK
+// IUI_GETNEXTTOPLEVELTASK
+// IUI_GETPREVTASK
+// IUI_GETPREVTOPLEVELTASK, 
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(DWORD taskID)
+{
+	dwTaskID = taskID;
+}
+
+// IUI_SETTASKFONT
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(HFONT font)
+{
+	hFont = font;
+}
+
+// IUI_MOVETASK
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(DWORD dwSelTaskID, 
+	DWORD dwParentID, 
+	DWORD dwAfterSiblingID)
+{
+	move.dwSelectedTaskID = dwSelTaskID;
+	move.dwParentID = dwParentID;
+	move.dwAfterSiblingID = dwAfterSiblingID;
+	move.bCopy = false;
+}
+
+// IUI_MULTISORT
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(const TDSORTCOLUMN* pCols)
+{
+	sort.nAttrib1 = TDC::MapColumnToIUIAttribute(pCols[0].nBy);
+	sort.bAscending1 = (pCols[0].bAscending != FALSE);
+
+	sort.nAttrib2 = TDC::MapColumnToIUIAttribute(pCols[1].nBy);
+	sort.bAscending2 = (pCols[1].bAscending != FALSE);
+
+	sort.nAttrib3 = TDC::MapColumnToIUIAttribute(pCols[2].nBy);
+	sort.bAscending3 = (pCols[2].bAscending != FALSE);
+}
+
+// IUI_SELECTFIRSTTASK
+// IUI_SELECTNEXTTASK
+// IUI_SELECTNEXTTASKINCLCURRENT
+// IUI_SELECTPREVTASK
+// IUI_SELECTLASTTASK
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nAttrib, 
+	BOOL bFindReplace, 
+	LPCWSTR szWords, 
+	BOOL bCaseSensitive, 
+	BOOL bWholeWord)
+{
+	select.nAttrib = nAttrib;
+	select.bFindReplace = (bFindReplace != FALSE);
+	select.szWords = szWords;
+	select.bCaseSensitive = (bCaseSensitive != FALSE);
+	select.bWholeWord = (bWholeWord != FALSE);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

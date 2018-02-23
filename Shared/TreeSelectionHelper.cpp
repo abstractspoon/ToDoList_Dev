@@ -290,15 +290,18 @@ BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw)
 	{
 		if (bRemoveFromHistory)
 		{
-			// flush the history stack
-			if (m_nCurSelection < m_aHistory.GetSize())
-				m_aHistory.RemoveAt(m_nCurSelection + 1, m_aHistory.GetSize() - m_nCurSelection - 1);
+			if (m_aHistory.GetSize() > 0)
+			{
+				// flush the history stack
+				if (m_nCurSelection < m_aHistory.GetSize())
+					m_aHistory.RemoveAt(m_nCurSelection + 1, m_aHistory.GetSize() - m_nCurSelection - 1);
 
-			// remove from elsewhere in history
-			POSITION pos = GetFirstItemPos();
+				// remove from elsewhere in history
+				POSITION pos = GetFirstItemPos();
 			
-			while (pos)
-				RemoveItemFromHistory(GetNextItem(pos));
+				while (pos)
+					RemoveItemFromHistory(GetNextItem(pos));
+			}
 		}
 		else
 		{

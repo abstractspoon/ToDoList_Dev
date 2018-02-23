@@ -72,17 +72,19 @@
 #include "..\shared\clipboard.h"
 #include "..\shared\rtlstylemgr.h"
 #include "..\shared\xslfile.h"
+#include "..\shared\soundedit.h"
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\sendfileto.h"
-#include "..\3rdparty\dibdata.h"
 
 #include <shlwapi.h>
 #include <windowsx.h>
 #include <direct.h>
 #include <math.h>
-
 #include <afxpriv.h>        // for WM_KICKIDLE
+
+#pragma warning(disable: 4201)
+#include <Mmsystem.h> 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -134,7 +136,6 @@ enum
 	TIMER_DUEITEMS,
 	TIMER_TIMETRACKING,
 	TIMER_AUTOMINIMIZE,
-	TIMER_TIMETRACKREMINDER,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -200,8 +201,8 @@ CToDoListWnd::CToDoListWnd()
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
-
 	m_cbQuickFind.SetMinDLUHeight(8);
+	m_nFlags |= WF_STAYACTIVE;
 }
 
 CToDoListWnd::~CToDoListWnd()
@@ -455,6 +456,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACK, OnToDoCtrlNotifyTimeTrack)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnToDoCtrlNotifyViewChange)
+	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACKREMINDER, OnToDoCtrlNotifyTimeTrackReminder)
 	ON_REGISTERED_MESSAGE(WM_TDL_ISCLOSING , OnToDoListIsClosing)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS , OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE , OnToDoListRestore)
@@ -660,12 +662,14 @@ void CToDoListWnd::SetupUIStrings()
 	CTimeEdit::SetUnits(THU_WEEKS,		CEnString(IDS_TE_WEEKS),	CEnString(IDS_WEEKS_ABBREV));
 	CTimeEdit::SetUnits(THU_MONTHS,		CEnString(IDS_TE_MONTHS),	CEnString(IDS_MONTHS_ABBREV));
 	CTimeEdit::SetUnits(THU_YEARS,		CEnString(IDS_TE_YEARS),	CEnString(IDS_YEARS_ABBREV));
-
 	CTimeEdit::SetDefaultButtonTip(CEnString(IDS_TIMEUNITS));
 
 	CFileEdit::SetDefaultButtonTips(CEnString(IDS_BROWSE), CEnString(IDS_VIEW));
 	CFileEdit::SetDefaultBrowseTitles(CEnString(IDS_BROWSEFILE_TITLE), CEnString(IDS_BROWSEFOLDER_TITLE));
 
+	CSoundEdit::SetDefaultFilter(CEnString(IDS_SOUNDFILEFILTER));
+	CSoundEdit::SetDefaultPlayButtonTip(CEnString(IDS_PLAYSOUNDBTNTIP));
+	
 	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
@@ -3069,7 +3073,14 @@ void CToDoListWnd::OnNewtaskAtbottom()
 BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit, DWORD dwDependency)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
+
+	// Special case
+	if (!tdc.CanCreateNewTask(nInsertWhere) && (tdc.GetTaskCount() == 0))
+	{
+		// This location always works
+		nInsertWhere = TDC::MapInsertIDToInsertWhere(ID_NEWTASK_ATTOP);
+	}
+
 	if (!tdc.CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency))
 		return FALSE;
 
@@ -3685,7 +3696,7 @@ BOOL CToDoListWnd::Export2Html(const CTaskFile& tasks, const CString& sFilePath,
 	}
 	
 	// else default export
-	return m_mgrImportExport.ExportTaskListToHtml(&tasks, sFilePath);
+	return (m_mgrImportExport.ExportTaskListToHtml(&tasks, sFilePath) == IIER_SUCCESS);
 }
 
 void CToDoListWnd::OnSaveas() 
@@ -3844,7 +3855,9 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		}
 	}
 	else
+	{
 		CFrameWnd::OnContextMenu(pWnd, point);
+	}
 }
 
 void CToDoListWnd::OnTrayiconShow() 
@@ -4880,8 +4893,12 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		}
 			
 		// visible filter controls
+		BOOL bRefreshFilter = FALSE;
+
 		if (m_bShowFilterBar)
 			bResizeDlg = TRUE;
+
+		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFilters());
 
 		BOOL bEnableMultiSel = newPrefs.GetMultiSelFilters();
 		BOOL bPrevMultiSel = oldPrefs.GetMultiSelFilters();
@@ -4889,14 +4906,19 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		if (bPrevMultiSel != bEnableMultiSel)
 		{
 			m_filterBar.EnableMultiSelection(bEnableMultiSel);
-
-			OnViewRefreshfilter();
+			bRefreshFilter = TRUE;
 		}
 
-		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFilters());
-
-		// title filter option
 		if (m_filterBar.SetTitleFilterOption(newPrefs.GetTitleFilterOption()))
+			bRefreshFilter = TRUE;
+
+		if (newPrefs.GetRecentlyModifiedPeriod() != oldPrefs.GetRecentlyModifiedPeriod())
+		{
+			CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
+			bRefreshFilter = (m_filterBar.GetFilter() == FS_RECENTMOD);
+		}
+		
+		if (bRefreshFilter)
 			OnViewRefreshfilter();
 
 		// inherited parent task attributes for new tasks
@@ -4943,9 +4965,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		// Content controls
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
 
-		// Recently modified period
-		CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
-
 		// don't ask me for the full details on this but it seems as
 		// though the CSysImageList class is waiting to process a 
 		// message before we can switch image sizes so we put it
@@ -4956,7 +4975,6 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 	
 	// finally set or terminate the various status check timers
 	RestoreTimers();
-
 }
 
 BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs)
@@ -5863,9 +5881,23 @@ void CToDoListWnd::OnUpdateEditCopy(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() > 0);
 }
 
-BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
+BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const
 {
-	return GetToDoCtrl().CanCreateNewTask(nInsertWhere);
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (tdc.CanCreateNewTask(nInsertWhere))
+		return TRUE;
+
+	// Special case
+	if ((tdc.GetTaskCount() == 0) && !bDependent)
+	{
+		UINT nNewTaskID = GetNewTaskCmdID();
+		
+		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 void CToDoListWnd::OnUpdateNewtaskAttopSelected(CCmdUI* pCmdUI) 
@@ -5885,7 +5917,7 @@ void CToDoListWnd::OnUpdateNewtaskAfterselectedtask(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateNewDependenttaskAfterselectedtask(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(CanCreateNewTask(TDC_INSERTAFTERSELTASK));
+	pCmdUI->Enable(CanCreateNewTask(TDC_INSERTAFTERSELTASK, TRUE));
 }
 
 void CToDoListWnd::OnUpdateNewtaskBeforeselectedtask(CCmdUI* pCmdUI) 
@@ -6330,7 +6362,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 	{
 		CString sTempImg = FileMisc::GetTempFilePath(_T("tdl.view"), _T("bmp"));
 
-		if (SaveViewToImage(GetToDoCtrl(), sTempImg))
+		if (GetToDoCtrl().SaveTaskViewToImage(sTempImg))
 		{
 			CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
 			
@@ -6441,7 +6473,6 @@ void CToDoListWnd::KillTimers()
 	SetTimer(TIMER_AUTOSAVE, FALSE);
 	SetTimer(TIMER_TIMETRACKING, FALSE);
 	SetTimer(TIMER_AUTOMINIMIZE, FALSE);
-	SetTimer(TIMER_TIMETRACKREMINDER, FALSE);
 }
 
 void CToDoListWnd::RestoreTimers()
@@ -6454,7 +6485,6 @@ void CToDoListWnd::RestoreTimers()
 	SetTimer(TIMER_CHECKOUTSTATUS, (prefs.GetKeepTryingToCheckout() || prefs.GetAutoCheckinFrequency()));
 	SetTimer(TIMER_TIMETRACKING, TRUE);
 	SetTimer(TIMER_AUTOMINIMIZE, prefs.GetAutoMinimizeFrequency());
-	SetTimer(TIMER_TIMETRACKREMINDER, prefs.GetTrackReminderFrequency());
 }
 
 void CToDoListWnd::SetTimer(UINT nTimerID, BOOL bOn)
@@ -6487,10 +6517,6 @@ void CToDoListWnd::SetTimer(UINT nTimerID, BOOL bOn)
 			
 		case TIMER_TIMETRACKING:
 			nPeriod = INTERVAL_TIMETRACKING;
-			break;
-			
-		case TIMER_TIMETRACKREMINDER:
-			nPeriod = (Prefs().GetTrackReminderFrequency() * ONE_MINUTE);
 			break;
 			
 		case TIMER_AUTOMINIMIZE:
@@ -6555,10 +6581,6 @@ void CToDoListWnd::OnTimer(UINT nIDEvent)
 		OnTimerTimeTracking();
 		break;
 		
-	case TIMER_TIMETRACKREMINDER:
-		OnTimerTimeTrackReminder();
-		break;
-		
 	case TIMER_AUTOMINIMIZE:
 		OnTimerAutoMinimize();
 		break;
@@ -6610,44 +6632,42 @@ void CToDoListWnd::UpdateWindowIcons()
 	m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
 }
 
-void CToDoListWnd::OnTimerTimeTrackReminder()
+LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lParam)
 {
-	AF_NOREENTRANT // macro helper
-		
-	// process files
-	CString sTasksTracking;
-	int nNumTDC = GetTDCCount();
-	
-	for (int nCtrl = 0; nCtrl < nNumTDC; nCtrl++)
+	DWORD dwTaskID = wParam;
+	const CFilteredToDoCtrl* pTDC = (const CFilteredToDoCtrl*)lParam;
+
+	if (!dwTaskID || !pTDC)
 	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
-
-		DWORD dwTaskID = tdc.GetTimeTrackTaskID(FALSE);
-		DWORD dwActiveID = tdc.GetTimeTrackTaskID(TRUE);
-
-		if (!dwTaskID && !dwActiveID)
-			continue;
-
-		if (nNumTDC > 1)
-		{
-			sTasksTracking += m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl);
-			sTasksTracking += _T(": ");
-		}
-		
-		sTasksTracking += tdc.GetTaskTitle(dwTaskID);
-
-		if (dwActiveID == 0) // paused
-			sTasksTracking += CEnString(IDS_TRACKREMINDERPAUSED);
-
-		sTasksTracking += ENDL;
+		ASSERT(0);
+		return 0L;
 	}
-	
-	// do we need to notify the user?
-	if (!sTasksTracking.IsEmpty())
+
+	CEnString sMessage;
+	sMessage.Format(IDS_TIMETRACKREMINDER, 
+					Prefs().GetTrackReminderFrequency(),
+					pTDC->GetFriendlyProjectName(),
+					pTDC->GetTaskTitle(dwTaskID));
+
+	m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_TIMETRACKREMINDER_BALLOONTITLE), NIIF_INFO);
+
+	// Option extras
+	const CPreferencesDlg& prefs = Prefs();
+	CString sSoundFile = prefs.GetTrackReminderSoundFile();
+
+	if (!sSoundFile.IsEmpty())
+		PlaySound(sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
+
+	// And optionally end tracking
+	if (prefs.GetEndTrackingOnReminder())
 	{
-		CEnString sMessage(IDS_TIMETRACKREMINDER, sTasksTracking);
-		m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_TIMETRACKREMINDER_BALLOONTITLE), NIIF_INFO);
+		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTDC);
+		ASSERT(nTDC != -1);
+
+		StopTimeTrackingTask(nTDC, FROM_APP);
 	}
+
+	return TRUE;
 }
 
 void CToDoListWnd::OnTimerDueItems(int nCtrl)
@@ -7622,8 +7642,8 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 													m_tdiDefault.sCommentsTypeID, 
 													vis);
 	
-	// create somewhere out in space
-	CRect rCtrl(-32010, -32010, -32000, -32000);
+	// create somewhere out in space but with a meaningful size
+	CRect rCtrl(-33000, -33000, -31000, -31000);
 	
 	if (pTDC && pTDC->Create(rCtrl, this, IDC_TODOLIST, bVisible, bEnabled))
 	{
@@ -7805,7 +7825,9 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	if (nCurSel != -1)
 	{
-		// make sure it's loaded
+		// make sure it's loaded and notify due tasks
+		// only if the user has not configured due task
+		// notifications on switching
 		if (!VerifyTaskListOpen(nCurSel, (nDueBy == -1)))
 		{
 			// restore the previous tab
@@ -7851,6 +7873,8 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	if (nCurSel != -1)
 	{
+		UpdateWindow();
+
 		CFilteredToDoCtrl& tdcShow = GetToDoCtrl(nCurSel);
 		tdcShow.UpdateWindow();
 
@@ -9389,12 +9413,12 @@ UINT CToDoListWnd::MapNewTaskPos(int nPos, BOOL bSubtask)
 	}
 }
 
-UINT CToDoListWnd::GetNewTaskCmdID()
+UINT CToDoListWnd::GetNewTaskCmdID() const
 {
 	return MapNewTaskPos(Prefs().GetNewTaskPos(), FALSE);
 }
 
-UINT CToDoListWnd::GetNewSubtaskCmdID()
+UINT CToDoListWnd::GetNewSubtaskCmdID() const
 {
 	return MapNewTaskPos(Prefs().GetNewSubtaskPos(), TRUE);
 }
@@ -12216,7 +12240,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		int nFormat = dialog.GetExportFormat();
 		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
 
-		if (!m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE))
+		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)
 		{
 			// Display error message
 			// TODO
@@ -12817,7 +12841,9 @@ void CToDoListWnd::OnViewSaveToImage()
 	// else
 	sFilePath = dialog.GetPathName();
 
-	if (SaveViewToImage(tdc, sFilePath))
+	DOPROGRESS(IDS_SAVETOIMAGEPROGRESS);
+	
+	if (tdc.SaveTaskViewToImage(sFilePath))
 	{
 		FileMisc::Run(*this, sFilePath);
 	}
@@ -12828,6 +12854,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	}
 }
 
+/*
 BOOL CToDoListWnd::SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath) 
 {
 	CWaitCursor cursor;
@@ -12846,6 +12873,7 @@ BOOL CToDoListWnd::SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFileP
 	// else
 	return FALSE;
 }
+*/
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
 {

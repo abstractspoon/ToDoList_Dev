@@ -19,6 +19,7 @@
 #include "..\shared\holdredraw.h"
 
 #include "..\3rdparty\T64Utils.h"
+#include "..\3rdparty\dibdata.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -113,6 +114,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
 	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnGanttPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnGanttGetTaskIcon)
+	ON_REGISTERED_MESSAGE(WM_GTLC_MOVETASK, OnGanttMoveTask)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -412,6 +414,10 @@ bool CGanttChartWnd::ProcessMessage(MSG* pMsg)
 		break;
 	}
 
+	// Drag and drop messages
+	if (m_ctrlGantt.ProcessMessage(pMsg))
+		return true;
+
 	// toolbar messages
 	return (m_tbHelper.ProcessMessage(pMsg) != FALSE);
 }
@@ -487,18 +493,11 @@ bool CGanttChartWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/
 	return false; // only support single selection
 }
 
-bool CGanttChartWnd::WantEditUpdate(IUI_ATTRIBUTE nAttribute) const
+bool CGanttChartWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	return (CGanttTreeListCtrl::WantEditUpdate(nAttribute) != FALSE);
-}
-
-bool CGanttChartWnd::WantSortUpdate(IUI_ATTRIBUTE nAttribute) const
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return (CGanttTreeListCtrl::WantSortUpdate(nAttribute) != FALSE);
 }
 
 void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
@@ -513,7 +512,7 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	UpdateSelectedTaskDates();
 }
 
-bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) 
+bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -536,41 +535,39 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		return true;
 
 	case IUI_TOGGLABLESORT:
-		if (WantSortUpdate((IUI_ATTRIBUTE)dwExtra))
+		if (pData)
 		{
-			m_ctrlGantt.Sort(MapColumn(dwExtra), TRUE);
+			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), TRUE);
 			return true;
 		}
 		break;
 
 	case IUI_SORT:
-		if (WantSortUpdate((IUI_ATTRIBUTE)dwExtra))
+		if (pData)
 		{
-			m_ctrlGantt.Sort(MapColumn(dwExtra), FALSE);
+			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), FALSE);
 			return true;
 		}
 		break;
 
 	case IUI_MULTISORT:
-		if (dwExtra)
+		if (pData)
 		{
-			const IUIMULTISORT* pSort = (const IUIMULTISORT*)dwExtra;
 			GANTTSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib1);
-			sort.cols[0].bAscending = (pSort->bAscending1 ? TRUE : FALSE);
+			sort.cols[0].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib1);
+			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib2);
-			sort.cols[1].bAscending = (pSort->bAscending2 ? TRUE : FALSE);
+			sort.cols[1].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib2);
+			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = m_ctrlGantt.MapAttributeToColumn(pSort->nAttrib3);
-			sort.cols[2].bAscending = (pSort->bAscending3 ? TRUE : FALSE);
+			sort.cols[2].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib3);
+			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlGantt.Sort(sort);
+			return true;
 		}
-
-		// TODO
-		return true;
+		break;
 
 	case IUI_SETFOCUS:
 		m_ctrlGantt.SetFocus();
@@ -581,46 +578,47 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 		return true;
 		
 	case IUI_SELECTTASK:
-		return SelectTask(dwExtra);
+		if (pData)
+			return SelectTask(pData->dwTaskID);
+		break;
 		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		if (dwExtra)
+		if (pData)
 		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			DWORD dwNextID =  m_ctrlGantt.GetNextTask(*pTaskID, nCmd);
+			DWORD dwNextID =  m_ctrlGantt.GetNextTask(pData->dwTaskID, nCmd);
 			
-			if (dwNextID && (dwNextID != *pTaskID))
+			if (dwNextID && (dwNextID != pData->dwTaskID))
 			{
-				*pTaskID = dwNextID;
+				pData->dwTaskID = dwNextID;
 				return true;
 			}
 		}
 		break;
 		
 	case IUI_SAVETOIMAGE:
-		if (dwExtra)
+		if (pData)
 		{
 			CLockUpdates lock(GetSafeHwnd());
 			CBitmap bmImage;
 
 			if (m_ctrlGantt.SaveToImage(bmImage))
 			{
-				HBITMAP* pHBM = (HBITMAP*)dwExtra;
-				*pHBM = (HBITMAP)bmImage.Detach();
+				CDibData dib;
 
-				return true;
+				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
+					return true;
 			}
 		}
 		break;
 
 	case IUI_SETTASKFONT:
-		if (dwExtra)
+		if (pData)
 		{
 			CHoldRedraw hr(*this);
-			m_ctrlGantt.SetFont((HFONT)dwExtra, TRUE);
+			m_ctrlGantt.SetFont(pData->hFont, TRUE);
 		}
 		break;
 
@@ -629,19 +627,27 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra)
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		if (dwExtra)
+		if (pData)
+			return (m_ctrlGantt.SelectTask(nCmd, pData->select) != FALSE);
+		break;
+
+		return true;
+
+	case IUI_MOVETASK:
+		if (pData)
 		{
-			const IUISELECTTASK* pSelect = (IUISELECTTASK*)dwExtra;
-			
-			return (m_ctrlGantt.SelectTask(nCmd, *pSelect) != FALSE);
+			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
+
+			return (m_ctrlGantt.MoveSelectedItem(pData->move) != FALSE);
 		}
 		break;
+
 	}
 
 	return false;
 }
 
-bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const 
+bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -672,7 +678,9 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
-		return WantSortUpdate((IUI_ATTRIBUTE)dwExtra);
+		if (pData)
+			return (CGanttTreeListCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+		break;
 
 	case IUI_MULTISORT:
 		return true;
@@ -684,12 +692,11 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		if (dwExtra)
+		if (pData)
 		{
-			DWORD* pTaskID = (DWORD*)dwExtra;
-			DWORD dwNextID = m_ctrlGantt.GetNextTask(*pTaskID, nCmd);
-			
-			return (dwNextID && (dwNextID != *pTaskID));
+			DWORD dwNextID =  m_ctrlGantt.GetNextTask(pData->dwTaskID, nCmd);
+
+			return (dwNextID && (dwNextID != pData->dwTaskID));
 		}
 		break;
 
@@ -699,6 +706,11 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, DWORD dwExtra) const
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return true;
+
+	case IUI_MOVETASK:
+		if (pData)
+			return (m_ctrlGantt.CanMoveSelectedItem(pData->move) != FALSE);
+		break;
 	}
 
 	// all else
@@ -921,6 +933,11 @@ LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 
 void CGanttChartWnd::OnSelchangedGanttTree(NMHDR* pNMHDR, LRESULT* pResult) 
 {
+	// Ignore selection changes during a move because we
+	// _Know_ that the logical selection does not change
+	if (m_ctrlGantt.IsMovingTask())
+		return;
+
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	*pResult = 0;
 	
@@ -1343,4 +1360,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
+}
+
+LRESULT CGanttChartWnd::OnGanttMoveTask(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_MOVESELECTEDTASK, wp, lp);
 }

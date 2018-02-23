@@ -784,6 +784,14 @@ BOOL FileMisc::IsFileWritable(LPCTSTR szFilePath)
 	return CFile().Open(szFilePath, CFile::modeWrite);
 }
 
+BOOL FileMisc::IsFileReadable(LPCTSTR szFilePath)
+{
+	if (!FileExists(szFilePath))
+		return FALSE;
+
+	return CFile().Open(szFilePath, CFile::modeRead);
+}
+
 BOOL FileMisc::IsFolderWritable(LPCTSTR szFolder)
 {
 	if (!FolderExists(szFolder))

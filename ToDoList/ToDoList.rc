@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,998,10
+ FILEVERSION 7,1,999,6
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 998, 10\0"
+            VALUE "FileVersion", "7, 1, 999, 6\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "7.2 Alpha Release\0"
+            VALUE "SpecialBuild", "7.2 Beta Release\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -342,7 +342,7 @@ BEGIN
     PUSHBUTTON      "Copy &All",IDC_COPYALL,295,202,50,14
 END
 
-IDD_PREFTASK_PAGE DIALOG DISCARDABLE  0, 0, 400, 334
+IDD_PREFTASK_PAGE DIALOG DISCARDABLE  0, 0, 400, 379
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
@@ -381,21 +381,25 @@ BEGIN
     CONTROL         "When time-tracking, remind me every:",
                     IDC_NOTIFYTIMETRACKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,190,385,10
-    EDITTEXT        IDC_NOTIFYTIMETRACKINGFREQUENCY,17,202,29,13,
+    EDITTEXT        IDC_NOTIFYTIMETRACKINGFREQUENCY,17,202,29,14,
                     ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "minutes",IDC_STATIC,53,203,26,8
-    LTEXT           "Time Periods",IDC_TIMEGROUP,7,222,386,8
-    LTEXT           "One &day equals:",IDC_STATIC,7,237,85,8
-    COMBOBOX        IDC_HOURSINONEDAY,97,235,39,115,CBS_DROPDOWN | 
+    LTEXT           "minutes",IDC_STATIC,53,204,90,8
+    LTEXT           "&Play this sound",IDC_STATIC,17,219,221,8
+    EDITTEXT        IDC_PLAYSOUND,17,231,215,14,ES_AUTOHSCROLL
+    CONTROL         "And then stop the timer",IDC_ENDTRACKINGONREMINDER,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,249,378,10
+    LTEXT           "Time Periods",IDC_TIMEGROUP,7,269,386,8
+    LTEXT           "One &day equals:",IDC_STATIC,7,284,85,8
+    COMBOBOX        IDC_HOURSINONEDAY,97,282,39,115,CBS_DROPDOWN | 
                     WS_TABSTOP
-    LTEXT           "hours",IDC_STATIC,143,237,59,8
-    LTEXT           "One &week equals:",IDC_STATIC,7,252,85,8
-    EDITTEXT        IDC_DAYSINONEWEEK,97,251,39,12,ES_AUTOHSCROLL | 
+    LTEXT           "hours",IDC_STATIC,143,284,59,8
+    LTEXT           "One &week equals:",IDC_STATIC,7,299,85,8
+    EDITTEXT        IDC_DAYSINONEWEEK,97,298,39,12,ES_AUTOHSCROLL | 
                     ES_READONLY | WS_DISABLED
-    LTEXT           "days",IDC_STATIC,143,252,60,8
+    LTEXT           "days",IDC_STATIC,143,299,60,8
     LTEXT           "Th&e following days represent the weekend:",IDC_STATIC,
-                    7,269,387,8
-    LISTBOX         IDC_WEEKENDS,7,281,225,43,LBS_OWNERDRAWFIXED | 
+                    7,316,387,8
+    LISTBOX         IDC_WEEKENDS,7,328,225,43,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
 END
@@ -1355,95 +1359,98 @@ BEGIN
     EDITTEXT        IDC_EXPORTFOLDER,28,349,171,13,ES_AUTOHSCROLL
 END
 
-IDD_PREFTASKCALC_PAGE DIALOGEX 0, 0, 400, 521
+IDD_PREFTASKCALC_PAGE DIALOG DISCARDABLE  0, 0, 400, 548
 STYLE WS_POPUP
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
+    CONTROL         "Display a task's 'Last Modified' date as the latest of its and all its subtasks' last modified dates",
+                    IDC_USELATESTLASTMODIFIED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,10,392,10
     CONTROL         "Display a task as 'Flagged' if any of its subtasks are flagged",
                     IDC_TASKINHERITSSUBTASKFLAGS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,10,383,10
+                    WS_TABSTOP,7,25,383,10
     CONTROL         "Treat subtasks of 'Locked' tasks as also being locked",
                     IDC_SUBTASKSINHERITLOCK,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,25,385,10
+                    WS_TABSTOP,7,40,385,10
     CONTROL         "After completing a task, set its 'Status' to:",
                     IDC_SETSTATUSONDONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,40,392,10
-    EDITTEXT        IDC_DONESTATUS,18,53,134,13,ES_AUTOHSCROLL
+                    WS_TABSTOP,7,55,392,10
+    EDITTEXT        IDC_DONESTATUS,18,68,134,13,ES_AUTOHSCROLL
     CONTROL         "&Synchronise a task's 'Completion' to changes in its 'Status'",
                     IDC_SYNCCOMPLETIONTOSTATUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,71,377,10
+                    WS_TABSTOP,18,86,377,10
     CONTROL         "&Treat due tasks as having the highest priority",
                     IDC_DUEHAVEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,88,385,10
+                    BS_TOP | WS_TABSTOP,7,103,385,10
     CONTROL         "T&reat completed tasks as having the lowest priority/risk",
                     IDC_DONEHAVELOWESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,103,385,10
+                    BS_TOP | WS_TABSTOP,7,118,385,10
     CONTROL         "Tr&eat tasks whose subtasks are all completed as also being 'completed'",
                     IDC_TREATSUBCOMPLETEDASDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,118,385,10
+                    BS_TOP | WS_TABSTOP,7,133,385,10
     CONTROL         "Di&splay a task's '% Completion' as being equal to its 'Time Spent' divided by its 'Time Estimate'",
                     IDC_AUTOCALCPERCENTDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,133,385,10
+                    BS_TOP | WS_TABSTOP,7,148,385,10
     CONTROL         "&Display a parent task's '% Completion' as being the average of all its subtasks' % completions",
                     IDC_AVERAGEPERCENTSUBCOMPLETION,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,148,385,10
+                    BS_TOP | WS_TABSTOP,7,163,385,10
     CONTROL         "I&nclude completed subtasks in this calculation",
                     IDC_INCLUDEDONEINAVERAGECALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,163,373,10
+                    WS_TABSTOP,18,178,373,10
     CONTROL         "&Weight % completion by number of subtasks",
                     IDC_WEIGHTPERCENTCALCBYNUMSUB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,178,373,10
+                    WS_TABSTOP,18,193,373,10
     CONTROL         "T&ake a task's '% Complete' into account when calculating time estimates",
                     IDC_USEPERCENTDONEINTIMEEST,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,193,385,10
+                    BS_TOP | WS_TABSTOP,7,208,385,10
     CONTROL         "Di&splay a task's priority/risk as being the highest of its and all its subtasks' priorities/risks",
                     IDC_USEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,208,385,10
+                    WS_TABSTOP,7,223,385,10
     CONTROL         "Inclu&de completed subtasks in this assessment",
                     IDC_INCLUDEDONEINPRIORITYCALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,223,374,10
+                    WS_TABSTOP,18,238,374,10
     CONTROL         "&Keep a task's time estimate synchronised with its start and due dates (and vice versa)",
                     IDC_SYNCTIMEESTANDDATES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,238,385,10
+                    BS_TOP | WS_TABSTOP,7,253,385,10
     CONTROL         "A&utomatically adjust a task's dates when its dependency's dates changes",
                     IDC_AUTOUPDATEDEPENDEES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,253,385,10
+                    BS_TOP | WS_TABSTOP,7,268,385,10
     CONTROL         "Tre&at tasks without a due date as being due 'Today' or on the 'Start' date whichever is later",
                     IDC_NODUEDATEDUETODAY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,268,385,10
+                    WS_TABSTOP,7,283,385,10
     LTEXT           "&Period defining 'Recently Modified' tasks",IDC_STATIC,
-                    7,283,392,10
-    EDITTEXT        IDC_RECENTMODPERIOD,18,296,69,13,ES_AUTOHSCROLL
+                    7,298,392,10
+    EDITTEXT        IDC_RECENTMODPERIOD,18,311,69,13,ES_AUTOHSCROLL
     GROUPBOX        "Calculate a task's 'Remaining Time' as:",IDC_STATIC,7,
-                    315,368,60
+                    330,368,60
     CONTROL         "Due date - &Current date",IDC_REMAININGTIMEISDUEDATE,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,330,
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,345,
                     351,10
     CONTROL         "&Time estimate - Time spent",IDC_REMAININGTIMEISSPENT,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,345,351,10
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,360,351,10
     CONTROL         "Time &estimate x ( 1 - % Completion)",
                     IDC_REMAININGTIMEISPERCENT,"Button",BS_AUTORADIOBUTTON | 
-                    BS_TOP,15,360,351,10
-    GROUPBOX        "Display a task's 'Due Date' as:",IDC_STATIC,7,380,368,
+                    BS_TOP,15,375,351,10
+    GROUPBOX        "Display a task's 'Due Date' as:",IDC_STATIC,7,395,368,
                     65
     CONTROL         "The &earliest of its due date and all its subtasks' due dates",
                     IDC_USEEARLIESTDUEDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,395,351,10
+                    WS_GROUP,15,410,351,10
     CONTROL         "The l&atest of its due date and all its subtasks' due dates",
-                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,410,
+                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,425,
                     351,10
     CONTROL         "I&ts assigned date",IDC_NOCALCDUEDATE,"Button",
-                    BS_AUTORADIOBUTTON,15,425,351,10
-    GROUPBOX        "Display a task's 'Start Date' as:",IDC_STATIC,7,450,368,
+                    BS_AUTORADIOBUTTON,15,440,351,10
+    GROUPBOX        "Display a task's 'Start Date' as:",IDC_STATIC,7,465,368,
                     65
     CONTROL         "The ea&rliest of its start date and all its subtasks' start dates",
                     IDC_USEEARLIESTSTARTDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,465,351,10
+                    WS_GROUP,15,480,351,10
     CONTROL         "The late&st of its start date and all its subtasks' start dates",
                     IDC_USELATESTSTARTDATE,"Button",BS_AUTORADIOBUTTON,15,
-                    480,351,10
+                    495,351,10
     CONTROL         "It&s assigned date",IDC_NOCALCDUEDATE2,"Button",
-                    BS_AUTORADIOBUTTON,15,495,351,10
+                    BS_AUTORADIOBUTTON,15,510,351,10
 END
 
 IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 240, 188
@@ -3823,7 +3830,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 396
         TOPMARGIN, 10
-        BOTTOMMARGIN, 329
+        BOTTOMMARGIN, 374
     END
 
     IDD_PREFTASKDEF_PAGE, DIALOG
@@ -3939,7 +3946,6 @@ BEGIN
     IDD_PREFTASKCALC_PAGE, DIALOG
     BEGIN
         TOPMARGIN, 10
-        BOTTOMMARGIN, 487
     END
 
     IDD_ADDLOGGEDTIME_DIALOG, DIALOG
@@ -4271,6 +4277,7 @@ BEGIN
     IDS_PRINTFAILED         "ToDoList was unable to print the active tasklist via your default  browser, which may mean that your browser does not support the 'print' command.\n\nPlease see your browser help for more information."
     IDS_SAVEBEFORECLOSE     "Would you like to save the changes to '%s' \nbefore closing?"
     IDS_TABSWITCHTOOLTIP    "Use '%s' to switch tasklists"
+    IDS_PREF_TASKVIEWVISIBILITY "User Interface>General>Task View Visibility"
     IDS_READONLYTOWRITABLE  "The status of the file '%s' has changed \nfrom 'read-only' to 'writable'."
     IDS_WRITABLETOREADONLY  "The status of the file '%s' has changed \nfrom 'writable' to 'read-only'."
     IDS_TASKLISTSRELOADED   "The following tasklists have been reloaded:\n\n%s"
@@ -5154,7 +5161,7 @@ BEGIN
     IDS_USERTOOL_FILEPROMPT "File prompt"
     IDS_FILTER_YESTERDAY    "Yesterday"
     IDS_TRACKREMINDERPAUSED " (paused)"
-    IDS_TIMETRACKREMINDER   "The following tasks are currently time tracked:\n\n%s"
+    IDS_TIMETRACKREMINDER   "The following task has been tracked for %d minutes:\n\n%s: %s"
     IDS_TIMETRACKREMINDER_BALLOONTITLE "Time Tracking Reminder"
     IDS_START_TRACKING      "Start Tracking"
     IDS_STOP_TRACKING       "Stop Tracking"
@@ -5283,6 +5290,8 @@ BEGIN
     IDS_STICKIES_LINK       "link"
     IDS_REPLACEINTASKTITLES "Replace in Task Titles"
     IDS_FINDINTASKTITLES    "Find in Task Titles"
+    IDS_SAVETOIMAGEPROGRESS "Saving task view image..."
+    IDS_INIFILELOCKED       "ToDoList cannot start because your preferences file is locked by another application."
 END
 
 #endif    // English (Australia) resources

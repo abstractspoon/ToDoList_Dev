@@ -130,6 +130,10 @@ SOURCE=.\KanbanListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanOptionComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -181,6 +185,10 @@ SOURCE=.\KanbanListCtrl.h
 # Begin Source File
 
 SOURCE=.\Kanbanmsg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanOptionComboBox.h
 # End Source File
 # Begin Source File
 

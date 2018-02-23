@@ -6,15 +6,19 @@
 #include "PreferencesTaskPage.h"
 
 #include "..\shared\Misc.h"
+#include "..\shared\FileMisc.h"
 #include "..\shared\DateHelper.h"
-
-//#include <locale.h>
+#include "..\shared\EnString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define NO_SOUND _T("None")
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage property page
@@ -27,6 +31,7 @@ CPreferencesTaskPage::CPreferencesTaskPage() :
 	//{{AFX_DATA_INIT(CPreferencesTaskPage)
 	//}}AFX_DATA_INIT
 
+	m_sTrackReminderSoundFile = FileMisc::GetWindowsFolder() + _T("\\media\\chimes.wav"); // default
 }
 
 CPreferencesTaskPage::~CPreferencesTaskPage()
@@ -52,6 +57,9 @@ void CPreferencesTaskPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_TRACKHIBERNATED, m_bTrackHibernated);
 	DDX_Check(pDX, IDC_SHOWTIMETRACKER, m_bShowTimeTracker);
 	//}}AFX_DATA_MAP
+	DDX_Text(pDX, IDC_PLAYSOUND, m_sTrackReminderSoundFile);
+	DDX_Check(pDX, IDC_ENDTRACKINGONREMINDER, m_bEndTrackingOnReminder);
+	DDX_Control(pDX, IDC_PLAYSOUND, m_ePlaySound);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -86,12 +94,13 @@ BOOL CPreferencesTaskPage::OnInitDialog()
 
 	GetDlgItem(IDC_LOGTASKSEPARATELY)->EnableWindow(m_bLogTime);
 	GetDlgItem(IDC_NOTIFYTIMETRACKINGFREQUENCY)->EnableWindow(m_bTrackReminder);
+	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_bTrackReminder);
+	GetDlgItem(IDC_ENDTRACKINGONREMINDER)->EnableWindow(m_bTrackReminder);
 
 	CDialogHelper::RefreshMaxColumnWidth(m_lbWeekends);
 
 	UpdateData(FALSE);
-
-
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -145,6 +154,12 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	m_bTrackReminder = pPrefs->GetProfileInt(szKey, _T("TrackReminder"), FALSE);
 	m_nTrackReminderFrequency = pPrefs->GetProfileInt(szKey, _T("TrackReminderFrequency"), 5);
 	m_bShowTimeTracker = pPrefs->GetProfileInt(szKey, _T("ShowTimeTracker"), TRUE);
+	m_bEndTrackingOnReminder = pPrefs->GetProfileInt(szKey, _T("EndTrackingOnReminder"), FALSE);
+
+	m_sTrackReminderSoundFile = pPrefs->GetProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile);
+
+	if (m_sTrackReminderSoundFile == NO_SOUND)
+		m_sTrackReminderSoundFile.Empty();
 
 	if (m_nTrackReminderFrequency <= 0)
 		m_bTrackReminder = FALSE;
@@ -175,6 +190,9 @@ void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 	pPrefs->WriteProfileInt(szKey, _T("TrackReminder"), m_bTrackReminder);
 	pPrefs->WriteProfileInt(szKey, _T("TrackReminderFrequency"), m_nTrackReminderFrequency);
 	pPrefs->WriteProfileInt(szKey, _T("ShowTimeTracker"), m_bShowTimeTracker);
+	pPrefs->WriteProfileInt(szKey, _T("EndTrackingOnReminder"), m_bEndTrackingOnReminder);
+
+	pPrefs->WriteProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile.IsEmpty() ? NO_SOUND : m_sTrackReminderSoundFile);
 
 	// validate time periods before writing
 	CString sHoursInDay;
@@ -187,11 +205,11 @@ void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
-
-
 void CPreferencesTaskPage::OnNotifyTimeTracking() 
 {
 	UpdateData();
 
 	GetDlgItem(IDC_NOTIFYTIMETRACKINGFREQUENCY)->EnableWindow(m_bTrackReminder);
+	GetDlgItem(IDC_PLAYSOUND)->EnableWindow(m_bTrackReminder);
+	GetDlgItem(IDC_ENDTRACKINGONREMINDER)->EnableWindow(m_bTrackReminder);
 }

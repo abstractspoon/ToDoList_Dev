@@ -58,6 +58,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_AVERAGEPERCENTSUBCOMPLETION, m_bAveragePercentSubCompletion);
 	DDX_Check(pDX, IDC_INCLUDEDONEINAVERAGECALC, m_bIncludeDoneInAverageCalc);
 	DDX_Check(pDX, IDC_TASKINHERITSSUBTASKFLAGS, m_bTaskInheritsSubtaskFlags);
+	DDX_Check(pDX, IDC_USELATESTLASTMODIFIED, m_bUseLatestLastModifiedDate);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -164,6 +165,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(_T("Completed")));
 	m_bSubtasksInheritLockStatus = pPrefs->GetProfileInt(szKey, _T("SubtasksInheritLockStatus"), FALSE);
 	m_bTaskInheritsSubtaskFlags = pPrefs->GetProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), FALSE);
+	m_bUseLatestLastModifiedDate = pPrefs->GetProfileInt(szKey, _T("UseLatestLastModifiedDate"), FALSE);
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
@@ -205,6 +207,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("SyncCompletionToStatus"), m_bSyncCompletionToStatus);
 	pPrefs->WriteProfileInt(szKey, _T("SubtasksInheritLockStatus"), m_bSubtasksInheritLockStatus);
 	pPrefs->WriteProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), m_bTaskInheritsSubtaskFlags);
+	pPrefs->WriteProfileInt(szKey, _T("UseLatestLastModifiedDate"), m_bUseLatestLastModifiedDate);
 
 	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_dRecentModTime);
 	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_nRecentModTimeUnits);

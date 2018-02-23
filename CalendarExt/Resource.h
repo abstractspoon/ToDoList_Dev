@@ -22,6 +22,7 @@
 #define IDC_SHOWCALCDUEDATES            1039
 #define IDC_DYNAMICTASKHEIGHT           1040
 #define IDC_SHOWOVERDUEASDUETODAY       1041
+#define IDC_HIDEPARENTTASKS             1042
 #define IDC_SHOWMINICALENDAR            2001
 #define IDC_SHOWTASKSCONTINUOUS         2002
 #define IDC_SHOWSTARTDATES              2003
@@ -48,7 +49,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        32793
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1042
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
 #endif

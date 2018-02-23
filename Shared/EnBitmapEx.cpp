@@ -74,9 +74,9 @@ BOOL CEnBitmapEx::ResizeImage(double dFactor)
 	return ProcessImage(&proc);
 }
 
-BOOL CEnBitmapEx::LightenImage(double dAmount, COLORREF crMask)
+BOOL CEnBitmapEx::LightenImage(double dAmount, BOOL bRGB, COLORREF crMask)
 {
-	CImageLightener proc(dAmount);
+	CImageLightener proc(dAmount, bRGB);
 	return ProcessImage(&proc, crMask);
 }
 
@@ -127,7 +127,7 @@ BOOL CEnBitmapEx::GrayScale(COLORREF crMask)
 	// create 'nice' disabled image
 	C32BIPArray aProcessors;
 	CImageGrayer ip2(0.33, 0.33, 0.33);
-	CImageLightener ip3(0.2);
+	CImageLightener ip3(0.2, TRUE);
 	CImageTinter ip4(GetSysColor(COLOR_3DSHADOW), 10);
 	CImageContraster ip5(-30);
 	
@@ -163,7 +163,7 @@ HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
 	
 	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
 	hbmDisabled.GrayImage(crMask);
-	hbmDisabled.LightenImage(0.3, crMask);
+	hbmDisabled.LightenImage(0.3, TRUE, crMask);
 	
 	return hbmDisabled.ExtractIcon(crMask, 16, 16);
 }

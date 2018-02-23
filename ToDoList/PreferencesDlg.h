@@ -167,6 +167,8 @@ public:
 	BOOL GetDisplayLogConfirm() const { return m_pageTask.GetDisplayLogConfirm(); }
 	int GetTrackReminderFrequency() const { return m_pageTask.GetTrackReminderFrequency(); }
 	int GetShowTimeTracker() const { return m_pageTask.GetShowTimeTracker(); }
+	CString GetTrackReminderSoundFile() const { return m_pageTask.GetTrackReminderSoundFile(); }
+	BOOL GetEndTrackingOnReminder() const { return m_pageTask.GetEndTrackingOnReminder(); }
 
 	// CPreferencesTaskCalcPage
 	BOOL GetAveragePercentSubCompletion() const { return m_pageTaskCalc.GetAveragePercentSubCompletion(); }
@@ -188,6 +190,7 @@ public:
 	BOOL GetSyncCompletionToStatus() const { return m_pageTaskCalc.GetSyncCompletionToStatus(); }
 	BOOL GetSubtasksInheritLockStatus() const { return m_pageTaskCalc.GetSubtasksInheritLockStatus(); }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_pageTaskCalc.GetTaskInheritsSubtaskFlags(); }
+	BOOL GetUseLatestLastModifiedDate() const { return m_pageTaskCalc.GetUseLatestLastModifiedDate(); }
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const { return m_pageTaskCalc.GetRecentlyModifiedPeriod(); }
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_pageTaskCalc.GetTimeRemainingCalculation(); }

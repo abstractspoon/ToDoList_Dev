@@ -336,7 +336,8 @@ BOOL CMSOutlookHelper::EscapeText(CString& sText)
 
 	// Other 'dangerous' characters can be replaced by 
 	// their HEX equivalent
-	const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
+//	const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
+	const CString sSearch(_T("#:<>\"Яавйнопрстухщэ"));
 	CString sReplace;
 
 	for (int nChar = 0; nChar < sSearch.GetLength(); nChar++)
