@@ -98,7 +98,7 @@ namespace MindMapUIExtension
 		const int ExpansionButtonSize = 8;
 		const int ExpansionButtonSeparation = 2;
 		const int LabelPadding = 2;
-        const int GraphBorder = 6;
+        const int GraphPadding = 6;
 
 		protected enum NodeDrawState
 		{
@@ -358,7 +358,7 @@ namespace MindMapUIExtension
             int border = BorderWidth;
 
             // Total size of the graph
-            Rectangle graphRect = Rectangle.Inflate(RootItem.TotalBounds, GraphBorder, GraphBorder);
+            Rectangle graphRect = Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
 
             // The portion of the client rect we are interested in 
             // (excluding the top and left borders)
@@ -1447,7 +1447,7 @@ namespace MindMapUIExtension
             }
 
             // Move the whole graph so that the top-left is (0,0)
-            Rectangle graphRect = Rectangle.Inflate(rootItem.TotalBounds, GraphBorder, GraphBorder);
+            Rectangle graphRect = Rectangle.Inflate(rootItem.TotalBounds, GraphPadding, GraphPadding);
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
             
 			this.AutoScrollMinSize = graphRect.Size;
@@ -2084,7 +2084,7 @@ namespace MindMapUIExtension
 
 			drawPos.Offset(m_DrawOffset);
             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-            drawPos.Offset(GraphBorder, GraphBorder);
+            drawPos.Offset(GraphPadding, GraphPadding);
 			
 			return drawPos;
 		}
