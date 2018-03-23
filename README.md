@@ -5,6 +5,7 @@ Note: These steps have only been tested up to VS2010.
 **Steps for building/running the ToDoList_Plugins solution**
 
 1. Clone the repo cleanly
+   Note: You will also need to clone 'ToDoList_Dev' alongside as the plugins depend on some shared header files
 2. Build the solution as-is ('PluginsHelper' should be the active project)
     * Note: The first time you build the solution, projects dependent on 'PluginHelpers' may fail to find the dll but just build again (not rebuild) and this second pass should succeed.
 3. Close all instances of ToDoList
