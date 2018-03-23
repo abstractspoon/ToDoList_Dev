@@ -95,10 +95,12 @@ float ColorUtil::DrawingColor::GetLuminance(Drawing::Color^ color)
 
 float ColorUtil::GetLuminance(UInt32 rgbColor)
 {
-	WORD wHue = 0, wLuminance = 0, wSaturation = 0;
-	ColorRGBToHLS((COLORREF)rgbColor, &wHue, &wLuminance, &wSaturation);
+// 	WORD wHue = 0, wLuminance = 0, wSaturation = 0;
+// 	ColorRGBToHLS((COLORREF)rgbColor, &wHue, &wLuminance, &wSaturation);
+// 
+// 	return (wLuminance / 240.0f);
 
-	return (wLuminance / 240.0f);
+	return (((GetBValue(rgbColor) * 0.1f) + (GetGValue(rgbColor) * 0.6f) + (GetRValue(rgbColor) * 0.3f)) / 255.0f);
 }
 
 UInt32 ColorUtil::SetLuminance(UInt32 rgbColor, float luminance)
