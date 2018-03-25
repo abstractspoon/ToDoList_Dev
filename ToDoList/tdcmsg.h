@@ -22,6 +22,7 @@ const UINT WM_TDCN_RECREATERECURRINGTASK	= ::RegisterWindowMessage(_T("WM_TDCN_R
 const UINT WM_TDCN_CLICKREMINDERCOL			= ::RegisterWindowMessage(_T("WM_TDCN_CLICKREMINDERCOL"));
 const UINT WM_TDCN_COLUMNEDITCLICK			= ::RegisterWindowMessage(_T("WM_TDCN_COLUMNEDITCLICK")); // lParam == <TDC_COLUMN>
 const UINT WM_TDCN_TIMETRACKREMINDER		= ::RegisterWindowMessage(_T("WM_TDCN_TIMETRACKREMINDER"));	// wParam = TaskID, lParam = TDC*
+const UINT WM_TDCN_SOURCECONTROLSAVE		= ::RegisterWindowMessage(_T("WM_TDCN_SOURCECONTROLSAVE"));	
 
 // from the filterbar
 const UINT WM_FBN_FILTERCHNG				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHNG")); 

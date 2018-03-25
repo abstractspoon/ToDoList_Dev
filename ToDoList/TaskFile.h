@@ -25,10 +25,10 @@
 
 // predecs
 class CBinaryData;
-class TODOITEM;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
 
+struct TODOITEM;
 struct TDCRECURRENCE; 
 struct TDCCOLEDITVISIBILITY;
 struct TDCCOLEDITFILTERVISIBILITY;
@@ -50,7 +50,7 @@ enum
 	TDL_FILEFORMAT_SORTBYID = 8,
 	TDL_FILEFORMAT_CUSTATTRIB,
 	TDL_FILEFORMAT_RECUR_MOD,
-	//TDL_FILEFORMAT_LOCKING,
+	TDL_FILEFORMAT_LOCKING,
 	// insert here when format changes
 
 	TDL_FILEFORMAT_CURRENT

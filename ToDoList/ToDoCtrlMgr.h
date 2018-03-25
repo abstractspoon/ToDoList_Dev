@@ -160,7 +160,7 @@ protected:
 		TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo = NULL) 
 		{ 
 			static int nNextUntitledIndex = 0;
-			nUntitled = (pCtrl->GetFilePath().IsEmpty() ? nNextUntitledIndex++ : -1);
+			nUntitled = (!pCtrl->HasFilePath() ? nNextUntitledIndex++ : -1);
 			
 			pTDC = pCtrl; 
 			bLoaded = loaded;
@@ -186,7 +186,7 @@ protected:
 					tLastMod = FileMisc::GetFileLastModified(sFilePath);
 				}
 
-				if (pCtrl->IsCheckedOut())
+				if (pCtrl->IsTasklistCheckedOut())
 					bLastCheckoutSuccess = TRUE;
 			}
 			

@@ -613,13 +613,25 @@ BOOL CToDoCtrlDataItems::DeleteTask(DWORD dwTaskID)
 
 BOOL CToDoCtrlDataItems::AddTask(DWORD dwTaskID, TODOITEM* pTDI)
 {
-	if (!pTDI || !dwTaskID)
+	if (!pTDI || !dwTaskID || HasTask(dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	SetAt(dwTaskID, pTDI);
+	return TRUE;
+}
+
+BOOL CToDoCtrlDataItems::SetTask(DWORD dwTaskID, const TODOITEM* pTDI)
+{
+	if (!pTDI || !dwTaskID || !HasTask(dwTaskID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	*GetTask(dwTaskID) = *pTDI;
 	return TRUE;
 }
 

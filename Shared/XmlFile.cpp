@@ -929,12 +929,20 @@ BOOL CXmlFile::Load(const CString& sFilePath, const CString& sRootItemName, IXml
 		Close();
 	
 	m_pCallback = pCallback;
+
+	BOOL bSuccess = Open(sFilePath, XF_READ);
 	
-	if (Open(sFilePath, XF_READ))
-		return LoadEx(sRootItemName, pCallback);
-	
-	// else
-	return FALSE;
+	if (bSuccess)
+	{
+		bSuccess = LoadEx(sRootItemName, pCallback);
+		Close();
+	}
+
+	// error handling
+	if (!bSuccess)
+		m_nFileError = GetLastError();
+
+	return bSuccess;
 }
 
 BOOL CXmlFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
@@ -945,8 +953,13 @@ BOOL CXmlFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
 	if (GetFileHandle() != (HANDLE)CStdioFileEx::hFileNull)
 		Close();
 	
-	BOOL bSuccess = (Open(sFilePath, XF_WRITE, nFormat) && SaveEx());
-	Close();
+	BOOL bSuccess = Open(sFilePath, XF_WRITE, nFormat);
+	
+	if (bSuccess)
+	{
+		bSuccess = SaveEx();
+		Close();
+	}
 
 	// error handling
 	if (!bSuccess)

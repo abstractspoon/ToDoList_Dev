@@ -24,7 +24,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-class TODOITEM
+struct TODOITEM
 {
 	friend class CToDoCtrlData;
 	
@@ -166,6 +166,7 @@ public:
 	void DeleteAll() { CleanUp(); }
 	BOOL DeleteTask(DWORD dwTaskID);
 	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI);
+	BOOL SetTask(DWORD dwTaskID, const TODOITEM* pTDI);
 
 protected:
 	void CleanUp();

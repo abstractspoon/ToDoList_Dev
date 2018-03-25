@@ -1871,6 +1871,9 @@ HTASKITEM CTaskFile::FindTask(unsigned long dwTaskID) const
 	if (dwTaskID <= 0)
 		return NULL;
 
+	if ((m_mapHandles.GetCount() == 0) && (Root()->HasItem(TDL_TASK)))
+		BuildHandleMap();
+
 	HTASKITEM hTask = NULL;
 	VERIFY(!m_mapHandles.Lookup(dwTaskID, hTask) || (hTask != NULL));
 

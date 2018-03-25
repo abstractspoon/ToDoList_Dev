@@ -391,6 +391,9 @@
     <ClCompile Include="TDLCleanupIniPreferencesDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCSourceControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="TDCTimeTracking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -844,6 +847,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDLCleanupIniPreferencesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCSourceControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCTimeTracking.h">

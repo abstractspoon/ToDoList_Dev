@@ -72,6 +72,8 @@ namespace OutlookAPI
 
 class CToDoCtrl : public CRuntimeDlg, protected IFindReplaceCmdHandler
 {
+	friend class CTDCSourceControl;
+
 // Construction
 public:
 	CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
@@ -107,18 +109,22 @@ public:
 	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
 	TDC_FILE CheckIn();
-	TDC_FILE CheckOut();
-	TDC_FILE CheckOut(CString& sCheckedOutTo);
-	BOOL IsCheckedOut() const;
+	TDC_FILE CheckOutTasklist();
+	TDC_FILE CheckOutTasklist(CString& sCheckedOutTo);
+
+	BOOL IsTasklistCheckedOut() const;
 	BOOL IsSourceControlled() const;
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);
 	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
+	BOOL CheckOutSelectedTasks();
+	BOOL CheckInSelectedTasks();
 
 	void Flush(BOOL bEndTimeTracking = FALSE); // called to end current editing actions
 	BOOL IsModified() const;
 	void SetModified(BOOL bMod = TRUE);
 
 	CString GetFilePath() const { return m_sLastSavePath; }
+	BOOL HasFilePath() const { return !m_sLastSavePath.IsEmpty(); }
 	void ClearFilePath() { m_sLastSavePath.Empty(); }
 	CString GetProjectName() const { return m_sProjectName; }
 	void SetProjectName(const CString& sProjectName);
@@ -273,8 +279,7 @@ public:
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
 	double CalcSelectedTaskCost() const { return m_taskTree.CalcSelectedTaskCost(); }
 
-	BOOL CanEditSelectedTask(DWORD dwTaskID = 0) const;
-	BOOL CanEditSelectedTaskLock() const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle);
@@ -531,22 +536,21 @@ protected:
 	COLORREF m_crColour;
 	CMapStringToString m_mapMetaData;
 	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
+	CTDCSourceControl m_ssc;
 
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	CTDCCustomControlArray m_aCustomControls;
 
 	DWORD m_dwNextUniqueID;
-	DWORD m_nFileVersion;
 	DWORD m_nFileFormat;
 	DWORD m_dwLastAddedID;
 	DWORD m_dwEditTitleTaskID;
 
+	mutable DWORD m_nFileVersion;
+
 	BOOL m_bModified;
 	BOOL m_bArchive;
-	BOOL m_bCheckedOut; // intentionally not a style
 	BOOL m_bSplitting; // dragging comments splitter
-	BOOL m_bTimeTrackingPaused;
-	BOOL m_bSourceControlled;
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bFirstLoadCommentsPrefs;
@@ -793,8 +797,6 @@ protected:
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
 	TDC_COLUMN MapCtrlIDToColumn(UINT nCtrlID) const;
-	CString GetSourceControlID(BOOL bAlternate = FALSE) const;
-	BOOL MatchesSourceControlID(const CString& sID) const;
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;
@@ -912,7 +914,7 @@ protected:
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void SetDefaultComboNames(CAutoComboBox& combo, const CStringArray& aNewNames, 
 								CStringArray& aDefNames, BOOL bReadOnly, BOOL bAddEmpty);
-	void BuildTasksForSave(CTaskFile& tasks, BOOL bFirstSave);
+	void BuildTasksForSave(CTaskFile& tasks) const;
 	BOOL SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	
 	static void SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, const CStringArray& aOldDefs, BOOL bAddEmpty = FALSE);

@@ -113,6 +113,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(BOOL bSyncSelection,
 	m_dwNextUniqueTaskID(100),
 	m_nMaxInfotipCommentsLength(-1),
 	m_bSortingColumns(FALSE),
+	m_bSourceControlled(FALSE),
 	m_nColorByAttrib(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
 	m_nDefTimeEstUnits(TDCU_HOURS), 
@@ -4204,8 +4205,12 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	BOOL bNoModifiers = Misc::ModKeysArePressed(0);
 	BOOL bSingleSelection = (GetSelectedCount() == 1);
 	BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
-	BOOL bReadOnly = IsReadOnly();
+	BOOL bReadOnly = (IsReadOnly() && !m_bSourceControlled);
 	BOOL bLocked = m_calculator.IsTaskLocked(dwTaskID);
+
+	// Special case
+	if (m_bSourceControlled && (nColID == TDCC_LOCK))
+		return TRUE;
 
 	// Edit operations
 	if (!bReadOnly)
@@ -4219,7 +4224,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			return !bLocked;
 
 		case TDCC_LOCK:
-			// Prevent editing of subtasks inheriting parent lock state
+			// else Prevent editing of subtasks inheriting parent lock state
 			if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
 				return !m_calculator.IsTaskLocked(m_data.GetTaskParentID(dwTaskID));
 

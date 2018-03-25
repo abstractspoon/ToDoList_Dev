@@ -1358,25 +1358,46 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM 
 	return bEdit;
 }
 
+BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
+{
+	return CToDoCtrl::CanEditSelectedTask(nAttrib, dwTaskID);
+}
+
+BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
+{
+	TDC_ATTRIBUTE nAttribID = TDC::MapIUIAttributeToAttribute(mod.nAttrib);
+	dwTaskID = mod.dwSelectedTaskID;
+
+	if (nAttribID == TDCA_NONE)
+	{
+		if (mod.nAttrib == IUI_OFFSETTASK)
+			nAttribID = TDCA_STARTDATE;
+		else
+			return FALSE;
+	}
+
+	if (!CanEditSelectedTask(nAttribID, dwTaskID))
+		return FALSE;
+
+	if (dwTaskID && (GetSelectedCount() == 1))
+	{
+		ASSERT(GetSelectedTaskID() == dwTaskID);
+		dwTaskID = 0; // same as 'selected'
+	}
+
+	return TRUE;
+}
+
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
-	DWORD dwTaskID = mod.dwSelectedTaskID;
+	DWORD dwTaskID = 0;
 
-	if (!CanEditSelectedTask(dwTaskID))
+	if (!CanEditSelectedTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-
-	if (dwTaskID)
-	{
-		if (GetSelectedCount() == 1)
-		{
-			ASSERT(GetSelectedTaskID() == dwTaskID);
-			dwTaskID = 0; // same as 'selected'
-		}
-	}
-	
+		
 	CStringArray aValues;
 	BOOL bChange = FALSE;
 	
@@ -1632,6 +1653,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 	case IUI_CREATIONDATE:
 	case IUI_CREATEDBY:
 	case IUI_POSITION:
+		ASSERT(0);
 		break;
 
 	default:
@@ -1644,7 +1666,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 
 BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
 {
-	if (!CanEditSelectedTask())
+	if (!CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
 
 	Flush();

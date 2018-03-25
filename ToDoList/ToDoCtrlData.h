@@ -13,6 +13,7 @@
 #include "tdcenum.h"
 #include "todoctrlundo.h"
 #include "todoitem.h"
+#include "tdcsourcecontrol.h"
 
 #include <afxtempl.h>
 
@@ -50,7 +51,7 @@ public:
 	CToDoCtrlData(const CWordArray& aStyles);
 	virtual ~CToDoCtrlData();
 
-	int BuildDataModel(const CTaskFile& tasks);
+	int BuildDataModel(const CTaskFile& tasks, const CTDCSourceControl& ssc);
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
 	
@@ -233,7 +234,7 @@ protected:
 
 protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos);
-	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
+	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent, BOOL bSourceControlled);
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwTaskID);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;

@@ -66,7 +66,8 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
-	
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();
 	FTC_VIEW GetTaskView() const { return m_tabViews.GetActiveView(); }
@@ -328,6 +329,7 @@ protected:
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttrib) const;
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter, DWORD dwFlags) const;
+	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const;
