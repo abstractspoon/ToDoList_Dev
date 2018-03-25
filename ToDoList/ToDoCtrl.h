@@ -19,6 +19,7 @@
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
+#include "tdcTimeTracking.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\dialoghelper.h"
@@ -330,6 +331,7 @@ public:
 	void BeginTimeTracking(DWORD dwTaskID);
 	BOOL DoAddTimeToLogFile();
 	void SetTimeTrackingReminderInterval(int nMinutes);
+	double GetTimeTrackingElapsedMinutes() const;
 
 	static void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	void SetDefaultTaskAttributes(const TODOITEM& tdi);
@@ -490,6 +492,7 @@ protected:
 	TDI_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
 	FIND_STATE m_findState;
+	CTDCTimeTracking m_timeTracking;
 
 	const CContentMgr& m_mgrContent;
 
@@ -516,15 +519,12 @@ protected:
 	CString m_sVersion;
 	CBinaryData m_customComments;
 	double m_dTimeEstimate, m_dTimeSpent;
+	double m_dTrackedTimeElapsedHours;
 	double m_dCost;
 	int m_nPriority;
 	int m_nRisk;
 	int m_nPercentDone;
-
-	double m_dTrackedTimeElapsedHours;
-	DWORD m_dwTimeTrackReminderIntervalTicks;
-	DWORD m_dwTimeTrackReminderElapsedTicks;
-
+	
 	TDC_UNITS m_nTimeEstUnits, m_nTimeSpentUnits;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;
@@ -538,8 +538,6 @@ protected:
 	DWORD m_dwNextUniqueID;
 	DWORD m_nFileVersion;
 	DWORD m_nFileFormat;
-	DWORD m_dwTimeTrackTaskID;
-	DWORD m_dwTimeTrackTickLast;
 	DWORD m_dwLastAddedID;
 	DWORD m_dwEditTitleTaskID;
 
