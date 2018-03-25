@@ -393,6 +393,7 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
 	DDX_Text(pDX, IDC_TASKTIME, m_sTaskTimes);
+	DDX_Text(pDX, IDC_ELAPSEDTIME, m_sElapsedTime);
 	DDX_Text(pDX, IDC_QUICKFIND, m_sQuickFind);
 }
 
@@ -868,8 +869,9 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 	m_aTasklists.DeleteAllTasklists();
 
 	m_sTaskTimes.Empty();
-	UpdateData(FALSE);
+	m_sElapsedTime.Empty();
 
+	UpdateData(FALSE);
 	UpdateButtonState();
 }
 
@@ -957,10 +959,19 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	TDC_UNITS nEstUnits = TDCU_HOURS, nSpentUnits = TDCU_HOURS;
 	
 	m_sTaskTimes.Empty();
+	m_sElapsedTime.Empty();
 	
-	if (pTDC && dwSelTaskID)
-		pTDC->GetTaskTimes(dwSelTaskID, dTimeEst, nEstUnits, dTimeSpent, nSpentUnits);
+	if (pTDC)
+	{
+		if (dwSelTaskID)
+			pTDC->GetTaskTimes(dwSelTaskID, dTimeEst, nEstUnits, dTimeSpent, nSpentUnits);
 
+		double dElapsed = pTDC->GetTimeTrackingElapsedMinutes();
+
+		if ((dElapsed > 0.0) || pTDC->GetTimeTrackTaskID(FALSE))
+			m_sElapsedTime = th.FormatTime(dElapsed, THU_MINS, 2);
+	}
+	
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
 		m_sTaskTimes.Format(_T("%s : %s"),
@@ -973,7 +984,7 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 			th.FormatTime(dTimeEst, TDC::MapUnitsToTHUnits(nEstUnits), 2),
 			th.FormatTime(dTimeSpent, TDC::MapUnitsToTHUnits(nSpentUnits), 2));
 	}
-	
+		
 	if (m_bCollapsed)
 		SetWindowText(m_sTaskTimes);
 
@@ -1348,7 +1359,7 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		rClient.DeflateRect(dlu.ToPixelsX(4), dlu.ToPixelsY(4));
 
 		// We _always_ display the button bottom-right
-		// together with the task combo and time display
+		// together with the task combo and time displays
 		CRect rCurBtn = GetChildRect(&m_btnStart), rNewBtn;
 
 		rNewBtn.right = rClient.right;
@@ -1365,15 +1376,20 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);
 		OffsetCtrl(this, IDC_TASKS_LABEL, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKS_LABEL, nXOffset, 0);
-		
+
 		OffsetCtrl(this, IDC_TASKTIME, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKTIME, nXOffset, 0);
 		OffsetCtrl(this, IDC_TASKTIME_LABEL, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKTIME_LABEL, nXOffset, 0);
 
+		OffsetCtrl(this, IDC_ELAPSEDTIME, 0, nYOffset);
+		ResizeCtrl(this, IDC_ELAPSEDTIME, nXOffset, 0);
+		OffsetCtrl(this, IDC_ELAPSEDTIME_LABEL, 0, nYOffset);
+		ResizeCtrl(this, IDC_ELAPSEDTIME_LABEL, nXOffset, 0);
+
 		// Then the rest if there is space
-		BOOL bShowTasklists = ((nRows == 4) || ((nRows == 3) && (m_aTasklists.GetNumTasklists() > 1)));
-		BOOL bShowQuickFind = ((nRows == 4) || ((nRows == 3) && !bShowTasklists));
+		BOOL bShowTasklists = ((nRows == 5) || ((nRows == 4) && (m_aTasklists.GetNumTasklists() > 1)));
+		BOOL bShowQuickFind = ((nRows == 5) || ((nRows == 4) && !bShowTasklists));
 
 		ShowCtrl(&m_toolbar, bShowQuickFind);
 		ShowCtrl(this, IDC_QUICKFIND, bShowQuickFind);

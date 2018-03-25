@@ -1063,14 +1063,10 @@ void CTabCtrlEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	// Prevent render artifacts on the tab that was beneath the spin control
-	const CWnd* pSpin = GetSpinButtonCtrl();
-
-	if (pSpin && (pScrollBar == pSpin))
+	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
 	{
 		CRect rSpin, rTab;
-
-		pSpin->GetWindowRect(rSpin);
-		ScreenToClient(rSpin);
+		GetSpinButtonCtrlRect(rSpin);
 		
 		int iTab = GetItemCount();
 
@@ -1092,6 +1088,23 @@ CSpinButtonCtrl* CTabCtrlEx::GetSpinButtonCtrl() const
 BOOL CTabCtrlEx::HasSpinButtonCtrl() const
 {
 	return (GetSpinButtonCtrl() != NULL);
+}
+
+BOOL CTabCtrlEx::GetSpinButtonCtrlRect(CRect& rSpin) const
+{
+	const CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
+
+	if (pSpin == NULL)
+		return FALSE;
+
+	CRect rClient;
+	GetClientRect(rClient);
+
+	pSpin->GetWindowRect(rSpin);
+	ScreenToClient(rSpin);
+
+	rSpin.OffsetRect(rClient.right - rSpin.right, 0);
+	return TRUE;
 }
 
 int CTabCtrlEx::GetScrollPos() const
@@ -1119,14 +1132,10 @@ BOOL CTabCtrlEx::SetScrollPos(int nPos)
 
 void CTabCtrlEx::EnsureSelVisible()
 {
-	CSpinButtonCtrl* pSpin = GetSpinButtonCtrl();
-
-	if (pSpin == NULL)
-		return;
-
 	CRect rSpin;
-	pSpin->GetWindowRect(rSpin);
-	ScreenToClient(rSpin);
+	
+	if (!GetSpinButtonCtrlRect(rSpin))
+		return;
 
 	CRect rActiveTab;
 	int nSelTab = GetCurSel();

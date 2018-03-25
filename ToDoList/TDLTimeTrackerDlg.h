@@ -147,7 +147,7 @@ protected:
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;
 	CImageList m_ilBtns;
-	CString m_sTaskTimes;
+	CString m_sTaskTimes, m_sElapsedTime;
 	CString m_sQuickFind;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;

@@ -1315,7 +1315,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 		// VERY SPECIAL CASE
 		// The task being time tracked has been filtered out
 		// in which case we don't need to check if it matches
-		if (dwModTaskID == m_dwTimeTrackTaskID)
+		if (m_timeTracking.IsTrackingTask(dwModTaskID))
 		{
 			if (m_taskTree.GetItem(dwModTaskID) == NULL)
 			{

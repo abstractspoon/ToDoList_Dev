@@ -1616,6 +1616,45 @@ CString FileMisc::GetModuleFilePath(HMODULE hMod)
 	return sModulePath;
 }
 
+BOOL FileMisc::IsNativeModule(HMODULE hMod)
+{
+	CString sModulePath = GetModuleFilePath(hMod);
+	return IsNativeModule(sModulePath);
+}
+
+BOOL FileMisc::IsNativeModule(LPCTSTR szModulePath)
+{
+	CFile file;
+
+	if (!file.Open(szModulePath, CFile::modeRead | CFile::typeBinary | CFile::shareDenyNone))
+		return -1;
+
+	BYTE data[4096] = { 0 };
+	UINT nNumBytes = file.Read(data, 4096);
+
+	file.Close();
+
+	// Verify this is a executable/dll  
+	if ((data[1] << 8 | data[0]) != 0x5a4d)  
+		return -1;  
+
+	// This will get the address for the WinNT header  
+	int iWinNTHdr = (data[63]<<24 | data[62]<<16 | data[61] << 8 | data[60]);  
+
+	// Verify this is an NT address  
+	if ((data[iWinNTHdr+3] << 24 | data[iWinNTHdr+2] << 16 | data[iWinNTHdr+1] << 8 | data[iWinNTHdr]) != 0x00004550)  
+		return -1;  
+
+	int iLightningAddr = iWinNTHdr + 24 + 208;  
+	int iSum = 0;  
+	int iTop = iLightningAddr + 8;  
+
+	for (int i = iLightningAddr; i < iTop; ++i)  
+		iSum |= data[i];  
+
+	return (iSum == 0);
+}
+
 CString FileMisc::GetWindowModuleFilePath(HWND hWnd)
 {
 	DWORD dwProcessID = 0;
@@ -1629,7 +1668,10 @@ CString FileMisc::GetWindowModuleFilePath(HWND hWnd)
 	if (hProcess == NULL)
 		return _T("");
 
-	return GetProcessFilePath(hProcess);
+	CString sFilePath = GetProcessFilePath(hProcess);
+	CloseHandle(hProcess);
+
+	return sFilePath;
 }
 
 BOOL FileMisc::CanonicalizePath(CString& sFilePath)

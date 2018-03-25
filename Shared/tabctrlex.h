@@ -157,6 +157,7 @@ protected:
 	COLORREF GetItemBkColor(int nTab);
 	CSpinButtonCtrl* GetSpinButtonCtrl() const;
 	BOOL HasSpinButtonCtrl() const;
+	BOOL GetSpinButtonCtrlRect(CRect& rSpin) const;
 
 	// pseudo message handler
 	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

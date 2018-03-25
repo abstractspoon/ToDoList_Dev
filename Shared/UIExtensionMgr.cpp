@@ -7,6 +7,7 @@
 #include "filemisc.h"
 #include "localizer.h"
 #include "misc.h"
+#include "osversion.h"
 
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -60,6 +61,11 @@ void CUIExtensionMgr::Initialize() const
 			{
 				if (IsUIExtensionDll(sDllPath))
 				{
+					// Avoid instantiating Non-native (C#) modules on Linux
+					if ((COSVersion() == OSV_LINUX) && !FileMisc::IsNativeModule(sDllPath))
+						continue;
+
+					// else
 					IUIExtension* pExtension = CreateUIExtensionInterface(sDllPath);
 
 					if (pExtension)

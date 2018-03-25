@@ -764,6 +764,7 @@
 #define IDC_STARTSTOP                   1475
 #define IDC_TASKTIME                    1476
 #define IDC_ARGMENUBTN                  1477
+#define IDC_ELAPSEDTIME                 1477
 #define IDC_SHOWTIMETRACKER             1479
 #define IDC_APPFOLDER                   1480
 #define IDC_PREFSFILE                   1481
@@ -772,6 +773,7 @@
 #define IDC_TASKS_LABEL                 1485
 #define IDC_TASKLISTS_LABEL             1486
 #define IDC_SYNCCOMPLETIONTOSTATUS      1487
+#define IDC_ELAPSEDTIME_LABEL           1487
 #define IDC_SNOOZEUNTILDATE             1489
 #define IDC_SNOOZEUNTILTIME             1490
 #define IDC_INCLUDEWEBLINKINCOMMENTSPASTE 1492

@@ -410,20 +410,6 @@ void CTDLImportOutlookDlg::OnDestroy()
 	m_pFolder = NULL;
 }
 
-time_t CTDLImportOutlookDlg::ConvertDate(DATE date)
-{
-	if (date <= 0.0)
-		return 0;
-
-	SYSTEMTIME st;
-	COleDateTime dt(date);
-
-	dt.GetAsSystemTime(st);
-
-	tm t = { st.wSecond, st.wMinute, st.wHour, st.wDay, st.wMonth - 1, st.wYear - 1900, 0 };
-	return mktime(&t);
-}
-
 void CTDLImportOutlookDlg::OnChoosefolder() 
 {
 	_NameSpace nmspc(m_pOutlook->GetNamespace(_T("MAPI")));

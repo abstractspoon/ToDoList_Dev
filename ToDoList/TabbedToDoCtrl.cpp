@@ -2365,14 +2365,14 @@ void CTabbedToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 {
 	CToDoCtrl::BeginTimeTracking(dwTaskID, bNotify);
 
-	m_taskList.SetTimeTrackTaskID(m_dwTimeTrackTaskID);
+	m_taskList.SetTimeTrackTaskID(m_timeTracking.GetTrackedTaskID());
 }
 
 void CTabbedToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 {
 	CToDoCtrl::EndTimeTracking(bAllowConfirm, bNotify);
 	
-	m_taskList.SetTimeTrackTaskID(m_dwTimeTrackTaskID);
+	m_taskList.SetTimeTrackTaskID(m_timeTracking.GetTrackedTaskID());
 }
 
 CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const

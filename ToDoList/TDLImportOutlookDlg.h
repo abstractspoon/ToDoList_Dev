@@ -77,8 +77,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static time_t ConvertDate(DATE date);
-
 	void AddFolderItemsToTree(OutlookAPI::MAPIFolder* pFolder, HTREEITEM htiParent = NULL);
 	BOOL DeleteItemFromFolder(OutlookAPI::_Item& obj, OutlookAPI::MAPIFolder* pFolder);
 	void AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hTaskParent, OutlookAPI::MAPIFolder* pFolder);

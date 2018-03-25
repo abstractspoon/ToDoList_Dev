@@ -3211,24 +3211,26 @@ void CGanttTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, con
 			break;
 			
 		case GTLCC_STARTDATE:
-			{
-				// draw non-selected calculated dates lighter
-				bLighter = (!bSelected && !gi.IsDone(TRUE) && 
-							((gi.bParent && HasOption(GTLCF_CALCPARENTDATES)) || 
-							(!gi.HasStart() && HasOption(GTLCF_CALCMISSINGSTARTDATES))));
-				
-				nFlags |= DT_RIGHT;
-			}
-			break;
-			
 		case GTLCC_DUEDATE:
 			{
 				// draw non-selected calculated dates lighter
-				bLighter = (!bSelected && !gi.IsDone(TRUE) &&
-							((gi.bParent && HasOption(GTLCF_CALCPARENTDATES)) || 
-							(!gi.HasDue() && HasOption(GTLCF_CALCMISSINGDUEDATES))));
+				if (!bSelected && !gi.IsDone(TRUE))
+				{
+					bLighter = (gi.bParent && HasOption(GTLCF_CALCPARENTDATES));
+
+					if (!bLighter)
+					{
+						if (nCol == GTLCC_STARTDATE)
+							bLighter = (!gi.HasStart() && HasOption(GTLCF_CALCMISSINGSTARTDATES));
+						else
+							bLighter = (!gi.HasDue() && HasOption(GTLCF_CALCMISSINGDUEDATES));
+					}
+				}
 				
-				nFlags |= DT_RIGHT;
+				// Right-align if the column width can show the entire date
+				// else keep left align to ensure day and month remain visible
+				if (rItem.Width() >= pDC->GetTextExtent(sItem).cx)
+					nFlags |= DT_RIGHT;
 			}
 			break;
 			

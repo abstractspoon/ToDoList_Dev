@@ -7,6 +7,7 @@
 #include "filemisc.h"
 #include "localizer.h"
 #include "misc.h"
+#include "osversion.h"
 
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\IImportExport.h"
@@ -88,6 +89,10 @@ void CImportExportMgr::Initialize() const
 			{
 				if (IsImportExportDll(sDllPath))
 				{
+					// Avoid instantiating Non-native (C#) modules on Linux
+					if ((COSVersion() == OSV_LINUX) && !FileMisc::IsNativeModule(sDllPath))
+						continue;
+
 					IImportTasklist* pImporter = CreateImportInterface(sDllPath);
 					
 					if (pImporter)

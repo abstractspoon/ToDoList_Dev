@@ -40,12 +40,15 @@ static LINETYPE LINETYPES[] =
 	{ ICILT_BEGIN_VTODO,	_T("BEGIN:VTODO") },
 	{ ICILT_BEGIN_VALARM,	_T("BEGIN:VALARM") },
 
-	{ ICILT_DTSTART,		_T("DTSTART;VALUE=DATE-TIME:") },
-	{ ICILT_DTDUE,			_T("DUE;VALUE=DATE-TIME:") },
-	{ ICILT_DTEND,			_T("DTEND;VALUE=DATE-TIME:") },
+	{ ICILT_DTSTART,		_T("DTSTART:") },
+	{ ICILT_DTDUE,			_T("DUE:") },
+	{ ICILT_DTEND,			_T("DTEND:") },
 	{ ICILT_DTSTART,		_T("DTSTART;VALUE=DATE:") },
 	{ ICILT_DTDUE,			_T("DUE;VALUE=DATE:") },
 	{ ICILT_DTEND,			_T("DTEND;VALUE=DATE:") },
+	{ ICILT_DTSTART,		_T("DTSTART;VALUE=DATE-TIME:") },
+	{ ICILT_DTDUE,			_T("DUE;VALUE=DATE-TIME:") },
+	{ ICILT_DTEND,			_T("DTEND;VALUE=DATE-TIME:") },
 	{ ICILT_SUMMARY,		_T("SUMMARY") },
 	{ ICILT_STATUS,			_T("STATUS") },
 	{ ICILT_CATEGORIES,		_T("CATEGORIES") },
@@ -414,11 +417,36 @@ BOOL CiCalImporter::ExtractDate(const CString& sValue, COleDateTime& date, BOOL 
 	Misc::Split(sDate, sTime, 'T');
 
 	// sanity checks
-	ASSERT(sDate.GetLength() == 8); // YYYYMMDD
-	ASSERT(sTime.IsEmpty() || (sTime.GetLength() == 6)); // HHMMSS
-	
-	if ((sDate.GetLength() != 8) || !(sTime.IsEmpty() || (sTime.GetLength() == 6)))
+	if (sDate.GetLength() != 8) // YYYYMMDD
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	BOOL bUTCTime = FALSE;
+
+	switch (sTime.GetLength())
+	{
+	case 0:
+	case 6: // HHMMSS
+		break;
+
+	case 7: // HHMMSSZ
+		if (Misc::Last(sTime) != 'Z')
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+		else
+		{
+			bUTCTime = TRUE;
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
 
 	int nYear, nMonth, nDay, nHour = 0, nMin = 0, nSec = 0;
 
@@ -450,7 +478,21 @@ BOOL CiCalImporter::ExtractDate(const CString& sValue, COleDateTime& date, BOOL 
 	// if there was no time component and this is an 'end' date
 	// then we subtract a day, because that's how ics represents 'end-of-day'
 	if (bEndDate && CDateHelper::IsDateSet(date) && (nHour == 0) && (nMin == 0) && (nSec == 0))
+	{
 		date.m_dt--;
+	}
+	else if (bUTCTime)
+	{
+		SYSTEMTIME st = { 0 }; 
+		date.GetAsSystemTime(st);
+
+		tm t = { st.wSecond, st.wMinute, st.wHour, st.wDay, st.wMonth - 1, st.wYear - 1900, 0 };
+		date = mktime(&t);
+
+#ifdef _DEBUG
+		CString sTime = CDateHelper::FormatDate(date, DHFD_TIME);
+#endif
+	}
 
 	return CDateHelper::IsDateSet(date);
 }
