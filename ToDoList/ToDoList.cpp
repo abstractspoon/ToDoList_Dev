@@ -943,9 +943,6 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		}
 	}
 
-	// Insert application version
-	CPreferences().WriteProfileString(_T("AppVer"), _T("Version"), FileMisc::GetAppVersion());
-
 	return TRUE;
 }
 

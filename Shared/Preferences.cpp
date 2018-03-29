@@ -141,8 +141,12 @@ CPreferences::CPreferences()
 
 			if (!Load(s_sPrefsPath, aItems))
 			{
-				ASSERT(0);
-				return;
+				if (FileMisc::FileExists(s_sPrefsPath));
+				{
+					// still need to increment reference count
+					s_nRef++;
+					return; // failed
+				}
 			}
 
 			Release(s_aIni);
@@ -294,21 +298,16 @@ BOOL CPreferences::SaveInternal()
 	if (!s_bDirty)
 		return TRUE; // nothing to do
 
-	// backup file first
-	CTempFileBackup backup(s_sPrefsPath);
-	
-	// write prefs
-	CStdioFileEx file;
-	
-	if (!file.Open(s_sPrefsPath, CFile::modeWrite | CFile::modeCreate, SFEF_UTF16))
-		return FALSE;
-	
 	// insert application version
 	INISECTION* pSection = GetSection(_T("AppVer"), TRUE);
 	ASSERT(pSection);
 	
 	if (pSection)
 		SetEntryValue(*pSection, _T("Version"), FileMisc::GetAppVersion(), FALSE);
+
+	// Build output as a single formatted string so that the 
+	// time the prefs file is open is as short as possible
+	CString sPrefsContents;
 	
 	for (int nSection = 0; nSection < s_aIni.GetSize(); nSection++)
 	{
@@ -318,7 +317,7 @@ BOOL CPreferences::SaveInternal()
 		CString sLine;
 		sLine.Format(_T("[%s]%s"), pSection->sSection, ENDL);
 		
-		file.WriteString(sLine);
+		sPrefsContents += sLine;
 		
 		// write entries to a CStringArray, then sort it and write it to file
 		CStringArray aEntries;
@@ -342,16 +341,23 @@ BOOL CPreferences::SaveInternal()
 		Misc::SortArray(aEntries);
 		
 		// format by newlines
-		CString sSection = Misc::FormatArray(aEntries, ENDL);
-		sSection += ENDL;
-		sSection += ENDL;
-		
-		// save to file
-		file.WriteString(sSection);
+		sPrefsContents += Misc::FormatArray(aEntries, ENDL);
+		sPrefsContents += ENDL;
+		sPrefsContents += ENDL;
 	}
 	
-	// Close/Flush the file BEFORE deleting the backup
-	file.Close();
+	// backup file first
+	CTempFileBackup backup(s_sPrefsPath);
+	
+	// write prefs
+	{
+		CStdioFileEx file;
+	
+		if (!file.Open(s_sPrefsPath, CFile::modeWrite | CFile::modeCreate, SFEF_UTF16))
+			return FALSE;
+
+		file.WriteString(sPrefsContents);
+	}
 	
 	s_bDirty = FALSE;
 

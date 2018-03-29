@@ -8488,6 +8488,10 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 	if (nSaveAll != TDCF_SUCCESS)
         return FALSE; // user cancelled
+
+	// Hold a reference to the preferences so that
+	// changes only get written once right at the end
+	CPreferences hold;
 	
 	// save settings before we close the tasklists
 	// to snapshot the currently open tasklists
