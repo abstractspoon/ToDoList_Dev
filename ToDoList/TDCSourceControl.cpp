@@ -38,7 +38,8 @@ BOOL CTDCSourceControl::Initialise(const CTaskFile& tasks, BOOL bWantCheckout)
 		CString sTasklistPath(tasks.GetFilePath());
 		VERIFY(InitialiseSourceControlFolder(sTasklistPath));
 
-		CString sTasklistSSCPath = GetSourceControlPath(sTasklistPath);
+		CString sTasklistSSCPath;
+		VERIFY(GetSourceControlPath(sTasklistPath, sTasklistSSCPath));
 
 		if (MatchesOurSourceControlID(GetCheckedOutTo(sTasklistSSCPath)))
 		{
@@ -70,7 +71,6 @@ BOOL CTDCSourceControl::Initialise(const CTaskFile& tasks, BOOL bWantCheckout)
 		}
 		else
 		{
-			CString sTasklistSSCPath = GetSourceControlPath(sTasklistPath);
 			CString sCheckedOutTo = GetCheckedOutTo(sTasklistSSCPath);
 
 			m_bTasklistCheckedOut = MatchesOurSourceControlID(sCheckedOutTo);
@@ -86,11 +86,11 @@ BOOL CTDCSourceControl::Initialise(const CTaskFile& tasks, BOOL bWantCheckout)
 
 BOOL CTDCSourceControl::InitialiseSourceControlFolder(LPCTSTR szTasklistPath)
 {
-	CString sSSCFolder(GetSourceControlFolder(szTasklistPath));
-
-	if (sSSCFolder.IsEmpty())
+	CString sSSCFolder;
+	
+	if (!GetSourceControlFolder(szTasklistPath, sSSCFolder))
 		return FALSE;
-
+	
 	if (!FileMisc::FolderExists(sSSCFolder))
 	{
 		if (!FileMisc::CreateFolder(sSSCFolder))
@@ -119,44 +119,37 @@ BOOL CTDCSourceControl::GetTasklistPath(CString& sTasklistPath) const
 
 BOOL CTDCSourceControl::GetSourceControlFolder(CString& sSSCFolder) const
 {
-	sSSCFolder = GetSourceControlFolder(m_tdc.GetFilePath());
-
-	return !sSSCFolder.IsEmpty();
+	return GetSourceControlFolder(m_tdc.GetFilePath(), sSSCFolder);
 }
 
-CString CTDCSourceControl::GetSourceControlFolder(LPCTSTR szTasklistPath)
+BOOL CTDCSourceControl::GetSourceControlFolder(LPCTSTR szTasklistPath, CString& sSSCFolder)
 {
-	CString sSSCFolder(szTasklistPath);
+	if (Misc::IsEmpty(szTasklistPath))
+		return FALSE;
 
-	if (!sSSCFolder.IsEmpty())
-		FileMisc::ReplaceExtension(sSSCFolder, _T(".ssc"));
-
-	return sSSCFolder;
+	FileMisc::ReplaceExtension(sSSCFolder, _T(".ssc"));
+	return TRUE;
 }
 
 BOOL CTDCSourceControl::GetTasklistSourceControlPath(CString& sTasklistSSCPath) const
 {
-	sTasklistSSCPath = GetSourceControlPath(m_tdc.GetFilePath());
-
-	return !sTasklistSSCPath.IsEmpty();
+	return GetSourceControlPath(m_tdc.GetFilePath(), sTasklistSSCPath);
 }
 
-CString CTDCSourceControl::GetSourceControlPath(LPCTSTR szTasklistPath)
+BOOL CTDCSourceControl::GetSourceControlPath(LPCTSTR szTasklistPath, CString& sTasklistSSCPath)
 {
 	ASSERT(!Misc::IsEmpty(szTasklistPath));
 	ASSERT(FileMisc::FileExists(szTasklistPath));
 
-	CString sSSCFolder(GetSourceControlFolder(szTasklistPath));
+	CString sSSCFolder;
 	
-	if (sSSCFolder.IsEmpty())
-		return sSSCFolder;
+	if (!GetSourceControlFolder(szTasklistPath, sSSCFolder))
+		return FALSE;
 
 	CString sTasklistName = FileMisc::GetFileNameFromPath(szTasklistPath, FALSE);
-
-	CString sTasklistSSCPath;
 	sTasklistSSCPath.Format(_T("%s\\%s.tsc"), sSSCFolder, sTasklistName);
 
-	return sTasklistSSCPath;
+	return TRUE;
 }
 
 BOOL CTDCSourceControl::GetTaskSourceControlPath(DWORD dwTaskID, CString& sTaskSSCPath) const
@@ -486,9 +479,9 @@ BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo)
 BOOL CTDCSourceControl::CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, 
 										LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo)
 {
-	CString sTasklistSSCPath = GetSourceControlPath(szTasklistPath);
-
-	if (sTasklistSSCPath.IsEmpty())
+	CString sTasklistSSCPath;
+	
+	if (!GetSourceControlPath(szTasklistPath, sTasklistSSCPath))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -713,7 +706,7 @@ int CTDCSourceControl::RestoreCheckedOutTasks(CToDoCtrlDataItems& tdItems) const
 
 BOOL CTDCSourceControl::HasCheckedOutTasks() const
 {
-	return (m_bTasklistSourceControlled && (m_mapTasksCheckedOut.GetSize() != 0));
+	return (m_bTasklistSourceControlled && (m_mapTasksCheckedOut.GetCount() != 0));
 }
 
 BOOL CTDCSourceControl::SaveCheckedOutTasks()

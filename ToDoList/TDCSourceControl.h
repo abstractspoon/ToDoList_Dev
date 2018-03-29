@@ -57,9 +57,9 @@ public:
 	BOOL IsTaskCheckedOut(DWORD dwTaskID, CString& sTaskCheckedOutTo) const;
 	BOOL IsTaskCheckedOutToUs(DWORD dwTaskID) const;
 
-	BOOL GetTasklistSourceControlPath(CString& sTasklistSCCPath) const;
-	BOOL GetSourceControlFolder(CString& sSCCFolder) const;
-	BOOL GetTaskSourceControlPath(DWORD dwTaskID, CString& sTaskSCCPath) const;
+	BOOL GetTasklistSourceControlPath(CString& sTasklistSSCPath) const;
+	BOOL GetSourceControlFolder(CString& sSSCFolder) const;
+	BOOL GetTaskSourceControlPath(DWORD dwTaskID, CString& sTaskSSCPath) const;
 	
 protected:
 	const CToDoCtrl& m_tdc;
@@ -74,7 +74,7 @@ protected:
 	BOOL GetTasklistPath(CString& sTasklistPath) const;
 	BOOL MatchesOurSourceControlID(const CString& sID) const;
 	BOOL SaveCheckedOutTask(DWORD dwTaskID, const TODOITEM& tdi) const;
-	BOOL SaveCheckedOutTask(const CString& sTaskSCCPath, DWORD dwTaskID, 
+	BOOL SaveCheckedOutTask(const CString& sTaskSSCPath, DWORD dwTaskID, 
 							const TODOITEM& tdi, BOOL bPreCheckout) const;
 
 	int DiscardDeletedCheckedOutTasks();
@@ -90,10 +90,10 @@ protected:
 	static DWORD GetTaskIDFromFilePath(LPCTSTR szPath);
 	static BOOL InitialiseSourceControlFolder(LPCTSTR szTasklistPath);
 	static BOOL CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo);
+	static BOOL GetSourceControlPath(LPCTSTR szTasklistPath, CString& sTaskSSCPath);
+	static BOOL GetSourceControlFolder(LPCTSTR szTasklistPath, CString& sSSCFolder);
 
 	static CString GetCheckedOutTo(LPCTSTR szPath);
-	static CString GetSourceControlPath(LPCTSTR szTasklistPath);
-	static CString GetSourceControlFolder(LPCTSTR szTasklistPath);
 };
 
 //////////////////////////////////////////////////////////////////////
