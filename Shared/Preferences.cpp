@@ -132,29 +132,19 @@ CPreferences::CPreferences()
 			CString sBackupPath = CFileBackup::BuildBackupPath(s_sPrefsPath, FBS_OVERWRITE);
 			
 			if (FileMisc::FileExists(sBackupPath))
-			{
-				FileMisc::CopyFile(sBackupPath, s_sPrefsPath, TRUE, TRUE);
-				FileMisc::DeleteFile(sBackupPath, TRUE);
-			}
+				FileMisc::MoveFile(sBackupPath, s_sPrefsPath, TRUE, TRUE);
 
 			CIniSectionArray aItems;
 
-			if (!Load(s_sPrefsPath, aItems))
+			if (Load(s_sPrefsPath, aItems))
 			{
-				if (FileMisc::FileExists(s_sPrefsPath));
-				{
-					// still need to increment reference count
-					s_nRef++;
-					return; // failed
-				}
+				Release(s_aIni);
+				Copy(aItems, s_aIni);
+				Release(aItems);
 			}
-
-			Release(s_aIni);
-			Copy(aItems, s_aIni);
-			Release(aItems);
-
-			s_bDirty = FALSE;
 		}
+
+		s_bDirty = FALSE;
 	}
 				
 	s_nRef++; // increment reference count
