@@ -291,7 +291,15 @@ SOURCE=.\TDCSimpleTextContent.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCSourceControl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCStartupOptions.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTimeTracking.cpp
 # End Source File
 # Begin Source File
 
@@ -839,6 +847,10 @@ SOURCE=.\TDCSimpleTextContent.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCSourceControl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCStartupOptions.h
 # End Source File
 # Begin Source File
@@ -852,6 +864,10 @@ SOURCE=.\tdcstruct.h
 # Begin Source File
 
 SOURCE=.\tdcswitch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTimeTracking.h
 # End Source File
 # Begin Source File
 
