@@ -299,8 +299,10 @@ namespace WordCloudUIExtension
 				throw new ArgumentNullException("words");
 			}
 
+            words = words.SortByText();
+
 			if (m_SavingToImage)
-				return base.Arrange(words.SortByText(), graphicEngine);
+				return base.Arrange(words, graphicEngine);
 
 			// The default 'sort by occurrences' will tell us the very 
 			// maximum number of words that will fit on the page

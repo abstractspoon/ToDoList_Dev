@@ -30,7 +30,7 @@ namespace WordCloudUIExtension
 		private const int ComboTop = 20;
         private const int LabelHeight = (ComboTop - LabelTop);
         private const int ComboHeight = 16;
-        private const int ControlTop = 49;
+ //       private const int ControlTop = 49;
 		private const int ComboWidth = 200;
 		private const int ComboSpacing = 6;
 		private const int MatchListDefaultWidth = 200;
@@ -900,5 +900,16 @@ namespace WordCloudUIExtension
 			return SplitterRect().Contains(pt);
 		}
 
+        protected int ControlTop
+        {
+            get 
+            { 
+                if (m_AttributeCombo != null)
+                    return m_AttributeCombo.Bounds.Bottom + new DlgUnits(m_HwndParent).ToPixelsY(4); 
+
+                // else
+                return 0;
+            }
+        }
 	}
 }

@@ -15,7 +15,6 @@ namespace WordCloudUIExtension
 	class TaskMatchesListView : ListView
     {
 		private const int MinTaskMatchesWidth = 100;
-		private const int TextIconOffset = 18;
 
         // -------------------------------------------------------------
 
@@ -31,8 +30,18 @@ namespace WordCloudUIExtension
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
             m_ilItemHeight = new ImageList();
-            m_ilItemHeight.ImageSize = new Size(1, 17); // minimum height
+            m_ilItemHeight.ImageSize = new Size(1, Win32.ScaleByDPIFactor(17)); // minimum height
 		}
+
+        private int TextIconOffset
+        {
+            get { return (ImageSize + 2); }
+        }
+
+        private int ImageSize
+        {
+            get { return Win32.ScaleByDPIFactor(16); }
+        }
 
 		public bool Initialise(Translator trans)
         {
@@ -393,8 +402,14 @@ namespace WordCloudUIExtension
 
 				if ((colIndex == 0) && m_TaskMatchesHaveIcons)
 				{
-					if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
-						m_TaskIcons.Draw(e.Graphics, itemRect.Left, itemRect.Top + 1);
+                    if ((e.Item.ImageIndex != -1) && m_TaskIcons.Get(item.Id))
+                    {
+                        int imageSize = ImageSize;
+                        Rectangle iconRect = new Rectangle(itemRect.Location, new Size(imageSize, imageSize));
+                        iconRect.Y += ((itemRect.Height - imageSize) / 2);
+
+                        m_TaskIcons.Draw(e.Graphics, iconRect.Left, iconRect.Top);
+                    }
 
 					itemRect.X += TextIconOffset;
 					itemRect.Width -= TextIconOffset;

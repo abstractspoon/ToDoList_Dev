@@ -81,4 +81,103 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 	return ::GetScrollPos(GetHwnd(hWnd), SB_HORZ);
 }
 
+bool Win32::WantScaleByDPIFactor()
+{
+	return (ScaleByDPIFactor(16) != 16);
+}
+
+int Win32::ScaleByDPIFactor(int nValue)
+{
+	return ::MulDiv(nValue, GetSystemDPI(), 96);
+}
+
+Drawing::Point Win32::ScalePointByDPIFactor(Drawing::Point^ point)
+{
+	Drawing::Point^ scaled = gcnew Drawing::Point(ScaleByDPIFactor(point->X), ScaleByDPIFactor(point->Y));
+
+	return *scaled;
+}
+
+Drawing::Size Win32::ScaleSizeByDPIFactor(Drawing::Size^ size)
+{
+	Drawing::Size^ scaled = gcnew Drawing::Size(ScaleByDPIFactor(size->Width), ScaleByDPIFactor(size->Height));
+
+	return *scaled;
+}
+
+Drawing::Rectangle Win32::ScaleRectByDPIFactor(Drawing::Rectangle^ rect)
+{
+	Drawing::Rectangle^ scaled = gcnew Drawing::Rectangle(ScalePointByDPIFactor(rect->Location), ScaleSizeByDPIFactor(rect->Size));
+
+	return *scaled;
+}
+
+int Win32::GetSystemDPI()
+{
+	static int nDPI = 0;
+
+	if (nDPI == 0)
+	{
+		HDC	hdc = ::GetDC(NULL);
+
+		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
+
+		::ReleaseDC(NULL, hdc);
+	}
+
+	return nDPI;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+DlgUnits::DlgUnits(IntPtr hWnd) 
+	: 
+	m_hWnd(Win32::GetHwnd(hWnd)),
+	m_DlgBaseUnitsX(0),
+	m_DlgBaseUnitsY(0)
+{
+}
+
+DlgUnits::DlgUnits() : m_hWnd(NULL)
+{
+	m_hWnd = NULL;
+	DWORD dwDLBU = ::GetDialogBaseUnits();
+
+	m_DlgBaseUnitsX = LOWORD(dwDLBU);
+	m_DlgBaseUnitsY = HIWORD(dwDLBU);
+}
+
+int DlgUnits::ToPixelsX(int x)
+{
+	int unused;
+	ToPixels(x, unused);
+
+	return x;
+}
+
+int DlgUnits::ToPixelsY(int y)
+{
+	int unused;
+	ToPixels(unused, y);
+
+	return y;
+}
+
+void DlgUnits::ToPixels(int& x, int& y)
+{
+	if (m_hWnd)
+	{
+		RECT rect = { 0, 0, x, y };
+		::MapDialogRect(m_hWnd, &rect);
+
+		x = rect.right;
+		y = rect.bottom;
+	}
+	else
+	{
+		x = MulDiv(x, m_DlgBaseUnitsX, 4);
+		y = MulDiv(y, m_DlgBaseUnitsY, 8);
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////

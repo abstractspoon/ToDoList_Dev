@@ -92,13 +92,18 @@ namespace MindMapUIExtension
 
 		// Constants ---------------------------------------------------------------------
 
-		const int ItemHorzSeparation = 40;
-		const int ItemVertSeparation = 4;
-        const int InsertionMarkerHeight = 6;
-		const int ExpansionButtonSize = 8;
-		const int ExpansionButtonSeparation = 2;
-		const int LabelPadding = 2;
-        const int GraphPadding = 6;
+        virtual protected int ScaleByDPIFactor(int value)
+        {
+            return value;
+        }
+
+		protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
+		protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
+        protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
+		protected int ExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
+		protected int ExpansionButtonSeparation { get { return ScaleByDPIFactor(2); } }
+		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
+        protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
 
 		protected enum NodeDrawState
 		{
@@ -2150,10 +2155,7 @@ namespace MindMapUIExtension
                     }
                 }
 
-
-                //if (GetItemDrawRect(Rectangle.Inflate(item.ItemBounds, 2, 0)).Contains(point))
-                    return node;
-
+                return node;
             }
 
             // all else

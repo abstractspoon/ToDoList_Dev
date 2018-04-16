@@ -384,7 +384,12 @@ namespace MindMapUIExtension
         		
         // Internal ------------------------------------------------------------
 
-        bool RefreshItemBoldState(TreeNode node, Boolean andChildren)
+        override protected int ScaleByDPIFactor(int value)
+        {
+            return Win32.ScaleByDPIFactor(value);
+        }
+
+        private bool RefreshItemBoldState(TreeNode node, Boolean andChildren)
         {
             var taskItem = TaskItem(node);
 
@@ -750,7 +755,9 @@ namespace MindMapUIExtension
 
 		private Rectangle CalcIconRect(Rectangle labelRect)
 		{
-			return new Rectangle((labelRect.X + 2), (CentrePoint(labelRect).Y) - 8, 16, 16);
+            int imageSize = ScaleByDPIFactor(16);
+
+            return new Rectangle((labelRect.X + 2), (CentrePoint(labelRect).Y) - (imageSize / 2), imageSize, imageSize);
 		}
 
 		private new void Clear()
@@ -794,7 +801,7 @@ namespace MindMapUIExtension
 		protected override int GetExtraWidth(TreeNode node)
 		{
 			if (NodeHasIcon(node))
-				return 16;
+				return ScaleByDPIFactor(16);
 
 			// else
 			return 0;
@@ -802,7 +809,7 @@ namespace MindMapUIExtension
 
 		protected override int GetMinItemHeight()
 		{
-			return 18;
+            return (ScaleByDPIFactor(16) + 2);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)

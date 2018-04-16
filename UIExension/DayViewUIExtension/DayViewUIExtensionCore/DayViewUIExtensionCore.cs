@@ -13,7 +13,7 @@ namespace DayViewUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class DayViewUIExtensionCore : Panel, IUIExtension
 	{
-		private IntPtr m_hwndParent = IntPtr.Zero;
+		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView;
 		private UInt32 m_SelectedTaskID = 0;
 		private Translator m_Trans;
@@ -35,7 +35,6 @@ namespace DayViewUIExtension
 
 		private const int LabelTop = 2;
 		private const int ComboTop = 2;
-		private const int ControlTop = 28;
 		private const string FontName = "Tahoma";
 
 		private bool m_SettingMonthYear = false;
@@ -56,7 +55,7 @@ namespace DayViewUIExtension
 
 		public DayViewUIExtensionCore(IntPtr hwndParent, Translator trans, String helpID)
 		{
-			m_hwndParent = hwndParent;
+			m_HwndParent = hwndParent;
 			m_Trans = trans;
             m_HelpID = helpID;
 
@@ -356,7 +355,7 @@ namespace DayViewUIExtension
 
 			m_WeekLabel.Font = new Font(FontName, 14);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
-			m_WeekLabel.Size = new Size(350, 20);
+			m_WeekLabel.Size = new Size(350, m_WeekLabel.Font.Height);
 			m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
 
 			Controls.Add(m_WeekLabel);
@@ -365,17 +364,26 @@ namespace DayViewUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var imageStream = assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp");
-
-			m_TBImageList = new ImageList();
-			m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
-			m_TBImageList.TransparentColor = Color.Magenta;
-			m_TBImageList.Images.AddStrip(new Bitmap(imageStream));
-
+			var images = new Bitmap(assembly.GetManifestResourceStream("DayViewUIExtension.toolbar_std.bmp"));
+            
+            m_TBImageList = new ImageList();
+            m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
+            m_TBImageList.TransparentColor = Color.Magenta;
+            m_TBImageList.Images.AddStrip(images);
+            
 			m_Toolbar = new ToolStrip();
-			m_Toolbar.ImageList = m_TBImageList;
 			m_Toolbar.Anchor = AnchorStyles.None;
 			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
+            m_Toolbar.ImageList = m_TBImageList;
+
+            if (Win32.WantScaleByDPIFactor())
+            {
+                int imageSize = Win32.ScaleByDPIFactor(16);
+
+                m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
+                m_Toolbar.AutoSize = false;
+                m_Toolbar.Height = (imageSize + 10);
+            }
 
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
@@ -398,8 +406,6 @@ namespace DayViewUIExtension
 			btn3.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn3);
 
-			m_Toolbar.Size = new Size(72, 24);
-			
 			Controls.Add(m_Toolbar);
 		}
 
@@ -412,7 +418,7 @@ namespace DayViewUIExtension
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
-            if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_hwndParent)) == DialogResult.OK)
+            if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
             {
 				UpdateDayViewPreferences();
             }
@@ -430,7 +436,7 @@ namespace DayViewUIExtension
 
 		protected void OnHelp(object sender, EventArgs e)
 		{
-            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
+            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
             notify.NotifyDoHelp(m_HelpID);
 		}
@@ -488,7 +494,7 @@ namespace DayViewUIExtension
             base.OnSizeChanged(e);
 
 			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
-			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top - 2);
+			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
 			
             Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
@@ -509,7 +515,7 @@ namespace DayViewUIExtension
 
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
+            UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			switch (m_DayView.Selection)
 			{
@@ -574,7 +580,7 @@ namespace DayViewUIExtension
 			if (item == null)
 				return;
 
-			UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_hwndParent);
+			UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			switch (move.Mode)
 			{
@@ -628,6 +634,18 @@ namespace DayViewUIExtension
 					break;
 			}
 		}
+
+        protected int ControlTop
+        {
+            get
+            {
+                if (m_MonthCombo != null)
+                    return m_MonthCombo.Bounds.Bottom + new DlgUnits(m_HwndParent).ToPixelsY(4);
+
+                // else
+                return 0;
+            }
+        }
 
 	}
 

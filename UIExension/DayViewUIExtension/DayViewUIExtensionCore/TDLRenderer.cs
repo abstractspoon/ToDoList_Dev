@@ -350,15 +350,17 @@ namespace DayViewUIExtension
                     if (TaskHasIcon(taskItem))
                     {
 						Rectangle rectIcon;
+                        int imageSize = Win32.ScaleByDPIFactor(16);
+
 
 						if (taskItem.IsLongAppt())
 						{
 							int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
-							rectIcon = new Rectangle((rect.Left + 2), (yCentre - 8), 16, 16);
+                            rectIcon = new Rectangle((rect.Left + 2), (yCentre - (imageSize / 2)), imageSize, imageSize);
 						}
 						else
 						{
-							rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, 16, 16);
+                            rectIcon = new Rectangle(rect.Left + 2, rect.Top + 2, imageSize, imageSize);
 						}
 
                         if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(taskItem.Id))
@@ -369,8 +371,8 @@ namespace DayViewUIExtension
 							}
 							else
 							{
-								gripRect.Y += 18;
-								gripRect.Height -= 18;
+                                gripRect.Y += (imageSize + 2);
+                                gripRect.Height -= (imageSize + 2);
 							}
 
 							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
