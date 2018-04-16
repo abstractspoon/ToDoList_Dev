@@ -299,16 +299,15 @@ namespace WordCloudUIExtension
 				throw new ArgumentNullException("words");
 			}
 
+			// See if all the words will fit on the page
             words = words.SortByText();
-
-			if (m_SavingToImage)
-				return base.Arrange(words, graphicEngine);
-
-			// The default 'sort by occurrences' will tell us the very 
-			// maximum number of words that will fit on the page
-			int numWords = base.Arrange(words, graphicEngine);
 			int maxWords = words.Count();
+			int numWords = base.Arrange(words, graphicEngine);
 
+			if (m_SavingToImage || (numWords >= maxWords))
+				return numWords;
+
+			// else
 			while (numWords < maxWords)
 			{
 				// Remove the 'extra' tasks and see if what's left fits
@@ -322,7 +321,7 @@ namespace WordCloudUIExtension
 				maxWords = numWords;
 				numWords = base.Arrange(words, graphicEngine);
 			}
-			
+						
 			return numWords;
         }
 
