@@ -354,8 +354,8 @@ namespace DayViewUIExtension
 			m_WeekLabel = new DayViewWeekLabel();
 
 			m_WeekLabel.Font = new Font(FontName, 14);
-			m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
-			m_WeekLabel.Size = new Size(350, m_WeekLabel.Font.Height);
+			m_WeekLabel.Location = new Point(m_Toolbar.Right, Win32.ScaleByDPIFactor(LabelTop));
+			m_WeekLabel.Size = new Size(Win32.ScaleByDPIFactor(350), m_Toolbar.Height);
 			m_WeekLabel.TextAlign = ContentAlignment.MiddleLeft;
 
 			Controls.Add(m_WeekLabel);
@@ -446,8 +446,8 @@ namespace DayViewUIExtension
 			m_MonthCombo = new DayViewMonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
-			m_MonthCombo.Location = new Point(0, ComboTop);
-			m_MonthCombo.Size = new Size(100, 16);
+			m_MonthCombo.Location = Win32.ScalePointByDPIFactor(new Point(0, ComboTop));
+			m_MonthCombo.Size = Win32.ScaleSizeByDPIFactor(new Size(100, 16));
 			
 			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
@@ -457,8 +457,8 @@ namespace DayViewUIExtension
 			m_YearCombo = new DayViewYearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
-			m_YearCombo.Location = new Point(105, ComboTop);
-			m_YearCombo.Size = new Size(100, 16);
+			m_YearCombo.Location = Win32.ScalePointByDPIFactor(new Point(105, ComboTop));
+			m_YearCombo.Size = Win32.ScaleSizeByDPIFactor(new Size(100, 16));
 
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);

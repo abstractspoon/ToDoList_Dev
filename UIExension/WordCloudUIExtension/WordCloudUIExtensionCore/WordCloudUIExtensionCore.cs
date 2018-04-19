@@ -76,7 +76,7 @@ namespace WordCloudUIExtension
 			m_Splitting = false;
 			m_InitialSplitPos = -1;
 			m_SplitterColor = Color.Gray;
-			m_SplitterWidth = 6;
+			m_SplitterWidth = Win32.ScaleByDPIFactor(6);
 
 			InitializeComponent();
 		}
@@ -427,7 +427,7 @@ namespace WordCloudUIExtension
 
 		void ShowSplitterBar(bool show = true)
 		{
-			int newSplitterWidth = (show ? 6 : 1);
+			int newSplitterWidth = (show ? Win32.ScaleByDPIFactor(6) : 1);
 
 			if (newSplitterWidth != m_SplitterWidth)
 			{
