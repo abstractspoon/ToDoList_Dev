@@ -63,7 +63,7 @@ BOOL CTDCSourceControl::Initialise(const CTaskFile& tasks, BOOL bWantCheckout)
 		{
 			CString sUnused;
 
-			if (!CheckOutTasklist(sTasklistPath, tasks.GetXmlHeader(), GetSourceControlID(), sUnused))
+			if (!CheckOutTasklist(sTasklistPath, tasks.GetXmlHeader(), GetSourceControlID(), sUnused, FALSE))
 			{
 				ASSERT(0);
 				return FALSE;
@@ -457,7 +457,7 @@ BOOL CTDCSourceControl::CheckOutTasklist()
 	return CheckOutTasklist(CString());
 }
 
-BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo)
+BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo, BOOL bForce)
 {
 	if (!m_bTasklistSourceControlled || m_bTasklistCheckedOut)
 	{
@@ -465,11 +465,17 @@ BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo)
 		return FALSE;
 	}
 
-	if (m_tdc.HasFilePath() && 
-		!CheckOutTasklist(m_tdc.GetFilePath(), m_tdc.m_sXmlHeader, GetSourceControlID(), sTasklistCheckedOutTo))
+	if (m_tdc.HasFilePath())
 	{
-		ASSERT(0);
-		return FALSE;
+		if (!CheckOutTasklist(m_tdc.GetFilePath(), 
+								m_tdc.m_sXmlHeader, 
+								GetSourceControlID(), 
+								sTasklistCheckedOutTo, 
+								bForce))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 	}
 
 	m_bTasklistCheckedOut = TRUE;
@@ -477,7 +483,8 @@ BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo)
 }
 
 BOOL CTDCSourceControl::CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, 
-										LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo)
+										LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo, 
+										BOOL bForce)
 {
 	CString sTasklistSSCPath;
 	
@@ -486,6 +493,9 @@ BOOL CTDCSourceControl::CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHe
 		ASSERT(0);
 		return FALSE;
 	}
+
+	if (bForce)
+		DeleteSentinelFile(sTasklistSSCPath);
 
 	if (!CreateSentinelFile(sTasklistSSCPath))
 	{ 

@@ -10776,7 +10776,7 @@ BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 	return m_ssc.AddTasklistToSourceControl(bAdd);
 }
 
-TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo)
+TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo, BOOL bForce)
 {
 	if (m_bDelayLoaded)
 		return TDCF_SSC_DELAYLOADED;
@@ -10786,7 +10786,7 @@ TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo)
 
 	do 
 	{
-		if (m_ssc.CheckOutTasklist(sCheckedOutTo))
+		if (m_ssc.CheckOutTasklist(sCheckedOutTo, bForce))
 		{
 			if (HasFilePath())
 			{

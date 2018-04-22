@@ -1401,8 +1401,9 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
+	TDC_ATTRIBUTE nAttrib = TDC::MapIUIAttributeToAttribute(mod.nAttrib);
 
-	if (!CanEditSelectedTask(dwTaskID))
+	if (!CanEditSelectedTask(nAttrib, dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
