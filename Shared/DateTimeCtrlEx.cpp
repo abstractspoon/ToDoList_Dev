@@ -6,6 +6,8 @@
 #include "OSVersion.h"
 #include "autoflag.h"
 #include "misc.h"
+#include "Graphicsmisc.h"
+#include "themed.h"
 
 #include <math.h>
 
@@ -401,22 +403,48 @@ CRect CDateTimeCtrlEx::GetCheckboxRect() const
 
 void CDateTimeCtrlEx::OnPaint()
 {
-	if (IsCheckboxFocused())
+	BOOL bCheckboxFocused = IsCheckboxFocused();
+	BOOL bWantDPIScaling = GraphicsMisc::WantDPIScaling();
+
+	if (bCheckboxFocused || bWantDPIScaling)
 	{
 		CPaintDC dc(this);
 		
-		// default drawing
-		CDateTimeCtrl::DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
-		
-		// selection rect
 		DATETIMEPICKERINFO dtpi = { 0 };
 		VERIFY (GetPickerInfo(dtpi));
+
+		// Fill the checkbox background depending on state
+		if (bCheckboxFocused)
+		{
+			dc.FillSolidRect(&dtpi.rcCheck, GetSysColor(COLOR_HIGHLIGHT));
+		}
+		else if (bWantDPIScaling)
+		{
+			dc.FillSolidRect(&dtpi.rcCheck, GetSysColor(COLOR_WINDOW));
+		}
+
+		// Always draw the checkbox because Windows gets
+		// the scaling wrong for high DPI
+		int nCheckboxSize = GraphicsMisc::ScaleByDPIFactor(16);
+
+		CRect rCheck(CPoint(dtpi.rcCheck.left, dtpi.rcCheck.top), CSize(nCheckboxSize, nCheckboxSize));
+		GraphicsMisc::CentreRect(rCheck, &dtpi.rcCheck, TRUE, TRUE);
+
+		UINT nState = DFCS_BUTTONCHECK;
 		
-		CRect rClip(dtpi.rcCheck);
-		rClip.DeflateRect(2, 2);
-		dc.ExcludeClipRect(rClip);
+		if (IsDateSet())
+			nState |= DFCS_CHECKED;
+
+		if (!IsWindowEnabled())
+			nState |= DFCS_INACTIVE;
 		
-		dc.FillSolidRect(&dtpi.rcCheck, GetSysColor(COLOR_HIGHLIGHT));
+		CThemed::DrawFrameControl(this, &dc, rCheck, DFC_BUTTON, nState);
+
+		// Clip out our drawing
+		dc.ExcludeClipRect(&dtpi.rcCheck);
+		
+		// default drawing
+		CDateTimeCtrl::DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
 	}
 	else
 	{

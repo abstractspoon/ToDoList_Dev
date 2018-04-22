@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "iconbutton.h"
-#include "misc.h"
+#include "GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CIconButton
 
-CIconButton::CIconButton(int nSize) : m_nSize(nSize)
+CIconButton::CIconButton(int nSize) : m_nSize(GraphicsMisc::ScaleByDPIFactor(nSize))
 {
 }
 
@@ -40,25 +40,16 @@ void CIconButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 
 void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 { 
+	m_ilIcon.DeleteImageList();
+
 	if (hIcon)
 	{
-		if (!m_ilIcon.GetSafeHandle())
-		{
-			m_ilIcon.Create(m_nSize, m_nSize, (ILC_COLOR32 | ILC_MASK), 1, 1);
-			VERIFY(m_ilIcon.Add(hIcon) == 0);
-		}
-		else
-		{
-			ASSERT(m_ilIcon.GetImageCount() == 1);
-			m_ilIcon.Replace(0, hIcon);
-		}
-		
+		m_ilIcon.Create(m_nSize, m_nSize, (ILC_COLOR32 | ILC_MASK), 0, 1);
+
+		VERIFY(m_ilIcon.Add(hIcon) == 0);
+
 		if (bCleanup)
 			::DestroyIcon(hIcon);
-	}
-	else
-	{
-		m_ilIcon.DeleteImageList();
 	}
 	
 	if (GetSafeHwnd())
@@ -69,8 +60,9 @@ void CIconButton::CalcExtraSpace(const CRect& rClient, CRect& rExtra) const
 {
 	if (GetWindowTextLength() == 0)
 	{
-		rExtra = rClient;
-		rExtra.DeflateRect(((rExtra.Width() - m_nSize) / 2), ((rExtra.Height() - m_nSize) / 2));
+		rExtra.SetRect(0, 0, m_nSize, m_nSize);
+
+		GraphicsMisc::CentreRect(rExtra, rClient, TRUE, TRUE);
 	}
 	else
 	{

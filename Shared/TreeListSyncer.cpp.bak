@@ -6,10 +6,12 @@
 #include "..\shared\themed.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
+#include "..\shared\misc.h"
+#include "..\shared\copywndcontents.h"
+#include "..\shared\enbitmap.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-#define WM_CHECK_WS_VSCROLL (WM_USER+1)
 #define WM_RESYNC           (WM_USER+2)
 #define WM_RESIZE           (WM_USER+3)
 
@@ -19,6 +21,7 @@ const int MAX_SPLITBAR_WIDTH	= 6;
 const int MIN_SPLITBAR_WIDTH	= 1;
 const int MIN_SPLIT_WIDTH		= (GetSystemMetrics(SM_CXVSCROLL) * 2);
 const int INITIAL_SPLIT_POS		= 300;
+const int LINUX_VOFFSET_FUDGE	= 2;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -41,14 +44,40 @@ const int INITIAL_SPLIT_POS		= 300;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls, HWND hwnd) : m_tls(tls), m_hwnd(hwnd)
+CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls)
 {
-	m_tls.EnableResync(FALSE, hwnd);
+	m_tls.EnableResync(FALSE, m_tls.PrimaryWnd());
 }
 
 CTLSHoldResync::~CTLSHoldResync()
 {
-	m_tls.EnableResync(TRUE, m_hwnd);
+	m_tls.EnableResync(TRUE, m_tls.PrimaryWnd());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+CHoldListVScroll::CHoldListVScroll(HWND hwndList) : m_hwndList(hwndList), m_nOrgVScrollPos(0)
+{
+	// it's acceptable to pass no HWND -> nothing happens
+	if (m_hwndList)
+		m_nOrgVScrollPos = ::GetScrollPos(hwndList, SB_VERT);
+}
+
+CHoldListVScroll::~CHoldListVScroll()
+{
+	if (m_hwndList)
+	{
+		int nPos = ListView_GetTopIndex(m_hwndList);
+		
+		if ((nPos != -1) && (nPos != m_nOrgVScrollPos))
+		{
+			CRect rItem;
+			ListView_GetItemRect(m_hwndList, 0, rItem, LVIR_BOUNDS);
+			
+			int nVOffset = ((m_nOrgVScrollPos - nPos) * rItem.Height());
+			ListView_Scroll(m_hwndList, 0, nVOffset);
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +101,9 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_bSplitting(FALSE),
 	m_nSplitPos(INITIAL_SPLIT_POS),
 	m_nSplitWidth(MAX_SPLITBAR_WIDTH),
-	m_crSplitBar(GetSysColor(COLOR_3DSHADOW))
+	m_crSplitBar(GetSysColor(COLOR_3DFACE)),
+	m_nHidden(TLSH_NONE),
+	m_bSavingToImage(FALSE)
 {
 }
 
@@ -88,7 +119,7 @@ void CTreeListSyncer::PostResync(HWND hwnd, BOOL bIncSelection)
 
 	m_bResyncPending = TRUE;
 
-	if (m_bResyncEnabled && !m_bResyncing)
+	if (CanResync())
 		::PostMessage(hwnd, WM_RESYNC, 0, bIncSelection);
 }
 
@@ -97,14 +128,33 @@ void CTreeListSyncer::PostResync(HWND hwnd)
 	PostResync(hwnd, TRUE);
 }
 
-void CTreeListSyncer::PostResize(HWND hwnd, BOOL bForce)
+void CTreeListSyncer::PostResize(BOOL bForce)
 {
 	if (m_bResizePending && !bForce)
 		return;
 
 	m_bResizePending = TRUE;
 
-	::PostMessage(hwnd, WM_RESIZE, 0, 0);
+	::PostMessage(GetHwnd(), WM_RESIZE, 0, 0);
+}
+
+BOOL CTreeListSyncer::SetHidden(TLS_HIDE nHide)
+{
+	switch (nHide)
+	{
+	case TLSH_NONE:
+	case TLSH_LEFT:
+	case TLSH_RIGHT:
+		if (nHide != m_nHidden)
+		{
+			m_nHidden = nHide;
+			PostResize();
+		}
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL CTreeListSyncer::Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWND hwndMainHeader)
@@ -143,7 +193,7 @@ BOOL CTreeListSyncer::Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWN
 	ShowVScrollBar(hwndLeft, FALSE);
 	ShowVScrollBar(hwndRight, bRightHadVScroll);
 
-	PostResize(GetHwnd());
+	PostResize();
 
 	return TRUE;
 }
@@ -194,13 +244,20 @@ BOOL CTreeListSyncer::SwapSides()
 	VERIFY(m_scRight.HookWindow(hwndRight, this));
 
 	// swap the splitter pos too
-	if (HasFlag(TLSF_SPLITTER))
+	if (HasFlag(TLSF_SPLITTER) && !IsHiding())
 	{
 		CRect rNewLeft;
 		::GetClientRect(hwndLeft, rNewLeft);
 
 		if (rNewLeft.Width() >= MIN_SPLIT_WIDTH)
 			m_nSplitPos = rNewLeft.Width();
+	}
+
+	// and any hidden pane
+	switch (m_nHidden)
+	{
+	case TLSH_LEFT:		m_nHidden = TLSH_RIGHT;	break;
+	case TLSH_RIGHT:	m_nHidden = TLSH_LEFT;	break;
 	}
 	
 	// resync 
@@ -210,7 +267,7 @@ BOOL CTreeListSyncer::SwapSides()
 	ShowVScrollBar(hwndLeft, FALSE);
 	ShowVScrollBar(hwndRight, bRightHadVScroll);
 
-	PostResize(GetHwnd(), TRUE);
+	PostResize(TRUE);
 
 	return TRUE;
 }
@@ -295,6 +352,7 @@ void CTreeListSyncer::Unsync()
 
 	RemoveType(m_scLeft.GetHwnd());
 	RemoveType(m_scRight.GetHwnd());
+	RemoveType(m_hwndPrimaryHeader);
 
 	m_scLeft.HookWindow(NULL);
 	m_scRight.HookWindow(NULL);
@@ -324,7 +382,7 @@ BOOL CTreeListSyncer::Resync(HWND hwnd, HWND hwndTo)
 
 BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 {
-	if (!m_bResyncEnabled || m_bResyncing)
+	if (!CanResync())
 		return FALSE;
 
 	CAutoFlag af(m_bResyncing, TRUE);
@@ -355,11 +413,24 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		// are these different?
 		if (htiTreeFirstVis != htiListFirstVis)
 		{
+// #ifdef _DEBUG
+// 			CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hwnd);
+// 			TRACE (_T("CTreeListSyncer::ResyncScrollPos(tree first vis = %s, list first vis = %s)\n"),
+// 						pTree->GetItemText(htiTreeFirstVis), pTree->GetItemText(htiListFirstVis));
+// #endif
 			// if so, then scroll and move the selection
 			// to the corresponding list item and update the current
 			// tree selection
 			TreeView_SelectSetFirstVisible(hwnd, htiListFirstVis);
-			htiSel = htiListFirstVis;
+
+			// Odd bug: The very last tree item will not scroll into view. 
+			// Expanding and collapsing an item is enough to resolve
+			// the issue. Don't have a solution yet.
+			if (TreeView_GetFirstVisible(hwnd) != htiListFirstVis)
+			{
+				// TODO
+			}
+		
 			bSynced = TRUE;
 		}
 	}
@@ -423,9 +494,10 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 
 	return bSynced;
 }
+
 BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel)
 {
-	if (!m_bResyncEnabled || m_bResyncing || !HasFlag(TLSF_SYNCSELECTION))
+	if (!CanResync() || !HasFlag(TLSF_SYNCSELECTION))
 	{
 		return FALSE;
 	}
@@ -488,8 +560,6 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 	}
 	else if (IsList(hwnd) && IsList(hwndTo)) // syncing list to list
 	{
-		TRACE(_T("Full Selection Resync called on List-List\n"));
-		
 		// clear existing selection first
 		ListView_SetItemState(hwnd, -1, 0, LVIS_SELECTED);
 		
@@ -508,7 +578,11 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 			if (nSelTo == nPrevSel)
 				break;
 		}
+
+		// selection mark
+		ListView_SetSelectionMark(hwnd, ListView_GetSelectionMark(hwndTo));
 		
+		// header
 		ResyncListHeader(hwnd);
 
 		bSynced = TRUE;
@@ -543,13 +617,27 @@ int CTreeListSyncer::GetSelectedListItems(HWND hwndList, CIntArray& aItems)
 	return aItems.GetSize();
 }
 
-void CTreeListSyncer::RecalcItemHeights(HWND hwnd)
+void CTreeListSyncer::RecalcItemHeights()
 {
+	HWND hwnd = PrimaryWnd();
+
 	// re-sync item height
 	m_bNeedInitItemHeight = TRUE;
 
 	if (IsTree(hwnd))
 		TreeView_SetItemHeight(hwnd, -1);
+
+	if (m_hilSize)
+	{
+		HWND hwndOther = OtherWnd(hwnd);
+
+		if (ListView_GetImageList(hwndOther, LVSIL_STATE) == m_hilSize)
+		{
+			ListView_SetImageList(hwndOther, NULL, LVSIL_STATE);
+			ImageList_Destroy(m_hilSize);
+			m_hilSize = NULL;
+		}
+	}
 	
 	InitItemHeights();
 }
@@ -590,13 +678,13 @@ void CTreeListSyncer::InitItemHeights()
 			ASSERT(nItemHeight != -1);
 
 			// handle other window
-			if (nItemHeight > nOtherItemHeight)
+			if (nItemHeight != nOtherItemHeight)
 			{
-				if (OsIsXP())
-					nItemHeight--;
+				//if (OsIsXP())
+				//	nItemHeight--;
 
 				ImageList_Destroy(m_hilSize);
-				m_hilSize = ImageList_Create(1, nItemHeight, ILC_COLOR, 1, 1);
+				m_hilSize = ImageList_Create(1, (nItemHeight - 1), ILC_COLOR, 1, 1);
 
 				ListView_SetImageList(hwndOther, m_hilSize, LVSIL_STATE);
 			}
@@ -608,8 +696,14 @@ void CTreeListSyncer::InitItemHeights()
 
 BOOL CTreeListSyncer::OsIsXP()
 {
-	static BOOL bXP(COSVersion() <= OSV_XP);
+	static BOOL bXP(COSVersion() < OSV_VISTA);
 	return bXP;
+}
+
+BOOL CTreeListSyncer::OsIsLinux()
+{
+	static BOOL bLinux(COSVersion() == OSV_LINUX);
+	return bLinux;
 }
 
 int CTreeListSyncer::GetItemHeight(HWND hwnd)
@@ -637,7 +731,6 @@ void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti)
 	CRect rItem;
 	TreeView_GetItemRect(hwnd, hti, &rItem, 0);
 						
-	//TRACE(_T("CTreeListSyncer::InvalidateTreeItem(%lu)\n"), GetTreeItemData(hwnd, hti));
 	::InvalidateRect(hwnd, rItem, TRUE);
 }
 
@@ -752,14 +845,12 @@ void CTreeListSyncer::SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear)
 	ASSERT(IsTree(hwnd));
 
 	if (bClear)
-	{
 		TreeView_SelectItem(hwnd, NULL);
 
-		if (hti)
-			TreeView_SelectItem(hwnd, hti);
-	}
+	if (hti)
+		TreeView_SelectItem(hwnd, hti);
 
-	SetTreeItemState(hwnd, hti, TVIS_SELECTED, TVIS_SELECTED);
+	//SetTreeItemState(hwnd, hti, TVIS_SELECTED, TVIS_SELECTED);
 	TreeView_EnsureVisible(hwnd, hti);
 }
 
@@ -991,17 +1082,6 @@ HTREEITEM CTreeListSyncer::FindVisibleTreeItem(HWND hwndTree, DWORD dwItemData)
 #ifdef _DEBUG // --------------------------------------------------------------------------------------------
 
 // DEBUG build only
-/*
-void CTreeListSyncer::TraceTreeSelection(LPCTSTR szLocation) const
-{
-	if (szLocation)
-		TRACE(_T("CTreeListSyncer::TraceTreeSelection(%s, %d)\n"), szLocation, GetTreeSelectionCount());
-	else
-		TRACE(_T("CTreeListSyncer::TraceTreeSelection(%d)\n"), GetTreeSelectionCount());
-}
-*/
-
-// DEBUG build only
 void CTreeListSyncer::TraceListSelection(HWND hwnd, LPCTSTR szLocation) const
 {
 	ASSERT(IsList(hwnd));
@@ -1102,12 +1182,20 @@ TLS_TYPE CTreeListSyncer::GetType(HWND hwnd)
 	if (!s_mapTypes.Lookup(hwnd, nType) || (nType == TLST_NONE))
 	{
 		// add value to map
-		BOOL bList = CWinClasses::IsClass(hwnd, WC_LISTVIEW);
-#ifdef _DEBUG
-		BOOL bTree = CWinClasses::IsClass(hwnd, WC_TREEVIEW);	
-		ASSERT(bList || bTree);
-#endif
-		nType = (bList ? TLST_LIST : TLST_TREE);
+		if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			nType = TLST_LIST;
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
+		{
+			nType = TLST_TREE;
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_HEADER))
+		{
+			nType = TLST_HEADER;
+		}
+		ASSERT(nType != TLST_NONE);
+
 		s_mapTypes[hwnd] = nType;
 	}
 
@@ -1123,6 +1211,7 @@ void CTreeListSyncer::PreDetachWindow()
 {
 	RemoveType(m_scLeft.GetHwnd());
 	RemoveType(m_scRight.GetHwnd());
+	RemoveType(m_hwndPrimaryHeader);
 }
 
 BOOL CTreeListSyncer::IsList(HWND hwnd)
@@ -1137,7 +1226,7 @@ BOOL CTreeListSyncer::IsTree(HWND hwnd)
 
 BOOL CTreeListSyncer::IsHeader(HWND hwnd)
 {
-	return (CWinClasses::IsClass(hwnd, WC_HEADER) ? TRUE : FALSE);
+	return (GetType(hwnd) == TLST_HEADER);
 }
 
 void CTreeListSyncer::ResyncListHeader(HWND hwnd)
@@ -1198,23 +1287,31 @@ void CTreeListSyncer::SetSplitBarColor(COLORREF crSplitBar)
 BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 {
 	BOOL bHandled = FALSE;
+	CRect rDead;
 
-	if (HasHScrollBar(m_scLeft.GetHwnd()) != HasHScrollBar(m_scRight.GetHwnd()))
+	if (GetHScrollDeadSpace(rDead))
 	{
-		CRect rPaint;
+		CThemed th;
 		
-		if (GetHScrollDeadSpace(rPaint))
-		{
-			CThemed th;
+		if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
+			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
+		else
+			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
+		
+		pDC->ExcludeClipRect(rDead);
+		bHandled = TRUE;
+	}
 
-			if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
-				th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rPaint);
-			else
-				pDC->FillSolidRect(rPaint, ::GetSysColor(COLOR_SCROLLBAR));
-			
-			pDC->ExcludeClipRect(rPaint);
-			bHandled = TRUE;
-		}
+	CRect rHeader;
+
+	if (OsIsLinux() && GetHeaderRect(PrimaryWnd(), rHeader, NULL))
+	{
+		rHeader.top = (rHeader.bottom - LINUX_VOFFSET_FUDGE);
+
+		pDC->FillSolidRect(rHeader, GetSysColor(COLOR_WINDOW));
+		pDC->ExcludeClipRect(rHeader);
+		
+		bHandled = TRUE;
 	}
 
 	CRect rSplitter;
@@ -1253,7 +1350,7 @@ void CTreeListSyncer::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF cr
 
 LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (!m_bResyncEnabled)
+	if (!IsResyncEnabled())
 		return CSubclassWnd::Default();
 	
 	ASSERT(hRealWnd == GetHwnd());
@@ -1268,7 +1365,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 		
 	case WM_RESIZE:
-		RefreshSize(hRealWnd);
+		RefreshSize();
 		m_bResizePending = FALSE;
 		break;
 
@@ -1300,7 +1397,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			{
 				::ClientToScreen(hRealWnd, &ptCursor);
 				
-				if (DragDetect(hRealWnd, ptCursor))
+				if (::DragDetect(hRealWnd, ptCursor))
 				{
 					::SetCapture(hRealWnd);
 					m_bSplitting = TRUE;
@@ -1522,7 +1619,6 @@ void CTreeListSyncer::HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExp
 		}
 		
 		EnableResync(TRUE, hwndTree);
-//		InvalidateTreeItem(hwndTree, hti);
 	}
 }
 
@@ -1807,6 +1903,11 @@ BOOL CTreeListSyncer::IsListItemSelected(HWND hwnd, int nItem) const
 	return ListItemHasState(hwnd, nItem, LVIS_SELECTED);
 }
 
+void CTreeListSyncer::OnNotifySplitterChange(int /*nSplitPos*/) 
+{
+	// Do nothing
+}
+
 BOOL CTreeListSyncer::IsTreeFullRowSelect(HWND hwnd)
 {
 	ASSERT(IsTree(hwnd));
@@ -1826,11 +1927,11 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 {
 	if (hRealWnd != Left() && hRealWnd != Right())
 	{
-		return CSubclasser::ScDefault(hRealWnd);
+		return ScDefault(hRealWnd);
 	}
-	else if (!m_bResyncEnabled && msg != WM_NCCALCSIZE)
+	else if (!IsResyncEnabled())
 	{
-		return CSubclasser::ScDefault(hRealWnd);
+		return ScDefault(hRealWnd);
 	}
 
 	LRESULT lr = 0;
@@ -1862,7 +1963,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ASSERT(hRealWnd == PrimaryWnd());
 			
 			// we only need to handle this if the new item is visible
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			HTREEITEM hti = (HTREEITEM)lr;
@@ -1904,14 +2005,12 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			if (hti == TVI_ROOT)
 			{
 				// temporary disable of resyncing required
-				m_bResyncEnabled = FALSE; 
+				CAutoFlag af(m_bResyncEnabled, FALSE); 
 
-				lr = CSubclasser::ScDefault(hRealWnd);
+				lr = ScDefault(hRealWnd);
 				bDoneDefault = TRUE;
 				
 				::SendMessage(OtherWnd(hRealWnd), LVM_DELETEALLITEMS, 0, 0);
-
-				m_bResyncEnabled = TRUE; 
 			}
 			// we only need to handle this if the item is visible
 			else if (hti && IsTreeItemVisible(hRealWnd, hti))
@@ -1946,7 +2045,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		{
 			ASSERT(IsList(hRealWnd));
 			
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 
 			int nItem = (int)lr;
@@ -1974,7 +2073,19 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ASSERT(IsList(hRealWnd));
 
 			// delete exact same item in 'OtherWnd'
-			VERIFY(::SendMessage(OtherWnd(hRealWnd), LVM_DELETEITEM, wp, lp));
+			HWND hwndOther = OtherWnd(hRealWnd);
+			VERIFY(::SendMessage(hwndOther, LVM_DELETEITEM, wp, lp));
+
+			// and then fix up itemdata of following items
+			if ((IsRight(hwndOther) && (m_nLinkage == TLSL_RIGHTDATA_IS_LEFTITEM)) ||
+				(IsLeft(hwndOther) && (m_nLinkage == TLSL_LEFTDATA_IS_RIGHTITEM)))
+			{
+				CAutoFlag af(m_bResyncing, TRUE);
+				int nNumItems = ListView_GetItemCount(hwndOther);
+
+				for (int nItem = (int)wp; nItem < nNumItems; nItem++)
+					SetListItemData(hwndOther, nItem, (int)nItem);
+			}
 		}
 		break;
 
@@ -1992,7 +2103,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		if (hRealWnd == PrimaryWnd())
 		{
 			// do default handling
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 
 			// forward on to list
@@ -2004,8 +2115,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				::SendMessage(m_hwndPrimaryHeader, WM_SETFONT, wp, lp);
 			
 			// resync item heights
-			RecalcItemHeights(hRealWnd);
-			RefreshSize(hRealWnd);
+			RecalcItemHeights();
+			RefreshSize();
 		}
 		break;
 
@@ -2014,8 +2125,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		// re-sync item heights
 		if (hRealWnd == PrimaryWnd())
 		{
-			RecalcItemHeights(hRealWnd);
-			RefreshSize(hRealWnd);
+			RecalcItemHeights();
+			RefreshSize();
 		}
 		break;
 
@@ -2024,7 +2135,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case TVM_ENSUREVISIBLE:
 		// one view has been scrolled => resync other
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
@@ -2037,7 +2148,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_MOUSEWHEEL:
 		if (IsRight(hRealWnd)) // right view has received mousewheel => resync left
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
@@ -2085,27 +2196,12 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_SIZE: 
 		{
 			// hide VScrollbar after default behaviour
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			if (IsLeft(hRealWnd) && HasVScrollBar(hRealWnd))
 			{
 				ShowVScrollBar(hRealWnd, FALSE, FALSE);
-			}
-		}
-		break;
-		
-	case WM_CHECK_WS_VSCROLL:
-		if (IsLeft(hRealWnd) && ShowVScrollBar(hRealWnd, FALSE))
-		{
-			if (IsList(hRealWnd))
-			{
-				// resize Header bar
-				ResyncListHeader(hRealWnd);
-			}
-			else
-			{
-				ForceNcCalcSize(hRealWnd);
 			}
 		}
 		break;
@@ -2140,7 +2236,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			// visibility is changing
 			if (bHScrollNow != bHScrollBefore || bVScrollNow != bVScrollBefore)
 			{
-				PostResize(hRealWnd);
+				PostResize();
 			}
 		}
 		break;
@@ -2158,34 +2254,22 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_LBUTTONDOWN:
 		if (IsList(hRealWnd) && IsTree(OtherWnd(hRealWnd)))
 		{
-			lr = CSubclasser::ScDefault(hRealWnd);
+			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
 		}
 		break;
 		
-	case WM_RESIZE:
-		RefreshSize(hRealWnd);
-		m_bResizePending = FALSE;
-		break;
-		
-	case LVM_SCROLL:
-		if (IsList(hRealWnd) && IsLeft(hRealWnd))
-		{
-			PostCheckVScrollBar();
-		}
-		break;
-		
 	case WM_TIMER:
 		{
- 			lr = CSubclasser::ScDefault(hRealWnd);
+ 			lr = ScDefault(hRealWnd);
  			bDoneDefault = TRUE;
 
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
 		}
 		break;
-
+		
 	case WM_KEYUP:
 		switch (wp)
 		{
@@ -2193,10 +2277,13 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		case VK_DOWN:
 		case VK_PRIOR:
 		case VK_NEXT:
-			lr = CSubclasser::ScDefault(hRealWnd);
-			bDoneDefault = TRUE;
+			{
+				lr = ScDefault(hRealWnd);
+				bDoneDefault = TRUE;
 				
-			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+				ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+			}
+			break;
 		}
 		break;
 		
@@ -2207,36 +2294,126 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			InvalidateAll(FALSE, TRUE);
 		}
 		break;
+
+	case WM_NCLBUTTONDOWN:
+	case WM_NCMBUTTONDOWN:
+	case WM_NCRBUTTONDOWN:
+	case WM_NCLBUTTONUP:
+	case WM_NCMBUTTONUP:
+	case WM_NCRBUTTONUP:
+	case WM_NCMOUSEMOVE:
+		// if this is a click in the area where the vertical
+		// scroll would normally be we convert it to a client
+		// mouse msg
+		if (IsLeft(hRealWnd) && (wp == HTVSCROLL))
+		{
+			VERIFY(ConvertNonClientToClientMouseMsg(hRealWnd, msg, wp, lp));
+
+			return ::SendMessage(hRealWnd, msg, wp, lp);
+		}
+		break;
 	}
 
 	if (!bDoneDefault)
-		lr = CSubclasser::ScDefault(hRealWnd);
+		lr = ScDefault(hRealWnd);
 	
 	return lr;
 }
 
-void CTreeListSyncer::PostCheckVScrollBar() const
+LRESULT CTreeListSyncer::ScDefault(HWND hwnd)
 {
-	::PostMessage(Left(), WM_CHECK_WS_VSCROLL, 0, 0);
+	return CSubclasser::ScDefault(IsLeft(hwnd) ? m_scLeft : m_scRight);
+}
+
+BOOL CTreeListSyncer::ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam)
+{
+	wParam = 0;
+
+	switch (nMsg)
+	{
+	case WM_NCLBUTTONDOWN:	
+		nMsg = WM_LBUTTONDOWN;
+		wParam = MK_LBUTTON;
+		break;
+
+	case WM_NCRBUTTONDOWN:	
+		nMsg = WM_RBUTTONDOWN;
+		wParam = MK_RBUTTON;
+		break;
+		
+	case WM_NCMBUTTONDOWN:	
+		nMsg = WM_MBUTTONDOWN;
+		wParam = MK_MBUTTON;
+		break;
+
+	case WM_NCLBUTTONUP:	
+		nMsg = WM_LBUTTONUP;
+		wParam = MK_LBUTTON;
+		break;
+		
+	case WM_NCRBUTTONUP:	
+		nMsg = WM_RBUTTONUP;
+		wParam = MK_RBUTTON;
+		break;
+		
+	case WM_NCMBUTTONUP:	
+		nMsg = WM_MBUTTONUP;
+		wParam = MK_MBUTTON;
+		break;
+				
+	case WM_NCMOUSEMOVE:	
+		nMsg = WM_MOUSEMOVE;
+
+		if (Misc::IsKeyPressed(VK_LBUTTON))
+		{
+			wParam = MK_LBUTTON;
+		}
+		else if (Misc::IsKeyPressed(VK_MBUTTON))
+		{
+			wParam = MK_MBUTTON;
+		}
+		else if (Misc::IsKeyPressed(VK_RBUTTON))
+		{
+			wParam = MK_RBUTTON;
+		}
+		break;
+
+	default:				
+		ASSERT(0);
+		return FALSE;
+	}
+		
+	if (Misc::IsKeyPressed(VK_SHIFT))
+		wParam |= MK_SHIFT;
+	
+	if (Misc::IsKeyPressed(VK_CONTROL))
+		wParam |= MK_CONTROL;
+
+	CPoint pt(lParam);
+	::ScreenToClient(hWnd, &pt);
+
+	lParam = MAKELPARAM(pt.x, pt.y);
+	
+	return TRUE;
 }
 
 BOOL CTreeListSyncer::ShowVScrollBar(HWND hwnd, BOOL bShow, BOOL bRefreshSize)
 {
-	DWORD dwStyle = GetStyle(hwnd, FALSE);
-	
 	// see if there's anything to do first
-	if ((bShow && !(dwStyle & WS_VSCROLL)) || (!bShow && (dwStyle & WS_VSCROLL)))
+	DWORD dwStyle = GetStyle(hwnd, FALSE), dwNewStyle(0);
+	
+	if (bShow)
+		dwNewStyle = (dwStyle | WS_VSCROLL);
+	else
+		dwNewStyle = (dwStyle & ~WS_VSCROLL);
+	
+	if (dwNewStyle != dwStyle)
 	{
-		if (bShow)
-			dwStyle |= WS_VSCROLL;
-		else
-			dwStyle &= ~WS_VSCROLL;
-		
-		::SetWindowLong(hwnd, GWL_STYLE, dwStyle);
+		::SetWindowLong(hwnd, GWL_STYLE, dwNewStyle);
 		::ShowScrollBar(hwnd, SB_VERT, bShow);
 		
 		if (bRefreshSize)
-			RefreshSize(hwnd);
+			RefreshSize();
 	}
 	
 	return TRUE;
@@ -2268,7 +2445,7 @@ void CTreeListSyncer::Show(BOOL bShow)
 
 BOOL CTreeListSyncer::GetSplitterRect(CRect& rSplitter) const
 {
-	if (HasFlag(TLSF_SPLITTER) && (m_nSplitPos >= MIN_SPLIT_WIDTH))
+	if (HasFlag(TLSF_SPLITTER) && !IsHiding() && (m_nSplitPos >= MIN_SPLIT_WIDTH))
 	{
 		GetBoundingRect(Left(), rSplitter);
 
@@ -2283,7 +2460,7 @@ BOOL CTreeListSyncer::GetSplitterRect(CRect& rSplitter) const
 
 BOOL CTreeListSyncer::PtInSplitter(const CPoint& pt, BOOL bScreen) const
 {
-	if (HasFlag(TLSF_SPLITTER))
+	if (HasFlag(TLSF_SPLITTER) && !IsHiding())
 	{
 		CRect rSplitter;
 
@@ -2304,15 +2481,38 @@ void CTreeListSyncer::AdjustForBorder(CRect& rLeft, CRect& rRight) const
 {
 	if (HasFlag(TLSF_BORDER))
 	{
-		rLeft.DeflateRect(1, 1, 0, 1);
-		rRight.DeflateRect(0, 1, 1, 1);
+		switch (m_nHidden)
+		{
+		case TLSH_NONE:
+			rLeft.DeflateRect(1, 1, 0, 1);
+			rRight.DeflateRect(0, 1, 1, 1);
+			break;
+			
+		case TLSH_LEFT:
+		case TLSH_RIGHT:
+			rRight.DeflateRect(1, 1, 1, 1);
+			rLeft.DeflateRect(1, 1, 1, 1);
+			break;
+		}
 	}
 }
 
 void CTreeListSyncer::Resize(const CRect& rect)
 {
-	// just use the existing 'left' width
-	Resize(rect, GetSplitPos());
+	switch (m_nHidden)
+	{
+	case TLSH_NONE:
+		Resize(rect, GetSplitPos());
+		break;
+
+	case TLSH_LEFT:
+		Resize(rect, 0);
+		break;
+
+	case TLSH_RIGHT:
+		Resize(rect, rect.right);
+		break;
+	}
 }
 
 void CTreeListSyncer::Resize(const CRect& rect, float fLeftProportion)
@@ -2325,21 +2525,26 @@ void CTreeListSyncer::Resize(const CRect& rect, int nLeftWidth)
 	if (rect.IsRectEmpty())
 		return;
 
-	if (nLeftWidth >= rect.Width())
-		nLeftWidth = rect.Width() - MIN_SPLIT_WIDTH;
+	if (!IsHiding())
+	{
+		if (nLeftWidth >= rect.Width())
+			nLeftWidth = (rect.Width() - MIN_SPLIT_WIDTH);
 
-	if (nLeftWidth < MIN_SPLIT_WIDTH)
-		return;
+		if (nLeftWidth < MIN_SPLIT_WIDTH)
+			return;
+
+		m_nSplitPos = nLeftWidth;
+	}
 
     CRect rLeft(rect), rRight(rect);
 	
-    rLeft.right = rLeft.left + nLeftWidth;
+    rLeft.right = (rLeft.left + nLeftWidth);
     rRight.left = rLeft.right;
 
-	if (HasFlag(TLSF_SPLITTER))
+	if (HasFlag(TLSF_SPLITTER) && !IsHiding())
+	{
 		rRight.left += m_nSplitWidth;
-
-	m_nSplitPos = nLeftWidth;
+	}
 
 	// we draw a border around the controls so deflate a bit
 	AdjustForBorder(rLeft, rRight);
@@ -2349,113 +2554,216 @@ void CTreeListSyncer::Resize(const CRect& rect, int nLeftWidth)
 
 void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 {
-	// always resize list first to get it's header properly positioned
-	if (IsList(Left()))
+	CRect rLeftActual(rLeft), rRightActual(rRight);
+	
+	// Adjust top of primary window to take account of 
+	// its or the others header
+	CRect rLeftHeader, rRightHeader;
+	BOOL bLeftHasHeader = GetHeaderRect(Left(), rLeftHeader, rLeft);
+	BOOL bRightHasHeader = GetHeaderRect(Right(), rRightHeader, rRight);
+
+	BOOL bLeftIsPrimary = (Left() == PrimaryWnd());
+
+	if (bLeftHasHeader && !bRightHasHeader)
 	{
-		Resize(Left(), rLeft, FALSE);
-		Resize(Right(), rRight, FALSE);
+		if (bLeftIsPrimary)
+		{
+			// we have a primary header but no list header
+			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
+		}
+		else // right is primary
+		{
+			// no primary header but list header
+			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
+			rRightActual.top = rLeftHeader.bottom;
+		}
 	}
-	else // list is right
+	else if (!bLeftHasHeader && bRightHasHeader)
 	{
-		Resize(Right(), rRight, FALSE);
-		Resize(Left(), rLeft, FALSE);
+		if (bLeftIsPrimary)
+		{
+			// no primary header but list header
+			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
+			rLeftActual.top = rRightHeader.bottom;
+		}
+		else // right is primary
+		{
+			// we have a primary header but no list header
+			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
+		}
+	}
+	else if (bLeftHasHeader && bRightHasHeader)
+	{
+		CRect rHeader;
+
+		if (bLeftIsPrimary)
+		{
+			rLeftActual.top = rLeftHeader.bottom;
+
+			rHeader.top = rRightHeader.top;
+			rHeader.bottom = rRightHeader.bottom;
+			rHeader.left = rLeftActual.left;
+			rHeader.right = rLeftActual.right;
+		}
+		else // right is primary
+		{
+			rRightActual.top = rRightHeader.bottom;
+			
+			rHeader.top = rLeftHeader.top;
+			rHeader.bottom = rLeftHeader.bottom;
+			rHeader.left = rRightActual.left;
+			rHeader.right = rRightActual.right;
+		}
+		
+		::ShowWindow(m_hwndPrimaryHeader, SW_SHOW);
+		::MoveWindow(m_hwndPrimaryHeader, rHeader.left, rHeader.top, rHeader.Width(), rHeader.Height(), TRUE);
+		
+		// if the primary header has only one item then
+		// resize it to the same size
+		if (Header_GetItemCount(m_hwndPrimaryHeader) == 1)
+		{
+			HD_ITEM hd = { 0 };
+			
+			hd.mask = HDI_WIDTH;
+			hd.cxy = rHeader.Width();
+			
+			Header_SetItem(m_hwndPrimaryHeader, 0, &hd);
+		}
 	}
 
+	// Adjust the height of one of the panes in the case where
+	// it does not have a horizontal scrollbar but the other pane does
+	BOOL bLeftHScroll, bLeftVScroll;
+	WindowNeedsScrollBars(Left(), rLeft, bLeftHScroll, bLeftVScroll);
+
+	BOOL bRightHScroll, bRightVScroll;
+	WindowNeedsScrollBars(Right(), rRight, bRightHScroll, bRightVScroll);
+
+	const int CXSCROLL = GetSystemMetrics(SM_CXVSCROLL);
+
+	if (bLeftHScroll && !bRightHScroll)
+	{
+		rRightActual.bottom -= CXSCROLL;
+
+		// Note: The act of deducting the height of the scrollbar
+		// from the bottom of the right pane may be enough to
+		// provoke the appearance of a vertical scrollbar which
+		// can itself provoke a horizontal scrollbar
+		WindowNeedsScrollBars(Right(), rRightActual, bRightHScroll, bRightVScroll);
+
+		if (bRightHScroll)
+		{
+			// if we are dragging then we simply prevent the move until 
+			// the drag moves to a 'safer' place
+ 			if (m_bSplitting)
+				return;
+
+			rRightActual.left -= CXSCROLL;
+			rLeftActual.right -= CXSCROLL;
+		}
+	}
+	else if (!bLeftHScroll && bRightHScroll)
+	{
+		rLeftActual.bottom -= CXSCROLL;
+
+		// Note: The act of deducting the height of the scrollbar
+		// from the bottom of the right pane may be enough to
+		// provoke the appearance of a vertical scrollbar which
+		// can itself provoke a horizontal scrollbar
+		WindowNeedsScrollBars(Left(), rLeftActual, bLeftHScroll, bLeftVScroll);
+
+		if (bLeftHScroll)
+		{
+			// if we are dragging then we simply prevent the move until 
+			// the drag moves to a 'safer' place
+			if (m_bSplitting)
+				return;
+
+			// else increase the width of the pane to remove the scrollbar
+			rRightActual.left += CXSCROLL;
+			rLeftActual.right += CXSCROLL;
+		}
+	}
+
+	::MoveWindow(Left(), rLeftActual.left, rLeftActual.top, rLeftActual.Width(), rLeftActual.Height(), TRUE);
+	::MoveWindow(Right(), rRightActual.left, rRightActual.top, rRightActual.Width(), rRightActual.Height(), TRUE);
 	
-	ResyncScrollPos(Left(), Right());
+	if (bLeftIsPrimary)
+		ResyncScrollPos(Right(), Left());
+	else
+		ResyncScrollPos(Left(), Right());
 
 	// also invalidate parent if we are drawing a border
 	if (HasFlag(TLSF_BORDER))
 		::InvalidateRect(GetHwnd(), NULL, TRUE);
 }
 
-void CTreeListSyncer::RefreshSize(HWND hwnd)
+void CTreeListSyncer::RefreshSize()
 {
 	CRect rect;
 
-	if (hwnd == GetHwnd())
+	GetBoundingRect(rect);
+	Resize(rect);
+}
+
+void CTreeListSyncer::WindowNeedsScrollBars(HWND hwnd, const CRect& rect, BOOL& bNeedHScroll, BOOL& bNeedVScroll) const
+{
+	bNeedHScroll = bNeedVScroll = FALSE;
+
+	BOOL bTree = IsTree(hwnd);
+	int nNumItems = (bTree ? TreeView_GetCount(hwnd) : ListView_GetItemCount(hwnd));
+
+	if (!nNumItems)
+		return;
+
+	const int nCxScroll = GetSystemMetrics(SM_CXVSCROLL);
+	const int nCyScroll = GetSystemMetrics(SM_CYHSCROLL);
+
+	CRect rClient(rect);
+
+	// adjust list top for its header
+	if (!bTree)
 	{
-		GetBoundingRect(rect);
-		Resize(rect);
+		HWND hwndHdr = ListView_GetHeader(hwnd);
+
+		CRect rHeader;
+		::GetWindowRect(hwndHdr, rHeader);
+
+		rClient.top += rHeader.Height();
 	}
-	else // resize one of the windows
+
+	CRect rContent;
+	GetContentSize(hwnd, rContent);
+
+	bNeedVScroll = (rClient.Height() <= rContent.Height());
+	bNeedHScroll = (rClient.Width() <= rContent.Width());
+
+	// the presence of one scrollbar can cause the need for the other
+	if (bNeedHScroll && !bNeedVScroll)
 	{
-		GetBoundingRect(hwnd, rect);
-		Resize(hwnd, rect, TRUE);
+		bNeedVScroll = ((rClient.Height() - nCyScroll) <= rContent.Height());
+	}
+	else if (!bNeedHScroll && bNeedVScroll)
+	{
+		bNeedHScroll = ((rClient.Width() - nCxScroll) <= rContent.Width());
 	}
 }
 
-void CTreeListSyncer::Resize(HWND hwnd, const CRect& rect, BOOL bInternal)
+void CTreeListSyncer::GetContentSize(HWND hwnd, CRect& rContent) const
 {
-	CRect rWnd(rect);
+	::GetWindowRect(hwnd, rContent);
+	rContent.OffsetRect(-rContent.TopLeft());
 	
-	// handle primary header
-	if (hwnd == PrimaryWnd())
-	{
-		// get current header rects
-		CRect rThisHeader, rOtherHeader;
-		BOOL bThisWndHasHeader = GetHeaderRect(hwnd, rThisHeader);
-		BOOL bOtherWndHasHeader = GetHeaderRect(OtherWnd(hwnd), rOtherHeader);
-		
-		if (bThisWndHasHeader && !bOtherWndHasHeader)
-		{
-			// we have a primary header but no list header
-			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
-		}
-		else if (!bThisWndHasHeader && bOtherWndHasHeader)
-		{
-			::ShowWindow(m_hwndPrimaryHeader, SW_HIDE);
-			rWnd.top = rOtherHeader.bottom;
-		}
-		else if (bThisWndHasHeader && bOtherWndHasHeader)
-		{
-			rWnd.top = rOtherHeader.bottom;
-			rThisHeader.top = rOtherHeader.top;
-			rThisHeader.bottom = rOtherHeader.bottom;
-			rThisHeader.left = rWnd.left;
-			rThisHeader.right = rWnd.right;
-			
-			::ShowWindow(m_hwndPrimaryHeader, SW_SHOW);
-			::MoveWindow(m_hwndPrimaryHeader, rThisHeader.left, rThisHeader.top, rThisHeader.Width(), rThisHeader.Height(), TRUE);
+	// we get the content width via the scrollbar info
+	SCROLLINFO si = { sizeof(SCROLLINFO), SIF_RANGE, 0 };
 
-			// if the primary header has only one item then
-			// resize it to the same size
-			if (Header_GetItemCount(m_hwndPrimaryHeader) == 1)
-			{
-				HD_ITEM hd = { 0 };
+	if (::GetScrollInfo(hwnd, SB_HORZ, &si))
+		rContent.right = si.nMax;
 
-				hd.mask = HDI_WIDTH;
-				hd.cxy = rThisHeader.Width();
+	// get content height via list item count
+	HWND hwndList = (IsTree(hwnd) ? OtherWnd(hwnd) : hwnd);
 
-				Header_SetItem(m_hwndPrimaryHeader, 0, &hd);
-			}
-		}
-	}
-	
-	// if this wnd does not have a scrollbar but the other does
-	// then make an allowance so that the client areas match
-	BOOL bThisWndHasHScroll = HasHScrollBar(hwnd);
-	BOOL bOtherWndHasHScroll = HasHScrollBar(OtherWnd(hwnd));
-	
-	if (!bThisWndHasHScroll && bOtherWndHasHScroll)
-		rWnd.bottom -= GetSystemMetrics(SM_CYHSCROLL);
-	
-	// resize wnd
-	CRect rPrev;
-//	GetBoundingRect(hwnd, rPrev);
-	::GetWindowRect(hwnd, rPrev);
-
-	if (rWnd != rPrev)
-	{
-		::MoveWindow(hwnd, rWnd.left, rWnd.top, rWnd.Width(), rWnd.Height(), TRUE);
-		
-		// because horizontal and vertical scrollbars can 
-		// unexpectedly appear in response to a resize we
-		// retrigger another resize but only if this call
-		// originated externally
-		if (!bInternal)
-			PostResize(hwnd);
-	}
+	rContent.bottom = (ListView_GetItemCount(hwndList) * GetItemHeight(hwnd));
 }
 
 BOOL CTreeListSyncer::HasVScrollBar() const
@@ -2473,7 +2781,7 @@ BOOL CTreeListSyncer::HasHScrollBar(HWND hwnd)
 	return (HasStyle(hwnd, WS_HSCROLL, FALSE));
 }
 
-BOOL CTreeListSyncer::GetHeaderRect(HWND hwnd, CRect& rect) const
+BOOL CTreeListSyncer::GetHeaderRect(HWND hwnd, CRect& rect, LPCRECT prcBounds) const
 {
 	ASSERT(IsList(hwnd) || IsList(OtherWnd(hwnd)));
 
@@ -2500,9 +2808,15 @@ BOOL CTreeListSyncer::GetHeaderRect(HWND hwnd, CRect& rect) const
 	::ScreenToClient(hwndParent, (LPPOINT)&(rHeader.TopLeft()));
 	::ScreenToClient(hwndParent, (LPPOINT)&(rHeader.BottomRight()));
 	
-	GetBoundingRect(hwnd, rect);
-	rect.top = rHeader.top;
-	rect.bottom = rHeader.bottom;
+	if (prcBounds)
+		rect.CopyRect(prcBounds);
+	else
+		GetBoundingRect(hwnd, rect);
+
+	rect.bottom = (rect.top + rHeader.Height());
+
+	if (OsIsLinux() && bPrimary && IsTree(hwnd))
+		rect.bottom += LINUX_VOFFSET_FUDGE;
 	
 	return (rHeader.Height() > 0);
 }
@@ -2520,7 +2834,7 @@ void CTreeListSyncer::SetSplitBarWidth(int nWidth)
 	if (nNewWidth != m_nSplitWidth)
 	{
 		m_nSplitWidth = nNewWidth;
-		RefreshSize(GetHwnd());
+		RefreshSize();
 	}
 }
 
@@ -2620,6 +2934,7 @@ void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITE
 		if ((m_nLinkage == TLSL_LEFTDATA_IS_RIGHTITEM) || 
 			(m_nLinkage == TLSL_RIGHTDATA_IS_LEFTITEM))
 		{
+			CAutoFlag af(m_bResyncing, TRUE);
 			int nItem = ListView_GetItemCount(hwndPrimary);
 
 			while (nItem--)
@@ -2716,14 +3031,158 @@ int CALLBACK CTreeListSyncer::SortListProc(LPARAM lParam1, LPARAM lParam2, LPARA
 	return 0;
 }
 
-BOOL CTreeListSyncer::PointInRect(POINT point, HWND hWnd, BOOL bScreenCoords)
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, COLORREF crGridline)
 {
-	CRect rect;
-	
-	if (bScreenCoords)
-		::GetWindowRect(hWnd, rect);
-	else
-		::GetClientRect(hWnd, rect);
-	
-	return rect.PtInRect(point);
+	return SaveToImage(bmImage, 0, -1, crGridline);
+}
+
+BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline)
+{
+	HWND hwndPrimary = PrimaryWnd();
+	BOOL bPrimaryIsLeft = IsLeft(hwndPrimary);
+
+	CAutoFlag af(m_bSavingToImage, TRUE);
+
+	bmImage.DeleteObject();
+
+	CEnBitmap bmPrimary, bmPrimaryHeader, bmOther;
+
+	if (!SaveToImage(hwndPrimary, bmPrimary))
+		return FALSE;
+
+	if (!SaveToImage(OtherWnd(hwndPrimary), bmOther, CRect(nOtherFrom, 0, nOtherTo, -1)))
+		return FALSE;
+
+	if (m_hwndPrimaryHeader && !SaveToImage(m_hwndPrimaryHeader, bmPrimaryHeader))
+		return FALSE;
+
+	// Create some memory DCs
+	HDC hDC = ::GetDC(::GetParent(hwndPrimary));
+	CDC* pDC = CDC::FromHandle(hDC);
+	CDC dcImage, dcParts;
+
+	if (dcImage.CreateCompatibleDC(pDC) && dcParts.CreateCompatibleDC(pDC))
+	{
+		// Create the image big enough to fit the tasks and columns side-by-side
+		CSize sizePrimary = bmPrimary.GetSize();
+		CSize sizeHeader = bmPrimaryHeader.GetSize();
+		CSize sizeOther = bmOther.GetSize();
+
+		CSize sizeImage;
+
+		sizeImage.cx = (sizePrimary.cx + sizeOther.cx);
+		sizeImage.cy = sizeOther.cy;
+
+		if (bmImage.CreateCompatibleBitmap(pDC, sizeImage.cx, sizeImage.cy))
+		{
+			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
+
+			// Primary
+			CBitmap* pOldPart = dcParts.SelectObject(&bmPrimary);
+
+			if (bPrimaryIsLeft)
+				dcImage.BitBlt(0, sizeHeader.cy, sizePrimary.cx, sizePrimary.cy, &dcParts, 0, 0, SRCCOPY);
+			else
+				dcImage.BitBlt(sizeOther.cx, sizeHeader.cy, sizePrimary.cx, sizePrimary.cy, &dcParts, 0, 0, SRCCOPY);
+
+			dcParts.SelectObject(pOldPart);
+
+			// Primary header
+			if (m_hwndPrimaryHeader)
+			{
+				pOldPart = dcParts.SelectObject(&bmPrimaryHeader);
+
+				if (bPrimaryIsLeft)
+					dcImage.BitBlt(0, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+				else
+					dcImage.BitBlt(sizeOther.cx, 0, sizeHeader.cx, sizeHeader.cy, &dcParts, 0, 0, SRCCOPY);
+
+				dcParts.SelectObject(pOldPart);
+
+				// if the task header is shorter than the tasks themselves
+				// then draw default header background for the remainder
+				if (sizeHeader.cx < sizePrimary.cx)
+				{
+					CRect rHeader((sizeHeader.cx - 2), 0, sizePrimary.cx, sizeHeader.cy);
+
+					if (!bPrimaryIsLeft)
+						rHeader.OffsetRect(sizeOther.cx, 0);
+			
+					CThemed th;
+					BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+
+					if (bThemed)
+					{
+						th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
+					}
+					else
+					{
+						dcImage.FillSolidRect(rHeader, ::GetSysColor(COLOR_3DFACE));
+						dcImage.Draw3dRect(rHeader, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
+					}
+				}
+			}
+
+			// Other part
+			pOldPart = dcParts.SelectObject(&bmOther);
+
+			if (bPrimaryIsLeft)
+				dcImage.BitBlt(sizePrimary.cx, 0, sizeOther.cx, sizeOther.cy, &dcParts, 0, 0, SRCCOPY);
+			else
+				dcImage.BitBlt(0, 0, sizeOther.cx, sizeOther.cy, &dcParts, 0, 0, SRCCOPY);
+
+			// Draw a column divider between primary and other
+			if (crGridline != CLR_NONE)
+			{
+				if (bPrimaryIsLeft)
+					dcImage.FillSolidRect(sizePrimary.cx - 1, sizeHeader.cy, 1, sizePrimary.cy, crGridline);
+				else
+					dcImage.FillSolidRect(sizeOther.cx - 1, sizeHeader.cy, 1, sizeOther.cy, crGridline);
+			}
+
+			dcParts.SelectObject(pOldPart);
+		}
+	}
+
+	::ReleaseDC(hwndPrimary, hDC);
+
+	return (bmImage.GetSafeHandle() != NULL);
+}
+
+BOOL CTreeListSyncer::SaveToImage(HWND hWnd, CBitmap& bmImage, const CRect& rFromTo)
+{
+	switch (GetType(hWnd))
+	{
+	case TLST_TREE:
+		{
+			CTreeCtrl* pTree = (CTreeCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pTree);
+
+			if (!CCopyTreeCtrlContents(*pTree).DoCopy(bmImage, rFromTo))
+				return FALSE;
+		}
+		break;
+
+	case TLST_LIST:
+		{
+			CListCtrl* pList = (CListCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pList);
+
+			if (!CCopyListCtrlContents(*pList).DoCopy(bmImage, rFromTo))
+				return FALSE;
+		}
+		break;
+
+	case TLST_HEADER:
+		{
+			CHeaderCtrl* pHeader = (CHeaderCtrl*)CWnd::FromHandle(hWnd);
+			ASSERT(pHeader);
+
+			if (!CCopyHeaderCtrlContents(*pHeader).DoCopy(bmImage, rFromTo))
+				return FALSE;
+		}
+		break;
+	}
+
+	return TRUE;
 }

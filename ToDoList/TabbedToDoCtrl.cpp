@@ -56,6 +56,10 @@ const UINT DEFTEXTFLAGS   = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_N
 
 //////////////////////////////////////////////////////////////////////
 
+UINT CTabbedToDoCtrl::WM_TDC_RESTORELASTTASKVIEW = (WM_TDC_RECREATERECURRINGTASK + 1);
+
+//////////////////////////////////////////////////////////////////////
+
 CStringArray CTabbedToDoCtrl::s_aDefTaskViews;
 
 //////////////////////////////////////////////////////////////////////
@@ -118,6 +122,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
+	ON_MESSAGE(WM_TDC_RESTORELASTTASKVIEW, OnRestoreLastTaskView)
 
 	ON_WM_DRAWITEM()
 	ON_WM_ERASEBKGND()
@@ -387,8 +392,13 @@ void CTabbedToDoCtrl::LoadPrefs()
 	FTC_VIEW nCurView = GetTaskView();
 	FTC_VIEW nView = (FTC_VIEW)prefs.GetProfileInt(sKey, _T("View"), FTCV_UNSET);
 
-	if ((nView != FTCV_UNSET) && (nView != nCurView))
-		SetTaskView(nView);
+	// Under high DPI displays (For reasons I don't understand) the plugin views 
+	// which derive from CDialog have the vertical positions of their controls 
+	// messed up unless we delay their creation
+	if (GraphicsMisc::WantDPIScaling())
+		PostMessage(WM_TDC_RESTORELASTTASKVIEW, nCurView, nView);
+	else
+		SendMessage(WM_TDC_RESTORELASTTASKVIEW, nCurView, nView);
 
 	// clear the view so we don't keep restoring it
 	prefs.WriteProfileInt(sKey, _T("View"), FTCV_UNSET);
@@ -547,7 +557,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 
 	try
 	{
-		pExtWnd = pVData->pExtension->CreateExtWindow(nCtrlID, WS_CHILD, 0, 0, 0, 0, GetSafeHwnd());
+		pExtWnd = pVData->pExtension->CreateExtWindow(nCtrlID, WS_CHILD, 0, 0, 0, 200, GetSafeHwnd());
 	}
 	catch (...)
 	{
@@ -1390,14 +1400,23 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
-	DWORD dwTaskID = 0;
+	DWORD dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod, dwTaskID))
+	if (!CanEditSelectedTask(dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-		
+
+	if (dwTaskID)
+	{
+		if (GetSelectedCount() == 1)
+		{
+			ASSERT(GetSelectedTaskID() == dwTaskID);
+			dwTaskID = 0; // same as 'selected'
+		}
+	}
+	
 	CStringArray aValues;
 	BOOL bChange = FALSE;
 	
@@ -1795,11 +1814,11 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	{
 		const IUITASKMOVE* pMove = (const IUITASKMOVE*)lParam;
 
-		HTREEITEM htiDropItem = TCH().FindItem(pMove->dwSelectedTaskID);
+		HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
 		ASSERT(htiDropItem == GetSelectedItem());
 
-		HTREEITEM htiDropTarget = TCH().FindItem(pMove->dwParentID);
-		HTREEITEM htiDropAfter = TCH().FindItem(pMove->dwAfterSiblingID);
+		HTREEITEM htiDropTarget = m_taskTree.GetItem(pMove->dwParentID);
+		HTREEITEM htiDropAfter = m_taskTree.GetItem(pMove->dwAfterSiblingID);
 
 		TDC_DROPOPERATION nDrop = (pMove->bCopy ? TDC_DROPCOPY : TDC_DROPMOVE);
 		bSuccess = DropSelectedTasks(nDrop, htiDropTarget, htiDropAfter);
@@ -3097,11 +3116,13 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 		{
 			UpdateExtensionViewsSelection(nAttrib);
 
-			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nCurView);
-
-			if (pExtWnd)
-				pExtWnd->SelectTask(dwTaskID);
-			
+			if (IsExtensionView(nCurView))
+			{
+				IUIExtensionWindow* pExtWnd = GetExtensionWnd(nCurView);
+				
+				if (pExtWnd)
+					pExtWnd->SelectTask(dwTaskID);
+			}
 			break;
 		}
 		// else fall thru to update all tasks
@@ -4491,8 +4512,8 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 				if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 				{
 					// Update the tree
-					HTREEITEM htiDestParent = TCH().FindItem(dwDestParentID);
-					HTREEITEM htiDestPrevSibling = TCH().FindItem(dwDestPrevSiblingID);
+					HTREEITEM htiDestParent = m_taskTree.GetItem(dwDestParentID);
+					HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(dwDestPrevSiblingID);
 
 					m_taskTree.MoveSelection(htiDestParent, htiDestPrevSibling);
 
@@ -6038,6 +6059,14 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	}
 
 	CToDoCtrl::OnContextMenu(pWnd, point);
+}
+
+LRESULT CTabbedToDoCtrl::OnRestoreLastTaskView(WPARAM nCurView, LPARAM nNewView)
+{
+	if (((FTC_VIEW)nNewView != FTCV_UNSET) && ((FTC_VIEW)nNewView != (FTC_VIEW)nCurView))
+		SetTaskView((FTC_VIEW)nNewView);
+	
+	return 0L;
 }
 
 LRESULT CTabbedToDoCtrl::OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam)

@@ -399,32 +399,32 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		return;
 
 	// Not interested in references
-	if (pTasks->IsTaskReference(hTask))
-		return;
-
-	// only interested in leaf tasks
-	if (!pTasks->IsTaskParent(hTask))
+	if (!pTasks->IsTaskReference(hTask))
 	{
-		STATSITEM* pSI = m_data.AddItem(pTasks->GetTaskID(hTask));
-
-		if (pSI) // means it's new
+		// only interested in leaf tasks
+		if (!pTasks->IsTaskParent(hTask))
 		{
-			pSI->dtStart = GetTaskStartDate(pTasks, hTask);
-			pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
-			pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
-			pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
+			STATSITEM* pSI = m_data.AddItem(pTasks->GetTaskID(hTask));
 
-			// make sure start is less than done
-			if (pSI->IsDone() && pSI->HasStart())
-				pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
+			if (pSI) // means it's new
+			{
+				pSI->dtStart = GetTaskStartDate(pTasks, hTask);
+				pSI->dtDone = GetTaskDoneDate(pTasks, hTask);
+				pSI->dTimeEst = pTasks->GetTaskTimeEstimate(hTask, pSI->nTimeEstUnits, false);
+				pSI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pSI->nTimeSpentUnits, false);
 
-			// update data extents as we go
-			pSI->MinMax(m_dtEarliestDate, m_dtLatestDate);
+				// make sure start is less than done
+				if (pSI->IsDone() && pSI->HasStart())
+					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
+
+				// update data extents as we go
+				pSI->MinMax(m_dtEarliestDate, m_dtLatestDate);
+			}
 		}
-	}
-	else // Process children
-	{
-		BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist);
+		else // Process children
+		{
+			BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist);
+		}
 	}
 
 	// handle siblings WITHOUT RECURSION

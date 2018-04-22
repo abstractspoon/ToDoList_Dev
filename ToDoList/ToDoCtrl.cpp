@@ -101,7 +101,7 @@ const COLORREF WHITE = RGB(240, 240, 240);
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT  DAYINSECS		= 24 * 60 * 60;
-const int   COMBODROPHEIGHT	= 200;
+const int   COMBODROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int	DECIMALS = 4;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -853,23 +853,18 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 {
 	// project name
-	CDlgUnits dlu(this);
-	CRect rLabel = GetCtrlRect(IDC_PROJECTLABEL); 
-	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
+	CRect rProject = GetCtrlRect(IDC_PROJECTNAME), rLabel(rProject); 
 
-	int nOffset = rAvailable.left - rLabel.left;
+	rLabel.OffsetRect(-rLabel.left, 0);
+	rLabel.right = rProject.left;
 
-	rLabel.OffsetRect(nOffset, 0);
-	rProject.left += nOffset;
 	rProject.right = rAvailable.right;
 
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
 
 	if (m_nMaxState != TDCMS_MAXTASKLIST && HasStyle(TDCS_SHOWPROJECTNAME))
-	{
 		rAvailable.top = rProject.bottom + 5;
-	}
 	else
 		rAvailable.top = rProject.top;
 }
@@ -6339,7 +6334,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 		{
 			// save off password
 			m_sPassword = tasks.GetPassword();
-
+			
 			// get comments type from header of older tasklists for the
 			// setting of the enclosed tasks
 			CONTENTFORMAT cf = tasks.GetCommentsType();
@@ -6356,7 +6351,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 				TSH().RemoveAll();
 				TSH().ClearHistory();
 			}
-
+					
 			LoadTasks(tasks);
 			LoadTaskIcons();
 			SetModified(FALSE);
@@ -9217,6 +9212,7 @@ HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 	///////////////////////////////////////////////////////////////////
 
 	// Restore checkout task states
+	// TODO
 	
 	// Then tree structure
 	HTREEITEM hti = RebuildTree();

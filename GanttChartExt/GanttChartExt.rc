@@ -73,27 +73,27 @@ EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,365,13,222,13,SS_CENTERIMAGE | 
+                    IDC_SELECTEDTASKDATES,340,13,247,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Custom2",IDC_TREEHEADER,"SysHeader32",0x0,0,31,160,13
+    CONTROL         "Custom2",IDC_TREEHEADER,"SysHeader32",0x0,0,33,160,13
     CONTROL         "Tree1",IDC_GANTTTREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
                     TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | 
-                    TVS_NONEVENHEIGHT | WS_HSCROLL | WS_TABSTOP,0,44,159,265
+                    TVS_NONEVENHEIGHT | WS_HSCROLL | WS_TABSTOP,0,46,159,263
     CONTROL         "List1",IDC_GANTTLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
-                    WS_TABSTOP,162,31,425,278
+                    WS_TABSTOP,162,33,425,276
     COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
-    LTEXT           "Selected Task Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    366,3,210,8
+    LTEXT           "Selected Task &Date Range",IDC_SELECTEDTASKDATES_LABEL,
+                    340,3,247,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,247,12,109,17
+                    WS_VISIBLE,243,12,92,17
 END
 
 
@@ -162,7 +162,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 396
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 400
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -172,58 +172,61 @@ BEGIN
     CONTROL         "&Display 'Alloc To' after task's gantt bar",
                     IDC_DISPLAYALLOCTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,22,333,10
+    CONTROL         "Di&splay 'Task Title' after task's gantt bar",
+                    IDC_DISPLAYTASKTITLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,37,333,10
     CONTROL         "Show '% &Complete' as progress on task's gantt bar",
                     IDC_DISPLAYPROGRESS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,37,333,10
+                    WS_TABSTOP,7,52,333,10
     CONTROL         "&Auto-scroll to task when selecting",
                     IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,52,333,10
+                    WS_TABSTOP,7,67,333,10
     CONTROL         "&Treat tasks with the following tag as 'Milestones':",
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,67,333,10
-    EDITTEXT        IDC_MILESTONETAG,18,79,211,13,ES_AUTOHSCROLL
-    LTEXT           "&Column Visibility",IDC_STATIC,7,98,333,8
-    LISTBOX         IDC_COLUMNVISIBILITY,7,110,222,44,LBS_SORT | 
+                    WS_TABSTOP,7,82,333,10
+    EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL
+    LTEXT           "&Column Visibility",IDC_STATIC,7,113,333,8
+    LISTBOX         IDC_COLUMNVISIBILITY,7,125,222,44,LBS_SORT | 
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Colours",IDC_COLORSGROUP,7,159,333,8
+    LTEXT           "Colours",IDC_COLORSGROUP,7,174,333,8
     CONTROL         "'&Non-working hours' colour",IDC_NONWORKINGHOURSCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,175,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,172,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,187,52,13,
                     BS_RIGHT
     CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,187,52,13,BS_RIGHT
-    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,201,52,13,BS_RIGHT
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,202,52,13,BS_RIGHT
+    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,216,52,13,BS_RIGHT
     CONTROL         "'Bar' colour for tasks having no colour",
                     IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    219,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,216,52,13,BS_RIGHT
-    GROUPBOX        "Parent Tasks",IDC_STATIC,7,235,333,63
+                    234,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,231,52,13,BS_RIGHT
+    GROUPBOX        "Parent Tasks",IDC_STATIC,7,250,333,63
     CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,249,320,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,264,320,10
     CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,264,320,10
+                    BS_AUTORADIOBUTTON,16,279,320,10
     CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,280,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,278,52,13,BS_RIGHT | 
+                    BS_AUTORADIOBUTTON,16,295,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,293,52,13,BS_RIGHT | 
                     WS_GROUP
-    LTEXT           "Dates",IDC_DATESGROUP,7,307,333,8
+    LTEXT           "Dates",IDC_DATESGROUP,7,322,333,8
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
                     IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,323,333,10
+                    WS_TABSTOP,7,338,333,10
     CONTROL         "Display collapsed parent tasks as 'Rollups'",
                     IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,338,323,10
+                    WS_TABSTOP,17,353,323,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,353,333,10
+                    WS_TABSTOP,7,368,333,10
     CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
                     IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,368,333,10
+                    WS_TABSTOP,7,383,333,10
 END
 
 IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
@@ -258,7 +261,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 389
+        BOTTOMMARGIN, 393
     END
 
     IDD_CREATEDEPENDS_DIALOG, DIALOG
@@ -429,6 +432,8 @@ BEGIN
     IDS_ATTRIB_ALLOCTO      "Allocated To"
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
+    IDS_ATTRIB_DONEDATE     "Completion Date"
+    IDS_COL_DONEDATE        "Completed"
 END
 
 #endif    // English (Australia) resources

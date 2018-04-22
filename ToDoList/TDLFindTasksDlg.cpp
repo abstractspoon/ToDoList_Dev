@@ -33,12 +33,10 @@ static SEARCHPARAM DEFAULTSEARCH(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int TABSTOPS			= 20;
-const int MATCH_COLWIDTH	= 50;
-const int TB_VOFFSET		= 2;
-const int SPLITTER_WIDTH	= 6;
-const int DIALOG_BORDER		= 6;
-const int MIN_LIST_SIZE		= 100;
+const int TABSTOPS			= GraphicsMisc::ScaleByDPIFactor(20);
+const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int DIALOG_BORDER		= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_LIST_SIZE		= GraphicsMisc::ScaleByDPIFactor(100);
 
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 

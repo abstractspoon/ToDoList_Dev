@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "tdlimportexportcombobox.h"
 
+#include "..\Shared\GraphicsMisc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -76,10 +78,11 @@ void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nIte
 		ptDraw.y--;
 	
 	HICON hIcon = GetImpExpIcon(nImpExp);
+	int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 	
 	if (hIcon)
 	{
-		::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, 16, 16, 0, NULL, DI_NORMAL);
+		::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL);
 	}
 	else // fallback on file handler icon
 	{
@@ -102,7 +105,7 @@ void CTDLImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nIte
 
 	// draw text
 	CRect rText(rect);
-	rText.left += 20; // for icon always
+	rText.left += (nImageSize + 4); // for icon always
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }

@@ -237,6 +237,10 @@ SOURCE=.\EnHeaderCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\EnImageList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\enlistctrl.cpp
 # End Source File
 # Begin Source File
@@ -874,6 +878,10 @@ SOURCE=.\enfiledialog.h
 # Begin Source File
 
 SOURCE=.\EnHeaderCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\EnImageList.h
 # End Source File
 # Begin Source File
 

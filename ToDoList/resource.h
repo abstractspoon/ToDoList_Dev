@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -152,12 +152,12 @@
 #define IDB_TIMETRACK_TOOLBAR_STD       300
 #define IDB_UDTPREFS_TOOLBAR_STD        301
 #define IDI_SIMPLETEXT                  302
-#define IDI_RESET                       303
 #define IDI_TIMETRACK_STD               304
 #define IDI_STYLE_IMAGE                 305
 #define IDD_GOTOTASK_DIALOG             306
 #define IDD_CLEANUPINIPREFERENCES_DIALOG 307
 #define IDI_ADD_LOGGED_TIME             308
+#define IDB_OUTLOOKTYPES                309
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -792,6 +792,7 @@
 #define IDC_EDIT_DISPLAYLANGUAGE        1507
 #define IDC_USELATESTLASTMODIFIED       1508
 #define IDC_ENDTRACKINGONREMINDER       1510
+#define IDC_USECREATIONTIMEFORDEFSTARTDATE 1511
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2120,15 +2121,16 @@
 #define IDS_FINDINTASKTITLES            58470
 #define IDS_SAVETOIMAGEPROGRESS         58471
 #define IDS_INIFILELOCKED               58472
+#define IDS_QUERYFORCEDCHECKOUT         58473
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        309
+#define _APS_NEXT_RESOURCE_VALUE        310
 #define _APS_NEXT_COMMAND_VALUE         34599
-#define _APS_NEXT_CONTROL_VALUE         1511
+#define _APS_NEXT_CONTROL_VALUE         1512
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

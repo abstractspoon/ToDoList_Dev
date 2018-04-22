@@ -345,12 +345,8 @@ BOOL CRRECToolBar::CheckButton(int nID, BOOL bChecked)
 
 void CRRECToolBar::OnSize(UINT nType, int cx, int cy) 
 {
-	GetToolBarCtrl().SetButtonSize(m_sizeButton);
-	
 	CEnToolBar::OnSize(nType, cx, cy);
 	
-	CSize size(GetToolBarCtrl().GetButtonSize());
-
 	if (m_font.GetSafeHwnd())
 	{
 		CRect rDiv;

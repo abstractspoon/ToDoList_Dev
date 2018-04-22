@@ -155,6 +155,7 @@ protected:
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
+	BOOL m_bAllowForcedCheckOut;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
@@ -755,7 +756,6 @@ protected:
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
-	BOOL DoQueryEndSession(BOOL bQuery, BOOL bEnding);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
@@ -768,6 +768,7 @@ protected:
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
+	BOOL SelectTaskCheckFilter(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 
 	static UINT MapNewTaskPos(int nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);

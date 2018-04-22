@@ -6,6 +6,11 @@ CIcon::CIcon(HICON hIcon) : m_hIcon(hIcon)
 {
 }
 
+CIcon::CIcon(UINT nIDIcon, int nSize) : m_hIcon(NULL)
+{
+	LoadIcon(nIDIcon, nSize);
+}
+
 CIcon::~CIcon()
 {
 	if (m_hIcon)

@@ -1038,31 +1038,9 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 			if (sArrItem.IsEmpty())
 				return nItem;
 		}
-		else if (bCaseSensitive)
+		else if (Find(szItem, sArrItem, bCaseSensitive, bWholeWord) != -1)
 		{
-			if (bWholeWord)
-			{
-				if (sArrItem.Find(szItem) != -1)
-					return nItem;
-			}
-			else
-			{
-				if (sArrItem == szItem)
-					return nItem;
-			}
-		}
-		else // case insensitive
-		{
-			if (bWholeWord)
-			{
-				if (Find(szItem, sArrItem, FALSE, FALSE) != -1)
-					return nItem;
-			}
-			else
-			{
-				if (NaturalCompare(sArrItem, szItem) == 0)
-					return nItem;
-			}
+			return nItem;
 		}
 	}
 

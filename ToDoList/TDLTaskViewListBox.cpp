@@ -23,7 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #define WM_INITLISTBOX (WM_APP+1)
 #define LISTVIEW_INDEX 0xFFFF
 
-const int IMAGESIZE = 16;
+const int IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskViewListBox
@@ -87,7 +87,7 @@ void CTDLTaskViewListBox::BuildList()
 
 	if (m_pMgrUIExt)
 	{
-		VERIFY(m_ilTaskViews.Create(16, 16, (ILC_MASK | ILC_COLOR32), 1, 1));
+		VERIFY(m_ilTaskViews.Create(IMAGESIZE, IMAGESIZE, (ILC_MASK | ILC_COLOR32), 1, 1));
 
 		// 'list view' is special
 		int nItem = AddString(CString(MAKEINTRESOURCE(IDS_LISTVIEW)));
@@ -119,6 +119,8 @@ void CTDLTaskViewListBox::BuildList()
 			SetHiddenViews(m_aHiddenViews);
 			m_aHiddenViews.RemoveAll();
 		}
+
+		SetItemHeight(-1, IMAGESIZE);
 	}
 }
 

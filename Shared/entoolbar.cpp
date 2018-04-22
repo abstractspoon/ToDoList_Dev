@@ -8,6 +8,7 @@
 #include "osversion.h"
 #include "graphicsmisc.h"
 #include "themed.h"
+#include "icon.h"
 
 #include <afxpriv.h>
 
@@ -130,27 +131,28 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 	
     pBitmap->RemapSysColors();
 	
-	// button size
-	BITMAP BM;
-	pBitmap->GetBitmap(&BM);
-	
 	int nCount = GetButtonCount(TRUE);
 	ASSERT (nCount);
 	
 	if (!nCount)
 		return FALSE;
 	
-	CSize sizeBmp((BM.bmWidth / nCount), BM.bmHeight);
-	CSize sizeBtn(sizeBmp.cx + 7, sizeBmp.cy + 7);
+	CSize sizeBM = pBitmap->GetSize();
+	CSize sizeBmp((sizeBM.cx / nCount), sizeBM.cy), sizeBtn(sizeBmp);
+
+	GraphicsMisc::ScaleByDPIFactor(&sizeBtn);
+	sizeBtn.cx += 7;
+	sizeBtn.cy += 7;
 	
 	SetSizes(sizeBtn, sizeBmp);
 
 	m_ilNormal.DeleteImageList();
 	
-	if (m_ilNormal.Create(sizeBmp.cx, sizeBmp.cy, ILC_COLOR32 | ILC_MASK, 0, 1)) 
+	if (m_ilNormal.Create(sizeBmp.cx, sizeBmp.cy, ILC_COLOR24 | ILC_MASK, 0, 1)) 
 	{
 		m_ilNormal.Add(pBitmap, crMask);
-				
+		m_ilNormal.ScaleByDPIFactor();
+
 		CImageList* pILPrev = GetToolBarCtrl().SetImageList(&m_ilNormal);
 
 		if (pILPrev)
@@ -231,11 +233,10 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 			pBitmap->RemapSysColors();
 		
 		// button size
-		int nCx = m_sizeImage.cx, nCy = m_sizeImage.cy;
-		
 		m_ilDisabled.DeleteImageList();
-		m_ilDisabled.Create(nCx, nCy, ILC_COLOR24 | ILC_MASK, 0, 1);
+		m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1);
 		m_ilDisabled.Add(pBitmap, crMask);
+		m_ilDisabled.ScaleByDPIFactor();
 		
 		CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
 		
@@ -607,5 +608,5 @@ void CEnToolBar::OnDestroy()
 
 	m_ilNormal.DeleteImageList();
 	m_ilDisabled.DeleteImageList();
-
 }
+

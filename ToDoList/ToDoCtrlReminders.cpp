@@ -202,7 +202,9 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 	if (m_aReminders[nRem].IsTaskRecurring())
 	{
 		TRACE(_T("CToDoCtrlReminders::DismissReminder(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
+
 		m_aReminders[nRem].bEnabled = FALSE;
+		RemoveListReminder(rem);
 	}
 	else
 	{

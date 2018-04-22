@@ -7,6 +7,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 #include "..\shared\misc.h"
+#include "..\shared\Graphicsmisc.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\enbitmap.h"
 
@@ -17,10 +18,10 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-const int MAX_SPLITBAR_WIDTH	= 6;
-const int MIN_SPLITBAR_WIDTH	= 1;
+const int MAX_SPLITBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_SPLITBAR_WIDTH	= 1; // don't scale
 const int MIN_SPLIT_WIDTH		= (GetSystemMetrics(SM_CXVSCROLL) * 2);
-const int INITIAL_SPLIT_POS		= 300;
+const int INITIAL_SPLIT_POS		= GraphicsMisc::ScaleByDPIFactor(300);
 const int LINUX_VOFFSET_FUDGE	= 2;
 
 //////////////////////////////////////////////////////////////////////////////////////////

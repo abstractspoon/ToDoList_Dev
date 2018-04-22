@@ -627,91 +627,92 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	if (!hTask)
 		return FALSE;
 
-	if (pTasks->IsTaskReference(hTask))
-		return FALSE;
-
-	DWORD dwTaskID = pTasks->GetTaskID(hTask);
-
-	KANBANITEM* pKI = m_data.NewItem(dwTaskID, pTasks->GetTaskTitle(hTask));
-	ASSERT(pKI);
-	
-	if (!pKI)
-		return FALSE;
-
-	pKI->bDone = pTasks->IsTaskDone(hTask);
-	pKI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-	pKI->bParent = pTasks->IsTaskParent(hTask);
-	pKI->dwParentID = dwParentID;
-	pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
-	pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-	pKI->bFlag = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
-
-	pKI->SetColor(pTasks->GetTaskTextColor(hTask));
-
-	LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-	pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-	
-	// Path is parent's path + parent's name
-	if (dwParentID)
+	// Not interested in references
+	if (!pTasks->IsTaskReference(hTask))
 	{
-		const KANBANITEM* pKIParent = m_data.GetItem(dwParentID);
-		ASSERT(pKIParent);
+		DWORD dwTaskID = pTasks->GetTaskID(hTask);
 
-		if (pKIParent->sPath.IsEmpty())
-			pKI->sPath = pKIParent->sTitle;
+		KANBANITEM* pKI = m_data.NewItem(dwTaskID, pTasks->GetTaskTitle(hTask));
+		ASSERT(pKI);
+	
+		if (!pKI)
+			return FALSE;
+
+		pKI->bDone = pTasks->IsTaskDone(hTask);
+		pKI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pKI->bParent = pTasks->IsTaskParent(hTask);
+		pKI->dwParentID = dwParentID;
+		pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
+		pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+		pKI->bFlag = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
+
+		pKI->SetColor(pTasks->GetTaskTextColor(hTask));
+
+		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+		pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+	
+		// Path is parent's path + parent's name
+		if (dwParentID)
+		{
+			const KANBANITEM* pKIParent = m_data.GetItem(dwParentID);
+			ASSERT(pKIParent);
+
+			if (pKIParent->sPath.IsEmpty())
+				pKI->sPath = pKIParent->sTitle;
+			else
+				pKI->sPath = pKIParent->sPath + '\\' + pKIParent->sTitle;
+
+			pKI->nLevel = (pKIParent->nLevel + 1);
+		}
 		else
-			pKI->sPath = pKIParent->sPath + '\\' + pKIParent->sTitle;
+		{
+			pKI->nLevel = 0;
+		}
 
-		pKI->nLevel = (pKIParent->nLevel + 1);
-	}
-	else
-	{
-		pKI->nLevel = 0;
-	}
+		// trackable attributes
+		CStringArray aValues;
 
-	// trackable attributes
-	CStringArray aValues;
+		if (GetTaskCategories(pTasks, hTask, aValues))
+			pKI->SetTrackedAttributeValues(IUI_CATEGORY, aValues);
 
-	if (GetTaskCategories(pTasks, hTask, aValues))
-		pKI->SetTrackedAttributeValues(IUI_CATEGORY, aValues);
+		if (GetTaskAllocTo(pTasks, hTask, aValues))
+			pKI->SetTrackedAttributeValues(IUI_ALLOCTO, aValues);
 
-	if (GetTaskAllocTo(pTasks, hTask, aValues))
-		pKI->SetTrackedAttributeValues(IUI_ALLOCTO, aValues);
-
-	if (GetTaskTags(pTasks, hTask, aValues))
-		pKI->SetTrackedAttributeValues(IUI_TAGS, aValues);
+		if (GetTaskTags(pTasks, hTask, aValues))
+			pKI->SetTrackedAttributeValues(IUI_TAGS, aValues);
 	
-	pKI->SetTrackedAttributeValue(IUI_STATUS, pTasks->GetTaskStatus(hTask));
-	pKI->SetTrackedAttributeValue(IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
-	pKI->SetTrackedAttributeValue(IUI_VERSION, pTasks->GetTaskVersion(hTask));
-	pKI->SetTrackedAttributeValue(IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
-	pKI->SetTrackedAttributeValue(IUI_RISK, pTasks->GetTaskRisk(hTask, FALSE));
+		pKI->SetTrackedAttributeValue(IUI_STATUS, pTasks->GetTaskStatus(hTask));
+		pKI->SetTrackedAttributeValue(IUI_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+		pKI->SetTrackedAttributeValue(IUI_VERSION, pTasks->GetTaskVersion(hTask));
+		pKI->SetTrackedAttributeValue(IUI_PRIORITY, pTasks->GetTaskPriority(hTask, FALSE));
+		pKI->SetTrackedAttributeValue(IUI_RISK, pTasks->GetTaskRisk(hTask, FALSE));
 
-	// custom attributes
-	int nCust = pTasks->GetCustomAttributeCount();
+		// custom attributes
+		int nCust = pTasks->GetCustomAttributeCount();
 
-	while (nCust--)
-	{
-		CString sCustID(pTasks->GetCustomAttributeID(nCust));
-		CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
+		while (nCust--)
+		{
+			CString sCustID(pTasks->GetCustomAttributeID(nCust));
+			CString sCustValue(pTasks->GetTaskCustomAttributeData(hTask, sCustID, true));
 
-		CStringArray aCustValues;
-		Misc::Split(sCustValue, aCustValues, '\n');
+			CStringArray aCustValues;
+			Misc::Split(sCustValue, aCustValues, '\n');
 
-		pKI->SetTrackedAttributeValues(sCustID, aCustValues);
+			pKI->SetTrackedAttributeValues(sCustID, aCustValues);
 
-		// Add to global attribute values
-		CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sCustID);
-		ASSERT(pValues);
+			// Add to global attribute values
+			CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sCustID);
+			ASSERT(pValues);
 			
-		pValues->AddValue(sCustValue);
+			pValues->AddValue(sCustValue);
+		}
+
+		// Other display-only attributes
+		UpdateItemDisplayAttributes(pKI, pTasks, hTask, attrib);
+
+		// first child
+		AddTaskToData(pTasks, pTasks->GetFirstTask(hTask), dwTaskID, attrib, TRUE);
 	}
-
-	// Other display-only attributes
-	UpdateItemDisplayAttributes(pKI, pTasks, hTask, attrib);
-
-	// first child
-	AddTaskToData(pTasks, pTasks->GetFirstTask(hTask), dwTaskID, attrib, TRUE);
 
 	// Siblings NON-RECURSIVELY
 	if (bAndSiblings)

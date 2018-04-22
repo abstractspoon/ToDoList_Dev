@@ -7,6 +7,8 @@
 // entoolbar.h : header file
 //
 
+#include "EnImageList.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CEnToolBar window
 
@@ -38,7 +40,7 @@ public:
 
 	// Attributes
 protected:
-	CImageList m_ilDisabled, m_ilNormal;
+	CEnImageList m_ilDisabled, m_ilNormal;
 	COLORREF m_crFrom, m_crTo, m_crHot;
 	BOOL m_bGradient, m_bGlass;
 	CUIntArray m_aRowHeights;

@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttMsg.h"
-#include "Ganttenum.h"
+#include "Ganttstatic.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
@@ -24,24 +24,6 @@ const COLORREF DEF_WEEKENDCOLOR			= RGB(224, 224, 224);
 const COLORREF DEF_NONWORKINGHOURSCOLOR	= RGB(224, 224, 224);
 const COLORREF DEF_PARENTCOLOR			= RGB(0, 0, 0);
 const COLORREF DEF_DEFAULTCOLOR			= RGB(70, 135, 245);
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct GANTTCOLUMNVIS
-{
-	UINT nIDAttribName;
-	GTLC_COLUMN nColID;
-};
-
-const GANTTCOLUMNVIS GANTTCOLUMNS[] = 
-{
-	{ IDS_ATTRIB_STARTDATE,		GTLCC_STARTDATE },
-	{ IDS_ATTRIB_DUEDATE,		GTLCC_DUEDATE },
-	{ IDS_ATTRIB_ALLOCTO,		GTLCC_ALLOCTO },
-	{ IDS_ATTRIB_PERCENTDONE,	GTLCC_PERCENT },
-	{ IDS_ATTRIB_TASKID,		GTLCC_TASKID },
-};
-const int NUM_COLUMNS = (sizeof(GANTTCOLUMNS) / sizeof(GANTTCOLUMNVIS));
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesPage dialog
@@ -64,7 +46,8 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CGanttPreferencesPage)
-	DDX_Check(pDX, IDC_DISPLAYALLOCTO, m_bDisplayAllocTo);
+	DDX_Check(pDX, IDC_DISPLAYALLOCTO, m_bDisplayTrailingAllocTo);
+	DDX_Check(pDX, IDC_DISPLAYTASKTITLE, m_bDisplayTrailingTaskTitle);
 	DDX_Check(pDX, IDC_AUTOSCROLLSELECTION, m_bAutoScrollSelection);
 	DDX_Check(pDX, IDC_WEEKENDCOLOR, m_bSpecifyWeekendColor);
 	DDX_Check(pDX, IDC_NONWORKINGHOURSCOLOR, m_bSpecifyNonWorkingHoursColor);
@@ -200,7 +183,7 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
-		const GANTTCOLUMNVIS& colVis = GANTTCOLUMNS[nCol];
+		const GANTTCOLUMN& colVis = GANTTCOLUMNS[nCol];
 		
 		int nItem = CDialogHelper::AddString(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColID);
 		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColID]);
@@ -242,7 +225,8 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileString(szKey, _T("MilestoneTag"), m_sMilestoneTag);
 
 	pPrefs->WriteProfileInt(szKey, _T("UseTagForMilestone"), m_bUseTagForMilestone);
-	pPrefs->WriteProfileInt(szKey, _T("DisplayAllocTo"), m_bDisplayAllocTo);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayAllocTo"), m_bDisplayTrailingAllocTo);
+	pPrefs->WriteProfileInt(szKey, _T("DisplayTaskTitle"), m_bDisplayTrailingTaskTitle);
 	pPrefs->WriteProfileInt(szKey, _T("AutoScrollSelection"), m_bAutoScrollSelection);
 	pPrefs->WriteProfileInt(szKey, _T("AutoCalcParentDates"), m_bAutoCalcParentDates);
 	pPrefs->WriteProfileInt(szKey, _T("CalculateMissingStartDates"), m_bCalculateMissingStartDates);
@@ -277,7 +261,8 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 {
 	m_sMilestoneTag = pPrefs->GetProfileString(szKey, _T("MilestoneTag"), CEnString(_T("Milestone")));
 	m_bUseTagForMilestone = pPrefs->GetProfileInt(szKey, _T("UseTagForMilestone"), TRUE);
-	m_bDisplayAllocTo = pPrefs->GetProfileInt(szKey, _T("DisplayAllocTo"), TRUE);
+	m_bDisplayTrailingAllocTo = pPrefs->GetProfileInt(szKey, _T("DisplayAllocTo"), TRUE);
+	m_bDisplayTrailingTaskTitle = pPrefs->GetProfileInt(szKey, _T("DisplayTaskTitle"), FALSE);
 	m_bAutoScrollSelection = pPrefs->GetProfileInt(szKey, _T("AutoScrollSelection"), TRUE);
 	m_bAutoCalcParentDates = pPrefs->GetProfileInt(szKey, _T("AutoCalcParentDates"), TRUE);
 	m_bCalculateMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalculateMissingStartDates"), TRUE);
@@ -304,7 +289,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 		GTLC_COLUMN nColID = GANTTCOLUMNS[nCol].nColID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
-		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, TRUE);
+		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, GANTTCOLUMNS[nCol].bDefaultVis);
 	}
 }
 

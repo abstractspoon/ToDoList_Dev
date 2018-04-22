@@ -905,9 +905,6 @@
     <None Include="res\depend_link.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\DropBox.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\English.gif">
       <Filter>Resource Files</Filter>
     </None>
@@ -924,9 +921,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\find_dialog_std.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\GoogleDrive.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\help_button.ico">
@@ -975,9 +969,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\shield.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\SkyDrive.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\social_toolbar.bmp">
@@ -1037,34 +1028,7 @@
     <None Include="res\timetrack_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\appointment.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\contact.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\flaggedmail.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\folder.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\journal.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\mail.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\note.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\outlook_16.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\task.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\reset.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\app_timetrack.ico">
@@ -1083,6 +1047,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\plus.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\outlooktypes.bmp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

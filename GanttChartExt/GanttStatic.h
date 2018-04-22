@@ -6,15 +6,22 @@
 #define AFX_GANTTSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_
 
 #include "resource.h"
-#include "ganttenum.h"
+#include "ganttstruct.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GTCDISPLAYMODE
+const GANTTCOLUMN GANTTCOLUMNS[] = 
 {
-	GTLC_MONTH_DISPLAY nDisplay;
-	UINT nStringID;
+	{ GTLCC_STARTDATE,	IDS_ATTRIB_STARTDATE,	IDS_COL_STARTDATE,	HDF_RIGHT,	FALSE },
+	{ GTLCC_DUEDATE,	IDS_ATTRIB_DUEDATE,		IDS_COL_DUEDATE,	HDF_RIGHT,	TRUE },
+	{ GTLCC_DONEDATE,	IDS_ATTRIB_DONEDATE,	IDS_COL_DONEDATE,	HDF_RIGHT,	FALSE },
+	{ GTLCC_ALLOCTO,	IDS_ATTRIB_ALLOCTO,		IDS_COL_ALLOCTO,	HDF_LEFT,	TRUE },
+	{ GTLCC_PERCENT,	IDS_ATTRIB_PERCENTDONE,	IDS_COL_PERCENTDONE,HDF_CENTER,	TRUE },
+	{ GTLCC_TASKID,		IDS_ATTRIB_TASKID,		IDS_COL_TASKID,		HDF_RIGHT,	FALSE }
 };
+const int NUM_COLUMNS = (sizeof(GANTTCOLUMNS) / sizeof(GANTTCOLUMN));
+
+/////////////////////////////////////////////////////////////////////////////
 
 static GTCDISPLAYMODE DISPLAYMODES[] = 
 {
@@ -35,8 +42,9 @@ static GTCDISPLAYMODE DISPLAYMODES[] =
 	{ GTLC_DISPLAY_DAYS_LONG,			IDS_DISPLAYDAYSLONG },
 	{ GTLC_DISPLAY_HOURS,				IDS_DISPLAYDAYSHOURS },
 };
-
 const int NUM_DISPLAYMODES = (sizeof(DISPLAYMODES) / sizeof(DISPLAYMODES[0]));
+
+/////////////////////////////////////////////////////////////////////////////
 
 static int FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
@@ -104,6 +112,8 @@ static BOOL IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	return (FindDisplay(nDisplay) != -1);
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 static GTLC_DRAG MapHitTestToDrag(GTLC_HITTEST nHit)
 {

@@ -8,6 +8,7 @@
 #include "themed.h"
 #include "autoflag.h"
 #include "misc.h"
+#include "graphicsmisc.h"
 #include "dialoghelper.h"
 
 #ifdef _DEBUG
@@ -15,6 +16,10 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int CHECKBOX_WIDTH = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -81,7 +86,7 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 	if (DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE))
 	{
 		CRect rText(rect);
-		rText.left += CalcCheckBoxWidth(dc);
+		rText.left += CHECKBOX_WIDTH;//CalcCheckBoxWidth(dc);
 		
 		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, TRUE, crText);
 	}
@@ -124,7 +129,7 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*
 
 	CRect rCheck(rect);
 	rCheck.left = 0;
-	rCheck.right = (rCheck.left + CalcCheckBoxWidth(dc));
+	rCheck.right = (rCheck.left + CHECKBOX_WIDTH/*CalcCheckBoxWidth(dc)*/);
 	
 	CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
 
@@ -151,7 +156,7 @@ int CCheckComboBox::CalcCheckBoxWidth(HDC hdc, HWND hwndRef)
 
 int CCheckComboBox::GetExtraListboxWidth() const
 {
-	return (CAutoComboBox::GetExtraListboxWidth() + CalcCheckBoxWidth(NULL, *this));
+	return (CAutoComboBox::GetExtraListboxWidth() + CHECKBOX_WIDTH/*CalcCheckBoxWidth(NULL, *this)*/);
 }
 
 LRESULT CCheckComboBox::OnGetTextLen(WPARAM wParam, LPARAM lParam)

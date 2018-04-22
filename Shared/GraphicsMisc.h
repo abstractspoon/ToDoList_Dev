@@ -120,6 +120,14 @@ namespace GraphicsMisc
 	int PixelToPoint(int nPixels);
 	int PixelsPerInch();
 
+	BOOL WantDPIScaling();
+	int GetSystemDPI();
+	double GetDPIScaleFactor();
+	BOOL ScaleByDPIFactor(LPRECT pRect);
+	BOOL ScaleByDPIFactor(LPSIZE pSize);
+	BOOL ScaleByDPIFactor(LPPOINT pPoint);
+	int ScaleByDPIFactor(int nValue);
+	
 	DWORD GetFontFlags(HFONT hFont);
 	int GetFontNameAndPointSize(HFONT hFont, CString& sFaceName);
 	int GetFontNameAndPointSize(HWND hWnd, CString& sFaceName);
@@ -179,13 +187,14 @@ namespace GraphicsMisc
 	COLORREF Blend(COLORREF color1, COLORREF color2, double dAmount);
 	COLORREF GetBestTextColor(COLORREF crBack);
 	void CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nNumColors, CDWordArray& aColors, BOOL bRGB = TRUE);
-
 	CString GetWebColor(COLORREF color);
 
 	void DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder = CLR_NONE, 
 					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL);
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
+	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert);
+	CPoint CentrePoint(LPCRECT prcRect);
 
 	BOOL DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);

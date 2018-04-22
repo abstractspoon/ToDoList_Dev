@@ -94,8 +94,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int BEVEL = 3; // pixels
-const int BORDER = 3; // pixels
+const int BEVEL = GraphicsMisc::ScaleByDPIFactor(3);
+const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MAX_NUM_TOOLS = 50;
 
 #ifdef _DEBUG
@@ -186,7 +186,8 @@ CToDoListWnd::CToDoListWnd()
 	m_nContextColumnID(TDCC_NONE),
 	m_bSettingAttribDefs(FALSE),
 	m_bReshowTimeTrackerOnEnable(FALSE),
-	m_bPromptLanguageChangeRestartOnActivate(FALSE)
+	m_bPromptLanguageChangeRestartOnActivate(FALSE),
+	m_bAllowForcedCheckOut(FALSE)
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
@@ -619,9 +620,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_ENABLE()
 	ON_WM_ENDSESSION()
 	ON_WM_ERASEBKGND()
-	ON_WM_ERASEBKGND()
 	ON_WM_HELPINFO()
-	ON_WM_INITMENUPOPUP()
 	ON_WM_INITMENUPOPUP()
 	ON_WM_MEASUREITEM()
 	ON_WM_MOVE()
@@ -759,6 +758,7 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 
 	m_bVisible = startup.HasFlag(TLD_FORCEVISIBLE) ? 1 : -1;
 	m_bSaveUIVisInTaskList = startup.HasFlag(TLD_SAVEUIVISINTASKLIST);
+	m_bAllowForcedCheckOut = startup.HasFlag(TLD_ALLOWFORCEDCHECKOUT);
 
 #ifdef _DEBUG
 	m_bPasswordPrompting = FALSE;
@@ -2106,19 +2106,11 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 		break; 
 		
 	case TDCF_NOTEXIST:
-		{
-			DWORD dwError = GetLastError();
-
-			if (dwError == ERROR_BAD_NETPATH)
-			{
-				nErr = TDCF_BADNETWORK;
-				sMessage.Format(IDS_BADNETWORK, szTaskList);
-			}
-			else
-			{
-				sMessage.Format(IDS_TASKLISTNOTFOUND, szTaskList);
-			}
-		}
+		sMessage.Format(IDS_TASKLISTNOTFOUND, szTaskList);
+		break;
+		
+	case TDCF_BADNETWORK:
+		sMessage.Format(IDS_BADNETWORK, szTaskList);
 		break;
 		
 	case TDCF_NOTTASKLIST:
@@ -2392,8 +2384,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				{
 					TDC_FILE nResult = OpenTaskList(sLastFile, FALSE);
 
-					// if the last active tasklist was cancelled then
-					// delay load it and mark the last active todoctrl as not found
+					// if the last active tasklist was cancelled or its an 
+					// inaccessible network path then delay load it and mark the last active todoctrl as not found
 					if (bActiveTDC && (nResult != TDCF_SUCCESS))
 					{
 						sOrgLastActiveFile = sLastActiveFile;
@@ -2785,6 +2777,7 @@ void CToDoListWnd::RestorePosition()
 	if (rect.IsRectEmpty())
 	{
 		rect.SetRect(0, 0, 1024, 730); // default
+		GraphicsMisc::ScaleByDPIFactor(rect);
 
 		// make sure it fits the screen
 		CRect rScreen;
@@ -4277,7 +4270,13 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	TDC_PREPAREPATH nType = PrepareFilePath(sFilePath, &storageInfo);
 	
 	if (nType == TDCPP_NONE)
+	{
+		if (GetLastError() == ERROR_BAD_NETPATH)
+			return TDCF_BADNETWORK;
+
+		// else
 		return TDCF_NOTEXIST;
+	}
 	
 	// see if the tasklist is already open
 	int nExist = -1;
@@ -6322,7 +6321,8 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CTDLPrintDialog dialog(sTitle, bPreview, 
 							tdc.GetTaskView(), 
 							tdc.GetStylesheetPath(),
-							tdc.GetCustomAttributeDefs());
+							tdc.GetCustomAttributeDefs(),
+							tdc.CanSaveTaskViewToImage());
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -8423,45 +8423,40 @@ void CToDoListWnd::OnUpdateCloseall(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetTDCCount());
 }
 
-BOOL CToDoListWnd::DoQueryEndSession(BOOL bQuery, BOOL bEnding)
-{
-	HWND hWnd = GetSafeHwnd();
-
-	// what we do here depends on whether we're on Vista or not
-	// we test for this by trying to load the new API functions
-	if (bQuery)
-	{
-		CEnString sReason(IDS_SHUTDOWNBLOCKREASON);
-
-		// if Vista and handling WM_QUERYENDSESSION
-		// we register our reason and return TRUE to
-		// get more time to clean up in WM_ENDSESSION
-		if (Misc::ShutdownBlockReasonCreate(hWnd, sReason))
-			return TRUE;
-
-		// else we're XP so we return TRUE to let shutdown continue
-		return TRUE;
-	}
-
-	// else do a proper shutdown
-	m_bEndingSession = TRUE;
-
-	return DoExit(FALSE, bEnding);
-}
-
 BOOL CToDoListWnd::OnQueryEndSession() 
 {
 	if (!CFrameWnd::OnQueryEndSession())
 		return FALSE;
+		
+	// if Vista we register our reason and return TRUE to
+	// get more time to clean up in WM_ENDSESSION
+	HWND hWndThis = GetSafeHwnd();
+	CEnString sReason(IDS_SHUTDOWNBLOCKREASON);
 	
-	return DoQueryEndSession(TRUE, FALSE);
+	if (Misc::ShutdownBlockReasonCreate(hWndThis, sReason))
+		return TRUE;
+	
+	// else we're XP so we return TRUE to let shutdown continue
+	return TRUE;
 }
 
 void CToDoListWnd::OnEndSession(BOOL bEnding) 
 {
-	CFrameWnd::OnEndSession(bEnding);
+	if (bEnding)
+	{
+		///////////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
+		DWORD dwTick = GetTickCount();
+		///////////////////////////////////////////////////////////////////////
+		
+		m_bEndingSession = TRUE;
+		DoExit(FALSE, TRUE);
 
-	DoQueryEndSession(FALSE, bEnding);
+		///////////////////////////////////////////////////////////////////
+		// PERMANENT LOGGING
+		FileMisc::LogTimeElapsed(dwTick, _T("CToDoListWnd::OnEndSession()"));
+		///////////////////////////////////////////////////////////////////
+	}
 }
 
 void CToDoListWnd::OnExit()
@@ -8537,6 +8532,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 			Sleep(50);
 		}
 
+		// Force components to save their state before we
+		// signal Windows that it's alright to shutdown
 		m_mgrImportExport.Release();
 		m_tbHelper.Release();
 		m_mgrShortcuts.Release();
@@ -8550,16 +8547,30 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 		m_dlgTimeTracker.DestroyWindow();
 		m_reminders.DestroyWindow();
-
-		// cleanup our shutdown reason
-		Misc::ShutdownBlockReasonDestroy(*this);
-
+		m_filterBar.DestroyWindow();
+		m_findDlg.DestroyWindow();
+			
+		// Only need to destroy windows if NOT closing Windows
+#ifdef _DEBUG
 		DestroyWindow();
-		
-		// By the time we get here 'this' has been destroyed
-		// so we must NOT attempt to call any non-static functions
-		if (bRestart)
+#else
+		if (!bClosingWindows)
+			DestroyWindow();
+#endif
+
+		hold.Save();
+
+		// cleanup the shutdown reason created in OnQueryEndSession.
+		// This allows Windows to forcibly close the app hence no need
+		// to call DestroyWindow
+		if (bClosingWindows)
 		{
+			Misc::ShutdownBlockReasonDestroy(GetSafeHwnd());
+		}
+		else if (bRestart)
+		{
+			// By the time we get here 'this' has been destroyed
+			// so we must NOT attempt to call any non-static functions
 			CString sParams = AfxGetApp()->m_lpCmdLine;
 			sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
 			
@@ -8592,7 +8603,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	}
 	
 	// cleanup our shutdown reason
-	Misc::ShutdownBlockReasonDestroy(*this);
+	Misc::ShutdownBlockReasonDestroy(GetSafeHwnd());
 
 	return FALSE;
 }
@@ -9499,30 +9510,52 @@ void CToDoListWnd::OnToolsCheckout()
 		return;
 	
 	CAutoFlag af(m_bSaving, TRUE);
-	CString sCheckedOutTo;
-	
-	TDC_FILE nFileRes = m_mgrToDoCtrls.CheckOut(nSel, sCheckedOutTo);
-	
-	if (nFileRes == TDCF_SUCCESS)
+	TDC_FILE nFileRes = TDCF_UNSET;
+	BOOL bAllowForcedCheckout = FALSE; // always FALSE first try
+
+	do 
 	{
-		// update UI
-		UpdateCaption();
-		UpdateMenuIconMgrSourceControlStatus();
-	}
-	else // failed -> notify user
-	{
-		CEnString sMessage, sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
-		
-		if ((nFileRes == TDCF_OTHER) && !sCheckedOutTo.IsEmpty())
+		CString sCheckedOutTo;
+		nFileRes = m_mgrToDoCtrls.CheckOut(nSel, sCheckedOutTo, bAllowForcedCheckout);
+
+		if (nFileRes == TDCF_SUCCESS)
 		{
-			sMessage.Format(IDS_CHECKEDOUTBYOTHER, sFilePath, sCheckedOutTo);
-			MessageBox(sMessage, IDS_CHECKOUT_TITLE, MB_OK | MB_ICONEXCLAMATION);
+			UpdateCaption();
+			UpdateMenuIconMgrSourceControlStatus();
+			break;
 		}
-		else
+
+		// else handle error
+		CString sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
+
+		if ((nFileRes != TDCF_OTHER) || sCheckedOutTo.IsEmpty())
 		{
 			HandleSaveTasklistError(nFileRes, sFilePath);
+			break;
 		}
-	}
+		
+		SYSTEMTIME stLastMod;
+		FileMisc::GetFileLastModified(sFilePath, stLastMod);
+
+		CEnString sMessage;
+		sMessage.Format(IDS_CHECKEDOUTBYOTHER, sFilePath, sCheckedOutTo, 
+						COleDateTime(stLastMod).Format(VAR_DATEVALUEONLY));
+
+		UINT nFlags = (MB_OK | MB_ICONEXCLAMATION);
+		
+		if (m_bAllowForcedCheckOut)
+		{
+			sMessage += CEnString(IDS_QUERYFORCEDCHECKOUT, sCheckedOutTo);
+			nFlags |= MB_YESNO;
+		}
+
+		if (MessageBox(sMessage, IDS_CHECKOUT_TITLE, nFlags) != IDYES)
+			break;
+
+		// else try again with a forced checkout
+		bAllowForcedCheckout = TRUE;
+	} 
+	while (nFileRes != TDCF_SUCCESS);
 }
 
 void CToDoListWnd::OnUpdateToolsCheckout(CCmdUI* pCmdUI) 
@@ -11591,8 +11624,8 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 	if (sPath.IsEmpty())
 	{
 		ASSERT(dwTaskID);
-		bSelected = GetToDoCtrl().SelectTask(dwTaskID);
 
+		bSelected = SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 		bHandled = TRUE; // handled regardless of result
 	}
 	else if (!PathIsRelative(sPath) && FileMisc::FileExists(sPath))
@@ -11609,7 +11642,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					bSelected |= GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -11627,7 +11660,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					bSelected |= GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -11646,6 +11679,29 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 		Show(FALSE);
 
 	return bHandled;
+}
+
+BOOL CToDoListWnd::SelectTaskCheckFilter(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
+{
+	if (tdc.SelectTask(dwTaskID))
+		return TRUE;
+
+	if (tdc.HasTask(dwTaskID) && tdc.HasAnyFilter())
+	{
+		tdc.ToggleFilter();
+
+		if (tdc.SelectTask(dwTaskID))
+		{
+			RefreshFilterBarControls();
+			return TRUE;
+		}
+
+		// else
+		ASSERT(0);
+		tdc.ToggleFilter();
+	}
+
+	return FALSE;
 }
 
 BOOL CToDoListWnd::ValidateTaskLinkFilePath(CString& sPath) const
@@ -12864,27 +12920,6 @@ void CToDoListWnd::OnViewSaveToImage()
 		// TODO
 	}
 }
-
-/*
-BOOL CToDoListWnd::SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath) 
-{
-	CWaitCursor cursor;
-	CBitmap bmImage;
-	
-	if (tdc.SaveTaskViewToImage(bmImage))
-	{
-		CDibData dib;
-
-		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath))
-		{
-			return TRUE;
-		}
-	}
-
-	// else
-	return FALSE;
-}
-*/
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
 {

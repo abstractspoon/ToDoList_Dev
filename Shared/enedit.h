@@ -10,6 +10,7 @@
 #include "maskedit.h"
 #include "hottracker.h"
 #include "tooltipctrlex.h"
+#include "enimagelist.h"
 
 #include <afxtempl.h>
 
@@ -90,7 +91,7 @@ protected:
 	BOOL m_bComboStyle;
 	CHotTracker m_hotTrack;
 	int m_nTopBorder, m_nBottomBorder;
-	CImageList m_ilBtns, m_ilDisabledBtns;
+	CEnImageList m_ilBtns, m_ilDisabledBtns;
 	CToolTipCtrlEx m_tooltip;
 
 // Overrides

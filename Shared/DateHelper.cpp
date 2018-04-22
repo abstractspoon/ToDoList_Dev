@@ -330,6 +330,16 @@ COleDateTime CDateHelper::GetDate(time64_t date)
 	return COleDateTime(st);
 }
 
+COleDateTime CDateHelper::GetDate(double dDate, COleDateTime::DateTimeStatus nStatus)
+{
+	COleDateTime date;
+
+	date.m_dt = dDate;
+	date.m_status = nStatus;
+
+	return date;
+}
+
 #if _MSC_VER < 1400
 BOOL CDateHelper::DecodeDate(const CString& sDate, time_t& date, BOOL bAndTime)
 {

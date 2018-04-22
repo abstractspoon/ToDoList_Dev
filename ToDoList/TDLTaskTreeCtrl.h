@@ -63,6 +63,7 @@ public:
 	inline const CTreeSelectionHelper& TSH() const { return m_tsh; }
 	
 	inline const CToDoCtrlFind& Find() const { return m_find; }
+	inline const CHTIMap& TreeItemMap() const { return m_mapHTItems; }
 
 	inline const TODOITEM* GetSelectedTask() const { return m_find.GetTask(GetSelectedItem()); }
 	inline const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue = TRUE) const { return m_find.GetTask(hti, bTrue); }
@@ -115,7 +116,6 @@ public:
 	
 	inline HTREEITEM GetSelectedItem() const { return TSH().GetFirstItem(); }
 	inline HTREEITEM GetTreeSelectedItem() const { return m_tcTasks.GetSelectedItem(); }
-	inline HTREEITEM GetItem(DWORD dwTaskID) const { return m_find.GetItem(dwTaskID); }
 	inline int GetItemCount() const { return m_tcTasks.GetCount(); }
 	inline int GetVisibleItemCount() const { return m_tcTasks.GetVisibleCount(); }
 	inline BOOL ItemHasChildren(HTREEITEM hti) const { return m_tcTasks.ItemHasChildren(hti); }
@@ -129,6 +129,7 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	BOOL GetLabelEditRect(CRect& rLabel) const;
+	HTREEITEM GetItem(DWORD dwTaskID) const;
 	
 	void ExpandAll(BOOL bExpand = TRUE);
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
@@ -156,6 +157,7 @@ protected:
 	CToDoCtrlFind m_find;
 	CTreeSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
+	CHTIMap m_mapHTItems;
 
 	HTREEITEM m_htiLastHandledLBtnDown;
 	WORD m_wKeyPress;
@@ -224,6 +226,7 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
+	void RefreshTreeItemMap();
 
 	GM_ITEMSTATE GetTreeItemState(HTREEITEM hti) const;
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;

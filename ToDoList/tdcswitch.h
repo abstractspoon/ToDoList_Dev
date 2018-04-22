@@ -19,9 +19,8 @@ const LPCTSTR SWITCH_TASKLINK				= _T("l");
 const LPCTSTR SWITCH_RESTART				= _T("rst");
 const LPCTSTR SWITCH_SAVEINTERMEDIATE		= _T("si");
 const LPCTSTR SWITCH_RANDOMISE				= _T("rnd");
-
-// temporary
 const LPCTSTR SWITCH_SAVEUIVISINTASKLIST	= _T("z");
+const LPCTSTR SWITCH_ALLOWFORCEDCHECKOUT	= _T("fco");
 
 #ifdef _DEBUG
 const LPCTSTR SWITCH_QUIET					= _T("q");

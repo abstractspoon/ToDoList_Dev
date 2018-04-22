@@ -1251,19 +1251,11 @@ SOURCE=.\res\app_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\appointment.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\clock.ico
 # End Source File
 # Begin Source File
 
 SOURCE=.\res\column_header.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\contact.ico
 # End Source File
 # Begin Source File
 
@@ -1315,31 +1307,11 @@ SOURCE=.\res\find_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\flaggedmail.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\folder.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\help_button.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\journal.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\list_view_std.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\mail.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\note.ico
 # End Source File
 # Begin Source File
 
@@ -1348,6 +1320,10 @@ SOURCE=.\res\null.ico
 # Begin Source File
 
 SOURCE=.\res\outlook_16.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\outlooktypes.bmp
 # End Source File
 # Begin Source File
 
@@ -1420,6 +1396,10 @@ SOURCE=.\res\timetrack_btns.bmp
 # Begin Source File
 
 SOURCE=.\res\timetrack_toolbar_std.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\RES\todolist.exe.manifest
 # End Source File
 # Begin Source File
 
@@ -1564,10 +1544,6 @@ SOURCE=..\Interfaces\UITHEME.h
 # End Group
 # Begin Source File
 
-SOURCE=.\RES\todolist.exe.manifest
-# End Source File
-# Begin Source File
-
 SOURCE=.\ToDoList.vcxproj
 # End Source File
 # Begin Source File
@@ -1580,12 +1556,12 @@ SOURCE=.\ToDoList_All.sln
 # End Source File
 # End Target
 # End Project
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
-# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
+# End Section
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section

@@ -46,8 +46,15 @@ BOOL CStatusBarProgress::BeginProgress(HWND hwndStatusBar, const CString& sPromp
 	m_nSBPane = nPane;
 
 	int nLenPrompt = GraphicsMisc::GetTextWidth(sPrompt, *pSB) + 10;
+	
+	CRect rProgress;
+	pSB->GetClientRect(rProgress);
 
-	m_pThread = new CProgressThread(m_hwndStatusBar, CRect(nLenPrompt, 3, nLenPrompt + 150, 16), TRUE);
+	rProgress.DeflateRect(0, 0, 0, GraphicsMisc::ScaleByDPIFactor(2));
+	rProgress.left = nLenPrompt;
+	rProgress.right = (nLenPrompt + GraphicsMisc::ScaleByDPIFactor(150));
+
+	m_pThread = new CProgressThread(m_hwndStatusBar, rProgress, TRUE);
 		
 	if (m_pThread && m_pThread->CreateThread())
 	{

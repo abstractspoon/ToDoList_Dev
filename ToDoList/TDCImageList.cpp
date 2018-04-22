@@ -11,6 +11,7 @@
 #include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
 #include "..\shared\icon.h"
+#include "..\shared\graphicsmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,14 +45,9 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 
 	if (Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 200))
 	{
-		// add folder icon first always
-		// because we may need it for parent tasks
-		CIcon icon(CSysImageList().ExtractFolderIcon());
-		ASSERT (icon.IsValid());
-		VERIFY (Add(icon) == 0);
-
-		m_mapNameToIndex[_T("0")] = 0;
-		m_mapIndexToName[0] = _T("0");
+		// Add a dummy placeholder for the 'folder' icon which we
+		// will replace once we have rescaled the imagelist
+		Add(CIcon(IDI_NULL, 16));
 
 		// because the icon set must come first for backwards compatibility
 		// we must first see if any other images exist before we add them.
@@ -90,6 +86,14 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		// else try application location
 		if (!dwResult)
 			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this);
+
+		ScaleByDPIFactor();
+
+		// Replace the first image with the actual folder icon
+		VERIFY(Replace(0, CIcon(CSysImageList().ExtractFolderIcon())) == 0);
+		
+		m_mapNameToIndex[_T("0")] = 0;
+		m_mapIndexToName[0] = _T("0");
 	}
 
 	return (GetSafeHandle() != NULL);
@@ -98,10 +102,10 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 int CTDCImageList::GetImageIndex(const CString& sImageName) const
 {
 	int nIndex = -1;
-
+	
 	if (!sImageName.IsEmpty())
 		m_mapNameToIndex.Lookup(sImageName, nIndex);
-
+	
 	return nIndex;
 }
 

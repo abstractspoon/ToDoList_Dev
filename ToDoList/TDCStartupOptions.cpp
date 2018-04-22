@@ -366,6 +366,9 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 	if (cmdInfo.HasOption(SWITCH_SAVEUIVISINTASKLIST))
 		m_dwFlags |= TLD_SAVEUIVISINTASKLIST;
 
+	if (cmdInfo.HasOption(SWITCH_ALLOWFORCEDCHECKOUT))
+		m_dwFlags |= TLD_ALLOWFORCEDCHECKOUT;
+
 	if (cmdInfo.GetOption(SWITCH_SAVEINTERMEDIATE, sValue))
 	{
 		m_dwFlags |= TLD_SAVEINTERMEDIATE;

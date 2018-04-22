@@ -22,9 +22,11 @@ public:
 	HIMAGELIST GetHImageList();
 	
 	BOOL Initialize();
+	int GetImageSize() const;
+	
 	int GetFileImageIndex(LPCTSTR szFilePath, BOOL bFailUnKnown = FALSE); // will call Initialize if nec.
 	int GetFolderImageIndex(); // will call Initialize if nec.
-	
+
 	// caller is responsible for clean up
 	HICON ExtractAppIcon();
 	HICON ExtractFileIcon(LPCTSTR szFilePath);
@@ -37,6 +39,7 @@ protected:
 	BOOL m_bLargeIcons;
 	HIMAGELIST m_hImageList;
 	int m_nFolderImage, m_nHtmlImage, m_nRemoteFolderImage, m_nUnknownTypeImage;
+	int m_nImageSize;
 	
 	static CMap<CString, LPCTSTR, int, int&> s_mapIndexCache;
 	

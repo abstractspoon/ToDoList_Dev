@@ -6,6 +6,8 @@
 #include "tdcimagelist.h"
 #include "tdcstruct.h"
 
+#include "..\Shared\GraphicsMisc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -40,7 +42,11 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	CRect rImage(rect);
-	const int nImgSpace = 18;
+	rImage.bottom = (rImage.top + m_ilImages.GetImageSize());
+
+	GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
+
+	const int nImageSize = GetItemHeight(-1);
 
 	CStringArray aImages;
 	int nNumImage = 0;
@@ -53,7 +59,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE);
 
 			// update image rect
-			rImage.left += nImgSpace;
+			rImage.left += nImageSize;
 		}
 
 		aImages.Add(sItem);
@@ -82,10 +88,9 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			if (m_ilImages.GetSafeHandle() && !sImage.IsEmpty())
 			{
 				CPoint pt = rImage.TopLeft();
-				pt.y--;
 
 				m_ilImages.Draw(&dc, sImage, pt, ILD_TRANSPARENT);
-				rImage.left += nImgSpace;
+				rImage.left += (nImageSize + 2);
 			}
 
 			// draw optional text

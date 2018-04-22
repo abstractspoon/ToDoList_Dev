@@ -11,6 +11,7 @@ class CIcon
 {
 public:
 	CIcon(HICON hIcon = NULL);
+	CIcon(UINT nIDIcon, int nSize);
 	virtual ~CIcon();
 
 	BOOL LoadIcon(UINT nIDIcon, int nSize = 16);

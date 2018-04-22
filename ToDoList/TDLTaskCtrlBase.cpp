@@ -43,12 +43,14 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int LV_COLPADDING			= 3;
-const int HD_COLPADDING			= 6;
-const int MIN_RESIZE_WIDTH		= 19; 
-const int COL_ICON_WIDTH		= 16; 
-const int MIN_COL_WIDTH			= 6;
-const int MIN_TASKS_WIDTH		= 200;
+const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
+const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
+const int ICON_SIZE				= GraphicsMisc::ScaleByDPIFactor(16); 
+const int MIN_RESIZE_WIDTH		= (ICON_SIZE + 3); 
+const int COL_ICON_SIZE			= ICON_SIZE; 
+const int COL_ICON_SPACING		= GraphicsMisc::ScaleByDPIFactor(2); 
+const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_TASKS_WIDTH		= GraphicsMisc::ScaleByDPIFactor(200);
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
@@ -938,6 +940,8 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, RGB(255, 0, 255)) == -1))
 		return FALSE;
 	
+	m_ilColSymbols.ScaleByDPIFactor();
+
 	// primary header
 	const TDCCOLUMN* pClient = GetColumn(TDCC_CLIENT);
 	ASSERT(pClient);
@@ -1015,6 +1019,8 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcColumnWidths()
 {
+	VERIFY(m_ilFileRef.Initialize());
+	
 	RecalcColumnWidths(FALSE); // standard
 	RecalcColumnWidths(TRUE); // custom
 }
@@ -1347,7 +1353,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 		{
 			CRect rIcon;
 			
-			if (!CalcColumnIconRect(rSubItem, rIcon, nFile, nNumFiles))
+			if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
 				break;
 
 			if (rIcon.PtInRect(ptList))
@@ -1765,36 +1771,30 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			}
 
 			// else
-			BOOL bDue = m_calculator.IsTaskDue(pTDI, pTDS); // due today or overdue
-			BOOL bDueToday = bDue ? m_calculator.IsTaskDue(pTDI, pTDS, TRUE) : FALSE;
-			BOOL bOverDue = (bDue && !bDueToday);
+			BOOL bDueToday = m_calculator.IsTaskDue(pTDI, pTDS, TRUE);
+			BOOL bOverDue = m_calculator.IsTaskDue(pTDI, pTDS, FALSE);
 
-			if (bDue)
+			// overdue takes priority
+			if (HasColor(m_crDue) && bOverDue)
 			{
-				// do we have a custom 'due today' color
-				if (bDueToday && HasColor(m_crDueToday))
-				{
-					crText = m_crDueToday;
-					break;
-				}
-
-				// overdue
-				if (HasColor(m_crDue))
-				{
-					crText = m_crDue;
-					break;
-				}
-			}
-
-			// else
-			if (HasColor(m_crStartedToday) && m_calculator.IsTaskStarted(pTDI, pTDS, TRUE))
-			{
-				crText = m_crStartedToday;
+				crText = m_crDue;
 				break;
 			}
-			else if (HasColor(m_crStarted) && m_calculator.IsTaskStarted(pTDI, pTDS)) // started by now
+			else if (HasColor(m_crDueToday) && bDueToday)
+			{
+				crText = m_crDueToday;
+				break;
+			}
+
+			// started 'by now' takes priority
+			if (HasColor(m_crStarted) && m_calculator.IsTaskStarted(pTDI, pTDS))
 			{
 				crText = m_crStarted;
+				break;
+			}
+			else if (HasColor(m_crStartedToday) && m_calculator.IsTaskStarted(pTDI, pTDS, TRUE))
+			{
+				crText = m_crStartedToday;
 				break;
 			}
 
@@ -2743,7 +2743,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 			{
 				CRect rIcon;
 				
-				if (!CalcColumnIconRect(rect, rIcon, nFile, nNumFiles))
+				if (!CalcFileIconRect(rect, rIcon, nFile, nNumFiles))
 					break; // out of bounds
 				
 				// first check for a tdl://
@@ -2794,7 +2794,9 @@ void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect&
 	
 		if (iImage != TDCC_NONE)
 		{
-			CPoint ptDraw(CalcColumnIconTopLeft(rect));
+			int nImageSize = m_ilColSymbols.GetImageSize();
+
+			CPoint ptDraw(CalcColumnIconTopLeft(rect, iImage, 1, nImageSize));
 			m_ilColSymbols.Draw(pDC, iImage, ptDraw, ILD_TRANSPARENT);
 		}
 	}
@@ -2802,7 +2804,8 @@ void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect&
 
 void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck)
 {
-	CPoint pt(CalcColumnIconTopLeft(rSubItem));
+	int nImageSize = m_ilCheckboxes.GetImageSize();
+	CPoint pt(CalcColumnIconTopLeft(rSubItem, 0, 1, nImageSize));
 				
 	// if the line height is odd, move one pixel down
 	// to avoid collision with selection rect
@@ -2812,28 +2815,22 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_
 	m_ilCheckboxes.Draw(pDC, nImage, pt, ILD_TRANSPARENT);
 }
 
-CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage, int nCount)
+CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage, int nCount, int nImageSize) const
 {
-	CPoint pt(rSubItem.CenterPoint());
+	CRect rImage(rSubItem.TopLeft(), CSize(nImageSize, nImageSize));
+	GraphicsMisc::CentreRect(rImage, rSubItem, (nCount == 1), TRUE);
 	
-	// Assume 16 px icons
-	int nRequiredWidth = ((nCount * (COL_ICON_WIDTH + 1)));
+	if (nCount > 1)
+		rImage.OffsetRect((nImage * (nImageSize + 1)), 0);
 
-	if (nRequiredWidth > rSubItem.Width())
-		pt.x = rSubItem.left;
-	else
-		pt.x -= (nRequiredWidth / 2);
-
-	pt.x += (nImage * (COL_ICON_WIDTH + 1));
-	pt.y -= 8;
-
-	return pt;
+	return rImage.TopLeft();
 }
 
-BOOL CTDLTaskCtrlBase::CalcColumnIconRect(const CRect& rSubItem, CRect& rIcon, int nImage, int nCount)
+BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage, int nCount) const
 {
-	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImage, nCount), 
-					CSize((COL_ICON_WIDTH + 1), (COL_ICON_WIDTH + 1)));
+	int nImageSize = m_ilFileRef.GetImageSize();
+
+	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImage, nCount, nImageSize), CSize(nImageSize, nImageSize));
 
 	// we always draw the first icon
 	if ((nImage == 0) || (rIcon.right <= rSubItem.right))
@@ -2899,60 +2896,57 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 
 	case TDCCA_ICON:
-		if (!data.IsEmpty() && (rCol.Width() > 16)) // min width for one icon
+		if (!data.IsEmpty() && (rCol.Width() > CalcRequiredIconColumnWidth(1)))
 		{
 			CStringArray aImages;
 			int nNumImage = data.AsArray(aImages);
 
-			int nReqWidth = (nNumImage * 18) - 2;
+			int nReqWidth = CalcRequiredIconColumnWidth(nNumImage);
 			int nAvailWidth = rCol.Width();
 
 			if (nAvailWidth < nReqWidth)
 			{
-				nNumImage = min(nNumImage, ((nAvailWidth - 2) / 18));
-				nReqWidth = (nNumImage * 18) - 2;
+				nNumImage = min(nNumImage, ((nAvailWidth + COL_ICON_SPACING - (LV_COLPADDING * 2)) / (COL_ICON_SIZE + COL_ICON_SPACING)));
+				nReqWidth = CalcRequiredIconColumnWidth(nNumImage);
 			}
 
-			// centre icon vertically
-			CPoint pt(rCol.left, (rCol.CenterPoint().y - 8));
-			int nTextAlign = attribDef.nTextAlignment;
-			
 			CString sName;
 			
 			if (nNumImage == 1)
 				sName = attribDef.GetImageName(data.AsString());
+
+			rCol.bottom = (rCol.top + COL_ICON_SIZE);
+			GraphicsMisc::CentreRect(rCol, rSubItem, FALSE, TRUE); // centre vertically
+
+			int nTextAlign = attribDef.nTextAlignment;
 			
 			switch (nTextAlign)
 			{
 			case DT_RIGHT:
 				// We still draw from the left just like text
-				rCol.right -= LV_COLPADDING;
-				pt.x = (rCol.right - nReqWidth);
+				rCol.left = (rCol.right - nReqWidth);
 				break;
 				
 			case DT_CENTER:
 				// if there is associated text then we align left
 				if (sName.IsEmpty())
 				{
-					pt.x = (rCol.left + ((rCol.Width() - nReqWidth) / 2));
-					break;
+					rCol.right = (rCol.left + nReqWidth);
+					GraphicsMisc::CentreRect(rCol, rSubItem, TRUE, FALSE);
 				}
 				else 
 				{
 					nTextAlign = DT_LEFT;
-					// fall thru
 				}
+				break;
 				
 			case DT_LEFT:
 			default:
-				rCol.left += 16;
-				pt.x += LV_COLPADDING;
 				break;
 			}
 
-			// calculate icon and text position
-			rCol.left += LV_COLPADDING;
 			BOOL bOverrun = FALSE;
+			rCol.left += LV_COLPADDING;
 
 			for (int nImg = 0; ((nImg < nNumImage) && !bOverrun); nImg++)
 			{
@@ -2960,10 +2954,10 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 				if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sDummy))
 				{
-					m_ilTaskIcons.Draw(pDC, sImage, pt, ILD_TRANSPARENT);
-					pt.x += 18;
+					m_ilTaskIcons.Draw(pDC, sImage, rCol.TopLeft(), ILD_TRANSPARENT);
+					rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
 
-					bOverrun = ((pt.x + 16) > rCol.right);
+					bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);
 				}
 			}
 			
@@ -3000,6 +2994,11 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	}
 
 	return TRUE; // we handled it
+}
+
+int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage)
+{
+	return ((nNumImage * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING + (LV_COLPADDING * 2));
 }
 
 BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime) const
@@ -3251,9 +3250,10 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 					// handle symbol images
 					if (pTDCC->iImage != -1)
 					{
-						CPoint ptDraw(CalcColumnIconTopLeft(pNMCD->rc));
+						CRect rImage(0, 0, COL_ICON_SIZE, COL_ICON_SIZE);
+						GraphicsMisc::CentreRect(rImage, rItem, TRUE, TRUE);
 
- 						m_ilColSymbols.Draw(pDC, pTDCC->iImage, ptDraw, ILD_TRANSPARENT);
+ 						m_ilColSymbols.Draw(pDC, pTDCC->iImage, rImage.TopLeft(), ILD_TRANSPARENT);
 						return CDRF_SKIPDEFAULT;
 					}
 				}
@@ -4010,7 +4010,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 			{
 				CRect rIcon;
 				
-				if (!CalcColumnIconRect(rSubItem, rIcon, nFile, nNumFiles))
+				if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
 					break; // outside the subitem
 				
 				if (rIcon.PtInRect(pt))
@@ -4224,7 +4224,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			return !bLocked;
 
 		case TDCC_LOCK:
-			// else Prevent editing of subtasks inheriting parent lock state
+			// Prevent editing of subtasks inheriting parent lock state
 			if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
 				return !m_calculator.IsTaskLocked(m_data.GetTaskParentID(dwTaskID));
 
@@ -4915,9 +4915,9 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 		{
 			int nMaxCount = m_find.GetLargestFileLinkCount(bVisibleOnly);
 
-			if (nMaxCount > 1)
+			if (nMaxCount >= 1)
 			{
-				nColWidth = (nMaxCount * MIN_RESIZE_WIDTH);
+				nColWidth = ((nMaxCount * (m_ilFileRef.GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
 
 				// compensate for extra padding we don't want 
 				nColWidth -= (2 * LV_COLPADDING);
@@ -4991,7 +4991,7 @@ int CTDLTaskCtrlBase::RecalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleOnly) c
 								break;
 
 							case TDCCA_FIXEDMULTILIST:
-								nColWidth = (attribDef.aDefaultListData.GetSize() * 18);
+								nColWidth = ((attribDef.aDefaultListData.GetSize() * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
 								break;
 							}
 						}

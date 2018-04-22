@@ -8,6 +8,7 @@
 #include "FileMisc.h"
 #include "themed.h"
 #include "osversion.h"
+#include "icon.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -48,6 +49,8 @@ typedef DWORD ARGB;
 //////////////////////////////////////////////////////////////////////
 
 static int PointsPerInch() { return 72; }
+
+const static int DEFAULT_DPI = 96;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -233,25 +236,11 @@ void GraphicsMisc::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSpl
 	
 	if (nSplitWidth > 2)
 	{
-		CRect rMarker(rSplitter);
-		CPoint ptCentre = rMarker.CenterPoint();
+		int nWidth = ScaleByDPIFactor(2);
+		int nHeight = ScaleByDPIFactor(20);
 		
-		if (bVert)
-		{
-			rMarker.left = ptCentre.x - 1;
-			rMarker.right = ptCentre.x + 1;
-
-			rMarker.top = ptCentre.y - 10;
-			rMarker.bottom = ptCentre.y + 10;
-		}
-		else // horizontal
-		{
-			rMarker.left = ptCentre.x - 10;
-			rMarker.right = ptCentre.x + 10;
-			
-			rMarker.top = ptCentre.y - 1;
-			rMarker.bottom = ptCentre.y + 1;
-		}
+		CRect rMarker(0, 0, (bVert ? nWidth : nHeight), (bVert ? nHeight : nWidth));
+		CentreRect(rMarker, rSplitter, TRUE, TRUE);
 		
 		// use the splitter bkgnd luminance to decide whether
 		// to draw the marker lighter or darker
@@ -483,6 +472,8 @@ HICON GraphicsMisc::LoadIcon(UINT nIDIcon, int nSize)
 									nSize, 
 									nSize, 
 									LR_LOADMAP3DCOLORS);
+
+	ASSERT(GetIconSize(hIcon).cx == nSize);
 
 	return hIcon;
 }
@@ -1096,6 +1087,32 @@ BOOL GraphicsMisc::FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND 
 	return FillItemRect(pDC, rItem, color, NULL);
 }
 
+CPoint GraphicsMisc::CentrePoint(LPCRECT prcRect)
+{
+	return CPoint(((prcRect->left + prcRect->right) / 2), ((prcRect->top + prcRect->bottom) / 2));
+}
+
+BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
+{
+	if (!bCentreHorz && !bCentreVert)
+		return FALSE;
+
+	if (bCentreHorz)
+	{
+		int nOffset = (CentrePoint(prcOther).x - CentrePoint(pRect).x);
+		::OffsetRect(pRect, nOffset, 0);
+	}
+
+	
+	if (bCentreVert)
+	{
+		int nOffset = (CentrePoint(prcOther).y - CentrePoint(pRect).y);
+		::OffsetRect(pRect, 0, nOffset);
+	}
+
+	return TRUE;
+}
+
 COLORREF GraphicsMisc::GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
 {
 	if (nState != GMIS_NONE)
@@ -1678,5 +1695,73 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 	}
 
 	return (NULL != ilCheckboxes.GetSafeHandle());
+}
+
+int GraphicsMisc::GetSystemDPI()
+{
+	static int nDPI = 0;
+	
+	if (nDPI == 0)
+	{
+		HDC	hdc = ::GetDC(NULL);
+		
+		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
+		
+		::ReleaseDC(NULL, hdc);
+	}
+	
+	return nDPI;
+}
+
+double GraphicsMisc::GetDPIScaleFactor()
+{
+	static double dScale = ((double)GetSystemDPI() / DEFAULT_DPI);
+	
+	return dScale;
+}
+
+BOOL GraphicsMisc::WantDPIScaling()
+{
+	return (GetDPIScaleFactor() > 1.0);
+}
+
+BOOL GraphicsMisc::ScaleByDPIFactor(LPRECT pRect)
+{
+	if (!WantDPIScaling())
+		return FALSE;
+
+	pRect->left		= ScaleByDPIFactor(pRect->left);
+	pRect->top		= ScaleByDPIFactor(pRect->top);
+	pRect->right	= ScaleByDPIFactor(pRect->right);
+	pRect->bottom	= ScaleByDPIFactor(pRect->bottom);
+
+	return TRUE;
+}
+
+BOOL GraphicsMisc::ScaleByDPIFactor(LPSIZE pSize)
+{
+	if (!WantDPIScaling())
+		return FALSE;
+	
+	pSize->cx = ScaleByDPIFactor(pSize->cx);
+	pSize->cy = ScaleByDPIFactor(pSize->cy);
+	
+	return TRUE;
+}
+
+BOOL GraphicsMisc::ScaleByDPIFactor(LPPOINT pPoint)
+{
+	if (!WantDPIScaling())
+		return FALSE;
+	
+	pPoint->x = ScaleByDPIFactor(pPoint->x);
+	pPoint->y = ScaleByDPIFactor(pPoint->y);
+	
+	return TRUE;
+}
+
+int GraphicsMisc::ScaleByDPIFactor(int nValue)
+{
+	return ::MulDiv(nValue, GetSystemDPI(), DEFAULT_DPI);
 }
 

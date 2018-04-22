@@ -247,6 +247,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="EnImageList.cpp" />
     <ClCompile Include="enlistctrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -728,6 +729,7 @@
     <ClInclude Include="enedit.h" />
     <ClInclude Include="enfiledialog.h" />
     <ClInclude Include="EnHeaderCtrl.h" />
+    <ClInclude Include="EnImageList.h" />
     <ClInclude Include="enlistctrl.h" />
     <ClInclude Include="EnMenu.h" />
     <ClInclude Include="EnRecentFileList.h" />

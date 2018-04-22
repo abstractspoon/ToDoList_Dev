@@ -2348,6 +2348,26 @@ BOOL CTDCTaskCalculator::IsTaskDue(DWORD dwTaskID, BOOL bToday) const
 	return IsTaskDue(pTDI, pTDS, bToday);
 }
 
+BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
+{
+	// sanity check
+	ASSERT (pTDS && pTDI);
+	
+	if (!pTDS || !pTDI)
+		return FALSE;
+	
+	double dDue = GetTaskDueDate(pTDI, pTDS);
+	
+	if (bToday)
+		return CDateHelper::IsToday(dDue);
+
+	// else
+	if (!CDateHelper::DateHasTime(dDue))
+		dDue = CDateHelper::GetEndOfDay(dDue);
+
+	return ((dDue > 0) && (dDue < COleDateTime::GetCurrentTime()));
+}
+
 BOOL CTDCTaskCalculator::IsTaskOverDue(DWORD dwTaskID) const
 {
 	return IsTaskDue(dwTaskID, FALSE);
@@ -2355,8 +2375,7 @@ BOOL CTDCTaskCalculator::IsTaskOverDue(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	// we need to check that it's due BUT not due today
-	return IsTaskDue(pTDI, pTDS, FALSE) && !IsTaskDue(pTDI, pTDS, TRUE);
+	return IsTaskDue(pTDI, pTDS, FALSE);
 }
 
 BOOL CTDCTaskCalculator::HasOverdueTasks() const
@@ -2364,7 +2383,7 @@ BOOL CTDCTaskCalculator::HasOverdueTasks() const
 	if (m_data.GetTaskCount() == 0)
 		return FALSE;
 
-	COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+	COleDateTime dtToday = CDateHelper::GetDate(DHD_NOW);
 	double dEarliest = GetEarliestDueDate();
 
 	return ((dEarliest > 0.0) && (dEarliest < dtToday));
@@ -2458,7 +2477,12 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 		double dTaskEarliest = GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE);
 
 		if (dTaskEarliest > 0.0)
+		{
+			if (!CDateHelper::DateHasTime(dTaskEarliest))
+				dTaskEarliest = CDateHelper::GetEndOfDay(dTaskEarliest);
+			
 			dEarliest = min(dTaskEarliest, dEarliest);
+		}
 	}
 
 	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
@@ -2601,23 +2625,6 @@ BOOL CTDCTaskCalculator::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
 
 	return IsTaskDone(pTDI, pTDS, dwExtraCheck);
-}
-
-BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
-{
-	// sanity check
-	ASSERT (pTDS && pTDI);
-
-	if (!pTDS || !pTDI)
-		return FALSE;
-
-	double dDue = GetTaskDueDate(pTDI, pTDS);
-
-	if (bToday)
-		return CDateHelper::IsToday(dDue);
-
-	// else
-	return ((dDue > 0) && (dDue < COleDateTime::GetCurrentTime()));
 }
 
 double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const

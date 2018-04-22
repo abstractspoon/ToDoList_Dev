@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\Shared\enimagelist.h"
+
 #include <afxtempl.h>
 
 typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
@@ -16,7 +18,7 @@ typedef CMap<int, int, CString, CString&> CMapIntToString;
 
 #define TDCIL_MAGENTA RGB(255, 0, 255)
 
-class CTDCImageList : public CImageList  
+class CTDCImageList : public CEnImageList  
 {
 public:
 	CTDCImageList();

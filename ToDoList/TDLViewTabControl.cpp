@@ -9,6 +9,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\graphicsmisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,7 +68,9 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 	{
 		if (!m_ilTabs.GetSafeHandle())
 		{
-			if (m_ilTabs.Create(16, 16, ILC_COLOR32 | ILC_MASK, 2, 1))
+			int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
+
+			if (m_ilTabs.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 2, 1))
 				SetImageList(&m_ilTabs);
 		}
 

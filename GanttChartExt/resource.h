@@ -11,6 +11,7 @@
 #define IDC_GANTTTREE                   1006
 #define IDC_DISPLAY                     1015
 #define IDC_DISPLAYALLOCTO              1016
+#define IDC_DISPLAYTASKTITLE            1017
 #define IDC_GOTOTODAY                   1020
 #define IDC_SELECTEDTASKDATES           1032
 #define IDC_DRAGMODE                    1033
@@ -107,6 +108,8 @@
 #define IDS_ATTRIB_ALLOCTO              57683
 #define IDS_ATTRIB_PERCENTDONE          57684
 #define IDS_ATTRIB_TASKID               57685
+#define IDS_ATTRIB_DONEDATE             57686
+#define IDS_COL_DONEDATE                57687
 
 // Next default values for new objects
 // 

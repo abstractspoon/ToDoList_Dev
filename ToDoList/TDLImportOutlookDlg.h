@@ -8,6 +8,7 @@
 //
 
 #include "..\Shared\wndprompt.h"
+#include "..\Shared\enimagelist.h"
 
 #include "..\Interfaces\ITasklist.h"
 #include "..\Interfaces\IImportExport.h"
@@ -50,7 +51,7 @@ public:
 	OutlookAPI::_Application* m_pOutlook;
 	OutlookAPI::MAPIFolder* m_pFolder;
 	CWndPromptManager m_wndPrompt;
-	CImageList m_ilItemTypes;
+	CEnImageList m_ilItemTypes;
 	CMap<int, int, int, int&> m_mapItemTypes;
 
 // Overrides
