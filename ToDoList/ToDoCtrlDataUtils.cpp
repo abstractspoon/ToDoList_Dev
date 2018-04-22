@@ -2362,10 +2362,13 @@ BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 		return CDateHelper::IsToday(dDue);
 
 	// else
+	if (dDue == 0.0)
+		return FALSE;
+
 	if (!CDateHelper::DateHasTime(dDue))
 		dDue = CDateHelper::GetEndOfDay(dDue);
 
-	return ((dDue > 0) && (dDue < COleDateTime::GetCurrentTime()));
+	return (dDue < COleDateTime::GetCurrentTime());
 }
 
 BOOL CTDCTaskCalculator::IsTaskOverDue(DWORD dwTaskID) const
