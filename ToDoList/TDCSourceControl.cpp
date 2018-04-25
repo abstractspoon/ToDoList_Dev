@@ -477,7 +477,7 @@ BOOL CTDCSourceControl::CheckOutTasklist(CString& sTasklistCheckedOutTo, BOOL bF
 			return FALSE;
 		}
 	}
-
+	
 	m_bTasklistCheckedOut = TRUE;
 	return TRUE;
 }
