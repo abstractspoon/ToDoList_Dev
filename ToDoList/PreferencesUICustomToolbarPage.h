@@ -40,22 +40,22 @@ protected:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesToolbarPage)
-	public:
-	virtual void OnOK();
+	//}}AFX_VIRTUAL
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesToolbarPage)
+	//}}AFX_MSG
 	afx_msg void OnMoveButtonUp();
 	afx_msg void OnMoveButtonDown();
 	afx_msg void OnDeleteButton();
-	//}}AFX_MSG
-	void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnListSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 		
@@ -63,6 +63,7 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
+	void EnableDisableButtons();
 
 };
 

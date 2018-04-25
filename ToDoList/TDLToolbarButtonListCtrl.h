@@ -25,6 +25,10 @@ public:
 	int GetButtons(CToolbarButtonArray& aButtons) const;
 	void SetButtons(const CToolbarButtonArray& aButtons);
 
+	BOOL CanMoveSelectedButtonUp() const;
+	BOOL CanMoveSelectedButtonDown() const;
+	BOOL CanDeleteSelectedButton() const;
+
 	BOOL MoveSelectedButtonUp();
 	BOOL MoveSelectedButtonDown();
 	BOOL DeleteSelectedButton();
@@ -65,6 +69,7 @@ protected:
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 
 	BOOL MoveButton(int nBtn, int nRows);
+	BOOL CanMoveButton(int nBtn, int nRows) const;
 
 };
 

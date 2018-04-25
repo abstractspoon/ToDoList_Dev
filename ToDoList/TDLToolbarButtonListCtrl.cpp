@@ -206,12 +206,7 @@ BOOL CTDLToolbarButtonListCtrl::CanEditCell(int nRow, int nCol) const
 
 BOOL CTDLToolbarButtonListCtrl::MoveButton(int nBtn, int nRows)
 {
-	if ((nRows == 0) || IsPrompt(nBtn))
-		return FALSE;
-
-	int nNewPos = (nBtn + nRows);
-
-	if ((nNewPos < 0) || (nNewPos >= (GetItemCount() - 1)))
+	if (!CanMoveButton(nBtn, nRows))
 		return FALSE;
 
 	TOOLBARBUTTON tb = m_aButtons[nBtn]; // copy
@@ -220,6 +215,7 @@ BOOL CTDLToolbarButtonListCtrl::MoveButton(int nBtn, int nRows)
 	CString sMenuItem = GetItemText(nBtn, MENUID_COL);
 	DeleteItem(nBtn);
 	
+	int nNewPos = (nBtn + nRows);
 	m_aButtons.InsertAt(nNewPos, tb);
 
 	int nRow = InsertRow(sMenuItem, nNewPos);
@@ -229,6 +225,34 @@ BOOL CTDLToolbarButtonListCtrl::MoveButton(int nBtn, int nRows)
 	SetCurSel(nRow);
 
 	return TRUE;
+}
+
+BOOL CTDLToolbarButtonListCtrl::CanMoveButton(int nBtn, int nRows) const
+{
+	if ((nRows == 0) || IsPrompt(nBtn))
+		return FALSE;
+
+	int nNewPos = (nBtn + nRows);
+
+	if ((nNewPos < 0) || (nNewPos >= (GetItemCount() - 1)))
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL CTDLToolbarButtonListCtrl::CanMoveSelectedButtonUp() const
+{
+	return CanMoveButton(GetCurSel(), -1);
+}
+
+BOOL CTDLToolbarButtonListCtrl::CanMoveSelectedButtonDown() const
+{
+	return CanMoveButton(GetCurSel(), 1);
+}
+
+BOOL CTDLToolbarButtonListCtrl::CanDeleteSelectedButton() const
+{
+	return CanDeleteCell(GetCurSel(), 0);
 }
 
 BOOL CTDLToolbarButtonListCtrl::MoveSelectedButtonUp()
@@ -245,7 +269,7 @@ BOOL CTDLToolbarButtonListCtrl::DeleteSelectedButton()
 {
 	int nRow = GetCurSel();
 
-	if (CanDeleteCell(nRow, 0))
+	if (CanDeleteSelectedButton())
 	{
 		m_aButtons.RemoveAt(nRow);
 		DeleteItem(nRow);

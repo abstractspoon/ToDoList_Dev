@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CPreferencesUICustomToolbarPage, CPreferencesPageBase)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_DELETE, OnDeleteButton)
 	//}}AFX_MSG_MAP
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_BUTTONLIST, OnListSelChange)
 
 END_MESSAGE_MAP()
 
@@ -55,6 +56,8 @@ END_MESSAGE_MAP()
 BOOL CPreferencesUICustomToolbarPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
+	
+	EnableDisableButtons();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -104,8 +107,16 @@ void CPreferencesUICustomToolbarPage::OnSize(UINT nType, int cx, int cy)
 	
 	if (m_ilcButtons.GetSafeHwnd())
 	{
-		CPoint ptBorders = GetChildRect(&m_ilcButtons).TopLeft();
-	//	ResizeChild(&m_ilcButtons, cx - 2 * ptBorders.x, cy - 2 * ptBorders.y);
+		CRect rBtnList = GetChildRect(&m_ilcButtons);
+
+		int nXOffset = (cx - rBtnList.left - GetCtrlRect(this, IDC_MOVEDOWN).right);
+		int nYOffset = (cy - rBtnList.top - rBtnList.bottom);
+
+		OffsetCtrl(this, IDC_MOVEDOWN, nXOffset, 0);
+		OffsetCtrl(this, IDC_MOVEUP, nXOffset, 0);
+		OffsetCtrl(this, IDC_DELETE, nXOffset, 0);
+
+		ResizeChild(&m_ilcButtons, nXOffset, nYOffset);
 	}
 }
 
@@ -126,15 +137,31 @@ void CPreferencesUICustomToolbarPage::OnOK()
 
 void CPreferencesUICustomToolbarPage::OnMoveButtonUp() 
 {
-	m_ilcButtons.MoveSelectedButtonUp();
+	if (m_ilcButtons.MoveSelectedButtonUp())
+		EnableDisableButtons();
 }
 
 void CPreferencesUICustomToolbarPage::OnMoveButtonDown() 
 {
-	m_ilcButtons.MoveSelectedButtonDown();
+	if (m_ilcButtons.MoveSelectedButtonDown())
+		EnableDisableButtons();
 }
 
 void CPreferencesUICustomToolbarPage::OnDeleteButton() 
 {
-	m_ilcButtons.DeleteSelectedButton();
+	if (m_ilcButtons.DeleteSelectedButton())
+		EnableDisableButtons();
+}
+
+void CPreferencesUICustomToolbarPage::OnListSelChange(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+	EnableDisableButtons();
+}
+
+void CPreferencesUICustomToolbarPage::EnableDisableButtons()
+{
+	GetDlgItem(IDC_MOVEDOWN)->EnableWindow(m_ilcButtons.CanMoveSelectedButtonDown());
+	GetDlgItem(IDC_MOVEUP)->EnableWindow(m_ilcButtons.CanMoveSelectedButtonUp());
+	GetDlgItem(IDC_DELETE)->EnableWindow(m_ilcButtons.CanDeleteSelectedButton());
 }
