@@ -377,6 +377,10 @@ SOURCE=.\menubutton.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MenuComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MenuIconMgr.cpp
 # End Source File
 # Begin Source File
@@ -1038,6 +1042,10 @@ SOURCE=.\MASKEDIT.H
 # Begin Source File
 
 SOURCE=.\menubutton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MenuComboBox.h
 # End Source File
 # Begin Source File
 

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -130,6 +130,7 @@
 #define IDD_WEBUPDATE_PROGRESS_DIALOG   272
 #define IDD_PREFUIVISIBILITY_PAGE       272
 #define IDD_SHOWREMINDER_DIALOG1        273
+#define IDD_PREFTOOLBAR_PAGE            274
 #define IDR_SOCIAL_TOOLBAR              274
 #define IDB_SOCIAL_TOOLBAR              275
 #define IDD_ABOUT_DIALOG                276
@@ -793,9 +794,16 @@
 #define IDC_USELATESTLASTMODIFIED       1508
 #define IDC_ENDTRACKINGONREMINDER       1510
 #define IDC_USECREATIONTIMEFORDEFSTARTDATE 1511
+#define IDC_CHECK1                      1512
+#define IDC_BUTTONLIST                  1513
+#define IDC_MENUCOMMANDS                1514
+#define IDC_MOVEUP                      1515
+#define IDC_MOVEDOWN                    1516
+#define IDC_DELETE                      1517
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
+#define IDD_PREFUIVISIBILITY_PAGE1      2001
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
 #define IDC_CHOOSEFOLDER                2003
@@ -2122,6 +2130,9 @@
 #define IDS_SAVETOIMAGEPROGRESS         58471
 #define IDS_INIFILELOCKED               58472
 #define IDS_QUERYFORCEDCHECKOUT         58473
+#define IDS_PREF_TOOLBAR                58474
+#define IDS_TOOLBARMENUSEPARATOR        58475
+#define IDS_NEW_TOOLBARBUTTON           58476
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
@@ -2130,7 +2141,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        310
 #define _APS_NEXT_COMMAND_VALUE         34599
-#define _APS_NEXT_CONTROL_VALUE         1512
+#define _APS_NEXT_CONTROL_VALUE         1518
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

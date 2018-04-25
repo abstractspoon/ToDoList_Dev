@@ -375,6 +375,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="MenuComboBox.cpp" />
     <ClCompile Include="MenuIconMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -769,6 +770,7 @@
     <ClInclude Include="mapex.h" />
     <ClInclude Include="MASKEDIT.H" />
     <ClInclude Include="menubutton.h" />
+    <ClInclude Include="MenuComboBox.h" />
     <ClInclude Include="MenuIconMgr.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MonthCalCtrlEx.h" />

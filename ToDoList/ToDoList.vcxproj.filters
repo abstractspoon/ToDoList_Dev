@@ -397,6 +397,15 @@
     <ClCompile Include="TDCTimeTracking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLCustomToolbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreferencesUICustomToolbarPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TDLToolbarButtonListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Interfaces\IContentControl.h">
@@ -853,6 +862,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCTimeTracking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLCustomToolbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLToolbarButtonListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesUICustomToolbarPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

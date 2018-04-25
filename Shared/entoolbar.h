@@ -76,6 +76,7 @@ protected:
 	
 	BOOL SetImage(CEnBitmapEx* pBitmap, COLORREF crMask);
 	void RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask);
+	void RefreshDisabledImageList();
 
 	int EstimateHeightRequired(int cx) const;
 	int EstimateRowsRequired(int cx) const;

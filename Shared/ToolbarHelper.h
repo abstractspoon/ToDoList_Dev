@@ -28,6 +28,7 @@ public:
 
 	BOOL Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr = NULL);
 	BOOL Release(BOOL bClearDropBtns = TRUE);
+	void InitTooltips();
 
 	BOOL ClearDropButton(UINT nBtnCmdID, BOOL bRedraw = TRUE);
 	BOOL SetDropButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT nDefCmdID = 0, char cHotkey = 0);
@@ -41,7 +42,7 @@ public:
 	BOOL ProcessMessage(MSG* pMsg); // called by parent
 	
 	static void PrepareMenuItems(CMenu* pMenu, CWnd* pWnd);
-	static CString GetTip(UINT nID);
+	static CString GetResourceTip(UINT nID);
 
 protected:
 	CToolBar* m_pToolbar;
@@ -64,14 +65,16 @@ protected:
 	BOOL m_bMultiline;
 	int m_nMultilineWidth;
 	CToolTipCtrl m_tt;
+	CString m_sActiveTipText;
+	UINT m_nIDLastShow;
 
 protected:
-	CString GetTip(UINT nID, LPPOINT pPoint) const;
+	CString GetTip(UINT nID, const CPoint& point) const;
+	CString GetTip(UINT nID, BOOL bOverDropBtn) const;
 	BOOL DisplayDropMenu(UINT nCmdID, BOOL bPressBtn = FALSE);
 	BOOL IsCmdEnabled(UINT nCmdID) const;
 	BOOL SetButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT nDefCmdID, TCHAR cHotkey, LPCTSTR szTip);
 	void RefreshTooltipRects();
-	void InitTooltips();
 
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);

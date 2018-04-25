@@ -585,7 +585,7 @@ BEGIN
     CONTROL         "E&nable sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,350,387,10
-    LTEXT           "Toolbar",IDC_TOOLBARGROUP,7,370,381,8
+    LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,370,381,8
     CONTROL         "Display 'User Defined Tools'",IDC_DISPLAYUDTSINTOOLBAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,385,387,10
     LTEXT           "'New Task' &button places task:",IDC_STATIC,8,400,380,8
@@ -1808,26 +1808,16 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PREFUIVISIBILITY_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
+IDD_PREFTOOLBAR_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "List2",IDC_VISIBILITY,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
-                    LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,19,380,143
-    CONTROL         "&Always show all available fields",IDC_SHOWALLATTRIB,
-                    "Button",BS_AUTORADIOBUTTON | BS_VCENTER | BS_MULTILINE | 
-                    WS_GROUP,15,185,366,10
-    CONTROL         "&Show fields whose corresponding column is visible",
-                    IDC_SHOWATTRIBASCOLUMN,"Button",BS_AUTORADIOBUTTON | 
-                    BS_VCENTER | BS_MULTILINE,15,200,364,10
-    CONTROL         "&Control each field individually",IDC_SHOWANYATTRIB,
-                    "Button",BS_AUTORADIOBUTTON,15,215,366,10
-    GROUPBOX        "Manage edit/filter field visibility",IDC_ATTRIBGROUP,7,
-                    171,380,60,WS_GROUP
-    LTEXT           "Default Attribute Visibility for New Tasklists",
-                    IDC_LISTLABEL,7,7,380,8
+    CONTROL         "List2",IDC_BUTTONLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,321,224
+    PUSHBUTTON      "Move &Up",IDC_MOVEUP,337,7,50,14
+    PUSHBUTTON      "Move &Down",IDC_MOVEDOWN,337,26,50,14
+    PUSHBUTTON      "Delete",IDC_DELETE,337,52,50,14
 END
 
 IDD_ABOUT_DIALOG DIALOG DISCARDABLE  0, 0, 332, 235
@@ -2039,6 +2029,28 @@ BEGIN
     DEFPUSHBUTTON   "&Clear Filter",IDC_CLEARFILTER,28,250,60,14
     DEFPUSHBUTTON   "OK",IDOK,131,250,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,187,250,50,14
+END
+
+IDD_PREFUIVISIBILITY_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "List2",IDC_VISIBILITY,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,7,19,380,143
+    CONTROL         "&Always show all available fields",IDC_SHOWALLATTRIB,
+                    "Button",BS_AUTORADIOBUTTON | BS_VCENTER | BS_MULTILINE | 
+                    WS_GROUP,15,185,366,10
+    CONTROL         "&Show fields whose corresponding column is visible",
+                    IDC_SHOWATTRIBASCOLUMN,"Button",BS_AUTORADIOBUTTON | 
+                    BS_VCENTER | BS_MULTILINE,15,200,364,10
+    CONTROL         "&Control each field individually",IDC_SHOWANYATTRIB,
+                    "Button",BS_AUTORADIOBUTTON,15,215,366,10
+    GROUPBOX        "Manage edit/filter field visibility",IDC_ATTRIBGROUP,7,
+                    171,380,60,WS_GROUP
+    LTEXT           "Default Attribute Visibility for New Tasklists",
+                    IDC_LISTLABEL,7,7,380,8
 END
 
 
@@ -4028,11 +4040,11 @@ BEGIN
         BOTTOMMARGIN, 194
     END
 
-    IDD_PREFUIVISIBILITY_PAGE, DIALOG
+    IDD_PREFTOOLBAR_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 387
-        TOPMARGIN, 10
+        TOPMARGIN, 7
         BOTTOMMARGIN, 231
     END
 
@@ -4090,6 +4102,14 @@ BEGIN
         RIGHTMARGIN, 237
         TOPMARGIN, 7
         BOTTOMMARGIN, 264
+    END
+
+    IDD_PREFUIVISIBILITY_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 387
+        TOPMARGIN, 10
+        BOTTOMMARGIN, 231
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -4240,7 +4260,7 @@ BEGIN
     IDS_PREF_UIVISIBILITY   "User Interface>Column/Attribute Visibility"
     IDS_PREF_TASKDEFINHERIT "Tasks>Defaults>Inheritable Attributes"
     IDS_PREF_UIFILTERING    "User Interface>General>Filtering"
-    IDS_PREF_UITOOLBAR      "User Interface>General>Toolbar"
+    IDS_PREF_UITOOLBAR      "User Interface>General>Main Toolbar"
     IDS_OPENTASKLIST_TITLE  "Open Tasklist"
     IDS_INVALIDTASKLIST     "'%s' does not appear to be a valid tasklist."
     IDS_STATUSREADONLY      "Read-only"
@@ -5290,6 +5310,9 @@ BEGIN
     IDS_SAVETOIMAGEPROGRESS "Saving task view image..."
     IDS_INIFILELOCKED       "ToDoList cannot start because your preferences file is locked by another application."
     IDS_QUERYFORCEDCHECKOUT "\n\nDo you want to forcibly checkout the tasklist?\n\nNote: Any unsaved data from '%s' will be lost!"
+    IDS_PREF_TOOLBAR        "User Interface>Custom Toolbar"
+    IDS_TOOLBARMENUSEPARATOR "<separator>"
+    IDS_NEW_TOOLBARBUTTON   "<New Button>"
 END
 
 #endif    // English (Australia) resources

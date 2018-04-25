@@ -23,6 +23,7 @@
 #include "TDLTimeTrackerDlg.h"
 #include "tdlquickfindcombobox.h"
 #include "TDLThreadedExporterWnd.h"
+#include "TDLCustomToolbar.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -94,7 +95,8 @@ protected:
 	CEnBrowserCtrl m_IE;
 	CEnMenu m_menubar;
 	CEnRecentFileList m_mruList;
-	CEnToolBar m_toolbar;
+	CEnToolBar m_toolbarMain;
+	CTDLCustomToolbar m_toolbarCustom;
 	CFont m_fontMain;
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
 	CImageList m_ilTabCtrl;
@@ -106,7 +108,7 @@ protected:
 	CTabCtrlEx m_tabCtrl;
 	CTaskListDropTarget m_dropTarget;
 	CToDoCtrlReminders m_reminders;
-	CToolbarHelper m_tbHelper;
+	CToolbarHelper m_tbHelperMain;//, m_tbHelperCustom;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
 	CWindowIcons m_icons;
@@ -630,7 +632,8 @@ protected:
 	void InitUIFont();
 	BOOL LoadMenubar();
 	BOOL InitTrayIcon();
-	BOOL InitToolbar();
+	BOOL InitMainToolbar();
+	BOOL InitCustomToolbar();
 	BOOL InitStatusbar();
 	BOOL InitFilterbar();
 	BOOL InitTimeTrackDlg();

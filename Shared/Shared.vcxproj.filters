@@ -478,6 +478,9 @@
     <ClCompile Include="EnImageList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MenuComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -991,6 +994,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnImageList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

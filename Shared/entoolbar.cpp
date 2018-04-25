@@ -247,6 +247,32 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 	}
 }
 
+void CEnToolBar::RefreshDisabledImageList() 
+{
+	m_ilDisabled.DeleteImageList();
+	m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1);
+
+	// Work directly off the icons
+	COLORREF crMask = RGB(255, 0, 255);
+	int nImageCount = m_ilNormal.GetImageCount();
+
+	for (int nImage = 0; nImage < nImageCount; nImage++)
+	{
+		CEnBitmapEx bmpImage;
+		bmpImage.CopyImage(CIcon(m_ilNormal.ExtractIcon(nImage)), crMask);
+
+		if (bmpImage.GrayScale(crMask))
+			m_ilDisabled.Add(&bmpImage, crMask);
+	}
+
+	CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
+		
+	if (pILPrev)
+		pILPrev->DeleteImageList(); // cleanup
+		
+	Invalidate();
+}
+
 void CEnToolBar::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
     *pResult = CDRF_DODEFAULT;
