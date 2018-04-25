@@ -12592,7 +12592,9 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
-	if (IsReadOnly() && !m_ssc.IsSourceControlled())
+	BOOL bSourceControlled = m_ssc.IsSourceControlled();
+
+	if (IsReadOnly() && !bSourceControlled)
 		return FALSE;
 
 	switch (nAttrib)
@@ -12637,11 +12639,11 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
-		return m_ssc.IsTasklistCheckedOut();
+		return (!bSourceControlled || m_ssc.IsTasklistCheckedOut());
 
 	case TDCA_DELETE:
 	case TDCA_POSITION: // move
-		return (m_ssc.IsTasklistCheckedOut() && GetSelectedCount());
+		return (!bSourceControlled || (m_ssc.IsTasklistCheckedOut() && GetSelectedCount()));
 
 	case TDCA_LOCK:
 		return GetSelectedCount();
