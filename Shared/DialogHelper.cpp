@@ -1900,7 +1900,7 @@ void CDialogHelper::ExcludeCtrls(const CWnd* pParent, CDC* pDC, BOOL bIgnoreCorn
 
 void CDialogHelper::ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners)
 {
-	if (!pChild)
+	if (!pChild || !pChild->GetSafeHwnd())
 		return;
 
 	// don't clip transparent controls

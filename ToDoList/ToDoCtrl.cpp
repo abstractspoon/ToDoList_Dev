@@ -12597,6 +12597,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 
 	switch (nAttrib)
 	{
+	case TDCA_NONE:
+		return FALSE;
+
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
 	case TDCA_CATEGORY:		
