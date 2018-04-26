@@ -136,6 +136,8 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol)
 
 void CTDLToolbarButtonListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 {
+	UNREFERENCED_PARAMETER(ctrl);
+
 	if (!m_aButtons.GetSize())
 		return;
 	
