@@ -39,7 +39,13 @@ CTDCImageList::~CTDCImageList()
 
 }
 
-BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent, BOOL bWantDefaultIcons)
+BOOL CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
+{
+	return LoadImages(_T(""), TDCIL_MAGENTA, TRUE, bWantToolbars);
+}
+
+BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
+							   BOOL bWantDefaultIcons, BOOL bWantToolbars)
 {
 	DeleteImageList(); // always
 
@@ -75,6 +81,19 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 				if (bm.LoadBitmap(IDB_TASKICONS_STD))
 					AddImage(_T(""), bm, crTransparent, this);
 			}
+		}
+
+		if (bWantToolbars)
+		{
+			CBitmap bm;
+			
+			if (bm.LoadBitmap(IDB_APP_TOOLBAR_STD))
+				AddImage(_T(""), bm, crTransparent, this);
+
+			bm.DeleteObject();
+
+			if (bm.LoadBitmap(IDB_APP_EXTRA_STD))
+				AddImage(_T(""), bm, crTransparent, this);
 		}
 
 		// then add the user's images

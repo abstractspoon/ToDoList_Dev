@@ -47,7 +47,7 @@ BOOL CTDLCustomToolbar::SetButtons(const CToolbarButtonArray& aButtons,
 
 	CTDCImageList ilButtons;
 
-	if (!ilButtons.LoadDefaultImages())
+	if (!ilButtons.LoadDefaultImages(TRUE))
 	{
 		ASSERT(0);
 		return FALSE;

@@ -24,8 +24,9 @@ public:
 	CTDCImageList();
 	virtual ~CTDCImageList();
 
-	BOOL LoadDefaultImages() { return LoadImages(_T("")); }
-	BOOL LoadImages(const CString& sTaskList, COLORREF crTransparent = TDCIL_MAGENTA, BOOL bWantDefaultIcons = TRUE);
+	BOOL LoadDefaultImages(BOOL bWantToolbars = FALSE);
+	BOOL LoadImages(const CString& sTaskList, COLORREF crTransparent = TDCIL_MAGENTA, 
+					BOOL bWantDefaultIcons = TRUE, BOOL bWantToolbars = FALSE);
 
 	int GetImageIndex(const CString& sImageName) const;
 	CString GetImageName(int nIndex) const;

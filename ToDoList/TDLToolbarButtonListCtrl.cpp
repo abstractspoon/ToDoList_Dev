@@ -81,7 +81,7 @@ void CTDLToolbarButtonListCtrl::InitState()
 	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));
 	AutoAdd(TRUE, FALSE);
 
-	m_ilImages.LoadDefaultImages();
+	m_ilImages.LoadDefaultImages(TRUE);
 
 	// Build list
 	for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
@@ -122,7 +122,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol)
 	case IMAGE_COL:
 		{
 			TOOLBARBUTTON& tb = m_aButtons[nItem];
-			CTDLTaskIconDlg dialog(m_ilImages, tb.sImageID);
+			CTDLTaskIconDlg dialog(m_ilImages, tb.sImageID, FALSE);
 			
 			if (dialog.DoModal() == IDOK)
 			{

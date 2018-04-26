@@ -20,7 +20,7 @@ class CTDLTaskIconDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem = TRUE, CWnd* pParent = NULL);   // standard constructor
 	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent = NULL);   // standard constructor
 
 	CString GetIconName() const; 
@@ -37,7 +37,7 @@ protected:
 	const CTDCImageList& m_ilIcons;
 	CString m_sIconName;
 	CMapStringToString m_mapRenamedItems;
-	BOOL m_bMultiSel;
+	BOOL m_bMultiSel, m_bWantNone;
 	CStringArray m_aIconNames;
 
 // Overrides
