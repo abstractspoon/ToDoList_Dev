@@ -706,7 +706,6 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 	{
 		m_cbQuickFind.DestroyWindow();
 		m_tbHelperMain.Release();
-		//m_tbHelperCustom.Release();
 		m_toolbarMain.DestroyWindow();
 		m_toolbarCustom.DestroyWindow();
 
@@ -2932,6 +2931,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 		return CFrameWnd::OnEraseBkgnd(pDC);
 
 	CDialogHelper::ExcludeChild(&m_toolbarMain, pDC);
+	CDialogHelper::ExcludeChild(&m_toolbarCustom, pDC);
 	CDialogHelper::ExcludeChild(&m_statusBar, pDC);
 	CDialogHelper::ExcludeChild(&m_tabCtrl, pDC);
 	CDialogHelper::ExcludeChild(&m_filterBar, pDC);
@@ -8633,7 +8633,6 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 		// signal Windows that it's alright to shutdown
 		m_mgrImportExport.Release();
 		m_tbHelperMain.Release();
-		//m_tbHelperCustom.Release();
 		m_mgrShortcuts.Release();
 		m_mgrImportExport.Release();
 		m_mgrUIExtensions.Release();

@@ -108,7 +108,7 @@ protected:
 	CTabCtrlEx m_tabCtrl;
 	CTaskListDropTarget m_dropTarget;
 	CToDoCtrlReminders m_reminders;
-	CToolbarHelper m_tbHelperMain;//, m_tbHelperCustom;
+	CToolbarHelper m_tbHelperMain;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
 	CWindowIcons m_icons;

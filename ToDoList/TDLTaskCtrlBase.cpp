@@ -3611,10 +3611,6 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 		}
 		break;
 		
-	case WM_SETFOCUS:
-		::SetFocus(Tasks());
-		break;
-
 	case WM_LBUTTONDBLCLK:
 		{
 			CPoint ptCursor(lp);
@@ -3772,10 +3768,6 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	{
 		switch (msg)
 		{
-		case WM_SETFOCUS:
-			InvalidateAll(FALSE, TRUE);
-			break;
-
 		case WM_PRINT:
 			if (!m_lcColumns.GetItemCount() && !m_sTasksWndPrompt.IsEmpty())
 			{
@@ -3908,10 +3900,6 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			}
 			break;
 
-		case WM_SETFOCUS:
-			InvalidateAll();
-			break;
-			
  		case WM_ERASEBKGND:
 			if (COSVersion() == OSV_LINUX)
 			{

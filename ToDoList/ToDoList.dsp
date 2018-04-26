@@ -1359,10 +1359,6 @@ SOURCE=.\res\prefs_dlg_std.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\reset.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\shield.ico
 # End Source File
 # Begin Source File
@@ -1396,10 +1392,6 @@ SOURCE=.\res\style_table.ico
 # Begin Source File
 
 SOURCE=.\res\style_wrap.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\task.ico
 # End Source File
 # Begin Source File
 

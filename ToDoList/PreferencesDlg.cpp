@@ -233,7 +233,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	AddPage(&m_pageUI,					IDS_PREF_UICOMMENTS,			IDC_COMMENTSGROUP);
 	AddPage(&m_pageUI,					IDS_PREF_UITABBAR,				IDC_TABBARGROUP);
 	AddPage(&m_pageUI,					IDS_PREF_TASKVIEWVISIBILITY,	IDC_TASKVIEWSGROUP);
-	AddPage(&m_pageUICustomToolbar,				IDS_PREF_TOOLBAR);
+	AddPage(&m_pageUICustomToolbar,		IDS_PREF_TOOLBAR);
 	AddPage(&m_pageUIVisibility,		IDS_PREF_UIVISIBILITY);
 	AddPage(&m_pageUITasklist,			IDS_PREF_UITASK);
 	AddPage(&m_pageUITasklistColors,	IDS_PREF_UITASKCOLOR);

@@ -472,7 +472,7 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		// and it's equiv item in 'hwnd'
 		int nEquivFirstVisItem = GetListItem(hwnd, hwndTo, nToFirstVisItem);
 		
-		if (nEquivFirstVisItem != nFirstVisItem)
+		if ((nEquivFirstVisItem != -1) && (nEquivFirstVisItem != nFirstVisItem))
 		{
 			int nItemHeight = max(GetItemHeight(hwndTo), GetItemHeight(hwnd));
 			ListView_Scroll(hwnd, 0, (nEquivFirstVisItem - nFirstVisItem) * nItemHeight);
@@ -851,7 +851,6 @@ void CTreeListSyncer::SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear)
 	if (hti)
 		TreeView_SelectItem(hwnd, hti);
 
-	//SetTreeItemState(hwnd, hti, TVIS_SELECTED, TVIS_SELECTED);
 	TreeView_EnsureVisible(hwnd, hti);
 }
 
@@ -1240,12 +1239,16 @@ void CTreeListSyncer::ResyncListHeader(HWND hwnd)
 	{
 		CRect rHeader, rList;
 		::GetWindowRect(hwndHeader, rHeader);
-		::ScreenToClient(hwnd, &(rHeader.TopLeft()));
-		::ScreenToClient(hwnd, &(rHeader.BottomRight()));
 		::GetClientRect(hwnd, rList);
-		
-		rHeader.right = rList.right;
-		::MoveWindow(hwndHeader, rHeader.left, rHeader.top, rHeader.Width(), rHeader.Height(), FALSE); 
+
+		if (rHeader.Width() != rList.Width())
+		{
+			::ScreenToClient(hwnd, &(rHeader.TopLeft()));
+			::ScreenToClient(hwnd, &(rHeader.BottomRight()));
+
+			rHeader.right = rList.right;
+			::MoveWindow(hwndHeader, rHeader.left, rHeader.top, rHeader.Width(), rHeader.Height(), FALSE); 
+		}
 	}
 }
 
@@ -1505,7 +1508,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 									if (htiSel != htiListSel)
 									{
 										TreeView_SelectItem(hwndOther, htiListSel);
-										UpdateWindow(hwndOther);
+										::UpdateWindow(hwndOther);
 									}
 								}
 							}
