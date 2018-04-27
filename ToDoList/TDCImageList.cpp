@@ -53,7 +53,6 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 	
 	if (Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 200))
 	{
-
 		// Add a dummy placeholder for the 'folder' icon which we
 		// will replace once we have rescaled the imagelist
 		Add(CIcon(IDI_NULL, 16));
