@@ -7,8 +7,6 @@
 #include "misc.h"
 #include "shortcutmanager.h"
 
-#include <afxpriv.h>        // for WM_KICKIDLE
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -36,7 +34,13 @@ public:
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToolbarHelper::CToolbarHelper() : m_pToolbar(NULL), m_bMultiline(FALSE), m_nMultilineWidth(200), m_pShortcutMgr(NULL)
+CToolbarHelper::CToolbarHelper() 
+	: 
+	m_pToolbar(NULL), 
+	m_bMultiline(FALSE), 
+	m_nMultilineWidth(200), 
+	m_pShortcutMgr(NULL),
+	m_nIDLastShow(0)
 {
 
 }
@@ -261,13 +265,11 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 					m_pToolbar->ScreenToClient(&point);
 
 					// get tip
-					static CString sTipText;
+					m_sActiveTipText = GetTip(nID, point);
 
-					sTipText = GetTip(nID, &point);
-
-					if (!sTipText.IsEmpty()) // will be zero on a separator
+					if (!m_sActiveTipText.IsEmpty()) // will be zero on a separator
 					{
-						pTTT->lpszText = (LPTSTR)(LPCTSTR)sTipText;
+						pTTT->lpszText = (LPTSTR)(LPCTSTR)m_sActiveTipText;
 						return TRUE;
 					}
 				}
@@ -280,26 +282,25 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 					if (m_pShortcutMgr)
 					{
-						static UINT nIDLastShow = 0;
 						UINT nCmdID = pNMHDR->idFrom;
 
 						// prevent re-entrancy on same tip
-						if (nCmdID != nIDLastShow)
+						if (nCmdID != m_nIDLastShow)
 						{
 							TOOLINFO ti =  { 0 };
 							ti.cbSize = sizeof(ti);
 							ti.hwnd = *m_pToolbar;
 
 							// restore callback on last shown item
-							if (nIDLastShow)
+							if (m_nIDLastShow != 0)
 							{
-								ti.uId = nIDLastShow;
+								ti.uId = m_nIDLastShow;
 								pTooltipCtrl->SendMessage(TTM_GETTOOLINFO, 0, (LPARAM)&ti);
 
 								ti.lpszText = LPSTR_TEXTCALLBACK;
 								pTooltipCtrl->SendMessage(TTM_SETTOOLINFO, 0, (LPARAM)&ti);
 
-								nIDLastShow = 0;
+								m_nIDLastShow = 0;
 							}
 
 							// append shortcut text to new item
@@ -318,7 +319,7 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 								pTooltipCtrl->SendMessage(TTM_SETMAXTIPWIDTH, 0, (m_bMultiline ? m_nMultilineWidth : UINT_MAX));
 
 								// store original id immediately to prevent re-entrancy
-								nIDLastShow = pNMHDR->idFrom;
+								m_nIDLastShow = pNMHDR->idFrom;
 
 								const int TIP_LEN = 80;
 								TCHAR szTip[TIP_LEN] = { 0 };
@@ -328,6 +329,9 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 								ti.uId = pNMHDR->idFrom;
 
 								pTooltipCtrl->SendMessage(TTM_GETTEXT, TIP_LEN, (LPARAM)&ti);
+
+								if (Misc::IsEmpty(szTip))
+									lstrcpyn(szTip, GetTip(nCmdID, FALSE), TIP_LEN);
 
 								CString sTip;
 								sTip.Format(_T("%s (%s)"), szTip, sShortcut);
@@ -408,8 +412,16 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 
 void CToolbarHelper::InitTooltips()
 {
-	if (!m_tt.Create(GetCWnd(), TTS_ALWAYSTIP))
+	int nBtnCount = m_pToolbar->GetToolBarCtrl().GetButtonCount();
+
+	if (!nBtnCount)
 		return;
+	
+	// Once only
+	if (m_tt.GetSafeHwnd() || !m_tt.Create(GetCWnd(), TTS_ALWAYSTIP))
+		return;
+
+	m_pToolbar->GetToolBarCtrl().SetToolTips(&m_tt);
 
 	// hook the toolbar for mouse messages
 	VERIFY(m_scToolbar.HookWindow(*m_pToolbar, this));
@@ -421,8 +433,6 @@ void CToolbarHelper::InitTooltips()
 	m_tt.Activate(TRUE);
 
 	// set up tools for each of the toolbar buttons
-	int nBtnCount = m_pToolbar->GetToolBarCtrl().GetButtonCount();
-
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
 		if (m_pToolbar->GetItemID(nBtn) != ID_SEPARATOR)
@@ -499,7 +509,7 @@ BOOL CToolbarHelper::IsCmdEnabled(UINT nCmdID) const
 	return TRUE;
 }
 
-CString CToolbarHelper::GetTip(UINT nID, LPPOINT pPoint) const
+CString CToolbarHelper::GetTip(UINT nID, const CPoint& point) const
 {
 	if (!nID)
 		return ""; // separator
@@ -507,21 +517,23 @@ CString CToolbarHelper::GetTip(UINT nID, LPPOINT pPoint) const
 	// are we over the dropbutton?
 	BOOL bOverDropBtn = FALSE;
 
-	if (pPoint)
-	{
-		CSize sizeBtn(m_pToolbar->GetToolBarCtrl().GetButtonSize());
-		CRect rButton;
+	CSize sizeBtn(m_pToolbar->GetToolBarCtrl().GetButtonSize());
+	CRect rButton;
+	
+	m_pToolbar->GetToolBarCtrl().GetRect(nID, rButton);
+	rButton.left += sizeBtn.cx;
+	
+	bOverDropBtn = rButton.PtInRect(point);
 
-		m_pToolbar->GetToolBarCtrl().GetRect(nID, rButton);
-		rButton.left += sizeBtn.cx;
+	return GetTip(nID, bOverDropBtn);
+}
 
-		if (rButton.PtInRect(*pPoint))
-			bOverDropBtn = TRUE;
-	}
+CString CToolbarHelper::GetTip(UINT nID, BOOL bOverDropBtn) const
+{
+	if (!nID)
+		return ""; // separator
 
 	CString sTip;
-
-	// do we have a mapping for this
 	THButton dm = { 0 };
 				
 	if (m_mapTHButtons.Lookup(nID, dm))
@@ -531,7 +543,7 @@ CString CToolbarHelper::GetTip(UINT nID, LPPOINT pPoint) const
 			// try the default item first
 			if (dm.nDefCmdID && IsCmdEnabled(dm.nDefCmdID))
 			{
-				sTip = GetTip(dm.nDefCmdID);
+				sTip = GetResourceTip(dm.nDefCmdID);
 
 				if (!sTip.IsEmpty())
 					return sTip;
@@ -543,10 +555,10 @@ CString CToolbarHelper::GetTip(UINT nID, LPPOINT pPoint) const
 			return dm.szTip;
 	}
 
-	return GetTip(nID);
+	return GetResourceTip(nID);
 }
 
-CString CToolbarHelper::GetTip(UINT nID)
+CString CToolbarHelper::GetResourceTip(UINT nID)
 {
 	CString sTip;
 

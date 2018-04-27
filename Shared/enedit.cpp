@@ -8,6 +8,7 @@
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
 #include "AcceleratorString.h"
+#include "icon.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -154,12 +155,21 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 		return FALSE;
 	
 	// Create imagelists first time
-	if (!m_ilBtns.GetSafeHandle() && !m_ilBtns.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
-		return FALSE;
+	int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 
-	if (!m_ilDisabledBtns.GetSafeHandle() && !m_ilDisabledBtns.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
-		return FALSE;
-	
+	if (!m_ilBtns.GetSafeHandle())
+	{
+		ASSERT(!m_ilDisabledBtns.GetSafeHandle());
+
+		if (!m_ilBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1) ||
+			!m_ilDisabledBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
+		{
+			return FALSE;
+		}
+	}
+
+	ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
+
 	nPos = max(nPos, 0);
 	nPos = min(nPos, GetButtonCount());
 	
@@ -167,12 +177,21 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	
 	eb.nID = nID;
 	eb.sTip = szTip;
-	eb.nWidth = ((nWidth != DEF_BTNWIDTH) ? nWidth : 20); // 2 px padding
 	eb.iImage = m_ilBtns.Add(hIcon);
 
-	HICON hDisabled = CEnBitmapEx::CreateDisabledIcon(hIcon);
-	VERIFY(m_ilDisabledBtns.Add(hDisabled) == eb.iImage);
-	::DestroyIcon(hDisabled);
+#ifdef _DEBUG
+	int nCount = m_ilBtns.GetImageCount();
+#endif
+
+	if (nWidth != DEF_BTNWIDTH)
+		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
+	else
+		eb.nWidth = (nImageSize + 4); // 2 px padding
+
+	CIcon iconDisabled(CEnBitmapEx::CreateDisabledIcon(hIcon));
+	VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
+	
+	ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
 
 	m_aButtons.InsertAt(nPos, eb);
 	
@@ -752,12 +771,15 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 	// draw caption/image
 	if (eb.iImage != -1)
 	{
-		CPoint ptDraw(rBtn.CenterPoint() - CPoint(8, 8));
+		int nImageSize = m_ilBtns.GetImageSize();
+
+		CRect rDraw(0, 0, nImageSize, nImageSize);
+		GraphicsMisc::CentreRect(rDraw, rBtn, TRUE, TRUE);
 
 		if (bEnabled)
-			m_ilBtns.Draw(pDC, eb.iImage, ptDraw, ILD_TRANSPARENT);
+			m_ilBtns.Draw(pDC, eb.iImage, rDraw.TopLeft(), ILD_TRANSPARENT);
 		else
-			m_ilDisabledBtns.Draw(pDC, eb.iImage, ptDraw, ILD_TRANSPARENT);
+			m_ilDisabledBtns.Draw(pDC, eb.iImage, rDraw.TopLeft(), ILD_TRANSPARENT);
 	}
 	else if (!eb.sCaption.IsEmpty())
 	{

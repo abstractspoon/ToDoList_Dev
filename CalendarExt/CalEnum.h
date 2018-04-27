@@ -56,8 +56,6 @@ enum TCC_SNAPMODE
 const double	ONE_MINUTE		= (1.0 / (24.0 * 60));
 const double	ONE_HOUR		= (1.0 / 24.0);
 const double	TWELVE_HOURS	= (12.0 / 24.0);
-const int		DEF_TASK_HEIGHT = 19; // Effective height is 1 less
-const int		MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 const int		DAY_IN_SECONDS	= (24 * 60 * 60);
 const int		WEEK_IN_SECONDS	= (DAY_IN_SECONDS * 7);
 

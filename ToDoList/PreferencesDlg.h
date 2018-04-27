@@ -12,6 +12,7 @@
 #include "preferencestaskdefpage.h"
 #include "preferencestaskdef2page.h"
 #include "preferencestoolpage.h"
+#include "preferencesuicustomtoolbarpage.h"
 #include "preferencesuivisibilitypage.h"
 #include "preferencesuipage.h"
 #include "preferencesuitasklistpage.h"
@@ -40,6 +41,7 @@ enum
 	PREFPAGE_UI, 
 	PREFPAGE_UITASK, 
 	PREFPAGE_UIFONTCOLOR, 
+	PREFPAGE_TOOLBAR, 
 	PREFPAGE_TASK, 
 	PREFPAGE_TASKCALC, 
 	PREFPAGE_TASKDEF, 
@@ -230,6 +232,10 @@ public:
 	BOOL GetIncludeWebLinksInCommentsPaste() const { return m_pageUI.GetIncludeWebLinksInCommentsPaste(); }
 	BOOL GetDisplayUDTsInToolbar() const { return m_pageUI.GetDisplayUDTsInToolbar(); }
 
+	// CPreferencesUICustomToolbarPage
+	BOOL HasCustomToolbar() const { return m_pageUICustomToolbar.HasToolbarButtons(); }
+	int GetCustomToolbarButtons(CToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
+
 	// CPreferencesUIVisibilityPage
 	void GetDefaultColumnEditFilterVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const { m_pageUIVisibility.GetColumnAttributeVisibility(vis); }
 	void SetDefaultColumnEditFilterVisibility(const TDCCOLEDITFILTERVISIBILITY& vis) { m_pageUIVisibility.SetColumnAttributeVisibility(vis); }
@@ -285,8 +291,8 @@ public:
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }
 
 	// CPreferencesToolPage
-	int GetUserTools(CUserToolArray& aTools) const { return m_pageTool.GetUserTools(aTools); }
-	BOOL GetUserTool(int nTool, USERTOOL& tool) const { return m_pageTool.GetUserTool(nTool, tool); } 
+	int GetUserTools(CUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
+	BOOL GetUserTool(int nTool, USERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
 
 //	BOOL Get() const { return m_b; }
 
@@ -302,11 +308,12 @@ protected:
 	CPreferencesUIVisibilityPage m_pageUIVisibility;
 	CPreferencesUITasklistPage m_pageUITasklist;
 	CPreferencesUITasklistColorsPage m_pageUITasklistColors;
+	CPreferencesUICustomToolbarPage m_pageUICustomToolbar;
 	CPreferencesTaskPage m_pageTask;
 	CPreferencesTaskCalcPage m_pageTaskCalc;
 	CPreferencesTaskDefPage m_pageTaskDef;
 	CPreferencesTaskDef2Page m_pageTaskDef2;
-	CPreferencesToolPage m_pageTool;
+	CPreferencesToolPage m_pageTools;
 	CPreferencesShortcutsPage m_pageShortcuts;
 	CPreferencesMultiUserPage m_pageMultiUser;
 

@@ -84,8 +84,6 @@ protected:
 	static CString s_sBrowseBtnTip, s_sGoBtnTip;
 	static CString s_sBrowseFilesTitle, s_sBrowseFoldersTitle;
 	static HICON s_hBrowseImage, s_hGoImage;
-	
-	const UINT ICON_WIDTH;
 
 protected:
 // Overrides

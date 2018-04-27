@@ -193,8 +193,10 @@ void CGanttTreeCtrl::ShowTaskIcons(BOOL bShow)
 	if (bShow)
 	{
 		// Create dummy image to make a space for drawing in
+		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
+		
 		if (!m_ilTaskIcons.GetSafeHandle())
-			VERIFY(m_ilTaskIcons.Create(16, 16, 0, 1, 0));
+			VERIFY(m_ilTaskIcons.Create(nImageSize, nImageSize, 0, 1, 0));
 
 		SetImageList(&m_ilTaskIcons, TVSIL_NORMAL);
 	}

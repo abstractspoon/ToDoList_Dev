@@ -27,6 +27,7 @@
 #include "..\shared\fontcache.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\tooltipctrlex.h"
+#include "..\Shared\enimagelist.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +66,7 @@ public:
 	void SetSourceControlled(BOOL bEnable = TRUE) { m_bSourceControlled = bEnable; }
 	void SetTasklistFolder(LPCTSTR szFolder) { m_sTasklistFolder = szFolder; }
 	CString GetTasklistFolder() const { return m_sTasklistFolder; }
-	
+
 	void OnCustomAttributeChange();
 	void OnColumnVisibilityChange();
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
@@ -290,7 +291,7 @@ protected:
 	CSysImageList m_ilFileRef;
 	CBrush m_brDue, m_brDueToday;
 	CFontCache m_fonts;
-	CImageList m_ilCheckboxes, m_ilColSymbols;
+	CEnImageList m_ilCheckboxes, m_ilColSymbols;
 	CIconCache m_imageIcons;
 
 	static CMap<TDC_COLUMN, TDC_COLUMN, const TDCCOLUMN*, const TDCCOLUMN*&> s_mapColumns;
@@ -381,6 +382,8 @@ protected:
 	void ResizeSplitterToFitColumns();
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
+	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImage = 0, int nCount = 1, int nImageSize = 16) const;
+	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;
@@ -512,10 +515,9 @@ protected:
 
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);
 	static BOOL InvalidateItem(CListCtrl& lc, int nItem, BOOL bUpdate = FALSE);
-	static CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImage = 0, int nCount = 1);
-	static BOOL CalcColumnIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
+	static int CalcRequiredIconColumnWidth(int nNumImage);
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 

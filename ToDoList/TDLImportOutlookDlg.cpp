@@ -14,6 +14,8 @@
 #include "..\shared\enstring.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\themed.h"
+#include "..\shared\icon.h"
+#include "..\shared\GraphicsMisc.h"
 
 #include "..\Interfaces\IPreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -36,18 +38,18 @@ using namespace OutlookAPI;
 
 const int OOC_FLAGGEDMAIL = -1;
 
-static int ICONS[][2] = 
+static int ICONS[] = 
 {
-	{ OOC_FOLDER,		IDI_FOLDER }, 
-	{ OOC_MAIL,			IDI_MAIL }, 
-	{ OOC_FLAGGEDMAIL,	IDI_FLAGGEDMAIL }, 
-	{ OOC_NOTE,			IDI_NOTE }, 	
-	{ OOC_TASK,			IDI_TASK }, 	
-	{ OOC_JOURNAL,		IDI_JOURNAL }, 
-	{ OOC_CONTACT,		IDI_CONTACT }, 
-	{ OOC_APPOINTMENT,	IDI_APPOINTMENT }
+	OOC_FOLDER, 
+	OOC_MAIL, 
+	OOC_FLAGGEDMAIL, 
+	OOC_NOTE, 	
+	OOC_TASK, 	
+	OOC_JOURNAL, 
+	OOC_CONTACT, 
+	OOC_APPOINTMENT
 };
-int NUM_ICONS = (sizeof(ICONS) / (2 * sizeof(UINT)));
+int NUM_ICONS = (sizeof(ICONS) / sizeof(ICONS[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
@@ -151,22 +153,20 @@ BOOL CTDLImportOutlookDlg::BuildItemImageList()
 	if (m_ilItemTypes.GetSafeHandle())
 		return TRUE;
 
-	if (!m_ilItemTypes.Create(16, 16, ILC_COLOR24 | ILC_MASK, NUM_ICONS, 1))
+	if (!m_ilItemTypes.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
 		return FALSE;
 
+	CBitmap bmp;
+	bmp.LoadBitmap(IDB_OUTLOOKTYPES);
+
+	m_ilItemTypes.Add(&bmp, RGB(255, 0, 255));
+
 	for (int nIcon = 0; nIcon < NUM_ICONS; nIcon++)
-	{
-		HICON hIcon = AfxGetApp()->LoadIcon(ICONS[nIcon][1]);
-
-		if (!hIcon)
-			return FALSE;
-
-		m_mapItemTypes[ICONS[nIcon][0]] = m_ilItemTypes.Add(hIcon);
-		::DestroyIcon(hIcon);
-	}
+		m_mapItemTypes[ICONS[nIcon]] = nIcon;
 
 	ASSERT(m_ilItemTypes.GetImageCount() == NUM_ICONS);
 
+	m_ilItemTypes.ScaleByDPIFactor();
 	m_tcTasks.SetImageList(&m_ilItemTypes, TVSIL_NORMAL);
 
 	return TRUE;

@@ -103,6 +103,9 @@ void CTDLLanguageComboBox::BuildLanguageList()
 		AddString(sFileName, hbmFlag, nLangID);
 	}
 
+	m_il.ScaleByDPIFactor();
+	SetImageList(&m_il);
+
 	SelectLanguage(m_sSelLanguage);
 }
 

@@ -23,12 +23,13 @@ static char THIS_FILE[] = __FILE__;
 
 const LPCTSTR NO_ICON = _T("__NONE__");
 
-CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, CWnd* pParent /*=NULL*/)
+CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLTaskIconDlg::IDD, pParent), 
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
-	m_bMultiSel(FALSE)
+	m_bMultiSel(FALSE),
+	m_bWantNone(bWantNoneItem)
 {
 
 }
@@ -37,7 +38,8 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArra
 	: 
 	CTDLDialog(CTDLTaskIconDlg::IDD, pParent), 
 	m_ilIcons(ilIcons), 
-	m_bMultiSel(TRUE)
+	m_bMultiSel(TRUE),
+	m_bWantNone(FALSE)
 {
 	if (aSelNames.GetSize())
 		m_sIconName = aSelNames[0];
@@ -214,8 +216,10 @@ void CTDLTaskIconDlg::BuildListCtrl()
 		}
 
 		// add a <none> option for turning off a task's image
-		if (!m_bMultiSel)
+		if (m_bWantNone)
 		{
+			ASSERT(!m_bMultiSel);
+
 			int nIndex = m_lcIcons.InsertItem(nImage, _T("<none>"), -1);
 			m_lcIcons.SetItemData(nIndex, (DWORD)-1);
 		}

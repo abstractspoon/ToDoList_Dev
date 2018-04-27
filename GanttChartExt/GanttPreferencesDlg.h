@@ -23,7 +23,8 @@ class CGanttPreferencesPage : public CPreferencesPageBase
 public:
 	CGanttPreferencesPage(CWnd* pParent = NULL);
 
-	BOOL GetDisplayAllocTo() const { return m_bDisplayAllocTo; }
+	BOOL GetDisplayTrailingAllocTo() const { return m_bDisplayTrailingAllocTo; }
+	BOOL GetDisplayTrailingTaskTitle() const { return m_bDisplayTrailingTaskTitle; }
 	BOOL GetAutoScrollSelection() const { return m_bAutoScrollSelection; }
 	int GetParentColoring(COLORREF& crParent) const;
 	BOOL GetAutoCalcParentDates() const { return m_bAutoCalcParentDates; }
@@ -45,7 +46,8 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CGanttPreferencesPage)
-	BOOL	m_bDisplayAllocTo;
+	BOOL	m_bDisplayTrailingAllocTo;
+	BOOL	m_bDisplayTrailingTaskTitle;
 	BOOL	m_bAutoScrollSelection;
 	BOOL	m_bSpecifyWeekendColor;
 	BOOL	m_bSpecifyNonWorkingHoursColor;
@@ -109,7 +111,8 @@ class CGanttPreferencesDlg : public CPreferencesDlgBase
 public:
 	CGanttPreferencesDlg(CWnd* pParent);
 
-	BOOL GetDisplayAllocTo() const { return m_page.GetDisplayAllocTo(); }
+	BOOL GetDisplayTrailingAllocTo() const { return m_page.GetDisplayTrailingAllocTo(); }
+	BOOL GetDisplayTrailingTaskTitle() const { return m_page.GetDisplayTrailingTaskTitle(); }
 	BOOL GetAutoScrollSelection() const { return m_page.GetAutoScrollSelection(); }
 	int GetParentColoring(COLORREF& crParent) const { return m_page.GetParentColoring(crParent); }
 	BOOL GetAutoCalcParentDates() const { return m_page.GetAutoCalcParentDates(); }

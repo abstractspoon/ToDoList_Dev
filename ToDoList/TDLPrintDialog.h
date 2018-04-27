@@ -31,7 +31,8 @@ class CTDLPrintDialog : public CTDLDialog
 // Construction
 public:
 	CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet,
-					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);
+					const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+					BOOL bSupportsExportToImage, CWnd* pParent = NULL);
 
 	BOOL GetStylesheet(CString& sStylesheet) const;
 	CString GetTitle() const { return m_sTitle; }
@@ -53,6 +54,7 @@ protected:
 	BOOL	m_bDate;
 	BOOL	m_bUseStylesheet;
 	BOOL	m_bPreview;
+	BOOL	m_bSupportsExportToImage;
 	CHistoryComboBox m_cbTitle;
 
 // Overrides

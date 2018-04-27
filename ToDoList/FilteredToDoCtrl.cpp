@@ -1450,8 +1450,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	// iterate the full data looking for items not in the
 	// tree and test them for inclusion in the filter
-	CHTIMap htiMap;
-	VERIFY (TCH().BuildHTIMap(htiMap) < (int)m_data.GetTaskCount());
+	ASSERT(m_taskTree.TreeItemMap().GetCount() < m_data.GetTaskCount());
 	
 	SEARCHPARAMS params;
 	m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
@@ -1459,7 +1458,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 	const TODOSTRUCTURE* pTDS = m_data.GetStructure();
 	ASSERT(pTDS);
 	
-	if (FindNewNowFilterTasks(pTDS, params, htiMap))
+	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
 	{
 		TDC_ATTRIBUTE nNowAttrib;
 

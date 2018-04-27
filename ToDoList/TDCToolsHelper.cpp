@@ -399,6 +399,7 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CToolBa
 		VERIFY(sil.Initialize());
 		
 		// start adding after the pref button
+		CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 		int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
 		int nAdded = 0;
 		
@@ -409,14 +410,13 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CToolBa
 				
 			if (hIcon)
 			{
-				CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 				int nImage = pIL->Add(hIcon);
 				
 				TBBUTTON tbb = { nImage, nTool + m_nStartID, 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
 				
 				if (toolbar.GetToolBarCtrl().InsertButton(nStartPos + nAdded, &tbb))
 					nAdded++;
-				else // remove image
+				else
 					pIL->Remove(nImage);
 				
 				// cleanup

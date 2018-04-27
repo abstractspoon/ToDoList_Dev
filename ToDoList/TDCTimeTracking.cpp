@@ -97,7 +97,7 @@ BOOL CTDCTimeTracking::BeginTracking(DWORD dwTaskID)
 
 void CTDCTimeTracking::SetTrackingReminderInterval(int nMinutes)
 {
-	m_dwTimeTrackReminderIntervalTicks = (nMinutes / (60 * TICKS2HOURS));
+	m_dwTimeTrackReminderIntervalTicks = (DWORD)(nMinutes / (60 * TICKS2HOURS));
 }
 
 BOOL CTDCTimeTracking::EndTracking()

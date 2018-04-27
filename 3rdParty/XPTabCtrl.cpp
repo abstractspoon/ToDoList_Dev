@@ -335,8 +335,15 @@ void CXPTabCtrl::DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT ui
 	int nOldMode=pDC->SetBkMode(TRANSPARENT);
 	HIMAGELIST hilTabs = (HIMAGELIST)TabCtrl_GetImageList(GetSafeHwnd());	// icon
 	if(hilTabs && tci.iImage>=0)
-	{	ImageList_Draw(hilTabs, tci.iImage, *pDC, rcItem.left+(bSel?2:0), rcItem.top+(bSel?0:-2), ILD_TRANSPARENT);
-		rcItem.left+=19;
+	{	
+		int cx = 0, cy = 0;
+		ImageList_GetIconSize(hilTabs, &cx, &cy);
+
+		CRect rImage(rcItem);
+		rImage.top += (((rImage.Height() - cy) / 2) - 2);
+			
+		ImageList_Draw(hilTabs, tci.iImage, *pDC, rImage.left, rImage.top, ILD_TRANSPARENT);
+		rcItem.left+=(cx + 3);
 	}
 	else rcItem.OffsetRect(-2,0);
 

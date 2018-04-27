@@ -9,6 +9,7 @@
 #include "enbitmapex.h"
 #include "osversion.h"
 #include "icon.h"
+#include "enimagelist.h"
 
 #ifndef ULONG_PTR
 	typedef unsigned long ULONG_PTR; 
@@ -234,6 +235,8 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& 
 			if (il.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
 				il.Add(&bm, crMask);
 		}
+
+		CEnImageList::ScaleByDPIFactor(il);
 	}
 	
 	return il.GetImageCount();

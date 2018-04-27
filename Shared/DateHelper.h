@@ -184,6 +184,7 @@ public:
 	static BOOL GetTimeT(const COleDateTime& date, time_t& timeT);
 	static BOOL GetTimeT64(const COleDateTime& date, time64_t& timeT);
 	static COleDateTime GetDate(time64_t date);
+	static COleDateTime GetDate(double date, COleDateTime::DateTimeStatus status);
 
 	static COleDateTime GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);

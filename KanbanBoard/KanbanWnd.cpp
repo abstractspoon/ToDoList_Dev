@@ -688,7 +688,7 @@ void CKanbanWnd::Resize(int cx, int cy)
 		}
 
 		CRect rMain(0, 0, cx, cy);
-		rMain.top = (rOptions.bottom + CDlgUnits(this).ToPixelsY(6));
+		rMain.top = CDlgUnits(this).ToPixelsY(28);
 		
 		m_ctrlKanban.MoveWindow(rMain);
 	}

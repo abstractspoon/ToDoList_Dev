@@ -7,6 +7,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 #include "..\shared\misc.h"
+#include "..\shared\Graphicsmisc.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\enbitmap.h"
 
@@ -17,10 +18,10 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-const int MAX_SPLITBAR_WIDTH	= 6;
-const int MIN_SPLITBAR_WIDTH	= 1;
+const int MAX_SPLITBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_SPLITBAR_WIDTH	= 1; // don't scale
 const int MIN_SPLIT_WIDTH		= (GetSystemMetrics(SM_CXVSCROLL) * 2);
-const int INITIAL_SPLIT_POS		= 300;
+const int INITIAL_SPLIT_POS		= GraphicsMisc::ScaleByDPIFactor(300);
 const int LINUX_VOFFSET_FUDGE	= 2;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +472,7 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		// and it's equiv item in 'hwnd'
 		int nEquivFirstVisItem = GetListItem(hwnd, hwndTo, nToFirstVisItem);
 		
-		if (nEquivFirstVisItem != nFirstVisItem)
+		if ((nEquivFirstVisItem != -1) && (nEquivFirstVisItem != nFirstVisItem))
 		{
 			int nItemHeight = max(GetItemHeight(hwndTo), GetItemHeight(hwnd));
 			ListView_Scroll(hwnd, 0, (nEquivFirstVisItem - nFirstVisItem) * nItemHeight);
@@ -550,7 +551,10 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 			if (nListSel != nTreeSel)
 			{
 				ListView_SetItemState(hwnd, nListSel, 0, LVIS_SELECTED | LVIS_FOCUSED);
+				InvalidateListItem(hwnd, nListSel);
+
 				ListView_SetItemState(hwnd, nTreeSel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+				InvalidateListItem(hwnd, nTreeSel);
 				
 				bSynced = TRUE;
 			}
@@ -570,7 +574,9 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		{
 			int nSel = GetListItem(hwnd, hwndTo, nSelTo);
 			ASSERT(nSel != -1);
+
 			ListView_SetItemState(hwnd, nSel, LVIS_SELECTED, LVIS_SELECTED);
+			InvalidateListItem(hwnd, nSelTo);
 			
 			int nPrevSel = nSel;
 			nSelTo = ListView_GetNextItem(hwndTo, nSelTo, LVIS_SELECTED);
@@ -734,6 +740,19 @@ void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti)
 	::InvalidateRect(hwnd, rItem, TRUE);
 }
 
+void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem)
+{
+	ASSERT(IsList(hwnd));
+	
+	CRect rItem, rList;
+	::GetClientRect(hwnd, rList);
+
+	ListView_GetItemRect(hwnd, nItem, &rItem, LVIR_BOUNDS);
+	rItem.right = rList.right;
+	
+	::InvalidateRect(hwnd, rItem, TRUE);
+}
+
 BOOL CTreeListSyncer::HasFocus() const
 {
 	return HasFocus(Left()) || HasFocus(Right());
@@ -850,7 +869,6 @@ void CTreeListSyncer::SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear)
 	if (hti)
 		TreeView_SelectItem(hwnd, hti);
 
-	//SetTreeItemState(hwnd, hti, TVIS_SELECTED, TVIS_SELECTED);
 	TreeView_EnsureVisible(hwnd, hti);
 }
 
@@ -1239,12 +1257,16 @@ void CTreeListSyncer::ResyncListHeader(HWND hwnd)
 	{
 		CRect rHeader, rList;
 		::GetWindowRect(hwndHeader, rHeader);
-		::ScreenToClient(hwnd, &(rHeader.TopLeft()));
-		::ScreenToClient(hwnd, &(rHeader.BottomRight()));
 		::GetClientRect(hwnd, rList);
-		
-		rHeader.right = rList.right;
-		::MoveWindow(hwndHeader, rHeader.left, rHeader.top, rHeader.Width(), rHeader.Height(), FALSE); 
+
+		if (rHeader.Width() != rList.Width())
+		{
+			::ScreenToClient(hwnd, &(rHeader.TopLeft()));
+			::ScreenToClient(hwnd, &(rHeader.BottomRight()));
+
+			rHeader.right = rList.right;
+			::MoveWindow(hwndHeader, rHeader.left, rHeader.top, rHeader.Width(), rHeader.Height(), FALSE); 
+		}
 	}
 }
 
@@ -1504,7 +1526,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 									if (htiSel != htiListSel)
 									{
 										TreeView_SelectItem(hwndOther, htiListSel);
-										UpdateWindow(hwndOther);
+										::UpdateWindow(hwndOther);
 									}
 								}
 							}

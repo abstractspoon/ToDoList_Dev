@@ -23,12 +23,14 @@ static char THIS_FILE[] = __FILE__;
 
 
 CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView, LPCTSTR szStylesheet, 
-									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+									const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+									BOOL bSupportsExportToImage, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_PRINT_DIALOG, pParent), 
 	m_bPreview(bPreview), 
 	m_dlgTaskSel(_T("Print"), nView),
 	m_sTitle(szTitle), 
+	m_bSupportsExportToImage(bSupportsExportToImage),
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 	//{{AFX_DATA_INIT(CTDLPrintDialog)
@@ -37,6 +39,9 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 
 	m_bDate = prefs.GetProfileInt(_T("Print"), _T("WantDate"), TRUE);
 	m_nExportStyle = (TDLPD_STYLE)prefs.GetProfileInt(_T("Print"), _T("ExportStyle"), TDLPDS_WRAP);
+
+	if (!m_bSupportsExportToImage && (m_nExportStyle == TDLPDS_IMAGE))
+		m_nExportStyle = TDLPDS_WRAP;
 
 	m_cbTitle.Load(prefs, _T("Print"));
 	m_dlgTaskSel.SetCustomAttributeDefinitions(aAttribDefs);
@@ -156,7 +161,7 @@ void CTDLPrintDialog::EnableDisableControls()
 	GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_TABLE)->EnableWindow(!m_bUseStylesheet); 
 	GetDlgItem(IDC_STYLE_PARA)->EnableWindow(!m_bUseStylesheet); 
-	GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet); 
+	GetDlgItem(IDC_STYLE_IMAGE)->EnableWindow(!m_bUseStylesheet && m_bSupportsExportToImage); 
 		
 	// Disable OK if stylesheet not valid
 	CString sUnused;

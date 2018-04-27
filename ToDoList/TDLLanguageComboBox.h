@@ -7,6 +7,8 @@
 // TDLLanguageComboBox.h : header file
 //
 
+#include "..\shared\EnImageList.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageComboBox window
 
@@ -29,7 +31,7 @@ public:
 protected:
 	mutable CString m_sSelLanguage;
 	CString m_sFilter;
-	CImageList m_il;
+	CEnImageList m_il;
 
 protected:
 // Overrides

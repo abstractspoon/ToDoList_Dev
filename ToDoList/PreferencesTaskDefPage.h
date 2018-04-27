@@ -67,7 +67,6 @@ protected:
 
 	CString	m_sDefCreatedBy;
 	double	m_dDefCost;
-	BOOL	m_bUpdateInheritAttributes;
 	BOOL	m_bReminderBeforeDue;
 	int		m_nDefPriority;
 	int		m_nDefRisk;
@@ -79,8 +78,9 @@ protected:
 	CString	m_sDefCategory;
 	CString m_sDefIcon;
 	COLORREF m_crDef;
-	BOOL	m_bUseCreationForDefStartDate;
-	BOOL	m_bUseCreationForDefDueDate;
+	BOOL	m_bUseCreationDateForDefStartDate;
+	BOOL	m_bUseCreationTimeForDefStartDate;
+	BOOL	m_bUseCreationDateForDefDueDate;
 	CWndPromptManager m_mgrPrompts;
 	CGroupLineManager m_mgrGroupLines;
 	CTDCImageList m_ilTaskIcons;
@@ -109,6 +109,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSetdefaulticon();
 	afx_msg void OnSelchangeReminder();
+	afx_msg void OnUseCreationDateForDefStartDate();
 	//}}AFX_MSG
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetdefaultcolor();

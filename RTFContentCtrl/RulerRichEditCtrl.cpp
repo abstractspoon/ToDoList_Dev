@@ -71,7 +71,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int SCMARGIN = 4;
+const int SCMARGIN = GraphicsMisc::ScaleByDPIFactor(4);
 const LPCTSTR FILEPREFIX = _T("file://");
 const int DEFTABSTOP = 320;
 const WORD PFN_NUMBERLIST = 0x0002;

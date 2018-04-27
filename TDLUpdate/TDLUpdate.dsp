@@ -150,6 +150,19 @@ SOURCE=.\TDLWebUpdater.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\res\tdlupdate.exe.manifest
+
+!IF  "$(CFG)" == "TDLUpdate - Win32 Unicode Release"
+
+!ELSEIF  "$(CFG)" == "TDLUpdate - Win32 Unicode Debug"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\TDLUpdate.ico
 # End Source File
 # Begin Source File
@@ -169,19 +182,6 @@ SOURCE=.\res\wiz_header.bmp
 SOURCE=..\3rdParty\Zlib\ZLIBSTAT.LIB
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\res\tdlupdate.exe.manifest
-
-!IF  "$(CFG)" == "TDLUpdate - Win32 Unicode Release"
-
-!ELSEIF  "$(CFG)" == "TDLUpdate - Win32 Unicode Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
 # Begin Source File
 
 SOURCE=.\TDLUpdate.vcxproj

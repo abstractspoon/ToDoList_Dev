@@ -1038,6 +1038,11 @@ HTREEITEM CTreeCtrlHelper::GetLastItem() const
 	return htiPrevLast;
 }
 
+HTREEITEM CTreeCtrlHelper::GetLastVisibleItem() const
+{
+	return m_tree.GetNextItem(NULL, TVGN_LASTVISIBLE);
+}
+
 HTREEITEM CTreeCtrlHelper::GetLastVisibleChildItem(HTREEITEM hti) const
 {
 	if (IsItemExpanded(hti) <= 0)

@@ -149,6 +149,7 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
 	SetSel(0, -1);
 	SetWindowPos(NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
 	EnableWindow(TRUE);
+	SetFocus();
 
 	return 0L;
 }

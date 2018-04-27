@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR STR_CLOSEBTN	= _T("r");
-const int SIZE_CLOSEBTN		= 8;
+const int SIZE_CLOSEBTN		= GraphicsMisc::ScaleByDPIFactor(8);
 const COLORREF RED			= RGB(200, 90, 90);
 const COLORREF WHITE		= RGB(240, 240, 240);
 

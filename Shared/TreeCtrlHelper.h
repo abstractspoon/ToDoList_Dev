@@ -23,6 +23,10 @@
 #	define TreeView_GetExtendedStyle(hwnd) (DWORD)SNDMSG((hwnd), TVM_GETEXTENDEDSTYLE, 0, 0)
 #endif
 
+#ifndef TVGN_LASTVISIBLE
+#	define TVGN_LASTVISIBLE 0x000A
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 typedef CMap<HTREEITEM, HTREEITEM, int, int&> CMapIndices;
@@ -180,6 +184,7 @@ public:
 	void SetItemBold(HTREEITEM hti, BOOL bBold = TRUE);
 	void SetTopLevelItemsBold(BOOL bBold = TRUE);
 
+	HTREEITEM GetLastVisibleItem() const;
 	HTREEITEM GetLastVisibleChildItem(HTREEITEM hti) const;
 	HTREEITEM GetLastChildItem(HTREEITEM hti) const;
 	HTREEITEM GetLastItem() const;

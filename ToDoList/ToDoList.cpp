@@ -110,7 +110,7 @@ CToDoListApp theApp;
 BOOL CToDoListApp::InitInstance()
 {
 	// Set this before anything else
-	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELPBUTTON));
+	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 
 	// Remove any old components before they might get loaded
 	CleanupAppFolder();
@@ -177,18 +177,12 @@ BOOL CToDoListApp::InitInstance()
 
 	// Set up file edit icons because these will be needed by
 	// welcome wizard and main app
-	HICON hBrowse = AfxGetApp()->LoadIcon(IDI_FILEEDIT_BROWSE);
-	HICON hGo = AfxGetApp()->LoadIcon(IDI_FILEEDIT_GO);
+	CIcon iconBrowse, iconGo;
+	iconBrowse.LoadIcon(IDI_FILEEDIT_BROWSE);
+	iconGo.LoadIcon(IDI_FILEEDIT_GO);
 	
-	if (hBrowse && hGo)
-	{
-		CFileEdit::SetDefaultButtonImages(hBrowse, hGo);
-	}
-	else
-	{
-		::DestroyIcon(hBrowse);
-		::DestroyIcon(hGo);
-	}
+	if (iconBrowse.IsValid() && iconGo.IsValid())
+		CFileEdit::SetDefaultButtonImages(iconBrowse.Detach(), iconGo.Detach());
 	
 	// init prefs 
 	if (!InitPreferences(cmdInfo))
@@ -850,6 +844,10 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		}
 
 		CPreferences prefs;
+
+		// Save language choice 
+		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
+		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
 		
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);

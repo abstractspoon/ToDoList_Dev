@@ -81,8 +81,9 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DEFAULTSTATUS, m_sDefStatus);
 	DDX_Text(pDX, IDC_DEFAULTTAGS, m_sDefTags);
 	DDX_Text(pDX, IDC_DEFAULTCATEGORY, m_sDefCategory);
-	DDX_Check(pDX, IDC_USECREATIONFORDEFSTARTDATE, m_bUseCreationForDefStartDate);
-	DDX_Check(pDX, IDC_USECREATIONFORDEFDUEDATE, m_bUseCreationForDefDueDate);
+	DDX_Check(pDX, IDC_USECREATIONFORDEFSTARTDATE, m_bUseCreationDateForDefStartDate);
+	DDX_Check(pDX, IDC_USECREATIONTIMEFORDEFSTARTDATE, m_bUseCreationTimeForDefStartDate);
+	DDX_Check(pDX, IDC_USECREATIONFORDEFDUEDATE, m_bUseCreationDateForDefDueDate);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -97,6 +98,7 @@ void CPreferencesTaskDefPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPreferencesTaskDefPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesTaskDefPage)
 	ON_CBN_SELCHANGE(IDC_DEFREMINDER, OnSelchangeReminder)
+	ON_BN_CLICKED(IDC_USECREATIONFORDEFSTARTDATE, OnUseCreationDateForDefStartDate)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SETDEFAULTICON, OnSetdefaulticon)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetdefaultcolor)
@@ -116,6 +118,7 @@ BOOL CPreferencesTaskDefPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_DEFGROUP, *this);
 
 	GetDlgItem(IDC_DEFREMINDERDATE)->EnableWindow(m_nDefReminderLeadin != TDLRPC_NOREMINDER);
+	GetDlgItem(IDC_USECREATIONTIMEFORDEFSTARTDATE)->EnableWindow(m_bUseCreationDateForDefStartDate);	
 
 	m_btDefColor.SetColor(m_crDef);
 	m_ilTaskIcons.LoadDefaultImages();
@@ -190,9 +193,9 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_sDefCategory = pPrefs->GetProfileString(szKey, _T("DefaultCategory"));
 	m_sDefCreatedBy = pPrefs->GetProfileString(szKey, _T("DefaultCreatedBy"), Misc::GetUserName());
 	m_crDef = pPrefs->GetProfileInt(szKey, _T("DefaultColor"), 0);
-	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(szKey, _T("UpdateInheritAttributes"), FALSE);
-	m_bUseCreationForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefStartDate"), TRUE);
-	m_bUseCreationForDefDueDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefDueDate"), FALSE);
+	m_bUseCreationDateForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefStartDate"), TRUE);
+	m_bUseCreationTimeForDefStartDate = pPrefs->GetProfileInt(szKey, _T("UseCreationTimeForDefStartDate"), FALSE);
+	m_bUseCreationDateForDefDueDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefDueDate"), FALSE);
 	m_dDefCost = Misc::Atof(pPrefs->GetProfileString(szKey, _T("DefaultCost"), _T("0")));
 	m_dDefTimeEst = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeEstimate"), 0);
 	m_eTimeEst.SetUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_HOURS));
@@ -235,9 +238,9 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 	pPrefs->WriteProfileString(szKey, _T("DefaultCreatedBy"), m_sDefCreatedBy);
 	pPrefs->WriteProfileString(szKey, _T("DefaultIcon"), m_sDefIcon);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultColor"), m_crDef);
-	pPrefs->WriteProfileInt(szKey, _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
-	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefStartDate"), m_bUseCreationForDefStartDate);
-	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefDueDate"), m_bUseCreationForDefDueDate);
+	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefStartDate"), m_bUseCreationDateForDefStartDate);
+	pPrefs->WriteProfileInt(szKey, _T("UseCreationTimeForDefStartDate"), m_bUseCreationTimeForDefStartDate);
+	pPrefs->WriteProfileInt(szKey, _T("UseCreationForDefDueDate"), m_bUseCreationDateForDefDueDate);
 	pPrefs->WriteProfileDouble(szKey, _T("DefaultCost"), m_dDefCost);
 	pPrefs->WriteProfileDouble(szKey, _T("DefaultTimeEstimate"), m_dDefTimeEst);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultTimeEstUnits"), m_eTimeEst.GetUnits());
@@ -271,6 +274,8 @@ void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKe
 
 void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 {
+	tdiDefault = TODOITEM(); // clear all attributes
+
 	tdiDefault.sTitle = CEnString(IDS_TASK);
 	tdiDefault.color = m_crDef;
 	tdiDefault.sAllocBy = m_sDefAllocBy;
@@ -284,11 +289,17 @@ void CPreferencesTaskDefPage::GetTaskAttributes(TODOITEM& tdiDefault) const
 	tdiDefault.nRisk = m_nDefRisk;
 	tdiDefault.sCreatedBy = m_sDefCreatedBy;
 	tdiDefault.sIcon = m_sDefIcon;
-	
-	tdiDefault.dateStart.m_dt = (m_bUseCreationForDefStartDate ? -1 : 0);
-	tdiDefault.dateStart.m_status = COleDateTime::null;
-	tdiDefault.dateDue.m_dt = (m_bUseCreationForDefDueDate ? -1 : 0);
-	tdiDefault.dateDue.m_status = COleDateTime::null;
+
+	if (m_bUseCreationDateForDefStartDate)
+	{
+		if (m_bUseCreationTimeForDefStartDate)
+			tdiDefault.dateStart = TODOITEM::dtUseCreationDateAndTime;
+		else
+			tdiDefault.dateStart = TODOITEM::dtUseCreationDateOnly;
+	}
+
+	if (m_bUseCreationDateForDefDueDate)
+		tdiDefault.dateDue = TODOITEM::dtUseCreationDateOnly;
 	
 	Misc::Split(m_sDefCategory, tdiDefault.aCategories);
 	Misc::Split(m_sDefAllocTo, tdiDefault.aAllocTo);
@@ -377,4 +388,11 @@ void CPreferencesTaskDefPage::UpdateCommentsSize()
 
 		m_ctrlComments.MoveWindow(rCtrl);
 	}
+}
+
+void CPreferencesTaskDefPage::OnUseCreationDateForDefStartDate() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_USECREATIONTIMEFORDEFSTARTDATE)->EnableWindow(m_bUseCreationDateForDefStartDate);	
 }

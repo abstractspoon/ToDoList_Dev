@@ -396,7 +396,6 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 			}
 			GraphicsMisc::DrawRect(pDC, rTab, crBack, CLR_NONE, 2);
 			
-			//pDC->FillSolidRect(rTab, crBack);
 			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
 		}
 	}
@@ -1132,10 +1131,16 @@ BOOL CTabCtrlEx::SetScrollPos(int nPos)
 
 void CTabCtrlEx::EnsureSelVisible()
 {
+	if (GetItemCount() == 0)
+		return;
+
 	CRect rSpin;
 	
 	if (!GetSpinButtonCtrlRect(rSpin))
+	{
+		SetScrollPos(0);
 		return;
+	}
 
 	CRect rActiveTab;
 	int nSelTab = GetCurSel();

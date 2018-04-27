@@ -267,7 +267,8 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// references
 				if ((nSubItem == 0) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
 				{
-					ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, CRect(pLVCD->nmcd.rc).TopLeft());
+					CPoint ptIcon(pLVCD->nmcd.rc.left, pLVCD->nmcd.rc.bottom - 32);
+					ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
 				}
 			}
 

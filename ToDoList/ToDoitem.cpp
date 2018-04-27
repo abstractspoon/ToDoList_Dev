@@ -20,9 +20,12 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-COleDateTimeSpan TODOITEM::s_dtsRecentModPeriod = (1.0 / 24); // one hour
+COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
 
-CString TODOITEM::s_sModifierName;
+CString TODOITEM::sModifierName;
+
+const COleDateTime TODOITEM::dtUseCreationDateOnly    =	CDateHelper::GetDate(-1, COleDateTime::null);
+const COleDateTime TODOITEM::dtUseCreationDateAndTime =	CDateHelper::GetDate(-2, COleDateTime::null);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,6 +50,11 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	dateCreated(COleDateTime::GetCurrentTime()),
 	dwTaskRefID(0)
 { 
+	CDateHelper::ClearDate(dateStart);
+	CDateHelper::ClearDate(dateDue);
+	CDateHelper::ClearDate(dateDone);
+	CDateHelper::ClearDate(dateCreated);
+	CDateHelper::ClearDate(dateLastMod);
 }
 
 TODOITEM::TODOITEM(const TODOITEM& tdi)
@@ -57,11 +65,8 @@ TODOITEM::TODOITEM(const TODOITEM& tdi)
 		dateCreated = COleDateTime::GetCurrentTime();
 
 	// initialise start and due dates
-	if (!CDateHelper::IsDateSet(dateStart) && (dateStart.m_dt == -1.0))
-		dateStart = CDateHelper::GetDateOnly(dateCreated);
-
-	if (!CDateHelper::IsDateSet(dateDue) && (dateDue.m_dt == -1.0))
-		dateDue = CDateHelper::GetDateOnly(dateCreated);
+	dateStart = GetDefaultStartDueDate(dateCreated, dateStart);
+	dateDue = GetDefaultStartDueDate(dateCreated, dateDue);
 }
 
 TODOITEM& TODOITEM::operator=(const TODOITEM& tdi) 
@@ -84,13 +89,13 @@ TODOITEM& TODOITEM::operator=(const TODOITEM& tdi)
 	dateDue = tdi.dateDue;
 	dateDone = tdi.dateDone;
 	dateCreated = tdi.dateCreated;
+	dateLastMod = tdi.dateLastMod;
 	bFlagged = tdi.bFlagged;
 	bLocked = tdi.bLocked;
 	sCreatedBy = tdi.sCreatedBy;
 	nRisk = tdi.nRisk;
 	sExternalID = tdi.sExternalID;
 	trRecurrence = tdi.trRecurrence;
-	dateLastMod = tdi.dateLastMod;
 	sLastModifiedBy = tdi.sLastModifiedBy;
 	sVersion = tdi.sVersion;
 	sIcon = tdi.sIcon;
@@ -311,7 +316,7 @@ BOOL TODOITEM::IsReference() const
 void TODOITEM::SetModified() 
 { 
 	dateLastMod = COleDateTime::GetCurrentTime(); 
-	sLastModifiedBy = s_sModifierName;
+	sLastModifiedBy = sModifierName;
 }
 
 CString TODOITEM::GetCategory(int nCat) const
@@ -440,11 +445,11 @@ BOOL TODOITEM::IsRecentlyModified(const COleDateTime& date)
 	if (!CDateHelper::IsDateSet(date))
 		return FALSE; // never
 
-	if (s_dtsRecentModPeriod.m_span == 0.0)
+	if (dtsRecentModPeriod.m_span == 0.0)
 		return TRUE; // always
 	
 	// else
-	return ((COleDateTime::GetCurrentTime() - date) < s_dtsRecentModPeriod);
+	return ((COleDateTime::GetCurrentTime() - date) < dtsRecentModPeriod);
 }
 
 COleDateTimeSpan TODOITEM::GetRemainingDueTime() const
@@ -546,12 +551,12 @@ CString TODOITEM::FormatTaskDependency(DWORD dwTaskID, const CString& sFile)
 
 void TODOITEM::SetRecentlyModifiedPeriod(double dDays)
 {
-	s_dtsRecentModPeriod = max(dDays, 0.0);
+	dtsRecentModPeriod = max(dDays, 0.0);
 }
 
 void TODOITEM::SetModifierName(const CString sModifier)
 {
-	s_sModifierName = sModifier;
+	sModifierName = sModifier;
 }
 
 TDC_UNITS TODOITEM::GetTimeUnits(BOOL bTimeEst) const
@@ -562,6 +567,22 @@ TDC_UNITS TODOITEM::GetTimeUnits(BOOL bTimeEst) const
 TH_UNITS TODOITEM::GetTHTimeUnits(BOOL bTimeEst) const
 {
 	return TDC::MapUnitsToTHUnits(bTimeEst ? nTimeEstUnits : nTimeSpentUnits);
+}
+
+COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue)
+{
+	// Can't use equality here because 'null' dates are always equal
+	if (dtStartDue.m_status == COleDateTime::null)
+	{
+		if (dtStartDue.m_dt == dtUseCreationDateAndTime.m_dt)
+			return dtCreation;
+
+		if (dtStartDue.m_dt == dtUseCreationDateOnly.m_dt)
+			return CDateHelper::GetDateOnly(dtCreation);
+	}
+	
+	// else
+	return CDateHelper::NullDate();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

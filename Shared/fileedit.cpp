@@ -78,7 +78,6 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) :
 					m_nStyle(nStyle), 
 					m_bTipNeeded(FALSE),
 					m_sFilter(szFilter),
-					ICON_WIDTH(20),
 					m_sCurFolder(FileMisc::GetCwd()),
 					m_bParentIsCombo(-1)
 {
@@ -302,6 +301,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	if (!sFilePath.IsEmpty())
 	{
 		int nImage = -1;
+		int nImageSize = m_ilSys.GetImageSize();
 		
 		if (HasStyle(FES_FOLDERS))
 		{
@@ -317,7 +317,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 			{
 				ClearImageIcon();
 
-				VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, 16, 16, 0, NULL, DI_NORMAL));
+				VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL));
 				return;
 			}
 
@@ -330,11 +330,11 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 			if (HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sFullPath))
 			{
 				if (m_ilImageIcon.GetSafeHandle() == NULL)
-					VERIFY(m_ilImageIcon.Create(16, 16, (ILC_COLOR32 | ILC_MASK), 1, 1));
+					VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));
 
 				if (m_ilImageIcon.GetImageCount() == 0)
 				{
-					CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), 16, 16));
+					CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), nImageSize, nImageSize));
 
 					if (icon.IsValid())
 						m_ilImageIcon.Add(icon);
@@ -542,7 +542,7 @@ void CFileEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp
 	CEnEdit::OnNcCalcSize(bCalcValidRects, lpncsp);
 
 	if (bCalcValidRects)
-		lpncsp->rgrc[0].left += ICON_WIDTH;
+		lpncsp->rgrc[0].left += (m_ilSys.GetImageSize() + 4);
 }
 
 void CFileEdit::OnKillFocus(CWnd* pNewWnd) 
@@ -558,7 +558,7 @@ CRect CFileEdit::GetIconRect() const
 	GetClientRect(rButton);
 
 	rButton.right = rButton.left;
-	rButton.left -= ICON_WIDTH;
+	rButton.left -= (m_ilSys.GetImageSize() + 2);
 	rButton.top -= m_nTopBorder;
 	rButton.bottom += m_nBottomBorder;
 
@@ -590,6 +590,8 @@ void CFileEdit::PreSubclassWindow()
 {
 	CEnEdit::PreSubclassWindow();
 	
+	m_ilSys.Initialize();
+
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	m_bFirstShow = TRUE;
 }

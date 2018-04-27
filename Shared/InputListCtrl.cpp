@@ -8,6 +8,7 @@
 #include "osversion.h"
 #include "graphicsmisc.h"
 #include "misc.h"
+#include "enimagelist.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -510,14 +511,14 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (pImageList)
 	{
 		nImage = GetImageIndex(nItem, 0); 
-		ImageList_GetIconSize(pImageList->m_hImageList, (int*)&sizeImage.cx, (int*)&sizeImage.cy);
+		CEnImageList::GetImageSize(*pImageList, sizeImage);
 	}
 
 	// state
 	CImageList* pStateList = GetImageList(LVSIL_STATE);
 
 	if (pStateList)
-		ImageList_GetIconSize(pStateList->m_hImageList, (int*)&sizeState.cx, (int*)&sizeState.cy);
+		CEnImageList::GetImageSize(*pStateList, sizeState);
 
 	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
 	{

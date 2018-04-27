@@ -290,6 +290,7 @@ void GANTTITEM::MinMaxDates(const GANTTITEM& giOther)
 	else // leaf task
 	{
 		CDateHelper::Max(dtMaxDue, giOther.dtDue);
+		CDateHelper::Max(dtMaxDue, giOther.dtDone);
 		CDateHelper::Min(dtMinStart, giOther.dtStart);
 	}
 }

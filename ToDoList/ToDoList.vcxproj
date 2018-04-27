@@ -54,6 +54,7 @@
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">false</GenerateManifest>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">false</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <Midl>
@@ -221,6 +222,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="PreferencesUICustomToolbarPage.cpp" />
     <ClCompile Include="PreferencesUIPage.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -377,6 +379,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="TDLContentTypeCombobox.cpp" />
+    <ClCompile Include="TDLCustomToolbar.cpp" />
     <ClCompile Include="TDLGoToTaskDlg.cpp" />
     <ClCompile Include="TDLImpExpAttributeMappingListCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -536,6 +539,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClCompile Include="TDLThemeComboBox.cpp" />
     <ClCompile Include="TDLThreadedExporterWnd.cpp" />
     <ClCompile Include="TDLTimeTrackerDlg.cpp" />
+    <ClCompile Include="TDLToolbarButtonListCtrl.cpp" />
     <ClCompile Include="TDLToolsUserInputDlg.cpp" />
     <ClCompile Include="TDLTransformDialog.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -606,6 +610,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="PreferencesTaskDefPage.h" />
     <ClInclude Include="PreferencesTaskPage.h" />
     <ClInclude Include="PreferencesToolPage.h" />
+    <ClInclude Include="PreferencesUICustomToolbarPage.h" />
     <ClInclude Include="PreferencesUIPage.h" />
     <ClInclude Include="PreferencesUITasklistColorsPage.h" />
     <ClInclude Include="PreferencesUITasklistPage.h" />
@@ -666,6 +671,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLCommentsCtrl.h" />
     <ClInclude Include="TDLContentMgr.h" />
     <ClInclude Include="TDLContentTypeCombobox.h" />
+    <ClInclude Include="TDLCustomToolbar.h" />
     <ClInclude Include="TDLGoToTaskDlg.h" />
     <ClInclude Include="TDLImpExpAttributeMappingListCtrl.h" />
     <ClInclude Include="TDLCsvImportExportDlg.h" />
@@ -718,6 +724,7 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <ClInclude Include="TDLThemeComboBox.h" />
     <ClInclude Include="TDLThreadedExporterWnd.h" />
     <ClInclude Include="TDLTimeTrackerDlg.h" />
+    <ClInclude Include="TDLToolbarButtonListCtrl.h" />
     <ClInclude Include="TDLToolsUserInputDlg.h" />
     <ClInclude Include="TDLTransformDialog.h" />
     <ClInclude Include="TDLViewTabControl.h" />
@@ -747,7 +754,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
   </ItemGroup>
   <ItemGroup>
     <None Include="res\abstractspoon.ico" />
-    <None Include="res\appointment.ico" />
     <None Include="res\app_extra_metro.bmp" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
@@ -758,13 +764,11 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\bitmap1.bmp" />
     <None Include="res\clock.ico" />
     <None Include="res\column_header.bmp" />
-    <None Include="res\contact.ico" />
     <None Include="res\custattrib_toolbar.bmp" />
     <None Include="res\custattrib_toolbar_metro.bmp" />
     <None Include="res\custattrib_toolbar_std.bmp" />
     <None Include="res\custom_attrib_icons.ico" />
     <None Include="res\depend_link.ico" />
-    <None Include="res\DropBox.ico" />
     <None Include="res\English.gif" />
     <None Include="res\fileedit_browse.ico" />
     <None Include="res\fileedit_go.ico" />
@@ -772,23 +776,16 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\find_toolbar.bmp" />
     <None Include="res\find_toolbar_metro.bmp" />
     <None Include="res\find_toolbar_std.bmp" />
-    <None Include="res\flaggedmail.ico" />
-    <None Include="res\folder.ico" />
-    <None Include="res\GoogleDrive.ico" />
     <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
-    <None Include="res\journal.ico" />
     <None Include="res\list_view_std.ico" />
-    <None Include="res\mail.ico" />
-    <None Include="res\note.ico" />
     <None Include="res\null.ico" />
+    <None Include="res\outlooktypes.bmp" />
     <None Include="res\outlook_16.ico" />
     <None Include="res\plus.ico" />
     <None Include="res\prefs_dlg_std.ico" />
-    <None Include="res\reset.ico" />
     <None Include="res\shield.ico" />
     <None Include="res\simpletext.ico" />
-    <None Include="res\SkyDrive.ico" />
     <None Include="res\social_toolbar.bmp" />
     <None Include="res\social_toolbar_std.bmp" />
     <None Include="res\src_control_std.bmp" />
@@ -796,7 +793,6 @@ copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
     <None Include="res\style_para.ico" />
     <None Include="res\style_table.ico" />
     <None Include="res\style_wrap.ico" />
-    <None Include="res\task.ico" />
     <None Include="res\task_icons_std.bmp" />
     <None Include="res\task_tree_std.ico" />
     <None Include="res\timetrac.bmp" />

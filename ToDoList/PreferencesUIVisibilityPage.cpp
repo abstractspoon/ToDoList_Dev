@@ -40,7 +40,6 @@ void CPreferencesUIVisibilityPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_SHOWALLATTRIB, (int&)m_nAttribShow);
 }
 
-
 BEGIN_MESSAGE_MAP(CPreferencesUIVisibilityPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesUIVisibilityPage)
 	ON_WM_SIZE()

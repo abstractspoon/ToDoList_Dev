@@ -1039,11 +1039,16 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			pDC->SetTextColor(m_theme.crAppText);
 #endif
 		}
-		
-		if ((pWnd->GetDlgCtrlID() == IDC_TASKTIME) &&
-			IsTrackingSelectedTasklistAndTask())
+
+		if (IsTrackingSelectedTasklistAndTask())
 		{
-			pDC->SetTextColor(255);
+			switch (pWnd->GetDlgCtrlID())
+			{
+			case IDC_TASKTIME:
+			case IDC_ELAPSEDTIME:
+				pDC->SetTextColor(255);
+				break;
+			}
 		}
 	}
 
@@ -1427,7 +1432,7 @@ void CTDLTimeTrackerDlg::CalcMinMaxSizes()
 		GetClientRect(rClient);
 
 		CDlgUnits dlu(this);
-		m_sizeMin.cy = ((rWindow.Height() - rClient.Height()) + (rClient.bottom - rLabel.top));
+		m_sizeMin.cy = ((rWindow.Height() - rClient.Height()) + (rClient.bottom - rLabel.top) + 4);
 	}
 }
 

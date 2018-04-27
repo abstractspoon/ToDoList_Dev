@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "themed.h"
 #include "graphicsmisc.h"
+#include "enimagelist.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -493,9 +494,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (pImageList)
 	{
-		nImage = GetImageIndex(nItem, 0); 
-		ImageList_GetIconSize(pImageList->m_hImageList, (int*)&sizeImage.cx, (int*)&sizeImage.cy);
-
+		CEnImageList::GetImageSize(*pImageList, sizeImage);
 		nIndent = GetItemIndent(nItem) * sizeImage.cx;
 
 		rText.left += nIndent;
@@ -506,7 +505,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	pStateList = GetImageList(LVSIL_STATE);
 
 	if (pStateList)
-		ImageList_GetIconSize(pStateList->m_hImageList, (int*)&sizeState.cx, (int*)&sizeState.cy);
+		CEnImageList::GetImageSize(*pStateList, sizeState);
 
 	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
 	{

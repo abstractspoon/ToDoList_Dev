@@ -130,12 +130,13 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	CPreferencesDlgBase::AddPage(&m_pageUIVisibility);
 	CPreferencesDlgBase::AddPage(&m_pageUITasklist);
 	CPreferencesDlgBase::AddPage(&m_pageUITasklistColors);
+	CPreferencesDlgBase::AddPage(&m_pageUICustomToolbar);
 	CPreferencesDlgBase::AddPage(&m_pageTask);
 	CPreferencesDlgBase::AddPage(&m_pageTaskCalc);
 	CPreferencesDlgBase::AddPage(&m_pageTaskDef);
 	CPreferencesDlgBase::AddPage(&m_pageTaskDef2);
 	CPreferencesDlgBase::AddPage(&m_pageExport);
-	CPreferencesDlgBase::AddPage(&m_pageTool);
+	CPreferencesDlgBase::AddPage(&m_pageTools);
 	CPreferencesDlgBase::AddPage(&m_pageShortcuts);
 
 	ForwardMessage(WM_PTP_TESTTOOL);
@@ -232,6 +233,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	AddPage(&m_pageUI,					IDS_PREF_UICOMMENTS,			IDC_COMMENTSGROUP);
 	AddPage(&m_pageUI,					IDS_PREF_UITABBAR,				IDC_TABBARGROUP);
 	AddPage(&m_pageUI,					IDS_PREF_TASKVIEWVISIBILITY,	IDC_TASKVIEWSGROUP);
+	AddPage(&m_pageUICustomToolbar,		IDS_PREF_TOOLBAR);
 	AddPage(&m_pageUIVisibility,		IDS_PREF_UIVISIBILITY);
 	AddPage(&m_pageUITasklist,			IDS_PREF_UITASK);
 	AddPage(&m_pageUITasklistColors,	IDS_PREF_UITASKCOLOR);
@@ -243,7 +245,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFINHERIT,		IDC_TOPOFPAGE);
 	AddPage(&m_pageTaskDef2,			IDS_PREF_TASKDEFLISTS,			IDC_DROPLISTGROUP);
 	AddPage(&m_pageExport,				IDS_PREF_EXPORT);
-	AddPage(&m_pageTool,				IDS_PREF_TOOLS);
+	AddPage(&m_pageTools,				IDS_PREF_TOOLS);
 	AddPage(&m_pageShortcuts,			IDS_PREF_SHORTCUT); 
 	
 	SynchronizeTree();

@@ -9,8 +9,6 @@
 
 #include "..\shared\ownerdrawcomboboxbase.h"
 
-#include <afxtempl.h>
-
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox window
 
@@ -36,7 +34,6 @@ protected:
 	const CContentMgr* m_pContentMgr;
 	int m_nInitSel;
 	CImageList m_ilContent;
-	CMap<int, int, int, int> m_mapImages;
 
 // Operations
 public:
@@ -61,7 +58,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void FillCombo();
-	int AddItemImage(HICON hIcon, BOOL bDeleteIcon = TRUE);
 	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 };

@@ -19,6 +19,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
+#include "..\Shared\enimagelist.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,15 +59,16 @@ enum // checkbox images
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int MIN_LABEL_EDIT_WIDTH	= 200;
-const int BAR_WIDTH				= 6;
+const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
+const int BAR_WIDTH				= GraphicsMisc::ScaleByDPIFactor(6);
 const int NUM_TEXTLINES			= 2;
-const int TITLE_VPADDING		= 8;
-const int LV_PADDING			= 3;
-const int CHECKBOX_PADDING		= 1;
-const int ICON_OFFSET			= 2;
-const int ATTRIB_INDENT			= 6;
-const int TIP_PADDING			= 4;
+const int TITLE_VPADDING		= GraphicsMisc::ScaleByDPIFactor(8);
+const int LV_PADDING			= GraphicsMisc::ScaleByDPIFactor(3);
+const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
+const int ICON_OFFSET			= GraphicsMisc::ScaleByDPIFactor(2);
+const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
+const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
+const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 
 const CRect TEXT_BORDER			= CRect(4, 3, 3, 2);
 
@@ -849,6 +851,7 @@ int CKanbanListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_header.ModifyStyle(HDS_FULLDRAG | HDS_DRAGDROP, 0, 0);
 
 	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
+	CEnImageList::ScaleByDPIFactor(m_ilFlags);
 
 	RefreshColumnTitle();
 	OnDisplayAttributeChanged();
@@ -1252,7 +1255,7 @@ void CKanbanListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 				// Attributes are not affected by the icon
 				if (bHasIcon)
-					rTitle.left = max(rAttributes.left, (rItem.left + 16 + ICON_OFFSET));
+					rTitle.left = max(rAttributes.left, (rItem.left + IMAGE_SIZE + ICON_OFFSET));
 				
 				// Text
 				DrawItemTitle(pDC, pKI, rTitle, crText);
@@ -1348,7 +1351,10 @@ BOOL CKanbanListCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, const CRect
 			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 			bHasIcons = TRUE;
 
-			rIcon.top += (16 + ICON_OFFSET);
+			rIcon.top += (IMAGE_SIZE + ICON_OFFSET);
+
+			if (m_bShowTaskColorAsBar && !pKI->IsDone(TRUE))
+				rIcon.left += BAR_WIDTH;
 		}
 	}
 
@@ -1372,7 +1378,7 @@ BOOL CKanbanListCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, BOOL bHasIcon
 		rBar.right = (rBar.left + BAR_WIDTH);
 
 		if (bHasIcon)
-			rBar.top += (16 + ICON_OFFSET);
+			rBar.top += (IMAGE_SIZE + ICON_OFFSET);
 
 		if (!pKI->IsDone(TRUE))
 		{
@@ -1451,7 +1457,8 @@ BOOL CKanbanListCtrl::GetItemCheckboxRect(CRect& rItem) const
 	if (m_bShowCompletionCheckboxes)
 	{
 		rItem.bottom = (rItem.top + CalcRequiredItemHeight(1));
-		rItem.DeflateRect(0, ((rItem.Height() - 16) / 2));
+
+		rItem.DeflateRect(0, ((rItem.Height() - CEnImageList::GetImageSize(m_ilCheckboxes)) / 2));
 		rItem.right = (rItem.left + rItem.Height());
 
 		return TRUE;

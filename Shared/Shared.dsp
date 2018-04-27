@@ -237,6 +237,10 @@ SOURCE=.\EnHeaderCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\EnImageList.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\enlistctrl.cpp
 # End Source File
 # Begin Source File
@@ -370,6 +374,10 @@ SOURCE=.\MASKEDIT.CPP
 # Begin Source File
 
 SOURCE=.\menubutton.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MenuComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -877,6 +885,10 @@ SOURCE=.\EnHeaderCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\EnImageList.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\enlistctrl.h
 # End Source File
 # Begin Source File
@@ -1030,6 +1042,10 @@ SOURCE=.\MASKEDIT.H
 # Begin Source File
 
 SOURCE=.\menubutton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MenuComboBox.h
 # End Source File
 # Begin Source File
 

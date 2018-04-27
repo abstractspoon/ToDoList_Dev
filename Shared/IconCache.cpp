@@ -6,6 +6,7 @@
 #include "IconCache.h"
 #include "Icon.h"
 #include "enbitmap.h"
+#include "GraphicsMisc.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -13,7 +14,7 @@
 
 CIconCache::CIconCache(int cx, int cy) : m_sizeIcon(max(cx, 16), max(cy, 16))
 {
-
+	GraphicsMisc::ScaleByDPIFactor(&m_sizeIcon);
 }
 
 CIconCache::~CIconCache()

@@ -101,7 +101,7 @@ const COLORREF WHITE = RGB(240, 240, 240);
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT  DAYINSECS		= 24 * 60 * 60;
-const int   COMBODROPHEIGHT	= 200;
+const int   COMBODROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int	DECIMALS = 4;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -853,23 +853,18 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 {
 	// project name
-	CDlgUnits dlu(this);
-	CRect rLabel = GetCtrlRect(IDC_PROJECTLABEL); 
-	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
+	CRect rProject = GetCtrlRect(IDC_PROJECTNAME), rLabel(rProject); 
 
-	int nOffset = rAvailable.left - rLabel.left;
+	rLabel.OffsetRect(-rLabel.left, 0);
+	rLabel.right = rProject.left;
 
-	rLabel.OffsetRect(nOffset, 0);
-	rProject.left += nOffset;
 	rProject.right = rAvailable.right;
 
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
 
 	if (m_nMaxState != TDCMS_MAXTASKLIST && HasStyle(TDCS_SHOWPROJECTNAME))
-	{
 		rAvailable.top = rProject.bottom + 5;
-	}
 	else
 		rAvailable.top = rProject.top;
 }
@@ -2698,8 +2693,13 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	{
 		// refresh the comments of the active task if we were called externally
 		// note: we don't use SetTextChange because that doesn't handle custom comments
-		if (!bInternal)
-			UpdateComments(TRUE);
+		if (!bInternal && (TSH().GetCount() == 1))
+		{
+			m_sTextComments = GetSelectedTaskComments();
+			m_customComments = GetSelectedTaskCustomComments(m_cfComments);
+
+			UpdateComments(FALSE);
+		}
 
 		TSH().InvalidateAll();
 
@@ -4765,14 +4765,22 @@ BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 
 	DWORD dwTaskID = GetSelectedTaskID();
 	
-	return m_timeTracking.CanTrackTask(dwTaskID);
+	if (dwTaskID)
+		return m_timeTracking.CanTrackTask(dwTaskID);
+
+	// else
+	return FALSE;
 }
 
 BOOL CToDoCtrl::IsSelectedTaskBeingTimeTracked() const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 
-	return m_timeTracking.IsTrackingTask(dwTaskID);
+	if (dwTaskID)
+		return m_timeTracking.IsTrackingTask(dwTaskID);
+
+	// else
+	return FALSE;
 }
 
 DWORD CToDoCtrl::GetTimeTrackTaskID(BOOL bActive) const

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "FindReplace.h"
+#include "GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -168,7 +169,7 @@ void FIND_STATE::AdjustDialogPosition(const CRect& rExcludeScreen, BOOL bUpDown)
 
 	if (CRect().IntersectRect(rDlg, rExcludeScreen))
 	{
-		const int PADDING = 20;
+		const int PADDING = GraphicsMisc::ScaleByDPIFactor(20);
 		CRect rScreen(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 
 		if (bUpDown)

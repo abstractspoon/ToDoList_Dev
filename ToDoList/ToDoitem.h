@@ -137,7 +137,10 @@ public:
 	
 	// meta-data for 3rd-party applications only
 	CMapStringToString mapMetaData; 
-	
+
+	const static COleDateTime dtUseCreationDateOnly;
+	const static COleDateTime dtUseCreationDateAndTime;
+
 protected:
 	// custom attributes
 	CTDCCustomAttributeDataMap mapCustomData;
@@ -145,8 +148,10 @@ protected:
 private:
 	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
 	
-	static COleDateTimeSpan s_dtsRecentModPeriod;
-	static CString s_sModifierName;
+	static COleDateTime GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue);
+	
+	static COleDateTimeSpan dtsRecentModPeriod;
+	static CString sModifierName;
 };
 
 //////////////////////////////////////////////////////////////////////

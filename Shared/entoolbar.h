@@ -7,6 +7,8 @@
 // entoolbar.h : header file
 //
 
+#include "EnImageList.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CEnToolBar window
 
@@ -38,7 +40,7 @@ public:
 
 	// Attributes
 protected:
-	CImageList m_ilDisabled, m_ilNormal;
+	CEnImageList m_ilDisabled, m_ilNormal;
 	COLORREF m_crFrom, m_crTo, m_crHot;
 	BOOL m_bGradient, m_bGlass;
 	CUIntArray m_aRowHeights;
@@ -74,6 +76,7 @@ protected:
 	
 	BOOL SetImage(CEnBitmapEx* pBitmap, COLORREF crMask);
 	void RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask);
+	void RefreshDisabledImageList();
 
 	int EstimateHeightRequired(int cx) const;
 	int EstimateRowsRequired(int cx) const;

@@ -170,6 +170,9 @@ protected:
 
 	static CStringArray s_aDefTaskViews;
 
+	// private message
+	static UINT WM_TDC_RESTORELASTTASKVIEW;
+
 // Overrides
 protected:
 	// ClassWizard generated virtual function overrides
@@ -199,6 +202,7 @@ protected:
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnRestoreLastTaskView(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnUIExtSelectTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam);

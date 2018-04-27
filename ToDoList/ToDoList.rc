@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 7,1,999,6
+ FILEVERSION 7,1,999,9
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,9 +47,9 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "7, 1, 999, 6\0"
+            VALUE "FileVersion", "7, 1, 999, 9\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-17\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-18\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
@@ -440,18 +440,20 @@ BEGIN
     PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,103,228,54,14,BS_RIGHT
     LTEXT           "&Start date",IDC_STATIC,7,247,87,8
     CONTROL         "&Date of creation",IDC_USECREATIONFORDEFSTARTDATE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,103,247,85,10
-    LTEXT           "&Due date",IDC_STATIC,7,264,87,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,103,247,288,10
+    CONTROL         "&Time of creation",IDC_USECREATIONTIMEFORDEFSTARTDATE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,115,261,276,10
+    LTEXT           "&Due date",IDC_STATIC,7,276,87,8
     CONTROL         "D&ate of creation",IDC_USECREATIONFORDEFDUEDATE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,103,263,85,10
-    LTEXT           "&Reminder",IDC_STATIC,7,281,87,8
-    COMBOBOX        IDC_DEFREMINDER,103,278,122,30,CBS_DROPDOWNLIST | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,103,275,288,10
+    LTEXT           "&Reminder",IDC_STATIC,7,293,87,8
+    COMBOBOX        IDC_DEFREMINDER,103,290,122,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_DEFREMINDERDATE,231,278,122,30,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_DEFREMINDERDATE,231,290,122,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Comments",IDC_STATIC,7,298,94,10
+    LTEXT           "&Comments",IDC_STATIC,7,310,94,10
     CONTROL         "",IDC_COMMENTSCTRLFRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE | WS_DISABLED,103,295,280,130
+                    WS_VISIBLE | WS_DISABLED,103,307,280,115
 END
 
 IDD_PREFTASKDEF2_PAGE DIALOG DISCARDABLE  0, 0, 398, 334
@@ -583,7 +585,7 @@ BEGIN
     CONTROL         "E&nable sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,350,387,10
-    LTEXT           "Toolbar",IDC_TOOLBARGROUP,7,370,381,8
+    LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,370,381,8
     CONTROL         "Display 'User Defined Tools'",IDC_DISPLAYUDTSINTOOLBAR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,385,387,10
     LTEXT           "'New Task' &button places task:",IDC_STATIC,8,400,380,8
@@ -1806,26 +1808,16 @@ BEGIN
                     WS_VSCROLL | WS_HSCROLL
 END
 
-IDD_PREFUIVISIBILITY_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
+IDD_PREFTOOLBAR_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
 STYLE WS_POPUP
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "List2",IDC_VISIBILITY,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
-                    LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,19,380,143
-    CONTROL         "&Always show all available fields",IDC_SHOWALLATTRIB,
-                    "Button",BS_AUTORADIOBUTTON | BS_VCENTER | BS_MULTILINE | 
-                    WS_GROUP,15,185,366,10
-    CONTROL         "&Show fields whose corresponding column is visible",
-                    IDC_SHOWATTRIBASCOLUMN,"Button",BS_AUTORADIOBUTTON | 
-                    BS_VCENTER | BS_MULTILINE,15,200,364,10
-    CONTROL         "&Control each field individually",IDC_SHOWANYATTRIB,
-                    "Button",BS_AUTORADIOBUTTON,15,215,366,10
-    GROUPBOX        "Manage edit/filter field visibility",IDC_ATTRIBGROUP,7,
-                    171,380,60,WS_GROUP
-    LTEXT           "Default Attribute Visibility for New Tasklists",
-                    IDC_LISTLABEL,7,7,380,8
+    CONTROL         "List2",IDC_BUTTONLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,321,224
+    PUSHBUTTON      "Move &Up",IDC_MOVEUP,337,7,50,14
+    PUSHBUTTON      "Move &Down",IDC_MOVEDOWN,337,26,50,14
+    PUSHBUTTON      "Delete",IDC_DELETE,337,52,50,14
 END
 
 IDD_ABOUT_DIALOG DIALOG DISCARDABLE  0, 0, 332, 235
@@ -1838,8 +1830,8 @@ BEGIN
                     LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_TABSTOP,7,45,318,110
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,206,318,1
-    ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,21,20
-    ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,21,20
+    ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
+    ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "Static",IDC_LICENSE,71,161,254,8
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
@@ -1853,7 +1845,7 @@ BEGIN
     LTEXT           "License:",IDC_STATIC,7,161,27,8
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-17",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-18",IDC_STATIC,213,7,87,8
 END
 
 IDD_SHOWREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 337, 231
@@ -1885,7 +1877,7 @@ IDD_TIMETRACK_DIALOG DIALOGEX 0, 0, 134, 111
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_STATICEDGE
 CAPTION "Time Tracker"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     COMBOBOX        IDC_TASKLISTS,4,28,126,128,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
@@ -2037,6 +2029,28 @@ BEGIN
     DEFPUSHBUTTON   "&Clear Filter",IDC_CLEARFILTER,28,250,60,14
     DEFPUSHBUTTON   "OK",IDOK,131,250,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,187,250,50,14
+END
+
+IDD_PREFUIVISIBILITY_PAGE DIALOG DISCARDABLE  0, 0, 394, 239
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "List2",IDC_VISIBILITY,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,7,19,380,143
+    CONTROL         "&Always show all available fields",IDC_SHOWALLATTRIB,
+                    "Button",BS_AUTORADIOBUTTON | BS_VCENTER | BS_MULTILINE | 
+                    WS_GROUP,15,185,366,10
+    CONTROL         "&Show fields whose corresponding column is visible",
+                    IDC_SHOWATTRIBASCOLUMN,"Button",BS_AUTORADIOBUTTON | 
+                    BS_VCENTER | BS_MULTILINE,15,200,364,10
+    CONTROL         "&Control each field individually",IDC_SHOWANYATTRIB,
+                    "Button",BS_AUTORADIOBUTTON,15,215,366,10
+    GROUPBOX        "Manage edit/filter field visibility",IDC_ATTRIBGROUP,7,
+                    171,380,60,WS_GROUP
+    LTEXT           "Default Attribute Visibility for New Tasklists",
+                    IDC_LISTLABEL,7,7,380,8
 END
 
 
@@ -2578,16 +2592,7 @@ IDI_DEPENDS_LINK        ICON    DISCARDABLE     "res\\depend_link.ico"
 IDI_NULL                ICON    DISCARDABLE     "res\\null.ico"
 IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 IDI_SIMPLETEXT          ICON    DISCARDABLE     "res\\simpletext.ico"
-IDI_APPOINTMENT         ICON    DISCARDABLE     "res\\appointment.ico"
-IDI_CONTACT             ICON    DISCARDABLE     "res\\contact.ico"
-IDI_FLAGGEDMAIL         ICON    DISCARDABLE     "res\\flaggedmail.ico"
-IDI_FOLDER              ICON    DISCARDABLE     "res\\folder.ico"
-IDI_JOURNAL             ICON    DISCARDABLE     "res\\journal.ico"
-IDI_MAIL                ICON    DISCARDABLE     "res\\mail.ico"
-IDI_NOTE                ICON    DISCARDABLE     "res\\note.ico"
 IDI_OUTLOOK             ICON    DISCARDABLE     "res\\outlook_16.ico"
-IDI_TASK                ICON    DISCARDABLE     "res\\task.ico"
-IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
 IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
 IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
@@ -2616,6 +2621,7 @@ IDR_TIMETRACKER_TOOLBAR BITMAP  MOVEABLE PURE   "res\\timetrac.bmp"
 IDB_TIMETRACK_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\timetrack_toolbar_std.bmp"
 IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
+IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4034,11 +4040,11 @@ BEGIN
         BOTTOMMARGIN, 194
     END
 
-    IDD_PREFUIVISIBILITY_PAGE, DIALOG
+    IDD_PREFTOOLBAR_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 387
-        TOPMARGIN, 10
+        TOPMARGIN, 7
         BOTTOMMARGIN, 231
     END
 
@@ -4096,6 +4102,14 @@ BEGIN
         RIGHTMARGIN, 237
         TOPMARGIN, 7
         BOTTOMMARGIN, 264
+    END
+
+    IDD_PREFUIVISIBILITY_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 387
+        TOPMARGIN, 10
+        BOTTOMMARGIN, 231
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -4246,7 +4260,7 @@ BEGIN
     IDS_PREF_UIVISIBILITY   "User Interface>Column/Attribute Visibility"
     IDS_PREF_TASKDEFINHERIT "Tasks>Defaults>Inheritable Attributes"
     IDS_PREF_UIFILTERING    "User Interface>General>Filtering"
-    IDS_PREF_UITOOLBAR      "User Interface>General>Toolbar"
+    IDS_PREF_UITOOLBAR      "User Interface>General>Main Toolbar"
     IDS_OPENTASKLIST_TITLE  "Open Tasklist"
     IDS_INVALIDTASKLIST     "'%s' does not appear to be a valid tasklist."
     IDS_STATUSREADONLY      "Read-only"
@@ -4288,7 +4302,7 @@ BEGIN
     IDS_TASKLISTSAUTOCHECKEDOUT 
                             "The following tasklists have been checked out:\n\n%s"
     IDS_SETFILEREF_TITLE    "Select File to which Task Refers"
-    IDS_CHECKEDOUTBYOTHER   "'%s' could not be checked out\nbecause it is currently checked out to '%s'"
+    IDS_CHECKEDOUTBYOTHER   "'%s' could not be checked out \nbecause it is currently checked out to '%s' (Last saved: %s)."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5295,6 +5309,10 @@ BEGIN
     IDS_FINDINTASKTITLES    "Find in Task Titles"
     IDS_SAVETOIMAGEPROGRESS "Saving task view image..."
     IDS_INIFILELOCKED       "ToDoList cannot start because your preferences file is locked by another application."
+    IDS_QUERYFORCEDCHECKOUT "\n\nDo you want to forcibly checkout the tasklist?\n\nNote: Any unsaved data from '%s' will be lost!"
+    IDS_PREF_TOOLBAR        "User Interface>Custom Toolbar"
+    IDS_TOOLBARMENUSEPARATOR "<separator>"
+    IDS_NEW_TOOLBARBUTTON   "<New Button>"
 END
 
 #endif    // English (Australia) resources

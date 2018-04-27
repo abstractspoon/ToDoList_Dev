@@ -229,9 +229,24 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, LPRECT pRect, UINT nT
 		
 		if (!th.Open(pWnd, sThClass))
 			return FALSE;
+
+		// Don't scale check boxes
+		CRect rImage(pRect);
+
+		if (nThPart == BP_CHECKBOX)
+		{
+			CSize size;
+			th.GetSize(nThPart, 1, size);
+
+			rImage.OffsetRect((rImage.Width() - size.cx) / 2, 
+								(rImage.Height() - size.cy) / 2);
+
+			rImage.right = (rImage.left + size.cx);
+			rImage.bottom = (rImage.top + size.cy);
+		}
 		
 		th.DrawParentBackground(pWnd, pDC, (LPRECT)(pClip ? pClip : pRect));
-		th.DrawBackground(pDC, nThPart, nThState, pRect, pClip);
+		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
 		
 		return TRUE;
 	}

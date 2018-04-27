@@ -450,24 +450,28 @@ BOOL CEnHeaderCtrl::DrawItemSortArrow(CDC* pDC, int nItem, BOOL bUp) const
 {
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 
-	CRect rArrow;
+	CRect rItem;
 	
-	if (!GetItemRect(nItem, rArrow))
+	if (!GetItemRect(nItem, rItem))
 		return FALSE;
 
 	static CThemed th(this, _T("Header"));
 	
 	if (th.AreControlsThemed())
 	{
-		rArrow.left = rArrow.CenterPoint().x - 6;
-		rArrow.right = rArrow.left + 12;
+		CSize size;
+		th.GetSize(HP_HEADERSORTARROW, 1, size);
+		
+		CRect rArrow(rItem.TopLeft(), size);
+
+		rArrow.OffsetRect((rItem.Width() - size.cx - 1) / 2, 0);
 		rArrow.bottom = rArrow.top + 8;
 		
 		return th.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
 	}
 	
 	// else
-	int nOffY = (bUp ? 5 : 3), nOffX = (rArrow.CenterPoint().x - 4);
+	int nOffY = (bUp ? 5 : 3), nOffX = (rItem.CenterPoint().x - 4);
 	int nDir = (bUp ? -1 : 1);
 	
 	POINT ptArrow[3] = { { 0, 0 }, { 3, (int)nDir * 3 }, { 7, -(int)nDir } };
