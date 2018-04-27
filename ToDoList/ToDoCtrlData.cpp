@@ -128,17 +128,17 @@ int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks, const CTDCSourceContro
 	// Restore checked out tasks
 	CToDoCtrlDataItems tdItems;
 
-	if (ssc.RestoreCheckedOutTasks(tdItems) == 0)
-		return TRUE;
-
-	DWORD dwTaskID = 0;
-	TODOITEM* pTDI = NULL;
-	POSITION pos = tdItems.GetStartPosition();
-
-	while (pos)
+	if (ssc.IsSourceControlled() && ssc.RestoreCheckedOutTasks(tdItems))
 	{
-		tdItems.GetNextAssoc(pos, dwTaskID, pTDI);
-		m_items.SetTask(dwTaskID, pTDI);
+		DWORD dwTaskID = 0;
+		TODOITEM* pTDI = NULL;
+		POSITION pos = tdItems.GetStartPosition();
+
+		while (pos)
+		{
+			tdItems.GetNextAssoc(pos, dwTaskID, pTDI);
+			m_items.SetTask(dwTaskID, pTDI);
+		}
 	}
 
 	return GetTaskCount();

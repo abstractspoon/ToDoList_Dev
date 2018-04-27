@@ -36,7 +36,7 @@ public:
 	BOOL CanAddTasklistToSourceControl(BOOL bAdd = TRUE) const;
 
 	BOOL CheckOutTasklist();
-	BOOL CheckOutTasklist(CString& sTasklistCheckedOutTo);
+	BOOL CheckOutTasklist(CString& sTasklistCheckedOutTo, BOOL bForce = FALSE);
 	BOOL CheckInTasklist();
 
 	BOOL CheckOutTask(DWORD dwTaskID, CString& sTaskCheckedOutTo);
@@ -89,7 +89,7 @@ protected:
 	static BOOL IsSourceControlled(LPCTSTR szPath);
 	static DWORD GetTaskIDFromFilePath(LPCTSTR szPath);
 	static BOOL InitialiseSourceControlFolder(LPCTSTR szTasklistPath);
-	static BOOL CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo);
+	static BOOL CheckOutTasklist(LPCTSTR szTasklistPath, LPCTSTR szXmlHeader, LPCTSTR szSourceControlID, CString& sTasklistCheckedOutTo, BOOL bForce);
 	static BOOL GetSourceControlPath(LPCTSTR szTasklistPath, CString& sTaskSSCPath);
 	static BOOL GetSourceControlFolder(LPCTSTR szTasklistPath, CString& sSSCFolder);
 

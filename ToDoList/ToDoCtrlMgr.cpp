@@ -507,14 +507,14 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex)
 	return CheckOut(nIndex, sTemp);
 }
 
-TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo)
+TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 {
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(CanCheckOut(nIndex));
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
-	TDC_FILE nCheckout = tdc.CheckOutTasklist(sCheckedOutTo);
+	TDC_FILE nCheckout = tdc.CheckOutTasklist(sCheckedOutTo, bForce);
 	
 	if (nCheckout == TDCF_SUCCESS)
 	{

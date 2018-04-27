@@ -1400,14 +1400,24 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
-	DWORD dwTaskID = 0;
+	DWORD dwTaskID = mod.dwSelectedTaskID;
+	TDC_ATTRIBUTE nAttrib = TDC::MapIUIAttributeToAttribute(mod.nAttrib);
 
-	if (!CanEditSelectedTask(mod, dwTaskID))
+	if (!CanEditSelectedTask(nAttrib, dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-		
+
+	if (dwTaskID)
+	{
+		if (GetSelectedCount() == 1)
+		{
+			ASSERT(GetSelectedTaskID() == dwTaskID);
+			dwTaskID = 0; // same as 'selected'
+		}
+	}
+	
 	CStringArray aValues;
 	BOOL bChange = FALSE;
 	

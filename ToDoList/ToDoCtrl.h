@@ -110,7 +110,7 @@ public:
 
 	TDC_FILE CheckIn();
 	TDC_FILE CheckOutTasklist();
-	TDC_FILE CheckOutTasklist(CString& sCheckedOutTo);
+	TDC_FILE CheckOutTasklist(CString& sCheckedOutTo, BOOL bForce = FALSE);
 
 	BOOL IsTasklistCheckedOut() const;
 	BOOL IsSourceControlled() const;

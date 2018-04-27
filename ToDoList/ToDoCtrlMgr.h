@@ -110,7 +110,7 @@ public:
 	BOOL CanAddToSourceControl(int nIndex, BOOL bAdd = TRUE) const;
 	BOOL IsCheckedOut(int nIndex) const;
 	TDC_FILE CheckOut(int nIndex);
-	TDC_FILE CheckOut(int nIndex, CString& sCheckedOutTo);
+	TDC_FILE CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce = FALSE);
 	TDC_FILE CheckIn(int nIndex);
 	
 	void MoveToDoCtrl(int nIndex, int nNumPlaces);

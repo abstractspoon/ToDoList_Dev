@@ -9606,30 +9606,52 @@ void CToDoListWnd::OnToolsCheckout()
 		return;
 	
 	CAutoFlag af(m_bSaving, TRUE);
-	CString sCheckedOutTo;
-	
-	TDC_FILE nFileRes = m_mgrToDoCtrls.CheckOut(nSel, sCheckedOutTo);
-	
-	if (nFileRes == TDCF_SUCCESS)
+	TDC_FILE nFileRes = TDCF_UNSET;
+	BOOL bAllowForcedCheckout = FALSE; // always FALSE first try
+
+	do 
 	{
-		// update UI
-		UpdateCaption();
-		UpdateMenuIconMgrSourceControlStatus();
-	}
-	else // failed -> notify user
-	{
-		CEnString sMessage, sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
-		
-		if ((nFileRes == TDCF_OTHER) && !sCheckedOutTo.IsEmpty())
+		CString sCheckedOutTo;
+		nFileRes = m_mgrToDoCtrls.CheckOut(nSel, sCheckedOutTo, bAllowForcedCheckout);
+
+		if (nFileRes == TDCF_SUCCESS)
 		{
-			sMessage.Format(IDS_CHECKEDOUTBYOTHER, sFilePath, sCheckedOutTo);
-			MessageBox(sMessage, IDS_CHECKOUT_TITLE, MB_OK | MB_ICONEXCLAMATION);
+			UpdateCaption();
+			UpdateMenuIconMgrSourceControlStatus();
+			break;
 		}
-		else
+
+		// else handle error
+		CString sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
+
+		if ((nFileRes != TDCF_OTHER) || sCheckedOutTo.IsEmpty())
 		{
 			HandleSaveTasklistError(nFileRes, sFilePath);
+			break;
 		}
-	}
+		
+		SYSTEMTIME stLastMod;
+		FileMisc::GetFileLastModified(sFilePath, stLastMod);
+
+		CEnString sMessage;
+		sMessage.Format(IDS_CHECKEDOUTBYOTHER, sFilePath, sCheckedOutTo, 
+						COleDateTime(stLastMod).Format(VAR_DATEVALUEONLY));
+
+		UINT nFlags = (MB_OK | MB_ICONEXCLAMATION);
+		
+		if (m_bAllowForcedCheckOut)
+		{
+			sMessage += CEnString(IDS_QUERYFORCEDCHECKOUT, sCheckedOutTo);
+			nFlags |= MB_YESNO;
+		}
+
+		if (MessageBox(sMessage, IDS_CHECKOUT_TITLE, nFlags) != IDYES)
+			break;
+
+		// else try again with a forced checkout
+		bAllowForcedCheckout = TRUE;
+	} 
+	while (nFileRes != TDCF_SUCCESS);
 }
 
 void CToDoListWnd::OnUpdateToolsCheckout(CCmdUI* pCmdUI) 
@@ -11698,8 +11720,8 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 	if (sPath.IsEmpty())
 	{
 		ASSERT(dwTaskID);
-		bSelected = GetToDoCtrl().SelectTask(dwTaskID);
 
+		bSelected = SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 		bHandled = TRUE; // handled regardless of result
 	}
 	else if (!PathIsRelative(sPath) && FileMisc::FileExists(sPath))
@@ -11716,7 +11738,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					bSelected |= GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -11734,7 +11756,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					bSelected |= GetToDoCtrl().SelectTask(dwTaskID);
+					SelectTaskCheckFilter(GetToDoCtrl(), dwTaskID);
 			}
 			else
 			{
@@ -11753,6 +11775,29 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 		Show(FALSE);
 
 	return bHandled;
+}
+
+BOOL CToDoListWnd::SelectTaskCheckFilter(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
+{
+	if (tdc.SelectTask(dwTaskID))
+		return TRUE;
+
+	if (tdc.HasTask(dwTaskID) && tdc.HasAnyFilter())
+	{
+		tdc.ToggleFilter();
+
+		if (tdc.SelectTask(dwTaskID))
+		{
+			RefreshFilterBarControls();
+			return TRUE;
+		}
+
+		// else
+		ASSERT(0);
+		tdc.ToggleFilter();
+	}
+
+	return FALSE;
 }
 
 BOOL CToDoListWnd::ValidateTaskLinkFilePath(CString& sPath) const
@@ -12971,27 +13016,6 @@ void CToDoListWnd::OnViewSaveToImage()
 		// TODO
 	}
 }
-
-/*
-BOOL CToDoListWnd::SaveViewToImage(CFilteredToDoCtrl& tdc, const CString& sFilePath) 
-{
-	CWaitCursor cursor;
-	CBitmap bmImage;
-	
-	if (tdc.SaveTaskViewToImage(bmImage))
-	{
-		CDibData dib;
-
-		if (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath))
-		{
-			return TRUE;
-		}
-	}
-
-	// else
-	return FALSE;
-}
-*/
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
 {

@@ -6347,7 +6347,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 		{
 			// save off password
 			m_sPassword = tasks.GetPassword();
-
+			
 			// get comments type from header of older tasklists for the
 			// setting of the enclosed tasks
 			CONTENTFORMAT cf = tasks.GetCommentsType();
@@ -6364,7 +6364,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 				TSH().RemoveAll();
 				TSH().ClearHistory();
 			}
-
+					
 			LoadTasks(tasks);
 			LoadTaskIcons();
 			SetModified(FALSE);
@@ -9225,6 +9225,7 @@ HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
 	///////////////////////////////////////////////////////////////////
 
 	// Restore checkout task states
+	// TODO
 	
 	// Then tree structure
 	HTREEITEM hti = RebuildTree();
@@ -10788,7 +10789,7 @@ BOOL CToDoCtrl::AddToSourceControl(BOOL bAdd)
 	return m_ssc.AddTasklistToSourceControl(bAdd);
 }
 
-TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo)
+TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo, BOOL bForce)
 {
 	if (m_bDelayLoaded)
 		return TDCF_SSC_DELAYLOADED;
@@ -10798,7 +10799,7 @@ TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo)
 
 	do 
 	{
-		if (m_ssc.CheckOutTasklist(sCheckedOutTo))
+		if (m_ssc.CheckOutTasklist(sCheckedOutTo, bForce))
 		{
 			if (HasFilePath())
 			{
@@ -12604,11 +12605,16 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
-	if (IsReadOnly() && !m_ssc.IsSourceControlled())
+	BOOL bSourceControlled = m_ssc.IsSourceControlled();
+
+	if (IsReadOnly() && !bSourceControlled)
 		return FALSE;
 
 	switch (nAttrib)
 	{
+	case TDCA_NONE:
+		return FALSE;
+
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
 	case TDCA_CATEGORY:		
@@ -12646,11 +12652,11 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
-		return m_ssc.IsTasklistCheckedOut();
+		return (!bSourceControlled || m_ssc.IsTasklistCheckedOut());
 
 	case TDCA_DELETE:
 	case TDCA_POSITION: // move
-		return (m_ssc.IsTasklistCheckedOut() && GetSelectedCount());
+		return (!bSourceControlled || (m_ssc.IsTasklistCheckedOut() && GetSelectedCount()));
 
 	case TDCA_LOCK:
 		return GetSelectedCount();
