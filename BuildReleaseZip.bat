@@ -13,7 +13,10 @@ REM Zip C++ Binaries
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\TDLTransEdit.exe
 
 REM Manifest for XP only (Updater will delete for other OSes)
-%PATH7ZIP% a %OUTZIP% %1\res\ToDoList.exe.xp.manifest
+%PATH7ZIP% a %OUTZIP% %1\res\ToDoList.exe.XP.manifest
+
+REM Manifest for high DPI screens
+%PATH7ZIP% a %OUTZIP% %1\res\ToDoList.exe.4K.manifest
 
 REM Handle dlls explicitly to maintain control over .NET plugins
 %PATH7ZIP% a %OUTZIP% %1\Unicode_Release\PlainTextImport.dll
