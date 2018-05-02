@@ -6,7 +6,7 @@
     <LocalDebuggerCommandArguments>-g</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommand>$(SolutionDir)\Release\ToDoList.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(SolutionDir)\..\ToDoList_7.2\ToDoList\Unicode_Release\ToDoList.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
