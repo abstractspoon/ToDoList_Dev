@@ -1,0 +1,465 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "WorkloadExt DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "WorkloadExt\0"
+            VALUE "LegalCopyright", "Copyright (C) 2012\0"
+            VALUE "OriginalFilename", "WorkloadExt.DLL\0"
+            VALUE "ProductName", "WorkloadExt Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_WorkloadTREE_DIALOG DIALOGEX 0, 0, 594, 316
+STYLE WS_CHILD
+EXSTYLE WS_EX_APPWINDOW
+FONT 8, "Tahoma"
+BEGIN
+    CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
+                    IDC_SELECTEDTASKDATES,351,13,236,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
+    COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Custom2",IDC_TREEHEADER,"SysHeader32",0x0,0,33,160,13
+    CONTROL         "Tree1",IDC_WorkloadTREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
+                    TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | 
+                    TVS_NONEVENHEIGHT | WS_HSCROLL | WS_TABSTOP,0,46,159,263
+    CONTROL         "List1",IDC_WorkloadLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
+                    WS_TABSTOP,162,33,425,276
+    COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
+    LTEXT           "Selected Task &Date Range",IDC_SELECTEDTASKDATES_LABEL,
+                    352,3,235,8
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,243,12,106,17
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO MOVEABLE PURE 
+BEGIN
+    IDD_WorkloadTREE_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 587
+        BOTTOMMARGIN, 309
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_Workload          ICON    DISCARDABLE     "res\\icon1.ico"
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 373, 223
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Workload Chart Preferences"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,262,202,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,316,202,50,14
+    CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
+END
+
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 400
+STYLE WS_CHILD
+FONT 8, "Tahoma"
+BEGIN
+    CONTROL         "Decades start on year '1' instead of year '0'. eg. '2001' instead of '2000'",
+                    IDC_DECADESAREONEBASED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,333,10
+    CONTROL         "&Display 'Alloc To' after task's Workload bar",
+                    IDC_DISPLAYALLOCTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    7,22,333,10
+    CONTROL         "Di&splay 'Task Title' after task's Workload bar",
+                    IDC_DISPLAYTASKTITLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,37,333,10
+    CONTROL         "Show '% &Complete' as progress on task's Workload bar",
+                    IDC_DISPLAYPROGRESS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,52,333,10
+    CONTROL         "&Auto-scroll to task when selecting",
+                    IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,67,333,10
+    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
+                    IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,82,333,10
+    EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL
+    LTEXT           "&Column Visibility",IDC_STATIC,7,113,333,8
+    LISTBOX         IDC_COLUMNVISIBILITY,7,125,222,44,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Colours",IDC_COLORSGROUP,7,174,333,8
+    CONTROL         "'&Non-working hours' colour",IDC_NONWORKINGHOURSCOLOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,187,52,13,
+                    BS_RIGHT
+    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,202,52,13,BS_RIGHT
+    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,137,10
+    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,216,52,13,BS_RIGHT
+    CONTROL         "'Bar' colour for tasks having no colour",
+                    IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
+                    234,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,231,52,13,BS_RIGHT
+    GROUPBOX        "Parent Tasks",IDC_STATIC,7,250,333,63
+    CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,264,320,10
+    CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
+                    BS_AUTORADIOBUTTON,16,279,320,10
+    CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
+                    BS_AUTORADIOBUTTON,16,295,133,10
+    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,293,52,13,BS_RIGHT | 
+                    WS_GROUP
+    LTEXT           "Dates",IDC_DATESGROUP,7,322,333,8
+    CONTROL         "A&uto-calculate parent task dates to include all subtasks",
+                    IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,338,333,10
+    CONTROL         "Display collapsed parent tasks as 'Rollups'",
+                    IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,17,353,323,10
+    CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
+                    IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,368,333,10
+    CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
+                    IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,383,333,10
+END
+
+IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,67,92,50,14
+    GROUPBOX        "Steps",IDC_STATIC,7,7,172,79
+    LTEXT           "",IDC_CURRENTSTAGE,14,23,157,54
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO MOVEABLE PURE 
+BEGIN
+    IDD_PREFERENCES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 366
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 216
+    END
+
+    IDD_PREFERENCES_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 340
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 393
+    END
+
+    IDD_CREATEDEPENDS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 106
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\WorkloadExt.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
+BEGIN
+    BUTTON      ID_Workload_GOTOTODAY
+    SEPARATOR
+    BUTTON      ID_Workload_PREFS
+    SEPARATOR
+    BUTTON      ID_Workload_NEWDEPENDS
+    BUTTON      ID_Workload_EDITDEPENDS
+    BUTTON      ID_Workload_DELETEDEPENDS
+    SEPARATOR
+    BUTTON      ID_HELP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_TOOLBAR             BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
+IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_Workload_DAYS          "Days"
+    IDS_Workload_WEEKS         "Weeks"
+    IDS_SNAP_FREE           "No Snapping"
+    IDS_SNAP_NEARESTDAY     "Nearest Day"
+    IDS_SNAP_NEARESTHALFDAY "Nearest Half-Day"
+    IDS_SNAP_NEARESTHALFYEAR "Nearest Half-Year"
+    IDS_SNAP_NEARESTHOUR    "Nearest Hour"
+    IDS_SNAP_NEARESTMONTH   "Nearest Month"
+    IDS_SNAP_NEARESTQUARTER "Nearest Quarter"
+    IDS_SNAP_NEARESTWEEK    "Nearest Week"
+    IDS_SNAP_NEARESTYEAR    "Nearest Year"
+    IDS_DISPLAYDAYSHOURS    "Hours"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_Workload_GOTOTODAY      "\nScroll To Today"
+    ID_Workload_PREFS          "\nWorkload Preferences"
+    ID_Workload_NEWDEPENDS     "\nAdd Dependency"
+    IDS_PICKINGFROMTASK     "Pick the task you want to be dependent on another task... "
+    IDS_PICKINGTOTASKADD    "Pick the task on which the just picked task will be dependent..."
+    ID_Workload_EDITDEPENDS    "\nEdit Dependency"
+    ID_Workload_DELETEDEPENDS  "\nDelete Dependency"
+    IDS_PICKINGFROMDEPEND_EDIT "Pick a dependency to edit... "
+    IDS_PICKINGFROMDEPEND_DELETE "Pick a dependency to delete..."
+    IDS_PICKINGTOTASKEDIT   "Pick the new task on which the just picked task will be dependent..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_PICKED              "Done!\n"
+    IDS_CREATEDEPEND_TITLE  "Create Task Dependency"
+    IDS_EDITDEPEND_TITLE    "Edit Task Dependency"
+    IDS_DELETEDEPEND_TITLE  "Delete Task Dependency"
+    IDS_DISPLAYYEARS        "Years \t\t\t\t(eg. 2013)"
+    IDS_DISPLAYQUARTERSSHORT "Quarters, narrow \t(eg. Q1 2013)"
+    IDS_DISPLAYQUARTERSMID  "Quarters, mid \t\t(eg. Jan-Mar 2013)"
+    IDS_DISPLAYQUARTERSLONG "Quarters, wide \t\t(eg. January-March 2013)"
+    IDS_DISPLAYMONTHSSHORT  "Months, narrow \t\t(eg. 01/13)"
+    IDS_DISPLAYMONTHSMID    "Months, mid \t\t(eg. Jan 2013)"
+    IDS_DISPLAYMONTHSLONG   "Months, wide \t\t(eg. January 2013)"
+    IDS_DISPLAYWEEKSSHORT   "Weeks, narrow"
+    IDS_DISPLAYWEEKSMID     "Weeks, mid"
+    IDS_DISPLAYWEEKSLONG    "Weeks, wide"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAYDAYSSHORT    "Days, narrow"
+    IDS_DISPLAYDAYSMID      "Days, mid"
+    IDS_DISPLAYDAYSLONG     "Days, wide"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
+    IDS_DISPLAYQUARTERCENTURIES "Quarter Centuries \t(eg. 2000-2024)"
+    IDS_DISPLAYDECADES      "Decades \t\t\t(eg, 2000-2009)"
+    IDS_SNAP_NEARESTQUARTERCENTURY "Nearest Quarter-Century"
+    IDS_SNAP_NEARESTDECADE  "Nearest Decade"
+    IDS_SNAP_NEARESTHALFHOUR "Nearest Half-Hour"
+    IDS_COL_STARTDATE       "Start"
+    IDS_COL_DUEDATE         "Due"
+    IDS_COL_ALLOCTO         "Alloc To"
+    IDS_COL_PERCENTDONE     "%"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COL_TASKID          "ID"
+    IDS_ATTRIB_STARTDATE    "Start Date"
+    IDS_ATTRIB_DUEDATE      "Due Date"
+    IDS_ATTRIB_ALLOCTO      "Allocated To"
+    IDS_ATTRIB_PERCENTDONE  "Percent Complete"
+    IDS_ATTRIB_TASKID       "Task ID"
+    IDS_ATTRIB_DONEDATE     "Completion Date"
+    IDS_COL_DONEDATE        "Completed"
+END
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\WorkloadExt.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
