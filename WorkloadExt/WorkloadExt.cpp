@@ -89,7 +89,7 @@ BOOL CWorkloadExtApp::InitInstance()
 	// Set this before anything else
 	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 	
-	m_icon.LoadIcon(IDR_Workload);
+	m_icon.LoadIcon(IDR_WORKLOAD);
 
 	return CWinApp::InitInstance();
 }

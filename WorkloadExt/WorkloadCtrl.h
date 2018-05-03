@@ -34,13 +34,13 @@ class CThemed;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CWorkloadTreeListCtrl : protected CTreeListSyncer  
+class CWorkloadCtrl : protected CTreeListSyncer  
 {
 	friend class CWorkloadLockUpdates;
 
 public:
-	CWorkloadTreeListCtrl(CWorkloadTreeCtrl& tree, CListCtrl& list);
-	virtual ~CWorkloadTreeListCtrl();
+	CWorkloadCtrl(CWorkloadTreeCtrl& tree, CListCtrl& list);
+	virtual ~CWorkloadCtrl();
 
 	BOOL Initialize(UINT nIDTreeHeader);
 	void Release();

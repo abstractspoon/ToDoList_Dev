@@ -67,10 +67,10 @@ END
 // Dialog
 //
 
-IDD_WorkloadTREE_DIALOG DIALOGEX 0, 0, 594, 316
+IDD_WORKLOADTREE_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
                     IDC_SELECTEDTASKDATES,351,13,236,12,SS_CENTERIMAGE | 
@@ -80,11 +80,11 @@ BEGIN
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "Custom2",IDC_TREEHEADER,"SysHeader32",0x0,0,33,160,13
-    CONTROL         "Tree1",IDC_WorkloadTREE,"SysTreeView32",TVS_HASBUTTONS | 
+    CONTROL         "Tree1",IDC_WORKLOADTREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
                     TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | TVS_NOTOOLTIPS | 
                     TVS_NONEVENHEIGHT | WS_HSCROLL | WS_TABSTOP,0,46,159,263
-    CONTROL         "List1",IDC_WorkloadLIST,"SysListView32",LVS_REPORT | 
+    CONTROL         "List1",IDC_WORKLOADLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
                     WS_TABSTOP,162,33,425,276
     COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
@@ -105,7 +105,7 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO MOVEABLE PURE 
 BEGIN
-    IDD_WorkloadTREE_DIALOG, DIALOG
+    IDD_WORKLOADTREE_DIALOG, DIALOG
     BEGIN
         RIGHTMARGIN, 587
         BOTTOMMARGIN, 309
@@ -133,7 +133,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_Workload          ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_WORKLOAD            ICON    DISCARDABLE     "res\\workload.ico"
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -329,13 +329,13 @@ END
 
 IDR_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
-    BUTTON      ID_Workload_GOTOTODAY
+    BUTTON      ID_WORKLOAD_GOTOTODAY
     SEPARATOR
-    BUTTON      ID_Workload_PREFS
+    BUTTON      ID_WORKLOAD_PREFS
     SEPARATOR
-    BUTTON      ID_Workload_NEWDEPENDS
-    BUTTON      ID_Workload_EDITDEPENDS
-    BUTTON      ID_Workload_DELETEDEPENDS
+    BUTTON      ID_WORKLOAD_NEWDEPENDS
+    BUTTON      ID_WORKLOAD_EDITDEPENDS
+    BUTTON      ID_WORKLOAD_DELETEDEPENDS
     SEPARATOR
     BUTTON      ID_HELP
 END
@@ -357,8 +357,8 @@ IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_Workload_DAYS          "Days"
-    IDS_Workload_WEEKS         "Weeks"
+    IDS_WORKLOAD_DAYS       "Days"
+    IDS_WORKLOAD_WEEKS      "Weeks"
     IDS_SNAP_FREE           "No Snapping"
     IDS_SNAP_NEARESTDAY     "Nearest Day"
     IDS_SNAP_NEARESTHALFDAY "Nearest Half-Day"
@@ -373,13 +373,13 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_Workload_GOTOTODAY      "\nScroll To Today"
-    ID_Workload_PREFS          "\nWorkload Preferences"
-    ID_Workload_NEWDEPENDS     "\nAdd Dependency"
+    ID_WORKLOAD_GOTOTODAY   "\nScroll To Today"
+    ID_WORKLOAD_PREFS       "\nWorkload Preferences"
+    ID_WORKLOAD_NEWDEPENDS  "\nAdd Dependency"
     IDS_PICKINGFROMTASK     "Pick the task you want to be dependent on another task... "
     IDS_PICKINGTOTASKADD    "Pick the task on which the just picked task will be dependent..."
-    ID_Workload_EDITDEPENDS    "\nEdit Dependency"
-    ID_Workload_DELETEDEPENDS  "\nDelete Dependency"
+    ID_WORKLOAD_EDITDEPENDS "\nEdit Dependency"
+    ID_WORKLOAD_DELETEDEPENDS "\nDelete Dependency"
     IDS_PICKINGFROMDEPEND_EDIT "Pick a dependency to edit... "
     IDS_PICKINGFROMDEPEND_DELETE "Pick a dependency to delete..."
     IDS_PICKINGTOTASKEDIT   "Pick the new task on which the just picked task will be dependent..."

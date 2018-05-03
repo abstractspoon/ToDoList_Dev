@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_WorkloadEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_)
-#define AFX_WorkloadEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_
+#define AFX_WORKLOADEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -17,7 +17,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR Workload_TYPEID = _T("83F6CBD3-5F3C-4567-9BA8-9544B899F949");
+const LPCTSTR WORKLOAD_TYPEID = _T("4320FC3D-C6A5-4A7E-A159-3BA69CEE6E9D");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -30,9 +30,9 @@ public:
     void Release(); // releases the interface
 	void SetLocalizer(ITransText* pTT);
 
-	LPCTSTR GetMenuText() const { return _T("Workload Chart"); }
+	LPCTSTR GetMenuText() const { return _T("Workload"); }
 	HICON GetIcon() const { return m_icon; }
-	LPCTSTR GetTypeID() const { return Workload_TYPEID; }
+	LPCTSTR GetTypeID() const { return WORKLOAD_TYPEID; }
 
 	IUIExtensionWindow* CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
 										long nLeft, long nTop, long nWidth, long nHeight, 

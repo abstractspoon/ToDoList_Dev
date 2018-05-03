@@ -401,6 +401,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name TDLTransEdit
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name WorkloadExt
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -418,6 +421,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "WorkloadExt"=..\WorkloadExt\WorkloadExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
     End Project Dependency
 }}}
 

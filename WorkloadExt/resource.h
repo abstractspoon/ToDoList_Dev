@@ -2,13 +2,13 @@
 // Microsoft Developer Studio generated include file.
 // Used by WorkloadExt.rc
 //
-#define IDD_WorkloadTREE_DIALOG            103
+#define IDD_WORKLOADTREE_DIALOG         103
 #define IDB_TOOLBAR_STD                 245
 #define IDI_HELP_BUTTON                 293
-#define IDR_Workload                  1000
+#define IDR_WORKLOAD                    1000
 #define IDC_TREEHEADER                  1004
-#define IDC_WorkloadLIST                   1005
-#define IDC_WorkloadTREE                   1006
+#define IDC_WORKLOADLIST                1005
+#define IDC_WORKLOADTREE                1006
 #define IDC_DISPLAY                     1015
 #define IDC_DISPLAYALLOCTO              1016
 #define IDC_DISPLAYTASKTITLE            1017
@@ -21,8 +21,8 @@
 #define IDC_SETPARENTCOLOR              1074
 #define IDC_SETDEFAULTCOLOR             1075
 #define IDC_SETNONWORKINGHOURSCOLOR     1076
-#define IDS_Workload_DAYS                  2001
-#define IDS_Workload_WEEKS                 2002
+#define IDS_WORKLOAD_DAYS               2001
+#define IDS_WORKLOAD_WEEKS              2002
 #define IDS_SNAP_FREE                   2003
 #define IDS_SNAP_NEARESTDAY             2004
 #define IDS_SNAP_NEARESTHALFDAY         2005
@@ -66,13 +66,13 @@
 #define IDC_DECADESAREONEBASED          16029
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_DISPLAYPARENTSASROLLUPS     16033
-#define ID_Workload_GOTOTODAY              32774
-#define ID_Workload_PREFS                  32775
-#define ID_Workload_NEWDEPENDS             32776
+#define ID_WORKLOAD_GOTOTODAY           32774
+#define ID_WORKLOAD_PREFS               32775
+#define ID_WORKLOAD_NEWDEPENDS          32776
 #define IDS_PICKINGFROMTASK             32777
 #define IDS_PICKINGTOTASKADD            32778
-#define ID_Workload_EDITDEPENDS            32779
-#define ID_Workload_DELETEDEPENDS          32780
+#define ID_WORKLOAD_EDITDEPENDS         32779
+#define ID_WORKLOAD_DELETEDEPENDS       32780
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
 #define IDS_PICKINGTOTASKEDIT           32783

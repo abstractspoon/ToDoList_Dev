@@ -328,7 +328,7 @@ const UINT IDC_HELPBUTTON = 1001;
 
 CWorkloadPreferencesDlg::CWorkloadPreferencesDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_Workload, IDI_HELP_BUTTON, pParent)
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_WORKLOAD, IDI_HELP_BUTTON, pParent)
 {
 	//{{AFX_DATA_INIT(CWorkloadPreferencesDlg)
 	//}}AFX_DATA_INIT

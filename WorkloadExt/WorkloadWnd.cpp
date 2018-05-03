@@ -53,7 +53,7 @@ const int PADDING = 3;
 
 CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_WorkloadTREE_DIALOG, pParent), 
+	CDialog(IDD_WORKLOADTREE_DIALOG, pParent), 
 	m_ctrlWorkload(m_tree, m_list),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
@@ -61,7 +61,7 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
 {
-	m_icon.LoadIcon(IDR_Workload);
+	m_icon.LoadIcon(IDR_WORKLOAD);
 }
 
 CWorkloadWnd::~CWorkloadWnd()
@@ -73,8 +73,8 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	DDX_Control(pDX, IDC_WorkloadLIST, m_list);
-	DDX_Control(pDX, IDC_WorkloadTREE, m_tree);
+	DDX_Control(pDX, IDC_WORKLOADLIST, m_list);
+	DDX_Control(pDX, IDC_WORKLOADTREE, m_tree);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
@@ -84,26 +84,20 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	//{{AFX_MSG_MAP(CWorkloadWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	ON_NOTIFY(TVN_KEYUP, IDC_WorkloadTREE, OnKeyUpWorkload)
+	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnKeyUpWorkload)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
-	ON_NOTIFY(NM_CLICK, IDC_WorkloadLIST, OnClickWorkloadList)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_WorkloadTREE, OnSelchangedWorkloadTree)
-	ON_COMMAND(ID_Workload_GOTOTODAY, OnWorkloadGotoToday)
-	ON_UPDATE_COMMAND_UI(ID_Workload_GOTOTODAY, OnUpdateWorkloadGotoToday)
-	ON_COMMAND(ID_Workload_NEWDEPENDS, OnWorkloadNewDepends)
-	ON_UPDATE_COMMAND_UI(ID_Workload_NEWDEPENDS, OnUpdateWorkloadNewDepends)
-	ON_COMMAND(ID_Workload_PREFS, OnWorkloadPreferences)
-	ON_UPDATE_COMMAND_UI(ID_Workload_PREFS, OnUpdateWorkloadPreferences)
+	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnClickWorkloadList)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_WORKLOADTREE, OnSelchangedWorkloadTree)
+	ON_COMMAND(ID_WORKLOAD_GOTOTODAY, OnWorkloadGotoToday)
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_GOTOTODAY, OnUpdateWorkloadGotoToday)
+	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
 	ON_WM_SHOWWINDOW()
-	ON_COMMAND(ID_Workload_EDITDEPENDS, OnWorkloadEditDepends)
-	ON_UPDATE_COMMAND_UI(ID_Workload_EDITDEPENDS, OnUpdateWorkloadEditDepends)
-	ON_COMMAND(ID_Workload_DELETEDEPENDS, OnWorkloadDeleteDepends)
-	ON_UPDATE_COMMAND_UI(ID_Workload_DELETEDEPENDS, OnUpdateWorkloadDeleteDepends)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WorkloadTREE, OnBeginEditTreeLabel)
+	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WORKLOADTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
@@ -112,7 +106,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnWorkloadNotifyZoomChange)
-	ON_REGISTERED_MESSAGE(WM_WorkloadDEPENDDLG_CLOSE, OnWorkloadDependencyDlgClose)
 	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnWorkloadPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnWorkloadGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_GTLC_MOVETASK, OnWorkloadMoveTask)
@@ -161,7 +154,7 @@ BOOL CWorkloadWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd,
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (CDialog::Create(IDD_WorkloadTREE_DIALOG, pParentWnd))
+	if (CDialog::Create(IDD_WORKLOADTREE_DIALOG, pParentWnd))
 	{
 		SetWindowLong(*this, GWL_STYLE, dwStyle);
 		SetDlgCtrlID(nID);
@@ -498,7 +491,7 @@ bool CWorkloadWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return (CWorkloadTreeListCtrl::WantEditUpdate(nAttribute) != FALSE);
+	return (CWorkloadCtrl::WantEditUpdate(nAttribute) != FALSE);
 }
 
 void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const IUI_ATTRIBUTE* pAttributes, int nNumAttributes)
@@ -680,7 +673,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 		if (pData)
-			return (CWorkloadTreeListCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+			return (CWorkloadCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
 		break;
 
 	case IUI_MULTISORT:
@@ -720,12 +713,12 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 GTLC_COLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
 {
-	return CWorkloadTreeListCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
+	return CWorkloadCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
 }
 
 DWORD CWorkloadWnd::MapColumn(GTLC_COLUMN nColumn)
 {
-	return (DWORD)CWorkloadTreeListCtrl::MapColumnToAttribute(nColumn);
+	return (DWORD)CWorkloadCtrl::MapColumnToAttribute(nColumn);
 }
 
 void CWorkloadWnd::OnSize(UINT nType, int cx, int cy) 
@@ -1233,121 +1226,6 @@ void CWorkloadWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 	
 	if (!bShow)
 		m_ctrlWorkload.CancelOperation();
-}
-
-void CWorkloadWnd::OnWorkloadNewDepends() 
-{
-	OnWorkloadDepends(GCDDM_ADD);
-}
-
-void CWorkloadWnd::OnUpdateWorkloadNewDepends(CCmdUI* pCmdUI) 
-{
-	OnUpdateWorkloadDepends(GCDDM_ADD, pCmdUI);
-}
-
-void CWorkloadWnd::OnWorkloadEditDepends() 
-{
-	OnWorkloadDepends(GCDDM_EDIT);
-}
-
-void CWorkloadWnd::OnUpdateWorkloadEditDepends(CCmdUI* pCmdUI) 
-{
-	OnUpdateWorkloadDepends(GCDDM_EDIT, pCmdUI);
-}
-
-void CWorkloadWnd::OnWorkloadDeleteDepends() 
-{
-	OnWorkloadDepends(GCDDM_DELETE);
-}
-
-void CWorkloadWnd::OnUpdateWorkloadDeleteDepends(CCmdUI* pCmdUI) 
-{
-	OnUpdateWorkloadDepends(GCDDM_DELETE, pCmdUI);
-}
-
-void CWorkloadWnd::OnWorkloadDepends(GCDD_MODE nMode)
-{
-	if (!m_bReadOnly)
-	{
-		ASSERT (m_dlgDepends.GetSafeHwnd() == NULL);
-		
-		if (m_dlgDepends.Create(nMode, this))
-		{
-			VERIFY (m_ctrlWorkload.BeginDependencyEdit(&m_dlgDepends));
-			m_toolbar.RefreshButtonStates();
-		}
-	}
-}
-
-void CWorkloadWnd::OnUpdateWorkloadDepends(GCDD_MODE nMode, CCmdUI* pCmdUI)
-{
-	pCmdUI->SetCheck(m_dlgDepends.GetMode() == nMode);
-	pCmdUI->Enable(!m_bReadOnly && ((m_dlgDepends.GetMode() == nMode) || (m_dlgDepends.GetMode() == GCDDM_NONE)));
-}
-
-LRESULT CWorkloadWnd::OnWorkloadDependencyDlgClose(WPARAM wp, LPARAM lp)
-{
-	UNREFERENCED_PARAMETER(lp);
-	ASSERT(((HWND)lp) == m_dlgDepends);
-	
-	if (m_dlgDepends.IsPickingCompleted())
-	{
-		// make sure the from task is selected
-		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
-
-		if (m_ctrlWorkload.GetSelectedTaskID() != dwFromTaskID)
-		{
-			SelectTask(dwFromTaskID);
-
-			// explicitly update parent because SelectTask will not
-			SendParentSelectionUpdate();
-		}
-
-		CDWordArray aDepends;
-		m_ctrlWorkload.GetSelectedTaskDependencies(aDepends);
-		
-		switch (wp)
-		{
-		case GCDDM_ADD:
-			aDepends.Add(m_dlgDepends.GetToTask());
-			break;
-			
-		case GCDDM_EDIT:
-			aDepends.Add(m_dlgDepends.GetToTask());
-			 //fall thru to delete prev dependency
-			
-		case GCDDM_DELETE:
-			{
-				DWORD dwPrevToTask;
-				VERIFY(m_dlgDepends.GetFromDependency(dwPrevToTask));
-				VERIFY(Misc::RemoveItem(dwPrevToTask, aDepends));
-			}
-			break;
-			
-		default:
-			ASSERT(0);
-			return 0L;
-			
-		}
-
-		// notify parent
-		CString sDepends = Misc::FormatArray(aDepends);
-		IUITASKMOD mod = { IUI_DEPENDENCY, 0 };
-
-		mod.szValue = sDepends;
-			
-		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
-		{
-			// update Workload ctrl
-			m_ctrlWorkload.SetSelectedTaskDependencies(aDepends);
-		}
-	}
-
-	m_toolbar.RefreshButtonStates(FALSE);
-	m_ctrlWorkload.OnEndDepedencyEdit();
-	m_ctrlWorkload.SetFocus();
-
-	return 0L;
 }
 
 LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 

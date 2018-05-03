@@ -8,9 +8,8 @@
 //
 
 #include "WorkloadTreeCtrl.h"
-#include "WorkloadTreeListCtrl.h"
+#include "WorkloadCtrl.h"
 #include "WorkloadPreferencesDlg.h"
-#include "WorkloadCreateDependsDlg.h"
 
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
@@ -35,7 +34,7 @@ public:
 
 	LPCTSTR GetMenuText() const { return _T("Workload Chart"); }
 	HICON GetIcon() const { return m_icon; }
-	LPCTSTR GetTypeID() const { return Workload_TYPEID; }
+	LPCTSTR GetTypeID() const { return WORKLOAD_TYPEID; }
 
 	void SetReadOnly(bool bReadOnly);
 	HWND GetHwnd() const { return GetSafeHwnd(); }
@@ -68,9 +67,8 @@ protected:
 	CListCtrl m_list;
 	CWorkloadTreeCtrl m_tree;
 	CTabbedComboBox	m_cbDisplayOptions;
-	CWorkloadTreeListCtrl m_ctrlWorkload;
+	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
-	CWorkloadCreateDependsDlg m_dlgDepends;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 
@@ -105,15 +103,9 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnWorkloadGotoToday();
 	afx_msg void OnUpdateWorkloadGotoToday(CCmdUI* pCmdUI);
-	afx_msg void OnWorkloadNewDepends();
-	afx_msg void OnUpdateWorkloadNewDepends(CCmdUI* pCmdUI);
 	afx_msg void OnWorkloadPreferences();
 	afx_msg void OnUpdateWorkloadPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg void OnWorkloadEditDepends();
-	afx_msg void OnUpdateWorkloadEditDepends(CCmdUI* pCmdUI);
-	afx_msg void OnWorkloadDeleteDepends();
-	afx_msg void OnUpdateWorkloadDeleteDepends(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -127,15 +119,10 @@ protected:
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyZoomChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnWorkloadDependencyDlgClose(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadMoveTask(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
-
-	// pseudo handlers
-	void OnWorkloadDepends(GCDD_MODE nMode);
-	void OnUpdateWorkloadDepends(GCDD_MODE nMode, CCmdUI* pCmdUI);
 
 protected:
 	void Resize(int cx, int cy);
