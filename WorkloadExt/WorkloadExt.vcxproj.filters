@@ -2,26 +2,23 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{449d0f84-8250-49ce-b02f-df21d21878fa}</UniqueIdentifier>
+      <UniqueIdentifier>{f54d5e3c-12a1-412f-b682-68458f5f62ed}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{f1dba6ad-34aa-4345-83c7-5a26988c5f29}</UniqueIdentifier>
+      <UniqueIdentifier>{26466217-94af-406e-9023-1690074484f3}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{3bf3ad67-4b53-4d39-ac36-32fd97eb4705}</UniqueIdentifier>
+      <UniqueIdentifier>{76618e62-806f-435b-8bc3-03bbb604434b}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="WorkloadExt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WorkloadWnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WorkloadCreateDependsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WorkloadPreferencesDlg.cpp">
@@ -30,38 +27,15 @@
     <ClCompile Include="WorkloadStruct.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WorkloadTreeListCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WorkloadTreeCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="WorkloadExt.def">
+    <ClCompile Include="WorkloadWnd.cpp">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="res\WorkloadExt.rc2">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\toolbar_std.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\help_button.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\XPcheckboxes.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
+    </ClCompile>
+    <ClCompile Include="WorkloadCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WorkloadExt.rc">
@@ -69,41 +43,63 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WorkloadExt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadCreateDependsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadEnum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadPreferencesDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadStruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WorkloadTreeListCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorkloadTreeCtrl.h">
+    <ClInclude Include="WorkloadEnum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkloadExt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkloadMsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WorkloadPreferencesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="WorkloadStatic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WorkloadStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkloadTreeCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkloadWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkloadCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="WorkloadExt.def">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\help_button.ico">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\WorkloadExt.rc2">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="res\XPcheckboxes.bmp">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="WorkloadExt.vcxproj" />
+    <CustomBuild Include="WorkloadExt.vcxproj.filters" />
   </ItemGroup>
 </Project>

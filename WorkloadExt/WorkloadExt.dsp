@@ -109,6 +109,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\WorkloadCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\WorkloadExt.cpp
 # End Source File
 # Begin Source File
@@ -133,10 +137,6 @@ SOURCE=.\WorkloadTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\WorkloadTreeListCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\WorkloadWnd.cpp
 # End Source File
 # End Group
@@ -150,6 +150,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WorkloadCtrl.h
 # End Source File
 # Begin Source File
 
@@ -181,10 +185,6 @@ SOURCE=.\WorkloadTreeCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\WorkloadTreeListCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\WorkloadWnd.h
 # End Source File
 # End Group
@@ -206,6 +206,10 @@ SOURCE=.\res\toolbar.bmp
 # Begin Source File
 
 SOURCE=.\res\toolbar_std.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\Workload.ico
 # End Source File
 # Begin Source File
 

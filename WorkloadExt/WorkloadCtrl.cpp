@@ -5712,7 +5712,7 @@ BOOL CWorkloadCtrl::StartDragging(const CPoint& ptCursor)
 	CPoint ptScreen(ptCursor);
 	m_lcColumns.ClientToScreen(&ptScreen);
 	
-	if (!DragDetect(m_lcColumns, ptScreen))
+	if (!::DragDetect(m_lcColumns, ptScreen))
 		return FALSE;
 
 	// Ensure the Workload item has valid dates
