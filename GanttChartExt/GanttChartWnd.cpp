@@ -901,7 +901,7 @@ void CGanttChartWnd::OnSelchangeDisplay()
 	if (!SetMonthDisplay(nNewDisplay))
 	{
 		// restore previous selection
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nCurDisplay);
+		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
 	}
 }
 
