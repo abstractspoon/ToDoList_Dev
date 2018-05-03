@@ -82,9 +82,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	//{{AFX_MSG_MAP(CWorkloadWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnKeyUpWorkload)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
-	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnClickWorkloadList)
 	ON_COMMAND(ID_WORKLOAD_GOTOTODAY, OnWorkloadGotoToday)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_GOTOTODAY, OnUpdateWorkloadGotoToday)
 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
@@ -97,8 +95,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
-	ON_REGISTERED_MESSAGE(WM_WLCN_DATECHANGE, OnWorkloadNotifyDateChange)
-	ON_REGISTERED_MESSAGE(WM_WLCN_DRAGCHANGE, OnWorkloadNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_ZOOMCHANGE, OnWorkloadNotifyZoomChange)
@@ -107,7 +103,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_WLC_GETTASKICON, OnWorkloadGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_WLC_MOVETASK, OnWorkloadMoveTask)
-	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -174,26 +169,6 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	pPrefs->WriteProfileInt(sKey, _T("SortColumn"), m_ctrlWorkload.GetSortColumn());
 	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
 
-	// snap modes
-	CString sSnapKey = sKey + _T("\\Snap");
-
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERCENTURIES, _T("QuarterCentury"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DECADES, _T("Decade"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_YEARS, _T("Year"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_SHORT, _T("QuarterShort"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_MID, _T("QuarterMid"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_LONG, _T("QuarterLong"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_SHORT, _T("MonthShort"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_MID, _T("MonthMid"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_LONG, _T("MonthLong"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_SHORT, _T("WeekShort"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_MID, _T("WeekMid"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_LONG, _T("WeekLong"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_SHORT, _T("DayShort"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_MID, _T("DayMid"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_LONG, _T("DayLong"));
-	SaveSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_HOURS, _T("Hour"));
-
 	// column widths
 	CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
 
@@ -247,14 +222,12 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// application preferences
-	m_ctrlWorkload.SetOption(GTLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	m_ctrlWorkload.SetOption(GTLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
-	m_ctrlWorkload.SetOption(GTLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	m_ctrlWorkload.SetOption(GTLCF_DISABLEDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
-	m_ctrlWorkload.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
-	m_ctrlWorkload.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
-
-	//m_tree.ShowCheckboxes(pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	m_ctrlWorkload.SetOption(WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	m_ctrlWorkload.SetOption(WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
+	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	m_ctrlWorkload.SetOption(WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
+	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
+	m_ctrlWorkload.SetOption(WLCF_SHOWTREECHECKBOXES, (pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE)));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -284,28 +257,8 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		// NOTE: sort is handled by the app
 		CString sKey(szKey);
 		
-		// snap modes
-		CString sSnapKey = sKey + _T("\\Snap");
-
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERCENTURIES, _T("QuarterCentury"), GTLCSM_NEARESTYEAR);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DECADES, _T("Decade"), GTLCSM_NEARESTYEAR);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_YEARS, _T("Year"), GTLCSM_NEARESTMONTH);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_SHORT, _T("QuarterShort"), GTLCSM_NEARESTMONTH);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_MID, _T("QuarterMid"), GTLCSM_NEARESTMONTH);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_QUARTERS_LONG, _T("QuarterLong"), GTLCSM_NEARESTMONTH);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_SHORT, _T("MonthShort"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_MID, _T("MonthMid"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_MONTHS_LONG, _T("MonthLong"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_SHORT, _T("WeekShort"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_MID, _T("WeekMid"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_WEEKS_LONG, _T("WeekLong"), GTLCSM_NEARESTDAY);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_SHORT, _T("DayShort"), GTLCSM_NEARESTHOUR);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_MID, _T("DayMid"), GTLCSM_NEARESTHOUR);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_DAYS_LONG, _T("DayLong"), GTLCSM_NEARESTHOUR);
-		LoadSnapModePreference(pPrefs, sSnapKey, GTLC_DISPLAY_HOURS, _T("Hour"), GTLCSM_NEARESTHOUR);
-
 		// last display
-		GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)pPrefs->GetProfileInt(sKey, _T("MonthDisplay"), GTLC_DISPLAY_MONTHS_LONG);
+		WLC_MONTH_DISPLAY nDisplay = (WLC_MONTH_DISPLAY)pPrefs->GetProfileInt(sKey, _T("MonthDisplay"), WLC_DISPLAY_MONTHS_LONG);
 		SetMonthDisplay(nDisplay);
 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
@@ -337,19 +290,6 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (GetSafeHwnd())
 			UpdateData(FALSE);
 	}
-}
-
-void CWorkloadWnd::LoadSnapModePreference(const IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay, GTLC_SNAPMODE nDefaultSnap) 
-{
-	m_mapDisplaySnapModes[nDisplay]	= (GTLC_SNAPMODE)pPrefs->GetProfileInt(szSnapKey, szDisplay, nDefaultSnap);
-}
-
-void CWorkloadWnd::SaveSnapModePreference(IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay) const
-{
-	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
-
-	VERIFY (m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
-	pPrefs->WriteProfileInt(szSnapKey, szDisplay, nSnap);
 }
 
 void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
@@ -448,7 +388,7 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	if (m_ctrlWorkload.HitTestTask(ptScreen))
 		return IUI_TASK;
 
-	// else check else where in tree or list client
+	// else check elsewhere in tree or list client
 	CRect rWorkload;
 	
 // 	m_tree.GetClientRect(rWorkload);
@@ -544,7 +484,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_MULTISORT:
 		if (pData)
 		{
-			WorkloadSORTCOLUMNS sort;
+			WORKLOADSORTCOLUMNS sort;
 
 			sort.cols[0].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttrib1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
@@ -708,12 +648,12 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	return false;
 }
 
-GTLC_COLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
+WLC_COLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
 {
 	return CWorkloadCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
 }
 
-DWORD CWorkloadWnd::MapColumn(GTLC_COLUMN nColumn)
+DWORD CWorkloadWnd::MapColumn(WLC_COLUMN nColumn)
 {
 	return (DWORD)CWorkloadCtrl::MapColumnToAttribute(nColumn);
 }
@@ -751,7 +691,6 @@ BOOL CWorkloadWnd::OnInitDialog()
 
 	m_ctrlWorkload.ExpandAll();
 
-	BuildSnapCombo();
  	BuildDisplayCombo();
 	
  	m_ctrlWorkload.ScrollToToday();
@@ -822,55 +761,19 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 	return CDialog::OnEraseBkgnd(pDC);
 }
 
-void CWorkloadWnd::OnKeyUpWorkload(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	ASSERT (!m_bInSelectTask);
-	
-	NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
-	
-	switch (pTVKD->wVKey)
-	{
-	case VK_UP:
-	case VK_DOWN:
-	case VK_PRIOR:
-	case VK_NEXT:
-		UpdateSelectedTaskDates();
-		SendParentSelectionUpdate();
-		break;
-	}
-	
-	*pResult = 0;
-}
-
 void CWorkloadWnd::SendParentSelectionUpdate()
 {
 	DWORD dwTaskID = m_ctrlWorkload.GetSelectedTaskID();
 	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
 }
 
-void CWorkloadWnd::OnClickWorkloadList(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
-{
-	UpdateSelectedTaskDates();
-	SendParentSelectionUpdate();
-
-	*pResult = 0;
-}
-
-BOOL CWorkloadWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
+BOOL CWorkloadWnd::SetMonthDisplay(WLC_MONTH_DISPLAY nDisplay)
 {
 	m_ctrlWorkload.ValidateMonthDisplay(nDisplay);
 
 	if (m_ctrlWorkload.SetMonthDisplay(nDisplay))
 	{
 		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
-
-		BuildSnapCombo();
-		
-		GTLC_SNAPMODE nSnap = GTLCSM_FREE;
-		VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
-
-		m_ctrlWorkload.SetSnapMode(nSnap);
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 
 		return TRUE;
 	}
@@ -881,8 +784,8 @@ BOOL CWorkloadWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 
 void CWorkloadWnd::OnSelchangeDisplay() 
 {
-	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
-	GTLC_MONTH_DISPLAY nNewDisplay = (GTLC_MONTH_DISPLAY)CDialogHelper::GetSelectedItemData(m_cbDisplayOptions);
+	WLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
+	WLC_MONTH_DISPLAY nNewDisplay = (WLC_MONTH_DISPLAY)CDialogHelper::GetSelectedItemData(m_cbDisplayOptions);
 
 	if (!SetMonthDisplay(nNewDisplay))
 	{
@@ -891,19 +794,9 @@ void CWorkloadWnd::OnSelchangeDisplay()
 	}
 }
 
-void CWorkloadWnd::OnSelchangeSnapMode() 
-{
-	// save snap mode as we go
-	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
-	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)CDialogHelper::GetSelectedItemData(m_cbSnapModes);
-
-	m_mapDisplaySnapModes[nCurDisplay] = nSnap;
-	m_ctrlWorkload.SetSnapMode(nSnap);
-}
-
 LRESULT CWorkloadWnd::OnWorkloadNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 {
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, (GTLC_MONTH_DISPLAY)lp);
+	CDialogHelper::SelectItemByData(m_cbDisplayOptions, (WLC_MONTH_DISPLAY)lp);
 
 	return 0L;
 }
@@ -911,7 +804,7 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((GTLC_COLUMN)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_COLUMN)lp));
 
 	return 0L;
 }
@@ -941,15 +834,9 @@ void CWorkloadWnd::OnSetFocus(CWnd* pOldWnd)
 
 void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 {
-	m_ctrlWorkload.SetOption(GTLCF_DISPLAYTRAILINGTASKTITLE, m_dlgPrefs.GetDisplayTrailingTaskTitle());
-	m_ctrlWorkload.SetOption(GTLCF_DISPLAYTRAILINGALLOCTO, m_dlgPrefs.GetDisplayTrailingAllocTo());
-	m_ctrlWorkload.SetOption(GTLCF_AUTOSCROLLTOTASK, m_dlgPrefs.GetAutoScrollSelection());
-	m_ctrlWorkload.SetOption(GTLCF_CALCPARENTDATES, m_dlgPrefs.GetAutoCalcParentDates());
-	m_ctrlWorkload.SetOption(GTLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
-	m_ctrlWorkload.SetOption(GTLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
-	m_ctrlWorkload.SetOption(GTLCF_DISPLAYPROGRESSINBAR, m_dlgPrefs.GetDisplayProgressInBar());
-	m_ctrlWorkload.SetOption(GTLCF_DECADESAREONEBASED, m_dlgPrefs.GetDecadesAreOneBased());
-	m_ctrlWorkload.SetOption(GTLCF_DISPLAYPARENTROLLUPS, m_dlgPrefs.GetDisplayParentsAsRollups());
+	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
+	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
+	m_ctrlWorkload.SetOption(WLCF_DECADESAREONEBASED, m_dlgPrefs.GetDecadesAreOneBased());
 
 	m_ctrlWorkload.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlWorkload.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
@@ -957,74 +844,9 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	m_ctrlWorkload.SetDefaultColor(m_dlgPrefs.GetDefaultColor());
 	m_ctrlWorkload.SetMilestoneTag(m_dlgPrefs.GetMilestoneTag());
 
-	COLORREF crParent;
-	GTLC_PARENTCOLORING nOption = (GTLC_PARENTCOLORING)m_dlgPrefs.GetParentColoring(crParent);
-
-	m_ctrlWorkload.SetParentColoring(nOption, crParent);
-
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
-}
-
-LRESULT CWorkloadWnd::OnWorkloadNotifyDateChange(WPARAM wp, LPARAM lp)
-{
-	COleDateTime dtStart, dtDue;
-	if (m_ctrlWorkload.GetSelectedTaskDates(dtStart, dtDue))
-	{
-		IUITASKMOD mod[2] = { { IUI_NONE, 0 }, { IUI_NONE, 0 } };
-		int nNumMod = 1;
-		
-		switch (wp)
-		{
-		case GTLCD_START:
-			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-			{
-				mod[0].nAttrib = IUI_STARTDATE;
-			}
-			break;
-			
-		case GTLCD_END:
-			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
-			{
-				mod[0].nAttrib = IUI_DUEDATE;
-			}
-			break;
-			
-		case GTLCD_WHOLE:
-			{
-				const WORKLOADITEM* pGIPreDrag = (const WORKLOADITEM*)lp;
-				ASSERT(pGIPreDrag);
-				
-				// if the pre-drag start or due dates were not set
-				// we set them explicitly else we offset the task
-				BOOL bStartSet = CDateHelper::IsDateSet(pGIPreDrag->dtStart);
-				BOOL bDueSet = CDateHelper::IsDateSet(pGIPreDrag->dtDue);
-
-				if (bStartSet && bDueSet)
-				{
-					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-						mod[0].nAttrib = IUI_OFFSETTASK;
-				}
-				else
-				{
-					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
-						CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
-					{
-						mod[0].nAttrib = IUI_STARTDATE;
-						mod[1].nAttrib = IUI_DUEDATE;
-						nNumMod = 2;
-					}
-				}
-			}
-			break;
-		}
-		
-		if (mod[0].nAttrib != IUI_NONE)
-			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMod, (LPARAM)&mod[0]);
-	}
-
-	return 0L;
 }
 
 void CWorkloadWnd::UpdateSelectedTaskDates()
@@ -1055,89 +877,9 @@ void CWorkloadWnd::UpdateSelectedTaskDates()
 	UpdateData(FALSE);
 }
 
-LRESULT CWorkloadWnd::OnWorkloadNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
-{
-	// save snap changes as we go
-	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)wp;
-	GTLC_MONTH_DISPLAY nDisplay = m_ctrlWorkload.GetMonthDisplay();
-
-	m_mapDisplaySnapModes[nDisplay] = nSnap;
-
-	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
-	UpdateSelectedTaskDates();
-
-	return 0L;
-}
-
-void CWorkloadWnd::BuildSnapCombo()
-{
-	m_cbSnapModes.ResetContent();
-
-	switch (m_ctrlWorkload.GetMonthDisplay())
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDECADE, GTLCSM_NEARESTDECADE);
-		break;
-		
-	case GTLC_DISPLAY_DECADES:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		break;
-		
-	case GTLC_DISPLAY_YEARS:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTQUARTER, GTLCSM_NEARESTQUARTER);
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		break;
-		
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTWEEK, GTLCSM_NEARESTWEEK);
-		break;
-		
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR, GTLCSM_NEARESTHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		break;
-
-	case GTLC_DISPLAY_HOURS:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFHOUR, GTLCSM_NEARESTHALFHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR, GTLCSM_NEARESTHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		break;
-	}
-	// Add to all
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
-
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_ctrlWorkload.GetSnapMode());
-}
-
 void CWorkloadWnd::BuildDisplayCombo()
 {
-	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
+	WLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
 
 	m_cbDisplayOptions.ResetContent();
 

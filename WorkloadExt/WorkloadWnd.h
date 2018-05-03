@@ -74,7 +74,6 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString m_sSelectedTaskDates;
-	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
 
@@ -94,9 +93,7 @@ protected:
 	//{{AFX_MSG(CWorkloadWnd)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnKeyUpWorkload(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDisplay();
-	afx_msg void OnClickWorkloadList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnWorkloadGotoToday();
 	afx_msg void OnUpdateWorkloadGotoToday(CCmdUI* pCmdUI);
@@ -105,13 +102,10 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
 
-	afx_msg LRESULT OnWorkloadNotifyDateChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnWorkloadNotifyDragChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyZoomChange(WPARAM wp, LPARAM lp);
@@ -129,16 +123,13 @@ protected:
 	void UpdateWorkloadCtrlPreferences();
 	void SendParentSelectionUpdate();
 	void UpdateSelectedTaskDates();
-	void BuildSnapCombo();
 	void BuildDisplayCombo();
-	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
-	void LoadSnapModePreference(const IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay, GTLC_SNAPMODE nDefaultSnap);
-	void SaveSnapModePreference(IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay) const;
+	BOOL SetMonthDisplay(WLC_MONTH_DISPLAY nDisplay);
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 
-	static DWORD MapColumn(GTLC_COLUMN nColumn);
-	static GTLC_COLUMN MapColumn(DWORD dwColumn);
+	static DWORD MapColumn(WLC_COLUMN nColumn);
+	static WLC_COLUMN MapColumn(DWORD dwColumn);
 };
 
 /////////////////////////////////////////////////////////////////////////////

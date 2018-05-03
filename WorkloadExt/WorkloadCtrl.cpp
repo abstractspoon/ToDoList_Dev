@@ -145,17 +145,14 @@ CWorkloadCtrl::CWorkloadCtrl()
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_pTCH(NULL),
 	m_nMonthWidth(DEF_MONTH_WIDTH),
-	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
-	m_dwOptions(GTLCF_AUTOSCROLLTOTASK | GTLCF_SHOWSPLITTERBAR),
+	m_nMonthDisplay(WLC_DISPLAY_MONTHS_LONG),
+	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crDefault(CLR_NONE),
 	m_crParent(CLR_NONE),
 	m_crToday(CLR_NONE),
 	m_crWeekend(CLR_NONE),
-	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-	m_nDragging(GTLCD_NONE), 
-	m_ptDragStart(0),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
 	m_bMovingTask(FALSE),
@@ -208,6 +205,8 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(NM_RCLICK, IDC_TASKTREEHEADER, OnRightClickTreeHeader)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
+	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
+	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnColumnsClick)
 
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -241,7 +240,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS), rect, this, IDC_TASKTREEHEADER))
+	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS | HDS_DRAGDROP), rect, this, IDC_TASKTREEHEADER))
 	{
 		return -1;
 	}
@@ -256,20 +255,10 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERDRAGDROP);
 	
 	// subclass the tree and list
-// 	if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
-// 	{
-		if (!Sync(m_tcTasks, m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
-		{
-			return -1;
-		}
-// 	}
-// 	else // left side
-// 	{
-// 		if (!Sync(m_lcColumns, Tasks(), TLSL_LEFTDATA_IS_RIGHTITEM, m_hdrTasks))
-// 		{
-// 			return FALSE;
-// 		}
-// 	}
+	if (!Sync(m_tcTasks, m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
+	{
+		return -1;
+	}
 	
 	// Column Header ---------------------------------------------------------------------
 	if (!m_hdrColumns.SubclassWindow(ListView_GetHeader(m_lcColumns)))
@@ -278,39 +267,27 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	m_hdrColumns.EnableToolTips();
 	
-	// set header font and calc char width
-// 	CFont* pFont = m_hdrColumns.GetFont();
-// 	m_hdrTasks.SetFont(pFont);
-// 	
-// 	CClientDC dc(&m_hdrTasks);
-// 	m_fAveHeaderCharWidth = GraphicsMisc::GetAverageCharWidth(&dc, pFont);
-// 	
-// 	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
-// 	
-// 	BuildColumns();
-// 	RecalcColumnWidths();
-// 	OnColumnVisibilityChange();
 	BuildTreeColumns();
 	BuildListColumns();
 	
 	CalcMinMonthWidths();
 
+	// prevent column reordering on columns
+	m_hdrColumns.ModifyStyle(HDS_DRAGDROP, 0);
+
+	// prevent translation of the list header
+	CLocalizer::EnableTranslation(m_hdrColumns, FALSE);
+
+	// Initialise tree drag and drop
+	m_treeDragDrop.Initialize(m_tcTasks.GetParent(), TRUE, FALSE);
+
+	// misc
+	m_tcTasks.ModifyStyle(TVS_SHOWSELALWAYS, 0, 0);
+	m_lcColumns.ModifyStyle(LVS_SHOWSELALWAYS, 0, 0);
+
+	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+
  	PostResize();
-// 	
-// 	// Tooltips for columns
-// 	if (m_tooltipColumns.Create(this))
-// 	{
-// 		m_tooltipColumns.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-// 		m_tooltipColumns.SetDelayTime(TTDT_INITIAL, 50);
-// 		m_tooltipColumns.SetDelayTime(TTDT_AUTOPOP, 10000);
-// 		m_tooltipColumns.SetMaxTipWidth((UINT)(WORD)-1);
-// 		
-// 		// Disable columns own tooltips
-// 		HWND hwndTooltips = (HWND)m_lcColumns.SendMessage(LVM_GETTOOLTIPS);
-// 		
-// 		if (hwndTooltips)
-// 			::SendMessage(hwndTooltips, TTM_ACTIVATE, FALSE, 0);
-// 	}
 	
 	return 0;
 }
@@ -337,20 +314,6 @@ BOOL CWorkloadCtrl::Initialize(UINT nIDTreeHeader)
 	// subclass the list header
 	VERIFY(m_hdrColumns.SubclassWindow(ListView_GetHeader(m_lcColumns)));
 	
-	// prevent column reordering on columns
-	m_hdrColumns.ModifyStyle(HDS_DRAGDROP, 0);
-
-	// prevent translation of the list header
-	CLocalizer::EnableTranslation(m_hdrColumns, FALSE);
-
-	// Initialise tree drag and drop
-	m_treeDragDrop.Initialize(m_tcTasks.GetParent(), TRUE, FALSE);
-
-	// misc
-	m_tcTasks.ModifyStyle(TVS_SHOWSELALWAYS, 0, 0);
-	m_lcColumns.ModifyStyle(LVS_SHOWSELALWAYS, 0, 0);
-
-	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
 	BuildTreeColumns();
 	BuildListColumns();
@@ -843,7 +806,7 @@ BOOL CWorkloadCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_TAGS:
 	case IUI_DONEDATE:
 	case IUI_DEPENDENCY:
-		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
+		return (MapAttributeToColumn(nAttrib) != WLCC_NONE);
 
 	case IUI_NONE:
 		return TRUE;
@@ -853,42 +816,42 @@ BOOL CWorkloadCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
+IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMN nCol)
 {
 	switch (nCol)
 	{
-	case GTLCC_TITLE:		return IUI_TASKNAME;
-	case GTLCC_DUEDATE:		return IUI_DUEDATE;
-	case GTLCC_STARTDATE:	return IUI_STARTDATE;
-	case GTLCC_ALLOCTO:		return IUI_ALLOCTO;
-	case GTLCC_PERCENT:		return IUI_PERCENT;
-	case GTLCC_TASKID:		return IUI_ID;
-	case GTLCC_DONEDATE:	return IUI_DONEDATE;
-	case GTLCC_TAGS:		return IUI_TAGS;
-	case GTLCC_DEPENDENCY:	return IUI_DEPENDENCY;
+	case WLCC_TITLE:		return IUI_TASKNAME;
+	case WLCC_DUEDATE:		return IUI_DUEDATE;
+	case WLCC_STARTDATE:	return IUI_STARTDATE;
+	case WLCC_ALLOCTO:		return IUI_ALLOCTO;
+	case WLCC_PERCENT:		return IUI_PERCENT;
+	case WLCC_TASKID:		return IUI_ID;
+	case WLCC_DONEDATE:	return IUI_DONEDATE;
+	case WLCC_TAGS:		return IUI_TAGS;
+	case WLCC_DEPENDENCY:	return IUI_DEPENDENCY;
 	}
 	
 	// all else 
 	return IUI_NONE;
 }
 
-GTLC_COLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
+WLC_COLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
-	case IUI_TASKNAME:		return GTLCC_TITLE;		
-	case IUI_DUEDATE:		return GTLCC_DUEDATE;		
-	case IUI_STARTDATE:		return GTLCC_STARTDATE;	
-	case IUI_ALLOCTO:		return GTLCC_ALLOCTO;		
-	case IUI_PERCENT:		return GTLCC_PERCENT;		
-	case IUI_ID:			return GTLCC_TASKID;		
-	case IUI_DONEDATE:		return GTLCC_DONEDATE;
-	case IUI_TAGS:			return GTLCC_TAGS;
-	case IUI_DEPENDENCY:	return GTLCC_DEPENDENCY;
+	case IUI_TASKNAME:		return WLCC_TITLE;		
+	case IUI_DUEDATE:		return WLCC_DUEDATE;		
+	case IUI_STARTDATE:		return WLCC_STARTDATE;	
+	case IUI_ALLOCTO:		return WLCC_ALLOCTO;		
+	case IUI_PERCENT:		return WLCC_PERCENT;		
+	case IUI_ID:			return WLCC_TASKID;		
+	case IUI_DONEDATE:		return WLCC_DONEDATE;
+	case IUI_TAGS:			return WLCC_TAGS;
+	case IUI_DEPENDENCY:	return WLCC_DEPENDENCY;
 	}
 	
 	// all else 
-	return GTLCC_NONE;
+	return WLCC_NONE;
 }
 
 BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
@@ -1173,7 +1136,7 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 
 	// cache and reset year range which will get 
 	// recalculated as we build the tree
-	WorkloadDATERANGE prevRange = m_dateRange;
+	WORKLOADDATERANGE prevRange = m_dateRange;
 	m_dateRange.Clear();
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
@@ -1361,22 +1324,22 @@ void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 	}
 }
 
-COleDateTime CWorkloadCtrl::GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const
+COleDateTime CWorkloadCtrl::GetStartDate(WLC_MONTH_DISPLAY nDisplay) const
 {
-	return m_dateRange.GetStart(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return m_dateRange.GetStart(nDisplay, !HasOption(WLCF_DECADESAREONEBASED));
 }
 
-COleDateTime CWorkloadCtrl::GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const
+COleDateTime CWorkloadCtrl::GetEndDate(WLC_MONTH_DISPLAY nDisplay) const
 {
-	return m_dateRange.GetEnd(nDisplay, !HasOption(GTLCF_DECADESAREONEBASED));
+	return m_dateRange.GetEnd(nDisplay, !HasOption(WLCF_DECADESAREONEBASED));
 }
 
-int CWorkloadCtrl::GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetStartYear(WLC_MONTH_DISPLAY nDisplay) const
 {
 	return GetStartDate(nDisplay).GetYear();
 }
 
-int CWorkloadCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetEndYear(WLC_MONTH_DISPLAY nDisplay) const
 {
 	int nYear = GetEndDate(nDisplay).GetYear();
 
@@ -1384,7 +1347,7 @@ int CWorkloadCtrl::GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const
 	return min(nYear, MAX_YEAR);
 }
 
-int CWorkloadCtrl::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetNumMonths(WLC_MONTH_DISPLAY nDisplay) const
 {
 	COleDateTime dtStart(GetStartDate(nDisplay)), dtEnd(GetEndDate(nDisplay));
 	
@@ -1413,29 +1376,30 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 		{
 			switch (dwOption)
 			{
-			case GTLCF_STRIKETHRUDONETASKS:
+			case WLCF_STRIKETHRUDONETASKS:
 				m_tcTasks.Fonts().Clear();
 				CWnd::Invalidate(FALSE);
 				break;
 
-			case GTLCF_DECADESAREONEBASED:
-				if ((m_nMonthDisplay == GTLC_DISPLAY_QUARTERCENTURIES) || 
-					(m_nMonthDisplay == GTLC_DISPLAY_DECADES))
+			case WLCF_DECADESAREONEBASED:
+				if ((m_nMonthDisplay == WLC_DISPLAY_QUARTERCENTURIES) || 
+					(m_nMonthDisplay == WLC_DISPLAY_DECADES))
 				{
 					UpdateListColumnsWidthAndText();
 				}
 				break;
 
-			case GTLCF_DISABLEDEPENDENTDRAGGING:
-				return;
-
-			case GTLCF_SHOWSPLITTERBAR:
+			case WLCF_SHOWSPLITTERBAR:
 				CTreeListSyncer::SetSplitBarWidth(bSet ? 10 : 0);
 				break;
 
-			case GTLCF_DISPLAYISODATES:
+			case WLCF_DISPLAYISODATES:
 				UpdateListColumnsWidthAndText();
 				CWnd::Invalidate(FALSE);
+				break;
+
+			case WLCF_SHOWTREECHECKBOXES:
+				m_tcTasks.ShowCheckboxes(bSet);
 				break;
 			}
 
@@ -1445,7 +1409,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-CString CWorkloadCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
+CString CWorkloadCtrl::FormatListColumnHeaderText(WLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
 {
 	if (nMonth == 0)
 		return _T("");
@@ -1455,8 +1419,8 @@ CString CWorkloadCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, i
 	
 	switch (nDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_DECADES:
 		{
 			int nStartYear = GetStartYear(nDisplay);
 			int nEndYear = GetEndYear(nDisplay);
@@ -1465,50 +1429,50 @@ CString CWorkloadCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, i
 		}
 		break;
 
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_YEARS:
 		sHeader.Format(_T("%d"), nYear);
 		break;
 		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_SHORT:
 		sHeader.Format(_T("Q%d %d"), (1 + ((nMonth-1) / 3)), nYear);
 		break;
 		
-	case GTLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_MID:
 		sHeader.Format(_T("%s-%s %d"), 
 			CDateHelper::GetMonthName(nMonth, TRUE),
 			CDateHelper::GetMonthName(nMonth+2, TRUE), 
 			nYear);
 		break;
 		
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		sHeader.Format(_T("%s-%s %d"), 
 			CDateHelper::GetMonthName(nMonth, FALSE),
 			CDateHelper::GetMonthName(nMonth+2, FALSE), 
 			nYear);
 		break;
 		
-	case GTLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_SHORT:
 		sHeader = FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), (DHFD_NODAY | DHFD_NOCENTURY));
 		break;
 		
-	case GTLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_MID:
 		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nYear);
 		break;
 		
-	case GTLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_MONTHS_LONG:
 		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nYear);
 		break;
 
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
 		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_WORKLOAD_WEEKS));
 		break;
 
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_WORKLOAD_DAYS));
 		break;
 		
@@ -1525,34 +1489,34 @@ double CWorkloadCtrl::GetMonthWidth(int nColWidth) const
 	return GetMonthWidth(m_nMonthDisplay, nColWidth);
 }
 
-double CWorkloadCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
+double CWorkloadCtrl::GetMonthWidth(WLC_MONTH_DISPLAY nDisplay, int nColWidth)
 {
 	switch (nDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
 		return (nColWidth / (25 * 12.0));
 		
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_DECADES:
 		return (nColWidth / (10 * 12.0));
 		
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_YEARS:
 		return (nColWidth / 12.0);
 		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		return (nColWidth / 3.0);
 		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		return (double)nColWidth;
 	}
 
@@ -1565,41 +1529,41 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 	return GetRequiredListColumnCount(m_nMonthDisplay);
 }
 
-int CWorkloadCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetRequiredListColumnCount(WLC_MONTH_DISPLAY nDisplay) const
 {
 	int nNumMonths = GetNumMonths(nDisplay);
 	int nNumCols = 0;
 
 	switch (nDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
 		nNumCols = (nNumMonths / (25 * 12));
 		break;
 		
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_DECADES:
 		nNumCols = (nNumMonths / (10 * 12));
 		break;
 		
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_YEARS:
 		nNumCols = (nNumMonths / 12);
 		break;
 		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		nNumCols = (nNumMonths / 3);
 		break;
 		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		nNumCols = nNumMonths;
 		break;
 
@@ -1616,39 +1580,39 @@ int CWorkloadCtrl::GetColumnWidth() const
 	return GetColumnWidth(m_nMonthDisplay, m_nMonthWidth);
 }
 
-int CWorkloadCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetColumnWidth(WLC_MONTH_DISPLAY nDisplay) const
 {
 	return GetColumnWidth(nDisplay, m_nMonthWidth);
 }
 
-int CWorkloadCtrl::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
+int CWorkloadCtrl::GetNumMonthsPerColumn(WLC_MONTH_DISPLAY nDisplay)
 {
 	switch (nDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
 		return (25 * 12);
 		
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_DECADES:
 		return (10 * 12);
 		
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_YEARS:
 		return 12;
 		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		return 3;
 		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		return 1;
 	}
 
@@ -1657,7 +1621,7 @@ int CWorkloadCtrl::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
 	return 1;
 }
 
-int CWorkloadCtrl::GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
+int CWorkloadCtrl::GetColumnWidth(WLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
 {
 	return (GetNumMonthsPerColumn(nDisplay) * nMonthWidth);
 }
@@ -1684,17 +1648,17 @@ void CWorkloadCtrl::BuildTreeColumns()
 	while (m_hdrTasks.DeleteItem(0));
 
 	// add columns
-	m_hdrTasks.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, GTLCC_TITLE);
-	//m_hdrTasks.EnableItemDragging(0, FALSE);
+	m_hdrTasks.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
+	m_hdrTasks.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
 		m_hdrTasks.InsertItem(nCol + 1, 
 								0, 
-								CEnString(WorkloadTREECOLUMNS[nCol].nIDColName), 
-								(WorkloadTREECOLUMNS[nCol].nColAlign | HDF_STRING),
+								CEnString(WORKLOADTREECOLUMNS[nCol].nIDColName), 
+								(WORKLOADTREECOLUMNS[nCol].nColAlign | HDF_STRING),
 								0,
-								WorkloadTREECOLUMNS[nCol].nColID);
+								WORKLOADTREECOLUMNS[nCol].nColID);
 	}
 }
 
@@ -1836,7 +1800,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		{
 			// check row is visible
 			CRect rItem;
-			GetTreeItemRect(hti, GTLCC_TITLE, rItem);
+			GetTreeItemRect(hti, WLCC_TITLE, rItem);
 
 			CRect rClient;
 			m_tcTasks.GetClientRect(rClient);
@@ -2065,7 +2029,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			{
 				// draw sort direction
 				int nCol = (int)pNMCD->dwItemSpec;
-				GTLC_COLUMN nColID = GetColumnID(nCol);
+				WLC_COLUMN nColID = GetColumnID(nCol);
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				
 				if (m_sort.IsSingleSortingBy(nColID))
@@ -2107,12 +2071,12 @@ void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 }
 
 // Called by parent
-void CWorkloadCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+void CWorkloadCtrl::Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
 {
 	Sort(nBy, bAllowToggle, bAscending, FALSE);
 }
 
-void CWorkloadCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
+void CWorkloadCtrl::Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
 {
 	m_sort.Sort(nBy, bAllowToggle, bAscending);
 
@@ -2127,7 +2091,7 @@ void CWorkloadCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BO
 		GetCWnd()->PostMessage(WM_WLCN_SORTCHANGE, 0, m_sort.single.nBy);
 }
 
-void CWorkloadCtrl::Sort(const WorkloadSORTCOLUMNS multi)
+void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS multi)
 {
 	m_sort.Sort(multi);
 
@@ -2158,7 +2122,7 @@ void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	
 	if (pHDN->iButton == 0) // left button
 	{
-		GTLC_COLUMN nColID = GetColumnID(pHDN->iItem);
+		WLC_COLUMN nColID = GetColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
 	}
 }
@@ -2173,21 +2137,21 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 		if (pHDN->pitem->mask & HDI_WIDTH)
 		{
 			// don't allow columns get too small
-			GTLC_COLUMN nColID = GetColumnID(pHDN->iItem);
+			WLC_COLUMN nColID = GetColumnID(pHDN->iItem);
 			
 			switch (nColID)
 			{
-			case GTLCC_TITLE:
+			case WLCC_TITLE:
 				if (pHDN->pitem->cxy < TREE_TITLE_MIN_WIDTH)
 					*pResult = TRUE; // prevent change
 				break;
 				
-			case GTLCC_STARTDATE:
-			case GTLCC_DUEDATE:
-			case GTLCC_DONEDATE:
-			case GTLCC_ALLOCTO:
-			case GTLCC_PERCENT:
-			case GTLCC_TASKID:
+			case WLCC_STARTDATE:
+			case WLCC_DUEDATE:
+			case WLCC_DONEDATE:
+			case WLCC_ALLOCTO:
+			case WLCC_PERCENT:
+			case WLCC_TASKID:
 				if (m_hdrTasks.IsItemVisible(pHDN->iItem))
 				{
 					if (pHDN->pitem->cxy < MIN_COL_WIDTH)
@@ -2218,6 +2182,33 @@ void CWorkloadCtrl::OnRightClickTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult
 	// pass on to parent
 	CWnd::GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
 }
+
+void CWorkloadCtrl::OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
+	
+	switch (pTVKD->wVKey)
+	{
+	case VK_UP:
+	case VK_DOWN:
+	case VK_PRIOR:
+	case VK_NEXT:
+		//UpdateSelectedTaskDates();
+		//SendParentSelectionUpdate();
+		break;
+	}
+	
+	*pResult = 0;
+}
+
+void CWorkloadCtrl::OnColumnsClick(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+{
+	//UpdateSelectedTaskDates();
+	//SendParentSelectionUpdate();
+	
+	*pResult = 0;
+}
+
 
 void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
@@ -2347,41 +2338,6 @@ void CWorkloadCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	// because keyboard gets handled in OnKeyUpWorkload
 	if (pNMTV->action != TVC_BYKEYBOARD)
 		CWnd::GetParent()->SendMessage(WM_WLCN_SELCHANGE, 0, GetTaskID(pNMTV->itemNew.hItem));
-
-	if (!m_bMovingTask && HasOption(GTLCF_AUTOSCROLLTOTASK))
-		ScrollToSelectedTask();
-}
-
-BOOL CWorkloadCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
-{
-	if (nHit != GTLCHT_NOWHERE)
-	{
-		GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-		ASSERT(IsDragging(nDrag));
-
-		if (dwTaskID != 0)
-		{
-			if (!CanDragTask(dwTaskID, nDrag))
-			{
-				if (m_data.ItemIsLocked(dwTaskID))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-
-				// else
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-			}
-			else
-			{
-				switch (nDrag)
-				{
-				case GTLCD_START:
-				case GTLCD_END:
-					return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
-				}
-			}
-		}
-	}
-
-	return FALSE;
 }
 
 LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -2464,17 +2420,6 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			return TRUE;
 
 		case WM_SETCURSOR:
-			if (!m_bReadOnly)
-			{
-				CPoint ptCursor(GetMessagePos());
-				GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-
-				DWORD dwHitID = ListHitTestTask(ptCursor, TRUE, nHit, TRUE);
-				ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
-
-				if (SetListTaskCursor(dwHitID, nHit))
-					return TRUE;
-			}
 			break;
 
 		case WM_LBUTTONDBLCLK:
@@ -2506,30 +2451,16 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			break;
 
 		case WM_CAPTURECHANGED:
-			// if someone else grabs the capture we cancel any drag
-			if (lp && (HWND(lp) != hRealWnd) && IsDragging())
-			{
-				CancelDrag(FALSE);
-				return FALSE; // eat
-			}
 			break;
 
 		case WM_KEYDOWN:
-			if (wp == VK_ESCAPE && IsDragging())
-			{
-				CancelDrag(TRUE);
-				return FALSE; // eat
-			}
 			break;
 
 		case WM_RBUTTONDOWN:
 			{
-				GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-				DWORD dwTaskID = ListHitTestTask(lp, FALSE, nHit, FALSE);
+				DWORD dwTaskID = ListHitTestTask(lp, FALSE);
 
-				ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
-
-				if (nHit != GTLCHT_NOWHERE)
+				if (dwTaskID != 0)
 					SelectTask(dwTaskID);
 			}
 			break;
@@ -2635,7 +2566,7 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				if (wKeys == MK_CONTROL)
 				{
 					// cache prev value
-					GTLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay;
+					WLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay;
 
 					// work out where we are going to scroll to after the zoom
 					DWORD dwScrollID = 0;
@@ -2802,14 +2733,10 @@ BOOL CWorkloadCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CWorkloadCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
+BOOL CWorkloadCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/)
 {
 	if (!m_bReadOnly)
 	{
-		if (UpdateDragging(point))
-		{
-			return TRUE; // eat
-		}
 	}
 
 	// not handled
@@ -2820,10 +2747,6 @@ BOOL CWorkloadCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	if (!m_bReadOnly)
 	{
-		if (StartDragging(point))
-		{
-			return TRUE; // eat
-		}
 	}
 	
 	// don't let the selection to be set to -1
@@ -2842,13 +2765,8 @@ BOOL CWorkloadCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
 	return FALSE;
 }
 
-BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint point)
+BOOL CWorkloadCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
 {
-	if (IsDragging() && EndDragging(point))
-	{
-		return TRUE; // eat
-	}
-
 	// not handled
 	return FALSE;
 }
@@ -2945,16 +2863,6 @@ void CWorkloadCtrl::SetMilestoneTag(const CString& sTag)
 	}
 }
 
-void CWorkloadCtrl::SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color)
-{
-	SetColor(m_crParent, color);
-
-	if (IsHooked() && (m_nParentColoring != nOption))
-		InvalidateAll();
-
-	m_nParentColoring = nOption;
-}
-
 void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 {
 	if (IsHooked() && (crNew != color))
@@ -2966,45 +2874,45 @@ void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
 {
 	dwFlags &= ~DHFD_ISO;
-	dwFlags |= (HasOption(GTLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
 
 	return CDateHelper::FormatDate(date, dwFlags);
 }
 
-CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, GTLC_COLUMN nCol) const
+CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nCol) const
 {
 	CString sItem;
 
 	switch (nCol)
 	{
-		case GTLCC_TITLE:
+		case WLCC_TITLE:
 			sItem = gi.sTitle;
 			break;
 
-		case GTLCC_TASKID:
+		case WLCC_TASKID:
 			sItem.Format(_T("%ld"), gi.dwTaskID);
 			break;
 			
-		case GTLCC_STARTDATE:
-		case GTLCC_DUEDATE:
+		case WLCC_STARTDATE:
+		case WLCC_DUEDATE:
 			{
 				COleDateTime dtStart, dtDue;
 				GetTaskStartDueDates(gi, dtStart, dtDue);
 
-				sItem = FormatDate((nCol == GTLCC_STARTDATE) ? dtStart : dtDue);
+				sItem = FormatDate((nCol == WLCC_STARTDATE) ? dtStart : dtDue);
 			}
 			break;
 
-		case GTLCC_DONEDATE:
+		case WLCC_DONEDATE:
 			if (CDateHelper::IsDateSet(gi.dtDone))
 				sItem = FormatDate(gi.dtDone);
 			break;
 
-		case GTLCC_ALLOCTO:
+		case WLCC_ALLOCTO:
 			sItem = gi.sAllocTo;
 			break;
 			
-		case GTLCC_PERCENT:
+		case WLCC_PERCENT:
 			sItem.Format(_T("%d%%"), gi.nPercent);
 			break;
 	}
@@ -3030,8 +2938,8 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
 
-	GTLC_COLUMN nColID = GetColumnID(nCol);
-	BOOL bTitleCol = (nColID == GTLCC_TITLE);
+	WLC_COLUMN nColID = GetColumnID(nCol);
+	BOOL bTitleCol = (nColID == WLCC_TITLE);
 
 	// draw item background colour
 	if (!bSelected && (crBack != CLR_NONE))
@@ -3039,7 +2947,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		CRect rBack(rItem);
 
 		if (bTitleCol)
-			GetTreeItemRect(hti, GTLCC_TITLE, rBack, TRUE); // label only
+			GetTreeItemRect(hti, WLCC_TITLE, rBack, TRUE); // label only
 		
 		// don't overwrite gridlines
 		if (m_crGridLine != CLR_NONE)
@@ -3067,29 +2975,27 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 		switch (nColID)
 		{
-		case GTLCC_TITLE:
+		case WLCC_TITLE:
 			nFlags |= DT_END_ELLIPSIS;
 			break;
 
-		case  GTLCC_TASKID:
+		case  WLCC_TASKID:
 			nFlags |= DT_RIGHT;
 			break;
 			
-		case GTLCC_STARTDATE:
-		case GTLCC_DUEDATE:
-		case GTLCC_DONEDATE:
+		case WLCC_STARTDATE:
+		case WLCC_DUEDATE:
+		case WLCC_DONEDATE:
 			{
 				// draw non-selected calculated dates lighter
 				if (!bSelected && !gi.IsDone(TRUE))
 				{
-					bLighter = (gi.bParent && HasOption(GTLCF_CALCPARENTDATES));
-
 					if (!bLighter)
 					{
-						if (nColID == GTLCC_STARTDATE)
-							bLighter = (!gi.HasStart() && HasOption(GTLCF_CALCMISSINGSTARTDATES));
+						if (nColID == WLCC_STARTDATE)
+							bLighter = (!gi.HasStart() && HasOption(WLCF_CALCMISSINGSTARTDATES));
 						else
-							bLighter = (!gi.HasDue() && HasOption(GTLCF_CALCMISSINGDUEDATES));
+							bLighter = (!gi.HasDue() && HasOption(WLCF_CALCMISSINGDUEDATES));
 					}
 				}
 				
@@ -3100,7 +3006,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			}
 			break;
 			
-		case GTLCC_PERCENT:
+		case WLCC_PERCENT:
 			nFlags |= DT_CENTER;
 			break;
 		}
@@ -3129,7 +3035,7 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 {
 	switch (m_nMonthDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
 		{
 			if (nMonth == 12)
 			{
@@ -3147,8 +3053,8 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 		}
 		break;
 
-	case GTLC_DISPLAY_DECADES:
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_YEARS:
 		{
 			if (nMonth == 12)
 			{
@@ -3163,9 +3069,9 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 		}
 		break;
 
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		{
 			if (nMonth == 12)
 				return DIV_VERT_DARK;
@@ -3178,9 +3084,9 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 		}
 		break;
 
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
 		{
 			if (nMonth == 12)
 				return DIV_VERT_DARK;
@@ -3193,12 +3099,12 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 		}
 		break;
 
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
 		{
 			if (nMonth == 12)
 				return DIV_VERT_DARK;
@@ -3208,7 +3114,7 @@ CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear)
 		}
 		break;
 		
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_HOURS:
 		return DIV_VERT_DARK;
 	}
 
@@ -3283,7 +3189,7 @@ CString CWorkloadCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
 		const WORKLOADITEM* pGI = NULL;
 		GET_GI_RET(dwTaskID, pGI, _T(""));
 
-		sLongest = GetTreeItemColumnText(*pGI, GTLCC_ALLOCTO);
+		sLongest = GetTreeItemColumnText(*pGI, WLCC_ALLOCTO);
 	}
 
 	// children
@@ -3305,10 +3211,10 @@ CString CWorkloadCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
 	return sLongest;
 }
 
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, GTLC_COLUMN nCol)
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
 {
-	BOOL bStrikThru = (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE));
-	BOOL bBold = ((nCol == GTLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
+	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE));
+	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
 
 	return m_tcTasks.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
 }
@@ -3319,11 +3225,11 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 	if (m_tcTasks.GetItemRect(hti, rItem, TRUE)) // text rect only
 	{
-		GTLC_COLUMN nColID = GetColumnID(nCol);
+		WLC_COLUMN nColID = GetColumnID(nCol);
 
 		switch (nColID)
 		{
-		case GTLCC_TITLE:
+		case WLCC_TITLE:
 			{
 				int nColWidth = m_hdrTasks.GetItemWidth(0); // always
 	
@@ -3334,12 +3240,12 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 			}
 			break;
 
-		case GTLCC_TASKID:
-		case GTLCC_STARTDATE:
-		case GTLCC_DUEDATE:
-		case GTLCC_DONEDATE:
-		case GTLCC_ALLOCTO:
-		case GTLCC_PERCENT:
+		case WLCC_TASKID:
+		case WLCC_STARTDATE:
+		case WLCC_DUEDATE:
+		case WLCC_DONEDATE:
+		case WLCC_ALLOCTO:
+		case WLCC_PERCENT:
 			{
 				CRect rHdrItem;
 				m_hdrTasks.GetItemRect(nCol, rHdrItem);
@@ -3349,7 +3255,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 			}
 			break;
 
-		case GTLCC_NONE:
+		case WLCC_NONE:
 		default:
 			ASSERT(0);
 			break;
@@ -3528,17 +3434,6 @@ void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BO
 	{
 		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected);
 	}
-
-	// Trailing text
-	if (HasOption(GTLCF_DISPLAYTRAILINGTASKTITLE) || 
-		HasOption(GTLCF_DISPLAYTRAILINGALLOCTO))
-	{
-		CRect rItem;
-		VERIFY(GetListItemRect(nItem, rItem));
-
-		COLORREF crRow = (bSelected ? CLR_NONE : GetRowColor(nItem));
-		DrawListItemText(pDC, gi, rItem, CRect(), crRow);
-	}
 }
 
 void CWorkloadCtrl::DrawListItemText(CDC* /*pDC*/, const WORKLOADITEM& /*gi*/, const CRect& /*rItem*/, const CRect& /*rClip*/, COLORREF /*crRow*/)
@@ -3583,54 +3478,54 @@ BOOL CWorkloadCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rCol
 	BOOL bToday = FALSE;
 
 	// Use higher resolution where possible
-	GTLC_MONTH_DISPLAY nCalcDisplay = GetColumnDisplay((int)dMonthWidth);
+	WLC_MONTH_DISPLAY nCalcDisplay = GetColumnDisplay((int)dMonthWidth);
 	BOOL bUseHigherRes = (CompareDisplays(nCalcDisplay, m_nMonthDisplay) > 0);
 
 	switch (m_nMonthDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
 		DrawListItemYears(pDC, rColumn, nYear, 25, gi, bSelected);
 		break;
 		
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_DECADES:
 		DrawListItemYears(pDC, rColumn, nYear, 10, gi, bSelected);
 		break;
 		
-	case GTLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_YEARS:
 		DrawListItemYear(pDC, rColumn, nYear, gi, bSelected);
 		break;
 		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, gi, bSelected);
 		break;
 		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
 		if (bUseHigherRes)
 			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected);
 		else
 			DrawListItemMonth(pDC, rColumn, nMonth, nYear, gi, bSelected);
 		break;
 		
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
 		if (bUseHigherRes)
 			DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, FALSE);
 		else
 			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected);
 		break;
 
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
 		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bUseHigherRes);
 		break;
 
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_HOURS:
 		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, TRUE);
 		break;
 	
@@ -3671,19 +3566,19 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 	switch (m_nMonthDisplay)
 	{
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
 		// should never get here
 		ASSERT(0);
 		break;
 
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_DECADES:
 		{
 			CRect rRange(rItem), rYear(rItem);
 			rYear.top += (rYear.Height() / 2);
@@ -3693,7 +3588,7 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rRange, m_hdrColumns.GetItemText(nCol), pThemed);
 
 			// draw year elements
-			int nNumYears = ((m_nMonthDisplay == GTLC_DISPLAY_DECADES) ? 10 : 25);
+			int nNumYears = ((m_nMonthDisplay == WLC_DISPLAY_DECADES) ? 10 : 25);
 			double dYearWidth = (rRange.Width() / (double)nNumYears);
 
 			rYear.right = rYear.left;
@@ -3714,9 +3609,9 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 		}
 		break;
 		
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
 		{
 			CRect rMonth(rItem), rWeek(rItem);
 			rWeek.top += (rWeek.Height() / 2);
@@ -3808,10 +3703,10 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 		}
 		break;
 
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		{
 			CRect rMonth(rItem), rDay(rItem);
 			rDay.top += (rDay.Height() / 2);
@@ -3840,12 +3735,12 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				{
 					CString sHeader;
 
-					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
+					if (m_nMonthDisplay == WLC_DISPLAY_HOURS)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 						sHeader = FormatDate(dtDay, DHFD_DOW);
 					}
-					else if (m_nMonthDisplay == GTLC_DISPLAY_DAYS_LONG)
+					else if (m_nMonthDisplay == WLC_DISPLAY_DAYS_LONG)
 					{
 						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 						sHeader = FormatDate(dtDay, DHFD_NOYEAR);
@@ -3905,32 +3800,18 @@ BOOL CWorkloadCtrl::HasDisplayDates(const WORKLOADITEM& gi) const
 
 BOOL CWorkloadCtrl::HasDoneDate(const WORKLOADITEM& gi) const
 {
-	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
-		return FALSE;
-
-	// else
 	return CDateHelper::IsDateSet(gi.dtDone);
 }
 
 BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
-	BOOL bDoneSet = FALSE;
+	dtStart = gi.dtStart;
+	dtDue = gi.dtDue;
 
-	if (gi.bParent && HasOption(GTLCF_CALCPARENTDATES))
-	{
-		dtStart = gi.dtMinStart;
-		dtDue = gi.dtMaxDue;
-	}
-	else
-	{
-		dtStart = gi.dtStart;
-		dtDue = gi.dtDue;
-
-		bDoneSet = CDateHelper::IsDateSet(gi.dtDone);
-	}
+	BOOL bDoneSet = CDateHelper::IsDateSet(gi.dtDone);
 		
 	// do we need to calculate due date?
-	if (!CDateHelper::IsDateSet(dtDue) && HasOption(GTLCF_CALCMISSINGDUEDATES))
+	if (!CDateHelper::IsDateSet(dtDue) && HasOption(WLCF_CALCMISSINGDUEDATES))
 	{
 		// always take completed date if that is set
 		if (bDoneSet)
@@ -3950,7 +3831,7 @@ BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& d
 	}
 	
 	// do we need to calculate start date?
-	if (!CDateHelper::IsDateSet(dtStart) && HasOption(GTLCF_CALCMISSINGSTARTDATES))
+	if (!CDateHelper::IsDateSet(dtStart) && HasOption(WLCF_CALCMISSINGSTARTDATES))
 	{
 		// take earlier of due or completed date
 		dtStart = CDateHelper::GetDateOnly(dtDue);
@@ -3967,7 +3848,7 @@ BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& d
 
 COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bAlternate) const
 {
-	COLORREF crTextBk = gi.GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crTextBk = gi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 
 	if (crTextBk == CLR_NONE)
 	{
@@ -3975,7 +3856,7 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelecte
 		{
 			crTextBk = m_crAltLine;
 		}
-		else if ((m_crDefault != CLR_NONE) && HasOption(GTLCF_TASKTEXTCOLORISBKGND))
+		else if ((m_crDefault != CLR_NONE) && HasOption(WLCF_TASKTEXTCOLORISBKGND))
 		{
 			crTextBk = m_crDefault;
 		}
@@ -3990,7 +3871,7 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelecte
 
 COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bLighter) const
 {
-	COLORREF crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crText = gi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
 
 	if (bSelected)
@@ -4003,61 +3884,6 @@ COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected,
 	}
 
 	return crText;
-}
-
-void CWorkloadCtrl::GetWorkloadBarColors(const WORKLOADITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
-{
-	// darker shade of the item crText/crBack
-	COLORREF crDefFill = gi.GetFillColor();
-	COLORREF crDefBorder = gi.GetBorderColor();
-
-	if (crDefFill == CLR_NONE)
-	{
-		if ((m_crDefault != CLR_NONE) && 
-			(!gi.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
-		{
-			crDefFill = m_crDefault;
-			crDefBorder = GraphicsMisc::Darker(crDefFill, 0.4);
-		}
-		else
-		{
-			crDefFill = GetSysColor(COLOR_WINDOW);
-			crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
-		}
-	}
-
-	if (gi.bParent)
-	{
-		switch (m_nParentColoring)
-		{
-		case GTLPC_NOCOLOR:
-			crBorder = crDefBorder;
-			crFill = CLR_NONE;
-			break;
-
-		case GTLPC_SPECIFIEDCOLOR:
-			crBorder = GraphicsMisc::Darker(m_crParent, 0.5);
-			crFill = m_crParent;
-			break;
-
-		case GTLPC_DEFAULTCOLORING:
-		default:
-			crBorder = crDefBorder;
-			crFill = crDefFill;
-
-			if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && 
-				!TCH().IsItemExpanded(GetTreeItem(gi.dwTaskID)))
-			{
-				crFill = GraphicsMisc::Lighter(crFill, 0.75);
-			}
-			break;
-		}
-	}
-	else
-	{
-		crBorder = crDefBorder;
-		crFill = crDefFill;
-	}
 }
 
 BOOL CWorkloadCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
@@ -4177,13 +4003,13 @@ void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
 
 BOOL CWorkloadCtrl::ZoomIn(BOOL bIn)
 {
-	GTLC_MONTH_DISPLAY nNewDisplay = (bIn ? GetNextDisplay(m_nMonthDisplay) : GetPreviousDisplay(m_nMonthDisplay));
-	ASSERT(nNewDisplay != GTLC_DISPLAY_NONE);
+	WLC_MONTH_DISPLAY nNewDisplay = (bIn ? GetNextDisplay(m_nMonthDisplay) : GetPreviousDisplay(m_nMonthDisplay));
+	ASSERT(nNewDisplay != WLC_DISPLAY_NONE);
 
 	return SetMonthDisplay(nNewDisplay);
 }
 
-BOOL CWorkloadCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
+BOOL CWorkloadCtrl::SetMonthDisplay(WLC_MONTH_DISPLAY nNewDisplay)
 {
 	if (!IsValidDisplay(nNewDisplay))
 	{
@@ -4201,26 +4027,26 @@ BOOL CWorkloadCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	// adjust the header height where we need to draw days/weeks
 	switch (nNewDisplay)
 	{
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
+	case WLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_MONTHS_SHORT:
+	case WLC_DISPLAY_MONTHS_MID:
+	case WLC_DISPLAY_MONTHS_LONG:
 		m_hdrColumns.SetRowCount(1);
 		m_hdrTasks.SetRowCount(1);
 		break;
 
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
+	case WLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_WEEKS_SHORT:
+	case WLC_DISPLAY_WEEKS_MID:
+	case WLC_DISPLAY_WEEKS_LONG:
+	case WLC_DISPLAY_DAYS_SHORT:
+	case WLC_DISPLAY_DAYS_MID:
+	case WLC_DISPLAY_DAYS_LONG:
+	case WLC_DISPLAY_HOURS:
 		m_hdrColumns.SetRowCount(2);
 		m_hdrTasks.SetRowCount(2);
 		break;
@@ -4233,12 +4059,12 @@ BOOL CWorkloadCtrl::SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay)
 	return ZoomTo(nNewDisplay, max(MIN_MONTH_WIDTH, nMinMonthWidth));
 }
 
-BOOL CWorkloadCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay) const
+BOOL CWorkloadCtrl::CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay) const
 {
 	return CanSetMonthDisplay(nDisplay, GetMinMonthWidth(nDisplay));
 }
 
-BOOL CWorkloadCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth) const
+BOOL CWorkloadCtrl::CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay, int nMonthWidth) const
 {
 	ASSERT(nMonthWidth > 0);
 
@@ -4255,7 +4081,7 @@ BOOL CWorkloadCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMonthWi
 	return (nTotalReqdWidth <= MAX_HEADER_WIDTH);
 }
 
-BOOL CWorkloadCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const
+BOOL CWorkloadCtrl::ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay) const
 {
 	if (!IsValidDisplay(nDisplay))
 	{
@@ -4268,7 +4094,7 @@ BOOL CWorkloadCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const
 	return ValidateMonthDisplay(nDisplay, nWidth);
 }
 
-BOOL CWorkloadCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nMonthWidth) const
+BOOL CWorkloadCtrl::ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay, int& nMonthWidth) const
 {
 	if (!IsValidDisplay(nDisplay))
 	{
@@ -4279,7 +4105,7 @@ BOOL CWorkloadCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nMon
 	if (!CanSetMonthDisplay(nDisplay, nMonthWidth))
 	{
 		// Look backwards until we find a valid display
-		GTLC_MONTH_DISPLAY nPrev = nDisplay;
+		WLC_MONTH_DISPLAY nPrev = nDisplay;
 		nDisplay = GetPreviousDisplay(nDisplay);
 
 		while (nDisplay != nPrev)
@@ -4303,7 +4129,7 @@ BOOL CWorkloadCtrl::ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nMon
 
 void CWorkloadCtrl::ValidateMonthDisplay()
 {
-	GTLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay, nDisplay = nPrevDisplay;
+	WLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay, nDisplay = nPrevDisplay;
 	int nMonthWidth = m_nMonthWidth;
 
 	VERIFY(ValidateMonthDisplay(nDisplay, nMonthWidth));
@@ -4315,7 +4141,7 @@ void CWorkloadCtrl::ValidateMonthDisplay()
 	}
 }
 
-BOOL CWorkloadCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
+BOOL CWorkloadCtrl::ZoomTo(WLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 {
 	// validate new display
 	if (!ValidateMonthDisplay(nNewDisplay, nNewMonthWidth))
@@ -4379,7 +4205,7 @@ BOOL CWorkloadCtrl::ZoomBy(int nAmount)
 	int nNewMonthWidth = (m_nMonthWidth + nAmount);
 
 	// will this trigger a min-width change?
-	GTLC_MONTH_DISPLAY nNewMonthDisplay = GetColumnDisplay(nNewMonthWidth);
+	WLC_MONTH_DISPLAY nNewMonthDisplay = GetColumnDisplay(nNewMonthWidth);
 
 	return ZoomTo(nNewMonthDisplay, nNewMonthWidth);
 }
@@ -4413,9 +4239,9 @@ void CWorkloadCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 	}
 }
 
-GTLC_COLUMN CWorkloadCtrl::GetColumnID(int nCol) const
+WLC_COLUMN CWorkloadCtrl::GetColumnID(int nCol) const
 {
-	return (GTLC_COLUMN)m_hdrTasks.GetItemData(nCol);
+	return (WLC_COLUMN)m_hdrTasks.GetItemData(nCol);
 }
 
 void CWorkloadCtrl::ResizeColumnsToFit()
@@ -4450,8 +4276,8 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 
 	int nTitleColWidth = max(nMinColWidth, (nSplitPos - nRestOfColsWidth));
 
-	m_hdrTasks.SetItemWidth(GTLCC_TITLE, nTitleColWidth);
-	m_hdrTasks.SetItemTracked(GTLCC_TITLE, TRUE);
+	m_hdrTasks.SetItemWidth(WLCC_TITLE, nTitleColWidth);
+	m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
 	m_hdrTasks.UpdateWindow();
 
 	m_tcTasks.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tcTasks.GetSafeHwnd());
@@ -4460,22 +4286,22 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 {
 	// Only need recalc non-fixed column widths
-	BOOL bTitle = !m_hdrTasks.IsItemTracked(GTLCC_TITLE);
-	BOOL bAllocTo = !m_hdrTasks.IsItemTracked(GTLCC_ALLOCTO);
-	BOOL bTaskID = !m_hdrTasks.IsItemTracked(GTLCC_TASKID);
+	BOOL bTitle = !m_hdrTasks.IsItemTracked(WLCC_TITLE);
+	BOOL bAllocTo = !m_hdrTasks.IsItemTracked(WLCC_ALLOCTO);
+	BOOL bTaskID = !m_hdrTasks.IsItemTracked(WLCC_TASKID);
 
 	if (bTitle || bAllocTo || bTaskID)
 	{
 		CClientDC dc(&m_tcTasks);
 
 		if (bTitle)
-			RecalcTreeColumnWidth(GTLCC_TITLE, &dc);
+			RecalcTreeColumnWidth(WLCC_TITLE, &dc);
 			
 		if (bAllocTo)
-			RecalcTreeColumnWidth(GTLCC_ALLOCTO, &dc);
+			RecalcTreeColumnWidth(WLCC_ALLOCTO, &dc);
 		
 		if (bTaskID)
-			RecalcTreeColumnWidth(GTLCC_TASKID, &dc);
+			RecalcTreeColumnWidth(WLCC_TASKID, &dc);
 		
 		if (bResize)
 			Resize();
@@ -4501,34 +4327,34 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tcTasks);
 
 	int nColWidth = 0;
-	GTLC_COLUMN nColID = GetColumnID(nCol);
+	WLC_COLUMN nColID = GetColumnID(nCol);
 
 	switch (nColID)
 	{
-	case GTLCC_TITLE:
+	case WLCC_TITLE:
 		nColWidth = CalcWidestItemTitle(NULL, pDC, TRUE);
 		nColWidth = max(nColWidth, TREE_TITLE_MIN_WIDTH);
 		break;
 
-	case GTLCC_TASKID:
+	case WLCC_TASKID:
 		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
 		break;
 		
-	case GTLCC_ALLOCTO:
+	case WLCC_ALLOCTO:
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(GetLongestVisibleAllocTo(NULL), pDC);
 		break;
 		
 	// rest of attributes are fixed width
-	case GTLCC_STARTDATE:
-	case GTLCC_DUEDATE: 
-	case GTLCC_DONEDATE: 
+	case WLCC_STARTDATE:
+	case WLCC_DUEDATE: 
+	case WLCC_DONEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
 		
-	case GTLCC_PERCENT: 
+	case WLCC_PERCENT: 
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
 		break;
 
@@ -4646,21 +4472,21 @@ void CWorkloadCtrl::UpdateListColumnsWidthAndText(int nWidth)
 		// Next column
 		switch (m_nMonthDisplay)
 		{
-		case GTLC_DISPLAY_QUARTERCENTURIES:
+		case WLC_DISPLAY_QUARTERCENTURIES:
 			nYear += 25;
 			break;
 
-		case GTLC_DISPLAY_DECADES:
+		case WLC_DISPLAY_DECADES:
 			nYear += 10;
 			break;
 			
-		case GTLC_DISPLAY_YEARS:
+		case WLC_DISPLAY_YEARS:
 			nYear += 1;
 			break;
 			
-		case GTLC_DISPLAY_QUARTERS_SHORT:
-		case GTLC_DISPLAY_QUARTERS_MID:
-		case GTLC_DISPLAY_QUARTERS_LONG:
+		case WLC_DISPLAY_QUARTERS_SHORT:
+		case WLC_DISPLAY_QUARTERS_MID:
+		case WLC_DISPLAY_QUARTERS_LONG:
 			nMonth += 3;
 
 			if (nMonth > 12)
@@ -4670,16 +4496,16 @@ void CWorkloadCtrl::UpdateListColumnsWidthAndText(int nWidth)
 			}
 			break;
 			
-		case GTLC_DISPLAY_MONTHS_SHORT:
-		case GTLC_DISPLAY_MONTHS_MID:
-		case GTLC_DISPLAY_MONTHS_LONG:
-		case GTLC_DISPLAY_WEEKS_SHORT:
-		case GTLC_DISPLAY_WEEKS_MID:
-		case GTLC_DISPLAY_WEEKS_LONG:
-		case GTLC_DISPLAY_DAYS_SHORT:
-		case GTLC_DISPLAY_DAYS_MID:
-		case GTLC_DISPLAY_DAYS_LONG:
-		case GTLC_DISPLAY_HOURS:
+		case WLC_DISPLAY_MONTHS_SHORT:
+		case WLC_DISPLAY_MONTHS_MID:
+		case WLC_DISPLAY_MONTHS_LONG:
+		case WLC_DISPLAY_WEEKS_SHORT:
+		case WLC_DISPLAY_WEEKS_MID:
+		case WLC_DISPLAY_WEEKS_LONG:
+		case WLC_DISPLAY_DAYS_SHORT:
+		case WLC_DISPLAY_DAYS_MID:
+		case WLC_DISPLAY_DAYS_LONG:
+		case WLC_DISPLAY_HOURS:
 			nMonth += 1;
 
 			if (nMonth > 12)
@@ -4800,7 +4626,7 @@ void CWorkloadCtrl::UpdateListColumns(int nWidth)
 	}
 }
 
-int CWorkloadCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
+int CWorkloadCtrl::GetMinMonthWidth(WLC_MONTH_DISPLAY nDisplay) const
 {
 	int nWidth = 0;
 	VERIFY(m_mapMinMonthWidths.Lookup(nDisplay, nWidth) && (nWidth >= MIN_MONTH_WIDTH));
@@ -4815,32 +4641,32 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 
 	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
 	{
-		GTLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
+		WLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
 		int nMinMonthWidth = 0;
 
 		switch (nDisplay)
 		{
-		case GTLC_DISPLAY_QUARTERCENTURIES:
+		case WLC_DISPLAY_QUARTERCENTURIES:
 			{
-				CString sText = FormatListColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2013);
+				CString sText = FormatListColumnHeaderText(WLC_DISPLAY_YEARS, 1, 2013);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
 			}
 			break;
 
-		case GTLC_DISPLAY_DECADES:
-		case GTLC_DISPLAY_YEARS:
+		case WLC_DISPLAY_DECADES:
+		case WLC_DISPLAY_YEARS:
 			{
 				// just increase the width of the preceding display
-				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * MULTIYEAR_MULTIPLIER);
 			}
 			break;
 			
-		case GTLC_DISPLAY_QUARTERS_SHORT:
+		case WLC_DISPLAY_QUARTERS_SHORT:
 			{
 				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2013);
 				
@@ -4849,8 +4675,8 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 			}
 			break;
 			
-		case GTLC_DISPLAY_QUARTERS_MID:
-		case GTLC_DISPLAY_QUARTERS_LONG:
+		case WLC_DISPLAY_QUARTERS_MID:
+		case WLC_DISPLAY_QUARTERS_LONG:
 			{
 				int nMinTextWidth = 0;
 				
@@ -4866,9 +4692,9 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 			}
 			break;
 			
-		case GTLC_DISPLAY_MONTHS_SHORT:
-		case GTLC_DISPLAY_MONTHS_MID:
-		case GTLC_DISPLAY_MONTHS_LONG:
+		case WLC_DISPLAY_MONTHS_SHORT:
+		case WLC_DISPLAY_MONTHS_MID:
+		case WLC_DISPLAY_MONTHS_LONG:
 			{
 				int nMinTextWidth = 0;
 				
@@ -4884,24 +4710,24 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 			}
 			break;
 			
-		case GTLC_DISPLAY_WEEKS_SHORT:
-		case GTLC_DISPLAY_WEEKS_MID:
-		case GTLC_DISPLAY_WEEKS_LONG:
-		case GTLC_DISPLAY_DAYS_SHORT:
-		case GTLC_DISPLAY_DAYS_MID:
+		case WLC_DISPLAY_WEEKS_SHORT:
+		case WLC_DISPLAY_WEEKS_MID:
+		case WLC_DISPLAY_WEEKS_LONG:
+		case WLC_DISPLAY_DAYS_SHORT:
+		case WLC_DISPLAY_DAYS_MID:
 			{
 				// just increase the width of the preceding display
-				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
 			}
 			break;
 
-		case GTLC_DISPLAY_DAYS_LONG:
+		case WLC_DISPLAY_DAYS_LONG:
 			{
 				// increase the width of the preceding display
-				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
@@ -4911,10 +4737,10 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 			}
 			break;
 			
-		case GTLC_DISPLAY_HOURS:
+		case WLC_DISPLAY_HOURS:
 			{
 				// just increase the width of the preceding display
-				GTLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
+				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
 
 				nMinMonthWidth = GetMinMonthWidth(nPrev);
 				nMinMonthWidth = (int)(nMinMonthWidth * HOUR_DAY_MULTIPLIER);
@@ -4936,14 +4762,14 @@ void CWorkloadCtrl::CalcMinMonthWidths()
 	dcClient.SelectObject(pOldFont);
 }
 
-GTLC_MONTH_DISPLAY CWorkloadCtrl::GetColumnDisplay(int nMonthWidth)
+WLC_MONTH_DISPLAY CWorkloadCtrl::GetColumnDisplay(int nMonthWidth)
 {
 	int nMinWidth = 0;
 
 	for (int nMode = 0; nMode < (NUM_DISPLAYMODES - 1); nMode++)
 	{
-		GTLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
-		GTLC_MONTH_DISPLAY nNext = DISPLAYMODES[nMode + 1].nDisplay;
+		WLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
+		WLC_MONTH_DISPLAY nNext = DISPLAYMODES[nMode + 1].nDisplay;
 
 		int nFromWidth = GetMinMonthWidth(nDisplay);
 		int nToWidth = GetMinMonthWidth(nNext);
@@ -4958,7 +4784,7 @@ GTLC_MONTH_DISPLAY CWorkloadCtrl::GetColumnDisplay(int nMonthWidth)
 int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CWorkloadCtrl* pThis = (CWorkloadCtrl*)lParamSort;
-	const WorkloadSORTCOLUMNS& sort = pThis->m_sort.multi;
+	const WORKLOADSORTCOLUMNS& sort = pThis->m_sort.multi;
 
 	int nCompare = 0;
 
@@ -4980,12 +4806,12 @@ int CALLBACK CWorkloadCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lPar
 	return pThis->CompareTasks(lParam1, lParam2, pThis->m_sort.single);
 }
 
-int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WorkloadSORTCOLUMN& col) const
+int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const
 {
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (col.nBy == GTLCC_TASKID)
+	if (col.nBy == WLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -5002,35 +4828,35 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const Workload
 
 		switch (col.nBy)
 		{
-		case GTLCC_TITLE:
+		case WLCC_TITLE:
 			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
 			break;
 
-		case GTLCC_STARTDATE:
+		case WLCC_STARTDATE:
 			nCompare = CDateHelper::Compare(pGI1->dtStart, pGI2->dtStart, TRUE, FALSE);
 			break;
 
-		case GTLCC_DUEDATE:
+		case WLCC_DUEDATE:
 			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
 			break;
 
-		case GTLCC_DONEDATE:
+		case WLCC_DONEDATE:
 			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
 			break;
 
-		case GTLCC_ALLOCTO:
+		case WLCC_ALLOCTO:
 			nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
 			break;
 
-		case GTLCC_PERCENT:
+		case WLCC_PERCENT:
 			nCompare = (pGI1->nPercent - pGI2->nPercent);
 			break;
 
-		case GTLCC_NONE:
+		case WLCC_NONE:
 			nCompare = (pGI1->nPosition - pGI2->nPosition);
 			break;
 
-		case GTLCC_TAGS:
+		case WLCC_TAGS:
 			{
 				CString sTags1 = Misc::FormatArray(pGI1->aTags);
 				CString sTags2 = Misc::FormatArray(pGI2->aTags);
@@ -5039,7 +4865,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const Workload
 			}
 			break;
 
-		case GTLCC_DEPENDENCY:
+		case WLCC_DEPENDENCY:
 			{
 				// If Task2 is dependent on Task1 then Task1 comes first
 				if (m_data.IsItemDependentOn(pGI2, dwTaskID1))
@@ -5145,19 +4971,19 @@ BOOL CWorkloadCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) 
 	return FALSE;
 }
 
-BOOL CWorkloadCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
+BOOL CWorkloadCtrl::GetDateFromScrollPos(int nScrollPos, WLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
 {
 	CRect rMonth(rColumn);
 
 	// Clip 'rColumn' if displaying more than months
 	switch (nDisplay)
 	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
+	case WLC_DISPLAY_QUARTERCENTURIES:
+	case WLC_DISPLAY_DECADES:
+	case WLC_DISPLAY_YEARS:
+	case WLC_DISPLAY_QUARTERS_SHORT:
+	case WLC_DISPLAY_QUARTERS_MID:
+	case WLC_DISPLAY_QUARTERS_LONG:
 		{
 			double dMonthWidth = GetMonthWidth(nDisplay, rMonth.Width());
 
@@ -5237,27 +5063,27 @@ int CWorkloadCtrl::GetScrollPosFromDate(const COleDateTime& date) const
 
 			switch (m_nMonthDisplay)
 			{
-			case GTLC_DISPLAY_QUARTERCENTURIES:
+			case WLC_DISPLAY_QUARTERCENTURIES:
 				// Column == 25 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
 				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
-			case GTLC_DISPLAY_DECADES:
+			case WLC_DISPLAY_DECADES:
 				// Column == 10 years
 				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
 				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 
-			case GTLC_DISPLAY_YEARS:
+			case WLC_DISPLAY_YEARS:
 				// Column == 12 months
 				nDaysInCol = (int)DAYS_IN_YEAR;
 				dDayInCol = ((int)((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				break;
 				
-			case GTLC_DISPLAY_QUARTERS_SHORT:
-			case GTLC_DISPLAY_QUARTERS_MID:
-			case GTLC_DISPLAY_QUARTERS_LONG:
+			case WLC_DISPLAY_QUARTERS_SHORT:
+			case WLC_DISPLAY_QUARTERS_MID:
+			case WLC_DISPLAY_QUARTERS_LONG:
 				// Column == 3 months
 				nDaysInCol = (int)(DAYS_IN_MONTH * 3);
 				dDayInCol = ((int)(((nMonth - 1) % 3) * DAYS_IN_MONTH) + nDay);
@@ -5374,8 +5200,7 @@ bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
 DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen) const
 {
 	// try list first
-	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE, nHit, FALSE);
+	DWORD dwTaskID = ListHitTestTask(ptScreen, TRUE);
 
 	// then tree
 	if (!dwTaskID)
@@ -5384,13 +5209,24 @@ DWORD CWorkloadCtrl::HitTestTask(const CPoint& ptScreen) const
 	return dwTaskID;
 }
 
+DWORD CWorkloadCtrl::ListHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
+{
+	int nUnused = -1;
+	int nItem = ListHitTestItem(ptScreen, bScreen, nUnused);
+	
+	if (nItem != -1)
+		return GetTaskID(nItem);
+
+	return 0;
+}
+
 DWORD CWorkloadCtrl::TreeHitTestTask(const CPoint& ptScreen, BOOL bScreen) const
 {
 	HTREEITEM htiHit = TreeHitTestItem(ptScreen, bScreen);
 	
 	if (htiHit)
 		return GetTaskID(htiHit);
-
+	
 	return 0;
 }
 
@@ -5524,74 +5360,6 @@ BOOL CWorkloadCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	return FALSE;
 }
 
-DWORD CWorkloadCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
-{
-	nHit = GTLCHT_NOWHERE;
-
-	if (m_data.GetCount() == 0)
-		return 0;
-
-	int nCol, nItem = ListHitTestItem(point, bScreen, nCol);
-
-	if (nItem == -1)
-		return 0;
-
-	// get task item and see where we hit
-	DWORD dwTaskID = GetTaskID(nItem);
-	
-	WORKLOADITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, 0);
-	
-	// No dragging on auto-calculated parent tasks
-	if (bDragging && HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
-		return 0;
-
-	COleDateTime dtStart, dtDue;
-	GetTaskStartDueDates(*pGI, dtStart, dtDue);
-
-	// Calculate the task rect
-	CRect rTask;
-	VERIFY(GetListItemRect(nItem, rTask));
-
-	if (!CDateHelper::DateHasTime(dtDue))
-		dtDue += 1.0;
-
-	rTask.right = GetScrollPosFromDate(dtDue);
-	rTask.left = GetScrollPosFromDate(dtStart);
-
-	rTask.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
-
-	// Create 'hit' boxes around the two ends
-	const int nDragTol = GetSystemMetrics(SM_CXDOUBLECLK);
-	CRect rStart(rTask), rEnd(rTask);
-
-	rStart.right = (rStart.left + min((rTask.Width() / 2), nDragTol));
-	rStart.left -= nDragTol;
-	rEnd.left = (rEnd.right - min((rTask.Width() / 2), nDragTol));
-	rEnd.right += nDragTol;
-
- 	// now check for closeness to ends
-	CPoint ptClient(point);
-	
-	if (bScreen)
-		m_lcColumns.ScreenToClient(&ptClient);
-	
-	if (rStart.PtInRect(ptClient))
-	{
-		nHit = GTLCHT_BEGIN;
-	}
-	else if (rEnd.PtInRect(ptClient))
-	{
-		nHit = GTLCHT_END;
-	}
-	else if (rTask.PtInRect(ptClient))
-	{
-		nHit = GTLCHT_MIDDLE;
-	}
-	
-	return dwTaskID;
-}
-
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
 {
 	if ((htiFrom == NULL) || (htiFrom == TVI_FIRST) || (htiFrom == TVI_ROOT))
@@ -5610,451 +5378,6 @@ DWORD CWorkloadCtrl::GetListTaskID(DWORD dwItemData) const
 	return GetTaskID((HTREEITEM)dwItemData);
 }
 
-BOOL CWorkloadCtrl::IsDragging() const
-{
-	return IsDragging(m_nDragging);
-}
-
-BOOL CWorkloadCtrl::IsDragging(GTLC_DRAG nDrag)
-{
-	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
-}
-
-BOOL CWorkloadCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
-{
-	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
-}
-
-BOOL CWorkloadCtrl::IsValidDragPoint(const CPoint& ptDrag) const
-{
-	if (!IsDragging())
-		return FALSE;
-
-	CRect rLimits;
-	GetDragLimits(rLimits);
-
-	return rLimits.PtInRect(ptDrag);
-}
-
-void CWorkloadCtrl::GetDragLimits(CRect& rLimits) const
-{
-	m_lcColumns.GetClientRect(rLimits);
-
-	// Clip the right hand end to the last column
-	CRect rColumn;
-	m_hdrColumns.GetItemRect(m_hdrColumns.GetItemCount() - 1, rColumn);
-	rLimits.right = min(rLimits.right, rColumn.right);
-
-	// Allow a buffer at start and end
-	rLimits.InflateRect(DRAG_BUFFER, 0);
-}
-
-BOOL CWorkloadCtrl::ValidateDragPoint(CPoint& ptDrag) const
-{
-	if (!IsValidDragPoint(ptDrag))
-		return FALSE;
-
-	// Clip to drag limits
-	CRect rLimits;
-	GetDragLimits(rLimits);
-
-	ptDrag.x = max(ptDrag.x, rLimits.left);
-	ptDrag.x = min(ptDrag.x, rLimits.right);
-	ptDrag.y = max(ptDrag.y, rLimits.top);
-	ptDrag.y = min(ptDrag.y, rLimits.bottom);
-
-	return TRUE;
-}
-
-BOOL CWorkloadCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
-{
-	if (m_data.ItemIsLocked(dwTaskID))
-		return FALSE;
-
-	// else
-	switch (nDrag)
-	{
-	case GTLCD_START:
-	case GTLCD_WHOLE:
-		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependecies(dwTaskID))
-			return FALSE;
-		break;
-	}
-	
-	// else
-	return TRUE;
-}
-
-BOOL CWorkloadCtrl::StartDragging(const CPoint& ptCursor)
-{
-	ASSERT(!m_bReadOnly);
-
-	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-	
-	DWORD dwTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
-	ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
-
-	if (nHit == GTLCHT_NOWHERE)
-		return FALSE;
-
-	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-	ASSERT(IsDragging(nDrag));
-
-	if (!CanDragTask(dwTaskID, nDrag))
-	{
-		MessageBeep(MB_ICONEXCLAMATION);
-		return FALSE;
-	}
-	
-	if (dwTaskID != GetSelectedTaskID())
-		SelectTask(dwTaskID);
-
-	CPoint ptScreen(ptCursor);
-	m_lcColumns.ClientToScreen(&ptScreen);
-	
-	if (!::DragDetect(m_lcColumns, ptScreen))
-		return FALSE;
-
-	// Ensure the Workload item has valid dates
-	WORKLOADITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	COleDateTime dtStart, dtDue;
-	GetTaskStartDueDates(*pGI, dtStart, dtDue);
-	
-	if (!pGI->HasDue())
-	{
-		if (!CDateHelper::IsDateSet(dtDue))
-			return FALSE;
-
-		// else
-		pGI->dtDue = pGI->dtMaxDue = dtDue;
-	}
-	
-	if (!pGI->HasStart())
-	{
-		if (!CDateHelper::IsDateSet(dtStart))
-			return FALSE;
-
-		// else
-		pGI->dtStart = pGI->dtMinStart = dtStart;
-	}
-	
-	// cache the original task and the start point
-	m_giPreDrag = *pGI;
-	m_ptDragStart = ptCursor;
-
-	// Start dragging
-	m_nDragging = nDrag;
-	m_dtDragMin = CalcMinDragDate(m_giPreDrag);
-
-	m_lcColumns.SetCapture();
-	
-	// keep parent informed
-	NotifyParentDragChange();
-
-	return TRUE;
-}
-
-COleDateTime CWorkloadCtrl::CalcMinDragDate(const WORKLOADITEM& gi) const
-{
-	COleDateTime dtMin;
-	CDateHelper::ClearDate(dtMin);
-
-	int nDepend = gi.aDependIDs.GetSize();
-
-	while (nDepend--)
-	{
-		DWORD dwDependID = gi.aDependIDs[nDepend];
-		ASSERT(dwDependID);
-
-		WORKLOADITEM* pGI = NULL;
-		GET_GI_RET(dwDependID, pGI, dtMin);
-
-		CDateHelper::Max(dtMin, pGI->dtDue);
-	}
-
-	return dtMin;
-}
-
-BOOL CWorkloadCtrl::EndDragging(const CPoint& ptCursor)
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(IsDragging());
-
-	if (IsDragging())
-	{
-		DWORD dwTaskID = GetSelectedTaskID();
-
-		WORKLOADITEM* pGI = NULL;
-		GET_GI_RET(dwTaskID, pGI, FALSE);
-
-		// Restore original refID because that's what we've been really dragging
-		if (pGI->dwOrgRefID)
-		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
-		}
-
-		// dropping outside the list is a cancel
-		if (!IsValidDragPoint(ptCursor))
-		{
-			CancelDrag(TRUE);
-			return FALSE;
-		}
-
-		GTLC_DRAG nDrag = m_nDragging;
-		
-		// cleanup
-		m_nDragging = GTLCD_NONE;
-		::ReleaseCapture();
-
-		// keep parent informed
-		if (DragDatesDiffer(*pGI, m_giPreDrag))
-		{
-			int nNumMonths = GetNumMonths(m_nMonthDisplay);
-			WorkloadDATERANGE prevRange = m_dateRange;
-
-			if (!NotifyParentDateChange(nDrag))
-			{
-				RestoreWorkloadItem(m_giPreDrag);
-			}
-			else
-			{
-				RecalcDateRange();
-				RecalcParentDates();
-
-				// Refresh list columns as required
-				if ((GetNumMonths(m_nMonthDisplay) != nNumMonths) ||
-					(!prevRange.Contains(*pGI)))
-				{
-					// For reasons I don't understand, the resource context is
-					// wrong when handling the LButtonUp
-					AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-					ValidateMonthDisplay();
-					UpdateListColumns();
-				}
-			}
-
-			NotifyParentDragChange();
-		}
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-BOOL CWorkloadCtrl::DragDatesDiffer(const WORKLOADITEM& gi1, const WORKLOADITEM& gi2)
-{
-	return ((gi1.dtStart != gi2.dtStart) || (gi1.dtDue != gi2.dtDue));
-}
-
-void CWorkloadCtrl::NotifyParentDragChange()
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
-
-	GetCWnd()->SendMessage(WM_WLCN_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
-}
-
-BOOL CWorkloadCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
-
-	if (IsDragging(nDrag))
-		return GetCWnd()->SendMessage(WM_WLCN_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
-
-	// else
-	return 0L;
-}
-
-BOOL CWorkloadCtrl::UpdateDragging(const CPoint& ptCursor)
-{
-	ASSERT(!m_bReadOnly);
-	
-	if (IsDragging())
-	{
-		DWORD dwTaskID = GetSelectedTaskID();
-		WORKLOADITEM* pGI = NULL;
-
-		GET_GI_RET(dwTaskID, pGI, FALSE);
-
-		COleDateTime dtStart, dtDue;
-		GetTaskStartDueDates(*pGI, dtStart, dtDue);
-
-		// update taskID to refID because we're really dragging the refID
-		if (pGI->dwOrgRefID)
-		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
-		}
-		
-		COleDateTime dtDrag;
-
-		if (GetValidDragDate(ptCursor, dtDrag))
-		{
-			// if the drag date precedes the min date, constrain
-			// date appropriately and show the 'no drag' cursor
-			BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
-			LPCTSTR szCursor = NULL;
-
-			CDateHelper::Max(dtDrag, m_dtDragMin);
-
-			switch (m_nDragging)
-			{
-			case GTLCD_START:
-				{
-					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					pGI->dtStart.m_dt = min(dtDrag.m_dt, (dtDue.m_dt - dMinDuration));
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_END:
-				{
-					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					pGI->dtDue.m_dt = max(dtDrag.m_dt, (dtStart.m_dt + dMinDuration));
-
-					// handle day boundary
-					if (!CDateHelper::DateHasTime(pGI->dtDue))
-					{
-						pGI->dtDue.m_dt = (CDateHelper::GetEndOfDay(pGI->dtDue).m_dt - 1.0);
-					}
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_WHOLE:
-				{
-					// preserve task duration
-					COleDateTime dtDuration(dtDue - dtStart);
-
-					// handle whole days
-					if (CDateHelper::DateHasTime(dtStart) && 
-						CDateHelper::DateHasTime(dtDue) && 
-						!CDateHelper::DateHasTime(dtDuration))
-					{
-						dtDuration = CDateHelper::GetEndOfPreviousDay(dtDuration);
-					}
-
-					pGI->dtStart = dtDrag;
-					pGI->dtDue = (dtDrag + dtDuration);
-
-					szCursor = IDC_SIZEALL;
-				}
-				break;
-			}
-			ASSERT(szCursor);
-
-			if (bNoDrag)
-				GraphicsMisc::SetDragDropCursor(GMOC_NO);
-			else
-				GraphicsMisc::SetStandardCursor(szCursor);
-
-			RecalcParentDates();
-			RedrawList();
-			RedrawTree();
-
-			// keep parent informed
-			NotifyParentDragChange();
-		}
-		else
-		{
-			// We've dragged outside the client rect
-			GraphicsMisc::SetDragDropCursor(GMOC_NO);
-		}
-
-		return TRUE; // always
-	}
-
-	// else
-	return FALSE; // not dragging
-}
-
-double CWorkloadCtrl::CalcMinDragDuration() const
-{
-	ASSERT((m_nDragging == GTLCD_START) || (m_nDragging == GTLCD_END));
-	
-	double dMin;
-
-	if (CalcMinDragDuration(GetSnapMode(), dMin))
-		return dMin;
-
-	switch (m_nMonthDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTMONTH, dMin));
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTDAY, dMin));
-		break;
-		
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHOUR, dMin));
-		break;
-
-	case GTLC_DISPLAY_HOURS:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHALFHOUR, dMin));
-		break;
-
-	default:
-		ASSERT(0);
-		dMin = 1.0;
-		break;
-	}
-
-	return dMin;
-}
-
-BOOL CWorkloadCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
-{
-	dMin = -1;
-
-	switch (nMode)
-	{
-	case GTLCSM_NEARESTQUARTERCENTURY:	dMin = 9125.0;		break;
-	case GTLCSM_NEARESTDECADE:			dMin = 3650.0;		break;
-	case GTLCSM_NEARESTYEAR:			dMin = 365.0;		break;
-	case GTLCSM_NEARESTHALFYEAR:		dMin = 182.0;		break;
-	case GTLCSM_NEARESTQUARTER:			dMin = 91.0;		break;
-	case GTLCSM_NEARESTMONTH:			dMin = 30.0;		break;
-	case GTLCSM_NEARESTWEEK:			dMin = 7.0;			break;
-	case GTLCSM_NEARESTDAY:				dMin = 1.0;			break;
-	case GTLCSM_NEARESTHALFDAY:			dMin = 0.5;			break;
-	case GTLCSM_NEARESTHOUR:			dMin = (1.0 / 24);	break;
-	case GTLCSM_NEARESTHALFHOUR:		dMin = (1.0 / 48);	break;
-
-	case GTLCSM_FREE:
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return (dMin > 0.0);
-}
-
 void CWorkloadCtrl::RedrawList(BOOL bErase)
 {
 	m_lcColumns.InvalidateRect(NULL, bErase);
@@ -6067,72 +5390,12 @@ void CWorkloadCtrl::RedrawTree(BOOL bErase)
 	m_tcTasks.UpdateWindow();
 }
 
-BOOL CWorkloadCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
-{
-	ASSERT(IsDragging());
-	CPoint ptDrag(ptCursor);
-
-	if (!ValidateDragPoint(ptDrag))
-		return FALSE;
-
-	if (!GetDateFromPoint(ptDrag, dtDrag))
-		return FALSE;
-
-	// if dragging the whole task, then we calculate
-	// dtDrag as WorkloadITEM::dtStart offset by the
-	// difference between the current drag pos and the
-	// initial drag pos
-	if (m_nDragging == GTLCD_WHOLE)
-	{
-		COleDateTime dtOrg;
-		GetDateFromPoint(m_ptDragStart, dtOrg);
-		
-		// offset from pre-drag position
-		double dOffset = dtDrag.m_dt - dtOrg.m_dt;
-		dtDrag = m_giPreDrag.dtStart.m_dt + dOffset;
-	}
-	
-	// adjust date depending on modifier keys 
-	dtDrag = GetNearestDate(dtDrag);
-	
-	// else
-	return TRUE;
-}
-
 BOOL CWorkloadCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
 {
 	// convert pos to date
 	int nScrollPos = (m_lcColumns.GetScrollPos(SB_HORZ) + ptCursor.x);
 
-	if (GetDateFromScrollPos(nScrollPos, date))
-		return TRUE;
-
-	// Fallback for dragging
-	if (IsValidDragPoint(ptCursor))
-	{
-		BOOL bDraggingLeft = (ptCursor.x < 0);
-			
-		int nRefCol = (bDraggingLeft ? 1 : (m_hdrColumns.GetItemCount() - 1));
-		int nDir = (bDraggingLeft ? -1 : 1);
-
-		CRect rColumn;
-		VERIFY(GetListColumnRect(nRefCol, rColumn, FALSE));
-
-		// Calculate the equivalent date for the 'previous/next' column
-		rColumn.OffsetRect((nDir * rColumn.Width()), 0);
-		ASSERT(nScrollPos >= rColumn.left && nScrollPos < rColumn.right);
-
-		int nYear, nMonth;
-		VERIFY(GetListColumnDate(nRefCol, nMonth, nYear));
-
-		int nNumMonthsPerCol = GetNumMonthsPerColumn(m_nMonthDisplay);
-		CDateHelper::IncrementMonth(nMonth, nYear, (nDir * nNumMonthsPerCol));
-
-		return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
-	}
-
-	// else
-	return FALSE;
+	return GetDateFromScrollPos(nScrollPos, date);
 }
 
 void CWorkloadCtrl::SetReadOnly(bool bReadOnly) 
@@ -6150,30 +5413,9 @@ BOOL CWorkloadCtrl::CancelOperation()
 		m_treeDragDrop.CancelDrag();
 		return TRUE;
 	}
-	else if (IsDragging())
-	{
-		CancelDrag(TRUE);
-		return TRUE;
-	}
 	
 	// else 
 	return FALSE;
-}
-
-// internal version
-void CWorkloadCtrl::CancelDrag(BOOL bReleaseCapture)
-{
-	ASSERT(IsDragging());
-
-	if (bReleaseCapture)
-		ReleaseCapture();
-	
-	// cancel drag, restoring original task dates
-	RestoreWorkloadItem(m_giPreDrag);
-	m_nDragging = GTLCD_NONE;
-
-	// keep parent informed
-	NotifyParentDragChange();
 }
 
 int CWorkloadCtrl::GetTreeColumnOrder(CIntArray& aTreeOrder) const
@@ -6265,190 +5507,6 @@ BOOL CWorkloadCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntA
 		m_aPrevTrackedCols.Copy(aListTracked);
 	
 	return TRUE;
-}
-
-GTLC_SNAPMODE CWorkloadCtrl::GetSnapMode() const
-{
-	if (IsDragging())
-	{
-		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-		BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
-		if (bCtrl || bShift)
-		{
-			switch (m_nMonthDisplay)
-			{
-			case GTLC_DISPLAY_QUARTERCENTURIES:
-			case GTLC_DISPLAY_DECADES:
-				if (bCtrl && bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFYEAR;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTYEAR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDECADE;
-				}
-				break;
-
-			case GTLC_DISPLAY_YEARS:
-				if (bCtrl && bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFYEAR;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTYEAR;
-				}
-				break;
-				
-			case GTLC_DISPLAY_QUARTERS_SHORT:
-			case GTLC_DISPLAY_QUARTERS_MID:
-			case GTLC_DISPLAY_QUARTERS_LONG:
-				if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTQUARTER;
-				}
-				break;
-				
-			case GTLC_DISPLAY_MONTHS_SHORT:
-			case GTLC_DISPLAY_MONTHS_MID:
-			case GTLC_DISPLAY_MONTHS_LONG:
-				if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
-				}
-				break;
-				
-			case GTLC_DISPLAY_WEEKS_SHORT:
-			case GTLC_DISPLAY_WEEKS_MID:
-			case GTLC_DISPLAY_WEEKS_LONG:
-				if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTWEEK;
-				}
-				break;
-				
-			case GTLC_DISPLAY_DAYS_SHORT:
-			case GTLC_DISPLAY_DAYS_MID:
-			case GTLC_DISPLAY_DAYS_LONG:
-				if (bCtrl && bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFDAY;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHOUR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
-				}
-				break;
-
-			case GTLC_DISPLAY_HOURS:
-				if (bCtrl && bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHOUR;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFHOUR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFDAY;
-				}
-				// TODO
-				break;
-				
-			default:
-				ASSERT(0);
-				// fall thru to whatever's currently set
-				break;
-			}
-		}
-	}
-
-	// else
-	return m_nSnapMode;
-}
-
-COleDateTime CWorkloadCtrl::GetNearestDate(const COleDateTime& dtDrag) const
-{
-	ASSERT(IsDragging());
-
-	BOOL bDraggingEnd = (m_nDragging == GTLCD_END);
-
-	switch (GetSnapMode())
-	{
-	case GTLCSM_NEARESTQUARTERCENTURY:
-		return CDateHelper::GetNearestQuarterCentury(dtDrag, bDraggingEnd);
-		
-	case GTLCSM_NEARESTDECADE:
-		return CDateHelper::GetNearestDecade(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTYEAR:
-		return CDateHelper::GetNearestYear(dtDrag, bDraggingEnd);
-		
-	case GTLCSM_NEARESTHALFYEAR:
-		return CDateHelper::GetNearestHalfYear(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTQUARTER:
-		return CDateHelper::GetNearestQuarter(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTMONTH:
-		return CDateHelper::GetNearestMonth(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTWEEK:
-		return CDateHelper::GetNearestWeek(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTDAY:
-		return CDateHelper::GetNearestDay(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTHALFDAY:
-		return CDateHelper::GetNearestHalfDay(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTHOUR:
-		return CDateHelper::GetNearestHour(dtDrag, bDraggingEnd);
-
-	case GTLCSM_NEARESTHALFHOUR:
-		return CDateHelper::GetNearestHalfHour(dtDrag, bDraggingEnd);
-
-	case GTLCSM_FREE:
-		if (bDraggingEnd)
-		{
-			COleDateTime dtEndOfDragDay(CDateHelper::GetEndOfDay(dtDrag));
-
-			if (dtDrag >= dtEndOfDragDay)
-				return dtEndOfDragDay;
-		}
-		// else
-		return dtDrag;
-	}
-
-	// all else
-	ASSERT(0);
-	return dtDrag;
 }
 
 DWORD CWorkloadCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const

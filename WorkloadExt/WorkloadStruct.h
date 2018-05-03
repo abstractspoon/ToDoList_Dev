@@ -70,48 +70,9 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadDEPENDENCY
+struct WORKLOADDATERANGE
 {
-	WorkloadDEPENDENCY();
-
-	void SetFrom(const CPoint& pt, DWORD dwTaskID = 0);
-	void SetTo(const CPoint& pt, DWORD dwTaskID = 0);
-
-	DWORD GetFromID() const;
-	DWORD GetToID() const;
-
-	BOOL Matches(DWORD dwFrom, DWORD dwTo) const;
-	
-	BOOL HitTest(const CRect& rect) const;
-	BOOL HitTest(const CPoint& point, int nTol = 2) const;
-
-	BOOL Draw(CDC* pDC, const CRect& rClient, BOOL bDragging);
-
-#ifdef _DEBUG
-	void Trace() const;
-#endif
-	
-	static int STUB;
-	
-protected:
-	CPoint ptFrom, ptTo;
-	DWORD dwFromID, dwToID;
-	
-protected:
-	void CalcDependencyPath(CPoint pts[3]) const;
-	BOOL CalcBoundingRect(CRect& rect) const;
-	void CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const;
-	void DrawDependencyArrow(CDC* pDC, const CPoint& pt) const;
-	BOOL IsFromAboveTo() const;
-};
-
-typedef CArray<WorkloadDEPENDENCY, WorkloadDEPENDENCY&> CWorkloadDependArray;
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct WorkloadDATERANGE
-{
-	WorkloadDATERANGE();
+	WORKLOADDATERANGE();
 
 	void Clear();
 	void MinMax(const WORKLOADITEM& gi);
@@ -119,8 +80,8 @@ struct WorkloadDATERANGE
 
 	COleDateTime GetStart() const { return dtStart; }
 	COleDateTime GetEnd() const { return dtEnd; }
-	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	COleDateTime GetStart(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	COleDateTime GetEnd(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
 
 	BOOL IsValid() const;
 	BOOL IsEmpty() const;
@@ -133,88 +94,61 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadSORTCOLUMN
+struct WORKLOADSORTCOLUMN
 {
-	WorkloadSORTCOLUMN();
+	WORKLOADSORTCOLUMN();
 
-	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
-	BOOL Matches(GTLC_COLUMN nBy, BOOL bAscending) const;
-	BOOL operator==(const WorkloadSORTCOLUMN& col) const;
+	BOOL Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Matches(WLC_COLUMN nBy, BOOL bAscending) const;
+	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
 
-	GTLC_COLUMN nBy;
+	WLC_COLUMN nBy;
 	BOOL bAscending;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadSORTCOLUMNS
+struct WORKLOADSORTCOLUMNS
 {
-	WorkloadSORTCOLUMNS();
+	WORKLOADSORTCOLUMNS();
 
-	BOOL Sort(const WorkloadSORTCOLUMNS& sort);
-	BOOL operator==(const WorkloadSORTCOLUMNS& sort) const;
+	BOOL Sort(const WORKLOADSORTCOLUMNS& sort);
+	BOOL operator==(const WORKLOADSORTCOLUMNS& sort) const;
 
-	WorkloadSORTCOLUMN cols[3];
+	WORKLOADSORTCOLUMN cols[3];
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadSORT
+struct WORKLOADSORT
 {
-	WorkloadSORT();
+	WORKLOADSORT();
 
 	BOOL IsSorting() const;
-	BOOL IsSortingBy(GTLC_COLUMN nColID) const;
-	BOOL IsSingleSortingBy(GTLC_COLUMN nColID) const;
-	BOOL IsMultiSortingBy(GTLC_COLUMN nColID) const;
-	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
-	BOOL Sort(const WorkloadSORTCOLUMNS& sort);
+	BOOL IsSortingBy(WLC_COLUMN nColID) const;
+	BOOL IsSingleSortingBy(WLC_COLUMN nColID) const;
+	BOOL IsMultiSortingBy(WLC_COLUMN nColID) const;
+	BOOL Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Sort(const WORKLOADSORTCOLUMNS& sort);
 
-	WorkloadSORTCOLUMN single;
-	WorkloadSORTCOLUMNS multi;
+	WORKLOADSORTCOLUMN single;
+	WORKLOADSORTCOLUMNS multi;
 	BOOL bMultiSort;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-class IWorkloadDependencyEditor
-{
-public:
-	virtual BOOL SetFromTask(DWORD dwFromTaskID) = 0;
-	virtual BOOL SetFromDependency(DWORD dwFromTaskID, DWORD dwCurToTaskID) = 0;
-	virtual BOOL SetToTask(DWORD dwToTaskID) = 0;
-
-	virtual DWORD GetFromTask() const = 0;
-	virtual DWORD GetFromDependency(DWORD& dwCurToTaskID) const = 0;
-	virtual DWORD GetToTask() const = 0;
-
-	virtual BOOL IsPicking() const = 0;
-	virtual BOOL IsPickingFromTask() const = 0;
-	virtual BOOL IsPickingFromDependency() const = 0;
-	virtual BOOL IsPickingToTask() const = 0;
-	virtual BOOL IsPickingCancelled() const = 0;
-	virtual BOOL IsPickingCompleted() const = 0;
-
-	virtual BOOL IsAdding() const = 0;
-	virtual BOOL IsEditing() const = 0;
-	virtual BOOL IsDeleting() const = 0;
-
-	virtual void Cancel() = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 struct GTCDISPLAYMODE
 {
-	GTLC_MONTH_DISPLAY nDisplay;
+	WLC_MONTH_DISPLAY nDisplay;
 	UINT nStringID;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadCOLUMN
+struct WORKLOADCOLUMN
 {
-	GTLC_COLUMN nColID;
+	WLC_COLUMN nColID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

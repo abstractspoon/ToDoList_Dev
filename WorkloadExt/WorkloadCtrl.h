@@ -86,15 +86,15 @@ public:
 	void SetFocus();
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
-	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
-	void Sort(const WorkloadSORTCOLUMNS multi);
-	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
+	void Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
+	void Sort(const WORKLOADSORTCOLUMNS multi);
+	WLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
-	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
-	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nNewDisplay);
-	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay) const;
-	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay) const;
+	WLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }
+	BOOL SetMonthDisplay(WLC_MONTH_DISPLAY nNewDisplay);
+	BOOL CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay) const;
+	BOOL ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay) const;
 	void ValidateMonthDisplay();
 
 	void ScrollToToday();
@@ -111,7 +111,6 @@ public:
 	void SetWeekendColor(COLORREF crWeekend);
 	void SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor);
 	void SetDefaultColor(COLORREF crDefault);
-	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
 	void SetSplitBarColor(COLORREF crSplitBar);
 
@@ -120,9 +119,6 @@ public:
 	BOOL GetLabelEditRect(LPRECT pEdit) const;
 	CString GetItemTip(CPoint ptScreen) const;
 	HTREEITEM GetItem(CPoint ptScreen) const;
-
-	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
-	GTLC_SNAPMODE GetSnapMode() const;
 
 	int GetTreeColumnOrder(CIntArray& aTreeOrder) const;
 	BOOL SetTreeColumnOrder(const CIntArray& aTreeOrder);
@@ -134,8 +130,8 @@ public:
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttrib);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttrib);
-	static IUI_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
-	static GTLC_COLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
+	static IUI_ATTRIBUTE MapColumnToAttribute(WLC_COLUMN nCol);
+	static WLC_COLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
 
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
@@ -145,24 +141,20 @@ protected:
 	BOOL m_bReadOnly;
 	BOOL m_bMovingTask;
 
-	WorkloadDATERANGE m_dateRange;
+	WORKLOADDATERANGE m_dateRange;
 	WORKLOADITEM m_giPreDrag;
-	WorkloadSORT m_sort;
+	WORKLOADSORT m_sort;
 
-	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
+	CMap<WLC_MONTH_DISPLAY, WLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 
 	COLORREF m_crAltLine, m_crGridLine, m_crParent, m_crDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
-	COleDateTime m_dtDragMin;
-	CPoint m_ptDragStart;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
-	GTLC_MONTH_DISPLAY m_nMonthDisplay;
-	GTLC_PARENTCOLORING m_nParentColoring;
+	WLC_MONTH_DISPLAY m_nMonthDisplay;
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
-	GTLC_DRAG m_nDragging;
 	int m_nPrevDropHilitedItem;
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
@@ -172,7 +164,6 @@ protected:
 
 private:
 	mutable CTreeCtrlHelper* m_pTCH;
-	mutable GTLC_SNAPMODE m_nSnapMode;
 
 protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -190,6 +181,8 @@ protected:
 	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnColumnsClick(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -253,27 +246,27 @@ protected:
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
 	void UpdateListColumnsWidthAndText(int nWidth = -1);
-	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
+	CString FormatListColumnHeaderText(WLC_MONTH_DISPLAY nDisplay, int nMonth = 0, int nYear = 0) const;
 
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
-	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, GTLC_COLUMN nColID);
+	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nColID);
 	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
 	void CalcMinMonthWidths();
-	int GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetMinMonthWidth(WLC_MONTH_DISPLAY nDisplay) const;
 	void BuildTreeColumns();
-	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
+	WLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
 	int GetColumnWidth() const;
-	int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetColumnWidth(WLC_MONTH_DISPLAY nDisplay) const;
 	double GetMonthWidth(int nColWidth) const;
 	int GetRequiredListColumnCount() const;
-	int GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
-	BOOL ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
+	int GetRequiredListColumnCount(WLC_MONTH_DISPLAY nDisplay) const;
+	BOOL ZoomTo(WLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
 	void DeleteTreeItem(HTREEITEM hti);
 	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
 	int FindColumn(int nScrollPos) const;
@@ -287,14 +280,14 @@ protected:
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
 	int CalcTreeWidth() const;
-	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
-	int GetEndYear(GTLC_MONTH_DISPLAY nDisplay) const;
-	COleDateTime GetStartDate(GTLC_MONTH_DISPLAY nDisplay) const;
-	COleDateTime GetEndDate(GTLC_MONTH_DISPLAY nDisplay) const;
-	int GetNumMonths(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetStartYear(WLC_MONTH_DISPLAY nDisplay) const;
+	int GetEndYear(WLC_MONTH_DISPLAY nDisplay) const;
+	COleDateTime GetStartDate(WLC_MONTH_DISPLAY nDisplay) const;
+	COleDateTime GetEndDate(WLC_MONTH_DISPLAY nDisplay) const;
+	int GetNumMonths(WLC_MONTH_DISPLAY nDisplay) const;
 	void Resize();
-	BOOL ValidateMonthDisplay(GTLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
-	BOOL CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nWidth) const;
+	BOOL ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay, int& nWidth) const;
+	BOOL CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay, int nWidth) const;
 	void RecalcDateRange();
    BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
@@ -306,8 +299,8 @@ protected:
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
+	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
-	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
 	DWORD HitTestTask(const CPoint& point, BOOL bScreen, int& nItem) const;
 	int GetListItem(DWORD dwTaskID) const;
 	int GetListItem(HTREEITEM hti) const;
@@ -318,39 +311,21 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetListTaskID(DWORD nItemData) const;
-	GTLC_COLUMN GetColumnID(int nCol) const;
+	WLC_COLUMN GetColumnID(int nCol) const;
 
-	BOOL StartDragging(const CPoint& ptCursor);
-	BOOL EndDragging(const CPoint& ptCursor);
-	BOOL UpdateDragging(const CPoint& ptCursor);
-	BOOL ValidateDragPoint(CPoint& ptDrag) const;
-	BOOL IsValidDragPoint(const CPoint& ptDrag) const;
-	void CancelDrag(BOOL bReleaseCapture);
-	BOOL IsDragging() const;
-	void GetDragLimits(CRect& rLimits) const;
-	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
-	COleDateTime GetNearestDate(const COleDateTime& date) const;
-	COleDateTime CalcMinDragDate(const WORKLOADITEM& gi) const;
-	double CalcMinDragDuration() const;
-	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
-	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
-
-	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
-	void NotifyParentDragChange();
 
 	int GetTotalTreeColumnsWidth() const;
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
-	CString GetTreeItemColumnText(const WORKLOADITEM& gi, GTLC_COLUMN nColID) const;
+	CString GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nColID) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
-	void GetWorkloadBarColors(const WORKLOADITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
  	COLORREF GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bAlternate) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
@@ -367,8 +342,8 @@ protected:
 	void RefreshTreeItemMap();
 
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
-	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
-	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WorkloadSORTCOLUMN& col) const;
+	void Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
+	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;
 
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);
@@ -379,7 +354,7 @@ protected:
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
-	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
+	static int GetColumnWidth(WLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static BOOL CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
@@ -390,16 +365,12 @@ protected:
 	static BOOL GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static int Compare(const CString& sText1, const CString& sText2);
-	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL DragDatesDiffer(const WORKLOADITEM& gi1, const WORKLOADITEM& gi2);
 	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
-	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
-	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
-	static int GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay);
+	static double GetMonthWidth(WLC_MONTH_DISPLAY nDisplay, int nColWidth);
+	static BOOL GetDateFromScrollPos(int nScrollPos, WLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
+	static int GetNumMonthsPerColumn(WLC_MONTH_DISPLAY nDisplay);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
-	static BOOL IsDragging(GTLC_DRAG nDrag);
-	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
 private:
 	void PreFixVScrollSyncBug();
