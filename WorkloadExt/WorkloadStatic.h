@@ -23,7 +23,7 @@ const int NUM_TREECOLUMNS = (sizeof(WORKLOADTREECOLUMNS) / sizeof(WORKLOADCOLUMN
 
 /////////////////////////////////////////////////////////////////////////////
 
-static GTCDISPLAYMODE DISPLAYMODES[] = 
+static WLCDISPLAYMODE DISPLAYMODES[] = 
 {
 	{ WLC_DISPLAY_QUARTERCENTURIES,	IDS_DISPLAYQUARTERCENTURIES },
 	{ WLC_DISPLAY_DECADES,				IDS_DISPLAYDECADES },

@@ -166,12 +166,12 @@ private:
 	mutable CTreeCtrlHelper* m_pTCH;
 
 protected:
-	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+
 	afx_msg void OnEndDragTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
@@ -183,6 +183,12 @@ protected:
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnColumnsClick(NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTreeDragOver(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTreeDragDrop(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTreeDragAbort(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 

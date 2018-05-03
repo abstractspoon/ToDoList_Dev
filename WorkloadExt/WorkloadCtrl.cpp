@@ -169,33 +169,6 @@ CWorkloadCtrl::~CWorkloadCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
-// 	ON_WM_SIZE()
-// 	ON_WM_CTLCOLOR()
-// 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnKeyUpWorkload)
-// 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
-// 	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnClickWorkloadList)
-// 	ON_COMMAND(ID_WORKLOAD_GOTOTODAY, OnWorkloadGotoToday)
-// 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_GOTOTODAY, OnUpdateWorkloadGotoToday)
-// 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
-// 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
-// 	ON_WM_SHOWWINDOW()
-// 	//}}AFX_MSG_MAP
-// 	ON_COMMAND(ID_HELP, OnHelp)
-// 	ON_WM_HELPINFO()
-// 	ON_WM_SETFOCUS()
-// 	ON_WM_ERASEBKGND()
-// 	ON_WM_NCDESTROY()
-// 
-// 	ON_REGISTERED_MESSAGE(WM_WLC_DATECHANGE, OnWorkloadNotifyDateChange)
-// 	ON_REGISTERED_MESSAGE(WM_WLC_DRAGCHANGE, OnWorkloadNotifyDragChange)
-// 	ON_REGISTERED_MESSAGE(WM_WLC_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
-// 	ON_REGISTERED_MESSAGE(WM_WLCN_SORT, OnWorkloadNotifySortChange)
-// 	ON_REGISTERED_MESSAGE(WM_WLCN_ZOOM, OnWorkloadNotifyZoomChange)
-// 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
-// 	ON_REGISTERED_MESSAGE(WM_WLC_GETTASKICON, OnWorkloadGetTaskIcon)
-// 	ON_REGISTERED_MESSAGE(WM_WLC_MOVETASK, OnWorkloadMoveTask)
-// 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
-
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WORKLOADTREE, OnBeginEditTreeLabel)
 	ON_NOTIFY(HDN_ENDDRAG, IDC_TASKTREEHEADER, OnEndDragTreeHeader)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKTREEHEADER, OnClickTreeHeader)
@@ -207,6 +180,12 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
 	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnColumnsClick)
+
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
+	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGOVER, OnTreeDragOver)
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGDROP, OnTreeDragDrop)
+	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
 
 	ON_WM_CREATE()
 	ON_WM_SIZE()
@@ -2209,7 +2188,6 @@ void CWorkloadCtrl::OnColumnsClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-
 void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	TV_DISPINFO* pDispInfo = (TV_DISPINFO*)pNMHDR;
@@ -2249,75 +2227,70 @@ void CWorkloadCtrl::OnTreeItemExpanded(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	RecalcTreeColumns(TRUE);
 }
 
-LRESULT CWorkloadCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+LRESULT CWorkloadCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	if (!IsResyncEnabled())
-		return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+	// Make sure the selection helper is synchronised
+	// with the tree's current selection
+	m_tshDragDrop.ClearHistory();
+	m_tshDragDrop.RemoveAll(TRUE, FALSE);
+	m_tshDragDrop.AddItem(m_tcTasks.GetSelectedItem(), FALSE);
+	
+	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+}
 
+LRESULT CWorkloadCtrl::OnTreePreDragMove(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+}
+
+LRESULT CWorkloadCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	// We currently DON'T support 'linking'
+	UINT nCursor = m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	
+	if (nCursor == DD_DROPEFFECT_LINK)
+		nCursor = DD_DROPEFFECT_NONE;
+	
+	return nCursor;
+}
+
+LRESULT CWorkloadCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage()))
 	{
-		// Drag and drop
-		if (msg == WM_DD_DRAGENTER)
+		HTREEITEM htiDropTarget = NULL, htiAfterSibling = NULL;
+		
+		if (m_treeDragDrop.GetDropTarget(htiDropTarget, htiAfterSibling))
 		{
-			// Make sure the selection helper is synchronised
-			// with the tree's current selection
-			m_tshDragDrop.ClearHistory();
-			m_tshDragDrop.RemoveAll(TRUE, FALSE);
-			m_tshDragDrop.AddItem(m_tcTasks.GetSelectedItem(), FALSE);
-
-			return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-		}
-		else if (msg == WM_DD_PREDRAGMOVE)
-		{
-			return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-		}
-		else if (msg == WM_DD_DRAGOVER)
-		{
-			// We currently DON'T support 'linking'
-			UINT nCursor = m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-
-			if (nCursor == DD_DROPEFFECT_LINK)
-				nCursor = DD_DROPEFFECT_NONE;
-
-			return nCursor;
-		}
-		else if (msg == WM_DD_DRAGDROP)
-		{
-			if (m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage()))
+			// Notify parent of move
+			HTREEITEM htiSel = GetSelectedItem();
+			ASSERT(htiSel);
+			
+			IUITASKMOVE move = { 0 };
+			
+			move.dwSelectedTaskID = GetTaskID(htiSel);
+			move.dwParentID = GetTaskID(htiDropTarget);
+			move.dwAfterSiblingID = GetTaskID(htiAfterSibling);
+			move.bCopy = (Misc::ModKeysArePressed(MKS_CTRL) != FALSE);
+			
+			// If copying a task, app will send us a full update 
+			// so we do not need to perform the move ourselves
+			if (CWnd::SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 			{
-				HTREEITEM htiDropTarget = NULL, htiAfterSibling = NULL;
-
-				if (m_treeDragDrop.GetDropTarget(htiDropTarget, htiAfterSibling))
-				{
-					// Notify parent of move
-					HTREEITEM htiSel = GetSelectedItem();
-					ASSERT(htiSel);
-
-					IUITASKMOVE move = { 0 };
-
-					move.dwSelectedTaskID = GetTaskID(htiSel);
-					move.dwParentID = GetTaskID(htiDropTarget);
-					move.dwAfterSiblingID = GetTaskID(htiAfterSibling);
-					move.bCopy = (Misc::ModKeysArePressed(MKS_CTRL) != FALSE);
-
-					// If copying a task, app will send us a full update 
-					// so we do not need to perform the move ourselves
-					if (CWnd::SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
-					{
-						htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
-
-						RefreshTreeItemMap();
-						SelectItem(htiSel);
-					}
-				}
+				htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
+				
+				RefreshTreeItemMap();
+				SelectItem(htiSel);
 			}
 		}
-		else if (msg == WM_DD_DRAGABORT)
-		{
-			return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
-		}
 	}
-	
-	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+
+	return 0L;
+}
+
+LRESULT CWorkloadCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
 }
 
 void CWorkloadCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)

@@ -138,7 +138,7 @@ struct WORKLOADSORT
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GTCDISPLAYMODE
+struct WLCDISPLAYMODE
 {
 	WLC_MONTH_DISPLAY nDisplay;
 	UINT nStringID;

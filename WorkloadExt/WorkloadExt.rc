@@ -73,19 +73,16 @@ EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,351,13,236,12,SS_CENTERIMAGE | 
+                    IDC_SELECTEDTASKDATES,263,13,236,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
     LTEXT           "Selected Task &Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    352,3,235,8
+                    264,3,235,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,243,12,106,17
+                    WS_VISIBLE,155,12,106,17
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,30,587,279
 END
@@ -223,16 +220,6 @@ BEGIN
                     WS_TABSTOP,7,383,333,10
 END
 
-IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    PUSHBUTTON      "Cancel",IDCANCEL,67,92,50,14
-    GROUPBOX        "Steps",IDC_STATIC,7,7,172,79
-    LTEXT           "",IDC_CURRENTSTAGE,14,23,157,54
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -256,14 +243,6 @@ BEGIN
         RIGHTMARGIN, 340
         TOPMARGIN, 7
         BOTTOMMARGIN, 393
-    END
-
-    IDD_CREATEDEPENDS_DIALOG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 179
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 106
     END
 END
 #endif    // APSTUDIO_INVOKED

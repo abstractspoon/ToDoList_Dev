@@ -63,7 +63,6 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadWnd)
 	//}}AFX_DATA
-	CComboBox m_cbSnapModes;
 	CTabbedComboBox	m_cbDisplayOptions;
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;

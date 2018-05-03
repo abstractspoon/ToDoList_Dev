@@ -72,7 +72,6 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
-	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
@@ -790,7 +789,7 @@ void CWorkloadWnd::OnSelchangeDisplay()
 	if (!SetMonthDisplay(nNewDisplay))
 	{
 		// restore previous selection
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nCurDisplay);
+		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
 	}
 }
 
@@ -885,7 +884,7 @@ void CWorkloadWnd::BuildDisplayCombo()
 
 	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
 	{
-		const GTCDISPLAYMODE& mode = DISPLAYMODES[nMode];
+		const WLCDISPLAYMODE& mode = DISPLAYMODES[nMode];
 
 		if (!m_ctrlWorkload.CanSetMonthDisplay(mode.nDisplay))
 		{
