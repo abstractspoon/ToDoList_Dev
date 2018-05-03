@@ -3,6 +3,7 @@
 // Used by WorkloadExt.rc
 //
 #define IDD_WORKLOADTREE_DIALOG         103
+#define IDD_WORKLOAD_DIALOG             103
 #define IDB_TOOLBAR_STD                 245
 #define IDI_HELP_BUTTON                 293
 #define IDR_WORKLOAD                    1000
@@ -60,6 +61,7 @@
 #define IDC_DISPLAYPROGRESS             16022
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_CURRENTSTAGE                16025
+#define IDC_WORKLOAD_FRAME              16025
 #define IDC_DISPLAY_LABEL               16026
 #define IDC_SNAPMODES_LABEL             16027
 #define IDC_SELECTEDTASKDATES_LABEL     16028

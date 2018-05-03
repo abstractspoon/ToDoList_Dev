@@ -64,8 +64,6 @@ protected:
 	//{{AFX_DATA(CWorkloadWnd)
 	//}}AFX_DATA
 	CComboBox m_cbSnapModes;
-	CListCtrl m_list;
-	CWorkloadTreeCtrl m_tree;
 	CTabbedComboBox	m_cbDisplayOptions;
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
@@ -99,7 +97,6 @@ protected:
 	afx_msg void OnKeyUpWorkload(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnClickWorkloadList(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnSelchangedWorkloadTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnWorkloadGotoToday();
 	afx_msg void OnUpdateWorkloadGotoToday(CCmdUI* pCmdUI);
@@ -107,7 +104,6 @@ protected:
 	afx_msg void OnUpdateWorkloadPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
-	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
@@ -119,6 +115,9 @@ protected:
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyZoomChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
+
+	afx_msg LRESULT OnWorkloadEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadMoveTask(WPARAM wp, LPARAM lp);

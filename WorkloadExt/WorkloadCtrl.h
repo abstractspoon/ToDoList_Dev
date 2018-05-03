@@ -34,16 +34,20 @@ class CThemed;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CWorkloadCtrl : protected CTreeListSyncer  
+class CWorkloadCtrl : public CWnd, protected CTreeListSyncer  
 {
+	//DECLARE_DYNAMIC(CWorkloadCtrl);
+
 	friend class CWorkloadLockUpdates;
 
 public:
-	CWorkloadCtrl(CWorkloadTreeCtrl& tree, CListCtrl& list);
+	CWorkloadCtrl();
 	virtual ~CWorkloadCtrl();
 
-	BOOL Initialize(UINT nIDTreeHeader);
-	void Release();
+	operator HWND() const { return GetSafeHwnd(); }
+	
+	BOOL Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible = TRUE);
+	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
@@ -64,9 +68,6 @@ public:
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
 	BOOL IsMovingTask() const { return m_bMovingTask; }
-
-	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
-	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
 
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	BOOL PointInHeader(const CPoint& ptScreen) const;
@@ -123,9 +124,6 @@ public:
 	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 	GTLC_SNAPMODE GetSnapMode() const;
 
-	BOOL BeginDependencyEdit(IWorkloadDependencyEditor* pDependEdit);
-	void OnEndDepedencyEdit();
-
 	int GetTreeColumnOrder(CIntArray& aTreeOrder) const;
 	BOOL SetTreeColumnOrder(const CIntArray& aTreeOrder);
 	void GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const;
@@ -140,21 +138,24 @@ public:
 	static GTLC_COLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
 
 protected:
+	CWorkloadTreeCtrl m_tcTasks;
+	CListCtrl m_lcColumns;
+	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
+
 	BOOL m_bReadOnly;
 	BOOL m_bMovingTask;
 
 	WorkloadDATERANGE m_dateRange;
-	WorkloadITEM m_giPreDrag;
+	WORKLOADITEM m_giPreDrag;
 	WorkloadSORT m_sort;
 
-	IWorkloadDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 
 	COLORREF m_crAltLine, m_crGridLine, m_crParent, m_crDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
 	COleDateTime m_dtDragMin;
-	CPoint m_ptDragStart, m_ptLastDependPick;
+	CPoint m_ptDragStart;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
@@ -167,10 +168,6 @@ protected:
 	CTreeSelectionHelper m_tshDragDrop;
 	CHTIMap m_mapHTItems;
 
-	CWorkloadTreeCtrl& m_tree;
-	CListCtrl& m_list;
-	CEnHeaderCtrl m_treeHeader, m_listHeader;
-
 	CWorkloadItemMap m_data;
 
 private:
@@ -180,6 +177,21 @@ private:
 protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+
+protected:
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnEndDragTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnItemChangedTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
+
+	DECLARE_MESSAGE_MAP()
 
 protected:
 	// base-class virtual message handlers
@@ -203,9 +215,9 @@ protected:
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 
-	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WorkloadITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
-	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WorkloadITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
-	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WorkloadITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
+	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
+	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
+	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
 	GM_ITEMSTATE GetItemState(int nItem) const;
@@ -213,44 +225,29 @@ protected:
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	
-	void DrawListItem(CDC* pDC, int nItem, const WorkloadITEM& gi, BOOL bSelected);
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup);
-	void DrawListItemText(CDC* pDC, const WorkloadITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow);
-	void DrawListItemRollupText(CDC* pDC, HTREEITEM hti, const CRect& rItem, const CRect& rClip, COLORREF crRow);
-	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup);
-	void DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected);
+	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BOOL bSelected);
+	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& gi, BOOL bSelected);
+	void DrawListItemText(CDC* pDC, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow);
+	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WORKLOADITEM& gi, BOOL bSelected);
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const WORKLOADITEM& gi, BOOL bSelected);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const WORKLOADITEM& gi, BOOL bSelected);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const WORKLOADITEM& gi, BOOL bSelected);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const WORKLOADITEM& gi, BOOL bSelected);
 	void DrawListItemWeeks(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const WORKLOADITEM& gi, BOOL bSelected);
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const WorkloadITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday, BOOL bDrawHours);
-
-	void DrawWorkloadBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const WorkloadITEM& gi);
-	void DrawWorkloadDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const WorkloadITEM& gi);
-	void DrawWorkloadMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const WorkloadITEM& gi);
-
-	BOOL DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
-	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
-	void DrawWorkloadParentEnds(CDC* pDC, const WorkloadITEM& gi, const CRect& rBar, 
-							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd);
+							const WORKLOADITEM& gi, BOOL bSelected, BOOL bDrawHours);
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 
 	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
-
-	void ClearDependencyPickLine(CDC* pDC = NULL);
-	BOOL DrawDependencyPickLine(const CPoint& ptClient);
-	void EndDependencyEdit();
 
 	void BuildListColumns();
 	void UpdateListColumns(int nWidth = -1);
@@ -262,7 +259,7 @@ protected:
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
-	HFONT GetTreeItemFont(HTREEITEM hti, const WorkloadITEM& gi, GTLC_COLUMN nColID);
+	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, GTLC_COLUMN nColID);
 	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
@@ -304,14 +301,13 @@ protected:
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
-	WorkloadITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
-	BOOL RestoreWorkloadItem(const WorkloadITEM& giPrev);
+	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
+	BOOL RestoreWorkloadItem(const WORKLOADITEM& giPrev);
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
-	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	DWORD HitTestTask(const CPoint& point, BOOL bScreen, int& nItem) const;
 	int GetListItem(DWORD dwTaskID) const;
 	int GetListItem(HTREEITEM hti) const;
@@ -335,7 +331,7 @@ protected:
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
-	COleDateTime CalcMinDragDate(const WorkloadITEM& gi) const;
+	COleDateTime CalcMinDragDate(const WORKLOADITEM& gi) const;
 	double CalcMinDragDuration() const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
@@ -348,18 +344,15 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
-	CString GetTreeItemColumnText(const WorkloadITEM& gi, GTLC_COLUMN nColID) const;
-	BOOL IsMilestone(const WorkloadITEM& gi) const;
+	CString GetTreeItemColumnText(const WORKLOADITEM& gi, GTLC_COLUMN nColID) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
-	BOOL CalcMilestoneRect(const WorkloadITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
-	int GetBestTextPos(const WorkloadITEM& gi, const CRect& rMonth) const;
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
-	void GetWorkloadBarColors(const WorkloadITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
- 	COLORREF GetTreeTextColor(const WorkloadITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
-	COLORREF GetTreeTextBkColor(const WorkloadITEM& gi, BOOL bSelected, BOOL bAlternate) const;
+	void GetWorkloadBarColors(const WORKLOADITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
+ 	COLORREF GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
+	COLORREF GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bAlternate) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 	COLORREF GetRowColor(int nItem) const;
 
@@ -367,10 +360,10 @@ protected:
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RecalcParentDates();
-	void RecalcParentDates(HTREEITEM htiParent, WorkloadITEM*& pGI);
-	BOOL GetTaskStartDueDates(const WorkloadITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
-	BOOL HasDisplayDates(const WorkloadITEM& gi) const;
-	BOOL HasDoneDate(const WorkloadITEM& gi) const;
+	void RecalcParentDates(HTREEITEM htiParent, WORKLOADITEM*& pGI);
+	BOOL GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
+	BOOL HasDisplayDates(const WORKLOADITEM& gi) const;
+	BOOL HasDoneDate(const WORKLOADITEM& gi) const;
 	void RefreshTreeItemMap();
 
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
@@ -380,22 +373,8 @@ protected:
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
 	void SetExpandedState(const CDWordArray& aExpanded);
 
-	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
-	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
-
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, WorkloadDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, WorkloadDEPENDENCY& depend) const;
-	int BuildVisibleDependencyList(CWorkloadDependArray& aDepends) const;
-	int BuildVisibleDependencyList(HTREEITEM htiFrom, CWorkloadDependArray& aDepends) const;
-	BOOL IsDependencyPickLinePosValid() const;
-	void ResetDependencyPickLinePos();
-
-	BOOL IsDependencyEditing() const;
-	BOOL IsPickingDependencyFromTask() const;
-	BOOL IsPickingFromDependency() const;
-	BOOL IsPickingDependencyToTask() const;
-	BOOL IsDependencyEditingCancelled() const;
-	BOOL IsDependencyEditingComplete() const;
+	CTreeCtrlHelper& TCH() { return m_tcTasks.TCH(); }
+	const CTreeCtrlHelper& TCH() const { return m_tcTasks.TCH(); }
 
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
@@ -413,7 +392,7 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL DragDatesDiffer(const WorkloadITEM& gi1, const WorkloadITEM& gi2);
+	static BOOL DragDatesDiffer(const WORKLOADITEM& gi1, const WORKLOADITEM& gi2);
 	static void OffsetMonth(int& nMonth, int& nYear, int nNumMonths);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
@@ -424,7 +403,6 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, WorkloadDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 
 };
 

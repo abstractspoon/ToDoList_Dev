@@ -47,6 +47,7 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
+const UINT IDC_WORKLOADCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadWnd
@@ -54,7 +55,6 @@ const int PADDING = 3;
 CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_WORKLOADTREE_DIALOG, pParent), 
-	m_ctrlWorkload(m_tree, m_list),
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 #pragma warning(disable:4355)
@@ -73,8 +73,6 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	DDX_Control(pDX, IDC_WORKLOADLIST, m_list);
-	DDX_Control(pDX, IDC_WORKLOADTREE, m_tree);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
@@ -87,7 +85,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnKeyUpWorkload)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnClickWorkloadList)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_WORKLOADTREE, OnSelchangedWorkloadTree)
 	ON_COMMAND(ID_WORKLOAD_GOTOTODAY, OnWorkloadGotoToday)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_GOTOTODAY, OnUpdateWorkloadGotoToday)
 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
@@ -97,18 +94,19 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WORKLOADTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
-	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnWorkloadNotifyDateChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnWorkloadNotifyDragChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnWorkloadNotifySortChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnWorkloadNotifyZoomChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_PREFSHELP, OnWorkloadPrefsHelp)
-	ON_REGISTERED_MESSAGE(WM_GTLC_GETTASKICON, OnWorkloadGetTaskIcon)
-	ON_REGISTERED_MESSAGE(WM_GTLC_MOVETASK, OnWorkloadMoveTask)
+	ON_REGISTERED_MESSAGE(WM_WLCN_DATECHANGE, OnWorkloadNotifyDateChange)
+	ON_REGISTERED_MESSAGE(WM_WLCN_DRAGCHANGE, OnWorkloadNotifyDragChange)
+	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
+	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
+	ON_REGISTERED_MESSAGE(WM_WLCN_ZOOMCHANGE, OnWorkloadNotifyZoomChange)
+	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
+	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
+	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
+	ON_REGISTERED_MESSAGE(WM_WLC_GETTASKICON, OnWorkloadGetTaskIcon)
+	ON_REGISTERED_MESSAGE(WM_WLC_MOVETASK, OnWorkloadMoveTask)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -256,7 +254,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlWorkload.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
 
-	m_tree.ShowCheckboxes(pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
+	//m_tree.ShowCheckboxes(pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -312,7 +310,6 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateWorkloadCtrlPreferences();
-
 
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
@@ -400,8 +397,8 @@ bool CWorkloadWnd::ProcessMessage(MSG* pMsg)
 
 			case VK_ADD:
 				// Eat because Windows own processing does not understand how we do things!
-				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
-					return true;
+// 				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
+// 					return true;
 				break;
 			}
 		}
@@ -454,14 +451,14 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	// else check else where in tree or list client
 	CRect rWorkload;
 	
-	m_tree.GetClientRect(rWorkload);
-	m_tree.ClientToScreen(rWorkload);
+// 	m_tree.GetClientRect(rWorkload);
+// 	m_tree.ClientToScreen(rWorkload);
 
 	if (rWorkload.PtInRect(ptScreen))
 		return IUI_TASKLIST;
 
-	m_list.GetClientRect(rWorkload);
-	m_list.ClientToScreen(rWorkload);
+// 	m_list.GetClientRect(rWorkload);
+// 	m_list.ClientToScreen(rWorkload);
 
 	if (rWorkload.PtInRect(ptScreen))
 		return IUI_TASKLIST;
@@ -654,7 +651,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return true;
 
 	case IUI_SAVETOIMAGE:
-		return (m_tree.GetCount() > 0);
+		return FALSE;//(m_tree.GetCount() > 0);
 
 	case IUI_EXPANDSELECTED:
 		{
@@ -749,20 +746,18 @@ BOOL CWorkloadWnd::OnInitDialog()
 	}
 		
 	// init syncer
-	m_ctrlWorkload.Initialize(IDC_TREEHEADER);
+	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
+	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
+
 	m_ctrlWorkload.ExpandAll();
 
-	CRect rClient;
-	GetClientRect(rClient);
-	Resize(rClient.Width(), rClient.Height());
-
 	BuildSnapCombo();
-	BuildDisplayCombo();
+ 	BuildDisplayCombo();
 	
-	m_ctrlWorkload.ScrollToToday();
-	m_ctrlWorkload.SetFocus();
+ 	m_ctrlWorkload.ScrollToToday();
+ 	m_ctrlWorkload.SetFocus();
 	
-	m_tree.ShowTaskIcons();
+	//m_tree.ShowTaskIcons();
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -770,12 +765,12 @@ BOOL CWorkloadWnd::OnInitDialog()
 
 void CWorkloadWnd::Resize(int cx, int cy)
 {
-	if (m_tree.GetSafeHwnd())
+	if (m_ctrlWorkload.GetSafeHwnd())
 	{
 		CRect rWorkload(0, 0, cx, cy);
 		rWorkload.top = CDlgUnits(this).ToPixelsY(28);
 
-		m_ctrlWorkload.Resize(rWorkload);
+		m_ctrlWorkload.MoveWindow(rWorkload);
 
 		// selected task dates takes available space
 		int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
@@ -802,11 +797,9 @@ HBRUSH CWorkloadWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC) 
 {
-	// let the Workload do its thing
-	m_ctrlWorkload.HandleEraseBkgnd(pDC);
-
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
+	CDialogHelper::ExcludeChild(&m_ctrlWorkload, pDC);
 
 	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES, pDC);
@@ -923,46 +916,27 @@ LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
-void CWorkloadWnd::OnSelchangedWorkloadTree(NMHDR* pNMHDR, LRESULT* pResult) 
+LRESULT CWorkloadWnd::OnWorkloadNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/) 
 {
-	// Ignore selection changes during a move because we
-	// _Know_ that the logical selection does not change
-	if (m_ctrlWorkload.IsMovingTask())
-		return;
-
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
-	*pResult = 0;
-
-	// Ignore setting selection to 'NULL' unless there are no tasks at all
-	// because we know it's temporary only
-	if ((pNMTreeView->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
-		return;
-		
 	UpdateSelectedTaskDates();
+	SendParentSelectionUpdate();
 
-	// ignore notifications arising out of SelectTask()
-	if (m_bInSelectTask && (pNMTreeView->action == TVC_UNKNOWN))
-		return;
-
-	// we're only interested in non-keyboard changes
-	// because keyboard gets handled in OnKeyUpWorkload
-	if (pNMTreeView->action != TVC_BYKEYBOARD)
-		SendParentSelectionUpdate();
+	return 0L;
 }
 
-void CWorkloadWnd::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+LRESULT CWorkloadWnd::OnWorkloadEditTaskTitle(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	*pResult = TRUE; // cancel our edit
-	
 	// notify app to edit
 	GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE);
+
+	return 0L;
 }
 
 void CWorkloadWnd::OnSetFocus(CWnd* pOldWnd) 
 {
 	CDialog::OnSetFocus(pOldWnd);
 	
-	m_tree.SetFocus();
+	m_ctrlWorkload.SetFocus();
 }
 
 void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
@@ -1019,7 +993,7 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyDateChange(WPARAM wp, LPARAM lp)
 			
 		case GTLCD_WHOLE:
 			{
-				const WorkloadITEM* pGIPreDrag = (const WorkloadITEM*)lp;
+				const WORKLOADITEM* pGIPreDrag = (const WORKLOADITEM*)lp;
 				ASSERT(pGIPreDrag);
 				
 				// if the pre-drag start or due dates were not set

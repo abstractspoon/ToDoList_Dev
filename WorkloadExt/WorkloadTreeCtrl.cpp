@@ -102,9 +102,9 @@ bool CWorkloadTreeCtrl::ProcessMessage(MSG* /*pMsg*/)
 	return false;
 }
 
-void CWorkloadTreeCtrl::FilterToolTipMessage(MSG* pMsg) 
+void CWorkloadTreeCtrl::FilterToolTipMessage(MSG* /*pMsg*/) 
 {
-	m_tooltip.FilterToolTipMessage(pMsg);
+	//m_tooltip.FilterToolTipMessage(pMsg);
 }
 
 void CWorkloadTreeCtrl::OnShowTooltip(NMHDR* /*pNMHDR*/, LRESULT* pResult)
@@ -159,16 +159,16 @@ LRESULT CWorkloadTreeCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 
 BOOL CWorkloadTreeCtrl::InitTooltip()
 {
-	if (!m_tooltip.GetSafeHwnd())
-	{
-		if (!m_tooltip.Create(this))
-			return FALSE;
-
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-		m_tooltip.SetFont(CFont::FromHandle(GraphicsMisc::GetFont(*this)));
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
-	}
+// 	if (!m_tooltip.GetSafeHwnd())
+// 	{
+// 		if (!m_tooltip.Create(this))
+// 			return FALSE;
+// 
+// 		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+// 		m_tooltip.SetFont(CFont::FromHandle(GraphicsMisc::GetFont(*this)));
+// 		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
+// 		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
+// 	}
 
 	return TRUE;
 }
@@ -212,7 +212,7 @@ HIMAGELIST CWorkloadTreeCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) cons
 		return NULL;
 
 	HWND hwndParent = ::GetParent(GetSafeHwnd());
-	return (HIMAGELIST)::SendMessage(hwndParent, WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+	return (HIMAGELIST)::SendMessage(hwndParent, WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
 void CWorkloadTreeCtrl::OnDestroy()

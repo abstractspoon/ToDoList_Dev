@@ -207,7 +207,7 @@ BOOL WorkloadDEPENDENCY::CalcBoundingRect(CRect& rect) const
 
 //////////////////////////////////////////////////////////////////////
 
-WorkloadITEM::WorkloadITEM() 
+WORKLOADITEM::WORKLOADITEM() 
 	: 
 	color(CLR_NONE), 
 	bParent(FALSE), 
@@ -221,12 +221,12 @@ WorkloadITEM::WorkloadITEM()
 {
 }
 
-WorkloadITEM::WorkloadITEM(const WorkloadITEM& gi)
+WORKLOADITEM::WORKLOADITEM(const WORKLOADITEM& gi)
 {
 	*this = gi;
 }
 
-WorkloadITEM& WorkloadITEM::operator=(const WorkloadITEM& gi)
+WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& gi)
 {
 	sTitle = gi.sTitle;
 	dtStart = gi.dtStart;
@@ -252,7 +252,7 @@ WorkloadITEM& WorkloadITEM::operator=(const WorkloadITEM& gi)
 	return (*this);
 }
 
-BOOL WorkloadITEM::operator==(const WorkloadITEM& gi)
+BOOL WORKLOADITEM::operator==(const WORKLOADITEM& gi)
 {
 	return ((sTitle == gi.sTitle) &&
 			(dtStart == gi.dtStart) &&
@@ -275,12 +275,12 @@ BOOL WorkloadITEM::operator==(const WorkloadITEM& gi)
 			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }
 
-WorkloadITEM::~WorkloadITEM()
+WORKLOADITEM::~WORKLOADITEM()
 {
 	
 }
 
-void WorkloadITEM::MinMaxDates(const WorkloadITEM& giOther)
+void WORKLOADITEM::MinMaxDates(const WORKLOADITEM& giOther)
 {
 	if (giOther.bParent)
 	{
@@ -295,7 +295,7 @@ void WorkloadITEM::MinMaxDates(const WorkloadITEM& giOther)
 	}
 }
 
-BOOL WorkloadITEM::IsDone(BOOL bIncGoodAs) const
+BOOL WORKLOADITEM::IsDone(BOOL bIncGoodAs) const
 {
 	if (CDateHelper::IsDateSet(dtDone))
 		return TRUE;
@@ -306,29 +306,29 @@ BOOL WorkloadITEM::IsDone(BOOL bIncGoodAs) const
 
 BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
 {
-	const WorkloadITEM* pGI = GetItem(dwTaskID);
+	const WORKLOADITEM* pGI = GetItem(dwTaskID);
 	
 	return (pGI && pGI->bLocked);
 }
 
 BOOL CWorkloadItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
-	const WorkloadITEM* pGI = GetItem(dwTaskID);
+	const WORKLOADITEM* pGI = GetItem(dwTaskID);
 	
 	return (pGI && pGI->aDependIDs.GetSize());
 }
 
-BOOL WorkloadITEM::HasStart() const
+BOOL WORKLOADITEM::HasStart() const
 {
 	return CDateHelper::IsDateSet(dtStart);
 }
 
-BOOL WorkloadITEM::HasDue() const
+BOOL WORKLOADITEM::HasDue() const
 {
 	return CDateHelper::IsDateSet(dtDue);
 }
 
-COLORREF WorkloadITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
+COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
@@ -342,7 +342,7 @@ COLORREF WorkloadITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	return GetSysColor(COLOR_WINDOWTEXT);
 }
 
-COLORREF WorkloadITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
+COLORREF WORKLOADITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (!bSelected && HasColor())
 	{
@@ -354,7 +354,7 @@ COLORREF WorkloadITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	return CLR_NONE;
 }
 
-COLORREF WorkloadITEM::GetFillColor() const
+COLORREF WORKLOADITEM::GetFillColor() const
 {
 	if (IsDone(TRUE))
 	{
@@ -370,7 +370,7 @@ COLORREF WorkloadITEM::GetFillColor() const
 	return CLR_NONE;
 }
 
-COLORREF WorkloadITEM::GetBorderColor() const
+COLORREF WORKLOADITEM::GetBorderColor() const
 {
 	if (IsDone(TRUE))
 	{
@@ -386,7 +386,7 @@ COLORREF WorkloadITEM::GetBorderColor() const
 	return CLR_NONE;
 }
 
-BOOL WorkloadITEM::HasColor() const
+BOOL WORKLOADITEM::HasColor() const
 {
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
@@ -401,7 +401,7 @@ CWorkloadItemMap::~CWorkloadItemMap()
 void CWorkloadItemMap::RemoveAll()
 {
 	DWORD dwTaskID = 0;
-	WorkloadITEM* pGI = NULL;
+	WORKLOADITEM* pGI = NULL;
 	
 	POSITION pos = GetStartPosition();
 	
@@ -413,17 +413,17 @@ void CWorkloadItemMap::RemoveAll()
 		delete pGI;
 	}
 	
-	CMap<DWORD, DWORD, WorkloadITEM*, WorkloadITEM*&>::RemoveAll();
+	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
 }
 
 BOOL CWorkloadItemMap::RemoveKey(DWORD dwKey)
 {
-	WorkloadITEM* pGI = NULL;
+	WORKLOADITEM* pGI = NULL;
 	
 	if (Lookup(dwKey, pGI))
 	{
 		delete pGI;
-		return CMap<DWORD, DWORD, WorkloadITEM*, WorkloadITEM*&>::RemoveKey(dwKey);
+		return CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveKey(dwKey);
 	}
 	
 	// else
@@ -438,12 +438,12 @@ BOOL CWorkloadItemMap::HasItem(DWORD dwKey) const
 	return (GetItem(dwKey) != NULL);
 }
 
-WorkloadITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
+WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 {
 	if (dwKey == 0)
 		return NULL;
 
-	WorkloadITEM* pGI = NULL;
+	WORKLOADITEM* pGI = NULL;
 	
 	if (Lookup(dwKey, pGI))
 		ASSERT(pGI);
@@ -451,9 +451,9 @@ WorkloadITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 	return pGI;
 }
 
-BOOL CWorkloadItemMap::RestoreItem(const WorkloadITEM& giPrev)
+BOOL CWorkloadItemMap::RestoreItem(const WORKLOADITEM& giPrev)
 {
-	WorkloadITEM* pGI = NULL;
+	WORKLOADITEM* pGI = NULL;
 
 	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
 	{
@@ -465,7 +465,7 @@ BOOL CWorkloadItemMap::RestoreItem(const WorkloadITEM& giPrev)
 	return FALSE;
 }
 
-BOOL CWorkloadItemMap::IsItemDependentOn(const WorkloadITEM* pGI, DWORD dwOtherID) const
+BOOL CWorkloadItemMap::IsItemDependentOn(const WORKLOADITEM* pGI, DWORD dwOtherID) const
 {
 	if (!pGI)
 	{
@@ -505,7 +505,7 @@ void WorkloadDATERANGE::Clear()
 	CDateHelper::ClearDate(dtEnd);
 }
 
-void WorkloadDATERANGE::MinMax(const WorkloadITEM& gi)
+void WorkloadDATERANGE::MinMax(const WORKLOADITEM& gi)
 {
 	MinMax(gi.dtStart);
 	MinMax(gi.dtDue);
@@ -625,7 +625,7 @@ BOOL WorkloadDATERANGE::IsEmpty() const
 	return (dtEnd == dtStart);
 }
 
-BOOL WorkloadDATERANGE::Contains(const WorkloadITEM& gi)
+BOOL WorkloadDATERANGE::Contains(const WORKLOADITEM& gi)
 {
 	return ((Compare(gi.dtStart) == 0) && (Compare(gi.dtDue) == 0));
 }

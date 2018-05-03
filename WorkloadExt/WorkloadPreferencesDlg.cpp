@@ -354,6 +354,6 @@ void CWorkloadPreferencesDlg::DoHelp()
 	ASSERT(m_pParentWnd);
 	
 	if (m_pParentWnd)
-		m_pParentWnd->SendMessage(WM_GTLC_PREFSHELP);
+		m_pParentWnd->SendMessage(WM_WLC_PREFSHELP);
 }
 

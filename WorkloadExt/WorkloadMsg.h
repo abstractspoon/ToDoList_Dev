@@ -11,36 +11,37 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_GTLC_DATECHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANGE"));
-
-// WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_GTLC_DRAGCHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
-
-// WPARAM = , LPARAM = TRUE/FALSE
-const UINT WM_GTLC_COMPLETIONCHANGE			= ::RegisterWindowMessage(_T("WM_GTLC_COMPLETIONCHANGE"));
-
 // WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYZOOM				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYZOOM"));
-
-// WPARAM = , LPARAM = 
-const UINT WM_GTLC_NOTIFYSORT				= ::RegisterWindowMessage(_T("WM_GTLC_NOTIFYSORT"));
-
-// WPARAM = , LPARAM = 
-const UINT WM_GTLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"));
+const UINT WM_WLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_WLC_PREFSHELP"));
 
 // WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_GTLC_GETTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_GETTASKICON"));
+const UINT WM_WLC_GETTASKICON			= ::RegisterWindowMessage(_T("WM_WLC_GETTASKICON"));
 
 // WPARAM = 0, LPARAM = IUITASKMOVE*
-const UINT WM_GTLC_MOVETASK					= ::RegisterWindowMessage(_T("WM_GTLC_MOVETASK"));
+const UINT WM_WLC_MOVETASK				= ::RegisterWindowMessage(_T("WM_WLC_MOVETASK"));
+
+// WPARAM = 0, LPARAM = Task ID
+const UINT WM_WLC_EDITTASKTITLE			= ::RegisterWindowMessage(_T("WM_WLC_EDITTASKTITLE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = GCDD_MODE, LPARAM = HWND
-const UINT WM_WorkloadDEPENDDLG_CLOSE			= ::RegisterWindowMessage(_T("WM_WorkloadDEPENDDLG_CLOSE"));
+// WPARAM = Hit test, LPARAM = Task ID
+const UINT WM_WLCN_DATECHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_DATECHANGE"));
 
-/////////////////////////////////////////////////////////////////////////////
+// WPARAM = Drag Mode, LPARAM = Task ID
+const UINT WM_WLCN_DRAGCHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_DRAGCHANGE"));
+
+// WPARAM = 0, LPARAM = Task ID
+const UINT WM_WLCN_SELCHANGE				= ::RegisterWindowMessage(_T("WM_WLCN_SELCHANGE"));
+
+// WPARAM = , LPARAM = TRUE/FALSE
+const UINT WM_WLCN_COMPLETIONCHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_COMPLETIONCHANGE"));
+
+// WPARAM = , LPARAM = 
+const UINT WM_WLCN_ZOOMCHANGE				= ::RegisterWindowMessage(_T("WM_WLCN_ZOOMCHANGE"));
+
+// WPARAM = , LPARAM = 
+const UINT WM_WLCN_SORTCHANGE				= ::RegisterWindowMessage(_T("WM_WLCN_SORTCHANGE"));
 
 // WPARAM = width, LPARAM = HWND
 const UINT WM_GTCN_TITLECOLUMNWIDTHCHANGE	= ::RegisterWindowMessage(_T("WM_GTCN_TITLECOLUMNWIDTHCHANGE"));

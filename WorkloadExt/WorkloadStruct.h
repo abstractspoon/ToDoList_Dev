@@ -15,14 +15,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct WorkloadITEM 
+struct WORKLOADITEM 
 { 
-	WorkloadITEM();
-	WorkloadITEM(const WorkloadITEM& gi);
-	virtual ~WorkloadITEM();
+	WORKLOADITEM();
+	WORKLOADITEM(const WORKLOADITEM& gi);
+	virtual ~WORKLOADITEM();
 	
-	WorkloadITEM& operator=(const WorkloadITEM& gi);
-	BOOL operator==(const WorkloadITEM& gi);
+	WORKLOADITEM& operator=(const WORKLOADITEM& gi);
+	BOOL operator==(const WORKLOADITEM& gi);
 	
 	CString sTitle;
 	COleDateTime dtStart, dtMinStart;
@@ -39,7 +39,7 @@ struct WorkloadITEM
 	int nPosition;
 	BOOL bLocked, bHasIcon;
 	
-	void MinMaxDates(const WorkloadITEM& giOther);
+	void MinMaxDates(const WORKLOADITEM& giOther);
 	BOOL IsDone(BOOL bIncGoodAs) const;
 	BOOL HasStart() const;
 	BOOL HasDue() const;
@@ -53,7 +53,7 @@ struct WorkloadITEM
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CWorkloadItemMap : public CMap<DWORD, DWORD, WorkloadITEM*, WorkloadITEM*&>
+class CWorkloadItemMap : public CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>
 {
 public:
 	virtual ~CWorkloadItemMap();
@@ -61,11 +61,11 @@ public:
 	void RemoveAll();
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwKey) const;
-	WorkloadITEM* GetItem(DWORD dwKey) const;
-	BOOL RestoreItem(const WorkloadITEM& giPrev);
+	WORKLOADITEM* GetItem(DWORD dwKey) const;
+	BOOL RestoreItem(const WORKLOADITEM& giPrev);
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
-	BOOL IsItemDependentOn(const WorkloadITEM* pGI, DWORD dwOtherID) const;
+	BOOL IsItemDependentOn(const WORKLOADITEM* pGI, DWORD dwOtherID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ struct WorkloadDATERANGE
 	WorkloadDATERANGE();
 
 	void Clear();
-	void MinMax(const WorkloadITEM& gi);
+	void MinMax(const WORKLOADITEM& gi);
 	void MinMax(const COleDateTime& date);
 
 	COleDateTime GetStart() const { return dtStart; }
@@ -124,7 +124,7 @@ struct WorkloadDATERANGE
 
 	BOOL IsValid() const;
 	BOOL IsEmpty() const;
-	BOOL Contains(const WorkloadITEM& gi);
+	BOOL Contains(const WORKLOADITEM& gi);
 	int Compare(const COleDateTime& date) const;
 
 protected:
