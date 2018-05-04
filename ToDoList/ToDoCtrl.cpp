@@ -217,7 +217,10 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_visColEdit(visDefault),
 	m_nTimeEstUnits(TDCU_HOURS),
 	m_nTimeSpentUnits(TDCU_HOURS),
+#pragma warning(push)
+#pragma warning(disable : 4355)
 	m_ssc(*this),
+#pragma warning(pop) 
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data),
 	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
@@ -2496,6 +2499,11 @@ BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 
 	// all else
 	return FALSE;
+}
+
+BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	return (m_data.RenameTasksAttributeValue(nListAttribID, sFrom, sTo, bCaseSensitive, bWholeWord) == SET_CHANGE);
 }
 
 BOOL CToDoCtrl::SetComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty)

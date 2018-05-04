@@ -25,29 +25,23 @@ struct WORKLOADITEM
 	BOOL operator==(const WORKLOADITEM& gi);
 	
 	CString sTitle;
-	COleDateTime dtStart, dtMinStart;
-	COleDateTime dtDue, dtMaxDue; 
-	COleDateTime dtDone; 
+	COleDateTime dtStart, dtDue; 
+	BOOL bDone;
 	COLORREF color;
-	CString sAllocTo;
+	CStringArray aAllocTo;
+	CMap<CString, LPCTSTR, double, double&> mapAllocatedDays;
 	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
-	CDWordArray aDependIDs;
-	CStringArray aTags;
 	int nPercent;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
 	int nPosition;
 	BOOL bLocked, bHasIcon;
 	
-	void MinMaxDates(const WORKLOADITEM& giOther);
-	BOOL IsDone(BOOL bIncGoodAs) const;
 	BOOL HasStart() const;
 	BOOL HasDue() const;
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
-	COLORREF GetFillColor() const;
-	COLORREF GetBorderColor() const;
 	BOOL HasColor() const;
 };
 
@@ -62,34 +56,7 @@ public:
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwKey) const;
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
-	BOOL RestoreItem(const WORKLOADITEM& giPrev);
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
-	BOOL ItemHasDependecies(DWORD dwTaskID) const;
-	BOOL IsItemDependentOn(const WORKLOADITEM* pGI, DWORD dwOtherID) const;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct WORKLOADDATERANGE
-{
-	WORKLOADDATERANGE();
-
-	void Clear();
-	void MinMax(const WORKLOADITEM& gi);
-	void MinMax(const COleDateTime& date);
-
-	COleDateTime GetStart() const { return dtStart; }
-	COleDateTime GetEnd() const { return dtEnd; }
-	COleDateTime GetStart(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-	COleDateTime GetEnd(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-
-	BOOL IsValid() const;
-	BOOL IsEmpty() const;
-	BOOL Contains(const WORKLOADITEM& gi);
-	int Compare(const COleDateTime& date) const;
-
-protected:
-	COleDateTime dtStart, dtEnd;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -134,14 +101,6 @@ struct WORKLOADSORT
 	WORKLOADSORTCOLUMN single;
 	WORKLOADSORTCOLUMNS multi;
 	BOOL bMultiSort;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct WLCDISPLAYMODE
-{
-	WLC_MONTH_DISPLAY nDisplay;
-	UINT nStringID;
 };
 
 /////////////////////////////////////////////////////////////////////////////

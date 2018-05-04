@@ -63,7 +63,6 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadWnd)
 	//}}AFX_DATA
-	CTabbedComboBox	m_cbDisplayOptions;
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
@@ -92,10 +91,7 @@ protected:
 	//{{AFX_MSG(CWorkloadWnd)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg void OnWorkloadGotoToday();
-	afx_msg void OnUpdateWorkloadGotoToday(CCmdUI* pCmdUI);
 	afx_msg void OnWorkloadPreferences();
 	afx_msg void OnUpdateWorkloadPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
@@ -107,7 +103,6 @@ protected:
 
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnWorkloadNotifyZoomChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnWorkloadEditTaskTitle(WPARAM wp, LPARAM lp);
@@ -122,8 +117,6 @@ protected:
 	void UpdateWorkloadCtrlPreferences();
 	void SendParentSelectionUpdate();
 	void UpdateSelectedTaskDates();
-	void BuildDisplayCombo();
-	BOOL SetMonthDisplay(WLC_MONTH_DISPLAY nDisplay);
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 

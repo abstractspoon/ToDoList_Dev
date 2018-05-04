@@ -40,12 +40,9 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& gi)
 {
 	sTitle = gi.sTitle;
 	dtStart = gi.dtStart;
-	dtMinStart = gi.dtMinStart;
 	dtDue = gi.dtDue;
-	dtMaxDue = gi.dtMaxDue;
-	dtDone = gi.dtDone;
+	bDone = gi.bDone;
 	color = gi.color;
-	sAllocTo = gi.sAllocTo;
 	bParent = gi.bParent;
 	dwTaskID = gi.dwTaskID;
 	dwRefID = gi.dwRefID;
@@ -56,8 +53,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& gi)
 	bHasIcon = gi.bHasIcon;
 	bSomeSubtaskDone = gi.bSomeSubtaskDone;
 	
-	aTags.Copy(gi.aTags);
-	aDependIDs.Copy(gi.aDependIDs);
+	aAllocTo.Copy(gi.aAllocTo);
 	
 	return (*this);
 }
@@ -66,12 +62,9 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& gi)
 {
 	return ((sTitle == gi.sTitle) &&
 			(dtStart == gi.dtStart) &&
-			(dtMinStart == gi.dtMinStart) &&
 			(dtDue == gi.dtDue) &&
-			(dtMaxDue == gi.dtMaxDue) &&
-			(dtDone == gi.dtDone) &&
+			(bDone == gi.bDone) &&
 			(color == gi.color) &&
-			(sAllocTo == gi.sAllocTo) &&
 			(bParent == gi.bParent) &&
 			(dwTaskID == gi.dwTaskID) &&
 			(dwRefID == gi.dwRefID) &&
@@ -81,8 +74,7 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& gi)
 			(bLocked == gi.bLocked) &&
 			(bHasIcon == gi.bHasIcon) &&
 			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
-			Misc::MatchAll(aTags, gi.aTags) &&
-			Misc::MatchAll(aDependIDs, gi.aDependIDs));
+			Misc::MatchAll(aAllocTo, gi.aAllocTo));
 }
 
 WORKLOADITEM::~WORKLOADITEM()
@@ -90,42 +82,11 @@ WORKLOADITEM::~WORKLOADITEM()
 	
 }
 
-void WORKLOADITEM::MinMaxDates(const WORKLOADITEM& giOther)
-{
-	if (giOther.bParent)
-	{
-		CDateHelper::Max(dtMaxDue, giOther.dtMaxDue);
-		CDateHelper::Min(dtMinStart, giOther.dtMinStart);
-	}
-	else // leaf task
-	{
-		CDateHelper::Max(dtMaxDue, giOther.dtDue);
-		CDateHelper::Max(dtMaxDue, giOther.dtDone);
-		CDateHelper::Min(dtMinStart, giOther.dtStart);
-	}
-}
-
-BOOL WORKLOADITEM::IsDone(BOOL bIncGoodAs) const
-{
-	if (CDateHelper::IsDateSet(dtDone))
-		return TRUE;
-
-	// else
-	return (bIncGoodAs && bGoodAsDone);
-}
-
 BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
 {
 	const WORKLOADITEM* pGI = GetItem(dwTaskID);
 	
 	return (pGI && pGI->bLocked);
-}
-
-BOOL CWorkloadItemMap::ItemHasDependecies(DWORD dwTaskID) const
-{
-	const WORKLOADITEM* pGI = GetItem(dwTaskID);
-	
-	return (pGI && pGI->aDependIDs.GetSize());
 }
 
 BOOL WORKLOADITEM::HasStart() const
@@ -142,7 +103,7 @@ COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
+		if (bColorIsBkgnd && !bSelected && !bDone && !bGoodAsDone)
 			return GraphicsMisc::GetBestTextColor(color);
 		else
 			return color;
@@ -156,40 +117,8 @@ COLORREF WORKLOADITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (!bSelected && HasColor())
 	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
+		if (bColorIsBkgnd && !bDone && !bGoodAsDone)
 			return color;
-	}
-	
-	// else
-	return CLR_NONE;
-}
-
-COLORREF WORKLOADITEM::GetFillColor() const
-{
-	if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return GraphicsMisc::Lighter(color, 0.8);
-	}
-	else if (HasColor())
-	{
-		return color;
-	}
-	
-	// else
-	return CLR_NONE;
-}
-
-COLORREF WORKLOADITEM::GetBorderColor() const
-{
-	if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return color;
-	}
-	else if (HasColor())
-	{
-		return GraphicsMisc::Darker(color, 0.4);
 	}
 	
 	// else
@@ -259,185 +188,6 @@ WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 		ASSERT(pGI);
 	
 	return pGI;
-}
-
-BOOL CWorkloadItemMap::RestoreItem(const WORKLOADITEM& giPrev)
-{
-	WORKLOADITEM* pGI = NULL;
-
-	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
-	{
-		*pGI = giPrev;
-		return TRUE;
-	}
-
-	ASSERT(0);
-	return FALSE;
-}
-
-BOOL CWorkloadItemMap::IsItemDependentOn(const WORKLOADITEM* pGI, DWORD dwOtherID) const
-{
-	if (!pGI)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nDepend = pGI->aDependIDs.GetSize();
-
-	while (nDepend--)
-	{
-		DWORD dwDependID = pGI->aDependIDs[nDepend];
-		ASSERT(dwDependID);
-
-		if (dwDependID == dwOtherID)
-			return TRUE;
-
-		// else check dependents of dwDependID
-		if (IsItemDependentOn(GetItem(dwDependID), dwOtherID)) // RECURSIVE
-			return TRUE;
-	}
-	
-	// all else
-	return FALSE;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-WORKLOADDATERANGE::WORKLOADDATERANGE()
-{
-	Clear();
-}
-
-void WORKLOADDATERANGE::Clear()
-{
-	CDateHelper::ClearDate(dtStart);
-	CDateHelper::ClearDate(dtEnd);
-}
-
-void WORKLOADDATERANGE::MinMax(const WORKLOADITEM& gi)
-{
-	MinMax(gi.dtStart);
-	MinMax(gi.dtDue);
-	MinMax(gi.dtDone);
-}
-
-void WORKLOADDATERANGE::MinMax(const COleDateTime& date)
-{
-	CDateHelper::Min(dtStart, date);
-	CDateHelper::Max(dtEnd, date);
-}
-
-COleDateTime WORKLOADDATERANGE::GetStart(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
-{
-	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
-
-	if (CDateHelper::IsDateSet(dtStart))
-		dtTemp = dtStart;
-
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		return CDateHelper::GetStartOfQuarterCentury(dtTemp, bZeroBasedDecades);
-
-	case WLC_DISPLAY_DECADES:
-		return CDateHelper::GetStartOfDecade(dtTemp, bZeroBasedDecades);
-
-	case WLC_DISPLAY_YEARS:
-		return CDateHelper::GetStartOfYear(dtTemp);
-
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		return CDateHelper::GetStartOfQuarter(dtTemp);
-
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		return CDateHelper::GetStartOfMonth(dtTemp);
-	}
-
-	ASSERT(0);
-	return dtTemp;
-}
-
-COleDateTime WORKLOADDATERANGE::GetEnd(WLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
-{
-	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
-
-	if (CDateHelper::IsDateSet(dtEnd))
-		dtTemp = dtEnd;
-
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		return CDateHelper::GetEndOfQuarterCentury(dtTemp, bZeroBasedDecades);
-
-	case WLC_DISPLAY_DECADES:
-		return CDateHelper::GetEndOfDecade(dtTemp, bZeroBasedDecades);
-
-	case WLC_DISPLAY_YEARS:
-		return CDateHelper::GetEndOfYear(dtTemp);
-
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		return CDateHelper::GetEndOfQuarter(dtTemp);
-
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		return CDateHelper::GetEndOfMonth(dtTemp);
-	}
-
-	ASSERT(0);
-	return dtTemp;
-}
-
-int WORKLOADDATERANGE::Compare(const COleDateTime& date) const
-{
-	ASSERT(CDateHelper::IsDateSet(date) && IsValid());
-
-	if (date < dtStart)
-		return -1;
-
-	if (date > dtEnd)
-		return 1;
-
-	// else
-	return 0; // contains
-}
-
-BOOL WORKLOADDATERANGE::IsValid() const
-{
-	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtEnd) &&
-			(dtStart <= dtEnd));
-}
-
-BOOL WORKLOADDATERANGE::IsEmpty() const
-{
-	ASSERT(IsValid());
-
-	return (dtEnd == dtStart);
-}
-
-BOOL WORKLOADDATERANGE::Contains(const WORKLOADITEM& gi)
-{
-	return ((Compare(gi.dtStart) == 0) && (Compare(gi.dtDue) == 0));
 }
 
 //////////////////////////////////////////////////////////////////////

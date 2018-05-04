@@ -214,6 +214,7 @@ public:
 	BOOL CanSpellcheckSelectedTaskComments();
 	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME);
 	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
+	BOOL RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 	
 	BOOL GotoSelectedTaskDependency(); 
 	BOOL GotoSelectedReferenceTaskTarget();

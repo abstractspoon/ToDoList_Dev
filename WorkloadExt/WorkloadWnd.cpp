@@ -73,7 +73,6 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
@@ -81,9 +80,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	//{{AFX_MSG_MAP(CWorkloadWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
-	ON_COMMAND(ID_WORKLOAD_GOTOTODAY, OnWorkloadGotoToday)
-	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_GOTOTODAY, OnUpdateWorkloadGotoToday)
 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
 	ON_WM_SHOWWINDOW()
@@ -96,7 +92,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
-	ON_REGISTERED_MESSAGE(WM_WLCN_ZOOMCHANGE, OnWorkloadNotifyZoomChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
@@ -164,7 +159,6 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// NOTE: sort is handled by the app
 	CString sKey(szKey);
 
-	pPrefs->WriteProfileInt(sKey, _T("MonthDisplay"), m_ctrlWorkload.GetMonthDisplay());
 	pPrefs->WriteProfileInt(sKey, _T("SortColumn"), m_ctrlWorkload.GetSortColumn());
 	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
 
@@ -256,10 +250,6 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		// NOTE: sort is handled by the app
 		CString sKey(szKey);
 		
-		// last display
-		WLC_MONTH_DISPLAY nDisplay = (WLC_MONTH_DISPLAY)pPrefs->GetProfileInt(sKey, _T("MonthDisplay"), WLC_DISPLAY_MONTHS_LONG);
-		SetMonthDisplay(nDisplay);
-
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateWorkloadCtrlPreferences();
 
@@ -435,9 +425,6 @@ void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
-
-	// Month Display may change for large date ranges
-	BuildDisplayCombo();
 
 	UpdateSelectedTaskDates();
 }
@@ -689,14 +676,8 @@ BOOL CWorkloadWnd::OnInitDialog()
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
 	m_ctrlWorkload.ExpandAll();
-
- 	BuildDisplayCombo();
-	
- 	m_ctrlWorkload.ScrollToToday();
  	m_ctrlWorkload.SetFocus();
 	
-	//m_tree.ShowTaskIcons();
-
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -766,40 +747,6 @@ void CWorkloadWnd::SendParentSelectionUpdate()
 	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
 }
 
-BOOL CWorkloadWnd::SetMonthDisplay(WLC_MONTH_DISPLAY nDisplay)
-{
-	m_ctrlWorkload.ValidateMonthDisplay(nDisplay);
-
-	if (m_ctrlWorkload.SetMonthDisplay(nDisplay))
-	{
-		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-void CWorkloadWnd::OnSelchangeDisplay() 
-{
-	WLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
-	WLC_MONTH_DISPLAY nNewDisplay = (WLC_MONTH_DISPLAY)CDialogHelper::GetSelectedItemData(m_cbDisplayOptions);
-
-	if (!SetMonthDisplay(nNewDisplay))
-	{
-		// restore previous selection
-		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
-	}
-}
-
-LRESULT CWorkloadWnd::OnWorkloadNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
-{
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, (WLC_MONTH_DISPLAY)lp);
-
-	return 0L;
-}
-
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 {
 	// notify app
@@ -835,13 +782,11 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 {
 	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
 	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
-	m_ctrlWorkload.SetOption(WLCF_DECADESAREONEBASED, m_dlgPrefs.GetDecadesAreOneBased());
 
 	m_ctrlWorkload.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlWorkload.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
 	m_ctrlWorkload.SetNonWorkingHoursColor(m_dlgPrefs.GetNonWorkingHoursColor());
 	m_ctrlWorkload.SetDefaultColor(m_dlgPrefs.GetDefaultColor());
-	m_ctrlWorkload.SetMilestoneTag(m_dlgPrefs.GetMilestoneTag());
 
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
@@ -874,46 +819,6 @@ void CWorkloadWnd::UpdateSelectedTaskDates()
 	}
 
 	UpdateData(FALSE);
-}
-
-void CWorkloadWnd::BuildDisplayCombo()
-{
-	WLC_MONTH_DISPLAY nCurDisplay = m_ctrlWorkload.GetMonthDisplay();
-
-	m_cbDisplayOptions.ResetContent();
-
-	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
-	{
-		const WLCDISPLAYMODE& mode = DISPLAYMODES[nMode];
-
-		if (!m_ctrlWorkload.CanSetMonthDisplay(mode.nDisplay))
-		{
-			int nCurMode = FindDisplay(nCurDisplay);
-
-			if (nMode < nCurMode)
-				nCurDisplay = mode.nDisplay;
-
-			break;
-		}
-
-		// else
-		CDialogHelper::AddString(m_cbDisplayOptions, mode.nStringID, mode.nDisplay);
-	}
-	
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
-}
-
-void CWorkloadWnd::OnWorkloadGotoToday() 
-{
-	m_ctrlWorkload.ScrollToToday();
-	
-	// and set focus back to it
-	m_ctrlWorkload.SetFocus();
-}
-
-void CWorkloadWnd::OnUpdateWorkloadGotoToday(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

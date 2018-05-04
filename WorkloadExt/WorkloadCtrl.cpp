@@ -79,7 +79,7 @@ const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
 
 //////////////////////////////////////////////////////////////////////
 
-#define GET_GI_RET(id, gi, ret)	\
+#define GET_WI_RET(id, gi, ret)	\
 {								\
 	if (id == 0) return ret;	\
 	gi = GetWorkloadItem(id);		\
@@ -87,7 +87,7 @@ const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
 	if (gi == NULL) return ret;	\
 }
 
-#define GET_GI(id, gi)		\
+#define GET_WI(id, gi)		\
 {							\
 	if (id == 0) return;	\
 	gi = GetWorkloadItem(id);	\
@@ -144,8 +144,6 @@ CWorkloadCtrl::CWorkloadCtrl()
 	:
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_pTCH(NULL),
-	m_nMonthWidth(DEF_MONTH_WIDTH),
-	m_nMonthDisplay(WLC_DISPLAY_MONTHS_LONG),
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
@@ -249,8 +247,6 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BuildTreeColumns();
 	BuildListColumns();
 	
-	CalcMinMonthWidths();
-
 	// prevent column reordering on columns
 	m_hdrColumns.ModifyStyle(HDS_DRAGDROP, 0);
 
@@ -344,11 +340,11 @@ DWORD CWorkloadCtrl::GetSelectedTaskID() const
 BOOL CWorkloadCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	const WORKLOADITEM* pGI = NULL;
+	const WORKLOADITEM* pWI = NULL;
 
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_WI_RET(dwTaskID, pWI, FALSE);
 	
-	if (GetTaskStartDueDates(*pGI, dtStart, dtDue))
+	if (GetTaskStartDueDates(*pWI, dtStart, dtDue))
 	{
 		// handle durations of whole days
 		COleDateTime dtDuration(dtDue - dtStart);
@@ -453,54 +449,6 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 
 	// else
 	return SelectTask(m_tcTasks.TCH().GetPrevItem(hti), select, FALSE);
-}
-
-void CWorkloadCtrl::RecalcParentDates()
-{
-	WORKLOADITEM dummy;
-	WORKLOADITEM* pGI = &dummy;
-
-	RecalcParentDates(NULL, pGI);
-}
-
-void CWorkloadCtrl::RecalcParentDates(HTREEITEM htiParent, WORKLOADITEM*& pGI)
-{
-	// ignore root
-	DWORD dwTaskID = 0;
-
-	// get Workload item for this tree item
-	if (htiParent)
-	{
-		dwTaskID = m_tcTasks.GetItemData(htiParent);
-		GET_GI(dwTaskID, pGI);
-	}
-	
-	// bail if this is a reference
-	if (pGI->dwRefID)
-		return;
-	
-	// reset dates
-	pGI->dtMinStart = pGI->dtStart;
-	pGI->dtMaxDue = pGI->dtDue;
-
-	// iterate children 
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(htiParent);
-	
-	while (htiChild)
-	{
-		WORKLOADITEM* pGIChild;
-
-		// recalc child if it has children itself
-		RecalcParentDates(htiChild, pGIChild);
-		ASSERT(pGIChild);
-
-		// keep track of earliest start date and latest due date
-		if (pGIChild)
-			pGI->MinMaxDates(*pGIChild);
-
-		// next child
-		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-	}
 }
 
 int CWorkloadCtrl::GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti) const
@@ -619,9 +567,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			
 			RebuildTree(pTasks);
 
-			ValidateMonthDisplay();
-			UpdateListColumns();
-
 			// Odd bug: The very last tree item will sometimes not scroll into view. 
 			// Expanding and collapsing an item is enough to resolve the issue. 
 			// First time only though.
@@ -630,11 +575,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			
 			SetExpandedState(aExpanded);
 			SelectTask(dwSelID);
-
-			if (dwSelID)
-				ScrollToSelectedTask();
-			else
-				ScrollToToday();
 		}
 		break;
 		
@@ -644,25 +584,10 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			CHoldRedraw hr(m_tcTasks);
 			CHoldRedraw hr2(m_lcColumns);
 			
-			// cache current year range to test for changes
-			int nNumMonths = GetNumMonths(m_nMonthDisplay);
-			
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
-				// recalc parent dates as required
-				if (attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE))
-				{
-					RecalcDateRange();
-					RecalcParentDates();
-				}
-				
-				// Refresh list columns as required
-				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
-				{
-					ValidateMonthDisplay();
-					UpdateListColumns();
-				}
+				// TODO
 			}
 		}
 		break;
@@ -676,20 +601,9 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 			
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
-
-			// cache current year range to test for changes
-			int nNumMonths = GetNumMonths(m_nMonthDisplay);
-			
 			RefreshTreeItemMap();
-			RecalcDateRange();
-			RecalcParentDates();
 
-			// fixup list columns as required
-			if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
-			{
-				ValidateMonthDisplay();
-				UpdateListColumns();
-			}
+			// TODO
 		}
 		break;
 		
@@ -726,26 +640,15 @@ void CWorkloadCtrl::PreFixVScrollSyncBug()
 	}
 }
 
-CString CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo)
 {
+	aAllocTo.RemoveAll();
 	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
-	
-	if (nAllocTo == 0)
-	{
-		return _T("");
-	}
-	else if (nAllocTo == 1)
-	{
-		return pTasks->GetTaskAllocatedTo(hTask, 0);
-	}
-	
-	// nAllocTo > 1 
-	CStringArray aAllocTo;
 	
 	while (nAllocTo--)
 		aAllocTo.InsertAt(0, pTasks->GetTaskAllocatedTo(hTask, nAllocTo));
 	
-	return Misc::FormatArray(aAllocTo);
+	return aAllocTo.GetSize();
 }
 
 BOOL CWorkloadCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
@@ -802,12 +705,8 @@ IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMN nCol)
 	case WLCC_TITLE:		return IUI_TASKNAME;
 	case WLCC_DUEDATE:		return IUI_DUEDATE;
 	case WLCC_STARTDATE:	return IUI_STARTDATE;
-	case WLCC_ALLOCTO:		return IUI_ALLOCTO;
 	case WLCC_PERCENT:		return IUI_PERCENT;
 	case WLCC_TASKID:		return IUI_ID;
-	case WLCC_DONEDATE:	return IUI_DONEDATE;
-	case WLCC_TAGS:		return IUI_TAGS;
-	case WLCC_DEPENDENCY:	return IUI_DEPENDENCY;
 	}
 	
 	// all else 
@@ -821,12 +720,8 @@ WLC_COLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 	case IUI_TASKNAME:		return WLCC_TITLE;		
 	case IUI_DUEDATE:		return WLCC_DUEDATE;		
 	case IUI_STARTDATE:		return WLCC_STARTDATE;	
-	case IUI_ALLOCTO:		return WLCC_ALLOCTO;		
 	case IUI_PERCENT:		return WLCC_PERCENT;		
 	case IUI_ID:			return WLCC_TASKID;		
-	case IUI_DONEDATE:		return WLCC_DONEDATE;
-	case IUI_TAGS:			return WLCC_TAGS;
-	case IUI_DEPENDENCY:	return WLCC_DEPENDENCY;
 	}
 	
 	// all else 
@@ -884,112 +779,70 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		return TRUE;
 	}
 	
-	WORKLOADITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	WORKLOADITEM* pWI = NULL;
+	GET_WI_RET(dwTaskID, pWI, FALSE);
 
 	// update taskID to refID 
-	if (pGI->dwOrgRefID)
+	if (pWI->dwOrgRefID)
 	{
-		dwTaskID = pGI->dwOrgRefID;
-		pGI->dwOrgRefID = 0;
+		dwTaskID = pWI->dwOrgRefID;
+		pWI->dwOrgRefID = 0;
 	}
 
 	// take a snapshot we can check changes against
-	WORKLOADITEM giOrg = *pGI;
+	WORKLOADITEM giOrg = *pWI;
 
 	// can't use a switch here because we also need to check for IUI_ALL
 	time64_t tDate = 0;
 	
 	if (attrib.Has(IUI_TASKNAME))
-		pGI->sTitle = pTasks->GetTaskTitle(hTask);
+		pWI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-	if (attrib.Has(IUI_ALLOCTO))
-		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
+// 	if (attrib.Has(IUI_ALLOCTO))
+// 		pWI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
 	if (attrib.Has(IUI_ICON))
-		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 	if (attrib.Has(IUI_PERCENT))
-		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
 	if (attrib.Has(IUI_STARTDATE))
 	{
-		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
-		{
-			pGI->dtStart = pGI->dtMinStart = GetDate(tDate, FALSE); // start of day
-		}
+		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
+			pWI->dtStart = GetDate(tDate, FALSE); // start of day
 		else
-		{
-			CDateHelper::ClearDate(pGI->dtStart);
-			CDateHelper::ClearDate(pGI->dtMinStart);
-		}
+			CDateHelper::ClearDate(pWI->dtStart);
 	}
 	
 	if (attrib.Has(IUI_DUEDATE))
 	{
-		if (pTasks->GetTaskDueDate64(hTask, pGI->bParent, tDate))
-		{
-			pGI->dtDue = pGI->dtMaxDue = GetDate(tDate, TRUE); // end of day
-		}
+		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
+			pWI->dtDue = GetDate(tDate, TRUE); // end of day
 		else
-		{
-			CDateHelper::ClearDate(pGI->dtDue);
-			CDateHelper::ClearDate(pGI->dtMaxDue);
-		}
+			CDateHelper::ClearDate(pWI->dtDue);
 	}
 	
 	if (attrib.Has(IUI_DONEDATE))
-	{
-		if (pTasks->GetTaskDoneDate64(hTask, tDate))
-			pGI->dtDone = GetDate(tDate, TRUE);
-		else
-			CDateHelper::ClearDate(pGI->dtDone);
-	}
-	
+		pWI->bDone = pTasks->IsTaskDone(hTask);
+
 	if (attrib.Has(IUI_SUBTASKDONE))
 	{
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	}
 
-	if (attrib.Has(IUI_TAGS))
-	{
-		int nTag = pTasks->GetTaskTagCount(hTask);
-		pGI->aTags.RemoveAll();
-		
-		while (nTag--)
-			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
-	}
-	
-	if (attrib.Has(IUI_DEPENDENCY))
-	{
-		int nDepend = pTasks->GetTaskDependencyCount(hTask);
-		pGI->aDependIDs.RemoveAll();
-		
-		while (nDepend--)
-		{
-			// Local dependencies only
-			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
-
-			if (dwTaskID)
-				pGI->aDependIDs.Add(dwTaskID);
-		}
-	}
-
-	// update date range
-	m_dateRange.MinMax(*pGI);
-	
 	// always update lock states
-	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
+	pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
 	// always update colour because it can change for so many reasons
-	pGI->color = pTasks->GetTaskTextColor(hTask);
+	pWI->color = pTasks->GetTaskTextColor(hTask);
 
 	// likewise 'Good as Done'
-	pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+	pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 
 	// detect update
-	BOOL bChange = !(*pGI == giOrg);
+	BOOL bChange = !(*pWI == giOrg);
 		
 	// children
 	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, attrib, TRUE))
@@ -1063,45 +916,31 @@ void CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTask
 
 WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) const
 {
-	WORKLOADITEM* pGI = m_data.GetItem(dwTaskID);
-	ASSERT(pGI);
+	WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
+	ASSERT(pWI);
 	
-	if (pGI)
+	if (pWI)
 	{
 		// For references we use the 'real' task but with the 
 		// original reference reference ID copied over
-		DWORD dwRefID = pGI->dwRefID;
+		DWORD dwRefID = pWI->dwRefID;
 		
-		if (dwRefID && (dwRefID != dwTaskID) && m_data.Lookup(dwRefID, pGI))
+		if (dwRefID && (dwRefID != dwTaskID) && m_data.Lookup(dwRefID, pWI))
 		{
 			// copy over the reference id so that the caller can still detect it
 			if (bCopyRefID)
 			{
-				ASSERT((pGI->dwRefID == 0) || (pGI->dwRefID == dwRefID));
-				pGI->dwOrgRefID = dwRefID;
+				ASSERT((pWI->dwRefID == 0) || (pWI->dwRefID == dwRefID));
+				pWI->dwOrgRefID = dwRefID;
 			}
 		}
 		else
 		{
-			pGI->dwOrgRefID = 0;
+			pWI->dwOrgRefID = 0;
 		}
 	}
 	
-	return pGI;
-}
-
-BOOL CWorkloadCtrl::RestoreWorkloadItem(const WORKLOADITEM& giPrev)
-{
-	if (m_data.RestoreItem(giPrev))
-	{
-		RecalcParentDates();
-		RedrawList();
-	
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
+	return pWI;
 }
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
@@ -1110,22 +949,11 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	m_lcColumns.DeleteAllItems();
 
 	m_data.RemoveAll();
-
 	m_dwMaxTaskID = 0;
-
-	// cache and reset year range which will get 
-	// recalculated as we build the tree
-	WORKLOADDATERANGE prevRange = m_dateRange;
-	m_dateRange.Clear();
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
-	// restore previous date range if no data
-	if (m_data.GetCount() == 0)
-		m_dateRange = prevRange;
-
 	RefreshTreeItemMap();
-	RecalcParentDates();
 	ExpandList();
 	RefreshItemBoldState();
 }
@@ -1133,27 +961,6 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 void CWorkloadCtrl::RefreshTreeItemMap()
 {
 	TCH().BuildHTIMap(m_mapHTItems);
-}
-
-void CWorkloadCtrl::RecalcDateRange()
-{
-	if (m_data.GetCount())
-	{
-		m_dateRange.Clear();
-
-		POSITION pos = m_data.GetStartPosition();
-		WORKLOADITEM* pGI = NULL;
-		DWORD dwTaskID = 0;
-
-		while (pos)
-		{
-			m_data.GetNextAssoc(pos, dwTaskID, pGI);
-			ASSERT(pGI);
-
-			if (pGI)
-				m_dateRange.MinMax(*pGI);
-		}
-	}
 }
 
 COleDateTime CWorkloadCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
@@ -1179,59 +986,38 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	m_dwMaxTaskID = max(m_dwMaxTaskID, dwTaskID);
 
 	// map the data
-	WORKLOADITEM* pGI = new WORKLOADITEM;
-	m_data[dwTaskID] = pGI;
+	WORKLOADITEM* pWI = new WORKLOADITEM;
+	m_data[dwTaskID] = pWI;
 	
-	pGI->dwTaskID = dwTaskID;
-	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
+	pWI->dwTaskID = dwTaskID;
+	pWI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 
 	// Except for position
-	pGI->nPosition = pTasks->GetTaskPosition(hTask);
+	pWI->nPosition = pTasks->GetTaskPosition(hTask);
 
 	// Only save data for non-references
-	if (pGI->dwRefID == 0)
+	if (pWI->dwRefID == 0)
 	{
-		pGI->sTitle = pTasks->GetTaskTitle(hTask);
-		pGI->color = pTasks->GetTaskTextColor(hTask);
-		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
-		pGI->bParent = pTasks->IsTaskParent(hTask);
-		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
-		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
-		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+		pWI->sTitle = pTasks->GetTaskTitle(hTask);
+		pWI->color = pTasks->GetTaskTextColor(hTask);
+		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pWI->bParent = pTasks->IsTaskParent(hTask);
+		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
+		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+
+		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
 
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 
 		time64_t tDate = 0;
 
-		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
-			pGI->dtStart = GetDate(tDate, FALSE);
+		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
+			pWI->dtStart = GetDate(tDate, FALSE);
 
-		if (pTasks->GetTaskDueDate64(hTask, pGI->bParent, tDate))
-			pGI->dtDue = GetDate(tDate, TRUE);
-
-		if (pTasks->GetTaskDoneDate64(hTask, tDate))
-			pGI->dtDone = GetDate(tDate, TRUE);
-
-		int nTag = pTasks->GetTaskTagCount(hTask);
-
-		while (nTag--)
-			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
-
-		// Local dependencies only
-		int nDepend = pTasks->GetTaskDependencyCount(hTask);
-		
-		while (nDepend--)
-		{	
-			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
-
-			if (dwTaskID)
-				pGI->aDependIDs.Add(dwTaskID);
-		}
-		
-		// track earliest and latest dates
-		m_dateRange.MinMax(*pGI);
+		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
+			pWI->dtDue = GetDate(tDate, TRUE);
 	}
 	
 	// add item to tree
@@ -1245,10 +1031,10 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (htiSibling)
 		{
 			DWORD dwSiblingID = m_tcTasks.GetItemData(htiSibling);
-			const WORKLOADITEM* pGISibling = GetWorkloadItem(dwSiblingID);
-			ASSERT(pGISibling);
+			const WORKLOADITEM* pWISibling = GetWorkloadItem(dwSiblingID);
+			ASSERT(pWISibling);
 
-			if (pGISibling && (pGISibling->nPosition == (pGI->nPosition - 1)))
+			if (pWISibling && (pWISibling->nPosition == (pWI->nPosition - 1)))
 			{
 				htiAfter = htiSibling;
 				break;
@@ -1292,51 +1078,15 @@ void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 	while (htiChild)
 	{
 		DWORD dwTaskID = GetTaskID(htiChild);
-		WORKLOADITEM* pGI = NULL;
+		WORKLOADITEM* pWI = NULL;
 
-		GET_GI(dwTaskID, pGI);
+		GET_WI(dwTaskID, pWI);
 
-		if (pGI->nPosition >= nFromPos)
-			pGI->nPosition++;
+		if (pWI->nPosition >= nFromPos)
+			pWI->nPosition++;
 		
 		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
 	}
-}
-
-COleDateTime CWorkloadCtrl::GetStartDate(WLC_MONTH_DISPLAY nDisplay) const
-{
-	return m_dateRange.GetStart(nDisplay, !HasOption(WLCF_DECADESAREONEBASED));
-}
-
-COleDateTime CWorkloadCtrl::GetEndDate(WLC_MONTH_DISPLAY nDisplay) const
-{
-	return m_dateRange.GetEnd(nDisplay, !HasOption(WLCF_DECADESAREONEBASED));
-}
-
-int CWorkloadCtrl::GetStartYear(WLC_MONTH_DISPLAY nDisplay) const
-{
-	return GetStartDate(nDisplay).GetYear();
-}
-
-int CWorkloadCtrl::GetEndYear(WLC_MONTH_DISPLAY nDisplay) const
-{
-	int nYear = GetEndDate(nDisplay).GetYear();
-
-	// for now, do not let end year exceed MAX_YEAR
-	return min(nYear, MAX_YEAR);
-}
-
-int CWorkloadCtrl::GetNumMonths(WLC_MONTH_DISPLAY nDisplay) const
-{
-	COleDateTime dtStart(GetStartDate(nDisplay)), dtEnd(GetEndDate(nDisplay));
-	
-	int nStartMonth = dtStart.GetMonth(), nStartYear = dtStart.GetYear();
-	int nEndMonth = dtEnd.GetMonth(), nEndYear = dtEnd.GetYear();
-
-	int nNumMonths = ((((nEndYear * 12) + nEndMonth) - ((nStartYear * 12) + nStartMonth)) + 1);
-	ASSERT(nNumMonths > 0);
-
-	return nNumMonths;
 }
 
 void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
@@ -1360,20 +1110,11 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				CWnd::Invalidate(FALSE);
 				break;
 
-			case WLCF_DECADESAREONEBASED:
-				if ((m_nMonthDisplay == WLC_DISPLAY_QUARTERCENTURIES) || 
-					(m_nMonthDisplay == WLC_DISPLAY_DECADES))
-				{
-					UpdateListColumnsWidthAndText();
-				}
-				break;
-
 			case WLCF_SHOWSPLITTERBAR:
 				CTreeListSyncer::SetSplitBarWidth(bSet ? 10 : 0);
 				break;
 
 			case WLCF_DISPLAYISODATES:
-				UpdateListColumnsWidthAndText();
 				CWnd::Invalidate(FALSE);
 				break;
 
@@ -1388,237 +1129,10 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-CString CWorkloadCtrl::FormatListColumnHeaderText(WLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
-{
-	if (nMonth == 0)
-		return _T("");
-	
-	//else
-	CString sHeader;
-	
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-	case WLC_DISPLAY_DECADES:
-		{
-			int nStartYear = GetStartYear(nDisplay);
-			int nEndYear = GetEndYear(nDisplay);
-
-			sHeader.Format(_T("%d-%d"), nStartYear, nEndYear);
-		}
-		break;
-
-	case WLC_DISPLAY_YEARS:
-		sHeader.Format(_T("%d"), nYear);
-		break;
-		
-	case WLC_DISPLAY_QUARTERS_SHORT:
-		sHeader.Format(_T("Q%d %d"), (1 + ((nMonth-1) / 3)), nYear);
-		break;
-		
-	case WLC_DISPLAY_QUARTERS_MID:
-		sHeader.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, TRUE),
-			CDateHelper::GetMonthName(nMonth+2, TRUE), 
-			nYear);
-		break;
-		
-	case WLC_DISPLAY_QUARTERS_LONG:
-		sHeader.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, FALSE),
-			CDateHelper::GetMonthName(nMonth+2, FALSE), 
-			nYear);
-		break;
-		
-	case WLC_DISPLAY_MONTHS_SHORT:
-		sHeader = FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), (DHFD_NODAY | DHFD_NOCENTURY));
-		break;
-		
-	case WLC_DISPLAY_MONTHS_MID:
-		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nYear);
-		break;
-		
-	case WLC_DISPLAY_MONTHS_LONG:
-		sHeader.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nYear);
-		break;
-
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_WORKLOAD_WEEKS));
-		break;
-
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		sHeader.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_WORKLOAD_DAYS));
-		break;
-		
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return sHeader;
-}
-
-double CWorkloadCtrl::GetMonthWidth(int nColWidth) const
-{
-	return GetMonthWidth(m_nMonthDisplay, nColWidth);
-}
-
-double CWorkloadCtrl::GetMonthWidth(WLC_MONTH_DISPLAY nDisplay, int nColWidth)
-{
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		return (nColWidth / (25 * 12.0));
-		
-	case WLC_DISPLAY_DECADES:
-		return (nColWidth / (10 * 12.0));
-		
-	case WLC_DISPLAY_YEARS:
-		return (nColWidth / 12.0);
-		
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		return (nColWidth / 3.0);
-		
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		return (double)nColWidth;
-	}
-
-	ASSERT(0);
-	return 0.0;
-}
-
 int CWorkloadCtrl::GetRequiredListColumnCount() const
 {
-	return GetRequiredListColumnCount(m_nMonthDisplay);
-}
-
-int CWorkloadCtrl::GetRequiredListColumnCount(WLC_MONTH_DISPLAY nDisplay) const
-{
-	int nNumMonths = GetNumMonths(nDisplay);
-	int nNumCols = 0;
-
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		nNumCols = (nNumMonths / (25 * 12));
-		break;
-		
-	case WLC_DISPLAY_DECADES:
-		nNumCols = (nNumMonths / (10 * 12));
-		break;
-		
-	case WLC_DISPLAY_YEARS:
-		nNumCols = (nNumMonths / 12);
-		break;
-		
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		nNumCols = (nNumMonths / 3);
-		break;
-		
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		nNumCols = nNumMonths;
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return (nNumCols + 1);
-}
-
-int CWorkloadCtrl::GetColumnWidth() const
-{
-	return GetColumnWidth(m_nMonthDisplay, m_nMonthWidth);
-}
-
-int CWorkloadCtrl::GetColumnWidth(WLC_MONTH_DISPLAY nDisplay) const
-{
-	return GetColumnWidth(nDisplay, m_nMonthWidth);
-}
-
-int CWorkloadCtrl::GetNumMonthsPerColumn(WLC_MONTH_DISPLAY nDisplay)
-{
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		return (25 * 12);
-		
-	case WLC_DISPLAY_DECADES:
-		return (10 * 12);
-		
-	case WLC_DISPLAY_YEARS:
-		return 12;
-		
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		return 3;
-		
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		return 1;
-	}
-
-	// else
-	ASSERT(0);
-	return 1;
-}
-
-int CWorkloadCtrl::GetColumnWidth(WLC_MONTH_DISPLAY nDisplay, int nMonthWidth)
-{
-	return (GetNumMonthsPerColumn(nDisplay) * nMonthWidth);
-}
-
-BOOL CWorkloadCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) const
-{
-	ASSERT (nCol > 0);
-	nMonth = nYear = 0;
-	
-	if (nCol > 0)
-	{
-		DWORD dwData = m_hdrColumns.GetItemData(nCol);
-
-		nMonth = LOWORD(dwData);
-		nYear = HIWORD(dwData);
-	}
-
-	return (nMonth >= 1 && nMonth <= 12);
+	// TODO
+	return 0;
 }
 
 void CWorkloadCtrl::BuildTreeColumns()
@@ -1759,14 +1273,14 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	case CDDS_ITEMPREPAINT:
 		{
 			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-			WORKLOADITEM* pGI = NULL;
+			WORKLOADITEM* pWI = NULL;
 
-			GET_GI_RET(dwTaskID, pGI, 0L);
+			GET_WI_RET(dwTaskID, pWI, 0L);
 				
  			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 			CRect rItem(pTVCD->nmcd.rc);
 
-			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rItem, FALSE);
+			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pWI, rItem, rItem, FALSE);
 				
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
@@ -1787,9 +1301,9 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
 			{
 				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-				WORKLOADITEM* pGI = NULL;
+				WORKLOADITEM* pWI = NULL;
 
-				GET_GI_RET(dwTaskID, pGI, 0L);
+				GET_WI_RET(dwTaskID, pWI, 0L);
 				
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 
@@ -1797,13 +1311,13 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				//DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
-				if (pGI->bHasIcon || pGI->bParent)
+				if (pWI->bHasIcon || pWI->bParent)
 				{
 					int iImageIndex = -1;
-					HIMAGELIST hilTask = m_tcTasks.GetTaskIcon(pGI->dwTaskID, iImageIndex);
+					HIMAGELIST hilTask = m_tcTasks.GetTaskIcon(pWI->dwTaskID, iImageIndex);
 
 					if (hilTask && (iImageIndex != -1))
 					{
@@ -1820,10 +1334,10 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				}
 				
 				// draw background
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected);
+				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pWI, rItem, rClient, bSelected);
 				
 				// draw Workload item attribute columns
-				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
+				DrawTreeItem(pDC, hti, *pWI, bSelected, crBack);
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -1921,8 +1435,8 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			DWORD dwTaskID = GetTaskID(nItem);
 			TRACE(_T("CWorkloadTreeListCtrl::OnListCustomDraw(ID = %ld)\n"), dwTaskID);
 
-			WORKLOADITEM* pGI = NULL;
-			GET_GI_RET(dwTaskID, pGI, 0L);
+			WORKLOADITEM* pWI = NULL;
+			GET_WI_RET(dwTaskID, pWI, 0L);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
@@ -1936,9 +1450,6 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
 			
-			// draw horz gridline before selection
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
-
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
@@ -1946,7 +1457,7 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2042,11 +1553,11 @@ void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 		
 		Resize();
 	}
-	else if (hwnd == m_hdrColumns)
-	{
-		if (nCol > 0) // first column always zero width
-			m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
-	}
+// 	else if (hwnd == m_hdrColumns)
+// 	{
+// 		if (nCol > 0) // first column always zero width
+// 			m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
+// 	}
 }
 
 // Called by parent
@@ -2127,8 +1638,6 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 				
 			case WLCC_STARTDATE:
 			case WLCC_DUEDATE:
-			case WLCC_DONEDATE:
-			case WLCC_ALLOCTO:
 			case WLCC_PERCENT:
 			case WLCC_TASKID:
 				if (m_hdrTasks.IsItemVisible(pHDN->iItem))
@@ -2193,12 +1702,12 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	TV_DISPINFO* pDispInfo = (TV_DISPINFO*)pNMHDR;
 	DWORD dwTaskID = pDispInfo->item.lParam;
 	
-	const WORKLOADITEM* pGI = NULL;
-	GET_GI(dwTaskID, pGI);
+	const WORKLOADITEM* pWI = NULL;
+	GET_WI(dwTaskID, pWI);
 	
 	if (pDispInfo->item.mask & TVIF_TEXT)
 	{
-		pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)pGI->sTitle;
+		pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)pWI->sTitle;
 	}
 	
 	if (pDispInfo->item.mask & (TVIF_SELECTEDIMAGE | TVIF_IMAGE))
@@ -2207,11 +1716,11 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		pDispInfo->item.mask |= TVIF_STATE;
 		pDispInfo->item.stateMask = TVIS_STATEIMAGEMASK;
 		
-		if (pGI->IsDone(FALSE))
+		if (pWI->bDone)
 		{
 			pDispInfo->item.state = TCHC_CHECKED;
 		}
-		else if (pGI->bSomeSubtaskDone)
+		else if (pWI->bSomeSubtaskDone)
 		{
 			pDispInfo->item.state = TCHC_MIXED;
 		}
@@ -2538,45 +2047,7 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				
 				if (wKeys == MK_CONTROL)
 				{
-					// cache prev value
-					WLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay;
-
-					// work out where we are going to scroll to after the zoom
-					DWORD dwScrollID = 0;
-					COleDateTime dtScroll;
-
-					// centre on the mouse if over the list
-					if (hRealWnd == m_lcColumns)
-					{
-						CPoint pt(::GetMessagePos());
-						m_lcColumns.ScreenToClient(&pt);
-
-						GetDateFromScrollPos((pt.x + m_lcColumns.GetScrollPos(SB_HORZ)), dtScroll);
-					}
-					else // centre on the task beneath the mouse
-					{
-						dwScrollID = HitTestTask(::GetMessagePos());
-					}
-
-					// For reasons I don't understand, the resource context is
-					// wrong when handling the mousewheel
-					AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-					// do the zoom
-					ZoomIn(zDelta > 0);
-
-					// scroll to area of interest
-					if (dwScrollID)
-					{
-						ScrollToTask(dwScrollID);
-					}
-					else if (CDateHelper::IsDateSet(dtScroll))
-					{
-						ScrollTo(dtScroll);
-					}
-					
-					// notify parent
-					GetCWnd()->SendMessage(WM_WLCN_ZOOMCHANGE, nPrevDisplay, m_nMonthDisplay);
+					// TODO
 				}
 				else
 				{
@@ -2671,11 +2142,11 @@ BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	if (!m_bReadOnly && (nFlags & TVHT_ONITEMSTATEICON))
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		const WORKLOADITEM* pGI = m_data.GetItem(dwTaskID);
-		ASSERT(pGI);
+		const WORKLOADITEM* pWI = m_data.GetItem(dwTaskID);
+		ASSERT(pWI);
 		
-		if (pGI)
-			GetCWnd()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tcTasks.GetSafeHwnd(), !pGI->IsDone(FALSE));
+		if (pWI)
+			GetCWnd()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tcTasks.GetSafeHwnd(), !pWI->bDone);
 		
 		return TRUE; // eat
 	}
@@ -2825,17 +2296,6 @@ void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar)
 	CTreeListSyncer::SetSplitBarColor(crSplitBar); 
 }
 
-void CWorkloadCtrl::SetMilestoneTag(const CString& sTag)
-{
-	if (sTag != m_sMilestoneTag)
-	{
-		m_sMilestoneTag = sTag;
-
-		if (IsHooked())
-			InvalidateAll();
-	}
-}
-
 void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 {
 	if (IsHooked() && (crNew != color))
@@ -2876,15 +2336,6 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN 
 			}
 			break;
 
-		case WLCC_DONEDATE:
-			if (CDateHelper::IsDateSet(gi.dtDone))
-				sItem = FormatDate(gi.dtDone);
-			break;
-
-		case WLCC_ALLOCTO:
-			sItem = gi.sAllocTo;
-			break;
-			
 		case WLCC_PERCENT:
 			sItem.Format(_T("%d%%"), gi.nPercent);
 			break;
@@ -2958,10 +2409,9 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			
 		case WLCC_STARTDATE:
 		case WLCC_DUEDATE:
-		case WLCC_DONEDATE:
 			{
 				// draw non-selected calculated dates lighter
-				if (!bSelected && !gi.IsDone(TRUE))
+				if (!bSelected && !gi.bDone && !gi.bGoodAsDone)
 				{
 					if (!bLighter)
 					{
@@ -3004,111 +2454,8 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	}
 }
 
-CWorkloadCtrl::DIV_TYPE CWorkloadCtrl::GetVerticalDivider(int nMonth, int nYear) const
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
 {
-	switch (m_nMonthDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		{
-			if (nMonth == 12)
-			{
-				if (nYear == (GetEndYear(m_nMonthDisplay)))
-					return DIV_VERT_DARK;
-
-				return DIV_VERT_MID;
-			}
-			else if ((nMonth % 3) == 0)
-			{
-				return DIV_VERT_LIGHT;
-			}
-
-			return DIV_NONE;
-		}
-		break;
-
-	case WLC_DISPLAY_DECADES:
-	case WLC_DISPLAY_YEARS:
-		{
-			if (nMonth == 12)
-			{
-				if (nYear == (GetEndYear(m_nMonthDisplay)))
-					return DIV_VERT_DARK;
-
-				return DIV_VERT_MID;
-			}
-
-			// else
-			return DIV_VERT_LIGHT;
-		}
-		break;
-
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		{
-			if (nMonth == 12)
-				return DIV_VERT_DARK;
-			
-			if ((nMonth % 3) == 0)
-				return DIV_VERT_MID;
-
-			// else
-			return DIV_VERT_LIGHT;
-		}
-		break;
-
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-		{
-			if (nMonth == 12)
-				return DIV_VERT_DARK;
-	
-			if (nMonth == 6)
-				return DIV_VERT_MID;
-		
-			// else
-			return DIV_VERT_LIGHT;
-		}
-		break;
-
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-		{
-			if (nMonth == 12)
-				return DIV_VERT_DARK;
-			
-			// else
-			return DIV_VERT_MID;
-		}
-		break;
-		
-	case WLC_DISPLAY_HOURS:
-		return DIV_VERT_DARK;
-	}
-
-	ASSERT(0);
-	return DIV_NONE;
-}
-
-BOOL CWorkloadCtrl::IsVerticalDivider(DIV_TYPE nType)
-{
-	switch (nType)
-	{
-	case DIV_VERT_LIGHT:
-	case DIV_VERT_MID:
-	case DIV_VERT_DARK:
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
 void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
 	if (!HasGridlines() || (nType == DIV_NONE) || (IsVerticalDivider(nType) && (rItem.right < 0)))
@@ -3150,43 +2497,7 @@ void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType
 	pDC->FillSolidRect(rDiv, color);
 	pDC->SetBkColor(crOld);
 }
-
-CString CWorkloadCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
-{
-	CString sLongest;
-
-	if (hti)
-	{
-		DWORD dwTaskID = GetTaskID(hti);
-
-		const WORKLOADITEM* pGI = NULL;
-		GET_GI_RET(dwTaskID, pGI, _T(""));
-
-		sLongest = GetTreeItemColumnText(*pGI, WLCC_ALLOCTO);
-	}
-
-	// children
-	if (!hti || TCH().IsItemExpanded(hti))
-	{
-		HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
-		
-		while (htiChild)
-		{
-			CString sLongestChild = GetLongestVisibleAllocTo(htiChild);
-			
-			if (sLongestChild.GetLength() > sLongest.GetLength())
-				sLongest = sLongestChild;
-			
-			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-		}
-	}
-	
-	return sLongest;
-}
-
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
-{
-	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE));
+	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && gi.bDone);
 	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
 
 	return m_tcTasks.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
@@ -3216,8 +2527,6 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		case WLCC_TASKID:
 		case WLCC_STARTDATE:
 		case WLCC_DUEDATE:
-		case WLCC_DONEDATE:
-		case WLCC_ALLOCTO:
 		case WLCC_PERCENT:
 			{
 				CRect rHdrItem;
@@ -3237,163 +2546,6 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 	if (m_bSavingToImage)
 		rItem.OffsetRect(-1, 0);
-}
-
-void CWorkloadCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
-											int nYear, int nNumYears, const WORKLOADITEM& gi,
-											BOOL bSelected)
-{
-	double dYearWidth = (rItem.Width() / (double)nNumYears);
-	CRect rYear(rItem);
-
-	for (int j = 0; j < nNumYears; j++)
-	{
-		if (j == (nNumYears - 1))
-			rYear.right = rItem.right;
-		else
-			rYear.right = (rItem.left + (int)(dYearWidth * (j + 1)));
-
-		DrawListItemYear(pDC, rYear, (nYear + j), gi, bSelected);
-
-		// next year
-		rYear.left = rYear.right; 
-	}
-}
-
-void CWorkloadCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-											const WORKLOADITEM& gi, BOOL bSelected)
-{
-	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected);
-}
-
-void CWorkloadCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
-											int nMonth, int nNumMonths, int nYear, 
-											const WORKLOADITEM& gi, BOOL bSelected)
-{
-	double dMonthWidth = (rItem.Width() / (double)nNumMonths);
-	CRect rMonth(rItem);
-
-	for (int i = 0; i < nNumMonths; i++)
-	{
-		if ((nMonth + i) == 12)
-			rMonth.right = rItem.right;
-		else
-			rMonth.right = (rItem.left + (int)(dMonthWidth * (i + 1)));
-
-		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, bSelected);
-
-		// next item
-		rMonth.left = rMonth.right; 
-	}
-}
-
-void CWorkloadCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, 
-											const WORKLOADITEM& /*gi*/, BOOL bSelected)
-{
-	DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-	DrawItemDivider(pDC, rMonth, nDiv, bSelected);
-}
-
-void CWorkloadCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, 
-											const WORKLOADITEM& gi, BOOL bSelected)
-{
-	// draw vertical week dividers
-	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	double dMonthWidth = rMonth.Width();
-
-	int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-	CRect rDay(rMonth);
-
-	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-
-	for (int nDay = 1; nDay <= nNumDays; nDay++)
-	{
-		rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
-		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
-
-		// draw divider
-		if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
-		{
-			rDay.right = rDay.left; // draw at start of day
-			DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
-		}
-
-		// next day
-		dtDay += 1;
-	}
-
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected);
-}
-
-void CWorkloadCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, const WORKLOADITEM& gi, 
-											BOOL bSelected, BOOL bDrawHours)
-{
-	// draw vertical day dividers
-	CRect rDay(rMonth);
-	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-	
-	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	double dDayWidth = (rMonth.Width() / (double)nNumDays);
-	
-	for (int nDay = 1; nDay <= nNumDays; nDay++)
-	{
-		rDay.right = (rMonth.left + (int)(nDay * dDayWidth));
-		
-		// only draw visible days
-		if (rDay.right > 0)
-		{
-			BOOL bDrawNonWorkingHours = (!bSelected && (m_crNonWorkingHoursColor != CLR_NONE));
-			
-			if (bDrawHours)
-			{
-				CRect rHour(rDay);
-				double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
-				
-				int nStartHour = -1, nEndHour = -1;
-				
-				if (bDrawNonWorkingHours)
-				{
-					CTimeHelper th;
-					
-					nStartHour = (int)th.GetStartOfWorkday(FALSE);
-					nEndHour = (int)(th.GetEndOfWorkday(FALSE) + 0.5);
-					
-					if (m_crGridLine != CLR_NONE)
-						rHour.bottom--;
-				}
-				
-				// draw all but the first and last hours dividers
-				for (int nHour = 1; nHour <= 24; nHour++)
-				{
-					rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
-					
-					if (bDrawNonWorkingHours)
-					{
-						if ((nHour < (nStartHour + 1)) || (nHour > nEndHour))
-							pDC->FillSolidRect(rHour, m_crNonWorkingHoursColor);
-					}
-					
-					if (nHour != 24)
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
-					
-					rHour.left = rHour.right;
-				}
-			}
-			
-			// draw all but the last day divider
-			if (nDay < nNumDays)
-				DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
-		}
-		
-		// next day
-		dtDay.m_dt += 1;
-		rDay.left = rDay.right;
-	}
-
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected);
 }
 
 void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BOOL bSelected)
@@ -3439,76 +2591,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 
 BOOL CWorkloadCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WORKLOADITEM& gi, BOOL bSelected)
 {
-	// get the date range for this column
-	int nMonth = 0, nYear = 0;
-	
-	if (!GetListColumnDate(nCol, nMonth, nYear))
-		return FALSE;
-
-	int nSaveDC = pDC->SaveDC();
-
-	double dMonthWidth = GetMonthWidth(rColumn.Width());
-	BOOL bToday = FALSE;
-
-	// Use higher resolution where possible
-	WLC_MONTH_DISPLAY nCalcDisplay = GetColumnDisplay((int)dMonthWidth);
-	BOOL bUseHigherRes = (CompareDisplays(nCalcDisplay, m_nMonthDisplay) > 0);
-
-	switch (m_nMonthDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-		DrawListItemYears(pDC, rColumn, nYear, 25, gi, bSelected);
-		break;
-		
-	case WLC_DISPLAY_DECADES:
-		DrawListItemYears(pDC, rColumn, nYear, 10, gi, bSelected);
-		break;
-		
-	case WLC_DISPLAY_YEARS:
-		DrawListItemYear(pDC, rColumn, nYear, gi, bSelected);
-		break;
-		
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, gi, bSelected);
-		break;
-		
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-		if (bUseHigherRes)
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected);
-		else
-			DrawListItemMonth(pDC, rColumn, nMonth, nYear, gi, bSelected);
-		break;
-		
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-		if (bUseHigherRes)
-			DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, FALSE);
-		else
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected);
-		break;
-
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bUseHigherRes);
-		break;
-
-	case WLC_DISPLAY_HOURS:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, TRUE);
-		break;
-	
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	pDC->RestoreDC(nSaveDC);
-
+	// TODO
 	return TRUE;
 }
 
@@ -3520,222 +2603,7 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	if (nCol == 0)
 		return;
 
-	// get the date range for this column
-	int nMonth = 0, nYear = 0;
-	
-	if (!GetListColumnDate(nCol, nMonth, nYear))
-		return;
-
-	int nSaveDC = pDC->SaveDC();
-	double dMonthWidth = GetMonthWidth(rItem.Width());
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_hdrColumns);
-	
-	CThemed th;
-	BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
-	CThemed* pThemed = (bThemed ? &th :NULL);
-
-	CRect rClip;
-	pDC->GetClipBox(rClip);
-
-	switch (m_nMonthDisplay)
-	{
-	case WLC_DISPLAY_YEARS:
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-		// should never get here
-		ASSERT(0);
-		break;
-
-	case WLC_DISPLAY_QUARTERCENTURIES:
-	case WLC_DISPLAY_DECADES:
-		{
-			CRect rRange(rItem), rYear(rItem);
-			rYear.top += (rYear.Height() / 2);
-
-			// draw range header
-			rRange.bottom = rYear.top;
-			DrawListHeaderRect(pDC, rRange, m_hdrColumns.GetItemText(nCol), pThemed);
-
-			// draw year elements
-			int nNumYears = ((m_nMonthDisplay == WLC_DISPLAY_DECADES) ? 10 : 25);
-			double dYearWidth = (rRange.Width() / (double)nNumYears);
-
-			rYear.right = rYear.left;
-
-			for (int i = 0; i < nNumYears; i++)
-			{
-				rYear.left = rYear.right;
-				rYear.right = rRange.left + (int)((i + 1) * dYearWidth);
-
-				// check if we can stop
-				if (rYear.left > rClip.right)
-					break; 
-
-				// check if we need to draw
-				if (rYear.right >= rClip.left)
-					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), pThemed);
-			}
-		}
-		break;
-		
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-		{
-			CRect rMonth(rItem), rWeek(rItem);
-			rWeek.top += (rWeek.Height() / 2);
-
-			// draw month header
-			rMonth.bottom = rWeek.top;
-			DrawListHeaderRect(pDC, rMonth, m_hdrColumns.GetItemText(nCol), pThemed);
-
-			// draw week elements
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-			double dDayWidth = (rMonth.Width() / (double)nNumDays);
-
-			// first week starts at 'First DOW of month'
-			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-			int nDay = CDateHelper::CalcDayOfMonth(nFirstDOW, 1, nMonth, nYear);
-
-			// If this is column 1 (column 0 is hidden) then we might need
-			// to draw part of the preceding week
-			if ((nCol == 1) && (nDay != -1))
-			{
-				rWeek.right = (rWeek.left + (int)((nDay - 1) * dDayWidth));
-				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed);
-			}
-
-			// calc number of first week
-			COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
-			int nWeek = CDateHelper::GetWeekofYear(dtWeek);
-			BOOL bDone = FALSE;
-
-			while (!bDone)
-			{
-				rWeek.left = rMonth.left + (int)((nDay - 1) * dDayWidth);
-
-				// if this week bridges into next month this needs special handling
-				if ((nDay + 6) > nNumDays)
-				{
-					// rest of this month
-					rWeek.right = rMonth.right;
-					
-					// plus some of next month
-					nDay += (6 - nNumDays);
-					nMonth++;
-					
-					if (nMonth > 12)
-					{
-						nMonth = 1;
-						nYear++;
-					}
-					
-					if (m_hdrColumns.GetItemRect(nCol+1, rMonth))
-					{
-						nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-						dDayWidth = (rMonth.Width() / (double)nNumDays);
-
-						rWeek.right += (int)(nDay * dDayWidth);
-					}
-
-					// if this is week 53, check that its not really week 1 of the next year
-					if (nWeek == 53)
-					{
-						ASSERT(nMonth == 1);
-
-						COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
-						nWeek = CDateHelper::GetWeekofYear(dtWeek);
-					}
-
-					bDone = TRUE;
-				}
-				else 
-				{
-					rWeek.right = rMonth.left + (int)((nDay + 6) * dDayWidth);
-				}
-
-				// check if we can stop
-				if (rWeek.left > rClip.right)
-					break; 
-
-				// check if we need to draw
-				if (rWeek.right >= rClip.left)
-					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed);
-
-				// next week
-				nDay += 7;
-				nWeek++;
-
-				// are we done?
-				bDone = (bDone || nDay > nNumDays);
-			}
-		}
-		break;
-
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		{
-			CRect rMonth(rItem), rDay(rItem);
-			rDay.top += (rDay.Height() / 2);
-
-			// draw month header
-			rMonth.bottom = rDay.top;
-			DrawListHeaderRect(pDC, rMonth, m_hdrColumns.GetItemText(nCol), pThemed);
-
-			// draw day elements
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
-			double dDayWidth = (rMonth.Width() / (double)nNumDays);
-
-			rDay.right = rDay.left;
-			
-			for (int nDay = 1; nDay <= nNumDays; nDay++)
-			{
-				rDay.left = rDay.right;
-				rDay.right = rMonth.left + (int)(nDay * dDayWidth);
-
-				// check if we can stop
-				if (rDay.left > rClip.right)
-					break; 
-
-				// check if we need to draw
-				if (rDay.right >= rClip.left)
-				{
-					CString sHeader;
-
-					if (m_nMonthDisplay == WLC_DISPLAY_HOURS)
-					{
-						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						sHeader = FormatDate(dtDay, DHFD_DOW);
-					}
-					else if (m_nMonthDisplay == WLC_DISPLAY_DAYS_LONG)
-					{
-						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
-						sHeader = FormatDate(dtDay, DHFD_NOYEAR);
-					}
-					else
-					{
-						sHeader.Format(_T("%d"), nDay);
-					}
-
-					DrawListHeaderRect(pDC, rDay, sHeader, pThemed);
-				}
-			}
-		}
-		break;
-		
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	pDC->SelectObject(pOldFont); // not sure if this is necessary but play safe
-	pDC->RestoreDC(nSaveDC);
+	// TODO
 }
 
 void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme)
@@ -3761,60 +2629,10 @@ void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CStri
 	}
 }
 
-BOOL CWorkloadCtrl::HasDisplayDates(const WORKLOADITEM& gi) const
-{
-	if (HasDoneDate(gi))
-		return TRUE;
-
-	// else
-	COleDateTime dummy1, dummy2;
-	return GetTaskStartDueDates(gi, dummy1, dummy2);
-}
-
-BOOL CWorkloadCtrl::HasDoneDate(const WORKLOADITEM& gi) const
-{
-	return CDateHelper::IsDateSet(gi.dtDone);
-}
-
 BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	dtStart = gi.dtStart;
 	dtDue = gi.dtDue;
-
-	BOOL bDoneSet = CDateHelper::IsDateSet(gi.dtDone);
-		
-	// do we need to calculate due date?
-	if (!CDateHelper::IsDateSet(dtDue) && HasOption(WLCF_CALCMISSINGDUEDATES))
-	{
-		// always take completed date if that is set
-		if (bDoneSet)
-		{
-			dtDue = gi.dtDone;
-		}
-		else // take later of start date and today
-		{
-			dtDue = CDateHelper::GetDateOnly(dtStart);
-			CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
-			
-			// and move to end of the day
-			dtDue = CDateHelper::GetEndOfDay(dtDue);
-		}
-		
-		ASSERT(CDateHelper::IsDateSet(dtDue));
-	}
-	
-	// do we need to calculate start date?
-	if (!CDateHelper::IsDateSet(dtStart) && HasOption(WLCF_CALCMISSINGSTARTDATES))
-	{
-		// take earlier of due or completed date
-		dtStart = CDateHelper::GetDateOnly(dtDue);
-		CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(gi.dtDone));
-
-		// take the earlier of that and 'today'
-		CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
-		
-		ASSERT(CDateHelper::IsDateSet(dtStart));
-	}
 
 	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));
 }
@@ -3859,45 +2677,6 @@ COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected,
 	return crText;
 }
 
-BOOL CWorkloadCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
-							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
-{
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-	if (nDaysInMonth == 0)
-		return FALSE;
-	
-	COleDateTime dtMonthStart(nYear, nMonth, 1, 0, 0, 0);
-	COleDateTime dtMonthEnd(nYear, nMonth, nDaysInMonth, 23, 59, 59); // end of last day
-
-	return CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtFrom, dtTo, rDate);
-}
-
-BOOL CWorkloadCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
-							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
-							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
-{
-	if (dtFrom > dtTo || dtTo < dtMonthStart || dtFrom > dtMonthEnd)
-		return FALSE;
-
-	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
-
-	if (dtFrom > dtMonthStart)
-		rDate.left = (rMonth.left + (int)(((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth)));
-	else
-		rDate.left = rMonth.left;
-
-	if (dtTo < dtMonthEnd)
-		rDate.right = (rMonth.left + (int)(((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth)));
-	else
-		rDate.right = rMonth.right;
-
-	rDate.top = rMonth.top;
-	rDate.bottom = rMonth.bottom;
-
-	return (rDate.right > 0);
-}
-
 HTREEITEM CWorkloadCtrl::GetTreeItem(DWORD dwTaskID) const
 {
 	HTREEITEM hti = NULL;
@@ -3911,20 +2690,6 @@ int CWorkloadCtrl::GetListItem(DWORD dwTaskID) const
 	HTREEITEM hti = GetTreeItem(dwTaskID);
 
 	return (hti ? GetListItem(hti) : -1);
-}
-
-BOOL CWorkloadCtrl::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
-{
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	ASSERT(nDaysInMonth);
-
-	if (nDaysInMonth == 0)
-		return FALSE;
-	
-	dtStart.SetDate(nYear, nMonth, 1);
-	dtEnd.m_dt = dtStart.m_dt + nDaysInMonth;
-	
-	return TRUE;
 }
 
 COLORREF CWorkloadCtrl::GetColor(COLORREF crBase, double dLighter, BOOL bSelected)
@@ -3974,215 +2739,6 @@ void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
-BOOL CWorkloadCtrl::ZoomIn(BOOL bIn)
-{
-	WLC_MONTH_DISPLAY nNewDisplay = (bIn ? GetNextDisplay(m_nMonthDisplay) : GetPreviousDisplay(m_nMonthDisplay));
-	ASSERT(nNewDisplay != WLC_DISPLAY_NONE);
-
-	return SetMonthDisplay(nNewDisplay);
-}
-
-BOOL CWorkloadCtrl::SetMonthDisplay(WLC_MONTH_DISPLAY nNewDisplay)
-{
-	if (!IsValidDisplay(nNewDisplay))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	// calculate the min month width for this display
-	int nMinMonthWidth = GetMinMonthWidth(nNewDisplay);
-	
-	// Check that the new mode does not exceed the max allowed
-	if (!CanSetMonthDisplay(nNewDisplay, nMinMonthWidth))
-		return FALSE;
-
-	// adjust the header height where we need to draw days/weeks
-	switch (nNewDisplay)
-	{
-	case WLC_DISPLAY_YEARS:
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-	case WLC_DISPLAY_MONTHS_SHORT:
-	case WLC_DISPLAY_MONTHS_MID:
-	case WLC_DISPLAY_MONTHS_LONG:
-		m_hdrColumns.SetRowCount(1);
-		m_hdrTasks.SetRowCount(1);
-		break;
-
-	case WLC_DISPLAY_QUARTERCENTURIES:
-	case WLC_DISPLAY_DECADES:
-	case WLC_DISPLAY_WEEKS_SHORT:
-	case WLC_DISPLAY_WEEKS_MID:
-	case WLC_DISPLAY_WEEKS_LONG:
-	case WLC_DISPLAY_DAYS_SHORT:
-	case WLC_DISPLAY_DAYS_MID:
-	case WLC_DISPLAY_DAYS_LONG:
-	case WLC_DISPLAY_HOURS:
-		m_hdrColumns.SetRowCount(2);
-		m_hdrTasks.SetRowCount(2);
-		break;
-		
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return ZoomTo(nNewDisplay, max(MIN_MONTH_WIDTH, nMinMonthWidth));
-}
-
-BOOL CWorkloadCtrl::CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay) const
-{
-	return CanSetMonthDisplay(nDisplay, GetMinMonthWidth(nDisplay));
-}
-
-BOOL CWorkloadCtrl::CanSetMonthDisplay(WLC_MONTH_DISPLAY nDisplay, int nMonthWidth) const
-{
-	ASSERT(nMonthWidth > 0);
-
-	if (!IsValidDisplay(nDisplay) || (nMonthWidth < 1))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nNumReqColumns = (GetRequiredListColumnCount(nDisplay) + 1);
-	int nColWidth = GetColumnWidth(nDisplay, nMonthWidth);
-	int nTotalReqdWidth = (nNumReqColumns * nColWidth);
-	
-	return (nTotalReqdWidth <= MAX_HEADER_WIDTH);
-}
-
-BOOL CWorkloadCtrl::ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay) const
-{
-	if (!IsValidDisplay(nDisplay))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nWidth = GetMinMonthWidth(nDisplay);
-	
-	return ValidateMonthDisplay(nDisplay, nWidth);
-}
-
-BOOL CWorkloadCtrl::ValidateMonthDisplay(WLC_MONTH_DISPLAY& nDisplay, int& nMonthWidth) const
-{
-	if (!IsValidDisplay(nDisplay))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (!CanSetMonthDisplay(nDisplay, nMonthWidth))
-	{
-		// Look backwards until we find a valid display
-		WLC_MONTH_DISPLAY nPrev = nDisplay;
-		nDisplay = GetPreviousDisplay(nDisplay);
-
-		while (nDisplay != nPrev)
-		{
-			nMonthWidth = GetMinMonthWidth(nDisplay);
-
-			if (CanSetMonthDisplay(nDisplay, nMonthWidth))
-				return TRUE;
-
-			nPrev = nDisplay;
-			nDisplay = GetPreviousDisplay(nDisplay);
-		} 
-
-		// We never get here 
-		ASSERT(0);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-void CWorkloadCtrl::ValidateMonthDisplay()
-{
-	WLC_MONTH_DISPLAY nPrevDisplay = m_nMonthDisplay, nDisplay = nPrevDisplay;
-	int nMonthWidth = m_nMonthWidth;
-
-	VERIFY(ValidateMonthDisplay(nDisplay, nMonthWidth));
-
-	if (m_nMonthDisplay != nDisplay)
-	{
-		VERIFY(SetMonthDisplay(nDisplay));
-		GetCWnd()->SendMessage(WM_WLCN_ZOOMCHANGE, nPrevDisplay, m_nMonthDisplay);
-	}
-}
-
-BOOL CWorkloadCtrl::ZoomTo(WLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
-{
-	// validate new display
-	if (!ValidateMonthDisplay(nNewDisplay, nNewMonthWidth))
-		return FALSE;
-
-	if ((nNewDisplay == m_nMonthDisplay) && (nNewMonthWidth == m_nMonthWidth))
-		return TRUE;
-
-	// cache the scroll-pos at the centre of the view so we can restore it
-	CRect rClient;
-	CWnd::GetClientRect(rClient);
-
-	COleDateTime dtPos;
-	BOOL bRestorePos = GetDateFromScrollPos((m_lcColumns.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
-
-	// always cancel any ongoing operation
-	CancelOperation();
-	
-	// do the update
-	CWorkloadLockUpdates glu(this, FALSE, FALSE);
-
-	if (nNewDisplay != m_nMonthDisplay)
-	{
-		int nNewColWidth = GetColumnWidth(nNewDisplay, nNewMonthWidth);
-
-		m_nMonthWidth = nNewMonthWidth;
-		m_nMonthDisplay = nNewDisplay;
-
-		UpdateListColumns(nNewColWidth);
-	}
-	else
-	{
-		int nCurColWidth = GetColumnWidth();
-		int nNewColWidth = GetColumnWidth(m_nMonthDisplay, nNewMonthWidth);
-
-		RecalcListColumnWidths(nCurColWidth, nNewColWidth);
-
-		m_nMonthWidth = (int)GetMonthWidth(nNewColWidth);
-	}
-
-	RefreshSize();
-
-	// restore scroll-pos
-	if (bRestorePos)
-	{
-		int nScrollPos = GetScrollPosFromDate(dtPos);
-
-		// Date was at the centre of the view
-		nScrollPos -= (rClient.Width() / 2);
-		nScrollPos = max(0, nScrollPos);
-
-		if (nScrollPos)
-			ListView_Scroll(m_lcColumns, (nScrollPos - m_lcColumns.GetScrollPos(SB_HORZ)), 0);
-	}
-
-	return TRUE;
-}
-
-BOOL CWorkloadCtrl::ZoomBy(int nAmount)
-{
-	int nNewMonthWidth = (m_nMonthWidth + nAmount);
-
-	// will this trigger a min-width change?
-	WLC_MONTH_DISPLAY nNewMonthDisplay = GetColumnDisplay(nNewMonthWidth);
-
-	return ZoomTo(nNewMonthDisplay, nNewMonthWidth);
-}
-
 void CWorkloadCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
 {
 	// resize the required number of columns
@@ -4228,11 +2784,11 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 
 	SetSplitPos(nTotalColWidth);
 	
-	// list columns (except first dummy column)
-	nCol = GetRequiredListColumnCount();
-	
-	while (--nCol > 0)
-		m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
+// 	// list columns (except first dummy column)
+// 	nCol = GetRequiredListColumnCount();
+// 	
+// 	while (--nCol > 0)
+// 		m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
 
 	Resize();
 }
@@ -4260,19 +2816,15 @@ BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 {
 	// Only need recalc non-fixed column widths
 	BOOL bTitle = !m_hdrTasks.IsItemTracked(WLCC_TITLE);
-	BOOL bAllocTo = !m_hdrTasks.IsItemTracked(WLCC_ALLOCTO);
 	BOOL bTaskID = !m_hdrTasks.IsItemTracked(WLCC_TASKID);
 
-	if (bTitle || bAllocTo || bTaskID)
+	if (bTitle || bTaskID)
 	{
 		CClientDC dc(&m_tcTasks);
 
 		if (bTitle)
 			RecalcTreeColumnWidth(WLCC_TITLE, &dc);
 			
-		if (bAllocTo)
-			RecalcTreeColumnWidth(WLCC_ALLOCTO, &dc);
-		
 		if (bTaskID)
 			RecalcTreeColumnWidth(WLCC_TASKID, &dc);
 		
@@ -4313,14 +2865,9 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 		nColWidth = pDC->GetTextExtent(Misc::Format(m_dwMaxTaskID)).cx;
 		break;
 		
-	case WLCC_ALLOCTO:
-		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(GetLongestVisibleAllocTo(NULL), pDC);
-		break;
-		
 	// rest of attributes are fixed width
 	case WLCC_STARTDATE:
 	case WLCC_DUEDATE: 
-	case WLCC_DONEDATE: 
 		{
 			COleDateTime date(2015, 12, 31, 23, 59, 59);
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
@@ -4384,11 +2931,11 @@ int CWorkloadCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd)
 			if (bEnd)
 			{
 				DWORD dwTaskID = GetTaskID(htiChild);
-				const WORKLOADITEM* pGI = NULL;
+				const WORKLOADITEM* pWI = NULL;
 			
-				GET_GI_RET(dwTaskID, pGI, 0);
+				GET_WI_RET(dwTaskID, pWI, 0);
 			
-				int nTextWidth = pDC->GetTextExtent(pGI->sTitle).cx;
+				int nTextWidth = pDC->GetTextExtent(pWI->sTitle).cx;
 				nWidth = max(nTextWidth, (rChild.left + nTextWidth));
 			}
 			else
@@ -4408,110 +2955,6 @@ int CWorkloadCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd)
 	return nWidest;
 }
 
-void CWorkloadCtrl::UpdateListColumnsWidthAndText(int nWidth)
-{
-	// first column is always zero width and not trackable
-	m_hdrColumns.SetItemWidth(0, 0);
-	m_hdrColumns.EnableItemTracking(0, FALSE);
-
-	if (nWidth == -1)
-		nWidth = GetColumnWidth();
-
-	int nNumReqColumns = (GetRequiredListColumnCount() + 1);
-	BOOL bUsePrevWidth = (m_aPrevColWidths.GetSize() == nNumReqColumns);
-	int nTotalReqdWidth = 0;
-
-	COleDateTime dtStart = GetStartDate(m_nMonthDisplay);
-	int nYear = dtStart.GetYear(), nMonth = dtStart.GetMonth();
-	
-	int nCol = 1;
-
-	do
-	{
-		if (nMonth && nYear)
-		{
-			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
-			DWORD dwData = MAKELONG(nMonth, nYear);
-
-			if (bUsePrevWidth)
-				nWidth = m_aPrevColWidths[nCol];
-
-			m_hdrColumns.SetItem(nCol, nWidth, sTitle, dwData);
-			m_hdrColumns.EnableItemTracking(nCol, TRUE);
-
-			nTotalReqdWidth += nWidth;
-		}
-
-		// Next column
-		switch (m_nMonthDisplay)
-		{
-		case WLC_DISPLAY_QUARTERCENTURIES:
-			nYear += 25;
-			break;
-
-		case WLC_DISPLAY_DECADES:
-			nYear += 10;
-			break;
-			
-		case WLC_DISPLAY_YEARS:
-			nYear += 1;
-			break;
-			
-		case WLC_DISPLAY_QUARTERS_SHORT:
-		case WLC_DISPLAY_QUARTERS_MID:
-		case WLC_DISPLAY_QUARTERS_LONG:
-			nMonth += 3;
-
-			if (nMonth > 12)
-			{
-				nMonth = 1;
-				nYear += 1;
-			}
-			break;
-			
-		case WLC_DISPLAY_MONTHS_SHORT:
-		case WLC_DISPLAY_MONTHS_MID:
-		case WLC_DISPLAY_MONTHS_LONG:
-		case WLC_DISPLAY_WEEKS_SHORT:
-		case WLC_DISPLAY_WEEKS_MID:
-		case WLC_DISPLAY_WEEKS_LONG:
-		case WLC_DISPLAY_DAYS_SHORT:
-		case WLC_DISPLAY_DAYS_MID:
-		case WLC_DISPLAY_DAYS_LONG:
-		case WLC_DISPLAY_HOURS:
-			nMonth += 1;
-
-			if (nMonth > 12)
-			{
-				nMonth = 1;
-				nYear += 1;
-			}
-			break;
-			
-		default:
-			ASSERT(0);
-			break;
-		}
-		ASSERT(CDateHelper::IsValidDayInMonth(1, nMonth, nYear));
-	}
-	while (++nCol < nNumReqColumns);
-
-	TRACE(_T("CWorkloadTreeListCtrl(Total Column Widths = %d)\n"), nTotalReqdWidth);
-
-	// for the rest, clear the text and item data and prevent tracking
-	int nNumCols = m_hdrColumns.GetItemCount();
-
-	for (; nCol < nNumCols; nCol++)
-	{
-		m_hdrColumns.EnableItemTracking(nCol, FALSE);
-		m_hdrColumns.SetItem(nCol, 0, _T(""), 0);
-	}
-
-	// always clear previous width/tracked arrays
-	m_aPrevColWidths.RemoveAll();
-	m_aPrevTrackedCols.RemoveAll();
-}
-
 void CWorkloadCtrl::BuildListColumns()
 {
 	// once only
@@ -4524,234 +2967,7 @@ void CWorkloadCtrl::BuildListColumns()
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 	m_lcColumns.InsertColumn(0, &lvc);
 	
-	// add other columns
-	int nNumCols = GetRequiredListColumnCount(m_nMonthDisplay);
-
-	for (int i = 0; i < nNumCols; i++)
-	{
-		lvc.cx = 0;
-		lvc.fmt = LVCFMT_CENTER | HDF_STRING;
-		lvc.pszText = _T("");
-		lvc.cchTextMax = 50;
-
-		int nCol = m_hdrColumns.GetItemCount();
-		m_lcColumns.InsertColumn(nCol, &lvc);
-	}
-
-	UpdateListColumnsWidthAndText();
-}
-
-void CWorkloadCtrl::UpdateListColumns(int nWidth)
-{
-	// cache the scrolled position
-	int nScrollPos = m_lcColumns.GetScrollPos(SB_HORZ);
-
-	COleDateTime dtPos;
-	BOOL bRestorePos = GetDateFromScrollPos(nScrollPos, dtPos);
-
-	if (nWidth == -1)
-		nWidth = GetColumnWidth();
-
-	int nNumCols = m_hdrColumns.GetItemCount();
-	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
-	int nDiffCols = (nReqCols - nNumCols);
-
-	if (nDiffCols > 0)
-	{
-		// add other columns
-		LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
-
-		for (int i = 0, nCol = nNumCols; i < nDiffCols; i++, nCol++)
-		{
-			lvc.cx = 0;
-			lvc.fmt = LVCFMT_CENTER | HDF_STRING;
-			lvc.pszText = _T("");
-			lvc.cchTextMax = 50;
-
-			m_lcColumns.InsertColumn(nCol, &lvc);
-		}
-	}
-	else if (nDiffCols < 0)
-	{
-		int i = nNumCols;
-		
-		while (i-- > nReqCols)
-		{
-			m_lcColumns.DeleteColumn(i);
-		}
-	}
-	ASSERT(m_hdrColumns.GetItemCount() == nReqCols);
-
-	if (nDiffCols != 0)
-		PostResize();
-
-	UpdateListColumnsWidthAndText(nWidth);
-
-	// restore scroll-pos
-	if (bRestorePos)
-	{
-		nScrollPos = GetScrollPosFromDate(dtPos);
-		m_lcColumns.Scroll(CSize(nScrollPos - m_lcColumns.GetScrollPos(SB_HORZ), 0));
-	}
-	else
-	{
-		m_lcColumns.SetScrollPos(SB_HORZ, 0, TRUE);
-	}
-}
-
-int CWorkloadCtrl::GetMinMonthWidth(WLC_MONTH_DISPLAY nDisplay) const
-{
-	int nWidth = 0;
-	VERIFY(m_mapMinMonthWidths.Lookup(nDisplay, nWidth) && (nWidth >= MIN_MONTH_WIDTH));
-
-	return max(nWidth, MIN_MONTH_WIDTH);
-}
-
-void CWorkloadCtrl::CalcMinMonthWidths()
-{
-	CClientDC dcClient(&m_hdrTasks);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_lcColumns);
-
-	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
-	{
-		WLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
-		int nMinMonthWidth = 0;
-
-		switch (nDisplay)
-		{
-		case WLC_DISPLAY_QUARTERCENTURIES:
-			{
-				CString sText = FormatListColumnHeaderText(WLC_DISPLAY_YEARS, 1, 2013);
-				
-				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
-				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
-			}
-			break;
-
-		case WLC_DISPLAY_DECADES:
-		case WLC_DISPLAY_YEARS:
-			{
-				// just increase the width of the preceding display
-				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
-
-				nMinMonthWidth = GetMinMonthWidth(nPrev);
-				nMinMonthWidth = (int)(nMinMonthWidth * MULTIYEAR_MULTIPLIER);
-			}
-			break;
-			
-		case WLC_DISPLAY_QUARTERS_SHORT:
-			{
-				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2013);
-				
-				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
-				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
-			}
-			break;
-			
-		case WLC_DISPLAY_QUARTERS_MID:
-		case WLC_DISPLAY_QUARTERS_LONG:
-			{
-				int nMinTextWidth = 0;
-				
-				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
-				{
-					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
-					
-					int nWidth = dcClient.GetTextExtent(sText).cx;
-					nMinTextWidth = max(nWidth, nMinTextWidth);
-				}
-				
-				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
-			}
-			break;
-			
-		case WLC_DISPLAY_MONTHS_SHORT:
-		case WLC_DISPLAY_MONTHS_MID:
-		case WLC_DISPLAY_MONTHS_LONG:
-			{
-				int nMinTextWidth = 0;
-				
-				for (int nMonth = 1; nMonth <= 12; nMonth++)
-				{
-					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
-					
-					int nWidth = dcClient.GetTextExtent(sText).cx;
-					nMinTextWidth = max(nWidth, nMinTextWidth);
-				}
-				
-				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING);
-			}
-			break;
-			
-		case WLC_DISPLAY_WEEKS_SHORT:
-		case WLC_DISPLAY_WEEKS_MID:
-		case WLC_DISPLAY_WEEKS_LONG:
-		case WLC_DISPLAY_DAYS_SHORT:
-		case WLC_DISPLAY_DAYS_MID:
-			{
-				// just increase the width of the preceding display
-				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
-
-				nMinMonthWidth = GetMinMonthWidth(nPrev);
-				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
-			}
-			break;
-
-		case WLC_DISPLAY_DAYS_LONG:
-			{
-				// increase the width of the preceding display
-				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
-
-				nMinMonthWidth = GetMinMonthWidth(nPrev);
-				nMinMonthWidth = (int)(nMinMonthWidth * DAY_WEEK_MULTIPLIER);
-
-				int nWidth = dcClient.GetTextExtent(_T(" 31/12 ")).cx;
-				nMinMonthWidth = max((nWidth * 31), nMinMonthWidth);
-			}
-			break;
-			
-		case WLC_DISPLAY_HOURS:
-			{
-				// just increase the width of the preceding display
-				WLC_MONTH_DISPLAY nPrev = DISPLAYMODES[nMode - 1].nDisplay;
-
-				nMinMonthWidth = GetMinMonthWidth(nPrev);
-				nMinMonthWidth = (int)(nMinMonthWidth * HOUR_DAY_MULTIPLIER);
-			}
-			break;
-			
-		default:
-			ASSERT(0);
-			break;
-		}
-
-		if (nMinMonthWidth > 0)
-		{
-			nMinMonthWidth++; // for rounding
-			m_mapMinMonthWidths[nDisplay] = nMinMonthWidth; 
-		}
-	}
-
-	dcClient.SelectObject(pOldFont);
-}
-
-WLC_MONTH_DISPLAY CWorkloadCtrl::GetColumnDisplay(int nMonthWidth)
-{
-	int nMinWidth = 0;
-
-	for (int nMode = 0; nMode < (NUM_DISPLAYMODES - 1); nMode++)
-	{
-		WLC_MONTH_DISPLAY nDisplay = DISPLAYMODES[nMode].nDisplay;
-		WLC_MONTH_DISPLAY nNext = DISPLAYMODES[nMode + 1].nDisplay;
-
-		int nFromWidth = GetMinMonthWidth(nDisplay);
-		int nToWidth = GetMinMonthWidth(nNext);
-
-		if ((nMonthWidth >= nFromWidth) && (nMonthWidth < nToWidth))
-			return nDisplay;
-	}
-
-	return GetLastDisplay();
+	// TODO
 }
 
 int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -4790,10 +3006,10 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	}
 	else
 	{
-		const WORKLOADITEM* pGI1 = GetWorkloadItem(dwTaskID1);
-		const WORKLOADITEM* pGI2 = GetWorkloadItem(dwTaskID2);
+		const WORKLOADITEM* pWI1 = GetWorkloadItem(dwTaskID1);
+		const WORKLOADITEM* pWI2 = GetWorkloadItem(dwTaskID2);
 
-		if (!pGI1 || !pGI2)
+		if (!pWI1 || !pWI2)
 		{
 			ASSERT(0);
 			return 0;
@@ -4802,57 +3018,23 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 		switch (col.nBy)
 		{
 		case WLCC_TITLE:
-			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);
+			nCompare = Compare(pWI1->sTitle, pWI2->sTitle);
 			break;
 
 		case WLCC_STARTDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtStart, pGI2->dtStart, TRUE, FALSE);
+			nCompare = CDateHelper::Compare(pWI1->dtStart, pWI2->dtStart, TRUE, FALSE);
 			break;
 
 		case WLCC_DUEDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
-			break;
-
-		case WLCC_DONEDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
-			break;
-
-		case WLCC_ALLOCTO:
-			nCompare = Compare(pGI1->sAllocTo, pGI2->sAllocTo);
+			nCompare = CDateHelper::Compare(pWI1->dtDue, pWI2->dtDue, TRUE, TRUE);
 			break;
 
 		case WLCC_PERCENT:
-			nCompare = (pGI1->nPercent - pGI2->nPercent);
+			nCompare = (pWI1->nPercent - pWI2->nPercent);
 			break;
 
 		case WLCC_NONE:
-			nCompare = (pGI1->nPosition - pGI2->nPosition);
-			break;
-
-		case WLCC_TAGS:
-			{
-				CString sTags1 = Misc::FormatArray(pGI1->aTags);
-				CString sTags2 = Misc::FormatArray(pGI2->aTags);
-		
-				nCompare = Misc::NaturalCompare(sTags1, sTags2, TRUE);
-			}
-			break;
-
-		case WLCC_DEPENDENCY:
-			{
-				// If Task2 is dependent on Task1 then Task1 comes first
-				if (m_data.IsItemDependentOn(pGI2, dwTaskID1))
-				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID2, dwTaskID1, dwTaskID1);
-					nCompare = -1;
-				}
-				// else if Task1 is dependent on Task2 then Task2 comes first
-				else if (m_data.IsItemDependentOn(pGI1, dwTaskID2))
-				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID1, dwTaskID2, dwTaskID2);
-					nCompare = 1;
-				}
-			}
+			nCompare = (pWI1->nPosition - pWI2->nPosition);
 			break;
 
 		default:
@@ -4875,59 +3057,6 @@ int CWorkloadCtrl::Compare(const CString& sText1, const CString& sText2)
 	return Misc::NaturalCompare(sText1, sText2);
 }
 
-void CWorkloadCtrl::ScrollToToday()
-{
-	ScrollTo(COleDateTime::GetCurrentTime());
-}
-
-void CWorkloadCtrl::ScrollToSelectedTask()
-{
-	ScrollToTask(GetSelectedTaskID());
-}
-
-void CWorkloadCtrl::ScrollToTask(DWORD dwTaskID)
-{
-	WORKLOADITEM* pGI = NULL;
-	GET_GI(dwTaskID, pGI);
-	
-	COleDateTime dtStart, dtDue;
-	
-	if (GetTaskStartDueDates(*pGI, dtStart, dtDue))
-	{
-		ScrollTo(dtStart);
-	}
-	else if (HasDoneDate(*pGI))
-	{
-		ScrollTo(pGI->dtDone);
-	}
-}
-
-void CWorkloadCtrl::ScrollTo(const COleDateTime& date)
-{
-	COleDateTime dateOnly = CDateHelper::GetDateOnly(date);
-
-	int nStartPos = GetScrollPosFromDate(dateOnly);
-	int nEndPos = GetScrollPosFromDate(dateOnly.m_dt + 1.0);
-
-	// if it is already visible no need to scroll
-	int nListStart = m_lcColumns.GetScrollPos(SB_HORZ);
-
-	CRect rList;
-	m_lcColumns.GetClientRect(rList);
-
-	if ((nStartPos >= nListStart) && (nEndPos <= (nListStart + rList.Width())))
-		return;
-
-	// deduct current scroll pos for relative move
-	nStartPos -= nListStart;
-
-	// and arbitrary offset
-	nStartPos -= 50;
-
-	if (m_lcColumns.Scroll(CSize(nStartPos, 0)))
-		CWnd::Invalidate(FALSE);
-}
-
 BOOL CWorkloadCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) const
 {
 	if (ListView_GetSubItemRect(m_lcColumns, 0, nCol, LVIR_BOUNDS, &rColumn))
@@ -4942,206 +3071,6 @@ BOOL CWorkloadCtrl::GetListColumnRect(int nCol, CRect& rColumn, BOOL bScrolled) 
 	}
 
 	return FALSE;
-}
-
-BOOL CWorkloadCtrl::GetDateFromScrollPos(int nScrollPos, WLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
-{
-	CRect rMonth(rColumn);
-
-	// Clip 'rColumn' if displaying more than months
-	switch (nDisplay)
-	{
-	case WLC_DISPLAY_QUARTERCENTURIES:
-	case WLC_DISPLAY_DECADES:
-	case WLC_DISPLAY_YEARS:
-	case WLC_DISPLAY_QUARTERS_SHORT:
-	case WLC_DISPLAY_QUARTERS_MID:
-	case WLC_DISPLAY_QUARTERS_LONG:
-		{
-			double dMonthWidth = GetMonthWidth(nDisplay, rMonth.Width());
-
-			// calc month as offset to start of column
-			int nPxOffset = (nScrollPos - rMonth.left);
-			int nMonthOffset = (int)(nPxOffset / dMonthWidth);
-
-			// clip rect to this month
-			rMonth.left += nPxOffset;
-			rMonth.right = (rMonth.left + (int)dMonthWidth);
-
-			nMonth += nMonthOffset;
-
-			// Months here are one-based
-			nYear += ((nMonth - 1) / 12);
-			nMonth = (((nMonth - 1) % 12) + 1);
-		}
-		break;
-	}
-
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	int nNumMins = MulDiv((nScrollPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
-
-	int nDay = (1 + (nNumMins / MINS_IN_DAY));
-	int nHour = ((nNumMins % MINS_IN_DAY) / MINS_IN_HOUR);
-	int nMin = (nNumMins % MINS_IN_HOUR);
-
-	ASSERT(nDay >= 1 && nDay <= nDaysInMonth);
-	ASSERT(nHour >= 0 && nHour < 24);
-
-	date.SetDateTime(nYear, nMonth, nDay, nHour, nMin, 0);
-
-	return CDateHelper::IsDateSet(date);
-}
-
-BOOL CWorkloadCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
-{
-	// find the column containing this scroll pos
-	int nCol = FindColumn(nScrollPos);
-
-	if (nCol == -1)
-		return FALSE;
-
-	// else
-	CRect rColumn;
-	VERIFY(GetListColumnRect(nCol, rColumn, FALSE));
-	ASSERT(nScrollPos >= rColumn.left && nScrollPos < rColumn.right);
-
-	int nYear, nMonth;
-	VERIFY(GetListColumnDate(nCol, nMonth, nYear));
-
-	return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
-}
-
-int CWorkloadCtrl::GetDrawPosFromDate(const COleDateTime& date) const
-{
-	return (GetScrollPosFromDate(date) - m_lcColumns.GetScrollPos(SB_HORZ));
-}
-
-int CWorkloadCtrl::GetScrollPosFromDate(const COleDateTime& date) const
-{
-	// figure out which column contains 'date'
-	int nCol = FindColumn(date);
-
-	if (nCol != -1)
-	{
-		CRect rColumn;
-
-		if (GetListColumnRect(nCol, rColumn, FALSE))
-		{
-			int nDay = date.GetDay();
-			int nMonth = date.GetMonth();
-			int nYear = date.GetYear();
-
-			double dDayInCol = 0;
-			int nDaysInCol = 0;
-
-			switch (m_nMonthDisplay)
-			{
-			case WLC_DISPLAY_QUARTERCENTURIES:
-				// Column == 25 years
-				nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
-				break;
-
-			case WLC_DISPLAY_DECADES:
-				// Column == 10 years
-				nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-				dDayInCol = (int)(((nYear - GetStartYear(m_nMonthDisplay)) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
-				break;
-
-			case WLC_DISPLAY_YEARS:
-				// Column == 12 months
-				nDaysInCol = (int)DAYS_IN_YEAR;
-				dDayInCol = ((int)((nMonth - 1) * DAYS_IN_MONTH) + nDay);
-				break;
-				
-			case WLC_DISPLAY_QUARTERS_SHORT:
-			case WLC_DISPLAY_QUARTERS_MID:
-			case WLC_DISPLAY_QUARTERS_LONG:
-				// Column == 3 months
-				nDaysInCol = (int)(DAYS_IN_MONTH * 3);
-				dDayInCol = ((int)(((nMonth - 1) % 3) * DAYS_IN_MONTH) + nDay);
-				break;
-
-			default: 
-				// Column == Month
-				nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
-				dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
-				break;
-			}
-
-			ASSERT(nDaysInCol > 0);
-
-			if (nDaysInCol > 0)
-			{
-				double dOffset = ((rColumn.Width() * dDayInCol) / nDaysInCol);
-				return (rColumn.left + (int)dOffset);
-			}
-		}
-	}
-
-	// else
-	return 0;
-}
-
-int CWorkloadCtrl::GetDateInMonths(int nMonth, int nYear) const
-{
-	return ((nYear * 12) + (nMonth - 1));
-}
-
-int CWorkloadCtrl::FindColumn(int nMonth, int nYear) const
-{	
-	int nMonths = GetDateInMonths(nMonth, nYear);
-	int nNumReqColumns = GetRequiredListColumnCount();
-
-	for (int i = 1; i <= nNumReqColumns; i++)
-	{
-		// get date for current column
-		VERIFY (GetListColumnDate(i, nMonth, nYear));
-
-		if (nMonths >= GetDateInMonths(nMonth, nYear))
-		{
-			if (i == nNumReqColumns)
-			{
-				return i;
-			}
-			else // get date for next column
-			{
-				VERIFY (GetListColumnDate(i+1, nMonth, nYear));
-				
-				if (nMonths < GetDateInMonths(nMonth, nYear))
-				{
-					return i;
-				}
-			}
-		}
-	}
-
-	// not found
-	return -1;
-}
-
-int CWorkloadCtrl::FindColumn(const COleDateTime& date) const
-{
-	return FindColumn(date.GetMonth(), date.GetYear());
-}
-
-int CWorkloadCtrl::FindColumn(int nScrollPos) const
-{
-	ASSERT(m_hdrColumns.GetItemCount() > 0);
-
-	int nNumReqColumns = GetRequiredListColumnCount();
-
-	for (int i = 1; i <= nNumReqColumns; i++)
-	{
-		CRect rColumn;
-		VERIFY(GetListColumnRect(i, rColumn, FALSE));
-
-		if ((nScrollPos >= rColumn.left) && (nScrollPos < rColumn.right))
-			return i;
-	}
-
-	// not found
-	return -1;
 }
 
 bool CWorkloadCtrl::PrepareNewTask(ITaskList* pTaskList) const
@@ -5239,15 +3168,15 @@ CString CWorkloadCtrl::GetItemTip(CPoint ptScreen) const
 			if (rItem.PtInRect(ptClient))
 			{
 				DWORD dwTaskID = GetTaskID(htiHit);
-				WORKLOADITEM* pGI = NULL;
+				WORKLOADITEM* pWI = NULL;
 
-				GET_GI_RET(dwTaskID, pGI, _T(""));
+				GET_WI_RET(dwTaskID, pWI, _T(""));
 
-				int nTextLen = GraphicsMisc::GetTextWidth(pGI->sTitle, m_tcTasks);
+				int nTextLen = GraphicsMisc::GetTextWidth(pWI->sTitle, m_tcTasks);
 				rItem.DeflateRect(TV_TIPPADDING, 0);
 
 				if (nTextLen > rItem.Width())
-					return pGI->sTitle;
+					return pWI->sTitle;
 			}
 		}
 	}
@@ -5304,14 +3233,8 @@ int CWorkloadCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 	{
 		ASSERT(lvht.iItem != -1);
 
-		// convert pos to date
-		COleDateTime dtHit;
-
-		if (GetDateFromPoint(lvht.pt, dtHit))
-		{
-			nCol = lvht.iSubItem;
-			return lvht.iItem;
-		}
+		nCol = lvht.iSubItem;
+		return lvht.iItem;
 	}
 
 	// all else
@@ -5361,14 +3284,6 @@ void CWorkloadCtrl::RedrawTree(BOOL bErase)
 {
 	m_tcTasks.InvalidateRect(NULL, bErase);
 	m_tcTasks.UpdateWindow();
-}
-
-BOOL CWorkloadCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
-{
-	// convert pos to date
-	int nScrollPos = (m_lcColumns.GetScrollPos(SB_HORZ) + ptCursor.x);
-
-	return GetDateFromScrollPos(nScrollPos, date);
 }
 
 void CWorkloadCtrl::SetReadOnly(bool bReadOnly) 
@@ -5544,19 +3459,8 @@ BOOL CWorkloadCtrl::SaveToImage(CBitmap& bmImage)
 
 	ResizeColumnsToFit();	
 
-	// Calculate the date range in scroll units
-	// allow a month's buffer at each end
-	COleDateTime dtFrom = CDateHelper::GetStartOfMonth(m_dateRange.GetStart());
-	COleDateTime dtTo = CDateHelper::GetEndOfMonth(m_dateRange.GetEnd());
-
-	CDateHelper::IncrementMonth(dtFrom, -1);
-	CDateHelper::IncrementMonth(dtTo, 1);
-
-	int nFrom = GetScrollPosFromDate(dtFrom);
-	int nTo = GetScrollPosFromDate(dtTo);
-
-	if (nTo == nFrom)
-		nTo = -1;
+	int nFrom = 0, nTo = -1;
+	// TODO
 	
 	BOOL bRes = CTreeListSyncer::SaveToImage(bmImage, nFrom, nTo);
 	
@@ -5599,8 +3503,6 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	
 	m_tcTasks.SetFont(CFont::FromHandle(hFont), bRedraw);
 
-	CalcMinMonthWidths();
-	SetMonthDisplay(m_nMonthDisplay);
 	ResizeColumnsToFit();
 
 	return TRUE;

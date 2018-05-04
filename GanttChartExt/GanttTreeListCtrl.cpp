@@ -6007,7 +6007,7 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 			break;
 
 		case GTLCC_DONEDATE:
-			nCompare = CDateHelper::Compare(pGI1->dtDue, pGI2->dtDue, TRUE, TRUE);
+			nCompare = CDateHelper::Compare(pGI1->dtDone, pGI2->dtDone, TRUE, TRUE);
 			break;
 
 		case GTLCC_ALLOCTO:
