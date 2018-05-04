@@ -1311,7 +1311,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				//DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
 				if (pWI->bHasIcon || pWI->bParent)
@@ -2454,8 +2454,20 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	}
 }
 
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
+BOOL CWorkloadCtrl::IsVerticalDivider(DIV_TYPE nType)
 {
+	switch (nType)
+	{
+	case DIV_VERT_LIGHT:
+	case DIV_VERT_MID:
+	case DIV_VERT_DARK:
+		return TRUE;
+	}
+	
+	// else
+	return FALSE;
+}
+
 void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
 	if (!HasGridlines() || (nType == DIV_NONE) || (IsVerticalDivider(nType) && (rItem.right < 0)))
@@ -2497,9 +2509,13 @@ void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType
 	pDC->FillSolidRect(rDiv, color);
 	pDC->SetBkColor(crOld);
 }
+
+
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
+{
 	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && gi.bDone);
 	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
-
+	
 	return m_tcTasks.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
 }
 
@@ -2585,17 +2601,19 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	
 	if (rColumn.left > rClip.right)
 		return FALSE; // we can stop
+	
+	DrawItemDivider(pDC, rColumn, DIV_HORZ, bSelected);
 
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected);
 }
 
-BOOL CWorkloadCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WORKLOADITEM& gi, BOOL bSelected)
+BOOL CWorkloadCtrl::DrawListItemColumnRect(CDC* /*pDC*/, int /*nCol*/, const CRect& /*rColumn*/, const WORKLOADITEM& /*gi*/, BOOL /*bSelected*/)
 {
 	// TODO
 	return TRUE;
 }
 
-void CWorkloadCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
+void CWorkloadCtrl::DrawListHeaderItem(CDC* /*pDC*/, int nCol)
 {
 	CRect rItem;
 	m_hdrColumns.GetItemRect(nCol, rItem);

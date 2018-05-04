@@ -210,8 +210,11 @@ protected:
 	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BOOL bSelected);
 	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& gi, BOOL bSelected);
 	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WORKLOADITEM& gi, BOOL bSelected);
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 	void DrawListItemText(CDC* pDC, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow);
+
+	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
+
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 
 	void BuildListColumns();
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
@@ -295,6 +298,7 @@ protected:
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
+	static BOOL IsVerticalDivider(DIV_TYPE nType);
 
 private:
 	void PreFixVScrollSyncBug();
