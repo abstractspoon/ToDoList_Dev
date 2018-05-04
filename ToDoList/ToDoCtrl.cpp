@@ -12688,7 +12688,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, nFromAttrib, nToAttrib);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, nToAttrib);
 
 		if (nItemRes == SET_CHANGE)
 		{
@@ -12729,7 +12729,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, nFromAttrib, sToCustomAttribID);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, sToCustomAttribID);
 
 		if (nItemRes == SET_CHANGE)
 		{
@@ -12781,7 +12781,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, sFromCustomAttribID, nToAttrib);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, nToAttrib);
 
 		if (nItemRes == SET_CHANGE)
 		{
@@ -12826,7 +12826,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		TDC_SET nItemRes = m_data.CopyTaskAttributeData(dwTaskID, sFromCustomAttribID, sToCustomAttribID);
+		TDC_SET nItemRes = m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, sToCustomAttribID);
 
 		if (nItemRes == SET_CHANGE)
 		{

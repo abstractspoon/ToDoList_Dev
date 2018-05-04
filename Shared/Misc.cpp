@@ -665,6 +665,16 @@ int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CStrin
 	return nNumReplaced;
 }
 
+int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	int nNumReplaced = 0, nItem = aSearchIn.GetSize();
+
+	while (nItem--)
+		nNumReplaced += Replace(sSearchFor, sReplaceWith, aSearchIn[nItem], bCaseSensitive, bWholeWord);
+
+	return nNumReplaced;
+}
+
 BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 {
 	if (IsEmpty(szPrefix))

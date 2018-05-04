@@ -3365,29 +3365,29 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
 	TDCCADATA data;
 
-	if (!GetTaskAttributeData(dwTaskID, nFromAttrib, data))
+	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
 		return SET_FAILED;
 
 	// else
-	return SetTaskAttributeData(dwTaskID, nToAttrib, data);
+	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	TDCCADATA data;
 
-	if (!GetTaskAttributeData(dwTaskID, nFromAttrib, data))
+	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
 		return SET_FAILED;
 
 	// else
 	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
 }
 
-BOOL CToDoCtrlData::GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const
+BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const
 {
 	data.Clear();
 
@@ -3462,7 +3462,7 @@ BOOL CToDoCtrlData::GetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, 
 	return !data.IsEmpty();
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -3472,10 +3472,10 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 	if (!pTDI->GetCustomAttributeValues().Lookup(sFromCustomAttribID, data))
 		return SET_FAILED;
 
-	return SetTaskAttributeData(dwTaskID, nToAttrib, data);
+	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
 }
 
-TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data)
+TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data)
 {
 	switch (nAttrib)
 	{
@@ -3549,7 +3549,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeData(DWORD dwTaskID, TDC_ATTRIBUTE nAttri
 	return SET_FAILED;
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -3561,3 +3561,94 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeData(DWORD dwTaskID, const CString& sFro
 
 	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
 }
+
+TDC_SET CToDoCtrlData::RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	TDC_SET nRes = SET_NOCHANGE;
+	TDCCADATA data;
+
+	DWORD dwTaskID = 0;
+	TODOITEM* pTDI = NULL;
+	POSITION pos = m_items.GetStartPosition();
+	
+	while (pos && (nRes != SET_FAILED))
+	{
+		m_items.GetNextAssoc(pos, dwTaskID, pTDI);
+
+		if (pTDI->GetCustomAttributeValue(sAttribID, data))
+		{
+			if (Misc::Find(sFrom, data.AsString(), bCaseSensitive, bWholeWord) != -1)
+			{
+				// save undo data
+				SaveEditUndo(dwTaskID, pTDI, TDCA_CUSTOMATTRIB);
+
+				CString sValue(data.AsString());
+				VERIFY(Misc::Replace(sFrom, sTo, sValue, bCaseSensitive, bWholeWord));
+
+				pTDI->SetCustomAttributeValue(sAttribID, sValue);
+				pTDI->SetModified();
+
+				nRes = SET_CHANGE;
+			}
+		}
+	}
+
+	return nRes;
+}
+
+TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwTaskID = 0;
+	TODOITEM* pTDI = NULL;
+	POSITION pos = m_items.GetStartPosition();
+	
+	while (pos && (nRes != SET_FAILED))
+	{
+		m_items.GetNextAssoc(pos, dwTaskID, pTDI);
+
+		if (TaskHasAttributeValue(pTDI, nAttrib, sFrom, bCaseSensitive, bWholeWord))
+		{
+			// save undo data
+			SaveEditUndo(dwTaskID, pTDI, nAttrib);
+
+			switch (nAttrib)
+			{
+			case TDCA_VERSION:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->sVersion, bCaseSensitive, bWholeWord));
+			case TDCA_ALLOCBY:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->sAllocBy, bCaseSensitive, bWholeWord));
+			case TDCA_EXTERNALID:	VERIFY(Misc::Replace(sFrom, sTo, pTDI->sExternalID, bCaseSensitive, bWholeWord));
+			case TDCA_STATUS:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->sStatus, bCaseSensitive, bWholeWord));
+
+			case TDCA_ALLOCTO:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->aAllocTo, bCaseSensitive, bWholeWord));
+			case TDCA_CATEGORY:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->aCategories, bCaseSensitive, bWholeWord));
+			case TDCA_TAGS:			VERIFY(Misc::Replace(sFrom, sTo, pTDI->aTags, bCaseSensitive, bWholeWord));
+			}
+
+			pTDI->SetModified();
+			nRes = SET_CHANGE;
+		}
+	}
+
+	return nRes;
+}
+
+BOOL CToDoCtrlData::TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
+{
+	switch (nAttrib)
+	{
+	case TDCA_VERSION:		return (Misc::Find(sText, pTDI->sVersion, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_ALLOCBY:		return (Misc::Find(sText, pTDI->sAllocBy, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_EXTERNALID:	return (Misc::Find(sText, pTDI->sExternalID, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_STATUS:		return (Misc::Find(sText, pTDI->sStatus, bCaseSensitive, bWholeWord) != -1);
+		
+	case TDCA_ALLOCTO:		return Misc::Contains(sText, pTDI->aAllocTo, bCaseSensitive, bWholeWord);
+	case TDCA_CATEGORY:		return Misc::Contains(sText, pTDI->aCategories, bCaseSensitive, bWholeWord);		
+	case TDCA_TAGS:			return Misc::Contains(sText, pTDI->aTags, bCaseSensitive, bWholeWord);
+		
+	default:
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
