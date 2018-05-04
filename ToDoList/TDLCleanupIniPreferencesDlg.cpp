@@ -189,7 +189,7 @@ void CTDLCleanupIniPreferencesDlg::OnOK()
 				VERIFY(prefs.DeleteProfileSection(sSection, TRUE));
 
 			// MRU
-			int nFind = Misc::Find(m_aMRU, sTasklist, FALSE, FALSE);
+			int nFind = Misc::Find(sTasklist, m_aMRU, FALSE, FALSE);
 
 			while (nFind != -1)
 			{
@@ -197,18 +197,18 @@ void CTDLCleanupIniPreferencesDlg::OnOK()
 				m_aMRU.RemoveAt(nFind);
 
 				bMRUChange = TRUE;
-				nFind = Misc::Find(m_aMRU, sTasklist, FALSE, FALSE);
+				nFind = Misc::Find(sTasklist, m_aMRU, FALSE, FALSE);
 			}
 
 			// Last Open tasklists
-			nFind = Misc::Find(m_aLastOpen, sTasklist);
+			nFind = Misc::Find(sTasklist, m_aLastOpen);
 			
 			while (nFind != -1)
 			{
 				m_aLastOpen.RemoveAt(nFind);
 				
 				bLastOpenChange = TRUE;
-				nFind = Misc::Find(m_aLastOpen, sTasklist);
+				nFind = Misc::Find(sTasklist, m_aLastOpen);
 			}
 
 			if (Misc::Find(sTasklist, m_sLastActiveFile, FALSE) != -1)

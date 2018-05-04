@@ -1339,7 +1339,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		
 		while (nVal--)
 		{
-			if (!Misc::Contains(aNewValues, aCurValues[nVal]))
+			if (!Misc::Contains(aCurValues[nVal], aNewValues))
 			{
 				CKanbanListCtrl* pCurList = GetListCtrl(aCurValues[nVal]);
 				ASSERT(pCurList);
@@ -1360,7 +1360,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		
 		while (nVal--)
 		{
-			if (!Misc::Contains(aCurValues, aNewValues[nVal]))
+			if (!Misc::Contains(aNewValues[nVal], aCurValues))
 			{
 				CKanbanListCtrl* pCurList = GetListCtrl(aNewValues[nVal]);
 				

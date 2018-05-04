@@ -219,7 +219,7 @@ BOOL COdbcTaskReader::PopulateTask(ODBCTASK& task)
 			{
 				if (!m_sAllocToFilter.IsEmpty())
 				{
-					if (!Misc::Contains(task.aAllocTo, m_sAllocToFilter, FALSE, FALSE))
+					if (!Misc::Contains(m_sAllocToFilter, task.aAllocTo, FALSE, FALSE))
 						return FALSE;
 				}
 			}

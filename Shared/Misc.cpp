@@ -944,7 +944,7 @@ BOOL Misc::MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL
 		const CString& sItem1 = GetItem(array1, nItem1);
 
 		// look for matching item in array2
-		if (Find(array2, sItem1, bCaseSensitive, FALSE) == -1)
+		if (Find(sItem1, array2, bCaseSensitive, FALSE) == -1)
 		{
 			// no-match found == not the same
 			return FALSE;
@@ -963,7 +963,7 @@ BOOL Misc::MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL
 		const CString& sItem1 = GetItem(array1, nItem1);
 
 		// look for matching item
-		if (Find(array2, sItem1, bCaseSensitive, bWholeWord) != -1)
+		if (Find(sItem1, array2, bCaseSensitive, bWholeWord) != -1)
 			return TRUE;
 	}
 	
@@ -1018,7 +1018,7 @@ BOOL Misc::MatchAny(const CDWordArray& array1, const CDWordArray& array2)
 	return FALSE;
 }
 
-int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bWholeWord)
+int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	ASSERT (szItem);
 
@@ -1047,9 +1047,9 @@ int Misc::Find(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, B
 	return -1;
 }
 
-BOOL Misc::Contains(const CStringArray& array, LPCTSTR szItem, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL Misc::Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, BOOL bWholeWord)
 {
-	return (Find(array, szItem, bCaseSensitive, bWholeWord) != -1);
+	return (Find(szItem, array, bCaseSensitive, bWholeWord) != -1);
 }
 
 const CString& Misc::GetItem(const CStringArray& array, int nItem)
@@ -1103,7 +1103,7 @@ int Misc::RemoveItems(const CStringArray& array, CStringArray& aFrom, BOOL bCase
 
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 {
-	int nFind = Find(aFrom, szItem, bCaseSensitive, FALSE);
+	int nFind = Find(szItem, aFrom, bCaseSensitive, FALSE);
 	
 	if (nFind == -1)
 		return -1;
@@ -1116,7 +1116,7 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 
 BOOL Misc::RemoveItem(DWORD dwItem, CDWordArray& aFrom)
 {
-	int nFind = Find(aFrom, dwItem);
+	int nFind = Find(dwItem, aFrom);
 
 	if (nFind == -1)
 		return -1;
@@ -1125,7 +1125,7 @@ BOOL Misc::RemoveItem(DWORD dwItem, CDWordArray& aFrom)
 	return TRUE;
 }
 
-int Misc::Find(const CDWordArray& array, DWORD dwItem)
+int Misc::Find(DWORD dwItem, const CDWordArray& array)
 {
 	int nItem = array.GetSize();
 
@@ -1160,7 +1160,7 @@ BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSens
 	if (sItem.IsEmpty())
 		return FALSE;
 
-	int nFind = Find(aTo, sItem, bCaseSensitive, FALSE);
+	int nFind = Find(sItem, aTo, bCaseSensitive, FALSE);
 
 	if (nFind == -1) // doesn't already exist
 	{

@@ -873,7 +873,7 @@ BOOL CCheckComboBox::ToggleCheck(int nItem)
 		// tri-state checkbox
 		{
 			CString sItem = GetItemText(nItem);
-			BOOL bTriState = Misc::Contains(m_aMixedItems, sItem, FALSE, FALSE);
+			BOOL bTriState = Misc::Contains(sItem, m_aMixedItems, FALSE, FALSE);
 
 			if (bTriState)
 				nCheck = CCBC_MIXED;

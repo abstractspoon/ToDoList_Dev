@@ -205,7 +205,7 @@ void CTDLTaskIconDlg::BuildListCtrl()
 			}
 			else
 			{
-				if (Misc::Contains(m_aIconNames, sBaseName, FALSE, FALSE))
+				if (Misc::Contains(sBaseName, m_aIconNames, FALSE, FALSE))
 				{
 					m_lcIcons.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
 

@@ -124,7 +124,7 @@ void CTDCUIExtensionHelper::PrepareViewVisibilityMenu(CMenu* pMenu, const CUIExt
 		
 		// check state
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
-		BOOL bVisible = Misc::Contains(aTypeIDs, sTypeID, FALSE, FALSE);
+		BOOL bVisible = Misc::Contains(sTypeID, aTypeIDs, FALSE, FALSE);
 		
 		pMenu->CheckMenuItem(nMenuID, bVisible ? MF_CHECKED : 0);
 	}
@@ -137,7 +137,7 @@ BOOL CTDCUIExtensionHelper::ProcessViewVisibilityMenuCmd(UINT nCmdID, const CUIE
 	if (nExt >= 0 && nExt < 16)
 	{
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
-		int nFind = Misc::Find(aTypeIDs, sTypeID, FALSE, FALSE);
+		int nFind = Misc::Find(sTypeID, aTypeIDs, FALSE, FALSE);
 		
 		// toggle visibility
 		if (nFind == -1)

@@ -793,7 +793,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 		default:
 			{
-				int nFind = Misc::Find(aDefaultListData, sItem, FALSE, FALSE);
+				int nFind = Misc::Find(sItem, aDefaultListData, FALSE, FALSE);
 				ASSERT((nFind != -1) || sItem.IsEmpty());
 
 				if (bNext)
@@ -824,7 +824,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString GetImageName(const CString& sImage) const
 	{
 		CString sName;
-		int nTag = Misc::Find(aDefaultListData, sImage);
+		int nTag = Misc::Find(sImage, aDefaultListData);
 
 		if (nTag != -1)
 		{
