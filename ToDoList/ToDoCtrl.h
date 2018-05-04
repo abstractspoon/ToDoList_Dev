@@ -431,8 +431,8 @@ public:
 	void SetAlternatePreferencesKey(const CString& sKey) { m_sAltPrefsKey = sKey; }
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
 
-	virtual void NotifyBeginPreferencesUpdate() {}
-	virtual void NotifyEndPreferencesUpdate() {}
+	virtual void NotifyBeginPreferencesUpdate(BOOL bFirst);
+	virtual void NotifyEndPreferencesUpdate(BOOL bFirst);
 	virtual void UpdateVisibleColumns();
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	virtual TDC_COLUMN ColumnHitTest(const CPoint& ptScreen) const;
@@ -811,6 +811,7 @@ protected:
 	void EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly);
 	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
+	int GetDefaultControlHeight() const;
 
 	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CDlgUnits* pDLU, 
 						const CRect& rItem, int nClientRight);

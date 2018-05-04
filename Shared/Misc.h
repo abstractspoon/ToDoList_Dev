@@ -367,8 +367,7 @@ namespace Misc
 	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 
-	double Round(double dValue);
-	float Round(float fValue);
+	int Round(double dValue);
 	double Atof(const CString& sValue);
 	CString Format(double dVal, int nDecPlaces, LPCTSTR szTrail);
 	CString Format(double dVal, int nDecPlaces = -1);

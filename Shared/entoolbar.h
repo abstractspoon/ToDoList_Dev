@@ -74,6 +74,7 @@ protected:
 	BOOL HasBkgndColor() const { return m_crFrom != CLR_NONE; }
 	COLORREF GetHotColor() const;
 	
+	void SetImageSize(int cx, int cy);
 	BOOL SetImage(CEnBitmapEx* pBitmap, COLORREF crMask);
 	void RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask);
 	void RefreshDisabledImageList();

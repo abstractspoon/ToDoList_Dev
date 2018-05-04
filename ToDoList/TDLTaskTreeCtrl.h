@@ -75,7 +75,6 @@ public:
 	inline BOOL IsItemSelected(HTREEITEM hti) const { return TSH().HasItem(hti); }
 	inline BOOL IsTaskSelected(DWORD dwTaskID) const { return TSH().HasItem(dwTaskID); }
 
-	void OnEndRebuild();
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
@@ -145,6 +144,8 @@ public:
 
 	void OnStyleUpdated(TDC_STYLE nStyle, BOOL bOn, BOOL bDoUpdate);
 	void OnStylesUpdated();
+	void OnEndRebuild();
+	void OnUndoRedo(BOOL bUndo);
 	
 #ifdef _DEBUG
 	void Trace(LPCTSTR szComment);

@@ -739,7 +739,7 @@ protected:
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
 
-	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
+	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl, BOOL bFirst);
 	void UpdateActiveToDoCtrlPreferences();
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();

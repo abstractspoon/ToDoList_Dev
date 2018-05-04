@@ -5030,6 +5030,9 @@ void CToDoListWnd::DoPreferences(int nInitPage)
 		if (bResizeDlg)
 			Resize();
 
+		Invalidate();
+		UpdateWindow();
+
 		// Stickies Support
 		CString sStickiesPath;
 
@@ -7745,7 +7748,10 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 													vis);
 	
 	// create somewhere out in space but with a meaningful size
-	CRect rCtrl(-33000, -33000, -31000, -31000);
+	CRect rCtrl;
+
+	CalcToDoCtrlRect(rCtrl);
+	rCtrl.OffsetRect(-30000, -30000);
 	
 	if (pTDC && pTDC->Create(rCtrl, this, IDC_TODOLIST, bVisible, bEnabled))
 	{
@@ -7761,7 +7767,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		pTDC->SetUITheme(m_theme);
 		
 		// rest of runtime preferences
-		UpdateToDoCtrlPreferences(pTDC);
+		UpdateToDoCtrlPreferences(pTDC, TRUE);
 
 		if (bFirstTDC)
 		{
@@ -7938,7 +7944,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		}
 
 		CFilteredToDoCtrl& tdcShow = GetToDoCtrl(nCurSel);
-		UpdateToDoCtrlPreferences(&tdcShow);
+		UpdateToDoCtrlPreferences(&tdcShow, FALSE);
 
 		// update the filter selection
  		RefreshFilterBarControls();
@@ -8456,7 +8462,7 @@ void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
 	{
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
 
-		UpdateToDoCtrlPreferences(&tdc);
+		UpdateToDoCtrlPreferences(&tdc, FALSE);
 
 		// and filter bar relies on this tdc's visible columns
 		m_filterBar.SetVisibleFilters(tdc.GetVisibleFilterFields());
@@ -8466,14 +8472,14 @@ void CToDoListWnd::UpdateActiveToDoCtrlPreferences()
 	}
 }
 
-void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
+void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC, BOOL bFirst)
 {
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl& tdc = *pTDC;
 
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
-												m_fontMain, m_fontTree, m_fontComments);
+												m_fontMain, m_fontTree, m_fontComments, bFirst);
 }
 
 void CToDoListWnd::OnSaveall() 

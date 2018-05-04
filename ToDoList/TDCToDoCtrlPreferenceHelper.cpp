@@ -6,16 +6,16 @@
 #include "TDCToDoCtrlPreferenceHelper.h"
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
-													BOOL bShowProjectName, BOOL bShowTreeListBar)
+													BOOL bShowProjectName, BOOL bShowTreeListBar, BOOL bFirst)
 {
-	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar);
+	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar, bFirst);
 }
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, const TODOITEM& tdiDefault, 
 													BOOL bShowProjectName, BOOL bShowTreeListBar, 
-													const CFont& fontMain, CFont& fontTree, CFont& fontComments)
+													const CFont& fontMain, CFont& fontTree, CFont& fontComments, BOOL bFirst)
 {
-	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar);
+	UpdateToDoCtrlPrefs(tdc, prefs, bShowProjectName, bShowTreeListBar, bFirst);
 
 	// Fonts handled separately from rest of preferences
 	UpdateToDoCtrl(tdc, prefs, fontMain, fontTree, fontComments);
@@ -56,9 +56,9 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const 
 }
 
 void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, 
-														BOOL bShowProjectName, BOOL bShowTreeListBar)
+														BOOL bShowProjectName, BOOL bShowTreeListBar, BOOL bFirst)
 {
-	tdc.NotifyBeginPreferencesUpdate();
+	tdc.NotifyBeginPreferencesUpdate(bFirst);
 
 	CTDCStylesMap styles;
 
@@ -198,5 +198,5 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	tdc.SetCompletionStatus(sStatus);
 
 	// we're done
-	tdc.NotifyEndPreferencesUpdate();
+	tdc.NotifyEndPreferencesUpdate(bFirst);
 }

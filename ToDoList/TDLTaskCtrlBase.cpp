@@ -332,7 +332,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 				sTooltip += sDepends; // always
 
 				// If local, append task name
-				if (dwDependID > 0)
+				if ((dwDependID != 0) && m_data.HasTask(dwDependID))
 				{
 					sTooltip += ' ';
 					sTooltip += '(';
@@ -940,7 +940,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, RGB(255, 0, 255)) == -1))
 		return FALSE;
 	
-	m_ilColSymbols.ScaleByDPIFactor();
+	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253));
 
 	// primary header
 	const TDCCOLUMN* pClient = GetColumn(TDCC_CLIENT);
@@ -1151,7 +1151,7 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	if (aOrder.GetSize() || aWidths.GetSize() || aTracked.GetSize())
 		SetSplitPos(prefs.GetProfileInt(sKey, _T("SplitPos"), 300));
 	else
-		SetSplitPos(CalcSplitterPosToFitColumns());
+		SetSplitPos(CalcSplitterPosToFitListColumns());
 
 	RefreshSize();
 
@@ -3618,7 +3618,7 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			
 			if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(ptCursor))
 			{
-				ResizeSplitterToFitColumns();
+				AdjustSplitterToFitAttributeColumns();
 				return 0L; // eat
 			}
 		}
@@ -3692,7 +3692,7 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
 }
 
-int CTDLTaskCtrlBase::CalcSplitterPosToFitColumns() const
+int CTDLTaskCtrlBase::CalcSplitterPosToFitListColumns() const
 {
 	int nFirst = m_hdrColumns.GetFirstVisibleItem();
 	ASSERT(nFirst != -1);
@@ -3724,9 +3724,9 @@ int CTDLTaskCtrlBase::CalcSplitterPosToFitColumns() const
 	return nNewSplitPos;
 }
 
-void CTDLTaskCtrlBase::ResizeSplitterToFitColumns()
+void CTDLTaskCtrlBase::AdjustSplitterToFitAttributeColumns()
 {
-	int nNewSplitPos = CalcSplitterPosToFitColumns();
+	int nNewSplitPos = CalcSplitterPosToFitListColumns();
 
 	if (nNewSplitPos != GetSplitPos())
 	{

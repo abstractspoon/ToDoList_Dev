@@ -1722,7 +1722,40 @@ double GraphicsMisc::GetDPIScaleFactor()
 
 BOOL GraphicsMisc::WantDPIScaling()
 {
-	return (GetDPIScaleFactor() > 1.0);
+	typedef enum PROCESSDPIAWARENESS
+	{
+		DPI_UNAWARE            = 0,
+		SYSTEM_DPI_AWARE       = 1,
+		PER_MONITOR_DPI_AWARE  = 2
+	};
+
+	typedef HRESULT (WINAPI *PFNGETPROCESSDPIAWARENESS)(HANDLE, PROCESSDPIAWARENESS*);
+
+	static BOOL bWantDPIScaling = -1;
+
+	if (bWantDPIScaling == -1)
+	{
+		HMODULE hMod = ::LoadLibrary(_T("Shcore.dll"));
+		bWantDPIScaling = FALSE;
+
+		if (hMod)
+		{
+			PFNGETPROCESSDPIAWARENESS pFn = (PFNGETPROCESSDPIAWARENESS)::GetProcAddress(hMod, "GetProcessDpiAwareness");
+
+			if (pFn)
+			{
+				PROCESSDPIAWARENESS nAwareness = DPI_UNAWARE;
+
+				if (pFn(NULL, &nAwareness) == S_OK)
+				{
+					if (nAwareness != DPI_UNAWARE)
+						bWantDPIScaling = (GetDPIScaleFactor() > 1.0);
+				}
+			}
+		}
+	}
+
+	return bWantDPIScaling;
 }
 
 BOOL GraphicsMisc::ScaleByDPIFactor(LPRECT pRect)

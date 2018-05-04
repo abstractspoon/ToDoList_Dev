@@ -327,6 +327,13 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 	RecalcColumnWidths();
 }
 
+void CTDLTaskTreeCtrl::OnUndoRedo(BOOL bUndo)
+{
+	CTDLTaskCtrlBase::OnUndoRedo(bUndo);
+
+	RefreshTreeItemMap();
+}
+
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
 {
 	if (GetSelectedCount())
@@ -1900,6 +1907,7 @@ void CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 				htiFirst = htiAfter;
 		}
 		
+		RefreshTreeItemMap();
 		RestoreSelection(cache);
 	}
 		

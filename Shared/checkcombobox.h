@@ -103,6 +103,7 @@ protected:
 	virtual int GetExtraListboxWidth() const;
 	virtual void HandleReturnKey();
 	virtual CString GetSelectedItemText() const;
+	virtual BOOL HasIcon() const { return TRUE; }
 
 protected:
 	void RecalcText(BOOL bUpdate = TRUE, BOOL bNotify = TRUE);

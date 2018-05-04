@@ -1441,27 +1441,13 @@ WCHAR* Misc::MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage)
 	return wTo;
 }
 
-double Misc::Round(double dValue)
+int Misc::Round(double dValue)
 {
 	if (dValue > 0)
-	{
-		if ((dValue - (int)dValue) > 0.5)
-			return ceil(dValue);
-		else
-			return floor(dValue);
-	}
-	else
-	{
-		if ((dValue - (int)dValue) > -0.5)
-			return floor(dValue);
-		else
-			return ceil(dValue);
-	}
-}
+		return (int)(dValue + 0.5);
 
-float Misc::Round(float fValue)
-{
-	return (float)Round((double)fValue);
+	// else
+	return (int)(dValue - 0.5);
 }
 
 BOOL Misc::IsNumber(const CString& sValue)

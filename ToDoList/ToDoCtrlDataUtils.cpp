@@ -1918,11 +1918,11 @@ int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUC
 		// just to keep the logic for each as clear as possible
 		if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
 		{
-			nPercent = (int)Misc::Round(GetWeightedPercentDone(pTDI, pTDS));
+			nPercent = Misc::Round(GetWeightedPercentDone(pTDI, pTDS));
 		}
 		else
 		{
-			nPercent = (int)Misc::Round(GetPercentDone(pTDI, pTDS));
+			nPercent = Misc::Round(GetPercentDone(pTDI, pTDS));
 		}
 	}
 

@@ -598,20 +598,6 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	return dtTemp;
 }
 
-int GANTTDATERANGE::Compare(const COleDateTime& date) const
-{
-	ASSERT(CDateHelper::IsDateSet(date) && IsValid());
-
-	if (date < dtStart)
-		return -1;
-
-	if (date > dtEnd)
-		return 1;
-
-	// else
-	return 0; // contains
-}
-
 BOOL GANTTDATERANGE::IsValid() const
 {
 	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtEnd) &&
@@ -625,9 +611,17 @@ BOOL GANTTDATERANGE::IsEmpty() const
 	return (dtEnd == dtStart);
 }
 
-BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi)
+BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
 {
-	return ((Compare(gi.dtStart) == 0) && (Compare(gi.dtDue) == 0));
+	ASSERT(IsValid());
+
+	if (!gi.HasStart() || (gi.dtStart < dtStart) || (gi.dtStart > dtEnd))
+		return FALSE;
+
+	if (!gi.HasDue() || (gi.dtDue < dtStart) || (gi.dtDue > dtEnd))
+		return FALSE;
+
+	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////

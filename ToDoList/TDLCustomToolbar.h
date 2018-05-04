@@ -21,7 +21,10 @@ class CToolbarHelper;
 
 struct TOOLBARBUTTON
 {
-	TOOLBARBUTTON() : nMenuID(0) {}
+	TOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
+		: nMenuID(nID), sImageID(szImage) 
+	{
+	}
 
 	BOOL operator==(const TOOLBARBUTTON& tbOther) const
 	{

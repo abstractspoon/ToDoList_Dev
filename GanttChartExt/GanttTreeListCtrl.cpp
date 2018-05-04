@@ -606,6 +606,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 			
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
+			UpdateParentStatus(pTasks, NULL, TRUE);
 
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
@@ -787,12 +788,6 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 
 		if (dwParentID)
 		{
-			if (!m_data.HasItem(dwParentID))
-			{
-				ASSERT(0);
-				return FALSE;
-			}
-
 			htiParent = GetTreeItem(dwParentID);
 
 			if (!htiParent)
@@ -800,6 +795,12 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 				ASSERT(0);
 				return FALSE;
 			}
+
+			// Ensure 'parent' status
+			GANTTITEM* pGIParent = NULL;
+			GET_GI_RET(dwParentID, pGIParent, FALSE);
+
+			pGIParent->bParent = TRUE;
 		}
 
 		// Before anything else we increment the position of 
@@ -844,7 +845,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		
 	if (attrib.Has(IUI_STARTDATE))
 	{
-		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
+		if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
 		{
 			pGI->dtStart = pGI->dtMinStart = GetDate(tDate, FALSE); // start of day
 		}
@@ -857,7 +858,7 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	
 	if (attrib.Has(IUI_DUEDATE))
 	{
-		if (pTasks->GetTaskDueDate64(hTask, pGI->bParent, tDate))
+		if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
 		{
 			pGI->dtDue = pGI->dtMaxDue = GetDate(tDate, TRUE); // end of day
 		}
@@ -988,6 +989,59 @@ void CGanttTreeListCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* 
 		
 		RemoveDeletedTasks(htiChild, pTasks, mapIDs);
 		htiChild = htiNext;
+	}
+}
+
+void CGanttTreeListCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
+{
+	if (hTask == NULL)
+		return;
+
+	// this task
+	GANTTITEM* pGI = NULL;
+	GET_GI(pTasks->GetTaskID(hTask), pGI);
+
+	pGI->bParent = pTasks->IsTaskParent(hTask);
+
+	// children
+	UpdateParentStatus(pTasks, pTasks->GetFirstTask(hTask), TRUE);
+
+	// handle siblings WITHOUT RECURSION
+	if (bAndSiblings)
+	{
+		HTASKITEM hSibling = pTasks->GetNextTask(hTask);
+
+		while (hSibling)
+		{
+			// FALSE == not siblings
+			UpdateParentStatus(pTasks, hSibling, FALSE);
+			hSibling = pTasks->GetNextTask(hSibling);
+		}
+	}
+}
+
+void CGanttTreeListCtrl::UpdateParentStatus(DWORD dwOldParentID, DWORD dwNewParentID)
+{
+	if (dwOldParentID)
+	{
+		GANTTITEM* pGIParent = NULL;
+		GET_GI(dwOldParentID, pGIParent);
+
+		HTREEITEM htiParent = GetTreeItem(dwOldParentID);
+		ASSERT(htiParent);
+
+		pGIParent->bParent = m_tree.ItemHasChildren(htiParent);
+	}
+
+	if (dwNewParentID)
+	{
+		GANTTITEM* pGIParent = NULL;
+		GET_GI(dwNewParentID, pGIParent);
+
+		HTREEITEM htiParent = GetTreeItem(dwNewParentID);
+		ASSERT(htiParent);
+
+		pGIParent->bParent = m_tree.ItemHasChildren(htiParent);;
 	}
 }
 
@@ -1135,10 +1189,10 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 
 		time64_t tDate = 0;
 
-		if (pTasks->GetTaskStartDate64(hTask, pGI->bParent, tDate))
+		if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
 			pGI->dtStart = GetDate(tDate, FALSE);
 
-		if (pTasks->GetTaskDueDate64(hTask, pGI->bParent, tDate))
+		if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
 			pGI->dtDue = GetDate(tDate, TRUE);
 
 		if (pTasks->GetTaskDoneDate64(hTask, tDate))
@@ -1852,7 +1906,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
 			CRect rItem;
-			VERIFY(GetListItemRect(nItem, rItem));
+			VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
 
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
@@ -2249,9 +2303,12 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// so we do not need to perform the move ourselves
 					if (SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&move) && !move.bCopy)
 					{
+						DWORD dwSrcParentID = GetTaskID(m_tree.GetParentItem(htiSel));
+						
 						htiSel = TCH().MoveTree(htiSel, htiDropTarget, htiAfterSibling, TRUE, TRUE);
 
 						RefreshTreeItemMap();
+						UpdateParentStatus(dwSrcParentID, move.dwParentID);
 						SelectItem(htiSel);
 					}
 				}
@@ -3732,10 +3789,12 @@ void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, 
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
-
+	
 	// Rollups for collapsed parents
-	HTREEITEM htiRollUp = NULL;
 	CRect rClip;
+	pDC->GetClipBox(rClip);
+
+	HTREEITEM htiRollUp = NULL;
 
 	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && gi.bParent)
 	{
@@ -3743,10 +3802,7 @@ void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, 
 		ASSERT(htiParent);
 
 		if (htiParent && !TCH().IsItemExpanded(htiParent))
-		{
 			htiRollUp = htiParent;
-			pDC->GetClipBox(rClip);
-		}
 	}
 
 	BOOL bContinue = TRUE;
@@ -3775,9 +3831,9 @@ void CGanttTreeListCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, 
 		HasOption(GTLCF_DISPLAYTRAILINGALLOCTO))
 	{
 		CRect rItem;
-		VERIFY(GetListItemRect(nItem, rItem));
+		VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
 
-		COLORREF crRow = (bSelected ? CLR_NONE : GetRowColor(nItem));
+		COLORREF crRow = CLR_NONE;//(bSelected ? CLR_NONE : GetRowColor(nItem));
 
 		if (htiRollUp)
 			DrawListItemRollupText(pDC, htiRollUp, rItem, rClip, crRow);
@@ -3837,8 +3893,14 @@ void CGanttTreeListCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const C
 	// get the end pos for this item relative to start of window
 	int nTextPos = GetBestTextPos(gi, rItem);
 
-	if ((nTextPos < 0) || (!rClip.IsRectNull() && (nTextPos > rClip.right)))
-		return;
+	if (!rClip.IsRectNull())
+	{
+		if (nTextPos > rClip.right)
+			return;
+
+		if ((nTextPos + pDC->GetTextExtent(sTrailing).cx + LV_COLPADDING) < rClip.left)
+			return;
+	}
 
 	CRect rText(rItem);
 	rText.left = (nTextPos + 3);
@@ -5340,12 +5402,22 @@ GTLC_COLUMN CGanttTreeListCtrl::GetColumnID(int nCol) const
 
 void CGanttTreeListCtrl::ResizeColumnsToFit()
 {
-	// tree columns
+	// tree columns (except title column)
 	CClientDC dc(&m_tree);
-	int nCol = m_treeHeader.GetItemCount(), nTotalColWidth = 0;
+	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = 0, nCol = 0;
 
-	while (nCol--)
-		nTotalColWidth += RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+	for (; nCol < nNumCols; nCol++)
+	{
+		int nColWidth = 0;
+		
+		if (nCol == 0) // title
+			nColWidth = m_treeHeader.GetItemWidth(nCol);
+		else
+			nColWidth = RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+
+		if (m_treeHeader.IsItemVisible(nCol))
+			nTotalColWidth += nColWidth;
+	}
 
 	SetSplitPos(nTotalColWidth);
 	
@@ -6689,10 +6761,13 @@ COleDateTime CGanttTreeListCtrl::CalcMinDragDate(const GANTTITEM& gi) const
 		DWORD dwDependID = gi.aDependIDs[nDepend];
 		ASSERT(dwDependID);
 
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(dwDependID, pGI, dtMin);
+		if (m_data.HasItem(dwDependID))
+		{
+			GANTTITEM* pGI = NULL;
+			GET_GI_RET(dwDependID, pGI, dtMin);
 
-		CDateHelper::Max(dtMin, pGI->dtDue);
+			CDateHelper::Max(dtMin, pGI->dtDue);
+		}
 	}
 
 	return dtMin;
@@ -7545,6 +7620,7 @@ BOOL CGanttTreeListCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 	CAutoFlag af(m_bMovingTask, TRUE);
 	
 	HTREEITEM htiSel = GetSelectedItem(), htiNew = NULL;
+	HTREEITEM htiSrcParent = m_tree.GetParentItem(htiSel);
 	HTREEITEM htiDestParent = GetTreeItem(move.dwParentID);
 	HTREEITEM htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 	
@@ -7558,7 +7634,11 @@ BOOL CGanttTreeListCtrl::MoveSelectedItem(const IUITASKMOVE& move)
 
 	if (htiNew)
 	{
+		UpdateParentStatus(GetTaskID(htiSrcParent), move.dwParentID);
+
+		RefreshTreeItemMap();
 		SelectItem(htiNew);
+
 		return TRUE;
 	}
 

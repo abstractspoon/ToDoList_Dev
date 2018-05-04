@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 #include "imageprocessors.h"
+#include "misc.h"
 
 #include <math.h>
 
@@ -527,7 +528,7 @@ CImageResizer::~CImageResizer()
 
 CSize CImageResizer::CalcDestSize(CSize sizeSrc)
 {
-	return CSize((int)(sizeSrc.cx * m_dFactor), (int)(sizeSrc.cy * m_dFactor));
+	return CSize(Misc::Round(sizeSrc.cx * m_dFactor), Misc::Round(sizeSrc.cy * m_dFactor));
 }
 
 BOOL CImageResizer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 

@@ -551,10 +551,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 			if (nListSel != nTreeSel)
 			{
 				ListView_SetItemState(hwnd, nListSel, 0, LVIS_SELECTED | LVIS_FOCUSED);
-				InvalidateListItem(hwnd, nListSel);
-
 				ListView_SetItemState(hwnd, nTreeSel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-				InvalidateListItem(hwnd, nTreeSel);
 				
 				bSynced = TRUE;
 			}
@@ -576,7 +573,6 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 			ASSERT(nSel != -1);
 
 			ListView_SetItemState(hwnd, nSel, LVIS_SELECTED, LVIS_SELECTED);
-			InvalidateListItem(hwnd, nSelTo);
 			
 			int nPrevSel = nSel;
 			nSelTo = ListView_GetNextItem(hwndTo, nSelTo, LVIS_SELECTED);
@@ -744,11 +740,8 @@ void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem)
 {
 	ASSERT(IsList(hwnd));
 	
-	CRect rItem, rList;
-	::GetClientRect(hwnd, rList);
-
+	CRect rItem;
 	ListView_GetItemRect(hwnd, nItem, &rItem, LVIR_BOUNDS);
-	rItem.right = rList.right;
 	
 	::InvalidateRect(hwnd, rItem, TRUE);
 }

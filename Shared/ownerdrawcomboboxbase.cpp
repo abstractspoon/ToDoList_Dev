@@ -177,11 +177,11 @@ void COwnerdrawComboBoxBase::InitItemHeight()
 
 int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 {
-	CDlgUnits dlu(this, TRUE);
+	CDlgUnits dlu(GetParent(), TRUE);
 	int nMinHeight = dlu.ToPixelsY(m_nMinDLUHeight);
 	
 	if (bList && HasIcon())
-		nMinHeight = max(nMinHeight, 18);
+		nMinHeight = max(nMinHeight, GraphicsMisc::ScaleByDPIFactor(16));
 
 	return nMinHeight;
 }
@@ -194,7 +194,9 @@ void COwnerdrawComboBoxBase::PreSubclassWindow()
 
 void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-	lpMeasureItemStruct->itemHeight = CalcMinItemHeight(TRUE); 
+	UINT nMinHeight = CalcMinItemHeight(TRUE);
+
+	lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, nMinHeight); 
 }
 
 int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct) 

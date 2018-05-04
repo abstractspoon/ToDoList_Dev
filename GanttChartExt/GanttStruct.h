@@ -30,7 +30,7 @@ struct GANTTITEM
 	COleDateTime dtDone; 
 	COLORREF color;
 	CString sAllocTo;
-	bool bParent;
+	BOOL bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	CDWordArray aDependIDs;
 	CStringArray aTags;
@@ -124,8 +124,7 @@ struct GANTTDATERANGE
 
 	BOOL IsValid() const;
 	BOOL IsEmpty() const;
-	BOOL Contains(const GANTTITEM& gi);
-	int Compare(const COleDateTime& date) const;
+	BOOL Contains(const GANTTITEM& gi) const;
 
 protected:
 	COleDateTime dtStart, dtEnd;

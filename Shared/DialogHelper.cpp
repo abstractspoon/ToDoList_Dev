@@ -1351,6 +1351,22 @@ CRect CDialogHelper::GetCtrlRect(const CWnd* pParent, UINT nCtrlID)
 	return EMPTY_RECT;
 }
 
+int CDialogHelper::GetChildHeight(const CWnd* pChild)
+{
+	ASSERT(pChild);
+
+	if (pChild)
+	{
+		CRect rChild;
+		pChild->GetWindowRect(rChild);
+
+		return rChild.Height();
+	}
+
+	// all else
+	return 0;
+}
+
 CRect CDialogHelper::GetChildRect(const CWnd* pChild) 
 { 
 	ASSERT(pChild && pChild->GetParent());

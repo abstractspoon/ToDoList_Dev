@@ -67,17 +67,31 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 {
 	// load tools
 	CToolbarButtonArray aButtons;
-	int nBtnCount = pPrefs->GetProfileInt(_T("Toolbar"), _T("ButtonCount"), 0);
+	int nBtnCount = pPrefs->GetProfileInt(_T("CustomToolbar"), _T("ButtonCount"), 0);
 
 	for (int nBtn = 1; nBtn <= nBtnCount; nBtn++)
 	{
-		CString sKey = Misc::MakeKey(_T("Toolbar\\Button%d"), nBtn);
+		CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn);
 
 		TOOLBARBUTTON tb;
 		tb.nMenuID = pPrefs->GetProfileInt(sKey, _T("MenuID"), 0);
 		tb.sImageID = pPrefs->GetProfileString(sKey, _T("ImageID"), _T(""));
 		
 		aButtons.Add(tb);
+	}
+
+	// If no tools and 'first time' then create a toolbar to showcase the feature
+	if (!nBtnCount && pPrefs->GetProfileInt(_T("CustomToolbar"), _T("FirstTime"), TRUE))
+	{
+		aButtons.Add(TOOLBARBUTTON(ID_NEW,					_T("28")));
+		aButtons.Add(TOOLBARBUTTON(ID_PRINTPREVIEW,			_T("82")));
+		aButtons.Add(TOOLBARBUTTON(ID_SENDTASKS,			_T("39")));
+		aButtons.Add(TOOLBARBUTTON());						// separator
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,		_T("49")));
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,		_T("100")));
+		aButtons.Add(TOOLBARBUTTON());						// separator
+		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,		_T("62")));
+		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,	_T("99")));
 	}
 	
 	m_ilcButtons.SetButtons(aButtons);
@@ -92,13 +106,14 @@ void CPreferencesUICustomToolbarPage::SavePreferences(IPreferences* pPrefs, LPCT
 	{
 		const TOOLBARBUTTON& tb = aButtons[nBtn];
 
-        CString sKey = Misc::MakeKey(_T("Toolbar\\Button%d"), nBtn + 1);
+        CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn + 1);
 		
 		pPrefs->WriteProfileInt(sKey, _T("MenuID"), tb.nMenuID);
 		pPrefs->WriteProfileString(sKey, _T("ImageID"), tb.sImageID);
 	}
 
-	pPrefs->WriteProfileInt(_T("Toolbar"), _T("ButtonCount"), nBtnCount);
+	pPrefs->WriteProfileInt(_T("CustomToolbar"), _T("ButtonCount"), nBtnCount);
+	pPrefs->WriteProfileInt(_T("CustomToolbar"), _T("FirstTime"), FALSE);
 }
 
 void CPreferencesUICustomToolbarPage::OnSize(UINT nType, int cx, int cy) 

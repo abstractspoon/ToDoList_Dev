@@ -135,8 +135,8 @@ public:
 
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void RebuildCustomAttributeUI();
-	virtual void NotifyBeginPreferencesUpdate();
-	virtual void NotifyEndPreferencesUpdate();
+	virtual void NotifyBeginPreferencesUpdate(BOOL bFirst);
+	virtual void NotifyEndPreferencesUpdate(BOOL bFirst);
 
 	// override these so we can notify extensions of color changes
 	void SetPriorityColors(const CDWordArray& aColors);

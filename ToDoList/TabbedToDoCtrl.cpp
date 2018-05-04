@@ -650,7 +650,8 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 		if (!hti)
 			hti = m_taskTree.GetChildItem(NULL);
 		
-		CToDoCtrl::SelectTask(GetTaskID(hti));
+		if (hti)
+			CToDoCtrl::SelectTask(GetTaskID(hti));
 	}
 
 	// take a note of what task is currently singly selected
@@ -2307,18 +2308,21 @@ void CTabbedToDoCtrl::SetAlternateLineColor(COLORREF color)
 	CToDoCtrl::SetAlternateLineColor(color);
 }
 
-void CTabbedToDoCtrl::NotifyBeginPreferencesUpdate()
+void CTabbedToDoCtrl::NotifyBeginPreferencesUpdate(BOOL bFirst)
 {
 	// base class
-	CToDoCtrl::NotifyBeginPreferencesUpdate();
+	CToDoCtrl::NotifyBeginPreferencesUpdate(bFirst);
 
 	// nothing else for us to do
 }
 
-void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
+void CTabbedToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
 {
 	// base class
-	CToDoCtrl::NotifyEndPreferencesUpdate();
+	CToDoCtrl::NotifyEndPreferencesUpdate(bFirst);
+
+	if (bFirst)
+		m_taskList.AdjustSplitterToFitAttributeColumns();
 
 	// notify extension windows
 	if (HasAnyExtensionViews())

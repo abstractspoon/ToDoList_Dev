@@ -118,6 +118,7 @@ public:
 
 	static CRect GetCtrlRect(const CWnd* pParent, UINT nCtrlID);
 	static CRect GetChildRect(const CWnd* pChild);
+	static int GetChildHeight(const CWnd* pChild);
 
 	static void SetCtrlState(const CWnd* pParent, UINT nCtrlID, RT_CTRLSTATE nState);
 	static void SetCtrlState(HWND hCtrl, RT_CTRLSTATE nState);

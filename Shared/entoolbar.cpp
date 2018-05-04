@@ -124,6 +124,17 @@ BOOL CEnToolBar::SetImage(const CString& sImagePath, COLORREF crMask)
 	return SetImage(&bitmap, crMask);
 }
 
+void CEnToolBar::SetImageSize(int cx, int cy)
+{
+	CSize sizeImage(cx, cy), sizeBtn(sizeImage);
+	
+	GraphicsMisc::ScaleByDPIFactor(&sizeBtn);
+	sizeBtn.cx += 7;
+	sizeBtn.cy += 7;
+	
+	SetSizes(sizeBtn, sizeImage);
+}
+
 BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 {
 	CEnBitmapEx bmDis;
@@ -138,17 +149,11 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 		return FALSE;
 	
 	CSize sizeBM = pBitmap->GetSize();
-	CSize sizeBmp((sizeBM.cx / nCount), sizeBM.cy), sizeBtn(sizeBmp);
-
-	GraphicsMisc::ScaleByDPIFactor(&sizeBtn);
-	sizeBtn.cx += 7;
-	sizeBtn.cy += 7;
-	
-	SetSizes(sizeBtn, sizeBmp);
+	SetImageSize((sizeBM.cx / nCount), sizeBM.cy);
 
 	m_ilNormal.DeleteImageList();
 	
-	if (m_ilNormal.Create(sizeBmp.cx, sizeBmp.cy, ILC_COLOR24 | ILC_MASK, 0, 1)) 
+	if (m_ilNormal.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1)) 
 	{
 		m_ilNormal.Add(pBitmap, crMask);
 		m_ilNormal.ScaleByDPIFactor();

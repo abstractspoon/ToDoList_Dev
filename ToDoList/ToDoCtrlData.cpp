@@ -3040,8 +3040,12 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 	case TDCD_DONE:
 		if (pTDIDepends->IsDone())
 		{
-			// start dates match the preceding task's end date 
-			dtNewStart = pTDIDepends->dateDone;
+			// New start date matched the preceding task's end date 
+			// Ignore completion time if due date has no time
+			if (pTDIDepends->HasDue() && !pTDIDepends->HasDueTime())
+				dtNewStart = CDateHelper::GetDateOnly(pTDIDepends->dateDone);
+			else
+				dtNewStart = pTDIDepends->dateDone;
 
 			// if we're on a day/night boundary move to next day
 			if (IsEndOfDay(dtNewStart))
@@ -3055,7 +3059,7 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 		// or its due date and it's not yet finished
 		if (!pTDIDepends->IsDone() && pTDIDepends->HasDue())
 		{	
-			// start dates match the preceding task's due date 
+			// New start date matches the preceding task's due date 
 			dtNewStart = pTDIDepends->dateDue;
 
 			// if we're on a day/night boundary move to next day

@@ -753,6 +753,9 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 			
 			if (!bCalcOnly)
 			{
+				// To handle DPI scaling better simply use the height of the category combo
+				rCtrl.bottom = (rCtrl.top + GetChildHeight(&m_cbCategoryFilter));
+				
 				// add 200 to combo dropdowns
 				CWnd* pCtrl = GetDlgItem(fc.nCtrlID);
 				

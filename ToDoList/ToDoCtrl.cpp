@@ -850,10 +850,17 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 	}
 }
 
+int CToDoCtrl::GetDefaultControlHeight() const
+{
+	// To handle DPI scaling better simply use the height of the category combo
+	return GetChildHeight(&m_cbCategory);
+}
+
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 {
 	// project name
 	CRect rProject = GetCtrlRect(IDC_PROJECTNAME), rLabel(rProject); 
+	rProject.bottom = (rProject.top + GetDefaultControlHeight());
 
 	rLabel.OffsetRect(-rLabel.left, 0);
 	rLabel.right = rProject.left;
@@ -1240,7 +1247,8 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CD
 	// move control
 	CRect rCtrl(rItem);
 	rCtrl.top += pDLU->ToPixelsY(CTRLHEIGHT);
-				
+	rCtrl.bottom = (rCtrl.top + GetDefaultControlHeight());
+
 	// some special cases
 	switch (ctrl.nCtrlID)
 	{
@@ -12327,6 +12335,8 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 		{
 			VERIFY(UndoLastActionItems(aElms));
 
+			m_taskTree.OnUndoRedo(bUndo);
+
 			// restore selection
 			if (!aTaskIDs.GetSize() || !m_taskTree.SelectTasks(aTaskIDs))
 			{
@@ -12334,8 +12344,6 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 					TSH().PrevSelection(FALSE);
 			}
 			
-			m_taskTree.OnUndoRedo(bUndo);
-
 			// update current selection
 			UpdateControls();
 
@@ -13101,4 +13109,14 @@ BOOL CToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
 
 	// else
 	return FALSE;
+}
+
+void CToDoCtrl::NotifyBeginPreferencesUpdate(BOOL /*bFirst*/)
+{
+}
+
+void CToDoCtrl::NotifyEndPreferencesUpdate(BOOL bFirst)
+{
+	if (bFirst)
+		m_taskTree.AdjustSplitterToFitAttributeColumns();
 }
