@@ -263,7 +263,7 @@ TDCCADATA& CTDCCustomAttributeDataMap::operator[](LPCTSTR key)
 	return CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::operator[](Misc::ToUpper(key));
 }
 
-void CTDCCustomAttributeDataMap::SetAt(LPCTSTR key, TDCCADATA& newValue)
+void CTDCCustomAttributeDataMap::SetAt(LPCTSTR key, const TDCCADATA& newValue)
 { 
 	(*this)[key] = newValue; 
 }
@@ -276,6 +276,43 @@ void CTDCCustomAttributeDataMap::Copy(const CTDCCustomAttributeDataMap& mapData)
 BOOL CTDCCustomAttributeDataMap::MatchAll(const CTDCCustomAttributeDataMap& mapData) const
 {
 	return Misc::MatchAllStrT<TDCCADATA>(*this, mapData);
+}
+
+void CTDCCustomAttributeDataMap::RemoveKey(LPCTSTR key)
+{
+	CMap<CString, LPCTSTR, TDCCADATA, TDCCADATA&>::RemoveKey(Misc::ToUpper(key));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+BOOL CTDCMetaDataMap::Lookup(LPCTSTR key, CString& rValue) const
+{
+	return CMapStringToString::Lookup(Misc::ToUpper(key), rValue);
+}
+
+CString& CTDCMetaDataMap::operator[](LPCTSTR key)
+{
+	return CMapStringToString::operator[](Misc::ToUpper(key));
+}
+
+void CTDCMetaDataMap::SetAt(LPCTSTR key, const CString& newValue)
+{ 
+	(*this)[key] = newValue; 
+}
+
+void CTDCMetaDataMap::Copy(const CTDCMetaDataMap& mapData)
+{
+	Misc::Copy(mapData, *this);
+}
+
+BOOL CTDCMetaDataMap::MatchAll(const CTDCMetaDataMap& mapData) const
+{
+	return Misc::MatchAll(*this, mapData);
+}
+
+void CTDCMetaDataMap::RemoveKey(LPCTSTR key)
+{
+	CMapStringToString::RemoveKey(Misc::ToUpper(key));
 }
 
 /////////////////////////////////////////////////////////////////////////////

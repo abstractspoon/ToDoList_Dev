@@ -585,6 +585,24 @@ COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, co
 	return CDateHelper::NullDate();
 }
 
+CString TODOITEM::GetMetaData(const CString& sKey) const
+{
+	CString sData;
+	mapMetaData.Lookup(sKey, sData);
+
+	return sData;
+}
+
+void TODOITEM::SetMetaData(const CString& sKey, const CString& sData)
+{
+	ASSERT(!sKey.IsEmpty());
+
+	if (sData.IsEmpty())
+		mapMetaData.RemoveKey(sKey);
+	else
+		mapMetaData[sKey] = sData;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 

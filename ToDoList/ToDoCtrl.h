@@ -310,6 +310,7 @@ public:
 	BOOL SetSelectedTaskIcon(const CString& sIcon); 
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data);
+	BOOL SetSelectedTaskMetaData(const CString& sKey, const CString& sMetaData);
 
 	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	BOOL CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);

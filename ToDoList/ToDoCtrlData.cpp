@@ -548,6 +548,14 @@ CString CToDoCtrlData::GetTaskVersion(DWORD dwTaskID) const
 	return pTDI->sVersion;
 }
 
+CString CToDoCtrlData::GetTaskMetaData(DWORD dwTaskID, const CString& sKey) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	return pTDI->GetMetaData(sKey);
+}
+
 CString CToDoCtrlData::GetTaskStatus(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -1746,6 +1754,25 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 		
 		// make changes
 		pTDI->SetCustomAttributeValue(sAttribID, data);
+		pTDI->SetModified();
+		
+		return SET_CHANGE;
+	}
+	return SET_NOCHANGE;
+}
+
+TDC_SET CToDoCtrlData::SetTaskMetaData(DWORD dwTaskID, const CString& sKey, const CString& sMetaData)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	if (sMetaData != pTDI->GetMetaData(sKey))
+	{
+		// save undo data
+		SaveEditUndo(dwTaskID, pTDI, TDCA_METADATA);
+		
+		// make changes
+		pTDI->SetMetaData(sKey, sMetaData);
 		pTDI->SetModified();
 		
 		return SET_CHANGE;

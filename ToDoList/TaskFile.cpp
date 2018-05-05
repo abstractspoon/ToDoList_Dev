@@ -1728,7 +1728,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 			SetTaskColor(hTask, tdi.color);
 
 		// meta data
-		SetTaskMetaData(hTask, tdi.mapMetaData);
+		SetTaskMetaData(hTask, tdi.GetMetaData());
 
 		// custom data
 		SetTaskCustomAttributeData(hTask, tdi.GetCustomAttributeValues());
@@ -1798,9 +1798,6 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
 		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
-		// meta data
-		GETATTRIB(TDL_TASKMETADATA,				GetTaskMetaData(hTask, tdi.mapMetaData));
-
 		// Comments
 		if (bOverwrite)
 		{
@@ -1830,6 +1827,15 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 
 			GetTaskCustomAttributeData(hTask, mapData); 
 			tdi.SetCustomAttributeValues(mapData);
+		}
+
+		// meta data
+		if (WANTATTRIB(TDL_TASKMETADATA))
+		{
+			CTDCMetaDataMap mapData;
+
+			GetTaskMetaData(hTask, mapData); 
+			tdi.SetMetaData(mapData);
 		}
 	}
 

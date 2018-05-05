@@ -116,6 +116,7 @@ public:
 	CString GetTaskFileRef(DWORD dwTaskID, int nFileRef) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
+
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
 	BOOL IsTaskFlagged(DWORD dwTaskID) const;
@@ -127,6 +128,7 @@ public:
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
 	CString GetTaskVersion(DWORD dwTaskID) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
+	CString GetTaskMetaData(DWORD dwTaskID, const CString& sKey) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
@@ -186,7 +188,8 @@ public:
 	TDC_SET SetTaskRecurrence(DWORD dwTaskID, const TDCRECURRENCE& tr);
 	TDC_SET SetTaskVersion(DWORD dwTaskID, const CString& sVersion);
 	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data);
-
+	TDC_SET SetTaskMetaData(DWORD dwTaskID, const CString& sKey, const CString& sMetaData);
+	
 	TDC_SET SetTaskAllocTo(DWORD dwTaskID, const CStringArray& aAllocTo, BOOL bAppend);
 	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend);
 	TDC_SET SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BOOL bAppend);

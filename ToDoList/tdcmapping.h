@@ -667,6 +667,7 @@ namespace TDC
 		case TDCA_ID:				return IUI_ID;
 		case TDCA_LASTMODDATE:		return IUI_LASTMOD;
 		case TDCA_LASTMODBY:		return IUI_LASTMOD;
+		case TDCA_METADATA:			return IUI_METADATA;
 		case TDCA_PERCENT:			return IUI_PERCENT;
 		case TDCA_POSITION:			return IUI_POSITION;
 		case TDCA_PRIORITY:			return IUI_PRIORITY;
@@ -798,6 +799,7 @@ namespace TDC
 		case IUI_ID:			return TDCA_ID;
 		case IUI_LASTMOD:		return TDCA_LASTMODDATE; // TDCA_LASTMODBY
 		case IUI_LOCK:			return TDCA_LOCK;
+		case IUI_METADATA:		return TDCA_METADATA;
 		case IUI_OFFSETTASK:	return TDCA_NONE; // intentionally 'none'
 		case IUI_PERCENT:		return TDCA_PERCENT;
 		case IUI_POSITION:		return TDCA_POSITION;
@@ -840,6 +842,7 @@ namespace TDC
 		case IUI_ID:			return TDCC_ID;
 		case IUI_LASTMOD:		return TDCC_LASTMODDATE; // TDCC_LASTMODBY
 		case IUI_LOCK:			return TDCC_LOCK;
+		case IUI_METADATA:		return TDCC_NONE;
 		case IUI_NONE:			return TDCC_NONE;
 		case IUI_PERCENT:		return TDCC_PERCENT;
 		case IUI_POSITION:		return TDCC_POSITION;

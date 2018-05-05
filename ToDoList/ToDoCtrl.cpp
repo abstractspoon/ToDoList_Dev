@@ -2350,6 +2350,40 @@ BOOL CToDoCtrl::ClearSelectedTaskCustomAttributeData(const CString& sAttribID, B
 	return SetSelectedTaskCustomAttributeData(sAttribID, TDCCADATA(), bCtrlEdited);
 }
 
+BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMetaData)
+{
+	if (!CanEditSelectedTask(TDCA_METADATA))
+		return FALSE;
+
+	if (sKey.IsEmpty())
+		return FALSE;
+
+	Flush();
+	
+	POSITION pos = TSH().GetFirstItemPos();
+	TDC_SET nRes = SET_NOCHANGE;
+	DWORD dwModTaskID = 0;
+	
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+		
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		TDC_SET nItemRes = m_data.SetTaskMetaData(dwTaskID, sKey, sMetaData);
+			
+		if (nItemRes == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+			dwModTaskID = dwTaskID;
+		}
+	}
+	
+	if (nRes == SET_CHANGE)
+ 		SetModified(TRUE, TDCA_METADATA, dwModTaskID);
+	
+	return (nRes != SET_FAILED);
+}
+
 void CToDoCtrl::DrawSplitter(CDC* pDC) 
 {
 	// draw splitter and clip out
@@ -10007,6 +10041,10 @@ BOOL CToDoCtrl::SetTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			else if (!pTDI->customComments.IsEmpty() || pTDI->sCommentsTypeID != m_cfDefault)
 				tasks.SetTaskCustomComments(hTask, pTDI->customComments, pTDI->sCommentsTypeID);
 		}
+
+		// Metadata
+		if (filter.WantAttribute(TDCA_METADATA))
+			tasks.SetTaskMetaData(hTask, pTDI->GetMetaData());
 
 		// custom data 
 		if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))

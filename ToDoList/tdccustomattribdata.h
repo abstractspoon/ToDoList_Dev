@@ -65,11 +65,26 @@ class CTDCCustomAttributeDataMap : public CMap<CString, LPCTSTR, TDCCADATA, TDCC
 {
 public:
 	BOOL Lookup(LPCTSTR key, TDCCADATA& rValue) const;
-	void SetAt(LPCTSTR key, TDCCADATA& newValue);
+	void SetAt(LPCTSTR key, const TDCCADATA& newValue);
 	void Copy(const CTDCCustomAttributeDataMap& mapData);
 	BOOL MatchAll(const CTDCCustomAttributeDataMap& mapData) const;
+	void RemoveKey(LPCTSTR key);
 
 	TDCCADATA& operator[](LPCTSTR key);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDCMetaDataMap : public CMapStringToString
+{
+public:
+	BOOL Lookup(LPCTSTR key, CString& rValue) const;
+	void SetAt(LPCTSTR key, const CString& newValue);
+	void Copy(const CTDCMetaDataMap& mapData);
+	BOOL MatchAll(const CTDCMetaDataMap& mapData) const;
+	void RemoveKey(LPCTSTR key);
+
+	CString& operator[](LPCTSTR key);
 };
 
 /////////////////////////////////////////////////////////////////////////////

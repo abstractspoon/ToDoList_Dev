@@ -219,6 +219,7 @@ enum IUI_ATTRIBUTE
 	IUI_SUBTASKDONE,
 	IUI_TASKNAMEORCOMMENTS,
 	IUI_ANYTEXTATTRIBUTE,
+	IUI_METADATA,
 
 	// new values here
 	// IUI_
@@ -233,7 +234,7 @@ struct IUITASKMOD
 {
 	IUI_ATTRIBUTE nAttrib;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
-	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
+	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB, IUI_METADATA
 
 	// The attribute value
 	union

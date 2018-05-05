@@ -1669,6 +1669,15 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 		}
 		break;
 
+	case IUI_METADATA:
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskMetaData(dwTaskID, mod.szCustomAttribID, mod.szValue));
+			else
+				bChange = SetSelectedTaskMetaData(mod.szCustomAttribID, mod.szValue);
+		}
+		break;
+
 	// not supported
 	case IUI_RECURRENCE: 
 	case IUI_CREATIONDATE:
@@ -3032,11 +3041,10 @@ int CTabbedToDoCtrl::GetExtensionViewAttributes(IUIExtensionWindow* pExtWnd, CTD
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
 		}
 
-		// Add custom attributes
+		// Always
 		mapAttrib.Add(TDCA_CUSTOMATTRIB);
-
-		// Always add lock state
 		mapAttrib.Add(TDCA_LOCK);
+		mapAttrib.Add(TDCA_METADATA);
 
 		// Include 'position' if extension supports 'unsorted'
 		CTDCUIExtensionAppCmdData data(IUI_NONE);

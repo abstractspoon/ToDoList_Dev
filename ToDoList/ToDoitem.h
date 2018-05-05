@@ -78,6 +78,11 @@ public:
 	const CTDCCustomAttributeDataMap& GetCustomAttributeValues() const { return mapCustomData; }
 	void SetCustomAttributeValues(const CTDCCustomAttributeDataMap& data) { mapCustomData.Copy(data); }
 
+	CString GetMetaData(const CString& sKey) const;
+	void SetMetaData(const CString& sKey, const CString& sData);
+	const CTDCMetaDataMap& GetMetaData() const { return mapMetaData; }
+	void SetMetaData(const CTDCMetaDataMap& mapData) { mapMetaData.Copy(mapData); }
+
 	TDC_UNITS GetTimeUnits(BOOL bTimeEst) const;
 	TH_UNITS GetTHTimeUnits(BOOL bTimeEst) const;
 	
@@ -135,9 +140,6 @@ public:
 	TDCRECURRENCE trRecurrence;
 	DWORD dwTaskRefID;
 	
-	// meta-data for 3rd-party applications only
-	CMapStringToString mapMetaData; 
-
 	const static COleDateTime dtUseCreationDateOnly;
 	const static COleDateTime dtUseCreationDateAndTime;
 
@@ -145,6 +147,9 @@ protected:
 	// custom attributes
 	CTDCCustomAttributeDataMap mapCustomData;
 	
+	// meta-data for 3rd-party applications only
+	CTDCMetaDataMap mapMetaData; 
+
 private:
 	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
 	
