@@ -609,7 +609,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	
 	InitItemHeights();
 	RecalcTreeColumns(TRUE);
-
+	UpdateListColumns();
+	
 	if (EditWantsResort(nUpdate, attrib))
 	{
 		ASSERT(m_sort.IsSorting());
@@ -794,8 +795,11 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (attrib.Has(IUI_TASKNAME))
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-// 	if (attrib.Has(IUI_ALLOCTO))
-// 		pWI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
+ 	if (attrib.Has(IUI_ALLOCTO))
+	{
+ 		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
+		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+	}
 	
 	if (attrib.Has(IUI_ICON))
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
@@ -944,7 +948,9 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	m_tcTasks.DeleteAllItems();
 	m_lcColumns.DeleteAllItems();
 
+	m_aAllocTo.RemoveAll();
 	m_data.RemoveAll();
+
 	m_dwMaxTaskID = 0;
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
@@ -992,7 +998,8 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
-
+		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+		
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 
@@ -1116,8 +1123,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 int CWorkloadCtrl::GetRequiredListColumnCount() const
 {
-	// TODO
-	return 0;
+	return (m_aAllocTo.GetSize() + 1);
 }
 
 void CWorkloadCtrl::BuildTreeColumns()
@@ -1406,19 +1412,11 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-#ifdef _DEBUG
-		{
-			static int nCount = 1;
-			TRACE(_T("\nCWorkloadTreeListCtrl::OnListCustomDraw(begin_%d)\n"), nCount++);
-		}
-#endif
-
 		return CDRF_NOTIFYITEMDRAW;
 								
 	case CDDS_ITEMPREPAINT:
 		{
 			DWORD dwTaskID = GetTaskID(nItem);
-			TRACE(_T("CWorkloadTreeListCtrl::OnListCustomDraw(ID = %ld)\n"), dwTaskID);
 
 			WORKLOADITEM* pWI = NULL;
 			GET_WI_RET(dwTaskID, pWI, 0L);
@@ -1430,7 +1428,7 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 			
 			CRect rItem;
-			VERIFY(GetListItemRect(nItem, rItem));
+			m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
@@ -2584,7 +2582,7 @@ void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BO
 
 	BOOL bContinue = TRUE;
 
-	for (int nCol = 1; ((nCol <= nNumCol) && bContinue); nCol++)
+	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
 	{
 		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected);
 	}
@@ -2616,6 +2614,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 		return FALSE; // we can stop
 	
 	DrawItemDivider(pDC, rColumn, DIV_HORZ, bSelected);
+	DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected);
 }
@@ -2964,24 +2963,16 @@ void CWorkloadCtrl::BuildListColumns()
 	// losing all our items too
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 	m_lcColumns.InsertColumn(0, &lvc);
-	
-	// TODO
+
+	UpdateListColumns();
 }
 
 void CWorkloadCtrl::UpdateListColumns()
 {
-	// cache the scrolled position
-/*
-	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
+	Misc::SortArray(m_aAllocTo);
 
-	COleDateTime dtPos;
-	BOOL bRestorePos = GetDateFromScrollPos(nScrollPos, dtPos);
-
-	if (nWidth == -1)
-		nWidth = GetColumnWidth();
-
-	int nNumCols = m_listHeader.GetItemCount();
-	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
+	int nNumCols = m_hdrColumns.GetItemCount();
+	int nReqCols = GetRequiredListColumnCount();
 	int nDiffCols = (nReqCols - nNumCols);
 
 	if (nDiffCols > 0)
@@ -2991,41 +2982,36 @@ void CWorkloadCtrl::UpdateListColumns()
 
 		for (int i = 0, nCol = nNumCols; i < nDiffCols; i++, nCol++)
 		{
-			lvc.cx = 0;
+			lvc.cx = 100;
 			lvc.fmt = LVCFMT_CENTER | HDF_STRING;
 			lvc.pszText = _T("");
 			lvc.cchTextMax = 50;
 
-			m_list.InsertColumn(nCol, &lvc);
+			m_lcColumns.InsertColumn(nCol, &lvc);
 		}
 	}
 	else if (nDiffCols < 0)
 	{
+		// don't delete first (hidden) column
 		int i = nNumCols;
 
 		while (i-- > nReqCols)
 		{
-			m_list.DeleteColumn(i);
+			m_lcColumns.DeleteColumn(i);
 		}
 	}
-	ASSERT(m_listHeader.GetItemCount() == nReqCols);
+	ASSERT(m_hdrColumns.GetItemCount() == nReqCols);
 
 	if (nDiffCols != 0)
 		PostResize();
 
-	UpdateListColumnsWidthAndText(nWidth);
+	// Update column header text
+	int i = nReqCols;
 
-	// restore scroll-pos
-	if (bRestorePos)
+	while (--i > 0)
 	{
-		nScrollPos = GetScrollPosFromDate(dtPos);
-		m_list.Scroll(CSize(nScrollPos - m_list.GetScrollPos(SB_HORZ), 0));
+		m_hdrColumns.SetItemText(i, m_aAllocTo[i - 1]);
 	}
-	else
-	{
-		m_list.SetScrollPos(SB_HORZ, 0, TRUE);
-	}
-*/
 }
 
 int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -3307,21 +3293,6 @@ int CWorkloadCtrl::ListHitTestItem(const CPoint& point, BOOL bScreen, int& nCol)
 
 	// all else
 	return -1;
-}
-
-BOOL CWorkloadCtrl::GetListItemRect(int nItem, CRect& rItem) const
-{
-	if (m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS))
-	{
-		// Extend to end of client rect
-		CRect rClient;
-		CWnd::GetClientRect(rClient);
-
-		rItem.right = max(rItem.right, rClient.right);
-		return TRUE;
-	}
-
-	return FALSE;
 }
 
 DWORD CWorkloadCtrl::GetTaskID(HTREEITEM htiFrom) const
