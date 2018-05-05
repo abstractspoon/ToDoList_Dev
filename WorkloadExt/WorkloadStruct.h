@@ -29,7 +29,6 @@ struct WORKLOADITEM
 	BOOL bDone;
 	COLORREF color;
 	CStringArray aAllocTo;
-	CMap<CString, LPCTSTR, double, double&> mapAllocatedDays;
 	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	int nPercent;
@@ -40,10 +39,21 @@ struct WORKLOADITEM
 	BOOL HasStart() const;
 	BOOL HasDue() const;
 	BOOL GetDuration(double& dDays) const;
+
+	void DecodeAllocations(const CString& sAllocations);
+	CString EncodeAllocations() const;
+
+	BOOL GetAllocation(const CString& sAllocTo, double& dDays) const;
+	BOOL GetAllocation(const CString& sAllocTo, CString& sDays) const;
+	void SetAllocation(const CString& sAllocTo, double dDays);
+	void SetAllocation(const CString& sAllocTo, const CString& sDays);
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	BOOL HasColor() const;
+
+protected:
+	CMapStringToString mapAllocatedDays;
 };
 
 /////////////////////////////////////////////////////////////////////////////

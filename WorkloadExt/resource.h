@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by WorkloadExt.rc
 //
 #define IDD_WORKLOADTREE_DIALOG         103
@@ -7,9 +7,6 @@
 #define IDB_TOOLBAR_STD                 245
 #define IDI_HELP_BUTTON                 293
 #define IDR_WORKLOAD                    1000
-#define IDC_TREEHEADER                  1004
-#define IDC_WORKLOADLIST                1005
-#define IDC_WORKLOADTREE                1006
 #define IDC_DISPLAY                     1015
 #define IDC_DISPLAYALLOCTO              1016
 #define IDC_DISPLAYTASKTITLE            1017
@@ -80,6 +77,7 @@
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
 #define IDS_PICKINGTOTASKEDIT           32783
+#define ID_WORKLOAD_EDITALLOCATIONS     32783
 #define IDS_PICKED                      32786
 #define IDS_CREATEDEPEND_TITLE          32787
 #define IDS_EDITDEPEND_TITLE            32788
@@ -120,7 +118,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16011
-#define _APS_NEXT_COMMAND_VALUE         32781
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         16034
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif

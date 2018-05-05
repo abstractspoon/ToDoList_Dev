@@ -83,6 +83,8 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
 	ON_WM_SHOWWINDOW()
+	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
@@ -90,6 +92,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
+	ON_REGISTERED_MESSAGE(WM_WLCN_ALLOCATIONCHANGE, OnWorkloadNotifyAllocationChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
@@ -855,6 +858,17 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
+LRESULT CWorkloadWnd::OnWorkloadNotifyAllocationChange(WPARAM /*wp*/, LPARAM /*lp*/) 
+{
+	IUITASKMOD mod = { IUI_METADATA, 0 };
+
+	CString sMetaData = m_ctrlWorkload.GetSelectedTaskMetaData();
+	mod.szValue = sMetaData;
+	mod.szCustomAttribID = WORKLOAD_TYPEID;
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
+}
+
 LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
@@ -863,4 +877,16 @@ LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
 LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_MOVESELECTEDTASK, wp, lp);
+}
+
+void CWorkloadWnd::OnWorkloadEditAllocations() 
+{
+	// TODO: Add your command handler code here
+	
+}
+
+void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI) 
+{
+	// TODO: Add your command update UI handler code here
+	
 }

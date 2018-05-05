@@ -62,8 +62,10 @@ public:
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	HTREEITEM GetSelectedItem() const;
-	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+
+	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
+	CString GetSelectedTaskMetaData() const;
 
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
@@ -157,6 +159,7 @@ protected:
 	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnColumnsGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);

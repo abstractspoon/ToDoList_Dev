@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "WorkloadExt.h" // for WORKLOAD_TYPEID
 #include "WorkloadCtrl.h"
 #include "WorkloadMsg.h"
 #include "WorkloadStatic.h"
@@ -131,9 +132,9 @@ private:
 
 enum
 {
-	IDC_TASKTREE = 100,		
-		IDC_TASKTREECOLUMNS,		
-		IDC_TASKTREEHEADER,		
+	IDC_WORKLOADTREE = 100,		
+	IDC_WORKLOADCOLUMNS,		
+	IDC_WORKLOADTREEHEADER,		
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -164,16 +165,17 @@ CWorkloadCtrl::~CWorkloadCtrl()
 
 BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WORKLOADTREE, OnBeginEditTreeLabel)
-	ON_NOTIFY(HDN_ENDDRAG, IDC_TASKTREEHEADER, OnEndDragTreeHeader)
-	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKTREEHEADER, OnClickTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TASKTREEHEADER, OnItemChangingTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGED, IDC_TASKTREEHEADER, OnItemChangedTreeHeader)
-	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TASKTREEHEADER, OnDblClickTreeHeaderDivider)
-	ON_NOTIFY(NM_RCLICK, IDC_TASKTREEHEADER, OnRightClickTreeHeader)
-	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
+	ON_NOTIFY(HDN_ENDDRAG, IDC_WORKLOADTREEHEADER, OnEndDragTreeHeader)
+	ON_NOTIFY(HDN_ITEMCLICK, IDC_WORKLOADTREEHEADER, OnClickTreeHeader)
+	ON_NOTIFY(HDN_ITEMCHANGING, IDC_WORKLOADTREEHEADER, OnItemChangingTreeHeader)
+	ON_NOTIFY(HDN_ITEMCHANGED, IDC_WORKLOADTREEHEADER, OnItemChangedTreeHeader)
+	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_WORKLOADTREEHEADER, OnDblClickTreeHeaderDivider)
+	ON_NOTIFY(NM_RCLICK, IDC_WORKLOADTREEHEADER, OnRightClickTreeHeader)
+	ON_NOTIFY(LVN_GETDISPINFO, IDC_WORKLOADCOLUMNS, OnColumnsGetDispInfo)
+	ON_NOTIFY(TVN_GETDISPINFO, IDC_WORKLOADTREE, OnTreeGetDispInfo)
+	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_WORKLOADTREE, OnTreeItemExpanded)
 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
-	ON_NOTIFY(NM_CLICK, IDC_WORKLOADLIST, OnColumnsClick)
+	ON_NOTIFY(NM_CLICK, IDC_WORKLOADCOLUMNS, OnColumnsClick)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -207,19 +209,19 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT),
 							rect, 
 							this, 
-							IDC_TASKTREE))
+							IDC_WORKLOADTREE))
 	{
 		return -1;
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS | HDS_DRAGDROP), rect, this, IDC_TASKTREEHEADER))
+	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS | HDS_DRAGDROP), rect, this, IDC_WORKLOADTREEHEADER))
 	{
 		return -1;
 	}
 	
 	// Column List ---------------------------------------------------------------------
-	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_TASKTREECOLUMNS))
+	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_WORKLOADCOLUMNS))
 	{
 		return -1;
 	}
@@ -331,6 +333,16 @@ DWORD CWorkloadCtrl::GetSelectedTaskID() const
 	HTREEITEM hti = GetTreeSelItem();
 
 	return (hti ? GetTaskID(hti) : 0);
+}
+
+CString CWorkloadCtrl::GetSelectedTaskMetaData() const
+{
+	DWORD dwTaskID = GetSelectedTaskID();
+	const WORKLOADITEM* pWI = NULL;
+
+	GET_WI_RET(dwTaskID, pWI, _T(""));
+
+	return pWI->EncodeAllocations();
 }
 
 BOOL CWorkloadCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
@@ -654,7 +666,6 @@ BOOL CWorkloadCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	{
 	case IUI_ALLOCTO:
 	case IUI_COLOR:
-	case IUI_DEPENDENCY:
 	case IUI_DONEDATE:
 	case IUI_DUEDATE:
 	case IUI_ICON:
@@ -663,7 +674,6 @@ BOOL CWorkloadCtrl::WantEditUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_PERCENT:
 	case IUI_STARTDATE:
 	case IUI_SUBTASKDONE:
-	case IUI_TAGS:
 	case IUI_TASKNAME:
 		return TRUE;
 	}
@@ -682,9 +692,6 @@ BOOL CWorkloadCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	case IUI_PERCENT:
 	case IUI_STARTDATE:
 	case IUI_TASKNAME:
-	case IUI_TAGS:
-	case IUI_DONEDATE:
-	case IUI_DEPENDENCY:
 		return (MapAttributeToColumn(nAttrib) != WLCC_NONE);
 
 	case IUI_NONE:
@@ -1010,6 +1017,8 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtDue = CDateHelper::GetDate(tDate);
+
+		pWI->DecodeAllocations(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
 	}
 	
 	// add item to tree
@@ -1189,7 +1198,7 @@ void CWorkloadCtrl::Resize(const CRect& rect)
 	{
 		CTreeListSyncer::Resize(rect, GetSplitPos());
 
-		m_tcTasks.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, m_hdrTasks.GetItemWidth(0), (LPARAM)m_tcTasks.GetSafeHwnd());
+		m_tcTasks.SendMessage(WM_WLCN_TITLECOLUMNWIDTHCHANGE, m_hdrTasks.GetItemWidth(0), (LPARAM)m_tcTasks.GetSafeHwnd());
 	}
 }
 
@@ -1712,6 +1721,26 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_UNCHECKED;
 		}
+	}
+}
+
+void CWorkloadCtrl::OnColumnsGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+	DWORD dwTaskID = GetTaskID(pDispInfo->item.iItem);
+	
+	const WORKLOADITEM* pWI = NULL;
+	GET_WI(dwTaskID, pWI);
+	
+	if ((pDispInfo->item.mask & LVIF_TEXT) && (pDispInfo->item.iSubItem > 0))
+	{
+		int nAllocTo = (pDispInfo->item.iSubItem - 1);
+		ASSERT(nAllocTo < m_aAllocTo.GetSize());
+
+		CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
+		pWI->GetAllocation(sAllocTo, sDays);
+
+		pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)sDays;
 	}
 }
 
@@ -2802,7 +2831,7 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
 	m_hdrTasks.UpdateWindow();
 
-	m_tcTasks.SendMessage(WM_GTCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tcTasks.GetSafeHwnd());
+	m_tcTasks.SendMessage(WM_WLCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tcTasks.GetSafeHwnd());
 }
 
 BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)

@@ -143,6 +143,72 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
+BOOL WORKLOADITEM::GetAllocation(const CString& sAllocTo, double& dDays) const
+{
+	CString sDays;
+	
+	if (!GetAllocation(sAllocTo, sDays))
+		return FALSE;
+
+	dDays = Misc::Atof(sDays);
+	return TRUE;
+}
+
+void WORKLOADITEM::SetAllocation(const CString& sAllocTo, double dDays)
+{
+	SetAllocation(sAllocTo, Misc::Format(dDays));
+}
+
+BOOL WORKLOADITEM::GetAllocation(const CString& sAllocTo, CString& sDays) const
+{
+	if (!mapAllocatedDays.Lookup(Misc::ToUpper(sAllocTo), sDays))
+		return FALSE;
+
+	return !sDays.IsEmpty();
+}
+
+void WORKLOADITEM::SetAllocation(const CString& sAllocTo, const CString& sDays)
+{
+	if (sDays.IsEmpty())
+		mapAllocatedDays.RemoveKey(Misc::ToUpper(sAllocTo));
+	else
+		mapAllocatedDays[Misc::ToUpper(sAllocTo)] = sDays;
+}
+
+void WORKLOADITEM::DecodeAllocations(const CString& sAllocations)
+{
+	mapAllocatedDays.RemoveAll();
+
+	CStringArray aAllocTo;
+	int nAllocTo = Misc::Split(sAllocations, aAllocTo, '\n');
+
+	while (nAllocTo--)
+	{
+		CString sDays, sPerson = aAllocTo[nAllocTo];
+		Misc::Split(sPerson, sDays, ':');
+
+		SetAllocation(sPerson, sDays);
+	}
+}
+
+CString WORKLOADITEM::EncodeAllocations() const
+{
+	CString sAllocations, sPerson, sDays;
+	CStringArray aAllocations;
+	POSITION pos = mapAllocatedDays.GetStartPosition();
+
+	while (pos)
+	{
+		mapAllocatedDays.GetNextAssoc(pos, sPerson, sDays);
+		ASSERT(!sPerson.IsEmpty());
+
+		if (!sPerson.IsEmpty())
+			aAllocations.Add(sPerson + ':' + sDays);
+	}
+
+	return Misc::FormatArray(aAllocations, '\n');
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CWorkloadItemMap::~CWorkloadItemMap()

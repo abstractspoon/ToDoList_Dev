@@ -95,12 +95,15 @@ protected:
 	afx_msg void OnWorkloadPreferences();
 	afx_msg void OnUpdateWorkloadPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnWorkloadEditAllocations();
+	afx_msg void OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
 
+	afx_msg LRESULT OnWorkloadNotifyAllocationChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
