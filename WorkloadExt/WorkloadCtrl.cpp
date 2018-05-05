@@ -147,10 +147,6 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
-	m_crDefault(CLR_NONE),
-	m_crParent(CLR_NONE),
-	m_crToday(CLR_NONE),
-	m_crWeekend(CLR_NONE),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
 	m_bMovingTask(FALSE),
@@ -810,7 +806,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (attrib.Has(IUI_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
-			pWI->dtStart = GetDate(tDate, FALSE); // start of day
+			pWI->dtStart = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtStart);
 	}
@@ -818,7 +814,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (attrib.Has(IUI_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
-			pWI->dtDue = GetDate(tDate, TRUE); // end of day
+			pWI->dtDue = CDateHelper::GetDate(tDate);
 		else
 			CDateHelper::ClearDate(pWI->dtDue);
 	}
@@ -963,17 +959,6 @@ void CWorkloadCtrl::RefreshTreeItemMap()
 	TCH().BuildHTIMap(m_mapHTItems);
 }
 
-COleDateTime CWorkloadCtrl::GetDate(time64_t tDate, BOOL bEndOfDay)
-{
-	COleDateTime date = CDateHelper::GetDate(tDate);
-
-	// only implement 'end of day' if the date has no time
-	if (CDateHelper::IsDateSet(date) && bEndOfDay && !CDateHelper::DateHasTime(date))
-		date = CDateHelper::GetEndOfDay(date);
-
-	return date;
-}
-
 void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 										HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
 {
@@ -1014,10 +999,10 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		time64_t tDate = 0;
 
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
-			pWI->dtStart = GetDate(tDate, FALSE);
+			pWI->dtStart = CDateHelper::GetDate(tDate);
 
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
-			pWI->dtDue = GetDate(tDate, TRUE);
+			pWI->dtDue = CDateHelper::GetDate(tDate);
 	}
 	
 	// add item to tree
@@ -1640,6 +1625,7 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 			case WLCC_DUEDATE:
 			case WLCC_PERCENT:
 			case WLCC_TASKID:
+			case WLCC_DURATION:
 				if (m_hdrTasks.IsItemVisible(pHDN->iItem))
 				{
 					if (pHDN->pitem->cxy < MIN_COL_WIDTH)
@@ -2271,26 +2257,6 @@ void CWorkloadCtrl::SetGridLineColor(COLORREF crGridLine)
 	SetColor(m_crGridLine, crGridLine);
 }
 
-void CWorkloadCtrl::SetTodayColor(COLORREF crToday)
-{
-	SetColor(m_crToday, crToday);
-}
-
-void CWorkloadCtrl::SetWeekendColor(COLORREF crWeekend)
-{
-	SetColor(m_crWeekend, crWeekend);
-}
-
-void CWorkloadCtrl::SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor)
-{
-	SetColor(m_crNonWorkingHoursColor, crNonWorkingHoursColor);
-}
-
-void CWorkloadCtrl::SetDefaultColor(COLORREF crDefault)
-{
-	SetColor(m_crDefault, crDefault);
-}
-
 void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar) 
 { 
 	CTreeListSyncer::SetSplitBarColor(crSplitBar); 
@@ -2310,6 +2276,42 @@ CString CWorkloadCtrl::FormatDate(const COleDateTime& date, DWORD dwFlags) const
 	dwFlags |= (HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
 
 	return CDateHelper::FormatDate(date, dwFlags);
+}
+
+int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
+{
+	int nLongest = 0;
+
+	if (hti)
+	{
+		DWORD dwTaskID = GetTaskID(hti);
+
+		const WORKLOADITEM* pWI = NULL;
+		GET_WI_RET(dwTaskID, pWI, 0);
+
+		double dDuration = 0;
+
+		if (pWI->GetDuration(dDuration))
+			nLongest = (int)dDuration;
+	}
+
+	// children
+	if (!hti || TCH().IsItemExpanded(hti))
+	{
+		HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			int nLongestChild = GetLongestVisibleDuration(htiChild);
+
+			if (nLongestChild > nLongest)
+				nLongest = nLongestChild;
+
+			htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+
+	return nLongest;
 }
 
 CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nCol) const
@@ -2333,6 +2335,15 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN 
 				GetTaskStartDueDates(gi, dtStart, dtDue);
 
 				sItem = FormatDate((nCol == WLCC_STARTDATE) ? dtStart : dtDue);
+			}
+			break;
+
+		case WLCC_DURATION:
+			{
+				double dDuration;
+
+				if (gi.GetDuration(dDuration))
+					sItem.Format(_T("%d Days"), (int)dDuration);
 			}
 			break;
 
@@ -2404,6 +2415,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			break;
 
 		case  WLCC_TASKID:
+		case WLCC_DURATION:
 			nFlags |= DT_RIGHT;
 			break;
 			
@@ -2544,6 +2556,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		case WLCC_STARTDATE:
 		case WLCC_DUEDATE:
 		case WLCC_PERCENT:
+		case WLCC_DURATION:
 			{
 				CRect rHdrItem;
 				m_hdrTasks.GetItemRect(nCol, rHdrItem);
@@ -2662,17 +2675,9 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelecte
 	if (crTextBk == CLR_NONE)
 	{
 		if (bAlternate && HasAltLineColor())
-		{
 			crTextBk = m_crAltLine;
-		}
-		else if ((m_crDefault != CLR_NONE) && HasOption(WLCF_TASKTEXTCOLORISBKGND))
-		{
-			crTextBk = m_crDefault;
-		}
 		else
-		{
 			crTextBk = GetSysColor(COLOR_WINDOW);
-		}
 	}
 	
 	return crTextBk;
@@ -2755,35 +2760,6 @@ void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
 
 	m_tcTasks.DeleteItem(htiFrom);
 	VERIFY(m_data.RemoveKey(dwTaskID));
-}
-
-void CWorkloadCtrl::RecalcListColumnWidths(int nFromWidth, int nToWidth)
-{
-	// resize the required number of columns
-	int nNumReqColumns = GetRequiredListColumnCount(), i;
-
-	for (i = 1; i <= nNumReqColumns; i++)
-	{
-		int nWidth = m_hdrColumns.GetItemWidth(i);
-
-		if (nFromWidth < nToWidth && nWidth < nToWidth)
-		{
-			m_hdrColumns.SetItemWidth(i, nToWidth);
-		}
-		else if (nFromWidth > nToWidth && nWidth > nToWidth)
-		{
-			m_hdrColumns.SetItemWidth(i, nToWidth);
-		}
-	}
-
-	// and zero out the rest
-	int nNumCols = m_hdrColumns.GetItemCount();
-
-	for (; i < nNumCols; i++)
-	{
-		m_hdrColumns.EnableItemTracking(i, FALSE);
-		m_hdrColumns.SetItemWidth(i, 0);
-	}
 }
 
 WLC_COLUMN CWorkloadCtrl::GetColumnID(int nCol) const
@@ -2891,6 +2867,10 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 			nColWidth = GraphicsMisc::GetAverageMaxStringWidth(FormatDate(date), pDC);
 		}
 		break;
+
+	case WLCC_DURATION:
+		nColWidth = pDC->GetTextExtent(CEnString(_T("%d Days"), GetLongestVisibleDuration(NULL))).cx;
+		break;
 		
 	case WLCC_PERCENT: 
 		nColWidth = GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
@@ -2988,6 +2968,66 @@ void CWorkloadCtrl::BuildListColumns()
 	// TODO
 }
 
+void CWorkloadCtrl::UpdateListColumns()
+{
+	// cache the scrolled position
+/*
+	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
+
+	COleDateTime dtPos;
+	BOOL bRestorePos = GetDateFromScrollPos(nScrollPos, dtPos);
+
+	if (nWidth == -1)
+		nWidth = GetColumnWidth();
+
+	int nNumCols = m_listHeader.GetItemCount();
+	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
+	int nDiffCols = (nReqCols - nNumCols);
+
+	if (nDiffCols > 0)
+	{
+		// add other columns
+		LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
+
+		for (int i = 0, nCol = nNumCols; i < nDiffCols; i++, nCol++)
+		{
+			lvc.cx = 0;
+			lvc.fmt = LVCFMT_CENTER | HDF_STRING;
+			lvc.pszText = _T("");
+			lvc.cchTextMax = 50;
+
+			m_list.InsertColumn(nCol, &lvc);
+		}
+	}
+	else if (nDiffCols < 0)
+	{
+		int i = nNumCols;
+
+		while (i-- > nReqCols)
+		{
+			m_list.DeleteColumn(i);
+		}
+	}
+	ASSERT(m_listHeader.GetItemCount() == nReqCols);
+
+	if (nDiffCols != 0)
+		PostResize();
+
+	UpdateListColumnsWidthAndText(nWidth);
+
+	// restore scroll-pos
+	if (bRestorePos)
+	{
+		nScrollPos = GetScrollPosFromDate(dtPos);
+		m_list.Scroll(CSize(nScrollPos - m_list.GetScrollPos(SB_HORZ), 0));
+	}
+	else
+	{
+		m_list.SetScrollPos(SB_HORZ, 0, TRUE);
+	}
+*/
+}
+
 int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CWorkloadCtrl* pThis = (CWorkloadCtrl*)lParamSort;
@@ -3045,6 +3085,16 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 
 		case WLCC_DUEDATE:
 			nCompare = CDateHelper::Compare(pWI1->dtDue, pWI2->dtDue, TRUE, TRUE);
+			break;
+
+		case WLCC_DURATION:
+			{
+				double dDuration1 = 0, dDuration2 = 0;
+				pWI1->GetDuration(dDuration1);
+				pWI1->GetDuration(dDuration2);
+
+				nCompare = (int)(dDuration1 - dDuration2);
+			}
 			break;
 
 		case WLCC_PERCENT:

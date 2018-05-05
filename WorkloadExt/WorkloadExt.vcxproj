@@ -201,6 +201,9 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\workload.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

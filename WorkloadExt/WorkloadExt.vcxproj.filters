@@ -102,4 +102,9 @@
     <CustomBuild Include="WorkloadExt.vcxproj" />
     <CustomBuild Include="WorkloadExt.vcxproj.filters" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\workload.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

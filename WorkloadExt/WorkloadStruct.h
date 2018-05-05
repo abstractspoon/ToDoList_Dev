@@ -39,6 +39,7 @@ struct WORKLOADITEM
 	
 	BOOL HasStart() const;
 	BOOL HasDue() const;
+	BOOL GetDuration(double& dDays) const;
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;

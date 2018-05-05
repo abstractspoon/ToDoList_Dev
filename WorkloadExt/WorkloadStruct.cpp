@@ -94,6 +94,19 @@ BOOL WORKLOADITEM::HasStart() const
 	return CDateHelper::IsDateSet(dtStart);
 }
 
+BOOL WORKLOADITEM::GetDuration(double& dDays) const
+{
+	if (!HasStart() || !HasDue())
+		return FALSE;
+
+	dDays = (dtDue.m_dt - dtStart.m_dt);
+
+	if (!CDateHelper::DateHasTime(dtDue))
+		dDays += 1.0;
+
+	return TRUE;
+}
+
 BOOL WORKLOADITEM::HasDue() const
 {
 	return CDateHelper::IsDateSet(dtDue);

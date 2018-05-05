@@ -94,13 +94,8 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
-	BOOL HandleEraseBkgnd(CDC* pDC) { return CTreeListSyncer::HandleEraseBkgnd(pDC); }
 	void SetAlternateLineColor(COLORREF crAltLine);
 	void SetGridLineColor(COLORREF crGridLine);
-	void SetTodayColor(COLORREF crToday);
-	void SetWeekendColor(COLORREF crWeekend);
-	void SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor);
-	void SetDefaultColor(COLORREF crDefault);
 	void SetSplitBarColor(COLORREF crSplitBar);
 
 	BOOL CancelOperation();
@@ -133,9 +128,9 @@ protected:
 	WORKLOADSORT m_sort;
 
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
+	CStringArray m_aAllocTo;
 
-	COLORREF m_crAltLine, m_crGridLine, m_crParent, m_crDefault;
-	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
+	COLORREF m_crAltLine, m_crGridLine;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	int m_nPrevDropHilitedItem;
@@ -217,7 +212,7 @@ protected:
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 
 	void BuildListColumns();
-	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
+	void UpdateListColumns();
 
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
@@ -262,7 +257,7 @@ protected:
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
-	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
+	int GetLongestVisibleDuration(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nColID) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
@@ -293,7 +288,6 @@ protected:
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
-	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo);
 	static int Compare(const CString& sText1, const CString& sText2);

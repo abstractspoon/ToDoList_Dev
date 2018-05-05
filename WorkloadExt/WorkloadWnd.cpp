@@ -783,11 +783,6 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
 	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
 
-	m_ctrlWorkload.SetTodayColor(m_dlgPrefs.GetTodayColor());
-	m_ctrlWorkload.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
-	m_ctrlWorkload.SetNonWorkingHoursColor(m_dlgPrefs.GetNonWorkingHoursColor());
-	m_ctrlWorkload.SetDefaultColor(m_dlgPrefs.GetDefaultColor());
-
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
