@@ -252,7 +252,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	return (*this);
 }
 
-BOOL GANTTITEM::operator==(const GANTTITEM& gi)
+BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 {
 	return ((sTitle == gi.sTitle) &&
 			(dtStart == gi.dtStart) &&

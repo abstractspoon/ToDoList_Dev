@@ -22,7 +22,7 @@ struct GANTTITEM
 	virtual ~GANTTITEM();
 	
 	GANTTITEM& operator=(const GANTTITEM& gi);
-	BOOL operator==(const GANTTITEM& gi);
+	BOOL operator==(const GANTTITEM& gi) const;
 	
 	CString sTitle;
 	COleDateTime dtStart, dtMinStart;
