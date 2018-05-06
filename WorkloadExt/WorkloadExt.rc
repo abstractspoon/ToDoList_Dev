@@ -216,6 +216,21 @@ BEGIN
                     WS_TABSTOP,7,383,333,10
 END
 
+IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Edit Allocations"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,157,142,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,213,142,50,14
+    LTEXT           "Task: ",IDC_STATIC,7,7,47,8
+    LTEXT           "",IDC_TASKTITLE,57,7,206,8
+    CONTROL         "List1",IDC_ALLOCATIONS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,32,256,103
+    LTEXT           "&Allocations:",IDC_STATIC,7,20,256,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -239,6 +254,14 @@ BEGIN
         RIGHTMARGIN, 340
         TOPMARGIN, 7
         BOTTOMMARGIN, 393
+    END
+
+    IDD_EDITALLOCATIONS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 263
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 156
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -321,69 +344,18 @@ IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_WORKLOAD_DAYS       "Days"
-    IDS_WORKLOAD_WEEKS      "Weeks"
-    IDS_SNAP_FREE           "No Snapping"
-    IDS_SNAP_NEARESTDAY     "Nearest Day"
-    IDS_SNAP_NEARESTHALFDAY "Nearest Half-Day"
-    IDS_SNAP_NEARESTHALFYEAR "Nearest Half-Year"
-    IDS_SNAP_NEARESTHOUR    "Nearest Hour"
-    IDS_SNAP_NEARESTMONTH   "Nearest Month"
-    IDS_SNAP_NEARESTQUARTER "Nearest Quarter"
-    IDS_SNAP_NEARESTWEEK    "Nearest Week"
-    IDS_SNAP_NEARESTYEAR    "Nearest Year"
-    IDS_DISPLAYDAYSHOURS    "Hours"
     IDS_ATTRIB_DURATION     "Duration"
     IDS_COL_DURATION        "Duration"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_WORKLOAD_GOTOTODAY   "\nScroll To Today"
     ID_WORKLOAD_PREFS       "\nWorkload Preferences"
-    ID_WORKLOAD_NEWDEPENDS  "\nAdd Dependency"
-    IDS_PICKINGFROMTASK     "Pick the task you want to be dependent on another task... "
-    IDS_PICKINGTOTASKADD    "Pick the task on which the just picked task will be dependent..."
-    ID_WORKLOAD_EDITDEPENDS "\nEdit Dependency"
-    ID_WORKLOAD_DELETEDEPENDS "\nDelete Dependency"
-    IDS_PICKINGFROMDEPEND_EDIT "Pick a dependency to edit... "
-    IDS_PICKINGFROMDEPEND_DELETE "Pick a dependency to delete..."
-    IDS_PICKINGTOTASKEDIT   "\nEdit Allocations"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_PICKED              "Done!\n"
-    IDS_CREATEDEPEND_TITLE  "Create Task Dependency"
-    IDS_EDITDEPEND_TITLE    "Edit Task Dependency"
-    IDS_DELETEDEPEND_TITLE  "Delete Task Dependency"
-    IDS_DISPLAYYEARS        "Years \t\t\t\t(eg. 2013)"
-    IDS_DISPLAYQUARTERSSHORT "Quarters, narrow \t(eg. Q1 2013)"
-    IDS_DISPLAYQUARTERSMID  "Quarters, mid \t\t(eg. Jan-Mar 2013)"
-    IDS_DISPLAYQUARTERSLONG "Quarters, wide \t\t(eg. January-March 2013)"
-    IDS_DISPLAYMONTHSSHORT  "Months, narrow \t\t(eg. 01/13)"
-    IDS_DISPLAYMONTHSMID    "Months, mid \t\t(eg. Jan 2013)"
-    IDS_DISPLAYMONTHSLONG   "Months, wide \t\t(eg. January 2013)"
-    IDS_DISPLAYWEEKSSHORT   "Weeks, narrow"
-    IDS_DISPLAYWEEKSMID     "Weeks, mid"
-    IDS_DISPLAYWEEKSLONG    "Weeks, wide"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_DISPLAYDAYSSHORT    "Days, narrow"
-    IDS_DISPLAYDAYSMID      "Days, mid"
-    IDS_DISPLAYDAYSLONG     "Days, wide"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_HELP                 "\nOnline Help"
-    IDS_DISPLAYQUARTERCENTURIES "Quarter Centuries \t(eg. 2000-2024)"
-    IDS_DISPLAYDECADES      "Decades \t\t\t(eg, 2000-2009)"
-    IDS_SNAP_NEARESTQUARTERCENTURY "Nearest Quarter-Century"
-    IDS_SNAP_NEARESTDECADE  "Nearest Decade"
-    IDS_SNAP_NEARESTHALFHOUR "Nearest Half-Hour"
     IDS_COL_STARTDATE       "Start"
     IDS_COL_DUEDATE         "Due"
     IDS_COL_ALLOCTO         "Alloc To"
@@ -398,8 +370,7 @@ BEGIN
     IDS_ATTRIB_ALLOCTO      "Allocated To"
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
-    IDS_ATTRIB_DONEDATE     "Completion Date"
-    IDS_COL_DONEDATE        "Completed"
+    IDS_NEW_ALLOCATION      "<new allocation>"
 END
 
 #endif    // English (Australia) resources

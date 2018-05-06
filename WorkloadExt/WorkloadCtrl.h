@@ -64,8 +64,9 @@ public:
 	HTREEITEM GetSelectedItem() const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
-	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
-	CString GetSelectedTaskMetaData() const;
+	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
+	BOOL SetSelectedTask(const WORKLOADITEM& wi);
+	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
@@ -159,7 +160,6 @@ protected:
 	afx_msg void OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRightClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnColumnsGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
@@ -195,9 +195,9 @@ protected:
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 
-	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
-	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
-	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
+	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
+	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
+	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
 	GM_ITEMSTATE GetItemState(int nItem) const;
@@ -205,10 +205,8 @@ protected:
 	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	
-	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BOOL bSelected);
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& gi, BOOL bSelected);
-	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const WORKLOADITEM& gi, BOOL bSelected);
-	void DrawListItemText(CDC* pDC, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClip, COLORREF crRow);
+	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
+	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
@@ -221,7 +219,7 @@ protected:
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
-	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nColID);
+	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMN nColID);
 	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
@@ -261,14 +259,14 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
-	CString GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nColID) const;
+	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMN nColID) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
- 	COLORREF GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
-	COLORREF GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bAlternate) const;
+ 	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
+	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const;
 	void SetColor(COLORREF& color, COLORREF crNew);
 	COLORREF GetRowColor(int nItem) const;
 
@@ -276,7 +274,7 @@ protected:
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RefreshTreeItemMap();
-	BOOL GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
+	BOOL GetTaskStartDueDates(const WORKLOADITEM& wi, COleDateTime& dtStart, COleDateTime& dtDue) const;
 
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
 	void Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);

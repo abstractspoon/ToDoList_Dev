@@ -25,68 +25,66 @@ WORKLOADITEM::WORKLOADITEM()
 	dwRefID(0), 
 	dwOrgRefID(0), 
 	bGoodAsDone(FALSE),
+	bDone(FALSE),
 	nPosition(-1),
 	bLocked(FALSE),
 	bSomeSubtaskDone(FALSE)
 {
 }
 
-WORKLOADITEM::WORKLOADITEM(const WORKLOADITEM& gi)
+WORKLOADITEM::WORKLOADITEM(const WORKLOADITEM& wi)
 {
-	*this = gi;
+	*this = wi;
 }
 
-WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& gi)
+WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 {
-	sTitle = gi.sTitle;
-	dtStart = gi.dtStart;
-	dtDue = gi.dtDue;
-	bDone = gi.bDone;
-	color = gi.color;
-	bParent = gi.bParent;
-	dwTaskID = gi.dwTaskID;
-	dwRefID = gi.dwRefID;
-	nPercent = gi.nPercent;
-	bGoodAsDone = gi.bGoodAsDone;
-	nPosition = gi.nPosition;
-	bLocked = gi.bLocked;
-	bHasIcon = gi.bHasIcon;
-	bSomeSubtaskDone = gi.bSomeSubtaskDone;
+	sTitle = wi.sTitle;
+	dtStart = wi.dtStart;
+	dtDue = wi.dtDue;
+	bDone = wi.bDone;
+	color = wi.color;
+	bParent = wi.bParent;
+	dwTaskID = wi.dwTaskID;
+	dwRefID = wi.dwRefID;
+	nPercent = wi.nPercent;
+	bGoodAsDone = wi.bGoodAsDone;
+	bDone = wi.bDone;
+	nPosition = wi.nPosition;
+	bLocked = wi.bLocked;
+	bHasIcon = wi.bHasIcon;
+	bSomeSubtaskDone = wi.bSomeSubtaskDone;
 	
-	aAllocTo.Copy(gi.aAllocTo);
+	aAllocTo.Copy(wi.aAllocTo);
+	Misc::Copy(wi.mapAllocatedDays, mapAllocatedDays);
 	
 	return (*this);
 }
 
-BOOL WORKLOADITEM::operator==(const WORKLOADITEM& gi)
+BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi)
 {
-	return ((sTitle == gi.sTitle) &&
-			(dtStart == gi.dtStart) &&
-			(dtDue == gi.dtDue) &&
-			(bDone == gi.bDone) &&
-			(color == gi.color) &&
-			(bParent == gi.bParent) &&
-			(dwTaskID == gi.dwTaskID) &&
-			(dwRefID == gi.dwRefID) &&
-			(nPercent == gi.nPercent) &&	
-			(nPosition == gi.nPosition) &&
-			(bGoodAsDone == gi.bGoodAsDone) &&
-			(bLocked == gi.bLocked) &&
-			(bHasIcon == gi.bHasIcon) &&
-			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
-			Misc::MatchAll(aAllocTo, gi.aAllocTo));
+	return ((sTitle == wi.sTitle) &&
+			(dtStart == wi.dtStart) &&
+			(dtDue == wi.dtDue) &&
+			(bDone == wi.bDone) &&
+			(color == wi.color) &&
+			(bParent == wi.bParent) &&
+			(dwTaskID == wi.dwTaskID) &&
+			(dwRefID == wi.dwRefID) &&
+			(nPercent == wi.nPercent) &&	
+			(nPosition == wi.nPosition) &&
+			(bGoodAsDone == wi.bGoodAsDone) &&
+			(bDone == wi.bDone) &&
+			(bLocked == wi.bLocked) &&
+			(bHasIcon == wi.bHasIcon) &&
+			(bSomeSubtaskDone == wi.bSomeSubtaskDone) &&
+			Misc::MatchAll(aAllocTo, wi.aAllocTo) &&
+			Misc::MatchAll(mapAllocatedDays, wi.mapAllocatedDays));
 }
 
 WORKLOADITEM::~WORKLOADITEM()
 {
 	
-}
-
-BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
-{
-	const WORKLOADITEM* pGI = GetItem(dwTaskID);
-	
-	return (pGI && pGI->bLocked);
 }
 
 BOOL WORKLOADITEM::HasStart() const
@@ -209,6 +207,11 @@ CString WORKLOADITEM::EncodeAllocations() const
 	return Misc::FormatArray(aAllocations, '\n');
 }
 
+void WORKLOADITEM::ClearAllocations()
+{
+	mapAllocatedDays.RemoveAll();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CWorkloadItemMap::~CWorkloadItemMap()
@@ -232,6 +235,13 @@ void CWorkloadItemMap::RemoveAll()
 	}
 	
 	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
+}
+
+BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
+{
+	const WORKLOADITEM* pGI = GetItem(dwTaskID);
+	
+	return (pGI && pGI->bLocked);
 }
 
 BOOL CWorkloadItemMap::RemoveKey(DWORD dwKey)

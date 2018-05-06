@@ -104,6 +104,14 @@ PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\EditAllocationsDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\EditAllocationsListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -143,6 +151,14 @@ SOURCE=.\WorkloadWnd.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\EditAllocationsDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\EditAllocationsListCtrl.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\Resource.h

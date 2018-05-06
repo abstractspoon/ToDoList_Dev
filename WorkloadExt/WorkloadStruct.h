@@ -18,11 +18,11 @@
 struct WORKLOADITEM 
 { 
 	WORKLOADITEM();
-	WORKLOADITEM(const WORKLOADITEM& gi);
+	WORKLOADITEM(const WORKLOADITEM& wi);
 	virtual ~WORKLOADITEM();
 	
-	WORKLOADITEM& operator=(const WORKLOADITEM& gi);
-	BOOL operator==(const WORKLOADITEM& gi);
+	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
+	BOOL operator==(const WORKLOADITEM& wi);
 	
 	CString sTitle;
 	COleDateTime dtStart, dtDue; 
@@ -42,6 +42,7 @@ struct WORKLOADITEM
 
 	void DecodeAllocations(const CString& sAllocations);
 	CString EncodeAllocations() const;
+	void ClearAllocations();
 
 	BOOL GetAllocation(const CString& sAllocTo, double& dDays) const;
 	BOOL GetAllocation(const CString& sAllocTo, CString& sDays) const;

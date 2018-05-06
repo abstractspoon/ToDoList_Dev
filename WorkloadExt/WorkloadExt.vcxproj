@@ -147,6 +147,8 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EditAllocationsDlg.cpp" />
+    <ClCompile Include="EditAllocationsListCtrl.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">stdafx.h</PrecompiledHeaderFile>
@@ -181,6 +183,8 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
     <ResourceCompile Include="WorkloadExt.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EditAllocationsDlg.h" />
+    <ClInclude Include="EditAllocationsListCtrl.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="WorkloadCtrl.h" />

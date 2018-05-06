@@ -47,6 +47,7 @@
 #define IDD_CREATEDEPENDS_DIALOG        16008
 #define IDC_NONWORKINGHOURSCOLOR        16009
 #define IDB_CHECKBOXES                  16010
+#define IDD_EDITALLOCATIONS_DIALOG      16011
 #define IDC_CALCULATEMISSINGSTARTDATE   16012
 #define IDC_CALCULATEMISSINGDUEDATE     16013
 #define IDC_CALCULATEPARENTDATES        16014
@@ -67,6 +68,8 @@
 #define IDC_DECADESAREONEBASED          16029
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_DISPLAYPARENTSASROLLUPS     16033
+#define IDC_TASKTITLE                   16034
+#define IDC_ALLOCATIONS                 16035
 #define ID_WORKLOAD_GOTOTODAY           32774
 #define ID_WORKLOAD_PREFS               32775
 #define ID_WORKLOAD_NEWDEPENDS          32776
@@ -112,14 +115,15 @@
 #define IDS_ATTRIB_TASKID               57685
 #define IDS_ATTRIB_DONEDATE             57686
 #define IDS_COL_DONEDATE                57687
+#define IDS_NEW_ALLOCATION              57688
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        16011
+#define _APS_NEXT_RESOURCE_VALUE        16012
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16034
+#define _APS_NEXT_CONTROL_VALUE         16036
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

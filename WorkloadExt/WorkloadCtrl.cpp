@@ -80,25 +80,21 @@ const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
 
 //////////////////////////////////////////////////////////////////////
 
-#define GET_WI_RET(id, gi, ret)	\
+#define GET_WI_RET(id, wi, ret)	\
 {								\
 	if (id == 0) return ret;	\
-	gi = GetWorkloadItem(id);		\
-	ASSERT(gi);					\
-	if (gi == NULL) return ret;	\
+	wi = GetWorkloadItem(id);		\
+	ASSERT(wi);					\
+	if (wi == NULL) return ret;	\
 }
 
-#define GET_WI(id, gi)		\
+#define GET_WI(id, wi)		\
 {							\
 	if (id == 0) return;	\
-	gi = GetWorkloadItem(id);	\
-	ASSERT(gi);				\
-	if (gi == NULL)	return;	\
+	wi = GetWorkloadItem(id);	\
+	ASSERT(wi);				\
+	if (wi == NULL)	return;	\
 }
-
-//////////////////////////////////////////////////////////////////////
-
-#define FROMISABOVE(t) ((t == GCDDT_FROMISABOVELEFT) || (t == GCDDT_FROMISABOVERIGHT))
 
 //////////////////////////////////////////////////////////////////////
 
@@ -171,7 +167,6 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(HDN_ITEMCHANGED, IDC_WORKLOADTREEHEADER, OnItemChangedTreeHeader)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_WORKLOADTREEHEADER, OnDblClickTreeHeaderDivider)
 	ON_NOTIFY(NM_RCLICK, IDC_WORKLOADTREEHEADER, OnRightClickTreeHeader)
-	ON_NOTIFY(LVN_GETDISPINFO, IDC_WORKLOADCOLUMNS, OnColumnsGetDispInfo)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_WORKLOADTREE, OnTreeGetDispInfo)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_WORKLOADTREE, OnTreeItemExpanded)
 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
@@ -335,43 +330,26 @@ DWORD CWorkloadCtrl::GetSelectedTaskID() const
 	return (hti ? GetTaskID(hti) : 0);
 }
 
-CString CWorkloadCtrl::GetSelectedTaskMetaData() const
-{
-	DWORD dwTaskID = GetSelectedTaskID();
-	const WORKLOADITEM* pWI = NULL;
-
-	GET_WI_RET(dwTaskID, pWI, _T(""));
-
-	return pWI->EncodeAllocations();
-}
-
-BOOL CWorkloadCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const WORKLOADITEM* pWI = NULL;
 
 	GET_WI_RET(dwTaskID, pWI, FALSE);
 	
-	if (GetTaskStartDueDates(*pWI, dtStart, dtDue))
-	{
-		// handle durations of whole days
-		COleDateTime dtDuration(dtDue - dtStart);
+	wi = *pWI;
+	return TRUE;
+}
 
-		if (CDateHelper::IsDateSet(dtDuration) && (dtDuration > CDateHelper::GetEndOfDay(dtDuration)))
-		{
-			double dWholeDays = (CDateHelper::GetDateOnly(dtDuration).m_dt + 1.0);
+BOOL CWorkloadCtrl::SetSelectedTask(const WORKLOADITEM& wi)
+{
+	DWORD dwTaskID = GetSelectedTaskID();
+	WORKLOADITEM* pWI = NULL;
 
-			if (!CDateHelper::DateHasTime(dtStart))
-				dWholeDays--;
+	GET_WI_RET(dwTaskID, pWI, FALSE);
 
-			dtDue.m_dt = (dtStart.m_dt + dWholeDays);
-		}
-
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
+	*pWI = wi;
+	return TRUE;
 }
 
 BOOL CWorkloadCtrl::SelectTask(DWORD dwTaskID)
@@ -1348,10 +1326,10 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	return CDRF_DODEFAULT;
 }
 
-COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
+COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
 {
 	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
-	COLORREF crBack = GetTreeTextBkColor(gi, bSelected, bAlternate);
+	COLORREF crBack = GetTreeTextBkColor(wi, bSelected, bAlternate);
 
 	if (!bSelected)
 	{
@@ -1721,26 +1699,6 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_UNCHECKED;
 		}
-	}
-}
-
-void CWorkloadCtrl::OnColumnsGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-	DWORD dwTaskID = GetTaskID(pDispInfo->item.iItem);
-	
-	const WORKLOADITEM* pWI = NULL;
-	GET_WI(dwTaskID, pWI);
-	
-	if ((pDispInfo->item.mask & LVIF_TEXT) && (pDispInfo->item.iSubItem > 0))
-	{
-		int nAllocTo = (pDispInfo->item.iSubItem - 1);
-		ASSERT(nAllocTo < m_aAllocTo.GetSize());
-
-		CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
-		pWI->GetAllocation(sAllocTo, sDays);
-
-		pDispInfo->item.pszText = (LPTSTR)(LPCTSTR)sDays;
 	}
 }
 
@@ -2341,25 +2299,25 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 	return nLongest;
 }
 
-CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN nCol) const
+CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMN nCol) const
 {
 	CString sItem;
 
 	switch (nCol)
 	{
 		case WLCC_TITLE:
-			sItem = gi.sTitle;
+			sItem = wi.sTitle;
 			break;
 
 		case WLCC_TASKID:
-			sItem.Format(_T("%ld"), gi.dwTaskID);
+			sItem.Format(_T("%ld"), wi.dwTaskID);
 			break;
 			
 		case WLCC_STARTDATE:
 		case WLCC_DUEDATE:
 			{
 				COleDateTime dtStart, dtDue;
-				GetTaskStartDueDates(gi, dtStart, dtDue);
+				GetTaskStartDueDates(wi, dtStart, dtDue);
 
 				sItem = FormatDate((nCol == WLCC_STARTDATE) ? dtStart : dtDue);
 			}
@@ -2369,28 +2327,28 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& gi, WLC_COLUMN 
 			{
 				double dDuration;
 
-				if (gi.GetDuration(dDuration))
+				if (wi.GetDuration(dDuration))
 					sItem.Format(_T("%d Days"), (int)dDuration);
 			}
 			break;
 
 		case WLCC_PERCENT:
-			sItem.Format(_T("%d%%"), gi.nPercent);
+			sItem.Format(_T("%d%%"), wi.nPercent);
 			break;
 	}
 
 	return sItem;
 }
 
-void CWorkloadCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack)
+void CWorkloadCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
 {
 	int nNumCol = m_hdrTasks.GetItemCount();
 
 	for (int nCol = 0; nCol < nNumCol; nCol++)
-		DrawTreeItemText(pDC, hti, nCol, gi, bSelected, crBack);
+		DrawTreeItemText(pDC, hti, nCol, wi, bSelected, crBack);
 }
 
-void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& gi, BOOL bSelected, COLORREF crBack)
+void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
 {
 	CRect rItem;
 	GetTreeItemRect(hti, nCol, rItem);
@@ -2422,7 +2380,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		return;
 
 	// draw text
-	CString sItem = GetTreeItemColumnText(gi, nColID);
+	CString sItem = GetTreeItemColumnText(wi, nColID);
 
 	if (!sItem.IsEmpty())
 	{
@@ -2450,14 +2408,14 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		case WLCC_DUEDATE:
 			{
 				// draw non-selected calculated dates lighter
-				if (!bSelected && !gi.bDone && !gi.bGoodAsDone)
+				if (!bSelected && !wi.bDone && !wi.bGoodAsDone)
 				{
 					if (!bLighter)
 					{
 						if (nColID == WLCC_STARTDATE)
-							bLighter = (!gi.HasStart() && HasOption(WLCF_CALCMISSINGSTARTDATES));
+							bLighter = (!wi.HasStart() && HasOption(WLCF_CALCMISSINGSTARTDATES));
 						else
-							bLighter = (!gi.HasDue() && HasOption(WLCF_CALCMISSINGDUEDATES));
+							bLighter = (!wi.HasDue() && HasOption(WLCF_CALCMISSINGDUEDATES));
 					}
 				}
 				
@@ -2473,9 +2431,9 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 			break;
 		}
 
-		COLORREF crText = GetTreeTextColor(gi, bSelected, bLighter);
+		COLORREF crText = GetTreeTextColor(wi, bSelected, bLighter);
 		COLORREF crOldColor = pDC->SetTextColor(crText);
-		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, gi, nColID));
+		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, wi, nColID));
 		
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sItem, rItem, nFlags);
@@ -2484,7 +2442,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 	}
 
 	// special case: drawing shortcut icon for reference tasks
-	if (bTitleCol && gi.dwOrgRefID)
+	if (bTitleCol && wi.dwOrgRefID)
 	{
 		GetTreeItemRect(hti, nCol, rItem, TRUE);
 		CPoint ptIcon(rItem.left, rItem.bottom - 32);
@@ -2550,9 +2508,9 @@ void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType
 }
 
 
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& gi, WLC_COLUMN nCol)
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMN nCol)
 {
-	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && gi.bDone);
+	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && wi.bDone);
 	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
 	
 	return m_tcTasks.Fonts().GetHFont(bBold, FALSE, FALSE, bStrikThru);
@@ -2604,7 +2562,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BOOL bSelected)
+void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2613,15 +2571,11 @@ void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& gi, BO
 
 	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected);
+		bContinue = DrawListItemColumn(pDC, nItem, nCol, wi, bSelected);
 	}
 }
 
-void CWorkloadCtrl::DrawListItemText(CDC* /*pDC*/, const WORKLOADITEM& /*gi*/, const CRect& /*rItem*/, const CRect& /*rClip*/, COLORREF /*crRow*/)
-{
-}
-
-BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& gi, BOOL bSelected)
+BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	if (nCol == 0)
 		return TRUE;
@@ -2645,12 +2599,17 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	DrawItemDivider(pDC, rColumn, DIV_HORZ, bSelected);
 	DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 
-	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected);
-}
+	int nAllocTo = (nCol - 1);
+	ASSERT(nAllocTo < m_aAllocTo.GetSize());
 
-BOOL CWorkloadCtrl::DrawListItemColumnRect(CDC* /*pDC*/, int /*nCol*/, const CRect& /*rColumn*/, const WORKLOADITEM& /*gi*/, BOOL /*bSelected*/)
-{
-	// TODO
+	CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
+	
+	if (wi.GetAllocation(sAllocTo, sDays))
+	{
+		rColumn.DeflateRect(LV_COLPADDING, 0);
+		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_RIGHT);
+	}
+
 	return TRUE;
 }
 
@@ -2688,17 +2647,17 @@ void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CStri
 	}
 }
 
-BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& wi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
-	dtStart = gi.dtStart;
-	dtDue = gi.dtDue;
+	dtStart = wi.dtStart;
+	dtDue = wi.dtDue;
 
 	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));
 }
 
-COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bAlternate) const
+COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const
 {
-	COLORREF crTextBk = gi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crTextBk = wi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 
 	if (crTextBk == CLR_NONE)
 	{
@@ -2711,9 +2670,9 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& gi, BOOL bSelecte
 	return crTextBk;
 }
 
-COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& gi, BOOL bSelected, BOOL bLighter) const
+COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter) const
 {
-	COLORREF crText = gi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crText = wi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 	ASSERT(crText != CLR_NONE);
 
 	if (bSelected)

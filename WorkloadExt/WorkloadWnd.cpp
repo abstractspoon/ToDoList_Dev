@@ -7,6 +7,7 @@
 #include "WorkloadWnd.h"
 #include "WorkloadStatic.h"
 #include "WorkloadMsg.h"
+#include "EditAllocationsDlg.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
@@ -793,30 +794,7 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 
 void CWorkloadWnd::UpdateSelectedTaskDates()
 {
-	COleDateTime dtStart, dtDue;
-	
-	if (m_ctrlWorkload.GetSelectedTaskDates(dtStart, dtDue))
-	{
-		CString sStart, sDue;
-
-		if (CDateHelper::DateHasTime(dtStart))
-			sStart = CDateHelper::FormatDate(dtStart, DHFD_TIME | DHFD_NOSEC);
-		else
-			sStart = CDateHelper::FormatDate(dtStart);
-
-		if (CDateHelper::DateHasTime(dtDue))
-			sDue = CDateHelper::FormatDate(dtDue, DHFD_TIME | DHFD_NOSEC);
-		else
-			sDue = CDateHelper::FormatDate(dtDue);
-
-		m_sSelectedTaskDates.Format(_T("%s - %s"), sStart, sDue);
-	}
-	else
-	{
-		m_sSelectedTaskDates.Empty();
-	}
-
-	UpdateData(FALSE);
+	// TODO
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 
@@ -860,9 +838,14 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CWorkloadWnd::OnWorkloadNotifyAllocationChange(WPARAM /*wp*/, LPARAM /*lp*/) 
 {
-	IUITASKMOD mod = { IUI_METADATA, 0 };
+	WORKLOADITEM wi;
 
-	CString sMetaData = m_ctrlWorkload.GetSelectedTaskMetaData();
+	if (!m_ctrlWorkload.GetSelectedTask(wi))
+		return 0L;
+
+	IUITASKMOD mod = { IUI_METADATA, 0 };
+	CString sMetaData = wi.EncodeAllocations();
+
 	mod.szValue = sMetaData;
 	mod.szCustomAttribID = WORKLOAD_TYPEID;
 
@@ -881,8 +864,15 @@ LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)
 
 void CWorkloadWnd::OnWorkloadEditAllocations() 
 {
-	// TODO: Add your command handler code here
+	WORKLOADITEM wi;
+	VERIFY(m_ctrlWorkload.GetSelectedTask(wi));
+
+	CEditAllocationsDlg dialog(wi, m_ctrlWorkload.GetAllocatedToList());
 	
+	if (dialog.DoModal() == IDOK)
+	{
+		m_ctrlWorkload.SetSelectedTask(dialog.GetAllocations());
+	}
 }
 
 void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI) 
