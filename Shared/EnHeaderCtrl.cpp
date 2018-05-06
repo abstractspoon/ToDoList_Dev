@@ -563,7 +563,7 @@ BOOL CEnHeaderCtrl::IsItemTracked(int nItem) const
 
 void CEnHeaderCtrl::EnableItemDragging(int nItem, BOOL bAllow)
 {
-	ASSERT(GetStyle() & HDS_DRAGDROP);
+	ASSERT(!bAllow || (GetStyle() & HDS_DRAGDROP));
 
 	ModifyItemFlags(nItem, EHCF_NODRAG, !bAllow);
 }

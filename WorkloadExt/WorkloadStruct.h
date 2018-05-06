@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
-#define AFX_WorkloadSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_
+#if !defined(AFX_WORKLOADSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
+#define AFX_WORKLOADSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -22,7 +22,7 @@ struct WORKLOADITEM
 	virtual ~WORKLOADITEM();
 	
 	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
-	BOOL operator==(const WORKLOADITEM& wi);
+	BOOL operator==(const WORKLOADITEM& wi) const;
 	
 	CString sTitle;
 	COleDateTime dtStart, dtDue; 
@@ -43,6 +43,7 @@ struct WORKLOADITEM
 	void DecodeAllocations(const CString& sAllocations);
 	CString EncodeAllocations() const;
 	void ClearAllocations();
+	BOOL AllocationsMatch(const WORKLOADITEM& wi) const;
 
 	BOOL GetAllocation(const CString& sAllocTo, double& dDays) const;
 	BOOL GetAllocation(const CString& sAllocTo, CString& sDays) const;
@@ -128,4 +129,4 @@ struct WORKLOADCOLUMN
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // !defined(AFX_WorkloadSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
+#endif // !defined(AFX_WORKLOADSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

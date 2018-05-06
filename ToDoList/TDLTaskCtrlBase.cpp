@@ -4386,6 +4386,7 @@ void CTDLTaskCtrlBase::SetModified(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PROJECTNAME:
 	case TDCA_COMMENTS:
 	case TDCA_ENCRYPT:
+	case TDCA_METADATA:
 		break;
 		
 	case TDCA_COLOR:

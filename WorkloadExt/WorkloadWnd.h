@@ -1,5 +1,5 @@
-#if !defined(AFX_WorkloadWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)
-#define AFX_WorkloadWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_
+#if !defined(AFX_WORKLOADWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)
+#define AFX_WORKLOADWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -103,7 +103,6 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
 
-	afx_msg LRESULT OnWorkloadNotifyAllocationChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
@@ -132,4 +131,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_WorkloadWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)
+#endif // !defined(AFX_WORKLOADWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)

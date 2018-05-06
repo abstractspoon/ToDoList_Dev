@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_)
+#if !defined(AFX_WORKLOADEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_)
 #define AFX_WORKLOADEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_
 
 #if _MSC_VER > 1000
@@ -17,7 +17,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR WORKLOAD_TYPEID = _T("4320FC3D-C6A5-4A7E-A159-3BA69CEE6E9D");
+const LPCTSTR WORKLOAD_TYPEID = _T("WORKLOAD_4320FC3D-C6A5-4A7E-A159-3BA69CEE6E9D");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,4 +48,4 @@ protected:
 	BOOL InitInstance();
 };
 
-#endif // !defined(AFX_WorkloadEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_)
+#endif // !defined(AFX_WORKLOADEXT_H__DEE73DE1_C6EC_4648_9151_0FC2C75A806D__INCLUDED_)

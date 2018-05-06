@@ -1,4 +1,9 @@
+#if !defined(AFX_WORKLOADTREECTRL_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)
+#define AFX_WORKLOADTREECTRL_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_
+
+#if _MSC_VER > 1000
 #pragma once
+#endif // _MSC_VER > 1000
 
 #include "..\shared\tooltipctrlex.h"
 #include "..\shared\fontcache.h"
@@ -54,4 +59,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+#endif // AFX_WORKLOADTREECTRL_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_
 

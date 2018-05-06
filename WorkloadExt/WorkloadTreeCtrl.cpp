@@ -53,7 +53,7 @@ void CWorkloadTreeCtrl::PreSubclassWindow()
 {
 	CTreeCtrl::PreSubclassWindow();
 
-//	InitTooltip();
+	InitTooltip();
 	m_fonts.Initialise(*this);
 }
 

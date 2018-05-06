@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "EditAllocationsListCtrl.h"
 
+#include "..\Shared\misc.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -27,6 +29,8 @@ const UINT IDC_ALLOCTO_COMBO = 1001;
 CEditAllocationsListCtrl::CEditAllocationsListCtrl(const WORKLOADITEM& wi, const CStringArray& aAllocTo)
 {
 	m_wi = wi;
+	Misc::SortArray(m_wi.aAllocTo);
+
 	m_aAllocTo.Copy(aAllocTo);
 }
 
@@ -54,19 +58,20 @@ void CEditAllocationsListCtrl::InitState()
 
 	CreateControl(m_cbAllocTo, IDC_ALLOCTO_COMBO);
 
-	int nAllocTo = m_aAllocTo.GetSize();
-
-	while (nAllocTo--)
-		m_cbAllocTo.AddString(m_aAllocTo[nAllocTo]);
-
 	AddCol(_T("Allocated To"), 200);
 	AddCol(_T("Days"), 75);
 
+// 	LV_COLUMN lvc = { 0 };
+// 	lvc.mask = LVCF_FMT;
+// 	lvc.fmt = LVCFMT_RIGHT;
+// 
+// 	SetColumn(ALLOCTO_COL, &lvc);
+	
 	SetAutoRowPrompt(CEnString(IDS_NEW_ALLOCATION));
 	AutoAdd(TRUE, FALSE);
 
 	// Build list
-	for (nAllocTo = 0; nAllocTo < m_wi.aAllocTo.GetSize(); nAllocTo++)
+	for (int nAllocTo = 0; nAllocTo < m_wi.aAllocTo.GetSize(); nAllocTo++)
 	{
 		const CString& sAllocTo = m_wi.aAllocTo[nAllocTo];
 		CString sDays;
@@ -82,10 +87,6 @@ void CEditAllocationsListCtrl::EditCell(int nItem, int nCol)
 	switch (nCol)
 	{
 	case ALLOCTO_COL:
-		// handle new allocations
-		if (IsPrompt(nItem))
-			AddRow(_T(""));
-
 		ShowControl(m_cbAllocTo, nItem, nCol);
 		break;
 
@@ -108,9 +109,25 @@ void CEditAllocationsListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			ASSERT (&ctrl == &m_cbAllocTo);
 
+			// Rebuild the list leaving out any already selected
+			m_cbAllocTo.ResetContent();
+			CStringArray aAllocTo;
+
+			aAllocTo.Copy(m_aAllocTo);
+			Misc::RemoveItems(m_wi.aAllocTo, aAllocTo);
+
+			int nAllocTo = aAllocTo.GetSize();
+
+			while (nAllocTo--)
+				m_cbAllocTo.AddString(aAllocTo[nAllocTo]);
+			
 			if (!IsPrompt(nRow))
 				m_cbAllocTo.SelectString(-1, GetItemText(nRow, nCol));
 		}
+		break;
+
+	case ALLOCDAYS_COL:
+		SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 		break;
 	}
 }
@@ -124,15 +141,20 @@ void CEditAllocationsListCtrl::OnAllocationComboOK()
 {
 	HideControl(m_cbAllocTo);
 
-	// update item text and keep data store synched
-	int nRow = GetCurSel();
+	int nAllocTo = m_cbAllocTo.GetCurSel();
 
-	if (nRow != CB_ERR)
+	if (nAllocTo != CB_ERR)
 	{
 		CString sAllocTo;
-		m_cbAllocTo.GetLBText(nRow, sAllocTo);
+		m_cbAllocTo.GetLBText(nAllocTo, sAllocTo);
 
-		SetItemText(nRow, ALLOCTO_COL, sAllocTo);
+		// handle new allocations
+		int nRow = GetCurSel();
+
+		if (IsPrompt(nRow))
+			AddRow(sAllocTo);
+		else
+			SetItemText(nRow, ALLOCTO_COL, sAllocTo);
 	}
 }
 
@@ -144,15 +166,17 @@ const WORKLOADITEM& CEditAllocationsListCtrl::GetAllocations() const
 void CEditAllocationsListCtrl::OnDestroy() 
 {
 	m_wi.ClearAllocations();
+	m_wi.aAllocTo.RemoveAll();
 
-	int nRow = (GetItemCount() - 1);
+	int nNumRows = (GetItemCount() - 1);
 
-	while (nRow--)
+	for (int nRow = 0; nRow < nNumRows; nRow++)
 	{
 		CString sAllocTo = GetItemText(nRow, ALLOCTO_COL);
 		CString sDays = GetItemText(nRow, ALLOCDAYS_COL);
 
 		m_wi.SetAllocation(sAllocTo, sDays);
+		m_wi.aAllocTo.Add(sAllocTo);
 	}
 
 	CInputListCtrl::OnDestroy();

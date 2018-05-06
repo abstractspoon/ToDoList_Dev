@@ -170,7 +170,7 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_WORKLOADTREE, OnTreeGetDispInfo)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_WORKLOADTREE, OnTreeItemExpanded)
 	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
-	ON_NOTIFY(NM_CLICK, IDC_WORKLOADCOLUMNS, OnColumnsClick)
+	ON_NOTIFY(NM_CLICK, IDC_WORKLOADCOLUMNS, OnClickColumns)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -236,6 +236,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return FALSE;
 	}
 	m_hdrColumns.EnableToolTips();
+	m_hdrColumns.EnableTracking(FALSE);
 	
 	BuildTreeColumns();
 	BuildListColumns();
@@ -598,8 +599,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	}
 	
 	InitItemHeights();
-	RecalcTreeColumns(TRUE);
 	UpdateListColumns();
+	RecalcTreeColumns(TRUE);
 	
 	if (EditWantsResort(nUpdate, attrib))
 	{
@@ -1660,7 +1661,7 @@ void CWorkloadCtrl::OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CWorkloadCtrl::OnColumnsClick(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CWorkloadCtrl::OnClickColumns(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
 	//UpdateSelectedTaskDates();
 	//SendParentSelectionUpdate();
@@ -2328,7 +2329,7 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMN 
 				double dDuration;
 
 				if (wi.GetDuration(dDuration))
-					sItem.Format(_T("%d Days"), (int)dDuration);
+					sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), (int)dDuration);
 			}
 			break;
 
@@ -2607,7 +2608,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	if (wi.GetAllocation(sAllocTo, sDays))
 	{
 		rColumn.DeflateRect(LV_COLPADDING, 0);
-		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_RIGHT);
+		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 	}
 
 	return TRUE;
@@ -2765,11 +2766,31 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 
 	SetSplitPos(nTotalColWidth);
 	
-// 	// list columns (except first dummy column)
-// 	nCol = GetRequiredListColumnCount();
-// 	
-// 	while (--nCol > 0)
-// 		m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
+	// list columns
+	RecalcListColumnsToFit();
+
+	Resize();
+}
+
+void CWorkloadCtrl::RecalcListColumnsToFit()
+{
+	// Calc widest column first
+	CClientDC dc(&m_lcColumns);
+	int nMaxHeaderWidth = 0;
+	int nCol = GetRequiredListColumnCount();
+
+	while (nCol--)
+	{
+		int nHeaderWidth = m_hdrColumns.GetItemTextWidth(nCol, &dc);
+		nMaxHeaderWidth = max(nMaxHeaderWidth, nHeaderWidth);
+	}
+	nMaxHeaderWidth += (2 * HD_COLPADDING);
+
+	// Resize all columns to that width (except first dummy column)
+	nCol = GetRequiredListColumnCount();
+
+	while (--nCol > 0)
+		m_hdrColumns.SetItemWidth(nCol, nMaxHeaderWidth);
 
 	Resize();
 }
@@ -2798,6 +2819,7 @@ BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 	// Only need recalc non-fixed column widths
 	BOOL bTitle = !m_hdrTasks.IsItemTracked(WLCC_TITLE);
 	BOOL bTaskID = !m_hdrTasks.IsItemTracked(WLCC_TASKID);
+	BOOL bDuration = !m_hdrTasks.IsItemTracked(WLCC_DURATION);
 
 	if (bTitle || bTaskID)
 	{
@@ -2808,6 +2830,9 @@ BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
 			
 		if (bTaskID)
 			RecalcTreeColumnWidth(WLCC_TASKID, &dc);
+
+		if (bDuration)
+			RecalcTreeColumnWidth(WLCC_DURATION, &dc);
 		
 		if (bResize)
 			Resize();
@@ -3000,6 +3025,8 @@ void CWorkloadCtrl::UpdateListColumns()
 	{
 		m_hdrColumns.SetItemText(i, m_aAllocTo[i - 1]);
 	}
+
+	RecalcListColumnsToFit();
 }
 
 int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
@@ -3333,9 +3360,9 @@ BOOL CWorkloadCtrl::CancelOperation()
 	return FALSE;
 }
 
-int CWorkloadCtrl::GetTreeColumnOrder(CIntArray& aTreeOrder) const
+int CWorkloadCtrl::GetTreeColumnOrder(CIntArray& aOrder) const
 {
-	return m_hdrTasks.GetItemOrder(aTreeOrder);
+	return m_hdrTasks.GetItemOrder(aOrder);
 }
 
 void CWorkloadCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
@@ -3351,76 +3378,42 @@ void CWorkloadCtrl::SetTreeColumnVisibility(const CDWordArray& aColumnVis)
 	Resize();
 }
 
-BOOL CWorkloadCtrl::SetTreeColumnOrder(const CIntArray& aTreeOrder)
+BOOL CWorkloadCtrl::SetTreeColumnOrder(const CIntArray& aOrder)
 {
-	if (!(aTreeOrder.GetSize() && (aTreeOrder[0] == 0)))
+	if (!(aOrder.GetSize() && (aOrder[0] == 0)))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	return m_hdrTasks.SetItemOrder(aTreeOrder);
+	return m_hdrTasks.SetItemOrder(aOrder);
 }
 
-void CWorkloadCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
+void CWorkloadCtrl::GetTreeColumnWidths(CIntArray& aWidths) const
 {
-	m_hdrTasks.GetItemWidths(aTreeWidths);
-	m_hdrColumns.GetItemWidths(aListWidths);
-
-	// trim the list columns to what's currently visible
-	// remember to include hidden dummy first column
-	int nNumMonths = (GetRequiredListColumnCount() + 1);
-	int nItem = aListWidths.GetSize();
-
-	while (nItem-- > nNumMonths)
-		aListWidths.RemoveAt(nItem);
+	m_hdrTasks.GetItemWidths(aWidths);
 }
 
-BOOL CWorkloadCtrl::SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths)
+BOOL CWorkloadCtrl::SetTreeColumnWidths(const CIntArray& aWidths)
 {
-	if (aTreeWidths.GetSize() != (NUM_TREECOLUMNS + 1))
+	if (aWidths.GetSize() != (NUM_TREECOLUMNS + 1))
 		return FALSE;
 
-	m_hdrTasks.SetItemWidths(aTreeWidths);
-
-	// save list column widths for when we've initialised our columns
-	// remember to include hidden dummy first column
-	if (aListWidths.GetSize() == (GetRequiredListColumnCount() + 1))
-		m_hdrColumns.SetItemWidths(aListWidths);
-	else
-		m_aPrevColWidths.Copy(aListWidths);
-
+	m_hdrTasks.SetItemWidths(aWidths);
 	return TRUE;
 }
 
-void CWorkloadCtrl::GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const
+void CWorkloadCtrl::GetTreeTrackedColumns(CIntArray& aTracked) const
 {
-	m_hdrTasks.GetTrackedItems(aTreeTracked);
-	m_hdrColumns.GetTrackedItems(aListTracked);
-
-	// trim the list columns to what's currently visible
-	// remember to include hidden dummy first column
-	int nNumMonths = (GetRequiredListColumnCount() + 1);
-	int nItem = aListTracked.GetSize();
-
-	while (nItem-- > nNumMonths)
-		aListTracked.RemoveAt(nItem);
+	m_hdrTasks.GetTrackedItems(aTracked);
 }
 
-BOOL CWorkloadCtrl::SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked)
+BOOL CWorkloadCtrl::SetTrackedTreeColumns(const CIntArray& aTracked)
 {
-	if (aTreeTracked.GetSize() != (NUM_TREECOLUMNS + 1))
+	if (aTracked.GetSize() != (NUM_TREECOLUMNS + 1))
 		return FALSE;
 	
-	m_hdrTasks.SetTrackedItems(aTreeTracked); 
-
-	// save list column tracking for when we've initialised our columns
-	// remember to include hidden dummy first column
-	if (aListTracked.GetSize() == (GetRequiredListColumnCount() + 1))
-		m_hdrColumns.SetTrackedItems(aListTracked);
-	else
-		m_aPrevTrackedCols.Copy(aListTracked);
-	
+	m_hdrTasks.SetTrackedItems(aTracked); 
 	return TRUE;
 }
 

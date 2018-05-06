@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
-#define AFX_WorkloadSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_
+#if !defined(AFX_WORKLOADSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
+#define AFX_WORKLOADSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_
 
 #include "resource.h"
 #include "Workloadstruct.h"
@@ -22,4 +22,4 @@ const int NUM_TREECOLUMNS = (sizeof(WORKLOADTREECOLUMNS) / sizeof(WORKLOADCOLUMN
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // !defined(AFX_WorkloadSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
+#endif // !defined(AFX_WORKLOADSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

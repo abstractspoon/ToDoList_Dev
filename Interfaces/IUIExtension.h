@@ -234,7 +234,7 @@ struct IUITASKMOD
 {
 	IUI_ATTRIBUTE nAttrib;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
-	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB, IUI_METADATA
+	LPCWSTR szCustomAttribID;	// IUI_CUSTOMATTRIB
 
 	// The attribute value
 	union

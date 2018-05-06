@@ -70,7 +70,7 @@ END
 IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
                     IDC_SELECTEDTASKDATES,108,13,236,12,SS_CENTERIMAGE | 
@@ -80,7 +80,7 @@ BEGIN
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,12,106,17
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,0,30,587,279
+                    WS_VISIBLE,0,30,587,226
 END
 
 
@@ -153,61 +153,16 @@ IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 400
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "Decades start on year '1' instead of year '0'. eg. '2001' instead of '2000'",
-                    IDC_DECADESAREONEBASED,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,7,333,10
-    CONTROL         "&Display 'Alloc To' after task's Workload bar",
-                    IDC_DISPLAYALLOCTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,22,333,10
-    CONTROL         "Di&splay 'Task Title' after task's Workload bar",
-                    IDC_DISPLAYTASKTITLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,37,333,10
-    CONTROL         "Show '% &Complete' as progress on task's Workload bar",
-                    IDC_DISPLAYPROGRESS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,52,333,10
-    CONTROL         "&Auto-scroll to task when selecting",
-                    IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,67,333,10
-    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
-                    IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,82,333,10
-    EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL
     LTEXT           "&Column Visibility",IDC_STATIC,7,113,333,8
     LISTBOX         IDC_COLUMNVISIBILITY,7,125,222,44,LBS_SORT | 
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Colours",IDC_COLORSGROUP,7,174,333,8
-    CONTROL         "'&Non-working hours' colour",IDC_NONWORKINGHOURSCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,190,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETNONWORKINGHOURSCOLOR,178,187,52,13,
-                    BS_RIGHT
-    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,205,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,202,52,13,BS_RIGHT
-    CONTROL         "'&Today' colour",IDC_TODAYCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,220,137,10
-    PUSHBUTTON      "S&et...   ",IDC_SETTODAYCOLOR,178,216,52,13,BS_RIGHT
-    CONTROL         "'Bar' colour for tasks having no colour",
-                    IDC_DEFAULTCOLOR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    234,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDEFAULTCOLOR,178,231,52,13,BS_RIGHT
-    GROUPBOX        "Parent Tasks",IDC_STATIC,7,250,333,63
-    CONTROL         "Us&e default colours",IDC_DEFAULTPARENTCOLORS,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,264,320,10
-    CONTROL         "Use '&No' colour",IDC_NOPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,279,320,10
-    CONTROL         "Use this &colour",IDC_SPECIFYPARENTCOLOR,"Button",
-                    BS_AUTORADIOBUTTON,16,295,133,10
-    PUSHBUTTON      "S&et...   ",IDC_SETPARENTCOLOR,178,293,52,13,BS_RIGHT | 
-                    WS_GROUP
     LTEXT           "Dates",IDC_DATESGROUP,7,322,333,8
     CONTROL         "A&uto-calculate parent task dates to include all subtasks",
                     IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,338,333,10
-    CONTROL         "Display collapsed parent tasks as 'Rollups'",
-                    IDC_DISPLAYPARENTSASROLLUPS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,353,323,10
     CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
                     IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,368,333,10
@@ -346,11 +301,13 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_ATTRIB_DURATION     "Duration"
     IDS_COL_DURATION        "Duration"
+    IDS_ALLOCATION_FORMAT   "%d days"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_WORKLOAD_PREFS       "\nWorkload Preferences"
+    ID_WORKLOAD_EDITALLOCATIONS "\nEdit Allocations"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -371,6 +328,13 @@ BEGIN
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
     IDS_NEW_ALLOCATION      "<new allocation>"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TOTALDAYSPERPERSON  "Total time engagement per person (days)"
+    IDS_NUMACTIVITIESPERPERSON "Number of activities per person"
+    IDS_LOADPERCENTAGEPERPERSON "Individual load percentage"
 END
 
 #endif    // English (Australia) resources

@@ -12671,8 +12671,10 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
+	case TDCA_ANYTEXTATTRIBUTE:		
 	case TDCA_CATEGORY:		
 	case TDCA_COLOR:		
+	case TDCA_COMMENTS:		
 	case TDCA_COST:			
 	case TDCA_CREATEDBY:	
 	case TDCA_CREATIONDATE:	
@@ -12684,7 +12686,8 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_EXTERNALID:	
 	case TDCA_FILEREF:		
 	case TDCA_FLAG:			
-	case TDCA_ICON:			
+	case TDCA_ICON:		
+	case TDCA_METADATA:
 	case TDCA_PERCENT:		
 	case TDCA_PRIORITY:		
 	case TDCA_RECURRENCE:	

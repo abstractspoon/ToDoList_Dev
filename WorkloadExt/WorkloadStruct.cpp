@@ -61,7 +61,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 	return (*this);
 }
 
-BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi)
+BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 {
 	return ((sTitle == wi.sTitle) &&
 			(dtStart == wi.dtStart) &&
@@ -85,6 +85,11 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi)
 WORKLOADITEM::~WORKLOADITEM()
 {
 	
+}
+
+BOOL WORKLOADITEM::AllocationsMatch(const WORKLOADITEM& wi) const
+{
+	return Misc::MatchAll(mapAllocatedDays, wi.mapAllocatedDays);
 }
 
 BOOL WORKLOADITEM::HasStart() const
@@ -167,10 +172,7 @@ BOOL WORKLOADITEM::GetAllocation(const CString& sAllocTo, CString& sDays) const
 
 void WORKLOADITEM::SetAllocation(const CString& sAllocTo, const CString& sDays)
 {
-	if (sDays.IsEmpty())
-		mapAllocatedDays.RemoveKey(Misc::ToUpper(sAllocTo));
-	else
-		mapAllocatedDays[Misc::ToUpper(sAllocTo)] = sDays;
+	mapAllocatedDays[Misc::ToUpper(sAllocTo)] = sDays;
 }
 
 void WORKLOADITEM::DecodeAllocations(const CString& sAllocations)

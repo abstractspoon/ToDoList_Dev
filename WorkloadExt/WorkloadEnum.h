@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)
-#define AFX_WorkloadENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_
+#if !defined(AFX_WORKLOADENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)
+#define AFX_WORKLOADENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -39,4 +39,4 @@ enum WLC_COLUMN
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // !defined(AFX_WorkloadENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)
+#endif // !defined(AFX_WORKLOADENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)

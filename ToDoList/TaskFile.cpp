@@ -512,8 +512,7 @@ BOOL CTaskFile::SaveEx()
 {
 	SetItemValue(TDL_APPVER, FileMisc::GetAppVersion());
 	SetItemValue(TDL_FILEFORMAT, TDL_FILEFORMAT_CURRENT);
-
-
+	
 	return XMLBASE::SaveEx();
 }
 

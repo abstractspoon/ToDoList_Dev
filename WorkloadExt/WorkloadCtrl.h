@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
-#define AFX_WorkloadTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
+#if !defined(AFX_WORKLOADTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#define AFX_WORKLOADTREELISTCTRL_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -107,12 +107,12 @@ public:
 	CString GetItemTip(CPoint ptScreen) const;
 	HTREEITEM GetItem(CPoint ptScreen) const;
 
-	int GetTreeColumnOrder(CIntArray& aTreeOrder) const;
-	BOOL SetTreeColumnOrder(const CIntArray& aTreeOrder);
-	void GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const;
-	BOOL SetColumnWidths(const CIntArray& aTreeWidths, const CIntArray& aListWidths);
-	BOOL SetTrackedColumns(const CIntArray& aTreeTracked, const CIntArray& aListTracked);
-	void GetTrackedColumns(CIntArray& aTreeTracked, CIntArray& aListTracked) const;
+	int GetTreeColumnOrder(CIntArray& aOrder) const;
+	BOOL SetTreeColumnOrder(const CIntArray& aOrder);
+	void GetTreeColumnWidths(CIntArray& aWidths) const;
+	BOOL SetTreeColumnWidths(const CIntArray& aWidths);
+	BOOL SetTrackedTreeColumns(const CIntArray& aTracked);
+	void GetTreeTrackedColumns(CIntArray& aTracked) const;
 	void SetTreeColumnVisibility(const CDWordArray& aColumnVis);
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttrib);
@@ -163,7 +163,7 @@ protected:
 	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnColumnsClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnClickColumns(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
@@ -212,9 +212,6 @@ protected:
 
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 
-	void BuildListColumns();
-	void UpdateListColumns();
-
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
@@ -224,12 +221,13 @@ protected:
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	void BuildTreeColumns();
+	void BuildListColumns();
+	void UpdateListColumns();
 	int GetRequiredListColumnCount() const;
 	void DeleteTreeItem(HTREEITEM hti);
 	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void InitItemHeights();
-	int CalcTreeWidth() const;
 	void Resize();
    BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
@@ -263,7 +261,8 @@ protected:
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
-
+	void RecalcListColumnsToFit();
+	
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const;
@@ -300,4 +299,4 @@ private:
 
 };
 
-#endif // !defined(AFX_WorkloadTREELIST_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#endif // !defined(AFX_WORKLOADTREELIST_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

@@ -93,7 +93,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
-	ON_REGISTERED_MESSAGE(WM_WLCN_ALLOCATIONCHANGE, OnWorkloadNotifyAllocationChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
@@ -167,17 +166,15 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
 
 	// column widths
-	CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
+	CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
 
 	m_ctrlWorkload.GetTreeColumnOrder(aTreeOrder);
-	m_ctrlWorkload.GetColumnWidths(aTreeWidths, aListWidths);
-	m_ctrlWorkload.GetTrackedColumns(aTreeTracked, aListTracked);
+	m_ctrlWorkload.GetTreeColumnWidths(aTreeWidths);
+	m_ctrlWorkload.GetTreeTrackedColumns(aTreeTracked);
 
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeOrder")), aTreeOrder);
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths);
-	SaveColumnState(pPrefs, (sKey + _T("\\ListWidths")), aListWidths);
 	SaveColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked);
-	SaveColumnState(pPrefs, (sKey + _T("\\ListTracked")), aListTracked);
 
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 }
@@ -258,7 +255,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		UpdateWorkloadCtrlPreferences();
 
 		// column order
-		CIntArray aTreeOrder, aTreeWidths, aListWidths, aTreeTracked, aListTracked;
+		CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
 
 		if (LoadColumnState(pPrefs, (sKey + _T("\\TreeOrder")), aTreeOrder))
 		{
@@ -267,17 +264,15 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		
 		// column widths
 		if (!LoadColumnState(pPrefs, (sKey + _T("\\TreeWidths")), aTreeWidths) ||
-			!LoadColumnState(pPrefs, (sKey + _T("\\ListWidths")), aListWidths) ||
-			!m_ctrlWorkload.SetColumnWidths(aTreeWidths, aListWidths))
+			!m_ctrlWorkload.SetTreeColumnWidths(aTreeWidths))
 		{
 			m_ctrlWorkload.ResizeColumnsToFit();
 		}
 		
 		// column tracking
-		if (LoadColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked) &&
-			LoadColumnState(pPrefs, (sKey + _T("\\ListTracked")), aListTracked))
+		if (LoadColumnState(pPrefs, (sKey + _T("\\TreeTracked")), aTreeTracked))
 		{
-			m_ctrlWorkload.SetTrackedColumns(aTreeTracked, aListTracked);
+			m_ctrlWorkload.SetTrackedTreeColumns(aTreeTracked);
 		}
 		
 		if (GetSafeHwnd())
@@ -726,10 +721,6 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 
 	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SELECTEDTASKDATES, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES_LABEL, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY_LABEL, pDC);
-	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -836,22 +827,6 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }
 
-LRESULT CWorkloadWnd::OnWorkloadNotifyAllocationChange(WPARAM /*wp*/, LPARAM /*lp*/) 
-{
-	WORKLOADITEM wi;
-
-	if (!m_ctrlWorkload.GetSelectedTask(wi))
-		return 0L;
-
-	IUITASKMOD mod = { IUI_METADATA, 0 };
-	CString sMetaData = wi.EncodeAllocations();
-
-	mod.szValue = sMetaData;
-	mod.szCustomAttribID = WORKLOAD_TYPEID;
-
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
-}
-
 LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
@@ -871,7 +846,34 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 	
 	if (dialog.DoModal() == IDOK)
 	{
-		m_ctrlWorkload.SetSelectedTask(dialog.GetAllocations());
+		const WORKLOADITEM& wiNew = dialog.GetAllocations();
+
+		if (!wiNew.AllocationsMatch(wi))
+		{
+			IUITASKMOD mod[2] = { { IUI_METADATA, 0 }, { IUI_ALLOCTO, 0 } };
+			int nNumMods = 0;
+
+			// always
+			CString sMetaData = wiNew.EncodeAllocations();
+			mod[nNumMods++].szValue = sMetaData;
+
+			// sometimes
+			CString sAllocTo;
+
+			if (!Misc::MatchAll(wi.aAllocTo, wiNew.aAllocTo))
+			{
+				sAllocTo = Misc::FormatArray(wiNew.aAllocTo, '\n');
+				mod[nNumMods++].szValue = sAllocTo;
+			}
+
+			if (nNumMods)
+			{
+				if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMods, (LPARAM)&mod[0]))
+				{
+					m_ctrlWorkload.SetSelectedTask(wiNew);
+				}
+			}
+		}
 	}
 }
 

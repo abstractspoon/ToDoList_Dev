@@ -1671,10 +1671,16 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDepend
 
 	case IUI_METADATA:
 		{
-			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskMetaData(dwTaskID, mod.szCustomAttribID, mod.szValue));
-			else
-				bChange = SetSelectedTaskMetaData(mod.szCustomAttribID, mod.szValue);
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(GetTaskView());
+			ASSERT(pExtWnd && pExtWnd->GetHwnd());
+
+			if (pExtWnd)
+			{
+				if (dwTaskID)
+					bChange = (SET_CHANGE == m_data.SetTaskMetaData(dwTaskID, pExtWnd->GetTypeID(), mod.szValue));
+				else
+					bChange = SetSelectedTaskMetaData(pExtWnd->GetTypeID(), mod.szValue);
+			}
 		}
 		break;
 
@@ -3156,6 +3162,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID
 
 	case TDCA_PROJECTNAME:
 	case TDCA_ENCRYPT:
+	case TDCA_METADATA:
 		// do nothing
 		break;
 

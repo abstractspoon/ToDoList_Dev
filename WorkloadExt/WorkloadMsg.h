@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_WorkloadMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
-#define AFX_WorkloadMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
+#if !defined(AFX_WORKLOADMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#define AFX_WORKLOADMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -25,9 +25,6 @@ const UINT WM_WLC_EDITTASKTITLE				= ::RegisterWindowMessage(_T("WM_WLC_EDITTASK
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_WLCN_ALLOCATIONCHANGE			= ::RegisterWindowMessage(_T("WM_WLCN_ALLOCATIONCHANGE"));
-
 // WPARAM = 0, LPARAM = Task ID
 const UINT WM_WLCN_SELCHANGE				= ::RegisterWindowMessage(_T("WM_WLCN_SELCHANGE"));
 
@@ -42,4 +39,4 @@ const UINT WM_WLCN_TITLECOLUMNWIDTHCHANGE	= ::RegisterWindowMessage(_T("WM_WLCN_
 
 /////////////////////////////////////////////////////////////////////////////
 
-#endif // !defined(AFX_WorkloadMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
+#endif // !defined(AFX_WORKLOADMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)
