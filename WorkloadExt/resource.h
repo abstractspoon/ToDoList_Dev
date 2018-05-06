@@ -59,6 +59,8 @@
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_TASKTITLE                   16034
 #define IDC_ALLOCATIONS                 16035
+#define IDC_TREETOTALS                  16036
+#define IDC_COLUMNSTOTALS               16037
 #define ID_WORKLOAD_PREFS               32775
 #define ID_WORKLOAD_EDITALLOCATIONS     32783
 #define IDS_COL_STARTDATE               57676

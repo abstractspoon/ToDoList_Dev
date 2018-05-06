@@ -60,8 +60,6 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_USETAGFORMILESTONE, m_bUseTagForMilestone);
 	DDX_Text(pDX, IDC_MILESTONETAG, m_sMilestoneTag);
 	DDX_Check(pDX, IDC_DISPLAYPROGRESS, m_bDisplayProgressInBar);
-	DDX_Check(pDX, IDC_DECADESAREONEBASED, m_bDecadesAreOneBased);
-	DDX_Check(pDX, IDC_DISPLAYPARENTSASROLLUPS, m_bDisplayParentsAsRollups);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btTodayColor);
 	DDX_Control(pDX, IDC_SETWEEKENDCOLOR, m_btWeekendColor);
@@ -190,7 +188,6 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	}
 
 	GetDlgItem(IDC_MILESTONETAG)->EnableWindow(m_bUseTagForMilestone);
-	GetDlgItem(IDC_DISPLAYPARENTSASROLLUPS)->EnableWindow(m_bAutoCalcParentDates);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -206,7 +203,6 @@ void CWorkloadPreferencesPage::OnCalculateParentDates()
 {
 	UpdateData();
 
-	GetDlgItem(IDC_DISPLAYPARENTSASROLLUPS)->EnableWindow(m_bAutoCalcParentDates);
 }
 
 void CWorkloadPreferencesPage::OnSetParentColor() 

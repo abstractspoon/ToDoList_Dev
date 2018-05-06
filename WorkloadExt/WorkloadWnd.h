@@ -67,6 +67,7 @@ protected:
 	CWorkloadPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
+	CListCtrl m_lcTreeTotals, m_lcColumnTotals;
 
 	CIcon m_icon;
 	CBrush m_brBack;
@@ -106,6 +107,7 @@ protected:
 	afx_msg LRESULT OnWorkloadNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadNotifySelChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnWorkloadNotifySplitterChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnWorkloadEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);

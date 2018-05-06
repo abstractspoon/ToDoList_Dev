@@ -252,6 +252,8 @@ BOOL CTreeListSyncer::SwapSides()
 
 		if (rNewLeft.Width() >= MIN_SPLIT_WIDTH)
 			m_nSplitPos = rNewLeft.Width();
+
+		OnNotifySplitterChange(m_nSplitPos);
 	}
 
 	// and any hidden pane
@@ -2565,6 +2567,7 @@ void CTreeListSyncer::Resize(const CRect& rect, int nLeftWidth)
 	AdjustForBorder(rLeft, rRight);
 	
 	Resize(rLeft, rRight);
+	OnNotifySplitterChange(nLeftWidth);
 }
 
 void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
@@ -2838,8 +2841,11 @@ BOOL CTreeListSyncer::GetHeaderRect(HWND hwnd, CRect& rect, LPCRECT prcBounds) c
 
 void CTreeListSyncer::SetSplitPos(int nPos)
 {
-	if (nPos >= MIN_SPLIT_WIDTH)
+	if ((nPos >= MIN_SPLIT_WIDTH) && (nPos != m_nSplitPos))
+	{
 		m_nSplitPos = nPos;
+		OnNotifySplitterChange(nPos);
+	}
 }
 
 void CTreeListSyncer::SetSplitBarWidth(int nWidth)

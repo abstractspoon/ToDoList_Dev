@@ -31,6 +31,7 @@ public:
 
 	void ShowCheckboxes(BOOL bShow = TRUE);
 	void ShowTaskIcons(BOOL bShow = TRUE);
+	void SetTitleColumnWidth(int nWidth);
 
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	
@@ -48,7 +49,6 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnTitleColumnWidthChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 

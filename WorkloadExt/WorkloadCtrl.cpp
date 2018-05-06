@@ -1177,7 +1177,8 @@ void CWorkloadCtrl::Resize(const CRect& rect)
 	{
 		CTreeListSyncer::Resize(rect, GetSplitPos());
 
-		m_tcTasks.SendMessage(WM_WLCN_TITLECOLUMNWIDTHCHANGE, m_hdrTasks.GetItemWidth(0), (LPARAM)m_tcTasks.GetSafeHwnd());
+		m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
+		CWnd::GetParent()->SendMessage(WM_WLCN_SPLITTERCHANGE, GetSplitPos(), GetSplitBarWidth());
 	}
 }
 
@@ -2811,7 +2812,8 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	m_hdrTasks.SetItemTracked(WLCC_TITLE, TRUE);
 	m_hdrTasks.UpdateWindow();
 
-	m_tcTasks.SendMessage(WM_WLCN_TITLECOLUMNWIDTHCHANGE, nTitleColWidth, (LPARAM)m_tcTasks.GetSafeHwnd());
+	m_tcTasks.SetTitleColumnWidth(nTitleColWidth);
+	CWnd::GetParent()->SendMessage(WM_WLCN_SPLITTERCHANGE, nSplitPos, GetSplitBarWidth());
 }
 
 BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)
