@@ -70,7 +70,7 @@ END
 IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
                     IDC_SELECTEDTASKDATES,108,13,236,12,SS_CENTERIMAGE | 
@@ -149,26 +149,15 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 400
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 108
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Column Visibility",IDC_STATIC,7,113,333,8
-    LISTBOX         IDC_COLUMNVISIBILITY,7,125,222,44,LBS_SORT | 
+    LTEXT           "&Column Visibility",IDC_STATIC,7,7,333,8
+    LISTBOX         IDC_COLUMNVISIBILITY,7,18,222,44,LBS_SORT | 
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Colours",IDC_COLORSGROUP,7,174,333,8
-    LTEXT           "Dates",IDC_DATESGROUP,7,322,333,8
-    CONTROL         "A&uto-calculate parent task dates to include all subtasks",
-                    IDC_CALCULATEPARENTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,338,333,10
-    CONTROL         "Calculate &missing 'start' dates as being the earlier of the task's due date and 'today'.",
-                    IDC_CALCULATEMISSINGSTARTDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,368,333,10
-    CONTROL         "Calc&ulate missing 'due' dates as being the later of the task's start date and 'today'.",
-                    IDC_CALCULATEMISSINGDUEDATE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,383,333,10
 END
 
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
@@ -208,7 +197,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 393
+        BOTTOMMARGIN, 101
     END
 
     IDD_EDITALLOCATIONS_DIALOG, DIALOG

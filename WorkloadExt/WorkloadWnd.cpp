@@ -49,7 +49,7 @@ const UINT IDC_WORKLOADCTRL = 1001;
 
 CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_WORKLOADTREE_DIALOG, pParent), 
+	CDialog(IDD_WORKLOAD_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 #pragma warning(disable:4355)
@@ -138,7 +138,7 @@ BOOL CWorkloadWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd,
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (CDialog::Create(IDD_WORKLOADTREE_DIALOG, pParentWnd))
+	if (CDialog::Create(IDD_WORKLOAD_DIALOG, pParentWnd))
 	{
 		SetWindowLong(*this, GWL_STYLE, dwStyle);
 		SetDlgCtrlID(nID);
@@ -770,9 +770,6 @@ void CWorkloadWnd::OnSetFocus(CWnd* pOldWnd)
 
 void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 {
-	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGSTARTDATES, m_dlgPrefs.GetCalculateMissingStartDates());
-	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGDUEDATES, m_dlgPrefs.GetCalculateMissingDueDates());
-
 	CDWordArray aColumnVis;
 	m_dlgPrefs.GetColumnVisibility(aColumnVis);
 	m_ctrlWorkload.SetTreeColumnVisibility(aColumnVis);
