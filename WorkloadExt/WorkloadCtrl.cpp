@@ -243,7 +243,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hdrColumns.EnableToolTips();
 	m_hdrColumns.EnableTracking(FALSE);
 
-	// Totals
+	// Totals are disabled so they can't grab the focus
 	dwStyle |= LVS_REPORT | LVS_NOCOLUMNHEADER | LVS_SINGLESEL | LVS_NOSCROLL | WS_TABSTOP | WS_DISABLED;
 
 	if (!m_lcTaskTotals.Create(dwStyle, rect, this, IDC_TREETOTALS))
@@ -261,7 +261,6 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	
 	m_lcColumnTotals.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
-	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 	
 	BuildTreeColumns();
@@ -1205,10 +1204,6 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
 		
 		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 3) * 3));
-
-		if (m_hdrColumns.CalcTotalItemsWidth() >= (cx - GetSplitPos() - GetSplitBarWidth() - 2))
-			rTreeTotals.top -= GetSystemMetrics(SM_CYHSCROLL);
-
 		rColumnTotals.top = rTreeTotals.top;
 		rTreeList.bottom = rTreeTotals.top - 3;
 		
