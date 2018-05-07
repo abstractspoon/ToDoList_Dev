@@ -38,8 +38,6 @@
 #define IDC_DEFAULTCOLOR                16006
 #define IDC_DATESGROUP                  16007
 #define IDC_COLORSGROUP                 16008
-#define IDD_CREATEDEPENDS_DIALOG        16008
-#define IDC_NONWORKINGHOURSCOLOR        16009
 #define IDB_CHECKBOXES                  16010
 #define IDD_EDITALLOCATIONS_DIALOG      16011
 #define IDC_CALCULATEMISSINGSTARTDATE   16012
@@ -50,8 +48,6 @@
 #define IDC_SPECIFYPARENTCOLOR          16017
 #define IDC_SHOWALLOCTOCOLUMN           16018
 #define IDC_PPHOST                      16019
-#define IDC_USETAGFORMILESTONE          16020
-#define IDC_MILESTONETAG                16021
 #define IDC_DISPLAYPROGRESS             16022
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_WORKLOAD_FRAME              16025

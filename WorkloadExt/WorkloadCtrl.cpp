@@ -47,6 +47,10 @@ static char THIS_FILE[]=__FILE__;
 #	define CDRF_SKIPPOSTPAINT	(0x00000100)
 #endif
 
+#ifndef LVS_EX_DOUBLEBUFFER
+#define LVS_EX_DOUBLEBUFFER 0x00010000
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -222,9 +226,9 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 	
-	// extended styles
 	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_HEADERDRAGDROP, LVS_EX_HEADERDRAGDROP);
-	
+	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+
 	// subclass the tree and list
 	if (!Sync(m_tcTasks, m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
 	{
@@ -239,16 +243,26 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hdrColumns.EnableToolTips();
 	m_hdrColumns.EnableTracking(FALSE);
 
-	// Totals below tree
-	if (!m_lcTaskTotals.Create((dwStyle | WS_TABSTOP | WS_BORDER), rect, this, IDC_TREETOTALS))
+	// Totals
+	dwStyle |= LVS_REPORT | LVS_NOCOLUMNHEADER | LVS_SINGLESEL | LVS_NOSCROLL | WS_TABSTOP | WS_DISABLED;
+
+	if (!m_lcTaskTotals.Create(dwStyle, rect, this, IDC_TREETOTALS))
+	{
+		return -1;
+	}
+
+	m_lcTaskTotals.SetBkColor(m_crBkgnd);
+	m_lcTaskTotals.SetTextBkColor(m_crBkgnd);
+	ListView_SetExtendedListViewStyleEx(m_lcTaskTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+	
+	if (!m_lcColumnTotals.Create(dwStyle, rect, this, IDC_COLUMNSTOTALS))
 	{
 		return -1;
 	}
 	
-	if (!m_lcColumnTotals.Create((dwStyle | WS_TABSTOP | WS_BORDER), rect, this, IDC_COLUMNSTOTALS))
-	{
-		return -1;
-	}
+	m_lcColumnTotals.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
+	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 	
 	BuildTreeColumns();
 	BuildListColumns();
@@ -265,8 +279,6 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// misc
 	m_tcTasks.ModifyStyle(TVS_SHOWSELALWAYS, 0, 0);
 	m_lcColumns.ModifyStyle(LVS_SHOWSELALWAYS, 0, 0);
-
-	ListView_SetExtendedListViewStyleEx(m_lcColumns, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
  	PostResize();
 	
@@ -311,8 +323,6 @@ BOOL CWorkloadCtrl::Initialize(UINT nIDTreeHeader)
 void CWorkloadCtrl::InitItemHeights()
 {
 	CTreeListSyncer::InitItemHeights();
-
-	//WorkloadDEPENDENCY::STUB = (m_tcTasks.GetItemHeight() / 2);
 }
 
 /*
@@ -1144,6 +1154,19 @@ void CWorkloadCtrl::BuildTreeColumns()
 								0,
 								WORKLOADTREECOLUMNS[nCol].nColID);
 	}
+
+	// Build Task totals once only
+	if (m_lcTaskTotals.GetItemCount() == 0)
+	{
+		m_lcTaskTotals.InsertColumn(0, _T(""), LVCFMT_LEFT, GetSplitPos());
+		m_lcTaskTotals.InsertItem(0, CEnString(IDS_TOTALDAYSPERPERSON));
+		m_lcTaskTotals.InsertItem(1, CEnString(IDS_NUMACTIVITIESPERPERSON));
+		m_lcTaskTotals.InsertItem(2, CEnString(IDS_LOADPERCENTAGEPERPERSON));
+
+		// Align right
+		LV_COLUMN lvc = { LVCF_FMT, LVCFMT_RIGHT, 0 };
+		m_lcTaskTotals.SetColumn(0, &lvc);
+	}
 }
 
 BOOL CWorkloadCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
@@ -1181,8 +1204,13 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rect(0, 0, cx, cy);
 		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
 		
-		rTreeTotals.top = rColumnTotals.top = (rect.bottom - (m_tcTasks.GetItemHeight() * 3));
-		rTreeList.bottom = (rTreeTotals.top - GetSplitBarWidth());
+		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 3) * 3));
+
+		if (m_hdrColumns.CalcTotalItemsWidth() >= (cx - GetSplitPos() - GetSplitBarWidth() - 2))
+			rTreeTotals.top -= GetSystemMetrics(SM_CYHSCROLL);
+
+		rColumnTotals.top = rTreeTotals.top;
+		rTreeList.bottom = rTreeTotals.top - 3;
 		
 		// Note: resizing for splitter is handled in OnNotifySplitterChange
 		m_lcTaskTotals.MoveWindow(rTreeTotals);
@@ -2271,6 +2299,7 @@ void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar)
 void CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 {
 	SetColor(m_crBkgnd, crBkgnd);
+	m_lcTaskTotals.SetBkColor(m_crBkgnd);
 }
 
 void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
@@ -2815,7 +2844,10 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 	nCol = GetRequiredListColumnCount();
 
 	while (--nCol > 0)
+	{
 		m_hdrColumns.SetItemWidth(nCol, nMaxHeaderWidth);
+		m_lcColumnTotals.SetColumnWidth(nCol, nMaxHeaderWidth);
+	}
 
 	Resize();
 }
@@ -2846,6 +2878,7 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	
 	m_lcTaskTotals.MoveWindow(rTreeTotals);
 	m_lcColumnTotals.MoveWindow(rColumnTotals);
+	m_lcTaskTotals.SetColumnWidth(0, nSplitPos);
 	
 	UpdateWindow();
 }
@@ -3025,7 +3058,9 @@ void CWorkloadCtrl::BuildListColumns()
 	// easily replace the other columns without
 	// losing all our items too
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
+	
 	m_lcColumns.InsertColumn(0, &lvc);
+	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
 }
@@ -3051,6 +3086,7 @@ void CWorkloadCtrl::UpdateListColumns()
 			lvc.cchTextMax = 50;
 
 			m_lcColumns.InsertColumn(nCol, &lvc);
+			m_lcColumnTotals.InsertColumn(nCol, &lvc);
 		}
 	}
 	else if (nDiffCols < 0)
@@ -3061,6 +3097,7 @@ void CWorkloadCtrl::UpdateListColumns()
 		while (i-- > nReqCols)
 		{
 			m_lcColumns.DeleteColumn(i);
+			m_lcColumnTotals.DeleteColumn(i);
 		}
 	}
 	ASSERT(m_hdrColumns.GetItemCount() == nReqCols);
