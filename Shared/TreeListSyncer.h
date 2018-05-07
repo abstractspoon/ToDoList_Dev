@@ -108,9 +108,9 @@ public:
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll();
 
+	virtual BOOL HandleEraseBkgnd(CDC* pDC);
 	BOOL HasFocus() const;
 	void SetFocus();
-	BOOL HandleEraseBkgnd(CDC* pDC);
 	void Show(BOOL bShow = TRUE);
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crGridline = CLR_NONE);
 	BOOL SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo, COLORREF crGridline = CLR_NONE);

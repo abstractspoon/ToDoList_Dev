@@ -34,9 +34,6 @@ const UINT WM_WLCN_COMPLETIONCHANGE	= ::RegisterWindowMessage(_T("WM_WLCN_COMPLE
 // WPARAM = , LPARAM = 
 const UINT WM_WLCN_SORTCHANGE		= ::RegisterWindowMessage(_T("WM_WLCN_SORTCHANGE"));
 
-// WPARAM = width, LPARAM = HWND
-const UINT WM_WLCN_SPLITTERCHANGE	= ::RegisterWindowMessage(_T("WM_WLCN_SPLITTERCHANGE"));
-
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_WORKLOADMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

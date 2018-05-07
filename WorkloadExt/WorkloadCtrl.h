@@ -36,8 +36,6 @@ class CThemed;
 
 class CWorkloadCtrl : public CWnd, protected CTreeListSyncer  
 {
-	//DECLARE_DYNAMIC(CWorkloadCtrl);
-
 	friend class CWorkloadLockUpdates;
 
 public:
@@ -54,6 +52,7 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	BOOL HandleEraseBkgnd(CDC* pDC);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib);
 	bool PrepareNewTask(ITaskList* pTask) const;
@@ -100,6 +99,7 @@ public:
 	void SetAlternateLineColor(COLORREF crAltLine);
 	void SetGridLineColor(COLORREF crGridLine);
 	void SetSplitBarColor(COLORREF crSplitBar);
+	void SetBackgroundColor(COLORREF crBkgnd);
 
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly);
@@ -123,6 +123,7 @@ public:
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
 	CListCtrl m_lcColumns;
+	CListCtrl m_lcTaskTotals, m_lcColumnTotals;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
 
 	BOOL m_bReadOnly;
@@ -133,7 +134,7 @@ protected:
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	CStringArray m_aAllocTo;
 
-	COLORREF m_crAltLine, m_crGridLine;
+	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	int m_nPrevDropHilitedItem;

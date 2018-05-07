@@ -144,6 +144,7 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
+	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
 	m_bMovingTask(FALSE),
@@ -201,7 +202,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
 	
-	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT),
+	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS),
 							rect, 
 							this, 
 							IDC_WORKLOADTREE))
@@ -210,7 +211,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS | HDS_DRAGDROP), rect, this, IDC_WORKLOADTREEHEADER))
+	if (!m_hdrTasks.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), rect, this, IDC_WORKLOADTREEHEADER))
 	{
 		return -1;
 	}
@@ -237,6 +238,17 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	m_hdrColumns.EnableToolTips();
 	m_hdrColumns.EnableTracking(FALSE);
+
+	// Totals below tree
+	if (!m_lcTaskTotals.Create((dwStyle | WS_TABSTOP | WS_BORDER), rect, this, IDC_TREETOTALS))
+	{
+		return -1;
+	}
+	
+	if (!m_lcColumnTotals.Create((dwStyle | WS_TABSTOP | WS_BORDER), rect, this, IDC_COLUMNSTOTALS))
+	{
+		return -1;
+	}
 	
 	BuildTreeColumns();
 	BuildListColumns();
@@ -1167,7 +1179,16 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 	if (cx && cy)
 	{
 		CRect rect(0, 0, cx, cy);
-		CTreeListSyncer::Resize(rect);
+		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
+		
+		rTreeTotals.top = rColumnTotals.top = (rect.bottom - (m_tcTasks.GetItemHeight() * 3));
+		rTreeList.bottom = (rTreeTotals.top - GetSplitBarWidth());
+		
+		// Note: resizing for splitter is handled in OnNotifySplitterChange
+		m_lcTaskTotals.MoveWindow(rTreeTotals);
+		m_lcColumnTotals.MoveWindow(rColumnTotals);
+
+		CTreeListSyncer::Resize(rTreeList);
 	}
 }
 
@@ -1176,9 +1197,7 @@ void CWorkloadCtrl::Resize(const CRect& rect)
 	if (m_hdrTasks.GetItemCount())
 	{
 		CTreeListSyncer::Resize(rect, GetSplitPos());
-
 		m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
-		CWnd::GetParent()->SendMessage(WM_WLCN_SPLITTERCHANGE, GetSplitPos(), GetSplitBarWidth());
 	}
 }
 
@@ -2249,6 +2268,11 @@ void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar)
 	CTreeListSyncer::SetSplitBarColor(crSplitBar); 
 }
 
+void CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
+{
+	SetColor(m_crBkgnd, crBkgnd);
+}
+
 void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
 {
 	if (IsHooked() && (crNew != color))
@@ -2813,7 +2837,31 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 	m_hdrTasks.UpdateWindow();
 
 	m_tcTasks.SetTitleColumnWidth(nTitleColWidth);
-	CWnd::GetParent()->SendMessage(WM_WLCN_SPLITTERCHANGE, nSplitPos, GetSplitBarWidth());
+
+	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTaskTotals);
+	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals);
+	
+	rTreeTotals.right = (rTreeTotals.left + GetSplitPos() + 1);
+	rColumnTotals.left = (rTreeTotals.right + GetSplitBarWidth() - 2);
+	
+	m_lcTaskTotals.MoveWindow(rTreeTotals);
+	m_lcColumnTotals.MoveWindow(rColumnTotals);
+	
+	UpdateWindow();
+}
+
+BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
+{
+	CTreeListSyncer::HandleEraseBkgnd(pDC);
+
+	CDialogHelper::ExcludeChild(&m_lcTaskTotals, pDC);
+	CDialogHelper::ExcludeChild(&m_lcColumnTotals, pDC);
+	
+	CRect rClient;
+	CWnd::GetClientRect(rClient);
+	
+	pDC->FillSolidRect(rClient, m_crBkgnd);
+	return TRUE;
 }
 
 BOOL CWorkloadCtrl::RecalcTreeColumns(BOOL bResize)

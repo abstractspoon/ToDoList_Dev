@@ -75,8 +75,6 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CWorkloadWnd)
 	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
-	DDX_Control(pDX, IDC_TREETOTALS, m_lcTreeTotals);
-	DDX_Control(pDX, IDC_COLUMNSTOTALS, m_lcColumnTotals);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
@@ -95,7 +93,6 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
 
-	ON_REGISTERED_MESSAGE(WM_WLCN_SPLITTERCHANGE, OnWorkloadNotifySplitterChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
@@ -299,6 +296,7 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_ctrlWorkload.SetSplitBarColor(m_theme.crAppBackDark);
+		m_ctrlWorkload.SetBackgroundColor(m_theme.crAppBackLight);
 	}
 }
 
@@ -688,21 +686,8 @@ void CWorkloadWnd::Resize(int cx, int cy)
 {
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
-		CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTreeTotals);
-		CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals);
-
-		int nYOffset = (cy - rTreeTotals.bottom);
-
-		rTreeTotals.OffsetRect(0, nYOffset);
-		rColumnTotals.OffsetRect(0, nYOffset);
-		rColumnTotals.right = cx;
-
-		// Note: resizing to suit splitter is handled in OnWorkloadNotifySplitterChange
-		m_lcTreeTotals.MoveWindow(rTreeTotals);
-		m_lcColumnTotals.MoveWindow(rColumnTotals);
-
 		CDlgUnits dlu(this);
-		CRect rWorkload(0, dlu.ToPixelsY(28), cx, rTreeTotals.top - dlu.ToPixelsY(2));
+		CRect rWorkload(0, dlu.ToPixelsY(28), cx, cy);
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
 
@@ -841,22 +826,6 @@ LRESULT CWorkloadWnd::OnWorkloadNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 		mod.tValue = T64Utils::T64_NULL;
 
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
-}
-
-LRESULT CWorkloadWnd::OnWorkloadNotifySplitterChange(WPARAM wp, LPARAM lp) 
-{
-	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTreeTotals);
-	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals);
-
-	rTreeTotals.right = (rTreeTotals.left + wp + 1);
-	rColumnTotals.left = (rTreeTotals.right + lp - 2);
-
-	m_lcTreeTotals.MoveWindow(rTreeTotals);
-	m_lcColumnTotals.MoveWindow(rColumnTotals);
-
-	UpdateWindow();
-
-	return 0;
 }
 
 LRESULT CWorkloadWnd::OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp)
