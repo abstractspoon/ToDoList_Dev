@@ -20,6 +20,27 @@ const WORKLOADCOLUMN WORKLOADTREECOLUMNS[] =
 };
 const int NUM_TREECOLUMNS = (sizeof(WORKLOADTREECOLUMNS) / sizeof(WORKLOADCOLUMN));
 
+//////////////////////////////////////////////////////////////////////
+
+// Pseudo tasks
+const DWORD ID_TOTALDAYSPERPERSON		= 0xffffffff;
+const DWORD ID_NUMACTIVITIESPERPERSON	= 0xfffffffe;
+const DWORD ID_PERCENTLOADPERPERSON		= 0xfffffffd;
+
+struct WORKLOADTOTAL
+{
+	UINT nTextResID;
+	DWORD dwID;
+};
+
+const WORKLOADTOTAL WORKLOADTOTALS[] =
+{
+	{ IDS_TOTALDAYSPERPERSON,		ID_TOTALDAYSPERPERSON },
+	{ IDS_NUMACTIVITIESPERPERSON,	ID_NUMACTIVITIESPERPERSON },
+	{ IDS_PERCENTLOADPERPERSON,		ID_TOTALDAYSPERPERSON },
+};
+const int NUM_TOTALS = (sizeof(WORKLOADTOTALS) / sizeof(WORKLOADTOTAL));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_WORKLOADSTATIC_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

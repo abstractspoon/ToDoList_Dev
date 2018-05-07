@@ -144,9 +144,6 @@ protected:
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;
 
-private:
-	mutable CTreeCtrlHelper* m_pTCH;
-
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -165,8 +162,7 @@ protected:
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickColumns(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTotalsLabelsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnAllocationTotalsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
@@ -181,6 +177,10 @@ protected:
 	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
+
+	LRESULT OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	LRESULT OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	LRESULT OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 			
 	// derived class callback
 	void OnNotifySplitterChange(int nSplitPos);
@@ -232,8 +232,9 @@ protected:
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void InitItemHeights();
 	void Resize();
-   BOOL GetListItemRect(int nItem, CRect& rItem) const;
+	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
+	void RecalculateAllocationTotals();
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
@@ -265,7 +266,8 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 	void RecalcListColumnsToFit();
-	
+	void PopulateTotalsLists();
+
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const;

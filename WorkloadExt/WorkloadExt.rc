@@ -323,7 +323,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_TOTALDAYSPERPERSON  "Total time engagement per person (days)"
     IDS_NUMACTIVITIESPERPERSON "Number of activities per person"
-    IDS_LOADPERCENTAGEPERPERSON "Individual load percentage"
+    IDS_PERCENTLOADPERPERSON "Individual load percentage"
 END
 
 #endif    // English (Australia) resources

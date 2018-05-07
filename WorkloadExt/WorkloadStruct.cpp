@@ -17,11 +17,12 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-WORKLOADITEM::WORKLOADITEM() 
+WORKLOADITEM::WORKLOADITEM(DWORD dwID, LPCTSTR szTitle) 
 	: 
+	sTitle(szTitle),
 	color(CLR_NONE), 
 	bParent(FALSE), 
-	dwTaskID(0), 
+	dwTaskID(dwID), 
 	dwRefID(0), 
 	dwOrgRefID(0), 
 	bGoodAsDone(FALSE),
@@ -224,35 +225,55 @@ CWorkloadItemMap::~CWorkloadItemMap()
 void CWorkloadItemMap::RemoveAll()
 {
 	DWORD dwTaskID = 0;
-	WORKLOADITEM* pGI = NULL;
+	WORKLOADITEM* pWI = NULL;
 	
 	POSITION pos = GetStartPosition();
 	
 	while (pos)
 	{
-		GetNextAssoc(pos, dwTaskID, pGI);
-		ASSERT(pGI);
+		GetNextAssoc(pos, dwTaskID, pWI);
+		ASSERT(pWI);
 		
-		delete pGI;
+		delete pWI;
 	}
 	
 	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
 }
 
+void CWorkloadItemMap::CalculateTotalItemDays(WORKLOADITEM& wiDays) const
+{
+	wiDays.ClearAllocations();
+
+	DWORD dwTaskID = 0;
+	WORKLOADITEM* pWI = NULL;
+
+	POSITION pos = GetStartPosition();
+	CMap<CString, LPCTSTR, double, double> mapItemTotals;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pWI);
+		ASSERT(pWI);
+
+		
+	}
+
+}
+
 BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID) const
 {
-	const WORKLOADITEM* pGI = GetItem(dwTaskID);
+	const WORKLOADITEM* pWI = GetItem(dwTaskID);
 	
-	return (pGI && pGI->bLocked);
+	return (pWI && pWI->bLocked);
 }
 
 BOOL CWorkloadItemMap::RemoveKey(DWORD dwKey)
 {
-	WORKLOADITEM* pGI = NULL;
+	WORKLOADITEM* pWI = NULL;
 	
-	if (Lookup(dwKey, pGI))
+	if (Lookup(dwKey, pWI))
 	{
-		delete pGI;
+		delete pWI;
 		return CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveKey(dwKey);
 	}
 	
@@ -273,12 +294,12 @@ WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 	if (dwKey == 0)
 		return NULL;
 
-	WORKLOADITEM* pGI = NULL;
+	WORKLOADITEM* pWI = NULL;
 	
-	if (Lookup(dwKey, pGI))
-		ASSERT(pGI);
+	if (Lookup(dwKey, pWI))
+		ASSERT(pWI);
 	
-	return pGI;
+	return pWI;
 }
 
 //////////////////////////////////////////////////////////////////////

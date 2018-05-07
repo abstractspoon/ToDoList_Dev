@@ -35,6 +35,17 @@ enum WLC_COLUMN
 	// NEW ITEMS HERE 
 };
 
+//////////////////////////////////////////////////////////////////////
+
+enum
+{
+	IDC_TASKTREE = 100,		
+	IDC_ALLOCATIONCOLUMNS,		
+	IDC_TASKHEADER,	
+	IDC_TOTALSLABELS,
+	IDC_ALLOCATIONTOTALS
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_WORKLOADENUM_H__49626430_4D7B_460F_98B7_363FCDBC388C__INCLUDED_)

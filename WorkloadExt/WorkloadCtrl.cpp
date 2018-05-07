@@ -130,15 +130,6 @@ private:
 	CWorkloadCtrl* m_pCtrl;
 };
 
-enum
-{
-	IDC_TASKTREE = 100,		
-	IDC_ALLOCATIONCOLUMNS,		
-	IDC_TASKHEADER,	
-	IDC_TOTALSLABELS,
-	IDC_ALLOCATIONTOTALS
-};
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -146,7 +137,6 @@ enum
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
-	m_pTCH(NULL),
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
@@ -178,8 +168,8 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
 	ON_NOTIFY(TVN_KEYUP, IDC_TASKTREE, OnTreeKeyUp)
 	ON_NOTIFY(NM_CLICK, IDC_ALLOCATIONCOLUMNS, OnClickColumns)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsLabelsCustomDraw)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnAllocationTotalsCustomDraw)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsListsCustomDraw)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnTotalsListsCustomDraw)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -269,6 +259,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	BuildTaskTreeColumns();
 	BuildListColumns();
+	PopulateTotalsLists();
 	
 	// prevent column reordering on columns
 	m_hdrColumns.ModifyStyle(HDS_DRAGDROP, 0);
@@ -288,61 +279,10 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-/*
-BOOL CWorkloadCtrl::Initialize(UINT nIDTreeHeader)
-{
-	ASSERT(m_tcTasks.GetSafeHwnd());
-	ASSERT(m_lcColumns.GetSafeHwnd());
-
-	// misc
-	m_nMonthWidth = DEF_MONTH_WIDTH;
-
-	// initialize tree header
-	if (!m_hdrTasks.SubclassDlgItem(nIDTreeHeader, m_tcTasks.GetParent()))
-		return FALSE;
-
-	m_hdrTasks.ModifyStyle(0, (HDS_FULLDRAG | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP));
-
-	// subclass the tree and list
-	if (!CTreeListSyncer::Sync(m_tcTasks, m_lcColumns, TLSL_RIGHTDATA_IS_LEFTITEM, m_hdrTasks))
-		return FALSE;
-
-	// subclass the list header
-	VERIFY(m_hdrColumns.SubclassWindow(ListView_GetHeader(m_lcColumns)));
-	
-
-	BuildTreeColumns();
-	BuildListColumns();
-
-	CalcMinMonthWidths();
-
-	if (m_nMonthWidth != DEF_MONTH_WIDTH)
-		RecalcListColumnWidths(DEF_MONTH_WIDTH, m_nMonthWidth);
-
-	return TRUE;
-}
-*/
-
 void CWorkloadCtrl::InitItemHeights()
 {
 	CTreeListSyncer::InitItemHeights();
 }
-
-/*
-void CWorkloadCtrl::Release() 
-{ 
-	if (::IsWindow(m_hdrTasks))
-		m_hdrTasks.UnsubclassWindow();
-
-	if (::IsWindow(m_hdrColumns))
-		m_hdrColumns.UnsubclassWindow();
-
-	Unsync(); 
-
-	delete m_pTCH;
-	m_pTCH = NULL;
-}
-*/
 
 HTREEITEM CWorkloadCtrl::GetSelectedItem() const
 {
@@ -626,6 +566,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	RecalcTreeColumns(TRUE);
+	RecalculateAllocationTotals();
 	
 	if (EditWantsResort(nUpdate, attrib))
 	{
@@ -637,6 +578,21 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			CTreeListSyncer::Sort(MultiSortProc, (DWORD)this);
 		else
 			CTreeListSyncer::Sort(SortProc, (DWORD)this);
+	}
+}
+
+void CWorkloadCtrl::RecalculateAllocationTotals()
+{
+	WORKLOADITEM* pWITotalDays = m_data.GetItem(ID_TOTALDAYSPERPERSON);
+
+	if (pWITotalDays)
+	{
+		pWITotalDays->ClearAllocations();
+	}
+	else
+	{
+		pWITotalDays = new WORKLOADITEM(ID_TOTALDAYSPERPERSON);
+		m_data[ID_TOTALDAYSPERPERSON] = pWITotalDays;
 	}
 }
 
@@ -976,6 +932,22 @@ void CWorkloadCtrl::RefreshTreeItemMap()
 	TCH().BuildHTIMap(m_mapHTItems);
 }
 
+void CWorkloadCtrl::PopulateTotalsLists()
+{
+	// Build Task totals once only
+	if (m_lcTotalsLabels.GetItemCount() == 0)
+	{
+		for (int nTotal = 0; nTotal < NUM_TOTALS; nTotal++)
+		{
+			int nItem = m_lcTotalsLabels.InsertItem(nTotal, CEnString(WORKLOADTOTALS[nTotal].nTextResID));
+			m_lcTotalsLabels.SetItemData(nItem, WORKLOADTOTALS[nTotal].dwID);
+
+			nItem = m_lcColumnTotals.InsertItem(nTotal, _T(""));
+			m_lcColumnTotals.SetItemData(nItem, WORKLOADTOTALS[nTotal].dwID);
+		}
+	}
+}
+
 void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 										HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd)
 {
@@ -988,10 +960,9 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	m_dwMaxTaskID = max(m_dwMaxTaskID, dwTaskID);
 
 	// map the data
-	WORKLOADITEM* pWI = new WORKLOADITEM;
+	WORKLOADITEM* pWI = new WORKLOADITEM(dwTaskID);
 	m_data[dwTaskID] = pWI;
 	
-	pWI->dwTaskID = dwTaskID;
 	pWI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 
 	// Except for position
@@ -1142,7 +1113,7 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 void CWorkloadCtrl::BuildTaskTreeColumns()
 {
 	// delete existing columns
-	while (m_hdrTasks.DeleteItem(0));
+//	while (m_hdrTasks.DeleteItem(0));
 
 	// add columns
 	m_hdrTasks.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
@@ -1159,17 +1130,12 @@ void CWorkloadCtrl::BuildTaskTreeColumns()
 	}
 
 	// Build Task totals once only
-	if (m_lcTotalsLabels.GetItemCount() == 0)
-	{
-		m_lcTotalsLabels.InsertColumn(0, _T(""), LVCFMT_LEFT, GetSplitPos());
-		m_lcTotalsLabels.InsertItem(0, CEnString(IDS_TOTALDAYSPERPERSON));
-		m_lcTotalsLabels.InsertItem(1, CEnString(IDS_NUMACTIVITIESPERPERSON));
-		m_lcTotalsLabels.InsertItem(2, CEnString(IDS_LOADPERCENTAGEPERPERSON));
+//	if (m_lcTotalsLabels.GetItemCount() == 0)
+	int nCol = m_lcTotalsLabels.InsertColumn(0, _T(""), LVCFMT_RIGHT, GetSplitPos());
 
-		// Align right
-		LV_COLUMN lvc = { LVCF_FMT, LVCFMT_RIGHT, 0 };
-		m_lcTotalsLabels.SetColumn(0, &lvc);
-	}
+	// Align right
+	LV_COLUMN lvc = { LVCF_FMT, LVCFMT_RIGHT, 0 };
+	m_lcTotalsLabels.SetColumn(nCol, &lvc);
 }
 
 BOOL CWorkloadCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
@@ -1439,45 +1405,64 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 	return GMIS_NONE;
 }
 
-void CWorkloadCtrl::OnTotalsLabelsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
-	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
-	
-	*pResult = CDRF_DODEFAULT;
-	
+	ASSERT(pLVCD->nmcd.hdr.idFrom == IDC_ALLOCATIONCOLUMNS);
+
+	return OnAllocationsListCustomDraw(pLVCD);
+}
+
+void CWorkloadCtrl::OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	switch (pNMHDR->idFrom)
+	{
+	case IDC_ALLOCATIONCOLUMNS:
+		ASSERT(0);
+		break;
+
+	case IDC_TOTALSLABELS:
+		*pResult = OnTotalsLabelsListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR);
+		break;
+
+	case IDC_ALLOCATIONTOTALS:
+		*pResult = OnAllocationsTotalsListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR);
+		break;
+	}
+}
+
+LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+{
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		*pResult = CDRF_NOTIFYITEMDRAW;
-		break;
-								
+		return CDRF_NOTIFYITEMDRAW;
+
 	case CDDS_ITEMPREPAINT:
 		{
 			HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			int nItem = (int)pLVCD->nmcd.dwItemSpec;
-			
+
 			pLVCD->clrTextBk = m_crBkgnd;
-			
+
 			CRect rFullWidth(pLVCD->nmcd.rc);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, m_crBkgnd, hwndList);
 		}
-		*pResult = CDRF_NEWFONT;
-		break;
+		return CDRF_NEWFONT;
 	}
+
+	// else
+	return CDRF_DODEFAULT;
 }
 
-void CWorkloadCtrl::OnAllocationTotalsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
+
+
+LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
-	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
-	
-	*pResult = CDRF_DODEFAULT;
-	
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		*pResult = CDRF_NOTIFYITEMDRAW;
-		break;
+		return CDRF_NOTIFYITEMDRAW;
 								
 	case CDDS_ITEMPREPAINT:
 		{
@@ -1497,16 +1482,18 @@ void CWorkloadCtrl::OnAllocationTotalsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			
 			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 
-			// Fake a data item		
-			WORKLOADITEM wi;
-			DrawListItem(m_lcColumnTotals, pDC, nItem, wi, FALSE);
+			WORKLOADITEM* pWI = m_data.GetItem(pLVCD->nmcd.lItemlParam);
+
+			if (pWI)
+				DrawListItem(m_lcColumnTotals, pDC, nItem, *pWI, FALSE);
 		}
-		*pResult = CDRF_SKIPDEFAULT;
-		break;
+		return CDRF_SKIPDEFAULT;
 	}
+
+	return CDRF_DODEFAULT;
 }
 
-LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
@@ -1640,11 +1627,10 @@ void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 		
 		Resize();
 	}
-// 	else if (hwnd == m_hdrColumns)
-// 	{
-// 		if (nCol > 0) // first column always zero width
-// 			m_hdrColumns.SetItemWidth(nCol, GetColumnWidth());
-// 	}
+	else if (hwnd == m_hdrColumns)
+	{
+		RecalcListColumnsToFit();
+	}
 }
 
 // Called by parent
@@ -3118,9 +3104,6 @@ void CWorkloadCtrl::BuildListColumns()
 	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
-
-	for (int i = 0; i < 3; i++)
-		m_lcColumnTotals.InsertItem(i, _T(""));
 }
 
 void CWorkloadCtrl::UpdateListColumns()

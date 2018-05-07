@@ -17,7 +17,7 @@
 
 struct WORKLOADITEM 
 { 
-	WORKLOADITEM();
+	WORKLOADITEM(DWORD dwID = 0, LPCTSTR szTitle = NULL);
 	WORKLOADITEM(const WORKLOADITEM& wi);
 	virtual ~WORKLOADITEM();
 	
@@ -70,6 +70,8 @@ public:
 	BOOL HasItem(DWORD dwKey) const;
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
+
+	void CalculateTotalItemDays(WORKLOADITEM& wiDays) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
