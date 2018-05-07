@@ -123,7 +123,7 @@ public:
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
 	CListCtrl m_lcColumns;
-	CListCtrl m_lcTaskTotals, m_lcColumnTotals;
+	CListCtrl m_lcTotalsLabels, m_lcColumnTotals;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
 
 	BOOL m_bReadOnly;
@@ -165,6 +165,8 @@ protected:
 	afx_msg void OnBeginEditTreeLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeKeyUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickColumns(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTotalsLabelsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnAllocationTotalsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
@@ -199,15 +201,15 @@ protected:
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
-	void DrawListHeaderItem(CDC* pDC, int nCol);
-	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
 	GM_ITEMSTATE GetItemState(int nItem) const;
 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
-	void RedrawList(BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	
-	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
+	void DrawListHeaderItem(CDC* pDC, int nCol);
+	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
+	void DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
+	BOOL DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
+	void RedrawList(BOOL bErase = FALSE);
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
@@ -221,7 +223,7 @@ protected:
 	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
-	void BuildTreeColumns();
+	void BuildTaskTreeColumns();
 	void BuildListColumns();
 	void UpdateListColumns();
 	int GetRequiredListColumnCount() const;

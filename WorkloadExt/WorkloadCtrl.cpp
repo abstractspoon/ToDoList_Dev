@@ -132,9 +132,11 @@ private:
 
 enum
 {
-	IDC_WORKLOADTREE = 100,		
-	IDC_WORKLOADCOLUMNS,		
-	IDC_WORKLOADTREEHEADER,		
+	IDC_TASKTREE = 100,		
+	IDC_ALLOCATIONCOLUMNS,		
+	IDC_TASKHEADER,	
+	IDC_TOTALSLABELS,
+	IDC_ALLOCATIONTOTALS
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -165,17 +167,19 @@ CWorkloadCtrl::~CWorkloadCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_WORKLOADTREE, OnBeginEditTreeLabel)
-	ON_NOTIFY(HDN_ENDDRAG, IDC_WORKLOADTREEHEADER, OnEndDragTreeHeader)
-	ON_NOTIFY(HDN_ITEMCLICK, IDC_WORKLOADTREEHEADER, OnClickTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGING, IDC_WORKLOADTREEHEADER, OnItemChangingTreeHeader)
-	ON_NOTIFY(HDN_ITEMCHANGED, IDC_WORKLOADTREEHEADER, OnItemChangedTreeHeader)
-	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_WORKLOADTREEHEADER, OnDblClickTreeHeaderDivider)
-	ON_NOTIFY(NM_RCLICK, IDC_WORKLOADTREEHEADER, OnRightClickTreeHeader)
-	ON_NOTIFY(TVN_GETDISPINFO, IDC_WORKLOADTREE, OnTreeGetDispInfo)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_WORKLOADTREE, OnTreeItemExpanded)
-	ON_NOTIFY(TVN_KEYUP, IDC_WORKLOADTREE, OnTreeKeyUp)
-	ON_NOTIFY(NM_CLICK, IDC_WORKLOADCOLUMNS, OnClickColumns)
+	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_TASKTREE, OnBeginEditTreeLabel)
+	ON_NOTIFY(HDN_ENDDRAG, IDC_TASKHEADER, OnEndDragTreeHeader)
+	ON_NOTIFY(HDN_ITEMCLICK, IDC_TASKHEADER, OnClickTreeHeader)
+	ON_NOTIFY(HDN_ITEMCHANGING, IDC_TASKHEADER, OnItemChangingTreeHeader)
+	ON_NOTIFY(HDN_ITEMCHANGED, IDC_TASKHEADER, OnItemChangedTreeHeader)
+	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TASKHEADER, OnDblClickTreeHeaderDivider)
+	ON_NOTIFY(NM_RCLICK, IDC_TASKHEADER, OnRightClickTreeHeader)
+	ON_NOTIFY(TVN_GETDISPINFO, IDC_TASKTREE, OnTreeGetDispInfo)
+	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREE, OnTreeItemExpanded)
+	ON_NOTIFY(TVN_KEYUP, IDC_TASKTREE, OnTreeKeyUp)
+	ON_NOTIFY(NM_CLICK, IDC_ALLOCATIONCOLUMNS, OnClickColumns)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TOTALSLABELS, OnTotalsLabelsCustomDraw)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ALLOCATIONTOTALS, OnAllocationTotalsCustomDraw)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -209,19 +213,19 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_tcTasks.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS),
 							rect, 
 							this, 
-							IDC_WORKLOADTREE))
+							IDC_TASKTREE))
 	{
 		return -1;
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_hdrTasks.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), rect, this, IDC_WORKLOADTREEHEADER))
+	if (!m_hdrTasks.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), rect, this, IDC_TASKHEADER))
 	{
 		return -1;
 	}
 	
 	// Column List ---------------------------------------------------------------------
-	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_WORKLOADCOLUMNS))
+	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_ALLOCATIONCOLUMNS))
 	{
 		return -1;
 	}
@@ -246,16 +250,16 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Totals are disabled so they can't grab the focus
 	dwStyle |= LVS_REPORT | LVS_NOCOLUMNHEADER | LVS_SINGLESEL | LVS_NOSCROLL | WS_TABSTOP | WS_DISABLED;
 
-	if (!m_lcTaskTotals.Create(dwStyle, rect, this, IDC_TREETOTALS))
+	if (!m_lcTotalsLabels.Create(dwStyle, rect, this, IDC_TOTALSLABELS))
 	{
 		return -1;
 	}
 
-	m_lcTaskTotals.SetBkColor(m_crBkgnd);
-	m_lcTaskTotals.SetTextBkColor(m_crBkgnd);
-	ListView_SetExtendedListViewStyleEx(m_lcTaskTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+	m_lcTotalsLabels.SetBkColor(m_crBkgnd);
+	m_lcTotalsLabels.SetTextBkColor(m_crBkgnd);
+	ListView_SetExtendedListViewStyleEx(m_lcTotalsLabels, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 	
-	if (!m_lcColumnTotals.Create(dwStyle, rect, this, IDC_COLUMNSTOTALS))
+	if (!m_lcColumnTotals.Create(dwStyle, rect, this, IDC_ALLOCATIONTOTALS))
 	{
 		return -1;
 	}
@@ -263,7 +267,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_lcColumnTotals.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
 	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 	
-	BuildTreeColumns();
+	BuildTaskTreeColumns();
 	BuildListColumns();
 	
 	// prevent column reordering on columns
@@ -1135,7 +1139,7 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 	return (m_aAllocTo.GetSize() + 1);
 }
 
-void CWorkloadCtrl::BuildTreeColumns()
+void CWorkloadCtrl::BuildTaskTreeColumns()
 {
 	// delete existing columns
 	while (m_hdrTasks.DeleteItem(0));
@@ -1155,16 +1159,16 @@ void CWorkloadCtrl::BuildTreeColumns()
 	}
 
 	// Build Task totals once only
-	if (m_lcTaskTotals.GetItemCount() == 0)
+	if (m_lcTotalsLabels.GetItemCount() == 0)
 	{
-		m_lcTaskTotals.InsertColumn(0, _T(""), LVCFMT_LEFT, GetSplitPos());
-		m_lcTaskTotals.InsertItem(0, CEnString(IDS_TOTALDAYSPERPERSON));
-		m_lcTaskTotals.InsertItem(1, CEnString(IDS_NUMACTIVITIESPERPERSON));
-		m_lcTaskTotals.InsertItem(2, CEnString(IDS_LOADPERCENTAGEPERPERSON));
+		m_lcTotalsLabels.InsertColumn(0, _T(""), LVCFMT_LEFT, GetSplitPos());
+		m_lcTotalsLabels.InsertItem(0, CEnString(IDS_TOTALDAYSPERPERSON));
+		m_lcTotalsLabels.InsertItem(1, CEnString(IDS_NUMACTIVITIESPERPERSON));
+		m_lcTotalsLabels.InsertItem(2, CEnString(IDS_LOADPERCENTAGEPERPERSON));
 
 		// Align right
 		LV_COLUMN lvc = { LVCF_FMT, LVCFMT_RIGHT, 0 };
-		m_lcTaskTotals.SetColumn(0, &lvc);
+		m_lcTotalsLabels.SetColumn(0, &lvc);
 	}
 }
 
@@ -1208,7 +1212,7 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		rTreeList.bottom = rTreeTotals.top - 3;
 		
 		// Note: resizing for splitter is handled in OnNotifySplitterChange
-		m_lcTaskTotals.MoveWindow(rTreeTotals);
+		m_lcTotalsLabels.MoveWindow(rTreeTotals);
 		m_lcColumnTotals.MoveWindow(rColumnTotals);
 
 		CTreeListSyncer::Resize(rTreeList);
@@ -1435,11 +1439,75 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 	return GMIS_NONE;
 }
 
+void CWorkloadCtrl::OnTotalsLabelsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+	
+	*pResult = CDRF_DODEFAULT;
+	
+	switch (pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+								
+	case CDDS_ITEMPREPAINT:
+		{
+			HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+			int nItem = (int)pLVCD->nmcd.dwItemSpec;
+			
+			pLVCD->clrTextBk = m_crBkgnd;
+			
+			CRect rFullWidth(pLVCD->nmcd.rc);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, m_crBkgnd, hwndList);
+		}
+		*pResult = CDRF_NEWFONT;
+		break;
+	}
+}
+
+void CWorkloadCtrl::OnAllocationTotalsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+	
+	*pResult = CDRF_DODEFAULT;
+	
+	switch (pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+								
+	case CDDS_ITEMPREPAINT:
+		{
+			HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
+			int nItem = (int)pLVCD->nmcd.dwItemSpec;
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+			
+			// draw item bkgnd and gridlines full width of list
+			COLORREF crBack = GetSysColor(COLOR_WINDOW);//GetRowColor(nItem);
+			pLVCD->clrTextBk = pLVCD->clrText = crBack;
+			
+			CRect rItem;
+			m_lcColumnTotals.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+			
+			CRect rFullWidth(rItem);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
+			
+			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+
+			// Fake a data item		
+			WORKLOADITEM wi;
+			DrawListItem(m_lcColumnTotals, pDC, nItem, wi, FALSE);
+		}
+		*pResult = CDRF_SKIPDEFAULT;
+		break;
+	}
+}
+
 LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
-	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
-	int nItem = (int)pLVCD->nmcd.dwItemSpec;
-	
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
@@ -1447,6 +1515,9 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 								
 	case CDDS_ITEMPREPAINT:
 		{
+			HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
+			int nItem = (int)pLVCD->nmcd.dwItemSpec;
+			
 			DWORD dwTaskID = GetTaskID(nItem);
 
 			WORKLOADITEM* pWI = NULL;
@@ -1463,6 +1534,8 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
+
+			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 			
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -1471,7 +1544,7 @@ LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
+			DrawListItem(m_lcColumns, pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2294,7 +2367,7 @@ void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar)
 void CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 {
 	SetColor(m_crBkgnd, crBkgnd);
-	m_lcTaskTotals.SetBkColor(m_crBkgnd);
+	m_lcTotalsLabels.SetBkColor(m_crBkgnd);
 }
 
 void CWorkloadCtrl::SetColor(COLORREF& color, COLORREF crNew)
@@ -2457,18 +2530,6 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 		case WLCC_STARTDATE:
 		case WLCC_DUEDATE:
 			{
-				// draw non-selected calculated dates lighter
-				if (!bSelected && !wi.bDone && !wi.bGoodAsDone)
-				{
-					if (!bLighter)
-					{
-						if (nColID == WLCC_STARTDATE)
-							bLighter = (!wi.HasStart() && HasOption(WLCF_CALCMISSINGSTARTDATES));
-						else
-							bLighter = (!wi.HasDue() && HasOption(WLCF_CALCMISSINGDUEDATES));
-					}
-				}
-				
 				// Right-align if the column width can show the entire date
 				// else keep left align to ensure day and month remain visible
 				if (rItem.Width() >= pDC->GetTextExtent(sItem).cx)
@@ -2612,7 +2673,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2621,11 +2682,11 @@ void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BO
 
 	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, wi, bSelected);
+		bContinue = DrawListItemColumn(lc, pDC, nItem, nCol, wi, bSelected);
 	}
 }
 
-BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
+BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	if (nCol == 0)
 		return TRUE;
@@ -2635,7 +2696,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 
 	// see if we can avoid drawing this sub-item at all
 	CRect rColumn;
-	m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+	lc.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -2646,7 +2707,6 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	if (rColumn.left > rClip.right)
 		return FALSE; // we can stop
 	
-	DrawItemDivider(pDC, rColumn, DIV_HORZ, bSelected);
 	DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 
 	int nAllocTo = (nCol - 1);
@@ -2865,15 +2925,15 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 
 	m_tcTasks.SetTitleColumnWidth(nTitleColWidth);
 
-	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTaskTotals);
+	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_lcTotalsLabels);
 	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_lcColumnTotals);
 	
 	rTreeTotals.right = (rTreeTotals.left + GetSplitPos() + 1);
 	rColumnTotals.left = (rTreeTotals.right + GetSplitBarWidth() - 2);
 	
-	m_lcTaskTotals.MoveWindow(rTreeTotals);
+	m_lcTotalsLabels.MoveWindow(rTreeTotals);
 	m_lcColumnTotals.MoveWindow(rColumnTotals);
-	m_lcTaskTotals.SetColumnWidth(0, nSplitPos);
+	m_lcTotalsLabels.SetColumnWidth(0, nSplitPos);
 	
 	UpdateWindow();
 }
@@ -2882,7 +2942,7 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 {
 	CTreeListSyncer::HandleEraseBkgnd(pDC);
 
-	CDialogHelper::ExcludeChild(&m_lcTaskTotals, pDC);
+	CDialogHelper::ExcludeChild(&m_lcTotalsLabels, pDC);
 	CDialogHelper::ExcludeChild(&m_lcColumnTotals, pDC);
 	
 	CRect rClient;
@@ -3058,6 +3118,9 @@ void CWorkloadCtrl::BuildListColumns()
 	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
+
+	for (int i = 0; i < 3; i++)
+		m_lcColumnTotals.InsertItem(i, _T(""));
 }
 
 void CWorkloadCtrl::UpdateListColumns()
