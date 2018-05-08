@@ -61,12 +61,7 @@ void CEditAllocationsListCtrl::InitState()
 	AddCol(_T("Allocated To"), 200);
 	AddCol(_T("Days"), 75);
 
-// 	LV_COLUMN lvc = { 0 };
-// 	lvc.mask = LVCF_FMT;
-// 	lvc.fmt = LVCFMT_RIGHT;
-// 
-// 	SetColumn(ALLOCTO_COL, &lvc);
-	
+	SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 	SetAutoRowPrompt(CEnString(IDS_NEW_ALLOCATION));
 	AutoAdd(TRUE, FALSE);
 
@@ -124,10 +119,6 @@ void CEditAllocationsListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			if (!IsPrompt(nRow))
 				m_cbAllocTo.SelectString(-1, GetItemText(nRow, nCol));
 		}
-		break;
-
-	case ALLOCDAYS_COL:
-		SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 		break;
 	}
 }
