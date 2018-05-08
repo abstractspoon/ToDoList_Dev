@@ -177,14 +177,14 @@ BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, double dDays)
 	return TRUE;
 }
 
-BOOL WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, CString& sDays) const
+BOOL WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, CString& sDays, int nDecimals) const
 {
 	double dDays;
 
 	if (!GetAllocatedDays(sAllocTo, dDays))
 		return FALSE;
 
-	sDays = Misc::Format(dDays, 2);
+	sDays = Misc::Format(dDays, nDecimals);
 	return TRUE;
 }
 

@@ -50,7 +50,7 @@ struct WORKLOADITEM
 	BOOL AllocatedDaysMatch(const WORKLOADITEM& wi) const;
 
 	BOOL GetAllocatedDays(const CString& sAllocTo, double& dDays) const;
-	BOOL GetAllocatedDays(const CString& sAllocTo, CString& sDays) const;
+	BOOL GetAllocatedDays(const CString& sAllocTo, CString& sDays, int nDecimals = -1) const;
 	BOOL SetAllocatedDays(const CString& sAllocTo, double dDays);
 	BOOL SetAllocatedDays(const CString& sAllocTo, const CString& sDays);
 	
