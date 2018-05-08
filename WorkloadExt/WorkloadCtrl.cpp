@@ -566,7 +566,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	InitItemHeights();
 	UpdateListColumns();
 	RecalcTreeColumns(TRUE);
-	RecalculateAllocationTotals();
+	RecalcAllocationTotals();
 	
 	if (EditWantsResort(nUpdate, attrib))
 	{
@@ -581,19 +581,26 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	}
 }
 
-void CWorkloadCtrl::RecalculateAllocationTotals()
+WORKLOADITEM* CWorkloadCtrl::CheckAddTotal(DWORD dwTotalID)
 {
-	WORKLOADITEM* pWITotalDays = m_data.GetItem(ID_TOTALDAYSPERPERSON);
+	WORKLOADITEM* pWITotal = m_data.GetItem(dwTotalID);
+		
+	if (!pWITotal)
+	{
+		pWITotal = new WORKLOADITEM(dwTotalID);
+		m_data[dwTotalID] = pWITotal;
+	}
+		
+	return pWITotal;
+}
 
-	if (pWITotalDays)
-	{
-		pWITotalDays->ClearAllocations();
-	}
-	else
-	{
-		pWITotalDays = new WORKLOADITEM(ID_TOTALDAYSPERPERSON);
-		m_data[ID_TOTALDAYSPERPERSON] = pWITotalDays;
-	}
+void CWorkloadCtrl::RecalcAllocationTotals()
+{
+	WORKLOADITEM* pWITotalDays = CheckAddTotal(ID_TOTALDAYSPERPERSON);
+	WORKLOADITEM* pWITotalTasks = CheckAddTotal(ID_TOTALTASKSPERPERSON);
+	WORKLOADITEM* pWIPercentLoad = CheckAddTotal(ID_PERCENTLOADPERPERSON);
+
+	m_data.CalculateTotals(*pWITotalDays, *pWITotalTasks, *pWIPercentLoad);
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
@@ -1130,12 +1137,11 @@ void CWorkloadCtrl::BuildTaskTreeColumns()
 	}
 
 	// Build Task totals once only
-//	if (m_lcTotalsLabels.GetItemCount() == 0)
-	int nCol = m_lcTotalsLabels.InsertColumn(0, _T(""), LVCFMT_RIGHT, GetSplitPos());
+	m_lcTotalsLabels.InsertColumn(0, _T(""), LVCFMT_RIGHT, GetSplitPos());
 
 	// Align right
 	LV_COLUMN lvc = { LVCF_FMT, LVCFMT_RIGHT, 0 };
-	m_lcTotalsLabels.SetColumn(nCol, &lvc);
+	m_lcTotalsLabels.SetColumn(0, &lvc);
 }
 
 BOOL CWorkloadCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
@@ -1173,7 +1179,7 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rect(0, 0, cx, cy);
 		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
 		
-		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 3) * 3));
+		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 1) * 3));
 		rColumnTotals.top = rTreeTotals.top;
 		rTreeList.bottom = rTreeTotals.top - 3;
 		
@@ -2700,7 +2706,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int n
 
 	CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
 	
-	if (wi.GetAllocation(sAllocTo, sDays))
+	if (wi.GetAllocatedDays(sAllocTo, sDays))
 	{
 		rColumn.DeflateRect(LV_COLPADDING, 0);
 		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
@@ -3648,8 +3654,12 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 		ASSERT(0);
 		return FALSE;
 	}
+
+	CFont* pFont = CFont::FromHandle(hFont);
 	
-	m_tcTasks.SetFont(CFont::FromHandle(hFont), bRedraw);
+	m_tcTasks.SetFont(pFont, bRedraw);
+	m_lcTotalsLabels.SetFont(pFont, bRedraw);
+	m_lcColumnTotals.SetFont(pFont, bRedraw);
 
 	ResizeColumnsToFit();
 

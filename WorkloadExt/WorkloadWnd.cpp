@@ -840,7 +840,7 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 	{
 		const WORKLOADITEM& wiNew = dialog.GetAllocations();
 
-		if (!wiNew.AllocationsMatch(wi))
+		if (!wiNew.AllocatedDaysMatch(wi))
 		{
 			IUITASKMOD mod[2] = { { IUI_METADATA, 0 }, { IUI_ALLOCTO, 0 } };
 			int nNumMods = 0;

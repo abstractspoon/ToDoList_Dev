@@ -15,6 +15,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const double NO_ALLOCATION = 0xffffffff;
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct WORKLOADITEM 
 { 
 	WORKLOADITEM(DWORD dwID = 0, LPCTSTR szTitle = NULL);
@@ -43,19 +47,19 @@ struct WORKLOADITEM
 	void DecodeAllocations(const CString& sAllocations);
 	CString EncodeAllocations() const;
 	void ClearAllocations();
-	BOOL AllocationsMatch(const WORKLOADITEM& wi) const;
+	BOOL AllocatedDaysMatch(const WORKLOADITEM& wi) const;
 
-	BOOL GetAllocation(const CString& sAllocTo, double& dDays) const;
-	BOOL GetAllocation(const CString& sAllocTo, CString& sDays) const;
-	void SetAllocation(const CString& sAllocTo, double dDays);
-	void SetAllocation(const CString& sAllocTo, const CString& sDays);
+	BOOL GetAllocatedDays(const CString& sAllocTo, double& dDays) const;
+	BOOL GetAllocatedDays(const CString& sAllocTo, CString& sDays) const;
+	BOOL SetAllocatedDays(const CString& sAllocTo, double dDays);
+	BOOL SetAllocatedDays(const CString& sAllocTo, const CString& sDays);
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	BOOL HasColor() const;
 
 protected:
-	CMapStringToString mapAllocatedDays;
+	CMap<CString, LPCTSTR, double, double&> mapAllocatedDays;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,7 +75,12 @@ public:
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
-	void CalculateTotalItemDays(WORKLOADITEM& wiDays) const;
+	void CalculateTotals(WORKLOADITEM& wiAllocatedDays, 
+						 WORKLOADITEM& wiAllocatedTasks,
+						 WORKLOADITEM& wiPercentLoading) const;
+
+protected:
+	static double GetAllocatedDays(const WORKLOADITEM& wi, const CString& sAllocTo);
 };
 
 /////////////////////////////////////////////////////////////////////////////

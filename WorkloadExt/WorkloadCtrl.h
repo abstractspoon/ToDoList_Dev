@@ -234,7 +234,8 @@ protected:
 	void Resize();
 	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
-	void RecalculateAllocationTotals();
+	void RecalcAllocationTotals();
+	WORKLOADITEM* CheckAddTotal(DWORD dwTotalID);
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
