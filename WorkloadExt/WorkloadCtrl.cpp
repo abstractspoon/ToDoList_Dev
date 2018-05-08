@@ -1492,7 +1492,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			WORKLOADITEM* pWI = m_data.GetItem(pLVCD->nmcd.lItemlParam);
 
 			if (pWI)
-				DrawListItem(m_lcColumnTotals, pDC, nItem, *pWI, FALSE);
+				DrawListItem(pDC, nItem, *pWI, FALSE);
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -1515,6 +1515,21 @@ int CWorkloadCtrl::GetItemDecimals(const WORKLOADITEM& wi)
 
 	// all else
 	return 2;
+}
+
+BOOL CWorkloadCtrl::IsTotalsItem(const WORKLOADITEM& wi)
+{
+	switch (wi.dwTaskID)
+	{
+	case ID_TOTALDAYSPERPERSON:
+	case ID_PERCENTLOADPERPERSON:
+	case ID_TOTALCOLUMNHEADER:
+	case ID_TOTALTASKSPERPERSON:
+		return TRUE;
+	}
+
+	// all else
+	return FALSE;
 }
 
 LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
@@ -1555,7 +1570,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawListItem(m_lcColumns, pDC, nItem, *pWI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2683,7 +2698,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2692,11 +2707,11 @@ void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKL
 
 	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
 	{
-		bContinue = DrawListItemColumn(lc, pDC, nItem, nCol, wi, bSelected);
+		bContinue = DrawListItemColumn(pDC, nItem, nCol, wi, bSelected);
 	}
 }
 
-BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
+BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	if (nCol == 0)
 		return TRUE;
@@ -2706,6 +2721,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int n
 
 	// see if we can avoid drawing this sub-item at all
 	CRect rColumn;
+	CListCtrl& lc = (IsTotalsItem(wi) ? m_lcColumnTotals : m_lcColumns);
 	lc.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 
 	CRect rClip;
