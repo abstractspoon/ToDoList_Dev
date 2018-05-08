@@ -1183,7 +1183,7 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rect(0, 0, cx, cy);
 		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
 		
-		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 1) * 3));
+		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 1) * NUM_TOTALS));
 		rColumnTotals.top = rTreeTotals.top;
 		rTreeList.bottom = rTreeTotals.top - 3;
 		
@@ -1445,27 +1445,23 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
+		{
+			CRect rClient;
+			m_lcTotalsLabels.GetClientRect(rClient);
+
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+			pDC->FillSolidRect(rClient, m_crBkgnd);
+		}
 		return CDRF_NOTIFYITEMDRAW;
 
 	case CDDS_ITEMPREPAINT:
-		{
-			HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
-			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-			int nItem = (int)pLVCD->nmcd.dwItemSpec;
-
-			pLVCD->clrTextBk = m_crBkgnd;
-
-			CRect rFullWidth(pLVCD->nmcd.rc);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, m_crBkgnd, hwndList);
-		}
+		pLVCD->clrTextBk = m_crBkgnd;
 		return CDRF_NEWFONT;
 	}
 
 	// else
 	return CDRF_DODEFAULT;
 }
-
-
 
 LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
@@ -1490,29 +1486,35 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
 			
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			if (nItem < (NUM_TOTALS - 1))
+				DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 
 			WORKLOADITEM* pWI = m_data.GetItem(pLVCD->nmcd.lItemlParam);
 
 			if (pWI)
-			{
-				switch (pLVCD->nmcd.lItemlParam)
-				{
-				case ID_TOTALDAYSPERPERSON:
-				case ID_PERCENTLOADPERPERSON:
-					DrawListItem(m_lcColumnTotals, pDC, nItem, *pWI, FALSE, 2);
-					break;
-
-				case ID_TOTALTASKSPERPERSON:
-					DrawListItem(m_lcColumnTotals, pDC, nItem, *pWI, FALSE, 0);
-					break;
-				}
-			}
+				DrawListItem(m_lcColumnTotals, pDC, nItem, *pWI, FALSE);
 		}
 		return CDRF_SKIPDEFAULT;
 	}
 
 	return CDRF_DODEFAULT;
+}
+
+int CWorkloadCtrl::GetItemDecimals(const WORKLOADITEM& wi)
+{
+	switch (wi.dwTaskID)
+	{
+	case ID_TOTALDAYSPERPERSON:
+	case ID_PERCENTLOADPERPERSON:
+		return 2;
+
+	case ID_TOTALCOLUMNHEADER:
+	case ID_TOTALTASKSPERPERSON:
+		return 0;
+	}
+
+	// all else
+	return 2;
 }
 
 LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
@@ -1553,7 +1555,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawListItem(m_lcColumns, pDC, nItem, *pWI, (nState != GMIS_NONE), 2);
+			DrawListItem(m_lcColumns, pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2681,7 +2683,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected, int nDecimals)
+void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2690,11 +2692,11 @@ void CWorkloadCtrl::DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKL
 
 	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
 	{
-		bContinue = DrawListItemColumn(lc, pDC, nItem, nCol, wi, bSelected, nDecimals);
+		bContinue = DrawListItemColumn(lc, pDC, nItem, nCol, wi, bSelected);
 	}
 }
 
-BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected, int nDecimals)
+BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	if (nCol == 0)
 		return TRUE;
@@ -2722,7 +2724,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int n
 
 	CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
 	
-	if (wi.GetAllocatedDays(sAllocTo, sDays, nDecimals))
+	if (wi.GetAllocatedDays(sAllocTo, sDays, GetItemDecimals(wi)))
 	{
 		rColumn.DeflateRect(LV_COLPADDING, 0);
 		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);

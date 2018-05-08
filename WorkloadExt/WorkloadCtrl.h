@@ -207,8 +207,8 @@ protected:
 	
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
-	void DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected, int nDecimals = -1);
-	BOOL DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected, int nDecimals = -1);
+	void DrawListItem(CListCtrl& lc, CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
+	BOOL DrawListItemColumn(CListCtrl& lc, CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
 	void RedrawList(BOOL bErase = FALSE);
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
@@ -299,6 +299,7 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
+	static int GetItemDecimals(const WORKLOADITEM& wi);
 
 private:
 	void PreFixVScrollSyncBug();
