@@ -121,6 +121,7 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);

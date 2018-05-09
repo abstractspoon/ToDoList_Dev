@@ -78,6 +78,8 @@ public:
 
 	void Resize(const CRect& rect);
 	void ResizeColumnsToFit();
+	void AdjustSplitterToFitAttributeColumns();
+	BOOL PtInSplitter(const CPoint& pt, BOOL bScreen = FALSE) const { return CTreeListSyncer::PtInSplitter(pt, bScreen); }
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);

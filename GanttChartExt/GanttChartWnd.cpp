@@ -106,6 +106,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_GANTTTREE, OnBeginEditTreeLabel)
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
+	ON_WM_LBUTTONDBLCLK()
 
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
@@ -138,6 +139,17 @@ BOOL CGanttChartWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CGanttChartWnd::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	if (m_ctrlGantt.PtInSplitter(point))
+	{
+		m_ctrlGantt.AdjustSplitterToFitAttributeColumns();
+		return;
+	}
+
+	CDialog::OnLButtonDblClk(nFlags, point);
 }
 
 LRESULT CGanttChartWnd::OnGanttPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)

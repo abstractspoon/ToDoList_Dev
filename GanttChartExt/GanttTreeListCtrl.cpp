@@ -5404,16 +5404,11 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 {
 	// tree columns (except title column)
 	CClientDC dc(&m_tree);
-	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = 0, nCol = 0;
+	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = m_treeHeader.GetItemWidth(0), nCol = 1;
 
 	for (; nCol < nNumCols; nCol++)
 	{
-		int nColWidth = 0;
-		
-		if (nCol == 0) // title
-			nColWidth = m_treeHeader.GetItemWidth(nCol);
-		else
-			nColWidth = RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+		int nColWidth = RecalcTreeColumnWidth(nCol, &dc);
 
 		if (m_treeHeader.IsItemVisible(nCol))
 			nTotalColWidth += nColWidth;
@@ -5428,6 +5423,22 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 		m_listHeader.SetItemWidth(nCol, GetColumnWidth());
 
 	Resize();
+}
+
+void CGanttTreeListCtrl::AdjustSplitterToFitAttributeColumns()
+{
+	int nColsWidth = m_listHeader.CalcTotalItemsWidth();
+	
+	if (HasVScrollBar(m_list))
+		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
+	
+	CRect rClient;
+	GetClientRect(rClient);
+	
+	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - 1);
+	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
+	
+	CTreeListSyncer::SetSplitPos(nNewSplitPos);
 }
 
 void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
