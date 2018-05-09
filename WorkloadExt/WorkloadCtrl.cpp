@@ -599,6 +599,7 @@ WORKLOADITEM* CWorkloadCtrl::CheckAddTotal(DWORD dwTotalID)
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
+	WORKLOADITEM* pWITotalCols = CheckAddTotal(ID_TOTALCOLUMNHEADER);
 	WORKLOADITEM* pWITotalDays = CheckAddTotal(ID_TOTALDAYSPERPERSON);
 	WORKLOADITEM* pWITotalTasks = CheckAddTotal(ID_TOTALTASKSPERPERSON);
 	WORKLOADITEM* pWIPercentLoad = CheckAddTotal(ID_PERCENTLOADPERPERSON);
@@ -1476,17 +1477,21 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			int nItem = (int)pLVCD->nmcd.dwItemSpec;
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
-			// draw item bkgnd and gridlines full width of list
-			COLORREF crBack = GetSysColor(COLOR_WINDOW);//GetRowColor(nItem);
-			pLVCD->clrTextBk = pLVCD->clrText = crBack;
+			if (nItem == 0) // header row
+				pLVCD->clrTextBk = GetSysColor(COLOR_WINDOW);
+			else
+				pLVCD->clrTextBk = GetRowColor(nItem + 1); // first row is header
+			
+			pLVCD->clrText = pLVCD->clrTextBk; // we're drawing the text
 			
 			CRect rItem;
 			m_lcColumnTotals.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 			
+			// draw item bkgnd and gridlines full width of list
 			CRect rFullWidth(rItem);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
+			GraphicsMisc::FillItemRect(pDC, rFullWidth, pLVCD->clrTextBk, hwndList);
 			
-			if (nItem < (NUM_TOTALS - 1))
+			if ((nItem > 0) && (nItem < (NUM_TOTALS - 1)))
 				DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 
 			WORKLOADITEM* pWI = m_data.GetItem(pLVCD->nmcd.lItemlParam);
@@ -2751,19 +2756,33 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	if (rColumn.left > rClip.right)
 		return FALSE; // we can stop
 	
-	DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
+	// Draw text
+	if (wi.dwTaskID != ID_TOTALCOLUMNHEADER)
+	{
+		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
+		rColumn.top += 2;
+	}
 
 	int nAllocTo = (nCol - 1);
 	ASSERT(nAllocTo < m_aAllocTo.GetSize());
 
 	CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
-	
-	if (wi.GetAllocatedDays(sAllocTo, sDays, GetItemDecimals(wi)))
+
+	// special case:
+	if (wi.dwTaskID == ID_TOTALCOLUMNHEADER)
+	{
+		CThemed th;
+		BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
+		CThemed* pThemed = (bThemed ? &th :NULL);
+			
+		DrawListHeaderRect(pDC, rColumn, sAllocTo, pThemed);
+	}
+	else if (wi.GetAllocatedDays(sAllocTo, sDays, GetItemDecimals(wi)))
 	{
 		rColumn.DeflateRect(LV_COLPADDING, 0);
 		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 	}
-
+	
 	return TRUE;
 }
 
