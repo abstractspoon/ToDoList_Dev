@@ -147,53 +147,39 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-BOOL WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, double& dDays) const
+double WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo) const
 {
-	if (!mapAllocatedDays.Lookup(Misc::ToUpper(sAllocTo), dDays))
-	{
-		dDays = 0.0;
-		return FALSE;
-	}
-	
-	if (dDays == NO_ALLOCATION)
-	{
-		dDays = 0.0;
-		return FALSE;
-	}
+	double dDays = 0.0;
+	mapAllocatedDays.Lookup(Misc::ToUpper(sAllocTo), dDays);
 
-	return TRUE;
+	return dDays;
 }
 
 BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, double dDays)
 {
-	if ((dDays <= 0) && (dDays != NO_ALLOCATION))
+	if (dDays < 0)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	mapAllocatedDays[Misc::ToUpper(sAllocTo)] = dDays;
+	if (dDays == 0.0)
+		mapAllocatedDays.RemoveKey(Misc::ToUpper(sAllocTo));
+	else
+		mapAllocatedDays[Misc::ToUpper(sAllocTo)] = dDays;
 
 	return TRUE;
 }
 
-BOOL WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, CString& sDays, int nDecimals) const
+CString WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, int nDecimals) const
 {
-	double dDays;
+	double dDays = GetAllocatedDays(sAllocTo);
 
-	if (!GetAllocatedDays(sAllocTo, dDays))
-		return FALSE;
-
-	sDays = Misc::Format(dDays, nDecimals);
-	return TRUE;
+	return ((dDays == 0.0) ? _T("") : Misc::Format(dDays, nDecimals));
 }
 
 BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, const CString& sDays)
 {
-	if (sDays.IsEmpty())
-		return SetAllocatedDays(sAllocTo, NO_ALLOCATION);
-
-	// else
 	return SetAllocatedDays(sAllocTo, Misc::Atof(sDays));
 }
 
@@ -229,7 +215,7 @@ CString WORKLOADITEM::EncodeAllocations() const
 		{
 			CString sDays;
 
-			if ((dDays > 0) && (dDays != NO_ALLOCATION))
+			if (dDays > 0)
 				aAllocations.Add(sPerson + ':' + Misc::Format(dDays));
 		}
 	}
@@ -288,14 +274,14 @@ void CWorkloadItemMap::CalculateTotals(WORKLOADITEM& wiAllocatedDays,
 		for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
 		{
 			CString sAllocTo(pWI->aAllocTo[nAllocTo]);
-			double dDays;
+			double dDays = pWI->GetAllocatedDays(sAllocTo);
 
-			if (pWI->GetAllocatedDays(sAllocTo, dDays))
+			if (dDays > 0.0)
 			{
-				double dTotalDays = GetAllocatedDays(wiAllocatedDays, sAllocTo);
+				double dTotalDays = wiAllocatedDays.GetAllocatedDays(sAllocTo);
 				VERIFY(wiAllocatedDays.SetAllocatedDays(sAllocTo, (dTotalDays + dDays)));
 
-				double dTotalTasks = GetAllocatedDays(wiAllocatedTasks, sAllocTo);
+				double dTotalTasks = wiAllocatedTasks.GetAllocatedDays(sAllocTo);
 				VERIFY(wiAllocatedTasks.SetAllocatedDays(sAllocTo, (dTotalTasks + 1.0)));
 			}
 		}
@@ -342,17 +328,6 @@ WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 		ASSERT(pWI);
 	
 	return pWI;
-}
-
-double CWorkloadItemMap::GetAllocatedDays(const WORKLOADITEM& wi, const CString& sAllocTo)
-{
-	double dDays = 0.0;
-
-	if (!wi.GetAllocatedDays(sAllocTo, dDays))
-		return 0.0;
-
-	// else
-	return dDays;
 }
 
 //////////////////////////////////////////////////////////////////////

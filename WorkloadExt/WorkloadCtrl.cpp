@@ -2812,10 +2812,15 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	{
 		DrawListHeaderRect(pDC, rColumn, sAllocTo);
 	}
-	else if (wi.GetAllocatedDays(sAllocTo, sDays, GetItemDecimals(wi)))
+	else
 	{
-		rColumn.DeflateRect(LV_COLPADDING, 0);
-		pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+		sDays = wi.GetAllocatedDays(sAllocTo, GetItemDecimals(wi));
+
+		if (!sDays.IsEmpty())
+		{
+			rColumn.DeflateRect(LV_COLPADDING, 0);
+			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+		}
 	}
 	
 	return TRUE;

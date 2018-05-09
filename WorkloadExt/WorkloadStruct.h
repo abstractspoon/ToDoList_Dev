@@ -15,10 +15,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const double NO_ALLOCATION = 0xffffffff;
-
-/////////////////////////////////////////////////////////////////////////////
-
 struct WORKLOADITEM 
 { 
 	WORKLOADITEM(DWORD dwID = 0, LPCTSTR szTitle = NULL);
@@ -49,8 +45,8 @@ struct WORKLOADITEM
 	void ClearAllocations();
 	BOOL AllocatedDaysMatch(const WORKLOADITEM& wi) const;
 
-	BOOL GetAllocatedDays(const CString& sAllocTo, double& dDays) const;
-	BOOL GetAllocatedDays(const CString& sAllocTo, CString& sDays, int nDecimals = -1) const;
+	double GetAllocatedDays(const CString& sAllocTo) const;
+	CString GetAllocatedDays(const CString& sAllocTo, int nDecimals) const;
 	BOOL SetAllocatedDays(const CString& sAllocTo, double dDays);
 	BOOL SetAllocatedDays(const CString& sAllocTo, const CString& sDays);
 	
@@ -79,8 +75,6 @@ public:
 						 WORKLOADITEM& wiAllocatedTasks,
 						 WORKLOADITEM& wiPercentLoading) const;
 
-protected:
-	static double GetAllocatedDays(const WORKLOADITEM& wi, const CString& sAllocTo);
 };
 
 /////////////////////////////////////////////////////////////////////////////

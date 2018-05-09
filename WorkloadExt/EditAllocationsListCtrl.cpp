@@ -69,8 +69,7 @@ void CEditAllocationsListCtrl::InitState()
 	for (int nAllocTo = 0; nAllocTo < m_wi.aAllocTo.GetSize(); nAllocTo++)
 	{
 		const CString& sAllocTo = m_wi.aAllocTo[nAllocTo];
-		CString sDays;
-		m_wi.GetAllocatedDays(sAllocTo, sDays, 2);
+		CString sDays = m_wi.GetAllocatedDays(sAllocTo, 2);
 
 		int nRow = AddRow(sAllocTo);
 		SetItemText(nRow, ALLOCDAYS_COL, sDays);
