@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -768,7 +768,9 @@
 #define IDC_ELAPSEDTIME                 1477
 #define IDC_SHOWTIMETRACKER             1479
 #define IDC_APPFOLDER                   1480
+#define IDC_APPPATH                     1480
 #define IDC_PREFSFILE                   1481
+#define IDC_PREFSPATH                   1481
 #define IDC_STYLESHEETNOTFOUND          1483
 #define IDC_TASKTIME_LABEL              1484
 #define IDC_TASKS_LABEL                 1485

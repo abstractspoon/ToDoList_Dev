@@ -9,6 +9,7 @@
 
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
+#include "..\Shared\fileEdit.h"
 
 #include "..\3rdparty\xhtmlstatic.h"
 
@@ -30,12 +31,13 @@ protected:
 	CListCtrl		m_lcContributors;
 	CString			m_sAppTitle;
 	CString			m_sLicense;
-	CString			m_sAppFolder;
-	CString			m_sPrefsFile;
+	CString			m_sAppFilePath;
+	CString			m_sPrefsFilePath;
 	CEnToolBar		m_toolbar;
 	CToolbarHelper	m_tbHelper;
 	CImageList		m_il;
 	CFont			m_fontAppTitle;
+	CFileEdit		m_eAppFile, m_ePrefsFile;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -52,6 +54,7 @@ protected:
 	//{{AFX_MSG(CTDLAboutDlg)
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 };
