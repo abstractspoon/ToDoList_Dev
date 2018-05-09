@@ -667,10 +667,10 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return m_tree.TCH().IsAnyItemCollapsed();
+		return (m_tree.TCH().IsAnyItemCollapsed() != FALSE);
 
 	case IUI_COLLAPSEALL:
-		return m_tree.TCH().IsAnyItemExpanded();
+		return (m_tree.TCH().IsAnyItemExpanded() != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_SELECTTASK:
