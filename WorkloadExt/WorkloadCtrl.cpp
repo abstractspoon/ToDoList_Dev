@@ -1944,6 +1944,15 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	{
 		switch (msg)
 		{
+		case WM_HSCROLL:
+			CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+			// Keep totals synced
+			m_lcColumnTotals.Invalidate(FALSE);
+			m_lcColumnTotals.UpdateWindow();
+
+			return 0L;
+
 		case WM_TIMER:
 			switch (wp)
 			{
@@ -2721,8 +2730,17 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 
 	// see if we can avoid drawing this sub-item at all
 	CRect rColumn;
-	CListCtrl& lc = (IsTotalsItem(wi) ? m_lcColumnTotals : m_lcColumns);
-	lc.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+
+	if (IsTotalsItem(wi))
+	{
+		m_lcColumnTotals.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+
+		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
+	}
+	else
+	{
+		m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+	}
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
