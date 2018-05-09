@@ -148,7 +148,6 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_tshDragDrop(m_tcTasks),
 	m_treeDragDrop(m_tshDragDrop, m_tcTasks)
 {
-
 }
 
 CWorkloadCtrl::~CWorkloadCtrl()
@@ -256,6 +255,9 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	m_lcColumnTotals.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
 	ListView_SetExtendedListViewStyleEx(m_lcColumnTotals, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
+	if (m_themeHeader.AreControlsThemed())
+		VERIFY(m_themeHeader.Open(*this, _T("HEADER")));
 	
 	BuildTaskTreeColumns();
 	BuildListColumns();
@@ -2733,7 +2735,8 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	if (m_hdrColumns.GetItemWidth(nCol) == 0)
 		return TRUE;
 
-	// see if we can avoid drawing this sub-item at all
+	// Col rect needs potentially needs adjustment to suit
+	// the horizontal scroll pos of the main allocation table
 	CRect rColumn;
 
 	if (IsTotalsItem(wi))
@@ -2747,6 +2750,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 		m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 	}
 
+	// see if we can avoid drawing this sub-item at all
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
@@ -2771,11 +2775,7 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 	// special case:
 	if (wi.dwTaskID == ID_TOTALCOLUMNHEADER)
 	{
-		CThemed th;
-		BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
-		CThemed* pThemed = (bThemed ? &th :NULL);
-			
-		DrawListHeaderRect(pDC, rColumn, sAllocTo, pThemed);
+		DrawListHeaderRect(pDC, rColumn, sAllocTo);
 	}
 	else if (wi.GetAllocatedDays(sAllocTo, sDays, GetItemDecimals(wi)))
 	{
@@ -2797,16 +2797,16 @@ void CWorkloadCtrl::DrawListHeaderItem(CDC* /*pDC*/, int nCol)
 	// TODO
 }
 
-void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme)
+void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
 {
-	if (!pTheme)
+	if (m_themeHeader.AreControlsThemed())
 	{
-		pDC->FillSolidRect(rItem, ::GetSysColor(COLOR_3DFACE));
-		pDC->Draw3dRect(rItem, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
+		m_themeHeader.DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rItem);
 	}
 	else
 	{
-		pTheme->DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rItem);
+		pDC->FillSolidRect(rItem, ::GetSysColor(COLOR_3DFACE));
+		pDC->Draw3dRect(rItem, ::GetSysColor(COLOR_3DHIGHLIGHT), ::GetSysColor(COLOR_3DSHADOW));
 	}
 	
 	// text

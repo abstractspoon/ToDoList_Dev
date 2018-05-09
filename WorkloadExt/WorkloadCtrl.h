@@ -20,6 +20,7 @@
 #include "..\shared\mapex.h"
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\TreeSelectionHelper.h"
+#include "..\shared\themed.h"
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
@@ -140,6 +141,7 @@ protected:
 	int m_nPrevDropHilitedItem;
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
+	CThemed m_themeHeader;
 
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;
@@ -206,7 +208,7 @@ protected:
 	void RedrawTree(BOOL bErase = FALSE);
 	
 	void DrawListHeaderItem(CDC* pDC, int nCol);
-	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme);
+	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
 	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
 	void RedrawList(BOOL bErase = FALSE);
