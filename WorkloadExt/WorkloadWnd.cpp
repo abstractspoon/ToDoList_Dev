@@ -565,13 +565,17 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
+		return (m_ctrlWorkload.CanExpandAll() != FALSE);
+		
 	case IUI_COLLAPSEALL:
+		return (m_ctrlWorkload.CanCollapseAll() != FALSE);
+		
 	case IUI_RESIZEATTRIBCOLUMNS:
 	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
-		return FALSE;//(m_tree.GetCount() > 0);
+		return (m_ctrlWorkload.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
 		{

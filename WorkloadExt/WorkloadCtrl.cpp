@@ -1239,6 +1239,16 @@ void CWorkloadCtrl::ExpandAll(BOOL bExpand)
 	RecalcTreeColumns(TRUE);
 }
 
+BOOL CWorkloadCtrl::CanExpandAll() const
+{
+	return TCH().IsAnyItemCollapsed();
+}
+
+BOOL CWorkloadCtrl::CanCollapseAll() const
+{
+	return TCH().IsAnyItemExpanded();
+}
+
 void CWorkloadCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 {
 	// avoid unnecessary processing

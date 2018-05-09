@@ -63,6 +63,7 @@ public:
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	HTREEITEM GetSelectedItem() const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+	int GetTaskCount() const { return (int)m_tcTasks.GetCount(); }
 
 	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
 	BOOL SetSelectedTask(const WORKLOADITEM& wi);
@@ -77,6 +78,8 @@ public:
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
+	BOOL CanExpandAll() const;
+	BOOL CanCollapseAll() const;
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
