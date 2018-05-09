@@ -445,6 +445,38 @@ void CTreeCtrlHelper::SetItemIntegral(HTREEITEM hti, int iIntegral)
 	m_tree.SetItem((LPTVITEM)&tvi);
 }
 
+BOOL CTreeCtrlHelper::IsAnyItemExpanded() const
+{
+	// Check top-level items for first match
+	HTREEITEM hti = m_tree.GetChildItem(NULL);
+	
+	while (hti)
+	{
+		if (IsItemExpanded(hti) > 0)
+			return TRUE;
+		
+		hti = TreeView_GetNextItem(m_tree, hti, TVGN_NEXT); // constness
+	}
+
+	return FALSE;
+}
+
+BOOL CTreeCtrlHelper::IsAnyItemCollapsed() const
+{
+	// Check top-level items for first match
+	HTREEITEM hti = m_tree.GetChildItem(NULL);
+	
+	while (hti)
+	{
+		if (IsItemExpanded(hti) == 0)
+			return TRUE;
+		
+		hti = TreeView_GetNextItem(m_tree, hti, TVGN_NEXT); // constness
+	}
+	
+	return FALSE;
+}
+
 int CTreeCtrlHelper::IsItemExpanded(HTREEITEM hti, BOOL bFully) const
 {
 	if (!hti)

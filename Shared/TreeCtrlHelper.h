@@ -160,6 +160,8 @@ public:
 	BOOL IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive = FALSE) const;
 	BOOL IsItemVisible(HTREEITEM hti) const;
 	BOOL ItemHasParent(HTREEITEM hti, HTREEITEM htiParent) const;
+	BOOL IsAnyItemExpanded() const;
+	BOOL IsAnyItemCollapsed() const;
 
 	void SetItemIntegral(HTREEITEM hti, int iIntegral);
 	

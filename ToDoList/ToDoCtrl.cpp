@@ -12036,35 +12036,10 @@ BOOL CToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const
 	switch (nWhat)
 	{
 	case TDCEC_ALL:
-		{
-			// Check top-level items for first match
-			HTREEITEM hti = m_taskTree.GetChildItem(NULL);
-
-			while (hti)
-			{
-				int nExpanded = m_taskTree.TCH().IsItemExpanded(hti);
-
-				switch (nExpanded)
-				{
-				case -1: // not a parent
-					break;
-
-				case 0:
-					if (bExpand)
-						return TRUE;
-					break;
-
-				default:
-					if (!bExpand)
-						return TRUE;
-					break;
-				}
-
-				hti = m_taskTree.GetNextItem(hti);
-			}
-
-			return FALSE;
-		}
+		if (bExpand)
+			return m_taskTree.TCH().IsAnyItemCollapsed();
+		else
+			return m_taskTree.TCH().IsAnyItemExpanded();
 		break;
 
 	case TDCEC_SELECTED:
