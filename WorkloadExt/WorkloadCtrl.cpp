@@ -178,6 +178,7 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 
 	ON_WM_CREATE()
 	ON_WM_SIZE()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 
@@ -279,6 +280,30 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
  	PostResize();
 	
 	return 0;
+}
+
+void CWorkloadCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
+{
+	CRect rSplitter;
+	
+	if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
+		AdjustSplitterToFitAttributeColumns();
+}
+
+void CWorkloadCtrl::AdjustSplitterToFitAttributeColumns()
+{
+	int nColsWidth = m_hdrColumns.CalcTotalItemsWidth();
+
+	if (HasVScrollBar(m_lcColumns))
+		nColsWidth += GetSystemMetrics(SM_CXVSCROLL);
+	
+	CRect rClient;
+	CWnd::GetClientRect(rClient);
+	
+	int nNewSplitPos = (rClient.right - nColsWidth - GetSplitBarWidth() - 1);
+	nNewSplitPos = max(MIN_LABEL_EDIT_WIDTH, nNewSplitPos);
+	
+	CTreeListSyncer::SetSplitPos(nNewSplitPos);
 }
 
 void CWorkloadCtrl::InitItemHeights()
@@ -2931,13 +2956,11 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 {
 	// tree columns
 	CClientDC dc(&m_tcTasks);
-	int nCol = m_hdrTasks.GetItemCount(), nTotalColWidth = 0;
+	int nNumCol = m_hdrTasks.GetItemCount();
 
-	while (nCol--)
-		nTotalColWidth += RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+	for (int nCol = 1; nCol < nNumCol; nCol++)
+		RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
 
-	SetSplitPos(nTotalColWidth);
-	
 	// list columns
 	RecalcListColumnsToFit();
 

@@ -152,6 +152,7 @@ protected:
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 
 	afx_msg void OnEndDragTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* pResult);
@@ -237,11 +238,12 @@ protected:
 	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
-	WORKLOADITEM* CheckAddTotal(DWORD dwTotalID);
+	void AdjustSplitterToFitAttributeColumns();
 
 	inline BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 
 	WORKLOADITEM* GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID = TRUE) const;
+	WORKLOADITEM* CheckAddTotal(DWORD dwTotalID);
 
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
