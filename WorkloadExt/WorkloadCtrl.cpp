@@ -53,34 +53,13 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-const int MAX_YEAR = 2100;
-#else
-const int MAX_YEAR = 2200;
-#endif
-
 const int MIN_COL_WIDTH			= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
-const int DEF_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(72);
 const int TREE_TITLE_MIN_WIDTH	= GraphicsMisc::ScaleByDPIFactor(75); 
-const int COLUMN_PADDING		= GraphicsMisc::ScaleByDPIFactor(15);
-const int MIN_MONTH_WIDTH		= GraphicsMisc::ScaleByDPIFactor(2);
-const int MINS_IN_HOUR			= 60;
-const int MINS_IN_DAY			= (MINS_IN_HOUR * 24);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
-const int MAX_HEADER_WIDTH		= 32000; // (SHRT_MAX - tolerance)
-const int DRAG_BUFFER			= GraphicsMisc::ScaleByDPIFactor(50);
-const int DONE_BOX				= GraphicsMisc::ScaleByDPIFactor(6);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
-
-const LONG DEPENDPICKPOS_NONE = 0xFFFFFFFF;
-const double DAY_WEEK_MULTIPLIER = 1.5;
-const double HOUR_DAY_MULTIPLIER = 6;
-const double MULTIYEAR_MULTIPLIER = 2.0;
-const double DAYS_IN_YEAR = 365.25;
-const double DAYS_IN_MONTH = (DAYS_IN_YEAR / 12);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -146,7 +125,8 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_bMovingTask(FALSE),
 	m_nPrevDropHilitedItem(-1),
 	m_tshDragDrop(m_tcTasks),
-	m_treeDragDrop(m_tshDragDrop, m_tcTasks)
+	m_treeDragDrop(m_tshDragDrop, m_tcTasks),
+	m_dWorkDaysInPeriod(22) // one month
 {
 }
 
@@ -626,12 +606,27 @@ WORKLOADITEM* CWorkloadCtrl::CheckAddTotal(DWORD dwTotalID)
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	WORKLOADITEM* pWITotalCols = CheckAddTotal(ID_TOTALCOLUMNHEADER);
+	// Placeholder only
+	WORKLOADITEM* pWIColHeader = CheckAddTotal(ID_TOTALCOLUMNHEADER); 
+
+	// Actual totals
 	WORKLOADITEM* pWITotalDays = CheckAddTotal(ID_TOTALDAYSPERPERSON);
 	WORKLOADITEM* pWITotalTasks = CheckAddTotal(ID_TOTALTASKSPERPERSON);
-	WORKLOADITEM* pWIPercentLoad = CheckAddTotal(ID_PERCENTLOADPERPERSON);
 
-	m_data.CalculateTotals(*pWITotalDays, *pWITotalTasks, *pWIPercentLoad);
+	m_data.CalculateTotals(*pWITotalDays, *pWITotalTasks);
+
+	// Individual loading
+	WORKLOADITEM* pWIPercentLoad = CheckAddTotal(ID_PERCENTLOADPERPERSON);
+	pWIPercentLoad->ClearAllocations();
+
+	for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
+	{
+		const CString& sAllocTo = m_aAllocTo[nAllocTo];
+		double dTotalDays = pWITotalDays->GetAllocatedDays(sAllocTo);
+
+		pWIPercentLoad->SetAllocatedDays(sAllocTo, (dTotalDays * 100 / m_dWorkDaysInPeriod));
+	}
+
 	m_lcColumnTotals.Invalidate();
 }
 
@@ -1547,8 +1542,10 @@ int CWorkloadCtrl::GetItemDecimals(const WORKLOADITEM& wi)
 	switch (wi.dwTaskID)
 	{
 	case ID_TOTALDAYSPERPERSON:
-	case ID_PERCENTLOADPERPERSON:
 		return 2;
+
+	case ID_PERCENTLOADPERPERSON:
+		return 1;
 
 	case ID_TOTALCOLUMNHEADER:
 	case ID_TOTALTASKSPERPERSON:
@@ -2818,6 +2815,9 @@ BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORK
 
 		if (!sDays.IsEmpty())
 		{
+			if (wi.dwTaskID == ID_PERCENTLOADPERPERSON)
+				sDays += '%';
+
 			rColumn.DeflateRect(LV_COLPADDING, 0);
 			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}

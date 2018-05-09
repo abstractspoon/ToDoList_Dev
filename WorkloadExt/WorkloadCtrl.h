@@ -137,7 +137,6 @@ protected:
 
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	CStringArray m_aAllocTo;
-
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
@@ -145,6 +144,7 @@ protected:
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
+	double m_dWorkDaysInPeriod;
 
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;

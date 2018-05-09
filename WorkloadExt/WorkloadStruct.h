@@ -49,6 +49,9 @@ struct WORKLOADITEM
 	CString GetAllocatedDays(const CString& sAllocTo, int nDecimals) const;
 	BOOL SetAllocatedDays(const CString& sAllocTo, double dDays);
 	BOOL SetAllocatedDays(const CString& sAllocTo, const CString& sDays);
+
+	double GetTotalAllocatedDays() const;
+	CString GetTotalAllocatedDays(int nDecimals) const;
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -56,6 +59,9 @@ struct WORKLOADITEM
 
 protected:
 	CMap<CString, LPCTSTR, double, double&> mapAllocatedDays;
+
+protected:
+	static CString Format(double dDays, int nDecimals);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -72,8 +78,7 @@ public:
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
 	void CalculateTotals(WORKLOADITEM& wiAllocatedDays, 
-						 WORKLOADITEM& wiAllocatedTasks,
-						 WORKLOADITEM& wiPercentLoading) const;
+						 WORKLOADITEM& wiAllocatedTasks) const;
 
 };
 

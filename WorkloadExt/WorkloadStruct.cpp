@@ -175,7 +175,7 @@ CString WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, int nDecimals) c
 {
 	double dDays = GetAllocatedDays(sAllocTo);
 
-	return ((dDays == 0.0) ? _T("") : Misc::Format(dDays, nDecimals));
+	return Format(dDays, nDecimals);
 }
 
 BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, const CString& sDays)
@@ -187,36 +187,36 @@ void WORKLOADITEM::DecodeAllocations(const CString& sAllocations)
 {
 	mapAllocatedDays.RemoveAll();
 
-	CStringArray aAllocTo;
-	int nAllocTo = Misc::Split(sAllocations, aAllocTo, '\n');
+	CStringArray aAllocations;
+	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
 
 	while (nAllocTo--)
 	{
-		CString sDays, sPerson = aAllocTo[nAllocTo];
-		Misc::Split(sPerson, sDays, ':');
+		CString sDays, sAllocTo = aAllocations[nAllocTo];
+		Misc::Split(sAllocTo, sDays, ':');
 
-		SetAllocatedDays(sPerson, sDays);
+		SetAllocatedDays(sAllocTo, sDays);
 	}
 }
 
 CString WORKLOADITEM::EncodeAllocations() const
 {
-	CString sAllocations, sPerson;
+	CString sAllocations, sAllocTo;
 	CStringArray aAllocations;
 	double dDays;
 	POSITION pos = mapAllocatedDays.GetStartPosition();
 
 	while (pos)
 	{
-		mapAllocatedDays.GetNextAssoc(pos, sPerson, dDays);
-		ASSERT(!sPerson.IsEmpty());
+		mapAllocatedDays.GetNextAssoc(pos, sAllocTo, dDays);
+		ASSERT(!sAllocTo.IsEmpty());
 
-		if (!sPerson.IsEmpty())
+		if (!sAllocTo.IsEmpty())
 		{
 			CString sDays;
 
 			if (dDays > 0)
-				aAllocations.Add(sPerson + ':' + Misc::Format(dDays));
+				aAllocations.Add(sAllocTo + ':' + Misc::Format(dDays));
 		}
 	}
 
@@ -226,6 +226,37 @@ CString WORKLOADITEM::EncodeAllocations() const
 void WORKLOADITEM::ClearAllocations()
 {
 	mapAllocatedDays.RemoveAll();
+}
+
+double WORKLOADITEM::GetTotalAllocatedDays() const
+{
+	CString sAllocTo;
+	CStringArray aAllocations;
+	double dTotalDays = 0, dDays;
+	POSITION pos = mapAllocatedDays.GetStartPosition();
+
+	while (pos)
+	{
+		mapAllocatedDays.GetNextAssoc(pos, sAllocTo, dDays);
+		ASSERT(!sAllocTo.IsEmpty());
+
+		if (!sAllocTo.IsEmpty())
+			dTotalDays += dDays;
+	}
+
+	return dTotalDays;
+}
+
+CString WORKLOADITEM::GetTotalAllocatedDays(int nDecimals) const
+{
+	double dDays = GetTotalAllocatedDays();
+
+	return Format(dDays, nDecimals);
+}
+
+CString WORKLOADITEM::Format(double dDays, int nDecimals)
+{
+	return ((dDays == 0.0) ? _T("") : Misc::Format(dDays, nDecimals));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -254,12 +285,10 @@ void CWorkloadItemMap::RemoveAll()
 }
 
 void CWorkloadItemMap::CalculateTotals(WORKLOADITEM& wiAllocatedDays, 
-									 WORKLOADITEM& wiAllocatedTasks,
-									 WORKLOADITEM& wiPercentLoad) const
+									 WORKLOADITEM& wiAllocatedTasks) const
 {
 	wiAllocatedDays.ClearAllocations();
 	wiAllocatedTasks.ClearAllocations();
-	wiPercentLoad.ClearAllocations();
 
 	DWORD dwTaskID = 0;
 	WORKLOADITEM* pWI = NULL;
