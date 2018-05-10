@@ -1588,12 +1588,16 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
+			BOOL bSelected = (nState != GMIS_NONE);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
 
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawAllocationListItem(pDC, nItem, pWI->mapAllocatedDays, (nState != GMIS_NONE));
+			COLORREF crText = GetTreeTextColor(*pWI, bSelected, FALSE);
+			pDC->SetTextColor(crText);
+			
+			DrawAllocationListItem(pDC, nItem, pWI->mapAllocatedDays, bSelected);
 		}
 		return CDRF_SKIPDEFAULT;
 	}
