@@ -18,8 +18,8 @@
 class CMapAllocations : protected CMap<CString, LPCTSTR, double, double&> 
 {
 public:
-	CMapAllocations() {}
-	virtual ~CMapAllocations() {}
+	CMapAllocations(BOOL bReturnAverageForTotal = FALSE);
+	virtual ~CMapAllocations();
 
 	double Get(const CString& sAllocTo) const;
 	CString Get(const CString& sAllocTo, int nDecimals) const;
@@ -39,6 +39,9 @@ public:
 	BOOL MatchAll(const CMapAllocations& other) const;
 	void Copy(const CMapAllocations& other);
 	void RemoveAll();
+
+protected:
+	BOOL m_bReturnAverageForTotal;
 	
 protected:
 	static CString Format(double dValue, int nDecimals);

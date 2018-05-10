@@ -17,6 +17,16 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CMapAllocations::CMapAllocations(BOOL bReturnAverageForTotal) 
+	:
+	m_bReturnAverageForTotal(bReturnAverageForTotal)
+{
+}
+
+CMapAllocations::~CMapAllocations() 
+{
+}
+
 void CMapAllocations::Copy(const CMapAllocations& other)
 {
 	Misc::CopyStrT<double>(other, *this);
@@ -143,6 +153,9 @@ double CMapAllocations::GetTotal() const
 CString CMapAllocations::GetTotal(int nDecimals) const
 {
 	double dValue = GetTotal();
+
+	if (m_bReturnAverageForTotal)
+		dValue /= GetCount();
 
 	return Format(dValue, nDecimals);
 }

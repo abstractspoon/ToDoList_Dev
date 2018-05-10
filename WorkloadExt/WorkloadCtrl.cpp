@@ -126,7 +126,10 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_nPrevDropHilitedItem(-1),
 	m_tshDragDrop(m_tcTasks),
 	m_treeDragDrop(m_tshDragDrop, m_tcTasks),
-	m_dWorkDaysInPeriod(22) // one month
+	m_dWorkDaysInPeriod(22), // one month
+	m_mapTotalDays(FALSE),
+	m_mapTotalTasks(FALSE),
+	m_mapPercentLoad(TRUE) // average
 {
 }
 
