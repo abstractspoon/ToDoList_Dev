@@ -22,18 +22,6 @@ const int NUM_TREECOLUMNS = (sizeof(WORKLOADTREECOLUMNS) / sizeof(WORKLOADCOLUMN
 
 //////////////////////////////////////////////////////////////////////
 
-// Pseudo tasks
-const DWORD ID_TOTALCOLUMNHEADER	= 0xffffffff;
-const DWORD ID_TOTALDAYSPERPERSON	= 0xfffffffe;
-const DWORD ID_TOTALTASKSPERPERSON	= 0xfffffffd;
-const DWORD ID_PERCENTLOADPERPERSON	= 0xfffffffc;
-
-struct WORKLOADTOTAL
-{
-	UINT nTextResID;
-	DWORD dwID;
-};
-
 const WORKLOADTOTAL WORKLOADTOTALS[] =
 {
 	{ 0,							ID_TOTALCOLUMNHEADER },

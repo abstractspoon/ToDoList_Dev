@@ -148,6 +148,7 @@ protected:
 
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;
+	CMapAllocations m_mapTotalDays, m_mapTotalTasks, m_mapPercentLoad;
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -213,8 +214,9 @@ protected:
 	
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
-	void DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected);
+	void DrawAllocationListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, BOOL bSelected);
+	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, int nDecimals);
+	void DrawTotalsHeader(CDC* pDC);
 	void RedrawList(BOOL bErase = FALSE);
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
@@ -306,8 +308,6 @@ protected:
 	static int Compare(const CString& sText1, const CString& sText2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL IsVerticalDivider(DIV_TYPE nType);
-	static int GetItemDecimals(const WORKLOADITEM& wi);
-	static BOOL IsTotalsItem(const WORKLOADITEM& wi);
 
 private:
 	void PreFixVScrollSyncBug();

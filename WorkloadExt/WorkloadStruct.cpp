@@ -17,6 +17,143 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+void CMapAllocations::Copy(const CMapAllocations& other)
+{
+	Misc::CopyStrT<double>(other, *this);
+}
+
+BOOL CMapAllocations::MatchAll(const CMapAllocations& other) const
+{
+	return Misc::MatchAllStrT<double>(*this, other);
+}
+
+void CMapAllocations::RemoveAll()
+{
+	CMap<CString, LPCTSTR, double, double&>::RemoveAll();
+}
+
+double CMapAllocations::Get(const CString& sAllocTo) const
+{
+	double dDays = 0.0;
+	Lookup(Misc::ToUpper(sAllocTo), dDays);
+
+	return dDays;
+}
+
+BOOL CMapAllocations::Set(const CString& sAllocTo, double dValue)
+{
+	if (dValue < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (dValue == 0.0)
+		RemoveKey(Misc::ToUpper(sAllocTo));
+	else
+		SetAt(Misc::ToUpper(sAllocTo), dValue);
+
+	return TRUE;
+}
+
+CString CMapAllocations::Get(const CString& sAllocTo, int nDecimals) const
+{
+	double dValue = Get(sAllocTo);
+
+	return Format(dValue, nDecimals);
+}
+
+BOOL CMapAllocations::Set(const CString& sAllocTo, const CString& sDays)
+{
+	return Set(sAllocTo, Misc::Atof(sDays));
+}
+
+BOOL CMapAllocations::Add(const CString& sAllocTo, double dValue)
+{
+	if (dValue <= 0)
+		return FALSE;
+
+	return Set(sAllocTo, (Get(sAllocTo) + dValue));
+}
+
+void CMapAllocations::Increment(const CString& sAllocTo)
+{
+	Add(sAllocTo, 1.0);
+}
+
+void CMapAllocations::Decode(const CString& sAllocations)
+{
+	RemoveAll();
+
+	CStringArray aAllocations;
+	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
+
+	while (nAllocTo--)
+	{
+		CString sDays, sAllocTo = aAllocations[nAllocTo];
+		Misc::Split(sAllocTo, sDays, ':');
+
+		Set(sAllocTo, sDays);
+	}
+}
+
+CString CMapAllocations::Encode() const
+{
+	CString sAllocations, sAllocTo;
+	CStringArray aAllocations;
+	double dValue;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, sAllocTo, dValue);
+		ASSERT(!sAllocTo.IsEmpty());
+
+		if (!sAllocTo.IsEmpty())
+		{
+			CString sDays;
+
+			if (dValue > 0)
+				aAllocations.Add(sAllocTo + ':' + Misc::Format(dValue));
+		}
+	}
+
+	return Misc::FormatArray(aAllocations, '\n');
+}
+
+double CMapAllocations::GetTotal() const
+{
+	CString sAllocTo;
+	CStringArray aAllocations;
+	double dTotalDays = 0, dValue;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, sAllocTo, dValue);
+		ASSERT(!sAllocTo.IsEmpty());
+
+		if (!sAllocTo.IsEmpty())
+			dTotalDays += dValue;
+	}
+
+	return dTotalDays;
+}
+
+CString CMapAllocations::GetTotal(int nDecimals) const
+{
+	double dValue = GetTotal();
+
+	return Format(dValue, nDecimals);
+}
+
+CString CMapAllocations::Format(double dValue, int nDecimals)
+{
+	return ((dValue == 0.0) ? _T("") : Misc::Format(dValue, nDecimals));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 WORKLOADITEM::WORKLOADITEM(DWORD dwID, LPCTSTR szTitle) 
 	: 
 	sTitle(szTitle),
@@ -57,7 +194,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 	bSomeSubtaskDone = wi.bSomeSubtaskDone;
 	
 	aAllocTo.Copy(wi.aAllocTo);
-	Misc::CopyStrT<double>(wi.mapAllocatedDays, mapAllocatedDays);
+	mapAllocatedDays.Copy(wi.mapAllocatedDays);
 	
 	return (*this);
 }
@@ -80,17 +217,12 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 			(bHasIcon == wi.bHasIcon) &&
 			(bSomeSubtaskDone == wi.bSomeSubtaskDone) &&
 			Misc::MatchAll(aAllocTo, wi.aAllocTo) &&
-			AllocatedDaysMatch(wi));
+			mapAllocatedDays.MatchAll(wi.mapAllocatedDays));
 }
 
 WORKLOADITEM::~WORKLOADITEM()
 {
 	
-}
-
-BOOL WORKLOADITEM::AllocatedDaysMatch(const WORKLOADITEM& wi) const
-{
-	return Misc::MatchAllStrT<double>(mapAllocatedDays, wi.mapAllocatedDays);
 }
 
 BOOL WORKLOADITEM::HasStart() const
@@ -147,118 +279,6 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-double WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo) const
-{
-	double dDays = 0.0;
-	mapAllocatedDays.Lookup(Misc::ToUpper(sAllocTo), dDays);
-
-	return dDays;
-}
-
-BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, double dDays)
-{
-	if (dDays < 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (dDays == 0.0)
-		mapAllocatedDays.RemoveKey(Misc::ToUpper(sAllocTo));
-	else
-		mapAllocatedDays[Misc::ToUpper(sAllocTo)] = dDays;
-
-	return TRUE;
-}
-
-CString WORKLOADITEM::GetAllocatedDays(const CString& sAllocTo, int nDecimals) const
-{
-	double dDays = GetAllocatedDays(sAllocTo);
-
-	return Format(dDays, nDecimals);
-}
-
-BOOL WORKLOADITEM::SetAllocatedDays(const CString& sAllocTo, const CString& sDays)
-{
-	return SetAllocatedDays(sAllocTo, Misc::Atof(sDays));
-}
-
-void WORKLOADITEM::DecodeAllocations(const CString& sAllocations)
-{
-	mapAllocatedDays.RemoveAll();
-
-	CStringArray aAllocations;
-	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
-
-	while (nAllocTo--)
-	{
-		CString sDays, sAllocTo = aAllocations[nAllocTo];
-		Misc::Split(sAllocTo, sDays, ':');
-
-		SetAllocatedDays(sAllocTo, sDays);
-	}
-}
-
-CString WORKLOADITEM::EncodeAllocations() const
-{
-	CString sAllocations, sAllocTo;
-	CStringArray aAllocations;
-	double dDays;
-	POSITION pos = mapAllocatedDays.GetStartPosition();
-
-	while (pos)
-	{
-		mapAllocatedDays.GetNextAssoc(pos, sAllocTo, dDays);
-		ASSERT(!sAllocTo.IsEmpty());
-
-		if (!sAllocTo.IsEmpty())
-		{
-			CString sDays;
-
-			if (dDays > 0)
-				aAllocations.Add(sAllocTo + ':' + Misc::Format(dDays));
-		}
-	}
-
-	return Misc::FormatArray(aAllocations, '\n');
-}
-
-void WORKLOADITEM::ClearAllocations()
-{
-	mapAllocatedDays.RemoveAll();
-}
-
-double WORKLOADITEM::GetTotalAllocatedDays() const
-{
-	CString sAllocTo;
-	CStringArray aAllocations;
-	double dTotalDays = 0, dDays;
-	POSITION pos = mapAllocatedDays.GetStartPosition();
-
-	while (pos)
-	{
-		mapAllocatedDays.GetNextAssoc(pos, sAllocTo, dDays);
-		ASSERT(!sAllocTo.IsEmpty());
-
-		if (!sAllocTo.IsEmpty())
-			dTotalDays += dDays;
-	}
-
-	return dTotalDays;
-}
-
-CString WORKLOADITEM::GetTotalAllocatedDays(int nDecimals) const
-{
-	double dDays = GetTotalAllocatedDays();
-
-	return Format(dDays, nDecimals);
-}
-
-CString WORKLOADITEM::Format(double dDays, int nDecimals)
-{
-	return ((dDays == 0.0) ? _T("") : Misc::Format(dDays, nDecimals));
-}
-
 //////////////////////////////////////////////////////////////////////
 
 CWorkloadItemMap::~CWorkloadItemMap()
@@ -284,11 +304,11 @@ void CWorkloadItemMap::RemoveAll()
 	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
 }
 
-void CWorkloadItemMap::CalculateTotals(WORKLOADITEM& wiAllocatedDays, 
-									 WORKLOADITEM& wiAllocatedTasks) const
+void CWorkloadItemMap::CalculateTotals(CMapAllocations& mapTotalDays, 
+									 CMapAllocations& mapTotalTasks) const
 {
-	wiAllocatedDays.ClearAllocations();
-	wiAllocatedTasks.ClearAllocations();
+	mapTotalDays.RemoveAll();
+	mapTotalTasks.RemoveAll();
 
 	DWORD dwTaskID = 0;
 	WORKLOADITEM* pWI = NULL;
@@ -303,16 +323,10 @@ void CWorkloadItemMap::CalculateTotals(WORKLOADITEM& wiAllocatedDays,
 		for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
 		{
 			CString sAllocTo(pWI->aAllocTo[nAllocTo]);
-			double dDays = pWI->GetAllocatedDays(sAllocTo);
+			double dDays = pWI->mapAllocatedDays.Get(sAllocTo);
 
-			if (dDays > 0.0)
-			{
-				double dTotalDays = wiAllocatedDays.GetAllocatedDays(sAllocTo);
-				VERIFY(wiAllocatedDays.SetAllocatedDays(sAllocTo, (dTotalDays + dDays)));
-
-				double dTotalTasks = wiAllocatedTasks.GetAllocatedDays(sAllocTo);
-				VERIFY(wiAllocatedTasks.SetAllocatedDays(sAllocTo, (dTotalTasks + 1.0)));
-			}
+			if (mapTotalDays.Add(sAllocTo, dDays))
+				mapTotalTasks.Increment(sAllocTo);
 		}
 	}
 }

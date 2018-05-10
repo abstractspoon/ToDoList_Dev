@@ -11,6 +11,18 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum WORKLOAD_TOTALS
+{
+	ID_TOTALCOLUMNHEADER = 0, // must be zero to match list items
+	ID_TOTALDAYSPERPERSON,
+	ID_TOTALTASKSPERPERSON,
+	ID_PERCENTLOADPERPERSON,
+
+	ID_LASTTOTAL
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum // options
 {
 	WLCF_SHOWTREECHECKBOXES			= 0x0001,

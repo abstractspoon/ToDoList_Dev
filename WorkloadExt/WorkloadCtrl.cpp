@@ -591,40 +591,19 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	}
 }
 
-WORKLOADITEM* CWorkloadCtrl::CheckAddTotal(DWORD dwTotalID)
-{
-	WORKLOADITEM* pWITotal = m_data.GetItem(dwTotalID);
-		
-	if (!pWITotal)
-	{
-		pWITotal = new WORKLOADITEM(dwTotalID);
-		m_data[dwTotalID] = pWITotal;
-	}
-		
-	return pWITotal;
-}
-
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	// Placeholder only
-	WORKLOADITEM* pWIColHeader = CheckAddTotal(ID_TOTALCOLUMNHEADER); 
-
-	// Actual totals
-	WORKLOADITEM* pWITotalDays = CheckAddTotal(ID_TOTALDAYSPERPERSON);
-	WORKLOADITEM* pWITotalTasks = CheckAddTotal(ID_TOTALTASKSPERPERSON);
-
-	m_data.CalculateTotals(*pWITotalDays, *pWITotalTasks);
+	m_data.CalculateTotals(m_mapTotalDays, m_mapTotalTasks);
 
 	// Individual loading
-	WORKLOADITEM* pWIPercentLoad = CheckAddTotal(ID_PERCENTLOADPERPERSON);
-	pWIPercentLoad->ClearAllocations();
+	m_mapPercentLoad.RemoveAll();
 
 	for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
 	{
 		const CString& sAllocTo = m_aAllocTo[nAllocTo];
-		double dTotalDays = pWITotalDays->GetAllocatedDays(sAllocTo);
+		double dTotalDays = m_mapTotalDays.Get(sAllocTo);
 
-		pWIPercentLoad->SetAllocatedDays(sAllocTo, (dTotalDays * 100 / m_dWorkDaysInPeriod));
+		m_mapPercentLoad.Set(sAllocTo, (dTotalDays * 100 / m_dWorkDaysInPeriod));
 	}
 
 	m_lcColumnTotals.Invalidate();
@@ -974,10 +953,10 @@ void CWorkloadCtrl::PopulateTotalsLists()
 		for (int nTotal = 0; nTotal < NUM_TOTALS; nTotal++)
 		{
 			int nItem = m_lcTotalsLabels.InsertItem(nTotal, CEnString(WORKLOADTOTALS[nTotal].nTextResID));
-			m_lcTotalsLabels.SetItemData(nItem, WORKLOADTOTALS[nTotal].dwID);
+			m_lcTotalsLabels.SetItemData(nItem, WORKLOADTOTALS[nTotal].nTotal);
 
 			nItem = m_lcColumnTotals.InsertItem(nTotal, _T(""));
-			m_lcColumnTotals.SetItemData(nItem, WORKLOADTOTALS[nTotal].dwID);
+			m_lcColumnTotals.SetItemData(nItem, WORKLOADTOTALS[nTotal].nTotal);
 		}
 	}
 }
@@ -1027,7 +1006,7 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtDue = CDateHelper::GetDate(tDate);
 
-		pWI->DecodeAllocations(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
+		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
 	}
 	
 	// add item to tree
@@ -1509,66 +1488,65 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			int nItem = (int)pLVCD->nmcd.dwItemSpec;
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 			
-			if (nItem == 0) // header row
-				pLVCD->clrTextBk = GetSysColor(COLOR_WINDOW);
-			else
-				pLVCD->clrTextBk = GetRowColor(nItem + 1); // first row is header
-			
-			pLVCD->clrText = pLVCD->clrTextBk; // we're drawing the text
-			
-			CRect rItem;
+			CRect rItem, rClient;
 			m_lcColumnTotals.GetItemRect(nItem, rItem, LVIR_BOUNDS);
-			
+			m_lcColumnTotals.GetClientRect(rClient);
+
 			// draw item bkgnd and gridlines full width of list
 			CRect rFullWidth(rItem);
-			GraphicsMisc::FillItemRect(pDC, rFullWidth, pLVCD->clrTextBk, hwndList);
-			
-			if ((nItem > 0) && (nItem < (NUM_TOTALS - 1)))
-				DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			rFullWidth.right = rClient.right + 2;
 
-			WORKLOADITEM* pWI = m_data.GetItem(pLVCD->nmcd.lItemlParam);
+			switch (nItem)
+			{
+			case ID_TOTALCOLUMNHEADER:
+				if (m_themeHeader.AreControlsThemed())
+					m_themeHeader.DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rFullWidth);
+				else
+					pDC->FillSolidRect(rFullWidth, ::GetSysColor(COLOR_3DFACE));
+				break;
+				
+			case ID_TOTALDAYSPERPERSON:
+			case ID_TOTALTASKSPERPERSON:
+			case ID_PERCENTLOADPERPERSON:
+				{
+					pDC->FillSolidRect(rFullWidth, GetRowColor(nItem + 1));
+					
+					if ((nItem + 1) != ID_LASTTOTAL)
+						DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+				}
+				break;
+				
+			default:
+				ASSERT(0);
+			}
 
-			if (pWI)
-				DrawListItem(pDC, nItem, *pWI, FALSE);
+			// Draw content
+			switch (nItem)
+			{
+			case ID_TOTALCOLUMNHEADER:
+				DrawTotalsHeader(pDC);
+				break;
+
+			case ID_TOTALDAYSPERPERSON:
+				DrawTotalsListItem(pDC, nItem, m_mapTotalDays, 2);
+				break;
+				
+			case ID_TOTALTASKSPERPERSON:
+				DrawTotalsListItem(pDC, nItem, m_mapTotalTasks, 0);
+				break;
+				
+			case ID_PERCENTLOADPERPERSON:
+				DrawTotalsListItem(pDC, nItem, m_mapPercentLoad, 1);
+				break;
+
+			default:
+				ASSERT(0);
+			}
 		}
 		return CDRF_SKIPDEFAULT;
 	}
 
 	return CDRF_DODEFAULT;
-}
-
-int CWorkloadCtrl::GetItemDecimals(const WORKLOADITEM& wi)
-{
-	switch (wi.dwTaskID)
-	{
-	case ID_TOTALDAYSPERPERSON:
-		return 2;
-
-	case ID_PERCENTLOADPERPERSON:
-		return 1;
-
-	case ID_TOTALCOLUMNHEADER:
-	case ID_TOTALTASKSPERPERSON:
-		return 0;
-	}
-
-	// all else
-	return 2;
-}
-
-BOOL CWorkloadCtrl::IsTotalsItem(const WORKLOADITEM& wi)
-{
-	switch (wi.dwTaskID)
-	{
-	case ID_TOTALDAYSPERPERSON:
-	case ID_PERCENTLOADPERPERSON:
-	case ID_TOTALCOLUMNHEADER:
-	case ID_TOTALTASKSPERPERSON:
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
 }
 
 LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
@@ -1609,7 +1587,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
 
 			// draw row
-			DrawListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
+			DrawAllocationListItem(pDC, nItem, pWI->mapAllocatedDays, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -1989,7 +1967,17 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			// Keep totals synced
 			m_lcColumnTotals.Invalidate(FALSE);
 			m_lcColumnTotals.UpdateWindow();
+			return 0L;
 
+		case WM_MOUSEWHEEL:
+			CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+			{
+				// Keep totals synced
+				m_lcColumnTotals.Invalidate(FALSE);
+				m_lcColumnTotals.UpdateWindow();
+			}
 			return 0L;
 
 		case WM_TIMER:
@@ -2746,84 +2734,83 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-void CWorkloadCtrl::DrawListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
 
-	BOOL bContinue = TRUE;
-
-	for (int nCol = 1; ((nCol < nNumCol) && bContinue); nCol++)
+	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, wi, bSelected);
-	}
-}
-
-BOOL CWorkloadCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const WORKLOADITEM& wi, BOOL bSelected)
-{
-	if (nCol == 0)
-		return TRUE;
-
-	if (m_hdrColumns.GetItemWidth(nCol) == 0)
-		return TRUE;
-
-	// Col rect needs potentially needs adjustment to suit
-	// the horizontal scroll pos of the main allocation table
-	CRect rColumn;
-
-	if (IsTotalsItem(wi))
-	{
-		m_lcColumnTotals.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-
-		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
-	}
-	else
-	{
+		CRect rColumn;
 		m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-	}
-
-	// see if we can avoid drawing this sub-item at all
-	CRect rClip;
-	pDC->GetClipBox(rClip);
-
-	if (rColumn.right < rClip.left)
-		return TRUE;
-	
-	if (rColumn.left > rClip.right)
-		return FALSE; // we can stop
-	
-	// Draw text
-	if (wi.dwTaskID != ID_TOTALCOLUMNHEADER)
-	{
+		
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 		rColumn.top += 2;
-	}
-
-	int nAllocTo = (nCol - 1);
-	ASSERT(nAllocTo < m_aAllocTo.GetSize());
-
-	CString sAllocTo = m_aAllocTo[nAllocTo], sDays;
-
-	// special case:
-	if (wi.dwTaskID == ID_TOTALCOLUMNHEADER)
-	{
-		DrawListHeaderRect(pDC, rColumn, sAllocTo);
-	}
-	else
-	{
-		sDays = wi.GetAllocatedDays(sAllocTo, GetItemDecimals(wi));
-
+		
+		int nAllocTo = (nCol - 1);
+		ASSERT(nAllocTo < m_aAllocTo.GetSize());
+		
+		CString sAllocTo = m_aAllocTo[nAllocTo];
+		CString sDays = mapAlloc.Get(sAllocTo, 2);
+		
 		if (!sDays.IsEmpty())
 		{
-			if (wi.dwTaskID == ID_PERCENTLOADPERPERSON)
-				sDays += '%';
-
 			rColumn.DeflateRect(LV_COLPADDING, 0);
 			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
 	}
+}
+
+void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, int nDecimals)
+{
+	ASSERT(nItem != -1);
+	int nNumCol = GetRequiredListColumnCount();
 	
-	return TRUE;
+	for (int nCol = 1; nCol < nNumCol; nCol++)
+	{
+		CRect rColumn;
+		m_lcColumnTotals.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
+			
+		// Offset for allocation label horz scroll
+		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
+			
+		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
+		rColumn.top++;
+			
+		int nAllocTo = (nCol - 1);
+		ASSERT(nAllocTo < m_aAllocTo.GetSize());
+		
+		CString sAllocTo = m_aAllocTo[nAllocTo];
+		CString sValue = mapAlloc.Get(sAllocTo, nDecimals);
+		
+		if (!sValue.IsEmpty())
+		{
+			if (nItem == ID_PERCENTLOADPERPERSON)
+				sValue += '%';
+			
+			rColumn.DeflateRect(LV_COLPADDING, 0);
+			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+		}
+	}
+}
+
+void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
+{
+	int nNumCol = GetRequiredListColumnCount();
+	
+	for (int nCol = 1; nCol < nNumCol; nCol++)
+	{
+		CRect rColumn;
+		m_lcColumnTotals.GetSubItemRect(ID_TOTALCOLUMNHEADER, nCol, LVIR_BOUNDS, rColumn);
+
+		// Offset for allocation label horz scroll
+		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
+			
+		int nAllocTo = (nCol - 1);
+		ASSERT(nAllocTo < m_aAllocTo.GetSize());
+			
+		DrawListHeaderRect(pDC, rColumn, m_aAllocTo[nAllocTo]);
+	}
 }
 
 void CWorkloadCtrl::DrawListHeaderItem(CDC* /*pDC*/, int nCol)

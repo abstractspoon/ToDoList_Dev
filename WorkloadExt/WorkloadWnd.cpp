@@ -844,13 +844,13 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 	{
 		const WORKLOADITEM& wiNew = dialog.GetAllocations();
 
-		if (!wiNew.AllocatedDaysMatch(wi))
+		if (!wiNew.mapAllocatedDays.MatchAll(wi.mapAllocatedDays))
 		{
 			IUITASKMOD mod[2] = { { IUI_METADATA, 0 }, { IUI_ALLOCTO, 0 } };
 			int nNumMods = 0;
 
 			// always
-			CString sMetaData = wiNew.EncodeAllocations();
+			CString sMetaData = wiNew.mapAllocatedDays.Encode();
 			mod[nNumMods++].szValue = sMetaData;
 
 			// sometimes

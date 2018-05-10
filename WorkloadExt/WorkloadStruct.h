@@ -15,6 +15,37 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CMapAllocations : protected CMap<CString, LPCTSTR, double, double&> 
+{
+public:
+	CMapAllocations() {}
+	virtual ~CMapAllocations() {}
+
+	double Get(const CString& sAllocTo) const;
+	CString Get(const CString& sAllocTo, int nDecimals) const;
+
+	double GetTotal() const;
+	CString GetTotal(int nDecimals) const;
+
+	BOOL Set(const CString& sAllocTo, double dValue);
+	BOOL Set(const CString& sAllocTo, const CString& sValue);
+
+	BOOL Add(const CString& sAllocTo, double dValue);
+	void Increment(const CString& sAllocTo);
+	
+	void Decode(const CString& sAllocations);
+	CString Encode() const;
+
+	BOOL MatchAll(const CMapAllocations& other) const;
+	void Copy(const CMapAllocations& other);
+	void RemoveAll();
+	
+protected:
+	static CString Format(double dValue, int nDecimals);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct WORKLOADITEM 
 { 
 	WORKLOADITEM(DWORD dwID = 0, LPCTSTR szTitle = NULL);
@@ -35,33 +66,16 @@ struct WORKLOADITEM
 	BOOL bGoodAsDone, bSomeSubtaskDone;
 	int nPosition;
 	BOOL bLocked, bHasIcon;
+	CMapAllocations mapAllocatedDays;
 	
 	BOOL HasStart() const;
 	BOOL HasDue() const;
 	BOOL GetDuration(double& dDays) const;
 
-	void DecodeAllocations(const CString& sAllocations);
-	CString EncodeAllocations() const;
-	void ClearAllocations();
-	BOOL AllocatedDaysMatch(const WORKLOADITEM& wi) const;
-
-	double GetAllocatedDays(const CString& sAllocTo) const;
-	CString GetAllocatedDays(const CString& sAllocTo, int nDecimals) const;
-	BOOL SetAllocatedDays(const CString& sAllocTo, double dDays);
-	BOOL SetAllocatedDays(const CString& sAllocTo, const CString& sDays);
-
-	double GetTotalAllocatedDays() const;
-	CString GetTotalAllocatedDays(int nDecimals) const;
-	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	BOOL HasColor() const;
 
-protected:
-	CMap<CString, LPCTSTR, double, double&> mapAllocatedDays;
-
-protected:
-	static CString Format(double dDays, int nDecimals);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,8 +91,8 @@ public:
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
-	void CalculateTotals(WORKLOADITEM& wiAllocatedDays, 
-						 WORKLOADITEM& wiAllocatedTasks) const;
+	void CalculateTotals(CMapAllocations& mapTotalDays, 
+						 CMapAllocations& mapTotalTasks) const;
 
 };
 
@@ -135,6 +149,14 @@ struct WORKLOADCOLUMN
 	UINT nIDColName;
 	int nColAlign;
 	BOOL bDefaultVis;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct WORKLOADTOTAL
+{
+	UINT nTextResID;
+	WORKLOAD_TOTALS nTotal;
 };
 
 /////////////////////////////////////////////////////////////////////////////
