@@ -1120,7 +1120,12 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 int CWorkloadCtrl::GetRequiredListColumnCount() const
 {
-	return (m_aAllocTo.GetSize() + 1);
+	int nNumCols = m_aAllocTo.GetSize();
+
+	nNumCols++; // first hidden column 
+	nNumCols++; // last 'total' column
+
+	return nNumCols;
 }
 
 void CWorkloadCtrl::BuildTaskTreeColumns()
@@ -2746,12 +2751,21 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 		
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 		rColumn.top += 2;
+
+		CString sDays;
 		
-		int nAllocTo = (nCol - 1);
-		ASSERT(nAllocTo < m_aAllocTo.GetSize());
-		
-		CString sAllocTo = m_aAllocTo[nAllocTo];
-		CString sDays = mapAlloc.Get(sAllocTo, 2);
+		if (nCol == (nNumCol - 1))
+		{
+			sDays = mapAlloc.GetTotal(2);
+		}
+		else
+		{
+			int nAllocTo = (nCol - 1);
+			ASSERT(nAllocTo < m_aAllocTo.GetSize());
+			
+			CString sAllocTo = m_aAllocTo[nAllocTo];
+			sDays = mapAlloc.Get(sAllocTo, 2);
+		}
 		
 		if (!sDays.IsEmpty())
 		{
@@ -2776,12 +2790,21 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 		rColumn.top++;
+
+		CString sValue;
 			
-		int nAllocTo = (nCol - 1);
-		ASSERT(nAllocTo < m_aAllocTo.GetSize());
-		
-		CString sAllocTo = m_aAllocTo[nAllocTo];
-		CString sValue = mapAlloc.Get(sAllocTo, nDecimals);
+		if (nCol == (nNumCol - 1))
+		{
+			sValue = mapAlloc.GetTotal(2);
+		}
+		else
+		{
+			int nAllocTo = (nCol - 1);
+			ASSERT(nAllocTo < m_aAllocTo.GetSize());
+			
+			CString sAllocTo = m_aAllocTo[nAllocTo];
+			sValue = mapAlloc.Get(sAllocTo, nDecimals);
+		}
 		
 		if (!sValue.IsEmpty())
 		{
@@ -2806,10 +2829,7 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 		// Offset for allocation label horz scroll
 		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
 			
-		int nAllocTo = (nCol - 1);
-		ASSERT(nAllocTo < m_aAllocTo.GetSize());
-			
-		DrawListHeaderRect(pDC, rColumn, m_aAllocTo[nAllocTo]);
+		DrawListHeaderRect(pDC, rColumn, m_hdrColumns.GetItemText(nCol));
 	}
 }
 
@@ -3249,11 +3269,12 @@ void CWorkloadCtrl::UpdateListColumns()
 		PostResize();
 
 	// Update column header text
-	int i = nReqCols;
-
-	while (--i > 0)
+	for (int i = 1; i < nReqCols; i++)
 	{
-		m_hdrColumns.SetItemText(i, m_aAllocTo[i - 1]);
+		if (i < (nReqCols - 1))
+			m_hdrColumns.SetItemText(i, m_aAllocTo[i - 1]);
+		else
+			m_hdrColumns.SetItemText(i, _T("Total"));
 	}
 
 	RecalcListColumnsToFit();
