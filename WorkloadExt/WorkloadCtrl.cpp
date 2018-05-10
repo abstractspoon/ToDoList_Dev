@@ -2740,6 +2740,27 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
+CString CWorkloadCtrl::GetListItemColumnText(const CMapAllocations& mapAlloc, int nCol, int nDecimals) const
+{
+	switch (GetListColumnType(nCol))
+	{
+	case WLCT_TOTAL:
+		return mapAlloc.GetTotal(nDecimals);
+		
+	case WLCT_VALUE:
+		{
+			int nAllocTo = (nCol - 1);
+			ASSERT(nAllocTo < m_aAllocTo.GetSize());
+			
+			CString sAllocTo = m_aAllocTo[nAllocTo];
+			return mapAlloc.Get(sAllocTo, nDecimals);
+		}
+		break;
+	}
+
+	return _T("");
+}
+
 void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
@@ -2753,27 +2774,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
 		rColumn.top += 2;
 
-		CString sDays;
-
-		switch (GetListColumnType(nCol))
-		{
-		case WLCT_HIDDEN:
-			break;
-
-		case WLCT_TOTAL:
-			sDays = mapAlloc.GetTotal(2);
-			break;
-
-		case WLCT_VALUE:
-			{
-				int nAllocTo = (nCol - 1);
-				ASSERT(nAllocTo < m_aAllocTo.GetSize());
-				
-				CString sAllocTo = m_aAllocTo[nAllocTo];
-				sDays = mapAlloc.Get(sAllocTo, 2);
-			}
-			break;
-		}
+		CString sDays = GetListItemColumnText(mapAlloc, nCol, 2);
 		
 		if (!sDays.IsEmpty())
 		{
@@ -2799,28 +2800,8 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 		rColumn.top++;
 
-		CString sValue;
+		CString sValue = GetListItemColumnText(mapAlloc, nCol, nDecimals);
 			
-		switch (GetListColumnType(nCol))
-		{
-		case WLCT_HIDDEN:
-			break;
-			
-		case WLCT_TOTAL:
-			sValue = mapAlloc.GetTotal(nDecimals);
-			break;
-			
-		case WLCT_VALUE:
-			{
-				int nAllocTo = (nCol - 1);
-				ASSERT(nAllocTo < m_aAllocTo.GetSize());
-				
-				CString sAllocTo = m_aAllocTo[nAllocTo];
-				sValue = mapAlloc.Get(sAllocTo, nDecimals);
-			}
-			break;
-		}
-		
 		if (!sValue.IsEmpty())
 		{
 			if (nItem == ID_PERCENTLOADPERPERSON)
@@ -3009,6 +2990,8 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 	Resize();
 }
 
+
+
 void CWorkloadCtrl::RecalcListColumnsToFit()
 {
 	// Calc widest column first
@@ -3023,13 +3006,23 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 	}
 	nMaxHeaderWidth += (2 * HD_COLPADDING);
 
-	// Resize all columns to that width (except first dummy column)
-	nCol = GetRequiredListColumnCount();
+	// Resize all columns to that width (except first column)
+	int nNumCols = GetRequiredListColumnCount();
 
-	while (--nCol > 0)
+	for (nCol = 1; nCol < nNumCols; nCol++)
 	{
-		m_hdrColumns.SetItemWidth(nCol, nMaxHeaderWidth);
-		m_lcColumnTotals.SetColumnWidth(nCol, nMaxHeaderWidth);
+		if (GetListColumnType(nCol) == WLCT_HIDDEN)
+		{
+			int nWidth = GraphicsMisc::ScaleByDPIFactor(10);
+
+			m_hdrColumns.SetItemWidth(nCol, nWidth);
+			m_lcColumnTotals.SetColumnWidth(nCol, nWidth);
+		}
+		else
+		{
+			m_hdrColumns.SetItemWidth(nCol, nMaxHeaderWidth);
+			m_lcColumnTotals.SetColumnWidth(nCol, nMaxHeaderWidth);
+		}
 	}
 
 	Resize();

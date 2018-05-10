@@ -273,6 +273,7 @@ protected:
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_TREECOLUMN nColID) const;
+	CString GetListItemColumnText(const CMapAllocations& mapAlloc, int nCol, int nDecimals) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
