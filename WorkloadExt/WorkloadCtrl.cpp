@@ -675,7 +675,7 @@ BOOL CWorkloadCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMN nCol)
+IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_TREECOLUMN nCol)
 {
 	switch (nCol)
 	{
@@ -690,7 +690,7 @@ IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMN nCol)
 	return IUI_NONE;
 }
 
-WLC_COLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
+WLC_TREECOLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -1123,6 +1123,7 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 	int nNumCols = m_aAllocTo.GetSize();
 
 	nNumCols++; // first hidden column 
+	nNumCols++; // spacer before last 'total' column
 	nNumCols++; // last 'total' column
 
 	return nNumCols;
@@ -1654,7 +1655,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			{
 				// draw sort direction
 				int nCol = (int)pNMCD->dwItemSpec;
-				WLC_COLUMN nColID = GetColumnID(nCol);
+				WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				
 				if (m_sort.IsSingleSortingBy(nColID))
@@ -1682,7 +1683,7 @@ void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 	if (hwnd == m_hdrTasks)
 	{
 		CClientDC dc(&m_tcTasks);
-		RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
 
 		SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
 		
@@ -1695,12 +1696,12 @@ void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 }
 
 // Called by parent
-void CWorkloadCtrl::Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
 {
 	Sort(nBy, bAllowToggle, bAscending, FALSE);
 }
 
-void CWorkloadCtrl::Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
+void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
 {
 	m_sort.Sort(nBy, bAllowToggle, bAscending);
 
@@ -1746,7 +1747,7 @@ void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	
 	if (pHDN->iButton == 0) // left button
 	{
-		WLC_COLUMN nColID = GetColumnID(pHDN->iItem);
+		WLC_TREECOLUMN nColID = GetTreeColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
 	}
 }
@@ -1761,7 +1762,7 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 		if (pHDN->pitem->mask & HDI_WIDTH)
 		{
 			// don't allow columns get too small
-			WLC_COLUMN nColID = GetColumnID(pHDN->iItem);
+			WLC_TREECOLUMN nColID = GetTreeColumnID(pHDN->iItem);
 			
 			switch (nColID)
 			{
@@ -2488,7 +2489,7 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 	return nLongest;
 }
 
-CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMN nCol) const
+CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_TREECOLUMN nCol) const
 {
 	CString sItem;
 
@@ -2547,7 +2548,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
 
-	WLC_COLUMN nColID = GetColumnID(nCol);
+	WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == WLCC_TITLE);
 
 	// draw item background colour
@@ -2685,7 +2686,7 @@ void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType
 }
 
 
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMN nCol)
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_TREECOLUMN nCol)
 {
 	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && wi.bDone);
 	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
@@ -2699,7 +2700,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 	if (m_tcTasks.GetItemRect(hti, rItem, TRUE)) // text rect only
 	{
-		WLC_COLUMN nColID = GetColumnID(nCol);
+		WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
 
 		switch (nColID)
 		{
@@ -2753,18 +2754,25 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 		rColumn.top += 2;
 
 		CString sDays;
-		
-		if (nCol == (nNumCol - 1))
+
+		switch (GetListColumnType(nCol))
 		{
+		case WLCT_HIDDEN:
+			break;
+
+		case WLCT_TOTAL:
 			sDays = mapAlloc.GetTotal(2);
-		}
-		else
-		{
-			int nAllocTo = (nCol - 1);
-			ASSERT(nAllocTo < m_aAllocTo.GetSize());
-			
-			CString sAllocTo = m_aAllocTo[nAllocTo];
-			sDays = mapAlloc.Get(sAllocTo, 2);
+			break;
+
+		case WLCT_VALUE:
+			{
+				int nAllocTo = (nCol - 1);
+				ASSERT(nAllocTo < m_aAllocTo.GetSize());
+				
+				CString sAllocTo = m_aAllocTo[nAllocTo];
+				sDays = mapAlloc.Get(sAllocTo, 2);
+			}
+			break;
 		}
 		
 		if (!sDays.IsEmpty())
@@ -2793,17 +2801,24 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 
 		CString sValue;
 			
-		if (nCol == (nNumCol - 1))
+		switch (GetListColumnType(nCol))
 		{
-			sValue = mapAlloc.GetTotal(2);
-		}
-		else
-		{
-			int nAllocTo = (nCol - 1);
-			ASSERT(nAllocTo < m_aAllocTo.GetSize());
+		case WLCT_HIDDEN:
+			break;
 			
-			CString sAllocTo = m_aAllocTo[nAllocTo];
-			sValue = mapAlloc.Get(sAllocTo, nDecimals);
+		case WLCT_TOTAL:
+			sValue = mapAlloc.GetTotal(nDecimals);
+			break;
+			
+		case WLCT_VALUE:
+			{
+				int nAllocTo = (nCol - 1);
+				ASSERT(nAllocTo < m_aAllocTo.GetSize());
+				
+				CString sAllocTo = m_aAllocTo[nAllocTo];
+				sValue = mapAlloc.Get(sAllocTo, nDecimals);
+			}
+			break;
 		}
 		
 		if (!sValue.IsEmpty())
@@ -2828,7 +2843,7 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 
 		// Offset for allocation label horz scroll
 		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
-			
+
 		DrawListHeaderRect(pDC, rColumn, m_hdrColumns.GetItemText(nCol));
 	}
 }
@@ -2969,9 +2984,14 @@ void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
-WLC_COLUMN CWorkloadCtrl::GetColumnID(int nCol) const
+WLC_TREECOLUMN CWorkloadCtrl::GetTreeColumnID(int nCol) const
 {
-	return (WLC_COLUMN)m_hdrTasks.GetItemData(nCol);
+	return (WLC_TREECOLUMN)m_hdrTasks.GetItemData(nCol);
+}
+
+WLC_LISTCOLUMNTYPE CWorkloadCtrl::GetListColumnType(int nCol) const
+{
+	return (WLC_LISTCOLUMNTYPE)m_hdrColumns.GetItemData(nCol);
 }
 
 void CWorkloadCtrl::ResizeColumnsToFit()
@@ -2981,7 +3001,7 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 	int nNumCol = m_hdrTasks.GetItemCount();
 
 	for (int nCol = 1; nCol < nNumCol; nCol++)
-		RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
 
 	// list columns
 	RecalcListColumnsToFit();
@@ -3104,7 +3124,7 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tcTasks);
 
 	int nColWidth = 0;
-	WLC_COLUMN nColID = GetColumnID(nCol);
+	WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
 
 	switch (nColID)
 	{
@@ -3223,6 +3243,7 @@ void CWorkloadCtrl::BuildListColumns()
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 	
 	m_lcColumns.InsertColumn(0, &lvc);
+	m_hdrColumns.SetItemData(0, WLCT_HIDDEN);
 	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
@@ -3241,13 +3262,13 @@ void CWorkloadCtrl::UpdateListColumns()
 		// add other columns
 		LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 
+		lvc.cx = 100;
+		lvc.fmt = LVCFMT_CENTER | HDF_STRING;
+		lvc.pszText = _T("");
+		lvc.cchTextMax = 50;
+		
 		for (int i = 0, nCol = nNumCols; i < nDiffCols; i++, nCol++)
 		{
-			lvc.cx = 100;
-			lvc.fmt = LVCFMT_CENTER | HDF_STRING;
-			lvc.pszText = _T("");
-			lvc.cchTextMax = 50;
-
 			m_lcColumns.InsertColumn(nCol, &lvc);
 			m_lcColumnTotals.InsertColumn(nCol, &lvc);
 		}
@@ -3268,13 +3289,24 @@ void CWorkloadCtrl::UpdateListColumns()
 	if (nDiffCols != 0)
 		PostResize();
 
-	// Update column header text
-	for (int i = 1; i < nReqCols; i++)
+	// Update column header text and type
+	for (int nCol = 1; nCol < nReqCols; nCol++)
 	{
-		if (i < (nReqCols - 1))
-			m_hdrColumns.SetItemText(i, m_aAllocTo[i - 1]);
+		if (nCol == (nReqCols - 2))
+		{
+			m_hdrColumns.SetItemData(nCol, WLCT_HIDDEN);
+			m_hdrColumns.SetItemText(nCol, _T(""));
+		}
+		else if (nCol == (nReqCols - 1))
+		{
+			m_hdrColumns.SetItemData(nCol, WLCT_TOTAL);
+			m_hdrColumns.SetItemText(nCol, CEnString(IDS_COL_TOTAL));
+		}
 		else
-			m_hdrColumns.SetItemText(i, _T("Total"));
+		{
+			m_hdrColumns.SetItemData(nCol, WLCT_VALUE);
+			m_hdrColumns.SetItemText(nCol, m_aAllocTo[nCol - 1]);
+		}
 	}
 
 	RecalcListColumnsToFit();

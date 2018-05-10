@@ -632,12 +632,12 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	return false;
 }
 
-WLC_COLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
+WLC_TREECOLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
 {
 	return CWorkloadCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
 }
 
-DWORD CWorkloadWnd::MapColumn(WLC_COLUMN nColumn)
+DWORD CWorkloadWnd::MapColumn(WLC_TREECOLUMN nColumn)
 {
 	return (DWORD)CWorkloadCtrl::MapColumnToAttribute(nColumn);
 }
@@ -744,7 +744,7 @@ void CWorkloadWnd::SendParentSelectionUpdate()
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_COLUMN)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_TREECOLUMN)lp));
 
 	return 0L;
 }

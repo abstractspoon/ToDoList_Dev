@@ -35,7 +35,7 @@ enum // options
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum WLC_COLUMN 
+enum WLC_TREECOLUMN 
 {
 	WLCC_NONE = -1,
 	WLCC_TITLE,
@@ -44,6 +44,17 @@ enum WLC_COLUMN
 	WLCC_PERCENT,
 	WLCC_TASKID,
 	WLCC_DURATION,
+	// NEW ITEMS HERE 
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+enum WLC_LISTCOLUMNTYPE
+{
+	WLCT_NONE = 0,
+	WLCT_HIDDEN,
+	WLCT_VALUE,
+	WLCT_TOTAL,
 	// NEW ITEMS HERE 
 };
 

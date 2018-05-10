@@ -14,7 +14,7 @@
 #define IDS_ALLOCATION_FORMAT           2015
 #define IDS_TOTALDAYSPERPERSON          2016
 #define IDS_NUMACTIVITIESPERPERSON      2017
-#define IDS_PERCENTLOADPERPERSON     2018
+#define IDS_PERCENTLOADPERPERSON        2018
 #define IDC_DIVIDER                     16001
 #define IDD_PREFERENCES_DIALOG          16002
 #define IDC_PREFERENCES                 16003
@@ -45,6 +45,7 @@
 #define IDS_ATTRIB_DONEDATE             57686
 #define IDS_COL_DONEDATE                57687
 #define IDS_NEW_ALLOCATION              57688
+#define IDS_COL_TOTAL                   57689
 
 // Next default values for new objects
 // 

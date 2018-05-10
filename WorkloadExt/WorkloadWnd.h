@@ -122,8 +122,8 @@ protected:
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 
-	static DWORD MapColumn(WLC_COLUMN nColumn);
-	static WLC_COLUMN MapColumn(DWORD dwColumn);
+	static DWORD MapColumn(WLC_TREECOLUMN nColumn);
+	static WLC_TREECOLUMN MapColumn(DWORD dwColumn);
 };
 
 /////////////////////////////////////////////////////////////////////////////

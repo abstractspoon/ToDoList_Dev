@@ -317,6 +317,7 @@ BEGIN
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
     IDS_NEW_ALLOCATION      "<new allocation>"
+    IDS_COL_TOTAL           "Total"
 END
 
 STRINGTABLE DISCARDABLE 

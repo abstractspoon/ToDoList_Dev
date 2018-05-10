@@ -102,11 +102,11 @@ struct WORKLOADSORTCOLUMN
 {
 	WORKLOADSORTCOLUMN();
 
-	BOOL Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
-	BOOL Matches(WLC_COLUMN nBy, BOOL bAscending) const;
+	BOOL Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Matches(WLC_TREECOLUMN nBy, BOOL bAscending) const;
 	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
 
-	WLC_COLUMN nBy;
+	WLC_TREECOLUMN nBy;
 	BOOL bAscending;
 };
 
@@ -129,10 +129,10 @@ struct WORKLOADSORT
 	WORKLOADSORT();
 
 	BOOL IsSorting() const;
-	BOOL IsSortingBy(WLC_COLUMN nColID) const;
-	BOOL IsSingleSortingBy(WLC_COLUMN nColID) const;
-	BOOL IsMultiSortingBy(WLC_COLUMN nColID) const;
-	BOOL Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL IsSortingBy(WLC_TREECOLUMN nColID) const;
+	BOOL IsSingleSortingBy(WLC_TREECOLUMN nColID) const;
+	BOOL IsMultiSortingBy(WLC_TREECOLUMN nColID) const;
+	BOOL Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Sort(const WORKLOADSORTCOLUMNS& sort);
 
 	WORKLOADSORTCOLUMN single;
@@ -144,7 +144,7 @@ struct WORKLOADSORT
 
 struct WORKLOADCOLUMN
 {
-	WLC_COLUMN nColID;
+	WLC_TREECOLUMN nColID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

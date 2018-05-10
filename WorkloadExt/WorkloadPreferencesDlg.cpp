@@ -69,7 +69,7 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_TREECOLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
@@ -83,7 +83,7 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_TREECOLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, WORKLOADTREECOLUMNS[nCol].bDefaultVis);
@@ -94,7 +94,7 @@ void CWorkloadPreferencesPage::OnOK()
 {
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_TREECOLUMN nColID = WORKLOADTREECOLUMNS[nCol].nColID;
 		m_aColumnVis[nColID] = m_lbColumnVisibility.GetCheckByData(nColID);
 	}
 

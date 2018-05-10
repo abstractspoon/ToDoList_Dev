@@ -92,9 +92,9 @@ public:
 	void SetFocus();
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
-	void Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
+	void Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
 	void Sort(const WORKLOADSORTCOLUMNS multi);
-	WLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
+	WLC_TREECOLUMN GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
@@ -121,8 +121,8 @@ public:
 
 	static BOOL WantEditUpdate(IUI_ATTRIBUTE nAttrib);
 	static BOOL WantSortUpdate(IUI_ATTRIBUTE nAttrib);
-	static IUI_ATTRIBUTE MapColumnToAttribute(WLC_COLUMN nCol);
-	static WLC_COLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
+	static IUI_ATTRIBUTE MapColumnToAttribute(WLC_TREECOLUMN nCol);
+	static WLC_TREECOLUMN MapAttributeToColumn(IUI_ATTRIBUTE nAttrib);
 
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
@@ -227,7 +227,7 @@ protected:
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
 	void GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
-	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMN nColID);
+	HFONT GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_TREECOLUMN nColID);
 	void SetDropHilite(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
@@ -264,14 +264,15 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetListTaskID(DWORD nItemData) const;
-	WLC_COLUMN GetColumnID(int nCol) const;
+	WLC_TREECOLUMN GetTreeColumnID(int nCol) const;
+	WLC_LISTCOLUMNTYPE GetListColumnType(int nCol) const;
 
 	int GetTotalTreeColumnsWidth() const;
 	BOOL RecalcTreeColumns(BOOL bResize = TRUE);
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
-	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMN nColID) const;
+	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_TREECOLUMN nColID) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
@@ -291,7 +292,7 @@ protected:
 	BOOL GetTaskStartDueDates(const WORKLOADITEM& wi, COleDateTime& dtStart, COleDateTime& dtDue) const;
 
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
-	void Sort(WLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
+	void Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;
 
 	int GetExpandedState(CDWordArray& aExpanded, HTREEITEM hti = NULL) const;
