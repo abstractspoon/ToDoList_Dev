@@ -94,7 +94,6 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CIcon m_iconUpdateBtn;
 
-	BOOL m_bAdvancedFilter;
 	BOOL m_bWantHideParents;
 	BOOL m_bRefreshBkgndColor;
 	BOOL m_bMultiSelection;

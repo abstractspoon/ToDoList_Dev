@@ -322,8 +322,6 @@ protected:
 	afx_msg void OnViewTogglefilter();
 	afx_msg void OnViewToggletaskexpanded();
 	afx_msg void OnViewToggletasksandcomments();
-	afx_msg void OnWindowPosChanged(WINDOWPOS FAR* lpwndpos);
-	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
 	afx_msg void OnTasklistCustomColumns();
 	afx_msg void OnEditGotoDependency();
 	afx_msg void OnUpdateEditGotoDependency(CCmdUI* pCmdUI);

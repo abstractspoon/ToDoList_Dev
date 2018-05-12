@@ -581,8 +581,8 @@ COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, co
 			return CDateHelper::GetDateOnly(dtCreation);
 	}
 	
-	// else
-	return CDateHelper::NullDate();
+	// else don't overwrite whatever exists
+	return dtStartDue;
 }
 
 CString TODOITEM::GetMetaData(const CString& sKey) const

@@ -90,7 +90,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, FTC_VIEW /*nV
 		case FO_ANYCATEGORY:
 		case FO_ANYALLOCTO:
 		case FO_ANYTAG:
-			bAddFlag = ((filter.nShow != FS_ADVANCED) && (filter.nShow != FS_SELECTED));
+			bAddFlag = (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED));
 			break;
 
 		case FO_SHOWALLSUB:

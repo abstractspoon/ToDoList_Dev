@@ -825,8 +825,7 @@ HBRUSH CGanttChartWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC) 
 {
-	// let the gantt do its thing
-	m_ctrlGantt.HandleEraseBkgnd(pDC);
+	// CGanttTreeListCtrl will do its own thing
 
 	// clip out our children
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);

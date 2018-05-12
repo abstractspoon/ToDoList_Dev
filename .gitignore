@@ -265,3 +265,4 @@ paket-files/
 *.db
 *.db
 *.db
+*.bak

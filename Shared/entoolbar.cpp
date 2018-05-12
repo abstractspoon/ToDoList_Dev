@@ -254,8 +254,10 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 
 void CEnToolBar::RefreshDisabledImageList() 
 {
+	int nImageSize = m_ilNormal.GetImageSize();
+
 	m_ilDisabled.DeleteImageList();
-	m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR24 | ILC_MASK, 0, 1);
+	m_ilDisabled.Create(nImageSize, nImageSize, ILC_COLOR24 | ILC_MASK, 0, 1);
 
 	// Work directly off the icons
 	COLORREF crMask = RGB(255, 0, 255);

@@ -52,7 +52,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 		m_sAdvancedFilter = tdc.GetAdvancedFilterName();
 		m_dwCustomFlags = tdc.GetAdvancedFilterFlags();
 
-		m_filter.nShow = FS_ADVANCED;
+		m_filter.Reset(FS_ADVANCED);
 	}
 	else
 	{
@@ -147,7 +147,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		// filter
-		if (m_filter.nShow == FS_ADVANCED)
+		if (m_filter.IsAdvanced())
 			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
 			m_cbTaskFilter.SelectAdvancedFilter(m_filter.nShow);
@@ -292,9 +292,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 void CTDLFilterDlg::EnableDisableControls()
 {
-	BOOL bSelFilter = (m_filter.nShow == FS_SELECTED);
-	BOOL bAdvFilter = (m_filter.nShow == FS_ADVANCED);
-	BOOL bEnable = !(bSelFilter || bAdvFilter);
+	BOOL bEnable = ((m_filter.nShow != FS_SELECTED) && m_filter.IsAdvanced());
 
 	GetDlgItem(IDC_TITLEFILTERTEXT)->EnableWindow(bEnable);
 

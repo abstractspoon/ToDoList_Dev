@@ -2133,6 +2133,7 @@
 #define IDS_PREF_TOOLBAR                58474
 #define IDS_TOOLBARMENUSEPARATOR        58475
 #define IDS_NEW_TOOLBARBUTTON           58476
+#define IDS_TASKREMINDERDLG_TITLE       58477
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects

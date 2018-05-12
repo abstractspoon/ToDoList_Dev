@@ -457,7 +457,7 @@ BOOL CTreeCtrlHelper::IsAnyItemExpanded() const
 		
 		hti = TreeView_GetNextItem(m_tree, hti, TVGN_NEXT); // constness
 	}
-
+	
 	return FALSE;
 }
 

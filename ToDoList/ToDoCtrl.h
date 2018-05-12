@@ -555,7 +555,6 @@ protected:
 	BOOL m_bSplitting; // dragging comments splitter
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
-	BOOL m_bFirstLoadCommentsPrefs;
 	BOOL m_bDeletingTasks;
 	BOOL m_bFindReplacing;
 

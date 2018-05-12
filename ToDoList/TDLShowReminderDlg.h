@@ -73,6 +73,7 @@ public:
 	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) {}
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/, BOOL /*bGotoTask*/) {}
 	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) {}
+	virtual void HideWindow();
 
 // Implementation
 protected:
@@ -97,6 +98,7 @@ protected:
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
 	void EnableControls();
 	void UpdateControls();
+	void UpdateTitleText();
 
 };
 

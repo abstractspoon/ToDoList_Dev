@@ -5255,6 +5255,16 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 	return FALSE;
 }
 
+BOOL CToDoCtrl::DeleteSelectedTask()
+{
+	Flush();
+	
+	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_DELETE);
+	
+	// else do the standard warning against deletion
+	return DeleteSelectedTask(TRUE, TRUE);
+}
+
 BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 {
 	if (!CanEditSelectedTask(TDCA_DELETE))
@@ -5386,16 +5396,6 @@ DWORD CToDoCtrl::GetNextNonSelectedTaskID() const
 	}
 
 	return GetTaskID(htiNextSel);
-}
-
-BOOL CToDoCtrl::DeleteSelectedTask()
-{
-	Flush();
-
-	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_DELETE);
-
-	// else do the standard warning against deletion
-	return DeleteSelectedTask(TRUE, TRUE);
 }
 
 BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)

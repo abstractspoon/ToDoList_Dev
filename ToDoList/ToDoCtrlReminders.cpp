@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrlReminders, CTDLShowReminderDlg)
 	//{{AFX_MSG_MAP(CToDoCtrlReminders)
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
+	ON_WM_SYSCOMMAND()
 END_MESSAGE_MAP()
 
 
@@ -534,10 +535,13 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	}
 		
 	// all else (fallback)
-	ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
-	AddListReminder(rem);
+	if (AddListReminder(rem))
+		ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
 
-	GraphicsMisc::FlashWindowEx(m_hWnd, (FLASHW_ALL | FLASHW_TIMERNOFG), 10, 0);
+	// Only flash the titlebar if we are visible and 
+	// our owner is not disabled (showing a modal dialog)
+	if (IsWindowVisible() && m_pWndNotify->IsWindowEnabled()) 
+		GraphicsMisc::FlashWindowEx(m_hWnd, (FLASHW_ALL | FLASHW_TIMERNOFG), 10, 0);
 
 	return TRUE;
 }
@@ -615,7 +619,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 
 	// hide dialog if this is the last
 	if (m_lcReminders.GetItemCount() == 0)
-		ShowWindow(SW_HIDE);
+		HideWindow();
 }
 
 void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask)
@@ -628,12 +632,12 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTas
 		if (bGotoTask)
 		{
 			DoGotoTask(rem);
-			ShowWindow(SW_HIDE);
+			HideWindow();
 		}
 		// hide dialog if this is the last
 		else if (m_lcReminders.GetItemCount() == 1)
 		{
-			ShowWindow(SW_HIDE);
+			HideWindow();
 		}
 
 		DismissReminder(nRem);
@@ -650,4 +654,31 @@ void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
 	m_pWndNotify->SendMessage(WM_TDCM_SELECTTASK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
 }
 
+void CToDoCtrlReminders::HideWindow()
+{
+	CTDLShowReminderDlg::HideWindow();
 
+	ActivateNotificationWindow();
+}
+
+void CToDoCtrlReminders::ActivateNotificationWindow()
+{
+	if (m_pWndNotify->IsWindowVisible() && 
+		m_pWndNotify->IsWindowEnabled() && 
+		!m_pWndNotify->IsIconic())
+	{
+		m_pWndNotify->SetForegroundWindow();
+	}
+}
+
+void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	CTDLShowReminderDlg::OnSysCommand(nID, lParam);
+
+	switch (nID)
+	{
+	case SC_MINIMIZE:
+		ActivateNotificationWindow();
+		break;
+	}
+}

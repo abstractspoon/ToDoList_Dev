@@ -606,7 +606,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 			
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
-			UpdateParentStatus(pTasks, NULL, TRUE);
+			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
 
 			// cache current year range to test for changes
 			int nNumMonths = GetNumMonths(m_nMonthDisplay);
@@ -998,8 +998,10 @@ void CGanttTreeListCtrl::UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKIT
 		return;
 
 	// this task
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+
 	GANTTITEM* pGI = NULL;
-	GET_GI(pTasks->GetTaskID(hTask), pGI);
+	GET_GI(dwTaskID, pGI);
 
 	pGI->bParent = pTasks->IsTaskParent(hTask);
 
@@ -5404,9 +5406,9 @@ void CGanttTreeListCtrl::ResizeColumnsToFit()
 {
 	// tree columns (except title column)
 	CClientDC dc(&m_tree);
-	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = m_treeHeader.GetItemWidth(0), nCol = 1;
+	int nNumCols = m_treeHeader.GetItemCount(), nTotalColWidth = m_treeHeader.GetItemWidth(0), nCol;
 
-	for (; nCol < nNumCols; nCol++)
+	for (nCol = 1; nCol < nNumCols; nCol++)
 	{
 		int nColWidth = RecalcTreeColumnWidth(nCol, &dc);
 

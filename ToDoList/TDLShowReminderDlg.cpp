@@ -164,12 +164,11 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	if (!GetSafeHwnd())
 		return FALSE;
-
-	m_lcReminders.SetFocus();
-
+	
 	int nItem = FindListReminder(rem);
+	BOOL bNewReminder = (nItem == -1);
 
-	if (nItem == -1)
+	if (bNewReminder)
 	{
 		CString sTask = rem.GetTaskTitle();
 		sTask.Replace(_T("&"), _T("&&"));
@@ -188,15 +187,24 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 		// do we need to play a sound?
 		if (!rem.sSoundFile.IsEmpty())
 			PlaySound(rem.sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
+		
+		if ((m_lcReminders.GetItemCount() == 1) || (m_lcReminders.GetSelectedCount() == 0))
+			m_lcReminders.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+
+		m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.pTDC->GetFriendlyProjectName());
+		m_lcReminders.SetFocus();
+		
+		UpdateTitleText();
 	}
 
-	if ((m_lcReminders.GetItemCount() == 1) || (m_lcReminders.GetSelectedCount() == 0))
-		m_lcReminders.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
-
-	m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.pTDC->GetFriendlyProjectName());
-	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString());
+	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
 	
-	return TRUE;
+	return bNewReminder;
+}
+
+void CTDLShowReminderDlg::UpdateTitleText()
+{
+	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
 }
 
 void CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
@@ -212,7 +220,9 @@ void CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
 
 		// Hide dialog when it becomes empty
 		if (m_lcReminders.GetItemCount() == 0)
-			ShowWindow(SW_HIDE);
+			HideWindow();
+		
+		UpdateTitleText();
 	}
 }
 
@@ -236,7 +246,9 @@ void CTDLShowReminderDlg::RemoveListReminders(const CFilteredToDoCtrl& tdc)
 
 	// Hide dialog when it becomes empty
 	if (m_lcReminders.GetItemCount() == 0)
-		ShowWindow(SW_HIDE);
+		HideWindow();
+	
+	UpdateTitleText();
 }
 
 void CTDLShowReminderDlg::RemoveAllListReminders()
@@ -386,14 +398,12 @@ void CTDLShowReminderDlg::OnOK()
 
 void CTDLShowReminderDlg::OnCancel()
 {
-	// hide dialog
-	ShowWindow(SW_HIDE);
+	HideWindow();
 }
 
 void CTDLShowReminderDlg::OnClose()
 {
-	// hide dialog
-	ShowWindow(SW_HIDE);
+	HideWindow();
 }
 
 void CTDLShowReminderDlg::OnSnoozeFor() 
@@ -458,4 +468,9 @@ void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		DoGotoTask(rem);
 
 	*pResult = 0;
+}
+
+void CTDLShowReminderDlg::HideWindow()
+{
+	ShowWindow(SW_HIDE);
 }

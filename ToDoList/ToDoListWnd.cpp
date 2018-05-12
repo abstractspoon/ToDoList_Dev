@@ -631,8 +631,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_SYSCOMMAND()
 	ON_WM_TIMER()
-	ON_WM_WINDOWPOSCHANGED()
-	ON_WM_WINDOWPOSCHANGING()
 
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
@@ -946,7 +944,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_TASKTEXT,					VK_F2,			0);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_UNDO,						'Z',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EXIT,								VK_F4,			HOTKEYF_ALT);
-	m_mgrShortcuts.AddShortcut(ID_HELP,								VK_F1,			0);
+	m_mgrShortcuts.AddShortcut(ID_HELP_WIKI,						VK_F1,			0);
 	m_mgrShortcuts.AddShortcut(ID_LOAD_NORMAL,						'O',			HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_MAXCOMMENTS,						'M',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_MAXTASKLIST,						'M',			HOTKEYF_CONTROL);
@@ -1130,6 +1128,19 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 		// grab the previous window in the z-order and if its
 		// static text then use that as the focus hint
 		CWnd* pFocus = CWnd::FromHandle((HWND)wp);
+
+#ifdef _DEBUG
+		if (pFocus)
+		{
+			CString sFocus;
+			pFocus->GetWindowText(sFocus);
+			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus);
+		}
+		else
+		{
+			TRACE(_T("OnFocusChange(NULL)\n"));
+		}
+#endif
 		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		if (CDialogHelper::IsChildOrSame(tdc.GetSafeHwnd(), (HWND)wp))
@@ -7586,11 +7597,6 @@ void CToDoListWnd::OnSort()
 	GetToDoCtrl().Resort(TRUE);
 }
 
-void CToDoListWnd::OnWindowPosChanged(WINDOWPOS FAR* lpwndpos) 
-{
-	CFrameWnd::OnWindowPosChanged(lpwndpos);
-}
-
 void CToDoListWnd::OnArchiveCompletedtasks() 
 {
 	CWaitCursor cursor;
@@ -12158,11 +12164,6 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 	
 	// else
 	return FALSE;
-}
-
-void CToDoListWnd::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos) 
-{
-	CFrameWnd::OnWindowPosChanging(lpwndpos); 
 }
 
 void CToDoListWnd::OnEditInsertdatetime() 

@@ -1850,7 +1850,7 @@ END
 
 IDD_SHOWREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 337, 231
 STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Task Reminder"
+CAPTION "Task Reminders"
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "List1",IDC_REMINDERS,"SysListView32",LVS_REPORT | 
@@ -4133,7 +4133,7 @@ BEGIN
     ID_NEWTASK              "\nNew Task"
     ID_NEWSUBTASK           "\nNew Subtask"
     ID_DELETEALLTASKS       "\nDelete All Tasks"
-    ID_NEW                  "\nCreate a New Tasklist"
+    ID_NEW                  "\nNew Tasklist"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5313,6 +5313,7 @@ BEGIN
     IDS_PREF_TOOLBAR        "User Interface>Custom Toolbar"
     IDS_TOOLBARMENUSEPARATOR "<separator>"
     IDS_NEW_TOOLBARBUTTON   "<New Button>"
+    IDS_TASKREMINDERDLG_TITLE "Task Reminders (%d)"
 END
 
 #endif    // English (Australia) resources

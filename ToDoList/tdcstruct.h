@@ -1906,6 +1906,8 @@ struct TDCFILTER
 		return !FiltersMatch(*this, filterEmpty, dwIgnore);
 	}
 
+	BOOL IsAdvanced() const { return (nShow == FS_ADVANCED); }
+
 	BOOL WantHideCompletedTasks() const
 	{
 		switch (nShow)
@@ -2016,9 +2018,11 @@ struct TDCFILTER
 			dwFlags &= ~dwFlag;
 	}
 
-	void Reset()
+	void Reset(FILTER_SHOW nInit = FS_ALL)
 	{
 		*this = TDCFILTER(); // empty filter
+
+		nShow = nInit;
 	}
 
 	BOOL Matches(const TDCFILTER& filter, DWORD dwIgnore = 0) const

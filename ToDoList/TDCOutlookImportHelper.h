@@ -13,12 +13,12 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCAttributeMapping;
-
 namespace OutlookAPI
 {
 	class _Item;
 }
+
+class CTDCAttributeMapping;
 
 struct TLDT_DATA;
 struct TODOITEM;

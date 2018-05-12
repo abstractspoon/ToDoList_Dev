@@ -406,7 +406,7 @@ int CShortcutManager::BuildMapping(UINT nMenuID, CStringArray& aMapping, char cD
 {
 	CEnMenu menu;
 
-	if (!menu.LoadMenu(nMenuID, GetHwnd(), TRUE) || !menu.GetMenuItemCount())
+	if (!menu.LoadMenu(nMenuID, GetHwnd(), TRUE, TRUE) || !menu.GetMenuItemCount())
 		return 0;
 
 	return BuildMapping(&menu, NULL, aMapping, cDelim);

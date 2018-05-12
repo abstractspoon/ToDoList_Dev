@@ -96,20 +96,26 @@ void CTDLToolbarButtonListCtrl::InitState()
 
 void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol)
 {
+	// handle new buttons
+	UINT nMenuID = 0;
+
+	if ((nItem == m_aButtons.GetSize()) && (nCol == MENUID_COL))
+	{ 
+		// separator
+		m_aButtons.Add(TOOLBARBUTTON());
+		int nRow = AddRow(CDialogHelper::GetItem(m_cbMenuItems, 0));
+
+		SetCurSel(nRow, MENUID_COL);
+		EnsureVisible(nRow, FALSE);
+	}
+	else
+	{
+		nMenuID = GetItemData(nItem);
+	}
+
 	switch (nCol)
 	{
 	case MENUID_COL:
-		// handle new buttons
-		if (IsPrompt(nItem))
-		{ 
-			// separator
-			m_aButtons.Add(TOOLBARBUTTON());
-			int nRow = AddRow(CDialogHelper::GetItem(m_cbMenuItems, 0));
-
-			SetCurSel(nRow, MENUID_COL);
-			EnsureVisible(nRow, FALSE);
-		}
-
 		ShowControl(m_cbMenuItems, nItem, nCol);
 		break;
 		

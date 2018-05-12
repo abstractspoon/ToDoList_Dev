@@ -73,12 +73,14 @@ public:
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
+	virtual void HideWindow();
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CToDoCtrlReminders)
 	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -89,6 +91,7 @@ protected:
 	BOOL DeleteReminder(int nRem);
 	BOOL DismissReminder(int nRem);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
+	void ActivateNotificationWindow();
 
 	enum 
 	{

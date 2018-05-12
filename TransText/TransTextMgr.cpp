@@ -17,14 +17,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-//////////////////////////////////////////////////////////////////////
-
-const UINT POPUPMENU_ID = 0xFFFFFFFF;
-
-#ifndef _countof
-#define _countof(array) (sizeof(array)/sizeof(array[0]))
-#endif
-
 ///////////////////////////////////////////////////////////////////////////////////
 
 CTransTextMgr::CTransTextMgr() : m_hwndMenuCallback(NULL) 
@@ -222,6 +214,8 @@ void CTransTextMgr::EnableTranslation(HMENU hMenu, BOOL bEnable)
 
 void CTransTextMgr::EnableTranslation(UINT nMenuID, BOOL bEnable)
 {
+	const UINT POPUPMENU_ID = 0xFFFFFFFF;
+
 	if (nMenuID && (nMenuID != POPUPMENU_ID))
 	{
 		CTransTextMgr& ttm = GetInstance();
@@ -341,25 +335,33 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 	TranslateText(strTipText, hWnd, _T("tooltip"));
 	
 	// copy back to TOOLTIPTEXT
+	const int MAX_TIP_LEN = ((sizeof(pTTTW->szText) / sizeof(pTTTW->szText[0])) - 1);
+
 #ifndef _UNICODE
 	if (pNMHDR->code == TTN_NEEDTEXTW)
 	{
-		pTTTA->lpszText = (LPTSTR)(LPCTSTR)strTipText;
+		strncpy(pTTTA->szText, strTipText, MAX_TIP_LEN);
+		pTTTA->lpszText = (LPSTR)(LPCSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW
 	{
 		Misc::EncodeAsUnicode(strTipText);
+
+		lstrcpyn(pTTTW->szText, (LPCWSTR)(LPCSTR)strTipText, MAX_TIP_LEN);
 		pTTTW->lpszText = (LPWSTR)(LPCWSTR)(LPCSTR)strTipText;
 	}
 #else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
 		Misc::EncodeAsMultiByte(strTipText);
+
+		strncpy(pTTTA->szText, (LPCSTR)(LPCWSTR)strTipText, MAX_TIP_LEN);
 		pTTTA->lpszText = (LPSTR)(LPCSTR)(LPCWSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW
 	{
-		pTTTW->lpszText = (LPTSTR)(LPCTSTR)strTipText;
+		lstrcpyn(pTTTW->szText, strTipText, MAX_TIP_LEN);
+		pTTTW->lpszText = (LPWSTR)(LPCWSTR)strTipText;
 	}
 #endif
 	

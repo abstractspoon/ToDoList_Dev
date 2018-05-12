@@ -151,7 +151,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 //}}AFX_MSG_MAP
 ON_WM_DESTROY()
 ON_WM_SIZE()
-ON_WM_ERASEBKGND()
 ON_WM_CREATE()
 ON_MESSAGE(WM_SETREDRAW, OnSetRedraw)
 ON_WM_SETCURSOR()
@@ -479,11 +478,6 @@ LRESULT CTDLTaskCtrlBase::OnSetRedraw(WPARAM wp, LPARAM /*lp*/)
 	m_lcColumns.SetRedraw(wp);
 
 	return 0L;
-}
-
-BOOL CTDLTaskCtrlBase::OnEraseBkgnd(CDC* pDC)
-{
-	return CTreeListSyncer::HandleEraseBkgnd(pDC);
 }
 
 BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
