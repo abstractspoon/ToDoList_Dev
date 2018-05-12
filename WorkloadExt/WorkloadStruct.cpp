@@ -154,7 +154,7 @@ CString CMapAllocations::GetTotal(int nDecimals) const
 {
 	double dValue = GetTotal();
 
-	if (m_bReturnAverageForTotal)
+	if (m_bReturnAverageForTotal && GetCount())
 		dValue /= GetCount();
 
 	return Format(dValue, nDecimals);
