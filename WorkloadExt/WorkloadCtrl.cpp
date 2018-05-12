@@ -1680,28 +1680,6 @@ void CWorkloadCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-void CWorkloadCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
-{
-	int nCol = pHDN->iItem;
-	ASSERT(nCol != -1);
-	
-	HWND hwnd = pHDN->hdr.hwndFrom;
-
-	if (hwnd == m_hdrTasks)
-	{
-		CClientDC dc(&m_tcTasks);
-		RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
-
-		SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
-		
-		Resize();
-	}
-	else if (hwnd == m_hdrColumns)
-	{
-		RecalcListColumnsToFit();
-	}
-}
-
 // Called by parent
 void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
 {
@@ -1723,7 +1701,7 @@ void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending,
 		GetCWnd()->PostMessage(WM_WLCN_SORTCHANGE, 0, m_sort.single.nBy);
 }
 
-void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS multi)
+void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
 {
 	m_sort.Sort(multi);
 
@@ -1805,7 +1783,16 @@ void CWorkloadCtrl::OnItemChangedTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResul
 
 void CWorkloadCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
-	OnHeaderDividerDblClk((NMHEADER*)pNMHDR);
+	CClientDC dc(&m_tcTasks);
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+	int nCol = pHDN->iItem;
+	ASSERT(nCol != -1);
+
+	RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
+	SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
+
+	Resize();
 }
 
 void CWorkloadCtrl::OnRightClickTreeHeader(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -2025,10 +2012,10 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					}
 					break;
 
-				case HDN_DIVIDERDBLCLICK:
+				case HDN_ITEMCLICK:
 					if (hwnd == m_hdrColumns)
 					{
-						OnHeaderDividerDblClk((NMHEADER*)pNMHDR);
+						OnListHeaderClick((NMHEADER*)pNMHDR);
 					}
 					break;
 
@@ -2247,6 +2234,11 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
+{
+	CString sAllocTo = m_hdrColumns.GetItemText(pHDN->iItem);
 }
 
 void CWorkloadCtrl::SetDropHilite(HTREEITEM hti, int nItem)

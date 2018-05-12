@@ -93,7 +93,7 @@ public:
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	void Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
-	void Sort(const WORKLOADSORTCOLUMNS multi);
+	void Sort(const WORKLOADSORTCOLUMNS& multi);
 	WLC_TREECOLUMN GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
@@ -195,7 +195,6 @@ protected:
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	// pseudo-message handlers
-	void OnHeaderDividerDblClk(NMHEADER* HDN);
 	BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
 	BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
@@ -204,6 +203,7 @@ protected:
 	BOOL OnListLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
+	void OnListHeaderClick(NMHEADER* HDN);
 
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack = CLR_NONE);
