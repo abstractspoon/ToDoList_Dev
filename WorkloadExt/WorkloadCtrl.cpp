@@ -1313,9 +1313,8 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
 		
-			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 		}
-		break;
+		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 								
 	case CDDS_ITEMPOSTPAINT:
 		{
@@ -1368,9 +1367,8 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawTreeItem(pDC, hti, *pWI, bSelected, crBack);
 			}			
 	
-			return CDRF_SKIPDEFAULT;
 		}
-		break;
+		return CDRF_SKIPDEFAULT;
 	}
 
 	return CDRF_DODEFAULT;
