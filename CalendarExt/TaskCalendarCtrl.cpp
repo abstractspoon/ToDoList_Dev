@@ -606,6 +606,8 @@ void CTaskCalendarCtrl::DrawGrid(CDC* pDC)
 
 void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 {
+	UpdateCellScrollBarVisibility();
+
 	// rebuild build display
 	m_nMaxDayTaskCount = 0;
 	m_mapVertPos.RemoveAll();
@@ -666,8 +668,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 {
 	// default drawing
 	CCalendarCtrl::DrawCellContent(pDC, pCell, rCell, bSelected, bToday);
-
-	UpdateCellScrollBarVisibility();
 
 	// then ours
 	if (!m_nMaxDayTaskCount)
