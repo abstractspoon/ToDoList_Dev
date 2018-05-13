@@ -2053,10 +2053,9 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 	if (hwnd == m_treeHeader)
 	{
 		CClientDC dc(&m_tree);
-		RecalcTreeColumnWidth(GetColumnID(nCol), &dc);
+		RecalcTreeColumnWidth(nCol, &dc);
 
 		SetSplitPos(m_treeHeader.CalcTotalItemsWidth());
-		
 		Resize();
 	}
 	else if (hwnd == m_listHeader)
@@ -2201,17 +2200,7 @@ LRESULT CGanttTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					
 				case HDN_DIVIDERDBLCLICK:
 					if (hwnd == m_treeHeader)
-					{
 						OnHeaderDividerDblClk((NMHEADER*)pNMHDR);
-					}
-					break;
-
-				case NM_RCLICK:
-					if (hwnd == m_treeHeader)
-					{
-						// pass on to parent
-						::SendMessage(hRealWnd, WM_CONTEXTMENU, (WPARAM)hwnd, (LPARAM)::GetMessagePos());
-					}
 					break;
 
 				case TVN_GETDISPINFO:
@@ -2499,44 +2488,30 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				LPNMHDR pNMHDR = (LPNMHDR)lp;
 				HWND hwnd = pNMHDR->hwndFrom;
 				
-				// let base class have its turn first
-				LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-
-				switch (pNMHDR->code)
+				if (hwnd == m_listHeader)
 				{
-				case NM_RCLICK:
-					if (hwnd == m_listHeader)
+					switch (pNMHDR->code)
 					{
-						// pass on to parent
-						::SendMessage(GetHwnd(), WM_CONTEXTMENU, (WPARAM)hwnd, (LPARAM)::GetMessagePos());
-					}
-					break;
-
-				case HDN_DIVIDERDBLCLICK:
-					if (hwnd == m_listHeader)
-					{
+					case HDN_DIVIDERDBLCLICK:
 						OnHeaderDividerDblClk((NMHEADER*)pNMHDR);
-					}
-					break;
+						return 0L; // no default handling
 
-				case HDN_ITEMCHANGING:
-					if (hwnd == m_listHeader)
-					{
-						NMHEADER* pHDN = (NMHEADER*)pNMHDR;
-						
-						// don't let user drag column too narrow
-						if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
+					case HDN_ITEMCHANGING:
 						{
-							if (m_listHeader.IsItemTrackable(pHDN->iItem) && (pHDN->pitem->cxy < MIN_COL_WIDTH))
-								pHDN->pitem->cxy = MIN_COL_WIDTH;
+							NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+						
+							// don't let user drag column too narrow
+							if ((pHDN->iButton == 0) && (pHDN->pitem->mask & HDI_WIDTH))
+							{
+								if (m_listHeader.IsItemTrackable(pHDN->iItem) && (pHDN->pitem->cxy < MIN_COL_WIDTH))
+									pHDN->pitem->cxy = MIN_COL_WIDTH;
 
-							m_list.Invalidate(FALSE);
+								m_list.Invalidate(FALSE);
+							}
 						}
+						break;
 					}
-					break;
-
 				}
-				return lr;
 			}
 			break;
 			
@@ -3897,6 +3872,9 @@ void CGanttTreeListCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const C
 	// get the end pos for this item relative to start of window
 	int nTextPos = GetBestTextPos(gi, rItem);
 
+	if (nTextPos == -1)
+		return;
+
 	if (!rClip.IsRectNull())
 	{
 		if (nTextPos > rClip.right)
@@ -4983,10 +4961,15 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 	COleDateTime dtDue = ((gi.bParent && HasOption(GTLCF_CALCPARENTDATES)) ? gi.dtMaxDue : gi.dtDue);
 
 	if (!CDateHelper::IsDateSet(dtDue))
-		return -1;
+	{
+		COleDateTime dtUnused;
+		GetTaskStartDueDates(gi, dtUnused, dtDue);
+
+		if (!CDateHelper::IsDateSet(dtDue))
+			return -1;
+	}
 
 	int nPos = GetDrawPosFromDate(dtDue);
-
 	CRect rMilestone;
 
 	if (CalcMilestoneRect(gi, rMonth, rMilestone))
@@ -5466,23 +5449,38 @@ void CGanttTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 
 BOOL CGanttTreeListCtrl::RecalcTreeColumns(BOOL bResize)
 {
-	// Only need recalc non-fixed column widths
-	BOOL bTitle = !m_treeHeader.IsItemTracked(GTLCC_TITLE);
-	BOOL bAllocTo = !m_treeHeader.IsItemTracked(GTLCC_ALLOCTO);
-	BOOL bTaskID = !m_treeHeader.IsItemTracked(GTLCC_TASKID);
+	BOOL bNeedRecalc = FALSE;
 
-	if (bTitle || bAllocTo || bTaskID)
+	int nNumCols = m_treeHeader.GetItemCount(), nCol;
+
+	for (nCol = 1; ((nCol < nNumCols) && !bNeedRecalc); nCol++)
+	{
+		switch (GetColumnID(nCol))
+		{
+		case GTLCC_TITLE:
+		case GTLCC_ALLOCTO:
+		case GTLCC_TASKID:
+			bNeedRecalc = !m_treeHeader.IsItemTracked(nCol);
+			break;
+		}
+	}
+
+	if (bNeedRecalc)
 	{
 		CClientDC dc(&m_tree);
 
-		if (bTitle)
-			RecalcTreeColumnWidth(GTLCC_TITLE, &dc);
-			
-		if (bAllocTo)
-			RecalcTreeColumnWidth(GTLCC_ALLOCTO, &dc);
-		
-		if (bTaskID)
-			RecalcTreeColumnWidth(GTLCC_TASKID, &dc);
+		for (nCol = 1; nCol < nNumCols; nCol++)
+		{
+			switch (GetColumnID(nCol))
+			{
+			case GTLCC_TITLE:
+			case GTLCC_ALLOCTO:
+			case GTLCC_TASKID:
+				if (!m_treeHeader.IsItemTracked(nCol))
+					RecalcTreeColumnWidth(nCol, &dc);
+				break;
+			}
+		}
 		
 		if (bResize)
 			Resize();
