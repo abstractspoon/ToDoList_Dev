@@ -1570,14 +1570,18 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SelectTask(dwSelID, TRUE);
 
-		if (!m_bReadOnly)
-			StartDragging(point);
+		const CCalendarCell* pCell = GetCell(point);
+
+		if (pCell)
+			SelectDate(pCell->date, FALSE);
+		
+		if (!m_bReadOnly && StartDragging(point))
+			return;
 	}
-	else
-	{
-		CCalendarCtrl::OnLButtonDown(nFlags, point);
-		UpdateWindow();
-	}
+
+	// else
+	CCalendarCtrl::OnLButtonDown(nFlags, point);
+	UpdateWindow();
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
