@@ -153,11 +153,12 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// NOTE: sort is handled by the app
+	// NOTE: Most of sort is handled by the app
 	CString sKey(szKey);
 
-	pPrefs->WriteProfileInt(sKey, _T("SortColumn"), m_ctrlWorkload.GetSortColumn());
-	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
+// 	pPrefs->WriteProfileInt(sKey, _T("SortColumn"), m_ctrlWorkload.GetSortColumn());
+// 	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
+	pPrefs->WriteProfileString(sKey, _T("SortByAllocTo"), m_ctrlWorkload.GetSortByAllocTo());
 
 	// column widths
 	CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -242,11 +243,13 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// Workload specific options
 	if (!bAppOnly)
 	{
-		// NOTE: sort is handled by the app
+		// NOTE: Most of sort is handled by the app
 		CString sKey(szKey);
 		
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 		UpdateWorkloadCtrlPreferences();
+
+		m_ctrlWorkload.SetSortByAllocTo(pPrefs->GetProfileString(sKey, _T("SortByAllocTo")));
 
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -632,12 +635,12 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	return false;
 }
 
-WLC_TREECOLUMN CWorkloadWnd::MapColumn(DWORD dwColumn)
+WLC_COLUMNID CWorkloadWnd::MapColumn(DWORD dwColumn)
 {
 	return CWorkloadCtrl::MapAttributeToColumn((IUI_ATTRIBUTE)dwColumn);
 }
 
-DWORD CWorkloadWnd::MapColumn(WLC_TREECOLUMN nColumn)
+DWORD CWorkloadWnd::MapColumn(WLC_COLUMNID nColumn)
 {
 	return (DWORD)CWorkloadCtrl::MapColumnToAttribute(nColumn);
 }
@@ -744,7 +747,7 @@ void CWorkloadWnd::SendParentSelectionUpdate()
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_TREECOLUMN)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_COLUMNID)lp));
 
 	return 0L;
 }

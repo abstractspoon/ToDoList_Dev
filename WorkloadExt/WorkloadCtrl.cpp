@@ -578,6 +578,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	
 	InitItemHeights();
 	UpdateListColumns();
+	FixupListSortColumn();
 	RecalcTreeColumns(TRUE);
 	RecalcAllocationTotals();
 	
@@ -678,7 +679,7 @@ BOOL CWorkloadCtrl::WantSortUpdate(IUI_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_TREECOLUMN nCol)
+IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
 {
 	switch (nCol)
 	{
@@ -687,13 +688,15 @@ IUI_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_TREECOLUMN nCol)
 	case WLCC_STARTDATE:	return IUI_STARTDATE;
 	case WLCC_PERCENT:		return IUI_PERCENT;
 	case WLCC_TASKID:		return IUI_ID;
+	case WLCC_ALLOCTO:		return IUI_ALLOCTO;
+	case WLCC_DURATION:		return IUI_TIMEEST;
 	}
 	
 	// all else 
 	return IUI_NONE;
 }
 
-WLC_TREECOLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
+WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -702,6 +705,8 @@ WLC_TREECOLUMN CWorkloadCtrl::MapAttributeToColumn(IUI_ATTRIBUTE nAttrib)
 	case IUI_STARTDATE:		return WLCC_STARTDATE;	
 	case IUI_PERCENT:		return WLCC_PERCENT;		
 	case IUI_ID:			return WLCC_TASKID;		
+	case IUI_ALLOCTO:		return WLCC_ALLOCTO;		
+	case IUI_TIMEEST:		return WLCC_DURATION;		
 	}
 	
 	// all else 
@@ -1623,20 +1628,35 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		switch (pNMCD->dwDrawStage)
 		{
 		case CDDS_PREPAINT:
-			// only need handle drawing for double row height
-			if (m_hdrColumns.GetRowCount() > 1)
+			// only need handle drawing for single sorting or double row height
+			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_hdrColumns.GetRowCount() > 1))
+			{
 				return CDRF_NOTIFYITEMDRAW;
+			}
+			break;
 							
 		case CDDS_ITEMPREPAINT:
 			// only need handle drawing for double row height
 			if (m_hdrColumns.GetRowCount() > 1)
 			{
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-				int nItem = (int)pNMCD->dwItemSpec;
+				int nCol = (int)pNMCD->dwItemSpec;
 
-				DrawListHeaderItem(pDC, nItem);
-
+				DrawListHeaderItem(pDC, nCol);
 				return CDRF_SKIPDEFAULT;
+			}
+			// else alloc to selection
+			return CDRF_NOTIFYPOSTPAINT;
+
+		case CDDS_ITEMPOSTPAINT:
+			{
+				int nCol = (int)pNMCD->dwItemSpec;
+
+				if (nCol == m_nSortByAllocToCol)
+				{
+					CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+					m_hdrColumns.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
+				}
 			}
 			break;
 		}
@@ -1662,11 +1682,13 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			{
 				// draw sort direction
 				int nCol = (int)pNMCD->dwItemSpec;
-				WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
+				WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				
 				if (m_sort.IsSingleSortingBy(nColID))
+				{
 					m_hdrTasks.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
+				}
 			}
 			break;
 		}
@@ -1681,13 +1703,46 @@ void CWorkloadCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 }
 
 // Called by parent
-void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending)
 {
+	FixupListSortColumn();
+
 	Sort(nBy, bAllowToggle, bAscending, FALSE);
 }
 
-void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
+void CWorkloadCtrl::SetSortByAllocTo(LPCTSTR szAllocTo)
 {
+	m_sSortByAllocTo = szAllocTo;
+}
+
+void CWorkloadCtrl::FixupListSortColumn(LPCTSTR szAllocTo)
+{
+	if (!Misc::IsEmpty(szAllocTo))
+	{
+		m_sSortByAllocTo = szAllocTo;
+	}
+	else if (m_sSortByAllocTo.IsEmpty() && m_aAllocTo.GetSize())
+	{
+		m_sSortByAllocTo = m_aAllocTo[0];
+	}
+
+	if (m_sSortByAllocTo == ALLOCTO_TOTALID)
+	{
+		m_nSortByAllocToCol = (m_hdrColumns.GetItemCount() - 1);
+	}
+	else
+	{
+		m_nSortByAllocToCol = Misc::Find(m_sSortByAllocTo, m_aAllocTo);
+
+		if (m_nSortByAllocToCol >= 0)
+			m_nSortByAllocToCol++; // first column is hidden
+	}
+}
+
+void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
+{
+	ASSERT((nBy != WLCC_ALLOCTO) || !m_sSortByAllocTo.IsEmpty());
+
 	m_sort.Sort(nBy, bAllowToggle, bAscending);
 
 	// do the sort
@@ -1698,11 +1753,13 @@ void CWorkloadCtrl::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending,
 	m_hdrTasks.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		GetCWnd()->PostMessage(WM_WLCN_SORTCHANGE, 0, m_sort.single.nBy);
+		GetCWnd()->PostMessage(WM_WLCN_SORTCHANGE, 0/*m_sort.single.bAscending*/, m_sort.single.nBy);
 }
 
 void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
 {
+	FixupListSortColumn();
+
 	m_sort.Sort(multi);
 
 	// do the sort
@@ -1732,7 +1789,7 @@ void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	
 	if (pHDN->iButton == 0) // left button
 	{
-		WLC_TREECOLUMN nColID = GetTreeColumnID(pHDN->iItem);
+		WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
 		Sort(nColID, TRUE, -1, TRUE);
 	}
 }
@@ -1747,7 +1804,7 @@ void CWorkloadCtrl::OnItemChangingTreeHeader(NMHDR* pNMHDR, LRESULT* pResult)
 		if (pHDN->pitem->mask & HDI_WIDTH)
 		{
 			// don't allow columns get too small
-			WLC_TREECOLUMN nColID = GetTreeColumnID(pHDN->iItem);
+			WLC_COLUMNID nColID = GetTreeColumnID(pHDN->iItem);
 			
 			switch (nColID)
 			{
@@ -2238,7 +2295,37 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)
 {
-	CString sAllocTo = m_hdrColumns.GetItemText(pHDN->iItem);
+	if (pHDN->iButton == 0) // left button
+	{
+		CString sSortByAllocTo;
+
+		switch (GetListColumnType(pHDN->iItem))
+		{
+		case WLCT_TOTAL:
+			sSortByAllocTo = ALLOCTO_TOTALID;
+			break;
+
+		case WLCT_VALUE:
+			sSortByAllocTo = m_hdrColumns.GetItemText(pHDN->iItem);
+			break;
+
+		default:
+			return;
+		}
+
+		BOOL bAscending = -1, bAllowToggle = TRUE;
+
+		if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO))
+		{
+			bAllowToggle = (m_sSortByAllocTo == sSortByAllocTo);
+			bAscending = m_sort.single.bAscending;
+		}
+
+		m_sSortByAllocTo = sSortByAllocTo;
+		m_nSortByAllocToCol = pHDN->iItem;
+
+		Sort(WLCC_ALLOCTO, bAllowToggle, bAscending, TRUE);
+	}
 }
 
 void CWorkloadCtrl::SetDropHilite(HTREEITEM hti, int nItem)
@@ -2488,7 +2575,7 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 	return nLongest;
 }
 
-CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_TREECOLUMN nCol) const
+CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nCol) const
 {
 	CString sItem;
 
@@ -2547,7 +2634,7 @@ void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WO
 
 	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
 
-	WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
+	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == WLCC_TITLE);
 
 	// draw item background colour
@@ -2685,7 +2772,7 @@ void CWorkloadCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType
 }
 
 
-HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_TREECOLUMN nCol)
+HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)
 {
 	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && wi.bDone);
 	BOOL bBold = ((nCol == WLCC_TITLE) && (m_tcTasks.GetParentItem(hti) == NULL));
@@ -2699,7 +2786,7 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 	if (m_tcTasks.GetItemRect(hti, rItem, TRUE)) // text rect only
 	{
-		WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
+		WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 
 		switch (nColID)
 		{
@@ -2964,9 +3051,9 @@ void CWorkloadCtrl::DeleteTreeItem(HTREEITEM htiFrom)
 	VERIFY(m_data.RemoveKey(dwTaskID));
 }
 
-WLC_TREECOLUMN CWorkloadCtrl::GetTreeColumnID(int nCol) const
+WLC_COLUMNID CWorkloadCtrl::GetTreeColumnID(int nCol) const
 {
-	return (WLC_TREECOLUMN)m_hdrTasks.GetItemData(nCol);
+	return (WLC_COLUMNID)m_hdrTasks.GetItemData(nCol);
 }
 
 WLC_LISTCOLUMNTYPE CWorkloadCtrl::GetListColumnType(int nCol) const
@@ -3010,7 +3097,7 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 
 	for (nCol = 1; nCol < nNumCols; nCol++)
 	{
-		if (GetListColumnType(nCol) == WLCT_HIDDEN)
+		if (GetListColumnType(nCol) == WLCT_EMPTY)
 		{
 			int nWidth = GraphicsMisc::ScaleByDPIFactor(10);
 
@@ -3116,7 +3203,7 @@ int CWorkloadCtrl::CalcTreeColumnWidth(int nCol, CDC* pDC) const
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_tcTasks);
 
 	int nColWidth = 0;
-	WLC_TREECOLUMN nColID = GetTreeColumnID(nCol);
+	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
 
 	switch (nColID)
 	{
@@ -3235,7 +3322,7 @@ void CWorkloadCtrl::BuildListColumns()
 	LVCOLUMN lvc = { LVCF_FMT | LVCF_WIDTH | LVCF_TEXT, 0 };
 	
 	m_lcColumns.InsertColumn(0, &lvc);
-	m_hdrColumns.SetItemData(0, WLCT_HIDDEN);
+	m_hdrColumns.SetItemData(0, WLCT_EMPTY);
 	m_lcColumnTotals.InsertColumn(0, &lvc);
 
 	UpdateListColumns();
@@ -3286,7 +3373,7 @@ void CWorkloadCtrl::UpdateListColumns()
 	{
 		if (nCol == (nReqCols - 2))
 		{
-			m_hdrColumns.SetItemData(nCol, WLCT_HIDDEN);
+			m_hdrColumns.SetItemData(nCol, WLCT_EMPTY);
 			m_hdrColumns.SetItemText(nCol, _T(""));
 		}
 		else if (nCol == (nReqCols - 1))
@@ -3379,6 +3466,17 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 
 		case WLCC_NONE:
 			nCompare = (pWI1->nPosition - pWI2->nPosition);
+			break;
+
+		case WLCC_ALLOCTO:
+			{
+				ASSERT(!m_sSortByAllocTo.IsEmpty());
+
+				double dDays1 = pWI1->mapAllocatedDays.Get(m_sSortByAllocTo);
+				double dDays2 = pWI2->mapAllocatedDays.Get(m_sSortByAllocTo);
+
+				nCompare = (int)(dDays1 - dDays2);
+			}
 			break;
 
 		default:

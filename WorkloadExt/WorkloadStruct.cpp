@@ -44,6 +44,10 @@ void CMapAllocations::RemoveAll()
 
 double CMapAllocations::Get(const CString& sAllocTo) const
 {
+	if (sAllocTo == ALLOCTO_TOTALID)
+		return GetTotal();
+
+	// else
 	double dDays = 0.0;
 	Lookup(Misc::ToUpper(sAllocTo), dDays);
 
@@ -393,7 +397,7 @@ WORKLOADSORTCOLUMN::WORKLOADSORTCOLUMN() : nBy(WLCC_NONE), bAscending(-1)
 
 }
 
-BOOL WORKLOADSORTCOLUMN::Matches(WLC_TREECOLUMN nSortBy, BOOL bSortAscending) const
+BOOL WORKLOADSORTCOLUMN::Matches(WLC_COLUMNID nSortBy, BOOL bSortAscending) const
 {
 	return ((nBy == nSortBy) && (bAscending == bSortAscending));
 }
@@ -403,12 +407,12 @@ BOOL WORKLOADSORTCOLUMN::operator==(const WORKLOADSORTCOLUMN& col) const
 	return Matches(col.nBy, col.bAscending);
 }
 
-BOOL WORKLOADSORTCOLUMN::Sort(WLC_TREECOLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
+BOOL WORKLOADSORTCOLUMN::Sort(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
 {
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
 
-	WLC_TREECOLUMN nOldSort = nBy;
+	WLC_COLUMNID nOldSort = nBy;
 	nBy = nSortBy;
 
 	if (nSortBy != WLCC_NONE)
@@ -487,7 +491,7 @@ BOOL WORKLOADSORT::IsSorting() const
 	return (multi.cols[0].nBy != WLCC_NONE);
 }
 
-BOOL WORKLOADSORT::IsSortingBy(WLC_TREECOLUMN nColID) const
+BOOL WORKLOADSORT::IsSortingBy(WLC_COLUMNID nColID) const
 {
 	if (!bMultiSort)
 		return IsSingleSortingBy(nColID);
@@ -495,12 +499,12 @@ BOOL WORKLOADSORT::IsSortingBy(WLC_TREECOLUMN nColID) const
 	return IsMultiSortingBy(nColID);
 }
 
-BOOL WORKLOADSORT::IsSingleSortingBy(WLC_TREECOLUMN nColID) const
+BOOL WORKLOADSORT::IsSingleSortingBy(WLC_COLUMNID nColID) const
 {
 	return (!bMultiSort && (single.nBy == nColID));
 }
 
-BOOL WORKLOADSORT::IsMultiSortingBy(WLC_TREECOLUMN nColID) const
+BOOL WORKLOADSORT::IsMultiSortingBy(WLC_COLUMNID nColID) const
 {
 	if (bMultiSort)
 	{
@@ -514,7 +518,7 @@ BOOL WORKLOADSORT::IsMultiSortingBy(WLC_TREECOLUMN nColID) const
 	return FALSE;
 }
 
-BOOL WORKLOADSORT::Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+BOOL WORKLOADSORT::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending)
 {
 	if (bMultiSort)
 	{

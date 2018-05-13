@@ -15,6 +15,8 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_");
+
 class CMapAllocations : protected CMap<CString, LPCTSTR, double, double&> 
 {
 public:
@@ -105,11 +107,12 @@ struct WORKLOADSORTCOLUMN
 {
 	WORKLOADSORTCOLUMN();
 
-	BOOL Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
-	BOOL Matches(WLC_TREECOLUMN nBy, BOOL bAscending) const;
+	BOOL Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Matches(WLC_COLUMNID nBy, BOOL bAscending) const;
 	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
 
-	WLC_TREECOLUMN nBy;
+	WLC_COLUMNID nBy;
+	CString sAllocTo;
 	BOOL bAscending;
 };
 
@@ -132,10 +135,10 @@ struct WORKLOADSORT
 	WORKLOADSORT();
 
 	BOOL IsSorting() const;
-	BOOL IsSortingBy(WLC_TREECOLUMN nColID) const;
-	BOOL IsSingleSortingBy(WLC_TREECOLUMN nColID) const;
-	BOOL IsMultiSortingBy(WLC_TREECOLUMN nColID) const;
-	BOOL Sort(WLC_TREECOLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL IsSortingBy(WLC_COLUMNID nColID) const;
+	BOOL IsSingleSortingBy(WLC_COLUMNID nColID) const;
+	BOOL IsMultiSortingBy(WLC_COLUMNID nColID) const;
+	BOOL Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Sort(const WORKLOADSORTCOLUMNS& sort);
 
 	WORKLOADSORTCOLUMN single;
@@ -147,7 +150,7 @@ struct WORKLOADSORT
 
 struct WORKLOADCOLUMN
 {
-	WLC_TREECOLUMN nColID;
+	WLC_COLUMNID nColID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;
