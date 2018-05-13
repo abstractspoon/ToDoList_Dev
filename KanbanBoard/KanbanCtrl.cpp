@@ -1651,8 +1651,8 @@ void CKanbanCtrl::RebuildListCtrlData(const CKanbanItemArrayMap& mapKIArray)
 	// only unwanted parents
 	CheckAddBacklogListCtrl();
 
-	// Resort without toggling
-	Sort(m_nSortBy, FALSE, m_bSortAscending);
+	// Resort
+	Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelection()
@@ -1992,7 +1992,7 @@ void CKanbanCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 			case KBCF_SORTSUBTASTASKSBELOWPARENTS:
 				if (m_nSortBy != IUI_NONE)
-					Sort(m_nSortBy, FALSE, m_bSortAscending);
+					Sort(m_nSortBy, m_bSortAscending);
 				break;
 
 			case KBCF_SHOWEMPTYCOLUMNS:
@@ -2238,7 +2238,7 @@ void CKanbanCtrl::Resize()
 	Resize(rClient);
 }
 
-void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending)
+void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAscending)
 {
 	// if the sort attribute equals the track attribute then
 	// tasks are already sorted into separate columns so we  
@@ -2251,25 +2251,8 @@ void CKanbanCtrl::Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending)
 
 	if (nBy != IUI_NONE)
 	{
-		// if it's the first time or we are changing columns 
-		// we always reset the direction
-		if ((m_bSortAscending == -1) || (nBy != nOldSort))
-		{
-			if (bAscending != -1)
-			{
-				m_bSortAscending = bAscending;
-			}
-			else
-			{
-				m_bSortAscending = 1;
-			}
-		}
-		else if (bAllowToggle)
-		{
-			ASSERT(m_bSortAscending != -1);
-
-			m_bSortAscending = !m_bSortAscending;
-		}
+		ASSERT(bAscending != -1);
+		m_bSortAscending = bAscending;
 
 		// do the sort
  		CHoldRedraw hr(*this);

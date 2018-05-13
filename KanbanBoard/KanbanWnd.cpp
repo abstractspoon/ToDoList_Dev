@@ -97,7 +97,6 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_COMPLETIONCHANGE, OnKanbanNotifyCompletionChange)
-	ON_REGISTERED_MESSAGE(WM_KBC_NOTIFYSORT, OnKanbanNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanGetTaskIcon)
@@ -536,18 +535,10 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		}
 		break;
 
-	case IUI_TOGGLABLESORT:
-		if (pData)
-		{
-			m_ctrlKanban.Sort(pData->nSortBy, TRUE);
-			return true;
-		}
-		break;
-				
 	case IUI_SORT:
 		if (pData)
 		{
-			m_ctrlKanban.Sort(pData->nSortBy, FALSE);
+			m_ctrlKanban.Sort(pData->nSortBy, (pData->bSortAscending ? TRUE : FALSE));
 			return true;
 		}
 		break;
@@ -615,7 +606,6 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* p
 	case IUI_SAVETOIMAGE:
 		return (m_ctrlKanban.CanSaveToImage() != FALSE);
 
-	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 		if (pData)
 			return (CKanbanCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
@@ -878,14 +868,6 @@ LRESULT CKanbanWnd::OnKanbanNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp)
 		mod.tValue = T64Utils::T64_NULL;
 
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
-}
-
-LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	// notify app
-	//	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((GTLC_COLUMN)lp));
-	
-	return 0L;
 }
 
 void CKanbanWnd::OnKanbanPreferences() 

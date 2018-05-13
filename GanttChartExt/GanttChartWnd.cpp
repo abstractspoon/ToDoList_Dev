@@ -547,18 +547,10 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlGantt.ExpandItem(m_ctrlGantt.GetSelectedItem(), FALSE);
 		return true;
 
-	case IUI_TOGGLABLESORT:
-		if (pData)
-		{
-			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), TRUE);
-			return true;
-		}
-		break;
-
 	case IUI_SORT:
 		if (pData)
 		{
-			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), FALSE);
+			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), (pData->bSortAscending ? TRUE : FALSE));
 			return true;
 		}
 		break;
@@ -693,7 +685,6 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		}
 		break;
 
-	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 		if (pData)
 			return (CGanttTreeListCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
@@ -937,10 +928,10 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM /*wp*/, LPARAM lp)
+LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((GTLC_COLUMN)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, wp, MapColumn((GTLC_COLUMN)lp));
 
 	return 0L;
 }

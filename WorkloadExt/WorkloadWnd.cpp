@@ -448,18 +448,10 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlWorkload.ExpandItem(m_ctrlWorkload.GetSelectedItem(), FALSE);
 		return true;
 
-	case IUI_TOGGLABLESORT:
-		if (pData)
-		{
-			m_ctrlWorkload.Sort(MapColumn(pData->nSortBy), TRUE);
-			return true;
-		}
-		break;
-
 	case IUI_SORT:
 		if (pData)
 		{
-			m_ctrlWorkload.Sort(MapColumn(pData->nSortBy), FALSE);
+			m_ctrlWorkload.Sort(MapColumn(pData->nSortBy), (pData->bSortAscending ? TRUE : FALSE));
 			return true;
 		}
 		break;
@@ -594,7 +586,6 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		}
 		break;
 
-	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 		if (pData)
 			return (CWorkloadCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
@@ -744,10 +735,10 @@ void CWorkloadWnd::SendParentSelectionUpdate()
 	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
 }
 
-LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM /*wp*/, LPARAM lp)
+LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, 0, MapColumn((WLC_COLUMNID)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, wp, MapColumn((WLC_COLUMNID)lp));
 
 	return 0L;
 }

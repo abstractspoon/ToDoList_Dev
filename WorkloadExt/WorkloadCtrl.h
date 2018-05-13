@@ -93,7 +93,7 @@ public:
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	void SetSortByAllocTo(LPCTSTR szAllocTo);
-	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending = -1);
+	void Sort(WLC_COLUMNID nBy, BOOL bAscending);
 	void Sort(const WORKLOADSORTCOLUMNS& multi);
 	WLC_COLUMNID GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }

@@ -53,7 +53,7 @@ public:
 	BOOL SelectTask(DWORD dwTaskID);
 	void ScrollToSelectedTask();
 	void ScrollToTask(DWORD dwTaskID);
-	BOOL SortBy(IUI_ATTRIBUTE nSortBy, BOOL bToggle);
+	BOOL SortBy(IUI_ATTRIBUTE nSortBy, BOOL bAscending);
 
 	TCC_SNAPMODE GetSnapMode() const;
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }

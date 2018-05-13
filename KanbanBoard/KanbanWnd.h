@@ -114,7 +114,6 @@ protected:
 	afx_msg LRESULT OnKanbanNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyCompletionChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnKanbanNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanEditTaskTitle(WPARAM wp, LPARAM lp);

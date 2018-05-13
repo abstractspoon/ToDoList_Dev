@@ -669,6 +669,11 @@ BOOL GANTTSORTCOLUMN::Sort(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAsc
 			ASSERT(bAscending != -1);
 			bAscending = !bAscending;
 		}
+		else
+		{
+			ASSERT(bSortAscending != -1);
+			bAscending = bSortAscending;
+		}
 	}
 	else
 	{

@@ -435,6 +435,11 @@ BOOL WORKLOADSORTCOLUMN::Sort(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSor
 			ASSERT(bAscending != -1);
 			bAscending = !bAscending;
 		}
+		else
+		{
+			ASSERT(bSortAscending != -1);
+			bAscending = bSortAscending;
+		}
 	}
 	else
 	{

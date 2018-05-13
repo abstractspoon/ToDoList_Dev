@@ -2067,9 +2067,11 @@ void CGanttTreeListCtrl::OnHeaderDividerDblClk(NMHEADER* pHDN)
 }
 
 // Called by parent
-void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAscending)
 {
-	Sort(nBy, bAllowToggle, bAscending, FALSE);
+	ASSERT(bAscending != -1);
+
+	Sort(nBy, FALSE, bAscending, FALSE);
 }
 
 void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent)
@@ -2087,7 +2089,7 @@ void CGanttTreeListCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscendin
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, 0, m_sort.single.nBy);
+		GetCWnd()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
 }
 
 void CGanttTreeListCtrl::Sort(const GANTTSORTCOLUMNS multi)

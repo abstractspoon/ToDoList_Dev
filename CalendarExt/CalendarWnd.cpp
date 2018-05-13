@@ -349,14 +349,9 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		// not handled
 		break;
 
-	case IUI_TOGGLABLESORT:
-		if (pData)
-			return (m_BigCalendar.SortBy(pData->nSortBy, TRUE) != FALSE);
-		break;
-
 	case IUI_SORT:
 		if (pData)
-			return (m_BigCalendar.SortBy(pData->nSortBy, FALSE) != FALSE);
+			return (m_BigCalendar.SortBy(pData->nSortBy, (pData->bSortAscending ? TRUE : FALSE)) != FALSE);
 		break;
 		
 	case IUI_SELECTTASK:
@@ -414,7 +409,6 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_SELECTTASK:
 		return true;
 
-	case IUI_TOGGLABLESORT:
 	case IUI_SORT:
 		if (pData)
 			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);

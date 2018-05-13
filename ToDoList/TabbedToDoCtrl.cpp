@@ -1238,7 +1238,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM wParam, LPARAM lParam)
 {
 	FTC_VIEW nView = GetTaskView();
 	
@@ -1272,7 +1272,10 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM /*wParam*/, LPARAM lPara
 			ASSERT(pVData);
 
 			if (pVData)
+			{
 				pVData->sort.single.nBy = TDC::MapIUIAttributeToColumn((IUI_ATTRIBUTE)lParam);
+				pVData->sort.single.bAscending = wParam;
+			}
 		}
 		break;
 	}
@@ -4267,7 +4270,7 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 		else
 		{
 			IUI_ATTRIBUTE nCol = TDC::MapColumnToIUIAttribute(pVData->sort.single.nBy);
-			CTDCUIExtensionAppCmdData data(nCol);
+			CTDCUIExtensionAppCmdData data(nCol, pVData->sort.single.bAscending);
 
 			ExtensionDoAppCommand(nView, IUI_SORT, data);
 		}
@@ -4350,18 +4353,26 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 			
 			if ((nCol != IUI_NONE) || (nBy == TDCC_NONE))
 			{
-				if (nBy == TDCC_NONE)
-					bAllowToggle = FALSE;
+				VIEWDATA* pVData = GetViewData(nView);
+				ASSERT(pVData);
 
-				CTDCUIExtensionAppCmdData data(nCol);
+				BOOL bSortAscending = pVData->sort.single.bAscending;
 
-				if (ExtensionDoAppCommand(nView, (bAllowToggle ? IUI_TOGGLABLESORT : IUI_SORT), data))
+				if (bSortAscending == -1)
 				{
-					VIEWDATA* pVData = GetViewData(nView);
-					ASSERT(pVData);
-			
-					if (pVData)
-						pVData->sort.single.nBy = nBy;
+					bSortAscending = TRUE;
+				}
+				else if ((nBy != TDCC_NONE) && bAllowToggle && (bSortAscending != -1))
+				{
+					bSortAscending = !bSortAscending;
+				}
+				 				
+				CTDCUIExtensionAppCmdData data(nCol, bSortAscending);
+
+				if (ExtensionDoAppCommand(nView, IUI_SORT, data))
+				{
+					pVData->sort.single.nBy = nBy;
+					pVData->sort.single.bAscending = bSortAscending;
 				}
 			}
 		}

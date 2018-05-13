@@ -54,7 +54,7 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
- 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAllowToggle, BOOL bAscending = -1);
+ 	void Sort(IUI_ATTRIBUTE nBy, BOOL bAscending);
  	BOOL IsSorted() const;
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);

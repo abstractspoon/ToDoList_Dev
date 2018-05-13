@@ -1026,21 +1026,13 @@ int CTaskCalendarCtrl::GetTaskHeight() const
 	return max(MIN_TASK_HEIGHT, min(nHeight, m_nTaskHeight));
 }
 
-BOOL CTaskCalendarCtrl::SortBy(IUI_ATTRIBUTE nSortBy, BOOL bToggle)
+BOOL CTaskCalendarCtrl::SortBy(IUI_ATTRIBUTE nSortBy, BOOL bAscending)
 {
 	if (!WantSortUpdate(nSortBy))
 		return FALSE;
 
 	m_nSortBy = nSortBy;
-
-	if (m_bSortAscending == -1)
-	{
-		m_bSortAscending = TRUE;
-	}
-	else if (bToggle)
-	{
-		m_bSortAscending = !m_bSortAscending;
-	}
+	m_bSortAscending = bAscending;
 
 	if (GetSafeHwnd())
 		Invalidate(FALSE);

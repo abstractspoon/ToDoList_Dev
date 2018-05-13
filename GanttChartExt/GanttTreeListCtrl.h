@@ -87,7 +87,7 @@ public:
 	void SetFocus();
 	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
-	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending = -1);
+	void Sort(GTLC_COLUMN nBy, BOOL bAscending);
 	void Sort(const GANTTSORTCOLUMNS multi);
 	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }

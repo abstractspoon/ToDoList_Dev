@@ -23,7 +23,7 @@ public:
 
 	// IUI_SORT
 	// IUI_TOGGLABLESORT
-	CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol);
+	CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending);
 
 	// IUI_SELECTTASK
 	// IUI_GETNEXTTASK

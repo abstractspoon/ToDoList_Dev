@@ -1703,11 +1703,13 @@ void CWorkloadCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 }
 
 // Called by parent
-void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending)
+void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAscending)
 {
+	ASSERT(bAscending != -1);
+
 	FixupListSortColumn();
 
-	Sort(nBy, bAllowToggle, bAscending, FALSE);
+	Sort(nBy, FALSE, bAscending, FALSE);
 }
 
 void CWorkloadCtrl::SetSortByAllocTo(LPCTSTR szAllocTo)
@@ -1750,10 +1752,13 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 	CTreeListSyncer::Sort(SortProc, (DWORD)this);
 
 	// update sort arrow
-	m_hdrTasks.Invalidate(FALSE);
+	if (nBy == WLCC_ALLOCTO)
+		m_hdrColumns.Invalidate(FALSE);
+	else
+		m_hdrTasks.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		GetCWnd()->PostMessage(WM_WLCN_SORTCHANGE, 0/*m_sort.single.bAscending*/, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nBy);
 }
 
 void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
@@ -2387,7 +2392,7 @@ BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		ASSERT(pWI);
 		
 		if (pWI)
-			GetCWnd()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tcTasks.GetSafeHwnd(), !pWI->bDone);
+			CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tcTasks.GetSafeHwnd(), !pWI->bDone);
 		
 		return TRUE; // eat
 	}

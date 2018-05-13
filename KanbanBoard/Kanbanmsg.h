@@ -21,9 +21,6 @@ const UINT WM_KBC_COMPLETIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_COMPLETI
 const UINT WM_KBC_SELECTIONCHANGE	= ::RegisterWindowMessage(_T("WM_KBC_SELECTIONCHANGE"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_KBC_NOTIFYSORT		= ::RegisterWindowMessage(_T("WM_KBC_NOTIFYSORT"));
-
-// WPARAM = , LPARAM = 
 const UINT WM_KBC_PREFSHELP			= ::RegisterWindowMessage(_T("WM_KBC_PREFSHELP"));
 
 // WPARAM = Task ID, LPARAM = int* (imageIndex), return HIMAGELIST

@@ -30,9 +30,12 @@ CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(LPCWSTR szImagePath)
 
 // IUI_SORT
 // IUI_TOGGLABLESORT
-CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol)
+CTDCUIExtensionAppCmdData::CTDCUIExtensionAppCmdData(IUI_ATTRIBUTE nSortCol, BOOL bAscending)
 {
+	ASSERT(bAscending != -1);
+
 	nSortBy = nSortCol;
+	bSortAscending = (bAscending != FALSE);
 }
 
 // IUI_SELECTTASK
