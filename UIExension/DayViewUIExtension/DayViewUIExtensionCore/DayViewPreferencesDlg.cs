@@ -24,6 +24,9 @@ namespace DayViewUIExtension
             m_HideTasksSpanningWeekends.Text = trans.Translate(m_HideTasksSpanningWeekends.Text);
             m_HideTasksSpanningDays.Text = trans.Translate(m_HideTasksSpanningDays.Text);
 
+            BtnCancel.Text = trans.Translate(BtnCancel.Text);
+            BtnOK.Text = trans.Translate(BtnOK.Text);
+            
             ScaleByDPIFactor();
         }
 
