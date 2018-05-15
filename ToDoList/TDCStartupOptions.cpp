@@ -555,7 +555,6 @@ void CTDCStartupOptions::ParseDate(const CEnCommandLineInfo& cmdInfo,
 			COleDateTime date;
 
 			if (CDateHelper::DecodeRelativeDate(sValue, date, FALSE) ||
-				CDateHelper::DecodeISODate(sValue, date, TRUE) ||
 				CDateHelper::DecodeDate(sValue, date, TRUE))
 			{
 				dtDate.SetValue(Misc::Format(date.m_dt));
