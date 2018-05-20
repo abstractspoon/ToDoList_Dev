@@ -251,7 +251,7 @@ CTDCStartupOptions::CTDCStartupOptions(const CEnCommandLineInfo& cmdInfo)
 		{
 			// time overrides
 			TDCSTARTUPATTRIB time;
-			ParseDate(cmdInfo, SWITCH_TASKCREATETIME, time);
+			ParseTime(cmdInfo, SWITCH_TASKCREATETIME, time);
 
 			double dTime = 0.0;
 			BOOL bOffset = FALSE;
