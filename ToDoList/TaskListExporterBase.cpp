@@ -205,7 +205,11 @@ CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
 					{
 						// combine the label and ID so we can import later
 						CString sLabel;
-						sLabel.Format(_T("%s (%s)"), pTasks->GetCustomAttributeLabel(nCust), pTasks->GetCustomAttributeID(nCust));
+
+						if (WantExportCustomAttributeID())
+							sLabel.Format(_T("%s (%s)"), pTasks->GetCustomAttributeLabel(nCust), pTasks->GetCustomAttributeID(nCust));
+						else
+							sLabel = pTasks->GetCustomAttributeLabel(nCust);
 
 						sHeader += FormatHeaderItem(nAttrib, sLabel);
 					}

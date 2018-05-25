@@ -98,6 +98,7 @@ enum TDCC_IMAGE
 	TDCCI_LOCK,
 	TDCCI_LOCKCALC,
 	TDCCI_FLAGCALC,
+	TDCCI_REMINDERDATEUNSET,
 };
 
 /////////////////////////////////////////////////////////////////////////////

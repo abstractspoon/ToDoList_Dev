@@ -140,7 +140,8 @@ protected:
 	BOOL m_bShowFilterBar;
 	BOOL m_bShowProjectName;
 	BOOL m_bShowStatusBar;
-	BOOL m_bShowToolbar;
+	BOOL m_bShowMainToolbar;
+	BOOL m_bShowCustomToolbar;
 	BOOL m_bShowTasklistBar;
 	BOOL m_bShowTreeListBar;
 	BOOL m_bInNewTask;
@@ -566,7 +567,8 @@ protected:
 	afx_msg void OnUpdateViewPrevSel(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewRefreshfilter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewSaveToImage(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewToolbar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewMainToolbar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewCustomToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUserTool(UINT nCmdID);
 	afx_msg void OnUserUIExtension(UINT nCmdID);
 	afx_msg void OnViewMovetasklistleft();
@@ -577,7 +579,8 @@ protected:
 	afx_msg void OnViewPrevSel();
 	afx_msg void OnViewRefreshfilter();
 	afx_msg void OnViewSaveToImage();
-	afx_msg void OnViewToolbar();
+	afx_msg void OnViewMainToolbar();
+	afx_msg void OnViewCustomToolbar();
 	afx_msg void OnWindow(UINT nCmdID);
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();
@@ -704,7 +707,7 @@ protected:
 	
 	void PrepareToolbar(int nOption);
 	void SetToolbarOption(int nOption);
-	void UpdateUDTsInToolbar();
+	void UpdateUDTsInMainToolbar();
 	void PopulateToolArgs(USERTOOLARGS& args) const;
 
 	CFilteredToDoCtrl& GetToDoCtrl();

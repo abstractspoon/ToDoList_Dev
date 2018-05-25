@@ -1423,8 +1423,8 @@ BEGIN
     LTEXT           "&Period defining 'Recently Modified' tasks",IDC_STATIC,
                     7,298,392,10
     EDITTEXT        IDC_RECENTMODPERIOD,18,311,69,13,ES_AUTOHSCROLL
-    GROUPBOX        "Calculate a task's 'Remaining Time' as:",IDC_STATIC,7,
-                    330,368,60
+    GROUPBOX        "Display a task's 'Remaining Time' as:",IDC_STATIC,7,330,
+                    368,60
     CONTROL         "Due date - &Current date",IDC_REMAININGTIMEISDUEDATE,
                     "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,345,
                     351,10
@@ -3165,7 +3165,8 @@ BEGIN
             MENUITEM "Task View Tab Bar",           ID_VIEW_SHOWTREELISTTABBAR
 
             MENUITEM "",                            1
-            MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+            MENUITEM "&Main Toolbar",               ID_VIEW_MAINTOOLBAR
+            MENUITEM "&Custom Toolbar",             ID_VIEW_CUSTOMTOOLBAR
             MENUITEM "Stat&us Bar",                 ID_VIEW_STATUS_BAR
         END
     END
@@ -5314,6 +5315,7 @@ BEGIN
     IDS_TOOLBARMENUSEPARATOR "<separator>"
     IDS_NEW_TOOLBARBUTTON   "<New Button>"
     IDS_TASKREMINDERDLG_TITLE "Task Reminders (%d)"
+    IDS_REMINDER_DATENOTSET "Reminder date not set"
 END
 
 #endif    // English (Australia) resources

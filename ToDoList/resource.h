@@ -1380,6 +1380,8 @@
 #define ID_TOOLS_TOGGLE_LOGGING         34596
 #define ID_VIEW_TOGGLEALLTASKEXPANDED   34597
 #define ID_EDIT_FINDREPLACEINTASKTITLES 34598
+#define ID_VIEW_MAINTOOLBAR             34599
+#define ID_VIEW_CUSTOMTOOLBAR           34600
 #define IDS_FIRSTSTRING                 57671
 #define IDS_PTP_NEWTOOL                 57671
 #define IDS_PTP_TOOLNAME                57672
@@ -2134,6 +2136,7 @@
 #define IDS_TOOLBARMENUSEPARATOR        58475
 #define IDS_NEW_TOOLBARBUTTON           58476
 #define IDS_TASKREMINDERDLG_TITLE       58477
+#define IDS_REMINDER_DATENOTSET         58478
 #define IDS_LASTSTRING                  58500
 
 // Next default values for new objects
@@ -2141,7 +2144,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        310
-#define _APS_NEXT_COMMAND_VALUE         34599
+#define _APS_NEXT_COMMAND_VALUE         34601
 #define _APS_NEXT_CONTROL_VALUE         1518
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

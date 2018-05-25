@@ -48,7 +48,9 @@ protected:
 	virtual CString FormatTitle(const ITASKLISTBASE* /*pTasks*/) const { return _T(""); }
 	virtual CString FormatHeaderItem(TDC_ATTRIBUTE /*nAttrib*/, const CString& /*sAttribLabel*/) const { return _T(""); }
 	virtual CString FormatHeader(const ITASKLISTBASE* pTasks) const;
+	
 	virtual BOOL WantAttribute(TDC_ATTRIBUTE attrib) const;
+	virtual BOOL WantExportCustomAttributeID() const { return TRUE; }
 
 protected:
 	// helpers

@@ -188,11 +188,18 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date) const
 			date = pTDC->GetTaskDate(dwTaskID, TDCD_START);
 		}
 		
-		date -= dRelativeDaysLeadIn;
+		if (CDateHelper::IsDateSet(date))
+		{
+			date -= dRelativeDaysLeadIn;
+		}
 	}
 	
-	date += dDaysSnooze;
+	if (CDateHelper::IsDateSet(date))
+	{
+		date += dDaysSnooze;
+		return TRUE;
+	}
 	
-	return CDateHelper::IsDateSet(date);
+	return FALSE;
 }
 

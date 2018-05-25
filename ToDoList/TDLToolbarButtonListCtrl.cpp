@@ -7,6 +7,7 @@
 #include "TDLTaskIconDlg.h"
 
 #include "..\Shared\DialogHelper.h"
+#include "..\Shared\enmenu.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,7 +71,24 @@ void CTDLToolbarButtonListCtrl::InitState()
 	ShowGrid(TRUE, TRUE);
 
 	CreateControl(m_cbMenuItems, IDC_MENUID_COMBO, FALSE);
-	m_cbMenuItems.Initialise(IDR_MAINFRAME, IDS_TOOLBARMENUSEPARATOR);
+
+	CEnMenu menu;
+
+	if (menu.LoadMenu(IDR_MAINFRAME, NULL, TRUE, TRUE))
+	{
+		menu.TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
+		menu.TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
+		menu.TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
+		menu.TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
+		menu.TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
+		menu.TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View Visibility %d"));
+		
+		m_cbMenuItems.Initialise(menu, IDS_TOOLBARMENUSEPARATOR);
+	}
+	else
+	{
+		m_cbMenuItems.Initialise(IDR_MAINFRAME, IDS_TOOLBARMENUSEPARATOR);
+	}
 
 	AddCol(_T("Menu Item"), 350);
 	SetColumnType(MENUID_COL, ILCT_DROPLIST);

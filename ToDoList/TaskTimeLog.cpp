@@ -364,6 +364,7 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
 			nFormat = SFEF_UTF16;
 
+		VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
 		VERIFY(FileMisc::SaveFile(sLogPath, sHeader, nFormat));
 	}
 

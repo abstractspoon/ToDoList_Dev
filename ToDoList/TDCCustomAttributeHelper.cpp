@@ -781,7 +781,10 @@ BOOL CTDCCustomAttributeHelper::IsColumnSortable(TDC_COLUMN nColID,
 
 BOOL CTDCCustomAttributeHelper::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	return (nAttribID >= TDCA_CUSTOMATTRIB_FIRST && nAttribID <= TDCA_CUSTOMATTRIB_LAST);
+	if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
+		return TRUE;
+
+	return (nAttribID == TDCA_CUSTOMATTRIB_ALL);
 }
 
 BOOL CTDCCustomAttributeHelper::IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID, 

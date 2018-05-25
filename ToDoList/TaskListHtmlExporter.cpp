@@ -34,7 +34,8 @@ static LPCTSTR SPACE = _T("&nbsp;");
 
 enum { STYLE_WRAP, STYLE_TABLE, STYLE_PARA };
 
-CTaskListHtmlExporter::CTaskListHtmlExporter() : STRIKETHRUDONE(TRUE), EXPORTSTYLE(STYLE_WRAP), ROOT(TRUE)
+CTaskListHtmlExporter::CTaskListHtmlExporter() 
+	: STRIKETHRUDONE(TRUE), EXPORTSTYLE(STYLE_WRAP), ROOT(TRUE), COMMENTSPERCENTWIDTH(30)
 {
 	// override base class ENDL
 	ENDL = "\n";
@@ -96,6 +97,7 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
 	EXPORTSTYLE = _ttoi(pTasks->GetMetaData(TDL_EXPORTSTYLE));
+
 	INDENT.Empty();
 
 	if (pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE))
@@ -119,6 +121,33 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	
 	if (!sCS.IsEmpty())
 		CHARSET.Format(_T("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n"), sCS);
+
+	if (WantAttribute(TDCA_COMMENTS))
+	{
+		COMMENTSPERCENTWIDTH = 30; // minimum
+
+		switch (ARRATTRIBUTES.GetSize())
+		{
+		case 2: // title & comments
+			COMMENTSPERCENTWIDTH = 60;
+			break;
+
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+			COMMENTSPERCENTWIDTH = 50;
+			break;
+
+		case 7:
+		case 8:
+		case 9:
+		case 10:
+			COMMENTSPERCENTWIDTH = 40;
+			break;
+		}
+	}
+
 
 	return true;
 }
@@ -176,13 +205,16 @@ CString CTaskListHtmlExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 	return sHeader;
 }
 
-CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE /*nAttrib*/, const CString& sAttribLabel) const
+CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
 {
 	CString sItem;
 
 	if (EXPORTSTYLE == STYLE_TABLE)
 	{
-		sItem.Format(_T("<th>%s</th>"), sAttribLabel);
+		if (nAttrib == TDCA_COMMENTS)
+			sItem.Format(_T("<th width=\"%d%%\">%s</th>"), COMMENTSPERCENTWIDTH, sAttribLabel);
+		else
+			sItem.Format(_T("<th>%s</th>"), sAttribLabel);
 	}
 
 	return sItem;
@@ -278,7 +310,8 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 	if (bEncodeVal)
 		TXT2XML(sAttribVal);
 
-	if (!sAttribVal.IsEmpty())
+	// Must process empty values in table format
+	if (!sAttribVal.IsEmpty() || (EXPORTSTYLE == STYLE_TABLE))
 	{
 		switch (nAttrib)
 		{
@@ -321,7 +354,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				case STYLE_TABLE:
 					// special case: custom attrib
 					if (IsCustomAttribute(nAttrib))
-						sFmtAttrib.Format(_T("<td>%s</td>"), sAttribVal);
+						sFmtAttrib = FormatTableCell(sAttribVal);
 					else
 						sFmtAttrib = sAttribVal;
 					break;
@@ -498,9 +531,13 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		if (sItem.IsEmpty())
 			sItem = SPACE;
 
-		sItem = _T("<td>") + sItem + _T("</td>");
+		sItem = FormatTableCell(sItem);
 	}
 
     return sItem;
 }
 
+CString CTaskListHtmlExporter::FormatTableCell(const CString& sValue)
+{
+	return (_T("<td valign=\"top\">") + sValue + _T("</td>"));
+}

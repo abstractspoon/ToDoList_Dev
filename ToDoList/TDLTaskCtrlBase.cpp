@@ -359,11 +359,17 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 		{
 			time_t tRem = GetTaskReminder(dwTaskID);
 			
-			if (tRem != 0)
+			if (tRem == -1)
+			{
+				sTooltip = CEnString(IDS_REMINDER_DATENOTSET);
+			}
+			else if (tRem > 0)
 			{
 				sTooltip = CDateHelper::FormatDate(tRem, (DHFD_DOW | DHFD_TIME | DHFD_NOSEC));
-				return GetUniqueToolTipID(dwTaskID, nColID);
 			}
+
+			if (!sTooltip.IsEmpty())
+				return GetUniqueToolTipID(dwTaskID, nColID);
 		}
 		break;
 
@@ -2573,21 +2579,29 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			{
 				time_t tRem = GetTaskReminder(dwTrueID);
 
+				// Reminder must be set and start/due date must be set
 				if (tRem != 0)
 				{
-					if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME) && (tRem != 0xFFFFFFFF))
+					if (tRem != -1)
 					{
-						COleDateTime dtRem(tRem);
-
-						if (CDateHelper::IsDateSet(dtRem))
+						if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
 						{
-							DrawColumnDate(pDC, dtRem, TDCD_CUSTOM, rSubItem, crText);
-							break;
+							COleDateTime dtRem(tRem);
+
+							if (CDateHelper::IsDateSet(dtRem))
+							{
+								DrawColumnDate(pDC, dtRem, TDCD_CUSTOM, rSubItem, crText);
+							}
+						}
+						else
+						{
+							DrawColumnImage(pDC, nColID, rSubItem);
 						}
 					}
-					
-					// all else draw icon
-					DrawColumnImage(pDC, nColID, rSubItem);
+					else
+					{
+						DrawColumnImage(pDC, nColID, rSubItem, TRUE);
+					}
 				}
 			}
 			break;
@@ -2776,14 +2790,14 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 	}
 }
 
-void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bCalc)
+void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bAlternate)
 {
 	const TDCCOLUMN* pCol = GetColumn(nColID);
 	ASSERT(pCol);
 
 	if (pCol)
 	{
-		TDCC_IMAGE iImage = (bCalc ? pCol->iCalcImage : pCol->iImage);
+		TDCC_IMAGE iImage = (bAlternate ? pCol->iAlternateImage : pCol->iImage);
 		ASSERT(iImage != TDCC_NONE);
 	
 		if (iImage != TDCC_NONE)
