@@ -80,7 +80,8 @@ CMSWordHelper::~CMSWordHelper()
 
 BOOL CMSWordHelper::IsWordInstalled(int nMinVersion)
 {
-	if (CFileRegister::IsRegisteredApp(_T("docx"), _T("WINWORD.EXE"), TRUE))
+//	if (CFileRegister::IsRegisteredApp(_T("docx"), _T("WINWORD.EXE"), TRUE))
+	if (CRegKey2::KeyExists(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\WINWORD.EXE")))
 	{
 		return (GetInstalledWordVersion() >= nMinVersion);
 	}

@@ -31,6 +31,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, BOOL bPreview, FTC_VIEW nView,
 	m_dlgTaskSel(_T("Print"), nView),
 	m_sTitle(szTitle), 
 	m_bSupportsExportToImage(bSupportsExportToImage),
+	m_bUseStylesheet(FALSE),
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 	//{{AFX_DATA_INIT(CTDLPrintDialog)
@@ -151,11 +152,7 @@ void CTDLPrintDialog::OnUsestylesheet()
 
 void CTDLPrintDialog::EnableDisableControls()
 {
-	if (m_nExportStyle == TDLPDS_IMAGE)
-	{
-		m_dlgTaskSel.EnableWindow(FALSE);
-		return;
-	}
+	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
 
 	GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_bUseStylesheet);
 	GetDlgItem(IDC_STYLE_WRAP)->EnableWindow(!m_bUseStylesheet); 
@@ -168,7 +165,7 @@ void CTDLPrintDialog::EnableDisableControls()
 	BOOL bEnable = (!m_bUseStylesheet || GetStylesheet(sUnused));
 
 	GetDlgItem(IDOK)->EnableWindow(bEnable);
-	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow(m_bUseStylesheet && bEnable); 
+	//GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow(m_bUseStylesheet && bEnable); 
 
 	// Helpful text for why OK button is disabled
 	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
@@ -185,7 +182,7 @@ void CTDLPrintDialog::OnChangeStylesheet()
 
 BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const 
 { 
-	if (m_bUseStylesheet)
+	if (m_bUseStylesheet && !m_sStylesheet.IsEmpty())
 	{
 		CTDLStylesheetParamConfigDlg dialog(GetBaseStylesheetPath());
 		sStylesheet = dialog.GetStylesheetPath();
@@ -200,6 +197,10 @@ BOOL CTDLPrintDialog::GetStylesheet(CString& sStylesheet) const
 
 CString CTDLPrintDialog::GetBaseStylesheetPath() const
 {
+	if (m_sStylesheet.IsEmpty())
+		return _T("");
+
+	// else
 	return FileMisc::GetFullPath(m_sStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets"));
 }
 

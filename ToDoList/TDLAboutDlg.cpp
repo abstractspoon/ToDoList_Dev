@@ -213,5 +213,5 @@ LRESULT CTDLAboutDlg::OnFileEditDisplayFile(WPARAM /*wp*/, LPARAM lp)
 {
 	FileMisc::SelectFileInExplorer((LPCTSTR)lp);
 
-	return 0L;
+	return 1L;
 }

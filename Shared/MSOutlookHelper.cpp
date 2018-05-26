@@ -184,7 +184,8 @@ CMSOutlookHelper::~CMSOutlookHelper()
 // static
 BOOL CMSOutlookHelper::IsOutlookInstalled()
 {
-	return CFileRegister::IsRegisteredApp(_T("msg"), _T("OUTLOOK.EXE"), TRUE);
+	//return CFileRegister::IsRegisteredApp(_T("msg"), _T("OUTLOOK.EXE"), TRUE);
+	return CRegKey2::KeyExists(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\OUTLOOK.EXE"));
 }
 
 /*
