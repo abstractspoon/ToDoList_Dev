@@ -30,11 +30,12 @@ namespace WordCloudUIExtension
 		private const int ComboTop = 20;
         private const int LabelHeight = (ComboTop - LabelTop);
         private const int ComboHeight = 16;
- //       private const int ControlTop = 49;
 		private const int ComboWidth = 200;
 		private const int ComboSpacing = 6;
 		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
+
+        private static int MinSplitWidth = Win32.ScaleByDPIFactor(25 * 2);
 
         // -------------------------------------------------------------
 
@@ -395,6 +396,7 @@ namespace WordCloudUIExtension
 					m_ColorsCombo.SelectedIndex = 0;
 
 				m_InitialSplitPos = prefs.GetProfileInt(key, "SplitterPosFromRight", MatchListDefaultWidth);
+                m_InitialSplitPos = Math.Max(m_InitialSplitPos, MinSplitWidth);
 
 				var style = (LayoutType)prefs.GetProfileInt(key, "LayoutStyle", (int)LayoutType.Spiral);
 
@@ -635,8 +637,8 @@ namespace WordCloudUIExtension
 			Rectangle splitterRect = SplitterRect();
 
 			// Always make sure the splitter is visible
-			splitterRect.X = Math.Max(splitterRect.X, 0);
-			splitterRect.X = Math.Min(splitterRect.X, ClientRectangle.Right - splitterRect.Width);
+			splitterRect.X = Math.Max(splitterRect.X, MinSplitWidth);
+			splitterRect.X = Math.Min(splitterRect.X, ClientRectangle.Right - MinSplitWidth);
 			
 			taskMatchesRect.X = splitterRect.Right;
 			taskMatchesRect.Width = (baseRect.Right - splitterRect.Right);
@@ -847,15 +849,26 @@ namespace WordCloudUIExtension
 
 			if ((newSplitLeft - 1) != m_WordCloud.Width)
 			{
-				m_WordCloud.Width = (newSplitLeft - 1); // account for border
+                int newSplitRight = (newSplitLeft + m_SplitterWidth);
+                int newTaskMatchesWidth = (m_TaskMatchesList.Right - newSplitRight);
 
-				int newSplitRight = (newSplitLeft + m_SplitterWidth);
+                if (newTaskMatchesWidth < MinSplitWidth)
+                {
+                    newTaskMatchesWidth = MinSplitWidth;
+                    newSplitRight = (m_TaskMatchesList.Right - newTaskMatchesWidth);
+                    newSplitLeft = (newSplitRight - m_SplitterWidth);
+                }
 
-				m_TaskMatchesList.Width = (m_TaskMatchesList.Right - newSplitRight);
-				m_TaskMatchesList.Left = newSplitRight;
+                if (m_TaskMatchesList.Width != newTaskMatchesWidth)
+                {
+                    m_WordCloud.Width = (newSplitLeft - 1); // account for border
 
-				Invalidate(false);
-				Update();
+                    m_TaskMatchesList.Width = newTaskMatchesWidth;
+				    m_TaskMatchesList.Left = newSplitRight;
+
+				    Invalidate(false);
+				    Update();
+                }
 			}
 		}
 
@@ -866,7 +879,7 @@ namespace WordCloudUIExtension
 			splitterRect.Inflate(-1, 0);
 
 			// Initialise split pos first time only
-			if (!ClientRectangle.IsEmpty && (m_InitialSplitPos > 0))
+			if ((ClientRectangle.Width > 0) && (m_InitialSplitPos > 0))
 			{
 				splitterRect.X = (ClientRectangle.Right - m_InitialSplitPos - (m_SplitterWidth / 2));
 				splitterRect.Width = m_SplitterWidth;
