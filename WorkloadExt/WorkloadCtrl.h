@@ -11,6 +11,7 @@
 
 #include "Workloadstruct.h"
 #include "WorkloadTreeCtrl.h"
+#include "WorkloadChart.h"
 
 #include "..\shared\TreeListSyncer.h"
 #include "..\shared\enheaderctrl.h"
@@ -128,6 +129,7 @@ public:
 
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
+	CWorkloadChart m_chart;
 	CListCtrl m_lcColumns;
 	CListCtrl m_lcTotalsLabels, m_lcColumnTotals;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;

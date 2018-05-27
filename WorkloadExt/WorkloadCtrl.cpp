@@ -129,7 +129,8 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_dWorkDaysInPeriod(22), // one month
 	m_mapTotalDays(FALSE),
 	m_mapTotalTasks(FALSE),
-	m_mapPercentLoad(TRUE) // average
+	m_mapPercentLoad(TRUE), // average
+	m_chart(m_data)
 {
 }
 
@@ -2475,8 +2476,8 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT /*nFlags*/, CPoint point)
 		return TRUE;
 	}
 
-	// not handled
-	return FALSE;
+	// else
+	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, 0, GetTaskID(nHit));
 }
 
 BOOL CWorkloadCtrl::GetLabelEditRect(LPRECT pEdit) const
