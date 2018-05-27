@@ -126,12 +126,12 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_nPrevDropHilitedItem(-1),
 	m_tshDragDrop(m_tcTasks),
 	m_treeDragDrop(m_tshDragDrop, m_tcTasks),
-	m_dWorkDaysInPeriod(22), // one month
 	m_mapTotalDays(FALSE),
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
-	m_barChart(m_aAllocTo, m_mapTotalDays)
+	m_barChart(m_aAllocTo, m_mapPercentLoad)
 {
+	SetAllocationPeriod(CDateHelper::GetDate(DHD_BEGINTHISMONTH), CDateHelper::GetDate(DHD_ENDTHISMONTH), TRUE);
 }
 
 CWorkloadCtrl::~CWorkloadCtrl()
@@ -273,6 +273,48 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
  	PostResize();
 	
 	return 0;
+}
+
+BOOL CWorkloadCtrl::SetAllocationPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive)
+{
+	if (dtTo < dtFrom)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!bInclusive && (dtTo == dtFrom))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_dtBegin = dtFrom;
+	m_dtEndInclusive = dtTo;
+
+	if (!bInclusive)
+		m_dtEndInclusive.m_dt--;
+
+	m_dWorkDaysInPeriod = CDateHelper::CalcDaysFromTo(m_dtBegin, m_dtEndInclusive, TRUE, TRUE);
+
+	if (GetSafeHwnd())
+	{
+		UpdateTotalsDateRangeLabel();
+		RecalcAllocationTotals();
+	}
+
+	return TRUE;
+}
+
+void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
+{
+	if (m_lcTotalsLabels.GetSafeHwnd())
+	{
+		CString sLabel;
+		sLabel.Format(CEnString(IDS_TOTALSDATERANGE), CDateHelper::FormatDate(m_dtBegin), CDateHelper::FormatDate(m_dtEndInclusive));
+
+		m_lcTotalsLabels.SetItemText(ID_TOTALCOLUMNHEADER, 0, sLabel);
+	}
 }
 
 void CWorkloadCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
@@ -977,6 +1019,8 @@ void CWorkloadCtrl::PopulateTotalsLists()
 			nItem = m_lcColumnTotals.InsertItem(nTotal, _T(""));
 			m_lcColumnTotals.SetItemData(nItem, WORKLOADTOTALS[nTotal].nTotal);
 		}
+
+		UpdateTotalsDateRangeLabel();
 	}
 }
 
@@ -1493,7 +1537,16 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		return CDRF_NOTIFYITEMDRAW;
 
 	case CDDS_ITEMPREPAINT:
-		pLVCD->clrTextBk = m_crBkgnd;
+		{
+			pLVCD->clrTextBk = m_crBkgnd;
+
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
+			if (pLVCD->nmcd.lItemlParam == ID_TOTALCOLUMNHEADER)
+				pDC->SelectObject(m_tcTasks.Fonts().GetFont(GMFS_BOLD));
+			else
+				pDC->SelectObject(m_tcTasks.Fonts().GetFont());
+		}
 		return CDRF_NEWFONT;
 	}
 

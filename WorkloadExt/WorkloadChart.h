@@ -12,7 +12,7 @@ class CMapAllocations;
 class CWorkloadChart : public CHMXChart
 {
 public:
-	CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapTotalDays);
+	CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad);
 	virtual ~CWorkloadChart();
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -20,7 +20,7 @@ public:
 	void OnEditData();
 
 protected:
-	const CMapAllocations& m_mapTotalDays;
+	const CMapAllocations& m_mapPercentLoad;
 	const CStringArray& m_aAllocTo;
 	
 protected:

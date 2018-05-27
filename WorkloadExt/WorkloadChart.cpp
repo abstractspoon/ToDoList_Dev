@@ -6,12 +6,14 @@
 #include "WorkloadChart.h"
 #include "WorkloadStruct.h"
 
+#include "..\Shared\EnString.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 // CWorkloadChart
-CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapTotalDays) 
+CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad) 
 	: 
-	m_mapTotalDays(mapTotalDays), 
+	m_mapPercentLoad(mapPercentLoad), 
 	m_aAllocTo(aAllocTo)
 {
 
@@ -61,6 +63,14 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	ModifyStyle(0, WS_BORDER);
+
+	// Once only
+	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
+	SetDatasetMin(0, 0.0);
+	SetDatasetMax(0, 100.0);
+	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
+	SetDrawGridOnTop(false);
+
 	OnEditData();
 
 	return 0;
@@ -68,18 +78,12 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CWorkloadChart::OnEditData()
 {
-	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
-	SetDatasetMin(0, 0.0);
-	SetDatasetMax(0, 100.0);
-
-	SetYText(_T("Total Allocated Days"));
-
 	// build the graph
 	ClearData(0);
 
 	for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
 	{
-		AddData(0, m_mapTotalDays.Get(m_aAllocTo[nAllocTo]));
+		AddData(0, m_mapPercentLoad.Get(m_aAllocTo[nAllocTo]));
 		SetXScaleLabel(nAllocTo, m_aAllocTo[nAllocTo]);
 	}
 

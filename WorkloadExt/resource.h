@@ -46,6 +46,7 @@
 #define IDS_COL_DONEDATE                57687
 #define IDS_NEW_ALLOCATION              57688
 #define IDS_COL_TOTAL                   57689
+#define IDS_TOTALSDATERANGE             57690
 
 // Next default values for new objects
 // 

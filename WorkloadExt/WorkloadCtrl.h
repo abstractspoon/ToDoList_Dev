@@ -70,6 +70,8 @@ public:
 	BOOL SetSelectedTask(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
+	BOOL SetAllocationPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive = TRUE);
+
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
 	BOOL IsMovingTask() const { return m_bMovingTask; }
@@ -149,6 +151,7 @@ protected:
 	double m_dWorkDaysInPeriod;
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
+	COleDateTime m_dtBegin, m_dtEndInclusive;
 
 	CStringArray m_aAllocTo;
 	CHTIMap m_mapHTItems;
@@ -285,6 +288,7 @@ protected:
 	void RecalcListColumnsToFit();
 	void PopulateTotalsLists();
 	void RemoveTotalsScrollbars();
+	void UpdateTotalsDateRangeLabel();
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
