@@ -1193,18 +1193,17 @@ void CWorkloadCtrl::SetFocus()
 		m_tcTasks.SetFocus();
 }
 
-void CWorkloadCtrl::Resize()
+void CWorkloadCtrl::Resize(int cx, int cy)
 {
-	CRect rect;
-	GetBoundingRect(rect);
-	
-	Resize(rect);
-}
+	if (!cx || !cy)
+	{
+		CRect rClient;
+		CWnd::GetClientRect(rClient);
 
-void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
-{
-	CWnd::OnSize(nType, cx, cy);
-	
+		cx = rClient.Width();
+		cy = rClient.Height();
+	}
+
 	if (cx && cy)
 	{
 		CRect rChart(((cx * 2) / 3), 0, cx, cy);
@@ -1221,17 +1220,18 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 		m_lcTotalsLabels.MoveWindow(rTreeTotals);
 		m_lcColumnTotals.MoveWindow(rColumnTotals);
 
-		CTreeListSyncer::Resize(rTreeList);
+		CTreeListSyncer::Resize(rTreeList, GetSplitPos());
+
+		if (m_hdrTasks.GetItemCount())
+			m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
 	}
 }
 
-void CWorkloadCtrl::Resize(const CRect& rect)
+void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	if (m_hdrTasks.GetItemCount())
-	{
-		CTreeListSyncer::Resize(rect, GetSplitPos());
-		m_tcTasks.SetTitleColumnWidth(m_hdrTasks.GetItemWidth(0));
-	}
+	CWnd::OnSize(nType, cx, cy);
+	
+	Resize(cx, cy);
 }
 
 void CWorkloadCtrl::ExpandAll(BOOL bExpand)
@@ -3089,25 +3089,31 @@ void CWorkloadCtrl::ResizeColumnsToFit()
 
 	// list columns
 	RecalcListColumnsToFit();
-
-	Resize();
 }
-
-
 
 void CWorkloadCtrl::RecalcListColumnsToFit()
 {
 	// Calc widest column first
 	CClientDC dc(&m_lcColumns);
-	int nMaxHeaderWidth = 0;
+	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+
+	int nMaxHeaderWidth = dc.GetTextExtent("100.0%").cx;
 	int nCol = GetRequiredListColumnCount();
 
 	while (nCol--)
 	{
-		int nHeaderWidth = m_hdrColumns.GetItemTextWidth(nCol, &dc);
+		CString sAllocTo = m_hdrColumns.GetItemText(nCol);
+
+		int nHeaderWidth = dc.GetTextExtent(sAllocTo).cx;
 		nMaxHeaderWidth = max(nMaxHeaderWidth, nHeaderWidth);
+
+		int nTotalWidth = dc.GetTextExtent(m_mapTotalDays.Get(sAllocTo, 2)).cx;
+		nMaxHeaderWidth = max(nMaxHeaderWidth, nTotalWidth);
 	}
 	nMaxHeaderWidth += (2 * HD_COLPADDING);
+
+	// cleanup
+	dc.SelectObject(pOldFont);
 
 	// Resize all columns to that width (except first column)
 	int nNumCols = GetRequiredListColumnCount();
@@ -3129,6 +3135,16 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 	}
 
 	Resize();
+	RemoveTotalsScrollbars();
+}
+
+void CWorkloadCtrl::RemoveTotalsScrollbars()
+{
+	if (m_lcColumnTotals.GetStyle() & (WS_VSCROLL | WS_HSCROLL))
+		m_lcColumnTotals.ModifyStyle(WS_VSCROLL | WS_HSCROLL, 0, SWP_FRAMECHANGED);
+
+	if (m_lcTotalsLabels.GetStyle() & (WS_VSCROLL | WS_HSCROLL))
+		m_lcTotalsLabels.ModifyStyle(WS_VSCROLL | WS_HSCROLL, 0, SWP_FRAMECHANGED);
 }
 
 void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
@@ -3917,6 +3933,9 @@ BOOL CWorkloadCtrl::SetFont(HFONT hFont, BOOL bRedraw)
 	m_tcTasks.SetFont(pFont, bRedraw);
 	m_lcTotalsLabels.SetFont(pFont, bRedraw);
 	m_lcColumnTotals.SetFont(pFont, bRedraw);
+	m_hdrColumns.SetFont(pFont, bRedraw);
+
+
 
 	ResizeColumnsToFit();
 

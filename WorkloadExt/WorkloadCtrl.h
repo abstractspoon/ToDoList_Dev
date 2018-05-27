@@ -84,7 +84,6 @@ public:
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
-	void Resize(const CRect& rect);
 	void ResizeColumnsToFit();
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
@@ -245,7 +244,7 @@ protected:
 	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void InitItemHeights();
-	void Resize();
+	void Resize(int cx = 0, int cy = 0);
 	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	void RecalcAllocationTotals();
@@ -285,6 +284,7 @@ protected:
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 	void RecalcListColumnsToFit();
 	void PopulateTotalsLists();
+	void RemoveTotalsScrollbars();
 
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
  	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
