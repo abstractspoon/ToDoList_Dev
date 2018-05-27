@@ -68,7 +68,7 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
 	//}}AFX_DATA_MAP
-	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
+	//DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
@@ -683,16 +683,16 @@ void CWorkloadWnd::Resize(int cx, int cy)
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
 		CDlgUnits dlu(this);
-		CRect rWorkload(0, dlu.ToPixelsY(28), cx, cy);
+		CRect rWorkload(0, dlu.ToPixelsY(16), cx, cy);
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
 
 		// selected task dates takes available space
-		int nXOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
-		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDTASKDATES, nXOffset, 0);
-
-		// always redraw the selected task dates
-		GetDlgItem(IDC_SELECTEDTASKDATES)->Invalidate(FALSE);
+// 		int nXOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
+// 		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDTASKDATES, nXOffset, 0);
+// 
+// 		// always redraw the selected task dates
+// 		GetDlgItem(IDC_SELECTEDTASKDATES)->Invalidate(FALSE);
 	}
 }
 

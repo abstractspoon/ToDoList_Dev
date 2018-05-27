@@ -30,6 +30,8 @@
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_TASKTITLE                   16034
 #define IDC_ALLOCATIONS                 16035
+#define IDC_DATETIMEPICKER1             16037
+#define IDC_DATETIMEPICKER2             16038
 #define ID_WORKLOAD_PREFS               32775
 #define ID_WORKLOAD_EDITALLOCATIONS     32783
 #define IDS_COL_STARTDATE               57676
@@ -54,7 +56,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16013
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16037
+#define _APS_NEXT_CONTROL_VALUE         16038
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

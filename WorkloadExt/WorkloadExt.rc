@@ -70,17 +70,19 @@ END
 IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    CTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,108,13,236,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Selected Task &Date Range",IDC_SELECTEDTASKDATES_LABEL,
-                    109,3,235,8
+    LTEXT           "Calculation Period",IDC_SELECTEDTASKDATES_LABEL,109,4,
+                    101,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,0,12,106,17
+                    WS_VISIBLE,1,0,106,17
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,0,30,587,279
+                    WS_VISIBLE,0,19,587,290
+    CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER1,"SysDateTimePick32",
+                    WS_TABSTOP,213,0,100,15
+    CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER2,"SysDateTimePick32",
+                    WS_TABSTOP,349,0,100,15
+    CTEXT           "to",IDC_STATIC,319,4,25,8
 END
 
 
