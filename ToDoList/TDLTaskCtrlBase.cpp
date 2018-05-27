@@ -4607,6 +4607,9 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 		ASSERT(nModCol == TDCC_NONE);
 		return FALSE;
 
+	case TDCA_METADATA:
+		return FALSE;
+
 	case TDCA_CUSTOMATTRIBDEFS:	// Resort all custom columns
 		ASSERT(nModCol == TDCC_NONE);
 		return CTDCCustomAttributeHelper::IsCustomColumn(nSortBy);
