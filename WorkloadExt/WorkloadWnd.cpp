@@ -90,7 +90,9 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SELCHANGE, OnWorkloadNotifySelChange)
+
 	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKTITLE, OnWorkloadEditTaskTitle)
+	ON_REGISTERED_MESSAGE(WM_WLC_EDITTASKALLOCATIONS, OnWorkloadEditTaskAllocations)
 	ON_REGISTERED_MESSAGE(WM_WLC_PREFSHELP, OnWorkloadPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_WLC_GETTASKICON, OnWorkloadGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_WLC_MOVETASK, OnWorkloadMoveTask)
@@ -422,13 +424,16 @@ void CWorkloadWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate, 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_ctrlWorkload.UpdateTasks(pTasks, nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes));
-
+	m_toolbar.RefreshButtonStates(FALSE);
+	
 	UpdateSelectedTaskDates();
 }
 
 bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	switch (nCmd)
 	{
@@ -547,7 +552,6 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return (m_ctrlWorkload.MoveSelectedItem(pData->move) != FALSE);
 		}
 		break;
-
 	}
 
 	return false;
@@ -748,6 +752,8 @@ LRESULT CWorkloadWnd::OnWorkloadNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	UpdateSelectedTaskDates();
 	SendParentSelectionUpdate();
 
+	m_toolbar.RefreshButtonStates(FALSE);
+
 	return 0L;
 }
 
@@ -829,6 +835,8 @@ LRESULT CWorkloadWnd::OnWorkloadMoveTask(WPARAM wp, LPARAM lp)
 
 void CWorkloadWnd::OnWorkloadEditAllocations() 
 {
+	ASSERT(CanEditSelectedTaskAllocations());
+
 	WORKLOADITEM wi;
 	VERIFY(m_ctrlWorkload.GetSelectedTask(wi));
 
@@ -867,8 +875,34 @@ void CWorkloadWnd::OnWorkloadEditAllocations()
 	}
 }
 
+LRESULT CWorkloadWnd::OnWorkloadEditTaskAllocations(WPARAM /*wp*/, LPARAM lp)
+{
+	if (CanEditSelectedTaskAllocations((DWORD)lp))
+	{
+		OnWorkloadEditAllocations();
+		return TRUE;
+	}
+
+	// else
+	ASSERT(0);
+	return FALSE;
+}
+
 void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI) 
 {
-	// TODO: Add your command update UI handler code here
-	
+	pCmdUI->Enable(CanEditSelectedTaskAllocations());
+}
+
+BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
+{
+	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	WORKLOADITEM wi;
+
+	return (m_ctrlWorkload.GetSafeHwnd() && m_ctrlWorkload.GetSelectedTask(wi) && !wi.bParent);
 }

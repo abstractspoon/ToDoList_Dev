@@ -111,6 +111,7 @@ protected:
 	afx_msg LRESULT OnWorkloadPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnWorkloadMoveTask(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnWorkloadEditTaskAllocations(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -121,6 +122,7 @@ protected:
 	void UpdateSelectedTaskDates();
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
+	BOOL CanEditSelectedTaskAllocations(DWORD dwTaskID = 0) const;
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);
