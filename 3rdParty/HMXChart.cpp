@@ -762,11 +762,8 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 	case HMX_DATASET_STYLE_VBAR:
 		{
 			// let's rock
-			CBrush brush(ds.GetColor()), *pBrushOld;
-			pBrushOld = dc.SelectObject(&brush);
-			dc.SelectStockObject(NULL_PEN);
-			
 			CRect rectTemp;
+
 			// nTemp will contains a parametrized data 
 			for(f=0; f<ds.GetDatasetSize(); f++) 
 			{
@@ -802,10 +799,8 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 					// show at least 1 line bar
 					rectTemp.right += (rectTemp.right == rectTemp.left) ? 1 : 0 ;
 				}
-				dc.Rectangle(rectTemp);
+				dc.FillSolidRect(rectTemp, ds.GetColor());
 			}
-			
-			dc.SelectObject(pBrushOld);
 		}
 		break;
 		
@@ -1137,7 +1132,7 @@ bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData)
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetDatasetStyle(int nDatasetIndex, int nStyle)
+bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1157,7 +1152,7 @@ bool CHMXChart::SetDatasetStyle(int nDatasetIndex, int nStyle)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetStyle(int nDatasetIndex, int& nStyle)
+bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1179,7 +1174,7 @@ bool CHMXChart::GetDatasetStyle(int nDatasetIndex, int& nStyle)
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetDatasetMarker(int nDatasetIndex, int nMarker)
+bool CHMXChart::SetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER nMarker)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1187,12 +1182,21 @@ bool CHMXChart::SetDatasetMarker(int nDatasetIndex, int nMarker)
 	return m_dataset[nDatasetIndex].SetMarker(nMarker);
 }
 
-bool CHMXChart::SetDatasetMinToZero(int nDatasetIndex, bool bSet)
+bool CHMXChart::SetDatasetMin(int nDatasetIndex, double dMin)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
 
-	m_dataset[nDatasetIndex].SetMinToZero(bSet);
+	m_dataset[nDatasetIndex].SetMin(dMin);
+	return true;
+}
+
+bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
+{
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+
+	m_dataset[nDatasetIndex].SetMax(dMax);
 	return true;
 }
 
@@ -1208,7 +1212,7 @@ bool CHMXChart::SetDatasetMinToZero(int nDatasetIndex, bool bSet)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetMarker(int nDatasetIndex, int& nMarker)
+bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;

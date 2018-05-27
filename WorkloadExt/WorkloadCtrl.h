@@ -129,7 +129,7 @@ public:
 
 protected:
 	CWorkloadTreeCtrl m_tcTasks;
-	CWorkloadChart m_chart;
+	CWorkloadChart m_barChart;
 	CListCtrl m_lcColumns;
 	CListCtrl m_lcTotalsLabels, m_lcColumnTotals;
 	CEnHeaderCtrl m_hdrColumns, m_hdrTasks;
@@ -140,7 +140,6 @@ protected:
 	WORKLOADSORT m_sort;
 
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
-	CStringArray m_aAllocTo;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
@@ -152,6 +151,7 @@ protected:
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
 
+	CStringArray m_aAllocTo;
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;
 	CMapAllocations m_mapTotalDays, m_mapTotalTasks, m_mapPercentLoad;

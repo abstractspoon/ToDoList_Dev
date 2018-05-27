@@ -11,27 +11,37 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
-#define HMX_DATASET_X_AXIS			0
-#define HMX_DATASET_Y_AXIS			1
+enum HMX_DATASET_AXIS
+{
+	HMX_DATASET_X_AXIS = 0,
+	HMX_DATASET_Y_AXIS,
+};
 
-#define HMX_DATASET_STYLE_LINE		1
-#define HMX_DATASET_STYLE_VBAR		2
-#define HMX_DATASET_STYLE_AREA		3
-#define HMX_DATASET_STYLE_AREALINE	4
+enum HMX_DATASET_STYLE
+{
+	HMX_DATASET_STYLE_NONE = 0,
+	HMX_DATASET_STYLE_LINE,
+	HMX_DATASET_STYLE_VBAR,
+	HMX_DATASET_STYLE_AREA,
+	HMX_DATASET_STYLE_AREALINE,
+};
 
-#define HMX_DATASET_MARKER_NONE		0
-#define HMX_DATASET_MARKER_TRI		1
-#define HMX_DATASET_MARKER_BOX		2
-#define HMX_DATASET_MARKER_SPH		3
-#define HMX_DATASET_MARKER_DIA		4
+enum HMX_DATASET_MARKER
+{
+	HMX_DATASET_MARKER_NONE = 0,
+	HMX_DATASET_MARKER_TRI,
+	HMX_DATASET_MARKER_BOX,
+	HMX_DATASET_MARKER_SPH,
+	HMX_DATASET_MARKER_DIA,
+};
 
 #define HMX_DATASET_VALUE_INVALID	1.7976931348623158e+308
 
 class CHMXDataset : public CObject  
 {
 public:
-	virtual bool		SetStyle( int nStyle );							// set data style
-	virtual int			GetStyle();										// get data style
+	virtual bool		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
+	virtual HMX_DATASET_STYLE GetStyle();								// get data style
 
 	virtual bool		SetColor( COLORREF clr );						// set data color
 	virtual COLORREF	GetColor();										// get data color
@@ -41,9 +51,8 @@ public:
 																		// unused if area
 	virtual int			GetSize();										// get size
 
-	virtual bool		SetMarker( int nMarker );						// set marker type (see #define section)
-																		// unused if style is bar or area
-	virtual int			GetMarker();									// get marker
+	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
+	virtual HMX_DATASET_MARKER GetMarker();								// get marker
 
 	virtual bool		AddData( double nData );						// set data adding new point
 	virtual bool		SetData( int nIndex, double nData );			// set data at specified index
@@ -51,7 +60,8 @@ public:
 	virtual int			GetDatasetSize();								// get dataset size (how many points in dataset?)
 
 	virtual bool		GetMinMax( double& nMin, double& nMax );		// gte min & max
-	virtual void		SetMinToZero(bool bSet = true);
+	virtual void		SetMin(double dMin);
+	virtual void		SetMax(double dMax);
 
 	virtual bool		ClearData();
 
@@ -61,12 +71,14 @@ public:
 protected:
 	CArray<double,double>	m_data;			// the data
 	COLORREF				m_clr;			// color
-	int						m_nMarker;		// marker type (see #define section)
+	HMX_DATASET_MARKER		m_nMarker;		// marker type (see #define section)
 	int						m_nSize;		// pen size if style is line
 											// bar size (0-10) if style is bar
 											// unused if style is area
-	int						m_nStyle;		// data style (see #define section)
-	bool					m_bSetMinToZero;
+	HMX_DATASET_STYLE		m_nStyle;		// data style (see #define section)
+
+	bool					m_bSetMinTo, m_bSetMaxTo;
+	double					m_dSetMinTo, m_dSetMaxTo;
 
 };
 

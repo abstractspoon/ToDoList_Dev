@@ -958,7 +958,7 @@ void CBurndownWnd::BuildBurndownGraph()
 {
 	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
 	m_graph.SetDatasetPenColor(0, COLOR_GREEN);
-	m_graph.SetDatasetMinToZero(0, true);
+	m_graph.SetDatasetMin(0, 0.0);
 	
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();
@@ -995,11 +995,11 @@ void CBurndownWnd::BuildSprintGraph()
 
 	m_graph.SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
 	m_graph.SetDatasetPenColor(SPRINT_EST,  COLOR_RED);
-	m_graph.SetDatasetMinToZero(SPRINT_EST, true);
+	m_graph.SetDatasetMin(SPRINT_EST, 0.0);
 
 	m_graph.SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
 	m_graph.SetDatasetPenColor(SPRINT_SPENT, COLOR_YELLOW);
-	m_graph.SetDatasetMinToZero(SPRINT_SPENT, true);
+	m_graph.SetDatasetMin(SPRINT_SPENT, 0.0);
 
 	// build the graph
 	COleDateTime dtStart = GetGraphStartDate();

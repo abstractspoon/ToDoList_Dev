@@ -20,6 +20,10 @@ CHMXDataset::CHMXDataset()
 	m_nSize  = 2;
 	m_nStyle = HMX_DATASET_STYLE_LINE;
 	m_clr    = RGB(0, 0, 0);
+	m_nMarker = HMX_DATASET_MARKER_NONE;
+
+	m_bSetMinTo = m_bSetMaxTo = false;
+	m_dSetMinTo = m_dSetMaxTo = -1;
 }
 
 CHMXDataset::~CHMXDataset()
@@ -68,7 +72,7 @@ bool CHMXDataset::GetData(int nCount, double &nSample)
 	return true;
 }
 
-bool CHMXDataset::SetStyle(int nStyle)
+bool CHMXDataset::SetStyle(HMX_DATASET_STYLE nStyle)
 {
 	m_nStyle = nStyle;
 	
@@ -82,14 +86,14 @@ bool CHMXDataset::SetColor(COLORREF clr)
 	return true;
 }
 
-bool CHMXDataset::SetMarker(int nMarker)
+bool CHMXDataset::SetMarker(HMX_DATASET_MARKER nMarker)
 {
 	m_nMarker = nMarker;
 
 	return true;
 }
 
-int CHMXDataset::GetMarker()
+HMX_DATASET_MARKER CHMXDataset::GetMarker()
 {
 	return m_nMarker;
 }
@@ -133,21 +137,32 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax)
 			}
 		}
 
-		if (m_bSetMinToZero)
-			nMin = min(0, dMin);
+		if (m_bSetMinTo)
+			nMin = min(dMin, m_dSetMinTo);
 		else
 			nMin = dMin;
 
-		nMax = dMax;
+		if (m_bSetMaxTo)
+			nMax = max(dMax, m_dSetMaxTo);
+		else
+			nMax = dMax;
+
 		return true;
 	} 
 	else
 		return false;
 }
 
-void CHMXDataset::SetMinToZero(bool bSet)
+void CHMXDataset::SetMin(double dMin)
 {
-	m_bSetMinToZero = bSet;
+	m_bSetMinTo = true;
+	m_dSetMinTo = dMin;
+}
+
+void CHMXDataset::SetMax(double dMax)
+{
+	m_bSetMaxTo = true;
+	m_dSetMaxTo = dMax;
 }
 
 int CHMXDataset::GetSize()
@@ -160,7 +175,7 @@ COLORREF CHMXDataset::GetColor()
 	return m_clr;
 }
 
-int CHMXDataset::GetStyle()
+HMX_DATASET_STYLE CHMXDataset::GetStyle()
 {
 	return m_nStyle;
 }

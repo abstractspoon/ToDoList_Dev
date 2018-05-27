@@ -109,11 +109,11 @@ public:
 	virtual bool		SetDatasetPenSize( int nDatasetIndex, int nSize );
 	virtual bool		GetDatasetPenSize( int nDatasetIndex, int& nSize );
 
-	virtual bool		SetDatasetStyle( int nDatasetIndex, int nStyle );
-	virtual bool		GetDatasetStyle( int nDatasetIndex, int& nStyle );
+	virtual bool		SetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE nStyle );
+	virtual bool		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle );
 
-	virtual bool		SetDatasetMarker( int nDatasetIndex, int nMarker );
-	virtual bool		GetDatasetMarker( int nDatasetIndex, int& nMarker );
+	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
+	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker );
 
 	virtual bool		AddData( int nDatasetIndex, double nData );
 	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
@@ -122,7 +122,8 @@ public:
 	virtual bool		ClearData( int nDatasetIndex);
 	virtual void		ClearData();
 	CSize				GetDataArea() const { return m_rectData.Size(); }
-	virtual bool		SetDatasetMinToZero(int nDatasetIndex, bool bSet = true);
+	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
+	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
 
 	// useful global functions
 	virtual bool		CalcDatas();

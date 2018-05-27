@@ -130,7 +130,7 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_mapTotalDays(FALSE),
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
-	m_chart(m_data)
+	m_barChart(m_aAllocTo, m_mapTotalDays)
 {
 }
 
@@ -243,6 +243,15 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if (m_themeHeader.AreControlsThemed())
 		VERIFY(m_themeHeader.Open(*this, _T("HEADER")));
+
+	// Bar Chart ------------------------------------------------------------------------
+	// Initialise graph
+	VERIFY(m_barChart.Create(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_BARCHART));
+
+	m_barChart.SetBkGnd(GetSysColor(COLOR_WINDOW));
+	m_barChart.SetXLabelsAreTicks(true);
+	m_barChart.SetXLabelAngle(45);
+	m_barChart.SetYTicks(10);
 	
 	BuildTaskTreeColumns();
 	BuildListColumns();
@@ -612,6 +621,7 @@ void CWorkloadCtrl::RecalcAllocationTotals()
 	}
 
 	m_lcColumnTotals.Invalidate();
+	m_barChart.OnEditData();
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
@@ -1197,7 +1207,10 @@ void CWorkloadCtrl::OnSize(UINT nType, int cx, int cy)
 	
 	if (cx && cy)
 	{
-		CRect rect(0, 0, cx, cy);
+		CRect rChart(((cx * 2) / 3), 0, cx, cy);
+		m_barChart.MoveWindow(rChart);
+
+		CRect rect(0, 0, rChart.left - 4, cy);
 		CRect rTreeTotals(rect), rColumnTotals(rect), rTreeList(rect);
 		
 		rTreeTotals.top = (rect.bottom - ((m_tcTasks.GetItemHeight() + 1) * NUM_TOTALS));
@@ -3155,6 +3168,7 @@ BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 
 	CDialogHelper::ExcludeChild(&m_lcTotalsLabels, pDC);
 	CDialogHelper::ExcludeChild(&m_lcColumnTotals, pDC);
+	CDialogHelper::ExcludeChild(&m_barChart, pDC);
 	
 	CRect rClient;
 	CWnd::GetClientRect(rClient);

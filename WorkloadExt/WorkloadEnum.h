@@ -67,7 +67,8 @@ enum
 	IDC_ALLOCATIONCOLUMNS,		
 	IDC_TASKHEADER,	
 	IDC_TOTALSLABELS,
-	IDC_ALLOCATIONTOTALS
+	IDC_ALLOCATIONTOTALS,
+	IDC_BARCHART,
 };
 
 /////////////////////////////////////////////////////////////////////////////
