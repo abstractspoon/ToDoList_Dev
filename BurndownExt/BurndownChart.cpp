@@ -40,6 +40,8 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 
 			SendMessage(WM_PRINTCLIENT, (WPARAM)dcImage.GetSafeHdc(), PRF_ERASEBKGND);
 			Invalidate(TRUE);
+
+			dcImage.SelectObject(pOldImage);
 		}
 	}
 
