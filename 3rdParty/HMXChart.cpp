@@ -38,6 +38,7 @@ CHMXChart::CHMXChart()
 	m_clrGrid = GetSysColor(COLOR_3DSHADOW);
 	m_bXLabelsAreTicks = false;
 	m_nXLabelDegrees = 0;
+	m_bDrawGridOnTop = true;
 }
 
 CHMXChart::~CHMXChart()
@@ -97,8 +98,17 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
 
-	DrawDatasets(dc);
-	DrawGrid(dc);
+	if (m_bDrawGridOnTop)
+	{
+		DrawDatasets(dc);
+		DrawGrid(dc);
+	}
+	else
+	{
+		DrawGrid(dc);
+		DrawDatasets(dc);
+	}
+
 	DrawTitle(dc);
 	DrawBaseline(dc);
 	DrawAxes(dc);
@@ -1336,6 +1346,15 @@ bool CHMXChart::SetGridColor(COLORREF clr)
 	}
 
 	return true;
+}
+
+void CHMXChart::SetDrawGridOnTop(bool bOnTop)
+{
+	if (bOnTop != m_bDrawGridOnTop)
+	{
+		m_bDrawGridOnTop = bOnTop;
+		Redraw();
+	}
 }
 
 //

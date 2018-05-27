@@ -101,6 +101,7 @@ public:
 	virtual COLORREF	GetBkGnd();
 
 	virtual bool		SetGridColor(COLORREF clr);
+	virtual void		SetDrawGridOnTop(bool bOnTop = true);
 
 	// dataset functions
 	virtual bool		SetDatasetPenColor( int nDatasetIndex, COLORREF clr );
@@ -177,6 +178,7 @@ protected:
 	int				m_nXLabelDegrees;
 
 	CPen			m_penGrid;
+	bool			m_bDrawGridOnTop;
 
 	//{{AFX_MSG(CHMXChart)
 	afx_msg void OnPaint();
