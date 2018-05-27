@@ -466,13 +466,17 @@ double CDateHelper::GetDate(DH_DATE nDate)
 	case DHD_ENDNEXTWEEK:
 		return (GetDate(DHD_ENDTHISWEEK) + 7.0);
 
+	case DHD_BEGINTHISMONTH:
+		date = COleDateTime::GetCurrentTime();
+		return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);
+
 	case DHD_ENDTHISMONTH:
 		{
 			date = COleDateTime::GetCurrentTime();
 			int nThisMonth = date.GetMonth();
 
 			while (date.GetMonth() == nThisMonth)
-				date += 20; // much quicker than doing it one day at a time
+				date += 10; // much quicker than doing it one day at a time
 
 			date -= date.GetDay(); // because we went into next month
 		}
@@ -489,6 +493,10 @@ double CDateHelper::GetDate(DH_DATE nDate)
 			date -= date.GetDay(); // because we went into next month + 1
 		}
 		break;
+
+	case DHD_BEGINTHISYEAR:
+		date = COleDateTime::GetCurrentTime();
+		return COleDateTime(date.GetYear(), 1, 1, 0, 0, 0);
 
 	case DHD_ENDTHISYEAR:
 		date = COleDateTime::GetCurrentTime(); // for current year
