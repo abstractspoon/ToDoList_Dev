@@ -75,7 +75,9 @@ struct WORKLOADITEM
 	
 	BOOL HasStart() const;
 	BOOL HasDue() const;
-	BOOL GetDuration(double& dDays) const;
+	BOOL HasDates() const { return (HasStart() && HasDue()); }
+	BOOL IsDone() const { return (bDone || bGoodAsDone); }
+	BOOL GetDuration(double& dDays, BOOL bWeekdays) const;
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -96,8 +98,8 @@ public:
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
-	void CalculateTotals(CMapAllocations& mapTotalDays, 
-						 CMapAllocations& mapTotalTasks) const;
+	void CalculateTotals(const COleDateTime& dtBegin, const COleDateTime& dtEndInclusive,
+							CMapAllocations& mapTotalDays, CMapAllocations& mapTotalTasks) const;
 
 };
 

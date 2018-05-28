@@ -70,7 +70,7 @@ public:
 	BOOL SetSelectedTask(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
-	BOOL SetAllocationPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive = TRUE);
+	BOOL SetCurrentPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive = TRUE);
 
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);

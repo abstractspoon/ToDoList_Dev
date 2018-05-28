@@ -30,8 +30,8 @@
 #define IDC_COLUMNVISIBILITY            16032
 #define IDC_TASKTITLE                   16034
 #define IDC_ALLOCATIONS                 16035
-#define IDC_DATETIMEPICKER1             16037
-#define IDC_DATETIMEPICKER2             16038
+#define IDC_PERIODBEGIN                 16037
+#define IDC_PERIODENDINCLUSIVE          16038
 #define ID_WORKLOAD_PREFS               32775
 #define ID_WORKLOAD_EDITALLOCATIONS     32783
 #define IDS_COL_STARTDATE               57676

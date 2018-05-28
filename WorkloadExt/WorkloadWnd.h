@@ -62,6 +62,8 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadWnd)
+	COleDateTime	m_dtPeriodBegin;
+	COleDateTime	m_dtPeriodEndInclusive;
 	//}}AFX_DATA
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
@@ -97,6 +99,8 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnWorkloadEditAllocations();
 	afx_msg void OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI);
+	afx_msg void OnChangePeriodBegin(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnChangePeriodEnd(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnHelp();

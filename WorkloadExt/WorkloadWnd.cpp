@@ -67,25 +67,29 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
+	DDX_DateTimeCtrl(pDX, IDC_PERIODBEGIN, m_dtPeriodBegin);
+	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriodEndInclusive);
 	//}}AFX_DATA_MAP
 	//DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	//{{AFX_MSG_MAP(CWorkloadWnd)
-	ON_WM_SIZE()
-	ON_WM_CTLCOLOR()
 	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
-	ON_WM_SHOWWINDOW()
 	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODBEGIN, OnChangePeriodBegin)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODENDINCLUSIVE, OnChangePeriodEnd)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
+	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
+	ON_WM_SHOWWINDOW()
 
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
@@ -158,9 +162,9 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// NOTE: Most of sort is handled by the app
 	CString sKey(szKey);
 
-// 	pPrefs->WriteProfileInt(sKey, _T("SortColumn"), m_ctrlWorkload.GetSortColumn());
-// 	pPrefs->WriteProfileInt(sKey, _T("SortAscending"), m_ctrlWorkload.GetSortAscending());
 	pPrefs->WriteProfileString(sKey, _T("SortByAllocTo"), m_ctrlWorkload.GetSortByAllocTo());
+	pPrefs->WriteProfileDouble(sKey, _T("PeriodBegin"), m_dtPeriodBegin.m_dt);
+	pPrefs->WriteProfileDouble(sKey, _T("PeriodEnd"), m_dtPeriodEndInclusive.m_dt);
 
 	// column widths
 	CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -252,6 +256,12 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		UpdateWorkloadCtrlPreferences();
 
 		m_ctrlWorkload.SetSortByAllocTo(pPrefs->GetProfileString(sKey, _T("SortByAllocTo")));
+
+		// Current period
+		m_dtPeriodBegin = pPrefs->GetProfileDouble(sKey, _T("PeriodBegin"), CDateHelper::GetDate(DHD_BEGINTHISMONTH));
+		m_dtPeriodEndInclusive = pPrefs->GetProfileDouble(sKey, _T("PeriodEnd"), CDateHelper::GetDate(DHD_ENDTHISMONTH));
+
+		m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
 
 		// column order
 		CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -905,4 +915,22 @@ BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 	WORKLOADITEM wi;
 
 	return (m_ctrlWorkload.GetSafeHwnd() && m_ctrlWorkload.GetSelectedTask(wi) && !wi.bParent);
+}
+
+void CWorkloadWnd::OnChangePeriodBegin(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	UpdateData();
+
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+	
+	*pResult = 0;
+}
+
+void CWorkloadWnd::OnChangePeriodEnd(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	UpdateData();
+
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+	
+	*pResult = 0;
 }

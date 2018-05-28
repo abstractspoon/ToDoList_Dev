@@ -247,16 +247,12 @@ BOOL WORKLOADITEM::HasStart() const
 	return CDateHelper::IsDateSet(dtStart);
 }
 
-BOOL WORKLOADITEM::GetDuration(double& dDays) const
+BOOL WORKLOADITEM::GetDuration(double& dDays, BOOL bWeekdays) const
 {
 	if (!HasStart() || !HasDue())
 		return FALSE;
 
-	dDays = (dtDue.m_dt - dtStart.m_dt);
-
-	if (!CDateHelper::DateHasTime(dtDue))
-		dDays += 1.0;
-
+	dDays = CDateHelper::CalcDaysFromTo(dtStart, dtDue, TRUE, bWeekdays);
 	return TRUE;
 }
 
@@ -321,8 +317,8 @@ void CWorkloadItemMap::RemoveAll()
 	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
 }
 
-void CWorkloadItemMap::CalculateTotals(CMapAllocations& mapTotalDays, 
-									 CMapAllocations& mapTotalTasks) const
+void CWorkloadItemMap::CalculateTotals(const COleDateTime& dtBegin, const COleDateTime& dtEndInclusive,
+	CMapAllocations& mapTotalDays, CMapAllocations& mapTotalTasks) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -337,10 +333,27 @@ void CWorkloadItemMap::CalculateTotals(CMapAllocations& mapTotalDays,
 		GetNextAssoc(pos, dwTaskID, pWI);
 		ASSERT(pWI);
 
+		// Count how many the days of the task fall within the specified period
+		if (!pWI->HasDates() || pWI->IsDone())
+			continue;
+
+		COleDateTime dtFrom = max(pWI->dtStart, dtBegin);
+		COleDateTime dtTo = min(pWI->dtDue, dtEndInclusive);
+
+		double dTaskDays = CDateHelper::CalcDaysFromTo(dtFrom, dtTo, TRUE, TRUE);
+			
+		if (dTaskDays == 0.0)
+			continue;
+
+		double dTaskDuration;
+		VERIFY(pWI->GetDuration(dTaskDuration, TRUE));
+
+		double dProportion = (dTaskDays / dTaskDuration);
+
 		for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
 		{
 			CString sAllocTo(pWI->aAllocTo[nAllocTo]);
-			double dDays = pWI->mapAllocatedDays.Get(sAllocTo);
+			double dDays = (pWI->mapAllocatedDays.Get(sAllocTo) * dProportion);
 
 			if (mapTotalDays.Add(sAllocTo, dDays))
 				mapTotalTasks.Increment(sAllocTo);

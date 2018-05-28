@@ -72,17 +72,17 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Calculation Period",IDC_SELECTEDTASKDATES_LABEL,109,4,
-                    101,8
+    RTEXT           "Current Period: From",IDC_SELECTEDTASKDATES_LABEL,109,4,
+                    99,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,1,0,106,17
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,19,587,290
-    CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER1,"SysDateTimePick32",
-                    WS_TABSTOP,213,0,100,15
-    CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER2,"SysDateTimePick32",
-                    WS_TABSTOP,349,0,100,15
-    CTEXT           "to",IDC_STATIC,319,4,25,8
+    CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
+                    WS_TABSTOP,213,0,70,15
+    CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
+                    "SysDateTimePick32",WS_TABSTOP,311,0,70,15
+    RTEXT           "to",IDC_STATIC,287,4,19,8
 END
 
 

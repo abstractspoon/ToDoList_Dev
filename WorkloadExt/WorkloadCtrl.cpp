@@ -131,7 +131,7 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_mapPercentLoad(TRUE), // average
 	m_barChart(m_aAllocTo, m_mapPercentLoad)
 {
-	SetAllocationPeriod(CDateHelper::GetDate(DHD_BEGINTHISMONTH), CDateHelper::GetDate(DHD_ENDTHISMONTH), TRUE);
+	SetCurrentPeriod(CDateHelper::GetDate(DHD_BEGINTHISMONTH), CDateHelper::GetDate(DHD_ENDTHISMONTH), TRUE);
 }
 
 CWorkloadCtrl::~CWorkloadCtrl()
@@ -275,7 +275,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-BOOL CWorkloadCtrl::SetAllocationPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive)
+BOOL CWorkloadCtrl::SetCurrentPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive)
 {
 	if (dtTo < dtFrom)
 	{
@@ -649,7 +649,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	m_data.CalculateTotals(m_mapTotalDays, m_mapTotalTasks);
+	m_data.CalculateTotals(m_dtBegin, m_dtEndInclusive, m_mapTotalDays, m_mapTotalTasks);
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();
@@ -2622,7 +2622,7 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 
 		double dDuration = 0;
 
-		if (pWI->GetDuration(dDuration))
+		if (pWI->GetDuration(dDuration, TRUE))
 			nLongest = (int)dDuration;
 	}
 
@@ -2673,7 +2673,7 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 			{
 				double dDuration;
 
-				if (wi.GetDuration(dDuration))
+				if (wi.GetDuration(dDuration, TRUE))
 					sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), (int)dDuration);
 			}
 			break;
@@ -3540,8 +3540,8 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 		case WLCC_DURATION:
 			{
 				double dDuration1 = 0, dDuration2 = 0;
-				pWI1->GetDuration(dDuration1);
-				pWI1->GetDuration(dDuration2);
+				pWI1->GetDuration(dDuration1, TRUE);
+				pWI1->GetDuration(dDuration2, TRUE);
 
 				nCompare = (int)(dDuration1 - dDuration2);
 			}
