@@ -128,6 +128,10 @@ SOURCE=.\GanttPreferencesDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttStatic.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttStruct.cpp
 # End Source File
 # Begin Source File
