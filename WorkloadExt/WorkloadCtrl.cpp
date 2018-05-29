@@ -23,6 +23,7 @@
 #include "..\shared\osversion.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
+#include "..\shared\wclassdefines.h"
 
 #include "..\Interfaces\iuiextension.h"
 
@@ -1598,7 +1599,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			default:
 				ASSERT(0);
 			}
-
+			
 			// Draw content
 			switch (nItem)
 			{

@@ -117,6 +117,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\WorkloadChart.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\WorkloadCtrl.cpp
 # End Source File
 # Begin Source File
@@ -166,6 +170,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WorkloadChart.h
 # End Source File
 # Begin Source File
 
