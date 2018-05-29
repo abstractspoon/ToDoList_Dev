@@ -72,17 +72,17 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
-    RTEXT           "Current Period: From",IDC_SELECTEDTASKDATES_LABEL,109,4,
+    RTEXT           "Current Period: From",IDC_SELECTEDTASKDATES_LABEL,150,4,
                     99,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,1,0,106,17
+                    WS_VISIBLE,1,0,146,18
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,19,587,290
     CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
-                    WS_TABSTOP,213,0,70,15
+                    WS_TABSTOP,254,0,70,15
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
-                    "SysDateTimePick32",WS_TABSTOP,311,0,70,15
-    RTEXT           "to",IDC_STATIC,287,4,19,8
+                    "SysDateTimePick32",WS_TABSTOP,352,0,70,15
+    RTEXT           "to",IDC_STATIC,328,4,19,8
 END
 
 
@@ -267,9 +267,16 @@ END
 
 IDR_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
+    BUTTON      ID_MOVEPERIODSTARTBACKONEMONTH
+    BUTTON      ID_MOVEPERIODBACKONEMONTH
+    BUTTON      ID_THISMONTHPERIOD
+    BUTTON      ID_MOVEPERIODFOREWARDSONEMONTH
+    BUTTON      ID_MOVEPERIODENDFOREWARDSONEMONTH
+    SEPARATOR
     BUTTON      ID_WORKLOAD_PREFS
     SEPARATOR
     BUTTON      ID_WORKLOAD_EDITALLOCATIONS
+    SEPARATOR
     BUTTON      ID_HELP
 END
 
@@ -328,6 +335,16 @@ BEGIN
     IDS_TOTALDAYSPERPERSON  "Total Allocated Days"
     IDS_NUMACTIVITIESPERPERSON "Number of Allocated Tasks"
     IDS_PERCENTLOADPERPERSON "Percentage Load"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_THISMONTHPERIOD      "\nSet period to 'this' month"
+    ID_MOVEPERIODSTARTBACKONEMONTH "\nMove start of period back one month"
+    ID_MOVEPERIODBACKONEMONTH "\nMove whole of period back one month"
+    ID_MOVEPERIODFOREWARDSONEMONTH "\nMove whole of period foreward one month"
+    ID_MOVEPERIODENDFOREWARDSONEMONTH 
+                            "\nMove end of period foreward one month"
 END
 
 #endif    // English (Australia) resources
