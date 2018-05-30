@@ -65,7 +65,7 @@ public:
 	static TCHAR GetUnits(TH_UNITS nUnits);
 	static BOOL DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static TH_UNITS DecodeUnits(TCHAR cUnits);
-	static TH_UNITS DecodeUnits(LPCTSTR szUnits);
+	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits);
 
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
