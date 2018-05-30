@@ -706,13 +706,6 @@ void CWorkloadWnd::Resize(int cx, int cy)
 		CRect rWorkload(0, dlu.ToPixelsY(16), cx, cy);
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
-
-		// selected task dates takes available space
-// 		int nXOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
-// 		CDialogHelper::ResizeCtrl(this, IDC_SELECTEDTASKDATES, nXOffset, 0);
-// 
-// 		// always redraw the selected task dates
-// 		GetDlgItem(IDC_SELECTEDTASKDATES)->Invalidate(FALSE);
 	}
 }
 

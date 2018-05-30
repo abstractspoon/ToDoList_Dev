@@ -72,8 +72,8 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
-    RTEXT           "Current Period: From",IDC_SELECTEDTASKDATES_LABEL,150,4,
-                    99,8
+    RTEXT           "Current Period: ",IDC_SELECTEDTASKDATES_LABEL,150,4,99,
+                    8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,1,0,146,18
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
@@ -81,8 +81,8 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
                     WS_TABSTOP,254,0,70,15
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
-                    "SysDateTimePick32",WS_TABSTOP,352,0,70,15
-    RTEXT           "to",IDC_STATIC,328,4,19,8
+                    "SysDateTimePick32",WS_TABSTOP,337,0,70,15
+    CTEXT           "-",IDC_STATIC,326,4,8,8
 END
 
 
@@ -327,7 +327,7 @@ BEGIN
     IDS_ATTRIB_TASKID       "Task ID"
     IDS_NEW_ALLOCATION      "<new allocation>"
     IDS_COL_TOTAL           "Total"
-    IDS_TOTALSDATERANGE     "Period %s - %s"
+    IDS_TOTALSDATERANGE     "Current Period: %s - %s"
 END
 
 STRINGTABLE DISCARDABLE 
