@@ -90,7 +90,7 @@ protected:
 	static CString FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeftOverUnits, 
 								double dLeftOverMultiplier, BOOL bDecPlaces);
 	static BOOL IsWeekdays(TH_UNITS nUnits);
-	static BOOL IsValidUnit(int nUnits);
+	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);
 	static BOOL RemoveAM(CString& sTime);
 };

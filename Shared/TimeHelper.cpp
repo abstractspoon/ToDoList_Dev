@@ -192,7 +192,7 @@ void CTimeHelper::CalculatePartWorkdays(const COleDateTime& dtStart, const COleD
 	}
 }
 
-BOOL CTimeHelper::IsValidUnit(int nUnits)
+BOOL CTimeHelper::IsValidUnit(TH_UNITS nUnits)
 {
 	switch (nUnits)
 	{
@@ -782,11 +782,9 @@ BOOL CTimeHelper::DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits
 	}
 
 	// Trailing units
-	TCHAR nLast = Misc::Last(sTime);
+	nUnits = CTimeHelper::DecodeUnits(Misc::Last(sTime));
 	
-	if (IsValidUnit(nLast))
-		nUnits = (TH_UNITS)nLast;
-	else
+	if (!IsValidUnit(nUnits))
 		nUnits = THU_HOURS;
 	
 	// Rest is number (note: ttof ignores any trailing letters)
