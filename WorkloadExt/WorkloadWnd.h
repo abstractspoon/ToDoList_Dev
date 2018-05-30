@@ -101,6 +101,16 @@ protected:
 	afx_msg void OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI);
 	afx_msg void OnChangePeriodBegin(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangePeriodEnd(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMovePeriodBackOneMonth();
+	afx_msg void OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnMovePeriodStartBackOneMonth();
+	afx_msg void OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnResetPeriodToThisMonth();
+	afx_msg void OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI);
+	afx_msg void OnMovePeriodEndForwardOneMonth();
+	afx_msg void OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMovePeriodForwardOneMonth();
+	afx_msg void OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnHelp();

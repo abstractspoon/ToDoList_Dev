@@ -81,6 +81,16 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODBEGIN, OnChangePeriodBegin)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODENDINCLUSIVE, OnChangePeriodEnd)
+	ON_COMMAND(ID_MOVEPERIODBACKONEMONTH, OnMovePeriodBackOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODBACKONEMONTH, OnUpdateMovePeriodBackOneMonth)
+	ON_COMMAND(ID_MOVEPERIODSTARTBACKONEMONTH, OnMovePeriodStartBackOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTBACKONEMONTH, OnUpdateMovePeriodStartBackOneMonth)
+	ON_COMMAND(ID_THISMONTHPERIOD, OnResetPeriodToThisMonth)
+	ON_UPDATE_COMMAND_UI(ID_THISMONTHPERIOD, OnUpdateResetPeriodToThisMonth)
+	ON_COMMAND(ID_MOVEPERIODENDFORWARDSONEMONTH, OnMovePeriodEndForwardOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDSONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
+	ON_COMMAND(ID_MOVEPERIODFORWARDSONEMONTH, OnUpdateMovePeriodForwardOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDSONEMONTH, OnUpdateUpdateMovePeriodForwardOneMonth)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
@@ -917,7 +927,7 @@ BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 	return (m_ctrlWorkload.GetSafeHwnd() && m_ctrlWorkload.GetSelectedTask(wi) && !wi.bParent);
 }
 
-void CWorkloadWnd::OnChangePeriodBegin(NMHDR* pNMHDR, LRESULT* pResult) 
+void CWorkloadWnd::OnChangePeriodBegin(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
 	UpdateData();
 
@@ -926,11 +936,84 @@ void CWorkloadWnd::OnChangePeriodBegin(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CWorkloadWnd::OnChangePeriodEnd(NMHDR* pNMHDR, LRESULT* pResult) 
+void CWorkloadWnd::OnChangePeriodEnd(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
 	UpdateData();
 
 	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
 	
 	*pResult = 0;
+}
+
+void CWorkloadWnd::OnMovePeriodBackOneMonth() 
+{
+	CDateHelper::IncrementMonth(m_dtPeriodBegin, -1);
+	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, -1);
+
+	UpdateData(FALSE);
+	
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CWorkloadWnd::OnMovePeriodStartBackOneMonth() 
+{
+	CDateHelper::IncrementMonth(m_dtPeriodBegin, -1);
+	
+	UpdateData(FALSE);
+	
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CWorkloadWnd::OnResetPeriodToThisMonth() 
+{
+	m_dtPeriodBegin = CDateHelper::GetDate(DHD_BEGINTHISMONTH);
+	m_dtPeriodEndInclusive = CDateHelper::GetDate(DHD_ENDTHISMONTH);
+	
+	UpdateData(FALSE);
+	
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+}
+
+void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
+{
+	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, 1);
+	
+	UpdateData(FALSE);
+	
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth() 
+{
+	CDateHelper::IncrementMonth(m_dtPeriodBegin, 1);
+	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, 1);
+	
+	UpdateData(FALSE);
+	
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+}
+
+void CWorkloadWnd::OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
 }
