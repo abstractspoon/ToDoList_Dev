@@ -142,17 +142,21 @@ public:
 	// Generated message map functions
 protected:
 	
-	virtual bool PaintBkGnd(CDC &dc);						// paint backgroud
-	virtual bool DrawTitle( CDC &dc );						// draw main title
-	virtual bool DrawGrid( CDC& dc);						// draw grid
-	virtual bool DrawAxes(CDC &dc);							// draw axes
-	virtual bool DrawHorzLine( CDC &dc);					// draw horz line
-	virtual bool DrawVertLine( CDC &dc);					// draw vert line
-	virtual bool DrawBaseline( CDC& dc );					// draw baseline
-	virtual bool DrawXScale( CDC& dc );						// draw x scale
-	virtual bool DrawYScale( CDC& dc );						// draw y scale
-	virtual bool DrawDataset(CDC &dc, CHMXDataset &ds );	// draw specific dataset
-	virtual bool DrawDatasets(CDC &dc);						// draw all datasets
+	virtual bool PaintBkGnd(CDC &dc);						
+	virtual bool DrawTitle( CDC &dc );						
+	virtual bool DrawGrid( CDC& dc);						
+	virtual bool DrawDataBkgnd( CDC& dc) { return true; } // default does nothing					
+	virtual bool DrawAxes(CDC &dc);							
+	virtual bool DrawHorzLine( CDC &dc);					
+	virtual bool DrawVertLine( CDC &dc);					
+	virtual bool DrawBaseline( CDC& dc );					
+	virtual bool DrawXScale( CDC& dc );						
+	virtual bool DrawYScale( CDC& dc );						
+	virtual bool DrawDataset(CDC &dc, int nDatasetIndex);	
+	virtual bool DrawDatasets(CDC &dc);						
+
+	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
+	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
 
 	CStringArray	m_strarrScaleXLabel;					// x labels
 	int				m_nXLabelStep;							// x label step

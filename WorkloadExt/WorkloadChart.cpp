@@ -8,6 +8,8 @@
 
 #include "..\Shared\EnString.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
@@ -23,9 +25,13 @@ const COLORREF COLOR_ORANGE	= RGB(255,  91,  21);
 CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad) 
 	: 
 	m_mapPercentLoad(mapPercentLoad), 
-	m_aAllocTo(aAllocTo)
+	m_aAllocTo(aAllocTo),
+	m_crOverload(COLOR_RED),
+	m_dOverloadValue(80.0),
+	m_crUnderload(COLOR_GREEN),
+	m_dUnderloadValue(50.0)
 {
-
+	SetDatasetLineColor(0, COLOR_BLUE);
 }
 
 CWorkloadChart::~CWorkloadChart()
@@ -77,18 +83,17 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
 	SetDatasetMin(0, 0.0);
 	SetDatasetMax(0, 100.0);
-	SetDatasetSizeFactor(0, 3);
-	SetDatasetLineColor(0, COLOR_ORANGE);
+	SetDatasetSizeFactor(0, 5);
 
 	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
 	SetDrawGridOnTop(false);
 
-	OnEditData();
+	OnChangeData();
 
 	return 0;
 }
 
-void CWorkloadChart::OnEditData()
+void CWorkloadChart::OnChangeData()
 {
 	// build the graph
 	ClearData(0);
@@ -101,4 +106,94 @@ void CWorkloadChart::OnEditData()
 
 	CalcDatas();
 	Invalidate(FALSE);
+}
+
+void CWorkloadChart::SetOverloadColor(double dOverloadValue, COLORREF crOverload)
+{
+	m_dOverloadValue = dOverloadValue;
+	m_crOverload = crOverload;
+}
+
+void CWorkloadChart::SetUnderloadColor(double dUnderloadValue, COLORREF crUnderload)
+{
+	m_dUnderloadValue = dUnderloadValue;
+	m_crUnderload = crUnderload;
+}
+
+BOOL CWorkloadChart::SetNormalColor(COLORREF crNormal)
+{
+	if (crNormal == CLR_NONE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return (SetDatasetLineColor(0, crNormal) ? TRUE : FALSE);
+}
+
+COLORREF CWorkloadChart::GetLineColor(int nDatasetIndex, double dValue) const
+{
+	if ((m_crOverload != CLR_NONE) && (dValue >= m_dOverloadValue))
+		return m_crOverload;
+
+	if ((m_crUnderload != CLR_NONE) && (dValue <= m_dUnderloadValue))
+		return m_crUnderload;
+
+	return CHMXChart::GetLineColor(nDatasetIndex, dValue);
+}
+
+COLORREF CWorkloadChart::GetFillColor(int nDatasetIndex, double dValue) const
+{
+	COLORREF crLine = GetLineColor(nDatasetIndex, dValue);
+
+	return RGBX::AdjustLighting(crLine, 0.25, FALSE);
+}
+
+bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
+{
+	if (!CHMXChart::DrawDataBkgnd(dc))
+		return false;
+
+	// Draw Over/underload cutoffs
+	if (HasOverload() || HasUnderload())
+	{
+		// Normal
+		COLORREF crFill = CLR_NONE;
+		
+		if (GetDatasetLineColor(0, crFill))
+		{
+			crFill = RGBX::AdjustLighting(crFill, 0.5, FALSE);
+			dc.FillSolidRect(m_rectData, crFill);
+		}
+		
+		if (HasOverload())
+		{
+			CRect rOverload(m_rectData);
+			rOverload.bottom -= (rOverload.Height() * (m_dOverloadValue / m_nYMax));
+
+			COLORREF crFill = RGBX::AdjustLighting(m_crOverload, 0.5, FALSE);
+			dc.FillSolidRect(rOverload, crFill);
+		}
+
+		if (HasUnderload())
+		{
+			CRect rUnderload(m_rectData);
+			rUnderload.top = (rUnderload.bottom - (rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+
+			COLORREF crFill = RGBX::AdjustLighting(m_crUnderload, 0.5, FALSE);
+			dc.FillSolidRect(rUnderload, crFill);
+		}
+	}
+
+	return true;
+}
+
+BOOL CWorkloadChart::HasOverload() const
+{
+	return ((m_crOverload != CLR_NONE) && (m_dOverloadValue > 0.0));
+}
+
+BOOL CWorkloadChart::HasUnderload() const
+{
+	return ((m_crUnderload != CLR_NONE) && (m_dUnderloadValue > 0.0));
 }

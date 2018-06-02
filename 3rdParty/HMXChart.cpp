@@ -97,6 +97,8 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
 
+	DrawDataBkgnd(dc);
+
 	if (m_bDrawGridOnTop)
 	{
 		DrawDatasets(dc);
@@ -143,16 +145,26 @@ bool CHMXChart::CopyToClipboard()
 	BeginWaitCursor();
 
 	memDC.CreateCompatibleDC(&dc);
-
 	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(),m_rectArea.Height());
 
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
 	PaintBkGnd(memDC);
+	DrawDataBkgnd(dc);
+
+	if (m_bDrawGridOnTop)
+	{
+		DrawDatasets(memDC);
+		DrawGrid(memDC);
+	}
+	else
+	{
+		DrawGrid(memDC);
+		DrawDatasets(memDC);
+	}
+
 	DrawTitle(memDC);
-	DrawGrid(memDC);
 	DrawBaseline(memDC);
-	DrawDatasets(memDC);
 	DrawAxes(memDC);
 	DrawYScale(memDC);
 	DrawXScale(memDC);
@@ -386,7 +398,7 @@ bool CHMXChart::DrawVertLine(CDC & dc)
 	for(int f=0; f<m_nXMax; f=f+m_nXLabelStep) 
 	{
 		dc.MoveTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.top);
-		dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 10);
+		dc.LineTo(m_rectData.left + (int)(nX*(f+0.5)), m_rectData.bottom + 8);
 	}
 
 	dc.MoveTo(m_rectData.left + m_rectData.Width() - 1, m_rectData.top);
@@ -648,7 +660,7 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 	// Draw dataset from last to first so I can show 
 	// first dataset in foreground, below the second dataset and so on
 	for(f=HMX_MAX_DATASET-1; f>=0; f--)
-		DrawDataset(dc, m_dataset[f]);
+		DrawDataset(dc, f);
 
 	return true;
 }
@@ -665,10 +677,15 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
+bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 {
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+
+	CHMXDataset& ds = m_dataset[nDatasetIndex];
+
 	// let's calc the bar size
-	double nBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
+	double dSpacing = (double)m_rectData.Width()/(double)m_nXMax;
 	int	f, nMarkerType;
 	double nFirstSample, nTemp, nTemp1, nZeroLine;
 
@@ -715,46 +732,46 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 						switch(ds.GetMarker()) 
 						{
 						case HMX_DATASET_MARKER_TRI:
-							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
 							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							dc.Polygon(ptMarker, 3);
 							break;
 						case HMX_DATASET_MARKER_BOX:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							dc.Polygon(ptMarker, 4);
 							break;
 						case HMX_DATASET_MARKER_SPH:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							dc.Ellipse(ptMarker[0].x, ptMarker[0].y, ptMarker[1].x, ptMarker[1].y);
 							break;
 						case HMX_DATASET_MARKER_DIA:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
 							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) + ds.GetSize()*2;
+							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
+							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 3 ].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f) - ds.GetSize()*2;
+							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp;
 							dc.Polygon(ptMarker, 4);
 							break;
@@ -799,20 +816,22 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 					rectTemp.bottom = m_rectData.bottom - (int)(nTemp);
 				}
 
-				rectTemp.left   = m_rectData.left + (int)(nBarWidth/2.0) - (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
-				rectTemp.right  = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
+				int nBarPos = m_rectData.left + (int)(dSpacing*(f + 0.5));
+
+				rectTemp.left   = (nBarPos - (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
+				rectTemp.right  = (nBarPos + (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
 
 				if (rectTemp.Width() <= 0)
 					rectTemp.right = (rectTemp.left + 1);
 				
-				dc.FillSolidRect(rectTemp, ds.GetLineColor());
+				dc.FillSolidRect(rectTemp, GetLineColor(nDatasetIndex, nSample));
 
 				if (nSample > 0.0)
 					rectTemp.DeflateRect(1, 1, 1, 0);
 				else
 					rectTemp.DeflateRect(1, 0, 1, 1);
 
-				dc.FillSolidRect(rectTemp, ds.GetFillColor());
+				dc.FillSolidRect(rectTemp, GetFillColor(nDatasetIndex, nSample));
 			}
 		}
 		break;
@@ -850,6 +869,22 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 	}
 
 	return true;
+}
+
+COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const
+{
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return CLR_NONE;
+
+	return m_dataset[nDatasetIndex].GetLineColor();
+}
+
+COLORREF CHMXChart::GetFillColor(int nDatasetIndex, double dValue) const
+{
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return CLR_NONE;
+
+	return m_dataset[nDatasetIndex].GetFillColor();
 }
 
 int CHMXChart::GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const
@@ -1320,7 +1355,7 @@ bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr)
 
 	clr = m_dataset[nDatasetIndex].GetLineColor();
 
-	return true;
+	return (clr != CLR_NONE);
 }
 
 bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr)
@@ -1330,7 +1365,7 @@ bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr)
 	
 	clr = m_dataset[nDatasetIndex].GetFillColor();
 	
-	return true;
+	return (clr != CLR_NONE);
 }
 
 //

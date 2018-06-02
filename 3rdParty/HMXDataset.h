@@ -48,10 +48,10 @@ public:
 	virtual bool		SetFillColor( COLORREF clr );					// set data color
 	virtual COLORREF	GetFillColor() const;							// get data color
 
+	virtual int			GetSize() const;								// get size
 	virtual bool		SetSize( int nSize );							// set pen size (in pixel)
 																		// set bar size (range 1-10)
 																		// unused if area
-	virtual int			GetSize() const;								// get size
 
 	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
 	virtual HMX_DATASET_MARKER GetMarker() const;						// get marker
@@ -61,7 +61,7 @@ public:
 	virtual bool		GetData( int nCount, double &nSample ) const;	// get data
 	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
-	virtual bool		GetMinMax( double& nMin, double& nMax ) const;	// gte min & max
+	virtual bool		GetMinMax( double& nMin, double& nMax ) const;	// get min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
 

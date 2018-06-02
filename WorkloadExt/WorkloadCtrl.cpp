@@ -664,7 +664,7 @@ void CWorkloadCtrl::RecalcAllocationTotals()
 	}
 
 	m_lcColumnTotals.Invalidate();
-	m_barChart.OnEditData();
+	m_barChart.OnChangeData();
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
@@ -1917,7 +1917,7 @@ void CWorkloadCtrl::OnDblClickTreeHeaderDivider(NMHDR* pNMHDR, LRESULT* /*pResul
 	int nCol = pHDN->iItem;
 	ASSERT(nCol != -1);
 
-	RecalcTreeColumnWidth(GetTreeColumnID(nCol), &dc);
+	RecalcTreeColumnWidth(nCol, &dc);
 	SetSplitPos(m_hdrTasks.CalcTotalItemsWidth());
 
 	Resize();
