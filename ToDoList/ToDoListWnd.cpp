@@ -12634,7 +12634,7 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 		tRem = 0;
 	}
 
-	return tRem;
+	return (LRESULT)tRem;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifyClickReminderCol(WPARAM /*wp*/, LPARAM /*lp*/)

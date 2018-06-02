@@ -24,6 +24,7 @@
 #include "..\shared\enbitmap.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\wclassdefines.h"
+#include "..\shared\mousewheelmgr.h"
 
 #include "..\Interfaces\iuiextension.h"
 
@@ -164,6 +165,7 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -2362,6 +2364,28 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
+{
+	// We have to handle mouse wheel over the totals because we have disabled it
+	if (HasHScrollBar(m_lcColumns))
+	{
+		CWnd::ScreenToClient(&pt);
+
+		if (ChildWindowFromPoint(pt) == &m_lcColumnTotals)
+		{
+			BOOL bScrollRight = (zDelta > 0);
+			int nScroll = 3;
+
+			while (nScroll--)
+				m_lcColumns.SendMessage(WM_HSCROLL, (bScrollRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
+
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 void CWorkloadCtrl::OnListHeaderClick(NMHEADER* pHDN)

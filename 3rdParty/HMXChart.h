@@ -145,7 +145,7 @@ protected:
 	virtual bool PaintBkGnd(CDC &dc);						
 	virtual bool DrawTitle( CDC &dc );						
 	virtual bool DrawGrid( CDC& dc);						
-	virtual bool DrawDataBkgnd( CDC& dc) { return true; } // default does nothing					
+	virtual bool DrawDataBkgnd( CDC& /*dc*/) { return true; } // default does nothing					
 	virtual bool DrawAxes(CDC &dc);							
 	virtual bool DrawHorzLine( CDC &dc);					
 	virtual bool DrawVertLine( CDC &dc);					

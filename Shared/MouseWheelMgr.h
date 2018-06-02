@@ -13,6 +13,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef GET_WHEEL_DELTA_WPARAM
+#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CMouseWheelMgr : public CHookMgr<CMouseWheelMgr>  
 {
    friend class CHookMgr<CMouseWheelMgr>;

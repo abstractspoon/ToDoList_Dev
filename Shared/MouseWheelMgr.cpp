@@ -13,10 +13,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#ifndef GET_WHEEL_DELTA_WPARAM
-#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
-#endif // GET_WHEEL_DELTA_WPARAM
-
 const int HORZ_LINE_SIZE = 20; // pixels
 
 //////////////////////////////////////////////////////////////////////
