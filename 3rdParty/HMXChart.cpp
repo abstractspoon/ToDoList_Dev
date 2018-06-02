@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "HMXChart.h"
-#include "ColorDef.h"
 
 #include <math.h>
 
@@ -695,7 +694,7 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 			if (!nPoints)
 				return false;
 
-			CPen pen(PS_SOLID, ds.GetSize(), ds.GetColor()), *pPenOld;
+			CPen pen(PS_SOLID, ds.GetSize(), ds.GetLineColor()), *pPenOld;
 			pPenOld = dc.SelectObject(&pen);
 
 			dc.Polyline(points.GetData(), nPoints);
@@ -703,7 +702,7 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 			nMarkerType = ds.GetMarker();
 			if(nMarkerType != HMX_DATASET_MARKER_NONE) 
 			{
-				CBrush brush(ds.GetColor()), *pBrushOld;
+				CBrush brush(ds.GetFillColor()), *pBrushOld;
 				pBrushOld = dc.SelectObject(&brush);
 
 				POINT ptMarker[5] = { 0 };
@@ -784,32 +783,36 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 				if(nSample > 0.0) 
 				{
 					//  bar is positive
-					
 					nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
 					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
 					
 					rectTemp.top    = m_rectData.bottom - (int)(nTemp);
 					rectTemp.bottom = m_rectData.bottom - (int)(nTemp1);
-					rectTemp.left   = m_rectData.left + (int)(nBarWidth/2.0) - (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
-					rectTemp.right  = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
-					// show at least 1 line bar
-					rectTemp.right += (rectTemp.right == rectTemp.left) ? 1 : 0 ;
 				} 
 				else 
 				{
 					// bar is negative
-					
 					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
 					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
 					
 					rectTemp.top    = m_rectData.bottom - (int)(nTemp1);
 					rectTemp.bottom = m_rectData.bottom - (int)(nTemp);
-					rectTemp.left   = m_rectData.left + (int)(nBarWidth/2.0) - (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
-					rectTemp.right  = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
-					// show at least 1 line bar
-					rectTemp.right += (rectTemp.right == rectTemp.left) ? 1 : 0 ;
 				}
-				dc.FillSolidRect(rectTemp, ds.GetColor());
+
+				rectTemp.left   = m_rectData.left + (int)(nBarWidth/2.0) - (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
+				rectTemp.right  = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(ds.GetSize()/2.0)/10.0) + (int)(nBarWidth*f);
+
+				if (rectTemp.Width() <= 0)
+					rectTemp.right = (rectTemp.left + 1);
+				
+				dc.FillSolidRect(rectTemp, ds.GetLineColor());
+
+				if (nSample > 0.0)
+					rectTemp.DeflateRect(1, 1, 1, 0);
+				else
+					rectTemp.DeflateRect(1, 0, 1, 1);
+
+				dc.FillSolidRect(rectTemp, ds.GetFillColor());
 			}
 		}
 		break;
@@ -818,13 +821,9 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 	case HMX_DATASET_STYLE_AREA:
 		{
 			BOOL bAreaLine = (ds.GetStyle() == HMX_DATASET_STYLE_AREALINE);
-			COLORREF crArea = ds.GetColor();
-
-			if (bAreaLine)
-				crArea = RGBX::AdjustLighting(crArea, 0.25, FALSE);
 
 			// let's rock
-			CBrush brush(crArea);
+			CBrush brush(ds.GetFillColor());
 			CBrush* pBrushOld = dc.SelectObject(&brush);
 			dc.SelectStockObject(NULL_PEN);
 			
@@ -837,7 +836,7 @@ bool CHMXChart::DrawDataset(CDC &dc, CHMXDataset & ds)
 			// draw line too?
 			if (bAreaLine)
 			{
-				CPen pen(PS_SOLID, 2, ds.GetColor());
+				CPen pen(PS_SOLID, 2, ds.GetLineColor());
 				CPen* pPenOld = dc.SelectObject(&pen);
 
 				// don't draw the first/last points
@@ -1244,7 +1243,7 @@ bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker)
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetDatasetPenSize(int nDatasetIndex, int nSize)
+bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1264,7 +1263,7 @@ bool CHMXChart::SetDatasetPenSize(int nDatasetIndex, int nSize)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetPenSize(int nDatasetIndex, int& nSize)
+bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1286,12 +1285,20 @@ bool CHMXChart::GetDatasetPenSize(int nDatasetIndex, int& nSize)
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetDatasetPenColor(int nDatasetIndex, COLORREF clr)
+bool CHMXChart::SetDatasetLineColor(int nDatasetIndex, COLORREF clr)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
 
-	return m_dataset[nDatasetIndex].SetColor(clr);
+	return m_dataset[nDatasetIndex].SetLineColor(clr);
+}
+
+bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
+{
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+	
+	return m_dataset[nDatasetIndex].SetFillColor(clr);
 }
 
 //
@@ -1306,13 +1313,23 @@ bool CHMXChart::SetDatasetPenColor(int nDatasetIndex, COLORREF clr)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetPenColor(int nDatasetIndex, COLORREF& clr)
+bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
 
-	clr = m_dataset[nDatasetIndex].GetColor();
+	clr = m_dataset[nDatasetIndex].GetLineColor();
 
+	return true;
+}
+
+bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr)
+{
+	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+	
+	clr = m_dataset[nDatasetIndex].GetFillColor();
+	
 	return true;
 }
 

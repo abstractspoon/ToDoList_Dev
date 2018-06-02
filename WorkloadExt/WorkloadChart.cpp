@@ -10,6 +10,15 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
+const COLORREF COLOR_RED	= RGB(204,   0,   0); 
+const COLORREF COLOR_YELLOW = RGB(204, 164,   0); 
+const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
+const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
+const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
+
+/////////////////////////////////////////////////////////////////////////////
+
 // CWorkloadChart
 CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad) 
 	: 
@@ -68,6 +77,9 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
 	SetDatasetMin(0, 0.0);
 	SetDatasetMax(0, 100.0);
+	SetDatasetSizeFactor(0, 3);
+	SetDatasetLineColor(0, COLOR_ORANGE);
+
 	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
 	SetDrawGridOnTop(false);
 

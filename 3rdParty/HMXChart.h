@@ -104,11 +104,13 @@ public:
 	virtual void		SetDrawGridOnTop(bool bOnTop = true);
 
 	// dataset functions
-	virtual bool		SetDatasetPenColor( int nDatasetIndex, COLORREF clr );
-	virtual bool		GetDatasetPenColor( int nDatasetIndex, COLORREF& clr );
+	virtual bool		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
+	virtual bool		GetDatasetLineColor( int nDatasetIndex, COLORREF& clr );
+	virtual bool		SetDatasetFillColor( int nDatasetIndex, COLORREF clr );
+	virtual bool		GetDatasetFillColor( int nDatasetIndex, COLORREF& clr );
 
-	virtual bool		SetDatasetPenSize( int nDatasetIndex, int nSize );
-	virtual bool		GetDatasetPenSize( int nDatasetIndex, int& nSize );
+	virtual bool		SetDatasetSizeFactor( int nDatasetIndex, int nSize );
+	virtual bool		GetDatasetLineThickness( int nDatasetIndex, int& nSize );
 
 	virtual bool		SetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE nStyle );
 	virtual bool		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle );

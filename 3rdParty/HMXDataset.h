@@ -41,25 +41,27 @@ class CHMXDataset : public CObject
 {
 public:
 	virtual bool		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
-	virtual HMX_DATASET_STYLE GetStyle();								// get data style
+	virtual HMX_DATASET_STYLE GetStyle() const;							// get data style
 
-	virtual bool		SetColor( COLORREF clr );						// set data color
-	virtual COLORREF	GetColor();										// get data color
+	virtual bool		SetLineColor( COLORREF clr );					// set data color
+	virtual COLORREF	GetLineColor() const;							// get data color
+	virtual bool		SetFillColor( COLORREF clr );					// set data color
+	virtual COLORREF	GetFillColor() const;							// get data color
 
 	virtual bool		SetSize( int nSize );							// set pen size (in pixel)
 																		// set bar size (range 1-10)
 																		// unused if area
-	virtual int			GetSize();										// get size
+	virtual int			GetSize() const;								// get size
 
 	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
-	virtual HMX_DATASET_MARKER GetMarker();								// get marker
+	virtual HMX_DATASET_MARKER GetMarker() const;						// get marker
 
 	virtual bool		AddData( double nData );						// set data adding new point
 	virtual bool		SetData( int nIndex, double nData );			// set data at specified index
-	virtual bool		GetData( int nCount, double &nSample );			// get data
-	virtual int			GetDatasetSize();								// get dataset size (how many points in dataset?)
+	virtual bool		GetData( int nCount, double &nSample ) const;	// get data
+	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
-	virtual bool		GetMinMax( double& nMin, double& nMax );		// gte min & max
+	virtual bool		GetMinMax( double& nMin, double& nMax ) const;	// gte min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
 
@@ -70,7 +72,7 @@ public:
 
 protected:
 	CArray<double,double>	m_data;			// the data
-	COLORREF				m_clr;			// color
+	COLORREF				m_crLine, m_crFill;	// colors
 	HMX_DATASET_MARKER		m_nMarker;		// marker type (see #define section)
 	int						m_nSize;		// pen size if style is line
 											// bar size (0-10) if style is bar

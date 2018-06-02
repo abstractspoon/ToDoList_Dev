@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "HMXDataset.h"
+#include "ColorDef.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -19,7 +20,8 @@ CHMXDataset::CHMXDataset()
 {
 	m_nSize  = 2;
 	m_nStyle = HMX_DATASET_STYLE_LINE;
-	m_clr    = RGB(0, 0, 0);
+	m_crLine = RGB(0, 0, 0);
+	m_crFill = CLR_NONE;
 	m_nMarker = HMX_DATASET_MARKER_NONE;
 
 	m_bSetMinTo = m_bSetMaxTo = false;
@@ -55,12 +57,12 @@ bool CHMXDataset::SetData(int nIndex, double nData)
 }
 
 
-int CHMXDataset::GetDatasetSize()
+int CHMXDataset::GetDatasetSize() const
 {
 	return m_data.GetSize();
 }
 
-bool CHMXDataset::GetData(int nCount, double &nSample)
+bool CHMXDataset::GetData(int nCount, double &nSample) const
 {
 	int nDatasetSize = GetDatasetSize();
 	
@@ -79,10 +81,17 @@ bool CHMXDataset::SetStyle(HMX_DATASET_STYLE nStyle)
 	return true;
 }
 
-bool CHMXDataset::SetColor(COLORREF clr)
+bool CHMXDataset::SetLineColor(COLORREF clr)
 {
-	m_clr = clr;
+	m_crLine = clr;
 
+	return true;
+}
+
+bool CHMXDataset::SetFillColor(COLORREF clr)
+{
+	m_crFill = clr;
+	
 	return true;
 }
 
@@ -93,7 +102,7 @@ bool CHMXDataset::SetMarker(HMX_DATASET_MARKER nMarker)
 	return true;
 }
 
-HMX_DATASET_MARKER CHMXDataset::GetMarker()
+HMX_DATASET_MARKER CHMXDataset::GetMarker() const
 {
 	return m_nMarker;
 }
@@ -108,7 +117,7 @@ bool CHMXDataset::SetSize(int nSize)
 	return true;
 }
 
-bool CHMXDataset::GetMinMax(double& nMin, double& nMax)
+bool CHMXDataset::GetMinMax(double& nMin, double& nMax) const
 {
 	double dMin, dMax, temp;
 
@@ -165,17 +174,26 @@ void CHMXDataset::SetMax(double dMax)
 	m_dSetMaxTo = dMax;
 }
 
-int CHMXDataset::GetSize()
+int CHMXDataset::GetSize() const
 {
 	return m_nSize;
 }
 
-COLORREF CHMXDataset::GetColor()
+COLORREF CHMXDataset::GetLineColor() const
 {
-	return m_clr;
+	return m_crLine;
 }
 
-HMX_DATASET_STYLE CHMXDataset::GetStyle()
+COLORREF CHMXDataset::GetFillColor() const
+{
+	if (m_crFill == CLR_NONE)
+		return RGBX::AdjustLighting(m_crLine, 0.25, FALSE);
+
+	// else
+	return m_crFill;
+}
+
+HMX_DATASET_STYLE CHMXDataset::GetStyle() const
 {
 	return m_nStyle;
 }

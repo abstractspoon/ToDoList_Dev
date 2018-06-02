@@ -12,7 +12,7 @@ public:
 	virtual ~CBurndownChart();
 
 	BOOL SaveToImage(CBitmap& bmImage);
-
+	
 protected:
 	DECLARE_MESSAGE_MAP()
 };
