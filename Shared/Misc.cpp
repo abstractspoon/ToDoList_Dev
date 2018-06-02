@@ -953,8 +953,8 @@ BOOL Misc::MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL
 	{
 		const CString& sItem1 = GetItem(array1, nItem1);
 
-		// look for matching item in array2
-		if (Find(sItem1, array2, bCaseSensitive, FALSE) == -1)
+		// look for exact matching item in array2
+		if (Find(sItem1, array2, bCaseSensitive, TRUE) == -1)
 		{
 			// no-match found == not the same
 			return FALSE;

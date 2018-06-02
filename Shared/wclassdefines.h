@@ -459,4 +459,26 @@
 
 //////////////////////////
 
+#define WC_DIRECTUIHWNDA              "DirectUIHWND"	// ansi
+#define WC_DIRECTUIHWNDW              L"DirectUIHWND"	// wide
+
+#ifdef UNICODE
+#define WC_DIRECTUIHWND               WC_DIRECTUIHWNDW
+#else
+#define WC_DIRECTUIHWND               WC_DIRECTUIHWNDA
+#endif
+
+//////////////////////////
+
+#define WC_CTRLNOTIFYSINKA              "CtrlNotifySink"	// ansi
+#define WC_CTRLNOTIFYSINKW              L"CtrlNotifySink"	// wide
+
+#ifdef UNICODE
+#define WC_CTRLNOTIFYSINK               WC_CTRLNOTIFYSINKW
+#else
+#define WC_CTRLNOTIFYSINK               WC_CTRLNOTIFYSINKA
+#endif
+
+//////////////////////////
+
 #endif

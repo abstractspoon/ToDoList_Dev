@@ -127,29 +127,24 @@ LRESULT CTransWnd::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 {
-	if (CWinClasses::IsClass(sClass, WC_STATIC))
+	// Some windows get custom handling ------------------------------------------------
+	if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
 	{
-		return new CTransWnd(sClass); // standard
-	}
-	else if (CWinClasses::IsClass(sClass, WC_BUTTON))
-	{
-		return new CTransWnd(sClass); // standard
-	}
-	else if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
-	{
-		// we do not translate ownerdraw (unless CBS_HASSTRINGS) or dropdown
+		// we do NOT translate ownerdraw (unless CBS_HASSTRINGS) or dropdown
 		BOOL bOwnerDraw = (dwStyle & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
 		BOOL bHasStrings = (dwStyle & CBS_HASSTRINGS);
 
 		UINT nStyle = (dwStyle & 0xf);
 
 		if ((nStyle == CBS_DROPDOWNLIST) && (!bOwnerDraw || bHasStrings))
+		{
 			return new CTransComboBox(sClass);
+		}
 	}
 	else if (CWinClasses::IsClass(sClass, WC_LISTBOX) || 
 			CWinClasses::IsClass(sClass, WC_CHECKLISTBOX))
 	{
-		// we do not translate ownerdraw (unless LBS_HASSTRINGS) 
+		// we do NOT translate ownerdraw (unless LBS_HASSTRINGS) 
 		BOOL bOwnerDraw = (dwStyle & (LBS_OWNERDRAWFIXED | LBS_OWNERDRAWVARIABLE));
 		BOOL bHasStrings = (dwStyle & LBS_HASSTRINGS);
 
@@ -158,10 +153,6 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 			BOOL bCheckLB = CWinClasses::IsClass(sClass, WC_CHECKLISTBOX);
 			return new CTransListBox(sClass, bCheckLB);
 		}
-	}
-	else if (CWinClasses::IsClass(sClass, WC_TOOLBAR))
-	{
-		return new CTransWnd(sClass);//ToolBar;
 	}
 	else if (CWinClasses::IsClass(sClass, WC_STATUSBAR))
 	{
@@ -173,34 +164,59 @@ CTransWnd* CTransWnd::NewTransWnd(const CString& sClass, DWORD dwStyle)
 	}
 	else if (CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
 	{
-		// we do not translate dropdown
-		if (dwStyle & CBS_SIMPLE) // this will also catch CBS_DROPDOWNLIST
+		// we do NOT translate dropdown
+		if (dwStyle & CBS_SIMPLE) 
+		{
+			// this will also catch CBS_DROPDOWNLIST
 			return new CTransComboBoxEx(sClass);
+		}
 	}
 	else if (CWinClasses::IsClass(sClass, WC_HEADER))
-	{
-		return new CTransHeaderCtrl(sClass); // we translate the item text
+	{ 
+		// we translate the item text
+		return new CTransHeaderCtrl(sClass);
 	}
 	else if (CWinClasses::IsClass(sClass, WC_LISTVIEW))
 	{
-		return new CTransListCtrl(sClass); // we translate the header item text
+		// we translate the header item text
+		return new CTransListCtrl(sClass); 
 	}
-	else if (CWinClasses::IsClass(sClass, WC_DIALOGBOX))
+	if (CWinClasses::IsClass(sClass, WC_STATIC))
 	{
-		return new CTransWnd(sClass); // standard
+		return new CTransWnd(sClass);
 	}
 	else if (CWinClasses::IsClass(sClass, WC_TOOLTIPS))
 	{
 		return new CTransTooltips(sClass); 
 	}
+	else if (CWinClasses::IsClass(sClass, WC_BUTTON))
+	{
+		return new CTransWnd(sClass);
+	}
+	// The rest get default handling only -------------------------------------------
+	else if (CWinClasses::IsClass(sClass, WC_TOOLBAR))
+	{
+		return new CTransWnd(sClass);
+	}
+	else if (CWinClasses::IsClass(sClass, WC_DIALOGBOX))
+	{
+		return new CTransWnd(sClass);
+	}
+	else if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND))
+	{
+		return new CTransWnd(sClass);
+	}
+	else if (CWinClasses::IsClass(sClass, WC_CTRLNOTIFYSINK))
+	{
+		return new CTransWnd(sClass);
+	}
 	else if (CWinClasses::IsClassEx(sClass, WC_MFCMDIFRAME))
 	{
-		return new CTransWnd(sClass); 
+		return new CTransWnd(sClass);
 	}
 	else if (CWinClasses::IsClassEx(sClass, WC_MFCFRAME))
 	{
-		// don't translated application title because it's dynamic
-		return new CTransWnd(sClass/*, (TWS_NOHANDLESETTEXT*/); 
+		return new CTransWnd(sClass);
 	}
 
 	// everything else

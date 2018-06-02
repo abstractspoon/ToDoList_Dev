@@ -44,7 +44,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	static CString GetOptions();
+	static int GetOptions(CStringArray& aOptions);
 };
 
 //{{AFX_INSERT_LOCATION}}

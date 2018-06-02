@@ -21,6 +21,60 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+static const UINT CMDLINE_OPTIONS[] = 
+{
+	IDS_COMMANDLINEOPTIONS,
+	IDS_CMDLINE_INIFILE,             
+	IDS_CMDLINE_TASKFILE,               
+	IDS_CMDLINE_FORCEVISIBLE,           
+	IDS_CMDLINE_NOPWORDPROMPT,          
+	IDS_CMDLINE_LOGGING,             
+	IDS_CMDLINE_IMPORT,                 
+	IDS_CMDLINE_COMMANDID,              
+	IDS_CMDLINE_STARTEMPTY,             
+	IDS_CMDLINE_TASKLINK,               
+	IDS_CMDLINE_RESTART,             
+	IDS_CMDLINE_SAVEINTERMEDIATE,       
+	IDS_CMDLINE_RANDOMISE,              
+	IDS_CMDLINE_SAVEUIVISINTASKLIST, 
+	IDS_CMDLINE_ALLOWFORCEDCHECKOUT, 
+	IDS_CMDLINE_NEWTASK,             
+	IDS_CMDLINE_SELECTTASKID,           
+	IDS_CMDLINE_PARENTID,               
+	IDS_CMDLINE_SIBLINGID,              
+	IDS_CMDLINE_TASKCOMMENTS,           
+	IDS_CMDLINE_TASKEXTID,              
+	IDS_CMDLINE_TASKCATEGORY,           
+	IDS_CMDLINE_TASKSTATUS,             
+	IDS_CMDLINE_TASKPRIORITY,           
+	IDS_CMDLINE_TASKRISK,               
+	IDS_CMDLINE_TASKTAGS,               
+	IDS_CMDLINE_TASKCOST,               
+	IDS_CMDLINE_TASKDEPENDENCY,         
+	IDS_CMDLINE_TASKTIMEEST,         
+	IDS_CMDLINE_TASKTIMESPENT,          
+	IDS_CMDLINE_TASKFILEREF,         
+	IDS_CMDLINE_TASKALLOCBY,         
+	IDS_CMDLINE_TASKALLOCTO,         
+	IDS_CMDLINE_TASKSTARTDATE,          
+	IDS_CMDLINE_TASKSTARTTIME,          
+	IDS_CMDLINE_TASKDUEDATE,         
+	IDS_CMDLINE_TASKDUETIME,         
+	IDS_CMDLINE_TASKDONEDATE,           
+	IDS_CMDLINE_TASKDONETIME,           
+	IDS_CMDLINE_TASKCREATEDATE,         
+	IDS_CMDLINE_TASKCREATETIME,         
+	IDS_CMDLINE_TASKPERCENT,         
+	IDS_CMDLINE_TASKVERSION,         
+	IDS_CMDLINE_TASKCUSTOMATTRIB,       
+	IDS_CMDLINE_TASKCOPYATTRIB,         
+	IDS_CMDLINE_HELP,                   
+};
+const int NUM_OPTIONS = sizeof(CMDLINE_OPTIONS) / sizeof(UINT);
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 // CTDLCmdlineOptionsDlg dialog
 
 CTDLCmdlineOptionsDlg::CTDLCmdlineOptionsDlg(CWnd* pParent /*=NULL*/)
@@ -60,13 +114,13 @@ BOOL CTDLCmdlineOptionsDlg::OnInitDialog()
 
 	// options
 	CStringArray aOptions;
-	int nNumOpt = Misc::Split(GetOptions(), aOptions, '\n');
+	int nNumOpt = GetOptions(aOptions);
 
 	for (int nOpt = 0; nOpt < nNumOpt; nOpt++)
 	{
 		CString sOption(aOptions[nOpt]), sText;
 
-		if (Misc::Split(sOption, sText, '\t', TRUE))
+		if (Misc::Split(sOption, sText, '\t', TRUE) && !sText.IsEmpty())
 		{
 			int nIndex = m_lcOptions.InsertItem(nOpt, sOption);
 			m_lcOptions.SetItemText(nIndex, 1, sText);
@@ -79,7 +133,6 @@ BOOL CTDLCmdlineOptionsDlg::OnInitDialog()
 	if (m_il.Create(1, 16, ILC_COLOR, 1, 1))
 		m_lcOptions.SetImageList(&m_il, LVSIL_SMALL);
 
-//	ListView_SetExtendedListViewStyleEx(m_lcOptions, LVS_EX_GRIDLINES, LVS_EX_GRIDLINES);
 	ListView_SetExtendedListViewStyleEx(m_lcOptions, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcOptions, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 
@@ -92,19 +145,22 @@ BOOL CTDLCmdlineOptionsDlg::OnInitDialog()
 void CTDLCmdlineOptionsDlg::OnCopyshortcuts() 
 {
 	CStringArray aOptions;
+	GetOptions(aOptions);
 
-	Misc::Split(GetOptions(), aOptions, '\n');
 	Misc::SortArray(aOptions);
 
 	CClipboard(*this).SetText(Misc::FormatArray(aOptions, '\n'));
 }
 
-CString CTDLCmdlineOptionsDlg::GetOptions()
+int CTDLCmdlineOptionsDlg::GetOptions(CStringArray& aOptions)
 {
-	CEnString sOptions(IDS_COMMANDLINEOPTIONS);
-	sOptions += CEnString(IDS_COMMANDLINETASKOPTIONS);
-	sOptions += CEnString(IDS_COMMANDLINETASKOPTIONS2);
-	sOptions += CEnString(IDS_COMMANDLINETASKOPTIONS3);
+	for (int nOpt = 0; nOpt < NUM_OPTIONS; nOpt++)
+	{
+		CEnString sOption(CMDLINE_OPTIONS[nOpt]);
 
-	return sOptions;
+		if (!sOption.IsEmpty())
+			aOptions.Add(sOption);
+	}
+
+	return aOptions.GetSize();
 }

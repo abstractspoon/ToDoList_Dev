@@ -4381,7 +4381,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_COMMANDLINEOPTIONS  "<filepath>\tOpens/selects the specified tasklist\n-m <filepath>\tImports the specified file\n-f <filepath2>[|<filepath3>|<filepath4>]\tAllows additional tasklists to be opened\n-v\tForces ToDoList to startup visible regardless of its last saved state\n-i <inipath>\tSpecifies an alternative settings file path\n-x\tTurns off password prompting except when first loading an encrypted tasklist\n-cmd <id>\tSends the specified command to ToDoList's main window\n-h, -help, -?\tThis messagebox\n"
+    IDS_COMMANDLINEOPTIONS  "<filepath>\tOpens/selects the specified tasklist"
     IDS_PTDP_DUEDATE        "Due Date"
     IDS_PRINTDLG_PREVIEW_TITLE "Print Preview Tasks"
     IDS_PRINTDLG_PRINT_TITLE "Print Tasks"
@@ -4675,18 +4675,12 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_TDLFILEFILTER       "Tasklist (*.tdl, *.xml)|*.tdl;*.xml||"
-    IDS_COMMANDLINETASKOPTIONS 
-                            "\n-nt <title>\tCreates a new task in the active tasklist with the specified title\n-pid <id>\tSpecifies the parent task in which to create the new task\n-bid <id>\tSpecifies the sibling task after which to create the new task\n-tid <id>\tSelects the task in the active tasklist\n-cm <comments>\tAdds to the 'Comments' for the currently selected task\n-tv <version>\tSets the 'Version' for the currently selected task\n-xid <ext_id>\tSets the 'external ID' for the currently selected task\n-c <categories>\tSets the 'Category(s) for the currently selected task\n-at <alloc to>\tSets the 'Allocated To(s)' for the currently selected task"
-    IDS_COMMANDLINETASKOPTIONS2 
-                            "\n-ab <alloc by>\tSets the 'Allocated By' for the currently selected task\n-s <status>\tSets the 'Status' for the currently selected task\n-p <priority>\tSets the 'Priority' for the currently selected task\n-r <risk>\tSets the 'Risk' for the currently selected task\n-tg <tags>\tSets the 'Tag(s)' for the currently selected task\n-dp <id>\tSets the 'Dependency(s)' for the currently selected task\n-te <hrs>\tSets the 'Time Estimate' for the currently selected task\n-ts <hrs>\tSets the 'Time Spent' for the currently selected task\n-fr <path>\tSets the 'File Link' for the currently selected task"
     IDS_OUTLOOK_FIELDNAME   "Outlook field..."
     IDS_TDC_COLUMN_TAGS     "Tags"
     IDS_TDCTIP_TAGS         "Tags:\t\t\t"
     IDS_TDLBC_TAGS          "Tags"
     IDS_FILTER_ANYTAGS      "Any tag can match"
     IDS_TDC_FIELD_TAGS      "Ta&gs"
-    IDS_COMMANDLINETASKOPTIONS3 
-                            "\n-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task\n-cs <cost>\tSets the 'Cost' for the currently selected task\n-md <date>\tSets the 'Creation Date' of the newly created task\n-sd <date>\tSets the 'Start Date' for the currently selected task\n-dd <date>\tSets the 'Due Date' for the currently selected task\n-cd <date>\tSets the 'Completion Date' for the currently selected task\n"
     IDS_STICKIESEXEFILTER   "Stickies|Stickies*.exe||"
     IDS_TDC_NONE            "<none>"
 END
@@ -4750,6 +4744,23 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_CMDLINE_TASKALLOCTO "-at <alloc to>\tSets the 'Allocated To(s)' for the currently selected task"
+    IDS_CMDLINE_TASKSTARTDATE 
+                            "-sd <date>\tSets the 'Start Date' for the currently selected task"
+    IDS_CMDLINE_TASKSTARTTIME 
+                            "-st <time>\tSets the 'Start Time' for the currently selected task"
+    IDS_CMDLINE_TASKDUEDATE "-dd <date>\tSets the 'Due Date' for the currently selected task"
+    IDS_CMDLINE_TASKDUETIME "-dt <time>\tSets the 'Due Time' for the currently selected task"
+    IDS_CMDLINE_TASKDONEDATE 
+                            "-cd <date>\tSets the 'Completion Date' for the currently selected task"
+    IDS_CMDLINE_TASKDONETIME 
+                            "-ct <time>\tSets the 'Completion Time' for the currently selected task"
+    IDS_CMDLINE_TASKCREATEDATE 
+                            "-md <date>\tSets the 'Creation Date' of the newly created task"
+    IDS_CMDLINE_TASKCREATETIME 
+                            "-mt <time>\tSets the 'Creation Time' of the newly created task"
+    IDS_CMDLINE_TASKPERCENT "-pc <percentage>\tSets the 'Percentage Completion' for the currently selected task"
+    IDS_CMDLINE_TASKVERSION "-tv <version>\tSets the 'Version' for the currently selected task"
     ID_EDIT_UNDO            "\nUndo"
     ID_EDIT_REDO            "\nRedo"
 END
@@ -5317,6 +5328,59 @@ BEGIN
     IDS_NEW_TOOLBARBUTTON   "<New Button>"
     IDS_TASKREMINDERDLG_TITLE "Task Reminders (%d)"
     IDS_REMINDER_DATENOTSET "Task date not set"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CMDLINE_INIFILE     "-i <inipath>\tSpecifies an alternative settings file path"
+    IDS_CMDLINE_TASKFILE    "-f <filepath2>[|<filepath3>|<filepath4>]\tAllows additional tasklists to be opened"
+    IDS_CMDLINE_FORCEVISIBLE 
+                            "-v\tForces ToDoList to startup visible regardless of its last saved state"
+    IDS_CMDLINE_NOPWORDPROMPT 
+                            "-x\tTurns off password prompting except when first loading an encrypted tasklist"
+    IDS_CMDLINE_LOGGING     "-g\tEnables logging"
+    IDS_CMDLINE_IMPORT      "-m <filepath>\tImports the specified file"
+    IDS_CMDLINE_COMMANDID   "-cmd <id>\tSends the specified command to ToDoList's main window"
+    IDS_CMDLINE_STARTEMPTY  "-e\tStarts ToDoList without reloading any previously open tasklists"
+    IDS_CMDLINE_TASKLINK    "-l <task link>"
+    IDS_CMDLINE_SAVEUIVISINTASKLIST 
+                            "-z\tStores attribute visibility settings within each tasklist"
+    IDS_CMDLINE_NEWTASK     "-nt <title>\tCreates a new task in the active tasklist with the specified title"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CMDLINE_SELECTTASKID 
+                            "-tid <task id>\tSelects the specified task in the active tasklist"
+    IDS_CMDLINE_PARENTID    "-pid <task id>\tSpecifies the parent task in which to create the new task"
+    IDS_CMDLINE_SIBLINGID   "-bid <task id>\tSpecifies the sibling task after which to create the new task"
+    IDS_CMDLINE_TASKCOMMENTS 
+                            "-cm <comments>\tAdds to the 'Comments' for the currently selected task"
+    IDS_CMDLINE_TASKEXTID   "-xid <ext_id>\tSets the 'external ID' for the currently selected task"
+    IDS_CMDLINE_TASKCATEGORY 
+                            "-c <categories>\tSets the 'Category(s) for the currently selected task"
+    IDS_CMDLINE_TASKSTATUS  "-s <status>\tSets the 'Status' for the currently selected task"
+    IDS_CMDLINE_TASKPRIORITY 
+                            "-p <priority>\tSets the 'Priority' for the currently selected task"
+    IDS_CMDLINE_TASKRISK    "-r <risk>\tSets the 'Risk' for the currently selected task"
+    IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tag(s)' for the currently selected task"
+    IDS_CMDLINE_TASKCOST    "-cs <cost>\tSets the 'Cost' for the currently selected task"
+    IDS_CMDLINE_TASKDEPENDENCY 
+                            "-dp <id>\tSets the 'Dependency(s)' for the currently selected task"
+    IDS_CMDLINE_TASKTIMEEST "-te <hrs>\tSets the 'Time Estimate' for the currently selected task"
+    IDS_CMDLINE_TASKTIMESPENT 
+                            "-ts <hrs>\tSets the 'Time Spent' for the currently selected task"
+    IDS_CMDLINE_TASKFILEREF "-fr <path>\tSets the 'File Link' for the currently selected task"
+    IDS_CMDLINE_TASKALLOCBY "-ab <alloc by>\tSets the 'Allocated By' for the currently selected task"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CMDLINE_TASKCUSTOMATTRIB 
+                            "-ca <attribute id> <attribute value>\tSets the value for the specified custom attribute ID for the currently selected task"
+    IDS_CMDLINE_TASKCOPYATTRIB 
+                            "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
+    IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
 END
 
 #endif    // English (Australia) resources
