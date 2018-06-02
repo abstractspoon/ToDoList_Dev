@@ -32,6 +32,7 @@
 #define IDC_ALLOCATIONS                 16035
 #define IDC_PERIODBEGIN                 16037
 #define IDC_PERIODENDINCLUSIVE          16038
+#define IDC_PERIODDURATION              16039
 #define ID_WORKLOAD_PREFS               32775
 #define ID_WORKLOAD_EDITALLOCATIONS     32783
 #define ID_THISMONTHPERIOD              32784
@@ -56,6 +57,7 @@
 #define IDS_NEW_ALLOCATION              57688
 #define IDS_COL_TOTAL                   57689
 #define IDS_TOTALSDATERANGE             57690
+#define IDS_PERIODDURATION              57691
 
 // Next default values for new objects
 // 
@@ -63,7 +65,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16013
 #define _APS_NEXT_COMMAND_VALUE         32792
-#define _APS_NEXT_CONTROL_VALUE         16038
+#define _APS_NEXT_CONTROL_VALUE         16040
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

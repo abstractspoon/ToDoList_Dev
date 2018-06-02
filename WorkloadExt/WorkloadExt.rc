@@ -72,7 +72,7 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
 FONT 8, "Tahoma"
 BEGIN
-    RTEXT           "Current Period: ",IDC_SELECTEDTASKDATES_LABEL,150,4,99,
+    RTEXT           "Current Period: ",IDC_SELECTEDTASKDATES_LABEL,150,3,99,
                     8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,1,0,146,18
@@ -82,7 +82,8 @@ BEGIN
                     WS_TABSTOP,254,0,70,15
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
                     "SysDateTimePick32",WS_TABSTOP,337,0,70,15
-    CTEXT           "-",IDC_STATIC,326,4,8,8
+    CTEXT           "-",IDC_STATIC,326,3,8,8
+    LTEXT           "Static",IDC_PERIODDURATION,410,3,177,8
 END
 
 
@@ -328,6 +329,7 @@ BEGIN
     IDS_NEW_ALLOCATION      "<new allocation>"
     IDS_COL_TOTAL           "Total"
     IDS_TOTALSDATERANGE     "Current Period: %s - %s"
+    IDS_PERIODDURATION      "(%d weekdays)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -341,11 +343,11 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_THISMONTHPERIOD      "\nSet period to 'this' month"
     ID_MOVEPERIODSTARTBACKONEMONTH "\nMove start of period back one month"
-    ID_MOVEPERIODBACKONEMONTH "\nMove whole of period back one month"
+    ID_MOVEPERIODBACKONEMONTH "\nMove whole period back one month"
     ID_MOVEPERIODFOREWARDSONEMONTH "\nMove whole of period forward one month"
     ID_MOVEPERIODENDFOREWARDSONEMONTH "\nMove end of period forward one month"
     ID_MOVEPERIODENDFORWARDSONEMONTH "\nMove end of period forward one month"
-    ID_MOVEPERIODFORWARDSONEMONTH "\nMove whole of period forward one month"
+    ID_MOVEPERIODFORWARDSONEMONTH "\nMove whole period forward one month"
 END
 
 #endif    // English (Australia) resources

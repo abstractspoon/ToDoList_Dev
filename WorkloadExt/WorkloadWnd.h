@@ -64,6 +64,7 @@ protected:
 	//{{AFX_DATA(CWorkloadWnd)
 	COleDateTime	m_dtPeriodBegin;
 	COleDateTime	m_dtPeriodEndInclusive;
+	CString	m_sPeriodDuration;
 	//}}AFX_DATA
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
@@ -137,6 +138,7 @@ protected:
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 	BOOL CanEditSelectedTaskAllocations(DWORD dwTaskID = 0) const;
+	void UpdatePeriod();
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);
