@@ -91,9 +91,6 @@
     <ClCompile Include="EnCommandLineInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="endatetimectrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="enedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -574,9 +571,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnCommandLineInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="endatetimectrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="enedit.h">
