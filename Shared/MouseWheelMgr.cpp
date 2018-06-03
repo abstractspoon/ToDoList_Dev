@@ -63,7 +63,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		HWND hwndPt = ::WindowFromPoint(info.pt);
 
 		int zDelta = GET_WHEEL_DELTA_WPARAM(info.mouseData);
-		BOOL bUp = (zDelta > 0), bRight = bUp;
+		BOOL bDown = (zDelta < 0), bRight = bDown;
 
 		// However this is complicated because we may also want to support
 		// Shift+MouseWheel horizontal scrolling and there is no default
@@ -167,7 +167,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) ||
 				CWinClasses::IsClass(sClass, WC_MONTHCAL))
 			{
-				::SendMessage(hwndPt, WM_KEYDOWN, (bUp ? VK_UP : VK_DOWN), 0L);
+				::SendMessage(hwndPt, WM_KEYDOWN, (bDown ? VK_UP : VK_DOWN), 0L);
 				return TRUE;
 			}
 		}
