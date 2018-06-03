@@ -76,7 +76,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_PAGERIGHT : SB_PAGELEFT), 0L);
 			return TRUE;
 		}
-		else if (info.hwnd != hwndPt) // non-focus windows
+		else if (::GetFocus() != hwndPt) // non-focus windows
 		{
 			// special handling for spin controls buddied to other controls
 			CString sClass = CWinClasses::GetClass(hwndPt);
@@ -167,7 +167,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) ||
 				CWinClasses::IsClass(sClass, WC_MONTHCAL))
 			{
-				::SendMessage(hwndPt, WM_KEYDOWN, (bDown ? VK_UP : VK_DOWN), 0L);
+				::SendMessage(hwndPt, WM_KEYDOWN, (bDown ? VK_DOWN : VK_UP), 0L);
 				return TRUE;
 			}
 		}
