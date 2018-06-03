@@ -151,17 +151,15 @@ double CMapAllocations::GetTotal() const
 			dTotalDays += dValue;
 	}
 
+	if (m_bReturnAverageForTotal && GetCount())
+		dTotalDays /= GetCount();
+
 	return dTotalDays;
 }
 
 CString CMapAllocations::GetTotal(int nDecimals) const
 {
-	double dValue = GetTotal();
-
-	if (m_bReturnAverageForTotal && GetCount())
-		dValue /= GetCount();
-
-	return Format(dValue, nDecimals);
+	return Format(GetTotal(), nDecimals);
 }
 
 CString CMapAllocations::Format(double dValue, int nDecimals)

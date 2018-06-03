@@ -108,6 +108,8 @@ public:
 	void SetGridLineColor(COLORREF crGridLine);
 	void SetSplitBarColor(COLORREF crSplitBar);
 	void SetBackgroundColor(COLORREF crBkgnd);
+	void SetOverlapColor(COLORREF crOverlap);
+	void SetAllocationColor(COLORREF crAllocation);
 
 	BOOL CancelOperation();
 	void SetReadOnly(bool bReadOnly);
@@ -142,6 +144,8 @@ protected:
 
 	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
+	COLORREF m_crAllocation, m_crOverlap;
+
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	int m_nPrevDropHilitedItem;

@@ -155,37 +155,35 @@ bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
 		return false;
 
 	// Draw Over/underload cutoffs
-	if (HasOverload() || HasUnderload())
+	if (HasOverload())
 	{
-		// Normal
-		COLORREF crFill = CLR_NONE;
-		
-		if (GetDatasetLineColor(0, crFill))
-		{
-			crFill = RGBX::AdjustLighting(crFill, 0.5, FALSE);
-			dc.FillSolidRect(m_rectData, crFill);
-		}
-		
-		if (HasOverload())
-		{
-			CRect rOverload(m_rectData);
-			rOverload.bottom -= (rOverload.Height() * (m_dOverloadValue / m_nYMax));
+		CRect rOverload(m_rectData);
+		rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
 
-			COLORREF crFill = RGBX::AdjustLighting(m_crOverload, 0.5, FALSE);
-			dc.FillSolidRect(rOverload, crFill);
-		}
+		dc.FillSolidRect(rOverload, GetBkgndColor(m_dOverloadValue));
+	}
 
-		if (HasUnderload())
-		{
-			CRect rUnderload(m_rectData);
-			rUnderload.top = (rUnderload.bottom - (rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+	if (HasUnderload())
+	{
+		CRect rUnderload(m_rectData);
+		rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
 
-			COLORREF crFill = RGBX::AdjustLighting(m_crUnderload, 0.5, FALSE);
-			dc.FillSolidRect(rUnderload, crFill);
-		}
+		dc.FillSolidRect(rUnderload, GetBkgndColor(m_dUnderloadValue));
 	}
 
 	return true;
+}
+
+COLORREF CWorkloadChart::GetBkgndColor(double dValue) const
+{
+	if (HasOverload() && (dValue >= m_dOverloadValue))
+		return RGBX::AdjustLighting(m_crOverload, 0.5, FALSE);
+
+	if (HasUnderload() && (dValue <= m_dUnderloadValue))
+		return RGBX::AdjustLighting(m_crUnderload, 0.5, FALSE);
+
+	// else
+	return CLR_NONE;
 }
 
 BOOL CWorkloadChart::HasOverload() const

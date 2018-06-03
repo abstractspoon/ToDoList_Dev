@@ -20,6 +20,8 @@ public:
 	void SetUnderloadColor(double dUnderloadValue, COLORREF crUnderload);
 	BOOL SetNormalColor(COLORREF crNormal);
 
+	COLORREF GetFillColor(double dValue) const { return GetFillColor(0, dValue); }
+
 	void OnChangeData();
 
 protected:
@@ -38,6 +40,7 @@ protected:
 	COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
 
 	bool DrawDataBkgnd( CDC& dc);
+	COLORREF GetBkgndColor(double dValue) const;
 
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;

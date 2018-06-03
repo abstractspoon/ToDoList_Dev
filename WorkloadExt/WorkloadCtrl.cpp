@@ -41,10 +41,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef GET_WHEEL_DELTA_WPARAM
-#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
-#endif 
-
 #ifndef CDRF_SKIPPOSTPAINT
 #	define CDRF_SKIPPOSTPAINT	(0x00000100)
 #endif
@@ -122,6 +118,8 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
+	m_crAllocation(RGB(255, 224, 224)),
+	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
 	m_bMovingTask(FALSE),
@@ -2375,7 +2373,7 @@ BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 
 		if (ChildWindowFromPoint(pt) == &m_lcColumnTotals)
 		{
-			BOOL bScrollRight = (zDelta > 0);
+			BOOL bScrollRight = (zDelta < 0);
 			int nScroll = 3;
 
 			while (nScroll--)
@@ -2605,6 +2603,16 @@ void CWorkloadCtrl::SetAlternateLineColor(COLORREF crAltLine)
 void CWorkloadCtrl::SetGridLineColor(COLORREF crGridLine)
 {
 	SetColor(m_crGridLine, crGridLine);
+}
+
+void CWorkloadCtrl::SetOverlapColor(COLORREF crOverlap)
+{
+	SetColor(m_crOverlap, crOverlap);
+}
+
+void CWorkloadCtrl::SetAllocationColor(COLORREF crAllocation)
+{
+	SetColor(m_crAllocation, crAllocation);
 }
 
 void CWorkloadCtrl::SetSplitBarColor(COLORREF crSplitBar) 
@@ -2980,14 +2988,33 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 		rColumn.top++;
+		rColumn.right--;
 
 		CString sValue = GetListItemColumnText(mapAlloc, nCol, nDecimals);
 			
 		if (!sValue.IsEmpty())
 		{
 			if (nItem == ID_PERCENTLOADPERPERSON)
+			{
+				COLORREF crBack = CLR_NONE;
+
+				switch (GetListColumnType(nCol))
+				{
+				case WLCT_VALUE:
+					crBack = m_barChart.GetFillColor(mapAlloc.Get(m_aAllocTo[nCol - 1]));
+					break;
+					
+				case WLCT_TOTAL:
+					crBack = m_barChart.GetFillColor(mapAlloc.GetTotal());
+					break;
+				}
+
+				if (crBack != CLR_NONE)
+					pDC->FillSolidRect(rColumn, crBack);
+	
 				sValue += '%';
-			
+			}
+		
 			rColumn.DeflateRect(LV_COLPADDING, 0);
 			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
