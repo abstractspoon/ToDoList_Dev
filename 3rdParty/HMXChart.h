@@ -68,59 +68,59 @@ public:
 
 	// X labels scale functions
 	virtual bool		SetXLabelStep( int nStep );
-	virtual int			GetXLabelStep();
+	virtual int			GetXLabelStep() const;
 	void				SetXLabelsAreTicks(bool bTicks = TRUE);
 	void				SetXLabelAngle(int nDegrees);
 
 	virtual bool		SetXScaleLabel( int nIndex, CString str );
-	virtual bool		GetXScaleLabel( int nIndex, CString& str );
+	virtual bool		GetXScaleLabel( int nIndex, CString& str ) const;
 	void				ClearXScaleLabels();
 
 	// X text
 	virtual bool		SetXText( CString sText );
-	virtual CString		GetXText();
+	virtual CString		GetXText() const;
 
 	// Y text
 	virtual bool		SetYText( CString sText );
-	virtual CString		GetYText();
+	virtual CString		GetYText() const;
 
 	// useful Y functions
 	virtual bool		SetRoundY( double nRound );
-	virtual double		GetRoundY();
+	virtual double		GetRoundY() const;
 
 	virtual bool		SetYTicks( int nTicks );
-	virtual int			GetYTicks();
+	virtual int			GetYTicks() const;
 
 	// main title functions
 	virtual	bool		SetTitle( CString strTitle );
-	virtual	CString		GetTitle();
+	virtual	CString		GetTitle() const;
 
 	// background functions
 	virtual bool		SetBkGnd();
 	virtual bool		SetBkGnd( COLORREF clr );
-	virtual COLORREF	GetBkGnd();
+	virtual COLORREF	GetBkGnd() const;
 
 	virtual bool		SetGridColor(COLORREF clr);
 	virtual void		SetDrawGridOnTop(bool bOnTop = true);
 
 	// dataset functions
 	virtual bool		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
-	virtual bool		GetDatasetLineColor( int nDatasetIndex, COLORREF& clr );
+	virtual bool		GetDatasetLineColor( int nDatasetIndex, COLORREF& clr ) const;
 	virtual bool		SetDatasetFillColor( int nDatasetIndex, COLORREF clr );
-	virtual bool		GetDatasetFillColor( int nDatasetIndex, COLORREF& clr );
+	virtual bool		GetDatasetFillColor( int nDatasetIndex, COLORREF& clr ) const;
 
 	virtual bool		SetDatasetSizeFactor( int nDatasetIndex, int nSize );
-	virtual bool		GetDatasetLineThickness( int nDatasetIndex, int& nSize );
+	virtual bool		GetDatasetLineThickness( int nDatasetIndex, int& nSize ) const;
 
 	virtual bool		SetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE nStyle );
-	virtual bool		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle );
+	virtual bool		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle ) const;
 
 	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
-	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker );
+	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
 
 	virtual bool		AddData( int nDatasetIndex, double nData );
 	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
-	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData );
+	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData ) const;
 
 	virtual bool		ClearData( int nDatasetIndex);
 	virtual void		ClearData();

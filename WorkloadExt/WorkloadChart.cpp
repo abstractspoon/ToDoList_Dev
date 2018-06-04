@@ -133,20 +133,32 @@ BOOL CWorkloadChart::SetNormalColor(COLORREF crNormal)
 
 COLORREF CWorkloadChart::GetLineColor(int nDatasetIndex, double dValue) const
 {
-	if ((m_crOverload != CLR_NONE) && (dValue >= m_dOverloadValue))
-		return m_crOverload;
+	COLORREF crLine = GetValueColor(dValue);
 
-	if ((m_crUnderload != CLR_NONE) && (dValue <= m_dUnderloadValue))
-		return m_crUnderload;
+	if (crLine == CLR_NONE)
+		crLine = CHMXChart::GetLineColor(nDatasetIndex, dValue);
 
-	return CHMXChart::GetLineColor(nDatasetIndex, dValue);
+	return crLine;
 }
 
-COLORREF CWorkloadChart::GetFillColor(int nDatasetIndex, double dValue) const
+COLORREF CWorkloadChart::GetFillColor(int /*nDatasetIndex*/, double dValue) const
 {
-	COLORREF crLine = GetLineColor(nDatasetIndex, dValue);
+	COLORREF crFill = GetValueColor(dValue);
 
-	return RGBX::AdjustLighting(crLine, 0.25, FALSE);
+	if (crFill != CLR_NONE)
+		crFill = RGBX::AdjustLighting(crFill, 0.25, FALSE);
+
+	return crFill;
+}
+
+COLORREF CWorkloadChart::GetLineColor(double dValue) const
+{
+	return GetLineColor(0, dValue);
+}
+
+COLORREF CWorkloadChart::GetFillColor(double dValue) const
+{
+	return GetFillColor(0, dValue);
 }
 
 bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
@@ -176,14 +188,33 @@ bool CWorkloadChart::DrawDataBkgnd( CDC& dc)
 
 COLORREF CWorkloadChart::GetBkgndColor(double dValue) const
 {
-	if (HasOverload() && (dValue >= m_dOverloadValue))
-		return RGBX::AdjustLighting(m_crOverload, 0.5, FALSE);
-
-	if (HasUnderload() && (dValue <= m_dUnderloadValue))
-		return RGBX::AdjustLighting(m_crUnderload, 0.5, FALSE);
+	if (IsOverloaded(dValue) || IsUnderloaded(dValue))
+		return RGBX::AdjustLighting(GetValueColor(dValue), 0.5, FALSE);
 
 	// else
 	return CLR_NONE;
+}
+
+COLORREF CWorkloadChart::GetValueColor(double dValue) const
+{
+	if (IsOverloaded(dValue))
+		return m_crOverload;
+
+	if (IsUnderloaded(dValue))
+		return m_crUnderload;
+
+	// else
+	return GetNormalColor();
+}
+
+COLORREF CWorkloadChart::GetNormalColor() const
+{
+	COLORREF crNormal;
+
+	if (!GetDatasetLineColor(0, crNormal))
+		crNormal = 0;
+
+	return crNormal;
 }
 
 BOOL CWorkloadChart::HasOverload() const
@@ -194,4 +225,14 @@ BOOL CWorkloadChart::HasOverload() const
 BOOL CWorkloadChart::HasUnderload() const
 {
 	return ((m_crUnderload != CLR_NONE) && (m_dUnderloadValue > 0.0));
+}
+
+BOOL CWorkloadChart::IsOverloaded(double dValue) const
+{
+	return (HasOverload() && (dValue >= m_dOverloadValue));
+}
+
+BOOL CWorkloadChart::IsUnderloaded(double dValue) const
+{
+	return (HasUnderload() && (dValue <= m_dUnderloadValue));
 }

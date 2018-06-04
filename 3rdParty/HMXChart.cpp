@@ -1155,7 +1155,7 @@ bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double nData)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData)
+bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1196,7 +1196,7 @@ bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle)
+bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1256,7 +1256,7 @@ bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker)
+bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1298,7 +1298,7 @@ bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize)
+bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1348,7 +1348,7 @@ bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr)
+bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1358,7 +1358,7 @@ bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr)
 	return (clr != CLR_NONE);
 }
 
-bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr)
+bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr) const
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
 		return false;
@@ -1442,7 +1442,7 @@ bool CHMXChart::SetBkGnd()
 //
 //		background color
 //
-COLORREF CHMXChart::GetBkGnd()
+COLORREF CHMXChart::GetBkGnd() const
 {
 	return m_clrBkGnd;
 }
@@ -1477,7 +1477,7 @@ bool CHMXChart::SetTitle(CString strTitle)
 //
 //		title
 //
-CString CHMXChart::GetTitle()
+CString CHMXChart::GetTitle() const
 {
 	return m_strTitle;
 }
@@ -1513,7 +1513,7 @@ bool CHMXChart::SetYTicks(int nTicks)
 //
 //		nTicks
 //
-int CHMXChart::GetYTicks()
+int CHMXChart::GetYTicks() const
 {
 	return m_nYTicks;
 }
@@ -1551,7 +1551,7 @@ bool CHMXChart::SetRoundY(double nRound)
 //
 //		nRoundY = rounding value
 //
-double CHMXChart::GetRoundY()
+double CHMXChart::GetRoundY() const
 {
 	return m_nRoundY;
 }
@@ -1586,7 +1586,7 @@ bool CHMXChart::SetYText(CString sText)
 //
 //		sText	= text
 //
-CString CHMXChart::GetYText()
+CString CHMXChart::GetYText() const
 {
 	return m_strYText;
 }
@@ -1621,7 +1621,7 @@ bool CHMXChart::SetXText(CString sText)
 //
 //		sText	= text
 //
-CString CHMXChart::GetXText()
+CString CHMXChart::GetXText() const
 {
 	return m_strXText;
 }
@@ -1669,7 +1669,7 @@ void CHMXChart::ClearXScaleLabels()
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetXScaleLabel(int nIndex, CString& str)
+bool CHMXChart::GetXScaleLabel(int nIndex, CString& str) const
 {
 	if(nIndex < 0 || nIndex > m_strarrScaleXLabel.GetUpperBound())
 		return false;
@@ -1724,7 +1724,7 @@ void CHMXChart::SetXLabelAngle(int nDegrees)
 //
 //		nStep = x label step
 //
-int CHMXChart::GetXLabelStep()
+int CHMXChart::GetXLabelStep() const
 {
 	return m_nXLabelStep;
 }

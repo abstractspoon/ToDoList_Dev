@@ -118,7 +118,7 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
-	m_crAllocation(RGB(255, 224, 224)),
+	m_crAllocation(RGB(255, 180, 180)),
 	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
@@ -2961,13 +2961,17 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 		m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, bSelected);
-		rColumn.top += 2;
+		rColumn.right--;
+		rColumn.bottom--;
 
 		CString sDays = GetListItemColumnText(mapAlloc, nCol, 2);
 		
 		if (!sDays.IsEmpty())
 		{
-			rColumn.DeflateRect(LV_COLPADDING, 0);
+			if (!bSelected && (m_crAllocation != CLR_NONE))
+				pDC->FillSolidRect(rColumn, m_crAllocation);
+
+			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
 	}
@@ -2987,7 +2991,6 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		rColumn.OffsetRect(-m_lcColumns.GetScrollPos(SB_HORZ), 0);
 			
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
-		rColumn.top++;
 		rColumn.right--;
 
 		CString sValue = GetListItemColumnText(mapAlloc, nCol, nDecimals);
@@ -3001,21 +3004,24 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 				switch (GetListColumnType(nCol))
 				{
 				case WLCT_VALUE:
-					crBack = m_barChart.GetFillColor(mapAlloc.Get(m_aAllocTo[nCol - 1]));
+					crBack = m_barChart.GetBkgndColor(mapAlloc.Get(m_aAllocTo[nCol - 1]));
 					break;
 					
 				case WLCT_TOTAL:
-					crBack = m_barChart.GetFillColor(mapAlloc.GetTotal());
+					crBack = m_barChart.GetBkgndColor(mapAlloc.GetTotal());
 					break;
 				}
 
 				if (crBack != CLR_NONE)
+				{
 					pDC->FillSolidRect(rColumn, crBack);
+					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+				}
 	
 				sValue += '%';
 			}
 		
-			rColumn.DeflateRect(LV_COLPADDING, 0);
+			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
 	}
