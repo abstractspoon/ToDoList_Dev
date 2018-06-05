@@ -26,6 +26,176 @@ const double START_OF_DAY = (1 / (24.0 * 60 * 60));
 
 //////////////////////////////////////////////////////////////////////
 
+COleDateTimeRange::COleDateTimeRange()
+{
+	Reset();
+}
+
+COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
+{
+	VERIFY(Set(dtStart, dtEnd, bInclusive));
+}
+
+COleDateTimeRange::COleDateTimeRange(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive)
+{
+	VERIFY(Set(nStart, nEnd, bInclusive));
+}
+
+COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive)
+{
+	VERIFY(Set(dtStart, nEnd, bInclusive));
+}
+
+COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive)
+{
+	VERIFY(Set(dtStart, nEndOffset, nOffsetUnits, bInclusive));
+}
+
+COleDateTimeRange::COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive)
+{
+	VERIFY(Set(nStart, nEndOffset, nOffsetUnits, bInclusive));
+}
+
+void COleDateTimeRange::Reset()
+{
+	CDateHelper::ClearDate(m_dtStart);
+	CDateHelper::ClearDate(m_dtEnd);
+	m_bInclusive = TRUE;
+}
+
+BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
+{
+	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd) || (dtEnd < m_dtStart))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_dtStart = dtStart;
+	m_dtEnd = dtEnd;
+	m_bInclusive = bInclusive;
+
+	return IsValid();
+}
+
+BOOL COleDateTimeRange::Set(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive)
+{
+	return Set(CDateHelper::GetDate(nStart), CDateHelper::GetDate(nEnd), bInclusive);
+}
+
+BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive)
+{
+	return Set(dtStart, CDateHelper::GetDate(nEnd), bInclusive);
+}
+
+BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive)
+{
+	COleDateTime dtEnd(dtStart);
+	
+	if (!CDateHelper::OffsetDate(dtEnd, nEndOffset, nOffsetUnits))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	return Set(dtStart, dtEnd, bInclusive);
+
+}
+
+BOOL COleDateTimeRange::Set(DH_DATE nStart, int nEndAmount, DH_UNITS nOffsetUnits, BOOL bInclusive)
+{
+	return Set(CDateHelper::GetDate(nStart), nEndAmount, nOffsetUnits, bInclusive);
+}
+
+BOOL COleDateTimeRange::IsValid() const
+{
+	return (CDateHelper::IsDateSet(m_dtStart) && 
+			CDateHelper::IsDateSet(m_dtEnd) && 
+			(m_dtEnd >= m_dtStart));
+}
+
+BOOL COleDateTimeRange::Contains(const COleDateTime& date) const
+{
+	if (!IsValid())
+		return FALSE;
+	
+	if (date < m_dtStart)
+		return FALSE;
+
+	return (date < GetEndInclusive());
+}
+
+BOOL COleDateTimeRange::Overlaps(const COleDateTimeRange& range) const
+{
+	if (!IsValid())
+		return FALSE;
+
+	if (GetEndInclusive() < range.GetStart())
+		return FALSE;
+
+	if (GetStart() > range.GetEndInclusive())
+		return FALSE;
+		
+	return TRUE;
+}
+
+COleDateTime COleDateTimeRange::GetStart() const
+{
+	return m_dtStart;
+}
+
+COleDateTime COleDateTimeRange::GetEnd() const
+{
+	return m_dtEnd;
+}
+
+COleDateTime COleDateTimeRange::GetEndInclusive() const
+{
+	if (m_bInclusive)
+		return CDateHelper::GetEndOfDay(m_dtEnd);
+
+	// else
+	return m_dtEnd;
+}
+
+int COleDateTimeRange::GetDayCount() const
+{
+	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, FALSE);
+}
+
+int COleDateTimeRange::GetWeekdayCount() const
+{
+	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, TRUE);
+}
+
+BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
+{
+	COleDateTimeRange prevRange = *this;
+
+	if (!CDateHelper::OffsetDate(m_dtStart, nAmount, nUnits) || 
+		!CDateHelper::OffsetDate(m_dtEnd, nAmount, nUnits))
+	{
+		*this = prevRange;
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
+{
+	CString sRange;
+
+	if (cDelim)
+		sRange.Format(_T("%s %c %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+	else
+		sRange.Format(_T("%s %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+
+	return sRange;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 DWORD CDateHelper::s_dwWeekend = (DHW_SATURDAY | DHW_SUNDAY);
 
 //////////////////////////////////////////////////////////////////////

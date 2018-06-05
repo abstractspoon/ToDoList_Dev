@@ -84,6 +84,45 @@ typedef __int64 time64_t;
 
 //////////////////////////////////////////////////////////////////////
 
+class COleDateTimeRange
+{
+	COleDateTimeRange();
+	COleDateTimeRange(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
+	COleDateTimeRange(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
+	COleDateTimeRange(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
+	COleDateTimeRange(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
+	COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
+
+	void Reset();
+
+	BOOL Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
+	BOOL Set(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
+	BOOL Set(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
+	BOOL Set(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
+	BOOL Set(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
+
+	BOOL IsValid() const;
+	BOOL Contains(const COleDateTime& date) const;
+	BOOL Overlaps(const COleDateTimeRange& range) const;
+
+	COleDateTime GetStart() const;
+	COleDateTime GetEnd() const;
+	COleDateTime GetEndInclusive() const; // returns 'end of day' if m_bInclusive is TRUE
+
+	int GetDayCount() const;
+	int GetWeekdayCount() const;
+
+	BOOL Offset(int nAmount, DH_UNITS nUnits);
+
+	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
+
+protected:
+	COleDateTime m_dtStart, m_dtEnd;
+	BOOL m_bInclusive;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDateHelper  
 {
 public:
