@@ -315,7 +315,7 @@ void CWorkloadItemMap::RemoveAll()
 	CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>::RemoveAll();
 }
 
-void CWorkloadItemMap::CalculateTotals(const COleDateTime& dtBegin, const COleDateTime& dtEndInclusive,
+void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 	CMapAllocations& mapTotalDays, CMapAllocations& mapTotalTasks) const
 {
 	mapTotalDays.RemoveAll();
@@ -335,8 +335,8 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTime& dtBegin, const COleDa
 		if (!pWI->HasDates() || pWI->IsDone())
 			continue;
 
-		COleDateTime dtFrom = max(pWI->dtStart, dtBegin);
-		COleDateTime dtTo = min(pWI->dtDue, dtEndInclusive);
+		COleDateTime dtFrom = max(pWI->dtStart, dtPeriod.m_dtStart);
+		COleDateTime dtTo = min(pWI->dtDue, dtPeriod.m_dtEnd);
 
 		double dTaskDays = CDateHelper::CalcDaysFromTo(dtFrom, dtTo, TRUE, TRUE);
 			

@@ -15,6 +15,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+class COleDateTimeRange;
+
+/////////////////////////////////////////////////////////////////////////////
+
 const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_");
 
 class CMapAllocations : protected CMap<CString, LPCTSTR, double, double&> 
@@ -98,8 +102,9 @@ public:
 	WORKLOADITEM* GetItem(DWORD dwKey) const;
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
-	void CalculateTotals(const COleDateTime& dtBegin, const COleDateTime& dtEndInclusive,
-							CMapAllocations& mapTotalDays, CMapAllocations& mapTotalTasks) const;
+	void CalculateTotals(const COleDateTimeRange& dtPeriod,
+							CMapAllocations& mapTotalDays, 
+							CMapAllocations& mapTotalTasks) const;
 
 };
 

@@ -22,6 +22,7 @@
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\TreeSelectionHelper.h"
 #include "..\shared\themed.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
@@ -70,7 +71,7 @@ public:
 	BOOL SetSelectedTask(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
-	BOOL SetCurrentPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive = TRUE);
+	BOOL SetCurrentPeriod(const COleDateTimeRange& dtPeriod);
 
 	BOOL CanMoveSelectedItem(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedItem(const IUITASKMOVE& move);
@@ -155,7 +156,7 @@ protected:
 	double m_dWorkDaysInPeriod;
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
-	COleDateTime m_dtBegin, m_dtEndInclusive;
+	COleDateTimeRange m_dtPeriod;
 
 	CStringArray m_aAllocTo;
 	CHTIMap m_mapHTItems;

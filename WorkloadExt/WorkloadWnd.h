@@ -15,6 +15,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\shared\Icon.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -62,8 +63,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadWnd)
-	COleDateTime	m_dtPeriodBegin;
-	COleDateTime	m_dtPeriodEndInclusive;
+	COleDateTimeRange m_dtPeriod;
 	CString	m_sPeriodDuration;
 	//}}AFX_DATA
 	CWorkloadCtrl m_ctrlWorkload;

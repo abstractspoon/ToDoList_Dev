@@ -57,6 +57,7 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 #pragma warning(default:4355)
 {
 	m_icon.LoadIcon(IDR_WORKLOAD);
+	m_dtPeriod.m_bInclusive = TRUE;
 }
 
 CWorkloadWnd::~CWorkloadWnd()
@@ -67,8 +68,8 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWorkloadWnd)
-	DDX_DateTimeCtrl(pDX, IDC_PERIODBEGIN, m_dtPeriodBegin);
-	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriodEndInclusive);
+	DDX_DateTimeCtrl(pDX, IDC_PERIODBEGIN, m_dtPeriod.m_dtStart);
+	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriod.m_dtEnd);
 	DDX_Text(pDX, IDC_PERIODDURATION, m_sPeriodDuration);
 	//}}AFX_DATA_MAP
 }
@@ -173,8 +174,8 @@ void CWorkloadWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	CString sKey(szKey);
 
 	pPrefs->WriteProfileString(sKey, _T("SortByAllocTo"), m_ctrlWorkload.GetSortByAllocTo());
-	pPrefs->WriteProfileDouble(sKey, _T("PeriodBegin"), m_dtPeriodBegin.m_dt);
-	pPrefs->WriteProfileDouble(sKey, _T("PeriodEnd"), m_dtPeriodEndInclusive.m_dt);
+	pPrefs->WriteProfileDouble(sKey, _T("PeriodBegin"), m_dtPeriod.m_dtStart.m_dt);
+	pPrefs->WriteProfileDouble(sKey, _T("PeriodEnd"), m_dtPeriod.m_dtEnd.m_dt);
 
 	// column widths
 	CIntArray aTreeOrder, aTreeWidths, aTreeTracked;
@@ -268,8 +269,8 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		m_ctrlWorkload.SetSortByAllocTo(pPrefs->GetProfileString(sKey, _T("SortByAllocTo")));
 
 		// Current period
-		m_dtPeriodBegin = pPrefs->GetProfileDouble(sKey, _T("PeriodBegin"), CDateHelper::GetDate(DHD_BEGINTHISMONTH));
-		m_dtPeriodEndInclusive = pPrefs->GetProfileDouble(sKey, _T("PeriodEnd"), CDateHelper::GetDate(DHD_ENDTHISMONTH));
+		m_dtPeriod.m_dtStart = pPrefs->GetProfileDouble(sKey, _T("PeriodBegin"), CDateHelper::GetDate(DHD_BEGINTHISMONTH));
+		m_dtPeriod.m_dtEnd = pPrefs->GetProfileDouble(sKey, _T("PeriodEnd"), CDateHelper::GetDate(DHD_ENDTHISMONTH));
 
 		UpdatePeriod();
 
@@ -938,17 +939,20 @@ void CWorkloadWnd::OnChangePeriodEnd(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CWorkloadWnd::OnMovePeriodBackOneMonth() 
 {
-	CDateHelper::IncrementMonth(m_dtPeriodBegin, -1);
-	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, -1);
+	m_dtPeriod.Offset(-1, DHU_MONTHS);
 
 	UpdatePeriod();
 }
 
 void CWorkloadWnd::UpdatePeriod()
 {
-	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriodBegin, m_dtPeriodEndInclusive);
+	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriod);
 
-	m_sPeriodDuration = CEnString(IDS_PERIODDURATION, (int)CDateHelper::CalcDaysFromTo(m_dtPeriodBegin, m_dtPeriodEndInclusive, TRUE, TRUE));
+	if (m_dtPeriod.IsValid())
+		m_sPeriodDuration = CEnString(IDS_PERIODDURATION, m_dtPeriod.GetWeekdayCount());
+	else
+		m_sPeriodDuration.Empty();
+
 	UpdateData(FALSE);
 }
 
@@ -959,7 +963,7 @@ void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodStartBackOneMonth() 
 {
-	CDateHelper::IncrementMonth(m_dtPeriodBegin, -1);
+	m_dtPeriod.OffsetStart(-1, DHU_MONTHS);
 	
 	UpdatePeriod();
 }
@@ -971,8 +975,7 @@ void CWorkloadWnd::OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnResetPeriodToThisMonth() 
 {
-	m_dtPeriodBegin = CDateHelper::GetDate(DHD_BEGINTHISMONTH);
-	m_dtPeriodEndInclusive = CDateHelper::GetDate(DHD_ENDTHISMONTH);
+	m_dtPeriod.Set(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH);
 	
 	UpdatePeriod();
 }
@@ -984,7 +987,7 @@ void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
 {
-	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, 1);
+	m_dtPeriod.OffsetEnd(1, DHU_MONTHS);
 	
 	UpdatePeriod();
 }
@@ -996,8 +999,7 @@ void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth() 
 {
-	CDateHelper::IncrementMonth(m_dtPeriodBegin, 1);
-	CDateHelper::IncrementMonth(m_dtPeriodEndInclusive, 1);
+	m_dtPeriod.Offset(1, DHU_MONTHS);
 	
 	UpdatePeriod();
 }

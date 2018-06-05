@@ -328,7 +328,7 @@ BEGIN
     IDS_ATTRIB_TASKID       "Task ID"
     IDS_NEW_ALLOCATION      "<new allocation>"
     IDS_COL_TOTAL           "Total"
-    IDS_TOTALSDATERANGE     "Current Period: %s - %s"
+    IDS_TOTALSDATERANGE     "Current Period: %s"
     IDS_PERIODDURATION      "(%d weekdays)"
 END
 

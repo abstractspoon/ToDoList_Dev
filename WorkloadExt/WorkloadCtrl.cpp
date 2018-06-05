@@ -129,9 +129,9 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_mapTotalDays(FALSE),
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
-	m_barChart(m_aAllocTo, m_mapPercentLoad)
+	m_barChart(m_aAllocTo, m_mapPercentLoad),
+	m_dtPeriod(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH, TRUE)
 {
-	SetCurrentPeriod(CDateHelper::GetDate(DHD_BEGINTHISMONTH), CDateHelper::GetDate(DHD_ENDTHISMONTH), TRUE);
 }
 
 CWorkloadCtrl::~CWorkloadCtrl()
@@ -276,27 +276,10 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-BOOL CWorkloadCtrl::SetCurrentPeriod(const COleDateTime& dtFrom, const COleDateTime& dtTo, BOOL bInclusive)
+BOOL CWorkloadCtrl::SetCurrentPeriod(const COleDateTimeRange& dtPeriod)
 {
-	if (dtTo < dtFrom)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (!bInclusive && (dtTo == dtFrom))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	m_dtBegin = dtFrom;
-	m_dtEndInclusive = dtTo;
-
-	if (!bInclusive)
-		m_dtEndInclusive.m_dt--;
-
-	m_dWorkDaysInPeriod = CDateHelper::CalcDaysFromTo(m_dtBegin, m_dtEndInclusive, TRUE, TRUE);
+	m_dtPeriod = dtPeriod;
+	m_dWorkDaysInPeriod = dtPeriod.GetWeekdayCount();
 
 	if (GetSafeHwnd())
 	{
@@ -312,7 +295,9 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 	if (m_lcTotalsLabels.GetSafeHwnd())
 	{
 		CString sLabel;
-		sLabel.Format(CEnString(IDS_TOTALSDATERANGE), CDateHelper::FormatDate(m_dtBegin), CDateHelper::FormatDate(m_dtEndInclusive));
+
+		if (m_dtPeriod.IsValid())
+			sLabel.Format(CEnString(IDS_TOTALSDATERANGE), m_dtPeriod.Format());
 
 		m_lcTotalsLabels.SetItemText(ID_TOTALCOLUMNHEADER, 0, sLabel);
 	}
@@ -650,17 +635,20 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	m_data.CalculateTotals(m_dtBegin, m_dtEndInclusive, m_mapTotalDays, m_mapTotalTasks);
+	m_data.CalculateTotals(m_dtPeriod, m_mapTotalDays, m_mapTotalTasks);
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();
 
-	for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
+	if (m_dWorkDaysInPeriod > 0.0)
 	{
-		const CString& sAllocTo = m_aAllocTo[nAllocTo];
-		double dTotalDays = m_mapTotalDays.Get(sAllocTo);
+		for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
+		{
+			const CString& sAllocTo = m_aAllocTo[nAllocTo];
+			double dTotalDays = m_mapTotalDays.Get(sAllocTo);
 
-		m_mapPercentLoad.Set(sAllocTo, (dTotalDays * 100 / m_dWorkDaysInPeriod));
+			m_mapPercentLoad.Set(sAllocTo, (dTotalDays * 100 / m_dWorkDaysInPeriod));
+		}
 	}
 
 	m_lcColumnTotals.Invalidate();

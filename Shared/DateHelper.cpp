@@ -31,41 +31,72 @@ COleDateTimeRange::COleDateTimeRange()
 	Reset();
 }
 
+COleDateTimeRange::COleDateTimeRange(const COleDateTimeRange& dtRange)
+{
+	Reset();
+	VERIFY(Set(dtRange.m_dtStart, dtRange.m_dtEnd, dtRange.m_bInclusive));
+}
+
 COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
+	Reset();
 	VERIFY(Set(dtStart, dtEnd, bInclusive));
 }
 
 COleDateTimeRange::COleDateTimeRange(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive)
 {
+	Reset();
 	VERIFY(Set(nStart, nEnd, bInclusive));
 }
 
 COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive)
 {
+	Reset();
 	VERIFY(Set(dtStart, nEnd, bInclusive));
 }
 
 COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive)
 {
+	Reset();
 	VERIFY(Set(dtStart, nEndOffset, nOffsetUnits, bInclusive));
 }
 
 COleDateTimeRange::COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive)
 {
+	Reset();
 	VERIFY(Set(nStart, nEndOffset, nOffsetUnits, bInclusive));
+}
+
+COleDateTimeRange& COleDateTimeRange::operator=(const COleDateTimeRange& range)
+{
+	m_dtStart = range.m_dtStart;
+	m_dtEnd = range.m_dtEnd;
+	m_bInclusive = range.m_bInclusive;
+
+	return *this;
+}
+
+BOOL COleDateTimeRange::operator==(const COleDateTimeRange& range) const
+{
+	if (!IsValid() || !range.IsValid())
+		return FALSE;
+
+	return ((m_dtStart == range.m_dtStart) && 
+			(m_dtEnd == range.m_dtEnd) && 
+			(m_bInclusive == range.m_bInclusive));
 }
 
 void COleDateTimeRange::Reset()
 {
+	m_bInclusive = TRUE;
+
 	CDateHelper::ClearDate(m_dtStart);
 	CDateHelper::ClearDate(m_dtEnd);
-	m_bInclusive = TRUE;
 }
 
 BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
-	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd) || (dtEnd < m_dtStart))
+	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd) || (dtEnd < dtStart))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -151,7 +182,7 @@ COleDateTime COleDateTimeRange::GetEnd() const
 
 COleDateTime COleDateTimeRange::GetEndInclusive() const
 {
-	if (m_bInclusive)
+	if (IsValid() && m_bInclusive)
 		return CDateHelper::GetEndOfDay(m_dtEnd);
 
 	// else
@@ -160,16 +191,25 @@ COleDateTime COleDateTimeRange::GetEndInclusive() const
 
 int COleDateTimeRange::GetDayCount() const
 {
+	if (!IsValid())
+		return 0;
+
 	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, FALSE);
 }
 
 int COleDateTimeRange::GetWeekdayCount() const
 {
+	if (!IsValid())
+		return 0;
+
 	return CDateHelper::CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive, TRUE);
 }
 
 BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 {
+	if (!IsValid())
+		return FALSE;
+
 	COleDateTimeRange prevRange = *this;
 
 	if (!CDateHelper::OffsetDate(m_dtStart, nAmount, nUnits) || 
@@ -182,14 +222,49 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
+BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
+{
+	if (!IsValid())
+		return FALSE;
+
+	COleDateTimeRange prevRange = *this;
+
+	if (!CDateHelper::OffsetDate(m_dtStart, nAmount, nUnits) || !IsValid())
+	{
+		*this = prevRange;
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits)
+{
+	if (!IsValid())
+		return FALSE;
+
+	COleDateTimeRange prevRange = *this;
+
+	if (!CDateHelper::OffsetDate(m_dtEnd, nAmount, nUnits) || !IsValid())
+	{
+		*this = prevRange;
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 {
 	CString sRange;
 
-	if (cDelim)
-		sRange.Format(_T("%s %c %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
-	else
-		sRange.Format(_T("%s %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+	if (IsValid())
+	{
+		if (cDelim)
+			sRange.Format(_T("%s %c %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), cDelim, CDateHelper::FormatDate(m_dtEnd, dwFlags));
+		else
+			sRange.Format(_T("%s %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+	}
 
 	return sRange;
 }

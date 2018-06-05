@@ -86,12 +86,17 @@ typedef __int64 time64_t;
 
 class COleDateTimeRange
 {
+public:
 	COleDateTimeRange();
+	COleDateTimeRange(const COleDateTimeRange& dtRange);
 	COleDateTimeRange(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
 	COleDateTimeRange(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
 	COleDateTimeRange(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
 	COleDateTimeRange(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 	COleDateTimeRange(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
+
+	COleDateTimeRange& operator=(const COleDateTimeRange& wi);
+	BOOL operator==(const COleDateTimeRange& wi) const;
 
 	void Reset();
 
@@ -113,10 +118,12 @@ class COleDateTimeRange
 	int GetWeekdayCount() const;
 
 	BOOL Offset(int nAmount, DH_UNITS nUnits);
+	BOOL OffsetStart(int nAmount, DH_UNITS nUnits);
+	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
 
-protected:
+public:
 	COleDateTime m_dtStart, m_dtEnd;
 	BOOL m_bInclusive;
 };
