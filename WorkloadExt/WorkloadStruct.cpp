@@ -483,7 +483,7 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 
 		COleDateTimeRange dtIntersect;
 		
-		if (!dtPeriod.GetIntersection(pWI->dtRange, dtIntersect))
+		if (!dtIntersect.IntersectRange(dtPeriod, pWI->dtRange))
 			continue;
 
 		double dTaskDuration = pWI->dtRange.GetWeekdayCount();
@@ -578,7 +578,7 @@ void CWorkloadItemMap::RecalculateOverlaps()
 					if (pWIOther->dtRange.m_dtStart > pWI->dtRange.m_dtEnd)
 						break;
 
-					if (pWI->dtRange.Intersects(pWIOther->dtRange))
+					if (pWI->dtRange.IntersectsWith(pWIOther->dtRange))
 						pWI->mapAllocatedDays.AppendOverlaps(pWIOther->mapAllocatedDays);
 				}				
 			}

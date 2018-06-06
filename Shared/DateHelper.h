@@ -108,8 +108,9 @@ public:
 
 	BOOL IsValid() const;
 	BOOL IsDateInRange(const COleDateTime& date) const;
-	BOOL Intersects(const COleDateTimeRange& dtOther) const;
-	BOOL GetIntersection(const COleDateTimeRange& dtOther, COleDateTimeRange& dtIntersection) const;
+	BOOL IntersectsWith(const COleDateTimeRange& dtOther) const;
+	BOOL IntersectRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL UnionRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
 
 	BOOL HasStart() const;
 	BOOL HasEnd() const;

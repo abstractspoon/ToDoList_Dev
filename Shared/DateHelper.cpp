@@ -155,9 +155,9 @@ BOOL COleDateTimeRange::IsDateInRange(const COleDateTime& date) const
 	return (date < GetEndInclusive());
 }
 
-BOOL COleDateTimeRange::Intersects(const COleDateTimeRange& dtOther) const
+BOOL COleDateTimeRange::IntersectsWith(const COleDateTimeRange& dtOther) const
 {
-	if (!IsValid())
+	if (!IsValid() || !dtOther.IsValid())
 		return FALSE;
 
 	if (GetEndInclusive() < dtOther.GetStart())
@@ -169,19 +169,32 @@ BOOL COleDateTimeRange::Intersects(const COleDateTimeRange& dtOther) const
 	return TRUE;
 }
 
-BOOL COleDateTimeRange::GetIntersection(const COleDateTimeRange& dtOther, COleDateTimeRange& dtIntersection) const
+BOOL COleDateTimeRange::IntersectRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
 {
-	COleDateTime dtStart = max(m_dtStart, dtOther.m_dtStart);
-	COleDateTime dtEnd = min(GetEndInclusive(), dtOther.GetEndInclusive());
-
-	if (dtStart > dtEnd)
+	if (!dtOther1.IntersectsWith(dtOther2))
 		return FALSE;
 
-	dtIntersection.m_dtStart = dtStart;
-	dtIntersection.m_dtEnd = dtEnd;
-	dtIntersection.m_bInclusive = (m_bInclusive || dtOther.m_bInclusive);
+	COleDateTime dtStart = max(dtOther1.m_dtStart, dtOther2.m_dtStart);
+	COleDateTime dtEnd = min(dtOther1.GetEndInclusive(), dtOther2.GetEndInclusive());
 
-	return dtIntersection.IsValid();
+	return Set(dtStart, dtEnd, (dtOther1.m_bInclusive || dtOther2.m_bInclusive));
+}
+
+BOOL COleDateTimeRange::UnionRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
+{
+	if (!dtOther1.IsValid() || !dtOther2.IsValid())
+		return FALSE;
+
+	COleDateTime dtStart = min(dtOther1.m_dtStart, dtOther2.m_dtStart);
+	COleDateTime dtEnd = max(dtOther1.GetEndInclusive(), dtOther2.GetEndInclusive());
+
+	COleDateTimeRange temp(dtStart, dtEnd, (dtOther1.m_bInclusive || dtOther2.m_bInclusive));
+
+	if (!temp.IsValid())
+		return FALSE;
+
+	*this = temp;
+	return TRUE;
 }
 
 COleDateTime COleDateTimeRange::GetStart() const
