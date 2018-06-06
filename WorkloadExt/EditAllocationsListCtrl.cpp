@@ -69,7 +69,7 @@ void CEditAllocationsListCtrl::InitState()
 	for (int nAllocTo = 0; nAllocTo < m_wi.aAllocTo.GetSize(); nAllocTo++)
 	{
 		const CString& sAllocTo = m_wi.aAllocTo[nAllocTo];
-		CString sDays = m_wi.mapAllocatedDays.Get(sAllocTo, 2);
+		CString sDays = m_wi.mapAllocatedDays.GetDays(sAllocTo, 2);
 
 		int nRow = AddRow(sAllocTo);
 		SetItemText(nRow, ALLOCDAYS_COL, sDays);
@@ -165,7 +165,7 @@ void CEditAllocationsListCtrl::OnDestroy()
 		CString sAllocTo = GetItemText(nRow, ALLOCTO_COL);
 		CString sDays = GetItemText(nRow, ALLOCDAYS_COL);
 
-		m_wi.mapAllocatedDays.Set(sAllocTo, sDays);
+		m_wi.mapAllocatedDays.SetDays(sAllocTo, sDays);
 		m_wi.aAllocTo.Add(sAllocTo);
 	}
 

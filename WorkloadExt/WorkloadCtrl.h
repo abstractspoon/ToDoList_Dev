@@ -161,7 +161,7 @@ protected:
 	CStringArray m_aAllocTo;
 	CHTIMap m_mapHTItems;
 	CWorkloadItemMap m_data;
-	CMapAllocations m_mapTotalDays, m_mapTotalTasks, m_mapPercentLoad;
+	CMapAllocationTotals m_mapTotalDays, m_mapTotalTasks, m_mapPercentLoad;
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -228,8 +228,8 @@ protected:
 	
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
-	void DrawAllocationListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, BOOL bSelected);
-	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, int nDecimals);
+	void DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
+	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapAlloc, int nDecimals);
 	void DrawTotalsHeader(CDC* pDC);
 	void RedrawList(BOOL bErase = FALSE);
 
@@ -250,7 +250,8 @@ protected:
 	void UpdateListColumns();
 	int GetRequiredListColumnCount() const;
 	void DeleteTreeItem(HTREEITEM hti);
-	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
+	void RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
+	BOOL RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs);
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	void InitItemHeights();
 	void Resize(int cx = 0, int cy = 0);
@@ -287,7 +288,8 @@ protected:
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	int GetLongestVisibleDuration(HTREEITEM hti) const;
 	CString GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNID nColID) const;
-	CString GetListItemColumnText(const CMapAllocations& mapAlloc, int nCol, int nDecimals) const;
+	CString GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const;
+	CString GetListItemColumnTotal(const CMapAllocationTotals& mapAlloc, int nCol, int nDecimals) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
@@ -306,7 +308,6 @@ protected:
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RefreshTreeItemMap();
-	BOOL GetTaskStartDueDates(const WORKLOADITEM& wi, COleDateTime& dtStart, COleDateTime& dtDue) const;
 
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
 	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);

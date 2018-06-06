@@ -4,7 +4,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CMapAllocations;
+class CMapAllocationTotals;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadChart
@@ -12,7 +12,7 @@ class CMapAllocations;
 class CWorkloadChart : public CHMXChart
 {
 public:
-	CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad);
+	CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocationTotals& mapPercentLoad);
 	virtual ~CWorkloadChart();
 
 	BOOL SaveToImage(CBitmap& bmImage);
@@ -30,7 +30,7 @@ public:
 	void OnChangeData();
 
 protected:
-	const CMapAllocations& m_mapPercentLoad;
+	const CMapAllocationTotals& m_mapPercentLoad;
 	const CStringArray& m_aAllocTo;
 
 	COLORREF m_crOverload, m_crUnderload;

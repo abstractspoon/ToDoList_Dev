@@ -33,8 +33,7 @@ COleDateTimeRange::COleDateTimeRange()
 
 COleDateTimeRange::COleDateTimeRange(const COleDateTimeRange& dtRange)
 {
-	Reset();
-	VERIFY(Set(dtRange.m_dtStart, dtRange.m_dtEnd, dtRange.m_bInclusive));
+	*this = dtRange;
 }
 
 COleDateTimeRange::COleDateTimeRange(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
@@ -145,7 +144,7 @@ BOOL COleDateTimeRange::IsValid() const
 			(m_dtEnd >= m_dtStart));
 }
 
-BOOL COleDateTimeRange::Contains(const COleDateTime& date) const
+BOOL COleDateTimeRange::IsDateInRange(const COleDateTime& date) const
 {
 	if (!IsValid())
 		return FALSE;
@@ -156,18 +155,33 @@ BOOL COleDateTimeRange::Contains(const COleDateTime& date) const
 	return (date < GetEndInclusive());
 }
 
-BOOL COleDateTimeRange::Overlaps(const COleDateTimeRange& range) const
+BOOL COleDateTimeRange::Intersects(const COleDateTimeRange& dtOther) const
 {
 	if (!IsValid())
 		return FALSE;
 
-	if (GetEndInclusive() < range.GetStart())
+	if (GetEndInclusive() < dtOther.GetStart())
 		return FALSE;
 
-	if (GetStart() > range.GetEndInclusive())
+	if (GetStart() > dtOther.GetEndInclusive())
 		return FALSE;
 		
 	return TRUE;
+}
+
+BOOL COleDateTimeRange::GetIntersection(const COleDateTimeRange& dtOther, COleDateTimeRange& dtIntersection) const
+{
+	COleDateTime dtStart = max(m_dtStart, dtOther.m_dtStart);
+	COleDateTime dtEnd = min(GetEndInclusive(), dtOther.GetEndInclusive());
+
+	if (dtStart > dtEnd)
+		return FALSE;
+
+	dtIntersection.m_dtStart = dtStart;
+	dtIntersection.m_dtEnd = dtEnd;
+	dtIntersection.m_bInclusive = (m_bInclusive || dtOther.m_bInclusive);
+
+	return dtIntersection.IsValid();
 }
 
 COleDateTime COleDateTimeRange::GetStart() const
@@ -187,6 +201,16 @@ COleDateTime COleDateTimeRange::GetEndInclusive() const
 
 	// else
 	return m_dtEnd;
+}
+
+BOOL COleDateTimeRange::HasStart() const
+{
+	return CDateHelper::IsDateSet(m_dtStart);
+}
+
+BOOL COleDateTimeRange::HasEnd() const
+{
+	return CDateHelper::IsDateSet(m_dtEnd);
 }
 
 int COleDateTimeRange::GetDayCount() const

@@ -70,20 +70,18 @@ END
 IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 594, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    RTEXT           "Current Period: ",IDC_SELECTEDTASKDATES_LABEL,150,3,99,
-                    8
+    LTEXT           "Current Period: ",IDC_PERIODDURATION,0,2,300,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,1,0,146,18
+                    WS_VISIBLE,155,12,185,15
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,0,19,587,290
+                    WS_VISIBLE,0,28,587,281
     CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
-                    WS_TABSTOP,254,0,70,15
+                    WS_TABSTOP,0,13,70,13
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
-                    "SysDateTimePick32",WS_TABSTOP,337,0,70,15
-    CTEXT           "-",IDC_STATIC,326,3,8,8
-    LTEXT           "Static",IDC_PERIODDURATION,410,3,177,8
+                    "SysDateTimePick32",WS_TABSTOP,81,13,70,13
+    CTEXT           "-",IDC_STATIC,71,16,8,8
 END
 
 
@@ -166,7 +164,7 @@ END
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Edit Allocations"
-FONT 8, "MS Sans Serif"
+FONT 8, "Tahoma"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,157,142,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,213,142,50,14
@@ -268,14 +266,19 @@ END
 
 IDR_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
-    BUTTON      ID_WORKLOAD_EDITALLOCATIONS
-    SEPARATOR
     BUTTON      ID_MOVEPERIODBACKONEMONTH
-    BUTTON      ID_MOVEPERIODSTARTBACKONEMONTH
-    BUTTON      ID_THISMONTHPERIOD
-    BUTTON      ID_MOVEPERIODENDFORWARDSONEMONTH
-    BUTTON      ID_MOVEPERIODFORWARDSONEMONTH
     SEPARATOR
+    BUTTON      ID_MOVEPERIODSTARTBACKONEMONTH
+    BUTTON      ID_MOVEPERIODSTARTFORWARDONEMONTH
+    SEPARATOR
+    BUTTON      ID_THISMONTHPERIOD
+    SEPARATOR
+    BUTTON      ID_MOVEPERIODENDBACKONEMONTH
+    BUTTON      ID_MOVEPERIODENDFORWARDONEMONTH
+    SEPARATOR
+    BUTTON      ID_MOVEPERIODFORWARDONEMONTH
+    SEPARATOR
+    BUTTON      ID_WORKLOAD_EDITALLOCATIONS
     BUTTON      ID_WORKLOAD_PREFS
     SEPARATOR
     BUTTON      ID_HELP
@@ -329,7 +332,7 @@ BEGIN
     IDS_NEW_ALLOCATION      "<new allocation>"
     IDS_COL_TOTAL           "Total"
     IDS_TOTALSDATERANGE     "Current Period: %s"
-    IDS_PERIODDURATION      "(%d weekdays)"
+    IDS_PERIODDURATION      "Current Period: %d weekdays"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -344,10 +347,11 @@ BEGIN
     ID_THISMONTHPERIOD      "\nSet period to 'this' month"
     ID_MOVEPERIODSTARTBACKONEMONTH "\nMove start of period back one month"
     ID_MOVEPERIODBACKONEMONTH "\nMove whole period back one month"
-    ID_MOVEPERIODFOREWARDSONEMONTH "\nMove whole of period forward one month"
-    ID_MOVEPERIODENDFOREWARDSONEMONTH "\nMove end of period forward one month"
-    ID_MOVEPERIODENDFORWARDSONEMONTH "\nMove end of period forward one month"
-    ID_MOVEPERIODFORWARDSONEMONTH "\nMove whole period forward one month"
+    ID_MOVEPERIODFORWARDONEMONTH "\nMove whole period forward one month"
+    ID_MOVEPERIODENDFORWARDONEMONTH "\nMove end of period forward one month"
+    ID_MOVEPERIODSTARTFORWARDONEMONTH 
+                            "\nMove start of period forward one month"
+    ID_MOVEPERIODENDBACKONEMONTH "\nMove end of period back one month"
 END
 
 #endif    // English (Australia) resources

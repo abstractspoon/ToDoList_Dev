@@ -11,6 +11,8 @@
 
 #include "Workloadenum.h"
 
+#include "..\shared\DateHelper.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -21,11 +23,81 @@ class COleDateTimeRange;
 
 const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_");
 
-class CMapAllocations : protected CMap<CString, LPCTSTR, double, double&> 
+/////////////////////////////////////////////////////////////////////////////
+
+struct WORKLOADALLOCATION
+{
+	WORKLOADALLOCATION() : dDays(0.0), bOverlapping(FALSE) {}
+
+	WORKLOADALLOCATION& operator=(const WORKLOADALLOCATION& wa)
+	{
+		dDays = wa.dDays;
+		bOverlapping = wa.bOverlapping;
+
+		return *this;
+	}
+
+	BOOL operator==(const WORKLOADALLOCATION& wa) const
+	{
+		return ((dDays == wa.dDays) && (bOverlapping == wa.bOverlapping));
+	}
+
+	BOOL operator!=(const WORKLOADALLOCATION& wa) const
+	{
+		return !(*this == wa);
+	}
+
+	void Reset()
+	{
+		dDays = 0.0;
+		bOverlapping = FALSE;
+	}
+
+	double dDays;
+	BOOL bOverlapping;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CMapDayAllocations : protected CMap<CString, LPCTSTR, WORKLOADALLOCATION, WORKLOADALLOCATION&> 
 {
 public:
-	CMapAllocations(BOOL bReturnAverageForTotal = FALSE);
-	virtual ~CMapAllocations();
+	CMapDayAllocations();
+	virtual ~CMapDayAllocations();
+
+	BOOL Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const;
+
+	double GetDays(const CString& sAllocTo) const;
+	CString GetDays(const CString& sAllocTo, int nDecimals) const;
+
+	double GetTotalDays() const;
+	CString GetTotalDays(int nDecimals) const;
+
+	BOOL SetDays(const CString& sAllocTo, double dValue);
+	BOOL SetDays(const CString& sAllocTo, const CString& sValue);
+
+	BOOL AppendOverlaps(const CMapDayAllocations& mapAlloc);
+	BOOL IsOverlapping(const CString& sAllocTo) const;
+	void ClearOverlaps();
+	
+	void Decode(const CString& sAllocations);
+	CString Encode() const;
+
+	BOOL MatchAll(const CMapDayAllocations& other) const;
+	void Copy(const CMapDayAllocations& other);
+	void RemoveAll();
+	
+protected:
+	static CString Format(double dValue, int nDecimals);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CMapAllocationTotals : protected CMap<CString, LPCTSTR, double, double&> 
+{
+public:
+	CMapAllocationTotals(BOOL bReturnAverageForTotal = FALSE);
+	virtual ~CMapAllocationTotals();
 
 	double Get(const CString& sAllocTo) const;
 	CString Get(const CString& sAllocTo, int nDecimals) const;
@@ -34,21 +106,14 @@ public:
 	CString GetTotal(int nDecimals) const;
 
 	BOOL Set(const CString& sAllocTo, double dValue);
-	BOOL Set(const CString& sAllocTo, const CString& sValue);
-
 	BOOL Add(const CString& sAllocTo, double dValue);
 	void Increment(const CString& sAllocTo);
-	
-	void Decode(const CString& sAllocations);
-	CString Encode() const;
 
-	BOOL MatchAll(const CMapAllocations& other) const;
-	void Copy(const CMapAllocations& other);
 	void RemoveAll();
 
 protected:
 	BOOL m_bReturnAverageForTotal;
-	
+
 protected:
 	static CString Format(double dValue, int nDecimals);
 };
@@ -65,23 +130,23 @@ struct WORKLOADITEM
 	BOOL operator==(const WORKLOADITEM& wi) const;
 	
 	CString sTitle;
-	COleDateTime dtStart, dtDue; 
-	BOOL bDone;
+	COleDateTimeRange dtRange; 
 	COLORREF color;
 	CStringArray aAllocTo;
-	bool bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	int nPercent;
-	BOOL bGoodAsDone, bSomeSubtaskDone;
 	int nPosition;
+	CMapDayAllocations mapAllocatedDays;
+
+	BOOL bDone;
+	bool bParent; // 'bool' to match ITaskList
 	BOOL bLocked, bHasIcon;
-	CMapAllocations mapAllocatedDays;
-	
-	BOOL HasStart() const;
-	BOOL HasDue() const;
-	BOOL HasDates() const { return (HasStart() && HasDue()); }
+	BOOL bGoodAsDone, bSomeSubtaskDone;
+
+	BOOL HasStartDate() const;
+	BOOL HasDueDate() const;
+	BOOL HasValidDates() const { return dtRange.IsValid(); }
 	BOOL IsDone() const { return (bDone || bGoodAsDone); }
-	BOOL GetDuration(double& dDays, BOOL bWeekdays) const;
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -103,8 +168,15 @@ public:
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
-							CMapAllocations& mapTotalDays, 
-							CMapAllocations& mapTotalTasks) const;
+							CMapAllocationTotals& mapTotalDays, 
+							CMapAllocationTotals& mapTotalTasks) const;
+
+	void RecalculateOverlaps();
+
+protected:
+	int BuildDateSortedList(CArray<WORKLOADITEM*, WORKLOADITEM*&>& aItems) const;
+	
+	static int CompareItems(const void* pV1, const void* pV2);
 
 };
 

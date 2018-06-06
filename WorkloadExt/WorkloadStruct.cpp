@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "WorkloadStruct.h"
 
-#include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\misc.h"
 
@@ -17,32 +16,234 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CMapAllocations::CMapAllocations(BOOL bReturnAverageForTotal) 
+CMapDayAllocations::CMapDayAllocations() 
+{
+}
+
+CMapDayAllocations::~CMapDayAllocations() 
+{
+}
+
+void CMapDayAllocations::Copy(const CMapDayAllocations& other)
+{
+	Misc::CopyStrT<WORKLOADALLOCATION>(other, *this);
+}
+
+BOOL CMapDayAllocations::MatchAll(const CMapDayAllocations& other) const
+{
+	return Misc::MatchAllStrT<WORKLOADALLOCATION>(*this, other);
+}
+
+void CMapDayAllocations::RemoveAll()
+{
+	CMap<CString, LPCTSTR, WORKLOADALLOCATION, WORKLOADALLOCATION&>::RemoveAll();
+}
+
+BOOL CMapDayAllocations::Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const
+{
+	wa.Reset();
+
+	if (sAllocTo == ALLOCTO_TOTALID)
+	{
+		wa.dDays = GetTotalDays();
+		wa.bOverlapping = FALSE;
+
+		return TRUE;
+	}
+
+	// else
+	return Lookup(Misc::ToUpper(sAllocTo), wa);
+}
+
+double CMapDayAllocations::GetDays(const CString& sAllocTo) const
+{
+	WORKLOADALLOCATION wa;
+	
+	Lookup(Misc::ToUpper(sAllocTo), wa);
+
+	return wa.dDays;
+}
+
+BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, double dValue)
+{
+	if (dValue < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (dValue == 0.0)
+	{
+		RemoveKey(Misc::ToUpper(sAllocTo));
+	}
+	else
+	{
+		WORKLOADALLOCATION wa;
+		wa.dDays = dValue;
+
+		SetAt(Misc::ToUpper(sAllocTo), wa);
+	}
+
+	return TRUE;
+}
+
+CString CMapDayAllocations::GetDays(const CString& sAllocTo, int nDecimals) const
+{
+	double dValue = GetDays(sAllocTo);
+
+	return Format(dValue, nDecimals);
+}
+
+BOOL CMapDayAllocations::SetDays(const CString& sAllocTo, const CString& sDays)
+{
+	return SetDays(sAllocTo, Misc::Atof(sDays));
+}
+
+BOOL CMapDayAllocations::AppendOverlaps(const CMapDayAllocations& mapOther)
+{
+	BOOL bAppended = FALSE;
+
+	if (GetCount())
+	{
+		CString sAllocTo;
+		WORKLOADALLOCATION wa;
+
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+		{
+			GetNextAssoc(pos, sAllocTo, wa);
+
+			if (!wa.bOverlapping && (mapOther.GetDays(sAllocTo) > 0.0))
+			{
+				wa.bOverlapping = TRUE;
+				SetAt(sAllocTo, wa);
+
+				bAppended = TRUE;
+			}
+		}
+	}
+
+	return bAppended;
+}
+
+BOOL CMapDayAllocations::IsOverlapping(const CString& sAllocTo) const
+{
+	WORKLOADALLOCATION wa;
+
+	return (Lookup(Misc::ToUpper(sAllocTo), wa) && wa.bOverlapping);
+}
+
+void CMapDayAllocations::ClearOverlaps()
+{
+	if (GetCount())
+	{
+		CString sAllocTo;
+		WORKLOADALLOCATION wa;
+
+		POSITION pos = GetStartPosition();
+
+		while (pos)
+		{
+			GetNextAssoc(pos, sAllocTo, wa);
+
+			if (wa.bOverlapping)
+			{
+				wa.bOverlapping = FALSE;
+				SetAt(sAllocTo, wa);
+			}
+		}
+	}
+}
+
+void CMapDayAllocations::Decode(const CString& sAllocations)
+{
+	RemoveAll();
+
+	CStringArray aAllocations;
+	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
+
+	while (nAllocTo--)
+	{
+		CString sDays, sAllocTo = aAllocations[nAllocTo];
+		Misc::Split(sAllocTo, sDays, ':');
+
+		SetDays(sAllocTo, sDays);
+	}
+}
+
+CString CMapDayAllocations::Encode() const
+{
+	CString sAllocations, sAllocTo;
+	CStringArray aAllocations;
+	WORKLOADALLOCATION wa;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, sAllocTo, wa);
+		ASSERT(!sAllocTo.IsEmpty());
+
+		if (!sAllocTo.IsEmpty())
+		{
+			CString sDays;
+
+			if (wa.dDays > 0)
+				aAllocations.Add(sAllocTo + ':' + Misc::Format(wa.dDays));
+		}
+	}
+
+	return Misc::FormatArray(aAllocations, '\n');
+}
+
+double CMapDayAllocations::GetTotalDays() const
+{
+	CString sAllocTo;
+	CStringArray aAllocations;
+	double dTotalDays = 0;
+	WORKLOADALLOCATION wa;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, sAllocTo, wa);
+		ASSERT(!sAllocTo.IsEmpty());
+
+		if (!sAllocTo.IsEmpty())
+			dTotalDays += wa.dDays;
+	}
+
+	return dTotalDays;
+}
+
+CString CMapDayAllocations::GetTotalDays(int nDecimals) const
+{
+	return Format(GetTotalDays(), nDecimals);
+}
+
+CString CMapDayAllocations::Format(double dValue, int nDecimals)
+{
+	return ((dValue == 0.0) ? _T("") : Misc::Format(dValue, nDecimals));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CMapAllocationTotals::CMapAllocationTotals(BOOL bReturnAverageForTotal) 
 	:
-	m_bReturnAverageForTotal(bReturnAverageForTotal)
+m_bReturnAverageForTotal(bReturnAverageForTotal)
 {
 }
 
-CMapAllocations::~CMapAllocations() 
+CMapAllocationTotals::~CMapAllocationTotals() 
 {
 }
 
-void CMapAllocations::Copy(const CMapAllocations& other)
-{
-	Misc::CopyStrT<double>(other, *this);
-}
-
-BOOL CMapAllocations::MatchAll(const CMapAllocations& other) const
-{
-	return Misc::MatchAllStrT<double>(*this, other);
-}
-
-void CMapAllocations::RemoveAll()
+void CMapAllocationTotals::RemoveAll()
 {
 	CMap<CString, LPCTSTR, double, double&>::RemoveAll();
 }
 
-double CMapAllocations::Get(const CString& sAllocTo) const
+double CMapAllocationTotals::Get(const CString& sAllocTo) const
 {
 	if (sAllocTo == ALLOCTO_TOTALID)
 		return GetTotal();
@@ -54,7 +255,7 @@ double CMapAllocations::Get(const CString& sAllocTo) const
 	return dDays;
 }
 
-BOOL CMapAllocations::Set(const CString& sAllocTo, double dValue)
+BOOL CMapAllocationTotals::Set(const CString& sAllocTo, double dValue)
 {
 	if (dValue < 0)
 	{
@@ -70,19 +271,14 @@ BOOL CMapAllocations::Set(const CString& sAllocTo, double dValue)
 	return TRUE;
 }
 
-CString CMapAllocations::Get(const CString& sAllocTo, int nDecimals) const
+CString CMapAllocationTotals::Get(const CString& sAllocTo, int nDecimals) const
 {
 	double dValue = Get(sAllocTo);
 
 	return Format(dValue, nDecimals);
 }
 
-BOOL CMapAllocations::Set(const CString& sAllocTo, const CString& sDays)
-{
-	return Set(sAllocTo, Misc::Atof(sDays));
-}
-
-BOOL CMapAllocations::Add(const CString& sAllocTo, double dValue)
+BOOL CMapAllocationTotals::Add(const CString& sAllocTo, double dValue)
 {
 	if (dValue <= 0)
 		return FALSE;
@@ -90,52 +286,12 @@ BOOL CMapAllocations::Add(const CString& sAllocTo, double dValue)
 	return Set(sAllocTo, (Get(sAllocTo) + dValue));
 }
 
-void CMapAllocations::Increment(const CString& sAllocTo)
+void CMapAllocationTotals::Increment(const CString& sAllocTo)
 {
 	Add(sAllocTo, 1.0);
 }
 
-void CMapAllocations::Decode(const CString& sAllocations)
-{
-	RemoveAll();
-
-	CStringArray aAllocations;
-	int nAllocTo = Misc::Split(sAllocations, aAllocations, '\n');
-
-	while (nAllocTo--)
-	{
-		CString sDays, sAllocTo = aAllocations[nAllocTo];
-		Misc::Split(sAllocTo, sDays, ':');
-
-		Set(sAllocTo, sDays);
-	}
-}
-
-CString CMapAllocations::Encode() const
-{
-	CString sAllocations, sAllocTo;
-	CStringArray aAllocations;
-	double dValue;
-	POSITION pos = GetStartPosition();
-
-	while (pos)
-	{
-		GetNextAssoc(pos, sAllocTo, dValue);
-		ASSERT(!sAllocTo.IsEmpty());
-
-		if (!sAllocTo.IsEmpty())
-		{
-			CString sDays;
-
-			if (dValue > 0)
-				aAllocations.Add(sAllocTo + ':' + Misc::Format(dValue));
-		}
-	}
-
-	return Misc::FormatArray(aAllocations, '\n');
-}
-
-double CMapAllocations::GetTotal() const
+double CMapAllocationTotals::GetTotal() const
 {
 	CString sAllocTo;
 	CStringArray aAllocations;
@@ -157,12 +313,12 @@ double CMapAllocations::GetTotal() const
 	return dTotalDays;
 }
 
-CString CMapAllocations::GetTotal(int nDecimals) const
+CString CMapAllocationTotals::GetTotal(int nDecimals) const
 {
 	return Format(GetTotal(), nDecimals);
 }
 
-CString CMapAllocations::Format(double dValue, int nDecimals)
+CString CMapAllocationTotals::Format(double dValue, int nDecimals)
 {
 	return ((dValue == 0.0) ? _T("") : Misc::Format(dValue, nDecimals));
 }
@@ -193,8 +349,7 @@ WORKLOADITEM::WORKLOADITEM(const WORKLOADITEM& wi)
 WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 {
 	sTitle = wi.sTitle;
-	dtStart = wi.dtStart;
-	dtDue = wi.dtDue;
+	dtRange = wi.dtRange;
 	bDone = wi.bDone;
 	color = wi.color;
 	bParent = wi.bParent;
@@ -217,8 +372,7 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 {
 	return ((sTitle == wi.sTitle) &&
-			(dtStart == wi.dtStart) &&
-			(dtDue == wi.dtDue) &&
+			(dtRange == wi.dtRange) &&
 			(bDone == wi.bDone) &&
 			(color == wi.color) &&
 			(bParent == wi.bParent) &&
@@ -240,23 +394,14 @@ WORKLOADITEM::~WORKLOADITEM()
 	
 }
 
-BOOL WORKLOADITEM::HasStart() const
+BOOL WORKLOADITEM::HasStartDate() const
 {
-	return CDateHelper::IsDateSet(dtStart);
+	return dtRange.HasStart();
 }
 
-BOOL WORKLOADITEM::GetDuration(double& dDays, BOOL bWeekdays) const
+BOOL WORKLOADITEM::HasDueDate() const
 {
-	if (!HasStart() || !HasDue())
-		return FALSE;
-
-	dDays = CDateHelper::CalcDaysFromTo(dtStart, dtDue, TRUE, bWeekdays);
-	return TRUE;
-}
-
-BOOL WORKLOADITEM::HasDue() const
-{
-	return CDateHelper::IsDateSet(dtDue);
+	return dtRange.HasEnd();
 }
 
 COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
@@ -316,7 +461,8 @@ void CWorkloadItemMap::RemoveAll()
 }
 
 void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
-	CMapAllocations& mapTotalDays, CMapAllocations& mapTotalTasks) const
+										CMapAllocationTotals& mapTotalDays, 
+										CMapAllocationTotals& mapTotalTasks) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -332,26 +478,26 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		ASSERT(pWI);
 
 		// Count how many the days of the task fall within the specified period
-		if (!pWI->HasDates() || pWI->IsDone())
+		if (!pWI->HasValidDates() || pWI->IsDone())
 			continue;
 
-		COleDateTime dtFrom = max(pWI->dtStart, dtPeriod.m_dtStart);
-		COleDateTime dtTo = min(pWI->dtDue, dtPeriod.m_dtEnd);
-
-		double dTaskDays = CDateHelper::CalcDaysFromTo(dtFrom, dtTo, TRUE, TRUE);
-			
-		if (dTaskDays == 0.0)
+		COleDateTimeRange dtIntersect;
+		
+		if (!dtPeriod.GetIntersection(pWI->dtRange, dtIntersect))
 			continue;
 
-		double dTaskDuration;
-		VERIFY(pWI->GetDuration(dTaskDuration, TRUE));
+		double dTaskDuration = pWI->dtRange.GetWeekdayCount();
+		
+		if (dTaskDuration == 0.0)
+			continue;
 
+		double dTaskDays = dtIntersect.GetWeekdayCount();
 		double dProportion = (dTaskDays / dTaskDuration);
 
 		for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
 		{
 			CString sAllocTo(pWI->aAllocTo[nAllocTo]);
-			double dDays = (pWI->mapAllocatedDays.Get(sAllocTo) * dProportion);
+			double dDays = (pWI->mapAllocatedDays.GetDays(sAllocTo) * dProportion);
 
 			if (mapTotalDays.Add(sAllocTo, dDays))
 				mapTotalTasks.Increment(sAllocTo);
@@ -399,6 +545,96 @@ WORKLOADITEM* CWorkloadItemMap::GetItem(DWORD dwKey) const
 		ASSERT(pWI);
 	
 	return pWI;
+}
+
+void CWorkloadItemMap::RecalculateOverlaps()
+{
+	CArray<WORKLOADITEM*, WORKLOADITEM*&> aItems;
+	int nNumItems = BuildDateSortedList(aItems);
+
+	DWORD dwTaskID = 0;
+	WORKLOADITEM* pWI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pWI);
+		ASSERT(pWI);
+
+		pWI->mapAllocatedDays.ClearOverlaps(); // reset
+
+		if (pWI->HasValidDates())
+		{
+			for (int nItem = 0; nItem < nNumItems; nItem++)
+			{
+				const WORKLOADITEM* pWIOther = aItems[nItem];
+				ASSERT(pWIOther->HasValidDates());
+
+				if (pWIOther != pWI)
+				{
+					// Stop when we reach the first item which has a 
+					// start date later than this task's due date
+					if (pWIOther->dtRange.m_dtStart > pWI->dtRange.m_dtEnd)
+						break;
+
+					if (pWI->dtRange.Intersects(pWIOther->dtRange))
+						pWI->mapAllocatedDays.AppendOverlaps(pWIOther->mapAllocatedDays);
+				}				
+			}
+		}
+	}
+}
+
+int CWorkloadItemMap::BuildDateSortedList(CArray<WORKLOADITEM*, WORKLOADITEM*&>& aItems) const
+{
+	aItems.RemoveAll();
+
+	DWORD dwTaskID = 0;
+	WORKLOADITEM* pWI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pWI);
+		ASSERT(pWI);
+
+		if (pWI->HasValidDates())
+			aItems.Add(pWI);
+	}
+
+	if (aItems.GetSize() > 1)
+		qsort(aItems.GetData(), aItems.GetSize(), sizeof(WORKLOADITEM*), CompareItems);
+
+	return aItems.GetSize();
+}
+
+int CWorkloadItemMap::CompareItems(const void* pV1, const void* pV2)
+{
+	typedef WORKLOADITEM* LPWORKLOADITEM;
+
+	const WORKLOADITEM* pWI1 = *(static_cast<const LPWORKLOADITEM*>(pV1));
+	const WORKLOADITEM* pWI2 = *(static_cast<const LPWORKLOADITEM*>(pV2));
+
+	ASSERT(pWI1 && pWI2 && (pWI1 != pWI2));
+	ASSERT(pWI1->HasValidDates() && pWI2->HasValidDates());
+
+	// Sort by start date
+	if (pWI1->dtRange.m_dtStart < pWI2->dtRange.m_dtStart)
+		return -1;
+
+	if (pWI1->dtRange.m_dtStart > pWI2->dtRange.m_dtStart)
+		return 1;
+
+	// Then by due date
+	if (pWI1->dtRange.m_dtEnd < pWI2->dtRange.m_dtEnd)
+		return -1;
+
+	if (pWI1->dtRange.m_dtEnd > pWI2->dtRange.m_dtEnd)
+		return 1;
+
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////

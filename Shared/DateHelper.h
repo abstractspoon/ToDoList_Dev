@@ -107,9 +107,12 @@ public:
 	BOOL Set(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 
 	BOOL IsValid() const;
-	BOOL Contains(const COleDateTime& date) const;
-	BOOL Overlaps(const COleDateTimeRange& range) const;
+	BOOL IsDateInRange(const COleDateTime& date) const;
+	BOOL Intersects(const COleDateTimeRange& dtOther) const;
+	BOOL GetIntersection(const COleDateTimeRange& dtOther, COleDateTimeRange& dtIntersection) const;
 
+	BOOL HasStart() const;
+	BOOL HasEnd() const;
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
 	COleDateTime GetEndInclusive() const; // returns 'end of day' if m_bInclusive is TRUE

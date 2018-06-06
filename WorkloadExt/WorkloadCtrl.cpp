@@ -590,7 +590,10 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
-				// TODO
+				if (attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_STARTDATE))
+				{
+					m_data.RecalculateOverlaps();
+				}
 			}
 		}
 		break;
@@ -599,21 +602,15 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		{
 			CHoldRedraw hr(m_tcTasks);
 			CHoldRedraw hr2(m_lcColumns);
-
-			CSet<DWORD> mapIDs;
-			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
-			
-			RemoveDeletedTasks(NULL, pTasks, mapIDs);
-			RefreshTreeItemMap();
-
-			// TODO
+		
+			RemoveDeletedTasks(pTasks);
 		}
 		break;
 		
 	default:
 		ASSERT(0);
 	}
-	
+
 	InitItemHeights();
 	UpdateListColumns();
 	FixupListSortColumn();
@@ -840,17 +837,17 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	if (attrib.Has(IUI_STARTDATE))
 	{
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
-			pWI->dtStart = CDateHelper::GetDate(tDate);
+			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
 		else
-			CDateHelper::ClearDate(pWI->dtStart);
+			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
 	}
 	
 	if (attrib.Has(IUI_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
-			pWI->dtDue = CDateHelper::GetDate(tDate);
+			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 		else
-			CDateHelper::ClearDate(pWI->dtDue);
+			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
 	}
 	
 	if (attrib.Has(IUI_DONEDATE))
@@ -921,17 +918,30 @@ void CWorkloadCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	}
 }
 
-void CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs)
+void CWorkloadCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
+{
+	CSet<DWORD> mapIDs;
+	BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
+
+	if (RemoveDeletedTasks(NULL, pTasks, mapIDs))
+	{
+		m_data.RecalculateOverlaps();
+		RefreshTreeItemMap();
+	}
+}
+
+BOOL CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CSet<DWORD>& mapIDs)
 {
 	// traverse the tree looking for items that do not 
 	// exist in pTasks and delete them
 	if (hti && !mapIDs.Has(GetTaskID(hti)))
 	{
 		DeleteTreeItem(hti);
-		return;
+		return TRUE;
 	}
 
 	// check its children
+	BOOL bSomeRemoved = FALSE;
 	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
 	
 	while (htiChild)
@@ -939,9 +949,11 @@ void CWorkloadCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTask
 		// get next sibling before we (might) delete this one
 		HTREEITEM htiNext = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
 		
-		RemoveDeletedTasks(htiChild, pTasks, mapIDs);
+		bSomeRemoved |= RemoveDeletedTasks(htiChild, pTasks, mapIDs);
 		htiChild = htiNext;
 	}
+
+	return bSomeRemoved;
 }
 
 WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID, BOOL bCopyRefID) const
@@ -985,6 +997,7 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
+	m_data.RecalculateOverlaps();
 	RefreshTreeItemMap();
 	ExpandList();
 	RefreshItemBoldState();
@@ -1053,10 +1066,10 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		time64_t tDate = 0;
 
 		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
-			pWI->dtStart = CDateHelper::GetDate(tDate);
+			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
 
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
-			pWI->dtDue = CDateHelper::GetDate(tDate);
+			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 
 		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
 	}
@@ -1659,7 +1672,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			COLORREF crText = GetTreeTextColor(*pWI, bSelected, FALSE);
 			pDC->SetTextColor(crText);
 			
-			DrawAllocationListItem(pDC, nItem, pWI->mapAllocatedDays, bSelected);
+			DrawAllocationListItem(pDC, nItem, *pWI, bSelected);
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2641,10 +2654,8 @@ int CWorkloadCtrl::GetLongestVisibleDuration(HTREEITEM hti) const
 		const WORKLOADITEM* pWI = NULL;
 		GET_WI_RET(dwTaskID, pWI, 0);
 
-		double dDuration = 0;
-
-		if (pWI->GetDuration(dDuration, TRUE))
-			nLongest = (int)dDuration;
+		if (pWI->HasValidDates())
+			nLongest = pWI->dtRange.GetWeekdayCount();
 	}
 
 	// children
@@ -2681,22 +2692,18 @@ CString CWorkloadCtrl::GetTreeItemColumnText(const WORKLOADITEM& wi, WLC_COLUMNI
 			break;
 			
 		case WLCC_STARTDATE:
-		case WLCC_DUEDATE:
-			{
-				COleDateTime dtStart, dtDue;
-				GetTaskStartDueDates(wi, dtStart, dtDue);
+			if (wi.HasStartDate())
+				sItem = FormatDate(wi.dtRange.m_dtStart);
+			break;
 
-				sItem = FormatDate((nCol == WLCC_STARTDATE) ? dtStart : dtDue);
-			}
+		case WLCC_DUEDATE:
+			if (wi.HasDueDate())
+				sItem = FormatDate(wi.dtRange.m_dtEnd);
 			break;
 
 		case WLCC_DURATION:
-			{
-				double dDuration;
-
-				if (wi.GetDuration(dDuration, TRUE))
-					sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), (int)dDuration);
-			}
+			if (wi.HasValidDates())
+				sItem.Format(CEnString(IDS_ALLOCATION_FORMAT), wi.dtRange.GetWeekdayCount());
 			break;
 
 		case WLCC_PERCENT:
@@ -2917,12 +2924,14 @@ void CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.OffsetRect(-1, 0);
 }
 
-CString CWorkloadCtrl::GetListItemColumnText(const CMapAllocations& mapAlloc, int nCol, int nDecimals) const
+CString CWorkloadCtrl::GetListItemColumnText(const WORKLOADITEM& wi, int nCol, int nDecimals, BOOL bSelected, COLORREF& crBack) const
 {
+	crBack = CLR_NONE;
+
 	switch (GetListColumnType(nCol))
 	{
 	case WLCT_TOTAL:
-		return mapAlloc.GetTotal(nDecimals);
+		return wi.mapAllocatedDays.GetTotalDays(nDecimals);
 		
 	case WLCT_VALUE:
 		{
@@ -2930,7 +2939,21 @@ CString CWorkloadCtrl::GetListItemColumnText(const CMapAllocations& mapAlloc, in
 			ASSERT(nAllocTo < m_aAllocTo.GetSize());
 			
 			CString sAllocTo = m_aAllocTo[nAllocTo];
-			return mapAlloc.Get(sAllocTo, nDecimals);
+			CString sDays = wi.mapAllocatedDays.GetDays(sAllocTo, nDecimals);
+
+			if (!sDays.IsEmpty())
+			{
+				if ((m_crOverlap != CLR_NONE) && wi.mapAllocatedDays.IsOverlapping(sAllocTo))
+				{
+					crBack = m_crOverlap;
+				}
+				else if (!bSelected && (m_crAllocation != CLR_NONE))
+				{
+					crBack = m_crAllocation;
+				}
+			}
+
+			return sDays;
 		}
 		break;
 	}
@@ -2938,7 +2961,28 @@ CString CWorkloadCtrl::GetListItemColumnText(const CMapAllocations& mapAlloc, in
 	return _T("");
 }
 
-void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, BOOL bSelected)
+CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTotals, int nCol, int nDecimals) const
+{
+	switch (GetListColumnType(nCol))
+	{
+	case WLCT_TOTAL:
+		return mapTotals.GetTotal(nDecimals);
+
+	case WLCT_VALUE:
+		{
+			int nAllocTo = (nCol - 1);
+			ASSERT(nAllocTo < m_aAllocTo.GetSize());
+
+			CString sAllocTo = m_aAllocTo[nAllocTo];
+			return mapTotals.Get(sAllocTo, nDecimals);
+		}
+		break;
+	}
+
+	return _T("");
+}
+
+void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2952,12 +2996,27 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 		rColumn.right--;
 		rColumn.bottom--;
 
-		CString sDays = GetListItemColumnText(mapAlloc, nCol, 2);
+		COLORREF crBack = CLR_NONE;
+		CString sDays = GetListItemColumnText(wi, nCol, 2, bSelected, crBack);
 		
 		if (!sDays.IsEmpty())
 		{
-			if (!bSelected && (m_crAllocation != CLR_NONE))
-				pDC->FillSolidRect(rColumn, m_crAllocation);
+			if (crBack != CLR_NONE)
+			{
+				if (bSelected)
+				{
+					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+				}
+				else
+				{
+					pDC->FillSolidRect(rColumn, crBack);
+					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+				}
+			}
+			else
+			{
+				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			}
 
 			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 			pDC->DrawText(sDays, (LPRECT)(LPCRECT)rColumn, DT_CENTER);
@@ -2965,7 +3024,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CMapAlloca
 	}
 }
 
-void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocations& mapAlloc, int nDecimals)
+void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapTotals, int nDecimals)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2981,7 +3040,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 		DrawItemDivider(pDC, rColumn, DIV_VERT_LIGHT, FALSE);
 		rColumn.right--;
 
-		CString sValue = GetListItemColumnText(mapAlloc, nCol, nDecimals);
+		CString sValue = GetListItemColumnTotal(mapTotals, nCol, nDecimals);
 			
 		if (!sValue.IsEmpty())
 		{
@@ -2992,11 +3051,11 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 				switch (GetListColumnType(nCol))
 				{
 				case WLCT_VALUE:
-					crBack = m_barChart.GetBkgndColor(mapAlloc.Get(m_aAllocTo[nCol - 1]));
+					crBack = m_barChart.GetBkgndColor(mapTotals.Get(m_aAllocTo[nCol - 1]));
 					break;
 					
 				case WLCT_TOTAL:
-					crBack = m_barChart.GetBkgndColor(mapAlloc.GetTotal());
+					crBack = m_barChart.GetBkgndColor(mapTotals.GetTotal());
 					break;
 				}
 
@@ -3063,14 +3122,6 @@ void CWorkloadCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CStri
 		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | GraphicsMisc::GetRTLDrawTextFlags(m_hdrColumns));
 		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
 	}
-}
-
-BOOL CWorkloadCtrl::GetTaskStartDueDates(const WORKLOADITEM& wi, COleDateTime& dtStart, COleDateTime& dtDue) const
-{
-	dtStart = wi.dtStart;
-	dtDue = wi.dtDue;
-
-	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));
 }
 
 COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const
@@ -3576,21 +3627,15 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			break;
 
 		case WLCC_STARTDATE:
-			nCompare = CDateHelper::Compare(pWI1->dtStart, pWI2->dtStart, TRUE, FALSE);
+			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtStart, pWI2->dtRange.m_dtStart, TRUE, FALSE);
 			break;
 
 		case WLCC_DUEDATE:
-			nCompare = CDateHelper::Compare(pWI1->dtDue, pWI2->dtDue, TRUE, TRUE);
+			nCompare = CDateHelper::Compare(pWI1->dtRange.m_dtEnd, pWI2->dtRange.m_dtEnd, TRUE, TRUE);
 			break;
 
 		case WLCC_DURATION:
-			{
-				double dDuration1 = 0, dDuration2 = 0;
-				pWI1->GetDuration(dDuration1, TRUE);
-				pWI1->GetDuration(dDuration2, TRUE);
-
-				nCompare = (int)(dDuration1 - dDuration2);
-			}
+			nCompare = (pWI1->dtRange.GetWeekdayCount() - pWI1->dtRange.GetWeekdayCount());
 			break;
 
 		case WLCC_PERCENT:
@@ -3605,8 +3650,8 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			{
 				ASSERT(!m_sSortByAllocTo.IsEmpty());
 
-				double dDays1 = pWI1->mapAllocatedDays.Get(m_sSortByAllocTo);
-				double dDays2 = pWI2->mapAllocatedDays.Get(m_sSortByAllocTo);
+				double dDays1 = pWI1->mapAllocatedDays.GetDays(m_sSortByAllocTo);
+				double dDays2 = pWI2->mapAllocatedDays.GetDays(m_sSortByAllocTo);
 
 				nCompare = (int)(dDays1 - dDays2);
 			}

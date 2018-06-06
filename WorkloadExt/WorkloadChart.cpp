@@ -22,7 +22,7 @@ const COLORREF COLOR_ORANGE	= RGB(255,  91,  21);
 /////////////////////////////////////////////////////////////////////////////
 
 // CWorkloadChart
-CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocations& mapPercentLoad) 
+CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocationTotals& mapPercentLoad) 
 	: 
 	m_mapPercentLoad(mapPercentLoad), 
 	m_aAllocTo(aAllocTo),
