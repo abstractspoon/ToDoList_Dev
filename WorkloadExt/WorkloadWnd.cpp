@@ -72,6 +72,8 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriod.m_dtEnd);
 	DDX_Text(pDX, IDC_PERIODDURATION, m_sPeriodDuration);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_PERIODBEGIN, m_dtcPeriodStart);
+	DDX_Control(pDX, IDC_PERIODENDINCLUSIVE, m_dtcPeriodEnd);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
@@ -82,16 +84,22 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODBEGIN, OnChangePeriodBegin)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODENDINCLUSIVE, OnChangePeriodEnd)
+
 	ON_COMMAND(ID_MOVEPERIODBACKONEMONTH, OnMovePeriodBackOneMonth)
-	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODBACKONEMONTH, OnUpdateMovePeriodBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODSTARTBACKONEMONTH, OnMovePeriodStartBackOneMonth)
-	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTBACKONEMONTH, OnUpdateMovePeriodStartBackOneMonth)
+	ON_COMMAND(ID_MOVEPERIODSTARTFORWARDONEMONTH, OnMovePeriodStartForwardOneMonth)
 	ON_COMMAND(ID_THISMONTHPERIOD, OnResetPeriodToThisMonth)
+	ON_COMMAND(ID_MOVEPERIODENDFORWARDONEMONTH, OnMovePeriodEndForwardOneMonth)
+	ON_COMMAND(ID_MOVEPERIODENDBACKONEMONTH, OnMovePeriodEndBackOneMonth)
+	ON_COMMAND(ID_MOVEPERIODFORWARDONEMONTH, OnMovePeriodForwardOneMonth)
+
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODBACKONEMONTH, OnUpdateMovePeriodBackOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTBACKONEMONTH, OnUpdateMovePeriodStartBackOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTFORWARDONEMONTH, OnUpdateMovePeriodStartForwardOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_THISMONTHPERIOD, OnUpdateResetPeriodToThisMonth)
-	ON_COMMAND(ID_MOVEPERIODENDFORWARDSONEMONTH, OnMovePeriodEndForwardOneMonth)
-	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDSONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
-	ON_COMMAND(ID_MOVEPERIODFORWARDSONEMONTH, OnUpdateMovePeriodForwardOneMonth)
-	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDSONEMONTH, OnUpdateUpdateMovePeriodForwardOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDBACKONEMONTH, OnUpdateMovePeriodEndBackOneMonth)
+	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDONEMONTH, OnUpdateUpdateMovePeriodForwardOneMonth)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
@@ -703,8 +711,10 @@ void CWorkloadWnd::Resize(int cx, int cy)
 {
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
-		CDlgUnits dlu(this);
-		CRect rWorkload(0, dlu.ToPixelsY(16), cx, cy);
+		CRect rWorkload = CDialogHelper::GetChildRect(&m_ctrlWorkload);
+
+		rWorkload.right = cx;
+		rWorkload.bottom = cy;
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
 	}
@@ -953,6 +963,7 @@ void CWorkloadWnd::UpdatePeriod()
 	else
 		m_sPeriodDuration.Empty();
 
+	m_toolbar.RefreshButtonStates(FALSE);
 	UpdateData(FALSE);
 }
 
@@ -961,11 +972,23 @@ void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 }
 
+void CWorkloadWnd::OnMovePeriodStartForwardOneMonth() 
+{
+	if (m_dtPeriod.OffsetStart(1, DHU_MONTHS))
+		UpdatePeriod();
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodStartForwardOneMonth(CCmdUI* pCmdUI) 
+{
+	COleDateTimeRange temp = m_dtPeriod;
+
+	pCmdUI->Enable(temp.IsValid() && temp.OffsetStart(1, DHU_MONTHS));
+}
+
 void CWorkloadWnd::OnMovePeriodStartBackOneMonth() 
 {
-	m_dtPeriod.OffsetStart(-1, DHU_MONTHS);
-	
-	UpdatePeriod();
+	if (m_dtPeriod.OffsetStart(-1, DHU_MONTHS))
+		UpdatePeriod();
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI) 
@@ -987,9 +1010,8 @@ void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
 {
-	m_dtPeriod.OffsetEnd(1, DHU_MONTHS);
-	
-	UpdatePeriod();
+	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS))
+		UpdatePeriod();
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI) 
@@ -997,10 +1019,23 @@ void CWorkloadWnd::OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 }
 
-void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth() 
+void CWorkloadWnd::OnMovePeriodEndBackOneMonth() 
+{
+	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS))
+		UpdatePeriod();
+}
+
+void CWorkloadWnd::OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI) 
+{
+	COleDateTimeRange temp = m_dtPeriod;
+
+	pCmdUI->Enable(temp.IsValid() && temp.OffsetEnd(-1, DHU_MONTHS));
+}
+
+void CWorkloadWnd::OnMovePeriodForwardOneMonth() 
 {
 	m_dtPeriod.Offset(1, DHU_MONTHS);
-	
+
 	UpdatePeriod();
 }
 

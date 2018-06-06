@@ -16,6 +16,7 @@
 #include "..\Shared\toolbarhelper.h"
 #include "..\shared\Icon.h"
 #include "..\shared\DateHelper.h"
+#include "..\shared\DateTimeCtrlEx.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -70,6 +71,7 @@ protected:
 	CWorkloadPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
+	CDateTimeCtrlEx m_dtcPeriodStart, m_dtcPeriodEnd;
 
 	CIcon m_icon;
 	CBrush m_brBack;
@@ -106,11 +108,15 @@ protected:
 	afx_msg void OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI);
 	afx_msg void OnMovePeriodStartBackOneMonth();
 	afx_msg void OnUpdateMovePeriodStartBackOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnMovePeriodStartForwardOneMonth();
+	afx_msg void OnUpdateMovePeriodStartForwardOneMonth(CCmdUI* pCmdUI);
 	afx_msg void OnResetPeriodToThisMonth();
 	afx_msg void OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI);
 	afx_msg void OnMovePeriodEndForwardOneMonth();
 	afx_msg void OnUpdateMovePeriodEndForwardOneMonth(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateMovePeriodForwardOneMonth();
+	afx_msg void OnMovePeriodEndBackOneMonth();
+	afx_msg void OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI);
+	afx_msg void OnMovePeriodForwardOneMonth();
 	afx_msg void OnUpdateUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
