@@ -106,12 +106,14 @@ public:
 	BOOL Set(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 	BOOL Set(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 
-	BOOL IsValid() const;
 	BOOL IsDateInRange(const COleDateTime& date) const;
 	BOOL IntersectsWith(const COleDateTimeRange& dtOther) const;
-	BOOL IntersectRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
-	BOOL UnionRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL GetUnion(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL GetUnion(const COleDateTimeRange& dtOther, const COleDateTime& date, BOOL bInclusive);
 
+	BOOL IsNull() const;
+	BOOL IsValid() const;
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
 	COleDateTime GetStart() const;
@@ -199,6 +201,7 @@ public:
 	static BOOL IsLeapYear(int nYear);
 	static BOOL IsToday(const COleDateTime& date);
 	static BOOL IsSameDay(const COleDateTime& date1, const COleDateTime& date2);
+	static BOOL IsEndOfDay(const COleDateTime& date);
 
 	static void SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly);
 	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, const COleDateTime& dtTimeOnly);

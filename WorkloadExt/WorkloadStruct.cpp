@@ -483,7 +483,7 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 
 		COleDateTimeRange dtIntersect;
 		
-		if (!dtIntersect.IntersectRange(dtPeriod, pWI->dtRange))
+		if (!dtIntersect.GetIntersection(dtPeriod, pWI->dtRange))
 			continue;
 
 		double dTaskDuration = pWI->dtRange.GetWeekdayCount();

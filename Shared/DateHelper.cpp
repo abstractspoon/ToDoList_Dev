@@ -103,7 +103,7 @@ BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtE
 
 	m_dtStart = dtStart;
 	m_dtEnd = dtEnd;
-	m_bInclusive = bInclusive;
+	m_bInclusive = (bInclusive && !CDateHelper::DateHasTime(dtEnd));
 
 	return IsValid();
 }
@@ -144,6 +144,11 @@ BOOL COleDateTimeRange::IsValid() const
 			(m_dtEnd >= m_dtStart));
 }
 
+BOOL COleDateTimeRange::IsNull() const
+{
+	return (!CDateHelper::IsDateSet(m_dtStart) && !CDateHelper::IsDateSet(m_dtEnd));
+}
+
 BOOL COleDateTimeRange::IsDateInRange(const COleDateTime& date) const
 {
 	if (!IsValid())
@@ -169,7 +174,7 @@ BOOL COleDateTimeRange::IntersectsWith(const COleDateTimeRange& dtOther) const
 	return TRUE;
 }
 
-BOOL COleDateTimeRange::IntersectRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
+BOOL COleDateTimeRange::GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
 {
 	if (!dtOther1.IntersectsWith(dtOther2))
 		return FALSE;
@@ -180,20 +185,78 @@ BOOL COleDateTimeRange::IntersectRange(const COleDateTimeRange& dtOther1, const 
 	return Set(dtStart, dtEnd, (dtOther1.m_bInclusive || dtOther2.m_bInclusive));
 }
 
-BOOL COleDateTimeRange::UnionRange(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
+BOOL COleDateTimeRange::GetUnion(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2)
 {
-	if (!dtOther1.IsValid() || !dtOther2.IsValid())
+	if (dtOther1.IsValid() && dtOther2.IsValid())
+	{
+		COleDateTime dtStart = min(dtOther1.m_dtStart, dtOther2.m_dtStart);
+		COleDateTime dtEnd = max(dtOther1.GetEndInclusive(), dtOther2.GetEndInclusive());
+		BOOL bInclusive = (dtOther1.m_bInclusive || dtOther2.m_bInclusive);
+
+		if (CDateHelper::IsEndOfDay(dtEnd))
+		{
+			dtEnd = CDateHelper::GetDateOnly(dtEnd);
+			bInclusive = TRUE;
+		}
+
+		COleDateTimeRange temp(dtStart, dtEnd, bInclusive);
+
+		if (!temp.IsValid())
+			return FALSE;
+
+		*this = temp;
+	}
+	else if (dtOther1.IsValid() && dtOther2.IsNull())
+	{
+		*this = dtOther1;
+	}
+	else if (dtOther2.IsValid() && dtOther1.IsNull())
+	{
+		*this = dtOther2;
+	}
+	else
+	{
 		return FALSE;
+	}
 
-	COleDateTime dtStart = min(dtOther1.m_dtStart, dtOther2.m_dtStart);
-	COleDateTime dtEnd = max(dtOther1.GetEndInclusive(), dtOther2.GetEndInclusive());
+	return TRUE;
+}
 
-	COleDateTimeRange temp(dtStart, dtEnd, (dtOther1.m_bInclusive || dtOther2.m_bInclusive));
+BOOL COleDateTimeRange::GetUnion(const COleDateTimeRange& dtOther, const COleDateTime& date, BOOL bInclusive)
+{
+	if (dtOther.IsValid() && CDateHelper::IsDateSet(date))
+	{
+		COleDateTime dtStart = min(dtOther.m_dtStart, date);
+		COleDateTime dtEnd = max(dtOther.GetEndInclusive(), date);
 
-	if (!temp.IsValid())
+		bInclusive |= dtOther.m_bInclusive;
+
+		if (CDateHelper::IsEndOfDay(dtEnd))
+		{
+			dtEnd = CDateHelper::GetDateOnly(dtEnd);
+			bInclusive = TRUE;
+		}
+
+		COleDateTimeRange temp(dtStart, dtEnd, bInclusive);
+
+		if (!temp.IsValid())
+			return FALSE;
+
+		*this = temp;
+	}
+	else if (dtOther.IsValid())
+	{
+		*this = dtOther;
+	}
+	else if (CDateHelper::IsDateSet(date))
+	{
+		return Set(date, date, bInclusive);
+	}
+	else
+	{
 		return FALSE;
+	}
 
-	*this = temp;
 	return TRUE;
 }
 
@@ -209,7 +272,7 @@ COleDateTime COleDateTimeRange::GetEnd() const
 
 COleDateTime COleDateTimeRange::GetEndInclusive() const
 {
-	if (IsValid() && m_bInclusive)
+	if (m_bInclusive && CDateHelper::IsDateSet(m_dtEnd) && !CDateHelper::DateHasTime(m_dtEnd))
 		return CDateHelper::GetEndOfDay(m_dtEnd);
 
 	// else
@@ -1535,6 +1598,11 @@ BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
 	return IsLeapYear(date.GetYear());
+}
+
+BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
+{
+	return (GetTimeOnly(date).m_dt >= END_OF_DAY);
 }
 
 BOOL CDateHelper::IsLeapYear(int nYear)
