@@ -10,9 +10,9 @@
 #include "EnBitmap.h"
 #include "graphicsMisc.h"
 #include "clipboard.h"
-#include "gdiplus.h"
 
 #include "..\3rdParty\DibData.h"
+#include "..\3rdParty\gdiplus.h"
 
 #include <afxpriv.h>
 

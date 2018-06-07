@@ -305,10 +305,6 @@ SOURCE=.\framewndcontainer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GdiPlus.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\GraphicsMisc.cpp
 # End Source File
 # Begin Source File
@@ -950,10 +946,6 @@ SOURCE=.\FontCache.h
 # Begin Source File
 
 SOURCE=.\framewndcontainer.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\GdiPlus.h
 # End Source File
 # Begin Source File
 

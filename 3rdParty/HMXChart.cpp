@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "HMXChart.h"
+#include "GDIPlus.h"
 
 #include <math.h>
 
@@ -677,6 +678,22 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //
 //		true if ok, else false
 //
+
+bool CHMXChart::DrawPoints(gdix_Graphics* graphics, gdix_Pen* pen, const POINT* points, int nNumPts)
+{
+	VERIFY(CGdiPlus::SetSmoothingMode(graphics, gdix_SmoothingModeAntiAlias));
+	
+	for (int nPt = 0; nPt < (nNumPts - 1); nPt++)
+	{
+		gdix_PointF from = { (float)points[nPt].x, (float)points[nPt].y };
+		gdix_PointF to = { (float)points[nPt + 1].x, (float)points[nPt + 1].y };
+		
+		VERIFY(CGdiPlus::DrawLine(graphics, pen, &from, &to));
+	}
+
+	return true;
+}
+
 bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
@@ -711,14 +728,24 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			if (!nPoints)
 				return false;
 
-			CPen pen(PS_SOLID, ds.GetSize(), ds.GetLineColor()), *pPenOld;
-			pPenOld = dc.SelectObject(&pen);
+			gdix_Pen* pen = NULL;
+			VERIFY(CGdiPlus::CreatePen(ds.GetLineColor(), (float)ds.GetSize(), &pen));
 
-			dc.Polyline(points.GetData(), nPoints);
+			gdix_Graphics* graphics = NULL;
+			VERIFY(CGdiPlus::CreateGraphics(dc, &graphics));
+
+			VERIFY(DrawPoints(graphics, pen, points.GetData(), points.GetSize()));
+
+			CGdiPlus::DeletePen(pen);
+			CGdiPlus::DeleteGraphics(graphics);
 			
 			nMarkerType = ds.GetMarker();
+
 			if(nMarkerType != HMX_DATASET_MARKER_NONE) 
 			{
+				CPen pen(PS_SOLID, ds.GetSize(), ds.GetLineColor()), *pPenOld;
+				pPenOld = dc.SelectObject(&pen);
+
 				CBrush brush(ds.GetFillColor()), *pBrushOld;
 				pBrushOld = dc.SelectObject(&brush);
 
@@ -738,6 +765,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							
 							dc.Polygon(ptMarker, 3);
 							break;
 						case HMX_DATASET_MARKER_BOX:
@@ -751,8 +779,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+							
 							dc.Polygon(ptMarker, 4);
 							break;
+
 						case HMX_DATASET_MARKER_SPH:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
@@ -760,8 +790,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
 							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
 							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+
 							dc.Ellipse(ptMarker[0].x, ptMarker[0].y, ptMarker[1].x, ptMarker[1].y);
 							break;
+
 						case HMX_DATASET_MARKER_DIA:
 							ds.GetData(f, nSample);
 							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
@@ -773,15 +805,16 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
 							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
 							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp;
+							
 							dc.Polygon(ptMarker, 4);
 							break;
 						}
 					}
 				}
 				dc.SelectObject(pBrushOld);
+				dc.SelectObject(pPenOld);
 			}
 			
-			dc.SelectObject(pPenOld);
 		}
 		break;
 		
@@ -855,12 +888,19 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			// draw line too?
 			if (bAreaLine)
 			{
-				CPen pen(PS_SOLID, 2, ds.GetLineColor());
-				CPen* pPenOld = dc.SelectObject(&pen);
+				gdix_Pen* pen = NULL;
+				VERIFY(CGdiPlus::CreatePen(ds.GetLineColor(), (float)ds.GetSize(), &pen));
+				
+				gdix_Graphics* graphics = NULL;
+				VERIFY(CGdiPlus::CreateGraphics(dc, &graphics));
 
+				VERIFY(CGdiPlus::SetSmoothingMode(graphics, gdix_SmoothingModeAntiAlias));
+				
 				// don't draw the first/last points
-				dc.Polyline(points.GetData() + 1, nPoints - 2);
-				dc.SelectObject(pPenOld);
+				VERIFY(DrawPoints(graphics, pen, points.GetData() + 1, points.GetSize() - 2));
+				
+				CGdiPlus::DeletePen(pen);
+				CGdiPlus::DeleteGraphics(graphics);
 			}
 			
 			dc.SelectObject(pBrushOld);

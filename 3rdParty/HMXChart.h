@@ -199,6 +199,11 @@ protected:
 	int CalcYScaleFontSize(CDC& dc, BOOL bTitle) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	int GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
+
+typedef void* gdix_Graphics;
+typedef void* gdix_Pen;
+
+	bool DrawPoints(gdix_Graphics* graphics, gdix_Pen* pen, const POINT* points, int nNumPts);
 };
 
 /////////////////////////////////////////////////////////////////////////////

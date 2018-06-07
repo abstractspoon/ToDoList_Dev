@@ -137,6 +137,10 @@ SOURCE=.\FPSMiniCalendarListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GdiPlus.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ggets.cpp
 # End Source File
 # Begin Source File
@@ -294,6 +298,10 @@ SOURCE=.\FPSMiniCalendarCtrl.h
 # Begin Source File
 
 SOURCE=.\FPSMiniCalendarListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GdiPlus.h
 # End Source File
 # Begin Source File
 

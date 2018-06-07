@@ -28,6 +28,26 @@ struct gdix_StartupOutput
 
 //////////////////////////////////////////////////////////////////////
 
+enum
+{
+	AlphaShift  = 24,
+    RedShift    = 16,
+    GreenShift  = 8,
+    BlueShift   = 0
+};
+
+// Assemble A, R, G, B values into a 32-bit integer
+
+static gdix_ARGB MakeARGB(COLORREF color, BYTE alpha = 255)
+{
+	return (((gdix_ARGB) (GetBValue(color)) << BlueShift) |
+			((gdix_ARGB) (GetGValue(color)) << GreenShift) |
+			((gdix_ARGB) (GetRValue(color)) << RedShift) |
+			((gdix_ARGB) (alpha) << AlphaShift));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 typedef gdix_Status (STDAPICALLTYPE* PFNSTARTUP)(ULONG_PTR*, const gdix_StartupInput*, gdix_StartupOutput*);
 typedef void		(STDAPICALLTYPE* PFNSHUTDOWN)(ULONG_PTR);
 
@@ -197,10 +217,10 @@ BOOL CGdiPlus::CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap)
 //	return FALSE;
 }
 
-BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background)
+BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, COLORREF background)
 {
 	GETPROCADDRESS(PFNCREATEHBITMAPFROMBITMAP, "GdipCreateHBITMAPFromBitmap");
-	return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
+	return (pFN(bitmap, hbmReturn, MakeARGB(background)) == gdix_Ok);
 // 	if (!Initialize())
 // 		return FALSE;
 // 
@@ -229,11 +249,11 @@ BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)
 // 	return FALSE;
 }
 
-BOOL CGdiPlus::CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen)
+BOOL CGdiPlus::CreatePen(COLORREF color, gdix_Real width, gdix_Pen** pen)
 {
 	GETPROCADDRESS(PFNCREATEPEN1, "GdipCreatePen1");
 
-	return (pFN(color, width, gdix_UnitPixel, pen) == gdix_Ok);
+	return (pFN(MakeARGB(color), width, gdix_UnitPixel, pen) == gdix_Ok);
 }
 
 BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
