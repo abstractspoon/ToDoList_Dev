@@ -477,10 +477,14 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		GetNextAssoc(pos, dwTaskID, pWI);
 		ASSERT(pWI);
 
-		// Count how many the days of the task fall within the specified period
+		// Weed out unwanted tasks
+		if (pWI->bParent)
+			continue;
+
 		if (!pWI->HasValidDates() || pWI->IsDone())
 			continue;
 
+		// Determine how many the days of the task fall within the specified period
 		COleDateTimeRange dtIntersect;
 		
 		if (!dtIntersect.GetIntersection(dtPeriod, pWI->dtRange))
@@ -490,6 +494,7 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		
 		if (dTaskDuration == 0.0)
 			continue;
+
 
 		double dTaskDays = dtIntersect.GetWeekdayCount();
 		double dProportion = (dTaskDays / dTaskDuration);
