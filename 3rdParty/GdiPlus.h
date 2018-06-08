@@ -152,15 +152,81 @@ struct gdix_RectF
 
 //////////////////////////////////////////////////////////////////////
 
+class CGdiPlusGraphics
+{
+public:
+	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeAntiAlias);
+	virtual ~CGdiPlusGraphics();
+
+	operator gdix_Graphics*() { return m_graphics; }
+
+protected:
+	gdix_Graphics* m_graphics;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CGdiPlusPen
+{
+public:
+	CGdiPlusPen(COLORREF color, int nWidth);
+	virtual ~CGdiPlusPen();
+
+	operator gdix_Pen*() { return m_pen; }
+
+protected:
+	gdix_Pen* m_pen;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+class CGdiPlusBrush
+{
+	CGdiPlusBrush(COLORREF color);
+	virtual ~CGdiPlusBrush();
+
+	operator gdix_Brush*() const { return m_brush; }
+
+protected:
+	gdix_Brush* m_brush;
+};
+*/
+
+//////////////////////////////////////////////////////////////////////
+
+class CGdiPlusPointF : public gdix_PointF
+{
+public:
+	CGdiPlusPointF(int nX = 0, int nY = 0);
+	CGdiPlusPointF(const POINT& pt);
+
+	operator gdix_PointF*() { return this; }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CGdiPlusRectF : public gdix_RectF
+{
+public:
+	CGdiPlusRectF(int l = 0, int t = 0, int r = 0, int b = 0);
+	CGdiPlusRectF(const POINT& ptTopLeft, const SIZE& size);
+	CGdiPlusRectF(const POINT& ptTopLeft, const POINT& ptBottomRight);
+	
+	operator gdix_RectF*() { return this; }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CGdiPlus  
 {
 public:
 	static BOOL CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
-	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, COLORREF background);
+	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
 
-	static BOOL CreatePen(COLORREF color, gdix_Real width, gdix_Pen** pen);
+	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);
 
 	static BOOL CreateGraphics(HDC hdc, gdix_Graphics**);
@@ -169,6 +235,11 @@ public:
 
 	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
 	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
+	
+	static BOOL DrawLine(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT& from, const POINT& to);
+	static BOOL DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count);
+
+	static gdix_ARGB MakeARGB(COLORREF color, BYTE alpha = 255);
 
 protected:
 	static HMODULE s_hGdiPlus;

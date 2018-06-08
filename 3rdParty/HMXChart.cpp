@@ -679,21 +679,6 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //		true if ok, else false
 //
 
-bool CHMXChart::DrawPoints(gdix_Graphics* graphics, gdix_Pen* pen, const POINT* points, int nNumPts)
-{
-	VERIFY(CGdiPlus::SetSmoothingMode(graphics, gdix_SmoothingModeAntiAlias));
-	
-	for (int nPt = 0; nPt < (nNumPts - 1); nPt++)
-	{
-		gdix_PointF from = { (float)points[nPt].x, (float)points[nPt].y };
-		gdix_PointF to = { (float)points[nPt + 1].x, (float)points[nPt + 1].y };
-		
-		VERIFY(CGdiPlus::DrawLine(graphics, pen, &from, &to));
-	}
-
-	return true;
-}
-
 bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
@@ -703,11 +688,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 
 	// let's calc the bar size
 	double dSpacing = (double)m_rectData.Width()/(double)m_nXMax;
-	int	f, nMarkerType;
 	double nFirstSample, nTemp, nTemp1, nZeroLine;
 
 	// get first sample, if dataset is empty continue to next dataset
-	f=0;
+	int f=0;
 	do 
 	{
 		if(!ds.GetData(f++, nFirstSample))
@@ -728,20 +712,12 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			if (!nPoints)
 				return false;
 
-			gdix_Pen* pen = NULL;
-			VERIFY(CGdiPlus::CreatePen(ds.GetLineColor(), (float)ds.GetSize(), &pen));
+			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
+			CGdiPlusGraphics graphics(dc);
 
-			gdix_Graphics* graphics = NULL;
-			VERIFY(CGdiPlus::CreateGraphics(dc, &graphics));
-
-			VERIFY(DrawPoints(graphics, pen, points.GetData(), points.GetSize()));
-
-			CGdiPlus::DeletePen(pen);
-			CGdiPlus::DeleteGraphics(graphics);
+			VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData(), points.GetSize()));
 			
-			nMarkerType = ds.GetMarker();
-
-			if(nMarkerType != HMX_DATASET_MARKER_NONE) 
+			if (ds.GetMarker() != HMX_DATASET_MARKER_NONE) 
 			{
 				CPen pen(PS_SOLID, ds.GetSize(), ds.GetLineColor()), *pPenOld;
 				pPenOld = dc.SelectObject(&pen);
@@ -888,19 +864,11 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			// draw line too?
 			if (bAreaLine)
 			{
-				gdix_Pen* pen = NULL;
-				VERIFY(CGdiPlus::CreatePen(ds.GetLineColor(), (float)ds.GetSize(), &pen));
-				
-				gdix_Graphics* graphics = NULL;
-				VERIFY(CGdiPlus::CreateGraphics(dc, &graphics));
-
-				VERIFY(CGdiPlus::SetSmoothingMode(graphics, gdix_SmoothingModeAntiAlias));
+				CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
+				CGdiPlusGraphics graphics(dc);
 				
 				// don't draw the first/last points
-				VERIFY(DrawPoints(graphics, pen, points.GetData() + 1, points.GetSize() - 2));
-				
-				CGdiPlus::DeletePen(pen);
-				CGdiPlus::DeleteGraphics(graphics);
+				VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData() + 1, points.GetSize() - 2));
 			}
 			
 			dc.SelectObject(pBrushOld);

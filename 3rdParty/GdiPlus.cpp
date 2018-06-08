@@ -13,6 +13,85 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusGraphics::CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing) : m_graphics(NULL)
+{
+	VERIFY(CGdiPlus::CreateGraphics(hDC, &m_graphics));
+	VERIFY(CGdiPlus::SetSmoothingMode(m_graphics, smoothing));
+}
+
+CGdiPlusGraphics::~CGdiPlusGraphics()
+{
+	VERIFY(CGdiPlus::DeleteGraphics(m_graphics));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth) : m_pen(NULL)
+{
+	VERIFY(CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen));
+}
+
+CGdiPlusPen::~CGdiPlusPen()
+{
+	VERIFY(CGdiPlus::DeletePen(m_pen));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CGdiPlusPointF::CGdiPlusPointF(int nX, int nY)
+{
+	x = (float)nX;
+	y = (float)nY;
+}
+
+CGdiPlusPointF::CGdiPlusPointF(const POINT& pt)
+{
+	x = (float)pt.x;
+	y = (float)pt.y;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CGdiPlusRectF::CGdiPlusRectF(int l, int t, int r, int b)
+{
+	x = (float)l;
+	y = (float)t;
+	w = (float)(r - l);
+	h = (float)(b - t);
+}
+
+CGdiPlusRectF::CGdiPlusRectF(const POINT& pt, const SIZE& size)
+{
+	x = (float)pt.x;
+	y = (float)pt.y;
+	w = (float)size.cx;
+	h = (float)size.cy;
+}
+
+CGdiPlusRectF::CGdiPlusRectF(const POINT& ptTopLeft, const POINT& ptBottomRight)
+{
+	x = (float)ptTopLeft.x;
+	y = (float)ptTopLeft.y;
+	w = (float)(ptBottomRight.x - ptTopLeft.x);
+	h = (float)(ptBottomRight.y - ptTopLeft.y);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+CGdiPlusBrush::CGdiPlusBrush(COLORREF color) : m_brush(NULL)
+{
+	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color), &m_brush));
+}
+
+CGdiPlusBrush::~CGdiPlusBrush()
+{
+	VERIFY(CGdiPlus::DeletePen(m_brush));
+}
+*/
+
+//////////////////////////////////////////////////////////////////////
+
 struct gdix_StartupInput
 {
     UINT32 GdiplusVersion;
@@ -25,26 +104,6 @@ struct gdix_StartupOutput
 {
 	// not used
 };
-
-//////////////////////////////////////////////////////////////////////
-
-enum
-{
-	AlphaShift  = 24,
-    RedShift    = 16,
-    GreenShift  = 8,
-    BlueShift   = 0
-};
-
-// Assemble A, R, G, B values into a 32-bit integer
-
-static gdix_ARGB MakeARGB(COLORREF color, BYTE alpha = 255)
-{
-	return (((gdix_ARGB) (GetBValue(color)) << BlueShift) |
-			((gdix_ARGB) (GetGValue(color)) << GreenShift) |
-			((gdix_ARGB) (GetRValue(color)) << RedShift) |
-			((gdix_ARGB) (alpha) << AlphaShift));
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -175,11 +234,28 @@ void CGdiPlus::Free()
 
 //////////////////////////////////////////////////////////////////////
 
+enum
+{
+	AlphaShift  = 24,
+	RedShift    = 16,
+	GreenShift  = 8,
+	BlueShift   = 0
+};
+
+gdix_ARGB CGdiPlus::MakeARGB(COLORREF color, BYTE alpha)
+{
+	return (((gdix_ARGB) (GetBValue(color)) << BlueShift) |
+			((gdix_ARGB) (GetGValue(color)) << GreenShift) |
+			((gdix_ARGB) (GetRValue(color)) << RedShift) |
+			((gdix_ARGB) (alpha) << AlphaShift));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 #define GETPROCADDRESS(tdef, fnName)                            \
 	if (!Initialize()) return FALSE;                            \
 	static tdef pFN = (tdef)GetProcAddress(s_hGdiPlus, fnName); \
 	if (!pFN) return FALSE;
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -187,73 +263,31 @@ BOOL CGdiPlus::CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap)
 {
 	GETPROCADDRESS(PFNCREATEBITMAPFROMSTREAM, "GdipCreateBitmapFromStream");
 	return (pFN(stream, bitmap) == gdix_Ok);
-
-// 	if (!Initialize())
-// 		return FALSE;
-// 	
-// 	static PFNCREATEBITMAPFROMSTREAM pFN = (PFNCREATEBITMAPFROMSTREAM)GetProcAddress(s_hGdiPlus, "GdipCreateBitmapFromStream");
-// 
-// 	if (pFN)
-// 		return (pFN(stream, bitmap) == gdix_Ok);
-// 
-// 	// else
-// 	return FALSE;
 }
 
 BOOL CGdiPlus::CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap)
 {
 	GETPROCADDRESS(PFNCREATEBITMAPFROMFILE, "GdipCreateBitmapFromFile");
 	return (pFN(filename, bitmap) == gdix_Ok);
-
-// 	if (!Initialize())
-// 		return FALSE;
-// 
-// 	static PFNCREATEBITMAPFROMFILE pFN = (PFNCREATEBITMAPFROMFILE)GetProcAddress(s_hGdiPlus, "GdipCreateBitmapFromFile");
-// 
-// 	if (pFN)
-// 		return (pFN(filename, bitmap) == gdix_Ok);
-// 
-// 	// else
-//	return FALSE;
 }
 
-BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, COLORREF background)
+BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background)
 {
 	GETPROCADDRESS(PFNCREATEHBITMAPFROMBITMAP, "GdipCreateHBITMAPFromBitmap");
-	return (pFN(bitmap, hbmReturn, MakeARGB(background)) == gdix_Ok);
-// 	if (!Initialize())
-// 		return FALSE;
-// 
-// 	static PFNCREATEHBITMAPFROMBITMAP pFN = (PFNCREATEHBITMAPFROMBITMAP)GetProcAddress(s_hGdiPlus, "GdipCreateHBITMAPFromBitmap");
-// 
-// 	if (pFN)
-// 		return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
-// 	
-// 	// else
-// 	return FALSE;
+	return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
 }
 
 BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)
 {
 	GETPROCADDRESS(PFNDELETEBITMAP, "GdipDisposeImage");
 	return (pFN(bitmap) == gdix_Ok);
-// 	if (!Initialize())
-// 		return FALSE;
-// 
-// 	static PFNDELETEBITMAP pFN = (PFNDELETEBITMAP)GetProcAddress(s_hGdiPlus, "GdipDisposeImage");
-// 
-// 	if (pFN)
-// 		return (pFN(bitmap) == gdix_Ok);
-// 	
-// 	// else
-// 	return FALSE;
 }
 
-BOOL CGdiPlus::CreatePen(COLORREF color, gdix_Real width, gdix_Pen** pen)
+BOOL CGdiPlus::CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen)
 {
 	GETPROCADDRESS(PFNCREATEPEN1, "GdipCreatePen1");
 
-	return (pFN(MakeARGB(color), width, gdix_UnitPixel, pen) == gdix_Ok);
+	return (pFN(color, width, gdix_UnitPixel, pen) == gdix_Ok);
 }
 
 BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
@@ -296,4 +330,20 @@ BOOL CGdiPlus::DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_Po
 	GETPROCADDRESS(PFNDRAWPOLYGON, "GdipDrawPolygon");
 
 	return (pFN(graphics, pen, points, count) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DrawLine(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT& from, const POINT& to)
+{
+	return DrawLine(graphics, pen, CGdiPlusPointF(from), CGdiPlusPointF(to));
+}
+
+BOOL CGdiPlus::DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count)
+{
+	for (int i = 0; i < (count - 1); i++)
+	{
+		if (!DrawLine(graphics, pen, points[i], points[i + 1]))
+			return FALSE;
+	}
+
+	return TRUE;
 }
