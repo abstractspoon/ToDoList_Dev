@@ -187,13 +187,6 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// application preferences
-	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
-	int nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
-
-	if (m_graph.SetTimeIntervals(nDaysInWeek, dHoursInDay))
-		RebuildGraph(FALSE, FALSE, TRUE);
-	
 	// burn down specific options
 	if (!bAppOnly)
 	{
@@ -204,7 +197,15 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			m_nChartType = BCT_INCOMPLETETASKS;
 
 		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
+		m_graph.SetChartType(m_nChartType);
 	}
+
+	// application preferences
+	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
+	int nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
+
+	if (m_graph.SetTimeIntervals(nDaysInWeek, dHoursInDay))
+		RebuildGraph(FALSE, FALSE, TRUE);
 }
 
 void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
