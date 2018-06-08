@@ -221,10 +221,6 @@ SOURCE=.\EnCommandLineInfo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\endatetimectrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\enedit.cpp
 # End Source File
 # Begin Source File
@@ -862,10 +858,6 @@ SOURCE=.\encolordialog.h
 # Begin Source File
 
 SOURCE=.\EnCommandLineInfo.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\endatetimectrl.h
 # End Source File
 # Begin Source File
 
