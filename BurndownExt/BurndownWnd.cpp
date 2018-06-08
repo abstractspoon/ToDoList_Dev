@@ -299,30 +299,6 @@ bool CBurndownWnd::WantTaskUpdate(IUI_ATTRIBUTE nAttribute) const
 	return false;
 }
 
-void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks)
-{
-	// reset data structures
-	m_data.RemoveAll();
-
-	if (pTasks->GetTaskCount())
-	{
-		CDateHelper::ClearDate(m_dtEarliestDate);
-		CDateHelper::ClearDate(m_dtLatestDate);
-
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
-		RebuildGraph(TRUE, FALSE, FALSE);
-	}
-	else if (CDateHelper::IsDateSet(m_dtEarliestDate))
-	{
-		// just clear the data but leave the axes
-		m_graph.ClearData(0);
-	}
-	else
-	{
-		m_dtEarliestDate = m_dtLatestDate = COleDateTime::GetCurrentTime();
-	}
-}
-
 void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist)
 {
 	if (hTask == NULL)
@@ -346,9 +322,6 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 				// make sure start is less than done
 				if (pSI->IsDone() && pSI->HasStart())
 					pSI->dtStart = min(pSI->dtStart, pSI->dtDone);
-
-				// update data extents as we go
-				pSI->MinMax(m_dtEarliestDate, m_dtLatestDate);
 			}
 		}
 		else // Process children
@@ -390,16 +363,19 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		BuildData(pTasks); // builds graph too
+		m_data.RemoveAll();
+
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
+		RebuildGraph(TRUE, TRUE, TRUE);
 		break;
 		
 	case IUI_NEW:
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, TRUE);
+		RebuildGraph(TRUE, TRUE, TRUE);
+		break;
+		
 	case IUI_EDIT:
-		if (nUpdate == IUI_NEW)
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE, TRUE);
-		else
-			UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
-
+		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, CSet<IUI_ATTRIBUTE>(pAttributes, nNumAttributes), TRUE);
 		RebuildGraph(TRUE, TRUE, TRUE);
 		break;
 		

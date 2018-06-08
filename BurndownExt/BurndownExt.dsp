@@ -142,7 +142,15 @@ SOURCE=.\BurndownChart.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownEnum.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownExt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\BurndownStatic.h
 # End Source File
 # Begin Source File
 

@@ -53,25 +53,25 @@ BOOL STATSITEM::IsDone() const
 	return CDateHelper::IsDateSet(dtDone);
 }
 
-void STATSITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
+void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
 {
-	MinMax(dtStart, dtMin, dtMax);
-	MinMax(dtDone, dtMin, dtMax);
+	MinMax(dtStart, dtExtents);
+	MinMax(dtDone, dtExtents);
 }
 
-void STATSITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax)
+void STATSITEM::MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents)
 {
 	if (CDateHelper::IsDateSet(date))
 	{
-		if (CDateHelper::IsDateSet(dtMin))
-			dtMin = min(dtMin, date);
+		if (CDateHelper::IsDateSet(dtExtents.m_dtStart))
+			dtExtents.m_dtStart = min(dtExtents.m_dtStart, date);
 		else
-			dtMin = date;
+			dtExtents.m_dtStart = date;
 		
-		if (CDateHelper::IsDateSet(dtMax))
-			dtMax = max(dtMax, date);
+		if (CDateHelper::IsDateSet(dtExtents.m_dtEnd))
+			dtExtents.m_dtEnd = max(dtExtents.m_dtEnd, date);
 		else
-			dtMax = date;
+			dtExtents.m_dtEnd = date;
 	}
 }
 
@@ -366,21 +366,19 @@ double CStatsItemArray::CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHou
 	return dDays;
 }
 
-void CStatsItemArray::GetDataExtents(COleDateTime& dtEarliestDate, COleDateTime& dtLatestDate) const
+void CStatsItemArray::GetDataExtents(COleDateTimeRange& dtExtents) const
 {
 	if (GetSize())
 	{
-		CDateHelper::ClearDate(dtEarliestDate);
-		CDateHelper::ClearDate(dtLatestDate);
-		
+		dtExtents.Reset();
 		int nItem = GetSize();
 		
 		while (nItem--)
-			GetAt(nItem)->MinMax(dtEarliestDate, dtLatestDate);
+			GetAt(nItem)->MinMax(dtExtents);
 	}
 	else
 	{
-		dtEarliestDate = dtLatestDate = COleDateTime::GetCurrentTime();
+		dtExtents.Set(DHD_NOW, DHD_NOW);
 	}
 }
 

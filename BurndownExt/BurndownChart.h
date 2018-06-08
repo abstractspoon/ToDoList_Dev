@@ -22,7 +22,7 @@ public:
 protected:
 	const CStatsItemArray& m_data;
 	
-	COleDateTime m_dtEarliestDate, m_dtLatestDate;
+	COleDateTimeRange m_dtExtents;
 	int m_nScale;
 	BURNDOWN_CHARTTYPE m_nChartType;
 	int m_nDaysInWeek;
@@ -38,11 +38,9 @@ protected:
 	void BuildSprintGraph();
 	void BuildBurndownGraph();
 	void RebuildXScale();
-	int GetDataDuration() const;
 	COleDateTime GetGraphStartDate() const;
 	COleDateTime GetGraphEndDate() const;
 	int CalculateRequiredXScale() const;
-	void UpdateDataExtents();
 
 };
 

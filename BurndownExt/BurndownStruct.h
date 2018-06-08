@@ -9,6 +9,7 @@
 
 #include "..\Shared\mapex.h"
 #include "..\shared\timehelper.h"
+#include "..\shared\datehelper.h"
 
 #include "..\Interfaces\ITaskList.h" // for TDC_UNITS
 
@@ -32,7 +33,7 @@ struct STATSITEM
 	BOOL HasStart() const;
 	BOOL IsDone() const;
 	
-	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
+	void MinMax(COleDateTimeRange& dtExtents) const;
 
 	double CalcTimeSpentInDays(const COleDateTime& date, int nDaysInWeek, double dHoursInDay) const;
 	double CalcTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
@@ -43,7 +44,7 @@ struct STATSITEM
 	DWORD dwTaskID;
 
 protected:
-	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
+	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 	static double CalcTimeInDays(double dTime, TDC_UNITS nUnits, int nDaysInWeek, double dHoursInDay);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
@@ -73,7 +74,7 @@ public:
 	double CalcTotalTimeEstimateInDays(int nDaysInWeek, double dHoursInDay) const;
 	int CalculateIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 
-	void GetDataExtents(COleDateTime& dtEarliestDate, COleDateTime& dtLatestDate) const;
+	void GetDataExtents(COleDateTimeRange& dtExtents) const;
 
 	STATSITEM* operator[](int nIndex) const;
 

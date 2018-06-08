@@ -80,7 +80,6 @@ protected:
 	BURNDOWN_CHARTTYPE m_nChartType;
 
 	CStatsItemArray m_data;
-	COleDateTime m_dtEarliestDate, m_dtLatestDate;
 
 protected:
 // Overrides
@@ -113,7 +112,6 @@ protected:
 protected:
 	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
-	void BuildData(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);

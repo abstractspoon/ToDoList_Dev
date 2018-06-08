@@ -116,6 +116,8 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 
 void CBurndownChart::BuildBurndownGraph()
 {
+	ClearData();
+		
 	SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
 	SetDatasetLineColor(0, COLOR_GREEN);
 	SetDatasetMin(0, 0.0);
@@ -131,7 +133,7 @@ void CBurndownChart::BuildBurndownGraph()
 	{
 		COleDateTime date(dtStart.m_dt + nDay);
 		
-		if (m_dtEarliestDate > date)
+		if (m_dtExtents.GetStart() > date)
 		{
 			AddData(0, 0);
 		}
@@ -147,6 +149,8 @@ void CBurndownChart::BuildBurndownGraph()
 
 void CBurndownChart::BuildSprintGraph()
 {
+	ClearData();
+
 	enum 
 	{ 
 		SPRINT_EST,
@@ -189,7 +193,7 @@ int CBurndownChart::CalculateRequiredXScale() const
 {
 	// calculate new x scale
 	int nDataWidth = GetDataArea().cx;
-	int nNumDays = GetDataDuration();
+	int nNumDays = m_dtExtents.GetDayCount();
 
 	// work thru the available scales until we find a suitable one
 	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
@@ -265,10 +269,10 @@ void CBurndownChart::RebuildXScale()
 COleDateTime CBurndownChart::GetGraphStartDate() const
 {
 	if (m_nChartType == BCT_REMAININGDAYS)
-		return m_dtEarliestDate;
+		return m_dtExtents.GetStart();
 
 	// else
-	COleDateTime dtStart(m_dtEarliestDate);
+	COleDateTime dtStart(m_dtExtents.GetStart());
 
 	// back up a bit to always show first completion
 	dtStart -= COleDateTimeSpan(7.0);
@@ -318,9 +322,9 @@ COleDateTime CBurndownChart::GetGraphStartDate() const
 COleDateTime CBurndownChart::GetGraphEndDate() const
 {
 	if (m_nChartType == BCT_REMAININGDAYS)
-		return m_dtLatestDate;
+		return m_dtExtents.GetEnd();
 
-	COleDateTime dtEnd = (m_dtLatestDate + COleDateTimeSpan(7.0));
+	COleDateTime dtEnd = (m_dtExtents.GetEnd() + COleDateTimeSpan(7.0));
 
 	// avoid unnecessary call to GetAsSystemTime()
 	if (m_nScale == BCS_DAY)
@@ -381,29 +385,13 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 		RebuildGraph(FALSE);
 }
 
-int CBurndownChart::GetDataDuration() const
-{
-	double dStart = m_dtEarliestDate;
-	ASSERT(dStart > 0.0);
-	
-	double dEnd = (m_dtLatestDate.m_dt + 1.0);
-	ASSERT(dEnd >= dStart);
-	
-	return ((int)dEnd - (int)dStart);
-}
-
-void CBurndownChart::UpdateDataExtents()
-{
-	m_data.GetDataExtents(m_dtEarliestDate, m_dtLatestDate);
-}
-
 void CBurndownChart::RebuildGraph(BOOL bUpdateExtents)
 {
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
 	
-	if (bUpdateExtents || !CDateHelper::IsDateSet(m_dtEarliestDate) || !CDateHelper::IsDateSet(m_dtLatestDate))
-		UpdateDataExtents();
+	if (bUpdateExtents || (m_dtExtents.GetDayCount() == 0))
+		m_data.GetDataExtents(m_dtExtents);
 	
 	ClearData();
 	SetYText(CEnString(STATSDISPLAY[m_nChartType].nYAxisID));
