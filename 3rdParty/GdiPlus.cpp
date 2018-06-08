@@ -38,6 +38,18 @@ CGdiPlusPen::~CGdiPlusPen()
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusBrush::CGdiPlusBrush(COLORREF color) : m_brush(NULL)
+{
+	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color), &m_brush));
+}
+
+CGdiPlusBrush::~CGdiPlusBrush()
+{
+	VERIFY(CGdiPlus::DeleteBrush(m_brush));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 CGdiPlusPointF::CGdiPlusPointF(int nX, int nY)
 {
 	x = (float)nX;
@@ -60,6 +72,14 @@ CGdiPlusRectF::CGdiPlusRectF(int l, int t, int r, int b)
 	h = (float)(b - t);
 }
 
+CGdiPlusRectF::CGdiPlusRectF(const RECT& rect)
+{
+	x = (float)rect.left;
+	y = (float)rect.top;
+	w = (float)(rect.right - rect.left);
+	h = (float)(rect.bottom - rect.top);
+}
+
 CGdiPlusRectF::CGdiPlusRectF(const POINT& pt, const SIZE& size)
 {
 	x = (float)pt.x;
@@ -75,20 +95,6 @@ CGdiPlusRectF::CGdiPlusRectF(const POINT& ptTopLeft, const POINT& ptBottomRight)
 	w = (float)(ptBottomRight.x - ptTopLeft.x);
 	h = (float)(ptBottomRight.y - ptTopLeft.y);
 }
-
-//////////////////////////////////////////////////////////////////////
-
-/*
-CGdiPlusBrush::CGdiPlusBrush(COLORREF color) : m_brush(NULL)
-{
-	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color), &m_brush));
-}
-
-CGdiPlusBrush::~CGdiPlusBrush()
-{
-	VERIFY(CGdiPlus::DeletePen(m_brush));
-}
-*/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -150,6 +156,8 @@ typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINE)(gdix_Graphics*,gdix_Pen*,gdix_
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPIE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPOLYGON)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWELLIPSE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWRECTANGLE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 
 // Fill methods 
 typedef gdix_Status (STDAPICALLTYPE *PFNFILLRECTANGLE)(gdix_Graphics*,gdix_Brush*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
@@ -297,6 +305,20 @@ BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
 	return (pFN(pen) == gdix_Ok);
 }
 
+BOOL CGdiPlus::CreateBrush(gdix_ARGB color, gdix_Brush** brush)
+{
+	GETPROCADDRESS(PFNCREATESOLIDFILL, "GdipCreateSolidFill");
+	
+	return (pFN(color, brush) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DeleteBrush(gdix_Brush* brush)
+{
+	GETPROCADDRESS(PFNDELETEBRUSH, "GdipDeleteBrush");
+	
+	return (pFN(brush) == gdix_Ok);
+}
+
 BOOL CGdiPlus::CreateGraphics(HDC hdc, gdix_Graphics** graphics)
 {
 	GETPROCADDRESS(PFNCREATEFROMHDC, "GdipCreateFromHDC");
@@ -332,6 +354,43 @@ BOOL CGdiPlus::DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_Po
 	return (pFN(graphics, pen, points, count) == gdix_Ok);
 }
 
+BOOL CGdiPlus::DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect)
+{
+	GETPROCADDRESS(PFNDRAWELLIPSE, "GdipDrawEllipse");
+	
+	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect)
+{
+	GETPROCADDRESS(PFNDRAWRECTANGLE, "GdipDrawRectangle");
+	
+	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
+BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count)
+{
+	GETPROCADDRESS(PFNFILLPOLYGON2, "GdipFillPolygon2Ellipse");
+	
+	return (pFN(graphics, brush, points, count) == gdix_Ok);
+}
+
+BOOL CGdiPlus::FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect)
+{
+	GETPROCADDRESS(PFNFILLELLIPSE, "GdipFillEllipse");
+	
+	return (pFN(graphics, brush, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
+BOOL CGdiPlus::FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect)
+{
+	GETPROCADDRESS(PFNFILLRECTANGLE, "GdipFillRectangle");
+	
+	return (pFN(graphics, brush, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
+// Win32 support -----------------------------------------------------------------------------------------
+
 BOOL CGdiPlus::DrawLine(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT& from, const POINT& to)
 {
 	return DrawLine(graphics, pen, CGdiPlusPointF(from), CGdiPlusPointF(to));
@@ -346,4 +405,43 @@ BOOL CGdiPlus::DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const P
 	}
 
 	return TRUE;
+}
+
+BOOL CGdiPlus::DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect)
+{
+	return DrawEllipse(graphics, pen, CGdiPlusRectF(rect));
+}
+
+BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect)
+{
+	return DrawRect(graphics, pen, CGdiPlusRectF(rect));
+}
+
+BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count)
+{
+	CArray<gdix_PointF, gdix_PointF> pointFs;
+	GetPointFs(points, count, pointFs);
+
+	return FillPolygon(graphics, brush, pointFs.GetData(), count);
+}
+
+BOOL CGdiPlus::FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect)
+{
+	return FillEllipse(graphics, brush, CGdiPlusRectF(rect));
+}
+
+BOOL CGdiPlus::FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect)
+{
+	return FillRect(graphics, brush, CGdiPlusRectF(rect));
+}
+
+void CGdiPlus::GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF>& pointFs)
+{
+	pointFs.SetSize(count);
+
+	for (int nPt = 0; nPt < count; nPt++)
+	{
+		pointFs[nPt].x = (float)points[nPt].x;
+		pointFs[nPt].y = (float)points[nPt].y;
+	}
 }
