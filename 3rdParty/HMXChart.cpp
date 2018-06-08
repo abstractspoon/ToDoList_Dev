@@ -679,6 +679,48 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //		true if ok, else false
 //
 
+BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, int nX, int nY, int nSize, CArray<POINT, POINT&>& ptMarker) const
+{
+	switch (nMarker) 
+	{
+	case HMX_DATASET_MARKER_TRIANGLE:
+		ptMarker.SetSize(3);
+		ptMarker[ 0 ].x = nX;
+		ptMarker[ 0 ].y = nY - nSize;
+		ptMarker[ 1 ].x = nX + nSize;
+		ptMarker[ 1 ].y = nY + nSize;
+		ptMarker[ 2 ].x = nX - nSize;
+		ptMarker[ 2 ].y = nY + nSize;
+		break;
+
+	case HMX_DATASET_MARKER_SQUARE:
+	case HMX_DATASET_MARKER_CIRCLE:
+		ptMarker.SetSize(2);
+		ptMarker[ 0 ].x = nX - nSize;
+		ptMarker[ 0 ].y = nY - nSize;
+		ptMarker[ 1 ].x = nX + nSize;
+		ptMarker[ 1 ].y = nY + nSize;
+		break;
+
+	case HMX_DATASET_MARKER_DIAMOND:
+		ptMarker.SetSize(4);
+		ptMarker[ 0 ].x = nX;
+		ptMarker[ 0 ].y = nY - nSize;
+		ptMarker[ 1 ].x = nX + nSize;
+		ptMarker[ 1 ].y = nY;
+		ptMarker[ 2 ].x = nX;
+		ptMarker[ 2 ].y = nY + nSize;
+		ptMarker[ 3 ].x = nX - nSize;
+		ptMarker[ 3 ].y = nY;
+		break;
+
+	default:
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 {
 	if(nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
@@ -717,80 +759,41 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 
 			VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData(), points.GetSize()));
 			
-			if (ds.GetMarker() != HMX_DATASET_MARKER_NONE) 
+			if (ds.GetMarker() == HMX_DATASET_MARKER_NONE) 
+				break;
+
+			CGdiPlusBrush brush(ds.GetFillColor());
+			CArray<POINT, POINT&> ptMarker;
+
+			for (f=0; f<ds.GetDatasetSize(); f++) 
 			{
-				CPen pen(PS_SOLID, ds.GetSize(), ds.GetLineColor()), *pPenOld;
-				pPenOld = dc.SelectObject(&pen);
+				ds.GetData(f, nSample);
 
-				CBrush brush(ds.GetFillColor()), *pBrushOld;
-				pBrushOld = dc.SelectObject(&brush);
+				if (nSample == HMX_DATASET_VALUE_INVALID) 
+					continue;
 
-				POINT ptMarker[5] = { 0 };
-				for(f=0; f<ds.GetDatasetSize(); f++) 
+				int nX = (m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f));
+				int nY = (m_rectData.bottom - (int)((nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin)));
+				int nSize = ds.GetSize()*2;
+
+				VERIFY(GetMarker(ds.GetMarker(), nX, nY, nSize, ptMarker));
+
+				switch (ds.GetMarker()) 
 				{
-					ds.GetData(f, nSample);
-					if(nSample != HMX_DATASET_VALUE_INVALID) 
-					{
-						nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-						switch(ds.GetMarker()) 
-						{
-						case HMX_DATASET_MARKER_TRI:
-							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
-							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
-							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
-							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							
-							dc.Polygon(ptMarker, 3);
-							break;
-						case HMX_DATASET_MARKER_BOX:
-							ds.GetData(f, nSample);
-							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
-							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
-							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
-							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
-							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							
-							dc.Polygon(ptMarker, 4);
-							break;
+				case HMX_DATASET_MARKER_TRIANGLE:
+				case HMX_DATASET_MARKER_DIAMOND:
+					VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
+					break;
 
-						case HMX_DATASET_MARKER_SPH:
-							ds.GetData(f, nSample);
-							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
-							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
-							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
+				case HMX_DATASET_MARKER_SQUARE:
+					VERIFY(CGdiPlus::DrawRect(graphics, pen, CRect(ptMarker[0], ptMarker[1]), brush));
+					break;
 
-							dc.Ellipse(ptMarker[0].x, ptMarker[0].y, ptMarker[1].x, ptMarker[1].y);
-							break;
-
-						case HMX_DATASET_MARKER_DIA:
-							ds.GetData(f, nSample);
-							nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-							ptMarker[ 0 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
-							ptMarker[ 0 ].y = m_rectData.bottom - (int)nTemp - ds.GetSize()*2;
-							ptMarker[ 1 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) + ds.GetSize()*2;
-							ptMarker[ 1 ].y = m_rectData.bottom - (int)nTemp;
-							ptMarker[ 2 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f);
-							ptMarker[ 2 ].y = m_rectData.bottom - (int)nTemp + ds.GetSize()*2;
-							ptMarker[ 3 ].x = m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f) - ds.GetSize()*2;
-							ptMarker[ 3 ].y = m_rectData.bottom - (int)nTemp;
-							
-							dc.Polygon(ptMarker, 4);
-							break;
-						}
-					}
+				case HMX_DATASET_MARKER_CIRCLE:
+					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CRect(ptMarker[0], ptMarker[1]), brush));
+					break;
 				}
-				dc.SelectObject(pBrushOld);
-				dc.SelectObject(pPenOld);
 			}
-			
 		}
 		break;
 		
@@ -850,28 +853,25 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 		{
 			BOOL bAreaLine = (ds.GetStyle() == HMX_DATASET_STYLE_AREALINE);
 
-			// let's rock
-			CBrush brush(ds.GetFillColor());
-			CBrush* pBrushOld = dc.SelectObject(&brush);
-			dc.SelectStockObject(NULL_PEN);
+			CGdiPlusGraphics graphics(dc);
+			CGdiPlusBrush brush(ds.GetFillColor());
 			
-			// let's calc real dataset size (excluding invalid data)
 			CArray<POINT, POINT&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
-			dc.Polygon(points.GetData(), nPoints);
+			CArray<gdix_PointF, gdix_PointF&> pointFs;
+			CGdiPlus::GetPointFs(points.GetData(), nPoints, pointFs);
+
+			VERIFY(CGdiPlus::FillPolygon(graphics, brush, pointFs.GetData(), nPoints));
 
 			// draw line too?
 			if (bAreaLine)
 			{
 				CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
-				CGdiPlusGraphics graphics(dc);
 				
-				// don't draw the first/last points
-				VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData() + 1, points.GetSize() - 2));
+				// don't draw the first/last closure points
+				VERIFY(CGdiPlus::DrawLines(graphics, pen, pointFs.GetData() + 1, nPoints - 2));
 			}
-			
-			dc.SelectObject(pBrushOld);
 		}
 		break;
 	}
@@ -895,7 +895,7 @@ COLORREF CHMXChart::GetFillColor(int nDatasetIndex, double dValue) const
 	return m_dataset[nDatasetIndex].GetFillColor();
 }
 
-int CHMXChart::GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const
+int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const
 {
 	// let's calc real dataset size (excluding invalid data)
 	int nPoints = 0, g;

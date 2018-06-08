@@ -198,7 +198,8 @@ protected:
 	int CalcXScaleFontSize(CDC& dc, BOOL bTitle) const;
 	int CalcYScaleFontSize(CDC& dc, BOOL bTitle) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
-	int GetPoints(/*const*/ CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
+	int GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
+	BOOL GetMarker(HMX_DATASET_MARKER nMarker, int x, int y, int nSize, CArray<POINT, POINT&>& ptMarker) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

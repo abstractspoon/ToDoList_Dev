@@ -41,7 +41,7 @@ const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALS
 const int    DEF_DAYSINWEEK = 5;
 const double DEF_HOURSINDAY = 8.0;
 
-const int    LINE_THICKNESS = 2;
+const int    LINE_THICKNESS = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -181,6 +181,7 @@ void CBurndownChart::BuildSprintGraph()
 	};
 	
 	SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
+	SetDatasetMarker(SPRINT_EST, HMX_DATASET_MARKER_NONE);
 	SetDatasetLineColor(SPRINT_EST,  COLOR_REDLINE);
 	SetDatasetSizeFactor(SPRINT_EST, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_EST, 0.0);

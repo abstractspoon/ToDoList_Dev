@@ -107,8 +107,10 @@ enum gdix_Unit
 
 enum gdix_SmoothingMode 
 {
-	gdix_SmoothingModeHighQuality = 2,
-	gdix_SmoothingModeAntiAlias = 4,
+	gdix_SmoothingModeNone = 0,
+	gdix_SmoothingModeLow = 2,
+	gdix_SmoothingModeMedium = 4,
+	gdix_SmoothingModeHigh = 5
 };
 
 enum gdix_StringAlignment 
@@ -121,7 +123,7 @@ enum gdix_FillMode
 {
 	gdix_FillModeAlternate = 0
 };
-
+#include <gdiplus.h>
 //////////////////////////////////////////////////////////////////////
 
 #define gdix_StringFormatFlagsNoWrap   0x00001000
@@ -156,7 +158,7 @@ struct gdix_RectF
 class CGdiPlusGraphics
 {
 public:
-	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeAntiAlias);
+	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeHigh);
 	virtual ~CGdiPlusGraphics();
 
 	operator gdix_Graphics*() { return m_graphics; }
@@ -183,6 +185,7 @@ protected:
 
 class CGdiPlusBrush
 {
+public:
 	CGdiPlusBrush(COLORREF color);
 	virtual ~CGdiPlusBrush();
 
@@ -237,6 +240,7 @@ public:
 	static BOOL DeleteGraphics(gdix_Graphics* graphics);
 
 	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
+	static BOOL DrawLines(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
 	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
 	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect);
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect);
@@ -250,15 +254,16 @@ public:
 
 	// Win32 support
 	static BOOL DrawLine(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT& from, const POINT& to);
-	static BOOL DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count);
-	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect);
-	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect);
+	static BOOL DrawLines(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count);
+	static BOOL DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count, gdix_Brush* brush = NULL);
+	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
+	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
 	
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);
 	static BOOL FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);
 
-	static void GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF>& pointFs);
+	static void GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF&>& pointFs);
 
 protected:
 	static HMODULE s_hGdiPlus;
