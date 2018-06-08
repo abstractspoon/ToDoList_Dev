@@ -9,18 +9,39 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
+#include "..\shared\graphicsmisc.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const COLORREF COLOR_GREEN	= RGB(122, 204,   0); 
-const COLORREF COLOR_RED	= RGB(204,   0,   0); 
-const COLORREF COLOR_YELLOW = RGB(204, 164,   0); 
-const COLORREF COLOR_BLUE	= RGB(0,     0, 244); 
-const COLORREF COLOR_PINK	= RGB(234,  28,  74); 
-const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
+ 
+const COLORREF COLOR_GREEN		= RGB(122, 204,   0); 
+const COLORREF COLOR_GREENLINE	= GraphicsMisc::Darker(COLOR_GREEN, 0.05, FALSE);
+const COLORREF COLOR_GREENFILL	= GraphicsMisc::Lighter(COLOR_GREEN, 0.25, FALSE);
+
+const COLORREF COLOR_RED		= RGB(204,   0,   0); 
+const COLORREF COLOR_REDLINE	= GraphicsMisc::Darker(COLOR_RED, 0.05, FALSE);
+const COLORREF COLOR_REDFILL	= GraphicsMisc::Lighter(COLOR_RED, 0.25, FALSE);
+
+const COLORREF COLOR_YELLOW		= RGB(204, 164,   0); 
+const COLORREF COLOR_YELLOWLINE	= GraphicsMisc::Darker(COLOR_YELLOW, 0.05, FALSE);
+const COLORREF COLOR_YELLOWFILL	= GraphicsMisc::Lighter(COLOR_YELLOW, 0.25, FALSE);
+
+const COLORREF COLOR_BLUE		= RGB(0,     0, 244); 
+const COLORREF COLOR_BLUELINE	= GraphicsMisc::Darker(COLOR_BLUE, 0.05, FALSE);
+const COLORREF COLOR_BLUEFILL	= GraphicsMisc::Lighter(COLOR_BLUE, 0.25, FALSE);
+
+const COLORREF COLOR_PINK		= RGB(234,  28,  74); 
+const COLORREF COLOR_PINKLINE	= GraphicsMisc::Darker(COLOR_PINK, 0.05, FALSE);
+const COLORREF COLOR_PINKFILL	= GraphicsMisc::Lighter(COLOR_PINK, 0.25, FALSE);
+
+const COLORREF COLOR_ORANGE		= RGB(255,  91,  21);
+const COLORREF COLOR_ORANGELINE	= GraphicsMisc::Darker(COLOR_ORANGE, 0.05, FALSE);
+const COLORREF COLOR_ORANGEFILL	= GraphicsMisc::Lighter(COLOR_ORANGE, 0.25, FALSE);
 
 const int    DEF_DAYSINWEEK = 5;
 const double DEF_HOURSINDAY = 8.0;
+
+const int    LINE_THICKNESS = 2;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -119,7 +140,9 @@ void CBurndownChart::BuildBurndownGraph()
 	ClearData();
 		
 	SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(0, COLOR_GREEN);
+	SetDatasetLineColor(0, COLOR_GREENLINE);
+	SetDatasetFillColor(0, COLOR_GREENFILL);
+	SetDatasetSizeFactor(0, LINE_THICKNESS);
 	SetDatasetMin(0, 0.0);
 	
 	// build the graph
@@ -158,11 +181,14 @@ void CBurndownChart::BuildSprintGraph()
 	};
 	
 	SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
-	SetDatasetLineColor(SPRINT_EST,  COLOR_RED);
+	SetDatasetLineColor(SPRINT_EST,  COLOR_REDLINE);
+	SetDatasetSizeFactor(SPRINT_EST, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_EST, 0.0);
 	
 	SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
-	SetDatasetLineColor(SPRINT_SPENT, COLOR_YELLOW);
+	SetDatasetLineColor(SPRINT_SPENT, COLOR_YELLOWLINE);
+	SetDatasetFillColor(SPRINT_SPENT, COLOR_YELLOWFILL);
+	SetDatasetSizeFactor(SPRINT_SPENT, LINE_THICKNESS);
 	SetDatasetMin(SPRINT_SPENT, 0.0);
 	
 	// build the graph
