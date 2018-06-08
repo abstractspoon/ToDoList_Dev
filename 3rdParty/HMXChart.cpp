@@ -1066,6 +1066,9 @@ bool CHMXChart::CalcDatas()
 	// nXMax contains the maximum number of elements, useful to 
 	// calculate the X scale factor
 
+	// prevent divide by zero
+	m_nYMax = max(m_nYMax, m_nYMin + 10);
+
 	return true;
 }
 
