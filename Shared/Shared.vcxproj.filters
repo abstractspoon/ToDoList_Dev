@@ -145,9 +145,6 @@
     <ClCompile Include="framewndcontainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GdiPlus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsMisc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -625,9 +622,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RichEditHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GdiPlus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GraphicsMisc.h">

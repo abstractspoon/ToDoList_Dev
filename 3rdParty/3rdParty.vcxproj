@@ -157,6 +157,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="GdiPlus.cpp" />
     <ClCompile Include="ggets.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -270,6 +271,7 @@
     <ClInclude Include="FontComboBox.h" />
     <ClInclude Include="FPSMiniCalendarCtrl.h" />
     <ClInclude Include="FPSMiniCalendarListCtrl.h" />
+    <ClInclude Include="GdiPlus.h" />
     <ClInclude Include="ggets.h" />
     <ClInclude Include="GUI.H" />
     <ClInclude Include="HMXChart.h" />
