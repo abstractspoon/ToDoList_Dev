@@ -5,10 +5,22 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <afxtempl.h>
+#include "BurndownEnum.h"
 
 #include "..\Shared\mapex.h"
 #include "..\shared\timehelper.h"
+
+#include "..\Interfaces\ITaskList.h" // for TDC_UNITS
+
+#include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct DISPLAYITEM
+{
+	UINT nYAxisID;
+	BURNDOWN_CHARTTYPE nDisplay;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +48,8 @@ protected:
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CStatsItemArray : protected CArray<STATSITEM*, STATSITEM*>
 {

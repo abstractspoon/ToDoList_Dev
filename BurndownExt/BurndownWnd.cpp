@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "BurndownExt.h"
 #include "BurndownWnd.h"
+#include "BurndownStatic.h"
 
 #include "..\shared\mapex.h"
 #include "..\shared\misc.h"
@@ -12,7 +13,6 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
-#include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 
 #include "..\3rdparty\dibdata.h"
@@ -26,61 +26,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-const int    DEF_DAYSINWEEK = 5;
-const double DEF_HOURSINDAY = 8.0;
-
-/////////////////////////////////////////////////////////////////////////////
-
-const int MIN_XSCALE_SPACING = 50; // pixels
-
-enum
-{
-	SCALE_DAY		= 1,
-	SCALE_WEEK		= 7,
-	SCALE_MONTH		= 30,
-	SCALE_2MONTH	= 60,
-	SCALE_QUARTER	= 90,
-	SCALE_HALFYEAR	= 180,
-	SCALE_YEAR		= 365,
-};
-
-static int SCALES[] = 
-{
-	SCALE_DAY,
-	SCALE_WEEK,
-	SCALE_MONTH,
-	SCALE_2MONTH,
-	SCALE_QUARTER,
-	SCALE_HALFYEAR,
-	SCALE_YEAR,
-};
-static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum DISPLAYTYPE
-{
-	SD_INCOMPLETE,
-	SD_REMAINING,
-
-	NUM_DISPLAYTYPES
-};
-
-struct DISPLAYITEM
-{
-	UINT nYAxisID;
-	DISPLAYTYPE nDisplay;
-};
-
-static DISPLAYITEM STATSDISPLAY[] = 
-{
-	{ IDS_DISPLAY_INCOMPLETE, SD_INCOMPLETE	},
-	{ IDS_DISPLAY_REMAINING, SD_REMAINING },
-};
-static int NUM_DISPLAY = sizeof(STATSDISPLAY) / sizeof(DISPLAYITEM);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -110,11 +55,9 @@ enum // m_dwUpdateGraphOnShow
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
-	m_nDisplay(SD_INCOMPLETE),
-	m_nScale(1),
+	m_nChartType(BCT_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
-	m_dHoursInDay(DEF_HOURSINDAY),
-	m_nDaysInWeek(DEF_DAYSINWEEK)
+	m_graph(m_data)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -135,11 +78,9 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
-		m_nDisplay = CDialogHelper::GetSelectedItemData(m_cbDisplay);
+		m_nChartType = (BURNDOWN_CHARTTYPE)CDialogHelper::GetSelectedItemData(m_cbDisplay);
 	else
-		CDialogHelper::SelectItemByData(m_cbDisplay, m_nDisplay);
-
-	DDX_CBIndex(pDX, IDC_DISPLAY, m_nDisplay);
+		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
 }
 
 
@@ -220,11 +161,6 @@ BOOL CBurndownWnd::OnInitDialog()
 
 	VERIFY(m_graph.SubclassDlgItem(IDC_GRAPH, this));
 
-	m_graph.SetBkGnd(GetSysColor(COLOR_WINDOW));
-	m_graph.SetXLabelsAreTicks(true);
-	m_graph.SetXLabelAngle(45);
-	m_graph.SetYTicks(10);
-
 	// Init combo
 	for (int nDisplay = 0; nDisplay < NUM_DISPLAY; nDisplay++)
 	{
@@ -244,7 +180,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	
 	//CString sKey(szKey);
 
-	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nDisplay);
+	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nChartType);
 }
 
 void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -255,25 +191,19 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	double dHoursInDay = _ttof(pPrefs->GetProfileString(_T("Preferences"), _T("HoursInDay"), _T("8")));
 	int nDaysInWeek = pPrefs->GetProfileInt(_T("Preferences"), _T("DaysInWeek"), 5);
 
-	if ((dHoursInDay != m_dHoursInDay) || (nDaysInWeek != m_nDaysInWeek))
-	{
-		m_dHoursInDay = dHoursInDay;
-		m_nDaysInWeek = nDaysInWeek;
-		
+	if (m_graph.SetTimeIntervals(nDaysInWeek, dHoursInDay))
 		RebuildGraph(FALSE, FALSE, TRUE);
-	}
 	
 	// burn down specific options
 	if (!bAppOnly)
 	{
 		//CString sKey(szKey);
+		m_nChartType = (BURNDOWN_CHARTTYPE)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_INCOMPLETETASKS);
 
-		m_nDisplay = pPrefs->GetProfileInt(szKey, _T("GraphType"), SD_INCOMPLETE);
+		if (m_nChartType > NUM_DISPLAY)
+			m_nChartType = BCT_INCOMPLETETASKS;
 
-		if (m_nDisplay > NUM_DISPLAYTYPES)
-			m_nDisplay = SD_INCOMPLETE;
-
-		CDialogHelper::SelectItemByData(m_cbDisplay, m_nDisplay);
+		CDialogHelper::SelectItemByData(m_cbDisplay, m_nChartType);
 	}
 }
 
@@ -457,8 +387,6 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	// we must have been initialized already
 	ASSERT(m_graph.GetSafeHwnd());
 
-	CHoldRedraw hr(m_graph);
-		
 	switch (nUpdate)
 	{
 	case IUI_ALL:
@@ -483,11 +411,6 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	default:
 		ASSERT(0);
 	}
-}
-
-void CBurndownWnd::UpdateDataExtents()
-{
-	m_data.GetDataExtents(m_dtEarliestDate, m_dtLatestDate);
 }
 
 void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings)
@@ -720,198 +643,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 
 		rFrame.DeflateRect(1, 1);
 		m_graph.MoveWindow(rFrame);
-
-		int nOldScale = m_nScale;
-		RebuildXScale();
-		
-		// handle scale change
-		if (m_nScale != nOldScale)
-			RebuildGraph(FALSE, FALSE, TRUE);
 	}
-}
-
-int CBurndownWnd::CalculateRequiredXScale() const
-{
-	// calculate new x scale
-	int nDataWidth = m_graph.GetDataArea().cx;
-	int nNumDays = GetDataDuration();
-
-	// work thru the available scales until we find a suitable one
-	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
-	{
-		int nSpacing = MulDiv(SCALES[nScale], nDataWidth, nNumDays);
-
-		if (nSpacing > MIN_XSCALE_SPACING)
-			return SCALES[nScale];
-	}
-
-	return SCALE_YEAR;
-}
-
-void CBurndownWnd::RebuildXScale()
-{
-	m_graph.ClearXScaleLabels();
-
-	// calc new scale
-	m_nScale = CalculateRequiredXScale();
-	m_graph.SetXLabelStep(m_nScale);
-
-	// Get new start and end dates
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-
-	// build ticks
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	COleDateTime dtTick = dtStart;
-	CString sTick;
-
-	for (int nDay = 0; nDay <= nNumDays; nDay += m_nScale)
-	{
-		sTick = CDateHelper::FormatDate(dtTick);
-		m_graph.SetXScaleLabel(nDay, sTick);
-
-		// next Tick date
-		switch (m_nScale)
-		{
-		case SCALE_DAY:
-			dtTick.m_dt += 1.0;
-			break;
-			
-		case SCALE_WEEK:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_WEEKS);
-			break;
-			
-		case SCALE_MONTH:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_MONTHS);
-			break;
-			
-		case SCALE_2MONTH:
-			CDateHelper::OffsetDate(dtTick, 2, DHU_MONTHS);
-			break;
-			
-		case SCALE_QUARTER:
-			CDateHelper::OffsetDate(dtTick, 3, DHU_MONTHS);
-			break;
-			
-		case SCALE_HALFYEAR:
-			CDateHelper::OffsetDate(dtTick, 6, DHU_MONTHS);
-			break;
-			
-		case SCALE_YEAR:
-			CDateHelper::OffsetDate(dtTick, 1, DHU_YEARS);
-			break;
-			
-		default:
-			ASSERT(0);
-		}
-	}
-}
-
-COleDateTime CBurndownWnd::GetGraphStartDate() const
-{
-	if (m_nDisplay == SD_REMAINING)
-		return m_dtEarliestDate;
-
-	// else
-	COleDateTime dtStart(m_dtEarliestDate);
-
-	// back up a bit to always show first completion
-	dtStart -= COleDateTimeSpan(7.0);
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtStart.GetAsSystemTime(st));
-
-	switch (m_nScale)
-	{
-	case SCALE_DAY:
-	case SCALE_WEEK:
-		// make sure we start at the beginning of a week
-		dtStart.m_dt -= st.wDayOfWeek;
-		return dtStart;
-		
-	case SCALE_MONTH:
-		st.wDay = 1; // start of month;
-		break;
-		
-	case SCALE_2MONTH:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 2)); // previous even month
-		break;
-
-	case SCALE_QUARTER:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 3)); // previous quarter
-		break;
-		
-	case SCALE_HALFYEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = (WORD)(st.wMonth - ((st.wMonth - 1) % 6)); // previous half-year
-		break;
-		
-	case SCALE_YEAR:
-		st.wDay = 1; // start of month;
-		st.wMonth = 1; // start of year
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
-}
-
-COleDateTime CBurndownWnd::GetGraphEndDate() const
-{
-	if (m_nDisplay == SD_REMAINING)
-		return m_dtLatestDate;
-
-	COleDateTime dtEnd = (m_dtLatestDate + COleDateTimeSpan(7.0));
-
-	// avoid unnecessary call to GetAsSystemTime()
-	if (m_nScale == SCALE_DAY)
-		return dtEnd;
-
-	SYSTEMTIME st = { 0 };
-	VERIFY(dtEnd.GetAsSystemTime(st));
-
-	switch (m_nScale)
-	{
-	case SCALE_DAY:
-		ASSERT(0); // handled above
-		break;
-		
-	case SCALE_WEEK:
-		break;
-		
-	case SCALE_MONTH:
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case SCALE_2MONTH:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 2)); // next even month
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-
-	case SCALE_QUARTER:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 3)); // next quarter
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case SCALE_HALFYEAR:
-		CDateHelper::IncrementMonth(st, ((st.wMonth - 1) % 6)); // next half-year
-		st.wDay = (WORD)CDateHelper::GetDaysInMonth(st.wMonth, st.wYear); // end of month;
-		break;
-		
-	case SCALE_YEAR:
-		st.wDay = 31;
-		st.wMonth = 12;
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return COleDateTime(st.wYear, st.wMonth, st.wDay, 0, 0, 0);
 }
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
@@ -925,124 +657,17 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		return;
 	}
 
-	CWaitCursor cursor;
-	CHoldRedraw hr(m_graph);
-
-	if (bUpdateExtents)
-		UpdateDataExtents();
-
 	if (bSortData)
 		m_data.Sort();
 
-	m_graph.ClearData();
-	m_graph.SetYText(CEnString(STATSDISPLAY[m_nDisplay].nYAxisID));
-
-	if (!m_data.IsEmpty())
-		RebuildXScale();
-
-	DWORD dwTick = GetTickCount();
-	
-	switch (STATSDISPLAY[m_nDisplay].nDisplay)
-	{
-	case SD_INCOMPLETE:
-		BuildBurndownGraph();
-		break;
-
-	case SD_REMAINING:
-		BuildSprintGraph();
-		break;
-	}
-}
-
-void CBurndownWnd::BuildBurndownGraph()
-{
-	m_graph.SetDatasetStyle(0, HMX_DATASET_STYLE_AREALINE);
-	m_graph.SetDatasetLineColor(0, COLOR_GREEN);
-	m_graph.SetDatasetMin(0, 0.0);
-	
-	// build the graph
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-	int nItemFrom = 0;
-
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		COleDateTime date(dtStart.m_dt + nDay);
-
-		if (m_dtEarliestDate > date)
-		{
-			m_graph.AddData(0, 0);
-		}
-		else
-		{
-			int nNumNotDone = m_data.CalculateIncompleteTaskCount(date, nItemFrom, nItemFrom);
-			m_graph.AddData(0, nNumNotDone);
-		}
-	}
-
-	m_graph.CalcDatas();
-}
-
-void CBurndownWnd::BuildSprintGraph()
-{
-	enum 
-	{ 
-		SPRINT_EST,
-		SPRINT_SPENT
-	};
-
-	m_graph.SetDatasetStyle(SPRINT_EST, HMX_DATASET_STYLE_LINE);
-	m_graph.SetDatasetLineColor(SPRINT_EST,  COLOR_RED);
-	m_graph.SetDatasetMin(SPRINT_EST, 0.0);
-
-	m_graph.SetDatasetStyle(SPRINT_SPENT, HMX_DATASET_STYLE_AREALINE);
-	m_graph.SetDatasetLineColor(SPRINT_SPENT, COLOR_YELLOW);
-	m_graph.SetDatasetMin(SPRINT_SPENT, 0.0);
-
-	// build the graph
-	COleDateTime dtStart = GetGraphStartDate();
-	COleDateTime dtEnd = GetGraphEndDate();
-
-	double dTotalEst = m_data.CalcTotalTimeEstimateInDays(m_nDaysInWeek, m_dHoursInDay);
-
-	int nNumDays = ((int)dtEnd.m_dt - (int)dtStart.m_dt);
-
-	for (int nDay = 0; nDay <= nNumDays; nDay++)
-	{
-		// Time Estimate
-		double dEst = ((nDay * dTotalEst) / nNumDays);
-		m_graph.AddData(SPRINT_EST, (dTotalEst - dEst));
-
-		// Time Spent
-		COleDateTime date(dtStart.m_dt + nDay);
-		double dSpent = m_data.CalcTimeSpentInDays(date, m_nDaysInWeek, m_dHoursInDay);
-		
-		m_graph.AddData(SPRINT_SPENT, (dTotalEst - dSpent));
-	}
-
-	m_graph.CalcDatas();
-}
-
-int CBurndownWnd::GetDataDuration() const
-{
-	double dStart = m_dtEarliestDate;
-	ASSERT(dStart > 0.0);
-
-	double dEnd = (m_dtLatestDate.m_dt + 1.0);
-	ASSERT(dEnd >= dStart);
-
-	return ((int)dEnd - (int)dStart);
+	m_graph.RebuildGraph(bUpdateExtents);
 }
 
 void CBurndownWnd::OnSelchangeDisplay()
 {
-	int nPrevDisplay = m_nDisplay;
 	UpdateData();
 
-	if (m_nDisplay != nPrevDisplay)
-		RebuildGraph(FALSE, FALSE, FALSE);
+	m_graph.SetChartType(m_nChartType);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -1062,6 +687,7 @@ LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	BOOL bSortData = (m_dwUpdateGraphOnShow & RESORT_DATA);
 	BOOL bUpdateExtents = (m_dwUpdateGraphOnShow & UPDATE_EXTENTS);
+
 	m_dwUpdateGraphOnShow = 0;
 
 	RebuildGraph(bSortData, bUpdateExtents, FALSE);

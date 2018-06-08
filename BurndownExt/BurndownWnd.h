@@ -17,7 +17,7 @@
 #include "..\Shared\toolbarhelper.h"
 
 #include "..\Interfaces\uitheme.h"
-#include "..\Interfaces\Itasklist.h"
+#include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\IUIExtension.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -76,11 +76,8 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbDisplay;
 
-	int m_nScale;
-	int	m_nDisplay;
 	DWORD m_dwUpdateGraphOnShow;
-	int m_nDaysInWeek;
-	double m_dHoursInDay;
+	BURNDOWN_CHARTTYPE m_nChartType;
 
 	CStatsItemArray m_data;
 	COleDateTime m_dtEarliestDate, m_dtLatestDate;
@@ -115,20 +112,12 @@ protected:
 
 protected:
 	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
-	void UpdateDataExtents();
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
-	void BuildSprintGraph();
-	void BuildBurndownGraph();
 	double GetTaskTimeInDays(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bEstimate);
-	void RebuildXScale();
-	int GetDataDuration() const;
-	COleDateTime GetGraphStartDate() const;
-	COleDateTime GetGraphEndDate() const;
-	int CalculateRequiredXScale() const;
 	COleDateTime GetTaskStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	COleDateTime GetTaskDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 
