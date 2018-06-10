@@ -405,21 +405,6 @@ IUI_HITTEST CWorkloadWnd::HitTest(const POINT& ptScreen) const
 	if (m_ctrlWorkload.HitTestTask(ptScreen))
 		return IUI_TASK;
 
-	// else check elsewhere in tree or list client
-	CRect rWorkload;
-	
-// 	m_tree.GetClientRect(rWorkload);
-// 	m_tree.ClientToScreen(rWorkload);
-
-	if (rWorkload.PtInRect(ptScreen))
-		return IUI_TASKLIST;
-
-// 	m_list.GetClientRect(rWorkload);
-// 	m_list.ClientToScreen(rWorkload);
-
-	if (rWorkload.PtInRect(ptScreen))
-		return IUI_TASKLIST;
-
 	// else 
 	return IUI_NOWHERE;
 }
