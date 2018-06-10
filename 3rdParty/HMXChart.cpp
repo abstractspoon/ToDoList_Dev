@@ -38,7 +38,6 @@ CHMXChart::CHMXChart()
 	m_clrGrid = GetSysColor(COLOR_3DSHADOW);
 	m_bXLabelsAreTicks = false;
 	m_nXLabelDegrees = 0;
-	m_bDrawGridOnTop = true;
 }
 
 CHMXChart::~CHMXChart()
@@ -100,16 +99,9 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 	DrawDataBkgnd(dc);
 
-	if (m_bDrawGridOnTop)
-	{
-		DrawDatasets(dc);
-		DrawGrid(dc);
-	}
-	else
-	{
-		DrawGrid(dc);
-		DrawDatasets(dc);
-	}
+	DrawDatasets(dc, false); // under grid
+	DrawGrid(dc);
+	DrawDatasets(dc, true); // over grid
 
 	DrawTitle(dc);
 	DrawBaseline(dc);
@@ -151,18 +143,11 @@ bool CHMXChart::CopyToClipboard()
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
 	PaintBkGnd(memDC);
-	DrawDataBkgnd(dc);
+	DrawDataBkgnd(memDC);
 
-	if (m_bDrawGridOnTop)
-	{
-		DrawDatasets(memDC);
-		DrawGrid(memDC);
-	}
-	else
-	{
-		DrawGrid(memDC);
-		DrawDatasets(memDC);
-	}
+	DrawDatasets(memDC, false); // under grid
+	DrawGrid(memDC);
+	DrawDatasets(memDC, true); // over grid
 
 	DrawTitle(memDC);
 	DrawBaseline(memDC);
@@ -206,10 +191,14 @@ bool CHMXChart::CopyToFile(CString sFile)
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 	
 	PaintBkGnd(memDC);
-	DrawTitle(memDC);
+	DrawDataBkgnd(dc);
+
+	DrawDatasets(memDC, false); // under grid
 	DrawGrid(memDC);
+	DrawDatasets(memDC, true); // over grid
+
+	DrawTitle(memDC);
 	DrawBaseline(memDC);
-	DrawDatasets(memDC);
 	DrawAxes(memDC);
 	DrawYScale(memDC);
 	DrawXScale(memDC);
@@ -654,14 +643,17 @@ bool CHMXChart::DrawYScale(CDC & dc)
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawDatasets(CDC& dc)
+bool CHMXChart::DrawDatasets(CDC& dc, bool bOverGrid)
 {
-	int f;
+	int f = HMX_MAX_DATASET;
 	
 	// Draw dataset from last to first so I can show 
 	// first dataset in foreground, below the second dataset and so on
-	for(f=HMX_MAX_DATASET-1; f>=0; f--)
-		DrawDataset(dc, f);
+	while (f--)
+	{
+		if (bOverGrid == WantDrawDatasetOverGrid(f))
+			DrawDataset(dc, f);
+	}
 
 	return true;
 }
@@ -679,39 +671,39 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //		true if ok, else false
 //
 
-BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, int nX, int nY, int nSize, CArray<POINT, POINT&>& ptMarker) const
+BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const
 {
 	switch (nMarker) 
 	{
 	case HMX_DATASET_MARKER_TRIANGLE:
 		ptMarker.SetSize(3);
-		ptMarker[ 0 ].x = nX;
-		ptMarker[ 0 ].y = nY - nSize;
-		ptMarker[ 1 ].x = nX + nSize;
-		ptMarker[ 1 ].y = nY + nSize;
-		ptMarker[ 2 ].x = nX - nSize;
-		ptMarker[ 2 ].y = nY + nSize;
+		ptMarker[ 0 ].x = pt.x;
+		ptMarker[ 0 ].y = pt.y - nSize;
+		ptMarker[ 1 ].x = pt.x + nSize;
+		ptMarker[ 1 ].y = pt.y + nSize;
+		ptMarker[ 2 ].x = pt.x - nSize;
+		ptMarker[ 2 ].y = pt.y + nSize;
 		break;
 
 	case HMX_DATASET_MARKER_SQUARE:
 	case HMX_DATASET_MARKER_CIRCLE:
 		ptMarker.SetSize(2);
-		ptMarker[ 0 ].x = nX - nSize;
-		ptMarker[ 0 ].y = nY - nSize;
-		ptMarker[ 1 ].x = nX + nSize;
-		ptMarker[ 1 ].y = nY + nSize;
+		ptMarker[ 0 ].x = pt.x - nSize;
+		ptMarker[ 0 ].y = pt.y - nSize;
+		ptMarker[ 1 ].x = pt.x + nSize;
+		ptMarker[ 1 ].y = pt.y + nSize;
 		break;
 
 	case HMX_DATASET_MARKER_DIAMOND:
 		ptMarker.SetSize(4);
-		ptMarker[ 0 ].x = nX;
-		ptMarker[ 0 ].y = nY - nSize;
-		ptMarker[ 1 ].x = nX + nSize;
-		ptMarker[ 1 ].y = nY;
-		ptMarker[ 2 ].x = nX;
-		ptMarker[ 2 ].y = nY + nSize;
-		ptMarker[ 3 ].x = nX - nSize;
-		ptMarker[ 3 ].y = nY;
+		ptMarker[ 0 ].x = pt.x;
+		ptMarker[ 0 ].y = pt.y - nSize;
+		ptMarker[ 1 ].x = pt.x + nSize;
+		ptMarker[ 1 ].y = pt.y;
+		ptMarker[ 2 ].x = pt.x;
+		ptMarker[ 2 ].y = pt.y + nSize;
+		ptMarker[ 3 ].x = pt.x - nSize;
+		ptMarker[ 3 ].y = pt.y;
 		break;
 
 	default:
@@ -748,7 +740,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 	{
 	case HMX_DATASET_STYLE_LINE:
 		{
-			CArray<POINT, POINT&> points;
+			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, FALSE);
 
 			if (!nPoints)
@@ -759,26 +751,21 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 
 			VERIFY(CGdiPlus::DrawPolygon(graphics, pen, points.GetData(), points.GetSize()));
 			
-			if (ds.GetMarker() == HMX_DATASET_MARKER_NONE) 
+			HMX_DATASET_MARKER nMarker = ds.GetMarker();
+
+			if (nMarker == HMX_DATASET_MARKER_NONE) 
 				break;
 
 			CGdiPlusBrush brush(ds.GetFillColor());
-			CArray<POINT, POINT&> ptMarker;
+			int nSize = ds.GetSize()*2;
 
-			for (f=0; f<ds.GetDatasetSize(); f++) 
+			CArray<gdix_PointF, gdix_PointF&> ptMarker;
+
+			for (f=0; f<nPoints; f++) 
 			{
-				ds.GetData(f, nSample);
+				VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
 
-				if (nSample == HMX_DATASET_VALUE_INVALID) 
-					continue;
-
-				int nX = (m_rectData.left + (int)(dSpacing/2.0) + (int)(dSpacing*f));
-				int nY = (m_rectData.bottom - (int)((nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin)));
-				int nSize = ds.GetSize()*2;
-
-				VERIFY(GetMarker(ds.GetMarker(), nX, nY, nSize, ptMarker));
-
-				switch (ds.GetMarker()) 
+				switch (nMarker) 
 				{
 				case HMX_DATASET_MARKER_TRIANGLE:
 				case HMX_DATASET_MARKER_DIAMOND:
@@ -786,11 +773,11 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 					break;
 
 				case HMX_DATASET_MARKER_SQUARE:
-					VERIFY(CGdiPlus::DrawRect(graphics, pen, CRect(ptMarker[0], ptMarker[1]), brush));
+					VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
 					break;
 
 				case HMX_DATASET_MARKER_CIRCLE:
-					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CRect(ptMarker[0], ptMarker[1]), brush));
+					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
 					break;
 				}
 			}
@@ -856,13 +843,10 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			CGdiPlusGraphics graphics(dc);
 			CGdiPlusBrush brush(ds.GetFillColor());
 			
-			CArray<POINT, POINT&> points;
+			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
-			CArray<gdix_PointF, gdix_PointF&> pointFs;
-			CGdiPlus::GetPointFs(points.GetData(), nPoints, pointFs);
-
-			VERIFY(CGdiPlus::FillPolygon(graphics, brush, pointFs.GetData(), nPoints));
+			VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
 
 			// draw line too?
 			if (bAreaLine)
@@ -870,7 +854,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 				CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
 				
 				// don't draw the first/last closure points
-				VERIFY(CGdiPlus::DrawLines(graphics, pen, pointFs.GetData() + 1, nPoints - 2));
+				VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
 			}
 		}
 		break;
@@ -895,7 +879,7 @@ COLORREF CHMXChart::GetFillColor(int nDatasetIndex, double dValue) const
 	return m_dataset[nDatasetIndex].GetFillColor();
 }
 
-int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const
+int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const
 {
 	// let's calc real dataset size (excluding invalid data)
 	int nPoints = 0, g;
@@ -927,11 +911,11 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, B
 		} 
 		while(nSample == HMX_DATASET_VALUE_INVALID);
 
-		points[0].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*(f-1.0));
+		points[0].x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*(f-1.0));
 		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
 		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
 		double nTemp = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[0].y = m_rectData.bottom - (int)nTemp;
+		points[0].y = m_rectData.bottom - (float)nTemp;
 
 		g++;
 	}
@@ -943,8 +927,8 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, B
 			continue;
 		// nTemp will contains a parametrized data 
 		double nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[g].x = m_rectData.left + (int)(nBarWidth/2.0) + (int)(nBarWidth*f);
-		points[g].y = m_rectData.bottom - (int) nTemp;
+		points[g].x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*f);
+		points[g].y = m_rectData.bottom - (float) nTemp;
 
 		g++;
 	}
@@ -956,7 +940,7 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, B
 		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
 		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
 		double nTemp = (nZeroLine - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[nPoints-1].y = m_rectData.bottom - (int) nTemp;
+		points[nPoints-1].y = m_rectData.bottom - (float) nTemp;
 	}
 
 	return points.GetSize();
@@ -1411,13 +1395,23 @@ bool CHMXChart::SetGridColor(COLORREF clr)
 	return true;
 }
 
-void CHMXChart::SetDrawGridOnTop(bool bOnTop)
+bool CHMXChart::SetDrawDatasetOverGrid(int nDatasetIndex, bool bOverGrid)
 {
-	if (bOnTop != m_bDrawGridOnTop)
-	{
-		m_bDrawGridOnTop = bOnTop;
+	if (nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+
+	if (m_dataset[nDatasetIndex].SetDrawOverGrid(bOverGrid))
 		Redraw();
-	}
+
+	return true;
+}
+
+bool CHMXChart::WantDrawDatasetOverGrid(int nDatasetIndex) const
+{
+	if (nDatasetIndex < 0 || nDatasetIndex >= HMX_MAX_DATASET)
+		return false;
+
+	return m_dataset[nDatasetIndex].WantDrawOverGrid();
 }
 
 //

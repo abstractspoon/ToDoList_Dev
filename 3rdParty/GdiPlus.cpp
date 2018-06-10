@@ -62,6 +62,12 @@ CGdiPlusPointF::CGdiPlusPointF(const POINT& pt)
 	y = (float)pt.y;
 }
 
+CGdiPlusPointF::CGdiPlusPointF(const gdix_PointF& pt)
+{
+	x = pt.x;
+	y = pt.y;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CGdiPlusRectF::CGdiPlusRectF(int l, int t, int r, int b)
@@ -94,6 +100,22 @@ CGdiPlusRectF::CGdiPlusRectF(const POINT& ptTopLeft, const POINT& ptBottomRight)
 	y = (float)ptTopLeft.y;
 	w = (float)(ptBottomRight.x - ptTopLeft.x);
 	h = (float)(ptBottomRight.y - ptTopLeft.y);
+}
+
+CGdiPlusRectF::CGdiPlusRectF(const gdix_RectF& rect)
+{
+	x = rect.x;
+	y = rect.y;
+	w = rect.w;
+	h = rect.h;
+}
+
+CGdiPlusRectF::CGdiPlusRectF(const gdix_PointF& ptTopLeft, const gdix_PointF& ptBottomRight)
+{
+	x = ptTopLeft.x;
+	y = ptTopLeft.y;
+	w = (ptBottomRight.x - ptTopLeft.x);
+	h = (ptBottomRight.y - ptTopLeft.y);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -355,22 +377,40 @@ BOOL CGdiPlus::DrawLines(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_Poin
 	return (pFN(graphics, pen, points, count) == gdix_Ok);
 }
 
-BOOL CGdiPlus::DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count)
+BOOL CGdiPlus::DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count, gdix_Brush* brush)
 {
+	if (brush && !FillPolygon(graphics, brush, points, count))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	GETPROCADDRESS(PFNDRAWPOLYGON, "GdipDrawPolygon");
 
 	return (pFN(graphics, pen, points, count) == gdix_Ok);
 }
 
-BOOL CGdiPlus::DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect)
+BOOL CGdiPlus::DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush)
 {
+	if (brush && !FillEllipse(graphics, brush, rect))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
 	GETPROCADDRESS(PFNDRAWELLIPSE, "GdipDrawEllipse");
 	
 	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
 }
 
-BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect)
+BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush)
 {
+	if (brush && !FillRect(graphics, brush, rect))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
 	GETPROCADDRESS(PFNDRAWRECTANGLE, "GdipDrawRectangle");
 	
 	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
@@ -417,30 +457,17 @@ BOOL CGdiPlus::DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const P
 	CArray<gdix_PointF, gdix_PointF&> pointFs;
 	GetPointFs(points, count, pointFs);
 
-	if (brush)
-		VERIFY(FillPolygon(graphics, brush, pointFs.GetData(), count));
-
-	return DrawPolygon(graphics, pen, pointFs.GetData(), count);
+	return DrawPolygon(graphics, pen, pointFs.GetData(), count, brush);
 }
 
 BOOL CGdiPlus::DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush)
 {
-	CGdiPlusRectF rectF(rect);
-
-	if (brush)
-		VERIFY(FillEllipse(graphics, brush, rectF));
-
-	return DrawEllipse(graphics, pen, rectF);
+	return DrawEllipse(graphics, pen, CGdiPlusRectF(rect), brush);
 }
 
 BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush)
 {
-	CGdiPlusRectF rectF(rect);
-
-	if (brush)
-		VERIFY(FillEllipse(graphics, brush, rectF));
-
-	return DrawRect(graphics, pen, rectF);
+	return DrawRect(graphics, pen, CGdiPlusRectF(rect), brush);
 }
 
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count)

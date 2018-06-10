@@ -27,7 +27,7 @@ public:
 	COLORREF GetFillColor(double dValue) const;
 	COLORREF GetBkgndColor(double dValue) const;
 
-	void OnChangeData();
+	void RebuildChart();
 
 protected:
 	const CMapAllocationTotals& m_mapPercentLoad;

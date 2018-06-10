@@ -84,16 +84,16 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetDatasetMin(0, 0.0);
 	SetDatasetMax(0, 100.0);
 	SetDatasetSizeFactor(0, 5);
+	SetDrawDatasetOverGrid(0, false);
 
 	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
-	SetDrawGridOnTop(false);
 
-	OnChangeData();
+	RebuildChart();
 
 	return 0;
 }
 
-void CWorkloadChart::OnChangeData()
+void CWorkloadChart::RebuildChart()
 {
 	// build the graph
 	ClearData(0);

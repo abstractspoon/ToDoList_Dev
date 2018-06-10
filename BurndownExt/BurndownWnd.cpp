@@ -654,7 +654,8 @@ void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow && m_dwUpdateGraphOnShow)
 	{
 		ASSERT(m_dwUpdateGraphOnShow & REBUILD_GRAPH);
-		PostMessage(WM_REBUILDGRAPH);
+//		PostMessage(WM_REBUILDGRAPH);
+		SendMessage(WM_REBUILDGRAPH);
 	}
 }
 

@@ -7,6 +7,9 @@
 #include <direct.h>
 
 #include "HMXDataset.h"	// Added by ClassView
+
+#include "..\3rdParty\GdiPlus.h"
+
 #if _MSC_VER >= 1000
 #pragma once
 #endif // _MSC_VER >= 1000
@@ -101,7 +104,6 @@ public:
 	virtual COLORREF	GetBkGnd() const;
 
 	virtual bool		SetGridColor(COLORREF clr);
-	virtual void		SetDrawGridOnTop(bool bOnTop = true);
 
 	// dataset functions
 	virtual bool		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
@@ -117,6 +119,9 @@ public:
 
 	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
 	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
+	
+	virtual bool		SetDrawDatasetOverGrid(int nDatasetIndex, bool bOverGrid = true);
+	virtual bool		WantDrawDatasetOverGrid(int nDatasetIndex) const;
 
 	virtual bool		AddData( int nDatasetIndex, double nData );
 	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
@@ -153,7 +158,7 @@ protected:
 	virtual bool DrawXScale( CDC& dc );						
 	virtual bool DrawYScale( CDC& dc );						
 	virtual bool DrawDataset(CDC &dc, int nDatasetIndex);	
-	virtual bool DrawDatasets(CDC &dc);						
+	virtual bool DrawDatasets(CDC &dc, bool bOverGrid);						
 
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
 	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
@@ -184,7 +189,6 @@ protected:
 	int				m_nXLabelDegrees;
 
 	CPen			m_penGrid;
-	bool			m_bDrawGridOnTop;
 
 	//{{AFX_MSG(CHMXChart)
 	afx_msg void OnPaint();
@@ -198,8 +202,8 @@ protected:
 	int CalcXScaleFontSize(CDC& dc, BOOL bTitle) const;
 	int CalcYScaleFontSize(CDC& dc, BOOL bTitle) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
-	int GetPoints(const CHMXDataset& ds, CArray<POINT, POINT&>& points, BOOL bArea) const;
-	BOOL GetMarker(HMX_DATASET_MARKER nMarker, int x, int y, int nSize, CArray<POINT, POINT&>& ptMarker) const;
+	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
+	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

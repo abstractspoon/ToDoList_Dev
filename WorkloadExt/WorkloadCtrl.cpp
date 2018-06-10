@@ -649,7 +649,7 @@ void CWorkloadCtrl::RecalcAllocationTotals()
 	}
 
 	m_lcColumnTotals.Invalidate();
-	m_barChart.OnChangeData();
+	m_barChart.RebuildChart();
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()

@@ -123,7 +123,7 @@ enum gdix_FillMode
 {
 	gdix_FillModeAlternate = 0
 };
-#include <gdiplus.h>
+
 //////////////////////////////////////////////////////////////////////
 
 #define gdix_StringFormatFlagsNoWrap   0x00001000
@@ -158,7 +158,7 @@ struct gdix_RectF
 class CGdiPlusGraphics
 {
 public:
-	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeHigh);
+	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeMedium);
 	virtual ~CGdiPlusGraphics();
 
 	operator gdix_Graphics*() { return m_graphics; }
@@ -202,6 +202,7 @@ class CGdiPlusPointF : public gdix_PointF
 public:
 	CGdiPlusPointF(int nX = 0, int nY = 0);
 	CGdiPlusPointF(const POINT& pt);
+	CGdiPlusPointF(const gdix_PointF& pt);
 
 	operator gdix_PointF*() { return this; }
 };
@@ -215,6 +216,9 @@ public:
 	CGdiPlusRectF(const RECT& rect);
 	CGdiPlusRectF(const POINT& ptTopLeft, const SIZE& size);
 	CGdiPlusRectF(const POINT& ptTopLeft, const POINT& ptBottomRight);
+
+	CGdiPlusRectF(const gdix_RectF& rect);
+	CGdiPlusRectF(const gdix_PointF& ptTopLeft, const gdix_PointF& ptBottomRight);
 	
 	operator gdix_RectF*() { return this; }
 };
@@ -241,9 +245,9 @@ public:
 
 	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
 	static BOOL DrawLines(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
-	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);
-	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect);
-	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect);
+	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count, gdix_Brush* brush = NULL);
+	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
+	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
 
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect);

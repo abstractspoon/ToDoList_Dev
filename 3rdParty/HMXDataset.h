@@ -54,6 +54,9 @@ public:
 	virtual bool		SetFillColor( COLORREF clr );					// set data color
 	virtual COLORREF	GetFillColor() const;							// get data color
 
+	virtual bool		SetDrawOverGrid(bool bOverGrid = true);
+	virtual bool		WantDrawOverGrid() const;
+
 	virtual int			GetSize() const;								// get size
 	virtual bool		SetSize( int nSize );							// set pen size (in pixel)
 																		// set bar size (range 1-10)
@@ -87,6 +90,7 @@ protected:
 
 	bool					m_bSetMinTo, m_bSetMaxTo;
 	double					m_dSetMinTo, m_dSetMaxTo;
+	bool					m_bDrawOverGrid;
 
 };
 
