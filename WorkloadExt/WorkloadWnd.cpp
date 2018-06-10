@@ -338,13 +338,13 @@ bool CWorkloadWnd::ProcessMessage(MSG* pMsg)
 	if (!IsWindowEnabled())
 		return false;
 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	switch (pMsg->message)
 	{
-	// handle 'escape' during dependency editing
+	// handle 'escape' during editing
 	case WM_KEYDOWN:
 		{
-			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 			switch (pMsg->wParam)
 			{
 			case VK_ESCAPE:
