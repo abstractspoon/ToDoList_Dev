@@ -743,7 +743,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, FALSE);
 
-			if (!nPoints)
+			if (nPoints < 2)
 				return false;
 
 			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
@@ -846,15 +846,18 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex)
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
-			VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
-
-			// draw line too?
-			if (bAreaLine)
+			if (nPoints < 4)
 			{
-				CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
+				VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
+
+				// draw line too?
+				if (bAreaLine)
+				{
+					CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
 				
-				// don't draw the first/last closure points
-				VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
+					// don't draw the first/last closure points
+					VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
+				}
 			}
 		}
 		break;
