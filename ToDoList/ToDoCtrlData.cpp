@@ -687,17 +687,16 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 
 	// Search the entire tasklist for tasks having 'dwTaskID'
 	// in their list of dependencies
-	POSITION pos = m_items.GetStartPosition();
 	CString sTaskID = Misc::Format(dwTaskID);
+
+	TODOITEM* pTDI = NULL;
+	POSITION pos = GetFirstTaskPosition();
 		
 	while (pos)
 	{
-		TODOITEM* pTDI = NULL;
-		DWORD dwDependsID;
-			
-		m_items.GetNextAssoc(pos, dwDependsID, pTDI);
-		ASSERT (pTDI);
-			
+		DWORD dwDependsID = GetNextTask(pos, pTDI);
+		ASSERT (dwDependsID && pTDI);
+
 		if (pTDI && (dwDependsID != dwTaskID) && Misc::Contains(sTaskID, pTDI->aDependencies))
 			return TRUE;
 	}	
@@ -713,25 +712,31 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependen
 
 	if (dwTaskID)
 	{
-		POSITION pos = m_items.GetStartPosition();
+		TODOITEM* pTDI = NULL;
+		POSITION pos = GetFirstTaskPosition();
 		
 		while (pos)
 		{
-			TODOITEM* pTDI = NULL;
-			DWORD dwDependsID;
+			DWORD dwDependentID = GetNextTask(pos, pTDI);
+			ASSERT (dwDependentID && pTDI);
 			
-			m_items.GetNextAssoc(pos, dwDependsID, pTDI);
-			ASSERT (pTDI);
-			
-			if (pTDI && (dwDependsID != dwTaskID))
+			if (pTDI && (dwDependentID != dwTaskID))
 			{
 				CDWordArray aDependIDs;
-				int nDepend = GetTaskLocalDependencies(dwDependsID, aDependIDs);
+				int nDepend = GetTaskLocalDependencies(dwDependentID, aDependIDs);
 
 				while (nDepend--)
 				{
-					if (aDependIDs[nDepend] == dwTaskID)
-						aDependents.Add(dwDependsID);
+					DWORD dwDependencyID = aDependIDs[nDepend];
+
+					if (dwDependencyID == dwTaskID)
+					{
+						aDependents.Add(dwDependentID);
+					}
+					else if (GetTrueTaskID(dwDependencyID) == dwTaskID)
+					{
+						aDependents.Add(dwDependentID);
+					}
 				}
 			}
 		}
@@ -1951,12 +1956,14 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 		
 		pTDI->SetModified();
 		
-		// update dependent dates
-		FixupTaskLocalDependentsDates(dwTaskID, nDate);
+		// update dependent dates and time estimates
+		if (CDateHelper::IsDateSet(date))
+		{
+			FixupTaskLocalDependentsDates(dwTaskID, nDate);
 
-		// and time estimates
-		if (bRecalcTimeEstimate)
-			RecalcTaskTimeEstimate(dwTaskID, pTDI, nDate);
+			if (bRecalcTimeEstimate)
+				RecalcTaskTimeEstimate(dwTaskID, pTDI, nDate);
+		}
 
 		// And subtasks
 		ApplyLastInheritedChangeToSubtasks(dwTaskID, TDC::MapDateToAttribute(nDate));
