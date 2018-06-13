@@ -871,7 +871,7 @@ CString CEnHeaderCtrl::GetItemText(int nItem) const
 	ASSERT (nItem >= 0 && nItem < GetItemCount());
 	HD_ITEM hdi = { 0 };
 
-	TCHAR szText[128];
+	TCHAR szText[128] = { 0 };
 
 	hdi.mask = HDI_TEXT;
 	hdi.pszText = szText;
