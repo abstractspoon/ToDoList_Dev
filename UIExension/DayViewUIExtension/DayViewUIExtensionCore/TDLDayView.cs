@@ -112,6 +112,14 @@ namespace DayViewUIExtension
 
         public TDLDayView(UIExtension.TaskIcon taskIcons)
         {
+            hourLabelWidth = Win32.ScaleByDPIFactor(hourLabelWidth);
+            hourLabelIndent = Win32.ScaleByDPIFactor(hourLabelIndent);
+            dayHeadersHeight = Win32.ScaleByDPIFactor(dayHeadersHeight);
+            appointmentGripWidth = Win32.ScaleByDPIFactor(appointmentGripWidth);
+            headerBorder = Win32.ScaleByDPIFactor(headerBorder);
+            longAppointmentSpacing = Win32.ScaleByDPIFactor(longAppointmentSpacing);
+            minSlotHeight = Win32.ScaleByDPIFactor(5);
+            
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 

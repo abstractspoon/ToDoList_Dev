@@ -53,15 +53,15 @@ namespace Calendar
 
         #region Constants
 
-        private int hourLabelWidth = 50;
-        private int hourLabelIndent = 2;
-        private int dayHeadersHeight = 19;
-        private int appointmentGripWidth = 5;
-        private int allDayEventsHeaderHeight = 0;
-        private int headerBorder = 2;
-		private int longAppointmentSpacing = 2;
-
-		static private int minSlotHeight = 5;
+        protected int hourLabelWidth = 50;
+        protected int hourLabelIndent = 2;
+        protected int dayHeadersHeight = 19;
+        protected int appointmentGripWidth = 5;
+        protected int allDayEventsHeaderHeight = 0;
+        protected int headerBorder = 2;
+        protected int longAppointmentSpacing = 2;
+        
+        static protected int minSlotHeight = 5;
 
         public enum AppHeightDrawMode
         {
