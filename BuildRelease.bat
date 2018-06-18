@@ -1,24 +1,40 @@
+ECHO OFF
 CLS
 
 set REPOROOT=C:\Users\Daniel.Godson\Documents\GitHub
 
-if NOT EXIST %REPOROOT% set CODE_DIR=D:\_code
+if NOT EXIST %REPOROOT% set REPOROOT=D:\_code
 if NOT EXIST %REPOROOT% exit
+
+ECHO REPOROOT=%REPOROOT%
+
+if NOT "%~1" == "" (
+   if NOT "%~1" == "\.." (
+      set LATESTREPO=%~1
+   )
+)
+
+if "%LATESTREPO%" == "" set LATESTREPO=%REPOROOT%\ToDoList_7.2
+
+ECHO LATESTREPO=%LATESTREPO%
 
 set DEVREPO=%REPOROOT%\ToDoList_Dev
 set RESREPO=%REPOROOT%\ToDoList_Resources
-set LATESTREPO=%REPOROOT%\ToDoList_7.2
 set PLUGINSREPO=%REPOROOT%\ToDoList_Plugins
 
-REM - Build Core App
-cd "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin"
+ECHO DEVREPO=%DEVREPO%
+ECHO RESREPO=%RESREPO%
+ECHO PLUGINSREPO=%PLUGINSREPO%
 
-msdev %LATESTREPO%\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
+ECHO ON
+
+REM - Build Core App
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" %LATESTREPO%\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Build Plugins
-cd "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" %PLUGINSREPO%\ToDoList_Plugins.sln /Build "Release"
 
-devenv %PLUGINSREPO%\ToDoList_Plugins.sln /build "Release"
+REM Allow caller to cancel
+pause
 
-cd %DEVREPO%
-CALL BuildReleaseZip.bat %LATESTREPO%
+CALL %DEVREPO%\BuildReleaseZip.bat %LATESTREPO%

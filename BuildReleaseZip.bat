@@ -1,12 +1,19 @@
+ECHO OFF
+
 if "%~1" == "" exit
 
 set REPOROOT=C:\Users\Daniel.Godson\Documents\GitHub
 
-if NOT EXIST %REPOROOT% set CODE_DIR=D:\_code
+if NOT EXIST %REPOROOT% set REPOROOT=D:\_code
 if NOT EXIST %REPOROOT% exit
+
+set LATESTREPO="%~1"
 
 set DEVREPO=%REPOROOT%\ToDoList_Dev
 set RESREPO=%REPOROOT%\ToDoList_Resources
+
+ECHO DEVREPO=%DEVREPO%
+ECHO RESREPO=%RESREPO%
 
 REM 7-Zip Location
 set PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
@@ -14,8 +21,13 @@ set PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
 if NOT EXIST %PATH7ZIP% set PATH7ZIP="C:\Program Files\7-Zip\7z.exe"
 if NOT EXIST %PATH7ZIP% exit
 
+ECHO PATH7ZIP=%PATH7ZIP%
+
 set OUTDIR=%1\ToDoList\Unicode_Release
 set OUTZIP=%OUTDIR%\todolist_exe_.zip
+
+ECHO OUTDIR=%OUTDIR%
+ECHO OUTZIP=%OUTZIP%
 
 del %OUTZIP%
 
