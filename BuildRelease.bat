@@ -1,22 +1,24 @@
 CLS
 
-set CODE_DIR=C:\Users\Daniel.Godson\Documents\GitHub
-REM set CODE_DIR=D:\_code
+set REPOROOT=C:\Users\Daniel.Godson\Documents\GitHub
 
-set DEV_DIR=%CODE_DIR%\ToDoList_Dev
-set LATEST_DIR=%CODE_DIR%\ToDoList_7.2
-set RES_DIR=%CODE_DIR%\ToDoList_Resources
-set PLUGINS_DIR=%CODE_DIR%\ToDoList_Plugins
+if NOT EXIST %REPOROOT% set CODE_DIR=D:\_code
+if NOT EXIST %REPOROOT% exit
+
+set DEVREPO=%REPOROOT%\ToDoList_Dev
+set RESREPO=%REPOROOT%\ToDoList_Resources
+set LATESTREPO=%REPOROOT%\ToDoList_7.2
+set PLUGINSREPO=%REPOROOT%\ToDoList_Plugins
 
 REM - Build Core App
 cd "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin"
 
-msdev %LATEST_DIR%\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" /REBUILD
+msdev %LATESTREPO%\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Build Plugins
 cd "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
 
-devenv %PLUGINS_DIR%\ToDoList_Plugins.sln /Rebuild "Release"
+devenv %PLUGINSREPO%\ToDoList_Plugins.sln /build "Release"
 
-cd %DEV_DIR%
-CALL BuildReleaseZip.bat %LATEST_DIR%\ToDoList
+cd %DEVREPO%
+CALL BuildReleaseZip.bat %LATESTREPO%
