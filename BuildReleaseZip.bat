@@ -1,8 +1,13 @@
 if "%~1" == "" exit
 
 set OUTZIP=%1\Unicode_Release\todolist_exe_.zip
+
+REM set RESPATH="D:\_code\ToDoList_Resources"
+set RESPATH="C:\Users\Daniel.Godson\Documents\GitHub\ToDoList_Resources"
+
 set PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
-set RESPATH="D:\_code\ToDoList_Resources"
+
+if NOT EXIST %PATH7ZIP% set PATH7ZIP="C:\Program Files\7-Zip\7z.exe"
 
 del %OUTZIP%
 
