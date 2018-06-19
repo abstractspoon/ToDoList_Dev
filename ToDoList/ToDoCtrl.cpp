@@ -5559,7 +5559,7 @@ LRESULT CToDoCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 
 BOOL CToDoCtrl::ConfirmDeleteAllTasks(BOOL bSelected) const
 {
-	if (!GetTaskCount() || CanEditSelectedTask(TDCA_DELETE))
+	if (!GetTaskCount() || !CanEditSelectedTask(TDCA_DELETE))
 	{
 		return FALSE;
 	}
