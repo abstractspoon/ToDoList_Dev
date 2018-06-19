@@ -149,7 +149,7 @@ BOOL COleDateTimeRange::IsNull() const
 	return (!CDateHelper::IsDateSet(m_dtStart) && !CDateHelper::IsDateSet(m_dtEnd));
 }
 
-BOOL COleDateTimeRange::IsDateInRange(const COleDateTime& date) const
+BOOL COleDateTimeRange::Contains(const COleDateTime& date) const
 {
 	if (!IsValid())
 		return FALSE;
@@ -157,7 +157,15 @@ BOOL COleDateTimeRange::IsDateInRange(const COleDateTime& date) const
 	if (date < m_dtStart)
 		return FALSE;
 
-	return (date < GetEndInclusive());
+	return (date <= GetEndInclusive());
+}
+
+BOOL COleDateTimeRange::Contains(const COleDateTimeRange& dtOther) const
+{
+	if (!IsValid() || !dtOther.IsValid())
+		return FALSE;
+
+	return (Contains(dtOther.GetStart()) && Contains(dtOther.GetEndInclusive()));
 }
 
 BOOL COleDateTimeRange::IntersectsWith(const COleDateTimeRange& dtOther) const

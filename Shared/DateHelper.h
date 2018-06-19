@@ -106,7 +106,8 @@ public:
 	BOOL Set(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 	BOOL Set(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 
-	BOOL IsDateInRange(const COleDateTime& date) const;
+	BOOL Contains(const COleDateTime& date) const;
+	BOOL Contains(const COleDateTimeRange& dtOther) const;
 	BOOL IntersectsWith(const COleDateTimeRange& dtOther) const;
 	BOOL GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
 	BOOL GetUnion(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
