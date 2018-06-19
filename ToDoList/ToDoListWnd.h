@@ -388,6 +388,7 @@ protected:
 	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTimeTrackerStartTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeTrackerStopTracking(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTimeTrackerResetElapsedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlDoLengthyOperation(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam);

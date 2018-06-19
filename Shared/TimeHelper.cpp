@@ -17,12 +17,15 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const double SECS2MINS	 	= 60;
 const double MINS2HOURS 	= 60;
 const double HOURS2DAYS 	= 24;
 const double DAYS2WEEKS 	= 7;
 const double WEEKS2MONTHS 	= 4.348; // 365.25 / (7 * 12)
 const double MONTHS2YEARS 	= 12;
 const double FUDGE 			= 1e-6;
+
+//////////////////////////////////////////////////////////////////////
 
 // user definables
 double CTimeHelper::HOURS2WORKDAYS = 8; 
@@ -196,6 +199,7 @@ BOOL CTimeHelper::IsValidUnit(TH_UNITS nUnits)
 {
 	switch (nUnits)
 	{
+	case THU_SECONDS:
 	case THU_MINS:
 	case THU_HOURS:
 	case THU_DAYS:
@@ -238,6 +242,11 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 		{
 			switch (nFromUnits)
 			{
+			case THU_MINS:
+				dTime *= SECS2MINS;
+				nFromUnits = THU_SECONDS;
+				break;
+				
 			case THU_HOURS:
 				dTime *= MINS2HOURS;
 				nFromUnits = THU_MINS;
@@ -254,8 +263,8 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 				break;
 				
 			case THU_WEEKS:
-				nFromUnits = GetDaysToWeeksUnits(nToUnits);
 				dTime *= GetDaysToWeeksFactor(nToUnits);
+				nFromUnits = GetDaysToWeeksUnits(nToUnits);
 				break;
 				
 			case THU_MONTHS:
@@ -276,11 +285,16 @@ double CTimeHelper::GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 		{
 			switch (nFromUnits)
 			{
+			case THU_SECONDS:
+				dTime /= SECS2MINS;
+				nFromUnits = THU_MINS;
+				break;
+
 			case THU_MINS:
 				dTime /= MINS2HOURS;
 				nFromUnits = THU_HOURS;
 				break;
-
+				
 			case THU_HOURS:
 				if (IsWeekdays(nToUnits))
 					dTime /= m_dHours2Workdays;
@@ -484,6 +498,7 @@ TCHAR CTimeHelper::GetUnits(TH_UNITS nUnits)
 	// handle first time
 	if (MAPUNIT2CH.GetCount() == 0)
 	{
+		SetUnits(THU_SECONDS,	'S');
 		SetUnits(THU_MINS,		'm');	
 		SetUnits(THU_HOURS,		'H');	
 		SetUnits(THU_WEEKDAYS,	'K');	
@@ -494,7 +509,7 @@ TCHAR CTimeHelper::GetUnits(TH_UNITS nUnits)
 	}
 
 	TCHAR cUnits = 0;
-	MAPUNIT2CH.Lookup(nUnits, cUnits);
+	VERIFY(MAPUNIT2CH.Lookup(nUnits, cUnits));
 
 	return cUnits;
 }
@@ -526,7 +541,7 @@ TH_UNITS CTimeHelper::GetDaysToWeeksUnits(TH_UNITS nUnits) const
 	return (IsWeekdays(nUnits) ? THU_WEEKDAYS : THU_DAYS);
 }
 
-CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, BOOL bDecPlaces, BOOL bAllowZero) const
+CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags) const
 {
 	// sanity check
 	if (!IsValidUnit(nUnitsFrom))
@@ -534,6 +549,8 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, BOOL bDecP
 		ASSERT(0);
 		return _T("");
 	}
+
+	BOOL bDecPlaces = (dwFlags & HMS_DECIMALPLACES);
 
 	// handle negative times
 	BOOL bNegative = (dTime < 0.0);
@@ -573,11 +590,14 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, BOOL bDecP
 	{
 		sTime = FormatTimeHMS(dHours, THU_HOURS, THU_MINS, MINS2HOURS, bDecPlaces);
 	}
-	else if (dMins >= 1.0)
+	else if (dMins > 0.0)
 	{
-		sTime = FormatTimeHMS(dMins, THU_MINS, THU_MINS, 0, FALSE);
+		if (dwFlags & HMS_WANTSECONDS)
+			sTime = FormatTimeHMS(dMins, THU_MINS, THU_SECONDS, SECS2MINS, bDecPlaces);
+		else
+			sTime = FormatTimeHMS(dMins, THU_MINS, THU_MINS, 0, FALSE);
 	}
-	else if (bAllowZero)
+	else if (dwFlags & HMS_ALLOWZERO)
 	{
 		sTime = FormatTimeHMS(0.0, nUnitsFrom, THU_NULL, 0, FALSE);
 	}
@@ -587,7 +607,6 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, BOOL bDecP
 		sTime = "-" + sTime;
 	
 	return sTime;
-	
 }
 
 CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeftOverUnits, 
@@ -639,12 +658,21 @@ int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 
 	switch (nFromUnits)
 	{
-	case THU_MINS:
+	case THU_SECONDS:
 		return -1; // less than everything else
+	
+	case THU_MINS:
+		switch(nToUnits)
+		{
+		case THU_SECONDS:  
+			return 1;
+		}
+		return -1; // all else
 	
 	case THU_HOURS:
 		switch(nToUnits)
 		{
+		case THU_SECONDS:  
 		case THU_MINS:  
 			return 1;
 		}
@@ -654,6 +682,7 @@ int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 	case THU_WEEKDAYS:
 		switch(nToUnits)
 		{
+		case THU_SECONDS:  
 		case THU_MINS:
 		case THU_HOURS:
 			return 1;
@@ -667,6 +696,7 @@ int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 	case THU_WEEKS:
 		switch(nToUnits)
 		{
+		case THU_SECONDS:  
 		case THU_MINS:
 		case THU_HOURS:
 		case THU_DAYS:
@@ -678,6 +708,7 @@ int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 	case THU_MONTHS:
 		switch(nToUnits)
 		{
+		case THU_SECONDS:  
 		case THU_MINS:
 		case THU_HOURS:
 		case THU_DAYS:

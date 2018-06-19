@@ -548,9 +548,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			DWORD dwSelID = GetSelectedTaskID();
 			
 			RebuildTree(pTasks);
-
-			ValidateMonthDisplay();
-			UpdateListColumns();
+			RecalcDateRange();
 
 			// Odd bug: The very last tree item will sometimes not scroll into view. 
 			// Expanding and collapsing an item is enough to resolve the issue. 
@@ -582,17 +580,7 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			{
 				// recalc parent dates as required
 				if (attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE))
-				{
 					RecalcDateRange();
-					RecalcParentDates();
-				}
-				
-				// Refresh list columns as required
-				if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
-				{
-					ValidateMonthDisplay();
-					UpdateListColumns();
-				}
 			}
 		}
 		break;
@@ -608,19 +596,8 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
 			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
 
-			// cache current year range to test for changes
-			int nNumMonths = GetNumMonths(m_nMonthDisplay);
-			
 			RefreshTreeItemMap();
 			RecalcDateRange();
-			RecalcParentDates();
-
-			// fixup list columns as required
-			if (GetNumMonths(m_nMonthDisplay) != nNumMonths)
-			{
-				ValidateMonthDisplay();
-				UpdateListColumns();
-			}
 		}
 		break;
 		
@@ -907,9 +884,6 @@ BOOL CGanttTreeListCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 		}
 	}
 
-	// update date range
-	m_dateRange.MinMax(*pGI);
-	
 	// always update lock states
 	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 
@@ -1096,22 +1070,11 @@ void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	m_list.DeleteAllItems();
 
 	m_data.RemoveAll();
-
 	m_dwMaxTaskID = 0;
-
-	// cache and reset year range which will get 
-	// recalculated as we build the tree
-	GANTTDATERANGE prevRange = m_dateRange;
-	m_dateRange.Clear();
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
-	// restore previous date range if no data
-	if (m_data.GetCount() == 0)
-		m_dateRange = prevRange;
-
 	RefreshTreeItemMap();
-	RecalcParentDates();
 	ExpandList();
 	RefreshItemBoldState();
 }
@@ -1125,6 +1088,8 @@ void CGanttTreeListCtrl::RecalcDateRange()
 {
 	if (m_data.GetCount())
 	{
+		GANTTDATERANGE prevRange = m_dateRange;
+
 		m_dateRange.Clear();
 
 		POSITION pos = m_data.GetStartPosition();
@@ -1137,7 +1102,21 @@ void CGanttTreeListCtrl::RecalcDateRange()
 			ASSERT(pGI);
 
 			if (pGI)
-				m_dateRange.MinMax(*pGI);
+			{
+				COleDateTime dtStart, dtEnd;
+				GetTaskStartDueDates(*pGI, dtStart, dtEnd);
+
+				m_dateRange.MinMax(dtStart);
+				m_dateRange.MinMax(dtEnd);
+			}
+		}
+
+		RecalcParentDates();
+
+		if (!(m_dateRange == prevRange))
+		{
+			ValidateMonthDisplay();
+			UpdateListColumns();
 		}
 	}
 }
@@ -1215,9 +1194,6 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 			if (dwTaskID)
 				pGI->aDependIDs.Add(dwTaskID);
 		}
-		
-		// track earliest and latest dates
-		m_dateRange.MinMax(*pGI);
 	}
 	
 	// add item to tree
@@ -1341,6 +1317,11 @@ void CGanttTreeListCtrl::SetOption(DWORD dwOption, BOOL bSet)
 		{
 			switch (dwOption)
 			{
+			case GTLCF_CALCMISSINGDUEDATES:
+			case GTLCF_CALCMISSINGSTARTDATES:
+				RecalcDateRange();
+				break;
+
 			case GTLCF_STRIKETHRUDONETASKS:
 				m_tree.Fonts().Clear();
 				Invalidate(FALSE);
@@ -5616,6 +5597,9 @@ int CGanttTreeListCtrl::CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL 
 
 void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
 {
+	CHoldRedraw hr(m_list);
+	CHoldRedraw hr2(m_listHeader);
+
 	// first column is always zero width and not trackable
 	m_listHeader.SetItemWidth(0, 0);
 	m_listHeader.EnableItemTracking(0, FALSE);
@@ -6822,30 +6806,10 @@ BOOL CGanttTreeListCtrl::EndDragging(const CPoint& ptCursor)
 		// keep parent informed
 		if (DragDatesDiffer(*pGI, m_giPreDrag))
 		{
-			int nNumMonths = GetNumMonths(m_nMonthDisplay);
-			GANTTDATERANGE prevRange = m_dateRange;
-
 			if (!NotifyParentDateChange(nDrag))
-			{
 				RestoreGanttItem(m_giPreDrag);
-			}
 			else
-			{
 				RecalcDateRange();
-				RecalcParentDates();
-
-				// Refresh list columns as required
-				if ((GetNumMonths(m_nMonthDisplay) != nNumMonths) ||
-					(!prevRange.Contains(*pGI)))
-				{
-					// For reasons I don't understand, the resource context is
-					// wrong when handling the LButtonUp
-					AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-					ValidateMonthDisplay();
-					UpdateListColumns();
-				}
-			}
 
 			NotifyParentDragChange();
 		}

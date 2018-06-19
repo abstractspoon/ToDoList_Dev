@@ -689,7 +689,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	// in their list of dependencies
 	CString sTaskID = Misc::Format(dwTaskID);
 
-	TODOITEM* pTDI = NULL;
+	const TODOITEM* pTDI = NULL;
 	POSITION pos = GetFirstTaskPosition();
 		
 	while (pos)
@@ -712,7 +712,7 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependen
 
 	if (dwTaskID)
 	{
-		TODOITEM* pTDI = NULL;
+		const TODOITEM* pTDI = NULL;
 		POSITION pos = GetFirstTaskPosition();
 		
 		while (pos)

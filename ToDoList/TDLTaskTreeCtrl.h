@@ -72,9 +72,9 @@ public:
 	inline DWORD GetTrueTaskID(HTREEITEM hti) const { return m_data.GetTrueTaskID(m_find.GetTaskID(hti)); }
 	inline DWORD GetSelectedTaskID() const { return GetTaskID(GetSelectedItem()); }
 	inline int GetSelectedCount() const { return TSH().GetCount(); }
-	inline BOOL IsItemSelected(HTREEITEM hti) const { return TSH().HasItem(hti); }
-	inline BOOL IsTaskSelected(DWORD dwTaskID) const { return TSH().HasItem(dwTaskID); }
 
+	BOOL IsItemSelected(HTREEITEM hti, BOOL bSingly = FALSE) const;
+	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;

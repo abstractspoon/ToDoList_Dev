@@ -70,7 +70,7 @@ public:
 	BOOL SelectTasks(const CDWordArray& aTasks, BOOL bTrue = FALSE);
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	void RestoreSelection(const TDCSELECTIONCACHE& cache);
-	BOOL IsTaskSelected(DWORD dwTaskID) const;
+	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
 	BOOL EnsureSelectionVisible();
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 

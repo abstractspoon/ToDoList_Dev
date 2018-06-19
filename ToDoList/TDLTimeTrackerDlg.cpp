@@ -26,8 +26,7 @@ enum // btns
 	BTN_STOPDISABLED,
 };
 
-const int TIMETRACKPERIOD	= 10000; // 10 secs
-const COLORREF WHITE		= RGB(255, 255, 255);
+const int ID_RESET_ELAPSED = 1;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -294,8 +293,11 @@ void CTDCTrackTasklistArray::DeleteAllTasklists()
 
 BOOL CTDCTrackTasklistArray::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 {
-	TRACKTASKLIST* pTTL = GetTasklist(pTDC);
+	return UpdateTracking(GetTasklist(pTDC));
+}
 
+BOOL CTDCTrackTasklistArray::UpdateTracking(TRACKTASKLIST* pTTL)
+{
 	if (!pTTL)
 	{
 		ASSERT(0);
@@ -303,10 +305,10 @@ BOOL CTDCTrackTasklistArray::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	}
 
 	// else
-	DWORD dwTrackedTaskID = pTDC->GetTimeTrackTaskID(FALSE);
+	DWORD dwTrackedTaskID = pTTL->pTDC->GetTimeTrackTaskID(FALSE);
 
 	pTTL->dwTrackedTaskID = dwTrackedTaskID;
-	pTTL->bTrackingPaused = (dwTrackedTaskID && (pTDC->GetTimeTrackTaskID(TRUE) != dwTrackedTaskID));
+	pTTL->bTrackingPaused = (dwTrackedTaskID && (pTTL->pTDC->GetTimeTrackTaskID(TRUE) != dwTrackedTaskID));
 
 	return TRUE;
 }
@@ -392,6 +394,7 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKLISTS, m_cbTasklists);
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
+	DDX_Control(pDX, IDC_ELAPSEDTIME, m_eElapsedTime);
 	DDX_Text(pDX, IDC_TASKTIME, m_sTaskTimes);
 	DDX_Text(pDX, IDC_ELAPSEDTIME, m_sElapsedTime);
 	DDX_Text(pDX, IDC_QUICKFIND, m_sQuickFind);
@@ -418,6 +421,7 @@ BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_COMMAND(ID_TIMETRACKER_ONTOP, OnToggleTopMost)
 	ON_COMMAND(ID_TIMETRACK_HELP, OnHelp)
 	ON_WM_HELPINFO()
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////
@@ -516,21 +520,19 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 		m_toolbar.SetDlgCtrlID(IDC_TOOLBAR);
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));
 		m_toolbar.GetToolBarCtrl().CheckButton(ID_TIMETRACKER_ONTOP, m_bAlwaysOnTop);
-
-#ifdef WHITETHEME
-		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
-#else
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-#endif
 
 		m_tbHelper.Initialize(&m_toolbar, this);
 	}
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
+
+	m_iconResetElapsed.LoadIcon(IDI_RESET_ELAPSED);
+	m_eElapsedTime.AddButton(ID_RESET_ELAPSED, m_iconResetElapsed, CEnString(IDS_RESET_ELAPSED), 15);
 		
-	m_icon.LoadIcon(IDR_MAINFRAME_STD);
-	SetIcon(m_icon, TRUE);
+	m_iconDlg.LoadIcon(IDR_MAINFRAME_STD);
+	SetIcon(m_iconDlg, TRUE);
 
 	EnableToolTips(TRUE);
 	CalcMinMaxSizes();
@@ -583,15 +585,11 @@ void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
 	
 	if (m_theme != oldTheme)
 	{
-#ifdef WHITETHEME
-		m_toolbar.SetBackgroundColors(WHITE, WHITE, FALSE, FALSE);
-#else
 		m_brBack.DeleteObject();
 
 		// Use crAppBackLight so the toolbar merges with the bkgnd
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, m_theme.HasGradient(), m_theme.HasGlass());
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-#endif
 		
 		Invalidate(TRUE);
 		SendMessage(WM_NCPAINT);
@@ -881,28 +879,29 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	ASSERT(pTDC);
 	
 	// Update data struct first
-	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(pTTL);
+	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
 	if (!pTTL)
-		return FALSE;
-
-	BOOL bWasTracking = pTTL->IsTracking();
-
-	if (!m_aTasklists.UpdateTracking(pTDC))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	// Show the tracker if we've just started actively tracking
-	// and switch to that tasklist
-	if (HasOption(TTDO_SHOWONBEGINTRACKING) && pTTL->IsTracking() && !bWasTracking)
+	BOOL bWasTracking = pTTL->IsTracking();
+
+	VERIFY(m_aTasklists.UpdateTracking(pTTL));
+
+	// If we've just started tracking, switch to that tasklist
+	// and show the dialog if required
+	if (pTTL->IsTracking() && !bWasTracking)
 	{
 		SelectTaskList(pTDC);
 
-		ShowWindow(SW_SHOWNORMAL);
-		SetForegroundWindow();
+		if (HasOption(TTDO_SHOWONBEGINTRACKING))
+		{
+			ShowWindow(SW_SHOWNORMAL);
+			SetForegroundWindow();
+		}
 	}
 	else
 	{
@@ -961,22 +960,16 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	m_sTaskTimes.Empty();
 	m_sElapsedTime.Empty();
 	
-	if (pTDC)
-	{
-		if (dwSelTaskID)
-			pTDC->GetTaskTimes(dwSelTaskID, dTimeEst, nEstUnits, dTimeSpent, nSpentUnits);
+	if (dwSelTaskID)
+		pTDC->GetTaskTimes(dwSelTaskID, dTimeEst, nEstUnits, dTimeSpent, nSpentUnits);
 
-		double dElapsed = pTDC->GetTimeTrackingElapsedMinutes();
-
-		if ((dElapsed > 0.0) || pTDC->GetTimeTrackTaskID(FALSE))
-			m_sElapsedTime = th.FormatTime(dElapsed, THU_MINS, 2);
-	}
+	m_sElapsedTime = pTDC->FormatTimeTrackingElapsedTime();
 	
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
 		m_sTaskTimes.Format(_T("%s : %s"),
-			th.FormatTimeHMS(dTimeEst, TDC::MapUnitsToTHUnits(nEstUnits), TRUE, TRUE),
-			th.FormatTimeHMS(dTimeSpent, TDC::MapUnitsToTHUnits(nSpentUnits), TRUE, TRUE));
+			th.FormatTimeHMS(dTimeEst, TDC::MapUnitsToTHUnits(nEstUnits), (HMS_ALLOWZERO | HMS_DECIMALPLACES)),
+			th.FormatTimeHMS(dTimeSpent, TDC::MapUnitsToTHUnits(nSpentUnits), (HMS_ALLOWZERO | HMS_DECIMALPLACES)));
 	}
 	else
 	{
@@ -991,7 +984,10 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CFilteredToDoCtrl* pTDC)
 	UpdateData(FALSE);
 
 	if (IsTrackingSelectedTasklistAndTask())
+	{
 		GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
+		GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
+	}
 }
 
 void CTDLTimeTrackerDlg::OnStartStopTracking()
@@ -1015,7 +1011,10 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	}
 
 	UpdateTracking(pTTL->pTDC);
-	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE); // to change text color
+
+	// redraw text colour
+	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
+	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 }
 
 HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -1028,16 +1027,12 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		{
 			pDC->SetBkMode(TRANSPARENT);
 
-#ifdef WHITETHEME
-			hbr = (HBRUSH)GetStockObject(WHITE_BRUSH);
-#else
 			if (!m_brBack.GetSafeHandle())
 				m_brBack.CreateSolidBrush(GetBkgndColor());
 
 			hbr = (HBRUSH)m_brBack.GetSafeHandle();
 
 			pDC->SetTextColor(m_theme.crAppText);
-#endif
 		}
 
 		if (IsTrackingSelectedTasklistAndTask())
@@ -1122,11 +1117,7 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 
 COLORREF CTDLTimeTrackerDlg::GetBkgndColor() const
 {
-#ifdef WHITETHEME
-	return WHITE;
-#else
 	return m_theme.crAppBackLight;
-#endif
 }
 
 void CTDLTimeTrackerDlg::OnChangeQuickFind()
@@ -1521,3 +1512,26 @@ void CTDLTimeTrackerDlg::SetWindowIcons(HICON hIconBig, HICON hIconSmall)
 	SetIcon(hIconBig, TRUE);
 	SetIcon(hIconSmall, FALSE);
 }
+
+LRESULT CTDLTimeTrackerDlg::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
+	case IDC_ELAPSEDTIME:
+		switch (lParam)
+		{
+		case ID_RESET_ELAPSED:
+			{
+				const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
+
+				m_pWndNotify->SendMessage(WM_TDLTTN_RESETELAPSEDTIME, 0, (LPARAM)pTDC);
+				UpdateTaskTime(pTDC);
+			}
+			break;
+		}
+		break;
+	}
+
+	return 0L;
+}
+

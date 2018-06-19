@@ -624,6 +624,11 @@ BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
 	return TRUE;
 }
 
+BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& range) const
+{
+	return ((dtStart == range.dtStart) && (dtEnd == range.dtEnd));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nBy(GTLCC_NONE), bAscending(-1)

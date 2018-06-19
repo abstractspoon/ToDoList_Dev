@@ -218,7 +218,7 @@ public:
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	void ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	
-	inline BOOL HasStyle(int nStyle) const { return m_aStyles[nStyle] ? TRUE : FALSE; }
+	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_aStyles[(int)nStyle] ? TRUE : FALSE; }
 	
 	static void SetDefaultCommentsFormat(const CString& format);
 	static void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);

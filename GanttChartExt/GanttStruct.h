@@ -112,7 +112,7 @@ typedef CArray<GANTTDEPENDENCY, GANTTDEPENDENCY&> CGanttDependArray;
 struct GANTTDATERANGE
 {
 	GANTTDATERANGE();
-
+	
 	void Clear();
 	void MinMax(const GANTTITEM& gi);
 	void MinMax(const COleDateTime& date);
@@ -125,6 +125,7 @@ struct GANTTDATERANGE
 	BOOL IsValid() const;
 	BOOL IsEmpty() const;
 	BOOL Contains(const GANTTITEM& gi) const;
+	BOOL operator==(const GANTTDATERANGE& range) const;
 
 protected:
 	COleDateTime dtStart, dtEnd;

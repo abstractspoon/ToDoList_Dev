@@ -1110,10 +1110,10 @@ DICTITEM* CTransDictionary::GetDictItem(CString& sText, BOOL bAutoCreate)
 		pDI = new DICTITEM(sText);
 		m_mapItems.SetAt(sText, pDI);
 	}
-#ifdef DEBUG
+#ifdef _DEBUG
 	else if (pDI && !pDI->GetTextOut().IsEmpty())
 	{
-		//int breakpoint = 0;
+		int breakpoint = 0;
 	}
 #endif
 

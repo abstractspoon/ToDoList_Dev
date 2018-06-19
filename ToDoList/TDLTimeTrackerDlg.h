@@ -15,6 +15,7 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\subclass.h"
 #include "..\shared\icon.h"
+#include "..\shared\enedit.h"
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -83,6 +84,7 @@ public:
 
 	int GetNumTasklists() const;
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
+	BOOL UpdateTracking(TRACKTASKLIST* pTTL);
 
 	int AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
 	BOOL DeleteTasklist(const CFilteredToDoCtrl* pTDC);
@@ -99,8 +101,6 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////
-
-//#define WHITETHEME
 
 class CTDLTimeTrackerDlg : public CDialog, protected CDialogHelper
 {
@@ -142,24 +142,20 @@ protected:
 	CWnd* m_pWndNotify;
 	CIconButton m_btnStart;
 	CWndPromptManager m_mgrPrompts;
-	CSize m_sizeMin, m_sizeMax, m_sizeLast;
+	CIcon m_iconDlg, m_iconResetElapsed;
+	CBrush m_brBack;
+	CEnToolBar m_toolbar;
+	CEnEdit m_eElapsedTime;
+	CImageList m_ilBtns;
 	
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;
-	CImageList m_ilBtns;
 	CString m_sTaskTimes, m_sElapsedTime;
 	CString m_sQuickFind;
-	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CString m_sOrgTitle;
 	DWORD m_dwOptions;
-	CIcon m_icon;
-
-#ifdef WHITETHEME
-#else
-	CBrush m_brBack;
-#endif
-
+	CSize m_sizeMin, m_sizeMax, m_sizeLast;
 	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -191,6 +187,7 @@ protected:
 	afx_msg void OnToggleTopMost();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	
 protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;

@@ -11,9 +11,12 @@
 
 #include <afxtempl.h>
 
+//////////////////////////////////////////////////////////////////////
+
 enum TH_UNITS
 {
 	THU_NULL		= 0,	// error code
+	THU_SECONDS		= 'S',
 	THU_MINS		= 'I',
 	THU_HOURS		= 'H',
 	THU_WEEKDAYS	= 'K',
@@ -22,6 +25,8 @@ enum TH_UNITS
 	THU_MONTHS		= 'M',
 	THU_YEARS		= 'Y',
 };
+
+//////////////////////////////////////////////////////////////////////
 
 enum THU_WORKDAYPERIOD
 {
@@ -32,6 +37,17 @@ enum THU_WORKDAYPERIOD
 	THU_AFTER,
 };
 
+//////////////////////////////////////////////////////////////////////
+
+enum THU_HMS
+{
+	HMS_ALLOWZERO		= 0x01,
+	HMS_DECIMALPLACES	= 0x02,
+	HMS_WANTSECONDS		= 0x04
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTimeHelper  
 {
 public:
@@ -39,7 +55,7 @@ public:
 	CTimeHelper(double dHoursInWorkday, double dWorkdaysInWeek);
 	
 	double GetTime(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
-	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, BOOL bDecPlaces = TRUE, BOOL bAllowZero = FALSE) const;
+	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
 	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
 	CString FormatTime(double dTime, int nDecPlaces) const;
 

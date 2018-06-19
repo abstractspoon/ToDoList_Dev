@@ -2425,11 +2425,13 @@ void CTabbedToDoCtrl::EndExtensionProgress()
 	GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, FALSE);
 }
 
-void CTabbedToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
+BOOL CTabbedToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 {
-	CToDoCtrl::BeginTimeTracking(dwTaskID, bNotify);
+	if (!CToDoCtrl::BeginTimeTracking(dwTaskID, bNotify))
+		return FALSE;
 
 	m_taskList.SetTimeTrackTaskID(m_timeTracking.GetTrackedTaskID());
+	return TRUE;
 }
 
 void CTabbedToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)

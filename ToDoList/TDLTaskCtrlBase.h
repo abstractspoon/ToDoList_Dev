@@ -103,7 +103,7 @@ public:
 	virtual int GetSelectedCount() const = 0;
  	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const = 0;
 	virtual DWORD GetSelectedTaskID() const = 0;
-	virtual BOOL IsTaskSelected(DWORD dwTaskID) const = 0;
+	virtual BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const = 0;
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue) = 0;
 	virtual BOOL SelectAll() = 0;
 	virtual void DeleteAll() = 0;

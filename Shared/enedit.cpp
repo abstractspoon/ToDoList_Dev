@@ -93,9 +93,9 @@ BOOL CEnEdit::AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth, LPCTSTR
 	return InsertButton(GetButtonCount(), nID, CString(static_cast<TCHAR>(nChar)), szTip, nWidth, szFont, TRUE);
 }
 
-BOOL CEnEdit::AddButton(UINT nID, HICON hIcon, LPCTSTR szTip)
+BOOL CEnEdit::AddButton(UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth)
 {
-	return InsertButton(GetButtonCount(), nID, hIcon, szTip);
+	return InsertButton(GetButtonCount(), nID, hIcon, szTip, nWidth);
 }
 
 BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont)

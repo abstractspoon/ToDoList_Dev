@@ -1185,8 +1185,11 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
 	return FALSE;
 }
 
-BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID) const
+BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 {
+	if (bSingly && (m_lcTasks.GetSelectedCount() != 1))
+		return FALSE;
+
 	POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
 	
 	while (pos)

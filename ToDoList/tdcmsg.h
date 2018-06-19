@@ -62,6 +62,7 @@ const UINT WM_FTD_GETLISTITEMS				= ::RegisterWindowMessage(_T("WM_FTD_GETLISTIT
 // CTDCTimeTrackerDlg
 const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STARTTRACKING"));		// wParam = taskID, lParam = CFilteredToDoCtrl*
 const UINT WM_TDLTTN_STOPTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STOPTRACKING"));		// wParam = taskID, lParam = CFilteredToDoCtrl*
+const UINT WM_TDLTTN_RESETELAPSEDTIME		= ::RegisterWindowMessage(_T("WM_TDLTTN_RESETELAPSEDTIME"));		// wParam = taskID, lParam = CFilteredToDoCtrl*
 const UINT WM_TDLTTN_LOADDELAYEDTASKLIST	= ::RegisterWindowMessage(_T("WM_TDLTTN_LOADDELAYEDTASKLIST")); // lParam = CFilteredToDoCtrl*
 
 // CTDLThreadedExporterWnd

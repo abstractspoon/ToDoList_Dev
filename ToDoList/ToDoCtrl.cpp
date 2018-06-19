@@ -222,7 +222,7 @@ CToDoCtrl::CToDoCtrl(const CContentMgr& mgr, const CONTENTFORMAT& cfDefault, con
 	m_ssc(*this),
 #pragma warning(pop) 
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
-	m_timeTracking(m_data),
+	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_taskTree(m_ilTaskIcons, m_data, m_aStyles, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
 	SetBordersDLU(0);
@@ -1860,9 +1860,11 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 								(nSelCount == 1) && 
 								m_timeTracking.CanTrackTask(dwTaskID));
 
-		m_eTimeSpent.CheckButton(ID_TIME_TRACK, m_timeTracking.IsTrackingTask(dwTaskID));
+		BOOL bIsTrackingTask = (bCanTimeTrack && m_timeTracking.IsTrackingTask(dwTaskID));
+
+		m_eTimeSpent.CheckButton(ID_TIME_TRACK, bIsTrackingTask);
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
-		m_eTimeSpent.EnableButton(ID_ADD_TIME, bCanTimeTrack);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, !bIsTrackingTask);
 
 		// dependency link button
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && !m_sDepends.IsEmpty());
@@ -4792,9 +4794,14 @@ void CToDoCtrl::PauseTimeTracking(BOOL bPause)
 	}
 }
 
-double CToDoCtrl::GetTimeTrackingElapsedMinutes() const
+CString CToDoCtrl::FormatTimeTrackingElapsedTime() const
 {
-	return m_timeTracking.GetElapsedMinutes();
+	return m_timeTracking.FormatElapsedTime();
+}
+
+void CToDoCtrl::ResetTimeTrackingElapsedMinutes()
+{
+	m_timeTracking.ResetReminderIsDue();
 }
 
 BOOL CToDoCtrl::TimeTrackSelectedTask()
@@ -4823,13 +4830,7 @@ BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 
 BOOL CToDoCtrl::IsSelectedTaskBeingTimeTracked() const
 {
-	DWORD dwTaskID = GetSelectedTaskID();
-
-	if (dwTaskID)
-		return m_timeTracking.IsTrackingTask(dwTaskID);
-
-	// else
-	return FALSE;
+	return m_timeTracking.IsTrackingSelectedTask();
 }
 
 DWORD CToDoCtrl::GetTimeTrackTaskID(BOOL bActive) const
@@ -4841,23 +4842,7 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 {
 	DWORD dwTrackedTaskID = m_timeTracking.GetTrackedTaskID(TRUE);
 
-	if (!dwTrackedTaskID)
-		return FALSE;
-
-	DWORD dwSelTaskID = GetSelectedTaskID();
-	BOOL bTrackingSelTask = (dwSelTaskID == dwTrackedTaskID);
-
-	if (!bTrackingSelTask && HasStyle(TDCS_TRACKSELECTEDTASKONLY))
-		return FALSE;
-	
-	// does it permit tracking
-	DWORD dwTrackID = (bTrackingSelTask ? dwSelTaskID : dwTrackedTaskID);
-
-	if (!m_timeTracking.CanTrackTask(dwTrackID))
-		return FALSE;
-
-	// yeah!
-	return TRUE;
+	return (dwTrackedTaskID != 0);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sID)
@@ -5791,7 +5776,6 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_CHECKOUTONLOAD:
 		case TDCS_SYNCTIMEESTIMATESANDDATES:
 		case TDCS_FOCUSTREEONENTER:
-		case TDCS_TRACKSELECTEDTASKONLY:
 		case TDCS_LOGTIMETRACKING:
 		case TDCS_LOGTASKTIMESEPARATELY:
 		case TDCS_WARNADDDELETEARCHIVE:
@@ -5804,16 +5788,11 @@ BOOL CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bOn, BOOL bWantUpdate)
 		case TDCS_SYNCCOMPLETIONTOSTATUS:
 		case TDCS_DISABLEPASSWORDPROMPTING:
 		case TDCS_SAVEUIVISINTASKLIST:
+		case TDCS_AUTOADJUSTDEPENDENCYDATES:
+		case TDCS_TRACKSELECTEDTASKONLY:
 			// do nothing
 			break;
 
-		case TDCS_AUTOADJUSTDEPENDENCYDATES:
-			if (bOn)
-			{
-				// :TODO: Auto adjust all dependents' dates
-			}
-			break;
-			
 		case TDCS_COMMENTSUSETREEFONT:
 			UpdateCommentsFont(TRUE);
 			break;
@@ -8446,7 +8425,7 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 
 			ASSERT ((GetSelectedCount() == 1) && 
 					IsItemSelected(hti) && 
-					m_data.IsTaskTimeTrackable(dwTaskID));
+					m_timeTracking.CanTrackTask(dwTaskID));
 			
 			ToggleTimeTracking(hti);
 		}
@@ -8720,19 +8699,23 @@ void CToDoCtrl::ToggleTimeTracking(HTREEITEM hti)
 }
 
 // External
-void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID)
+BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID)
 {
-	BeginTimeTracking(dwTaskID, FALSE); // don't notify
+	return BeginTimeTracking(dwTaskID, FALSE); // don't notify
 }
 
 // Internal
-void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
+BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 {
 	if (!m_timeTracking.CanTrackTask(dwTaskID))
-		return;
+		return FALSE;
 
 	// if there's a current task being tracked then end it
 	EndTimeTracking(TRUE, bNotify);
+
+	// Select the task if this is a requirement
+	if (HasStyle(TDCS_TRACKSELECTEDTASKONLY) && !m_taskTree.IsTaskSelected(dwTaskID, TRUE))
+		VERIFY(SelectTask(dwTaskID));
 
 	VERIFY(m_timeTracking.BeginTracking(dwTaskID));
 
@@ -8753,6 +8736,8 @@ void CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	// notify parent
 	if (bNotify)
 		GetParent()->SendMessage(WM_TDCN_TIMETRACK, (WPARAM)GetSafeHwnd(), TRUE);
+
+	return TRUE;
 }
 
 void CToDoCtrl::SetTimeTrackingReminderInterval(int nMinutes)

@@ -226,7 +226,7 @@ protected:
 	virtual void UpdateTasklistVisibility();
 	virtual void UpdateVisibleColumns();
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
-	virtual void BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
+	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 

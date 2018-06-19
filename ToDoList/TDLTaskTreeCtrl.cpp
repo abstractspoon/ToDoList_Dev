@@ -2155,6 +2155,22 @@ BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 	return FALSE;
 }
 
+BOOL CTDLTaskTreeCtrl::IsItemSelected(HTREEITEM hti, BOOL bSingly) const 
+{ 
+	if (bSingly && !TSH().HasSingleSelection())
+		return FALSE;
+
+	return TSH().HasItem(hti);
+}
+
+BOOL CTDLTaskTreeCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const 
+{ 
+	if (bSingly && !TSH().HasSingleSelection())
+		return FALSE;
+
+	return TSH().HasItem(dwTaskID);
+}
+
 int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
 {
 	DWORD dwFocusID;
