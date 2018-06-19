@@ -21,8 +21,9 @@ static char THIS_FILE[]=__FILE__;
 
 const double ONE_HOUR	= (1.0 / 24.0);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const double END_OF_DAY = (((24 * 60 * 60) - 1) / (24.0 * 60 * 60));
-const double START_OF_DAY = (1 / (24.0 * 60 * 60));
+const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally less precision
+const double END_OF_DAY = (1.0 - ONE_SECOND);
+const double START_OF_DAY = ONE_SECOND;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -242,12 +243,11 @@ BOOL COleDateTimeRange::Add(const COleDateTime& date, BOOL bInclusive)
 	if (!CDateHelper::IsDateSet(date))
 		return FALSE;
 
-	if (!IsValid())
-		return Set(date, date, bInclusive);
+	CDateHelper::Min(m_dtStart, date);
 
-	m_dtStart = min(m_dtStart, date);
-	m_dtEnd = max(GetEndInclusive(), GetEndInclusive(date, bInclusive));
-			
+	m_dtEnd = GetEndInclusive();
+	CDateHelper::Max(m_dtEnd, GetEndInclusive(date, bInclusive));
+
 	m_bInclusive |= bInclusive;
 			
 	if (CDateHelper::IsEndOfDay(m_dtEnd))
@@ -1608,7 +1608,10 @@ BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 
 BOOL CDateHelper::IsEndOfDay(const COleDateTime& date)
 {
-	return (GetTimeOnly(date).m_dt >= END_OF_DAY);
+	double dTime = GetTimeOnly(date).m_dt;
+
+	// Handle rounding
+	return (fabs(dTime - END_OF_DAY) < ONE_SECOND);
 }
 
 BOOL CDateHelper::IsLeapYear(int nYear)
