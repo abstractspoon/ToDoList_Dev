@@ -43,7 +43,8 @@ enum THU_HMS
 {
 	HMS_ALLOWZERO		= 0x01,
 	HMS_DECIMALPLACES	= 0x02,
-	HMS_WANTSECONDS		= 0x04
+	HMS_WANTSECONDS		= 0x04,
+	HMS_FORMATSPACED	= 0x08
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -104,7 +105,9 @@ protected:
 	static double GetTimeOnly(const COleDateTime& date);
 	static BOOL Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits); // 0=same, -1=nFrom < nTo else 1
 	static CString FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeftOverUnits, 
-								double dLeftOverMultiplier, BOOL bDecPlaces);
+								double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim);
+	static CString FormatTimeHMS(int nTime, TH_UNITS nUnits);
+
 	static BOOL IsWeekdays(TH_UNITS nUnits);
 	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);

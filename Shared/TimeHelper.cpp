@@ -551,6 +551,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	}
 
 	BOOL bDecPlaces = (dwFlags & HMS_DECIMALPLACES);
+	TCHAR cDelim = ((dwFlags & HMS_FORMATSPACED) ? ' ' : 0);
 
 	// handle negative times
 	BOOL bNegative = (dTime < 0.0);
@@ -572,34 +573,34 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	
 	if (dYears >= 1.0)
 	{
-		sTime = FormatTimeHMS(dYears, THU_YEARS, THU_MONTHS, MONTHS2YEARS, bDecPlaces);
+		sTime = FormatTimeHMS(dYears, THU_YEARS, THU_MONTHS, MONTHS2YEARS, bDecPlaces, cDelim);
 	}
 	else if (dMonths >= 1.0)
 	{
-		sTime = FormatTimeHMS(dMonths, THU_MONTHS, THU_WEEKS, WEEKS2MONTHS, bDecPlaces);
+		sTime = FormatTimeHMS(dMonths, THU_MONTHS, THU_WEEKS, WEEKS2MONTHS, bDecPlaces, cDelim);
 	}
 	else if (dWeeks >= 1.0)
 	{
-		sTime = FormatTimeHMS(dWeeks, THU_WEEKS, THU_DAYS, GetDaysToWeeksFactor(nUnitsFrom), bDecPlaces);
+		sTime = FormatTimeHMS(dWeeks, THU_WEEKS, THU_DAYS, GetDaysToWeeksFactor(nUnitsFrom), bDecPlaces, cDelim);
 	}
 	else if (dDays >= 1.0)
 	{
-		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_dHours2Workdays, bDecPlaces);
+		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_dHours2Workdays, bDecPlaces, cDelim);
 	}
 	else if (dHours >= 1.0)
 	{
-		sTime = FormatTimeHMS(dHours, THU_HOURS, THU_MINS, MINS2HOURS, bDecPlaces);
+		sTime = FormatTimeHMS(dHours, THU_HOURS, THU_MINS, MINS2HOURS, bDecPlaces, cDelim);
 	}
 	else if (dMins > 0.0)
 	{
 		if (dwFlags & HMS_WANTSECONDS)
-			sTime = FormatTimeHMS(dMins, THU_MINS, THU_SECONDS, SECS2MINS, bDecPlaces);
+			sTime = FormatTimeHMS(dMins, THU_MINS, THU_SECONDS, SECS2MINS, bDecPlaces, cDelim);
 		else
-			sTime = FormatTimeHMS(dMins, THU_MINS, THU_MINS, 0, FALSE);
+			sTime = FormatTimeHMS(dMins, THU_MINS, THU_MINS, 0, FALSE, 0);
 	}
 	else if (dwFlags & HMS_ALLOWZERO)
 	{
-		sTime = FormatTimeHMS(0.0, nUnitsFrom, THU_NULL, 0, FALSE);
+		sTime = FormatTimeHMS(0.0, nUnitsFrom, THU_NULL, 0, FALSE, 0);
 	}
 
 	// handle negative times
@@ -610,7 +611,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 }
 
 CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeftOverUnits, 
-								   double dLeftOverMultiplier, BOOL bDecPlaces)
+								   double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim)
 {
 	// sanity check
 	if (!IsValidUnit(nUnits) || !IsValidUnit(nLeftOverUnits) && (nLeftOverUnits != THU_NULL))
@@ -619,28 +620,35 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 		return _T("");
 	}
 
-	CString sTime;
+	CString sTime = FormatTimeHMS((int)dTime, nUnits);
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{
 		double dLeftOver = ((dTime - (int)dTime) * dLeftOverMultiplier + FUDGE);
 
-		// omit second element if zero
-		if (((int)dLeftOver) == 0)
+		// Include second element if at least 1
+		if (dLeftOver >= 1.0)
 		{
-			sTime.Format(_T("%d%c"), (int)dTime, GetUnits(nUnits));
+			if (cDelim)
+				sTime += cDelim;
+
+			sTime += FormatTimeHMS((int)dLeftOver, nLeftOverUnits);
 		}
-		else
-		{
-			sTime.Format(_T("%d%c%d%c"), (int)dTime, GetUnits(nUnits), 
-						(int)dLeftOver, GetUnits(nLeftOverUnits));
-		}
-	}
-	else
-	{
-		sTime.Format(_T("%d%c"), (int)(dTime + 0.5), GetUnits(nUnits));
 	}
 	
+	return sTime;
+}
+
+CString CTimeHelper::FormatTimeHMS(int nTime, TH_UNITS nUnits)
+{
+	CString sTime;
+
+	// sanity check
+	if (!IsValidUnit(nUnits))
+		ASSERT(0);
+	else
+		sTime.Format(_T("%d%c"), nTime, GetUnits(nUnits));
+
 	return sTime;
 }
 
@@ -769,7 +777,7 @@ TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits)
 	{
 		TH_UNITS nTHUnits;
 		TCHAR cValidUnit;
-
+		
 		MAPUNIT2CH.GetNextAssoc(pos, nTHUnits, cValidUnit);
 		ASSERT(IsValidUnit(nTHUnits));
 
