@@ -100,18 +100,22 @@ public:
 
 	void Reset();
 
+	BOOL Set(const COleDateTimeRange& dtRange);
 	BOOL Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive = TRUE);
 	BOOL Set(DH_DATE nStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
 	BOOL Set(const COleDateTime& dtStart, DH_DATE nEnd, BOOL bInclusive = TRUE);
 	BOOL Set(const COleDateTime& dtStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 	BOOL Set(DH_DATE nStart, int nEndOffset, DH_UNITS nOffsetUnits, BOOL bInclusive = TRUE);
 
-	BOOL Contains(const COleDateTime& date) const;
+	BOOL Contains(const COleDateTime& date, BOOL bInclusive = TRUE) const;
 	BOOL Contains(const COleDateTimeRange& dtOther) const;
 	BOOL IntersectsWith(const COleDateTimeRange& dtOther) const;
 	BOOL GetIntersection(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
-	BOOL GetUnion(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
-	BOOL GetUnion(const COleDateTimeRange& dtOther, const COleDateTime& date, BOOL bInclusive);
+
+	BOOL Add(const COleDateTimeRange& dtOther1, const COleDateTimeRange& dtOther2);
+	BOOL Add(const COleDateTimeRange& dtOther, const COleDateTime& date, BOOL bInclusive = TRUE);
+	BOOL Add(const COleDateTimeRange& dtOther);
+	BOOL Add(const COleDateTime& date, BOOL bInclusive = TRUE);
 
 	BOOL IsNull() const;
 	BOOL IsValid() const;
@@ -119,7 +123,9 @@ public:
 	BOOL HasEnd() const;
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
-	COleDateTime GetEndInclusive() const; // returns 'end of day' if m_bInclusive is TRUE
+
+	// returns 'end of day' if m_bInclusive is TRUE and date has no time
+	COleDateTime GetEndInclusive() const; 
 
 	int GetDayCount() const;
 	int GetWeekdayCount() const;
@@ -129,6 +135,9 @@ public:
 	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
+
+	// returns 'end of day' if bInclusive is TRUE and date has no time
+	static COleDateTime GetEndInclusive(const COleDateTime& date, BOOL bInclusive);
 
 public:
 	COleDateTime m_dtStart, m_dtEnd;
