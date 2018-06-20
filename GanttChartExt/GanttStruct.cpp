@@ -403,12 +403,12 @@ COleDateTime GANTTITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
 
 void GANTTITEM::SetStartDate(time64_t tDate, BOOL bAndMinMax)
 {
-	return SetStartDate(GetDate(tDate, FALSE), bAndMinMax);
+	SetStartDate(GetDate(tDate, FALSE), bAndMinMax);
 }
 
 void GANTTITEM::SetDueDate(time64_t tDate, BOOL bAndMinMax)
 {
-	return SetDueDate(GetDate(tDate, TRUE), bAndMinMax);
+	SetDueDate(GetDate(tDate, TRUE), bAndMinMax);
 }
 
 void GANTTITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
