@@ -11,7 +11,44 @@
 
 #include "ganttenum.h"
 
+#include "..\Shared\DateHelper.h"
+
 #include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTITEM;
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTDATERANGE : protected COleDateTimeRange
+{
+	GANTTDATERANGE();
+	
+	void Reset();
+	BOOL IsValid() const;
+
+	void Add(const GANTTITEM& gi);
+	void Add(const COleDateTime& dtStart, const COleDateTime& dtEnd);
+
+	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
+
+	COleDateTime GetStart() const;
+	COleDateTime GetEnd() const;
+
+	void SetStart(const COleDateTime& date);
+	void SetEnd(const COleDateTime& date);
+
+	BOOL HasStart() const;
+	BOOL HasEnd() const;
+
+	void ClearStart();
+	void ClearEnd();
+
+	BOOL Contains(const GANTTITEM& gi) const;
+	BOOL operator==(const GANTTDATERANGE& dtOther) const;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -25,8 +62,7 @@ struct GANTTITEM
 	BOOL operator==(const GANTTITEM& gi) const;
 	
 	CString sTitle;
-	COleDateTime dtStart, dtMinStart;
-	COleDateTime dtDue, dtMaxDue; 
+	GANTTDATERANGE dtRange, dtMinMaxRange;
 	COleDateTime dtDone; 
 	COLORREF color;
 	CString sAllocTo;
@@ -39,16 +75,34 @@ struct GANTTITEM
 	int nPosition;
 	BOOL bLocked, bHasIcon;
 	
-	void MinMaxDates(const GANTTITEM& giOther);
 	BOOL IsDone(BOOL bIncGoodAs) const;
-	BOOL HasStart() const;
-	BOOL HasDue() const;
+	BOOL IsMilestone(const CString& sMilestoneTag) const;
+
+	BOOL HasStartDate() const;
+	BOOL HasDueDate() const;
+	BOOL HasDoneDate(BOOL bCalcParentDates) const;
+	BOOL HasColor() const;
+
+	void SetStartDate(time64_t tDate, BOOL bAndMinMax = FALSE);
+	void SetDueDate(time64_t tDate, BOOL bAndMinMax = FALSE);
+	void SetStartDate(const COleDateTime& date, BOOL bAndMinMax = FALSE);
+	void SetDueDate(const COleDateTime& date, BOOL bAndMinMax = FALSE);
+	void SetDoneDate(time64_t tDate);
+	
+	void ClearStartDate(BOOL bAndMinMax = FALSE);
+	void ClearDueDate(BOOL bAndMinMax = FALSE);
+	void ClearDoneDate();
+
+	BOOL GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const;
+	void MinMaxDates(const GANTTITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue);
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor() const;
 	COLORREF GetBorderColor() const;
-	BOOL HasColor() const;
+
+	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,8 +118,11 @@ public:
 	GANTTITEM* GetItem(DWORD dwKey) const;
 	BOOL RestoreItem(const GANTTITEM& giPrev);
 	BOOL ItemIsLocked(DWORD dwTaskID) const;
+
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
-	BOOL IsItemDependentOn(const GANTTITEM* pGI, DWORD dwOtherID) const;
+	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;
+	COleDateTime CalcMaxDependencyDate(const GANTTITEM& gi) const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -106,30 +163,6 @@ protected:
 };
 
 typedef CArray<GANTTDEPENDENCY, GANTTDEPENDENCY&> CGanttDependArray;
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct GANTTDATERANGE
-{
-	GANTTDATERANGE();
-	
-	void Clear();
-	void MinMax(const GANTTITEM& gi);
-	void MinMax(const COleDateTime& date);
-
-	COleDateTime GetStart() const { return dtStart; }
-	COleDateTime GetEnd() const { return dtEnd; }
-	COleDateTime GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-	COleDateTime GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades = TRUE) const;
-
-	BOOL IsValid() const;
-	BOOL IsEmpty() const;
-	BOOL Contains(const GANTTITEM& gi) const;
-	BOOL operator==(const GANTTDATERANGE& range) const;
-
-protected:
-	COleDateTime dtStart, dtEnd;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 

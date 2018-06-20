@@ -229,10 +229,8 @@ GANTTITEM::GANTTITEM(const GANTTITEM& gi)
 GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 {
 	sTitle = gi.sTitle;
-	dtStart = gi.dtStart;
-	dtMinStart = gi.dtMinStart;
-	dtDue = gi.dtDue;
-	dtMaxDue = gi.dtMaxDue;
+	dtRange = gi.dtRange;
+	dtMinMaxRange = gi.dtMinMaxRange;
 	dtDone = gi.dtDone;
 	color = gi.color;
 	sAllocTo = gi.sAllocTo;
@@ -255,10 +253,8 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 {
 	return ((sTitle == gi.sTitle) &&
-			(dtStart == gi.dtStart) &&
-			(dtMinStart == gi.dtMinStart) &&
-			(dtDue == gi.dtDue) &&
-			(dtMaxDue == gi.dtMaxDue) &&
+			(dtRange == gi.dtRange) &&
+			(dtMinMaxRange == gi.dtMinMaxRange) &&
 			(dtDone == gi.dtDone) &&
 			(color == gi.color) &&
 			(sAllocTo == gi.sAllocTo) &&
@@ -280,19 +276,12 @@ GANTTITEM::~GANTTITEM()
 	
 }
 
-void GANTTITEM::MinMaxDates(const GANTTITEM& giOther)
+void GANTTITEM::MinMaxDates(const GANTTITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue)
 {
-	if (giOther.bParent)
-	{
-		CDateHelper::Max(dtMaxDue, giOther.dtMaxDue);
-		CDateHelper::Min(dtMinStart, giOther.dtMinStart);
-	}
-	else // leaf task
-	{
-		CDateHelper::Max(dtMaxDue, giOther.dtDue);
-		CDateHelper::Max(dtMaxDue, giOther.dtDone);
-		CDateHelper::Min(dtMinStart, giOther.dtStart);
-	}
+	COleDateTime dtStart, dtEnd;
+	giOther.GetStartEndDates(bCalcParentDates, bCalcMissingStart, bCalcMissingDue, dtStart, dtEnd);
+
+	dtMinMaxRange.Add(dtStart, dtEnd);
 }
 
 BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
@@ -318,14 +307,23 @@ BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
 	return (pGI && pGI->aDependIDs.GetSize());
 }
 
-BOOL GANTTITEM::HasStart() const
+BOOL GANTTITEM::HasStartDate() const
 {
-	return CDateHelper::IsDateSet(dtStart);
+	return dtRange.HasStart();
 }
 
-BOOL GANTTITEM::HasDue() const
+BOOL GANTTITEM::HasDueDate() const
 {
-	return CDateHelper::IsDateSet(dtDue);
+	return dtRange.HasEnd();
+}
+
+BOOL GANTTITEM::HasDoneDate(BOOL bCalcParentDates) const
+{
+	if (bParent && bCalcParentDates)
+		return FALSE;
+
+	// else
+	return CDateHelper::IsDateSet(dtDone);
 }
 
 COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
@@ -389,6 +387,138 @@ COLORREF GANTTITEM::GetBorderColor() const
 BOOL GANTTITEM::HasColor() const
 {
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
+}
+
+
+COleDateTime GANTTITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
+{
+	COleDateTime date = CDateHelper::GetDate(tDate);
+
+	// only implement 'end of day' if the date has no time
+	if (CDateHelper::IsDateSet(date) && bEndOfDay && !CDateHelper::DateHasTime(date))
+		date = CDateHelper::GetEndOfDay(date);
+
+	return date;
+}
+
+void GANTTITEM::SetStartDate(time64_t tDate, BOOL bAndMinMax)
+{
+	return SetStartDate(GetDate(tDate, FALSE), bAndMinMax);
+}
+
+void GANTTITEM::SetDueDate(time64_t tDate, BOOL bAndMinMax)
+{
+	return SetDueDate(GetDate(tDate, TRUE), bAndMinMax);
+}
+
+void GANTTITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
+{
+	dtRange.SetStart(date);
+
+	if (bAndMinMax)
+		dtMinMaxRange.SetStart(date);
+}
+
+void GANTTITEM::SetDueDate(const COleDateTime& date, BOOL bAndMinMax)
+{
+	dtRange.SetEnd(date);
+
+	if (bAndMinMax)
+		dtMinMaxRange.SetEnd(date);
+}
+
+void GANTTITEM::SetDoneDate(time64_t tDate)
+{
+	dtDone = GetDate(tDate, TRUE);
+}
+
+void GANTTITEM::ClearStartDate(BOOL bAndMinMax)
+{
+	dtRange.ClearStart();
+
+	if (bAndMinMax)
+		dtMinMaxRange.ClearStart();
+}
+
+void GANTTITEM::ClearDueDate(BOOL bAndMinMax)
+{
+	dtRange.ClearEnd();
+
+	if (bAndMinMax)
+		dtMinMaxRange.ClearStart();
+}
+
+void GANTTITEM::ClearDoneDate()
+{
+	CDateHelper::ClearDate(dtDone);
+}
+
+BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const
+{
+	BOOL bDoneSet = FALSE;
+
+	if (bParent && bCalcParentDates)
+	{
+		dtStart = dtMinMaxRange.GetStart();
+		dtDue = dtMinMaxRange.GetEnd();
+	}
+	else
+	{
+		dtStart = dtRange.GetStart();
+		dtDue = dtRange.GetEnd();
+
+		bDoneSet = CDateHelper::IsDateSet(dtDone);
+	}
+
+	// do we need to calculate due date?
+	if (!CDateHelper::IsDateSet(dtDue) && bCalcMissingDue)
+	{
+		// always take completed date if that is set
+		if (bDoneSet)
+		{
+			dtDue = dtDone;
+		}
+		else // take later of start date and today
+		{
+			dtDue = CDateHelper::GetDateOnly(dtStart);
+			CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
+
+			// and move to end of the day
+			dtDue = CDateHelper::GetEndOfDay(dtDue);
+		}
+
+		ASSERT(CDateHelper::IsDateSet(dtDue));
+	}
+
+	// do we need to calculate start date?
+	if (!CDateHelper::IsDateSet(dtStart) && bCalcMissingStart)
+	{
+		// take earlier of due or completed date
+		dtStart = CDateHelper::GetDateOnly(dtDue);
+		CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
+
+		// take the earlier of that and 'today'
+		CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
+
+		ASSERT(CDateHelper::IsDateSet(dtStart));
+	}
+
+	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));
+}
+
+BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
+{
+	if (sMilestoneTag.IsEmpty() || (aTags.GetSize() == 0))
+		return FALSE;
+
+	if (!bParent && !dtRange.HasEnd())
+		return FALSE;
+
+	if (bParent && !dtMinMaxRange.HasEnd())
+		return FALSE;
+
+	// else
+	return Misc::Contains(sMilestoneTag, aTags, FALSE, FALSE);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -465,26 +595,23 @@ BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
 	return FALSE;
 }
 
-BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM* pGI, DWORD dwOtherID) const
+BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const
 {
-	if (!pGI)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	int nDepend = pGI->aDependIDs.GetSize();
+	int nDepend = gi.aDependIDs.GetSize();
 
 	while (nDepend--)
 	{
-		DWORD dwDependID = pGI->aDependIDs[nDepend];
+		DWORD dwDependID = gi.aDependIDs[nDepend];
 		ASSERT(dwDependID);
 
 		if (dwDependID == dwOtherID)
 			return TRUE;
 
 		// else check dependents of dwDependID
-		if (IsItemDependentOn(GetItem(dwDependID), dwOtherID)) // RECURSIVE
+		const GANTTITEM* pGIDepends = GetItem(dwDependID);
+		ASSERT(pGIDepends);
+
+		if (pGIDepends && IsItemDependentOn(*pGIDepends, dwOtherID)) // RECURSIVE CALL
 			return TRUE;
 	}
 	
@@ -492,38 +619,68 @@ BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM* pGI, DWORD dwOtherID) con
 	return FALSE;
 }
 
+COleDateTime CGanttItemMap::CalcMaxDependencyDate(const GANTTITEM& gi) const
+{
+	COleDateTime dtMax;
+	CDateHelper::ClearDate(dtMax);
+
+	int nDepend = gi.aDependIDs.GetSize();
+
+	while (nDepend--)
+	{
+		DWORD dwDependID = gi.aDependIDs[nDepend];
+		ASSERT(dwDependID);
+
+		if (HasItem(dwDependID))
+		{
+			const GANTTITEM* pGIDepends = GetItem(dwDependID);
+			ASSERT(pGIDepends);
+
+			if (pGIDepends)
+				CDateHelper::Max(dtMax, pGIDepends->dtRange.GetEnd());
+		}
+	}
+
+	return dtMax;
+}
+
 //////////////////////////////////////////////////////////////////////
 
-GANTTDATERANGE::GANTTDATERANGE()
+GANTTDATERANGE::GANTTDATERANGE() : COleDateTimeRange()
 {
-	Clear();
+	m_bInclusive = FALSE; // always
 }
 
-void GANTTDATERANGE::Clear()
+BOOL GANTTDATERANGE::IsValid() const
 {
-	CDateHelper::ClearDate(dtStart);
-	CDateHelper::ClearDate(dtEnd);
+	ASSERT(!m_bInclusive);
+
+	return (COleDateTimeRange::IsValid() && !m_bInclusive);
 }
 
-void GANTTDATERANGE::MinMax(const GANTTITEM& gi)
+void GANTTDATERANGE::Add(const GANTTITEM& gi)
 {
-	MinMax(gi.dtStart);
-	MinMax(gi.dtDue);
-	MinMax(gi.dtDone);
+	if (gi.IsDone(FALSE))
+		Add(gi.dtRange.m_dtStart, gi.dtDone);
+	else
+		Add(gi.dtRange.m_dtStart, gi.dtRange.m_dtEnd);
 }
 
-void GANTTDATERANGE::MinMax(const COleDateTime& date)
-{
-	CDateHelper::Min(dtStart, date);
-	CDateHelper::Max(dtEnd, date);
+void GANTTDATERANGE::Add(const COleDateTime& dtStart, const COleDateTime& dtEnd) 
+{ 
+	// bInclusive always FALSE
+	CDateHelper::Min(m_dtStart, dtStart);
+	CDateHelper::Max(m_dtEnd, dtEnd);
 }
 
 COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
+	ASSERT(!m_bInclusive); // always
+
 	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
 
-	if (CDateHelper::IsDateSet(dtStart))
-		dtTemp = dtStart;
+	if (CDateHelper::IsDateSet(m_dtStart))
+		dtTemp = m_dtStart;
 
 	switch (nDisplay)
 	{
@@ -560,10 +717,12 @@ COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBas
 
 COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
+	ASSERT(!m_bInclusive); // always
+
 	COleDateTime dtTemp = COleDateTime::GetCurrentTime();
 
-	if (CDateHelper::IsDateSet(dtEnd))
-		dtTemp = dtEnd;
+	if (CDateHelper::IsDateSet(m_dtEnd))
+		dtTemp = m_dtEnd;
 
 	switch (nDisplay)
 	{
@@ -598,35 +757,90 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	return dtTemp;
 }
 
-BOOL GANTTDATERANGE::IsValid() const
-{
-	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtEnd) &&
-			(dtStart <= dtEnd));
-}
-
-BOOL GANTTDATERANGE::IsEmpty() const
-{
-	ASSERT(IsValid());
-
-	return (dtEnd == dtStart);
-}
-
 BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
 {
 	ASSERT(IsValid());
 
-	if (!gi.HasStart() || (gi.dtStart < dtStart) || (gi.dtStart > dtEnd))
+	if (!gi.HasStartDate() || (gi.dtRange.m_dtStart < m_dtStart) || (gi.dtRange.m_dtStart > m_dtEnd))
 		return FALSE;
 
-	if (!gi.HasDue() || (gi.dtDue < dtStart) || (gi.dtDue > dtEnd))
+	if (!gi.HasDueDate() || (gi.dtRange.m_dtEnd < m_dtStart) || (gi.dtRange.m_dtEnd > m_dtEnd))
 		return FALSE;
 
 	return TRUE;
 }
 
-BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& range) const
+BOOL GANTTDATERANGE::operator==(const GANTTDATERANGE& dtOther) const
 {
-	return ((dtStart == range.dtStart) && (dtEnd == range.dtEnd));
+	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always
+
+	return ((m_dtStart == dtOther.m_dtStart) && (m_dtEnd == dtOther.m_dtEnd));
+}
+
+void GANTTDATERANGE::SetStart(const COleDateTime& date)
+{
+	ASSERT(!m_bInclusive); // always
+
+	m_dtStart = date;
+}
+
+void GANTTDATERANGE::SetEnd(const COleDateTime& date)
+{
+	ASSERT(!m_bInclusive); // always
+
+	if (!CDateHelper::DateHasTime(date))
+		m_dtEnd = CDateHelper::GetEndOfDay(date);
+	else
+		m_dtEnd = date;
+}
+
+void GANTTDATERANGE::ClearStart()
+{
+	ASSERT(!m_bInclusive); // always
+
+	CDateHelper::ClearDate(m_dtStart);
+}
+
+void GANTTDATERANGE::ClearEnd()
+{
+	ASSERT(!m_bInclusive); // always
+
+	CDateHelper::ClearDate(m_dtEnd);
+}
+
+void GANTTDATERANGE::Reset()
+{
+	COleDateTimeRange::Reset();
+
+	m_bInclusive = FALSE; // always
+}
+
+COleDateTime GANTTDATERANGE::GetStart() const 
+{ 
+	ASSERT(!m_bInclusive); // always
+
+	return COleDateTimeRange::GetStart(); 
+}
+
+COleDateTime GANTTDATERANGE::GetEnd() const 
+{ 
+	ASSERT(!m_bInclusive); // always
+
+	return COleDateTimeRange::GetEnd(); 
+}
+
+BOOL GANTTDATERANGE::HasStart() const 
+{ 
+	ASSERT(!m_bInclusive); // always
+
+	return COleDateTimeRange::HasStart(); 
+}
+
+BOOL GANTTDATERANGE::HasEnd() const 
+{ 
+	ASSERT(!m_bInclusive); // always
+
+	return COleDateTimeRange::HasEnd(); 
 }
 
 //////////////////////////////////////////////////////////////////////

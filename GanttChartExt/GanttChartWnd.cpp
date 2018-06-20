@@ -1037,8 +1037,8 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 				
 				// if the pre-drag start or due dates were not set
 				// we set them explicitly else we offset the task
-				BOOL bStartSet = CDateHelper::IsDateSet(pGIPreDrag->dtStart);
-				BOOL bDueSet = CDateHelper::IsDateSet(pGIPreDrag->dtDue);
+				BOOL bStartSet = pGIPreDrag->HasStartDate();
+				BOOL bDueSet = pGIPreDrag->HasDueDate();
 
 				if (bStartSet && bDueSet)
 				{

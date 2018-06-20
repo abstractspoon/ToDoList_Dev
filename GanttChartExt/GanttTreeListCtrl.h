@@ -337,7 +337,6 @@ protected:
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
-	COleDateTime CalcMinDragDate(const GANTTITEM& gi) const;
 	double CalcMinDragDuration() const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
@@ -350,18 +349,19 @@ protected:
 	int RecalcTreeColumnWidth(int nCol, CDC* pDC);
 	int CalcTreeColumnWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
-	CString GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nColID) const;
-	BOOL IsMilestone(const GANTTITEM& gi) const;
 	int CalcWidestItemTitle(HTREEITEM htiParent, CDC* pDC, BOOL bEnd) const;
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
-	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
-	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
 	CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0) const;
 
-	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
+	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
+	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
+	CString GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nColID) const;
 	void GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
- 	COLORREF GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
+	COLORREF GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	COLORREF GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const;
+	BOOL GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
+
+	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	void SetColor(COLORREF& color, COLORREF crNew);
 	COLORREF GetRowColor(int nItem) const;
 
@@ -370,13 +370,10 @@ protected:
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib, BOOL bAndSiblings);
 	void RecalcParentDates();
 	void RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI);
-	BOOL GetTaskStartDueDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
-	BOOL HasDisplayDates(const GANTTITEM& gi) const;
-	BOOL HasDoneDate(const GANTTITEM& gi) const;
 	void RefreshTreeItemMap();
 	void UpdateParentStatus(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void UpdateParentStatus(DWORD dwOldParentID, DWORD dwNewParentID);
-
+	
 	BOOL EditWantsResort(IUI_UPDATETYPE nUpdate, const CSet<IUI_ATTRIBUTE>& attrib) const;
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
@@ -405,7 +402,6 @@ protected:
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
-	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static BOOL CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
