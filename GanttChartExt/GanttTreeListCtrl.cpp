@@ -1078,8 +1078,8 @@ void CGanttTreeListCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 
 	RefreshTreeItemMap();
-	ExpandList();
 	RefreshItemBoldState();
+	ExpandList();
 }
 
 void CGanttTreeListCtrl::RefreshTreeItemMap()
@@ -1095,25 +1095,10 @@ void CGanttTreeListCtrl::RecalcDateRange()
 	{
 		GANTTDATERANGE prevRange = m_dateRange;
 
-		m_dateRange.Reset();
-
-		POSITION pos = m_data.GetStartPosition();
-		GANTTITEM* pGI = NULL;
-		DWORD dwTaskID = 0;
-
-		while (pos)
-		{
-			m_data.GetNextAssoc(pos, dwTaskID, pGI);
-			ASSERT(pGI);
-
-			if (pGI)
-			{
-				COleDateTime dtStart, dtEnd;
-				GetTaskStartEndDates(*pGI, dtStart, dtEnd);
-
-				m_dateRange.Add(dtStart, dtEnd);
-			}
-		}
+		m_data.CalcDateRange(HasOption(GTLCF_CALCPARENTDATES),
+							HasOption(GTLCF_CALCMISSINGSTARTDATES),
+							HasOption(GTLCF_CALCMISSINGDUEDATES), 
+							m_dateRange);
 
 		if (!(m_dateRange == prevRange))
 		{
@@ -3857,7 +3842,7 @@ void CGanttTreeListCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const C
 	}
 
 	CRect rText(rItem);
-	rText.left = (nTextPos + 3);
+	rText.left = nTextPos;
 	rText.top += 2;
 
 	COLORREF crFill, crBorder;

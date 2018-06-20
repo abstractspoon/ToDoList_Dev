@@ -123,6 +123,8 @@ public:
 	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;
 	COleDateTime CalcMaxDependencyDate(const GANTTITEM& gi) const;
 
+	void CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, GANTTDATERANGE& dtRange);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

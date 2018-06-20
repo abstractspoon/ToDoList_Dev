@@ -644,6 +644,29 @@ COleDateTime CGanttItemMap::CalcMaxDependencyDate(const GANTTITEM& gi) const
 	return dtMax;
 }
 
+void CGanttItemMap::CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, GANTTDATERANGE& dtRange)
+{
+	dtRange.Reset();
+
+	POSITION pos = GetStartPosition();
+	GANTTITEM* pGI = NULL;
+	DWORD dwTaskID = 0;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pGI);
+		ASSERT(pGI);
+
+		if (pGI)
+		{
+			COleDateTime dtStart, dtEnd;
+			pGI->GetStartEndDates(bCalcParentDates, bCalcMissingStart, bCalcMissingDue, dtStart, dtEnd);
+
+			dtRange.Add(dtStart, dtEnd);
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GANTTDATERANGE::GANTTDATERANGE() : COleDateTimeRange()
