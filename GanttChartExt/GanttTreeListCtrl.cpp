@@ -1089,6 +1089,8 @@ void CGanttTreeListCtrl::RefreshTreeItemMap()
 
 void CGanttTreeListCtrl::RecalcDateRange()
 {
+	RecalcParentDates();
+
 	if (m_data.GetCount())
 	{
 		GANTTDATERANGE prevRange = m_dateRange;
@@ -1112,8 +1114,6 @@ void CGanttTreeListCtrl::RecalcDateRange()
 				m_dateRange.Add(dtStart, dtEnd);
 			}
 		}
-
-		RecalcParentDates();
 
 		if (!(m_dateRange == prevRange))
 		{
