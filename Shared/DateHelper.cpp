@@ -250,11 +250,8 @@ BOOL COleDateTimeRange::Add(const COleDateTime& date, BOOL bInclusive)
 
 	m_bInclusive |= bInclusive;
 			
-	if (CDateHelper::IsEndOfDay(m_dtEnd))
-	{
+	if (m_bInclusive && CDateHelper::IsEndOfDay(m_dtEnd))
 		m_dtEnd = CDateHelper::GetDateOnly(m_dtEnd);
-		m_bInclusive = TRUE;
-	}
 
 	// Result must logically be valid
 	ASSERT(IsValid());
