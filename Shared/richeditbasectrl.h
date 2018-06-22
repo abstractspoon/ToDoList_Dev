@@ -40,6 +40,7 @@
 #	define EM_GETEDITSTYLE			(WM_USER + 205)
 
 // Extended edit style masks 
+#	define SES_NOFOCUSLINKNOTIFY	0x00000020
 #	define SES_USECTF				0x00010000
 #	define SES_CTFALLOWEMBED		0x00200000
 #	define SES_CTFALLOWSMARTTAG		0x00400000
@@ -86,6 +87,17 @@ enum // REBC_BORDERS
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#ifndef AURL_ENABLEURL
+#	define	AURL_ENABLEURL			0x01
+#	define	AURL_ENABLEEMAILADDR	0x02
+#	define	AURL_ENABLETELNO		0x04
+#	define	AURL_ENABLEEAURLS		0x08
+#	define	AURL_ENABLEDRIVELETTERS	0x10
+#	define	AURL_DISABLEMIXEDLGC	0x20
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 // CRichEditBaseCtrl window
 
 class CRichEditBaseCtrl : public CRichEditCtrl, protected IFindReplaceCmdHandler
@@ -115,7 +127,6 @@ public:
 	BOOL SetTextEx(const CString& sText, DWORD dwFlags = ST_KEEPUNDO | ST_SELECTION, UINT nCodePage = CP_ACP); 
 
 	void EnableSelectOnFocus(BOOL bEnable) { m_bEnableSelectOnFocus = bEnable; }
-	void SelectCurrentWord();
 	BOOL CanEdit() const;
 
 	BOOL PasteSpecial(CLIPFORMAT nFormat); // EM_PASTESPECIAL
@@ -169,6 +180,10 @@ public:
 	void SetParaAlignment(int alignment);
 	BOOL GetParaAlignment() const;
 	BOOL SetSelectedWebLink(const CString& sWebLink, const CString& sText);
+
+	BOOL EnableAutoUrlDetection(DWORD dwFlags = AURL_ENABLEURL);
+	BOOL EnableAutoUrlDetection(const CStringArray& aProtocols, DWORD dwFlags = AURL_ENABLEURL);
+	BOOL IsAutoUrlDetectionEnabled() const;
 
 	// Attributes
 protected:
@@ -272,6 +287,7 @@ protected:
 	BOOL SameAsSelected(LPCTSTR lpszCompare, BOOL bCase, BOOL bWord);
 	BOOL IsFindDialog(HWND hwnd) const;
 	BOOL InsertSoftReturn();
+	void Initialise();
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);

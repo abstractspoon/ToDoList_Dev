@@ -119,9 +119,7 @@ int CRichEditBaseCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	ASSERT_VALID(this);
 	
-	SetOLECallback(&m_callback);
-	EnableInlineSpellChecking(TRUE);
-	EnableAutoFontChanging(FALSE);
+	Initialise();
 		
 	return 0;
 }
@@ -152,10 +150,17 @@ void CRichEditBaseCtrl::OnDestroy()
 
 void CRichEditBaseCtrl::PreSubclassWindow() 
 {
+	Initialise();
+
+	CRichEditCtrl::PreSubclassWindow();
+}
+
+void CRichEditBaseCtrl::Initialise()
+{
 	SetOLECallback(&m_callback);
 	EnableInlineSpellChecking(TRUE);
-	
-	CRichEditCtrl::PreSubclassWindow();
+	EnableAutoFontChanging(FALSE);
+	EnableAutoUrlDetection();
 }
 
 BOOL CRichEditBaseCtrl::Undo()
@@ -329,20 +334,6 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 	delete [] szChar;
 
 	return sText;
-}
-
-void CRichEditBaseCtrl::SelectCurrentWord()
-{
-	CHARRANGE cr;
-	GetSel(cr);
-
-	if (cr.cpMin == cr.cpMax) // nothing already selected
-	{
-		cr.cpMin = SendMessage(EM_FINDWORDBREAK, WB_LEFT, cr.cpMin);
-		cr.cpMax = SendMessage(EM_FINDWORDBREAK, WB_RIGHTBREAK, cr.cpMax + 1);
-
-		SetSel(cr);
-	}
 }
 
 BOOL CRichEditBaseCtrl::InsertSoftReturn()
@@ -1361,4 +1352,51 @@ BOOL CRichEditBaseCtrl::SetSelectedWebLink(const CString& sWebLink, const CStrin
 	sRTFLink.Format(RTF_LINK, sWebLink, sLinkText);
 
 	return SetTextEx(sRTFLink);
+}
+
+BOOL CRichEditBaseCtrl::EnableAutoUrlDetection(DWORD dwFlags)
+{
+	if (SendMessage(EM_AUTOURLDETECT, dwFlags, NULL) != 0)
+		return FALSE;
+
+	EnableEditStyles(SES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
+	SetEventMask(GetEventMask() | ENM_LINK);
+
+	return TRUE;
+}
+
+BOOL CRichEditBaseCtrl::EnableAutoUrlDetection(const CStringArray& aProtocols, DWORD dwFlags)
+{
+	if (!dwFlags || !aProtocols.GetSize())
+		return EnableAutoUrlDetection(dwFlags);
+
+	// Don't allow custom protocols if not Vista of above
+	if (COSVersion() < OSV_VISTA)
+		return FALSE;
+
+	// Build list of protocols
+	CString sProtocols;
+	int nProt = aProtocols.GetSize();
+
+	while (nProt--)
+	{
+		CString sProtocol(aProtocols[nProt]);
+		sProtocol.TrimRight(_T(":/"));
+
+		sProtocols += sProtocol;
+		sProtocols += ':';
+	}
+
+	if (SendMessage(EM_AUTOURLDETECT, dwFlags, (LPARAM)(LPCTSTR)sProtocols) != 0)
+		return FALSE;
+	
+	EnableEditStyles(SES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
+	SetEventMask(GetEventMask() | ENM_LINK);
+
+	return TRUE;
+}
+
+BOOL CRichEditBaseCtrl::IsAutoUrlDetectionEnabled() const
+{
+	return ::SendMessage(GetSafeHwnd(), EM_GETAUTOURLDETECT, 0, 0);
 }

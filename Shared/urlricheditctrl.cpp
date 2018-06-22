@@ -35,7 +35,7 @@ const UINT PAUSE = 1000; // 1 second
 
 CUrlRichEditCtrl::CUrlRichEditCtrl() 
 	: 
-	m_nContextUrl(-1), 
+	m_sContextUrl(-1), 
 	m_lpDragObject(NULL),
 	m_nFileProtocol(-1), 
 	m_nFileProtocol2(-1)
@@ -74,6 +74,8 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSKEYDOWN()
 	ON_WM_TIMER()
+	ON_WM_MOUSEMOVE()
+	ON_WM_SETCURSOR()
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -95,8 +97,22 @@ int CUrlRichEditCtrl::AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify)
 		PROTOCOL prot(szProtocol, bWantNotify);
 		return m_aProtocols.Add(prot);
 	}
+
+	if (GetSafeHwnd())
+		EnableAutoUrlDetection();
 	
 	return nExist;
+}
+
+BOOL CUrlRichEditCtrl::EnableAutoUrlDetection()
+{
+	if (!m_aProtocols.GetSize())
+		return CRichEditBaseCtrl::EnableAutoUrlDetection();
+
+	CStringArray aProtocols;
+	VERIFY(GetProtocols(aProtocols));
+
+	return CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols);
 }
 
 int CUrlRichEditCtrl::MatchProtocol(LPCTSTR szText) const
@@ -114,13 +130,45 @@ int CUrlRichEditCtrl::MatchProtocol(LPCTSTR szText) const
    return -1;
 }
 
+CString CUrlRichEditCtrl::GetUrlAsFile(const CString& sUrl)
+{
+	if (WebMisc::IsFileURI(sUrl))
+	{
+		CString sFilePath;
+		
+		if (WebMisc::DecodeFileURI(sUrl, sFilePath))
+		{
+			FileMisc::ExpandPathEnvironmentVariables(sFilePath);
+			return sFilePath;
+		}
+	}
+	
+	// else
+	return sUrl;
+}
+
+int CUrlRichEditCtrl::GetProtocols(CStringArray& aProtocols) const
+{
+	aProtocols.RemoveAll();
+
+	int nNumProt = m_aProtocols.GetSize();
+	
+	for (int nProt = 0; nProt < nNumProt; nProt++)
+		aProtocols.Add(m_aProtocols[nProt].sProtocol);
+
+	return aProtocols.GetSize();
+}
+
 BOOL CUrlRichEditCtrl::OnChangeText() 
 {
-	// kill any existing timer
-	KillTimer(TIMER_REPARSE);
+	if (!IsAutoUrlDetectionEnabled())
+	{
+		// kill any existing timer
+		KillTimer(TIMER_REPARSE);
 
-	// and start a new one
-	SetTimer(TIMER_REPARSE, PAUSE, NULL);
+		// and start a new one
+		SetTimer(TIMER_REPARSE, PAUSE, NULL);
+	}
 	
 	return FALSE;
 }
@@ -151,34 +199,50 @@ LRESULT CUrlRichEditCtrl::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	return nNumFiles;
 }
 
-void CUrlRichEditCtrl::PreSubclassWindow() 
+void CUrlRichEditCtrl::Initialise()
 {
-	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE );
+	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE | ENM_LINK);
 	DragAcceptFiles();
 	
 	// enable multilevel undo
 	SendMessage(EM_SETTEXTMODE, TM_MULTILEVELUNDO);
 
-	m_ncBorder.Initialize(GetSafeHwnd());
+	// Enable custom protocol handling
+	EnableAutoUrlDetection();
 
+	m_ncBorder.Initialize(GetSafeHwnd());
+}
+
+void CUrlRichEditCtrl::PreSubclassWindow() 
+{
 	CRichEditBaseCtrl::PreSubclassWindow();
+
+	Initialise();
 }
 
 LRESULT CUrlRichEditCtrl::OnSetText(WPARAM /*wp*/, LPARAM lp)
 {
-	// eat duplicate messages
-	CString sText;
-	GetWindowText(sText);
-	
-	BOOL bChange = (sText != (LPCTSTR)lp);
 	LRESULT lr = 0;
-	
-	if (bChange)
+
+	if (IsAutoUrlDetectionEnabled())
 	{
-		CRichEditHelper::ClearUndo(GetSafeHwnd());
-		
 		lr = Default();
-		ParseAndFormatText(TRUE);
+	}
+	else
+	{
+		CString sText;
+		GetWindowText(sText);
+		
+		// eat duplicate messages
+		BOOL bChange = (sText != (LPCTSTR)lp);
+		
+		if (bChange)
+		{
+			CRichEditHelper::ClearUndo(GetSafeHwnd());
+			
+			lr = Default();
+			ParseAndFormatText(TRUE);
+		}
 	}
 	
 	return lr;
@@ -187,9 +251,40 @@ LRESULT CUrlRichEditCtrl::OnSetText(WPARAM /*wp*/, LPARAM lp)
 LRESULT CUrlRichEditCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	LRESULT lr = Default();
-	ParseAndFormatText(TRUE);
+
+	if (!IsAutoUrlDetectionEnabled())
+	{
+		ParseAndFormatText(TRUE);
+	}
 	
 	return lr;
+}
+
+BOOL CUrlRichEditCtrl::FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const
+{
+	ASSERT(szPos && szText);
+	ASSERT(szPos >= szText);
+	ASSERT(szPos < (szText + nTextLen));
+
+	// Allow for start of a line but no other delimiter
+	if (*szPos == '\n')
+	{
+		szPos++;
+	}
+	else if (IsBaseDelim(szPos))
+	{
+		return FALSE; // between words
+	}
+
+	while (szPos > szText)
+	{
+		if (IsBaseDelim(szPos - 1))
+			break;
+
+		szPos--;
+	}
+
+	return (MatchProtocol(szPos) != -1);
 }
 
 BOOL CUrlRichEditCtrl::FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile)
@@ -277,6 +372,9 @@ BOOL CUrlRichEditCtrl::IsFileProtocol(int nProtocol) const
 
 void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 {
+	if (IsAutoUrlDetectionEnabled())
+		return;
+
 	KillTimer(TIMER_REPARSE);
 	AF_NOREENTRANT // prevent reentrancy
 		
@@ -344,7 +442,6 @@ void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 			urli.cr.cpMin = nUrlStart;
 			urli.cr.cpMax = (nUrlStart + nUrlLen);
 			urli.sUrl = CString(szUrlStart, nUrlLen);
-			urli.bWantNotify = m_aProtocols[nProt].bWantNotify;
 			
 			InsertInOrder(urli, aUrls);
 		}
@@ -429,8 +526,10 @@ void CUrlRichEditCtrl::ParseAndFormatText(BOOL bForceReformat)
 	}
 }
 
-BOOL CUrlRichEditCtrl::UrlsMatch(const CUrlArray& aUrls)
+BOOL CUrlRichEditCtrl::UrlsMatch(const CUrlArray& aUrls) const
 {
+	ASSERT(!IsAutoUrlDetectionEnabled());
+
 	int nUrls = aUrls.GetSize();
 
 	if (nUrls !=  m_aUrls.GetSize())
@@ -465,17 +564,12 @@ void CUrlRichEditCtrl::InsertInOrder(URLITEM& urli, CUrlArray& aUrls)
 	aUrls.InsertAt(0, urli);
 }
 
-BOOL CUrlRichEditCtrl::GoToUrl(int nUrl) const
+BOOL CUrlRichEditCtrl::GoToUrl(const CString& sUrl) const
 {
-	if (nUrl < 0 || nUrl >= m_aUrls.GetSize())
-		return FALSE;
-	
-	const URLITEM& urli = m_aUrls[nUrl];
+	int nProtocol = MatchProtocol(sUrl);
 		
-	if (!urli.bWantNotify)
+	if ((nProtocol != -1) && !m_aProtocols[nProtocol].bWantNotify)
 	{
-		CString sUrl = GetUrl(nUrl, TRUE);
-
 		// Handle Outlook manually because under Windows 10 ShellExecute 
 		// will succeed even if Outlook is not installed
 		if (CMSOutlookHelper::IsOutlookUrl(sUrl))
@@ -483,21 +577,29 @@ BOOL CUrlRichEditCtrl::GoToUrl(int nUrl) const
 			if (CMSOutlookHelper::HandleUrl(*this, sUrl))
 				return TRUE;
 		}
+		else if (WebMisc::IsFileURI(sUrl))
+		{
+			if (FileMisc::Run(*this, GetUrlAsFile(sUrl)) >= SE_ERR_SUCCESS)
+			{
+				return TRUE;
+			}
+		}
 		else if (FileMisc::Run(*this, sUrl) >= SE_ERR_SUCCESS)
 		{
 			return TRUE;
 		}
 
-		// else forward to parent
+		// All else forward to parent
 		SendNotifyFailedUrl(sUrl);
 		return FALSE;
 	}
 
 	// else
-	SendNotifyCustomUrl(urli.sUrl);
+	SendNotifyCustomUrl(sUrl);
 	return TRUE;
 }
 
+/*
 BOOL CUrlRichEditCtrl::CopyUrlToClipboard(int nUrl) const
 {
 	if (nUrl < 0 || nUrl >= m_aUrls.GetSize())
@@ -505,6 +607,7 @@ BOOL CUrlRichEditCtrl::CopyUrlToClipboard(int nUrl) const
 	
 	return CClipboard(*this).SetText(GetUrl(nUrl, TRUE));
 }
+*/
 
 LRESULT CUrlRichEditCtrl::SendNotifyCustomUrl(LPCTSTR szUrl) const
 {
@@ -717,30 +820,13 @@ HRESULT CUrlRichEditCtrl::GetContextMenu(WORD /*seltype*/, LPOLEOBJECT /*lpoleob
 
 /////////////////////////////////////////////////////////////////////////////
 
-CString CUrlRichEditCtrl::GetUrl(int nURL, BOOL bAsFile) const
+CString CUrlRichEditCtrl::GetContextUrl(BOOL bAsFile) const
 {
-	ASSERT (nURL >= 0 && nURL < m_aUrls.GetSize());
-	
-	if ((nURL >= 0) && (nURL < m_aUrls.GetSize()))
-	{
-		CString sUrl(m_aUrls[nURL].sUrl);
-		
-		if (bAsFile && WebMisc::IsFileURI(sUrl))
-		{
-			CString sFilePath;
-
-			if (WebMisc::DecodeFileURI(sUrl, sFilePath))
-			{
-				FileMisc::ExpandPathEnvironmentVariables(sFilePath);
-				sUrl = sFilePath;
-			}
-		}
-		
-		return sUrl;
-	}
+	if (bAsFile)
+		return GetUrlAsFile(m_sContextUrl);
 	
 	// else
-	return "";
+	return m_sContextUrl;
 }
 
 CString CUrlRichEditCtrl::CreateFileLink(LPCTSTR szFile)
@@ -875,7 +961,9 @@ void CUrlRichEditCtrl::PathReplaceSel(LPCTSTR lpszPath, BOOL bFile)
 	}
 	
 	ReplaceSel(sPath, TRUE);
-	ParseAndFormatText();
+
+	if (!IsAutoUrlDetectionEnabled())
+		ParseAndFormatText();
 	
 	// set the new selection to be the dropped text
 	SetSel(crSelOrg.cpMin, crSelOrg.cpMin + sPath.GetLength());
@@ -889,10 +977,13 @@ void CUrlRichEditCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		m_ptContextMenu = GetCaretPos();
 		
 		// does this location lie on a url?
-		m_nContextUrl = FindUrl(m_ptContextMenu);
-		
-		// convert point to screen coords for WM_CONTEXTMENU handling
-		ClientToScreen(&m_ptContextMenu);
+		if (SelectionHasEffect(CFM_LINK, CFE_LINK))
+			m_sContextUrl = FindUrl(m_ptContextMenu);
+		else
+			m_sContextUrl.Empty();
+
+		ClientToScreen(&m_ptContextMenu); // for WM_CONTEXTMENU handling
+
 	}
 	
 	CRichEditBaseCtrl::OnKeyUp(nChar, nRepCnt, nFlags);
@@ -900,17 +991,17 @@ void CUrlRichEditCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CUrlRichEditCtrl::OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	if (nChar == VK_F10 && GetKeyState(VK_SHIFT))
+	if ((nChar == VK_F10) && GetKeyState(VK_SHIFT))
 	{
 		m_ptContextMenu = GetCaretPos();
-
+		
 		// does this location lie on a url?
-		m_nContextUrl = FindUrl(m_ptContextMenu);
-
-		// convert point to screen coords
-		ClientToScreen(&m_ptContextMenu);
-
-		// eat message else we'll get a WM_KEYUP with VK_APPS
+		if (SelectionHasEffect(CFM_LINK, CFE_LINK))
+			m_sContextUrl = FindUrl(m_ptContextMenu);
+		else
+			m_sContextUrl.Empty();
+		
+		ClientToScreen(&m_ptContextMenu); // for WM_CONTEXTMENU handling
 	}
 
 	CRichEditBaseCtrl::OnSysKeyDown(nChar, nRepCnt, nFlags);
@@ -918,8 +1009,6 @@ void CUrlRichEditCtrl::OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CUrlRichEditCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	m_nContextUrl = FindUrl(point);
-	
 	// move the caret to the pos clicked
 	int nChar = CharFromPoint(point);
 	
@@ -933,6 +1022,9 @@ void CUrlRichEditCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 		if (!ContainsPos(crSel, nChar))
 			SetSel(nChar, nChar);
 	}
+
+	// OnNotifyLink will handle setting this
+	m_sContextUrl.Empty();
 	
 	CRichEditBaseCtrl::OnRButtonDown(nFlags, point);
 }
@@ -941,10 +1033,7 @@ void CUrlRichEditCtrl::OnRButtonUp(UINT nHitTest, CPoint point)
 {
 	m_ptContextMenu = point;
 	ClientToScreen(&m_ptContextMenu);
-	
-	if (FindUrl(point) != m_nContextUrl)
-		m_nContextUrl = -1;
-	
+
 	CRichEditBaseCtrl::OnRButtonUp(nHitTest, point);
 }
 
@@ -958,13 +1047,7 @@ int CUrlRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CRichEditBaseCtrl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE | ENM_LINK);
-	DragAcceptFiles();
-	
-	// enable multilevel undo
-	SendMessage(EM_SETTEXTMODE, TM_MULTILEVELUNDO);
-
-	m_ncBorder.Initialize(GetSafeHwnd());
+	Initialise();
 
 	return 0;
 }
@@ -972,9 +1055,27 @@ int CUrlRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CUrlRichEditCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point) 
 {
 	// if we arrived here then it means that noone had derived
-	// from us and handled OnContextMenu. sow e must forward to 
+	// from us and handled OnContextMenu. so we must forward to 
 	// our parent else we'll end up in a recursive loop
 	GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), MAKELPARAM(point.x, point.y));
+}
+
+BOOL CUrlRichEditCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// OnNotifyLink will update
+	if (!Misc::IsKeyPressed(VK_LBUTTON) && !Misc::IsKeyPressed(VK_RBUTTON))
+		m_sContextUrl.Empty();
+	
+	return CRichEditBaseCtrl::OnSetCursor(pWnd, nHitTest, message);
+}
+
+void CUrlRichEditCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// OnNotifyLink will update
+	if (!Misc::IsKeyPressed(VK_LBUTTON) && !Misc::IsKeyPressed(VK_RBUTTON))
+		m_sContextUrl.Empty();
+	
+	CRichEditBaseCtrl::OnMouseMove(nFlags, point);
 }
 
 BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
@@ -985,6 +1086,8 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 	switch (pENL->msg)
 	{
 	case WM_SETCURSOR:
+		m_sContextUrl = GetTextRange(pENL->chrg);
+
 		if (bShift)
 		{
 			// because we're overriding the default behaviour we need to
@@ -1005,8 +1108,13 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 		break;
 
+	case WM_RBUTTONDOWN:
+	case WM_MOUSEMOVE:
+		m_sContextUrl = GetTextRange(pENL->chrg);
+		break;
+
 	case WM_LBUTTONDOWN:
-		m_nContextUrl = FindUrl(pENL->chrg);
+		m_sContextUrl = GetTextRange(pENL->chrg);
 		
 		// Shift allows clicking on the link without opening it
 		if (bShift)
@@ -1017,7 +1125,7 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 			SetSel(nPos, nPos);
 			
 			// eat
-			m_nContextUrl = -1;
+			m_sContextUrl.Empty();
 			return TRUE; // we handle it
 		}
 		break;
@@ -1025,95 +1133,100 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 	case WM_LBUTTONUP:
 		if (!bShift)
 		{
-			int nUrl = FindUrl(pENL->chrg);
+			CString sUrl = GetTextRange(pENL->chrg);
 
-			if (nUrl == -1)
-			{
-				CString sUrl = GetTextRange(pENL->chrg);
-				FileMisc::Run(*this, sUrl);
-			}
-			else if (nUrl == m_nContextUrl)
-			{
-				if (!bShift)
-					GoToUrl(m_nContextUrl);
-			}
+			if (!sUrl.IsEmpty() && (m_sContextUrl == sUrl))
+				GoToUrl(m_sContextUrl);
 		}
-		m_nContextUrl = -1;
 		return TRUE; // we handle all links
 	}
 
 	return FALSE;
 }
 
-int CUrlRichEditCtrl::FindUrl(const CHARRANGE& cr) const
+CString CUrlRichEditCtrl::FindUrl(const CPoint& point) const
 {
-	int nUrl = m_aUrls.GetSize();
-	
-	while (nUrl--)
-	{
-		const URLITEM& urli = m_aUrls[nUrl];
-		
-		if (urli.cr == cr)
-			return nUrl;
-	}
-
-	// not found
-	return -1;
+	return FindUrl(CharFromPoint(point));
 }
 
-int CUrlRichEditCtrl::FindUrl(const CPoint& point) const
+CString CUrlRichEditCtrl::FindUrl(int nPos) const
 {
-	int nPos = CharFromPoint(point);
-
 	if (nPos >= 0)
 	{
-		int nUrl = m_aUrls.GetSize();
-
-		while (nUrl--)
+		if (IsAutoUrlDetectionEnabled())
 		{
-			const URLITEM& urli = m_aUrls[nUrl];
+			CString sText;
+			GetWindowText(sText);
 
-			if (ContainsPos(urli.cr, nPos))
-				return nUrl;
+			if (nPos < sText.GetLength())
+			{
+				LPCTSTR szStart = ((LPCTSTR)sText + nPos);
+
+				if (FindStartOfUrl(sText, sText.GetLength(), szStart))
+				{
+					int nUrlLen = 0;
+					BOOL bBraced = (szStart[0] == '<');
+					BOOL bFile = IsFileProtocol(MatchProtocol(szStart));
+
+					LPCTSTR szEnd = szStart;
+
+					if (FindEndOfUrl(szEnd, nUrlLen, bBraced, bFile))
+					{
+						return CString(szStart, nUrlLen);
+					}
+				}
+			}
+		}
+		else
+		{
+			int nUrl = m_aUrls.GetSize();
+			
+			while (nUrl--)
+			{
+				const URLITEM& urli = m_aUrls[nUrl];
+				
+				if (ContainsPos(urli.cr, nPos))
+					return urli.sUrl;
+			}
 		}
 	}
 
-	// not found
-	return -1;
+	// else
+	return _T("");
 }
+
 
 void CUrlRichEditCtrl::OnTimer(UINT nIDEvent) 
 {
 	// if we've arrived here then it means that the user
 	// has paused for long enough to reparse the latest changes
 	if (nIDEvent == TIMER_REPARSE)
+	{
+		ASSERT(!IsAutoUrlDetectionEnabled());
+
 		ParseAndFormatText();
+	}
 	
 	CRichEditBaseCtrl::OnTimer(nIDEvent);
 }
 
 int CUrlRichEditCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	int nHit = FindUrl(point);
-	
-	if (nHit != -1)
+	CString sTooltip;
+
+	if (!m_sContextUrl.IsEmpty() && GetUrlTooltip(m_sContextUrl, sTooltip))
 	{
-		const URLITEM& urli = m_aUrls[nHit];
-		CString sTooltip;
-
-		if (GetUrlTooltip(urli.sUrl, sTooltip))
-		{
-			nHit = MAKELONG(point.x, point.y);
-
-			pTI->hwnd = m_hWnd;
-			pTI->uId  = nHit;
-			pTI->rect = CRect(CPoint(point.x-1,point.y-1),CSize(2,2));
-			pTI->uFlags |= TTF_NOTBUTTON | TTF_ALWAYSTIP;
-			pTI->lpszText = _tcsdup(sTooltip);
-
-			return nHit;
-		}
+		int nHit = MAKELONG(point.x, point.y);
+		
+		pTI->hwnd = m_hWnd;
+		pTI->uId  = nHit;
+		pTI->rect = CRect(CPoint(point.x-1,point.y-1),CSize(2,2));
+		pTI->uFlags |= TTF_NOTBUTTON | TTF_ALWAYSTIP;
+		pTI->lpszText = _tcsdup(sTooltip);
+		
+		return nHit;
 	}
 
+	// else
 	return 0;
 }

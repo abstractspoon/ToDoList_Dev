@@ -405,7 +405,7 @@ void CRTFContentControl::OnContextMenu(CWnd* pWnd, CPoint point)
 				}
 
 				// Remove URL commands if URL not clicked on
-				if (m_rtf.GetContextUrl() == -1)
+				if (m_rtf.GetContextUrl().IsEmpty())
 				{
 					pPopup->DeleteMenu(ID_EDIT_OPENURL, MF_BYCOMMAND);
 					pPopup->DeleteMenu(ID_EDIT_COPYURL, MF_BYCOMMAND);
@@ -742,12 +742,13 @@ void CRTFContentControl::OnUpdateEditDelete(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditFileBrowse() 
 {
-	int nUrl = m_rtf.GetContextUrl();
-	CString sFile;
+	//int nUrl = m_rtf.GetContextUrl();
+	CString sFile = m_rtf.GetContextUrl();
 	
-	if (nUrl != -1)
+//	if (nUrl != -1)
+	if (!sFile.IsEmpty())
 	{
-		sFile = m_rtf.GetUrl(nUrl, TRUE);
+		//sFile = m_rtf.GetUrl(nUrl, TRUE);
 
 		if (!FileMisc::FileExists(sFile))
 			sFile.Empty();
@@ -811,39 +812,36 @@ void CRTFContentControl::OnUpdateEditHorzRule(CCmdUI* pCmdUI)
 
 void CRTFContentControl::OnEditOpenUrl() 
 {
-	int nUrl = m_rtf.GetContextUrl();
-
-	if (nUrl != -1)
-		m_rtf.GoToUrl(nUrl);
+// 	int nUrl = m_rtf.GetContextUrl();
+// 
+// 	if (nUrl != -1)
+// 		m_rtf.GoToUrl(nUrl);
 }
 
 void CRTFContentControl::OnEditCopyUrl() 
 {
-	int nUrl = m_rtf.GetContextUrl();
-
-	if (nUrl != -1)
-		m_rtf.CopyUrlToClipboard(nUrl);
+	if (!m_rtf.GetContextUrl().IsEmpty())
+		CClipboard(m_rtf).SetText(m_rtf.GetContextUrl());
 }
 
 void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI) 
 {
 	if (pCmdUI->m_pMenu)
 	{
-		int nUrl = m_rtf.GetContextUrl();
-		pCmdUI->Enable(nUrl != -1);
+		CEnString sUrl = m_rtf.GetContextUrl();
+		pCmdUI->Enable(!sUrl.IsEmpty());
 		
-		if (nUrl != -1)
+		if (!sUrl.IsEmpty() && pCmdUI->m_pMenu)
 		{
-			CEnString sMenu;
+			CString sText, sMenu;
 			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
-			sMenu.Translate(pCmdUI->m_pMenu->GetSafeHmenu());
 			
+			sUrl = m_rtf.GetUrlAsFile(sUrl);
+
 			// restrict url length to 250 pixels
-			CEnString sUrl(m_rtf.GetUrl(nUrl, TRUE));
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
 			
-			CString sText;
 			sText.Format(_T("%s: %s"), sMenu, sUrl);
 			pCmdUI->SetText(sText);
 		}

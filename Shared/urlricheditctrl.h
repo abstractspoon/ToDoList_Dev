@@ -20,12 +20,11 @@ struct URLITEM
 {
 	CHARRANGE cr;
 	CString sUrl;
-	BOOL bWantNotify;
 };
 
 struct PROTOCOL
 {
-   PROTOCOL(LPCTSTR szProtocol = NULL, BOOL bNotify = FALSE) : sProtocol(szProtocol), bWantNotify(bNotify) {}
+	PROTOCOL(LPCTSTR szProtocol = NULL, BOOL bNotify = FALSE) : sProtocol(szProtocol), bWantNotify(bNotify) {}
 
 	CString sProtocol;
 	BOOL bWantNotify;
@@ -42,17 +41,19 @@ class CUrlRichEditCtrl : public CRichEditBaseCtrl
 public:
 	CUrlRichEditCtrl();
 	
-	int GetUrlCount() const { return m_aUrls.GetSize(); }
-	CString GetUrl(int nURL, BOOL bAsFile = FALSE) const;
+	//int GetUrlCount() const { return m_aUrls.GetSize(); }
+	//CString GetUrl(int nURL, BOOL bAsFile = FALSE) const;
 	void PathReplaceSel(LPCTSTR lpszPath, BOOL bFile);
-	BOOL GoToUrl(int nUrl) const;
-	BOOL CopyUrlToClipboard(int nUrl) const;
+	BOOL GoToUrl(const CString& sUrl) const;
+	//BOOL CopyUrlToClipboard(int nUrl) const;
 	CPoint GetContextMenuPos() { return m_ptContextMenu; }
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);
-	int GetContextUrl() { return m_nContextUrl; }
+	CString GetContextUrl(BOOL bAsFile = FALSE) const;
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
+
+	static CString GetUrlAsFile(const CString& sUrl);
 
 	// Attributes
 protected:
@@ -61,14 +62,11 @@ protected:
 	CRichEditNcBorder m_ncBorder;
 
 	CPoint m_ptContextMenu;
-	int m_nContextUrl;
+	CString m_sContextUrl;
 	CHARRANGE m_crDropSel;
 	LPDATAOBJECT m_lpDragObject;
 	int m_nFileProtocol, m_nFileProtocol2;
 
-	// Operations
-public:
-	
 	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CUrlRichEditCtrl)
@@ -95,6 +93,8 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetText(WPARAM wp, LPARAM lp);
@@ -111,20 +111,25 @@ protected:
 	virtual CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format);
 	
 protected:
-	int FindUrl(const CHARRANGE& cr) const;
-	int FindUrl(const CPoint& point) const;
-	BOOL UrlsMatch(const CUrlArray& aUrls); 
+	CString FindUrl(const CPoint& point) const;
+	CString FindUrl(int nPos) const;
+	BOOL UrlsMatch(const CUrlArray& aUrls) const; 
 	void TrackDragCursor();
 	int MatchProtocol(LPCTSTR szText) const;
 	BOOL AppendSourceUrls(LPCTSTR szUrl);
 	BOOL IsFileProtocol(int nProtocol) const;
 	BOOL GetUrlTooltip(const CString& sUrl, CString& sTooltip) const;
+	int GetProtocols(CStringArray& aProtocols) const;
+	BOOL EnableAutoUrlDetection();
+	void Initialise();
+	BOOL FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const;
 	
 	static BOOL FindEndOfUrl(LPCTSTR& szPos, int& nUrlLen, BOOL bBraced, BOOL bFile);
 	static BOOL IsBaseDelim(LPCTSTR szText);
 	static void InsertInOrder(URLITEM& urli, CUrlArray& aUrls);
 	static CString CreateFileLink(LPCTSTR szFile);
 	static void AppendURLsToLinkText(CString& sLinkText, const CString& sURLs);
+
 
 };
 

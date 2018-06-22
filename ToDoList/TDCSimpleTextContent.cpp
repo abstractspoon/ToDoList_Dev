@@ -14,6 +14,7 @@
 #include "..\shared\richedithelper.h"
 #include "..\shared\richeditspellcheck.h"
 #include "..\shared\misc.h"
+#include "..\shared\webmisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enmenu.h"
@@ -275,7 +276,7 @@ void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 #endif
 
 				// Remove URL commands if URL not clicked on
-				if (m_nContextUrl == -1)
+				if (m_sContextUrl.IsEmpty())
 				{
 					pPopup->DeleteMenu(ID_COMMENTS_OPENURL, MF_BYCOMMAND);
 					pPopup->DeleteMenu(ID_COMMENTS_COPYURL, MF_BYCOMMAND);
@@ -376,33 +377,19 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 		break;
 		
 	case ID_COMMENTS_OPENURL:
-		if (m_nContextUrl != -1)
-			GoToUrl(m_nContextUrl);
-		
-		// reset
-		m_nContextUrl = -1;
+		if (!m_sContextUrl.IsEmpty())
+			GoToUrl(m_sContextUrl);
 		break;
 		
 	case ID_COMMENTS_COPYURL:
-		if (m_nContextUrl != -1)
-			CopyUrlToClipboard(m_nContextUrl);
-		
-		// reset
-		m_nContextUrl = -1;
+		if (!m_sContextUrl.IsEmpty())
+			CClipboard(*this).SetText(m_sContextUrl);
 		break;
 		
 	case ID_COMMENTS_FILEBROWSE:
 		if (CanEdit())
 		{
-			CString sFile;
-			
-			if (m_nContextUrl != -1)
-			{
-				sFile = GetUrl(m_nContextUrl, TRUE);
-
-				if (FileMisc::FileExists(sFile))
-					sFile.Empty();
-			}
+			CString sFile = GetUrlAsFile(m_sContextUrl);
 						
 			CFileOpenDialog dialog(IDS_BROWSEFILE_TITLE, NULL, sFile, (EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT));
 			
@@ -416,9 +403,6 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 					CRichEditHelper::PasteFiles(*this, aPaths, REP_ASFILEURL, FALSE);
 				}
 			}
-
-			// reset
-			m_nContextUrl = -1;
 		}
 		break;
 		
@@ -502,15 +486,19 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 		// if pCmdUI->m_pMenu is NOT null then we need to set the menu
 		// text to the url, else it's just MFC checking that the option
 		// is still enabled
-		pCmdUI->Enable(m_nContextUrl != -1);
+		pCmdUI->Enable(!m_sContextUrl.IsEmpty());
 
-		if ((m_nContextUrl != -1) && pCmdUI->m_pMenu)
+		if (!m_sContextUrl.IsEmpty() && pCmdUI->m_pMenu)
 		{
 			CString sText, sMenu;
 			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
 			
 			// restrict url length to 250 pixels
-			CEnString sUrl(GetUrl(m_nContextUrl, TRUE));
+			CEnString sUrl(m_sContextUrl);
+
+			if (WebMisc::IsFileURI(sUrl))
+				sUrl = GetUrlAsFile(m_sContextUrl);
+
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
 
