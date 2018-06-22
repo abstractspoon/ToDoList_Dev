@@ -125,6 +125,8 @@ public:
 	CString GetTextRange(const CHARRANGE& cr) const;
 	CString GetSelText() const;
 	BOOL SetTextEx(const CString& sText, DWORD dwFlags = ST_KEEPUNDO | ST_SELECTION, UINT nCodePage = CP_ACP); 
+	int GetSelStart() const;
+	int GetSelEnd() const;
 
 	void EnableSelectOnFocus(BOOL bEnable) { m_bEnableSelectOnFocus = bEnable; }
 	BOOL CanEdit() const;

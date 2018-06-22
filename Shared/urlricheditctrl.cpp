@@ -117,17 +117,20 @@ BOOL CUrlRichEditCtrl::EnableAutoUrlDetection()
 
 int CUrlRichEditCtrl::MatchProtocol(LPCTSTR szText) const
 {
-   int nNumProt = m_aProtocols.GetSize();
-
-   for (int nProt = 0; nProt < nNumProt; nProt++)
-   {
-      const PROTOCOL& prot = m_aProtocols[nProt];
-
-      if (_tcsnicmp(szText, prot.sProtocol, prot.sProtocol.GetLength()) == 0)
-         return nProt;
-   }
-
-   return -1;
+	if (szText[0] == '<')
+		szText++;
+	
+	int nNumProt = m_aProtocols.GetSize();
+	
+	for (int nProt = 0; nProt < nNumProt; nProt++)
+	{
+		const PROTOCOL& prot = m_aProtocols[nProt];
+		
+		if (_tcsnicmp(szText, prot.sProtocol, prot.sProtocol.GetLength()) == 0)
+			return nProt;
+	}
+	
+	return -1;
 }
 
 CString CUrlRichEditCtrl::GetUrlAsFile(const CString& sUrl)
@@ -266,20 +269,30 @@ BOOL CUrlRichEditCtrl::FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szP
 	ASSERT(szPos >= szText);
 	ASSERT(szPos < (szText + nTextLen));
 
-	// Allow for start of a line but no other delimiter
-	if (*szPos == '\n')
+	int nStartPos = (szPos - szText);
+	int nStartLine = ::SendMessage(GetSafeHwnd(), EM_LINEFROMCHAR, nStartPos, 0);
+	int nStartPosOfLine = ::SendMessage(GetSafeHwnd(), EM_LINEINDEX, nStartLine, 0);
+	int nLineLen = ::SendMessage(GetSafeHwnd(), EM_LINELENGTH, nStartPosOfLine, 0);
+	int nEndPosOfLine = (nStartPosOfLine + nLineLen);
+
+	if (nStartPos == nStartPosOfLine)
 	{
 		szPos++;
 	}
-	else if (IsBaseDelim(szPos))
+	else if (nStartPos == nEndPosOfLine)
 	{
-		return FALSE; // between words
+		szPos--;
 	}
 
 	while (szPos > szText)
 	{
 		if (IsBaseDelim(szPos - 1))
+		{
+			if (szPos[-1] == '<')
+				szPos--;
+
 			break;
+		}
 
 		szPos--;
 	}
@@ -798,8 +811,8 @@ void CUrlRichEditCtrl::TrackDragCursor()
 {
 	// also track the cursor for the drop position
 	CPoint ptCursor(::GetMessagePos());
-				
 	ScreenToClient(&ptCursor);
+				
 	int nChar = CharFromPoint(ptCursor);
 	m_crDropSel.cpMin = m_crDropSel.cpMax = nChar;
 
@@ -978,7 +991,7 @@ void CUrlRichEditCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		
 		// does this location lie on a url?
 		if (SelectionHasEffect(CFM_LINK, CFE_LINK))
-			m_sContextUrl = FindUrl(m_ptContextMenu);
+			m_sContextUrl = FindUrl(GetSelStart());
 		else
 			m_sContextUrl.Empty();
 
@@ -997,7 +1010,7 @@ void CUrlRichEditCtrl::OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		
 		// does this location lie on a url?
 		if (SelectionHasEffect(CFM_LINK, CFE_LINK))
-			m_sContextUrl = FindUrl(m_ptContextMenu);
+			m_sContextUrl = FindUrl(GetSelStart());
 		else
 			m_sContextUrl.Empty();
 		
@@ -1172,6 +1185,12 @@ CString CUrlRichEditCtrl::FindUrl(int nPos) const
 
 					if (FindEndOfUrl(szEnd, nUrlLen, bBraced, bFile))
 					{
+						if (bBraced)
+						{
+							szStart++;
+							nUrlLen--;
+						}
+
 						return CString(szStart, nUrlLen);
 					}
 				}

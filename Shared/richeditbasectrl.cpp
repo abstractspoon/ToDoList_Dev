@@ -274,6 +274,22 @@ CString CRichEditBaseCtrl::GetSelText() const
 	return GetTextRange(cr);
 }
 
+int CRichEditBaseCtrl::GetSelStart() const
+{
+	CHARRANGE cr;
+	GetSel(cr);
+	
+	return cr.cpMin;
+}
+
+int CRichEditBaseCtrl::GetSelEnd() const
+{
+	CHARRANGE cr;
+	GetSel(cr);
+	
+	return cr.cpMax;
+}
+
 CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 {
 	int nLength = int(cr.cpMax - cr.cpMin + 1);
