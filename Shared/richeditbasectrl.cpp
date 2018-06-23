@@ -1416,6 +1416,7 @@ BOOL CRichEditBaseCtrl::IsAutoUrlDetectionEnabled() const
 {
 	return ::SendMessage(GetSafeHwnd(), EM_GETAUTOURLDETECT, 0, 0);
 }
+
 BOOL CRichEditBaseCtrl::IsStartOfLine(int nCharPos) const
 {
 	int nLine = ::SendMessage(GetSafeHwnd(), EM_LINEFROMCHAR, nCharPos, 0);

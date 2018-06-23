@@ -269,17 +269,13 @@ BOOL CUrlRichEditCtrl::FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szP
 	ASSERT(szPos >= szText);
 	ASSERT(szPos < (szText + nTextLen));
 
-	int nStartPos = (szPos - szText);
-	int nStartLine = ::SendMessage(GetSafeHwnd(), EM_LINEFROMCHAR, nStartPos, 0);
-	int nStartPosOfLine = ::SendMessage(GetSafeHwnd(), EM_LINEINDEX, nStartLine, 0);
-	int nLineLen = ::SendMessage(GetSafeHwnd(), EM_LINELENGTH, nStartPosOfLine, 0);
-	int nEndPosOfLine = (nStartPosOfLine + nLineLen);
+	int nPos = (szPos - szText);
 
-	if (nStartPos == nStartPosOfLine)
+	if (IsStartOfLine(nPos))
 	{
 		szPos++;
 	}
-	else if (nStartPos == nEndPosOfLine)
+	else if (IsEndOfLine(nPos))
 	{
 		szPos--;
 	}
