@@ -35,7 +35,6 @@ const UINT PAUSE = 1000; // 1 second
 
 CUrlRichEditCtrl::CUrlRichEditCtrl() 
 	: 
-	m_sContextUrl(-1), 
 	m_lpDragObject(NULL),
 	m_nFileProtocol(-1), 
 	m_nFileProtocol2(-1)

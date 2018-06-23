@@ -41,11 +41,8 @@ class CUrlRichEditCtrl : public CRichEditBaseCtrl
 public:
 	CUrlRichEditCtrl();
 	
-	//int GetUrlCount() const { return m_aUrls.GetSize(); }
-	//CString GetUrl(int nURL, BOOL bAsFile = FALSE) const;
 	void PathReplaceSel(LPCTSTR lpszPath, BOOL bFile);
 	BOOL GoToUrl(const CString& sUrl) const;
-	//BOOL CopyUrlToClipboard(int nUrl) const;
 	CPoint GetContextMenuPos() { return m_ptContextMenu; }
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);

@@ -1190,7 +1190,7 @@ BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 	ASSERT(GetSafeHwnd());
 
 	EnableLanguageOptions(IMF_SPELLCHECKING, bEnable);
-	EnableEditStyles((SES_USECTF | SES_CTFALLOWEMBED | SES_CTFALLOWSMARTTAG | SES_CTFALLOWPROOFING), bEnable);
+	EnableEditStyles((RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING), bEnable);
 
 	return TRUE;
 }
@@ -1375,7 +1375,7 @@ BOOL CRichEditBaseCtrl::EnableAutoUrlDetection(DWORD dwFlags)
 	if (SendMessage(EM_AUTOURLDETECT, dwFlags, NULL) != 0)
 		return FALSE;
 
-	EnableEditStyles(SES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
+	EnableEditStyles(RECBES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
 	SetEventMask(GetEventMask() | ENM_LINK);
 
 	return TRUE;
@@ -1406,7 +1406,7 @@ BOOL CRichEditBaseCtrl::EnableAutoUrlDetection(const CStringArray& aProtocols, D
 	if (SendMessage(EM_AUTOURLDETECT, dwFlags, (LPARAM)(LPCTSTR)sProtocols) != 0)
 		return FALSE;
 	
-	EnableEditStyles(SES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
+	EnableEditStyles(RECBES_NOFOCUSLINKNOTIFY, (dwFlags != 0));
 	SetEventMask(GetEventMask() | ENM_LINK);
 
 	return TRUE;

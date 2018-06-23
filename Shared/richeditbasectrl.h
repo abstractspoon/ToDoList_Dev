@@ -38,14 +38,17 @@
 #ifndef EM_SETEDITSTYLE
 #	define EM_SETEDITSTYLE			(WM_USER + 204)
 #	define EM_GETEDITSTYLE			(WM_USER + 205)
+#endif
 
 // Extended edit style masks 
-#	define SES_NOFOCUSLINKNOTIFY	0x00000020
-#	define SES_USECTF				0x00010000
-#	define SES_CTFALLOWEMBED		0x00200000
-#	define SES_CTFALLOWSMARTTAG		0x00400000
-#	define SES_CTFALLOWPROOFING		0x00800000
-#endif
+enum RECB_EDITSTYLE
+{
+	RECBES_NOFOCUSLINKNOTIFY = 0x00000020,
+	RECBES_USECTF			 = 0x00010000,
+	RECBES_CTFALLOWEMBED	 = 0x00200000,
+	RECBES_CTFALLOWSMARTTAG	 = 0x00400000,
+	RECBES_CTFALLOWPROOFING	 = 0x00800000,
+};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +79,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum // REBC_BORDERS
+enum REBC_BORDERS
 {
 	REBCB_NONE		= 0x00,
 	REBCB_TOP		= 0x01,
@@ -88,14 +91,15 @@ enum // REBC_BORDERS
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef AURL_ENABLEURL
-#	define	AURL_ENABLEURL			0x01
-#	define	AURL_ENABLEEMAILADDR	0x02
-#	define	AURL_ENABLETELNO		0x04
-#	define	AURL_ENABLEEAURLS		0x08
-#	define	AURL_ENABLEDRIVELETTERS	0x10
-#	define	AURL_DISABLEMIXEDLGC	0x20
-#endif
+enum REBC_URL
+{
+	REBCU_ENABLEURL			 = 0x01,
+	REBCU_ENABLEEMAILADDR	 = 0x02,
+	REBCU_ENABLETELNO		 = 0x04,
+	REBCU_ENABLEEAURLS		 = 0x08,
+	REBCU_ENABLEDRIVELETTERS = 0x10,
+	REBCU_DISABLEMIXEDLGC	 = 0x20,
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // CRichEditBaseCtrl window
@@ -186,8 +190,8 @@ public:
 	BOOL GetParaAlignment() const;
 	BOOL SetSelectedWebLink(const CString& sWebLink, const CString& sText);
 
-	BOOL EnableAutoUrlDetection(DWORD dwFlags = AURL_ENABLEURL);
-	BOOL EnableAutoUrlDetection(const CStringArray& aProtocols, DWORD dwFlags = AURL_ENABLEURL);
+	BOOL EnableAutoUrlDetection(DWORD dwFlags = REBCU_ENABLEURL);
+	BOOL EnableAutoUrlDetection(const CStringArray& aProtocols, DWORD dwFlags = REBCU_ENABLEURL);
 	BOOL IsAutoUrlDetectionEnabled() const;
 
 	// Attributes
