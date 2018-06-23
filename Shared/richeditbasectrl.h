@@ -168,7 +168,10 @@ public:
 	void SetFirstVisibleLine(int nLine);
 	CPoint GetCaretPos() const;
 	void MoveCaretToEnd();
-	void SetCaretPos(int nPos);
+	void SetCaretPos(int nCharPos);
+
+	BOOL IsStartOfLine(int nCharPos) const;
+	BOOL IsEndOfLine(int nCharPos) const;
 
 	BOOL EnableToolTips(BOOL bEnable = TRUE);
 	void FilterToolTipMessage(MSG* pMsg); // for MFC non-extension Dlls

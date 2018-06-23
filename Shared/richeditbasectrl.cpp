@@ -1416,3 +1416,20 @@ BOOL CRichEditBaseCtrl::IsAutoUrlDetectionEnabled() const
 {
 	return ::SendMessage(GetSafeHwnd(), EM_GETAUTOURLDETECT, 0, 0);
 }
+BOOL CRichEditBaseCtrl::IsStartOfLine(int nCharPos) const
+{
+	int nLine = ::SendMessage(GetSafeHwnd(), EM_LINEFROMCHAR, nCharPos, 0);
+	int nLineStart = ::SendMessage(GetSafeHwnd(), EM_LINEINDEX, nLine, 0);
+
+	return (nCharPos == nLineStart);
+}
+
+BOOL CRichEditBaseCtrl::IsEndOfLine(int nCharPos) const
+{
+	int nLine = ::SendMessage(GetSafeHwnd(), EM_LINEFROMCHAR, nCharPos, 0);
+	int nLineStart = ::SendMessage(GetSafeHwnd(), EM_LINEINDEX, nLine, 0);
+	int nLineLen = ::SendMessage(GetSafeHwnd(), EM_LINELENGTH, nLineStart, 0);
+	int nEndPosOfLine = (nLineStart + nLineLen);
+
+	return (nCharPos == nEndPosOfLine);
+}
