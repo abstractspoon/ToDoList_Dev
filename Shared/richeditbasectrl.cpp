@@ -1247,7 +1247,7 @@ BOOL CRichEditBaseCtrl::IsInlineSpellCheckingEnabled() const
 	DWORD dwLangFlags = IMF_SPELLCHECKING;
 
 	DWORD dwEditStyle = ::SendMessage(GetSafeHwnd(), EM_GETEDITSTYLE, 0, 0);
-	DWORD dwEditFlags = (SES_USECTF | SES_CTFALLOWEMBED | SES_CTFALLOWSMARTTAG | SES_CTFALLOWPROOFING);
+	DWORD dwEditFlags = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
 
 	return (Misc::HasFlag(dwLangOpt, dwLangFlags) && Misc::HasFlag(dwEditStyle, dwEditFlags));
 }
