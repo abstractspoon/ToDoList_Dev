@@ -1386,9 +1386,12 @@ BOOL CRichEditBaseCtrl::EnableAutoUrlDetection(const CStringArray& aProtocols, D
 	if (!dwFlags || !aProtocols.GetSize())
 		return EnableAutoUrlDetection(dwFlags);
 
-	// Don't allow custom protocols if not Vista of above
-	if (COSVersion() < OSV_VISTA)
+	// Only Windows 8 and above supports custom protocols
+	if (COSVersion() < OSV_WIN8)
+	{
+		EnableAutoUrlDetection(FALSE);
 		return FALSE;
+	}
 
 	// Build list of protocols
 	CString sProtocols;
