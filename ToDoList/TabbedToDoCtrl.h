@@ -208,6 +208,7 @@ protected:
 	afx_msg LRESULT OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtMoveSelectedTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtEditSelectedTaskTitle(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUIExtEditSelectedTaskIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtSortColumnChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam);
