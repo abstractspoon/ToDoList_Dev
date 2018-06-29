@@ -277,9 +277,14 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 	return (bRet != FALSE);
 }
 
-bool UIExtension::ParentNotify::NotifyEditTaskLabel()
+bool UIExtension::ParentNotify::NotifyEditLabel()
 {
 	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_EDITSELECTEDTASKTITLE, 0, 0));
+}
+
+bool UIExtension::ParentNotify::NotifyEditIcon()
+{
+	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_EDITSELECTEDTASKICON, 0, 0));
 }
 
 bool UIExtension::ParentNotify::NotifyDoHelp(String^ helpID)

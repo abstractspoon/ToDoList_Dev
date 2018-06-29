@@ -220,6 +220,7 @@ namespace MindMapUIExtension
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
 			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
 			m_MindMap.EditTaskLabel += new EditTaskLabelEventHandler(OnMindMapEditTaskLabel);
+            m_MindMap.EditTaskIcon += new EditTaskIconEventHandler(OnMindMapEditTaskIcon);
             m_MindMap.EditTaskDone += new EditTaskCompletionEventHandler(OnMindMapEditTaskCompletion);
 
             this.Controls.Add(m_MindMap);
@@ -229,7 +230,7 @@ namespace MindMapUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_hwndParent);
 
-			notify.NotifyEditTaskLabel();
+			notify.NotifyEditLabel();
 		}
 
         void OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
@@ -238,6 +239,14 @@ namespace MindMapUIExtension
 
             notify.NotifyMod(UIExtension.TaskAttribute.DoneDate, (completed ? DateTime.Now : DateTime.MinValue));
         }
+
+        void OnMindMapEditTaskIcon(object sender, UInt32 taskId)
+        {
+            var notify = new UIExtension.ParentNotify(m_hwndParent);
+
+            notify.NotifyEditIcon();
+        }
+
 		void OnMindMapSelectionChange(object sender, object itemData)
 		{
 			var taskItem = (itemData as MindMapTaskItem);

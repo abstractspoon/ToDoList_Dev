@@ -154,6 +154,7 @@ namespace MindMapUIExtension
 	public class TdlMindMapControl : MindMapControl
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
+        public event EditTaskIconEventHandler       EditTaskIcon;
         public event EditTaskCompletionEventHandler EditTaskDone;
 
 		// From Parent
@@ -896,6 +897,11 @@ namespace MindMapUIExtension
                     if (EditTaskDone != null)
                         EditTaskDone(this, UniqueID(SelectedNode), !taskItem.IsDone(false));
                 }
+                else if (HitTestIcon(node, e.Location))
+                {
+                    if (EditTaskIcon != null)
+                        EditTaskIcon(this, UniqueID(SelectedNode));
+                }
                 else if (SelectNodeWasPreviouslySelected)
 			    {
 			        if (EditTaskLabel != null)
@@ -912,6 +918,17 @@ namespace MindMapUIExtension
             var availRect = GetItemLabelRect(node);
 
             return CalcCheckboxRect(availRect).Contains(point);
+        }
+
+        protected bool HitTestIcon(TreeNode node, Point point)
+        {
+            if (IsRoot(node))
+                return false;
+
+            var availRect = GetItemLabelRect(node);
+            availRect.X += m_CheckboxSize.Width;
+
+            return CalcIconRect(availRect).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
