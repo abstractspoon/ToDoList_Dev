@@ -220,6 +220,7 @@ namespace MindMapUIExtension
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
 			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
 			m_MindMap.EditTaskLabel += new EditTaskLabelEventHandler(OnMindMapEditTaskLabel);
+            m_MindMap.EditTaskDone += new EditTaskCompletionEventHandler(OnMindMapEditTaskCompletion);
 
             this.Controls.Add(m_MindMap);
         }
@@ -231,6 +232,12 @@ namespace MindMapUIExtension
 			notify.NotifyEditTaskLabel();
 		}
 
+        void OnMindMapEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        {
+            var notify = new UIExtension.ParentNotify(m_hwndParent);
+
+            notify.NotifyMod(UIExtension.TaskAttribute.DoneDate, (completed ? DateTime.Now : DateTime.MinValue));
+        }
 		void OnMindMapSelectionChange(object sender, object itemData)
 		{
 			var taskItem = (itemData as MindMapTaskItem);

@@ -1609,8 +1609,10 @@ namespace MindMapUIExtension
         {
             Rectangle itemBounds = Copy(node.Bounds);
 
-            if (!node.IsExpanded)
-                itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
+            // Always calculate the width of the text because the tree 
+            // doesn't seem to return the same widths as the Graphics object
+            // which is what we will be using to render the text
+            itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
 
 			if (IsParent(node) && !IsRoot(node))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
@@ -1699,20 +1701,6 @@ namespace MindMapUIExtension
 				Rectangle drawRect = GetItemLabelRect(node);
 				NodeDrawState drawState = GetDrawState(node);
                 NodeDrawPos drawPos = GetDrawPos(node);
-
-				// Make sure selection rect is long enough
-				if ((drawPos != NodeDrawPos.Root) && (drawState != NodeDrawState.None))
-				{
-					int textWidth = ((int)graphics.MeasureString(node.Text, GetNodeFont(node)).Width);
-					textWidth += GetExtraWidth(node);
-
-					int xOffset = (drawRect.Width - textWidth - (2 * LabelPadding));
-
-					if (item.IsFlipped)
-						drawRect.X += xOffset;
-
-					drawRect.Width -= xOffset;
-				}
 
 				DrawNodeLabel(graphics, node.Text, drawRect, drawState, drawPos, GetNodeFont(node), item.ItemData);
 

@@ -146,7 +146,11 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent) : m_hwndParent(NULL)
 bool UIExtension::ParentNotify::NotifyMod(UIExtension::TaskAttribute nAttribute, DateTime date)
 {
 	IUITASKMOD mod = { UIExtension::Map(nAttribute), 0 };
-	mod.tValue = static_cast<__int64>(Task::Map(date));
+
+	if (date == DateTime::MinValue)
+		mod.tValue = 0xffffffffffffffff;
+	else
+		mod.tValue = static_cast<__int64>(Task::Map(date));
 	
 	return DoNotify(&mod, 1);
 }

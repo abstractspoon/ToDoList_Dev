@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -10,6 +11,8 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 namespace MindMapUIExtension
 {
 	public delegate void EditTaskLabelEventHandler(object sender, UInt32 taskId);
+    public delegate void EditTaskIconEventHandler(object sender, UInt32 taskId);
+    public delegate void EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
 	public class MindMapTaskItem
 	{
@@ -22,6 +25,7 @@ namespace MindMapUIExtension
 		private Boolean m_IsFlagged;
 		private Boolean m_IsParent;
         private Boolean m_IsDone;
+        private Boolean m_IsGoodAsDone;
 		private Boolean m_IsLocked;
 
 		// -----------------------------------------------------------------
@@ -36,6 +40,7 @@ namespace MindMapUIExtension
 			m_IsFlagged = false;
 			m_IsParent = false;
 			m_IsDone = false;
+            m_IsGoodAsDone = false;
 			m_IsLocked = false;
 		}
 
@@ -48,7 +53,8 @@ namespace MindMapUIExtension
 			m_HasIcon = (task.GetIcon().Length > 0);
 			m_IsFlagged = task.IsFlagged();
 			m_IsParent = task.IsParent();
-            m_IsDone = (task.IsDone() || task.IsGoodAsDone());
+            m_IsDone = task.IsDone();
+            m_IsGoodAsDone = task.IsGoodAsDone();
 			m_IsLocked = task.IsLocked();
 		}
         
@@ -101,8 +107,15 @@ namespace MindMapUIExtension
 		public Boolean HasIcon { get { return m_HasIcon; } }
 		public Boolean IsFlagged { get { return m_IsFlagged; } }
 		public Boolean IsParent { get { return m_IsParent; } }
-		public Boolean IsDone { get { return m_IsDone; } }
 		public Boolean IsLocked { get { return m_IsLocked; } }
+
+        public Boolean IsDone(bool includeGoodAsDone) 
+        { 
+            if (includeGoodAsDone && m_IsGoodAsDone)
+                return true;
+
+            return m_IsDone; 
+        }
 
 		public bool ProcessTaskUpdate(Task task, HashSet<UIExtension.TaskAttribute> attribs)
 		{
@@ -122,7 +135,10 @@ namespace MindMapUIExtension
 				m_TextColor = task.GetTextDrawingColor();
 
             if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
-                m_IsDone = (task.IsDone() || task.IsGoodAsDone());
+            {
+                m_IsDone = task.IsDone();
+                m_IsGoodAsDone = task.IsGoodAsDone();
+            }
 
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked();
@@ -137,7 +153,8 @@ namespace MindMapUIExtension
 
 	public class TdlMindMapControl : MindMapControl
 	{
-		public event EditTaskLabelEventHandler EditTaskLabel;
+		public event EditTaskLabelEventHandler      EditTaskLabel;
+        public event EditTaskCompletionEventHandler EditTaskDone;
 
 		// From Parent
 		private Translator m_Trans;
@@ -152,6 +169,7 @@ namespace MindMapUIExtension
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont;
+        private Size m_CheckboxSize;
 
 		// -------------------------------------------------------------------------
 
@@ -170,6 +188,9 @@ namespace MindMapUIExtension
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
 			m_EditTimer.Tick += new EventHandler(OnEditLabelTimer);
+
+            using (Graphics graphics = Graphics.FromHwnd(Handle))
+                m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 		}
         
         public new void SetFont(String fontName, int fontSize)
@@ -269,7 +290,7 @@ namespace MindMapUIExtension
 		{
 			var labelRect = base.GetSelectedItemLabelRect();
 
-			labelRect.X += (GetExtraWidth(SelectedNode) + 2);
+			labelRect.X += GetExtraWidth(SelectedNode);
 
 			return labelRect;
 		}
@@ -662,7 +683,7 @@ namespace MindMapUIExtension
             }
         }
 
-		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
+        protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
                                               Font nodeFont, Object itemData)
 		{
@@ -676,7 +697,7 @@ namespace MindMapUIExtension
 			// Draw Background
 			if (!taskColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone)
+				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone(true))
 				{
 					backColor = new SolidBrush(taskColor);
 					textColor = new SolidBrush(DrawingColor.GetBestTextColor(taskColor));
@@ -709,25 +730,41 @@ namespace MindMapUIExtension
 					break;
 			}
 
-			// Draw icon
-			if (TaskHasIcon(taskItem))
-			{
-				Rectangle iconRect = CalcIconRect(rect);
+            // Checkbox
+            if (nodePos != NodeDrawPos.Root)
+            {
+                Rectangle checkRect = CalcCheckboxRect(rect);
+                CheckBoxRenderer.DrawCheckBox(graphics, new Point(checkRect.Left, checkRect.Top), GetItemCheckboxState(taskItem));
 
-				if (m_TaskIcons.Get(taskItem.ID))
-					m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+                rect.Width = (rect.Right - checkRect.Right);
+                rect.X = checkRect.Right;
+            }
 
-				int xOffset = (iconRect.Right - rect.Left);
+			// Task icon
+            if (TaskHasIcon(taskItem))
+            {
+                Rectangle iconRect = CalcIconRect(rect);
 
-				rect.X += xOffset;
-				rect.Width -= xOffset;
-			}
+                if (m_TaskIcons.Get(taskItem.ID))
+                    m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+
+                rect.Width = (rect.Right - iconRect.Right);
+                rect.X = iconRect.Right;
+            }
 			
 			// Draw Text
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
 			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
+
+        CheckBoxState GetItemCheckboxState(MindMapTaskItem taskItem)
+        {
+            if (taskItem.IsDone(false))
+                return CheckBoxState.CheckedNormal;
+            else
+                return CheckBoxState.UncheckedNormal;
+        }
 
 		protected Boolean NodeHasIcon(TreeNode node)
 		{
@@ -753,12 +790,25 @@ namespace MindMapUIExtension
 								ptTo);
 		}
 
-		private Rectangle CalcIconRect(Rectangle labelRect)
+		private Rectangle CalcIconRect(Rectangle availRect)
 		{
             int imageSize = ScaleByDPIFactor(16);
 
-            return new Rectangle((labelRect.X + 2), (CentrePoint(labelRect).Y) - (imageSize / 2), imageSize, imageSize);
+            return CalcImageRect(availRect, imageSize, imageSize);
 		}
+
+        private Rectangle CalcCheckboxRect(Rectangle availRect)
+        {
+            return CalcImageRect(availRect, m_CheckboxSize.Width, m_CheckboxSize.Height);
+        }
+
+        private Rectangle CalcImageRect(Rectangle availRect, int width, int height)
+        {
+            int left = (availRect.X + 2);
+            int top = (CentrePoint(availRect).Y - (height / 2));
+
+            return new Rectangle(left, top, width, height);
+        }
 
 		private new void Clear()
 		{
@@ -800,11 +850,15 @@ namespace MindMapUIExtension
 
 		protected override int GetExtraWidth(TreeNode node)
 		{
-			if (NodeHasIcon(node))
-				return ScaleByDPIFactor(16);
+            int extraWidth = 0;
 
-			// else
-			return 0;
+            if (!IsRoot(node))
+                extraWidth += (m_CheckboxSize.Width + 2);
+
+			if (NodeHasIcon(node))
+				extraWidth += (ScaleByDPIFactor(16) + 2);
+
+			return extraWidth;
 		}
 
 		protected override int GetMinItemHeight()
@@ -833,14 +887,32 @@ namespace MindMapUIExtension
 			if (HitTestExpansionButton(node, e.Location))
 				return;
 
-			var taskItem = TaskItem(node);
+            var taskItem = TaskItem(node);
 
-			if (!taskItem.IsLocked && SelectNodeWasPreviouslySelected)
-			{
-				if (EditTaskLabel != null)
-					m_EditTimer.Start();
-			}
+            if (!taskItem.IsLocked)
+            {
+                if (HitTestCheckbox(node, e.Location))
+                {
+                    if (EditTaskDone != null)
+                        EditTaskDone(this, UniqueID(SelectedNode), !taskItem.IsDone(false));
+                }
+                else if (SelectNodeWasPreviouslySelected)
+			    {
+			        if (EditTaskLabel != null)
+				        m_EditTimer.Start();
+                }
+            }
 		}
+
+        protected bool HitTestCheckbox(TreeNode node, Point point)
+        {
+            if (IsRoot(node))
+                return false;
+
+            var availRect = GetItemLabelRect(node);
+
+            return CalcCheckboxRect(availRect).Contains(point);
+        }
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
