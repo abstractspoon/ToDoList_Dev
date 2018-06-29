@@ -5125,7 +5125,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		m_taskTree.InvalidateAll();
 
 		if (bEdit)
-			EditSelectedTask(TRUE);
+			EditSelectedTaskTitle(TRUE);
 		else
 			SetFocusToTasks();
 	}
@@ -5391,7 +5391,7 @@ BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)
 	return FALSE;
 }
 
-BOOL CToDoCtrl::EditSelectedTask(BOOL bTaskIsNew)
+BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 {
 	if (!CanEditSelectedTask(TDCA_TASKNAME))
 		return FALSE;
@@ -8410,7 +8410,7 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 	{
 	case TDCC_CLIENT:
 		ASSERT(CanEditSelectedTask(TDCA_TASKNAME, dwTaskID));
-		EditSelectedTask(FALSE);
+		EditSelectedTaskTitle(FALSE);
 		break;
 		
 	case TDCC_DONE:

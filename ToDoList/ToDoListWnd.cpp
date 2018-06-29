@@ -3245,7 +3245,7 @@ void CToDoListWnd::OnEditTaskdone()
 
 void CToDoListWnd::OnEditTasktext() 
 {
-	GetToDoCtrl().EditSelectedTask();
+	GetToDoCtrl().EditSelectedTaskTitle();
 }
 
 void CToDoListWnd::OnTrayIconClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)

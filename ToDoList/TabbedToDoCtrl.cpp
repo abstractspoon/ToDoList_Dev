@@ -1366,7 +1366,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	BOOL bEdit = EditSelectedTask();
+	BOOL bEdit = EditSelectedTaskTitle();
 	ASSERT(bEdit);
 
 	return bEdit;
