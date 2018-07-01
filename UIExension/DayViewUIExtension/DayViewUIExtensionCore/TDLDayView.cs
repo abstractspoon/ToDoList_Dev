@@ -124,6 +124,7 @@ namespace DayViewUIExtension
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 
             InitializeComponent();
+            RefreshHScrollSize();
         }
 
         protected void InitializeComponent()

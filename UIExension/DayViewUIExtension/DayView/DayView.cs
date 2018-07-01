@@ -1754,6 +1754,12 @@ namespace Calendar
 
         #region Internal Utility Classes
 
+        protected void RefreshHScrollSize()
+        {
+            hscroll.Width = hourLabelWidth;
+            hscroll.Height = dayHeadersHeight;
+        }
+
         class HalfHourLayout
         {
             public int Count;
