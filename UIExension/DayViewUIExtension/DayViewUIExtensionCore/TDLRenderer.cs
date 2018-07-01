@@ -253,20 +253,30 @@ namespace DayViewUIExtension
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-                    //get short dayabbr. if narrow dayrect
-                    string sTodaysName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
-                    if (rect.Width < 105)
-                        sTodaysName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek);
-
-                    rect.Offset(2, 1);
-
-					using (Font fntDay = new Font("Tahoma", 8, FontStyle.Regular))
-                        g.DrawString(sTodaysName, fntDay, SystemBrushes.WindowText, rect, format);
-
-                    rect.Offset(-2, -1);
-
+                    // Day of month
                     using (Font fntDayDate = new Font("Tahoma", 9, FontStyle.Bold))
-                        g.DrawString(date.ToString(" d"), fntDayDate, SystemBrushes.WindowText, rect, formatdd);
+                    {
+                        var dateNum = date.ToString(" d");
+                        g.DrawString(dateNum, fntDayDate, SystemBrushes.WindowText, rect, formatdd);
+
+                        int strWidth = (int)g.MeasureString(dateNum, fntDayDate).Width;
+
+                        rect.Width -= strWidth;
+                        rect.X += strWidth;
+                    }
+
+                    // Day of week
+                    using (Font fntDay = new Font("Tahoma", 8, FontStyle.Regular))
+                    {
+                        string dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
+                        int nameWidth = (int)g.MeasureString(dayName, fntDay).Width;
+
+                        // get short day abbr. if narrow dayrect
+                        if (rect.Width < nameWidth)
+                            dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek);
+
+                        g.DrawString(dayName, fntDay, SystemBrushes.WindowText, rect, format);
+                    }
                 }
             }
         }
