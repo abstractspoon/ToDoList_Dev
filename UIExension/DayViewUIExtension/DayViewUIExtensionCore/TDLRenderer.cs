@@ -161,26 +161,31 @@ namespace DayViewUIExtension
 
             using (SolidBrush brush = new SolidBrush(this.TextColor))
             {
-                string ampmtime;
+                string amPmTime;
 
                 if (ampm)
                 {
                     if (hour < 12)
-                        ampmtime = "AM";
+                        amPmTime = "AM";
                     else
-                        ampmtime = "PM";
+                        amPmTime = "PM";
 
                     if (hour != 12)
                         hour = hour % 12;
                 }
                 else
-                    ampmtime = "00";
+                {
+                    amPmTime = "00";
+                }
 
+                String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
+                
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-				g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont, brush, rect);
+				g.DrawString(hourStr, HourFont, brush, rect);
 
-                rect.X += 27;
-                g.DrawString(ampmtime, MinuteFont, brush, rect);
+                rect.X += ((int)g.MeasureString(hourStr, HourFont).Width + 2);
+
+                g.DrawString(amPmTime, MinuteFont, brush, rect);
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
         }
