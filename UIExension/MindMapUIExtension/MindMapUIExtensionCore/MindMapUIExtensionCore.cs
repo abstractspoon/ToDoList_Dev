@@ -137,6 +137,9 @@ namespace MindMapUIExtension
 			bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
 			m_MindMap.ShowParentsAsFolders = showParentsAsFolders;
 
+            bool showDoneCheckboxes = (prefs.GetProfileInt("Preferences", "AllowCheckboxAgainstTreeItem", 0) != 0);
+            m_MindMap.ShowCompletionCheckboxes = showDoneCheckboxes;
+
             bool strikeThruDone = (prefs.GetProfileInt("Preferences", "StrikethroughDone", 1) != 0);
             String fontName = FontName;
             int fontSize = 8;

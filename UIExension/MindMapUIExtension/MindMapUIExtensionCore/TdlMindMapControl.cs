@@ -168,6 +168,8 @@ namespace MindMapUIExtension
 		private Boolean m_ShowParentAsFolder;
 		private Boolean m_TaskColorIsBkgnd;
 		private Boolean m_IgnoreMouseClick;
+        private Boolean m_ShowCompletionCheckboxes;
+
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -186,6 +188,7 @@ namespace MindMapUIExtension
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
 			m_ShowParentAsFolder = false;
+            m_ShowCompletionCheckboxes = true;
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -274,6 +277,19 @@ namespace MindMapUIExtension
 				}
 			}
 		}
+
+        public Boolean ShowCompletionCheckboxes
+        {
+            get { return m_ShowCompletionCheckboxes; }
+            set
+            {
+                if (m_ShowCompletionCheckboxes != value)
+                {
+                    m_ShowCompletionCheckboxes = value;
+                    RecalculatePositions();
+                }
+            }
+        }
 
         public bool WantTaskUpdate(UIExtension.TaskAttribute attrib)
         {
@@ -716,7 +732,9 @@ namespace MindMapUIExtension
             {
                 // Checkbox
                 Rectangle checkRect = CalcCheckboxRect(rect);
-                CheckBoxRenderer.DrawCheckBox(graphics, new Point(checkRect.Left, checkRect.Top), GetItemCheckboxState(taskItem));
+
+                if (m_ShowCompletionCheckboxes)
+                    CheckBoxRenderer.DrawCheckBox(graphics, new Point(checkRect.Left, checkRect.Top), GetItemCheckboxState(taskItem));
 
 			    // Task icon
                 if (TaskHasIcon(taskItem))
@@ -729,7 +747,7 @@ namespace MindMapUIExtension
                     rect.Width = (rect.Right - iconRect.Right - 2);
                     rect.X = iconRect.Right + 2;
                 }
-                else
+                else if (m_ShowCompletionCheckboxes)
                 {
                     rect.Width = (rect.Right - checkRect.Right - 2);
                     rect.X = checkRect.Right + 2;
@@ -829,6 +847,9 @@ namespace MindMapUIExtension
 
         private Rectangle CalcCheckboxRect(Rectangle labelRect)
         {
+            if (!m_ShowCompletionCheckboxes)
+                return Rectangle.Empty;
+
             int left = labelRect.X;
             int top = (CentrePoint(labelRect).Y - (m_CheckboxSize.Height / 2));
 
@@ -837,9 +858,12 @@ namespace MindMapUIExtension
 
         private Rectangle CalcIconRect(Rectangle labelRect)
 		{
-            int imageSize = ScaleByDPIFactor(16);
+            int left = (labelRect.X + 2);
+            
+            if (m_ShowCompletionCheckboxes)
+                left += m_CheckboxSize.Width;
 
-            int left = (labelRect.X + 2 + m_CheckboxSize.Width);
+            int imageSize = ScaleByDPIFactor(16);
             int top = (CentrePoint(labelRect).Y - (imageSize / 2));
 
             return new Rectangle(left, top, imageSize, imageSize);
@@ -885,11 +909,11 @@ namespace MindMapUIExtension
 
 		protected override int GetExtraWidth(TreeNode node)
 		{
-            int extraWidth = 0;
+            int extraWidth = 2;
             var taskItem = TaskItem(node);
 
-            if (taskItem.IsTask)
-                extraWidth += (m_CheckboxSize.Width + 2);
+            if (m_ShowCompletionCheckboxes && taskItem.IsTask)
+                extraWidth += m_CheckboxSize.Width;
 
 			if (TaskHasIcon(taskItem))
 				extraWidth += (ScaleByDPIFactor(16) + 2);
@@ -947,6 +971,9 @@ namespace MindMapUIExtension
 
         protected bool HitTestCheckbox(TreeNode node, Point point)
         {
+            if (!m_ShowCompletionCheckboxes)
+                return false;
+
             return CalcCheckboxRect(GetItemLabelRect(node)).Contains(point);
         }
 
