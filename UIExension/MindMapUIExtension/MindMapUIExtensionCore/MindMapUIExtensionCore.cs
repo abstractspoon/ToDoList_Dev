@@ -137,15 +137,17 @@ namespace MindMapUIExtension
 			bool showParentsAsFolders = (prefs.GetProfileInt("Preferences", "ShowParentsAsFolders", 0) != 0);
 			m_MindMap.ShowParentsAsFolders = showParentsAsFolders;
 
+            bool strikeThruDone = (prefs.GetProfileInt("Preferences", "StrikethroughDone", 1) != 0);
+            String fontName = FontName;
+            int fontSize = 8;
+            
             if (prefs.GetProfileInt("Preferences", "SpecifyTreeFont", 0) != 0)
             {
-                m_MindMap.SetFont(prefs.GetProfileString("Preferences", "TreeFont", FontName),
-                                  prefs.GetProfileInt("Preferences", "FontSize", 8));
+                fontName = prefs.GetProfileString("Preferences", "TreeFont", fontName);
+                fontSize = prefs.GetProfileInt("Preferences", "FontSize", fontSize);
             }
-            else
-            {
-                m_MindMap.SetFont(FontName, 8);
-            }
+
+            m_MindMap.SetFont(fontName, fontSize, strikeThruDone);
         }
 
 		public new Boolean Focus()

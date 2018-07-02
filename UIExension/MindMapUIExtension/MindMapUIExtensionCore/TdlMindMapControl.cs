@@ -170,7 +170,7 @@ namespace MindMapUIExtension
 		private Boolean m_IgnoreMouseClick;
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
-        private Font m_BoldLabelFont;
+        private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
 
 		// -------------------------------------------------------------------------
@@ -195,13 +195,30 @@ namespace MindMapUIExtension
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 		}
         
-        public new void SetFont(String fontName, int fontSize)
+        public new void SetFont(String fontName, int fontSize, bool strikeThruDone)
         {
-            if ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize))
-            {
+            bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
+            bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
+
+            if (baseFontChange)
                 m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
-                RefreshItemBoldState(RootNode, true);
+
+            if (doneFontChange)
+            {
+                if (strikeThruDone)
+                {
+                    m_BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
+                    m_DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
+                }
+                else
+                {
+                    m_BoldDoneLabelFont = m_BoldLabelFont;
+                    m_DoneLabelFont = null;
+                }
             }
+
+            if ((baseFontChange || doneFontChange) && RefreshItemFont(RootNode, true))
+                RecalculatePositions();
             
             base.SetFont(fontName, fontSize);
         }
@@ -412,7 +429,7 @@ namespace MindMapUIExtension
             return Win32.ScaleByDPIFactor(value);
         }
 
-        private bool RefreshItemBoldState(TreeNode node, Boolean andChildren)
+        private bool RefreshItemFont(TreeNode node, Boolean andChildren)
         {
             var taskItem = TaskItem(node);
 
@@ -421,28 +438,31 @@ namespace MindMapUIExtension
 
             Font curFont = node.NodeFont, newFont = null;
 
-            if ((taskItem.IsTask) && (taskItem.ParentID == 0))
-                newFont = m_BoldLabelFont;
-            else
-                newFont = null;
+            if (taskItem.IsTask)
+            {
+                if (taskItem.ParentID == 0)
+                {
+                    if (taskItem.IsDone(false))
+                        newFont = m_BoldDoneLabelFont;
+                    else
+                        newFont = m_BoldLabelFont;
+                }
+                else if (taskItem.IsDone(false))
+                {
+                    newFont = m_DoneLabelFont;
+                }
+            }
 
             bool fontChange = (newFont != curFont);
 
             if (fontChange)
-            {
                 node.NodeFont = newFont;
-
-                // Need to re-set text for the tree to properly
-                // recalculate bold item lengths
-                if (newFont == m_BoldLabelFont)
-                    node.Text = taskItem.ToString();
-            }
             
             // children
             if (andChildren)
             {
                 foreach (TreeNode childNode in node.Nodes)
-                    fontChange |= RefreshItemBoldState(childNode, true);
+                    fontChange |= RefreshItemFont(childNode, true);
             }
 
             return fontChange;
@@ -562,7 +582,7 @@ namespace MindMapUIExtension
                 m_Items.Add(taskItem.ID, taskItem);
 				rootNode = AddRootNode(taskItem, taskItem.ID);
 
-                RefreshItemBoldState(rootNode, false);
+                RefreshItemFont(rootNode, false);
 
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
@@ -681,7 +701,7 @@ namespace MindMapUIExtension
             if (taskItem != null)
             {
                 taskItem.FixupParentID(TaskItem(parent));
-                RefreshItemBoldState(node, false);
+                RefreshItemFont(node, false);
             }
         }
 
@@ -845,7 +865,7 @@ namespace MindMapUIExtension
 			if (node == null)
 				return false;
 
-            RefreshItemBoldState(node, false);
+            RefreshItemFont(node, false);
 
 			// First Child
 			if (!AddTaskToTree(task.GetFirstSubtask(), node))
