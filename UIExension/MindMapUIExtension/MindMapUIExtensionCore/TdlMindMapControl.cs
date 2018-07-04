@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -961,7 +962,7 @@ namespace MindMapUIExtension
 
             var taskItem = TaskItem(node);
 
-            if (!taskItem.IsLocked)
+            if (!ReadOnly && !taskItem.IsLocked)
             {
                 if (HitTestCheckbox(node, e.Location))
                 {
@@ -1041,7 +1042,7 @@ namespace MindMapUIExtension
 
 			var node = HitTestPositions(e.Location);
 
-			if ((node != null) && !HitTestExpansionButton(node, e.Location))
+			if (!ReadOnly && (node != null) && !HitTestExpansionButton(node, e.Location))
 			{
 				var taskItem = TaskItem(node);
 

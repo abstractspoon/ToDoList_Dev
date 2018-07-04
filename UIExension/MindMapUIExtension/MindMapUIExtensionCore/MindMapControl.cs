@@ -166,13 +166,14 @@ namespace MindMapUIExtension
             m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
             m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
 
-            this.AutoScroll = true;
-			this.AllowDrop = true;
+            AutoScroll = true;
+			AllowDrop = true;
+            ReadOnly = false;
 
-			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-			this.SetStyle(ControlStyles.UserPaint, true);
-			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+			SetStyle(ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(ControlStyles.ResizeRedraw, true);
             
             base.BorderStyle = BorderStyle.None;
 		}
@@ -307,7 +308,13 @@ namespace MindMapUIExtension
 				}
 			}
 		}
-		
+
+        public Boolean ReadOnly
+        {
+            set;
+            get;
+        }
+
         public bool SetSelectedNode(UInt32 uniqueID)
         {
             var node = FindNode(uniqueID);
@@ -546,7 +553,7 @@ namespace MindMapUIExtension
 						EndUpdate();
 						EnsureItemVisible(Item(hit));
 					}
-					else
+					else if (!ReadOnly)
 					{
 						SelectedNode = hit;
 
@@ -566,6 +573,8 @@ namespace MindMapUIExtension
 
 			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
 			{
+                Debug.Assert(!ReadOnly);
+
 				if (CheckStartDragging(e.Location))
 					m_DragTimer.Stop();
 			}
@@ -591,6 +600,8 @@ namespace MindMapUIExtension
 
 		protected void OnDragTimer(object sender, EventArgs e)
 		{
+            Debug.Assert(!ReadOnly);
+
 			m_DragTimer.Stop();
 
 			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
@@ -601,7 +612,9 @@ namespace MindMapUIExtension
 	
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
+            Debug.Assert(!ReadOnly);
+
+            TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode));
 
 			if (draggedNode == null)
 			{
@@ -644,7 +657,9 @@ namespace MindMapUIExtension
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
-			RedrawNode(m_DropTarget, false);
+            Debug.Assert(!ReadOnly);
+
+            RedrawNode(m_DropTarget, false);
             Invalidate(CalculateInsertionMarkerRect(m_DropTarget, m_DropPos));
 
 			m_DropTarget = null;
@@ -661,7 +676,9 @@ namespace MindMapUIExtension
 
 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
 		{
-			base.OnQueryContinueDrag(e);
+            Debug.Assert(!ReadOnly);
+
+            base.OnQueryContinueDrag(e);
 
 			if (e.EscapePressed)
 			{
@@ -676,7 +693,9 @@ namespace MindMapUIExtension
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-			base.OnDragLeave(e);
+            Debug.Assert(!ReadOnly);
+
+            base.OnDragLeave(e);
 
 			m_DropTarget = null;
 			m_DropPos = DropPos.None;
@@ -795,7 +814,9 @@ namespace MindMapUIExtension
 
 		private bool CheckStartDragging(Point cursor)
 		{
-			// Check for drag movement
+            Debug.Assert(!ReadOnly);
+
+            // Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
 			if (GetDragRect(ptOrg).Contains(cursor))
@@ -814,7 +835,9 @@ namespace MindMapUIExtension
 
         private DropPos GetDropPos(TreeNode dropTarget, Point cursorPos)
         {
-			var item = Item(dropTarget);
+            Debug.Assert(!ReadOnly);
+
+            var item = Item(dropTarget);
 
 			if (!GetItemDrawRect(item.TotalBounds).Contains(cursorPos))
 				return DropPos.None;
@@ -847,7 +870,9 @@ namespace MindMapUIExtension
 
 		private Boolean IsAcceptableDragSource(TreeNode node)
 		{
-			if ((node == null) || IsRoot(node))
+            Debug.Assert(!ReadOnly);
+
+            if ((node == null) || IsRoot(node))
 				return false;
 
 			// else
@@ -856,7 +881,9 @@ namespace MindMapUIExtension
 
 		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
-			if ((dropTarget == null) || (dropTarget == draggedNode))
+            Debug.Assert(!ReadOnly);
+
+            if ((dropTarget == null) || (dropTarget == draggedNode))
 				return false;
 
 			if (IsChildNode(draggedNode, dropTarget))
@@ -877,12 +904,16 @@ namespace MindMapUIExtension
 
 		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
-			return true;
+            Debug.Assert(!ReadOnly);
+
+            return true;
 		}
 
 		virtual protected Boolean IsAcceptableDragSource(Object itemData)
 		{
-			return (itemData != null);
+            Debug.Assert(!ReadOnly);
+
+            return (itemData != null);
 		}
 
 		private Rectangle GetDoubleClickRect(Point cursor)
@@ -895,7 +926,9 @@ namespace MindMapUIExtension
 
 		private Rectangle GetDragRect(Point cursor)
 		{
-			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+            Debug.Assert(!ReadOnly);
+
+            var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
 			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
 
 			return rect;
@@ -903,7 +936,9 @@ namespace MindMapUIExtension
 
 		private void DoDrop(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
-			if (IsAcceptableDropTarget(draggedNode, dropTarget, dropPos, copy))
+            Debug.Assert(!ReadOnly);
+
+            if (IsAcceptableDropTarget(draggedNode, dropTarget, dropPos, copy))
 			{
                 TreeNode parentNode = null, afterSiblingNode = null;
 
@@ -954,7 +989,9 @@ namespace MindMapUIExtension
 
 		virtual protected Boolean DoDrop(MindMapDragEventArgs e)
 		{
-			if (DragDropChange != null)
+            Debug.Assert(!ReadOnly);
+
+            if (DragDropChange != null)
 				return DragDropChange(this, e);
 
 			// else

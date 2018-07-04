@@ -118,6 +118,7 @@ namespace MindMapUIExtension
 
         public void SetReadOnly(bool bReadOnly)
         {
+            m_MindMap.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)
