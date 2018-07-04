@@ -108,6 +108,7 @@ namespace Abstractspoon
 				Boolean IsDone();
 				Boolean IsDue();
 				Boolean IsGoodAsDone();
+				Boolean HasSomeSubtasksDone();
 				Boolean IsFlagged();
 				Boolean IsParent();
 				Boolean IsLocked();

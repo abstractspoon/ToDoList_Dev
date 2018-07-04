@@ -105,6 +105,7 @@ namespace Abstractspoon
 					Tag,
 					CustomAttribute,
 					OffsetTask,
+					SubtaskDone,
 
 					// new values here ONLY
 

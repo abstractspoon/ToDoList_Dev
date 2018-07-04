@@ -26,6 +26,7 @@ namespace MindMapUIExtension
 		private Boolean m_IsParent;
         private Boolean m_IsDone;
         private Boolean m_IsGoodAsDone;
+        private Boolean m_SomeSubtasksDone;
 		private Boolean m_IsLocked;
 
 		// -----------------------------------------------------------------
@@ -41,6 +42,7 @@ namespace MindMapUIExtension
 			m_IsParent = false;
 			m_IsDone = false;
             m_IsGoodAsDone = false;
+            m_SomeSubtasksDone = false;
 			m_IsLocked = false;
 		}
 
@@ -55,6 +57,7 @@ namespace MindMapUIExtension
 			m_IsParent = task.IsParent();
             m_IsDone = task.IsDone();
             m_IsGoodAsDone = task.IsGoodAsDone();
+            m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 			m_IsLocked = task.IsLocked();
 		}
         
@@ -109,6 +112,7 @@ namespace MindMapUIExtension
 		public Boolean IsParent { get { return m_IsParent; } }
 		public Boolean IsLocked { get { return m_IsLocked; } }
         public Boolean IsTask { get { return (m_TaskID != 0); } }
+        public Boolean HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
 
         public Boolean IsDone(bool includeGoodAsDone) 
         { 
@@ -134,6 +138,9 @@ namespace MindMapUIExtension
 
 			if (attribs.Contains(UIExtension.TaskAttribute.Color))
 				m_TextColor = task.GetTextDrawingColor();
+
+            if (attribs.Contains(UIExtension.TaskAttribute.SubtaskDone))
+                m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 
             if (attribs.Contains(UIExtension.TaskAttribute.DoneDate))
             {
@@ -198,7 +205,7 @@ namespace MindMapUIExtension
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 		}
         
-        public new void SetFont(String fontName, int fontSize, bool strikeThruDone)
+        public void SetFont(String fontName, int fontSize, bool strikeThruDone)
         {
             bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
             bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
@@ -302,6 +309,7 @@ namespace MindMapUIExtension
                 case UIExtension.TaskAttribute.Color:
                 case UIExtension.TaskAttribute.DoneDate:
 			    case UIExtension.TaskAttribute.Position:
+			    case UIExtension.TaskAttribute.SubtaskDone:
                     return true;
             }
 
@@ -812,8 +820,12 @@ namespace MindMapUIExtension
         {
             if (taskItem.IsDone(false))
                 return CheckBoxState.CheckedNormal;
-            else
-                return CheckBoxState.UncheckedNormal;
+
+            if (taskItem.HasSomeSubtasksDone)
+                return CheckBoxState.MixedNormal;
+
+            // else
+            return CheckBoxState.UncheckedNormal;
         }
 
 		protected Boolean NodeHasIcon(TreeNode node)

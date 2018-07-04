@@ -52,6 +52,7 @@ UIExtension::TaskAttribute UIExtension::Map(IUI_ATTRIBUTE attrib)
 	case IUI_TAGS:			return UIExtension::TaskAttribute::Tag;
 	case IUI_CUSTOMATTRIB:	return UIExtension::TaskAttribute::CustomAttribute;
 	case IUI_OFFSETTASK:	return UIExtension::TaskAttribute::OffsetTask;
+	case IUI_SUBTASKDONE:	return UIExtension::TaskAttribute::SubtaskDone;
 	//  case IUI_
 	}
 

@@ -510,6 +510,12 @@ Boolean Task::IsGoodAsDone()
 	return GETTASKVAL(IsTaskGoodAsDone, false);
 }
 
+Boolean Task::HasSomeSubtasksDone()
+{
+	LPCWSTR szSubtasks = GETTASKVAL(GetTaskSubtaskCompletion, NULL);
+	return (szSubtasks && *szSubtasks && (szSubtasks[0] != '0'));
+}
+
 Boolean Task::IsFlagged()
 {
 	return GETTASKVAL_ARG(IsTaskFlagged, FALSE, false);
