@@ -17,7 +17,7 @@ const UINT WM_GTLC_DATECHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANG
 // WPARAM = Drag Mode, LPARAM = Task ID
 const UINT WM_GTLC_DRAGCHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DRAGCHANGE"));
 
-// WPARAM = , LPARAM = TRUE/FALSE
+// WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_GTLC_COMPLETIONCHANGE			= ::RegisterWindowMessage(_T("WM_GTLC_COMPLETIONCHANGE"));
 
 // WPARAM = , LPARAM = 
@@ -31,6 +31,9 @@ const UINT WM_GTLC_PREFSHELP				= ::RegisterWindowMessage(_T("WM_GTLC_PREFSHELP"
 
 // WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_GTLC_GETTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_GETTASKICON"));
+
+// WPARAM = HWND, LPARAM = 
+const UINT WM_GTLC_EDITTASKICON				= ::RegisterWindowMessage(_T("WM_GTLC_EDITTASKICON"));
 
 // WPARAM = 0, LPARAM = IUITASKMOVE*
 const UINT WM_GTLC_MOVETASK					= ::RegisterWindowMessage(_T("WM_GTLC_MOVETASK"));

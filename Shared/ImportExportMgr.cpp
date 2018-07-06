@@ -316,9 +316,13 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSr
 
 int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
 {
+	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
+
+	if (sExt.IsEmpty())
+		return -1;
+
 	Initialize(); // initialize on demand
 
-	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
 	int nImporter = m_aImporters.GetSize();
 
 	while (nImporter--)
@@ -332,9 +336,13 @@ int CImportExportMgr::FindImporter(LPCTSTR szFilePath) const
 
 int CImportExportMgr::FindExporter(LPCTSTR szFilePath) const
 {
+	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
+
+	if (sExt.IsEmpty())
+		return -1;
+
 	Initialize(); // initialize on demand
 
-	CString sExt = FileMisc::GetExtension(szFilePath, FALSE);
 	int nExporter = m_aExporters.GetSize();
 
 	while (nExporter--)

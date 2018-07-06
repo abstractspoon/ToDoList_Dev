@@ -696,9 +696,7 @@ HRESULT CRulerRichEdit::QueryAcceptData(LPDATAOBJECT lpdataobj, CLIPFORMAT* lpcf
 					sImagePath = FileMisc::GetTempFilePath(sFileName, sExt);
 					FileMisc::DeleteFile(sImagePath, TRUE);
 
-					HRESULT hr = ::URLDownloadToFile(NULL, sSourceUrl, sImagePath, 0, NULL);
-					
-					if (hr != S_OK)
+					if (!WebMisc::DownloadFile(sSourceUrl, sImagePath))
 						sImagePath.Empty();
 				}
 

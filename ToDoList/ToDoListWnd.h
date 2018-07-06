@@ -33,6 +33,7 @@
 #include "..\shared\entoolbar.h"
 #include "..\shared\tabctrlex.h"
 #include "..\shared\enrecentfilelist.h"
+#include "..\shared\enimagelist.h"
 #include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\tabbedcombobox.h"
@@ -99,7 +100,7 @@ protected:
 	CTDLCustomToolbar m_toolbarCustom;
 	CFont m_fontMain;
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
-	CImageList m_ilTabCtrl;
+	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
 	CStatusBarACT	m_statusBar;
 	CStatusBarProgress m_sbProgress;
@@ -793,10 +794,6 @@ protected:
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
-	
-	static int MessageBox(UINT nIDText, UINT nIDCaption = 0, UINT nType = MB_OK, LPCTSTR szData = NULL);
-	static int MessageBox(const CString& sText, UINT nIDCaption = 0, UINT nType = MB_OK);
-	static int MessageBox(const CString& sText, const CString& sCaption, UINT nType = MB_OK);
 };
 
 //{{AFX_INSERT_LOCATION}}

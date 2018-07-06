@@ -73,6 +73,7 @@
 #include "..\shared\rtlstylemgr.h"
 #include "..\shared\xslfile.h"
 #include "..\shared\soundedit.h"
+#include "..\shared\messagebox.h"
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\sendfileto.h"
@@ -95,8 +96,11 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int BEVEL = 3; // DON'T SCALE
-const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MAX_NUM_TOOLS = 50;
+const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
+
+const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
+const int QUICKFIND_VOFFSET = (GraphicsMisc::WantDPIScaling() ? (GraphicsMisc::ScaleByDPIFactor(2) - 1) : 0);
 
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
@@ -669,7 +673,7 @@ void CToDoListWnd::SetupUIStrings()
 	CTimeEdit::SetUnits(THU_WEEKS,		CEnString(IDS_TE_WEEKS),	CEnString(IDS_WEEKS_ABBREV));
 	CTimeEdit::SetUnits(THU_MONTHS,		CEnString(IDS_TE_MONTHS),	CEnString(IDS_MONTHS_ABBREV));
 	CTimeEdit::SetUnits(THU_YEARS,		CEnString(IDS_TE_YEARS),	CEnString(IDS_YEARS_ABBREV));
-	CTimeEdit::SetDefaultButtonTip(CEnString(IDS_TIMEUNITS));
+	CTimeEdit::SetDefaultButtonTip(		CEnString(IDS_TIMEUNITS));
 
 	CFileEdit::SetDefaultButtonTips(CEnString(IDS_BROWSE), CEnString(IDS_VIEW));
 	CFileEdit::SetDefaultBrowseTitles(CEnString(IDS_BROWSEFILE_TITLE), CEnString(IDS_BROWSEFOLDER_TITLE));
@@ -793,31 +797,6 @@ BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 	return FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
 }
 
-int CToDoListWnd::MessageBox(UINT nIDText, UINT nIDCaption, UINT nType, LPCTSTR szData)
-{
-	if (!Misc::IsEmpty(szData))
-		return MessageBox(CEnString(nIDText, szData), nIDCaption, nType);
-	else
-		return MessageBox(CEnString(nIDText), nIDCaption, nType);
-}
-
-int CToDoListWnd::MessageBox(const CString& sText, UINT nIDCaption, UINT nType)
-{
-	return MessageBox(sText, CEnString(nIDCaption), nType);
-}
-
-int CToDoListWnd::MessageBox(const CString& sText, const CString& sCaption, UINT nType)
-{
-	CString sMessage;
-
-	if (!sCaption.IsEmpty())
-		sMessage.Format(_T("%s|%s"), sCaption, sText);
-	else
-		sMessage = sText;
-
-	return AfxMessageBox(sMessage, nType);
-}
-
 int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -867,7 +846,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// notify users about dodgy content plugins
 	if (m_mgrContent.SomePluginsHaveBadversions())
 	{
-		if (MessageBox(IDS_BADPLUGINVERSIONS, IDS_BADPLUGINTITLE, MB_OKCANCEL) == IDCANCEL)
+		if (CMessageBox::AfxShow(IDS_BADPLUGINTITLE, IDS_BADPLUGINVERSIONS, MB_OKCANCEL) == IDCANCEL)
 			return -1;
 	}
 
@@ -907,6 +886,8 @@ BOOL CToDoListWnd::InitTabCtrl()
 			bm.LoadBitmap(IDB_SOURCECONTROL_STD);
 			
 			m_ilTabCtrl.Add(&bm, RGB(255, 0, 255));
+			m_ilTabCtrl.ScaleByDPIFactor();
+
 			m_tabCtrl.SetImageList(&m_ilTabCtrl);
 			
 			return TRUE;
@@ -1361,7 +1342,9 @@ BOOL CToDoListWnd::InitMainToolbar()
 	
 	CRect rect;
 	m_toolbarMain.GetToolBarCtrl().GetItemRect(nPos + 1, &rect);
-	rect.bottom += 200;
+
+	rect.top += QUICKFIND_VOFFSET;
+	rect.bottom += QUICKFIND_HEIGHT;
 	
 	if (!m_cbQuickFind.Create(WS_CHILD | WS_VSCROLL | WS_VISIBLE | CBS_AUTOHSCROLL | 
 		CBS_DROPDOWN, rect, &m_toolbarMain, IDC_QUICKFIND))
@@ -1439,7 +1422,7 @@ void CToDoListWnd::OnQuickFindNext()
 		{
 			// return to start
 			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTFIRST))
-				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1471,7 +1454,7 @@ void CToDoListWnd::OnQuickFindPrev()
 		{
 			// return to end
 			if (!GetToDoCtrl().SelectTask(m_sQuickFind, TDC_SELECTLAST))
-				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1516,7 +1499,7 @@ void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 		{
 			if (bComboSelChange)
 			{
-				MessageBox(IDS_QUICKFIND_NOTFOUND, 0, MB_OK, m_sQuickFind);
+				AfxMessageBox(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind), MB_OK);
 				m_cbQuickFind.SetFocus();
 			}
 
@@ -1530,7 +1513,7 @@ BOOL CToDoListWnd::HandleReservedShortcut(DWORD dwShortcut)
 {
 	if (CFilteredToDoCtrl::IsReservedShortcut(dwShortcut))
 	{
-		int nRet = MessageBox(IDS_RESERVEDSHORTCUT_MSG, IDS_RESERVEDSHORTCUT_TITLE, MB_YESNOCANCEL);
+		int nRet = CMessageBox::AfxShow(IDS_RESERVEDSHORTCUT_TITLE, IDS_RESERVEDSHORTCUT_MSG, MB_YESNOCANCEL);
 		
 		if (nRet == IDYES)
 			DoPreferences(PREFPAGE_SHORTCUT);
@@ -1813,7 +1796,7 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 				sMessage.Format(IDS_SAVENOSPACE, szTasklist);
 			}
 			
-			if (IDOK == MessageBox(sMessage, IDS_SAVETASKLIST_TITLE, (MB_OKCANCEL | MB_ICONEXCLAMATION)))
+			if (IDOK == CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, (MB_OKCANCEL | MB_ICONEXCLAMATION)))
 			{
 				// try again
 				return TRUE;
@@ -1854,7 +1837,7 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 	if (!sMessage.IsEmpty())
 	{
 		FileMisc::LogText(_T("Saving of the file '%s' failed with the error code: %d"), szTasklist, nErr);
-		MessageBox(sMessage, IDS_SAVETASKLIST_TITLE, MB_OK);
+		CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, MB_OK);
 	}
 	
 	return FALSE; // not handled
@@ -2214,7 +2197,7 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 	if (!sMessage.IsEmpty())
 	{
 		FileMisc::LogText(_T("Loading of the file '%s' failed with the error code: %d"), szTaskList, nErr);
-		MessageBox(sMessage, CEnString(IDS_OPENTASKLIST_TITLE), MB_OK);
+		CMessageBox::AfxShow(IDS_OPENTASKLIST_TITLE, sMessage, MB_OK);
 	}
 }
 
@@ -2655,7 +2638,7 @@ void CToDoListWnd::ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExist
 	UNREFERENCED_PARAMETER(bExistingReg);
 #endif
 
-	AfxMessageBox(CEnString(nMsgID));
+	CMessageBox::AfxShow(nMsgID);
 
 	// Record that we've told them so that we don't
 	// tell them again unless they've switched to admin
@@ -3987,7 +3970,7 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 	if (!DoDueTaskNotification(nTDC, PFP_DUETODAY))
 	{
 		CEnString sMessage(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC));
-		MessageBox(sMessage);//, IDS_DUETASKS_TITLE);
+		AfxMessageBox(sMessage);//, IDS_DUETASKS_TITLE);
 	}
 }
 
@@ -5116,7 +5099,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 		{
 			// if the language file exists and has changed then inform the user that they to restart
 			// Note: restarting will also handle 'bAdd2Dict' and 'bEnableRTL'
-			if (MessageBox(IDS_RESTARTTOCHANGELANGUAGE, 0, MB_YESNO) == IDYES)
+			if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGELANGUAGE, MB_YESNO) == IDYES)
 			{
 				return TRUE;
 			}
@@ -5128,7 +5111,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	{
 		// if the language file exists and has changed then inform the user that they to restart
 		// Note: restarting will also handle 'bAdd2Dict'
-		if (MessageBox(IDS_RESTARTTOCHANGERTLINPUT, 0, MB_YESNO) == IDYES)
+		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
 		{
 			return TRUE;
 		}
@@ -6148,7 +6131,7 @@ void CToDoListWnd::OnReload()
 	
 	if (m_mgrToDoCtrls.IsModified(nSel))
 	{ 
-		if (IDYES != MessageBox(IDS_CONFIRMRELOAD, IDS_CONFIRMRELOAD_TITLE, MB_YESNOCANCEL | MB_DEFBUTTON2))
+		if (IDYES != CMessageBox::AfxShow(IDS_CONFIRMRELOAD_TITLE, IDS_CONFIRMRELOAD, MB_YESNOCANCEL | MB_DEFBUTTON2))
 		{
 			return;
 		}
@@ -6220,7 +6203,10 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 		if (rNewPos.TopLeft() != rPrevPos.TopLeft())
 		{
 			m_toolbarMain.ScreenToClient(rNewPos);
-			rNewPos.bottom = rNewPos.top + 200;
+
+			rNewPos.top += QUICKFIND_VOFFSET;
+			rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
+
 			m_cbQuickFind.MoveWindow(rNewPos);
 		}
 
@@ -6499,7 +6485,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 		DWORD dwRes = FileMisc::Run(*this, sTempFile, NULL, SW_HIDE, NULL, bPreview ? _T("print") : NULL);
 								
 		if (dwRes < 32)
-			MessageBox(IDS_PRINTFAILED, IDS_PRINTFAILED_TITLE, MB_OK);
+			CMessageBox::AfxShow(IDS_PRINTFAILED_TITLE, IDS_PRINTFAILED, MB_OK);
 	}
 }
 
@@ -6914,7 +6900,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 				if (!bReadOnly) // might been modified
 					sMessage += CEnString(IDS_WANTRELOAD);
 
-				UINT nRet = MessageBox(sMessage, IDS_STATUSCHANGE_TITLE, !bReadOnly ? MB_YESNOCANCEL : MB_OK);
+				UINT nRet = CMessageBox::AfxShow(IDS_STATUSCHANGE_TITLE, sMessage, !bReadOnly ? MB_YESNOCANCEL : MB_OK);
 				
 				bReload = (nRet == IDYES || nRet == IDOK);
 			}
@@ -7020,7 +7006,7 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 				CEnString sMessage(IDS_MODIFIEDELSEWHERE, sFilePath);
 				sMessage += CEnString(IDS_WANTRELOAD);
 				
-				bReload = (MessageBox(sMessage, IDS_TIMESTAMPCHANGE_TITLE, MB_YESNOCANCEL) == IDYES);
+				bReload = (CMessageBox::AfxShow(IDS_TIMESTAMPCHANGE_TITLE, sMessage, MB_YESNOCANCEL) == IDYES);
 			}
 			
 			if (bReload && ReloadTaskList(nCtrl, FALSE, (nReloadOption == RO_ASK)))
@@ -7269,7 +7255,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 		PopulateToolArgs(args);
 
 		CTDCToolsHelper th(prefs.GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
-		th.RunTool(ut, args, this);
+		th.RunTool(ut, args);
 	}
 }
 
@@ -7817,7 +7803,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		// set global styles once only allowing the taskfile 
 		// itself to override from this point on
 		pTDC->SetStyle(TDCS_SAVEUIVISINTASKLIST, m_bSaveUIVisInTaskList);
-		pTDC->SetStyle(TDCS_DISABLEPASSWORDPROMPTING, m_bPasswordPrompting);
+		pTDC->SetStyle(TDCS_DISABLEPASSWORDPROMPTING, !m_bPasswordPrompting);
 
 		// Set initial theme before it becomes visible
 		pTDC->SetUITheme(m_theme);
@@ -8216,7 +8202,7 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 			CEnString sMessage(IDS_SAVEBEFORECLOSE, sName);
 			
 			// don't allow user to cancel if closing down
-			int nRet = MessageBox(sMessage, IDS_CONFIRMSAVE_TITLE, bClosingWindows ? MB_YESNO : MB_YESNOCANCEL);
+			int nRet = CMessageBox::AfxShow(IDS_CONFIRMSAVE_TITLE, sMessage, bClosingWindows ? MB_YESNO : MB_YESNOCANCEL);
 			
 			if (nRet == IDYES)
 			{
@@ -9059,7 +9045,7 @@ void CToDoListWnd::HandleExportTasklistError(IIMPORTEXPORT_RESULT nErr)
 	}
 
 	if (nMessageID)
-		AfxMessageBox(CEnString(nMessageID), (MB_OK | nIcon));
+		CMessageBox::AfxShow(nMessageID), (MB_OK | nIcon);
 }
 
 void CToDoListWnd::OnSetPriority(UINT nCmdID) 
@@ -9207,7 +9193,7 @@ LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 		PopulateToolArgs(args);
 
 		CTDCToolsHelper th(Prefs().GetEnableTDLExtension(), ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
-		th.TestTool(*pTool, args, m_pPrefs);
+		th.TestTool(*pTool, args);
 	}
 	
 	return 0;
@@ -9707,7 +9693,7 @@ void CToDoListWnd::OnToolsCheckout()
 			nFlags |= MB_YESNO;
 		}
 
-		if (MessageBox(sMessage, IDS_CHECKOUT_TITLE, nFlags) != IDYES)
+		if (CMessageBox::AfxShow(IDS_CHECKOUT_TITLE, sMessage, nFlags) != IDYES)
 			break;
 
 		// else try again with a forced checkout
@@ -9760,7 +9746,7 @@ void CToDoListWnd::OnToolsCheckin()
 			CString sName = m_mgrToDoCtrls.GetFriendlyProjectName(nSel);
 			CEnString sMessage(IDS_SAVEBEFORECHECKIN, sName);
 			
-			int nRet = MessageBox(sMessage, IDS_CHECKIN_TITLE, MB_YESNOCANCEL);
+			int nRet = CMessageBox::AfxShow(IDS_CHECKIN_TITLE, sMessage, MB_YESNOCANCEL);
 			
 			switch (nRet)
 			{
@@ -9846,7 +9832,7 @@ void CToDoListWnd::OnExport()
 		if ((nTDCCount == 1) || !dialog.GetExportAllTasklists() || dialog.GetExportOneFile())
 		{
 			if (FileMisc::FileExists(sExportPath))
-				bOverWrite = (IDOK == MessageBox(sExportPath, IDS_CONFIRM_EXPORT_OVERWRITE, nMsgFlags));
+				bOverWrite = (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, sExportPath, nMsgFlags));
 			else
 				bOverWrite = TRUE;
 		}
@@ -9868,7 +9854,7 @@ void CToDoListWnd::OnExport()
 			}
 
 			if (aExistPaths.GetSize())
-				bOverWrite = (IDOK == MessageBox(Misc::FormatArray(aExistPaths, _T("\n\n")), IDS_CONFIRM_EXPORT_OVERWRITE, nMsgFlags));
+				bOverWrite = (IDOK == CMessageBox::AfxShow(IDS_CONFIRM_EXPORT_OVERWRITE, Misc::FormatArray(aExistPaths, _T("\n\n")), nMsgFlags));
 			else
 				bOverWrite = TRUE;
 		}
@@ -10694,7 +10680,7 @@ void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID)
 	
 	if (!DoDueTaskNotification(GetSelToDoCtrl(), nDueBy))
 	{
-		MessageBox(nIDDueBy, 0, MB_OK, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl()));
+		AfxMessageBox(CEnString(nIDDueBy, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl())), MB_OK);
 	}
 }
 
@@ -11097,7 +11083,7 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 		{
 			m_bPromptLanguageChangeRestartOnActivate = FALSE;
 
-			if (MessageBox(IDS_RESTARTTOCHANGELANGUAGE, 0, MB_YESNO) == IDYES)
+			if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGELANGUAGE, MB_YESNO) == IDYES)
 			{
 				DoExit(TRUE);
 				return;
@@ -11725,8 +11711,10 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 										dialog.GetOutputFilepath()))
 				{
 					// query the user to view the results
-					if (MessageBox(IDS_LOGANALYSIS_QUERYOPEN, 0, MB_YESNO) == IDYES)
+					if (CMessageBox::AfxShow(IDS_LOGANALYSIS_QUERYOPEN, MB_YESNO) == IDYES)
+					{
 						FileMisc::Run(*this, dialog.GetOutputFilepath());
+					}
 
 					return;
 				}
@@ -11741,11 +11729,11 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 			{
 			case ERROR_ACCESS_DENIED:
 			case ERROR_SHARING_VIOLATION:
-				MessageBox(IDS_LOGANALYSIS_ERRNOACCESS, 0, MB_ICONWARNING);
+				CMessageBox::AfxShow(IDS_LOGANALYSIS_ERRNOACCESS, MB_ICONWARNING);
 				break;
 
 			default: // no tasks matching
-				bContinue = (MessageBox(IDS_LOGANALYSIS_ERRNOTASKS, 0, MB_YESNO) == IDYES);
+				bContinue = (CMessageBox::AfxShow(IDS_LOGANALYSIS_ERRNOTASKS, MB_YESNO) == IDYES);
 				break;
 			}
 		}
@@ -11977,7 +11965,7 @@ LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 	{
 		if (!CMSOutlookHelper::IsOutlookInstalled())
 		{
-			AfxMessageBox(CEnString(IDS_ERROROUTLOOKNOTINSTALLED));
+			CMessageBox::AfxShow(IDS_ERROROUTLOOKNOTINSTALLED);
 			return TRUE; // we handled it
 		}
 		else if (CMSOutlookHelper::HandleUrl(*this, szLink))
@@ -12007,7 +11995,7 @@ LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)
 	}
 
 	// all else
-	MessageBox(IDS_COMMENTSGOTOERRMSG);
+	CMessageBox::AfxShow(IDS_COMMENTSGOTOERRMSG);
 	return 0L;
 }
 
@@ -12920,7 +12908,7 @@ void CToDoListWnd::OnEditSelectReferenceTarget()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	if (!tdc.GotoSelectedReferenceTaskTarget())	
-		MessageBox(IDS_NOREFERENCETASKSINSELECTION);
+		CMessageBox::AfxShow(IDS_NOREFERENCETASKSINSELECTION);
 }
 
 void CToDoListWnd::OnUpdateEditSelectReferenceTarget(CCmdUI* pCmdUI) 
@@ -12931,7 +12919,7 @@ void CToDoListWnd::OnUpdateEditSelectReferenceTarget(CCmdUI* pCmdUI)
 void CToDoListWnd::OnEditSelectTaskReferences() 
 {
 	if (!GetToDoCtrl().GotoSelectedTaskReferences())	
-		MessageBox(IDS_SELECTIONHASNOREFERENCETASKS);
+		CMessageBox::AfxShow(IDS_SELECTIONHASNOREFERENCETASKS);
 }
 
 void CToDoListWnd::OnUpdateEditSelectTaskReferences(CCmdUI* pCmdUI) 
@@ -13019,7 +13007,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	// Prompt to restart app whenever Regional settings change
 	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))
 	{
-		if (MessageBox(IDS_RESTARTTOUPDATESETTINGS, 0, MB_YESNO) == IDYES)
+		if (AfxMessageBox(IDS_RESTARTTOUPDATESETTINGS, 0, MB_YESNO) == IDYES)
 		{
 			DoExit(TRUE);
 			return;
@@ -13102,7 +13090,7 @@ void CToDoListWnd::OnMoveSelectTaskDependencies()
 void CToDoListWnd::OnMoveSelectTaskDependents()
 {
 	if (!GetToDoCtrl().GotoSelectedTaskLocalDependents())
-		MessageBox(IDS_NOTASKSDEPENDENTONSELECTION);
+		AfxMessageBox(IDS_NOTASKSDEPENDENTONSELECTION);
 }
 
 void CToDoListWnd::OnUpdateMoveSelectTaskDependencies(CCmdUI* pCmdUI)

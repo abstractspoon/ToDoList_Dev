@@ -341,7 +341,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloa
 		}
 	}
 
-	if (S_OK != ::URLDownloadToFile(NULL, m_sDownloadUri, m_sDownloadFile, 0, &m_dlgProgress))
+	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, &m_dlgProgress))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
 		return FALSE;

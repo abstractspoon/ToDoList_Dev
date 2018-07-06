@@ -51,6 +51,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\mapex.h"
+#include "..\shared\messagebox.h"
 
 #include "..\interfaces\IContentControl.h"
 
@@ -5020,8 +5021,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) c
 	// are we an archive and should we warn user if we are
 	if (m_bArchive && HasStyle(TDCS_WARNADDDELETEARCHIVE))
 	{
-		if (MessageBoxEx(this, IDS_TDC_WARNADDTOARCHIVE, IDS_TDC_CONFIRMADD_TITLE, 
-						MB_YESNO | MB_ICONQUESTION) != IDYES) 
+		if (CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION) != IDYES) 
 		{
 			return FALSE;
 		}
@@ -5566,9 +5566,7 @@ BOOL CToDoCtrl::ConfirmDeleteAllTasks(BOOL bSelected) const
 	// are we an archive and should we warn user if we are
 	else if (m_bArchive && HasStyle(TDCS_WARNADDDELETEARCHIVE))
 	{
-		return (MessageBoxEx(this, IDS_TDC_WARNDELETEFROMARCHIVE, 
-							IDS_TDC_CONFIRMDELETE_TITLE, 
-							MB_YESNO | MB_ICONQUESTION) == IDYES);
+		return (CMessageBox::AfxShow(IDS_TDC_CONFIRMDELETE_TITLE, IDS_TDC_WARNDELETEFROMARCHIVE, MB_YESNO | MB_ICONQUESTION) == IDYES);
 	}
 	else if (HasStyle(TDCS_CONFIRMDELETE))
 	{
@@ -5586,7 +5584,7 @@ BOOL CToDoCtrl::ConfirmDeleteAllTasks(BOOL bSelected) const
 		}
 		// else MB_DEFBUTTON1
 			
-		return (MessageBoxEx(this, sMessage, IDS_TDC_CONFIRMDELETE_TITLE, nFlags) == IDYES);
+		return (CMessageBox::AfxShow(IDS_TDC_CONFIRMDELETE_TITLE, sMessage, nFlags) == IDYES);
 	}
 		
 	// all else
@@ -6085,8 +6083,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath)
 				{
 					CEnString sMessage(IDS_TDC_CONFIRMOVERWRITE, sSavePath);
 					
-					if (MessageBoxEx(this, sMessage, IDS_TDC_CONFIRMOVERWRITE_TITLE, 
-						MB_ICONWARNING | MB_YESNO) != IDYES)
+					if (CMessageBox::AfxShow(IDS_TDC_CONFIRMOVERWRITE_TITLE, sMessage, MB_ICONWARNING | MB_YESNO) != IDYES)
 					{
 						return TDCF_CANCELLED;
 					}
@@ -11301,7 +11298,7 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 	}
 
 	if (bWantQueryRecalc)
-		nRecalcTime = MessageBox(CEnString(IDS_TDC_RECALCPROMPT), CEnString(IDS_TDC_RECALCTITLE), MB_ICONQUESTION | MB_YESNOCANCEL);
+		nRecalcTime = CMessageBox::AfxShow(IDS_TDC_RECALCPROMPT, IDS_TDC_RECALCTITLE, MB_ICONQUESTION | MB_YESNOCANCEL);
 
 	if (nRecalcTime != IDCANCEL)
 	{
@@ -11439,8 +11436,10 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 		}
 		else if (nRet == IDNOERRORS && bNotifyNoErrors)
 		{
-			MessageBoxEx(this, bTitle ? IDS_TDC_NOTITLESPELLERRORS : IDS_TDC_NOCOMMENTSPELLERRORS, 
-				IDS_TDC_SPELLCHECK_TITLE);
+			if (bCheckTitle)
+				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOTITLESPELLERRORS);
+			else
+				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOCOMMENTSPELLERRORS);
 		}
 		else if (nRet == IDCANCEL)
 		{
@@ -12164,12 +12163,12 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 		}
 		else
 		{
-			MessageBoxEx(this, CEnString(IDS_TDC_TASKIDNOTFOUND, dwTaskID), IDS_TDC_TASKIDNOTFOUND_TITLE);
+			CMessageBox::AfxShow(IDS_TDC_TASKIDNOTFOUND_TITLE, IDS_TDC_TASKIDNOTFOUND);
 		}
 	}
 	else
 	{
-		MessageBoxEx(this, CEnString(IDS_TDC_ZEROINVALIDTASKID), IDS_TDC_ZEROINVALIDTASKID_TITLE);
+		CMessageBox::AfxShow(IDS_TDC_ZEROINVALIDTASKID_TITLE, IDS_TDC_ZEROINVALIDTASKID);
 	}
 
 	return FALSE;

@@ -4582,7 +4582,7 @@ BEGIN
     IDS_UPDATER_SMARTSCREENBLOCK 
                             "The updater could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
     IDS_EDIT_OPENFILEREF    "Open Task File Link"
-    IDS_TE_WEEKDAYS         "d\t(weekdays)"
+    IDS_TE_WEEKDAYS         "Weekdays"
     IDS_WEEKDAYS_ABBREV     "d"
     IDS_USERTOOL_FOLDERPROMPT "Folder prompt"
     IDS_USERTOOL_TEXTPROMPT "Text prompt"
@@ -4831,12 +4831,12 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_SOUNDFILEFILTER     "Sounds (*.wav)|*.wav||"
-    IDS_TE_MINS             "m\t(minutes)"
-    IDS_TE_HOURS            "H\t(hours)"
-    IDS_TE_DAYS             "D\t(days)"
-    IDS_TE_WEEKS            "W\t(weeks)"
-    IDS_TE_MONTHS           "M\t(months)"
-    IDS_TE_YEARS            "Y\t(years)"
+    IDS_TE_MINS             "Minutes"
+    IDS_TE_HOURS            "Hours"
+    IDS_TE_DAYS             "Days"
+    IDS_TE_WEEKS            "Weeks"
+    IDS_TE_MONTHS           "Months"
+    IDS_TE_YEARS            "Years"
     IDS_FILTER_ANYCATS      "Any category can match"
     IDS_FILTER_ANYPEOPLE    "Any person can match"
     IDS_FILTER_HIDEPARENTS  "Hide parent tasks (List View)"

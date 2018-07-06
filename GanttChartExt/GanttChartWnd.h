@@ -131,6 +131,7 @@ protected:
 	afx_msg LRESULT OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttGetTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGanttEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttMoveTask(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 

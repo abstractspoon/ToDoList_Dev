@@ -585,7 +585,14 @@ BOOL CEnEdit::SetButtonTip(UINT nID, LPCTSTR szTip)
 	if (nBtn < 0)
 		return FALSE;
 
-	m_aButtons[nBtn].sTip = szTip;
+	if (m_aButtons[nBtn].sTip != szTip)
+	{
+		m_aButtons[nBtn].sTip = szTip;
+		
+		if (m_tooltip.GetSafeHwnd())
+			m_tooltip.Activate(FALSE);
+	}
+
 	return TRUE;
 }
 

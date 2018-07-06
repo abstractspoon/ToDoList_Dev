@@ -16,6 +16,7 @@
 #include "..\shared\preferences.h"
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
+#include "..\shared\messagebox.h"
 
 #include <shlwapi.h>
 
@@ -39,27 +40,21 @@ CTDCToolsHelper::~CTDCToolsHelper()
 	
 }
 
-BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd)
+BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args)
 {
-	return RunTestTool(tool, args, pWnd, FALSE);
+	return RunTestTool(tool, args, FALSE);
 }
 
-BOOL CTDCToolsHelper::TestTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd)
+BOOL CTDCToolsHelper::TestTool(const USERTOOL& tool, const USERTOOLARGS& args)
 {
-	return RunTestTool(tool, args, pWnd, TRUE);
+	return RunTestTool(tool, args, TRUE);
 }
 
-BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd, BOOL bTest)
+BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bTest)
 {
-	if (!pWnd || !pWnd->GetSafeHwnd())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	
 	CString sToolPath(GetToolPath(tool));
 
-	if (!CheckToDoListVersionCompatibility(sToolPath, pWnd))
+	if (!CheckToDoListVersionCompatibility(sToolPath))
 	{
 		return FALSE;
 	}
@@ -68,7 +63,7 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 		CEnString sMessage;
 		sMessage.Format(IDS_TH_TOOLNOTFOUND, sToolPath);
 
-		pWnd->MessageBox(sMessage, CEnString(IDS_TH_RUNTOOLERROR_TITLE), MB_OK | MB_ICONERROR);
+		CMessageBox::AfxShow(IDS_TH_RUNTOOLERROR_TITLE, sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 	
@@ -85,27 +80,21 @@ BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args
 		CEnString sMessage;
 		sMessage.Format(IDS_TH_TESTTOOL, sToolPath, sCmdline);
 
-		if (pWnd->MessageBox(sMessage, CEnString(IDS_TH_TESTTOOL_TITLE), MB_YESNO | MB_ICONQUESTION) == IDNO)
+		if (CMessageBox::AfxShow(IDS_TH_TESTTOOL_TITLE, sMessage, MB_YESNO | MB_ICONQUESTION) == IDNO)
 			return FALSE;
 	}
 
-	DWORD dwRes = FileMisc::Run(*pWnd, sToolPath, sCmdline, (tool.bRunMinimized ? SW_MINIMIZE : SW_SHOWNORMAL));
+	DWORD dwRes = FileMisc::Run(*AfxGetMainWnd(), sToolPath, sCmdline, (tool.bRunMinimized ? SW_MINIMIZE : SW_SHOWNORMAL));
 	
 	// error handling
 	if (dwRes < SE_ERR_SUCCESS)
-		pWnd->MessageBox(CEnString(IDS_TH_RUNTOOLERROR, tool.sToolName), CEnString(IDS_TH_RUNTOOLERROR_TITLE), MB_OK | MB_ICONERROR);
+		CMessageBox::AfxShow(IDS_TH_RUNTOOLERROR_TITLE, CEnString(IDS_TH_RUNTOOLERROR, tool.sToolName), MB_OK | MB_ICONERROR);
 
 	return (dwRes >= SE_ERR_SUCCESS);
 }
 
-BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath, CWnd* pWnd) const
+BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath) const
 {
-	if (!pWnd || !pWnd->GetSafeHwnd())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	// Check if we have anything to do first
 	if (Misc::ToUpper(FileMisc::GetFileNameFromPath(sToolPath)) != _T("TODOLIST.EXE"))
 		return TRUE;
@@ -122,7 +111,7 @@ BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath
 	CEnString sMessage;
 	sMessage.Format(IDS_TH_TOOLVERSIONERROR, aToolVersion[0], aToolVersion[1], aAppVersion[0], aAppVersion[1]);
 
-	pWnd->MessageBox(sMessage, CEnString(IDS_TH_TOOLVERSIONERROR_TITLE), MB_OK | MB_ICONERROR);
+	CMessageBox::AfxShow(IDS_TH_TOOLVERSIONERROR_TITLE, sMessage, MB_OK | MB_ICONERROR);
 
 	return FALSE;
 }

@@ -99,12 +99,10 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 
 	SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 
-	CString sLabel;
-	sLabel.Format(_T("%c"), GetTimeUnit(nUnits).cAbbrLabel);
-
-	CString sTip(s_sUnitsBtnTip.IsEmpty() ? TIME_UNITS : s_sUnitsBtnTip);
-	AddButton(TEBTN_UNITS, sLabel, sTip, CALC_BTNWIDTH);
+	AddButton(TEBTN_UNITS, _T(""), _T(""), CALC_BTNWIDTH);
 	SetDropMenuButton(TEBTN_UNITS);
+
+	UpdateButtonText(nUnits);
 }
 
 CTimeEdit::~CTimeEdit()
@@ -190,11 +188,27 @@ void CTimeEdit::PreSubclassWindow()
 {
 	CEnEdit::PreSubclassWindow();
 
-	CString sLabel;
-	sLabel.Format(_T("%c"), GetTimeUnit(m_nUnits).cAbbrLabel);
-	SetButtonCaption(1, sLabel);
-
+	UpdateButtonText(m_nUnits);
 	SetTime(GetTime());
+}
+
+void CTimeEdit::UpdateButtonText(TH_UNITS nUnits)
+{
+	if (nUnits != THU_NULL)
+	{
+		const TIMEUNIT& tu = GetTimeUnit(nUnits);
+		
+		CString sLabel;
+		sLabel.Format(_T("%c"), tu.cAbbrLabel);
+		
+		SetButtonCaption(TEBTN_UNITS, sLabel);
+		SetButtonTip(TEBTN_UNITS, tu.szLabel);
+	}
+	else
+	{
+		SetButtonCaption(TEBTN_UNITS, _T(""));
+		SetButtonTip(TEBTN_UNITS, (s_sUnitsBtnTip.IsEmpty() ? TIME_UNITS : s_sUnitsBtnTip));
+	}
 }
 
 double CTimeEdit::GetTime() const
@@ -225,16 +239,7 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits)
 	if (nUnits != m_nUnits)
 	{
 		m_nUnits = nUnits;
-
-		if (GetSafeHwnd())
-		{
-			CString sLabel;
-
-			if (nUnits != THU_NULL)
-				sLabel.Format(_T("%c"), GetTimeUnit(nUnits).cAbbrLabel);
-
-			SetButtonCaption(1, sLabel);
-		}
+		UpdateButtonText(m_nUnits);
 	}
 }
 
@@ -253,38 +258,19 @@ BOOL CTimeEdit::CreateUnitsPopupMenu(BOOL bUpdateState)
 	ASSERT(GetSafeHwnd());
 
 	// create once only
-	if (!m_menuUnits.GetSafeHmenu())
+	if (!m_menuUnits.GetSafeHmenu() && m_menuUnits.CreatePopupMenu())
 	{
-		if (m_menuUnits.CreatePopupMenu())
-		{			
-			for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)
-			{
-				const TIMEUNIT& tu = TIMEUNITS[nUnit];
-				m_menuUnits.AppendMenu(MF_STRING, tu.nMenuID, tu.szLabel);
-			}
-
-			// translate
-			if (CLocalizer::TranslateMenu(m_menuUnits, *this))
-			{
-				// update static abbreviations once only
-				if (!s_bUnitsTranslated)
-				{
-					for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)
-					{
-						CString sMenuItem;
-						m_menuUnits.GetMenuString(nUnit, sMenuItem, MF_BYPOSITION);
-						
-						if (!sMenuItem.IsEmpty())
-						{
-							TIMEUNIT& tu = TIMEUNITS[nUnit];
-							tu.cAbbrLabel = sMenuItem[0];
-						}
-					}
-
-					s_bUnitsTranslated = TRUE;
-				}
-			}
+		CString sMenuItem;
+		
+		for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)
+		{
+			const TIMEUNIT& tu = TIMEUNITS[nUnit];
+			sMenuItem.Format(_T("%c\t%s"), tu.cAbbrLabel, tu.szLabel);
+			
+			m_menuUnits.AppendMenu(MF_STRING, tu.nMenuID, sMenuItem);
 		}
+
+		CLocalizer::EnableTranslation(m_menuUnits, FALSE);
 	}
 
 	// state

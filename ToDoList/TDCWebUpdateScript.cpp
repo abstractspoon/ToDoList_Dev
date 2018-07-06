@@ -9,8 +9,6 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\filemisc.h"
 
-#include <comdef.h>
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -97,7 +95,7 @@ BOOL CTDCWebUpdateScript::LoadScript(const CString& sScriptUrl)
 	CString sTempFile = FileMisc::GetTempFilePath(_T(""));
 	FileMisc::DeleteFile(sTempFile, TRUE);
 
-	// clear cache 
+	// clear cache before downloading
 	if (!WebMisc::DeleteCacheEntry(sScriptUrl))
 	{
 		if (GetLastError() == ERROR_ACCESS_DENIED)
@@ -107,18 +105,8 @@ BOOL CTDCWebUpdateScript::LoadScript(const CString& sScriptUrl)
 		}
 	}
 	
-	// before downloading
-	HRESULT hr = ::URLDownloadToFile(NULL, sScriptUrl, sTempFile, 0, NULL);
-	
-	if (hr != S_OK)
-	{
-		FileMisc::LogText(_T("CTDCWebUpdateScript::LoadScript(failed to download %s to %s)"), sScriptUrl, sTempFile);
-
-		_com_error err(hr);
-		FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), err.ErrorMessage());
-
+	if (!WebMisc::DownloadFile(sScriptUrl, sTempFile))
 		return FALSE;
-	}
 	
 	// verify the script contents
 	CStringArray aLines;

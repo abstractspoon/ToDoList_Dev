@@ -9,12 +9,22 @@
 #pragma once
 #endif // _MSC_VER >= 1000
 
+//////////////////////////////////////////////////////////////////////
+
 enum RT_CTRLSTATE // for SetCtrlState
 {
 	RTCS_ENABLED,
 	RTCS_DISABLED,
 	RTCS_READONLY,
 };
+
+//////////////////////////////////////////////////////////////////////
+
+#ifndef WM_NCMOUSELEAVE
+#	define WM_NCMOUSELEAVE 0x000002A2
+#endif
+
+//////////////////////////////////////////////////////////////////////
 
 class CDialogHelper
 {
@@ -133,11 +143,10 @@ public:
 	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 	static void ExcludeCtrl(const CWnd* pParent, UINT nCtrlID, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
-
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
 
-	static int ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR szInstruction, LPCTSTR szText, UINT nFlags);
-
+	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
+	
 protected:
 	CDialogHelper() : m_bInUpdateEx(FALSE) {}
 
