@@ -329,6 +329,9 @@ const UINT WM_IUI_MOVESELECTEDTASK		= ::RegisterWindowMessageW(L"WM_IUI_MOVESELE
 // wParam = lParam = 0
 const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
 
+// wParam = lParam = 0
+const UINT WM_IUI_EDITSELECTEDTASKICON	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKICON"); 
+
 // wParam = sort ascending, lParam = Column ID
 const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
 

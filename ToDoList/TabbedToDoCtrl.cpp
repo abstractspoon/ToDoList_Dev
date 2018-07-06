@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
 
 	ON_REGISTERED_MESSAGE(WM_IUI_EDITSELECTEDTASKTITLE, OnUIExtEditSelectedTaskTitle)
+	ON_REGISTERED_MESSAGE(WM_IUI_EDITSELECTEDTASKICON, OnUIExtEditSelectedTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_IUI_MODIFYSELECTEDTASK, OnUIExtModifySelectedTask)
 	ON_REGISTERED_MESSAGE(WM_IUI_MOVESELECTEDTASK, OnUIExtMoveSelectedTask)
 	ON_REGISTERED_MESSAGE(WM_IUI_SELECTTASK, OnUIExtSelectTask)
@@ -1366,7 +1367,15 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	BOOL bEdit = EditSelectedTask();
+	BOOL bEdit = EditSelectedTaskTitle();
+	ASSERT(bEdit);
+
+	return bEdit;
+}
+
+LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskIcon(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	BOOL bEdit = EditSelectedTaskIcon();
 	ASSERT(bEdit);
 
 	return bEdit;
@@ -1405,9 +1414,8 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, BOOL& bDependChange, BOOL& bMoveTask)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
-	TDC_ATTRIBUTE nAttrib = TDC::MapIUIAttributeToAttribute(mod.nAttrib);
 
-	if (!CanEditSelectedTask(nAttrib, dwTaskID))
+	if (!CanEditSelectedTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return FALSE;

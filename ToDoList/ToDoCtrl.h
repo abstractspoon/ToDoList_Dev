@@ -209,7 +209,7 @@ public:
 	BOOL CanTaskRecur(DWORD dwTaskID) const { return m_data.CanTaskRecur(dwTaskID); }
 
 	BOOL DeleteSelectedTask();
-	BOOL EditSelectedTask(BOOL bTaskIsNew = FALSE); 
+	BOOL EditSelectedTaskTitle(BOOL bTaskIsNew = FALSE); 
 	void SpellcheckSelectedTask(BOOL bTitle); // else comments
 	BOOL CanSpellcheckSelectedTaskComments();
 	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME);
