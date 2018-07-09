@@ -12,6 +12,7 @@
 #include "filemisc.h"
 #include "misc.h"
 #include "enstring.h"
+#include "messagebox.h"
 
 #include <Shlwapi.h>
 
@@ -1010,9 +1011,7 @@ RMERR CRemoteFile::DownloadFile(const FILERESULT* pRemoteFile, LPCTSTR szToLocal
 		CEnString sMessage;
 		sMessage.Format(_T("The '%s' already exists.\n\nAre you sure you want to overwrite it?"), szToLocalPath);
 
-		HWND hWnd = m_pParent ? m_pParent->GetSafeHwnd() : NULL;
-
-		if (MessageBox(hWnd, sMessage, _T("Confirm Overwrite"), MB_YESNO) == IDNO)
+		if (CMessageBox::AfxShow(m_pParent, _T("Confirm Overwrite"), sMessage, MB_YESNO) == IDNO)
 			return RMERR_USERCANCELLED;
 	}
 
@@ -1210,8 +1209,7 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 		CEnString sMessage;
 		sMessage.Format(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
 
-		HWND hWnd = m_pParent ? m_pParent->GetSafeHwnd() : NULL;
-		int nRet = MessageBox(hWnd, sMessage, _T("Confirm Overwrite"), MB_YESNO);
+		int nRet = CMessageBox::AfxShow(m_pParent, _T("Confirm Overwrite"), sMessage, MB_YESNO);
 
 		if (nRet != IDYES && nRet != IDOK)
 			return RMERR_USERCANCELLED;

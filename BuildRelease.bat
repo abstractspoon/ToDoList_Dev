@@ -29,10 +29,12 @@ ECHO PLUGINSREPO=%PLUGINSREPO%
 ECHO ON
 
 REM - Build Core App
-"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" %LATESTREPO%\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
+cd %LATESTREPO%
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList\ToDoList_All.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Build Plugins
-"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" %PLUGINSREPO%\ToDoList_Plugins.sln /Build "Release"
+cd %PLUGINSREPO%
+"C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\devenv.com" .\ToDoList_Plugins.sln /Build "Release"
 
 REM Allow caller to cancel
 pause

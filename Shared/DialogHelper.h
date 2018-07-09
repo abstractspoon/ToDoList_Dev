@@ -143,10 +143,12 @@ public:
 	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 	static void ExcludeCtrl(const CWnd* pParent, UINT nCtrlID, CDC* pDC, BOOL bIgnoreCorners = FALSE);
 	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
-
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
 
+<<<<<<< HEAD
 	static int ShowMessageBox(HWND hwndParent, LPCTSTR szCaption, LPCTSTR szInstruction, LPCTSTR szText, UINT nFlags);
+=======
+>>>>>>> origin/master
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
 	
 protected:

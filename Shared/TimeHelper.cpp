@@ -777,7 +777,7 @@ TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits)
 	{
 		TH_UNITS nTHUnits;
 		TCHAR cValidUnit;
-		
+
 		MAPUNIT2CH.GetNextAssoc(pos, nTHUnits, cValidUnit);
 		ASSERT(IsValidUnit(nTHUnits));
 

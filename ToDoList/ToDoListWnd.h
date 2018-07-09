@@ -794,10 +794,6 @@ protected:
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
-	
-	static int MessageBox(UINT nIDText, UINT nIDCaption = 0, UINT nType = MB_OK, LPCTSTR szData = NULL);
-	static int MessageBox(const CString& sText, UINT nIDCaption = 0, UINT nType = MB_OK);
-	static int MessageBox(const CString& sText, const CString& sCaption, UINT nType = MB_OK);
 };
 
 //{{AFX_INSERT_LOCATION}}

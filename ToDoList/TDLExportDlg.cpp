@@ -10,6 +10,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\preferences.h"
 #include "..\shared\misc.h"
+#include "..\shared\messagebox.h"
 
 #include <shlwapi.h>
 
@@ -275,7 +276,7 @@ void CTDLExportDlg::OnOK()
 			else
 				sMessage.Format(IDS_ED_CONFIRMEXPORTPATH, sPath);
 							
-			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_CONFIRMEXPORTPATH_TITLE), MB_YESNO);
+			UINT nRet = CMessageBox::AfxShow(IDS_ED_CONFIRMEXPORTPATH_TITLE, sMessage, MB_YESNO);
 
 			if (nRet == IDNO)
 			{
@@ -297,7 +298,7 @@ void CTDLExportDlg::OnOK()
 		{
 			CEnString sMessage(IDS_ED_NOMAKEEXPORTPATH, m_sExportPath);
 			
-			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_NOMAKEEXPORTPATH_TITLE), MB_OKCANCEL);
+			UINT nRet = CMessageBox::AfxShow(IDS_ED_NOMAKEEXPORTPATH_TITLE, sMessage, MB_OKCANCEL);
 
 			// re-display dialog
 			if (nRet == IDOK)

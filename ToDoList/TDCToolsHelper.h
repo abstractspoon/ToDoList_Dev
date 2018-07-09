@@ -49,8 +49,8 @@ public:
 	virtual ~CTDCToolsHelper();
 	
 	void UpdateMenu(CCmdUI* pCmdUI, const CUserToolArray& tools, CMenuIconMgr& iconMgr);
-	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd);
-	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd);
+	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args);
+	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args);
 	void AppendToolsToToolbar(const CUserToolArray& aTools, CToolBar& toolbar, UINT nCmdAfter);
 	void RemoveToolsFromToolbar(CToolBar& toolbar, UINT nCmdAfter);
 	
@@ -64,8 +64,8 @@ protected:
 						BOOL bEscapeSpaces, CString& sCmdline);
    	LPCTSTR GetFileFilter();
 	LPCTSTR GetDefaultFileExt();
-	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath, CWnd* pWnd) const;
-	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, CWnd* pWnd, BOOL bTest);
+	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
+	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, BOOL bTest);
 
 	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& ut);
 	static CString GetToolPath(const USERTOOL& tool);

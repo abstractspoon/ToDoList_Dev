@@ -31,6 +31,7 @@
 #include "..\shared\osversion.h"
 #include "..\shared\rtlstylemgr.h"
 #include "..\shared\winhelpbutton.h"
+#include "..\shared\messagebox.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -109,7 +110,8 @@ CToDoListApp theApp;
 
 BOOL CToDoListApp::InitInstance()
 {
-	// Set this before anything else
+	// Set these before anything else
+	CMessageBox::SetAppName(CToDoListWnd::GetTitle(FALSE));
 	CWinHelpButton::SetDefaultIcon(GraphicsMisc::LoadIcon(IDI_HELPBUTTON));
 
 	// Remove any old components before they might get loaded
@@ -1088,7 +1090,7 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 		sText = aPrompt[2];
 	}
 	
-	return CDialogHelper::ShowMessageBox(hwndMain, sTitle, sInstruction, sText, nType);
+	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
 }
 
 void CToDoListApp::OnImportPrefs() 
