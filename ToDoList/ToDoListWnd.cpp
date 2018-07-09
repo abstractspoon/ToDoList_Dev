@@ -95,8 +95,11 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int BEVEL = 3; // DON'T SCALE
-const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MAX_NUM_TOOLS = 50;
+const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
+
+const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
+const int QUICKFIND_VOFFSET = (GraphicsMisc::WantDPIScaling() ? (GraphicsMisc::ScaleByDPIFactor(2) - 1) : 0);
 
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
@@ -669,7 +672,7 @@ void CToDoListWnd::SetupUIStrings()
 	CTimeEdit::SetUnits(THU_WEEKS,		CEnString(IDS_TE_WEEKS),	CEnString(IDS_WEEKS_ABBREV));
 	CTimeEdit::SetUnits(THU_MONTHS,		CEnString(IDS_TE_MONTHS),	CEnString(IDS_MONTHS_ABBREV));
 	CTimeEdit::SetUnits(THU_YEARS,		CEnString(IDS_TE_YEARS),	CEnString(IDS_YEARS_ABBREV));
-	CTimeEdit::SetDefaultButtonTip(CEnString(IDS_TIMEUNITS));
+	CTimeEdit::SetDefaultButtonTip(		CEnString(IDS_TIMEUNITS));
 
 	CFileEdit::SetDefaultButtonTips(CEnString(IDS_BROWSE), CEnString(IDS_VIEW));
 	CFileEdit::SetDefaultBrowseTitles(CEnString(IDS_BROWSEFILE_TITLE), CEnString(IDS_BROWSEFOLDER_TITLE));
@@ -907,6 +910,8 @@ BOOL CToDoListWnd::InitTabCtrl()
 			bm.LoadBitmap(IDB_SOURCECONTROL_STD);
 			
 			m_ilTabCtrl.Add(&bm, RGB(255, 0, 255));
+			m_ilTabCtrl.ScaleByDPIFactor();
+
 			m_tabCtrl.SetImageList(&m_ilTabCtrl);
 			
 			return TRUE;
@@ -1361,7 +1366,9 @@ BOOL CToDoListWnd::InitMainToolbar()
 	
 	CRect rect;
 	m_toolbarMain.GetToolBarCtrl().GetItemRect(nPos + 1, &rect);
-	rect.bottom += 200;
+
+	rect.top += QUICKFIND_VOFFSET;
+	rect.bottom += QUICKFIND_HEIGHT;
 	
 	if (!m_cbQuickFind.Create(WS_CHILD | WS_VSCROLL | WS_VISIBLE | CBS_AUTOHSCROLL | 
 		CBS_DROPDOWN, rect, &m_toolbarMain, IDC_QUICKFIND))
@@ -6220,7 +6227,10 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 		if (rNewPos.TopLeft() != rPrevPos.TopLeft())
 		{
 			m_toolbarMain.ScreenToClient(rNewPos);
-			rNewPos.bottom = rNewPos.top + 200;
+
+			rNewPos.top += QUICKFIND_VOFFSET;
+			rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
+
 			m_cbQuickFind.MoveWindow(rNewPos);
 		}
 
@@ -7817,7 +7827,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		// set global styles once only allowing the taskfile 
 		// itself to override from this point on
 		pTDC->SetStyle(TDCS_SAVEUIVISINTASKLIST, m_bSaveUIVisInTaskList);
-		pTDC->SetStyle(TDCS_DISABLEPASSWORDPROMPTING, m_bPasswordPrompting);
+		pTDC->SetStyle(TDCS_DISABLEPASSWORDPROMPTING, !m_bPasswordPrompting);
 
 		// Set initial theme before it becomes visible
 		pTDC->SetUITheme(m_theme);

@@ -231,7 +231,7 @@ BOOL CTDLColumnAttribVisibilityListCtrl::CanEditCell(int nRow, int nCol) const
 	return FALSE;
 }
 
-void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol)
+void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	// don't allow editing on the attribute column if
 	// user is displaying attributes as columns
@@ -245,7 +245,7 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol)
 		}
 	}
 
-	CInputListCtrl::EditCell(nItem, nCol);
+	CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 
 	// update our data to match
 	TDC_COLUMN nColumn = GetItemColumn(nItem);

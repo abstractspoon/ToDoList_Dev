@@ -31,6 +31,12 @@ const CRect EMPTY_RECT(0, 0, 0, 0);
 const CString DELIMS(_T(".,;:-?"));
 
 //////////////////////////////////////////////////////////////////////
+
+#ifndef TME_NONCLIENT
+#	define TME_NONCLIENT   0x00000010
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // MFC replacements to prevent popup error messages
 
 BOOL DH_SimpleScanf(LPCTSTR lpszText, LPCTSTR lpszFormat, va_list pData)
@@ -2113,4 +2119,28 @@ HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
 	ASSERT(hWnd && ::IsChild(hwndParent, hWnd));
 
 	return hWnd;
+}
+
+BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)
+{
+	DWORD dwFlags = (TME_LEAVE | (bIncludeNonClient ? TME_NONCLIENT : 0));
+	
+	if (!bEnable)
+	{
+		TRACKMOUSEEVENT tme = { sizeof(tme), (TME_CANCEL | dwFlags), hWnd, 0 };
+		return _TrackMouseEvent(&tme);
+	}
+	else // see if we're already tracking
+	{
+		TRACKMOUSEEVENT tme = { sizeof(tme), TME_QUERY, hWnd, 0 };
+		
+		if (!_TrackMouseEvent(&tme))
+			return FALSE;
+		
+		if ((tme.dwFlags & dwFlags) == dwFlags)
+			return TRUE;
+	}
+	
+	TRACKMOUSEEVENT tme = { sizeof(tme), dwFlags, hWnd, 0 };
+	return _TrackMouseEvent(&tme);
 }

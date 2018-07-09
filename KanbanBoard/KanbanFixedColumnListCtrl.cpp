@@ -152,7 +152,7 @@ void CKanbanFixedColumnListCtrl::InitState()
 	CInputListCtrl::InitState();
 }
 
-void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol)
+void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	switch (nCol)
 	{
@@ -179,7 +179,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol)
 
 	case KFCL_TITLECOL:
 	default:
-		CInputListCtrl::EditCell(nItem, nCol);
+		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 		break;
 	}
 }

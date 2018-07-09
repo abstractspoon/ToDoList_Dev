@@ -22,7 +22,8 @@ enum IL_COLUMNTYPE
 	ILCT_DROPLIST, 
 	ILCT_BROWSE, 
 	ILCT_DATE,
-	ILCT_CHECK
+	ILCT_CHECK,
+	ILCT_POPUPMENU, 
 }; 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -139,7 +140,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;

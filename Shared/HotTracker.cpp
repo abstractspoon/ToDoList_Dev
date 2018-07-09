@@ -5,18 +5,12 @@
 #include "stdafx.h"
 #include "HotTracker.h"
 
+#include "DialogHelper.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
-#endif
-
-#ifndef WM_NCMOUSELEAVE
-#	define WM_NCMOUSELEAVE 0x000002A2
-#endif
-
-#ifndef TME_NONCLIENT
-#	define TME_NONCLIENT   0x00000010
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -62,6 +56,15 @@ BOOL CHotTracker::UpdateRect(int nRect, const CRect& rect)
 		return FALSE;
 
 	m_aRects[nRect] = rect;
+	return TRUE;
+}
+
+BOOL CHotTracker::DeleteRect(int nRect)
+{
+	if (nRect < 0 || nRect >= m_aRects.GetSize())
+		return FALSE;
+
+	m_aRects.RemoveAt(nRect);
 	return TRUE;
 }
 
@@ -122,24 +125,13 @@ LRESULT CHotTracker::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM /*wp*/, LPAR
 void CHotTracker::InitTracking()
 {
 	if (m_aRects.GetSize())
-	{
-		// see if we're already tracking
-		TRACKMOUSEEVENT tme = { sizeof(tme), TME_QUERY, GetHwnd(), 0 };
-
-		if (_TrackMouseEvent(&tme) && (tme.dwFlags & (TME_LEAVE | TME_NONCLIENT)) != (TME_LEAVE | TME_NONCLIENT))
-		{
-			TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE | TME_NONCLIENT, GetHwnd(), 0 };
-			_TrackMouseEvent(&tme);
-		}
-	}
+		CDialogHelper::TrackMouseLeave(GetHwnd());
 }
 
 void CHotTracker::Reset()
 {
 	m_aRects.RemoveAll();
 
-	TRACKMOUSEEVENT tme = { sizeof(tme), TME_CANCEL | TME_LEAVE | TME_NONCLIENT, GetHwnd(), 0 };
-	_TrackMouseEvent(&tme);
-
+	CDialogHelper::TrackMouseLeave(GetHwnd(), FALSE);
 	HookWindow(NULL);
 }

@@ -68,7 +68,7 @@ protected:
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void InitState();

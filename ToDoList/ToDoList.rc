@@ -206,7 +206,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 438
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -3778,7 +3778,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Create Task &File Link",      ID_TDD_SETFILELINK
         MENUITEM SEPARATOR
-        MENUITEM "Cancel",                      IDCANCEL
+        MENUITEM "Cancel\tEsc",                 IDCANCEL
     END
 END
 
@@ -3791,6 +3791,30 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
         MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
+    END
+END
+
+IDR_FINDTASKS MENU DISCARDABLE 
+BEGIN
+    POPUP "Relative Date Placeholders"
+    BEGIN
+        MENUITEM "&Today",                      ID_RELATIVEDATE_TODAY
+        MENUITEM "T&omorrow",                   ID_RELATIVEDATE_TOMORROW
+        MENUITEM "&Yesterday",                  ID_RELATIVEDATE_YESTERDAY
+        MENUITEM SEPARATOR
+        MENUITEM "End of This &Week",           ID_RELATIVEDATE_ENDTHISWEEK
+        MENUITEM "End of Next W&eek",           ID_RELATIVEDATE_ENDNEXTWEEK
+        MENUITEM "End of Last Wee&k",           ID_RELATIVEDATE_ENDLASTWEEK
+        MENUITEM SEPARATOR
+        MENUITEM "End of This &Month",          ID_RELATIVEDATE_ENDTHISMONTH
+        MENUITEM "End of Next Mo&nth",          ID_RELATIVEDATE_ENDNEXTMONTH
+        MENUITEM "End of Last Mont&h",          ID_RELATIVEDATE_ENDLASTMONTH
+        MENUITEM SEPARATOR
+        MENUITEM "End of This &Year",           ID_RELATIVEDATE_ENDTHISYEAR
+        MENUITEM "End of Next Ye&ar",           ID_RELATIVEDATE_ENDNEXTYEAR
+        MENUITEM "End of Last Yea&r",           ID_RELATIVEDATE_ENDLASTYEAR
+        MENUITEM SEPARATOR
+        MENUITEM "Cancel\tEsc",                 IDCANCEL
     END
 END
 
@@ -4582,7 +4606,7 @@ BEGIN
     IDS_UPDATER_SMARTSCREENBLOCK 
                             "The updater could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
     IDS_EDIT_OPENFILEREF    "Open Task File Link"
-    IDS_TE_WEEKDAYS         "d\t(weekdays)"
+    IDS_TE_WEEKDAYS         "Weekdays"
     IDS_WEEKDAYS_ABBREV     "d"
     IDS_USERTOOL_FOLDERPROMPT "Folder prompt"
     IDS_USERTOOL_TEXTPROMPT "Text prompt"
@@ -4831,12 +4855,12 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_SOUNDFILEFILTER     "Sounds (*.wav)|*.wav||"
-    IDS_TE_MINS             "m\t(minutes)"
-    IDS_TE_HOURS            "H\t(hours)"
-    IDS_TE_DAYS             "D\t(days)"
-    IDS_TE_WEEKS            "W\t(weeks)"
-    IDS_TE_MONTHS           "M\t(months)"
-    IDS_TE_YEARS            "Y\t(years)"
+    IDS_TE_MINS             "Minutes"
+    IDS_TE_HOURS            "Hours"
+    IDS_TE_DAYS             "Days"
+    IDS_TE_WEEKS            "Weeks"
+    IDS_TE_MONTHS           "Months"
+    IDS_TE_YEARS            "Years"
     IDS_FILTER_ANYCATS      "Any category can match"
     IDS_FILTER_ANYPEOPLE    "Any person can match"
     IDS_FILTER_HIDEPARENTS  "Hide parent tasks (List View)"

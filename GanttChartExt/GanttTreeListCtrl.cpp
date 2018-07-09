@@ -1125,8 +1125,6 @@ void CGanttTreeListCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hT
 	
 	pGI->dwTaskID = dwTaskID;
 	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
-
-	// Except for position
 	pGI->nPosition = pTasks->GetTaskPosition(hTask);
 
 	// Only save data for non-references
@@ -2636,10 +2634,19 @@ LRESULT CGanttTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			if (!m_bReadOnly)
 			{
 				CPoint ptCursor(GetMessagePos());
-				DWORD dwTaskID = TreeHitTestTask(ptCursor, TRUE);
+				m_tree.ScreenToClient(&ptCursor);
 
-				if (dwTaskID && m_data.ItemIsLocked(dwTaskID))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				UINT nFlags = 0;
+				HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nFlags);
+
+				if (htiHit)
+				{
+					if (m_data.ItemIsLocked(m_tree.GetItemData(htiHit)))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+					if (nFlags & TVHT_ONITEMICON)
+						return GraphicsMisc::SetHandCursor();
+				}
 			}
 			break;
 		}
@@ -2834,16 +2841,23 @@ BOOL CGanttTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 
 BOOL CGanttTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
-	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-
-	if (!m_bReadOnly && (nFlags & TVHT_ONITEMSTATEICON))
+	if (!m_bReadOnly)
 	{
-		DWORD dwTaskID = GetTaskID(hti);
-		const GANTTITEM* pGI = m_data.GetItem(dwTaskID);
-		ASSERT(pGI);
-		
-		if (pGI)
-			GetCWnd()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
+		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
+
+		if (nFlags & TVHT_ONITEMSTATEICON)
+		{
+			DWORD dwTaskID = GetTaskID(hti);
+			const GANTTITEM* pGI = m_data.GetItem(dwTaskID);
+			ASSERT(pGI);
+
+			if (pGI)
+				GetCWnd()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), !pGI->IsDone(FALSE));
+		}
+		else if (nFlags & TVHT_ONITEMICON)
+		{
+			GetCWnd()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+		}
 		
 		return TRUE; // eat
 	}

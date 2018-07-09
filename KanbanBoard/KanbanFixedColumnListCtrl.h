@@ -52,7 +52,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL CanEditSelectedCell() const;
 	virtual void InitState();

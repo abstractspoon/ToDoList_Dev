@@ -126,7 +126,7 @@ void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 			// double clicks on an already selected item. 
 			// ie the WM_LBUTTONDOWN that preceeds WM_LBUTTONDBLCLK will already
 			// have initiated an edit 
-			EditCell(nItem, nCol);
+			EditCell(nItem, nCol, FALSE);
 		}
 	}
 }
@@ -163,11 +163,11 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
-			EditCell(nItem, nCol);
+			EditCell(nItem, nCol, TRUE);
 		}
 		else if (CanEditSelectedCell() && bHadFocus && nItem == nSelItem && nCol == nSelCol)
 		{
-			EditCell(nItem, nCol);
+			EditCell(nItem, nCol, FALSE);
 		}
 		else
 		{
@@ -185,7 +185,7 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	}
 }
 
-void CInputListCtrl::EditCell(int nItem, int nCol)
+void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	CString sText;
 	CRect rEdit;
@@ -453,7 +453,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	else if ((nChar == VK_F2 || nChar == VK_SPACE || nChar == VK_RETURN) && CanEditSelectedCell())
 	{
 		// if its the space bar then edit the current cell
-		EditCell(nItem, nCol);
+		EditCell(nItem, nCol, FALSE);
 	}
 
 	// update the list selection if its changed
@@ -658,13 +658,13 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			// adjust for button
 			if (bHasBtn)
 			{
-				if (rButton.left == rCell.left)
+				if (rButton.left <= rCell.left)
 				{
-					rText.left += rButton.Width();
+					rText.left = rButton.right;
 				}
-				else if (rButton.right == rCell.right)
+				else if (rButton.right >= rCell.right)
 				{
-					rText.right -= rButton.Width();
+					rText.right = rButton.left;
 				}
 				else // button is centred => no text
 				{
@@ -760,12 +760,21 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			break;
 					
-		case ILCT_DATE:
+		case ILCT_POPUPMENU:
 			{
-				CRect rDate(rButton);
-				rDate.DeflateRect(0, 1, 1, 2);
-				CThemed::DrawFrameControl(this, pDC, rDate, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwDisabled));
+
+				if (dwDisabled)
+					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+
+				UINT nFlags = DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
+				GraphicsMisc::DrawAnsiSymbol(pDC, '6', rButton, nFlags, &GraphicsMisc::Marlett());
 			}
+			break;
+
+		case ILCT_DATE:
+			rButton.DeflateRect(0, 1, 1, 2);
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwDisabled));
 			break;
 					
 		case ILCT_BROWSE:
@@ -817,14 +826,17 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 			rButton.left = (rButton.right - BTN_WIDTH);
 			break;
 
-		case ILCT_BROWSE:
-			rButton.left = (rButton.right - BTN_WIDTH - 1);
+		case ILCT_POPUPMENU:
+			rButton.right++;
+			rButton.left = (rButton.right - BTN_WIDTH - 2);
+			rButton.top--;
 			break;
-					
+
+		case ILCT_BROWSE:
 		case ILCT_DATE:
 			rButton.left = (rButton.right - BTN_WIDTH - 1);
 			break;
-			
+					
 		case ILCT_CHECK:
 			rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
 			rButton.right = (rButton.left + BTN_WIDTH);
@@ -971,7 +983,7 @@ BOOL CInputListCtrl::CanEditSelectedCell() const
 
 void CInputListCtrl::EditSelectedCell()
 {
-	EditCell(GetCurSel(), m_nCurCol);
+	EditCell(GetCurSel(), m_nCurCol, FALSE);
 }
 
 void CInputListCtrl::OnKillFocus(CWnd* pNewWnd) 

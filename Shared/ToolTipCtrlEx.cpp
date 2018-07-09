@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
 
+#include "DialogHelper.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_SYSKEYFIRST = WM_SYSKEYDOWN;
@@ -78,7 +80,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 	// Adapted from CWnd::FilterToolTipMessage()
 	UINT message = pMsg->message;
 
-	if (message == WM_MOUSELEAVE)
+	if ((message == WM_MOUSELEAVE) || (message == WM_NCMOUSELEAVE))
 	{
 		Activate(FALSE);
 	}
@@ -246,6 +248,7 @@ BOOL CToolTipCtrlEx::WantMessage(const MSG* pMsg)
 	switch (message)
 	{
 	case WM_MOUSELEAVE:
+	case WM_NCMOUSELEAVE:
 	case WM_MOUSEMOVE:
 	case WM_NCMOUSEMOVE:
 	case WM_LBUTTONUP:
@@ -278,6 +281,10 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 		
 		InitToolInfo(m_tiLast, FALSE);
 		m_nLastHit = -1;
+	}
+	else
+	{
+		CDialogHelper::TrackMouseLeave(::GetParent(m_hWnd));
 	}
 }
 

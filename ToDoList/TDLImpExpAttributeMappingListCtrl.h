@@ -54,7 +54,7 @@ protected:
 protected:
 	void BuildListCtrl();
 	
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();

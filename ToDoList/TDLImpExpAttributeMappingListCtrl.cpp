@@ -211,7 +211,7 @@ int CTDLImportExportAttributeMappingListCtrl::FindRow(const CString& sName, int 
 	return -1;
 }
 
-void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol)
+void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	if ((m_bImporting && nCol == IMPORT_COLUMNID) ||
 		(!m_bImporting && nCol == EXPORT_COLUMNID))
@@ -220,7 +220,9 @@ void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol)
 		ShowControl(m_cbAttributes, nItem, nCol); 
 	}
 	else
-		CInputListCtrl::EditCell(nItem, nCol);
+	{
+		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+	}
 }
 
 BOOL CTDLImportExportAttributeMappingListCtrl::IsEditing() const 

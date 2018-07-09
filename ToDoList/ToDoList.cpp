@@ -1858,6 +1858,9 @@ void CToDoListApp::CleanupAppFolder()
 	FileMisc::DeleteFile(sFolder + _T("StatisticsExt.dll"), TRUE);
 	FileMisc::DeleteFile(sFolder + _T("OutlookImpExp.dll"), TRUE);
 
+	// remove experimental manifest
+	FileMisc::DeleteFileBySize(sFolder + _T("ToDoList.exe.4K.manifest"), 1153, TRUE);
+
 	// gif translation 'flags' replaced with pngs
 	CString sTranslations = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 	FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));

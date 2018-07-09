@@ -9,7 +9,7 @@
 // InputListCtrlEdit.h : header file
 //
 
-#include "maskedit.h"
+#include "enedit.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPopupEditCtrl window
@@ -24,7 +24,7 @@ enum PEC_CLEANUP
 	PEC_NOCLEANUP,
 };
 
-class CPopupEditCtrl : public CMaskEdit
+class CPopupEditCtrl : public CEnEdit
 {
 // Construction
 public:

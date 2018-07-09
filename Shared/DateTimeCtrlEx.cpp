@@ -410,26 +410,33 @@ void CDateTimeCtrlEx::OnPaint()
 	{
 		CPaintDC dc(this);
 		
+		CRect rCheck;
 		DATETIMEPICKERINFO dtpi = { 0 };
-		VERIFY (GetPickerInfo(dtpi));
+
+		if (GetPickerInfo(dtpi))
+		{
+			rCheck = dtpi.rcCheck;
+		}
+		else
+		{
+			GetClientRect(rCheck);
+
+			rCheck.right = rCheck.Height();
+			rCheck.DeflateRect(2, 2);
+		}
 
 		// Fill the checkbox background depending on state
 		if (bCheckboxFocused)
 		{
-			dc.FillSolidRect(&dtpi.rcCheck, GetSysColor(COLOR_HIGHLIGHT));
+			dc.FillSolidRect(rCheck, GetSysColor(COLOR_HIGHLIGHT));
 		}
 		else if (bWantDPIScaling)
 		{
-			dc.FillSolidRect(&dtpi.rcCheck, GetSysColor(COLOR_WINDOW));
+			dc.FillSolidRect(rCheck, GetSysColor(COLOR_WINDOW));
 		}
 
 		// Always draw the checkbox because Windows gets
 		// the scaling wrong for high DPI
-		int nCheckboxSize = GraphicsMisc::ScaleByDPIFactor(16);
-
-		CRect rCheck(CPoint(dtpi.rcCheck.left, dtpi.rcCheck.top), CSize(nCheckboxSize, nCheckboxSize));
-		GraphicsMisc::CentreRect(rCheck, &dtpi.rcCheck, TRUE, TRUE);
-
 		UINT nState = DFCS_BUTTONCHECK;
 		
 		if (IsDateSet())

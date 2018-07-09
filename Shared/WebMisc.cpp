@@ -5,6 +5,8 @@
 #include "xmlcharmap.h"
 #include "regkey.h"
 
+#include <comdef.h>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <wininet.h>
@@ -346,4 +348,52 @@ BOOL WebMisc::IsProtocolRegistered(LPCTSTR szProtocol, LPCTSTR szAppName, LPCTST
 
 	// else
 	return TRUE;
+}
+
+BOOL WebMisc::GetPageTitle(const CString& sPageHtml, CString& sTitle)
+{
+	int nTitleStart = sPageHtml.Find(_T("<title"));
+
+	if (nTitleStart == -1)
+		return FALSE;
+
+	int nTitleStartEndBrace = sPageHtml.Find('>', nTitleStart);
+
+	if (nTitleStartEndBrace == -1)
+		return FALSE;
+
+	int nTitleEnd = sPageHtml.Find(_T("</title>"));
+
+	if ((nTitleEnd == -1) || (nTitleEnd <= nTitleStartEndBrace))
+		return FALSE;
+
+	sTitle = sPageHtml.Mid(nTitleStartEndBrace + 1, (nTitleEnd - (nTitleStartEndBrace + 1)));
+
+	return !sTitle.IsEmpty();
+}
+
+BOOL WebMisc::DownloadFile(LPCTSTR szDownloadUri, LPCTSTR szDownloadFile, IBindStatusCallback* pCallback)
+{
+	HRESULT hr = ::URLDownloadToFile(NULL, szDownloadUri, szDownloadFile, 0, pCallback);
+
+	if (hr == S_OK)
+		return TRUE;
+
+	// else
+	FileMisc::LogText(_T("WebMisc::DownloadFile(failed to download %s to %s)"), szDownloadUri, szDownloadFile);
+
+	_com_error err(hr);
+	FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), err.ErrorMessage());
+
+	return FALSE;
+}
+
+BOOL WebMisc::DownloadPage(LPCTSTR szDownloadUri, CString& sPageContents, IBindStatusCallback* pCallback)
+{
+	CString sTempFile = FileMisc::GetTempFilePath();
+
+	if (!DownloadFile(szDownloadUri, sTempFile, pCallback))
+		return FALSE;
+
+	return FileMisc::LoadFile(sTempFile, sPageContents);
 }

@@ -27,6 +27,7 @@ public:
 	int AddRect(const CRect& rect);
 	int AddRect(); // adds a placeholder
 	BOOL UpdateRect(int nRect, const CRect& rect);
+	BOOL DeleteRect(int nRect);
 	int GetRectCount() { return m_aRects.GetSize(); }
 	BOOL GetRect(int nRect, CRect& rect);
 

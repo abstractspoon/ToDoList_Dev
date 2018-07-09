@@ -57,7 +57,7 @@ protected:
 	TDC_ATTRIBUTE GetItemAttrib(int nItem) const;
 
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void InitState();
 	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;

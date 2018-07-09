@@ -112,7 +112,7 @@ void CTDLToolbarButtonListCtrl::InitState()
 	}
 }
 
-void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol)
+void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	// handle new buttons
 	UINT nMenuID = 0;

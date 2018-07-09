@@ -24,6 +24,10 @@ namespace WebMisc
 	int ExtractHtmlLinks(const CString& sHtml, CStringArray& aLinks, CStringArray& aLinkText);
 	int ExtractFirstHtmlLink(const CString& sHtml, CString& sLink, CString& sText);
 	int ExtractNextHtmlLink(const CString& sHtml, int nFrom, CString& sLink, CString& sText);
+	
+	BOOL GetPageTitle(const CString& sPageHtml, CString& sTitle);
+	BOOL DownloadFile(LPCTSTR szDownloadUri, LPCTSTR sDownloadFile, IBindStatusCallback* pCallback = NULL);
+	BOOL DownloadPage(LPCTSTR szDownloadUri, CString& sPageContents, IBindStatusCallback* pCallback = NULL);
 
 	BOOL FormatFileURI(LPCTSTR szFilePath, CString& sFileURI, BOOL bEncodeChars = TRUE);
 	BOOL DecodeFileURI(LPCTSTR szFileURI, CString& sFilePath);

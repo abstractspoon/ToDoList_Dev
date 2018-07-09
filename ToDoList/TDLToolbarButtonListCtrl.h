@@ -63,7 +63,7 @@ protected:
 
 protected:
 	virtual void InitState();
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;

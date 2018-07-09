@@ -50,6 +50,9 @@ public:
 	BOOL InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
 	BOOL InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH );
 
+	BOOL DeleteButton(UINT nID);
+	void DeleteAllButtons();
+
 	BOOL EnableButton(UINT nID, BOOL bEnable = TRUE);
 	BOOL CheckButton(UINT nID, BOOL bChecked = TRUE);
 	BOOL SetButtonTip(UINT nID, LPCTSTR szTip);

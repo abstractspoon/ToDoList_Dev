@@ -5103,7 +5103,7 @@ BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sI
 		// see if dependent is one of 'our' tasks
 		if (dwDependID && sFile.IsEmpty())
 		{
-			if (!m_data.IsTaskDone(dwDependID))
+			if (m_data.HasTask(dwDependID) && !m_data.IsTaskDone(dwDependID))
 			{
 				sIncomplete = aDepends[nDepends];
 				return TRUE;

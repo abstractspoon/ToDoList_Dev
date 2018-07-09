@@ -17,6 +17,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum 
 { 
 	ATTRIB_COL, 
@@ -24,6 +26,8 @@ enum
 	VALUE_COL, 
 	ANDOR_COL 
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum 
 { 
@@ -38,7 +42,13 @@ enum
 	CUSTOMICON_ID,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 const float COL_PROPORTIONS[] = { 15.0f/47, 13.0f/47, 13.0f/47, 6.0f/47 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT RELATIVEDATEPLACEHOLDER_BTNID = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskExpressionListCtrl
@@ -79,8 +89,9 @@ BEGIN_MESSAGE_MAP(CTDLFindTaskExpressionListCtrl, CInputListCtrl)
 	ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
 	ON_NOTIFY(DTN_DATETIMECHANGE, DATE_ID, OnDateChange)
 	ON_NOTIFY(DTN_CLOSEUP, DATE_ID, OnDateCloseUp)
-	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
 	ON_EN_CHANGE(TIME_ID, OnTimeChange)
+	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -301,7 +312,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 	return NULL;
 }
 
-void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol)
+void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	// handle new rules
 	if (nItem == GetRuleCount() && nCol == ATTRIB_COL)
@@ -331,6 +342,14 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol)
 			case FT_DATE:
 			case FT_TIMEPERIOD:
 				ShowControl(*pEdit, nItem, nCol);
+				break;
+
+			case FT_DATERELATIVE:
+				PrepareEdit(nItem, nCol);
+				CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+
+				if (bBtnClick)
+					OnEEBtnClick(m_editBox.GetDlgCtrlID(), RELATIVEDATEPLACEHOLDER_BTNID);
 				break;
 
 			case FT_ICON:
@@ -375,7 +394,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol)
 					PrepareEdit(nItem, nCol);
 
 					if (pEdit == &m_editBox)
-						CInputListCtrl::EditCell(nItem, nCol);
+						CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 					else
 						ShowControl(*pEdit, nItem, nCol);
 					break;
@@ -418,6 +437,9 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 			{
 			case FT_DATE:
 				return ILCT_DATE;
+
+			case FT_DATERELATIVE:
+				return ILCT_POPUPMENU;
 
 			case FT_ICON:
 				{
@@ -529,6 +551,8 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 {
 	const SEARCHPARAM& sp = m_aSearchParams[nRow];
 
+	m_editBox.DeleteAllButtons();
+
 	switch (sp.GetAttribType())
 	{
 	case FT_STRING:
@@ -541,6 +565,8 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 		
 	case FT_DATERELATIVE:
 		m_editBox.SetMask(_T("nNtTdDWMY+-1234567890"));
+		m_editBox.AddButton(RELATIVEDATEPLACEHOLDER_BTNID, _T(""), _T(""));
+		m_editBox.SetDropMenuButton(RELATIVEDATEPLACEHOLDER_BTNID);
 		break;
 		
 	case FT_DOUBLE:
@@ -1296,6 +1322,54 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnTimeUnitsChange(WPARAM /*wp*/, LPARAM 
 	return 0L;
 }
 
+LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
+{
+	switch (lp)
+	{
+	case RELATIVEDATEPLACEHOLDER_BTNID:
+		{
+			CMenu menu;
+
+			if (menu.LoadMenu(IDR_FINDTASKS))
+			{
+				UINT nID = m_editBox.TrackPopupMenu(lp, menu.GetSubMenu(0), EETPM_RETURNCMD);
+				CString sRelDate;
+
+				switch (nID)
+				{
+				case ID_RELATIVEDATE_TODAY:			sRelDate = _T("t");	  break;
+				case ID_RELATIVEDATE_TOMORROW:		sRelDate = _T("t+1"); break;
+				case ID_RELATIVEDATE_YESTERDAY:		sRelDate = _T("t-1"); break;
+
+				case ID_RELATIVEDATE_ENDTHISWEEK:	sRelDate = _T("W");   break;
+				case ID_RELATIVEDATE_ENDNEXTWEEK:	sRelDate = _T("W+1"); break;
+				case ID_RELATIVEDATE_ENDLASTWEEK:	sRelDate = _T("W-1"); break;
+
+				case ID_RELATIVEDATE_ENDTHISMONTH:	sRelDate = _T("M");   break;
+				case ID_RELATIVEDATE_ENDNEXTMONTH:	sRelDate = _T("M+1"); break;
+				case ID_RELATIVEDATE_ENDLASTMONTH:	sRelDate = _T("M-1"); break;
+
+				case ID_RELATIVEDATE_ENDTHISYEAR:	sRelDate = _T("Y");   break;
+				case ID_RELATIVEDATE_ENDNEXTYEAR:	sRelDate = _T("Y+1"); break;
+				case ID_RELATIVEDATE_ENDLASTYEAR:	sRelDate = _T("Y-1"); break;
+
+				case 0: // Cancel
+					break;
+
+				default:
+					ASSERT(0);
+				}
+
+				if (!sRelDate.IsEmpty())
+					m_editBox.ReplaceSel(sRelDate, TRUE);
+			}
+		}
+		break;
+	}
+
+	return 0L;
+}
+
 void CTDLFindTaskExpressionListCtrl::OnSize(UINT nType, int cx, int cy) 
 {
 	CInputListCtrl::OnSize(nType, cx, cy);
@@ -1333,7 +1407,7 @@ void CTDLFindTaskExpressionListCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlag
 		// numeric keys only work for value column
 		if (isalpha(nChar) || (nCol == VALUE_COL && isdigit(nChar)))
 		{
-			EditCell(nItem, nCol);
+			EditCell(nItem, nCol, FALSE);
 
 			// forward key down on to edit control
 			CWnd* pEdit = GetEditControl(nItem, nCol);

@@ -127,7 +127,6 @@ protected:
 	static CString CreateFileLink(LPCTSTR szFile);
 	static void AppendURLsToLinkText(CString& sLinkText, const CString& sURLs);
 
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

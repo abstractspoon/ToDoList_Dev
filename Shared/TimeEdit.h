@@ -71,6 +71,7 @@ protected:
 	void CheckSetUnits(TH_UNITS nUnits, BOOL bQueryUnits);
 	BOOL CreateUnitsPopupMenu(BOOL bUpdateState);
 	UINT MapUnitsToMenuID() const;
+	void UpdateButtonText(TH_UNITS nUnits);
 
 	static void RemoveTrailingZeros(CString& sTime);
 };

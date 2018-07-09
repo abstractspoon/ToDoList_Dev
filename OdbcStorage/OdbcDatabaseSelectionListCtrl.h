@@ -54,7 +54,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	CString FormatUniqueName(const ODBCDATABASESETUP& dbSetup) const;
 };
 

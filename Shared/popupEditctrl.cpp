@@ -32,7 +32,7 @@ CPopupEditCtrl::~CPopupEditCtrl()
 }
 
 
-BEGIN_MESSAGE_MAP(CPopupEditCtrl, CMaskEdit)
+BEGIN_MESSAGE_MAP(CPopupEditCtrl, CEnEdit)
 	//{{AFX_MSG_MAP(CPopupEditCtrl)
 	ON_WM_KILLFOCUS()
 	ON_WM_CREATE()
@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 void CPopupEditCtrl::OnKillFocus(CWnd* pNewWnd) 
 {
-	CMaskEdit::OnKillFocus(pNewWnd);
+	CEnEdit::OnKillFocus(pNewWnd);
 
 	// tell parent edit has been ended only if it hasn't already been
 	// dealt with
@@ -71,7 +71,7 @@ BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags)
 
 	if (dwStyle & WS_CHILD)
 	{
-		if (CMaskEdit::Create(dwStyle, CRect(0, 0, 0, 0), pParentWnd, nID))
+		if (CEnEdit::Create(dwStyle, CRect(0, 0, 0, 0), pParentWnd, nID))
 		{
 			ModifyStyle(0, WS_CLIPSIBLINGS);
 			return TRUE;
@@ -87,7 +87,7 @@ BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags)
 
 int CPopupEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
-	if (CMaskEdit::OnCreate(lpCreateStruct) == -1)
+	if (CEnEdit::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
 	SetFont(m_pParent->GetFont());
@@ -105,7 +105,7 @@ void CPopupEditCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 
-	CMaskEdit::OnChar(nChar, nRepCnt, nFlags);
+	CEnEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
 void CPopupEditCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -121,7 +121,7 @@ void CPopupEditCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 
-	CMaskEdit::OnKeyDown(nChar, nRepCnt, nFlags);
+	CEnEdit::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 UINT CPopupEditCtrl::OnGetDlgCode() 

@@ -33,6 +33,7 @@
 #include "..\shared\entoolbar.h"
 #include "..\shared\tabctrlex.h"
 #include "..\shared\enrecentfilelist.h"
+#include "..\shared\enimagelist.h"
 #include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\tabbedcombobox.h"
@@ -99,7 +100,7 @@ protected:
 	CTDLCustomToolbar m_toolbarCustom;
 	CFont m_fontMain;
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
-	CImageList m_ilTabCtrl;
+	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
 	CStatusBarACT	m_statusBar;
 	CStatusBarProgress m_sbProgress;

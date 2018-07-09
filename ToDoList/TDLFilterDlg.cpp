@@ -292,7 +292,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 void CTDLFilterDlg::EnableDisableControls()
 {
-	BOOL bEnable = ((m_filter.nShow != FS_SELECTED) && m_filter.IsAdvanced());
+	BOOL bEnable = ((m_filter.nShow != FS_SELECTED) && !m_filter.IsAdvanced());
 
 	GetDlgItem(IDC_TITLEFILTERTEXT)->EnableWindow(bEnable);
 

@@ -150,7 +150,7 @@ BOOL COdbcDatabaseSelectionListCtrl::AddDatabaseSetup(const ODBCDATABASESETUP& d
 	ASSERT(GetCurSel() == nItem);
 
 	if (bDoSetup)
-		EditCell(nItem, COL_SETUP);
+		EditCell(nItem, COL_SETUP, FALSE);
 
 	return TRUE;
 }
@@ -229,7 +229,7 @@ int COdbcDatabaseSelectionListCtrl::GetDatabaseSetups(COdbcDatabaseSetupArray& a
 	return aDbSetup.GetSize();
 }
 
-void COdbcDatabaseSelectionListCtrl::EditCell(int nItem, int nCol)
+void COdbcDatabaseSelectionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	ASSERT(nCol == 1);
 	ASSERT(nItem < m_aDbSetup.GetSize());
