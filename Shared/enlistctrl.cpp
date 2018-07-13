@@ -18,15 +18,28 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-
+#if _MSC_VER >= 1400
+#	define LVGROUPITEM LVITEM
+#else
 struct LVGROUPITEM
 {
-	LVITEM lvi;
-
-    int iGroupId;
-    UINT cColumns; // tile view columns
-    PUINT puColumns;
+	UINT mask;
+	int iItem;
+	int iSubItem;
+	UINT state;
+	UINT stateMask;
+	LPWSTR pszText;
+	int cchTextMax;
+	int iImage;
+	LPARAM lParam;
+	int iIndent;
+	int iGroupId;
+	UINT cColumns; // tile view columns
+	PUINT puColumns;
+	int* piColFmt;
+	int iGroup; // readonly. only valid for owner data.
 };
+#endif
 
 #ifndef LVIF_GROUPID
 #	define LVIF_GROUPID     0x0100
@@ -53,7 +66,7 @@ struct LVGROUPITEM
 #define LVGA_FOOTER_CENTER  0x00000010
 #define LVGA_FOOTER_RIGHT   0x00000020  // Don't forget to validate exclusivity
 
-typedef struct tagLVGROUP
+struct LVGROUP
 {
     UINT    cbSize;
     UINT    mask;
@@ -68,14 +81,10 @@ typedef struct tagLVGROUP
     UINT    stateMask;
     UINT    state;
     UINT    uAlign;
-} LVGROUP, *PLVGROUP;
+};
 
 #define LVM_INSERTGROUP         (LVM_FIRST + 145)
 #define LVM_ENABLEGROUPVIEW     (LVM_FIRST + 157)
-
-#else
-
-//#define LVGROUPITEM LVGROUP
 
 #endif
 
@@ -1985,8 +1994,8 @@ int CEnListCtrl::GetItemGroupId(int nRow)
 {
 	LVGROUPITEM lvgi = { 0 };
 
-    lvgi.lvi.mask = LVIF_GROUPID;
-    lvgi.lvi.iItem = nRow;
+    lvgi.mask = LVIF_GROUPID;
+    lvgi.iItem = nRow;
 
 	VERIFY(GetItem((LVITEM*)&lvgi));
 
@@ -1997,9 +2006,9 @@ BOOL CEnListCtrl::SetItemGroupId(int nRow, int nGroupID)
 {
 	LVGROUPITEM lvgi = { 0 };
 	
-	lvgi.lvi.mask = LVIF_GROUPID;
-	lvgi.lvi.iItem = nRow;
-	lvgi.lvi.iSubItem = 0;
+	lvgi.mask = LVIF_GROUPID;
+	lvgi.iItem = nRow;
+	lvgi.iSubItem = 0;
 	lvgi.iGroupId = nGroupID;
 
 	return SetItem((LVITEM*)&lvgi);

@@ -51,6 +51,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 
 	virtual void PreDrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
@@ -59,7 +60,8 @@ protected:
 
 	BOOL DrawCheckbox(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	void GetItemColors(LPDRAWITEMSTRUCT lpDrawItemStruct, COLORREF& crText, COLORREF& crBackgnd);
-
+	BOOL GetItemCheckRect(int nItem, CRect& rCheck) const;
+	void GetItemCheckRect(const CRect& rItem, CRect& rCheck) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -4549,8 +4549,12 @@ BOOL CGanttTreeListCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDE
 	}
 	else
 	{
-		COleDateTime dtPos = (bFrom ? pGI->dtRange.GetStart() : pGI->dtRange.GetEnd());
-		nPos = (GetScrollPosFromDate(dtPos) - m_list.GetScrollPos(SB_HORZ));
+		COleDateTime dtStart, dtDue;
+
+		if (!GetTaskStartEndDates(*pGI, dtStart, dtDue))
+			return FALSE;
+
+		nPos = GetScrollPosFromDate(bFrom ? dtStart : dtDue) - m_list.GetScrollPos(SB_HORZ);
 	}
 
 	CPoint pt(nPos, ((rItem.top + rItem.bottom) / 2));
@@ -4905,7 +4909,7 @@ int CGanttTreeListCtrl::GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth)
 		nPos = (GetDrawPosFromDate(gi.dtDone) + (DONE_BOX / 2));
 	}
 
-	return nPos;
+	return (nPos + 2);
 }
 
 BOOL CGanttTreeListCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected)

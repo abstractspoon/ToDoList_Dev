@@ -24,7 +24,7 @@ public:
 // Attributes
 public:
 	BOOL AddHeaderRow(LPCTSTR szText);
-	int AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPCTSTR szPath, const CFilteredToDoCtrl* pTDC);
+	int AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC);
 
 	int GetResultCount() const; // all tasklists
 	int GetResultCount(const CFilteredToDoCtrl* pTDC) const;
@@ -69,7 +69,7 @@ protected:
 
 protected:
   	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
-	CFont* GetResultFont(const FTDRESULT* pRes, BOOL bHot);
+	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);
 	BOOL IsResultHot(const RECT& rResult) const;
 
 	static BOOL OsIsXP();

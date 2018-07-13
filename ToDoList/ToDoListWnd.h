@@ -704,7 +704,6 @@ protected:
 	void AddUserStorageToMenu(CMenu* pMenu);
 
 	void ShowFindDialog(BOOL bShow = TRUE);
-	void AddFindResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	
 	void PrepareToolbar(int nOption);

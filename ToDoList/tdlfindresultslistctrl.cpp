@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "tdlfindresultslistctrl.h"
+#include "FilteredToDoCtrl.h"
 
 #include "..\shared\preferences.h"
 #include "..\shared\misc.h"
@@ -21,6 +22,13 @@ static char THIS_FILE[] = __FILE__;
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP     0x00004000
 #endif
+
+enum
+{
+	COL_TASKTITLE,
+	COL_WHATMATCHED,
+	COL_TASKPATH
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindResultsListCtrl
@@ -49,9 +57,9 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	CEnListCtrl::PreSubclassWindow();
 
 	// setup up result list
-	InsertColumn(0, CEnString(IDS_FT_TASK), LVCFMT_LEFT, 250);
-	InsertColumn(1, CEnString(IDS_FT_WHATMATCHED), LVCFMT_LEFT, 150);
-	InsertColumn(2, CEnString(IDS_FT_PATH), LVCFMT_LEFT, 100);
+	InsertColumn(COL_TASKTITLE, CEnString(IDS_FT_TASK), LVCFMT_LEFT, 250);
+	InsertColumn(COL_WHATMATCHED, CEnString(IDS_FT_WHATMATCHED), LVCFMT_LEFT, 150);
+	InsertColumn(COL_TASKPATH, CEnString(IDS_FT_PATH), LVCFMT_LEFT, 100);
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_ONECLICKACTIVATE, LVS_EX_ONECLICKACTIVATE);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_UNDERLINEHOT, LVS_EX_UNDERLINEHOT);
@@ -174,6 +182,9 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 
 		DeleteItem(nItem);
 	}
+
+	m_nCurGroupID = -1;
+	SendMessage(LVM_REMOVEALLGROUPS);
 }
 
 BOOL CTDLFindResultsListCtrl::IsResultHot(const RECT& rResult) const
@@ -224,16 +235,6 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				GraphicsMisc::DrawExplorerItemBkgnd(pDC, *this, nState, rRow, GMIB_THEMECLASSIC);
 			}
 			
-			// set the font once per item
-			CFont* pFont = GetResultFont(pRes, bHot);
-			ASSERT(pFont);
-
-			if (pFont)
-			{
-				::SelectObject(pLVCD->nmcd.hdc, pFont->GetSafeHandle());
-				*pResult = CDRF_NEWFONT;
-			}
-
 			// hide text because we will draw it in SUBITEMPREPAINT
 			pLVCD->clrTextBk = pLVCD->clrText = GetSysColor(COLOR_WINDOW);
 		}
@@ -247,28 +248,43 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 			if (pRes)
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-				BOOL bHot = IsResultHot(pLVCD->nmcd.rc);
-				BOOL bSelected = IsItemSelected(nItem);
+				CString sColText = GetItemText(nItem, nSubItem);
 
-				COLORREF crText = GetResultTextColor(pRes, bSelected, bHot);
-				pDC->SetTextColor(crText);
-
-				CRect rRow(pLVCD->nmcd.rc);
-				
-				// extra for XP
-				if (OsIsXP())
-					GetSubItemRect(nItem, nSubItem, LVIR_LABEL, rRow);
-
-				int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
-
-				pDC->DrawText(GetItemText(nItem, nSubItem), rRow, nFlags);
-
-				// references
-				if ((nSubItem == 0) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
+				if (!sColText.IsEmpty())
 				{
-					CPoint ptIcon(pLVCD->nmcd.rc.left, pLVCD->nmcd.rc.bottom - 32);
-					ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
+					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+					BOOL bHot = IsResultHot(pLVCD->nmcd.rc);
+					BOOL bSelected = IsItemSelected(nItem);
+
+					COLORREF crText = GetResultTextColor(pRes, bSelected, bHot);
+					pDC->SetTextColor(crText);
+
+					// set the font for each column item
+					CFont* pFont = GetResultFont(pRes, nSubItem, bHot);
+					ASSERT(pFont);
+
+					if (pFont)
+					{
+						::SelectObject(pLVCD->nmcd.hdc, pFont->GetSafeHandle());
+						*pResult = CDRF_NEWFONT;
+					}
+
+					CRect rRow(pLVCD->nmcd.rc);
+				
+					// extra for XP
+					if (OsIsXP())
+						GetSubItemRect(nItem, nSubItem, LVIR_LABEL, rRow);
+
+					int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
+
+					pDC->DrawText(sColText, rRow, nFlags);
+
+					// references
+					if ((nSubItem == COL_TASKTITLE) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
+					{
+						CPoint ptIcon(pLVCD->nmcd.rc.left, pLVCD->nmcd.rc.bottom - 32);
+						ShellIcons::DrawIcon(pDC, ShellIcons::SI_SHORTCUT, ptIcon, true);
+					}
 				}
 			}
 
@@ -306,7 +322,7 @@ COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL
 	return ((crText == CLR_NONE) ? GetSysColor(COLOR_WINDOWTEXT) : crText);
 }
 
-CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, BOOL bHot)
+CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot)
 {
 	ASSERT(pRes);
 
@@ -316,8 +332,8 @@ CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, BOOL bHot)
 			return NULL;
 
 		BOOL bStrikeThru = (m_bStrikeThruDone && pRes->IsDone());
-		BOOL bBold = pRes->IsTopmost();
 		BOOL bUnderline = bHot;
+		BOOL bBold = (nCol == COL_TASKTITLE) ? pRes->IsTopmost() : FALSE;
 
 		return m_fonts.GetFont(bBold, FALSE, bUnderline, bStrikeThru);
 	}
@@ -354,14 +370,16 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 		Invalidate();
 }
 
-int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPCTSTR szPath, const CFilteredToDoCtrl* pTDC)
+int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC)
 {
 	int nPos = GetItemCount();
+	CString sTitle = pTDC->GetTaskTitle(result.dwTaskID);
+	CString sPath = pTDC->GetTaskPath(result.dwTaskID);
 		
 	// add result
-	int nIndex = InsertItem(nPos, szTask);
+	int nIndex = InsertItem(nPos, sTitle);
 	SetItemText(nIndex, 1, Misc::FormatArray(result.aMatched));
-	SetItemText(nIndex, 2, szPath);
+	SetItemText(nIndex, 2, sPath);
 
 	if (m_nCurGroupID != -1)
 		SetItemGroupId(nIndex, m_nCurGroupID);

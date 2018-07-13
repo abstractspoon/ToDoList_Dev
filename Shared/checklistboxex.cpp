@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CCheckListBoxEx, CCheckListBox)
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_WM_DESTROY()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -168,21 +169,39 @@ BOOL CCheckListBoxEx::DrawCheckbox(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if ((nItem >= 0) && 
 		(lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT)))
 	{
-		CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-		
 		COLORREF newBkColor, crUnused;
 		GetItemColors(lpDrawItemStruct, crUnused, newBkColor);
 		
+		CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 		pDC->FillSolidRect(rItem, newBkColor);
 		
-		int nCheck = GetCheck(nItem);
-		rItem.DeflateRect(0, ((rItem.Height() - m_nImageHeight) / 2));
+		CRect rCheck;
+		GetItemCheckRect(rItem, rCheck);
 
-		m_ilCheck.Draw(pDC, nCheck, rItem.TopLeft(), ILD_TRANSPARENT);
+		m_ilCheck.Draw(pDC, GetCheck(nItem), rItem.TopLeft(), ILD_TRANSPARENT);
 	}
 
 	lpDrawItemStruct->rcItem.left += (m_nImageHeight + 1);
 	return TRUE;
+}
+
+BOOL CCheckListBoxEx::GetItemCheckRect(int nItem, CRect& rCheck) const
+{
+	CRect rItem;
+
+	if (GetItemRect(nItem, rItem) == LB_ERR)
+		return FALSE;
+
+	GetItemCheckRect(rItem, rCheck);
+	return TRUE;
+}
+
+void CCheckListBoxEx::GetItemCheckRect(const CRect& rItem, CRect& rCheck) const
+{
+	rCheck = rItem;
+
+	rCheck.DeflateRect(0, ((rCheck.Height() - m_nImageHeight) / 2));
+	rCheck.right = (rCheck.left + m_nImageHeight);
 }
 
 void CCheckListBoxEx::PreMeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -239,7 +258,7 @@ void CCheckListBoxEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		CString strText;
 		GetText(lpDrawItemStruct->itemID, strText);
 
-		pDC->ExtTextOut(lpDrawItemStruct->rcItem.left + 2,
+		pDC->ExtTextOut(lpDrawItemStruct->rcItem.left + 2, // OUR CHANGE
 			lpDrawItemStruct->rcItem.top + max(0, (cyItem - m_cyText) / 2),
 			ETO_OPAQUE, &(lpDrawItemStruct->rcItem), strText, strText.GetLength(), NULL);
 
@@ -266,4 +285,39 @@ void CCheckListBoxEx::GetItemColors(LPDRAWITEMSTRUCT lpDrawItemStruct, COLORREF&
 		crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
 		crBackgnd = GetSysColor(COLOR_HIGHLIGHT);
 	}
+}
+
+void CCheckListBoxEx::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// Because we provide proper themed checkboxes we have to trick
+	// out base class into playing along
+	BOOL bInCheck = FALSE;
+	int nIndex = CheckFromPoint(point, bInCheck);
+
+	if ((nIndex == LB_ERR) || !IsEnabled(nIndex) || bInCheck)
+	{
+		// Default handling
+		CCheckListBox::OnLButtonDown(nFlags, point);
+		return;
+	}
+
+	CRect rCheck;
+	VERIFY(GetItemCheckRect(nIndex, rCheck));
+
+	if (!rCheck.PtInRect(point))
+	{
+		// Default handling
+		CCheckListBox::OnLButtonDown(nFlags, point);
+		return;
+	}
+
+	// Adjust the point so that it falls within our
+	// base class's check box and resend the message
+	point.x = (rCheck.left + 5);
+	point.y = (rCheck.top + 5);
+
+	ASSERT((CheckFromPoint(point, bInCheck) == nIndex) && bInCheck);
+
+	SendMessage(WM_LBUTTONDOWN, nFlags, MAKELPARAM(point.x, point.y));
+	InvalidateRect(rCheck);
 }

@@ -520,7 +520,7 @@ void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDef
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
 }
 
-void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPCTSTR szPath, const CFilteredToDoCtrl* pTDC)
+void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC)
 {
 	if (GetSafeHwnd())
 	{
@@ -541,7 +541,7 @@ void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, LPCTSTR szTask, LPC
 		}
 
 		// else
-		int nIndex = m_lcResults.AddResult(result, szTask, szPath, pTDC);
+		int nIndex = m_lcResults.AddResult(result, pTDC);
 
 		if (nIndex != -1)
 		{

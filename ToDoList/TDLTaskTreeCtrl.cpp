@@ -304,7 +304,6 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 	}
 }
 
-
 void CTDLTaskTreeCtrl::RefreshTreeItemMap()
 {
 	TCH().BuildHTIMap(m_mapHTItems);
