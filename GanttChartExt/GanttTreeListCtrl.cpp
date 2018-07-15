@@ -1849,7 +1849,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	case CDDS_ITEMPREPAINT:
 		{
 			DWORD dwTaskID = GetTaskID(nItem);
-			TRACE(_T("CGanttTreeListCtrl::OnListCustomDraw(ID = %ld)\n"), dwTaskID);
+// 			TRACE(_T("CGanttTreeListCtrl::OnListCustomDraw(ID = %ld)\n"), dwTaskID);
 
 			GANTTITEM* pGI = NULL;
 			GET_GI_RET(dwTaskID, pGI, 0L);
@@ -5635,7 +5635,7 @@ void CGanttTreeListCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	}
 	while (++nCol < nNumReqColumns);
 
-	TRACE(_T("CGanttTreeListCtrl(Total Column Widths = %d)\n"), nTotalReqdWidth);
+//	TRACE(_T("CGanttTreeListCtrl(Total Column Widths = %d)\n"), nTotalReqdWidth);
 
 	// for the rest, clear the text and item data and prevent tracking
 	int nNumCols = m_listHeader.GetItemCount();
@@ -5982,13 +5982,13 @@ int CGanttTreeListCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GAN
 				// If Task2 is dependent on Task1 then Task1 comes first
 				if (m_data.IsItemDependentOn(*pGI2, dwTaskID1))
 				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID2, dwTaskID1, dwTaskID1);
+//					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID2, dwTaskID1, dwTaskID1);
 					nCompare = -1;
 				}
 				// else if Task1 is dependent on Task2 then Task2 comes first
 				else if (m_data.IsItemDependentOn(*pGI1, dwTaskID2))
 				{
-					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID1, dwTaskID2, dwTaskID2);
+//					TRACE(_T("Sort(Task %d depends on Task %d. Task %d sorts higher\n"), dwTaskID1, dwTaskID2, dwTaskID2);
 					nCompare = 1;
 				}
 			}
