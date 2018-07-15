@@ -85,6 +85,7 @@ struct LVGROUP
 
 #define LVM_INSERTGROUP         (LVM_FIRST + 145)
 #define LVM_ENABLEGROUPVIEW     (LVM_FIRST + 157)
+#define LVM_REMOVEALLGROUPS     (LVM_FIRST + 160)
 
 #endif
 
@@ -2012,4 +2013,9 @@ BOOL CEnListCtrl::SetItemGroupId(int nRow, int nGroupID)
 	lvgi.iGroupId = nGroupID;
 
 	return SetItem((LVITEM*)&lvgi);
+}
+
+void CEnListCtrl::RemoveAllGroups()
+{
+	SendMessage(LVM_REMOVEALLGROUPS);
 }

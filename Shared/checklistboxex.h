@@ -27,7 +27,7 @@ public:
 // Attributes
 protected:
 	CImageList m_ilCheck;
-	int m_nImageHeight;
+	int m_nCheckHeight;
 
 // Operations
 public:

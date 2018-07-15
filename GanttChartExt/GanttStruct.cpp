@@ -468,39 +468,39 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 		dtDue = dtRange.GetEnd();
 
 		bDoneSet = CDateHelper::IsDateSet(dtDone);
-	}
 
-	// do we need to calculate due date?
-	if (!CDateHelper::IsDateSet(dtDue) && bCalcMissingDue)
-	{
-		// always take completed date if that is set
-		if (bDoneSet)
+		// do we need to calculate due date?
+		if (!CDateHelper::IsDateSet(dtDue) && bCalcMissingDue)
 		{
-			dtDue = dtDone;
+			// always take completed date if that is set
+			if (bDoneSet)
+			{
+				dtDue = dtDone;
+			}
+			else // take later of start date and today
+			{
+				dtDue = CDateHelper::GetDateOnly(dtStart);
+				CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
+	
+				// and move to end of the day
+				dtDue = CDateHelper::GetEndOfDay(dtDue);
+			}
+	
+			ASSERT(CDateHelper::IsDateSet(dtDue));
 		}
-		else // take later of start date and today
+	
+		// do we need to calculate start date?
+		if (!CDateHelper::IsDateSet(dtStart) && bCalcMissingStart)
 		{
-			dtDue = CDateHelper::GetDateOnly(dtStart);
-			CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
-
-			// and move to end of the day
-			dtDue = CDateHelper::GetEndOfDay(dtDue);
+			// take earlier of due or completed date
+			dtStart = CDateHelper::GetDateOnly(dtDue);
+			CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
+	
+			// take the earlier of that and 'today'
+			CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
+	
+			ASSERT(CDateHelper::IsDateSet(dtStart));
 		}
-
-		ASSERT(CDateHelper::IsDateSet(dtDue));
-	}
-
-	// do we need to calculate start date?
-	if (!CDateHelper::IsDateSet(dtStart) && bCalcMissingStart)
-	{
-		// take earlier of due or completed date
-		dtStart = CDateHelper::GetDateOnly(dtDue);
-		CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
-
-		// take the earlier of that and 'today'
-		CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
-
-		ASSERT(CDateHelper::IsDateSet(dtStart));
 	}
 
 	return (CDateHelper::IsDateSet(dtStart) && CDateHelper::IsDateSet(dtDue));

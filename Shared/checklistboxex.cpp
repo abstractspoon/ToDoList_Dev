@@ -15,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CCheckListBoxEx
 
-CCheckListBoxEx::CCheckListBoxEx() : m_nImageHeight(0)
+CCheckListBoxEx::CCheckListBoxEx() : m_nCheckHeight(0)
 {
 }
 
@@ -141,7 +141,9 @@ void CCheckListBoxEx::PreSubclassWindow()
 
 		IMAGEINFO ii;
 		m_ilCheck.GetImageInfo(0, &ii);
-		m_nImageHeight = (ii.rcImage.bottom - ii.rcImage.top);
+		m_nCheckHeight = (ii.rcImage.bottom - ii.rcImage.top);
+
+		SetItemHeight(0, (m_nCheckHeight + 1));
 	}
 }
 
@@ -181,7 +183,7 @@ BOOL CCheckListBoxEx::DrawCheckbox(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		m_ilCheck.Draw(pDC, GetCheck(nItem), rItem.TopLeft(), ILD_TRANSPARENT);
 	}
 
-	lpDrawItemStruct->rcItem.left += (m_nImageHeight + 1);
+	lpDrawItemStruct->rcItem.left += (m_nCheckHeight + 1);
 	return TRUE;
 }
 
@@ -200,8 +202,8 @@ void CCheckListBoxEx::GetItemCheckRect(const CRect& rItem, CRect& rCheck) const
 {
 	rCheck = rItem;
 
-	rCheck.DeflateRect(0, ((rCheck.Height() - m_nImageHeight) / 2));
-	rCheck.right = (rCheck.left + m_nImageHeight);
+	rCheck.DeflateRect(0, ((rCheck.Height() - m_nCheckHeight) / 2));
+	rCheck.right = (rCheck.left + m_nCheckHeight);
 }
 
 void CCheckListBoxEx::PreMeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -209,7 +211,7 @@ void CCheckListBoxEx::PreMeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	CCheckListBox::PreMeasureItem(lpMeasureItemStruct);
 
 	if (m_ilCheck.GetSafeHandle())
-		lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, (UINT)(m_nImageHeight + 1));
+		lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, (UINT)(m_nCheckHeight + 1));
 }
 
 LRESULT CCheckListBoxEx::OnSetFont(WPARAM , LPARAM)
@@ -221,7 +223,7 @@ LRESULT CCheckListBoxEx::OnSetFont(WPARAM , LPARAM)
 		== (LBS_OWNERDRAWFIXED | LBS_HASSTRINGS))
 	{
 		int nMinHeight = CalcMinimumItemHeight();
-		SetItemHeight(0, max(nMinHeight, (m_nImageHeight + 1)));
+		SetItemHeight(0, max(nMinHeight, (m_nCheckHeight + 1)));
 	}
 
 	return 0;

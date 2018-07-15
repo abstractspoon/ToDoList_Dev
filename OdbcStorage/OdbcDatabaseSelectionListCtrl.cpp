@@ -229,7 +229,7 @@ int COdbcDatabaseSelectionListCtrl::GetDatabaseSetups(COdbcDatabaseSetupArray& a
 	return aDbSetup.GetSize();
 }
 
-void COdbcDatabaseSelectionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
+void COdbcDatabaseSelectionListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
 {
 	ASSERT(nCol == 1);
 	ASSERT(nItem < m_aDbSetup.GetSize());

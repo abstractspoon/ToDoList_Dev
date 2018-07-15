@@ -589,7 +589,6 @@ void CGanttTreeListCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE 
 			// update the task(s)
 			if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, attrib, TRUE))
 			{
-				// recalc parent dates as required
 				if (attrib.Has(IUI_STARTDATE) || attrib.Has(IUI_DUEDATE) || attrib.Has(IUI_DONEDATE))
 					RecalcDateRange();
 			}
@@ -1089,10 +1088,10 @@ void CGanttTreeListCtrl::RefreshTreeItemMap()
 
 void CGanttTreeListCtrl::RecalcDateRange()
 {
-	RecalcParentDates();
-
 	if (m_data.GetCount())
 	{
+		RecalcParentDates();
+	
 		GANTTDATERANGE prevRange = m_dateRange;
 
 		m_data.CalcDateRange(HasOption(GTLCF_CALCPARENTDATES),
@@ -1840,12 +1839,11 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	{
 	case CDDS_PREPAINT:
 #ifdef _DEBUG
-		{
-			static int nCount = 1;
-			TRACE(_T("\nCGanttTreeListCtrl::OnListCustomDraw(begin_%d)\n"), nCount++);
-		}
+// 		{
+// 			static int nCount = 1;
+// 			TRACE(_T("\nCGanttTreeListCtrl::OnListCustomDraw(begin_%d)\n"), nCount++);
+// 		}
 #endif
-
 		return CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;
 								
 	case CDDS_ITEMPREPAINT:
@@ -1916,7 +1914,7 @@ LRESULT CGanttTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				}
 			}
 
-			TRACE(_T("CGanttTreeListCtrl::OnListCustomDraw(end)\n"));
+			//TRACE(_T("CGanttTreeListCtrl::OnListCustomDraw(end)\n"));
 
 			return CDRF_SKIPDEFAULT;
 		}
@@ -2880,6 +2878,10 @@ BOOL CGanttTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	}
 	else
 	{
+		// Kill any built-in timers for label editing
+		m_tree.KillTimer(0x2A);
+		m_tree.KillTimer(0x2B);
+
 		ExpandItem(hti, !TCH().IsItemExpanded(hti), TRUE);
 		return TRUE;
 	}

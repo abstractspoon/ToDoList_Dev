@@ -81,8 +81,6 @@ void CTDLTaskViewListBox::BuildList()
 	if (CCheckListBoxEx::GetCount())
 		return;
 
-	// Remove sort so that items have same order as images 
-//	ASSERT((GetStyle() & CBS_SORT) == 0);
 	ASSERT(m_pMgrUIExt);
 
 	if (m_pMgrUIExt)
@@ -120,7 +118,7 @@ void CTDLTaskViewListBox::BuildList()
 			m_aHiddenViews.RemoveAll();
 		}
 
-		SetItemHeight(-1, IMAGESIZE);
+		SetItemHeight(0, max(IMAGESIZE, (m_nCheckHeight + 1)));
 	}
 }
 

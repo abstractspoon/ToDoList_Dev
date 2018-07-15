@@ -336,8 +336,7 @@ BOOL COdbcDatabaseAttributeSetupListCtrl::CanEditCell(int nItem, int nCol) const
 	return FALSE;
 }
 
-
-void COdbcDatabaseAttributeSetupListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
+void COdbcDatabaseAttributeSetupListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
 {
 	switch (nCol)
 	{

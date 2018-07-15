@@ -1120,16 +1120,16 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 		CWnd* pFocus = CWnd::FromHandle((HWND)wp);
 
 #ifdef _DEBUG
-		if (pFocus)
-		{
-			CString sFocus;
-			pFocus->GetWindowText(sFocus);
-			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
-		}
-		else
-		{
-			TRACE(_T("OnFocusChange(NULL)\n"));
-		}
+// 		if (pFocus)
+// 		{
+// 			CString sFocus;
+// 			pFocus->GetWindowText(sFocus);
+// 			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
+// 		}
+// 		else
+// 		{
+// 			TRACE(_T("OnFocusChange(NULL)\n"));
+// 		}
 #endif
 		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
@@ -10439,7 +10439,9 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 				m_findDlg.AddHeaderRow(sTitle);
 				
 				for (int nResult = 0; nResult < aResults.GetSize(); nResult++)
-					AddFindResult(aResults[nResult], &tdc);
+				{
+					m_findDlg.AddResult(aResults[nResult], &tdc);
+				}
 			}
 		}
 	}	
@@ -10447,14 +10449,6 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_findDlg.SetActiveWindow();
 	
 	return 0;
-}
-
-void CToDoListWnd::AddFindResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC)
-{
-	CString sTitle = pTDC->GetTaskTitle(result.dwTaskID);
-	CString sPath = pTDC->GetTaskPath(result.dwTaskID);
-	
-	m_findDlg.AddResult(result, sTitle, sPath, pTDC);
 }
 
 LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)

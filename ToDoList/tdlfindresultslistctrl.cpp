@@ -184,7 +184,7 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 	}
 
 	m_nCurGroupID = -1;
-	SendMessage(LVM_REMOVEALLGROUPS);
+	RemoveAllGroups();
 }
 
 BOOL CTDLFindResultsListCtrl::IsResultHot(const RECT& rResult) const
