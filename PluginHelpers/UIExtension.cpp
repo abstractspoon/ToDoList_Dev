@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 #include "UIExtension.h"
+#include "Win32.h"
 
 #include "..\..\ToDoList_Dev\Interfaces\UITheme.h"
 #include "..\..\ToDoList_Dev\Interfaces\IUIExtension.h"
@@ -410,11 +411,14 @@ Windows::Forms::Cursor^ UIExtension::AppCursor::Load(AppCursor::CursorType curso
 
 	if ((cursorFile != nullptr) && System::IO::File::Exists(cursorFile))
 	{
+		const int DEF_ICONSIZE = 32;
+		int nSize = (Win32::WantScaleByDPIFactor() ? Win32::ScaleByDPIFactor(DEF_ICONSIZE) : DEF_ICONSIZE);
+
 		HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
 											MS(cursorFile), 
 											IMAGE_CURSOR, 
-											32, 
-											32, 
+											nSize, 
+											nSize, 
 											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
 		
 		return gcnew Windows::Forms::Cursor(static_cast<IntPtr>(hCursor));
