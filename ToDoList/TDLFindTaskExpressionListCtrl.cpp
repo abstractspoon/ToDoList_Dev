@@ -10,6 +10,7 @@
 
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1332,6 +1333,8 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 
 			if (menu.LoadMenu(IDR_FINDTASKS))
 			{
+				CLocalizer::TranslateMenu(menu);
+
 				UINT nID = m_editBox.TrackPopupMenu(lp, menu.GetSubMenu(0), EETPM_RETURNCMD);
 				CString sRelDate;
 
@@ -1353,7 +1356,7 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 				case ID_RELATIVEDATE_ENDNEXTYEAR:	sRelDate = _T("Y+1"); break;
 				case ID_RELATIVEDATE_ENDLASTYEAR:	sRelDate = _T("Y-1"); break;
 
-				case 0: // Cancel
+				case IDCANCEL:
 					break;
 
 				default:
