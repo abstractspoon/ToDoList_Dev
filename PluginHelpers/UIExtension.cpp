@@ -414,8 +414,8 @@ Windows::Forms::Cursor^ UIExtension::AppCursor::Load(AppCursor::CursorType curso
 		HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
 											MS(cursorFile), 
 											IMAGE_CURSOR, 
-											0, 
-											0, 
+											GetSystemMetrics(SM_CXCURSOR), 
+											GetSystemMetrics(SM_CYCURSOR), 
 											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
 		
 		return gcnew Windows::Forms::Cursor(static_cast<IntPtr>(hCursor));
