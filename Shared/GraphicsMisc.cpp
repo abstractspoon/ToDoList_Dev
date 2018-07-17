@@ -560,8 +560,8 @@ HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 	HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
 											sCursorPath, 
 											IMAGE_CURSOR, 
-											32, 
-											32, 
+											0, 
+											0, 
 											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
 	return hCursor;
 }
