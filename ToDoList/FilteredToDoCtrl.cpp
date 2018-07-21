@@ -99,6 +99,32 @@ BOOL CFilteredToDoCtrl::OnInitDialog()
 	return FALSE;
 }
 
+BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
+{	
+	if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+		return TRUE;
+	
+	// If the task is filtered out we toggle the filter and try again
+	if (HasAnyFilter() && HasTask(dwTaskID))
+	{
+		ToggleFilter(); // show all tasks
+		
+		if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+			return TRUE;
+
+		// else
+		ASSERT(0);
+		ToggleFilter(); // restore filter
+	}
+	
+	return FALSE;
+}
+
+BOOL CFilteredToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
+{
+	return CTabbedToDoCtrl::SelectTask(sPart, nSelect); 
+}
+
 BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
 	// handle reloading of tasklist with a filter present

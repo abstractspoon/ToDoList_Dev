@@ -45,6 +45,9 @@ public:
 	BOOL ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged); // returns true if any tasks were removed
 	BOOL ArchiveSelectedTasks(BOOL bRemove); // returns true if any tasks were removed
 
+	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
+	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
+
 	FILTER_SHOW GetFilter(CTDCFilter& filter) const { filter = m_filter; }
 	void RefreshFilter();
 	void ClearFilter();

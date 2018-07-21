@@ -378,8 +378,8 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 		
 	// add result
 	int nIndex = InsertItem(nPos, sTitle);
-	SetItemText(nIndex, 1, Misc::FormatArray(result.aMatched));
-	SetItemText(nIndex, 2, sPath);
+	SetItemText(nIndex, COL_WHATMATCHED, Misc::FormatArray(result.aMatched));
+	SetItemText(nIndex, COL_TASKPATH, sPath);
 
 	if (m_nCurGroupID != -1)
 		SetItemGroupId(nIndex, m_nCurGroupID);

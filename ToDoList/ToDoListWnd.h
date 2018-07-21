@@ -773,7 +773,6 @@ protected:
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
-	BOOL SelectTaskCheckFilter(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 
 	static UINT MapNewTaskPos(int nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);

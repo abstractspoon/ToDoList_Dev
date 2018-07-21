@@ -3729,7 +3729,6 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 {	
 	BOOL bRes = CToDoCtrl::SelectTask(dwTaskID, bTrue);
 
-	// check task has not been filtered out
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
