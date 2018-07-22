@@ -53,8 +53,7 @@ int CEnImageList::GetImageSize(HIMAGELIST hil)
 	if (!GetImageSize(hil, nCx, nCy))
 		return -1;
 	
-	ASSERT(nCx == nCy);
-	return nCy;
+	return max(nCx, nCy);
 }
 
 BOOL CEnImageList::GetImageSize(HIMAGELIST hil, int& nCx, int& nCy)

@@ -550,7 +550,7 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	switch (nCmd)
 	{
 	case IUI_SAVETOIMAGE:
-		return !m_data.IsSorted();
+		return !m_data.IsEmpty();
 
 	case IUI_EXPANDALL:
 	case IUI_COLLAPSEALL:

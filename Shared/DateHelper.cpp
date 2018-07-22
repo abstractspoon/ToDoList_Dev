@@ -21,7 +21,7 @@ static char THIS_FILE[]=__FILE__;
 
 const double ONE_HOUR	= (1.0 / 24.0);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally less precision
+const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float'
 const double END_OF_DAY = (1.0 - ONE_SECOND);
 const double START_OF_DAY = ONE_SECOND;
 
