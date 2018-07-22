@@ -76,7 +76,7 @@ void CEditAllocationsListCtrl::InitState()
 	}
 }
 
-void CEditAllocationsListCtrl::EditCell(int nItem, int nCol)
+void CEditAllocationsListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	switch (nCol)
 	{
@@ -85,7 +85,7 @@ void CEditAllocationsListCtrl::EditCell(int nItem, int nCol)
 		break;
 
 	case ALLOCDAYS_COL:
-		CInputListCtrl::EditCell(nItem, nCol);
+		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 		break;
 	}
 }

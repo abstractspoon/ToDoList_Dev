@@ -11375,14 +11375,14 @@ void CToDoCtrl::Spellcheck()
 	}
 }
 
-BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOOL bTitle, BOOL bNotifyNoErrors)
+BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOOL bCheckTitle, BOOL bNotifyNoErrors)
 {
 	ASSERT(pSpellChecker);
 	
 	if (!pSpellChecker)
 		return FALSE;
 
-	if (!bTitle && !CanSpellcheckComments())
+	if (!bCheckTitle && !CanSpellcheckComments())
 		return TRUE;
 	
 	DWORD dwTaskID = GetTaskID(hti);
@@ -11391,7 +11391,7 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 	
 	if (pTDI)
 	{
-		if (bTitle)
+		if (bCheckTitle)
 		{
 			CString sTitle = m_data.GetTaskTitle(dwTaskID);
 			
@@ -11415,7 +11415,7 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 		{
 			int nChange = SET_NOCHANGE;
 			
-			if (bTitle)
+			if (bCheckTitle)
 			{
 				CString sTitle = pSpellChecker->GetCorrectedText();
 				nChange = m_data.SetTaskTitle(dwTaskID, sTitle);

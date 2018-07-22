@@ -51,7 +51,7 @@ protected:
 
 protected:
 	virtual void InitState();
-	virtual void EditCell(int nItem, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 };
 

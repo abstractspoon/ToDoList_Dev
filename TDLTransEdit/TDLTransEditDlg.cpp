@@ -16,6 +16,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\mousewheelmgr.h"
+#include "..\shared\messagebox.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -328,7 +329,7 @@ BOOL CTDLTransEditDlg::PromptAndSave()
 	{
 		CEnString sText(IDS_SAVECHANGES, FileMisc::GetFileNameFromPath(m_dictionary.GetDictionaryPath()));
 
-		int nRet = CDialogHelper::ShowMessageBox(*this, m_sBaseTitle, _T("Save Changes?"), sText, MB_YESNOCANCEL);
+		int nRet = CMessageBox::Show(this, m_sBaseTitle, _T("Save Changes?"), sText, MB_YESNOCANCEL);
 
 		switch (nRet)
 		{
