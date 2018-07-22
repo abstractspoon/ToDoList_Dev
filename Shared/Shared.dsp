@@ -377,6 +377,10 @@ SOURCE=.\MenuIconMgr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MessageBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Misc.cpp
 # End Source File
 # Begin Source File
@@ -1034,6 +1038,10 @@ SOURCE=.\MenuComboBox.h
 # Begin Source File
 
 SOURCE=.\MenuIconMgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MessageBox.h
 # End Source File
 # Begin Source File
 
