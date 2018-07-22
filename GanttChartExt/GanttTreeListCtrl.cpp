@@ -4854,7 +4854,7 @@ void CGanttTreeListCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /
 
 BOOL CGanttTreeListCtrl::CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const
 {
-	if (gi.IsMilestone(m_sMilestoneTag))
+	if (!gi.IsMilestone(m_sMilestoneTag))
 		return FALSE;
 
 	rMilestone = rMonth;
