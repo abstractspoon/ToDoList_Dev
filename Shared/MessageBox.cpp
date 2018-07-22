@@ -31,7 +31,7 @@ const CString DELIMS(_T(".,;:-?"));
 
 //////////////////////////////////////////////////////////////////////
 
-typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LONG_PTR lpRefData);
+typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, long/*LONG_PTR*/ lpRefData);
 
 struct TASKDIALOGBUTTON
 {
@@ -70,15 +70,15 @@ struct TASKDIALOGCONFIGEX
 		PCWSTR pszFooterIcon;
 	};
 	PCWSTR                         pszFooter;
-	PFNTASKDIALOGCALLBACK           pfCallback;
-	LONG_PTR                       lpCallbackData;
+	PFNTASKDIALOGCALLBACK          pfCallback;
+	long/*LONG_PTR*/               lpCallbackData;
 	UINT                           cxWidth;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 typedef HRESULT (WINAPI *PFNTASKDIALOG)(HWND, HINSTANCE, PCWSTR, PCWSTR, PCWSTR, DWORD, PCWSTR, int*);
-typedef HRESULT (WINAPI *PFNTASKDIALOGINDIRECT)(const TASKDIALOGCONFIG*, int*, int*, BOOL*);
+typedef HRESULT (WINAPI *PFNTASKDIALOGINDIRECT)(const TASKDIALOGCONFIGEX*, int*, int*, BOOL*);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -282,7 +282,7 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 			}
 
 
-			TASKDIALOGCONFIG tdc = { sizeof(tdc), 0 };
+			TASKDIALOGCONFIGEX tdc = { sizeof(tdc), 0 };
 
 			tdc.pszWindowTitle = wszCaption;
 			tdc.pszMainInstruction = wszInstruction;
