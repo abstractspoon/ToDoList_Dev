@@ -59,6 +59,7 @@
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\dibdata.h"
+#include "..\3rdparty\gdiplus.h"
 
 #include <Windowsx.h>
 #include <float.h>
@@ -13110,6 +13111,16 @@ BOOL CToDoCtrl::SaveTaskViewToImage(CString& sFilePath)
 
 	if (m_taskTree.SaveToImage(bmImage))
 	{
+		CString sPngPath(sFilePath);
+		FileMisc::ReplaceExtension(sPngPath, _T(".png"));
+
+		if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
+		{
+			sFilePath = sPngPath;
+			return TRUE;
+		}
+
+		// Fallback
 		CDibData dib;
 
 		return (dib.CreateDIB(bmImage) && dib.SaveDIB(sFilePath));

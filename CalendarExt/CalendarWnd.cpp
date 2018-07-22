@@ -14,10 +14,12 @@
 #include "..\Shared\themed.h"
 #include "..\Shared\dlgunits.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\localizer.h"
 
 #include "..\3rdparty\dibdata.h"
+#include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\UITheme.h"
 #include "..\Interfaces\IPreferences.h"
@@ -370,6 +372,16 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 			if (m_BigCalendar.SaveToImage(bmImage))
 			{
+				CString sPngPath(pData->szFilePath);
+				FileMisc::ReplaceExtension(sPngPath, _T(".png"));
+				
+				if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
+				{
+					lstrcpyn(pData->szFilePath, sPngPath, MAX_PATH);
+					return true;
+				}
+				
+				// Fallback
 				CDibData dib;
 
 				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))

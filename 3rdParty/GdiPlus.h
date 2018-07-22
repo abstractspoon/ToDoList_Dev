@@ -88,9 +88,14 @@ typedef void* gdix_Font;
 typedef void* gdix_StringFormat;
 typedef void* gdix_Path;
 typedef void* gdix_Bitmap;
+typedef void* gdix_Image;
 
 typedef float gdix_Real;
 typedef DWORD gdix_ARGB;
+
+//////////////////////////////////////////////////////////////////////
+
+struct IMAGECODECINFO;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -162,6 +167,7 @@ public:
 	virtual ~CGdiPlusGraphics();
 
 	operator gdix_Graphics*() { return m_graphics; }
+	BOOL IsValid() const { return (m_graphics != NULL); }
 
 protected:
 	gdix_Graphics* m_graphics;
@@ -176,6 +182,7 @@ public:
 	virtual ~CGdiPlusPen();
 
 	operator gdix_Pen*() { return m_pen; }
+	BOOL IsValid() const { return (m_pen != NULL); }
 
 protected:
 	gdix_Pen* m_pen;
@@ -190,9 +197,30 @@ public:
 	virtual ~CGdiPlusBrush();
 
 	operator gdix_Brush*() const { return m_brush; }
+	BOOL IsValid() const { return (m_brush != NULL); }
 
 protected:
 	gdix_Brush* m_brush;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CGdiPlusBitmap
+{
+public:
+	CGdiPlusBitmap(IStream* stream);
+	CGdiPlusBitmap(const WCHAR* filename);
+	CGdiPlusBitmap(HBITMAP hbitmap);
+	virtual ~CGdiPlusBitmap();
+
+	operator gdix_Bitmap*() { return m_bitmap; }
+	gdix_Image* AsImage() { return (gdix_Image*)m_bitmap; }
+
+	BOOL IsValid() const { return (m_bitmap != NULL); }
+	BOOL SaveAsPNG(const WCHAR* filename);
+
+protected:
+	gdix_Bitmap* m_bitmap;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -231,8 +259,10 @@ public:
 	// Native GDI+
 	static BOOL CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
+	static BOOL CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap);
 	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
+	static BOOL SaveBitmapAsPNG(gdix_Bitmap* bitmap, const WCHAR* filename);
 
 	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);
@@ -276,6 +306,11 @@ protected:
 protected:
 	static BOOL Initialize(); // initialize on demand
 	static void Free();
+
+	static BOOL GetImageEncoders(UINT numEncoders, UINT sizeEncoderArray, IMAGECODECINFO* pEncoders);
+	static BOOL GetImageEncodersSize(UINT* numEncoders, UINT* sizeEncoderArray);
+	static BOOL GetEncoderClsid(const WCHAR* szFormat, CLSID* pClsid);
+
 };
 
 #endif // !defined(AFX_GDIPLUS_H__41B5F6AC_E7D4_49CA_9E2F_96FDA94EBB28__INCLUDED_)

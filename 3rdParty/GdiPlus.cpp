@@ -13,6 +13,25 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+struct IMAGECODECINFO
+{
+    CLSID Clsid;
+    GUID  FormatID;
+    const WCHAR* CodecName;
+    const WCHAR* DllName;
+    const WCHAR* FormatDescription;
+    const WCHAR* FilenameExtension;
+    const WCHAR* MimeType;
+    DWORD Flags;
+    DWORD Version;
+    DWORD SigCount;
+    DWORD SigSize;
+    const BYTE* SigPattern;
+    const BYTE* SigMask;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 CGdiPlusGraphics::CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing) : m_graphics(NULL)
 {
 	VERIFY(CGdiPlus::CreateGraphics(hDC, &m_graphics));
@@ -120,6 +139,33 @@ CGdiPlusRectF::CGdiPlusRectF(const gdix_PointF& ptTopLeft, const gdix_PointF& pt
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusBitmap::CGdiPlusBitmap(IStream* stream) : m_bitmap(NULL)
+{
+	CGdiPlus::CreateBitmapFromStream(stream, &m_bitmap);
+}
+
+CGdiPlusBitmap::CGdiPlusBitmap(const WCHAR* filename) : m_bitmap(NULL)
+{
+	CGdiPlus::CreateBitmapFromFile(filename, &m_bitmap);
+}
+
+CGdiPlusBitmap::CGdiPlusBitmap(HBITMAP hbitmap) : m_bitmap(NULL)
+{
+	CGdiPlus::CreateBitmapFromHBITMAP(hbitmap, NULL, &m_bitmap);
+}
+
+BOOL CGdiPlusBitmap::SaveAsPNG(const WCHAR* filename)
+{
+	return CGdiPlus::SaveBitmapAsPNG(m_bitmap, filename);
+}
+
+CGdiPlusBitmap::~CGdiPlusBitmap()
+{
+	CGdiPlus::DeleteBitmap(m_bitmap);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 struct gdix_StartupInput
 {
     UINT32 GdiplusVersion;
@@ -198,9 +244,17 @@ typedef gdix_Status (STDAPICALLTYPE *PFNMEASURESTRING)(gdix_Graphics*,const WCHA
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMSTREAM)(IStream*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE)(const WCHAR*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
+typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMHBITMAP)(HBITMAP, HPALETTE, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEBITMAP)(gdix_Bitmap*);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
+
+// Image methods
+typedef gdix_Status (STDAPICALLTYPE *PFNSAVEIMAGETOFILE)(gdix_Image*, const WCHAR*, const CLSID*, const void*);
+
+// Misc
+typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEENCODERS)(UINT, UINT, IMAGECODECINFO*);
+typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEENCODERSSIZE)(UINT*, UINT*);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -308,8 +362,32 @@ BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, 
 	return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
 }
 
+BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap)
+{
+	GETPROCADDRESS(PFNCREATEBITMAPFROMHBITMAP, "GdipCreateBitmapFromHBITMAP");
+	return (pFN(hbitmap, hPal, bitmap) == gdix_Ok);
+}
+
+BOOL CGdiPlus::SaveBitmapAsPNG(gdix_Bitmap* bitmap, const WCHAR* filename)
+{
+	if (!bitmap)
+		return FALSE;
+
+	CLSID clsidPNG = { 0 };
+
+	if (!GetEncoderClsid(L"image/png", &clsidPNG))
+		return FALSE;
+
+	GETPROCADDRESS(PFNSAVEIMAGETOFILE, "GdipSaveImageToFile");
+	
+	return (pFN((gdix_Image*)bitmap, filename, &clsidPNG, NULL) == gdix_Ok);
+}
+
 BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)
 {
+	if (!bitmap)
+		return FALSE;
+
 	GETPROCADDRESS(PFNDELETEBITMAP, "GdipDisposeImage");
 	return (pFN(bitmap) == gdix_Ok);
 }
@@ -323,6 +401,9 @@ BOOL CGdiPlus::CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen)
 
 BOOL CGdiPlus::DeletePen(gdix_Pen* pen)
 {
+	if (!pen)
+		return FALSE;
+	
 	GETPROCADDRESS(PFNDELETEPEN, "GdipDeletePen");
 
 	return (pFN(pen) == gdix_Ok);
@@ -337,6 +418,9 @@ BOOL CGdiPlus::CreateBrush(gdix_ARGB color, gdix_Brush** brush)
 
 BOOL CGdiPlus::DeleteBrush(gdix_Brush* brush)
 {
+	if (!brush)
+		return FALSE;
+	
 	GETPROCADDRESS(PFNDELETEBRUSH, "GdipDeleteBrush");
 	
 	return (pFN(brush) == gdix_Ok);
@@ -351,6 +435,9 @@ BOOL CGdiPlus::CreateGraphics(HDC hdc, gdix_Graphics** graphics)
 
 BOOL CGdiPlus::DeleteGraphics(gdix_Graphics* graphics)
 {
+	if (!graphics)
+		return FALSE;
+	
 	GETPROCADDRESS(PFNDELETEGRAPHICS, "GdipDeleteGraphics");
 
 	return (pFN(graphics) == gdix_Ok);
@@ -497,4 +584,48 @@ void CGdiPlus::GetPointFs(const POINT points[], int count, CArray<gdix_PointF, g
 		pointFs[nPt].x = (float)points[nPt].x;
 		pointFs[nPt].y = (float)points[nPt].y;
 	}
+}
+
+BOOL CGdiPlus::GetImageEncoders(UINT numEncoders, UINT sizeEncoderArray, IMAGECODECINFO* pEncoders)
+{
+	GETPROCADDRESS(PFNGETIMAGEENCODERS, "GdipGetImageEncoders");
+	
+	return (pFN(numEncoders, sizeEncoderArray, pEncoders) == gdix_Ok);
+}
+
+BOOL CGdiPlus::GetImageEncodersSize(UINT* numEncoders, UINT* sizeEncoderArray)
+{
+	GETPROCADDRESS(PFNGETIMAGEENCODERSSIZE, "GdipGetImageEncodersSize");
+	
+	return (pFN(numEncoders, sizeEncoderArray) == gdix_Ok);
+}
+
+BOOL CGdiPlus::GetEncoderClsid(const WCHAR* szFormat, CLSID* pClsid)
+{
+    UINT numEncoders = 0;
+    UINT sizeEncoderArray = 0;
+	
+    if (!GetImageEncodersSize(&numEncoders, &sizeEncoderArray) || !sizeEncoderArray)
+		return FALSE;
+
+    IMAGECODECINFO* pImageCodecInfo = (IMAGECODECINFO*)malloc(sizeEncoderArray);
+
+    if (pImageCodecInfo == NULL)
+		return FALSE;
+	
+    VERIFY (GetImageEncoders(numEncoders, sizeEncoderArray, pImageCodecInfo));
+	
+    for (UINT nEncoder = 0; nEncoder < numEncoders; ++nEncoder)
+    {
+        if (wcscmp(pImageCodecInfo[nEncoder].MimeType, szFormat) == 0)
+        {
+            *pClsid = pImageCodecInfo[nEncoder].Clsid;
+            free(pImageCodecInfo);
+
+            return TRUE;
+        }
+    }
+	
+    free(pImageCodecInfo);
+    return FALSE;
 }

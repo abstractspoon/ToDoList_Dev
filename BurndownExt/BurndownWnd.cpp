@@ -9,6 +9,7 @@
 
 #include "..\shared\mapex.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 #include "..\shared\themed.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
@@ -16,6 +17,7 @@
 #include "..\shared\enstring.h"
 
 #include "..\3rdparty\dibdata.h"
+#include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -517,6 +519,16 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 			if (m_graph.SaveToImage(bmImage))
 			{
+				CString sPngPath(pData->szFilePath);
+				FileMisc::ReplaceExtension(sPngPath, _T(".png"));
+				
+				if (CGdiPlusBitmap(bmImage).SaveAsPNG(sPngPath))
+				{
+					lstrcpyn(pData->szFilePath, sPngPath, MAX_PATH);
+					return true;
+				}
+				
+				// Fallback
 				CDibData dib;
 
 				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
