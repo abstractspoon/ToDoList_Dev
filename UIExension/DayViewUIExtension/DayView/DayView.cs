@@ -531,7 +531,11 @@ namespace Calendar
         private void UpdateWorkingHours()
         {
             workStart = new DateTime(1, 1, 1, workingHourStart, workingMinuteStart, 0);
-            workEnd = new DateTime(1, 1, 1, workingHourEnd, workingMinuteEnd, 0);
+
+            if (workingHourEnd >= 24)
+                workEnd = new DateTime(1, 1, 2, 0, 0, 0);
+            else
+                workEnd = new DateTime(1, 1, 1, workingHourEnd, workingMinuteEnd, 0);
 
             Invalidate();
         }

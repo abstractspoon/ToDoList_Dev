@@ -245,8 +245,8 @@ namespace DayViewUIExtension
             const double LUNCHSTARTTIME = (MIDDAY - 0.5);
             const double LUNCHENDTIME = (MIDDAY + 0.5);
 
-            double StartOfDay = LUNCHSTARTTIME - (hoursInDay / 2);
-            double EndOfDay = LUNCHENDTIME + (hoursInDay / 2);
+            double StartOfDay = Math.Max(LUNCHSTARTTIME - (hoursInDay / 2), 0);
+            double EndOfDay = Math.Min(LUNCHENDTIME + (hoursInDay / 2), 24);
 
             m_DayView.WorkingHourStart = (int)StartOfDay;
             m_DayView.WorkingMinuteStart = (int)((StartOfDay - m_DayView.WorkingHourStart) * 60);
