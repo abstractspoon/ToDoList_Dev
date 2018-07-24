@@ -94,7 +94,31 @@ namespace WordCloudUIExtension
 			Items.Add(new ColorScheme(new String[] { "#21B6A8", "#177F75", "#B6212D", "#7F171F", "#B67721", "#7F5417" }));
 			Items.Add(new ColorScheme(new String[] { "#9DAF72", "#566047", "#562F32", "#462D44", "#859731", "#640E27" }));
 			Items.Add(new ColorScheme(new String[] { "#00904B", "#64BD4F", "#E13987", "#F191BA", "#FEEA65", "#835322" }));
+
+            // ColorBrewer palettes
+            Items.Add(new ColorScheme(new String[] { "#ADDD8E", "#78C679", "#41AB5D", "#238443", "#006837", "#004529" }));
+            Items.Add(new ColorScheme(new String[] { "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#253494", "#081D58" }));
+            Items.Add(new ColorScheme(new String[] { "#A8DDB5", "#7BCCC4", "#4EB3D3", "#2B8CBE", "#0868AC", "#084081" }));
+            Items.Add(new ColorScheme(new String[] { "#99D8C9", "#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B" }));
+            Items.Add(new ColorScheme(new String[] { "#A6BDDB", "#67A9CF", "#3690C0", "#02818A", "#016C59", "#014636" }));
+            Items.Add(new ColorScheme(new String[] { "#A6BDDB", "#74A9CF", "#3690C0", "#0570B0", "#045A8D", "#023858" }));
+            Items.Add(new ColorScheme(new String[] { "#9EBCDA", "#8C96C6", "#8C6BB1", "#88419D", "#810F7C", "#4D004B" }));
+            Items.Add(new ColorScheme(new String[] { "#FA9FB5", "#F768A1", "#DD3497", "#AE017E", "#7A0177", "#49006A" }));
+            Items.Add(new ColorScheme(new String[] { "#C994C7", "#DF65B0", "#E7298A", "#CE1256", "#980043", "#67001F" }));
+            Items.Add(new ColorScheme(new String[] { "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#B30000", "#7F0000" }));
+            Items.Add(new ColorScheme(new String[] { "#FEB24C", "#FD8D3C", "#FC4E2A", "#E31A1C", "#BD0026", "#800026" }));
+            Items.Add(new ColorScheme(new String[] { "#FEC44F", "#FE9929", "#EC7014", "#CC4C02", "#993404", "#662506" }));
+            Items.Add(new ColorScheme(new String[] { "#BCBDDC", "#9E9AC8", "#807DBA", "#6A51A3", "#54278F", "#3F007D" }));
+            Items.Add(new ColorScheme(new String[] { "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#08519C", "#08306B" }));
+            Items.Add(new ColorScheme(new String[] { "#A1D99B", "#74C476", "#41AB5D", "#238B45", "#006D2C", "#00441B" }));
+            Items.Add(new ColorScheme(new String[] { "#FDAE6B", "#FD8D3C", "#F16913", "#D94801", "#A63603", "#7F2704" }));
+            Items.Add(new ColorScheme(new String[] { "#FC9272", "#FB6A4A", "#EF3B2C", "#CB181D", "#A50F15", "#67000D" }));
+            Items.Add(new ColorScheme(new String[] { "#BDBDBD", "#969696", "#737373", "#525252", "#252525", "#000000" }));
+            Items.Add(new ColorScheme(new String[] { "#1B9E77", "#D95F02", "#7570B3", "#E7298A", "#66A61E", "#E6AB02", "#A6761D", "#666666" }));
+            Items.Add(new ColorScheme(new String[] { "#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999" }));
+
 			Items.Add(new ColorScheme(new Color[] { Color.DarkRed, Color.DarkBlue, Color.DarkGreen, Color.Navy, Color.DarkCyan, Color.DarkOrange, Color.DarkGoldenrod, Color.DarkKhaki, Color.Blue, Color.Red, Color.Green }));
+
 // 			Items.Add(new ColorScheme(new String[] { "", "", "", "", "", "", "", "", "", "", "" }));
 // 			Items.Add(new ColorScheme(new String[] { "", "", "", "", "", "", "", "", "", "", "" }));
 
