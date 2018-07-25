@@ -97,6 +97,10 @@ SOURCE=.\ClipboardBackup.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ColorBrewer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ColorDef.cpp
 # End Source File
 # Begin Source File
@@ -258,6 +262,10 @@ SOURCE=.\CalendarCtrl.h
 # Begin Source File
 
 SOURCE=.\ClipboardBackup.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ColorBrewer.h
 # End Source File
 # Begin Source File
 
