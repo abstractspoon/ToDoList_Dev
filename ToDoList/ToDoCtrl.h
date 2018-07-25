@@ -116,8 +116,8 @@ public:
 	BOOL IsSourceControlled() const;
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);
 	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
-	BOOL CheckOutSelectedTasks();
-	BOOL CheckInSelectedTasks();
+	//BOOL CheckOutSelectedTasks();
+	//BOOL CheckInSelectedTasks();
 
 	void Flush(BOOL bEndTimeTracking = FALSE); // called to end current editing actions
 	BOOL IsModified() const;

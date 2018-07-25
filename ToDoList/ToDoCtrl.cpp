@@ -8435,14 +8435,14 @@ LRESULT CToDoCtrl::OnColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_LOCK:
-		if (m_ssc.IsSourceControlled())
-		{
-			if (IsSelectedTaskLocked())
-				CheckOutSelectedTasks();
-			else
-				CheckInSelectedTasks();
-		}
-		else
+		//if (m_ssc.IsSourceControlled())
+		//{
+		//	if (IsSelectedTaskLocked())
+		//		CheckOutSelectedTasks();
+		//	else
+		//		CheckInSelectedTasks();
+		//}
+		//else
 		{
 			SetSelectedTaskLock(!m_data.IsTaskLocked(dwTaskID));
 		}
@@ -10860,6 +10860,7 @@ TDC_FILE CToDoCtrl::CheckOutTasklist(CString& sCheckedOutTo, BOOL bForce)
 	return MapTaskfileError(file.GetLastFileError());
 }
 
+/*
 BOOL CToDoCtrl::CheckOutSelectedTasks()
 {
 	if (!m_ssc.IsSourceControlled())
@@ -10933,6 +10934,7 @@ BOOL CToDoCtrl::CheckInSelectedTasks()
 
 	return TRUE;
 }
+*/
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const
 {
