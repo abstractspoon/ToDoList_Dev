@@ -9,6 +9,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+CColorBrewer::CColorBrewer(DWORD dwFlags) : m_dwFlags(dwFlags)
+{
+
+}
+
 BOOL CColorBrewer::ValidatePalettes()
 {
 	int nGroup = COLORBREWER_NUMGROUPS;
@@ -228,12 +233,12 @@ BOOL CColorBrewer::PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors
 	return ((nNumColors == -1) || (pal.nNumColors == nNumColors));
 }
 
-void CColorBrewer::Copy(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo)
+void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo)
 {
 	palTo = palFrom;
 }
 
-void CColorBrewer::Copy(const COLORBREWER_PALETTE& palFrom, CDWordArray& aTo)
+void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, CDWordArray& aTo)
 {
 	int nCol = palFrom.nNumColors;
 	aTo.SetSize(nCol);
