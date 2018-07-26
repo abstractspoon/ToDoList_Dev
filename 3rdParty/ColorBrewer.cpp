@@ -9,11 +9,13 @@
 
 //////////////////////////////////////////////////////////////////////
 
+template <class T>
 CColorBrewer::CColorBrewer(DWORD dwFlags) : m_dwFlags(dwFlags)
 {
 
 }
 
+template <class T>
 BOOL CColorBrewer::ValidatePalettes()
 {
 	int nGroup = COLORBREWER_NUMGROUPS;
@@ -31,6 +33,7 @@ BOOL CColorBrewer::ValidatePalettes()
 	return TRUE;
 }
 
+template <class T>
 BOOL CColorBrewer::ValidateGroup(const COLORBREWER_PALETTEGROUP& group)
 {
 	if (group.nNumPalettes > COLORBREWER_MAXPALETTES)
@@ -65,6 +68,7 @@ BOOL CColorBrewer::ValidateGroup(const COLORBREWER_PALETTEGROUP& group)
 	return TRUE;
 }
 
+template <class T>
 BOOL CColorBrewer::ValidatePalette(const COLORBREWER_PALETTE& pal)
 {
 	if (pal.nNumColors > COLORBREWER_MAXCOLORS)
@@ -99,105 +103,7 @@ BOOL CColorBrewer::ValidatePalette(const COLORBREWER_PALETTE& pal)
 	return TRUE;
 }
 
-int CColorBrewer::GetAllPalettes(CColorBrewerPaletteArray& aPalettes)
-{
-	return GetAllPalettesT<CColorBrewerPaletteArray>(aPalettes);
-}
-
-int CColorBrewer::GetAllPalettes(CDWordPaletteArray& aPalettes)
-{
-	return GetAllPalettesT<CDWordPaletteArray>(aPalettes);
-}
-
-int CColorBrewer::GetPalettes(int nNumColors, CColorBrewerPaletteArray& aPalettes, BOOL bAllowSynthesis)
-{
-	return GetPalettesT<CColorBrewerPaletteArray>(nNumColors, aPalettes, bAllowSynthesis);
-}
-
-int CColorBrewer::GetPalettes(int nNumColors, CDWordPaletteArray& aPalettes, BOOL bAllowSynthesis)
-{
-	return GetPalettesT<CDWordPaletteArray>(nNumColors, aPalettes, bAllowSynthesis);
-}
-
-int CColorBrewer::GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPaletteArray& aPalettes, int nNumColors, BOOL bAllowSynthesis)
-{
-	return GetPalettesT<CColorBrewerPaletteArray>(nType, aPalettes, nNumColors, bAllowSynthesis);
-}
-
-int CColorBrewer::GetPalettes(COLORBREWER_PALETTETYPE nType, CDWordPaletteArray& aPalettes, int nNumColors, BOOL bAllowSynthesis)
-{
-	return GetPalettesT<CDWordPaletteArray>(nType, aPalettes, nNumColors, bAllowSynthesis);
-}
-
-int CColorBrewer::GetPalettes(LPCTSTR szName, CColorBrewerPaletteArray& aPalettes, BOOL bPartial)
-{
-	return GetPalettesT<CColorBrewerPaletteArray>(szName, aPalettes, bPartial);
-}
-
-int CColorBrewer::GetPalettes(LPCTSTR szName, CDWordPaletteArray& aPalettes, BOOL bPartial)
-{
-	return GetPalettesT<CDWordPaletteArray>(szName, aPalettes, bPartial);
-}
-
-int CColorBrewer::CountPalettes(COLORBREWER_PALETTETYPE nType, int nNumColors)
-{
-	int nGroup = COLORBREWER_NUMGROUPS, nCount = 0;
-
-	while (nGroup--)
-	{
-		const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-
-		if (GroupMatches(group, nType))
-		{
-			if (nNumColors < 0)
-			{
-				nCount += group.nNumPalettes;
-			}
-			else if (GroupMatches(group, nNumColors))
-			{
-				nCount++;
-			}
-		}
-	}
-
-	return nCount;
-}
-
-int CColorBrewer::CountPalettes(int nNumColors)
-{
-	int nGroup = COLORBREWER_NUMGROUPS, nCount = 0;
-
-	while (nGroup--)
-	{
-		const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-
-		if (GroupMatches(group, nNumColors))
-		{
-			if (nNumColors < 0)
-				nCount += group.nNumPalettes;
-			else
-				nCount++;
-		}
-	}
-
-	return nCount;
-}
-
-int CColorBrewer::CountPalettes(LPCTSTR szName, BOOL bPartial)
-{
-	int nGroup = COLORBREWER_NUMGROUPS, nCount = 0;
-
-	while (nGroup--)
-	{
-		const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-
-		if (GroupMatches(group, szName, bPartial))
-			nCount += group.nNumPalettes;
-	}
-
-	return nCount;
-}
-
+template <class T>
 BOOL CColorBrewer::GroupMatches(const COLORBREWER_PALETTEGROUP& group, LPCTSTR szName, BOOL bPartial)
 {
 	if (bPartial)
@@ -207,11 +113,13 @@ BOOL CColorBrewer::GroupMatches(const COLORBREWER_PALETTEGROUP& group, LPCTSTR s
 	return (StrCmpI(group.szName, szName) != NULL);
 }
 
+template <class T>
 BOOL CColorBrewer::GroupMatches(const COLORBREWER_PALETTEGROUP& group, COLORBREWER_PALETTETYPE nType)
 {
 	return (group.nType == nType);
 }
 
+template <class T>
 BOOL CColorBrewer::GroupMatches(const COLORBREWER_PALETTEGROUP& group, int nNumColors)
 {
 	if (nNumColors == -1)
@@ -228,17 +136,19 @@ BOOL CColorBrewer::GroupMatches(const COLORBREWER_PALETTEGROUP& group, int nNumC
 	return FALSE;
 }
 
+template <class T>
 BOOL CColorBrewer::PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors)
 {
 	return ((nNumColors == -1) || (pal.nNumColors == nNumColors));
 }
 
-void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo)
+template <class T>
+void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo) const
 {
 	palTo = palFrom;
 }
 
-void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, CDWordArray& aTo)
+void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorrefArray& aTo) const
 {
 	int nCol = palFrom.nNumColors;
 	aTo.SetSize(nCol);
@@ -247,7 +157,8 @@ void CColorBrewer::CopyPalette(const COLORBREWER_PALETTE& palFrom, CDWordArray& 
 		aTo[nCol] = palFrom.crPalette[nCol];
 }
 
-BOOL CColorBrewer::CanSynthesize(const COLORBREWER_PALETTE& palFrom, int nNumColors)
+template <class T>
+BOOL CColorBrewer::CanSynthesize(const COLORBREWER_PALETTE& palFrom, int nNumColors) const
 {
 	if ((nNumColors % 2) == 0)
 		return FALSE;
@@ -255,7 +166,8 @@ BOOL CColorBrewer::CanSynthesize(const COLORBREWER_PALETTE& palFrom, int nNumCol
 	return (palFrom.nNumColors == ((nNumColors / 2) + 1));
 }
 
-BOOL CColorBrewer::Synthesize(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo, int nNumColors)
+template <class T>
+BOOL CColorBrewer::Synthesize(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo, int nNumColors) const
 {
 	if (!CanSynthesize(palFrom, nNumColors))
 		return FALSE;
@@ -277,6 +189,7 @@ BOOL CColorBrewer::Synthesize(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PA
 	return TRUE;
 }
 
+template <class T>
 COLORREF CColorBrewer::GetAverageColor(COLORREF color1, COLORREF color2)
 {
 	return RGB(((GetRValue(color1) + GetRValue(color2)) / 2),
