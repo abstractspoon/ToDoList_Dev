@@ -17,125 +17,54 @@
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CArray<COLORBREWER_PALETTE, COLORBREWER_PALETTE&> CColorBrewerPaletteArray;
-
-class CColorrefArray : public CArray<COLORREF, COLORREF&>
+class CColorBrewerPalette : public CDWordArray
 {
 public:
-	CColorrefArray& operator=(const CColorrefArray& arr)
+	CColorBrewerPalette& operator=(const CColorBrewerPalette& arr)
 	{
 		Copy(arr);
 		return *this;
 	}
 };
 
-typedef CArray<CColorrefArray, CColorrefArray&> CColorrefPaletteArray;
+typedef CArray<CColorBrewerPalette, CColorBrewerPalette&> CColorBrewerPaletteArray;
 
 //////////////////////////////////////////////////////////////////////
 
 enum // Flags
 {
-	CBF_ALLOWSYNTHESIS = 0x01,
-	CBF_EXCLUDEPALECOLORS = 0x02,
+	CBF_ALLOWSYNTHESIS	= 0x01,
+	CBF_TEXTSAFE		= 0x02,
 	// CBF_
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template <class T>
 class CColorBrewer  
 {
 public:
 	CColorBrewer(DWORD dwFlags = 0);
 
-	int GetAllPalettes(CArray<T, T&>& aPalettes) const
-	{
-#ifdef _DEBUG
-		ValidatePalettes();
-#endif
-		aPalettes.RemoveAll();
-		
-		for (int nGroup = 0; nGroup < COLORBREWER_NUMGROUPS; nGroup++)
-			CopyGroupT(COLORBREWER_GROUPS[nGroup], aPalettes);
-		
-		return aPalettes.GetSize();
-	}
-
-	int GetPalettes(int nNumColors, CArray<T, T&>& aPalettes) const
-	{
-#ifdef _DEBUG
-		ValidatePalettes();
-#endif
-		aPalettes.RemoveAll();
-		
-		for (int nGroup = 0; nGroup < COLORBREWER_NUMGROUPS; nGroup++)
-		{
-			const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-			
-			for (int nPal = 0; nPal < group.nNumPalettes; nPal++)
-			{
-				if (PaletteMatches(group.palettes[nPal], nNumColors))
-					CopyPaletteT(group.palettes[nPal], aPalettes);
-			}
-		}
-		
-		return aPalettes.GetSize();
-	}
+	int GetAllPalettes(CColorBrewerPaletteArray& aPalettes) const;
 	
-	int GetPalettes(COLORBREWER_PALETTETYPE nType, CArray<T, T&>& aPalettes, int nNumColors = -1) const
-	{
-ifdef _DEBUG
-		ValidatePalettes();
-#endif
-		aPalettes.RemoveAll();
-		
-		for (int nGroup = 0; nGroup < COLORBREWER_NUMGROUPS; nGroup++)
-		{
-			const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-			
-			if (GroupMatches(group, nType))
-			{
-				for (int nPal = 0; nPal < group.nNumPalettes; nPal++)
-				{
-					if (PaletteMatches(group.palettes[nPal], nNumColors))
-						CopyPaletteT(group.palettes[nPal], aPalettes);
-				}
-			}
-		}
-		
-		return aPalettes.GetSize();
-	}
-	
-	int GetPalettes(LPCTSTR szName, CArray<T, T&>& aPalettes, BOOL bPartial = TRUE) const
-	{
-#ifdef _DEBUG
-		ValidatePalettes();
-#endif
-		aPalettes.RemoveAll();
-		
-		for (int nGroup = 0; nGroup < COLORBREWER_NUMGROUPS; nGroup++)
-		{
-			const COLORBREWER_PALETTEGROUP& group = COLORBREWER_GROUPS[nGroup];
-			
-			if (GroupMatches(group, szName, bPartial))
-			{
-				for (int nPal = 0; nPal < group.nNumPalettes; nPal++)
-					CopyPaletteT(group.palettes[nPal], aPalettes);
-			}
-		}
-		
-		return aPalettes.GetSize();
-	}
+	int GetPalettes(int nNumColors, CColorBrewerPaletteArray& aPalettes, BOOL bAppend = FALSE) const;
+	int GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPaletteArray& aPalettes, int nNumColors = -1, BOOL bAppend = FALSE) const;
+	int GetPalettes(LPCTSTR szName, CColorBrewerPaletteArray& aPalettes, BOOL bPartial = TRUE, BOOL bAppend = FALSE) const;
 
 protected:
 	DWORD m_dwFlags;
 
 protected:
-	void CopyPalette(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo) const;
-	void CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorrefArray& aTo) const;
+	void CopyGroup(const COLORBREWER_PALETTEGROUP& group, CColorBrewerPaletteArray& aPalettes) const;
+	void CopyPalette(const COLORBREWER_PALETTE& pal, CColorBrewerPaletteArray& aPalettes) const;
+	void CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& aTo) const;
 
-	BOOL CanSynthesize(const COLORBREWER_PALETTE& palFrom, int nNumColors) const;
-	BOOL Synthesize(const COLORBREWER_PALETTE& palFrom, COLORBREWER_PALETTE& palTo, int nNumColors) const;
+	BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
+	BOOL PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors) const;
+	int FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
+
+	BOOL Synthesize(int nNumColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palTo) const;
+	BOOL Synthesize(int nNumColors, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palTo) const;
 
 	static BOOL ValidatePalettes();
 	static BOOL ValidateGroup(const COLORBREWER_PALETTEGROUP& group);
@@ -143,25 +72,11 @@ protected:
 
 	static BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, LPCTSTR szName, BOOL bPartial);
 	static BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, COLORBREWER_PALETTETYPE nType);
-	static BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, int nNumColors);
-	static BOOL PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors);
 
 	static COLORREF GetAverageColor(COLORREF color1, COLORREF color2);
-
-private:
-	void CopyGroupT(const COLORBREWER_PALETTEGROUP& group, CArray<T, T&>& aPalettes) const 
-	{
-		for (int nPal = 0; nPal < group.nNumPalettes; nPal++)
-			CopyPaletteT(group.palettes[nPal], aPalettes);
-	}
 	
-	void CopyPaletteT(const COLORBREWER_PALETTE& pal, CArray<T, T&>& aPalettes) const
-	{
-		T temp;
-		CopyPalette(pal, temp);
-		aPalettes.Add(temp);
-	}
-	
+	static BOOL IsTextSafeColor(COLORREF color);
+	static int GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom);
 };
 
-//#endif // !defined(AFX_COLORBREWER_H__B8945E59_E0C7_4C2A_A688_D0F4C2EAD899__INCLUDED_)
+#endif // !defined(AFX_COLORBREWER_H__B8945E59_E0C7_4C2A_A688_D0F4C2EAD899__INCLUDED_)
