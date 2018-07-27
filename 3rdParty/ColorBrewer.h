@@ -33,8 +33,8 @@ typedef CArray<CColorBrewerPalette, CColorBrewerPalette&> CColorBrewerPaletteArr
 
 enum // Flags
 {
-	CBF_ALLOWSYNTHESIS	= 0x01,
-	CBF_TEXTSAFE		= 0x02,
+	CBF_SYNTHESIZE	= 0x01,
+	CBF_TEXTSAFE	= 0x02,
 	// CBF_
 };
 
@@ -45,26 +45,32 @@ class CColorBrewer
 public:
 	CColorBrewer(DWORD dwFlags = 0);
 
+	// Supports text-safety only
 	int GetAllPalettes(CColorBrewerPaletteArray& aPalettes) const;
-	
-	int GetPalettes(int nNumColors, CColorBrewerPaletteArray& aPalettes, BOOL bAppend = FALSE) const;
-	int GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPaletteArray& aPalettes, int nNumColors = -1, BOOL bAppend = FALSE) const;
 	int GetPalettes(LPCTSTR szName, CColorBrewerPaletteArray& aPalettes, BOOL bPartial = TRUE, BOOL bAppend = FALSE) const;
+	
+	// Supports text-safety and synthesis
+	// nNumColors must be >= 3
+	int GetPalettes(int nNumColors, CColorBrewerPaletteArray& aPalettes, BOOL bAppend = FALSE) const;
+
+	// Supports text-safety
+	// Supports synthesis if nNumColors >= 3
+	int GetPalettes(COLORBREWER_PALETTETYPE nType, CColorBrewerPaletteArray& aPalettes, int nNumColors = -1, BOOL bAppend = FALSE) const;
 
 protected:
 	DWORD m_dwFlags;
 
 protected:
 	void CopyGroup(const COLORBREWER_PALETTEGROUP& group, CColorBrewerPaletteArray& aPalettes) const;
-	void CopyPalette(const COLORBREWER_PALETTE& pal, CColorBrewerPaletteArray& aPalettes) const;
-	void CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& aTo) const;
+	int CopyPalette(const COLORBREWER_PALETTE& pal, CColorBrewerPaletteArray& aPalettes) const;
+	int CopyPalette(const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& aTo) const;
 
 	BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
 	BOOL PaletteMatches(const COLORBREWER_PALETTE& pal, int nNumColors) const;
 	int FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumColors) const;
 
-	BOOL Synthesize(int nNumColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palTo) const;
-	BOOL Synthesize(int nNumColors, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palTo) const;
+	BOOL SynthesizePalette(int nNumColors, const COLORBREWER_PALETTEGROUP& groupFrom, CColorBrewerPalette& palTo) const;
+	BOOL SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTypeFrom, const COLORBREWER_PALETTE& palFrom, CColorBrewerPalette& palTo) const;
 
 	static BOOL ValidatePalettes();
 	static BOOL ValidateGroup(const COLORBREWER_PALETTEGROUP& group);
