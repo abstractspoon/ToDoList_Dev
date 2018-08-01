@@ -306,24 +306,61 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 	{
 	case CBPT_SEQUENTIAL:
 		{
-			CColorBrewerPalette temp;
-			int nReqColorCount = ((nNumColors / 2) + 1), nCol;
-
-			if (CopyPalette(palFrom, temp) != nReqColorCount)
-				return FALSE;
-
-			palTo.SetSize(nNumColors);
-
-			// Copy known colours
-			int nCol = nReqColorCount;
-
-			while (nCol--)
-				palTo[nCol * 2] = temp[nCol];
-			
-			// Calc missing colours
-			for (nCol = 1; nCol < nNumColors; nCol += 2)
+			if (nNumColors % 2) // odd number
 			{
-				palTo[nCol] = GetAverageColor(palTo[nCol - 1], palTo[nCol + 1]);
+				CColorBrewerPalette temp;
+				int nReqColorCount = ((nNumColors / 2) + 1);
+
+				if (CopyPalette(palFrom, temp) != nReqColorCount)
+					return FALSE;
+
+				palTo.SetSize(nNumColors);
+
+				for (int nCol = 0; nCol < nNumColors; nCol++)
+				{
+					int nTempCol = (nCol / 2);
+
+					switch (nCol % 2)
+					{
+					case 0: // 0, 2, 4, 6, 8, 10, etc
+						palTo[nCol] = temp[nTempCol];
+						break;
+
+					case 1: // 1, 3, 5, 7, 9, 11, etc
+						palTo[nCol] = BlendColors(temp[nTempCol], 1, palTo[nTempCol + 1], 1); // 50/50
+						break;
+					}
+				}
+			}
+			else // even number
+			{
+				CColorBrewerPalette temp;
+				int nReqColorCount = ((nNumColors / 3) + 1);
+
+				if (CopyPalette(palFrom, temp) != nReqColorCount)
+					return FALSE;
+
+				palTo.SetSize(nNumColors);
+
+				for (int nCol = 0; nCol < nNumColors; nCol++)
+				{
+					int nTempCol = (nCol / 3);
+
+					switch (nCol % 3)
+					{
+					case 0: // 0, 3, 6, 9, etc
+						palTo[nCol] = temp[nTempCol];
+						break;
+
+					case 1: // 1, 4, 7, 10, etc
+						palTo[nCol] = BlendColors(temp[nTempCol], 2, palTo[nTempCol + 1], 1); // 66/33
+						break;
+
+					case 2: // 2, 5, 8, 11, etc
+						palTo[nCol] = BlendColors(temp[nTempCol], 1, palTo[nTempCol + 1], 2); // 33/66
+						break;
+					}
+				}
 			}
 		}
 		break;
@@ -331,29 +368,17 @@ BOOL CColorBrewer::SynthesizePalette(int nNumColors, COLORBREWER_PALETTETYPE nTy
 	case CBPT_DIVERGING:
 		{
 			CColorBrewerPalette temp;
-			int nRequiredColorCount = ((nNumColors / 2) + 1), nCol;
+			int nPalColorCount = CopyPalette(palFrom, temp);
 
-			if (CopyPalette(palFrom, temp) != nRequiredColorCount)
-				return FALSE;
-
-			palTo.SetSize(nNumColors);
-
-			// Copy known colours
-			int nCol = nRequiredColorCount;
-
-			while (nCol--)
-				palTo[nCol * 2] = temp[nCol];
-			
-			// Calc missing colours
-			for (nCol = 1; nCol < nNumColors; nCol += 2)
-			{
-				palTo[nCol] = GetAverageColor(palTo[nCol - 1], palTo[nCol + 1]);
-			}
+			// TODO
 		}
 		break;
 
 	case CBPT_QUALITATIVE:
-		break;
+		// Not supported because no colour has any relationship
+		// to those colours adjacent to it and therefore blending
+		// adjacent colours in any way makes no sense
+		return FALSE;
 
 	default:
 		ASSERT(0);
@@ -375,11 +400,13 @@ int CColorBrewer::FindPalette(const COLORBREWER_PALETTEGROUP& group, int nNumCol
 	return -1;
 }
 
-COLORREF CColorBrewer::GetAverageColor(COLORREF color1, COLORREF color2)
+COLORREF CColorBrewer::BlendColors(COLORREF color1, int nAmount1, COLORREF color2, int nAmount2)
 {
-	return RGB(((GetRValue(color1) + GetRValue(color2)) / 2),
-				((GetGValue(color1) + GetGValue(color2)) / 2),
-				((GetBValue(color1) + GetBValue(color2)) / 2));
+	BYTE nRed = (BYTE)(((GetRValue(color1) * nAmount1) + (GetRValue(color2) * nAmount2)) / (nAmount1 + nAmount2));
+	BYTE nGreen = (BYTE)(((GetGValue(color1) * nAmount1) + (GetGValue(color2) * nAmount2)) / (nAmount1 + nAmount2));
+	BYTE nBlue = (BYTE)(((GetBValue(color1) * nAmount1) + (GetBValue(color2) * nAmount2)) / (nAmount1 + nAmount2));
+
+	return RGB(nRed, nGreen, nBlue);
 }
 
 void CColorBrewer::CopyGroup(const COLORBREWER_PALETTEGROUP& group, CColorBrewerPaletteArray& aPalettes) const 

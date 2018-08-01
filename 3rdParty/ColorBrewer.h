@@ -79,7 +79,7 @@ protected:
 	static BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, LPCTSTR szName, BOOL bPartial);
 	static BOOL GroupMatches(const COLORBREWER_PALETTEGROUP& group, COLORBREWER_PALETTETYPE nType);
 
-	static COLORREF GetAverageColor(COLORREF color1, COLORREF color2);
+	static COLORREF BlendColors(COLORREF color1, int nAmount1, COLORREF color2, int nAmount2);
 	
 	static BOOL IsTextSafeColor(COLORREF color);
 	static int GetTextSafeColorCount(const COLORBREWER_PALETTE& palFrom);
