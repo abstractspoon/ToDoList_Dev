@@ -879,7 +879,7 @@ CString CTDCCustomAttributeHelper::GetAttributeTypeID(UINT nCtrlID, const CTDCCu
 	return _T("");
 }
 
-void CTDCCustomAttributeHelper::UpdateCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomAttributeHelper::UpdateCustomAttributeControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 																const CTDCCustomAttribDefinitionArray& aAttribDefs,
 																const CTDCCustomAttributeDataMap& mapData)
 {
@@ -897,7 +897,7 @@ void CTDCCustomAttributeHelper::UpdateCustomAttributeControls(const CWnd* pParen
 	}
 }
 
-void CTDCCustomAttributeHelper::ClearCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomAttributeHelper::ClearCustomAttributeControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 															const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	int nCtrl = aControls.GetSize();
