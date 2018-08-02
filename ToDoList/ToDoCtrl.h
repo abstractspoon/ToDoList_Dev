@@ -761,7 +761,6 @@ protected:
 	// -------------------------------------------------------------------------------
 	
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
-	void UpdateTaskCustomAttribute(TDC_ATTRIBUTE nAttrib);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);

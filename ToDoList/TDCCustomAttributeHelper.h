@@ -80,6 +80,7 @@ public:
 	static BOOL IsColumnSortable(TDC_COLUMN nColID, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	
+	// not currently used
 	static CWnd* GetControlFromAttributeDef(const CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 											const CTDCCustomControlArray& aControls);
 
@@ -96,11 +97,11 @@ public:
 	static void ClearCustomAttributeControl(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
-	static void UpdateCustomAttributeControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
+	static void UpdateCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
 											const CTDCCustomAttributeDataMap& mapData);
 
-	static void ClearCustomAttributeControls(const CWnd* pParent, const CTDCCustomControlArray& aControls,
+	static void ClearCustomAttributeControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static BOOL GetControlAttributeTypes(const CUSTOMATTRIBCTRLITEM& ctrl,

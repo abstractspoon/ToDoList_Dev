@@ -146,7 +146,6 @@ public:
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
-	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, CStringArray& aMatched, CStringArray& aMixed) const;
 	BOOL IsSelectedTaskReference() const;
 	DWORD GetSelectedTaskParentID() const;
 	BOOL IsSelectedTaskDone() const;
@@ -519,8 +518,6 @@ protected:
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
 	static int CalcRequiredIconColumnWidth(int nNumImage);
-	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int>& mapCounts, int nNumTasks, 
-												CStringArray& aMatched, CStringArray& aMixed);
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
 	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 

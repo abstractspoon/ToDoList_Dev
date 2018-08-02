@@ -5796,38 +5796,6 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	return !data.IsEmpty();
 }
 
-BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, CStringArray& aMatched, CStringArray& aMixed) const
-{
-	int nSelCount = GetSelectedCount();
-	CMap<CString, LPCTSTR, int, int> mapCounts;
-
-	if (nSelCount)
-	{
-		POSITION pos = GetFirstSelectedTaskPos();
-
-		while (pos)
-		{
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-			TDCCADATA data;
-			m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data);
-
-			CStringArray aTaskItems;
-			int nItem = data.AsArray(aTaskItems);
-
-			while (nItem--)
-			{
-				int nCount = 0;
-				mapCounts.Lookup(aTaskItems[nItem], nCount);
-
-				mapCounts[aTaskItems[nItem]] = ++nCount;
-			}
-		}
-	}
-
-	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
-}
-
 int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aAllocTo) const
 {
 	return GetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo);
@@ -5945,11 +5913,15 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 
 int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const
 {
+	aMatched.RemoveAll();
+	aMixed.RemoveAll();
+
 	int nSelCount = GetSelectedCount();
-	CMap<CString, LPCTSTR, int, int> mapCounts;
 
 	if (nSelCount)
 	{
+		CMap<CString, LPCTSTR, int, int> mapCounts;
+
 		POSITION pos = GetFirstSelectedTaskPos();
 
 		while (pos)
@@ -5967,32 +5939,24 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 				mapCounts[aTaskItems[nItem]] = ++nCount;
 			}
 		}
-	}
 
-	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
-}
+		pos = mapCounts.GetStartPosition();
 
-int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
-{
-	aMatched.RemoveAll();
-	aMixed.RemoveAll();
-
-	POSITION pos = mapCounts.GetStartPosition();
-
-	while (pos)
-	{
-		CString sItem;
-		int nCount = 0;
-
-		mapCounts.GetNextAssoc(pos, sItem, nCount);
-
-		if (nCount == nNumTasks)
+		while (pos)
 		{
-			aMatched.Add(sItem);
-		}
-		else if (nCount > 0)
-		{
-			aMixed.Add(sItem);
+			CString sItem;
+			int nCount = 0;
+
+			mapCounts.GetNextAssoc(pos, sItem, nCount);
+
+			if (nCount == nSelCount)
+			{
+				aMatched.Add(sItem);
+			}
+			else if (nCount > 0)
+			{
+				aMixed.Add(sItem);
+			}
 		}
 	}
 

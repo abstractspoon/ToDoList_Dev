@@ -308,13 +308,11 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_AutoCBString(pDX, IDC_STATUS, m_sStatus);
 	DDX_AutoCBString(pDX, IDC_VERSION, m_sVersion);
 
-	// Category, Tags and AllocTo handled else to support mixed states
-
 	DDX_CBPriority(pDX, IDC_PRIORITY, m_nPriority);
 	DDX_CBRisk(pDX, IDC_RISK, m_nRisk);
 	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 	
-	// Misc
+	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
 		CString sPercent;
@@ -343,7 +341,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 
 		m_cbFileRef.SetFileList(m_aFileRefs);
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
-	
+
 		if (m_mapCustomCtrlData.GetCount() == 0)
 			CTDCCustomAttributeHelper::ClearCustomAttributeControls(this, m_aCustomControls, m_aCustomAttribDefs);
 		else
@@ -2209,90 +2207,18 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	default:
-		UpdateTaskCustomAttribute(nAttrib);
-		break;
-	}
-}
-
-void CToDoCtrl::UpdateTaskCustomAttribute(TDC_ATTRIBUTE nAttrib)
-{
-	if (!CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
-	{
-		ASSERT(0);
-		return;
-	}
-
-	// Multi-selection items need special handling
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-	VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(nAttrib, m_aCustomAttribDefs, attribDef));
-
-	if (attribDef.IsMultiList())
-	{
-		CWnd* pCtrl = CTDCCustomAttributeHelper::GetControlFromAttributeDef(this, attribDef, m_aCustomControls);
-
-		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CCheckComboBox)))
+		// handle custom attributes
+		if (CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib))
 		{
-			CCheckComboBox* pCombo = (CCheckComboBox*)pCtrl;
+			CString sAttribID = CTDCCustomAttributeHelper::GetAttributeTypeID(nAttrib, m_aCustomAttribDefs);
+			TDCCADATA data;
 
-			CStringArray aChecked, aUnchecked;
-			BOOL bMergeItems = FALSE;
-
-			pCombo->GetChecked(aChecked, CCBC_CHECKED);
-
-			if (pCombo->IsAnyChecked(CCBC_MIXED))
-			{
-				pCombo->GetChecked(aUnchecked, CCBC_UNCHECKED);
-				bMergeItems = TRUE;
-			}
-
-			POSITION pos = TSH().GetFirstItemPos();
-			TDC_SET nRes = SET_NOCHANGE;
-			DWORD dwRefTaskID = 0;
-
-			IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-			while (pos)
-			{
-				DWORD dwTaskID = TSH().GetNextItemData(pos);
-				TDCCADATA data;
-				CStringArray aTaskItems;
-
-				if (bMergeItems && m_data.GetTaskCustomAttributeData(dwTaskID, attribDef.sUniqueID, data))
-				{
-					data.AsArray(aTaskItems);
-
-					Misc::AddUniqueItems(aChecked, aTaskItems);
-					Misc::RemoveItems(aUnchecked, aTaskItems);
-				}
-				else
-				{
-					aTaskItems.Copy(aChecked);
-				}
-
-				TDC_SET nItemRes = m_data.SetTaskCustomAttributeData(dwTaskID, attribDef.sUniqueID, aTaskItems);
-
-				if (nItemRes == SET_CHANGE)
-				{
-					nRes = SET_CHANGE;
-					dwRefTaskID = dwTaskID;
-				}
-			}
-
-			if (nRes == SET_CHANGE)
-				SetModified(TRUE, nAttrib, dwRefTaskID);
-
-			return;
+			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
+				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
+			else
+				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
 		}
 	}
-
-	// else
-	CString sAttribID = attribDef.sUniqueID;
-	TDCCADATA data;
-
-	if (m_mapCustomCtrlData.Lookup(sAttribID, data))
-		SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
-	else
-		ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
 }
 
 void CToDoCtrl::OnChangePriority()
@@ -4646,8 +4572,6 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
 									BOOL bAppend, CCheckComboBox& combo)
 {
-	ASSERT(!CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib));
-
 	DWORD dwRefTaskID = 0;
 	TDC_SET nRes = SetSelectedTaskArray(nAttrib, aItems, bAppend, dwRefTaskID);
 	
@@ -4686,8 +4610,6 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 
 TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, DWORD& dwRefTaskID)
 {
-	ASSERT(!CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib));
-
 	if (!CanEditSelectedTask(nAttrib))
 		return SET_FAILED;
 
@@ -4719,10 +4641,6 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo)
 {
-	ASSERT(!CTDCCustomAttributeHelper::IsCustomAttribute(nAttrib));
-
-	// We only need to be careful if the combo has any mixed items
-	// and if the task itself has any current array items
 	CStringArray aChecked, aUnchecked, aTaskItems;
 	BOOL bMergeItems = FALSE;
 
@@ -4744,6 +4662,8 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
+		// We only need to be careful if the combo has any mixed items
+		// and if the task itself has any current array items
 		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems))
 		{
 			Misc::AddUniqueItems(aChecked, aTaskItems);
@@ -4767,6 +4687,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 		SetModified(TRUE, nAttrib, dwRefTaskID);
 
 	return nRes;
+
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCategories(const CStringArray& aCats)
