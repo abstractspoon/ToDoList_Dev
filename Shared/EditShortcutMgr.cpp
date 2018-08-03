@@ -42,14 +42,14 @@ void CEditShortcutMgr::Release()
 
 BOOL CEditShortcutMgr::OnKeyboard(UINT uVirtKey, UINT uFlags)
 {
-	// only handle key down messages
-	BOOL bKeyDown = !(HIWORD(uFlags) & KF_UP);
-	BOOL bRepeat = ((HIWORD(uFlags) & KF_REPEAT) > 1);
-
 	HWND hwnd = ::GetFocus();
-	
+
 	if (CHookMgr<CEditShortcutMgr>::ClassMatches(hwnd))
 	{
+		// only handle key down messages
+		BOOL bKeyDown = !(HIWORD(uFlags) & KF_UP);
+		BOOL bRepeat = ((HIWORD(uFlags) & KF_REPEAT) > 1);
+
 		// check for 'Ctrl + backspace'
 		if ((uVirtKey == VK_BACK) && Misc::IsKeyPressed(VK_CONTROL))
 		{
