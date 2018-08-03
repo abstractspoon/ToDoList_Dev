@@ -5767,25 +5767,63 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 {
 	data.Clear();
 
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			
-			TDCCADATA dataNext;
-			m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, dataNext);
+	int nSelCount = GetSelectedCount();
 
-			if (data != dataNext)
+	if (nSelCount)
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(CTDCCustomAttributeHelper::GetAttributeDef(sAttribID, m_aCustomAttribDefs, attribDef));
+
+		// Multi-selection check lists need special handling
+		if (attribDef.IsMultiList())
+		{
+			CMap<CString, LPCTSTR, int, int> mapCounts;
+			POSITION pos = GetFirstSelectedTaskPos();
+
+			while (pos)
 			{
-				data.Clear();
-				return FALSE;
+				DWORD dwTaskID = GetNextSelectedTaskID(pos);
+				
+				if (m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data))
+				{
+					CStringArray aTaskItems;
+					int nItem = data.AsArray(aTaskItems);
+
+					while (nItem--)
+					{
+						int nCount = 0;
+						mapCounts.Lookup(aTaskItems[nItem], nCount);
+
+						mapCounts[aTaskItems[nItem]] = ++nCount;
+					}
+				}
+			}
+
+			CStringArray aMatched, aMixed;
+			SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
+
+			data.Set(aMatched, aMixed);
+		}
+		else
+		{
+			// get first item's value as initial
+			POSITION pos = GetFirstSelectedTaskPos();
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		
+			m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data);
+		
+			while (pos)
+			{
+				dwTaskID = GetNextSelectedTaskID(pos);
+			
+				TDCCADATA dataNext;
+				m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, dataNext);
+
+				if (data != dataNext)
+				{
+					data.Clear();
+					return FALSE;
+				}
 			}
 		}
 
@@ -5913,50 +5951,51 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 
 int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const
 {
+	int nSelCount = GetSelectedCount();
+	CMap<CString, LPCTSTR, int, int> mapCounts;
+
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		CStringArray aTaskItems;
+		int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
+
+		while (nItem--)
+		{
+			int nCount = 0;
+			mapCounts.Lookup(aTaskItems[nItem], nCount);
+
+			mapCounts[aTaskItems[nItem]] = ++nCount;
+		}
+	}
+
+	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
+}
+
+int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
+{
 	aMatched.RemoveAll();
 	aMixed.RemoveAll();
 
-	int nSelCount = GetSelectedCount();
+	POSITION pos = mapCounts.GetStartPosition();
 
-	if (nSelCount)
+	while (pos)
 	{
-		CMap<CString, LPCTSTR, int, int> mapCounts;
+		CString sItem;
+		int nCount = 0;
 
-		POSITION pos = GetFirstSelectedTaskPos();
+		mapCounts.GetNextAssoc(pos, sItem, nCount);
 
-		while (pos)
+		if (nCount == nNumTasks)
 		{
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-			CStringArray aTaskItems;
-			int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
-
-			while (nItem--)
-			{
-				int nCount = 0;
-				mapCounts.Lookup(aTaskItems[nItem], nCount);
-
-				mapCounts[aTaskItems[nItem]] = ++nCount;
-			}
+			aMatched.Add(sItem);
 		}
-
-		pos = mapCounts.GetStartPosition();
-
-		while (pos)
+		else if (nCount > 0)
 		{
-			CString sItem;
-			int nCount = 0;
-
-			mapCounts.GetNextAssoc(pos, sItem, nCount);
-
-			if (nCount == nSelCount)
-			{
-				aMatched.Add(sItem);
-			}
-			else if (nCount > 0)
-			{
-				aMixed.Add(sItem);
-			}
+			aMixed.Add(sItem);
 		}
 	}
 

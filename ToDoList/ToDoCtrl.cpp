@@ -343,9 +343,9 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 		m_eRecurrence.SetRecurrenceOptions(m_tRecurrence);
 
 		if (m_mapCustomCtrlData.GetCount() == 0)
-			CTDCCustomAttributeHelper::ClearCustomAttributeControls(this, m_aCustomControls, m_aCustomAttribDefs);
+			CTDCCustomAttributeHelper::ClearControls(this, m_aCustomControls, m_aCustomAttribDefs);
 		else
-			CTDCCustomAttributeHelper::UpdateCustomAttributeControls(this, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
+			CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 	}
 }
 
@@ -2338,7 +2338,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 		if (CTDCCustomAttributeHelper::GetControl(sAttribID, m_aCustomControls, ctrl))
 		{
 			if (!bCtrlEdited)
-				CTDCCustomAttributeHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
+				CTDCCustomAttributeHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 
 			if (ctrl.HasBuddy())
 				EnableDisableControls(GetSelectedItem());
@@ -4770,12 +4770,13 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL b
 		{
 			UpdateDateTimeControls(TRUE);
 		}
-		else if (!bEdit)
+
+		// We only update the control if not editing otherwise
+		// if the user is partially way thru typing a task ID
+		// and the partial ID does not exist then it gets 
+		// removed from the edit field. 
+		if (!bEdit)
 		{
-			// We only update the control if not editing otherwise
-			// if the user is partially way thru typing a task ID
-			// and the partial ID does not exist then it gets 
-			// removed from the edit field. 
 			ASSERT(dwRefTaskID);
 			m_sDepends = Misc::FormatArray(aDepends);
 			UpdateDataEx(this, IDC_DEPENDS, m_sDepends, FALSE);
@@ -6264,8 +6265,8 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
- 	CTDCCustomAttributeHelper::RebuildCustomAttributeEditUI(m_aCustomAttribDefs, m_aCustomControls, 
- 															m_ilTaskIcons, this, IDC_VERSION);
+ 	CTDCCustomAttributeHelper::RebuildEditControls(m_aCustomAttribDefs, m_aCustomControls, 
+ 													m_ilTaskIcons, this, IDC_VERSION);
 	Resize();
 
 	m_taskTree.OnCustomAttributeChange();
@@ -6969,7 +6970,7 @@ void CToDoCtrl::OnDestroy()
 	}
 	
 	// clean up custom controls
-	CTDCCustomAttributeHelper::CleanupCustomAttributeUI(m_aCustomControls, this);
+	CTDCCustomAttributeHelper::CleanupControls(m_aCustomControls, this);
 	
 	CRuntimeDlg::OnDestroy();
 }
@@ -9302,10 +9303,11 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 		hti = m_taskTree.GetChildItem();
 	}
 	
-	m_taskTree.SetExpandedTasks(aExpanded);
-
 	// Notify tree that the rebuild is over
 	m_taskTree.OnEndRebuild();
+
+	// Then restore previous state
+	m_taskTree.SetExpandedTasks(aExpanded);
 
 	if (!RestoreTreeSelection(cache))
 	{

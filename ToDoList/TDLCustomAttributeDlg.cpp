@@ -618,6 +618,9 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 	// update list type in case it has changed
 	m_dwListType = attrib.GetListType();
 
+	// update feature combo
+	m_cbFeatures.SetAttributeDefintion(attrib);
+
 	EnableControls();
 
 	// and list

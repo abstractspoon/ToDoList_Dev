@@ -188,6 +188,7 @@ namespace GraphicsMisc
 	COLORREF GetBestTextColor(COLORREF crBack);
 	void CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nNumColors, CDWordArray& aColors, BOOL bRGB = TRUE);
 	CString GetWebColor(COLORREF color);
+	COLORREF ParseWebColor(const CString& sHexColor);
 
 	void DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder = CLR_NONE, 
 					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL);

@@ -20,6 +20,7 @@ struct TDCCADATA
 	TDCCADATA(double dValue);
 	TDCCADATA(double dValue, TDC_UNITS nUnits);
 	TDCCADATA(const CStringArray& aValues);
+	TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra);
 	TDCCADATA(int nValue);
 	TDCCADATA(const COleDateTime& dtValue);
 	TDCCADATA(bool bValue);
@@ -30,6 +31,7 @@ struct TDCCADATA
 	BOOL operator==(const TDCCADATA& data) const;
 	BOOL operator!=(const TDCCADATA& data) const;
 
+	BOOL HasExtra() const;
 	BOOL IsEmpty() const;
 	void Clear();
 
@@ -39,6 +41,7 @@ struct TDCCADATA
 	COleDateTime AsDate() const;
 	bool AsBool() const;
 	int AsArray(CStringArray& aValues) const;
+	int AsArrays(CStringArray& aValues, CStringArray& aExtra) const;
 	double AsTimePeriod(TDC_UNITS& nUnits) const;
 
 	TDC_UNITS GetTimeUnits() const;
@@ -50,13 +53,19 @@ struct TDCCADATA
 	void Set(double dValue, TDC_UNITS nUnits);
 	void Set(bool bValue, TCHAR nChar = 0);
 	void Set(const CStringArray& aValues);
+	void Set(const CStringArray& aValues, const CStringArray& aExtra);
 
 	CString FormatAsArray(TCHAR cSep = 0) const;
 	CString FormatAsDate(BOOL bISO = FALSE) const;
 	CString FormatAsTimePeriod(int nDecimalPlaces = 2) const;
 
 protected:
-	CString sData;
+	CString sData, sExtra;
+
+protected:
+	static void Set(const CStringArray& aValues, CString& sValue);
+	static int AsArray(const CString& sValue, CStringArray& aValues);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

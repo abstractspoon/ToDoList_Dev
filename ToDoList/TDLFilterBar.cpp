@@ -301,7 +301,7 @@ BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CTDLFilterBar::OnDestroy()
 {
-	CTDCCustomAttributeHelper::CleanupCustomAttributeUI(m_aCustomControls, this);
+	CTDCCustomAttributeHelper::CleanupControls(m_aCustomControls, this);
 
 	CDialog::OnDestroy();
 }
@@ -542,10 +542,10 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 {
 	tdc.GetCustomAttributeDefs(m_aCustomAttribDefs);
 
-	if (CTDCCustomAttributeHelper::NeedRebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
+	if (CTDCCustomAttributeHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
 																		m_aCustomControls))
 	{
-		CTDCCustomAttributeHelper::RebuildCustomAttributeFilterUI(m_aCustomAttribDefs, 
+		CTDCCustomAttributeHelper::RebuildFilterControls(m_aCustomAttribDefs, 
 																	m_aCustomControls, 
 																	tdc.GetTaskIconImageList(), 
 																	this, 
@@ -554,7 +554,7 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc)
 	}
 
 	// Update data
-	CTDCCustomAttributeHelper::UpdateCustomAttributeControls(this, m_aCustomControls, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
+	CTDCCustomAttributeHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
 }
 
 void CTDLFilterBar::SetFilterLabelAlignment(BOOL bLeft)

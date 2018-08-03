@@ -489,6 +489,11 @@ BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sConte
 	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
 
 	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());
+
+#ifdef _DEBUG
+	FileMisc::SaveFile(_T("StickiesContent.rtf"), sContent, SFEF_UTF8WITHOUTBOM);
+#endif
+
 	return !sContent.IsEmpty();
 }
 

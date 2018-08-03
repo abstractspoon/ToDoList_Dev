@@ -1751,14 +1751,46 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 	
 	TDCCADATA dataOld;
 	GetTaskCustomAttributeData(dwTaskID, sAttribID, dataOld);
-	
-	if (data != dataOld)
+
+	CStringArray aOldItems, aNewItems;
+	dataOld.AsArray(aOldItems);
+
+	// Mixed state multi-selection lists need special handling
+	if (data.HasExtra())
+	{
+		CStringArray aMatched, aMixed;
+		data.AsArrays(aMatched, aMixed);
+
+		// Starting with the 'old' items, we remove any 
+		// that are neither 'matched' nor 'mixed', and then
+		// add any that matched
+		aNewItems.Copy(aOldItems);
+		
+		int nItem = aNewItems.GetSize();
+
+		while (nItem--)
+		{
+			if (!Misc::HasT(aMatched, aNewItems[nItem]) &&
+				!Misc::HasT(aMixed, aNewItems[nItem]))
+			{
+				aNewItems.RemoveAt(nItem);
+			}
+		}
+
+		Misc::AddUniqueItems(aMatched, aNewItems);
+	}
+	else
+	{
+		data.AsArray(aNewItems);
+	}
+		
+	if (!Misc::MatchAll(aOldItems, aNewItems))
 	{
 		// save undo data
 		SaveEditUndo(dwTaskID, pTDI, TDCA_CUSTOMATTRIB);
 		
 		// make changes
-		pTDI->SetCustomAttributeValue(sAttribID, data);
+		pTDI->SetCustomAttributeValue(sAttribID, aNewItems);
 		pTDI->SetModified();
 		
 		return SET_CHANGE;

@@ -46,7 +46,11 @@ const LPCTSTR RTF_HORZ_LINE				= _T("{\\rtf1{\\pict\\wmetafile8\\picw26\\pich26\
 											_T("010001000000000001000100000000002800000001000000010000000100010000000000000000")
 											_T("000000000000000000000000000000000000000000ffffff00000000ff040000002701ffff0300")
 											_T("00000000}}");
-const LPCTSTR RTF_LINK					= _T("{\\rtf1{\\colortbl;\\red0\\green0\\blue255;}{\\field{\\*\\fldinst{HYPERLINK\"%s\"}}")
+
+// The use of whitespace within '{ HYPERLINK \" %s \"}' is ABSOLUTELY ESSENTIAL
+// Reference: https://autohotkey.com/boards/viewtopic.php?t=43427
+const LPCTSTR RTF_LINK					= _T("{\\rtf1{\\colortbl;\\red0\\green0\\blue255;}")
+											_T("{\\field{\\*\\fldinst{ HYPERLINK \" %s \"}}")
 											_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}");
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1111,7 +1115,7 @@ DWORD CRichEditBaseCtrl::StreamInCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG
 	return 0;
 }
 
-BOOL CRichEditBaseCtrl::Save(CString& filename)
+BOOL CRichEditBaseCtrl::Save(const CString& filename)
 {
 	CString str = GetRTF(); // returns multibyte encoded string
 	
@@ -1119,7 +1123,7 @@ BOOL CRichEditBaseCtrl::Save(CString& filename)
 	return FileMisc::SaveFile(filename, (LPCSTR)(LPCTSTR)str);
 }
 
-BOOL CRichEditBaseCtrl::Load(CString& filename)
+BOOL CRichEditBaseCtrl::Load(const CString& filename)
 {
 	CString str;
 	

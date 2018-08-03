@@ -113,8 +113,8 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0);
 
-	BOOL Save(CString& filename);
-	BOOL Load(CString& filename);
+	BOOL Save(const CString& filename);
+	BOOL Load(const CString& filename);
 	
 	CString GetRTF() const; // ansi encoded string
 	int	GetRTFLength() const; // in characters

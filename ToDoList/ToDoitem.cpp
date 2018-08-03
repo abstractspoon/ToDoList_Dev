@@ -480,7 +480,13 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 
 BOOL TODOITEM::GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const
 {
-	return (mapCustomData.Lookup(sAttribID, data) && !data.IsEmpty());
+	if (mapCustomData.Lookup(sAttribID, data) && !data.IsEmpty())
+	{
+		ASSERT(!data.HasExtra());
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 void TODOITEM::SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data)
@@ -566,7 +572,7 @@ TDC_UNITS TODOITEM::GetTimeUnits(BOOL bTimeEst) const
 
 TH_UNITS TODOITEM::GetTHTimeUnits(BOOL bTimeEst) const
 {
-	return TDC::MapUnitsToTHUnits(bTimeEst ? nTimeEstUnits : nTimeSpentUnits);
+	return TDC::MapUnitsToTHUnits(GetTimeUnits(bTimeEst));
 }
 
 COleDateTime TODOITEM::GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue)

@@ -1407,6 +1407,27 @@ CString GraphicsMisc::GetWebColor(COLORREF color)
 	return sColor;
 }
 
+COLORREF GraphicsMisc::ParseWebColor(const CString& sHexColor)
+{
+	COLORREF color = CLR_NONE;
+	WORD wRed = 0, wBlue = 0, wGreen = 0;
+
+	switch (sHexColor.GetLength())
+	{
+	case 7:
+		if (_stscanf(sHexColor, _T("#%02X%02X%02X"), wRed, wGreen, wBlue) == 3)
+			color = RGB(wRed, wGreen, wBlue);
+		break;
+
+	case 6:
+		if (_stscanf(sHexColor, _T("%02X%02X%02X"), wRed, wGreen, wBlue) == 3)
+			color = RGB(wRed, wGreen, wBlue);
+		break;
+	}
+
+	return color;
+}
+
 CSize GraphicsMisc::GetIconSize(HICON hIcon)
 {
 	ICONINFO iconinfo = { 0 };
